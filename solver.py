@@ -6,7 +6,7 @@ import sys
 import struct
 
 # the different difficulties available
-easy = 0
+easy = 1
 medium = 3
 hard = 5
 harder = 7
@@ -24,16 +24,17 @@ mania = 15
 knowsMockball = (True, easy) # early super and ice beam
 
 # common
-knowsDamageBoosting = (True, easy) # for brinstar ceiling
+knowsCeilingDBoost = (True, easy) # for brinstar ceiling
 knowsAlcatrazEscape = (True, hardcore) # alcatraz without bomb
 knowsLavaDive = (True, hardcore) # ridley without gravity
 knowsSimpleShortCharge = (True, easy) # Waterway ETank without gravity, and Wrecked Ship access
 knowsInfiniteBombJump = (True, hard) # to access certain locations without high jump or space jump
+knowsGreenGateGlitch = (True, medium) # to access screw attack and crocomire
 
 # uncommon
 knowsMochtroidClip = (True, medium) # to access botwoon without speedbooster
 knowsPuyoClip = (False, 0) # to access spring ball without grapple beam
-knowsGateGlitch = (True, easy) # ETank in Brinstar Gate
+knowsReverseGateGlitch = (True, medium) # ETank in Brinstar Gate
 knowsShortCharge = (False, 0) 
 knowsSuitlessOuterMaridia = (True, hardcore)
 knowsEarlyKraid = (True, easy) # to access kraid without hi jump boots
@@ -104,7 +105,7 @@ def wand2(a, b, difficulty=0):
     else:
         return (False, 0)
 
-# they must be a better pythonic way of doing that...
+# they must be a better pythonic way of doing that... FLO : maybe put an array instead of a,b,c,d ...?
 def wand(a, b, c=None, d=None, difficulty=0):
     if c is None and d is None:
         ret = wand2(a, b)
@@ -166,7 +167,7 @@ def energyReserveCountOk(items, count, difficulty=0):
     return (energyReserveCount(items) >= count, difficulty)
 
 def energyReserveCountOkList(items, difficulties):
-    # get a list: [(2, difficulty=hard), (4, difficulty=medium), (6, difficulty=easy)] TODO FLO : comprends pas ce code...mais je dirais 2=mania, 4=hardcore, 7=medium, 10=easy
+    # get a list: [(2, difficulty=hard), (4, difficulty=medium), (6, difficulty=easy)]
     difficulty = difficulties.pop(0)
     result = energyReserveCountOk(items, difficulty[0], difficulty=difficulty[1])
     while len(difficulties) > 0:
@@ -181,7 +182,7 @@ def canHellRun(items):
     if heatProof(items)[0]:
         return (True, easy)
     elif energyReserveCount(items) >= 3:
-        return energyReserveCountOkList(items, [(3, medium), (6, easy)])
+        return energyReserveCountOkList(items, [(3, mania), (4, hardcore), (5, hard), (7, medium), (8, easy)])
     else:
         return (False, 0)
 
@@ -223,11 +224,11 @@ def canDestroyBombWalls(items):
                haveItem(items, 'ScrewAttack'))
 
 def canEnterAndLeaveGauntlet(items):
-    return wand(wor(canFly(items), haveItem(items, 'HiJump'), haveItem(items, 'SpeedBooster')),
+    return wand(wor(canFly(items), haveItem(items, 'HiJump', difficulty=hard), haveItem(items, 'SpeedBooster')),
                 wor(canUseBombs(items, difficulty=hard),
                     wand(canUsePowerBombs(items), itemCountOk(items, 'PowerBomb', 2), difficulty=medium),
                     haveItem(items, 'ScrewAttack'),
-                    wand(haveItem(items, 'SpeedBooster'), canUsePowerBombs(items), energyReserveCountOk(items, 2), difficulty=hard)))
+                    wand(haveItem(items, 'SpeedBooster'), canUsePowerBombs(items), energyReserveCountOk(items, 2), knowsSimpleShortCharge, difficulty=medium)))
 
 def canPassBombPassages(items):
     return wor(canUseBombs(items), canUsePowerBombs(items))
@@ -242,7 +243,8 @@ def canAccessKraid(items):
     return wand(canAccessRedBrinstar(items),
                 canPassBombPassages(items),
                 wor(knowsEarlyKraid,
-                    haveItem(items, 'HiJump')))
+                    haveItem(items, 'HiJump'),
+                    canFly(items)))
 
 def canAccessWs(items):
     return wand(canUsePowerBombs(items),
@@ -250,21 +252,21 @@ def canAccessWs(items):
                 wor(haveItem(items, 'Grapple'),
                     haveItem(items, 'SpaceJump'),
                     wor(knowsContinuousWallJump,
-                        knowsDiagonalBombJump,
-                        knowsSimpleShortCharge)))
+                        wand(canUseBombs(items), knowsDiagonalBombJump),
+                        wand(haveItem(items, 'SpeedBooster'), knowsSimpleShortCharge))))
     
 def canAccessHeatedNorfair(items):
     return wand(canAccessRedBrinstar(items), canHellRun(items))
     
 def canAccessCrocomire(items):
-    return wor(canAccessHeatedNorfair(items),
-               wand(canAccessKraid(items),
-                    canUsePowerBombs(items),
+    return wor(wand(canAccessHeatedNorfair(items), wor(haveItem(items, 'Wave'), knowsGreenGateGlitch)),
+               wand(canAccessKraid(items), # FIXME : knowsEarlyKraid "trick" is now entangled with crocomire access
+                    canUsePowerBombs(items), 
                     haveItem(items, 'SpeedBooster'),
                     energyReserveCountOk(items, 2)))
     
 def canAccessLowerNorfair(items):
-    return wand(canAccessHeatedNorfair(items),
+    return wand(canAccessHeatedNorfair(items), # FIXME : hell runs difficulty settings affect lower norfair access with a 'and' condition...on paper this is bad, but you do want some etanks before going there
                 canUsePowerBombs(items),
                 haveItem(items, 'Varia'),
                 wor(wand(haveItem(items, 'HiJump'), knowsLavaDive),
@@ -274,7 +276,7 @@ def canPassWorstRoom(items):
     return wand(canAccessLowerNorfair(items),
                 wor(canFly(items),
                     wand(haveItem(items, 'Ice'), haveItem(items, 'Charge'), difficulty=mania),
-                    haveItem(items, 'HiJump', difficulty=hardcore)))
+                    haveItem(items, 'HiJump', difficulty=hard)))
 
 def canAccessOuterMaridia(items):
     # even harder if without gravity and without stronger gun
@@ -307,7 +309,7 @@ def canDefeatBotwoon(items):
                     canDoSuitlessMaridia(items)),
                 wor(wand(haveItem(items, 'Ice'),
                          knowsMochtroidClip),
-                    haveItem(items, 'SpeedBooster'))) # TODO FLO : ammo check???
+                    haveItem(items, 'SpeedBooster'))) # FIXME : ammo check???
 
 def canDefeatDraygon(items):
     return wand(canDefeatBotwoon(items),
@@ -498,7 +500,7 @@ locations = [
     'Class': "Major",
     'Visibility': "Chozo",
     # DONE: difficulty handled with knowsAlcatrazEscape
-    'Available': lambda items: wand(haveItem(items, 'Morph'), canOpenRedDoors(items), wor(knowsAlcatrazEscape, haveItem(items, 'Bomb')))
+    'Available': lambda items: wand(haveItem(items, 'Morph'), canOpenRedDoors(items), wor(knowsAlcatrazEscape, haveItem(items, 'Bomb'), canUsePowerBombs(items)))
 },
 {
     'Area': "Crateria",
@@ -507,7 +509,7 @@ locations = [
     'Address': 0x78432,
     'Visibility': "Visible",
     # DONE: easy one, nothing to add
-    'Available': lambda items: wor(canDestroyBombWalls(items), haveItem(items, 'SpeedBooster'))
+    'Available': lambda items: wor(canDestroyBombWalls(items), haveItem(items, 'SpeedBooster')) # TODO that SpeedBooster check is if you had to do alcatraz...check if that implies a short charge?
 },
 {
     'Area': "Brinstar",
@@ -516,7 +518,7 @@ locations = [
     'Address': 0x7852C,
     'Visibility': "Chozo",
     # DONE: mock ball for early retreval
-    'Available': lambda items: wand(wor(haveItem(items, 'SpeedBooster'), canDestroyBombWalls(items)), canOpenRedDoors(items), wor(wand(knowsMockball, haveItem(items, 'Morph')), haveItem(items, 'SpeedBooster')))
+    'Available': lambda items: wand(canOpenRedDoors(items), wor(wand(knowsMockball, haveItem(items, 'Morph')), haveItem(items, 'SpeedBooster')))
 },
 {
     'Area': "Brinstar",
@@ -542,8 +544,8 @@ locations = [
     'Class': "Major",
     'Address': 0x7879E,
     'Visibility': "Hidden",
-    # DONE: use knowsDamageBoosting
-    'Available': lambda items: wor(knowsDamageBoosting, canFly(items), haveItem(items, 'HiJump'))
+    # DONE: use knowsCeilingDBoost
+    'Available': lambda items: wor(knowsCeilingDBoost, canFly(items), haveItem(items, 'HiJump'), haveItem(items, 'Ice'))
 },
 {
     'Area': "Brinstar",
@@ -560,7 +562,7 @@ locations = [
     'Class': "Major",
     'Address': 0x787FA,
     'Visibility': "Visible",
-    # DONE: use knowsSuitlessWaterway
+    # DONE: use knowsSimpleShortCharge
     'Available': lambda items: wand(canUsePowerBombs(items), canOpenRedDoors(items), haveItem(items, 'SpeedBooster'), wor(haveItem(items, 'Gravity'), knowsSimpleShortCharge))
 },
 {
@@ -569,8 +571,8 @@ locations = [
     'Class': "Major",
     'Address': 0x78824,
     'Visibility': "Visible",
-    # DONE: use knowsGateGlitch
-    'Available': lambda items: wand(canUsePowerBombs(items), wor(haveItem(items, 'Wave'), wand(haveItem(items, 'Super'), haveItem(items, 'HiJump'), knowsGateGlitch)))
+    # DONE: use knowsReverseGateGlitch
+    'Available': lambda items: wand(canUsePowerBombs(items), wor(haveItem(items, 'Wave'), wand(haveItem(items, 'Super'), haveItem(items, 'HiJump'), knowsReverseGateGlitch)))
 },
 {
     'Area': "Brinstar",
@@ -621,7 +623,7 @@ locations = [
     'Address': 0x78B24,
     'Visibility': "Chozo",
     # DONE: harder without varia
-    'Available': lambda items: wand(canAccessKraid(items), wor(heatProof(items), energyReserveCountOkList(items, [(2, hard), (4, medium), (6, easy)])))
+    'Available': lambda items: wand(canAccessKraid(items), wor(heatProof(items), energyReserveCountOkList(items, [(2, hardcore), (3, hard), (4, medium), (6, easy)])), wor(wand(haveItem(items, 'Morph'), knowsMockball), haveItem(items, 'SpeedBooster'))) # FIXME : knowsEarlyKraid has nothing to do with this and is implied by canAccessKraid
 },
 {
     'Area': "Norfair",
@@ -647,7 +649,7 @@ locations = [
     'Class': "Major",
     'Address': 0x78C36,
     'Visibility': "Chozo",
-    'Available': lambda items: wand(canAccessCrocomire(items), wor(canFly(items), haveItem(items, 'Ice', difficulty=mania), haveItem(items, 'SpeedBooster'), knowsGateGlitch))
+    'Available': lambda items: wand(canAccessCrocomire(items), wor(canFly(items), haveItem(items, 'Ice', difficulty=mania), haveItem(items, 'SpeedBooster'), knowsGreenGateGlitch))
 },
 {
     'Area': "Norfair",
@@ -655,7 +657,7 @@ locations = [
     'Class': "Major",
     'Address': 0x78C3E,
     'Visibility': "Chozo",
-    'Available': lambda items: wand(canAccessHeatedNorfair(items), wor(canFly(items), haveItem(items, 'Grapple'), haveItem(items, 'HiJump', difficulty=hardcore)))
+    'Available': lambda items: wand(canAccessHeatedNorfair(items), wor(canFly(items), haveItem(items, 'Grapple'), haveItem(items, 'HiJump', difficulty=hard)))
 },
 {
     'Area': "Norfair",
@@ -773,8 +775,8 @@ locations = [
     'Class': "Major",
     'Address': 0x7C5E3,
     'Visibility': "Chozo",
-    # DONE: difficulty already handled in the two functions
-    'Available': lambda items: wand(canAccessOuterMaridia(items), wor(canDoSuitlessMaridia(items), haveItem(items, 'Gravity')))
+    # DONE: difficulty already handled in the two functions. FLO : I add mania difficulty in suitless case for this one
+    'Available': lambda items: wand(canAccessOuterMaridia(items), wor(haveItem(items, 'Gravity'), wand(canDoSuitlessMaridia(items), (True, mania))))
 },
 {
     'Area': "Maridia",
@@ -874,7 +876,7 @@ locations = [
     'Class': "Minor",
     'Address': 0x78478,
     'Visibility': "Visible",
-    'Available': lambda items: wand(canUsePowerBombs(items), haveItem(items, 'SpeedBooster'), wor(haveItem(items, 'ETank'), haveItem(items, 'Varia'), haveItem(items, 'Gravity')))
+    'Available': lambda items: wand(canUsePowerBombs(items), haveItem(items, 'SpeedBooster'), wor(wand(haveItem(items, 'Ice'), (True, easy)), wand(haveItem(items, 'ETank'), haveItem(items, 'Varia'), haveItem(items, 'Gravity'), difficulty=hardcore))) # hardcore dboost...
 },
 {
     'Area': "Crateria",
@@ -1333,6 +1335,7 @@ locations = [
     'Available': lambda items: canDefeatBotwoon(items)
 }
 ]
+# FIXME : where's ScrewAttack ??? 
 
 
 if len(sys.argv) != 2:

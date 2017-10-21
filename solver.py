@@ -518,7 +518,7 @@ locations = [
     'Address': 0x7852C,
     'Visibility': "Chozo",
     # DONE: mock ball for early retreval
-    'Available': lambda items: wand(canOpenRedDoors(items), wor(wand(knowsMockball, haveItem(items, 'Morph')), haveItem(items, 'SpeedBooster')))
+    'Available': lambda items: wand(wor(haveItem(items, 'SpeedBooster'), canDestroyBombWalls(items)), canOpenRedDoors(items), wor(wand(knowsMockball, haveItem(items, 'Morph')), haveItem(items, 'SpeedBooster')))
 },
 {
     'Area': "Brinstar",

@@ -27,36 +27,41 @@ knowsMockball = (True, easy) # early super and ice beam
 knowsDamageBoosting = (True, easy) # for brinstar ceiling
 knowsAlcatrazEscape = (True, hardcore) # alcatraz without bomb
 knowsLavaDive = (True, hardcore) # ridley without gravity
-knowsSuitlessWaterway = (True, easy) # Waterway ETank without gravity
+knowsSimpleShortCharge = (True, easy) # Waterway ETank without gravity, and Wrecked Ship access
+knowsInfiniteBombJump = (True, hard) # to access certain locations without high jump or space jump
 
 # uncommon
 knowsMochtroidClip = (True, medium) # to access botwoon without speedbooster
 knowsPuyoClip = (False, 0) # to access spring ball without grapple beam
 knowsGateGlitch = (True, easy) # ETank in Brinstar Gate
-knowsShortCharge = (False, 0) # access wrecked ship
+knowsShortCharge = (False, 0) 
 knowsSuitlessOuterMaridia = (True, hardcore)
 knowsEarlyKraid = (True, easy) # to access kraid without hi jump boots
 
 # rare
-knowsInfiniteBombJump = (True, hard)
-knowsGravityJump = (False, 0) # TODO: not used yet in the checks
+knowsGravityJump = (False, 0) 
 knowsContinuousWallJump = (False, 0) # access wrecked ship
-knowsSpringBallJump = (False, 0) # TODO: not used yet in the checks
+knowsSpringBallJump = (False, 0) 
+knowsXrayDboost = (False, 0) 
 
 # rarest
 knowsDiagonalBombJump = (False, 0) # access wrecked ship
+
+# end game
+knowsZebSkip = (False, 0) # change minimal ammo count TODO FLO : not used yet
 
 # choose how many items are required
 # 100%:
 #  need them all (major & minor)
 # minimal:
 #  need only the minimal required major and minor items
+# FLO : charge not required. bombs not required. Ice OR Speed required.
 #   Morphing Ball (1)
-#   Missiles (2 or 3)
+#   Missiles (3)
 #   Bombs (1)
 #   Energy Tanks (3)
 #   Charge Beam (1)
-#   Super Missiles (2 or 3)
+#   Super Missiles (2)
 #   Varia Suit (1)
 #   Speed Boots (1)
 #   Power Bombs (1)
@@ -161,7 +166,7 @@ def energyReserveCountOk(items, count, difficulty=0):
     return (energyReserveCount(items) >= count, difficulty)
 
 def energyReserveCountOkList(items, difficulties):
-    # get a list: [(2, difficulty=hard), (4, difficulty=medium), (6, difficulty=easy)]
+    # get a list: [(2, difficulty=hard), (4, difficulty=medium), (6, difficulty=easy)] TODO FLO : comprends pas ce code...mais je dirais 2=mania, 4=hardcore, 7=medium, 10=easy
     difficulty = difficulties.pop(0)
     result = energyReserveCountOk(items, difficulty[0], difficulty=difficulty[1])
     while len(difficulties) > 0:
@@ -246,7 +251,7 @@ def canAccessWs(items):
                     haveItem(items, 'SpaceJump'),
                     wor(knowsContinuousWallJump,
                         knowsDiagonalBombJump,
-                        knowsShortCharge)))
+                        knowsSimpleShortCharge)))
     
 def canAccessHeatedNorfair(items):
     return wand(canAccessRedBrinstar(items), canHellRun(items))
@@ -263,14 +268,12 @@ def canAccessLowerNorfair(items):
                 canUsePowerBombs(items),
                 haveItem(items, 'Varia'),
                 wor(wand(haveItem(items, 'HiJump'), knowsLavaDive),
-                    haveItem(items, 'Gravity')))
+                    wand(haveItem(items, 'Gravity'), knowsGravityJump)))
     
 def canPassWorstRoom(items):
-    # TODO: don't know how difficult is just Ice or just HiJump, but it must be hard given the name of the room
-    # TODO: add some knowsXXX for worst room ?
     return wand(canAccessLowerNorfair(items),
                 wor(canFly(items),
-                    haveItem(items, 'Ice', difficulty=mania),
+                    wand(haveItem(items, 'Ice'), haveItem(items, 'Charge'), difficulty=mania),
                     haveItem(items, 'HiJump', difficulty=hardcore)))
 
 def canAccessOuterMaridia(items):
@@ -304,21 +307,33 @@ def canDefeatBotwoon(items):
                     canDoSuitlessMaridia(items)),
                 wor(wand(haveItem(items, 'Ice'),
                          knowsMochtroidClip),
-                    haveItem(items, 'SpeedBooster')))
+                    haveItem(items, 'SpeedBooster'))) # TODO FLO : ammo check???
 
 def canDefeatDraygon(items):
     return wand(canDefeatBotwoon(items),
                 haveItem(items, 'Gravity'));
+
+# FLO : les majors et le stuff ne sont pas si independants que ca
+# si tu n'as pas charge beam il faut en avoir plein pour affronter ridley,
+# botwoon et mother brain, donc il faudrait une fonction enough_stuff pour
+# chacune de ces 3 etapes. 
+# si tu as charge et que tu sais faire le zebskip il n'y a clairement pas besoin
+# de bcp de minors pour passer mother brain. si tu ne sais pas faire le zebskip,
+# il t'en faut pas mal pour buter tous les zebs (trucs rouge). ok ya un refill de
+# missiles pas loin mais bon.
+# a la reflexion ca me parait bien complique d'integrer les minor items au solver
+# sauf pour le partie debut du jeu, car il y en a plein partout donc ce n'est jamais
+# un souci ou une difficulte d'en ramasser
 
 def enough_stuff(items, minor_locations):
     if items_pickup == '100%':
         # need them all
         return len(minor_locations) == 0
     elif items_pickup == 'minimal':
-        return haveItem_count(items, 'Missile', 2) and haveItem_count(items, 'Super', 2) and haveItem_count(items, 'PowerBomb', 1)
+        return haveItem_count(items, 'Missile', 3) and haveItem_count(items, 'Super', 2) and haveItem_count(items, 'PowerBomb', 1)
     elif items_pickup == 'normal':
-        # check that we have 60 super, 10 bomb, 5 missiles
-        return itemCount(items, 'Missile') >= 1 and itemCount(items, 'Super') >= 12 and itemCount(items, 'PowerBomb') >= 2
+        # check that we have 60 super, 10 bomb, 10 missiles
+        return itemCount(items, 'Missile') >= 2 and itemCount(items, 'Super') >= 12 and itemCount(items, 'PowerBomb') >= 2
 
 def enough_majors(items, major_locations):
     # the end condition
@@ -546,7 +561,7 @@ locations = [
     'Address': 0x787FA,
     'Visibility': "Visible",
     # DONE: use knowsSuitlessWaterway
-    'Available': lambda items: wand(canUsePowerBombs(items), canOpenRedDoors(items), haveItem(items, 'SpeedBooster'), wor(haveItem(items, 'Gravity'), knowsSuitlessWaterway))
+    'Available': lambda items: wand(canUsePowerBombs(items), canOpenRedDoors(items), haveItem(items, 'SpeedBooster'), wor(haveItem(items, 'Gravity'), knowsSimpleShortCharge))
 },
 {
     'Area': "Brinstar",
@@ -563,7 +578,6 @@ locations = [
     'Class': "Major",
     'Address': 0x78876,
     'Visibility': "Chozo",
-    # TODO: what's the difficulty of the different cases ? do we have to add some knowsXXX ?
     # original condition (easier to read, I have to put the lambda function on one line):
     #                Available = fun items ->canAccessRedBrinstar items && 
     #                                        canUsePowerBombs items &&
@@ -571,7 +585,7 @@ locations = [
     #                                         haveItem items SpaceJump ||
     #                                         (haveItem items Varia && energyReserveCount items >= 4) ||
     #                                         (energyReserveCount items >= 6))
-    'Available': lambda items: wand(canAccessRedBrinstar(items), canUsePowerBombs(items), wor(haveItem(items, 'Grapple'), haveItem(items, 'SpaceJump'), wand(haveItem(items, 'Varia'), energyReserveCountOk(items, 4), difficulty=medium), energyReserveCountOk(items, 6, difficulty=hard)))
+    'Available': lambda items: wand(canAccessRedBrinstar(items), canUsePowerBombs(items), wor(haveItem(items, 'Grapple'), haveItem(items, 'SpaceJump'), wand(haveItem(items, 'Varia'), energyReserveCountOk(items, 4), knowsXrayDboost), wand(energyReserveCountOk(items, 6), knowsXrayDboost)))
 },
 {
     'Area': "Brinstar",
@@ -633,8 +647,7 @@ locations = [
     'Class': "Major",
     'Address': 0x78C36,
     'Visibility': "Chozo",
-    # TODO: what's the difficulty without speedbooster ?
-    'Available': lambda items: wand(canAccessCrocomire(items), wor(canFly(items), haveItem(items, 'Ice'), haveItem(items, 'SpeedBooster')))
+    'Available': lambda items: wand(canAccessCrocomire(items), wor(canFly(items), haveItem(items, 'Ice', difficulty=mania), haveItem(items, 'SpeedBooster'), knowsGateGlitch))
 },
 {
     'Area': "Norfair",
@@ -642,8 +655,7 @@ locations = [
     'Class': "Major",
     'Address': 0x78C3E,
     'Visibility': "Chozo",
-    # TODO: the one in the bubbles, how hard is it with just the grapple or the hijump ?
-    'Available': lambda items: wand(canAccessHeatedNorfair(items), wor(canFly(items), haveItem(items, 'Grapple'), haveItem(items, 'HiJump')))
+    'Available': lambda items: wand(canAccessHeatedNorfair(items), wor(canFly(items), haveItem(items, 'Grapple'), haveItem(items, 'HiJump', difficulty=hardcore)))
 },
 {
     'Area': "Norfair",
@@ -661,8 +673,8 @@ locations = [
     'Address': 0x78CCA,
     'Visibility': "Chozo",
     # DONE: this one is not easy without grapple beam nor space jump, with hijump medium wall jump is required
-    # TODO: how to we do it without grapple, spacejump and hijump ? with diagonal bomb jump ?
-    'Available': lambda items: wand(canAccessHeatedNorfair(items), wor(haveItem(items, 'Grapple'), haveItem(items, 'SpaceJump'), haveItem(items, 'HiJump', difficulty=medium), (True, hard)))
+    # FLO : no need of high jump for this, just wall jumping
+    'Available': lambda items: wand(canAccessHeatedNorfair(items), wor(haveItem(items, 'Grapple'), haveItem(items, 'SpaceJump'), (True, medium)))
 },
 {
     'Area': "LowerNorfair",
@@ -688,7 +700,6 @@ locations = [
     'Class': "Major",
     'Address': 0x79184,
     'Visibility': "Visible",
-    # TODO: how hard is it further than the requirements for the worst room ?
     'Available': lambda items: canPassWorstRoom(items)
 },
 {
@@ -706,8 +717,7 @@ locations = [
     'Class': "Major",
     'Address': 0x7C337,
     'Visibility': "Visible",
-    # TODO: what's the difficulty for each case ?
-    'Available': lambda items: wand(canAccessWs(items), wor(wor(haveItem(items, 'Bomb'), haveItem(items, 'PowerBomb'), haveItem(items, 'HiJump')), wor(haveItem(items, 'SpaceJump'), haveItem(items, 'SpeedBooster'), haveItem(items, 'SpringBall'))))
+    'Available': lambda items: wand(canAccessWs(items), wor(wor(haveItem(items, 'Bomb', difficulty=mania), haveItem(items, 'PowerBomb', difficulty=mania), haveItem(items, 'HiJump', difficulty=medium)), wor(haveItem(items, 'SpaceJump', difficulty=easy), haveItem(items, 'SpeedBooster', difficulty=medium), wand(haveItem(items, 'SpringBall'), knowsSpringBallJump))))
 # test in the randomizer (easier to read)
 #                Available = fun items -> canAccessWs items &&
 #                                            (haveItem items Bomb ||
@@ -750,8 +760,7 @@ locations = [
     'Class': "Major",
     'Address': 0x7C559,
     'Visibility': "Chozo",
-    # TODO: what's the difficulty for each cases ?
-    'Available': lambda items: wand(canDefeatDraygon(items), wor(haveItem(items, 'SpeedBooster'), wand(wor(haveItem(items, 'Charge'), haveItem(items, 'ScrewAttack')), wor(canFly(items), haveItem(items, 'HiJump')))))
+    'Available': lambda items: wand(canDefeatDraygon(items), wor(wand(haveItem(items, 'SpeedBooster'), knowsShortCharge, difficulty=hardcore), wand(wor(haveItem(items, 'Charge', difficulty=hard), haveItem(items, 'ScrewAttack', difficulty=easy)), wor(canFly(items), haveItem(items, 'HiJump', difficulty=medium)))))
 #                Available = fun items -> canDefeatDraygon items &&
 #                                         (haveItem items SpeedBooster ||
 #                                            (haveItem items Charge ||
@@ -783,7 +792,7 @@ locations = [
     'Address': 0x7C755,
     'Visibility': "Visible",
     # DONE: difficulty already handled in the functions
-    # TODO: check the functions to be sure that they are ok
+    # TODO: check the functions to be sure that they are ok. FLO : ???
     'Available': lambda items: wor(canDefeatBotwoon(items), wand(canAccessOuterMaridia(items), canDoSuitlessMaridia(items)))
 },
 {

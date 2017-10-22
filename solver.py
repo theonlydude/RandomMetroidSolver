@@ -7,17 +7,17 @@ import sys, struct, math
 # the difficulties for each technics
 from parameters import *
 
-def get_item(rom_file, address, visibility):
+def getItem(romFile, address, visibility):
     # return the hex code of the object at the given address
 
     # the end game fake location
     if address == 0x0000:
         return '0x0000'
 
-    rom_file.seek(address, 0)
+    romFile.seek(address, 0)
     # value is in two bytes
-    value1 = struct.unpack("B", rom_file.read(1))
-    value2 = struct.unpack("B", rom_file.read(1))
+    value1 = struct.unpack("B", romFile.read(1))
+    value2 = struct.unpack("B", romFile.read(1))
 
     # match itemVisibility with
     # | Visible -> 0
@@ -85,7 +85,7 @@ def wor(a, b, c=None, d=None, difficulty=0):
 
 # check items and compute difficulty
 # the second parameter returned is the difficulty:
-def haveItem_count(items, item, count):
+def haveItemCount(items, item, count):
     return items.count(item) >= count
 
 def haveItem(items, item, difficulty=0):
@@ -94,8 +94,17 @@ def haveItem(items, item, difficulty=0):
 def itemCount(items, item):
     return items.count(item)
 
-def itemCountOk(items, item, count):
-    return (itemCount(items, item) >= count, 0)
+def itemCountOk(items, item, count, difficulty=0):
+    return (itemCount(items, item) >= count, difficulty)
+
+def itemCountOkList(items, item, difficulties):
+    # get a list: [(2, difficulty=hard), (4, difficulty=medium), (6, difficulty=easy)]
+    difficulty = difficulties.pop(0)
+    result = itemCountOk(items, item, difficulty[0], difficulty=difficulty[1])
+    while len(difficulties) > 0:
+        difficulty = difficulties.pop(0)
+        result = wor(result, itemCountOk(items, item, difficulty[0], difficulty=difficulty[1]))
+    return result
 
 def energyReserveCount(items):
     return itemCount(items, 'ETank') + itemCount(items, 'Reserve')
@@ -191,24 +200,24 @@ def canAccessWs(items):
                     wor(knowsContinuousWallJump,
                         wand(canUseBombs(items), knowsDiagonalBombJump),
                         wand(haveItem(items, 'SpeedBooster'), knowsSimpleShortCharge))))
-    
+
 def canAccessHeatedNorfair(items):
     return wand(canAccessRedBrinstar(items), canHellRun(items))
-    
+
 def canAccessCrocomire(items):
     return wor(wand(canAccessHeatedNorfair(items), wor(haveItem(items, 'Wave'), knowsGreenGateGlitch)),
                wand(canAccessKraid(items), # FIXME : knowsEarlyKraid "trick" is now entangled with crocomire access
                     canUsePowerBombs(items), 
                     haveItem(items, 'SpeedBooster'),
                     energyReserveCountOk(items, 2)))
-    
+
 def canAccessLowerNorfair(items):
     return wand(canAccessHeatedNorfair(items), # FIXME : hell runs difficulty settings affect lower norfair access with a 'and' condition...on paper this is bad, but you do want some etanks before going there
                 canUsePowerBombs(items),
                 haveItem(items, 'Varia'),
                 wor(wand(haveItem(items, 'HiJump'), knowsLavaDive),
                     wand(haveItem(items, 'Gravity'), knowsGravityJump)))
-    
+
 def canPassWorstRoom(items):
     return wand(canAccessLowerNorfair(items),
                 wor(canFly(items),
@@ -229,12 +238,12 @@ def canAccessOuterMaridia(items):
                                   wor(haveItem(items, 'Wave'),
                                       haveItem(items, 'Spazer'),
                                       haveItem(items, 'Plasma')))))))
-    
+
 def canAccessInnerMaridia(items):
     return wand(canAccessRedBrinstar(items),
                 canUsePowerBombs(items),
                 haveItem(items, 'Gravity'))
-    
+
 def canDoSuitlessMaridia(items):
     return wand(knowsSuitlessOuterMaridia,
                 haveItem(items, 'HiJump'),
@@ -252,65 +261,61 @@ def canDefeatDraygon(items):
     return wand(canDefeatBotwoon(items),
                 haveItem(items, 'Gravity'));
 
-# FLO : les majors et le stuff ne sont pas si independants que ca
-# si tu n'as pas charge beam il faut en avoir plein pour affronter ridley,
-# botwoon et mother brain, donc il faudrait une fonction enough_stuff pour
-# chacune de ces 3 etapes. 
-# si tu as charge et que tu sais faire le zebskip il n'y a clairement pas besoin
-# de bcp de minors pour passer mother brain. si tu ne sais pas faire le zebskip,
-# il t'en faut pas mal pour buter tous les zebs (trucs rouge). ok ya un refill de
-# missiles pas loin mais bon.
-# a la reflexion ca me parait bien complique d'integrer les minor items au solver
-# sauf pour le partie debut du jeu, car il y en a plein partout donc ce n'est jamais
-# un souci ou une difficulte d'en ramasser
-
-def canInflictEnoughDamages(items, bossEnergy, doubleSuper=False, charge=True):
+def canInflictEnoughDamages(items, bossEnergy, doubleSuper=False, charge=True, power=False):
     # TODO: handle special beam attacks ? (http://deanyd.net/sm/index.php?title=Charge_Beam_Combos)
 
     # http://deanyd.net/sm/index.php?title=Damage
-    standard_damage = 0
+    standardDamage = 0
     if haveItem(items, 'Charge')[0] and charge is True:
         if wand(haveItem(items, 'Ice'), haveItem(items, 'Wave'), haveItem(items, 'Plasma'))[0]:
-            standard_damage = 300
+            standardDamage = 300
         elif wand(haveItem(items, 'Wave'), haveItem(items, 'Plasma')):
-            standard_damage = 250
+            standardDamage = 250
         elif wand(haveItem(items, 'Ice'), haveItem(items, 'Plasma')):
-            standard_damage = 200
+            standardDamage = 200
         elif wand(haveItem(items, 'Plasma')):     
-            standard_damage = 150
+            standardDamage = 150
         elif wand(haveItem(items, 'Ice'), haveItem(items, 'Wave'), haveItem(items, 'Spazer')):
-            standard_damage = 100
+            standardDamage = 100
         elif wand(haveItem(items, 'Wave'), haveItem(items, 'Spazer')):
-            standard_damage = 70
+            standardDamage = 70
         elif wand(haveItem(items, 'Ice'), haveItem(items, 'Spazer')):
-            standard_damage = 60
+            standardDamage = 60
         elif wand(haveItem(items, 'Ice'), haveItem(items, 'Wave')):
-            standard_damage = 60
+            standardDamage = 60
         elif haveItem(items, 'Wave'):
-            standard_damage = 50
+            standardDamage = 50
         elif haveItem(items, 'Spazer'):
-            standard_damage = 40
+            standardDamage = 40
         elif haveItem(items, 'Ice'):
-            standard_damage = 30
+            standardDamage = 30
         else:
-            standard_damage = 20
+            standardDamage = 20
 
     # charge triples the damage
-    charged_damage = standard_damage * 3
+    chargeDamage = standardDamage * 3
 
     # missile 100 damages, super missile 300 damages, 5 missile in each extension
     if doubleSuper is True:
-        missiles_damage = (itemCount(items, 'Missile') * 5 * 100 + itemCount(items, 'Super') * 5 * 300 * 2)
+        missilesDamage = (itemCount(items, 'Missile') * 5 * 100 + itemCount(items, 'Super') * 5 * 300 * 2)
     else:
-        missiles_damage = (itemCount(items, 'Missile') * 5 * 100 + itemCount(items, 'Super') * 5 * 300)
+        missilesDamage = (itemCount(items, 'Missile') * 5 * 100 + itemCount(items, 'Super') * 5 * 300)
 
-    if missiles_damage > bossEnergy:
+    powerDamage = 0
+    if power is True and haveItem(items, 'PowerBomb')[0]:
+        powerDamage = itemCount(items, 'PowerBomb') * 200
+
+    if missilesDamage > bossEnergy:
         return (True, easy)
-    elif charged_damage > 0:
-        hits_required = (bossEnergy - missiles_damage) / charged_damage
-        return (True, int(math.ceil(hits_required / 10.0)))
     else:
-        return (False, 0)
+        bossEnergy = bossEnergy - powerDamage
+        if bossEnergy <= 0:
+            return (True, medium)
+        if chargeDamage > 0:
+            hitsRequired = (bossEnergy - missilesDamage) / chargeDamage
+            return (True, int(math.ceil(hitsRequired / 10.0)))
+        else:
+            return (False, 0)
 
 def enoughStuffsRidley(items):
     return canInflictEnoughDamages(items, 18000, doubleSuper=True)
@@ -319,147 +324,158 @@ def enoughStuffsKraid(items):
     return canInflictEnoughDamages(items, 1000)
 
 def enoughStuffsDraygon(items):
-    return canInflictEnoughDamages(items, 6000)
+    return wor(canInflictEnoughDamages(items, 6000),
+               wand(knowsDraygonGrappleKill,
+                    haveItem(items, 'Grapple')),
+               wand(knowsShortCharge,
+                    haveItem(items, 'SpeedBooster')))
 
 def enoughStuffsPhantoon(items):
-    return canInflictEnoughDamages(items, 2500, doubleSuper=True)
+    # with only super and no missiles/charge phantoon is way harder
+    if haveItem(items, 'Charge')[0]:
+        return canInflictEnoughDamages(items, 2500, doubleSuper=True)
+    else:
+        return wand(canInflictEnoughDamages(items, 2500, doubleSuper=True),
+                    wor(itemCountOk(items, 'Missile', 7),
+                        itemCountOkList(items, 'Missile', [(1, mania), (2, hardcore), (3, harder), (4, hard), (5, medium), (6, easy)])))
 
 def enoughStuffsMotherbrain(items):
-    return canInflictEnoughDamages(items, 3000 + 18000, charge=False)
+    # MB1 can't be hit by charge beam
+    return wand(canInflictEnoughDamages(items, 3000, charge=False), canInflictEnoughDamages(items, 18000 + 3000))
 
-def endGame(items):
-    # TODO: how many missiles to destroy a zebetite ? can it be destroyed with charged beam ?
-    return wand(enoughStuffsMotherbrain(items), wor(knowsZebSkip, canInflictEnoughDamages(items, 1000)))
+def canEndGame(items):
+    # a zebetite has 1100 energy
+    return wand(enoughStuffsMotherbrain(items), wor(knowsZebSkip, canInflictEnoughDamages(items, 1100)))
 
-def enough_stuff(items, minor_locations):
+def enoughStuff(items, minorLocations):
     if itemsPickup == '100%':
         # need them all
-        return len(minor_locations) == 0
+        return len(minorLocations) == 0
     elif itemsPickup == 'minimal':
-        return haveItem_count(items, 'Missile', 3) and haveItem_count(items, 'Super', 2) and haveItem_count(items, 'PowerBomb', 1)
+        return haveItemCount(items, 'Missile', 3) and haveItemCount(items, 'Super', 2) and haveItemCount(items, 'PowerBomb', 1)
     elif itemsPickup == 'normal':
         # check that we have 60 super, 10 bomb, 10 missiles
         return itemCount(items, 'Missile') >= 2 and itemCount(items, 'Super') >= 12 and itemCount(items, 'PowerBomb') >= 2
 
-def enough_majors(items, major_locations):
+def enoughMajors(items, majorLocations):
     # the end condition
     if itemsPickup == '100%' or itemsPickup == 'normal':
-        return len(major_locations) ==0
+        return len(majorLocations) ==0
     elif itemsPickup == 'minimal':
         # FLO : charge not required. bombs not required. Ice OR Speed required.
-        return haveItem_count(items, 'Morph', 1) and haveItem_count(items, 'Bomb', 1) and haveItem_count(items, 'ETank', 3) and haveItem_count(items, 'Charge', 1) and haveItem_count(items, 'Varia', 1) and haveItem_count(items, 'SpeedBooster', 1) and haveItem_count(items, 'Gravity', 1)
+        return haveItemCount(items, 'Morph', 1) and haveItemCount(items, 'Bomb', 1) and haveItemCount(items, 'ETank', 3) and haveItemCount(items, 'Charge', 1) and haveItemCount(items, 'Varia', 1) and haveItemCount(items, 'SpeedBooster', 1) and haveItemCount(items, 'Gravity', 1)
 
-def get_difficulty(locations):
+def getDifficulty(locations):
     # loop on the available locations depending on the collected items
     # before getting a new item, loop on all of them and get their difficulty, the next collected item is the one with the smallest difficulty, if equality between major and minor, take major first
 
-    major_locations = filter(lambda location: location["Class"] == "Major", locations)
-    minor_locations = filter(lambda location: location["Class"] == "Minor", locations)
+    majorLocations = filter(lambda location: location["Class"] == "Major", locations)
+    minorLocations = filter(lambda location: location["Class"] == "Minor", locations)
 
-    visited_locations = []
-    collected_items = []
+    visitedLocations = []
+    collectedItems = []
 
     # with the knowsXXX conditions some roms can be unbeatable, so we have to detect it
     previous = -1
     current = 0
 
-    print("{}: available major: {}, available minor: {}, visited: {}".format(itemsPickup, len(major_locations), len(minor_locations), len(visited_locations)))
+    print("{}: available major: {}, available minor: {}, visited: {}".format(itemsPickup, len(majorLocations), len(minorLocations), len(visitedLocations)))
 
-    while not enough_majors(collected_items, major_locations) or not enough_stuff(collected_items, minor_locations):
-        # print(str(collected_items))
+    while not enoughMajors(collectedItems, majorLocations) or not enoughStuff(collectedItems, minorLocations):
+        # print(str(collectedItems))
 
-        current = len(collected_items)
+        current = len(collectedItems)
         if current == previous:
             # we're stuck ! abort
             break
 
         # compute the difficulty of all the locations
-        for loc in major_locations:
-            loc['difficulty'] = loc['Available'](collected_items)
-        enough = enough_stuff(collected_items, minor_locations)
+        for loc in majorLocations:
+            loc['difficulty'] = loc['Available'](collectedItems)
+        enough = enoughStuff(collectedItems, minorLocations)
         if not enough:
-            for loc in minor_locations:
-                loc['difficulty'] = loc['Available'](collected_items)
+            for loc in minorLocations:
+                loc['difficulty'] = loc['Available'](collectedItems)
 
         # keep only the available locations
-        major_available = filter(lambda loc: loc["difficulty"][0] == True, major_locations)
+        majorAvailable = filter(lambda loc: loc["difficulty"][0] == True, majorLocations)
         if not enough:
-            minor_available = filter(lambda loc: loc["difficulty"][0] == True, minor_locations)
+            minorAvailable = filter(lambda loc: loc["difficulty"][0] == True, minorLocations)
 
         # that shouldn't happen
-        if len(major_available) == 0 and enough is True:
+        if len(majorAvailable) == 0 and enough is True:
             print('ERROR: no more major item available')
             boire.dela(chiasse)
 
         # sort them on difficulty
-        major_available.sort(key=lambda loc: loc['difficulty'][1])
+        majorAvailable.sort(key=lambda loc: loc['difficulty'][1])
         if not enough:
-            minor_available.sort(key=lambda loc: loc['difficulty'][1])
+            minorAvailable.sort(key=lambda loc: loc['difficulty'][1])
 
         # first take major items with no difficulty
-        major_picked = False
-        while len(major_available) > 0 and major_available[0]["difficulty"][1] == easy:
-            loc = major_available.pop(0)
-            major_locations.remove(loc)
-            visited_locations.append(loc)
-            collected_items.append(items[loc["item"]]["name"])
-            major_picked = True
+        majorPicked = False
+        while len(majorAvailable) > 0 and majorAvailable[0]["difficulty"][1] == easy:
+            loc = majorAvailable.pop(0)
+            majorLocations.remove(loc)
+            visitedLocations.append(loc)
+            collectedItems.append(items[loc["item"]]["name"])
+            majorPicked = True
 
         # if we take at least one major, recompute the difficulty
-        if major_picked is True:
+        if majorPicked is True:
             continue
 
         # if enough stuff, take the next available major
         if enough is True:
             # take first major
-            loc = major_available.pop(0)
-            major_locations.remove(loc)
-            visited_locations.append(loc)
-            collected_items.append(items[loc["item"]]["name"])
+            loc = majorAvailable.pop(0)
+            majorLocations.remove(loc)
+            visitedLocations.append(loc)
+            collectedItems.append(items[loc["item"]]["name"])
         else:
-            if len(major_available) == 0:
-                next_major_difficulty = 100
+            if len(majorAvailable) == 0:
+                nextMajorDifficulty = 100
             else:
-                next_major_difficulty = major_available[0]["difficulty"][1]
+                nextMajorDifficulty = majorAvailable[0]["difficulty"][1]
 
             # take the minors easier than the next major, check if we don't get too much stuff
-            minor_picked = False
-            while len(minor_available) > 0 and minor_available[0]["difficulty"][1] < next_major_difficulty and not enough_stuff(collected_items, minor_locations):
-                loc = minor_available.pop(0)
-                minor_locations.remove(loc)
-                visited_locations.append(loc)
-                collected_items.append(items[loc["item"]]["name"])
-                minor_picked = True
+            minorPicked = False
+            while len(minorAvailable) > 0 and minorAvailable[0]["difficulty"][1] < nextMajorDifficulty and not enoughStuff(collectedItems, minorLocations):
+                loc = minorAvailable.pop(0)
+                minorLocations.remove(loc)
+                visitedLocations.append(loc)
+                collectedItems.append(items[loc["item"]]["name"])
+                minorPicked = True
 
             # if we take at least one minor, recompute the difficulty
-            if minor_picked is True:
+            if minorPicked is True:
                 continue
 
             # take the next available major
-            if len(major_available) > 0:
-                loc = major_available.pop(0)
-                major_locations.remove(loc)
-                visited_locations.append(loc)
-                collected_items.append(items[loc["item"]]["name"])
+            if len(majorAvailable) > 0:
+                loc = majorAvailable.pop(0)
+                majorLocations.remove(loc)
+                visitedLocations.append(loc)
+                collectedItems.append(items[loc["item"]]["name"])
 
     # print generated path
     if displayGeneratedPath is True:
         print("Generated path:")
         print('{:>50}: {:>12} {:>16} {}'.format("Location Name", "Area", "Item", "Difficulty"))
         print('-'*92)
-        for location in visited_locations:
+        for location in visitedLocations:
             print('{:>50}: {:>12} {:>16} {}'.format(location['Name'], location['Area'], items[location['item']]['name'], location['difficulty'][1]))
 
-    if not enough_majors(collected_items, major_locations) or not enough_stuff(collected_items, minor_locations):
+    if not enoughMajors(collectedItems, majorLocations) or not enoughStuff(collectedItems, minorLocations):
         # we have aborted
         difficulty = -1
     else:
         # sum difficulty for all visited locations
         difficulty = 0
-        for loc in visited_locations:
+        for loc in visitedLocations:
             difficulty = difficulty + loc['difficulty'][1]
 
-    print("{}: remaining major: {}, remaining minor: {}, visited: {}".format(itemsPickup, len(major_locations), len(minor_locations), len(visited_locations)))
+    print("{}: remaining major: {}, remaining minor: {}, visited: {}".format(itemsPickup, len(majorLocations), len(minorLocations), len(visitedLocations)))
 
     return difficulty
 
@@ -820,7 +836,7 @@ locations = [
     'Address': 0x0000,
     'Visibility': "Visible",
     # DONE: difficulty already handled in the function
-    'Available': lambda items: endGame(items)
+    'Available': lambda items: canEndGame(items)
 },
 {
     'Area': "Crateria",
@@ -1356,31 +1372,31 @@ if len(sys.argv) != 2:
     print("missing param: rom file")
     sys.exit(0)
 
-rom_name = sys.argv[1]
-print("rom_name=" + rom_name)
+romName = sys.argv[1]
+print("romName=" + romName)
 
-rom_file = open(rom_name, "r")
+romFile = open(romName, "r")
 
 for location in locations:
-    location["item"] = get_item(rom_file, location["Address"], location["Visibility"])
+    location["item"] = getItem(romFile, location["Address"], location["Visibility"])
     #print('{:>50}: {:>16}'.format(location["Name"], items[location["item"]]['name']))
 
-rom_file.close()
+romFile.close()
 
-difficulty = get_difficulty(locations)
+difficulty = getDifficulty(locations)
 
 if difficulty >= 0:
     if difficulty < 15:
-        difficulty_text = 'easy'
+        difficultyText = 'easy'
     elif difficulty < 30:
-        difficulty_text = 'medium'
+        difficultyText = 'medium'
     elif difficulty < 45:
-        difficulty_text = 'hard'
+        difficultyText = 'hard'
     elif difficulty < 60:
-        difficulty_text = 'hardcore'
+        difficultyText = 'hardcore'
     else:
-        difficulty_text = 'mania'
+        difficultyText = 'mania'
 
-    print("Estimated difficulty for items pickup {}: {} ({})".format(itemsPickup, difficulty_text, difficulty))
+    print("Estimated difficulty for items pickup {}: {} ({})".format(itemsPickup, difficultyText, difficulty))
 else:
     print("Aborted run, can't finish the game with the given prerequisites")

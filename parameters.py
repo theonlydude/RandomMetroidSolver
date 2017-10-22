@@ -66,4 +66,4 @@ itemsPickup = 'normal'
 #itemsPickup = 'minimal'
 
 # display the generated path
-displayGeneratedPath = False
+displayGeneratedPath = True

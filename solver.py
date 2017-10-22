@@ -2,80 +2,17 @@
 
 # https://itemrando.supermetroid.run/randomize
 
-import sys
-import struct
+import sys, struct, math
 
-# the different difficulties available
-easy = 1
-medium = 3
-hard = 5
-harder = 7
-hardcore = 10
-mania = 15
-
-# the different technics to know (cf. http://deanyd.net/sm/index.php?title=Item_Randomizer)
-# and the personnal perceived difficulty.
-# False means: I can't do this technic or I don't know it.
-
-# universal
-# assume everyone knows wall jump & shinespark.
-#knowsWallJump = (True, easy)
-#knowsShinespark = (True, easy)
-knowsMockball = (True, easy) # early super and ice beam
-
-# common
-knowsCeilingDBoost = (True, easy) # for brinstar ceiling
-knowsAlcatrazEscape = (True, hardcore) # alcatraz without bomb
-knowsLavaDive = (True, hardcore) # ridley without gravity
-knowsSimpleShortCharge = (True, easy) # Waterway ETank without gravity, and Wrecked Ship access
-knowsInfiniteBombJump = (True, hard) # to access certain locations without high jump or space jump
-knowsGreenGateGlitch = (True, medium) # to access screw attack and crocomire
-
-# uncommon
-knowsMochtroidClip = (True, medium) # to access botwoon without speedbooster
-knowsPuyoClip = (False, 0) # to access spring ball without grapple beam
-knowsReverseGateGlitch = (True, medium) # ETank in Brinstar Gate
-knowsShortCharge = (False, 0) 
-knowsSuitlessOuterMaridia = (True, hardcore)
-knowsEarlyKraid = (True, easy) # to access kraid without hi jump boots
-
-# rare
-knowsGravityJump = (False, 0) 
-knowsContinuousWallJump = (False, 0) # access wrecked ship
-knowsSpringBallJump = (False, 0) 
-knowsXrayDboost = (False, 0) 
-
-# rarest
-knowsDiagonalBombJump = (False, 0) # access wrecked ship
-
-# end game
-knowsZebSkip = (False, 0) # change minimal ammo count TODO FLO : not used yet
-
-# choose how many items are required
-# 100%:
-#  need them all (major & minor)
-# minimal:
-#  need only the minimal required major and minor items
-# FLO : charge not required. bombs not required. Ice OR Speed required.
-#   Morphing Ball (1)
-#   Missiles (3)
-#   Bombs (1)
-#   Energy Tanks (3)
-#   Charge Beam (1)
-#   Super Missiles (2)
-#   Varia Suit (1)
-#   Speed Boots (1)
-#   Power Bombs (1)
-#   Gravity Suit (1)
-# normal:
-#  take all the majors and enough stuff, 60 super (12), 10 bomb (2), 5 missile (1)
-items_pickup = 'normal'
-#items_pickup = '100%'
-#items_pickup = 'minimal'
-
+# the difficulties for each technics
+from parameters import *
 
 def get_item(rom_file, address, visibility):
     # return the hex code of the object at the given address
+
+    # the end game fake location
+    if address == 0x0000:
+        return '0x0000'
 
     rom_file.seek(address, 0)
     # value is in two bytes
@@ -327,21 +264,89 @@ def canDefeatDraygon(items):
 # sauf pour le partie debut du jeu, car il y en a plein partout donc ce n'est jamais
 # un souci ou une difficulte d'en ramasser
 
+def canInflictEnoughDamages(items, bossEnergy, doubleSuper=False, charge=True):
+    # TODO: handle special beam attacks ? (http://deanyd.net/sm/index.php?title=Charge_Beam_Combos)
+
+    # http://deanyd.net/sm/index.php?title=Damage
+    charged_damage = 0
+    if haveItem(items, 'Charge')[0] and charge is True:
+        if wand(haveItem(items, 'Ice'), haveItem(items, 'Wave'), haveItem(items, 'Plasma'))[0]:
+            charged_damage = 300
+        elif wand(haveItem(items, 'Wave'), haveItem(items, 'Plasma')):
+            charged_damage = 250
+        elif wand(haveItem(items, 'Ice'), haveItem(items, 'Plasma')):
+            charged_damage = 200
+        elif wand(haveItem(items, 'Plasma')):     
+            charged_damage = 150
+        elif wand(haveItem(items, 'Ice'), haveItem(items, 'Wave'), haveItem(items, 'Spazer')):
+            charged_damage = 100
+        elif wand(haveItem(items, 'Wave'), haveItem(items, 'Spazer')):
+            charged_damage = 70
+        elif wand(haveItem(items, 'Ice'), haveItem(items, 'Spazer')):
+            charged_damage = 60
+        elif wand(haveItem(items, 'Ice'), haveItem(items, 'Wave')):
+            charged_damage = 60
+        elif haveItem(items, 'Wave'):
+            charged_damage = 50
+        elif haveItem(items, 'Spazer'):
+            charged_damage = 40
+        elif haveItem(items, 'Ice'):
+            charged_damage = 30
+        else:
+            charged_damage = 20
+
+    # charge triples the damage
+    charged_damage = charged_damage * 3
+
+    # missile 100 damages, super missile 300 damages, 5 missile in each extension
+    if doubleSuper is True:
+        missiles_damage = (itemCount(items, 'Missile') * 5 * 100 + itemCount(items, 'Super') * 5 * 300 * 2)
+    else:
+        missiles_damage = (itemCount(items, 'Missile') * 5 * 100 + itemCount(items, 'Super') * 5 * 300)
+
+    if missiles_damage > bossEnergy:
+        return (True, easy)
+    elif charged_damage > 0:
+        hits_required = (bossEnergy - missiles_damage) / charged_damage
+        return (True, int(math.ceil(hits_required / 10.0)))
+    else:
+        return (False, 0)
+
+def enoughStuffsRidley(items):
+    return canInflictEnoughDamages(items, 18000, doubleSuper=True)
+
+def enoughStuffsKraid(items):
+    return canInflictEnoughDamages(items, 1000)
+
+def enoughStuffsDraygon(items):
+    return canInflictEnoughDamages(items, 6000)
+
+def enoughStuffsPhantoon(items):
+    return canInflictEnoughDamages(items, 2500, doubleSuper=True)
+
+def enoughStuffsMotherbrain(items):
+    return canInflictEnoughDamages(items, 3000 + 18000, charge=False)
+
+def endGame(items):
+    # TODO: how many missiles to destroy a zebetite ? can it be destroyed with charged beam ?
+    return wand(enoughStuffsMotherbrain(items), wor(knowsZebSkip, canInflictEnoughDamages(items, 1000)))
+
 def enough_stuff(items, minor_locations):
-    if items_pickup == '100%':
+    if itemsPickup == '100%':
         # need them all
         return len(minor_locations) == 0
-    elif items_pickup == 'minimal':
+    elif itemsPickup == 'minimal':
         return haveItem_count(items, 'Missile', 3) and haveItem_count(items, 'Super', 2) and haveItem_count(items, 'PowerBomb', 1)
-    elif items_pickup == 'normal':
+    elif itemsPickup == 'normal':
         # check that we have 60 super, 10 bomb, 10 missiles
         return itemCount(items, 'Missile') >= 2 and itemCount(items, 'Super') >= 12 and itemCount(items, 'PowerBomb') >= 2
 
 def enough_majors(items, major_locations):
     # the end condition
-    if items_pickup == '100%' or items_pickup == 'normal':
+    if itemsPickup == '100%' or itemsPickup == 'normal':
         return len(major_locations) ==0
-    elif items_pickup == 'minimal':
+    elif itemsPickup == 'minimal':
+        # FLO : charge not required. bombs not required. Ice OR Speed required.
         return haveItem_count(items, 'Morph', 1) and haveItem_count(items, 'Bomb', 1) and haveItem_count(items, 'ETank', 3) and haveItem_count(items, 'Charge', 1) and haveItem_count(items, 'Varia', 1) and haveItem_count(items, 'SpeedBooster', 1) and haveItem_count(items, 'Gravity', 1)
 
 def get_difficulty(locations):
@@ -358,7 +363,7 @@ def get_difficulty(locations):
     previous = -1
     current = 0
 
-    print("{}: available major: {}, available minor: {}, visited: {}".format(items_pickup, len(major_locations), len(minor_locations), len(visited_locations)))
+    print("{}: available major: {}, available minor: {}, visited: {}".format(itemsPickup, len(major_locations), len(minor_locations), len(visited_locations)))
 
     while not enough_majors(collected_items, major_locations) or not enough_stuff(collected_items, minor_locations):
         # print(str(collected_items))
@@ -438,11 +443,12 @@ def get_difficulty(locations):
                 collected_items.append(items[loc["item"]]["name"])
 
     # print generated path
-    print("Generated path:")
-    print('{:>50}: {:>12} {:>16} {}'.format("Location Name", "Area", "Item", "Difficulty"))
-    print('-'*92)
-    for location in visited_locations:
-        print('{:>50}: {:>12} {:>16} {}'.format(location['Name'], location['Area'], items[location['item']]['name'], location['difficulty'][1]))
+    if displayGeneratedPath is True:
+        print("Generated path:")
+        print('{:>50}: {:>12} {:>16} {}'.format("Location Name", "Area", "Item", "Difficulty"))
+        print('-'*92)
+        for location in visited_locations:
+            print('{:>50}: {:>12} {:>16} {}'.format(location['Name'], location['Area'], items[location['item']]['name'], location['difficulty'][1]))
 
     if not enough_majors(collected_items, major_locations) or not enough_stuff(collected_items, minor_locations):
         # we have aborted
@@ -453,32 +459,33 @@ def get_difficulty(locations):
         for loc in visited_locations:
             difficulty = difficulty + loc['difficulty'][1]
 
-    print("{}: remaining major: {}, remaining minor: {}, visited: {}".format(items_pickup, len(major_locations), len(minor_locations), len(visited_locations)))
+    print("{}: remaining major: {}, remaining minor: {}, visited: {}".format(itemsPickup, len(major_locations), len(minor_locations), len(visited_locations)))
 
     return difficulty
 
 items = {
-    '0xeed7': {'name' : 'ETank'},
-    '0xeedb': {'name' : 'Missile'},
-    '0xeedf': {'name' : 'Super'},
-    '0xeee3': {'name' : 'PowerBomb'},
-    '0xeee7': {'name' : 'Bomb'},
-    '0xeeeb': {'name' : 'Charge'},
-    '0xeeef': {'name' : 'Ice'},
-    '0xeef3': {'name' : 'HiJump'},
-    '0xeef7': {'name' : 'SpeedBooster'},
-    '0xeefb': {'name' : 'Wave'},
-    '0xeeff': {'name' : 'Spazer'},
-    '0xef03': {'name' : 'SpringBall'},
-    '0xef07': {'name' : 'Varia'},
-    '0xef13': {'name' : 'Plasma'},
-    '0xef17': {'name' : 'Grapple'},
-    '0xef23': {'name' : 'Morph'},
-    '0xef27': {'name' : 'Reserve'},
-    '0xef0b': {'name' : 'Gravity'},
-    '0xef0f': {'name' : 'XRayScope'},
-    '0xef1b': {'name' : 'SpaceJump'},
-    '0xef1f': {'name' : 'ScrewAttack'},
+    '0xeed7': {'name': 'ETank'},
+    '0xeedb': {'name': 'Missile'},
+    '0xeedf': {'name': 'Super'},
+    '0xeee3': {'name': 'PowerBomb'},
+    '0xeee7': {'name': 'Bomb'},
+    '0xeeeb': {'name': 'Charge'},
+    '0xeeef': {'name': 'Ice'},
+    '0xeef3': {'name': 'HiJump'},
+    '0xeef7': {'name': 'SpeedBooster'},
+    '0xeefb': {'name': 'Wave'},
+    '0xeeff': {'name': 'Spazer'},
+    '0xef03': {'name': 'SpringBall'},
+    '0xef07': {'name': 'Varia'},
+    '0xef13': {'name': 'Plasma'},
+    '0xef17': {'name': 'Grapple'},
+    '0xef23': {'name': 'Morph'},
+    '0xef27': {'name': 'Reserve'},
+    '0xef0b': {'name': 'Gravity'},
+    '0xef0f': {'name': 'XRayScope'},
+    '0xef1b': {'name': 'SpaceJump'},
+    '0xef1f': {'name': 'ScrewAttack'},
+    '0x0000': {'name': 'End'}
 }
 
 # generated with:
@@ -614,7 +621,7 @@ locations = [
     'Address': 0x78ACA,
     'Visibility': "Chozo",
     # DONE: no difficulty
-    'Available': lambda items: canAccessKraid(items)
+    'Available': lambda items: wand(canAccessKraid(items), enoughStuffsKraid(items))
 },
 {
     'Area': "Norfair",
@@ -685,7 +692,7 @@ locations = [
     'Address': 0x79108,
     'Visibility': "Hidden",
     # DONE: already set in function
-    'Available': lambda items: canPassWorstRoom(items)
+    'Available': lambda items: wand(canPassWorstRoom(items), enoughStuffsRidley(items))
 },
 {
     'Area': "LowerNorfair",
@@ -736,7 +743,7 @@ locations = [
     'Address': 0x7C365,
     'Visibility': "Visible",
     # DONE: easy once WS is accessible
-    'Available': lambda items: canAccessWs(items)
+    'Available': lambda items: wand(canAccessWs(items), enoughStuffsPhantoon(items))
 },
 {
     'Area': "WreckedShip",
@@ -804,7 +811,16 @@ locations = [
     'Address': 0x7C7A7,
     'Visibility': "Chozo",
     # DONE: difficulty already handled in the function
-    'Available': lambda items: canDefeatDraygon(items)
+    'Available': lambda items: wand(canDefeatDraygon(items), enoughStuffsDraygon(items))
+},
+{
+    'Area': "Tourian",
+    'Name': "End Game",
+    'Class': "Major",
+    'Address': 0x0000,
+    'Visibility': "Visible",
+    # DONE: difficulty already handled in the function
+    'Available': lambda items: endGame(items)
 },
 {
     'Area': "Crateria",
@@ -1335,8 +1351,6 @@ locations = [
     'Available': lambda items: canDefeatBotwoon(items)
 }
 ]
-# FIXME : where's ScrewAttack ??? 
-
 
 if len(sys.argv) != 2:
     print("missing param: rom file")
@@ -1356,6 +1370,17 @@ rom_file.close()
 difficulty = get_difficulty(locations)
 
 if difficulty >= 0:
-    print("Estimated difficulty: {}".format(difficulty))
+    if difficulty < 15:
+        difficulty_text = 'easy'
+    elif difficulty < 30:
+        difficulty_text = 'medium'
+    elif difficulty < 45:
+        difficulty_text = 'hard'
+    elif difficulty < 60:
+        difficulty_text = 'hardcore'
+    else:
+        difficulty_text = 'mania'
+
+    print("Estimated difficulty: {} ({})".format(difficulty_text, difficulty))
 else:
     print("Aborted run, can't finish the game with the given prerequisites")

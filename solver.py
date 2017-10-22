@@ -255,7 +255,7 @@ def canDefeatBotwoon(items):
                     canDoSuitlessMaridia(items)),
                 wor(wand(haveItem(items, 'Ice'),
                          knowsMochtroidClip),
-                    haveItem(items, 'SpeedBooster'))) # FIXME : ammo check???
+                    haveItem(items, 'SpeedBooster')))
 
 def canDefeatDraygon(items):
     return wand(canDefeatBotwoon(items),
@@ -361,8 +361,7 @@ def enoughMajors(items, majorLocations):
     if itemsPickup == '100%' or itemsPickup == 'normal':
         return len(majorLocations) ==0
     elif itemsPickup == 'minimal':
-        # FLO : charge not required. bombs not required. Ice OR Speed required.
-        return haveItemCount(items, 'Morph', 1) and haveItemCount(items, 'Bomb', 1) and haveItemCount(items, 'ETank', 3) and haveItemCount(items, 'Charge', 1) and haveItemCount(items, 'Varia', 1) and haveItemCount(items, 'SpeedBooster', 1) and haveItemCount(items, 'Gravity', 1)
+        return haveItemCount(items, 'Morph', 1) and (haveItemCount(items, 'Bomb', 1) or haveItemCount(items, 'PowerBomb', 1)) and haveItemCount(items, 'ETank', 3) and haveItemCount(items, 'Varia', 1) and (haveItemCount(items, 'SpeedBooster', 1) or haveItemCount(items, 'Ice', 1)) and haveItemCount(items, 'Gravity', 1)
 
 def getDifficulty(locations):
     # loop on the available locations depending on the collected items
@@ -531,7 +530,9 @@ locations = [
     'Address': 0x78432,
     'Visibility': "Visible",
     # DONE: easy one, nothing to add
-    'Available': lambda items: wor(canDestroyBombWalls(items), haveItem(items, 'SpeedBooster')) # TODO that SpeedBooster check is if you had to do alcatraz...check if that implies a short charge?
+    'Available': lambda items: wor(canDestroyBombWalls(items), haveItem(items, 'SpeedBooster'))
+    # TODO that SpeedBooster check is if you had to do alcatraz...check if that implies a short charge?
+    # the alcatraz check is already done in the 'Bomb' location
 },
 {
     'Area': "Brinstar",

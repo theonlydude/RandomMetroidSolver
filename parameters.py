@@ -61,8 +61,8 @@ knowsZebSkip = (False, 0) # change minimal ammo count TODO FLO : not used yet
 #   Gravity Suit (1)
 # normal:
 #  take all the majors and enough stuff, 60 super (12), 10 bomb (2), 5 missile (1)
-itemsPickup = 'normal'
-#itemsPickup = '100%'
+#itemsPickup = 'normal'
+itemsPickup = '100%'
 #itemsPickup = 'minimal'
 
 # display the generated path

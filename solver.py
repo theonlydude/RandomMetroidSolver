@@ -268,35 +268,35 @@ def canInflictEnoughDamages(items, bossEnergy, doubleSuper=False, charge=True):
     # TODO: handle special beam attacks ? (http://deanyd.net/sm/index.php?title=Charge_Beam_Combos)
 
     # http://deanyd.net/sm/index.php?title=Damage
-    charged_damage = 0
+    standard_damage = 0
     if haveItem(items, 'Charge')[0] and charge is True:
         if wand(haveItem(items, 'Ice'), haveItem(items, 'Wave'), haveItem(items, 'Plasma'))[0]:
-            charged_damage = 300
+            standard_damage = 300
         elif wand(haveItem(items, 'Wave'), haveItem(items, 'Plasma')):
-            charged_damage = 250
+            standard_damage = 250
         elif wand(haveItem(items, 'Ice'), haveItem(items, 'Plasma')):
-            charged_damage = 200
+            standard_damage = 200
         elif wand(haveItem(items, 'Plasma')):     
-            charged_damage = 150
+            standard_damage = 150
         elif wand(haveItem(items, 'Ice'), haveItem(items, 'Wave'), haveItem(items, 'Spazer')):
-            charged_damage = 100
+            standard_damage = 100
         elif wand(haveItem(items, 'Wave'), haveItem(items, 'Spazer')):
-            charged_damage = 70
+            standard_damage = 70
         elif wand(haveItem(items, 'Ice'), haveItem(items, 'Spazer')):
-            charged_damage = 60
+            standard_damage = 60
         elif wand(haveItem(items, 'Ice'), haveItem(items, 'Wave')):
-            charged_damage = 60
+            standard_damage = 60
         elif haveItem(items, 'Wave'):
-            charged_damage = 50
+            standard_damage = 50
         elif haveItem(items, 'Spazer'):
-            charged_damage = 40
+            standard_damage = 40
         elif haveItem(items, 'Ice'):
-            charged_damage = 30
+            standard_damage = 30
         else:
-            charged_damage = 20
+            standard_damage = 20
 
     # charge triples the damage
-    charged_damage = charged_damage * 3
+    charged_damage = standard_damage * 3
 
     # missile 100 damages, super missile 300 damages, 5 missile in each extension
     if doubleSuper is True:
@@ -701,7 +701,7 @@ locations = [
     'Address': 0x79110,
     'Visibility': "Chozo",
     # DONE: easy with green gate glitch
-    'Available': lambda items: canAccessLowerNorfair(items)
+    'Available': lambda items: wand(canAccessLowerNorfair(items), wor(haveItem(items, 'SpaceJump'), knowsGreenGateGlitch))
 },
 {
     'Area': "LowerNorfair",
@@ -1381,6 +1381,6 @@ if difficulty >= 0:
     else:
         difficulty_text = 'mania'
 
-    print("Estimated difficulty: {} ({})".format(difficulty_text, difficulty))
+    print("Estimated difficulty for items pickup {}: {} ({})".format(itemsPickup, difficulty_text, difficulty))
 else:
     print("Aborted run, can't finish the game with the given prerequisites")

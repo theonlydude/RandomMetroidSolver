@@ -1,5 +1,5 @@
 # the different difficulties available
-easy = 1
+easy = 0
 medium = 3
 hard = 5
 harder = 7
@@ -28,9 +28,10 @@ knowsGreenGateGlitch = (True, medium) # to access screw attack and crocomire
 knowsMochtroidClip = (True, medium) # to access botwoon without speedbooster
 knowsPuyoClip = (False, 0) # to access spring ball without grapple beam
 knowsReverseGateGlitch = (True, medium) # ETank in Brinstar Gate
-knowsShortCharge = (False, 0) 
+knowsShortCharge = (False, 0) # to kill draygon
 knowsSuitlessOuterMaridia = (True, hardcore)
 knowsEarlyKraid = (True, easy) # to access kraid without hi jump boots
+knowsDraygonGrappleKill = (False, 0) # easy kill for draygon
 
 # rare
 knowsGravityJump = (False, 0) 
@@ -66,4 +67,4 @@ itemsPickup = '100%'
 #itemsPickup = 'minimal'
 
 # display the generated path
-displayGeneratedPath = True
+displayGeneratedPath = False

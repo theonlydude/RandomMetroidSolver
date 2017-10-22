@@ -42,7 +42,6 @@ def wand2(a, b, difficulty=0):
     else:
         return (False, 0)
 
-# they must be a better pythonic way of doing that... FLO : maybe put an array instead of a,b,c,d ...?
 def wand(a, b, c=None, d=None, difficulty=0):
     if c is None and d is None:
         ret = wand2(a, b)
@@ -216,7 +215,8 @@ def canAccessLowerNorfair(items):
                 canUsePowerBombs(items),
                 haveItem(items, 'Varia'),
                 wor(wand(haveItem(items, 'HiJump'), knowsLavaDive),
-                    wand(haveItem(items, 'Gravity'), knowsGravityJump)))
+                    wand(haveItem(items, 'Gravity'), knowsGravityJump),
+                    haveItem(items, 'SpaceJump')))
 
 def canPassWorstRoom(items):
     return wand(canAccessLowerNorfair(items),
@@ -336,8 +336,7 @@ def enoughStuffsPhantoon(items):
         return canInflictEnoughDamages(items, 2500, doubleSuper=True)
     else:
         return wand(canInflictEnoughDamages(items, 2500, doubleSuper=True),
-                    wor(itemCountOk(items, 'Missile', 7),
-                        itemCountOkList(items, 'Missile', [(1, mania), (2, hardcore), (3, harder), (4, hard), (5, medium), (6, easy)])))
+                    itemCountOkList(items, 'Missile', [(1, mania), (2, hardcore), (3, harder), (4, hard), (5, medium), (6, easy)]))
 
 def enoughStuffsMotherbrain(items):
     # MB1 can't be hit by charge beam
@@ -1386,13 +1385,13 @@ romFile.close()
 difficulty = getDifficulty(locations)
 
 if difficulty >= 0:
-    if difficulty < 15:
+    if difficulty == 0:
         difficultyText = 'easy'
-    elif difficulty < 30:
+    elif difficulty < 5:
         difficultyText = 'medium'
-    elif difficulty < 45:
+    elif difficulty < 10:
         difficultyText = 'hard'
-    elif difficulty < 60:
+    elif difficulty < 20:
         difficultyText = 'hardcore'
     else:
         difficultyText = 'mania'

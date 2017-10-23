@@ -10,9 +10,9 @@ from parameters import *
 def getItem(romFile, address, visibility):
     # return the hex code of the object at the given address
 
-    # the end game fake location
-    if address == 0x0000:
-        return '0x0000'
+    # # the end game fake location
+    # if address == 0x0000:
+    #     return '0x0000'
 
     romFile.seek(address, 0)
     # value is in two bytes
@@ -379,7 +379,7 @@ def getDifficulty(locations):
 
     print("{}: available major: {}, available minor: {}, visited: {}".format(itemsPickup, len(majorLocations), len(minorLocations), len(visitedLocations)))
 
-    while not enoughMajors(collectedItems, majorLocations) or not enoughStuff(collectedItems, minorLocations):
+    while not enoughMajors(collectedItems, majorLocations) or not enoughStuff(collectedItems, minorLocations) or not canEndGame(collectedItems):
         # print(str(collectedItems))
 
         current = len(collectedItems)
@@ -473,7 +473,7 @@ def getDifficulty(locations):
         for location in visitedLocations:
             print('{:>50}: {:>12} {:>16} {}'.format(location['Name'], location['Area'], items[location['item']]['name'], location['difficulty'][1]))
 
-    if not enoughMajors(collectedItems, majorLocations) or not enoughStuff(collectedItems, minorLocations):
+    if not enoughMajors(collectedItems, majorLocations) or not enoughStuff(collectedItems, minorLocations) or not canEndGame(collectedItems):
         # we have aborted
         difficulty = (-1, -1)
     else:
@@ -515,8 +515,8 @@ items = {
     '0xef0b': {'name': 'Gravity'},
     '0xef0f': {'name': 'XRayScope'},
     '0xef1b': {'name': 'SpaceJump'},
-    '0xef1f': {'name': 'ScrewAttack'},
-    '0x0000': {'name': 'End'}
+    '0xef1f': {'name': 'ScrewAttack'}
+#    '0x0000': {'name': 'End'}
 }
 
 # generated with:
@@ -538,7 +538,7 @@ locations = [
     'Class': "Major",
     'Visibility': "Chozo",
     # DONE: difficulty handled with knowsAlcatrazEscape
-    'Available': lambda items: wand(haveItem(items, 'Morph'), canOpenRedDoors(items), wor(knowsAlcatrazEscape, haveItem(items, 'Bomb'), canUsePowerBombs(items)))
+    'Available': lambda items: wand(haveItem(items, 'Morph'), canOpenRedDoors(items))
 },
 {
     'Area': "Crateria",
@@ -547,8 +547,10 @@ locations = [
     'Address': 0x78432,
     'Visibility': "Visible",
     # DONE: easy one, nothing to add
-    'Available': lambda items: wor(canDestroyBombWalls(items), haveItem(items, 'SpeedBooster'))
-    # TODO that SpeedBooster check is if you had to do alcatraz...check if that implies a short charge?
+    # FLO : rewrote condition. initial condition was good for the randomizer itself but not for difficulty estimation. we know that if no power bombs
+    # are found early, BT will give either Bomb, ScrewAttack or SpeedBooster, so we reflect that logic for item immediately after Bomb
+    'Available': lambda items: wor(wand(knowsAlcatrazEscape, haveItem(items, 'SpeedBooster'), wand(knowsAlcatrazEscape, haveItem(items, 'ScrewAttack'))), haveItem(items, 'Bomb'), canUsePowerBombs(items))
+    # FIXME that SpeedBooster check is if you had to do alcatraz...check if that implies a short charge?
     # the alcatraz check is already done in the 'Bomb' location
 },
 {
@@ -846,15 +848,15 @@ locations = [
     # DONE: difficulty already handled in the function
     'Available': lambda items: wand(canDefeatDraygon(items), enoughStuffsDraygon(items))
 },
-{
-    'Area': "Tourian",
-    'Name': "End Game",
-    'Class': "Major",
-    'Address': 0x0000,
-    'Visibility': "Visible",
-    # DONE: difficulty already handled in the function
-    'Available': lambda items: canEndGame(items)
-},
+# {
+#     'Area': "Tourian",
+#     'Name': "End Game",
+#     'Class': "Major",
+#     'Address': 0x0000,
+#     'Visibility': "Visible",
+#     # DONE: difficulty already handled in the function
+#     'Available': lambda items: canEndGame(items)
+# },
 {
     'Area': "Crateria",
     'Name': "Power Bomb (Crateria surface)",

@@ -1,10 +1,10 @@
 # the different difficulties available
-easy = 0
-medium = 3
-hard = 5
-harder = 7
-hardcore = 10
-mania = 15
+easy = 1
+medium = 5
+hard = 10
+harder = 25
+hardcore = 50
+mania = 100
 
 # the different technics to know (cf. http://deanyd.net/sm/index.php?title=Item_Randomizer)
 # and the personnal perceived difficulty.
@@ -63,8 +63,8 @@ knowsZebSkip = (False, 0) # change minimal ammo count TODO FLO : not used yet
 # normal:
 #  take all the majors and enough stuff, 60 super (12), 10 bomb (2), 5 missile (1)
 #itemsPickup = 'normal'
-itemsPickup = '100%'
-#itemsPickup = 'minimal'
+#itemsPickup = '100%'
+itemsPickup = 'minimal'
 
 # display the generated path
 displayGeneratedPath = True

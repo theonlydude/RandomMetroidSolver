@@ -10,10 +10,6 @@ from parameters import *
 def getItem(romFile, address, visibility):
     # return the hex code of the object at the given address
 
-    # # the end game fake location
-    # if address == 0x0000:
-    #     return '0x0000'
-
     romFile.seek(address, 0)
     # value is in two bytes
     value1 = struct.unpack("B", romFile.read(1))
@@ -353,13 +349,12 @@ def enoughStuff(items, minorLocations):
     elif itemsPickup == 'minimal':
         return haveItemCount(items, 'Missile', 3) and haveItemCount(items, 'Super', 2) and haveItemCount(items, 'PowerBomb', 1)
     elif itemsPickup == 'normal':
-        # check that we have 60 super, 10 bomb, 10 missiles
-        return itemCount(items, 'Missile') >= 2 and itemCount(items, 'Super') >= 12 and itemCount(items, 'PowerBomb') >= 2
+        return canEndGame(items)[0]
 
 def enoughMajors(items, majorLocations):
     # the end condition
     if itemsPickup == '100%' or itemsPickup == 'normal':
-        return len(majorLocations) ==0
+        return len(majorLocations) == 0
     elif itemsPickup == 'minimal':
         return haveItemCount(items, 'Morph', 1) and (haveItemCount(items, 'Bomb', 1) or haveItemCount(items, 'PowerBomb', 1)) and haveItemCount(items, 'ETank', 3) and haveItemCount(items, 'Varia', 1) and (haveItemCount(items, 'SpeedBooster', 1) or haveItemCount(items, 'Ice', 1)) and haveItemCount(items, 'Gravity', 1)
 
@@ -419,7 +414,7 @@ def getDifficulty(locations):
             visitedLocations.append(loc)
             collecting = items[loc["item"]]["name"]
             collectedItems.append(collecting)
-#            print("collecting major : " + collecting + " at " + loc['Name'])
+            # print("collecting major : " + collecting + " at " + loc['Name'])
             majorPicked = True
 
         # if we take at least one major, recompute the difficulty
@@ -434,10 +429,10 @@ def getDifficulty(locations):
             visitedLocations.append(loc)
             collecting = items[loc["item"]]["name"]
             collectedItems.append(collecting)
-#            print("collecting major : " + collecting + " at " + loc['Name'])
+            # print("collecting major : " + collecting + " at " + loc['Name'])
         else:
             if len(majorAvailable) == 0:
-                nextMajorDifficulty = 100
+                nextMajorDifficulty = mania * 10
             else:
                 nextMajorDifficulty = majorAvailable[0]["difficulty"][1]
 
@@ -449,7 +444,7 @@ def getDifficulty(locations):
                 visitedLocations.append(loc)
                 collecting = items[loc["item"]]["name"]
                 collectedItems.append(collecting)
-#                print("collecting minor : " + collecting + " at " + loc['Name'])
+                # print("collecting minor : " + collecting + " at " + loc['Name'])
                 minorPicked = True
 
             # if we take at least one minor, recompute the difficulty
@@ -463,7 +458,7 @@ def getDifficulty(locations):
                 visitedLocations.append(loc)
                 collecting = items[loc["item"]]["name"]
                 collectedItems.append(collecting)
-#                print("collecting major : " + collecting + " at " + loc['Name'])
+                # print("collecting major : " + collecting + " at " + loc['Name'])
 
     # print generated path
     if displayGeneratedPath is True:
@@ -486,7 +481,7 @@ def getDifficulty(locations):
         # we compute the number of '+' that we'll display next to the difficulty to take in
         # account the sum of the difficulties.
         if difficulty_sum > difficulty_max:
-            difficulty = (difficulty_max, (difficulty_sum - difficulty_max) / difficulty_max)
+            difficulty = (difficulty_max, (difficulty_sum - difficulty_max) / (difficulty_max * 2))
         else:
             difficulty = (difficulty_max, 0)
 
@@ -516,7 +511,6 @@ items = {
     '0xef0f': {'name': 'XRayScope'},
     '0xef1b': {'name': 'SpaceJump'},
     '0xef1f': {'name': 'ScrewAttack'}
-#    '0x0000': {'name': 'End'}
 }
 
 # generated with:
@@ -847,15 +841,6 @@ locations = [
     # DONE: difficulty already handled in the function
     'Available': lambda items: wand(canDefeatDraygon(items), enoughStuffsDraygon(items))
 },
-# {
-#     'Area': "Tourian",
-#     'Name': "End Game",
-#     'Class': "Major",
-#     'Address': 0x0000,
-#     'Visibility': "Visible",
-#     # DONE: difficulty already handled in the function
-#     'Available': lambda items: canEndGame(items)
-# },
 {
     'Area': "Crateria",
     'Name': "Power Bomb (Crateria surface)",
@@ -1417,6 +1402,6 @@ if difficulty[0] >= 0:
     else:
         difficultyText = 'mania'
 
-    print("Estimated difficulty for items pickup {}: {}{}".format(itemsPickup, difficultyText, '+'*difficulty[1]))
+    print("Estimated difficulty for items pickup {}: {}".format(itemsPickup, difficultyText))
 else:
     print("Aborted run, can't finish the game with the given prerequisites")

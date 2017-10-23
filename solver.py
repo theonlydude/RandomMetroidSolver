@@ -216,7 +216,7 @@ def canAccessLowerNorfair(items):
                 haveItem(items, 'Varia'),
                 wor(wand(haveItem(items, 'HiJump'), knowsLavaDive),
                     wand(haveItem(items, 'Gravity'), knowsGravityJump),
-                    haveItem(items, 'SpaceJump')))
+                    wand(haveItem(items, 'Gravity'), haveItem(items, 'SpaceJump'))))
 
 def canPassWorstRoom(items):
     return wand(canAccessLowerNorfair(items),
@@ -466,12 +466,20 @@ def getDifficulty(locations):
 
     if not enoughMajors(collectedItems, majorLocations) or not enoughStuff(collectedItems, minorLocations):
         # we have aborted
-        difficulty = -1
+        difficulty = (-1, -1)
     else:
         # sum difficulty for all visited locations
-        difficulty = 0
+        difficulty_sum = 0
+        difficulty_max = 0
         for loc in visitedLocations:
-            difficulty = difficulty + loc['difficulty'][1]
+            difficulty_sum = difficulty_sum + loc['difficulty'][1]
+            difficulty_max = max(difficulty_max, loc['difficulty'][1])
+        # we compute the number of '+' that we'll display next to the difficulty to take in
+        # account the sum of the difficulties.
+        if difficulty_sum > difficulty_max:
+            difficulty = (difficulty_max, (difficulty_sum - difficulty_max) / difficulty_max)
+        else:
+            difficulty = (difficulty_max, 0)
 
     print("{}: remaining major: {}, remaining minor: {}, visited: {}".format(itemsPickup, len(majorLocations), len(minorLocations), len(visitedLocations)))
 
@@ -1385,18 +1393,18 @@ romFile.close()
 
 difficulty = getDifficulty(locations)
 
-if difficulty >= 0:
-    if difficulty == 0:
+if difficulty[0] >= 0:
+    if difficulty[0] == easy:
         difficultyText = 'easy'
-    elif difficulty < 5:
+    elif difficulty[0] == medium:
         difficultyText = 'medium'
-    elif difficulty < 10:
+    elif difficulty[0] == hard or difficulty == harder:
         difficultyText = 'hard'
-    elif difficulty < 20:
+    elif difficulty[0] == hardcore:
         difficultyText = 'hardcore'
     else:
         difficultyText = 'mania'
 
-    print("Estimated difficulty for items pickup {}: {} ({})".format(itemsPickup, difficultyText, difficulty))
+    print("Estimated difficulty for items pickup {}: {}{}".format(itemsPickup, difficultyText, '+'*difficulty[1]))
 else:
     print("Aborted run, can't finish the game with the given prerequisites")

@@ -549,9 +549,8 @@ locations = [
     # DONE: easy one, nothing to add
     # FLO : rewrote condition. initial condition was good for the randomizer itself but not for difficulty estimation. we know that if no power bombs
     # are found early, BT will give either Bomb, ScrewAttack or SpeedBooster, so we reflect that logic for item immediately after Bomb
-    'Available': lambda items: wor(wand(knowsAlcatrazEscape, haveItem(items, 'SpeedBooster'), wand(knowsAlcatrazEscape, haveItem(items, 'ScrewAttack'))), haveItem(items, 'Bomb'), canUsePowerBombs(items))
+    'Available': lambda items: wor(wand(knowsAlcatrazEscape, haveItem(items, 'SpeedBooster')), wand(knowsAlcatrazEscape, haveItem(items, 'ScrewAttack')), wand(haveItem(items, 'Morph'), haveItem(items, 'Bomb')), canUsePowerBombs(items))
     # FIXME that SpeedBooster check is if you had to do alcatraz...check if that implies a short charge?
-    # the alcatraz check is already done in the 'Bomb' location
 },
 {
     'Area': "Brinstar",

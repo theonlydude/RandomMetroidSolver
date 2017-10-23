@@ -386,6 +386,7 @@ def getDifficulty(locations):
         if current == previous:
             # we're stuck ! abort
             break
+        previous = current
 
         # compute the difficulty of all the locations
         for loc in majorLocations:
@@ -416,7 +417,9 @@ def getDifficulty(locations):
             loc = majorAvailable.pop(0)
             majorLocations.remove(loc)
             visitedLocations.append(loc)
-            collectedItems.append(items[loc["item"]]["name"])
+            collecting = items[loc["item"]]["name"]
+            collectedItems.append(collecting)
+#            print("collecting major : " + collecting + " at " + loc['Name'])
             majorPicked = True
 
         # if we take at least one major, recompute the difficulty
@@ -429,7 +432,9 @@ def getDifficulty(locations):
             loc = majorAvailable.pop(0)
             majorLocations.remove(loc)
             visitedLocations.append(loc)
-            collectedItems.append(items[loc["item"]]["name"])
+            collecting = items[loc["item"]]["name"]
+            collectedItems.append(collecting)
+#            print("collecting major : " + collecting + " at " + loc['Name'])
         else:
             if len(majorAvailable) == 0:
                 nextMajorDifficulty = 100
@@ -442,7 +447,9 @@ def getDifficulty(locations):
                 loc = minorAvailable.pop(0)
                 minorLocations.remove(loc)
                 visitedLocations.append(loc)
-                collectedItems.append(items[loc["item"]]["name"])
+                collecting = items[loc["item"]]["name"]
+                collectedItems.append(collecting)
+#                print("collecting minor : " + collecting + " at " + loc['Name'])
                 minorPicked = True
 
             # if we take at least one minor, recompute the difficulty
@@ -454,7 +461,9 @@ def getDifficulty(locations):
                 loc = majorAvailable.pop(0)
                 majorLocations.remove(loc)
                 visitedLocations.append(loc)
-                collectedItems.append(items[loc["item"]]["name"])
+                collecting = items[loc["item"]]["name"]
+                collectedItems.append(collecting)
+#                print("collecting major : " + collecting + " at " + loc['Name'])
 
     # print generated path
     if displayGeneratedPath is True:
@@ -1401,7 +1410,7 @@ if difficulty[0] >= 0:
     elif difficulty[0] >= hard and difficulty[0] < harder:
         difficultyText = 'hard'
     elif difficulty[0] >= harder and difficulty[0] < hardcore:
-        difficultyText = 'harder'
+        difficultyText = 'very hard'
     elif difficulty[0] >= hardcore and difficulty[0] < mania:
         difficultyText = 'hardcore'
     else:

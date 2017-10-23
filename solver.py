@@ -646,7 +646,7 @@ locations = [
     'Address': 0x7899C,
     'Visibility': "Hidden",
     # DONE: no difficulty
-    'Available': lambda items: canAccessKraid(items)
+    'Available': lambda items: wand(canAccessKraid(items), enoughStuffsKraid(items))
 },
 {
     'Area': "Brinstar",
@@ -752,7 +752,7 @@ locations = [
     'Address': 0x7C2E9,
     'Visibility': "Chozo",
     # DONE: easy
-    'Available': lambda items: wand(canAccessWs(items), haveItem(items, 'SpeedBooster'), wor(haveItem(items, 'Varia'), energyReserveCountOk(items, 1)))
+    'Available': lambda items: wand(canAccessWs(items), enoughStuffsPhantoon(items), haveItem(items, 'SpeedBooster'), wor(haveItem(items, 'Varia'), energyReserveCountOk(items, 1)))
 },
 {
     'Area': "WreckedShip",
@@ -760,7 +760,7 @@ locations = [
     'Class': "Major",
     'Address': 0x7C337,
     'Visibility': "Visible",
-    'Available': lambda items: wand(canAccessWs(items), wor(wor(haveItem(items, 'Bomb', difficulty=mania), haveItem(items, 'PowerBomb', difficulty=mania), haveItem(items, 'HiJump', difficulty=medium)), wor(haveItem(items, 'SpaceJump', difficulty=easy), haveItem(items, 'SpeedBooster', difficulty=medium), wand(haveItem(items, 'SpringBall'), knowsSpringBallJump))))
+    'Available': lambda items: wand(canAccessWs(items), enoughStuffsPhantoon(items), wor(wor(haveItem(items, 'Bomb', difficulty=mania), haveItem(items, 'PowerBomb', difficulty=mania), haveItem(items, 'HiJump', difficulty=medium)), wor(haveItem(items, 'SpaceJump', difficulty=easy), haveItem(items, 'SpeedBooster', difficulty=medium), wand(haveItem(items, 'SpringBall'), knowsSpringBallJump))))
 # test in the randomizer (easier to read)
 #                Available = fun items -> canAccessWs items &&
 #                                            (haveItem items Bomb ||
@@ -786,7 +786,7 @@ locations = [
     'Address': 0x7C36D,
     'Visibility': "Chozo",
     # DONE: easy
-    'Available': lambda items: wand(canAccessWs(items), wor(haveItem(items, 'Varia'), energyReserveCountOk(items, 1)))
+    'Available': lambda items: wand(canAccessWs(items), enoughStuffsPhantoon(items), wor(haveItem(items, 'Varia'), energyReserveCountOk(items, 1)))
 },
 {
     'Area': "Maridia",
@@ -803,7 +803,7 @@ locations = [
     'Class': "Major",
     'Address': 0x7C559,
     'Visibility': "Chozo",
-    'Available': lambda items: wand(canDefeatDraygon(items), wor(wand(haveItem(items, 'SpeedBooster'), knowsShortCharge, difficulty=hardcore), wand(wor(haveItem(items, 'Charge', difficulty=hard), haveItem(items, 'ScrewAttack', difficulty=easy)), wor(canFly(items), haveItem(items, 'HiJump', difficulty=medium)))))
+    'Available': lambda items: wand(canDefeatDraygon(items), enoughStuffsDraygon(items), wor(wand(haveItem(items, 'SpeedBooster'), knowsShortCharge, difficulty=hardcore), wand(wor(haveItem(items, 'Charge', difficulty=hard), haveItem(items, 'ScrewAttack', difficulty=easy)), wor(canFly(items), haveItem(items, 'HiJump', difficulty=medium)))))
 #                Available = fun items -> canDefeatDraygon items &&
 #                                         (haveItem items SpeedBooster ||
 #                                            (haveItem items Charge ||

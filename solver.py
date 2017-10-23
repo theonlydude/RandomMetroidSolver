@@ -1394,13 +1394,15 @@ romFile.close()
 difficulty = getDifficulty(locations)
 
 if difficulty[0] >= 0:
-    if difficulty[0] == easy:
+    if difficulty[0] >= easy and difficulty[0] < medium:
         difficultyText = 'easy'
-    elif difficulty[0] == medium:
+    elif difficulty[0] >= medium and difficulty[0] < hard:
         difficultyText = 'medium'
-    elif difficulty[0] == hard or difficulty == harder:
+    elif difficulty[0] >= hard and difficulty[0] < harder:
         difficultyText = 'hard'
-    elif difficulty[0] == hardcore:
+    elif difficulty[0] >= harder and difficulty[0] < hardcore:
+        difficultyText = 'harder'
+    elif difficulty[0] >= hardcore and difficulty[0] < mania:
         difficultyText = 'hardcore'
     else:
         difficultyText = 'mania'

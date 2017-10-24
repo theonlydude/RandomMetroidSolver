@@ -94,14 +94,14 @@ displayGeneratedPath = True
 # If not enough info is provided here, base difficulty will be medium.
 bossesDifficulty = {
     'Kraid' : {
-        'Rate' : 0.1,
+        'Rate' : 0.05,
         'Energy' : {
             1 : medium,
             2 : easy
         }
     },
     'Phantoon' : {
-        'Rate' : 0.1,
+        'Rate' : 0.02,
         'Energy' : {
             1 : mania,
             3 : hardcore,
@@ -111,7 +111,7 @@ bossesDifficulty = {
         }
     },
     'Draygon' : {
-        'Rate' : 0.1,
+        'Rate' : 0.05,
         'Energy ' : {
             1 : mania,
             3 : hardcore,
@@ -122,7 +122,7 @@ bossesDifficulty = {
         },
     },
     'Ridley' : {
-        'Rate' : 0.33,
+        'Rate' : 0.25,
         'Energy' : {
             1 : mania,
             6 : hardcore,

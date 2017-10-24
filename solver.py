@@ -350,6 +350,7 @@ def canInflictEnoughDamages(items, bossEnergy, doubleSuper=False, charge=True, p
     if bossEnergy > 0:
         # rely on missile drops : let's say you get 12 missiles in a minute and fire them (DPS of 20)
         secs += (bossEnergy / 20.0)
+    #print('ammoMargin = ' + str(ammoMargin) + ', secs = ' + str(secs))
         
     return (ammoMargin, secs)
 
@@ -363,11 +364,12 @@ def computeBossDifficulty(items, ammoMargin, secs, diffTbl):
     else:
         duration = secs / rate
     suitsCoeff = 0.5
-    if haveItem(items, 'Varia'):
+    if haveItem(items, 'Varia')[0]:
         suitsCoeff *= 2
-    if haveItem(items, 'Gravity'):
-        suitsCoeff *= 2        
+    if haveItem(items, 'Gravity')[0]:
+        suitsCoeff *= 2
     energy = suitsCoeff * energyReserveCount(items)
+    #print('suitsCoeff = ' + str(suitsCoeff) + ', energy = ' + str(energy) + ', duration = ' + str(duration))
     energyDict = None
     if diffTbl.has_key('Energy'):
         energyDict = diffTbl['Energy']
@@ -391,22 +393,26 @@ def computeBossDifficulty(items, ammoMargin, secs, diffTbl):
     diffAdjust = (1 - (ammoMargin - 1.5))
     if diffAdjust > 1:
         difficulty *= diffAdjust
-
+    #print('difficulty = ' + str(difficulty))
+        
     return difficulty
 
 def enoughStuffsRidley(items):
+    #print('RIDLEY')
     (ammoMargin, secs) = canInflictEnoughDamages(items, 18000, doubleSuper=True, givesDrops=False)
     if ammoMargin == 0:
         return (False, 0)
     return (True, computeBossDifficulty(items, ammoMargin, secs, bossesDifficulty['Ridley']))
 
 def enoughStuffsKraid(items):
+    #print('KRAID')
     (ammoMargin, secs) = canInflictEnoughDamages(items, 1000)
     if ammoMargin == 0:
         return (False, 0)
     return (True, computeBossDifficulty(items, ammoMargin, secs, bossesDifficulty['Kraid']))    
 
 def enoughStuffsDraygon(items):
+    #print('DRAYGON')
     (ammoMargin, secs) = canInflictEnoughDamages(items, 6000)
     fight = (False, 0)
     if ammoMargin > 0:
@@ -418,6 +424,7 @@ def enoughStuffsDraygon(items):
                     haveItem(items, 'SpeedBooster')))
 
 def enoughStuffsPhantoon(items):
+    #print('PHANTOON')
     # with only super and no missiles/charge phantoon is way harder
     (ammoMargin, secs) = canInflictEnoughDamages(items, 2500, doubleSuper=True)
     if ammoMargin == 0:
@@ -432,6 +439,7 @@ def enoughStuffsPhantoon(items):
     return (True, difficulty)
 
 def enoughStuffsMotherbrain(items):
+    #print('MB')
     # MB1 can't be hit by charge beam
     (ammoMargin, secs) = canInflictEnoughDamages(items, 3000, charge=False, givesDrops=False)
     if ammoMargin == 0:
@@ -519,7 +527,7 @@ def getDifficulty(locations):
             visitedLocations.append(loc)
             collecting = items[loc["item"]]["name"]
             collectedItems.append(collecting)
-            # print("collecting major : " + collecting + " at " + loc['Name'])
+            #print("collecting major : " + collecting + " at " + loc['Name'])
             majorPicked = True
 
         # if we take at least one major, recompute the difficulty
@@ -534,7 +542,7 @@ def getDifficulty(locations):
             visitedLocations.append(loc)
             collecting = items[loc["item"]]["name"]
             collectedItems.append(collecting)
-            # print("collecting major : " + collecting + " at " + loc['Name'])
+            #print("collecting major : " + collecting + " at " + loc['Name'])
         else:
             if len(majorAvailable) == 0:
                 nextMajorDifficulty = mania * 10
@@ -563,7 +571,7 @@ def getDifficulty(locations):
                 visitedLocations.append(loc)
                 collecting = items[loc["item"]]["name"]
                 collectedItems.append(collecting)
-                # print("collecting major : " + collecting + " at " + loc['Name'])
+                #print("collecting major : " + collecting + " at " + loc['Name'])
 
     # print generated path
     if displayGeneratedPath is True:

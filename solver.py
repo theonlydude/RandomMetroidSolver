@@ -340,6 +340,8 @@ def canInflictEnoughDamages(items, bossEnergy, doubleSuper=False, charge=True, p
     for dps in sorted(dpsDict, reverse=True):
         amount = dpsDict[dps][0]
         one = dpsDict[dps][1]
+        if dps == 0 or one == 0 or amount == 0:
+            continue
         fire = min(bossEnergy / one, amount)
         secs += fire * (one / dps)
         bossEnergy -= fire * one

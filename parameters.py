@@ -120,7 +120,7 @@ bossesDifficulty = {
             7 : medium,
             9 : easy        
         },
-    }
+    },
     'Ridley' : {
         'Rate' : 0.33,
         'Energy' : {

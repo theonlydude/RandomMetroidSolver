@@ -236,14 +236,14 @@ def canAccessOuterMaridia(items):
                                       haveItem(items, 'Plasma')))))))
 
 def canAccessInnerMaridia(items):
+    # easy regular way
     return wand(canAccessRedBrinstar(items),
                 canUsePowerBombs(items),
                 haveItem(items, 'Gravity'))
 
 def canDoSuitlessMaridia(items):
-    return wand(knowsSuitlessOuterMaridia,
-                haveItem(items, 'HiJump'),
-                haveItem(items, 'Ice'),
+    # harder way
+    return wand(canAccessOuterMaridia(items),
                 haveItem(items, 'Grapple'))
 
 def canDefeatBotwoon(items):
@@ -540,9 +540,9 @@ locations = [
     'Class': "Major",
     'Address': 0x78432,
     'Visibility': "Visible",
-    # DONE: easy one, nothing to add
-    # FLO : rewrote condition. initial condition was good for the randomizer itself but not for difficulty estimation. we know that if no power bombs
-    # are found early, BT will give either Bomb, ScrewAttack or SpeedBooster, so we reflect that logic for item immediately after Bomb
+    # DONE: rewrote condition. initial condition was good for the randomizer itself but not for difficulty
+    # estimation. we know that if no power bombs are found early, BT will give either Bomb, ScrewAttack or
+    # SpeedBooster, so we reflect that logic for item immediately after Bomb
     'Available': lambda items: wor(wand(knowsAlcatrazEscape, haveItem(items, 'SpeedBooster')), wand(knowsAlcatrazEscape, haveItem(items, 'ScrewAttack')), wand(haveItem(items, 'Morph'), haveItem(items, 'Bomb')), canUsePowerBombs(items))
     # FIXME that SpeedBooster check is if you had to do alcatraz...check if that implies a short charge?
 },
@@ -789,6 +789,12 @@ locations = [
     'Address': 0x7C47D,
     'Visibility': "Visible",
     # DONE: difficulty already handled in canAccessOuterMaridia
+    # to acces the ETank in higher part of the room:
+    #  -use grapple to attach to the block
+    #  -use speedbooster ??
+    #  FIXME: is SpeedBooster possible without gravity in this room ? is it a simple short or short charge ?
+    #  -can fly (space jump or infinite bomb jump)
+    #  FIXME: is it possible to infinite bomb jump from the mama turtle when it's up ?
     'Available': lambda items: wand(canAccessOuterMaridia(items), wor(canFly(items), haveItem(items, 'SpeedBooster'), haveItem(items, 'Grapple')))
 },
 {
@@ -797,12 +803,20 @@ locations = [
     'Class': "Major",
     'Address': 0x7C559,
     'Visibility': "Chozo",
-    'Available': lambda items: wand(canDefeatDraygon(items), enoughStuffsDraygon(items), wor(wand(haveItem(items, 'SpeedBooster'), knowsShortCharge, difficulty=hardcore), wand(wor(haveItem(items, 'Charge', difficulty=hard), haveItem(items, 'ScrewAttack', difficulty=easy)), wor(canFly(items), haveItem(items, 'HiJump', difficulty=medium)))))
-#                Available = fun items -> canDefeatDraygon items &&
-#                                         (haveItem items SpeedBooster ||
-#                                            (haveItem items Charge ||
-#                                             haveItem items ScrewAttack) &&
-#                                            (canFly items || haveItem items HiJump));
+    # DONE: to leave the Plasma Beam room you have to kill the space pirates and return to the door
+    # to unlock the door:
+    #  -can access draygon room to kill him
+    #  -have enough stuff to kill him
+    # to kill the space pirates:
+    #  -do short charges with speedbooster
+    #  -do beam charges with spin jump attacks
+    #  -have screw attack
+    #  -have plasma beam
+    # to go back to the door:
+    #  -have high jump boots
+    #  -can fly (space jump or infinite bomb jump)
+    #  -use short charge with speedbooster
+    'Available': lambda items: wand(canDefeatDraygon(items), enoughStuffsDraygon(items), wor(wand(haveItem(items, 'SpeedBooster'), knowsShortCharge, difficulty=hardcore), wand(wor(haveItem(items, 'Charge', difficulty=hard), haveItem(items, 'ScrewAttack', difficulty=easy), haveItem(items, 'Plasma', difficulty=easy)), wor(canFly(items), haveItem(items, 'HiJump', difficulty=medium)))))
 },
 {
     'Area': "Maridia",
@@ -810,7 +824,8 @@ locations = [
     'Class': "Major",
     'Address': 0x7C5E3,
     'Visibility': "Chozo",
-    # DONE: difficulty already handled in the two functions. FLO : I add mania difficulty in suitless case for this one
+    # DONE: this item can be taken without gravity, but it's super hard because of the quick sands...
+    # so add mania difficulty in suitless case for this one
     'Available': lambda items: wand(canAccessOuterMaridia(items), wor(haveItem(items, 'Gravity'), wand(canDoSuitlessMaridia(items), (True, mania))))
 },
 {
@@ -820,6 +835,11 @@ locations = [
     'Address': 0x7C6E5,
     'Visibility': "Chozo",
     # DONE: handle puyo clip and diagonal bomb jump
+    # to access the spring ball you can either:
+    #  -use the puyo clip with ice
+    #  -use the grapple to destroy the block and then:
+    #    -use high boots jump
+    #    -fly (with space jump or diagonal bomb jump
     'Available': lambda items: wand(canAccessInnerMaridia(items), wor(wand(haveItem(items, 'Ice'), knowsPuyoClip), wand(haveItem(items, 'Grapple'), wor(canFlyDiagonally(items), haveItem(items, 'HiJump')))))
 },
 {
@@ -829,8 +849,7 @@ locations = [
     'Address': 0x7C755,
     'Visibility': "Visible",
     # DONE: difficulty already handled in the functions
-    # TODO: check the functions to be sure that they are ok. FLO : ???
-    'Available': lambda items: wor(canDefeatBotwoon(items), wand(canAccessOuterMaridia(items), canDoSuitlessMaridia(items)))
+    'Available': lambda items: canDefeatBotwoon(items)
 },
 {
     'Area': "Maridia",
@@ -838,7 +857,8 @@ locations = [
     'Class': "Major",
     'Address': 0x7C7A7,
     'Visibility': "Chozo",
-    # DONE: difficulty already handled in the function
+    # DONE: difficulty already handled in the function,
+    # we need to have access to the boss and enough stuff to kill him
     'Available': lambda items: wand(canDefeatDraygon(items), enoughStuffsDraygon(items))
 },
 {

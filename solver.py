@@ -165,11 +165,11 @@ def canDestroyBombWalls(items):
                haveItem(items, 'ScrewAttack'))
 
 def canEnterAndLeaveGauntlet(items):
-    return wand(wor(canFly(items), haveItem(items, 'HiJump', difficulty=hard), haveItem(items, 'SpeedBooster')),
-                wor(canUseBombs(items, difficulty=hard),
-                    wand(canUsePowerBombs(items), itemCountOk(items, 'PowerBomb', 2), difficulty=medium),
+    return wand(wor(canFly(items), wand(haveItem(items, 'HiJump'), knowsHiJumpGauntletAccess), haveItem(items, 'SpeedBooster')),
+                wor(wand(canUseBombs(items), knowsGauntletWithBombs),
+                    wand(canUsePowerBombs(items), itemCountOk(items, 'PowerBomb', 2), knowsGauntletWithPowerBombs),
                     haveItem(items, 'ScrewAttack'),
-                    wand(haveItem(items, 'SpeedBooster'), canUsePowerBombs(items), energyReserveCountOk(items, 2), knowsSimpleShortCharge, difficulty=medium)))
+                    wand(haveItem(items, 'SpeedBooster'), canUsePowerBombs(items), energyReserveCountOk(items, 2), wand(knowsSimpleShortCharge, knowsGauntletEntrySpark))))
 
 def canPassBombPassages(items):
     return wor(canUseBombs(items), canUsePowerBombs(items))
@@ -217,23 +217,25 @@ def canAccessLowerNorfair(items):
 def canPassWorstRoom(items):
     return wand(canAccessLowerNorfair(items),
                 wor(canFly(items),
-                    wand(haveItem(items, 'Ice'), haveItem(items, 'Charge'), difficulty=mania),
-                    haveItem(items, 'HiJump', difficulty=hard)))
+                    wand(haveItem(items, 'Ice'), haveItem(items, 'Charge'), knowsWorstRoomIceCharge),
+                    haveItem(items, 'HiJump', knowsWorstRoomHiJump)))
 
 def canAccessOuterMaridia(items):
     # even harder if without gravity and without stronger gun
     return wand(canAccessRedBrinstar(items),
                 canUsePowerBombs(items),
                 wor(haveItem(items, 'Gravity'),
-                    wand(knowsSuitlessOuterMaridia,
-                         wor(wand(haveItem(items, 'HiJump'),
-                                  haveItem(items, 'Ice'),
-                                  difficulty=hard),
-                             wand(haveItem(items, 'HiJump'),
-                                  haveItem(items, 'Ice'),
-                                  wor(haveItem(items, 'Wave'),
-                                      haveItem(items, 'Spazer'),
-                                      haveItem(items, 'Plasma')))))))
+                    wor(wand(haveItem(items, 'HiJump'),
+                             haveItem(items, 'Ice'),
+                             wor(knowsSuitlessOuterMaridiaNoGuns,
+                                 wand(knowsSuitlessOuterMaridia,
+                                      haveItem(items, 'SpringBall'), knowsSpringBallJump))),
+                        wand(haveItem(items, 'HiJump'),
+                             haveItem(items, 'Ice'),
+                             wor(haveItem(items, 'Wave'),
+                                 haveItem(items, 'Spazer'),
+                                 haveItem(items, 'Plasma')),
+                             knowsSuitlessOuterMaridia))))
 
 def canAccessInnerMaridia(items):
     # easy regular way
@@ -425,7 +427,6 @@ def enoughStuffsDraygon(items):
 
 def enoughStuffsPhantoon(items):
     #print('PHANTOON')
-    # with only super and no missiles/charge phantoon is way harder
     (ammoMargin, secs) = canInflictEnoughDamages(items, 2500, doubleSuper=True)
     if ammoMargin == 0:
         return (False, 0)
@@ -450,12 +451,7 @@ def enoughStuffsMotherbrain(items):
         return (False, 0)
     return (True, computeBossDifficulty(items, ammoMargin, secs, bossesDifficulty['Mother Brain']))
 
-def canEndGame(items):
-    # a zebetite has 1100 energy
-#    return wand(enoughStuffsMotherbrain(items), wor(knowsZebSkip, canInflictEnoughDamages(items, 1100)))
-    return enoughStuffsMotherbrain(items) # FIXME
-
-def enoughStuff(items, minorLocations):
+def enoughMinors(items, minorLocations):
     if itemsPickup == '100%':
         # need them all
         return len(minorLocations) == 0
@@ -470,6 +466,35 @@ def enoughMajors(items, majorLocations):
         return len(majorLocations) == 0
     elif itemsPickup == 'minimal':
         return haveItemCount(items, 'Morph', 1) and (haveItemCount(items, 'Bomb', 1) or haveItemCount(items, 'PowerBomb', 1)) and haveItemCount(items, 'ETank', 3) and haveItemCount(items, 'Varia', 1) and (haveItemCount(items, 'SpeedBooster', 1) or haveItemCount(items, 'Ice', 1)) and haveItemCount(items, 'Gravity', 1)
+
+def canBeatKraid(items):
+    return getLocation("Varia Suit")['Available'](items)
+
+def canBeatPhantoon(items):
+    return getLocation("Right Super, Wrecked Ship")['Available'](items)
+
+def canBeatRidley(items):
+    return getLocation("Energy Tank, Ridley")['Available'](items)
+
+def canBeatDraygon(items):
+    return getLocation("Space Jump")['Available'](items)
+
+def canBeatGoldenFour(items):
+    return wand(canBeatKraid(items), canBeatPhantoon(items), canBeatDraygon(items), canBeatRidley(items))
+
+def canPassMetroids(items):
+    return wand(canOpenRedDoors(items), wor(haveItem(items, 'Ice'), (haveItemCount(items, 'PowerBomb', 3), 0))) # to avoid leaving tourian to refill power bombs
+
+def canPassZebetites(items):
+    return wor(wand(haveItem(items, 'Ice'), knowsIceZebSkip), wand(haveItem(items, 'SpeedBooster'), knowsSpeedZebSkip), (canInflictEnoughDamages(items, 1100*3, charge=False, givesDrops=False) >= 1, 0)) # account for all the zebs to avoid constant refills
+
+def canEndGame(items):
+    # to finish the game you must :
+    # - beat golden 4
+    # - defeat metroids
+    # - destroy/skip the zebetites
+    # - beat Mother Brain
+    return wand((canBeatGoldenFour(items)[0], 0), canPassMetroids(items), canPassZebetites(items), enoughStuffsMotherbrain(items)) # difficulty for golden 4 already accounted for by enoughMajors and enoughMinors
 
 def getDifficulty(locations):
     # loop on the available locations depending on the collected items
@@ -487,7 +512,14 @@ def getDifficulty(locations):
 
     print("{}: available major: {}, available minor: {}, visited: {}".format(itemsPickup, len(majorLocations), len(minorLocations), len(visitedLocations)))
 
-    while not enoughMajors(collectedItems, majorLocations) or not enoughStuff(collectedItems, minorLocations) or not canEndGame(collectedItems):
+    isEndPossible = False
+    endDifficulty = mania
+    while True:
+        # actual while condition
+        hasEnoughItems = enoughMajors(collectedItems, majorLocations) and enoughMinors(collectedItems, minorLocations)
+        (isEndPossible, endDifficulty) = canEndGame(collectedItems)        
+        if isEndPossible and hasEnoughItems:
+            break
         # print(str(collectedItems))
 
         current = len(collectedItems)
@@ -499,7 +531,7 @@ def getDifficulty(locations):
         # compute the difficulty of all the locations
         for loc in majorLocations:
             loc['difficulty'] = loc['Available'](collectedItems)
-        enough = enoughStuff(collectedItems, minorLocations)
+        enough = enoughMinors(collectedItems, minorLocations)
         if not enough:
             for loc in minorLocations:
                 loc['difficulty'] = loc['Available'](collectedItems)
@@ -551,7 +583,7 @@ def getDifficulty(locations):
 
             # take the minors easier than the next major, check if we don't get too much stuff
             minorPicked = False
-            while len(minorAvailable) > 0 and minorAvailable[0]["difficulty"][1] < nextMajorDifficulty and not enoughStuff(collectedItems, minorLocations):
+            while len(minorAvailable) > 0 and minorAvailable[0]["difficulty"][1] < nextMajorDifficulty and not enoughMinors(collectedItems, minorLocations):
                 loc = minorAvailable.pop(0)
                 minorLocations.remove(loc)
                 visitedLocations.append(loc)
@@ -573,15 +605,26 @@ def getDifficulty(locations):
                 collectedItems.append(collecting)
                 #print("collecting major : " + collecting + " at " + loc['Name'])
 
+    if isEndPossible:
+        visitedLocations.append({
+            'item' : 'The End',
+            'Name' : 'The End',
+            'Area' : 'The End',
+            'difficulty' : (True, endDifficulty)
+        })
     # print generated path
     if displayGeneratedPath is True:
         print("Generated path:")
         print('{:>50}: {:>12} {:>16} {}'.format("Location Name", "Area", "Item", "Difficulty"))
         print('-'*92)
         for location in visitedLocations:
-            print('{:>50}: {:>12} {:>16} {}'.format(location['Name'], location['Area'], items[location['item']]['name'], location['difficulty'][1]))
+            if items.has_key(location['item']):
+                itemName = items[location['item']]['name']
+            else:
+                itemName = 'The End'
+            print('{:>50}: {:>12} {:>16} {}'.format(location['Name'], location['Area'], itemName, location['difficulty'][1]))
 
-    if not enoughMajors(collectedItems, majorLocations) or not enoughStuff(collectedItems, minorLocations) or not canEndGame(collectedItems):
+    if not enoughMajors(collectedItems, majorLocations) or not enoughMinors(collectedItems, minorLocations) or not canEndGame(collectedItems):
         # we have aborted
         difficulty = (-1, -1)
     else:
@@ -625,6 +668,14 @@ items = {
     '0xef1b': {'name': 'SpaceJump'},
     '0xef1f': {'name': 'ScrewAttack'}
 }
+
+
+def getLocation(name):
+    for loc in locations:
+        if loc['Name'] == name:
+            return loc
+    return None
+
 
 # generated with:
 # sed -e "s+\([A-Z][a-z]*\) =+'\1' =+" -e 's+ =+:+' -e 's+: \([A-Z][a-z]*\);+: "\1",+' -e 's+";+",+' -e 's+\(0x[0-9A-D]*\);+\1,+' -e 's+fun items -> +lambda items: +' -e 's+};+},+' -e 's+^            ++' locations.fs > locations.py
@@ -807,7 +858,7 @@ locations = [
     'Class': "Major",
     'Address': 0x78C36,
     'Visibility': "Chozo",
-    'Available': lambda items: wand(canAccessCrocomire(items), wor(canFly(items), haveItem(items, 'Ice', difficulty=mania), haveItem(items, 'SpeedBooster'), knowsGreenGateGlitch))
+    'Available': lambda items: wand(canAccessCrocomire(items), wor(canFly(items), wand(haveItem(items, 'Ice'), knowsClimbToGrappleWithIce), haveItem(items, 'SpeedBooster'), knowsGreenGateGlitch))
 },
 {
     'Area': "Norfair",
@@ -877,7 +928,7 @@ locations = [
     'Class': "Major",
     'Address': 0x7C337,
     'Visibility': "Visible",
-    'Available': lambda items: wand(canAccessWs(items), enoughStuffsPhantoon(items), wor(wor(haveItem(items, 'Bomb', difficulty=mania), haveItem(items, 'PowerBomb', difficulty=mania), haveItem(items, 'HiJump', difficulty=medium)), wor(haveItem(items, 'SpaceJump', difficulty=easy), haveItem(items, 'SpeedBooster', difficulty=medium), wand(haveItem(items, 'SpringBall'), knowsSpringBallJump))))
+    'Available': lambda items: wand(canAccessWs(items), enoughStuffsPhantoon(items), wor(wor(haveItem(items, 'Bomb'), haveItem(items, 'PowerBomb')), knowsSpongeBathBombJump, wand(haveItem(items, 'HiJump'), knowsSpongeBathHiJump), wor(haveItem(items, 'SpaceJump', difficulty=easy), wand(haveItem(items, 'SpeedBooster'), knowsSpongeBathSpeed), wand(haveItem(items, 'SpringBall'), knowsSpringBallJump))))
 # test in the randomizer (easier to read)
 #                Available = fun items -> canAccessWs items &&
 #                                            (haveItem items Bomb ||
@@ -939,7 +990,7 @@ locations = [
     #  -have high jump boots
     #  -can fly (space jump or infinite bomb jump)
     #  -use short charge with speedbooster
-    'Available': lambda items: wand(canDefeatDraygon(items), enoughStuffsDraygon(items), wor(wand(haveItem(items, 'SpeedBooster'), knowsShortCharge, difficulty=hardcore), wand(wor(haveItem(items, 'Charge', difficulty=hard), haveItem(items, 'ScrewAttack', difficulty=easy), haveItem(items, 'Plasma', difficulty=easy)), wor(canFly(items), haveItem(items, 'HiJump', difficulty=medium)))))
+    'Available': lambda items: wand(canDefeatDraygon(items), enoughStuffsDraygon(items), wor(wand(haveItem(items, 'SpeedBooster'), knowsShortCharge, knowsKillPlasmaPiratesWithSpark), wand(haveItem(items, 'Charge'), knowsKillPlasmaPiratesWithCharge), haveItem(items, 'ScrewAttack', difficulty=easy), haveItem(items, 'Plasma', difficulty=easy)), wor(canFly(items), wand(haveItem(items, 'HiJump'), knowsExitPlasmaRoomHiJump), wand(haveItem(items, 'SpeedBooster'), knowsShortCharge)))
 },
 {
     'Area': "Maridia",
@@ -948,8 +999,7 @@ locations = [
     'Address': 0x7C5E3,
     'Visibility': "Chozo",
     # DONE: this item can be taken without gravity, but it's super hard because of the quick sands...
-    # so add mania difficulty in suitless case for this one
-    'Available': lambda items: wand(canAccessOuterMaridia(items), wor(haveItem(items, 'Gravity'), wand(canDoSuitlessMaridia(items), (True, mania))))
+    'Available': lambda items: wand(canAccessOuterMaridia(items), wor(haveItem(items, 'Gravity'), wand(canDoSuitlessMaridia(items), knowsSuitlessSandpit)))
 },
 {
     'Area': "Maridia",

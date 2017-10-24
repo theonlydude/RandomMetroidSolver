@@ -30,41 +30,79 @@ knowsPuyoClip = (False, 0) # to access spring ball without grapple beam
 knowsReverseGateGlitch = (True, medium) # ETank in Brinstar Gate
 knowsShortCharge = (False, 0) # to kill draygon
 knowsSuitlessOuterMaridia = (True, hardcore)
+knowsSuitlessOuterMaridiaNoGuns = (True, mania) # suitless maridia without even wave, spazer or plasma...
 knowsEarlyKraid = (True, easy) # to access kraid without hi jump boots
 knowsDraygonGrappleKill = (True, medium) # easy kill for draygon
 
 # rare
 knowsGravityJump = (True, hard) 
 knowsContinuousWallJump = (False, 0) # access wrecked ship
-knowsSpringBallJump = (True, hard) 
-knowsXrayDboost = (False, 0) 
+knowsSpringBallJump = (True, hard) # access to wrecked ship etank without anything else and suitless maridia navigation
+knowsXrayDboost = (False, 0)  # Xray without grapple or space jump
 
 # rarest
 knowsDiagonalBombJump = (False, 0) # access wrecked ship
 
 # end game
-knowsZebSkip = (False, 0) # change minimal ammo count TODO FLO : not used yet
+knowsIceZebSkip = (False, 0) # change minimal ammo count 
+knowsSpeedZebSkip = (False, 0) # change minimal ammo count 
+
+# Difficulties of specific parts
+
+# gauntlet
+knowsHiJumpGauntletAccess = (True, harder)
+knowsGauntletWithBombs = (True, hard)
+knowsGauntletWithPowerBombs = (True, medium)
+knowsGauntletEntrySpark = (True, medium) # implies knowsSimpleShortCharge
+
+# worst room in the game
+knowsWorstRoomIceCharge = (False, 0) # can pass worst room JUST by freezing pirates
+knowsWorstRoomHiJump = (True, hard) # can go up worst room with HiJump and wall jumps
+
+# grapple
+knowsClimbToGrappleWithIce = (False, 0) # just learn green gate glitch, it's easier
+
+# wrecked ship etank access ("sponge bath" room)
+knowsSpongeBathBombJump = (False, 0)
+knowsSpongeBathHiJump = (True, medium)
+knowsSpongeBathSpeed = (True, medium)
+
+# plasma room
+knowsKillPlasmaPiratesWithSpark = (False, 0) # kill plasma pirates with spark echoes. implies knowsShortCharge
+knowsKillPlasmaPiratesWithCharge = (True, hard)
+knowsExitPlasmaRoomHiJump = (True, medium)
+
+# sandpit
+knowsSuitlessSandpit = (False, 0) # access the item in the sandpit suitless
 
 # choose how many items are required
+# note on charge/minors : the solver strategy when it does not look for charge specifically
+# (depending on the settings) is to look for both missiles/supers and charge beam until either
+# - charge is found: it then stop looking for minors after the minimum is reached
+# - or enough minors to finish the game are found: it then stops looking for charge
+
 # 100%:
 #  need them all (major & minor)
+#itemsPickup = '100%'
+
 # minimal:
 #  need only the minimal required major and minor items
 #   Morphing Ball (1)
-#   Missiles (3)
-#   Bombs (1)
-#   Energy Tanks (3)
-#   Charge Beam (1)
-#   Super Missiles (2)
+#   Charge (or enough minors to finish without)
+#   Missiles (3 or more depending on zebskip settings, or enough to finish without charge)
+#   Energy Tanks (4)
+#   Super Missiles (2 or more depending on zebskip settings, or enough to finish without charge)
 #   Varia Suit (1)
-#   Speed Boots (1)
+#   Speed Boots (1) or Ice Beam (1)
 #   Power Bombs (1)
 #   Gravity Suit (1)
-# normal:
-#  take all the majors and enough stuff, 60 super (12), 10 bomb (2), 5 missile (1)
-#itemsPickup = 'normal'
-#itemsPickup = '100%'
 itemsPickup = 'minimal'
+
+# normal:
+#  take all the majors and as many minors as in comfort settings
+#itemsPickup = 'normal'
+
+
 
 # display the generated path
 displayGeneratedPath = True
@@ -118,7 +156,7 @@ bossesDifficulty = {
             4 : harder,
             5 : hard,
             7 : medium,
-            9 : easy        
+            10 : easy      
         },
     },
     'Ridley' : {

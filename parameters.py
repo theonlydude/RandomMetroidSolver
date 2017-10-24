@@ -18,10 +18,10 @@ knowsMockball = (True, easy) # early super and ice beam
 
 # common
 knowsCeilingDBoost = (True, easy) # for brinstar ceiling
-knowsAlcatrazEscape = (True, hardcore) # alcatraz without bomb
-knowsLavaDive = (True, hardcore) # ridley without gravity
+knowsAlcatrazEscape = (False, 0) # alcatraz without bomb
+knowsLavaDive = (True, harder) # ridley without gravity
 knowsSimpleShortCharge = (True, easy) # Waterway ETank without gravity, and Wrecked Ship access
-knowsInfiniteBombJump = (True, hard) # to access certain locations without high jump or space jump
+knowsInfiniteBombJump = (True, medium) # to access certain locations without high jump or space jump
 knowsGreenGateGlitch = (True, medium) # to access screw attack and crocomire
 
 # uncommon
@@ -31,12 +31,12 @@ knowsReverseGateGlitch = (True, medium) # ETank in Brinstar Gate
 knowsShortCharge = (False, 0) # to kill draygon
 knowsSuitlessOuterMaridia = (True, hardcore)
 knowsEarlyKraid = (True, easy) # to access kraid without hi jump boots
-knowsDraygonGrappleKill = (False, 0) # easy kill for draygon
+knowsDraygonGrappleKill = (True, medium) # easy kill for draygon
 
 # rare
-knowsGravityJump = (False, 0) 
+knowsGravityJump = (True, hard) 
 knowsContinuousWallJump = (False, 0) # access wrecked ship
-knowsSpringBallJump = (False, 0) 
+knowsSpringBallJump = (True, hard) 
 knowsXrayDboost = (False, 0) 
 
 # rarest
@@ -68,3 +68,78 @@ itemsPickup = 'minimal'
 
 # display the generated path
 displayGeneratedPath = True
+
+# boss difficulty tables :
+#
+# key is boss name. value is a dictionary where you define:
+#
+# 1. Rate : the rate of time in which you can land shots. For example
+# : 0.5 means you can land shots half the time in the boss (30secs in
+# a given minute). If no information is given here, the fight will be
+# considered to be 2 minutes, regardless of anything else.
+#
+# 2. Energy : a dictionary where key is etanks+reserves you have,
+# value is estimated difficulty for a 2-minute fight. If etanks entry
+# is not defined, the one below will be chosen, or the minimum one if
+# no below entry is defined. You can give any difficulty number
+# instead of the fixed values defined above. The amount of energy you
+# have is to be considered with one suit only : it will be considered
+# *2 if you have both suits, and /2 if you have no suits.
+#
+# Actual difficulty calculation will also take into account estimated
+# fight duration. Difficulty will be multiplied with the ratio against
+# 2-minutes value entered here. The ammo margin will also be
+# considered if you do not have charge.
+#
+# If not enough info is provided here, base difficulty will be medium.
+bossesDifficulty = {
+    'Kraid' : {
+        'Rate' : 0.1,
+        'Energy' : {
+            1 : medium,
+            2 : easy
+        }
+    },
+    'Phantoon' : {
+        'Rate' : 0.1,
+        'Energy' : {
+            1 : mania,
+            3 : hardcore,
+            4 : hard,
+            6 : medium,
+            8 : easy
+        }
+    },
+    'Draygon' : {
+        'Rate' : 0.1,
+        'Energy ' : {
+            1 : mania,
+            3 : hardcore,
+            4 : harder,
+            5 : hard,
+            7 : medium,
+            9 : easy        
+        },
+    }
+    'Ridley' : {
+        'Rate' : 0.33,
+        'Energy' : {
+            1 : mania,
+            6 : hardcore,
+            8 : harder,
+            10 : hard,
+            14 : medium  # I'll never say Ridley is easy! ;)
+        },
+    },
+    'Mother Brain' : {
+        'Rate' : 0.5,
+        'Energy' : {
+            3 : mania, # less than 3 is actually impossible
+            4 : hardcore,
+            6 : harder,
+            8 : hard,
+            10 : medium,
+            12 : easy
+        }
+    }
+}

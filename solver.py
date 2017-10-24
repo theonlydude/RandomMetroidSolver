@@ -257,7 +257,18 @@ def canDefeatDraygon(items):
     return wand(canDefeatBotwoon(items),
                 haveItem(items, 'Gravity'));
 
-def canInflictEnoughDamages(items, bossEnergy, doubleSuper=False, charge=True, power=False):
+# returns a tuple with :
+#
+# - a floating point number : 0 if boss is unbeatable with
+# current equipment, and an ammo "margin" (ex : 1.5 means we have 50%
+# more firepower than absolutely necessary). Useful to compute boss
+# difficulty when not having charge. If player has charge, the actual
+# value is not useful.
+#
+# - estimation of the fight duration in seconds (well not really, it
+# is if you fire and land shots perfectly and constantly), giving info
+# to compute boss fight difficulty
+def canInflictEnoughDamages(items, bossEnergy, doubleSuper=False, charge=True, power=False, givesDrops=True):
     # TODO: handle special beam attacks ? (http://deanyd.net/sm/index.php?title=Charge_Beam_Combos)
 
     # http://deanyd.net/sm/index.php?title=Damage
@@ -289,38 +300,116 @@ def canInflictEnoughDamages(items, bossEnergy, doubleSuper=False, charge=True, p
             standardDamage = 20
 
     # charge triples the damage
-    chargeDamage = standardDamage * 3
+    chargeDPS = standardDamage * 3.0
 
     # missile 100 damages, super missile 300 damages, 5 missile in each extension
+    missilesAmount = itemCount(items, 'Missile') * 5
+    missilesDamage = missilesAmount * 100
+    supersAmount = itemCount(items, 'Super') * 5
+    oneSuper = 300.0
     if doubleSuper is True:
-        missilesDamage = (itemCount(items, 'Missile') * 5 * 100 + itemCount(items, 'Super') * 5 * 300 * 2)
-    else:
-        missilesDamage = (itemCount(items, 'Missile') * 5 * 100 + itemCount(items, 'Super') * 5 * 300)
+        oneSuper *= 2
+    supersDamage = supersAmount * oneSuper    
 
     powerDamage = 0
+    powerAmount = 0
     if power is True and haveItem(items, 'PowerBomb')[0]:
-        powerDamage = itemCount(items, 'PowerBomb') * 200
+        # PBs come also in packs of 5
+        powerAmount = itemCount(items, 'PowerBomb') * 5 
+        powerDamage = powerAmount * 200
 
-    if missilesDamage > bossEnergy:
-        return (True, easy)
+    canBeatBoss = chargeDPS > 0 or givesDrops or (missilesDamage + supersDamage + powerDamage) >= bossEnergy
+
+    if not canBeatBoss:
+        return (0, 0)
+    ammoMargin = (missilesDamage + supersDamage + powerDamage) / bossEnergy
+    if chargeDPS > 0:
+        ammoMargin += 2
+
+    # FIXME : these are rough estimations
+    missilesDPS = 4 * 100.0
+    supersDPS = 2 * 300.0
+    if doubleSuper is True:
+        supersDPS *= 2
+    if powerDamage > 0:    
+        powerDPS = 200.0 / 3
     else:
-        bossEnergy = bossEnergy - powerDamage
+        powerDPS = 0.0
+    dpsDict = { missilesDPS : (missilesAmount, 100.0), supersDPS : (supersAmount, oneSuper), powerDPS : (powerAmount, 200.0), chargeDPS : (10000, chargeDPS) } # one charged shot per second. and no boss will take more 10000 charged shots
+    secs = 0
+    for dps in sorted(dpsDict, reverse=True):
+        amount = dpsDict[dps][0]
+        one = dpsDict[dps][1]
+        fire = min(bossEnergy / one, amount)
+        secs += fire * (one / dps)
+        bossEnergy -= fire * one
         if bossEnergy <= 0:
-            return (True, medium)
-        if chargeDamage > 0:
-            hitsRequired = (bossEnergy - missilesDamage) / chargeDamage
-            return (True, int(math.ceil(hitsRequired / 10.0)))
-        else:
-            return (False, 0)
+            break
+    if bossEnergy > 0:
+        # rely on missile drops : let's say you get 12 missiles in a minute and fire them (DPS of 20)
+        secs += (bossEnergy / 20.0)
+        
+    return (ammoMargin, secs)
+
+def computeBossDifficulty(items, ammoMargin, secs, diffTbl):
+    # actual fight duration :
+    rate = None
+    if diffTbl.has_key('Rate'):
+        rate = diffTbl['Rate']
+    if rate is None:
+        duration = 120.0
+    else:
+        duration = secs / rate
+    suitsCoeff = 0.5
+    if haveItem(items, 'Varia'):
+        suitsCoeff *= 2
+    if haveItem(items, 'Gravity'):
+        suitsCoeff *= 2        
+    energy = suitsCoeff * energyReserveCount(items)
+    energyDict = None
+    if diffTbl.has_key('Energy'):
+        energyDict = diffTbl['Energy']
+    difficulty = medium
+    # get difficulty by energy
+    if energyDict:
+        keyz = sorted(energyDict.keys())
+        if len(keyz) > 0:
+            difficulty = energyDict[keyz[0]]
+            for k in keyz:
+                if k > energy:
+                    break
+                difficulty = energyDict[k]
+    # FIXME : formulas below shall be adapted to actual difficulty value 'scale' we use
+    # adjust by fight duration
+    difficulty *= (duration / 120)
+    # and by ammo margin : 50% more is considered 'normal'
+    # only augment difficulty in case of no charge, don't lower it.
+    # if we have charge, ammoMargin will be > 2 (see canInflictEnoughDamages),
+    # so this does not apply
+    diffAdjust = (1 - (ammoMargin - 1.5))
+    if diffAdjust > 1:
+        difficulty *= diffAdjust
+
+    return difficulty
 
 def enoughStuffsRidley(items):
-    return canInflictEnoughDamages(items, 18000, doubleSuper=True)
+    (ammoMargin, secs) = canInflictEnoughDamages(items, 18000, doubleSuper=True, givesDrops=False)
+    if ammoMargin == 0:
+        return (False, 0)
+    return (True, computeBossDifficulty(items, ammoMargin, secs, bossesDifficulty['Ridley']))
 
 def enoughStuffsKraid(items):
-    return canInflictEnoughDamages(items, 1000)
+    (ammoMargin, secs) = canInflictEnoughDamages(items, 1000)
+    if ammoMargin == 0:
+        return (False, 0)
+    return (True, computeBossDifficulty(items, ammoMargin, secs, bossesDifficulty['Kraid']))    
 
 def enoughStuffsDraygon(items):
-    return wor(canInflictEnoughDamages(items, 6000),
+    (ammoMargin, secs) = canInflictEnoughDamages(items, 6000)
+    fight = (False, 0)
+    if ammoMargin > 0:
+        fight = (True, computeBossDifficulty(items, ammoMargin, secs, bossesDifficulty['Kraid']))    
+    return wor(fight,
                wand(knowsDraygonGrappleKill,
                     haveItem(items, 'Grapple')),
                wand(knowsShortCharge,
@@ -328,19 +417,33 @@ def enoughStuffsDraygon(items):
 
 def enoughStuffsPhantoon(items):
     # with only super and no missiles/charge phantoon is way harder
-    if haveItem(items, 'Charge')[0]:
-        return canInflictEnoughDamages(items, 2500, doubleSuper=True)
-    else:
-        return wand(canInflictEnoughDamages(items, 2500, doubleSuper=True),
-                    itemCountOkList(items, 'Missile', [(1, mania), (2, hardcore), (3, harder), (4, hard), (5, medium), (6, easy)]))
+    (ammoMargin, secs) = canInflictEnoughDamages(items, 2500, doubleSuper=True)
+    if ammoMargin == 0:
+        return (False, 0)
+    difficulty = computeBossDifficulty(items, ammoMargin, secs, bossesDifficulty['Phantoon'])
+    hasCharge = haveItem(items, 'Charge')[0]
+    if hasCharge or haveItem(items, 'ScrewAttack')[0]:
+        difficulty /= 1.2 # you can avoid flames        
+    elif not hasCharge and itemCount(items, 'Missile') <= 2: # few missiles is harder
+        difficulty *= 1.2
+        
+    return (True, difficulty)
 
 def enoughStuffsMotherbrain(items):
     # MB1 can't be hit by charge beam
-    return wand(canInflictEnoughDamages(items, 3000, charge=False), canInflictEnoughDamages(items, 18000 + 3000))
+    (ammoMargin, secs) = canInflictEnoughDamages(items, 3000, charge=False, givesDrops=False)
+    if ammoMargin == 0:
+        return (False, 0)
+    # we actually don't give a shit about MB1 difficulty, since we embark its health in the following calc
+    (ammoMargin, secs) = canInflictEnoughDamages(items, 18000 + 3000, givesDrops=False)
+    if ammoMargin == 0:
+        return (False, 0)
+    return (True, computeBossDifficulty(items, ammoMargin, secs, bossesDifficulty['Mother Brain']))
 
 def canEndGame(items):
     # a zebetite has 1100 energy
-    return wand(enoughStuffsMotherbrain(items), wor(knowsZebSkip, canInflictEnoughDamages(items, 1100)))
+#    return wand(enoughStuffsMotherbrain(items), wor(knowsZebSkip, canInflictEnoughDamages(items, 1100)))
+    return enoughStuffsMotherbrain(items) # FIXME
 
 def enoughStuff(items, minorLocations):
     if itemsPickup == '100%':

@@ -64,7 +64,7 @@ knowsClimbToGrappleWithIce = (False, 0) # just learn green gate glitch, it's eas
 
 # wrecked ship etank access ("sponge bath" room)
 knowsSpongeBathBombJump = (False, 0)
-knowsSpongeBathHiJump = (True, medium)
+knowsSpongeBathHiJump = (True, easy)
 knowsSpongeBathSpeed = (True, medium)
 
 # plasma room
@@ -101,8 +101,6 @@ itemsPickup = 'minimal'
 # normal:
 #  take all the majors and as many minors as in comfort settings
 #itemsPickup = 'normal'
-
-
 
 # display the generated path
 displayGeneratedPath = True
@@ -180,4 +178,12 @@ bossesDifficulty = {
             12 : easy
         }
     }
+}
+
+# hell run table
+hellRuns = {
+    # Ice Beam hell run
+    'Ice' : [(2, hardcore), (3, harder), (4, hard), (6, medium)],
+    # rest of upper norfair
+    'Rest' : [(3, mania), (4, hardcore), (6, hard), (8, medium)]
 }

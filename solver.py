@@ -94,6 +94,7 @@ def itemCountOk(items, item, count, difficulty=0):
 
 def itemCountOkList(items, item, difficulties):
     # get a list: [(2, difficulty=hard), (4, difficulty=medium), (6, difficulty=easy)]
+    difficulties = difficulties[:] # copy
     difficulty = difficulties.pop(0)
     result = itemCountOk(items, item, difficulty[0], difficulty=difficulty[1])
     while len(difficulties) > 0:
@@ -109,6 +110,7 @@ def energyReserveCountOk(items, count, difficulty=0):
 
 def energyReserveCountOkList(items, difficulties):
     # get a list: [(2, difficulty=hard), (4, difficulty=medium), (6, difficulty=easy)]
+    difficulties = difficulties[:] # copy
     difficulty = difficulties.pop(0)
     result = energyReserveCountOk(items, difficulty[0], difficulty=difficulty[1])
     while len(difficulties) > 0:
@@ -123,7 +125,7 @@ def canHellRun(items):
     if heatProof(items)[0]:
         return (True, easy)
     elif energyReserveCount(items) >= 3:
-        return energyReserveCountOkList(items, [(3, mania), (4, hardcore), (5, hard), (7, medium), (8, easy)])
+        return energyReserveCountOkList(items, hellRuns['Rest'])
     else:
         return (False, 0)
 
@@ -832,7 +834,7 @@ locations = [
     'Address': 0x78B24,
     'Visibility': "Chozo",
     # DONE: harder without varia
-    'Available': lambda items: wand(canAccessKraid(items), wor(heatProof(items), energyReserveCountOkList(items, [(2, hardcore), (3, hard), (4, medium), (6, easy)])), wor(wand(haveItem(items, 'Morph'), knowsMockball), haveItem(items, 'SpeedBooster'))) # FIXME : knowsEarlyKraid has nothing to do with this and is implied by canAccessKraid
+    'Available': lambda items: wand(canAccessKraid(items), wor(heatProof(items), energyReserveCountOkList(items, hellRuns['Ice'])), wor(wand(haveItem(items, 'Morph'), knowsMockball), haveItem(items, 'SpeedBooster'))) # FIXME : knowsEarlyKraid has nothing to do with this and is implied by canAccessKraid
 },
 {
     'Area': "Norfair",

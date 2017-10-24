@@ -263,7 +263,7 @@ def canDefeatDraygon(items):
 # current equipment, and an ammo "margin" (ex : 1.5 means we have 50%
 # more firepower than absolutely necessary). Useful to compute boss
 # difficulty when not having charge. If player has charge, the actual
-# value is not useful.
+# value is not useful, and is guaranteed to be > 2.
 #
 # - estimation of the fight duration in seconds (well not really, it
 # is if you fire and land shots perfectly and constantly), giving info
@@ -416,7 +416,7 @@ def enoughStuffsDraygon(items):
     (ammoMargin, secs) = canInflictEnoughDamages(items, 6000)
     fight = (False, 0)
     if ammoMargin > 0:
-        fight = (True, computeBossDifficulty(items, ammoMargin, secs, bossesDifficulty['Kraid']))    
+        fight = (True, computeBossDifficulty(items, ammoMargin, secs, bossesDifficulty['Draygon']))    
     return wor(fight,
                wand(knowsDraygonGrappleKill,
                     haveItem(items, 'Grapple')),

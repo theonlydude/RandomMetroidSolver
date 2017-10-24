@@ -634,7 +634,7 @@ locations = [
     'Address': 0x78404,
     'Class': "Major",
     'Visibility': "Chozo",
-    # DONE: difficulty handled with knowsAlcatrazEscape
+    # DONE: need to morph to enter Alcatraz. red door at Flyway
     'Available': lambda items: wand(haveItem(items, 'Morph'), canOpenRedDoors(items))
 },
 {
@@ -643,11 +643,14 @@ locations = [
     'Class': "Major",
     'Address': 0x78432,
     'Visibility': "Visible",
-    # DONE: rewrote condition. initial condition was good for the randomizer itself but not for difficulty
-    # estimation. we know that if no power bombs are found early, BT will give either Bomb, ScrewAttack or
-    # SpeedBooster, so we reflect that logic for item immediately after Bomb
-    'Available': lambda items: wor(wand(knowsAlcatrazEscape, haveItem(items, 'SpeedBooster')), wand(knowsAlcatrazEscape, haveItem(items, 'ScrewAttack')), wand(haveItem(items, 'Morph'), haveItem(items, 'Bomb')), canUsePowerBombs(items))
-    # FIXME that SpeedBooster check is if you had to do alcatraz...check if that implies a short charge?
+    # DONE: rewrote condition. initial condition was good for the randomizer itself
+    #       but not for difficulty estimation. We know that if no power bombs are
+    #       found early, BT will give either Bomb, ScrewAttack or SpeedBooster,
+    #       so we reflect that logic for the item immediately after Bomb
+    # FIXME: that SpeedBooster check is if you had to do alcatraz...
+    #        check if that implies a short charge?
+    'Available': lambda items: wor(wand(knowsAlcatrazEscape, haveItem(items, 'SpeedBooster')), wand(knowsAlcatrazEscape, haveItem(items, 'ScrewAttack')), canDestroyBombWalls(items))
+
 },
 {
     'Area': "Brinstar",
@@ -655,7 +658,9 @@ locations = [
     'Class': "Major",
     'Address': 0x7852C,
     'Visibility': "Chozo",
-    # DONE: mock ball for early retreval
+    # DONE: break the bomb wall at left of Parlor and Alcatraz,
+    #       open red door at Green Brinstar Main Shaft,
+    #       mock ball for early retreval or speed booster
     'Available': lambda items: wand(wor(haveItem(items, 'SpeedBooster'), canDestroyBombWalls(items)), canOpenRedDoors(items), wor(wand(knowsMockball, haveItem(items, 'Morph')), haveItem(items, 'SpeedBooster')))
 },
 {
@@ -664,8 +669,9 @@ locations = [
     'Class': "Major",
     'Address': 0x78614,
     'Visibility': "Chozo",
-    # DONE: no difficulty
-    'Available': lambda items: wor(wand(canPassBombPassages(items), canOpenRedDoors(items)), canUsePowerBombs(items))
+    # DONE: open red door at Green Brinstar Main Shaft,
+    #       break the bomb wall at left of Parlor and Alcatraz
+    'Available': lambda items: wand(canOpenRedDoors(items), wor(canPassBombPassages(items), canUsePowerBombs(items)))
 },
 {
     'Area': "Brinstar",
@@ -682,7 +688,11 @@ locations = [
     'Class': "Major",
     'Address': 0x7879E,
     'Visibility': "Hidden",
-    # DONE: use knowsCeilingDBoost
+    # DONE: to get this major items the different technics are:
+    #  -can fly (continuous bomb jump or space jump)
+    #  -have the high jump boots
+    #  -freeze the Reo to jump on it
+    #  -do a damage boost with one of the two Geemers
     'Available': lambda items: wor(knowsCeilingDBoost, canFly(items), haveItem(items, 'HiJump'), haveItem(items, 'Ice'))
 },
 {

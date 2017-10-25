@@ -9,6 +9,32 @@ mania = 100
 # keep getting majors of at most this difficulty before going for minors
 difficulty_target=easy
 
+# display the generated path (spoilers!)
+displayGeneratedPath = False
+
+# choose how many items are required
+
+# 100%:
+#  need them all (major & minor)
+#itemsPickup = '100%'
+
+# minimal:
+#  need only the minimal required major and minor items
+#   Morphing Ball (1)
+#   Charge (or enough minors to finish without)
+#   Missiles (enough to finish the game)
+#   Energy Tanks (4)
+#   Super Missiles (enough to finish the game)
+#   Varia Suit (1)
+#   Speed Boots (1) or Ice Beam (1)
+#   Power Bombs (1)
+#   Gravity Suit (1)
+itemsPickup = 'minimal'
+
+# normal:
+#  take all the majors as many missiles/supers as in minimal and 4 power bomb packs
+#itemsPickup = 'normal'
+
 # the different technics to know (cf. http://deanyd.net/sm/index.php?title=Item_Randomizer)
 # and the personnal perceived difficulty.
 # False means: I can't do this technic or I don't know it.
@@ -77,36 +103,6 @@ knowsExitPlasmaRoomHiJump = (True, medium)
 
 # sandpit
 knowsSuitlessSandpit = (False, 0) # access the item in the sandpit suitless
-
-# choose how many items are required
-# note on charge/minors : the solver strategy when it does not look for charge specifically
-# (depending on the settings) is to look for both missiles/supers and charge beam until either
-# - charge is found: it then stop looking for minors after the minimum is reached
-# - or enough minors to finish the game are found: it then stops looking for charge
-
-# 100%:
-#  need them all (major & minor)
-#itemsPickup = '100%'
-
-# minimal:
-#  need only the minimal required major and minor items
-#   Morphing Ball (1)
-#   Charge (or enough minors to finish without)
-#   Missiles (3 or more depending on zebskip settings, or enough to finish without charge)
-#   Energy Tanks (4)
-#   Super Missiles (2 or more depending on zebskip settings, or enough to finish without charge)
-#   Varia Suit (1)
-#   Speed Boots (1) or Ice Beam (1)
-#   Power Bombs (1)
-#   Gravity Suit (1)
-itemsPickup = 'minimal'
-
-# normal:
-#  take all the majors and as many minors as in comfort settings
-#itemsPickup = 'normal'
-
-# display the generated path
-displayGeneratedPath = True
 
 # boss difficulty tables :
 #

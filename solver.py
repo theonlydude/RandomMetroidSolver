@@ -461,10 +461,13 @@ def enoughMinors(items, minorLocations):
     if itemsPickup == '100%':
         # need them all
         return len(minorLocations) == 0
-    elif itemsPickup == 'minimal':
-        return haveItemCount(items, 'Missile', 3) and haveItemCount(items, 'Super', 2) and haveItemCount(items, 'PowerBomb', 1)
-    elif itemsPickup == 'normal':
-        return canEndGame(items)[0]
+    else:
+        canEnd = canEndGame(items)[0]
+        if itemsPickup == "normal":
+            return canEnd and haveItemCount(items, 'PowerBomb', 4)
+        else: 
+            return canEnd
+
 
 def getLocation(loc_list, name):
     for loc in loc_list:

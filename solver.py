@@ -572,7 +572,7 @@ def getDifficulty(locations):
 
         # first take major items with no difficulty
         majorPicked = False
-        while len(majorAvailable) > 0 and majorAvailable[0]["difficulty"][1] == easy:
+        while len(majorAvailable) > 0 and majorAvailable[0]["difficulty"][1] <= difficulty_target:
             loc = majorAvailable.pop(0)
             majorLocations.remove(loc)
             visitedLocations.append(loc)

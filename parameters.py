@@ -6,6 +6,9 @@ harder = 25
 hardcore = 50
 mania = 100
 
+# keep getting majors of at most this difficulty before going for minors
+difficulty_target=easy
+
 # the different technics to know (cf. http://deanyd.net/sm/index.php?title=Item_Randomizer)
 # and the personnal perceived difficulty.
 # False means: I can't do this technic or I don't know it.

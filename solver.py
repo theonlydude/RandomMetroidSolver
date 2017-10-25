@@ -34,7 +34,8 @@ def getItem(romFile, address, visibility):
 # if true, add given difficulty to output
 def wand2(a, b, difficulty=0):
     if a[0] is True and b[0] is True:
-        return (True, a[1] + b[1] + difficulty)
+        d = a[1] + b[1]
+        return (True, d + difficulty)
     else:
         return (False, 0)
 
@@ -334,8 +335,8 @@ def canInflictEnoughDamages(items, bossEnergy, doubleSuper=False, charge=True, p
         ammoMargin += 2
 
     # FIXME : these are rough estimations
-    missilesDPS = 4 * 100.0
-    supersDPS = 2 * 300.0
+    missilesDPS = 3 * 100.0
+    supersDPS = 1.5 * 300.0
     if doubleSuper is True:
         supersDPS *= 2
     if powerDamage > 0:    
@@ -465,27 +466,39 @@ def enoughMinors(items, minorLocations):
     elif itemsPickup == 'normal':
         return canEndGame(items)[0]
 
-def enoughMajors(items, majorLocations):
+def getLocation(loc_list, name):
+    for loc in loc_list:
+        if loc['Name'] == name:
+            return loc
+    return None
+
+    
+def haveBossesItems(visitedLocations):
+    kraidLocation = getLocation(locations, "Varia Suit")
+    phantoonLocation = getLocation(locations, "Right Super, Wrecked Ship")
+    draygonLocation = getLocation(locations, "Space Jump")
+    ridleyLocation = getLocation(locations, "Energy Tank, Ridley")
+
+    return kraidLocation in visitedLocations and phantoonLocation in visitedLocations and draygonLocation in visitedLocations and ridleyLocation in visitedLocations
+    
+def enoughMajors(items, majorLocations, visitedLocations):
     # the end condition
     if itemsPickup == '100%' or itemsPickup == 'normal':
         return len(majorLocations) == 0
     elif itemsPickup == 'minimal':
-        return haveItemCount(items, 'Morph', 1) and (haveItemCount(items, 'Bomb', 1) or haveItemCount(items, 'PowerBomb', 1)) and haveItemCount(items, 'ETank', 3) and haveItemCount(items, 'Varia', 1) and (haveItemCount(items, 'SpeedBooster', 1) or haveItemCount(items, 'Ice', 1)) and haveItemCount(items, 'Gravity', 1)
+        return haveItemCount(items, 'Morph', 1) and (haveItemCount(items, 'Bomb', 1) or haveItemCount(items, 'PowerBomb', 1)) and haveItemCount(items, 'ETank', 3) and haveItemCount(items, 'Varia', 1) and (haveItemCount(items, 'SpeedBooster', 1) or haveItemCount(items, 'Ice', 1)) and haveItemCount(items, 'Gravity', 1) and haveBossesItems(visitedLocations)
 
 def canBeatKraid(items):
-    return getLocation("Varia Suit")['Available'](items)
+    return ['Available'](items)
 
 def canBeatPhantoon(items):
-    return getLocation("Right Super, Wrecked Ship")['Available'](items)
+    return ['Available'](items)
 
 def canBeatRidley(items):
-    return getLocation("Energy Tank, Ridley")['Available'](items)
+    return ['Available'](items)
 
 def canBeatDraygon(items):
-    return getLocation("Space Jump")['Available'](items)
-
-def canBeatGoldenFour(items):
-    return wand(canBeatKraid(items), canBeatPhantoon(items), canBeatDraygon(items), canBeatRidley(items))
+    return ['Available'](items)
 
 def canPassMetroids(items):
     return wand(canOpenRedDoors(items), wor(haveItem(items, 'Ice'), (haveItemCount(items, 'PowerBomb', 3), 0))) # to avoid leaving tourian to refill power bombs
@@ -495,11 +508,12 @@ def canPassZebetites(items):
 
 def canEndGame(items):
     # to finish the game you must :
-    # - beat golden 4
+    # - beat golden 4 : we force pickup of the 4 items
+    #   behind the bosses in enoughMajors to ensure that
     # - defeat metroids
     # - destroy/skip the zebetites
     # - beat Mother Brain
-    return wand((canBeatGoldenFour(items)[0], 0), canPassMetroids(items), canPassZebetites(items), enoughStuffsMotherbrain(items)) # difficulty for golden 4 already accounted for by enoughMajors and enoughMinors
+    return wand(canPassMetroids(items), canPassZebetites(items), enoughStuffsMotherbrain(items))
 
 def getDifficulty(locations):
     # loop on the available locations depending on the collected items
@@ -521,7 +535,7 @@ def getDifficulty(locations):
     endDifficulty = mania
     while True:
         # actual while condition
-        hasEnoughItems = enoughMajors(collectedItems, majorLocations) and enoughMinors(collectedItems, minorLocations)
+        hasEnoughItems = enoughMajors(collectedItems, majorLocations, visitedLocations) and enoughMinors(collectedItems, minorLocations)
         (isEndPossible, endDifficulty) = canEndGame(collectedItems)        
         if isEndPossible and hasEnoughItems:
             break
@@ -629,7 +643,7 @@ def getDifficulty(locations):
                 itemName = 'The End'
             print('{:>50}: {:>12} {:>16} {}'.format(location['Name'], location['Area'], itemName, location['difficulty'][1]))
 
-    if not enoughMajors(collectedItems, majorLocations) or not enoughMinors(collectedItems, minorLocations) or not canEndGame(collectedItems):
+    if not enoughMajors(collectedItems, majorLocations, visitedLocations) or not enoughMinors(collectedItems, minorLocations) or not canEndGame(collectedItems):
         # we have aborted
         difficulty = (-1, -1)
     else:
@@ -673,13 +687,6 @@ items = {
     '0xef1b': {'name': 'SpaceJump'},
     '0xef1f': {'name': 'ScrewAttack'}
 }
-
-
-def getLocation(name):
-    for loc in locations:
-        if loc['Name'] == name:
-            return loc
-    return None
 
 
 # generated with:

@@ -219,8 +219,11 @@ def canAccessLowerNorfair(items):
 def canPassWorstRoom(items):
     return wand(canAccessLowerNorfair(items),
                 wor(canFly(items),
-                    wand(haveItem(items, 'Ice'), haveItem(items, 'Charge'), knowsWorstRoomIceCharge),
-                    haveItem(items, 'HiJump', knowsWorstRoomHiJump)))
+                    wand(haveItem(items, 'Ice'),
+                         haveItem(items, 'Charge'),
+                         knowsWorstRoomIceCharge),
+                    wand(haveItem(items, 'HiJump'),
+                         knowsWorstRoomHiJump)))
 
 def canAccessOuterMaridia(items):
     # even harder if without gravity and without stronger gun

@@ -565,9 +565,8 @@ def getDifficulty(locations):
 
         # that shouldn't happen
         if len(majorAvailable) == 0 and enough is True:
-            print('ERROR: no more major item available')
-            boire.dela(chiasse)
-
+            break
+            
         # sort them on difficulty
         majorAvailable.sort(key=lambda loc: loc['difficulty'][1])
         if not enough:

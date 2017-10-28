@@ -491,18 +491,6 @@ def enoughMajors(items, majorLocations, visitedLocations):
     elif itemsPickup == 'minimal':
         return haveItemCount(items, 'Morph', 1) and (haveItemCount(items, 'Bomb', 1) or haveItemCount(items, 'PowerBomb', 1)) and haveItemCount(items, 'ETank', 3) and haveItemCount(items, 'Varia', 1) and (haveItemCount(items, 'SpeedBooster', 1) or haveItemCount(items, 'Ice', 1)) and haveItemCount(items, 'Gravity', 1) and haveBossesItems(visitedLocations)
 
-def canBeatKraid(items):
-    return ['Available'](items)
-
-def canBeatPhantoon(items):
-    return ['Available'](items)
-
-def canBeatRidley(items):
-    return ['Available'](items)
-
-def canBeatDraygon(items):
-    return ['Available'](items)
-
 def canPassMetroids(items):
     return wand(canOpenRedDoors(items), wor(haveItem(items, 'Ice'), (haveItemCount(items, 'PowerBomb', 3), 0))) # to avoid leaving tourian to refill power bombs
 
@@ -724,7 +712,8 @@ locations = [
     #       so we reflect that logic for the item immediately after Bomb
     # FIXME: that SpeedBooster check is if you had to do alcatraz...
     #        check if that implies a short charge?
-    'Available': lambda items: wor(wand(knowsAlcatrazEscape, haveItem(items, 'SpeedBooster')), wand(knowsAlcatrazEscape, haveItem(items, 'ScrewAttack')), canDestroyBombWalls(items))
+    # FIX: not enough length to do a regular charge
+    'Available': lambda items: wor(wand(knowsAlcatrazEscape, wor(haveItem(items, 'SpeedBooster'), haveItem(items, 'ScrewAttack'))), canDestroyBombWalls(items))
 
 },
 {

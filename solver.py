@@ -168,11 +168,20 @@ def canDestroyBombWalls(items):
                haveItem(items, 'ScrewAttack'))
 
 def canEnterAndLeaveGauntlet(items):
-    return wand(wor(canFly(items), wand(haveItem(items, 'HiJump'), knowsHiJumpGauntletAccess), haveItem(items, 'SpeedBooster')),
+    return wand(wor(canFly(items),
+                    wand(haveItem(items, 'HiJump'),
+                         knowsHiJumpGauntletAccess),
+                    haveItem(items, 'SpeedBooster')),
                 wor(wand(canUseBombs(items), knowsGauntletWithBombs),
-                    wand(canUsePowerBombs(items), itemCountOk(items, 'PowerBomb', 2), knowsGauntletWithPowerBombs),
+                    wand(canUsePowerBombs(items),
+                         itemCountOk(items, 'PowerBomb', 2),
+                         knowsGauntletWithPowerBombs),
                     haveItem(items, 'ScrewAttack'),
-                    wand(haveItem(items, 'SpeedBooster'), canUsePowerBombs(items), energyReserveCountOk(items, 2), wand(knowsSimpleShortCharge, knowsGauntletEntrySpark))))
+                    wand(haveItem(items, 'SpeedBooster'),
+                         canUsePowerBombs(items),
+                         energyReserveCountOk(items, 2),
+                         wand(knowsSimpleShortCharge,
+                              knowsGauntletEntrySpark))))
 
 def canPassBombPassages(items):
     return wor(canUseBombs(items), canUsePowerBombs(items))
@@ -235,7 +244,8 @@ def canAccessOuterMaridia(items):
                              haveItem(items, 'Ice'),
                              wor(knowsSuitlessOuterMaridiaNoGuns,
                                  wand(knowsSuitlessOuterMaridia,
-                                      haveItem(items, 'SpringBall'), knowsSpringBallJump))),
+                                      haveItem(items, 'SpringBall'),
+                                      knowsSpringBallJump))),
                         wand(haveItem(items, 'HiJump'),
                              haveItem(items, 'Ice'),
                              wor(haveItem(items, 'Wave'),
@@ -244,24 +254,37 @@ def canAccessOuterMaridia(items):
                              knowsSuitlessOuterMaridia))))
 
 def canAccessInnerMaridia(items):
-    # easy regular way
+    # EXPLAINED: this is the easy regular way:
+    #            access Red Tower in red brinstar,
+    #            power bomb to destroy the tunnel at Glass Tunnel,
+    #            gravity suit to move freely under water,
+    #            at Mt Everest, no need for grapple to access upper right door:
+    #            https://www.youtube.com/watch?v=2GPx-6ARSIw&t=2m28s
     return wand(canAccessRedBrinstar(items),
                 canUsePowerBombs(items),
                 haveItem(items, 'Gravity'))
 
 def canDoSuitlessMaridia(items):
-    # harder way
+    # EXPLAINED: this is the harder way if no gravity,
+    #            reach the Mt Everest then use the grapple to access the upper right door.
+    #            it can also be done without gravity nor grapple (https://www.youtube.com/watch?v=lsbnUKcblPk)
     return wand(canAccessOuterMaridia(items),
                 haveItem(items, 'Grapple'))
 
 def canDefeatBotwoon(items):
+    # EXPLAINED: access Aqueduct, either with or without gravity suit,
+    #            then in Botwoon Hallway, either:
+    #             -use regular speedbooster (with gravity)
+    #             -do a mochtroidclip (https://www.youtube.com/watch?v=1z_TQu1Jf1I&t=20m28s)
     return wand(wor(canAccessInnerMaridia(items),
                     canDoSuitlessMaridia(items)),
                 wor(wand(haveItem(items, 'Ice'),
                          knowsMochtroidClip),
-                    haveItem(items, 'SpeedBooster')))
+                    wand(haveItem(items, 'SpeedBooster'),
+                         haveItem(items, 'Gravity'))))
 
 def canDefeatDraygon(items):
+    # EXPLAINED: the randomizer considers that we need gravity to defeat Draygon
     return wand(canDefeatBotwoon(items),
                 haveItem(items, 'Gravity'));
 
@@ -697,7 +720,7 @@ locations = [
     'Address': 0x78404,
     'Class': "Major",
     'Visibility': "Chozo",
-    # DONE: need to morph to enter Alcatraz. red door at Flyway
+    # EXPLAINED: need to morph to enter Alcatraz. red door at Flyway
     'Available': lambda items: wand(haveItem(items, 'Morph'), canOpenRedDoors(items))
 },
 {
@@ -722,9 +745,9 @@ locations = [
     'Class': "Major",
     'Address': 0x7852C,
     'Visibility': "Chozo",
-    # DONE: break the bomb wall at left of Parlor and Alcatraz,
-    #       open red door at Green Brinstar Main Shaft,
-    #       mock ball for early retreval or speed booster
+    # EXPLAINED: break the bomb wall at left of Parlor and Alcatraz,
+    #            open red door at Green Brinstar Main Shaft,
+    #            mock ball for early retreval or speed booster
     'Available': lambda items: wand(wor(haveItem(items, 'SpeedBooster'), canDestroyBombWalls(items)), canOpenRedDoors(items), wor(wand(knowsMockball, haveItem(items, 'Morph')), haveItem(items, 'SpeedBooster')))
 },
 {
@@ -733,8 +756,8 @@ locations = [
     'Class': "Major",
     'Address': 0x78614,
     'Visibility': "Chozo",
-    # DONE: open red door at Green Brinstar Main Shaft,
-    #       break the bomb wall at left of Parlor and Alcatraz
+    # EXPLAINED: open red door at Green Brinstar Main Shaft (down right),
+    #            break the bomb wall at left of Parlor and Alcatraz
     'Available': lambda items: wand(canOpenRedDoors(items), wor(canPassBombPassages(items), canUsePowerBombs(items)))
 },
 {
@@ -743,7 +766,7 @@ locations = [
     'Class': "Major",
     'Address': 0x786DE,
     'Visibility': "Visible",
-    # DONE: no difficulty
+    # EXPLAINED: no difficulty
     'Available': lambda items: (True, 0)
 },
 {
@@ -752,7 +775,7 @@ locations = [
     'Class': "Major",
     'Address': 0x7879E,
     'Visibility': "Hidden",
-    # DONE: to get this major items the different technics are:
+    # EXPLAINED: to get this major item the different technics are:
     #  -can fly (continuous bomb jump or space jump)
     #  -have the high jump boots
     #  -freeze the Reo to jump on it
@@ -765,7 +788,8 @@ locations = [
     'Class': "Major",
     'Address': 0x787C2,
     'Visibility': "Visible",
-    # DONE: no difficulty
+    # EXPLAINED: break the bomb wall at left of Parlor and Alcatraz,
+    #            power bomb down of Green Brinstar Main Shaft
     'Available': lambda items: canUsePowerBombs(items)
 },
 {
@@ -774,7 +798,13 @@ locations = [
     'Class': "Major",
     'Address': 0x787FA,
     'Visibility': "Visible",
-    # DONE: use knowsSimpleShortCharge
+    # EXPLAINED: break the bomb wall at left of Parlor and Alcatraz with power bombs,
+    #            open red door at Green Brinstar Main Shaft (down right),
+    #            power bomb at bottom of Big Pink (Charge Beam),
+    #            open red door leading to waterway,
+    #            at waterway, either do:
+    #  -with gravity do a speed charge
+    #  -a simple short charge from the blocks above the water
     'Available': lambda items: wand(canUsePowerBombs(items), canOpenRedDoors(items), haveItem(items, 'SpeedBooster'), wor(haveItem(items, 'Gravity'), knowsSimpleShortCharge))
 },
 {

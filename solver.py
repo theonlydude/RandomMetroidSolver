@@ -771,7 +771,7 @@ locations = [
     'Class': "Major",
     'Address': 0x78264,
     'Visibility': "Visible",
-    # DONE: difficulty already handled in the canEnterAndLeaveGauntlet function
+    # EXPLAINED: difficulty already handled in the canEnterAndLeaveGauntlet function
     'Available': lambda items: canEnterAndLeaveGauntlet(items)
 },
 {
@@ -793,9 +793,8 @@ locations = [
     #       but not for difficulty estimation. We know that if no power bombs are
     #       found early, BT will give either Bomb, ScrewAttack or SpeedBooster,
     #       so we reflect that logic for the item immediately after Bomb
-    # FIXME: that SpeedBooster check is if you had to do alcatraz...
-    #        check if that implies a short charge?
-    # FIX: not enough length to do a regular charge
+    # FIXME: if we had to do alcatraz escape, do we have to do a short or a simple short charge
+    #        to break the bomb wall left of Parlor and Alcatraz with speed booster ?
     'Available': lambda items: wor(wand(knowsAlcatrazEscape, wor(haveItem(items, 'SpeedBooster'), haveItem(items, 'ScrewAttack'))), canDestroyBombWalls(items))
 
 },

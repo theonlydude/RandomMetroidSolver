@@ -209,7 +209,12 @@ def canAccessWs(items):
                         wand(haveItem(items, 'SpeedBooster'), knowsSimpleShortCharge))))
 
 def canAccessHeatedNorfair(items):
-    return wand(canAccessRedBrinstar(items), canHellRun(items))
+    # EXPLAINED: from Red Tower, to go to Bubble Mountain we have to pass through
+    #            heated rooms, which requires a hell run if we don't have gravity.
+    #            this test is then used to access Speed, Norfair Reserve Tank, Wave and Crocomire
+    #            as they are all hellruns from Bublle Mountain.
+    return wand(canAccessRedBrinstar(items),
+                canHellRun(items))
 
 def canAccessCrocomire(items):
     return wor(wand(canAccessHeatedNorfair(items), wor(haveItem(items, 'Wave'), knowsGreenGateGlitch)),
@@ -219,12 +224,24 @@ def canAccessCrocomire(items):
                     energyReserveCountOk(items, 2)))
 
 def canAccessLowerNorfair(items):
-    return wand(canAccessHeatedNorfair(items), # FIXME : hell runs difficulty settings affect lower norfair access with a 'and' condition...on paper this is bad, but you do want some etanks before going there
+    # EXPLAINED: the randomizer never requires to pass it without the Varia suit.
+    #            from Red Brinstar to access Lava Dive room we open the door
+    #            with a power bomb then pass the Lava Dive room,. To pass Lava Dive room, either:
+    #             -have gravity suit and space jump (easy way)
+    #             -have gravity and perform a gravity jump
+    #             -have hijump boots and knows the Lava Dive wall jumps, the wall jumps are
+    #              a little easier with Ice and Plasma as we can freeze the Funes, we need
+    #              at least three ETanks to do it without gravity
+    return wand(canAccessRedBrinstar(items),
+                heatProof(items),
                 canUsePowerBombs(items),
-                haveItem(items, 'Varia'),
-                wor(wand(haveItem(items, 'HiJump'), knowsLavaDive),
-                    wand(haveItem(items, 'Gravity'), knowsGravityJump),
-                    wand(haveItem(items, 'Gravity'), haveItem(items, 'SpaceJump'))))
+                wor(wand(haveItem(items, 'Gravity'),
+                         haveItem(items, 'SpaceJump')),
+                    wand(haveItem(items, 'Gravity'),
+                         knowsGravityJump),
+                    wand(haveItem(items, 'HiJump'),
+                         energyReserveCountOk(items, 3),
+                         knowsLavaDive)))
 
 def canPassWorstRoom(items):
     return wand(canAccessLowerNorfair(items),
@@ -236,7 +253,15 @@ def canPassWorstRoom(items):
                          knowsWorstRoomHiJump)))
 
 def canAccessOuterMaridia(items):
-    # even harder if without gravity and without stronger gun
+    # EXPLAINED: access Red Tower in red brinstar,
+    #            power bomb to destroy the tunnel at Glass Tunnel,
+    #            then to climb up Main Street, either:
+    #             -have gravity (easy regular way)
+    #             -freeze the enemies to jump on them, but without a strong gun in the upper left
+    #              when the Sciser comes down you don't have enough time to hit it several times
+    #              to freeze it, as such you have to either:
+    #               -use the first Sciser from the ground and wait for it to come all the way up
+    #               -do a double jump with spring ball
     return wand(canAccessRedBrinstar(items),
                 canUsePowerBombs(items),
                 wor(haveItem(items, 'Gravity'),
@@ -267,7 +292,8 @@ def canAccessInnerMaridia(items):
 def canDoSuitlessMaridia(items):
     # EXPLAINED: this is the harder way if no gravity,
     #            reach the Mt Everest then use the grapple to access the upper right door.
-    #            it can also be done without gravity nor grapple (https://www.youtube.com/watch?v=lsbnUKcblPk)
+    #            it can also be done without gravity nor grapple but the randomizer will never
+    #            require it (https://www.youtube.com/watch?v=lsbnUKcblPk).
     return wand(canAccessOuterMaridia(items),
                 haveItem(items, 'Grapple'))
 
@@ -278,10 +304,11 @@ def canDefeatBotwoon(items):
     #             -do a mochtroidclip (https://www.youtube.com/watch?v=1z_TQu1Jf1I&t=20m28s)
     return wand(wor(canAccessInnerMaridia(items),
                     canDoSuitlessMaridia(items)),
-                wor(wand(haveItem(items, 'Ice'),
-                         knowsMochtroidClip),
-                    wand(haveItem(items, 'SpeedBooster'),
-                         haveItem(items, 'Gravity'))))
+                wor(wand(haveItem(items, 'SpeedBooster'),
+                         haveItem(items, 'Gravity')),
+                    wand(haveItem(items, 'Ice'),
+                         knowsMochtroidClip)))
+
 
 def canDefeatDraygon(items):
     # EXPLAINED: the randomizer considers that we need gravity to defeat Draygon
@@ -899,6 +926,7 @@ locations = [
     'Class': "Major",
     'Address': 0x78C3E,
     'Visibility': "Chozo",
+    # TODO: also Ice to freeze a Waver
     'Available': lambda items: wand(canAccessHeatedNorfair(items), wor(canFly(items), haveItem(items, 'Grapple'), haveItem(items, 'HiJump', difficulty=hard)))
 },
 {

@@ -213,15 +213,25 @@ def canAccessKraid(items):
                 canPassBombPassages(items))
 
 def canAccessWs(items):
-    return wand(canUsePowerBombs(items),
-                haveItem(items, 'Super'),
-                wor(haveItem(items, 'Grapple'),
-                    haveItem(items, 'SpaceJump'),
-                    wor(knowsContinuousWallJump,
-                        wand(canUseBombs(items),
-                             knowsDiagonalBombJump),
-                        wand(haveItem(items, 'SpeedBooster'),
-                             knowsSimpleShortCharge))))
+    # EXPLAINED: from Landing Site we open the green door on the right, then in Crateria
+    #            Keyhunter room we open the yellow door on the right to the Moat.
+    #            In the Moat we can either:
+    #             -use grapple or space jump (easy way)
+    #             -do a continuous wall jump (https://www.youtube.com/watch?v=4HVhTwwax6g)
+    #             -do a diagonal bomb jump from the middle platform (https://www.youtube.com/watch?v=5NRqQ7RbK3A&t=10m58s)
+    #             -do a short charge from the Keyhunter room (https://www.youtube.com/watch?v=kFAYji2gFok)
+    #             -do a gravity jump from below the right platform
+    #             -do a mock ball and a bounce ball (https://www.youtube.com/watch?v=WYxtRF--834)
+    #              FIXME: does it requires the highjump boots ?
+    return wand(haveItem(items, 'Super'),
+                canUsePowerBombs(items),
+                wor(wor(haveItem(items, 'Grapple'),
+                        haveItem(items, 'SpaceJump'),
+                        knowsContinuousWallJump),
+                    wor(wand(knowsDiagonalBombJump, canUseBombs(items)),
+                        wand(knowsSimpleShortCharge, haveItem(items, 'SpeedBooster')),
+                        wand(knowsGravityJump, haveItem(items, 'Gravity')),
+                        wand(knowsMockball, haveItem(items, 'Morph')))))
 
 def canAccessHeatedNorfair(items):
     # EXPLAINED: from Red Tower, to go to Bubble Mountain we have to pass through
@@ -239,8 +249,7 @@ def canAccessCrocomire(items):
     #              then speed booster in Crocomire Speedway (easy hell run if no varia
     #              as we only have to go in straight line, so two ETanks are required)
     return wor(wand(canAccessHeatedNorfair(items),
-                    wor(haveItem(items, 'Wave'),
-                        knowsGreenGateGlitch)),
+                    wor(knowsGreenGateGlitch, haveItem(items, 'Wave'))),
                wand(canAccessRedBrinstar(items),
                     canUsePowerBombs(items),
                     haveItem(items, 'SpeedBooster'),
@@ -259,23 +268,16 @@ def canAccessLowerNorfair(items):
     return wand(heatProof(items),
                 canAccessRedBrinstar(items),
                 canUsePowerBombs(items),
-                wor(wand(haveItem(items, 'Gravity'),
-                         haveItem(items, 'SpaceJump')),
-                    wand(haveItem(items, 'Gravity'),
-                         knowsGravityJump),
-                    wand(haveItem(items, 'HiJump'),
-                         energyReserveCountOk(items, 3),
-                         knowsLavaDive)))
+                wor(wand(haveItem(items, 'Gravity'), haveItem(items, 'SpaceJump')),
+                    wand(knowsGravityJump, haveItem(items, 'Gravity')),
+                    wand(knowsLavaDive, haveItem(items, 'HiJump'), energyReserveCountOk(items, 3))))
 
 def canPassWorstRoom(items):
     # https://www.youtube.com/watch?v=gfmEDDmSvn4
     return wand(canAccessLowerNorfair(items),
                 wor(canFly(items),
-                    wand(haveItem(items, 'Ice'),
-                         haveItem(items, 'Charge'),
-                         knowsWorstRoomIceCharge),
-                    wand(haveItem(items, 'HiJump'),
-                         knowsWorstRoomHiJump)))
+                    wand(knowsWorstRoomIceCharge, haveItem(items, 'Ice'), haveItem(items, 'Charge')),
+                    wand(knowsWorstRoomHiJump, haveItem(items, 'HiJump'))))
 
 def canAccessOuterMaridia(items):
     # EXPLAINED: access Red Tower in red brinstar,
@@ -296,12 +298,12 @@ def canAccessOuterMaridia(items):
                                  wand(knowsSuitlessOuterMaridia,
                                       haveItem(items, 'SpringBall'),
                                       knowsSpringBallJump))),
-                        wand(haveItem(items, 'HiJump'),
+                        wand(knowsSuitlessOuterMaridia,
+                             haveItem(items, 'HiJump'),
                              haveItem(items, 'Ice'),
                              wor(haveItem(items, 'Wave'),
                                  haveItem(items, 'Spazer'),
-                                 haveItem(items, 'Plasma')),
-                             knowsSuitlessOuterMaridia))))
+                                 haveItem(items, 'Plasma'))))))
 
 def canAccessInnerMaridia(items):
     # EXPLAINED: this is the easy regular way:
@@ -331,8 +333,7 @@ def canDefeatBotwoon(items):
                     canDoSuitlessMaridia(items)),
                 wor(wand(haveItem(items, 'SpeedBooster'),
                          haveItem(items, 'Gravity')),
-                    wand(haveItem(items, 'Ice'),
-                         knowsMochtroidClip)))
+                    wand(knowsMochtroidClip, haveItem(items, 'Ice'))))
 
 
 def canDefeatDraygon(items):

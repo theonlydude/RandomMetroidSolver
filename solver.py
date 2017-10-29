@@ -168,20 +168,28 @@ def canDestroyBombWalls(items):
                haveItem(items, 'ScrewAttack'))
 
 def canEnterAndLeaveGauntlet(items):
+    # EXPLAINED: to access Gauntlet Entrance from Landing site we can either:
+    #             -fly to it (infinite bomb jumps or space jump)
+    #             -shinespark to it
+    #             -wall jump with high jump boots
+    #            then inside it to break the bomb wals:
+    #             -use screw attack (easy way)
+    #             -use power bombs
+    #             -use bombs
+    #             -perform a simple short charge on the way in
+    #              and use power bombs on the way out
     return wand(wor(canFly(items),
-                    wand(haveItem(items, 'HiJump'),
-                         knowsHiJumpGauntletAccess),
-                    haveItem(items, 'SpeedBooster')),
-                wor(wand(canUseBombs(items), knowsGauntletWithBombs),
-                    wand(canUsePowerBombs(items),
-                         itemCountOk(items, 'PowerBomb', 2),
-                         knowsGauntletWithPowerBombs),
-                    haveItem(items, 'ScrewAttack'),
+                    haveItem(items, 'SpeedBooster'),
+                    wand(knowsHiJumpGauntletAccess, haveItem(items, 'HiJump'))),
+                wor(haveItem(items, 'ScrewAttack'),
+                    wand(knowsGauntletWithPowerBombs,
+                         canUsePowerBombs(items),
+                         itemCountOk(items, 'PowerBomb', 2)),
+                    wand(knowsGauntletWithBombs, canUseBombs(items)),
                     wand(haveItem(items, 'SpeedBooster'),
                          canUsePowerBombs(items),
                          energyReserveCountOk(items, 2),
-                         wand(knowsSimpleShortCharge,
-                              knowsGauntletEntrySpark))))
+                         wand(knowsSimpleShortCharge, knowsGauntletEntrySpark))))
 
 def canPassBombPassages(items):
     return wor(canUseBombs(items),
@@ -222,7 +230,6 @@ def canAccessWs(items):
     #             -do a short charge from the Keyhunter room (https://www.youtube.com/watch?v=kFAYji2gFok)
     #             -do a gravity jump from below the right platform
     #             -do a mock ball and a bounce ball (https://www.youtube.com/watch?v=WYxtRF--834)
-    #              FIXME: does it requires the highjump boots ?
     return wand(haveItem(items, 'Super'),
                 canUsePowerBombs(items),
                 wor(wor(haveItem(items, 'Grapple'),
@@ -231,7 +238,7 @@ def canAccessWs(items):
                     wor(wand(knowsDiagonalBombJump, canUseBombs(items)),
                         wand(knowsSimpleShortCharge, haveItem(items, 'SpeedBooster')),
                         wand(knowsGravityJump, haveItem(items, 'Gravity')),
-                        wand(knowsMockball, haveItem(items, 'Morph')))))
+                        wand(knowsMockballWs, haveItem(items, 'Morph'), haveItem(items, 'SpringBall')))))
 
 def canAccessHeatedNorfair(items):
     # EXPLAINED: from Red Tower, to go to Bubble Mountain we have to pass through

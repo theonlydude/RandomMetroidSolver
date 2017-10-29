@@ -10,7 +10,7 @@ mania = 100
 difficulty_target=easy
 
 # display the generated path (spoilers!)
-displayGeneratedPath = False
+displayGeneratedPath = True
 
 # choose how many items are required
 
@@ -47,7 +47,7 @@ knowsMockball = (True, easy) # early super and ice beam
 
 # common
 knowsCeilingDBoost = (True, easy) # for brinstar ceiling
-knowsAlcatrazEscape = (False, 0) # alcatraz without bomb
+knowsAlcatrazEscape = (True, medium) # alcatraz without bomb
 knowsLavaDive = (True, harder) # ridley without gravity
 knowsSimpleShortCharge = (True, easy) # Waterway ETank without gravity, and Wrecked Ship access
 knowsInfiniteBombJump = (True, medium) # to access certain locations without high jump or space jump
@@ -103,6 +103,9 @@ knowsExitPlasmaRoomHiJump = (True, medium)
 
 # sandpit
 knowsSuitlessSandpit = (False, 0) # access the item in the sandpit suitless
+
+# wrecked ship
+knowsMockballWs = (False, 0) # early wrecked ship access using a mock ball
 
 # boss difficulty tables :
 #

@@ -184,20 +184,33 @@ def canEnterAndLeaveGauntlet(items):
                               knowsGauntletEntrySpark))))
 
 def canPassBombPassages(items):
-    return wor(canUseBombs(items), canUsePowerBombs(items))
+    return wor(canUseBombs(items),
+               canUsePowerBombs(items))
 
 def canAccessRedBrinstar(items):
+    # EXPLAINED: we can go from Landing Site to Red Tower using two different paths:
+    #             -break the bomb wall at left of Parlor and Alcatraz,
+    #              open red door at Green Brinstar Main Shaft,
+    #              morph at the lower part of Big Pink then use a super on the green door
+    #             -open green door at the right of Landing Site, then open the yellow
+    #              door at Crateria Keyhunter room
     return wand(haveItem(items, 'Super'),
                 wor(wand(canDestroyBombWalls(items),
                          haveItem(items, 'Morph')),
                     canUsePowerBombs(items)))
 
 def canAccessKraid(items):
+    # EXPLAINED: from Red Tower we have to go to Warehouse Entrance, and there we have to
+    #            access the upper right platform with either:
+    #             -hijump boots (easy regular way)
+    #             -fly (space jump or infinite bomb jump)
+    #             -know how to wall jump on the platform without the hijump boots
+    #            then we have to break a bomb block at Warehouse Zeela room
     return wand(canAccessRedBrinstar(items),
-                canPassBombPassages(items),
-                wor(knowsEarlyKraid,
-                    haveItem(items, 'HiJump'),
-                    canFly(items)))
+                wor(haveItem(items, 'HiJump'),
+                    canFly(items),
+                    knowsEarlyKraid),
+                canPassBombPassages(items))
 
 def canAccessWs(items):
     return wand(canUsePowerBombs(items),
@@ -205,35 +218,46 @@ def canAccessWs(items):
                 wor(haveItem(items, 'Grapple'),
                     haveItem(items, 'SpaceJump'),
                     wor(knowsContinuousWallJump,
-                        wand(canUseBombs(items), knowsDiagonalBombJump),
-                        wand(haveItem(items, 'SpeedBooster'), knowsSimpleShortCharge))))
+                        wand(canUseBombs(items),
+                             knowsDiagonalBombJump),
+                        wand(haveItem(items, 'SpeedBooster'),
+                             knowsSimpleShortCharge))))
 
 def canAccessHeatedNorfair(items):
     # EXPLAINED: from Red Tower, to go to Bubble Mountain we have to pass through
     #            heated rooms, which requires a hell run if we don't have gravity.
     #            this test is then used to access Speed, Norfair Reserve Tank, Wave and Crocomire
-    #            as they are all hellruns from Bublle Mountain.
+    #            as they are all hellruns from Bubble Mountain.
     return wand(canAccessRedBrinstar(items),
                 canHellRun(items))
 
 def canAccessCrocomire(items):
-    return wor(wand(canAccessHeatedNorfair(items), wor(haveItem(items, 'Wave'), knowsGreenGateGlitch)),
-               wand(canAccessKraid(items), # FIXME : knowsEarlyKraid "trick" is now entangled with crocomire access
-                    canUsePowerBombs(items), 
+    # EXPLAINED: two options there, either:
+    #             -from Bubble Mountain, hellrun to Crocomire's room. at Upper Norfair 
+    #              Farming room there's a blue gate which requires a gate glitch if no wave
+    #             -the regular way, from Red Tower, power bomb in Ice Beam Gate room,
+    #              then speed booster in Crocomire Speedway (easy hell run if no varia
+    #              as we only have to go in straight line, so two ETanks are required)
+    return wor(wand(canAccessHeatedNorfair(items),
+                    wor(haveItem(items, 'Wave'),
+                        knowsGreenGateGlitch)),
+               wand(canAccessRedBrinstar(items),
+                    canUsePowerBombs(items),
                     haveItem(items, 'SpeedBooster'),
                     energyReserveCountOk(items, 2)))
 
 def canAccessLowerNorfair(items):
     # EXPLAINED: the randomizer never requires to pass it without the Varia suit.
-    #            from Red Brinstar to access Lava Dive room we open the door
-    #            with a power bomb then pass the Lava Dive room,. To pass Lava Dive room, either:
+    #            from Red Tower in Brinstar to access Lava Dive room we open the yellow door
+    #            in Kronic Boost room with a power bomb then pass the Lava Dive room. 
+    #            To pass Lava Dive room, either:
     #             -have gravity suit and space jump (easy way)
     #             -have gravity and perform a gravity jump
     #             -have hijump boots and knows the Lava Dive wall jumps, the wall jumps are
     #              a little easier with Ice and Plasma as we can freeze the Funes, we need
     #              at least three ETanks to do it without gravity
-    return wand(canAccessRedBrinstar(items),
-                heatProof(items),
+    return wand(heatProof(items),
+                canAccessRedBrinstar(items),
                 canUsePowerBombs(items),
                 wor(wand(haveItem(items, 'Gravity'),
                          haveItem(items, 'SpaceJump')),
@@ -244,6 +268,7 @@ def canAccessLowerNorfair(items):
                          knowsLavaDive)))
 
 def canPassWorstRoom(items):
+    # https://www.youtube.com/watch?v=gfmEDDmSvn4
     return wand(canAccessLowerNorfair(items),
                 wor(canFly(items),
                     wand(haveItem(items, 'Ice'),

@@ -551,14 +551,12 @@ def enoughMinors(items, minorLocations):
         else: 
             return canEnd
 
-
 def getLocation(loc_list, name):
     for loc in loc_list:
         if loc['Name'] == name:
             return loc
     return None
 
-    
 def haveBossesItems(visitedLocations):
     kraidLocation = getLocation(locations, "Varia Suit")
     phantoonLocation = getLocation(locations, "Right Super, Wrecked Ship")
@@ -623,7 +621,11 @@ def getDifficulty(locations):
 
         # compute the difficulty of all the locations
         for loc in majorLocations:
-            loc['difficulty'] = loc['Available'](collectedItems)
+            if loc.has_key('PostAvailable'):
+                loc['difficulty'] = wand(loc['Available'](collectedItems),
+                                         loc['PostAvailable'](collectedItems + [items[loc['item']]['name']]))
+            else:
+                loc['difficulty'] = loc['Available'](collectedItems)
         enough = enoughMinors(collectedItems, minorLocations)
         if not enough:
             for loc in minorLocations:
@@ -780,8 +782,10 @@ locations = [
     'Address': 0x78404,
     'Class': "Major",
     'Visibility': "Chozo",
-    # EXPLAINED: need to morph to enter Alcatraz. red door at Flyway
-    'Available': lambda items: wand(haveItem(items, 'Morph'), canOpenRedDoors(items))
+    # EXPLAINED: need to morph to enter Alcatraz. red door at Flyway.
+    #            we may not have bombs or power bomb to get out of Alcatraz.
+    'Available': lambda items: wand(haveItem(items, 'Morph'), canOpenRedDoors(items)),
+    'PostAvailable': lambda items: wor(knowsAlcatrazEscape, canPassBombPassages(items))
 },
 {
     'Area': "Crateria",
@@ -793,9 +797,9 @@ locations = [
     #       but not for difficulty estimation. We know that if no power bombs are
     #       found early, BT will give either Bomb, ScrewAttack or SpeedBooster,
     #       so we reflect that logic for the item immediately after Bomb
-    # FIXME: if we had to do alcatraz escape, do we have to do a short or a simple short charge
-    #        to break the bomb wall left of Parlor and Alcatraz with speed booster ?
-    'Available': lambda items: wor(wand(knowsAlcatrazEscape, wor(haveItem(items, 'SpeedBooster'), haveItem(items, 'ScrewAttack'))), canDestroyBombWalls(items))
+    'Available': lambda items: wor(haveItem(items, 'SpeedBooster'),
+                                   haveItem(items, 'ScrewAttack'),
+                                   canDestroyBombWalls(items))
 
 },
 {

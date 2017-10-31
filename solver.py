@@ -784,8 +784,10 @@ locations = [
     'Visibility': "Chozo",
     # EXPLAINED: need to morph to enter Alcatraz. red door at Flyway.
     #            we may not have bombs or power bomb to get out of Alcatraz.
-    'Available': lambda items: wand(haveItem(items, 'Morph'), canOpenRedDoors(items)),
-    'PostAvailable': lambda items: wor(knowsAlcatrazEscape, canPassBombPassages(items))
+    'Available': lambda items: wand(haveItem(items, 'Morph'),
+                                    canOpenRedDoors(items)),
+    'PostAvailable': lambda items: wor(knowsAlcatrazEscape,
+                                       canPassBombPassages(items))
 },
 {
     'Area': "Crateria",
@@ -811,7 +813,12 @@ locations = [
     # EXPLAINED: break the bomb wall at left of Parlor and Alcatraz,
     #            open red door at Green Brinstar Main Shaft,
     #            mock ball for early retreval or speed booster
-    'Available': lambda items: wand(wor(haveItem(items, 'SpeedBooster'), canDestroyBombWalls(items)), canOpenRedDoors(items), wor(wand(knowsMockball, haveItem(items, 'Morph')), haveItem(items, 'SpeedBooster')))
+    'Available': lambda items: wand(wor(haveItem(items, 'SpeedBooster'),
+                                        canDestroyBombWalls(items)),
+                                    canOpenRedDoors(items),
+                                    wor(wand(knowsMockball,
+                                             haveItem(items, 'Morph')),
+                                        haveItem(items, 'SpeedBooster')))
 },
 {
     'Area': "Brinstar",
@@ -821,7 +828,9 @@ locations = [
     'Visibility': "Chozo",
     # EXPLAINED: open red door at Green Brinstar Main Shaft (down right),
     #            break the bomb wall at left of Parlor and Alcatraz
-    'Available': lambda items: wand(canOpenRedDoors(items), wor(canPassBombPassages(items), canUsePowerBombs(items)))
+    'Available': lambda items: wand(canOpenRedDoors(items),
+                                    wor(canPassBombPassages(items),
+                                        canUsePowerBombs(items)))
 },
 {
     'Area': "Brinstar",
@@ -843,7 +852,10 @@ locations = [
     #  -have the high jump boots
     #  -freeze the Reo to jump on it
     #  -do a damage boost with one of the two Geemers
-    'Available': lambda items: wor(knowsCeilingDBoost, canFly(items), haveItem(items, 'HiJump'), haveItem(items, 'Ice'))
+    'Available': lambda items: wor(knowsCeilingDBoost,
+                                   canFly(items),
+                                   haveItem(items, 'HiJump'),
+                                   haveItem(items, 'Ice'))
 },
 {
     'Area': "Brinstar",
@@ -868,7 +880,11 @@ locations = [
     #            at waterway, either do:
     #  -with gravity do a speed charge
     #  -a simple short charge from the blocks above the water
-    'Available': lambda items: wand(canUsePowerBombs(items), canOpenRedDoors(items), haveItem(items, 'SpeedBooster'), wor(haveItem(items, 'Gravity'), knowsSimpleShortCharge))
+    'Available': lambda items: wand(canUsePowerBombs(items),
+                                    canOpenRedDoors(items),
+                                    haveItem(items, 'SpeedBooster'),
+                                    wor(haveItem(items, 'Gravity'),
+                                        knowsSimpleShortCharge))
 },
 {
     'Area': "Brinstar",
@@ -877,7 +893,11 @@ locations = [
     'Address': 0x78824,
     'Visibility': "Visible",
     # DONE: use knowsReverseGateGlitch
-    'Available': lambda items: wand(canUsePowerBombs(items), wor(haveItem(items, 'Wave'), wand(haveItem(items, 'Super'), haveItem(items, 'HiJump'), knowsReverseGateGlitch)))
+    'Available': lambda items: wand(canUsePowerBombs(items),
+                                    wor(haveItem(items, 'Wave'),
+                                        wand(haveItem(items, 'Super'),
+                                             haveItem(items, 'HiJump'),
+                                             knowsReverseGateGlitch)))
 },
 {
     'Area': "Brinstar",
@@ -885,14 +905,15 @@ locations = [
     'Class': "Major",
     'Address': 0x78876,
     'Visibility': "Chozo",
-    # original condition (easier to read, I have to put the lambda function on one line):
-    #                Available = fun items ->canAccessRedBrinstar items && 
-    #                                        canUsePowerBombs items &&
-    #                                        (haveItem items Grapple ||
-    #                                         haveItem items SpaceJump ||
-    #                                         (haveItem items Varia && energyReserveCount items >= 4) ||
-    #                                         (energyReserveCount items >= 6))
-    'Available': lambda items: wand(canAccessRedBrinstar(items), canUsePowerBombs(items), wor(haveItem(items, 'Grapple'), haveItem(items, 'SpaceJump'), wand(haveItem(items, 'Varia'), energyReserveCountOk(items, 4), knowsXrayDboost), wand(energyReserveCountOk(items, 6), knowsXrayDboost)))
+    'Available': lambda items: wand(canAccessRedBrinstar(items),
+                                    canUsePowerBombs(items),
+                                    wor(haveItem(items, 'Grapple'),
+                                        haveItem(items, 'SpaceJump'),
+                                        wand(haveItem(items, 'Varia'),
+                                             energyReserveCountOk(items, 4),
+                                             knowsXrayDboost),
+                                        wand(energyReserveCountOk(items, 6),
+                                             knowsXrayDboost)))
 },
 {
     'Area': "Brinstar",
@@ -910,7 +931,8 @@ locations = [
     'Address': 0x7899C,
     'Visibility': "Hidden",
     # DONE: no difficulty
-    'Available': lambda items: wand(canAccessKraid(items), enoughStuffsKraid(items))
+    'Available': lambda items: wand(canAccessKraid(items),
+                                    enoughStuffsKraid(items))
 },
 {
     'Area': "Brinstar",
@@ -919,7 +941,8 @@ locations = [
     'Address': 0x78ACA,
     'Visibility': "Chozo",
     # DONE: no difficulty
-    'Available': lambda items: wand(canAccessKraid(items), enoughStuffsKraid(items))
+    'Available': lambda items: wand(canAccessKraid(items),
+                                    enoughStuffsKraid(items))
 },
 {
     'Area': "Norfair",
@@ -928,7 +951,12 @@ locations = [
     'Address': 0x78B24,
     'Visibility': "Chozo",
     # DONE: harder without varia
-    'Available': lambda items: wand(canAccessKraid(items), wor(heatProof(items), energyReserveCountOkList(items, hellRuns['Ice'])), wor(wand(haveItem(items, 'Morph'), knowsMockball), haveItem(items, 'SpeedBooster'))) # FIXME : knowsEarlyKraid has nothing to do with this and is implied by canAccessKraid
+    'Available': lambda items: wand(canAccessKraid(items),
+                                    wor(heatProof(items),
+                                        energyReserveCountOkList(items, hellRuns['Ice'])),
+                                    wor(wand(haveItem(items, 'Morph'),
+                                             knowsMockball),
+                                        haveItem(items, 'SpeedBooster'))) # FIXME : knowsEarlyKraid has nothing to do with this and is implied by canAccessKraid
 },
 {
     'Area': "Norfair",
@@ -954,7 +982,12 @@ locations = [
     'Class': "Major",
     'Address': 0x78C36,
     'Visibility': "Chozo",
-    'Available': lambda items: wand(canAccessCrocomire(items), wor(canFly(items), wand(haveItem(items, 'Ice'), knowsClimbToGrappleWithIce), haveItem(items, 'SpeedBooster'), knowsGreenGateGlitch))
+    'Available': lambda items: wand(canAccessCrocomire(items),
+                                    wor(canFly(items),
+                                        wand(haveItem(items, 'Ice'),
+                                             knowsClimbToGrappleWithIce),
+                                        haveItem(items, 'SpeedBooster'),
+                                        knowsGreenGateGlitch))
 },
 {
     'Area': "Norfair",
@@ -963,7 +996,10 @@ locations = [
     'Address': 0x78C3E,
     'Visibility': "Chozo",
     # TODO: also Ice to freeze a Waver
-    'Available': lambda items: wand(canAccessHeatedNorfair(items), wor(canFly(items), haveItem(items, 'Grapple'), haveItem(items, 'HiJump', difficulty=hard)))
+    'Available': lambda items: wand(canAccessHeatedNorfair(items),
+                                    wor(canFly(items),
+                                        haveItem(items, 'Grapple'),
+                                        haveItem(items, 'HiJump', difficulty=hard)))
 },
 {
     'Area': "Norfair",
@@ -982,7 +1018,10 @@ locations = [
     'Visibility': "Chozo",
     # DONE: this one is not easy without grapple beam nor space jump, with hijump medium wall jump is required
     # FLO : no need of high jump for this, just wall jumping
-    'Available': lambda items: wand(canAccessHeatedNorfair(items), wor(haveItem(items, 'Grapple'), haveItem(items, 'SpaceJump'), (True, medium)))
+    'Available': lambda items: wand(canAccessHeatedNorfair(items),
+                                    wor(haveItem(items, 'Grapple'),
+                                        haveItem(items, 'SpaceJump'),
+                                        (True, medium)))
 },
 {
     'Area': "LowerNorfair",
@@ -991,7 +1030,8 @@ locations = [
     'Address': 0x79108,
     'Visibility': "Hidden",
     # DONE: already set in function
-    'Available': lambda items: wand(canPassWorstRoom(items), enoughStuffsRidley(items))
+    'Available': lambda items: wand(canPassWorstRoom(items),
+                                    enoughStuffsRidley(items))
 },
 {
     'Area': "LowerNorfair",
@@ -1000,7 +1040,9 @@ locations = [
     'Address': 0x79110,
     'Visibility': "Chozo",
     # DONE: easy with green gate glitch
-    'Available': lambda items: wand(canAccessLowerNorfair(items), wor(haveItem(items, 'SpaceJump'), knowsGreenGateGlitch))
+    'Available': lambda items: wand(canAccessLowerNorfair(items),
+                                    wor(haveItem(items, 'SpaceJump'),
+                                        knowsGreenGateGlitch))
 },
 {
     'Area': "LowerNorfair",
@@ -1017,7 +1059,11 @@ locations = [
     'Address': 0x7C2E9,
     'Visibility': "Chozo",
     # DONE: easy
-    'Available': lambda items: wand(canAccessWs(items), enoughStuffsPhantoon(items), haveItem(items, 'SpeedBooster'), wor(haveItem(items, 'Varia'), energyReserveCountOk(items, 1)))
+    'Available': lambda items: wand(canAccessWs(items),
+                                    enoughStuffsPhantoon(items),
+                                    haveItem(items, 'SpeedBooster'),
+                                    wor(haveItem(items, 'Varia'),
+                                        energyReserveCountOk(items, 1)))
 },
 {
     'Area': "WreckedShip",
@@ -1025,15 +1071,18 @@ locations = [
     'Class': "Major",
     'Address': 0x7C337,
     'Visibility': "Visible",
-    'Available': lambda items: wand(canAccessWs(items), enoughStuffsPhantoon(items), wor(wor(haveItem(items, 'Bomb'), haveItem(items, 'PowerBomb')), knowsSpongeBathBombJump, wand(haveItem(items, 'HiJump'), knowsSpongeBathHiJump), wor(haveItem(items, 'SpaceJump', difficulty=easy), wand(haveItem(items, 'SpeedBooster'), knowsSpongeBathSpeed), wand(haveItem(items, 'SpringBall'), knowsSpringBallJump))))
-# test in the randomizer (easier to read)
-#                Available = fun items -> canAccessWs items &&
-#                                            (haveItem items Bomb ||
-#                                             haveItem items PowerBomb ||
-#                                             haveItem items HiJump ||
-#                                             haveItem items SpaceJump ||
-#                                             haveItem items SpeedBooster ||
-#                                             haveItem items SpringBall);
+    'Available': lambda items: wand(canAccessWs(items),
+                                    enoughStuffsPhantoon(items),
+                                    wor(wor(haveItem(items, 'Bomb'),
+                                            haveItem(items, 'PowerBomb')),
+                                        knowsSpongeBathBombJump,
+                                        wand(haveItem(items, 'HiJump'),
+                                             knowsSpongeBathHiJump),
+                                        wor(haveItem(items, 'SpaceJump', difficulty=easy),
+                                            wand(haveItem(items, 'SpeedBooster'),
+                                                 knowsSpongeBathSpeed),
+                                            wand(haveItem(items, 'SpringBall'),
+                                                 knowsSpringBallJump))))
 },
 {
     'Area': "WreckedShip",
@@ -1042,7 +1091,8 @@ locations = [
     'Address': 0x7C365,
     'Visibility': "Visible",
     # DONE: easy once WS is accessible
-    'Available': lambda items: wand(canAccessWs(items), enoughStuffsPhantoon(items))
+    'Available': lambda items: wand(canAccessWs(items),
+                                    enoughStuffsPhantoon(items))
 },
 {
     'Area': "WreckedShip",
@@ -1051,7 +1101,10 @@ locations = [
     'Address': 0x7C36D,
     'Visibility': "Chozo",
     # DONE: easy
-    'Available': lambda items: wand(canAccessWs(items), enoughStuffsPhantoon(items), wor(haveItem(items, 'Varia'), energyReserveCountOk(items, 1)))
+    'Available': lambda items: wand(canAccessWs(items),
+                                    enoughStuffsPhantoon(items),
+                                    wor(haveItem(items, 'Varia'),
+                                        energyReserveCountOk(items, 1)))
 },
 {
     'Area': "Maridia",
@@ -1066,7 +1119,10 @@ locations = [
     #  FIXME: is SpeedBooster possible without gravity in this room ? is it a simple short or short charge ?
     #  -can fly (space jump or infinite bomb jump)
     #  FIXME: is it possible to infinite bomb jump from the mama turtle when it's up ?
-    'Available': lambda items: wand(canAccessOuterMaridia(items), wor(canFly(items), haveItem(items, 'SpeedBooster'), haveItem(items, 'Grapple')))
+    'Available': lambda items: wand(canAccessOuterMaridia(items),
+                                    wor(canFly(items),
+                                        haveItem(items, 'SpeedBooster'),
+                                        haveItem(items, 'Grapple')))
 },
 {
     'Area': "Maridia",
@@ -1087,7 +1143,20 @@ locations = [
     #  -have high jump boots
     #  -can fly (space jump or infinite bomb jump)
     #  -use short charge with speedbooster
-    'Available': lambda items: wand(canDefeatDraygon(items), enoughStuffsDraygon(items), wor(wand(haveItem(items, 'SpeedBooster'), knowsShortCharge, knowsKillPlasmaPiratesWithSpark), wand(haveItem(items, 'Charge'), knowsKillPlasmaPiratesWithCharge), haveItem(items, 'ScrewAttack', difficulty=easy), haveItem(items, 'Plasma', difficulty=easy)), wor(canFly(items), wand(haveItem(items, 'HiJump'), knowsExitPlasmaRoomHiJump), wand(haveItem(items, 'SpeedBooster'), knowsShortCharge)))
+    'Available': lambda items: wand(canDefeatDraygon(items),
+                                    enoughStuffsDraygon(items),
+                                    wor(wand(haveItem(items, 'SpeedBooster'),
+                                             knowsShortCharge,
+                                             knowsKillPlasmaPiratesWithSpark),
+                                        wand(haveItem(items, 'Charge'),
+                                             knowsKillPlasmaPiratesWithCharge),
+                                        haveItem(items, 'ScrewAttack', difficulty=easy),
+                                        haveItem(items, 'Plasma', difficulty=easy)),
+                                    wor(canFly(items),
+                                        wand(haveItem(items, 'HiJump'),
+                                             knowsExitPlasmaRoomHiJump),
+                                        wand(haveItem(items, 'SpeedBooster'),
+                                             knowsShortCharge)))
 },
 {
     'Area': "Maridia",
@@ -1096,7 +1165,10 @@ locations = [
     'Address': 0x7C5E3,
     'Visibility': "Chozo",
     # DONE: this item can be taken without gravity, but it's super hard because of the quick sands...
-    'Available': lambda items: wand(canAccessOuterMaridia(items), wor(haveItem(items, 'Gravity'), wand(canDoSuitlessMaridia(items), knowsSuitlessSandpit)))
+    'Available': lambda items: wand(canAccessOuterMaridia(items),
+                                    wor(haveItem(items, 'Gravity'),
+                                        wand(canDoSuitlessMaridia(items),
+                                             knowsSuitlessSandpit)))
 },
 {
     'Area': "Maridia",
@@ -1110,7 +1182,12 @@ locations = [
     #  -use the grapple to destroy the block and then:
     #    -use high boots jump
     #    -fly (with space jump or diagonal bomb jump
-    'Available': lambda items: wand(canAccessInnerMaridia(items), wor(wand(haveItem(items, 'Ice'), knowsPuyoClip), wand(haveItem(items, 'Grapple'), wor(canFlyDiagonally(items), haveItem(items, 'HiJump')))))
+    'Available': lambda items: wand(canAccessInnerMaridia(items),
+                                    wor(wand(haveItem(items, 'Ice'),
+                                             knowsPuyoClip),
+                                        wand(haveItem(items, 'Grapple'),
+                                             wor(canFlyDiagonally(items),
+                                                 haveItem(items, 'HiJump')))))
 },
 {
     'Area': "Maridia",
@@ -1129,7 +1206,8 @@ locations = [
     'Visibility': "Chozo",
     # DONE: difficulty already handled in the function,
     # we need to have access to the boss and enough stuff to kill him
-    'Available': lambda items: wand(canDefeatDraygon(items), enoughStuffsDraygon(items))
+    'Available': lambda items: wand(canDefeatDraygon(items),
+                                    enoughStuffsDraygon(items))
 },
 {
     'Area': "Crateria",
@@ -1137,7 +1215,9 @@ locations = [
     'Class': "Minor",
     'Address': 0x781CC,
     'Visibility': "Visible",
-    'Available': lambda items: wand(canUsePowerBombs(items), wor(haveItem(items, 'SpeedBooster'), canFly(items)))
+    'Available': lambda items: wand(canUsePowerBombs(items),
+                                    wor(haveItem(items, 'SpeedBooster'),
+                                        canFly(items)))
 },
 {
     'Area': "Crateria",
@@ -1185,7 +1265,8 @@ locations = [
     'Class': "Minor",
     'Address': 0x78464,
     'Visibility': "Visible",
-    'Available': lambda items: wand(canEnterAndLeaveGauntlet(items), canPassBombPassages(items))
+    'Available': lambda items: wand(canEnterAndLeaveGauntlet(items),
+                                    canPassBombPassages(items))
 },
 {
     'Area': "Crateria",
@@ -1193,7 +1274,8 @@ locations = [
     'Class': "Minor",
     'Address': 0x7846A,
     'Visibility': "Visible",
-    'Available': lambda items: wand(canEnterAndLeaveGauntlet(items), canPassBombPassages(items))
+    'Available': lambda items: wand(canEnterAndLeaveGauntlet(items),
+                                    canPassBombPassages(items))
 },
 {
     'Area': "Crateria",
@@ -1201,7 +1283,13 @@ locations = [
     'Class': "Minor",
     'Address': 0x78478,
     'Visibility': "Visible",
-    'Available': lambda items: wand(canUsePowerBombs(items), haveItem(items, 'SpeedBooster'), wor(wand(haveItem(items, 'Ice'), (True, easy)), wand(haveItem(items, 'ETank'), haveItem(items, 'Varia'), haveItem(items, 'Gravity'), difficulty=hardcore))) # hardcore dboost...
+    'Available': lambda items: wand(canUsePowerBombs(items),
+                                    haveItem(items, 'SpeedBooster'),
+                                    wor(wand(haveItem(items, 'Ice'),
+                                             (True, easy)),
+                                        wand(haveItem(items, 'ETank'),
+                                             haveItem(items, 'Varia'),
+                                             haveItem(items, 'Gravity'), difficulty=hardcore))) # hardcore dboost...
 },
 {
     'Area': "Crateria",
@@ -1225,7 +1313,8 @@ locations = [
     'Class': "Minor",
     'Address': 0x784E4,
     'Visibility': "Chozo",
-    'Available': lambda items: wand(canPassBombPassages(items), haveItem(items, 'Super'))
+    'Available': lambda items: wand(canPassBombPassages(items),
+                                    haveItem(items, 'Super'))
 },
 {
     'Area': "Brinstar",
@@ -1233,7 +1322,8 @@ locations = [
     'Class': "Minor",
     'Address': 0x78518,
     'Visibility': "Visible",
-    'Available': lambda items: wand(canPassBombPassages(items), canOpenRedDoors(items))
+    'Available': lambda items: wand(canPassBombPassages(items),
+                                    canOpenRedDoors(items))
 },
 {
     'Area': "Brinstar",
@@ -1241,7 +1331,11 @@ locations = [
     'Class': "Minor",
     'Address': 0x7851E,
     'Visibility': "Visible",
-    'Available': lambda items: wand(wor(haveItem(items, 'SpeedBooster'), canDestroyBombWalls(items)), canOpenRedDoors(items), wor(haveItem(items, 'Morph'), haveItem(items, 'SpeedBooster')))
+    'Available': lambda items: wand(wor(haveItem(items, 'SpeedBooster'),
+                                        canDestroyBombWalls(items)),
+                                    canOpenRedDoors(items),
+                                    wor(haveItem(items, 'Morph'),
+                                        haveItem(items, 'SpeedBooster')))
 },
 {
     'Area': "Brinstar",
@@ -1249,7 +1343,8 @@ locations = [
     'Class': "Minor",
     'Address': 0x78532,
     'Visibility': "Hidden",
-    'Available': lambda items: wand(canPassBombPassages(items), canOpenRedDoors(items))
+    'Available': lambda items: wand(canPassBombPassages(items),
+                                    canOpenRedDoors(items))
 },
 {
     'Area': "Brinstar",
@@ -1257,7 +1352,9 @@ locations = [
     'Class': "Minor",
     'Address': 0x78538,
     'Visibility': "Visible",
-    'Available': lambda items: wand(canDestroyBombWalls(items), canOpenRedDoors(items), haveItem(items, 'Morph'))
+    'Available': lambda items: wand(canDestroyBombWalls(items),
+                                    canOpenRedDoors(items),
+                                    haveItem(items, 'Morph'))
 },
 {
     'Area': "Brinstar",
@@ -1265,7 +1362,9 @@ locations = [
     'Class': "Minor",
     'Address': 0x78608,
     'Visibility': "Visible",
-    'Available': lambda items: wor(wand(canDestroyBombWalls(items), canOpenRedDoors(items)), canUsePowerBombs(items))
+    'Available': lambda items: wor(wand(canDestroyBombWalls(items),
+                                        canOpenRedDoors(items)),
+                                   canUsePowerBombs(items))
 },
 {
     'Area': "Brinstar",
@@ -1273,7 +1372,9 @@ locations = [
     'Class': "Minor",
     'Address': 0x7860E,
     'Visibility': "Visible",
-    'Available': lambda items: wor(wand(canDestroyBombWalls(items), canOpenRedDoors(items)), canUsePowerBombs(items))
+    'Available': lambda items: wor(wand(canDestroyBombWalls(items),
+                                        canOpenRedDoors(items)),
+                                   canUsePowerBombs(items))
 },
 {
     'Area': "Brinstar",
@@ -1281,7 +1382,8 @@ locations = [
     'Class': "Minor",
     'Address': 0x7865C,
     'Visibility': "Visible",
-    'Available': lambda items: wand(canUsePowerBombs(items), haveItem(items, 'Super'))
+    'Available': lambda items: wand(canUsePowerBombs(items),
+                                    haveItem(items, 'Super'))
 },
 {
     'Area': "Brinstar",
@@ -1289,7 +1391,9 @@ locations = [
     'Class': "Minor",
     'Address': 0x78676,
     'Visibility': "Visible",
-    'Available': lambda items: wor(wand(canPassBombPassages(items), canOpenGreenDoors(items)), canUsePowerBombs(items))
+    'Available': lambda items: wor(wand(canPassBombPassages(items),
+                                        canOpenGreenDoors(items)),
+                                   canUsePowerBombs(items))
 },
 {
     'Area': "Brinstar",
@@ -1313,7 +1417,8 @@ locations = [
     'Class': "Minor",
     'Address': 0x787D0,
     'Visibility': "Visible",
-    'Available': lambda items: wand(canUsePowerBombs(items), canOpenGreenDoors(items))
+    'Available': lambda items: wand(canUsePowerBombs(items),
+                                    canOpenGreenDoors(items))
 },
 {
     'Area': "Brinstar",
@@ -1345,7 +1450,8 @@ locations = [
     'Class': "Minor",
     'Address': 0x788CA,
     'Visibility': "Visible",
-    'Available': lambda items: wand(canAccessRedBrinstar(items), canUsePowerBombs(items))
+    'Available': lambda items: wand(canAccessRedBrinstar(items),
+                                    canUsePowerBombs(items))
 },
 {
     'Area': "Brinstar",
@@ -1353,7 +1459,8 @@ locations = [
     'Class': "Minor",
     'Address': 0x7890E,
     'Visibility': "Chozo",
-    'Available': lambda items: wand(canAccessRedBrinstar(items), canUsePowerBombs(items))
+    'Available': lambda items: wand(canAccessRedBrinstar(items),
+                                    canUsePowerBombs(items))
 },
 {
     'Area': "Brinstar",
@@ -1361,7 +1468,8 @@ locations = [
     'Class': "Minor",
     'Address': 0x78914,
     'Visibility': "Visible",
-    'Available': lambda items: wand(canAccessRedBrinstar(items), canUsePowerBombs(items))
+    'Available': lambda items: wand(canAccessRedBrinstar(items),
+                                    canUsePowerBombs(items))
 },
 {
     'Area': "Brinstar",
@@ -1369,7 +1477,8 @@ locations = [
     'Class': "Minor",
     'Address': 0x789EC,
     'Visibility': "Hidden",
-    'Available': lambda items: wand(canAccessKraid(items), canUsePowerBombs(items))
+    'Available': lambda items: wand(canAccessKraid(items),
+                                    canUsePowerBombs(items))
 },
 {
     'Area': "Norfair",
@@ -1385,7 +1494,9 @@ locations = [
     'Class': "Minor",
     'Address': 0x78B46,
     'Visibility': "Hidden",
-    'Available': lambda items: wand(canAccessKraid(items), canUsePowerBombs(items), canHellRun(items))
+    'Available': lambda items: wand(canAccessKraid(items),
+                                    canUsePowerBombs(items),
+                                    canHellRun(items))
 },
 {
     'Area': "Norfair",
@@ -1393,7 +1504,10 @@ locations = [
     'Class': "Minor",
     'Address': 0x78BC0,
     'Visibility': "Visible",
-    'Available': lambda items: wand(canAccessCrocomire(items), wor(canFly(items), haveItem(items, 'Grapple'), wand(haveItem(items, 'HiJump'), haveItem(items, 'SpeedBooster'))))
+    'Available': lambda items: wand(canAccessCrocomire(items),
+                                    wor(canFly(items), haveItem(items, 'Grapple'),
+                                        wand(haveItem(items, 'HiJump'),
+                                             haveItem(items, 'SpeedBooster'))))
 },
 {
     'Area': "Norfair",
@@ -1433,7 +1547,9 @@ locations = [
     'Class': "Minor",
     'Address': 0x78C2A,
     'Visibility': "Visible",
-    'Available': lambda items: wand(canAccessCrocomire(items), wor(canFly(items), haveItem(items, 'Grapple'), haveItem(items, 'SpeedBooster')))
+    'Available': lambda items: wand(canAccessCrocomire(items),
+                                    wor(canFly(items), haveItem(items, 'Grapple'),
+                                        haveItem(items, 'SpeedBooster')))
 },
 {
     'Area': "Norfair",
@@ -1441,7 +1557,9 @@ locations = [
     'Class': "Minor",
     'Address': 0x78C44,
     'Visibility': "Hidden",
-    'Available': lambda items: wand(canAccessHeatedNorfair(items), wor(canFly(items), haveItem(items, 'Grapple'), haveItem(items, 'HiJump')))
+    'Available': lambda items: wand(canAccessHeatedNorfair(items),
+                                    wor(canFly(items), haveItem(items, 'Grapple'),
+                                        haveItem(items, 'HiJump')))
 },
 {
     'Area': "Norfair",
@@ -1449,7 +1567,9 @@ locations = [
     'Class': "Minor",
     'Address': 0x78C52,
     'Visibility': "Visible",
-    'Available': lambda items: wand(canAccessHeatedNorfair(items), wor(canFly(items), haveItem(items, 'Grapple'), haveItem(items, 'HiJump')))
+    'Available': lambda items: wand(canAccessHeatedNorfair(items),
+                                    wor(canFly(items), haveItem(items, 'Grapple'),
+                                        haveItem(items, 'HiJump')))
 },
 {
     'Area': "Norfair",
@@ -1481,7 +1601,8 @@ locations = [
     'Class': "Minor",
     'Address': 0x78E6E,
     'Visibility': "Visible",
-    'Available': lambda items: wand(canAccessLowerNorfair(items), haveItem(items, 'SpaceJump'))
+    'Available': lambda items: wand(canAccessLowerNorfair(items),
+                                    haveItem(items, 'SpaceJump'))
 },
 {
     'Area': "LowerNorfair",
@@ -1545,7 +1666,9 @@ locations = [
     'Class': "Minor",
     'Address': 0x7C2EF,
     'Visibility': "Visible",
-    'Available': lambda items: wand(canAccessWs(items), wor(haveItem(items, 'Varia'), energyReserveCountOk(items, 1)))
+    'Available': lambda items: wand(canAccessWs(items),
+                                    wor(haveItem(items, 'Varia'),
+                                        energyReserveCountOk(items, 1)))
 },
 {
     'Area': "WreckedShip",
@@ -1569,7 +1692,10 @@ locations = [
     'Class': "Minor",
     'Address': 0x7C437,
     'Visibility': "Visible",
-    'Available': lambda items: wand(canAccessRedBrinstar(items), canUsePowerBombs(items), haveItem(items, 'Gravity'), haveItem(items, 'SpeedBooster'))
+    'Available': lambda items: wand(canAccessRedBrinstar(items),
+                                    canUsePowerBombs(items),
+                                    haveItem(items, 'Gravity'),
+                                    haveItem(items, 'SpeedBooster'))
 },
 {
     'Area': "Maridia",
@@ -1633,7 +1759,8 @@ locations = [
     'Class': "Minor",
     'Address': 0x7C5F1,
     'Visibility': "Visible",
-    'Available': lambda items: wand(canAccessOuterMaridia(items), haveItem(items, 'Gravity'))
+    'Available': lambda items: wand(canAccessOuterMaridia(items),
+                                    haveItem(items, 'Gravity'))
 },
 {
     'Area': "Maridia",
@@ -1641,7 +1768,8 @@ locations = [
     'Address': 0x7C603,
     'Class': "Minor",
     'Visibility': "Visible",
-    'Available': lambda items: wand(canAccessOuterMaridia(items), haveItem(items, 'Gravity'))
+    'Available': lambda items: wand(canAccessOuterMaridia(items),
+                                    haveItem(items, 'Gravity'))
 },
 {
     'Area': "Maridia",
@@ -1649,7 +1777,8 @@ locations = [
     'Class': "Minor",
     'Address': 0x7C609,
     'Visibility': "Visible",
-    'Available': lambda items: wand(canAccessOuterMaridia(items), haveItem(items, 'Gravity'))
+    'Available': lambda items: wand(canAccessOuterMaridia(items),
+                                    haveItem(items, 'Gravity'))
 },
 {
     'Area': "Maridia",

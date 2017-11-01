@@ -2,7 +2,7 @@
 
 # https://itemrando.supermetroid.run/randomize
 
-import sys, struct, math
+import sys, struct, math, os, json
 
 # the difficulties for each technics
 from parameters import *
@@ -786,8 +786,7 @@ locations = [
     #            we may not have bombs or power bomb to get out of Alcatraz.
     'Available': lambda items: wand(haveItem(items, 'Morph'),
                                     canOpenRedDoors(items)),
-    'PostAvailable': lambda items: wor(knowsAlcatrazEscape,
-                                       canPassBombPassages(items))
+    'PostAvailable': lambda items: wor(knowsAlcatrazEscape, canPassBombPassages(items))
 },
 {
     'Area': "Crateria",
@@ -1790,37 +1789,65 @@ locations = [
 }
 ]
 
-if len(sys.argv) != 2:
-    print("missing param: rom file")
-    sys.exit(0)
+def loadKnowsVars(paramName):
+    # the json file is a dict with the knowsXXX variables
+    with open(paramName) as jsonFile:
+        params = json.load(jsonFile)
 
-romName = sys.argv[1]
-print("romName=" + romName)
+        # load the params into the global vars
+        for param in params:
+            globals()[param] = params[param]
 
-romFile = open(romName, "r")
+def solveRom(romName, paramName):
+    print("romName=" + romName)
 
-for location in locations:
-    location["item"] = getItem(romFile, location["Address"], location["Visibility"])
-    #print('{:>50}: {:>16}'.format(location["Name"], items[location["item"]]['name']))
+    if paramName is not None:
+        loadKnowsVars(paramName)
 
-romFile.close()
+    with open(romName, "r") as romFile:
+        for location in locations:
+            location["item"] = getItem(romFile, location["Address"], location["Visibility"])
+            #print('{:>50}: {:>16}'.format(location["Name"], items[location["item"]]['name']))
 
-difficulty = getDifficulty(locations)
+    difficulty = getDifficulty(locations)
 
-if difficulty[0] >= 0:
-    if difficulty[0] >= easy and difficulty[0] < medium:
-        difficultyText = 'easy'
-    elif difficulty[0] >= medium and difficulty[0] < hard:
-        difficultyText = 'medium'
-    elif difficulty[0] >= hard and difficulty[0] < harder:
-        difficultyText = 'hard'
-    elif difficulty[0] >= harder and difficulty[0] < hardcore:
-        difficultyText = 'very hard'
-    elif difficulty[0] >= hardcore and difficulty[0] < mania:
-        difficultyText = 'hardcore'
+    if difficulty[0] >= 0:
+        if difficulty[0] >= easy and difficulty[0] < medium:
+            difficultyText = 'easy'
+        elif difficulty[0] >= medium and difficulty[0] < hard:
+            difficultyText = 'medium'
+        elif difficulty[0] >= hard and difficulty[0] < harder:
+            difficultyText = 'hard'
+        elif difficulty[0] >= harder and difficulty[0] < hardcore:
+            difficultyText = 'very hard'
+        elif difficulty[0] >= hardcore and difficulty[0] < mania:
+            difficultyText = 'hardcore'
+        else:
+            difficultyText = 'mania'
+
+        print("Estimated difficulty for items pickup {}: {}".format(itemsPickup, difficultyText))
     else:
-        difficultyText = 'mania'
+        print("Aborted run, can't finish the game with the given prerequisites")
 
-    print("Estimated difficulty for items pickup {}: {}".format(itemsPickup, difficultyText))
-else:
-    print("Aborted run, can't finish the game with the given prerequisites")
+if __name__ == "__main__":
+    if len(sys.argv) == 2:
+        romName = sys.argv[1]
+        paramName = None
+    elif len(sys.argv) == 3:
+        romName = None
+        paramName = None
+        for arg in sys.argv[1:]:
+            ext = os.path.splitext(arg)
+            if ext[1] == '.sfc':
+                romName = arg
+            elif ext[1] == '.json':
+                paramName = arg
+            else:
+                print("wrong file type given as parameter: {}".format(ext))
+                sys.exit(-1)
+    else:
+        print("missing param: rom file")
+        sys.exit(0)
+
+    solveRom(romName, paramName)
+

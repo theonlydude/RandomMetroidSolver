@@ -545,7 +545,7 @@ def enoughMinors(items, minorLocations):
         # need them all
         return len(minorLocations) == 0
     else:
-        canEnd = canEndGame(items)[0]
+        canEnd = enoughStuffTourian(items)[0]
         if itemsPickup == "normal":
             return canEnd and haveItemCount(items, 'PowerBomb', 4)
         else: 
@@ -556,36 +556,39 @@ def getLocation(loc_list, name):
         if loc['Name'] == name:
             return loc
     return None
-
-def haveBossesItems(visitedLocations):
-    kraidLocation = getLocation(locations, "Varia Suit")
-    phantoonLocation = getLocation(locations, "Right Super, Wrecked Ship")
-    draygonLocation = getLocation(locations, "Space Jump")
-    ridleyLocation = getLocation(locations, "Energy Tank, Ridley")
-
-    return kraidLocation in visitedLocations and phantoonLocation in visitedLocations and draygonLocation in visitedLocations and ridleyLocation in visitedLocations
     
 def enoughMajors(items, majorLocations, visitedLocations):
     # the end condition
     if itemsPickup == '100%' or itemsPickup == 'normal':
         return len(majorLocations) == 0
     elif itemsPickup == 'minimal':
-        return haveItemCount(items, 'Morph', 1) and (haveItemCount(items, 'Bomb', 1) or haveItemCount(items, 'PowerBomb', 1)) and haveItemCount(items, 'ETank', 3) and haveItemCount(items, 'Varia', 1) and (haveItemCount(items, 'SpeedBooster', 1) or haveItemCount(items, 'Ice', 1)) and haveItemCount(items, 'Gravity', 1) and haveBossesItems(visitedLocations)
+        return haveItemCount(items, 'Morph', 1) and (haveItemCount(items, 'Bomb', 1) or haveItemCount(items, 'PowerBomb', 1)) and haveItemCount(items, 'ETank', 3) and haveItemCount(items, 'Varia', 1) and (haveItemCount(items, 'SpeedBooster', 1) or haveItemCount(items, 'Ice', 1)) and haveItemCount(items, 'Gravity', 1)
 
 def canPassMetroids(items):
     return wand(canOpenRedDoors(items), wor(haveItem(items, 'Ice'), (haveItemCount(items, 'PowerBomb', 3), 0))) # to avoid leaving tourian to refill power bombs
 
 def canPassZebetites(items):
-    return wor(wand(haveItem(items, 'Ice'), knowsIceZebSkip), wand(haveItem(items, 'SpeedBooster'), knowsSpeedZebSkip), (canInflictEnoughDamages(items, 1100*3, charge=False, givesDrops=False) >= 1, 0)) # account for all the zebs to avoid constant refills
+    return wor(wand(haveItem(items, 'Ice'), knowsIceZebSkip), wand(haveItem(items, 'SpeedBooster'), knowsSpeedZebSkip), (canInflictEnoughDamages(items, 1100*4, charge=False, givesDrops=False) >= 1, 0)) # account for all the zebs to avoid constant refills
+
+def allBossesDead():
+    return wand(bossDead('Kraid'), bossDead('Phantoon'), bossDead('Draygon'), bossDead('Ridley'))
+
+def enoughStuffTourian(items):
+    return wand(canPassMetroids(items), canPassZebetites(items), enoughStuffsMotherbrain(items))
 
 def canEndGame(items):
     # to finish the game you must :
     # - beat golden 4 : we force pickup of the 4 items
-    #   behind the bosses in enoughMajors to ensure that
+    #   behind the bosses to ensure that
     # - defeat metroids
     # - destroy/skip the zebetites
     # - beat Mother Brain
-    return wand(canPassMetroids(items), canPassZebetites(items), enoughStuffsMotherbrain(items))
+    return wand(allBossesDead(), enoughStuffTourian(items))
+
+def collectItem(collectedItems, loc):
+    collectedItems.append(items[loc["item"]]["name"])
+    if loc.has_key('Pickup'):
+        loc['Pickup']()
 
 def getDifficulty(locations):
     # loop on the available locations depending on the collected items
@@ -651,9 +654,7 @@ def getDifficulty(locations):
             loc = majorAvailable.pop(0)
             majorLocations.remove(loc)
             visitedLocations.append(loc)
-            collecting = items[loc["item"]]["name"]
-            collectedItems.append(collecting)
-            #print("collecting major : " + collecting + " at " + loc['Name'])
+            collectItem(collectedItems, loc)
             majorPicked = True
 
         # if we take at least one major, recompute the difficulty
@@ -666,9 +667,7 @@ def getDifficulty(locations):
             loc = majorAvailable.pop(0)
             majorLocations.remove(loc)
             visitedLocations.append(loc)
-            collecting = items[loc["item"]]["name"]
-            collectedItems.append(collecting)
-            #print("collecting major : " + collecting + " at " + loc['Name'])
+            collectItem(collectedItems, loc)
         else:
             if len(majorAvailable) == 0:
                 nextMajorDifficulty = mania * 10
@@ -681,9 +680,7 @@ def getDifficulty(locations):
                 loc = minorAvailable.pop(0)
                 minorLocations.remove(loc)
                 visitedLocations.append(loc)
-                collecting = items[loc["item"]]["name"]
-                collectedItems.append(collecting)
-                # print("collecting minor : " + collecting + " at " + loc['Name'])
+                collectItem(collectedItems, loc)
                 minorPicked = True
 
             # if we take at least one minor, recompute the difficulty
@@ -695,9 +692,7 @@ def getDifficulty(locations):
                 loc = majorAvailable.pop(0)
                 majorLocations.remove(loc)
                 visitedLocations.append(loc)
-                collecting = items[loc["item"]]["name"]
-                collectedItems.append(collecting)
-                #print("collecting major : " + collecting + " at " + loc['Name'])
+                collectItem(collectedItems, loc)
 
     if isEndPossible:
         visitedLocations.append({
@@ -763,6 +758,26 @@ items = {
     '0xef1f': {'name': 'ScrewAttack'}
 }
 
+areaBosses = {
+    'Brinstar': 'Kraid',
+    'Norfair': 'Ridley',
+    'LowerNorfair': 'Ridley',
+    'WreckedShip': 'Phantoon',
+    'Maridia': 'Draygon'
+}
+
+golden4Dead = {
+    'Kraid' : False,
+    'Phantoon' : False,
+    'Draygon' : False,
+    'Ridley' : False
+}
+
+def bossDead(boss):
+    return (golden4Dead[boss], 0)
+
+def beatBoss(boss):
+    golden4Dead[boss] = True
 
 # generated with:
 # sed -e "s+\([A-Z][a-z]*\) =+'\1' =+" -e 's+ =+:+' -e 's+: \([A-Z][a-z]*\);+: "\1",+' -e 's+";+",+' -e 's+\(0x[0-9A-D]*\);+\1,+' -e 's+fun items -> +lambda items: +' -e 's+};+},+' -e 's+^            ++' locations.fs > locations.py
@@ -801,7 +816,6 @@ locations = [
     'Available': lambda items: wor(haveItem(items, 'SpeedBooster'),
                                    haveItem(items, 'ScrewAttack'),
                                    canDestroyBombWalls(items))
-
 },
 {
     'Area': "Brinstar",
@@ -930,8 +944,7 @@ locations = [
     'Address': 0x7899C,
     'Visibility': "Hidden",
     # DONE: no difficulty
-    'Available': lambda items: wand(canAccessKraid(items),
-                                    enoughStuffsKraid(items))
+    'Available': lambda items: wand(canAccessKraid(items), bossDead('Kraid'))
 },
 {
     'Area': "Brinstar",
@@ -940,8 +953,9 @@ locations = [
     'Address': 0x78ACA,
     'Visibility': "Chozo",
     # DONE: no difficulty
-    'Available': lambda items: wand(canAccessKraid(items),
-                                    enoughStuffsKraid(items))
+    'Available': lambda items: wand(canAccessKraid(items),                                    
+                                    enoughStuffsKraid(items)),
+    'Pickup': lambda: beatBoss('Kraid')
 },
 {
     'Area': "Norfair",
@@ -1030,7 +1044,8 @@ locations = [
     'Visibility': "Hidden",
     # DONE: already set in function
     'Available': lambda items: wand(canPassWorstRoom(items),
-                                    enoughStuffsRidley(items))
+                                    enoughStuffsRidley(items)),
+    'Pickup': lambda: beatBoss('Ridley')
 },
 {
     'Area': "LowerNorfair",
@@ -1059,10 +1074,10 @@ locations = [
     'Visibility': "Chozo",
     # DONE: easy
     'Available': lambda items: wand(canAccessWs(items),
-                                    enoughStuffsPhantoon(items),
                                     haveItem(items, 'SpeedBooster'),
                                     wor(haveItem(items, 'Varia'),
-                                        energyReserveCountOk(items, 1)))
+                                        energyReserveCountOk(items, 1)),
+                                    bossDead('Phantoon'))
 },
 {
     'Area': "WreckedShip",
@@ -1071,7 +1086,7 @@ locations = [
     'Address': 0x7C337,
     'Visibility': "Visible",
     'Available': lambda items: wand(canAccessWs(items),
-                                    enoughStuffsPhantoon(items),
+                                    bossDead('Phantoon'),
                                     wor(wor(haveItem(items, 'Bomb'),
                                             haveItem(items, 'PowerBomb')),
                                         knowsSpongeBathBombJump,
@@ -1091,7 +1106,8 @@ locations = [
     'Visibility': "Visible",
     # DONE: easy once WS is accessible
     'Available': lambda items: wand(canAccessWs(items),
-                                    enoughStuffsPhantoon(items))
+                                    enoughStuffsPhantoon(items)),
+    'Pickup': lambda: beatBoss('Phantoon')
 },
 {
     'Area': "WreckedShip",
@@ -1101,7 +1117,7 @@ locations = [
     'Visibility': "Chozo",
     # DONE: easy
     'Available': lambda items: wand(canAccessWs(items),
-                                    enoughStuffsPhantoon(items),
+                                    bossDead('Phantoon'),
                                     wor(haveItem(items, 'Varia'),
                                         energyReserveCountOk(items, 1)))
 },
@@ -1132,7 +1148,6 @@ locations = [
     # DONE: to leave the Plasma Beam room you have to kill the space pirates and return to the door
     # to unlock the door:
     #  -can access draygon room to kill him
-    #  -have enough stuff to kill him
     # to kill the space pirates:
     #  -do short charges with speedbooster
     #  -do beam charges with spin jump attacks
@@ -1143,7 +1158,7 @@ locations = [
     #  -can fly (space jump or infinite bomb jump)
     #  -use short charge with speedbooster
     'Available': lambda items: wand(canDefeatDraygon(items),
-                                    enoughStuffsDraygon(items),
+                                    bossDead('Draygon'),
                                     wor(wand(haveItem(items, 'SpeedBooster'),
                                              knowsShortCharge,
                                              knowsKillPlasmaPiratesWithSpark),
@@ -1206,7 +1221,8 @@ locations = [
     # DONE: difficulty already handled in the function,
     # we need to have access to the boss and enough stuff to kill him
     'Available': lambda items: wand(canDefeatDraygon(items),
-                                    enoughStuffsDraygon(items))
+                                    enoughStuffsDraygon(items)),
+    'Pickup': lambda: beatBoss('Draygon')
 },
 {
     'Area': "Crateria",

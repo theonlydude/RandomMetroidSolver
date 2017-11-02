@@ -595,7 +595,8 @@ def getAvailableItemsList(locations, area, threshold):
     around = filter(lambda loc: loc['Area'] == area and loc['difficulty'][1] <= threshold and not areaBossDead(area), locations)
     outside = filter(lambda loc: not loc in around, locations)
     around.sort(key=lambda loc: loc['difficulty'][1])
-    outside.sort(key=lambda loc: loc['difficulty'][1])
+    # we want to sort the outside locations by putting the ones is the same area first, then we sort by remaining areas.
+    outside.sort(key=lambda loc: (loc['difficulty'][1], 0 if loc['Area'] == area else 1, loc['Area']))
 
     return around + outside
 
@@ -1876,4 +1877,3 @@ if __name__ == "__main__":
         sys.exit(0)
 
     solveRom(romName, paramName)
-

@@ -589,6 +589,15 @@ def collectItem(collectedItems, loc):
     collectedItems.append(items[loc["item"]]["name"])
     if loc.has_key('Pickup'):
         loc['Pickup']()
+    return loc['Area']
+
+def getAvailableItemsList(locations, area, threshold):
+    around = filter(lambda loc: loc['Area'] == area and loc['difficulty'][1] <= threshold, locations)
+    outside = filter(lambda loc: not loc in around, locations)
+    around.sort(key=lambda loc: loc['difficulty'][1])
+    outside.sort(key=lambda loc: loc['difficulty'][1])
+
+    return around + outside
 
 def getDifficulty(locations):
     # loop on the available locations depending on the collected items
@@ -608,6 +617,7 @@ def getDifficulty(locations):
 
     isEndPossible = False
     endDifficulty = mania
+    area = 'Crateria'
     while True:
         # actual while condition
         hasEnoughItems = enoughMajors(collectedItems, majorLocations, visitedLocations) and enoughMinors(collectedItems, minorLocations)
@@ -639,22 +649,23 @@ def getDifficulty(locations):
         if not enough:
             minorAvailable = filter(lambda loc: loc["difficulty"][0] == True, minorLocations)
 
-        # that shouldn't happen
         if len(majorAvailable) == 0 and enough is True:
+            # stuck
             break
             
-        # sort them on difficulty
-        majorAvailable.sort(key=lambda loc: loc['difficulty'][1])
+        # sort them on difficulty and proximity
+        majorAvailable = getAvailableItemsList(majorAvailable, area, difficulty_target)
         if not enough:
-            minorAvailable.sort(key=lambda loc: loc['difficulty'][1])
+            minorAvailable = getAvailableItemsList(minorAvailable, area, difficulty_target)
 
-        # first take major items with no difficulty
+        # first take major item in the current area while the boss is alive or
+        # until it is too hard
         majorPicked = False
         while len(majorAvailable) > 0 and majorAvailable[0]["difficulty"][1] <= difficulty_target:
             loc = majorAvailable.pop(0)
             majorLocations.remove(loc)
             visitedLocations.append(loc)
-            collectItem(collectedItems, loc)
+            area = collectItem(collectedItems, loc)
             majorPicked = True
 
         # if we take at least one major, recompute the difficulty
@@ -667,7 +678,7 @@ def getDifficulty(locations):
             loc = majorAvailable.pop(0)
             majorLocations.remove(loc)
             visitedLocations.append(loc)
-            collectItem(collectedItems, loc)
+            area = collectItem(collectedItems, loc)
         else:
             if len(majorAvailable) == 0:
                 nextMajorDifficulty = mania * 10
@@ -680,7 +691,7 @@ def getDifficulty(locations):
                 loc = minorAvailable.pop(0)
                 minorLocations.remove(loc)
                 visitedLocations.append(loc)
-                collectItem(collectedItems, loc)
+                area = collectItem(collectedItems, loc)
                 minorPicked = True
 
             # if we take at least one minor, recompute the difficulty
@@ -692,7 +703,7 @@ def getDifficulty(locations):
                 loc = majorAvailable.pop(0)
                 majorLocations.remove(loc)
                 visitedLocations.append(loc)
-                collectItem(collectedItems, loc)
+                area = collectItem(collectedItems, loc)
 
     if isEndPossible:
         visitedLocations.append({
@@ -779,6 +790,11 @@ def bossDead(boss):
 def beatBoss(boss):
     golden4Dead[boss] = True
 
+def areaBossDead(area):
+    if not areaBosses.has_key(area):
+        return True
+    return golden4Dead[areaBosses[area]]
+
 # generated with:
 # sed -e "s+\([A-Z][a-z]*\) =+'\1' =+" -e 's+ =+:+' -e 's+: \([A-Z][a-z]*\);+: "\1",+' -e 's+";+",+' -e 's+\(0x[0-9A-D]*\);+\1,+' -e 's+fun items -> +lambda items: +' -e 's+};+},+' -e 's+^            ++' locations.fs > locations.py
 locations = [
@@ -809,12 +825,7 @@ locations = [
     'Class': "Major",
     'Address': 0x78432,
     'Visibility': "Visible",
-    # DONE: rewrote condition. initial condition was good for the randomizer itself
-    #       but not for difficulty estimation. We know that if no power bombs are
-    #       found early, BT will give either Bomb, ScrewAttack or SpeedBooster,
-    #       so we reflect that logic for the item immediately after Bomb
-    'Available': lambda items: wor(haveItem(items, 'SpeedBooster'),
-                                   haveItem(items, 'ScrewAttack'),
+    'Available': lambda items: wor(haveItem(items, 'SpeedBooster'), # FIXME getting through here with SpeedBooster is not easy...
                                    canDestroyBombWalls(items))
 },
 {

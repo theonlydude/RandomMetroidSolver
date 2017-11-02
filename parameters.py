@@ -6,8 +6,8 @@ harder = 25
 hardcore = 50
 mania = 100
 
-# keep getting majors of at most this difficulty before going for minors
-difficulty_target=easy
+# keep getting majors of at most this difficulty before going for minors or changing area
+difficulty_target=hard
 
 # display the generated path (spoilers!)
 displayGeneratedPath = True
@@ -47,7 +47,7 @@ knowsMockball = (True, easy) # early super and ice beam
 
 # common
 knowsCeilingDBoost = (True, easy) # for brinstar ceiling
-knowsAlcatrazEscape = (True, medium) # alcatraz without bomb
+knowsAlcatrazEscape = (True, harder) # alcatraz without bomb
 knowsLavaDive = (True, harder) # ridley without gravity
 knowsSimpleShortCharge = (True, easy) # Waterway ETank without gravity, and Wrecked Ship access
 knowsInfiniteBombJump = (True, medium) # to access certain locations without high jump or space jump
@@ -113,7 +113,9 @@ knowsMockballWs = (False, 0) # early wrecked ship access using a mock ball
 #
 # 1. Rate : the rate of time in which you can land shots. For example
 # : 0.5 means you can land shots half the time in the boss (30secs in
-# a given minute). If no information is given here, the fight will be
+# a given minute). It represents a combination of the fraction of the
+# time you can hit the boss and your general accuracy against the boss.
+# If no information is given here, the fight will be
 # considered to be 2 minutes, regardless of anything else.
 #
 # 2. Energy : a dictionary where key is etanks+reserves you have,
@@ -187,5 +189,32 @@ hellRuns = {
     # Ice Beam hell run
     'Ice' : [(2, hardcore), (3, harder), (4, hard), (6, medium)],
     # rest of upper norfair
-    'Rest' : [(3, mania), (4, hardcore), (6, hard), (8, medium)]
+    'MainUpperNorfair' : [(3, mania), (4, hardcore), (6, hard), (8, medium)]
+}
+
+# various settings used in difficulty computation
+algoSettings = {
+    # Boss Fights
+
+    # number of missiles fired per second during boss battles
+    # (used along with Rate)
+    'missilesPerSecond' : 3,
+    # number of supers fired per second during boss battles
+    # (used along with Rate)
+    'supersPerSecond' : 1.5,
+    # number of power bombs fired per second during boss battles
+    # (used along with Rate)
+    'powerBombsPerSecond' : 1/3,
+    # firepower grabbed by picking up drops during boss battles
+    # in missiles per minute (1 super = 3 missiles)
+    'missileDropsPerMinute' : 12,
+    # if no charge beam, amount of ammo margin to consider the boss
+    # fight as 'normal' (1.5 = 50% more for instance)
+    # boss fight difficulty will be linearly increased between this value
+    # and 1
+    'ammoMarginIfNoCharge' : 1.5,
+    # divide the difficulty by this amount if charge or screw attack 
+    'phantoonFlamesAvoidBonus' : 1.2,
+    # multiply the difficulty by this amount if no charge and few missiles 
+    'phantoonLowMissileMalus' : 1.2
 }

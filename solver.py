@@ -126,7 +126,7 @@ def canHellRun(items):
     if heatProof(items)[0]:
         return (True, easy)
     elif energyReserveCount(items) >= 3:
-        return energyReserveCountOkList(items, hellRuns['Rest'])
+        return energyReserveCountOkList(items, hellRuns['MainUpperNorfair'])
     else:
         return (False, 0)
 
@@ -417,13 +417,12 @@ def canInflictEnoughDamages(items, bossEnergy, doubleSuper=False, charge=True, p
     if chargeDPS > 0:
         ammoMargin += 2
 
-    # FIXME : these are rough estimations
-    missilesDPS = 3 * 100.0
-    supersDPS = 1.5 * 300.0
+    missilesDPS = algoSettings['missilesPerSecond'] * 100.0
+    supersDPS = algoSettings['supersPerSecond'] * 300.0
     if doubleSuper is True:
         supersDPS *= 2
     if powerDamage > 0:    
-        powerDPS = 200.0 / 3
+        powerDPS = algoSettings['powerBombsPerSecond'] * 200.0
     else:
         powerDPS = 0.0
     dpsDict = { missilesDPS : (missilesAmount, 100.0), supersDPS : (supersAmount, oneSuper), powerDPS : (powerAmount, 200.0), chargeDPS : (10000, chargeDPS) } # one charged shot per second. and no boss will take more 10000 charged shots
@@ -439,8 +438,8 @@ def canInflictEnoughDamages(items, bossEnergy, doubleSuper=False, charge=True, p
         if bossEnergy <= 0:
             break
     if bossEnergy > 0:
-        # rely on missile drops : let's say you get 12 missiles in a minute and fire them (DPS of 20)
-        secs += (bossEnergy / 20.0)
+        # rely on missile/supers drops
+        secs += bossEnergy * algoSettings['missileDropsPerMinute'] * 100 / 60
     #print('ammoMargin = ' + str(ammoMargin) + ', secs = ' + str(secs))
         
     return (ammoMargin, secs)
@@ -474,14 +473,13 @@ def computeBossDifficulty(items, ammoMargin, secs, diffTbl):
                 if k > energy:
                     break
                 difficulty = energyDict[k]
-    # FIXME : formulas below shall be adapted to actual difficulty value 'scale' we use
     # adjust by fight duration
     difficulty *= (duration / 120)
-    # and by ammo margin : 50% more is considered 'normal'
+    # and by ammo margin
     # only augment difficulty in case of no charge, don't lower it.
-    # if we have charge, ammoMargin will be > 2 (see canInflictEnoughDamages),
+    # if we have charge, ammoMargin will have a huge value (see canInflictEnoughDamages),
     # so this does not apply
-    diffAdjust = (1 - (ammoMargin - 1.5))
+    diffAdjust = (1 - (ammoMargin - algoSettings['ammoMarginIfNoCharge']))
     if diffAdjust > 1:
         difficulty *= diffAdjust
     #print('difficulty = ' + str(difficulty))
@@ -522,9 +520,9 @@ def enoughStuffsPhantoon(items):
     difficulty = computeBossDifficulty(items, ammoMargin, secs, bossesDifficulty['Phantoon'])
     hasCharge = haveItem(items, 'Charge')[0]
     if hasCharge or haveItem(items, 'ScrewAttack')[0]:
-        difficulty /= 1.2 # you can avoid flames        
+        difficulty /= algoSettings['phantoonFlamesAvoidBonus']
     elif not hasCharge and itemCount(items, 'Missile') <= 2: # few missiles is harder
-        difficulty *= 1.2
+        difficulty *= algoSettings['phantoonLowMissileMalus']
         
     return (True, difficulty)
 
@@ -1839,23 +1837,61 @@ def solveRom(romName, paramName):
     difficulty = getDifficulty(locations)
 
     if difficulty[0] >= 0:
-        if difficulty[0] >= easy and difficulty[0] < medium:
-            difficultyText = 'easy'
-        elif difficulty[0] >= medium and difficulty[0] < hard:
-            difficultyText = 'medium'
-        elif difficulty[0] >= hard and difficulty[0] < harder:
-            difficultyText = 'hard'
-        elif difficulty[0] >= harder and difficulty[0] < hardcore:
-            difficultyText = 'very hard'
-        elif difficulty[0] >= hardcore and difficulty[0] < mania:
-            difficultyText = 'hardcore'
-        else:
-            difficultyText = 'mania'
-
-        print("Estimated difficulty for items pickup {}: {}".format(itemsPickup, difficultyText))
+#        displayDifficulyText(difficulty[0])
+        displayDifficultyScale(difficulty[0])
     else:
         print("Aborted run, can't finish the game with the given prerequisites")
 
+difficulties = {
+    easy : 'easy',
+    medium : 'medium',
+    hard : 'hard',
+    harder : 'very hard',
+    hardcore : 'hardcore',
+    mania : 'mania'
+}
+        
+def displayDifficulyText(difficulty):
+    if difficulty >= easy and difficulty < medium:
+        difficultyText = difficulties[easy]
+    elif difficulty >= medium and difficulty < hard:
+        difficultyText = difficulties[medium]
+    elif difficulty >= hard and difficulty < harder:
+        difficultyText = difficulties[hard]
+    elif difficulty >= harder and difficulty < hardcore:
+        difficultyText = difficulties[harder]
+    elif difficulty >= hardcore and difficulty < mania:
+        difficultyText = difficulties[hardcore]
+    else:
+        difficultyText = difficulties[mania]
+
+    print("Estimated difficulty for items pickup {}: {}".format(itemsPickup, difficultyText))
+    
+def displayDifficultyScale(difficulty):
+    if difficulty == 0:
+        print('FREEEEEE')
+        return
+    previous = 0
+    for d in sorted(difficulties):
+        if difficulty >= d:
+            previous = d
+        else:
+            displayString = difficulties[previous]
+            displayString += ' '
+            scale = d - previous
+            pos = int(difficulty - previous)
+            displayString += '-' * pos
+            displayString += '^'
+            displayString += '-' * (scale - pos)
+            displayString += ' '
+            displayString += difficulties[d]
+            print(displayString)
+            break
+
+    if previous == 0:
+        print('MAAAANIIIAAAAAAA')
+
+    
 if __name__ == "__main__":
     if len(sys.argv) == 2:
         romName = sys.argv[1]

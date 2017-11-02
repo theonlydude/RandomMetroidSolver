@@ -592,7 +592,7 @@ def collectItem(collectedItems, loc):
     return loc['Area']
 
 def getAvailableItemsList(locations, area, threshold):
-    around = filter(lambda loc: loc['Area'] == area and loc['difficulty'][1] <= threshold, locations)
+    around = filter(lambda loc: loc['Area'] == area and loc['difficulty'][1] <= threshold and not areaBossDead(area), locations)
     outside = filter(lambda loc: not loc in around, locations)
     around.sort(key=lambda loc: loc['difficulty'][1])
     outside.sort(key=lambda loc: loc['difficulty'][1])
@@ -660,7 +660,7 @@ def getDifficulty(locations):
 
         # first take major items in the current area 
         majorPicked = False
-        while len(majorAvailable) > 0 and majorAvailable[0]['Area'] == area:
+        while len(majorAvailable) > 0 and majorAvailable[0]['Area'] == area and majorAvailable[0]['difficulty'] <= easy:
             loc = majorAvailable.pop(0)
             majorLocations.remove(loc)
             visitedLocations.append(loc)

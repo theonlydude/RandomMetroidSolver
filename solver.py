@@ -658,14 +658,13 @@ def getDifficulty(locations):
         if not enough:
             minorAvailable = getAvailableItemsList(minorAvailable, area, difficulty_target)
 
-        # first take major item in the current area while the boss is alive or
-        # until it is too hard
+        # first take major items in the current area 
         majorPicked = False
-        while len(majorAvailable) > 0 and majorAvailable[0]["difficulty"][1] <= difficulty_target:
+        while len(majorAvailable) > 0 and majorAvailable[0]['Area'] == area:
             loc = majorAvailable.pop(0)
             majorLocations.remove(loc)
             visitedLocations.append(loc)
-            area = collectItem(collectedItems, loc)
+            collectItem(collectedItems, loc)
             majorPicked = True
 
         # if we take at least one major, recompute the difficulty
@@ -687,7 +686,7 @@ def getDifficulty(locations):
 
             # take the minors easier than the next major, check if we don't get too much stuff
             minorPicked = False
-            while len(minorAvailable) > 0 and minorAvailable[0]["difficulty"][1] < nextMajorDifficulty and not enoughMinors(collectedItems, minorLocations):
+            while len(minorAvailable) > 0 and minorAvailable[0]["difficulty"][1] < nextMajorDifficulty and minorAvailable[0]['Area'] == area and not enoughMinors(collectedItems, minorLocations):
                 loc = minorAvailable.pop(0)
                 minorLocations.remove(loc)
                 visitedLocations.append(loc)

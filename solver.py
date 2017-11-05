@@ -447,7 +447,7 @@ def canInflictEnoughDamages(items, bossEnergy, doubleSuper=False, charge=True, p
 def computeBossDifficulty(items, ammoMargin, secs, diffTbl):
     # actual fight duration :
     rate = None
-    if diffTbl.has_key('Rate'):
+    if 'Rate' in diffTbl:
         rate = diffTbl['Rate']
     if rate is None:
         duration = 120.0
@@ -461,7 +461,7 @@ def computeBossDifficulty(items, ammoMargin, secs, diffTbl):
     energy = suitsCoeff * energyReserveCount(items)
     #print('suitsCoeff = ' + str(suitsCoeff) + ', energy = ' + str(energy) + ', duration = ' + str(duration))
     energyDict = None
-    if diffTbl.has_key('Energy'):
+    if 'Energy' in diffTbl:
         energyDict = diffTbl['Energy']
     difficulty = medium
     # get difficulty by energy
@@ -566,7 +566,7 @@ def canPassMetroids(items):
     return wand(canOpenRedDoors(items), wor(haveItem(items, 'Ice'), (haveItemCount(items, 'PowerBomb', 3), 0))) # to avoid leaving tourian to refill power bombs
 
 def canPassZebetites(items):
-    return wor(wand(haveItem(items, 'Ice'), knowsIceZebSkip), wand(haveItem(items, 'SpeedBooster'), knowsSpeedZebSkip), (canInflictEnoughDamages(items, 1100*4, charge=False, givesDrops=False) >= 1, 0)) # account for all the zebs to avoid constant refills
+    return wor(wand(haveItem(items, 'Ice'), knowsIceZebSkip), wand(haveItem(items, 'SpeedBooster'), knowsSpeedZebSkip), (canInflictEnoughDamages(items, 1100*4, charge=False, givesDrops=False)[0] >= 1, 0)) # account for all the zebs to avoid constant refills
 
 def allBossesDead():
     return wand(bossDead('Kraid'), bossDead('Phantoon'), bossDead('Draygon'), bossDead('Ridley'))
@@ -585,13 +585,13 @@ def canEndGame(items):
 
 def collectItem(collectedItems, loc):
     collectedItems.append(items[loc["item"]]["name"])
-    if loc.has_key('Pickup'):
+    if 'Pickup' in loc:
         loc['Pickup']()
     return loc['Area']
 
 def getAvailableItemsList(locations, area, threshold):
-    around = filter(lambda loc: loc['Area'] == area and loc['difficulty'][1] <= threshold and not areaBossDead(area), locations)
-    outside = filter(lambda loc: not loc in around, locations)
+    around = [loc for loc in locations if loc['Area'] == area and loc['difficulty'][1] <= threshold and not areaBossDead(area)]
+    outside = [loc for loc in locations if not loc in around]
     around.sort(key=lambda loc: loc['difficulty'][1])
     # we want to sort the outside locations by putting the ones is the same area first, then we sort by remaining areas.
     outside.sort(key=lambda loc: (loc['difficulty'][1], 0 if loc['Area'] == area else 1, loc['Area']))
@@ -602,8 +602,8 @@ def getDifficulty(locations):
     # loop on the available locations depending on the collected items
     # before getting a new item, loop on all of them and get their difficulty, the next collected item is the one with the smallest difficulty, if equality between major and minor, take major first
 
-    majorLocations = filter(lambda location: location["Class"] == "Major", locations)
-    minorLocations = filter(lambda location: location["Class"] == "Minor", locations)
+    majorLocations = [loc for loc in locations if loc["Class"] == "Major"]
+    minorLocations = [loc for loc in locations if loc["Class"] == "Minor"]
 
     visitedLocations = []
     collectedItems = []
@@ -633,7 +633,7 @@ def getDifficulty(locations):
 
         # compute the difficulty of all the locations
         for loc in majorLocations:
-            if loc.has_key('PostAvailable'):
+            if 'PostAvailable' in loc:
                 loc['difficulty'] = wand(loc['Available'](collectedItems),
                                          loc['PostAvailable'](collectedItems + [items[loc['item']]['name']]))
             else:
@@ -644,9 +644,9 @@ def getDifficulty(locations):
                 loc['difficulty'] = loc['Available'](collectedItems)
 
         # keep only the available locations
-        majorAvailable = filter(lambda loc: loc["difficulty"][0] == True, majorLocations)
+        majorAvailable = [loc for loc in majorLocations if loc["difficulty"][0] == True]
         if not enough:
-            minorAvailable = filter(lambda loc: loc["difficulty"][0] == True, minorLocations)
+            minorAvailable = [loc for loc in minorLocations if loc["difficulty"][0] == True]
 
         if len(majorAvailable) == 0 and enough is True:
             # stuck
@@ -659,7 +659,7 @@ def getDifficulty(locations):
 
         # first take major items in the current area 
         majorPicked = False
-        while len(majorAvailable) > 0 and majorAvailable[0]['Area'] == area and majorAvailable[0]['difficulty'] <= easy:
+        while len(majorAvailable) > 0 and majorAvailable[0]['Area'] == area and majorAvailable[0]['difficulty'][0] <= easy:
             loc = majorAvailable.pop(0)
             majorLocations.remove(loc)
             visitedLocations.append(loc)
@@ -716,7 +716,7 @@ def getDifficulty(locations):
         print('{:>50}: {:>12} {:>16} {}'.format("Location Name", "Area", "Item", "Difficulty"))
         print('-'*92)
         for location in visitedLocations:
-            if items.has_key(location['item']):
+            if location['item'] in items:
                 itemName = items[location['item']]['name']
             else:
                 itemName = 'The End'
@@ -789,7 +789,7 @@ def beatBoss(boss):
     golden4Dead[boss] = True
 
 def areaBossDead(area):
-    if not areaBosses.has_key(area):
+    if area not in areaBosses:
         return True
     return golden4Dead[areaBosses[area]]
 
@@ -1829,7 +1829,7 @@ def solveRom(romName, paramName):
     if paramName is not None:
         loadKnowsVars(paramName)
 
-    with open(romName, "r") as romFile:
+    with open(romName, "rb") as romFile:
         for location in locations:
             location["item"] = getItem(romFile, location["Address"], location["Visibility"])
             #print('{:>50}: {:>16}'.format(location["Name"], items[location["item"]]['name']))

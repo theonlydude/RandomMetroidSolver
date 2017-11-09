@@ -651,7 +651,7 @@ def getDifficulty(locations):
         if len(majorAvailable) == 0 and enough is True:
             # stuck
             break
-            
+
         # sort them on difficulty and proximity
         majorAvailable = getAvailableItemsList(majorAvailable, area, difficulty_target)
         if not enough:
@@ -685,7 +685,7 @@ def getDifficulty(locations):
 
             # take the minors easier than the next major, check if we don't get too much stuff
             minorPicked = False
-            while len(minorAvailable) > 0 and minorAvailable[0]["difficulty"][1] < nextMajorDifficulty and minorAvailable[0]['Area'] == area and not enoughMinors(collectedItems, minorLocations):
+            while len(minorAvailable) > 0 and minorAvailable[0]["difficulty"][1] < nextMajorDifficulty and not enoughMinors(collectedItems, minorLocations):
                 loc = minorAvailable.pop(0)
                 minorLocations.remove(loc)
                 visitedLocations.append(loc)

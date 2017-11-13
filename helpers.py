@@ -521,12 +521,6 @@ def enoughMinors(items, minorLocations):
         else: 
             return canEnd
 
-def getLocation(loc_list, name):
-    for loc in loc_list:
-        if loc['Name'] == name:
-            return loc
-    return None
-    
 def enoughMajors(items, majorLocations, visitedLocations):
     # the end condition
     if itemsPickup == '100%' or itemsPickup == 'normal':

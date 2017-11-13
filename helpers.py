@@ -545,9 +545,6 @@ def canPassZebetites(items):
                wand(haveItem(items, 'SpeedBooster'), knowsSpeedZebSkip),
                (canInflictEnoughDamages(items, 1100*4, charge=False, givesDrops=False)[0] >= 1, 0)) # account for all the zebs to avoid constant refills
 
-def allBossesDead():
-    return wand(bossDead('Kraid'), bossDead('Phantoon'), bossDead('Draygon'), bossDead('Ridley'))
-
 def enoughStuffTourian(items):
     return wand(canPassMetroids(items), canPassZebetites(items), enoughStuffsMotherbrain(items))
 
@@ -558,10 +555,10 @@ def canEndGame(items):
     # - defeat metroids
     # - destroy/skip the zebetites
     # - beat Mother Brain
-    return wand(allBossesDead(), enoughStuffTourian(items))
+    return wand(Bosses.allBossesDead(), enoughStuffTourian(items))
 
 def getAvailableItemsList(locations, area, threshold):
-    around = [loc for loc in locations if loc['Area'] == area and loc['difficulty'][1] <= threshold and not areaBossDead(area)]
+    around = [loc for loc in locations if loc['Area'] == area and loc['difficulty'][1] <= threshold and not Bosses.areaBossDead(area)]
     outside = [loc for loc in locations if not loc in around]
     around.sort(key=lambda loc: loc['difficulty'][1])
     # we want to sort the outside locations by putting the ones is the same area first, then we sort by remaining areas.
@@ -569,28 +566,40 @@ def getAvailableItemsList(locations, area, threshold):
 
     return around + outside
 
-areaBosses = {
-    'Brinstar': 'Kraid',
-    'Norfair': 'Ridley',
-    'LowerNorfair': 'Ridley',
-    'WreckedShip': 'Phantoon',
-    'Maridia': 'Draygon'
-}
+class Bosses:
+    # bosses helpers to know if they are dead
+    areaBosses = {
+        'Brinstar': 'Kraid',
+        'Norfair': 'Ridley',
+        'LowerNorfair': 'Ridley',
+        'WreckedShip': 'Phantoon',
+        'Maridia': 'Draygon'
+    }
 
-golden4Dead = {
-    'Kraid' : False,
-    'Phantoon' : False,
-    'Draygon' : False,
-    'Ridley' : False
-}
+    golden4Dead = {
+        'Kraid' : False,
+        'Phantoon' : False,
+        'Draygon' : False,
+        'Ridley' : False
+    }
 
-def bossDead(boss):
-    return (golden4Dead[boss], 0)
+    @staticmethod
+    def bossDead(boss):
+        return (Bosses.golden4Dead[boss], 0)
 
-def beatBoss(boss):
-    golden4Dead[boss] = True
+    @staticmethod
+    def beatBoss(boss):
+        Bosses.golden4Dead[boss] = True
 
-def areaBossDead(area):
-    if area not in areaBosses:
-        return True
-    return golden4Dead[areaBosses[area]]
+    @staticmethod
+    def areaBossDead(area):
+        if area not in Bosses.areaBosses:
+            return True
+        return Bosses.golden4Dead[Bosses.areaBosses[area]]
+
+    @staticmethod
+    def allBossesDead():
+        return wand(Bosses.bossDead('Kraid'),
+                    Bosses.bossDead('Phantoon'),
+                    Bosses.bossDead('Draygon'),
+                    Bosses.bossDead('Ridley'))

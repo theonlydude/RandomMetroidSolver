@@ -162,7 +162,7 @@ locations = [
     'Address': 0x7899C,
     'Visibility': "Hidden",
     # DONE: no difficulty
-    'Available': lambda items: wand(canAccessKraid(items), bossDead('Kraid'))
+    'Available': lambda items: wand(canAccessKraid(items), Bosses.bossDead('Kraid'))
 },
 {
     'Area': "Brinstar",
@@ -173,7 +173,7 @@ locations = [
     # DONE: no difficulty
     'Available': lambda items: wand(canAccessKraid(items),                                    
                                     enoughStuffsKraid(items)),
-    'Pickup': lambda: beatBoss('Kraid')
+    'Pickup': lambda: Bosses.beatBoss('Kraid')
 },
 {
     'Area': "Norfair",
@@ -263,7 +263,7 @@ locations = [
     # DONE: already set in function
     'Available': lambda items: wand(canPassWorstRoom(items),
                                     enoughStuffsRidley(items)),
-    'Pickup': lambda: beatBoss('Ridley')
+    'Pickup': lambda: Bosses.beatBoss('Ridley')
 },
 {
     'Area': "LowerNorfair",
@@ -295,7 +295,7 @@ locations = [
                                     haveItem(items, 'SpeedBooster'),
                                     wor(haveItem(items, 'Varia'),
                                         energyReserveCountOk(items, 1)),
-                                    bossDead('Phantoon'))
+                                    Bosses.bossDead('Phantoon'))
 },
 {
     'Area': "WreckedShip",
@@ -304,7 +304,7 @@ locations = [
     'Address': 0x7C337,
     'Visibility': "Visible",
     'Available': lambda items: wand(canAccessWs(items),
-                                    bossDead('Phantoon'),
+                                    Bosses.bossDead('Phantoon'),
                                     wor(wor(haveItem(items, 'Bomb'),
                                             haveItem(items, 'PowerBomb')),
                                         knowsSpongeBathBombJump,
@@ -325,7 +325,7 @@ locations = [
     # DONE: easy once WS is accessible
     'Available': lambda items: wand(canAccessWs(items),
                                     enoughStuffsPhantoon(items)),
-    'Pickup': lambda: beatBoss('Phantoon')
+    'Pickup': lambda: Bosses.beatBoss('Phantoon')
 },
 {
     'Area': "WreckedShip",
@@ -335,7 +335,7 @@ locations = [
     'Visibility': "Chozo",
     # DONE: easy
     'Available': lambda items: wand(canAccessWs(items),
-                                    bossDead('Phantoon'),
+                                    Bosses.bossDead('Phantoon'),
                                     wor(haveItem(items, 'Varia'),
                                         energyReserveCountOk(items, 1)))
 },
@@ -376,7 +376,7 @@ locations = [
     #  -can fly (space jump or infinite bomb jump)
     #  -use short charge with speedbooster
     'Available': lambda items: wand(canDefeatDraygon(items),
-                                    bossDead('Draygon'),
+                                    Bosses.bossDead('Draygon'),
                                     wor(wand(haveItem(items, 'SpeedBooster'),
                                              knowsShortCharge,
                                              knowsKillPlasmaPiratesWithSpark),
@@ -440,7 +440,7 @@ locations = [
     # we need to have access to the boss and enough stuff to kill him
     'Available': lambda items: wand(canDefeatDraygon(items),
                                     enoughStuffsDraygon(items)),
-    'Pickup': lambda: beatBoss('Draygon')
+    'Pickup': lambda: Bosses.beatBoss('Draygon')
 },
 {
     'Area': "Crateria",

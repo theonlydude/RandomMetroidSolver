@@ -195,6 +195,7 @@ class Solver:
                 'Area' : 'The End',
                 'difficulty' : (True, endDifficulty)
             })
+
         # print generated path
         if displayGeneratedPath is True:
             print("Generated path:")

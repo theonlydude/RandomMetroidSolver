@@ -2,7 +2,7 @@
 
 # https://itemrando.supermetroid.run/randomize
 
-import sys, struct, math, os, json
+import sys, struct, math, os, json, logging
 
 # the difficulties for each technics
 from parameters import *
@@ -11,10 +11,6 @@ from helpers import *
 
 class Solver:
     # given a rom and parameters returns the estimated difficulty
-
-    romName = None
-    paramName = None
-    locations = None
 
     items = {
         '0xeed7': {'name': 'ETank'},
@@ -44,8 +40,18 @@ class Solver:
         import tournament_locations
         self.locations = tournament_locations.locations
 
+        #logging.basicConfig(level=logging.DEBUG)
+        logging.basicConfig(level=logging.INFO)
+        self.log = logging.getLogger('Solver')
+
     def loadRom(self, romName):
         RomReader(romName).loadItems(self.locations)
+
+        # add item name to location
+        self.log.debug("Display items at locations:")
+        for location in self.locations:
+            location['itemName'] = self.items[location["item"]]['name']
+            self.log.debug('{:>50}: {:>16}'.format(location["Name"], location['itemName']))
 
     def loadParams(self, paramName=None):
         # TODO::load parameters.py vars into an object instead of in global
@@ -90,7 +96,7 @@ class Solver:
         previous = -1
         current = 0
 
-        print("{}: available major: {}, available minor: {}, visited: {}".format(itemsPickup, len(majorLocations), len(minorLocations), len(visitedLocations)))
+        self.log.debug("{}: available major: {}, available minor: {}, visited: {}".format(itemsPickup, len(majorLocations), len(minorLocations), len(visitedLocations)))
 
         isEndPossible = False
         endDifficulty = mania
@@ -101,7 +107,7 @@ class Solver:
             (isEndPossible, endDifficulty) = canEndGame(collectedItems)
             if isEndPossible and hasEnoughItems:
                 break
-            # print(str(collectedItems))
+            self.log.debug(str(collectedItems))
 
             current = len(collectedItems)
             if current == previous:
@@ -113,7 +119,7 @@ class Solver:
             for loc in majorLocations:
                 if 'PostAvailable' in loc:
                     loc['difficulty'] = wand(loc['Available'](collectedItems),
-                                             loc['PostAvailable'](collectedItems + [self.items[loc['item']]['name']]))
+                                             loc['PostAvailable'](collectedItems + [loc['itemName']]))
                 else:
                     loc['difficulty'] = loc['Available'](collectedItems)
             enough = enoughMinors(collectedItems, minorLocations)
@@ -184,6 +190,7 @@ class Solver:
         if isEndPossible:
             visitedLocations.append({
                 'item' : 'The End',
+                'itemName' : 'The End',
                 'Name' : 'The End',
                 'Area' : 'The End',
                 'difficulty' : (True, endDifficulty)
@@ -194,11 +201,10 @@ class Solver:
             print('{:>50}: {:>12} {:>16} {}'.format("Location Name", "Area", "Item", "Difficulty"))
             print('-'*92)
             for location in visitedLocations:
-                if location['item'] in self.items:
-                    itemName = self.items[location['item']]['name']
-                else:
-                    itemName = 'The End'
-                print('{:>50}: {:>12} {:>16} {}'.format(location['Name'], location['Area'], itemName, location['difficulty'][1]))
+                print('{:>50}: {:>12} {:>16} {}'.format(location['Name'],
+                                                        location['Area'],
+                                                        location['itemName'],
+                                                        location['difficulty'][1]))
 
         if not enoughMajors(collectedItems, majorLocations, visitedLocations) or not enoughMinors(collectedItems, minorLocations) or not canEndGame(collectedItems):
             # we have aborted
@@ -217,12 +223,12 @@ class Solver:
             else:
                 difficulty = (difficulty_max, 0)
 
-        print("{}: remaining major: {}, remaining minor: {}, visited: {}".format(itemsPickup, len(majorLocations), len(minorLocations), len(visitedLocations)))
+        self.log.debug("{}: remaining major: {}, remaining minor: {}, visited: {}".format(itemsPickup, len(majorLocations), len(minorLocations), len(visitedLocations)))
 
         return difficulty
 
     def collectItem(self, collectedItems, loc):
-        collectedItems.append(self.items[loc["item"]]["name"])
+        collectedItems.append(loc["itemName"])
         if 'Pickup' in loc:
             loc['Pickup']()
         return loc['Area']
@@ -259,7 +265,6 @@ class RomReader:
         with open(self.romName, "rb") as romFile:
             for location in locations:
                 location["item"] = self.getItem(romFile, location["Address"], location["Visibility"])
-                #print('{:>50}: {:>16}'.format(location["Name"], items[location["item"]]['name']))
 
 class DifficultyDisplayer:
     difficulties = {
@@ -335,5 +340,4 @@ if __name__ == "__main__":
         print("missing param: rom file")
         sys.exit(0)
 
-    solver = Solver()
-    solver.solveRom(romName, paramName)
+    Solver().solveRom(romName, paramName)

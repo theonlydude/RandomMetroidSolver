@@ -7,10 +7,10 @@ hardcore = 50
 mania = 100
 
 # keep getting majors of at most this difficulty before going for minors or changing area
-difficulty_target=hard
+difficulty_target=hardcore
 
 # display the generated path (spoilers!)
-displayGeneratedPath = True
+displayGeneratedPath = False
 
 # choose how many items are required
 
@@ -35,6 +35,10 @@ itemsPickup = 'minimal'
 #  take all the majors as many missiles/supers as in minimal and 4 power bomb packs
 #itemsPickup = 'normal'
 
+# ultra minimal:
+#  take the same items as minimal, just them, nothing more
+#itemsPickup = 'ultra minimal'
+
 # the different technics to know (cf. http://deanyd.net/sm/index.php?title=Item_Randomizer)
 # and the personnal perceived difficulty.
 # False means: I can't do this technic or I don't know it.
@@ -55,7 +59,7 @@ knowsGreenGateGlitch = (True, medium) # to access screw attack and crocomire
 
 # uncommon
 knowsMochtroidClip = (True, medium) # to access botwoon without speedbooster
-knowsPuyoClip = (False, 0) # to access spring ball without grapple beam
+knowsPuyoClip = (True, mania) # to access spring ball without grapple beam
 knowsReverseGateGlitch = (True, medium) # ETank in Brinstar Gate
 knowsShortCharge = (False, 0) # to kill draygon
 knowsSuitlessOuterMaridia = (True, hardcore)
@@ -65,12 +69,12 @@ knowsDraygonGrappleKill = (True, medium) # easy kill for draygon
 
 # rare
 knowsGravityJump = (True, hard) 
-knowsContinuousWallJump = (False, 0) # access wrecked ship
+knowsContinuousWallJump = (True, mania) # access wrecked ship
 knowsSpringBallJump = (True, hard) # access to wrecked ship etank without anything else and suitless maridia navigation
-knowsXrayDboost = (False, 0)  # Xray without grapple or space jump
+knowsXrayDboost = (True, mania)  # Xray without grapple or space jump
 
 # rarest
-knowsDiagonalBombJump = (False, 0) # access wrecked ship
+knowsDiagonalBombJump = (True, mania) # access wrecked ship
 
 # end game
 knowsIceZebSkip = (False, 0) # change minimal ammo count 
@@ -85,14 +89,14 @@ knowsGauntletWithPowerBombs = (True, medium)
 knowsGauntletEntrySpark = (True, medium) # implies knowsSimpleShortCharge
 
 # worst room in the game
-knowsWorstRoomIceCharge = (False, 0) # can pass worst room JUST by freezing pirates
-knowsWorstRoomHiJump = (True, hard) # can go up worst room with HiJump and wall jumps
+knowsWorstRoomIceCharge = (True, mania) # can pass worst room JUST by freezing pirates
+knowsWorstRoomHiJump = (True, hardcore) # can go up worst room with HiJump and wall jumps
 
 # grapple
 knowsClimbToGrappleWithIce = (False, 0) # just learn green gate glitch, it's easier
 
 # wrecked ship etank access ("sponge bath" room)
-knowsSpongeBathBombJump = (False, 0)
+knowsSpongeBathBombJump = (True, mania)
 knowsSpongeBathHiJump = (True, easy)
 knowsSpongeBathSpeed = (True, medium)
 
@@ -105,7 +109,7 @@ knowsExitPlasmaRoomHiJump = (True, medium)
 knowsSuitlessSandpit = (False, 0) # access the item in the sandpit suitless
 
 # wrecked ship
-knowsMockballWs = (False, 0) # early wrecked ship access using a mock ball
+knowsMockballWs = (True, mania) # early wrecked ship access using a mock ball
 
 # boss difficulty tables :
 #

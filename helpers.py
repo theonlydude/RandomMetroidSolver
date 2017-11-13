@@ -521,7 +521,7 @@ def enoughMinors(items, minorLocations):
         else: 
             return canEnd
 
-def enoughMajors(items, majorLocations, visitedLocations):
+def enoughMajors(items, majorLocations):
     # the end condition
     if itemsPickup == '100%' or itemsPickup == 'normal':
         return len(majorLocations) == 0

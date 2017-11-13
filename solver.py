@@ -103,7 +103,7 @@ class Solver:
         area = 'Crateria'
         while True:
             # actual while condition
-            hasEnoughItems = enoughMajors(collectedItems, majorLocations, visitedLocations) and enoughMinors(collectedItems, minorLocations)
+            hasEnoughItems = enoughMajors(collectedItems, majorLocations) and enoughMinors(collectedItems, minorLocations)
             (isEndPossible, endDifficulty) = canEndGame(collectedItems)
             if isEndPossible and hasEnoughItems:
                 break
@@ -206,7 +206,7 @@ class Solver:
                                                         location['itemName'],
                                                         location['difficulty'][1]))
 
-        if not enoughMajors(collectedItems, majorLocations, visitedLocations) or not enoughMinors(collectedItems, minorLocations) or not canEndGame(collectedItems):
+        if not enoughMajors(collectedItems, majorLocations) or not enoughMinors(collectedItems, minorLocations) or not canEndGame(collectedItems):
             # we have aborted
             difficulty = (-1, -1)
         else:

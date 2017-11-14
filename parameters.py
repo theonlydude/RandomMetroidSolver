@@ -36,7 +36,8 @@ itemsPickup = 'minimal'
 #itemsPickup = 'normal'
 
 # ultra minimal:
-#  take the same items as minimal, just them, nothing more
+#  take only the required items to end the game, just them, nothing more.
+#  just a test, not production ready
 #itemsPickup = 'ultra minimal'
 
 # the different technics to know (cf. http://deanyd.net/sm/index.php?title=Item_Randomizer)

@@ -571,6 +571,7 @@ class Pickup:
 
     def isMinimalItem(self, items, item):
         # to grab only minimal items
+        # TODO::not very realistic, and there's plenty of special cases...
         if item == 'Morph':
             return True
         elif item == 'Bomb':

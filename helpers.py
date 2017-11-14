@@ -270,7 +270,12 @@ def canAccessOuterMaridia(items):
     #               -do a double jump with spring ball
     return wand(canAccessRedBrinstar(items),
                 canUsePowerBombs(items),
-                wor(haveItem(items, 'Gravity'),
+                wor(wand(haveItem(items, 'Gravity'),
+                         # condition below is to get past Mt. Everest
+                         wor(haveItem(items, 'Grapple'),
+                             haveItem(items, 'SpeedBooster'),
+                             canFly(items),
+                             knowsGravityJump)),
                     wor(wand(haveItem(items, 'HiJump'),
                              haveItem(items, 'Ice'),
                              wor(knowsSuitlessOuterMaridiaNoGuns,

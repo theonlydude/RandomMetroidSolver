@@ -510,31 +510,6 @@ def enoughStuffsMotherbrain(items):
         return (False, 0)
     return (True, computeBossDifficulty(items, ammoMargin, secs, bossesDifficulty['Mother Brain']))
 
-def enoughMinors(items, minorLocations):
-    if itemsPickup == '100%':
-        # need them all
-        return len(minorLocations) == 0
-    else:
-        canEnd = enoughStuffTourian(items)[0]
-        if itemsPickup == "normal":
-            return canEnd and haveItemCount(items, 'PowerBomb', 4)
-        else: 
-            return canEnd
-
-def enoughMajors(items, majorLocations):
-    # the end condition
-    if itemsPickup == '100%' or itemsPickup == 'normal':
-        return len(majorLocations) == 0
-    elif itemsPickup == 'minimal':
-        return (haveItemCount(items, 'Morph', 1)
-                and (haveItemCount(items, 'Bomb', 1)
-                     or haveItemCount(items, 'PowerBomb', 1))
-                and haveItemCount(items, 'ETank', 3)
-                and haveItemCount(items, 'Varia', 1)
-                and (haveItemCount(items, 'SpeedBooster', 1)
-                     or haveItemCount(items, 'Ice', 1))
-                and haveItemCount(items, 'Gravity', 1))
-
 def canPassMetroids(items):
     return wand(canOpenRedDoors(items),
                 wor(haveItem(items, 'Ice'),
@@ -548,23 +523,76 @@ def canPassZebetites(items):
 def enoughStuffTourian(items):
     return wand(canPassMetroids(items), canPassZebetites(items), enoughStuffsMotherbrain(items))
 
-def canEndGame(items):
-    # to finish the game you must :
-    # - beat golden 4 : we force pickup of the 4 items
-    #   behind the bosses to ensure that
-    # - defeat metroids
-    # - destroy/skip the zebetites
-    # - beat Mother Brain
-    return wand(Bosses.allBossesDead(), enoughStuffTourian(items))
+class Pickup:
+    def __init__(self, itemsPickup):
+        self.itemsPickup = itemsPickup
 
-def getAvailableItemsList(locations, area, threshold):
-    around = [loc for loc in locations if loc['Area'] == area and loc['difficulty'][1] <= threshold and not Bosses.areaBossDead(area)]
-    outside = [loc for loc in locations if not loc in around]
-    around.sort(key=lambda loc: loc['difficulty'][1])
-    # we want to sort the outside locations by putting the ones is the same area first, then we sort by remaining areas.
-    outside.sort(key=lambda loc: (loc['difficulty'][1], 0 if loc['Area'] == area else 1, loc['Area']))
+    def enoughMinors(self, items, minorLocations):
+        if self.itemsPickup == '100%':
+            # need them all
+            return len(minorLocations) == 0
+        else:
+            canEnd = enoughStuffTourian(items)[0]
+            if itemsPickup == "normal":
+                return canEnd and haveItemCount(items, 'PowerBomb', 4)
+            else:
+                return canEnd
 
-    return around + outside
+    def enoughMajors(self, items, majorLocations):
+        # the end condition
+        if self.itemsPickup == '100%' or self.itemsPickup == 'normal':
+            return len(majorLocations) == 0
+        elif self.itemsPickup == 'minimal' or self.itemsPickup == 'ultra minimal':
+            return (haveItemCount(items, 'Morph', 1)
+                    # pass bomb block passages
+                    and (haveItemCount(items, 'Bomb', 1)
+                         or haveItemCount(items, 'PowerBomb', 1))
+                    # mother brain rainbow attack
+                    and haveItemCount(items, 'ETank', 3)
+                    # lower norfair access
+                    and haveItemCount(items, 'Varia', 1)
+                    # speed or ice to access botwoon
+                    and (haveItemCount(items, 'SpeedBooster', 1)
+                         or haveItemCount(items, 'Ice', 1))
+                    # draygon access
+                    and haveItemCount(items, 'Gravity', 1))
+
+    def grabItem(self, items, item):
+        # check if we grab the major item
+        if self.itemsPickup == 'ultra minimal':
+            return self.isMinimalItem(items, item)
+        else:
+            return True
+
+    def isMinimalItem(self, items, item):
+        # to grab only minimal items
+        if item == 'Morph':
+            return True
+        elif item == 'Bomb':
+            return not haveItemCount(items, 'PowerBomb', 1)
+        elif item == 'PowerBomb':
+            return not haveItemCount(items, 'Bomb', 1)
+        elif item == 'ETank':
+            return itemCount(items, 'ETank') <= 2
+        elif item == 'Varia':
+            return True
+        elif item == 'Ice':
+            return True
+        elif item == 'SpeedBooster':
+            return True
+        elif item == 'Gravity':
+            return True
+        # for "Energy Tank, Brinstar Gate"
+        elif item == 'HiJump':
+            return True
+        # for "X-Ray Scope"
+        elif item == 'Grapple':
+            return True
+        # to break bomb wall at left of Parlor and Alcatraz
+        elif item == 'ScrewAttack':
+            return True
+        else:
+            return False
 
 class Bosses:
     # bosses helpers to know if they are dead

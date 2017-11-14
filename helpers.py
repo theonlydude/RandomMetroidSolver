@@ -273,6 +273,7 @@ def canAccessOuterMaridia(items):
                 wor(wand(haveItem(items, 'Gravity'),
                          # condition below is to get past Mt. Everest
                          wor(haveItem(items, 'Grapple'),
+                             haveItem(items, 'SpeedBooster'),
                              canFly(items),
                              knowsGravityJump)),
                     wor(wand(haveItem(items, 'HiJump'),

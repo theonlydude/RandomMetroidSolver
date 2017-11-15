@@ -88,13 +88,15 @@ class Solver:
                 # if we've aborted, display remaining majors
                 if difficulty[0] == -1:
                     self.printPath("Remaining major locations:", self.majorLocations)
+            # display difficulty scale
             self.displayDifficulty(difficulty)
 
         return difficulty
 
     def displayDifficulty(self, difficulty):
         if difficulty[0] >= 0:
-            DifficultyDisplayer(difficulty[0]).scale()
+            text = DifficultyDisplayer(difficulty[0]).scale()
+            print("Estimated difficulty for items pickup {}: {}".format(itemsPickup, text))
         else:
             print("Aborted run, can't finish the game with the given prerequisites")
 
@@ -326,6 +328,7 @@ class RomReader:
 
 class DifficultyDisplayer:
     difficulties = {
+        0 : 'baby',
         easy : 'easy',
         medium : 'medium',
         hard : 'hard',
@@ -352,15 +355,9 @@ class DifficultyDisplayer:
         else:
             difficultyText = self.difficulties[mania]
 
-        print("Estimated difficulty for items pickup {}: {}".format(itemsPickup, difficultyText))
+        return difficultyText
 
     def scale(self):
-        # print("scale: difficulty: {}".format(self.difficulty))
-
-        if self.difficulty == 0:
-            print('FREEEEEE')
-            return
-
         previous = 0
         for d in sorted(self.difficulties):
             if self.difficulty >= d:
@@ -375,8 +372,9 @@ class DifficultyDisplayer:
                 displayString += '-' * (scale - pos)
                 displayString += ' '
                 displayString += self.difficulties[d]
-                print(displayString)
                 break
+
+        return displayString
 
 if __name__ == "__main__":
     if len(sys.argv) == 2:

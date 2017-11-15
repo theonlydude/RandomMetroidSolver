@@ -81,7 +81,14 @@ class Solver:
 
         difficulty = self.computeDifficulty()
 
-        self.displayDifficulty(difficulty)
+        if self.type == 'console':
+            # print generated path
+            if displayGeneratedPath is True:
+                self.printPath("Generated path:", self.visitedLocations)
+                # if we've aborted, display remaining majors
+                if difficulty[0] == -1:
+                    self.printPath("Remaining major locations:", self.majorLocations)
+            self.displayDifficulty(difficulty)
 
         return difficulty
 
@@ -196,10 +203,6 @@ class Solver:
                 'difficulty' : (True, endDifficulty)
             })
 
-        # print generated path
-        if displayGeneratedPath is True:
-            self.printPath("Generated path:", self.visitedLocations)
-
         # compute difficulty value
         difficulty = self.computeDifficultyValue()
 
@@ -219,9 +222,6 @@ class Solver:
         if not self.pickup.enoughMajors(self.collectedItems, self.majorLocations) or not self.pickup.enoughMinors(self.collectedItems, self.minorLocations) or not self.canEndGame():
             # we have aborted
             difficulty = (-1, -1)
-
-            if displayGeneratedPath is True:
-                self.printPath("Remaining major locations:", self.majorLocations)
         else:
             # sum difficulty for all visited locations
             difficulty_sum = 0

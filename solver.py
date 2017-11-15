@@ -36,11 +36,14 @@ class Solver:
         '0xef1f': {'name': 'ScrewAttack'}
     }
 
-    def __init__(self):
+    def __init__(self, type='console'):
         import tournament_locations
         self.locations = tournament_locations.locations
 
         self.pickup = Pickup(itemsPickup)
+
+        # can be called from command line (console) or from web site (web)
+        self.type = type
 
         #logging.basicConfig(level=logging.DEBUG)
         logging.basicConfig(level=logging.INFO)
@@ -55,10 +58,12 @@ class Solver:
             location['itemName'] = self.items[location["item"]]['name']
             self.log.debug('{:>50}: {:>16}'.format(location["Name"], location['itemName']))
 
-    def loadParams(self, paramName=None):
+    def loadParamsDict(self, paramsDict):
+        for param in paramsDict:
+            globals()[param] = paramsDict[param]
+
+    def loadParams(self, paramName):
         # TODO::load parameters.py vars into an object instead of in global
-        if paramName is None:
-            return
 
         # the json file is a dict with the knowsXXX variables
         with open(paramName) as jsonFile:
@@ -68,13 +73,17 @@ class Solver:
             for param in params:
                 globals()[param] = params[param]
 
-    def solveRom(self, romName, paramName):
-        self.loadParams(paramName)
-        self.loadRom(romName)
+    def solveRom(self, romName=None, paramName=None):
+        if paramName is not None:
+            self.loadParams(paramName)
+        if romName is not None:
+            self.loadRom(romName)
 
-        difficulty = self.getDifficulty()
+        difficulty = self.computeDifficulty()
 
         self.displayDifficulty(difficulty)
+
+        return difficulty
 
     def displayDifficulty(self, difficulty):
         if difficulty[0] >= 0:
@@ -82,63 +91,57 @@ class Solver:
         else:
             print("Aborted run, can't finish the game with the given prerequisites")
 
-    def getDifficulty(self):
+    def computeDifficulty(self):
         # loop on the available locations depending on the collected items.
         # before getting a new item, loop on all of them and get their difficulty,
         # the next collected item is the one with the smallest difficulty,
         # if equality between major and minor, take major first.
 
-        majorLocations = [loc for loc in self.locations if loc["Class"] == "Major"]
-        minorLocations = [loc for loc in self.locations if loc["Class"] == "Minor"]
+        self.majorLocations = [loc for loc in self.locations if loc["Class"] == "Major"]
+        self.minorLocations = [loc for loc in self.locations if loc["Class"] == "Minor"]
 
-        visitedLocations = []
-        collectedItems = []
+        self.visitedLocations = []
+        self.collectedItems = []
 
         # with the knowsXXX conditions some roms can be unbeatable, so we have to detect it
         previous = -1
         current = 0
 
-        self.log.debug("{}: available major: {}, available minor: {}, visited: {}".format(itemsPickup, len(majorLocations), len(minorLocations), len(visitedLocations)))
+        self.log.debug("{}: available major: {}, available minor: {}, visited: {}".format(itemsPickup, len(self.majorLocations), len(self.minorLocations), len(self.visitedLocations)))
 
         isEndPossible = False
         endDifficulty = mania
         area = 'Crateria'
         while True:
             # actual while condition
-            hasEnoughItems = (self.pickup.enoughMajors(collectedItems, majorLocations)
-                              and self.pickup.enoughMinors(collectedItems, minorLocations))
-            (isEndPossible, endDifficulty) = self.canEndGame(collectedItems)
+            hasEnoughItems = (self.pickup.enoughMajors(self.collectedItems, self.majorLocations)
+                              and self.pickup.enoughMinors(self.collectedItems, self.minorLocations))
+            (isEndPossible, endDifficulty) = self.canEndGame()
             if isEndPossible and hasEnoughItems:
                 break
 
-            self.log.debug(str(collectedItems))
+            self.log.debug(str(self.collectedItems))
 
             # check if we have collected an item in the last loop
-            current = len(collectedItems)
+            current = len(self.collectedItems)
             if current == previous:
                 # we're stuck ! abort
                 break
             previous = current
 
             # compute the difficulty of all the locations
-            for loc in majorLocations:
-                if 'PostAvailable' in loc:
-                    loc['difficulty'] = wand(loc['Available'](collectedItems),
-                                             loc['PostAvailable'](collectedItems + [loc['itemName']]))
-                else:
-                    loc['difficulty'] = loc['Available'](collectedItems)
-            enough = self.pickup.enoughMinors(collectedItems, minorLocations)
+            self.computeLocationsDifficulty(self.majorLocations)
+            enough = self.pickup.enoughMinors(self.collectedItems, self.minorLocations)
             if not enough:
-                for loc in minorLocations:
-                    loc['difficulty'] = loc['Available'](collectedItems)
+                self.computeLocationsDifficulty(self.minorLocations)
 
             # keep only the available locations
-            majorAvailable = [loc for loc in majorLocations if loc["difficulty"][0] == True]
+            majorAvailable = [loc for loc in self.majorLocations if loc["difficulty"][0] == True]
             if not enough:
-                minorAvailable = [loc for loc in minorLocations if loc["difficulty"][0] == True]
+                minorAvailable = [loc for loc in self.minorLocations if loc["difficulty"][0] == True]
 
+            # check if we're stuck
             if len(majorAvailable) == 0 and enough is True:
-                # stuck
                 break
 
             # sort them on difficulty and proximity
@@ -151,10 +154,7 @@ class Solver:
             while (len(majorAvailable) > 0
                    and majorAvailable[0]['Area'] == area
                    and majorAvailable[0]['difficulty'][0] <= easy):
-                loc = majorAvailable.pop(0)
-                majorLocations.remove(loc)
-                visitedLocations.append(loc)
-                self.collectItem(collectedItems, loc)
+                self.collectMajor(majorAvailable.pop(0))
                 majorPicked = True
 
             # if we take at least one major, recompute the difficulty
@@ -164,10 +164,7 @@ class Solver:
             # if enough stuff, take the next available major
             if enough is True:
                 # take first major
-                loc = majorAvailable.pop(0)
-                majorLocations.remove(loc)
-                visitedLocations.append(loc)
-                area = self.collectItem(collectedItems, loc)
+                area = self.collectMajor(majorAvailable.pop(0))
             else:
                 if len(majorAvailable) == 0:
                     nextMajorDifficulty = mania * 10
@@ -178,11 +175,8 @@ class Solver:
                 minorPicked = False
                 while (len(minorAvailable) > 0
                        and minorAvailable[0]["difficulty"][1] < nextMajorDifficulty
-                       and not self.pickup.enoughMinors(collectedItems, minorLocations)):
-                    loc = minorAvailable.pop(0)
-                    minorLocations.remove(loc)
-                    visitedLocations.append(loc)
-                    area = self.collectItem(collectedItems, loc)
+                       and not self.pickup.enoughMinors(self.collectedItems, self.minorLocations)):
+                    area = self.collectMinor(minorAvailable.pop(0))
                     minorPicked = True
 
                 # if we take at least one minor, recompute the difficulty
@@ -191,13 +185,10 @@ class Solver:
 
                 # take the next available major
                 if len(majorAvailable) > 0:
-                    loc = majorAvailable.pop(0)
-                    majorLocations.remove(loc)
-                    visitedLocations.append(loc)
-                    area = self.collectItem(collectedItems, loc)
+                    area = self.collectMajor(majorAvailable.pop(0))
 
         if isEndPossible:
-            visitedLocations.append({
+            self.visitedLocations.append({
                 'item' : 'The End',
                 'itemName' : 'The End',
                 'Name' : 'The End',
@@ -207,19 +198,35 @@ class Solver:
 
         # print generated path
         if displayGeneratedPath is True:
-            self.printPath("Generated path:", visitedLocations)
+            self.printPath("Generated path:", self.visitedLocations)
 
-        if not self.pickup.enoughMajors(collectedItems, majorLocations) or not self.pickup.enoughMinors(collectedItems, minorLocations) or not self.canEndGame(collectedItems):
+        # compute difficulty value
+        difficulty = self.computeDifficultyValue()
+
+        self.log.debug("{}: remaining major: {}, remaining minor: {}, visited: {}".format(itemsPickup, len(self.majorLocations), len(self.minorLocations), len(self.visitedLocations)))
+
+        return difficulty
+
+    def computeLocationsDifficulty(self, locations):
+        for loc in locations:
+            if 'PostAvailable' in loc:
+                loc['difficulty'] = wand(loc['Available'](self.collectedItems),
+                                         loc['PostAvailable'](self.collectedItems + [loc['itemName']]))
+            else:
+                loc['difficulty'] = loc['Available'](self.collectedItems)
+
+    def computeDifficultyValue(self):
+        if not self.pickup.enoughMajors(self.collectedItems, self.majorLocations) or not self.pickup.enoughMinors(self.collectedItems, self.minorLocations) or not self.canEndGame():
             # we have aborted
             difficulty = (-1, -1)
 
             if displayGeneratedPath is True:
-                self.printPath("Remaining major locations:", majorLocations)
+                self.printPath("Remaining major locations:", self.majorLocations)
         else:
             # sum difficulty for all visited locations
             difficulty_sum = 0
             difficulty_max = 0
-            for loc in visitedLocations:
+            for loc in self.visitedLocations:
                 difficulty_sum = difficulty_sum + loc['difficulty'][1]
                 difficulty_max = max(difficulty_max, loc['difficulty'][1])
             # we compute the number of '+' that we'll display next to the difficulty to take in
@@ -228,8 +235,6 @@ class Solver:
                 difficulty = (difficulty_max, (difficulty_sum - difficulty_max) / (difficulty_max * 2))
             else:
                 difficulty = (difficulty_max, 0)
-
-        self.log.debug("{}: remaining major: {}, remaining minor: {}, visited: {}".format(itemsPickup, len(majorLocations), len(minorLocations), len(visitedLocations)))
 
         return difficulty
 
@@ -243,25 +248,37 @@ class Solver:
                                                     location['itemName'],
                                                     location['difficulty'][1]))
 
-    def collectItem(self, collectedItems, loc):
+    def collectMajor(self, loc):
+        self.majorLocations.remove(loc)
+        self.visitedLocations.append(loc)
+        area = self.collectItem(loc)
+        return area
+
+    def collectMinor(self, loc):
+        self.minorLocations.remove(loc)
+        self.visitedLocations.append(loc)
+        area = self.collectItem(loc)
+        return area
+
+    def collectItem(self, loc):
         item = loc["itemName"]
-        if loc["Class"] == "Minor" or self.pickup.grabItem(collectedItems, item):
-            collectedItems.append(item)
+        if loc["Class"] == "Minor" or self.pickup.grabItem(self.collectedItems, item):
+            self.collectedItems.append(item)
         else:
             self.log.debug("Item not picked up: {}".format(item))
-            collectedItems.append('Dummy')
+            self.collectedItems.append('Dummy')
         if 'Pickup' in loc:
             loc['Pickup']()
         return loc['Area']
 
-    def canEndGame(self, items):
+    def canEndGame(self):
         # to finish the game you must :
         # - beat golden 4 : we force pickup of the 4 items
         #   behind the bosses to ensure that
         # - defeat metroids
         # - destroy/skip the zebetites
         # - beat Mother Brain
-        return wand(Bosses.allBossesDead(), enoughStuffTourian(items))
+        return wand(Bosses.allBossesDead(), enoughStuffTourian(self.collectedItems))
 
     def getAvailableItemsList(self, locations, area, threshold):
         around = [loc for loc in locations if loc['Area'] == area and loc['difficulty'][1] <= threshold and not Bosses.areaBossDead(area)]
@@ -338,7 +355,7 @@ class DifficultyDisplayer:
         print("Estimated difficulty for items pickup {}: {}".format(itemsPickup, difficultyText))
 
     def scale(self):
-        print("scale: difficulty: {}".format(self.difficulty))
+        # print("scale: difficulty: {}".format(self.difficulty))
 
         if self.difficulty == 0:
             print('FREEEEEE')
@@ -360,9 +377,6 @@ class DifficultyDisplayer:
                 displayString += self.difficulties[d]
                 print(displayString)
                 break
-
-        if previous == 0:
-            print('MAAAANIIIAAAAAAA')
 
 if __name__ == "__main__":
     if len(sys.argv) == 2:

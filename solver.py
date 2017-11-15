@@ -86,16 +86,17 @@ class Solver:
             if displayGeneratedPath is True:
                 self.printPath("Generated path:", self.visitedLocations)
                 # if we've aborted, display remaining majors
-                if difficulty[0] == -1:
+                if difficulty == -1:
                     self.printPath("Remaining major locations:", self.majorLocations)
+
             # display difficulty scale
             self.displayDifficulty(difficulty)
 
         return difficulty
 
     def displayDifficulty(self, difficulty):
-        if difficulty[0] >= 0:
-            text = DifficultyDisplayer(difficulty[0]).scale()
+        if difficulty >= 0:
+            text = DifficultyDisplayer(difficulty).scale()
             print("Estimated difficulty for items pickup {}: {}".format(itemsPickup, text))
         else:
             print("Aborted run, can't finish the game with the given prerequisites")
@@ -223,20 +224,13 @@ class Solver:
     def computeDifficultyValue(self):
         if not self.pickup.enoughMajors(self.collectedItems, self.majorLocations) or not self.pickup.enoughMinors(self.collectedItems, self.minorLocations) or not self.canEndGame():
             # we have aborted
-            difficulty = (-1, -1)
+            difficulty = -1
         else:
             # sum difficulty for all visited locations
-            difficulty_sum = 0
             difficulty_max = 0
             for loc in self.visitedLocations:
-                difficulty_sum = difficulty_sum + loc['difficulty'][1]
                 difficulty_max = max(difficulty_max, loc['difficulty'][1])
-            # we compute the number of '+' that we'll display next to the difficulty to take in
-            # account the sum of the difficulties.
-            if difficulty_sum > difficulty_max:
-                difficulty = (difficulty_max, (difficulty_sum - difficulty_max) / (difficulty_max * 2))
-            else:
-                difficulty = (difficulty_max, 0)
+            difficulty = difficulty_max
 
         return difficulty
 

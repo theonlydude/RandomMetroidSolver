@@ -222,7 +222,7 @@ def canAccessHeatedNorfair(items):
 
 def canAccessCrocomire(items):
     # EXPLAINED: two options there, either:
-    #             -from Bubble Mountain, hellrun to Crocomire's room. at Upper Norfair 
+    #             -from Bubble Mountain, hellrun to Crocomire's room. at Upper Norfair
     #              Farming room there's a blue gate which requires a gate glitch if no wave
     #             -the regular way, from Red Tower, power bomb in Ice Beam Gate room,
     #              then speed booster in Crocomire Speedway (easy hell run if no varia
@@ -237,7 +237,7 @@ def canAccessCrocomire(items):
 def canAccessLowerNorfair(items):
     # EXPLAINED: the randomizer never requires to pass it without the Varia suit.
     #            from Red Tower in Brinstar to access Lava Dive room we open the yellow door
-    #            in Kronic Boost room with a power bomb then pass the Lava Dive room. 
+    #            in Kronic Boost room with a power bomb then pass the Lava Dive room.
     #            To pass Lava Dive room, either:
     #             -have gravity suit and space jump (easy way)
     #             -have gravity and perform a gravity jump
@@ -348,7 +348,7 @@ def canInflictEnoughDamages(items, bossEnergy, doubleSuper=False, charge=True, p
             standardDamage = 250
         elif wand(haveItem(items, 'Ice'), haveItem(items, 'Plasma')):
             standardDamage = 200
-        elif wand(haveItem(items, 'Plasma')):     
+        elif wand(haveItem(items, 'Plasma')):
             standardDamage = 150
         elif wand(haveItem(items, 'Ice'), haveItem(items, 'Wave'), haveItem(items, 'Spazer')):
             standardDamage = 100
@@ -377,13 +377,13 @@ def canInflictEnoughDamages(items, bossEnergy, doubleSuper=False, charge=True, p
     oneSuper = 300.0
     if doubleSuper is True:
         oneSuper *= 2
-    supersDamage = supersAmount * oneSuper    
+    supersDamage = supersAmount * oneSuper
 
     powerDamage = 0
     powerAmount = 0
     if power is True and haveItem(items, 'PowerBomb')[0]:
         # PBs come also in packs of 5
-        powerAmount = itemCount(items, 'PowerBomb') * 5 
+        powerAmount = itemCount(items, 'PowerBomb') * 5
         powerDamage = powerAmount * 200
 
     canBeatBoss = chargeDPS > 0 or givesDrops or (missilesDamage + supersDamage + powerDamage) >= bossEnergy
@@ -398,7 +398,7 @@ def canInflictEnoughDamages(items, bossEnergy, doubleSuper=False, charge=True, p
     supersDPS = algoSettings['supersPerSecond'] * 300.0
     if doubleSuper is True:
         supersDPS *= 2
-    if powerDamage > 0:    
+    if powerDamage > 0:
         powerDPS = algoSettings['powerBombsPerSecond'] * 200.0
     else:
         powerDPS = 0.0
@@ -418,7 +418,7 @@ def canInflictEnoughDamages(items, bossEnergy, doubleSuper=False, charge=True, p
         # rely on missile/supers drops
         secs += bossEnergy * algoSettings['missileDropsPerMinute'] * 100 / 60
     #print('ammoMargin = ' + str(ammoMargin) + ', secs = ' + str(secs))
-        
+
     return (ammoMargin, secs)
 
 def computeBossDifficulty(items, ammoMargin, secs, diffTbl):
@@ -460,7 +460,7 @@ def computeBossDifficulty(items, ammoMargin, secs, diffTbl):
     if diffAdjust > 1:
         difficulty *= diffAdjust
     #print('difficulty = ' + str(difficulty))
-        
+
     return difficulty
 
 def enoughStuffsRidley(items):
@@ -475,14 +475,14 @@ def enoughStuffsKraid(items):
     (ammoMargin, secs) = canInflictEnoughDamages(items, 1000)
     if ammoMargin == 0:
         return (False, 0)
-    return (True, computeBossDifficulty(items, ammoMargin, secs, bossesDifficulty['Kraid']))    
+    return (True, computeBossDifficulty(items, ammoMargin, secs, bossesDifficulty['Kraid']))
 
 def enoughStuffsDraygon(items):
     #print('DRAYGON')
     (ammoMargin, secs) = canInflictEnoughDamages(items, 6000)
     fight = (False, 0)
     if ammoMargin > 0:
-        fight = (True, computeBossDifficulty(items, ammoMargin, secs, bossesDifficulty['Draygon']))    
+        fight = (True, computeBossDifficulty(items, ammoMargin, secs, bossesDifficulty['Draygon']))
     return wor(fight,
                wand(knowsDraygonGrappleKill,
                     haveItem(items, 'Grapple')),
@@ -500,7 +500,7 @@ def enoughStuffsPhantoon(items):
         difficulty /= algoSettings['phantoonFlamesAvoidBonus']
     elif not hasCharge and itemCount(items, 'Missile') <= 2: # few missiles is harder
         difficulty *= algoSettings['phantoonLowMissileMalus']
-        
+
     return (True, difficulty)
 
 def enoughStuffsMotherbrain(items):

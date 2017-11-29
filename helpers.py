@@ -67,13 +67,11 @@ def itemCountOk(items, item, count, difficulty=0):
 
 def itemCountOkList(items, item, difficulties):
     # get a list: [(2, difficulty=hard), (4, difficulty=medium), (6, difficulty=easy)]
-    difficulties = difficulties[:] # copy
-    difficulty = difficulties.pop(0)
-    result = itemCountOk(items, item, difficulty[0], difficulty=difficulty[1])
-    while len(difficulties) > 0:
-        difficulty = difficulties.pop(0)
-        result = wor(result, itemCountOk(items, item, difficulty[0], difficulty=difficulty[1]))
-    return result
+    def f(difficulty):
+        return itemCountOk(items, item, difficulty[0], difficulty=difficulty[1])
+    return reduce(lambda result, difficulty: wor(result, f(difficulty)),
+                  difficulties[1:],
+                  difficulties[0])
 
 def energyReserveCount(items):
     return itemCount(items, 'ETank') + itemCount(items, 'Reserve')
@@ -83,13 +81,11 @@ def energyReserveCountOk(items, count, difficulty=0):
 
 def energyReserveCountOkList(items, difficulties):
     # get a list: [(2, difficulty=hard), (4, difficulty=medium), (6, difficulty=easy)]
-    difficulties = difficulties[:] # copy
-    difficulty = difficulties.pop(0)
-    result = energyReserveCountOk(items, difficulty[0], difficulty=difficulty[1])
-    while len(difficulties) > 0:
-        difficulty = difficulties.pop(0)
-        result = wor(result, energyReserveCountOk(items, difficulty[0], difficulty=difficulty[1]))
-    return result
+    def f(difficulty):
+        return energyReserveCountOk(items, difficulty[0], difficulty=difficulty[1])
+    return reduce(lambda result, difficulty: wor(result, f(difficulty)),
+                  difficulties[1:],
+                  f(difficulties[0]))
 
 def heatProof(items):
     return haveItem(items, 'Varia')

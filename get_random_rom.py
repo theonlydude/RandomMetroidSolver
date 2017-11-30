@@ -23,7 +23,7 @@
 #    <input type="submit" value="Randomize!" class="btn btn-primary"/>
 #    </form>
 
-import requests, shutil
+import requests, shutil, random
 
 def getRandomizedRom(originalRomFilePath, seed):
     # generate a new Tournament random rom by uploading a rom to the website
@@ -34,11 +34,12 @@ def getRandomizedRom(originalRomFilePath, seed):
     session = requests.session()
     r = session.get(url)
 
-    # difficulty 3 is Tournament, the website want the seed to be a number when it's zero
-    data = {'difficulty': '3', 'seed': 0 if seed == 0 else str(seed)}
+    # difficulty 3 is Tournament
+    data = [('seed', seed), ('difficulty', 3)]
     files = {'filename': (originalRomFilePath,
                           open(originalRomFilePath, 'rb'),
                           'application/octet-stream')}
+
     r2 = session.post(url, data=data, files=files, stream=True)
 
     if r2.status_code == 200:
@@ -61,5 +62,6 @@ def getRandomizedRom(originalRomFilePath, seed):
         return None
 
 if __name__ == "__main__":
-    fileName = getRandomizedRom('Super_Metroid_JU.smc', 0)
+    random.seed()
+    fileName = getRandomizedRom('Super_Metroid_JU.smc', random.randint(0, 9999999))
     print("The randomized rom file is \"{}\"".format(fileName))

@@ -1,3 +1,5 @@
+from functools import reduce
+
 # the difficulties for each technics
 from parameters import *
 

@@ -2,9 +2,16 @@
 
 # !! must be launched from RandomMetroidSolver directory, not tests directory !!
 
-python -m unittest discover
+echo "Tests in python2:"
+python2 -m unittest discover
+echo ""
 
-for ROM in tests/roms/*; do
+echo "Tests in python3:"
+python3 -m unittest discover
+echo ""
+
+echo "Test each rom in python2 and python3:"
+time for ROM in tests/roms/*; do
     echo "${ROM}"
     python2 solver.py "${ROM}"
     python3 solver.py "${ROM}"

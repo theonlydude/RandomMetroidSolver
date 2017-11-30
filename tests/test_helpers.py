@@ -6,12 +6,11 @@ from parameters import easy
 from parameters import medium
 from parameters import hard
 from parameters import hellRuns
-
-from solver import Solver
+from solver import RomReader
 
 
 class TestHelpers(unittest.TestCase):
-    allItems = list(Solver.items.iteritems())
+    allItems = list(RomReader.items.items())
 
     def testItemCountOkList(self):
         chosenItem = self.allItems[0]

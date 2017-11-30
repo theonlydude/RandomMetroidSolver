@@ -12,31 +12,11 @@ from helpers import *
 class Solver:
     # given a rom and parameters returns the estimated difficulty
 
-    items = {
-        '0xeed7': {'name': 'ETank'},
-        '0xeedb': {'name': 'Missile'},
-        '0xeedf': {'name': 'Super'},
-        '0xeee3': {'name': 'PowerBomb'},
-        '0xeee7': {'name': 'Bomb'},
-        '0xeeeb': {'name': 'Charge'},
-        '0xeeef': {'name': 'Ice'},
-        '0xeef3': {'name': 'HiJump'},
-        '0xeef7': {'name': 'SpeedBooster'},
-        '0xeefb': {'name': 'Wave'},
-        '0xeeff': {'name': 'Spazer'},
-        '0xef03': {'name': 'SpringBall'},
-        '0xef07': {'name': 'Varia'},
-        '0xef13': {'name': 'Plasma'},
-        '0xef17': {'name': 'Grapple'},
-        '0xef23': {'name': 'Morph'},
-        '0xef27': {'name': 'Reserve'},
-        '0xef0b': {'name': 'Gravity'},
-        '0xef0f': {'name': 'XRayScope'},
-        '0xef1b': {'name': 'SpaceJump'},
-        '0xef1f': {'name': 'ScrewAttack'}
-    }
+    def __init__(self, type='console', rom=None, params=None):
+        #logging.basicConfig(level=logging.DEBUG)
+        logging.basicConfig(level=logging.INFO)
+        self.log = logging.getLogger('Solver')
 
-    def __init__(self, type='console'):
         import tournament_locations
         self.locations = tournament_locations.locations
 
@@ -45,39 +25,50 @@ class Solver:
         # can be called from command line (console) or from web site (web)
         self.type = type
 
-        #logging.basicConfig(level=logging.DEBUG)
-        logging.basicConfig(level=logging.INFO)
-        self.log = logging.getLogger('Solver')
+        self.romLoaded = False
+        if rom is not None:
+            self.loadRom(rom)
 
-    def loadRom(self, romName):
-        RomReader(romName).loadItems(self.locations)
+        # TODO::add a param loader like the rom loader
+        self.paramsLoaded = True
 
-        # add item name to location
-        self.log.debug("Display items at locations:")
-        for location in self.locations:
-            location['itemName'] = self.items[location["item"]]['name']
-            self.log.debug('{:>50}: {:>16}'.format(location["Name"], location['itemName']))
+    def loadRom(self, rom):
+        RomLoader.factory(rom).assignItems(self.locations)
+
+        if self.log.getEffectiveLevel() == logging.DEBUG:
+            self.log.debug("Display items at locations:")
+            for location in self.locations:
+                self.log.debug('{:>50}: {:>16}'.format(location["Name"], location['itemName']))
+
+        self.romLoaded = True
+
+    def loadParams(self):
+        # load the default parameters from parameters.py
+        self.paramsLoaded = True
 
     def loadParamsDict(self, paramsDict):
+        # load the parameters from a python dict
         for param in paramsDict:
             globals()[param] = paramsDict[param]
 
-    def loadParams(self, paramName):
+        self.paramsLoaded = True
+
+    def loadParamsJson(self, paramName):
+        # load the parameters from a json file
+
         # TODO::load parameters.py vars into an object instead of in global
 
         # the json file is a dict with the knowsXXX variables
         with open(paramName) as jsonFile:
             params = json.load(jsonFile)
 
-            # load the params into the global vars
-            for param in params:
-                globals()[param] = params[param]
+            self.loadParamsDict(params)
 
-    def solveRom(self, romName=None, paramName=None):
-        if paramName is not None:
-            self.loadParams(paramName)
-        if romName is not None:
-            self.loadRom(romName)
+    def solveRom(self):
+        if self.paramsLoaded is False or self.romLoaded is False:
+            self.log.error("Parameters or rom not loaded: params: {}, rom: {}".format(self.paramsLoaded,
+                                                                                      self.romLoaded))
+            return
 
         difficulty = self.computeDifficulty()
 
@@ -289,9 +280,32 @@ class Solver:
 
 class RomReader:
     # read the items in the rom
+    items = {
+        '0xeed7': {'name': 'ETank'},
+        '0xeedb': {'name': 'Missile'},
+        '0xeedf': {'name': 'Super'},
+        '0xeee3': {'name': 'PowerBomb'},
+        '0xeee7': {'name': 'Bomb'},
+        '0xeeeb': {'name': 'Charge'},
+        '0xeeef': {'name': 'Ice'},
+        '0xeef3': {'name': 'HiJump'},
+        '0xeef7': {'name': 'SpeedBooster'},
+        '0xeefb': {'name': 'Wave'},
+        '0xeeff': {'name': 'Spazer'},
+        '0xef03': {'name': 'SpringBall'},
+        '0xef07': {'name': 'Varia'},
+        '0xef13': {'name': 'Plasma'},
+        '0xef17': {'name': 'Grapple'},
+        '0xef23': {'name': 'Morph'},
+        '0xef27': {'name': 'Reserve'},
+        '0xef0b': {'name': 'Gravity'},
+        '0xef0f': {'name': 'XRayScope'},
+        '0xef1b': {'name': 'SpaceJump'},
+        '0xef1f': {'name': 'ScrewAttack'}
+    }
 
-    def __init__(self, romName):
-        self.romName = romName
+    def __init__(self, romFileName):
+        self.romFileName = romFileName
 
     def getItem(self, romFile, address, visibility):
         # return the hex code of the object at the given address
@@ -316,9 +330,59 @@ class RomReader:
             manger.du(cul)
 
     def loadItems(self, locations):
-        with open(self.romName, "rb") as romFile:
-            for location in locations:
-                location["item"] = self.getItem(romFile, location["Address"], location["Visibility"])
+        with open(self.romFileName, "rb") as romFile:
+            for loc in locations:
+                item = self.getItem(romFile, loc["Address"], loc["Visibility"])
+                loc["itemName"] = self.items[item]["name"]
+
+class RomLoader:
+    @staticmethod
+    def factory(rom):
+        # can be a real rom. can be a json or a dict with the locations - items association
+        if type(rom) is str:
+            ext = os.path.splitext(rom)
+            if ext[1].lower() == '.sfc' or ext[1].lower() == '.smc':
+                return RomLoaderSfc(rom)
+            elif ext[1].lower() == '.json':
+                return RomLoaderJson(rom)
+            else:
+                print("wrong rom file type: {}".format(ext[1]))
+                sys.exit(-1)
+        elif type(rom) is dict:
+            return RomLoaderDict(rom)
+
+    def assignItems(self, locations):
+        # update the itemName of the locations
+        for loc in locations:
+            loc['itemName'] = self.locsItems[loc['Name']]
+
+    def dump(self, filename):
+        with open(fileName, 'w') as jsonFile:
+            json.dump(self.locsItems, jsonFile)
+
+class RomLoaderSfc(RomLoader):
+    # standard usage
+    def __init__(self, romFileName):
+        self.romReader = RomReader(romFileName)
+
+    def assignItems(self, locations):
+        # update the itemName of the locations
+        self.romReader.loadItems(locations)
+
+        self.locsItems = {}
+        for loc in locations:
+            self.locsItems[loc['Name']] = loc['itemName']
+
+class RomLoaderJson(RomLoader):
+    # when called from the test suite
+    def __init__(self, jsonFileName):
+        with open(jsonFileName) as jsonFile:
+            self.locsItems = json.load(jsonFile)
+
+class RomLoaderDict(RomLoader):
+    # when called from the website
+    def __init__(self, locsItems):
+        self.locsItems = locsItems
 
 class DifficultyDisplayer:
     difficulties = {
@@ -329,7 +393,8 @@ class DifficultyDisplayer:
         harder : 'very hard',
         hardcore : 'hardcore',
         mania : 'mania',
-        mania*2 : 'god'
+        mania*2 : 'god',
+        mania*4 : 'samus'
     }
 
     def __init__(self, difficulty):
@@ -372,22 +437,9 @@ class DifficultyDisplayer:
 
 if __name__ == "__main__":
     if len(sys.argv) == 2:
-        romName = sys.argv[1]
-        paramName = None
-    elif len(sys.argv) == 3:
-        romName = None
-        paramName = None
-        for arg in sys.argv[1:]:
-            ext = os.path.splitext(arg)
-            if ext[1] == '.sfc':
-                romName = arg
-            elif ext[1] == '.json':
-                paramName = arg
-            else:
-                print("wrong file type given as parameter: {}".format(ext))
-                sys.exit(-1)
+        romFileName = sys.argv[1]
     else:
         print("missing param: rom file")
         sys.exit(0)
 
-    Solver().solveRom(romName, paramName)
+    Solver(rom=romFileName).solveRom()

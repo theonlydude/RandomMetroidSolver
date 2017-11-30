@@ -356,7 +356,7 @@ class RomLoader:
         for loc in locations:
             loc['itemName'] = self.locsItems[loc['Name']]
 
-    def dump(self, filename):
+    def dump(self, fileName):
         with open(fileName, 'w') as jsonFile:
             json.dump(self.locsItems, jsonFile)
 

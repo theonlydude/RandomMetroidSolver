@@ -31,8 +31,8 @@ class Solver:
         if rom is not None:
             self.loadRom(rom)
 
-        # TODO::add a param loader like the rom loader
-        self.paramsLoaded = True
+        if params is not None:
+            self.loadParams()
 
     def loadRom(self, rom):
         RomLoader.factory(rom).assignItems(self.locations)
@@ -44,32 +44,12 @@ class Solver:
 
         self.romLoaded = True
 
-    def loadParams(self):
-        # load the default parameters from parameters.py
-        self.paramsLoaded = True
-
-    def loadParamsDict(self, paramsDict):
-        # load the parameters from a python dict
-        for param in paramsDict:
-            globals()[param] = paramsDict[param]
-
-        self.paramsLoaded = True
-
-    def loadParamsJson(self, paramName):
-        # load the parameters from a json file
-
-        # TODO::load parameters.py vars into an object instead of in global
-
-        # the json file is a dict with the knowsXXX variables
-        with open(paramName) as jsonFile:
-            params = json.load(jsonFile)
-
-            self.loadParamsDict(params)
+    def loadParams(self, params):
+        ParamsLoader.factory(params).load()
 
     def solveRom(self):
-        if self.paramsLoaded is False or self.romLoaded is False:
-            self.log.error("Parameters or rom not loaded: params: {}, rom: {}".format(self.paramsLoaded,
-                                                                                      self.romLoaded))
+        if  self.romLoaded is False:
+            self.log.error("rom not loaded")
             return
 
         difficulty = self.computeDifficulty()
@@ -386,6 +366,52 @@ class RomLoaderDict(RomLoader):
     def __init__(self, locsItems):
         self.locsItems = locsItems
 
+class ParamsLoader:
+    @staticmethod
+    def factory(params):
+        # can be a json or a dict with the parameters
+        if type(params) is str:
+            ext = os.path.splitext(params)
+            if ext[1].lower() == '.json':
+                return ParamsLoaderJson(params)
+            else:
+                print("wrong parameters file type: {}".format(ext[1]))
+                sys.exit(-1)
+        elif type(params) is dict:
+            return ParamsLoaderDict(params)
+
+    def load(self):
+        # update the parameters in the parameters classes: Conf, Knows, Settings
+        # Conf
+        for param in self.params['Conf']:
+            if param[0:len('__')] != '__':
+                setattr(Conf, param, self.params['Conf'][param])
+
+        # Knows
+        for param in self.params['Knows']:
+            if param[0:len('__')] != '__':
+                setattr(Knows, param, self.params['Knows'][param])
+
+        # Settings
+        for param in self.params['Settings']:
+            if param[0:len('__')] != '__':
+                setattr(Settings, param, self.params['Settings'][param])
+
+    def dump(self, fileName):
+        with open(fileName, 'w') as jsonFile:
+            json.dump(self.params, jsonFile)
+
+class ParamsLoaderJson(ParamsLoader):
+    # when called from the test suite
+    def __init__(self, jsonFileName):
+        with open(jsonFileName) as jsonFile:
+            self.params = json.load(jsonFile)
+
+class ParamsLoaderDict(ParamsLoader):
+    # when called from the website
+    def __init__(self, params):
+        self.params = params
+
 class DifficultyDisplayer:
     difficulties = {
         0 : 'baby',
@@ -438,10 +464,15 @@ class DifficultyDisplayer:
         return displayString
 
 if __name__ == "__main__":
-    if len(sys.argv) == 2:
-        romFileName = sys.argv[1]
-    else:
-        print("missing param: rom file")
+    if len(sys.argv) not in (2, 3):
+        print("missing param: rom file [param file]")
         sys.exit(0)
 
-    Solver(rom=romFileName).solveRom()
+    romFileName = sys.argv[1]
+    solver = Solver(rom=romFileName)
+
+    if len(sys.argv) == 3:
+        paramsFileName = sys.argv[2]
+        solver.loadParams(paramsFileName)
+
+    solver.solveRom()

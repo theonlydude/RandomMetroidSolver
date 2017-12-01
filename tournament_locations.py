@@ -1,4 +1,4 @@
-from parameters import Knows
+from parameters import Knows, Settings
 # the canXXX functions
 from helpers import *
 
@@ -185,7 +185,7 @@ locations = [
     # DONE: harder without varia
     'Available': lambda items: wand(canAccessKraid(items),
                                     wor(heatProof(items),
-                                        energyReserveCountOkList(items, hellRuns['Ice'])),
+                                        energyReserveCountOkList(items, Settings.hellRuns['Ice'])),
                                     wor(wand(haveItem(items, 'Morph'),
                                              Knows.Mockball),
                                         haveItem(items, 'SpeedBooster'))) # FIXME : Knows.EarlyKraid has nothing to do with this and is implied by canAccessKraid

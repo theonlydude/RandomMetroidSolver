@@ -6,7 +6,8 @@ import sys, struct, math, os, json, logging
 
 # the difficulties for each technics
 from parameters import Conf
-from parameters import *
+from parameters import easy, medium, hard, harder, hardcore, mania
+
 # the canXXX functions
 from helpers import *
 

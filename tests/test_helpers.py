@@ -2,10 +2,8 @@ import unittest
 
 from helpers import itemCountOkList
 from helpers import energyReserveCountOkList
-from parameters import easy
-from parameters import medium
-from parameters import hard
-from parameters import hellRuns
+from parameters import easy, medium, hard
+from parameters import Settings
 from solver import RomReader
 
 
@@ -14,14 +12,14 @@ class TestHelpers(unittest.TestCase):
 
     def testItemCountOkList(self):
         chosenItem = self.allItems[0]
-        difficulties = hellRuns['Ice']
+        difficulties = Settings.hellRuns['Ice']
         self.assertEqual((False, 0),
                          itemCountOkList(self.allItems,
                                          chosenItem,
                                          difficulties))
 
     def testEnergyReserveCountOkList(self):
-        difficulties = hellRuns['Ice']
+        difficulties = Settings.hellRuns['Ice']
         self.assertEqual((False, 0),
                          energyReserveCountOkList(self.allItems,
                                                   difficulties))

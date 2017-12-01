@@ -1,8 +1,8 @@
 from functools import reduce
 
 # the difficulties for each technics
-from parameters import Knows
-from parameters import *
+from parameters import Knows, Settings
+from parameters import easy, medium, hard, harder, hardcore, mania
 
 # we have to compare booleans, but with a weight (the difficulty)
 # a and b type is: (bool, weight)
@@ -97,7 +97,7 @@ def canHellRun(items):
     if heatProof(items)[0]:
         return (True, easy)
     elif energyReserveCount(items) >= 3:
-        return energyReserveCountOkList(items, hellRuns['MainUpperNorfair'])
+        return energyReserveCountOkList(items, Settings.hellRuns['MainUpperNorfair'])
     else:
         return (False, 0)
 
@@ -393,12 +393,12 @@ def canInflictEnoughDamages(items, bossEnergy, doubleSuper=False, charge=True, p
     if chargeDPS > 0:
         ammoMargin += 2
 
-    missilesDPS = algoSettings['missilesPerSecond'] * 100.0
-    supersDPS = algoSettings['supersPerSecond'] * 300.0
+    missilesDPS = Settings.algoSettings['missilesPerSecond'] * 100.0
+    supersDPS = Settings.algoSettings['supersPerSecond'] * 300.0
     if doubleSuper is True:
         supersDPS *= 2
     if powerDamage > 0:
-        powerDPS = algoSettings['powerBombsPerSecond'] * 200.0
+        powerDPS = Settings.algoSettings['powerBombsPerSecond'] * 200.0
     else:
         powerDPS = 0.0
     dpsDict = { missilesDPS : (missilesAmount, 100.0), supersDPS : (supersAmount, oneSuper), powerDPS : (powerAmount, 200.0), chargeDPS : (10000, chargeDPS) } # one charged shot per second. and no boss will take more 10000 charged shots
@@ -415,7 +415,7 @@ def canInflictEnoughDamages(items, bossEnergy, doubleSuper=False, charge=True, p
             break
     if bossEnergy > 0:
         # rely on missile/supers drops
-        secs += bossEnergy * algoSettings['missileDropsPerMinute'] * 100 / 60
+        secs += bossEnergy * Settings.algoSettings['missileDropsPerMinute'] * 100 / 60
     #print('ammoMargin = ' + str(ammoMargin) + ', secs = ' + str(secs))
 
     return (ammoMargin, secs)
@@ -455,7 +455,7 @@ def computeBossDifficulty(items, ammoMargin, secs, diffTbl):
     # only augment difficulty in case of no charge, don't lower it.
     # if we have charge, ammoMargin will have a huge value (see canInflictEnoughDamages),
     # so this does not apply
-    diffAdjust = (1 - (ammoMargin - algoSettings['ammoMarginIfNoCharge']))
+    diffAdjust = (1 - (ammoMargin - Settings.algoSettings['ammoMarginIfNoCharge']))
     if diffAdjust > 1:
         difficulty *= diffAdjust
     #print('difficulty = ' + str(difficulty))
@@ -467,21 +467,21 @@ def enoughStuffsRidley(items):
     (ammoMargin, secs) = canInflictEnoughDamages(items, 18000, doubleSuper=True, givesDrops=False)
     if ammoMargin == 0:
         return (False, 0)
-    return (True, computeBossDifficulty(items, ammoMargin, secs, bossesDifficulty['Ridley']))
+    return (True, computeBossDifficulty(items, ammoMargin, secs, Settings.bossesDifficulty['Ridley']))
 
 def enoughStuffsKraid(items):
     #print('KRAID')
     (ammoMargin, secs) = canInflictEnoughDamages(items, 1000)
     if ammoMargin == 0:
         return (False, 0)
-    return (True, computeBossDifficulty(items, ammoMargin, secs, bossesDifficulty['Kraid']))
+    return (True, computeBossDifficulty(items, ammoMargin, secs, Settings.bossesDifficulty['Kraid']))
 
 def enoughStuffsDraygon(items):
     #print('DRAYGON')
     (ammoMargin, secs) = canInflictEnoughDamages(items, 6000)
     fight = (False, 0)
     if ammoMargin > 0:
-        fight = (True, computeBossDifficulty(items, ammoMargin, secs, bossesDifficulty['Draygon']))
+        fight = (True, computeBossDifficulty(items, ammoMargin, secs, Settings.bossesDifficulty['Draygon']))
     return wor(fight,
                wand(Knows.DraygonGrappleKill,
                     haveItem(items, 'Grapple')),
@@ -493,12 +493,12 @@ def enoughStuffsPhantoon(items):
     (ammoMargin, secs) = canInflictEnoughDamages(items, 2500, doubleSuper=True)
     if ammoMargin == 0:
         return (False, 0)
-    difficulty = computeBossDifficulty(items, ammoMargin, secs, bossesDifficulty['Phantoon'])
+    difficulty = computeBossDifficulty(items, ammoMargin, secs, Settings.bossesDifficulty['Phantoon'])
     hasCharge = haveItem(items, 'Charge')[0]
     if hasCharge or haveItem(items, 'ScrewAttack')[0]:
-        difficulty /= algoSettings['phantoonFlamesAvoidBonus']
+        difficulty /= Settings.algoSettings['phantoonFlamesAvoidBonus']
     elif not hasCharge and itemCount(items, 'Missile') <= 2: # few missiles is harder
-        difficulty *= algoSettings['phantoonLowMissileMalus']
+        difficulty *= Settings.algoSettings['phantoonLowMissileMalus']
 
     return (True, difficulty)
 
@@ -512,7 +512,7 @@ def enoughStuffsMotherbrain(items):
     (ammoMargin, secs) = canInflictEnoughDamages(items, 18000 + 3000, givesDrops=False)
     if ammoMargin == 0:
         return (False, 0)
-    return (True, computeBossDifficulty(items, ammoMargin, secs, bossesDifficulty['Mother Brain']))
+    return (True, computeBossDifficulty(items, ammoMargin, secs, Settings.bossesDifficulty['Mother Brain']))
 
 def canPassMetroids(items):
     return wand(canOpenRedDoors(items),

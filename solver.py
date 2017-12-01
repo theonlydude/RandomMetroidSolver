@@ -379,6 +379,8 @@ class ParamsLoader:
                 sys.exit(-1)
         elif type(params) is dict:
             return ParamsLoaderDict(params)
+        elif params is None:
+            return ParamsLoaderMem()
 
     def load(self):
         # update the parameters in the parameters classes: Conf, Knows, Settings
@@ -411,6 +413,13 @@ class ParamsLoaderDict(ParamsLoader):
     # when called from the website
     def __init__(self, params):
         self.params = params
+
+class ParamsLoaderMem(ParamsLoader):
+    # to load the current classes from memory
+    def __init__(self):
+        self.params = {'Conf': {k: v for k, v in Conf.__dict__.items() if k[0:len('__')] != '__'},
+                       'Knows': {k: v for k, v in Knows.__dict__.items() if k[0:len('__')] != '__'},
+                       'Settings': {k: v for k, v in Settings.__dict__.items() if k[0:len('__')] != '__'}}
 
 class DifficultyDisplayer:
     difficulties = {

@@ -1,6 +1,7 @@
 from functools import reduce
 
 # the difficulties for each technics
+from parameters import Knows
 from parameters import *
 
 # we have to compare booleans, but with a weight (the difficulty)
@@ -103,16 +104,16 @@ def canHellRun(items):
 def canFly(items):
     if haveItem(items, 'SpaceJump')[0]:
         return (True, easy)
-    elif haveItem(items, 'Morph')[0] and haveItem(items, 'Bomb')[0] and knowsInfiniteBombJump[0]:
-        return knowsInfiniteBombJump
+    elif haveItem(items, 'Morph')[0] and haveItem(items, 'Bomb')[0] and Knows.InfiniteBombJump[0]:
+        return Knows.InfiniteBombJump
     else:
         return (False, 0)
 
 def canFlyDiagonally(items):
     if haveItem(items, 'SpaceJump')[0]:
         return (True, easy)
-    elif haveItem(items, 'Morph')[0] and haveItem(items, 'Bomb')[0] and knowsDiagonalBombJump[0]:
-        return knowsDiagonalBombJump
+    elif haveItem(items, 'Morph')[0] and haveItem(items, 'Bomb')[0] and Knows.DiagonalBombJump[0]:
+        return Knows.DiagonalBombJump
     else:
         return (False, 0)
 
@@ -150,16 +151,16 @@ def canEnterAndLeaveGauntlet(items):
     #              and use power bombs on the way out
     return wand(wor(canFly(items),
                     haveItem(items, 'SpeedBooster'),
-                    wand(knowsHiJumpGauntletAccess, haveItem(items, 'HiJump'))),
+                    wand(Knows.HiJumpGauntletAccess, haveItem(items, 'HiJump'))),
                 wor(haveItem(items, 'ScrewAttack'),
-                    wand(knowsGauntletWithPowerBombs,
+                    wand(Knows.GauntletWithPowerBombs,
                          canUsePowerBombs(items),
                          itemCountOk(items, 'PowerBomb', 2)),
-                    wand(knowsGauntletWithBombs, canUseBombs(items)),
+                    wand(Knows.GauntletWithBombs, canUseBombs(items)),
                     wand(haveItem(items, 'SpeedBooster'),
                          canUsePowerBombs(items),
                          energyReserveCountOk(items, 2),
-                         wand(knowsSimpleShortCharge, knowsGauntletEntrySpark))))
+                         wand(Knows.SimpleShortCharge, Knows.GauntletEntrySpark))))
 
 def canPassBombPassages(items):
     return wor(canUseBombs(items),
@@ -187,7 +188,7 @@ def canAccessKraid(items):
     return wand(canAccessRedBrinstar(items),
                 wor(haveItem(items, 'HiJump'),
                     canFly(items),
-                    knowsEarlyKraid),
+                    Knows.EarlyKraid),
                 canPassBombPassages(items))
 
 def canAccessWs(items):
@@ -204,11 +205,11 @@ def canAccessWs(items):
                 canUsePowerBombs(items),
                 wor(wor(haveItem(items, 'Grapple'),
                         haveItem(items, 'SpaceJump'),
-                        knowsContinuousWallJump),
-                    wor(wand(knowsDiagonalBombJump, canUseBombs(items)),
-                        wand(knowsSimpleShortCharge, haveItem(items, 'SpeedBooster')),
-                        wand(knowsGravityJump, haveItem(items, 'Gravity')),
-                        wand(knowsMockballWs, haveItem(items, 'Morph'), haveItem(items, 'SpringBall')))))
+                        Knows.ContinuousWallJump),
+                    wor(wand(Knows.DiagonalBombJump, canUseBombs(items)),
+                        wand(Knows.SimpleShortCharge, haveItem(items, 'SpeedBooster')),
+                        wand(Knows.GravityJump, haveItem(items, 'Gravity')),
+                        wand(Knows.MockballWs, haveItem(items, 'Morph'), haveItem(items, 'SpringBall')))))
 
 def canAccessHeatedNorfair(items):
     # EXPLAINED: from Red Tower, to go to Bubble Mountain we have to pass through
@@ -226,7 +227,7 @@ def canAccessCrocomire(items):
     #              then speed booster in Crocomire Speedway (easy hell run if no varia
     #              as we only have to go in straight line, so two ETanks are required)
     return wor(wand(canAccessHeatedNorfair(items),
-                    wor(knowsGreenGateGlitch, haveItem(items, 'Wave'))),
+                    wor(Knows.GreenGateGlitch, haveItem(items, 'Wave'))),
                wand(canAccessRedBrinstar(items),
                     canUsePowerBombs(items),
                     haveItem(items, 'SpeedBooster'),
@@ -246,15 +247,15 @@ def canAccessLowerNorfair(items):
                 canAccessRedBrinstar(items),
                 canUsePowerBombs(items),
                 wor(wand(haveItem(items, 'Gravity'), haveItem(items, 'SpaceJump')),
-                    wand(knowsGravityJump, haveItem(items, 'Gravity')),
-                    wand(knowsLavaDive, haveItem(items, 'HiJump'), energyReserveCountOk(items, 3))))
+                    wand(Knows.GravityJump, haveItem(items, 'Gravity')),
+                    wand(Knows.LavaDive, haveItem(items, 'HiJump'), energyReserveCountOk(items, 3))))
 
 def canPassWorstRoom(items):
     # https://www.youtube.com/watch?v=gfmEDDmSvn4
     return wand(canAccessLowerNorfair(items),
                 wor(canFly(items),
-                    wand(knowsWorstRoomIceCharge, haveItem(items, 'Ice'), haveItem(items, 'Charge')),
-                    wand(knowsWorstRoomHiJump, haveItem(items, 'HiJump'))))
+                    wand(Knows.WorstRoomIceCharge, haveItem(items, 'Ice'), haveItem(items, 'Charge')),
+                    wand(Knows.WorstRoomHiJump, haveItem(items, 'HiJump'))))
 
 def canAccessOuterMaridia(items):
     # EXPLAINED: access Red Tower in red brinstar,
@@ -273,14 +274,14 @@ def canAccessOuterMaridia(items):
                          wor(haveItem(items, 'Grapple'),
                              haveItem(items, 'SpeedBooster'),
                              canFly(items),
-                             knowsGravityJump)),
+                             Knows.GravityJump)),
                     wor(wand(haveItem(items, 'HiJump'),
                              haveItem(items, 'Ice'),
-                             wor(knowsSuitlessOuterMaridiaNoGuns,
-                                 wand(knowsSuitlessOuterMaridia,
+                             wor(Knows.SuitlessOuterMaridiaNoGuns,
+                                 wand(Knows.SuitlessOuterMaridia,
                                       haveItem(items, 'SpringBall'),
-                                      knowsSpringBallJump))),
-                        wand(knowsSuitlessOuterMaridia,
+                                      Knows.SpringBallJump))),
+                        wand(Knows.SuitlessOuterMaridia,
                              haveItem(items, 'HiJump'),
                              haveItem(items, 'Ice'),
                              wor(haveItem(items, 'Wave'),
@@ -315,7 +316,7 @@ def canDefeatBotwoon(items):
                     canDoSuitlessMaridia(items)),
                 wor(wand(haveItem(items, 'SpeedBooster'),
                          haveItem(items, 'Gravity')),
-                    wand(knowsMochtroidClip, haveItem(items, 'Ice'))))
+                    wand(Knows.MochtroidClip, haveItem(items, 'Ice'))))
 
 
 def canDefeatDraygon(items):
@@ -482,9 +483,9 @@ def enoughStuffsDraygon(items):
     if ammoMargin > 0:
         fight = (True, computeBossDifficulty(items, ammoMargin, secs, bossesDifficulty['Draygon']))
     return wor(fight,
-               wand(knowsDraygonGrappleKill,
+               wand(Knows.DraygonGrappleKill,
                     haveItem(items, 'Grapple')),
-               wand(knowsShortCharge,
+               wand(Knows.ShortCharge,
                     haveItem(items, 'SpeedBooster')))
 
 def enoughStuffsPhantoon(items):
@@ -519,8 +520,8 @@ def canPassMetroids(items):
                     (haveItemCount(items, 'PowerBomb', 3), 0))) # to avoid leaving tourian to refill power bombs
 
 def canPassZebetites(items):
-    return wor(wand(haveItem(items, 'Ice'), knowsIceZebSkip),
-               wand(haveItem(items, 'SpeedBooster'), knowsSpeedZebSkip),
+    return wor(wand(haveItem(items, 'Ice'), Knows.IceZebSkip),
+               wand(haveItem(items, 'SpeedBooster'), Knows.SpeedZebSkip),
                (canInflictEnoughDamages(items, 1100*4, charge=False, givesDrops=False)[0] >= 1, 0)) # account for all the zebs to avoid constant refills
 
 def enoughStuffTourian(items):
@@ -536,7 +537,7 @@ class Pickup:
             return len(minorLocations) == 0
         else:
             canEnd = enoughStuffTourian(items)[0]
-            if itemsPickup == "normal":
+            if self.itemsPickup == "normal":
                 return canEnd and haveItemCount(items, 'PowerBomb', 4)
             else:
                 return canEnd

@@ -5,6 +5,7 @@
 import sys, struct, math, os, json, logging
 
 # the difficulties for each technics
+from parameters import Conf
 from parameters import *
 # the canXXX functions
 from helpers import *
@@ -20,7 +21,7 @@ class Solver:
         import tournament_locations
         self.locations = tournament_locations.locations
 
-        self.pickup = Pickup(itemsPickup)
+        self.pickup = Pickup(Conf.itemsPickup)
 
         # can be called from command line (console) or from web site (web)
         self.type = type
@@ -74,7 +75,7 @@ class Solver:
 
         if self.type == 'console':
             # print generated path
-            if displayGeneratedPath is True:
+            if Conf.displayGeneratedPath is True:
                 self.printPath("Generated path:", self.visitedLocations)
                 # if we've aborted, display remaining majors
                 if difficulty == -1:
@@ -88,7 +89,7 @@ class Solver:
     def displayDifficulty(self, difficulty):
         if difficulty >= 0:
             text = DifficultyDisplayer(difficulty).scale()
-            print("Estimated difficulty for items pickup {}: {}".format(itemsPickup, text))
+            print("Estimated difficulty for items pickup {}: {}".format(Conf.itemsPickup, text))
         else:
             print("Aborted run, can't finish the game with the given prerequisites")
 
@@ -108,7 +109,7 @@ class Solver:
         previous = -1
         current = 0
 
-        self.log.debug("{}: available major: {}, available minor: {}, visited: {}".format(itemsPickup, len(self.majorLocations), len(self.minorLocations), len(self.visitedLocations)))
+        self.log.debug("{}: available major: {}, available minor: {}, visited: {}".format(Conf.itemsPickup, len(self.majorLocations), len(self.minorLocations), len(self.visitedLocations)))
 
         isEndPossible = False
         endDifficulty = mania
@@ -146,9 +147,9 @@ class Solver:
                 break
 
             # sort them on difficulty and proximity
-            majorAvailable = self.getAvailableItemsList(majorAvailable, area, difficulty_target)
+            majorAvailable = self.getAvailableItemsList(majorAvailable, area, Conf.difficultyTarget)
             if not enough:
-                minorAvailable = self.getAvailableItemsList(minorAvailable, area, difficulty_target)
+                minorAvailable = self.getAvailableItemsList(minorAvailable, area, Conf.difficultyTarget)
 
             # first take easy major items in the current area
             majorPicked = False
@@ -200,7 +201,7 @@ class Solver:
         # compute difficulty value
         difficulty = self.computeDifficultyValue()
 
-        self.log.debug("{}: remaining major: {}, remaining minor: {}, visited: {}".format(itemsPickup, len(self.majorLocations), len(self.minorLocations), len(self.visitedLocations)))
+        self.log.debug("{}: remaining major: {}, remaining minor: {}, visited: {}".format(Conf.itemsPickup, len(self.majorLocations), len(self.minorLocations), len(self.visitedLocations)))
 
         return difficulty
 

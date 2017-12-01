@@ -1,3 +1,4 @@
+from parameters import Knows
 # the canXXX functions
 from helpers import *
 
@@ -23,7 +24,7 @@ locations = [
     #            we may not have bombs or power bomb to get out of Alcatraz.
     'Available': lambda items: wand(haveItem(items, 'Morph'),
                                     canOpenRedDoors(items)),
-    'PostAvailable': lambda items: wor(knowsAlcatrazEscape, 
+    'PostAvailable': lambda items: wor(Knows.AlcatrazEscape,
                                        canPassBombPassages(items))
 },
 {
@@ -47,7 +48,7 @@ locations = [
     'Available': lambda items: wand(wor(haveItem(items, 'SpeedBooster'),
                                         canDestroyBombWalls(items)),
                                     canOpenRedDoors(items),
-                                    wor(wand(knowsMockball,
+                                    wor(wand(Knows.Mockball,
                                              haveItem(items, 'Morph')),
                                         haveItem(items, 'SpeedBooster')))
 },
@@ -83,7 +84,7 @@ locations = [
     #  -have the high jump boots
     #  -freeze the Reo to jump on it
     #  -do a damage boost with one of the two Geemers
-    'Available': lambda items: wor(knowsCeilingDBoost,
+    'Available': lambda items: wor(Knows.CeilingDBoost,
                                    canFly(items),
                                    haveItem(items, 'HiJump'),
                                    haveItem(items, 'Ice'))
@@ -115,7 +116,7 @@ locations = [
                                     canOpenRedDoors(items),
                                     haveItem(items, 'SpeedBooster'),
                                     wor(haveItem(items, 'Gravity'),
-                                        knowsSimpleShortCharge))
+                                        Knows.SimpleShortCharge))
 },
 {
     'Area': "Brinstar",
@@ -123,12 +124,12 @@ locations = [
     'Class': "Major",
     'Address': 0x78824,
     'Visibility': "Visible",
-    # DONE: use knowsReverseGateGlitch
+    # DONE: use Knows.ReverseGateGlitch
     'Available': lambda items: wand(canUsePowerBombs(items),
                                     wor(haveItem(items, 'Wave'),
                                         wand(haveItem(items, 'Super'),
                                              haveItem(items, 'HiJump'),
-                                             knowsReverseGateGlitch)))
+                                             Knows.ReverseGateGlitch)))
 },
 {
     'Area': "Brinstar",
@@ -142,9 +143,9 @@ locations = [
                                         haveItem(items, 'SpaceJump'),
                                         wand(haveItem(items, 'Varia'),
                                              energyReserveCountOk(items, 4),
-                                             knowsXrayDboost),
+                                             Knows.XrayDboost),
                                         wand(energyReserveCountOk(items, 6),
-                                             knowsXrayDboost)))
+                                             Knows.XrayDboost)))
 },
 {
     'Area': "Brinstar",
@@ -186,8 +187,8 @@ locations = [
                                     wor(heatProof(items),
                                         energyReserveCountOkList(items, hellRuns['Ice'])),
                                     wor(wand(haveItem(items, 'Morph'),
-                                             knowsMockball),
-                                        haveItem(items, 'SpeedBooster'))) # FIXME : knowsEarlyKraid has nothing to do with this and is implied by canAccessKraid
+                                             Knows.Mockball),
+                                        haveItem(items, 'SpeedBooster'))) # FIXME : Knows.EarlyKraid has nothing to do with this and is implied by canAccessKraid
 },
 {
     'Area': "Norfair",
@@ -216,9 +217,9 @@ locations = [
     'Available': lambda items: wand(canAccessCrocomire(items),
                                     wor(canFly(items),
                                         wand(haveItem(items, 'Ice'),
-                                             knowsClimbToGrappleWithIce),
+                                             Knows.ClimbToGrappleWithIce),
                                         haveItem(items, 'SpeedBooster'),
-                                        knowsGreenGateGlitch))
+                                        Knows.GreenGateGlitch))
 },
 {
     'Area': "Norfair",
@@ -274,7 +275,7 @@ locations = [
     # DONE: easy with green gate glitch
     'Available': lambda items: wand(canAccessLowerNorfair(items),
                                     wor(haveItem(items, 'SpaceJump'),
-                                        knowsGreenGateGlitch))
+                                        Knows.GreenGateGlitch))
 },
 {
     'Area': "LowerNorfair",
@@ -307,14 +308,14 @@ locations = [
                                     Bosses.bossDead('Phantoon'),
                                     wor(wor(haveItem(items, 'Bomb'),
                                             haveItem(items, 'PowerBomb')),
-                                        knowsSpongeBathBombJump,
+                                        Knows.SpongeBathBombJump,
                                         wand(haveItem(items, 'HiJump'),
-                                             knowsSpongeBathHiJump),
+                                             Knows.SpongeBathHiJump),
                                         wor(haveItem(items, 'SpaceJump', difficulty=easy),
                                             wand(haveItem(items, 'SpeedBooster'),
-                                                 knowsSpongeBathSpeed),
+                                                 Knows.SpongeBathSpeed),
                                             wand(haveItem(items, 'SpringBall'),
-                                                 knowsSpringBallJump))))
+                                                 Knows.SpringBallJump))))
 },
 {
     'Area': "WreckedShip",
@@ -378,17 +379,17 @@ locations = [
     'Available': lambda items: wand(canDefeatDraygon(items),
                                     Bosses.bossDead('Draygon'),
                                     wor(wand(haveItem(items, 'SpeedBooster'),
-                                             knowsShortCharge,
-                                             knowsKillPlasmaPiratesWithSpark),
+                                             Knows.ShortCharge,
+                                             Knows.KillPlasmaPiratesWithSpark),
                                         wand(haveItem(items, 'Charge'),
-                                             knowsKillPlasmaPiratesWithCharge),
+                                             Knows.KillPlasmaPiratesWithCharge),
                                         haveItem(items, 'ScrewAttack', difficulty=easy),
                                         haveItem(items, 'Plasma', difficulty=easy)),
                                     wor(canFly(items),
                                         wand(haveItem(items, 'HiJump'),
-                                             knowsExitPlasmaRoomHiJump),
+                                             Knows.ExitPlasmaRoomHiJump),
                                         wand(haveItem(items, 'SpeedBooster'),
-                                             knowsShortCharge)))
+                                             Knows.ShortCharge)))
 },
 {
     'Area': "Maridia",
@@ -400,7 +401,7 @@ locations = [
     'Available': lambda items: wand(canAccessOuterMaridia(items),
                                     wor(haveItem(items, 'Gravity'),
                                         wand(canDoSuitlessMaridia(items),
-                                             knowsSuitlessSandpit)))
+                                             Knows.SuitlessSandpit)))
 },
 {
     'Area': "Maridia",
@@ -416,7 +417,7 @@ locations = [
     #    -fly (with space jump or diagonal bomb jump
     'Available': lambda items: wand(canAccessInnerMaridia(items),
                                     wor(wand(haveItem(items, 'Ice'),
-                                             knowsPuyoClip),
+                                             Knows.PuyoClip),
                                         wand(haveItem(items, 'Grapple'),
                                              wor(canFlyDiagonally(items),
                                                  haveItem(items, 'HiJump')))))

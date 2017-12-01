@@ -6,111 +6,113 @@ harder = 25
 hardcore = 50
 mania = 100
 
-# keep getting majors of at most this difficulty before going for minors or changing area
-difficulty_target=hardcore
+class Conf:
+    # keep getting majors of at most this difficulty before going for minors or changing area
+    difficultyTarget=hardcore
 
-# display the generated path (spoilers!)
-displayGeneratedPath = False
+    # display the generated path (spoilers!)
+    displayGeneratedPath = False
 
-# choose how many items are required
+    # choose how many items are required
 
-# 100%:
-#  need them all (major & minor)
-#itemsPickup = '100%'
+    # 100%:
+    #  need them all (major & minor)
+    #itemsPickup = '100%'
 
-# minimal:
-#  need only the minimal required major and minor items
-#   Morphing Ball (1)
-#   Charge (or enough minors to finish without)
-#   Missiles (enough to finish the game)
-#   Energy Tanks (4)
-#   Super Missiles (enough to finish the game)
-#   Varia Suit (1)
-#   Speed Boots (1) or Ice Beam (1)
-#   Power Bombs (1)
-#   Gravity Suit (1)
-itemsPickup = 'minimal'
+    # minimal:
+    #  need only the minimal required major and minor items
+    #   Morphing Ball (1)
+    #   Charge (or enough minors to finish without)
+    #   Missiles (enough to finish the game)
+    #   Energy Tanks (4)
+    #   Super Missiles (enough to finish the game)
+    #   Varia Suit (1)
+    #   Speed Boots (1) or Ice Beam (1)
+    #   Power Bombs (1)
+    #   Gravity Suit (1)
+    itemsPickup = 'minimal'
 
-# normal:
-#  take all the majors as many missiles/supers as in minimal and 4 power bomb packs
-#itemsPickup = 'normal'
+    # normal:
+    #  take all the majors as many missiles/supers as in minimal and 4 power bomb packs
+    #itemsPickup = 'normal'
 
-# ultra minimal:
-#  take only the required items to end the game, just them, nothing more.
-#  just a test, not production ready
-#itemsPickup = 'ultra minimal'
+    # ultra minimal:
+    #  take only the required items to end the game, just them, nothing more.
+    #  just a test, not production ready
+    #itemsPickup = 'ultra minimal'
 
-# the different technics to know (cf. http://deanyd.net/sm/index.php?title=Item_Randomizer)
-# and the personnal perceived difficulty.
-# False means: I can't do this technic or I don't know it.
+class Knows:
+    # the different technics to know (cf. http://deanyd.net/sm/index.php?title=Item_Randomizer)
+    # and the personnal perceived difficulty.
+    # False means: I can't do this technic or I don't know it.
 
-# universal
-# assume everyone knows wall jump & shinespark.
-#knowsWallJump = (True, easy)
-#knowsShinespark = (True, easy)
-knowsMockball = (True, easy) # early super and ice beam
+    # universal
+    # assume everyone knows wall jump & shinespark.
+    #WallJump = (True, easy)
+    #Shinespark = (True, easy)
+    Mockball = (True, easy) # early super and ice beam
 
-# common
-knowsCeilingDBoost = (True, easy) # for brinstar ceiling
-knowsAlcatrazEscape = (True, harder) # alcatraz without bomb
-knowsLavaDive = (True, harder) # ridley without gravity
-knowsSimpleShortCharge = (True, easy) # Waterway ETank without gravity, and Wrecked Ship access
-knowsInfiniteBombJump = (True, medium) # to access certain locations without high jump or space jump
-knowsGreenGateGlitch = (True, medium) # to access screw attack and crocomire
+    # common
+    CeilingDBoost = (True, easy) # for brinstar ceiling
+    AlcatrazEscape = (True, harder) # alcatraz without bomb
+    LavaDive = (True, harder) # ridley without gravity
+    SimpleShortCharge = (True, easy) # Waterway ETank without gravity, and Wrecked Ship access
+    InfiniteBombJump = (True, medium) # to access certain locations without high jump or space jump
+    GreenGateGlitch = (True, medium) # to access screw attack and crocomire
 
-# uncommon
-knowsMochtroidClip = (True, medium) # to access botwoon without speedbooster
-knowsPuyoClip = (True, mania) # to access spring ball without grapple beam
-knowsReverseGateGlitch = (True, medium) # ETank in Brinstar Gate
-knowsShortCharge = (False, 0) # to kill draygon
-knowsSuitlessOuterMaridia = (True, hardcore)
-knowsSuitlessOuterMaridiaNoGuns = (True, mania) # suitless maridia without even wave, spazer or plasma...
-knowsEarlyKraid = (True, easy) # to access kraid without hi jump boots
-knowsDraygonGrappleKill = (True, medium) # easy kill for draygon
+    # uncommon
+    MochtroidClip = (True, medium) # to access botwoon without speedbooster
+    PuyoClip = (True, mania) # to access spring ball without grapple beam
+    ReverseGateGlitch = (True, medium) # ETank in Brinstar Gate
+    ShortCharge = (False, 0) # to kill draygon
+    SuitlessOuterMaridia = (True, hardcore)
+    SuitlessOuterMaridiaNoGuns = (True, mania) # suitless maridia without even wave, spazer or plasma...
+    EarlyKraid = (True, easy) # to access kraid without hi jump boots
+    DraygonGrappleKill = (True, medium) # easy kill for draygon
 
-# rare
-knowsGravityJump = (True, hard) 
-knowsContinuousWallJump = (True, mania) # access wrecked ship
-knowsSpringBallJump = (True, hard) # access to wrecked ship etank without anything else and suitless maridia navigation
-knowsXrayDboost = (True, mania)  # Xray without grapple or space jump
+    # rare
+    GravityJump = (True, hard)
+    ContinuousWallJump = (True, mania) # access wrecked ship
+    SpringBallJump = (True, hard) # access to wrecked ship etank without anything else and suitless maridia navigation
+    XrayDboost = (True, mania)  # Xray without grapple or space jump
 
-# rarest
-knowsDiagonalBombJump = (True, mania) # access wrecked ship
+    # rarest
+    DiagonalBombJump = (True, mania) # access wrecked ship
 
-# end game
-knowsIceZebSkip = (False, 0) # change minimal ammo count 
-knowsSpeedZebSkip = (False, 0) # change minimal ammo count 
+    # end game
+    IceZebSkip = (False, 0) # change minimal ammo count
+    SpeedZebSkip = (False, 0) # change minimal ammo count
 
-# Difficulties of specific parts
+    # Difficulties of specific parts
 
-# gauntlet
-knowsHiJumpGauntletAccess = (True, harder)
-knowsGauntletWithBombs = (True, hard)
-knowsGauntletWithPowerBombs = (True, medium)
-knowsGauntletEntrySpark = (True, medium) # implies knowsSimpleShortCharge
+    # gauntlet
+    HiJumpGauntletAccess = (True, harder)
+    GauntletWithBombs = (True, hard)
+    GauntletWithPowerBombs = (True, medium)
+    GauntletEntrySpark = (True, medium) # implies Knows.SimpleShortCharge
 
-# worst room in the game
-knowsWorstRoomIceCharge = (True, mania) # can pass worst room JUST by freezing pirates
-knowsWorstRoomHiJump = (True, hardcore) # can go up worst room with HiJump and wall jumps
+    # worst room in the game
+    WorstRoomIceCharge = (True, mania) # can pass worst room JUST by freezing pirates
+    WorstRoomHiJump = (True, hardcore) # can go up worst room with HiJump and wall jumps
 
-# grapple
-knowsClimbToGrappleWithIce = (False, 0) # just learn green gate glitch, it's easier
+    # grapple
+    ClimbToGrappleWithIce = (False, 0) # just learn green gate glitch, it's easier
 
-# wrecked ship etank access ("sponge bath" room)
-knowsSpongeBathBombJump = (True, mania)
-knowsSpongeBathHiJump = (True, easy)
-knowsSpongeBathSpeed = (True, medium)
+    # wrecked ship etank access ("sponge bath" room)
+    SpongeBathBombJump = (True, mania)
+    SpongeBathHiJump = (True, easy)
+    SpongeBathSpeed = (True, medium)
 
-# plasma room
-knowsKillPlasmaPiratesWithSpark = (False, 0) # kill plasma pirates with spark echoes. implies knowsShortCharge
-knowsKillPlasmaPiratesWithCharge = (True, hard)
-knowsExitPlasmaRoomHiJump = (True, medium)
+    # plasma room
+    KillPlasmaPiratesWithSpark = (False, 0) # kill plasma pirates with spark echoes. implies Knows.ShortCharge
+    KillPlasmaPiratesWithCharge = (True, hard)
+    ExitPlasmaRoomHiJump = (True, medium)
 
-# sandpit
-knowsSuitlessSandpit = (False, 0) # access the item in the sandpit suitless
+    # sandpit
+    SuitlessSandpit = (False, 0) # access the item in the sandpit suitless
 
-# wrecked ship
-knowsMockballWs = (True, mania) # early wrecked ship access using a mock ball
+    # wrecked ship
+    MockballWs = (True, mania) # early wrecked ship access using a mock ball
 
 # boss difficulty tables :
 #

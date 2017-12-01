@@ -231,7 +231,8 @@ locations = [
     'Available': lambda items: wand(canAccessHeatedNorfair(items),
                                     wor(canFly(items),
                                         haveItem(items, 'Grapple'),
-                                        haveItem(items, 'HiJump', difficulty=hard)))
+                                        wand(haveItem(items, 'HiJump'),
+                                             Knows.NorfairReserveHiJump)))
 },
 {
     'Area': "Norfair",
@@ -253,7 +254,7 @@ locations = [
     'Available': lambda items: wand(canAccessHeatedNorfair(items),
                                     wor(haveItem(items, 'Grapple'),
                                         haveItem(items, 'SpaceJump'),
-                                        (True, medium)))
+                                        Knows.WaveBeamWallJump))
 },
 {
     'Area': "LowerNorfair",

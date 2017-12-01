@@ -540,7 +540,7 @@ class Pickup:
             if self.itemsPickup == "normal":
                 return canEnd and haveItemCount(items, 'PowerBomb', 4)
             else:
-                return canEnd
+                return canEnd and haveItemCount(items, 'PowerBomb', 1)
 
     def enoughMajors(self, items, majorLocations):
         # the end condition

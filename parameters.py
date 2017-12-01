@@ -85,6 +85,9 @@ class Knows:
 
     # Difficulties of specific parts
 
+    # brinstar red tower without ice or screw
+    RedTowerClimb = (True, hardcore)
+
     # gauntlet
     HiJumpGauntletAccess = (True, harder)
     GauntletWithBombs = (True, hard)

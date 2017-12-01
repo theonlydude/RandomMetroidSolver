@@ -693,8 +693,14 @@ locations = [
     'Class': "Minor",
     'Address': 0x7890E,
     'Visibility': "Chozo",
+    # can access from red brinstar lower or upper
+    # from upper: power bomb
+    # from lower: ice or screw or climb red tower
     'Available': lambda items: wand(canAccessRedBrinstar(items),
-                                    canUsePowerBombs(items))
+                                    wor(canUsePowerBombs(items),
+                                        Knows.RedTowerClimb,
+                                        haveItem(items, 'Ice'),
+                                        haveItem(items, 'ScrewAttack')))
 },
 {
     'Area': "Brinstar",
@@ -702,8 +708,12 @@ locations = [
     'Class': "Minor",
     'Address': 0x78914,
     'Visibility': "Visible",
+    # same as "Power Bomb (red Brinstar spike room)"
     'Available': lambda items: wand(canAccessRedBrinstar(items),
-                                    canUsePowerBombs(items))
+                                    wor(canUsePowerBombs(items),
+                                        Knows.RedTowerClimb,
+                                        haveItem(items, 'Ice'),
+                                        haveItem(items, 'ScrewAttack')))
 },
 {
     'Area': "Brinstar",

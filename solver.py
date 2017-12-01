@@ -32,7 +32,7 @@ class Solver:
             self.loadRom(rom)
 
         if params is not None:
-            self.loadParams()
+            self.loadParams(params)
 
     def loadRom(self, rom):
         RomLoader.factory(rom).assignItems(self.locations)
@@ -184,6 +184,12 @@ class Solver:
 
         self.log.debug("{}: remaining major: {}, remaining minor: {}, visited: {}".format(Conf.itemsPickup, len(self.majorLocations), len(self.minorLocations), len(self.visitedLocations)))
 
+        self.log.debug("remaining majors:")
+        for loc in self.majorLocations:
+            self.log.debug("{} ({})".format(loc['Name'], loc['itemName']))
+
+        self.log.debug("bosses: {}".format(Bosses.golden4Dead))
+
         return difficulty
 
     def computeLocationsDifficulty(self, locations):
@@ -238,6 +244,9 @@ class Solver:
             self.collectedItems.append('Dummy')
         if 'Pickup' in loc:
             loc['Pickup']()
+
+        self.log.debug("collectItem: {} at {}".format(item, loc['Name']))
+
         return loc['Area']
 
     def canEndGame(self):

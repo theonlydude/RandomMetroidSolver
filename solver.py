@@ -15,8 +15,8 @@ class Solver:
     # given a rom and parameters returns the estimated difficulty
 
     def __init__(self, type='console', rom=None, params=None):
-        #logging.basicConfig(level=logging.DEBUG)
-        logging.basicConfig(level=logging.INFO)
+        logging.basicConfig(level=logging.DEBUG)
+        #logging.basicConfig(level=logging.INFO)
         self.log = logging.getLogger('Solver')
 
         if params is not None:
@@ -147,11 +147,11 @@ class Solver:
             if not enough:
                 minorAvailable = self.getAvailableItemsList(minorAvailable, area, Conf.difficultyTarget)
 
-            # first take easy major items in the current area
+            # first take major items of acceptable difficulty in the current area
             majorPicked = False
             while (len(majorAvailable) > 0
                    and majorAvailable[0]['Area'] == area
-                   and majorAvailable[0]['difficulty'][0] <= easy):
+                   and majorAvailable[0]['difficulty'][0] <= Conf.difficultyTarget):
                 self.collectMajor(majorAvailable.pop(0))
                 majorPicked = True
             # if we took at least one major, recompute the difficulty
@@ -159,29 +159,25 @@ class Solver:
                 continue
             # next item decision
             if (enough or len(minorAvailable) == 0) and len(majorAvailable) > 0:
-                self.log.debug('NO/ENOUGH MINORS')
+                self.log.debug('MAJOR')
                 area = self.collectMajor(majorAvailable.pop(0))
             elif len(majorAvailable) == 0 and len(minorAvailable) > 0:
-                self.log.debug('NO MAJORS')
+                self.log.debug('MINOR')
                 area = self.collectMinor(minorAvailable.pop(0))
             elif len(majorAvailable) > 0 and len(minorAvailable) > 0:
                 self.log.debug('BOTH|M=' + majorAvailable[0]['Name'] + ', m=' + minorAvailable[0]['Name'])
                 # if both are available, decide based on area and difficulty                
-                nextMajArea = majorAvailable[0]['Area']
                 nextMajDifficulty = majorAvailable[0]['difficulty'][0]
                 nextMinArea = minorAvailable[0]['Area']
                 nextMinDifficulty = minorAvailable[0]['difficulty'][0]
-                if nextMajArea == area and nextMajDifficulty <= Conf.difficultyTarget:
-                    area = self.collectMajor(majorAvailable.pop(0))
-                elif nextMinArea == area and nextMinDifficulty <= Conf.difficultyTarget:
+                if nextMinArea == area and nextMinDifficulty <= Conf.difficultyTarget:
                     area = self.collectMinor(minorAvailable.pop(0))
+                # difficulty over area (this is a difficulty estimator,
+                # not a speedrunning simulator)
+                elif nextMinDifficulty < nextMajDifficulty:
+                    area = self.collectMinor(minorAvailable.pop(0))                    
                 else:
-                    # difficulty over area (this is a difficulty estimator,
-                    # not a speedrunning simulator)
-                    if nextMinDifficulty < nextMajDifficulty:
-                        area = self.collectMinor(minorAvailable.pop(0))
-                    else:
-                        area = self.collectMajor(majorAvailable.pop(0))
+                    area = self.collectMajor(majorAvailable.pop(0))
         # main loop end
         if isEndPossible:
             self.visitedLocations.append({

@@ -15,8 +15,8 @@ class Solver:
     # given a rom and parameters returns the estimated difficulty
 
     def __init__(self, type='console', rom=None, params=None):
-        logging.basicConfig(level=logging.DEBUG)
-        #logging.basicConfig(level=logging.INFO)
+        #logging.basicConfig(level=logging.DEBUG)
+        logging.basicConfig(level=logging.INFO)
         self.log = logging.getLogger('Solver')
 
         import tournament_locations

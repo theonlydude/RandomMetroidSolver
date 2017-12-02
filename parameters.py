@@ -11,36 +11,17 @@ class Conf:
     difficultyTarget=medium
 
     # display the generated path (spoilers!)
-    displayGeneratedPath = False
+    displayGeneratedPath = True
 
     # choose how many items are required
-
-    # 100%:
-    #  need them all (major & minor)
-    #itemsPickup = '100%'
-
-    # minimal:
-    #  need only the minimal required major and minor items
-    #   Morphing Ball (1)
-    #   Charge (or enough minors to finish without)
-    #   Missiles (enough to finish the game)
-    #   Energy Tanks (4)
-    #   Super Missiles (enough to finish the game)
-    #   Varia Suit (1)
-    #   Speed Boots (1) or Ice Beam (1)
-    #   Power Bombs (1)
-    #   Gravity Suit (1)
-    itemsPickup = 'minimal'
-
-    # normal:
-    #  take all the majors as many missiles/supers as in minimal and 4 power bomb packs
-    #itemsPickup = 'normal'
-
-    # ultra minimal:
-    #  take only the required items to end the game, just them, nothing more.
-    #  just a test, not production ready
-    #itemsPickup = 'ultra minimal'
-
+    majorsPickup='minimal'
+    #majorsPickup='all'
+    minorsPickup = {
+        'Missile' : 10,
+        'Super' : 8,
+        'PowerBomb' : 3
+    }
+    #minorsPickup='all'
 class Knows:
     # the different technics to know (cf. http://deanyd.net/sm/index.php?title=Item_Randomizer)
     # and the personnal perceived difficulty.
@@ -51,7 +32,7 @@ class Knows:
     #WallJump = (True, easy)
     #Shinespark = (True, easy)
     Mockball = (True, easy) # early super and ice beam
-
+    
     # common
     CeilingDBoost = (True, easy) # for brinstar ceiling
     AlcatrazEscape = (True, harder) # alcatraz without bomb
@@ -62,7 +43,7 @@ class Knows:
 
     # uncommon
     MochtroidClip = (True, medium) # to access botwoon without speedbooster
-    PuyoClip = (True, mania) # to access spring ball without grapple beam
+    PuyoClip = (False, 0) # to access spring ball without grapple beam
     ReverseGateGlitch = (True, medium) # ETank in Brinstar Gate
     ShortCharge = (False, 0) # to kill draygon
     SuitlessOuterMaridia = (True, hardcore)
@@ -72,7 +53,7 @@ class Knows:
 
     # rare
     GravityJump = (True, hard)
-    ContinuousWallJump = (True, mania) # access wrecked ship
+    ContinuousWallJump = (False, 0) # access wrecked ship
     SpringBallJump = (True, hard) # access to wrecked ship etank without anything else and suitless maridia navigation
     XrayDboost = (True, mania)  # Xray without grapple or space jump
 
@@ -86,7 +67,7 @@ class Knows:
     # Difficulties of specific parts
 
     # brinstar red tower without ice or screw
-    RedTowerClimb = (True, hardcore)
+    RedTowerClimb = (True, harder)
 
     # gauntlet
     HiJumpGauntletAccess = (True, harder)
@@ -95,12 +76,12 @@ class Knows:
     GauntletEntrySpark = (True, medium) # implies Knows.SimpleShortCharge
 
     # upper norfair
-    NorfairReserveHiJump = (True, hard) # cilmb to norfair reserve area by walljumping
-    WaveBeamWallJump = (True, easy) # climb to wave with wall jump
-
+    NorfairReserveHiJump = (True, hard) # climb to norfair reserve area by walljumping
+    WaveBeamWallJump = (True, easy) # climb to wave with wall jump 
+    
     # worst room in the game
     WorstRoomIceCharge = (True, mania) # can pass worst room JUST by freezing pirates
-    WorstRoomHiJump = (True, hardcore) # can go up worst room with HiJump and wall jumps
+    WorstRoomHiJump = (True, hard) # can go up worst room with HiJump and wall jumps
 
     # grapple
     ClimbToGrappleWithIce = (False, 0) # just learn green gate glitch, it's easier
@@ -119,7 +100,7 @@ class Knows:
     SuitlessSandpit = (False, 0) # access the item in the sandpit suitless
 
     # wrecked ship
-    MockballWs = (True, mania) # early wrecked ship access using a mock ball
+    MockballWs = (True, hardcore) # early wrecked ship access using a mock ball
 
 class Settings:
     # boss difficulty tables :
@@ -199,12 +180,12 @@ class Settings:
         }
     }
 
-    # hell run table
+    # hell run table (set to none for 
     hellRuns = {
         # Ice Beam hell run
-        'Ice' : [(2, hardcore), (3, harder), (4, hard), (6, medium)],
+        'Ice' : [(2, hardcore), (3, hard), (4, medium), (6, easy)],
         # rest of upper norfair
-        'MainUpperNorfair' : [(3, mania), (4, hardcore), (6, hard), (8, medium)]
+        'MainUpperNorfair' : [(3, mania), (4, hardcore), (6, hard), (10, medium)]
     }
 
     # various settings used in difficulty computation

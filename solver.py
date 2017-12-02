@@ -15,8 +15,8 @@ class Solver:
     # given a rom and parameters returns the estimated difficulty
 
     def __init__(self, type='console', rom=None, params=None):
-        logging.basicConfig(level=logging.DEBUG)
-        #logging.basicConfig(level=logging.INFO)
+        #logging.basicConfig(level=logging.DEBUG)
+        logging.basicConfig(level=logging.INFO)
         self.log = logging.getLogger('Solver')
 
         if params is not None:
@@ -39,7 +39,7 @@ class Solver:
         import tournament_locations
         self.locations = tournament_locations.locations
 
-        self.pickup = Pickup(Conf.itemsPickup)
+        self.pickup = Pickup(Conf.majorsPickup, Conf.minorsPickup)
 
         # can be called from command line (console) or from web site (web)
         self.type = type
@@ -84,7 +84,7 @@ class Solver:
     def displayDifficulty(self, difficulty):
         if difficulty >= 0:
             text = DifficultyDisplayer(difficulty).scale()
-            print("Estimated difficulty for items pickup {}: {}".format(Conf.itemsPickup, text))
+            print("Estimated difficulty: {}".format(text))
         else:
             print("Aborted run, can't finish the game with the given prerequisites")
 
@@ -104,7 +104,7 @@ class Solver:
         previous = -1
         current = 0
 
-        self.log.debug("{}: available major: {}, available minor: {}, visited: {}".format(Conf.itemsPickup, len(self.majorLocations), len(self.minorLocations), len(self.visitedLocations)))
+        self.log.debug("{}/{}: available major: {}, available minor: {}, visited: {}".format(Conf.majorsPickup, str(Conf.minorsPickup), len(self.majorLocations), len(self.minorLocations), len(self.visitedLocations)))
 
         isEndPossible = False
         endDifficulty = mania
@@ -191,7 +191,7 @@ class Solver:
         # compute difficulty value
         difficulty = self.computeDifficultyValue()
 
-        self.log.debug("{}: remaining major: {}, remaining minor: {}, visited: {}".format(Conf.itemsPickup, len(self.majorLocations), len(self.minorLocations), len(self.visitedLocations)))
+        self.log.debug("{}/{}: remaining major: {}, remaining minor: {}, visited: {}".format(Conf.majorsPickup, Conf.minorsPickup, len(self.majorLocations), len(self.minorLocations), len(self.visitedLocations)))
 
         self.log.debug("remaining majors:")
         for loc in self.majorLocations:
@@ -246,11 +246,7 @@ class Solver:
 
     def collectItem(self, loc):
         item = loc["itemName"]
-        if loc["Class"] == "Minor" or self.pickup.grabItem(self.collectedItems, item):
-            self.collectedItems.append(item)
-        else:
-            self.log.debug("Item not picked up: {}".format(item))
-            self.collectedItems.append('Dummy')
+        self.collectedItems.append(item)
         if 'Pickup' in loc:
             loc['Pickup']()
 

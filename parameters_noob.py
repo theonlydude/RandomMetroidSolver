@@ -14,33 +14,15 @@ class Conf:
     displayGeneratedPath = True
 
     # choose how many items are required
-
-    # 100%:
-    #  need them all (major & minor)
-    itemsPickup = '100%'
-
-    # minimal:
-    #  need only the minimal required major and minor items
-    #   Morphing Ball (1)
-    #   Charge (or enough minors to finish without)
-    #   Missiles (enough to finish the game)
-    #   Energy Tanks (4)
-    #   Super Missiles (enough to finish the game)
-    #   Varia Suit (1)
-    #   Speed Boots (1) or Ice Beam (1)
-    #   Power Bombs (1)
-    #   Gravity Suit (1)
-    #itemsPickup = 'minimal'
-
-    # normal:
-    #  take all the majors as many missiles/supers as in minimal and 4 power bomb packs
-    #itemsPickup = 'normal'
-
-    # ultra minimal:
-    #  take only the required items to end the game, just them, nothing more.
-    #  just a test, not production ready
-    #itemsPickup = 'ultra minimal'
-
+    #majorsPickup='minimal'
+    majorsPickup='all'
+    #minorsPickup = {
+    #    'Missile' : 10,
+    #    'Super' : 8,
+    #    'PowerBomb' : 3
+    #}
+    minorsPickup='all'
+    
 class Knows:
     # the different technics to know (cf. http://deanyd.net/sm/index.php?title=Item_Randomizer)
     # and the personnal perceived difficulty.
@@ -51,7 +33,7 @@ class Knows:
     #WallJump = (True, easy)
     #Shinespark = (True, easy)
     Mockball = (False, 0) # early super and ice beam
-
+    
     # common
     CeilingDBoost = (False, 0) # for brinstar ceiling
     AlcatrazEscape = (False, 0) # alcatraz without bomb
@@ -95,7 +77,7 @@ class Knows:
     GauntletEntrySpark = (False, 0) # implies Knows.SimpleShortCharge
 
     # upper norfair
-    NorfairReserveHiJump = (False, 0) # cilmb to norfair reserve area by walljumping
+    NorfairReserveHiJump = (False, 0) # climb to norfair reserve area by walljumping
     WaveBeamWallJump = (False, 0) # climb to wave with wall jump 
     
     # worst room in the game
@@ -199,12 +181,12 @@ class Settings:
         }
     }
 
-    # hell run table
+    # hell run table (set to none for 
     hellRuns = {
         # Ice Beam hell run
-        'Ice' : [(2, hardcore), (3, harder), (4, hard), (6, medium)],
+        'Ice' : [(2, hardcore), (3, hard), (4, medium), (6, easy)],
         # rest of upper norfair
-        'MainUpperNorfair' : [(3, mania), (4, hardcore), (6, hard), (8, medium)]
+        'MainUpperNorfair' : [(3, mania), (4, hardcore), (6, hard), (10, medium)]
     }
 
     # various settings used in difficulty computation

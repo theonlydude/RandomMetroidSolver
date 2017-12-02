@@ -83,6 +83,8 @@ def energyReserveCountOk(items, count, difficulty=0):
     return (energyReserveCount(items) >= count, difficulty)
 
 def energyReserveCountOkList(items, difficulties):
+    if difficulties is None or len(difficulties) == 0:
+        return (False, 0)
     # get a list: [(2, difficulty=hard), (4, difficulty=medium), (6, difficulty=easy)]
     def f(difficulty):
         return energyReserveCountOk(items, difficulty[0], difficulty=difficulty[1])
@@ -324,6 +326,35 @@ def canDefeatDraygon(items):
     return wand(canDefeatBotwoon(items),
                 haveItem(items, 'Gravity'));
 
+
+def getBeamDamage(items):
+    standardDamage = 20
+    
+    if wand(haveItem(items, 'Ice'), haveItem(items, 'Wave'), haveItem(items, 'Plasma'))[0]:
+        standardDamage = 300
+    elif wand(haveItem(items, 'Wave'), haveItem(items, 'Plasma')):
+        standardDamage = 250
+    elif wand(haveItem(items, 'Ice'), haveItem(items, 'Plasma')):
+        standardDamage = 200
+    elif wand(haveItem(items, 'Plasma')):
+        standardDamage = 150
+    elif wand(haveItem(items, 'Ice'), haveItem(items, 'Wave'), haveItem(items, 'Spazer')):
+        standardDamage = 100
+    elif wand(haveItem(items, 'Wave'), haveItem(items, 'Spazer')):
+        standardDamage = 70
+    elif wand(haveItem(items, 'Ice'), haveItem(items, 'Spazer')):
+        standardDamage = 60
+    elif wand(haveItem(items, 'Ice'), haveItem(items, 'Wave')):
+        standardDamage = 60
+    elif haveItem(items, 'Wave'):
+        standardDamage = 50
+    elif haveItem(items, 'Spazer'):
+        standardDamage = 40
+    elif haveItem(items, 'Ice'):
+        standardDamage = 30
+        
+    return standardDamage
+
 # returns a tuple with :
 #
 # - a floating point number : 0 if boss is unbeatable with
@@ -341,35 +372,11 @@ def canInflictEnoughDamages(items, bossEnergy, doubleSuper=False, charge=True, p
     # http://deanyd.net/sm/index.php?title=Damage
     standardDamage = 0
     if haveItem(items, 'Charge')[0] and charge is True:
-        if wand(haveItem(items, 'Ice'), haveItem(items, 'Wave'), haveItem(items, 'Plasma'))[0]:
-            standardDamage = 300
-        elif wand(haveItem(items, 'Wave'), haveItem(items, 'Plasma')):
-            standardDamage = 250
-        elif wand(haveItem(items, 'Ice'), haveItem(items, 'Plasma')):
-            standardDamage = 200
-        elif wand(haveItem(items, 'Plasma')):
-            standardDamage = 150
-        elif wand(haveItem(items, 'Ice'), haveItem(items, 'Wave'), haveItem(items, 'Spazer')):
-            standardDamage = 100
-        elif wand(haveItem(items, 'Wave'), haveItem(items, 'Spazer')):
-            standardDamage = 70
-        elif wand(haveItem(items, 'Ice'), haveItem(items, 'Spazer')):
-            standardDamage = 60
-        elif wand(haveItem(items, 'Ice'), haveItem(items, 'Wave')):
-            standardDamage = 60
-        elif haveItem(items, 'Wave'):
-            standardDamage = 50
-        elif haveItem(items, 'Spazer'):
-            standardDamage = 40
-        elif haveItem(items, 'Ice'):
-            standardDamage = 30
-        else:
-            standardDamage = 20
-
+        standardDamage = getBeamDamage(items)
     # charge triples the damage
     chargeDPS = standardDamage * 3.0
 
-    # missile 100 damages, super missile 300 damages, 5 missile in each extension
+    # missile 100 damages, super missile 300 damages, PBs 200 dmg, 5 in each extension
     missilesAmount = itemCount(items, 'Missile') * 5
     missilesDamage = missilesAmount * 100
     supersAmount = itemCount(items, 'Super') * 5
@@ -377,18 +384,16 @@ def canInflictEnoughDamages(items, bossEnergy, doubleSuper=False, charge=True, p
     if doubleSuper is True:
         oneSuper *= 2
     supersDamage = supersAmount * oneSuper
-
     powerDamage = 0
     powerAmount = 0
     if power is True and haveItem(items, 'PowerBomb')[0]:
-        # PBs come also in packs of 5
         powerAmount = itemCount(items, 'PowerBomb') * 5
         powerDamage = powerAmount * 200
-
+        
     canBeatBoss = chargeDPS > 0 or givesDrops or (missilesDamage + supersDamage + powerDamage) >= bossEnergy
-
     if not canBeatBoss:
         return (0, 0)
+    
     ammoMargin = (missilesDamage + supersDamage + powerDamage) / bossEnergy
     if chargeDPS > 0:
         ammoMargin += 2
@@ -442,13 +447,13 @@ def computeBossDifficulty(items, ammoMargin, secs, diffTbl):
     difficulty = medium
     # get difficulty by energy
     if energyDict:
-        keyz = sorted(energyDict.keys())
+        keyz = sorted(map(int, energyDict.keys()))
         if len(keyz) > 0:
-            difficulty = energyDict[keyz[0]]
+            difficulty = float(energyDict[keyz[0]])
             for k in keyz:
                 if k > energy:
                     break
-                difficulty = energyDict[k]
+                difficulty = float(energyDict[k])
     # adjust by fight duration
     difficulty *= (duration / 120)
     # and by ammo margin
@@ -528,25 +533,29 @@ def enoughStuffTourian(items):
     return wand(canPassMetroids(items), canPassZebetites(items), enoughStuffsMotherbrain(items))
 
 class Pickup:
-    def __init__(self, itemsPickup):
-        self.itemsPickup = itemsPickup
+    def __init__(self, majorsPickup, minorsPickup):
+        self.majorsPickup = majorsPickup
+        self.minorsPickup = minorsPickup
 
+    def _enoughMinorTable(self, items, minorType):
+        return haveItemCount(items, minorType, int(self.minorsPickup[minorType]))
+        
     def enoughMinors(self, items, minorLocations):
-        if self.itemsPickup == '100%':
+        if self.minorsPickup == 'all':
             # need them all
             return len(minorLocations) == 0
         else:
             canEnd = enoughStuffTourian(items)[0]
-            if self.itemsPickup == "normal":
-                return canEnd and haveItemCount(items, 'PowerBomb', 4)
-            else:
-                return canEnd and haveItemCount(items, 'PowerBomb', 1)
+            return (canEnd
+                    and self._enoughMinorTable(items, 'Missile')
+                    and self._enoughMinorTable(items, 'Super')
+                    and self._enoughMinorTable(items, 'PowerBomb'))
 
     def enoughMajors(self, items, majorLocations):
         # the end condition
-        if self.itemsPickup == '100%' or self.itemsPickup == 'normal':
+        if self.majorsPickup == 'all':
             return len(majorLocations) == 0
-        elif self.itemsPickup == 'minimal' or self.itemsPickup == 'ultra minimal':
+        elif self.majorsPickup == 'minimal':
             return (haveItemCount(items, 'Morph', 1)
                     # pass bomb block passages
                     and (haveItemCount(items, 'Bomb', 1)
@@ -560,44 +569,6 @@ class Pickup:
                          or haveItemCount(items, 'Ice', 1))
                     # draygon access
                     and haveItemCount(items, 'Gravity', 1))
-
-    def grabItem(self, items, item):
-        # check if we grab the major item
-        if self.itemsPickup == 'ultra minimal':
-            return self.isMinimalItem(items, item)
-        else:
-            return True
-
-    def isMinimalItem(self, items, item):
-        # to grab only minimal items
-        # TODO::not very realistic, and there's plenty of special cases...
-        if item == 'Morph':
-            return True
-        elif item == 'Bomb':
-            return not haveItemCount(items, 'PowerBomb', 1)
-        elif item == 'PowerBomb':
-            return not haveItemCount(items, 'Bomb', 1)
-        elif item == 'ETank':
-            return itemCount(items, 'ETank') <= 2
-        elif item == 'Varia':
-            return True
-        elif item == 'Ice':
-            return True
-        elif item == 'SpeedBooster':
-            return True
-        elif item == 'Gravity':
-            return True
-        # for "Energy Tank, Brinstar Gate"
-        elif item == 'HiJump':
-            return True
-        # for "X-Ray Scope"
-        elif item == 'Grapple':
-            return True
-        # to break bomb wall at left of Parlor and Alcatraz
-        elif item == 'ScrewAttack':
-            return True
-        else:
-            return False
 
 class Bosses:
     # bosses helpers to know if they are dead

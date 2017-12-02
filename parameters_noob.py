@@ -181,12 +181,12 @@ class Settings:
         }
     }
 
-    # hell run table (set to none for 
+    # hell run table (set en entry to none to disable hell run)
     hellRuns = {
         # Ice Beam hell run
-        'Ice' : [(2, hardcore), (3, hard), (4, medium), (6, easy)],
+        'Ice' : None,
         # rest of upper norfair
-        'MainUpperNorfair' : [(3, mania), (4, hardcore), (6, hard), (10, medium)]
+        'MainUpperNorfair' : None
     }
 
     # various settings used in difficulty computation

@@ -429,7 +429,7 @@ def computeBossDifficulty(items, ammoMargin, secs, diffTbl):
     # actual fight duration :
     rate = None
     if 'Rate' in diffTbl:
-        rate = diffTbl['Rate']
+        rate = float(diffTbl['Rate'])
     if rate is None:
         duration = 120.0
     else:

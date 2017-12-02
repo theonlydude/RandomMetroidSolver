@@ -33,41 +33,39 @@ class Knows:
     #Shinespark = (True, easy)
     Mockball = (True, easy) # early super and ice beam
     
-    # common
+    # global
     CeilingDBoost = (True, easy) # for brinstar ceiling
     AlcatrazEscape = (True, harder) # alcatraz without bomb
     LavaDive = (True, harder) # ridley without gravity
     SimpleShortCharge = (True, easy) # Waterway ETank without gravity, and Wrecked Ship access
     InfiniteBombJump = (True, medium) # to access certain locations without high jump or space jump
     GreenGateGlitch = (True, medium) # to access screw attack and crocomire
-
-    # uncommon
     MochtroidClip = (True, medium) # to access botwoon without speedbooster
     PuyoClip = (False, 0) # to access spring ball without grapple beam
     ReverseGateGlitch = (True, medium) # ETank in Brinstar Gate
     ShortCharge = (False, 0) # to kill draygon
     SuitlessOuterMaridia = (True, hardcore)
     SuitlessOuterMaridiaNoGuns = (True, mania) # suitless maridia without even wave, spazer or plasma...
-    EarlyKraid = (True, easy) # to access kraid without hi jump boots
-    DraygonGrappleKill = (True, medium) # easy kill for draygon
-
-    # rare
     GravityJump = (True, hard)
     ContinuousWallJump = (False, 0) # access wrecked ship
     SpringBallJump = (True, hard) # access to wrecked ship etank without anything else and suitless maridia navigation
-    XrayDboost = (True, mania)  # Xray without grapple or space jump
-
-    # rarest
     DiagonalBombJump = (True, mania) # access wrecked ship
-
+    
+    # bosses
+    DraygonGrappleKill = (True, medium) # easy kill for draygon
+    MicrowaveDraygon = (True, easy)
+    MicrowavePhantoon = (True, medium)
+    
     # end game
     IceZebSkip = (False, 0) # change minimal ammo count
     SpeedZebSkip = (False, 0) # change minimal ammo count
 
     # Difficulties of specific parts
 
-    # brinstar red tower without ice or screw
-    RedTowerClimb = (True, harder)
+    # Brinstar
+    EarlyKraid = (True, easy) # to access kraid without hi jump boots
+    XrayDboost = (False, 0)  # Xray without grapple or space jump
+    RedTowerClimb = (True, harder) # brinstar red tower without ice or screw
 
     # gauntlet
     HiJumpGauntletAccess = (True, harder)

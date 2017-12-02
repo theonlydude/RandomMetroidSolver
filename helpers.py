@@ -490,6 +490,10 @@ def enoughStuffsDraygon(items):
     return wor(fight,
                wand(Knows.DraygonGrappleKill,
                     haveItem(items, 'Grapple')),
+               wand(Knows.MicrowaveDraygon,
+                    haveItem(items, 'Plasma'),
+                    haveItem(items, 'Charge'),
+                    haveItem(items, 'XRayScope')),
                wand(Knows.ShortCharge,
                     haveItem(items, 'SpeedBooster')))
 
@@ -504,8 +508,13 @@ def enoughStuffsPhantoon(items):
         difficulty /= Settings.algoSettings['phantoonFlamesAvoidBonus']
     elif not hasCharge and itemCount(items, 'Missile') <= 2: # few missiles is harder
         difficulty *= Settings.algoSettings['phantoonLowMissileMalus']
+    fight = (True, difficulty)
 
-    return (True, difficulty)
+    return wor(fight,
+               wand(Knows.MicrowavePhantoon,
+                    haveItem(items, 'Plasma'),
+                    haveItem(items, 'Charge'),
+                    haveItem(items, 'XRayScope')))
 
 def enoughStuffsMotherbrain(items):
     #print('MB')

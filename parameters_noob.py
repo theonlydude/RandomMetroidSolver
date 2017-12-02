@@ -14,15 +14,14 @@ class Conf:
     displayGeneratedPath = True
 
     # choose how many items are required
-    #majorsPickup='minimal'
-    majorsPickup='all'
-    #minorsPickup = {
-    #    'Missile' : 10,
-    #    'Super' : 8,
-    #    'PowerBomb' : 3
-    #}
-    minorsPickup='all'
-    
+    majorsPickup='minimal'
+    #majorsPickup='all'
+    minorsPickup = {
+        'Missile' : 10,
+        'Super' : 8,
+        'PowerBomb' : 3
+    }
+    #minorsPickup='all'
 class Knows:
     # the different technics to know (cf. http://deanyd.net/sm/index.php?title=Item_Randomizer)
     # and the personnal perceived difficulty.
@@ -32,76 +31,74 @@ class Knows:
     # assume everyone knows wall jump & shinespark.
     #WallJump = (True, easy)
     #Shinespark = (True, easy)
-    Mockball = (False, 0) # early super and ice beam
+    Mockball = (True, easy) # early super and ice beam
     
-    # common
-    CeilingDBoost = (False, 0) # for brinstar ceiling
-    AlcatrazEscape = (False, 0) # alcatraz without bomb
-    LavaDive = (False, 0) # ridley without gravity
-    SimpleShortCharge = (False, 0) # Waterway ETank without gravity, and Wrecked Ship access
-    InfiniteBombJump = (False, 0) # to access certain locations without high jump or space jump
-    GreenGateGlitch = (False, 0) # to access screw attack and crocomire
-
-    # uncommon
-    MochtroidClip = (False, 0) # to access botwoon without speedbooster
+    # global
+    CeilingDBoost = (True, easy) # for brinstar ceiling
+    AlcatrazEscape = (True, harder) # alcatraz without bomb
+    LavaDive = (True, harder) # ridley without gravity
+    SimpleShortCharge = (True, easy) # Waterway ETank without gravity, and Wrecked Ship access
+    InfiniteBombJump = (True, medium) # to access certain locations without high jump or space jump
+    GreenGateGlitch = (True, medium) # to access screw attack and crocomire
+    MochtroidClip = (True, medium) # to access botwoon without speedbooster
     PuyoClip = (False, 0) # to access spring ball without grapple beam
-    ReverseGateGlitch = (False, 0) # ETank in Brinstar Gate
+    ReverseGateGlitch = (True, medium) # ETank in Brinstar Gate
     ShortCharge = (False, 0) # to kill draygon
-    SuitlessOuterMaridia = (False, 0)
-    SuitlessOuterMaridiaNoGuns = (False, 0) # suitless maridia without even wave, spazer or plasma...
-    EarlyKraid = (False, 0) # to access kraid without hi jump boots
-    DraygonGrappleKill = (False, 0) # easy kill for draygon
-
-    # rare
-    GravityJump = (False, 0)
+    SuitlessOuterMaridia = (True, hardcore)
+    SuitlessOuterMaridiaNoGuns = (True, mania) # suitless maridia without even wave, spazer or plasma...
+    GravityJump = (True, hard)
     ContinuousWallJump = (False, 0) # access wrecked ship
-    SpringBallJump = (False, 0) # access to wrecked ship etank without anything else and suitless maridia navigation
-    XrayDboost = (False, 0)  # Xray without grapple or space jump
-
-    # rarest
-    DiagonalBombJump = (False, 0) # access wrecked ship
-
+    SpringBallJump = (True, hard) # access to wrecked ship etank without anything else and suitless maridia navigation
+    DiagonalBombJump = (True, mania) # access wrecked ship
+    
+    # bosses
+    DraygonGrappleKill = (True, medium) # easy kill for draygon
+    MicrowaveDraygon = (True, easy)
+    MicrowavePhantoon = (True, medium)
+    
     # end game
     IceZebSkip = (False, 0) # change minimal ammo count
     SpeedZebSkip = (False, 0) # change minimal ammo count
 
     # Difficulties of specific parts
 
-    # brinstar red tower without ice or screw
-    RedTowerClimb = (False, 0)
+    # Brinstar
+    EarlyKraid = (True, easy) # to access kraid without hi jump boots
+    XrayDboost = (False, 0)  # Xray without grapple or space jump
+    RedTowerClimb = (True, harder) # brinstar red tower without ice or screw
 
     # gauntlet
-    HiJumpGauntletAccess = (False, 0)
-    GauntletWithBombs = (False, 0)
-    GauntletWithPowerBombs = (False, 0)
-    GauntletEntrySpark = (False, 0) # implies Knows.SimpleShortCharge
+    HiJumpGauntletAccess = (True, harder)
+    GauntletWithBombs = (True, hard)
+    GauntletWithPowerBombs = (True, medium)
+    GauntletEntrySpark = (True, medium) # implies Knows.SimpleShortCharge
 
     # upper norfair
-    NorfairReserveHiJump = (False, 0) # climb to norfair reserve area by walljumping
-    WaveBeamWallJump = (False, 0) # climb to wave with wall jump 
+    NorfairReserveHiJump = (True, hard) # climb to norfair reserve area by walljumping
+    WaveBeamWallJump = (True, easy) # climb to wave with wall jump 
     
     # worst room in the game
-    WorstRoomIceCharge = (False, 0) # can pass worst room JUST by freezing pirates
-    WorstRoomHiJump = (False, 0) # can go up worst room with HiJump and wall jumps
+    WorstRoomIceCharge = (True, mania) # can pass worst room JUST by freezing pirates
+    WorstRoomHiJump = (True, hard) # can go up worst room with HiJump and wall jumps
 
     # grapple
     ClimbToGrappleWithIce = (False, 0) # just learn green gate glitch, it's easier
 
     # wrecked ship etank access ("sponge bath" room)
-    SpongeBathBombJump = (False, 0)
-    SpongeBathHiJump = (False, 0)
-    SpongeBathSpeed = (False, 0)
+    SpongeBathBombJump = (True, mania)
+    SpongeBathHiJump = (True, easy)
+    SpongeBathSpeed = (True, medium)
 
     # plasma room
     KillPlasmaPiratesWithSpark = (False, 0) # kill plasma pirates with spark echoes. implies Knows.ShortCharge
-    KillPlasmaPiratesWithCharge = (False, 0)
-    ExitPlasmaRoomHiJump = (False, 0)
+    KillPlasmaPiratesWithCharge = (True, hard)
+    ExitPlasmaRoomHiJump = (True, medium)
 
     # sandpit
     SuitlessSandpit = (False, 0) # access the item in the sandpit suitless
 
     # wrecked ship
-    MockballWs = (False, 0) # early wrecked ship access using a mock ball
+    MockballWs = (True, hardcore) # early wrecked ship access using a mock ball
 
 class Settings:
     # boss difficulty tables :
@@ -181,7 +178,7 @@ class Settings:
         }
     }
 
-    # hell run table (set en entry to none to disable hell run)
+    # hell run table (set to none for 
     hellRuns = {
         # Ice Beam hell run
         'Ice' : None,

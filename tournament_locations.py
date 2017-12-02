@@ -484,7 +484,9 @@ locations = [
     'Class': "Minor",
     'Address': 0x78248,
     'Visibility': "Visible",
-    'Available': lambda items: canAccessWs(items)
+    # it's before actual wrecked ship access
+    'Available': lambda items: wand(haveItem(items, 'Super'),
+                                    canDestroyBombWalls(items))
 },
 {
     'Area': "Crateria",
@@ -520,11 +522,8 @@ locations = [
     'Visibility': "Visible",
     'Available': lambda items: wand(canUsePowerBombs(items),
                                     haveItem(items, 'SpeedBooster'),
-                                    wor(wand(haveItem(items, 'Ice'),
-                                             (True, easy)),
-                                        wand(haveItem(items, 'ETank'),
-                                             haveItem(items, 'Varia'),
-                                             haveItem(items, 'Gravity'), difficulty=hardcore))) # hardcore dboost...
+                                    wor(haveItem(items, 'Ice'),
+                                        Knows.ShortCharge))
 },
 {
     'Area': "Crateria",
@@ -548,8 +547,15 @@ locations = [
     'Class': "Minor",
     'Address': 0x784E4,
     'Visibility': "Chozo",
-    'Available': lambda items: wand(canPassBombPassages(items),
-                                    haveItem(items, 'Super'))
+    # brinstar access, and
+    # either you go the back way, using a super and the camera glitch,
+    # or just beat spore spawn (so no Knows* setting needed for the glitch)
+    'Available': lambda items: wand(wor(haveItem(items, 'SpeedBooster'),
+                                        canDestroyBombWalls(items)),
+                                    canOpenRedDoors(items),
+                                    wor(wand(canPassBombPassages(items),
+                                             haveItem(items, 'Super')),
+                                        (True, easy)))
 },
 {
     'Area': "Brinstar",
@@ -569,7 +575,7 @@ locations = [
     'Available': lambda items: wand(wor(haveItem(items, 'SpeedBooster'),
                                         canDestroyBombWalls(items)),
                                     canOpenRedDoors(items),
-                                    wor(haveItem(items, 'Morph'),
+                                    wor(wand(haveItem(items, 'Morph'), Knows.Mockball),
                                         haveItem(items, 'SpeedBooster')))
 },
 {
@@ -579,7 +585,9 @@ locations = [
     'Address': 0x78532,
     'Visibility': "Hidden",
     'Available': lambda items: wand(canPassBombPassages(items),
-                                    canOpenRedDoors(items))
+                                    canOpenRedDoors(items),
+                                    wor(wand(haveItem(items, 'Morph'), Knows.Mockball),
+                                        haveItem(items, 'SpeedBooster')))
 },
 {
     'Area': "Brinstar",
@@ -587,9 +595,12 @@ locations = [
     'Class': "Minor",
     'Address': 0x78538,
     'Visibility': "Visible",
-    'Available': lambda items: wand(canDestroyBombWalls(items),
+    'Available': lambda items: wand(wor(haveItem(items, 'SpeedBooster'),
+                                        canDestroyBombWalls(items)),
                                     canOpenRedDoors(items),
-                                    haveItem(items, 'Morph'))
+                                    haveItem(items, 'Morph'),
+                                    wor(Knows.Mockball,
+                                        haveItem(items, 'SpeedBooster')))
 },
 {
     'Area': "Brinstar",
@@ -607,7 +618,8 @@ locations = [
     'Class': "Minor",
     'Address': 0x7860E,
     'Visibility': "Visible",
-    'Available': lambda items: wor(wand(canDestroyBombWalls(items),
+    'Available': lambda items: wor(wand(wor(haveItem(items, 'SpeedBooster'),
+                                            canDestroyBombWalls(items)),
                                         canOpenRedDoors(items)),
                                    canUsePowerBombs(items))
 },
@@ -776,7 +788,12 @@ locations = [
     'Class': "Minor",
     'Address': 0x78C04,
     'Visibility': "Visible",
-    'Available': lambda items: canAccessCrocomire(items)
+    'Available': lambda items: wand(canAccessCrocomire(items),
+                                    wor(canFly(items),
+                                        haveItem(items, 'Grapple'),
+                                        wand(haveItem(items, 'HiJump'),
+                                             haveItem(items, 'SpeedBooster'))))
+                                        
 },
 {
     'Area': "Norfair",
@@ -804,7 +821,7 @@ locations = [
     'Visibility': "Hidden",
     'Available': lambda items: wand(canAccessHeatedNorfair(items),
                                     wor(canFly(items), haveItem(items, 'Grapple'),
-                                        haveItem(items, 'HiJump')))
+                                        wand(haveItem(items, 'HiJump'), Knows.NorfairReserveHiJump)))
 },
 {
     'Area': "Norfair",
@@ -814,7 +831,7 @@ locations = [
     'Visibility': "Visible",
     'Available': lambda items: wand(canAccessHeatedNorfair(items),
                                     wor(canFly(items), haveItem(items, 'Grapple'),
-                                        haveItem(items, 'HiJump')))
+                                        wand(haveItem(items, 'HiJump'), Knows.NorfairReserveHiJump)))
 },
 {
     'Area': "Norfair",
@@ -855,7 +872,9 @@ locations = [
     'Class': "Minor",
     'Address': 0x78E74,
     'Visibility': "Hidden",
-    'Available': lambda items: canAccessLowerNorfair(items)
+    'Available': lambda items: wand(canAccessLowerNorfair(items),
+                                    wor(haveItem(items, 'SpaceJump'),
+                                        Knows.GreenGateGlitch))
 },
 {
     'Area': "LowerNorfair",

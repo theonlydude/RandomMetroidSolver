@@ -15,8 +15,8 @@ class Solver:
     # given a rom and parameters returns the estimated difficulty
 
     def __init__(self, type='console', rom=None, params=None):
-        #logging.basicConfig(level=logging.DEBUG)
-        logging.basicConfig(level=logging.INFO)
+        logging.basicConfig(level=logging.DEBUG)
+        #logging.basicConfig(level=logging.INFO)
         self.log = logging.getLogger('Solver')
 
         import tournament_locations
@@ -103,8 +103,9 @@ class Solver:
             if isEndPossible and hasEnoughItems:
                 break
 
-            self.log.debug(str(self.collectedItems))
-
+            #self.log.debug(str(self.collectedItems))
+            self.log.debug("Current Area : " + area)
+            
             # check if we have collected an item in the last loop
             current = len(self.collectedItems)
             if current == previous:
@@ -139,37 +140,35 @@ class Solver:
                    and majorAvailable[0]['difficulty'][0] <= easy):
                 self.collectMajor(majorAvailable.pop(0))
                 majorPicked = True
-
-            # if we take at least one major, recompute the difficulty
+            # if we took at least one major, recompute the difficulty
             if majorPicked is True:
                 continue
-
-            # if enough stuff, take the next available major
-            if enough is True:
-                # take first major
+            # next item decision
+            if (enough or len(minorAvailable) == 0) and len(majorAvailable) > 0:
+                self.log.debug('NO/ENOUGH MINORS')
                 area = self.collectMajor(majorAvailable.pop(0))
-            else:
-                if len(majorAvailable) == 0:
-                    nextMajorDifficulty = mania * 10
-                else:
-                    nextMajorDifficulty = majorAvailable[0]["difficulty"][1]
-
-                # take the minors easier than the next major, check if we don't get too much stuff
-                minorPicked = False
-                while (len(minorAvailable) > 0
-                       and minorAvailable[0]["difficulty"][1] < nextMajorDifficulty
-                       and not self.pickup.enoughMinors(self.collectedItems, self.minorLocations)):
-                    area = self.collectMinor(minorAvailable.pop(0))
-                    minorPicked = True
-
-                # if we take at least one minor, recompute the difficulty
-                if minorPicked is True:
-                    continue
-
-                # take the next available major
-                if len(majorAvailable) > 0:
+            elif len(majorAvailable) == 0 and len(minorAvailable) > 0:
+                self.log.debug('NO MAJORS')
+                area = self.collectMinor(minorAvailable.pop(0))
+            elif len(majorAvailable) > 0 and len(minorAvailable) > 0:
+                self.log.debug('BOTH|M=' + majorAvailable[0]['Name'] + ', m=' + minorAvailable[0]['Name'])
+                # if both are available, decide based on area and difficulty                
+                nextMajArea = majorAvailable[0]['Area']
+                nextMajDifficulty = majorAvailable[0]['difficulty'][0]
+                nextMinArea = minorAvailable[0]['Area']
+                nextMinDifficulty = minorAvailable[0]['difficulty'][0]
+                if nextMajArea == area and nextMajDifficulty <= Conf.difficultyTarget:
                     area = self.collectMajor(majorAvailable.pop(0))
-
+                elif nextMinArea == area and nextMinDifficulty <= Conf.difficultyTarget:
+                    area = self.collectMinor(minorAvailable.pop(0))
+                else:
+                    # difficulty over area (this is a difficulty estimator,
+                    # not a speedrunning simulator)
+                    if nextMinDifficulty < nextMajDifficulty:
+                        area = self.collectMinor(minorAvailable.pop(0))
+                    else:
+                        area = self.collectMajor(majorAvailable.pop(0))
+        # main loop end
         if isEndPossible:
             self.visitedLocations.append({
                 'item' : 'The End',
@@ -264,8 +263,8 @@ class Solver:
 
         outside = [loc for loc in locations if not loc in around]
         # we want to sort the outside locations by putting the ones is the same area first,
-        # then we sort by remaining areas.
-        outside.sort(key=lambda loc: (loc['difficulty'][1], 0 if loc['Area'] == area else 1, loc['Area']))
+        # then we sort the remaining areas starting whith boss dead status
+        outside.sort(key=lambda loc: (loc['difficulty'][1], 0 if loc['Area'] == area else 1, 0 if not Bosses.areaBossDead(loc['Area']) else 1))
 
         return around + outside
 

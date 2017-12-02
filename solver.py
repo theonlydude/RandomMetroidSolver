@@ -5,19 +5,36 @@
 import sys, struct, math, os, json, logging
 
 # the difficulties for each technics
-from parameters import Conf
+from parameters import Conf, Knows, Settings
 from parameters import easy, medium, hard, harder, hardcore, mania
 
-# the canXXX functions
+# the helper functions
 from helpers import *
 
 class Solver:
     # given a rom and parameters returns the estimated difficulty
 
     def __init__(self, type='console', rom=None, params=None):
-        #logging.basicConfig(level=logging.DEBUG)
-        logging.basicConfig(level=logging.INFO)
+        logging.basicConfig(level=logging.DEBUG)
+        #logging.basicConfig(level=logging.INFO)
         self.log = logging.getLogger('Solver')
+
+        if params is not None:
+            self.loadParams(params)
+
+        if self.log.getEffectiveLevel() == logging.DEBUG:
+            self.log.debug("loaded knows: ")
+            for knows in Knows.__dict__:
+                if knows[0:len('__')] != '__':
+                    self.log.debug("{}: {}".format(knows, Knows.__dict__[knows]))
+            self.log.debug("loaded settings:")
+            for setting in Settings.__dict__:
+                if setting[0:len('__')] != '__':
+                    self.log.debug("{}: {}".format(setting, Settings.__dict__[setting]))
+            self.log.debug("loaded conf:")
+            for conf in Conf.__dict__:
+                if conf[0:len('__')] != '__':
+                    self.log.debug("{}: {}".format(conf, Conf.__dict__[conf]))
 
         import tournament_locations
         self.locations = tournament_locations.locations
@@ -30,9 +47,6 @@ class Solver:
         self.romLoaded = False
         if rom is not None:
             self.loadRom(rom)
-
-        if params is not None:
-            self.loadParams(params)
 
     def loadRom(self, rom):
         RomLoader.factory(rom).assignItems(self.locations)
@@ -378,11 +392,13 @@ class RomLoaderDict(RomLoader):
 class ParamsLoader:
     @staticmethod
     def factory(params):
-        # can be a json or a dict with the parameters
+        # can be a json, a python file or a dict with the parameters
         if type(params) is str:
             ext = os.path.splitext(params)
             if ext[1].lower() == '.json':
                 return ParamsLoaderJson(params)
+            elif ext[1].lower() == '.py':
+                return ParamsLoaderPy(ext[0])
             else:
                 print("wrong parameters file type: {}".format(ext[1]))
                 sys.exit(-1)
@@ -417,6 +433,15 @@ class ParamsLoaderJson(ParamsLoader):
     def __init__(self, jsonFileName):
         with open(jsonFileName) as jsonFile:
             self.params = json.load(jsonFile)
+
+class ParamsLoaderPy(ParamsLoader):
+    # for testing purpose
+    def __init__(self, pyFileName):
+        import importlib
+        importlib.import_module(pyFileName)
+        self.params = {'Conf': {k: v for k, v in Conf.__dict__.items() if k[0:len('__')] != '__'},
+                       'Knows': {k: v for k, v in Knows.__dict__.items() if k[0:len('__')] != '__'},
+                       'Settings': {k: v for k, v in Settings.__dict__.items() if k[0:len('__')] != '__'}}
 
 class ParamsLoaderDict(ParamsLoader):
     # when called from the website

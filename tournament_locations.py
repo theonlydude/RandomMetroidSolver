@@ -2,7 +2,7 @@ from parameters import Knows, Settings
 # the canXXX functions
 from helpers import *
 
-# all the items locations with the prerequisites to access them
+# All the items locations with the prerequisites to access them
 
 locations = [
 {

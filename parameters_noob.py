@@ -17,7 +17,7 @@ class Conf:
 
     # 100%:
     #  need them all (major & minor)
-    #itemsPickup = '100%'
+    itemsPickup = '100%'
 
     # minimal:
     #  need only the minimal required major and minor items
@@ -30,7 +30,7 @@ class Conf:
     #   Speed Boots (1) or Ice Beam (1)
     #   Power Bombs (1)
     #   Gravity Suit (1)
-    itemsPickup = 'minimal'
+    #itemsPickup = 'minimal'
 
     # normal:
     #  take all the majors as many missiles/supers as in minimal and 4 power bomb packs

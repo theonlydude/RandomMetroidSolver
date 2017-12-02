@@ -8,7 +8,7 @@ mania = 100
 
 class Conf:
     # keep getting majors of at most this difficulty before going for minors or changing area
-    difficultyTarget=hardcore
+    difficultyTarget=medium
 
     # display the generated path (spoilers!)
     displayGeneratedPath = False
@@ -93,6 +93,10 @@ class Knows:
     GauntletWithBombs = (True, hard)
     GauntletWithPowerBombs = (True, medium)
     GauntletEntrySpark = (True, medium) # implies Knows.SimpleShortCharge
+
+    # upper norfair
+    NorfairReserveHiJump = (True, hard) # cilmb to norfair reserve area by walljumping
+    WaveBeamWallJump = (True, easy) # climb to wave with wall jump
 
     # worst room in the game
     WorstRoomIceCharge = (True, mania) # can pass worst room JUST by freezing pirates

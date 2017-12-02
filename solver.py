@@ -15,8 +15,8 @@ class Solver:
     # given a rom and parameters returns the estimated difficulty
 
     def __init__(self, type='console', rom=None, params=None):
-        logging.basicConfig(level=logging.DEBUG)
-        #logging.basicConfig(level=logging.INFO)
+        #logging.basicConfig(level=logging.DEBUG)
+        logging.basicConfig(level=logging.INFO)
         self.log = logging.getLogger('Solver')
 
         if params is not None:
@@ -428,6 +428,23 @@ class ParamsLoader:
         with open(fileName, 'w') as jsonFile:
             json.dump(self.params, jsonFile)
 
+    def printToScreen(self):
+        print("self.params: {}".format(self.params))
+
+        print("loaded knows: ")
+        for knows in Knows.__dict__:
+            if knows[0:len('__')] != '__':
+                print("{}: {}".format(knows, Knows.__dict__[knows]))
+        print("loaded settings:")
+        for setting in Settings.__dict__:
+            if setting[0:len('__')] != '__':
+                print("{}: {}".format(setting, Settings.__dict__[setting]))
+        print("loaded conf:")
+        for conf in Conf.__dict__:
+            if conf[0:len('__')] != '__':
+                print("{}: {}".format(conf, Conf.__dict__[conf]))
+
+
 class ParamsLoaderJson(ParamsLoader):
     # when called from the test suite
     def __init__(self, jsonFileName):
@@ -438,10 +455,13 @@ class ParamsLoaderPy(ParamsLoader):
     # for testing purpose
     def __init__(self, pyFileName):
         import importlib
-        importlib.import_module(pyFileName)
-        self.params = {'Conf': {k: v for k, v in Conf.__dict__.items() if k[0:len('__')] != '__'},
-                       'Knows': {k: v for k, v in Knows.__dict__.items() if k[0:len('__')] != '__'},
-                       'Settings': {k: v for k, v in Settings.__dict__.items() if k[0:len('__')] != '__'}}
+        mod = importlib.import_module(pyFileName)
+        conf = getattr(mod, 'Conf')
+        knows = getattr(mod, 'Knows')
+        settings = getattr(mod, 'Settings')
+        self.params = {'Conf': {k: v for k, v in conf.__dict__.items() if k[0:len('__')] != '__'},
+                       'Knows': {k: v for k, v in knows.__dict__.items() if k[0:len('__')] != '__'},
+                       'Settings': {k: v for k, v in settings.__dict__.items() if k[0:len('__')] != '__'}}
 
 class ParamsLoaderDict(ParamsLoader):
     # when called from the website

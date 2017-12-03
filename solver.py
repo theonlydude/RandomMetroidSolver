@@ -19,8 +19,38 @@ class Solver:
         #logging.basicConfig(level=logging.INFO)
         self.log = logging.getLogger('Solver')
 
+        # in the __init__ method the parameter classes are not updated
         if params is not None:
             self.loadParams(params)
+
+        # can be called from command line (console) or from web site (web)
+        self.type = type
+
+        self.init()
+
+        self.romLoaded = False
+        if rom is not None:
+            self.loadRom(rom)
+
+    def init(self):
+        # in the __init__ method the Conf, Knows and Settings classes are not updated
+        import tournament_locations
+        self.locations = tournament_locations.locations
+
+        self.pickup = Pickup(Conf.majorsPickup, Conf.minorsPickup)
+
+    def loadRom(self, rom):
+        RomLoader.factory(rom).assignItems(self.locations)
+
+        if self.log.getEffectiveLevel() == logging.DEBUG:
+            self.log.debug("Display items at locations:")
+            for location in self.locations:
+                self.log.debug('{:>50}: {:>16}'.format(location["Name"], location['itemName']))
+
+        self.romLoaded = True
+
+    def loadParams(self, params):
+        ParamsLoader.factory(params).load()
 
         if self.log.getEffectiveLevel() == logging.DEBUG:
             self.log.debug("loaded knows: ")
@@ -35,31 +65,6 @@ class Solver:
             for conf in Conf.__dict__:
                 if conf[0:len('__')] != '__':
                     self.log.debug("{}: {}".format(conf, Conf.__dict__[conf]))
-
-        import tournament_locations
-        self.locations = tournament_locations.locations
-
-        self.pickup = Pickup(Conf.majorsPickup, Conf.minorsPickup)
-
-        # can be called from command line (console) or from web site (web)
-        self.type = type
-
-        self.romLoaded = False
-        if rom is not None:
-            self.loadRom(rom)
-
-    def loadRom(self, rom):
-        RomLoader.factory(rom).assignItems(self.locations)
-
-        if self.log.getEffectiveLevel() == logging.DEBUG:
-            self.log.debug("Display items at locations:")
-            for location in self.locations:
-                self.log.debug('{:>50}: {:>16}'.format(location["Name"], location['itemName']))
-
-        self.romLoaded = True
-
-    def loadParams(self, params):
-        ParamsLoader.factory(params).load()
 
     def solveRom(self):
         if  self.romLoaded is False:

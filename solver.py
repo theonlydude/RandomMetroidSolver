@@ -533,13 +533,21 @@ if __name__ == "__main__":
     parser.add_argument('--param', '-p', help="the input parameters", nargs='+', default=None, dest='paramsFileName')
 
     parser.add_argument('--debug', '-d', help="activate debug logging", dest='debug', action='store_true')
-    #parser.add_argument()
+    parser.add_argument('--difficultyTarget', '-t', help="the difficulty target that the solver will aim for", dest='difficultyTarget', nargs='?', default=None, type=int)
+    parser.add_argument('--displayGeneratedPath', '-g', help="display the generated path (spoilers!)", dest='displayGeneratedPath', action='store_true')
 
     args = parser.parse_args()
+
     solver = Solver(rom=args.romFileName, debug=args.debug)
 
     if args.paramsFileName is not None:
         for paramsFileName in args.paramsFileName:
             solver.loadParams(paramsFileName)
+
+    if args.difficultyTarget is not None:
+        print("difficultyTarget={}".format(args.difficultyTarget))
+        Conf.difficultyTarget = args.difficultyTarget
+
+    Conf.displayGeneratedPath = args.displayGeneratedPath
 
     solver.solveRom()

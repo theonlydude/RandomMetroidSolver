@@ -330,27 +330,27 @@ def canDefeatDraygon(items):
 def getBeamDamage(items):
     standardDamage = 20
     
-    if wand(haveItem(items, 'Ice'), haveItem(items, 'Wave'), haveItem(items, 'Plasma'))[0]:
+    if wand(haveItem(items, 'Ice'), haveItem(items, 'Wave'), haveItem(items, 'Plasma'))[0] is True:
         standardDamage = 300
-    elif wand(haveItem(items, 'Wave'), haveItem(items, 'Plasma')):
+    elif wand(haveItem(items, 'Wave'), haveItem(items, 'Plasma'))[0] is True:
         standardDamage = 250
-    elif wand(haveItem(items, 'Ice'), haveItem(items, 'Plasma')):
+    elif wand(haveItem(items, 'Ice'), haveItem(items, 'Plasma'))[0] is True:
         standardDamage = 200
-    elif wand(haveItem(items, 'Plasma')):
+    elif haveItem(items, 'Plasma')[0] is True:
         standardDamage = 150
-    elif wand(haveItem(items, 'Ice'), haveItem(items, 'Wave'), haveItem(items, 'Spazer')):
+    elif wand(haveItem(items, 'Ice'), haveItem(items, 'Wave'), haveItem(items, 'Spazer'))[0] is True:
         standardDamage = 100
-    elif wand(haveItem(items, 'Wave'), haveItem(items, 'Spazer')):
+    elif wand(haveItem(items, 'Wave'), haveItem(items, 'Spazer'))[0] is True:
         standardDamage = 70
-    elif wand(haveItem(items, 'Ice'), haveItem(items, 'Spazer')):
+    elif wand(haveItem(items, 'Ice'), haveItem(items, 'Spazer'))[0] is True:
         standardDamage = 60
-    elif wand(haveItem(items, 'Ice'), haveItem(items, 'Wave')):
+    elif wand(haveItem(items, 'Ice'), haveItem(items, 'Wave'))[0] is True:
         standardDamage = 60
-    elif haveItem(items, 'Wave'):
+    elif haveItem(items, 'Wave')[0] is True:
         standardDamage = 50
-    elif haveItem(items, 'Spazer'):
+    elif haveItem(items, 'Spazer')[0] is True:
         standardDamage = 40
-    elif haveItem(items, 'Ice'):
+    elif haveItem(items, 'Ice')[0] is True:
         standardDamage = 30
         
     return standardDamage
@@ -374,7 +374,7 @@ def canInflictEnoughDamages(items, bossEnergy, doubleSuper=False, charge=True, p
     if haveItem(items, 'Charge')[0] and charge is True:
         standardDamage = getBeamDamage(items)
     # charge triples the damage
-    chargeDPS = standardDamage * 3.0
+    chargeDamage = standardDamage * 3.0
 
     # missile 100 damages, super missile 300 damages, PBs 200 dmg, 5 in each extension
     missilesAmount = itemCount(items, 'Missile') * 5
@@ -390,12 +390,12 @@ def canInflictEnoughDamages(items, bossEnergy, doubleSuper=False, charge=True, p
         powerAmount = itemCount(items, 'PowerBomb') * 5
         powerDamage = powerAmount * 200
         
-    canBeatBoss = chargeDPS > 0 or givesDrops or (missilesDamage + supersDamage + powerDamage) >= bossEnergy
+    canBeatBoss = chargeDamage > 0 or givesDrops or (missilesDamage + supersDamage + powerDamage) >= bossEnergy
     if not canBeatBoss:
         return (0, 0)
     
     ammoMargin = (missilesDamage + supersDamage + powerDamage) / bossEnergy
-    if chargeDPS > 0:
+    if chargeDamage > 0:
         ammoMargin += 2
 
     missilesDPS = Settings.algoSettings['missilesPerSecond'] * 100.0
@@ -406,7 +406,9 @@ def canInflictEnoughDamages(items, bossEnergy, doubleSuper=False, charge=True, p
         powerDPS = Settings.algoSettings['powerBombsPerSecond'] * 200.0
     else:
         powerDPS = 0.0
-    dpsDict = { missilesDPS : (missilesAmount, 100.0), supersDPS : (supersAmount, oneSuper), powerDPS : (powerAmount, 200.0), chargeDPS : (10000, chargeDPS) } # one charged shot per second. and no boss will take more 10000 charged shots
+    chargeDPS = chargeDamage * Settings.algoSettings['chargedShotsPerSeond']
+#    print("chargeDPS=" + str(chargeDPS))
+    dpsDict = { missilesDPS : (missilesAmount, 100.0), supersDPS : (supersAmount, oneSuper), powerDPS : (powerAmount, 200.0), chargeDPS : (10000, chargeDamage) } # no boss will take more 10000 charged shots
     secs = 0
     for dps in sorted(dpsDict, reverse=True):
         amount = dpsDict[dps][0]
@@ -419,9 +421,9 @@ def canInflictEnoughDamages(items, bossEnergy, doubleSuper=False, charge=True, p
         if bossEnergy <= 0:
             break
     if bossEnergy > 0:
-        # rely on missile/supers drops
-        secs += bossEnergy * Settings.algoSettings['missileDropsPerMinute'] * 100 / 60
-    #print('ammoMargin = ' + str(ammoMargin) + ', secs = ' + str(secs))
+#        print ('!! drops !! ')
+        secs += bossEnergy * rate * Settings.algoSettings['missileDropsPerMinute'] * 100 / 60
+#    print('ammoMargin = ' + str(ammoMargin) + ', secs = ' + str(secs))
 
     return (ammoMargin, secs)
 
@@ -434,13 +436,13 @@ def computeBossDifficulty(items, ammoMargin, secs, diffTbl):
         duration = 120.0
     else:
         duration = secs / rate
+ #   print('rate=' + str(rate) + ', duration=' + str(duration))       
     suitsCoeff = 0.5
     if haveItem(items, 'Varia')[0]:
         suitsCoeff *= 2
     if haveItem(items, 'Gravity')[0]:
         suitsCoeff *= 2
     energy = suitsCoeff * energyReserveCount(items)
-    #print('suitsCoeff = ' + str(suitsCoeff) + ', energy = ' + str(energy) + ', duration = ' + str(duration))
     energyDict = None
     if 'Energy' in diffTbl:
         energyDict = diffTbl['Energy']
@@ -450,11 +452,19 @@ def computeBossDifficulty(items, ammoMargin, secs, diffTbl):
         energyDict = {int(k):float(v) for k,v in energyDict.items()}
         keyz = sorted(energyDict.keys())
         if len(keyz) > 0:
-            difficulty = energyDict[keyz[0]]
+            current = keyz[0]
+            sup = None
+            difficulty = energyDict[current]
             for k in keyz:
                 if k > energy:
+                    sup=k
                     break
+                current = k
                 difficulty = energyDict[k]
+            # interpolate if we can
+            if energy > current and sup is not None:
+                difficulty += (energyDict[sup] - difficulty)/(sup - current) * (energy - current)
+ #   print("energy=" + str(energy) + ", base diff=" + str(difficulty))
     # adjust by fight duration
     difficulty *= (duration / 120)
     # and by ammo margin

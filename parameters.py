@@ -112,7 +112,7 @@ class Settings:
     # considered to be 2 minutes, regardless of anything else.
     #
     # 2. Energy : a dictionary where key is etanks+reserves you have,
-    # value is estimated difficulty for a 2-minute fight. If etanks entry
+    # value is estimated difficulty *for a 2-minute fight*. If etanks entry
     # is not defined, the one below will be chosen, or the minimum one if
     # no below entry is defined. You can give any difficulty number
     # instead of the fixed values defined above. The amount of energy you
@@ -138,41 +138,42 @@ class Settings:
             'Energy' : {
                 1 : mania,
                 3 : hardcore,
-                4 : hard,
-                6 : medium,
-                8 : easy
-            }
-        },
-        'Draygon' : {
-            'Rate' : 0.05,
-            'Energy ' : {
-                1 : mania,
-                3 : hardcore,
                 4 : harder,
                 5 : hard,
                 7 : medium,
                 10 : easy
-            },
+            }
         },
-        'Ridley' : {
-            'Rate' : 0.25,
+        'Draygon' : {
+            'Rate' : 0.08,
             'Energy' : {
                 1 : mania,
                 6 : hardcore,
                 8 : harder,
-                10 : hard,
-                14 : medium  # I'll never say Ridley is easy! ;)
+                11 : hard,
+                14 : medium,
+                20 : easy
+            },
+        },
+        'Ridley' : {
+            'Rate' : 0.15,
+            'Energy' : {
+                1 : mania,
+                7 : hardcore,
+                11 : harder,
+                14 : hard,
+                20 : medium 
             },
         },
         'Mother Brain' : {
             'Rate' : 0.5,
             'Energy' : {
                 3 : mania, # less than 3 is actually impossible
-                4 : hardcore,
-                6 : harder,
-                8 : hard,
-                10 : medium,
-                12 : easy
+                8 : hardcore,
+                12 : harder,
+                16 : hard,
+                20 : medium,
+                24 : easy
             }
         }
     }
@@ -194,10 +195,12 @@ class Settings:
         'missilesPerSecond' : 3,
         # number of supers fired per second during boss battles
         # (used along with Rate)
-        'supersPerSecond' : 1.5,
+        'supersPerSecond' : 1.85,
         # number of power bombs fired per second during boss battles
         # (used along with Rate)
         'powerBombsPerSecond' : 1/3,
+        # number of charged shots per second (at most 1)
+        'chargedShotsPerSeond' : 0.75,
         # firepower grabbed by picking up drops during boss battles
         # in missiles per minute (1 super = 3 missiles)
         'missileDropsPerMinute' : 12,

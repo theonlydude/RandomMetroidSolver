@@ -2,7 +2,7 @@
 
 # https://itemrando.supermetroid.run/randomize
 
-import sys, struct, math, os, json, logging
+import sys, struct, math, os, json, logging, argparse
 
 # the difficulties for each technics
 from parameters import Conf, Knows, Settings
@@ -14,9 +14,11 @@ from helpers import *
 class Solver:
     # given a rom and parameters returns the estimated difficulty
 
-    def __init__(self, type='console', rom=None, params=None):
-        logging.basicConfig(level=logging.DEBUG)
-        #logging.basicConfig(level=logging.INFO)
+    def __init__(self, type='console', rom=None, params=None, debug=False):
+        if debug is True:
+            logging.basicConfig(level=logging.DEBUG)
+        else:
+            logging.basicConfig(level=logging.INFO)
         self.log = logging.getLogger('Solver')
 
         # in the __init__ method the parameter classes are not updated
@@ -526,15 +528,16 @@ class DifficultyDisplayer:
         return displayString
 
 if __name__ == "__main__":
-    if len(sys.argv) not in (2, 3):
-        print("missing param: rom file [param file]")
-        sys.exit(0)
+    parser = argparse.ArgumentParser(description="Random Metroid Solver")
+    parser.add_argument('romFileName', help="the input rom")
+    parser.add_argument('--param', '-p', help="the input parameters", nargs='?', default=None, dest='paramsFileName')
 
-    romFileName = sys.argv[1]
-    solver = Solver(rom=romFileName)
+    parser.add_argument('--debug', '-d', help="activate debug logging", dest='debug', action='store_true')
 
-    if len(sys.argv) == 3:
-        paramsFileName = sys.argv[2]
-        solver.loadParams(paramsFileName)
+    args = parser.parse_args()
+    solver = Solver(rom=args.romFileName, debug=args.debug)
+
+    if args.paramsFileName is not None:
+        solver.loadParams(args.paramsFileName)
 
     solver.solveRom()

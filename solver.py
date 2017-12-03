@@ -530,14 +530,16 @@ class DifficultyDisplayer:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Random Metroid Solver")
     parser.add_argument('romFileName', help="the input rom")
-    parser.add_argument('--param', '-p', help="the input parameters", nargs='?', default=None, dest='paramsFileName')
+    parser.add_argument('--param', '-p', help="the input parameters", nargs='+', default=None, dest='paramsFileName')
 
     parser.add_argument('--debug', '-d', help="activate debug logging", dest='debug', action='store_true')
+    #parser.add_argument()
 
     args = parser.parse_args()
     solver = Solver(rom=args.romFileName, debug=args.debug)
 
     if args.paramsFileName is not None:
-        solver.loadParams(args.paramsFileName)
+        for paramsFileName in args.paramsFileName:
+            solver.loadParams(paramsFileName)
 
     solver.solveRom()

@@ -15,8 +15,8 @@ class Solver:
     # given a rom and parameters returns the estimated difficulty
 
     def __init__(self, type='console', rom=None, params=None):
-        #logging.basicConfig(level=logging.DEBUG)
-        logging.basicConfig(level=logging.INFO)
+        logging.basicConfig(level=logging.DEBUG)
+        #logging.basicConfig(level=logging.INFO)
         self.log = logging.getLogger('Solver')
 
         if params is not None:
@@ -115,6 +115,7 @@ class Solver:
                               and self.pickup.enoughMinors(self.collectedItems, self.minorLocations))
             (isEndPossible, endDifficulty) = self.canEndGame()
             if isEndPossible and hasEnoughItems:
+                self.log.debug("END")
                 break
 
             #self.log.debug(str(self.collectedItems))
@@ -124,6 +125,7 @@ class Solver:
             current = len(self.collectedItems)
             if current == previous:
                 # we're stuck ! abort
+                self.log.debug("STUCK ALL")
                 break
             previous = current
 
@@ -140,6 +142,7 @@ class Solver:
 
             # check if we're stuck
             if len(majorAvailable) == 0 and enough is True:
+                self.log.debug("STUCK MAJORS")
                 break
 
             # sort them on difficulty and proximity

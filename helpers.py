@@ -542,7 +542,7 @@ def enoughStuffTourian(items):
     return wand(canPassMetroids(items), canPassZebetites(items), enoughStuffsMotherbrain(items))
 
 class Pickup:
-    def __init__(self, majorsPickup, minorsPickup):
+    def __init__(self, majorsPickup, minorsPickup):        
         self.majorsPickup = majorsPickup
         self.minorsPickup = minorsPickup
 
@@ -578,6 +578,8 @@ class Pickup:
                          or haveItemCount(items, 'Ice', 1))
                     # draygon access
                     and haveItemCount(items, 'Gravity', 1))
+        else:
+            return False
 
 class Bosses:
     # bosses helpers to know if they are dead

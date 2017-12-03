@@ -545,7 +545,6 @@ if __name__ == "__main__":
             solver.loadParams(paramsFileName)
 
     if args.difficultyTarget is not None:
-        print("difficultyTarget={}".format(args.difficultyTarget))
         Conf.difficultyTarget = args.difficultyTarget
 
     Conf.displayGeneratedPath = args.displayGeneratedPath

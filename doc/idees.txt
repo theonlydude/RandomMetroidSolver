@@ -1,0 +1,129 @@
+
+x2 sur diff mother brain dans params
+
+*** areas:
+
+* idée générale :
+
+comptabiliser la difficulté des déplacements
+
+cela implique de l'utiliser pour prendre une décision, afin d'éviter
+les déplacements inutiles que ne ferait pas un humain (réalisme).
+
+aussi, choisir le max de difficulté uniquement ne suffit plus, les
+déplacements s'ajoutant par définition.
+
+=> il faut aussi régler le pb des can* qui comptent la difficulté
+plusieurs fois
+
+* exemples
+
+- sortie LN :
+  - en soi (pas facile)
+  - + si on doit y re-rentrer (ie Ridley pas mort)
+- sortie main UN si hell runs et pas speed
+- sortie Maridia suitless
+
+* difficulté de navigation
+
+rejoint la difficulté de sortie, mais est utilisée pour les
+déplacements en interne d'une zone
+
+* idées implémentation
+
+Nouvelles sub-areas avec transitions
+
+Crateria/LandingSite -> Brinstar/Blue, Bombs, Terminator, Gauntlet, WreckedShipBottom, Brinstar/Red/Top
+Crateria/Bombs -> LandingSite
+Crateria/Terminator -> LandingSite, Brinstar/Green
+Crateria/Gauntlet -> LandingSite, Terminator
+Crateria/WreckedShipBottom -> LandingSite, WreckedShip/Main
+Crateria/WreckedShipTop -> WreckedShip/Gravity, WreckedShipBottom, WreckedShip/Top
+Crateria/ForgottenHighway -> WreckedShip/Back, Maridia/ForgottenHighway
+
+Brinstar/Blue -> Crateria/LandingSite, Green/Hills
+Brinstar/Green -> Reserve, Pink
+Brinstar/Green/Reserve -> Green
+Brinstar/Green/Hills -> Pink, Red
+Brinstar/Pink -> Green/Hills, Green
+Brinstar/Red -> Green/Hills, Top, Bottom
+Brinstar/Red/Top -> Red, Crateria/LandingSite
+Brinstar/Red/Bottom -> Red, Kraid, Norfair/Entrance, Maridia/Green
+Brinstar/Kraid -> Red/Bottom
+
+WreckedShip/Main -> WreckedShip/Back, WreckedShip/Top
+WreckedShip/Back -> WreckedShip/Main, Crateria/ForgottenHighway
+WreckedShip/Top -> Crateria/WreckedShipTop, WreckedShip/Main
+WreckedShip/Gravity -> Crateria/WreckedShipBottom
+
+Norfair/Entrance -> Ice, Bubble/Bottom, Crocomire, Brinstar/Red/Bottom
+Norfair/Ice -> Entrance
+Norfair/Crocomire -> GrappleEscape, Bubble/Bottom, Bottom
+Norfair/Bubble/Top -> Bubble/Bottom, Reserve, Speed, Wave
+Norfair/Bubble/Bottom -> Top, Crocomire, Reserve, Bottom, Entrance
+Norfair/Bottom -> Bubble/Bottom, Wave, LowerNorfair/BeforeAmphitheater
+Norfair/Reserve -> Bubble/Top, Bubble/Bottom
+Norfair/Wave -> Bubble/Top, Bottom
+Norfair/Speed -> Bubble/Top
+Norfair/GrappleEscape -> Crocomire, Entrance
+
+LowerNorfair/BeforeAmphitheater -> ScrewAttack, AfterAmphitheater
+LowerNorfair/ScrewAttack -> BeforeAmphitheater
+LowerNorfait/AfterAmphitheater -> Norfair/Bubble/Top
+
+Maridia/ForgottenHighway -> Crateria/ForgottenHighway, Pink/Top, Sandpits
+Maridia/Green -> Pink/Bottom, Brinstar/Red/Bottom, Brinstar/Red/Top
+# item sandpits are here, as well as yellow maridia
+Maridia/Pink/Bottom -> Pink/Top, Sandpits, Green
+Maridia/Pink/Top -> Pink/Bottom, ForgottenHighway
+# right area with the mini draygons and shaktool
+Maridia/Sandpits -> ForgottenHighway, Green, Brinstar/Red/Bottom
+
+ensuite pour chaque zone:
+
+difficulté de navigation à l'intérieur de la zone (en fonction des
+items)
+
+transitions possibles vers d'autres zones, avec difficulté associée
+(en fonction des items aussi)
+
+difficulté d'un item =   difficulté de navigation jusqu'à l'item
+	   	       + difficultés de l'item lui meme
+
+difficulté de navigation =
+difficulté de navigation zone courante
++ si autre zone: difficulté de transition + difficulté de navigation autre zone
+
+la transition peut être indirecte auquel cas il faut calculer le
+parcours le plus court, sachant que si on passe dans une zone on
+ajoute sa difficulté de navigation en plus des difficultés de
+transitions
+
+* conclusion
+
+faisable, mais bcp de taf. pas trop de pb de conception, à part devoir
+balader l'area courante partout
+
+Pour faire ça propre, il faut :
+
+- ajouter les sub-areas des items
+- dans les fonctions Available, virer toutes les conditions d'accès à
+  la zone de l'item :
+  - canAccess*
+  - tests des micro-zones bloquées par des tricks, qui doivent donc toutes
+    être répertoriées
+  - hell runs (permettra aussi de séparer chaque hell run dans les params)
+- regrouper ces conditions dans un objet qui gère les déplacements/transitions
+- dans les calculs de difficulté des items, utiliser cet objet
+
+tout cela risque aussi de faire une tétra-chiée de settings de difficulté
+subjectifs, d'où la nécessité de faire des presets. pour éviter ça, valeurs
+à pas trop toucher * movement skill.
+
+aussi, risque que l'algo, se basant uniquement sur la difficulté, parte dans
+la mauvaise direction, donc ptet donner des prios + importantes aux zones ou
+il faut aller.
+
+donner la notion d'objectif pourrait être pratique (aller voir le boss
+pas mort le plus proche), donc aller là prioritairement (si ça ne
+passe pas le seuil de difficulté).

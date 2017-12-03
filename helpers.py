@@ -447,13 +447,14 @@ def computeBossDifficulty(items, ammoMargin, secs, diffTbl):
     difficulty = medium
     # get difficulty by energy
     if energyDict:
-        keyz = sorted(map(int, energyDict.keys()))
+        energyDict = {int(k):float(v) for k,v in energyDict.items()}
+        keyz = sorted(energyDict.keys())
         if len(keyz) > 0:
-            difficulty = float(energyDict[keyz[0]])
+            difficulty = energyDict[keyz[0]]
             for k in keyz:
                 if k > energy:
                     break
-                difficulty = float(energyDict[k])
+                difficulty = energyDict[k]
     # adjust by fight duration
     difficulty *= (duration / 120)
     # and by ammo margin

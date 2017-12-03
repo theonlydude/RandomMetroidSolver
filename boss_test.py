@@ -61,5 +61,4 @@ if __name__ == "__main__":
     boss('Draygon', enoughStuffsDraygon)
     boss('Ridley', enoughStuffsRidley)
     boss('MotherBrain', enoughStuffsMotherbrain)
-    
 

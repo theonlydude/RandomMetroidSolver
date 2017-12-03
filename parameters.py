@@ -198,9 +198,9 @@ class Settings:
         'supersPerSecond' : 1.85,
         # number of power bombs fired per second during boss battles
         # (used along with Rate)
-        'powerBombsPerSecond' : 1/3,
+        'powerBombsPerSecond' : 0.33,
         # number of charged shots per second (at most 1)
-        'chargedShotsPerSeond' : 0.75,
+        'chargedShotsPerSecond' : 0.75,
         # firepower grabbed by picking up drops during boss battles
         # in missiles per minute (1 super = 3 missiles)
         'missileDropsPerMinute' : 12,

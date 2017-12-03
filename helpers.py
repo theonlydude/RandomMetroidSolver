@@ -406,7 +406,7 @@ def canInflictEnoughDamages(items, bossEnergy, doubleSuper=False, charge=True, p
         powerDPS = Settings.algoSettings['powerBombsPerSecond'] * 200.0
     else:
         powerDPS = 0.0
-    chargeDPS = chargeDamage * Settings.algoSettings['chargedShotsPerSeond']
+    chargeDPS = chargeDamage * Settings.algoSettings['chargedShotsPerSecond']
 #    print("chargeDPS=" + str(chargeDPS))
     dpsDict = { missilesDPS : (missilesAmount, 100.0), supersDPS : (supersAmount, oneSuper), powerDPS : (powerAmount, 200.0), chargeDPS : (10000, chargeDamage) } # no boss will take more 10000 charged shots
     secs = 0
@@ -422,7 +422,7 @@ def canInflictEnoughDamages(items, bossEnergy, doubleSuper=False, charge=True, p
             break
     if bossEnergy > 0:
 #        print ('!! drops !! ')
-        secs += bossEnergy * rate * Settings.algoSettings['missileDropsPerMinute'] * 100 / 60
+        secs += bossEnergy * Settings.algoSettings['missileDropsPerMinute'] * 100 / 60
 #    print('ammoMargin = ' + str(ammoMargin) + ', secs = ' + str(secs))
 
     return (ammoMargin, secs)

@@ -14,31 +14,25 @@ from helpers import *
 class Solver:
     # given a rom and parameters returns the estimated difficulty
 
-    def __init__(self, type='console', rom=None, params=None, debug=False):
+    def __init__(self, type='console', rom=None, debug=False):
         if debug is True:
             logging.basicConfig(level=logging.DEBUG)
         else:
             logging.basicConfig(level=logging.INFO)
         self.log = logging.getLogger('Solver')
 
-        # in the __init__ method the parameter classes are not updated
-        if params is not None:
-            self.loadParams(params)
-
         # can be called from command line (console) or from web site (web)
         self.type = type
 
-        self.init()
+        import tournament_locations
+        self.locations = tournament_locations.locations
 
         self.romLoaded = False
         if rom is not None:
             self.loadRom(rom)
 
-    def init(self):
+    def postInit(self):
         # in the __init__ method the Conf, Knows and Settings classes are not updated
-        import tournament_locations
-        self.locations = tournament_locations.locations
-
         self.pickup = Pickup(Conf.majorsPickup, Conf.minorsPickup)
 
     def loadRom(self, rom):
@@ -548,5 +542,7 @@ if __name__ == "__main__":
         Conf.difficultyTarget = args.difficultyTarget
 
     Conf.displayGeneratedPath = args.displayGeneratedPath
+
+    solver.postInit()
 
     solver.solveRom()

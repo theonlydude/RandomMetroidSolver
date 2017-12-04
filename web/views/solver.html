@@ -1,0 +1,9 @@
+{{extend 'layout.html'}}
+<h2>Input form form</h2>
+{{=form}}
+<h2>Submitted variables</h2>
+{{=BEAUTIFY(request.vars)}}
+<h2>Accepted variables</h2>
+{{=BEAUTIFY(form.vars)}}
+<h2>Errors in form</h2>
+{{=BEAUTIFY(form.errors)}}

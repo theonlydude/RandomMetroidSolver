@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 # the html form on the randomizer website:
-#    <form method="post" action="/randomize" enctype="multipart/form-data">        
+#    <form method="post" action="/randomize" enctype="multipart/form-data">
 #    <div class="form-group">
 #        <label for="filename">Pick a vanilla (unheadered) SM ROM to upload and patch</label>
 #        <input type="file" id="filename" name="filename"/>
@@ -44,12 +44,12 @@ def getRandomizedRom(originalRomFilePath, seed):
 
     if r2.status_code == 200:
         # in the reponse we have the headers variable containing the generated seed:
-        # 'headers': {'Content-Length': '1576728', 
-        #            'Content-Encoding': 'gzip', 
-        #            'Keep-Alive': 'timeout=5, max=99', 
-        #            'Content-Type': 'application/octet-stream', 
-        #            'Content-Disposition': 'attachment; filename="Item Randomizer TX9255788.sfc"', 
-        #            'Server': 'Suave (https://suave.io)', 
+        # 'headers': {'Content-Length': '1576728',
+        #            'Content-Encoding': 'gzip',
+        #            'Keep-Alive': 'timeout=5, max=99',
+        #            'Content-Type': 'application/octet-stream',
+        #            'Content-Disposition': 'attachment; filename="Item Randomizer TX9255788.sfc"',
+        #            'Server': 'Suave (https://suave.io)',
         #            'Connection': 'Keep-Alive', 'Date': 'Sun, 05 Nov 2017 12:12:15 GMT'},
         outRomFileName = r2.headers['Content-Disposition'][len('attachment; filename="'):-len('"')]
 

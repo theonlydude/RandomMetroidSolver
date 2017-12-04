@@ -55,7 +55,7 @@ if __name__ == "__main__":
         params = sys.argv[1]
     ParamsLoader.factory(params).load()
     print(str(Settings.bossesDifficulty))
-    
+
     boss('Kraid', enoughStuffsKraid)
     boss('Phantoon', enoughStuffsPhantoon)
     boss('Draygon', enoughStuffsDraygon)

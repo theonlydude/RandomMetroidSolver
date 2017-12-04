@@ -31,7 +31,7 @@ class Knows:
     # assume everyone knows wall jump & shinespark.
     #WallJump = (True, easy)
     #Shinespark = (True, easy)
-    
+
     # used across the game
     Mockball = (True, easy) # early super and ice beam
     SimpleShortCharge = (True, easy) # Waterway ETank without gravity, and Wrecked Ship access
@@ -40,7 +40,7 @@ class Knows:
     ShortCharge = (False, 0) # to kill draygon
     GravityJump = (True, hard)
     SpringBallJump = (True, hard) # access to wrecked ship etank without anything else and suitless maridia navigation
-    
+
     # bosses
     DraygonGrappleKill = (True, medium) # easy kill for draygon
     MicrowaveDraygon = (True, easy)
@@ -49,7 +49,7 @@ class Knows:
     # end game
     IceZebSkip = (False, 0) # change minimal ammo count
     SpeedZebSkip = (False, 0) # change minimal ammo count
-    
+
     # Area difficulties
 
     # Brinstar
@@ -68,9 +68,9 @@ class Knows:
 
     # upper norfair
     NorfairReserveHiJump = (True, hard) # climb to norfair reserve area by walljumping
-    WaveBeamWallJump = (True, easy) # climb to wave with wall jump 
+    WaveBeamWallJump = (True, easy) # climb to wave with wall jump
     ClimbToGrappleWithIce = (False, 0) # just learn green gate glitch, it's easier
-    
+
     # lower norfair
     LavaDive = (True, harder) # ridley without gravity
     WorstRoomIceCharge = (True, mania) # can pass worst room JUST by freezing pirates
@@ -162,7 +162,7 @@ class Settings:
                 7 : hardcore,
                 11 : harder,
                 14 : hard,
-                20 : medium 
+                20 : medium
             },
         },
         'Mother Brain' : {
@@ -178,7 +178,7 @@ class Settings:
         }
     }
 
-    # hell run table (set to none for 
+    # hell run table (set to none for
     hellRuns = {
         # Ice Beam hell run
         'Ice' : [(2, hardcore), (3, hard), (4, medium), (6, easy)],

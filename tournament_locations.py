@@ -172,7 +172,7 @@ locations = [
     'Address': 0x78ACA,
     'Visibility': "Chozo",
     # DONE: no difficulty
-    'Available': lambda items: wand(canAccessKraid(items),                                    
+    'Available': lambda items: wand(canAccessKraid(items),
                                     enoughStuffsKraid(items)),
     'Pickup': lambda: Bosses.beatBoss('Kraid')
 },
@@ -793,7 +793,7 @@ locations = [
                                         haveItem(items, 'Grapple'),
                                         wand(haveItem(items, 'HiJump'),
                                              haveItem(items, 'SpeedBooster'))))
-                                        
+
 },
 {
     'Area': "Norfair",

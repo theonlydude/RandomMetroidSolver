@@ -329,7 +329,7 @@ def canDefeatDraygon(items):
 
 def getBeamDamage(items):
     standardDamage = 20
-    
+
     if wand(haveItem(items, 'Ice'), haveItem(items, 'Wave'), haveItem(items, 'Plasma'))[0] is True:
         standardDamage = 300
     elif wand(haveItem(items, 'Wave'), haveItem(items, 'Plasma'))[0] is True:
@@ -352,7 +352,7 @@ def getBeamDamage(items):
         standardDamage = 40
     elif haveItem(items, 'Ice')[0] is True:
         standardDamage = 30
-        
+
     return standardDamage
 
 # returns a tuple with :
@@ -389,11 +389,11 @@ def canInflictEnoughDamages(items, bossEnergy, doubleSuper=False, charge=True, p
     if power is True and haveItem(items, 'PowerBomb')[0]:
         powerAmount = itemCount(items, 'PowerBomb') * 5
         powerDamage = powerAmount * 200
-        
+
     canBeatBoss = chargeDamage > 0 or givesDrops or (missilesDamage + supersDamage + powerDamage) >= bossEnergy
     if not canBeatBoss:
         return (0, 0)
-    
+
     ammoMargin = (missilesDamage + supersDamage + powerDamage) / bossEnergy
     if chargeDamage > 0:
         ammoMargin += 2
@@ -436,7 +436,7 @@ def computeBossDifficulty(items, ammoMargin, secs, diffTbl):
         duration = 120.0
     else:
         duration = secs / rate
- #   print('rate=' + str(rate) + ', duration=' + str(duration))       
+ #   print('rate=' + str(rate) + ', duration=' + str(duration))
     suitsCoeff = 0.5
     if haveItem(items, 'Varia')[0]:
         suitsCoeff *= 2
@@ -553,13 +553,13 @@ def enoughStuffTourian(items):
     return wand(canPassMetroids(items), canPassZebetites(items), enoughStuffsMotherbrain(items))
 
 class Pickup:
-    def __init__(self, majorsPickup, minorsPickup):        
+    def __init__(self, majorsPickup, minorsPickup):
         self.majorsPickup = majorsPickup
         self.minorsPickup = minorsPickup
 
     def _enoughMinorTable(self, items, minorType):
         return haveItemCount(items, minorType, int(self.minorsPickup[minorType]))
-        
+
     def enoughMinors(self, items, minorLocations):
         if self.minorsPickup == 'all':
             # need them all

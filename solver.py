@@ -121,7 +121,7 @@ class Solver:
 
             #self.log.debug(str(self.collectedItems))
             self.log.debug("Current Area : " + area)
-            
+
             # check if we have collected an item in the last loop
             current = len(self.collectedItems)
             if current == previous:
@@ -170,7 +170,7 @@ class Solver:
                 area = self.collectMinor(minorAvailable.pop(0))
             elif len(majorAvailable) > 0 and len(minorAvailable) > 0:
                 self.log.debug('BOTH|M=' + majorAvailable[0]['Name'] + ', m=' + minorAvailable[0]['Name'])
-                # if both are available, decide based on area and difficulty                
+                # if both are available, decide based on area and difficulty
                 nextMajDifficulty = majorAvailable[0]['difficulty'][0]
                 nextMinArea = minorAvailable[0]['Area']
                 nextMinDifficulty = minorAvailable[0]['difficulty'][0]
@@ -179,7 +179,7 @@ class Solver:
                 # difficulty over area (this is a difficulty estimator,
                 # not a speedrunning simulator)
                 elif nextMinDifficulty < nextMajDifficulty:
-                    area = self.collectMinor(minorAvailable.pop(0))                    
+                    area = self.collectMinor(minorAvailable.pop(0))
                 else:
                     area = self.collectMajor(majorAvailable.pop(0))
         # main loop end

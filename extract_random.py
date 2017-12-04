@@ -7,7 +7,7 @@ import sys
 
 # generate .json for a rom
 if __name__ == "__main__":
-    
+
     if len(sys.argv) == 2:
         romFileName = sys.argv[1]
     else:

@@ -49,6 +49,7 @@ def solver():
 
     if session.paramsClass is not None:
         paramsClass = session.paramsClass
+        print("Use {} params from session".format(paramsClass))
     else:
         paramsClass = 'veteran'
 
@@ -62,10 +63,13 @@ def solver():
     if session.paramsClass is not None and session.paramsDict is not None:
         print("Use parameters from {}".format(session.lastUsed))
         if session.paramsClass == 'noob':
+            print('use noob params from session')
             params['noob']['Knows'] = session.paramsDict['Knows']
         elif session.paramsClass == 'regular':
+            print('use regular params from session')
             params['regular']['Knows'] = session.paramsDict['Knows']
         elif session.paramsClass == 'veteran':
+            print('use veteran params from session')
             params['veteran']['Knows'] = session.paramsDict['Knows']
 
 
@@ -133,10 +137,7 @@ def compute_difficulty():
     session.lastUsed = datetime.datetime.now()
 
     # call solver
-    solver = Solver(type='web')
-    solver.loadRom(randomizedRom)
-    solver.loadParams(paramsDict)
-    solver.postInit()
+    solver = Solver(type='web', rom=randomizedRom, params=[paramsDict])
     difficulty = solver.solveRom()
     text = DifficultyDisplayer(difficulty).scale()
 

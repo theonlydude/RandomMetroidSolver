@@ -73,7 +73,7 @@ def solver():
             params['veteran']['Knows'] = session.paramsDict['Knows']
 
 
-    table.append(TR("Parameters preset", SELECT('noob', 'regular', 'veteran', _name='paramsClass', value=paramsClass), ""))
+    table.append(TR("Parameters preset", SELECT('noob', 'regular', 'veteran', _name='paramsClass', value=paramsClass, onchange="showDiv(this)"), ""))
 
     table.append(TR("", "Do I know the technic", "Difficulty of the technic"))
 

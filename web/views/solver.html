@@ -1,15 +1,5 @@
 {{extend 'layout.html'}}
 <!--
-<h2>Input form form</h2>
-{{=form}}
-<h2>Submitted variables</h2>
-{{=BEAUTIFY(request.vars)}}
-<h2>Accepted variables</h2>
-{{=BEAUTIFY(form.vars)}}
-<h2>Errors in form</h2>
-{{=BEAUTIFY(form.errors)}}
--->
-<!--
 <select id="paramsClass" name="paramsClass" onchange="showDiv(this)">
    <option value="noob">Noob</option>
    <option value ="regular">Regular</option>
@@ -39,66 +29,28 @@ function toggleSelect(elem)
 </script>
 
 <body>
-<div id="regular">
-<h2>Used across the game</h2>
-<table>
+
 {{
-easy = 1
-medium = 5
-hard = 10
-harder = 25
-hardcore = 50
-mania = 100
-
-difficulties = {
-  0: 'mania',
-  easy : 'easy',
-  medium : 'medium',
-  hard : 'hard',
-  harder : 'harder',
-  hardcore : 'hardcore',
-  mania : 'mania'
-}
-usedAcrossTheGame = ['Mockball', 'SimpleShortCharge', 'InfiniteBombJump', 'GreenGateGlitch', 'ShortCharge', 'GravityJump', 'SpringBallJump']
-
-desc = {'Mockball': {'title': 'Early super and ice beam', 'href': 'http://deanyd.net/sm/index.php?title=Mockball'},
-        'SimpleShortCharge': {'title': 'Waterway ETank without gravity, and Wrecked Ship access', 'href': 'http://deanyd.net/sm/index.php?title=Quick_charge'},
-        'InfiniteBombJump': {'title': 'To access certain locations without high jump or space jump', 'href': 'https://www.youtube.com/watch?v=Qfmcm7hkXP4'},
-        'GreenGateGlitch': {'title': 'To access screw attack and crocomire', 'href': 'http://deanyd.net/sm/index.php?title=Gate_Glitch'},
-        'ShortCharge': {'title': 'To kill draygon', 'href': 'http://deanyd.net/sm/index.php?title=Short_Charge'},
-        'GravityJump': {'title': 'n/a', 'href': 'http://deanyd.net/sm/index.php?title=14%25#Gravity_Jump'},
-        'SpringBallJump': {'title': 'Access to wrecked ship etank without anything else and suitless maridia navigation', 'href': None}
-       }
-
-knows = {'Mockball': (True, easy),
-         'SimpleShortCharge': (True, easy),
-         'InfiniteBombJump': (True, medium),
-         'GreenGateGlitch': (True, medium),
-         'ShortCharge': (False, 0),
-         'GravityJump': (True, hard),
-         'SpringBallJump': (True, hard)
-        }
-
-for know in usedAcrossTheGame:
-  response.write("<tr>", escape=False)
+def displayKnow(know):
+  response.write("<tr>\n", escape=False)
 
   if desc[know]['href'] is not None:
-    response.write("  <td><span title=\"{}\"><a href=\"{}\">{}</a></span></td>".format(desc[know]['title'], desc[know]['href'], know), escape=False)
+    response.write("  <td><span title=\"{}\"><a href=\"{}\">{}</a></span></td>\n".format(desc[know]['title'], desc[know]['href'], know), escape=False)
   else:
-    response.write("  <td><span title=\"{}\">{}</span></td>".format(desc[know]['title'], know), escape=False)
+    response.write("  <td><span title=\"{}\">{}</span></td>\n".format(desc[know]['title'], know), escape=False)
     pass
 
   checked="value=\"off\""
   if knows[know][0] is True:
     checked="checked=\"checked\" value=\"on\""
     pass
-  response.write("  <td><input id=\"{}_bool\" name=\"{}_bool\" type=\"checkbox\" {} onClick=\"toggleSelect('{}')\"></td>".format(know, know, checked, know), escape=False)
+  response.write("  <td><input id=\"{}_bool\" name=\"{}_bool\" type=\"checkbox\" {} onClick=\"toggleSelect('{}')\" form=\"mainform\"></td>\n".format(know, know, checked, know), escape=False)
 
   disabled=""
   if knows[know][0] is False:
     disabled="disabled"
     pass
-  response.write("  <td><select id=\"{}_diff\" name=\"{}_diff\" {}>".format(know, know, disabled), escape=False)
+  response.write("  <td><select id=\"{}_diff\" name=\"{}_diff\" {} form=\"mainform\">\n".format(know, know, disabled), escape=False)
   knowDiff=knows[know][1]
   knowDiff=knowDiff if knowDiff != 0 else mania
   for difficulty in [easy, medium, hard, harder, hardcore, mania]:
@@ -107,52 +59,32 @@ for know in usedAcrossTheGame:
       selected="selected=\"selected\""
       pass
 
-    response.write("<option value=\"{}\" {}>{}</option>".format(difficulties[difficulty], selected, difficulties[difficulty]), escape=False)
+    response.write("    <option value=\"{}\" {}>{}</option>\n".format(difficulties[difficulty], selected, difficulties[difficulty]), escape=False)
     pass
 
-  response.write("</tr>", escape=False)
+  response.write("</tr>\n", escape=False)
+  pass
+
+def displayCategory(category):
+  response.write("<h2>{}</h2>\n".format(category['title']), escape=False)
+  response.write("<table>\n", escape=False)
+  for know in category['knows']:
+    displayKnow(know)
+    pass
+  response.write("</table>\n", escape=False)
+pass
+}}
+
+{{=form}}
+
+<div id="regular">
+
+{{
+for category in categories:
+  displayCategory(category)
   pass
 
 pass
 }}
-
-<!--
-<tr>
-  <td><span title="Early super and ice beam"><a href="http://deanyd.net/sm/index.php?title=Mockball">Mockball</a></span></td>
-  <td><input id="Mockball_bool" name="Mockball_bool" type="checkbox" checked="checked" value="on" onClick="toggleSelect('Mockball')"></td>
-  <td><select id="Mockball_diff" name="Mockball_diff"><option value="false"></option><option value="easy" selected="selected">easy</option><option value="medium">medium</option><option value="hard">hard</option><option value="hardcore">hardcore</option><option value="mania">mania</option></select></td>
-</tr>
-<tr>
-  <td><span title="Waterway ETank without gravity, and Wrecked Ship access"><a href="http://deanyd.net/sm/index.php?title=Quick_charge">Simple Short Charge</a></span></td>
-  <td><input id="SimpleShortCharge_bool" name="SimpleShortCharge_bool" type="checkbox" checked="checked" value="on" onClick="toggleSelect('SimpleShortCharge')"></td>
-  <td><select id="SimpleShortCharge_diff" name="SimpleShortCharge_diff"><option value="false"></option><option value="easy" selected="selected">easy</option><option value="medium">medium</option><option value="hard">hard</option><option value="hardcore">hardcore</option><option value="mania">mania</option></select></td>
-</tr>
-<tr>
-  <td><span title="To access certain locations without high jump or space jump"><a href="https://www.youtube.com/watch?v=Qfmcm7hkXP4">Infinite Bomb Jump</a></span></td>
-  <td><input id="InfiniteBombJump_bool" name="InfiniteBombJump_bool" type="checkbox" checked="checked" value="on" onClick="toggleSelect('InfiniteBombJump')"></td>
-  <td><select id="InfiniteBombJump_diff" name="InfiniteBombJump_diff"><option value="false"></option><option value="easy">easy</option><option value="medium" selected="selected">medium</option><option value="hard">hard</option><option value="hardcore">hardcore</option><option value="mania">mania</option></select></td>
-</tr>
-<tr>
-  <td><span title="To access screw attack and crocomire"><a href="http://deanyd.net/sm/index.php?title=Gate_Glitch">Green Gate Glitch</a></span></td>
-  <td><input id="GreenGateGlitch_bool" name="GreenGateGlitch_bool" type="checkbox" checked="checked" value="on" onClick="toggleSelect('GreenGateGlitch')"></td>
-  <td><select id="GreenGateGlitch_diff" name="GreenGateGlitch_diff"><option value="false"></option><option value="easy">easy</option><option value="medium" selected="selected">medium</option><option value="hard">hard</option><option value="hardcore">hardcore</option><option value="mania">mania</option></select></td>
-</tr>
-<tr>
-  <td><span title="To kill draygon"><a href="http://deanyd.net/sm/index.php?title=Short_Charge">Short Charge</a></span></td>
-  <td><input id="ShortCharge_bool" name="ShortCharge_bool" type="checkbox" value="off" onClick="toggleSelect('ShortCharge')"></td>
-  <td><select id="ShortCharge_diff" name="ShortCharge_diff" disabled><option value="false" selected="selected"></option><option value="easy">easy</option><option value="medium">medium</option><option value="hard">hard</option><option value="hardcore">hardcore</option><option value="mania">mania</option></select></td>
-</tr>
-<tr>
-  <td><span title="n/a"><a href="http://deanyd.net/sm/index.php?title=14%25#Gravity_Jump">Gravity Jump</a></span></td>
-  <td><input id="GravityJump_bool" name="GravityJump_bool" type="checkbox" checked="checked" value="on" onClick="toggleSelect('GravityJump')"></td>
-  <td><select id="GravityJump_diff" name="GravityJump_diff"><option value="false"></option><option value="easy">easy</option><option value="medium">medium</option><option value="hard" selected="selected">hard</option><option value="hardcore">hardcore</option><option value="mania">mania</option></select></td>
-</tr>
-<tr>
-  <td><span title="Access to wrecked ship etank without anything else and suitless maridia navigation">SpringBall Jump</span></td>
-  <td><input id="SpringBallJump_bool" name="SpringBallJump_bool" type="checkbox" checked="checked" value="on" onClick="toggleSelect('SpringBallJump')"></td>
-  <td><select id="SpringBallJump_diff" name="SpringBallJump_diff"><option value="false"></option><option value="easy">easy</option><option value="medium">medium</option><option value="hard" selected="selected">hard</option><option value="hardcore">hardcore</option><option value="mania">mania</option></select></td>
-</tr>
--->
-</table>
 </div>
 </body>

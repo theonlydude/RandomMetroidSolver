@@ -1,5 +1,10 @@
 {{extend 'layout.html'}}
 
+<style>
+  a:link {color: SteelBlue;}
+  a:visited {color: gray;}
+</style>
+
 <script>
 function toggleSelect(elem)
 {
@@ -16,17 +21,23 @@ function toggleSelect(elem)
 def displayKnow(know):
   response.write("<tr>\n", escape=False)
 
-  if desc[know]['href'] is not None:
-    response.write("  <td><span title=\"{}\"><a href=\"{}\">{}</a></span></td>\n".format(desc[know]['title'], desc[know]['href'], desc[know]['display']), escape=False)
-  else:
-    response.write("  <td><span title=\"{}\">{}</span></td>\n".format(desc[know]['title'], desc[know]['display']), escape=False)
-    pass
-
   checked="value=\"off\""
   if knows[know][0] is True:
     checked="checked=\"checked\" value=\"on\""
     pass
   response.write("  <td><input id=\"{}_bool\" name=\"{}_bool\" type=\"checkbox\" {} onClick=\"toggleSelect('{}')\" form=\"mainform\"></td>\n".format(know, know, checked, know), escape=False)
+
+  #if desc[know]['href'] is not None:
+  #  response.write("  <td><span title=\"{}\"><a href=\"{}\">{}</a></span></td>\n".format(desc[know]['title'], desc[know]['href'], desc[know]['display']), escape=False)
+  #else:
+  #  response.write("  <td><span title=\"{}\">{}</span></td>\n".format(desc[know]['title'], desc[know]['display']), escape=False)
+  #  pass
+
+  if desc[know]['href'] is not None:
+    response.write("  <td><a href=\"{}\">&nbsp&nbsp{}&nbsp&nbsp</a></td>\n".format(desc[know]['href'], desc[know]['display']), escape=False)
+  else:
+    response.write("  <td>&nbsp&nbsp{}&nbsp&nbsp</td>\n".format(desc[know]['display']), escape=False)
+    pass
 
   disabled=""
   if knows[know][0] is False:
@@ -43,6 +54,8 @@ def displayKnow(know):
 
     response.write("    <option value=\"{}\" {}>{}</option>\n".format(difficulties[difficulty], selected, difficulties[difficulty]), escape=False)
     pass
+
+  response.write("  <td>&nbsp&nbsp{}</td>".format(desc[know]['title']), escape=False)
 
   response.write("</tr>\n", escape=False)
   pass
@@ -66,6 +79,9 @@ Load a previously saved presets.
 {{=loadForm}}
 
 <hr>
+
+For each technic you can choose if you know it and your perceived difficulty.</br>
+Clicking on most of the technics will send you to an explanation or a tutorial.
 
 {{
 for category in categories:

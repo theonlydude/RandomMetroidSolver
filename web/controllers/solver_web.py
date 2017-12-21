@@ -221,7 +221,7 @@ def solver():
 #            params['veteran']['Knows'] = session.paramsDict['Knows']
 
 
-    print("paramsFile={}".format(paramsFile))
+    #print("paramsFile={}".format(paramsFile))
 
     # main form
     mainTable = TABLE(TR("Tournament Rom seed: TX",
@@ -230,36 +230,46 @@ def solver():
                                requires=IS_INT_IN_RANGE(0, 9999999, error_message = 'Seed is a number between 0 and 9999999'),
                                default=1234567)))
     mainTable.append(TR(INPUT(_type="submit",_value="Compute difficulty")))
-    mainForm = FORM(mainTable, _id="mainform")
+    mainForm = FORM(mainTable, _id="mainform", _name="mainform")
 
-    if mainForm.accepts(request, session):
-        response.flash="main form accepted"
-        session.vars = mainForm.vars
-        session.post_vars = request.post_vars
-        redirect(URL(r=request, f='compute_difficulty'))
-    elif mainForm.errors:
-        response.flash="Seed number is invalid"
+    if mainForm.process(formname='mainform').accepted:
+        print("mainForm is accepted")
+        if mainForm.accepts(request, session):
+            print("mainForm ok")
+            response.flash="main form accepted"
+            session.vars = mainForm.vars
+            session.post_vars = request.post_vars
+            redirect(URL(r=request, f='compute_difficulty'))
+        elif mainForm.errors:
+            print("mainForm not ok")
+            response.flash="Seed number is invalid"
 
 
     # load form
-    loadTable = TABLE(TR("Choose an available preset:", SELECT()))
+    files = os.listdir('diff_presets')
+    presets = [os.path.splitext(file)[0] for file in files]
+
+    loadTable = TABLE(TR("Choose an available preset:",
+                         SELECT(*files, **dict(_name="paramsFile"))))
     loadTable.append(TR(INPUT(_type="submit",_value="Load presets")))
-    loadForm = FORM(loadTable, _id="loadform")
+    loadForm = FORM(loadTable, _id="loadform", _name="loadform")
 
-    if loadForm.accepts(request, session):
-        response.flash="load form accepted"
-        # check that the presets file exists
-        paramsFile = mainForm.vars['paramsFile']
-        fullPath = 'diff_presets/{}.json'.format(paramsFile)
-        if os.path.isfile(fullPath):
-            # load it
+    if loadForm.process(formname='loadform').accepted:
+        print("loadForm is accepted")
+        if loadForm.accepts(request, session):
+            response.flash="load form accepted"
+            # check that the presets file exists
+            paramsFile = mainForm.vars['paramsFile']
+            fullPath = 'diff_presets/{}.json'.format(paramsFile)
+            if os.path.isfile(fullPath):
+                # load it
+                params = ParamsLoader.factory(fullPath).params
+                session.paramsFile = paramsFile
+            else:
+                response.flash = "Presets file not found"
 
-            session.paramsFile = paramsFile
-        else:
-            response.flash = "Presets file not found"
-
-    elif mainForm.errors:
-        response.flash="Invalid presets"
+        elif mainForm.errors:
+            response.flash="Invalid presets"
 
 
     # save form
@@ -276,8 +286,10 @@ def solver():
                                          IS_ALPHANUMERIC(error_message='Password must be alphanumeric and max 32 chars'), 
                                          IS_LENGTH(32)])))
     saveTable.append(TR(INPUT(_type="submit",_value="Save presets")))
-    saveForm = FORM(saveTable, _id="loadform")
+    saveForm = FORM(saveTable, _id="saveform", _name="saveform")
 
+    if saveForm.process(formname='saveform').accepted:
+        print("saveForm is accepted")
 
     # send values to view
     return dict(mainForm=mainForm, loadForm=loadForm, saveForm=saveForm,

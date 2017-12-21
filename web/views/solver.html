@@ -1,24 +1,6 @@
 {{extend 'layout.html'}}
-<!--
-<select id="paramsClass" name="paramsClass" onchange="showDiv(this)">
-   <option value="noob">Noob</option>
-   <option value ="regular">Regular</option>
-   <option value="veteran">Veteran</option>
-</select>
-
-function showDiv(elem){
-   if(elem.value == "noob")
-      document.getElementById('noob_div').style.display = "block";
-   if(elem.value == "regular")
-      document.getElementById(regular_div').style.display = "block";
-   if(elem.value == "veteran")
-      document.getElementById('veteran_div').style.display = "block";
-}
--->
 
 <script>
-// window.onload = toggleSelect(); // to disable select on load if needed
-
 function toggleSelect(elem)
 {
   var boolElem = elem + "_bool"
@@ -35,9 +17,9 @@ def displayKnow(know):
   response.write("<tr>\n", escape=False)
 
   if desc[know]['href'] is not None:
-    response.write("  <td><span title=\"{}\"><a href=\"{}\">{}</a></span></td>\n".format(desc[know]['title'], desc[know]['href'], know), escape=False)
+    response.write("  <td><span title=\"{}\"><a href=\"{}\">{}</a></span></td>\n".format(desc[know]['title'], desc[know]['href'], desc[know]['display']), escape=False)
   else:
-    response.write("  <td><span title=\"{}\">{}</span></td>\n".format(desc[know]['title'], know), escape=False)
+    response.write("  <td><span title=\"{}\">{}</span></td>\n".format(desc[know]['title'], desc[know]['display']), escape=False)
     pass
 
   checked="value=\"off\""
@@ -75,9 +57,15 @@ def displayCategory(category):
 pass
 }}
 
-{{=form}}
+Enter your tournament rom seed, ajust the presets depending on the technics you know then press 'Compute Difficulty'.
+{{=mainForm}}
 
-<div id="regular">
+<hr>
+
+Load a previously saved presets.
+{{=loadForm}}
+
+<hr>
 
 {{
 for category in categories:
@@ -86,5 +74,10 @@ for category in categories:
 
 pass
 }}
-</div>
+
+<hr>
+
+Save or update the presets. A password is required to later modify the presets.
+{{=saveForm}}
+
 </body>

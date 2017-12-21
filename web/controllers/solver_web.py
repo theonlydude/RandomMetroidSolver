@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import datetime
+import datetime, os.path
 
 from parameters import *
 from helpers import *
@@ -27,55 +27,62 @@ difficulties2 = {
     'mania' : mania
 }
 
-desc = {'Mockball': {'title': 'Early super and ice beam',
+desc = {'Mockball': {'display': 'Mockball',
+                     'title': 'Early super and ice beam',
                      'href': 'http://deanyd.net/sm/index.php?title=Mockball'},
-        'SimpleShortCharge': {'title': 'Waterway ETank without gravity, and Wrecked Ship access',
+        'SimpleShortCharge': {'display': 'Simple Short Charge',
+                              'title': 'Waterway ETank without gravity, and Wrecked Ship access',
                               'href': 'http://deanyd.net/sm/index.php?title=Quick_charge'},
-        'InfiniteBombJump': {'title': 'To access certain locations without high jump or space jump',
+        'InfiniteBombJump': {'display': 'Infinite Bomb Jump',
+                             'title': 'To access certain locations without high jump or space jump',
                              'href': 'https://www.youtube.com/watch?v=Qfmcm7hkXP4'},
-        'GreenGateGlitch': {'title': 'To access screw attack and crocomire',
+        'GreenGateGlitch': {'display': 'Green Gate Glitch',
+                            'title': 'To access screw attack and crocomire',
                             'href': 'http://deanyd.net/sm/index.php?title=Gate_Glitch'},
-        'ShortCharge': {'title': 'To kill draygon',
+        'ShortCharge': {'display': 'Short Charge',
+                        'title': 'To kill draygon',
                         'href': 'http://deanyd.net/sm/index.php?title=Short_Charge'},
-        'GravityJump': {'title': 'n/a',
+        'GravityJump': {'display': 'Gravity Jump',
+                        'title': 'n/a',
                         'href': 'http://deanyd.net/sm/index.php?title=14%25#Gravity_Jump'},
-        'SpringBallJump': {'title': 'Access to wrecked ship etank without anything else and suitless maridia navigation',
+        'SpringBallJump': {'display': 'Spring Ball Jump',
+                           'title': 'Access to wrecked ship etank without anything else and suitless maridia navigation',
                            'href': None},
-        'DraygonGrappleKill': {'title': 'n/a', 'href': None},
-        'MicrowaveDraygon': {'title': 'n/a', 'href': None},
-        'MicrowavePhantoon': {'title': 'n/a', 'href': None},
-        'IceZebSkip': {'title': 'n/a', 'href': None},
-        'SpeedZebSkip': {'title': 'n/a', 'href': None},
-        'CeilingDBoost': {'title': 'n/a', 'href': None},
-        'AlcatrazEscape': {'title': 'n/a', 'href': 'https://www.youtube.com/watch?v=XSBeLJJafjY'},
-        'ReverseGateGlitch': {'title': 'n/a', 'href': None},
-        'EarlyKraid': {'title': 'n/a', 'href': None},
-        'XrayDboost': {'title': 'n/a', 'href': None},
-        'RedTowerClimb': {'title': 'n/a', 'href': None},
-        'HiJumpGauntletAccess': {'title': 'n/a', 'href': None},
-        'GauntletWithBombs': {'title': 'n/a', 'href': None},
-        'GauntletWithPowerBombs': {'title': 'n/a', 'href': None},
-        'GauntletEntrySpark': {'title': 'n/a', 'href': None},
-        'NorfairReserveHiJump': {'title': 'n/a', 'href': None},
-        'WaveBeamWallJump': {'title': 'n/a', 'href': None},
-        'ClimbToGrappleWithIce': {'title': 'n/a', 'href': None},
-        'LavaDive': {'title': 'n/a', 'href': None},
-        'WorstRoomIceCharge': {'title': 'n/a', 'href': None},
-        'WorstRoomHiJump': {'title': 'n/a', 'href': None},
-        'ContinuousWallJump': {'title': 'n/a', 'href': None},
-        'DiagonalBombJump': {'title': 'n/a', 'href': None},
-        'MockballWs': {'title': 'n/a', 'href': None},
-        'SpongeBathBombJump': {'title': 'n/a', 'href': None},
-        'SpongeBathHiJump': {'title': 'n/a', 'href': None},
-        'SpongeBathSpeed': {'title': 'n/a', 'href': None},
-        'SuitlessOuterMaridia': {'title': 'n/a', 'href': None},
-        'SuitlessOuterMaridiaNoGuns': {'title': 'n/a', 'href': None},
-        'MochtroidClip': {'title': 'n/a', 'href': None},
-        'PuyoClip': {'title': 'n/a', 'href': None},
-        'KillPlasmaPiratesWithSpark': {'title': 'n/a', 'href': None},
-        'KillPlasmaPiratesWithCharge': {'title': 'n/a', 'href': None},
-        'ExitPlasmaRoomHiJump': {'title': 'n/a', 'href': None},
-        'SuitlessSandpit': {'title': 'n/a', 'href': None}
+        'DraygonGrappleKill': {'display': 'Draygon Grapple Kill', 'title': 'n/a', 'href': None},
+        'MicrowaveDraygon': {'display': 'Microwave Draygon', 'title': 'n/a', 'href': None},
+        'MicrowavePhantoon': {'display': 'Microwave Phantoon', 'title': 'n/a', 'href': None},
+        'IceZebSkip': {'display': 'Ice Zeb Skip', 'title': 'n/a', 'href': None},
+        'SpeedZebSkip': {'display': 'Speed Zeb Skip', 'title': 'n/a', 'href': None},
+        'CeilingDBoost': {'display': 'Ceiling Damage Boost', 'title': 'n/a', 'href': None},
+        'AlcatrazEscape': {'display': 'Alcatraz Escape', 'title': 'n/a', 'href': 'https://www.youtube.com/watch?v=XSBeLJJafjY'},
+        'ReverseGateGlitch': {'display': 'Reverse Gate Glitch', 'title': 'n/a', 'href': None},
+        'EarlyKraid': {'display': 'Early Kraid', 'title': 'n/a', 'href': None},
+        'XrayDboost': {'display': 'Xray Damage Boost', 'title': 'n/a', 'href': None},
+        'RedTowerClimb': {'display': 'Red Tower Climb', 'title': 'n/a', 'href': None},
+        'HiJumpGauntletAccess': {'display': 'Hi-Jump Gauntlet Access', 'title': 'n/a', 'href': None},
+        'GauntletWithBombs': {'display': 'Gauntlet With Bombs', 'title': 'n/a', 'href': None},
+        'GauntletWithPowerBombs': {'display': 'Gauntlet With Power-Bombs', 'title': 'n/a', 'href': None},
+        'GauntletEntrySpark': {'display': 'Gauntlet Entry Spark', 'title': 'n/a', 'href': None},
+        'NorfairReserveHiJump': {'display': 'Norfair Reserve Hi-Jump', 'title': 'n/a', 'href': None},
+        'WaveBeamWallJump': {'display': 'Wave-Beam Wall-Jump', 'title': 'n/a', 'href': None},
+        'ClimbToGrappleWithIce': {'display': 'Climb to Grapple With Ice', 'title': 'n/a', 'href': None},
+        'LavaDive': {'display': 'Lava Dive', 'title': 'n/a', 'href': None},
+        'WorstRoomIceCharge': {'display': 'Worst Room Ice and Charge', 'title': 'n/a', 'href': None},
+        'WorstRoomHiJump': {'display': 'Worst Room Hi-Jump', 'title': 'n/a', 'href': None},
+        'ContinuousWallJump': {'display': 'Continuous Wall-Jump', 'title': 'n/a', 'href': None},
+        'DiagonalBombJump': {'display': 'Diagonal Bomb-Jump', 'title': 'n/a', 'href': None},
+        'MockballWs': {'display': 'Mockball Wrecked Ship', 'title': 'n/a', 'href': None},
+        'SpongeBathBombJump': {'display': 'SpongeBath Bomb-Jump', 'title': 'n/a', 'href': None},
+        'SpongeBathHiJump': {'display': 'SpongeBath Hi-Jump', 'title': 'n/a', 'href': None},
+        'SpongeBathSpeed': {'display': 'SpongeBath Speed', 'title': 'n/a', 'href': None},
+        'SuitlessOuterMaridia': {'display': 'Suitless Outer Maridia', 'title': 'n/a', 'href': None},
+        'SuitlessOuterMaridiaNoGuns': {'display': 'Suitless Outer Maridia with no Guns', 'title': 'n/a', 'href': None},
+        'MochtroidClip': {'display': 'Mochtroid Clip', 'title': 'n/a', 'href': None},
+        'PuyoClip': {'display': 'Puyo Clip', 'title': 'n/a', 'href': None},
+        'KillPlasmaPiratesWithSpark': {'display': 'Kill Plasma Pirates with Spark', 'title': 'n/a', 'href': None},
+        'KillPlasmaPiratesWithCharge': {'display': 'Kill Plasma Pirates with Charge', 'title': 'n/a', 'href': None},
+        'ExitPlasmaRoomHiJump': {'display': 'Exit Plasma room Hi-Jump', 'title': 'n/a', 'href': None},
+        'SuitlessSandpit': {'display': 'Suitless Sandpit', 'title': 'n/a', 'href': None}
 }
 
 usedAcrossTheGame = ['Mockball', 'SimpleShortCharge', 'InfiniteBombJump', 'GreenGateGlitch', 'ShortCharge', 'GravityJump', 'SpringBallJump']
@@ -111,7 +118,6 @@ def solver():
     print("")
     print("")
 
-    table = TABLE(TR("Tournament Rom seed: TX", INPUT(_type="text",_name="seed",requires=IS_NOT_EMPTY(),default=1234567)))
 
 #    ,
 #                  TR("difficulty_target:",
@@ -121,56 +127,90 @@ def solver():
 #                                                'harder', 'hardcore', 'mania']),
 #                            value=difficulties[Conf.difficultyTarget])))
 
-    if session.paramsClass is not None:
-        paramsClass = session.paramsClass
-        print("Use {} params from session".format(paramsClass))
+    if session.paramsFile is not None:
+        paramsFile = session.paramsFile
+        print("Use {} params from session".format(paramsFile))
     else:
-        paramsClass = 'veteran'
+        paramsFile = 'regular'
 
     # load the presets
-    params = {}
-    params['noob'] = ParamsLoader.factory('diff_presets/noob.json').params
-    params['regular'] = ParamsLoader.factory('diff_presets/flo.json').params
-    params['veteran'] = ParamsLoader.factory('diff_presets/veteran.json').params
+    params = ParamsLoader.factory('diff_presets/{}.json'.format(paramsFile)).params
 
-    # get the knowsXXX from the session if available
-    if session.paramsClass is not None and session.paramsDict is not None:
-        print("Use parameters from {}".format(session.lastUsed))
-        if session.paramsClass == 'noob':
-            print('use noob params from session')
-            params['noob']['Knows'] = session.paramsDict['Knows']
-        elif session.paramsClass == 'regular':
-            print('use regular params from session')
-            params['regular']['Knows'] = session.paramsDict['Knows']
-        elif session.paramsClass == 'veteran':
-            print('use veteran params from session')
-            params['veteran']['Knows'] = session.paramsDict['Knows']
+#    # get the knowsXXX from the session if available
+#    if session.paramsClass is not None and session.paramsDict is not None:
+#        print("Use parameters from {}".format(session.lastUsed))
+#        if session.paramsClass == 'noob':
+#            print('use noob params from session')
+#            params['noob']['Knows'] = session.paramsDict['Knows']
+#        elif session.paramsClass == 'regular':
+#            print('use regular params from session')
+#            params['regular']['Knows'] = session.paramsDict['Knows']
+#        elif session.paramsClass == 'veteran':
+#            print('use veteran params from session')
+#            params['veteran']['Knows'] = session.paramsDict['Knows']
 
 
-    table.append(TR("Parameters preset", SELECT('noob', 'regular', 'veteran', _name='paramsClass', value=paramsClass, onchange="showDiv(this)"), ""))
+    print("paramsFile={}".format(paramsFile))
 
-    print("paramsClass={}".format(paramsClass))
+    # main form
+    mainTable = TABLE(TR("Tournament Rom seed: TX",
+                         INPUT(_type="text",
+                               _name="seed",
+                               requires=IS_INT_IN_RANGE(0, 9999999, error_message = 'Seed is a number between 0 and 9999999'),
+                               default=1234567)))
+    mainTable.append(TR(INPUT(_type="submit",_value="Compute difficulty")))
+    mainForm = FORM(mainTable, _id="mainform")
 
-    table.append(TR(INPUT(_type="submit",_value="SUBMIT")))
-
-    form=FORM(table, _id="mainform")
-
-    if form.accepts(request,session):
-        response.flash="form accepted"
-        #print("request={}".format(request))
-        session.vars = form.vars
+    if mainForm.accepts(request, session):
+        response.flash="main form accepted"
+        session.vars = mainForm.vars
         session.post_vars = request.post_vars
         redirect(URL(r=request, f='compute_difficulty'))
-    elif form.errors:
-        response.flash="form is invalid"
-    else:
-        response.flash="please fill the form"
+    elif mainForm.errors:
+        response.flash="Seed number is invalid"
 
-    return dict(form=form,
+
+    # load form
+    loadTable = TABLE(TR("Choose an available preset:", SELECT()))
+    loadTable.append(TR(INPUT(_type="submit",_value="Load presets")))
+    loadForm = FORM(loadTable, _id="loadform")
+
+    if loadForm.accepts(request, session):
+        response.flash="load form accepted"
+        # check that the presets file exists
+        paramsFile = mainForm.vars['paramsFile']
+        fullPath = 'diff_presets/{}.json'.format(paramsFile)
+
+        # load it
+
+        session.paramsFile = paramsFile
+    elif mainForm.errors:
+        response.flash="Invalid presets"
+
+
+    # save form
+    saveTable = TABLE(TR("Name of the preset:",
+                         INPUT(_type="text",
+                               _name="saveFile",
+                               requires=[IS_NOT_EMPTY(),
+                                         IS_ALPHANUMERIC(error_message='Preset name must be alphanumeric and max 32 chars'), 
+                                         IS_LENGTH(32)])),
+                      TR("Password:",
+                         INPUT(_type="text",
+                               _name="password",
+                               requires=[IS_NOT_EMPTY(),
+                                         IS_ALPHANUMERIC(error_message='Password must be alphanumeric and max 32 chars'), 
+                                         IS_LENGTH(32)])))
+    saveTable.append(TR(INPUT(_type="submit",_value="Save presets")))
+    saveForm = FORM(saveTable, _id="loadform")
+
+
+    # send values to view
+    return dict(mainForm=mainForm, loadForm=loadForm, saveForm=saveForm,
                 desc=desc,
                 difficulties=difficulties,
                 categories=categories,
-                knows=params[session.paramsClass]['Knows'],
+                knows=params['Knows'],
                 easy=easy,medium=medium,hard=hard,harder=harder,hardcore=hardcore,mania=mania)
 
 def compute_difficulty():

@@ -180,10 +180,13 @@ def solver():
         # check that the presets file exists
         paramsFile = mainForm.vars['paramsFile']
         fullPath = 'diff_presets/{}.json'.format(paramsFile)
+        if os.path.isfile(fullPath):
+            # load it
 
-        # load it
+            session.paramsFile = paramsFile
+        else:
+            response.flash = "Presets file not found"
 
-        session.paramsFile = paramsFile
     elif mainForm.errors:
         response.flash="Invalid presets"
 

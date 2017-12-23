@@ -6,7 +6,8 @@ from parameters import *
 from helpers import *
 from tournament_locations import *
 from solver import *
-from get_random_rom import *
+# get_random_rom works only in python 3.5, for testing in 2.7 we have to comment it
+#from get_random_rom import *
 
 difficulties = {
     0: 'mania',
@@ -203,7 +204,8 @@ def solver():
     print("request.post_var.paramsFile={}".format(request.post_vars.paramsFile))
 
     if (request.post_vars._formname is not None
-        and request.post_vars._formname == 'loadform'):
+        and request.post_vars._formname in ['loadform', 'saveform']
+        and request.post_vars.paramsFile is not None):
         paramsFile = request.post_vars.paramsFile
         print("Use {} params from request".format(paramsFile))
     elif session.paramsFile is not None:
@@ -232,30 +234,6 @@ def solver():
         session.vars = mainForm.vars
         session.post_vars = request.post_vars
         redirect(URL(r=request, f='compute_difficulty'))
-
-
-    # load form
-    files = os.listdir('diff_presets')
-    presets = [os.path.splitext(file)[0] for file in files]
-
-    loadTable = TABLE(TR("Choose an available preset:",
-                         SELECT(*presets, **dict(_name="paramsFile", value=paramsFile))))
-    loadTable.append(TR(INPUT(_type="submit",_value="Load presets")))
-    loadForm = FORM(loadTable, _id="loadform", _name="loadform")
-
-    if loadForm.process(formname='loadform').accepted:
-        print("loadForm is accepted")
-        response.flash="load form accepted"
-
-        # check that the presets file exists
-        paramsFile = loadForm.vars['paramsFile']
-        fullPath = 'diff_presets/{}.json'.format(paramsFile)
-        if os.path.isfile(fullPath):
-            # load it
-            params = ParamsLoader.factory(fullPath).params
-            session.paramsFile = paramsFile
-        else:
-            response.flash = "Presets file not found"
 
 
     # save form
@@ -290,17 +268,46 @@ def solver():
             # check if password match
             if passwordSHA256 == oldParams['password']:
                 # update the presets file
-                paramsDict = generate_json_from_parameters(session)
+                paramsDict = generate_json_from_parameters(request.post_vars, hidden=True)
                 paramsDict['password'] = passwordSHA256
                 ParamsLoader.factory(paramsDict).dump(fullPath)
+                session.paramsFile = saveFile
+                redirect(URL(r=request, f='solver'))
             else:
                 response.flash = "Password mismatch with existing presets file {}".format(saveFile)
 
         else:
             # write the presets file
-            paramsDict = generate_json_from_parameters(session)
+            paramsDict = generate_json_from_parameters(request.post_vars, hidden=True)
             paramsDict['password'] = passwordSHA256
             ParamsLoader.factory(paramsDict).dump(fullPath)
+            session.paramsFile = saveFile
+            redirect(URL(r=request, f='solver'))
+
+    # load form
+    files = sorted(os.listdir('diff_presets'))
+    presets = [os.path.splitext(file)[0] for file in files]
+
+    loadTable = TABLE(TR("Choose an available preset:",
+                         SELECT(*presets, **dict(_name="paramsFile", value=paramsFile))))
+    loadTable.append(TR(INPUT(_type="submit",_value="Load presets")))
+    loadForm = FORM(loadTable, _id="loadform", _name="loadform")
+
+    if loadForm.process(formname='loadform').accepted:
+        print("loadForm is accepted")
+        response.flash="load form accepted"
+
+        # check that the presets file exists
+        paramsFile = loadForm.vars['paramsFile']
+        fullPath = 'diff_presets/{}.json'.format(paramsFile)
+        if os.path.isfile(fullPath):
+            # load it
+            params = ParamsLoader.factory(fullPath).params
+            session.paramsFile = paramsFile
+            redirect(URL(r=request, f='solver'))
+        else:
+            response.flash = "Presets file not found"
+
 
     # send values to view
     return dict(mainForm=mainForm, loadForm=loadForm, saveForm=saveForm,
@@ -310,17 +317,21 @@ def solver():
                 knows=params['Knows'],
                 easy=easy,medium=medium,hard=hard,harder=harder,hardcore=hardcore,mania=mania)
 
-def generate_json_from_parameters(session):
+def generate_json_from_parameters(vars, hidden):
+    if hidden is True:
+        hidden = "_hidden"
+    else:
+        hidden = ""
     paramsDict = {'Conf': {}, 'Settings': {}, 'Knows': {}}
     for var in Knows.__dict__:
         print("var={}".format(var))
         if var[0:len('__')] != '__':
-            boolVar = session.post_vars[var+"_bool"]
-            print("{} = {}".format(var+"_bool", boolVar))
+            boolVar = vars[var+"_bool"+hidden]
+            print("{} = {}".format(var+"_bool"+hidden, boolVar))
             if boolVar is None:
                 paramsDict['Knows'][var] = [False, 0]
             else:
-                paramsDict['Knows'][var] = [True, difficulties2[session.post_vars[var+"_diff"]]]
+                paramsDict['Knows'][var] = [True, difficulties2[vars[var+"_diff"+hidden]]]
             print("{}: {}".format(var, paramsDict['Knows'][var]))
 
     return paramsDict
@@ -339,7 +350,7 @@ def compute_difficulty():
     print("load from session:")
     print("session.vars={}".format(session.vars))
     print("session.post_vars={}".format(session.post_vars))
-    paramsDict = generate_json_from_parameters(session)
+    paramsDict = generate_json_from_parameters(session.post_vars, hidden=False)
 
     # store paramsDict in the session
     session.paramsDict = paramsDict

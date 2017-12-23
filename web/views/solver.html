@@ -9,9 +9,17 @@
 function toggleSelect(elem)
 {
   var boolElem = elem + "_bool"
+  var boolElemHidden = boolElem + "_hidden"
   var diffElem = elem + "_diff"
   var isChecked = document.getElementById(boolElem).checked;
   document.getElementById(diffElem).disabled = !isChecked;
+  document.getElementById(boolElemHidden).checked = isChecked;
+}
+function changeHiddenSelect(diffElem)
+{
+  var diffElemHidden = diffElem + "_hidden"
+  document.getElementById(diffElemHidden).value = document.getElementById(diffElem).value
+  document.getElementById(diffElemHidden).selectedIndex = document.getElementById(diffElem).selectedIndex
 }
 </script>
 
@@ -27,12 +35,6 @@ def displayKnow(know):
     pass
   response.write("  <td><input id=\"{}_bool\" name=\"{}_bool\" type=\"checkbox\" {} onClick=\"toggleSelect('{}')\" form=\"mainform\"></td>\n".format(know, know, checked, know), escape=False)
 
-  #if desc[know]['href'] is not None:
-  #  response.write("  <td><span title=\"{}\"><a href=\"{}\">{}</a></span></td>\n".format(desc[know]['title'], desc[know]['href'], desc[know]['display']), escape=False)
-  #else:
-  #  response.write("  <td><span title=\"{}\">{}</span></td>\n".format(desc[know]['title'], desc[know]['display']), escape=False)
-  #  pass
-
   if desc[know]['href'] is not None:
     response.write("  <td><a href=\"{}\">&nbsp&nbsp{}&nbsp&nbsp</a></td>\n".format(desc[know]['href'], desc[know]['display']), escape=False)
   else:
@@ -43,7 +45,8 @@ def displayKnow(know):
   if knows[know][0] is False:
     disabled="disabled"
     pass
-  response.write("  <td><select id=\"{}_diff\" name=\"{}_diff\" {} form=\"mainform\">\n".format(know, know, disabled), escape=False)
+
+  response.write("  <td><select id=\"{}_diff\" name=\"{}_diff\" {} form=\"mainform\" onchange=\"changeHiddenSelect('{}_diff')\">\n".format(know, know, disabled, know), escape=False)
   knowDiff=knows[know][1]
   knowDiff=knowDiff if knowDiff != 0 else mania
   for difficulty in [easy, medium, hard, harder, hardcore, mania]:
@@ -56,6 +59,21 @@ def displayKnow(know):
     pass
 
   response.write("  <td>&nbsp&nbsp{}</td>".format(desc[know]['title']), escape=False)
+
+  response.write("  <td><input id=\"{}_bool_hidden\" name=\"{}_bool_hidden\" type=\"checkbox\" {} form=\"saveform\" style='visibility:hidden'></td>\n".format(know, know, checked, know), escape=False)
+
+  response.write("  <td><select id=\"{}_diff_hidden\" name=\"{}_diff_hidden\" form=\"saveform\"  style='visibility:hidden'>\n".format(know, know), escape=False)
+  knowDiff=knows[know][1]
+  knowDiff=knowDiff if knowDiff != 0 else mania
+  for difficulty in [easy, medium, hard, harder, hardcore, mania]:
+    selected=""
+    if knowDiff == difficulty:
+      selected="selected=\"selected\""
+      pass
+
+    response.write("    <option value=\"{}\" {}>{}</option>\n".format(difficulties[difficulty], selected, difficulties[difficulty]), escape=False)
+    pass
+
 
   response.write("</tr>\n", escape=False)
   pass

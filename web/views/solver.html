@@ -1,6 +1,10 @@
 {{extend 'layout.html'}}
 
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <style>
+.checked {
+    color: orange;
+}
   a:link {color: SteelBlue;}
   a:visited {color: gray;}
 </style>
@@ -103,8 +107,20 @@ Enter your tournament rom seed, ajust the presets depending on the technics you 
 <hr>
 
 {{
-if resultTable is not None:
-  =resultTable
+if resultText is not None:
+  =resultText
+
+  if resultNormalized is not None:
+    for i in [1,2,3,4,5]:
+      if i <= resultNormalized:
+        response.write("<span class=\"fa fa-star checked\"></span>", escape=False)
+      else:
+        response.write("<span class=\"fa fa-star\"></span>", escape=False)
+        pass
+      pass
+    pass
+
+  response.write("<br/>", escape=False)
 
   response.write("<input id=\"displayPath\" name=\"displayPath\" type=\"checkbox\" onClick=\"showPath()\">\n", escape=False)
   response.write("Display the generated path (spoilers)")

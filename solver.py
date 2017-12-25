@@ -157,7 +157,7 @@ class Solver:
             majorPicked = False
             while (len(majorAvailable) > 0
                    and majorAvailable[0]['Area'] == area
-                   and majorAvailable[0]['difficulty'][0] <= Conf.difficultyTarget):
+                   and majorAvailable[0]['difficulty'][1] <= Conf.difficultyTarget):
                 self.collectMajor(majorAvailable.pop(0))
                 majorPicked = True
             # if we took at least one major, recompute the difficulty
@@ -529,6 +529,21 @@ class DifficultyDisplayer:
                 break
 
         return displayString
+
+    def normalize(self):
+        if self.difficulty == -1:
+            return (None, None)
+
+        previous = 0
+        for d in sorted(self.difficulties):
+            if self.difficulty >= d:
+                previous = d
+            else:
+                baseDiff = self.difficulties[previous]
+                normalized = int(5*float(self.difficulty - previous)/float(d - previous))
+                break
+
+        return (baseDiff, normalized)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Random Metroid Solver")

@@ -186,15 +186,12 @@ categories = [{'knows': usedAcrossTheGame, 'title': 'Used across the game'},
               {'knows': maridiaSandpit, 'title': 'Maridia Sandpit'}]
 
 def solver():
-    print("")
-
-#    ,
-#                  TR("difficulty_target:",
-#                     SELECT('easy', 'medium', 'hard', 'harder', 'hardcore', 'mania',
-#                            _name="difficulty_target",
-#                            requires=IS_IN_SET(['easy', 'medium', 'hard',
-#                                                'harder', 'hardcore', 'mania']),
-#                            value=difficulties[Conf.difficultyTarget])))
+#    TR("difficulty_target:",
+#       SELECT('easy', 'medium', 'hard', 'harder', 'hardcore', 'mania',
+#              _name="difficulty_target",
+#              requires=IS_IN_SET(['easy', 'medium', 'hard',
+#                                  'harder', 'hardcore', 'mania']),
+#              value=difficulties[Conf.difficultyTarget])))
 
     if (request.post_vars._formname is not None
         and request.post_vars._formname in ['loadform', 'saveform']
@@ -299,19 +296,24 @@ def solver():
         else:
             response.flash = "Presets file not found"
 
-    # add result in a table
+
     if session.result is not None:
         if session.result['difficulty'] == -1:
-            resultTable = TABLE(TR("The rom {} is not finishable with the known technics".format(session.result['randomizedRom'])))
+            resultText = "The rom {} is not finishable with the known technics".format(session.result['randomizedRom'])
         else:
-            resultTable = TABLE(TR("The rom {} estimated difficulty is: {}".format(session.result['randomizedRom'], session.result['text'])))
+            resultText = "The rom {} estimated difficulty is: {} ".format(session.result['randomizedRom'], session.result['baseDiff'])
+
+        resultNormalized = session.result['normalized']
 
         # add generated path (spoiler !)
         pathTable = TABLE(TR(TH("Location Name"), TH("Area"), TH("Item"), TH("Difficulty")))
         for location, area, item, difficulty in session.result['generatedPath']:
             pathTable.append(TR(location, area, item, difficulty))
     else:
-        resultTable = None
+        resultText = None
+        resultNormalized = None
+        pathTable = None
+
 
     # send values to view
     return dict(mainForm=mainForm, loadForm=loadForm, saveForm=saveForm,
@@ -319,7 +321,7 @@ def solver():
                 difficulties=difficulties,
                 categories=categories,
                 knows=params['Knows'],
-                resultTable=resultTable, pathTable=pathTable,
+                resultText=resultText, pathTable=pathTable, resultNormalized=resultNormalized,
                 easy=easy,medium=medium,hard=hard,harder=harder,hardcore=hardcore,mania=mania)
 
 def generate_json_from_parameters(vars, hidden):
@@ -329,15 +331,15 @@ def generate_json_from_parameters(vars, hidden):
         hidden = ""
     paramsDict = {'Conf': {}, 'Settings': {}, 'Knows': {}}
     for var in Knows.__dict__:
-        print("var={}".format(var))
+        # print("var={}".format(var))
         if var[0:len('__')] != '__':
             boolVar = vars[var+"_bool"+hidden]
-            print("{} = {}".format(var+"_bool"+hidden, boolVar))
+            # print("{} = {}".format(var+"_bool"+hidden, boolVar))
             if boolVar is None:
                 paramsDict['Knows'][var] = [False, 0]
             else:
                 paramsDict['Knows'][var] = [True, difficulties2[vars[var+"_diff"+hidden]]]
-            print("{}: {}".format(var, paramsDict['Knows'][var]))
+            # print("{}: {}".format(var, paramsDict['Knows'][var]))
 
     return paramsDict
 
@@ -352,14 +354,14 @@ def compute_difficulty(seed, post_vars):
     # randomized rom is downloaded in "/home/dude/download/web2py"
 
     # generate json from parameters
-    #paramsDict = generate_json_from_parameters(session.post_vars, hidden=False)
     paramsDict = generate_json_from_parameters(post_vars, hidden=False)
 
     # call solver
     solver = Solver(type='web', rom=randomizedRom, params=[paramsDict])
     difficulty = solver.solveRom()
-    text = DifficultyDisplayer(difficulty).scale()
+    (baseDiff, normalized) = DifficultyDisplayer(difficulty).normalize()
 
     path = solver.getPath(solver.visitedLocations)
 
-    return dict(randomizedRom=randomizedRom, difficulty=difficulty, text=text, generatedPath=path)
+    return dict(randomizedRom=randomizedRom, difficulty=difficulty,
+                baseDiff=baseDiff, normalized=normalized, generatedPath=path)

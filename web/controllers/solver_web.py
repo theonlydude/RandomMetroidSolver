@@ -187,9 +187,6 @@ categories = [{'knows': usedAcrossTheGame, 'title': 'Used across the game'},
 
 def solver():
     print("")
-    print("")
-    print("")
-
 
 #    ,
 #                  TR("difficulty_target:",
@@ -198,10 +195,6 @@ def solver():
 #                            requires=IS_IN_SET(['easy', 'medium', 'hard',
 #                                                'harder', 'hardcore', 'mania']),
 #                            value=difficulties[Conf.difficultyTarget])))
-
-    print("request.post_var.formname={}".format(request.post_vars.formname))
-    print("request.post_var._formname={}".format(request.post_vars._formname))
-    print("request.post_var.paramsFile={}".format(request.post_vars.paramsFile))
 
     if (request.post_vars._formname is not None
         and request.post_vars._formname in ['loadform', 'saveform']
@@ -231,10 +224,8 @@ def solver():
     if mainForm.process(formname='mainform').accepted:
         print("mainForm is accepted")
         response.flash="main form accepted"
-        session.vars = mainForm.vars
-        session.post_vars = request.post_vars
-        redirect(URL(r=request, f='compute_difficulty'))
-
+        session.result = compute_difficulty(mainForm.vars['seed'], request.post_vars)
+        redirect(URL(r=request, f='solver'))
 
     # save form
     saveTable = TABLE(TR("Name of the preset:",
@@ -308,6 +299,19 @@ def solver():
         else:
             response.flash = "Presets file not found"
 
+    # add result in a table
+    if session.result is not None:
+        if session.result['difficulty'] == -1:
+            resultTable = TABLE(TR("The rom {} is not finishable with the known technics".format(session.result['randomizedRom'])))
+        else:
+            resultTable = TABLE(TR("The rom {} estimated difficulty is: {}".format(session.result['randomizedRom'], session.result['text'])))
+
+        # add generated path (spoiler !)
+        pathTable = TABLE(TR(TH("Location Name"), TH("Area"), TH("Item"), TH("Difficulty")))
+        for location, area, item, difficulty in session.result['generatedPath']:
+            pathTable.append(TR(location, area, item, difficulty))
+    else:
+        resultTable = None
 
     # send values to view
     return dict(mainForm=mainForm, loadForm=loadForm, saveForm=saveForm,
@@ -315,6 +319,7 @@ def solver():
                 difficulties=difficulties,
                 categories=categories,
                 knows=params['Knows'],
+                resultTable=resultTable, pathTable=pathTable,
                 easy=easy,medium=medium,hard=hard,harder=harder,hardcore=hardcore,mania=mania)
 
 def generate_json_from_parameters(vars, hidden):
@@ -336,9 +341,9 @@ def generate_json_from_parameters(vars, hidden):
 
     return paramsDict
 
-def compute_difficulty():
+def compute_difficulty(seed, post_vars):
     originalRom = '/home/dude/supermetroid_random/Super_Metroid_JU.smc'
-    seed = session.vars['seed']
+    #seed = session.vars['seed']
 
     # during development don't ask the same seed over and over again 
     #randomizedRom = getRandomizedRom(originalRom, seed)
@@ -347,23 +352,14 @@ def compute_difficulty():
     # randomized rom is downloaded in "/home/dude/download/web2py"
 
     # generate json from parameters
-    print("load from session:")
-    print("session.vars={}".format(session.vars))
-    print("session.post_vars={}".format(session.post_vars))
-    paramsDict = generate_json_from_parameters(session.post_vars, hidden=False)
-
-    # store paramsDict in the session
-    session.paramsDict = paramsDict
-    session.paramsClass = session.vars['paramsClass']
-    session.lastUsed = datetime.datetime.now()
+    #paramsDict = generate_json_from_parameters(session.post_vars, hidden=False)
+    paramsDict = generate_json_from_parameters(post_vars, hidden=False)
 
     # call solver
     solver = Solver(type='web', rom=randomizedRom, params=[paramsDict])
     difficulty = solver.solveRom()
     text = DifficultyDisplayer(difficulty).scale()
 
-    path = None
-    if Conf.displayGeneratedPath is True and difficulty >= 0:
-        path = solver.visitedLocations
+    path = solver.getPath(solver.visitedLocations)
 
-    return dict(randomizedRom=randomizedRom, difficulty=difficulty, text=text, path=path)
+    return dict(randomizedRom=randomizedRom, difficulty=difficulty, text=text, generatedPath=path)

@@ -21,6 +21,14 @@ function changeHiddenSelect(diffElem)
   document.getElementById(diffElemHidden).value = document.getElementById(diffElem).value
   document.getElementById(diffElemHidden).selectedIndex = document.getElementById(diffElem).selectedIndex
 }
+function showPath()
+{
+  if(document.getElementById('displayPath').checked) {
+    document.getElementById('path_div').style.display = "block";
+  } else {
+    document.getElementById('path_div').style.display = "none";
+  }
+}
 </script>
 
 <body>
@@ -93,6 +101,21 @@ Enter your tournament rom seed, ajust the presets depending on the technics you 
 {{=mainForm}}
 
 <hr>
+
+{{
+if resultTable is not None:
+  =resultTable
+
+  response.write("<input id=\"displayPath\" name=\"displayPath\" type=\"checkbox\" onClick=\"showPath()\">\n", escape=False)
+  response.write("Display the generated path (spoilers)")
+
+  response.write("<div id=\"path_div\" style=\"display:none;\">\n", escape=False)
+  response.write("<hr>\n", escape=False)
+  =pathTable
+  response.write("</div>\n", escape=False)
+  response.write("<hr>\n", escape=False)
+  pass
+}}
 
 Load a previously saved presets.
 

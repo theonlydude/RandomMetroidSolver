@@ -228,6 +228,13 @@ class Solver:
 
         return difficulty
 
+    def getPath(self, locations):
+        out = []
+        for location in locations:
+            out.append([location['Name'], location['Area'], location['itemName'], location['difficulty'][1]])
+
+        return out
+
     def printPath(self, message, locations):
         print(message)
         print('{:>50}: {:>12} {:>16} {}'.format("Location Name", "Area", "Item", "Difficulty"))

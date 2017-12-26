@@ -313,9 +313,9 @@ def solver():
 
     if session.result is not None:
         if session.result['difficulty'] == -1:
-            resultText = "The rom {} is not finishable with the known technics".format(session.result['randomizedRom'])
+            resultText = "The rom \"{}\" is not finishable with the known technics".format(session.result['randomizedRom'])
         else:
-            resultText = "The rom {} estimated difficulty is: {} ".format(session.result['randomizedRom'], session.result['baseDiff'])
+            resultText = "The rom \"{}\" estimated difficulty is: {} ".format(session.result['randomizedRom'], session.result['baseDiff'])
 
         resultNormalized = session.result['normalized']
 
@@ -358,25 +358,34 @@ def generate_json_from_parameters(vars, hidden):
     return paramsDict
 
 def compute_difficulty(seed, post_vars):
-    originalRom = '/home/dude/supermetroid_random/Super_Metroid_JU.smc'
-    #seed = session.vars['seed']
+    originalRom = os.path.expanduser('~/RandomMetroidSolver/Super_Metroid_JU.smc')
 
+    # randomized rom is downloaded in "~/web2py/" (the cwd when in web2py)
     # during development don't ask the same seed over and over again 
+    #seed = session.vars['seed']
     #randomizedRom = getRandomizedRom(originalRom, seed)
-    randomizedRom = 'TX6869602.sfc'
+    seed = '6869602'
+    randomizedRom = "Item Randomizer TX6869602.sfc"
 
-    # randomized rom is downloaded in "/home/dude/download/web2py"
+    # generate json from rom to avoid downloading it again and again if the user is tweaking its params
+    jsonFileName = 'TX' + str(seed) + '.json'
+
+    if not os.path.isfile(jsonFileName):
+        romLoader = RomLoader.factory(randomizedRom)
+        romLoader.assignItems(locations)
+        romLoader.dump(jsonFileName)
+        os.remove(randomizedRom)
 
     # generate json from parameters
     paramsDict = generate_json_from_parameters(post_vars, hidden=False)
     session.paramsDict = paramsDict
 
     # call solver
-    solver = Solver(type='web', rom=randomizedRom, params=[paramsDict])
+    solver = Solver(type='web', rom=jsonFileName, params=[paramsDict])
     difficulty = solver.solveRom()
     (baseDiff, normalized) = DifficultyDisplayer(difficulty).normalize()
 
-    path = solver.getPath(solver.visitedLocations)
+    generatedPath = solver.getPath(solver.visitedLocations)
 
     return dict(randomizedRom=randomizedRom, difficulty=difficulty,
-                baseDiff=baseDiff, normalized=normalized, generatedPath=path)
+                baseDiff=baseDiff, normalized=normalized, generatedPath=generatedPath)

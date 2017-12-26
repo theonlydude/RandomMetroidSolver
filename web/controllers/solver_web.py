@@ -390,3 +390,6 @@ def compute_difficulty(seed, post_vars):
 
     return dict(randomizedRom=randomizedRom, difficulty=difficulty,
                 baseDiff=baseDiff, normalized=normalized, generatedPath=generatedPath)
+
+def infos():
+    return dict()

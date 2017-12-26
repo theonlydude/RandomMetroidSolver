@@ -11,8 +11,7 @@ from parameters import *
 from helpers import *
 from tournament_locations import *
 from solver import *
-# get_random_rom works only in python 3.5, for testing in 2.7 we have to comment it
-#from get_random_rom import *
+from get_random_rom import *
 
 difficulties = {
     0: 'mania',
@@ -359,7 +358,6 @@ def generate_json_from_parameters(vars, hidden):
 
 def compute_difficulty(seed, post_vars):
     originalRom = os.path.expanduser('~/RandomMetroidSolver/Super_Metroid_JU.smc')
-    #seed = session.vars['seed']
     seed = '6869602'
 
     # generate json from rom to avoid downloading it again and again if the user is tweaking its params

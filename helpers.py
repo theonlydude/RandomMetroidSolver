@@ -610,6 +610,11 @@ class Bosses:
     }
 
     @staticmethod
+    def reset():
+        for boss in Bosses.golden4Dead:
+            Bosses.golden4Dead[boss] = False
+
+    @staticmethod
     def bossDead(boss):
         return (Bosses.golden4Dead[boss], 0)
 

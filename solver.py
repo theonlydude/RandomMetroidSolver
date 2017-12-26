@@ -37,6 +37,8 @@ class Solver:
 
         self.pickup = Pickup(Conf.majorsPickup, Conf.minorsPickup)
 
+        Bosses.reset()
+
     def loadRom(self, rom):
         RomLoader.factory(rom).assignItems(self.locations)
 
@@ -65,7 +67,7 @@ class Solver:
                     self.log.debug("{}: {}".format(conf, Conf.__dict__[conf]))
 
     def solveRom(self):
-        if  self.romLoaded is False:
+        if self.romLoaded is False:
             self.log.error("rom not loaded")
             return
 

@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/python
 
 # the html form on the randomizer website:
 #    <form method="post" action="/randomize" enctype="multipart/form-data">

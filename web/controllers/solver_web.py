@@ -359,22 +359,24 @@ def generate_json_from_parameters(vars, hidden):
 
 def compute_difficulty(seed, post_vars):
     originalRom = os.path.expanduser('~/RandomMetroidSolver/Super_Metroid_JU.smc')
-
-    # randomized rom is downloaded in "~/web2py/" (the cwd when in web2py)
-    # during development don't ask the same seed over and over again 
     #seed = session.vars['seed']
-    #randomizedRom = getRandomizedRom(originalRom, seed)
     seed = '6869602'
-    randomizedRom = "Item Randomizer TX6869602.sfc"
 
     # generate json from rom to avoid downloading it again and again if the user is tweaking its params
     jsonFileName = 'TX' + str(seed) + '.json'
 
     if not os.path.isfile(jsonFileName):
+        # randomized rom is downloaded in "~/web2py/" (the cwd when in web2py)
+        # during development don't ask the same seed over and over again
+        #randomizedRom = getRandomizedRom(originalRom, seed)
+        randomizedRom = "Item Randomizer TX6869602.sfc"
+
         romLoader = RomLoader.factory(randomizedRom)
         romLoader.assignItems(locations)
         romLoader.dump(jsonFileName)
         os.remove(randomizedRom)
+    else:
+        randomizedRom = "Item Randomizer TX{}.sfc".format(seed)
 
     # generate json from parameters
     paramsDict = generate_json_from_parameters(post_vars, hidden=False)

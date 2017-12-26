@@ -18,7 +18,7 @@ difficulties = {
     easy : 'easy',
     medium : 'medium',
     hard : 'hard',
-    harder : 'harder',
+    harder : 'very hard',
     hardcore : 'hardcore',
     mania : 'mania'
 }
@@ -28,6 +28,7 @@ difficulties2 = {
     'medium' : medium,
     'hard' : hard,
     'harder' : harder,
+    'very hard': harder,
     'hardcore' : hardcore,
     'mania' : mania
 }
@@ -191,10 +192,10 @@ categories = [{'knows': usedAcrossTheGame, 'title': 'Used across the game'},
 
 def solver():
 #    TR("difficulty_target:",
-#       SELECT('easy', 'medium', 'hard', 'harder', 'hardcore', 'mania',
+#       SELECT('easy', 'medium', 'hard', 'very hard', 'hardcore', 'mania',
 #              _name="difficulty_target",
 #              requires=IS_IN_SET(['easy', 'medium', 'hard',
-#                                  'harder', 'hardcore', 'mania']),
+#                                  'very hard', 'hardcore', 'mania']),
 #              value=difficulties[Conf.difficultyTarget])))
 
     alreadyLoaded = False

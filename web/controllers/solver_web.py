@@ -1,6 +1,11 @@
 # -*- coding: utf-8 -*-
 
-import datetime, os.path, os, hashlib
+import sys, os.path
+path = os.path.expanduser('~/RandomMetroidSolver')
+if os.path.exists(path) and path not in sys.path:
+    sys.path.append(path)
+
+import datetime, os, hashlib
 
 from parameters import *
 from helpers import *

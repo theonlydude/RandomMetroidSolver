@@ -198,6 +198,11 @@ def solver():
 #                                  'harder', 'hardcore', 'mania']),
 #              value=difficulties[Conf.difficultyTarget])))
 
+    alreadyLoaded = False
+    if session.paramsDict is not None:
+        params = ParamsLoader.factory(session.paramsDict).params
+        alreadyLoaded = True
+
     if (request.post_vars._formname is not None
         and request.post_vars._formname in ['loadform', 'saveform']
         and request.post_vars.paramsFile is not None):
@@ -210,8 +215,9 @@ def solver():
         paramsFile = 'regular'
         print("Use {} params from default".format(paramsFile))
 
-    # load the presets
-    params = ParamsLoader.factory('diff_presets/{}.json'.format(paramsFile)).params
+    if not alreadyLoaded:
+        # load the presets
+        params = ParamsLoader.factory('diff_presets/{}.json'.format(paramsFile)).params
 
 
     # main form
@@ -297,6 +303,9 @@ def solver():
             # load it
             params = ParamsLoader.factory(fullPath).params
             session.paramsFile = paramsFile
+            # params changed, no longer display the old result to avoid confusion
+            session.result = None
+            session.paramsDict = None
             redirect(URL(r=request, f='solver'))
         else:
             response.flash = "Presets file not found"
@@ -360,6 +369,7 @@ def compute_difficulty(seed, post_vars):
 
     # generate json from parameters
     paramsDict = generate_json_from_parameters(post_vars, hidden=False)
+    session.paramsDict = paramsDict
 
     # call solver
     solver = Solver(type='web', rom=randomizedRom, params=[paramsDict])

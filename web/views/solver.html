@@ -121,16 +121,50 @@ Enter your tournament rom seed, ajust the presets depending on the technics you 
 {{
 if resultText is not None:
   =resultText
+  =difficulty
 
-  if resultNormalized is not None:
-    for i in [1,2,3,4,5]:
-      if i <= resultNormalized:
-        response.write("<span class=\"fa fa-star checked\"></span>", escape=False)
-      else:
-        response.write("<span class=\"fa fa-star\"></span>", escape=False)
-        pass
+  difficulties = {
+      easy : 'easy',
+      medium : 'medium',
+      hard : 'hard',
+      harder : 'very hard',
+      hardcore : 'hardcore',
+      mania : 'mania',
+      mania*2: 'god'
+  }
+
+  from math import ceil, floor
+
+  response.write("<table>", escape=False)
+
+  lower = easy
+  for upper in sorted(difficulties)[1:]:
+    # we can fill all the stars
+    numStars = int(ceil((upper - lower)/5.0))
+    if difficulty >= upper:
+      numStarsOn = numStars
+      numStarsOff = 0
+    elif difficulty <= lower:
+      numStarsOn = 0
+      numStarsOff = numStars
+    else:
+      numStarsOn = int(ceil((difficulty - lower)/5.0))
+      numStarsOff = int(floor((upper - difficulty)/5.0))
       pass
+
+    response.write("<tr><td>{}</td><td>".format(difficulties[lower]), escape=False)
+    for i in range(numStarsOn):
+      response.write("<span class=\"fa fa-star checked\"></span>", escape=False)
+      pass
+    for i in range(numStarsOff):
+      response.write("<span class=\"fa fa-star\"></span>", escape=False)
+      pass
+    response.write("</td></tr>", escape=False)
+
+    lower = upper
     pass
+
+  response.write("</table>", escape=False)
 
   response.write("<br/>", escape=False)
 

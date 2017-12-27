@@ -315,17 +315,20 @@ def solver():
         if session.result['difficulty'] == -1:
             resultText = "The rom \"{}\" is not finishable with the known technics".format(session.result['randomizedRom'])
         else:
-            resultText = "The rom \"{}\" estimated difficulty is: {} ".format(session.result['randomizedRom'], session.result['baseDiff'])
+            resultText = "The rom \"{}\" estimated difficulty is: ".format(session.result['randomizedRom'])
 
-        resultNormalized = session.result['normalized']
+        difficulty = session.result['difficulty']
 
         # add generated path (spoiler !)
         pathTable = TABLE(TR(TH("Location Name"), TH("Area"), TH("Item"), TH("Difficulty")))
-        for location, area, item, difficulty in session.result['generatedPath']:
-            pathTable.append(TR(location, area, item, difficulty))
+        for location, area, item, diff in session.result['generatedPath']:
+            pathTable.append(TR(location, area, item, diff))
+
+        # display the result only once
+        session.result = None
     else:
         resultText = None
-        resultNormalized = None
+        difficulty = None
         pathTable = None
 
 
@@ -335,7 +338,7 @@ def solver():
                 difficulties=difficulties,
                 categories=categories,
                 knows=params['Knows'],
-                resultText=resultText, pathTable=pathTable, resultNormalized=resultNormalized,
+                resultText=resultText, pathTable=pathTable, difficulty=difficulty,
                 easy=easy,medium=medium,hard=hard,harder=harder,hardcore=hardcore,mania=mania)
 
 def generate_json_from_parameters(vars, hidden):
@@ -384,12 +387,10 @@ def compute_difficulty(seed, post_vars):
     # call solver
     solver = Solver(type='web', rom=jsonFileName, params=[paramsDict])
     difficulty = solver.solveRom()
-    (baseDiff, normalized) = DifficultyDisplayer(difficulty).normalize()
 
     generatedPath = solver.getPath(solver.visitedLocations)
 
-    return dict(randomizedRom=randomizedRom, difficulty=difficulty,
-                baseDiff=baseDiff, normalized=normalized, generatedPath=generatedPath)
+    return dict(randomizedRom=randomizedRom, difficulty=difficulty, generatedPath=generatedPath)
 
 def infos():
     return dict()

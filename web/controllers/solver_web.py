@@ -331,6 +331,11 @@ def solver():
         difficulty = None
         pathTable = None
 
+    # set title
+    response.title = 'Super Metroid Item Randomizer Solver'
+    response.menu = [['Super Metroid Item Randomizer Solver', False, '#'],
+                     ['Solve!', True, URL(f='solver')],
+                     ['Information & Contact', False, URL(f='infos')]]
 
     # send values to view
     return dict(mainForm=mainForm, loadForm=loadForm, saveForm=saveForm,
@@ -393,4 +398,10 @@ def compute_difficulty(seed, post_vars):
     return dict(randomizedRom=randomizedRom, difficulty=difficulty, generatedPath=generatedPath)
 
 def infos():
+    # set title
+    response.title = 'Super Metroid Item Randomizer Solver'
+    response.menu = [['Super Metroid Item Randomizer Solver', False, '#'],
+                     ['Solve!', False, URL(f='solver')],
+                     ['Information & Contact', True, URL(f='infos')]]
+
     return dict()

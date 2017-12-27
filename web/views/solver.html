@@ -76,9 +76,9 @@ def displayKnow(know):
 
   response.write("  <td>&nbsp&nbsp{}</td>".format(desc[know]['title']), escape=False)
 
-  response.write("  <td><input id=\"{}_bool_hidden\" name=\"{}_bool_hidden\" type=\"checkbox\" {} form=\"saveform\" style='visibility:hidden'></td>\n".format(know, know, checked, know), escape=False)
+  response.write("  <td><input id=\"{}_bool_hidden\" name=\"{}_bool_hidden\" type=\"checkbox\" {} form=\"saveform\" style='display:none'></td>\n".format(know, know, checked, know), escape=False)
 
-  response.write("  <td><select id=\"{}_diff_hidden\" name=\"{}_diff_hidden\" form=\"saveform\"  style='visibility:hidden'>\n".format(know, know), escape=False)
+  response.write("  <td><select id=\"{}_diff_hidden\" name=\"{}_diff_hidden\" form=\"saveform\" style='display:none'>\n".format(know, know), escape=False)
   knowDiff=knows[know][1]
   knowDiff=knowDiff if knowDiff != 0 else mania
   for difficulty in [easy, medium, hard, harder, hardcore, mania]:
@@ -113,7 +113,6 @@ Enter your tournament rom seed, ajust the presets depending on the technics you 
 {{
 if resultText is not None:
   =resultText
-  =difficulty
 
   difficulties = {
       easy : 'easy',
@@ -125,35 +124,39 @@ if resultText is not None:
       mania*2: 'god'
   }
 
-  from math import ceil, floor
+  if difficulty != -1:
+    =difficulty
 
-  response.write("<table>", escape=False)
+    from math import ceil, floor
 
-  lower = easy
-  for upper in sorted(difficulties)[1:]:
-    # we can fill all the stars
-    numStars = int(ceil((upper - lower)/5.0))
-    if difficulty >= upper:
-      numStarsOn = numStars
-      numStarsOff = 0
-    elif difficulty <= lower:
-      numStarsOn = 0
-      numStarsOff = numStars
-    else:
-      numStarsOn = int(ceil((difficulty - lower)/5.0))
-      numStarsOff = int(floor((upper - difficulty)/5.0))
+    response.write("<table>", escape=False)
+
+    lower = easy
+    for upper in sorted(difficulties)[1:]:
+      # we can fill all the stars
+      numStars = int(ceil((upper - lower)/5.0))
+      if difficulty >= upper:
+        numStarsOn = numStars
+        numStarsOff = 0
+      elif difficulty <= lower:
+        numStarsOn = 0
+        numStarsOff = numStars
+      else:
+        numStarsOn = int(ceil((difficulty - lower)/5.0))
+        numStarsOff = int(floor((upper - difficulty)/5.0))
+        pass
+
+      response.write("<tr><td>{}</td><td>".format(difficulties[lower]), escape=False)
+      for i in range(numStarsOn):
+        response.write("<span class=\"fa fa-star checked\"></span>", escape=False)
+        pass
+      for i in range(numStarsOff):
+        response.write("<span class=\"fa fa-star\"></span>", escape=False)
+        pass
+      response.write("</td></tr>", escape=False)
+
+      lower = upper
       pass
-
-    response.write("<tr><td>{}</td><td>".format(difficulties[lower]), escape=False)
-    for i in range(numStarsOn):
-      response.write("<span class=\"fa fa-star checked\"></span>", escape=False)
-      pass
-    for i in range(numStarsOff):
-      response.write("<span class=\"fa fa-star\"></span>", escape=False)
-      pass
-    response.write("</td></tr>", escape=False)
-
-    lower = upper
     pass
 
   response.write("</table>", escape=False)

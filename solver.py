@@ -547,6 +547,41 @@ class DifficultyDisplayer:
 
         return (baseDiff, normalized)
 
+    def percent(self):
+        # return the difficulty as a percent
+        if self.difficulty == -1:
+            return -1
+        elif self.difficulty in [0, easy]:
+            return 0
+
+        difficultiesPercent = {
+            easy: 0,
+            medium: 20,
+            hard: 40,
+            harder: 60,
+            hardcore: 80,
+            mania: 100,
+            mania*2: 100
+        }
+
+        difficulty = self.difficulty if self.difficulty < mania else mania
+
+        lower = 0
+        for upper in sorted(self.difficulties):
+            if self.difficulty >= upper:
+                lower = upper
+            else:
+                lowerPercent = difficultiesPercent[lower]
+                upperPercent = difficultiesPercent[upper]
+
+                a = (upperPercent-lowerPercent)/float(upper-lower)
+                b = lowerPercent - a * lower
+
+                percent = int(difficulty * a + b)
+                break
+
+        return percent
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Random Metroid Solver")
     parser.add_argument('romFileName', help="the input rom")

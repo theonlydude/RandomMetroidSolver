@@ -151,6 +151,7 @@ class NewRandomizer:
         itemLocation = 
         return ([itemLocation.Item] + items, removeItem(itemLocation.Item.Type, itemPool), [itemLocation] + itemLocations)
 
+    # called with: generateItems(rnd, [], [], (Items.getItemPool rnd), locationPool)
     def generateItems(rnd, items, itemLocations, itemPool, locationPool):
         #let generateItems (rnd:Random) (items:Item list) (itemLocations:ItemLocation list) (itemPool:Item list) (locationPool:Location list) =
         let mutable newItems = items

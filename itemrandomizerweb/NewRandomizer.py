@@ -6,7 +6,13 @@ import Items
 #let unusedLocation (location:Location) itemLocations =
 #    not (List.exists (fun itemLocation -> itemLocation.Location.Address = location.Address) itemLocations)
 def unusedLocation(location, itemLocations):
-    return not List.exists(lambda itemLoc: itemLoc["Location"]["Address"] == location["Address"], itemLocations)
+    #  not fast enough
+    #return not List.exists(lambda itemLoc: itemLoc["Location"]["Address"] == location["Address"], itemLocations)
+    address = location["Address"]
+    for itemLoc in itemLocations:
+        if itemLoc["Location"]["Address"] == address:
+            return False
+    return True
 
 #let currentLocations items itemLocations locationPool =
 #    List.filter (fun location -> location.Available items && unusedLocation location itemLocations ) locationPool

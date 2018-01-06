@@ -117,10 +117,12 @@ class Random:
 
         range = maxValue - minValue
         if range <= self.int32_maxValue:
-            return ((int)(self.Sample() * range) + minValue)
+            retValue = ((int)(self.Sample() * range) + minValue)
         else:
-            return (int)((long)(self.GetSampleForLargeRange() * range) + minValue)
+            retValue = (int)((long)(self.GetSampleForLargeRange() * range) + minValue)
     
+        # print("Next({}, {}) -> {}".format(minValue, maxValue, retValue))
+        return retValue
     
     #/*=====================================Next=====================================
     # **Returns: A double [0..1)

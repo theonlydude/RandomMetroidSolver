@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-from stdlib import Map, Array, List, Random
+from stdlib import Random
 import Items
 import TournamentLocations
 import NewRandomizer
@@ -18,8 +18,12 @@ if __name__ == "__main__":
     rnd = Random(seed)
     itemLocs = NewRandomizer.generateItems(rnd, [], [], Items.getItemPool(rnd), locationPool)
 
+    # transform itemLocs in our usual dict(location, item)
+    locsItems = {}
     for itemLoc in itemLocs:
-        item = itemLoc["Item"]["Type"]
-        loc = itemLoc["Location"]["Name"]
-        area = itemLoc["Location"]["Area"]
-        print('{:>50}: {:>12} {:>16} '.format(loc, area, item))
+        locsItems[itemLoc["Location"]["Name"]] = itemLoc["Item"]["Type"]
+
+    #print(locsItems)
+
+    for loc in locsItems:
+        print('{:>50}: {:>16} '.format(loc, locsItems[loc]))

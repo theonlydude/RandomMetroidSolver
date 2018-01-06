@@ -4,14 +4,24 @@ import sys, os.path
 path = os.path.expanduser('~/RandomMetroidSolver')
 if os.path.exists(path) and path not in sys.path:
     sys.path.append(path)
+path = os.path.expanduser('~/RandomMetroidSolver/itemrandomizerweb')
+if os.path.exists(path) and path not in sys.path:
+    sys.path.append(path)
 
 import datetime, os, hashlib
 
+# to solve the rom
 from parameters import *
 from helpers import *
 from tournament_locations import *
 from solver import *
 from get_random_rom import *
+
+# to randomize the rom
+from stdlib import Random
+import NewRandomizer
+import Items
+import TournamentLocations
 
 difficulties = {
     0: 'mania',
@@ -366,24 +376,30 @@ def generate_json_from_parameters(vars, hidden):
     return paramsDict
 
 def compute_difficulty(seed, post_vars):
-    originalRom = os.path.expanduser('~/RandomMetroidSolver/Super_Metroid_JU.smc')
-    seed = '6869602'
+    #originalRom = os.path.expanduser('~/RandomMetroidSolver/Super_Metroid_JU.smc')
+    #seed = '6869602'
 
-    # generate json from rom to avoid downloading it again and again if the user is tweaking its params
+    # generate json to avoid generating it again and again if the user is tweaking its params
     jsonFileName = 'TX' + str(seed) + '.json'
 
     if not os.path.isfile(jsonFileName):
-        # randomized rom is downloaded in "~/web2py/" (the cwd when in web2py)
-        # during development don't ask the same seed over and over again
-        #randomizedRom = getRandomizedRom(originalRom, seed)
-        randomizedRom = "Item Randomizer TX6869602.sfc"
+        # randomized rom json is generated in "~/web2py/" (the cwd when in web2py)
 
-        romLoader = RomLoader.factory(randomizedRom)
-        romLoader.assignItems(locations)
+        # randomize the rom
+        locationPool = TournamentLocations.AllLocations
+        rnd = Random(seed)
+        itemLocs = NewRandomizer.generateItems(rnd, [], [], Items.getItemPool(rnd), locationPool)
+
+        # transform itemLocs in our usual dict(location, item)
+        locsItems = {}
+        for itemLoc in itemLocs:
+            locsItems[itemLoc["Location"]["Name"]] = itemLoc["Item"]["Type"]
+
+        # dump json
+        romLoader = RomLoader.factory(locsItems)
         romLoader.dump(jsonFileName)
-        os.remove(randomizedRom)
-    else:
-        randomizedRom = "Item Randomizer TX{}.sfc".format(seed)
+
+    randomizedRom = "Item Randomizer TX{}.sfc".format(seed)
 
     # generate json from parameters
     paramsDict = generate_json_from_parameters(post_vars, hidden=False)

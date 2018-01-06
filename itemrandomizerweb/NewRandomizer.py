@@ -82,7 +82,7 @@ def removeItem(itemType, itemPool):
         if head["Type"] == itemType:
             return tail
         else:
-            return head + removeItem(itemType, tail)
+            return [head] + removeItem(itemType, tail)
 
 #let placeItem (rnd:Random) (items:Item list) (itemPool:Item list) locations =
 #    let item = match List.length items with
@@ -107,7 +107,7 @@ def placeItem(rnd, items, itemPool, locations):
         item = List.item(rnd.Next(0, List.length(items)), items)
 
     availableLocations = List.filter(lambda loc: canPlaceAtLocation(item, loc), locations)
-    return {'Item': item, 'Locations': List.item(rnd.Next(0, List.length(availableLocations)), availableLocations)}
+    return {'Item': item, 'Location': List.item(rnd.Next(0, List.length(availableLocations)), availableLocations)}
 
 #let placeSpecificItem (rnd:Random) item (itemPool:Item list) locations =
 #    let availableLocations = List.filter (fun location -> canPlaceAtLocation item location) locations
@@ -139,7 +139,7 @@ def getItem(itemType):
 def getAssumedItems(item, prefilledItems, itemLocations, itemPool):
     items = removeItem(item["Type"], itemPool)
     items = List.append(items, prefilledItems)
-    accessibleItems = List.map(lambda i: i.Item, List.filter(lambda il: il["Location"]["Available"](items) and not List.exists(lambda k: k["Type"] == il["Item"]["Type"], prefilledItems), itemLocations))
+    accessibleItems = List.map(lambda i: i["Item"], List.filter(lambda il: il["Location"]["Available"](items) and not List.exists(lambda k: k["Type"] == il["Item"]["Type"], prefilledItems), itemLocations))
     return List.append(items, accessibleItems)
 
 #let rec generateAssumedItems prefilledItems items (itemLocations:ItemLocation list) (itemPool:Item list) locationPool =
@@ -170,7 +170,7 @@ def generateAssumedItems(prefilledItems, items, itemLocations, itemPool, locatio
 
             itemLocation = placeSpecificItemAtLocation(item, fillLocation)
             return generateAssumedItems(prefilledItems,
-                                                      [itemLocation.Item] + items,
+                                                      [itemLocation["Item"]] + items,
                                                       [itemLocation] + itemLocations,
                                                       removeItem(itemLocation["Item"]["Type"], itemPool),
                                                       locationPool)
@@ -198,14 +198,14 @@ def generateMoreItems(rnd, items, itemLocations, itemPool, locationPool):
         return itemLocations
 
     itemLocation = placeItem(rnd,
-                                           possibleItems(items, itemLocations, itemPool, locationPool),
-                                           itemPool,
-                                           currentLocations(items, itemLocations, locationPool))
+                             possibleItems(items, itemLocations, itemPool, locationPool),
+                             itemPool,
+                             currentLocations(items, itemLocations, locationPool))
     return generateMoreItems(rnd,
-                                           itemLocation["Item"] + items,
-                                           itemLocation + itemLocations,
-                                           removeItem(itemLocation["Item"]["Type"], itemPool),
-                                           locationPool)
+                             [itemLocation["Item"]] + items,
+                             [itemLocation] + itemLocations,
+                             removeItem(itemLocation["Item"]["Type"], itemPool),
+                             locationPool)
 
 #let rec getWeightedLocations (locationPool:Location list) num (locations:Map<int, Location>) =
 #    match locationPool with
@@ -223,7 +223,7 @@ def generateMoreItems(rnd, items, itemLocations, itemPool, locationPool):
 def getWeightedLocations(locationPool, num, locations):
     if len(locationPool) == 0:
         # TODO::Map.toList has already sorted by the keys
-        return List.map(lambda (k, v): v, List.sortBy(lambda (k, v): k, Map.toList(locations)))
+        return List.map(lambda k_v: k_v[1], List.sortBy(lambda k_v: k_v[0], Map.toList(locations)))
 
     loc = locationPool[0]
     tail = locationPool[1:]
@@ -231,7 +231,7 @@ def getWeightedLocations(locationPool, num, locations):
     weigths = {'Brinstar': 0, 'Crateria': 0, 'LowerNorfair': 11, 'Maridia': 0, 'Norfair': 0, 'WreckedShip': 12}
 
     weigth = num - weigths[loc['Area']]
-    locations = locations[weigth] = loc
+    locations[weigth] = loc
     # TODO::why filter and not just use tail ?
     return getWeightedLocations(List.filter(lambda l: l["Address"] != loc["Address"], locationPool), num + 10, locations)
 
@@ -243,13 +243,14 @@ def getWeightedLocations(locationPool, num, locations):
 #    itemPool <- removeItem itemLocation.Item.Type itemPool
 #    itemLocations <- itemLocation :: itemLocations
 def prefill(rnd, itemType, items, itemLocations, itemPool, locationPool):
-    # update parameters items, itemLocations, itemPool
+    # update parameters: items, itemLocations, itemPool
     item = List.find(lambda i: i["Type"] == itemType, Items.Items)
     cl = List.filter(lambda l: l["Class"] == item["Class"] and canPlaceAtLocation(item, l), currentLocations(items, itemLocations, locationPool))
     itemLocation = placeSpecificItemAtLocation(item, List.item(rnd.Next(0, List.length(cl)), cl))
-    items = [itemLocation.Item] + items
+    items = [itemLocation["Item"]] + items
     itemPool = removeItem(itemLocation["Item"]["Type"], itemPool)
     itemLocations = [itemLocation] + itemLocations
+    return (items, itemLocations, itemPool)
 
 #let generateItems (rnd:Random) (items:Item list) (itemLocations:ItemLocation list) (itemPool:Item list) (locationPool:Location list) =
 #    let mutable newItems = items
@@ -318,36 +319,41 @@ def generateItems(rnd, items, itemLocations, itemPool, locationPool):
     newItemPool = itemPool
 
     # Place Morph at one of the earliest locations so that it's always accessible
-    prefill(rnd, "Morph", newItems, newItemLocations, newItemPool, locationPool)
+    #print("generateItems::begin::newItems {}, newItemLocations {}, newItemPool {}".format(len(newItems), len(newItemLocations), len(newItemPool)))
+    (newItems, newItemLocations, newItemPool) = prefill(rnd, "Morph", newItems, newItemLocations, newItemPool, locationPool)
+    #print("generateItems::morph::newItems {}, newItemLocations {}, newItemPool {}".format(len(newItems), len(newItemLocations), len(newItemPool)))
 
     # Place either a super or a missile to open up BT's location 
     if rnd.Next(0, 2) == 0:
-        prefill(rnd, "Missile", newItems, newItemLocations, newItemPool, locationPool)
+        (newItems, newItemLocations, newItemPool) = prefill(rnd, "Missile", newItems, newItemLocations, newItemPool, locationPool)
     else:
-        prefill(rnd, "Super", newItems, newItemLocations, newItemPool, locationPool)
+        (newItems, newItemLocations, newItemPool) = prefill(rnd, "Super", newItems, newItemLocations, newItemPool, locationPool)
+    #print("generateItems::missile::newItems {}, newItemLocations {}, newItemPool {}".format(len(newItems), len(newItemLocations), len(newItemPool)))
 
     # Next step is to place items that opens up access to breaking bomb blocks
     # by placing either Screw/Speed/Bomb or just a PB pack early.
     # One PB pack will be placed after filling with other items so that there's at least on accessible
     random = rnd.Next(0, 13)
     if random == 0:
-        prefill(rnd, "Missile", newItems, newItemLocations, newItemPool, locationPool)
-        prefill(rnd, "ScrewAttack", newItems, newItemLocations, newItemPool, locationPool)
-        prefill(rnd, "PowerBomb", newItems, newItemLocations, newItemPool, locationPool)
+        (newItems, newItemLocations, newItemPool) = prefill(rnd, "Missile", newItems, newItemLocations, newItemPool, locationPool)
+        (newItems, newItemLocations, newItemPool) = prefill(rnd, "ScrewAttack", newItems, newItemLocations, newItemPool, locationPool)
+        (newItems, newItemLocations, newItemPool) = prefill(rnd, "PowerBomb", newItems, newItemLocations, newItemPool, locationPool)
     elif random == 1:
-        prefill(rnd, "Missile", newItems, newItemLocations, newItemPool, locationPool)
-        prefill(rnd, "SpeedBooster", newItems, newItemLocations, newItemPool, locationPool)
-        prefill(rnd, "PowerBomb", newItems, newItemLocations, newItemPool, locationPool)
+        (newItems, newItemLocations, newItemPool) = prefill(rnd, "Missile", newItems, newItemLocations, newItemPool, locationPool)
+        (newItems, newItemLocations, newItemPool) = prefill(rnd, "SpeedBooster", newItems, newItemLocations, newItemPool, locationPool)
+        (newItems, newItemLocations, newItemPool) = prefill(rnd, "PowerBomb", newItems, newItemLocations, newItemPool, locationPool)
     elif random == 2:
-        prefill(rnd, "Missile", newItems, newItemLocations, newItemPool, locationPool)
-        prefill(rnd, "Bomb", newItems, newItemLocations, newItemPool, locationPool)
-        prefill(rnd, "PowerBomb", newItems, newItemLocations, newItemPool, locationPool)
+        (newItems, newItemLocations, newItemPool) = prefill(rnd, "Missile", newItems, newItemLocations, newItemPool, locationPool)
+        (newItems, newItemLocations, newItemPool) = prefill(rnd, "Bomb", newItems, newItemLocations, newItemPool, locationPool)
+        (newItems, newItemLocations, newItemPool) = prefill(rnd, "PowerBomb", newItems, newItemLocations, newItemPool, locationPool)
     else:
-        prefill(rnd, "PowerBomb", newItems, newItemLocations, newItemPool, locationPool)
+        (newItems, newItemLocations, newItemPool) = prefill(rnd, "PowerBomb", newItems, newItemLocations, newItemPool, locationPool)
+    #print("generateItems::break bomb block::newItems {}, newItemLocations {}, newItemPool {}".format(len(newItems), len(newItemLocations), len(newItemPool)))
 
     # Place a super if it's not already placed
     if not List.exists(lambda i: i["Type"] == "Super", newItems):
-        prefill(rnd, "Super", newItems, newItemLocations, newItemPool, locationPool)
+        (newItems, newItemLocations, newItemPool) = prefill(rnd, "Super", newItems, newItemLocations, newItemPool, locationPool)
+        #print("generateItems::super::newItems {}, newItemLocations {}, newItemPool {}".format(len(newItems), len(newItemLocations), len(newItemPool)))
 
     # Save the prefilled items into a new list to be used later
     prefilledItems = newItems

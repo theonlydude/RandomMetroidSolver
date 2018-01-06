@@ -20,7 +20,12 @@ class Array:
         # the integer passed to the function indicates the index of element.
         # done in place.
         for i in range(len(array)):
-            array[i] = fun(i, array[i])
+            fun(i, array[i])
+
+    @staticmethod
+    def length(array):
+        # returns the length of an array
+        return len(array)
 
 class List:
     @staticmethod
@@ -31,14 +36,21 @@ class List:
     @staticmethod
     def exists(fun, list):
         # tests if any element of the list satisfies the given predicate
-        # TODO::use next to avoid executing fun on all the list
-        return True in [fun(elem) for elem in list]
+
+        # take 86% off all execution time:
+        #return True in [fun(elem) for elem in list]
+
+        # do a loop and exit on first True occurence
+        for elem in list:
+            if fun(elem) == True:
+                return True
+        return False
 
     @staticmethod
     def filter(fun, list):
         # returns a new collection containing only the elements of the collection
         # for which the given predicate returns true
-        return [elem for elem in list if fun(list) is True]
+        return [elem for elem in list if fun(elem) is True]
 
     @staticmethod
     def find(fun, list):
@@ -197,7 +209,7 @@ class Random:
         else:
             retValue = (int)((long)(self.GetSampleForLargeRange() * range) + minValue)
     
-        # print("Next({}, {}) -> {}".format(minValue, maxValue, retValue))
+        #print("Next({}, {}) -> {}".format(minValue, maxValue, retValue))
         return retValue
     
     #/*=====================================Next=====================================

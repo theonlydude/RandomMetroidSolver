@@ -1,5 +1,7 @@
 # https://github.com/tewtal/itemrandomizerweb/blob/master/ItemRandomizer/TournamentLocations.fs
 
+from stdlib import List
+
 # Functions to check if we have a specific item
 
 #let haveItem items (itemType:ItemType) =
@@ -52,8 +54,8 @@ def canOpenGreenDoors(items):
 def canOpenYellowDoors(items):
     return haveItem(items, "Morph") and haveItem(items, "PowerBomb")
 #let canUsePowerBombs = canOpenYellowDoors
-def canUsePowerBombs():
-    return canOpenYellowDoors()
+def canUsePowerBombs(items):
+    return canOpenYellowDoors(items)
 
 #let canDestroyBombWalls items =
 #    (haveItem items Morph &&
@@ -243,7 +245,7 @@ AllLocations = [
     {
         'Area': 'Crateria',
         'Name': "Missile (Crateria moat)",
-        'Class': 'Mino',
+        'Class': 'Minor',
         'Address': 0x78248,
         'Visibility': 'Visible',
         'Available': lambda items: canAccessWs(items)

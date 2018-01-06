@@ -14,7 +14,12 @@ if __name__ == "__main__":
     #writeLocations data itemLocations        
 
     locationPool = TournamentLocations.AllLocations
-    seed = 42
+    seed = 6869602
     rnd = Random(seed)
-    locs = NewRandomizer.generateItems(rnd, [], [], Items.getItemPool(rnd), locationPool)
-    print("Generated locations: {}".format(locs))
+    itemLocs = NewRandomizer.generateItems(rnd, [], [], Items.getItemPool(rnd), locationPool)
+
+    for itemLoc in itemLocs:
+        item = itemLoc["Item"]["Type"]
+        loc = itemLoc["Location"]["Name"]
+        area = itemLoc["Location"]["Area"]
+        print('{:>50}: {:>12} {:>16} '.format(loc, area, item))

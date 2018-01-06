@@ -11,6 +11,8 @@ def unusedLocation(location, itemLocations):
 #let currentLocations items itemLocations locationPool =
 #    List.filter (fun location -> location.Available items && unusedLocation location itemLocations ) locationPool
 def currentLocations(items, itemLocations, locationPool):
+    # keep only the item type, it's too slow otherwise
+    items = [item["Type"] for item in items]
     return List.filter(lambda loc: loc["Available"](items) and unusedLocation(loc, itemLocations), locationPool)
 
 #let canPlaceAtLocation (item:Item) (location:Location) =
@@ -139,6 +141,8 @@ def getItem(itemType):
 def getAssumedItems(item, prefilledItems, itemLocations, itemPool):
     items = removeItem(item["Type"], itemPool)
     items = List.append(items, prefilledItems)
+    # keep only the item type, it's too slow otherwise
+    items = [item["Type"] for item in items]
     accessibleItems = List.map(lambda i: i["Item"], List.filter(lambda il: il["Location"]["Available"](items) and not List.exists(lambda k: k["Type"] == il["Item"]["Type"], prefilledItems), itemLocations))
     return List.append(items, accessibleItems)
 

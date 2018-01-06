@@ -14,15 +14,19 @@ def haveItem(items, itemType):
     #return True in [item["Type"] == itemType for item in items]
 
     # better (23s):
-    for item in items:
-        if item["Type"] == itemType:
-            return True
-    return False
+    #for item in items:
+    #    if item["Type"] == itemType:
+    #        return True
+    #return False
+
+    # best (12.3s) (items is a list of itemType)
+    return itemType in items
 
 #let itemCount items itemType =
 #    List.length (List.filter (fun (item:Item) -> item.Type = itemType) items)
 def itemCount(items, itemType):
-    return List.length(List.filter(lambda item: item["Type"] == itemType, items))
+    #return List.length(List.filter(lambda item: item["Type"] == itemType, items))
+    return items.count(itemType)
 
 #let energyReserveCount items =
 #    itemCount items ETank +

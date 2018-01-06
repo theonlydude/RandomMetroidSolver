@@ -49,7 +49,7 @@ def canPlaceAtLocation(item, location):
 #let canPlaceItem (item:Item) itemLocations =
 #    List.exists (fun location -> canPlaceAtLocation item location) itemLocations
 def canPlaceItem(item, itemLocations):
-    return List.exists(lambda loc: NewRandomizer.canPlaceAtLocation(item, loc), itemLocations)
+    return List.exists(lambda loc: canPlaceAtLocation(item, loc), itemLocations)
 
 #let checkItem item items (itemLocations:ItemLocation list) locationPool =
 #    let oldLocations = (currentLocations items itemLocations locationPool)
@@ -57,17 +57,17 @@ def canPlaceItem(item, itemLocations):
 #    let newLocationsHasMajor = List.exists (fun l -> l.Class = Major) newLocations
 #    canPlaceItem item oldLocations && newLocationsHasMajor && (List.length newLocations) > (List.length oldLocations)
 def checkItem(item, items, itemLocations, locationPool):
-    oldLocations = NewRandomizer.currentLocations(items, itemLocations, locationPool)
-    newLocations = NewRandomizer.currentLocations([item] + items, itemLocations, locationPool)
+    oldLocations = currentLocations(items, itemLocations, locationPool)
+    newLocations = currentLocations([item] + items, itemLocations, locationPool)
     newLocationsHasMajor = List.exists(lambda l: l["Class"] == 'Major', newLocations)
-    return (NewRandomizer.canPlaceItem(item, oldLocations)
+    return (canPlaceItem(item, oldLocations)
             and newLocationsHasMajor
             and List.length(newLocations) > List.length(oldLocations))
 
 #let possibleItems items itemLocations itemPool locationPool =
 #    List.filter (fun item -> checkItem item items itemLocations locationPool) itemPool
 def possibleItems(items, itemLocations, itemPool, locationPool):
-    return List.filter(lambda item: NewRandomizer.checkItem(item, items, itemLocations, locationPool), itemPool)
+    return List.filter(lambda item: checkItem(item, items, itemLocations, locationPool), itemPool)
 
 #let rec removeItem itemType itemPool =
 #    match itemPool with
@@ -82,7 +82,7 @@ def removeItem(itemType, itemPool):
         if head["Type"] == itemType:
             return tail
         else:
-            return head + NewRandomizer.removeItem(itemType, tail)
+            return head + removeItem(itemType, tail)
 
 #let placeItem (rnd:Random) (items:Item list) (itemPool:Item list) locations =
 #    let item = match List.length items with
@@ -106,14 +106,14 @@ def placeItem(rnd, items, itemPool, locations):
     else:
         item = List.item(rnd.Next(0, List.length(items)), items)
 
-    availableLocations = List.filter(lambda loc: NewRandomizer.canPlaceAtLocation(item, loc), locations)
+    availableLocations = List.filter(lambda loc: canPlaceAtLocation(item, loc), locations)
     return {'Item': item, 'Locations': List.item(rnd.Next(0, List.length(availableLocations)), availableLocations)}
 
 #let placeSpecificItem (rnd:Random) item (itemPool:Item list) locations =
 #    let availableLocations = List.filter (fun location -> canPlaceAtLocation item location) locations
 #    { Item = item; Location = (List.item (rnd.Next (List.length availableLocations)) availableLocations) }
 def placeSpecificItem(rnd, item, itemPool, locations):
-    availableLocations = List.filter(lambda loc: NewRandomizer.canPlaceAtLocation(item, loc), locations)
+    availableLocations = List.filter(lambda loc: canPlaceAtLocation(item, loc), locations)
     return {'Item': item, 'Location': List.item(rnd.Next(0, List.length(availableLocations)), availableLocations)}
 
 #let placeSpecificItemAtLocation item location =
@@ -124,7 +124,7 @@ def placeSpecificItemAtLocation(item, location):
 #let getEmptyLocations itemLocations (locationPool:Location list) =
 #    List.filter (fun (l:Location) -> unusedLocation l itemLocations) locationPool
 def getEmptyLocations(itemLocations, locationPool):
-    return List.filter(lambda l: NewRandomizer.unusedLocation(l, itemLocations), locationPool)
+    return List.filter(lambda l: unusedLocation(l, itemLocations), locationPool)
 
 #let getItem itemType =
 #    List.find (fun i -> i.Type = itemType) Items.Items
@@ -137,7 +137,7 @@ def getItem(itemType):
 #    let accessibleItems = List.map (fun i -> i.Item) (List.filter (fun il -> (il.Location.Available items) && (not (List.exists (fun k -> k.Type = il.Item.Type) prefilledItems))) itemLocations)
 #    List.append items accessibleItems
 def getAssumedItems(item, prefilledItems, itemLocations, itemPool):
-    items = NewRandomizer.removeItem(item["Type"], itemPool)
+    items = removeItem(item["Type"], itemPool)
     items = List.append(items, prefilledItems)
     accessibleItems = List.map(lambda i: i.Item, List.filter(lambda il: il["Location"]["Available"](items) and not List.exists(lambda k: k["Type"] == il["Item"]["Type"], prefilledItems), itemLocations))
     return List.append(items, accessibleItems)
@@ -164,15 +164,15 @@ def generateAssumedItems(prefilledItems, items, itemLocations, itemPool, locatio
             return (items, itemLocations, itemPool)
         else:
             item = List.head(List.filter(lambda i: i["Category"] == "Progression", itemPool))
-            assumedItems = NewRandomizer.getAssumedItems(item, prefilledItems, itemLocations, itemPool)
-            availableLocations = List.filter(lambda l: l["Available"](assumedItems) and NewRandomizer.canPlaceAtLocation(item, l), NewRandomizer.getEmptyLocations(itemLocations, locationPool))
+            assumedItems = getAssumedItems(item, prefilledItems, itemLocations, itemPool)
+            availableLocations = List.filter(lambda l: l["Available"](assumedItems) and canPlaceAtLocation(item, l), getEmptyLocations(itemLocations, locationPool))
             fillLocation = List.head(availableLocations)
 
-            itemLocation = NewRandomizer.placeSpecificItemAtLocation(item, fillLocation)
-            return NewRandomizer.generateAssumedItems(prefilledItems,
+            itemLocation = placeSpecificItemAtLocation(item, fillLocation)
+            return generateAssumedItems(prefilledItems,
                                                       [itemLocation.Item] + items,
                                                       [itemLocation] + itemLocations,
-                                                      NewRandomizer.removeItem(itemLocation["Item"]["Type"], itemPool),
+                                                      removeItem(itemLocation["Item"]["Type"], itemPool),
                                                       locationPool)
 
 #let swap (a: _[]) x y =
@@ -197,14 +197,14 @@ def generateMoreItems(rnd, items, itemLocations, itemPool, locationPool):
     if len(itemPool) == 0:
         return itemLocations
 
-    itemLocation = NewRandomizer.placeItem(rnd,
-                                           NewRandomizer.possibleItems(items, itemLocations, itemPool, locationPool),
+    itemLocation = placeItem(rnd,
+                                           possibleItems(items, itemLocations, itemPool, locationPool),
                                            itemPool,
-                                           NewRandomizer.currentLocations(items, itemLocations, locationPool))
-    return NewRandomizer.generateMoreItems(rnd,
+                                           currentLocations(items, itemLocations, locationPool))
+    return generateMoreItems(rnd,
                                            itemLocation["Item"] + items,
                                            itemLocation + itemLocations,
-                                           NewRandomizer.removeItem(itemLocation["Item"]["Type"], itemPool),
+                                           removeItem(itemLocation["Item"]["Type"], itemPool),
                                            locationPool)
 
 #let rec getWeightedLocations (locationPool:Location list) num (locations:Map<int, Location>) =
@@ -233,7 +233,7 @@ def getWeightedLocations(locationPool, num, locations):
     weigth = num - weigths[loc['Area']]
     locations = locations[weigth] = loc
     # TODO::why filter and not just use tail ?
-    return NewRandomizer.getWeightedLocations(List.filter(lambda l: l["Address"] != loc["Address"], locationPool), num + 10, locations)
+    return getWeightedLocations(List.filter(lambda l: l["Address"] != loc["Address"], locationPool), num + 10, locations)
 
 #let prefill (rnd:Random) (itemType:ItemType) (items:Item list byref) (itemLocations:ItemLocation list byref) (itemPool:Item list byref) (locationPool: Location list) =
 #    let item = List.find (fun i -> i.Type = itemType) Items.Items
@@ -245,10 +245,10 @@ def getWeightedLocations(locationPool, num, locations):
 def prefill(rnd, itemType, items, itemLocations, itemPool, locationPool):
     # update parameters items, itemLocations, itemPool
     item = List.find(lambda i: i["Type"] == itemType, Items.Items)
-    cl = List.filter(lambda l: l["Class"] == item["Class"] and NewRandomizer.canPlaceAtLocation(item, l), NewRandomizer.currentLocations(items, itemLocations, locationPool))
-    itemLocation = NewRandomizer.placeSpecificItemAtLocation(item, List.item(rnd.Next(0, List.length(cl)), cl))
+    cl = List.filter(lambda l: l["Class"] == item["Class"] and canPlaceAtLocation(item, l), currentLocations(items, itemLocations, locationPool))
+    itemLocation = placeSpecificItemAtLocation(item, List.item(rnd.Next(0, List.length(cl)), cl))
     items = [itemLocation.Item] + items
-    itemPool = NewRandomizer.removeItem(itemLocation["Item"]["Type"], itemPool)
+    itemPool = removeItem(itemLocation["Item"]["Type"], itemPool)
     itemLocations = [itemLocation] + itemLocations
 
 #let generateItems (rnd:Random) (items:Item list) (itemLocations:ItemLocation list) (itemPool:Item list) (locationPool:Location list) =
@@ -318,48 +318,48 @@ def generateItems(rnd, items, itemLocations, itemPool, locationPool):
     newItemPool = itemPool
 
     # Place Morph at one of the earliest locations so that it's always accessible
-    NewRandomizer.prefill(rnd, "Morph", newItems, newItemLocations, newItemPool, locationPool)
+    prefill(rnd, "Morph", newItems, newItemLocations, newItemPool, locationPool)
 
     # Place either a super or a missile to open up BT's location 
     if rnd.Next(0, 2) == 0:
-        NewRandomizer.prefill(rnd, "Missile", newItems, newItemLocations, newItemPool, locationPool)
+        prefill(rnd, "Missile", newItems, newItemLocations, newItemPool, locationPool)
     else:
-        NewRandomizer.prefill(rnd, "Super", newItems, newItemLocations, newItemPool, locationPool)
+        prefill(rnd, "Super", newItems, newItemLocations, newItemPool, locationPool)
 
     # Next step is to place items that opens up access to breaking bomb blocks
     # by placing either Screw/Speed/Bomb or just a PB pack early.
     # One PB pack will be placed after filling with other items so that there's at least on accessible
     random = rnd.Next(0, 13)
     if random == 0:
-        NewRandomizer.prefill(rnd, "Missile", newItems, newItemLocations, newItemPool, locationPool)
-        NewRandomizer.prefill(rnd, "ScrewAttack", newItems, newItemLocations, newItemPool, locationPool)
-        NewRandomizer.prefill(rnd, "PowerBomb", newItems, newItemLocations, newItemPool, locationPool)
+        prefill(rnd, "Missile", newItems, newItemLocations, newItemPool, locationPool)
+        prefill(rnd, "ScrewAttack", newItems, newItemLocations, newItemPool, locationPool)
+        prefill(rnd, "PowerBomb", newItems, newItemLocations, newItemPool, locationPool)
     elif random == 1:
-        NewRandomizer.prefill(rnd, "Missile", newItems, newItemLocations, newItemPool, locationPool)
-        NewRandomizer.prefill(rnd, "SpeedBooster", newItems, newItemLocations, newItemPool, locationPool)
-        NewRandomizer.prefill(rnd, "PowerBomb", newItems, newItemLocations, newItemPool, locationPool)
+        prefill(rnd, "Missile", newItems, newItemLocations, newItemPool, locationPool)
+        prefill(rnd, "SpeedBooster", newItems, newItemLocations, newItemPool, locationPool)
+        prefill(rnd, "PowerBomb", newItems, newItemLocations, newItemPool, locationPool)
     elif random == 2:
-        NewRandomizer.prefill(rnd, "Missile", newItems, newItemLocations, newItemPool, locationPool)
-        NewRandomizer.prefill(rnd, "Bomb", newItems, newItemLocations, newItemPool, locationPool)
-        NewRandomizer.prefill(rnd, "PowerBomb", newItems, newItemLocations, newItemPool, locationPool)
+        prefill(rnd, "Missile", newItems, newItemLocations, newItemPool, locationPool)
+        prefill(rnd, "Bomb", newItems, newItemLocations, newItemPool, locationPool)
+        prefill(rnd, "PowerBomb", newItems, newItemLocations, newItemPool, locationPool)
     else:
-        NewRandomizer.prefill(rnd, "PowerBomb", newItems, newItemLocations, newItemPool, locationPool)
+        prefill(rnd, "PowerBomb", newItems, newItemLocations, newItemPool, locationPool)
 
     # Place a super if it's not already placed
     if not List.exists(lambda i: i["Type"] == "Super", newItems):
-        NewRandomizer.prefill(rnd, "Super", newItems, newItemLocations, newItemPool, locationPool)
+        prefill(rnd, "Super", newItems, newItemLocations, newItemPool, locationPool)
 
     # Save the prefilled items into a new list to be used later
     prefilledItems = newItems
 
     # Shuffle the locations randomly, then adjust the order slightly based on weighting per area
     shuffledLocations = List.toArray(List.filter(lambda l: l["Class"] == "Major", locationPool))
-    NewRandomizer.shuffle(rnd, shuffledLocations)
-    weightedLocations = NewRandomizer.getWeightedLocations(Array.toList(shuffledLocations), 100, {})
+    shuffle(rnd, shuffledLocations)
+    weightedLocations = getWeightedLocations(Array.toList(shuffledLocations), 100, {})
 
     # Shuffle the item pool
     shuffledItemsArr = List.toArray(newItemPool)
-    NewRandomizer.shuffle(rnd, shuffledItemsArr)
+    shuffle(rnd, shuffledItemsArr)
     shuffledItems = Array.toList(shuffledItemsArr)
 
     # Always start with placing a suit (this helps getting maximum spread of suit locations)
@@ -371,7 +371,7 @@ def generateItems(rnd, items, itemLocations, itemPool, locationPool):
     shuffledItems = [firstItem] + List.filter(lambda i: i["Type"] != firstItem["Type"], shuffledItems)
 
     # Place the rest of progression items randomly
-    (progressItems, progressItemLocations, progressItemPool) = NewRandomizer.generateAssumedItems(prefilledItems, newItems, newItemLocations, shuffledItems, weightedLocations)
+    (progressItems, progressItemLocations, progressItemPool) = generateAssumedItems(prefilledItems, newItems, newItemLocations, shuffledItems, weightedLocations)
 
     # All progression items are placed and every other location in the game should now be accessible
     # so place the rest of the items randomly using the regular placement method

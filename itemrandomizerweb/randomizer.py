@@ -1,3 +1,4 @@
+#!/usr/bin/python
 
 from stdlib import Map, Array, List, Random
 import Items

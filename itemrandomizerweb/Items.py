@@ -187,7 +187,7 @@ Items = [
 #let addItem (itemType:ItemType) (itemPool:Item list) =
 #    (List.find (fun item -> item.Type = itemType) Items) :: itemPool
 def addItem(itemType, itemPool):
-    return [List.find(lambda item: item["Type"] == itemType, Items.Items)] + itemPool
+    return [List.find(lambda item: item["Type"] == itemType, Items)] + itemPool
 
 #let rec addAmmo (rnd:System.Random) (itemPool:Item list) =
 #    match List.length itemPool with
@@ -232,23 +232,23 @@ def addAmmo(rnd, itemPool):
 #    |> addItem Super
 #    |> addAmmo rnd
 def getItemPool(rnd):
-    itemPool = Items.addItem('Reserve', Items)
-    itemPool = Items.addItem('Reserve', itemPool)
-    itemPool = Items.addItem('Reserve', itemPool)
-    itemPool = Items.addItem('ETank', itemPool)
-    itemPool = Items.addItem('ETank', itemPool)
-    itemPool = Items.addItem('ETank', itemPool)
-    itemPool = Items.addItem('ETank', itemPool)
-    itemPool = Items.addItem('ETank', itemPool)
-    itemPool = Items.addItem('ETank', itemPool)
-    itemPool = Items.addItem('ETank', itemPool)
-    itemPool = Items.addItem('ETank', itemPool)
-    itemPool = Items.addItem('ETank', itemPool)
-    itemPool = Items.addItem('ETank', itemPool)
-    itemPool = Items.addItem('ETank', itemPool)
-    itemPool = Items.addItem('ETank', itemPool)
-    itemPool = Items.addItem('ETank', itemPool)
-    itemPool = Items.addItem('Missile', itemPool)
-    itemPool = Items.addItem('Super', itemPool)
-    itemPool = Items.addAmmo(rnd, itemPool)
+    itemPool = addItem('Reserve', Items)
+    itemPool = addItem('Reserve', itemPool)
+    itemPool = addItem('Reserve', itemPool)
+    itemPool = addItem('ETank', itemPool)
+    itemPool = addItem('ETank', itemPool)
+    itemPool = addItem('ETank', itemPool)
+    itemPool = addItem('ETank', itemPool)
+    itemPool = addItem('ETank', itemPool)
+    itemPool = addItem('ETank', itemPool)
+    itemPool = addItem('ETank', itemPool)
+    itemPool = addItem('ETank', itemPool)
+    itemPool = addItem('ETank', itemPool)
+    itemPool = addItem('ETank', itemPool)
+    itemPool = addItem('ETank', itemPool)
+    itemPool = addItem('ETank', itemPool)
+    itemPool = addItem('ETank', itemPool)
+    itemPool = addItem('Missile', itemPool)
+    itemPool = addItem('Super', itemPool)
+    itemPool = addAmmo(rnd, itemPool)
     return itemPool

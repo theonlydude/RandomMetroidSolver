@@ -231,9 +231,15 @@ def solver():
 
 
     # main form
+    if session.seed is not None:
+        seedValue = str(session.seed)
+    else:
+        seedValue = ''
+
     mainTable = TABLE(TR("Tournament Rom seed: TX",
                          INPUT(_type="text",
                                _name="seed",
+                               _value=seedValue,
                                requires=IS_INT_IN_RANGE(0, 9999999, error_message = 'Seed is a number between 0 and 9999999'),
                                default=1234567)))
     mainTable.append(TR(INPUT(_type="submit",_value="Compute difficulty")))
@@ -376,9 +382,6 @@ def generate_json_from_parameters(vars, hidden):
     return paramsDict
 
 def compute_difficulty(seed, post_vars):
-    #originalRom = os.path.expanduser('~/RandomMetroidSolver/Super_Metroid_JU.smc')
-    #seed = '6869602'
-
     # generate json to avoid generating it again and again if the user is tweaking its params
     jsonFileName = 'TX' + str(seed) + '.json'
 
@@ -404,6 +407,7 @@ def compute_difficulty(seed, post_vars):
     # generate json from parameters
     paramsDict = generate_json_from_parameters(post_vars, hidden=False)
     session.paramsDict = paramsDict
+    session.seed = seed
 
     # call solver
     solver = Solver(type='web', rom=jsonFileName, params=[paramsDict])

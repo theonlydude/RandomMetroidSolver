@@ -7,7 +7,17 @@ from stdlib import List
 #let haveItem items (itemType:ItemType) =
 #    List.exists (fun (item:Item) -> item.Type = itemType) items
 def haveItem(items, itemType):
-    return List.exists(lambda item: item["Type"] == itemType, items)
+    # this is too slow (42.8s)
+    #return List.exists(lambda item: item["Type"] == itemType, items)
+
+    # faster but not enough (34.7s):
+    #return True in [item["Type"] == itemType for item in items]
+
+    # better (23s):
+    for item in items:
+        if item["Type"] == itemType:
+            return True
+    return False
 
 #let itemCount items itemType =
 #    List.length (List.filter (fun (item:Item) -> item.Type = itemType) items)

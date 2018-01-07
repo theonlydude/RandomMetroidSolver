@@ -46,6 +46,8 @@ if resultText is not None:
 
       google.charts.load('current', {'packages':['timeline']});
       google.charts.setOnLoadCallback(drawChart);
+
+
       function drawChart() {
         var container = document.getElementById('timeline');
         var chart = new google.visualization.Timeline(container);
@@ -86,17 +88,32 @@ if diffPercent > 80 and diffPercent <= 100:
         var options = {
           hAxis: {
             minValue: 0,
-            maxValue: 100,
-            //format: 'percent',
-            gridlines: { count: 10 },
-            ticks: [10,20,30,40,50,60,70,80,90,100]
+            maxValue: 100
           },
           timeline: { groupByRowLabel: true},
           tooltip: { trigger: 'none' },
           colors: ['#6daa53', '#f1be0b', '#e69235', '#d13434', '#000000'],
           avoidOverlappingGridLines: false,
-
         };
+
+function allReady() {
+    var e = document.getElementById('timeline');
+    // svg elements don't have inner/outerHTML properties, so use the parents
+    alert(e.getElementsByTagName('svg')[0].parentNode.innerHTML);
+}
+
+    google.visualization.events.addListener(chart, 'ready', function () {
+      // remove haxis label
+      var labels = container.getElementsByTagName('text');
+      for (i = 0; i < labels.length; i++) {
+        //console.log(labels[i].textContent)
+        if (labels[i].textContent == '0') {
+          //console.log("found")
+          labels[i].parentNode.removeChild(labels[i]);
+        }
+      }
+    });
+
         chart.draw(dataTable, options);
 }
 {{
@@ -190,37 +207,6 @@ if resultText is not None:
 
   if difficulty != -1:
     =difficulty
-
-#    from math import ceil, floor
-#
-#    response.write("<table>", escape=False)
-#
-#    lower = easy
-#    for upper in sorted(difficulties)[1:]:
-#      # we can fill all the stars
-#      numStars = int(ceil((upper - lower)/5.0))
-#      if difficulty >= upper:
-#        numStarsOn = numStars
-#        numStarsOff = 0
-#      elif difficulty <= lower:
-#        numStarsOn = 0
-#        numStarsOff = numStars
-#      else:
-#        numStarsOn = int(ceil((difficulty - lower)/5.0))
-#        numStarsOff = int(floor((upper - difficulty)/5.0))
-#        pass
-#
-#      response.write("<tr><td>{}</td><td>".format(difficulties[lower]), escape=False)
-#      for i in range(numStarsOn):
-#        response.write("<span class=\"fa fa-star checked\"></span>", escape=False)
-#        pass
-#      for i in range(numStarsOff):
-#        response.write("<span class=\"fa fa-star\"></span>", escape=False)
-#        pass
-#      response.write("</td></tr>", escape=False)
-#
-#      lower = upper
-#      pass
     pass
 
   response.write("</table>", escape=False)
@@ -232,7 +218,7 @@ if resultText is not None:
 {{
 if resultText is not None and difficulty != -1:
 }}
-<div id="timeline" style="height: 100px; width: 50%;"></div>
+<div id="timeline" style="height: 95px; width: 50%;"></div>
 
 {{
 pass

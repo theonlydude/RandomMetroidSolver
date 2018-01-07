@@ -13,7 +13,7 @@ from helpers import *
 
 class Solver:
     # given a rom and parameters returns the estimated difficulty
-
+    
     def __init__(self, type='console', rom=None, params=None, debug=False):
         if debug is True:
             logging.basicConfig(level=logging.DEBUG)
@@ -34,13 +34,13 @@ class Solver:
         self.romLoaded = False
         if rom is not None:
             self.loadRom(rom)
-
+        
         self.pickup = Pickup(Conf.majorsPickup, Conf.minorsPickup)
 
         Bosses.reset()
 
     def loadRom(self, rom):
-        RomLoader.factory(rom).assignItems(self.locations)
+        self.fullMode = RomLoader.factory(rom).assignItems(self.locations)
 
         if self.log.getEffectiveLevel() == logging.DEBUG:
             self.log.debug("Display items at locations:")
@@ -99,8 +99,12 @@ class Solver:
         # the next collected item is the one with the smallest difficulty,
         # if equality between major and minor, take major first.
 
-        self.majorLocations = [loc for loc in self.locations if loc["Class"] == "Major"]
-        self.minorLocations = [loc for loc in self.locations if loc["Class"] == "Minor"]
+        if not self.fullMode:
+            self.majorLocations = [loc for loc in self.locations if loc["Class"] == "Major"]
+            self.minorLocations = [loc for loc in self.locations if loc["Class"] == "Minor"]
+        else:
+            self.majorLocations = self.locations
+            self.minorLocations = self.locations
 
         self.visitedLocations = []
         self.collectedItems = []
@@ -292,6 +296,7 @@ class Solver:
 class RomReader:
     # read the items in the rom
     items = {
+        # vanilla
         '0xeed7': {'name': 'ETank'},
         '0xeedb': {'name': 'Missile'},
         '0xeedf': {'name': 'Super'},
@@ -312,7 +317,51 @@ class RomReader:
         '0xef0b': {'name': 'Gravity'},
         '0xef0f': {'name': 'XRayScope'},
         '0xef1b': {'name': 'SpaceJump'},
-        '0xef1f': {'name': 'ScrewAttack'}
+        '0xef1f': {'name': 'ScrewAttack'},
+        # old rando "chozo" items
+        '0xef2b': {'name': 'ETank' },
+        '0xef2f': {'name': 'Missile' },
+        '0xef33': {'name': 'Super' },
+        '0xef37': {'name': 'PowerBomb' },
+        '0xef3b': {'name': 'Bomb' },
+        '0xef3f': {'name': 'Charge'},
+        '0xef43': {'name': 'Ice'},
+        '0xef47': {'name': 'HiJump'},
+        '0xef4b': {'name': 'SpeedBooster'},
+        '0xef4f': {'name': 'Wave'},
+        '0xef53': {'name': 'Spazer'},
+        '0xef57': {'name': 'SpringBall'},
+        '0xef5b': {'name': 'Varia'},
+        '0xef5f': {'name': 'Gravity'},
+        '0xef63': {'name': 'XRayScope'},
+        '0xef67': {'name': 'Plasma'},
+        '0xef6b': {'name': 'Grapple'},
+        '0xef6f': {'name': 'SpaceJump'},
+        '0xef73': {'name': 'ScrewAttack'},
+        '0xef77': {'name': 'Morph'},
+        '0xef7b': {'name': 'Reserve'},
+        # old rando "hidden" items
+        '0xef7f': {'name': 'ETank' },
+        '0xef83': {'name': 'Missile' },
+        '0xef87': {'name': 'Super' },
+        '0xef8b': {'name': 'PowerBomb' },
+        '0xef8f': {'name': 'Bomb' },
+        '0xef93': {'name': 'Charge'},
+        '0xef97': {'name': 'Ice'},
+        '0xef9b': {'name': 'HiJump'},
+        '0xef9f': {'name': 'SpeedBooster'},
+        '0xefa3': {'name': 'Wave'},
+        '0xefa7': {'name': 'Spazer'},
+        '0xefab': {'name': 'SpringBall'},
+        '0xefaf': {'name': 'Varia'},
+        '0xefb3': {'name': 'Gravity'},
+        '0xefb7': {'name': 'XRayScope'},
+        '0xefbb': {'name': 'Plasma'},
+        '0xefbf': {'name': 'Grapple'},
+        '0xefc3': {'name': 'SpaceJump'},
+        '0xefc7': {'name': 'ScrewAttack'},
+        '0xefcb': {'name': 'Morph'},
+        '0xefcf': {'name': 'Reserve'}
     }
 
     def __init__(self, romFileName):
@@ -366,6 +415,7 @@ class RomLoader:
         # update the itemName of the locations
         for loc in locations:
             loc['itemName'] = self.locsItems[loc['Name']]
+        return False
 
     def dump(self, fileName):
         with open(fileName, 'w') as jsonFile:
@@ -374,6 +424,7 @@ class RomLoader:
 class RomLoaderSfc(RomLoader):
     # standard usage
     def __init__(self, romFileName):
+        self.romFileName = romFileName
         self.romReader = RomReader(romFileName)
 
     def assignItems(self, locations):
@@ -383,6 +434,7 @@ class RomLoaderSfc(RomLoader):
         self.locsItems = {}
         for loc in locations:
             self.locsItems[loc['Name']] = loc['itemName']
+        return "FX" in self.romFileName
 
 class RomLoaderJson(RomLoader):
     # when called from the test suite

@@ -339,6 +339,7 @@ def solver():
             resultText = "The rom \"{}\" estimated difficulty is: ".format(session.result['randomizedRom'])
 
         difficulty = session.result['difficulty']
+        diffPercent = session.result['diffPercent']
 
         # add generated path (spoiler !)
         pathTable = TABLE(TR(TH("Location Name"), TH("Area"), TH("Item"), TH("Difficulty")))
@@ -350,6 +351,7 @@ def solver():
     else:
         resultText = None
         difficulty = None
+        diffPercent = None
         pathTable = None
 
     # set title
@@ -364,7 +366,8 @@ def solver():
                 difficulties=difficulties,
                 categories=categories,
                 knows=params['Knows'],
-                resultText=resultText, pathTable=pathTable, difficulty=difficulty,
+                resultText=resultText, pathTable=pathTable,
+                difficulty=difficulty, diffPercent=diffPercent,
                 easy=easy,medium=medium,hard=hard,harder=harder,hardcore=hardcore,mania=mania)
 
 def generate_json_from_parameters(vars, hidden):
@@ -417,10 +420,12 @@ def compute_difficulty(seed, post_vars):
     # call solver
     solver = Solver(type='web', rom=jsonFileName, params=[paramsDict])
     difficulty = solver.solveRom()
+    diffPercent = DifficultyDisplayer(difficulty).percent()
 
     generatedPath = solver.getPath(solver.visitedLocations)
 
-    return dict(randomizedRom=randomizedRom, difficulty=difficulty, generatedPath=generatedPath)
+    return dict(randomizedRom=randomizedRom, difficulty=difficulty,
+                generatedPath=generatedPath, diffPercent=diffPercent)
 
 def infos():
     # set title

@@ -14,7 +14,8 @@
                        border-radius: 12px;}
 </style>
 
-<script>
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script type="text/javascript">
 function toggleSelect(elem)
 {
   var boolElem = elem + "_bool"
@@ -38,6 +39,69 @@ function showPath()
     document.getElementById('path_div').style.display = "none";
   }
 }
+
+{{
+if resultText is not None:
+}}
+
+      google.charts.load('current', {'packages':['timeline']});
+      google.charts.setOnLoadCallback(drawChart);
+      function drawChart() {
+        var container = document.getElementById('timeline');
+        var chart = new google.visualization.Timeline(container);
+        var dataTable = new google.visualization.DataTable();
+
+        dataTable.addColumn({ type: 'string', id: 'Role' });
+        dataTable.addColumn({ type: 'string', id: 'Difficulty' });
+        dataTable.addColumn({ type: 'number', id: 'Start' });
+        dataTable.addColumn({ type: 'number', id: 'End' });
+        dataTable.addRows([
+{{
+if diffPercent <= 20:
+  response.write("[ 'Difficulty', 'easy', 0, {} ]".format(diffPercent), escape=False)
+else:
+  response.write("[ 'Difficulty', 'easy', 0, 20 ],", escape=False)
+  pass
+if diffPercent > 20 and diffPercent <= 40:
+  response.write("[ 'Difficulty', 'medium', 20, {} ]".format(diffPercent), escape=False)
+elif diffPercent > 40:
+  response.write("[ 'Difficulty', 'medium', 20, 40 ],", escape=False)
+  pass
+if diffPercent > 40 and diffPercent <= 60:
+  response.write("[ 'Difficulty', 'hard', 40, {} ]".format(diffPercent), escape=False)
+elif diffPercent > 60:
+  response.write("[ 'Difficulty', 'hard', 40, 60 ],", escape=False)
+  pass
+if diffPercent > 60 and diffPercent <= 80:
+  response.write("[ 'Difficulty', 'very hard', 60, {} ]".format(diffPercent), escape=False)
+elif diffPercent > 80:
+  response.write("[ 'Difficulty', 'very hard', 60, 80 ],", escape=False)
+  pass
+if diffPercent > 80 and diffPercent <= 100:
+  response.write("[ 'Difficulty', 'hardcore', 80, {} ]".format(diffPercent), escape=False)
+  pass
+}}
+          ]);
+
+        var options = {
+          hAxis: {
+            minValue: 0,
+            maxValue: 100,
+            //format: 'percent',
+            gridlines: { count: 10 },
+            ticks: [10,20,30,40,50,60,70,80,90,100]
+          },
+          timeline: { groupByRowLabel: true},
+          tooltip: { trigger: 'none' },
+          colors: ['#6daa53', '#f1be0b', '#e69235', '#d13434', '#000000'],
+          avoidOverlappingGridLines: false,
+
+        };
+        chart.draw(dataTable, options);
+}
+{{
+pass
+}}
 </script>
 
 <body>
@@ -127,42 +191,55 @@ if resultText is not None:
   if difficulty != -1:
     =difficulty
 
-    from math import ceil, floor
-
-    response.write("<table>", escape=False)
-
-    lower = easy
-    for upper in sorted(difficulties)[1:]:
-      # we can fill all the stars
-      numStars = int(ceil((upper - lower)/5.0))
-      if difficulty >= upper:
-        numStarsOn = numStars
-        numStarsOff = 0
-      elif difficulty <= lower:
-        numStarsOn = 0
-        numStarsOff = numStars
-      else:
-        numStarsOn = int(ceil((difficulty - lower)/5.0))
-        numStarsOff = int(floor((upper - difficulty)/5.0))
-        pass
-
-      response.write("<tr><td>{}</td><td>".format(difficulties[lower]), escape=False)
-      for i in range(numStarsOn):
-        response.write("<span class=\"fa fa-star checked\"></span>", escape=False)
-        pass
-      for i in range(numStarsOff):
-        response.write("<span class=\"fa fa-star\"></span>", escape=False)
-        pass
-      response.write("</td></tr>", escape=False)
-
-      lower = upper
-      pass
+#    from math import ceil, floor
+#
+#    response.write("<table>", escape=False)
+#
+#    lower = easy
+#    for upper in sorted(difficulties)[1:]:
+#      # we can fill all the stars
+#      numStars = int(ceil((upper - lower)/5.0))
+#      if difficulty >= upper:
+#        numStarsOn = numStars
+#        numStarsOff = 0
+#      elif difficulty <= lower:
+#        numStarsOn = 0
+#        numStarsOff = numStars
+#      else:
+#        numStarsOn = int(ceil((difficulty - lower)/5.0))
+#        numStarsOff = int(floor((upper - difficulty)/5.0))
+#        pass
+#
+#      response.write("<tr><td>{}</td><td>".format(difficulties[lower]), escape=False)
+#      for i in range(numStarsOn):
+#        response.write("<span class=\"fa fa-star checked\"></span>", escape=False)
+#        pass
+#      for i in range(numStarsOff):
+#        response.write("<span class=\"fa fa-star\"></span>", escape=False)
+#        pass
+#      response.write("</td></tr>", escape=False)
+#
+#      lower = upper
+#      pass
     pass
 
   response.write("</table>", escape=False)
 
   response.write("<br/>", escape=False)
+  pass
+}}
 
+{{
+if resultText is not None:
+}}
+<div id="timeline" style="height: 100px; width: 50%;"></div>
+
+{{
+pass
+}}
+
+{{
+if resultText is not None:
   response.write("<input id=\"displayPath\" name=\"displayPath\" type=\"checkbox\" onClick=\"showPath()\">\n", escape=False)
   response.write("Display the generated path (spoilers)")
 

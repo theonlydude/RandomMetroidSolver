@@ -251,54 +251,6 @@ def solver():
         session.result = compute_difficulty(mainForm.vars['seed'], request.post_vars)
         redirect(URL(r=request, f='solver'))
 
-    # save form
-    saveTable = TABLE(TR("Name of the preset:",
-                         INPUT(_type="text",
-                               _name="saveFile",
-                               requires=[IS_NOT_EMPTY(),
-                                         IS_ALPHANUMERIC(error_message='Preset name must be alphanumeric and max 32 chars'), 
-                                         IS_LENGTH(32)])),
-                      TR("Password:",
-                         INPUT(_type="text",
-                               _name="password",
-                               requires=[IS_NOT_EMPTY(),
-                                         IS_ALPHANUMERIC(error_message='Password must be alphanumeric and max 32 chars'), 
-                                         IS_LENGTH(32)])))
-    saveTable.append(TR(INPUT(_type="submit",_value="Save presets")))
-    saveForm = FORM(saveTable, _id="saveform", _name="saveform")
-
-    if saveForm.process(formname='saveform').accepted:
-        print("saveForm is accepted")
-        response.flash="save form accepted"
-
-        # check if the presets file already exists
-        saveFile = saveForm.vars['saveFile']
-        password = saveForm.vars['password']
-        passwordSHA256 = hashlib.sha256(password).hexdigest()
-        fullPath = 'diff_presets/{}.json'.format(saveFile)
-        if os.path.isfile(fullPath):
-            # load it
-            oldParams = ParamsLoader.factory(fullPath).params
-
-            # check if password match
-            if passwordSHA256 == oldParams['password']:
-                # update the presets file
-                paramsDict = generate_json_from_parameters(request.post_vars, hidden=True)
-                paramsDict['password'] = passwordSHA256
-                ParamsLoader.factory(paramsDict).dump(fullPath)
-                session.paramsFile = saveFile
-                redirect(URL(r=request, f='solver'))
-            else:
-                response.flash = "Password mismatch with existing presets file {}".format(saveFile)
-
-        else:
-            # write the presets file
-            paramsDict = generate_json_from_parameters(request.post_vars, hidden=True)
-            paramsDict['password'] = passwordSHA256
-            ParamsLoader.factory(paramsDict).dump(fullPath)
-            session.paramsFile = saveFile
-            redirect(URL(r=request, f='solver'))
-
     # load form
     files = sorted(os.listdir('diff_presets'))
     presets = [os.path.splitext(file)[0] for file in files]
@@ -324,6 +276,60 @@ def solver():
             redirect(URL(r=request, f='solver'))
         else:
             response.flash = "Presets file not found"
+
+    # save form
+    saveTable = TABLE(TR("Update an existing preset:",
+                         SELECT(*presets, **dict(_name="paramsFile", value=paramsFile))),
+                      TR("Create a new preset:",
+                         INPUT(_type="text",
+                               _name="saveFile",
+                               requires=[IS_ALPHANUMERIC(error_message='Preset name must be alphanumeric and max 32 chars'),
+                                         IS_LENGTH(32)])),
+                      TR("Password:",
+                         INPUT(_type="text",
+                               _name="password",
+                               requires=[IS_NOT_EMPTY(),
+                                         IS_ALPHANUMERIC(error_message='Password must be alphanumeric and max 32 chars'), 
+                                         IS_LENGTH(32)])))
+    saveTable.append(TR(INPUT(_type="submit",_value="Save presets")))
+    saveForm = FORM(saveTable, _id="saveform", _name="saveform")
+
+    if saveForm.process(formname='saveform').accepted:
+        print("saveForm is accepted")
+        response.flash="save form accepted"
+
+        # update or creation ?
+        saveFile = saveForm.vars['saveFile']
+        if saveFile == "":
+            saveFile = saveForm.vars['paramsFile']
+
+        # check if the presets file already exists
+        password = saveForm.vars['password']
+        password = password.encode('utf-8')
+        passwordSHA256 = hashlib.sha256(password).hexdigest()
+        fullPath = 'diff_presets/{}.json'.format(saveFile)
+        if os.path.isfile(fullPath):
+            # load it
+            oldParams = ParamsLoader.factory(fullPath).params
+
+            # check if password match
+            if 'password' in oldParams and passwordSHA256 == oldParams['password']:
+                # update the presets file
+                paramsDict = generate_json_from_parameters(request.post_vars, hidden=True)
+                paramsDict['password'] = passwordSHA256
+                ParamsLoader.factory(paramsDict).dump(fullPath)
+                session.paramsFile = saveFile
+                redirect(URL(r=request, f='solver'))
+            else:
+                response.flash = "Password mismatch with existing presets file {}".format(saveFile)
+
+        else:
+            # write the presets file
+            paramsDict = generate_json_from_parameters(request.post_vars, hidden=True)
+            paramsDict['password'] = passwordSHA256
+            ParamsLoader.factory(paramsDict).dump(fullPath)
+            session.paramsFile = saveFile
+            redirect(URL(r=request, f='solver'))
 
 
     if session.result is not None:

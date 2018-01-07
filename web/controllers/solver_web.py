@@ -304,8 +304,7 @@ def solver():
     presets = [os.path.splitext(file)[0] for file in files]
 
     loadTable = TABLE(TR("Choose an available preset:",
-                         SELECT(*presets, **dict(_name="paramsFile", value=paramsFile))))
-    loadTable.append(TR(INPUT(_type="submit",_value="Load presets")))
+                         SELECT(*presets, **dict(_name="paramsFile", value=paramsFile, _onchange="this.form.submit()"))))
     loadForm = FORM(loadTable, _id="loadform", _name="loadform")
 
     if loadForm.process(formname='loadform').accepted:

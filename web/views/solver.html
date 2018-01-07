@@ -55,40 +55,40 @@ if resultText is not None:
 
         dataTable.addColumn({ type: 'string', id: 'Role' });
         dataTable.addColumn({ type: 'string', id: 'Difficulty' });
-        dataTable.addColumn({ type: 'number', id: 'Start' });
-        dataTable.addColumn({ type: 'number', id: 'End' });
+        dataTable.addColumn({ type: 'date', id: 'Start' });
+        dataTable.addColumn({ type: 'date', id: 'End' });
         dataTable.addRows([
 {{
 if diffPercent <= 20:
-  response.write("[ 'Difficulty', 'easy', 0, {} ]".format(diffPercent), escape=False)
+  response.write("[ 'Difficulty', 'easy', new Date(1900, 0, 0), new Date(19{}, 0, 0) ]".format(diffPercent), escape=False)
 else:
-  response.write("[ 'Difficulty', 'easy', 0, 20 ],", escape=False)
+  response.write("[ 'Difficulty', 'easy', new Date(1900, 0, 0), new Date(1920, 0, 0) ],", escape=False)
   pass
 if diffPercent > 20 and diffPercent <= 40:
-  response.write("[ 'Difficulty', 'medium', 20, {} ]".format(diffPercent), escape=False)
+  response.write("[ 'Difficulty', 'medium', new Date(1920, 0, 0), new Date(19{}, 0, 0) ]".format(diffPercent), escape=False)
 elif diffPercent > 40:
-  response.write("[ 'Difficulty', 'medium', 20, 40 ],", escape=False)
+  response.write("[ 'Difficulty', 'medium', new Date(1920, 0, 0), new Date(1940, 0, 0) ],", escape=False)
   pass
 if diffPercent > 40 and diffPercent <= 60:
-  response.write("[ 'Difficulty', 'hard', 40, {} ]".format(diffPercent), escape=False)
+  response.write("[ 'Difficulty', 'hard', new Date(1940, 0, 0), new Date(19{}, 0, 0) ]".format(diffPercent), escape=False)
 elif diffPercent > 60:
-  response.write("[ 'Difficulty', 'hard', 40, 60 ],", escape=False)
+  response.write("[ 'Difficulty', 'hard', new Date(1940, 0, 0), new Date(1960, 0, 0) ],", escape=False)
   pass
 if diffPercent > 60 and diffPercent <= 80:
-  response.write("[ 'Difficulty', 'very hard', 60, {} ]".format(diffPercent), escape=False)
+  response.write("[ 'Difficulty', 'very hard', new Date(1960, 0, 0), new Date(19{}, 0, 0) ]".format(diffPercent), escape=False)
 elif diffPercent > 80:
-  response.write("[ 'Difficulty', 'very hard', 60, 80 ],", escape=False)
+  response.write("[ 'Difficulty', 'very hard', new Date(1960, 0, 0), new Date(1980, 0, 0) ],", escape=False)
   pass
 if diffPercent > 80 and diffPercent <= 100:
-  response.write("[ 'Difficulty', 'hardcore', 80, {} ]".format(diffPercent), escape=False)
+  response.write("[ 'Difficulty', 'hardcore', new Date(1980, 0, 0), new Date(19{}, 0, 0) ]".format(diffPercent), escape=False)
   pass
 }}
           ]);
 
         var options = {
           hAxis: {
-            minValue: 0,
-            maxValue: 100
+            minValue: new Date(1900, 0, 0),
+            maxValue: new Date(2000, 0, 0)
           },
           timeline: { groupByRowLabel: true},
           tooltip: { trigger: 'none' },
@@ -105,15 +105,18 @@ function allReady() {
     google.visualization.events.addListener(chart, 'ready', function () {
       // remove haxis label
       var labels = container.getElementsByTagName('text');
+
       for (i = 0; i < labels.length; i++) {
-        //console.log(labels[i].textContent)
-        if (labels[i].textContent == '0') {
+        // console.log(labels[i].textContent)
+        if (labels[i].textContent.substring(0,2) == '19') {
           //console.log("found")
           labels[i].parentNode.removeChild(labels[i]);
+          i--;
         }
       }
-    });
 
+    });
+//google.visualization.events.addListener(chart, 'ready', allReady);
         chart.draw(dataTable, options);
 }
 {{

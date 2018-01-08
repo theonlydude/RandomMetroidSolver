@@ -401,7 +401,7 @@ def generate_json_from_parameters(vars, hidden):
             paramsDict['Conf']['minorsPickup'] = 'all'
         else:
             paramsDict['Conf']['majorsPickup'] = 'minimal'
-            paramsDict['Conf']['minorsPickup'] = {'Missile' : 10, 'Super' : 8, 'PowerBomb' : 3}
+            paramsDict['Conf']['minorsPickup'] = {'Missile' : 10, 'Super' : 5, 'PowerBomb' : 2}
 
     return paramsDict
 

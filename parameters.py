@@ -18,8 +18,8 @@ class Conf:
     #majorsPickup='all'
     minorsPickup = {
         'Missile' : 10,
-        'Super' : 8,
-        'PowerBomb' : 3
+        'Super' : 5,
+        'PowerBomb' : 2
     }
     #minorsPickup='all'
 class Knows:

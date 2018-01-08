@@ -201,13 +201,6 @@ categories = [{'knows': usedAcrossTheGame, 'title': 'Used across the game'},
               {'knows': maridiaSandpit, 'title': 'Maridia Sandpit'}]
 
 def solver():
-#    TR("difficulty_target:",
-#       SELECT('easy', 'medium', 'hard', 'very hard', 'hardcore', 'mania',
-#              _name="difficulty_target",
-#              requires=IS_IN_SET(['easy', 'medium', 'hard',
-#                                  'very hard', 'hardcore', 'mania']),
-#              value=difficulties[Conf.difficultyTarget])))
-
     alreadyLoaded = False
     if session.paramsDict is not None:
         params = ParamsLoader.factory(session.paramsDict).params
@@ -217,13 +210,10 @@ def solver():
         and request.post_vars._formname in ['loadform', 'saveform']
         and request.post_vars.paramsFile is not None):
         paramsFile = request.post_vars.paramsFile
-        print("Use {} params from request".format(paramsFile))
     elif session.paramsFile is not None:
         paramsFile = session.paramsFile
-        print("Use {} params from session".format(paramsFile))
     else:
         paramsFile = 'regular'
-        print("Use {} params from default".format(paramsFile))
 
     if not alreadyLoaded:
         # load the presets
@@ -331,7 +321,12 @@ def solver():
             session.paramsFile = saveFile
             redirect(URL(r=request, f='solver'))
 
+    # conf parameters
+    conf = {}
+    conf["pickup"] = Conf.majorsPickup
+    conf["target"] = Conf.difficultyTarget
 
+    # display result
     if session.result is not None:
         if session.result['difficulty'] == -1:
             resultText = "The rom \"{}\" is not finishable with the known technics".format(session.result['randomizedRom'])
@@ -365,7 +360,7 @@ def solver():
                 desc=desc,
                 difficulties=difficulties,
                 categories=categories,
-                knows=params['Knows'],
+                knows=params['Knows'], conf=conf,
                 resultText=resultText, pathTable=pathTable,
                 difficulty=difficulty, diffPercent=diffPercent,
                 easy=easy,medium=medium,hard=hard,harder=harder,hardcore=hardcore,mania=mania)
@@ -386,6 +381,19 @@ def generate_json_from_parameters(vars, hidden):
             else:
                 paramsDict['Knows'][var] = [True, difficulties2[vars[var+"_diff"+hidden]]]
             # print("{}: {}".format(var, paramsDict['Knows'][var]))
+
+    diffTarget = vars["difficulty_target"+hidden]
+    if diffTarget is not None:
+        paramsDict['Conf']['difficultyTarget'] = difficulties2[diffTarget]
+
+    pickupStrategy = vars["pickup_strategy"+hidden]
+    if pickupStrategy is not None:
+        if pickupStrategy == 'all':
+            paramsDict['Conf']['majorsPickup'] = 'all'
+            paramsDict['Conf']['minorsPickup'] = 'all'
+        else:
+            paramsDict['Conf']['majorsPickup'] = 'minimal'
+            paramsDict['Conf']['minorsPickup'] = {'Missile' : 10, 'Super' : 8, 'PowerBomb' : 3}
 
     return paramsDict
 

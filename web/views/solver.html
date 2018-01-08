@@ -12,6 +12,9 @@
   a:visited {color: gray;}
   .web2py-menu-active {border: 2px solid gray;
                        border-radius: 12px;}
+label {
+    font-weight: normal !important;
+}
 </style>
 
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
@@ -243,6 +246,53 @@ if resultText is not None:
 Load a previously saved presets.
 
 {{=loadForm}}
+
+<hr>
+
+The maximum difficulty for picking up an item in the current area before moving to another area.
+<br/>
+
+Difficulty target:
+{{
+=SELECT('easy', 'medium', 'hard', 'very hard', 'hardcore', 'mania',
+       _id="difficulty_target",
+       _name="difficulty_target",
+       _form="mainform",
+       _onchange="changeHiddenSelect('diff_target')",
+       requires=IS_IN_SET(['easy', 'medium', 'hard', 'very hard', 'hardcore', 'mania']),
+       value=difficulties[conf["target"]])
+}}
+{{
+=SELECT('easy', 'medium', 'hard', 'very hard', 'hardcore', 'mania',
+       _id="difficulty_target_hidden",
+       _name="difficulty_target_hidden",
+       _form="saveform",
+       _style='display:none',
+       requires=IS_IN_SET(['easy', 'medium', 'hard', 'very hard', 'hardcore', 'mania']),
+       value=difficulties[conf["target"]])
+}}
+<br/><br/>
+The strategy for picking up major and minor items.
+<br/>
+Pickup strategy:
+{{
+=SELECT('all', 'minimal',
+        _id="pickup_strategy",
+        _name="pickup_strategy",
+        _form="mainform",
+        _onchange="changeHiddenSelect('pickup_strategy')",
+        requires=IS_IN_SET(['all', 'minimal']),
+        value=conf["pickup"])
+}}
+{{
+=SELECT('all', 'minimal',
+        _id="pickup_strategy_hidden",
+        _name="pickup_strategy_hidden",
+        _form="saveform",
+        _style='display:none',
+        requires=IS_IN_SET(['all', 'minimal']),
+        value=conf["pickup"])
+}}
 
 <hr>
 

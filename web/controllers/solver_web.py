@@ -323,8 +323,14 @@ def solver():
 
     # conf parameters
     conf = {}
-    conf["pickup"] = Conf.majorsPickup
-    conf["target"] = Conf.difficultyTarget
+    if 'difficultyTarget' in params['Conf']:
+        conf["target"] = params['Conf']['difficultyTarget']
+    else:
+        conf["target"] = Conf.difficultyTarget
+    if 'majorsPickup' in params['Conf']:
+        conf["pickup"] = params['Conf']['majorsPickup']
+    else:
+        conf["pickup"] = Conf.majorsPickup
 
     # display result
     if session.result is not None:
@@ -383,8 +389,10 @@ def generate_json_from_parameters(vars, hidden):
             # print("{}: {}".format(var, paramsDict['Knows'][var]))
 
     diffTarget = vars["difficulty_target"+hidden]
+    print("diffTarget={}".format(diffTarget))
     if diffTarget is not None:
         paramsDict['Conf']['difficultyTarget'] = difficulties2[diffTarget]
+        print("paramsDict['Conf']['difficultyTarget']={}".format(paramsDict['Conf']['difficultyTarget']))
 
     pickupStrategy = vars["pickup_strategy"+hidden]
     if pickupStrategy is not None:

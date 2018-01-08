@@ -211,10 +211,6 @@ if resultText is not None:
       mania*2: 'god'
   }
 
-  if difficulty != -1:
-    =difficulty
-    pass
-
   response.write("</table>", escape=False)
 
   response.write("<br/>", escape=False)
@@ -258,7 +254,7 @@ Difficulty target:
        _id="difficulty_target",
        _name="difficulty_target",
        _form="mainform",
-       _onchange="changeHiddenSelect('diff_target')",
+       _onchange="changeHiddenSelect('difficulty_target')",
        requires=IS_IN_SET(['easy', 'medium', 'hard', 'very hard', 'hardcore', 'mania']),
        value=difficulties[conf["target"]])
 }}

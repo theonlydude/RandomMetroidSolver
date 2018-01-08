@@ -191,7 +191,7 @@ def displayCategory(category):
 pass
 }}
 
-Enter your tournament rom seed, ajust the presets depending on the technics you know then press 'Compute Difficulty'.
+Enter your tournament rom seed, ajust the presets depending on the techniques you know then press 'Compute Difficulty'.
 
 {{=mainForm}}
 
@@ -270,6 +270,26 @@ Difficulty target:
 <br/><br/>
 The strategy for picking up major and minor items.
 <br/>
+<ul>
+<li>All:</li>
+<ul><li>Will grab all the major and minor items.</li></ul>
+
+<li>Minimal:</li>
+<ul>
+<li>Majors:
+
+Will get Morph, Bomb and/or Power bombs, 3 ETanks, Varia,<br/>
+Gravity, Speed Booster or Ice Beam, and anything else along the way.
+</li>
+<li>Minors:
+
+Will pick up 10 Missiles packs, 5 Super packs and 2 Power Bomb<br/>
+packs. If Charge Beam is not picked up along the way or not<br/>
+accessible, enough minors to beat Mother Brain will be picked up.
+</li>
+</ul>
+</ul>
+<br/>
 Pickup strategy:
 {{
 =SELECT('all', 'minimal',
@@ -292,8 +312,8 @@ Pickup strategy:
 
 <hr>
 
-For each technic you can choose if you know it and your perceived difficulty.</br>
-Clicking on most of the technics will send you to an explanation or a tutorial.
+For each technique you can choose if you know it and your perceived difficulty.</br>
+Clicking on most of the techniques will send you to an explanation or a tutorial.
 
 {{
 for category in categories:

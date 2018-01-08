@@ -236,7 +236,6 @@ def solver():
     mainForm = FORM(mainTable, _id="mainform", _name="mainform")
 
     if mainForm.process(formname='mainform').accepted:
-        print("mainForm is accepted")
         response.flash="main form accepted"
         session.result = compute_difficulty(mainForm.vars['seed'], request.post_vars)
         redirect(URL(r=request, f='solver'))
@@ -250,7 +249,6 @@ def solver():
     loadForm = FORM(loadTable, _id="loadform", _name="loadform")
 
     if loadForm.process(formname='loadform').accepted:
-        print("loadForm is accepted")
         response.flash="load form accepted"
 
         # check that the presets file exists
@@ -285,7 +283,6 @@ def solver():
     saveForm = FORM(saveTable, _id="saveform", _name="saveform")
 
     if saveForm.process(formname='saveform').accepted:
-        print("saveForm is accepted")
         response.flash="save form accepted"
 
         # update or creation ?
@@ -389,10 +386,10 @@ def generate_json_from_parameters(vars, hidden):
             # print("{}: {}".format(var, paramsDict['Knows'][var]))
 
     diffTarget = vars["difficulty_target"+hidden]
-    print("diffTarget={}".format(diffTarget))
+    #print("diffTarget={}".format(diffTarget))
     if diffTarget is not None:
         paramsDict['Conf']['difficultyTarget'] = difficulties2[diffTarget]
-        print("paramsDict['Conf']['difficultyTarget']={}".format(paramsDict['Conf']['difficultyTarget']))
+        #print("paramsDict['Conf']['difficultyTarget']={}".format(paramsDict['Conf']['difficultyTarget']))
 
     pickupStrategy = vars["pickup_strategy"+hidden]
     if pickupStrategy is not None:

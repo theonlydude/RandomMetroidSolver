@@ -14,7 +14,7 @@ if __name__ == "__main__":
     #writeLocations data itemLocations        
 
     locationPool = TournamentLocations.AllLocations
-    seed = 6869602
+    seed = 1234567
     rnd = Random(seed)
     itemLocs = NewRandomizer.generateItems(rnd, [], [], Items.getItemPool(rnd), locationPool)
 

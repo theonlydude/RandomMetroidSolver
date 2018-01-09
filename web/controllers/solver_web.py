@@ -15,7 +15,7 @@ from parameters import *
 from helpers import *
 from tournament_locations import *
 from solver import *
-from get_random_rom import *
+#from get_random_rom import *
 
 # to randomize the rom
 from stdlib import Random

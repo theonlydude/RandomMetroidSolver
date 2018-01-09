@@ -44,7 +44,7 @@ difficulties2 = {
 }
 
 desc = {'Mockball': {'display': 'Mockball',
-                     'title': 'Early super and ice beam',
+                     'title': 'Early Super and Ice Beam',
                      'href': 'https://wiki.supermetroid.run/index.php?title=Mockball'},
         'SimpleShortCharge': {'display': 'Simple Short Charge',
                               'title': 'Waterway ETank without gravity, and Wrecked Ship access',
@@ -201,23 +201,33 @@ categories = [{'knows': usedAcrossTheGame, 'title': 'Used across the game'},
               {'knows': maridiaSandpit, 'title': 'Maridia Sandpit'}]
 
 def solver():
-    alreadyLoaded = False
-    if session.paramsDict is not None:
-        params = ParamsLoader.factory(session.paramsDict).params
-        alreadyLoaded = True
 
-    if (request.post_vars._formname is not None
-        and request.post_vars._formname in ['loadform', 'saveform']
-        and request.post_vars.paramsFile is not None):
-        paramsFile = request.post_vars.paramsFile
-    elif session.paramsFile is not None:
-        paramsFile = session.paramsFile
+    # load conf from session if available
+    loaded = False
+    if session.paramsFile is None:
+        # default preset
+        session.paramsFile = 'regular'
+
+    if request.post_vars._formname is not None:
+        # press solve, load or save button
+        if request.post_vars._formname in ['saveform', 'mainform']:
+            # store the changes in case the form won't be accepted
+            paramsDict = generate_json_from_parameters(request.post_vars,
+                                                       hidden=(request.post_vars._formname == 'saveform'))
+            session.paramsDict = paramsDict
+            params = ParamsLoader.factory(session.paramsDict).params
+            loaded = True
+        elif request.post_vars._formname in ['loadform']:
+            # nothing to load, we'll load the new params file with the load form code
+            pass
     else:
-        paramsFile = 'regular'
+        # no forms button pressed
+        if session.paramsDict is not None:
+            params = ParamsLoader.factory(session.paramsDict).params
+            loaded = True
 
-    if not alreadyLoaded:
-        # load the presets
-        params = ParamsLoader.factory('diff_presets/{}.json'.format(paramsFile)).params
+    if not loaded:
+        params = ParamsLoader.factory('diff_presets/{}.json'.format(session.paramsFile)).params
 
 
     # main form
@@ -245,7 +255,7 @@ def solver():
     presets = [os.path.splitext(file)[0] for file in files]
 
     loadTable = TABLE(TR("Choose an available preset:",
-                         SELECT(*presets, **dict(_name="paramsFile", value=paramsFile, _onchange="this.form.submit()"))))
+                         SELECT(*presets, **dict(_name="paramsFile", value=session.paramsFile, _onchange="this.form.submit()"))))
     loadForm = FORM(loadTable, _id="loadform", _name="loadform")
 
     if loadForm.process(formname='loadform').accepted:
@@ -267,7 +277,7 @@ def solver():
 
     # save form
     saveTable = TABLE(TR("Update an existing preset:",
-                         SELECT(*presets, **dict(_name="paramsFile", value=paramsFile))),
+                         SELECT(*presets, **dict(_name="paramsFile", value=session.paramsFile))),
                       TR("Create a new preset:",
                          INPUT(_type="text",
                                _name="saveFile",

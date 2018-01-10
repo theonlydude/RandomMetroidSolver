@@ -147,8 +147,6 @@ def getItem(itemType):
 def getAssumedItems(item, prefilledItems, itemLocations, itemPool):
     items = removeItem(item["Type"], itemPool)
     items = List.append(items, prefilledItems)
-    # keep only the item type, it's too slow otherwise
-    items = [item["Type"] for item in items]
     accessibleItems = List.map(lambda i: i["Item"], List.filter(lambda il: il["Location"]["Available"](items) and not List.exists(lambda k: k["Type"] == il["Item"]["Type"], prefilledItems), itemLocations))
     return List.append(items, accessibleItems)
 

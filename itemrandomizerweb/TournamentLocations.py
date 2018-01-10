@@ -20,12 +20,28 @@ def haveItem(items, itemType):
     #return False
 
     # best (12.3s) (items is a list of itemType)
+    #return itemType in items
+
+    # 8.3s, handle both cases
+    if len(items) == 0:
+        return False
+
+    if 'Type' in items[0]:
+        items = [item["Type"] for item in items]
+
     return itemType in items
 
 #let itemCount items itemType =
 #    List.length (List.filter (fun (item:Item) -> item.Type = itemType) items)
 def itemCount(items, itemType):
+    # too slow
     #return List.length(List.filter(lambda item: item["Type"] == itemType, items))
+    if len(items) == 0:
+        return 0
+
+    if 'Type' in items[0]:
+        items = [item["Type"] for item in items]
+
     return items.count(itemType)
 
 #let energyReserveCount items =

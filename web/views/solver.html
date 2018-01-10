@@ -83,6 +83,9 @@ elif diffPercent > 80:
   response.write("[ 'Difficulty', 'very hard', new Date(1960, 0, 0), new Date(1980, 0, 0) ],", escape=False)
   pass
 if diffPercent > 80 and diffPercent <= 100:
+  if diffPercent == 100:
+    diffPercent = 99
+    pass
   response.write("[ 'Difficulty', 'hardcore', new Date(1980, 0, 0), new Date(19{}, 0, 0) ]".format(diffPercent), escape=False)
   pass
 }}

@@ -11,7 +11,7 @@ class Conf:
     difficultyTarget=medium
 
     # display the generated path (spoilers!)
-    displayGeneratedPath = True
+    displayGeneratedPath = False
 
     # choose how many items are required
     majorsPickup='minimal'

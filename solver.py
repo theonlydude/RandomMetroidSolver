@@ -398,7 +398,7 @@ class RomReader:
                 item = self.getItem(romFile, loc["Address"], loc["Visibility"])
                 loc["itemName"] = self.items[item]["name"]
                 loc["Class"] = self.getLocClass(loc["Name"], self.items[item]["class"])
-                print("{}: {} => {}".format(loc["Name"], loc["Class"], loc["itemName"]))
+                #print("{}: {} => {}".format(loc["Name"], loc["Class"], loc["itemName"]))
 
     def getLocClass(self, locName, itemClass):
         # always keep bosses locs as major

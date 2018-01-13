@@ -397,7 +397,16 @@ class RomReader:
             for loc in locations:
                 item = self.getItem(romFile, loc["Address"], loc["Visibility"])
                 loc["itemName"] = self.items[item]["name"]
-                loc["Class"] = self.items[item]["class"]
+                loc["Class"] = self.getLocClass(loc["Name"], self.items[item]["class"])
+                print("{}: {} => {}".format(loc["Name"], loc["Class"], loc["itemName"]))
+
+    def getLocClass(self, locName, itemClass):
+        # always keep bosses locs as major
+        if locName in ["Energy Tank, Ridley", "Right Super, Wrecked Ship",
+                       "Space Jump", "Varia Suit"]:
+            return "Major"
+        else:
+            return itemClass
 
 class RomLoader:
     @staticmethod

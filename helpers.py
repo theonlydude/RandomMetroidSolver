@@ -474,7 +474,6 @@ def computeBossDifficulty(items, ammoMargin, secs, diffTbl):
     diffAdjust = (1 - (ammoMargin - Settings.algoSettings['ammoMarginIfNoCharge']))
     if diffAdjust > 1:
         difficulty *= diffAdjust
-    #print('difficulty = ' + str(difficulty))
 
     return difficulty
 

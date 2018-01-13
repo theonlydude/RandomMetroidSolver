@@ -373,9 +373,14 @@ class RomReader:
         value2 = struct.unpack("B", romFile.read(1))
 
         # dessyreqt randomizer make some missiles non existant, detect it
+        # 0x1a is to say that the item is a morphball
+        # 0xeedb is missile item
+        # 0x786de is Morphing Ball location
         romFile.seek(address+4, 0)
         value3 = struct.unpack("B", romFile.read(1))
-        if value3[0] == int('0x1a', 16) and value2[0]*256+(value1[0]) == int('0xeedb', 16):
+        if (value3[0] == int('0x1a', 16)
+            and value2[0]*256+(value1[0]) == int('0xeedb', 16)
+            and address != int('0x786DE', 16)):
             return hex(0)
 
         # match itemVisibility with

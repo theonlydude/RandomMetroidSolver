@@ -372,10 +372,10 @@ class RomReader:
         value1 = struct.unpack("B", romFile.read(1))
         value2 = struct.unpack("B", romFile.read(1))
 
-        # dessyreqt randomizer make some missiles non existant, detect it (0x1a == 26)
+        # dessyreqt randomizer make some missiles non existant, detect it
         romFile.seek(address+4, 0)
         value3 = struct.unpack("B", romFile.read(1))
-        if value3[0] == 26:
+        if value3[0] == int('0x1a', 16) and value2[0]*256+(value1[0]) == int('0xeedb', 16):
             return hex(0)
 
         # match itemVisibility with

@@ -14,14 +14,16 @@ class Conf:
     displayGeneratedPath = False
 
     # choose how many items are required
-    majorsPickup='minimal'
-    #majorsPickup='all'
+    majorsPickup = 'minimal'
+    #majorsPickup = 'all'
+    #majorsPickup = 'any'
     minorsPickup = {
         'Missile' : 10,
         'Super' : 5,
         'PowerBomb' : 2
     }
-    #minorsPickup='all'
+    #minorsPickup = 'all'
+    #minorsPickup = 'any'
 class Knows:
     # the different technics to know (cf. http://deanyd.net/sm/index.php?title=Item_Randomizer)
     # and the personnal perceived difficulty.
@@ -39,7 +41,7 @@ class Knows:
     GreenGateGlitch = (True, medium) # to access screw attack and crocomire
     ShortCharge = (False, 0) # to kill draygon
     GravityJump = (True, hard)
-    SpringBallJump = (True, hard) # access to wrecked ship etank without anything else and suitless maridia navigation
+    SpringBallJump = (True, hard) # access to wrecked ship etank without anything else and suitless maridia navigation (precious room exit)
 
     # bosses
     DraygonGrappleKill = (True, medium) # easy kill for draygon
@@ -56,11 +58,13 @@ class Knows:
     CeilingDBoost = (True, easy) # for brinstar ceiling
     AlcatrazEscape = (True, harder) # alcatraz without bomb
     ReverseGateGlitch = (True, medium) # ETank in Brinstar Gate
+    ReverseGateGlitchHiJumpLess = (False, 0) # Same but without high jump
     EarlyKraid = (True, easy) # to access kraid without hi jump boots
     XrayDboost = (False, 0)  # Xray without grapple or space jump
     RedTowerClimb = (True, harder) # brinstar red tower without ice or screw
 
     # gauntlet
+    HiJumpLessGauntletAccess = (False, 0)
     HiJumpGauntletAccess = (True, harder)
     GauntletWithBombs = (True, hard)
     GauntletWithPowerBombs = (True, medium)
@@ -89,6 +93,10 @@ class Knows:
     # suitless
     SuitlessOuterMaridia = (True, hardcore)
     SuitlessOuterMaridiaNoGuns = (True, mania) # suitless maridia without even wave, spazer or plasma...
+    # suitless draygon
+    DraygonRoomGrappleExit = (False, 0)
+    DraygonRoomCrystalExit = (False, 0) # give a free shine spark
+    PreciousRoomXRayExit = (False, 0)
     # clips
     MochtroidClip = (True, medium) # to access botwoon without speedbooster
     PuyoClip = (False, 0) # to access spring ball without grapple beam

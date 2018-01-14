@@ -129,7 +129,9 @@ locations = [
                                     wor(haveItem(items, 'Wave'),
                                         wand(haveItem(items, 'Super'),
                                              haveItem(items, 'HiJump'),
-                                             Knows.ReverseGateGlitch)))
+                                             Knows.ReverseGateGlitch),
+                                        wand(haveItem(items, 'Super'),
+                                             Knows.ReverseGateGlitchHiJumpLess)))
 },
 {
     'Area': "Brinstar",

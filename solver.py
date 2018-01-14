@@ -80,6 +80,7 @@ class Solver:
                 # if we've aborted, display remaining majors
                 if difficulty == -1:
                     self.printPath("Remaining major locations:", self.majorLocations)
+                    self.printPath("Remaining minor locations:", self.minorLocations)
 
             # display difficulty scale
             self.displayDifficulty(difficulty)
@@ -136,24 +137,20 @@ class Solver:
 
             # compute the difficulty of all the locations
             self.computeLocationsDifficulty(self.majorLocations)
-            enough = self.pickup.enoughMinors(self.collectedItems, self.minorLocations)
-            if not enough:
-                self.computeLocationsDifficulty(self.minorLocations)
+            self.computeLocationsDifficulty(self.minorLocations)
 
             # keep only the available locations
             majorAvailable = [loc for loc in self.majorLocations if loc["difficulty"][0] == True]
-            if not enough:
-                minorAvailable = [loc for loc in self.minorLocations if loc["difficulty"][0] == True]
+            minorAvailable = [loc for loc in self.minorLocations if loc["difficulty"][0] == True]
 
             # check if we're stuck
-            if len(majorAvailable) == 0 and enough is True:
-                self.log.debug("STUCK MAJORS")
+            if len(majorAvailable) == 0 and len(minorAvailable) == 0:
+                self.log.debug("STUCK MAJORS and MINORS")
                 break
 
             # sort them on difficulty and proximity
             majorAvailable = self.getAvailableItemsList(majorAvailable, area, Conf.difficultyTarget)
-            if not enough:
-                minorAvailable = self.getAvailableItemsList(minorAvailable, area, Conf.difficultyTarget)
+            minorAvailable = self.getAvailableItemsList(minorAvailable, area, Conf.difficultyTarget)
 
             # first take major items of acceptable difficulty in the current area
             majorPicked = False
@@ -166,7 +163,7 @@ class Solver:
             if majorPicked is True:
                 continue
             # next item decision
-            if (enough or len(minorAvailable) == 0) and len(majorAvailable) > 0:
+            if len(minorAvailable) == 0 and len(majorAvailable) > 0:
                 self.log.debug('MAJOR')
                 area = self.collectMajor(majorAvailable.pop(0))
             elif len(majorAvailable) == 0 and len(minorAvailable) > 0:

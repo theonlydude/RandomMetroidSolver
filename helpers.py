@@ -145,6 +145,7 @@ def canEnterAndLeaveGauntlet(items):
     #             -fly to it (infinite bomb jumps or space jump)
     #             -shinespark to it
     #             -wall jump with high jump boots
+    #             -wall jump without high jump boots
     #            then inside it to break the bomb wals:
     #             -use screw attack (easy way)
     #             -use power bombs
@@ -153,7 +154,8 @@ def canEnterAndLeaveGauntlet(items):
     #              and use power bombs on the way out
     return wand(wor(canFly(items),
                     haveItem(items, 'SpeedBooster'),
-                    wand(Knows.HiJumpGauntletAccess, haveItem(items, 'HiJump'))),
+                    wand(Knows.HiJumpGauntletAccess, haveItem(items, 'HiJump')),
+                    Knows.HiJumpLessGauntletAccess),
                 wor(haveItem(items, 'ScrewAttack'),
                     wand(Knows.GauntletWithPowerBombs,
                          canUsePowerBombs(items),
@@ -320,12 +322,26 @@ def canDefeatBotwoon(items):
                          haveItem(items, 'Gravity')),
                     wand(Knows.MochtroidClip, haveItem(items, 'Ice'))))
 
+def canCrystalFlash(items):
+    return wand(itemCountOk(items, 'Missile', 2),
+                itemCountOk(items, 'Super', 2),
+                itemCountOk(items, 'PowerBomb', 3))
 
 def canDefeatDraygon(items):
-    # EXPLAINED: the randomizer considers that we need gravity to defeat Draygon
+    # EXPLAINED: the randomizer considers that we need gravity to defeat Draygon.
+    #            dessyreqt randomizer in machosist can have suitless draygon:
+    #            to exit draygon room: grapple or crystal flash (for free shine spark)
+    #            to exit precious room: spring ball jump or xray scope glitch
     return wand(canDefeatBotwoon(items),
-                haveItem(items, 'Gravity'));
-
+                wor(haveItem(items, 'Gravity'),
+                    wand(wor(wand(haveItem(items, 'Grapple'),
+                                  Knows.DraygonRoomGrappleExit),
+                             wand(canCrystalFlash(items),
+                                  Knows.DraygonRoomCrystalExit)),
+                         wor(wand(haveItem(items, 'SpringBall'),
+                                  Knows.SpringBallJump),
+                             wand(haveItem(items, 'XRayScope'),
+                                  Knows.PreciousRoomXRayExit)))))
 
 def getBeamDamage(items):
     standardDamage = 20
@@ -563,6 +579,8 @@ class Pickup:
         if self.minorsPickup == 'all':
             # need them all
             return len(minorLocations) == 0
+        elif self.minorsPickup == 'any':
+            return True
         else:
             canEnd = enoughStuffTourian(items)[0]
             return (canEnd
@@ -574,6 +592,8 @@ class Pickup:
         # the end condition
         if self.majorsPickup == 'all':
             return len(majorLocations) == 0
+        elif self.majorsPickup == 'any':
+            return True
         elif self.majorsPickup == 'minimal':
             return (haveItemCount(items, 'Morph', 1)
                     # pass bomb block passages

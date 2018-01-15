@@ -425,6 +425,12 @@ def solver():
                      ['Solve!', True, URL(f='solver')],
                      ['Information & Contact', False, URL(f='infos')]]
 
+    # add missing knows
+    for know in Knows.__dict__:
+        if know[0:len('__')] != '__':
+            if know not in params['Knows'].keys():
+                params['Knows'][know] = Knows.__dict__[know]
+
     # send values to view
     return dict(mainForm=mainForm, loadForm=loadForm, saveForm=saveForm,
                 desc=desc,

@@ -252,7 +252,7 @@ def solver():
     roms = [os.path.splitext(file)[0]+'.sfc' for file in files]
 
     mainForm = FORM(TABLE(TR("Already uploaded rom:",
-                             SELECT(*roms, **dict(_name="romFile", value=session.romFile+'.sfc')))),
+                             SELECT(*roms, **dict(_name="romFile", value=session.romFile+'.sfc' if session.romFile is not None else None)))),
                     TABLE(TR("Pick a randomized Super Metroid ROM to upload and solve:",
                              INPUT(_type="file",
                                    _name="uploadFile",

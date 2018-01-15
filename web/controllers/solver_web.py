@@ -13,7 +13,7 @@ import datetime, os, hashlib
 # to solve the rom
 from parameters import *
 from helpers import *
-from tournament_locations import *
+import tournament_locations
 from solver import *
 #from get_random_rom import *
 
@@ -88,6 +88,9 @@ desc = {'Mockball': {'display': 'Mockball',
         'ReverseGateGlitch': {'display': 'Reverse Gate Glitch',
                               'title': 'Open wave gate in Pink Brinstar from bottom left corner with High Jump',
                               'href': 'https://www.youtube.com/watch?v=cykJDBBSBrc' },
+        'ReverseGateGlitchHiJumpLess': {'display': 'Reverse Gate Glitch without High Jump',
+                              'title': 'Open wave gate in Pink Brinstar from bottom left corner without High Jump',
+                              'href': None },
         'EarlyKraid': {'display': 'Early Kraid',
                        'title': 'Access Kraid area by wall jumping',
                        'href': 'https://www.youtube.com/watch?v=rHMHqTHHqHs' },
@@ -97,6 +100,9 @@ desc = {'Mockball': {'display': 'Mockball',
         'RedTowerClimb': {'display': 'Red Tower Climb',
                           'title': 'Climb Red Tower without Ice or Screw Attack',
                           'href': 'https://www.youtube.com/watch?v=g3goe6PZ4o0' },
+        'HiJumpLessGauntletAccess': {'display': 'Gauntlet Access without High Jump',
+                                 'title': 'Access Gauntlet area using realy tricky wall jumps',
+                                 'href': None},
         'HiJumpGauntletAccess': {'display': 'Hi-Jump Gauntlet Access',
                                  'title': 'Access Gauntlet area using tricky wall jumps',
                                  'href': 'https://www.youtube.com/watch?v=2a6mf-kB60U' },
@@ -152,6 +158,15 @@ desc = {'Mockball': {'display': 'Mockball',
         'SuitlessOuterMaridiaNoGuns': {'display': 'Suitless Outer Maridia with no Guns',
                                        'title': 'Same as above, but with no firepower besides Ice Beam',
                                        'href': 'https://www.youtube.com/watch?v=c2xoPigezvM' },
+        'DraygonRoomGrappleExit': {'display': 'Exit Draygon room with the Grapple',
+                                 'title': 'n/a',
+                                 'href': None },
+        'DraygonRoomCrystalExit': {'display': 'Exit Draygon room with a shine spark',
+                                 'title': 'Doing a Crystal flash and being grabbed by Draygon gives a free shine spark',
+                                 'href': None },
+        'PreciousRoomXRayExit': {'display': 'Exit the Precious room with an Xray glitch',
+                                 'title': 'n/a',
+                                 'href': None },
         'MochtroidClip': {'display': 'Mochtroid Clip',
                           'title': 'Get to Botwoon with Ice Beam',
                           'href': 'https://wiki.supermetroid.run/index.php?title=14%25#Mochtroid_Clip' },
@@ -175,13 +190,14 @@ desc = {'Mockball': {'display': 'Mockball',
 usedAcrossTheGame = ['Mockball', 'SimpleShortCharge', 'InfiniteBombJump', 'GreenGateGlitch', 'ShortCharge', 'GravityJump', 'SpringBallJump']
 bosses = ['DraygonGrappleKill', 'MicrowaveDraygon', 'MicrowavePhantoon']
 endGame = ['IceZebSkip', 'SpeedZebSkip']
-brinstar = ['CeilingDBoost', 'AlcatrazEscape', 'ReverseGateGlitch', 'EarlyKraid', 'XrayDboost', 'RedTowerClimb']
-gauntlet = ['HiJumpGauntletAccess', 'GauntletWithBombs', 'GauntletWithPowerBombs', 'GauntletEntrySpark']
+brinstar = ['CeilingDBoost', 'AlcatrazEscape', 'ReverseGateGlitch', 'ReverseGateGlitchHiJumpLess', 'EarlyKraid', 'XrayDboost', 'RedTowerClimb']
+gauntlet = ['HiJumpLessGauntletAccess', 'HiJumpGauntletAccess', 'GauntletWithBombs', 'GauntletWithPowerBombs', 'GauntletEntrySpark']
 upperNorfair = ['NorfairReserveHiJump', 'WaveBeamWallJump', 'ClimbToGrappleWithIce']
 lowerNorfair = ['LavaDive', 'WorstRoomIceCharge', 'WorstRoomHiJump']
 wreckedShip = ['ContinuousWallJump', 'DiagonalBombJump', 'MockballWs']
 wreckedShipEtank = ['SpongeBathBombJump', 'SpongeBathHiJump', 'SpongeBathSpeed']
 maridiaSuitless = ['SuitlessOuterMaridia', 'SuitlessOuterMaridiaNoGuns']
+maridiaSuitlessDraygon = ['DraygonRoomGrappleExit', 'DraygonRoomCrystalExit', 'PreciousRoomXRayExit']
 maridiaClips = ['MochtroidClip', 'PuyoClip']
 maridiaPlasmaRoom = ['KillPlasmaPiratesWithSpark', 'KillPlasmaPiratesWithCharge', 'ExitPlasmaRoomHiJump']
 maridiaSandpit = ['SuitlessSandpit']
@@ -196,6 +212,7 @@ categories = [{'knows': usedAcrossTheGame, 'title': 'Used across the game'},
               {'knows': wreckedShip, 'title': 'Wrecked Ship'},
               {'knows': wreckedShipEtank, 'title': 'Wrecked Ship Etank'},
               {'knows': maridiaSuitless, 'title': 'Maridia Suitless'},
+              {'knows': maridiaSuitlessDraygon, 'title': 'Maridia Suitless Draygon'},
               {'knows': maridiaClips, 'title': 'Maridia Clips'},
               {'knows': maridiaPlasmaRoom, 'title': 'Maridia Plasma Room'},
               {'knows': maridiaSandpit, 'title': 'Maridia Sandpit'}]
@@ -231,23 +248,63 @@ def solver():
 
 
     # main form
-    if session.seed is not None:
-        seedValue = str(session.seed)
-    else:
-        seedValue = ''
+    files = sorted(os.listdir('roms'))
+    roms = [os.path.splitext(file)[0]+'.sfc' for file in files]
 
-    mainTable = TABLE(TR("Tournament Rom seed: TX",
-                         INPUT(_type="text",
-                               _name="seed",
-                               _value=seedValue,
-                               requires=IS_INT_IN_RANGE(0, 9999999, error_message = 'Seed is a number between 0 and 9999999'),
-                               default=1234567)))
-    mainTable.append(TR(INPUT(_type="submit",_value="Compute difficulty")))
-    mainForm = FORM(mainTable, _id="mainform", _name="mainform")
+    mainForm = FORM(TABLE(TR("Already uploaded rom:",
+                             SELECT(*roms, **dict(_name="romFile", value=session.romFile+'.sfc')))),
+                    TABLE(TR("Pick a randomized Super Metroid ROM to upload and solve:",
+                             INPUT(_type="file",
+                                   _name="uploadFile",
+                                   # limit uploaded file to 4MB
+                                   #requires=[IS_LENGTH(4*1024*1024),
+                                   #          IS_UPLOAD_FILENAME(extension='sfc')]))),
+                                   ))),
+                    TABLE(TR(INPUT(_type="submit",_value="Compute difficulty"))),
+                    _id="mainform", _name="mainform")
 
     if mainForm.process(formname='mainform').accepted:
         response.flash="main form accepted"
-        session.result = compute_difficulty(mainForm.vars['seed'], request.post_vars)
+
+        # new uploaded rom ?
+        if type(mainForm.vars['uploadFile']) != bytes:
+            uploadFileName = mainForm.vars['uploadFile'].filename
+            uploadFileContent = mainForm.vars['uploadFile'].file
+
+            (base, ext) = os.path.splitext(uploadFileName)
+            jsonRomFileName = 'roms/' + base + '.json'
+
+            if ext not in ['.sfc', '.smc']:
+                response.flash = "Rom file must be .sfc or .smc"
+                redirect(URL(r=request, f='solver'))
+
+            # try loading it and create a json from it
+            try:
+                tempRomFile = 'roms/' + base + '.sfc'
+                with open(tempRomFile, 'wb') as tempRom:
+                    tempRom.write(uploadFileContent.read())
+
+                romLoader = RomLoader.factory(tempRomFile)
+                romLoader.assignItems(tournament_locations.locations)
+                romLoader.dump(jsonRomFileName)
+
+                os.remove(tempRomFile)
+            except:
+                print("exception !!")
+                response.flash = "Error loading the rom file"
+                redirect(URL(r=request, f='solver'))
+
+            session.romFile = base
+        else:
+            session.romFile = os.path.splitext(mainForm.vars['romFile'])[0]
+            jsonRomFileName = 'roms/' + session.romFile + '.json'
+
+        # check that the json file exists
+        if not os.path.isfile(jsonRomFileName):
+            response.flash = "Missing json rom file on the server"
+            redirect(URL(r=request, f='solver'))
+
+        session.result = compute_difficulty(jsonRomFileName, request.post_vars)
         redirect(URL(r=request, f='solver'))
 
     # load form
@@ -406,42 +463,25 @@ def generate_json_from_parameters(vars, hidden):
         if pickupStrategy == 'all':
             paramsDict['Conf']['majorsPickup'] = 'all'
             paramsDict['Conf']['minorsPickup'] = 'all'
+        elif pickupStrategy == 'any':
+            paramsDict['Conf']['majorsPickup'] = 'any'
+            paramsDict['Conf']['minorsPickup'] = 'any'
         else:
             paramsDict['Conf']['majorsPickup'] = 'minimal'
             paramsDict['Conf']['minorsPickup'] = {'Missile' : 10, 'Super' : 5, 'PowerBomb' : 2}
 
     return paramsDict
 
-def compute_difficulty(seed, post_vars):
-    # generate json to avoid generating it again and again if the user is tweaking its params
-    jsonFileName = 'TX' + str(seed) + '.json'
+def compute_difficulty(jsonRomFileName, post_vars):
 
-    if not os.path.isfile(jsonFileName):
-        # randomized rom json is generated in "~/web2py/" (the cwd when in web2py)
-
-        # randomize the rom
-        locationPool = TournamentLocations.AllLocations
-        rnd = Random(seed)
-        itemLocs = NewRandomizer.generateItems(rnd, [], [], Items.getItemPool(rnd), locationPool)
-
-        # transform itemLocs in our usual dict(location, item)
-        locsItems = {}
-        for itemLoc in itemLocs:
-            locsItems[itemLoc["Location"]["Name"]] = itemLoc["Item"]["Type"]
-
-        # dump json
-        romLoader = RomLoader.factory(locsItems)
-        romLoader.dump(jsonFileName)
-
-    randomizedRom = "Item Randomizer TX{}.sfc".format(seed)
+    randomizedRom = os.path.basename(jsonRomFileName.replace('json', 'sfc'))
 
     # generate json from parameters
     paramsDict = generate_json_from_parameters(post_vars, hidden=False)
     session.paramsDict = paramsDict
-    session.seed = seed
 
     # call solver
-    solver = Solver(type='web', rom=jsonFileName, params=[paramsDict])
+    solver = Solver(type='web', rom=jsonRomFileName, params=[paramsDict])
     difficulty = solver.solveRom()
     diffPercent = DifficultyDisplayer(difficulty).percent()
 

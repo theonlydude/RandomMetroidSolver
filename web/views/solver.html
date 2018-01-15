@@ -194,7 +194,7 @@ def displayCategory(category):
 pass
 }}
 
-Enter your tournament rom seed, ajust the presets depending on the techniques you know then press 'Compute Difficulty'.
+<p>Ajust the presets depending on the techniques you know, choose your randomized rom then press 'Compute Difficulty'.</p>
 
 {{=mainForm}}
 
@@ -277,6 +277,9 @@ The strategy for picking up major and minor items.
 <li>All:</li>
 <ul><li>Will grab all the major and minor items.</li></ul>
 
+<li>Any:</li>
+<ul><li>No requirements on the items as long as the rom is finishable</li></ul>
+
 <li>Minimal:</li>
 <ul>
 <li>Majors:
@@ -295,21 +298,21 @@ accessible, enough minors to beat Mother Brain will be picked up.
 <br/>
 Pickup strategy:
 {{
-=SELECT('all', 'minimal',
+=SELECT('all', 'minimal', 'any',
         _id="pickup_strategy",
         _name="pickup_strategy",
         _form="mainform",
         _onchange="changeHiddenSelect('pickup_strategy')",
-        requires=IS_IN_SET(['all', 'minimal']),
+        requires=IS_IN_SET(['all', 'minimal', 'any']),
         value=conf["pickup"])
 }}
 {{
-=SELECT('all', 'minimal',
+=SELECT('all', 'minimal', 'any',
         _id="pickup_strategy_hidden",
         _name="pickup_strategy_hidden",
         _form="saveform",
         _style='display:none',
-        requires=IS_IN_SET(['all', 'minimal']),
+        requires=IS_IN_SET(['all', 'minimal', 'any']),
         value=conf["pickup"])
 }}
 

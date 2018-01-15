@@ -626,7 +626,8 @@ class DifficultyDisplayer:
             harder: 60,
             hardcore: 80,
             mania: 100,
-            mania*2: 100
+            mania*2: 100,
+            mania*4: 100
         }
 
         difficulty = self.difficulty if self.difficulty < mania else mania

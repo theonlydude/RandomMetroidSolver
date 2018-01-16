@@ -4,9 +4,9 @@ import sys, os.path
 path = os.path.expanduser('~/RandomMetroidSolver')
 if os.path.exists(path) and path not in sys.path:
     sys.path.append(path)
-path = os.path.expanduser('~/RandomMetroidSolver/itemrandomizerweb')
-if os.path.exists(path) and path not in sys.path:
-    sys.path.append(path)
+#path = os.path.expanduser('~/RandomMetroidSolver/itemrandomizerweb')
+#if os.path.exists(path) and path not in sys.path:
+#    sys.path.append(path)
 
 import datetime, os, hashlib
 
@@ -18,10 +18,10 @@ from solver import *
 #from get_random_rom import *
 
 # to randomize the rom
-from stdlib import Random
-import NewRandomizer
-import Items
-import TournamentLocations
+#from stdlib import Random
+#import NewRandomizer
+#import Items
+#import TournamentLocations
 
 difficulties = {
     0: 'mania',
@@ -267,6 +267,7 @@ def solver():
         response.flash="main form accepted"
 
         # new uploaded rom ?
+        error = False
         if type(mainForm.vars['uploadFile']) != bytes:
             uploadFileName = mainForm.vars['uploadFile'].filename
             uploadFileContent = mainForm.vars['uploadFile'].file
@@ -276,36 +277,35 @@ def solver():
 
             if ext not in ['.sfc', '.smc']:
                 response.flash = "Rom file must be .sfc or .smc"
-                redirect(URL(r=request, f='solver'))
+                error = True
+            else:
+                # try loading it and create a json from it
+                try:
+                    tempRomFile = 'roms/' + base + '.sfc'
+                    with open(tempRomFile, 'wb') as tempRom:
+                        tempRom.write(uploadFileContent.read())
 
-            # try loading it and create a json from it
-            try:
-                tempRomFile = 'roms/' + base + '.sfc'
-                with open(tempRomFile, 'wb') as tempRom:
-                    tempRom.write(uploadFileContent.read())
+                    romLoader = RomLoader.factory(tempRomFile)
+                    romLoader.assignItems(tournament_locations.locations)
+                    romLoader.dump(jsonRomFileName)
 
-                romLoader = RomLoader.factory(tempRomFile)
-                romLoader.assignItems(tournament_locations.locations)
-                romLoader.dump(jsonRomFileName)
+                    os.remove(tempRomFile)
 
-                os.remove(tempRomFile)
-            except:
-                print("exception !!")
-                response.flash = "Error loading the rom file"
-                redirect(URL(r=request, f='solver'))
-
-            session.romFile = base
+                    session.romFile = base
+                except:
+                    response.flash = "Error loading the rom file"
+                    error = True
         else:
             session.romFile = os.path.splitext(mainForm.vars['romFile'])[0]
             jsonRomFileName = 'roms/' + session.romFile + '.json'
 
-        # check that the json file exists
-        if not os.path.isfile(jsonRomFileName):
-            response.flash = "Missing json rom file on the server"
-            redirect(URL(r=request, f='solver'))
-
-        session.result = compute_difficulty(jsonRomFileName, request.post_vars)
-        redirect(URL(r=request, f='solver'))
+        if not error:
+            # check that the json file exists
+            if not os.path.isfile(jsonRomFileName):
+                response.flash = "Missing json rom file on the server"
+            else:
+                session.result = compute_difficulty(jsonRomFileName, request.post_vars)
+                redirect(URL(r=request, f='solver'))
 
     # load form
     files = sorted(os.listdir('diff_presets'))

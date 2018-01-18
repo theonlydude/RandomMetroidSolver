@@ -441,7 +441,8 @@ class RomLoader:
     @staticmethod
     def factory(rom):
         # can be a real rom. can be a json or a dict with the locations - items association
-        if type(rom) is str:
+        # unicode only exists in python2
+        if type(rom) is str or type(rom) is unicode:
             ext = os.path.splitext(rom)
             if ext[1].lower() == '.sfc' or ext[1].lower() == '.smc':
                 return RomLoaderSfc(rom)

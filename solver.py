@@ -363,11 +363,9 @@ class RomReader:
             self.romFileName = romFileName
 
     def getItemFromFakeRom(self, fakeRom, address, visibility):
-        print("getItemFromFakeRom address={}".format(address))
         value1 = fakeRom[address]
         value2 = fakeRom[address+1]
         value3 = fakeRom[address+4]
-        print("value1 {}, value2 {}, value3 {}".format(value1, value2, value3))
 
         if (value3 == int('0x1a', 16)
             and value2*256+value1 == int('0xeedb', 16)
@@ -419,9 +417,7 @@ class RomReader:
 
     def loadItemsFromFakeRom(self, fakeRom, locations):
         for loc in locations:
-            print("loadItemsFromFakeRom")
             item = self.getItemFromFakeRom(fakeRom, loc["Address"], loc["Visibility"])
-            print("item {}".format(item))
             loc["itemName"] = self.items[item]["name"]
             loc["Class"] = self.getLocClass(loc["Name"], self.items[item]["class"])
 
@@ -444,10 +440,8 @@ class RomReader:
 class RomLoader:
     @staticmethod
     def factory(rom):
-        print("romloader factory")
         # can be a real rom. can be a json or a dict with the locations - items association
         if type(rom) is str:
-            print("romloader type str")
             ext = os.path.splitext(rom)
             if ext[1].lower() == '.sfc' or ext[1].lower() == '.smc':
                 return RomLoaderSfc(rom)
@@ -457,7 +451,6 @@ class RomLoader:
                 print("wrong rom file type: {}".format(ext[1]))
                 sys.exit(-1)
         elif type(rom) is dict:
-            print("romloader type dict")
             return RomLoaderDict(rom)
 
     def assignItems(self, locations):
@@ -492,21 +485,15 @@ class RomLoaderJson(RomLoader):
 class RomLoaderDict(RomLoader):
     # when called from the website
     def __init__(self, fakeRom):
-        print("__init__")
         self.fakeRom = fakeRom
 
     def assignItems(self, locations):
-        print("assignItems 1")
         # update the itemName of the locations
         RomReader().loadItemsFromFakeRom(self.fakeRom, locations)
-
-        print("assignItems 2")
 
         self.locsItems = {}
         for loc in locations:
             self.locsItems[loc['Name']] = loc['itemName']
-
-        print("assignItems 3")
 
 class ParamsLoader:
     @staticmethod

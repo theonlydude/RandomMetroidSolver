@@ -358,8 +358,31 @@ class RomReader:
         '0x0': {'name': 'Nothing', 'class': 'Nothing'}
     }
 
-    def __init__(self, romFileName):
-        self.romFileName = romFileName
+    def __init__(self, romFileName=None):
+        if romFileName is not None:
+            self.romFileName = romFileName
+
+    def getItemFromFakeRom(self, fakeRom, address, visibility):
+        print("getItemFromFakeRom address={}".format(address))
+        value1 = fakeRom[address]
+        value2 = fakeRom[address+1]
+        value3 = fakeRom[address+4]
+        print("value1 {}, value2 {}, value3 {}".format(value1, value2, value3))
+
+        if (value3 == int('0x1a', 16)
+            and value2*256+value1 == int('0xeedb', 16)
+            and address != int('0x786DE', 16)):
+            return hex(0)
+
+        if visibility == 'Visible':
+            return hex(value2*256+(value1-0))
+        elif visibility == 'Chozo':
+            return hex(value2*256+(value1-84))
+        elif visibility == 'Hidden':
+            return hex(value2*256+(value1-168))
+        else:
+            # crash !
+            manger.du(cul)
 
     def getItem(self, romFile, address, visibility):
         # return the hex code of the object at the given address
@@ -394,6 +417,14 @@ class RomReader:
             # crash !
             manger.du(cul)
 
+    def loadItemsFromFakeRom(self, fakeRom, locations):
+        for loc in locations:
+            print("loadItemsFromFakeRom")
+            item = self.getItemFromFakeRom(fakeRom, loc["Address"], loc["Visibility"])
+            print("item {}".format(item))
+            loc["itemName"] = self.items[item]["name"]
+            loc["Class"] = self.getLocClass(loc["Name"], self.items[item]["class"])
+
     def loadItems(self, locations):
         with open(self.romFileName, "rb") as romFile:
             for loc in locations:
@@ -413,8 +444,10 @@ class RomReader:
 class RomLoader:
     @staticmethod
     def factory(rom):
+        print("romloader factory")
         # can be a real rom. can be a json or a dict with the locations - items association
         if type(rom) is str:
+            print("romloader type str")
             ext = os.path.splitext(rom)
             if ext[1].lower() == '.sfc' or ext[1].lower() == '.smc':
                 return RomLoaderSfc(rom)
@@ -424,6 +457,7 @@ class RomLoader:
                 print("wrong rom file type: {}".format(ext[1]))
                 sys.exit(-1)
         elif type(rom) is dict:
+            print("romloader type dict")
             return RomLoaderDict(rom)
 
     def assignItems(self, locations):
@@ -457,8 +491,22 @@ class RomLoaderJson(RomLoader):
 
 class RomLoaderDict(RomLoader):
     # when called from the website
-    def __init__(self, locsItems):
-        self.locsItems = locsItems
+    def __init__(self, fakeRom):
+        print("__init__")
+        self.fakeRom = fakeRom
+
+    def assignItems(self, locations):
+        print("assignItems 1")
+        # update the itemName of the locations
+        RomReader().loadItemsFromFakeRom(self.fakeRom, locations)
+
+        print("assignItems 2")
+
+        self.locsItems = {}
+        for loc in locations:
+            self.locsItems[loc['Name']] = loc['itemName']
+
+        print("assignItems 3")
 
 class ParamsLoader:
     @staticmethod

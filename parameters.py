@@ -14,16 +14,16 @@ class Conf:
     displayGeneratedPath = False
 
     # choose how many items are required
-    majorsPickup = 'minimal'
+    #majorsPickup = 'minimal'
     #majorsPickup = 'all'
-    #majorsPickup = 'any'
-    minorsPickup = {
-        'Missile' : 10,
-        'Super' : 5,
-        'PowerBomb' : 2
-    }
+    majorsPickup = 'any'
+    #minorsPickup = {
+    #    'Missile' : 10,
+    #    'Super' : 5,
+    #    'PowerBomb' : 2
+    #}
     #minorsPickup = 'all'
-    #minorsPickup = 'any'
+    minorsPickup = 'any'
 class Knows:
     # the different technics to know (cf. http://deanyd.net/sm/index.php?title=Item_Randomizer)
     # and the personnal perceived difficulty.

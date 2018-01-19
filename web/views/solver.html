@@ -151,8 +151,9 @@ window.onload = function(){
                 var re = /(?:\.([^.]+))?$/;
 		var ext = re.exec(file.name)[1];
                 if( ! (ext === "sfc" || ext === "smc") ) {
-                    console.log("wrong extension: "+ext);
-                    return;
+                    document.getElementById("uploadFile").value = "";
+                    alert("wrong extension: "+ext);
+                    return false;
                 }
 
                 var re = /((.*)\.[^.]+)?$/;
@@ -163,8 +164,9 @@ window.onload = function(){
 
                 var fileSize = file.size;
 		if( fileSize > 4*1024*1024 ) {
-                    console.log("wrong rom file size: "+fileSize.toString());
-                    return;
+                    document.getElementById("uploadFile").value = "";
+                    alert("wrong rom file size: "+fileSize.toString());
+                    return false;
                 }
 
                 var bytes = new Uint8Array(e.target.result);

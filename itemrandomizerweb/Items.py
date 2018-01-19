@@ -147,7 +147,7 @@ Items = [
         'Message': 0x2953f
     },
     {
-        'Type': 'XRay',
+        'Type': 'XRayScope',
         'Category': 'Misc',
         'Class': 'Major',
         'Code': 0xef0f,

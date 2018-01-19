@@ -196,6 +196,7 @@ class Solver:
         # compute difficulty value
         difficulty = self.computeDifficultyValue()
 
+        self.log.debug("difficulty={}".format(difficulty))
         self.log.debug("{}/{}: remaining major: {}, remaining minor: {}, visited: {}".format(Conf.majorsPickup, Conf.minorsPickup, len(self.majorLocations), len(self.minorLocations), len(self.visitedLocations)))
 
         self.log.debug("remaining majors:")
@@ -215,7 +216,7 @@ class Solver:
                 loc['difficulty'] = loc['Available'](self.collectedItems)
 
     def computeDifficultyValue(self):
-        if not self.pickup.enoughMajors(self.collectedItems, self.majorLocations) or not self.pickup.enoughMinors(self.collectedItems, self.minorLocations) or not self.canEndGame():
+        if not self.pickup.enoughMajors(self.collectedItems, self.majorLocations) or not self.pickup.enoughMinors(self.collectedItems, self.minorLocations) or not self.canEndGame()[0]:
             # we have aborted
             difficulty = -1
         else:
@@ -286,76 +287,106 @@ class Solver:
 
         return around + outside
 
+class Items:
+    itemsClasses = {
+        'ETank': 'Major',
+        'Missile': 'Minor',
+        'Super': 'Minor',
+        'PowerBomb': 'Minor',
+        'Bomb': 'Major',
+        'Charge': 'Major',
+        'Ice': 'Major',
+        'HiJump': 'Major',
+        'SpeedBooster': 'Major',
+        'Wave': 'Major',
+        'Spazer': 'Major',
+        'SpringBall': 'Major',
+        'Varia': 'Major',
+        'Plasma': 'Major',
+        'Grapple': 'Major',
+        'Morph': 'Major',
+        'Reserve': 'Major',
+        'Gravity': 'Major',
+        'XRayScope': 'Major',
+        'SpaceJump': 'Major',
+        'ScrewAttack': 'Major',
+        'Nothing': 'Nothing'
+    }
+
+    @staticmethod
+    def getItemClass(item):
+        return Items.itemsClasses[item]
+
 class RomReader:
     # read the items in the rom
     items = {
         # vanilla
-        '0xeed7': {'name': 'ETank', 'class': 'Major'},
-        '0xeedb': {'name': 'Missile', 'class': 'Minor'},
-        '0xeedf': {'name': 'Super', 'class': 'Minor'},
-        '0xeee3': {'name': 'PowerBomb', 'class': 'Minor'},
-        '0xeee7': {'name': 'Bomb', 'class': 'Major'},
-        '0xeeeb': {'name': 'Charge', 'class': 'Major'},
-        '0xeeef': {'name': 'Ice', 'class': 'Major'},
-        '0xeef3': {'name': 'HiJump', 'class': 'Major'},
-        '0xeef7': {'name': 'SpeedBooster', 'class': 'Major'},
-        '0xeefb': {'name': 'Wave', 'class': 'Major'},
-        '0xeeff': {'name': 'Spazer', 'class': 'Major'},
-        '0xef03': {'name': 'SpringBall', 'class': 'Major'},
-        '0xef07': {'name': 'Varia', 'class': 'Major'},
-        '0xef13': {'name': 'Plasma', 'class': 'Major'},
-        '0xef17': {'name': 'Grapple', 'class': 'Major'},
-        '0xef23': {'name': 'Morph', 'class': 'Major'},
-        '0xef27': {'name': 'Reserve', 'class': 'Major'},
-        '0xef0b': {'name': 'Gravity', 'class': 'Major'},
-        '0xef0f': {'name': 'XRayScope', 'class': 'Major'},
-        '0xef1b': {'name': 'SpaceJump', 'class': 'Major'},
-        '0xef1f': {'name': 'ScrewAttack', 'class': 'Major'},
+        '0xeed7': {'name': 'ETank'},
+        '0xeedb': {'name': 'Missile'},
+        '0xeedf': {'name': 'Super'},
+        '0xeee3': {'name': 'PowerBomb'},
+        '0xeee7': {'name': 'Bomb'},
+        '0xeeeb': {'name': 'Charge'},
+        '0xeeef': {'name': 'Ice'},
+        '0xeef3': {'name': 'HiJump'},
+        '0xeef7': {'name': 'SpeedBooster'},
+        '0xeefb': {'name': 'Wave'},
+        '0xeeff': {'name': 'Spazer'},
+        '0xef03': {'name': 'SpringBall'},
+        '0xef07': {'name': 'Varia'},
+        '0xef13': {'name': 'Plasma'},
+        '0xef17': {'name': 'Grapple'},
+        '0xef23': {'name': 'Morph'},
+        '0xef27': {'name': 'Reserve'},
+        '0xef0b': {'name': 'Gravity'},
+        '0xef0f': {'name': 'XRayScope'},
+        '0xef1b': {'name': 'SpaceJump'},
+        '0xef1f': {'name': 'ScrewAttack'},
         # old rando "chozo" items
-        '0xef2b': {'name': 'ETank', 'class': 'Major'},
-        '0xef2f': {'name': 'Missile', 'class': 'Minor'},
-        '0xef33': {'name': 'Super', 'class': 'Minor'},
-        '0xef37': {'name': 'PowerBomb', 'class': 'Minor'},
-        '0xef3b': {'name': 'Bomb', 'class': 'Major'},
-        '0xef3f': {'name': 'Charge', 'class': 'Major'},
-        '0xef43': {'name': 'Ice', 'class': 'Major'},
-        '0xef47': {'name': 'HiJump', 'class': 'Major'},
-        '0xef4b': {'name': 'SpeedBooster', 'class': 'Major'},
-        '0xef4f': {'name': 'Wave', 'class': 'Major'},
-        '0xef53': {'name': 'Spazer', 'class': 'Major'},
-        '0xef57': {'name': 'SpringBall', 'class': 'Major'},
-        '0xef5b': {'name': 'Varia', 'class': 'Major'},
-        '0xef5f': {'name': 'Gravity', 'class': 'Major'},
-        '0xef63': {'name': 'XRayScope', 'class': 'Major'},
-        '0xef67': {'name': 'Plasma', 'class': 'Major'},
-        '0xef6b': {'name': 'Grapple', 'class': 'Major'},
-        '0xef6f': {'name': 'SpaceJump', 'class': 'Major'},
-        '0xef73': {'name': 'ScrewAttack', 'class': 'Major'},
-        '0xef77': {'name': 'Morph', 'class': 'Major'},
-        '0xef7b': {'name': 'Reserve', 'class': 'Major'},
+        '0xef2b': {'name': 'ETank'},
+        '0xef2f': {'name': 'Missile'},
+        '0xef33': {'name': 'Super'},
+        '0xef37': {'name': 'PowerBomb'},
+        '0xef3b': {'name': 'Bomb'},
+        '0xef3f': {'name': 'Charge'},
+        '0xef43': {'name': 'Ice'},
+        '0xef47': {'name': 'HiJump'},
+        '0xef4b': {'name': 'SpeedBooster'},
+        '0xef4f': {'name': 'Wave'},
+        '0xef53': {'name': 'Spazer'},
+        '0xef57': {'name': 'SpringBall'},
+        '0xef5b': {'name': 'Varia'},
+        '0xef5f': {'name': 'Gravity'},
+        '0xef63': {'name': 'XRayScope'},
+        '0xef67': {'name': 'Plasma'},
+        '0xef6b': {'name': 'Grapple'},
+        '0xef6f': {'name': 'SpaceJump'},
+        '0xef73': {'name': 'ScrewAttack'},
+        '0xef77': {'name': 'Morph'},
+        '0xef7b': {'name': 'Reserve'},
         # old rando "hidden" items
-        '0xef7f': {'name': 'ETank', 'class': 'Major'},
-        '0xef83': {'name': 'Missile', 'class': 'Minor'},
-        '0xef87': {'name': 'Super', 'class': 'Minor'},
-        '0xef8b': {'name': 'PowerBomb', 'class': 'Minor'},
-        '0xef8f': {'name': 'Bomb', 'class': 'Major'},
-        '0xef93': {'name': 'Charge', 'class': 'Major'},
-        '0xef97': {'name': 'Ice', 'class': 'Major'},
-        '0xef9b': {'name': 'HiJump', 'class': 'Major'},
-        '0xef9f': {'name': 'SpeedBooster', 'class': 'Major'},
-        '0xefa3': {'name': 'Wave', 'class': 'Major'},
-        '0xefa7': {'name': 'Spazer', 'class': 'Major'},
-        '0xefab': {'name': 'SpringBall', 'class': 'Major'},
-        '0xefaf': {'name': 'Varia', 'class': 'Major'},
-        '0xefb3': {'name': 'Gravity', 'class': 'Major'},
-        '0xefb7': {'name': 'XRayScope', 'class': 'Major'},
-        '0xefbb': {'name': 'Plasma', 'class': 'Major'},
-        '0xefbf': {'name': 'Grapple', 'class': 'Major'},
-        '0xefc3': {'name': 'SpaceJump', 'class': 'Major'},
-        '0xefc7': {'name': 'ScrewAttack', 'class': 'Major'},
-        '0xefcb': {'name': 'Morph', 'class': 'Major'},
-        '0xefcf': {'name': 'Reserve', 'class': 'Major'},
-        '0x0': {'name': 'Nothing', 'class': 'Nothing'}
+        '0xef7f': {'name': 'ETank'},
+        '0xef83': {'name': 'Missile'},
+        '0xef87': {'name': 'Super'},
+        '0xef8b': {'name': 'PowerBomb'},
+        '0xef8f': {'name': 'Bomb'},
+        '0xef93': {'name': 'Charge'},
+        '0xef97': {'name': 'Ice'},
+        '0xef9b': {'name': 'HiJump'},
+        '0xef9f': {'name': 'SpeedBooster'},
+        '0xefa3': {'name': 'Wave'},
+        '0xefa7': {'name': 'Spazer'},
+        '0xefab': {'name': 'SpringBall'},
+        '0xefaf': {'name': 'Varia'},
+        '0xefb3': {'name': 'Gravity'},
+        '0xefb7': {'name': 'XRayScope'},
+        '0xefbb': {'name': 'Plasma'},
+        '0xefbf': {'name': 'Grapple'},
+        '0xefc3': {'name': 'SpaceJump'},
+        '0xefc7': {'name': 'ScrewAttack'},
+        '0xefcb': {'name': 'Morph'},
+        '0xefcf': {'name': 'Reserve'},
+        '0x0': {'name': 'Nothing'}
     }
 
     def __init__(self, romFileName=None):
@@ -419,23 +450,13 @@ class RomReader:
         for loc in locations:
             item = self.getItemFromFakeRom(fakeRom, loc["Address"], loc["Visibility"])
             loc["itemName"] = self.items[item]["name"]
-            loc["Class"] = self.getLocClass(loc["Name"], self.items[item]["class"])
 
     def loadItems(self, locations):
         with open(self.romFileName, "rb") as romFile:
             for loc in locations:
                 item = self.getItem(romFile, loc["Address"], loc["Visibility"])
                 loc["itemName"] = self.items[item]["name"]
-                loc["Class"] = self.getLocClass(loc["Name"], self.items[item]["class"])
                 #print("{}: {} => {}".format(loc["Name"], loc["Class"], loc["itemName"]))
-
-    def getLocClass(self, locName, itemClass):
-        # always keep bosses locs as major
-        if locName in ["Energy Tank, Ridley", "Right Super, Wrecked Ship",
-                       "Space Jump", "Varia Suit"]:
-            return "Major"
-        else:
-            return itemClass
 
 class RomLoader:
     @staticmethod
@@ -455,13 +476,22 @@ class RomLoader:
             return RomLoaderDict(rom)
 
     def assignItems(self, locations):
-        # update the itemName of the locations
+        # update the itemName and Class of the locations
         for loc in locations:
             loc['itemName'] = self.locsItems[loc['Name']]
+            loc["Class"] = self.getLocClass(loc["Name"], Items.getItemClass(loc['itemName']))
 
     def dump(self, fileName):
         with open(fileName, 'w') as jsonFile:
             json.dump(self.locsItems, jsonFile)
+
+    def getLocClass(self, locName, itemClass):
+        # always keep bosses locs as major
+        if locName in ["Energy Tank, Ridley", "Right Super, Wrecked Ship",
+                       "Space Jump", "Varia Suit"]:
+            return "Major"
+        else:
+            return itemClass
 
 class RomLoaderSfc(RomLoader):
     # standard usage
@@ -476,6 +506,7 @@ class RomLoaderSfc(RomLoader):
         self.locsItems = {}
         for loc in locations:
             self.locsItems[loc['Name']] = loc['itemName']
+            loc["Class"] = self.getLocClass(loc["Name"], Items.getItemClass(loc['itemName']))
 
 class RomLoaderJson(RomLoader):
     # when called from the test suite
@@ -495,6 +526,7 @@ class RomLoaderDict(RomLoader):
         self.locsItems = {}
         for loc in locations:
             self.locsItems[loc['Name']] = loc['itemName']
+            loc["Class"] = self.getLocClass(loc["Name"], Items.getItemClass(loc['itemName']))
 
 class ParamsLoader:
     @staticmethod

@@ -458,12 +458,18 @@ class RomReader:
                 loc["itemName"] = self.items[item]["name"]
                 #print("{}: {} => {}".format(loc["Name"], loc["Class"], loc["itemName"]))
 
+def isString(string):
+    if sys.version[0] == '2':
+        return type(string) == str or type(string) == unicode
+    else:
+        return type(string) == str
+
 class RomLoader:
     @staticmethod
     def factory(rom):
         # can be a real rom. can be a json or a dict with the locations - items association
         # unicode only exists in python2
-        if type(rom) is str or type(rom) is unicode:
+        if isString(rom):
             ext = os.path.splitext(rom)
             if ext[1].lower() == '.sfc' or ext[1].lower() == '.smc':
                 return RomLoaderSfc(rom)

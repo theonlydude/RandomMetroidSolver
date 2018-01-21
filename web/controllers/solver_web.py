@@ -252,6 +252,8 @@ def solver():
     if mainForm.process(formname='mainform').accepted:
         response.flash="main form accepted"
 
+        print("type(mainForm.vars['uploadFile'])=[{}]".format(type(mainForm.vars['uploadFile'])))
+
         # new uploaded rom ?
         error = False
         if mainForm.vars['json'] != '':
@@ -276,7 +278,13 @@ def solver():
                 response.flash = "Error loading the rom file"
                 error = True
 
-        elif mainForm.vars['uploadFile'] is not None and type(mainForm.vars['uploadFile']) != bytes:
+        # python3:
+        # no file: type(mainForm.vars['uploadFile'])=[<class 'str'>]
+        # file:    type(mainForm.vars['uploadFile'])=[<class 'cgi.FieldStorage'>]
+        # python2:
+        # no file: type(mainForm.vars['uploadFile'])=[<type 'str'>]
+        # file:    type(mainForm.vars['uploadFile'])=[<type 'instance'>]
+        elif mainForm.vars['uploadFile'] is not None and type(mainForm.vars['uploadFile']) != str:
             uploadFileName = mainForm.vars['uploadFile'].filename
             uploadFileContent = mainForm.vars['uploadFile'].file
 

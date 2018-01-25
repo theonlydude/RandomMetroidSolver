@@ -235,12 +235,20 @@ def solver():
     if not loaded:
         params = ParamsLoader.factory('diff_presets/{}.json'.format(session.paramsFile)).params
 
+    # filter the displayed roms to display only the ones uploaded in this session
+    if session.romFiles is None:
+        session.romFiles = []
+        roms = []
+    elif len(session.romFiles) == 0:
+        roms = []
+    else:
+        files = sorted(os.listdir('roms'))
+        bases = [os.path.splitext(file)[0] for file in files]
+        filtered = [base for base in bases if base in session.romFiles]
+        roms = [file+'.sfc' for file in filtered]
 
     # main form
-    files = sorted(os.listdir('roms'))
-    roms = [os.path.splitext(file)[0]+'.sfc' for file in files]
-
-    mainForm = FORM(TABLE(TR("Already uploaded rom:",
+    mainForm = FORM(TABLE(TR("Already uploaded rom in this session:",
                              SELECT(*roms, **dict(_name="romFile", value=session.romFile+'.sfc' if session.romFile is not None else None)))),
                     TABLE(TR("Pick a randomized Super Metroid ROM to upload and solve:",
                              INPUT(_type="file",
@@ -250,9 +258,6 @@ def solver():
                     _id="mainform", _name="mainform", _onsubmit="doSubmit();")
 
     if mainForm.process(formname='mainform').accepted:
-        response.flash="main form accepted"
-
-        print("type(mainForm.vars['uploadFile'])=[{}]".format(type(mainForm.vars['uploadFile'])))
 
         # new uploaded rom ?
         error = False
@@ -274,6 +279,8 @@ def solver():
                 romLoader.dump(jsonRomFileName)
 
                 session.romFile = base
+                if base not in session.romFiles:
+                    session.romFiles.append(base)
             except:
                 response.flash = "Error loading the rom file"
                 error = True
@@ -308,12 +315,19 @@ def solver():
                     os.remove(tempRomFile)
 
                     session.romFile = base
+                    if base not in session.romFiles:
+                        session.romFiles.append(base)
                 except:
                     response.flash = "Error loading the rom file"
                     error = True
-        else:
+
+        elif len(mainForm.vars['romFile']) != 0:
             session.romFile = os.path.splitext(mainForm.vars['romFile'])[0]
             jsonRomFileName = 'roms/' + session.romFile + '.json'
+
+        else:
+            response.flash = "No rom file selected for upload"
+            error = True
 
         if not error:
             # check that the json file exists
@@ -332,7 +346,6 @@ def solver():
     loadForm = FORM(loadTable, _id="loadform", _name="loadform")
 
     if loadForm.process(formname='loadform').accepted:
-        response.flash="load form accepted"
 
         # check that the presets file exists
         paramsFile = loadForm.vars['paramsFile']
@@ -366,7 +379,6 @@ def solver():
     saveForm = FORM(saveTable, _id="saveform", _name="saveform")
 
     if saveForm.process(formname='saveform').accepted:
-        response.flash="save form accepted"
 
         # update or creation ?
         saveFile = saveForm.vars['saveFile']

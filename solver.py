@@ -153,14 +153,10 @@ class Solver:
             minorAvailable = self.getAvailableItemsList(minorAvailable, area, Conf.difficultyTarget)
 
             # first take major items of acceptable difficulty in the current area
-            majorPicked = False
-            while (len(majorAvailable) > 0
+            if (len(majorAvailable) > 0
                    and majorAvailable[0]['Area'] == area
                    and majorAvailable[0]['difficulty'][1] <= Conf.difficultyTarget):
                 self.collectMajor(majorAvailable.pop(0))
-                majorPicked = True
-            # if we took at least one major, recompute the difficulty
-            if majorPicked is True:
                 continue
             # next item decision
             if len(minorAvailable) == 0 and len(majorAvailable) > 0:

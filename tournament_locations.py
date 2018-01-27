@@ -238,7 +238,7 @@ locations = [
                                     wor(canFly(items),
                                         haveItem(items, 'Grapple'),
                                         wand(haveItem(items, 'HiJump'),
-                                             Knows.NorfairReserveHiJump),
+                                             Knows.GetAroundWallJump),
                                         wand(haveItem(items, 'Ice'),
                                              Knows.NorfairReserveIce)))
 },
@@ -401,7 +401,7 @@ locations = [
                                             haveItem(items, 'Plasma', difficulty=easy)),
                                         wor(canFly(items),
                                             wand(haveItem(items, 'HiJump'),
-                                                 Knows.ExitPlasmaRoomHiJump),
+                                                 Knows.GetAroundWallJump),
                                             wand(haveItem(items, 'SpeedBooster'),
                                                  Knows.ShortCharge)))
 },
@@ -852,7 +852,7 @@ locations = [
     'Visibility': "Hidden",
     'Available': lambda items: wand(canAccessHeatedNorfair(items),
                                     wor(canFly(items), haveItem(items, 'Grapple'),
-                                        wand(haveItem(items, 'HiJump'), Knows.NorfairReserveHiJump)))
+                                        wand(haveItem(items, 'HiJump'), Knows.GetAroundWallJump)))
 },
 {
     'Area': "Norfair",
@@ -862,7 +862,7 @@ locations = [
     'Visibility': "Visible",
     'Available': lambda items: wand(canAccessHeatedNorfair(items),
                                     wor(canFly(items), haveItem(items, 'Grapple'),
-                                        wand(haveItem(items, 'HiJump'), Knows.NorfairReserveHiJump)))
+                                        wand(haveItem(items, 'HiJump'), Knows.GetAroundWallJump)))
 },
 {
     'Area': "Norfair",

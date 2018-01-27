@@ -259,7 +259,7 @@ def canPassWorstRoom(items):
     return wand(canAccessLowerNorfair(items),
                 wor(canFly(items),
                     wand(Knows.WorstRoomIceCharge, haveItem(items, 'Ice'), haveItem(items, 'Charge')),
-                    wand(Knows.WorstRoomHiJump, haveItem(items, 'HiJump'))))
+                    wand(Knows.GetAroundWallJump, haveItem(items, 'HiJump'))))
 
 def canAccessOuterMaridia(items):
     # EXPLAINED: access Red Tower in red brinstar,

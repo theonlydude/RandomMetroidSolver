@@ -42,6 +42,7 @@ class Knows:
     ShortCharge = (False, 0) # to kill draygon
     GravityJump = (True, hard)
     SpringBallJump = (True, hard) # access to wrecked ship etank without anything else and suitless maridia navigation (precious room exit)
+    GetAroundWallJump = (True, hard) # tricky wall jumps where you have to get around the platform you want to wall jump on (access norfair reserve, go through worst room in the game, exit plasma room)
 
     # bosses
     DraygonGrappleKill = (True, medium) # easy kill for draygon
@@ -72,7 +73,6 @@ class Knows:
     GauntletEntrySpark = (True, medium) # implies Knows.SimpleShortCharge
 
     # upper norfair
-    NorfairReserveHiJump = (True, hard) # climb to norfair reserve area by walljumping
     NorfairReserveIce = (True, hard) # climb to norfair reserve area by freezing a Waver
     WaveBeamWallJump = (True, easy) # climb to wave with wall jump
     ClimbToGrappleWithIce = (False, 0) # just learn green gate glitch, it's easier
@@ -106,7 +106,6 @@ class Knows:
     # plasma room
     KillPlasmaPiratesWithSpark = (False, 0) # kill plasma pirates with spark echoes. implies Knows.ShortCharge
     KillPlasmaPiratesWithCharge = (True, hard)
-    ExitPlasmaRoomHiJump = (True, medium)
     # sandpit
     SuitlessSandpit = (False, 0) # access the item in the sandpit suitless
 

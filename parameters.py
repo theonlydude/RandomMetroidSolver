@@ -80,7 +80,6 @@ class Knows:
     # lower norfair
     LavaDive = (True, harder) # ridley without gravity
     WorstRoomIceCharge = (True, mania) # can pass worst room JUST by freezing pirates
-    WorstRoomHiJump = (True, hard) # can go up worst room with HiJump and wall jumps
     ScrewAttackExit = (True, medium) # gain momentum from Golden Torizo Energy Recharge room, then wall jump in Screw Attack room
 
     # wrecked ship

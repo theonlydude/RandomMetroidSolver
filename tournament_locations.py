@@ -141,13 +141,18 @@ locations = [
     'Visibility': "Chozo",
     'Available': lambda items: wand(canAccessRedBrinstar(items),
                                     canUsePowerBombs(items),
-                                    wor(haveItem(items, 'Grapple'),
-                                        haveItem(items, 'SpaceJump'),
+                                    wor(wor(haveItem(items, 'Grapple'),
+                                            haveItem(items, 'SpaceJump')),
                                         wand(haveItem(items, 'Varia'),
                                              energyReserveCountOk(items, 4),
                                              Knows.XrayDboost),
                                         wand(energyReserveCountOk(items, 6),
-                                             Knows.XrayDboost)))
+                                             Knows.XrayDboost),
+                                        wand(haveItem(items, 'Ice'),
+                                             Knows.XrayIce,
+                                             wor(energyReserveCountOk(items, 6),
+                                                 wand(haveItem(items, 'Varia'),
+                                                      energyReserveCountOk(items, 4))))))
 },
 {
     'Area': "Brinstar",
@@ -229,12 +234,13 @@ locations = [
     'Class': "Major",
     'Address': 0x78C3E,
     'Visibility': "Chozo",
-    # TODO: also Ice to freeze a Waver
     'Available': lambda items: wand(canAccessHeatedNorfair(items),
                                     wor(canFly(items),
                                         haveItem(items, 'Grapple'),
                                         wand(haveItem(items, 'HiJump'),
-                                             Knows.NorfairReserveHiJump)))
+                                             Knows.NorfairReserveHiJump),
+                                        wand(haveItem(items, 'Ice'),
+                                             Knows.NorfairReserveIce)))
 },
 {
     'Area': "Norfair",
@@ -278,7 +284,12 @@ locations = [
     # DONE: easy with green gate glitch
     'Available': lambda items: wand(canAccessLowerNorfair(items),
                                     wor(haveItem(items, 'SpaceJump'),
-                                        Knows.GreenGateGlitch))
+                                        Knows.GreenGateGlitch)),
+    'PostAvailable': lambda items: wor(canFly(items),
+                                       wand(haveItem(items, 'HiJump'),
+                                            haveItem(items, 'ScrewAttack'),
+                                            haveItem(items, 'SpeedBooster'),
+                                            Knows.ScrewAttackExit))
 },
 {
     'Area': "LowerNorfair",
@@ -380,19 +391,19 @@ locations = [
     #  -can fly (space jump or infinite bomb jump)
     #  -use short charge with speedbooster
     'Available': lambda items: wand(canDefeatDraygon(items),
-                                    Bosses.bossDead('Draygon'),
-                                    wor(wand(haveItem(items, 'SpeedBooster'),
-                                             Knows.ShortCharge,
-                                             Knows.KillPlasmaPiratesWithSpark),
-                                        wand(haveItem(items, 'Charge'),
-                                             Knows.KillPlasmaPiratesWithCharge),
-                                        haveItem(items, 'ScrewAttack', difficulty=easy),
-                                        haveItem(items, 'Plasma', difficulty=easy)),
-                                    wor(canFly(items),
-                                        wand(haveItem(items, 'HiJump'),
-                                             Knows.ExitPlasmaRoomHiJump),
-                                        wand(haveItem(items, 'SpeedBooster'),
-                                             Knows.ShortCharge)))
+                                    Bosses.bossDead('Draygon')),
+    'PostAvailable': lambda items: wand(wor(wand(haveItem(items, 'SpeedBooster'),
+                                                 Knows.ShortCharge,
+                                                 Knows.KillPlasmaPiratesWithSpark),
+                                            wand(haveItem(items, 'Charge'),
+                                                 Knows.KillPlasmaPiratesWithCharge),
+                                            haveItem(items, 'ScrewAttack', difficulty=easy),
+                                            haveItem(items, 'Plasma', difficulty=easy)),
+                                        wor(canFly(items),
+                                            wand(haveItem(items, 'HiJump'),
+                                                 Knows.ExitPlasmaRoomHiJump),
+                                            wand(haveItem(items, 'SpeedBooster'),
+                                                 Knows.ShortCharge)))
 },
 {
     'Area': "Maridia",
@@ -441,10 +452,26 @@ locations = [
     'Address': 0x7C7A7,
     'Visibility': "Chozo",
     # DONE: difficulty already handled in the function,
-    # we need to have access to the boss and enough stuff to kill him
+    # we need to have access to the boss and enough stuff to kill him.
+    # to get out of draygon room:
+    #   with gravity but without highjump/bomb/space jump: gravity jump
+    #   dessyreqt randomizer in machosist can have suitless draygon:
+    #     to exit draygon room: grapple or crystal flash (for free shine spark)
+    #     to exit precious room: spring ball jump or xray scope glitch
     'Available': lambda items: wand(canDefeatDraygon(items),
                                     enoughStuffsDraygon(items)),
-    'Pickup': lambda: Bosses.beatBoss('Draygon')
+    'Pickup': lambda: Bosses.beatBoss('Draygon'),
+    'PostAvailable': lambda items: wor(wand(haveItem(items, 'Gravity'),
+                                            wor(canFly(items),
+                                                Knows.GravityJump)),
+                                       wand(wor(wand(haveItem(items, 'Grapple'),
+                                                     Knows.DraygonRoomGrappleExit),
+                                                wand(canCrystalFlash(items),
+                                                     Knows.DraygonRoomCrystalExit)),
+                                            wor(wand(haveItem(items, 'SpringBall'),
+                                                     Knows.SpringBallJump),
+                                                wand(haveItem(items, 'XRayScope'),
+                                                     Knows.PreciousRoomXRayExit))))
 },
 {
     'Area': "Crateria",

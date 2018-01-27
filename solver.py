@@ -736,4 +736,5 @@ if __name__ == "__main__":
 
     Conf.displayGeneratedPath = args.displayGeneratedPath
 
-    solver.solveRom()
+    diff = solver.solveRom()
+    print("{} : {}".format(diff, args.romFileName))

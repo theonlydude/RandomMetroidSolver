@@ -328,20 +328,7 @@ def canCrystalFlash(items):
                 itemCountOk(items, 'PowerBomb', 3))
 
 def canDefeatDraygon(items):
-    # EXPLAINED: the randomizer considers that we need gravity to defeat Draygon.
-    #            dessyreqt randomizer in machosist can have suitless draygon:
-    #            to exit draygon room: grapple or crystal flash (for free shine spark)
-    #            to exit precious room: spring ball jump or xray scope glitch
-    return wand(canDefeatBotwoon(items),
-                wor(haveItem(items, 'Gravity'),
-                    wand(wor(wand(haveItem(items, 'Grapple'),
-                                  Knows.DraygonRoomGrappleExit),
-                             wand(canCrystalFlash(items),
-                                  Knows.DraygonRoomCrystalExit)),
-                         wor(wand(haveItem(items, 'SpringBall'),
-                                  Knows.SpringBallJump),
-                             wand(haveItem(items, 'XRayScope'),
-                                  Knows.PreciousRoomXRayExit)))))
+    return canDefeatBotwoon(items)
 
 def getBeamDamage(items):
     standardDamage = 20

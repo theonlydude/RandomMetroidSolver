@@ -61,6 +61,7 @@ class Knows:
     ReverseGateGlitchHiJumpLess = (False, 0) # Same but without high jump
     EarlyKraid = (True, easy) # to access kraid without hi jump boots
     XrayDboost = (False, 0)  # Xray without grapple or space jump
+    XrayIce = (True, hard) # Xray with icing enemies
     RedTowerClimb = (True, harder) # brinstar red tower without ice or screw
 
     # gauntlet
@@ -72,6 +73,7 @@ class Knows:
 
     # upper norfair
     NorfairReserveHiJump = (True, hard) # climb to norfair reserve area by walljumping
+    NorfairReserveIce = (True, hard) # climb to norfair reserve area by freezing a Waver
     WaveBeamWallJump = (True, easy) # climb to wave with wall jump
     ClimbToGrappleWithIce = (False, 0) # just learn green gate glitch, it's easier
 
@@ -79,6 +81,7 @@ class Knows:
     LavaDive = (True, harder) # ridley without gravity
     WorstRoomIceCharge = (True, mania) # can pass worst room JUST by freezing pirates
     WorstRoomHiJump = (True, hard) # can go up worst room with HiJump and wall jumps
+    ScrewAttackExit = (True, medium) # gain momentum from Golden Torizo Energy Recharge room, then wall jump in Screw Attack room
 
     # wrecked ship
     ContinuousWallJump = (False, 0) # access wrecked ship

@@ -127,9 +127,6 @@ desc = {'Mockball': {'display': 'Mockball',
         'WorstRoomIceCharge': {'display': 'Worst Room Ice and Charge',
                                'title': 'Go through Worst Room In The Game JUST by freezing pirates',
                                'href': 'https://www.youtube.com/watch?v=AYK7LREbLI8'},
-        'WorstRoomHiJump': {'display': 'Worst Room Hi-Jump',
-                            'title': 'Go through Worst Room In The Game with Hi Jump and wall jumps',
-                            'href': 'https://www.youtube.com/watch?v=xyYIg7WSJ1w'},
         'ScrewAttackExit': {'display': 'Screw Attack Exit',
                             'title': 'Gain momentum from Golden Torizo Energy Recharge room, then wall jump in Screw Attack room',
                             'href': None},
@@ -189,7 +186,7 @@ endGame = ['IceZebSkip', 'SpeedZebSkip']
 brinstar = ['CeilingDBoost', 'AlcatrazEscape', 'ReverseGateGlitch', 'ReverseGateGlitchHiJumpLess', 'EarlyKraid', 'XrayDboost', 'XrayIce', 'RedTowerClimb']
 gauntlet = ['HiJumpLessGauntletAccess', 'HiJumpGauntletAccess', 'GauntletWithBombs', 'GauntletWithPowerBombs', 'GauntletEntrySpark']
 upperNorfair = ['NorfairReserveIce', 'WaveBeamWallJump', 'ClimbToGrappleWithIce']
-lowerNorfair = ['LavaDive', 'ScrewAttackExit', 'WorstRoomIceCharge', 'WorstRoomHiJump']
+lowerNorfair = ['LavaDive', 'ScrewAttackExit', 'WorstRoomIceCharge']
 wreckedShip = ['ContinuousWallJump', 'DiagonalBombJump', 'MockballWs']
 wreckedShipEtank = ['SpongeBathBombJump', 'SpongeBathHiJump', 'SpongeBathSpeed']
 maridiaSuitless = ['SuitlessOuterMaridia', 'SuitlessOuterMaridiaNoGuns']

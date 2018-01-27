@@ -33,7 +33,7 @@ locations = [
     'Class': "Major",
     'Address': 0x78432,
     'Visibility': "Visible",
-    'Available': lambda items: wor(haveItem(items, 'SpeedBooster'), # FIXME getting through here with SpeedBooster is not easy...
+    'Available': lambda items: wor(wand(haveItem(items, 'SpeedBooster'), Knows.SimpleShortCharge), 
                                    canDestroyBombWalls(items))
 },
 {

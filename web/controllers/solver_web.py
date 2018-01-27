@@ -442,6 +442,8 @@ def solver():
         for location, area, item, diff, techniques in session.result['generatedPath']:
             pathTable.append(TR(location, area, item, diff, techniques))
 
+        knowsUsed = session.result['knowsUsed']
+
         # display the result only once
         session.result = None
     else:
@@ -449,6 +451,7 @@ def solver():
         difficulty = None
         diffPercent = None
         pathTable = None
+        knowsUsed = None
 
     # set title
     response.title = 'Super Metroid Item Randomizer Solver'
@@ -467,7 +470,7 @@ def solver():
                 desc=desc,
                 difficulties=difficulties,
                 categories=categories,
-                knows=params['Knows'], conf=conf,
+                knows=params['Knows'], conf=conf, knowsUsed=knowsUsed,
                 resultText=resultText, pathTable=pathTable,
                 difficulty=difficulty, diffPercent=diffPercent,
                 easy=easy,medium=medium,hard=hard,harder=harder,hardcore=hardcore,mania=mania)
@@ -523,8 +526,16 @@ def compute_difficulty(jsonRomFileName, post_vars):
 
     generatedPath = solver.getPath(solver.visitedLocations)
 
+    # the different knows used during the rom
+    knowsUsed = solver.getKnowsUsed()
+    used = len(knowsUsed)
+
+    # the number of knows set to True
+    total = len([param for param in paramsDict['Knows'] if paramsDict['Knows'][param][0] is True])
+
     return dict(randomizedRom=randomizedRom, difficulty=difficulty,
-                generatedPath=generatedPath, diffPercent=diffPercent)
+                generatedPath=generatedPath, diffPercent=diffPercent,
+                knowsUsed=(used, total))
 
 def infos():
     # set title

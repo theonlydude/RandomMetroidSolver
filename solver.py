@@ -232,6 +232,16 @@ class Solver:
 
         return out
 
+    def getKnowsUsed(self):
+        knows = []
+        for loc in self.visitedLocations:
+            knows += loc['difficulty'].knows
+
+        # get unique knows
+        knows = list(set(knows))
+
+        return knows
+
     def printPath(self, message, locations):
         print(message)
         print('{:>50} {:>13} {:>16} {:>14} {}'.format("Location Name", "Area", "Item", "Difficulty", "Knows used"))
@@ -740,5 +750,8 @@ if __name__ == "__main__":
 
     Conf.displayGeneratedPath = args.displayGeneratedPath
 
-    diff = solver.solveRom()
-    print("{} : {}".format(diff, args.romFileName))
+    solver.solveRom()
+    #diff = solver.solveRom()
+    #knowsUsed = solver.getKnowsUsed()
+    #print("{} : diff : {}".format(diff, args.romFileName))
+    #print("{} : knows Used : {}".format(len(knowsUsed), args.romFileName))

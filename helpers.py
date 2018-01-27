@@ -3,16 +3,14 @@ from functools import reduce
 # the difficulties for each technics
 from parameters import Knows, Settings
 from parameters import easy, medium, hard, harder, hardcore, mania
+from smbool import SMBool
 
-# we have to compare booleans, but with a weight (the difficulty)
-# a and b type is: (bool, weight)
-# if true, add given difficulty to output
+# compare Super Metroid booleans
 def wand2(a, b, difficulty=0):
-    if a[0] is True and b[0] is True:
-        d = a[1] + b[1]
-        return (True, d + difficulty)
+    if a.bool is True and b.bool is True:
+        return SMBool(True, a.difficulty + b.difficulty + difficulty, a.knows + b.knows)
     else:
-        return (False, 0)
+        return SMBool(False)
 
 def wand(a, b, c=None, d=None, difficulty=0):
     if c is None and d is None:
@@ -24,20 +22,26 @@ def wand(a, b, c=None, d=None, difficulty=0):
     else:
         ret = wand2(wand2(wand2(a, b), c), d)
 
-    if ret[0] is True:
-        return (ret[0], ret[1] + difficulty)
-    else:
-        return (False, 0)
+    if ret.bool is True:
+        ret.difficulty += difficulty
+
+    return ret
 
 def wor2(a, b, difficulty=0):
-    if a[0] is True and b[0] is True:
-        return (True, min(a[1], b[1]) + difficulty)
-    elif a[0] is True:
-        return (True, a[1] + difficulty)
-    elif b[0] is True:
-        return (True, b[1] + difficulty)
+    if a.bool is True and b.bool is True:
+        if a.difficulty < b.difficulty:
+            return SMBool(True, a.difficulty + difficulty, a.knows)
+        elif a.difficulty > b.difficulty:
+            return SMBool(True, b.difficulty + difficulty, b.knows)
+        else:
+            # in case of egality we return both knows
+            return SMBool(True, a.difficulty + difficulty, a.knows + b.knows)
+    elif a.bool is True:
+        return SMBool(True, a.difficulty + difficulty, a.knows)
+    elif b.bool is True:
+        return SMBool(True, b.difficulty + difficulty, b.knows)
     else:
-        return (False, 0)
+        return SMBool(False)
 
 def wor(a, b, c=None, d=None, difficulty=0):
     if c is None and d is None:
@@ -49,10 +53,10 @@ def wor(a, b, c=None, d=None, difficulty=0):
     else:
         ret = wor2(wor2(wor2(a, b), c), d)
 
-    if ret[0] is True:
-        return (ret[0], ret[1] + difficulty)
-    else:
-        return (False, 0)
+    if ret.bool is True:
+        ret.difficulty += difficulty
+
+    return ret
 
 # check items and compute difficulty
 # the second parameter returned is the difficulty:
@@ -60,13 +64,13 @@ def haveItemCount(items, item, count):
     return items.count(item) >= count
 
 def haveItem(items, item, difficulty=0):
-    return (item in items, difficulty)
+    return SMBool(item in items, difficulty)
 
 def itemCount(items, item):
     return items.count(item)
 
 def itemCountOk(items, item, count, difficulty=0):
-    return (itemCount(items, item) >= count, difficulty)
+    return SMBool(itemCount(items, item) >= count, difficulty)
 
 def itemCountOkList(items, item, difficulties):
     # get a list: [(2, difficulty=hard), (4, difficulty=medium), (6, difficulty=easy)]
@@ -80,11 +84,11 @@ def energyReserveCount(items):
     return itemCount(items, 'ETank') + itemCount(items, 'Reserve')
 
 def energyReserveCountOk(items, count, difficulty=0):
-    return (energyReserveCount(items) >= count, difficulty)
+    return SMBool(energyReserveCount(items) >= count, difficulty)
 
 def energyReserveCountOkList(items, difficulties):
     if difficulties is None or len(difficulties) == 0:
-        return (False, 0)
+        return SMBool(False)
     # get a list: [(2, difficulty=hard), (4, difficulty=medium), (6, difficulty=easy)]
     def f(difficulty):
         return energyReserveCountOk(items, difficulty[0], difficulty=difficulty[1])
@@ -96,28 +100,28 @@ def heatProof(items):
     return haveItem(items, 'Varia')
 
 def canHellRun(items):
-    if heatProof(items)[0]:
-        return (True, easy)
+    if heatProof(items).bool:
+        return SMBool(True, easy)
     elif energyReserveCount(items) >= 3:
         return energyReserveCountOkList(items, Settings.hellRuns['MainUpperNorfair'])
     else:
-        return (False, 0)
+        return SMBool(False)
 
 def canFly(items):
-    if haveItem(items, 'SpaceJump')[0]:
-        return (True, easy)
-    elif haveItem(items, 'Morph')[0] and haveItem(items, 'Bomb')[0] and Knows.InfiniteBombJump[0]:
+    if haveItem(items, 'SpaceJump').bool:
+        return SMBool(True, easy)
+    elif haveItem(items, 'Morph').bool and haveItem(items, 'Bomb').bool and Knows.InfiniteBombJump.bool:
         return Knows.InfiniteBombJump
     else:
-        return (False, 0)
+        return SMBool(False)
 
 def canFlyDiagonally(items):
-    if haveItem(items, 'SpaceJump')[0]:
-        return (True, easy)
-    elif haveItem(items, 'Morph')[0] and haveItem(items, 'Bomb')[0] and Knows.DiagonalBombJump[0]:
+    if haveItem(items, 'SpaceJump').bool:
+        return SMBool(True, easy)
+    elif haveItem(items, 'Morph').bool and haveItem(items, 'Bomb').bool and Knows.DiagonalBombJump.bool:
         return Knows.DiagonalBombJump
     else:
-        return (False, 0)
+        return SMBool(False)
 
 def canUseBombs(items, difficulty=0):
     return wand(haveItem(items, 'Morph'), haveItem(items, 'Bomb'), difficulty=difficulty)
@@ -333,27 +337,27 @@ def canDefeatDraygon(items):
 def getBeamDamage(items):
     standardDamage = 20
 
-    if wand(haveItem(items, 'Ice'), haveItem(items, 'Wave'), haveItem(items, 'Plasma'))[0] is True:
+    if wand(haveItem(items, 'Ice'), haveItem(items, 'Wave'), haveItem(items, 'Plasma')).bool is True:
         standardDamage = 300
-    elif wand(haveItem(items, 'Wave'), haveItem(items, 'Plasma'))[0] is True:
+    elif wand(haveItem(items, 'Wave'), haveItem(items, 'Plasma')).bool is True:
         standardDamage = 250
-    elif wand(haveItem(items, 'Ice'), haveItem(items, 'Plasma'))[0] is True:
+    elif wand(haveItem(items, 'Ice'), haveItem(items, 'Plasma')).bool is True:
         standardDamage = 200
-    elif haveItem(items, 'Plasma')[0] is True:
+    elif haveItem(items, 'Plasma').bool is True:
         standardDamage = 150
-    elif wand(haveItem(items, 'Ice'), haveItem(items, 'Wave'), haveItem(items, 'Spazer'))[0] is True:
+    elif wand(haveItem(items, 'Ice'), haveItem(items, 'Wave'), haveItem(items, 'Spazer')).bool is True:
         standardDamage = 100
-    elif wand(haveItem(items, 'Wave'), haveItem(items, 'Spazer'))[0] is True:
+    elif wand(haveItem(items, 'Wave'), haveItem(items, 'Spazer')).bool is True:
         standardDamage = 70
-    elif wand(haveItem(items, 'Ice'), haveItem(items, 'Spazer'))[0] is True:
+    elif wand(haveItem(items, 'Ice'), haveItem(items, 'Spazer')).bool is True:
         standardDamage = 60
-    elif wand(haveItem(items, 'Ice'), haveItem(items, 'Wave'))[0] is True:
+    elif wand(haveItem(items, 'Ice'), haveItem(items, 'Wave')).bool is True:
         standardDamage = 60
-    elif haveItem(items, 'Wave')[0] is True:
+    elif haveItem(items, 'Wave').bool is True:
         standardDamage = 50
-    elif haveItem(items, 'Spazer')[0] is True:
+    elif haveItem(items, 'Spazer').bool is True:
         standardDamage = 40
-    elif haveItem(items, 'Ice')[0] is True:
+    elif haveItem(items, 'Ice').bool is True:
         standardDamage = 30
 
     return standardDamage
@@ -374,7 +378,7 @@ def canInflictEnoughDamages(items, bossEnergy, doubleSuper=False, charge=True, p
 
     # http://deanyd.net/sm/index.php?title=Damage
     standardDamage = 0
-    if haveItem(items, 'Charge')[0] and charge is True:
+    if haveItem(items, 'Charge').bool and charge is True:
         standardDamage = getBeamDamage(items)
     # charge triples the damage
     chargeDamage = standardDamage * 3.0
@@ -389,7 +393,7 @@ def canInflictEnoughDamages(items, bossEnergy, doubleSuper=False, charge=True, p
     supersDamage = supersAmount * oneSuper
     powerDamage = 0
     powerAmount = 0
-    if power is True and haveItem(items, 'PowerBomb')[0]:
+    if power is True and haveItem(items, 'PowerBomb').bool:
         powerAmount = itemCount(items, 'PowerBomb') * 5
         powerDamage = powerAmount * 200
 
@@ -441,9 +445,9 @@ def computeBossDifficulty(items, ammoMargin, secs, diffTbl):
         duration = secs / rate
  #   print('rate=' + str(rate) + ', duration=' + str(duration))
     suitsCoeff = 0.5
-    if haveItem(items, 'Varia')[0]:
+    if haveItem(items, 'Varia').bool:
         suitsCoeff *= 2
-    if haveItem(items, 'Gravity')[0]:
+    if haveItem(items, 'Gravity').bool:
         suitsCoeff *= 2
     energy = suitsCoeff * energyReserveCount(items)
     energyDict = None
@@ -484,22 +488,23 @@ def enoughStuffsRidley(items):
     #print('RIDLEY')
     (ammoMargin, secs) = canInflictEnoughDamages(items, 18000, doubleSuper=True, givesDrops=False)
     if ammoMargin == 0:
-        return (False, 0)
-    return (True, computeBossDifficulty(items, ammoMargin, secs, Settings.bossesDifficulty['Ridley']))
+        return SMBool(False)
+    return SMBool(True, computeBossDifficulty(items, ammoMargin, secs, Settings.bossesDifficulty['Ridley']))
 
 def enoughStuffsKraid(items):
     #print('KRAID')
     (ammoMargin, secs) = canInflictEnoughDamages(items, 1000)
     if ammoMargin == 0:
-        return (False, 0)
-    return (True, computeBossDifficulty(items, ammoMargin, secs, Settings.bossesDifficulty['Kraid']))
+        return SMBool(False)
+    return SMBool(True, computeBossDifficulty(items, ammoMargin, secs, Settings.bossesDifficulty['Kraid']))
 
 def enoughStuffsDraygon(items):
     #print('DRAYGON')
     (ammoMargin, secs) = canInflictEnoughDamages(items, 6000)
-    fight = (False, 0)
     if ammoMargin > 0:
-        fight = (True, computeBossDifficulty(items, ammoMargin, secs, Settings.bossesDifficulty['Draygon']))
+        fight = SMBool(True, computeBossDifficulty(items, ammoMargin, secs, Settings.bossesDifficulty['Draygon']))
+    else:
+        fight = SMBool(False)
     return wor(fight,
                wand(Knows.DraygonGrappleKill,
                     haveItem(items, 'Grapple')),
@@ -514,14 +519,14 @@ def enoughStuffsPhantoon(items):
     #print('PHANTOON')
     (ammoMargin, secs) = canInflictEnoughDamages(items, 2500, doubleSuper=True)
     if ammoMargin == 0:
-        return (False, 0)
+        return SMBool(False)
     difficulty = computeBossDifficulty(items, ammoMargin, secs, Settings.bossesDifficulty['Phantoon'])
-    hasCharge = haveItem(items, 'Charge')[0]
-    if hasCharge or haveItem(items, 'ScrewAttack')[0]:
+    hasCharge = haveItem(items, 'Charge').bool
+    if hasCharge or haveItem(items, 'ScrewAttack').bool:
         difficulty /= Settings.algoSettings['phantoonFlamesAvoidBonus']
     elif not hasCharge and itemCount(items, 'Missile') <= 2: # few missiles is harder
         difficulty *= Settings.algoSettings['phantoonLowMissileMalus']
-    fight = (True, difficulty)
+    fight = SMBool(True, difficulty)
 
     return wor(fight,
                wand(Knows.MicrowavePhantoon,
@@ -534,22 +539,22 @@ def enoughStuffsMotherbrain(items):
     # MB1 can't be hit by charge beam
     (ammoMargin, secs) = canInflictEnoughDamages(items, 3000, charge=False, givesDrops=False)
     if ammoMargin == 0:
-        return (False, 0)
+        return SMBool(False)
     # we actually don't give a shit about MB1 difficulty, since we embark its health in the following calc
     (ammoMargin, secs) = canInflictEnoughDamages(items, 18000 + 3000, givesDrops=False)
     if ammoMargin == 0:
-        return (False, 0)
-    return (True, computeBossDifficulty(items, ammoMargin, secs, Settings.bossesDifficulty['Mother Brain']))
+        return SMBool(False)
+    return SMBool(True, computeBossDifficulty(items, ammoMargin, secs, Settings.bossesDifficulty['Mother Brain']))
 
 def canPassMetroids(items):
     return wand(canOpenRedDoors(items),
                 wor(haveItem(items, 'Ice'),
-                    (haveItemCount(items, 'PowerBomb', 3), 0))) # to avoid leaving tourian to refill power bombs
+                    SMBool(haveItemCount(items, 'PowerBomb', 3), 0))) # to avoid leaving tourian to refill power bombs
 
 def canPassZebetites(items):
     return wor(wand(haveItem(items, 'Ice'), Knows.IceZebSkip),
                wand(haveItem(items, 'SpeedBooster'), Knows.SpeedZebSkip),
-               (canInflictEnoughDamages(items, 1100*4, charge=False, givesDrops=False)[0] >= 1, 0)) # account for all the zebs to avoid constant refills
+               SMBool(canInflictEnoughDamages(items, 1100*4, charge=False, givesDrops=False)[0] >= 1, 0)) # account for all the zebs to avoid constant refills
 
 def enoughStuffTourian(items):
     return wand(canPassMetroids(items), canPassZebetites(items), enoughStuffsMotherbrain(items))
@@ -569,7 +574,7 @@ class Pickup:
         elif self.minorsPickup == 'any':
             return True
         else:
-            canEnd = enoughStuffTourian(items)[0]
+            canEnd = enoughStuffTourian(items).bool
             return (canEnd
                     and self._enoughMinorTable(items, 'Missile')
                     and self._enoughMinorTable(items, 'Super')
@@ -622,7 +627,7 @@ class Bosses:
 
     @staticmethod
     def bossDead(boss):
-        return (Bosses.golden4Dead[boss], 0)
+        return SMBool(Bosses.golden4Dead[boss], 0)
 
     @staticmethod
     def beatBoss(boss):

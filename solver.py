@@ -119,7 +119,8 @@ class Solver:
             # actual while condition
             hasEnoughItems = (self.pickup.enoughMajors(self.collectedItems, self.majorLocations)
                               and self.pickup.enoughMinors(self.collectedItems, self.minorLocations))
-            (isEndPossible, endDifficulty) = self.canEndGame()
+            canEndGame = self.canEndGame()
+            (isEndPossible, endDifficulty) = (canEndGame.bool, canEndGame.difficulty)
             if isEndPossible and hasEnoughItems:
                 self.log.debug("END")
                 break
@@ -140,8 +141,8 @@ class Solver:
             self.computeLocationsDifficulty(self.minorLocations)
 
             # keep only the available locations
-            majorAvailable = [loc for loc in self.majorLocations if loc["difficulty"][0] == True]
-            minorAvailable = [loc for loc in self.minorLocations if loc["difficulty"][0] == True]
+            majorAvailable = [loc for loc in self.majorLocations if loc["difficulty"].bool == True]
+            minorAvailable = [loc for loc in self.minorLocations if loc["difficulty"].bool == True]
 
             # check if we're stuck
             if len(majorAvailable) == 0 and len(minorAvailable) == 0:
@@ -155,7 +156,7 @@ class Solver:
             # first take major items of acceptable difficulty in the current area
             if (len(majorAvailable) > 0
                    and majorAvailable[0]['Area'] == area
-                   and majorAvailable[0]['difficulty'][1] <= Conf.difficultyTarget):
+                   and majorAvailable[0]['difficulty'].difficulty <= Conf.difficultyTarget):
                 self.collectMajor(majorAvailable.pop(0))
                 continue
             # next item decision
@@ -168,9 +169,9 @@ class Solver:
             elif len(majorAvailable) > 0 and len(minorAvailable) > 0:
                 self.log.debug('BOTH|M=' + majorAvailable[0]['Name'] + ', m=' + minorAvailable[0]['Name'])
                 # if both are available, decide based on area and difficulty
-                nextMajDifficulty = majorAvailable[0]['difficulty'][0]
+                nextMajDifficulty = majorAvailable[0]['difficulty'].bool
                 nextMinArea = minorAvailable[0]['Area']
-                nextMinDifficulty = minorAvailable[0]['difficulty'][0]
+                nextMinDifficulty = minorAvailable[0]['difficulty'].bool
                 if nextMinArea == area and nextMinDifficulty <= Conf.difficultyTarget:
                     area = self.collectMinor(minorAvailable.pop(0))
                 # difficulty over area (this is a difficulty estimator,
@@ -186,7 +187,7 @@ class Solver:
                 'itemName' : 'The End',
                 'Name' : 'The End',
                 'Area' : 'The End',
-                'difficulty' : (True, endDifficulty)
+                'difficulty' : SMBool(True, endDifficulty)
             })
 
         # compute difficulty value
@@ -212,14 +213,14 @@ class Solver:
                 loc['difficulty'] = loc['Available'](self.collectedItems)
 
     def computeDifficultyValue(self):
-        if not self.pickup.enoughMajors(self.collectedItems, self.majorLocations) or not self.pickup.enoughMinors(self.collectedItems, self.minorLocations) or not self.canEndGame()[0]:
+        if not self.pickup.enoughMajors(self.collectedItems, self.majorLocations) or not self.pickup.enoughMinors(self.collectedItems, self.minorLocations) or not self.canEndGame().bool:
             # we have aborted
             difficulty = -1
         else:
             # sum difficulty for all visited locations
             difficulty_max = 0
             for loc in self.visitedLocations:
-                difficulty_max = max(difficulty_max, loc['difficulty'][1])
+                difficulty_max = max(difficulty_max, loc['difficulty'].difficulty)
             difficulty = difficulty_max
 
         return difficulty
@@ -227,19 +228,20 @@ class Solver:
     def getPath(self, locations):
         out = []
         for location in locations:
-            out.append([location['Name'], location['Area'], location['itemName'], location['difficulty'][1]])
+            out.append([location['Name'], location['Area'], location['itemName'], location['difficulty'].difficulty])
 
         return out
 
     def printPath(self, message, locations):
         print(message)
-        print('{:>50}: {:>12} {:>16} {}'.format("Location Name", "Area", "Item", "Difficulty"))
-        print('-'*92)
+        print('{:>50} {:>13} {:>16} {:>14} {}'.format("Location Name", "Area", "Item", "Difficulty", "Knows used"))
+        print('-'*106)
         for location in locations:
-            print('{:>50}: {:>12} {:>16} {}'.format(location['Name'],
-                                                    location['Area'],
-                                                    location['itemName'],
-                                                    location['difficulty'][1]))
+            print('{:>50}: {:>12} {:>16} {:>14} {}'.format(location['Name'],
+                                                           location['Area'],
+                                                           location['itemName'],
+                                                           location['difficulty'].difficulty,
+                                                           location['difficulty'].knows))
 
     def collectMajor(self, loc):
         self.majorLocations.remove(loc)
@@ -273,13 +275,13 @@ class Solver:
         return wand(Bosses.allBossesDead(), enoughStuffTourian(self.collectedItems))
 
     def getAvailableItemsList(self, locations, area, threshold):
-        around = [loc for loc in locations if loc['Area'] == area and loc['difficulty'][1] <= threshold and not Bosses.areaBossDead(area)]
-        around.sort(key=lambda loc: loc['difficulty'][1])
+        around = [loc for loc in locations if loc['Area'] == area and loc['difficulty'].difficulty <= threshold and not Bosses.areaBossDead(area)]
+        around.sort(key=lambda loc: loc['difficulty'].difficulty)
 
         outside = [loc for loc in locations if not loc in around]
         # we want to sort the outside locations by putting the ones is the same area first,
         # then we sort the remaining areas starting whith boss dead status
-        outside.sort(key=lambda loc: (loc['difficulty'][1], 0 if loc['Area'] == area else 1, 0 if not Bosses.areaBossDead(loc['Area']) else 1))
+        outside.sort(key=lambda loc: (loc['difficulty'].difficulty, 0 if loc['Area'] == area else 1, 0 if not Bosses.areaBossDead(loc['Area']) else 1))
 
         return around + outside
 

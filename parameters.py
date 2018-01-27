@@ -1,3 +1,5 @@
+from smbool import SMBool
+
 # the different difficulties available
 easy = 1
 medium = 5
@@ -35,78 +37,78 @@ class Knows:
     #Shinespark = (True, easy)
 
     # used across the game
-    Mockball = (True, easy) # early super and ice beam
-    SimpleShortCharge = (True, easy) # Waterway ETank without gravity, and Wrecked Ship access
-    InfiniteBombJump = (True, medium) # to access certain locations without high jump or space jump
-    GreenGateGlitch = (True, medium) # to access screw attack and crocomire
-    ShortCharge = (False, 0) # to kill draygon
-    GravityJump = (True, hard)
-    SpringBallJump = (True, hard) # access to wrecked ship etank without anything else and suitless maridia navigation (precious room exit)
-    GetAroundWallJump = (True, hard) # tricky wall jumps where you have to get around the platform you want to wall jump on (access norfair reserve, go through worst room in the game, exit plasma room)
+    Mockball = SMBool(True, easy, ['Mockball']) # early super and ice beam
+    SimpleShortCharge = SMBool(True, easy, ['SimpleShortCharge']) # Waterway ETank without gravity, and Wrecked Ship access
+    InfiniteBombJump = SMBool(True, medium, ['InfiniteBombJump']) # to access certain locations without high jump or space jump
+    GreenGateGlitch = SMBool(True, medium, ['GreenGateGlitch']) # to access screw attack and crocomire
+    ShortCharge = SMBool(False, 0, ['ShortCharge']) # to kill draygon
+    GravityJump = SMBool(True, hard, ['GravityJump'])
+    SpringBallJump = SMBool(True, hard, ['SpringBallJump']) # access to wrecked ship etank without anything else and suitless maridia navigation (precious room exit)
+    GetAroundWallJump = SMBool(True, hard, ['GetAroundWallJump']) # tricky wall jumps where you have to get around the platform you want to wall jump on (access norfair reserve, go through worst room in the game, exit plasma room)
 
     # bosses
-    DraygonGrappleKill = (True, medium) # easy kill for draygon
-    MicrowaveDraygon = (True, easy)
-    MicrowavePhantoon = (True, medium)
+    DraygonGrappleKill = SMBool(True, medium, ['DraygonGrappleKill']) # easy kill for draygon
+    MicrowaveDraygon = SMBool(True, easy, ['MicrowaveDraygon'])
+    MicrowavePhantoon = SMBool(True, medium, ['MicrowavePhantoon'])
 
     # end game
-    IceZebSkip = (False, 0) # change minimal ammo count
-    SpeedZebSkip = (False, 0) # change minimal ammo count
+    IceZebSkip = SMBool(False, 0, ['IceZebSkip']) # change minimal ammo count
+    SpeedZebSkip = SMBool(False, 0, ['SpeedZebSkip']) # change minimal ammo count
 
     # Area difficulties
 
     # Brinstar
-    CeilingDBoost = (True, easy) # for brinstar ceiling
-    AlcatrazEscape = (True, harder) # alcatraz without bomb
-    ReverseGateGlitch = (True, medium) # ETank in Brinstar Gate
-    ReverseGateGlitchHiJumpLess = (False, 0) # Same but without high jump
-    EarlyKraid = (True, easy) # to access kraid without hi jump boots
-    XrayDboost = (False, 0)  # Xray without grapple or space jump
-    XrayIce = (True, hard) # Xray with icing enemies
-    RedTowerClimb = (True, harder) # brinstar red tower without ice or screw
+    CeilingDBoost = SMBool(True, easy, ['CeilingDBoost']) # for brinstar ceiling
+    AlcatrazEscape = SMBool(True, harder, ['AlcatrazEscape']) # alcatraz without bomb
+    ReverseGateGlitch = SMBool(True, medium, ['ReverseGateGlitch']) # ETank in Brinstar Gate
+    ReverseGateGlitchHiJumpLess = SMBool(False, 0, ['ReverseGateGlitchHiJumpLess']) # Same but without high jump
+    EarlyKraid = SMBool(True, easy, ['EarlyKraid']) # to access kraid without hi jump boots
+    XrayDboost = SMBool(False, 0, ['XrayDboost'])  # Xray without grapple or space jump
+    XrayIce = SMBool(True, hard, ['XrayIce']) # Xray with icing enemies
+    RedTowerClimb = SMBool(True, harder, ['RedTowerClimb']) # brinstar red tower without ice or screw
 
     # gauntlet
-    HiJumpLessGauntletAccess = (False, 0)
-    HiJumpGauntletAccess = (True, harder)
-    GauntletWithBombs = (True, hard)
-    GauntletWithPowerBombs = (True, medium)
-    GauntletEntrySpark = (True, medium) # implies Knows.SimpleShortCharge
+    HiJumpLessGauntletAccess = SMBool(False, 0, ['HiJumpLessGauntletAccess'])
+    HiJumpGauntletAccess = SMBool(True, harder, ['HiJumpGauntletAccess'])
+    GauntletWithBombs = SMBool(True, hard, ['GauntletWithBombs'])
+    GauntletWithPowerBombs = SMBool(True, medium, ['GauntletWithPowerBombs'])
+    GauntletEntrySpark = SMBool(True, medium, ['GauntletEntrySpark']) # implies Knows.SimpleShortCharge
 
     # upper norfair
-    NorfairReserveIce = (True, hard) # climb to norfair reserve area by freezing a Waver
-    WaveBeamWallJump = (True, easy) # climb to wave with wall jump
-    ClimbToGrappleWithIce = (False, 0) # just learn green gate glitch, it's easier
+    NorfairReserveIce = SMBool(True, hard, ['NorfairReserveIce']) # climb to norfair reserve area by freezing a Waver
+    WaveBeamWallJump = SMBool(True, easy, ['WaveBeamWallJump']) # climb to wave with wall jump
+    ClimbToGrappleWithIce = SMBool(False, 0, ['ClimbToGrappleWithIce']) # just learn green gate glitch, it's easier
 
     # lower norfair
-    LavaDive = (True, harder) # ridley without gravity
-    WorstRoomIceCharge = (True, mania) # can pass worst room JUST by freezing pirates
-    ScrewAttackExit = (True, medium) # gain momentum from Golden Torizo Energy Recharge room, then wall jump in Screw Attack room
+    LavaDive = SMBool(True, harder, ['LavaDive']) # ridley without gravity
+    WorstRoomIceCharge = SMBool(True, mania, ['WorstRoomIceCharge']) # can pass worst room JUST by freezing pirates
+    ScrewAttackExit = SMBool(True, medium, ['ScrewAttackExit']) # gain momentum from Golden Torizo Energy Recharge room, then wall jump in Screw Attack room
 
     # wrecked ship
-    ContinuousWallJump = (False, 0) # access wrecked ship
-    DiagonalBombJump = (True, mania) # access wrecked ship
-    MockballWs = (True, hardcore) # early wrecked ship access using a mock ball
+    ContinuousWallJump = SMBool(False, 0, ['ContinuousWallJump']) # access wrecked ship
+    DiagonalBombJump = SMBool(True, mania, ['DiagonalBombJump']) # access wrecked ship
+    MockballWs = SMBool(True, hardcore, ['MockballWs']) # early wrecked ship access using a mock ball
     # wrecked ship etank access ("sponge bath" room)
-    SpongeBathBombJump = (True, mania)
-    SpongeBathHiJump = (True, easy)
-    SpongeBathSpeed = (True, medium)
+    SpongeBathBombJump = SMBool(True, mania, ['SpongeBathBombJump'])
+    SpongeBathHiJump = SMBool(True, easy, ['SpongeBathHiJump'])
+    SpongeBathSpeed = SMBool(True, medium, ['SpongeBathSpeed'])
 
     # maridia
     # suitless
-    SuitlessOuterMaridia = (True, hardcore)
-    SuitlessOuterMaridiaNoGuns = (True, mania) # suitless maridia without even wave, spazer or plasma...
+    SuitlessOuterMaridia = SMBool(True, hardcore, ['SuitlessOuterMaridia'])
+    SuitlessOuterMaridiaNoGuns = SMBool(True, mania, ['SuitlessOuterMaridiaNoGuns']) # suitless maridia without even wave, spazer or plasma...
     # suitless draygon
-    DraygonRoomGrappleExit = (False, 0)
-    DraygonRoomCrystalExit = (False, 0) # give a free shine spark
-    PreciousRoomXRayExit = (False, 0)
+    DraygonRoomGrappleExit = SMBool(False, 0, ['DraygonRoomGrappleExit'])
+    DraygonRoomCrystalExit = SMBool(False, 0, ['DraygonRoomCrystalExit']) # give a free shine spark
+    PreciousRoomXRayExit = SMBool(False, 0, ['PreciousRoomXRayExit'])
     # clips
-    MochtroidClip = (True, medium) # to access botwoon without speedbooster
-    PuyoClip = (False, 0) # to access spring ball without grapple beam
+    MochtroidClip = SMBool(True, medium, ['MochtroidClip']) # to access botwoon without speedbooster
+    PuyoClip = SMBool(False, 0, ['PuyoClip']) # to access spring ball without grapple beam
     # plasma room
-    KillPlasmaPiratesWithSpark = (False, 0) # kill plasma pirates with spark echoes. implies Knows.ShortCharge
-    KillPlasmaPiratesWithCharge = (True, hard)
+    KillPlasmaPiratesWithSpark = SMBool(False, 0, ['KillPlasmaPiratesWithSpark']) # kill plasma pirates with spark echoes. implies Knows.ShortCharge
+    KillPlasmaPiratesWithCharge = SMBool(True, hard, ['KillPlasmaPiratesWithCharge'])
     # sandpit
-    SuitlessSandpit = (False, 0) # access the item in the sandpit suitless
+    SuitlessSandpit = SMBool(False, 0, ['SuitlessSandpit']) # access the item in the sandpit suitless
 
 class Settings:
     # boss difficulty tables :

@@ -71,7 +71,7 @@ locations = [
     'Address': 0x786DE,
     'Visibility': "Visible",
     # EXPLAINED: no difficulty
-    'Available': lambda items: (True, 0)
+    'Available': lambda items: SMBool(True, 0)
 },
 {
     'Area': "Brinstar",
@@ -586,7 +586,7 @@ locations = [
                                     canOpenRedDoors(items),
                                     wor(wand(canPassBombPassages(items),
                                              haveItem(items, 'Super')),
-                                        (True, easy)))
+                                        SMBool(True, easy)))
 },
 {
     'Area': "Brinstar",

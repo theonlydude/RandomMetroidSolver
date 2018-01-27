@@ -560,7 +560,9 @@ class ParamsLoader:
         # Knows
         for param in self.params['Knows']:
             if param[0:len('__')] != '__':
-                setattr(Knows, param, self.params['Knows'][param])
+                setattr(Knows, param, SMBool(self.params['Knows'][param][0],
+                                             self.params['Knows'][param][1],
+                                             ['{}'.format(param)]))
 
         # Settings
         for param in self.params['Settings']:

@@ -54,6 +54,9 @@ desc = {'Mockball': {'display': 'Mockball',
         'SpringBallJump': {'display': 'Spring Ball Jump',
                            'title': 'Access to wrecked ship etank without anything else, suitless maridia navigation',
                            'href': 'https://www.youtube.com/watch?v=8ldQUIgBavw'},
+        'GetAroundWallJump': {'display': 'Get around Wall Jump',
+                              'title': 'Tricky wall jumps where you have to get around the platform you want to wall jump on (access Norfair Reserve, go through Worst Room in the game, exit Plasma Room)',
+                              'href': 'https://www.youtube.com/watch?v=2GPx-6ARSIw&t=137s'},
         'DraygonGrappleKill': {'display': 'Draygon Grapple Kill',
                                'title': 'Instant kill on Draygon with electric grapple',
                                'href': 'https://www.youtube.com/watch?v=gcemRrXqCbE'},
@@ -87,6 +90,9 @@ desc = {'Mockball': {'display': 'Mockball',
         'XrayDboost': {'display': 'X-Ray Damage Boost',
                        'title': 'Get to X-Ray location without Space Jump or Grapple',
                        'href': 'https://www.youtube.com/watch?v=2GPx-6ARSIw&t=162s'},
+        'XrayIce': {'display': 'X-Ray Ice',
+                    'title': 'Get to X-Ray location by freezing enemies',
+                    'href': None},
         'RedTowerClimb': {'display': 'Red Tower Climb',
                           'title': 'Climb Red Tower without Ice or Screw Attack',
                           'href': 'https://www.youtube.com/watch?v=g3goe6PZ4o0'},
@@ -106,9 +112,9 @@ desc = {'Mockball': {'display': 'Mockball',
         'GauntletEntrySpark': {'display': 'Gauntlet Entry Spark',
                                'title': 'Traverse Gauntlet area with a Shine spark',
                                'href': 'https://www.youtube.com/watch?v=rFobt0S5sD4'},
-        'NorfairReserveHiJump': {'display': 'Norfair Reserve Hi-Jump',
-                                 'title': 'Access Norfair Reserve using just Hi Jump and wall jumping',
-                                 'href': 'https://www.youtube.com/watch?v=2GPx-6ARSIw&t=137s'},
+        'NorfairReserveIce': {'display': 'Norfair Reserve Ice',
+                              'title': 'Climb to Norfair Reserve area by freezing a Waver',
+                              'href': None},
         'WaveBeamWallJump': {'display': 'Wave-Beam Wall-Jump',
                              'title': 'Climb to Wave Beam with wall jumps',
                              'href': 'https://www.youtube.com/watch?v=2GPx-6ARSIw&t=140s'},
@@ -124,6 +130,9 @@ desc = {'Mockball': {'display': 'Mockball',
         'WorstRoomHiJump': {'display': 'Worst Room Hi-Jump',
                             'title': 'Go through Worst Room In The Game with Hi Jump and wall jumps',
                             'href': 'https://www.youtube.com/watch?v=xyYIg7WSJ1w'},
+        'ScrewAttackExit': {'display': 'Screw Attack Exit',
+                            'title': 'Gain momentum from Golden Torizo Energy Recharge room, then wall jump in Screw Attack room',
+                            'href': None},
         'ContinuousWallJump': {'display': 'Continuous Wall-Jump',
                                'title': 'Get over the moat using CWJ',
                                'href': 'https://www.youtube.com/watch?v=4HVhTwwax6g'},
@@ -169,27 +178,24 @@ desc = {'Mockball': {'display': 'Mockball',
         'KillPlasmaPiratesWithCharge': {'display': 'Kill Plasma Pirates with Charge',
                                         'title': 'Use pseudo-screw to kill the pirates in Plasma Beam room',
                                         'href': None},
-        'ExitPlasmaRoomHiJump': {'display': 'Exit Plasma room Hi-Jump',
-                                 'title': 'Exit the Plasma room with Hi-Jump and walljumps',
-                                 'href': None},
         'SuitlessSandpit': {'display': 'Suitless Sandpit',
                             'title': 'Access item in the left sandpit without Gravity',
                             'href': 'https://www.youtube.com/watch?v=1M2TiEVwH2I'}
 }
 
-usedAcrossTheGame = ['Mockball', 'SimpleShortCharge', 'InfiniteBombJump', 'GreenGateGlitch', 'ShortCharge', 'GravityJump', 'SpringBallJump']
+usedAcrossTheGame = ['Mockball', 'SimpleShortCharge', 'InfiniteBombJump', 'GreenGateGlitch', 'ShortCharge', 'GravityJump', 'SpringBallJump', 'GetAroundWallJump']
 bosses = ['DraygonGrappleKill', 'MicrowaveDraygon', 'MicrowavePhantoon']
 endGame = ['IceZebSkip', 'SpeedZebSkip']
-brinstar = ['CeilingDBoost', 'AlcatrazEscape', 'ReverseGateGlitch', 'ReverseGateGlitchHiJumpLess', 'EarlyKraid', 'XrayDboost', 'RedTowerClimb']
+brinstar = ['CeilingDBoost', 'AlcatrazEscape', 'ReverseGateGlitch', 'ReverseGateGlitchHiJumpLess', 'EarlyKraid', 'XrayDboost', 'XrayIce', 'RedTowerClimb']
 gauntlet = ['HiJumpLessGauntletAccess', 'HiJumpGauntletAccess', 'GauntletWithBombs', 'GauntletWithPowerBombs', 'GauntletEntrySpark']
-upperNorfair = ['NorfairReserveHiJump', 'WaveBeamWallJump', 'ClimbToGrappleWithIce']
-lowerNorfair = ['LavaDive', 'WorstRoomIceCharge', 'WorstRoomHiJump']
+upperNorfair = ['NorfairReserveIce', 'WaveBeamWallJump', 'ClimbToGrappleWithIce']
+lowerNorfair = ['LavaDive', 'ScrewAttackExit', 'WorstRoomIceCharge', 'WorstRoomHiJump']
 wreckedShip = ['ContinuousWallJump', 'DiagonalBombJump', 'MockballWs']
 wreckedShipEtank = ['SpongeBathBombJump', 'SpongeBathHiJump', 'SpongeBathSpeed']
 maridiaSuitless = ['SuitlessOuterMaridia', 'SuitlessOuterMaridiaNoGuns']
 maridiaSuitlessDraygon = ['DraygonRoomGrappleExit', 'DraygonRoomCrystalExit', 'PreciousRoomXRayExit']
 maridiaClips = ['MochtroidClip', 'PuyoClip']
-maridiaPlasmaRoom = ['KillPlasmaPiratesWithSpark', 'KillPlasmaPiratesWithCharge', 'ExitPlasmaRoomHiJump']
+maridiaPlasmaRoom = ['KillPlasmaPiratesWithSpark', 'KillPlasmaPiratesWithCharge']
 maridiaSandpit = ['SuitlessSandpit']
 
 categories = [{'knows': usedAcrossTheGame, 'title': 'Used across the game'},

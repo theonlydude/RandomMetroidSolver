@@ -228,7 +228,7 @@ class Solver:
     def getPath(self, locations):
         out = []
         for location in locations:
-            out.append([location['Name'], location['Area'], location['itemName'], location['difficulty'].difficulty])
+            out.append([location['Name'], location['Area'], location['itemName'], '{0:.2f}'.format(location['difficulty'].difficulty), ', '.join(location['difficulty'].knows)])
 
         return out
 

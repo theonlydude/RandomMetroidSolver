@@ -438,9 +438,9 @@ def solver():
         diffPercent = session.result['diffPercent']
 
         # add generated path (spoiler !)
-        pathTable = TABLE(TR(TH("Location Name"), TH("Area"), TH("Item"), TH("Difficulty")))
-        for location, area, item, diff in session.result['generatedPath']:
-            pathTable.append(TR(location, area, item, diff))
+        pathTable = TABLE(TR(TH("Location Name"), TH("Area"), TH("Item"), TH("Difficulty"), TH("Techniques used")))
+        for location, area, item, diff, techniques in session.result['generatedPath']:
+            pathTable.append(TR(location, area, item, diff, techniques))
 
         # display the result only once
         session.result = None

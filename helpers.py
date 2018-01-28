@@ -81,7 +81,7 @@ def itemCountOkList(items, item, difficulties):
                   difficulties[0])
 
 def energyReserveCount(items):
-    return itemCount(items, 'ETank') + itemCount(items, 'Reserve')
+    return 1 + itemCount(items, 'ETank') + itemCount(items, 'Reserve')
 
 def energyReserveCountOk(items, count, difficulty=0):
     return SMBool(energyReserveCount(items) >= count, difficulty)
@@ -263,7 +263,8 @@ def canPassWorstRoom(items):
     return wand(canAccessLowerNorfair(items),
                 wor(canFly(items),
                     wand(Knows.WorstRoomIceCharge, haveItem(items, 'Ice'), haveItem(items, 'Charge')),
-                    wand(Knows.GetAroundWallJump, haveItem(items, 'HiJump'))))
+                    wand(Knows.GetAroundWallJump, haveItem(items, 'HiJump')),
+                    wand(Knows.SpringBallJumpFromWall, haveItem(items, 'SpringBall'))))
 
 def canAccessOuterMaridia(items):
     # EXPLAINED: access Red Tower in red brinstar,
@@ -445,10 +446,10 @@ def computeBossDifficulty(items, ammoMargin, secs, diffTbl):
         duration = secs / rate
  #   print('rate=' + str(rate) + ', duration=' + str(duration))
     suitsCoeff = 0.5
-    if haveItem(items, 'Varia').bool:
-        suitsCoeff *= 2
     if haveItem(items, 'Gravity').bool:
-        suitsCoeff *= 2
+        suitsCoeff = 2
+    elif haveItem(items, 'Varia').bool:
+        suitsCoeff = 1
     energy = suitsCoeff * energyReserveCount(items)
     energyDict = None
     if 'Energy' in diffTbl:

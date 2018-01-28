@@ -44,6 +44,7 @@ class Knows:
     ShortCharge = SMBool(False, 0, ['ShortCharge']) # to kill draygon
     GravityJump = SMBool(True, hard, ['GravityJump'])
     SpringBallJump = SMBool(True, hard, ['SpringBallJump']) # access to wrecked ship etank without anything else and suitless maridia navigation (precious room exit)
+    SpringBallJumpFromWall = SMBool(True, harder, ['SpringBallJumpFromWall']) # exit screw attack area, climb worst room without high jump
     GetAroundWallJump = SMBool(True, hard, ['GetAroundWallJump']) # tricky wall jumps where you have to get around the platform you want to wall jump on (access norfair reserve, go through worst room in the game, exit plasma room)
 
     # bosses
@@ -97,6 +98,8 @@ class Knows:
     # suitless
     SuitlessOuterMaridia = SMBool(True, hardcore, ['SuitlessOuterMaridia'])
     SuitlessOuterMaridiaNoGuns = SMBool(True, mania, ['SuitlessOuterMaridiaNoGuns']) # suitless maridia without even wave, spazer or plasma...
+    # mama
+    MamaGrappleWithWallJump = SMBool(False, 0, ['MamaGrappleWithWallJump']) # get to grapple block with with just grapple and wall jumps
     # suitless draygon
     DraygonRoomGrappleExit = SMBool(False, 0, ['DraygonRoomGrappleExit'])
     DraygonRoomCrystalExit = SMBool(False, 0, ['DraygonRoomCrystalExit']) # give a free shine spark
@@ -123,12 +126,11 @@ class Settings:
     # considered to be 2 minutes, regardless of anything else.
     #
     # 2. Energy : a dictionary where key is etanks+reserves you have,
-    # value is estimated difficulty *for a 2-minute fight*. If etanks entry
-    # is not defined, the one below will be chosen, or the minimum one if
+    # value is estimated difficulty *for a 2-minute fight*, with Varia
+    # suit only.
+    # If not defined, the one below will be chosen, or the minimum one if
     # no below entry is defined. You can give any difficulty number
-    # instead of the fixed values defined above. The amount of energy you
-    # have is to be considered with one suit only : it will be considered
-    # *2 if you have both suits, and /2 if you have no suits.
+    # instead of the fixed values defined above.
     #
     # Actual difficulty calculation will also take into account estimated
     # fight duration. Difficulty will be multiplied with the ratio against
@@ -136,67 +138,123 @@ class Settings:
     # considered if you do not have charge.
     #
     # If not enough info is provided here, base difficulty will be medium.
-    bossesDifficulty = {
+    bossesDifficultyPresets = {
         'Kraid' : {
-            'Rate' : 0.05,
-            'Energy' : {
-                1 : medium,
-                2 : easy
-            }
+            "He's annoying" : {
+                'Rate' : 0.05,
+                'Energy' : {
+                    1 : hard,
+                    2 : medium,
+                    3 : easy
+                }
+            },
+            # Gives medium for vanilla situation
+            'Default' : {
+                'Rate' : 0.05,
+                'Energy' : {
+                    1 : medium,
+                    2 : easy
+                }
+            },       
+            # you usually get quick kill
+            'Quick Kill' : {
+                'Rate' : 3,
+                'Energy' : {
+                    1 : easy
+                }
+            }            
         },
         'Phantoon' : {
-            'Rate' : 0.02,
-            'Energy' : {
-                1 : mania,
-                3 : hardcore,
-                4 : harder,
-                5 : hard,
-                7 : medium,
-                10 : easy
+            'Default' : {
+                'Rate' : 0.02,
+                'Energy' : {
+                    1 : mania,
+                    3 : hardcore,
+                    4 : harder,
+                    5 : hard,
+                    7 : medium,
+                    10 : easy
+                }
             }
         },
         'Draygon' : {
-            'Rate' : 0.08,
-            'Energy' : {
-                1 : mania,
-                6 : hardcore,
-                8 : harder,
-                11 : hard,
-                14 : medium,
-                20 : easy
+            'Default' : {
+                'Rate' : 0.08,
+                'Energy' : {
+                    1 : mania,
+                    6 : hardcore,
+                    8 : harder,
+                    11 : hard,
+                    14 : medium,
+                    20 : easy
+                },
             },
         },
         'Ridley' : {
-            'Rate' : 0.15,
-            'Energy' : {
-                1 : mania,
-                7 : hardcore,
-                11 : harder,
-                14 : hard,
-                20 : medium
+            'Default' : {
+                'Rate' : 0.15,
+                'Energy' : {
+                    1 : mania,
+                    7 : hardcore,
+                    11 : harder,
+                    14 : hard,
+                    20 : medium
+                },
             },
         },
         'Mother Brain' : {
-            'Rate' : 0.5,
-            'Energy' : {
-                3 : mania, # less than 3 is actually impossible
-                8 : hardcore,
-                12 : harder,
-                16 : hard,
-                20 : medium,
-                24 : easy
+            'Default' : {
+                'Rate' : 0.5,
+                'Energy' : {
+                    3 : mania, # less than 3 is actually impossible
+                    8 : hardcore,
+                    12 : harder,
+                    16 : hard,
+                    20 : medium,
+                    24 : easy
+                }
             }
         }
     }
 
-    # hell run table (set to none for
-    hellRuns = {
-        # Ice Beam hell run
-        'Ice' : [(2, hardcore), (3, hard), (4, medium), (6, easy)],
-        # rest of upper norfair
-        'MainUpperNorfair' : [(3, mania), (4, hardcore), (6, hard), (10, medium)]
+    bossesDifficulty = {
+        'Kraid' : bossesDifficultyPresets['Kraid']['Default'],
+        'Phantoon' : bossesDifficultyPresets['Phantoon']['Default'],
+        'Draygon' : bossesDifficultyPresets['Draygon']['Default'],
+        'Ridley' : bossesDifficultyPresets['Ridley']['Default'],
+        'Mother Brain' : bossesDifficultyPresets['Mother Brain']['Default']
     }
 
+    # hell run table
+    # set entry to None to disable
+    hellRunPresets = {
+        'Ice' : {
+            'No thanks' : None,
+            # get comfortable before going in
+            'Gimme energy' : [(4, hardcore), (5, harder), (6, hard), (10, medium)],
+            # balanced setting
+            'Default' : [(2, hardcore), (3, hard), (4, medium)],
+            # you don't mind doing hell runs at all
+            'Bring the heat' : [(2, hard), (3, medium)],
+            # RBO runner
+            'I run RBO' : [(2, medium), (3, easy)] 
+        },
+        'MainUpperNorfair' : {
+            'No thanks' : None,
+            'Gimme energy' : [(4, mania), (6, hardcore), (8, harder), (10, hard), (14, medium)],
+            'Default' : [(3, mania), (5, hardcore), (6, hard), (9, medium)],
+            'Bring the heat' : [(3, hardcore), (4, hard), (5, medium), (7, easy)],
+            'I run RBO' : [(3, harder), (4, hard), (5, medium), (6, easy)] 
+        }
+    }
+    
+    hellRuns = {
+        # Ice Beam hell run
+        'Ice' : hellRunPresets['Ice']['Default'],
+        # rest of upper norfair
+        'MainUpperNorfair' : hellRunPresets['MainUpperNorfair']['Default']
+    }
+    
     # various settings used in difficulty computation
     algoSettings = {
         # Boss Fights

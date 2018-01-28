@@ -289,7 +289,8 @@ locations = [
                                        wand(haveItem(items, 'HiJump'),
                                             haveItem(items, 'ScrewAttack'),
                                             haveItem(items, 'SpeedBooster'),
-                                            Knows.ScrewAttackExit))
+                                            Knows.ScrewAttackExit),
+                                       wand(haveItem(items, 'SpringBall'), Knows.SpringBallJumpFromWall))
 },
 {
     'Area': "LowerNorfair",
@@ -364,13 +365,13 @@ locations = [
     # to acces the ETank in higher part of the room:
     #  -use grapple to attach to the block
     #  -use speedbooster ??
-    #  FIXME: is SpeedBooster possible without gravity in this room ? is it a simple short or short charge ?
     #  -can fly (space jump or infinite bomb jump)
-    #  FIXME: is it possible to infinite bomb jump from the mama turtle when it's up ?
     'Available': lambda items: wand(canAccessOuterMaridia(items),
                                     wor(canFly(items),
-                                        haveItem(items, 'SpeedBooster'),
-                                        haveItem(items, 'Grapple')))
+                                        wand(haveItem(items, 'Gravity'), haveItem(items, 'SpeedBooster')),
+                                        wand(haveItem(items, 'HiJump'), haveItem(items, 'SpringBall'), Knows.SpringBallJump),
+                                        wand(haveItem(items, 'Grapple'),
+                                             wor(haveItem(items, 'HiJump'), Knows.MamaGrappleWithWallJump))))
 },
 {
     'Area': "Maridia",

@@ -54,6 +54,9 @@ desc = {'Mockball': {'display': 'Mockball',
         'SpringBallJump': {'display': 'Spring Ball Jump',
                            'title': 'Access to wrecked ship etank without anything else, suitless maridia navigation',
                            'href': 'https://www.youtube.com/watch?v=8ldQUIgBavw&t=49s'},
+        'SpringBallJumpFromWall': {'display': 'Spring Ball Jump from wall',
+                                   'title': 'Exit Screw Attack area, climb Worst Room without High Jump',
+                                   'href': None},
         'GetAroundWallJump': {'display': 'Get around Wall Jump',
                               'title': 'Tricky wall jumps where you have to get around the platform you want to wall jump on (access Norfair Reserve, go through Worst Room in the game, exit Plasma Room)',
                               'href': 'https://www.youtube.com/watch?v=2GPx-6ARSIw&t=137s'},
@@ -154,6 +157,9 @@ desc = {'Mockball': {'display': 'Mockball',
         'SuitlessOuterMaridiaNoGuns': {'display': 'Suitless Outer Maridia with no Guns',
                                        'title': 'Same as above, but with no firepower besides Ice Beam',
                                        'href': 'https://www.youtube.com/watch?v=c2xoPigezvM'},
+        'MamaGrappleWithWallJump': {'display': 'Mama Grapple with Wall Jump',
+                                    'title': 'Get to Grapple block with with just Grapple and Wall Jumps',
+                                    'href': None},
         'DraygonRoomGrappleExit': {'display': 'Exit Draygon room with the Grapple',
                                  'title': 'Use Grapple to bounce them morph and demorph up to the platform',
                                  'href': 'https://www.youtube.com/watch?v=i2OGuFpcfiw&t=154s'},
@@ -180,7 +186,7 @@ desc = {'Mockball': {'display': 'Mockball',
                             'href': 'https://www.youtube.com/watch?v=1M2TiEVwH2I'}
 }
 
-usedAcrossTheGame = ['Mockball', 'SimpleShortCharge', 'InfiniteBombJump', 'GreenGateGlitch', 'ShortCharge', 'GravityJump', 'SpringBallJump', 'GetAroundWallJump']
+usedAcrossTheGame = ['Mockball', 'SimpleShortCharge', 'InfiniteBombJump', 'GreenGateGlitch', 'ShortCharge', 'GravityJump', 'SpringBallJump', 'SpringBallJumpFromWall', 'GetAroundWallJump']
 bosses = ['DraygonGrappleKill', 'MicrowaveDraygon', 'MicrowavePhantoon']
 endGame = ['IceZebSkip', 'SpeedZebSkip']
 brinstar = ['CeilingDBoost', 'AlcatrazEscape', 'ReverseGateGlitch', 'ReverseGateGlitchHiJumpLess', 'EarlyKraid', 'XrayDboost', 'XrayIce', 'RedTowerClimb']
@@ -190,6 +196,7 @@ lowerNorfair = ['LavaDive', 'ScrewAttackExit', 'WorstRoomIceCharge']
 wreckedShip = ['ContinuousWallJump', 'DiagonalBombJump', 'MockballWs']
 wreckedShipEtank = ['SpongeBathBombJump', 'SpongeBathHiJump', 'SpongeBathSpeed']
 maridiaSuitless = ['SuitlessOuterMaridia', 'SuitlessOuterMaridiaNoGuns']
+maridiaMama = ['MamaGrappleWithWallJump']
 maridiaSuitlessDraygon = ['DraygonRoomGrappleExit', 'DraygonRoomCrystalExit', 'PreciousRoomXRayExit']
 maridiaClips = ['MochtroidClip', 'PuyoClip']
 maridiaPlasmaRoom = ['KillPlasmaPiratesWithSpark', 'KillPlasmaPiratesWithCharge']
@@ -205,6 +212,7 @@ categories = [{'knows': usedAcrossTheGame, 'title': 'Used across the game'},
               {'knows': wreckedShip, 'title': 'Wrecked Ship'},
               {'knows': wreckedShipEtank, 'title': 'Wrecked Ship Etank'},
               {'knows': maridiaSuitless, 'title': 'Maridia Suitless'},
+              {'knows': maridiaMama, 'title': 'Mama Turtle'},
               {'knows': maridiaSuitlessDraygon, 'title': 'Maridia Suitless Draygon'},
               {'knows': maridiaClips, 'title': 'Maridia Clips'},
               {'knows': maridiaPlasmaRoom, 'title': 'Maridia Plasma Room'},

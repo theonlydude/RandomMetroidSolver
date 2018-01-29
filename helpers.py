@@ -81,7 +81,7 @@ def itemCountOkList(items, item, difficulties):
                   difficulties[0])
 
 def energyReserveCount(items):
-    return 1 + itemCount(items, 'ETank') + itemCount(items, 'Reserve')
+    return itemCount(items, 'ETank') + itemCount(items, 'Reserve')
 
 def energyReserveCountOk(items, count, difficulty=0):
     return SMBool(energyReserveCount(items) >= count, difficulty)
@@ -450,7 +450,7 @@ def computeBossDifficulty(items, ammoMargin, secs, diffTbl):
         suitsCoeff = 2
     elif haveItem(items, 'Varia').bool:
         suitsCoeff = 1
-    energy = suitsCoeff * energyReserveCount(items)
+    energy = suitsCoeff * (1 + energyReserveCount(items))
     energyDict = None
     if 'Energy' in diffTbl:
         energyDict = diffTbl['Energy']

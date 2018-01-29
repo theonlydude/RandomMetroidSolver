@@ -750,8 +750,8 @@ if __name__ == "__main__":
 
     Conf.displayGeneratedPath = args.displayGeneratedPath
 
-    solver.solveRom()
-    #diff = solver.solveRom()
-    #knowsUsed = solver.getKnowsUsed()
-    #print("{} : diff : {}".format(diff, args.romFileName))
-    #print("{} : knows Used : {}".format(len(knowsUsed), args.romFileName))
+    #solver.solveRom()
+    diff = solver.solveRom()
+    knowsUsed = solver.getKnowsUsed()
+    print("{} : diff : {}".format(diff, args.romFileName))
+    print("{} : knows Used : {}".format(len(knowsUsed), args.romFileName))

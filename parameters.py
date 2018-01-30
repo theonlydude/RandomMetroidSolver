@@ -66,7 +66,7 @@ class Knows:
     EarlyKraid = SMBool(True, easy, ['EarlyKraid']) # to access kraid without hi jump boots
     XrayDboost = SMBool(False, 0, ['XrayDboost'])  # Xray without grapple or space jump
     XrayIce = SMBool(True, hard, ['XrayIce']) # Xray with icing enemies
-    RedTowerClimb = SMBool(True, harder, ['RedTowerClimb']) # brinstar red tower without ice or screw
+    RedTowerClimb = SMBool(True, harder, ['RedTowerClimb']) # brinstar red tower without ice or space jump
 
     # gauntlet
     HiJumpLessGauntletAccess = SMBool(False, 0, ['HiJumpLessGauntletAccess'])
@@ -162,7 +162,7 @@ class Settings:
                 'Energy' : {
                     1 : easy
                 }
-            }            
+            }
         },
         'Phantoon' : {
             'Default' : {

@@ -500,7 +500,7 @@ locations = [
     'Class': "Minor",
     'Address': 0x781EE,
     'Visibility': "Hidden",
-    'Available': lambda items: canAccessWs(items)
+    'Available': lambda items: wand(canAccessWs(items), Bosses.bossDead('Phantoon'))
 },
 {
     'Area': "Crateria",
@@ -508,7 +508,7 @@ locations = [
     'Class': "Minor",
     'Address': 0x781F4,
     'Visibility': "Visible",
-    'Available': lambda items: canAccessWs(items)
+    'Available': lambda items: wand(canAccessWs(items), Bosses.bossDead('Phantoon'))
 },
 {
     'Area': "Crateria",
@@ -745,7 +745,7 @@ locations = [
                                     wor(canUsePowerBombs(items),
                                         Knows.RedTowerClimb,
                                         haveItem(items, 'Ice'),
-                                        haveItem(items, 'ScrewAttack')))
+                                        haveItem(items, 'SpaceJump')))
 },
 {
     'Area': "Brinstar",
@@ -758,7 +758,7 @@ locations = [
                                     wor(canUsePowerBombs(items),
                                         Knows.RedTowerClimb,
                                         haveItem(items, 'Ice'),
-                                        haveItem(items, 'ScrewAttack')))
+                                        haveItem(items, 'SpaceJump')))
 },
 {
     'Area': "Brinstar",
@@ -964,7 +964,8 @@ locations = [
     'Visibility': "Visible",
     'Available': lambda items: wand(canAccessWs(items),
                                     wor(haveItem(items, 'Varia'),
-                                        energyReserveCountOk(items, 1)))
+                                        energyReserveCountOk(items, 1)),
+                                    Bosses.bossDead('Phantoon'))
 },
 {
     'Area': "WreckedShip",
@@ -972,7 +973,7 @@ locations = [
     'Class': "Minor",
     'Address': 0x7C319,
     'Visibility': "Visible",
-    'Available': lambda items: canAccessWs(items)
+    'Available': lambda items: wand(canAccessWs(items), Bosses.bossDead('Phantoon'))
 },
 {
     'Area': "WreckedShip",
@@ -980,7 +981,7 @@ locations = [
     'Class': "Minor",
     'Address': 0x7C357,
     'Visibility': "Visible",
-    'Available': lambda items: canAccessWs(items)
+    'Available': lambda items: wand(canAccessWs(items), Bosses.bossDead('Phantoon'))
 },
 {
     'Area': "Maridia",
@@ -1039,7 +1040,10 @@ locations = [
     'Class': "Minor",
     'Address': 0x7C5DD,
     'Visibility': "Visible",
-    'Available': lambda items: canAccessInnerMaridia(items)
+    'Available': lambda items: wand(canAccessOuterMaridia(items),
+                                    wor(haveItem(items, 'Gravity'),
+                                        wand(canDoSuitlessMaridia(items),
+                                             Knows.SuitlessSandpit)))
 },
 {
     'Area': "Maridia",
@@ -1047,7 +1051,10 @@ locations = [
     'Class': "Minor",
     'Address': 0x7C5EB,
     'Visibility': "Visible",
-    'Available': lambda items: canAccessInnerMaridia(items)
+    'Available': lambda items: wand(canAccessOuterMaridia(items),
+                                    wor(haveItem(items, 'Gravity'),
+                                        wand(canDoSuitlessMaridia(items),
+                                             Knows.SuitlessSandpit)))
 },
 {
     'Area': "Maridia",
@@ -1065,6 +1072,7 @@ locations = [
     'Class': "Minor",
     'Visibility': "Visible",
     'Available': lambda items: wand(canAccessOuterMaridia(items),
+                                    haveItem(items, 'SpeedBooster'), # TODO FLO find trick to get this without speed booster and add knows
                                     haveItem(items, 'Gravity'))
 },
 {
@@ -1074,6 +1082,7 @@ locations = [
     'Address': 0x7C609,
     'Visibility': "Visible",
     'Available': lambda items: wand(canAccessOuterMaridia(items),
+                                    haveItem(items, 'SpeedBooster'), # TODO FLO find trick to get this without speed booster and add knows
                                     haveItem(items, 'Gravity'))
 },
 {

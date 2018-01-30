@@ -279,7 +279,17 @@ def displayKnow(know):
 
   response.write("  <td>{}</td>".format(desc[know]['title']), escape=False)
 
-  response.write("  <td></td>", escape=False)
+  response.write("  <td>", escape=False)
+  first = True
+  for room in desc[know]['rooms']:
+    if first is True:
+      first = False
+    else:
+      response.write(", ", escape=False)
+      pass
+    response.write("<a href=\"{}\">{}</a>".format(room[1], room[0]), escape=False)
+    pass
+  response.write("</td>", escape=False)
 
   response.write("  <input id=\"{}_bool_hidden\" name=\"{}_bool_hidden\" type=\"checkbox\" {} form=\"saveform\" style='display:none'>\n".format(know, know, checked, know), escape=False)
 

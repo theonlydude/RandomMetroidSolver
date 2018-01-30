@@ -287,7 +287,11 @@ def displayKnow(know):
     else:
       response.write(", ", escape=False)
       pass
-    response.write("<a href=\"{}\">{}</a>".format(room[1], room[0]), escape=False)
+    if room[1] is not None:
+      response.write("<a href=\"{}\">{}</a>".format(room[1], room[0]), escape=False)
+    else:
+      response.write("{}".format(room[0]), escape=False)
+      pass
     pass
   response.write("</td>", escape=False)
 

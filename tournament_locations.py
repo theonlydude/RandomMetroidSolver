@@ -862,7 +862,8 @@ locations = [
     'Address': 0x78C52,
     'Visibility': "Visible",
     'Available': lambda items: wand(canAccessHeatedNorfair(items),
-                                    wor(canFly(items), haveItem(items, 'Grapple'),
+                                    wor(canFly(items),
+                                        haveItem(items, 'Grapple'),
                                         wand(haveItem(items, 'HiJump'), Knows.GetAroundWallJump)))
 },
 {

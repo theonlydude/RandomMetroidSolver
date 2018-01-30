@@ -259,17 +259,15 @@ def solver():
         roms = [file+'.sfc' for file in filtered]
 
     # main form
-    mainForm = FORM(TABLE(TR("Already uploaded rom in this session:",
-                             SELECT(*roms, **dict(_name="romFile", value=session.romFile+'.sfc' if session.romFile is not None else None)))),
-                    TABLE(TR("Pick a randomized Super Metroid ROM to upload and solve:",
-                             INPUT(_type="file",
-                                   _name="uploadFile", _id="uploadFile"))),
-                    TABLE(TR(INPUT(_type="submit",_value="Compute difficulty"))),
-                    INPUT(_type="text", _name="json", _id="json", _style='display:none'),
+    mainForm = FORM(TABLE(TR("Already uploaded rom in this session: ",
+                             SELECT(*roms, **dict(_name="romFile", value=session.romFile+'.sfc' if session.romFile is not None else None))),
+                          TR("Randomized Super Metroid rom: ",
+                             INPUT(_type="file", _name="uploadFile", _id="uploadFile"))),
+                          INPUT(_type="submit",_value="Compute difficulty"),
+                          INPUT(_type="text", _name="json", _id="json", _style='display:none'),
                     _id="mainform", _name="mainform", _onsubmit="doSubmit();")
 
     if mainForm.process(formname='mainform').accepted:
-
         # new uploaded rom ?
         error = False
         if mainForm.vars['json'] != '':
@@ -352,12 +350,11 @@ def solver():
     files = sorted(os.listdir('diff_presets'))
     presets = [os.path.splitext(file)[0] for file in files]
 
-    loadTable = TABLE(TR("Choose an available preset:",
-                         SELECT(*presets, **dict(_name="paramsFile", value=session.paramsFile, _onchange="this.form.submit()"))))
-    loadForm = FORM(loadTable, _id="loadform", _name="loadform")
+    loadForm = FORM("Choose an available preset: ",
+                    SELECT(*presets, **dict(_name="paramsFile", value=session.paramsFile, _onchange="this.form.submit()")),
+                    _id="loadform", _name="loadform")
 
     if loadForm.process(formname='loadform').accepted:
-
         # check that the presets file exists
         paramsFile = loadForm.vars['paramsFile']
         fullPath = 'diff_presets/{}.json'.format(paramsFile)
@@ -390,7 +387,6 @@ def solver():
     saveForm = FORM(saveTable, _id="saveform", _name="saveform")
 
     if saveForm.process(formname='saveform').accepted:
-
         # update or creation ?
         saveFile = saveForm.vars['saveFile']
         if saveFile == "":

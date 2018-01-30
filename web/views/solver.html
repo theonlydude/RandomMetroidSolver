@@ -16,6 +16,50 @@
 label {
     font-weight: normal !important;
 }
+
+.check {
+    width: 1%;
+    white-space: nowrap;
+}
+.name {
+    width: 10%;
+    white-space: nowrap;
+}
+.diff {
+    width: 1%;
+    white-space: nowrap;
+}
+.desc {
+    width: 33%;
+}
+.rooms {
+    width: 33%;
+}
+.full {
+    width: 100%;
+}
+
+th {
+    background-color: #ddd;
+
+    padding-left: 5px;
+    padding-right: 5px;
+    padding-top: 0px;
+    padding-bottom: 0px;
+}
+
+td {
+    padding-left: 5px;
+    padding-right: 5px;
+    padding-top: 0px;
+    padding-bottom: 0px;
+
+    border-bottom: 1px solid #ddd;
+}
+
+hr {
+    border-width: 2px;
+}
 </style>
 
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
@@ -211,9 +255,9 @@ def displayKnow(know):
   response.write("  <td><input id=\"{}_bool\" name=\"{}_bool\" type=\"checkbox\" {} onClick=\"toggleSelect('{}')\" form=\"mainform\"></td>\n".format(know, know, checked, know), escape=False)
 
   if desc[know]['href'] is not None:
-    response.write("  <td><a href=\"{}\">&nbsp&nbsp{}&nbsp&nbsp</a></td>\n".format(desc[know]['href'], desc[know]['display']), escape=False)
+    response.write("  <td><a href=\"{}\">{}</a></td>\n".format(desc[know]['href'], desc[know]['display']), escape=False)
   else:
-    response.write("  <td>&nbsp&nbsp{}&nbsp&nbsp</td>\n".format(desc[know]['display']), escape=False)
+    response.write("  <td>{}</td>\n".format(desc[know]['display']), escape=False)
     pass
 
   disabled=""
@@ -233,11 +277,13 @@ def displayKnow(know):
     response.write("    <option value=\"{}\" {}>{}</option>\n".format(difficulties[difficulty], selected, difficulties[difficulty]), escape=False)
     pass
 
-  response.write("  <td>&nbsp&nbsp{}</td>".format(desc[know]['title']), escape=False)
+  response.write("  <td>{}</td>".format(desc[know]['title']), escape=False)
 
-  response.write("  <td><input id=\"{}_bool_hidden\" name=\"{}_bool_hidden\" type=\"checkbox\" {} form=\"saveform\" style='display:none'></td>\n".format(know, know, checked, know), escape=False)
+  response.write("  <td></td>", escape=False)
 
-  response.write("  <td><select id=\"{}_diff_hidden\" name=\"{}_diff_hidden\" form=\"saveform\" style='display:none'>\n".format(know, know), escape=False)
+  response.write("  <input id=\"{}_bool_hidden\" name=\"{}_bool_hidden\" type=\"checkbox\" {} form=\"saveform\" style='display:none'>\n".format(know, know, checked, know), escape=False)
+
+  response.write("  <select id=\"{}_diff_hidden\" name=\"{}_diff_hidden\" form=\"saveform\" style='display:none'>\n".format(know, know), escape=False)
   knowDiff=knows[know][1]
   knowDiff=knowDiff if knowDiff != 0 else mania
   for difficulty in [easy, medium, hard, harder, hardcore, mania]:
@@ -255,7 +301,11 @@ def displayKnow(know):
 
 def displayCategory(category):
   response.write("<h2>{}</h2>\n".format(category['title']), escape=False)
-  response.write("<table>\n", escape=False)
+  response.write("<table class=\"full\">\n", escape=False)
+
+  response.write("<colgroup><col class=\"check\" /><col class=\"name\" /><col class=\"diff\" /><col class=\"desc\" /><col class=\"rooms\" />", escape=False)
+
+  response.write("  <tr><th></th><th>Technique</th><th>Difficulty</th><th>Description</th><th>Used in rooms</th></tr>", escape=False)
   for know in category['knows']:
     displayKnow(know)
     pass

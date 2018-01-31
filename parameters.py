@@ -26,92 +26,356 @@ class Conf:
     #}
     #minorsPickup = 'all'
     minorsPickup = 'any'
+
 class Knows:
     # the different technics to know (cf. http://deanyd.net/sm/index.php?title=Item_Randomizer)
     # and the personnal perceived difficulty.
     # False means: I can't do this technic or I don't know it.
 
-    # universal
-    # assume everyone knows wall jump & shinespark.
-    #WallJump = (True, easy)
-    #Shinespark = (True, easy)
+    # store the descriptions used by the website along side the definition of the knows
+    desc = {}
 
     # used across the game
-    Mockball = SMBool(True, easy, ['Mockball']) # early super and ice beam
-    SimpleShortCharge = SMBool(True, easy, ['SimpleShortCharge']) # Waterway ETank without gravity, and Wrecked Ship access
-    InfiniteBombJump = SMBool(True, medium, ['InfiniteBombJump']) # to access certain locations without high jump or space jump
-    GreenGateGlitch = SMBool(True, medium, ['GreenGateGlitch']) # to access screw attack and crocomire
-    ShortCharge = SMBool(False, 0, ['ShortCharge']) # to kill draygon
+    Mockball = SMBool(True, easy, ['Mockball'])
+    desc['Mockball'] = {'display': 'Mockball',
+                        'title': 'Early Super and Ice Beam',
+                        'href': 'https://wiki.supermetroid.run/index.php?title=Mockball',
+                        'rooms': [('Early Supers Room', 'Early_Supers_Room'),
+                                  ('Ice Beam Gate Room', 'Ice_Beam_Gate_Room')]}
+
+    SimpleShortCharge = SMBool(True, easy, ['SimpleShortCharge'])
+    desc['SimpleShortCharge'] = {'display': 'Simple Short Charge',
+                                 'title': 'Waterway ETank without gravity, and Wrecked Ship access',
+                                 'href': 'https://wiki.supermetroid.run/index.php?title=Quick_charge',
+                                 'rooms': [('Parlor and Alcatraz', 'Parlor_and_Alcatraz'),
+                                           ('Waterway Energy Tank Room', 'Waterway_Energy_Tank_Room'),
+                                           ('Landing Site', 'Landing_Site'),
+                                           ('Crateria Keyhunter Room', 'Crateria_Keyhunter_Room')]}
+
+    InfiniteBombJump = SMBool(True, medium, ['InfiniteBombJump'])
+    desc['InfiniteBombJump'] = {'display': 'Infinite Bomb-Jump',
+                                'title': 'To access certain locations without Hi-Jump or Space-Jump',
+                                'href': 'https://www.youtube.com/watch?v=Qfmcm7hkXP4',
+                                'rooms': [('Pretty much everywhere', None)]}
+
+    GreenGateGlitch = SMBool(True, medium, ['GreenGateGlitch'])
+    desc['GreenGateGlitch'] = {'display': 'Green Gate Glitch',
+                               'title': 'To access screw attack and crocomire',
+                               'href': 'https://wiki.supermetroid.run/index.php?title=Gate_Glitch',
+                               'rooms': [('Grapple Tutorial Room 3', 'Grapple_Tutorial_Room_3'),
+                                         ('Fast Ripper Room', 'Fast_Ripper_Room'),
+                                         ('Upper Norfair Farming Room', 'Upper_Norfair_Farming_Room')]}
+
+    ShortCharge = SMBool(False, 0, ['ShortCharge'])
+    desc['ShortCharge'] = {'display': 'Short Charge',
+                           'title': 'To kill draygon',
+                           'href': 'https://wiki.supermetroid.run/index.php?title=Short_Charge',
+                           'rooms': [('Plasma Room', 'Plasma_Room'),
+                                     ('Crateria Super Room', 'Crateria_Super_Room'),
+                                     ("Draygon's Room", 'Draygon%27s_Room')]}
+
     GravityJump = SMBool(True, hard, ['GravityJump'])
-    SpringBallJump = SMBool(True, hard, ['SpringBallJump']) # access to wrecked ship etank without anything else and suitless maridia navigation (precious room exit)
-    SpringBallJumpFromWall = SMBool(True, harder, ['SpringBallJumpFromWall']) # exit screw attack area, climb worst room without high jump
-    GetAroundWallJump = SMBool(True, hard, ['GetAroundWallJump']) # tricky wall jumps where you have to get around the platform you want to wall jump on (access norfair reserve, go through worst room in the game, exit plasma room)
+    desc['GravityJump'] = {'display': 'Gravity-Jump',
+                           'title': 'Super Hi-Jumps in water/lava',
+                           'href': 'https://wiki.supermetroid.run/index.php?title=14%25#Gravity_Jump',
+                           'rooms': [("Draygon's Room", 'Draygon%27s_Room'),
+                                     ('The Moat', 'The_Moat'),
+                                     ('Lava Dive Room', 'Lava_Dive_Room'),
+                                     ('Mt. Everest', 'Mt._Everest')]}
+
+    SpringBallJump = SMBool(True, hard, ['SpringBallJump'])
+    desc['SpringBallJump'] = {'display': 'SpringBall-Jump',
+                              'title': 'Access to wrecked ship etank without anything else, suitless maridia navigation',
+                              'href': 'https://www.youtube.com/watch?v=8ldQUIgBavw&t=49s',
+                              'rooms': [('Main Street', 'Main_Street'),
+                                        ('Sponge Bath', 'Sponge_Bath'),
+                                        ('Mama Turtle Room', 'Mama_Turtle_Room'),
+                                        ('The Precious Room', 'The_Precious_Room')]}
+
+    SpringBallJumpFromWall = SMBool(True, harder, ['SpringBallJumpFromWall'])
+    desc['SpringBallJumpFromWall'] = {'display': 'SpringBall-Jump from wall',
+                                      'title': 'Exit Screw Attack area, climb Worst Room without Hi-Jump',
+                                      'href': None,
+                                      'rooms': [('Screw Attack Room', 'Screw_Attack_Room'),
+                                                ('The Worst Room In The Game', 'The_Worst_Room_In_The_Game')]}
+
+    GetAroundWallJump = SMBool(True, hard, ['GetAroundWallJump'])
+    desc['GetAroundWallJump'] = {'display': 'Get around Wall-Jump',
+                                 'title': 'Tricky Wall-Jumps where you have to get around the platform you want to Wall-Jump on (access Norfair Reserve, go through Worst Room in the game, exit Plasma Room)',
+                                 'href': 'https://www.youtube.com/watch?v=2GPx-6ARSIw&t=137s',
+                                 'rooms': [('The Worst Room In The Game', 'The_Worst_Room_In_The_Game'),
+                                           ('Bubble Mountain', 'Bubble_Mountain'),
+                                           ('Plasma Room', 'Plasma_Room')]}
 
     # bosses
-    DraygonGrappleKill = SMBool(True, medium, ['DraygonGrappleKill']) # easy kill for draygon
-    MicrowaveDraygon = SMBool(True, easy, ['MicrowaveDraygon'])
-    MicrowavePhantoon = SMBool(True, medium, ['MicrowavePhantoon'])
+    DraygonGrappleKill = SMBool(True, medium, ['DraygonGrappleKill'])
+    desc['DraygonGrappleKill'] = {'display': 'Draygon Grapple Kill',
+                                  'title': 'Instant kill on Draygon with electric grapple',
+                                  'href': 'https://www.youtube.com/watch?v=gcemRrXqCbE',
+                                  'rooms': [("Draygon's Room", 'Draygon%27s_Room')]}
 
-    # end game
-    IceZebSkip = SMBool(False, 0, ['IceZebSkip']) # change minimal ammo count
-    SpeedZebSkip = SMBool(False, 0, ['SpeedZebSkip']) # change minimal ammo count
+    MicrowaveDraygon = SMBool(True, easy, ['MicrowaveDraygon'])
+    desc['MicrowaveDraygon'] = {'display': 'Microwave Draygon',
+                                'title': 'Charge/Plasma/X-Ray glitch on Draygon',
+                                'href': 'https://www.youtube.com/watch?v=tj0VybUH6ZY',
+                                'rooms': [("Draygon's Room", 'Draygon%27s_Room')]}
+
+    MicrowavePhantoon = SMBool(True, medium, ['MicrowavePhantoon'])
+    desc['MicrowavePhantoon'] = {'display': 'Microwave Phantoon',
+                                 'title': 'Same as Draygon, with a few missiles to start',
+                                 'href': None,
+                                 'rooms': [("Phantoon's Room", 'Phantoon%27s_Room')]}
+
+    # End Game
+    IceZebSkip = SMBool(False, 0, ['IceZebSkip'])
+    desc['IceZebSkip'] = {'display': 'Ice Zeb Skip',
+                          'title': 'Skip the Zebetites with Ice beam',
+                          'href': 'https://www.youtube.com/watch?v=GBXi3MSpGZg',
+                          'rooms': [('Mother Brain Room', 'Mother_Brain_Room')]}
+
+    SpeedZebSkip = SMBool(False, 0, ['SpeedZebSkip'])
+    desc['SpeedZebSkip'] = {'display': 'Speed Zeb Skip',
+                            'title': 'Skip the Zebetites with a shinespark',
+                            'href': 'https://www.youtube.com/watch?v=jEAgdWQ9kLQ',
+                            'rooms': [('Mother Brain Room', 'Mother_Brain_Room')]}
 
     # Area difficulties
 
     # Brinstar
-    CeilingDBoost = SMBool(True, easy, ['CeilingDBoost']) # for brinstar ceiling
-    AlcatrazEscape = SMBool(True, harder, ['AlcatrazEscape']) # alcatraz without bomb
-    ReverseGateGlitch = SMBool(True, medium, ['ReverseGateGlitch']) # ETank in Brinstar Gate
-    ReverseGateGlitchHiJumpLess = SMBool(False, 0, ['ReverseGateGlitchHiJumpLess']) # Same but without high jump
-    EarlyKraid = SMBool(True, easy, ['EarlyKraid']) # to access kraid without hi jump boots
-    XrayDboost = SMBool(False, 0, ['XrayDboost'])  # Xray without grapple or space jump
-    XrayIce = SMBool(True, hard, ['XrayIce']) # Xray with icing enemies
-    RedTowerClimb = SMBool(True, harder, ['RedTowerClimb']) # brinstar red tower without ice or space jump
+    CeilingDBoost = SMBool(True, easy, ['CeilingDBoost'])
+    desc['CeilingDBoost'] = {'display': 'Ceiling Damage Boost',
+                          'title': 'Hit an enemy at the right time to get the item in Blue Brinstar Ceiling',
+                          'href': 'https://www.metroid2002.com/3/early_items_blue_brinstar_energy_tank.php',
+                          'rooms': [('Blue Brinstar Energy Tank Room', 'https://wiki.supermetroid.run/Blue_Brinstar_Energy_Tank_Room')]}
 
-    # gauntlet
+    AlcatrazEscape = SMBool(True, harder, ['AlcatrazEscape'])
+    desc['AlcatrazEscape'] = {'display': 'Alcatraz Escape',
+                              'title': 'Escape from Bomb area using its entrance tunnel',
+                              'href': 'https://www.youtube.com/watch?v=XSBeLJJafjY',
+                              'rooms': [('Parlor and Alcatraz', 'Parlor_and_Alcatraz')]}
+
+    ReverseGateGlitch = SMBool(True, medium, ['ReverseGateGlitch'])
+    desc['ReverseGateGlitch'] = {'display': 'Reverse Gate Glitch',
+                                 'title': 'Open wave gate in Pink Brinstar from bottom left corner with Hi-Jump',
+                                 'href': 'https://www.youtube.com/watch?v=cykJDBBSBrc',
+                                 'rooms': [('Pink Brinstar Hopper Room', 'Pink_Brinstar_Hopper_Room')]}
+
+    ReverseGateGlitchHiJumpLess = SMBool(False, 0, ['ReverseGateGlitchHiJumpLess'])
+    desc['ReverseGateGlitchHiJumpLess'] = {'display': 'Reverse Gate Glitch w/o Hi-Jump',
+                                           'title': 'Open wave gate in Pink Brinstar from bottom left corner without Hi-Jump',
+                                           'href': None,
+                                           'rooms': [('Pink Brinstar Hopper Room', 'Pink_Brinstar_Hopper_Room')]}
+
+    EarlyKraid = SMBool(True, easy, ['EarlyKraid'])
+    desc['EarlyKraid'] = {'display': 'Early Kraid',
+                          'title': 'Access Kraid area by Wall-Jumping',
+                          'href': 'https://www.youtube.com/watch?v=rHMHqTHHqHs',
+                          'rooms': [('Warehouse Entrance', 'Warehouse_Entrance')]}
+
+    XrayDboost = SMBool(False, 0, ['XrayDboost'])
+    desc['XrayDboost'] = {'display': 'X-Ray Damage Boost',
+                          'title': 'Get to X-Ray location without Space-Jump or Grapple',
+                          'href': 'https://www.youtube.com/watch?v=2GPx-6ARSIw&t=162s',
+                          'rooms': [('Red Brinstar Fireflea Room', 'Red_Brinstar_Fireflea_Room')]}
+
+    XrayIce = SMBool(True, hard, ['XrayIce'])
+    desc['XrayIce'] = {'display': 'X-Ray Ice',
+                       'title': 'Get to X-Ray location by freezing enemies',
+                       'href': None,
+                       'rooms': [('Red Brinstar Fireflea Room', 'Red_Brinstar_Fireflea_Room')]}
+
+    RedTowerClimb = SMBool(True, harder, ['RedTowerClimb'])
+    desc['RedTowerClimb'] = {'display': 'Red Tower Climb',
+                             'title': 'Climb Red Tower without Ice or Space-Jump',
+                             'href': 'https://www.youtube.com/watch?v=g3goe6PZ4o0',
+                             'rooms': [('Red Tower', 'Red_Tower')]}
+
+    # Gauntlet
     HiJumpLessGauntletAccess = SMBool(False, 0, ['HiJumpLessGauntletAccess'])
+    desc['HiJumpLessGauntletAccess'] = {'display': 'Gauntlet Access w/o Hi-Jump',
+                                        'title': 'Access Gauntlet area using really tricky Wall-Jumps',
+                                        'href': 'https://www.youtube.com/watch?v=uVU2X-egOTI&t=25s',
+                                        'rooms': [('Landing Site', 'Landing_Site')]}
+
     HiJumpGauntletAccess = SMBool(True, harder, ['HiJumpGauntletAccess'])
+    desc['HiJumpGauntletAccess'] = {'display': 'Hi-Jump Gauntlet Access',
+                                    'title': 'Access Gauntlet area using tricky Wall-Jumps',
+                                    'href': 'https://www.youtube.com/watch?v=2a6mf-kB60U',
+                                    'rooms': [('Landing Site', 'Landing_Site')]}
+
     GauntletWithBombs = SMBool(True, hard, ['GauntletWithBombs'])
+    desc['GauntletWithBombs'] = {'display': 'Gauntlet With Bombs',
+                                 'title': 'Traverse Gauntlet area with only bombs',
+                                 'href': 'https://www.youtube.com/watch?v=HZ8589lLlAg',
+                                 'rooms': [('Gauntlet Entrance', 'Gauntlet_Entrance')]}
+
     GauntletWithPowerBombs = SMBool(True, medium, ['GauntletWithPowerBombs'])
-    GauntletEntrySpark = SMBool(True, medium, ['GauntletEntrySpark']) # implies Knows.SimpleShortCharge
+    desc['GauntletWithPowerBombs'] = {'display':
+                                      'Gauntlet With Power-Bombs',
+                                      'title': 'Traverse Gauntlet area with power bombs',
+                                      'href': None,
+                                      'rooms': [('Gauntlet Entrance', 'Gauntlet_Entrance')]}
 
-    # upper norfair
-    NorfairReserveIce = SMBool(True, hard, ['NorfairReserveIce']) # climb to norfair reserve area by freezing a Waver
-    WaveBeamWallJump = SMBool(True, easy, ['WaveBeamWallJump']) # climb to wave with wall jump
-    ClimbToGrappleWithIce = SMBool(False, 0, ['ClimbToGrappleWithIce']) # just learn green gate glitch, it's easier
+    GauntletEntrySpark = SMBool(True, medium, ['GauntletEntrySpark'])
+    desc['GauntletEntrySpark'] = {'display': 'Gauntlet Entry Spark',
+                                  'title': 'Traverse Gauntlet area with a Shine spark',
+                                  'href': 'https://www.youtube.com/watch?v=rFobt0S5sD4',
+                                  'rooms': [('Landing Site', 'Landing_Site'),
+                                            ('Gauntlet Entrance', 'Gauntlet_Entrance')]}
 
-    # lower norfair
-    LavaDive = SMBool(True, harder, ['LavaDive']) # ridley without gravity
-    WorstRoomIceCharge = SMBool(True, mania, ['WorstRoomIceCharge']) # can pass worst room JUST by freezing pirates
-    ScrewAttackExit = SMBool(True, medium, ['ScrewAttackExit']) # gain momentum from Golden Torizo Energy Recharge room, then wall jump in Screw Attack room
+    # Upper Norfair
+    NorfairReserveIce = SMBool(True, hard, ['NorfairReserveIce'])
+    desc['NorfairReserveIce'] = {'display': 'Norfair Reserve Ice',
+                                 'title': 'Climb to Norfair Reserve area by freezing a Waver',
+                                 'href': None,
+                                 'rooms': [('Bubble Mountain', 'Bubble_Mountain')]}
+
+    WaveBeamWallJump = SMBool(True, easy, ['WaveBeamWallJump'])
+    desc['WaveBeamWallJump'] = {'display': 'Wave-Beam Wall-Jump',
+                                'title': 'Climb to Wave Beam with Wall-Jumps',
+                                'href': 'https://www.youtube.com/watch?v=2GPx-6ARSIw&t=140s',
+                                'rooms': [('Double Chamber', 'Double_Chamber')]}
+
+    ClimbToGrappleWithIce = SMBool(False, 0, ['ClimbToGrappleWithIce'])
+    desc['ClimbToGrappleWithIce'] = {'display': 'Climb to Grapple With Ice',
+                                     'title': 'Climb to Grapple Beam area using Ice Beam on enemies in Post Crocomire Jump Room',
+                                     'href': None,
+                                     'rooms': [('Post Crocomire Jump Room', 'Post_Crocomire_Jump_Room')]}
+
+    # Lower Norfair
+    LavaDive = SMBool(True, harder, ['LavaDive'])
+    desc['LavaDive'] = {'display': 'Lava Dive',
+                        'title': 'Enter Lower Norfair with Varia and Hi-Jump',
+                        'href': 'https://www.youtube.com/watch?v=pdyBy_54dB0',
+                        'rooms': [('Lava Dive Room', 'Lava_Dive_Room')]}
+
+    WorstRoomIceCharge = SMBool(True, mania, ['WorstRoomIceCharge'])
+    desc['WorstRoomIceCharge'] = {'display': 'Worst Room Ice and Charge',
+                                  'title': 'Go through Worst Room In The Game JUST by freezing pirates',
+                                  'href': 'https://www.youtube.com/watch?v=AYK7LREbLI8',
+                                  'rooms': [('The Worst Room In The Game', 'The_Worst_Room_In_The_Game')]}
+
+    ScrewAttackExit = SMBool(True, medium, ['ScrewAttackExit'])
+    desc['ScrewAttackExit'] = {'display': 'Screw Attack Exit',
+                               'title': 'Gain momentum from Golden Torizo Energy Recharge room, then Wall-Jump in Screw Attack room',
+                               'href': None,
+                               'rooms': [('Screw Attack Room', 'Screw_Attack_Room')]}
 
     # wrecked ship
-    ContinuousWallJump = SMBool(False, 0, ['ContinuousWallJump']) # access wrecked ship
-    DiagonalBombJump = SMBool(True, mania, ['DiagonalBombJump']) # access wrecked ship
-    MockballWs = SMBool(True, hardcore, ['MockballWs']) # early wrecked ship access using a mock ball
+    ContinuousWallJump = SMBool(False, 0, ['ContinuousWallJump'])
+    desc['ContinuousWallJump'] = {'display': 'Continuous Wall-Jump',
+                                  'title': 'Get over the Moat using CWJ',
+                                  'href': 'https://www.youtube.com/watch?v=4HVhTwwax6g',
+                                  'rooms': [('The Moat', 'The_Moat')]}
+
+    DiagonalBombJump = SMBool(True, mania, ['DiagonalBombJump'])
+    desc['DiagonalBombJump'] = {'display': 'Diagonal Bomb-Jump',
+                                'title': 'Get over The Moat using Bomb-Jumps',
+                                'href': 'https://www.youtube.com/watch?v=9Q8WGKCVb40',
+                                'rooms': [('The Moat', 'The_Moat')]}
+
+    MockballWs = SMBool(True, hardcore, ['MockballWs'])
+    desc['MockballWs'] = {'display': 'Mockball Wrecked Ship',
+                          'title': 'Get over the moat using Mockball and Spring Ball',
+                          'href': 'https://www.youtube.com/watch?v=WYxtRF--834',
+                          'rooms': [('The Moat', 'The_Moat')]}
+
     # wrecked ship etank access ("sponge bath" room)
     SpongeBathBombJump = SMBool(True, mania, ['SpongeBathBombJump'])
-    SpongeBathHiJump = SMBool(True, easy, ['SpongeBathHiJump'])
-    SpongeBathSpeed = SMBool(True, medium, ['SpongeBathSpeed'])
+    desc['SpongeBathBombJump'] = {'display': 'SpongeBath Bomb-Jump',
+                                  'title': 'Get through Sponge Bath room with Bomb-Jumps',
+                                  'href': 'https://www.youtube.com/watch?v=8ldQUIgBavw',
+                                  'rooms': [('Sponge Bath', 'Sponge_Bath')]}
 
-    # maridia
-    # suitless
+    SpongeBathHiJump = SMBool(True, easy, ['SpongeBathHiJump'])
+    desc['SpongeBathHiJump'] = {'display': 'SpongeBath Hi-Jump',
+                                'title': 'Get through sponge bath room with Hi-Jump and Wall-Jumps',
+                                'href': 'https://www.youtube.com/watch?v=8ldQUIgBavw',
+                                'rooms': [('Sponge Bath', 'Sponge_Bath')]}
+
+    SpongeBathSpeed = SMBool(True, medium, ['SpongeBathSpeed'])
+    desc['SpongeBathSpeed'] = {'display': 'SpongeBath Speed',
+                               'title': 'Get through sponge bath room with Speed Boster and Wall-Jumps',
+                               'href': 'https://www.youtube.com/watch?v=8ldQUIgBavw',
+                               'rooms': [('Sponge Bath', 'Sponge_Bath')]}
+
+    # Maridia
+    # Suitless
     SuitlessOuterMaridia = SMBool(True, hardcore, ['SuitlessOuterMaridia'])
-    SuitlessOuterMaridiaNoGuns = SMBool(True, mania, ['SuitlessOuterMaridiaNoGuns']) # suitless maridia without even wave, spazer or plasma...
-    # mama
-    MamaGrappleWithWallJump = SMBool(False, 0, ['MamaGrappleWithWallJump']) # get to grapple block with with just grapple and wall jumps
-    # suitless draygon
+    desc['SuitlessOuterMaridia'] = {'display': 'Suitless Outer Maridia',
+                                    'title': 'Make your way through Maridia (up to Botwoon area) with Hi-Jump, Grapple and Ice',
+                                    'href': 'https://www.youtube.com/watch?v=c2xoPigezvM',
+                                    'rooms': [('Main Street', 'Main_Street'),
+                                              ('Mt. Everest', 'Mt._Everest'),
+                                              ('Crab Shaft', 'Crab_Shaft'),
+                                              ('Aqueduct', 'Aqueduct'),
+                                              ('Botwoon Hallway', 'Botwoon_Hallway')]}
+
+    SuitlessOuterMaridiaNoGuns = SMBool(True, mania, ['SuitlessOuterMaridiaNoGuns'])
+    desc['SuitlessOuterMaridiaNoGuns'] = {'display': 'Suitless Outer Maridia with no Guns',
+                                          'title': 'Same as above, but with no firepower besides Ice Beam',
+                                          'href': 'https://www.youtube.com/watch?v=c2xoPigezvM',
+                                          'rooms': [('Main Street', 'Main_Street')]}
+
+    # Mama
+    MamaGrappleWithWallJump = SMBool(False, 0, ['MamaGrappleWithWallJump'])
+    desc['MamaGrappleWithWallJump'] = {'display': 'Mama Grapple with Wall-Jump',
+                                       'title': 'Get to Grapple block with with just Grapple and Wall-Jumps',
+                                       'href': None,
+                                       'rooms': [('Mama Turtle Room', 'Mama_Turtle_Room')]}
+
+    # Suitless Draygon
     DraygonRoomGrappleExit = SMBool(False, 0, ['DraygonRoomGrappleExit'])
-    DraygonRoomCrystalExit = SMBool(False, 0, ['DraygonRoomCrystalExit']) # give a free shine spark
+    desc['DraygonRoomGrappleExit'] = {'display': 'Exit Draygon room with the Grapple',
+                                      'title': 'Use Grapple to bounce them morph and demorph up to the platform',
+                                      'href': 'https://www.youtube.com/watch?v=i2OGuFpcfiw&t=154s',
+                                      'rooms': [("Draygon's Room", 'Draygon%27s_Room')]}
+
+    DraygonRoomCrystalExit = SMBool(False, 0, ['DraygonRoomCrystalExit'])
+    desc['DraygonRoomCrystalExit'] = {'display': 'Exit Draygon room with a shine spark',
+                                      'title': 'Doing a Crystal flash and being grabbed by Draygon gives a free shine spark',
+                                      'href': 'https://www.youtube.com/watch?v=hrHHfvGD3wo&t=625s',
+                                      'rooms': [("Draygon's Room", 'Draygon%27s_Room')]}
+
     PreciousRoomXRayExit = SMBool(False, 0, ['PreciousRoomXRayExit'])
+    desc['PreciousRoomXRayExit'] = {'display': 'Exit the Precious room with an Xray glitch',
+                                    'title': 'Use an XrayScope glitch to climb out of the Precious room',
+                                    'href': 'https://www.youtube.com/watch?v=i2OGuFpcfiw&t=160s',
+                                    'rooms': [('The Precious Room', 'The_Precious_Room')]}
+
     # clips
-    MochtroidClip = SMBool(True, medium, ['MochtroidClip']) # to access botwoon without speedbooster
-    PuyoClip = SMBool(False, 0, ['PuyoClip']) # to access spring ball without grapple beam
+    MochtroidClip = SMBool(True, medium, ['MochtroidClip'])
+    desc['MochtroidClip'] = {'display': 'Mochtroid Clip',
+                             'title': 'Get to Botwoon with Ice Beam',
+                             'href': 'https://wiki.supermetroid.run/index.php?title=14%25#Mochtroid_Clip',
+                             'rooms': [('Botwoon Hallway', 'Botwoon_Hallway')]}
+
+    PuyoClip = SMBool(False, 0, ['PuyoClip'])
+    desc['PuyoClip'] = {'display': 'Puyo Clip',
+                        'title': 'Get to Spring Ball with Gravity Suit and Ice Beam',
+                        'href': 'https://www.youtube.com/watch?v=e5ZH_9paSLw',
+                        'rooms': [('Pants Room', 'Pants_Room')]}
+
     # plasma room
-    KillPlasmaPiratesWithSpark = SMBool(False, 0, ['KillPlasmaPiratesWithSpark']) # kill plasma pirates with spark echoes. implies Knows.ShortCharge
+    KillPlasmaPiratesWithSpark = SMBool(False, 0, ['KillPlasmaPiratesWithSpark'])
+    desc['KillPlasmaPiratesWithSpark'] = {'display': 'Kill Plasma Pirates with Spark',
+                                          'title': 'Use shinesparks to kill the pirates in Plasma Beam room',
+                                          'href': None,
+                                          'rooms': [('Plasma Room', 'Plasma_Room')]}
+
     KillPlasmaPiratesWithCharge = SMBool(True, hard, ['KillPlasmaPiratesWithCharge'])
+    desc['KillPlasmaPiratesWithCharge'] = {'display': 'Kill Plasma Pirates with Charge',
+                                           'title': 'Use pseudo-screw to kill the pirates in Plasma Beam room',
+                                           'href': None,
+                                           'rooms': [('Plasma Room', 'Plasma_Room')]}
+
     # sandpit
     SuitlessSandpit = SMBool(False, 0, ['SuitlessSandpit']) # access the item in the sandpit suitless
+    desc['SuitlessSandpit'] = {'display': 'Suitless Sandpit',
+                               'title': 'Access item in the left sandpit without Gravity',
+                               'href': 'https://www.youtube.com/watch?v=1M2TiEVwH2I',
+                               'rooms': [('West Sand Hole', 'West_Sand_Hole'),
+                                         ('East Sand Hole', 'East_Sand_Hole')]}
 
 class Settings:
     # boss difficulty tables :

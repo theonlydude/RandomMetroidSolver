@@ -377,6 +377,43 @@ class Knows:
                                'rooms': [('West Sand Hole', 'West_Sand_Hole'),
                                          ('East Sand Hole', 'East_Sand_Hole')]}
 
+    categories = [{'knows': ['Mockball', 'SimpleShortCharge', 'InfiniteBombJump', 'GreenGateGlitch',
+                             'ShortCharge', 'GravityJump', 'SpringBallJump',
+                             'SpringBallJumpFromWall', 'GetAroundWallJump'],
+                   'title': 'Used across the game'},
+                  {'knows': ['DraygonGrappleKill', 'MicrowaveDraygon', 'MicrowavePhantoon'],
+                   'title': 'Bosses'},
+                  {'knows': ['IceZebSkip', 'SpeedZebSkip'],
+                   'title': 'End Game'},
+                  {'knows': ['CeilingDBoost', 'AlcatrazEscape', 'ReverseGateGlitch',
+                             'ReverseGateGlitchHiJumpLess', 'EarlyKraid', 'XrayDboost',
+                             'XrayIce', 'RedTowerClimb'],
+                   'title': 'Brinstar'},
+                  {'knows': ['HiJumpLessGauntletAccess', 'HiJumpGauntletAccess', 'GauntletWithBombs',
+                             'GauntletWithPowerBombs', 'GauntletEntrySpark'],
+                   'title': 'Gauntlet'},
+                  {'knows': ['NorfairReserveIce', 'WaveBeamWallJump', 'ClimbToGrappleWithIce'],
+                   'title': 'Upper Norfair'},
+                  {'knows': ['LavaDive', 'ScrewAttackExit', 'WorstRoomIceCharge'],
+                   'title': 'Lower Norfair'},
+                  {'knows': ['ContinuousWallJump', 'DiagonalBombJump', 'MockballWs'],
+                   'title': 'Wrecked Ship'},
+                  {'knows': ['SpongeBathBombJump', 'SpongeBathHiJump', 'SpongeBathSpeed'],
+                   'title': 'Wrecked Ship Etank'},
+                  {'knows': ['SuitlessOuterMaridia', 'SuitlessOuterMaridiaNoGuns'],
+                   'title': 'Maridia Suitless'},
+                  {'knows': ['MamaGrappleWithWallJump'],
+                   'title': 'Mama Turtle'},
+                  {'knows': ['DraygonRoomGrappleExit', 'DraygonRoomCrystalExit',
+                             'PreciousRoomXRayExit'],
+                   'title': 'Maridia Suitless Draygon'},
+                  {'knows': ['MochtroidClip', 'PuyoClip'],
+                   'title': 'Maridia Clips'},
+                  {'knows': ['KillPlasmaPiratesWithSpark', 'KillPlasmaPiratesWithCharge'],
+                   'title': 'Maridia Plasma Room'},
+                  {'knows': ['SuitlessSandpit'],
+                   'title': 'Maridia Sandpit'}]
+
 class Settings:
     # boss difficulty tables :
     #

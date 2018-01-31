@@ -33,38 +33,6 @@ difficulties2 = {
     'mania' : mania
 }
 
-usedAcrossTheGame = ['Mockball', 'SimpleShortCharge', 'InfiniteBombJump', 'GreenGateGlitch', 'ShortCharge', 'GravityJump', 'SpringBallJump', 'SpringBallJumpFromWall', 'GetAroundWallJump']
-bosses = ['DraygonGrappleKill', 'MicrowaveDraygon', 'MicrowavePhantoon']
-endGame = ['IceZebSkip', 'SpeedZebSkip']
-brinstar = ['CeilingDBoost', 'AlcatrazEscape', 'ReverseGateGlitch', 'ReverseGateGlitchHiJumpLess', 'EarlyKraid', 'XrayDboost', 'XrayIce', 'RedTowerClimb']
-gauntlet = ['HiJumpLessGauntletAccess', 'HiJumpGauntletAccess', 'GauntletWithBombs', 'GauntletWithPowerBombs', 'GauntletEntrySpark']
-upperNorfair = ['NorfairReserveIce', 'WaveBeamWallJump', 'ClimbToGrappleWithIce']
-lowerNorfair = ['LavaDive', 'ScrewAttackExit', 'WorstRoomIceCharge']
-wreckedShip = ['ContinuousWallJump', 'DiagonalBombJump', 'MockballWs']
-wreckedShipEtank = ['SpongeBathBombJump', 'SpongeBathHiJump', 'SpongeBathSpeed']
-maridiaSuitless = ['SuitlessOuterMaridia', 'SuitlessOuterMaridiaNoGuns']
-maridiaMama = ['MamaGrappleWithWallJump']
-maridiaSuitlessDraygon = ['DraygonRoomGrappleExit', 'DraygonRoomCrystalExit', 'PreciousRoomXRayExit']
-maridiaClips = ['MochtroidClip', 'PuyoClip']
-maridiaPlasmaRoom = ['KillPlasmaPiratesWithSpark', 'KillPlasmaPiratesWithCharge']
-maridiaSandpit = ['SuitlessSandpit']
-
-categories = [{'knows': usedAcrossTheGame, 'title': 'Used across the game'},
-              {'knows': bosses, 'title': 'Bosses'},
-              {'knows': endGame, 'title': 'End Game'},
-              {'knows': brinstar, 'title': 'Brinstar'},
-              {'knows': gauntlet, 'title': 'Gauntlet'},
-              {'knows': upperNorfair, 'title': 'Upper Norfair'},
-              {'knows': lowerNorfair, 'title': 'Lower Norfair'},
-              {'knows': wreckedShip, 'title': 'Wrecked Ship'},
-              {'knows': wreckedShipEtank, 'title': 'Wrecked Ship Etank'},
-              {'knows': maridiaSuitless, 'title': 'Maridia Suitless'},
-              {'knows': maridiaMama, 'title': 'Mama Turtle'},
-              {'knows': maridiaSuitlessDraygon, 'title': 'Maridia Suitless Draygon'},
-              {'knows': maridiaClips, 'title': 'Maridia Clips'},
-              {'knows': maridiaPlasmaRoom, 'title': 'Maridia Plasma Room'},
-              {'knows': maridiaSandpit, 'title': 'Maridia Sandpit'}]
-
 def solver():
     # load conf from session if available
     loaded = False
@@ -312,7 +280,7 @@ def solver():
 
     # add missing knows
     for know in Knows.__dict__:
-        if know[0:len('__')] != '__' and know != 'desc':
+        if know[0:len('__')] != '__' and know[0] == know[0].upper():
             if know not in params['Knows'].keys():
                 params['Knows'][know] = Knows.__dict__[know]
 
@@ -320,7 +288,7 @@ def solver():
     return dict(mainForm=mainForm, loadForm=loadForm, saveForm=saveForm,
                 desc=Knows.desc,
                 difficulties=difficulties,
-                categories=categories,
+                categories=Knows.categories,
                 knows=params['Knows'], conf=conf, knowsUsed=knowsUsed,
                 resultText=resultText, pathTable=pathTable,
                 difficulty=difficulty, diffPercent=diffPercent,
@@ -334,7 +302,7 @@ def generate_json_from_parameters(vars, hidden):
     paramsDict = {'Conf': {}, 'Settings': {}, 'Knows': {}}
     for var in Knows.__dict__:
         # print("var={}".format(var))
-        if var[0:len('__')] != '__' and var != 'desc':
+        if var[0:len('__')] != '__' and var[0] == var[0].upper():
             boolVar = vars[var+"_bool"+hidden]
             # print("{} = {}".format(var+"_bool"+hidden, boolVar))
             if boolVar is None:

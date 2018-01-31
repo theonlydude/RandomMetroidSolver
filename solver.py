@@ -9,7 +9,7 @@ from parameters import Conf, Knows, Settings
 from parameters import easy, medium, hard, harder, hardcore, mania
 
 # the helper functions
-from helpers import *
+from helpers import Pickup, Bosses, wand, wor, enoughStuffTourian, SMBool
 
 class Solver:
     # given a rom and parameters returns the estimated difficulty

@@ -1,6 +1,15 @@
-from parameters import Knows, Settings
+from parameters import Knows, Settings, easy, medium, hard, harder, hardcore, mania
 # the canXXX functions
-from helpers import *
+from helpers import canEnterAndLeaveGauntlet, wand, wor, haveItem, canOpenRedDoors
+from helpers import canPassBombPassages, canDestroyBombWalls, canUsePowerBombs, SMBool
+from helpers import canFly, canAccessRedBrinstar, energyReserveCountOk, canAccessKraid
+from helpers import Bosses, enoughStuffsKraid, heatProof, energyReserveCountOk
+from helpers import energyReserveCountOkList, canAccessCrocomire, canAccessHeatedNorfair
+from helpers import canPassWorstRoom, enoughStuffsRidley, canAccessLowerNorfair
+from helpers import canAccessWs, enoughStuffsPhantoon, enoughStuffsDraygon
+from helpers import canAccessOuterMaridia, canDefeatDraygon, canDoSuitlessMaridia
+from helpers import canAccessInnerMaridia, canFlyDiagonally, canDefeatBotwoon
+from helpers import canCrystalFlash, canOpenGreenDoors, canHellRun
 
 # all the items locations with the prerequisites to access them
 

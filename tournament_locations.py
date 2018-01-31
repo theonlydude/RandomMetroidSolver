@@ -20,6 +20,7 @@ locations = [
     'Class': "Major",
     'Address': 0x78264,
     'Visibility': "Visible",
+    'Room': 'Gauntlet Energy Tank Room',
     # EXPLAINED: difficulty already handled in the canEnterAndLeaveGauntlet function
     'Available': lambda items: canEnterAndLeaveGauntlet(items)
 },
@@ -29,6 +30,7 @@ locations = [
     'Address': 0x78404,
     'Class': "Major",
     'Visibility': "Chozo",
+    'Room': 'Bomb Torizo Room',
     # EXPLAINED: need to morph to enter Alcatraz. red door at Flyway.
     #            we may not have bombs or power bomb to get out of Alcatraz.
     'Available': lambda items: wand(haveItem(items, 'Morph'),
@@ -42,6 +44,7 @@ locations = [
     'Class': "Major",
     'Address': 0x78432,
     'Visibility': "Visible",
+    'Room': 'Terminator Room',
     'Available': lambda items: wor(wand(haveItem(items, 'SpeedBooster'), Knows.SimpleShortCharge), 
                                    canDestroyBombWalls(items))
 },
@@ -51,6 +54,7 @@ locations = [
     'Class': "Major",
     'Address': 0x7852C,
     'Visibility': "Chozo",
+    'Room': 'Brinstar Reserve Tank Room',
     # EXPLAINED: break the bomb wall at left of Parlor and Alcatraz,
     #            open red door at Green Brinstar Main Shaft,
     #            mock ball for early retreval or speed booster
@@ -67,6 +71,7 @@ locations = [
     'Class': "Major",
     'Address': 0x78614,
     'Visibility': "Chozo",
+    'Room': 'Big Pink',
     # EXPLAINED: open red door at Green Brinstar Main Shaft (down right),
     #            break the bomb wall at left of Parlor and Alcatraz
     'Available': lambda items: wand(canOpenRedDoors(items),
@@ -79,6 +84,7 @@ locations = [
     'Class': "Major",
     'Address': 0x786DE,
     'Visibility': "Visible",
+    'Room': 'Morph Ball Room',
     # EXPLAINED: no difficulty
     'Available': lambda items: SMBool(True, 0)
 },
@@ -88,6 +94,7 @@ locations = [
     'Class': "Major",
     'Address': 0x7879E,
     'Visibility': "Hidden",
+    'Room': 'Blue Brinstar Energy Tank Room',
     # EXPLAINED: to get this major item the different technics are:
     #  -can fly (continuous bomb jump or space jump)
     #  -have the high jump boots
@@ -104,6 +111,7 @@ locations = [
     'Class': "Major",
     'Address': 0x787C2,
     'Visibility': "Visible",
+    'Room': 'Etecoon Energy Tank Room',
     # EXPLAINED: break the bomb wall at left of Parlor and Alcatraz,
     #            power bomb down of Green Brinstar Main Shaft
     'Available': lambda items: canUsePowerBombs(items)
@@ -114,6 +122,7 @@ locations = [
     'Class': "Major",
     'Address': 0x787FA,
     'Visibility': "Visible",
+    'Room': 'Waterway Energy Tank Room',
     # EXPLAINED: break the bomb wall at left of Parlor and Alcatraz with power bombs,
     #            open red door at Green Brinstar Main Shaft (down right),
     #            power bomb at bottom of Big Pink (Charge Beam),
@@ -133,6 +142,7 @@ locations = [
     'Class': "Major",
     'Address': 0x78824,
     'Visibility': "Visible",
+    'Room': 'Hopper Energy Tank Room',
     # DONE: use Knows.ReverseGateGlitch
     'Available': lambda items: wand(canUsePowerBombs(items),
                                     wor(haveItem(items, 'Wave'),
@@ -148,6 +158,7 @@ locations = [
     'Class': "Major",
     'Address': 0x78876,
     'Visibility': "Chozo",
+    'Room': 'X-Ray Scope Room',
     'Available': lambda items: wand(canAccessRedBrinstar(items),
                                     canUsePowerBombs(items),
                                     wor(wor(haveItem(items, 'Grapple'),
@@ -169,6 +180,7 @@ locations = [
     'Class': "Major",
     'Address': 0x7896E,
     'Visibility': "Chozo",
+    'Room': 'Spazer Room',
     # DONE: no difficulty
     'Available': lambda items: canAccessRedBrinstar(items)
 },
@@ -178,6 +190,7 @@ locations = [
     'Class': "Major",
     'Address': 0x7899C,
     'Visibility': "Hidden",
+    'Room': 'Warehouse Energy Tank Room',
     # DONE: no difficulty
     'Available': lambda items: wand(canAccessKraid(items), Bosses.bossDead('Kraid'))
 },
@@ -187,6 +200,7 @@ locations = [
     'Class': "Major",
     'Address': 0x78ACA,
     'Visibility': "Chozo",
+    'Room': 'Varia Suit Room',
     # DONE: no difficulty
     'Available': lambda items: wand(canAccessKraid(items),
                                     enoughStuffsKraid(items)),
@@ -198,6 +212,7 @@ locations = [
     'Class': "Major",
     'Address': 0x78B24,
     'Visibility': "Chozo",
+    'Room': 'Ice Beam Room',
     # DONE: harder without varia
     'Available': lambda items: wand(canAccessKraid(items),
                                     wor(heatProof(items),
@@ -212,6 +227,7 @@ locations = [
     'Class': "Major",
     'Address': 0x78BA4,
     'Visibility': "Visible",
+    'Room': "Crocomire's Room",
     # DONE: difficulty already set in canHellRun
     'Available': lambda items: canAccessCrocomire(items)
 },
@@ -221,6 +237,7 @@ locations = [
     'Class': "Major",
     'Address': 0x78BAC,
     'Visibility': "Chozo",
+    'Room': 'Hi Jump Boots Room',
     # DONE: no difficulty
     'Available': lambda items: canAccessRedBrinstar(items)
 },
@@ -230,6 +247,7 @@ locations = [
     'Class': "Major",
     'Address': 0x78C36,
     'Visibility': "Chozo",
+    'Room': 'Grapple Beam Room',
     'Available': lambda items: wand(canAccessCrocomire(items),
                                     wor(canFly(items),
                                         wand(haveItem(items, 'Ice'),
@@ -243,6 +261,7 @@ locations = [
     'Class': "Major",
     'Address': 0x78C3E,
     'Visibility': "Chozo",
+    'Room': 'Norfair Reserve Tank Room',
     'Available': lambda items: wand(canAccessHeatedNorfair(items),
                                     wor(canFly(items),
                                         haveItem(items, 'Grapple'),
@@ -257,6 +276,7 @@ locations = [
     'Class': "Major",
     'Address': 0x78C82,
     'Visibility': "Chozo",
+    'Room': 'Speed Booster Room',
     # DONE: difficulty already done in the function
     'Available': lambda items: canAccessHeatedNorfair(items)
 },
@@ -266,8 +286,9 @@ locations = [
     'Class': "Major",
     'Address': 0x78CCA,
     'Visibility': "Chozo",
-    # DONE: this one is not easy without grapple beam nor space jump, with hijump medium wall jump is required
-    # FLO : no need of high jump for this, just wall jumping
+    'Room': 'Wave Beam Room',
+    # DONE: this one is not easy without grapple beam nor space jump,
+    #       with hijump medium wall jump is required
     'Available': lambda items: wand(canAccessHeatedNorfair(items),
                                     wor(haveItem(items, 'Grapple'),
                                         haveItem(items, 'SpaceJump'),
@@ -279,6 +300,7 @@ locations = [
     'Class': "Major",
     'Address': 0x79108,
     'Visibility': "Hidden",
+    'Room': 'Ridley Tank Room',
     # DONE: already set in function
     'Available': lambda items: wand(canPassWorstRoom(items),
                                     enoughStuffsRidley(items)),
@@ -290,6 +312,7 @@ locations = [
     'Class': "Major",
     'Address': 0x79110,
     'Visibility': "Chozo",
+    'Room': 'Screw Attack Room',
     # DONE: easy with green gate glitch
     'Available': lambda items: wand(canAccessLowerNorfair(items),
                                     wor(haveItem(items, 'SpaceJump'),
@@ -307,6 +330,7 @@ locations = [
     'Class': "Major",
     'Address': 0x79184,
     'Visibility': "Visible",
+    'Room': 'Lower Norfair Fireflea Room',
     'Available': lambda items: canPassWorstRoom(items)
 },
 {

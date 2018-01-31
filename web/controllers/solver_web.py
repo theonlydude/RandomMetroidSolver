@@ -8,10 +8,9 @@ if os.path.exists(path) and path not in sys.path:
 import datetime, os, hashlib
 
 # to solve the rom
-from parameters import *
-from helpers import *
+from parameters import easy, medium, hard, harder, hardcore, mania, Conf, Knows, Settings
 import tournament_locations
-from solver import *
+from solver import Solver, ParamsLoader, DifficultyDisplayer
 
 difficulties = {
     0: 'mania',

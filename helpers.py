@@ -472,7 +472,7 @@ def computeBossDifficulty(items, ammoMargin, secs, diffTbl):
             # interpolate if we can
             if energy > current and sup is not None:
                 difficulty += (energyDict[sup] - difficulty)/(sup - current) * (energy - current)
- #   print("energy=" + str(energy) + ", base diff=" + str(difficulty))
+#    print("energy=" + str(energy) + ", base diff=" + str(difficulty))
     # adjust by fight duration
     difficulty *= (duration / 120)
     # and by ammo margin
@@ -486,22 +486,22 @@ def computeBossDifficulty(items, ammoMargin, secs, diffTbl):
     return difficulty
 
 def enoughStuffsRidley(items):
-    #print('RIDLEY')
     (ammoMargin, secs) = canInflictEnoughDamages(items, 18000, doubleSuper=True, givesDrops=False)
     if ammoMargin == 0:
         return SMBool(False)
+#    print('RIDLEY', ammoMargin, secs)
     return SMBool(True, computeBossDifficulty(items, ammoMargin, secs, Settings.bossesDifficulty['Ridley']))
 
 def enoughStuffsKraid(items):
-    #print('KRAID')
     (ammoMargin, secs) = canInflictEnoughDamages(items, 1000)
     if ammoMargin == 0:
         return SMBool(False)
+#    print('KRAID', ammoMargin, secs)
     return SMBool(True, computeBossDifficulty(items, ammoMargin, secs, Settings.bossesDifficulty['Kraid']))
 
 def enoughStuffsDraygon(items):
-    #print('DRAYGON')
     (ammoMargin, secs) = canInflictEnoughDamages(items, 6000)
+#    print('DRAY', ammoMargin, secs)
     if ammoMargin > 0:
         fight = SMBool(True, computeBossDifficulty(items, ammoMargin, secs, Settings.bossesDifficulty['Draygon']))
     else:
@@ -517,10 +517,10 @@ def enoughStuffsDraygon(items):
                     haveItem(items, 'SpeedBooster')))
 
 def enoughStuffsPhantoon(items):
-    #print('PHANTOON')
     (ammoMargin, secs) = canInflictEnoughDamages(items, 2500, doubleSuper=True)
     if ammoMargin == 0:
         return SMBool(False)
+#    print('PHANTOON', ammoMargin, secs)
     difficulty = computeBossDifficulty(items, ammoMargin, secs, Settings.bossesDifficulty['Phantoon'])
     hasCharge = haveItem(items, 'Charge').bool
     if hasCharge or haveItem(items, 'ScrewAttack').bool:
@@ -545,6 +545,7 @@ def enoughStuffsMotherbrain(items):
     (ammoMargin, secs) = canInflictEnoughDamages(items, 18000 + 3000, givesDrops=False)
     if ammoMargin == 0:
         return SMBool(False)
+#    print('MB2', ammoMargin, secs)
     return SMBool(True, computeBossDifficulty(items, ammoMargin, secs, Settings.bossesDifficulty['Mother Brain']))
 
 def canPassMetroids(items):

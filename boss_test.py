@@ -17,12 +17,14 @@ def stuff(base, nEtanks, nMissiles, nSupers, nPowerBombs):
 itemSets = {
     'Kraid' : {
         'Standard' : stuff(['Spazer', 'Charge'], 1, 4, 1, 0),
-        'ChargeLess' : stuff([], 1, 4, 1, 0)
+        'ChargeLess' : stuff([], 1, 4, 1, 0),
+        'NoTanks' : stuff(['Spazer', 'Charge'], 0, 4, 1, 0),
     },
     'Phantoon' : {
         'Standard' : stuff(['Spazer', 'Charge', 'Wave', 'Varia'], 5, 6, 1, 1),
         'ChargeLess' : stuff(['Varia'], 5, 6, 3, 1),
-        'Tough' : stuff(['Charge', 'Wave'], 5, 3, 1, 1)
+        'Tough' : stuff(['Charge', 'Wave'], 5, 3, 1, 1),
+        'VeryTough': stuff(['Charge'], 1, 2, 1, 1),
     },
     'Draygon' : {
         'Standard' : stuff(['Spazer', 'Charge', 'Wave', 'Ice', 'Varia', 'Gravity'], 7, 10, 4, 3),
@@ -30,12 +32,12 @@ itemSets = {
         'Tough' : stuff(['Charge', 'Wave', 'Ice', 'Varia', 'Gravity'], 5, 8, 2, 3),
     },
     'Ridley' : {
-        'Standard' : stuff(['Plasma', 'Charge', 'Wave', 'Ice', 'Varia', 'Gravity'], 9, 10, 6, 3),
+        'Standard' : stuff(['Plasma', 'Charge', 'Wave', 'Ice', 'Varia', 'Gravity'], 7, 10, 6, 3),
         'ChargeLess' : stuff(['Varia', 'Gravity'], 9, 10, 9, 3),
-        'Tough' : stuff(['Spazer', 'Charge', 'Wave', 'Ice', 'Varia', 'Gravity'], 5, 10, 3, 3),
+        'Tough' : stuff(['Spazer', 'Charge', 'Wave', 'Ice', 'Varia', 'Gravity'], 4, 10, 3, 3),
         'TX4633580' : stuff(['Spazer', 'Charge', 'Plasma', 'Ice', 'Varia', 'Gravity'], 13, 10, 10, 4)
     },
-    'MotherBrain' : {
+    'Mother Brain' : {
         'Standard' : stuff(['Plasma', 'Charge', 'Wave', 'Ice', 'Varia', 'Gravity'], 9, 10, 6, 3),
         'ChargeLess' : stuff(['Varia', 'Gravity'], 9, 10, 14, 3),
         'Tough' : stuff(['Spazer', 'Charge', 'Wave', 'Ice', 'Varia', 'Gravity'], 5, 10, 5, 3)
@@ -43,23 +45,28 @@ itemSets = {
 }
 
 def boss(name, diffFunction):
-    print("*** " + name + " ***")
-    for setName, itemSet in itemSets[name].items():
-        print('* ' + setName)
-#        print(str(itemSet))
-        d = diffFunction(itemSet)
-        print('---> ' + str(d))
+    with open(name + ".csv", "w") as csvOut:
+        csvOut.write("Diff_preset;Item_set;ok;diff\n")
+        print("*** " + name + " ***")
+        for presetName, diffPreset in Settings.bossesDifficultyPresets[name].items():
+            print("** Diff preset :" + presetName)
+            Settings.bossesDifficulty[name] = diffPreset
+            print(str(Settings.bossesDifficulty[name]))        
+            for setName, itemSet in itemSets[name].items():
+                print('* Item set ' + setName)
+                #        print(str(itemSet))
+                d = diffFunction(itemSet)
+                print('---> ' + str(d))
+                csvOut.write(presetName + ";" + setName + ";" + str(d[0]) + ";" + str(d[1]) + "\n")
 
 if __name__ == "__main__":
     params=None
     if len(sys.argv) >= 2:
         params = sys.argv[1]
     ParamsLoader.factory(params).load()
-    print(str(Settings.bossesDifficulty))
-
     boss('Kraid', enoughStuffsKraid)
     boss('Phantoon', enoughStuffsPhantoon)
     boss('Draygon', enoughStuffsDraygon)
     boss('Ridley', enoughStuffsRidley)
-    boss('MotherBrain', enoughStuffsMotherbrain)
+    boss('Mother Brain', enoughStuffsMotherbrain)
 

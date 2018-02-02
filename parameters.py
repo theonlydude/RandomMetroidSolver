@@ -439,35 +439,40 @@ class Settings:
     # considered if you do not have charge.
     #
     # If not enough info is provided here, base difficulty will be medium.
+
+    # logic behind the presets : the ones where find the boss difficult are
+    # calibrated to give 'hard' in vanilla situations, the default are calibrated
+    # to give 'medium' in vanilla situations, just above gives 'easy' in vanilla
+    # situations, and top settings basically discards the boss except for extreme
+    # situations (very low energy or firepower)
     bossesDifficultyPresets = {
         'Kraid' : {
             "He's annoying" : {
-                'Rate' : 0.05,
+                'Rate' : 0.0075,
                 'Energy' : {
-                    1 : hard,
-                    2 : medium,
-                    3 : easy
-                }
-            },
-            # Gives medium for vanilla situation
-            'Default' : {
-                'Rate' : 0.05,
-                'Energy' : {
+                    0.5 : hard,
                     1 : medium,
                     2 : easy
                 }
-            },       
-            # you usually get quick kill
-            'Quick Kill' : {
-                'Rate' : 3,
+            },
+            'Default' : {
+                'Rate' : 0.015,
                 'Energy' : {
-                    1 : easy
+                    0.5 : hard,
+                    1.5 : medium,
+                    2.5 : easy
+                }
+            },
+            'Quick Kill' : {
+                'Rate' : 1,
+                'Energy' : {
+                    0.5 : easy
                 }
             }
         },
         'Phantoon' : {
-            'Default' : {
-                'Rate' : 0.02,
+            'A lot of trouble' : {
+                'Rate' : 0.01,
                 'Energy' : {
                     1 : mania,
                     3 : hardcore,
@@ -476,11 +481,40 @@ class Settings:
                     7 : medium,
                     10 : easy
                 }
+            },
+            'Default' : {
+                'Rate' : 0.015,
+                'Energy' : {
+                    1 : mania,
+                    2 : hardcore,
+                    4 : harder,
+                    5 : hard,
+                    6 : medium,
+                    10 : easy
+                }
+            },
+            'Used to it' : {
+                'Rate' : 0.02,
+                'Energy' : {
+                    1 : (hardcore + mania)/2,
+                    2 : harder,
+                    2.5 : hard,
+                    4 : medium,
+                    6 : easy
+                }
+            },
+            'No problemo' : {
+                'Rate' : 0.02,
+                'Energy' : {
+                    1 : hard,
+                    2 : medium,
+                    3 : easy
+                }                
             }
         },
         'Draygon' : {
-            'Default' : {
-                'Rate' : 0.08,
+            'A lot of trouble' : {
+                'Rate' : 0.025,
                 'Energy' : {
                     1 : mania,
                     6 : hardcore,
@@ -490,29 +524,125 @@ class Settings:
                     20 : easy
                 },
             },
+            'Default' : {
+                'Rate' : 0.05,
+                'Energy' : {
+                    1 : mania,
+                    6 : hardcore,
+                    8 : harder,
+                    11 : hard,
+                    14 : medium,
+                    20 : easy
+                },
+            },
+            'Used to it' : {
+                'Rate' : 0.06,
+                'Energy' : {
+                    1 : mania,
+                    4 : hardcore,
+                    6 : harder,
+                    8 : hard,
+                    11 : medium,
+                    14 : easy
+                },            
+            },
+            'No problemo' : {
+                'Rate' : 0.08,
+                'Energy' : {
+                    1 : mania,
+                    4 : hardcore,
+                    5 : harder,
+                    6 : hard,
+                    8 : medium,
+                    12 : easy
+                },
+            }
         },
         'Ridley' : {
-            'Default' : {
-                'Rate' : 0.15,
+            "I'm scared!" : {
+                'Rate' : 0.047,
                 'Energy' : {
                     1 : mania,
                     7 : hardcore,
                     11 : harder,
                     14 : hard,
                     20 : medium
+                }, 
+            },
+            'Default' : {
+                'Rate' : 0.12,
+                'Energy' : {
+                    1 : mania,
+                    6 : hardcore,
+                    8 : harder,
+                    12 : hard,
+                    20 : medium,
+                    36 : easy
                 },
             },
+            'Used to it' : {
+                'Rate' : 0.16,
+                'Energy' : {
+                    1 : mania,
+                    6 : hardcore,
+                    8 : harder,
+                    10 : hard,
+                    14 : medium,
+                    20 : easy
+                },                
+            },
+            'Piece of cake' : {
+                'Rate' : 0.3,
+                'Energy' : {
+                    1 : mania,
+                    3 : hardcore,
+                    4 : harder,
+                    6 : hard,
+                    8 : medium,
+                    10 : easy
+                }                
+            }
         },
         'Mother Brain' : {
-            'Default' : {
-                'Rate' : 0.5,
+            "It can get ugly" : {
+                'Rate' : 0.18,
                 'Energy' : {
-                    3 : mania, # less than 3 is actually impossible
+                    4 : mania, # less than 4 is actually impossible
+                    8 : hardcore,
+                    12 : harder,
+                    16 : hard,
+                    24 : medium,
+                    32 : easy
+                }                
+            },
+            'Default' : {
+                'Rate' : 0.25,
+                'Energy' : {
+                    4 : mania, # less than 4 is actually impossible
                     8 : hardcore,
                     12 : harder,
                     16 : hard,
                     20 : medium,
                     24 : easy
+                }
+            },
+            'Is this really the last boss?': {
+                'Rate' : 0.5,
+                'Energy' : {
+                    4 : mania, # less than 4 is actually impossible
+                    6 : hardcore,
+                    8 : harder,
+                    12 : hard,
+                    14 : medium,
+                    20 : easy
+                }
+            },
+            'Nice cutscene bro' : {
+                'Rate' : 0.6,
+                'Energy' : {
+                    4 : hard, # less than 4 is actually impossible
+                    8 : medium,
+                    12 : easy
                 }
             }
         }

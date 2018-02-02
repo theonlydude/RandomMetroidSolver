@@ -339,6 +339,7 @@ locations = [
     'Class': "Major",
     'Address': 0x7C2E9,
     'Visibility': "Chozo",
+    'Room': 'Bowling Alley',
     # DONE: easy
     'Available': lambda items: wand(canAccessWs(items),
                                     haveItem(items, 'SpeedBooster'),
@@ -352,6 +353,7 @@ locations = [
     'Class': "Major",
     'Address': 0x7C337,
     'Visibility': "Visible",
+    'Room': 'Wrecked Ship Energy Tank Room',
     'Available': lambda items: wand(canAccessWs(items),
                                     Bosses.bossDead('Phantoon'),
                                     wor(wand(wor(haveItem(items, 'Bomb'),
@@ -371,6 +373,7 @@ locations = [
     'Class': "Major",
     'Address': 0x7C365,
     'Visibility': "Visible",
+    'Room': 'Wrecked Ship East Super Room',
     # DONE: easy once WS is accessible
     'Available': lambda items: wand(canAccessWs(items),
                                     enoughStuffsPhantoon(items)),
@@ -382,6 +385,7 @@ locations = [
     'Class': "Major",
     'Address': 0x7C36D,
     'Visibility': "Chozo",
+    'Room': 'Gravity Suit Room',
     # DONE: easy
     'Available': lambda items: wand(canAccessWs(items),
                                     Bosses.bossDead('Phantoon'),
@@ -394,6 +398,7 @@ locations = [
     'Class': "Major",
     'Address': 0x7C47D,
     'Visibility': "Visible",
+    'Room': 'Mama Turtle Room',
     # DONE: difficulty already handled in canAccessOuterMaridia
     # to acces the ETank in higher part of the room:
     #  -use grapple to attach to the block
@@ -412,6 +417,7 @@ locations = [
     'Class': "Major",
     'Address': 0x7C559,
     'Visibility': "Chozo",
+    'Room': 'Plasma Room',
     # DONE: to leave the Plasma Beam room you have to kill the space pirates and return to the door
     # to unlock the door:
     #  -can access draygon room to kill him
@@ -445,6 +451,7 @@ locations = [
     'Class': "Major",
     'Address': 0x7C5E3,
     'Visibility': "Chozo",
+    'Room': 'West Sand Hole',
     # DONE: this item can be taken without gravity, but it's super hard because of the quick sands...
     'Available': lambda items: wand(canAccessOuterMaridia(items),
                                     wor(haveItem(items, 'Gravity'),
@@ -457,6 +464,7 @@ locations = [
     'Class': "Major",
     'Address': 0x7C6E5,
     'Visibility': "Chozo",
+    'Room': 'Spring Ball Room',
     # DONE: handle puyo clip and diagonal bomb jump
     # to access the spring ball you can either:
     #  -use the puyo clip with ice
@@ -476,6 +484,7 @@ locations = [
     'Class': "Major",
     'Address': 0x7C755,
     'Visibility': "Visible",
+    'Room': 'Botwoon Energy Tank Room',
     # DONE: difficulty already handled in the functions
     'Available': lambda items: canDefeatBotwoon(items)
 },
@@ -485,6 +494,7 @@ locations = [
     'Class': "Major",
     'Address': 0x7C7A7,
     'Visibility': "Chozo",
+    'Room': 'Space Jump Room',
     # DONE: difficulty already handled in the function,
     # we need to have access to the boss and enough stuff to kill him.
     # to get out of draygon room:
@@ -515,6 +525,7 @@ locations = [
     'Class': "Minor",
     'Address': 0x781CC,
     'Visibility': "Visible",
+    'Room': 'Crateria Power Bomb Room',
     'Available': lambda items: wand(canUsePowerBombs(items),
                                     wor(haveItem(items, 'SpeedBooster'),
                                         canFly(items)))
@@ -525,6 +536,7 @@ locations = [
     'Class': "Minor",
     'Address': 0x781E8,
     'Visibility': "Visible",
+    'Room': 'West Ocean',
     'Available': lambda items: canAccessWs(items)
 },
 {
@@ -533,6 +545,7 @@ locations = [
     'Class': "Minor",
     'Address': 0x781EE,
     'Visibility': "Hidden",
+    'Room': 'West Ocean',
     'Available': lambda items: wand(canAccessWs(items), Bosses.bossDead('Phantoon'))
 },
 {
@@ -541,6 +554,7 @@ locations = [
     'Class': "Minor",
     'Address': 0x781F4,
     'Visibility': "Visible",
+    'Room': 'West Ocean',
     'Available': lambda items: wand(canAccessWs(items), Bosses.bossDead('Phantoon'))
 },
 {
@@ -549,6 +563,7 @@ locations = [
     'Class': "Minor",
     'Address': 0x78248,
     'Visibility': "Visible",
+    'Room': 'The Moat',
     # it's before actual wrecked ship access
     'Available': lambda items: wand(haveItem(items, 'Super'),
                                     canDestroyBombWalls(items))
@@ -559,6 +574,7 @@ locations = [
     'Class': "Minor",
     'Address': 0x783EE,
     'Visibility': "Visible",
+    'Room': 'Pit Room',
     'Available': lambda items: canDestroyBombWalls(items)
 },
 {
@@ -567,6 +583,7 @@ locations = [
     'Class': "Minor",
     'Address': 0x78464,
     'Visibility': "Visible",
+    'Room': 'Green Pirates Shaft',
     'Available': lambda items: wand(canEnterAndLeaveGauntlet(items),
                                     canPassBombPassages(items))
 },
@@ -576,6 +593,7 @@ locations = [
     'Class': "Minor",
     'Address': 0x7846A,
     'Visibility': "Visible",
+    'Room': 'Green Pirates Shaft',
     'Available': lambda items: wand(canEnterAndLeaveGauntlet(items),
                                     canPassBombPassages(items))
 },
@@ -585,6 +603,7 @@ locations = [
     'Class': "Minor",
     'Address': 0x78478,
     'Visibility': "Visible",
+    'Room': 'Crateria Super Room',
     'Available': lambda items: wand(canUsePowerBombs(items),
                                     haveItem(items, 'SpeedBooster'),
                                     wor(haveItem(items, 'Ice'),
@@ -596,6 +615,7 @@ locations = [
     'Class': "Minor",
     'Address': 0x78486,
     'Visibility': "Visible",
+    'Room': 'The Final Missile',
     'Available': lambda items: canPassBombPassages(items)
 },
 {
@@ -604,6 +624,7 @@ locations = [
     'Class': "Minor",
     'Address': 0x784AC,
     'Visibility': "Chozo",
+    'Room': 'Green Brinstar Main Shaft',
     'Available': lambda items: canUsePowerBombs(items)
 },
 {
@@ -612,6 +633,7 @@ locations = [
     'Class': "Minor",
     'Address': 0x784E4,
     'Visibility': "Chozo",
+    'Room': 'Spore Spawn Super Room',
     # brinstar access, and
     # either you go the back way, using a super and the camera glitch,
     # or just beat spore spawn (so no Knows* setting needed for the glitch)
@@ -628,6 +650,7 @@ locations = [
     'Class': "Minor",
     'Address': 0x78518,
     'Visibility': "Visible",
+    'Room': 'Early Supers Room',
     'Available': lambda items: wand(canPassBombPassages(items),
                                     canOpenRedDoors(items))
 },
@@ -637,6 +660,7 @@ locations = [
     'Class': "Minor",
     'Address': 0x7851E,
     'Visibility': "Visible",
+    'Room': 'Early Supers Room',
     'Available': lambda items: wand(wor(haveItem(items, 'SpeedBooster'),
                                         canDestroyBombWalls(items)),
                                     canOpenRedDoors(items),
@@ -649,6 +673,7 @@ locations = [
     'Class': "Minor",
     'Address': 0x78532,
     'Visibility': "Hidden",
+    'Room': 'Brinstar Reserve Tank Room',
     'Available': lambda items: wand(canPassBombPassages(items),
                                     canOpenRedDoors(items),
                                     wor(wand(haveItem(items, 'Morph'), Knows.Mockball),
@@ -660,6 +685,8 @@ locations = [
     'Class': "Minor",
     'Address': 0x78538,
     'Visibility': "Visible",
+    'Room': 'Brinstar Reserve Tank Room',
+    # TODO::condition is weird, morph is required
     'Available': lambda items: wand(wor(haveItem(items, 'SpeedBooster'),
                                         canDestroyBombWalls(items)),
                                     canOpenRedDoors(items),
@@ -673,6 +700,7 @@ locations = [
     'Class': "Minor",
     'Address': 0x78608,
     'Visibility': "Visible",
+    'Room': 'Big Pink',
     'Available': lambda items: wor(wand(canDestroyBombWalls(items),
                                         canOpenRedDoors(items)),
                                    canUsePowerBombs(items))
@@ -683,6 +711,7 @@ locations = [
     'Class': "Minor",
     'Address': 0x7860E,
     'Visibility': "Visible",
+    'Room': 'Big Pink',
     'Available': lambda items: wor(wand(wor(haveItem(items, 'SpeedBooster'),
                                             canDestroyBombWalls(items)),
                                         canOpenRedDoors(items)),
@@ -694,6 +723,7 @@ locations = [
     'Class': "Minor",
     'Address': 0x7865C,
     'Visibility': "Visible",
+    'Room': 'Pink Brinstar Power Bomb Room',
     'Available': lambda items: wand(canUsePowerBombs(items),
                                     haveItem(items, 'Super'))
 },
@@ -703,6 +733,7 @@ locations = [
     'Class': "Minor",
     'Address': 0x78676,
     'Visibility': "Visible",
+    'Room': 'Green Hill Zone',
     'Available': lambda items: wor(wand(canPassBombPassages(items),
                                         canOpenGreenDoors(items)),
                                    canUsePowerBombs(items))
@@ -713,6 +744,7 @@ locations = [
     'Class': "Minor",
     'Address': 0x7874C,
     'Visibility': "Visible",
+    'Room': 'Morph Ball Room',
     'Available': lambda items: canUsePowerBombs(items)
 },
 {
@@ -721,6 +753,7 @@ locations = [
     'Address': 0x78798,
     'Class': "Minor",
     'Visibility': "Visible",
+    'Room': 'Blue Brinstar Energy Tank Room',
     'Available': lambda items: haveItem(items, 'Morph')
 },
 {
@@ -729,6 +762,7 @@ locations = [
     'Class': "Minor",
     'Address': 0x787D0,
     'Visibility': "Visible",
+    'Room': 'Etecoon Super Room',
     'Available': lambda items: wand(canUsePowerBombs(items),
                                     canOpenGreenDoors(items))
 },
@@ -738,6 +772,7 @@ locations = [
     'Class': "Minor",
     'Address': 0x78802,
     'Visibility': "Chozo",
+    'Room': 'First Missile Room',
     'Available': lambda items: haveItem(items, 'Morph')
 },
 {
@@ -746,6 +781,7 @@ locations = [
     'Class': "Minor",
     'Address': 0x78836,
     'Visibility': "Visible",
+    'Room': 'Billy Mays Room',
     'Available': lambda items: canUsePowerBombs(items)
 },
 {
@@ -754,6 +790,7 @@ locations = [
     'Class': "Minor",
     'Address': 0x7883C,
     'Visibility': "Hidden",
+    'Room': 'Billy Mays Room',
     'Available': lambda items: canUsePowerBombs(items)
 },
 {
@@ -762,6 +799,7 @@ locations = [
     'Class': "Minor",
     'Address': 0x788CA,
     'Visibility': "Visible",
+    'Room': 'Beta Power Bomb Room',
     'Available': lambda items: wand(canAccessRedBrinstar(items),
                                     canUsePowerBombs(items))
 },
@@ -771,6 +809,7 @@ locations = [
     'Class': "Minor",
     'Address': 0x7890E,
     'Visibility': "Chozo",
+    'Room': 'Alpha Power Bomb Room',
     # can access from red brinstar lower or upper
     # from upper: power bomb
     # from lower: ice or screw or climb red tower
@@ -786,6 +825,7 @@ locations = [
     'Class': "Minor",
     'Address': 0x78914,
     'Visibility': "Visible",
+    'Room': 'Alpha Power Bomb Room',
     # same as "Power Bomb (red Brinstar spike room)"
     'Available': lambda items: wand(canAccessRedBrinstar(items),
                                     wor(canUsePowerBombs(items),
@@ -799,6 +839,7 @@ locations = [
     'Class': "Minor",
     'Address': 0x789EC,
     'Visibility': "Hidden",
+    'Room': 'Warehouse Keyhunter Room',
     'Available': lambda items: wand(canAccessKraid(items),
                                     canUsePowerBombs(items))
 },
@@ -808,6 +849,7 @@ locations = [
     'Class': "Minor",
     'Address': 0x78AE4,
     'Visibility': "Hidden",
+    'Room': 'Cathedral',
     'Available': lambda items: canAccessHeatedNorfair(items)
 },
 {
@@ -816,6 +858,7 @@ locations = [
     'Class': "Minor",
     'Address': 0x78B46,
     'Visibility': "Hidden",
+    'Room': 'Crumble Shaft',
     'Available': lambda items: wand(canAccessKraid(items),
                                     canUsePowerBombs(items),
                                     canHellRun(items))
@@ -826,6 +869,7 @@ locations = [
     'Class': "Minor",
     'Address': 0x78BC0,
     'Visibility': "Visible",
+    'Room': 'Crocomire Escape',
     'Available': lambda items: wand(canAccessCrocomire(items),
                                     wor(canFly(items), haveItem(items, 'Grapple'),
                                         wand(haveItem(items, 'HiJump'),
@@ -837,6 +881,7 @@ locations = [
     'Class': "Minor",
     'Address': 0x78BE6,
     'Visibility': "Visible",
+    'Room': 'Hi Jump Energy Tank Room',
     'Available': lambda items: canAccessRedBrinstar(items)
 },
 {
@@ -845,6 +890,7 @@ locations = [
     'Class': "Minor",
     'Address': 0x78BEC,
     'Visibility': "Visible",
+    'Room': 'Hi Jump Energy Tank Room',
     'Available': lambda items: canAccessRedBrinstar(items)
 },
 {
@@ -853,6 +899,7 @@ locations = [
     'Class': "Minor",
     'Address': 0x78C04,
     'Visibility': "Visible",
+    'Room': 'Post Crocomire Power Bomb Room',
     'Available': lambda items: wand(canAccessCrocomire(items),
                                     wor(canFly(items),
                                         haveItem(items, 'Grapple'),
@@ -866,6 +913,7 @@ locations = [
     'Class': "Minor",
     'Address': 0x78C14,
     'Visibility': "Visible",
+    'Room': 'Post Crocomire Missile Room',
     'Available': lambda items: canAccessCrocomire(items)
 },
 {
@@ -874,6 +922,7 @@ locations = [
     'Class': "Minor",
     'Address': 0x78C2A,
     'Visibility': "Visible",
+    'Room': 'Post Crocomire Jump Room',
     'Available': lambda items: wand(canAccessCrocomire(items),
                                     wor(canFly(items), haveItem(items, 'Grapple'),
                                         haveItem(items, 'SpeedBooster')))
@@ -884,6 +933,7 @@ locations = [
     'Class': "Minor",
     'Address': 0x78C44,
     'Visibility': "Hidden",
+    'Room': 'Norfair Reserve Tank Room',
     'Available': lambda items: wand(canAccessHeatedNorfair(items),
                                     wor(canFly(items), haveItem(items, 'Grapple'),
                                         wand(haveItem(items, 'HiJump'), Knows.GetAroundWallJump)))
@@ -894,6 +944,7 @@ locations = [
     'Class': "Minor",
     'Address': 0x78C52,
     'Visibility': "Visible",
+    'Room': 'Green Bubbles Missile Room',
     'Available': lambda items: wand(canAccessHeatedNorfair(items),
                                     wor(canFly(items),
                                         haveItem(items, 'Grapple'),
@@ -905,6 +956,7 @@ locations = [
     'Class': "Minor",
     'Address': 0x78C66,
     'Visibility': "Visible",
+    'Room': 'Bubble Mountain',
     'Available': lambda items: canAccessHeatedNorfair(items)
 },
 {
@@ -913,6 +965,7 @@ locations = [
     'Class': "Minor",
     'Address': 0x78C74,
     'Visibility': "Hidden",
+    'Room': 'Speed Booster Hall',
     'Available': lambda items: canAccessHeatedNorfair(items)
 },
 {
@@ -921,6 +974,7 @@ locations = [
     'Class': "Minor",
     'Address': 0x78CBC,
     'Visibility': "Visible",
+    'Room': 'Double Chamber',
     'Available': lambda items: canAccessHeatedNorfair(items)
 },
 {
@@ -929,6 +983,7 @@ locations = [
     'Class': "Minor",
     'Address': 0x78E6E,
     'Visibility': "Visible",
+    'Room': 'TODO',
     'Available': lambda items: wand(canAccessLowerNorfair(items),
                                     haveItem(items, 'SpaceJump'))
 },
@@ -938,6 +993,7 @@ locations = [
     'Class': "Minor",
     'Address': 0x78E74,
     'Visibility': "Hidden",
+    'Room': 'TODO',
     'Available': lambda items: wand(canAccessLowerNorfair(items),
                                     wor(haveItem(items, 'SpaceJump'),
                                         Knows.GreenGateGlitch))
@@ -948,6 +1004,7 @@ locations = [
     'Class': "Minor",
     'Address': 0x78F30,
     'Visibility': "Visible",
+    'Room': 'TODO',
     'Available': lambda items: canPassWorstRoom(items)
 },
 {
@@ -956,6 +1013,7 @@ locations = [
     'Class': "Minor",
     'Address': 0x78FCA,
     'Visibility': "Visible",
+    'Room': 'TODO',
     'Available': lambda items: canPassWorstRoom(items)
 },
 {
@@ -964,6 +1022,7 @@ locations = [
     'Class': "Minor",
     'Address': 0x78FD2,
     'Visibility': "Visible",
+    'Room': 'TODO',
     'Available': lambda items: canPassWorstRoom(items)
 },
 {
@@ -972,6 +1031,7 @@ locations = [
     'Class': "Minor",
     'Address': 0x790C0,
     'Visibility': "Visible",
+    'Room': 'TODO',
     'Available': lambda items: canPassWorstRoom(items)
 },
 {
@@ -980,6 +1040,7 @@ locations = [
     'Class': "Minor",
     'Address': 0x79100,
     'Visibility': "Visible",
+    'Room': 'TODO',
     'Available': lambda items: canPassWorstRoom(items)
 },
 {
@@ -988,6 +1049,7 @@ locations = [
     'Class': "Minor",
     'Address': 0x7C265,
     'Visibility': "Visible",
+    'Room': 'TODO',
     'Available': lambda items: canAccessWs(items)
 },
 {
@@ -996,6 +1058,7 @@ locations = [
     'Class': "Minor",
     'Address': 0x7C2EF,
     'Visibility': "Visible",
+    'Room': 'TODO',
     'Available': lambda items: wand(canAccessWs(items),
                                     wor(haveItem(items, 'Varia'),
                                         energyReserveCountOk(items, 1)),
@@ -1007,6 +1070,7 @@ locations = [
     'Class': "Minor",
     'Address': 0x7C319,
     'Visibility': "Visible",
+    'Room': 'TODO',
     'Available': lambda items: wand(canAccessWs(items), Bosses.bossDead('Phantoon'))
 },
 {
@@ -1015,6 +1079,7 @@ locations = [
     'Class': "Minor",
     'Address': 0x7C357,
     'Visibility': "Visible",
+    'Room': 'TODO',
     'Available': lambda items: wand(canAccessWs(items), Bosses.bossDead('Phantoon'))
 },
 {
@@ -1023,6 +1088,7 @@ locations = [
     'Class': "Minor",
     'Address': 0x7C437,
     'Visibility': "Visible",
+    'Room': 'TODO',
     'Available': lambda items: wand(canAccessRedBrinstar(items),
                                     canUsePowerBombs(items),
                                     haveItem(items, 'Gravity'),
@@ -1034,6 +1100,7 @@ locations = [
     'Class': "Minor",
     'Address': 0x7C43D,
     'Visibility': "Visible",
+    'Room': 'TODO',
     'Available': lambda items: canAccessOuterMaridia(items)
 },
 {
@@ -1042,6 +1109,7 @@ locations = [
     'Class': "Minor",
     'Address': 0x7C483,
     'Visibility': "Hidden",
+    'Room': 'TODO',
     'Available': lambda items: canAccessOuterMaridia(items)
 },
 {
@@ -1050,6 +1118,7 @@ locations = [
     'Class': "Minor",
     'Address': 0x7C4AF,
     'Visibility': "Visible",
+    'Room': 'TODO',
     'Available': lambda items: canAccessInnerMaridia(items)
 },
 {
@@ -1058,6 +1127,7 @@ locations = [
     'Class': "Minor",
     'Address': 0x7C4B5,
     'Visibility': "Visible",
+    'Room': 'TODO',
     'Available': lambda items: canAccessInnerMaridia(items)
 },
 {
@@ -1066,6 +1136,7 @@ locations = [
     'Class': "Minor",
     'Address': 0x7C533,
     'Visibility': "Visible",
+    'Room': 'TODO',
     'Available': lambda items: canAccessInnerMaridia(items)
 },
 {
@@ -1074,6 +1145,7 @@ locations = [
     'Class': "Minor",
     'Address': 0x7C5DD,
     'Visibility': "Visible",
+    'Room': 'TODO',
     'Available': lambda items: wand(canAccessOuterMaridia(items),
                                     wor(haveItem(items, 'Gravity'),
                                         wand(canDoSuitlessMaridia(items),
@@ -1085,6 +1157,7 @@ locations = [
     'Class': "Minor",
     'Address': 0x7C5EB,
     'Visibility': "Visible",
+    'Room': 'TODO',
     'Available': lambda items: wand(canAccessOuterMaridia(items),
                                     wor(haveItem(items, 'Gravity'),
                                         wand(canDoSuitlessMaridia(items),
@@ -1096,6 +1169,7 @@ locations = [
     'Class': "Minor",
     'Address': 0x7C5F1,
     'Visibility': "Visible",
+    'Room': 'TODO',
     'Available': lambda items: wand(canAccessOuterMaridia(items),
                                     haveItem(items, 'Gravity'))
 },
@@ -1105,6 +1179,7 @@ locations = [
     'Address': 0x7C603,
     'Class': "Minor",
     'Visibility': "Visible",
+    'Room': 'TODO',
     'Available': lambda items: wand(canAccessOuterMaridia(items),
                                     haveItem(items, 'SpeedBooster'), # TODO FLO find trick to get this without speed booster and add knows
                                     haveItem(items, 'Gravity'))
@@ -1115,6 +1190,7 @@ locations = [
     'Class': "Minor",
     'Address': 0x7C609,
     'Visibility': "Visible",
+    'Room': 'TODO',
     'Available': lambda items: wand(canAccessOuterMaridia(items),
                                     haveItem(items, 'SpeedBooster'), # TODO FLO find trick to get this without speed booster and add knows
                                     haveItem(items, 'Gravity'))
@@ -1125,6 +1201,7 @@ locations = [
     'Class': "Minor",
     'Address': 0x7C74D,
     'Visibility': "Hidden",
+    'Room': 'TODO',
     'Available': lambda items: canDefeatBotwoon(items)
 }
 ]

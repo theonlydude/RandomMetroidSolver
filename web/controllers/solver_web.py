@@ -5,12 +5,12 @@ path = os.path.expanduser('~/RandomMetroidSolver')
 if os.path.exists(path) and path not in sys.path:
     sys.path.append(path)
 
-import datetime, os, hashlib
+import datetime, os, hashlib, json
 
 # to solve the rom
-from parameters import easy, medium, hard, harder, hardcore, mania, Conf, Knows, Settings
+from parameters import easy, medium, hard, harder, hardcore, mania, Conf, Knows, Settings, isKnows
 import tournament_locations
-from solver import Solver, ParamsLoader, DifficultyDisplayer
+from solver import Solver, ParamsLoader, DifficultyDisplayer, RomLoader
 
 difficulties = {
     0: 'mania',
@@ -279,7 +279,7 @@ def solver():
 
     # add missing knows
     for know in Knows.__dict__:
-        if know[0:len('__')] != '__' and know[0] == know[0].upper():
+        if isKnows(know):
             if know not in params['Knows'].keys():
                 params['Knows'][know] = Knows.__dict__[know]
 
@@ -301,7 +301,7 @@ def generate_json_from_parameters(vars, hidden):
     paramsDict = {'Conf': {}, 'Settings': {}, 'Knows': {}}
     for var in Knows.__dict__:
         # print("var={}".format(var))
-        if var[0:len('__')] != '__' and var[0] == var[0].upper():
+        if isKnows(var):
             boolVar = vars[var+"_bool"+hidden]
             # print("{} = {}".format(var+"_bool"+hidden, boolVar))
             if boolVar is None:

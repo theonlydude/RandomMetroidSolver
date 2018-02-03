@@ -5,7 +5,7 @@
 import sys, struct, math, os, json, logging, argparse
 
 # the difficulties for each technics
-from parameters import Conf, Knows, Settings
+from parameters import Conf, Knows, Settings, isKnows, isConf, isSettings
 from parameters import easy, medium, hard, harder, hardcore, mania
 
 # the helper functions
@@ -55,15 +55,15 @@ class Solver:
         if self.log.getEffectiveLevel() == logging.DEBUG:
             self.log.debug("loaded knows: ")
             for knows in Knows.__dict__:
-                if knows[0:len('__')] != '__':
+                if isKnows(knows):
                     self.log.debug("{}: {}".format(knows, Knows.__dict__[knows]))
             self.log.debug("loaded settings:")
             for setting in Settings.__dict__:
-                if setting[0:len('__')] != '__':
+                if isSettings(setting):
                     self.log.debug("{}: {}".format(setting, Settings.__dict__[setting]))
             self.log.debug("loaded conf:")
             for conf in Conf.__dict__:
-                if conf[0:len('__')] != '__':
+                if isConf(conf):
                     self.log.debug("{}: {}".format(conf, Conf.__dict__[conf]))
 
     def solveRom(self):
@@ -550,33 +550,29 @@ class ParamsLoader:
             ext = os.path.splitext(params)
             if ext[1].lower() == '.json':
                 return ParamsLoaderJson(params)
-            elif ext[1].lower() == '.py':
-                return ParamsLoaderPy(ext[0])
             else:
                 print("wrong parameters file type: {}".format(ext[1]))
                 sys.exit(-1)
         elif type(params) is dict:
             return ParamsLoaderDict(params)
-        elif params is None:
-            return ParamsLoaderMem()
 
     def load(self):
         # update the parameters in the parameters classes: Conf, Knows, Settings
         # Conf
         for param in self.params['Conf']:
-            if param[0:len('__')] != '__':
+            if isConf(param):
                 setattr(Conf, param, self.params['Conf'][param])
 
         # Knows
         for param in self.params['Knows']:
-            if param[0:len('__')] != '__':
+            if isKnows(param):
                 setattr(Knows, param, SMBool(self.params['Knows'][param][0],
                                              self.params['Knows'][param][1],
                                              ['{}'.format(param)]))
 
         # Settings
         for param in self.params['Settings']:
-            if param[0:len('__')] != '__':
+            if isSettings(param):
                 setattr(Settings, param, self.params['Settings'][param])
 
     def dump(self, fileName):
@@ -588,15 +584,15 @@ class ParamsLoader:
 
         print("loaded knows: ")
         for knows in Knows.__dict__:
-            if knows[0:len('__')] != '__':
+            if isKnows(knows):
                 print("{}: {}".format(knows, Knows.__dict__[knows]))
         print("loaded settings:")
         for setting in Settings.__dict__:
-            if setting[0:len('__')] != '__':
+            if isSettings(setting):
                 print("{}: {}".format(setting, Settings.__dict__[setting]))
         print("loaded conf:")
         for conf in Conf.__dict__:
-            if conf[0:len('__')] != '__':
+            if isConf(conf):
                 print("{}: {}".format(conf, Conf.__dict__[conf]))
 
 
@@ -606,29 +602,10 @@ class ParamsLoaderJson(ParamsLoader):
         with open(jsonFileName) as jsonFile:
             self.params = json.load(jsonFile)
 
-class ParamsLoaderPy(ParamsLoader):
-    # for testing purpose
-    def __init__(self, pyFileName):
-        import importlib
-        mod = importlib.import_module(pyFileName)
-        conf = getattr(mod, 'Conf')
-        knows = getattr(mod, 'Knows')
-        settings = getattr(mod, 'Settings')
-        self.params = {'Conf': {k: v for k, v in conf.__dict__.items() if k[0:len('__')] != '__'},
-                       'Knows': {k: v for k, v in knows.__dict__.items() if k[0:len('__')] != '__'},
-                       'Settings': {k: v for k, v in settings.__dict__.items() if k[0:len('__')] != '__'}}
-
 class ParamsLoaderDict(ParamsLoader):
     # when called from the website
     def __init__(self, params):
         self.params = params
-
-class ParamsLoaderMem(ParamsLoader):
-    # to load the current classes from memory
-    def __init__(self):
-        self.params = {'Conf': {k: v for k, v in Conf.__dict__.items() if k[0:len('__')] != '__'},
-                       'Knows': {k: v for k, v in Knows.__dict__.items() if k[0:len('__')] != '__'},
-                       'Settings': {k: v for k, v in Settings.__dict__.items() if k[0:len('__')] != '__'}}
 
 class DifficultyDisplayer:
     difficulties = {

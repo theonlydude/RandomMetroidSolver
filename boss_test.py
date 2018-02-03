@@ -60,10 +60,9 @@ def boss(name, diffFunction):
                 csvOut.write(presetName + ";" + setName + ";" + str(d[0]) + ";" + str(d[1]) + "\n")
 
 if __name__ == "__main__":
-    params=None
     if len(sys.argv) >= 2:
         params = sys.argv[1]
-    ParamsLoader.factory(params).load()
+        ParamsLoader.factory(params).load()
     boss('Kraid', enoughStuffsKraid)
     boss('Phantoon', enoughStuffsPhantoon)
     boss('Draygon', enoughStuffsDraygon)

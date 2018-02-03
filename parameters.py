@@ -8,6 +8,9 @@ harder = 25
 hardcore = 50
 mania = 100
 
+def isConf(conf):
+    return conf[0:len('__')] != '__'
+
 class Conf:
     # keep getting majors of at most this difficulty before going for minors or changing area
     difficultyTarget=medium
@@ -26,6 +29,9 @@ class Conf:
     #}
     #minorsPickup = 'all'
     minorsPickup = 'any'
+
+def isKnows(knows):
+    return knows[0:len('__')] != '__' and knows[0] == knows[0].upper()
 
 class Knows:
     # the different technics to know (cf. http://deanyd.net/sm/index.php?title=Item_Randomizer)
@@ -413,6 +419,9 @@ class Knows:
                    'title': 'Maridia Plasma Room'},
                   {'knows': ['SuitlessSandpit'],
                    'title': 'Maridia Sandpit'}]
+
+def isSettings(settings):
+    return settings[0:len('__')] != '__'
 
 class Settings:
     # boss difficulty tables :

@@ -1,6 +1,10 @@
 # RandomMetroidSolver
 Check a randomized super metroid rom and display its estimated difficulty
 
+There's a website to use the solver: [Super Metroid Item Randomizer Solver](http://randommetroidsolver.pythonanywhere.com/)
+
+
+Or in command line:
 ```sh
 usage: solver.py [-h] [--param PARAMSFILENAME [PARAMSFILENAME ...]] [--debug]
                  [--difficultyTarget [DIFFICULTYTARGET]]

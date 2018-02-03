@@ -90,7 +90,7 @@ class Knows:
 
     SpringBallJump = SMBool(True, hard, ['SpringBallJump'])
     desc['SpringBallJump'] = {'display': 'SpringBall-Jump',
-                              'title': 'Access to wrecked ship etank without anything else, suitless maridia navigation',
+                              'title': 'Do a SpringBall Jump from a jump to Access to Wrecked Ship Etank without anything else, Suitless Maridia navigation',
                               'href': 'https://www.youtube.com/watch?v=8ldQUIgBavw&t=49s',
                               'rooms': ['Main Street',
                                         'Sponge Bath',
@@ -99,7 +99,7 @@ class Knows:
 
     SpringBallJumpFromWall = SMBool(True, harder, ['SpringBallJumpFromWall'])
     desc['SpringBallJumpFromWall'] = {'display': 'SpringBall-Jump from wall',
-                                      'title': 'Exit Screw Attack area, climb Worst Room without Hi-Jump',
+                                      'title': 'Do a SpringBall jump after a Wall jump to exit Screw Attack area, climb Worst Room without Hi-Jump',
                                       'href': None,
                                       'rooms': ['Screw Attack Room'
                                                 'The Worst Room In The Game']}

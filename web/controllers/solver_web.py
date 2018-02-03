@@ -273,7 +273,7 @@ def solver():
 
     # set title
     response.title = 'Super Metroid Item Randomizer Solver'
-    response.menu = [['Super Metroid Item Randomizer Solver', False, '#'],
+    response.menu = [['Super Metroid Item Randomizer Solver', False, URL(f='solver')],
                      ['Solve!', True, URL(f='solver')],
                      ['Information & Contact', False, URL(f='infos')]]
 
@@ -358,7 +358,7 @@ def compute_difficulty(jsonRomFileName, post_vars):
 def infos():
     # set title
     response.title = 'Super Metroid Item Randomizer Solver'
-    response.menu = [['Super Metroid Item Randomizer Solver', False, '#'],
+    response.menu = [['Super Metroid Item Randomizer Solver', False, URL(f='solver')],
                      ['Solve!', False, URL(f='solver')],
                      ['Information & Contact', True, URL(f='infos')]]
 

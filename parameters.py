@@ -730,18 +730,36 @@ class Settings:
         'phantoonLowMissileMalus' : 1.2
     }
 
+# layout patches added by randomizers
 class RomPatches:
+    #### Patches definitions
+    
+    # blue door to access the room with etank+missile
     BlueBrinstarBlueDoor      = 10
+    # shot block instead of bomb blocks for spazer access
     SpazerShotBlock           = 20
+    # climb back up red tower from bottom no matter what
     RedTowerLeftPassage       = 21
+    # exit red tower top to crateria or back to red tower without power bombs
+    RedTowerBlueDoors         = 22
+    # shot block to exit hu jump area 
     HiJumpShotBlock           = 30
+    # access main upper norfair without anything
     CathedralEntranceWallJump = 31
 
+
+    #### Patch sets
+    # total randomizer, tournament seeds
     Total_TX = [ BlueBrinstarBlueDoor,
-                 SpazerShotBlock, RedTowerLeftPassage,
+                 SpazerShotBlock, RedTowerLeftPassage, RedTowerBlueDoors,
                  HiJumpShotBlock, CathedralEntranceWallJump ]
 
+    # dessyreqt randomizer
+    Dessy = []
+
+    ### Active patches
     ActivePatches = Total_TX
 
-    def isPatchActive(patch):
-        return (patch in ActivePatches)
+    @staticmethod
+    def has(patch):
+        return SMBool(patch in RomPatches.ActivePatches)

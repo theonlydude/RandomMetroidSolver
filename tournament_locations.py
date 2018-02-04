@@ -1,4 +1,4 @@
-from parameters import Knows, Settings, easy, medium, hard, harder, hardcore, mania
+from parameters import Knows, Settings, RomPatches, easy, medium, hard, harder, hardcore, mania
 # the canXXX functions
 from helpers import canEnterAndLeaveGauntlet, wand, wor, haveItem, canOpenRedDoors
 from helpers import canPassBombPassages, canDestroyBombWalls, canUsePowerBombs, SMBool
@@ -100,10 +100,11 @@ locations = [
     #  -have the high jump boots
     #  -freeze the Reo to jump on it
     #  -do a damage boost with one of the two Geemers
-    'Available': lambda items: wor(Knows.CeilingDBoost,
-                                   canFly(items),
-                                   haveItem(items, 'HiJump'),
-                                   haveItem(items, 'Ice'))
+    'Available': lambda items: wand(wor(canOpenRedDoors(items), RomPatches.has(RomPatches.BlueBrinstarBlueDoor)),
+                                    wor(Knows.CeilingDBoost,
+                                        canFly(items),
+                                        haveItem(items, 'HiJump'),
+                                        haveItem(items, 'Ice')))
 },
 {
     'Area': "Brinstar",
@@ -182,7 +183,8 @@ locations = [
     'Visibility': "Chozo",
     'Room': 'Spazer Room',
     # DONE: no difficulty
-    'Available': lambda items: canAccessRedBrinstar(items)
+    'Available': lambda items: wand(canAccessRedBrinstar(items),
+                                    wor(canPassBombPassages(items), RomPatches.has(RomPatches.SpazerShotBlock)))
 },
 {
     'Area': "Brinstar",
@@ -238,7 +240,9 @@ locations = [
     'Visibility': "Chozo",
     'Room': 'Hi Jump Boots Room',
     # DONE: no difficulty
-    'Available': lambda items: canAccessRedBrinstar(items)
+    'Available': lambda items: canAccessRedBrinstar(items),
+    'PostAvailable': lambda items: wor(canPassBombPassages(items),
+                                       RomPatches.has(RomPatches.HiJumpShotBlock))
 },
 {
     'Area': "Norfair",
@@ -565,7 +569,7 @@ locations = [
     'Room': 'The Moat',
     # it's before actual wrecked ship access
     'Available': lambda items: wand(haveItem(items, 'Super'),
-                                    canDestroyBombWalls(items))
+                                    haveItem(items, 'PowerBomb'))
 },
 {
     'Area': "Crateria",
@@ -753,7 +757,9 @@ locations = [
     'Class': "Minor",
     'Visibility': "Visible",
     'Room': 'Blue Brinstar Energy Tank Room',
-    'Available': lambda items: haveItem(items, 'Morph')
+    'Available': lambda items: wand(haveItem(items, 'Morph'),
+                                    wor(canOpenRedDoors(items),
+                                        RomPatches.has(RomPatches.BlueBrinstarBlueDoor)))
 },
 {
     'Area': "Brinstar",
@@ -881,7 +887,9 @@ locations = [
     'Address': 0x78BE6,
     'Visibility': "Visible",
     'Room': 'Hi Jump Energy Tank Room',
-    'Available': lambda items: canAccessRedBrinstar(items)
+    'Available': lambda items: canAccessRedBrinstar(items),
+    'PostAvailable': lambda items: wor(canPassBombPassages(items),
+                                       RomPatches.has(RomPatches.HiJumpShotBlock))
 },
 {
     'Area': "Norfair",

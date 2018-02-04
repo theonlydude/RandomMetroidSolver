@@ -4,7 +4,7 @@ from helpers import canEnterAndLeaveGauntlet, wand, wor, haveItem, canOpenRedDoo
 from helpers import canPassBombPassages, canDestroyBombWalls, canUsePowerBombs, SMBool
 from helpers import canFly, canAccessRedBrinstar, energyReserveCountOk, canAccessKraid
 from helpers import Bosses, enoughStuffsKraid, heatProof, energyReserveCountOk
-from helpers import energyReserveCountOkList, canAccessCrocomire, canAccessHeatedNorfair
+from helpers import energyReserveCountOkHellRun, canAccessCrocomire, canAccessHeatedNorfair
 from helpers import canPassWorstRoom, enoughStuffsRidley, canAccessLowerNorfair
 from helpers import canAccessWs, enoughStuffsPhantoon, enoughStuffsDraygon
 from helpers import canAccessOuterMaridia, canDefeatDraygon, canDoSuitlessMaridia
@@ -216,7 +216,7 @@ locations = [
     # DONE: harder without varia
     'Available': lambda items: wand(canAccessKraid(items),
                                     wor(heatProof(items),
-                                        energyReserveCountOkList(items, 'Ice')),
+                                        energyReserveCountOkHellRun(items, 'Ice')),
                                     wor(wand(haveItem(items, 'Morph'),
                                              Knows.Mockball),
                                         haveItem(items, 'SpeedBooster'))) # FIXME : Knows.EarlyKraid has nothing to do with this and is implied by canAccessKraid

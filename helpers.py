@@ -86,7 +86,7 @@ def energyReserveCount(items):
 def energyReserveCountOk(items, count, difficulty=0):
     return SMBool(energyReserveCount(items) >= count, difficulty)
 
-def energyReserveCountOkList(items, hellRunName):
+def energyReserveCountOkHellRun(items, hellRunName):
     difficulties = Settings.hellRuns[hellRunName]
 
     if difficulties is None or len(difficulties) == 0:
@@ -108,7 +108,7 @@ def canHellRun(items):
     if heatProof(items).bool:
         return SMBool(True, easy)
     elif energyReserveCount(items) >= 3:
-        return energyReserveCountOkList(items, 'MainUpperNorfair')
+        return energyReserveCountOkHellRun(items, 'MainUpperNorfair')
     else:
         return SMBool(False)
 

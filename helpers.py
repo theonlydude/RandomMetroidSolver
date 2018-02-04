@@ -99,11 +99,11 @@ def energyReserveCountOkList(items, difficulties):
 def heatProof(items):
     return haveItem(items, 'Varia')
 
-def canHellRun(items):
+def canHellRun(items, hellRun):
     if heatProof(items).bool:
         return SMBool(True, easy)
     elif energyReserveCount(items) >= 3:
-        return energyReserveCountOkList(items, Settings.hellRuns['MainUpperNorfair'])
+        return energyReserveCountOkList(items, Settings.hellRuns[hellRun])
     else:
         return SMBool(False)
 
@@ -225,7 +225,7 @@ def canAccessHeatedNorfair(items):
     #            this test is then used to access Speed, Norfair Reserve Tank, Wave and Crocomire
     #            as they are all hellruns from Bubble Mountain.
     return wand(canAccessRedBrinstar(items),
-                canHellRun(items))
+                canHellRun(items, 'MainUpperNorfair'))
 
 def canAccessCrocomire(items):
     # EXPLAINED: two options there, either:
@@ -251,7 +251,7 @@ def canAccessLowerNorfair(items):
     #             -have hijump boots and knows the Lava Dive wall jumps, the wall jumps are
     #              a little easier with Ice and Plasma as we can freeze the Funes, we need
     #              at least three ETanks to do it without gravity
-    return wand(heatProof(items),
+    return wand(canHellRun(items, 'LowerNorfair'),
                 canAccessRedBrinstar(items),
                 canUsePowerBombs(items),
                 wor(wand(haveItem(items, 'Gravity'), haveItem(items, 'SpaceJump')),

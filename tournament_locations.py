@@ -215,8 +215,7 @@ locations = [
     'Room': 'Ice Beam Room',
     # DONE: harder without varia
     'Available': lambda items: wand(canAccessKraid(items),
-                                    wor(heatProof(items),
-                                        energyReserveCountOkList(items, Settings.hellRuns['Ice'])),
+                                    canHellRun(items, 'Ice'),
                                     wor(wand(haveItem(items, 'Morph'),
                                              Knows.Mockball),
                                         haveItem(items, 'SpeedBooster'))) # FIXME : Knows.EarlyKraid has nothing to do with this and is implied by canAccessKraid
@@ -861,7 +860,7 @@ locations = [
     'Room': 'Crumble Shaft',
     'Available': lambda items: wand(canAccessKraid(items),
                                     canUsePowerBombs(items),
-                                    canHellRun(items))
+                                    canHellRun(items, 'Ice'))
 },
 {
     'Area': "Norfair",

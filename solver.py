@@ -94,6 +94,24 @@ class Solver:
         else:
             print("Aborted run, can't finish the game with the given prerequisites")
 
+    def getDiffThreshold(self):
+        target = Conf.difficultyTarget
+        threshold = target
+        epsilon = 0.001
+        if target <= easy:
+            threshold = medium - epsilon
+        elif target <= medium:
+            threshold = hard - epsilon
+        elif target <= hard:
+            threshold = harder - epsilon
+        elif target <= harder:
+            threshold = hardcore - epsilon
+        elif target <= hardcore:
+            threshold = mania - epsilon
+
+        return threshold
+
+            
     def computeDifficulty(self):
         # loop on the available locations depending on the collected items.
         # before getting a new item, loop on all of them and get their difficulty,
@@ -115,10 +133,12 @@ class Solver:
         isEndPossible = False
         endDifficulty = mania
         area = 'Crateria'
+        diffThreshold = self.getDiffThreshold()
         while True:
             # actual while condition
-            hasEnoughItems = (self.pickup.enoughMajors(self.collectedItems, self.majorLocations)
-                              and self.pickup.enoughMinors(self.collectedItems, self.minorLocations))
+            hasEnoughMinors = self.pickup.enoughMinors(self.collectedItems, self.minorLocations)
+            hasEnoughMajors = self.pickup.enoughMajors(self.collectedItems, self.majorLocations)
+            hasEnoughItems = hasEnoughMajors and hasEnoughMinors
             canEndGame = self.canEndGame()
             (isEndPossible, endDifficulty) = (canEndGame.bool, canEndGame.difficulty)
             if isEndPossible and hasEnoughItems:
@@ -150,8 +170,8 @@ class Solver:
                 break
 
             # sort them on difficulty and proximity
-            majorAvailable = self.getAvailableItemsList(majorAvailable, area, Conf.difficultyTarget)
-            minorAvailable = self.getAvailableItemsList(minorAvailable, area, Conf.difficultyTarget)
+            majorAvailable = self.getAvailableItemsList(majorAvailable, area, diffThreshold, hasEnoughMajors)
+            minorAvailable = self.getAvailableItemsList(minorAvailable, area, diffThreshold, hasEnoughMinors)
 
             # first take major items of acceptable difficulty in the current area
             if (len(majorAvailable) > 0
@@ -284,14 +304,13 @@ class Solver:
         # - beat Mother Brain
         return wand(Bosses.allBossesDead(), enoughStuffTourian(self.collectedItems))
 
-    def getAvailableItemsList(self, locations, area, threshold):
+    def getAvailableItemsList(self, locations, area, threshold, enough):
         around = [loc for loc in locations if loc['Area'] == area and loc['difficulty'].difficulty <= threshold and not Bosses.areaBossDead(area)]
-        around.sort(key=lambda loc: loc['difficulty'].difficulty)
-
+        around.sort(key=lambda loc: (0 if 'Pickup' in loc else 1, loc['difficulty'].difficulty)) # usually pickup action means beating a boss, so do that first if possible
         outside = [loc for loc in locations if not loc in around]
-        # we want to sort the outside locations by putting the ones is the same area first,
+        # we want to sort the outside locations by putting the ones is the same area first if we don't have enough items,
         # then we sort the remaining areas starting whith boss dead status
-        outside.sort(key=lambda loc: (loc['difficulty'].difficulty, 0 if loc['Area'] == area else 1, 0 if not Bosses.areaBossDead(loc['Area']) else 1))
+        outside.sort(key=lambda loc: (0 if loc['Area'] == area and not enough and loc['difficulty'].difficulty <= threshold else 1, loc['difficulty'].difficulty if not Bosses.areaBossDead(loc['Area']) and loc['difficulty'].difficulty <= threshold else 100000, loc['difficulty'].difficulty))
 
         return around + outside
 

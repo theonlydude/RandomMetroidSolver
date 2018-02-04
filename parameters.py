@@ -442,7 +442,7 @@ class Settings:
     #
     # If not enough info is provided here, base difficulty will be medium.
 
-    # logic behind the presets : the ones where find the boss difficult are
+    # logic behind the presets : the ones where you find the boss difficult are
     # calibrated to give 'hard' in vanilla situations, the default are calibrated
     # to give 'medium' in vanilla situations, just above gives 'easy' in vanilla
     # situations, and top settings basically discards the boss except for extreme

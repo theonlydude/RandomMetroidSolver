@@ -736,6 +736,8 @@ class RomPatches:
     
     # blue door to access the room with etank+missile
     BlueBrinstarBlueDoor      = 10
+    # missile in the first room is a major item and accessible and ceiling is a minor
+    BlueBrinstarMissile       = 11 
     # shot block instead of bomb blocks for spazer access
     SpazerShotBlock           = 20
     # climb back up red tower from bottom no matter what
@@ -747,17 +749,21 @@ class RomPatches:
     # access main upper norfair without anything
     CathedralEntranceWallJump = 31
 
-
     #### Patch sets
+    
     # total randomizer, tournament seeds
     Total_TX = [ BlueBrinstarBlueDoor,
                  SpazerShotBlock, RedTowerLeftPassage, RedTowerBlueDoors,
                  HiJumpShotBlock, CathedralEntranceWallJump ]
 
+    # total randomizer, casual seeds
+    Total_CX = [ BlueBrinstarMissile ] + Total_TX
+    
     # dessyreqt randomizer
     Dessy = []
 
     ### Active patches
+    
     ActivePatches = Total_TX
 
     @staticmethod

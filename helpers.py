@@ -551,7 +551,7 @@ def enoughStuffsMotherbrain(items):
     if ammoMargin == 0:
         return SMBool(False)
 #    print('MB2', ammoMargin, secs)
-    return SMBool(True, computeBossDifficulty(items, ammoMargin, secs, Settings.bossesDifficulty['Mother Brain']))
+    return SMBool(True, computeBossDifficulty(items, ammoMargin, secs, Settings.bossesDifficulty['MotherBrain']))
 
 def canPassMetroids(items):
     return wand(canOpenRedDoors(items),

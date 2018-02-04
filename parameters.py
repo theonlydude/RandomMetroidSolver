@@ -605,7 +605,7 @@ class Settings:
                 }                
             }
         },
-        'Mother Brain' : {
+        'MotherBrain' : {
             "It can get ugly" : {
                 'Rate' : 0.18,
                 'Energy' : {
@@ -655,7 +655,7 @@ class Settings:
         'Phantoon' : bossesDifficultyPresets['Phantoon']['Default'],
         'Draygon' : bossesDifficultyPresets['Draygon']['Default'],
         'Ridley' : bossesDifficultyPresets['Ridley']['Default'],
-        'Mother Brain' : bossesDifficultyPresets['Mother Brain']['Default']
+        'MotherBrain' : bossesDifficultyPresets['MotherBrain']['Default']
     }
 
     # hell run table

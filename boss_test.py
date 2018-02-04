@@ -37,7 +37,7 @@ itemSets = {
         'Tough' : stuff(['Spazer', 'Charge', 'Wave', 'Ice', 'Varia', 'Gravity'], 4, 10, 3, 3),
         'TX4633580' : stuff(['Spazer', 'Charge', 'Plasma', 'Ice', 'Varia', 'Gravity'], 13, 10, 10, 4)
     },
-    'Mother Brain' : {
+    'MotherBrain' : {
         'Standard' : stuff(['Plasma', 'Charge', 'Wave', 'Ice', 'Varia', 'Gravity'], 9, 10, 6, 3),
         'ChargeLess' : stuff(['Varia', 'Gravity'], 9, 10, 14, 3),
         'Tough' : stuff(['Spazer', 'Charge', 'Wave', 'Ice', 'Varia', 'Gravity'], 5, 10, 5, 3)
@@ -67,5 +67,5 @@ if __name__ == "__main__":
     boss('Phantoon', enoughStuffsPhantoon)
     boss('Draygon', enoughStuffsDraygon)
     boss('Ridley', enoughStuffsRidley)
-    boss('Mother Brain', enoughStuffsMotherbrain)
+    boss('MotherBrain', enoughStuffsMotherbrain)
 

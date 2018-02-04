@@ -38,6 +38,19 @@ label {
 .full {
     width: 100%;
 }
+.center {
+    text-align: center;
+}
+.right {
+    text-align: right;
+}
+.nopadding {
+    background: linear-gradient(to right, #ddd, #fff);
+    padding-left: 10px;
+    padding-right: 0px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
 
 th {
     background-color: #ddd;
@@ -60,6 +73,26 @@ td {
 hr {
     border-width: 2px;
 }
+
+/* https://www.w3schools.com/howto/howto_css_two_columns.asp */
+* {
+    box-sizing: border-box;
+}
+.column {
+    float: left;
+    width: 50%;
+    padding: 10px;
+}
+.row:after {
+    content: "";
+    display: table;
+    clear: both;
+}
+@media (max-width: 800px) {
+    .column {
+        width: 100%;
+    }
+}
 </style>
 
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
@@ -72,18 +105,23 @@ function doSubmit() {
 }
 function toggleSelect(elem)
 {
-  var boolElem = elem + "_bool"
-  var boolElemHidden = boolElem + "_hidden"
-  var diffElem = elem + "_diff"
+  var boolElem = elem + "_bool";
+  var boolElemHidden = boolElem + "_hidden";
+  var diffElem = elem + "_diff";
   var isChecked = document.getElementById(boolElem).checked;
   document.getElementById(diffElem).disabled = !isChecked;
   document.getElementById(boolElemHidden).checked = isChecked;
 }
 function changeHiddenSelect(diffElem)
 {
-  var diffElemHidden = diffElem + "_hidden"
-  document.getElementById(diffElemHidden).value = document.getElementById(diffElem).value
-  document.getElementById(diffElemHidden).selectedIndex = document.getElementById(diffElem).selectedIndex
+  var diffElemHidden = diffElem + "_hidden";
+
+  console.log("manger");
+  console.log("elem: "+diffElem);
+  console.log("elemHidden: "+diffElem);
+
+  document.getElementById(diffElemHidden).value = document.getElementById(diffElem).value;
+  document.getElementById(diffElemHidden).selectedIndex = document.getElementById(diffElem).selectedIndex;
 }
 function showPath()
 {
@@ -245,6 +283,34 @@ window.onload = function(){
 
 <body>
 {{
+def displaySelect(name, values, value):
+  response.write("<select id=\"{}\" name=\"{}\" form=\"mainform\" onchange=\"changeHiddenSelect('{}')\">\n".format(name, name, name), escape=False)
+
+  for difficulty in values:
+    selected=""
+    if value == difficulty:
+      selected="selected=\"selected\""
+      pass
+
+    response.write("  <option value=\"{}\" {}>{}</option>\n".format(difficulty, selected, difficulty), escape=False)
+    pass
+
+  response.write("</select>\n", escape=False)
+
+  response.write("<select id=\"{}_hidden\" name=\"{}_hidden\" form=\"saveform\" style='display:none'>\n".format(name, name), escape=False)
+
+  for difficulty in values:
+    selected=""
+    if value == difficulty:
+      selected="selected=\"selected\""
+      pass
+
+    response.write("  <option value=\"{}\" {}>{}</option>\n".format(difficulty, selected, difficulty), escape=False)
+    pass
+
+  response.write("</select>\n", escape=False)
+  pass
+
 def displayKnow(know):
   response.write("<tr>\n", escape=False)
 
@@ -276,6 +342,7 @@ def displayKnow(know):
 
     response.write("    <option value=\"{}\" {}>{}</option>\n".format(difficulties[difficulty], selected, difficulties[difficulty]), escape=False)
     pass
+  response.write("</select>\n", escape=False)
 
   response.write("  <td>{}</td>".format(desc[know]['title']), escape=False)
 
@@ -306,6 +373,7 @@ def displayKnow(know):
     response.write("    <option value=\"{}\" {}>{}</option>\n".format(difficulties[difficulty], selected, difficulties[difficulty]), escape=False)
     pass
 
+  response.write("</select>\n", escape=False)
 
   response.write("</tr>\n", escape=False)
   pass
@@ -329,6 +397,7 @@ pass
 {{=mainForm}}
 
 <hr>
+
 {{
 if resultText is not None:
   =resultText
@@ -374,16 +443,27 @@ if resultText is not None:
   pass
 }}
 
+<p>
 Load a previously saved presets or one of these: noob, regular, veteran, speedrunner.
-
 {{=loadForm}}
+</p>
 
-<hr>
+<table class="full">
+  <h1 class="nopadding">Global Settings</h1>
+</table>
 
-The maximum difficulty for picking up an item in the current area before moving to another area (Warning: selecting a too hard difficulty may produce unrealistic results).
-<br/>
-
-Difficulty target:
+<div class="row">
+  <div class="column">
+<h3>Difficulty Target</h3>
+<p>
+The maximum difficulty for picking up an item in the current area before moving to another area <br/>
+(Warning: selecting a too hard difficulty may produce unrealistic results).
+</p>
+<p>
+<table>
+  <tr>
+    <td>Difficulty target:</td>
+    <td>
 {{
 =SELECT('easy', 'medium', 'hard', 'very hard', 'hardcore', 'mania',
        _id="difficulty_target",
@@ -402,9 +482,14 @@ Difficulty target:
        requires=IS_IN_SET(['easy', 'medium', 'hard', 'very hard', 'hardcore', 'mania']),
        value=difficulties[conf["target"]])
 }}
-<br/><br/>
+    </td>
+  </tr>
+</table>
+</p>
+<h3>Pickup Strategy</h3>
+<p>
 The strategy for picking up major and minor items.
-<br/>
+</p>
 <ul>
 <li>All:</li>
 <ul><li>Will grab all the major and minor items.</li></ul>
@@ -427,8 +512,11 @@ accessible, enough minors to beat Mother Brain will be picked up.
 </li>
 </ul>
 </ul>
-<br/>
-Pickup strategy:
+<p>
+<table>
+  <tr>
+    <td>Pickup strategy:</td>
+    <td>
 {{
 =SELECT('all', 'minimal', 'any',
         _id="pickup_strategy",
@@ -447,12 +535,112 @@ Pickup strategy:
         requires=IS_IN_SET(['all', 'minimal', 'any']),
         value=conf["pickup"])
 }}
+    </td>
+  </tr>
+</table>
+</p>
 
-<hr>
+  </div>
+  <div class="column">
+    <h3>Hellruns</h3>
+    <p>
+      No thanks: don't do hellruns<br/>
+      Gimme energy: get comfortable before going in<br/>
+      Default: balanced setting<br/>
+      Bring the heat: you don't mind doing hell runs at all<br/>
+      I run RBO: Reverse Boss Order runner<br/>
+       <table>
+	<tr>
+	  <td>Ice:</td>
+	  <td>
+{{
+      hellruns = ['No thanks', 'Gimme energy', 'Default', 'Bring the heat', 'I run RBO']
+      displaySelect("Ice", hellruns, settings['Ice'])
+}}
+	  </td>
+	</tr>
+	<tr>
+	  <td>Main Upper Norfair:</td>
+	  <td>
+{{
+      displaySelect("MainUpperNorfair", hellruns, settings['MainUpperNorfair'])
+}}
+	  </td>
+	</tr>
+      </table>
 
+    </p>
+    <h3>Bosses</h3>
+    <p>
+      Logic behind the presets : the ones where you find the boss difficult are
+      calibrated to give 'hard' in vanilla situations, the default are calibrated
+      to give 'medium' in vanilla situations, just above gives 'easy' in vanilla
+      situations, and top settings basically discards the boss except for extreme
+      situations (very low energy or firepower)
+
+      <table>
+	<tr>
+	  <td>Kraid:</td>
+	  <td>
+{{
+      kraid = ["He's annoying", 'Default', 'Quick Kill']
+      displaySelect("Kraid", kraid, settings['Kraid'])
+}}
+	  </td>
+	</tr>
+
+	<tr>
+	  <td>Draygon:</td>
+	  <td>
+{{
+      draygon = ['A lot of trouble', 'Default', 'Used to it', 'No problemo']
+      displaySelect("Draygon", draygon, settings['Draygon'])
+}}
+	  </td>
+	</tr>
+
+	<tr>
+	  <td>Ridley:</td>
+	  <td>
+{{
+      ridley = ["I'm scared!", 'Default', 'Used to it', 'Piece of cake']
+      displaySelect("Ridley", ridley, settings['Ridley'])
+}}
+	  </td>
+	</tr>
+
+	<tr>
+	  <td>Phantoon:</td>
+	  <td>
+{{
+      phantoon = ['A lot of trouble', 'Default', 'Used to it', 'No problemo']
+      displaySelect("Phantoon", phantoon, settings['Phantoon'])
+}}
+	  </td>
+	</tr>
+
+	<tr>
+	  <td>Mother Brain:</td>
+	  <td>
+{{
+      motherBrain = ['It can get ugly', 'Default', 'Is this really the last boss?', 'Nice cutscene bro']
+      displaySelect("MotherBrain", motherBrain, settings['MotherBrain'])
+}}
+	  </td>
+	</tr>
+      </table>
+    </p>
+  </div>
+</div>
+
+<table class="full">
+  <h1 class="nopadding">Techniques</h1>
+</table>
+
+<p>
 For each technique you can choose if you know it and your perceived difficulty.</br>
 Clicking on most of the techniques will send you to an explanation or a tutorial.
-
+</p>
 {{
 for category in categories:
   displayCategory(category)

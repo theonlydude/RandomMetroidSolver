@@ -86,15 +86,20 @@ def energyReserveCount(items):
 def energyReserveCountOk(items, count, difficulty=0):
     return SMBool(energyReserveCount(items) >= count, difficulty)
 
-def energyReserveCountOkList(items, difficulties):
+def energyReserveCountOkHellRun(items, hellRunName):
+    difficulties = Settings.hellRuns[hellRunName]
+
     if difficulties is None or len(difficulties) == 0:
         return SMBool(False)
+
     # get a list: [(2, difficulty=hard), (4, difficulty=medium), (6, difficulty=easy)]
     def f(difficulty):
         return energyReserveCountOk(items, difficulty[0], difficulty=difficulty[1])
-    return reduce(lambda result, difficulty: wor(result, f(difficulty)),
-                  difficulties[1:],
-                  f(difficulties[0]))
+    result = reduce(lambda result, difficulty: wor(result, f(difficulty)),
+                    difficulties[1:],
+                    f(difficulties[0]))
+    result.knows = [hellRunName+'HellRun']
+    return result
 
 def heatProof(items):
     return haveItem(items, 'Varia')
@@ -546,7 +551,7 @@ def enoughStuffsMotherbrain(items):
     if ammoMargin == 0:
         return SMBool(False)
 #    print('MB2', ammoMargin, secs)
-    return SMBool(True, computeBossDifficulty(items, ammoMargin, secs, Settings.bossesDifficulty['Mother Brain']))
+    return SMBool(True, computeBossDifficulty(items, ammoMargin, secs, Settings.bossesDifficulty['MotherBrain']))
 
 def canPassMetroids(items):
     return wand(canOpenRedDoors(items),

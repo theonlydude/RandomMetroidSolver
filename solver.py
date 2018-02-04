@@ -561,7 +561,7 @@ class RomLoaderDict(RomLoader):
             self.locsItems[loc['Name']] = loc['itemName']
             loc["Class"] = self.getLocClass(loc["Name"], Items.getItemClass(loc['itemName']))
 
-class ParamsLoader:
+class ParamsLoader(object):
     @staticmethod
     def factory(params):
         # can be a json, a python file or a dict with the parameters
@@ -574,6 +574,19 @@ class ParamsLoader:
                 sys.exit(-1)
         elif type(params) is dict:
             return ParamsLoaderDict(params)
+
+    def __init__(self):
+        if 'Knows' not in self.params:
+            self.params['Knows'] = {}
+        if 'Conf' not in self.params:
+            self.params['Conf'] = {}
+        if 'Settings' not in self.params:
+            self.params['Settings'] = {}
+
+        if 'hellRuns' not in self.params['Settings']:
+            self.params['Settings']['hellRuns'] = {}
+        if 'bossesDifficulty' not in self.params['Settings']:
+            self.params['Settings']['bossesDifficulty'] = {}
 
     def load(self):
         # update the parameters in the parameters classes: Conf, Knows, Settings
@@ -591,7 +604,7 @@ class ParamsLoader:
 
         # Settings
         for param in self.params['Settings']:
-            if isSettings(param):
+            if isSettings(param) and len(self.params['Settings'][param]) > 0:
                 setattr(Settings, param, self.params['Settings'][param])
 
     def dump(self, fileName):
@@ -620,11 +633,13 @@ class ParamsLoaderJson(ParamsLoader):
     def __init__(self, jsonFileName):
         with open(jsonFileName) as jsonFile:
             self.params = json.load(jsonFile)
+        super(ParamsLoaderJson, self).__init__()
 
 class ParamsLoaderDict(ParamsLoader):
     # when called from the website
     def __init__(self, params):
         self.params = params
+        super(ParamsLoaderDict, self).__init__()
 
 class DifficultyDisplayer:
     difficulties = {

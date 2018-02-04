@@ -164,8 +164,11 @@ def solver():
     files = sorted(os.listdir('diff_presets'))
     presets = [os.path.splitext(file)[0] for file in files]
 
-    loadForm = FORM("Choose an available preset: ",
-                    SELECT(*presets, **dict(_name="paramsFile", value=session.paramsFile, _onchange="this.form.submit()")),
+    loadForm = FORM(TABLE(TR("Choose an available preset: ",
+                             SELECT(*presets,
+                                    **dict(_name="paramsFile",
+                                           value=session.paramsFile,
+                                           _onchange="this.form.submit()")))),
                     _id="loadform", _name="loadform")
 
     if loadForm.process(formname='loadform').accepted:
@@ -273,7 +276,7 @@ def solver():
 
     # set title
     response.title = 'Super Metroid Item Randomizer Solver'
-    response.menu = [['Super Metroid Item Randomizer Solver', False, '#'],
+    response.menu = [['Super Metroid Item Randomizer Solver', False, URL(f='solver')],
                      ['Solve!', True, URL(f='solver')],
                      ['Information & Contact', False, URL(f='infos')]]
 
@@ -283,11 +286,23 @@ def solver():
             if know not in params['Knows'].keys():
                 params['Knows'][know] = Knows.__dict__[know]
 
+    # add missing settings
+    for boss in ['Kraid', 'Phantoon', 'Draygon', 'Ridley', 'MotherBrain']:
+        if boss not in params['Settings']['bossesDifficulty']:
+            params['Settings']['bossesDifficulty'][boss] = Settings.bossesDifficulty[boss]
+        if boss not in params['Settings']:
+            params['Settings'][boss] = 'Default'
+    for hellrun in ['Ice', 'MainUpperNorfair']:
+        if hellrun not in params['Settings']['hellRuns']:
+            params['Settings']['hellRuns'][hellrun] = Settings.hellRuns[hellrun]
+        if hellrun not in params['Settings']:
+            params['Settings'][hellrun] = 'Default'
+
     # send values to view
     return dict(mainForm=mainForm, loadForm=loadForm, saveForm=saveForm,
                 desc=Knows.desc,
                 difficulties=difficulties,
-                categories=Knows.categories,
+                categories=Knows.categories, settings=params['Settings'],
                 knows=params['Knows'], conf=conf, knowsUsed=knowsUsed,
                 resultText=resultText, pathTable=pathTable,
                 difficulty=difficulty, diffPercent=diffPercent,
@@ -298,23 +313,22 @@ def generate_json_from_parameters(vars, hidden):
         hidden = "_hidden"
     else:
         hidden = ""
-    paramsDict = {'Conf': {}, 'Settings': {}, 'Knows': {}}
+
+    paramsDict = {'Knows': {}, 'Conf': {}, 'Settings': {'hellRuns': {}, 'bossesDifficulty': {}}}
+
+    # Knows
     for var in Knows.__dict__:
-        # print("var={}".format(var))
         if isKnows(var):
             boolVar = vars[var+"_bool"+hidden]
-            # print("{} = {}".format(var+"_bool"+hidden, boolVar))
             if boolVar is None:
                 paramsDict['Knows'][var] = [False, 0]
             else:
                 paramsDict['Knows'][var] = [True, difficulties2[vars[var+"_diff"+hidden]]]
-            # print("{}: {}".format(var, paramsDict['Knows'][var]))
 
+    # Conf
     diffTarget = vars["difficulty_target"+hidden]
-    #print("diffTarget={}".format(diffTarget))
     if diffTarget is not None:
         paramsDict['Conf']['difficultyTarget'] = difficulties2[diffTarget]
-        #print("paramsDict['Conf']['difficultyTarget']={}".format(paramsDict['Conf']['difficultyTarget']))
 
     pickupStrategy = vars["pickup_strategy"+hidden]
     if pickupStrategy is not None:
@@ -327,6 +341,16 @@ def generate_json_from_parameters(vars, hidden):
         else:
             paramsDict['Conf']['majorsPickup'] = 'minimal'
             paramsDict['Conf']['minorsPickup'] = {'Missile' : 10, 'Super' : 5, 'PowerBomb' : 2}
+
+    # Settings
+    for hellRun in ['Ice', 'MainUpperNorfair']:
+        value = vars[hellRun+hidden]
+        paramsDict['Settings']['hellRuns'][hellRun] = Settings.hellRunPresets[hellRun][vars[hellRun+hidden]]
+        paramsDict['Settings'][hellRun] = vars[hellRun+hidden]
+
+    for boss in ['Kraid', 'Phantoon', 'Draygon', 'Ridley', 'MotherBrain']:
+        paramsDict['Settings']['bossesDifficulty'][boss] = Settings.bossesDifficultyPresets[boss][vars[boss+hidden]]
+        paramsDict['Settings'][boss] = vars[boss+hidden]
 
     return paramsDict
 
@@ -350,6 +374,8 @@ def compute_difficulty(jsonRomFileName, post_vars):
 
     # the number of knows set to True
     total = len([param for param in paramsDict['Knows'] if paramsDict['Knows'][param][0] is True])
+    if 'hellRuns' in paramsDict['Settings']:
+        total += len([hellRun for hellRun in paramsDict['Settings']['hellRuns'] if paramsDict['Settings']['hellRuns'][hellRun] is not None])
 
     return dict(randomizedRom=randomizedRom, difficulty=difficulty,
                 generatedPath=generatedPath, diffPercent=diffPercent,
@@ -358,7 +384,7 @@ def compute_difficulty(jsonRomFileName, post_vars):
 def infos():
     # set title
     response.title = 'Super Metroid Item Randomizer Solver'
-    response.menu = [['Super Metroid Item Randomizer Solver', False, '#'],
+    response.menu = [['Super Metroid Item Randomizer Solver', False, URL(f='solver')],
                      ['Solve!', False, URL(f='solver')],
                      ['Information & Contact', True, URL(f='infos')]]
 

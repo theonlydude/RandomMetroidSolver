@@ -19,16 +19,16 @@ class Conf:
     displayGeneratedPath = False
 
     # choose how many items are required
-    #majorsPickup = 'minimal'
+    majorsPickup = 'minimal'
     #majorsPickup = 'all'
-    majorsPickup = 'any'
-    #minorsPickup = {
-    #    'Missile' : 10,
-    #    'Super' : 5,
-    #    'PowerBomb' : 2
-    #}
+    #majorsPickup = 'any'
+    minorsPickup = {
+       'Missile' : 10,
+       'Super' : 5,
+       'PowerBomb' : 2
+    }
     #minorsPickup = 'all'
-    minorsPickup = 'any'
+    #minorsPickup = 'any'
 
 def isKnows(knows):
     return knows[0:len('__')] != '__' and knows[0] == knows[0].upper()
@@ -685,6 +685,11 @@ class Settings:
             'Default' : [(3, mania), (5, hardcore), (6, hard), (9, medium)],
             'Bring the heat' : [(3, hardcore), (4, hard), (5, medium), (7, easy)],
             'I run RBO' : [(3, harder), (4, hard), (5, medium), (6, easy)] 
+        },
+        'LowerNorfair' : {
+            'Default' : None,
+            'Bring the heat' : [(9, mania), (12, hardcore), (14, harder), (18, hard)],
+            'I run RBO' : [(7, mania), (9, hardcore), (11, harder), (14, hard), (18, medium)]
         }
     }
     
@@ -692,7 +697,8 @@ class Settings:
         # Ice Beam hell run
         'Ice' : hellRunPresets['Ice']['Default'],
         # rest of upper norfair
-        'MainUpperNorfair' : hellRunPresets['MainUpperNorfair']['Default']
+        'MainUpperNorfair' : hellRunPresets['MainUpperNorfair']['Default'],
+        'LowerNorfair' : hellRunPresets['LowerNorfair']['Default']
     }
     
     # various settings used in difficulty computation
@@ -723,3 +729,19 @@ class Settings:
         # multiply the difficulty by this amount if no charge and few missiles
         'phantoonLowMissileMalus' : 1.2
     }
+
+class RomPatches:
+    BlueBrinstarBlueDoor      = 10
+    SpazerShotBlock           = 20
+    RedTowerLeftPassage       = 21
+    HiJumpShotBlock           = 30
+    CathedralEntranceWallJump = 31
+
+    Total_TX = [ BlueBrinstarBlueDoor,
+                 SpazerShotBlock, RedTowerLeftPassage,
+                 HiJumpShotBlock, CathedralEntranceWallJump ]
+
+    ActivePatches = Total_TX
+
+    def isPatchActive(patch):
+        return (patch in ActivePatches)

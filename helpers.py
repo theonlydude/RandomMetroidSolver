@@ -107,7 +107,7 @@ def heatProof(items):
 def canHellRun(items, hellRun):
     if heatProof(items).bool:
         return SMBool(True, easy)
-    elif energyReserveCount(items) >= 3:
+    elif energyReserveCount(items) >= 2:
         return energyReserveCountOkHellRun(items, hellRun)
     else:
         return SMBool(False)

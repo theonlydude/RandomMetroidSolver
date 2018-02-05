@@ -292,7 +292,7 @@ def solver():
             params['Settings']['bossesDifficulty'][boss] = Settings.bossesDifficulty[boss]
         if boss not in params['Settings']:
             params['Settings'][boss] = 'Default'
-    for hellrun in ['Ice', 'MainUpperNorfair']:
+    for hellrun in ['Ice', 'MainUpperNorfair', 'LowerNorfair']:
         if hellrun not in params['Settings']['hellRuns']:
             params['Settings']['hellRuns'][hellrun] = Settings.hellRuns[hellrun]
         if hellrun not in params['Settings']:
@@ -347,6 +347,9 @@ def generate_json_from_parameters(vars, hidden):
         value = vars[hellRun+hidden]
         paramsDict['Settings']['hellRuns'][hellRun] = Settings.hellRunPresets[hellRun][vars[hellRun+hidden]]
         paramsDict['Settings'][hellRun] = vars[hellRun+hidden]
+
+    paramsDict['Settings']['hellRuns']['LowerNorfair'] = Settings.hellRunPresets['LowerNorfair']['Default']
+    paramsDict['Settings']['LowerNorfair'] = 'Default'
 
     for boss in ['Kraid', 'Phantoon', 'Draygon', 'Ridley', 'MotherBrain']:
         paramsDict['Settings']['bossesDifficulty'][boss] = Settings.bossesDifficultyPresets[boss][vars[boss+hidden]]

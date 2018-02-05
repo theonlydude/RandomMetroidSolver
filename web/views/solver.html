@@ -544,10 +544,10 @@ accessible, enough minors to beat Mother Brain will be picked up.
   <div class="column">
     <h3>Hellruns</h3>
     <p>
-      No thanks: don't do hellruns<br/>
-      Gimme energy: get comfortable before going in<br/>
-      Default: balanced setting<br/>
-      Bring the heat: you don't mind doing hell runs at all<br/>
+      No thanks: Don't do hellruns<br/>
+      Gimme energy: Get comfortable before going in<br/>
+      Default: Balanced setting. For Lower Norfair's hell run "Default" means "No thanks"<br/>
+      Bring the heat: You don't mind doing hell runs at all<br/>
       I run RBO: Reverse Boss Order runner<br/>
        <table>
 	<tr>
@@ -564,6 +564,15 @@ accessible, enough minors to beat Mother Brain will be picked up.
 	  <td>
 {{
       displaySelect("MainUpperNorfair", hellruns, settings['MainUpperNorfair'])
+}}
+	  </td>
+	</tr>
+	<tr>
+	  <td>Lower Norfair:</td>
+	  <td>
+{{
+      hellruns = ['Default', 'Bring the heat', 'I run RBO']
+      displaySelect("LowerNorfair", hellruns, settings['LowerNorfair'])
 }}
 	  </td>
 	</tr>

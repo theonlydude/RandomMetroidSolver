@@ -250,7 +250,7 @@ def solver():
     if 'itemsForbidden' in params['Conf']:
         conf["itemsForbidden"] = params['Conf']['itemsForbidden']
     else:
-        conf["itemsForbidden"] = Conf.itemsForbidden
+        conf["itemsForbidden"] = []
 
     # display result
     if session.result is not None:

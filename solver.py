@@ -286,7 +286,16 @@ class Solver:
 
     def collectItem(self, loc):
         item = loc["itemName"]
-        self.collectedItems.append(item)
+        if item not in Conf.itemsForbidden:
+            self.collectedItems.append(item)
+        else:
+            # update the name of the item
+            item = "-{}-".format(item)
+            loc["itemName"] = item
+            self.collectedItems.append(item)
+            # we still need the boss difficulty
+            if 'Pickup' not in loc:
+                loc["difficulty"] = SMBool(False)
         if 'Pickup' in loc:
             loc['Pickup']()
 

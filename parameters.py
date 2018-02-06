@@ -30,6 +30,9 @@ class Conf:
     #minorsPickup = 'all'
     #minorsPickup = 'any'
 
+    # the list of items to not pick up
+    itemsForbidden = []
+
 def isKnows(knows):
     return knows[0:len('__')] != '__' and knows[0] == knows[0].upper()
 

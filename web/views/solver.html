@@ -51,6 +51,10 @@ label {
     padding-top: 5px;
     padding-bottom: 5px;
 }
+.linethrough {
+    text-decoration: line-through;
+}
+text-decoration: line-through;
 
 th {
     background-color: #ddd;
@@ -110,6 +114,13 @@ function toggleSelect(elem)
   var diffElem = elem + "_diff";
   var isChecked = document.getElementById(boolElem).checked;
   document.getElementById(diffElem).disabled = !isChecked;
+  document.getElementById(boolElemHidden).checked = isChecked;
+}
+function toggleOnlySelect(elem)
+{
+  var boolElem = elem + "_bool";
+  var boolElemHidden = boolElem + "_hidden";
+  var isChecked = document.getElementById(boolElem).checked;
   document.getElementById(boolElemHidden).checked = isChecked;
 }
 function changeHiddenSelect(diffElem)
@@ -452,6 +463,35 @@ Load a previously saved presets or one of these: noob, regular, veteran, speedru
   <h1 class="nopadding">Global Settings</h1>
 </table>
 
+<h3>Items not picked up</h3>
+<p>
+  For testing purpose you can choose to not pick up some items.
+</p>
+<table class="full">
+<tr>
+{{
+  i = 0
+  for item in ['Bomb', 'Charge', 'ETank', 'Grapple', 'Gravity', 'HiJump', 'Ice', 'Missile', 'Morph', 'Plasma', 'PowerBomb', 'Reserve', 'ScrewAttack', 'SpaceJump', 'Spazer', 'SpeedBooster', 'SpringBall', 'Super', 'Varia', 'Wave', 'XRayScope']:
+    if item in conf["itemsForbidden"]:
+      checked = "checked=\"checked\" value=\"on\""
+    else:
+      checked = ""
+      pass
+    response.write("<td><input id=\"{}_bool\" name=\"{}_bool\" type=\"checkbox\" {} onClick=\"toggleOnlySelect('{}')\" form=\"mainform\">\n".format(item, item, checked, item), escape=False)
+    response.write("<input id=\"{}_bool_hidden\" name=\"{}_bool_hidden\" type=\"checkbox\" {} form=\"saveform\" style='display:none'>\n".format(item, item, checked), escape=False)
+
+    response.write("{}<br/>".format(item), escape=False)
+    response.write("</td>", escape=False)
+
+    i += 1
+    if i % 7 == 0:
+      response.write("</tr><tr>", escape=False)
+      pass
+    pass
+}}
+</tr>
+</table>
+
 <div class="row">
   <div class="column">
 <h3>Difficulty Target</h3>
@@ -495,7 +535,8 @@ The strategy for picking up major and minor items.
 <ul><li>Will grab all the major and minor items.</li></ul>
 
 <li>Any:</li>
-<ul><li>No requirements on the items as long as the rom is finishable</li></ul>
+<ul><li>No requirements on the items as long as the rom is finishable.<br/>
+Warning: The generated path may not be realistic</li></ul>
 
 <li>Minimal:</li>
 <ul>

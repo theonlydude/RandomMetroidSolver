@@ -247,6 +247,10 @@ def solver():
         conf["pickup"] = params['Conf']['majorsPickup']
     else:
         conf["pickup"] = Conf.majorsPickup
+    if 'itemsForbidden' in params['Conf']:
+        conf["itemsForbidden"] = params['Conf']['itemsForbidden']
+    else:
+        conf["itemsForbidden"] = Conf.itemsForbidden
 
     # display result
     if session.result is not None:
@@ -261,7 +265,11 @@ def solver():
         # add generated path (spoiler !)
         pathTable = TABLE(TR(TH("Location Name"), TH("Area"), TH("Item"), TH("Difficulty"), TH("Techniques used")))
         for location, area, item, diff, techniques in session.result['generatedPath']:
-            pathTable.append(TR(location, area, item, diff, techniques))
+            # not picked up items start with an '-'
+            if item[0] != '-':
+                pathTable.append(TR(location, area, item, diff, techniques))
+            else:
+                pathTable.append(TR(location, area, DIV(item, _class='linethrough'), diff, techniques))
 
         knowsUsed = session.result['knowsUsed']
 
@@ -341,6 +349,14 @@ def generate_json_from_parameters(vars, hidden):
         else:
             paramsDict['Conf']['majorsPickup'] = 'minimal'
             paramsDict['Conf']['minorsPickup'] = {'Missile' : 10, 'Super' : 5, 'PowerBomb' : 2}
+
+    itemsForbidden = []
+    for item in ['ETank', 'Missile', 'Super', 'PowerBomb', 'Bomb', 'Charge', 'Ice', 'HiJump', 'SpeedBooster', 'Wave', 'Spazer', 'SpringBall', 'Varia', 'Plasma', 'Grapple', 'Morph', 'Reserve', 'Gravity', 'XRayScope', 'SpaceJump', 'ScrewAttack']:
+        boolvar = vars[item+"_bool"+hidden]
+        if boolvar is not None:
+            itemsForbidden.append(item)
+
+    paramsDict['Conf']['itemsForbidden'] = itemsForbidden
 
     # Settings
     for hellRun in ['Ice', 'MainUpperNorfair', 'LowerNorfair']:

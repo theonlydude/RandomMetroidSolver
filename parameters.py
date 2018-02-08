@@ -25,7 +25,7 @@ class Conf:
     difficultyTarget=medium
 
     # display the generated path (spoilers!)
-    displayGeneratedPath = False
+    displayGeneratedPath=False
 
     # choose how many items are required
     majorsPickup = 'minimal'
@@ -262,6 +262,12 @@ class Knows:
                         'href': 'https://www.youtube.com/watch?v=pdyBy_54dB0',
                         'rooms': ['Lava Dive Room']}
 
+    LavaDiveNoHiJump = SMBool(False, 0, ['LavaDiveNoHiJump'])
+    desc['LavaDive'] = {'display': 'Lava Dive',
+                        'title': 'Enter Lower Norfair with just the Varia suit',
+                        'href': 'https://www.youtube.com/watch?v=pdyBy_54dB0',
+                        'rooms': ['Lava Dive Room']}
+
     WorstRoomIceCharge = SMBool(True, mania, ['WorstRoomIceCharge'])
     desc['WorstRoomIceCharge'] = {'display': 'Worst Room Ice and Charge',
                                   'title': 'Go through Worst Room In The Game JUST by freezing pirates',
@@ -327,6 +333,12 @@ class Knows:
                                           'href': 'https://www.youtube.com/watch?v=c2xoPigezvM',
                                           'rooms': ['Main Street']}
 
+    TediousMountEverest = SMBool(False, 0, ['TediousMountEverest'])
+    desc['TediousMountEverest'] = {'display': 'Mt. Everest without anything',
+                                    'title': 'Make your way through Mt. Everest with nothing but Ice (and Hi-Jump when suitless)',
+                                    'href': 'https://www.youtube.com/watch?v=chFbX9rRV_k&t=123s',
+                                    'rooms': ['Mt. Everest']}
+
     # Mama
     MamaGrappleWithWallJump = SMBool(False, 0, ['MamaGrappleWithWallJump'])
     desc['MamaGrappleWithWallJump'] = {'display': 'Mama Grapple with Wall-Jump',
@@ -341,11 +353,11 @@ class Knows:
                                       'href': 'https://www.youtube.com/watch?v=i2OGuFpcfiw&t=154s',
                                       'rooms': ["Draygon's Room"]}
 
-    DraygonRoomCrystalExit = SMBool(False, 0, ['DraygonRoomCrystalExit'])
-    desc['DraygonRoomCrystalExit'] = {'display': 'Exit Draygon room with a shine spark',
-                                      'title': 'Doing a Crystal flash and being grabbed by Draygon gives a free shine spark',
-                                      'href': 'https://www.youtube.com/watch?v=hrHHfvGD3wo&t=625s',
-                                      'rooms': ["Draygon's Room"]}
+    DraygonRoomCrystalFlash = SMBool(False, 0, ['DraygonRoomCrystalFlash'])
+    desc['DraygonRoomCrystalFlash'] = {'display': 'Exit Draygon room or precious room with a shine spark',
+                                       'title': 'Doing a Crystal flash and being grabbed by Draygon gives a free shine spark',
+                                       'href': 'https://www.youtube.com/watch?v=hrHHfvGD3wo&t=625s',
+                                       'rooms': ["Draygon's Room"]}
 
     PreciousRoomXRayExit = SMBool(False, 0, ['PreciousRoomXRayExit'])
     desc['PreciousRoomXRayExit'] = {'display': 'Exit the Precious room with an Xray glitch',
@@ -382,7 +394,7 @@ class Knows:
     # sandpit
     SuitlessSandpit = SMBool(False, 0, ['SuitlessSandpit']) # access the item in the sandpit suitless
     desc['SuitlessSandpit'] = {'display': 'Suitless Sandpit',
-                               'title': 'Access item in the left sandpit without Gravity',
+                               'title': 'Access items in sandpits without Gravity',
                                'href': 'https://www.youtube.com/watch?v=1M2TiEVwH2I',
                                'rooms': ['West Sand Hole', 'East Sand Hole']}
 

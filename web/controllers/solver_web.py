@@ -172,7 +172,7 @@ def solver():
                                            _onchange="this.form.submit()",
                                            _class="filldropdown")),
                              " "),
-                          _class="half"),
+                          _class="threequarter"),
                     _id="loadform", _name="loadform")
 
     if loadForm.process(formname='loadform').accepted:
@@ -201,7 +201,8 @@ def solver():
                          INPUT(_type="text",
                                _name="saveFile",
                                requires=[IS_ALPHANUMERIC(error_message='Preset name must be alphanumeric and max 32 chars'),
-                                         IS_LENGTH(32)]),
+                                         IS_LENGTH(32)],
+                               _class="full"),
                          INPUT(_type="button",_value="Create", _class="full", _onclick="askPassword()")),
                       TR(INPUT(_type="text",
                                _name="password", _id="password",
@@ -209,7 +210,7 @@ def solver():
                                          IS_ALPHANUMERIC(error_message='Password must be alphanumeric and max 32 chars'), 
                                          IS_LENGTH(32)],
                                _style='display:none')),
-                      _class="half")
+                      _class="threequarter")
     saveForm = FORM(saveTable, _id="saveform", _name="saveform")
 
     if saveForm.process(formname='saveform').accepted:

@@ -61,7 +61,7 @@ def wor(a, b, c=None, d=None, difficulty=0):
 
 # negates boolean part of the SMBool
 def wnot(a):
-    return SMBool(not a.bool, a.difficulty)
+    return SMBool(not a.bool, a.difficulty, a.knows)
 
 # check items and compute difficulty
 # the second parameter returned is the difficulty:

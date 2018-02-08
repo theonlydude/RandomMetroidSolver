@@ -73,10 +73,10 @@ def solver():
         roms = [file+'.sfc' for file in filtered]
 
     # main form
-    mainForm = FORM(TABLE(TR("Already uploaded rom in this session: ",
-                             SELECT(*roms, **dict(_name="romFile", value=session.romFile+'.sfc' if session.romFile is not None else None, _class="filldropdown"))),
-                          TR("Randomized Super Metroid rom: ",
-                             INPUT(_type="file", _name="uploadFile", _id="uploadFile"))),
+    mainForm = FORM(TABLE(TR("Randomized Super Metroid rom: ",
+                             INPUT(_type="file", _name="uploadFile", _id="uploadFile")),
+                          TR("Already uploaded rom in this session: ",
+                             SELECT(*roms, **dict(_name="romFile", value=session.romFile+'.sfc' if session.romFile is not None else None, _class="filldropdown")))),
                           INPUT(_type="submit",_value="Compute difficulty"),
                           INPUT(_type="text", _name="json", _id="json", _style='display:none'),
                     _id="mainform", _name="mainform", _onsubmit="doSubmit();")

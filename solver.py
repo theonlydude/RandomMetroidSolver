@@ -275,14 +275,15 @@ class Solver:
 
     def printPath(self, message, locations):
         print(message)
-        print('{:>50} {:>13} {:>16} {:>14} {}'.format("Location Name", "Area", "Item", "Difficulty", "Knows used"))
+        print('{:>50} {:>13} {:>16} {:>14} {} {}'.format("Location Name", "Area", "Item", "Difficulty", "Knows used", "Items used"))
         print('-'*106)
         for location in locations:
-            print('{:>50}: {:>12} {:>16} {:>14} {}'.format(location['Name'],
-                                                           location['Area'],
-                                                           location['itemName'],
-                                                           location['difficulty'].difficulty,
-                                                           location['difficulty'].knows))
+            print('{:>50}: {:>12} {:>16} {:>14} {} {}'.format(location['Name'],
+                                                              location['Area'],
+                                                              location['itemName'],
+                                                              location['difficulty'].difficulty,
+                                                              location['difficulty'].knows,
+                                                              list(set(location['difficulty'].items))))
 
     def collectMajor(self, loc):
         self.majorLocations.remove(loc)

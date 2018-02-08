@@ -9,7 +9,8 @@ from rom import RomPatches
 # compare Super Metroid booleans
 def wand2(a, b, difficulty=0):
     if a.bool is True and b.bool is True:
-        return SMBool(True, a.difficulty + b.difficulty + difficulty, a.knows + b.knows)
+        return SMBool(True, a.difficulty + b.difficulty + difficulty,
+                      a.knows + b.knows, a.items + b.items)
     else:
         return SMBool(False)
 
@@ -31,16 +32,17 @@ def wand(a, b, c=None, d=None, difficulty=0):
 def wor2(a, b, difficulty=0):
     if a.bool is True and b.bool is True:
         if a.difficulty < b.difficulty:
-            return SMBool(True, a.difficulty + difficulty, a.knows)
+            return SMBool(True, a.difficulty + difficulty, a.knows, a.items)
         elif a.difficulty > b.difficulty:
-            return SMBool(True, b.difficulty + difficulty, b.knows)
+            return SMBool(True, b.difficulty + difficulty, b.knows, b.items)
         else:
             # in case of egality we return both knows
-            return SMBool(True, a.difficulty + difficulty, a.knows + b.knows)
+            return SMBool(True, a.difficulty + difficulty,
+                          a.knows + b.knows, a.items + b.items)
     elif a.bool is True:
-        return SMBool(True, a.difficulty + difficulty, a.knows)
+        return SMBool(True, a.difficulty + difficulty, a.knows, a.items)
     elif b.bool is True:
-        return SMBool(True, b.difficulty + difficulty, b.knows)
+        return SMBool(True, b.difficulty + difficulty, b.knows, b.items)
     else:
         return SMBool(False)
 
@@ -61,7 +63,7 @@ def wor(a, b, c=None, d=None, difficulty=0):
 
 # negates boolean part of the SMBool
 def wnot(a):
-    return SMBool(not a.bool, a.difficulty, a.knows)
+    return SMBool(not a.bool, a.difficulty, a.knows, a.items)
 
 # check items and compute difficulty
 # the second parameter returned is the difficulty:
@@ -69,13 +71,19 @@ def haveItemCount(items, item, count):
     return items.count(item) >= count
 
 def haveItem(items, item, difficulty=0):
-    return SMBool(item in items, difficulty)
+    if item in items:
+        return SMBool(True, difficulty, items = [item])
+    else:
+        return SMBool(False)
 
 def itemCount(items, item):
     return items.count(item)
 
 def itemCountOk(items, item, count, difficulty=0):
-    return SMBool(itemCount(items, item) >= count, difficulty)
+    if itemCount(items, item) >= count:
+        return SMBool(True, difficulty, items = [item])
+    else:
+        return SMBool(False)
 
 def itemCountOkList(items, item, difficulties):
     # get a list: [(2, difficulty=hard), (4, difficulty=medium), (6, difficulty=easy)]
@@ -89,7 +97,10 @@ def energyReserveCount(items):
     return itemCount(items, 'ETank') + itemCount(items, 'Reserve')
 
 def energyReserveCountOk(items, count, difficulty=0):
-    return SMBool(energyReserveCount(items) >= count, difficulty)
+    if energyReserveCount(items) >= count:
+        return SMBool(True, difficulty, items = ['ETank', 'Reserve'])
+    else:
+        return SMBool(False)
 
 def energyReserveCountOkHellRun(items, hellRunName):
     difficulties = Settings.hellRuns[hellRunName]

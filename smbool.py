@@ -1,9 +1,10 @@
 # super metroid boolean
 class SMBool:
-    def __init__(self, bool, difficulty=0, knows=[]):
+    def __init__(self, bool, difficulty=0, knows=[], items=[]):
         self.bool = bool
         self.difficulty = difficulty
         self.knows = knows
+        self.items = items
 
     def __repr__(self):
         # to display the smbool as a string

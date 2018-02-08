@@ -1,8 +1,11 @@
-{{extend 'layout.html'}}
+{{
+extend 'layout.html'
+}}
+
 
 <meta name="description" content="Solver for the randomized Super Metroid roms"/>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <link rel="shortcut icon" href={{=URL('static','favicon.ico')}} type="image/ico"/>
+
 <title>Super Metroid Item Randomizer Solver</title>
 
 <style>
@@ -54,10 +57,63 @@ label {
 .linethrough {
     text-decoration: line-through;
 }
-text-decoration: line-through;
+
+.fixed {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background-color: #ddd;
+    width: 100%;
+    z-index: 100;
+    border-bottom: 2px solid #666;
+}
+
+.main {
+    margin-top: 8.5em; /* Add a top margin to avoid content overlay */
+}
+
+input, .none {
+}
+
+.fill {
+    width:100%;
+    padding-left:0px;
+    padding-right:0px;
+}
+
+.menu {
+    width: 100%;
+    background-color: #333;
+    color: #eee;
+    text-align: center;
+}
+
+a.menu:link {
+    color: #eee;
+    padding-left: 4em;
+    padding-right: 4em;
+    font-weight: bold;
+}
+a.menu:visited {
+    color: #eee;
+    padding-left: 4em;
+    padding-right: 4em;
+    font-weight: bold;
+}
+
+.filldropdown {
+    width:100%;
+    padding-left:0px;
+    padding-right:0px;
+}
+
+table {
+    border-collapse: collapse;
+}
 
 th {
-    background-color: #ddd;
+    //background-color: #ddd;
 
     padding-left: 5px;
     padding-right: 5px;
@@ -74,8 +130,26 @@ td {
     border-bottom: 1px solid #ddd;
 }
 
+select {
+//    width:100%;
+//    padding-left:0px;
+//    padding-right:0px;
+}
+
 hr {
-    border-width: 2px;
+    //border-width: 2px;
+}
+
+h3, form {
+    margin: 0.1em;
+}
+
+.paddingleft {
+    padding-left: 10px;
+}
+
+p {
+    margin: 0.5em;
 }
 
 /* https://www.w3schools.com/howto/howto_css_two_columns.asp */
@@ -85,7 +159,7 @@ hr {
 .column {
     float: left;
     width: 50%;
-    padding: 10px;
+    padding-left: 10px;
 }
 .row:after {
     content: "";
@@ -97,10 +171,29 @@ hr {
         width: 100%;
     }
 }
+#passwordPopup {
+    padding: 20px;
+    background-color: #ddd;
+    position: fixed;
+    border: 1px solid #666;
+    top: 10em;
+    left: 30em;
+    display: none;
+    z-index: 100000;
+}
 </style>
 
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 <script type="text/javascript">
+function askPassword() {
+  console.log('askPassword');
+  document.getElementById("passwordPopup").style.display = "block";
+  document.getElementById("passwordPopupInput").focus();
+}
+function submitPreset() {
+  document.getElementById("password").value = document.getElementById("passwordPopupInput").value;
+  document.saveform.submit();
+}
 function doSubmit() {
   if(window.File && window.FileList && window.FileReader) {
     document.getElementById("uploadFile").disabled = true;
@@ -295,7 +388,7 @@ window.onload = function(){
 <body>
 {{
 def displaySelect(name, values, value):
-  response.write("<select id=\"{}\" name=\"{}\" form=\"mainform\" onchange=\"changeHiddenSelect('{}')\">\n".format(name, name, name), escape=False)
+  response.write("<select id=\"{}\" name=\"{}\" form=\"mainform\" onchange=\"changeHiddenSelect('{}')\" class=\"filldropdown\">\n".format(name, name, name), escape=False)
 
   for difficulty in values:
     selected=""
@@ -403,11 +496,42 @@ def displayCategory(category):
 pass
 }}
 
-<p>Ajust the presets depending on the techniques you know, choose your randomized rom then press 'Compute Difficulty'.</p>
+<div class="fixed">
+  <div class="menu">
+    {{=A('Super Metroid Item Randomizer Solver', _href=URL(f='solver'), _class='menu')}}
+    {{=A('Solve!', _href=URL(f='solver'), _class='menu')}}
+    {{=A('Information & Contact', _href=URL(f='infos'), _class='menu')}}
+  </div>
+  <div class="row">
+    <div class="column">
+      <div class="paddingleft">
+	<h3>Rom</h3>
+	<p>
+	  Ajust the presets depending on the techniques you know, choose your randomized rom then press 'Compute Difficulty'.
+	  {{=mainForm}}
+	</p>
+      </div>
+    </div>
+    <div class="column">
+      <div class="paddingleft">
+	<h3>Presets</h3>
+	<p>
+	  Load a previously saved presets or one of these: noob, regular, veteran, speedrunner.
+	  {{=loadForm}}
+          {{=saveForm}}
+	</p>
+      </div>
+    </div>
+  </div>
+</div>
 
-{{=mainForm}}
+<div id="passwordPopup">
+    <div>Enter Password:</div>
+    <input id="passwordPopupInput" type="text"/>
+    <button onclick="submitPreset()">Done</button>
+</div>
 
-<hr>
+<div class="main">
 
 {{
 if resultText is not None:
@@ -454,10 +578,6 @@ if resultText is not None:
   pass
 }}
 
-<p>
-Load a previously saved presets or one of these: noob, regular, veteran, speedrunner.
-{{=loadForm}}
-</p>
 
 <table class="full">
   <h1 class="nopadding">Global Settings</h1>
@@ -481,6 +601,7 @@ The maximum difficulty for picking up an item in the current area before moving 
        _name="difficulty_target",
        _form="mainform",
        _onchange="changeHiddenSelect('difficulty_target')",
+       _class="filldropdown",
        requires=IS_IN_SET(['easy', 'medium', 'hard', 'very hard', 'hardcore', 'mania']),
        value=difficulties[conf["target"]])
 }}
@@ -535,6 +656,7 @@ accessible, enough minors to beat Mother Brain will be picked up.
         _name="pickup_strategy",
         _form="mainform",
         _onchange="changeHiddenSelect('pickup_strategy')",
+        _class="filldropdown",
         requires=IS_IN_SET(['all', 'minimal', 'any']),
         value=conf["pickup"])
 }}
@@ -699,10 +821,5 @@ for category in categories:
 pass
 }}
 
-<hr>
-
-Save or update the presets. A password is required to later modify the presets.
-
-{{=saveForm}}
-
+</div>
 </body>

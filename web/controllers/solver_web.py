@@ -147,7 +147,6 @@ def solver():
         elif len(mainForm.vars['romFile']) != 0:
             session.romFile = os.path.splitext(mainForm.vars['romFile'])[0]
             jsonRomFileName = 'roms/' + session.romFile + '.json'
-
         else:
             session.flash = "No rom file selected for upload"
             error = True
@@ -158,18 +157,22 @@ def solver():
                 session.flash = "Missing json rom file on the server"
             else:
                 session.result = compute_difficulty(jsonRomFileName, request.post_vars)
-                redirect(URL(r=request, f='solver'))
+
+        redirect(URL(r=request, f='solver'))
 
     # load form
     files = sorted(os.listdir('diff_presets'))
     presets = [os.path.splitext(file)[0] for file in files]
 
-    loadForm = FORM(TABLE(TR("Load preset: ",
+    loadForm = FORM(TABLE(COLGROUP(COL(_class="quarter"), COL(_class="half"), COL(_class="quarter")),
+                          TR("Load preset: ",
                              SELECT(*presets,
                                     **dict(_name="paramsFile",
                                            value=session.paramsFile,
                                            _onchange="this.form.submit()",
-                                           _class="filldropdown")))),
+                                           _class="filldropdown")),
+                             " "),
+                          _class="threequarter"),
                     _id="loadform", _name="loadform")
 
     if loadForm.process(formname='loadform').accepted:
@@ -188,7 +191,8 @@ def solver():
             session.flash = "Presets file not found"
 
     # save form
-    saveTable = TABLE(TR("Update preset:",
+    saveTable = TABLE(COLGROUP(COL(_class="quarter"), COL(_class="half"), COL(_class="quarter")),
+                      TR("Update preset:",
                          SELECT(*presets, **dict(_name="paramsFile",
                                                  value=session.paramsFile,
                                                  _class="filldropdown")),
@@ -197,14 +201,16 @@ def solver():
                          INPUT(_type="text",
                                _name="saveFile",
                                requires=[IS_ALPHANUMERIC(error_message='Preset name must be alphanumeric and max 32 chars'),
-                                         IS_LENGTH(32)]),
+                                         IS_LENGTH(32)],
+                               _class="full"),
                          INPUT(_type="button",_value="Create", _class="full", _onclick="askPassword()")),
                       TR(INPUT(_type="text",
                                _name="password", _id="password",
                                requires=[IS_NOT_EMPTY(),
                                          IS_ALPHANUMERIC(error_message='Password must be alphanumeric and max 32 chars'), 
                                          IS_LENGTH(32)],
-                               _style='display:none')))
+                               _style='display:none')),
+                      _class="threequarter")
     saveForm = FORM(saveTable, _id="saveform", _name="saveform")
 
     if saveForm.process(formname='saveform').accepted:

@@ -41,6 +41,18 @@ label {
 .full {
     width: 100%;
 }
+.threequarter {
+    width: 75%;
+}
+.half {
+    width: 50%;
+}
+.third {
+    width: 33%;
+}
+.quarter {
+    width: 25%;
+}
 .center {
     text-align: center;
 }
@@ -53,6 +65,8 @@ label {
     padding-right: 0px;
     padding-top: 5px;
     padding-bottom: 5px;
+    position: relative;
+    left: -0.2em;
 }
 .linethrough {
     text-decoration: line-through;
@@ -70,7 +84,7 @@ label {
 }
 
 .main {
-    margin-top: 8.5em; /* Add a top margin to avoid content overlay */
+    margin-top: 8em; /* Add a top margin to avoid content overlay */
 }
 
 input, .none {
@@ -171,28 +185,28 @@ p {
         width: 100%;
     }
 }
-#passwordPopup {
-    padding: 20px;
-    background-color: #ddd;
-    position: fixed;
-    border: 1px solid #666;
-    top: 10em;
-    left: 30em;
-    display: none;
-    z-index: 100000;
+.container-fluid {
+    padding-left: 0px;
+    padding-right: 0px;
+}
+.col-md-12 {
+    padding-left: 1em;
+    padding-right: 1em;
+}
+.btn {
+    padding: 0.2em 2.5em;
 }
 </style>
 
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 <script type="text/javascript">
 function askPassword() {
-  console.log('askPassword');
-  document.getElementById("passwordPopup").style.display = "block";
-  document.getElementById("passwordPopupInput").focus();
-}
-function submitPreset() {
-  document.getElementById("password").value = document.getElementById("passwordPopupInput").value;
-  document.saveform.submit();
+  var password = prompt("Please enter your password", "password");
+
+  if (password != null) {
+    document.getElementById("password").value = password;
+    document.saveform.submit();
+  }
 }
 function doSubmit() {
   if(window.File && window.FileList && window.FileReader) {
@@ -505,7 +519,7 @@ pass
   <div class="row">
     <div class="column">
       <div class="paddingleft">
-	<h3>Rom</h3>
+	<h3>ROM</h3>
 	<p>
 	  Ajust the presets depending on the techniques you know, choose your randomized rom then press 'Compute Difficulty'.
 	  {{=mainForm}}
@@ -523,12 +537,6 @@ pass
       </div>
     </div>
   </div>
-</div>
-
-<div id="passwordPopup">
-    <div>Enter Password:</div>
-    <input id="passwordPopupInput" type="text"/>
-    <button onclick="submitPreset()">Done</button>
 </div>
 
 <div class="main">
@@ -574,7 +582,6 @@ if resultText is not None:
   response.write("<hr>\n", escape=False)
   =pathTable
   response.write("</div>\n", escape=False)
-  response.write("<hr>\n", escape=False)
   pass
 }}
 
@@ -627,8 +634,14 @@ The strategy for picking up major and minor items.
 <ul><li>Will grab all the major and minor items.</li></ul>
 
 <li>Any:</li>
-<ul><li>No requirements on the items as long as the rom is finishable.<br/>
-Warning: The generated path may not be realistic</li></ul>
+<ul>
+  <li>
+    No requirements on the items as long as the rom is finishable.<br/>
+    Warning: The generated path may not be realistic.<br/>
+    Use this setting on seeds that are unfinishable at first,</br>
+    such as masochist seeds in Dessyreqt randomizer.
+  </li>
+</ul>
 
 <li>Minimal:</li>
 <ul>
@@ -822,4 +835,5 @@ pass
 }}
 
 </div>
+<br/>
 </body>

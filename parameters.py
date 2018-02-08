@@ -263,10 +263,10 @@ class Knows:
                         'rooms': ['Lava Dive Room']}
 
     LavaDiveNoHiJump = SMBool(False, 0, ['LavaDiveNoHiJump'])
-    desc['LavaDive'] = {'display': 'Lava Dive',
-                        'title': 'Enter Lower Norfair with just the Varia suit',
-                        'href': 'https://www.youtube.com/watch?v=pdyBy_54dB0',
-                        'rooms': ['Lava Dive Room']}
+    desc['LavaDiveNoHiJump'] = {'display': 'Hi-Jump less Lava Dive',
+                                'title': 'Enter Lower Norfair with just the Varia suit',
+                                'href': 'https://www.youtube.com/watch?v=pdyBy_54dB0',
+                                'rooms': ['Lava Dive Room']}
 
     WorstRoomIceCharge = SMBool(True, mania, ['WorstRoomIceCharge'])
     desc['WorstRoomIceCharge'] = {'display': 'Worst Room Ice and Charge',
@@ -415,17 +415,17 @@ class Knows:
                    'title': 'Gauntlet'},
                   {'knows': ['NorfairReserveIce', 'WaveBeamWallJump', 'ClimbToGrappleWithIce'],
                    'title': 'Upper Norfair'},
-                  {'knows': ['LavaDive', 'ScrewAttackExit', 'WorstRoomIceCharge'],
+                  {'knows': ['LavaDive', 'LavaDiveNoHiJump', 'ScrewAttackExit', 'WorstRoomIceCharge'],
                    'title': 'Lower Norfair'},
                   {'knows': ['ContinuousWallJump', 'DiagonalBombJump', 'MockballWs'],
                    'title': 'Wrecked Ship'},
                   {'knows': ['SpongeBathBombJump', 'SpongeBathHiJump', 'SpongeBathSpeed'],
                    'title': 'Wrecked Ship Etank'},
-                  {'knows': ['SuitlessOuterMaridia', 'SuitlessOuterMaridiaNoGuns'],
-                   'title': 'Maridia Suitless'},
+                  {'knows': ['SuitlessOuterMaridia', 'SuitlessOuterMaridiaNoGuns', 'TediousMountEverest'],
+                   'title': 'Outer Maridia'},
                   {'knows': ['MamaGrappleWithWallJump'],
                    'title': 'Mama Turtle'},
-                  {'knows': ['DraygonRoomGrappleExit', 'DraygonRoomCrystalExit',
+                  {'knows': ['DraygonRoomGrappleExit', 'DraygonRoomCrystalFlash',
                              'PreciousRoomXRayExit'],
                    'title': 'Maridia Suitless Draygon'},
                   {'knows': ['MochtroidClip', 'PuyoClip'],

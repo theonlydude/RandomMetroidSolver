@@ -284,7 +284,9 @@ def canAccessLowerNorfair(items):
                 canUsePowerBombs(items),
                 wor(wand(haveItem(items, 'Gravity'), haveItem(items, 'SpaceJump')),
                     wand(Knows.GravityJump, haveItem(items, 'Gravity')),
-                    wand(Knows.LavaDive, haveItem(items, 'HiJump'), energyReserveCountOk(items, 3))))
+                    wand(wor(wand(Knows.LavaDive, haveItem(items, 'HiJump')),
+                             Knows.LavaDiveNoHiJump),
+                         energyReserveCountOk(items, 3))))
 
 def canPassWorstRoom(items):
     # https://www.youtube.com/watch?v=gfmEDDmSvn4
@@ -293,6 +295,16 @@ def canPassWorstRoom(items):
                     wand(Knows.WorstRoomIceCharge, haveItem(items, 'Ice'), haveItem(items, 'Charge')),
                     wand(Knows.GetAroundWallJump, haveItem(items, 'HiJump')),
                     wand(Knows.SpringBallJumpFromWall, haveItem(items, 'SpringBall'))))
+
+def canPassMtEverest(items):
+    return  wand(canAccessOuterMaridia(items),
+                 wor(wand(haveItem(items, 'Gravity'),                      
+                          wor(haveItem(items, 'Grapple'),
+                              haveItem(items, 'SpeedBooster')),
+                          wor(canFly(items),
+                              Knows.GravityJump,
+                              wand(haveItem(items, 'Ice'), Knows.TediousMountEverest))),
+                     canDoSuitlessMaridia(items)))
 
 def canAccessOuterMaridia(items):
     # EXPLAINED: access Red Tower in red brinstar,
@@ -306,12 +318,7 @@ def canAccessOuterMaridia(items):
     #               -do a double jump with spring ball
     return wand(canAccessRedBrinstar(items),
                 canUsePowerBombs(items),
-                wor(wand(haveItem(items, 'Gravity'),
-                         # condition below is to get past Mt. Everest
-                         wor(haveItem(items, 'Grapple'),
-                             haveItem(items, 'SpeedBooster'),
-                             canFly(items),
-                             Knows.GravityJump)),
+                wor(haveItem(items, 'Gravity'),
                     wor(wand(haveItem(items, 'HiJump'),
                              haveItem(items, 'Ice'),
                              wor(Knows.SuitlessOuterMaridiaNoGuns,
@@ -342,21 +349,21 @@ def canDoSuitlessMaridia(items):
     #            it can also be done without gravity nor grapple but the randomizer will never
     #            require it (https://www.youtube.com/watch?v=lsbnUKcblPk).
     return wand(canAccessOuterMaridia(items),
-                haveItem(items, 'Grapple'))
+                wor(haveItem(items, 'Grapple'), Knows.TediousMountEverest))
 
 def canDefeatBotwoon(items):
     # EXPLAINED: access Aqueduct, either with or without gravity suit,
     #            then in Botwoon Hallway, either:
     #             -use regular speedbooster (with gravity)
     #             -do a mochtroidclip (https://www.youtube.com/watch?v=1z_TQu1Jf1I&t=20m28s)
-    return wand(wor(canAccessInnerMaridia(items),
-                    canDoSuitlessMaridia(items)),
+    return wand(canPassMtEverest(items),
                 wor(wand(haveItem(items, 'SpeedBooster'),
                          haveItem(items, 'Gravity')),
                     wand(Knows.MochtroidClip, haveItem(items, 'Ice'))))
 
 def canCrystalFlash(items):
-    return wand(itemCountOk(items, 'Missile', 2),
+    return wand(canUsePowerBombs(items),
+                itemCountOk(items, 'Missile', 2),
                 itemCountOk(items, 'Super', 2),
                 itemCountOk(items, 'PowerBomb', 3))
 
@@ -574,7 +581,19 @@ def enoughStuffsMotherbrain(items):
     if ammoMargin == 0:
         return SMBool(False)
 #    print('MB2', ammoMargin, secs)
-    return SMBool(True, computeBossDifficulty(items, ammoMargin, secs, Settings.bossesDifficulty['MotherBrain']))
+    bossItems = items
+    nTanks = items.count('ETank')
+    if not haveItem(items, 'Varia').bool:
+        # "remove" 3 etanks (accounting for rainbow beam damage without varia)
+        if nTanks < 6:
+            return SMBool(False, 0)
+        bossItems = items[:] # copy
+        while bossItems.count('ETank') >= nTanks - 3:
+            bossItems.remove('ETank')
+    elif nTanks < 3:
+        return SMBool(False, 0)
+        
+    return SMBool(True, computeBossDifficulty(bossItems, ammoMargin, secs, Settings.bossesDifficulty['MotherBrain']))
 
 def canPassMetroids(items):
     return wand(canOpenRedDoors(items),
@@ -617,14 +636,18 @@ class Pickup:
         elif self.majorsPickup == 'any':
             return True
         elif self.majorsPickup == 'minimal':
+            canResistRainbow = (haveItemCount(items, 'ETank', 3)
+                                and haveItemCount(items, 'Varia', 1)) \
+                               or haveItemCount(items, 'ETank', 6)
+            
             return (haveItemCount(items, 'Morph', 1)
                     # pass bomb block passages
                     and (haveItemCount(items, 'Bomb', 1)
                          or haveItemCount(items, 'PowerBomb', 1))
                     # mother brain rainbow attack
-                    and haveItemCount(items, 'ETank', 3)
+                    and canResistRainbow
                     # lower norfair access
-                    and haveItemCount(items, 'Varia', 1)
+                    and (haveItemCount(items, 'Varia', 1) or wnot(RomPatches.has(RomPatches.NoGravityEnvProtection)).bool) # gravity is checked below
                     # speed or ice to access botwoon
                     and (haveItemCount(items, 'SpeedBooster', 1)
                          or haveItemCount(items, 'Ice', 1))

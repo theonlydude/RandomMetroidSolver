@@ -152,7 +152,7 @@ class Solver:
             hasEnoughItems = hasEnoughMajors and hasEnoughMinors
             canEndGame = self.canEndGame()
             (isEndPossible, endDifficulty) = (canEndGame.bool, canEndGame.difficulty)
-            if isEndPossible and hasEnoughItems:
+            if isEndPossible and hasEnoughItems and endDifficulty <= diffThreshold:
                 self.log.debug("END")
                 break
 
@@ -162,8 +162,10 @@ class Solver:
             # check if we have collected an item in the last loop
             current = len(self.collectedItems)
             if current == previous:
-                # we're stuck ! abort
-                self.log.debug("STUCK ALL")
+                if not isEndPossible:
+                    self.log.debug("STUCK ALL")
+                else:
+                    self.log.debug("HARD END")
                 break
             previous = current
 
@@ -177,7 +179,10 @@ class Solver:
 
             # check if we're stuck
             if len(majorAvailable) == 0 and len(minorAvailable) == 0:
-                self.log.debug("STUCK MAJORS and MINORS")
+                if not isEndPossible:
+                    self.log.debug("STUCK MAJORS and MINORS")
+                else:
+                    self.log.debug("HARD END")
                 break
 
             # sort them on difficulty and proximity
@@ -187,7 +192,7 @@ class Solver:
             # first take major items of acceptable difficulty in the current area
             if (len(majorAvailable) > 0
                    and majorAvailable[0]['Area'] == area
-                   and majorAvailable[0]['difficulty'].difficulty <= Conf.difficultyTarget):
+                   and majorAvailable[0]['difficulty'].difficulty <= diffThreshold):
                 self.collectMajor(majorAvailable.pop(0))
                 continue
             # next item decision
@@ -195,19 +200,21 @@ class Solver:
                 self.log.debug('MAJOR')
                 area = self.collectMajor(majorAvailable.pop(0))
             elif len(majorAvailable) == 0 and len(minorAvailable) > 0:
+                # we don't check for hasEnoughMinors here, because we would be stuck, so pickup
+                # what we can and hope it gets better
                 self.log.debug('MINOR')
                 area = self.collectMinor(minorAvailable.pop(0))
             elif len(majorAvailable) > 0 and len(minorAvailable) > 0:
                 self.log.debug('BOTH|M=' + majorAvailable[0]['Name'] + ', m=' + minorAvailable[0]['Name'])
                 # if both are available, decide based on area and difficulty
-                nextMajDifficulty = majorAvailable[0]['difficulty'].bool
+                nextMajDifficulty = majorAvailable[0]['difficulty'].difficulty
                 nextMinArea = minorAvailable[0]['Area']
-                nextMinDifficulty = minorAvailable[0]['difficulty'].bool
-                if nextMinArea == area and nextMinDifficulty <= Conf.difficultyTarget:
+                nextMinDifficulty = minorAvailable[0]['difficulty'].difficulty
+                if nextMinArea == area and nextMinDifficulty <= diffThreshold and not hasEnoughMinors:
                     area = self.collectMinor(minorAvailable.pop(0))
                 # difficulty over area (this is a difficulty estimator,
                 # not a speedrunning simulator)
-                elif nextMinDifficulty < nextMajDifficulty:
+                elif nextMinDifficulty < nextMajDifficulty and not hasEnoughMinors:
                     area = self.collectMinor(minorAvailable.pop(0))
                 else:
                     area = self.collectMajor(majorAvailable.pop(0))
@@ -334,18 +341,24 @@ class Solver:
         around.sort(key=lambda loc: (0 if 'Pickup' in loc else 1, loc['difficulty'].difficulty))
 
         outside = [loc for loc in locations if not loc in around]
+        self.log.debug("around1 = " + str([loc['Name'] for loc in around]))
+        self.log.debug("outside1 = " + str([loc['Name'] for loc in outside]))        
         # we want to sort the outside locations by putting the ones is the same
         # area first if we don't have enough items,
         # then we sort the remaining areas starting whith boss dead status
-        outside.sort(key=lambda loc: (0
-                                      if loc['Area'] == area and not enough and loc['difficulty'].difficulty <= threshold
+        outside.sort(key=lambda loc: (0 if loc['Area'] == area and not enough and loc['difficulty'].difficulty <= threshold
                                       else 1,
-                                      loc['difficulty'].difficulty
-                                      if not Bosses.areaBossDead(loc['Area'])
-                                      and loc['difficulty'].difficulty <= threshold
+                                      loc['difficulty'].difficulty if not Bosses.areaBossDead(loc['Area'])
+                                                                      and loc['difficulty'].difficulty <= threshold
+                                                                      and 'Pickup' in loc
                                       else 100000,
+                                      loc['difficulty'].difficulty if not Bosses.areaBossDead(loc['Area'])
+                                                                      and loc['difficulty'].difficulty <= threshold
+                                      else 100000,                                      
                                       loc['difficulty'].difficulty))
-
+        self.log.debug("around2 = " + str([loc['Name'] for loc in around]))
+        self.log.debug("outside2 = " + str([loc['Name'] for loc in outside]))
+        
         return around + outside
 
 class Items:
@@ -406,19 +419,12 @@ class RomLoader:
         # update the itemName and Class of the locations
         for loc in locations:
             loc['itemName'] = self.locsItems[loc['Name']]
-            loc["Class"] = self.getLocClass(loc["Name"], Items.getItemClass(loc['itemName']))
+            loc["Class"] = Items.getItemClass(loc['itemName'])
 
     def dump(self, fileName):
         with open(fileName, 'w') as jsonFile:
             json.dump(self.locsItems, jsonFile)
 
-    def getLocClass(self, locName, itemClass):
-        # always keep bosses locs as major
-        if locName in ["Energy Tank, Ridley", "Right Super, Wrecked Ship",
-                       "Space Jump", "Varia Suit"]:
-            return "Major"
-        else:
-            return itemClass
 
 class RomLoaderSfc(RomLoader):
     # standard usage
@@ -433,7 +439,7 @@ class RomLoaderSfc(RomLoader):
         self.locsItems = {}
         for loc in locations:
             self.locsItems[loc['Name']] = loc['itemName']
-            loc["Class"] = self.getLocClass(loc["Name"], Items.getItemClass(loc['itemName']))
+            loc["Class"] = Items.getItemClass(loc['itemName'])
 
 class RomLoaderJson(RomLoader):
     # when called from the test suite
@@ -453,7 +459,7 @@ class RomLoaderDict(RomLoader):
         self.locsItems = {}
         for loc in locations:
             self.locsItems[loc['Name']] = loc['itemName']
-            loc["Class"] = self.getLocClass(loc["Name"], Items.getItemClass(loc['itemName']))
+            loc["Class"] = Items.getItemClass(loc['itemName'])
 
 class ParamsLoader(object):
     @staticmethod

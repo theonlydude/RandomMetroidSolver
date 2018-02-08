@@ -70,7 +70,7 @@ label {
 }
 
 .main {
-    margin-top: 8.5em; /* Add a top margin to avoid content overlay */
+    margin-top: 9em; /* Add a top margin to avoid content overlay */
 }
 
 input, .none {
@@ -171,28 +171,17 @@ p {
         width: 100%;
     }
 }
-#passwordPopup {
-    padding: 20px;
-    background-color: #ddd;
-    position: fixed;
-    border: 1px solid #666;
-    top: 10em;
-    left: 30em;
-    display: none;
-    z-index: 100000;
-}
 </style>
 
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 <script type="text/javascript">
 function askPassword() {
-  console.log('askPassword');
-  document.getElementById("passwordPopup").style.display = "block";
-  document.getElementById("passwordPopupInput").focus();
-}
-function submitPreset() {
-  document.getElementById("password").value = document.getElementById("passwordPopupInput").value;
-  document.saveform.submit();
+  var password = prompt("Please enter your password", "password");
+
+  if (password != null) {
+    document.getElementById("password").value = password;
+    document.saveform.submit();
+  }
 }
 function doSubmit() {
   if(window.File && window.FileList && window.FileReader) {
@@ -523,12 +512,6 @@ pass
       </div>
     </div>
   </div>
-</div>
-
-<div id="passwordPopup">
-    <div>Enter Password:</div>
-    <input id="passwordPopupInput" type="text"/>
-    <button onclick="submitPreset()">Done</button>
 </div>
 
 <div class="main">

@@ -111,7 +111,6 @@ class Solver:
 
         return threshold
 
-            
     def computeDifficulty(self):
         # loop on the available locations depending on the collected items.
         # before getting a new item, loop on all of them and get their difficulty,
@@ -287,7 +286,16 @@ class Solver:
 
     def collectItem(self, loc):
         item = loc["itemName"]
-        self.collectedItems.append(item)
+        if item not in Conf.itemsForbidden:
+            self.collectedItems.append(item)
+        else:
+            # update the name of the item
+            item = "-{}-".format(item)
+            loc["itemName"] = item
+            self.collectedItems.append(item)
+            # we still need the boss difficulty
+            if 'Pickup' not in loc:
+                loc["difficulty"] = SMBool(False)
         if 'Pickup' in loc:
             loc['Pickup']()
 
@@ -306,11 +314,21 @@ class Solver:
     
     def getAvailableItemsList(self, locations, area, threshold, enough):
         around = [loc for loc in locations if loc['Area'] == area and loc['difficulty'].difficulty <= threshold and not Bosses.areaBossDead(area)]
-        around.sort(key=lambda loc: (0 if 'Pickup' in loc else 1, loc['difficulty'].difficulty)) # usually pickup action means beating a boss, so do that first if possible
+        # usually pickup action means beating a boss, so do that first if possible
+        around.sort(key=lambda loc: (0 if 'Pickup' in loc else 1, loc['difficulty'].difficulty))
+
         outside = [loc for loc in locations if not loc in around]
-        # we want to sort the outside locations by putting the ones is the same area first if we don't have enough items,
+        # we want to sort the outside locations by putting the ones is the same
+        # area first if we don't have enough items,
         # then we sort the remaining areas starting whith boss dead status
-        outside.sort(key=lambda loc: (0 if loc['Area'] == area and not enough and loc['difficulty'].difficulty <= threshold else 1, loc['difficulty'].difficulty if not Bosses.areaBossDead(loc['Area']) and loc['difficulty'].difficulty <= threshold else 100000, loc['difficulty'].difficulty))
+        outside.sort(key=lambda loc: (0
+                                      if loc['Area'] == area and not enough and loc['difficulty'].difficulty <= threshold
+                                      else 1,
+                                      loc['difficulty'].difficulty
+                                      if not Bosses.areaBossDead(loc['Area'])
+                                      and loc['difficulty'].difficulty <= threshold
+                                      else 100000,
+                                      loc['difficulty'].difficulty))
 
         return around + outside
 

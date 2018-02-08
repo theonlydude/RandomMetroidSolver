@@ -30,6 +30,9 @@ class Conf:
     #minorsPickup = 'all'
     #minorsPickup = 'any'
 
+    # the list of items to not pick up
+    itemsForbidden = []
+
 def isKnows(knows):
     return knows[0:len('__')] != '__' and knows[0] == knows[0].upper()
 
@@ -52,10 +55,8 @@ class Knows:
     desc['SimpleShortCharge'] = {'display': 'Simple Short Charge',
                                  'title': 'Activate SpeedBooster faster for Waterway ETank without gravity, and Wrecked Ship access',
                                  'href': 'https://wiki.supermetroid.run/index.php?title=Quick_charge',
-                                 'rooms': ['Parlor and Alcatraz',
-                                           'Waterway Energy Tank Room',
-                                           'Landing Site', 'Landing_Site'
-                                           'Crateria Keyhunter Room']}
+                                 'rooms': ['Parlor and Alcatraz', 'Waterway Energy Tank Room',
+                                           'Landing Site', 'Crateria Keyhunter Room']}
 
     InfiniteBombJump = SMBool(True, medium, ['InfiniteBombJump'])
     desc['InfiniteBombJump'] = {'display': 'Infinite Bomb-Jump',
@@ -101,7 +102,7 @@ class Knows:
     desc['SpringBallJumpFromWall'] = {'display': 'SpringBall-Jump from wall',
                                       'title': 'Do a SpringBall jump after a Wall jump to exit Screw Attack area, climb Worst Room without Hi-Jump',
                                       'href': None,
-                                      'rooms': ['Screw Attack Room'
+                                      'rooms': ['Screw Attack Room',
                                                 'The Worst Room In The Game']}
 
     GetAroundWallJump = SMBool(True, hard, ['GetAroundWallJump'])

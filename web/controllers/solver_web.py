@@ -74,7 +74,7 @@ def solver():
 
     # main form
     mainForm = FORM(TABLE(TR("Already uploaded rom in this session: ",
-                             SELECT(*roms, **dict(_name="romFile", value=session.romFile+'.sfc' if session.romFile is not None else None))),
+                             SELECT(*roms, **dict(_name="romFile", value=session.romFile+'.sfc' if session.romFile is not None else None, _class="filldropdown"))),
                           TR("Randomized Super Metroid rom: ",
                              INPUT(_type="file", _name="uploadFile", _id="uploadFile"))),
                           INPUT(_type="submit",_value="Compute difficulty"),
@@ -105,7 +105,7 @@ def solver():
                 if base not in session.romFiles:
                     session.romFiles.append(base)
             except:
-                response.flash = "Error loading the rom file"
+                session.flash = "Error loading the rom file"
                 error = True
 
         # python3:
@@ -122,7 +122,7 @@ def solver():
             jsonRomFileName = 'roms/' + base + '.json'
 
             if ext not in ['.sfc', '.smc']:
-                response.flash = "Rom file must be .sfc or .smc"
+                session.flash = "Rom file must be .sfc or .smc"
                 error = True
             else:
                 # try loading it and create a json from it
@@ -141,7 +141,7 @@ def solver():
                     if base not in session.romFiles:
                         session.romFiles.append(base)
                 except:
-                    response.flash = "Error loading the rom file"
+                    session.flash = "Error loading the rom file"
                     error = True
 
         elif len(mainForm.vars['romFile']) != 0:
@@ -149,13 +149,13 @@ def solver():
             jsonRomFileName = 'roms/' + session.romFile + '.json'
 
         else:
-            response.flash = "No rom file selected for upload"
+            session.flash = "No rom file selected for upload"
             error = True
 
         if not error:
             # check that the json file exists
             if not os.path.isfile(jsonRomFileName):
-                response.flash = "Missing json rom file on the server"
+                session.flash = "Missing json rom file on the server"
             else:
                 session.result = compute_difficulty(jsonRomFileName, request.post_vars)
                 redirect(URL(r=request, f='solver'))
@@ -164,11 +164,12 @@ def solver():
     files = sorted(os.listdir('diff_presets'))
     presets = [os.path.splitext(file)[0] for file in files]
 
-    loadForm = FORM(TABLE(TR("Choose an available preset: ",
+    loadForm = FORM(TABLE(TR("Load preset: ",
                              SELECT(*presets,
                                     **dict(_name="paramsFile",
                                            value=session.paramsFile,
-                                           _onchange="this.form.submit()")))),
+                                           _onchange="this.form.submit()",
+                                           _class="filldropdown")))),
                     _id="loadform", _name="loadform")
 
     if loadForm.process(formname='loadform').accepted:
@@ -184,23 +185,26 @@ def solver():
             session.paramsDict = None
             redirect(URL(r=request, f='solver'))
         else:
-            response.flash = "Presets file not found"
+            session.flash = "Presets file not found"
 
     # save form
-    saveTable = TABLE(TR("Update an existing preset:",
-                         SELECT(*presets, **dict(_name="paramsFile", value=session.paramsFile))),
-                      TR("Create a new preset:",
+    saveTable = TABLE(TR("Update preset:",
+                         SELECT(*presets, **dict(_name="paramsFile",
+                                                 value=session.paramsFile,
+                                                 _class="filldropdown")),
+                         INPUT(_type="button",_value="Update", _class="full", _onclick="askPassword()")),
+                      TR("New preset:",
                          INPUT(_type="text",
                                _name="saveFile",
                                requires=[IS_ALPHANUMERIC(error_message='Preset name must be alphanumeric and max 32 chars'),
-                                         IS_LENGTH(32)])),
-                      TR("Password:",
-                         INPUT(_type="text",
-                               _name="password",
+                                         IS_LENGTH(32)]),
+                         INPUT(_type="button",_value="Create", _class="full", _onclick="askPassword()")),
+                      TR(INPUT(_type="text",
+                               _name="password", _id="password",
                                requires=[IS_NOT_EMPTY(),
                                          IS_ALPHANUMERIC(error_message='Password must be alphanumeric and max 32 chars'), 
-                                         IS_LENGTH(32)])))
-    saveTable.append(TR(INPUT(_type="submit",_value="Save presets")))
+                                         IS_LENGTH(32)],
+                               _style='display:none')))
     saveForm = FORM(saveTable, _id="saveform", _name="saveform")
 
     if saveForm.process(formname='saveform').accepted:
@@ -225,9 +229,11 @@ def solver():
                 paramsDict['password'] = passwordSHA256
                 ParamsLoader.factory(paramsDict).dump(fullPath)
                 session.paramsFile = saveFile
+                session.flash = "Preset {} updated".format(saveFile)
                 redirect(URL(r=request, f='solver'))
             else:
-                response.flash = "Password mismatch with existing presets file {}".format(saveFile)
+                session.flash = "Password mismatch with existing presets file {}".format(saveFile)
+                redirect(URL(r=request, f='solver'))
 
         else:
             # write the presets file
@@ -235,6 +241,7 @@ def solver():
             paramsDict['password'] = passwordSHA256
             ParamsLoader.factory(paramsDict).dump(fullPath)
             session.paramsFile = saveFile
+            session.flash = "Preset {} created".format(saveFile)
             redirect(URL(r=request, f='solver'))
 
     # conf parameters
@@ -247,6 +254,10 @@ def solver():
         conf["pickup"] = params['Conf']['majorsPickup']
     else:
         conf["pickup"] = Conf.majorsPickup
+    if 'itemsForbidden' in params['Conf']:
+        conf["itemsForbidden"] = params['Conf']['itemsForbidden']
+    else:
+        conf["itemsForbidden"] = []
 
     # display result
     if session.result is not None:
@@ -261,7 +272,11 @@ def solver():
         # add generated path (spoiler !)
         pathTable = TABLE(TR(TH("Location Name"), TH("Area"), TH("Item"), TH("Difficulty"), TH("Techniques used")))
         for location, area, item, diff, techniques in session.result['generatedPath']:
-            pathTable.append(TR(location, area, item, diff, techniques))
+            # not picked up items start with an '-'
+            if item[0] != '-':
+                pathTable.append(TR(location, area, item, diff, techniques))
+            else:
+                pathTable.append(TR(location, area, DIV(item, _class='linethrough'), diff, techniques))
 
         knowsUsed = session.result['knowsUsed']
 
@@ -276,9 +291,6 @@ def solver():
 
     # set title
     response.title = 'Super Metroid Item Randomizer Solver'
-    response.menu = [['Super Metroid Item Randomizer Solver', False, URL(f='solver')],
-                     ['Solve!', True, URL(f='solver')],
-                     ['Information & Contact', False, URL(f='infos')]]
 
     # add missing knows
     for know in Knows.__dict__:
@@ -292,7 +304,7 @@ def solver():
             params['Settings']['bossesDifficulty'][boss] = Settings.bossesDifficulty[boss]
         if boss not in params['Settings']:
             params['Settings'][boss] = 'Default'
-    for hellrun in ['Ice', 'MainUpperNorfair']:
+    for hellrun in ['Ice', 'MainUpperNorfair', 'LowerNorfair']:
         if hellrun not in params['Settings']['hellRuns']:
             params['Settings']['hellRuns'][hellrun] = Settings.hellRuns[hellrun]
         if hellrun not in params['Settings']:
@@ -342,8 +354,16 @@ def generate_json_from_parameters(vars, hidden):
             paramsDict['Conf']['majorsPickup'] = 'minimal'
             paramsDict['Conf']['minorsPickup'] = {'Missile' : 10, 'Super' : 5, 'PowerBomb' : 2}
 
+    itemsForbidden = []
+    for item in ['ETank', 'Missile', 'Super', 'PowerBomb', 'Bomb', 'Charge', 'Ice', 'HiJump', 'SpeedBooster', 'Wave', 'Spazer', 'SpringBall', 'Varia', 'Plasma', 'Grapple', 'Morph', 'Reserve', 'Gravity', 'XRayScope', 'SpaceJump', 'ScrewAttack']:
+        boolvar = vars[item+"_bool"+hidden]
+        if boolvar is not None:
+            itemsForbidden.append(item)
+
+    paramsDict['Conf']['itemsForbidden'] = itemsForbidden
+
     # Settings
-    for hellRun in ['Ice', 'MainUpperNorfair']:
+    for hellRun in ['Ice', 'MainUpperNorfair', 'LowerNorfair']:
         value = vars[hellRun+hidden]
         paramsDict['Settings']['hellRuns'][hellRun] = Settings.hellRunPresets[hellRun][vars[hellRun+hidden]]
         paramsDict['Settings'][hellRun] = vars[hellRun+hidden]

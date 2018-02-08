@@ -129,8 +129,8 @@ class Solver:
             self.majorLocations = [loc for loc in self.locations if loc["Class"] == "Major"]
             self.minorLocations = [loc for loc in self.locations if loc["Class"] == "Minor"]
         else:
-            self.majorLocations = self.locations
-            self.minorLocations = self.locations
+            self.majorLocations = self.locations[:] # copy
+            self.minorLocations = self.majorLocations
 
         self.visitedLocations = []
         self.collectedItems = []

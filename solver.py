@@ -302,8 +302,8 @@ class Solver:
         # - defeat metroids
         # - destroy/skip the zebetites
         # - beat Mother Brain
-        return wand(Bosses.allBossesDead(), enoughStuffTourian(self.collectedItems))
-
+        return wand(Bosses.allBossesDead(), enoughStuffTourian(self.collectedItems))            
+    
     def getAvailableItemsList(self, locations, area, threshold, enough):
         around = [loc for loc in locations if loc['Area'] == area and loc['difficulty'].difficulty <= threshold and not Bosses.areaBossDead(area)]
         around.sort(key=lambda loc: (0 if 'Pickup' in loc else 1, loc['difficulty'].difficulty)) # usually pickup action means beating a boss, so do that first if possible

@@ -147,7 +147,6 @@ def solver():
         elif len(mainForm.vars['romFile']) != 0:
             session.romFile = os.path.splitext(mainForm.vars['romFile'])[0]
             jsonRomFileName = 'roms/' + session.romFile + '.json'
-
         else:
             session.flash = "No rom file selected for upload"
             error = True
@@ -158,7 +157,8 @@ def solver():
                 session.flash = "Missing json rom file on the server"
             else:
                 session.result = compute_difficulty(jsonRomFileName, request.post_vars)
-                redirect(URL(r=request, f='solver'))
+
+        redirect(URL(r=request, f='solver'))
 
     # load form
     files = sorted(os.listdir('diff_presets'))

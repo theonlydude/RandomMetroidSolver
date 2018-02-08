@@ -1,4 +1,4 @@
-from parameters import Knows, Settings, RomPatches, easy, medium, hard, harder, hardcore, mania
+from parameters import Knows, Settings, easy, medium, hard, harder, hardcore, mania
 # the canXXX functions
 from helpers import canEnterAndLeaveGauntlet, wand, wor, haveItem, canOpenRedDoors
 from helpers import canPassBombPassages, canDestroyBombWalls, canUsePowerBombs, SMBool
@@ -10,6 +10,8 @@ from helpers import canAccessWs, enoughStuffsPhantoon, enoughStuffsDraygon
 from helpers import canAccessOuterMaridia, canDefeatDraygon, canDoSuitlessMaridia
 from helpers import canAccessInnerMaridia, canFlyDiagonally, canDefeatBotwoon
 from helpers import canCrystalFlash, canOpenGreenDoors, canHellRun
+
+from rom import RomPatches
 
 # all the items locations with the prerequisites to access them
 
@@ -757,7 +759,7 @@ locations = [
     'Class': "Minor",
     'Visibility': "Visible",
     'Room': 'Blue Brinstar Energy Tank Room',
-    'Available': lambda items: wand(haveItem(items, 'Morph'),
+    'Available': lambda items: wand(wor(haveItem(items, 'Morph'), RomPatches.has(RomPatches.BlueBrinstarMissile)),
                                     wor(canOpenRedDoors(items),
                                         RomPatches.has(RomPatches.BlueBrinstarBlueDoor)))
 },

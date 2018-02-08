@@ -4,6 +4,7 @@ from functools import reduce
 from parameters import Knows, Settings
 from parameters import easy, medium, hard, harder, hardcore, mania
 from smbool import SMBool
+from rom import RomPatches
 
 # compare Super Metroid booleans
 def wand2(a, b, difficulty=0):
@@ -58,6 +59,10 @@ def wor(a, b, c=None, d=None, difficulty=0):
 
     return ret
 
+# negates boolean part of the SMBool
+def wnot(a):
+    return SMBool(not a.bool, a.difficulty)
+
 # check items and compute difficulty
 # the second parameter returned is the difficulty:
 def haveItemCount(items, item, count):
@@ -102,7 +107,9 @@ def energyReserveCountOkHellRun(items, hellRunName):
     return result
 
 def heatProof(items):
-    return haveItem(items, 'Varia')
+    return wor(haveItem(items, 'Varia'),
+               wand(wnot(RomPatches.has(RomPatches.NoGravityEnvProtection)),
+                    haveItem(items, 'Gravity')))
 
 def canHellRun(items, hellRun):
     if heatProof(items).bool:
@@ -230,6 +237,11 @@ def canAccessHeatedNorfair(items):
     #            this test is then used to access Speed, Norfair Reserve Tank, Wave and Crocomire
     #            as they are all hellruns from Bubble Mountain.
     return wand(canAccessRedBrinstar(items),
+                wor(haveItem(items, 'SpeedBooster'), # frog speedway
+                    # go through cathedral
+                    RomPatches.has(RomPatches.CathedralEntranceWallJump),
+                    haveItem(items, 'HiJump'),
+                    canFly(items)),
                 canHellRun(items, 'MainUpperNorfair'))
 
 def canAccessCrocomire(items):

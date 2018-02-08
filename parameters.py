@@ -12,6 +12,15 @@ def isConf(conf):
     return conf[0:len('__')] != '__'
 
 class Conf:
+    # ROM type, between :
+    # - Total_TX/FX/CX/X/HX : Total's randomizer seeds, Tournament/Full/Casual/Normal/Hard
+    # - Dessy : Dessyreqt randomizer seeds
+    # - Vanilla : original game
+    romType='Total_TX'
+    # if true, will override seed type if ROM filename follows default filename patterns
+    # from given rando
+    guessRomType=True
+    
     # keep getting majors of at most this difficulty before going for minors or changing area
     difficultyTarget=medium
 
@@ -723,43 +732,3 @@ class Settings:
         # multiply the difficulty by this amount if no charge and few missiles
         'phantoonLowMissileMalus' : 1.2
     }
-
-# layout patches added by randomizers
-class RomPatches:
-    #### Patches definitions
-    
-    # blue door to access the room with etank+missile
-    BlueBrinstarBlueDoor      = 10
-    # missile in the first room is a major item and accessible and ceiling is a minor
-    BlueBrinstarMissile       = 11 
-    # shot block instead of bomb blocks for spazer access
-    SpazerShotBlock           = 20
-    # climb back up red tower from bottom no matter what
-    RedTowerLeftPassage       = 21
-    # exit red tower top to crateria or back to red tower without power bombs
-    RedTowerBlueDoors         = 22
-    # shot block to exit hu jump area 
-    HiJumpShotBlock           = 30
-    # access main upper norfair without anything
-    CathedralEntranceWallJump = 31
-
-    #### Patch sets
-    
-    # total randomizer, tournament seeds
-    Total_TX = [ BlueBrinstarBlueDoor,
-                 SpazerShotBlock, RedTowerLeftPassage, RedTowerBlueDoors,
-                 HiJumpShotBlock, CathedralEntranceWallJump ]
-
-    # total randomizer, casual seeds
-    Total_CX = [ BlueBrinstarMissile ] + Total_TX
-    
-    # dessyreqt randomizer
-    Dessy = []
-
-    ### Active patches
-    
-    ActivePatches = Total_TX
-
-    @staticmethod
-    def has(patch):
-        return SMBool(patch in RomPatches.ActivePatches)

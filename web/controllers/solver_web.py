@@ -164,12 +164,15 @@ def solver():
     files = sorted(os.listdir('diff_presets'))
     presets = [os.path.splitext(file)[0] for file in files]
 
-    loadForm = FORM(TABLE(TR("Load preset: ",
+    loadForm = FORM(TABLE(COLGROUP(COL(_class="quarter"), COL(_class="half"), COL(_class="quarter")),
+                          TR("Load preset: ",
                              SELECT(*presets,
                                     **dict(_name="paramsFile",
                                            value=session.paramsFile,
                                            _onchange="this.form.submit()",
-                                           _class="filldropdown")))),
+                                           _class="filldropdown")),
+                             " "),
+                          _class="half"),
                     _id="loadform", _name="loadform")
 
     if loadForm.process(formname='loadform').accepted:
@@ -188,7 +191,8 @@ def solver():
             session.flash = "Presets file not found"
 
     # save form
-    saveTable = TABLE(TR("Update preset:",
+    saveTable = TABLE(COLGROUP(COL(_class="quarter"), COL(_class="half"), COL(_class="quarter")),
+                      TR("Update preset:",
                          SELECT(*presets, **dict(_name="paramsFile",
                                                  value=session.paramsFile,
                                                  _class="filldropdown")),
@@ -204,7 +208,8 @@ def solver():
                                requires=[IS_NOT_EMPTY(),
                                          IS_ALPHANUMERIC(error_message='Password must be alphanumeric and max 32 chars'), 
                                          IS_LENGTH(32)],
-                               _style='display:none')))
+                               _style='display:none')),
+                      _class="half")
     saveForm = FORM(saveTable, _id="saveform", _name="saveform")
 
     if saveForm.process(formname='saveform').accepted:

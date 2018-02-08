@@ -7,7 +7,7 @@ from helpers import Bosses, enoughStuffsKraid, heatProof, energyReserveCountOk
 from helpers import energyReserveCountOkHellRun, canAccessCrocomire, canAccessHeatedNorfair
 from helpers import canPassWorstRoom, enoughStuffsRidley, canAccessLowerNorfair
 from helpers import canAccessWs, enoughStuffsPhantoon, enoughStuffsDraygon
-from helpers import canAccessOuterMaridia, canDefeatDraygon, canDoSuitlessMaridia
+from helpers import canAccessOuterMaridia, canDefeatDraygon, canPassMtEverest
 from helpers import canAccessInnerMaridia, canFlyDiagonally, canDefeatBotwoon
 from helpers import canCrystalFlash, canOpenGreenDoors, canHellRun
 
@@ -458,10 +458,9 @@ locations = [
     'Visibility': "Chozo",
     'Room': 'West Sand Hole',
     # DONE: this item can be taken without gravity, but it's super hard because of the quick sands...
-    'Available': lambda items: wand(canAccessOuterMaridia(items),
+    'Available': lambda items: wand(canPassMtEverest(items),
                                     wor(haveItem(items, 'Gravity'),
-                                        wand(canDoSuitlessMaridia(items),
-                                             Knows.SuitlessSandpit)))
+                                        Knows.SuitlessSandpit)) # suitless maridia conditions are in canPassMtEverest
 },
 {
     'Area': "Maridia",
@@ -506,7 +505,7 @@ locations = [
     #   with gravity but without highjump/bomb/space jump: gravity jump
     #   dessyreqt randomizer in machosist can have suitless draygon:
     #     to exit draygon room: grapple or crystal flash (for free shine spark)
-    #     to exit precious room: spring ball jump or xray scope glitch
+    #     to exit precious room: spring ball jump, xray scope glitch or stored spark
     'Available': lambda items: wand(canDefeatDraygon(items),
                                     enoughStuffsDraygon(items)),
     'Pickup': lambda: Bosses.beatBoss('Draygon'),
@@ -515,14 +514,22 @@ locations = [
                                                 Knows.GravityJump,
                                                 wand(haveItem(items, 'HiJump'),
                                                      haveItem(items, 'SpeedBooster')))),
-                                       wand(wor(wand(haveItem(items, 'Grapple'),
+                                       wand(wand(canCrystalFlash(items),
+                                                 Knows.DraygonRoomCrystalFlash),
+                                            # use the spark either to exit draygon room or precious room
+                                            wor(wand(haveItem(items, 'Grapple'),
                                                      Knows.DraygonRoomGrappleExit),
-                                                wand(canCrystalFlash(items),
-                                                     Knows.DraygonRoomCrystalExit)),
-                                            wor(wand(haveItem(items, 'SpringBall'),
-                                                     Knows.SpringBallJump),
                                                 wand(haveItem(items, 'XRayScope'),
-                                                     Knows.PreciousRoomXRayExit))))
+                                                     Knows.PreciousRoomXRayExit),
+                                                wand(haveItem(items, 'SpringBall'),
+                                                     Knows.SpringBallJump))),
+                                       # spark-less exit (no CF)
+                                       wand(wand(haveItem(items, 'Grapple'),
+                                                 Knows.DraygonRoomGrappleExit),
+                                            wor(wand(haveItem(items, 'XRayScope'),
+                                                     Knows.PreciousRoomXRayExit),
+                                                wand(haveItem(items, 'SpringBall'),
+                                                     Knows.SpringBallJump))))
 },
 {
     'Area': "Crateria",
@@ -1157,8 +1164,7 @@ locations = [
     'Room': 'West Sand Hole',
     'Available': lambda items: wand(canAccessOuterMaridia(items),
                                     wor(haveItem(items, 'Gravity'),
-                                        wand(canDoSuitlessMaridia(items),
-                                             Knows.SuitlessSandpit)))
+                                        Knows.SuitlessSandpit))
 },
 {
     'Area': "Maridia",
@@ -1169,8 +1175,7 @@ locations = [
     'Room': 'East Sand Hole',
     'Available': lambda items: wand(canAccessOuterMaridia(items),
                                     wor(haveItem(items, 'Gravity'),
-                                        wand(canDoSuitlessMaridia(items),
-                                             Knows.SuitlessSandpit)))
+                                        Knows.SuitlessSandpit))
 },
 {
     'Area': "Maridia",
@@ -1189,7 +1194,7 @@ locations = [
     'Class': "Minor",
     'Visibility': "Visible",
     'Room': 'Aqueduct',
-    'Available': lambda items: wand(canAccessOuterMaridia(items),
+    'Available': lambda items: wand(canPassMtEverest(items),
                                     haveItem(items, 'SpeedBooster'), # TODO FLO find trick to get this without speed booster and add knows
                                     haveItem(items, 'Gravity'))
 },
@@ -1200,7 +1205,7 @@ locations = [
     'Address': 0x7C609,
     'Visibility': "Visible",
     'Room': 'Aqueduct',
-    'Available': lambda items: wand(canAccessOuterMaridia(items),
+    'Available': lambda items: wand(canPassMtEverest(items),
                                     haveItem(items, 'SpeedBooster'), # TODO FLO find trick to get this without speed booster and add knows
                                     haveItem(items, 'Gravity'))
 },

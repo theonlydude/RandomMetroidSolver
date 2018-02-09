@@ -225,6 +225,7 @@ class Solver:
                 'itemName' : 'The End',
                 'Name' : 'The End',
                 'Area' : 'The End',
+                'Room': 'Mother Brain Room',
                 'difficulty' : SMBool(True, endDifficulty)
             })
 
@@ -266,7 +267,7 @@ class Solver:
     def getPath(self, locations):
         out = []
         for location in locations:
-            out.append([location['Name'], location['Area'], location['itemName'],
+            out.append([(location['Name'], location['Room']), location['Area'], location['itemName'],
                         '{0:.2f}'.format(location['difficulty'].difficulty),
                         ', '.join(sorted(list(set(location['difficulty'].knows)))),
                         ', '.join(sorted(list(set(location['difficulty'].items))))])

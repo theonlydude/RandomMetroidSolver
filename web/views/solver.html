@@ -137,8 +137,6 @@ table {
 }
 
 th {
-    //background-color: #ddd;
-
     padding-left: 5px;
     padding-right: 5px;
     padding-top: 0px;
@@ -152,16 +150,6 @@ td {
     padding-bottom: 0px;
 
     border-bottom: 1px solid #ddd;
-}
-
-select {
-//    width:100%;
-//    padding-left:0px;
-//    padding-right:0px;
-}
-
-hr {
-    //border-width: 2px;
 }
 
 h3, form {
@@ -211,10 +199,7 @@ p {
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 <script type="text/javascript">
 function changeRomType() {
-  console.log(document.getElementById("romType").value);
-  console.log(document.getElementById("romFile").value);
   var romType = guessRomType(document.getElementById("romFile").value);
-  console.log(romType);
   document.getElementById("romType").value = romType;
 }
 function guessRomType(filename) {

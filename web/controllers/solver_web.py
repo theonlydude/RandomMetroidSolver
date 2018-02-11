@@ -224,7 +224,7 @@ def solver():
                                            value=session.paramsFile,
                                            _onchange="this.form.submit()",
                                            _class="filldropdown")),
-                             " "),
+                             INPUT(_type="submit",_value="Load", _class="full")),
                           _class="threequarter"),
                     _id="loadform", _name="loadform")
 

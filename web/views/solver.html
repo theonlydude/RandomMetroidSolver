@@ -210,6 +210,56 @@ p {
 
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 <script type="text/javascript">
+function changeRomType() {
+  console.log(document.getElementById("romType").value);
+  console.log(document.getElementById("romFile").value);
+  var romType = guessRomType(document.getElementById("romFile").value);
+  console.log(romType);
+  document.getElementById("romType").value = romType;
+}
+function guessRomType(filename) {
+  var re = /[CTFH]?X\d+/;
+  var match = filename.match(re);
+
+  if (match != null) {
+    switch(match[0][0]) {
+      case 'C':
+        return "Total Casual";
+      case 'T':
+        return "Total Tournament";
+      case 'F':
+        return "Total Full";
+      case 'H':
+        return "Total Hard";
+      case 'X':
+        return "Total Normal";
+    }
+  }
+
+  var re = /[CMS]?\d+/;
+  var match = filename.match(re);
+
+  if (match != null) {
+    switch(match[0][0]) {
+      case 'C':
+        return "Dessy Casual";
+      case 'M':
+        return "Dessy Masochist";
+      case 'S':
+        return "Dessy Speedrunner";
+    }
+  }
+
+  var re = /Super[ _]*Metroid/;
+  var match = filename.match(re);
+
+  if (match != null) {
+    return "Vanilla";
+  }
+
+  // default to TX
+  return "Total Tournament";
+}
 function askPassword() {
   var password = prompt("Please enter your password", "password");
 
@@ -243,10 +293,6 @@ function toggleOnlySelect(elem)
 function changeHiddenSelect(diffElem)
 {
   var diffElemHidden = diffElem + "_hidden";
-
-  console.log("manger");
-  console.log("elem: "+diffElem);
-  console.log("elemHidden: "+diffElem);
 
   document.getElementById(diffElemHidden).value = document.getElementById(diffElem).value;
   document.getElementById(diffElemHidden).selectedIndex = document.getElementById(diffElem).selectedIndex;
@@ -369,7 +415,6 @@ window.onload = function(){
 
                 var re = /((.*)\.[^.]+)?$/;
                 var base = re.exec(file.name)[1];
-		console.log("ext: "+ext.toString());
 
                 var outFileName = file.name.replace(/\.[^/.]+$/, ".json");
 
@@ -398,6 +443,9 @@ window.onload = function(){
 
                 var output = document.getElementById("json");
                 output.value = json;
+
+                var romType = guessRomType(file.name);
+                document.getElementById("romType").value = romType;
             }
 
             reader.readAsArrayBuffer(file)

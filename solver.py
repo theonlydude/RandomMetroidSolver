@@ -43,7 +43,7 @@ class Solver:
 
     def loadRom(self, rom):
         RomLoader.factory(rom).assignItems(self.locations)
-        if Conf.guessRomType is True:
+        if Conf.guessRomType is True and self.type == 'console':
             guessed = RomType.guess(rom)
             if guessed is not None:
                 Conf.romType = guessed

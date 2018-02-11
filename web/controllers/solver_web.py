@@ -5,7 +5,8 @@ path = os.path.expanduser('~/RandomMetroidSolver')
 if os.path.exists(path) and path not in sys.path:
     sys.path.append(path)
 
-import datetime, os, hashlib, json
+import datetime, os, hashlib, json, re
+from collections import OrderedDict
 
 # to solve the rom
 from parameters import easy, medium, hard, harder, hardcore, mania, Conf, Knows, Settings, isKnows
@@ -31,6 +32,42 @@ difficulties2 = {
     'hardcore' : hardcore,
     'mania' : mania
 }
+
+romTypes = OrderedDict([('Total Casual', 'Total_CX'), ('Total Normal', 'Total_X'),
+                        ('Total Hard', 'Total_HX'), ('Total Tournament', 'Total_TX'),
+                        ('Total Full', 'Total_FX'), ('Dessy Casual', 'Dessy'),
+                        ('Dessy Speedrunner', 'Dessy'), ('Dessy Masochist', 'Dessy'),
+                        ('Vanilla', 'Vanilla')])
+
+def guessRomType(filename):
+    match = re.findall(r'/[CTFH]?X\d+/', filename)
+    if len(match) > 0:
+        if match[0][0] == 'C':
+            return "Total Casual"
+        elif match[0][0] == 'T':
+            return "Total Tournament"
+        elif match[0][0] == 'F':
+            return "Total Full"
+        elif match[0][0] == 'H':
+            return "Total Hard"
+        elif match[0][0] == 'X':
+            return "Total Normal"
+
+    match = re.findall(r'[CMS]?\d+', filename)
+    if len(match) > 0:
+        if match[0][0] == 'C':
+            return "Dessy Casual"
+        elif match[0][0] == 'M':
+            return "Dessy Masochist"
+        elif match[0][0] == 'S':
+            return "Dessy Speedrunner"
+
+    match = re.findall(r'Super[ _]*Metroid', filename)
+    if len(match) > 0:
+        return "Vanilla"
+
+    # default to TX
+    return "Total Tournament"
 
 def solver():
     # load conf from session if available
@@ -73,10 +110,26 @@ def solver():
         roms = [file+'.sfc' for file in filtered]
 
     # main form
+    if session.romFile is not None:
+        romFile = session.romFile+'.sfc'
+        romType = guessRomType(romFile)
+    else:
+        romFile = None
+        romType = 'Total Tournament'
+
     mainForm = FORM(TABLE(TR("Randomized Super Metroid rom: ",
                              INPUT(_type="file", _name="uploadFile", _id="uploadFile")),
                           TR("Already uploaded rom in this session: ",
-                             SELECT(*roms, **dict(_name="romFile", value=session.romFile+'.sfc' if session.romFile is not None else None, _class="filldropdown")))),
+                             SELECT(*roms, **dict(_name="romFile",
+                                                  _id="romFile",
+                                                  value=romFile,
+                                                  _class="filldropdown",
+                                                  _onchange="changeRomType()"))),
+                          TR("ROM type: ", SELECT(*romTypes.keys(),
+                                                  _name="romType",
+                                                  _id="romType",
+                                                  value=romType,
+                                                  _class="filldropdown"))),
                           INPUT(_type="submit",_value="Compute difficulty"),
                           INPUT(_type="text", _name="json", _id="json", _style='display:none'),
                     _id="mainform", _name="mainform", _onsubmit="doSubmit();")
@@ -373,6 +426,8 @@ def generate_json_from_parameters(vars, hidden):
             itemsForbidden.append(item)
 
     paramsDict['Conf']['itemsForbidden'] = itemsForbidden
+
+    paramsDict['Conf']['romType'] = romTypes[vars['romType']]
 
     # Settings
     for hellRun in ['Ice', 'MainUpperNorfair', 'LowerNorfair']:

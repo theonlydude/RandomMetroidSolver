@@ -82,9 +82,19 @@ label {
     z-index: 100;
     border-bottom: 2px solid #666;
 }
+@media (max-width: 1200px) {
+    .fixed {
+        position: relative;
+    }
+}
+@media (min-width: 1200px) {
+    .main {
+        margin-top: 13em; /* Add a top margin to avoid content overlay */
+    }
+}
 
-.main {
-    margin-top: 8em; /* Add a top margin to avoid content overlay */
+body {
+    padding-top: 0px;
 }
 
 input, .none {

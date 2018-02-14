@@ -435,6 +435,12 @@ window.onload = function(){
 
                 var romType = guessRomType(file.name);
                 document.getElementById("romType").value = romType;
+
+                var option = document.createElement('option');
+                option.text = option.value = file.name;
+                var select = document.getElementById("romFile");
+                select.add(option, 0);
+                select.value = option.value;
             }
 
             reader.readAsArrayBuffer(file)

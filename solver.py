@@ -269,7 +269,7 @@ class Solver:
         for location in locations:
             out.append([(location['Name'], location['Room']), location['Area'], location['itemName'],
                         '{0:.2f}'.format(location['difficulty'].difficulty),
-                        ', '.join(sorted(list(set(location['difficulty'].knows)))),
+                        ', '.join(sorted(location['difficulty'].knows)),
                         ', '.join(sorted(list(set(location['difficulty'].items))))])
 
         return out
@@ -293,7 +293,7 @@ class Solver:
                                                               location['Area'],
                                                               location['itemName'],
                                                               location['difficulty'].difficulty,
-                                                              list(set(location['difficulty'].knows)),
+                                                              sorted(location['difficulty'].knows),
                                                               list(set(location['difficulty'].items))))
 
     def collectMajor(self, loc):

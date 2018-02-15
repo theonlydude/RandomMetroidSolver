@@ -427,17 +427,21 @@ def generate_json_from_parameters(vars, hidden):
 
     paramsDict['Conf']['itemsForbidden'] = itemsForbidden
 
-    paramsDict['Conf']['romType'] = romTypes[vars['romType']]
+    if vars['romType'] is not None:
+        paramsDict['Conf']['romType'] = romTypes[vars['romType']]
 
     # Settings
     for hellRun in ['Ice', 'MainUpperNorfair', 'LowerNorfair']:
         value = vars[hellRun+hidden]
-        paramsDict['Settings']['hellRuns'][hellRun] = Settings.hellRunPresets[hellRun][vars[hellRun+hidden]]
-        paramsDict['Settings'][hellRun] = vars[hellRun+hidden]
+        if value is not None:
+            paramsDict['Settings']['hellRuns'][hellRun] = Settings.hellRunPresets[hellRun][value]
+            paramsDict['Settings'][hellRun] = value
 
     for boss in ['Kraid', 'Phantoon', 'Draygon', 'Ridley', 'MotherBrain']:
-        paramsDict['Settings']['bossesDifficulty'][boss] = Settings.bossesDifficultyPresets[boss][vars[boss+hidden]]
-        paramsDict['Settings'][boss] = vars[boss+hidden]
+        value = vars[boss+hidden]
+        if value is not None:
+            paramsDict['Settings']['bossesDifficulty'][boss] = Settings.bossesDifficultyPresets[boss][value]
+            paramsDict['Settings'][boss] = value
 
     return paramsDict
 

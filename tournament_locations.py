@@ -268,12 +268,14 @@ locations = [
     'Visibility': "Chozo",
     'Room': 'Norfair Reserve Tank Room',
     'Available': lambda items: wand(canAccessHeatedNorfair(items),
-                                    wor(canFly(items),
-                                        haveItem(items, 'Grapple'),
-                                        wand(haveItem(items, 'HiJump'),
-                                             Knows.GetAroundWallJump),
-                                        wand(haveItem(items, 'Ice'),
-                                             Knows.NorfairReserveIce)))
+                                    wor(wor(canFly(items),
+                                            haveItem(items, 'Grapple'),
+                                            wand(haveItem(items, 'HiJump'),
+                                                 Knows.GetAroundWallJump)),
+                                        wor(wand(haveItem(items, 'Ice'),
+                                                 Knows.NorfairReserveIce),
+                                            wand(haveItem(items, 'SpringBall'),
+                                                 Knows.SpringBallJumpFromWall))))
 },
 {
     'Area': "Norfair",

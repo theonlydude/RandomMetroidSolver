@@ -310,6 +310,10 @@ if resultText is not None:
         dataTable.addColumn({ type: 'date', id: 'End' });
         dataTable.addRows([
 {{
+if diffPercent == 20 or diffPercent == 40 or diffPercent == 60 or diffPercent == 80:
+  diffPercent += 1
+  pass
+
 if diffPercent <= 20:
   response.write("[ 'Difficulty', 'easy', new Date(1900, 0, 0), new Date(19{}, 0, 0) ]".format(diffPercent), escape=False)
 else:
@@ -431,6 +435,12 @@ window.onload = function(){
 
                 var romType = guessRomType(file.name);
                 document.getElementById("romType").value = romType;
+
+                var option = document.createElement('option');
+                option.text = option.value = file.name;
+                var select = document.getElementById("romFile");
+                select.add(option, 0);
+                select.value = option.value;
             }
 
             reader.readAsArrayBuffer(file)

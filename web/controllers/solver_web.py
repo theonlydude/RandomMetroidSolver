@@ -40,7 +40,7 @@ romTypes = OrderedDict([('Total Casual', 'Total_CX'), ('Total Normal', 'Total_X'
                         ('Vanilla', 'Vanilla')])
 
 def guessRomType(filename):
-    match = re.findall(r'/[CTFH]?X\d+/', filename)
+    match = re.findall(r'[CTFH]?X\d+', filename)
     if len(match) > 0:
         if match[0][0] == 'C':
             return "Total Casual"

@@ -112,7 +112,8 @@ class Knows:
                                       'title': 'Do a SpringBall jump after a Wall jump to exit Screw Attack area, climb Worst Room without Hi-Jump',
                                       'href': None,
                                       'rooms': ['Screw Attack Room',
-                                                'The Worst Room In The Game']}
+                                                'The Worst Room In The Game',
+                                                'Bubble Mountain']}
 
     GetAroundWallJump = SMBool(True, hard, ['GetAroundWallJump'])
     desc['GetAroundWallJump'] = {'display': 'Get around Wall-Jump',

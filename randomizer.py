@@ -1,9 +1,10 @@
 #!/usr/bin/python
 
+import argparse, random
+
 from itemrandomizerweb.stdlib import Random
 from itemrandomizerweb import Items
-#import TournamentLocations
-from NewRandomizer import NewRandomizer
+from itemrandomizerweb.NewRandomizer import NewRandomizer
 from tournament_locations import locations
 from helpers import canEnterAndLeaveGauntlet, wand, wor, haveItem, canOpenRedDoors
 from helpers import canPassBombPassages, canDestroyBombWalls, canUsePowerBombs, SMBool
@@ -15,6 +16,8 @@ from helpers import canAccessWs, enoughStuffsPhantoon, enoughStuffsDraygon
 from helpers import canAccessOuterMaridia, canDefeatDraygon, canPassMtEverest
 from helpers import canAccessInnerMaridia, canFlyDiagonally, canDefeatBotwoon
 from helpers import canCrystalFlash, canOpenGreenDoors, canHellRun
+from parameters import hard
+from solver import ParamsLoader
 
 if __name__ == "__main__":
 
@@ -24,11 +27,31 @@ if __name__ == "__main__":
     #//writeItemNames data Items.Items |> ignore
     #writeLocations data itemLocations        
 
-    #locationPool = TournamentLocations.AllLocations
-    seed = 9876543
+    parser = argparse.ArgumentParser(description="Random Metroid Randomizer")
+    parser.add_argument('--param', '-p', help="the input parameters", nargs='+', default=None, dest='paramsFileName')
+
+    parser.add_argument('--debug', '-d', help="activate debug logging", dest='debug', action='store_true')
+    parser.add_argument('--difficultyTarget', '-t', help="the maximum difficulty target that the randomizer will use", dest='difficultyTarget', nargs='?', default=None, type=int)
+    parser.add_argument('--seed', '-s', help="randomization seed to use", dest='seed', nargs='?', default=0, type=int)
+
+    args = parser.parse_args()
+
+    if args.paramsFileName is not None:
+        ParamsLoader.factory(args.paramsFileName[0]).load()
+    
+    if args.seed == 0:
+        seed = random.randint(0, 9999999)
+    else:
+        seed = args.seed
+
+    if args.difficultyTarget is not None:
+        difficultyTarget = args.difficultyTarget
+    else:
+        difficultyTarget = hard
+
     locationPool = locations
 
-    randomizer = NewRandomizer(seed)
+    randomizer = NewRandomizer(seed, difficultyTarget, locations)
     itemLocs = randomizer.generateItems([], [])
 
     # transform itemLocs in our usual dict(location, item)

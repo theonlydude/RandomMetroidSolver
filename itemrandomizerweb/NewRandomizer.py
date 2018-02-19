@@ -1,18 +1,13 @@
 from itemrandomizerweb.stdlib import Map, Array, List, Random
 from itemrandomizerweb import Items
 import random
-from tournament_locations import locations
-from helpers import Bosses
 
 # https://github.com/tewtal/itemrandomizerweb/blob/master/ItemRandomizer/Randomizers.fs
 
 global space
 space = 0
 class NewRandomizer:
-    def __init__(self, seed):
-        if seed == 0:
-            seed = random.randint(1, 9999999)
-
+    def __init__(self, seed, difficultyTarget, locations):
         self.rnd = Random(seed)
         random.seed(seed)
 

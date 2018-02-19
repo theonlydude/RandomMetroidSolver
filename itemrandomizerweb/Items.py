@@ -1,4 +1,4 @@
-from stdlib import List
+from itemrandomizerweb.stdlib import List
 
 # https://github.com/tewtal/itemrandomizerweb/blob/master/ItemRandomizer/Items.fs
 Items = [
@@ -184,19 +184,9 @@ Items = [
 #    let itemCode = (item.Code + modifier)
 #    toByteArray itemCode
 
-#let addItem (itemType:ItemType) (itemPool:Item list) =
-#    (List.find (fun item -> item.Type = itemType) Items) :: itemPool
 def addItem(itemType, itemPool):
     return [List.find(lambda item: item["Type"] == itemType, Items)] + itemPool
 
-#let rec addAmmo (rnd:System.Random) (itemPool:Item list) =
-#    match List.length itemPool with
-#    | 100 -> itemPool
-#    | _ -> addAmmo rnd (addItem (match rnd.Next(7) with
-#                                 | 0 | 1 | 2 -> Missile
-#                                 | 3 | 4 | 5 -> Super
-#                                 | _ -> PowerBomb)
-#                                 itemPool)
 def addAmmo(rnd, itemPool):
     if List.length(itemPool) == 100:
         return itemPool
@@ -210,27 +200,6 @@ def addAmmo(rnd, itemPool):
             item = 'PowerBomb'
         return addAmmo(rnd, addItem(item, itemPool))
 
-#let getItemPool rnd =
-#    Items
-#    |> addItem Reserve
-#    |> addItem Reserve
-#    |> addItem Reserve
-#    |> addItem ETank
-#    |> addItem ETank
-#    |> addItem ETank
-#    |> addItem ETank
-#    |> addItem ETank
-#    |> addItem ETank
-#    |> addItem ETank
-#    |> addItem ETank
-#    |> addItem ETank
-#    |> addItem ETank
-#    |> addItem ETank
-#    |> addItem ETank
-#    |> addItem ETank
-#    |> addItem Missile
-#    |> addItem Super
-#    |> addAmmo rnd
 def getItemPool(rnd):
     itemPool = addItem('Reserve', Items)
     itemPool = addItem('Reserve', itemPool)

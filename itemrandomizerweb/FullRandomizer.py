@@ -5,18 +5,7 @@ import random
 
 class FullRandomizer(Randomizer):
     def __init__(self, seed, difficultyTarget, locations):
-        self.rnd = Random(seed)
-        random.seed(seed)
-
-        self.itemPool = Items.getItemPool(self.rnd)
-        self.locationPool = locations
-
-        # list of locations not already used
-        self.unusedLocations = locations
-        # list of locations already used
-        self.usedLocations = []
-        # list of {'Item': item, 'Location': location}, the items assigned to a location
-        self.itemLocations = []
+        super(FullRandomizer, self).__init__(seed, difficultyTarget, locations)
 
     def canPlaceAtLocation(self, item, location):
         return True

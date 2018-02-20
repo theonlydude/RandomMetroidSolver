@@ -246,7 +246,7 @@ function guessRomType(filename) {
   return "Total Tournament";
 }
 function askPassword() {
-  var password = prompt("Please enter your password", "password");
+  var password = prompt("Please enter your password, it'll be used to later modify your preset, maximum 32 characters", "password");
 
   if (password != null) {
     document.getElementById("password").value = password;

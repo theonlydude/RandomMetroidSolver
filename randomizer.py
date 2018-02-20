@@ -4,7 +4,7 @@ import argparse, random
 
 from itemrandomizerweb.stdlib import Random
 from itemrandomizerweb import Items
-from itemrandomizerweb.NewRandomizer import NewRandomizer
+from itemrandomizerweb.Randomizer import Randomizer
 from tournament_locations import locations
 from helpers import canEnterAndLeaveGauntlet, wand, wor, haveItem, canOpenRedDoors
 from helpers import canPassBombPassages, canDestroyBombWalls, canUsePowerBombs, SMBool
@@ -33,6 +33,7 @@ if __name__ == "__main__":
     parser.add_argument('--debug', '-d', help="activate debug logging", dest='debug', action='store_true')
     parser.add_argument('--difficultyTarget', '-t', help="the maximum difficulty target that the randomizer will use", dest='difficultyTarget', nargs='?', default=None, type=int)
     parser.add_argument('--seed', '-s', help="randomization seed to use", dest='seed', nargs='?', default=0, type=int)
+    parser.add_argument('--algo', '-a', help="randomization algorithm to use", dest='algo', nargs='?', default=None)
 
     args = parser.parse_args()
 
@@ -44,14 +45,21 @@ if __name__ == "__main__":
     else:
         seed = args.seed
 
+    print("seed={}".format(seed))
+
     if args.difficultyTarget is not None:
         difficultyTarget = args.difficultyTarget
     else:
         difficultyTarget = hard
 
+    if args.algo is not None:
+        algo = args.algo
+    else:
+        algo = 'Total_Tournament'
+
     locationPool = locations
 
-    randomizer = NewRandomizer(seed, difficultyTarget, locations)
+    randomizer = Randomizer.factory(algo, seed, difficultyTarget, locations)
     itemLocs = randomizer.generateItems([], [])
 
     # transform itemLocs in our usual dict(location, item)

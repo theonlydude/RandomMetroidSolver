@@ -400,7 +400,9 @@ def generate_json_from_parameters(vars, hidden):
             if boolVar is None:
                 paramsDict['Knows'][var] = [False, 0]
             else:
-                paramsDict['Knows'][var] = [True, difficulties2[vars[var+"_diff"+hidden]]]
+                diffVar = vars[var+"_diff"+hidden]
+                if diffVar is not None:
+                    paramsDict['Knows'][var] = [True, difficulties2[diffVar]]
 
     # Conf
     diffTarget = vars["difficulty_target"+hidden]

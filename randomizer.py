@@ -12,13 +12,24 @@ from rom import RomPatcher
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Random Metroid Randomizer")
-    parser.add_argument('--param', '-p', help="the input parameters", nargs='+', default=None, dest='paramsFileName')
+    parser.add_argument('--param', '-p', help="the input parameters", nargs='+',
+                        default=None, dest='paramsFileName')
 
-    parser.add_argument('--debug', '-d', help="activate debug logging", dest='debug', action='store_true')
-    parser.add_argument('--difficultyTarget', '-t', help="the maximum difficulty target that the randomizer will use", dest='difficultyTarget', nargs='?', default=None, choices=['easy', 'medium', 'hard', 'harder', 'hardcore', 'mania'])
-    parser.add_argument('--seed', '-s', help="randomization seed to use", dest='seed', nargs='?', default=0, type=int)
-    parser.add_argument('--algo', '-a', help="randomization algorithm to use", dest='algo', nargs='?', default=None, choices=['Total_Tournament', 'Total_Full', 'Total_Casual', 'Total_Normal', 'Total_Hard'])
-    parser.add_argument('--rom', '-r', help="the already randomized rom to patch with the new items", dest='rom', nargs='?', default=None)
+    parser.add_argument('--debug', '-d', help="activate debug logging", dest='debug',
+                        action='store_true')
+    parser.add_argument('--difficultyTarget', '-t',
+                        help="the maximum difficulty target that the randomizer will use",
+                        dest='difficultyTarget', nargs='?', default=None,
+                        choices=['easy', 'medium', 'hard', 'harder', 'hardcore', 'mania'])
+    parser.add_argument('--seed', '-s', help="randomization seed to use", dest='seed',
+                        nargs='?', default=0, type=int)
+    parser.add_argument('--algo', '-a', help="randomization algorithm to use",
+                        dest='algo', nargs='?', default=None,
+                        choices=['Total_Tournament', 'Total_Full', 'Total_Casual',
+                                 'Total_Normal', 'Total_Hard'])
+    parser.add_argument('--rom', '-r',
+                        help="the already randomized rom to patch with the new items",
+                        dest='rom', nargs='?', default=None)
 
     args = parser.parse_args()
 
@@ -45,6 +56,30 @@ if __name__ == "__main__":
     else:
         algo = 'Total_Tournament'
 
+    algo2text = {
+        'Total_Tournament': 'TX',
+        'Total_Full': 'FX',
+        'Total_Casual': 'CX',
+        'Total_Normal': 'X',
+        'Total_Hard': 'HX'}
+
+    fileName = 'Ouiche Randomizer ' + algo2text[algo] + str(seed) + ' ' + preset + ' ' + diff2text[difficultyTarget]
+
+    # same as solver
+    threshold = difficultyTarget
+    epsilon = 0.001
+    if difficultyTarget <= easy:
+        threshold = medium - epsilon
+    elif difficultyTarget <= medium:
+        threshold = hard - epsilon
+    elif difficultyTarget <= hard:
+        threshold = harder - epsilon
+    elif difficultyTarget <= harder:
+        threshold = hardcore - epsilon
+    elif difficultyTarget <= hardcore:
+        threshold = mania - epsilon
+    difficultyTarget = threshold
+
     locationPool = locations
 
     try:
@@ -63,15 +98,6 @@ if __name__ == "__main__":
         for loc in locsItems:
             print('{:>50}: {:>16} '.format(loc, locsItems[loc]))
 
-    algo2text = {
-        'Total_Tournament': 'TX',
-        'Total_Full': 'FX',
-        'Total_Casual': 'CX',
-        'Total_Normal': 'X',
-        'Total_Hard': 'HX'}
-
-    fileName = 'Ouiche Randomizer ' + algo2text[algo] + str(seed) + ' ' + preset + ' ' + diff2text[difficultyTarget]
-
     if args.rom is not None:
         romFileName = args.rom
         fileName += '.sfc'
@@ -80,6 +106,5 @@ if __name__ == "__main__":
         fileName += '.json'
         with open(fileName, 'w') as jsonFile:
             json.dump(locsItems, jsonFile)
-
 
     print("Rom generated: {}".format(fileName))

@@ -629,6 +629,7 @@ class DifficultyDisplayer:
         difficulty = self.difficulty if self.difficulty < mania else mania
 
         lower = 0
+        percent = 100
         for upper in sorted(self.difficulties):
             if self.difficulty >= upper:
                 lower = upper

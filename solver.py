@@ -6,7 +6,7 @@ import sys, math, os, json, logging, argparse
 
 # the difficulties for each technics
 from parameters import Conf, Knows, Settings, isKnows, isConf, isSettings
-from parameters import easy, medium, hard, harder, hardcore, mania
+from parameters import easy, medium, hard, harder, hardcore, mania, diff2text
 
 # the helper functions
 from helpers import Pickup, Bosses, wand, wor, enoughStuffTourian, SMBool
@@ -543,44 +543,32 @@ class ParamsLoaderDict(ParamsLoader):
         super(ParamsLoaderDict, self).__init__()
 
 class DifficultyDisplayer:
-    difficulties = {
-        0 : 'baby',
-        easy : 'easy',
-        medium : 'medium',
-        hard : 'hard',
-        harder : 'very hard',
-        hardcore : 'hardcore',
-        mania : 'mania',
-        mania*2 : 'god',
-        mania*4 : 'samus'
-    }
-
     def __init__(self, difficulty):
         self.difficulty = difficulty
 
     def text(self):
         if self.difficulty >= easy and self.difficulty < medium:
-            difficultyText = self.difficulties[easy]
+            difficultyText = diff2text[easy]
         elif self.difficulty >= medium and self.difficulty < hard:
-            difficultyText = self.difficulties[medium]
+            difficultyText = diff2text[medium]
         elif self.difficulty >= hard and self.difficulty < harder:
-            difficultyText = self.difficulties[hard]
+            difficultyText = diff2text[hard]
         elif self.difficulty >= harder and self.difficulty < hardcore:
-            difficultyText = self.difficulties[harder]
+            difficultyText = diff2text[harder]
         elif self.difficulty >= hardcore and self.difficulty < mania:
-            difficultyText = self.difficulties[hardcore]
+            difficultyText = diff2text[hardcore]
         else:
-            difficultyText = self.difficulties[mania]
+            difficultyText = diff2text[mania]
 
         return difficultyText
 
     def scale(self):
         previous = 0
-        for d in sorted(self.difficulties):
+        for d in sorted(diff2text):
             if self.difficulty >= d:
                 previous = d
             else:
-                displayString = self.difficulties[previous]
+                displayString = diff2text[previous]
                 displayString += ' '
                 scale = d - previous
                 pos = int(self.difficulty - previous)
@@ -588,7 +576,7 @@ class DifficultyDisplayer:
                 displayString += '^'
                 displayString += '-' * (scale - pos)
                 displayString += ' '
-                displayString += self.difficulties[d]
+                displayString += diff2text[d]
                 break
 
         return displayString
@@ -598,11 +586,11 @@ class DifficultyDisplayer:
             return (None, None)
 
         previous = 0
-        for d in sorted(self.difficulties):
+        for d in sorted(diff2text):
             if self.difficulty >= d:
                 previous = d
             else:
-                baseDiff = self.difficulties[previous]
+                baseDiff = diff2text[previous]
                 normalized = int(5*float(self.difficulty - previous)/float(d - previous))
                 break
 
@@ -630,7 +618,7 @@ class DifficultyDisplayer:
 
         lower = 0
         percent = 100
-        for upper in sorted(self.difficulties):
+        for upper in sorted(diff2text):
             if self.difficulty >= upper:
                 lower = upper
             else:

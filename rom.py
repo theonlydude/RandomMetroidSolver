@@ -1,6 +1,7 @@
 
-import re, struct
+import re, struct, sys, shutil
 from helpers import SMBool
+from itemrandomizerweb import Items
 
 # layout patches added by randomizers
 class RomPatches:
@@ -221,3 +222,22 @@ class RomReader:
                 item = self.getItem(romFile, loc["Address"], loc["Visibility"])
                 loc["itemName"] = self.items[item]["name"]
                 #print("{}: {} => {}".format(loc["Name"], loc["Class"], loc["itemName"]))
+
+class RomPatcher:
+    @staticmethod
+    def patch(romFileName, outFileName, itemLocs):
+        try:
+            shutil.copyfile(romFileName, outFileName)
+            shutil.copyfile(romFileName, outFileName+'-bak')
+
+            with open(outFileName, 'r+') as outFile:
+                for itemLoc in itemLocs:
+                    itemCode = Items.getItemTypeCode(itemLoc['Item'],
+                                                     itemLoc['Location']['Visibility'])
+                    outFile.seek(itemLoc['Location']['Address'], 0)
+                    outFile.write(itemCode[0])
+                    outFile.seek(itemLoc['Location']['Address'] + 1, 0)
+                    outFile.write(itemCode[1])
+        except:
+            print("Error patching {}. Is {} a valid ROM ?".format(outFileName, romFileName, romFileName))
+            sys.exit(-1)

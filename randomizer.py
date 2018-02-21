@@ -1,45 +1,33 @@
 #!/usr/bin/python
 
-import argparse, random
+import argparse, random, os.path, json, sys
 
 from itemrandomizerweb.stdlib import Random
 from itemrandomizerweb import Items
 from itemrandomizerweb.Randomizer import Randomizer
 from tournament_locations import locations
-from helpers import canEnterAndLeaveGauntlet, wand, wor, haveItem, canOpenRedDoors
-from helpers import canPassBombPassages, canDestroyBombWalls, canUsePowerBombs, SMBool
-from helpers import canFly, canAccessRedBrinstar, energyReserveCountOk, canAccessKraid
-from helpers import Bosses, enoughStuffsKraid, heatProof, energyReserveCountOk
-from helpers import energyReserveCountOkHellRun, canAccessCrocomire, canAccessHeatedNorfair
-from helpers import canPassWorstRoom, enoughStuffsRidley, canAccessLowerNorfair
-from helpers import canAccessWs, enoughStuffsPhantoon, enoughStuffsDraygon
-from helpers import canAccessOuterMaridia, canDefeatDraygon, canPassMtEverest
-from helpers import canAccessInnerMaridia, canFlyDiagonally, canDefeatBotwoon
-from helpers import canCrystalFlash, canOpenGreenDoors, canHellRun
-from parameters import hard
+from parameters import easy, medium, hard, harder, hardcore, mania, text2diff, diff2text
 from solver import ParamsLoader
+from rom import RomPatcher
 
 if __name__ == "__main__":
-
-    #let rnd = Random(seed)
-    #let itemLocations = writeSpoiler seed spoiler fileName (randomizer rnd [] [] (Items.getItemPool rnd) locationPool)
-    #writeRomSpoiler data (List.sortBy (fun il -> il.Item.Type) (List.filter (fun il -> il.Item.Class = Major && il.Item.Type <> ETank && il.Item.Type <> Reserve) itemLocations)) 0x2f5240 |> ignore
-    #//writeItemNames data Items.Items |> ignore
-    #writeLocations data itemLocations        
-
     parser = argparse.ArgumentParser(description="Random Metroid Randomizer")
     parser.add_argument('--param', '-p', help="the input parameters", nargs='+', default=None, dest='paramsFileName')
 
     parser.add_argument('--debug', '-d', help="activate debug logging", dest='debug', action='store_true')
-    parser.add_argument('--difficultyTarget', '-t', help="the maximum difficulty target that the randomizer will use", dest='difficultyTarget', nargs='?', default=None, type=int)
+    parser.add_argument('--difficultyTarget', '-t', help="the maximum difficulty target that the randomizer will use", dest='difficultyTarget', nargs='?', default=None, choices=['easy', 'medium', 'hard', 'harder', 'hardcore', 'mania'])
     parser.add_argument('--seed', '-s', help="randomization seed to use", dest='seed', nargs='?', default=0, type=int)
-    parser.add_argument('--algo', '-a', help="randomization algorithm to use", dest='algo', nargs='?', default=None)
+    parser.add_argument('--algo', '-a', help="randomization algorithm to use", dest='algo', nargs='?', default=None, choices=['Total_Tournament', 'Total_Full', 'Total_Casual', 'Total_Normal', 'Total_Hard'])
+    parser.add_argument('--rom', '-r', help="the already randomized rom to patch with the new items", dest='rom', nargs='?', default=None)
 
     args = parser.parse_args()
 
     if args.paramsFileName is not None:
         ParamsLoader.factory(args.paramsFileName[0]).load()
-    
+        preset = os.path.splitext(os.path.basename(args.paramsFileName[0]))[0]
+    else:
+        preset = 'default'
+
     if args.seed == 0:
         seed = random.randint(0, 9999999)
     else:
@@ -47,8 +35,8 @@ if __name__ == "__main__":
 
     print("seed={}".format(seed))
 
-    if args.difficultyTarget is not None:
-        difficultyTarget = args.difficultyTarget
+    if args.difficultyTarget:
+        difficultyTarget = text2diff[args.difficultyTarget]
     else:
         difficultyTarget = hard
 
@@ -59,15 +47,39 @@ if __name__ == "__main__":
 
     locationPool = locations
 
-    randomizer = Randomizer.factory(algo, seed, difficultyTarget, locations)
-    itemLocs = randomizer.generateItems([], [])
+    try:
+        randomizer = Randomizer.factory(algo, seed, difficultyTarget, locations)
+        itemLocs = randomizer.generateItems()
+    except:
+        print("Can't generate a randomized rom with the given parameters, try increasing the difficulty target.")
+        sys.exit(-1)
 
     # transform itemLocs in our usual dict(location, item)
     locsItems = {}
     for itemLoc in itemLocs:
         locsItems[itemLoc["Location"]["Name"]] = itemLoc["Item"]["Type"]
 
-    #print(locsItems)
+    if args.debug is True:
+        for loc in locsItems:
+            print('{:>50}: {:>16} '.format(loc, locsItems[loc]))
 
-    for loc in locsItems:
-        print('{:>50}: {:>16} '.format(loc, locsItems[loc]))
+    algo2text = {
+        'Total_Tournament': 'TX',
+        'Total_Full': 'FX',
+        'Total_Casual': 'CX',
+        'Total_Normal': 'X',
+        'Total_Hard': 'HX'}
+
+    fileName = 'Ouiche Randomizer ' + algo2text[algo] + str(seed) + ' ' + preset + ' ' + diff2text[difficultyTarget]
+
+    if args.rom is not None:
+        romFileName = args.rom
+        fileName += '.sfc'
+        RomPatcher.patch(romFileName, fileName, itemLocs)
+    else:
+        fileName += '.json'
+        with open(fileName, 'w') as jsonFile:
+            json.dump(locsItems, jsonFile)
+
+
+    print("Rom generated: {}".format(fileName))

@@ -26,6 +26,7 @@ class Randomizer(object):
         random.seed(seed)
 
         self.itemPool = Items.getItemPool(self.rnd)
+        self.difficultyTarget = difficultyTarget
         self.locationPool = locations
 
         # list of locations not already used
@@ -34,6 +35,14 @@ class Randomizer(object):
         self.usedLocations = []
         # list of {'Item': item, 'Location': location}, the items assigned to a location
         self.itemLocations = []
+
+    def locAvailable(self, loc, items):
+        result = loc["Available"](items)
+        return result.bool is True and result.difficulty <= self.difficultyTarget
+
+    def locPostAvailable(self, loc, items):
+        result = loc["PostAvailable"](items)
+        return result.bool is True and result.difficulty <= self.difficultyTarget
 
     def currentLocations(self, items):
         # loop on all the location pool and check if the loc is not already used and if the available function is true
@@ -47,7 +56,7 @@ class Randomizer(object):
         # keep only the item type, it's too slow otherwise
         items = [item["Type"] for item in items]
 
-        return List.filter(lambda loc: loc["Available"](items)[0], self.unusedLocations)
+        return List.filter(lambda loc: self.locAvailable(loc, items), self.unusedLocations)
 
     def canPlaceItem(self, item, itemLocations):
         # for an item check if a least one location can accept it, without checking
@@ -171,7 +180,7 @@ class Randomizer(object):
         # but not the locations where the prefilled items have been placed
         # => locations with progression items accessible with all the progression items and the preffiled items but not the current item
         filteredItemLocations = List.filter(lambda itLoc: (not List.exists(lambda preIt: preIt["Type"] == itLoc["Item"]["Type"], prefilledItems)
-                                                           and itLoc["Location"]["Available"](items)[0]),
+                                                           and self.locAvailable(itLoc["Location"], items)),
                                             itemLocations)
 
         # progression items accessibles without the current item
@@ -204,13 +213,13 @@ class Randomizer(object):
             # get first available location
             for loc in emptyLocations:
                 if 'PostAvailable' in loc:
-                    if (loc["Available"](assumedItems)[0] and 
-                        loc['PostAvailable'](assumedItems + [item['Type']])[0] and
+                    if (self.locAvailable(loc, assumedItems) and
+                        self.locPostAvailable(loc, assumedItems + [item['Type']]) and
                         self.canPlaceAtLocation(item, loc)):
                         fillLocation = loc
                         break
                 else:
-                    if loc["Available"](assumedItems)[0] and self.canPlaceAtLocation(item, loc):
+                    if self.locAvailable(loc, assumedItems) and self.canPlaceAtLocation(item, loc):
                         fillLocation = loc
                         break
 
@@ -297,7 +306,7 @@ class Randomizer(object):
 
         return (items, itemLocations, itemPool)
 
-    def generateItems(self, items, itemLocations):
+    def generateItems(self):
         # main function
         #
         # items: empty list
@@ -305,8 +314,8 @@ class Randomizer(object):
         #
         # return 
 
-        newItems = items
-        newItemLocations = itemLocations
+        newItems = []
+        newItemLocations = []
         newItemPool = self.itemPool
 
         # Place Morph at one of the earliest locations so that it's always accessible

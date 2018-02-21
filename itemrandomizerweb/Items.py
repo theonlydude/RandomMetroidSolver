@@ -1,4 +1,5 @@
 from itemrandomizerweb.stdlib import List
+import struct
 
 # https://github.com/tewtal/itemrandomizerweb/blob/master/ItemRandomizer/Items.fs
 Items = [
@@ -172,17 +173,19 @@ Items = [
     }
 ]
 
-#let toByteArray itemCode = [|byte(itemCode &&& 0xFF); byte(itemCode >>> 8)|]
+def toByteArray(itemCode):
+    return (struct.pack('B', itemCode & 0xff), struct.pack('B', itemCode >> 8))
 
-#let getItemTypeCode item itemVisibility =
-#    let modifier =
-#        match itemVisibility with
-#        | Visible -> 0
-#        | Chozo -> 0x54
-#        | Hidden -> 0xA8
-#
-#    let itemCode = (item.Code + modifier)
-#    toByteArray itemCode
+def getItemTypeCode(item, itemVisibility):
+    if itemVisibility == 'Visible':
+        modifier = 0
+    elif itemVisibility == 'Chozo':
+        modifier = 84
+    elif itemVisibility == 'Hidden':
+        modifier = 168
+
+    itemCode = item['Code'] + modifier
+    return toByteArray(itemCode)
 
 def addItem(itemType, itemPool):
     return [List.find(lambda item: item["Type"] == itemType, Items)] + itemPool

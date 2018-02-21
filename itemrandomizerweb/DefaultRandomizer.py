@@ -37,7 +37,9 @@ class DefaultRandomizer(NewRandomizer):
 
         return {'Item': item, 'Location': location}
 
-    def generateItems(self, items, itemLocations):
+    def generateItems(self):
+        items = []
+        itemLocations = []
         while len(self.itemPool) > 0:
             curLocs = self.currentLocations(items)
             posItems = self.possibleItems(curLocs, items, itemLocations, self.itemPool, self.locationPool)

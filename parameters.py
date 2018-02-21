@@ -8,6 +8,31 @@ harder = 25
 hardcore = 50
 mania = 100
 
+diff2text = {
+    0: 'baby',
+    easy: 'easy',
+    medium: 'medium',
+    hard: 'hard',
+    harder: 'very hard',
+    hardcore: 'hardcore',
+    mania: 'mania',
+    mania*2: 'god',
+    mania*4: 'samus'
+}
+
+text2diff = {
+    'baby': 0,
+    'easy': easy,
+    'medium': medium,
+    'hard': hard,
+    'harder': harder,
+    'very hard': harder,
+    'hardcore': hardcore,
+    'mania': mania,
+    'god': mania*2,
+    'samus': mania*4
+}
+
 def isConf(conf):
     return conf[0:len('__')] != '__'
 

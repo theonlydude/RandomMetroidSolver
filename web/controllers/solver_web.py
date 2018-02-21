@@ -10,28 +10,9 @@ from collections import OrderedDict
 
 # to solve the rom
 from parameters import easy, medium, hard, harder, hardcore, mania, Conf, Knows, Settings, isKnows
+from parameters import diff2text, text2diff
 import tournament_locations
 from solver import Solver, ParamsLoader, DifficultyDisplayer, RomLoader
-
-difficulties = {
-    0: 'mania',
-    easy : 'easy',
-    medium : 'medium',
-    hard : 'hard',
-    harder : 'very hard',
-    hardcore : 'hardcore',
-    mania : 'mania'
-}
-
-difficulties2 = {
-    'easy' : easy,
-    'medium' : medium,
-    'hard' : hard,
-    'harder' : harder,
-    'very hard': harder,
-    'hardcore' : hardcore,
-    'mania' : mania
-}
 
 romTypes = OrderedDict([('Total Casual', 'Total_CX'), ('Total Normal', 'Total_X'),
                         ('Total Hard', 'Total_HX'), ('Total Tournament', 'Total_TX'),
@@ -378,7 +359,7 @@ def solver():
     # send values to view
     return dict(mainForm=mainForm, loadForm=loadForm, saveForm=saveForm,
                 desc=Knows.desc,
-                difficulties=difficulties,
+                difficulties=diff2text,
                 categories=Knows.categories, settings=params['Settings'],
                 knows=params['Knows'], conf=conf, knowsUsed=knowsUsed,
                 resultText=resultText, pathTable=pathTable,
@@ -402,12 +383,12 @@ def generate_json_from_parameters(vars, hidden):
             else:
                 diffVar = vars[var+"_diff"+hidden]
                 if diffVar is not None:
-                    paramsDict['Knows'][var] = [True, difficulties2[diffVar]]
+                    paramsDict['Knows'][var] = [True, text2diff[diffVar]]
 
     # Conf
     diffTarget = vars["difficulty_target"+hidden]
     if diffTarget is not None:
-        paramsDict['Conf']['difficultyTarget'] = difficulties2[diffTarget]
+        paramsDict['Conf']['difficultyTarget'] = text2diff[diffTarget]
 
     pickupStrategy = vars["pickup_strategy"+hidden]
     if pickupStrategy is not None:

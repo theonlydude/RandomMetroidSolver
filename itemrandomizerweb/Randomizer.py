@@ -12,6 +12,7 @@ class Randomizer(object):
             from FullRandomizer import FullRandomizer
             return FullRandomizer(seed, difficultyTarget, locations)
         elif algo == 'Total_Casual' or algo == 'Total_Normal':
+            from DefaultRandomizer import DefaultRandomizer
             return DefaultRandomizer(seed, difficultyTarget, locations)
         elif algo == 'Total_Hard':
             return SparseRandomizer(seed, difficultyTarget, locations)

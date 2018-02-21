@@ -43,40 +43,39 @@ class SparseRandomizer(NewRandomizer):
             return False
 
         newLocations = self.currentLocations([item] + items)
-        newLocationsHasMajor = List.exists(lambda l: l["Class"] == 'Major', newLocations)
+        if len(newLocations) <= len(oldLocations):
+            return False
 
-        return newLocationsHasMajor and len(newLocations) > len(oldLocations)
+        if item['Class'] == 'Major':
+            return True
 
+        newLocationsHasMajor = List.exists(lambda l: l["Class"] == 'Major' and not List.exists(lambda ol: ol['Address'] == l['Address'], oldLocations), newLocations)
 
+        return newLocationsHasMajor
 
+    def checkFillerItem(self, curLocs, item, items, itemLocations, locationPool):
+        return self.canPlaceItem(item, curLocs)
 
-        let newLocationsHasMajor = List.exists (fun (l:Location) -> l.Class = Major && not (List.exists (fun (ol:Location) -> ol.Address = l.Address) oldLocations)) newLocations
+    def getNewLocations(self, curLocs, item, items):
+        oldLocations = curLocs
+        newLocations = self.currentLocations([item] + items)
 
-        canPlaceItem item oldLocations && (newLocationsHasMajor || item.Class = Major) && (List.length newLocations) > (List.length oldLocations)
+        if item['Type'] == 'Varia':
+            return (len(newLocations) - len(oldLocations) + 1) * 3
+        elif item['Type'] == 'Gravity':
+            return (len(newLocations) - len(oldLocations) + 1) * 4
+        elif item['Type'] == 'Super':
+            return len(newLocations) - len(oldLocations) + 1
+        elif item['Type'] == 'PowerBomb':
+            return len(newLocations) - len(oldLocations) + 2
+        else:
+            return len(newLocations) - len(oldLocations)
 
-    new
-    let checkFillerItem item items (itemLocations:ItemLocation list) locationPool =
-        let oldLocations = (currentLocations items itemLocations locationPool)
-        canPlaceItem item oldLocations
+    def possibleItems(self, curLocs, items, itemLocations, itemPool, locationPool):
+        return List.sortBy(lambda item: self.getNewLocations(curLocs, item, items), List.filter(lambda item: self.checkItem(item, items, itemLocations, locationPool), itemPool))
 
-    new
-    let getNewLocations item items (itemLocations:ItemLocation list) locationPool =
-        let oldLocations = (currentLocations items itemLocations locationPool)
-        let newLocations = (currentLocations (item :: items) itemLocations locationPool)
-        match item.Type with 
-        | Varia -> (((List.length newLocations) - (List.length oldLocations)) + 1) * 3
-        | Gravity -> (((List.length newLocations) - (List.length oldLocations)) + 1) * 4
-        | Super -> ((List.length newLocations) - (List.length oldLocations)) + 1
-        | PowerBomb -> ((List.length newLocations) - (List.length oldLocations)) + 2
-        | _ -> ((List.length newLocations) - (List.length oldLocations))
-
-    diff
-    let possibleItems items itemLocations itemPool locationPool =
-        List.sortBy (fun item -> getNewLocations item items itemLocations locationPool) (List.filter (fun item -> checkItem item items itemLocations locationPool) itemPool)
-
-    new
-    let possibleFillerItems items itemLocations itemPool locationPool =
-        List.filter (fun item -> checkFillerItem item items itemLocations locationPool) itemPool
+    def possibleFillerItems(self, items, itemLocations, itemPool, locationPool):
+        return List.filter(lambda item: checkFillerItem(item, items, itemLocations, locationPool), itemPool)
 
 
     diff

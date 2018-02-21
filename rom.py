@@ -237,6 +237,6 @@ class RomPatcher:
                     outFile.write(itemCode[0])
                     outFile.seek(itemLoc['Location']['Address'] + 1, 0)
                     outFile.write(itemCode[1])
-        except:
-            print("Error patching {}. Is {} a valid ROM ?".format(outFileName, romFileName, romFileName))
+        except Exception as e:
+            print("Error patching {}. Is {} a valid ROM ? ({})".format(outFileName, romFileName, e))
             sys.exit(-1)

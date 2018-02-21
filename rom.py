@@ -228,7 +228,6 @@ class RomPatcher:
     def patch(romFileName, outFileName, itemLocs):
         try:
             shutil.copyfile(romFileName, outFileName)
-            shutil.copyfile(romFileName, outFileName+'-bak')
 
             with open(outFileName, 'r+') as outFile:
                 for itemLoc in itemLocs:

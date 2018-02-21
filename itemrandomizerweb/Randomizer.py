@@ -15,6 +15,7 @@ class Randomizer(object):
             from DefaultRandomizer import DefaultRandomizer
             return DefaultRandomizer(seed, difficultyTarget, locations)
         elif algo == 'Total_Hard':
+            from SparseRandomizer import SparseRandomizer
             return SparseRandomizer(seed, difficultyTarget, locations)
         else:
             print("ERROR: unknown algo: {}".format(algo))

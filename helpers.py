@@ -492,7 +492,7 @@ def computeBossDifficulty(items, ammoMargin, secs, diffTbl):
     difficulty = medium
     # get difficulty by energy
     if energyDict:
-        energyDict = {int(k):float(v) for k,v in energyDict.items()}
+        energyDict = {float(k):float(v) for k,v in energyDict.items()}
         keyz = sorted(energyDict.keys())
         if len(keyz) > 0:
             current = keyz[0]

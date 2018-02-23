@@ -5,7 +5,7 @@ path = os.path.expanduser('~/RandomMetroidSolver')
 if os.path.exists(path) and path not in sys.path:
     sys.path.append(path)
 
-import datetime, os, hashlib, json, re
+import datetime, os, hashlib, json, re, subprocess, tempfile
 from collections import OrderedDict
 
 # to solve the rom
@@ -98,7 +98,7 @@ def solver():
         romFile = None
         romType = 'Total Tournament'
 
-    mainForm = FORM(TABLE(TR("Randomized Super Metroid rom: ",
+    mainForm = FORM(TABLE(TR("Randomized Super Metroid ROM: ",
                              INPUT(_type="file", _name="uploadFile", _id="uploadFile")),
                           TR("Already uploaded rom in this session: ",
                              SELECT(*roms, **dict(_name="romFile",
@@ -458,8 +458,34 @@ def compute_difficulty(jsonRomFileName, post_vars):
 def infos():
     # set title
     response.title = 'Super Metroid Item Randomizer Solver'
-    response.menu = [['Super Metroid Item Randomizer Solver', False, URL(f='solver')],
-                     ['Solve!', False, URL(f='solver')],
-                     ['Information & Contact', True, URL(f='infos')]]
 
     return dict()
+
+def randomizer():
+    response.title = 'Super Metroid Ouiche Randomizer'
+
+    files = sorted(os.listdir('diff_presets'))
+    presets = [os.path.splitext(file)[0] for file in files]
+
+    return dict(algos=['Total_Casual', 'Total_Normal', 'Total_Tournament', 'Total_Full'],
+                presets=presets)
+
+def randomizerWebService():
+    jsonFileName = tempfile.mkstemp()[1]
+
+    params = ['pypy',  os.path.expanduser("~/RandomMetroidSolver/randomizer.py"),
+              '--algo', request.vars.algo, '--seed', request.vars.seed,
+              '--difficultyTarget', request.vars.difficulty_target,
+              '--output', jsonFileName, '--preset', request.vars.paramsFile]
+
+    ret = subprocess.call(params)
+
+
+    if ret == 0:
+        with open(jsonFileName) as jsonFile:
+            locsItems = json.load(jsonFile)
+
+        os.remove(jsonFileName)
+        return locsItems
+    else:
+        return -1

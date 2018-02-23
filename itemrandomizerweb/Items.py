@@ -176,7 +176,7 @@ Items = [
 def toByteArray(itemCode):
     return (struct.pack('B', itemCode & 0xff), struct.pack('B', itemCode >> 8))
 
-def getItemTypeCode(item, itemVisibility):
+def getItemTypeCode(item, itemVisibility, returnsInt=False):
     if itemVisibility == 'Visible':
         modifier = 0
     elif itemVisibility == 'Chozo':
@@ -185,7 +185,10 @@ def getItemTypeCode(item, itemVisibility):
         modifier = 168
 
     itemCode = item['Code'] + modifier
-    return toByteArray(itemCode)
+    if returnsInt is True:
+        return (itemCode & 0xff, itemCode >> 8)
+    else:
+        return toByteArray(itemCode)
 
 def addItem(itemType, itemPool):
     return [List.find(lambda item: item["Type"] == itemType, Items)] + itemPool

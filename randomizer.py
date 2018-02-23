@@ -30,12 +30,21 @@ if __name__ == "__main__":
     parser.add_argument('--rom', '-r',
                         help="the already randomized rom to patch with the new items",
                         dest='rom', nargs='?', default=None)
+    parser.add_argument('--output', '-o',
+                        help="to choose the name of the generated json (for the webservice)",
+                        dest='output', nargs='?', default=None)
+    parser.add_argument('--preset', '-e',
+                        help="the name of the preset (for the webservice)",
+                        dest='preset', nargs='?', default=None)
 
     args = parser.parse_args()
 
     if args.paramsFileName is not None:
         ParamsLoader.factory(args.paramsFileName[0]).load()
         preset = os.path.splitext(os.path.basename(args.paramsFileName[0]))[0]
+    elif args.preset is not None:
+        preset = args.preset
+        ParamsLoader.factory('diff_presets/' + preset + '.json').load()
     else:
         preset = 'default'
 
@@ -43,8 +52,6 @@ if __name__ == "__main__":
         seed = random.randint(0, 9999999)
     else:
         seed = args.seed
-
-    print("seed={}".format(seed))
 
     if args.difficultyTarget:
         difficultyTarget = text2diff[args.difficultyTarget]
@@ -99,12 +106,30 @@ if __name__ == "__main__":
             print('{:>50}: {:>16} '.format(loc, locsItems[loc]))
 
     if args.rom is not None:
+        # patch local rom
         romFileName = args.rom
         fileName += '.sfc'
         RomPatcher.patch(romFileName, fileName, itemLocs)
     else:
-        fileName += '.json'
-        with open(fileName, 'w') as jsonFile:
-            json.dump(locsItems, jsonFile)
+        if args.output is not None:
+            # web service
+            locsItems = {}
+            for itemLoc in itemLocs:
+                itemCode = Items.getItemTypeCode(itemLoc['Item'],
+                                                 itemLoc['Location']['Visibility'],
+                                                 returnsInt = True)
+                locsItems[itemLoc['Location']['Address']] = itemCode[0]
+                locsItems[itemLoc['Location']['Address'] + 1] = itemCode[1]
+
+            locsItems["fileName"] = fileName + '.sfc'
+
+            #print("locsItems={}".format(locsItems))
+            with open(args.output, 'w') as jsonFile:
+                json.dump(locsItems, jsonFile)
+        else:
+            # rom json
+            fileName += '.json'
+            with open(fileName, 'w') as jsonFile:
+                json.dump(locsItems, jsonFile)
 
     print("Rom generated: {}".format(fileName))

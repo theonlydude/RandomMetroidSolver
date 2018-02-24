@@ -1,6 +1,26 @@
 {
   "password": "732071161c41f9d3c0342e85d579a5bf27ddabc0529a5344749c9b084ca52bf0",
   "Knows": {
+    "XrayIce": [
+      false,
+      0
+    ],
+    "GetAroundWallJump": [
+      false,
+      0
+    ],
+    "HiJumpLessGauntletAccess": [
+      false,
+      0
+    ],
+    "ReverseGateGlitchHiJumpLess": [
+      false,
+      0
+    ],
+    "NorfairReserveIce": [
+      false,
+      0
+    ],
     "ExitPlasmaRoomHiJump": [
       false,
       0
@@ -171,7 +191,7 @@
     ]
   },
   "Conf": {
-    "difficultyTarget": 5,
+    "difficultyTarget": 1,
     "minorsPickup": "all",
     "displayGeneratedPath": false,
     "majorsPickup": "all"
@@ -206,7 +226,7 @@
           "7": 50
         }
       },
-      "Mother Brain": {
+      "MotherBrain": {
         "Rate": 0.5,
         "Energy": {
           "3": 100,
@@ -231,7 +251,8 @@
     },
     "hellRuns": {
       "MainUpperNorfair": null,
-      "Ice": null
+      "Ice": null,
+      "LowerNorfair": null	
     },
     "algoSettings": {
       "powerBombsPerSecond": 0.33,

@@ -1,9 +1,9 @@
-from NewRandomizer import NewRandomizer
+from Randomizer import Randomizer
 from stdlib import Map, Array, List, Random
 import Items
 import random
 
-class DefaultRandomizer(NewRandomizer):
+class DefaultRandomizer(Randomizer):
     def __init__(self, seed, difficultyTarget, locations):
         super(DefaultRandomizer, self).__init__(seed, difficultyTarget, locations)
 

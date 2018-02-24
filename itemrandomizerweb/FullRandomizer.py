@@ -3,7 +3,7 @@ from stdlib import Map, Array, List, Random
 import Items
 import random
 
-class FullRandomizer(Randomizer):
+class FullRandomizer(NewRandomizer):
     def __init__(self, seed, difficultyTarget, locations):
         super(FullRandomizer, self).__init__(seed, difficultyTarget, locations)
 

@@ -2,6 +2,7 @@
 import re, struct, sys, shutil
 from helpers import SMBool
 from itemrandomizerweb import Items
+from itemrandomizerweb.patches import patches
 
 # layout patches added by randomizers
 class RomPatches:
@@ -224,6 +225,32 @@ class RomReader:
                 #print("{}: {} => {}".format(loc["Name"], loc["Class"], loc["itemName"]))
 
 class RomPatcher:
+    IPSPatches = {
+        'Standard': ['Fix_Morph_Ball_Hidden_Chozo_PLMs', 'Disable_GT_Code', 'Fix_heat_damage_speed_echoes_bug',
+                     'Removes_Gravity_Suit_heat_protection', 'Fix_Screw_Attack_selection_in_menu',
+                     'Instantly_open_G4_passage_when_all_bosses_are_killed', 'Seed_display',
+                     'Suit_acquisition_animation_skip', 'Custom_credits_with_stats',
+                     'Fix_Morph_and_Missiles_Room_State', 'Intro_Ceres_Skip_and_initial_door_flag_setup',
+                     'Custom_credits_with_stats__tracking_code', 'Disable_Space_Time_select_in_menu',
+                     'Wake_up_zebes_when_going_right_from_morph', 'Mother_Brain_Cutscene_Edits'],
+        'Layout': ['Raise_platforms_in_red_tower_bottom_to_always_be_able_to_get_back_up',
+                   'Disable respawning blocks at dachora pit',
+                   'Raise_platform_in_first_heated_norfair_room_to_not_require_hi_jump',
+                   'Make_it_possible_to_escape_from_below_early_super_bridge_without_bombs',
+                   'Replace_bomb_blocks_with_shot_blocks_before_Hi_Jump',
+                   'Replace_bomb_blocks_with_shot_blocks_at_Moat',
+                   'Replace_bomb_blocks_with_shot_blocks_before_Spazer'],
+        # TODO::missing optional patches:
+        #  -remove fanfare
+        #  -map angle down on select
+        #  -respin
+        #  -naked dying samus
+        'Optional': ['Max_Ammo_Display', 'MSU1_audio'],
+        'Casual': ['Swap_construction_zone_etank_with_missiles_and_open_up_path_to_missiles'],
+        'Tournament': [],
+        'Full': []
+    }
+
     @staticmethod
     def patch(romFileName, outFileName, itemLocs):
         try:
@@ -240,3 +267,34 @@ class RomPatcher:
         except Exception as e:
             print("Error patching {}. Is {} a valid ROM ? ({})".format(outFileName, romFileName, e))
             sys.exit(-1)
+
+    @staticmethod
+    def applyIPSPatches(romFileName, difficulty='Tournament', optionalPatches=[]):
+        #try:
+            with open(romFileName, 'r+') as romFile:
+                # apply standard patches
+                for patchName in RomPatcher.IPSPatches['Standard']:
+                    RomPatcher.applyIPSPatch(romFile, patchName)
+
+                # apply layout patches
+                for patchName in RomPatcher.IPSPatches['Layout']:
+                    RomPatcher.applyIPSPatch(romFile, patchName)
+
+                # apply difficulty patches
+                for patchName in RomPatcher.IPSPatches[difficulty]:
+                    RomPatcher.applyIPSPatch(romFile, patchName)
+
+                # apply optional patches
+                for patchName in optionalPatches:
+                    if patchName in RomPatcher.IPSPatches['Optional']:
+                        RomPatcher.applyIPSPatch(romFile, patchName)
+        #except Exception as e:
+        #    print("Error patching {}. ({})".format(romFileName, e))
+        #    sys.exit(-1)
+
+    @staticmethod
+    def applyIPSPatch(romFile, patchName):
+        patchData = patches[patchName]
+        for address in patchData:
+            romFile.seek(address)
+            romFile.write(struct.pack('B', patchData[address]))

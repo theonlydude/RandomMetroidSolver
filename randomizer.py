@@ -24,11 +24,10 @@ if __name__ == "__main__":
     parser.add_argument('--seed', '-s', help="randomization seed to use", dest='seed',
                         nargs='?', default=0, type=int)
     parser.add_argument('--algo', '-a', help="randomization algorithm to use",
-                        dest='algo', nargs='?', default=None,
-                        choices=['Total_Tournament', 'Total_Full', 'Total_Casual',
-                                 'Total_Normal', 'Total_Hard'])
+                        dest='algo', nargs='?', default='Total_Tournament',
+                        choices=['Total_Tournament', 'Total_Full', 'Total_Casual'])
     parser.add_argument('--rom', '-r',
-                        help="the already randomized rom to patch with the new items",
+                        help="the vanilia ROM",
                         dest='rom', nargs='?', default=None)
     parser.add_argument('--output', '-o',
                         help="to choose the name of the generated json (for the webservice)",
@@ -36,6 +35,10 @@ if __name__ == "__main__":
     parser.add_argument('--preset', '-e',
                         help="the name of the preset (for the webservice)",
                         dest='preset', nargs='?', default=None)
+    parser.add_argument('--patch', '-c',
+                        help="optional patches to add",
+                        dest='patches', nargs='+', default=[],
+                        choices=['Max_Ammo_Display', 'MSU1_audio'])
 
     args = parser.parse_args()
 
@@ -58,10 +61,7 @@ if __name__ == "__main__":
     else:
         difficultyTarget = hard
 
-    if args.algo is not None:
-        algo = args.algo
-    else:
-        algo = 'Total_Tournament'
+    algo = args.algo
 
     algo2text = {
         'Total_Tournament': 'TX',
@@ -110,6 +110,9 @@ if __name__ == "__main__":
         romFileName = args.rom
         fileName += '.sfc'
         RomPatcher.patch(romFileName, fileName, itemLocs)
+
+        difficulty = algo[algo.find('_')+1:]
+        RomPatcher.applyIPSPatches(fileName, difficulty, args.patches)
     else:
         if args.output is not None:
             # web service

@@ -123,12 +123,16 @@ def heatProof(items):
                     haveItem(items, 'Gravity')))
 
 def canHellRun(items, hellRun):
+    ret = None
     if heatProof(items).bool:
-        return SMBool(True, easy)
+        ret = SMBool(True, easy)
     elif energyReserveCount(items) >= 2:
-        return energyReserveCountOkHellRun(items, hellRun)
+        ret = energyReserveCountOkHellRun(items, hellRun)
     else:
-        return SMBool(False)
+        ret = SMBool(False)
+    # if ret.bool is False:
+    #     print('HELL NO')
+    return ret
 
 def canFly(items):
     if haveItem(items, 'SpaceJump').bool:

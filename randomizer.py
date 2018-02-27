@@ -118,6 +118,8 @@ if __name__ == "__main__":
         RomPatcher.applyIPSPatches(fileName, difficulty, args.patches)
 
         RomPatcher.writeSeed(fileName, seed)
+
+        RomPatcher.writeSpoiler(fileName, itemLocs)
     else:
         if args.output is not None:
             # web service

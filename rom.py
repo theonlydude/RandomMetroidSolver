@@ -4,6 +4,7 @@ from helpers import SMBool
 from itemrandomizerweb import Items
 from itemrandomizerweb.patches import patches
 from itemrandomizerweb import Items
+from itemrandomizerweb.stdlib import List
 
 # layout patches added by randomizers
 class RomPatches:
@@ -318,3 +319,86 @@ class RomPatcher:
             romFile.write(seedInfoArr2[0])
             romFile.seek(0x2FFF03)
             romFile.write(seedInfoArr2[1])
+
+    @staticmethod
+    def writeSpoiler(romFileName, itemLocs):
+        # keep only majors, filter out Etanks and Reserve
+        fItemLocs = List.sortBy(lambda il: il['Item']['Type'],
+                                List.filter(lambda il: (il['Item']['Class'] == 'Major'
+                                                        and il['Item']['Type'] not in ['ETank',
+                                                                                       'Reserve']),
+                                            itemLocs))
+
+        regex = re.compile(r"[^A-Z0-9\.,'!: ]+")
+
+        def prepareString(s, isItem=True):
+            s = s.upper()
+            # remove chars not displayable
+            s = regex.sub('', s)
+            # remove space before and after
+            s = s.strip()
+            # limit to 30 chars, add one space before
+            # pad to 32 chars
+            if isItem is True:
+                s = " " + s[0:30]
+                s = s.ljust(32)
+            else:
+                s = " " + s[0:30] + " "
+                s = " " + s.rjust(31, '.')
+
+            return s
+
+        with open(romFileName, 'r+') as romFile:
+            address = 0x2f5240
+            for iL in fItemLocs:
+                itemName = prepareString(iL['Item']['Name'])
+                locationName = prepareString(iL['Location']['Name'], isItem=False)
+
+                RomPatcher.writeCreditsString(romFile, address, 0x04, itemName)
+                RomPatcher.writeCreditsString(romFile, (address + 0x40), 0x18, locationName)
+
+                address += 0x80
+
+            RomPatcher.patchBytes(romFile, address, [0, 0, 0, 0])
+
+    @staticmethod
+    def writeCreditsString(romFile, address, color, string):
+        array = [RomPatcher.convertCreditsChar(color, char) for char in string]
+        RomPatcher.patchBytes(romFile, address, array)
+
+    @staticmethod
+    def convertCreditsChar(color, byte):
+        if byte == ' ':
+            ib = 0x7f
+        elif byte == '!':
+            ib = 0x1F
+        elif byte == ':':
+            ib = 0x1E
+        elif byte == '\\':
+            ib = 0x1D
+        elif byte == '_':
+            ib = 0x1C
+        elif byte == ',':
+            ib = 0x1B
+        elif byte == '.':
+            ib = 0x1A
+        else:
+            ib = ord(byte) - 0x41
+
+        if ib == 0x7F:
+            return 0x007F
+        else:
+            return (color << 8) + ib
+
+    @staticmethod
+    def patchBytes(romFile, address, array):
+        for dByte in array:
+            dByteArr = Items.toByteArray(dByte)
+
+            romFile.seek(address)
+            romFile.write(dByteArr[0])
+            address += 1
+
+            romFile.seek(address)
+            romFile.write(dByteArr[1])
+            address += 1

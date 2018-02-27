@@ -1,4 +1,4 @@
-from Randomizer import Randomizer
+from NewRandomizer import NewRandomizer
 from stdlib import Map, Array, List, Random
 import Items
 import random

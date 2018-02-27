@@ -80,6 +80,7 @@ class NewRandomizer(Randomizer):
         # locationPool: randomized majors locations
         #
         # return ()
+        self.currentItems = items
         if len(itemPool) == 0:
             return (items, itemLocations, itemPool)
         else:
@@ -104,7 +105,7 @@ class NewRandomizer(Randomizer):
                     if self.locAvailable(loc, assumedItems) and self.canPlaceAtLocation(item, loc):
                         fillLocation = loc
                         break
-
+                    
             itemLocation = self.placeSpecificItemAtLocation(item, fillLocation)
 
             i=0
@@ -112,9 +113,9 @@ class NewRandomizer(Randomizer):
                 if loc == fillLocation:
                     locationPool = locationPool[0:i] + locationPool[i+1:]
                 i+=1
-
+            items.append(itemLocation["Item"])               
             return self.generateAssumedItems(prefilledItems,
-                                             [itemLocation["Item"]] + items,
+                                             items,
                                              [itemLocation] + itemLocations,
                                              self.removeItem(itemLocation["Item"]["Type"], itemPool),
                                              locationPool)
@@ -123,11 +124,15 @@ class NewRandomizer(Randomizer):
         if len(itemPool) == 0:
             return itemLocations
 
+        self.currentItems = items
         curLocs = self.currentLocations(items)
-        posItems = self.possibleItems(curLocs, items, itemLocations, itemPool, locationPool)
-
-        itemLocation = self.placeItem(posItems, itemPool, curLocs)
-        return self.generateMoreItems([itemLocation["Item"]] + items,
+        itemLocation = None
+        while itemLocation is None:
+            posItems = self.possibleItems(curLocs, items, itemLocations, itemPool, locationPool)
+            itemLocation = self.placeItem(posItems, itemPool, curLocs)
+        print(str(len(self.currentItems) + 1) + ':' + itemLocation['Item']['Type'] + ' at ' + itemLocation['Location']['Name'])
+        items.append(itemLocation["Item"])
+        return self.generateMoreItems(items,
                                       [itemLocation] + itemLocations,
                                       self.removeItem(itemLocation["Item"]["Type"], itemPool),
                                       locationPool)
@@ -199,7 +204,7 @@ class NewRandomizer(Randomizer):
         newItems = []
         newItemLocations = []
         newItemPool = self.itemPool
-
+        
         # Place Morph at one of the earliest locations so that it's always accessible
         (newItems, newItemLocations, newItemPool) = self.prefill("Morph", newItems, newItemLocations, newItemPool, self.locationPool)
 

@@ -44,6 +44,8 @@ class Randomizer(object):
         return result.bool is True and result.difficulty <= self.difficultyTarget
 
     def locPostAvailable(self, loc, items):
+        if not 'PostAvailable' in loc:
+            return True
         result = loc["PostAvailable"](items)
         return result.bool is True and result.difficulty <= self.difficultyTarget
 
@@ -103,15 +105,7 @@ class Randomizer(object):
 
         return itemPool
 
-    def placeItem(self, items, itemPool, locations):
-        # 
-        #
-        # items: possible items to place
-        # itemPool: 
-        # locations: locations available
-        #
-        # returns a dict with the item and the location
-
+    def getItemToPlace(self, items, itemPool):
         itemsLen = len(items)
         if itemsLen == 0:
             if List.exists(lambda i: i["Type"] == "ScrewAttack", itemPool):
@@ -123,7 +117,22 @@ class Randomizer(object):
         else:
             item = List.item(random.randint(0, len(items)-1), items)
 
-        availableLocations = List.filter(lambda loc: self.canPlaceAtLocation(item, loc), locations)
+        return item
+
+    def placeItem(self, items, itemPool, locations):
+        # 
+        #
+        # items: possible items to place
+        # itemPool: 
+        # locations: locations available
+        #
+        # returns a dict with the item and the location
+        item = self.getItemToPlace(items, itemPool)
+        currentItems = [i["Type"] for i in self.currentItems]
+        currentItems.append(item['Type'])
+        availableLocations = List.filter(lambda loc: self.canPlaceAtLocation(item, loc) and self.locPostAvailable(loc, currentItems), locations)
+        if len(availableLocations) == 0:
+            return None
         location = List.item(random.randint(0, len(availableLocations)-1), availableLocations)
 
         self.usedLocations += [location]
@@ -135,7 +144,7 @@ class Randomizer(object):
 
         if 'Pickup' in location:
             location['Pickup']()
-
+            
         return {'Item': item, 'Location': location}
 
     def checkItem(self, curLocs, item, items, itemLocations, locationPool):

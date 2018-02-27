@@ -8,7 +8,7 @@ from itemrandomizerweb.Randomizer import Randomizer
 from tournament_locations import locations
 from parameters import easy, medium, hard, harder, hardcore, mania, text2diff, diff2text
 from solver import ParamsLoader
-from rom import RomPatcher
+from rom import RomPatcher, RomPatches
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Random Metroid Randomizer")
@@ -92,6 +92,7 @@ if __name__ == "__main__":
     locationPool = locations
 
 #    try:
+    RomPatches.ActivePatches = RomPatches.Total # TODO check if this is always the case
     randomizer = Randomizer.factory(algo, seed, difficultyTarget, locations)
     itemLocs = randomizer.generateItems()
     # except:

@@ -113,6 +113,8 @@ if __name__ == "__main__":
 
         difficulty = algo[algo.find('_')+1:]
         RomPatcher.applyIPSPatches(fileName, difficulty, args.patches)
+
+        RomPatcher.writeSeed(fileName, seed)
     else:
         if args.output is not None:
             # web service

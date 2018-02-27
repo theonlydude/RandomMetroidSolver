@@ -1,8 +1,9 @@
 
-import re, struct, sys, shutil
+import re, struct, sys, shutil, random
 from helpers import SMBool
 from itemrandomizerweb import Items
 from itemrandomizerweb.patches import patches
+from itemrandomizerweb import Items
 
 # layout patches added by randomizers
 class RomPatches:
@@ -270,7 +271,7 @@ class RomPatcher:
 
     @staticmethod
     def applyIPSPatches(romFileName, difficulty='Tournament', optionalPatches=[]):
-        #try:
+        try:
             with open(romFileName, 'r+') as romFile:
                 # apply standard patches
                 for patchName in RomPatcher.IPSPatches['Standard']:
@@ -288,9 +289,9 @@ class RomPatcher:
                 for patchName in optionalPatches:
                     if patchName in RomPatcher.IPSPatches['Optional']:
                         RomPatcher.applyIPSPatch(romFile, patchName)
-        #except Exception as e:
-        #    print("Error patching {}. ({})".format(romFileName, e))
-        #    sys.exit(-1)
+        except Exception as e:
+            print("Error patching {}. ({})".format(romFileName, e))
+            sys.exit(-1)
 
     @staticmethod
     def applyIPSPatch(romFile, patchName):
@@ -298,3 +299,22 @@ class RomPatcher:
         for address in patchData:
             romFile.seek(address)
             romFile.write(struct.pack('B', patchData[address]))
+
+    @staticmethod
+    def writeSeed(romFileName, seed):
+        with open(romFileName, 'r+') as romFile:
+            random.seed(seed)
+
+            seedInfo = random.randint(0, 0xFFFF)
+            seedInfo2 = random.randint(0, 0xFFFF)
+            seedInfoArr = Items.toByteArray(seedInfo)
+            seedInfoArr2 = Items.toByteArray(seedInfo2)
+
+            romFile.seek(0x2FFF00)
+            romFile.write(seedInfoArr[0])
+            romFile.seek(0x2FFF01)
+            romFile.write(seedInfoArr[1])
+            romFile.seek(0x2FFF02)
+            romFile.write(seedInfoArr2[0])
+            romFile.seek(0x2FFF03)
+            romFile.write(seedInfoArr2[1])

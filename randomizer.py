@@ -53,6 +53,8 @@ if __name__ == "__main__":
     else:
         seed = args.seed
 
+    print("SEED: " + str(seed))
+        
     if args.difficultyTarget:
         difficultyTarget = text2diff[args.difficultyTarget]
     else:
@@ -70,7 +72,7 @@ if __name__ == "__main__":
         'Total_Normal': 'X',
         'Total_Hard': 'HX'}
 
-    fileName = 'Ouiche Randomizer ' + algo2text[algo] + str(seed) + ' ' + preset + ' ' + diff2text[difficultyTarget]
+    fileName = 'Ouiche_Randomizer_' + algo2text[algo] + str(seed) + '_' + preset + '_' + diff2text[difficultyTarget]
 
     # same as solver
     threshold = difficultyTarget
@@ -89,12 +91,12 @@ if __name__ == "__main__":
 
     locationPool = locations
 
-    try:
-        randomizer = Randomizer.factory(algo, seed, difficultyTarget, locations)
-        itemLocs = randomizer.generateItems()
-    except:
-        print("Can't generate a randomized rom with the given parameters, try increasing the difficulty target.")
-        sys.exit(-1)
+#    try:
+    randomizer = Randomizer.factory(algo, seed, difficultyTarget, locations)
+    itemLocs = randomizer.generateItems()
+    # except:
+    #     print("Can't generate a randomized rom with the given parameters, try increasing the difficulty target.")
+    #     sys.exit(-1)
 
     # transform itemLocs in our usual dict(location, item)
     locsItems = {}

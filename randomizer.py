@@ -37,8 +37,9 @@ if __name__ == "__main__":
                         dest='preset', nargs='?', default=None)
     parser.add_argument('--patch', '-c',
                         help="optional patches to add",
-                        dest='patches', nargs='+', default=[],
-                        choices=['Max_Ammo_Display', 'MSU1_audio'])
+                        dest='patches', nargs='?', default=[], action='append',
+                        choices=['AimAnyButton.ips', 'itemsounds.ips', 'max_ammo_display.ips',
+                                 'spinjumprestart.ips', 'supermetroid_msu1.ips'])
 
     args = parser.parse_args()
 

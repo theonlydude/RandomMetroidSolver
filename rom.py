@@ -299,7 +299,8 @@ class RomPatcher:
         patchData = patches[patchName]
         for address in patchData:
             romFile.seek(address)
-            romFile.write(struct.pack('B', patchData[address]))
+            for byte in patchData[address]:
+                romFile.write(struct.pack('B', byte))
 
     @staticmethod
     def writeSeed(romFileName, seed):

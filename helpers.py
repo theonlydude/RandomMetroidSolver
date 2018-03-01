@@ -605,9 +605,10 @@ def canPassMetroids(items):
                     SMBool(haveItemCount(items, 'PowerBomb', 3), 0))) # to avoid leaving tourian to refill power bombs
 
 def canPassZebetites(items):
+    # account for one zebetite, refill may be necessary
     return wor(wand(haveItem(items, 'Ice'), Knows.IceZebSkip),
                wand(haveItem(items, 'SpeedBooster'), Knows.SpeedZebSkip),
-               SMBool(canInflictEnoughDamages(items, 1100*4, charge=False, givesDrops=False)[0] >= 1, 0)) # account for all the zebs to avoid constant refills
+               SMBool(canInflictEnoughDamages(items, 1100, charge=False, givesDrops=False)[0] >= 1, 0))
 
 def enoughStuffTourian(items):
     return wand(canPassMetroids(items), canPassZebetites(items), enoughStuffsMotherbrain(items))

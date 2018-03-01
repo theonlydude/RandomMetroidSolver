@@ -4,8 +4,8 @@ import Items
 import random
 
 class FullRandomizer(NewRandomizer):
-    def __init__(self, seed, difficultyTarget, locations):
-        super(FullRandomizer, self).__init__(seed, difficultyTarget, locations)
+    def __init__(self, seed, difficultyTarget, locations, qty):
+        super(FullRandomizer, self).__init__(seed, difficultyTarget, locations, qty)
 
     def canPlaceAtLocation(self, item, location):
         return True

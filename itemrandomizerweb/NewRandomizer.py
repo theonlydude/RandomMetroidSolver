@@ -6,12 +6,26 @@ from stdlib import Map, Array, List, Random
 # https://github.com/tewtal/itemrandomizerweb/blob/master/ItemRandomizer/Randomizers.fs
 
 class NewRandomizer(Randomizer):
-    def __init__(self, seed, difficultyTarget, locations):
-        super(NewRandomizer, self).__init__(seed, difficultyTarget, locations)
+    def __init__(self, seed, difficultyTarget, locations, qty, sampleSize, choose):
+        super(NewRandomizer, self).__init__(seed, difficultyTarget, locations, qty, sampleSize)
 
     def filterCurLocations(self, item, curLocations):
         return List.filter(lambda l: l["Class"] == item["Class"] and self.canPlaceAtLocation(item, l), curLocations)
 
+    def getItemToPlace(self, items, itemPool):
+        itemsLen = len(items)
+        if itemsLen == 0:
+            if List.exists(lambda i: i["Type"] == "ScrewAttack", itemPool):
+                item = List.find(lambda i: i["Type"] == "ScrewAttack", itemPool)
+            elif List.exists(lambda i: i["Type"] == "SpeedBooster", itemPool):
+                item = List.find(lambda i: i["Type"] == "SpeedBooster", itemPool)
+            else:
+                item = List.item(random.randint(0, len(itemPool)-1), itemPool)
+        else:
+            item = self.chooseItem(items)
+
+        return item
+    
     def shuffleLocations(self):
         shuffledLocations = List.toArray(List.filter(lambda l: l["Class"] == "Major", self.unusedLocations))
         random.shuffle(shuffledLocations)

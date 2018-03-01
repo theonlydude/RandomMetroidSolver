@@ -227,28 +227,77 @@ class RomReader:
                 #print("{}: {} => {}".format(loc["Name"], loc["Class"], loc["itemName"]))
 
 class RomPatcher:
+    # standard:
+    # Intro/Ceres Skip and initial door flag setup
+    #   introskip_doorflags.ips
+    # Instantly open G4 passage when all bosses are killed
+    #   g4_skip.ips
+    # Wake up zebes when going right from morph
+    #   wake_zebes.ips
+    # Seed display
+    #   seed_display.ips
+    # Custom credits with stats
+    #   credits.ips
+    # Custom credits with stats (tracking code)
+    #   tracking.ips
+    # Removes Gravity Suit heat protection
+    # Mother Brain Cutscene Edits
+    # Suit acquisition animation skip
+    # Fix Morph & Missiles Room State
+    # Fix heat damage speed echoes bug
+    # Disable GT Code
+    # Disable Space/Time select in menu
+    # Fix Morph Ball Hidden/Chozo PLM's
+    # Fix Screw Attack selection in menu
+    # 
+    # optional (Kejardon):
+    # Allows the aim buttons to be assigned to any button
+    #   AimAnyButton.ips
+    # 
+    # optional (Scyzer):
+    # Remove fanfare when picking up an item
+    #   itemsounds.ips
+    # A circle is drawn for items which have not been collected, and a dot for collected
+    #   mapitemcircles.ips
+    # Allows Samus to start spinning in mid air after jumping or falling
+    #   spinjumprestart.ips
+    # Play music with MSU1 chip on SD2SNES
+    #   supermetroid_msu1.ips
+    # Max Ammo Display
+    #   max_ammo_display.ips
+    # 
+    # casual:
+    # Swap construction zone e-tank with missiles and open up path to missiles
+    #   retro_brin_etank_missile_swap.ips
+    # 
+    # layout:
+    # Disable respawning blocks at dachora pit
+    #   dachora.ips
+    # Make it possible to escape from below early super bridge without bombs
+    #   early_super_bridge.ips
+    # Replace bomb blocks with shot blocks before Hi-Jump
+    #   high_jump.ips
+    # Replace bomb blocks with shot blocks at Moat
+    #   moat.ips
+    # Raise platform in first heated norfair room to not require hi-jump
+    #   nova_boost_platform.ip
+    # Raise platforms in red tower bottom to always be able to get back up
+    #   red_tower.ips
+    # Replace bomb blocks with shot blocks before Spazer
+    #   spazer.ips
     IPSPatches = {
-        'Standard': ['Fix_Morph_Ball_Hidden_Chozo_PLMs', 'Disable_GT_Code', 'Fix_heat_damage_speed_echoes_bug',
-                     'Removes_Gravity_Suit_heat_protection', 'Fix_Screw_Attack_selection_in_menu',
-                     'Instantly_open_G4_passage_when_all_bosses_are_killed', 'Seed_display',
-                     'Suit_acquisition_animation_skip', 'Custom_credits_with_stats',
-                     'Fix_Morph_and_Missiles_Room_State', 'Intro_Ceres_Skip_and_initial_door_flag_setup',
-                     'Custom_credits_with_stats__tracking_code', 'Disable_Space_Time_select_in_menu',
-                     'Wake_up_zebes_when_going_right_from_morph', 'Mother_Brain_Cutscene_Edits'],
-        'Layout': ['Raise_platforms_in_red_tower_bottom_to_always_be_able_to_get_back_up',
-                   'Disable respawning blocks at dachora pit',
-                   'Raise_platform_in_first_heated_norfair_room_to_not_require_hi_jump',
-                   'Make_it_possible_to_escape_from_below_early_super_bridge_without_bombs',
-                   'Replace_bomb_blocks_with_shot_blocks_before_Hi_Jump',
-                   'Replace_bomb_blocks_with_shot_blocks_at_Moat',
-                   'Replace_bomb_blocks_with_shot_blocks_before_Spazer'],
-        # TODO::missing optional patches:
-        #  -remove fanfare
-        #  -map angle down on select
-        #  -respin
-        #  -naked dying samus
-        'Optional': ['Max_Ammo_Display', 'MSU1_audio'],
-        'Casual': ['Swap_construction_zone_etank_with_missiles_and_open_up_path_to_missiles'],
+        'Standard': ['credits_ouiche.ips', 'g4_skip.ips', 'introskip_doorflags.ips',
+                     'seed_display.ips', 'tracking.ips', 'wake_zebes.ips',
+                     'Removes_Gravity_Suit_heat_protection', 'Mother_Brain_Cutscene_Edits',
+                     'Suit_acquisition_animation_skip', 'Fix_Morph_and_Missiles_Room_State',
+                     'Fix_heat_damage_speed_echoes_bug', 'Disable_GT_Code',
+                     'Disable_Space_Time_select_in_menu', 'Fix_Morph_Ball_Hidden_Chozo_PLMs',
+                     'Fix_Screw_Attack_selection_in_menu'],
+        'Layout': ['dachora.ips', 'early_super_bridge.ips', 'high_jump.ips', 'moat.ips',
+                   'nova_boost_platform.ips', 'red_tower.ips', 'spazer.ips'],
+        'Optional': ['AimAnyButton.ips', 'itemsounds.ips', 'max_ammo_display.ips',
+                     'spinjumprestart.ips', 'supermetroid_msu1.ips'],
+        'Casual': ['retro_brin_etank_missile_swap.ips'],
         'Tournament': [],
         'Full': []
     }
@@ -260,12 +309,20 @@ class RomPatcher:
 
             with open(outFileName, 'r+') as outFile:
                 for itemLoc in itemLocs:
-                    itemCode = Items.getItemTypeCode(itemLoc['Item'],
-                                                     itemLoc['Location']['Visibility'])
-                    outFile.seek(itemLoc['Location']['Address'], 0)
-                    outFile.write(itemCode[0])
-                    outFile.seek(itemLoc['Location']['Address'] + 1, 0)
-                    outFile.write(itemCode[1])
+                    if itemLoc['Item']['Type'] in ['Nothing', 'NoEnergy']:
+                        # put missile morphball like dessy
+                        itemCode = Items.toByteArray(0xeedb)
+                        outFile.seek(itemLoc['Location']['Address'], 0)
+                        outFile.write(itemCode[0])
+                        outFile.write(itemCode[1])
+                        outFile.seek(itemLoc['Location']['Address'] + 4, 0)
+                        outFile.write(struct.pack('B', 0x1a))
+                    else:
+                        itemCode = Items.getItemTypeCode(itemLoc['Item'],
+                                                         itemLoc['Location']['Visibility'])
+                        outFile.seek(itemLoc['Location']['Address'], 0)
+                        outFile.write(itemCode[0])
+                        outFile.write(itemCode[1])
         except Exception as e:
             print("Error patching {}. Is {} a valid ROM ? ({})".format(outFileName, romFileName, e))
             sys.exit(-1)
@@ -296,10 +353,12 @@ class RomPatcher:
 
     @staticmethod
     def applyIPSPatch(romFile, patchName):
+        print("Apply patch {}".format(patchName))
         patchData = patches[patchName]
         for address in patchData:
             romFile.seek(address)
-            romFile.write(struct.pack('B', patchData[address]))
+            for byte in patchData[address]:
+                romFile.write(struct.pack('B', byte))
 
     @staticmethod
     def writeSeed(romFileName, seed):

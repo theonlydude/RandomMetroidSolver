@@ -37,9 +37,34 @@ if __name__ == "__main__":
                         dest='preset', nargs='?', default=None)
     parser.add_argument('--patch', '-c',
                         help="optional patches to add",
-                        dest='patches', nargs='+', default=[],
-                        choices=['Max_Ammo_Display', 'MSU1_audio'])
-
+                        dest='patches', nargs='?', default=[], action='append',
+                        choices=['AimAnyButton.ips', 'itemsounds.ips', 'max_ammo_display.ips',
+                                 'spinjumprestart.ips', 'supermetroid_msu1.ips'])
+    parser.add_argument('--missileQty', '-m',
+                        help="quantity of missiles",
+                        dest='missileQty', nargs='?', default=3,
+                        choices=[str(i) for i in range(1,10)])
+    parser.add_argument('--superQty', '-q',
+                        help="quantity of super missiles",
+                        dest='superQty', nargs='?', default=3,
+                        choices=[str(i) for i in range(1,10)])
+    parser.add_argument('--powerBombQty', '-w',
+                        help="quantity of power bombs",
+                        dest='powerBombQty', nargs='?', default=1,
+                        choices=[str(i) for i in range(1,10)])
+    parser.add_argument('--minorQty', '-n',
+                        help="quantity of minors",
+                        dest='minorQty', nargs='?', default=100,
+                        choices=[str(i) for i in range(1,101)])
+    parser.add_argument('--energyQty', '-g',
+                        help="quantity of ETanks/Reserve Tanks",
+                        dest='energyQty', nargs='?', default='vanilla',
+                        choices=['sparse', 'medium', 'vanilla'])
+    parser.add_argument('--sampleSize', '-z',
+                        help="Sample size to choose next item (lower is faster but less accurate)",
+                        dest='sampleSize', nargs='?', default=100,
+                        choices=[str(i) for i in range(1,101)])
+    
     args = parser.parse_args()
 
     if args.paramsFileName is not None:
@@ -62,6 +87,11 @@ if __name__ == "__main__":
         difficultyTarget = text2diff[args.difficultyTarget]
     else:
         difficultyTarget = hard
+
+    chooseItemWeights = { 'Random' : 5, 'MinProgression' : 5 }
+    chooseLocWeights = { 'Random' : 1, 'MinDiff' : 0, 'MaxDiff' : 1, 'SpreadProgression' : 8 }
+    choose = { 'Items' : chooseItemWeights, 'Locations' : chooseLocWeights }
+    restrictions = { 'SuitsSpeedScrew' : True, 'MajorMinor' : True }
 
     algo = args.algo
 
@@ -93,11 +123,14 @@ if __name__ == "__main__":
 
 #    try:
     RomPatches.ActivePatches = RomPatches.Total
-    randomizer = Randomizer.factory(algo, seed, difficultyTarget, locations)
+    qty = {'missile': int(args.missileQty), 'super': int(args.superQty),
+           'powerBomb': int(args.powerBombQty), 'energy': args.energyQty,
+           'minors': int(args.minorQty)}
+    randomizer = Randomizer.factory(algo, seed, difficultyTarget, locations, qty, args.sampleSize, choose, restrictions)
     itemLocs = randomizer.generateItems()
-    # except:
-    #     print("Can't generate a randomized rom with the given parameters, try increasing the difficulty target.")
-    #     sys.exit(-1)
+    if itemLocs is None:
+        print("Can't generate a randomized rom with the given parameters, try increasing the difficulty target.")
+        sys.exit(-1)
 
     # transform itemLocs in our usual dict(location, item)
     locsItems = {}

@@ -266,10 +266,6 @@ class RomPatcher:
     # Max Ammo Display
     #   max_ammo_display.ips
     # 
-    # casual:
-    # Swap construction zone e-tank with missiles and open up path to missiles
-    #   retro_brin_etank_missile_swap.ips
-    # 
     # layout:
     # Disable respawning blocks at dachora pit
     #   dachora.ips
@@ -296,10 +292,7 @@ class RomPatcher:
         'Layout': ['dachora.ips', 'early_super_bridge.ips', 'high_jump.ips', 'moat.ips',
                    'nova_boost_platform.ips', 'red_tower.ips', 'spazer.ips'],
         'Optional': ['AimAnyButton.ips', 'itemsounds.ips', 'max_ammo_display.ips',
-                     'spinjumprestart.ips', 'supermetroid_msu1.ips'],
-        'Casual': ['retro_brin_etank_missile_swap.ips'],
-        'Tournament': [],
-        'Full': []
+                     'spinjumprestart.ips', 'supermetroid_msu1.ips']
     }
 
     @staticmethod
@@ -328,7 +321,7 @@ class RomPatcher:
             sys.exit(-1)
 
     @staticmethod
-    def applyIPSPatches(romFileName, difficulty='Tournament', optionalPatches=[]):
+    def applyIPSPatches(romFileName, optionalPatches=[]):
         try:
             with open(romFileName, 'r+') as romFile:
                 # apply standard patches
@@ -337,10 +330,6 @@ class RomPatcher:
 
                 # apply layout patches
                 for patchName in RomPatcher.IPSPatches['Layout']:
-                    RomPatcher.applyIPSPatch(romFile, patchName)
-
-                # apply difficulty patches
-                for patchName in RomPatcher.IPSPatches[difficulty]:
                     RomPatcher.applyIPSPatch(romFile, patchName)
 
                 # apply optional patches

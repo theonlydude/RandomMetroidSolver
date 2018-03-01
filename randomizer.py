@@ -147,8 +147,7 @@ if __name__ == "__main__":
         fileName += '.sfc'
         RomPatcher.patch(romFileName, fileName, itemLocs)
 
-        difficulty = algo[algo.find('_')+1:]
-        RomPatcher.applyIPSPatches(fileName, difficulty, args.patches)
+        RomPatcher.applyIPSPatches(fileName, args.patches)
 
         RomPatcher.writeSeed(fileName, seed)
 

@@ -309,12 +309,20 @@ class RomPatcher:
 
             with open(outFileName, 'r+') as outFile:
                 for itemLoc in itemLocs:
-                    itemCode = Items.getItemTypeCode(itemLoc['Item'],
-                                                     itemLoc['Location']['Visibility'])
-                    outFile.seek(itemLoc['Location']['Address'], 0)
-                    outFile.write(itemCode[0])
-                    outFile.seek(itemLoc['Location']['Address'] + 1, 0)
-                    outFile.write(itemCode[1])
+                    if itemLoc['Item']['Type'] in ['Nothing', 'NoEnergy']:
+                        # put missile morphball like dessy
+                        itemCode = Items.toByteArray(0xeedb)
+                        outFile.seek(itemLoc['Location']['Address'], 0)
+                        outFile.write(itemCode[0])
+                        outFile.write(itemCode[1])
+                        outFile.seek(itemLoc['Location']['Address'] + 4, 0)
+                        outFile.write(struct.pack('B', 0x1a))
+                    else:
+                        itemCode = Items.getItemTypeCode(itemLoc['Item'],
+                                                         itemLoc['Location']['Visibility'])
+                        outFile.seek(itemLoc['Location']['Address'], 0)
+                        outFile.write(itemCode[0])
+                        outFile.write(itemCode[1])
         except Exception as e:
             print("Error patching {}. Is {} a valid ROM ? ({})".format(outFileName, romFileName, e))
             sys.exit(-1)

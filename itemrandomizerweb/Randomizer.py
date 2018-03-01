@@ -4,7 +4,7 @@ from stdlib import Map, Array, List, Random
 
 class Randomizer(object):
     @staticmethod
-    def factory(algo, seed, difficultyTarget, locations):
+    def factory(algo, seed, difficultyTarget, locations, sampleSize=1):
         if algo == 'Total_Tournament':
             from NewRandomizer import NewRandomizer
             return NewRandomizer(seed, difficultyTarget, locations)
@@ -13,10 +13,7 @@ class Randomizer(object):
             return FullRandomizer(seed, difficultyTarget, locations)
         elif algo == 'Total_Casual' or algo == 'Total_Normal':
             from DefaultRandomizer import DefaultRandomizer
-            return DefaultRandomizer(seed, difficultyTarget, locations)
-        elif algo == 'Total_NormalFull':
-            from DefaultRandomizerFull import DefaultRandomizerFull
-            return DefaultRandomizerFull(seed, difficultyTarget, locations)
+            return DefaultRandomizer(seed, difficultyTarget, locations, sampleSize)
         elif algo == 'Total_Hard':
             from SparseRandomizer import SparseRandomizer
             return SparseRandomizer(seed, difficultyTarget, locations)
@@ -24,14 +21,16 @@ class Randomizer(object):
             print("ERROR: unknown algo: {}".format(algo))
             return None
 
-    def __init__(self, seed, difficultyTarget, locations):
+    def __init__(self, seed, difficultyTarget, locations, sampleSize=1):
         self.rnd = Random(seed)
         random.seed(seed)
 
         self.itemPool = Items.getItemPool(self.rnd)
         self.difficultyTarget = difficultyTarget
         self.locationPool = locations
-
+        self.sampleSize = sampleSize
+        self.chosenLocation = None
+        
         # list of locations not already used
         self.unusedLocations = locations
         # list of locations already used
@@ -47,6 +46,7 @@ class Randomizer(object):
         if not 'PostAvailable' in loc:
             return True
         result = loc["PostAvailable"](items)
+#        print("POST " + str(result.bool))
         return result.bool is True and result.difficulty <= self.difficultyTarget
 
     def currentLocations(self, items):
@@ -60,8 +60,9 @@ class Randomizer(object):
 
         # keep only the item type, it's too slow otherwise
         items = [item["Type"] for item in items]
-
-        return List.filter(lambda loc: self.locAvailable(loc, items), self.unusedLocations)
+        avail = lambda loc: self.locAvailable(loc, items)
+        
+        return List.filter(avail, self.unusedLocations)
 
     def canPlaceItem(self, item, itemLocations):
         # for an item check if a least one location can accept it, without checking
@@ -86,8 +87,9 @@ class Randomizer(object):
         random.shuffle(itemPool)
         for item in itemPool:
             if self.checkItem(curLocs, item, items, itemLocations, locationPool):
-                result = [item]
-                break
+                result.append(item)
+                if len(result) >= self.sampleSize:
+                    break
         return result
 
     def removeItem(self, itemType, itemPool):
@@ -105,6 +107,9 @@ class Randomizer(object):
 
         return itemPool
 
+    def chooseItem(self, items):
+        return items[random.randint(0, len(items)-1)]
+    
     def getItemToPlace(self, items, itemPool):
         itemsLen = len(items)
         if itemsLen == 0:
@@ -115,10 +120,13 @@ class Randomizer(object):
             else:
                 item = List.item(random.randint(0, len(itemPool)-1), itemPool)
         else:
-            item = List.item(random.randint(0, len(items)-1), items)
+            item = self.chooseItem(items)
 
         return item
 
+    def chooseLocation(self, availableLocations):
+        return availableLocations[random.randint(0, len(availableLocations)-1)]
+    
     def placeItem(self, items, itemPool, locations):
         # 
         #
@@ -132,8 +140,9 @@ class Randomizer(object):
         currentItems.append(item['Type'])
         availableLocations = List.filter(lambda loc: self.canPlaceAtLocation(item, loc) and self.locPostAvailable(loc, currentItems), locations)
         if len(availableLocations) == 0:
+            self.failItems.append(item)
             return None
-        location = List.item(random.randint(0, len(availableLocations)-1), availableLocations)
+        location = self.chooseLocation(availableLocations)
 
         self.usedLocations += [location]
         i=0

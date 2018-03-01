@@ -420,7 +420,7 @@ class RomLoader:
         # update the itemName and Class of the locations
         for loc in locations:
             loc['itemName'] = self.locsItems[loc['Name']]
-            loc["Class"] = Items.getItemClass(loc['itemName'])
+            #loc["Class"] = Items.getItemClass(loc['itemName'])
 
     def dump(self, fileName):
         with open(fileName, 'w') as jsonFile:
@@ -440,7 +440,7 @@ class RomLoaderSfc(RomLoader):
         self.locsItems = {}
         for loc in locations:
             self.locsItems[loc['Name']] = loc['itemName']
-            loc["Class"] = Items.getItemClass(loc['itemName'])
+            #loc["Class"] = Items.getItemClass(loc['itemName'])
 
 class RomLoaderJson(RomLoader):
     # when called from the test suite
@@ -460,7 +460,7 @@ class RomLoaderDict(RomLoader):
         self.locsItems = {}
         for loc in locations:
             self.locsItems[loc['Name']] = loc['itemName']
-            loc["Class"] = Items.getItemClass(loc['itemName'])
+            #loc["Class"] = Items.getItemClass(loc['itemName'])
 
 class ParamsLoader(object):
     @staticmethod

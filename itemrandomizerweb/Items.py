@@ -212,41 +212,27 @@ def addItem(itemType, itemPool):
     return [List.find(lambda item: item["Type"] == itemType, Items)] + itemPool
 
 def addAmmo(itemPool, qty):
+    # always add enough minors to pass zebetites (1100 damages) and mother brain 1 (3000 damages)
+    # ie: 1 missiles and 1 supper, and 2 (supers or missiles)
+    for i in range(2):
+        if random.random() < 0.5:
+            itemPool = addItem('Missile', itemPool)
+        else:
+            itemPool = addItem('Super', itemPool)
+
     # there's 66 minors locations, 5 minors items are already in the pool
-    minorLocations = 66 - 5
+    minorLocations = ((66 - 5) * qty['minors']) / 100
     maxItems = len(itemPool) + minorLocations
 
-    # depending on quantity compute thresholds (everything at max = 100%)
-    minMissiles = 0.145
-    avgMissiles = 0.285
-    maxMissiles = 0.425
-    minPB = 0.5
-    avgPB = 0.10
-    maxPB = 0.15
-
-    if qty['missile'] == 'min':
-        missileThreshold = minMissiles
-    elif qty['missile'] == 'avg':
-        missileThreshold = avgMissiles
-    else:
-        missileThreshold = maxMissiles
-
-    if qty['super'] == 'min':
-        superThreshold = missileThreshold + minMissiles
-    elif qty['super'] == 'avg':
-        superThreshold = missileThreshold + avgMissiles
-    else:
-        superThreshold = missileThreshold + maxMissiles
-
-    if qty['powerBomb'] == 'min':
-        powerBombThreshold = superThreshold + minPB
-    elif qty['super'] == 'avg':
-        powerBombThreshold = superThreshold + avgPB
-    else:
-        powerBombThreshold = superThreshold + maxPB
-
-    if powerBombThreshold < 1.0:
+    # we won't generate all the minors, add the nothing item
+    if qty['minors'] != 100:
         Items.append(Nothing)
+
+    # depending on quantity, compute thresholds
+    sumQty = float(qty['missile'] + qty['super'] + qty['powerBomb'])
+    missileThreshold = qty['missile'] / sumQty
+    superThreshold = qty['super'] / sumQty
+    powerBombThreshold = qty['powerBomb'] / sumQty
 
     while len(itemPool) < maxItems:
         rand = random.random()
@@ -254,17 +240,18 @@ def addAmmo(itemPool, qty):
             item = 'Missile'
         elif rand <= superThreshold:
             item = 'Super'
-        elif rand <= powerBombThreshold:
-            item = 'PowerBomb'
         else:
-            item = 'Nothing'
+            item = 'PowerBomb'
 
         itemPool = addItem(item, itemPool)
+
+    for i in range(100 - maxItems):
+        itemPool = addItem('Nothing', itemPool)
 
     return itemPool
 
 def getItemPool(qty):
-    if qty['energy'] == 'min':
+    if qty['energy'] == 'sparse':
         # 5 (there's always a reserve and an etank added by the first call to addItem with Items as parameter)
         if random.random() < 0.5:
             itemPool = addItem('Reserve', Items)
@@ -277,8 +264,8 @@ def getItemPool(qty):
         Items.append(NoEnergy)
         for i in range(13):
             itemPool = addItem('NoEnergy', itemPool)
-    elif qty['energy'] == 'avg':
-        # 13
+    elif qty['energy'] == 'medium':
+        # 11
         itemPool = addItem('ETank', Items)
         for i in range(3):
             if random.random() < 0.5:
@@ -286,11 +273,11 @@ def getItemPool(qty):
             else:
                 itemPool = addItem('ETank', itemPool)
 
-        for i in range(7):
+        for i in range(5):
             itemPool = addItem('ETank', itemPool)
 
         Items.append(NoEnergy)
-        for i in range(5):
+        for i in range(7):
             itemPool = addItem('NoEnergy', itemPool)
     else:
         # 18
@@ -300,8 +287,6 @@ def getItemPool(qty):
         for i in range(13):
             itemPool = addItem('ETank', itemPool)
 
-    itemPool = addItem('Missile', itemPool)
-    itemPool = addItem('Super', itemPool)
     itemPool = addAmmo(itemPool, qty)
 
     return itemPool

@@ -42,20 +42,24 @@ if __name__ == "__main__":
                                  'spinjumprestart.ips', 'supermetroid_msu1.ips'])
     parser.add_argument('--missileQty', '-m',
                         help="quantity of missiles",
-                        dest='missileQty', nargs='?', default='avg',
-                        choices=['min', 'avg', 'max'])
+                        dest='missileQty', nargs='?', default=3,
+                        choices=[str(i) for i in range(1,10)])
     parser.add_argument('--superQty', '-q',
                         help="quantity of super missiles",
-                        dest='superQty', nargs='?', default='avg',
-                        choices=['min', 'avg', 'max'])
+                        dest='superQty', nargs='?', default=3,
+                        choices=[str(i) for i in range(1,10)])
     parser.add_argument('--powerBombQty', '-w',
                         help="quantity of power bombs",
-                        dest='powerBombQty', nargs='?', default='avg',
-                        choices=['min', 'avg', 'max'])
+                        dest='powerBombQty', nargs='?', default=1,
+                        choices=[str(i) for i in range(1,10)])
+    parser.add_argument('--minorQty', '-n',
+                        help="quantity of minors",
+                        dest='minorQty', nargs='?', default=100,
+                        choices=[str(i) for i in range(1,101)])
     parser.add_argument('--energyQty', '-g',
                         help="quantity of ETanks/Reserve Tanks",
-                        dest='energyQty', nargs='?', default='avg',
-                        choices=['min', 'avg', 'max'])
+                        dest='energyQty', nargs='?', default='vanilla',
+                        choices=['sparse', 'medium', 'vanilla'])
 
     args = parser.parse_args()
 
@@ -110,8 +114,9 @@ if __name__ == "__main__":
 
 #    try:
     RomPatches.ActivePatches = RomPatches.Total # TODO check if this is always the case
-    qty = {'missile': args.missileQty, 'super': args.superQty,
-           'powerBomb': args.powerBombQty, 'energy': args.energyQty}
+    qty = {'missile': int(args.missileQty), 'super': int(args.superQty),
+           'powerBomb': int(args.powerBombQty), 'energy': args.energyQty,
+           'minors': int(args.minorQty)}
     randomizer = Randomizer.factory(algo, seed, difficultyTarget, locations, qty)
     itemLocs = randomizer.generateItems()
     # except:

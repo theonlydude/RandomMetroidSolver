@@ -3,9 +3,9 @@
 (
 echo "patches = {"
 
-cd ~/supermetroid_random/patches
+cd ~/RandomMetroidSolver/itemrandomizerweb/patches
 
-for i in *.ips; do ~/RandomMetroidSolver/ips.pl $i; done
+for i in *.ips; do ./ips.pl $i; done
 
 echo '"Removes_Gravity_Suit_heat_protection": {
 0x06e37d: [0x01],

@@ -92,7 +92,7 @@ if __name__ == "__main__":
     locationPool = locations
 
 #    try:
-    RomPatches.ActivePatches = RomPatches.Total # TODO check if this is always the case
+    RomPatches.ActivePatches = RomPatches.Total
     randomizer = Randomizer.factory(algo, seed, difficultyTarget, locations)
     itemLocs = randomizer.generateItems()
     # except:

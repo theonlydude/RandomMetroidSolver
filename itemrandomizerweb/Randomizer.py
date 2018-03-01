@@ -4,31 +4,24 @@ from stdlib import Map, Array, List, Random
 
 class Randomizer(object):
     @staticmethod
-    def factory(algo, seed, difficultyTarget, locations):
+    def factory(algo, seed, difficultyTarget, locations, qty):
         if algo == 'Total_Tournament':
             from NewRandomizer import NewRandomizer
-            return NewRandomizer(seed, difficultyTarget, locations)
+            return NewRandomizer(seed, difficultyTarget, locations, qty)
         elif algo == 'Total_Full':
             from FullRandomizer import FullRandomizer
-            return FullRandomizer(seed, difficultyTarget, locations)
+            return FullRandomizer(seed, difficultyTarget, locations, qty)
         elif algo == 'Total_Casual' or algo == 'Total_Normal':
             from DefaultRandomizer import DefaultRandomizer
-            return DefaultRandomizer(seed, difficultyTarget, locations)
-        elif algo == 'Total_NormalFull':
-            from DefaultRandomizerFull import DefaultRandomizerFull
-            return DefaultRandomizerFull(seed, difficultyTarget, locations)
-        elif algo == 'Total_Hard':
-            from SparseRandomizer import SparseRandomizer
-            return SparseRandomizer(seed, difficultyTarget, locations)
+            return DefaultRandomizer(seed, difficultyTarget, locations, qty)
         else:
             print("ERROR: unknown algo: {}".format(algo))
             return None
 
-    def __init__(self, seed, difficultyTarget, locations):
-        self.rnd = Random(seed)
+    def __init__(self, seed, difficultyTarget, locations, qty):
         random.seed(seed)
 
-        self.itemPool = Items.getItemPool(self.rnd)
+        self.itemPool = Items.getItemPool(qty)
         self.difficultyTarget = difficultyTarget
         self.locationPool = locations
 

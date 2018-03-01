@@ -40,6 +40,22 @@ if __name__ == "__main__":
                         dest='patches', nargs='?', default=[], action='append',
                         choices=['AimAnyButton.ips', 'itemsounds.ips', 'max_ammo_display.ips',
                                  'spinjumprestart.ips', 'supermetroid_msu1.ips'])
+    parser.add_argument('--missileQty', '-m',
+                        help="quantity of missiles",
+                        dest='missileQty', nargs='?', default='avg',
+                        choices=['min', 'avg', 'max'])
+    parser.add_argument('--superQty', '-q',
+                        help="quantity of super missiles",
+                        dest='superQty', nargs='?', default='avg',
+                        choices=['min', 'avg', 'max'])
+    parser.add_argument('--powerBombQty', '-w',
+                        help="quantity of power bombs",
+                        dest='powerBombQty', nargs='?', default='avg',
+                        choices=['min', 'avg', 'max'])
+    parser.add_argument('--energyQty', '-g',
+                        help="quantity of ETanks/Reserve Tanks",
+                        dest='energyQty', nargs='?', default='avg',
+                        choices=['min', 'avg', 'max'])
 
     args = parser.parse_args()
 
@@ -94,7 +110,9 @@ if __name__ == "__main__":
 
 #    try:
     RomPatches.ActivePatches = RomPatches.Total # TODO check if this is always the case
-    randomizer = Randomizer.factory(algo, seed, difficultyTarget, locations)
+    qty = {'missile': args.missileQty, 'super': args.superQty,
+           'powerBomb': args.powerBombQty, 'energy': args.energyQty}
+    randomizer = Randomizer.factory(algo, seed, difficultyTarget, locations, qty)
     itemLocs = randomizer.generateItems()
     # except:
     #     print("Can't generate a randomized rom with the given parameters, try increasing the difficulty target.")

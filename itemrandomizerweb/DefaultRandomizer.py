@@ -4,8 +4,8 @@ import Items
 import random
 
 class DefaultRandomizer(Randomizer):
-    def __init__(self, seed, difficultyTarget, locations):
-        super(DefaultRandomizer, self).__init__(seed, difficultyTarget, locations)
+    def __init__(self, seed, difficultyTarget, locations, qty):
+        super(DefaultRandomizer, self).__init__(seed, difficultyTarget, locations, qty)
 
     def getItemToPlace(self, items, itemPool):        
         itemsLen = len(items)

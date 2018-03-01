@@ -1,5 +1,6 @@
 from itemrandomizerweb.stdlib import List
 import struct
+import random
 
 # https://github.com/tewtal/itemrandomizerweb/blob/master/ItemRandomizer/Items.fs
 Items = [
@@ -173,6 +174,23 @@ Items = [
     }
 ]
 
+Nothing = {
+    'Type': 'Nothing',
+    'Category': 'Ammo',
+    'Class': 'Minor',
+    'Code': 0xeedb,
+    'Name': "Nothing",
+    'Message': 0x0
+}
+NoEnergy = {
+    'Type': 'NoEnergy',
+    'Category': 'Misc',
+    'Class': 'Major',
+    'Code': 0xeedb,
+    'Name': "No Energy",
+    'Message': 0x0
+}
+
 def toByteArray(itemCode):
     return (struct.pack('B', itemCode & 0xff), struct.pack('B', itemCode >> 8))
 
@@ -193,37 +211,97 @@ def getItemTypeCode(item, itemVisibility, returnsInt=False):
 def addItem(itemType, itemPool):
     return [List.find(lambda item: item["Type"] == itemType, Items)] + itemPool
 
-def addAmmo(rnd, itemPool):
-    if List.length(itemPool) == 100:
-        return itemPool
-    else:
-        rand = rnd.Next(0, 7)
-        if rand in [0, 1, 2]:
-            item = 'Missile'
-        elif rand in [3, 4, 5]:
-            item = 'Super'
-        else:
-            item = 'PowerBomb'
-        return addAmmo(rnd, addItem(item, itemPool))
+def addAmmo(itemPool, qty):
+    # there's 66 minors locations, 5 minors items are already in the pool
+    minorLocations = 66 - 5
+    maxItems = len(itemPool) + minorLocations
 
-def getItemPool(rnd):
-    itemPool = addItem('Reserve', Items)
-    itemPool = addItem('Reserve', itemPool)
-    itemPool = addItem('Reserve', itemPool)
-    itemPool = addItem('ETank', itemPool)
-    itemPool = addItem('ETank', itemPool)
-    itemPool = addItem('ETank', itemPool)
-    itemPool = addItem('ETank', itemPool)
-    itemPool = addItem('ETank', itemPool)
-    itemPool = addItem('ETank', itemPool)
-    itemPool = addItem('ETank', itemPool)
-    itemPool = addItem('ETank', itemPool)
-    itemPool = addItem('ETank', itemPool)
-    itemPool = addItem('ETank', itemPool)
-    itemPool = addItem('ETank', itemPool)
-    itemPool = addItem('ETank', itemPool)
-    itemPool = addItem('ETank', itemPool)
+    # depending on quantity compute thresholds (everything at max = 100%)
+    minMissiles = 0.145
+    avgMissiles = 0.285
+    maxMissiles = 0.425
+    minPB = 0.5
+    avgPB = 0.10
+    maxPB = 0.15
+
+    if qty['missile'] == 'min':
+        missileThreshold = minMissiles
+    elif qty['missile'] == 'avg':
+        missileThreshold = avgMissiles
+    else:
+        missileThreshold = maxMissiles
+
+    if qty['super'] == 'min':
+        superThreshold = missileThreshold + minMissiles
+    elif qty['super'] == 'avg':
+        superThreshold = missileThreshold + avgMissiles
+    else:
+        superThreshold = missileThreshold + maxMissiles
+
+    if qty['powerBomb'] == 'min':
+        powerBombThreshold = superThreshold + minPB
+    elif qty['super'] == 'avg':
+        powerBombThreshold = superThreshold + avgPB
+    else:
+        powerBombThreshold = superThreshold + maxPB
+
+    if powerBombThreshold < 1.0:
+        Items.append(Nothing)
+
+    while len(itemPool) < maxItems:
+        rand = random.random()
+        if rand <= missileThreshold:
+            item = 'Missile'
+        elif rand <= superThreshold:
+            item = 'Super'
+        elif rand <= powerBombThreshold:
+            item = 'PowerBomb'
+        else:
+            item = 'Nothing'
+
+        itemPool = addItem(item, itemPool)
+
+    return itemPool
+
+def getItemPool(qty):
+    if qty['energy'] == 'min':
+        # 5 (there's always a reserve and an etank added by the first call to addItem with Items as parameter)
+        if random.random() < 0.5:
+            itemPool = addItem('Reserve', Items)
+        else:
+            itemPool = addItem('ETank', Items)
+        itemPool = addItem('ETank', itemPool)
+        itemPool = addItem('ETank', itemPool)
+
+        # complete up to 18 energies with nothing item
+        Items.append(NoEnergy)
+        for i in range(13):
+            itemPool = addItem('NoEnergy', itemPool)
+    elif qty['energy'] == 'avg':
+        # 13
+        itemPool = addItem('ETank', Items)
+        for i in range(3):
+            if random.random() < 0.5:
+                itemPool = addItem('Reserve', itemPool)
+            else:
+                itemPool = addItem('ETank', itemPool)
+
+        for i in range(7):
+            itemPool = addItem('ETank', itemPool)
+
+        Items.append(NoEnergy)
+        for i in range(5):
+            itemPool = addItem('NoEnergy', itemPool)
+    else:
+        # 18
+        itemPool = addItem('Reserve', Items)
+        for i in range(2):
+            itemPool = addItem('Reserve', itemPool)
+        for i in range(13):
+            itemPool = addItem('ETank', itemPool)
+
     itemPool = addItem('Missile', itemPool)
     itemPool = addItem('Super', itemPool)
-    itemPool = addAmmo(rnd, itemPool)
+    itemPool = addAmmo(itemPool, qty)
+
     return itemPool

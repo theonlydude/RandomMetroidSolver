@@ -6,8 +6,8 @@ from stdlib import Map, Array, List, Random
 # https://github.com/tewtal/itemrandomizerweb/blob/master/ItemRandomizer/Randomizers.fs
 
 class NewRandomizer(Randomizer):
-    def __init__(self, seed, difficultyTarget, locations):
-        super(NewRandomizer, self).__init__(seed, difficultyTarget, locations)
+    def __init__(self, seed, difficultyTarget, locations, qty):
+        super(NewRandomizer, self).__init__(seed, difficultyTarget, locations, qty)
 
     def filterCurLocations(self, item, curLocations):
         return List.filter(lambda l: l["Class"] == item["Class"] and self.canPlaceAtLocation(item, l), curLocations)

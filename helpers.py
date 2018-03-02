@@ -273,6 +273,11 @@ def canAccessCrocomire(items):
                     haveItem(items, 'SpeedBooster'),
                     energyReserveCountOk(items, 2)))
 
+def canDefeatCrocomire(items):
+    return wand(canAccessCrocomire(items),
+                enoughStuffCroc(items))
+                    
+
 def canAccessLowerNorfair(items):
     # EXPLAINED: the randomizer never requires to pass it without the Varia suit.
     #            from Red Tower in Brinstar to access Lava Dive room we open the yellow door
@@ -360,7 +365,8 @@ def canDefeatBotwoon(items):
     #            then in Botwoon Hallway, either:
     #             -use regular speedbooster (with gravity)
     #             -do a mochtroidclip (https://www.youtube.com/watch?v=1z_TQu1Jf1I&t=20m28s)
-    return wand(canPassMtEverest(items),
+    return wand(enoughStuffBotwoon(items),
+                canPassMtEverest(items),
                 wor(wand(haveItem(items, 'SpeedBooster'),
                          haveItem(items, 'Gravity')),
                     wand(Knows.MochtroidClip, haveItem(items, 'Ice'))))
@@ -524,6 +530,20 @@ def computeBossDifficulty(items, ammoMargin, secs, diffTbl):
 
     return difficulty
 
+def enoughStuffCroc(items):
+    # say croc has ~5000 energy, and ignore its useless drops
+    (ammoMargin, secs) = canInflictEnoughDamages(items, 5000, givesDrops=False)
+    if ammoMargin == 0:
+        return SMBool(False)
+    return SMBool(True, easy)
+
+def enoughStuffBotwoon(items):
+    # say botwoon has 5000 energy : it is actually 3000 but account for missed shots
+    (ammoMargin, secs) = canInflictEnoughDamages(items, 5000, givesDrops=False)
+    if ammoMargin == 0:
+        return SMBool(False)
+    return SMBool(True, easy)    
+
 def enoughStuffsRidley(items):
     (ammoMargin, secs) = canInflictEnoughDamages(items, 18000, doubleSuper=True, givesDrops=False)
     if ammoMargin == 0:
@@ -543,6 +563,8 @@ def enoughStuffsDraygon(items):
 #    print('DRAY', ammoMargin, secs)
     if ammoMargin > 0:
         fight = SMBool(True, computeBossDifficulty(items, ammoMargin, secs, Settings.bossesDifficulty['Draygon']))
+        if haveItem(items, 'Gravity') is False:
+            fight.difficulty *= Settings.algoSettings['draygonNoGravityMalus']
     else:
         fight = SMBool(False)
     return wor(fight,
@@ -552,7 +574,8 @@ def enoughStuffsDraygon(items):
                     haveItem(items, 'Plasma'),
                     haveItem(items, 'Charge'),
                     haveItem(items, 'XRayScope')),
-               wand(Knows.ShortCharge,
+               wand(haveItem(items, 'Gravity'),
+                    Knows.ShortCharge,
                     haveItem(items, 'SpeedBooster')))
 
 def enoughStuffsPhantoon(items):

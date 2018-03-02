@@ -768,5 +768,7 @@ class Settings:
         # divide the difficulty by this amount if charge or screw attack
         'phantoonFlamesAvoidBonus' : 1.2,
         # multiply the difficulty by this amount if no charge and few missiles
-        'phantoonLowMissileMalus' : 1.2
+        'phantoonLowMissileMalus' : 1.2,
+        # multiply the difficulty by this amount if you have to fight with water physics
+        'draygonNoGravityMalus' : 2.0
     }

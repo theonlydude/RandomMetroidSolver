@@ -90,7 +90,7 @@ if __name__ == "__main__":
     choose = { 'Items' : chooseItemWeights, 'Locations' : chooseLocWeights }
     restrictions = { 'Suits' : True, 'SpeedScrew' : False, 'MajorMinor' : False }
 
-    fileName = 'Ouiche_Randomizer_' + 'O' + str(seed) + '_' + preset + '_' + diff2text[difficultyTarget]
+    fileName = 'Ouiche_Randomizer_' + str(seed) + '_' + preset
 
     # same as solver
     threshold = difficultyTarget
@@ -109,7 +109,6 @@ if __name__ == "__main__":
 
     locationPool = locations
 
-#    try:
     RomPatches.ActivePatches = RomPatches.Total
     qty = {'missile': int(args.missileQty), 'super': int(args.superQty),
            'powerBomb': int(args.powerBombQty), 'energy': args.energyQty,

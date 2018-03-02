@@ -126,7 +126,7 @@ if __name__ == "__main__":
     qty = {'missile': int(args.missileQty), 'super': int(args.superQty),
            'powerBomb': int(args.powerBombQty), 'energy': args.energyQty,
            'minors': int(args.minorQty)}
-    randomizer = Randomizer.factory(algo, seed, difficultyTarget, locations, qty, args.sampleSize, choose, restrictions)
+    randomizer = Randomizer.factory(algo, seed, difficultyTarget, locations, qty, int(args.sampleSize), choose, restrictions)
     itemLocs = randomizer.generateItems()
     if itemLocs is None:
         print("Can't generate a randomized rom with the given parameters, try increasing the difficulty target.")

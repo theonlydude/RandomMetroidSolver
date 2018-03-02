@@ -43,7 +43,8 @@ class Randomizer(object):
     #                                                  placed progression items.
     #                                                  if not, this is equivalent to Random
     # restrictions : item placement restrictions dict. values are booleans. keys :
-    #                'SuitsSpeedScrew' : no suits early game, no speed or screw in the very first rooms
+    #                'Suits' : no suits early game
+    #                'SpeedScrew' : no speed or screw in the very first rooms
     #                'MajorMinor' : if true, will put major items in major locations, and minor items
     #                               in minor locations
     def __init__(self, seed, difficultyTarget, locations, qty, sampleSize, choose, restrictions):
@@ -303,7 +304,7 @@ class Randomizer(object):
             if matchingClass is False:
                 return False
 
-        if self.restrictions['SuitsSpeedScrew'] is True:
+        if self.restrictions['Suits'] is True:
             if item["Type"] == "Gravity":
                 return ((not (location["Area"] == "Crateria" or location["Area"] == "Brinstar"))
                         or location["Name"] == "X-Ray Scope" or location["Name"] == "Energy Tank, Waterway")
@@ -312,7 +313,7 @@ class Randomizer(object):
                              or location["Name"] == "Morphing Ball"
                              or location["Name"] == "Missile (blue Brinstar middle)"
                              or location["Name"] == "Energy Tank, Brinstar Ceiling"))
-            elif item["Type"] == "SpeedBooster" or item["Type"] == "ScrewAttack":
+        if self.restrictions['SpeedScrew'] is True and (item["Type"] == "SpeedBooster" or item["Type"] == "ScrewAttack"):
                 return (not (location["Name"] == "Morphing Ball"
                              or location["Name"] == "Missile (blue Brinstar middle)"
                              or location["Name"] == "Energy Tank, Brinstar Ceiling"))

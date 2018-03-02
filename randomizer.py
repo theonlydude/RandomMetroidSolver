@@ -91,7 +91,7 @@ if __name__ == "__main__":
     chooseItemWeights = { 'Random' : 5, 'MinProgression' : 5, 'MaxProgression' : 0 }
     chooseLocWeights = { 'Random' : 1, 'MinDiff' : 0, 'MaxDiff' : 2, 'SpreadProgression' : 7 }
     choose = { 'Items' : chooseItemWeights, 'Locations' : chooseLocWeights }
-    restrictions = { 'SuitsSpeedScrew' : True, 'MajorMinor' : False }
+    restrictions = { 'Suits' : True, 'SpeedScrew' : True, 'MajorMinor' : False }
 
     algo = args.algo
 

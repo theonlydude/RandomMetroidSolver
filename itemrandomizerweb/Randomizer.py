@@ -18,6 +18,34 @@ class Randomizer(object):
             print("ERROR: unknown algo: {}".format(algo))
             return None
 
+    # seed : rand seed
+    # difficultyTarget : max diff
+    # locations : items locations
+    # qty : dictionary telling how many tanks and ammo will be distributed. keys are:
+    #       'missile', 'super', 'powerBomb' : relative weight of ammo distribution (ex:3/3/1)
+    #       'energy' : can be 'sparse' (5 tanks), 'medium' (11 tanks), 'vanilla' (14 Etanks, 4 reserves)
+    #       'minors' : percentage of ammo to distribute. 100 being vanilla
+    # sampleSize : possible items sample size between 1 and 100. Has to be > 1 for choose dict to be relevant.
+    # choose : relative weight dicts for choosing items (key 'Items') and locations (key 'Locations').
+    #          Weights gives the probability a method will be used to choose next item or location.
+    #          Item dict : 'Random' => choose next item randomly
+    #                      'MinProgression' => between possible items, choose the one that opens up
+    #                                          the least amount of new locations (slow/hard)
+    #                      'MaxProgression' => between possible items, choose the one that opens up
+    #                                          the most amount of new locations (fast/easy)
+    #          Locations dict : 'Random' => choose next location randomly
+    #                           'MinDiff' => between possible locations, choose the one with the lowest
+    #                                        access difficulty
+    #                           'MaxDiff' => between possible locations, choose the one with the highest
+    #                                        access difficulty
+    #                           'SpreadProgression' => if item to place is a progression item, will try
+    #                                                  to put it as far away as possible from already
+    #                                                  placed progression items.
+    #                                                  if not, this is equivalent to Random
+    # restrictions : item placement restrictions dict. values are booleans. keys :
+    #                'SuitsSpeedScrew' : no suits early game, no speed or screw in the very first rooms
+    #                'MajorMinor' : if true, will put major items in major locations, and minor items
+    #                               in minor locations
     def __init__(self, seed, difficultyTarget, locations, qty, sampleSize, choose, restrictions):
         random.seed(seed)
 
@@ -26,7 +54,8 @@ class Randomizer(object):
         self.chooseItemRanges = self.getRangeDict(choose['Items'])
         self.chooseItemFuncs = {
             'Random' : self.chooseItemRandom,
-            'MinProgression' : self.chooseItemMinProgression
+            'MinProgression' : self.chooseItemMinProgression,
+            'MaxProgression' : self.chooseItemMaxProgression
         }
         self.chooseLocRanges = self.getRangeDict(choose['Locations'])
         self.chooseLocFuncs = {
@@ -40,14 +69,11 @@ class Randomizer(object):
         self.difficultyTarget = difficultyTarget
         self.locationPool = locations
         self.sampleSize = sampleSize
-        self.chosenLocation = None
         
         # list of locations not already used
         self.unusedLocations = locations
         # list of locations already used
         self.usedLocations = []
-        # list of {'Item': item, 'Location': location}, the items assigned to a location
-        self.itemLocations = []
         self.progressionLocs = []
 
     def locAvailable(self, loc, items):
@@ -157,8 +183,20 @@ class Randomizer(object):
             if newLocs < minNewLocs:
                 minNewLocs = newLocs
                 ret = item
-#        print(ret['Type'] + ' ' + str(minNewLocs))
-        return ret        
+        return ret
+
+    def chooseItemMaxProgression(self, items):
+        maxNewLocs = 0
+        ret = None
+        
+        for item in items:
+            if item in self.failItems:
+                continue
+            newLocs = len(self.currentLocations(self.currentItems + [item]))
+            if newLocs > maxNewLocs:
+                maxNewLocs = newLocs
+                ret = item
+        return ret    
 
     def chooseItem(self, items):
         return self.getChooseFunc(self.chooseItemRanges, self.chooseItemFuncs)(items)
@@ -268,16 +306,11 @@ class Randomizer(object):
                 return ((not (location["Area"] == "Crateria" or location["Area"] == "Brinstar"))
                         or location["Name"] == "X-Ray Scope" or location["Name"] == "Energy Tank, Waterway")
             elif item["Type"] == "Varia":
-                return (not (location["Area"] == "LowerNorfair"
-                             or location["Area"] == "Crateria"
+                return (not (location["Area"] == "Crateria"
                              or location["Name"] == "Morphing Ball"
                              or location["Name"] == "Missile (blue Brinstar middle)"
                              or location["Name"] == "Energy Tank, Brinstar Ceiling"))
-            elif item["Type"] == "SpeedBooster":
-                return (not (location["Name"] == "Morphing Ball"
-                             or location["Name"] == "Missile (blue Brinstar middle)"
-                             or location["Name"] == "Energy Tank, Brinstar Ceiling"))
-            elif item["Type"] == "ScrewAttack":
+            elif item["Type"] == "SpeedBooster" or item["Type"] == "ScrewAttack":
                 return (not (location["Name"] == "Morphing Ball"
                              or location["Name"] == "Missile (blue Brinstar middle)"
                              or location["Name"] == "Energy Tank, Brinstar Ceiling"))

@@ -23,9 +23,6 @@ if __name__ == "__main__":
                         choices=['easy', 'medium', 'hard', 'harder', 'hardcore', 'mania'])
     parser.add_argument('--seed', '-s', help="randomization seed to use", dest='seed',
                         nargs='?', default=0, type=int)
-    parser.add_argument('--algo', '-a', help="randomization algorithm to use",
-                        dest='algo', nargs='?', default='Total_Tournament',
-                        choices=['Total_Tournament', 'Total_Full', 'Total_Casual'])
     parser.add_argument('--rom', '-r',
                         help="the vanilia ROM",
                         dest='rom', nargs='?', default=None)
@@ -88,21 +85,12 @@ if __name__ == "__main__":
     else:
         difficultyTarget = hard
 
-    chooseItemWeights = { 'Random' : 5, 'MinProgression' : 5, 'MaxProgression' : 0 }
+    chooseItemWeights = { 'Random' : 1, 'MinProgression' : 10, 'MaxProgression' : 0 }
     chooseLocWeights = { 'Random' : 1, 'MinDiff' : 0, 'MaxDiff' : 2, 'SpreadProgression' : 7 }
     choose = { 'Items' : chooseItemWeights, 'Locations' : chooseLocWeights }
-    restrictions = { 'Suits' : True, 'SpeedScrew' : True, 'MajorMinor' : False }
+    restrictions = { 'Suits' : True, 'SpeedScrew' : False, 'MajorMinor' : False }
 
-    algo = args.algo
-
-    algo2text = {
-        'Total_Tournament': 'TX',
-        'Total_Full': 'FX',
-        'Total_Casual': 'CX',
-        'Total_Normal': 'X',
-        'Total_Hard': 'HX'}
-
-    fileName = 'Ouiche_Randomizer_' + algo2text[algo] + str(seed) + '_' + preset + '_' + diff2text[difficultyTarget]
+    fileName = 'Ouiche_Randomizer_' + 'O' + str(seed) + '_' + preset + '_' + diff2text[difficultyTarget]
 
     # same as solver
     threshold = difficultyTarget
@@ -126,7 +114,8 @@ if __name__ == "__main__":
     qty = {'missile': int(args.missileQty), 'super': int(args.superQty),
            'powerBomb': int(args.powerBombQty), 'energy': args.energyQty,
            'minors': int(args.minorQty)}
-    randomizer = Randomizer.factory(algo, seed, difficultyTarget, locations, qty, int(args.sampleSize), choose, restrictions)
+    randomizer = Randomizer(seed, difficultyTarget, locations, qty,
+                            int(args.sampleSize), choose, restrictions)
     itemLocs = randomizer.generateItems()
     if itemLocs is None:
         print("Can't generate a randomized rom with the given parameters, try increasing the difficulty target.")

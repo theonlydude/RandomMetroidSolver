@@ -1,23 +1,8 @@
-import random
+import sys, random
 import Items
 from stdlib import Map, Array, List, Random
 
 class Randomizer(object):
-    @staticmethod
-    def factory(algo, seed, difficultyTarget, locations, qty, sampleSize, choose, restrictions):
-        if algo == 'Total_Tournament':
-            from NewRandomizer import NewRandomizer
-            return NewRandomizer(seed, difficultyTarget, locations, qty, sampleSize)
-        elif algo == 'Total_Full':
-            from FullRandomizer import FullRandomizer
-            return FullRandomizer(seed, difficultyTarget, locations, qty, sampleSize)
-        elif algo == 'Total_Casual' or algo == 'Total_Normal':
-            from DefaultRandomizer import DefaultRandomizer
-            return DefaultRandomizer(seed, difficultyTarget, locations, qty, sampleSize, choose, restrictions)
-        else:
-            print("ERROR: unknown algo: {}".format(algo))
-            return None
-
     # seed : rand seed
     # difficultyTarget : max diff
     # locations : items locations
@@ -319,3 +304,29 @@ class Randomizer(object):
                              or location["Name"] == "Energy Tank, Brinstar Ceiling"))
 
         return True
+
+    def generateItems(self):
+        items = []
+        itemLocations = []
+        self.currentItems = items
+        while len(self.itemPool) > 0:
+            curLocs = self.currentLocations(items)
+            itemLocation = None
+            self.failItems = []
+            while itemLocation is None:
+                posItems = self.possibleItems(curLocs, items, itemLocations, self.itemPool, self.locationPool)
+#                print(str(len(posItems)) + " possible items")
+                itemLocation = self.placeItem(posItems, self.itemPool, curLocs)
+                if len(self.failItems) >= len(posItems):
+                    break
+            if itemLocation is None:
+                return None
+#            print(str(len(self.currentItems) + 1) + ':' + itemLocation['Item']['Type'] + ' at ' + itemLocation['Location']['Name'])
+            sys.stdout.write('.')
+            sys.stdout.flush()
+            items.append(itemLocation['Item'])
+            itemLocations.append(itemLocation)
+            self.itemPool = self.removeItem(itemLocation['Item']['Type'], self.itemPool)
+        print("")
+            
+        return itemLocations

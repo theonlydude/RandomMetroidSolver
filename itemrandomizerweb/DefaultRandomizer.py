@@ -18,6 +18,7 @@ class DefaultRandomizer(Randomizer):
             self.failItems = []
             while itemLocation is None:
                 posItems = self.possibleItems(curLocs, items, itemLocations, self.itemPool, self.locationPool)
+#                print(str(len(posItems)) + " possible items")
                 itemLocation = self.placeItem(posItems, self.itemPool, curLocs)
                 if len(self.failItems) >= len(posItems):
                     break

@@ -257,14 +257,16 @@ class RomPatcher:
     # optional (Scyzer):
     # Remove fanfare when picking up an item
     #   itemsounds.ips
-    # A circle is drawn for items which have not been collected, and a dot for collected
-    #   mapitemcircles.ips
     # Allows Samus to start spinning in mid air after jumping or falling
     #   spinjumprestart.ips
-    # Play music with MSU1 chip on SD2SNES
-    #   supermetroid_msu1.ips
+    #
+    # optional standard:
     # Max Ammo Display
     #   max_ammo_display.ips
+    #
+    # optional ():
+    # Play music with MSU1 chip on SD2SNES
+    #   supermetroid_msu1.ips
     # 
     # layout:
     # Disable respawning blocks at dachora pit

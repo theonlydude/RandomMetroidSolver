@@ -351,7 +351,7 @@ window.onload = function(){
   <div class="main">
 
     <p>
-      Randomized Super Metroid ROM:
+      Vanilla Super Metroid ROM:
     </p>
     <p>
       {{
@@ -365,17 +365,6 @@ window.onload = function(){
     <p>
       {{
       =INPUT(_type="text", _name="seed", _id="seed", _form="mainform", value=0)
-      }}
-    </p>
-
-    <p>
-      Choose the randomizer algorithm that you want to use:
-    </p>
-    <p>
-      {{
-      =SELECT(*algos,
-              **dict(_id="algo", _name="algo", _form="mainform",
-                     requires=IS_IN_SET(algos), value="Total_Tournament"))
       }}
     </p>
 
@@ -410,5 +399,49 @@ window.onload = function(){
     =FORM(INPUT(_type="submit", _value="Randomize", _id="submitBtn"),
                 _id="mainform", _name="mainform", _onsubmit="doSubmit(); return false;")
     }}
+
+    <p>
+      The patches included by default:
+      <ul>
+        <li>Intro/Ceres Skip and initial door flag setup</li>
+        <li>Instantly open G4 passage when all bosses are killed</li>
+        <li>Wake up zebes when going right from morph</li>
+        <li>Seed display</li>
+        <li>Custom credits with stats</li>
+        <li>Removes Gravity Suit heat protection</li>
+        <li>Mother Brain Cutscene Edits</li>
+        <li>Suit acquisition animation skip</li>
+        <li>Fix Morph & Missiles Room State</li>
+        <li>Fix heat damage speed echoes bug</li>
+        <li>Disable GT Code</li>
+        <li>Disable Space/Time select in menu</li>
+        <li>Fix Morph Ball Hidden/Chozo PLM's</li>
+        <li>Fix Screw Attack selection in menu</li>
+      </ul>
+    </p>
+    <p>
+      The layout patches included by default:
+      <ul>
+        <li>Disable respawning blocks at dachora pit</li>
+        <li>Make it possible to escape from below early super bridge without bombs</li>
+        <li>Replace bomb blocks with shot blocks before Hi-Jump</li>
+        <li>Replace bomb blocks with shot blocks at Moat</li>
+        <li>Raise platform in first heated norfair room to not require hi-jump</li>
+        <li>Raise platforms in red tower bottom to always be able to get back up</li>
+        <li>Replace bomb blocks with shot blocks before Spazer</li>
+      </ul>
+    </p>
+
+    <p>
+      Optional patches to add to the randomized ROM:
+      <ul>
+        <li>Allows the aim buttons to be assigned to any button</li>
+        <li>Remove fanfare when picking up an item</li>
+        <li>Allows Samus to start spinning in mid air after jumping or falling</li>
+        <li>Play music with MSU1 chip on SD2SNES</li>
+        <li>Max Ammo Display</li>
+    </ul>
+    </p>
+
   </div>
 </body>

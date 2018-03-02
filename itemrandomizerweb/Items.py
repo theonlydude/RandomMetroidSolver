@@ -231,8 +231,8 @@ def addAmmo(itemPool, qty):
     # depending on quantity, compute thresholds
     sumQty = float(qty['missile'] + qty['super'] + qty['powerBomb'])
     missileThreshold = qty['missile'] / sumQty
-    superThreshold = qty['super'] / sumQty
-    powerBombThreshold = qty['powerBomb'] / sumQty
+    superThreshold = missileThreshold + qty['super'] / sumQty
+    powerBombThreshold = superThreshold + qty['powerBomb'] / sumQty
 
     while len(itemPool) < maxItems:
         rand = random.random()

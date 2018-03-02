@@ -4,7 +4,7 @@ from helpers import canEnterAndLeaveGauntlet, wand, wor, haveItem, canOpenRedDoo
 from helpers import canPassBombPassages, canDestroyBombWalls, canUsePowerBombs, SMBool
 from helpers import canFly, canAccessRedBrinstar, energyReserveCountOk, canAccessKraid
 from helpers import Bosses, enoughStuffsKraid, heatProof, energyReserveCountOk
-from helpers import energyReserveCountOkHellRun, canAccessCrocomire, canAccessHeatedNorfair
+from helpers import energyReserveCountOkHellRun, canAccessCrocomire, canDefeatCrocomire, canAccessHeatedNorfair
 from helpers import canPassWorstRoom, enoughStuffsRidley, canAccessLowerNorfair
 from helpers import canAccessWs, enoughStuffsPhantoon, enoughStuffsDraygon
 from helpers import canAccessOuterMaridia, canDefeatDraygon, canPassMtEverest
@@ -232,7 +232,7 @@ locations = [
     'Visibility': "Visible",
     'Room': "Crocomire's Room",
     # DONE: difficulty already set in canHellRun
-    'Available': lambda items: canAccessCrocomire(items)
+    'Available': lambda items: canDefeatCrocomire(items)
 },
 {
     'Area': "Norfair",
@@ -253,7 +253,7 @@ locations = [
     'Address': 0x78C36,
     'Visibility': "Chozo",
     'Room': 'Grapple Beam Room',
-    'Available': lambda items: wand(canAccessCrocomire(items),
+    'Available': lambda items: wand(canDefeatCrocomire(items),
                                     wor(canFly(items),
                                         wand(haveItem(items, 'Ice'),
                                              Knows.ClimbToGrappleWithIce),
@@ -656,7 +656,8 @@ locations = [
                                     canOpenRedDoors(items),
                                     wor(wand(canPassBombPassages(items),
                                              haveItem(items, 'Super')),
-                                        SMBool(True, easy)))
+                                        SMBool(True, easy))),
+    'PostAvailable': lambda items: canOpenGreenDoors(items)
 },
 {
     'Area': "Brinstar",
@@ -918,7 +919,7 @@ locations = [
     'Address': 0x78C04,
     'Visibility': "Visible",
     'Room': 'Post Crocomire Power Bomb Room',
-    'Available': lambda items: wand(canAccessCrocomire(items),
+    'Available': lambda items: wand(canDefeatCrocomire(items),
                                     wor(canFly(items),
                                         haveItem(items, 'Grapple'),
                                         wand(haveItem(items, 'HiJump'),
@@ -932,7 +933,7 @@ locations = [
     'Address': 0x78C14,
     'Visibility': "Visible",
     'Room': 'Post Crocomire Missile Room',
-    'Available': lambda items: canAccessCrocomire(items)
+    'Available': lambda items: canDefeatCrocomire(items)
 },
 {
     'Area': "Norfair",
@@ -941,7 +942,7 @@ locations = [
     'Address': 0x78C2A,
     'Visibility': "Visible",
     'Room': 'Post Crocomire Jump Room',
-    'Available': lambda items: wand(canAccessCrocomire(items),
+    'Available': lambda items: wand(canDefeatCrocomire(items),
                                     wor(canFly(items), haveItem(items, 'Grapple'),
                                         haveItem(items, 'SpeedBooster')))
 },

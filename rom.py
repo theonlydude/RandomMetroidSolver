@@ -375,8 +375,8 @@ class RomPatcher:
         # keep only majors, filter out Etanks and Reserve
         fItemLocs = List.sortBy(lambda il: il['Item']['Type'],
                                 List.filter(lambda il: (il['Item']['Class'] == 'Major'
-                                                        and il['Item']['Type'] not in ['ETank',
-                                                                                       'Reserve']),
+                                                        and il['Item']['Type'] not in ['ETank', 'Reserve',
+                                                                                       'NoEnergy', 'Nothing']),
                                             itemLocs))
 
         regex = re.compile(r"[^A-Z0-9\.,'!: ]+")

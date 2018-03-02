@@ -199,6 +199,7 @@ class Randomizer(object):
         return ret    
 
     def chooseItem(self, items):
+        random.shuffle(items)
         return self.getChooseFunc(self.chooseItemRanges, self.chooseItemFuncs)(items)
         
     def chooseLocationRandom(self, availableLocations, item):
@@ -228,6 +229,7 @@ class Randomizer(object):
             return self.chooseLocationRandom(availableLocations, item)
 
     def chooseLocation(self, availableLocations, item):
+        random.shuffle(availableLocations)
         return self.getChooseFunc(self.chooseLocRanges, self.chooseLocFuncs)(availableLocations, item)
     
     def getItemToPlace(self, items, itemPool):        

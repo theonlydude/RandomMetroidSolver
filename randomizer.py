@@ -88,10 +88,10 @@ if __name__ == "__main__":
     else:
         difficultyTarget = hard
 
-    chooseItemWeights = { 'Random' : 5, 'MinProgression' : 5 }
-    chooseLocWeights = { 'Random' : 1, 'MinDiff' : 0, 'MaxDiff' : 1, 'SpreadProgression' : 8 }
+    chooseItemWeights = { 'Random' : 5, 'MinProgression' : 5, 'MaxProgression' : 0 }
+    chooseLocWeights = { 'Random' : 1, 'MinDiff' : 0, 'MaxDiff' : 2, 'SpreadProgression' : 7 }
     choose = { 'Items' : chooseItemWeights, 'Locations' : chooseLocWeights }
-    restrictions = { 'SuitsSpeedScrew' : True, 'MajorMinor' : True }
+    restrictions = { 'SuitsSpeedScrew' : True, 'MajorMinor' : False }
 
     algo = args.algo
 

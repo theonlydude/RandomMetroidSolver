@@ -252,7 +252,7 @@ class Solver:
                 loc['difficulty'] = loc['Available'](self.collectedItems)
 
     def computeDifficultyValue(self):
-        if not self.pickup.enoughMajors(self.collectedItems, self.majorLocations) or not self.pickup.enoughMinors(self.collectedItems, self.minorLocations) or not self.canEndGame().bool:
+        if not self.canEndGame().bool:
             # we have aborted
             difficulty = -1
         else:

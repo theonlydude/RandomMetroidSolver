@@ -314,8 +314,8 @@ class Randomizer(object):
                              or location["Name"] == "Missile (blue Brinstar middle)"
                              or location["Name"] == "Energy Tank, Brinstar Ceiling"))
         if self.restrictions['SpeedScrew'] is True and (item["Type"] == "SpeedBooster" or item["Type"] == "ScrewAttack"):
-                return (not (location["Name"] == "Morphing Ball"
-                             or location["Name"] == "Missile (blue Brinstar middle)"
-                             or location["Name"] == "Energy Tank, Brinstar Ceiling"))
+            return (not (location["Name"] == "Morphing Ball"
+                         or location["Name"] == "Missile (blue Brinstar middle)"
+                         or location["Name"] == "Energy Tank, Brinstar Ceiling"))
 
         return True

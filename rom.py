@@ -260,11 +260,11 @@ class RomPatcher:
     # Allows Samus to start spinning in mid air after jumping or falling
     #   spinjumprestart.ips
     #
-    # optional standard:
+    # optional standard (imcompatible with MSU1 music):
     # Max Ammo Display
     #   max_ammo_display.ips
     #
-    # optional ():
+    # optional (DarkShock):
     # Play music with MSU1 chip on SD2SNES
     #   supermetroid_msu1.ips
     # 

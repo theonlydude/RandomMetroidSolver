@@ -288,6 +288,9 @@ def canAccessLowerNorfair(items):
     #             -have hijump boots and knows the Lava Dive wall jumps, the wall jumps are
     #              a little easier with Ice and Plasma as we can freeze the Funes, we need
     #              at least three ETanks to do it without gravity
+    nTanks4Dive = 3
+    if not heatProof(items):
+        nTanks4Dive = 8
     return wand(canHellRun(items, 'LowerNorfair'),
                 canAccessRedBrinstar(items),
                 canUsePowerBombs(items),
@@ -295,7 +298,7 @@ def canAccessLowerNorfair(items):
                     wand(Knows.GravityJump, haveItem(items, 'Gravity')),
                     wand(wor(wand(Knows.LavaDive, haveItem(items, 'HiJump')),
                              Knows.LavaDiveNoHiJump),
-                         energyReserveCountOk(items, 3))))
+                         energyReserveCountOk(items, nTanks4Dive))))
 
 def canPassWorstRoom(items):
     # https://www.youtube.com/watch?v=gfmEDDmSvn4

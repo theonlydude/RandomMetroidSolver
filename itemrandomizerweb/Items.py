@@ -38,7 +38,8 @@ Items = [
     },
     {
         'Type': 'Bomb',
-        'Category': 'Progression',
+#        'Category': 'Progression',
+        'Category' : 'Misc',
         'Class': 'Major',
         'Code': 0xeee7,
         'Name': "Bomb",
@@ -54,7 +55,8 @@ Items = [
     },
     {
         'Type': 'Ice',
-        'Category': 'Progression',
+#        'Category': 'Progression',
+        'Category': 'Beam',
         'Class': 'Major',
         'Code': 0xeeef,
         'Name': "Ice Beam",
@@ -62,7 +64,8 @@ Items = [
     },
     {
         'Type': 'HiJump',
-        'Category': 'Progression',
+#        'Category': 'Progression',
+        'Category': 'Misc',
         'Class': 'Major',
         'Code': 0xeef3,
         'Name': "Hi-Jump Boots",
@@ -118,7 +121,8 @@ Items = [
     },
     {
         'Type': 'Grapple',
-        'Category': 'Progression',
+#        'Category': 'Progression',
+        'Category': 'Misc',
         'Class': 'Major',
         'Code': 0xef17,
         'Name': "Grappling Beam",
@@ -176,15 +180,16 @@ Items = [
 
 Nothing = {
     'Type': 'Nothing',
-    'Category': 'Ammo',
+    'Category': 'Nothing',
     'Class': 'Minor',
     'Code': 0xeedb,
     'Name': "Nothing",
     'Message': 0x0
 }
+
 NoEnergy = {
     'Type': 'NoEnergy',
-    'Category': 'Misc',
+    'Category': 'Nothing',
     'Class': 'Major',
     'Code': 0xeedb,
     'Name': "No Energy",

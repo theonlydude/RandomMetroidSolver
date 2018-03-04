@@ -461,25 +461,58 @@ def infos():
 
     return dict()
 
+patches = [
+    ('AimAnyButton', "Allows the aim buttons to be assigned to any button"),
+    ('itemsounds', "Remove fanfare when picking up an item"),
+    ('spinjumprestart', "Allows Samus to start spinning in mid air after jumping or falling"),
+    ('supermetroid_msu1', "Play music with MSU1 chip on SD2SNES"),
+    ('max_ammo_display', "Max Ammo Display (incompatible with MSU1 patch)")
+]
+
 def randomizer():
     response.title = 'Super Metroid Ouiche Randomizer'
+
+    if session.randomizer is None:
+        session.randomizer = {}
 
     files = sorted(os.listdir('diff_presets'))
     presets = [os.path.splitext(file)[0] for file in files]
 
-    return dict(algos=['Total_Casual', 'Total_Normal', 'Total_Tournament', 'Total_Full'],
-                presets=presets)
+    return dict(presets=presets, patches=patches)
 
 def randomizerWebService():
     jsonFileName = tempfile.mkstemp()[1]
 
+    print("request.vars={}".format(request.vars))
+
+    # store vars in session
+    #try:
+    if session.randomizer is None:
+        session.randomizer = {}
+
+    session.randomizer['difficulty_target'] = request.vars.difficulty_target
+    session.randomizer['paramsFile'] = request.vars.paramsFile
+    for patch in patches:
+        session.randomizer[patch[0]] = request.vars[patch[0]]
+    session.randomizer['missileQty'] = request.vars.missileQty
+    session.randomizer['superQty'] = request.vars.superQty
+    session.randomizer['powerBombQty'] = request.vars.powerBombQty
+    session.randomizer['minorQty'] = request.vars.minorQty
+    session.randomizer['energyQty'] = request.vars.energyQty
+    #except:
+    #    return -1
+
     params = ['pypy',  os.path.expanduser("~/RandomMetroidSolver/randomizer.py"),
-              '--algo', request.vars.algo, '--seed', request.vars.seed,
+              '--seed', request.vars.seed,
               '--difficultyTarget', request.vars.difficulty_target,
-              '--output', jsonFileName, '--preset', request.vars.paramsFile]
+              '--output', jsonFileName, '--preset', request.vars.paramsFile,
+              '--missileQty', request.vars.missileQty,
+              '--superQty', request.vars.superQty,
+              '--powerBombQty', request.vars.powerBombQty,
+              '--minorQty', request.vars.minorQty,
+              '--energyQty', request.vars.energyQty]
 
     ret = subprocess.call(params)
-
 
     if ret == 0:
         with open(jsonFileName) as jsonFile:

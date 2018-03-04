@@ -94,6 +94,10 @@ label {
     }
 }
 
+.main {
+    margin-bottom: 5em;
+}
+
 .main-container {
     margin-top: 0px;
 }
@@ -262,7 +266,7 @@ function doSubmit() {
     var filesInput = document.getElementById("uploadFile");
     var file = filesInput.files[0]
     if (file === undefined) {
-      alert("Please select an already randomized ROM first")
+      alert("Please select a Super Metroid Vanilla ROM first")
       btn = document.getElementById("submitBtn");
       btn.data = "Randomize";
       btn.disabled = false;
@@ -280,7 +284,9 @@ function doSubmit() {
 
     // call web service with parameters
     ajax('{{=URL(f='randomizerWebService.json')}}',
-         ['seed', 'algo', 'difficulty_target', 'paramsFile'],
+         ['seed', 'difficulty_target', 'paramsFile', 'AimAnyButton',
+          'itemsounds', 'spinjumprestart', 'supermetroid_msu1', 'max_ammo_display',
+          'missileQty', 'superQty', 'powerBombQty', 'minorQty', 'energyQty'],
          'target',
          {done: AjaxCallCompleted});
 
@@ -349,13 +355,13 @@ window.onload = function(){
   </div>
 
   <div class="main">
-
+    <form id="mainform", name="mainform", onsubmit="doSubmit(); return false;">
     <p>
       Vanilla Super Metroid ROM:
     </p>
     <p>
       {{
-      =INPUT(_type="file", _name="uploadFile", _id="uploadFile", _form="mainform")
+      =INPUT(_type="file", _name="uploadFile", _id="uploadFile")
       }}
     </p>
 
@@ -364,7 +370,7 @@ window.onload = function(){
     </p>
     <p>
       {{
-      =INPUT(_type="text", _name="seed", _id="seed", _form="mainform", value=0)
+      =INPUT(_type="text", _name="seed", _id="seed", value=0)
       }}
     </p>
 
@@ -373,13 +379,18 @@ window.onload = function(){
     </p>
     <p>
       {{
+      if 'difficulty_target' in session.randomizer:
+        value = session.randomizer['difficulty_target']
+      else:
+        value = 'medium'
+        pass
+      }}
+      {{
       =SELECT('easy', 'medium', 'hard', 'very hard', 'hardcore', 'mania',
               _id="difficulty_target",
               _name="difficulty_target",
-              _form="mainform",
-              #_class="filldropdown",
               requires=IS_IN_SET(['easy', 'medium', 'hard', 'very hard', 'hardcore', 'mania']),
-              value="medium")
+              value=value)
       }}
     </p>
 
@@ -388,17 +399,17 @@ window.onload = function(){
     </p>
     <p>
       {{
+      if 'paramsFile' in session.randomizer:
+        value = session.randomizer['paramsFile']
+      else:
+        value = 'regular'
+        pass
+      }}
+      {{
       =SELECT(*presets,
-              **dict(_id="paramsFile", _name="paramsFile",
-                     _form="mainform", #_class="filldropdown",
-                     value="medium"))
+              **dict(_id="paramsFile", _name="paramsFile", value=value))
       }}
     </p>
-
-    {{
-    =FORM(INPUT(_type="submit", _value="Randomize", _id="submitBtn"),
-                _id="mainform", _name="mainform", _onsubmit="doSubmit(); return false;")
-    }}
 
     <p>
       The patches included by default:
@@ -422,26 +433,91 @@ window.onload = function(){
     <p>
       The layout patches included by default:
       <ul>
-        <li>Disable respawning blocks at dachora pit</li>
-        <li>Make it possible to escape from below early super bridge without bombs</li>
+        <li>Disable respawning blocks at Dachora Pit</li>
+        <li>Make it possible to escape from below early Super bridge without Bombs</li>
         <li>Replace bomb blocks with shot blocks before Hi-Jump</li>
         <li>Replace bomb blocks with shot blocks at Moat</li>
-        <li>Raise platform in first heated norfair room to not require hi-jump</li>
-        <li>Raise platforms in red tower bottom to always be able to get back up</li>
+        <li>Raise platform in first heated Norfair room to not require Hi-Jump</li>
+        <li>Raise platforms in Red Tower bottom to always be able to get back up</li>
         <li>Replace bomb blocks with shot blocks before Spazer</li>
       </ul>
     </p>
 
     <p>
-      Optional patches to add to the randomized ROM:
-      <ul>
-        <li>Allows the aim buttons to be assigned to any button</li>
-        <li>Remove fanfare when picking up an item</li>
-        <li>Allows Samus to start spinning in mid air after jumping or falling</li>
-        <li>Play music with MSU1 chip on SD2SNES</li>
-        <li>Max Ammo Display</li>
-    </ul>
+      Optional patches to add to the randomized ROM:<br/>
+{{
+for patch in patches:
+
+  if patch[0] in session.randomizer and session.randomizer[patch[0]] == 'on':
+}}
+    {{=INPUT(_id=patch[0], _name=patch[0], _type="checkbox", _checked="checked", _value="on")}}
+{{
+  else:
+}}
+    {{=INPUT(_id=patch[0], _name=patch[0], _type="checkbox")}}
+    {{pass}}
+{{
+  response.write("{}".format(patch[1]))
+
+  response.write("<br/>", escape=False)
+  pass
+}}
+    </p>
+    <p>
+{{
+      if 'missileQty' in session.randomizer:
+        valueM = session.randomizer['missileQty']
+      else:
+        valueM = "3"
+        pass
+      if 'superQty' in session.randomizer:
+        valueS = session.randomizer['superQty']
+      else:
+        valueS = "3"
+        pass
+      if 'powerBombQty' in session.randomizer:
+        valueP = session.randomizer['powerBombQty']
+      else:
+        valueP = "1"
+        pass
+      if 'minorQty' in session.randomizer:
+        valuem = session.randomizer['minorQty']
+      else:
+        valuem = "100"
+        pass
+      if 'energyQty' in session.randomizer:
+        valueE = session.randomizer['energyQty']
+      else:
+        valueE = "vanilla"
+        pass
+}}
+
+      The quantity of Minors and Energy<br/>
+      For each minors, the higher the number the higher the probability of choosing it<br/>
+      <label for="missileQty">Quantity of Missiles</label>
+      <input name="missileQty" id="missileQty" type="number" value={{=valueM}} min="1" max="10"><br/>
+      <label for="superQty">Quantity of Super Missiles</label>
+      <input name="superQty" id="superQty" type="number" value={{=valueS}} min="1" max="10"><br/>
+      <label for="powerBombQty">Quantity of Power Bombs</label>
+      <input name="powerBombQty" id="powerBombQty" type="number" value={{=valueP}} value="1" min="1" max="10"><br/>
+
+      <label for="minorQty">Percentage of minors available</label>
+      <input name="minorQty" id="minorQty" type="number" value={{=valuem}} min="1" max="100"><br/>
+
+      <label for="energyQty">Quantity of Energy/Reserve Tanks available</label>
+      {{
+      =SELECT('sparse', 'medium', 'vanilla',
+              _id="energyQty",
+              _name="energyQty",
+              requires=IS_IN_SET(['sparse', 'medium', 'vanilla']),
+              value=valueE)
+      }}
+
     </p>
 
+    {{
+    =INPUT(_type="submit", _value="Randomize", _id="submitBtn")
+    }}
+  </form>
   </div>
 </body>

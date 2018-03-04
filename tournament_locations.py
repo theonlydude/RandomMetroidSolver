@@ -1138,7 +1138,7 @@ locations = [
     'Address': 0x7C4AF,
     'Visibility': "Visible",
     'Room': 'Watering Hole',
-    'Available': lambda items: canAccessInnerMaridia(items)
+    'Available': lambda items: canPassMtEverest(items)
 },
 {
     'Area': "Maridia",
@@ -1147,7 +1147,7 @@ locations = [
     'Address': 0x7C4B5,
     'Visibility': "Visible",
     'Room': 'Watering Hole',
-    'Available': lambda items: canAccessInnerMaridia(items)
+    'Available': lambda items: canPassMtEverest(items)
 },
 {
     'Area': "Maridia",
@@ -1156,7 +1156,7 @@ locations = [
     'Address': 0x7C533,
     'Visibility': "Visible",
     'Room': 'Pseudo Plasma Spark Room',
-    'Available': lambda items: canAccessInnerMaridia(items)
+    'Available': lambda items: canPassMtEverest(items)
 },
 {
     'Area': "Maridia",

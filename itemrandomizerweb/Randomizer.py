@@ -23,10 +23,12 @@ class Randomizer(object):
     #                                        access difficulty
     #                           'MaxDiff' => between possible locations, choose the one with the highest
     #                                        access difficulty
-    #                           'SpreadProgression' => if item to place is a progression item, will try
+    #                           'SpreadProgression' => Not a weight, but a boolean. If it is True
+    #                                                  and item to place is a progression item, will try
     #                                                  to put it as far away as possible from already
     #                                                  placed progression items.
-    #                                                  if not, this is equivalent to Random
+    #                                                  If it is not a pregression item, weights
+    #                                                  are used.
     # restrictions : item placement restrictions dict. values are booleans. keys :
     #                'Suits' : no suits early game
     #                'SpeedScrew' : no speed or screw in the very first rooms
@@ -37,28 +39,25 @@ class Randomizer(object):
 
         # we assume that 'choose' dict is perfectly formed, that is all keys
         # below are defined in the appropriate weight dicts
-        self.chooseItemRanges = self.getRangeDict(choose['Items'])
+        self.isSpreadProgression = choose['Locations']['SpreadProgression']
+        del choose['Locations']['SpreadProgression']
         self.chooseItemFuncs = {
             'Random' : self.chooseItemRandom,
             'MinProgression' : self.chooseItemMinProgression,
             'MaxProgression' : self.chooseItemMaxProgression
         }
-        self.chooseLocRanges = self.getRangeDict(choose['Locations'])
+        self.chooseItemRanges = self.getRangeDict(choose['Items'])
         self.chooseLocFuncs = {
             'Random' : self.chooseLocationRandom,
             'MinDiff' : self.chooseLocationMinDiff,
-            'MaxDiff' : self.chooseLocationMaxDiff,
-            'SpreadProgression' : self.chooseLocationSpreadProgression
+            'MaxDiff' : self.chooseLocationMaxDiff
         }
+        self.chooseLocRanges = self.getRangeDict(choose['Locations'])
         self.restrictions = restrictions
         self.itemPool = Items.getItemPool(qty)
         self.difficultyTarget = difficultyTarget
-        self.locationPool = locations
-        self.sampleSize = sampleSize
-        
-        # list of locations not already used
+        self.sampleSize = sampleSize      
         self.unusedLocations = locations
-        # list of locations already used
         self.usedLocations = []
         self.progressionLocs = []
 
@@ -78,7 +77,6 @@ class Randomizer(object):
         # 
         # items: list of items, each item is a dict
         # itemLocations: list of dict with the current association of (item - location)
-        # locationPool: list of the 100 locations
         #
         # return: list of locations
 
@@ -98,19 +96,18 @@ class Randomizer(object):
         # return bool
         return List.exists(lambda loc: self.canPlaceAtLocation(item, loc), itemLocations)
 
-    def possibleItems(self, curLocs, items, itemLocations, itemPool, locationPool):
+    def possibleItems(self, curLocs, items, itemPool):
         # loop on all the items in the item pool of not already place items and return those that can be 
         #
         # items: list of items already placed
         # itemLocations: list of dict with the current association of (item - location)
         # itemPool: list of the items not already placed
-        # locationPool: list of the 100 locations
         #
         # return list of items eligible for next placement
         result = []
         random.shuffle(itemPool)
         for item in itemPool:
-            if self.checkItem(curLocs, item, items, itemLocations, locationPool):
+            if self.checkItem(curLocs, item, items):
                 result.append(item)
                 if len(result) >= self.sampleSize:
                     break
@@ -142,8 +139,6 @@ class Randomizer(object):
             w = float(weightDict[k]) / total
             current += w
             rangeDict[k] = current
-        # print(weightDict)
-        # print(rangeDict)
             
         return rangeDict
 
@@ -157,7 +152,7 @@ class Randomizer(object):
     
     def chooseItemRandom(self, items):
         return items[random.randint(0, len(items)-1)]
-
+    
     def chooseItemMinProgression(self, items):
         minNewLocs = 1000
         ret = None
@@ -182,8 +177,8 @@ class Randomizer(object):
             if newLocs > maxNewLocs:
                 maxNewLocs = newLocs
                 ret = item
-        return ret    
-
+        return ret 
+    
     def chooseItem(self, items):
         random.shuffle(items)
         return self.getChooseFunc(self.chooseItemRanges, self.chooseItemFuncs)(items)
@@ -208,19 +203,25 @@ class Randomizer(object):
             d = 1.0/cnt
         return d
     
-    def chooseLocationSpreadProgression(self, availableLocations, item):
-        if item['Category'] == 'Progression':
-            return max(availableLocations, key=lambda loc:self.areaDistance(loc, self.progressionLocs))
-        else:
-            return self.chooseLocationRandom(availableLocations, item)
+    def getLocsSpreadProgression(self, availableLocations):
+        distances = [self.areaDistance(loc, self.progressionLocs) for loc in availableLocations]
+        maxDist = max(distances)
+        indices = [index for index, d in enumerate(distances) if d == maxDist]        
+        locs = [availableLocations[i] for i in indices]
+
+        return locs
 
     def chooseLocation(self, availableLocations, item):
-        random.shuffle(availableLocations)
-        return self.getChooseFunc(self.chooseLocRanges, self.chooseLocFuncs)(availableLocations, item)
+        locs = availableLocations
+        if self.isSpreadProgression is True and item['Category'] == 'Progression':
+            locs = self.getLocsSpreadProgression(availableLocations)
+        random.shuffle(locs)
+        return self.getChooseFunc(self.chooseLocRanges, self.chooseLocFuncs)(locs, item)
     
     def getItemToPlace(self, items, itemPool):        
         itemsLen = len(items)
         if itemsLen == 0:
+#            print("EMPTY")
             item = List.item(random.randint(0, len(itemPool)-1), itemPool)
         else:
             item = self.chooseItem(items)
@@ -243,6 +244,7 @@ class Randomizer(object):
             return None
         location = self.chooseLocation(availableLocations, item)
         if item['Category'] == 'Progression':
+#            print("placing " + item['Type'])
             self.progressionLocs.append(location)
         
         self.usedLocations += [location]
@@ -257,7 +259,7 @@ class Randomizer(object):
             
         return {'Item': item, 'Location': location}
 
-    def checkItem(self, curLocs, item, items, itemLocations, locationPool):
+    def checkItem(self, curLocs, item, items):
         # get the list of unused locations accessible with the given items (old),
         # the list of unused locations accessible with the given items and the new item (new).
         # check that there's a major location in the new list for next iteration of placement.
@@ -265,8 +267,6 @@ class Randomizer(object):
         #
         # item: dict of the item to check
         # items: list of items already placed
-        # itemLocations: list of dict with the current association of (item - location)
-        # locationPool: list of the 100 locations
         #
         # return bool
         oldLocations = curLocs
@@ -289,44 +289,172 @@ class Randomizer(object):
             if matchingClass is False:
                 return False
 
+        def isInBlueBrinstar(loc):
+            return location["Name"] in ["Morphing Ball",
+                                        "Missile (blue Brinstar middle)",
+                                        "Energy Tank, Brinstar Ceiling",
+                                        "Power Bomb (blue Brinstar)",
+                                        "Missile (blue Brinstar bottom)",
+                                        "Missile (blue Brinstar top)",
+                                        "Missile (blue Brinstar behind missile)"]
+            
         if self.restrictions['Suits'] is True:
             if item["Type"] == "Gravity":
                 return ((not (location["Area"] == "Crateria" or location["Area"] == "Brinstar"))
                         or location["Name"] == "X-Ray Scope" or location["Name"] == "Energy Tank, Waterway")
             elif item["Type"] == "Varia":
-                return (not (location["Area"] == "Crateria"
-                             or location["Name"] == "Morphing Ball"
-                             or location["Name"] == "Missile (blue Brinstar middle)"
-                             or location["Name"] == "Energy Tank, Brinstar Ceiling"))
-        if self.restrictions['SpeedScrew'] is True and (item["Type"] == "SpeedBooster" or item["Type"] == "ScrewAttack"):
-            return (not (location["Name"] == "Morphing Ball"
-                         or location["Name"] == "Missile (blue Brinstar middle)"
-                         or location["Name"] == "Energy Tank, Brinstar Ceiling"))
+                return not (location["Area"] == "Crateria" or isInBlueBrinstar(location))
+        if self.restrictions['SpeedScrew'] is True:
+            if item["Type"] == "SpeedBooster":
+                return not isInBlueBrinstar(location)
+            if item["Type"] == "ScrewAttack":
+                return not (isInBlueBrinstar(location) or location["Area"] == "Crateria") # screw attack this early is a bit too easy. plus, with MinProgression setting, ScrewAttack always ends up at Bomb
 
         return True
 
-    def generateItems(self):
-        items = []
-        itemLocations = []
-        self.currentItems = items
-        while len(self.itemPool) > 0:
-            curLocs = self.currentLocations(items)
-            itemLocation = None
-            self.failItems = []
-            while itemLocation is None:
-                posItems = self.possibleItems(curLocs, items, itemLocations, self.itemPool, self.locationPool)
-#                print(str(len(posItems)) + " possible items")
-                itemLocation = self.placeItem(posItems, self.itemPool, curLocs)
-                if len(self.failItems) >= len(posItems):
-                    break
+#     def generateItems(self):
+#         items = []
+#         itemLocations = []
+#         self.currentItems = items
+#         while len(self.itemPool) > 0:
+#             curLocs = self.currentLocations(items)
+#             itemLocation = None
+#             self.failItems = []
+#             while itemLocation is None:
+#                 posItems = self.possibleItems(curLocs, items, self.itemPool)
+#                 #                print(str(len(posItems)) + " possible items")
+#                 itemLocation = self.placeItem(posItems, self.itemPool, curLocs)
+#                 if len(self.failItems) >= len(posItems):
+#                     break
+#             if itemLocation is None:
+#                 return None
+# #            print(str(len(self.currentItems) + 1) + ':' + itemLocation['Item']['Type'] + ' at ' + itemLocation['Location']['Name'])
+#             sys.stdout.write('.')
+#             sys.stdout.flush()
+#             items.append(itemLocation['Item'])
+#             itemLocations.append(itemLocation)
+#             self.itemPool = self.removeItem(itemLocation['Item']['Type'], self.itemPool)
+#         print("")
+            
+#         return itemLocations
+
+    def getItem(self, itemLocation, itemLocations):
+        sys.stdout.write('.')
+        sys.stdout.flush()
+        self.currentItems.append(itemLocation['Item'])
+        itemLocations.append(itemLocation)
+#        print(str(len(self.currentItems)) + ':' + itemLocation['Item']['Type'] + ' at ' + itemLocation['Location']['Name'])
+        self.itemPool = self.removeItem(itemLocation['Item']['Type'], self.itemPool)
+
+    def generateItem(self, curLocs, pool):
+        itemLocation = None
+        while itemLocation is None:
+            posItems = self.possibleItems(curLocs, self.currentItems, pool)
+            #                print(str(len(posItems)) + " possible items")
+            itemLocation = self.placeItem(posItems, pool, curLocs)
+            if len(self.failItems) >= len(posItems):
+                break
             if itemLocation is None:
                 return None
-#            print(str(len(self.currentItems) + 1) + ':' + itemLocation['Item']['Type'] + ' at ' + itemLocation['Location']['Name'])
-            sys.stdout.write('.')
-            sys.stdout.flush()
-            items.append(itemLocation['Item'])
-            itemLocations.append(itemLocation)
-            self.itemPool = self.removeItem(itemLocation['Item']['Type'], self.itemPool)
+        return itemLocation
+
+    def cancelLastItem(self, itemLocations):
+        itemLoc = itemLocations.pop()
+        item = itemLoc['Item']
+        loc = itemLoc['Location']
+        self.currentItems.pop()
+        self.itemPool.append(item)
+        self.usedLocations.remove(loc)
+        self.unusedLocations.append(loc)
+#        print("Cancelled  " + item['Type'] + " at " + loc['Name'])
+        sys.stdout.write('x')
+        sys.stdout.flush()
+    
+    def generateItems(self):
+        itemLocations = []
+        self.currentItems = []
+        while len(self.itemPool) > 0:
+            # 1. fill up with non-progression stuff
+            pool = [item for item in self.itemPool if item['Category'] != 'Progression'] # we can filter further if necessary
+            poolWasEmpty = len(pool) == 0
+            itemLocation = None
+            nItems = 0
+#            itemLimit = random.randint(5, 25)
+            itemLimit = 100
+#            print("NON-PROG")
+            while len(pool) > 0 and nItems < itemLimit: 
+#                print(str(len(pool)) + " " + str(len(self.itemPool)))
+                curLocs = self.currentLocations(self.currentItems)
+                self.failItems = []
+                itemLocation = self.generateItem(curLocs, pool)
+                if itemLocation is None:
+                    break
+                else:
+                    nItems += 1
+                    self.getItem(itemLocation, itemLocations)
+                    pool = self.removeItem(itemLocation['Item']['Type'], pool)
+            isStuck = not poolWasEmpty and itemLocation is None
+            if len(self.itemPool) > 0:
+                # 2. collect with regular item pool
+#                print("REGULAR")
+                removed = True
+                itemLocation = None
+                self.failItems = []
+                if not isStuck:
+#                    print("PRECANCEL")
+                    curLocs = self.currentLocations(self.currentItems)
+                    itemLocation = self.generateItem(curLocs, self.itemPool)
+                    isStuck = itemLocation is None                    
+                while itemLocation is None and (removed is True or not isStuck):
+                    # if we were stuck, cancel a bunch of our last decisions
+                    curLocs = self.currentLocations(self.currentItems)
+                    removed = False
+                    doRemove = True
+                    while isStuck and len(itemLocations) > 0 and doRemove:
+                        self.cancelLastItem(itemLocations)
+                        removed = True
+                        # we can continue to cancel decisions if we don't regress
+                        nextCur = self.currentLocations(self.currentItems[:-1])
+                        doRemove = len(curLocs) == len(nextCur) or len(curLocs) == len(nextCur) - 1 
+                    # proceed like normal
+                    curLocs = self.currentLocations(self.currentItems)
+                    itemLocation = self.generateItem(curLocs, self.itemPool)
+                    if not isStuck and itemLocation is None:
+                        # we weren't stuck before but we are now...cancel last item to survive this corner case
+                        self.cancelLastItem(itemLocations)
+                        
+                if itemLocation is None: # actually stuck
+                    print("STUCK !")
+                    print("REM LOCS = "  + str([loc['Name'] for loc in self.unusedLocations]))
+                    print("REM ITEMS = "  + str([item['Type'] for item in self.itemPool]))
+                    return None
+                self.getItem(itemLocation, itemLocations)                
         print("")
-            
+
         return itemLocations
+
+# IDEES :
+# - changer les choose en parametres generaux Min/Max progression/difficulty
+# * si min progression : rendre grand le itemLimit. Garder le concept de l'item qui
+# ouvre le moins de chemin possible?? ou alors juste eviter de placer un item
+# flag progression. a voir aussi sur placer les suits en dernier?
+# * si max diff : impact sur le choix de l'item => prendre l'item qui diminue
+# le moins la difficulte totale (ou max?) des currentLocations obtenues avec
+# cet item.
+# pb des conflits entre ces settings : dico de poids?
+# pb de la rigidite du choix : failItems devrait suffire
+
+# SPREAD :
+# A tester : pour tous les items (pas que les progression), les placer autant que possible
+# dans des zones du jeu ou il y a encore "de la place" afin d'eviter de condamner
+# des zones.
+# Pour permettre cela, avoir en plus (ou en remplacement?) de l'itemLimit une alerte
+# sur le remplissage d'une zone dans la boucle "NON-PROG", pour chercher a s'en ouvrir
+# une autre avec la boucle "REGULAR"
+
+# chooseLocation :
+# Placer en min/max diff n'a pas l'air d'avoir d'interet car ce n'est pas rempli dans
+# l'ordre de toutes facons...
+
+# protection tournoi/race :
+# avoir un log public sur le site des dernieres seeds solvees avec nom de fichier+md5+preset.

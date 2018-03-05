@@ -25,21 +25,23 @@ extend 'layout.html'
 body {
     margin-bottom: 0px;
 }
-#myOverlay {
-    position: fixed;
-    height: 100%;
-    width: 100%;
-}
-#myOverlay {
-    background: fixed;
-    opacity: .5;
-    z-index: 200;
-    display: none;
+#overlay {
+    position: fixed; /* Sit on top of the page content */
+    display: none; /* Hidden by default */
+    width: 100%; /* Full width (cover the whole page) */
+    height: 100%; /* Full height (cover the whole page) */
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0,0,0,0.5); /* Black background with opacity */
+    z-index: 2; /* Specify a stack order in case you're using a different order for other elements */
+    cursor: pointer; /* Add a pointer on hover */
 }
 #loadingGIF {
     position: absolute;
     top: 40%;
-    left: 45%;
+    left: 5%;
     z-index: 3;
     display:none;
 }
@@ -77,7 +79,7 @@ function AjaxCallCompleted(data) {
     console.log("button text set back to randomize");
 
     // remove "working" message
-    $('#myOverlay').hide();
+    $('#overlay').hide();
     $('#loadingGIF').hide();
 }
 
@@ -96,7 +98,7 @@ function doSubmit() {
           btn = document.getElementById("submitBtn");
           btn.data = "Randomize";
           btn.disabled = false;
-      }, 1000);
+      }, 20000);
 
       return false;
     }
@@ -112,13 +114,8 @@ function doSubmit() {
          {done: AjaxCallCompleted});
 
     // while WS is working, display "working" message
-    $('#myOverlay').show();
+    $('#overlay').show();
     $('#loadingGIF').show();
-
-    setTimeout(function(){ 
-        $('#myOverlay').hide();
-        $('#loadingGIF').hide();
-    }, 10000);
   }
 
   return false;
@@ -162,7 +159,7 @@ window.onload = function(){
 </script>
 
 <body>
-  <div id="myOverlay"></div>
+  <div id="overlay"></div>
   <div id="loadingGIF"><img src={{=URL('static/images','ajax-loader.gif')}}/></div>
 
 
@@ -179,7 +176,7 @@ window.onload = function(){
     <div class="row">
       <div class="column">
         <form id="mainform", name="mainform", onsubmit="doSubmit(); return false;">
-          <table>
+          <table class="full">
             <colgroup><col class="half" /><col class="half" /></colgroup>
             <tr>
               <td>Vanilla Super Metroid ROM:</td>
@@ -192,9 +189,7 @@ window.onload = function(){
             <tr>
               <td>Randomizer seed:</td>
               <td>
-      {{
-      =INPUT(_type="text", _name="seed", _id="seed", value=0, _class="full")
-      }}
+		<input name="seed" id="seed" type="number" value="0" min="0" max="9999999" class="full">
               </td>
             </tr>
             <tr>
@@ -266,7 +261,7 @@ window.onload = function(){
 
       The quantity of Minors and Energy<br/>
       For each minors, the higher the number the higher the probability of choosing it<br/>
-      <table>
+      <table class="full">
         <colgroup><col class="half" /><col class="half" /></colgroup>
         <tr>
           <td>Quantity of Missiles</td>

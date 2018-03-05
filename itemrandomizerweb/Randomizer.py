@@ -424,7 +424,6 @@ class Randomizer(object):
                         doRemove = len(curLocs) == len(nextCur) or len(curLocs) == len(nextCur) - 1
                         if doRemove:
                             curLocs = nextCur
-                        print(doRemove)
                     # proceed like normal
                     curLocs = self.currentLocations(self.currentItems)
                     itemLocation = self.generateItem(curLocs, self.itemPool)
@@ -447,7 +446,7 @@ class Randomizer(object):
 # * si min progression : rendre grand le itemLimit. Garder le concept de l'item qui
 # ouvre le moins de chemin possible?? ou alors juste eviter de placer un item
 # flag progression. a voir aussi sur placer les suits en dernier?
-# on peut jouer aussi sur les items présents dans NON-PROG
+# on peut jouer aussi sur les items presents dans NON-PROG
 # * si max diff : impact sur le choix de l'item => prendre l'item qui diminue
 # le moins la difficulte totale (ou max?) des currentLocations obtenues avec
 # cet item.

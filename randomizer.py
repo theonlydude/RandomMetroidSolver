@@ -85,15 +85,6 @@ if __name__ == "__main__":
     else:
         difficultyTarget = hard
 
-    chooseItemWeights = { 'Random' : 1, 'MinProgression' : 0, 'MaxProgression' : 0 }
-    chooseLocWeights = { 'Random' : 1, 'MinDiff' : 0, 'MaxDiff' : 0, 'SpreadProgression' : True }
-    choose = { 'Items' : chooseItemWeights, 'Locations' : chooseLocWeights }
-    restrictions = { 'Suits' : True, 'SpeedScrew' : True, 'MajorMinor' : True }
-    seedCode = 'X'
-    if restrictions['MajorMinor'] is False:
-        seedCode = 'FX'
-    fileName = 'Ouiche_Randomizer_' + seedCode + str(seed) + '_' + preset
-
     # same as solver
     threshold = difficultyTarget
     epsilon = 0.001
@@ -108,6 +99,15 @@ if __name__ == "__main__":
     elif difficultyTarget <= hardcore:
         threshold = mania - epsilon
     difficultyTarget = threshold
+        
+    chooseItemWeights = { 'Random' : 5, 'MinProgression' : 5, 'MaxProgression' : 0 }
+    chooseLocWeights = { 'Random' : 1, 'MinDiff' : 0, 'MaxDiff' : 0, 'SpreadProgression' : True }
+    choose = { 'Items' : chooseItemWeights, 'Locations' : chooseLocWeights }
+    restrictions = { 'Suits' : True, 'SpeedScrew' : True, 'MajorMinor' : True }
+    seedCode = 'X'
+    if restrictions['MajorMinor'] is False:
+        seedCode = 'FX'
+    fileName = 'Ouiche_Randomizer_' + seedCode + str(seed) + '_' + preset
 
     locationPool = locations
 

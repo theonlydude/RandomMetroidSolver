@@ -511,6 +511,10 @@ def randomizerWebService():
               '--powerBombQty', request.vars.powerBombQty,
               '--minorQty', request.vars.minorQty,
               '--energyQty', request.vars.energyQty]
+    for patch in patches:
+        if request.vars[patch[0]] == 'on':
+            params.append('-c')
+            params.append(patch[0] + '.ips')
 
     ret = subprocess.call(params)
 

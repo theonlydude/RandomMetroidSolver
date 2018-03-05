@@ -328,19 +328,29 @@ class RomPatcher:
     @staticmethod
     def applyIPSPatches(romFileName, optionalPatches=[]):
         try:
-            with open(romFileName, 'r+') as romFile:
-                # apply standard patches
-                for patchName in RomPatcher.IPSPatches['Standard']:
+            if romFileName is not None:
+                romFile = open(romFileName, 'r+')
+            else:
+                romFile = FakeROM()
+
+            # apply standard patches
+            for patchName in RomPatcher.IPSPatches['Standard']:
+                RomPatcher.applyIPSPatch(romFile, patchName)
+
+            # apply layout patches
+            for patchName in RomPatcher.IPSPatches['Layout']:
+                RomPatcher.applyIPSPatch(romFile, patchName)
+
+            # apply optional patches
+            for patchName in optionalPatches:
+                if patchName in RomPatcher.IPSPatches['Optional']:
                     RomPatcher.applyIPSPatch(romFile, patchName)
 
-                # apply layout patches
-                for patchName in RomPatcher.IPSPatches['Layout']:
-                    RomPatcher.applyIPSPatch(romFile, patchName)
+            romFile.close()
 
-                # apply optional patches
-                for patchName in optionalPatches:
-                    if patchName in RomPatcher.IPSPatches['Optional']:
-                        RomPatcher.applyIPSPatch(romFile, patchName)
+            if romFileName is None:
+                return romFile.data
+
         except Exception as e:
             print("Error patching {}. ({})".format(romFileName, e))
             sys.exit(-1)

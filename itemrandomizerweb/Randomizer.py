@@ -181,7 +181,10 @@ class Randomizer(object):
     
     def chooseItem(self, items):
         random.shuffle(items)
-        return self.getChooseFunc(self.chooseItemRanges, self.chooseItemFuncs)(items)
+        item = self.getChooseFunc(self.chooseItemRanges, self.chooseItemFuncs)(items)
+        if item is None:
+            item = self.chooseItemRandom(items)
+        return item
         
     def chooseLocationRandom(self, availableLocations, item):
         return availableLocations[random.randint(0, len(availableLocations)-1)]
@@ -343,7 +346,7 @@ class Randomizer(object):
         sys.stdout.flush()
         self.currentItems.append(itemLocation['Item'])
         itemLocations.append(itemLocation)
-#        print(str(len(self.currentItems)) + ':' + itemLocation['Item']['Type'] + ' at ' + itemLocation['Location']['Name'])
+ #       print(str(len(self.currentItems)) + ':' + itemLocation['Item']['Type'] + ' at ' + itemLocation['Location']['Name'])
         self.itemPool = self.removeItem(itemLocation['Item']['Type'], self.itemPool)
 
     def generateItem(self, curLocs, pool):
@@ -410,12 +413,18 @@ class Randomizer(object):
                     curLocs = self.currentLocations(self.currentItems)
                     removed = False
                     doRemove = True
-                    while isStuck and len(itemLocations) > 0 and doRemove:
+                    maxCancel = 3 # assume we can't get stuck by a combination of more than 3 items...
+                    nCancel = 0
+                    while isStuck and len(itemLocations) > 0 and doRemove and nCancel <= maxCancel:
                         self.cancelLastItem(itemLocations)
+                        nCancel += 1
                         removed = True
                         # we can continue to cancel decisions if we don't regress
                         nextCur = self.currentLocations(self.currentItems[:-1])
-                        doRemove = len(curLocs) == len(nextCur) or len(curLocs) == len(nextCur) - 1 
+                        doRemove = len(curLocs) == len(nextCur) or len(curLocs) == len(nextCur) - 1
+                        if doRemove:
+                            curLocs = nextCur
+                        print(doRemove)
                     # proceed like normal
                     curLocs = self.currentLocations(self.currentItems)
                     itemLocation = self.generateItem(curLocs, self.itemPool)
@@ -438,6 +447,7 @@ class Randomizer(object):
 # * si min progression : rendre grand le itemLimit. Garder le concept de l'item qui
 # ouvre le moins de chemin possible?? ou alors juste eviter de placer un item
 # flag progression. a voir aussi sur placer les suits en dernier?
+# on peut jouer aussi sur les items présents dans NON-PROG
 # * si max diff : impact sur le choix de l'item => prendre l'item qui diminue
 # le moins la difficulte totale (ou max?) des currentLocations obtenues avec
 # cet item.

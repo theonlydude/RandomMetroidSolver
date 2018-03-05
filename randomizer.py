@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import argparse, random, os.path, json, sys
+import argparse, random, os.path, json, sys, shutil
 
 from itemrandomizerweb.stdlib import Random
 from itemrandomizerweb import Items
@@ -135,29 +135,34 @@ if __name__ == "__main__":
         # patch local rom
         romFileName = args.rom
         fileName += '.sfc'
-        RomPatcher.patch(romFileName, fileName, itemLocs)
 
-        RomPatcher.applyIPSPatches(fileName, args.patches)
+        try:
+            shutil.copyfile(romFileName, fileName)
 
-        RomPatcher.writeSeed(fileName, seed)
+            RomPatcher.writeItemsLocs(fileName, itemLocs)
 
-        RomPatcher.writeSpoiler(fileName, itemLocs)
+            RomPatcher.applyIPSPatches(fileName, args.patches)
+
+            RomPatcher.writeSeed(fileName, seed)
+
+            RomPatcher.writeSpoiler(fileName, itemLocs)
+        except Exception as e:
+            print("Error patching {}. Is {} a valid ROM ? ({})".format(fileName, romFileName, e))
+            sys.exit(-1)
     else:
         if args.output is not None:
             # web service
-            locsItems = {}
-            for itemLoc in itemLocs:
-                itemCode = Items.getItemTypeCode(itemLoc['Item'],
-                                                 itemLoc['Location']['Visibility'],
-                                                 returnsInt = True)
-                locsItems[itemLoc['Location']['Address']] = itemCode[0]
-                locsItems[itemLoc['Location']['Address'] + 1] = itemCode[1]
+            data = {}
 
-            locsItems["fileName"] = fileName + '.sfc'
+            data.update(RomPatcher.writeItemsLocs(None, itemLocs))
+            data.update(RomPatcher.writeSeed(None, seed))
+            data.update(RomPatcher.writeSpoiler(None, itemLocs))
 
-            #print("locsItems={}".format(locsItems))
+            fileName += '.sfc'
+            data["fileName"] = fileName
+
             with open(args.output, 'w') as jsonFile:
-                json.dump(locsItems, jsonFile)
+                json.dump(data, jsonFile)
         else:
             # rom json
             fileName += '.json'

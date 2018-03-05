@@ -1,5 +1,5 @@
 
-import re, struct, sys, shutil, random
+import re, struct, sys, random
 from helpers import SMBool
 from itemrandomizerweb import Items
 from itemrandomizerweb.patches import patches
@@ -184,7 +184,7 @@ class RomReader:
     def getItem(self, romFile, address, visibility):
         # return the hex code of the object at the given address
 
-        romFile.seek(address, 0)
+        romFile.seek(address)
         # value is in two bytes
         value1 = struct.unpack("B", romFile.read(1))
         value2 = struct.unpack("B", romFile.read(1))
@@ -193,7 +193,7 @@ class RomReader:
         # 0x1a is to say that the item is a morphball
         # 0xeedb is missile item
         # 0x786de is Morphing Ball location
-        romFile.seek(address+4, 0)
+        romFile.seek(address+4)
         value3 = struct.unpack("B", romFile.read(1))
         if (value3[0] == int('0x1a', 16)
             and value2[0]*256+(value1[0]) == int('0xeedb', 16)
@@ -298,29 +298,32 @@ class RomPatcher:
     }
 
     @staticmethod
-    def patch(romFileName, outFileName, itemLocs):
-        try:
-            shutil.copyfile(romFileName, outFileName)
+    def writeItemsLocs(outFileName, itemLocs):
+        if outFileName is not None:
+            outFile = open(outFileName, 'r+')
+        else:
+            outFile = FakeROM()
 
-            with open(outFileName, 'r+') as outFile:
-                for itemLoc in itemLocs:
-                    if itemLoc['Item']['Type'] in ['Nothing', 'NoEnergy']:
-                        # put missile morphball like dessy
-                        itemCode = Items.toByteArray(0xeedb)
-                        outFile.seek(itemLoc['Location']['Address'], 0)
-                        outFile.write(itemCode[0])
-                        outFile.write(itemCode[1])
-                        outFile.seek(itemLoc['Location']['Address'] + 4, 0)
-                        outFile.write(struct.pack('B', 0x1a))
-                    else:
-                        itemCode = Items.getItemTypeCode(itemLoc['Item'],
-                                                         itemLoc['Location']['Visibility'])
-                        outFile.seek(itemLoc['Location']['Address'], 0)
-                        outFile.write(itemCode[0])
-                        outFile.write(itemCode[1])
-        except Exception as e:
-            print("Error patching {}. Is {} a valid ROM ? ({})".format(outFileName, romFileName, e))
-            sys.exit(-1)
+        for itemLoc in itemLocs:
+            if itemLoc['Item']['Type'] in ['Nothing', 'NoEnergy']:
+                # put missile morphball like dessy
+                itemCode = Items.toByteArray(0xeedb)
+                outFile.seek(itemLoc['Location']['Address'])
+                outFile.write(itemCode[0])
+                outFile.write(itemCode[1])
+                outFile.seek(itemLoc['Location']['Address'] + 4)
+                outFile.write(struct.pack('B', 0x1a))
+            else:
+                itemCode = Items.getItemTypeCode(itemLoc['Item'],
+                                                 itemLoc['Location']['Visibility'])
+                outFile.seek(itemLoc['Location']['Address'])
+                outFile.write(itemCode[0])
+                outFile.write(itemCode[1])
+
+        outFile.close()
+
+        if outFileName is None:
+            return outFile.data
 
     @staticmethod
     def applyIPSPatches(romFileName, optionalPatches=[]):
@@ -353,22 +356,28 @@ class RomPatcher:
 
     @staticmethod
     def writeSeed(romFileName, seed):
-        with open(romFileName, 'r+') as romFile:
-            random.seed(seed)
+        if romFileName is not None:
+            romFile = open(romFileName, 'r+')
+        else:
+            romFile = FakeROM()
 
-            seedInfo = random.randint(0, 0xFFFF)
-            seedInfo2 = random.randint(0, 0xFFFF)
-            seedInfoArr = Items.toByteArray(seedInfo)
-            seedInfoArr2 = Items.toByteArray(seedInfo2)
+        random.seed(seed)
 
-            romFile.seek(0x2FFF00)
-            romFile.write(seedInfoArr[0])
-            romFile.seek(0x2FFF01)
-            romFile.write(seedInfoArr[1])
-            romFile.seek(0x2FFF02)
-            romFile.write(seedInfoArr2[0])
-            romFile.seek(0x2FFF03)
-            romFile.write(seedInfoArr2[1])
+        seedInfo = random.randint(0, 0xFFFF)
+        seedInfo2 = random.randint(0, 0xFFFF)
+        seedInfoArr = Items.toByteArray(seedInfo)
+        seedInfoArr2 = Items.toByteArray(seedInfo2)
+
+        romFile.seek(0x2FFF00)
+        romFile.write(seedInfoArr[0])
+        romFile.write(seedInfoArr[1])
+        romFile.write(seedInfoArr2[0])
+        romFile.write(seedInfoArr2[1])
+
+        romFile.close()
+
+        if romFileName is None:
+            return romFile.data
 
     @staticmethod
     def writeSpoiler(romFileName, itemLocs):
@@ -398,18 +407,27 @@ class RomPatcher:
 
             return s
 
-        with open(romFileName, 'r+') as romFile:
-            address = 0x2f5240
-            for iL in fItemLocs:
-                itemName = prepareString(iL['Item']['Name'])
-                locationName = prepareString(iL['Location']['Name'], isItem=False)
+        if romFileName is not None:
+            romFile = open(romFileName, 'r+')
+        else:
+            romFile = FakeROM()
 
-                RomPatcher.writeCreditsString(romFile, address, 0x04, itemName)
-                RomPatcher.writeCreditsString(romFile, (address + 0x40), 0x18, locationName)
+        address = 0x2f5240
+        for iL in fItemLocs:
+            itemName = prepareString(iL['Item']['Name'])
+            locationName = prepareString(iL['Location']['Name'], isItem=False)
 
-                address += 0x80
+            RomPatcher.writeCreditsString(romFile, address, 0x04, itemName)
+            RomPatcher.writeCreditsString(romFile, (address + 0x40), 0x18, locationName)
 
-            RomPatcher.patchBytes(romFile, address, [0, 0, 0, 0])
+            address += 0x80
+
+        RomPatcher.patchBytes(romFile, address, [0, 0, 0, 0])
+
+        romFile.close()
+
+        if romFileName is None:
+            return romFile.data
 
     @staticmethod
     def writeCreditsString(romFile, address, color, string):
@@ -442,13 +460,24 @@ class RomPatcher:
 
     @staticmethod
     def patchBytes(romFile, address, array):
+        romFile.seek(address)
         for dByte in array:
             dByteArr = Items.toByteArray(dByte)
-
-            romFile.seek(address)
             romFile.write(dByteArr[0])
-            address += 1
-
-            romFile.seek(address)
             romFile.write(dByteArr[1])
-            address += 1
+
+class FakeROM:
+    # to have the same code for real rom and the webservice
+    def __init__(self):
+        self.curAddress = 0
+        self.data = {}
+
+    def seek(self, address):
+        self.curAddress = address
+
+    def write(self, byte):
+        self.data[self.curAddress] = struct.unpack("B", byte)
+        self.curAddress += 1
+
+    def close(self):
+        pass

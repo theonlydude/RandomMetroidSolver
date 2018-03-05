@@ -199,7 +199,7 @@ NoEnergy = {
 def toByteArray(itemCode):
     return (struct.pack('B', itemCode & 0xff), struct.pack('B', itemCode >> 8))
 
-def getItemTypeCode(item, itemVisibility, returnsInt=False):
+def getItemTypeCode(item, itemVisibility):
     if itemVisibility == 'Visible':
         modifier = 0
     elif itemVisibility == 'Chozo':
@@ -208,10 +208,7 @@ def getItemTypeCode(item, itemVisibility, returnsInt=False):
         modifier = 168
 
     itemCode = item['Code'] + modifier
-    if returnsInt is True:
-        return (itemCode & 0xff, itemCode >> 8)
-    else:
-        return toByteArray(itemCode)
+    return toByteArray(itemCode)
 
 def addItem(itemType, itemPool):
     return [List.find(lambda item: item["Type"] == itemType, Items)] + itemPool

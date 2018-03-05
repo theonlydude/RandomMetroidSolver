@@ -176,29 +176,30 @@ window.onload = function(){
   </div>
 
   <div class="main">
-    <form id="mainform", name="mainform", onsubmit="doSubmit(); return false;">
-    <p>
-      Vanilla Super Metroid ROM:
-    </p>
-    <p>
+    <div class="row">
+      <div class="column">
+        <form id="mainform", name="mainform", onsubmit="doSubmit(); return false;">
+          <table>
+            <colgroup><col class="half" /><col class="half" /></colgroup>
+            <tr>
+              <td>Vanilla Super Metroid ROM:</td>
+              <td>
       {{
       =INPUT(_type="file", _name="uploadFile", _id="uploadFile")
       }}
-    </p>
-
-    <p>
-      Randomizer seed:
-    </p>
-    <p>
+              </td>
+            </tr>
+            <tr>
+              <td>Randomizer seed:</td>
+              <td>
       {{
-      =INPUT(_type="text", _name="seed", _id="seed", value=0)
+      =INPUT(_type="text", _name="seed", _id="seed", value=0, _class="full")
       }}
-    </p>
-
-    <p>
-      The maximum difficulty for picking up an item:
-    </p>
-    <p>
+              </td>
+            </tr>
+            <tr>
+              <td>The maximum difficulty for picking up an item:</td>
+              <td>
       {{
       if 'difficulty_target' in session.randomizer:
         value = session.randomizer['difficulty_target']
@@ -210,15 +211,15 @@ window.onload = function(){
       =SELECT('easy', 'medium', 'hard', 'very hard', 'hardcore', 'mania',
               _id="difficulty_target",
               _name="difficulty_target",
+              _class="full",
               requires=IS_IN_SET(['easy', 'medium', 'hard', 'very hard', 'hardcore', 'mania']),
               value=value)
       }}
-    </p>
-
-    <p>
-      The preset used to randomize:
-    </p>
-    <p>
+              </td>
+            </tr>
+            <tr>
+              <td>The preset used to randomize:</td>
+              <td>
       {{
       if 'paramsFile' in session.randomizer:
         value = session.randomizer['paramsFile']
@@ -228,30 +229,91 @@ window.onload = function(){
       }}
       {{
       =SELECT(*presets,
-              **dict(_id="paramsFile", _name="paramsFile", value=value))
+              **dict(_id="paramsFile", _name="paramsFile", value=value, _class="full"))
       }}
-    </p>
+              </td>
+            </tr>
+          </table>
 
     <p>
-      The patches included by default:
-      <ul>
-        <li>Intro/Ceres Skip and initial door flag setup</li>
-        <li>Instantly open G4 passage when all bosses are killed</li>
-        <li>Wake up zebes when going right from morph</li>
-        <li>Seed display</li>
-        <li>Custom credits with stats</li>
-        <li>Removes Gravity Suit heat protection</li>
-        <li>Mother Brain Cutscene Edits</li>
-        <li>Suit acquisition animation skip</li>
-        <li>Fix Morph & Missiles Room State</li>
-        <li>Fix heat damage speed echoes bug</li>
-        <li>Disable GT Code</li>
-        <li>Disable Space/Time select in menu</li>
-        <li>Fix Morph Ball Hidden/Chozo PLM's</li>
-        <li>Fix Screw Attack selection in menu</li>
-      </ul>
-    </p>
+{{
+      if 'missileQty' in session.randomizer:
+        valueM = session.randomizer['missileQty']
+      else:
+        valueM = "3"
+        pass
+      if 'superQty' in session.randomizer:
+        valueS = session.randomizer['superQty']
+      else:
+        valueS = "3"
+        pass
+      if 'powerBombQty' in session.randomizer:
+        valueP = session.randomizer['powerBombQty']
+      else:
+        valueP = "1"
+        pass
+      if 'minorQty' in session.randomizer:
+        valuem = session.randomizer['minorQty']
+      else:
+        valuem = "100"
+        pass
+      if 'energyQty' in session.randomizer:
+        valueE = session.randomizer['energyQty']
+      else:
+        valueE = "vanilla"
+        pass
+}}
+
+      The quantity of Minors and Energy<br/>
+      For each minors, the higher the number the higher the probability of choosing it<br/>
+      <table>
+        <colgroup><col class="half" /><col class="half" /></colgroup>
+        <tr>
+          <td>Quantity of Missiles</td>
+          <td>
+            <input name="missileQty" id="missileQty" type="number" value={{=valueM}} min="1" max="10", class="full">
+          </td>
+        </tr>
+        <tr>
+          <td>Quantity of Super Missiles</td>
+          <td>
+            <input name="superQty" id="superQty" type="number" value={{=valueS}} min="1" max="10", class="full">
+          </td>
+        </tr>
+        <tr>
+          <td>Quantity of Power Bombs</td>
+          <td>
+            <input name="powerBombQty" id="powerBombQty" type="number" value={{=valueP}} value="1" min="1" max="10" class="full">
+          </td>
+        </tr>
+        <tr>
+          <td>Percentage of minors available</td>
+          <td>
+            <input name="minorQty" id="minorQty" type="number" value={{=valuem}} min="1" max="100", class="full">
+          </td>
+        </tr>
+        <tr>
+          <td>Quantity of Energy/Reserve Tanks available</td>
+          <td>
+      {{
+      =SELECT('sparse', 'medium', 'vanilla',
+              _id="energyQty",
+              _name="energyQty",
+              requires=IS_IN_SET(['sparse', 'medium', 'vanilla']),
+              value=valueE,
+              _class="full")
+      }}
+          </td>
+        </tr>
+      </table>
+
+    {{
+    =INPUT(_type="submit", _value="Randomize", _id="submitBtn")
+    }}
+    </div>
+  <div class="column">
     <p>
+      All the patches from Total Item Randomizer are included by default.<br/>
       The layout patches included by default:
       <ul>
         <li>Disable respawning blocks at Dachora Pit</li>
@@ -284,61 +346,10 @@ for patch in patches:
   pass
 }}
     </p>
-    <p>
-{{
-      if 'missileQty' in session.randomizer:
-        valueM = session.randomizer['missileQty']
-      else:
-        valueM = "3"
-        pass
-      if 'superQty' in session.randomizer:
-        valueS = session.randomizer['superQty']
-      else:
-        valueS = "3"
-        pass
-      if 'powerBombQty' in session.randomizer:
-        valueP = session.randomizer['powerBombQty']
-      else:
-        valueP = "1"
-        pass
-      if 'minorQty' in session.randomizer:
-        valuem = session.randomizer['minorQty']
-      else:
-        valuem = "100"
-        pass
-      if 'energyQty' in session.randomizer:
-        valueE = session.randomizer['energyQty']
-      else:
-        valueE = "vanilla"
-        pass
-}}
 
-      The quantity of Minors and Energy<br/>
-      For each minors, the higher the number the higher the probability of choosing it<br/>
-      <label for="missileQty">Quantity of Missiles</label>
-      <input name="missileQty" id="missileQty" type="number" value={{=valueM}} min="1" max="10"><br/>
-      <label for="superQty">Quantity of Super Missiles</label>
-      <input name="superQty" id="superQty" type="number" value={{=valueS}} min="1" max="10"><br/>
-      <label for="powerBombQty">Quantity of Power Bombs</label>
-      <input name="powerBombQty" id="powerBombQty" type="number" value={{=valueP}} value="1" min="1" max="10"><br/>
 
-      <label for="minorQty">Percentage of minors available</label>
-      <input name="minorQty" id="minorQty" type="number" value={{=valuem}} min="1" max="100"><br/>
-
-      <label for="energyQty">Quantity of Energy/Reserve Tanks available</label>
-      {{
-      =SELECT('sparse', 'medium', 'vanilla',
-              _id="energyQty",
-              _name="energyQty",
-              requires=IS_IN_SET(['sparse', 'medium', 'vanilla']),
-              value=valueE)
-      }}
-
-    </p>
-
-    {{
-    =INPUT(_type="submit", _value="Randomize", _id="submitBtn")
-    }}
   </form>
+  </div>
+  </div>
   </div>
 </body>

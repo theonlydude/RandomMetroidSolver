@@ -79,21 +79,21 @@ class Solver:
             self.log.error("rom not loaded")
             return
 
-        difficulty = self.computeDifficulty()
+        (difficulty, itemsOk) = self.computeDifficulty()
 
         if self.type == 'console':
             # print generated path
             if Conf.displayGeneratedPath is True:
                 self.printPath("Generated path:", self.visitedLocations)
                 # if we've aborted, display remaining majors
-                if difficulty == -1:
+                if difficulty == -1 or itemsOk is False:
                     self.printPath("Remaining major locations:", self.majorLocations)
                     self.printPath("Remaining minor locations:", self.minorLocations)
 
             # display difficulty scale
             self.displayDifficulty(difficulty)
 
-        return difficulty
+        return (difficulty, itemsOk)
 
     def displayDifficulty(self, difficulty):
         if difficulty >= 0:
@@ -230,9 +230,10 @@ class Solver:
             })
 
         # compute difficulty value
-        difficulty = self.computeDifficultyValue()
+        (difficulty, itemsOk) = self.computeDifficultyValue()
 
         self.log.debug("difficulty={}".format(difficulty))
+        self.log.debug("itemsOk={}".format(itemsOk))
         self.log.debug("{}/{}: remaining major: {}, remaining minor: {}, visited: {}".format(Conf.majorsPickup, Conf.minorsPickup, len(self.majorLocations), len(self.minorLocations), len(self.visitedLocations)))
 
         self.log.debug("remaining majors:")
@@ -241,7 +242,7 @@ class Solver:
 
         self.log.debug("bosses: {}".format(Bosses.golden4Dead))
 
-        return difficulty
+        return (difficulty, itemsOk)
 
     def computeLocationsDifficulty(self, locations):
         for loc in locations:
@@ -254,15 +255,21 @@ class Solver:
     def computeDifficultyValue(self):
         if not self.canEndGame().bool:
             # we have aborted
-            difficulty = -1
+            return (-1, False)
         else:
-            # sum difficulty for all visited locations
-            difficulty_max = 0
+            # return the maximum difficulty
+            difficultyMax = 0
             for loc in self.visitedLocations:
-                difficulty_max = max(difficulty_max, loc['difficulty'].difficulty)
-            difficulty = difficulty_max
+                difficultyMax = max(difficultyMax, loc['difficulty'].difficulty)
+            difficulty = difficultyMax
 
-        return difficulty
+            # check if we have taken all the requested items
+            if (self.pickup.enoughMinors(self.collectedItems, self.minorLocations)
+                and self.pickup.enoughMajors(self.collectedItems, self.majorLocations)):
+                return (difficulty, True)
+            else:
+                # can finish but can't take all the requested items
+                return (difficulty, False)
 
     def getPath(self, locations):
         out = []

@@ -231,7 +231,7 @@ window.onload = function(){
                 var fileSize = file.size;
 		if( fileSize > 4*1024*1024 ) {
                     document.getElementById("uploadFile").value = "";
-                    alert("wrong rom file size: "+fileSize.toString());
+                    alert("Wrong ROM file size: "+fileSize.toString());
                     return false;
                 }
 
@@ -395,7 +395,7 @@ pass
       <div class="paddingleft">
 	<h3>ROM</h3>
 	<p>
-	  Ajust the presets depending on the techniques you know, choose your randomized rom then press 'Compute Difficulty'.
+	  Ajust the presets depending on the techniques you know, choose your randomized ROM then press 'Compute Difficulty'.
 	  {{=mainForm}}
 	</p>
       </div>
@@ -440,10 +440,19 @@ if resultText is not None and difficulty != -1:
 }}
 <div id="timeline" style="height: 95px; width: 50%;"></div>
 
-<p>To solve this rom {{=knowsUsed[0]}} distinct techniques have been used out of the {{=knowsUsed[1]}} known techniques.</p></br>
+<p>
+  To solve this ROM {{=knowsUsed[0]}} distinct techniques have been used out of the {{=knowsUsed[1]}} known techniques.
+</p>
+{{
+  if itemsOk is False:
+}}
+<p>
+  Warning: the ROM is finishable, but we couldn't pickup all the requested items.
+</p>
 
 {{
-pass
+    pass
+  pass
 }}
 
 
@@ -510,7 +519,7 @@ The strategy for picking up major and minor items.
 <li>Any:</li>
 <ul>
   <li>
-    No requirements on the items as long as the rom is finishable.<br/>
+    No requirements on the items as long as the ROM is finishable.<br/>
     Warning: The generated path may not be realistic.<br/>
     Use this setting on seeds that are unfinishable at first,</br>
     such as masochist seeds in Dessyreqt randomizer.

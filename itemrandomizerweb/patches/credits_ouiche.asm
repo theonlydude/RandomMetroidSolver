@@ -928,10 +928,10 @@ script:
 
     // Custom item randomizer credits text        
 
-    dw {draw}, {row}*128
+    dw {draw}, {row}*128 // OUICHE RANDOMIZER STAFF
     dw {draw}, {blank}
     dw {draw}, {blank}
-    dw {draw}, {row}*129
+    dw {draw}, {row}*129 // RANDOMIZER CODE
     dw {draw}, {blank}
     dw {draw}, {row}*130
     dw {draw}, {row}*131
@@ -966,10 +966,8 @@ script:
     dw {draw}, {row}*148
     dw {draw}, {row}*149
     dw {draw}, {blank}
-    dw {draw}, {blank}
-    dw {draw}, {row}*150 // SPECIAL THANKS TO
-    dw {draw}, {blank}
-    dw {draw}, {row}*151 // SUPER METROID DISASSEMBLY
+    dw {draw}, {row}*150
+    dw {draw}, {row}*151
     dw {draw}, {blank}
     dw {draw}, {row}*152
     dw {draw}, {row}*153
@@ -977,18 +975,21 @@ script:
     dw {draw}, {row}*154
     dw {draw}, {row}*155
     dw {draw}, {blank}
-    dw {draw}, {row}*156
-    dw {draw}, {row}*157
+    dw {draw}, {blank}
+    dw {draw}, {row}*156 // SPECIAL THANKS TO
+    dw {draw}, {blank}
+    dw {draw}, {row}*157 // METROID CONSTRUCTION
+    dw {draw}, {blank}
     dw {draw}, {row}*158
+    dw {draw}, {row}*159
     dw {draw}, {blank}
+    dw {draw}, {row}*160 // SUPER METROID SRL COMMUNITY
     dw {draw}, {blank}
-    dw {draw}, {row}*159 // TOURNAMENT ORGANIZERS
-    dw {draw}, {blank}
-    dw {draw}, {row}*160
     dw {draw}, {row}*161
-    dw {draw}, {blank}
     dw {draw}, {row}*162
-    dw {draw}, {row}*163
+    dw {draw}, {blank}
+    dw {draw}, {blank}
+    dw {draw}, {row}*163 // INFORMATION
     dw {draw}, {blank}
     dw {draw}, {row}*164
     dw {draw}, {row}*165
@@ -996,24 +997,19 @@ script:
     dw {draw}, {row}*166
     dw {draw}, {row}*167
     dw {draw}, {blank}
-    dw {draw}, {blank}
-    dw {draw}, {row}*168 // SPEEDGAMING STAFF
-    dw {draw}, {blank}
+    dw {draw}, {row}*168
     dw {draw}, {row}*169
+    dw {draw}, {blank}
     dw {draw}, {row}*170
-    dw {draw}, {blank}
     dw {draw}, {row}*171
+    dw {draw}, {blank}
     dw {draw}, {row}*172
-    dw {draw}, {blank}
-    dw {draw}, {blank}
-    dw {draw}, {row}*173 // METROID CONSTRUCTION
+    dw {draw}, {row}*173
     dw {draw}, {blank}
     dw {draw}, {row}*174
     dw {draw}, {row}*175
     dw {draw}, {blank}
-    dw {draw}, {blank}
-    dw {draw}, {row}*176 // SUPER METROID SRL COMMUNITY
-    dw {draw}, {blank}
+    dw {draw}, {row}*176
     dw {draw}, {row}*177
     dw {draw}, {row}*178
     dw {draw}, {blank}
@@ -1234,46 +1230,43 @@ credits:
     dw "             foosda             " // 147
     dw "             LEODOX             " // 148
     dw "             leodox             " // 149
+    dw "            DARKSHOCK           " // 150
+    dw "            darkshock           " // 151
+    dw "            KEJARDON            " // 152
+    dw "            kejardon            " // 153
+    dw "             SCYZER             " // 154
+    dw "             scyzer             " // 155
     {cyan}
-    dw "       SPECIAL THANKS TO        " // 150
+    dw "       SPECIAL THANKS TO        " // 156
     {yellow}
-    dw "   SUPER METROID DISASSEMBLY    " // 151
+    dw "      METROID CONSTRUCTION      " // 157
     {big}
-    dw "             PJBOY              " // 152
-    dw "             pjboy              " // 153
-    dw "            KEJARDON            " // 154
-    dw "            kejardon            " // 155
-    dw "             SCYZER             " // 156
-    dw "             scyzer             " // 157
-    dw "                                " // 158
+    dw "     METROIDCONSTRUCTION COM    " // 158
+    dw "     metroidconstruction.com    " // 159
     {yellow}
-    dw "     TOURNAMENT ORGANIZERS      " // 159
+    dw "  SUPER METROID SRL COMMUNITY   " // 160
     {big}
-    dw "            FERAL5X             " // 160
-    dw "            feral%x             " // 161
-    dw "           STRAEVARAS           " // 162
-    dw "           straevaras           " // 163
-    dw "         WILDANACONDA69         " // 164
-    dw "         wildanaconda&)         " // 165
-    dw "           BELTHASAR            " // 166
-    dw "           belthasar            " // 167
-    {yellow}
-    dw "       SPEEDGAMING STAFF        " // 168
+    dw "    DISCORD INVITE . RT2FWZT    " // 161 (rT2fWZt)
+    dw "    discord invite . RT@FWZT    " // 162
+    {pink}
+    dw "          INFORMATION           " // 163
     {big}
-    dw "            FEASEL              " // 169
-    dw "            feasel              " // 170
-    dw "           MITHICAL9            " // 171
-    dw "           mithical)            " // 172
-    {yellow}
-    dw "      METROID CONSTRUCTION      " // 173
-    {big}
-    dw "     METROIDCONSTRUCTION COM    " // 174
-    dw "     metroidconstruction.com    " // 175
-    {yellow}
-    dw "  SUPER METROID SRL COMMUNITY   " // 176
-    {big}
-    dw "    DISCORD INVITE . 6RYJM4M    " // 177
-    dw "    discord invite . &ryjm$m    " // 178
+    dw "  CHECK YOUR RANDOMIZED ROMS    " // 164
+    dw "  check your randomized roms    " // 165
+    dw "  GET THE LIST OF TECHNIQUES    " // 166
+    dw "  get the list of techniques    " // 167
+    dw "      AND MUCH MORE ON          " // 168
+    dw "      and much more on          " // 169
+    dw "  THE SUPER METROID SOLVER AT   " // 170
+    dw "  the super metroid solver at   " // 171
+    dw "                                " // 172
+    dw "                                " // 173
+    dw "       RANDOMMETROIDSOLVER      " // 174
+    dw "       randommetroidsolver      " // 175
+    dw "        PYTHONANYWHERE COM      " // 176
+    dw "       .pythonanywhere.com      " // 177
+    dw "                                " // 178
+
     {big}
     dw "       RANDOMMETROIDSOLVER      " // 179
     dw "       randommetroidsolver      " // 180

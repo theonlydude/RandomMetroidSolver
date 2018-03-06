@@ -1247,7 +1247,7 @@ credits:
     dw "  SUPER METROID SRL COMMUNITY   " // 160
     {big}
     dw "    DISCORD INVITE . RT2FWZT    " // 161 (rT2fWZt)
-    dw "    discord invite . RT@FWZT    " // 162
+    dw "    discord invite . rt@fwzt    " // 162
     {pink}
     dw "          INFORMATION           " // 163
     {big}

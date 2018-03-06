@@ -11,7 +11,7 @@ from parameters import easy, medium, hard, harder, hardcore, mania, diff2text
 # the helper functions
 from helpers import Pickup, Bosses, wand, wor, enoughStuffTourian, SMBool
 
-from rom import RomReader, RomType
+from rom import RomReader, RomType, RomLoader
 
 class Solver:
     # given a rom and parameters returns the estimated difficulty
@@ -362,105 +362,6 @@ class Solver:
         
         return around + outside
 
-class Items:
-    itemsClasses = {
-        'ETank': 'Major',
-        'Missile': 'Minor',
-        'Super': 'Minor',
-        'PowerBomb': 'Minor',
-        'Bomb': 'Major',
-        'Charge': 'Major',
-        'Ice': 'Major',
-        'HiJump': 'Major',
-        'SpeedBooster': 'Major',
-        'Wave': 'Major',
-        'Spazer': 'Major',
-        'SpringBall': 'Major',
-        'Varia': 'Major',
-        'Plasma': 'Major',
-        'Grapple': 'Major',
-        'Morph': 'Major',
-        'Reserve': 'Major',
-        'Gravity': 'Major',
-        'XRayScope': 'Major',
-        'SpaceJump': 'Major',
-        'ScrewAttack': 'Major',
-        'Nothing': 'Nothing'
-    }
-
-    @staticmethod
-    def getItemClass(item):
-        return Items.itemsClasses[item]
-
-
-def isString(string):
-    if sys.version[0] == '2':
-        return type(string) == str or type(string) == unicode
-    else:
-        return type(string) == str
-
-class RomLoader:
-    @staticmethod
-    def factory(rom):
-        # can be a real rom. can be a json or a dict with the locations - items association
-        # unicode only exists in python2
-        if isString(rom):
-            ext = os.path.splitext(rom)
-            if ext[1].lower() == '.sfc' or ext[1].lower() == '.smc':
-                return RomLoaderSfc(rom)
-            elif ext[1].lower() == '.json':
-                return RomLoaderJson(rom)
-            else:
-                print("wrong rom file type: {}".format(ext[1]))
-                sys.exit(-1)
-        elif type(rom) is dict:
-            return RomLoaderDict(rom)
-
-    def assignItems(self, locations):
-        # update the itemName and Class of the locations
-        for loc in locations:
-            loc['itemName'] = self.locsItems[loc['Name']]
-            #loc["Class"] = Items.getItemClass(loc['itemName'])
-
-    def dump(self, fileName):
-        with open(fileName, 'w') as jsonFile:
-            json.dump(self.locsItems, jsonFile)
-
-
-class RomLoaderSfc(RomLoader):
-    # standard usage
-    def __init__(self, romFileName):
-        self.romFileName = romFileName
-        self.romReader = RomReader(romFileName)
-
-    def assignItems(self, locations):
-        # update the itemName of the locations
-        self.romReader.loadItems(locations)
-
-        self.locsItems = {}
-        for loc in locations:
-            self.locsItems[loc['Name']] = loc['itemName']
-            #loc["Class"] = Items.getItemClass(loc['itemName'])
-
-class RomLoaderJson(RomLoader):
-    # when called from the test suite
-    def __init__(self, jsonFileName):
-        with open(jsonFileName) as jsonFile:
-            self.locsItems = json.load(jsonFile)
-
-class RomLoaderDict(RomLoader):
-    # when called from the website
-    def __init__(self, fakeRom):
-        self.fakeRom = fakeRom
-
-    def assignItems(self, locations):
-        # update the itemName of the locations
-        RomReader().loadItemsFromFakeRom(self.fakeRom, locations)
-
-        self.locsItems = {}
-        for loc in locations:
-            self.locsItems[loc['Name']] = loc['itemName']
-            #loc["Class"] = Items.getItemClass(loc['itemName'])
 
 class ParamsLoader(object):
     @staticmethod

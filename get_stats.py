@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-from solver import RomLoader
+from rom import RomLoader
 from sys import argv
 from tournament_locations import locations
 
@@ -28,7 +28,7 @@ if __name__ == "__main__":
 
     outFileName = 'stats.csv'
     with open(outFileName, 'w') as outFile:
-        outFile.write(";Crateria;Brinstar;Norfair;WreckedShip;Maridia;LowerNorfair;")
+        outFile.write("ITEM;Crateria;Brinstar;Norfair;WreckedShip;Maridia;LowerNorfair;\n")
         for item in ['Varia', 'Gravity', 'SpeedBooster', 'HiJump', 'Grapple', 'SpaceJump', 'Ice', 'Bomb']:
             outFile.write("{};{};{};{};{};{};{};\n".format(item,
                                                            counts[item]['Crateria'],

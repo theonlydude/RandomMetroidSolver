@@ -78,6 +78,8 @@ function AjaxPresetCallCompleted(data) {
 }
 
 function AjaxRandomizerCallCompleted(data) {
+    console.log("AjaxRandomizerCallCompleted");
+
     // with items/Locations patch the local rom in memory
     var filesInput = document.getElementById("uploadFile");
     var file = filesInput.files[0]
@@ -195,7 +197,7 @@ window.onload = function(){
 
   <div class="fixed">
     <div class="menu">
-      {{=A('Super Metroid Item Randomizer Solver', _href=URL(f='solver'), _class='menu')}}
+      {{=A('Super Metroid Ouiche Randomizer', _href=URL(f='randomizer'), _class='menu')}}
       {{=A('Solve!', _href=URL(f='solver'), _class='menu')}}
       {{=A('Randomize!', _href=URL(f='randomizer'), _class='menu')}}
       {{=A('Information & Contact', _href=URL(f='infos'), _class='menu')}}

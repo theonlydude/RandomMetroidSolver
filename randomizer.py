@@ -67,9 +67,9 @@ if __name__ == "__main__":
     if args.paramsFileName is not None:
         ParamsLoader.factory(args.paramsFileName[0]).load()
         preset = os.path.splitext(os.path.basename(args.paramsFileName[0]))[0]
-    elif args.preset is not None:
-        preset = args.preset
-        ParamsLoader.factory('diff_presets/' + preset + '.json').load()
+
+        if args.preset is not None:
+            preset = args.preset
     else:
         preset = 'default'
 

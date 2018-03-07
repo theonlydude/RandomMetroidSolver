@@ -485,13 +485,8 @@ def randomizer():
 
     return dict(presets=presets, patches=patches)
 
-def randomizerWebService():
-    jsonFileName = tempfile.mkstemp()[1]
-
-    print("request.vars={}".format(request.vars))
-
-    # store vars in session
-    #try:
+def sessionWebService():
+    # web service to update the session
     if session.randomizer is None:
         session.randomizer = {}
 
@@ -504,13 +499,23 @@ def randomizerWebService():
     session.randomizer['powerBombQty'] = request.vars.powerBombQty
     session.randomizer['minorQty'] = request.vars.minorQty
     session.randomizer['energyQty'] = request.vars.energyQty
-    #except:
-    #    return -1
+
+    return 0
+
+def randomizerWebService():
+    # web service to compute a new random
+    presetFileName = tempfile.mkstemp()[1] + '.json'
+    jsonFileName = tempfile.mkstemp()[1]
+
+    #print("request.vars={}".format(request.vars))
+    with open(presetFileName, 'w') as presetFile:
+        presetFile.write(request.vars.paramsFileTarget)
 
     params = ['pypy',  os.path.expanduser("~/RandomMetroidSolver/randomizer.py"),
               '--seed', request.vars.seed,
               '--difficultyTarget', request.vars.difficulty_target,
-              '--output', jsonFileName, '--preset', request.vars.paramsFile,
+              '--output', jsonFileName, '--param', presetFileName,
+              '--preset', request.vars.paramsFile,
               '--missileQty', request.vars.missileQty,
               '--superQty', request.vars.superQty,
               '--powerBombQty', request.vars.powerBombQty,
@@ -528,6 +533,23 @@ def randomizerWebService():
             locsItems = json.load(jsonFile)
 
         os.remove(jsonFileName)
+        os.remove(presetFileName)
         return locsItems
+    else:
+        os.remove(jsonFileName)
+        os.remove(presetFileName)
+        return -1
+
+def presetWebService():
+    # web service to get the content of the preset file
+    paramsFile = request.vars.paramsFile
+    print("presetWebService: paramsFile={}".format(paramsFile))
+    fullPath = 'diff_presets/{}.json'.format(paramsFile)
+    # check that the presets file exists
+    if os.path.isfile(fullPath):
+        # load it
+        params = ParamsLoader.factory(fullPath).params
+        params = json.dumps(params)
+        return params
     else:
         return -1

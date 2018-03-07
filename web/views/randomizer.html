@@ -40,10 +40,19 @@ body {
 }
 #loadingGIF {
     position: absolute;
-    top: 40%;
     left: 5%;
     z-index: 3;
     display:none;
+}
+@media (max-height: 800px) {
+    .loadingGIF {
+         top: 20%;
+    }
+}
+@media (min-height: 800px) {
+    .loadingGIF {
+         top: 40%;
+    }
 }
 .hidden {
     display: none;
@@ -51,7 +60,24 @@ body {
 </style>
 
 <script type="text/javascript">
-function AjaxCallCompleted(data) {
+function AjaxPresetCallCompleted(data) {
+    console.log("AjaxPresetCallCompleted");
+
+    // todo: detect when an error occured in the web service.
+
+    var presetInput = document.getElementById("paramsFileTarget");
+    presetInput.value = data;
+
+    // call web service with parameters
+    ajax('{{=URL(f='randomizerWebService.json')}}',
+         ['seed', 'difficulty_target', 'paramsFile', 'paramsFileTarget', 'AimAnyButton',
+          'itemsounds', 'spinjumprestart', 'supermetroid_msu1', 'max_ammo_display',
+          'missileQty', 'superQty', 'powerBombQty', 'minorQty', 'energyQty'],
+         'target',
+         {done: AjaxRandomizerCallCompleted});
+}
+
+function AjaxRandomizerCallCompleted(data) {
     // with items/Locations patch the local rom in memory
     var filesInput = document.getElementById("uploadFile");
     var file = filesInput.files[0]
@@ -64,7 +90,6 @@ function AjaxCallCompleted(data) {
 
         for(var key in data) {
             if(key === "fileName") { continue; }
-            console.log(key+": "+data[key]);
             bytes[key] = data[key];
         }
 
@@ -77,6 +102,13 @@ function AjaxCallCompleted(data) {
     // set backup button text to Randomize
     document.getElementById("submitBtn").data = "Randomize";
     console.log("button text set back to randomize");
+
+    // call webservice to update the session
+    ajax('{{=URL(f='sessionWebService')}}',
+         ['seed', 'difficulty_target', 'paramsFile', 'AimAnyButton',
+          'itemsounds', 'spinjumprestart', 'supermetroid_msu1', 'max_ammo_display',
+          'missileQty', 'superQty', 'powerBombQty', 'minorQty', 'energyQty'],
+         'target');
 
     // remove "working" message
     $('#overlay').hide();
@@ -103,15 +135,13 @@ function doSubmit() {
       return false;
     }
 
-    console.log("uploadFile=["+file+"]")
+    console.log("before preset web service call")
 
-    // call web service with parameters
-    ajax('{{=URL(f='randomizerWebService.json')}}',
-         ['seed', 'difficulty_target', 'paramsFile', 'AimAnyButton',
-          'itemsounds', 'spinjumprestart', 'supermetroid_msu1', 'max_ammo_display',
-          'missileQty', 'superQty', 'powerBombQty', 'minorQty', 'energyQty'],
-         'target',
-         {done: AjaxCallCompleted});
+    // call preset web service with parameters
+    ajax('{{=URL(f='presetWebService')}}',
+         ['paramsFile'],
+         'paramsFileTarget',
+         {done: AjaxPresetCallCompleted});
 
     // while WS is working, display "working" message
     $('#overlay').show();
@@ -226,6 +256,7 @@ window.onload = function(){
       =SELECT(*presets,
               **dict(_id="paramsFile", _name="paramsFile", value=value, _class="full"))
       }}
+      <input name="paramsFileTarget" id="paramsFileTarget" type="text" value="" class="hidden">
               </td>
             </tr>
           </table>

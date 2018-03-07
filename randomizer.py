@@ -100,7 +100,7 @@ if __name__ == "__main__":
         threshold = mania - epsilon
     difficultyTarget = threshold
         
-    chooseItemWeights = { 'Random' : 5, 'MinProgression' : 5, 'MaxProgression' : 0 }
+    chooseItemWeights = { 'Random' : 1, 'MinProgression' : 0, 'MaxProgression' : 0 }
     chooseLocWeights = { 'Random' : 1, 'MinDiff' : 0, 'MaxDiff' : 0, 'SpreadProgression' : True }
     choose = { 'Items' : chooseItemWeights, 'Locations' : chooseLocWeights }
     restrictions = { 'Suits' : True, 'SpeedScrew' : True, 'MajorMinor' : True }

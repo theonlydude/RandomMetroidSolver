@@ -25,23 +25,34 @@ extend 'layout.html'
 body {
     margin-bottom: 0px;
 }
-#myOverlay {
-    position: fixed;
-    height: 100%;
-    width: 100%;
-}
-#myOverlay {
-    background: fixed;
-    opacity: .5;
-    z-index: 200;
-    display: none;
+#overlay {
+    position: fixed; /* Sit on top of the page content */
+    display: none; /* Hidden by default */
+    width: 100%; /* Full width (cover the whole page) */
+    height: 100%; /* Full height (cover the whole page) */
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0,0,0,0.5); /* Black background with opacity */
+    z-index: 2; /* Specify a stack order in case you're using a different order for other elements */
+    cursor: pointer; /* Add a pointer on hover */
 }
 #loadingGIF {
     position: absolute;
-    top: 40%;
-    left: 45%;
+    left: 5%;
     z-index: 3;
     display:none;
+}
+@media (max-height: 800px) {
+    .loadingGIF {
+         top: 20%;
+    }
+}
+@media (min-height: 800px) {
+    .loadingGIF {
+         top: 40%;
+    }
 }
 .hidden {
     display: none;
@@ -49,7 +60,26 @@ body {
 </style>
 
 <script type="text/javascript">
-function AjaxCallCompleted(data) {
+function AjaxPresetCallCompleted(data) {
+    console.log("AjaxPresetCallCompleted");
+
+    // todo: detect when an error occured in the web service.
+
+    var presetInput = document.getElementById("paramsFileTarget");
+    presetInput.value = data;
+
+    // call web service with parameters
+    ajax('{{=URL(f='randomizerWebService.json')}}',
+         ['seed', 'difficulty_target', 'paramsFile', 'paramsFileTarget', 'AimAnyButton',
+          'itemsounds', 'spinjumprestart', 'supermetroid_msu1', 'max_ammo_display',
+          'missileQty', 'superQty', 'powerBombQty', 'minorQty', 'energyQty'],
+         'target',
+         {done: AjaxRandomizerCallCompleted});
+}
+
+function AjaxRandomizerCallCompleted(data) {
+    console.log("AjaxRandomizerCallCompleted");
+
     // with items/Locations patch the local rom in memory
     var filesInput = document.getElementById("uploadFile");
     var file = filesInput.files[0]
@@ -62,7 +92,6 @@ function AjaxCallCompleted(data) {
 
         for(var key in data) {
             if(key === "fileName") { continue; }
-            console.log(key+": "+data[key]);
             bytes[key] = data[key];
         }
 
@@ -76,8 +105,15 @@ function AjaxCallCompleted(data) {
     document.getElementById("submitBtn").data = "Randomize";
     console.log("button text set back to randomize");
 
+    // call webservice to update the session
+    ajax('{{=URL(f='sessionWebService')}}',
+         ['seed', 'difficulty_target', 'paramsFile', 'AimAnyButton',
+          'itemsounds', 'spinjumprestart', 'supermetroid_msu1', 'max_ammo_display',
+          'missileQty', 'superQty', 'powerBombQty', 'minorQty', 'energyQty'],
+         'target');
+
     // remove "working" message
-    $('#myOverlay').hide();
+    $('#overlay').hide();
     $('#loadingGIF').hide();
 }
 
@@ -96,29 +132,22 @@ function doSubmit() {
           btn = document.getElementById("submitBtn");
           btn.data = "Randomize";
           btn.disabled = false;
-      }, 1000);
+      }, 20000);
 
       return false;
     }
 
-    console.log("uploadFile=["+file+"]")
+    console.log("before preset web service call")
 
-    // call web service with parameters
-    ajax('{{=URL(f='randomizerWebService.json')}}',
-         ['seed', 'difficulty_target', 'paramsFile', 'AimAnyButton',
-          'itemsounds', 'spinjumprestart', 'supermetroid_msu1', 'max_ammo_display',
-          'missileQty', 'superQty', 'powerBombQty', 'minorQty', 'energyQty'],
-         'target',
-         {done: AjaxCallCompleted});
+    // call preset web service with parameters
+    ajax('{{=URL(f='presetWebService')}}',
+         ['paramsFile'],
+         'paramsFileTarget',
+         {done: AjaxPresetCallCompleted});
 
     // while WS is working, display "working" message
-    $('#myOverlay').show();
+    $('#overlay').show();
     $('#loadingGIF').show();
-
-    setTimeout(function(){ 
-        $('#myOverlay').hide();
-        $('#loadingGIF').hide();
-    }, 10000);
   }
 
   return false;
@@ -162,13 +191,13 @@ window.onload = function(){
 </script>
 
 <body>
-  <div id="myOverlay"></div>
+  <div id="overlay"></div>
   <div id="loadingGIF"><img src={{=URL('static/images','ajax-loader.gif')}}/></div>
 
 
   <div class="fixed">
     <div class="menu">
-      {{=A('Super Metroid Item Randomizer Solver', _href=URL(f='solver'), _class='menu')}}
+      {{=A('Super Metroid Ouiche Randomizer', _href=URL(f='randomizer'), _class='menu')}}
       {{=A('Solve!', _href=URL(f='solver'), _class='menu')}}
       {{=A('Randomize!', _href=URL(f='randomizer'), _class='menu')}}
       {{=A('Information & Contact', _href=URL(f='infos'), _class='menu')}}
@@ -179,7 +208,7 @@ window.onload = function(){
     <div class="row">
       <div class="column">
         <form id="mainform", name="mainform", onsubmit="doSubmit(); return false;">
-          <table>
+          <table class="full">
             <colgroup><col class="half" /><col class="half" /></colgroup>
             <tr>
               <td>Vanilla Super Metroid ROM:</td>
@@ -192,9 +221,7 @@ window.onload = function(){
             <tr>
               <td>Randomizer seed:</td>
               <td>
-      {{
-      =INPUT(_type="text", _name="seed", _id="seed", value=0, _class="full")
-      }}
+		<input name="seed" id="seed" type="number" value="0" min="0" max="9999999" class="full">
               </td>
             </tr>
             <tr>
@@ -204,7 +231,7 @@ window.onload = function(){
       if 'difficulty_target' in session.randomizer:
         value = session.randomizer['difficulty_target']
       else:
-        value = 'medium'
+        value = 'hard'
         pass
       }}
       {{
@@ -231,6 +258,7 @@ window.onload = function(){
       =SELECT(*presets,
               **dict(_id="paramsFile", _name="paramsFile", value=value, _class="full"))
       }}
+      <input name="paramsFileTarget" id="paramsFileTarget" type="text" value="" class="hidden">
               </td>
             </tr>
           </table>
@@ -266,7 +294,7 @@ window.onload = function(){
 
       The quantity of Minors and Energy<br/>
       For each minors, the higher the number the higher the probability of choosing it<br/>
-      <table>
+      <table class="full">
         <colgroup><col class="half" /><col class="half" /></colgroup>
         <tr>
           <td>Quantity of Missiles</td>

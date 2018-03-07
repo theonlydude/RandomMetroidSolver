@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-from solver import RomLoader
+from rom import RomLoader
 from tournament_locations import locations
 import os.path
 import sys

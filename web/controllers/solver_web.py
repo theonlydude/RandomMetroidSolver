@@ -304,7 +304,10 @@ def solver():
         if session.result['difficulty'] == -1:
             resultText = "The rom \"{}\" is not finishable with the known technics".format(session.result['randomizedRom'])
         else:
-            resultText = "The rom \"{}\" estimated difficulty is: ".format(session.result['randomizedRom'])
+            if session.result['itemsOk'] is False:
+                resultText = "The rom \"{}\" is finishable but not all the requested items can be picked up with the known technics. Estimated difficulty is: ".format(session.result['randomizedRom'])
+            else:
+                resultText = "The rom \"{}\" estimated difficulty is: ".format(session.result['randomizedRom'])
 
         difficulty = session.result['difficulty']
         diffPercent = session.result['diffPercent']
@@ -325,6 +328,7 @@ def solver():
                                     diff, techniques, items))
 
         knowsUsed = session.result['knowsUsed']
+        itemsOk = session.result['itemsOk']
 
         # display the result only once
         session.result = None
@@ -334,6 +338,7 @@ def solver():
         diffPercent = None
         pathTable = None
         knowsUsed = None
+        itemsOk = None
 
     # set title
     response.title = 'Super Metroid Item Randomizer Solver'
@@ -363,7 +368,7 @@ def solver():
                 categories=Knows.categories, settings=params['Settings'],
                 knows=params['Knows'], conf=conf, knowsUsed=knowsUsed,
                 resultText=resultText, pathTable=pathTable,
-                difficulty=difficulty, diffPercent=diffPercent,
+                difficulty=difficulty, itemsOk=itemsOk, diffPercent=diffPercent,
                 easy=easy,medium=medium,hard=hard,harder=harder,hardcore=hardcore,mania=mania)
 
 def generate_json_from_parameters(vars, hidden):
@@ -437,7 +442,7 @@ def compute_difficulty(jsonRomFileName, post_vars):
 
     # call solver
     solver = Solver(type='web', rom=jsonRomFileName, params=[paramsDict])
-    difficulty = solver.solveRom()
+    (difficulty, itemsOk) = solver.solveRom()
     diffPercent = DifficultyDisplayer(difficulty).percent()
 
     generatedPath = solver.getPath(solver.visitedLocations)
@@ -453,7 +458,7 @@ def compute_difficulty(jsonRomFileName, post_vars):
 
     return dict(randomizedRom=randomizedRom, difficulty=difficulty,
                 generatedPath=generatedPath, diffPercent=diffPercent,
-                knowsUsed=(used, total))
+                knowsUsed=(used, total), itemsOk=itemsOk)
 
 def infos():
     # set title
@@ -480,13 +485,8 @@ def randomizer():
 
     return dict(presets=presets, patches=patches)
 
-def randomizerWebService():
-    jsonFileName = tempfile.mkstemp()[1]
-
-    print("request.vars={}".format(request.vars))
-
-    # store vars in session
-    #try:
+def sessionWebService():
+    # web service to update the session
     if session.randomizer is None:
         session.randomizer = {}
 
@@ -499,13 +499,25 @@ def randomizerWebService():
     session.randomizer['powerBombQty'] = request.vars.powerBombQty
     session.randomizer['minorQty'] = request.vars.minorQty
     session.randomizer['energyQty'] = request.vars.energyQty
-    #except:
-    #    return -1
+
+    return 0
+
+def randomizerWebService():
+    # web service to compute a new random
+    presetFileName = tempfile.mkstemp()[1] + '.json'
+    jsonFileName = tempfile.mkstemp()[1]
+
+    print("randomizerWebService")
+
+    #print("request.vars={}".format(request.vars))
+    with open(presetFileName, 'w') as presetFile:
+        presetFile.write(request.vars.paramsFileTarget)
 
     params = ['pypy',  os.path.expanduser("~/RandomMetroidSolver/randomizer.py"),
               '--seed', request.vars.seed,
               '--difficultyTarget', request.vars.difficulty_target,
-              '--output', jsonFileName, '--preset', request.vars.paramsFile,
+              '--output', jsonFileName, '--param', presetFileName,
+              '--preset', request.vars.paramsFile,
               '--missileQty', request.vars.missileQty,
               '--superQty', request.vars.superQty,
               '--powerBombQty', request.vars.powerBombQty,
@@ -523,6 +535,24 @@ def randomizerWebService():
             locsItems = json.load(jsonFile)
 
         os.remove(jsonFileName)
+        os.remove(presetFileName)
         return locsItems
+    else:
+        os.remove(jsonFileName)
+        os.remove(presetFileName)
+        print("randomizerWebService: something wrong happened")
+        return -1
+
+def presetWebService():
+    # web service to get the content of the preset file
+    paramsFile = request.vars.paramsFile
+    print("presetWebService: paramsFile={}".format(paramsFile))
+    fullPath = 'diff_presets/{}.json'.format(paramsFile)
+    # check that the presets file exists
+    if os.path.isfile(fullPath):
+        # load it
+        params = ParamsLoader.factory(fullPath).params
+        params = json.dumps(params)
+        return params
     else:
         return -1

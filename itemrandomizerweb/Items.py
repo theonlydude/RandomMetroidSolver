@@ -55,8 +55,8 @@ Items = [
     },
     {
         'Type': 'Ice',
-#        'Category': 'Progression',
-        'Category': 'Beam',
+        'Category': 'Progression',
+#        'Category': 'Beam',
         'Class': 'Major',
         'Code': 0xeeef,
         'Name': "Ice Beam",
@@ -64,7 +64,7 @@ Items = [
     },
     {
         'Type': 'HiJump',
-#        'Category': 'Progression',
+        'Category': 'Progression',
         'Category': 'Misc',
         'Class': 'Major',
         'Code': 0xeef3,
@@ -162,7 +162,8 @@ Items = [
     },
     {
         'Type': 'SpaceJump',
-        'Category': 'Progression',
+#        'Category': 'Progression',
+        'Category': 'Misc',
         'Class': 'Major',
         'Code': 0xef1b,
         'Name': "Space Jump",

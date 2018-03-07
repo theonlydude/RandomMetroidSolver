@@ -372,10 +372,30 @@ class Randomizer(object):
 #        print("Cancelled  " + item['Type'] + " at " + loc['Name'])
         sys.stdout.write('x')
         sys.stdout.flush()
+        
+    def checkLocPool(self):
+        if self.isSpreadProgression is False:
+            return True
+        nProgs = len([item for item in self.itemPool if item['Category'] == 'Progression'])
+        if nProgs == 0:
+            return True
+        # check that there is room left in all main areas
+        room = {'Brinstar' : 0, 'Norfair' : 0, 'WreckedShip' : 0, 'LowerNorfair' : 0, 'Maridia' : 0}
+        for loc in self.unusedLocations:
+            majAvail = self.restrictions['MajorMinor'] is False or loc['Class'] == 'Major'
+            if majAvail and loc['Area'] in room:
+                room[loc['Area']] += 1
+        for r in room.values():
+            if r > 0 and r <= 2:
+                sys.stdout.write('|')
+                sys.stdout.flush()
+                return False
+        return True
+        
     
     def generateItems(self):
         itemLocations = []
-        self.currentItems = []
+        self.currentItems = []        
         while len(self.itemPool) > 0:
             # 1. fill up with non-progression stuff
             pool = [item for item in self.itemPool if item['Category'] != 'Progression'] # we can filter further if necessary
@@ -384,8 +404,9 @@ class Randomizer(object):
             nItems = 0
 #            itemLimit = random.randint(5, 25)
             itemLimit = 100
+            locPoolOk = True
 #            print("NON-PROG")
-            while len(pool) > 0 and nItems < itemLimit: 
+            while len(pool) > 0 and nItems < itemLimit and locPoolOk: 
 #                print(str(len(pool)) + " " + str(len(self.itemPool)))
                 curLocs = self.currentLocations(self.currentItems)
                 self.failItems = []
@@ -396,9 +417,11 @@ class Randomizer(object):
                     nItems += 1
                     self.getItem(itemLocation, itemLocations)
                     pool = self.removeItem(itemLocation['Item']['Type'], pool)
+                locPoolOk = self.checkLocPool()
             isStuck = not poolWasEmpty and itemLocation is None
             if len(self.itemPool) > 0:
-                # 2. collect with regular item pool
+                # 2. collect with standard pool
+#                pool = [item for item in self.itemPool if item['Category'] == 'Progression'] # we can filter further if necessary
 #                print("REGULAR")
                 removed = True
                 itemLocation = None
@@ -406,7 +429,7 @@ class Randomizer(object):
                 if not isStuck:
 #                    print("PRECANCEL")
                     curLocs = self.currentLocations(self.currentItems)
-                    itemLocation = self.generateItem(curLocs, self.itemPool)
+                    itemLocation = self.generateItem(curLocs, self.itemPool)                    
                     isStuck = itemLocation is None                    
                 while itemLocation is None and (removed is True or not isStuck):
                     # if we were stuck, cancel a bunch of our last decisions

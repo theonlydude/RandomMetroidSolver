@@ -65,8 +65,8 @@ function AjaxPresetCallCompleted(data) {
 
     // call web service with parameters
     var request = $.ajax({
-      // url: "http://ouicherandomizer.pythonanywhere.com/randomizer/solver_web/randomizerWebService.json",
-      url: "{{=URL(f='randomizerWebService.json')}}",
+      //url: "http://ouicherandomizer.pythonanywhere.com/randomizer/solver_web/randomizerWebService",
+      url: "{{=URL(f='randomizerWebService')}}",
       method: "POST",
       data: {
         seed : document.getElementById("seed").value,
@@ -89,11 +89,18 @@ function AjaxPresetCallCompleted(data) {
     });
 
     request.done(AjaxRandomizerCallCompleted);
-    request.fail(ajaxFail);
+    request.fail(ajaxFailJSON);
 }
 
 function ajaxFail(jqXHR, textStatus) {
   document.getElementById("flash").innerHTML = jqXHR.responseText;
+  $('#flash').show();
+  $('#overlay').hide();
+  $('#loadingGIF').hide();
+}
+
+function ajaxFailJSON(jqXHR, textStatus) {
+  document.getElementById("flash").innerHTML = jqXHR.responseJSON;
   $('#flash').show();
   $('#overlay').hide();
   $('#loadingGIF').hide();

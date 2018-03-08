@@ -485,54 +485,61 @@ def randomizer():
 
     return dict(presets=presets, patches=patches)
 
-def validateWebServiceParams(patchs, quantities, others):
+def raiseHttp(code, msg, isJson=False):
+    print("raiseHttp: code {} msg {} isJson {}".format(code, msg, isJson))
+    if isJson is True:
+        msg = json.dumps(msg)
+
+    raise HTTP(code, msg)
+
+def validateWebServiceParams(patchs, quantities, others, isJson=False):
     parameters = patchs + quantities + others
 
     for param in parameters:
         if request.vars[param] is None:
-            raise HTTP(400, "Missing parameter: {}".format(param))
+            raiseHttp(400, "Missing parameter: {}".format(param), isJson)
 
     for patch in patchs:
         if request.vars[patch] not in ['on', 'off']:
-            raise HTTP(400, "Wrong value for {}: {}, authorized values: on/off".format(patch, request.vars[patch]))
+            raiseHttp(400, "Wrong value for {}: {}, authorized values: on/off".format(patch, request.vars[patch]), isJson)
 
     def getInt(param):
         try:
             return int(request.vars[param])
         except:
-            raise HTTP(400, "Wrong value for {}: {}, must be an int".format(param, request.vars[param]))
+            raiseHttp(400, "Wrong value for {}: {}, must be an int".format(param, request.vars[param]), isJson)
 
     for qty in quantities:
         qtyInt = getInt(qty)
         if qtyInt not in range(1, 10):
-            raise HTTP(400, "Wrong value for {}: {}, must be between 1 and 9".format(qty, request.vars[qty]))
+            raiseHttp(400, json.dumps("Wrong value for {}: {}, must be between 1 and 9".format(qty, request.vars[qty])), isJson)
 
     if 'seed' in others:
         seedInt = getInt('seed')
         if seedInt < 0 or seedInt > 9999999:
-            raise HTTP(400, "Wrong value for seed: {}, must be between 0 and 9999999".format(request.vars[seed]))
+            raiseHttp(400, "Wrong value for seed: {}, must be between 0 and 9999999".format(request.vars[seed]), isJson)
 
     if request.vars.difficulty_target not in ['easy', 'medium', 'hard', 'harder', 'hardcore', 'mania']:
-        raise HTTP(400, "Wrong value for difficulty_target, authorized values: easy/medium/hard/harder/hardcore/mania")
+        raiseHttp(400, "Wrong value for difficulty_target, authorized values: easy/medium/hard/harder/hardcore/mania", isJson)
 
     if IS_ALPHANUMERIC()(request.vars.paramsFile)[1] is not None:
-        raise HTTP(400, "Wrong value for paramsFile, must be alphanumeric")
+        raiseHttp(400, "Wrong value for paramsFile, must be alphanumeric", isJson)
 
     if IS_LENGTH(maxsize=32, minsize=1)(request.vars.paramsFile)[1] is not None:
-        raise HTTP(400, "Wrong length for paramsFile, name must be between 1 and 32 characters")
+        raiseHttp(400, "Wrong length for paramsFile, name must be between 1 and 32 characters", isJson)
 
     minorQtyInt = getInt('minorQty')
     if minorQtyInt < 1 or minorQtyInt > 100:
-        raise HTTP(400, "Wrong value for minorQty, must be between 1 and 100")
+        raiseHttp(400, "Wrong value for minorQty, must be between 1 and 100", isJson)
 
     if request.vars.energyQty not in ['sparse', 'medium', 'vanilla']:
-        raise HTTP(400, "Wrong value for energyQty: authorized values: sparse/medium/vanilla")
+        raiseHttp(400, "Wrong value for energyQty: authorized values: sparse/medium/vanilla", isJson)
 
     if 'paramsFileTarget' in others:
         try:
             json.loads(request.vars.paramsFileTarget)
         except:
-            raise HTTP(400, "Wrong value for paramsFileTarget, must be a JSON string")
+            raiseHttp(400, "Wrong value for paramsFileTarget, must be a JSON string", isJson)
 
 def sessionWebService():
     # web service to update the session
@@ -555,7 +562,7 @@ def sessionWebService():
     session.randomizer['energyQty'] = request.vars.energyQty
 
 def randomizerWebService():
-    # web service to compute a new random
+    # web service to compute a new random (returns json string)
     print("randomizerWebService")
 
     # set header to authorize cross domain AJAX
@@ -565,7 +572,7 @@ def randomizerWebService():
     patchs = ['AimAnyButton', 'itemsounds', 'spinjumprestart', 'supermetroid_msu1', 'max_ammo_display']
     quantities = ['missileQty', 'superQty', 'powerBombQty']
     others = ['seed', 'difficulty_target', 'paramsFile', 'paramsFileTarget', 'minorQty', 'energyQty']
-    validateWebServiceParams(patchs, quantities, others)
+    validateWebServiceParams(patchs, quantities, others, isJson=True)
 
     # randomize
     presetFileName = tempfile.mkstemp()[1] + '.json'
@@ -601,11 +608,11 @@ def randomizerWebService():
 
         os.remove(jsonFileName)
         os.remove(presetFileName)
-        return locsItems
+        return json.dumps(locsItems)
     else:
         os.remove(jsonFileName)
         os.remove(presetFileName)
-        raise HTTP(400, "randomizerWebService: something wrong happened")
+        raise HTTP(400, json.dumps("randomizerWebService: something wrong happened"))
 
 def presetWebService():
     # web service to get the content of the preset file

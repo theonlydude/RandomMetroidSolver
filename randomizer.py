@@ -140,11 +140,8 @@ if __name__ == "__main__":
             shutil.copyfile(romFileName, fileName)
 
             RomPatcher.writeItemsLocs(fileName, itemLocs)
-
             RomPatcher.applyIPSPatches(fileName, args.patches)
-
             RomPatcher.writeSeed(fileName, seed)
-
             RomPatcher.writeSpoiler(fileName, itemLocs)
         except Exception as e:
             print("Error patching {}. Is {} a valid ROM ? ({})".format(fileName, romFileName, e))

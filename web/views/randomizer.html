@@ -63,18 +63,40 @@ body {
 function AjaxPresetCallCompleted(data) {
     console.log("AjaxPresetCallCompleted");
 
-    // todo: detect when an error occured in the web service.
-
-    var presetInput = document.getElementById("paramsFileTarget");
-    presetInput.value = data;
-
     // call web service with parameters
-    ajax('{{=URL(f='randomizerWebService.json')}}',
-         ['seed', 'difficulty_target', 'paramsFile', 'paramsFileTarget', 'AimAnyButton',
-          'itemsounds', 'spinjumprestart', 'supermetroid_msu1', 'max_ammo_display',
-          'missileQty', 'superQty', 'powerBombQty', 'minorQty', 'energyQty'],
-         'target',
-         {done: AjaxRandomizerCallCompleted});
+    var request = $.ajax({
+      // url: "http://ouicherandomizer.pythonanywhere.com/randomizer/solver_web/randomizerWebService.json",
+      url: "{{=URL(f='randomizerWebService.json')}}",
+      method: "POST",
+      data: {
+        seed : document.getElementById("seed").value,
+        difficulty_target : document.getElementById("difficulty_target").value,
+        paramsFile : document.getElementById("paramsFile").value,
+        paramsFileTarget : data,
+        AimAnyButton : document.getElementById("AimAnyButton").value,
+        itemsounds : document.getElementById("itemsounds").value,
+        spinjumprestart : document.getElementById("spinjumprestart").value,
+        supermetroid_msu1 : document.getElementById("supermetroid_msu1").value,
+        max_ammo_display : document.getElementById("max_ammo_display").value,
+        missileQty : document.getElementById("missileQty").value,
+        superQty : document.getElementById("superQty").value,
+        powerBombQty : document.getElementById("powerBombQty").value,
+        minorQty : document.getElementById("minorQty").value,
+        energyQty : document.getElementById("energyQty").value
+      },
+      dataType: "json",
+      crossDomain: true
+    });
+
+    request.done(AjaxRandomizerCallCompleted);
+    request.fail(ajaxFail);
+}
+
+function ajaxFail(jqXHR, textStatus) {
+  document.getElementById("flash").innerHTML = jqXHR.responseText;
+  $('#flash').show();
+  $('#overlay').hide();
+  $('#loadingGIF').hide();
 }
 
 function AjaxRandomizerCallCompleted(data) {
@@ -106,11 +128,27 @@ function AjaxRandomizerCallCompleted(data) {
     console.log("button text set back to randomize");
 
     // call webservice to update the session
-    ajax('{{=URL(f='sessionWebService')}}',
-         ['seed', 'difficulty_target', 'paramsFile', 'AimAnyButton',
-          'itemsounds', 'spinjumprestart', 'supermetroid_msu1', 'max_ammo_display',
-          'missileQty', 'superQty', 'powerBombQty', 'minorQty', 'energyQty'],
-         'target');
+    var request = $.ajax({
+      url: "{{=URL(f='sessionWebService')}}",
+      method: "POST",
+      data: {
+        difficulty_target : document.getElementById("difficulty_target").value,
+        paramsFile : document.getElementById("paramsFile").value,
+        AimAnyButton : document.getElementById("AimAnyButton").value,
+        itemsounds : document.getElementById("itemsounds").value,
+        spinjumprestart : document.getElementById("spinjumprestart").value,
+        supermetroid_msu1 : document.getElementById("supermetroid_msu1").value,
+        max_ammo_display : document.getElementById("max_ammo_display").value,
+        missileQty : document.getElementById("missileQty").value,
+        superQty : document.getElementById("superQty").value,
+        powerBombQty : document.getElementById("powerBombQty").value,
+        minorQty : document.getElementById("minorQty").value,
+        energyQty : document.getElementById("energyQty").value
+      },
+      dataType: "html"
+    });
+
+    request.fail(ajaxFail);
 
     // remove "working" message
     $('#overlay').hide();
@@ -137,13 +175,18 @@ function doSubmit() {
       return false;
     }
 
-    console.log("before preset web service call")
+    console.log("before preset web service call");
 
     // call preset web service with parameters
-    ajax('{{=URL(f='presetWebService')}}',
-         ['paramsFile'],
-         'paramsFileTarget',
-         {done: AjaxPresetCallCompleted});
+    var request = $.ajax({
+      url: "{{=URL(f='presetWebService')}}",
+      method: "POST",
+      data: { paramsFile : document.getElementById("paramsFile").value },
+      dataType: "html"
+    });
+
+    request.done(AjaxPresetCallCompleted);
+    request.fail(ajaxFail);
 
     // while WS is working, display "working" message
     $('#overlay').show();
@@ -258,7 +301,6 @@ window.onload = function(){
       =SELECT(*presets,
               **dict(_id="paramsFile", _name="paramsFile", value=value, _class="full"))
       }}
-      <input name="paramsFileTarget" id="paramsFileTarget" type="text" value="" class="hidden">
               </td>
             </tr>
           </table>
@@ -365,7 +407,7 @@ for patch in patches:
 {{
   else:
 }}
-    {{=INPUT(_id=patch[0], _name=patch[0], _type="checkbox")}}
+    {{=INPUT(_id=patch[0], _name=patch[0], _type="checkbox", _value="off")}}
     {{pass}}
 {{
   response.write("{}".format(patch[1]))

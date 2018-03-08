@@ -485,8 +485,62 @@ def randomizer():
 
     return dict(presets=presets, patches=patches)
 
+def validateWebServiceParams(patchs, quantities, others):
+    parameters = patchs + quantities + others
+
+    for param in parameters:
+        if request.vars[param] is None:
+            raise HTTP(400, "Missing parameter: {}".format(param))
+
+    for patch in patchs:
+        if request.vars[patch] not in ['on', 'off']:
+            raise HTTP(400, "Wrong value for {}: {}, authorized values: on/off".format(patch, request.vars[patch]))
+
+    def getInt(param):
+        try:
+            return int(request.vars[param])
+        except:
+            raise HTTP(400, "Wrong value for {}: {}, must be an int".format(param, request.vars[param]))
+
+    for qty in quantities:
+        qtyInt = getInt(qty)
+        if qtyInt not in range(1, 10):
+            raise HTTP(400, "Wrong value for {}: {}, must be between 1 and 9".format(qty, request.vars[qty]))
+
+    if 'seed' in others:
+        seedInt = getInt('seed')
+        if seedInt < 0 or seedInt > 9999999:
+            raise HTTP(400, "Wrong value for seed: {}, must be between 0 and 9999999".format(request.vars[seed]))
+
+    if request.vars.difficulty_target not in ['easy', 'medium', 'hard', 'harder', 'hardcore', 'mania']:
+        raise HTTP(400, "Wrong value for difficulty_target, authorized values: easy/medium/hard/harder/hardcore/mania")
+
+    if IS_ALPHANUMERIC()(request.vars.paramsFile)[1] is not None:
+        raise HTTP(400, "Wrong value for paramsFile, must be alphanumeric")
+
+    if IS_LENGTH(maxsize=32, minsize=1)(request.vars.paramsFile)[1] is not None:
+        raise HTTP(400, "Wrong length for paramsFile, name must be between 1 and 32 characters")
+
+    minorQtyInt = getInt('minorQty')
+    if minorQtyInt < 1 or minorQtyInt > 100:
+        raise HTTP(400, "Wrong value for minorQty, must be between 1 and 100")
+
+    if request.vars.energyQty not in ['sparse', 'medium', 'vanilla']:
+        raise HTTP(400, "Wrong value for energyQty: authorized values: sparse/medium/vanilla")
+
+    if 'paramsFileTarget' in others:
+        try:
+            json.loads(request.vars.paramsFileTarget)
+        except:
+            raise HTTP(400, "Wrong value for paramsFileTarget, must be a JSON string")
+
 def sessionWebService():
     # web service to update the session
+    patchs = ['AimAnyButton', 'itemsounds', 'spinjumprestart', 'supermetroid_msu1', 'max_ammo_display']
+    quantities = ['missileQty', 'superQty', 'powerBombQty']
+    others = ['difficulty_target', 'paramsFile', 'minorQty', 'energyQty']
+    validateWebServiceParams(patchs, quantities, others)
+
     if session.randomizer is None:
         session.randomizer = {}
 
@@ -500,16 +554,27 @@ def sessionWebService():
     session.randomizer['minorQty'] = request.vars.minorQty
     session.randomizer['energyQty'] = request.vars.energyQty
 
-    return 0
-
 def randomizerWebService():
     # web service to compute a new random
+    print("randomizerWebService")
+
+    # set header to authorize cross domain AJAX
+    response.headers['Access-Control-Allow-Origin'] = '*'
+
+    # check validity of all parameters
+    patchs = ['AimAnyButton', 'itemsounds', 'spinjumprestart', 'supermetroid_msu1', 'max_ammo_display']
+    quantities = ['missileQty', 'superQty', 'powerBombQty']
+    others = ['seed', 'difficulty_target', 'paramsFile', 'paramsFileTarget', 'minorQty', 'energyQty']
+    validateWebServiceParams(patchs, quantities, others)
+
+    # randomize
     presetFileName = tempfile.mkstemp()[1] + '.json'
     jsonFileName = tempfile.mkstemp()[1]
 
-    print("randomizerWebService")
+    print("randomizerWebService, params validated")
 
     #print("request.vars={}".format(request.vars))
+
     with open(presetFileName, 'w') as presetFile:
         presetFile.write(request.vars.paramsFileTarget)
 
@@ -540,14 +605,25 @@ def randomizerWebService():
     else:
         os.remove(jsonFileName)
         os.remove(presetFileName)
-        print("randomizerWebService: something wrong happened")
-        return -1
+        raise HTTP(400, "randomizerWebService: something wrong happened")
 
 def presetWebService():
     # web service to get the content of the preset file
+    if request.vars.paramsFile is None:
+        raise HTTP(400, "Missing paramsFile parameter")
+
     paramsFile = request.vars.paramsFile
+
+    if IS_ALPHANUMERIC()(paramsFile)[1] is not None:
+        raise HTTP(400, "Preset name must be alphanumeric")
+
+    if IS_LENGTH(maxsize=32, minsize=1)(paramsFile)[1] is not None:
+        raise HTTP(400, "Preset name must be between 1 and 32 characters")
+
     print("presetWebService: paramsFile={}".format(paramsFile))
+
     fullPath = 'diff_presets/{}.json'.format(paramsFile)
+
     # check that the presets file exists
     if os.path.isfile(fullPath):
         # load it
@@ -555,4 +631,4 @@ def presetWebService():
         params = json.dumps(params)
         return params
     else:
-        return -1
+        raise HTTP(400, "Preset not found")

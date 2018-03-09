@@ -100,7 +100,12 @@ function ajaxFail(jqXHR, textStatus) {
 }
 
 function ajaxFailJSON(jqXHR, textStatus) {
-  document.getElementById("flash").innerHTML = jqXHR.responseJSON;
+  // cross domain calls currently return 'undefined' information... (cf. https://www.html5rocks.com/en/tutorials/cors/)
+  if(jqXHR.responseJSON == null) {
+    document.getElementById("flash").innerHTML = "Something wrong happened, try increasing your difficulty target";
+  } else {
+    document.getElementById("flash").innerHTML = jqXHR.responseJSON;
+  }
   $('#flash').show();
   $('#overlay').hide();
   $('#loadingGIF').hide();

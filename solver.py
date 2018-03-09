@@ -315,6 +315,18 @@ class Solver:
         area = self.collectItem(loc)
         return area
 
+    def sortItemsByUsage(self):
+        # sort the items in this order:
+        # Morph Bomb PowerBomb Ice Gravity HiJump Wave Super Plasma SpaceJump SpeedBooster ScrewAttack Spazer SpringBall Varia Grapple Charge Missile XRayScope
+        unsortedItems = self.collectedItems[:]
+        sortedItems = []
+        for item in ['Morph', 'Bomb', 'PowerBomb', 'Ice', 'Gravity', 'HiJump', 'Wave', 'Super', 'Plasma', 'SpaceJump', 'SpeedBooster', 'ScrewAttack', 'Spazer', 'SpringBall', 'Varia', 'Grapple', 'Charge', 'Missile', 'XRayScope']:
+            if item in self.collectedItems:
+                sortedItems.append(item)
+                unsortedItems.remove(item)
+
+        self.collectedItems = sortedItems + unsortedItems
+
     def collectItem(self, loc):
         item = loc["itemName"]
         if item not in Conf.itemsForbidden:
@@ -331,6 +343,9 @@ class Solver:
             loc['Pickup']()
 
         self.log.debug("collectItem: {} at {}".format(item, loc['Name']))
+
+        # sort items by most frequent first
+        self.sortItemsByUsage()
 
         return loc['Area']
 

@@ -71,6 +71,7 @@ def haveItemCount(items, item, count):
     return items.count(item) >= count
 
 def haveItem(items, item, difficulty=0):
+    #print(item)
     if item in items:
         return SMBool(True, difficulty, items = [item])
     else:

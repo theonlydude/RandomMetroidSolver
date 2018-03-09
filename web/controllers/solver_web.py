@@ -14,13 +14,21 @@ from parameters import diff2text, text2diff
 import tournament_locations
 from solver import Solver, ParamsLoader, DifficultyDisplayer, RomLoader
 
-romTypes = OrderedDict([('Total Casual', 'Total_CX'), ('Total Normal', 'Total_X'),
+romTypes = OrderedDict([('Ouiche Classic', 'Ouiche_X'), ('Ouiche Full', 'Ouiche_FX'),
+                        ('Total Casual', 'Total_CX'), ('Total Normal', 'Total_X'),
                         ('Total Hard', 'Total_HX'), ('Total Tournament', 'Total_TX'),
                         ('Total Full', 'Total_FX'), ('Dessy Casual', 'Dessy'),
                         ('Dessy Speedrunner', 'Dessy'), ('Dessy Masochist', 'Dessy'),
                         ('Vanilla', 'Vanilla')])
 
 def guessRomType(filename):
+    match = re.findall(r'Ouiche_Randomizer_[F]?X\d+', filename)
+    if len(match) > 0:
+        if match[0][18] == 'F':
+            return "Ouiche Full"
+        elif match[0][18] == 'X':
+            return "Ouiche Classic"
+
     match = re.findall(r'[CTFH]?X\d+', filename)
     if len(match) > 0:
         if match[0][0] == 'C':

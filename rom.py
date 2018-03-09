@@ -33,7 +33,7 @@ class RomPatches:
     NoGravityEnvProtection  = 1010
     
     #### Patch sets
-    # total randomizer, all seeds
+    # total randomizer: tournament and full
     Total = [ BlueBrinstarBlueDoor,
               SpazerShotBlock, RedTowerLeftPassage, RedTowerBlueDoors,
               HiJumpShotBlock, CathedralEntranceWallJump,
@@ -58,14 +58,23 @@ class RomType:
     # if no ROM type could be guessed, returns None
     @staticmethod    
     def guess(fileName):
+        fileName = os.path.basename(fileName)
+
+        # ouiche ?
+        m = re.match(r'^Ouiche_Randomizer_([F]?X)\d+.*$', fileName)
+        if m is not None:
+            return 'Ouiche_' + m.group(1)
+
         # total ?
         m = re.match(r'^.*?([CTFH]?X)\d+.*$', fileName)
         if m is not None:
             return 'Total_' + m.group(1)
+
         # dessy ?
         m = re.match(r'^.*[CMS]\d+.*$', fileName)
         if m is not None:
             return 'Dessy'
+
         # vanilla ?
         m = re.match(r'^.*Super[ _]*Metroid.*$', fileName)
         if m is not None:
@@ -78,7 +87,9 @@ class RomType:
     def apply(romType):
         if romType == 'Total_CX':
             RomPatches.ActivePatches = RomPatches.Total_CX
-        elif romType.startswith('Total_'):
+        elif romType in ['Total_TX', 'Total_FX']:
+            RomPatches.ActivePatches = RomPatches.Total
+        elif romType.startswith('Ouiche_'):
             RomPatches.ActivePatches = RomPatches.Total
         elif romType == 'Dessy':
             RomPatches.ActivePatches = RomPatches.Dessy

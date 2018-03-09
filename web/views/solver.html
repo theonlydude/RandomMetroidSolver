@@ -24,6 +24,18 @@ function changeRomType() {
   document.getElementById("romType").value = romType;
 }
 function guessRomType(filename) {
+  var re = /Ouiche_Randomizer_[F]?X\d+/;
+  var match = filename.match(re);
+
+  if (match != null) {
+    switch(match[0][18]) {
+      case 'F':
+        return "Ouiche Full";
+      case 'X':
+        return "Ouiche Classic";
+    }
+  }
+
   var re = /[CTFH]?X\d+/;
   var match = filename.match(re);
 

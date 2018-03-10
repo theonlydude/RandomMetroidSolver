@@ -274,9 +274,9 @@ window.onload = function(){
               </td>
             </tr>
             <tr>
-              <td>Randomizer seed:</td>
+              <td>Randomizer seed (0 for a random one):</td>
               <td>
-		<input name="seed" id="seed" type="number" value="0" min="0" max="9999999" class="full">
+		<input name="seed" id="seed" type="number" value="0" min="0" max="9999999" class="full" required>
               </td>
             </tr>
             <tr>
@@ -353,25 +353,25 @@ window.onload = function(){
         <tr>
           <td>Quantity of Missiles</td>
           <td>
-            <input name="missileQty" id="missileQty" type="number" value={{=valueM}} min="1" max="9", class="full">
+            <input name="missileQty" id="missileQty" type="number" value={{=valueM}} min="1" max="9", class="full" required>
           </td>
         </tr>
         <tr>
           <td>Quantity of Super Missiles</td>
           <td>
-            <input name="superQty" id="superQty" type="number" value={{=valueS}} min="1" max="9", class="full">
+            <input name="superQty" id="superQty" type="number" value={{=valueS}} min="1" max="9", class="full" required>
           </td>
         </tr>
         <tr>
           <td>Quantity of Power Bombs</td>
           <td>
-            <input name="powerBombQty" id="powerBombQty" type="number" value={{=valueP}} value="1" min="1" max="9" class="full">
+            <input name="powerBombQty" id="powerBombQty" type="number" value={{=valueP}} value="1" min="1" max="9" class="full" required>
           </td>
         </tr>
         <tr>
           <td>Percentage of minors available</td>
           <td>
-            <input name="minorQty" id="minorQty" type="number" value={{=valuem}} min="1" max="100", class="full">
+            <input name="minorQty" id="minorQty" type="number" value={{=valuem}} min="1" max="100", class="full" required>
           </td>
         </tr>
         <tr>

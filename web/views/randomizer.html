@@ -2,11 +2,13 @@
 extend 'layout.html'
 }}
 
-
 <meta name="description" content="Solver for the randomized Super Metroid roms"/>
 <link rel="shortcut icon" href={{=URL('static','favicon.ico')}} type="image/ico"/>
 <script src="{{=URL('static','js/FileSaver.js')}}"></script>
-<link rel="stylesheet" type="text/css" href={{=URL('static/css','mystyle.css')}} media="screen"/>
+<link rel="stylesheet" type="text/css" href={{=URL('static','css/mystyle.css')}} media="screen"/>
+
+<link rel="stylesheet" type="text/css" href={{=URL('static','dist/switchery.css')}} media="screen"/>
+<script src="{{=URL('static','dist/switchery.js')}}"></script>
 
 <title>Super Metroid Item Randomizer</title>
 
@@ -70,19 +72,26 @@ function AjaxPresetCallCompleted(data) {
       method: "POST",
       data: {
         seed : document.getElementById("seed").value,
-        difficulty_target : document.getElementById("difficulty_target").value,
         paramsFile : document.getElementById("paramsFile").value,
         paramsFileTarget : data,
+        missileQty : document.getElementById("missileQty").value,
+        superQty : document.getElementById("superQty").value,
+        powerBombQty : document.getElementById("powerBombQty").value,
+        minorQty : document.getElementById("minorQty").value,
+        energyQty : document.getElementById("energyQty").value,
+        useMaxDiff : document.getElementById("useMaxDiff").value,
+        maxDifficulty : document.getElementById("maxDifficulty").value,
+        progressionSpeed : document.getElementById("progressionSpeed").value,
+        spreadItems : document.getElementById("spreadItems").value,
+        fullRandomization : document.getElementById("fullRandomization").value,
+        suitsRestriction : document.getElementById("suitsRestriction").value,
+        speedScrewRestriction : document.getElementById("speedScrewRestriction").value,
         AimAnyButton : document.getElementById("AimAnyButton").value,
         itemsounds : document.getElementById("itemsounds").value,
         spinjumprestart : document.getElementById("spinjumprestart").value,
         supermetroid_msu1 : document.getElementById("supermetroid_msu1").value,
         max_ammo_display : document.getElementById("max_ammo_display").value,
-        missileQty : document.getElementById("missileQty").value,
-        superQty : document.getElementById("superQty").value,
-        powerBombQty : document.getElementById("powerBombQty").value,
-        minorQty : document.getElementById("minorQty").value,
-        energyQty : document.getElementById("energyQty").value
+
       },
       dataType: "json",
       crossDomain: true
@@ -144,18 +153,24 @@ function AjaxRandomizerCallCompleted(data) {
       url: "{{=URL(f='sessionWebService')}}",
       method: "POST",
       data: {
-        difficulty_target : document.getElementById("difficulty_target").value,
         paramsFile : document.getElementById("paramsFile").value,
-        AimAnyButton : document.getElementById("AimAnyButton").value,
-        itemsounds : document.getElementById("itemsounds").value,
-        spinjumprestart : document.getElementById("spinjumprestart").value,
-        supermetroid_msu1 : document.getElementById("supermetroid_msu1").value,
-        max_ammo_display : document.getElementById("max_ammo_display").value,
         missileQty : document.getElementById("missileQty").value,
         superQty : document.getElementById("superQty").value,
         powerBombQty : document.getElementById("powerBombQty").value,
         minorQty : document.getElementById("minorQty").value,
-        energyQty : document.getElementById("energyQty").value
+        energyQty : document.getElementById("energyQty").value,
+        useMaxDiff : document.getElementById("useMaxDiff").value,
+        maxDifficulty : document.getElementById("maxDifficulty").value,
+        progressionSpeed : document.getElementById("progressionSpeed").value,
+        spreadItems : document.getElementById("spreadItems").value,
+        fullRandomization : document.getElementById("fullRandomization").value,
+        suitsRestriction : document.getElementById("suitsRestriction").value,
+        speedScrewRestriction : document.getElementById("speedScrewRestriction").value,
+        AimAnyButton : document.getElementById("AimAnyButton").value,
+        itemsounds : document.getElementById("itemsounds").value,
+        spinjumprestart : document.getElementById("spinjumprestart").value,
+        supermetroid_msu1 : document.getElementById("supermetroid_msu1").value,
+        max_ammo_display : document.getElementById("max_ammo_display").value
       },
       dataType: "html"
     });
@@ -163,6 +178,7 @@ function AjaxRandomizerCallCompleted(data) {
     request.fail(ajaxFail);
 
     // remove "working" message
+    $('#flash').hide();
     $('#overlay').hide();
     $('#loadingGIF').hide();
 }
@@ -242,13 +258,85 @@ window.onload = function(){
     } else {
         alert("This website requires the HTML5 File API, please upgrade your browser to a newer version.");
     }
+
+    var maxAmmo = document.getElementById("max_ammo_display");
+    maxAmmo.onchange = function(){
+        var maxAmmo = document.getElementById("max_ammo_display");
+        var msu1 = document.getElementById("supermetroid_msu1");
+
+        if(msu1.checked && maxAmmo.checked){
+            msu1.click();
+        }
+    };
+
+    var msu1 = document.getElementById("supermetroid_msu1");
+    msu1.onchange = function(){
+        var maxAmmo = document.getElementById("max_ammo_display");
+        var msu1 = document.getElementById("supermetroid_msu1");
+
+        if(maxAmmo.checked && msu1.checked){
+            maxAmmo.click();
+        }
+    };
+
+    var useMax = document.getElementById("useMaxDiff");
+    if(! useMax.checked){
+        document.getElementById("maxDifficulty").disabled = true;
+    }
+    useMax.onchange = function(){
+        var useMax = document.getElementById("useMaxDiff");
+        if(useMax.checked){
+            document.getElementById("maxDifficulty").disabled = false;
+        } else {
+            document.getElementById("maxDifficulty").disabled = true;
+        }
+    }
 }
 </script>
+{{
+def displayCheckbox(id):
+  if id in session.randomizer and session.randomizer[id] == 'on':
+}}
+    {{=INPUT(_id=id, _name=id, _type="checkbox", _checked="checked", _value="on", _class="js-switch")}}
+{{
+  else:
+}}
+    {{=INPUT(_id=id, _name=id, _type="checkbox", _value="off", _class="js-switch")}}
+    {{pass}}
 
+  {{
+  response.write("<script type=\"text/javascript\">new Switchery(document.getElementById(\"{}\")".format(id), escape=False);
+  response.write(", { size: 'small', color: '#ddd' });</script>", escape=False)
+  pass
+  }}
+
+{{
+def displaySelect(id, values, default):
+  if id in session.randomizer:
+    value = session.randomizer[id]
+  else:
+    value = default
+    pass
+}}
+  {{
+   =SELECT(*values,
+           **dict(_id=id, _name=id, value=value, _class="full"))
+  }}
+{{pass}}
+{{
+def displayNumber(id, min, max, default):
+  if id in session.randomizer:
+    value = session.randomizer[id]
+  else:
+    value = default
+    pass
+
+  response.write("<input name=\"{}\" id=\"{}\" type=\"number\" value=\"{}\" min=\"{}\" max=\"{}\" class=\"full\" required>".format(id, id, value, min, max), escape=False)
+  pass
+}}
 <body>
   <div id="overlay"></div>
   <div id="loadingGIF"><img src={{=URL('static/images','ajax-loader.gif')}}/></div>
-
 
   <div class="fixed">
     <div class="menu">
@@ -260,178 +348,105 @@ window.onload = function(){
   </div>
 
   <div class="main">
-    <div class="row">
-      <div class="column">
-        <form id="mainform", name="mainform", onsubmit="doSubmit(); return false;">
+    <form id="mainform", name="mainform", onsubmit="doSubmit(); return false;">
+      <div class="row">
+	<div class="column">
+	  <p>The Ouiche randomizer will generate a Super Metroid ROM finishable using the known techniques of the preset</p>
           <table class="full">
             <colgroup><col class="half" /><col class="half" /></colgroup>
             <tr>
               <td>Vanilla Super Metroid ROM:</td>
-              <td>
-      {{
-      =INPUT(_type="file", _name="uploadFile", _id="uploadFile")
-      }}
-              </td>
+              <td>{{=INPUT(_type="file", _name="uploadFile", _id="uploadFile")}}</td>
             </tr>
             <tr>
               <td>Randomizer seed (0 for a random one):</td>
-              <td>
-		<input name="seed" id="seed" type="number" value="0" min="0" max="9999999" class="full" required>
-              </td>
-            </tr>
-            <tr>
-              <td>The maximum difficulty for picking up an item:</td>
-              <td>
-      {{
-      if 'difficulty_target' in session.randomizer:
-        value = session.randomizer['difficulty_target']
-      else:
-        value = 'hard'
-        pass
-      }}
-      {{
-      =SELECT('easy', 'medium', 'hard', 'very hard', 'hardcore', 'mania',
-              _id="difficulty_target",
-              _name="difficulty_target",
-              _class="full",
-              requires=IS_IN_SET(['easy', 'medium', 'hard', 'very hard', 'hardcore', 'mania']),
-              value=value)
-      }}
-              </td>
+              <td>{{displayNumber("seed", "0", "9999999", "0")}}</td>
             </tr>
             <tr>
               <td>The preset used to randomize:</td>
-              <td>
-      {{
-      if 'paramsFile' in session.randomizer:
-        value = session.randomizer['paramsFile']
-      else:
-        value = 'regular'
-        pass
-      }}
-      {{
-      =SELECT(*presets,
-              **dict(_id="paramsFile", _name="paramsFile", value=value, _class="full"))
-      }}
-              </td>
+              <td>{{displaySelect("paramsFile", presets, "regular")}}</td>
             </tr>
           </table>
-
-    <p>
-{{
-      if 'missileQty' in session.randomizer:
-        valueM = session.randomizer['missileQty']
-      else:
-        valueM = "3"
-        pass
-      if 'superQty' in session.randomizer:
-        valueS = session.randomizer['superQty']
-      else:
-        valueS = "3"
-        pass
-      if 'powerBombQty' in session.randomizer:
-        valueP = session.randomizer['powerBombQty']
-      else:
-        valueP = "1"
-        pass
-      if 'minorQty' in session.randomizer:
-        valuem = session.randomizer['minorQty']
-      else:
-        valuem = "100"
-        pass
-      if 'energyQty' in session.randomizer:
-        valueE = session.randomizer['energyQty']
-      else:
-        valueE = "vanilla"
-        pass
-}}
-
-      The quantity of Minors and Energy<br/>
-      For each minors, the higher the number the higher the probability of choosing it<br/>
-      <table class="full">
-        <colgroup><col class="half" /><col class="half" /></colgroup>
-        <tr>
-          <td>Quantity of Missiles</td>
-          <td>
-            <input name="missileQty" id="missileQty" type="number" value={{=valueM}} min="1" max="9", class="full" required>
-          </td>
-        </tr>
-        <tr>
-          <td>Quantity of Super Missiles</td>
-          <td>
-            <input name="superQty" id="superQty" type="number" value={{=valueS}} min="1" max="9", class="full" required>
-          </td>
-        </tr>
-        <tr>
-          <td>Quantity of Power Bombs</td>
-          <td>
-            <input name="powerBombQty" id="powerBombQty" type="number" value={{=valueP}} value="1" min="1" max="9" class="full" required>
-          </td>
-        </tr>
-        <tr>
-          <td>Percentage of minors available</td>
-          <td>
-            <input name="minorQty" id="minorQty" type="number" value={{=valuem}} min="1" max="100", class="full" required>
-          </td>
-        </tr>
-        <tr>
-          <td>Quantity of Energy/Reserve Tanks available</td>
-          <td>
-      {{
-      =SELECT('sparse', 'medium', 'vanilla',
-              _id="energyQty",
-              _name="energyQty",
-              requires=IS_IN_SET(['sparse', 'medium', 'vanilla']),
-              value=valueE,
-              _class="full")
-      }}
-          </td>
-        </tr>
-      </table>
-
-    {{
-    =INPUT(_type="submit", _value="Randomize", _id="submitBtn")
-    }}
-    </div>
-  <div class="column">
-    <p>
-      All the patches from Total Item Randomizer are included by default.<br/>
-      The layout patches included by default:
-      <ul>
-        <li>Disable respawning blocks at Dachora Pit</li>
-        <li>Make it possible to escape from below early Super bridge without Bombs</li>
-        <li>Replace bomb blocks with shot blocks before Hi-Jump</li>
-        <li>Replace bomb blocks with shot blocks at Moat</li>
-        <li>Raise platform in first heated Norfair room to not require Hi-Jump</li>
-        <li>Raise platforms in Red Tower bottom to always be able to get back up</li>
-        <li>Replace bomb blocks with shot blocks before Spazer</li>
-      </ul>
-    </p>
-
-    <p>
-      Optional patches to add to the randomized ROM:<br/>
+	  <br/>
+	  <h4>The quantity of Minors and Energy</h4>
+	  <p>For each minors, the higher the number the higher the probability of choosing it</p>
+	  <table class="full">
+            <colgroup><col class="half" /><col class="half" /></colgroup>
+            <tr>
+              <td>Quantity of Missiles:</td>
+              <td>{{displayNumber("missileQty", "1", "9", "3")}}</td>
+            </tr>
+            <tr>
+              <td>Quantity of Super Missiles:</td>
+              <td>{{displayNumber("superQty", "1", "9", "3")}}</td>
+            </tr>
+            <tr>
+              <td>Quantity of Power Bombs:</td>
+              <td>{{displayNumber("powerBombQty", "1", "9", "1")}}</td>
+            </tr>
+            <tr>
+              <td>Percentage of minors available:</td>
+              <td>{{displayNumber("minorQty", "1", "100", "100")}}</td>
+            </tr>
+            <tr>
+              <td>Quantity of Energy/Reserve Tanks available:</td>
+              <td>{{displaySelect("energyQty", ["sparse", "medium", "vanilla"], "vanilla")}}</td>
+            </tr>
+	  </table>
+	  <br/>
+	  <h4>Randomizer parameters</h4>
+	  <table class="full">
+            <tr>
+              <td>{{displayCheckbox("useMaxDiff")}}The maximum difficulty for picking up an item:<br/>Warning: if too low may cause the randomizer to abort</td>
+              <td>{{displaySelect("maxDifficulty", ['easy', 'medium', 'hard', 'very hard', 'hardcore', 'mania'], "hard")}}</td>
+            </tr>
+	    <tr>
+	      <td class="half">Progression speed:</td>
+              <td class="half">{{displaySelect("progressionSpeed", ['slowest', 'slow', 'medium', 'fast', 'fastest'], "medium")}}</td>
+	    </tr>
+	    <tr>
+	      <td colspan="2">{{displayCheckbox("spreadItems")}}Spread items</td>
+	    </tr>
+	    <tr>
+	      <td colspan="2">{{displayCheckbox("fullRandomization")}}Full randomization</td>
+	    </tr>
+	    <tr>
+	      <td colspan="2">{{displayCheckbox("suitsRestriction")}}Suits restriction</td>
+	    </tr>
+	    <tr>
+	      <td colspan="2">{{displayCheckbox("speedScrewRestriction")}}Speed/Screw restriction</td>
+	    </tr>
+	  </table>
+         {{=INPUT(_type="submit", _value="Randomize", _id="submitBtn")}}
+	</div>
+	<div class="column">
+	  <h4>Patches</h4>
+	  <p>
+	    All the patches from Total Item Randomizer are included by default.<br/>
+	    The layout patches included by default:
+	    <ul>
+              <li>Disable respawning blocks at Dachora Pit</li>
+              <li>Make it possible to escape from below early Super bridge without Bombs</li>
+              <li>Replace bomb blocks with shot blocks before Hi-Jump</li>
+              <li>Replace bomb blocks with shot blocks at Moat</li>
+              <li>Raise platform in first heated Norfair room to not require Hi-Jump</li>
+              <li>Raise platforms in Red Tower bottom to always be able to get back up</li>
+              <li>Replace bomb blocks with shot blocks before Spazer</li>
+	    </ul>
+	  </p>
+	  <p>
+	    Optional patches to add to the randomized ROM:<br/>
 {{
 for patch in patches:
-
-  if patch[0] in session.randomizer and session.randomizer[patch[0]] == 'on':
-}}
-    {{=INPUT(_id=patch[0], _name=patch[0], _type="checkbox", _checked="checked", _value="on")}}
-{{
-  else:
-}}
-    {{=INPUT(_id=patch[0], _name=patch[0], _type="checkbox", _value="off")}}
-    {{pass}}
-{{
+  displayCheckbox(patch[0])
   response.write("{}".format(patch[1]))
 
   response.write("<br/>", escape=False)
   pass
 }}
-    </p>
-
-
-  </form>
-  </div>
-  </div>
+	  </p>
+	</div>
+      </div>
+    </form>
   </div>
 </body>

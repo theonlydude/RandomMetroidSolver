@@ -17,19 +17,19 @@ if __name__ == "__main__":
 
     parser.add_argument('--debug', '-d', help="activate debug logging", dest='debug',
                         action='store_true')
-    parser.add_argument('--difficultyTarget', '-t',
+    parser.add_argument('--maxDifficulty', '-t',
                         help="the maximum difficulty target that the randomizer will use",
-                        dest='difficultyTarget', nargs='?', default=None,
+                        dest='maxDifficulty', nargs='?', default=None,
                         choices=['easy', 'medium', 'hard', 'harder', 'hardcore', 'mania'])
     parser.add_argument('--seed', '-s', help="randomization seed to use", dest='seed',
                         nargs='?', default=0, type=int)
     parser.add_argument('--rom', '-r',
                         help="the vanilia ROM",
                         dest='rom', nargs='?', default=None)
-    parser.add_argument('--output', '-o',
+    parser.add_argument('--output',
                         help="to choose the name of the generated json (for the webservice)",
                         dest='output', nargs='?', default=None)
-    parser.add_argument('--preset', '-e',
+    parser.add_argument('--preset',
                         help="the name of the preset (for the webservice)",
                         dest='preset', nargs='?', default=None)
     parser.add_argument('--patch', '-c',
@@ -57,11 +57,23 @@ if __name__ == "__main__":
                         help="quantity of ETanks/Reserve Tanks",
                         dest='energyQty', nargs='?', default='vanilla',
                         choices=['sparse', 'medium', 'vanilla'])
-    parser.add_argument('--sampleSize', '-z',
-                        help="Sample size to choose next item (lower is faster but less accurate)",
-                        dest='sampleSize', nargs='?', default=100,
-                        choices=[str(i) for i in range(1,101)])
-    
+    parser.add_argument('--spreadItems',
+                        help="",
+                        dest='spreadItems', nargs='?', default=False)
+    parser.add_argument('--fullRandomization',
+                        help="",
+                        dest='fullRandomization', nargs='?', default=False)
+    parser.add_argument('--suitsRestriction',
+                        help="",
+                        dest='suitsRestriction', nargs='?', default=False)
+    parser.add_argument('--speedScrewRestriction',
+                        help="",
+                        dest='speedScrewRestriction', nargs='?', default=False)
+    parser.add_argument('--progressionSpeed', '-i',
+                        help="",
+                        dest='progressionSpeed', nargs='?', default='medium',
+                        choices=['slowest', 'slow', 'medium', 'fast', 'fastest'])
+
     args = parser.parse_args()
 
     if args.paramsFileName is not None:
@@ -79,26 +91,26 @@ if __name__ == "__main__":
         seed = args.seed
 
     print("SEED: " + str(seed))
-        
-    if args.difficultyTarget:
-        difficultyTarget = text2diff[args.difficultyTarget]
+
+    if args.maxDifficulty:
+        maxDifficulty = text2diff[args.maxDifficulty]
     else:
-        difficultyTarget = hard
+        maxDifficulty = hard
 
     # same as solver
-    threshold = difficultyTarget
+    threshold = maxDifficulty
     epsilon = 0.001
-    if difficultyTarget <= easy:
+    if maxDifficulty <= easy:
         threshold = medium - epsilon
-    elif difficultyTarget <= medium:
+    elif maxDifficulty <= medium:
         threshold = hard - epsilon
-    elif difficultyTarget <= hard:
+    elif maxDifficulty <= hard:
         threshold = harder - epsilon
-    elif difficultyTarget <= harder:
+    elif maxDifficulty <= harder:
         threshold = hardcore - epsilon
-    elif difficultyTarget <= hardcore:
+    elif maxDifficulty <= hardcore:
         threshold = mania - epsilon
-    difficultyTarget = threshold
+    maxDifficulty = threshold
         
     chooseItemWeights = { 'Random' : 1, 'MinProgression' : 0, 'MaxProgression' : 0 }
     chooseLocWeights = { 'Random' : 1, 'MinDiff' : 0, 'MaxDiff' : 0, 'SpreadProgression' : True }
@@ -115,8 +127,9 @@ if __name__ == "__main__":
     qty = {'missile': int(args.missileQty), 'super': int(args.superQty),
            'powerBomb': int(args.powerBombQty), 'energy': args.energyQty,
            'minors': int(args.minorQty)}
-    randomizer = Randomizer(seed, difficultyTarget, locations, qty,
-                            int(args.sampleSize), choose, restrictions)
+    sampleSize = 100
+    randomizer = Randomizer(seed, maxDifficulty, locations, qty,
+                            sampleSize, choose, restrictions)
     itemLocs = randomizer.generateItems()
     if itemLocs is None:
         print("Can't generate a randomized rom with the given parameters, try increasing the difficulty target.")

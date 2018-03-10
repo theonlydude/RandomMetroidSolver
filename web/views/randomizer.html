@@ -267,6 +267,7 @@ window.onload = function(){
         if(msu1.checked && maxAmmo.checked){
             msu1.click();
         }
+        switchCheckbox("max_ammo_display");
     };
 
     var msu1 = document.getElementById("supermetroid_msu1");
@@ -277,6 +278,7 @@ window.onload = function(){
         if(maxAmmo.checked && msu1.checked){
             maxAmmo.click();
         }
+        switchCheckbox("supermetroid_msu1");
     };
 
     var useMax = document.getElementById("useMaxDiff");
@@ -290,18 +292,27 @@ window.onload = function(){
         } else {
             document.getElementById("maxDifficulty").disabled = true;
         }
+        switchCheckbox("useMaxDiff");
     }
+}
+function switchCheckbox(id) {
+  var check = document.getElementById(id);
+  if(check.checked){
+    check.value = "on";
+  } else {
+    check.value = "off";
+  }
 }
 </script>
 {{
 def displayCheckbox(id):
   if id in session.randomizer and session.randomizer[id] == 'on':
 }}
-    {{=INPUT(_id=id, _name=id, _type="checkbox", _checked="checked", _value="on", _class="js-switch")}}
+    {{=INPUT(_id=id, _name=id, _type="checkbox", _checked="checked", _value="on", _class="js-switch", _onchange="switchCheckbox('{}')".format(id))}}
 {{
   else:
 }}
-    {{=INPUT(_id=id, _name=id, _type="checkbox", _value="off", _class="js-switch")}}
+    {{=INPUT(_id=id, _name=id, _type="checkbox", _value="off", _class="js-switch", _onchange="switchCheckbox('{}')".format(id))}}
     {{pass}}
 
   {{

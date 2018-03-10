@@ -4,7 +4,7 @@ import argparse, random, os.path, json, sys, shutil
 
 from itemrandomizerweb.stdlib import Random
 from itemrandomizerweb import Items
-from itemrandomizerweb.Randomizer import Randomizer
+from itemrandomizerweb.Randomizer import Randomizer, RandoSettings
 from tournament_locations import locations
 from parameters import easy, medium, hard, harder, hardcore, mania, text2diff, diff2text
 from solver import ParamsLoader
@@ -18,7 +18,7 @@ if __name__ == "__main__":
     parser.add_argument('--debug', '-d', help="activate debug logging", dest='debug',
                         action='store_true')
     parser.add_argument('--maxDifficulty', '-t',
-                        help="the maximum difficulty target that the randomizer will use",
+                        help="the maximum difficulty generated seed will be for given parameters",
                         dest='maxDifficulty', nargs='?', default=None,
                         choices=['easy', 'medium', 'hard', 'harder', 'hardcore', 'mania'])
     parser.add_argument('--seed', '-s', help="randomization seed to use", dest='seed',
@@ -59,16 +59,16 @@ if __name__ == "__main__":
                         choices=['sparse', 'medium', 'vanilla'])
     parser.add_argument('--spreadItems',
                         help="",
-                        dest='spreadItems', nargs='?', default=False)
+                        dest='spreadItems', nargs='?', default=True)
     parser.add_argument('--fullRandomization',
                         help="",
                         dest='fullRandomization', nargs='?', default=False)
     parser.add_argument('--suitsRestriction',
                         help="",
-                        dest='suitsRestriction', nargs='?', default=False)
+                        dest='suitsRestriction', nargs='?', default=True)
     parser.add_argument('--speedScrewRestriction',
                         help="",
-                        dest='speedScrewRestriction', nargs='?', default=False)
+                        dest='speedScrewRestriction', nargs='?', default=True)
     parser.add_argument('--progressionSpeed', '-i',
                         help="",
                         dest='progressionSpeed', nargs='?', default='medium',
@@ -95,7 +95,7 @@ if __name__ == "__main__":
     if args.maxDifficulty:
         maxDifficulty = text2diff[args.maxDifficulty]
     else:
-        maxDifficulty = hard
+        maxDifficulty = 100000
 
     # same as solver
     threshold = maxDifficulty
@@ -112,10 +112,7 @@ if __name__ == "__main__":
         threshold = mania - epsilon
     maxDifficulty = threshold
         
-    chooseItemWeights = { 'Random' : 1, 'MinProgression' : 0, 'MaxProgression' : 0 }
-    chooseLocWeights = { 'Random' : 1, 'MinDiff' : 0, 'MaxDiff' : 0, 'SpreadProgression' : True }
-    choose = { 'Items' : chooseItemWeights, 'Locations' : chooseLocWeights }
-    restrictions = { 'Suits' : True, 'SpeedScrew' : True, 'MajorMinor' : True }
+    restrictions = { 'Suits' : args.suitsRestriction, 'SpeedScrew' : args.speedScrewRestriction, 'MajorMinor' : not args.fullRandomization }
     seedCode = 'X'
     if restrictions['MajorMinor'] is False:
         seedCode = 'FX'
@@ -128,8 +125,8 @@ if __name__ == "__main__":
            'powerBomb': int(args.powerBombQty), 'energy': args.energyQty,
            'minors': int(args.minorQty)}
     sampleSize = 100
-    randomizer = Randomizer(seed, maxDifficulty, locations, qty,
-                            sampleSize, choose, restrictions)
+    randoSettings = RandoSettings(maxDifficulty, args.progressionSpeed, qty, restrictions, args.spreadItems, sampleSize)
+    randomizer = Randomizer(seed, locations, randoSettings)
     itemLocs = randomizer.generateItems()
     if itemLocs is None:
         print("Can't generate a randomized rom with the given parameters, try increasing the difficulty target.")

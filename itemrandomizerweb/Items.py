@@ -38,8 +38,7 @@ Items = [
     },
     {
         'Type': 'Bomb',
-#        'Category': 'Progression',
-        'Category' : 'Misc',
+        'Category': 'Progression',
         'Class': 'Major',
         'Code': 0xeee7,
         'Name': "Bomb",
@@ -56,7 +55,6 @@ Items = [
     {
         'Type': 'Ice',
         'Category': 'Progression',
-#        'Category': 'Beam',
         'Class': 'Major',
         'Code': 0xeeef,
         'Name': "Ice Beam",
@@ -65,7 +63,6 @@ Items = [
     {
         'Type': 'HiJump',
         'Category': 'Progression',
-        'Category': 'Misc',
         'Class': 'Major',
         'Code': 0xeef3,
         'Name': "Hi-Jump Boots",
@@ -121,8 +118,7 @@ Items = [
     },
     {
         'Type': 'Grapple',
-#        'Category': 'Progression',
-        'Category': 'Misc',
+        'Category': 'Progression',
         'Class': 'Major',
         'Code': 0xef17,
         'Name': "Grappling Beam",
@@ -162,8 +158,7 @@ Items = [
     },
     {
         'Type': 'SpaceJump',
-#        'Category': 'Progression',
-        'Category': 'Misc',
+        'Category': 'Progression',
         'Class': 'Major',
         'Code': 0xef1b,
         'Name': "Space Jump",

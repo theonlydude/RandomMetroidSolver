@@ -32,6 +32,7 @@ class RandoSettings(object):
         }
         self.progressionItemTypes = self.getProgressionItemTypes(progSpeed)
         self.itemLimit = self.getItemLimit(progSpeed)
+        self.locLimit = self.getLocLimit(progSpeed)
 
     def getChooseItemDict(self, progSpeed):
         if progSpeed == 'slowest':
@@ -99,6 +100,12 @@ class RandoSettings(object):
         elif progSpeed == 'fastest':
             itemLimit = 1
         return itemLimit
+
+    def getLocLimit(self, progSpeed):
+        locLimit = 2
+        if progSpeed == 'slowest':
+            locLimit = 1
+        return locLimit
         
 class Randomizer(object):
     # seed : rand seed
@@ -129,6 +136,7 @@ class Randomizer(object):
         self.sampleSize = settings.sampleSize
         self.itemLimit = settings.itemLimit
         self.unusedLocations = locations
+        self.locLimit = settings.locLimit
         self.usedLocations = []
         self.progressionLocs = []
         self.progressionItemTypes = settings.progressionItemTypes
@@ -435,7 +443,7 @@ class Randomizer(object):
             if majAvail and loc['Area'] in room:
                 room[loc['Area']] += 1
         for r in room.values():
-            if r > 0 and r <= 2:
+            if r > 0 and r <= self.locLimit:
                 sys.stdout.write('|')
                 sys.stdout.flush()
                 return False

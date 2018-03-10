@@ -500,10 +500,10 @@ def randomizer():
         session.randomizer['energyQty'] = "vanilla"
         session.randomizer['useMaxDiff'] = "off"
         session.randomizer['progressionSpeed'] = "medium"
-        session.randomizer['spreadItems'] = "off"
+        session.randomizer['spreadItems'] = "on"
         session.randomizer['fullRandomization'] = "off"
-        session.randomizer['suitsRestriction'] = "off"
-        session.randomizer['speedScrewRestriction'] = "off"
+        session.randomizer['suitsRestriction'] = "on"
+        session.randomizer['speedScrewRestriction'] = "on"
 
 
     files = sorted(os.listdir('diff_presets'))

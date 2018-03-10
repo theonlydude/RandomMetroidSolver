@@ -58,17 +58,17 @@ if __name__ == "__main__":
                         dest='energyQty', nargs='?', default='vanilla',
                         choices=['sparse', 'medium', 'vanilla'])
     parser.add_argument('--spreadItems',
-                        help="",
-                        dest='spreadItems', nargs='?', default=True)
+                        help="", action='store_true',
+                        dest='spreadItems', default=True)
     parser.add_argument('--fullRandomization',
-                        help="",
-                        dest='fullRandomization', nargs='?', default=False)
+                        help="", action='store_true',
+                        dest='fullRandomization', default=False)
     parser.add_argument('--suitsRestriction',
-                        help="",
-                        dest='suitsRestriction', nargs='?', default=True)
+                        help="", action='store_true',
+                        dest='suitsRestriction', default=True)
     parser.add_argument('--speedScrewRestriction',
-                        help="",
-                        dest='speedScrewRestriction', nargs='?', default=True)
+                        help="", action='store_true',
+                        dest='speedScrewRestriction', default=True)
     parser.add_argument('--progressionSpeed', '-i',
                         help="",
                         dest='progressionSpeed', nargs='?', default='medium',

@@ -94,7 +94,7 @@ class RandoSettings(object):
     def getItemLimit(self, progSpeed):
         itemLimit = 100
         if progSpeed == 'medium':
-            itemLimit = 25
+            itemLimit = 20
         elif progSpeed == 'fast':
             itemLimit = 10
         elif progSpeed == 'fastest':
@@ -134,7 +134,9 @@ class Randomizer(object):
         self.itemPool = Items.getItemPool(settings.qty)
         self.difficultyTarget = settings.maxDiff
         self.sampleSize = settings.sampleSize
-        self.itemLimit = settings.itemLimit
+        minLimit = settings.itemLimit - settings.itemLimit/10
+        maxLimit = settings.itemLimit + settings.itemLimit/10
+        self.itemLimit = random.randint(minLimit, maxLimit)
         self.unusedLocations = locations
         self.locLimit = settings.locLimit
         self.usedLocations = []

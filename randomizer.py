@@ -111,7 +111,7 @@ if __name__ == "__main__":
     elif maxDifficulty <= hardcore:
         threshold = mania - epsilon
     maxDifficulty = threshold
-        
+
     restrictions = { 'Suits' : args.suitsRestriction, 'SpeedScrew' : args.speedScrewRestriction, 'MajorMinor' : not args.fullRandomization }
     seedCode = 'X'
     if restrictions['MajorMinor'] is False:

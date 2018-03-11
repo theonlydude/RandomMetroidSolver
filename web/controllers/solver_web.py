@@ -493,6 +493,7 @@ def randomizer():
         for patch in patches:
             session.randomizer[patch[0]] = "on"
         session.randomizer['supermetroid_msu1'] = "off"
+        session.randomizer['spinjumprestart'] = "off"
         session.randomizer['missileQty'] = "3"
         session.randomizer['superQty'] = "3"
         session.randomizer['powerBombQty'] = "1"

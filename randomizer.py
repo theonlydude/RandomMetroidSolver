@@ -14,7 +14,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Random Metroid Randomizer")
     parser.add_argument('--param', '-p', help="the input parameters", nargs='+',
                         default=None, dest='paramsFileName')
-
+    parser.add_argument('--dir',
+                        help="output directory",
+                        dest='directory', nargs='?', default='.')
     parser.add_argument('--debug', '-d', help="activate debug logging", dest='debug',
                         action='store_true')
     parser.add_argument('--maxDifficulty', '-t',
@@ -116,7 +118,7 @@ if __name__ == "__main__":
     seedCode = 'X'
     if restrictions['MajorMinor'] is False:
         seedCode = 'FX'
-    fileName = 'Ouiche_Randomizer_' + seedCode + str(seed) + '_' + preset
+    fileName = args.directory + '/' + 'Ouiche_Randomizer_' + seedCode + str(seed) + '_' + preset
 
     locationPool = locations
 

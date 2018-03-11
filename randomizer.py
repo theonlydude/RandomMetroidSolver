@@ -60,16 +60,16 @@ if __name__ == "__main__":
                         dest='energyQty', nargs='?', default='vanilla',
                         choices=['sparse', 'medium', 'vanilla'])
     parser.add_argument('--spreadItems',
-                        help="", action='store_true',
+                        help="spread progression items", action='store_true',
                         dest='spreadItems', default=True)
     parser.add_argument('--fullRandomization',
-                        help="", action='store_true',
+                        help="will place majors in all locations", action='store_true',
                         dest='fullRandomization', default=False)
     parser.add_argument('--suitsRestriction',
-                        help="", action='store_true',
+                        help="no suits in early game", action='store_true',
                         dest='suitsRestriction', default=True)
     parser.add_argument('--speedScrewRestriction',
-                        help="", action='store_true',
+                        help="no speed or screw in the very first rooms", action='store_true',
                         dest='speedScrewRestriction', default=True)
     parser.add_argument('--progressionSpeed', '-i',
                         help="",

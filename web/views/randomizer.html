@@ -412,20 +412,20 @@ def displayNumber(id, min, max, default):
               <td>{{displaySelect("maxDifficulty", ['easy', 'medium', 'hard', 'very hard', 'hardcore', 'mania'], "hard")}}</td>
             </tr>
 	    <tr>
-	      <td class="half">Progression speed:</td>
+	      <td class="half">Progression speed: when placing an item at a location determine how many new locations will be reacheable with that new item (slow: few, fast: many)</td>
               <td class="half">{{displaySelect("progressionSpeed", ['slowest', 'slow', 'medium', 'fast', 'fastest'], "medium")}}</td>
 	    </tr>
 	    <tr>
-	      <td colspan="2">{{displayCheckbox("spreadItems")}}Spread items</td>
+	      <td colspan="2">{{displayCheckbox("spreadItems")}}Spread progression items in all areas with maximum distance between them</td>
 	    </tr>
 	    <tr>
-	      <td colspan="2">{{displayCheckbox("fullRandomization")}}Full randomization</td>
+	      <td colspan="2">{{displayCheckbox("fullRandomization")}}Full randomization: place majors in all locations</td>
 	    </tr>
 	    <tr>
-	      <td colspan="2">{{displayCheckbox("suitsRestriction")}}Suits restriction</td>
+	      <td colspan="2">{{displayCheckbox("suitsRestriction")}}Suits restriction: no Gravity or Varia suits in early game</td>
 	    </tr>
 	    <tr>
-	      <td colspan="2">{{displayCheckbox("speedScrewRestriction")}}Speed/Screw restriction</td>
+	      <td colspan="2">{{displayCheckbox("speedScrewRestriction")}}Speed/Screw restriction: no SpeedBooster or Screw Attack in the very first rooms</td>
 	    </tr>
 	  </table>
          {{=INPUT(_type="submit", _value="Randomize", _id="submitBtn")}}

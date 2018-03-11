@@ -657,7 +657,8 @@ locations = [
                                     wor(wand(canPassBombPassages(items),
                                              haveItem(items, 'Super')),
                                         SMBool(True, easy))),
-    'PostAvailable': lambda items: canOpenGreenDoors(items)
+    'PostAvailable': lambda items: wand(canOpenGreenDoors(items),
+                                        canPassBombPassages(items))
 },
 {
     'Area': "Brinstar",

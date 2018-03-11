@@ -4,7 +4,7 @@ from stdlib import Map, Array, List, Random
 
 class RandoSettings(object):
     # maxDiff : max diff
-    # progSpeed : Slowest, Slow, Medium, Fast, Fastest
+    # progSpeed : slowest, slow, medium, fast, fastest
     # qty : dictionary telling how many tanks and ammo will be distributed. keys are:
     #       'missile', 'super', 'powerBomb' : relative weight of ammo distribution (ex:3/3/1)
     #       'energy' : can be 'sparse' (5 tanks), 'medium' (11 tanks), 'vanilla' (14 Etanks, 4 reserves)
@@ -14,7 +14,7 @@ class RandoSettings(object):
     #                'SpeedScrew' : no speed or screw in the very first rooms
     #                'MajorMinor' : if true, will put major items in major locations, and minor items
     #                               in minor locations
-    # spreadProg : if true, will spread progrssion items
+    # spreadProg : if true, will spread progression items
     # sampleSize : possible items sample size between 1 and 100. Has to be > 1 for choose dict to be relevant.
     def __init__(self, maxDiff, progSpeed, qty, restrictions, spreadProg, sampleSize):
         self.maxDiff = maxDiff
@@ -37,14 +37,14 @@ class RandoSettings(object):
     def getChooseItemDict(self, progSpeed):
         if progSpeed == 'slowest':
             return {
-                'MinProgression' : 5,
-                'Random' : 5,
+                'MinProgression' : 1,
+                'Random' : 2,
                 'MaxProgression' : 0
             }
         if progSpeed == 'slow':
             return {
-                'MinProgression' : 2,
-                'Random' : 8,
+                'MinProgression' : 15,
+                'Random' : 85,
                 'MaxProgression' : 0
             }
         if progSpeed == 'medium':
@@ -56,14 +56,14 @@ class RandoSettings(object):
         if progSpeed == 'fast':
             return {
                 'MinProgression' : 0,
-                'Random' : 8,
-                'MaxProgression' : 2
+                'Random' : 85,
+                'MaxProgression' : 15
             }
         if progSpeed == 'fastest':
             return {
                 'MinProgression' : 0,
-                'Random' : 5,
-                'MaxProgression' : 5
+                'Random' : 2,
+                'MaxProgression' : 1
             }            
         return None
 
@@ -94,7 +94,7 @@ class RandoSettings(object):
     def getItemLimit(self, progSpeed):
         itemLimit = 100
         if progSpeed == 'medium':
-            itemLimit = 20
+            itemLimit = 25
         elif progSpeed == 'fast':
             itemLimit = 10
         elif progSpeed == 'fastest':
@@ -102,9 +102,16 @@ class RandoSettings(object):
         return itemLimit
 
     def getLocLimit(self, progSpeed):
-        locLimit = 2
         if progSpeed == 'slowest':
+            locLimit = -1
+        elif progSpeed == 'slow':
             locLimit = 1
+        elif progSpeed == 'medium':
+            locLimit = 2
+        elif progSpeed == 'fast':
+            locLimit = 3
+        elif progSpeed == 'fastest':
+            locLimit = 4
         return locLimit
         
 class Randomizer(object):

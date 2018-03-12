@@ -118,7 +118,10 @@ if __name__ == "__main__":
     seedCode = 'X'
     if restrictions['MajorMinor'] is False:
         seedCode = 'FX'
-    fileName = args.directory + '/' + 'VARIA_Randomizer_' + seedCode + str(seed) + '_' + preset
+
+    fileName = 'VARIA_Randomizer_' + seedCode + str(seed) + '_' + preset
+    if args.directory != '.':
+        fileName = args.directory + '/' + fileName
 
     locationPool = locations
 

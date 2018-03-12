@@ -60,10 +60,10 @@ class RomType:
     def guess(fileName):
         fileName = os.path.basename(fileName)
 
-        # ouiche ?
-        m = re.match(r'^Ouiche_Randomizer_([F]?X)\d+.*$', fileName)
+        # VARIA ?
+        m = re.match(r'^VARIA_Randomizer_([F]?X)\d+.*$', fileName)
         if m is not None:
-            return 'Ouiche_' + m.group(1)
+            return 'VARIA_' + m.group(1)
 
         # total ?
         m = re.match(r'^.*?([CTFH]?X)\d+.*$', fileName)
@@ -89,7 +89,7 @@ class RomType:
             RomPatches.ActivePatches = RomPatches.Total_CX
         elif romType in ['Total_TX', 'Total_FX']:
             RomPatches.ActivePatches = RomPatches.Total
-        elif romType.startswith('Ouiche_'):
+        elif romType.startswith('VARIA_'):
             RomPatches.ActivePatches = RomPatches.Total
         elif romType == 'Dessy':
             RomPatches.ActivePatches = RomPatches.Dessy
@@ -295,7 +295,7 @@ class RomPatcher:
     # Replace bomb blocks with shot blocks before Spazer
     #   spazer.ips
     IPSPatches = {
-        'Standard': ['credits_ouiche.ips', 'g4_skip.ips', 'introskip_doorflags.ips',
+        'Standard': ['credits_varia.ips', 'g4_skip.ips', 'introskip_doorflags.ips',
                      'seed_display.ips', 'tracking.ips', 'wake_zebes.ips',
                      'Removes_Gravity_Suit_heat_protection', 'Mother_Brain_Cutscene_Edits',
                      'Suit_acquisition_animation_skip', 'Fix_Morph_and_Missiles_Room_State',

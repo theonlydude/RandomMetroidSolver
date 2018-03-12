@@ -118,7 +118,7 @@ if __name__ == "__main__":
     seedCode = 'X'
     if restrictions['MajorMinor'] is False:
         seedCode = 'FX'
-    fileName = args.directory + '/' + 'Ouiche_Randomizer_' + seedCode + str(seed) + '_' + preset
+    fileName = args.directory + '/' + 'VARIA_Randomizer_' + seedCode + str(seed) + '_' + preset
 
     locationPool = locations
 

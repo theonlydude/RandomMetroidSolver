@@ -14,7 +14,7 @@ from parameters import diff2text, text2diff
 import tournament_locations
 from solver import Solver, ParamsLoader, DifficultyDisplayer, RomLoader
 
-romTypes = OrderedDict([('Ouiche Classic', 'Ouiche_X'), ('Ouiche Full', 'Ouiche_FX'),
+romTypes = OrderedDict([('VARIA Classic', 'VARIA_X'), ('VARIA Full', 'VARIA_FX'),
                         ('Total Casual', 'Total_CX'), ('Total Normal', 'Total_X'),
                         ('Total Hard', 'Total_HX'), ('Total Tournament', 'Total_TX'),
                         ('Total Full', 'Total_FX'), ('Dessy Casual', 'Dessy'),
@@ -22,12 +22,12 @@ romTypes = OrderedDict([('Ouiche Classic', 'Ouiche_X'), ('Ouiche Full', 'Ouiche_
                         ('Vanilla', 'Vanilla')])
 
 def guessRomType(filename):
-    match = re.findall(r'Ouiche_Randomizer_[F]?X\d+', filename)
+    match = re.findall(r'VARIA_Randomizer_[F]?X\d+', filename)
     if len(match) > 0:
         if match[0][18] == 'F':
-            return "Ouiche Full"
+            return "VARIA Full"
         elif match[0][18] == 'X':
-            return "Ouiche Classic"
+            return "VARIA Classic"
 
     match = re.findall(r'[CTFH]?X\d+', filename)
     if len(match) > 0:
@@ -483,7 +483,7 @@ patches = [
 ]
 
 def randomizer():
-    response.title = 'Super Metroid Ouiche Randomizer'
+    response.title = 'Super Metroid VARIA Randomizer'
 
     if session.randomizer is None:
         session.randomizer = {}

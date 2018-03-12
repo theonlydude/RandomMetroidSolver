@@ -928,7 +928,7 @@ script:
 
     // Custom item randomizer credits text        
 
-    dw {draw}, {row}*128 // OUICHE RANDOMIZER STAFF
+    dw {draw}, {row}*128 // VARIA RANDOMIZER STAFF
     dw {draw}, {blank}
     dw {draw}, {blank}
     dw {draw}, {row}*129 // RANDOMIZER CODE
@@ -1202,7 +1202,7 @@ credits:
     // }!@#$%&/()>~.
     
     {pink}
-    dw "     OUICHE RANDOMIZER STAFF    " // 128
+    dw "     VARIA RANDOMIZER STAFF    " // 128
     {purple}
     dw "         RANDOMIZER CODE        " // 129
     {big}

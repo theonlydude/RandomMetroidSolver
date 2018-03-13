@@ -21,7 +21,7 @@ nb_cpu=$(grep processor /proc/cpuinfo | wc -l)
 }
 
 mkdir -p $test_set/old_seeds
-mv Ouiche_Randomizer_*.sfc $test_set/old_seeds 2> /dev/null
+mv VARIA_Randomizer_*.sfc $test_set/old_seeds 2> /dev/null
 rmdir $test_set/old_seeds 2> /dev/null
 
 which pypy && PYPY="pypy"
@@ -52,12 +52,14 @@ for p in $presets; do
 	for i in $(seq 1 $n); do
 	    if [ ${workers} -lt ${nb_cpu} ]; then
 		worker ${p} ${speed} ${i} ${dest} &
+                renice -n 10 -p $!
 		let workers=${workers}+1
 	    else
 		wait
 		workers=0
 	    fi
 	done
+        wait
 	$GET_STATS $dest/*.sfc
 	mv *stats.csv $dest
     done

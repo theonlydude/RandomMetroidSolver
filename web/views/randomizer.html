@@ -351,7 +351,7 @@ def displayNumber(id, min, max, default):
 
   <div class="fixed">
     <div class="menu">
-      {{=A('Super Metroid VARIA Randomizer', _href=URL(f='randomizer'), _class='menu')}}
+      {{=A('Super Metroid VARIA Randomizer and Solver', _href=URL(f='randomizer'), _class='menu')}}
       {{=A('Solve!', _href=URL(f='solver'), _class='menu')}}
       {{=A('Randomize!', _href=URL(f='randomizer'), _class='menu')}}
       {{=A('Information & Contact', _href=URL(f='infos'), _class='menu')}}
@@ -362,7 +362,7 @@ def displayNumber(id, min, max, default):
     <form id="mainform", name="mainform", onsubmit="doSubmit(); return false;">
       <div class="row">
 	<div class="column">
-	  <p>The Very Adaptative Randomizer of Items for Anyone (VARIA) randomizer will generate a Super Metroid ROM finishable using the known techniques of the preset</p>
+	  <p>The Very Adaptative Randomizer of Items for Anyone (VARIA) randomizer will generate a Super Metroid ROM finishable using the known techniques of the chosen preset</p>
           <table class="full">
             <colgroup><col class="half" /><col class="half" /></colgroup>
             <tr>
@@ -416,7 +416,7 @@ def displayNumber(id, min, max, default):
               <td class="half">{{displaySelect("progressionSpeed", ['slowest', 'slow', 'medium', 'fast', 'fastest'], "medium")}}</td>
 	    </tr>
 	    <tr>
-	      <td colspan="2">{{displayCheckbox("spreadItems")}}Spread progression items in all areas with maximum distance between them</td>
+	      <td colspan="2">{{displayCheckbox("spreadItems")}}Spread progression items (uncheck for faster progression)</td>
 	    </tr>
 	    <tr>
 	      <td colspan="2">{{displayCheckbox("fullRandomization")}}Full randomization: place majors in all locations</td>
@@ -433,7 +433,7 @@ def displayNumber(id, min, max, default):
 	<div class="column">
 	  <h4>Patches</h4>
 	  <p>
-	    All the patches from Total Item Randomizer are included by default (except animals patches).<br/>
+	    All the <a href="https://itemrando.supermetroid.run/information">patches</a> from Total Item Randomizer are included by default (except animals patches).<br/>
 	    The layout patches included by default:
 	    <ul>
               <li>Disable respawning blocks at Dachora Pit</li>

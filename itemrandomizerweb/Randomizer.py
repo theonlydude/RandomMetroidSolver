@@ -74,11 +74,11 @@ class RandoSettings(object):
             return progTypes
         else:
             progTypes.remove('HiJump')
-            progTypes.remove('Charge')
             progTypes.remove('Bomb')
         if progSpeed == 'slow':
             return progTypes
         else:
+            progTypes.remove('Charge')
             progTypes.remove('Grapple')
             progTypes.remove('Ice')
         if progSpeed == 'medium':
@@ -440,8 +440,6 @@ class Randomizer(object):
         sys.stdout.flush()
         
     def checkLocPool(self):
-        if self.isSpreadProgression is False:
-            return True
         nProgs = len([item for item in self.itemPool if self.isProgItem(item)])
         if nProgs == 0:
             return True

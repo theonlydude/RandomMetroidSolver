@@ -477,7 +477,6 @@ class Randomizer(object):
                 if itemLocation is None:
                     break
                 else:
-                    nLoops += 1
                     nItems += 1
                     self.getItem(itemLocation, itemLocations)
                     pool = self.removeItem(itemLocation['Item']['Type'], pool)

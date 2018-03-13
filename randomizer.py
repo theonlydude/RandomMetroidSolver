@@ -75,6 +75,10 @@ if __name__ == "__main__":
                         help="",
                         dest='progressionSpeed', nargs='?', default='medium',
                         choices=['slowest', 'slow', 'medium', 'fast', 'fastest'])
+    parser.add_argument('--superFun', 
+                        help="randomly remove major items from the pool for maximum enjoyment",
+                        dest='superFun', nargs='?', default=[], action='append',
+                        choices=['Movement', 'Combat', 'Suits'])
 
     args = parser.parse_args()
 
@@ -91,7 +95,8 @@ if __name__ == "__main__":
         seed = random.randint(0, 9999999)
     else:
         seed = args.seed
-
+    random.seed(seed)
+        
     print("SEED: " + str(seed))
 
     if args.maxDifficulty:
@@ -130,8 +135,8 @@ if __name__ == "__main__":
            'powerBomb': int(args.powerBombQty), 'energy': args.energyQty,
            'minors': int(args.minorQty)}
     sampleSize = 100
-    randoSettings = RandoSettings(maxDifficulty, args.progressionSpeed, qty, restrictions, args.spreadItems, sampleSize)
-    randomizer = Randomizer(seed, locations, randoSettings)
+    randoSettings = RandoSettings(maxDifficulty, args.progressionSpeed, qty, restrictions, args.spreadItems, sampleSize, args.superFun)
+    randomizer = Randomizer(locations, randoSettings)
     itemLocs = randomizer.generateItems()
     if itemLocs is None:
         print("Can't generate a randomized rom with the given parameters, try increasing the difficulty target.")

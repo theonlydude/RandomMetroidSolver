@@ -1,5 +1,6 @@
 import sys, random
 import Items
+from parameters import Knows, Settings
 from stdlib import Map, Array, List, Random
 
 class RandoSettings(object):
@@ -16,12 +17,16 @@ class RandoSettings(object):
     #                               in minor locations
     # spreadProg : if true, will spread progression items
     # sampleSize : possible items sample size between 1 and 100. Has to be > 1 for choose dict to be relevant.
-    def __init__(self, maxDiff, progSpeed, qty, restrictions, spreadProg, sampleSize):
+    # superFun : super fun settings list. can contain 'Movement', 'Combat', 'Suits'. Will remove random items
+    # of the relevant categorie(s). This can easily cause aborted seeds, so some basic checks will be performed
+    # beforehand to know whether an item can indeed be removed.
+    def __init__(self, maxDiff, progSpeed, qty, restrictions, spreadProg, sampleSize, superFun):
+        self.progSpeed = progSpeed
         self.maxDiff = maxDiff
         self.qty = qty
         self.restrictions = restrictions
         self.isSpreadProgression = spreadProg
-        self.sampleSize = sampleSize
+        self.sampleSize = sampleSize        
         self.choose = {
             'Locations' : {
                 'Random' : 1,
@@ -33,6 +38,7 @@ class RandoSettings(object):
         self.progressionItemTypes = self.getProgressionItemTypes(progSpeed)
         self.itemLimit = self.getItemLimit(progSpeed)
         self.locLimit = self.getLocLimit(progSpeed)
+        self.forbiddenItems = self.getForbiddenItems(superFun)
 
     def getChooseItemDict(self, progSpeed):
         if progSpeed == 'slowest':
@@ -113,14 +119,78 @@ class RandoSettings(object):
         elif progSpeed == 'fastest':
             locLimit = 4
         return locLimit
+
+    def getForbiddenItemsFromList(self, itemList):
+        remove = []
+        nItems = float(len(itemList))
+        n = int(round(random.gauss(nItems/2, nItems/8), 0))
+        if n < 0:
+            n = 0
+        if n > len(itemList):
+            n = len(itemList)
+        for i in range(n):
+            idx = random.randint(0, len(itemList) - 1)
+            remove.append(itemList.pop(idx))
+        return remove
+
+    def getForbiddenSuits(self, dontRemove):
+        removable = []
+        # can we remove gravity?
+        if Knows.SuitlessOuterMaridia.bool or Knows.SuitlessOuterMaridiaNoGuns.bool:
+            if Knows.DraygonRoomCrystalFlash.bool:
+                if Knows.PreciousRoomXRayExit.bool:
+                    removable.append('Gravity')
+                elif Knows.DraygonRoomGrappleExit.bool and not Knows.SpringBallJump.bool:
+                    removable.append('Gravity')
+                    dontRemove.append('Grapple')
+                elif not Knows.DraygonRoomGrappleExit.bool and Knows.SpringBallJump.bool:
+                    removable.append('Gravity')
+                    dontRemove.append('SpringBall')
+                elif Knows.DraygonRoomGrappleExit.bool and Knows.SpringBallJump.bool:
+                    if random.random() < 0.5:
+                        dontRemove.append('SpringBall')
+                    else:
+                        dontRemove.append('Grapple')
+                    removable.append('Gravity')
+            elif Knows.DraygonRoomGrappleExit.bool:
+                if Knows.PreciousRoomXRayExit.bool:
+                    removable.append('Gravity')
+                    dontRemove.append('Grapple')
+                elif Knows.SpringBallJump.bool:
+                    removable.append('Gravity')
+                    dontRemove.append('Grapple')
+                    dontRemove.append('SpringBall')
+        # can we remove varia?
+        if Settings.hellRuns['LowerNorfair'] is not None and self.qty['energy'] != 'sparse':
+            removable.append('Varia')
+        return removable
+
+    def getForbiddenMovement(self, dontRemove):
+        movementItems = ['SpaceJump', 'Bomb', 'HiJump', 'SpeedBooster', 'Grapple', 'SpringBall']        
+        return [item for item in movementItems if not item in dontRemove]
+
+    def getForbiddenCombat(self):
+        combatItems = ['ScrewAttack', 'Wave', 'Spazer', 'Plasma']
+        return combatItems
+    
+    def getForbiddenItems(self, superFun):
+        remove = []
+        dontRemove = []
+        if 'Suits' in superFun: # impact on movement item
+            removableSuits = self.getForbiddenSuits(removable, dontRemove)
+            remove += self.getForbiddenItemsFromList(removableSuits)
+        if 'Movement' in superFun:
+            removableMovement = self.getForbiddenMovement(dontRemove)
+            remove += self.getForbiddenItemsFromList(removableMovement)
+        if 'Combat' in superFun:
+            removableCombat = self.getForbiddenCombat()
+            remove += self.getForbiddenItemsFromList(removableCombat)
+        return remove
         
 class Randomizer(object):
-    # seed : rand seed
     # locations : items locations
     # settings : RandoSettings instance
-    def __init__(self, seed, locations, settings):
-        random.seed(seed)
-
+    def __init__(self, locations, settings):
         # we assume that 'choose' dict is perfectly formed, that is all keys
         # below are defined in the appropriate weight dicts
         self.isSpreadProgression = settings.isSpreadProgression
@@ -138,7 +208,7 @@ class Randomizer(object):
         }
         self.chooseLocRanges = self.getRangeDict(settings.choose['Locations'])
         self.restrictions = settings.restrictions
-        self.itemPool = Items.getItemPool(settings.qty)
+        self.itemPool = Items.getItemPool(settings.qty, settings.forbiddenItems)
         self.difficultyTarget = settings.maxDiff
         self.sampleSize = settings.sampleSize
         minLimit = settings.itemLimit - settings.itemLimit/10
@@ -303,6 +373,9 @@ class Randomizer(object):
 
         return locs
 
+    def hasItemType(self, t):
+        return any(item['Type'] == t for item in self.currentItems)
+    
     def isProgItem(self, item):
         return item['Type'] in self.progressionItemTypes
     

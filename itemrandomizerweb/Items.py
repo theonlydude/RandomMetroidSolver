@@ -248,7 +248,8 @@ def addAmmo(itemPool, qty):
 
     return itemPool
 
-def getItemPool(qty):
+def getItemPool(qty, forbiddenItems):
+    # TODO actually use forbiddenItems argument
     if qty['energy'] == 'sparse':
         # 5 (there's always a reserve and an etank added by the first call to addItem with Items as parameter)
         if random.random() < 0.5:

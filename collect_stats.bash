@@ -35,10 +35,10 @@ function worker {
     echo
     echo "**** $p $speed $i ****"
     echo
-    seed=$(head -c 500 /dev/urandom | tr -dc '0-9' | fold -w 7 | head -n 1)
+    seed=$(head -c 500 /dev/urandom | tr -dc '0-9' | fold -w 7 | head -n 1 | sed 's/^0*//')
     ${PYPY} $RANDO --seed ${seed} -i $speed --param diff_presets/$p.json -c AimAnyButton.ips -c itemsounds.ips -c max_ammo_display.ips -c spinjumprestart.ips --rom ~/roms/Super\ Metroid\ \(Japan\,\ USA\)\ \(En\,Ja\).sfc
     solver_log="$dest/${seed}.txt"
-    rom="Ouiche_Randomizer_X${seed}_${p}.sfc"
+    rom="VARIA_Randomizer_*${seed}_${p}.sfc"
     $SOLVER $rom --param diff_presets/$p.json  --difficultyTarget 5 --displayGeneratedPath > $solver_log
     mv $rom $dest
 }

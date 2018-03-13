@@ -200,6 +200,20 @@ class RomReader:
         value1 = struct.unpack("B", romFile.read(1))
         value2 = struct.unpack("B", romFile.read(1))
 
+        # match itemVisibility with
+        # | Visible -> 0
+        # | Chozo -> 0x54 (84)
+        # | Hidden -> 0xA8 (168)
+        if visibility == 'Visible':
+            itemCode = hex(value2[0]*256+(value1[0]-0))
+        elif visibility == 'Chozo':
+            itemCode = hex(value2[0]*256+(value1[0]-84))
+        elif visibility == 'Hidden':
+            itemCode = hex(value2[0]*256+(value1[0]-168))
+        else:
+            # crash !
+            manger.du(cul)
+
         # dessyreqt randomizer make some missiles non existant, detect it
         # 0x1a is to say that the item is a morphball
         # 0xeedb is missile item
@@ -207,23 +221,11 @@ class RomReader:
         romFile.seek(address+4)
         value3 = struct.unpack("B", romFile.read(1))
         if (value3[0] == int('0x1a', 16)
-            and value2[0]*256+(value1[0]) == int('0xeedb', 16)
+            and int(itemCode, 16) == int('0xeedb', 16)
             and address != int('0x786DE', 16)):
             return hex(0)
-
-        # match itemVisibility with
-        # | Visible -> 0
-        # | Chozo -> 0x54 (84)
-        # | Hidden -> 0xA8 (168)
-        if visibility == 'Visible':
-            return hex(value2[0]*256+(value1[0]-0))
-        elif visibility == 'Chozo':
-            return hex(value2[0]*256+(value1[0]-84))
-        elif visibility == 'Hidden':
-            return hex(value2[0]*256+(value1[0]-168))
         else:
-            # crash !
-            manger.du(cul)
+            return itemCode
 
     def loadItemsFromFakeRom(self, fakeRom, locations):
         for loc in locations:
@@ -318,7 +320,7 @@ class RomPatcher:
         for itemLoc in itemLocs:
             if itemLoc['Item']['Type'] in ['Nothing', 'NoEnergy']:
                 # put missile morphball like dessy
-                itemCode = Items.toByteArray(0xeedb)
+                itemCode = Items.getItemTypeCode({'Code': 0xeedb}, itemLoc['Location']['Visibility'])
                 outFile.seek(itemLoc['Location']['Address'])
                 outFile.write(itemCode[0])
                 outFile.write(itemCode[1])

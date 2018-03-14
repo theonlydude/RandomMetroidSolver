@@ -2,7 +2,7 @@ import sys, random
 import Items
 from parameters import Knows, Settings
 from stdlib import Map, Array, List, Random
-from helpers import wand, Bosses, enoughStuffTourian
+from helpers import wand, Bosses, enoughStuffTourian#, canPassMetroids, canPassZebetites, enoughStuffsMotherbrain
 
 class RandoSettings(object):
     # maxDiff : max diff
@@ -498,7 +498,7 @@ class Randomizer(object):
             
         return True
 
-    def getItem(self, itemLocation, itemLocations):
+    def getItem(self, itemLocation, itemLocations, collect=True):
         sys.stdout.write('.')
         sys.stdout.flush()
         item = itemLocation['Item']
@@ -512,11 +512,10 @@ class Randomizer(object):
             if loc == location:
                 self.unusedLocations = self.unusedLocations[0:i] + self.unusedLocations[i+1:]
             i+=1
-
-        if 'Pickup' in location:
-            location['Pickup']()
-
-        self.currentItems.append(item)
+        if collect is True:
+            if 'Pickup' in location:
+                location['Pickup']()
+            self.currentItems.append(item)
         itemLocations.append(itemLocation)
  #       print(str(len(self.currentItems)) + ':' + itemLocation['Item']['Type'] + ' at ' + itemLocation['Location']['Name'])
         self.itemPool = self.removeItem(item['Type'], self.itemPool)
@@ -537,7 +536,8 @@ class Randomizer(object):
         itemLoc = itemLocations.pop()
         item = itemLoc['Item']
         loc = itemLoc['Location']
-        self.currentItems.pop()
+        if item in self.currentItems:
+            self.currentItems.remove(item)
         self.itemPool.append(item)
         self.usedLocations.remove(loc)
         self.unusedLocations.append(loc)
@@ -590,7 +590,8 @@ class Randomizer(object):
                 itemLocation['Item'] = self.getNextItemInPool('ETank')
             else:
                 break
-            self.getItem(itemLocation, itemLocations)
+            print("Fill : " + itemLocation['Item']['Type'] + " at " + itemLocation['Location']['Name'])
+            self.getItem(itemLocation, itemLocations, False)
 
     def generateItems(self):
         itemLocations = []
@@ -598,6 +599,7 @@ class Randomizer(object):
         nLoops = 0
         isStuck = False
         self.fillRestrictedLocations(itemLocations)
+        maxLen = len(self.itemPool)
         while len(self.itemPool) > 0 and nLoops < 500 and not isStuck:
             # 1. fill up with non-progression stuff
             pool = [item for item in self.itemPool if not self.isProgItem(item)]
@@ -637,7 +639,7 @@ class Randomizer(object):
                     doRemove = True
                     maxCancel = 3 # assume we can't get stuck by a combination of more than 3 items...
                     nCancel = 0
-                    while isStuck and len(itemLocations) > 0 and doRemove and nCancel <= maxCancel:
+                    while isStuck and len(itemLocations) > 0 and doRemove and nCancel <= maxCancel and len(self.itemPool) <= maxLen:
                         self.cancelLastItem(itemLocations)
                         nCancel += 1
                         removed = True
@@ -652,23 +654,28 @@ class Randomizer(object):
                     if not isStuck and itemLocation is None:
                         # we weren't stuck before but we are now...cancel last item to survive this corner case
                         self.cancelLastItem(itemLocations)
-                if itemLocation is not None:
+                isStuck = itemLocation is None
+                if isStuck is False:
                     self.getItem(itemLocation, itemLocations)
-                else:
-                    isStuck = True
             nLoops += 1
         if len(self.itemPool) > 0:
             # check if we can finish the game
-            canEndGame = wand(Bosses.allBossesDead(), enoughStuffTourian(self.currentItems))
+            # print(canPassMetroids(self.currentItems))
+            # print(canPassZebetites(self.currentItems))
+            # print(enoughStuffsMotherbrain(self.currentItems))
+            itemTypes = [item['Type'] for item in self.currentItems]
+            canEndGame = wand(Bosses.allBossesDead(), enoughStuffTourian(itemTypes))
+            print(canEndGame)
             if canEndGame.bool is True and canEndGame.difficulty < self.difficultyTarget:
                 # place randomly all remaining items
                 itemLocation = {}
                 while len(self.itemPool) > 0:
                     itemLocation['Item'] = self.itemPool[0]
                     itemLocation['Location']  = self.unusedLocations[random.randint(0, len(self.unusedLocations) - 1)]
-                    self.getItem(itemLocation, itemLocations)
+                    print("Fill : " + itemLocation['Item']['Type'] + " at " + itemLocation['Location']['Name'])
+                    self.getItem(itemLocation, itemLocations, False)
             else:
-                print("\nSTUCK !")
+                print("\nSTUCK ! ")
                 print("REM LOCS = "  + str([loc['Name'] for loc in self.unusedLocations]))
                 print("REM ITEMS = "  + str([item['Type'] for item in self.itemPool]))
                 return None

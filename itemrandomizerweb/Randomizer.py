@@ -671,6 +671,7 @@ class Randomizer(object):
                 print("REM LOCS = "  + str([loc['Name'] for loc in self.unusedLocations]))
                 print("REM ITEMS = "  + str([item['Type'] for item in self.itemPool]))
                 return None
+        print("")
         return itemLocations
 
 # IDEES :

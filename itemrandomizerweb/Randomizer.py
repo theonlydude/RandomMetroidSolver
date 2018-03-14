@@ -210,7 +210,7 @@ class Randomizer(object):
         self.chooseLocRanges = self.getRangeDict(settings.choose['Locations'])
         self.restrictions = settings.restrictions
         self.itemPool = Items.getItemPool(settings.qty, settings.forbiddenItems)
-        self.restrictedLocations = self.getRestrictedLocations(settings.forbiddenItems)
+        self.restrictedLocations = self.getRestrictedLocations(settings.forbiddenItems, locations)
         self.difficultyTarget = settings.maxDiff
         self.sampleSize = settings.sampleSize
         minLimit = settings.itemLimit - settings.itemLimit/10
@@ -222,7 +222,7 @@ class Randomizer(object):
         self.progressionLocs = []
         self.progressionItemTypes = settings.progressionItemTypes
 
-    def getRestrictedLocations(self, forbiddenItems):
+    def getRestrictedLocations(self, forbiddenItems, locations):
         # list only absolutely unreachable locations, regardless of known techniques
         # TODO more accurate filtering
         restricted = []
@@ -236,7 +236,16 @@ class Randomizer(object):
                            "Spring Ball" ]
         if 'SpaceJump' in forbiddenItems:
             restricted += ["Missile (Gold Torizo)"]
-        return list(set(restricted))
+
+        restricted = list(set(restricted))
+
+        # add full locations
+        restrictedFull = []
+        for restrictLoc in restricted:
+            for loc in locations:
+                if loc['Name'] == restrictLoc:
+                    restrictedFull.append(loc)
+        return restrictedFull
         
     def locAvailable(self, loc, items):
         result = loc["Available"](items)

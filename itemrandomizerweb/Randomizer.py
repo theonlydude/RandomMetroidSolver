@@ -482,8 +482,6 @@ class Randomizer(object):
                                                 "Missile (blue Brinstar top)",
                                                 "Missile (blue Brinstar behind missile)"]
         
-
-        
         if self.restrictions['Suits'] is True:
             if item["Type"] == "Gravity":
                 return ((not (location["Area"] == "Crateria" or location["Area"] == "Brinstar"))
@@ -517,7 +515,7 @@ class Randomizer(object):
                 location['Pickup']()
             self.currentItems.append(item)
         itemLocations.append(itemLocation)
- #       print(str(len(self.currentItems)) + ':' + itemLocation['Item']['Type'] + ' at ' + itemLocation['Location']['Name'])
+        #print(str(len(self.currentItems)) + ':' + itemLocation['Item']['Type'] + ' at ' + itemLocation['Location']['Name'])
         self.itemPool = self.removeItem(item['Type'], self.itemPool)
 
     def generateItem(self, curLocs, pool):
@@ -590,7 +588,7 @@ class Randomizer(object):
                 itemLocation['Item'] = self.getNextItemInPool('ETank')
             else:
                 break
-            print("Fill : " + itemLocation['Item']['Type'] + " at " + itemLocation['Location']['Name'])
+#            print("Fill : " + itemLocation['Item']['Type'] + " at " + itemLocation['Location']['Name'])
             self.getItem(itemLocation, itemLocations, False)
 
     def generateItems(self):
@@ -627,11 +625,8 @@ class Randomizer(object):
                 removed = True
                 itemLocation = None
                 self.failItems = []
-                if not isStuck:
-#                    print("PRECANCEL")
-                    curLocs = self.currentLocations(self.currentItems)
-                    itemLocation = self.generateItem(curLocs, self.itemPool)                    
-                    isStuck = itemLocation is None
+                curLocs = self.currentLocations(self.currentItems)
+                itemLocation = self.generateItem(curLocs, self.itemPool)
                 while itemLocation is None and (removed is True or not isStuck):
                     # if we were stuck, cancel a bunch of our last decisions
                     curLocs = self.currentLocations(self.currentItems)
@@ -660,26 +655,22 @@ class Randomizer(object):
             nLoops += 1
         if len(self.itemPool) > 0:
             # check if we can finish the game
-            # print(canPassMetroids(self.currentItems))
-            # print(canPassZebetites(self.currentItems))
-            # print(enoughStuffsMotherbrain(self.currentItems))
             itemTypes = [item['Type'] for item in self.currentItems]
             canEndGame = wand(Bosses.allBossesDead(), enoughStuffTourian(itemTypes))
-            print(canEndGame)
             if canEndGame.bool is True and canEndGame.difficulty < self.difficultyTarget:
                 # place randomly all remaining items
-                itemLocation = {}
                 while len(self.itemPool) > 0:
-                    itemLocation['Item'] = self.itemPool[0]
-                    itemLocation['Location']  = self.unusedLocations[random.randint(0, len(self.unusedLocations) - 1)]
-                    print("Fill : " + itemLocation['Item']['Type'] + " at " + itemLocation['Location']['Name'])
+                    itemLocation = {
+                        'Item' : self.itemPool[0],
+                        'Location' : self.unusedLocations[random.randint(0, len(self.unusedLocations) - 1)]
+                    }
+#                    print("Fill : " + itemLocation['Item']['Type'] + " at " + itemLocation['Location']['Name'])
                     self.getItem(itemLocation, itemLocations, False)
             else:
                 print("\nSTUCK ! ")
                 print("REM LOCS = "  + str([loc['Name'] for loc in self.unusedLocations]))
                 print("REM ITEMS = "  + str([item['Type'] for item in self.itemPool]))
                 return None
-        print("")
         return itemLocations
 
 # IDEES :

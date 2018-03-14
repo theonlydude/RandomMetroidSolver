@@ -504,12 +504,8 @@ class Randomizer(object):
         if self.isProgItem(item):
                 #            print("placing " + item['Type'])
             self.progressionLocs.append(location)
-        self.usedLocations += [location]
-        i=0
-        for loc in self.unusedLocations:
-            if loc == location:
-                self.unusedLocations = self.unusedLocations[0:i] + self.unusedLocations[i+1:]
-            i+=1
+        self.usedLocations.append(location)
+        self.unusedLocations.remove(location)
         if collect is True:
             if 'Pickup' in location:
                 location['Pickup']()

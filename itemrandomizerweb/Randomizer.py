@@ -634,7 +634,7 @@ class Randomizer(object):
                     doRemove = True
                     maxCancel = 3 # assume we can't get stuck by a combination of more than 3 items...
                     nCancel = 0
-                    while isStuck and len(itemLocations) > 0 and doRemove and nCancel <= maxCancel and len(self.itemPool) <= maxLen:
+                    while isStuck and len(itemLocations) > 0 and doRemove and nCancel < maxCancel and len(self.itemPool) <= maxLen:
                         self.cancelLastItem(itemLocations)
                         nCancel += 1
                         removed = True

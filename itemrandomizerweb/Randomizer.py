@@ -643,7 +643,6 @@ class Randomizer(object):
                     if not isStuck and itemLocation is None:
                         # we weren't stuck before but we are now...cancel last item to survive this corner case
                         self.cancelLastItem(itemLocations)
-                        
                 if itemLocation is not None:
                     self.getItem(itemLocation, itemLocations)
                 else:

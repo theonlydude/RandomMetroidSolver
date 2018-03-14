@@ -248,8 +248,28 @@ def addAmmo(itemPool, qty):
 
     return itemPool
 
+def removeItem(itemType, itemPool):
+    i=0
+    for item in itemPool:
+        if item['Type'] == itemType:
+            return itemPool[0:i] + itemPool[i+1:]
+        i+=1
+
+    raise Exception("Item {} no present in itemPool".format(itemType))
+
+def removeForbiddenItems(forbiddenItems, itemPool, noEnergyAdded):
+    if noEnergyAdded is False:
+        Items.append(NoEnergy)
+
+    for item in forbiddenItems:
+        print("remove item {}".format(item))
+        itemPool = removeItem(item, itemPool)
+        itemPool = addItem('NoEnergy', itemPool)
+    return itemPool
+
 def getItemPool(qty, forbiddenItems):
-    # TODO actually use forbiddenItems argument
+    noEnergyAdded = False
+
     if qty['energy'] == 'sparse':
         # 5 (there's always a reserve and an etank added by the first call to addItem with Items as parameter)
         if random.random() < 0.5:
@@ -261,6 +281,7 @@ def getItemPool(qty, forbiddenItems):
 
         # complete up to 18 energies with nothing item
         Items.append(NoEnergy)
+        noEnergyAdded = True
         for i in range(13):
             itemPool = addItem('NoEnergy', itemPool)
     elif qty['energy'] == 'medium':
@@ -276,6 +297,7 @@ def getItemPool(qty, forbiddenItems):
             itemPool = addItem('ETank', itemPool)
 
         Items.append(NoEnergy)
+        noEnergyAdded = True
         for i in range(7):
             itemPool = addItem('NoEnergy', itemPool)
     else:
@@ -287,5 +309,7 @@ def getItemPool(qty, forbiddenItems):
             itemPool = addItem('ETank', itemPool)
 
     itemPool = addAmmo(itemPool, qty)
+
+    itemPool = removeForbiddenItems(forbiddenItems, itemPool, noEnergyAdded)
 
     return itemPool

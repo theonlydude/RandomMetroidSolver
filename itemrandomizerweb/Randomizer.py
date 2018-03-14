@@ -177,7 +177,7 @@ class RandoSettings(object):
         remove = []
         dontRemove = []
         if 'Suits' in superFun: # impact on movement item
-            removableSuits = self.getForbiddenSuits(removable, dontRemove)
+            removableSuits = self.getForbiddenSuits(dontRemove)
             remove += self.getForbiddenItemsFromList(removableSuits)
         if 'Movement' in superFun:
             removableMovement = self.getForbiddenMovement(dontRemove)

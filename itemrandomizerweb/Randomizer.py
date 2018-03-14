@@ -2,6 +2,7 @@ import sys, random
 import Items
 from parameters import Knows, Settings
 from stdlib import Map, Array, List, Random
+from helpers import wand, Bosses, enoughStuffTourian
 
 class RandoSettings(object):
     # maxDiff : max diff
@@ -209,6 +210,7 @@ class Randomizer(object):
         self.chooseLocRanges = self.getRangeDict(settings.choose['Locations'])
         self.restrictions = settings.restrictions
         self.itemPool = Items.getItemPool(settings.qty, settings.forbiddenItems)
+        self.restrictedLocations = self.getRestrictedLocations(settings.forbiddenItems)
         self.difficultyTarget = settings.maxDiff
         self.sampleSize = settings.sampleSize
         minLimit = settings.itemLimit - settings.itemLimit/10
@@ -220,6 +222,22 @@ class Randomizer(object):
         self.progressionLocs = []
         self.progressionItemTypes = settings.progressionItemTypes
 
+    def getRestrictedLocations(self, forbiddenItems):
+        # list only absolutely unreachable locations, regardless of known techniques
+        # TODO more accurate filtering
+        restricted = []
+        if 'SpeedBooster' in forbiddenItems:
+            restricted += ["Energy Tank, Waterway", "Reserve Tank, Wrecked Ship",
+                           "Super Missile (Crateria)", "Missile (green Maridia shinespark)",
+                           "Missile (pink Maridia)", "Super Missile (pink Maridia)"]
+        if 'Gravity' in forbiddenItems:
+            restricted += ["Missile (pink Maridia)", "Super Missile (pink Maridia)",
+                           "Missile (green Maridia shinespark)", "Power Bomb (right Maridia sand pit room)",
+                           "Spring Ball" ]
+        if 'SpaceJump' in forbiddenItems:
+            restricted += ["Missile (Gold Torizo)"]
+        return list(set(restricted))
+        
     def locAvailable(self, loc, items):
         result = loc["Available"](items)
         return result.bool is True and result.difficulty <= self.difficultyTarget
@@ -375,6 +393,9 @@ class Randomizer(object):
 
     def hasItemType(self, t):
         return any(item['Type'] == t for item in self.currentItems)
+
+    def hasItemTypeInPool(self, t):
+        return any(item['Type'] == t for item in self.itemPool)
     
     def isProgItem(self, item):
         return item['Type'] in self.progressionItemTypes
@@ -411,19 +432,6 @@ class Randomizer(object):
             self.failItems.append(item)
             return None
         location = self.chooseLocation(availableLocations, item)
-        if self.isProgItem(item):
-#            print("placing " + item['Type'])
-            self.progressionLocs.append(location)
-        
-        self.usedLocations += [location]
-        i=0
-        for loc in self.unusedLocations:
-            if loc == location:
-                self.unusedLocations = self.unusedLocations[0:i] + self.unusedLocations[i+1:]
-            i+=1
-
-        if 'Pickup' in location:
-            location['Pickup']()
             
         return {'Item': item, 'Location': location}
 
@@ -457,36 +465,52 @@ class Randomizer(object):
             if matchingClass is False:
                 return False
 
-        def isInBlueBrinstar(loc):
-            return location["Name"] in ["Morphing Ball",
-                                        "Missile (blue Brinstar middle)",
-                                        "Energy Tank, Brinstar Ceiling",
-                                        "Power Bomb (blue Brinstar)",
-                                        "Missile (blue Brinstar bottom)",
-                                        "Missile (blue Brinstar top)",
-                                        "Missile (blue Brinstar behind missile)"]
-            
+        isInBlueBrinstar = location["Name"] in ["Morphing Ball",
+                                                "Missile (blue Brinstar middle)",
+                                                "Energy Tank, Brinstar Ceiling",
+                                                "Power Bomb (blue Brinstar)",
+                                                "Missile (blue Brinstar bottom)",
+                                                "Missile (blue Brinstar top)",
+                                                "Missile (blue Brinstar behind missile)"]
+        
+
+        
         if self.restrictions['Suits'] is True:
             if item["Type"] == "Gravity":
                 return ((not (location["Area"] == "Crateria" or location["Area"] == "Brinstar"))
                         or location["Name"] == "X-Ray Scope" or location["Name"] == "Energy Tank, Waterway")
             elif item["Type"] == "Varia":
-                return not (location["Area"] == "Crateria" or isInBlueBrinstar(location))
+                return not (location["Area"] == "Crateria" or isInBlueBrinstar)
         if self.restrictions['SpeedScrew'] is True:
             if item["Type"] == "SpeedBooster":
-                return not isInBlueBrinstar(location)
+                return not isInBlueBrinstar
             if item["Type"] == "ScrewAttack":
-                return not (isInBlueBrinstar(location) or location["Area"] == "Crateria") # screw attack this early is a bit too easy. plus, with MinProgression setting, ScrewAttack always ends up at Bomb
-
+                return not (isInBlueBrinstar or location["Area"] == "Crateria") # screw attack this early is a bit too easy. plus, with MinProgression setting, ScrewAttack always ends up at Bomb
+            
         return True
 
     def getItem(self, itemLocation, itemLocations):
         sys.stdout.write('.')
         sys.stdout.flush()
-        self.currentItems.append(itemLocation['Item'])
+        item = itemLocation['Item']
+        location = itemLocation['Location']
+        if self.isProgItem(item):
+                #            print("placing " + item['Type'])
+            self.progressionLocs.append(location)
+        self.usedLocations += [location]
+        i=0
+        for loc in self.unusedLocations:
+            if loc == location:
+                self.unusedLocations = self.unusedLocations[0:i] + self.unusedLocations[i+1:]
+            i+=1
+
+        if 'Pickup' in location:
+            location['Pickup']()
+
+        self.currentItems.append(item)
         itemLocations.append(itemLocation)
  #       print(str(len(self.currentItems)) + ':' + itemLocation['Item']['Type'] + ' at ' + itemLocation['Location']['Name'])
-        self.itemPool = self.removeItem(itemLocation['Item']['Type'], self.itemPool)
+        self.itemPool = self.removeItem(item['Type'], self.itemPool)
 
     def generateItem(self, curLocs, pool):
         itemLocation = None
@@ -528,13 +552,44 @@ class Randomizer(object):
                 sys.stdout.flush()
                 return False
         return True
-        
+
+    def getNextItemInPool(self, t):
+        return next(item for item in self.itemPool if item['Type'] == t)
     
+    def fillRestrictedLocations(self, itemLocations):
+        # fill up unreachable locations with "junk" to maximize the chance of the ROM
+        # to be finishable
+        for loc in self.restrictedLocations:
+            isMajor = self.restrictions['MajorMinor'] is False or loc['Class'] == 'Major'
+            isMinor = self.restrictions['MajorMinor'] is False or loc['Class'] == 'Minor'
+            itemLocation = {'Location' : loc}
+            if isMinor and self.hasItemTypeInPool('Nothing'):
+                itemLocation['Item'] = self.getNextItemInPool('Nothing')
+            elif isMajor and self.hasItemTypeInPool('NoEnergy'):
+                itemLocation['Item'] = self.getNextItemInPool('NoEnergy')
+            elif isMajor and self.hasItemTypeInPool('XRayScope'):
+                itemLocation['Item'] = self.getNextItemInPool('XRayScope')
+            elif isMinor and self.hasItemTypeInPool('Missile'):
+                itemLocation['Item'] = self.getNextItemInPool('Missile')
+            elif isMinor and self.hasItemTypeInPool('Super'):
+                itemLocation['Item'] = self.getNextItemInPool('Super')
+            elif isMinor and self.hasItemTypeInPool('PowerBomb'):
+                itemLocation['Item'] = self.getNextItemInPool('PowerBomb')
+            elif isMajor and self.hasItemTypeInPool('Reserve'):
+                itemLocation['Item'] = self.getNextItemInPool('Reserve')
+            elif isMajor and self.hasItemTypeInPool('ETank'):
+                itemLocation['Item'] = self.getNextItemInPool('ETank')
+            else:
+                break
+            self.getItem(itemLocation, itemLocations)
+
     def generateItems(self):
         itemLocations = []
         self.currentItems = []
         nLoops = 0
-        while len(self.itemPool) > 0:
+        isStuck = False
+        self.fillRestrictedLocations(itemLocations)
+        while len(self.itemPool) > 0 and nLoops < 500 and not isStuck:
             # 1. fill up with non-progression stuff
             pool = [item for item in self.itemPool if not self.isProgItem(item)]
             poolWasEmpty = len(pool) == 0
@@ -589,21 +644,27 @@ class Randomizer(object):
                         # we weren't stuck before but we are now...cancel last item to survive this corner case
                         self.cancelLastItem(itemLocations)
                         
-                if itemLocation is None: # actually stuck
-                    print("STUCK !")
-                    print("REM LOCS = "  + str([loc['Name'] for loc in self.unusedLocations]))
-                    print("REM ITEMS = "  + str([item['Type'] for item in self.itemPool]))
-                    return None
-                self.getItem(itemLocation, itemLocations)
+                if itemLocation is not None:
+                    self.getItem(itemLocation, itemLocations)
+                else:
+                    isStuck = True
             nLoops += 1
-            if nLoops > 500: # this is coming out of my ass
-                print("")
-                print(str(nLoops) + " LOOPS...TOO MUCH")
+        if len(self.itemPool) > 0:
+            # check if we can finish the game
+            canEndGame = wand(Bosses.allBossesDead(), enoughStuffTourian(self.currentItems))
+            if canEndGame.bool is True and canEndGame.difficulty < self.difficultyTarget:
+                # place randomly all remaining items
+                itemLocation = {}
+                while len(self.itemPool) > 0:
+                    itemLocation['Item'] = self.itemPool[0]
+                    itemLocation['Location']  = self.unusedLocations[random.randint(0, len(self.unusedLocations) - 1)]
+                    self.getItem(itemLocation, itemLocations)
+            else:
+                print("\nSTUCK !")
                 print("REM LOCS = "  + str([loc['Name'] for loc in self.unusedLocations]))
                 print("REM ITEMS = "  + str([item['Type'] for item in self.itemPool]))
                 return None
         print("")
-
         return itemLocations
 
 # IDEES :

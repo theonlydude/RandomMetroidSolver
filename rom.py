@@ -297,7 +297,7 @@ class RomPatcher:
     # Replace bomb blocks with shot blocks before Spazer
     #   spazer.ips
     IPSPatches = {
-        'Standard': ['credits_varia.ips', 'g4_skip.ips', 'introskip_doorflags.ips',
+        'Standard': ['credits_varia.ips', 'g4_skip.ips', 'doorflags.ips',
                      'seed_display.ips', 'tracking.ips', 'wake_zebes.ips',
                      'Removes_Gravity_Suit_heat_protection', 'Mother_Brain_Cutscene_Edits',
                      'Suit_acquisition_animation_skip', 'Fix_Morph_and_Missiles_Room_State',
@@ -307,7 +307,8 @@ class RomPatcher:
         'Layout': ['dachora.ips', 'early_super_bridge.ips', 'high_jump.ips', 'moat.ips',
                    'nova_boost_platform.ips', 'red_tower.ips', 'spazer.ips'],
         'Optional': ['AimAnyButton.ips', 'itemsounds.ips', 'max_ammo_display.ips',
-                     'spinjumprestart.ips', 'supermetroid_msu1.ips', 'elevators_doors_speed.ips']
+                     'spinjumprestart.ips', 'supermetroid_msu1.ips', 'elevators_doors_speed.ips',
+                     'skip_intro.ips', 'skip_ceres.ips']
     }
 
     @staticmethod

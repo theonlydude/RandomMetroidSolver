@@ -55,6 +55,8 @@ echo '"Removes_Gravity_Suit_heat_protection": {
 0x0268ce: [0x04],
 0x026e02: [0x04]},
 "Fix_Screw_Attack_selection_in_menu":{
-0x0134c5: [0x0c]}
+0x0134c5: [0x0c]},
+"skip_ceres.ips":{
+0x16eda: [0x1f]}
 }'
 ) > ~/RandomMetroidSolver/itemrandomizerweb/patches.py

@@ -475,12 +475,12 @@ def infos():
     return dict()
 
 patches = [
-    ('AimAnyButton', "Allows the aim buttons to be assigned to any button"),
-    ('itemsounds', "Remove fanfare when picking up an item"),
-    ('spinjumprestart', "Allows Samus to start spinning in mid air after jumping or falling"),
-    ('elevators_doors_speed', 'Accelerate doors and elevators transitions'),
-    ('supermetroid_msu1', "Play music with MSU1 chip on SD2SNES"),
-    ('max_ammo_display', "Max Ammo Display (incompatible with MSU1 patch)")
+    ('AimAnyButton', "Allows the aim buttons to be assigned to any button (by Kejardon)"),
+    ('itemsounds', "Remove fanfare when picking up an item (by Scyzer)"),
+    ('spinjumprestart', "Allows Samus to start spinning in mid air after jumping or falling (by Kejardon)"),
+    ('elevators_doors_speed', 'Accelerate doors and elevators transitions (by Rakki & Lioran)'),
+    ('supermetroid_msu1', "Play music with MSU1 chip on SD2SNES (by DarkShock)"),
+    ('max_ammo_display', "Max Ammo Display (by Personitis) (incompatible with MSU1 patch)")
 ]
 
 def randomizer():

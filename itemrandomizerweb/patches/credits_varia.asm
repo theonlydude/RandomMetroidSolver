@@ -1230,12 +1230,12 @@ credits:
     dw "             foosda             " // 147
     dw "             LEODOX             " // 148
     dw "             leodox             " // 149
-    dw "        DARKSHOCK  RAKKI        " // 150
-    dw "        darkshock  rakki        " // 151
+    dw "       DARKSHOCK & RAKKI        " // 150
+    dw "       darkshock ~ rakki        " // 151
     dw "            KEJARDON            " // 152
     dw "            kejardon            " // 153
-    dw "        SCYZER  LIORAN          " // 154
-    dw "        scyzer  lioran          " // 155
+    dw "       SCYZER & LIORAN          " // 154
+    dw "       scyzer ~ lioran          " // 155
     {cyan}
     dw "       SPECIAL THANKS TO        " // 156
     {yellow}

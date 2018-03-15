@@ -460,7 +460,10 @@ class Randomizer(object):
             return False
 
         newLocations = self.currentLocations([item] + items)
-        newLocationsHasMajor = List.exists(lambda l: l["Class"] == 'Major', newLocations)
+        if self.restrictions["MajorMinor"] is True:
+            newLocationsHasMajor = List.exists(lambda l: l["Class"] == 'Major', newLocations)
+        else:
+            newLocationsHasMajor = True
 
         return newLocationsHasMajor and len(newLocations) > len(oldLocations)
     

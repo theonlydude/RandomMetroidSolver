@@ -478,6 +478,7 @@ patches = [
     ('AimAnyButton', "Allows the aim buttons to be assigned to any button"),
     ('itemsounds', "Remove fanfare when picking up an item"),
     ('spinjumprestart', "Allows Samus to start spinning in mid air after jumping or falling"),
+    ('elevators_doors_speed', 'Accelerate doors and elevators transitions'),
     ('supermetroid_msu1', "Play music with MSU1 chip on SD2SNES"),
     ('max_ammo_display', "Max Ammo Display (incompatible with MSU1 patch)")
 ]
@@ -578,7 +579,7 @@ def validateWebServiceParams(patchs, quantities, others, isJson=False):
 
 def sessionWebService():
     # web service to update the session
-    patchs = ['AimAnyButton', 'itemsounds', 'spinjumprestart', 'supermetroid_msu1', 'max_ammo_display']
+    patchs = ['AimAnyButton', 'itemsounds', 'spinjumprestart', 'supermetroid_msu1', 'max_ammo_display', 'elevators_doors_speed']
     quantities = ['missileQty', 'superQty', 'powerBombQty']
     others = ['paramsFile', 'minorQty', 'energyQty', 'useMaxDiff', 'maxDifficulty',
               'progressionSpeed', 'spreadItems', 'fullRandomization', 'suitsRestriction',
@@ -612,7 +613,7 @@ def randomizerWebService():
     response.headers['Access-Control-Allow-Origin'] = '*'
 
     # check validity of all parameters
-    patchs = ['AimAnyButton', 'itemsounds', 'spinjumprestart', 'supermetroid_msu1', 'max_ammo_display']
+    patchs = ['AimAnyButton', 'itemsounds', 'spinjumprestart', 'supermetroid_msu1', 'max_ammo_display', 'elevators_doors_speed']
     quantities = ['missileQty', 'superQty', 'powerBombQty']
     others = ['seed', 'paramsFile', 'paramsFileTarget', 'minorQty', 'energyQty', 'useMaxDiff',
               'maxDifficulty', 'progressionSpeed', 'spreadItems', 'fullRandomization',

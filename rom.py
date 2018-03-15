@@ -307,7 +307,7 @@ class RomPatcher:
         'Layout': ['dachora.ips', 'early_super_bridge.ips', 'high_jump.ips', 'moat.ips',
                    'nova_boost_platform.ips', 'red_tower.ips', 'spazer.ips'],
         'Optional': ['AimAnyButton.ips', 'itemsounds.ips', 'max_ammo_display.ips',
-                     'spinjumprestart.ips', 'supermetroid_msu1.ips']
+                     'spinjumprestart.ips', 'supermetroid_msu1.ips', 'elevators_doors_speed.ips']
     }
 
     @staticmethod

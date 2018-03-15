@@ -587,74 +587,86 @@ class Randomizer(object):
 #            print("Fill : " + itemLocation['Item']['Type'] + " at " + itemLocation['Location']['Name'])
             self.getItem(itemLocation, itemLocations, False)
 
+    def fillNonProgressionItems(self, itemLocations):
+        pool = [item for item in self.itemPool if not self.isProgItem(item)]
+        poolWasEmpty = len(pool) == 0
+        itemLocation = None
+        nItems = 0
+        locPoolOk = True
+#            print("NON-PROG")
+        while len(pool) > 0 and nItems < self.itemLimit and locPoolOk: 
+    #                print(str(len(pool)) + " " + str(len(self.itemPool)))
+            curLocs = self.currentLocations(self.currentItems)
+            self.failItems = []
+            itemLocation = self.generateItem(curLocs, pool)
+            if itemLocation is None:
+                break
+            else:
+                nItems += 1
+                self.getItem(itemLocation, itemLocations)
+                pool = self.removeItem(itemLocation['Item']['Type'], pool)
+            locPoolOk = self.checkLocPool()
+        isStuck = not poolWasEmpty and itemLocation is None
+        return isStuck
+
+    def getItemFromStandardPool(self, itemLocations, isStuck, maxLen):
+#                print("REGULAR")
+        # first, try to put an item from standard pool
+        removed = True
+        itemLocation = None
+        self.failItems = []
+        curLocs = self.currentLocations(self.currentItems)
+        itemLocation = self.generateItem(curLocs, self.itemPool)
+        while itemLocation is None and (removed is True or not isStuck):
+            # we cannot place items anymore, cancel a bunch of our last decisions
+            curLocs = self.currentLocations(self.currentItems)
+            removed = False
+            doRemove = True
+            maxCancel = 3 # assume we can't get stuck by a combination of more than 3 items...
+            nCancel = 0
+            while isStuck and len(itemLocations) > 0 and doRemove and nCancel < maxCancel and len(self.itemPool) <= maxLen:
+                self.cancelLastItem(itemLocations)
+                nCancel += 1
+                removed = True
+                # we can continue to cancel decisions if we don't regress
+                nextCur = self.currentLocations(self.currentItems[:-1])
+                doRemove = len(curLocs) == len(nextCur) or len(curLocs) == len(nextCur) - 1
+                if doRemove:
+                    curLocs = nextCur
+            # proceed like normal
+            curLocs = self.currentLocations(self.currentItems)
+            itemLocation = self.generateItem(curLocs, self.itemPool)
+            if not isStuck and itemLocation is None:
+                # we weren't stuck before but we are now...cancel last item to survive this corner case
+                self.cancelLastItem(itemLocations)
+        isStuck = itemLocation is None
+        if isStuck is False:
+            self.getItem(itemLocation, itemLocations)
+        return isStuck
+    
     def generateItems(self):
         itemLocations = []
         self.currentItems = []
         nLoops = 0
         isStuck = False
+        # if major items are removed from the pool (super fun setting), fill not accessible locations with
+        # items that are as useless as possible
         self.fillRestrictedLocations(itemLocations)
-        maxLen = len(self.itemPool)
+        maxLen = len(self.itemPool) # to prevent cancelling of these useless items/locations
         while len(self.itemPool) > 0 and nLoops < 500 and not isStuck:
             # 1. fill up with non-progression stuff
-            pool = [item for item in self.itemPool if not self.isProgItem(item)]
-            poolWasEmpty = len(pool) == 0
-            itemLocation = None
-            nItems = 0
-            locPoolOk = True
-#            print("NON-PROG")
-            while len(pool) > 0 and nItems < self.itemLimit and locPoolOk: 
-#                print(str(len(pool)) + " " + str(len(self.itemPool)))
-                curLocs = self.currentLocations(self.currentItems)
-                self.failItems = []
-                itemLocation = self.generateItem(curLocs, pool)
-                if itemLocation is None:
-                    break
-                else:
-                    nItems += 1
-                    self.getItem(itemLocation, itemLocations)
-                    pool = self.removeItem(itemLocation['Item']['Type'], pool)
-                locPoolOk = self.checkLocPool()
-            isStuck = not poolWasEmpty and itemLocation is None
+            isStuck = self.fillNonProgressionItems(itemLocations)
             if len(self.itemPool) > 0:
-                # 2. collect with standard pool
+                # 2. collect an item with standard pool that will unlock the situation
+                isStuck = self.getItemFromStandardPool(itemLocations, isStuck, maxLen)
 #                print("REGULAR")
-                removed = True
-                itemLocation = None
-                self.failItems = []
-                curLocs = self.currentLocations(self.currentItems)
-                itemLocation = self.generateItem(curLocs, self.itemPool)
-                while itemLocation is None and (removed is True or not isStuck):
-                    # if we were stuck, cancel a bunch of our last decisions
-                    curLocs = self.currentLocations(self.currentItems)
-                    removed = False
-                    doRemove = True
-                    maxCancel = 3 # assume we can't get stuck by a combination of more than 3 items...
-                    nCancel = 0
-                    while isStuck and len(itemLocations) > 0 and doRemove and nCancel < maxCancel and len(self.itemPool) <= maxLen:
-                        self.cancelLastItem(itemLocations)
-                        nCancel += 1
-                        removed = True
-                        # we can continue to cancel decisions if we don't regress
-                        nextCur = self.currentLocations(self.currentItems[:-1])
-                        doRemove = len(curLocs) == len(nextCur) or len(curLocs) == len(nextCur) - 1
-                        if doRemove:
-                            curLocs = nextCur
-                    # proceed like normal
-                    curLocs = self.currentLocations(self.currentItems)
-                    itemLocation = self.generateItem(curLocs, self.itemPool)
-                    if not isStuck and itemLocation is None:
-                        # we weren't stuck before but we are now...cancel last item to survive this corner case
-                        self.cancelLastItem(itemLocations)
-                isStuck = itemLocation is None
-                if isStuck is False:
-                    self.getItem(itemLocation, itemLocations)
             nLoops += 1
         if len(self.itemPool) > 0:
-            # check if we can finish the game
+            # we could not place all items, check if we can finish the game
             itemTypes = [item['Type'] for item in self.currentItems]
             canEndGame = wand(Bosses.allBossesDead(), enoughStuffTourian(itemTypes))
             if canEndGame.bool is True and canEndGame.difficulty < self.difficultyTarget:
-                # place randomly all remaining items
+                # seed is finishable, place randomly all remaining items
                 while len(self.itemPool) > 0:
                     itemLocation = {
                         'Item' : self.itemPool[0],

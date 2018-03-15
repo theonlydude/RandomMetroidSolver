@@ -10,6 +10,8 @@ from parameters import easy, medium, hard, harder, hardcore, mania, text2diff, d
 from solver import ParamsLoader
 from rom import RomPatcher, RomPatches
 
+speeds = ['slowest', 'slow', 'medium', 'fast', 'fastest']
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Random Metroid Randomizer")
     parser.add_argument('--param', '-p', help="the input parameters", nargs='+',
@@ -75,7 +77,7 @@ if __name__ == "__main__":
     parser.add_argument('--progressionSpeed', '-i',
                         help="",
                         dest='progressionSpeed', nargs='?', default='medium',
-                        choices=['slowest', 'slow', 'medium', 'fast', 'fastest'])
+                        choices=speeds + ['random'])
     parser.add_argument('--superFun', 
                         help="randomly remove major items from the pool for maximum enjoyment",
                         dest='superFun', nargs='?', default=[], action='append',
@@ -97,8 +99,12 @@ if __name__ == "__main__":
     else:
         seed = args.seed
     random.seed(seed)
+    progSpeed = args.progressionSpeed
+    if progSpeed == "random":
+        progSpeed = speeds[random.randint(0, len(speeds)-1)]
         
     print("SEED: " + str(seed))
+    print("progression speed: " + progSpeed)
 
     if args.maxDifficulty:
         maxDifficulty = text2diff[args.maxDifficulty]
@@ -136,7 +142,7 @@ if __name__ == "__main__":
            'powerBomb': int(args.powerBombQty), 'energy': args.energyQty,
            'minors': int(args.minorQty)}
     sampleSize = 100
-    randoSettings = RandoSettings(maxDifficulty, args.progressionSpeed, qty, restrictions, args.spreadItems, sampleSize, args.superFun)
+    randoSettings = RandoSettings(maxDifficulty, progSpeed, qty, restrictions, args.spreadItems, sampleSize, args.superFun)
     randomizer = Randomizer(locations, randoSettings)
     itemLocs = randomizer.generateItems()
     if itemLocs is None:

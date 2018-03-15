@@ -91,7 +91,9 @@ function AjaxPresetCallCompleted(data) {
         spinjumprestart : document.getElementById("spinjumprestart").value,
         supermetroid_msu1 : document.getElementById("supermetroid_msu1").value,
         max_ammo_display : document.getElementById("max_ammo_display").value,
-        elevators_doors_speed : document.getElementById("elevators_doors_speed").value
+        elevators_doors_speed : document.getElementById("elevators_doors_speed").value,
+        skip_ceres : document.getElementById("skip_ceres").value,
+        skip_intro : document.getElementById("skip_intro").value
       },
       dataType: "json",
       crossDomain: true
@@ -171,7 +173,9 @@ function AjaxRandomizerCallCompleted(data) {
         spinjumprestart : document.getElementById("spinjumprestart").value,
         supermetroid_msu1 : document.getElementById("supermetroid_msu1").value,
         max_ammo_display : document.getElementById("max_ammo_display").value,
-        elevators_doors_speed : document.getElementById("elevators_doors_speed").value
+        elevators_doors_speed : document.getElementById("elevators_doors_speed").value,
+        skip_ceres : document.getElementById("skip_ceres").value,
+        skip_intro : document.getElementById("skip_intro").value
       },
       dataType: "html"
     });
@@ -259,6 +263,28 @@ window.onload = function(){
     } else {
         alert("This website requires the HTML5 File API, please upgrade your browser to a newer version.");
     }
+
+    var skipCeres = document.getElementById("skip_ceres");
+    skipCeres.onchange = function(){
+        var skipCeres = document.getElementById("skip_ceres");
+        var skipIntro = document.getElementById("skip_intro");
+
+        if(skipCeres.checked && skipIntro.checked){
+            skipIntro.click();
+        }
+        switchCheckbox("skip_ceres");
+    };
+
+    var skipIntro = document.getElementById("skip_intro");
+    skipIntro.onchange = function(){
+        var skipCeres = document.getElementById("skip_ceres");
+        var skipIntro = document.getElementById("skip_intro");
+
+        if(skipIntro.checked && skipCeres.checked){
+            skipCeres.click();
+        }
+        switchCheckbox("skip_intro");
+    };
 
     var maxAmmo = document.getElementById("max_ammo_display");
     maxAmmo.onchange = function(){

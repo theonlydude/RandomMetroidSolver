@@ -1,6 +1,10 @@
 arch snes.cpu
 lorom
 
+// This skips the intro
+org $82eeda
+    db $1f
+
 // Hijack init routine to autosave and set door flags
 org $828067
     jsl introskip_doorflags

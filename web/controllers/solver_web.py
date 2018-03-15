@@ -475,6 +475,8 @@ def infos():
     return dict()
 
 patches = [
+    ('skip_intro', "Skip text intro (start at Ceres Station) (by Smiley)"),
+    ('skip_ceres', "Skip text intro and Ceres station (start at Landing Site) (by Total)"),
     ('AimAnyButton', "Allows the aim buttons to be assigned to any button (by Kejardon)"),
     ('itemsounds', "Remove fanfare when picking up an item (by Scyzer)"),
     ('spinjumprestart', "Allows Samus to start spinning in mid air after jumping or falling (by Kejardon)"),
@@ -495,6 +497,7 @@ def randomizer():
             session.randomizer[patch[0]] = "on"
         session.randomizer['supermetroid_msu1'] = "off"
         session.randomizer['spinjumprestart'] = "off"
+        session.randomizer['skip_intro'] = "off"
         session.randomizer['missileQty'] = "3"
         session.randomizer['superQty'] = "3"
         session.randomizer['powerBombQty'] = "1"
@@ -579,7 +582,8 @@ def validateWebServiceParams(patchs, quantities, others, isJson=False):
 
 def sessionWebService():
     # web service to update the session
-    patchs = ['AimAnyButton', 'itemsounds', 'spinjumprestart', 'supermetroid_msu1', 'max_ammo_display', 'elevators_doors_speed']
+    patchs = ['AimAnyButton', 'itemsounds', 'spinjumprestart', 'supermetroid_msu1',
+              'max_ammo_display', 'elevators_doors_speed', 'skip_intro', 'skip_ceres']
     quantities = ['missileQty', 'superQty', 'powerBombQty']
     others = ['paramsFile', 'minorQty', 'energyQty', 'useMaxDiff', 'maxDifficulty',
               'progressionSpeed', 'spreadItems', 'fullRandomization', 'suitsRestriction',
@@ -613,7 +617,8 @@ def randomizerWebService():
     response.headers['Access-Control-Allow-Origin'] = '*'
 
     # check validity of all parameters
-    patchs = ['AimAnyButton', 'itemsounds', 'spinjumprestart', 'supermetroid_msu1', 'max_ammo_display', 'elevators_doors_speed']
+    patchs = ['AimAnyButton', 'itemsounds', 'spinjumprestart', 'supermetroid_msu1',
+              'max_ammo_display', 'elevators_doors_speed', 'skip_intro', 'skip_ceres']
     quantities = ['missileQty', 'superQty', 'powerBombQty']
     others = ['seed', 'paramsFile', 'paramsFileTarget', 'minorQty', 'energyQty', 'useMaxDiff',
               'maxDifficulty', 'progressionSpeed', 'spreadItems', 'fullRandomization',

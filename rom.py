@@ -297,7 +297,7 @@ class RomPatcher:
     # Replace bomb blocks with shot blocks before Spazer
     #   spazer.ips
     IPSPatches = {
-        'Standard': ['credits_varia.ips', 'g4_skip.ips', 'doorflags.ips',
+        'Standard': ['credits_varia.ips', 'g4_skip.ips',
                      'seed_display.ips', 'tracking.ips', 'wake_zebes.ips',
                      'Removes_Gravity_Suit_heat_protection', 'Mother_Brain_Cutscene_Edits',
                      'Suit_acquisition_animation_skip', 'Fix_Morph_and_Missiles_Room_State',

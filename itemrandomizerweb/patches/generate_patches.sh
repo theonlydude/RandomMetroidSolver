@@ -1,9 +1,11 @@
 #!/bin/bash
 
+[ -z "$SOLVER_DIR" ] && SOLVER_DIR=~/RandomMetroidSolver
+
 (
 echo "patches = {"
 
-cd ~/RandomMetroidSolver/itemrandomizerweb/patches
+cd $SOLVER_DIR/itemrandomizerweb/patches
 
 for i in *.ips; do ./ips.pl $i; done
 
@@ -57,4 +59,4 @@ echo '"Removes_Gravity_Suit_heat_protection": {
 "Fix_Screw_Attack_selection_in_menu":{
 0x0134c5: [0x0c]}
 }'
-) > ~/RandomMetroidSolver/itemrandomizerweb/patches.py
+) > $SOLVER_DIR/itemrandomizerweb/patches.py

@@ -438,7 +438,8 @@ class Randomizer(object):
         currentItems.append(item['Type'])
         availableLocations = List.filter(lambda loc: self.canPlaceAtLocation(item, loc) and self.locPostAvailable(loc, currentItems), locations)
         if len(availableLocations) == 0:
-            self.failItems.append(item)
+            if not item in self.failItems:
+                self.failItems.append(item)
             return None
         location = self.chooseLocation(availableLocations, item)
             
@@ -519,14 +520,13 @@ class Randomizer(object):
 
     def generateItem(self, curLocs, pool):
         itemLocation = None
+        self.failItems = []
+        posItems = self.possibleItems(curLocs, self.currentItems, pool)
         while itemLocation is None:
-            posItems = self.possibleItems(curLocs, self.currentItems, pool)
             #                print(str(len(posItems)) + " possible items")
             itemLocation = self.placeItem(posItems, pool, curLocs)
             if len(self.failItems) >= len(posItems):
                 break
-            if itemLocation is None:
-                return None
         return itemLocation
 
     def cancelLastItem(self, itemLocations):
@@ -600,7 +600,6 @@ class Randomizer(object):
         while len(pool) > 0 and nItems < self.itemLimit and locPoolOk: 
     #                print(str(len(pool)) + " " + str(len(self.itemPool)))
             curLocs = self.currentLocations(self.currentItems)
-            self.failItems = []
             itemLocation = self.generateItem(curLocs, pool)
             if itemLocation is None:
                 break
@@ -617,7 +616,6 @@ class Randomizer(object):
         # first, try to put an item from standard pool
         removed = True
         itemLocation = None
-        self.failItems = []
         curLocs = self.currentLocations(self.currentItems)
         itemLocation = self.generateItem(curLocs, self.itemPool)
         while itemLocation is None and (removed is True or not isStuck):

@@ -509,10 +509,17 @@ def randomizer():
         session.randomizer['fullRandomization'] = "off"
         session.randomizer['suitsRestriction'] = "on"
         session.randomizer['speedScrewRestriction'] = "on"
+        session.randomizer['funCombat'] = "off"
+        session.randomizer['funMovement'] = "off"
+        session.randomizer['funSuits'] = "off"
 
-
+    # put standard presets first
+    stdPresets = ['noob', 'regular', 'veteran', 'speedrunner']
     files = sorted(os.listdir('diff_presets'))
     presets = [os.path.splitext(file)[0] for file in files]
+    for preset in stdPresets:
+        presets.remove(preset)
+    presets = stdPresets + presets
 
     return dict(presets=presets, patches=patches)
 
@@ -533,6 +540,9 @@ def validateWebServiceParams(patchs, quantities, others, isJson=False):
     for patch in patchs:
         if request.vars[patch] not in ['on', 'off']:
             raiseHttp(400, "Wrong value for {}: {}, authorized values: on/off".format(patch, request.vars[patch]), isJson)
+
+    if request.vars['skip_intro'] == request.vars['skip_ceres']:
+        raiseHttp(400, "You must choose one and only one patch for skipping the intro/Ceres station")
 
     def getInt(param):
         try:
@@ -564,8 +574,9 @@ def validateWebServiceParams(patchs, quantities, others, isJson=False):
     if minorQtyInt < 1 or minorQtyInt > 100:
         raiseHttp(400, "Wrong value for minorQty, must be between 1 and 100", isJson)
 
-    if request.vars.energyQty not in ['sparse', 'medium', 'vanilla']:
-        raiseHttp(400, "Wrong value for energyQty: authorized values: sparse/medium/vanilla", isJson)
+    if 'energyQty' in others:
+        if request.vars.energyQty not in ['sparse', 'medium', 'vanilla']:
+            raiseHttp(400, "Wrong value for energyQty: authorized values: sparse/medium/vanilla", isJson)
 
     if 'paramsFileTarget' in others:
         try:
@@ -574,11 +585,13 @@ def validateWebServiceParams(patchs, quantities, others, isJson=False):
             raiseHttp(400, "Wrong value for paramsFileTarget, must be a JSON string", isJson)
 
     for check in ['useMaxDiff', 'spreadItems', 'fullRandomization', 'suitsRestriction', 'speedScrewRestriction']:
-        if request.vars[check] not in ['on', 'off']:
-            raiseHttp(400, "Wrong value for {}: {}, authorized values: on/off".format(check, request.vars[check]), isJson)
+        if check in others:
+            if request.vars[check] not in ['on', 'off']:
+                raiseHttp(400, "Wrong value for {}: {}, authorized values: on/off".format(check, request.vars[check]), isJson)
 
-    if request.vars['progressionSpeed'] not in ['slowest', 'slow', 'medium', 'fast', 'fastest']:
-        raiseHttp(400, "Wrong value for progressionSpeed: {}, authorized values slowest/slow/medium/fast/fastest".format(request.vars['progressionSpeed']), isJson)
+    if 'progressionSpeed' in others:
+        if request.vars['progressionSpeed'] not in ['random', 'slowest', 'slow', 'medium', 'fast', 'fastest']:
+            raiseHttp(400, "Wrong value for progressionSpeed: {}, authorized values random/slowest/slow/medium/fast/fastest".format(request.vars['progressionSpeed']), isJson)
 
 def sessionWebService():
     # web service to update the session
@@ -587,7 +600,7 @@ def sessionWebService():
     quantities = ['missileQty', 'superQty', 'powerBombQty']
     others = ['paramsFile', 'minorQty', 'energyQty', 'useMaxDiff', 'maxDifficulty',
               'progressionSpeed', 'spreadItems', 'fullRandomization', 'suitsRestriction',
-              'speedScrewRestriction']
+              'speedScrewRestriction', 'funCombat', 'funMovement', 'funSuits']
     validateWebServiceParams(patchs, quantities, others)
 
     if session.randomizer is None:
@@ -608,6 +621,9 @@ def sessionWebService():
     session.randomizer['fullRandomization'] = request.vars.fullRandomization
     session.randomizer['suitsRestriction'] = request.vars.suitsRestriction
     session.randomizer['speedScrewRestriction'] = request.vars.speedScrewRestriction
+    session.randomizer['funCombat'] = request.vars.funCombat
+    session.randomizer['funMovement'] = request.vars.funMovement
+    session.randomizer['funSuits'] = request.vars.funSuits
 
 def randomizerWebService():
     # web service to compute a new random (returns json string)
@@ -622,7 +638,7 @@ def randomizerWebService():
     quantities = ['missileQty', 'superQty', 'powerBombQty']
     others = ['seed', 'paramsFile', 'paramsFileTarget', 'minorQty', 'energyQty', 'useMaxDiff',
               'maxDifficulty', 'progressionSpeed', 'spreadItems', 'fullRandomization',
-              'suitsRestriction', 'speedScrewRestriction']
+              'suitsRestriction', 'speedScrewRestriction', 'funCombat', 'funMovement', 'funSuits']
     validateWebServiceParams(patchs, quantities, others, isJson=True)
 
     # randomize
@@ -660,6 +676,15 @@ def randomizerWebService():
         params.append('--suitsRestriction')
     if request.vars.speedScrewRestriction == 'on':
         params.append('--speedScrewRestriction')
+    if request.vars.funCombat == 'on':
+        params.append('--superFun')
+        params.append('Combat')
+    if request.vars.funMovement == 'on':
+        params.append('--superFun')
+        params.append('Movement')
+    if request.vars.funSuits == 'on':
+        params.append('--superFun')
+        params.append('Suits')
 
     ret = subprocess.call(params)
 

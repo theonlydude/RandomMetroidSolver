@@ -93,7 +93,10 @@ function AjaxPresetCallCompleted(data) {
         max_ammo_display : document.getElementById("max_ammo_display").value,
         elevators_doors_speed : document.getElementById("elevators_doors_speed").value,
         skip_ceres : document.getElementById("skip_ceres").value,
-        skip_intro : document.getElementById("skip_intro").value
+        skip_intro : document.getElementById("skip_intro").value,
+        funCombat : document.getElementById("funCombat").value,
+        funMovement : document.getElementById("funMovement").value,
+        funSuits : document.getElementById("funSuits").value
       },
       dataType: "json",
       crossDomain: true
@@ -113,7 +116,7 @@ function ajaxFail(jqXHR, textStatus) {
 function ajaxFailJSON(jqXHR, textStatus) {
   // cross domain calls currently return 'undefined' information... (cf. https://www.html5rocks.com/en/tutorials/cors/)
   if(jqXHR.responseJSON == null) {
-    document.getElementById("flash").innerHTML = "Something wrong happened, try increasing your difficulty target";
+    document.getElementById("flash").innerHTML = "Something wrong happened or the VARIA randomizer aborted: try to raise or disable max difficulty setting, or disable Super Fun Times (TM) setting";
   } else {
     document.getElementById("flash").innerHTML = jqXHR.responseJSON;
   }
@@ -175,7 +178,10 @@ function AjaxRandomizerCallCompleted(data) {
         max_ammo_display : document.getElementById("max_ammo_display").value,
         elevators_doors_speed : document.getElementById("elevators_doors_speed").value,
         skip_ceres : document.getElementById("skip_ceres").value,
-        skip_intro : document.getElementById("skip_intro").value
+        skip_intro : document.getElementById("skip_intro").value,
+        funCombat : document.getElementById("funCombat").value,
+        funMovement : document.getElementById("funMovement").value,
+        funSuits : document.getElementById("funSuits").value
       },
       dataType: "html"
     });
@@ -269,9 +275,15 @@ window.onload = function(){
         var skipCeres = document.getElementById("skip_ceres");
         var skipIntro = document.getElementById("skip_intro");
 
+        // if both are set, unselect the other one
         if(skipCeres.checked && skipIntro.checked){
             skipIntro.click();
         }
+        // if none are set, select the other one
+        if(! skipCeres.checked && ! skipIntro.checked){
+            skipIntro.click();
+        }
+
         switchCheckbox("skip_ceres");
     };
 
@@ -283,8 +295,16 @@ window.onload = function(){
         if(skipIntro.checked && skipCeres.checked){
             skipCeres.click();
         }
+        if(! skipCeres.checked && ! skipIntro.checked){
+            skipCeres.click();
+        }
         switchCheckbox("skip_intro");
     };
+
+    // if none are set, activate skip ceres
+    if(! skipCeres.checked && ! skipIntro.checked){
+        skipCeres.click();
+    }
 
     var maxAmmo = document.getElementById("max_ammo_display");
     maxAmmo.onchange = function(){
@@ -440,8 +460,11 @@ def displayNumber(id, min, max, default):
               <td>{{displaySelect("maxDifficulty", ['easy', 'medium', 'hard', 'harder', 'hardcore', 'mania'], "hard")}}</td>
             </tr>
 	    <tr>
-	      <td class="half">Progression speed: how fast progression items are likely to be found</td>
-              <td class="half">{{displaySelect("progressionSpeed", ['slowest', 'slow', 'medium', 'fast', 'fastest'], "medium")}}</td>
+	      <td class="half">
+                Progression speed: how fast progression items are likely to be found<br/>
+                Select random to randomly choose a progression speed
+              </td>
+              <td class="half">{{displaySelect("progressionSpeed", ['random', 'slowest', 'slow', 'medium', 'fast', 'fastest'], "medium")}}</td>
 	    </tr>
 	    <tr>
 	      <td colspan="2">{{displayCheckbox("spreadItems")}}Spread progression items (uncheck for faster progression)</td>
@@ -484,6 +507,22 @@ for patch in patches:
   pass
 }}
 	  </p>
+          <h4>Super Fun Times (TM)</h4>
+          <p>
+            Have fun randomly removing major items! Warning: For experienced players only.<br/>
+            Will randomly remove some items from the following sets:
+          </p>
+	  <table class="full">
+            <tr>
+              <td>{{displayCheckbox("funCombat")}} Combat (Screw Attack, all beams but Ice and Charge)</td>
+            </tr>
+            <tr>
+              <td>{{displayCheckbox("funMovement")}} Movement (Hi/Space Jump, Grapple, Spring Ball, Speed, Bombs)</td>
+            </tr>
+            <tr>
+              <td>{{displayCheckbox("funSuits")}} Suits (will not activate if relevant known techniques are not enabled in the preset)</td>
+            </tr>
+          </table>
 	</div>
       </div>
     </form>

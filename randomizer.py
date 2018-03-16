@@ -83,8 +83,10 @@ if __name__ == "__main__":
                         dest='superFun', nargs='?', default=[], action='append',
                         choices=['Movement', 'Combat', 'Suits'])
 
+    # parse args
     args = parser.parse_args()
 
+    # if diff preset given, load it
     if args.paramsFileName is not None:
         ParamsLoader.factory(args.paramsFileName[0]).load()
         preset = os.path.splitext(os.path.basename(args.paramsFileName[0]))[0]
@@ -94,24 +96,28 @@ if __name__ == "__main__":
     else:
         preset = 'default'
 
+    # if no seed given, choose one
     if args.seed == 0:
         seed = random.randint(0, 9999999)
     else:
         seed = args.seed
     random.seed(seed)
+
+    # if random progression speed, choose one
     progSpeed = args.progressionSpeed
     if progSpeed == "random":
         progSpeed = speeds[random.randint(0, len(speeds)-1)]
-        
+
     print("SEED: " + str(seed))
     print("progression speed: " + progSpeed)
 
+    # if no max diff, set it very high
     if args.maxDifficulty:
         maxDifficulty = text2diff[args.maxDifficulty]
     else:
         maxDifficulty = 100000
 
-    # same as solver
+    # same as solver, increase max difficulty 
     threshold = maxDifficulty
     epsilon = 0.001
     if maxDifficulty <= easy:
@@ -126,14 +132,20 @@ if __name__ == "__main__":
         threshold = mania - epsilon
     maxDifficulty = threshold
 
+    # fill restrictions dict
     restrictions = { 'Suits' : args.suitsRestriction, 'SpeedScrew' : args.speedScrewRestriction, 'MajorMinor' : not args.fullRandomization }
     seedCode = 'X'
     if restrictions['MajorMinor'] is False:
         seedCode = 'FX'
 
+    # output ROM name
     fileName = 'VARIA_Randomizer_' + seedCode + str(seed) + '_' + preset
     if args.directory != '.':
         fileName = args.directory + '/' + fileName
+
+    # check that one skip patch is set
+    if 'skip_intro.ips' not in args.patches and 'skip_ceres.ips' not in args.patches:
+        args.patches.append('skip_ceres.ips')
 
     locationPool = locations
 

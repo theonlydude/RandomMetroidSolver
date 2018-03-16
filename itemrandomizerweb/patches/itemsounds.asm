@@ -77,194 +77,194 @@ lorom
 ;If you want to play the normal sound clip for an item, put "DW NORMAL *newline* DB $02" (or leave it black if you haven't already changed it)
 
 org $84E0B3			;Energy Tank
-	DW SOUNDFX
-	DB !None
+	DW SPECIALFX
+	DB !Energy
 org $84E0D8			;Missile
-	DW SOUNDFX	;Load sound from SOUNDFX
-	DB !None	;Run the "click" sound
+	DW SOUNDFX
+	DB !Click	
 org $84E0FD			;Super Missile
 	DW SOUNDFX
-	DB !None
+	DB !Click
 org $84E122			;Powerbomb
 	DW SOUNDFX
-	DB !None
+	DB !Click
 org $84E14F			;Bombs
-	DW SOUNDFX
-	DB !None
+	DW SPECIALFX
+	DB !Bomb
 org $84E17D			;Charge Beam
-	DW SOUNDFX
-	DB !None
+	DW SPECIALFX
+	DB !Laser
 org $84E1AB			;Ice Beam
-	DW SOUNDFX
-	DB !None
+	DW MISCFX
+	DB !Freeze
 org $84E1D9			;High Jump
 	DW SOUNDFX
-	DB !None
+	DB !Helmet
 org $84E207			;Speed Booster
-	DW SOUNDFX
-	DB !None
+	DW MISCFX
+	DB !Spark
 org $84E235			;Wave Beam
-	DW SOUNDFX
-	DB !None
+	DW SPECIALFX
+	DB !Laser
 org $84E263			;Spazer Beam
-	DW SOUNDFX
-	DB !None
+	DW SPECIALFX
+	DB !Laser
 org $84E291			;Spring Ball
-	DW SOUNDFX
-	DB !None
+	DW MISCFX
+	DB !Land
 org $84E2C3			;Varia Suit
 	DW SOUNDFX
 	DB !None
 org $84E2F8			;Gravity Suit
-	DW SOUNDFX
-	DB !None
+	DW SPECIALFX
+	DB !Bubble
 org $84E32D			;X-ray
 	DW SOUNDFX
-	DB !None	
+	DB !Click
 org $84E35A			;Plasma Beam
-	DW SOUNDFX
-	DB !None
+	DW SPECIALFX
+	DB !Laser
 org $84E388			;Grapple Beam
 	DW SOUNDFX
-	DB !None
+	DB !Click
 org $84E3B5			;Space Jump
 	DW SOUNDFX
-	DB !None	
+	DB !Helmet	
 org $84E3E3			;Screw Attack
-	DW SOUNDFX
-	DB !None	
+	DW SPECIALFX
+	DB !Screw	
 org $84E411			;Morph Ball
 	DW SOUNDFX
 	DB !None
 org $84E43F			;Reserve Tank
-	DW SOUNDFX
-	DB !None
+	DW SPECIALFX
+	DB !Energy
 org $84E46F			;Chozo Energy Tank
-	DW SOUNDFX
-	DB !None
+	DW SPECIALFX
+	DB !Energy
 org $84E4A1			;Chozo Missile
 	DW SOUNDFX
-	DB !None
+	DB !Click
 org $84E4D3			;Chozo Super Missile
 	DW SOUNDFX
-	DB !None
+	DB !Click
 org $84E505			;Chozo Powerbomb
 	DW SOUNDFX
-	DB !None
+	DB !Click
 org $84E53F			;Chozo Bombs
-	DW SOUNDFX
-	DB !None
+	DW SPECIALFX
+	DB !Bomb
 org $84E57A			;Chozo Charge Beam
-	DW SOUNDFX
-	DB !None
+	DW SPECIALFX
+	DB !Laser
 org $84E5B5			;Chozo Ice Beam
-	DW SOUNDFX
-	DB !None
+	DW MISCFX
+	DB !Freeze
 org $84E5F0			;Chozo High Jump
 	DW SOUNDFX
-	DB !None
+	DB !Helmet
 org $84E62B			;Chozo Speed Booster
-	DW SOUNDFX
-	DB !None
+	DW MISCFX
+	DB !Spark
 org $84E66F			;Chozo Wave Beam
-	DW SOUNDFX
-	DB !None
+	DW SPECIALFX
+	DB !Laser
 org $84E6AA			;Chozo Spazer Beam
-	DW SOUNDFX
-	DB !None
+	DW SPECIALFX
+	DB !Laser
 org $84E6E5			;Chozo Spring Ball
-	DW SOUNDFX
-	DB !None
+	DW MISCFX
+	DB !Land
 org $84E720			;Chozo Varia Suit
 	DW SOUNDFX
 	DB !None
 org $84E762			;Chozo Gravity Suit
-	DW SOUNDFX
-	DB !None
+	DW SPECIALFX
+	DB !Bubble
 org $84E7A4			;Chozo X-ray
 	DW SOUNDFX
-	DB !None	
+	DB !Click	
 org $84E7DE			;Chozo Plasma Beam
-	DW SOUNDFX
-	DB !None
+	DW SPECIALFX
+	DB !Laser
 org $84E819			;Chozo Grapple Beam
 	DW SOUNDFX
-	DB !None
+	DB !Click
 org $84E853			;Chozo Space Jump
 	DW SOUNDFX
-	DB !None
+	DB !Helmet
 org $84E88E			;Chozo Screw Attack
-	DW SOUNDFX
-	DB !None
+	DW SPECIALFX
+	DB !Screw
 org $84E8C9			;Chozo Morph Ball
 	DW SOUNDFX
 	DB !None
 org $84E904			;Chozo Reserve Tank
-	DW SOUNDFX
-	DB !None
+	DW SPECIALFX
+	DB !Energy
 org $84E93A			;Scenery Energy Tank
-	DW SOUNDFX
-	DB !None
+	DW SPECIALFX
+	DB !Energy
 org $84E972			;Scenery Missile
 	DW SOUNDFX
-	DB !None
+	DB !Click
 org $84E9AA			;Scenery Super Missile
 	DW SOUNDFX
-	DB !None
+	DB !Click
 org $84E9E2			;Scenery Powerbomb
 	DW SOUNDFX
-	DB !None
+	DB !Click
 org $84EA22			;Scenery Bombs
-	DW SOUNDFX
-	DB !None
+	DW SPECIALFX
+	DB !Bomb
 org $84EA63			;Scenery Charge Beam
-	DW SOUNDFX
-	DB !None
+	DW SPECIALFX
+	DB !Laser
 org $84EAA4			;Scenery Ice Beam
-	DW SOUNDFX
-	DB !None
+	DW MISCFX
+	DB !Freeze
 org $84EAE5			;Scenery High Jump
 	DW SOUNDFX
-	DB !None
+	DB !Helmet
 org $84EB26			;Scenery Speed Booster
-	DW SOUNDFX
-	DB !None
+	DW MISCFX
+	DB !Spark
 org $84EB67			;Scenery Wave Beam
-	DW SOUNDFX
-	DB !None
+	DW SPECIALFX
+	DB !Laser
 org $84EBA8			;Scenery Spazer Beam
-	DW SOUNDFX
-	DB !None
+	DW SPECIALFX
+	DB !Laser
 org $84EBE9			;Scenery Spring Ball
-	DW SOUNDFX
-	DB !None
+	DW MISCFX
+	DB !Land
 org $84EC2A			;Scenery Varia Suit
 	DW SOUNDFX
 	DB !None
 org $84EC72			;Scenery Gravity Suit
-	DW SOUNDFX
-	DB !None
+	DW SPECIALFX
+	DB !Bubble
 org $84ECBA			;Scenery X-ray
 	DW SOUNDFX
-	DB !None	
+	DB !Click	
 org $84ECFA			;Scenery Plasma Beam
-	DW SOUNDFX
-	DB !None
+	DW SPECIALFX
+	DB !Laser
 org $84ED3B			;Scenery Grapple Beam
 	DW SOUNDFX
-	DB !None
+	DB !Click
 org $84ED7B			;Scenery Space Jump
 	DW SOUNDFX
-	DB !None
+	DB !Helmet
 org $84EDBC			;Scenery Screw Attack
-	DW SOUNDFX
-	DB !None
+	DW SPECIALFX
+	DB !Screw
 org $84EDFD			;Scenery Morph Ball
 	DW SOUNDFX
 	DB !None	
 org $84EE3E			;Scenery Reserve Tank
-	DW SOUNDFX
-	DB !None
+	DW SPECIALFX
+	DB !Energy
 
 ;-------------------------DON'T EDIT THIS STUFF--------------------------
 

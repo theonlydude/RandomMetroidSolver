@@ -1024,6 +1024,10 @@ script:
     dw {draw}, {blank}
     dw {draw}, {blank}
     dw {draw}, {blank}
+    dw {draw}, {blank}
+    dw {draw}, {blank}
+    dw {draw}, {blank}
+    dw {draw}, {blank}
     
     dw {draw}, {blank}
     dw {draw}, {row}*183
@@ -1202,7 +1206,7 @@ credits:
     // }!@#$%&/()>~.
     
     {pink}
-    dw "     VARIA RANDOMIZER STAFF    " // 128
+    dw "     VARIA RANDOMIZER STAFF     " // 128
     {purple}
     dw "         RANDOMIZER CODE        " // 129
     {big}
@@ -1248,7 +1252,7 @@ credits:
     {big}
     dw "    DISCORD INVITE . RT2FWZT    " // 161 (rT2fWZt)
     dw "    discord invite . rt@fwzt    " // 162
-    {pink}
+    {purple}
     dw "          INFORMATION           " // 163
     {big}
     dw "  CHECK YOUR RANDOMIZED ROMS    " // 164
@@ -1266,8 +1270,6 @@ credits:
     dw "        PYTHONANYWHERE COM      " // 176
     dw "       .pythonanywhere.com      " // 177
     dw "                                " // 178
-
-    {big}
     dw "       RANDOMMETROIDSOLVER      " // 179
     dw "       randommetroidsolver      " // 180
     dw "        PYTHONANYWHERE COM      " // 181

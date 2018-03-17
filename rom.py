@@ -446,6 +446,13 @@ class RomPatcher:
 
             address += 0x80
 
+        # we need 16 majors displayed, if we've removed majors, add some blank text
+        for i in range(16 - len(fItemLocs)):
+            RomPatcher.writeCreditsString(romFile, address, 0x04, prepareString(""))
+            RomPatcher.writeCreditsString(romFile, (address + 0x40), 0x18, prepareString(""))
+
+            address += 0x80
+
         RomPatcher.patchBytes(romFile, address, [0, 0, 0, 0])
 
         romFile.close()

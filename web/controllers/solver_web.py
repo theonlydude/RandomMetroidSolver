@@ -646,7 +646,8 @@ def randomizerWebService():
     jsonFileName = tempfile.mkstemp()[1]
 
     print("randomizerWebService, params validated")
-    print("request.vars={}".format(request.vars))
+    for var in request.vars:
+        print("{}: {}".format(var, request.vars[var]))
 
     with open(presetFileName, 'w') as presetFile:
         presetFile.write(request.vars.paramsFileTarget)

@@ -341,6 +341,36 @@ window.onload = function(){
         }
         switchCheckbox("useMaxDiff");
     }
+
+    var progSpeed = document.getElementById("progressionSpeed");
+    progSpeed.onchange = function(){
+        var progSpeed = document.getElementById("progressionSpeed");
+        if(progSpeed.value == 'slow' || progSpeed.value == 'slowest'){
+            var suitsRestriction = document.getElementById("suitsRestriction");
+            var spreadItems = document.getElementById("spreadItems");
+
+            if(! suitsRestriction.checked){
+                suitsRestriction.click();
+            }
+            if(! spreadItems.checked){
+                spreadItems.click();
+            }
+        }
+        if(progSpeed.value == 'fast' || progSpeed.value == 'fastest'){
+            var spreadItems = document.getElementById("spreadItems");
+
+            if(spreadItems.checked){
+                spreadItems.click();
+            }
+        }
+        if(progSpeed.value == 'fastest'){
+            var suitsRestriction = document.getElementById("suitsRestriction");
+
+            if(suitsRestriction.checked){
+                suitsRestriction.click();
+            }
+        }
+    }
 }
 function switchCheckbox(id) {
   var check = document.getElementById(id);

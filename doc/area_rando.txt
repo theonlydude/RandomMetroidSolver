@@ -134,14 +134,16 @@ Idées Maridia :
 - utiliser la porte Missile Refill
 - rajouter une porte derrière le chozo de spring ball
 
+
 Idées Norfair :
 
 - utiliser la porte Map Station
 - rajouter une porte en bas à droite de la croco jump room
 - utiliser la porte de sortie lower norfair (virer les crumble blocks) 
+- rajouter une porte derrière Norfair Reserve
 
 Idées Lower Norfair:
 
+- rentrer par la sortie
 - rajouter une porte derrière la power bomb en haut à droite
 - rajouter une porte derrière Ridley
-

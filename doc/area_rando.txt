@@ -1,0 +1,87 @@
+
+Principe
+********
+
+Modifier la map de façon random afin de changer les jonctions entre
+les areas, tout en gardant la randomization d'items bien sûr.
+
+Exemple : prendre l'ascenseur de blue brinstar au début et arriver à
+Norfair, trouver morph a hi jump, repartir etc.
+
+Il faut que les liaisons soient bidirectionnelles, mais pas forcément
+logiques "géographiquement" (seul le jeu de base l'est). Pour
+continuer l'exemple, l'ascenseur crateria->green brinstar pourrait
+mener à Maridia.
+
+Une "jonction" est souvent un ascenseur mais pas forcément
+(cf. wrecked ship).
+
+Pour maximiser le nombre de possibilités il serait intéressant de
+rajouter des portes dans certains "bords de zone" afin de créer des
+jonctions, et/ou d'en griser d'autres. Soit certaines pièces bien
+identifiées ou cela peut arriver, ou idéalement en random parmi
+plusieurs pièces candidates.
+
+Zones
+*****
+
+Sauf contre-indication ONE WAY, toutes les portes sont
+bidirectionnelles, le sens indiqué donne le sens vers lequel aller
+pour changer de zone.
+
+A travailler afin d'équilibrer les transitions possibles pour les
+zones, ou trouver les endroits ou on peut rajouter/désactiver des
+portes.
+
+Crateria
+--------
+
+Zone de départ.
+Tout jusqu'au Moat inclus (pas la partie wrecked ship).
+
+> : Porte droite du Moat
+V : Ascenseur Blue Brinstar
+V : Ascenseur Green Brinstar
+V : Ascenseur Red Brinstar
+
+Brinstar
+--------
+
+^ ; Ascenseur Blue Brin. / Crateria
+^ : Ascenseur Green B. / Crateria
+^ : Ascenseur Red B. / Crateria
+V : Ascenseur Red B. Norfair
+^ : Porte Maridia Tube
+
+Wrecked Ship
+------------
+
+Contient Ocean et la zone en haut en dehors du ship, ainsi que
+forgotten highway.
+
+< : Porte gauche Ocean
+V : Ascenseur Forgotten Highway / Maridia
+
+Maridia
+-------
+
+V : Porte tube
+^ : Ascenseur forgotten highway
+V (ONE WAY) : green gate vers Brinstar/proche asc. Norfair
+
+Norfair
+-------
+
+^ ; Ascenseur Brinstar
+< : Porte jane accès Lava Dive
+
+Lower Norfair
+-------------
+
+> : Porte droite Lava Dive
+< (ONE WAY) : retour Norfair
+
+
+
+
+

@@ -116,7 +116,7 @@ function ajaxFail(jqXHR, textStatus) {
 function ajaxFailJSON(jqXHR, textStatus) {
   // cross domain calls currently return 'undefined' information... (cf. https://www.html5rocks.com/en/tutorials/cors/)
   if(jqXHR.responseJSON == null) {
-    document.getElementById("flash").innerHTML = "Something wrong happened or the VARIA randomizer aborted: try to raise or disable max difficulty setting, or disable Super Fun Times (TM) setting";
+    document.getElementById("flash").innerHTML = "Something wrong happened or the VARIA randomizer aborted: try again or try to raise or disable max difficulty setting, or disable Super Fun Times (TM) setting";
   } else {
     document.getElementById("flash").innerHTML = jqXHR.responseJSON;
   }
@@ -341,6 +341,36 @@ window.onload = function(){
         }
         switchCheckbox("useMaxDiff");
     }
+
+    var progSpeed = document.getElementById("progressionSpeed");
+    progSpeed.onchange = function(){
+        var progSpeed = document.getElementById("progressionSpeed");
+        if(progSpeed.value == 'slow' || progSpeed.value == 'slowest'){
+            var suitsRestriction = document.getElementById("suitsRestriction");
+            var spreadItems = document.getElementById("spreadItems");
+
+            if(! suitsRestriction.checked){
+                suitsRestriction.click();
+            }
+            if(! spreadItems.checked){
+                spreadItems.click();
+            }
+        }
+        if(progSpeed.value == 'fast' || progSpeed.value == 'fastest'){
+            var spreadItems = document.getElementById("spreadItems");
+
+            if(spreadItems.checked){
+                spreadItems.click();
+            }
+        }
+        if(progSpeed.value == 'fastest'){
+            var suitsRestriction = document.getElementById("suitsRestriction");
+
+            if(suitsRestriction.checked){
+                suitsRestriction.click();
+            }
+        }
+    }
 }
 function switchCheckbox(id) {
   var check = document.getElementById(id);
@@ -409,7 +439,7 @@ def displayNumber(id, min, max, default):
     <form id="mainform", name="mainform", onsubmit="doSubmit(); return false;">
       <div class="row">
 	<div class="column">
-	  <p>The Very Adaptative Randomizer of Items for Anyone (VARIA) randomizer will generate a Super Metroid ROM finishable using the known techniques of the chosen preset</p>
+	  <p>The Very Adaptive Randomizer of Items for Anyone (VARIA) randomizer will generate a Super Metroid ROM finishable using the known techniques of the chosen preset</p>
           <table class="full">
             <colgroup><col class="half" /><col class="half" /></colgroup>
             <tr>

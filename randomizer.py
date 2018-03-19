@@ -64,16 +64,16 @@ if __name__ == "__main__":
                         choices=['sparse', 'medium', 'vanilla'])
     parser.add_argument('--spreadItems',
                         help="spread progression items", action='store_true',
-                        dest='spreadItems', default=True)
+                        dest='spreadItems', default=False)
     parser.add_argument('--fullRandomization',
                         help="will place majors in all locations", action='store_true',
                         dest='fullRandomization', default=False)
     parser.add_argument('--suitsRestriction',
                         help="no suits in early game", action='store_true',
-                        dest='suitsRestriction', default=True)
+                        dest='suitsRestriction', default=False)
     parser.add_argument('--speedScrewRestriction',
                         help="no speed or screw in the very first rooms", action='store_true',
-                        dest='speedScrewRestriction', default=True)
+                        dest='speedScrewRestriction', default=False)
     parser.add_argument('--progressionSpeed', '-i',
                         help="",
                         dest='progressionSpeed', nargs='?', default='medium',
@@ -109,7 +109,7 @@ if __name__ == "__main__":
         progSpeed = speeds[random.randint(0, len(speeds)-1)]
 
     print("SEED: " + str(seed))
-    print("progression speed: " + progSpeed)
+#    print("progression speed: " + progSpeed)
 
     # if no max diff, set it very high
     if args.maxDifficulty:
@@ -142,7 +142,8 @@ if __name__ == "__main__":
     fileName = 'VARIA_Randomizer_' + seedCode + str(seed) + '_' + preset
     if args.directory != '.':
         fileName = args.directory + '/' + fileName
-
+    if args.progressionSpeed != "random":
+        fileName += "_" + args.progressionSpeed
     # check that one skip patch is set
     if 'skip_intro.ips' not in args.patches and 'skip_ceres.ips' not in args.patches:
         args.patches.append('skip_ceres.ips')

@@ -28,7 +28,7 @@ function guessRomType(filename) {
   var match = filename.match(re);
 
   if (match != null) {
-    switch(match[0][18]) {
+    switch(match[0][17]) {
       case 'F':
         return "VARIA Full";
       case 'X':

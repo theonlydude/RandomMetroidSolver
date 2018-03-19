@@ -262,7 +262,7 @@ def removeForbiddenItems(forbiddenItems, itemPool, noEnergyAdded):
         Items.append(NoEnergy)
 
     for item in forbiddenItems:
-        print("remove item {}".format(item))
+#        print("remove item {}".format(item))
         itemPool = removeItem(item, itemPool)
         itemPool = addItem('NoEnergy', itemPool)
     return itemPool

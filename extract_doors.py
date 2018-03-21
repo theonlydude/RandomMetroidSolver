@@ -3,7 +3,8 @@
 # get info from https://github.com/DJuttmann/SM3E
 
 import sys, struct
-from rooms import rooms
+from rooms import roomsElevator
+rooms = roomsElevator
 
 def concatBytes(b0, b1, b2):
     return b0 + (b1 << 8) + (b2 << 16)
@@ -48,7 +49,7 @@ def readDoorsData(romFile, roomInfo):
 
         if data[0] == 0 and data[1] == 0:
             doorData.append({'type': 'elevator',
-                             'startAddressPC': doorPtr})
+                             'startAddressPC': hex(doorPtr)})
         else:
             #      RoomPtr         = Tools.ConcatBytes (b [0], b [1], 0x8F);
             #      Bitflag         = b [2];
@@ -66,7 +67,16 @@ def readDoorsData(romFile, roomInfo):
                              'startAddressPC': hex(doorPtr)})
 
     roomInfo['doorData'] = doorData
-    print("doorData: {}".format(doorData))
+    print("doorsData: ")
+    for d in doorData:
+        if d['type'] == 'door':
+            print("Door")
+            print("roomPrt: {}".format(d['roomPrt']))
+            print("doorAsmPtr: {}".format(d['doorAsmPtr']))
+            print("startAddressPC: {}".format(d['startAddressPC']))
+        else:
+            print("Elevator")
+            print("startAddressPC: {}".format(d['startAddressPC']))
 
 def readRooms(romFileName):
     #    RoomIndex         = b [0];
@@ -89,6 +99,7 @@ def readRooms(romFileName):
 
             doorsPtr = concatBytes(value[0], value[1], 0x8F)
             roomInfo['doorsPtr'] = doorsPtr
+            print("")
             print("{} ({}) doorsPtr: {}".format(roomInfo['name'], hex(roomInfo['address']), hex(doorsPtr)))
 
             readDoorsPtrs(romFile, roomInfo)

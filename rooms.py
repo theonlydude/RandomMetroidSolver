@@ -1,3 +1,23 @@
+roomsElevator = [
+# crateria
+{"address": 0x0797B5, "doorCount": 3, "name": "[Elevator to Blue Brinstar]"},
+{"address": 0x079E9F, "doorCount": 4, "name": "Morph Ball Room"},
+{"address": 0x07962A, "doorCount": 3, "name": "[Elevator to Red Brinstar]"},
+{"address": 0x07A322, "doorCount": 7, "name": "Caterpillar Room"},
+{"address": 0x079938, "doorCount": 3, "name": "[Elevator to Green Brinstar]"},
+{"address": 0x079AD9, "doorCount": 11, "name": "Green Brinstar Main Shaft [etecoon room]"},
+{"address": 0x0794CC, "doorCount": 3, "name": "[Elevator to Maridia]"},
+{"address": 0x07D30B, "doorCount": 4, "name": "Maridia Elevator Room"},
+
+# brinstar
+{"address": 0x07A6A1, "doorCount": 4, "name": "Warehouse Entrance"},
+{"address": 0x07A7DE, "doorCount": 8, "name": "Business Center"},
+
+# norfair
+{"address": 0x07AF3F, "doorCount": 4, "name": "[Elevator to Lower Norfair]"},
+{"address": 0x07B236, "doorCount": 4, "name": "Main Hall"},
+]
+
 rooms = [
 {"address": 0x0791F8, "doorCount": 4, "name": "Landing Site"},
 {"address": 0x0792B3, "doorCount": 2, "name": "Gauntlet Entrance"},

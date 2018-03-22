@@ -1,4 +1,5 @@
 roomsElevator = [
+# elevators
 # crateria
 {"address": 0x0797B5, "doorCount": 3, "name": "[Elevator to Blue Brinstar]", "direction": "down"},
 {"address": 0x079E9F, "doorCount": 4, "name": "Morph Ball Room", "direction": "up"},
@@ -16,6 +17,19 @@ roomsElevator = [
 # norfair
 {"address": 0x07AF3F, "doorCount": 4, "name": "[Elevator to Lower Norfair]", "direction": "down"},
 {"address": 0x07B236, "doorCount": 4, "name": "Main Hall", "direction": "up"},
+
+# doors
+# wrecked ship
+{"address": 0x0795FF, "doorCount": 2, "name": "The Moat", "direction": "right"},
+{"address": 0x0793FE, "doorCount": 6, "name": "West Ocean", "direction": "left"},
+
+# maridia
+{"address": 0x07CFC9, "doorCount": 5, "name": "Main Street", "direction": "down"},
+{"address": 0x07CEFB, "doorCount": 4, "name": "Glass Tunnel", "direction": "up"},
+
+# norfair
+{"address": 0x07AE74, "doorCount": 4, "name": "Kronic Boost Room", "direction": "left"},
+{"address": 0x07AF14, "doorCount": 2, "name": "Lava Dive Room", "direction": "right"}
 ]
 
 rooms = [

@@ -5,7 +5,7 @@ SOLVER=./solver.py
 GET_STATS=./get_stats.py
 
 
-presets="flo manu noob speedrunner"
+presets="flo noob speedrunner"
 progs="slowest slow medium fast fastest"
 n=20
 
@@ -58,14 +58,13 @@ for p in $presets; do
 	mkdir $dest
 	workers=0
 	for i in $(seq 1 $n); do
-	    if [ ${workers} -lt ${nb_cpu} ]; then
-		worker ${p} ${speed} ${i} ${dest} "$extra" &
-                renice -n 10 -p $!
-		let workers=${workers}+1
-	    else
+	    if [ ${workers} -ge ${nb_cpu} ]; then
 		wait
 		workers=0
 	    fi
+	    worker ${p} ${speed} ${i} ${dest} "$extra" &
+            renice -n 10 -p $!
+	    let workers=${workers}+1
 	done
         wait
 	$GET_STATS $dest/*.sfc

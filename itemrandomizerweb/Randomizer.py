@@ -50,8 +50,8 @@ class RandoSettings(object):
             }
         if progSpeed == 'slow':
             return {
-                'MinProgression' : 15,
-                'Random' : 85,
+                'MinProgression' : 25,
+                'Random' : 75,
                 'MaxProgression' : 0
             }
         if progSpeed == 'medium':
@@ -63,8 +63,8 @@ class RandoSettings(object):
         if progSpeed == 'fast':
             return {
                 'MinProgression' : 0,
-                'Random' : 85,
-                'MaxProgression' : 15
+                'Random' : 75,
+                'MaxProgression' : 25
             }
         if progSpeed == 'fastest':
             return {
@@ -87,10 +87,10 @@ class RandoSettings(object):
         else:
             progTypes.remove('Charge')
             progTypes.remove('Grapple')
-            progTypes.remove('Ice')
         if progSpeed == 'medium':
             return progTypes
         else:
+            progTypes.remove('Ice')
             progTypes.remove('SpaceJump')
         if progSpeed == 'fast':
             return progTypes
@@ -100,20 +100,19 @@ class RandoSettings(object):
 
     def getItemLimit(self, progSpeed):
         itemLimit = 100
-        if progSpeed == 'medium':
-            itemLimit = 25
+        if progSpeed == 'slow':
+            itemLimit = 20
+        elif progSpeed == 'medium':
+            itemLimit = 13
         elif progSpeed == 'fast':
-            itemLimit = 10
+            itemLimit = 8
         elif progSpeed == 'fastest':
             itemLimit = 1
         return itemLimit
 
     def getLocLimit(self, progSpeed):
-        if progSpeed == 'slowest':
-            locLimit = -1
-        elif progSpeed == 'slow':
-            locLimit = 1
-        elif progSpeed == 'medium':
+        locLimit = -1
+        if progSpeed == 'medium':
             locLimit = 2
         elif progSpeed == 'fast':
             locLimit = 3
@@ -213,14 +212,14 @@ class Randomizer(object):
         self.restrictedLocations = self.getRestrictedLocations(settings.forbiddenItems, locations)
         self.difficultyTarget = settings.maxDiff
         self.sampleSize = settings.sampleSize
-        minLimit = settings.itemLimit - settings.itemLimit/10
-        maxLimit = settings.itemLimit + settings.itemLimit/10
-        self.itemLimit = random.randint(minLimit, maxLimit)
+        self.itemLimit = settings.itemLimit
         self.unusedLocations = locations
         self.locLimit = settings.locLimit
         self.usedLocations = []
-        self.progressionLocs = []
+        self.progressionItemLocs = []
         self.progressionItemTypes = settings.progressionItemTypes
+        self.maxCancel = 1
+        self.pickedUpLocs = []
 
     def getRestrictedLocations(self, forbiddenItems, locations):
         # list only absolutely unreachable locations, regardless of known techniques
@@ -393,7 +392,8 @@ class Randomizer(object):
         return d
     
     def getLocsSpreadProgression(self, availableLocations):
-        distances = [self.areaDistance(loc, self.progressionLocs) for loc in availableLocations]
+        progLocs = [il['Location'] for il in self.progressionItemLocs if il['Item']['Class'] == 'Major']
+        distances = [self.areaDistance(loc, progLocs) for loc in availableLocations]
         maxDist = max(distances)
         indices = [index for index, d in enumerate(distances) if d == maxDist]        
         locs = [availableLocations[i] for i in indices]
@@ -407,7 +407,11 @@ class Randomizer(object):
         return any(item['Type'] == t for item in self.itemPool)
     
     def isProgItem(self, item):
-        return item['Type'] in self.progressionItemTypes
+        if item['Type'] in self.progressionItemTypes:
+            return True
+        if not item in self.currentItems:
+            return len(self.currentLocations(self.currentItems)) < len(self.currentLocations(self.currentItems + [item]))
+        return False
     
     def chooseLocation(self, availableLocations, item):
         locs = availableLocations
@@ -419,8 +423,8 @@ class Randomizer(object):
     def getItemToPlace(self, items, itemPool):        
         itemsLen = len(items)
         if itemsLen == 0:
-#            print("EMPTY")
-            item = List.item(random.randint(0, len(itemPool)-1), itemPool)
+            fixedPool = [item for item in itemPool if item not in self.failItems]
+            item = List.item(random.randint(0, len(fixedPool)-1), fixedPool)
         else:
             item = self.chooseItem(items)
         return item
@@ -437,6 +441,11 @@ class Randomizer(object):
         currentItems = [i["Type"] for i in self.currentItems]
         currentItems.append(item['Type'])
         availableLocations = List.filter(lambda loc: self.canPlaceAtLocation(item, loc) and self.locPostAvailable(loc, currentItems), locations)
+        # if a loc is available we trigger pick up action, to make more locs available afterwards
+        for loc in availableLocations:
+            if 'Pickup' in loc and not loc in self.pickedUpLocs:
+                loc['Pickup']()
+                self.pickedUpLocs.append(loc)
         if len(availableLocations) == 0:
             if not item in self.failItems:
                 self.failItems.append(item)
@@ -506,16 +515,13 @@ class Randomizer(object):
         item = itemLocation['Item']
         location = itemLocation['Location']
         if self.isProgItem(item):
-                #            print("placing " + item['Type'])
-            self.progressionLocs.append(location)
+            self.progressionItemLocs.append(itemLocation)
         self.usedLocations.append(location)
         self.unusedLocations.remove(location)
         if collect is True:
-            if 'Pickup' in location:
-                location['Pickup']()
             self.currentItems.append(item)
         itemLocations.append(itemLocation)
-        #print(str(len(self.currentItems)) + ':' + itemLocation['Item']['Type'] + ' at ' + itemLocation['Location']['Name'])
+#        print(str(len(self.currentItems)) + ':' + itemLocation['Item']['Type'] + ' at ' + itemLocation['Location']['Name'])
         self.itemPool = self.removeItem(item['Type'], self.itemPool)
 
     def generateItem(self, curLocs, pool):
@@ -523,14 +529,35 @@ class Randomizer(object):
         self.failItems = []
         posItems = self.possibleItems(curLocs, self.currentItems, pool)
         while itemLocation is None:
-            #                print(str(len(posItems)) + " possible items")
+            nPool = len(set([item['Type'] for item in pool]))
+#            print("P " + str(len(posItems)) + ", F " + str(len(self.failItems)) + " / " + str(nPool))
             itemLocation = self.placeItem(posItems, pool, curLocs)
-            if len(self.failItems) >= len(posItems):
+            if len(self.failItems) >= nPool:
                 break
+#        print(set([item['Type'] for item in posItems]))
         return itemLocation
 
-    def cancelLastItem(self, itemLocations):
-        itemLoc = itemLocations.pop()
+    def cancelItem(self, itemLocations):
+        # cancel an item that did not made progress
+        # favor majors as they are more likely to improve the situation,
+        # unless we don't have all minor types yet
+        itemTypes = [item['Type'] for item in self.currentItems]
+        tryMinors = 'Missile' not in itemTypes or 'Super' not in itemTypes or 'PowerBomb' not in itemTypes
+        locList = []
+        i = len(itemLocations) - 1
+        while len(locList) <= self.maxCancel+1 and i >= 0: # maxCancel grows over time if we get stuck, +1 to get randomness even when its value is 1 
+            il = itemLocations[i]
+            if il not in self.progressionItemLocs and ((il['Item']['Class'] == 'Minor' and tryMinors is True) or il['Item']['Class'] == 'Major'):
+                locList.append(il)
+            i -= 1
+        random.shuffle(locList)
+        itemLoc = next((il for il in locList if (il['Item']['Class'] == 'Minor' and tryMinors is True) or il['Item']['Class'] == 'Major'), None)
+        if itemLoc is not None:
+            itemLocations.remove(itemLoc)
+        else:
+            # this can happen when we force a cancel for more variety, but it is not possible
+#            print("aborted cancel")
+            return
         item = itemLoc['Item']
         loc = itemLoc['Location']
         if item in self.currentItems:
@@ -597,8 +624,10 @@ class Randomizer(object):
         nItems = 0
         locPoolOk = True
 #            print("NON-PROG")
-        while len(pool) > 0 and nItems < self.itemLimit and locPoolOk: 
-    #                print(str(len(pool)) + " " + str(len(self.itemPool)))
+        minLimit = self.itemLimit - self.itemLimit/5
+        maxLimit = self.itemLimit + self.itemLimit/5
+        itemLimit = random.randint(minLimit, maxLimit)
+        while len(pool) > 0 and nItems < itemLimit and locPoolOk: 
             curLocs = self.currentLocations(self.currentItems)
             itemLocation = self.generateItem(curLocs, pool)
             if itemLocation is None:
@@ -614,35 +643,35 @@ class Randomizer(object):
     def getItemFromStandardPool(self, itemLocations, isStuck, maxLen):
 #                print("REGULAR")
         # first, try to put an item from standard pool
-        removed = True
-        itemLocation = None
+#        print("PROG IN " + str([l['Name'] for l in self.currentLocations(self.currentItems)]))
         curLocs = self.currentLocations(self.currentItems)
-        itemLocation = self.generateItem(curLocs, self.itemPool)
-        while itemLocation is None and (removed is True or not isStuck):
+        nLocsIn = len(curLocs)
+        itemLocation = None
+        if not isStuck:
+            itemLocation = self.generateItem(curLocs, self.itemPool)
+        if itemLocation is None:
             # we cannot place items anymore, cancel a bunch of our last decisions
-            curLocs = self.currentLocations(self.currentItems)
-            removed = False
-            doRemove = True
-            maxCancel = 3 # assume we can't get stuck by a combination of more than 3 items...
             nCancel = 0
-            while isStuck and len(itemLocations) > 0 and doRemove and nCancel < maxCancel and len(self.itemPool) <= maxLen:
-                self.cancelLastItem(itemLocations)
+            while len(itemLocations) > 0 and nCancel < self.maxCancel and len(self.itemPool) <= maxLen:
+                self.cancelItem(itemLocations)
                 nCancel += 1
-                removed = True
-                # we can continue to cancel decisions if we don't regress
-                nextCur = self.currentLocations(self.currentItems[:-1])
-                doRemove = len(curLocs) == len(nextCur) or len(curLocs) == len(nextCur) - 1
-                if doRemove:
-                    curLocs = nextCur
-            # proceed like normal
             curLocs = self.currentLocations(self.currentItems)
             itemLocation = self.generateItem(curLocs, self.itemPool)
-            if not isStuck and itemLocation is None:
-                # we weren't stuck before but we are now...cancel last item to survive this corner case
-                self.cancelLastItem(itemLocations)
+        else:
+            sys.stdout.write('-')
+            sys.stdout.flush()            
         isStuck = itemLocation is None
         if isStuck is False:
             self.getItem(itemLocation, itemLocations)
+        curLocs = self.currentLocations(self.currentItems)
+        nLocsOut = len(curLocs)
+        if nLocsOut <= nLocsIn:
+#            print("up")
+            self.maxCancel += 1
+        else:
+#            print("one")
+            self.maxCancel = 1
+#        print("PROG OUT " + str([l['Name'] for l in curLocs]))
         return isStuck
     
     def generateItems(self):
@@ -659,8 +688,8 @@ class Randomizer(object):
             isStuck = self.fillNonProgressionItems(itemLocations)
             if len(self.itemPool) > 0:
                 # 2. collect an item with standard pool that will unlock the situation
+#                print("Full Pool " + str(len(self.itemPool)) + ", curLocs " + str([l['Name'] for l in self.currentLocations(self.currentItems)]))
                 isStuck = self.getItemFromStandardPool(itemLocations, isStuck, maxLen)
-#                print("REGULAR")
             nLoops += 1
         if len(self.itemPool) > 0:
             # we could not place all items, check if we can finish the game

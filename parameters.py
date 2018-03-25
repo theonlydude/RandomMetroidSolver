@@ -218,12 +218,6 @@ class Knows:
                           'href': 'https://www.youtube.com/watch?v=2GPx-6ARSIw&t=162s',
                           'rooms': ['Red Brinstar Fireflea Room']}
 
-    XrayIce = SMBool(True, hard, ['XrayIce'])
-    desc['XrayIce'] = {'display': 'X-Ray Ice',
-                       'title': 'Get to X-Ray location by freezing enemies',
-                       'href': None,
-                       'rooms': ['Red Brinstar Fireflea Room']}
-
     RedTowerClimb = SMBool(True, harder, ['RedTowerClimb'])
     desc['RedTowerClimb'] = {'display': 'Red Tower Climb',
                              'title': 'Climb Red Tower without Ice or Space-Jump',
@@ -255,31 +249,6 @@ class Knows:
                                       'title': 'Traverse Gauntlet area with power bombs',
                                       'href': None,
                                       'rooms': ['Gauntlet Entrance']}
-
-    GauntletEntrySpark = SMBool(True, medium, ['GauntletEntrySpark'])
-    desc['GauntletEntrySpark'] = {'display': 'Gauntlet Entry Spark',
-                                  'title': 'Traverse Gauntlet area with a Shine spark',
-                                  'href': 'https://www.youtube.com/watch?v=rFobt0S5sD4',
-                                  'rooms': ['Landing Site', 'Gauntlet Entrance']}
-
-    # Upper Norfair
-    NorfairReserveIce = SMBool(True, hard, ['NorfairReserveIce'])
-    desc['NorfairReserveIce'] = {'display': 'Norfair Reserve Ice',
-                                 'title': 'Climb to Norfair Reserve area by freezing a Waver',
-                                 'href': None,
-                                 'rooms': ['Bubble Mountain']}
-
-    WaveBeamWallJump = SMBool(True, easy, ['WaveBeamWallJump'])
-    desc['WaveBeamWallJump'] = {'display': 'Wave-Beam Wall-Jump',
-                                'title': 'Climb to Wave Beam with Wall-Jumps',
-                                'href': 'https://www.youtube.com/watch?v=2GPx-6ARSIw&t=140s',
-                                'rooms': ['Double Chamber']}
-
-    ClimbToGrappleWithIce = SMBool(False, 0, ['ClimbToGrappleWithIce'])
-    desc['ClimbToGrappleWithIce'] = {'display': 'Climb to Grapple With Ice',
-                                     'title': 'Climb to Grapple Beam area using Ice Beam on enemies in Post Crocomire Jump Room',
-                                     'href': None,
-                                     'rooms': ['Post Crocomire Jump Room']}
 
     # Lower Norfair
     LavaDive = SMBool(True, harder, ['LavaDive'])
@@ -347,14 +316,14 @@ class Knows:
     # Maridia
     # Suitless
     SuitlessOuterMaridia = SMBool(True, hardcore, ['SuitlessOuterMaridia'])
-    desc['SuitlessOuterMaridia'] = {'display': 'Suitless Outer Maridia',
-                                    'title': 'Make your way through Maridia (up to Botwoon area) with Hi-Jump, Grapple and Ice',
+    desc['SuitlessOuterMaridia'] = {'display': 'Suitless Maridia',
+                                    'title': 'Make your way through Maridia (except spring ball and the sandpits) with Hi-Jump, Grapple and Ice',
                                     'href': 'https://www.youtube.com/watch?v=c2xoPigezvM',
                                     'rooms': ['Main Street', 'Mt. Everest', 'Crab Shaft',
                                               'Aqueduct', 'Botwoon Hallway']}
 
     SuitlessOuterMaridiaNoGuns = SMBool(True, mania, ['SuitlessOuterMaridiaNoGuns'])
-    desc['SuitlessOuterMaridiaNoGuns'] = {'display': 'Suitless Outer Maridia with no Guns',
+    desc['SuitlessOuterMaridiaNoGuns'] = {'display': 'Suitless Maridia with no Guns',
                                           'title': 'Same as above, but with no firepower besides Ice Beam',
                                           'href': 'https://www.youtube.com/watch?v=c2xoPigezvM',
                                           'rooms': ['Main Street']}
@@ -364,13 +333,6 @@ class Knows:
                                     'title': 'Make your way through Mt. Everest with nothing but Ice (and Hi-Jump when suitless)',
                                     'href': 'https://www.youtube.com/watch?v=chFbX9rRV_k&t=123s',
                                     'rooms': ['Mt. Everest']}
-
-    # Mama
-    MamaGrappleWithWallJump = SMBool(False, 0, ['MamaGrappleWithWallJump'])
-    desc['MamaGrappleWithWallJump'] = {'display': 'Mama Grapple with Wall-Jump',
-                                       'title': 'Get to Grapple block with with just Grapple and Wall-Jumps',
-                                       'href': None,
-                                       'rooms': ['Mama Turtle Room']}
 
     # Suitless Draygon
     DraygonRoomGrappleExit = SMBool(False, 0, ['DraygonRoomGrappleExit'])
@@ -433,33 +395,26 @@ class Knows:
                   {'knows': ['IceZebSkip', 'SpeedZebSkip'],
                    'title': 'End Game'},
                   {'knows': ['CeilingDBoost', 'AlcatrazEscape', 'ReverseGateGlitch',
-                             'ReverseGateGlitchHiJumpLess', 'EarlyKraid', 'XrayDboost',
-                             'XrayIce', 'RedTowerClimb'],
+                             'ReverseGateGlitchHiJumpLess', 'EarlyKraid', 'XrayDboost', 'RedTowerClimb'],
                    'title': 'Brinstar'},
                   {'knows': ['HiJumpLessGauntletAccess', 'HiJumpGauntletAccess', 'GauntletWithBombs',
-                             'GauntletWithPowerBombs', 'GauntletEntrySpark'],
+                             'GauntletWithPowerBombs'],
                    'title': 'Gauntlet'},
-                  {'knows': ['NorfairReserveIce', 'WaveBeamWallJump', 'ClimbToGrappleWithIce'],
-                   'title': 'Upper Norfair'},
                   {'knows': ['LavaDive', 'LavaDiveNoHiJump', 'ScrewAttackExit', 'WorstRoomIceCharge'],
                    'title': 'Lower Norfair'},
                   {'knows': ['ContinuousWallJump', 'DiagonalBombJump', 'MockballWs'],
                    'title': 'Wrecked Ship'},
                   {'knows': ['SpongeBathBombJump', 'SpongeBathHiJump', 'SpongeBathSpeed'],
                    'title': 'Wrecked Ship Etank'},
-                  {'knows': ['SuitlessOuterMaridia', 'SuitlessOuterMaridiaNoGuns', 'TediousMountEverest'],
-                   'title': 'Outer Maridia'},
-                  {'knows': ['MamaGrappleWithWallJump'],
-                   'title': 'Mama Turtle'},
+                  {'knows': ['SuitlessOuterMaridia', 'SuitlessOuterMaridiaNoGuns', 'SuitlessSandpit', 'TediousMountEverest'],
+                   'title': 'Suitless Maridia'},
                   {'knows': ['DraygonRoomGrappleExit', 'DraygonRoomCrystalFlash',
                              'PreciousRoomXRayExit'],
                    'title': 'Maridia Suitless Draygon'},
                   {'knows': ['MochtroidClip', 'PuyoClip'],
                    'title': 'Maridia Clips'},
                   {'knows': ['KillPlasmaPiratesWithSpark', 'KillPlasmaPiratesWithCharge'],
-                   'title': 'Maridia Plasma Room'},
-                  {'knows': ['SuitlessSandpit'],
-                   'title': 'Maridia Sandpit'}]
+                   'title': 'Maridia Plasma Room'}]
 
 def isSettings(settings):
     return settings[0:len('__')] != '__'

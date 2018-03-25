@@ -165,17 +165,20 @@ locations = [
     'Available': lambda items: wand(canAccessRedBrinstar(items),
                                     canUsePowerBombs(items),
                                     wor(wor(haveItem(items, 'Grapple'),
-                                            haveItem(items, 'SpaceJump')),
-                                        wand(haveItem(items, 'Varia'),
-                                             energyReserveCountOk(items, 4),
-                                             Knows.XrayDboost),
-                                        wand(energyReserveCountOk(items, 6),
-                                             Knows.XrayDboost),
-                                        wand(haveItem(items, 'Ice'),
-                                             Knows.XrayIce,
+                                            haveItem(items, 'SpaceJump'),
+                                            wand(Knows.XrayDboost,
+                                                 wor(wand(heatProof(items),
+                                                          energyReserveCountOk(items, 3)),
+                                                     energyReserveCountOk(items, 6))),
+                                            wand(haveItem(items, 'Ice'),
+                                                 wor(energyReserveCountOk(items, 6),
+                                                     wand(heatProof(items),
+                                                          energyReserveCountOk(items, 3))))),
+                                        wand(haveItem(items, 'Bomb'),
+                                             Knows.InfiniteBombJump,
                                              wor(energyReserveCountOk(items, 6),
-                                                 wand(haveItem(items, 'Varia'),
-                                                      energyReserveCountOk(items, 4))))))
+                                                 wand(heatProof(items),
+                                                      energyReserveCountOk(items, 3))))))
 },
 {
     'Area': "Brinstar",
@@ -255,8 +258,6 @@ locations = [
     'Room': 'Grapple Beam Room',
     'Available': lambda items: wand(canDefeatCrocomire(items),
                                     wor(canFly(items),
-                                        wand(haveItem(items, 'Ice'),
-                                             Knows.ClimbToGrappleWithIce),
                                         haveItem(items, 'SpeedBooster'),
                                         Knows.GreenGateGlitch))
 },
@@ -272,8 +273,7 @@ locations = [
                                             haveItem(items, 'Grapple'),
                                             wand(haveItem(items, 'HiJump'),
                                                  Knows.GetAroundWallJump)),
-                                        wor(wand(haveItem(items, 'Ice'),
-                                                 Knows.NorfairReserveIce),
+                                        wor(haveItem(items, 'Ice'),
                                             wand(haveItem(items, 'SpringBall'),
                                                  Knows.SpringBallJumpFromWall))))
 },
@@ -294,12 +294,7 @@ locations = [
     'Address': 0x78CCA,
     'Visibility': "Chozo",
     'Room': 'Wave Beam Room',
-    # DONE: this one is not easy without grapple beam nor space jump,
-    #       with hijump medium wall jump is required
-    'Available': lambda items: wand(canAccessHeatedNorfair(items),
-                                    wor(haveItem(items, 'Grapple'),
-                                        haveItem(items, 'SpaceJump'),
-                                        Knows.WaveBeamWallJump))
+    'Available': lambda items: canAccessHeatedNorfair(items)
 },
 {
     'Area': "LowerNorfair",
@@ -350,7 +345,7 @@ locations = [
     # DONE: easy
     'Available': lambda items: wand(canAccessWs(items),
                                     haveItem(items, 'SpeedBooster'),
-                                    wor(haveItem(items, 'Varia'),
+                                    wor(heatProof(items),
                                         energyReserveCountOk(items, 1)),
                                     Bosses.bossDead('Phantoon'))
 },
@@ -396,7 +391,7 @@ locations = [
     # DONE: easy
     'Available': lambda items: wand(canAccessWs(items),
                                     Bosses.bossDead('Phantoon'),
-                                    wor(haveItem(items, 'Varia'),
+                                    wor(heatProof(items),
                                         energyReserveCountOk(items, 1)))
 },
 {
@@ -415,8 +410,7 @@ locations = [
                                     wor(canFly(items),
                                         wand(haveItem(items, 'Gravity'), haveItem(items, 'SpeedBooster')),
                                         wand(haveItem(items, 'HiJump'), haveItem(items, 'SpringBall'), Knows.SpringBallJump),
-                                        wand(haveItem(items, 'Grapple'),
-                                             wor(haveItem(items, 'HiJump'), Knows.MamaGrappleWithWallJump))))
+                                        haveItem(items, 'Grapple')))
 },
 {
     'Area': "Maridia",
@@ -1080,7 +1074,7 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Bowling Alley',
     'Available': lambda items: wand(canAccessWs(items),
-                                    wor(haveItem(items, 'Varia'),
+                                    wor(heatProof(items),
                                         energyReserveCountOk(items, 1)),
                                     Bosses.bossDead('Phantoon'))
 },

@@ -196,7 +196,7 @@ def canEnterAndLeaveGauntlet(items):
                     wand(haveItem(items, 'SpeedBooster'),
                          canUsePowerBombs(items),
                          energyReserveCountOk(items, 2),
-                         wand(Knows.SimpleShortCharge, Knows.GauntletEntrySpark))))
+                         Knows.GauntletWithPowerBombs)))
 
 def canPassBombPassages(items):
     return wor(canUseBombs(items),

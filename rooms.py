@@ -29,7 +29,11 @@ roomsElevator = [
 
 # norfair
 {"address": 0x07AE74, "doorCount": 4, "name": "Kronic Boost Room", "direction": "left"},
-{"address": 0x07AF14, "doorCount": 2, "name": "Lava Dive Room", "direction": "right"}
+{"address": 0x07AF14, "doorCount": 2, "name": "Lava Dive Room", "direction": "right"},
+
+# test
+{"address": 0x0792FD, "doorCount": 7, "name": "Parlor and Alcatraz", "direction": "down"},
+{"address": 0x0796BA, "doorCount": 5, "name": "Climb", "direction": "up"}
 ]
 
 rooms = [

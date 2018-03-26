@@ -220,7 +220,7 @@ def addAmmo(itemPool, qty):
 
     # there's 66 minors locations, 5 minors items are already in the pool
     minorLocations = ((66 - 5) * qty['minors']) / 100
-    maxItems = len(itemPool) + minorLocations
+    maxItems = len(itemPool) + int(minorLocations)
 
     # we won't generate all the minors, add the nothing item
     if qty['minors'] != 100:

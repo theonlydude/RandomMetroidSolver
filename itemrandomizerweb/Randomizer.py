@@ -1,7 +1,7 @@
 import sys, random
-import Items
+from itemrandomizerweb import Items
 from parameters import Knows, Settings
-from stdlib import Map, Array, List, Random
+from itemrandomizerweb.stdlib import Map, Array, List, Random
 from helpers import wand, Bosses, enoughStuffTourian#, canPassMetroids, canPassZebetites, enoughStuffsMotherbrain
 
 class RandoSettings(object):
@@ -624,8 +624,8 @@ class Randomizer(object):
         nItems = 0
         locPoolOk = True
 #            print("NON-PROG")
-        minLimit = self.itemLimit - self.itemLimit/5
-        maxLimit = self.itemLimit + self.itemLimit/5
+        minLimit = self.itemLimit - int(self.itemLimit/5)
+        maxLimit = self.itemLimit + int(self.itemLimit/5)
         itemLimit = random.randint(minLimit, maxLimit)
         while len(pool) > 0 and nItems < itemLimit and locPoolOk: 
             curLocs = self.currentLocations(self.currentItems)

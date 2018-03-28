@@ -81,11 +81,11 @@ class RandoSettings(object):
             return progTypes
         else:
             progTypes.remove('HiJump')
-            progTypes.remove('Bomb')
+            progTypes.remove('Charge')
         if progSpeed == 'slow':
             return progTypes
         else:
-            progTypes.remove('Charge')
+            progTypes.remove('Bomb')
             progTypes.remove('Grapple')
         if progSpeed == 'medium':
             return progTypes
@@ -219,6 +219,7 @@ class Randomizer(object):
         self.progressionItemLocs = []
         self.progressionItemTypes = settings.progressionItemTypes
         self.maxCancel = 1
+        self.totalCancels = 0
         self.pickedUpLocs = []
 
     def getRestrictedLocations(self, forbiddenItems, locations):
@@ -565,13 +566,13 @@ class Randomizer(object):
         self.itemPool.append(item)
         self.usedLocations.remove(loc)
         self.unusedLocations.append(loc)
+        self.totalCancels += 1
 #        print("Cancelled  " + item['Type'] + " at " + loc['Name'])
         sys.stdout.write('x')
         sys.stdout.flush()
         
     def checkLocPool(self):
-        nProgs = len([item for item in self.itemPool if self.isProgItem(item)])
-        if nProgs == 0:
+        if not any(self.isProgItem(item) for item in self.itemPool):
             return True
         # check that there is room left in all main areas
         room = {'Brinstar' : 0, 'Norfair' : 0, 'WreckedShip' : 0, 'LowerNorfair' : 0, 'Maridia' : 0}
@@ -647,11 +648,11 @@ class Randomizer(object):
         curLocs = self.currentLocations(self.currentItems)
         nLocsIn = len(curLocs)
         itemLocation = None
+        nCancel = 0
         if not isStuck:
             itemLocation = self.generateItem(curLocs, self.itemPool)
         if itemLocation is None:
             # we cannot place items anymore, cancel a bunch of our last decisions
-            nCancel = 0
             while len(itemLocations) > 0 and nCancel < self.maxCancel and len(self.itemPool) <= maxLen:
                 self.cancelItem(itemLocations)
                 nCancel += 1
@@ -659,13 +660,18 @@ class Randomizer(object):
             itemLocation = self.generateItem(curLocs, self.itemPool)
         else:
             sys.stdout.write('-')
-            sys.stdout.flush()            
+            sys.stdout.flush()
         isStuck = itemLocation is None
+        nFreed = 0
         if isStuck is False:
+            if nCancel > 0:
+                nFreed = nCancel - 1
             self.getItem(itemLocation, itemLocations)
+        else:
+            nFreed = nCancel
         curLocs = self.currentLocations(self.currentItems)
         nLocsOut = len(curLocs)
-        if nLocsOut <= nLocsIn:
+        if nLocsOut - nFreed <= nLocsIn:
 #            print("up")
             self.maxCancel += 1
         else:
@@ -683,7 +689,7 @@ class Randomizer(object):
         # items that are as useless as possible
         self.fillRestrictedLocations(itemLocations)
         maxLen = len(self.itemPool) # to prevent cancelling of these useless items/locations
-        while len(self.itemPool) > 0 and nLoops < 500 and not isStuck:
+        while len(self.itemPool) > 0 and self.totalCancels < 500 and not isStuck:
             # 1. fill up with non-progression stuff
             isStuck = self.fillNonProgressionItems(itemLocations)
             if len(self.itemPool) > 0:

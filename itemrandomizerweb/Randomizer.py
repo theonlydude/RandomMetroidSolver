@@ -1,7 +1,7 @@
 import sys, random
-import Items
+from itemrandomizerweb import Items
 from parameters import Knows, Settings
-from stdlib import Map, Array, List, Random
+from itemrandomizerweb.stdlib import Map, Array, List, Random
 from helpers import wand, Bosses, enoughStuffTourian#, canPassMetroids, canPassZebetites, enoughStuffsMotherbrain
 
 class RandoSettings(object):
@@ -410,8 +410,17 @@ class Randomizer(object):
     def isProgItem(self, item):
         if item['Type'] in self.progressionItemTypes:
             return True
+        if item['Type'] in self.nonProgTypesCache:
+            return False
+        if item['Type'] in self.progTypesCache:
+            return True
         if not item in self.currentItems:
-            return len(self.currentLocations(self.currentItems)) < len(self.currentLocations(self.currentItems + [item]))
+            isProg = len(self.currentLocations(self.currentItems)) < len(self.currentLocations(self.currentItems + [item]))
+            if isProg is False and item['Type'] not in self.nonProgTypesCache:
+                self.nonProgTypesCache.append(item['Type'])
+            elif isProg is True and item['Type'] not in self.progTypesCache:
+                self.progTypesCache.append(item['Type'])
+            return isProg
         return False
     
     def chooseLocation(self, availableLocations, item):
@@ -521,6 +530,8 @@ class Randomizer(object):
         self.unusedLocations.remove(location)
         if collect is True:
             self.currentItems.append(item)
+            self.nonProgTypesCache = []
+            self.progTypesCache = []
         itemLocations.append(itemLocation)
 #        print(str(len(self.currentItems)) + ':' + itemLocation['Item']['Type'] + ' at ' + itemLocation['Location']['Name'])
         self.itemPool = self.removeItem(item['Type'], self.itemPool)
@@ -625,8 +636,8 @@ class Randomizer(object):
         nItems = 0
         locPoolOk = True
 #            print("NON-PROG")
-        minLimit = self.itemLimit - self.itemLimit/5
-        maxLimit = self.itemLimit + self.itemLimit/5
+        minLimit = self.itemLimit - int(self.itemLimit/5)
+        maxLimit = self.itemLimit + int(self.itemLimit/5)
         itemLimit = random.randint(minLimit, maxLimit)
         while len(pool) > 0 and nItems < itemLimit and locPoolOk: 
             curLocs = self.currentLocations(self.currentItems)
@@ -683,6 +694,8 @@ class Randomizer(object):
     def generateItems(self):
         itemLocations = []
         self.currentItems = []
+        self.nonProgTypesCache = []
+        self.progTypesCache = []
         nLoops = 0
         isStuck = False
         # if major items are removed from the pool (super fun setting), fill not accessible locations with

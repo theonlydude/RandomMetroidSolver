@@ -2,7 +2,6 @@
 
 import argparse, random, os.path, json, sys, shutil
 
-from itemrandomizerweb.stdlib import Random
 from itemrandomizerweb import Items
 from itemrandomizerweb.Randomizer import Randomizer, RandoSettings
 from tournament_locations import locations

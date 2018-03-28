@@ -71,12 +71,13 @@ def readDoorsData(romFile, roomInfo):
                                  'roomPrt': hex(concatBytes(data[0], data[1])),
                                  'direction': hex(data[3]),
                                  'screenX': hex(data[6]),
-                                 'screenY': hex(data[7])})
+                                 'screenY': hex(data[7]),
+                                 'distanceToSpawn': hex(concatBytes(data[8], data[9]))})
 
     roomInfo['doorData'] = doorData
     #print("Doors Data:")
     for d in doorData:
-        print("doorPtr: {}, roomPrt: {}, direction: {}, screenX: {}, screenY: {}".format(d['doorPtr'], d['roomPrt'], d['direction'], d['screenX'], d['screenY']))
+        print("doorPtr: {}, roomPrt: {}, direction: {}, screenX: {}, screenY: {}, distanceToSpawn: {}".format(d['doorPtr'], d['roomPrt'], d['direction'], d['screenX'], d['screenY'], d['distanceToSpawn']))
 
 def readRooms(romFileName):
     #    RoomIndex         = b [0];

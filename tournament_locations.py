@@ -9,7 +9,7 @@ from helpers import canPassWorstRoom, enoughStuffsRidley, canAccessLowerNorfair
 from helpers import canAccessWs, enoughStuffsPhantoon, enoughStuffsDraygon
 from helpers import canAccessOuterMaridia, canDefeatDraygon, canPassMtEverest
 from helpers import canAccessInnerMaridia, canFlyDiagonally, canDefeatBotwoon
-from helpers import canCrystalFlash, canOpenGreenDoors, canHellRun
+from helpers import canCrystalFlash, canOpenGreenDoors, canOpenYellowDoors, canHellRun
 
 from rom import RomPatches
 
@@ -573,8 +573,8 @@ locations = [
     'Visibility': "Visible",
     'Room': 'The Moat',
     # it's before actual wrecked ship access
-    'Available': lambda items: wand(haveItem(items, 'Super'),
-                                    haveItem(items, 'PowerBomb'))
+    'Available': lambda items: wand(canOpenGreenDoors(items),
+                                    canOpenYellowDoors(items))
 },
 {
     'Area': "Crateria",

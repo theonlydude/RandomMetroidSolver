@@ -662,7 +662,7 @@ class Randomizer(object):
         nCancel = 0
         if not isStuck:
             itemLocation = self.generateItem(curLocs, self.itemPool)
-        if itemLocation is None:
+        if itemLocation is None and self.totalCancels < 500:
             # we cannot place items anymore, cancel a bunch of our last decisions
             while len(itemLocations) > 0 and nCancel < self.maxCancel and len(self.itemPool) <= maxLen:
                 self.cancelItem(itemLocations)
@@ -696,20 +696,18 @@ class Randomizer(object):
         self.currentItems = []
         self.nonProgTypesCache = []
         self.progTypesCache = []
-        nLoops = 0
         isStuck = False
         # if major items are removed from the pool (super fun setting), fill not accessible locations with
         # items that are as useless as possible
         self.fillRestrictedLocations(itemLocations)
         maxLen = len(self.itemPool) # to prevent cancelling of these useless items/locations
-        while len(self.itemPool) > 0 and self.totalCancels < 500 and not isStuck:
+        while len(self.itemPool) > 0 and not isStuck:
             # 1. fill up with non-progression stuff
             isStuck = self.fillNonProgressionItems(itemLocations)
             if len(self.itemPool) > 0:
                 # 2. collect an item with standard pool that will unlock the situation
 #                print("Full Pool " + str(len(self.itemPool)) + ", curLocs " + str([l['Name'] for l in self.currentLocations(self.currentItems)]))
                 isStuck = self.getItemFromStandardPool(itemLocations, isStuck, maxLen)
-            nLoops += 1
         if len(self.itemPool) > 0:
             # we could not place all items, check if we can finish the game
             itemTypes = [item['Type'] for item in self.currentItems]

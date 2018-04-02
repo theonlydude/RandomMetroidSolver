@@ -10,28 +10,25 @@ Noeuds du graphe: tous les points d'accès aux GraphArea. Le graph
 complet est donc tous les "sous-graphes" correspondant à chaque
 GraphArea, connectés avec les transitions (Vanilla ou Random).
 
-Locations: une location est considérée accessible si sa GraphArea est
-accessible, sauf si des fonctions supplémentaires sont fournies,
-donnant l'accessibilité en fonction du point d'accès (en plus de la
-fonction spécifique à la location elle-même).
+Locations: une location est considérée accessible depuis un point
+d'accès de sa GraphArea si elle fournit la fonction d'accès pour ce
+point. Le résultat sera wand avec celui de la fonction spécifique à la
+location elle-même (Available).
 
 Donc vérifier si une location est accessible revient à vérifier si un
 point d'accès de sa GraphArea permettant d'obtenir la location est
-accessible.
+accessible, puis de faire wand avec la fonction Available de la
+location. 
 
 Chaque noeud du graph a aussi une fonction retournant un smbool
-permettant de le traverser. Le poids d'une transition A->B est donc le
-poids de traversée de A+le poids de la transition elle-même.
-
-Les transitions inter-GraphArea ont été choisies pour ne rien avoir de
-particulier, donc leur poids est uniquement le poids de traversée du
-point de sortie de la GraphArea précédente.
+permettant de le traverser en cas de transition inter-areas. Le poids
+d'une transition A->B est donc le poids de traversée de A+le poids de
+la transition elle-même (wand).
 
 Tous les sous-graphes intra-GraphArea peuvent être construits dès
 maintenant.
 
-Ajout du root node 'samus gunship', à connecter aux différents points
-d'accès de la GraphArea Crateria.
+Root node: 'Landing Site'
 
 Généralités Algo (rando/solver)
 *******************************
@@ -74,9 +71,10 @@ Obtention des availables :
 de la location. On doit maintenant centraliser ce code afin d'y avoir
 accès depuis le solver et le rando)
 
-Pour chaque location: on parcourt tous les points d'accès de sa
-GraphArea et si elle est accessible depuis le root node on vérifie si
-la location est accessible depuis le point d'accès.
+Pour chaque location: on parcourt tous les points d'accès qu'elle
+fournit. Si le point d'accès est dans le graphe (donc accessible
+depuis le root node), on wand le résultat de l'accès au point et de la
+fonction Available.
 
 On se retrouve ainsi avec un smbool d'accès pour chaque location et
 l'algo rando/solver peut fonctionner comme avant.

@@ -125,8 +125,9 @@ def heatProof(items):
 
 def canHellRun(items, hellRun):
     ret = None
-    if heatProof(items).bool:
-        ret = SMBool(True, easy)
+    isHeatProof = heatProof(items)
+    if isHeatProof.bool == True:
+        ret = SMBool(True, easy, items=isHeatProof.items)
     elif energyReserveCount(items) >= 2:
         ret = energyReserveCountOkHellRun(items, hellRun)
     else:
@@ -137,7 +138,7 @@ def canHellRun(items, hellRun):
 
 def canFly(items):
     if haveItem(items, 'SpaceJump').bool:
-        return SMBool(True, easy)
+        return SMBool(True, easy, items=['SpaceJump'])
     elif haveItem(items, 'Morph').bool and haveItem(items, 'Bomb').bool and Knows.InfiniteBombJump.bool:
         return Knows.InfiniteBombJump
     else:
@@ -145,7 +146,7 @@ def canFly(items):
 
 def canFlyDiagonally(items):
     if haveItem(items, 'SpaceJump').bool:
-        return SMBool(True, easy)
+        return SMBool(True, easy, items=['SpaceJump'])
     elif haveItem(items, 'Morph').bool and haveItem(items, 'Bomb').bool and Knows.DiagonalBombJump.bool:
         return Knows.DiagonalBombJump
     else:

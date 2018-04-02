@@ -25,7 +25,14 @@ class RomPatches:
     HiJumpShotBlock           = 30
     # access main upper norfair without anything
     CathedralEntranceWallJump = 31
+    # moat bottom block
+    MoatShotBlock             = 41
+    # remove crumble block for reverse lower norfair door access
+    SingleChamberNoCrumble    = 101,
+    # remove green gates for reverse maridia access
+    NoMaridiaGreenGates       = 102
 
+    
     ### Other
     # lava gives less damage than in vanilla
     ReducedLavaDamage       = 1000
@@ -34,7 +41,7 @@ class RomPatches:
     
     #### Patch sets
     # total randomizer: tournament and full
-    Total = [ BlueBrinstarBlueDoor,
+    Total = [ BlueBrinstarBlueDoor, MoatShotBlock,
               SpazerShotBlock, RedTowerLeftPassage, RedTowerBlueDoors,
               HiJumpShotBlock, CathedralEntranceWallJump,
               ReducedLavaDamage, NoGravityEnvProtection ]

@@ -1,206 +1,200 @@
 #!/usr/bin/python
 
 from networkx import MultiDiGraph
-from networkx.algorithms.simple_paths import all_simple_paths
 
-#from networkx import draw_networkx
-#import matplotlib.pyplot as plt
+from networkx import draw_networkx
+import matplotlib.pyplot as plt
 
-g = MultiDiGraph()
+from graph_helpers import wand, wor, haveItem, canPassMoat, canPassMoatReverse, canOpenGreenDoors, canPassTerminatorBombWall, canOpenYellowDoors, canDestroyBombWalls, canOpenRedDoors, canPassSpongeBath, canPassForgottenHighway, canHellRun, canPassLavaPit, canPassWorstRoom, canPassAmphitheaterReverse, canGoUpMtEverest, canClimbRedTower, canClimbBottomRedTower, canUsePowerBombs
+from rom import RomPatches
+from smbool import SMBool
 
-# Crateria and Blue Brinstar
-g.add_node('Crateria Landing Site')
-g.add_node('Crateria Lower Mushrooms')
-g.add_node('Crateria Moat')
-g.add_node('Crateria Keyhunter Room')
-g.add_node('Blue Brinstar Morph Ball Room')
+class Node(object):
+    # name : Node name
+    # graphArea : graph area the node is located in
+    # transitions : intra-area transitions
+    # traverse: traverse function, will be wand to the added transitions
+    # TODO add SNES door attributes (or some kind of Tag property to carry it)
+    def __init__(self, name, graphArea, transitions, traverse=lambda items: SMBool(True, 0)):
+        self.Name = name
+        self.GraphArea = graphArea
+        self.transitions = transitions
+        self.traverse = traverse
 
-g.add_edge('Crateria Landing Site', 'Crateria Lower Mushrooms' )
-g.add_edge('Crateria Landing Site', 'Crateria Moat')
-g.add_edge('Crateria Landing Site', 'Crateria Keyhunter Room')
-g.add_edge('Crateria Landing Site', 'Blue Brinstar Morph Ball Room')
-g.add_edge('Crateria Lower Mushrooms', 'Crateria Moat')
-g.add_edge('Crateria Lower Mushrooms', 'Crateria Keyhunter Room')
-g.add_edge('Crateria Lower Mushrooms', 'Blue Brinstar Morph Ball Room')
-g.add_edge('Crateria Moat', 'Crateria Lower Mushrooms')
-g.add_edge('Crateria Moat', 'Crateria Keyhunter Room')
-g.add_edge('Crateria Moat', 'Blue Brinstar Morph Ball Room')
-g.add_edge('Crateria Keyhunter Room', 'Crateria Lower Mushrooms')
-g.add_edge('Crateria Keyhunter Room', 'Crateria Moat')
-g.add_edge('Crateria Keyhunter Room', 'Blue Brinstar Morph Ball Room')
-g.add_edge('Blue Brinstar Morph Ball Room', 'Crateria Lower Mushrooms')
-g.add_edge('Blue Brinstar Morph Ball Room', 'Crateria Moat')
-g.add_edge('Blue Brinstar Morph Ball Room', 'Crateria Keyhunter Room')
+    def __str__(self):
+        return "[" + self.GraphArea + "] " + self.name
 
-# Green and Pink Brinstar
-g.add_node('Green Pink Brinstar Elevator')
-g.add_node('Green Pink Brinstar Green Hill Zone')
-g.add_node('Green Pink Brinstar Noob Bridge')
-
-g.add_edge('Green Pink Brinstar Elevator', 'Green Pink Brinstar Green Hill Zone')
-g.add_edge('Green Pink Brinstar Elevator', 'Green Pink Brinstar Noob Bridge')
-g.add_edge('Green Pink Brinstar Green Hill Zone', 'Green Pink Brinstar Elevator')
-g.add_edge('Green Pink Brinstar Green Hill Zone', 'Green Pink Brinstar Noob Bridge')
-g.add_edge('Green Pink Brinstar Noob Bridge', 'Green Pink Brinstar Elevator')
-g.add_edge('Green Pink Brinstar Noob Bridge', 'Green Pink Brinstar Green Hill Zone')
-
-# Wrecked Ship
-g.add_node('Wrecked Ship West Ocean')
-g.add_node('Wrecked Ship Crab Maze')
-
-g.add_edge('Wrecked Ship West Ocean', 'Wrecked Ship Crab Maze')
-g.add_edge('Wrecked Ship Crab Maze', 'Wrecked Ship West Ocean')
-
-# Lower Norfair
-g.add_node('Lower Norfair Lava Dive')
-g.add_node('Lower Norfair Three Muskateers Room')
-
-g.add_edge('Lower Norfair Lava Dive', 'Lower Norfair Three Muskateers Room')
-g.add_edge('Lower Norfair Three Muskateers Room', 'Lower Norfair Lava Dive')
-
-# Norfair
-g.add_node('Norfair Warehouse Entrance')
-g.add_node('Norfair Single Chamber')
-g.add_node('Norfair Kronic Boost Room')
-
-g.add_edge('Norfair Warehouse Entrance', 'Norfair Single Chamber')
-g.add_edge('Norfair Warehouse Entrance', 'Norfair Kronic Boost Room')
-g.add_edge('Norfair Single Chamber', 'Norfair Warehouse Entrance')
-g.add_edge('Norfair Single Chamber', 'Norfair Kronic Boost Room')
-g.add_edge('Norfair Kronic Boost Room', 'Norfair Warehouse Entrance')
-g.add_edge('Norfair Kronic Boost Room', 'Norfair Single Chamber')
-
-# Maridia
-g.add_node('Maridia Main Street')
-g.add_node('Maridia Red Fish Room')
-g.add_node('Maridia Crab Hole')
-g.add_node('Maridia Coude')
-
-g.add_edge('Maridia Main Street', 'Maridia Red Fish Room')
-g.add_edge('Maridia Main Street', 'Maridia Crab Hole')
-g.add_edge('Maridia Main Street', 'Maridia Coude')
-g.add_edge('Maridia Red Fish Room', 'Maridia Main Street')
-g.add_edge('Maridia Red Fish Room', 'Maridia Crab Hole')
-g.add_edge('Maridia Red Fish Room', 'Maridia Coude')
-g.add_edge('Maridia Crab Hole', 'Maridia Main Street')
-g.add_edge('Maridia Crab Hole', 'Maridia Red Fish Room')
-g.add_edge('Maridia Crab Hole', 'Maridia Coude')
-g.add_edge('Maridia Coude', 'Maridia Main Street')
-g.add_edge('Maridia Coude', 'Maridia Red Fish Room')
-g.add_edge('Maridia Coude', 'Maridia Crab Hole')
-
-# Red Brinstar
-g.add_node('Red Brinstar Red Tower')
-g.add_node('Red Brinstar Caterpillar Room')
-g.add_node('Red Brinstar East Tunnel Down')
-g.add_node('Red Brinstar East Tunnel Up')
-g.add_node('Red Brinstar Glass Tunnel')
-g.add_node('Red Brinstar Elevator to Red Brinstar')
-
-g.add_edge('Red Brinstar Red Tower', 'Red Brinstar Caterpillar Room')
-g.add_edge('Red Brinstar Red Tower', 'Red Brinstar East Tunnel Down')
-g.add_edge('Red Brinstar Red Tower', 'Red Brinstar East Tunnel Up')
-g.add_edge('Red Brinstar Red Tower', 'Red Brinstar Glass Tunnel')
-g.add_edge('Red Brinstar Red Tower', 'Red Brinstar Elevator to Red Brinstar')
-g.add_edge('Red Brinstar Caterpillar Room', 'Red Brinstar Red Tower')
-g.add_edge('Red Brinstar Caterpillar Room', 'Red Brinstar East Tunnel Down')
-g.add_edge('Red Brinstar Caterpillar Room', 'Red Brinstar East Tunnel Up')
-g.add_edge('Red Brinstar Caterpillar Room', 'Red Brinstar Glass Tunnel')
-g.add_edge('Red Brinstar Caterpillar Room', 'Red Brinstar Elevator to Red Brinstar')
-g.add_edge('Red Brinstar East Tunnel Down', 'Red Brinstar Red Tower')
-g.add_edge('Red Brinstar East Tunnel Down', 'Red Brinstar Caterpillar Room')
-g.add_edge('Red Brinstar East Tunnel Down', 'Red Brinstar East Tunnel Up')
-g.add_edge('Red Brinstar East Tunnel Down', 'Red Brinstar Glass Tunnel')
-g.add_edge('Red Brinstar East Tunnel Down', 'Red Brinstar Elevator to Red Brinstar')
-g.add_edge('Red Brinstar East Tunnel Up', 'Red Brinstar Red Tower')
-g.add_edge('Red Brinstar East Tunnel Up', 'Red Brinstar Caterpillar Room')
-g.add_edge('Red Brinstar East Tunnel Up', 'Red Brinstar East Tunnel Down')
-g.add_edge('Red Brinstar East Tunnel Up', 'Red Brinstar Glass Tunnel')
-g.add_edge('Red Brinstar East Tunnel Up', 'Red Brinstar Elevator to Red Brinstar')
-g.add_edge('Red Brinstar Glass Tunnel', 'Red Brinstar Red Tower')
-g.add_edge('Red Brinstar Glass Tunnel', 'Red Brinstar Caterpillar Room')
-g.add_edge('Red Brinstar Glass Tunnel', 'Red Brinstar East Tunnel Down')
-g.add_edge('Red Brinstar Glass Tunnel', 'Red Brinstar East Tunnel Up')
-g.add_edge('Red Brinstar Glass Tunnel', 'Red Brinstar Elevator to Red Brinstar')
-g.add_edge('Red Brinstar Elevator to Red Brinstar', 'Red Brinstar Red Tower')
-g.add_edge('Red Brinstar Elevator to Red Brinstar', 'Red Brinstar Caterpillar Room')
-g.add_edge('Red Brinstar Elevator to Red Brinstar', 'Red Brinstar East Tunnel Down')
-g.add_edge('Red Brinstar Elevator to Red Brinstar', 'Red Brinstar East Tunnel Up')
-g.add_edge('Red Brinstar Elevator to Red Brinstar', 'Red Brinstar Glass Tunnel')
-
-# add vanilla transitions
-g.add_edge('Crateria Lower Mushrooms', 'Green Pink Brinstar Elevator')
-g.add_edge('Green Pink Brinstar Elevator', 'Crateria Lower Mushrooms')
-g.add_edge('Blue Brinstar Morph Ball Room', 'Green Pink Brinstar Green Hill Zone')
-g.add_edge('Green Pink Brinstar Green Hill Zone', 'Blue Brinstar Morph Ball Room')
-g.add_edge('Crateria Moat', 'Wrecked Ship West Ocean')
-g.add_edge('Wrecked Ship West Ocean', 'Crateria Moat')
-g.add_edge('Crateria Keyhunter Room', 'Red Brinstar Elevator to Red Brinstar')
-g.add_edge('Red Brinstar Elevator to Red Brinstar', 'Crateria Keyhunter Room')
-g.add_edge('Green Pink Brinstar Noob Bridge', 'Red Brinstar Red Tower')
-g.add_edge('Red Brinstar Red Tower', 'Green Pink Brinstar Noob Bridge')
-g.add_edge('Wrecked Ship Crab Maze', 'Maridia Coude')
-g.add_edge('Maridia Coude', 'Wrecked Ship Crab Maze')
-g.add_edge('Norfair Kronic Boost Room', 'Lower Norfair Lava Dive')
-g.add_edge('Lower Norfair Lava Dive', 'Norfair Kronic Boost Room')
-g.add_edge('Lower Norfair Three Muskateers Room', 'Norfair Single Chamber')
-g.add_edge('Norfair Single Chamber', 'Lower Norfair Three Muskateers Room')
-g.add_edge('Norfair Warehouse Entrance', 'Red Brinstar East Tunnel Down')
-g.add_edge('Red Brinstar East Tunnel Down', 'Norfair Warehouse Entrance')
-g.add_edge('Red Brinstar East Tunnel Up', 'Maridia Crab Hole')
-g.add_edge('Maridia Crab Hole', 'Red Brinstar East Tunnel Up')
-g.add_edge('Red Brinstar Caterpillar Room', 'Maridia Red Fish Room')
-g.add_edge('Maridia Red Fish Room', 'Red Brinstar Caterpillar Room')
-g.add_edge('Red Brinstar Glass Tunnel', 'Maridia Main Street')
-g.add_edge('Maridia Main Street', 'Red Brinstar Glass Tunnel')
-
-#draw_networkx(g)
-#plt.show()
-
-#for node in ['Crateria Lower Mushrooms', 'Crateria Moat', 'Crateria Keyhunter Room', 'Blue Brinstar Morph Ball Room', 'Green Pink Brinstar Elevator', 'Green Pink Brinstar Green Hill Zone', 'Green Pink Brinstar Noob Bridge', 'Wrecked Ship West Ocean', 'Wrecked Ship Crab Maze', 'Lower Norfair Lava Dive', 'Lower Norfair Three Muskateers Room', 'Norfair Warehouse Entrance', 'Norfair Single Chamber', 'Norfair Kronic Boost Room', 'Maridia Main Street', 'Maridia Red Fish Room', 'Maridia Crab Hole', 'Maridia Coude', 'Red Brinstar Red Tower', 'Red Brinstar Caterpillar Room', 'Red Brinstar East Tunnel Down', 'Red Brinstar East Tunnel Up', 'Red Brinstar Glass Tunnel', 'Red Brinstar Elevator to Red Brinstar']:
-#    p = all_simple_paths(g, 'Crateria Landing Site', node)
-#    print("Paths to {}: {}".format(node, len(list(p))))
-    #for path in list(p):
-    #    print("  {}".format(path))
+    # for additions after construction (inter-area transitions)
+    def addTransition(self, destName):
+        self.transitions[destName] = lambda items: self.traverse(items)
+    
+    def getTransition(self, destName, items):
+        if not destName in self.transitions:
+            return (False, 0)
+        return self.transitions[destName](items)
 
 
-s = MultiDiGraph()
+# all access points and traverse functions
+nodes = [
+    # Crateria and Blue Brinstar
+    Node('Landing Site', 'Crateria', {
+        'Lower Mushrooms Left': lambda items: canPassTerminatorBombWall(items),
+        'Keyhunter Room Bottom': lambda items: canOpenGreenDoors(items),
+        'Morph Ball Room Left': lambda items: canUsePowerBombs(items)
+    }),
+    Node('Lower Mushrooms Left', 'Crateria', {
+        'Landing Site': lambda items: canPassTerminatorBombWall(items)
+    }),
+    Node('Moat Right', 'Crateria', {
+        'Keyhunter Room Bottom': lambda items: canPassMoatReverse(items)
+    }),
+    Node('Keyhunter Room Bottom', 'Crateria', {
+        'Moat Right': lambda items: canPassMoat(items),
+        'Landing Site': lambda items: SMBool(True, 0)
+    }, lambda items: canOpenYellowDoors(items)),
+    Node('Morph Ball Room Left', 'Crateria', {
+         'Landing Site': lambda items: canUsePowerBombs(items)
+    }),
+    # Green and Pink Brinstar
+    Node('Green Brinstar Elevator Right', 'GreenPinkBrinstar', {
+        'Green Hill Zone Top Right': lambda items: wand(canDestroyBombWalls(items), # pink
+                                                        haveItem(items, 'Morph'), # big pink
+                                                        canOpenGreenDoors(items)) # also implies first red door
+    }),
+    Node('Green Hill Zone Top Right', 'GreenPinkBrinstar', {
+        'Noob Bridge Right': lambda items: SMBool(True, 0),
+        'Green Brinstar Elevator Right': lambda items: wand(canDestroyBombWalls(items), # pink
+                                                            haveItem(items, 'Morph')) # big pink
+    }, lambda items: canOpenYellowDoors(items)),
+    Node('Noob Bridge Right', 'GreenPinkBrinstar', {
+        'Green Hill Zone Top Right': lambda items: wor(haveItem(items, 'Wave'),
+                                                       wand(canOpenRedDoors(items), # can do the glitch with either missile or supers
+                                                            Knows.GreenGateGlitch))
+    }),
+    # Wrecked Ship
+    Node('West Ocean Left', 'WreckedShip', {
+        'Crab Maze Left': lambda items: wand(canOpenGreenDoors(items),
+                                             canPassSpongeBath(items), # implies dead phantoon
+                                             canPassForgottenHighway(items))
+    }),
+    Node('Crab Maze Left', 'WreckedShip', {
+        'West Ocean Left': lambda items: canPassForgottenHighway(items)
+    }),
+    # Lower Norfair
+    Node('Lava Dive Right', 'LowerNorfair', {
+        'Three Muskateers Room Left': lambda items: wand(canHellRun(items, 'LowerNorfair'),
+                                                         canPassLavaPit(items),
+                                                         canPassWorstRoom(items))
+    }),
+    Node('Three Muskateers Room Left', 'LowerNorfair', {
+        'Lava Dive Right': lambda items: wand(canHellRun(items, 'LowerNorfair'),
+                                              canPassAmphitheaterReverse(items)) # if this is OK, reverse lava pit will be too...
+    }),
+    # Norfair   
+    Node('Warehouse Entrance Left', 'Norfair', {
+        'Single Chamber Top Right': lambda items: wand(canHellRun(items, 'MainUpperNorfair'),
+                                                       RomPatches.has(RomPatches.SingleChamberNoCrumble),
+                                                       wor(canOpenRedDoors(items), # cathedral
+                                                           wand(haveItem(items, 'SpeedBooster'), # frog speedway
+                                                                canUsePowerBombs(items)))), 
+        'Kronic Boost Room Bottom Right': lambda items: canHellRun(items, 'MainUpperNorfair')
+    }),
+    Node('Single Chamber Top Right', 'Norfair', {
+        'Warehouse Entrance Left': lambda items: canHellRun(items, 'MainUpperNorfair'),
+        'Kronic Boost Room Bottom Right': lambda items: canHellRun(items, 'MainUpperNorfair')
+    }),
+    Node('Kronic Boost Room Bottom Right', 'Norfair', {
+        'Single Chamber Top Right': lambda items: wand(canHellRun(items, 'MainUpperNorfair'),
+                                                       RomPatches.has(RomPatches.SingleChamberNoCrumble)),
+        'Warehouse Entrance Left': lambda items: canHellRun(items, 'MainUpperNorfair')
+    }, lambda items: canOpenYellowDoors(items)),
+    # Maridia
+    Node('Main Street Bottom', 'Maridia', {
+        'Red Fish Room Left': lambda items: canGoUpMtEverest(items),
+        'Crab Hole Bottom Left': lambda items: canOpenGreenDoors(items), # red door+green gate
+    }),
+    Node('Crab Hole Bottom Left', 'Maridia', {
+        'Main Street Bottom': lambda items: wand(wor(haveItem(items, 'Gravity'), # TODO check what's really possible here...
+                                                     haveItem(items, 'HiJump')),
+                                                 wand(haveItem(items, 'Super'), Knows.GreenGateGlitch)),
+        'Le Coude Right': lambda items: wand(wor(haveItem(items, 'Gravity'),
+                                                 haveItem(items, 'HiJump')), # the sand pit to go through is possible with no gravity or particular knowledge. FIXME is HiJump necessary?
+                                             canOpenGreenDoors(items)) # toilet door
+    }),
+    Node('Le Coude Right', 'Maridia', {
+        'Crab Hole Bottom Left': lambda items: wand(canOpenYellowDoors(items),
+                                                    wand(wor(haveItem(items, 'Gravity'),
+                                                             haveItem(items, 'HiJump')), # the sand pit to go through is possible with no gravity or particular knowledge. FIXME is HiJump necessary?
+                                                         canOpenGreenDoors(items))), # toilet door
+        'Main Street Bottom': lambda items: wand(canOpenYellowDoors(items),
+                                                 wand(wor(haveItem(items, 'Gravity'),
+                                                          haveItem(items, 'HiJump')), # the sand pit to go through is possible with no gravity or particular knowledge. FIXME is HiJump necessary?
+                                                      canOpenGreenDoors(items), # toilet door
+                                                      Knows.GreenGateGlitch)),
+    }),
+    Node('Red Fish Room Left', 'Maridia', {
+        'Main Street Bottom': lambda items: SMBool(True, 0) # just go down
+    }),
+    # Red Brinstar. Main nodes: Red Tower Top Left, East Tunnel Right
+    Node('Red Tower Top Left', 'RedBrinstar', {
+        # go up
+        'Red Brinstar Elevator': lambda items: wand(canClimbRedTower(items),
+                                                    wor(canOpenYellowDoors(items),
+                                                        RomPatches.has(RomPatches.RedTowerBlueDoors)))
+        'Caterpillar Room Top Right': lambda items: wand(haveItem(items, 'Morph'),
+                                                         RomPatches.has(RomPatches.NoMaridiaGreenGates),
+                                                         canClimbRedTower(items)),
+        # go down
+        'East Tunnel Right': lambda items: SMBool(True, 0)
+    }),
+    Node('Caterpillar Room Top Right', 'RedBrinstar', {
+        'Red Brinstar Elevator': lambda items: wand(wor(RomPatches.has(RomPatches.NoMaridiaGreenGates), canOpenGreenDoors(items)),
+                                                    wor(canUsePowerBombs(items),
+                                                        RomPatches.has(RomPatches.RedTowerBlueDoors))),
+        'Red Tower Top Left': lambda items: wand(wor(RomPatches.has(RomPatches.NoMaridiaGreenGates), canOpenGreenDoors(items)),
+                                                 canOpenYellowDoors(items))
+    }, lambda items: haveItem(items, 'Morph')),
+    Node('Red Brinstar Elevator', 'RedBrinstar', {
+        'Caterpillar Room Top Right': lambda items: RomPatches.has(RomPatches.NoMaridiaGreenGates),
+        'Red Tower Top Left': lambda items: canOpenYellowDoors(items)
+    }),
+    Node('East Tunnel Right', 'RedBrinstar', {
+        'East Tunnel Top Right': lambda items: RomPatches.has(RomPatches.NoMaridiaGreenGates),
+        'Glass Tunnel Top': lambda items: wand(canUsePowerBombs(items),
+                                               wor(haveItem(items, 'Gravity'),
+                                                   haveItem(items, 'HiJump'))),
+        'Red Tower Top Left': lambda items: canClimbBottomRedTower(items)
+    }),
+    Node('East Tunnel Top Right', 'RedBrinstar', {
+        'East Tunnel Right': lambda items: wor(RomPatches.has(RomPatches.NoMaridiaGreenGates),
+                                               canOpenGreenDoors(items))
+    }),
+    Node('Glass Tunnel Top', 'RedBrinstar', {
+        'East Tunnel Right': lambda items: SMBool(True, 0)
+    }, lambda items: canUsePowerBombs(items)) # break tube
+]
 
-s.add_node('Crateria')
-s.add_node('Green Pink Brinstar')
-s.add_node('Red Brinstar')
-s.add_node('Wrecked Ship')
-s.add_node('Maridia')
-s.add_node('Tourian')
-s.add_node('Norfair')
-s.add_node('Lower Norfair')
-s.add_node('Blue Brinstar')
+nodeDict = {}
 
-s.add_edge('Crateria', 'Tourian')
-s.add_edge('Crateria', 'Green Brinstar')
-s.add_edge('Crateria', 'Wrecked Ship')
-s.add_edge('Crateria', 'Red Brinstar')
-s.add_edge('Crateria', 'Blue Brinstar')
-s.add_edge('Green Pink Brinstar', 'Red Brinstar')
-s.add_edge('Green Pink Brinstar', 'Blue Brinstar')
-s.add_edge('Green Pink Brinstar', 'Crateria')
-s.add_edge('Blue Brinstar', 'Crateria')
-s.add_edge('Blue Brinstar', 'Green Pink Brinstar')
-s.add_edge('Wrecked Ship', 'Crateria')
-s.add_edge('Wrecked Ship', 'Maridia')
-s.add_edge('Maridia', 'Wrecked Ship')
-s.add_edge('Maridia', 'Red Brinstar')
-s.add_edge('Red Brinstar', 'Green Pink Brinstar')
-s.add_edge('Red Brinstar', 'Crateria')
-s.add_edge('Red Brinstar', 'Maridia')
-s.add_edge('Red Brinstar', 'Norfair')
-s.add_edge('Norfair', 'Red Brinstar')
-s.add_edge('Norfair', 'Lower Norfair')
-s.add_edge('Lower Norfair', 'Norfair')
+for node in nodes:
+    nodeDict[node.Name] = node
 
+def addTransition(srcName, dstName, both=True):
+    src = nodeDict[srcName]
+    src.addTransition(dstName)
+    if both is True:
+        addTransition(dstName, srcName, False)        
 
-for node in ['Blue Brinstar', 'Green Pink Brinstar', 'Tourian', 'Wrecked Ship', 'Maridia', 'Red Brinstar', 'Norfair', 'Lower Norfair']:
-    p = all_simple_paths(s, 'Crateria', node)
-    print("Paths to {}:".format(node))
-    for path in list(p):
-        print("  {}".format(path))
+def addVanillaTransitions():
+    addTransition('Lower Mushrooms Left', 'Green Brinstar Elevator Right')
+    addTransition('Morph Ball Room Left', 'Green Hill Zone Top Right')
+    addTransition('Moat Right', 'West Ocean Left')
+    addTransition('Keyhunter Room Bottom', 'Red Brinstar Elevator')
+    addTransition('Noob Bridge Right', 'Red Tower Top Left')
+    addTransition('Crab Maze Left', 'Le Coude Right')
+    addTransition('Kronic Boost Room Bottom Right', 'Lava Dive Right')
+    addTransition('Three Muskateers Room Left', 'Single Chamber Top Right')
+    addTransition('Warehouse Entrance Left', 'East Tunnel Right')
+    addTransition('East Tunnel Top Right', 'Crab Hole Bottom Left')
+    addTransition('Caterpillar Room Top Right', 'Red Fish Room Left')
+    addTransition('Glass Tunnel Top', 'Main Street Bottom')

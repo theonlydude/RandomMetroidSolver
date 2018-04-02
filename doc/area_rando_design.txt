@@ -1,0 +1,82 @@
+
+Design Graphe
+*************
+
+Notion de "GraphArea": correspond à l'area de l'item ou point d'accès
+au sens graphe. Par ex Blue Brinstar est dans Crateria, Kraid dans
+Norfair etc.
+
+Noeuds du graphe: tous les points d'accès aux GraphArea. Le graph
+complet est donc tous les "sous-graphes" correspondant à chaque
+GraphArea, connectés avec les transitions (Vanilla ou Random).
+
+Locations: une location est considérée accessible si sa GraphArea est
+accessible, sauf si des fonctions supplémentaires sont fournies,
+donnant l'accessibilité en fonction du point d'accès (en plus de la
+fonction spécifique à la location elle-même).
+
+Donc vérifier si une location est accessible revient à vérifier si un
+point d'accès de sa GraphArea permettant d'obtenir la location est
+accessible.
+
+Chaque noeud du graph a aussi une fonction retournant un smbool
+permettant de le traverser. Le poids d'une transition A->B est donc le
+poids de traversée de A+le poids de la transition elle-même.
+
+Les transitions inter-GraphArea ont été choisies pour ne rien avoir de
+particulier, donc leur poids est uniquement le poids de traversée du
+point de sortie de la GraphArea précédente.
+
+Tous les sous-graphes intra-GraphArea peuvent être construits dès
+maintenant.
+
+Ajout du root node 'samus gunship', à connecter aux différents points
+d'accès de la GraphArea Crateria.
+
+Généralités Algo (rando/solver)
+*******************************
+
+On se donne en entrée :
+
+- les sous-graphes intra-GraphArea, avec les nodes et les fonctions
+ donnant les transitions vers les autres nodes de leur GraphArea
+- la liste des transitions inter-GraphArea: ce n'est *pas* le graphe
+mais cela permettra de le constuire
+
+On crée le graphe en fonction des items acquis. Partant du root node,
+et du sous-graphe correspondant à la GraphArea Crateria on parcourt
+les transitions afin de rajouter les noeuds et arêtes itérativement.
+
+Noeuds: décrit plus haut
+Arêtes: portent le poids de la transition calculé tq décrit ci-dessus
+
+Le graphe sera recalculé à chaque item acquis, et de plus en plus
+complexe. Le fait qu'il soit composé uniquement des endroits
+accessibles permettra d'accélérer grandement le calcul des available
+locations (surtout au début). Dans le cas du solver on ajoute toutes
+les transitions dès que le smbool est True. Dans le cas du rando avec
+max diff on contrôle la difficulté de la transition avant de
+l'ajouter. 
+
+On obtient ainsi un graphe potentiellement cyclique, ce qui ne
+facilite pas le calcul de chemin du root node vers un autre node
+quelconque.
+
+=> on passe un coup d'algo Edmonds dessus afin d'en obtenir un
+spanning tree à partir du root node. Ce spanning tree nous donne le
+chemin optimal depuis le root node vers chaque autre node (il en
+existera toujours un et un seul).
+
+Obtention des availables :
+**************************
+
+(actuellement tout est porté par la fonction Available (et PostAvail)
+de la location. On doit maintenant centraliser ce code afin d'y avoir
+accès depuis le solver et le rando)
+
+Pour chaque location: on parcourt tous les points d'accès de sa
+GraphArea et si elle est accessible depuis le root node on vérifie si
+la location est accessible depuis le point d'accès.
+
+On se retrouve ainsi avec un smbool d'accès pour chaque location et
+l'algo rando/solver peut fonctionner comme avant.

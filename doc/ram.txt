@@ -1,0 +1,24 @@
+92FD -> 95FF
+
+7CF80 => East Tunnel
+7A322 => Caterpillar
+7AD5E => Single Chamber
+
+7E:0AF6 - 7E:0AF7    Samus's X position in pixels
+7E:0AF8 - 7E:0AF9    Samus's sub-pixel X position
+7E:0AFA - 7E:0AFB    Samus's Y position in pixels
+7E:0AFC - 7E:0AFD    Samus's sub-pixel Y position
+7E:0B2C - 7E:0B2D    Samus's vertical speed (1/65536ths pixel/frame). Unsigned
+7E:0B2E - 7E:0B2F    Samus's vertical speed (pixels/frame). Unsigned
+7E:0B42 - 7E:0B43    Samus's horizontal speed forward. (pixels/frame)
+7E:0B44 - 7E:0B45    Samus's horizontal speed forward (1/65536ths pixel/frame)
+7E:0B46 - 7E:0B47    Samus's horizontal 'momentum' forward (pixels/frame)
+7E:0B48 - 7E:0B49    Samus's horizontal 'momentum' forward (1/65536ths pixel/frame)
+7E:0B56 - 7E:0B57    Moves Samus this distance horizontally, in subpixels.
+7E:0B58 - 7E:0B59    Moves Samus this distance horizontally, in pixels.
+7E:0B5A - 7E:0B5B    Moves Samus this distance vertically, in subpixels.
+7E:0B5C - 7E:0B5D    Moves Samus this distance vertically, in pixels.
+7E:0A1E              X-Direction Samus is moving? 8 = right, 4 = left
+7E:0B04 - 7E:0B05    Samus's X position on screen (0AF6 - 0911)
+7E:0B06 - 7E:0B07    Samus's Y position on screen (0AFA - 0915)
+

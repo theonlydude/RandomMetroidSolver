@@ -261,10 +261,21 @@ def canPassSpongeBath(items):
                              Knows.SpringBallJump))))
 
 # the water zone east of WS
-def canPassForgottenHighway(items):
-    return wor(haveItem(items, 'Gravity'),
-               haveItem(items, 'HiJump')) # TODO add a knows? investigate on this...
+def canPassForgottenHighway(items, fromWs):
+    if fromWs is True:
+        suitlessCondition = wand(haveItem(items, 'HiJump'),
+                                 wor(haveItem(items, 'Ice'), 
+                                     wand(haveItem(items, 'SpringBall'), Knows.SpringBallJump))) # TODO check if spring ball jump is actually possible (should be)
+    else:
+        # TOFO check this
+        suitlessCondition = wor(haveItem(items, 'HiJump'),
+                                haveItem(items, 'Ice'),
+                                wand(haveItem(items, 'SpringBall'), Knows.SpringBallJump))
+
     
+    return wor(haveItem(items, 'Gravity'),
+               suitlessCondition)
+
 def canAccessHeatedNorfairFromEntrance(items):
     # EXPLAINED: from Red Tower, to go to Bubble Mountain we have to pass through
     #            heated rooms, which requires a hell run if we don't have gravity.
@@ -272,9 +283,10 @@ def canAccessHeatedNorfairFromEntrance(items):
     #            as they are all hellruns from Bubble Mountain.
     return wand(wor(haveItem(items, 'SpeedBooster'), # frog speedway
                     # go through cathedral
-                    RomPatches.has(RomPatches.CathedralEntranceWallJump),
-                    haveItem(items, 'HiJump'),
-                    canFly(items)),
+                    wand(canOpenRedDoors(items),
+                         wor(RomPatches.has(RomPatches.CathedralEntranceWallJump),
+                             haveItem(items, 'HiJump'),
+                             canFly(items))),
                 canHellRun(items, 'MainUpperNorfair'))
 
 def canAccessCrocFromNorfairEntrance(items):
@@ -288,6 +300,16 @@ def canAccessCrocFromNorfairEntrance(items):
 def canAccessCrocFromMainUpperNorfair(items):
     return wand(canHellRun(items, 'MainUpperNorfair'),
                 wor(Knows.GreenGateGlitch, haveItem(items, 'Wave')))
+
+def canEnterNorfairReserveArea(items):
+    return wand(canOpenGreenDoors(items),
+                wor(wor(canFly(items),
+                        haveItem(items, 'Grapple'),
+                        wand(haveItem(items, 'HiJump'),
+                             Knows.GetAroundWallJump)),
+                    wor(haveItem(items, 'Ice'),
+                        wand(haveItem(items, 'SpringBall'),
+                             Knows.SpringBallJumpFromWall))))
 
 def canPassLavaPit(items):
     # EXPLAINED: the randomizer never requires to pass it without the Varia suit.
@@ -377,17 +399,6 @@ def canDoSuitlessOuterMaridia(items):
                     wor(haveItem(items, 'Wave'),
                         haveItem(items, 'Spazer'),
                         haveItem(items, 'Plasma'))))
-
-def canAccessInnerMaridia(items):
-    # EXPLAINED: this is the easy regular way:
-    #            access Red Tower in red brinstar,
-    #            power bomb to destroy the tunnel at Glass Tunnel,
-    #            gravity suit to move freely under water,
-    #            at Mt Everest, no need for grapple to access upper right door:
-    #            https://www.youtube.com/watch?v=2GPx-6ARSIw&t=2m28s
-    return wand(canAccessRedBrinstar(items),
-                canUsePowerBombs(items),
-                haveItem(items, 'Gravity'))
 
 def canDoSuitlessMaridia(items):
     # EXPLAINED: this is the harder way if no gravity,

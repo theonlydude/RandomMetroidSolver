@@ -579,3 +579,8 @@ if __name__ == "__main__":
     knowsUsed = solver.getKnowsUsed()
     print("{} : diff : {}".format(diff, args.romFileName))
     print("{} : knows Used : {}".format(len(knowsUsed), args.romFileName))
+    if diff[0] is True:
+        sys.exit(0)
+    else:
+        sys.exit(1)
+

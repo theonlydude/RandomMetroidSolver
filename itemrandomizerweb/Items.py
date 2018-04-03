@@ -6,7 +6,7 @@ import random
 Items = [
     {
         'Type': 'ETank',
-        'Category': 'Misc',
+        'Category': 'Energy',
         'Class': 'Major',
         'Code': 0xeed7,
         'Name': "Energy Tank",
@@ -134,7 +134,7 @@ Items = [
     },
     {
         'Type': 'Reserve',
-        'Category': 'Misc',
+        'Category': 'Energy',
         'Class': 'Major',
         'Code': 0xef27,
         'Name': "Reserve Tank",

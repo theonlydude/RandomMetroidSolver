@@ -393,7 +393,7 @@ class Randomizer(object):
         return d
     
     def getLocsSpreadProgression(self, availableLocations):
-        progLocs = [il['Location'] for il in self.progressionItemLocs if il['Item']['Class'] == 'Major']
+        progLocs = [il['Location'] for il in self.progressionItemLocs if il['Item']['Class'] == 'Major' and il['Item']['Category'] != "Energy"]
         distances = [self.areaDistance(loc, progLocs) for loc in availableLocations]
         maxDist = max(distances)
         indices = [index for index, d in enumerate(distances) if d == maxDist]        
@@ -526,6 +526,10 @@ class Randomizer(object):
         location = itemLocation['Location']
         if self.isProgItem(item):
             self.progressionItemLocs.append(itemLocation)
+            if item['Category'] == 'Energy':
+                # if energy made us progress we must not cancel energy we already
+                # have, so add the already collected energy to progression locations
+                self.progressionItemLocs += [il for il in itemLocations if il['Category'] == 'Energy']
         self.usedLocations.append(location)
         self.unusedLocations.remove(location)
         if collect is True:

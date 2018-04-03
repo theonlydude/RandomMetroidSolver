@@ -75,10 +75,10 @@ nodes = [
     Node('West Ocean Left', 'WreckedShip', {
         'Crab Maze Left': lambda items: wand(canOpenGreenDoors(items),
                                              canPassSpongeBath(items), # implies dead phantoon
-                                             canPassForgottenHighway(items))
+                                             canPassForgottenHighway(items, True))
     }),
     Node('Crab Maze Left', 'WreckedShip', {
-        'West Ocean Left': lambda items: canPassForgottenHighway(items)
+        'West Ocean Left': lambda items: canPassForgottenHighway(items, False)
     }),
     # Lower Norfair
     Node('Lava Dive Right', 'LowerNorfair', {
@@ -92,12 +92,9 @@ nodes = [
     }),
     # Norfair   
     Node('Warehouse Entrance Left', 'Norfair', {
-        'Single Chamber Top Right': lambda items: wand(canHellRun(items, 'MainUpperNorfair'),
-                                                       RomPatches.has(RomPatches.SingleChamberNoCrumble),
-                                                       wor(canOpenRedDoors(items), # cathedral
-                                                           wand(haveItem(items, 'SpeedBooster'), # frog speedway
-                                                                canUsePowerBombs(items)))), 
-        'Kronic Boost Room Bottom Right': lambda items: canHellRun(items, 'MainUpperNorfair')
+        'Single Chamber Top Right': lambda items: wand(canAccessHeatedNorfairFromEntrance(items),
+                                                       RomPatches.has(RomPatches.SingleChamberNoCrumble)),
+        'Kronic Boost Room Bottom Right': lambda items: canAccessHeatedNorfairFromEntrance(items)
     }),
     Node('Single Chamber Top Right', 'Norfair', {
         'Warehouse Entrance Left': lambda items: canHellRun(items, 'MainUpperNorfair'),
@@ -114,11 +111,11 @@ nodes = [
         'Crab Hole Bottom Left': lambda items: canOpenGreenDoors(items), # red door+green gate
     }),
     Node('Crab Hole Bottom Left', 'Maridia', {
-        'Main Street Bottom': lambda items: wand(wor(haveItem(items, 'Gravity'), # TODO check what's really possible here...
-                                                     haveItem(items, 'HiJump')),
+        'Main Street Bottom': lambda items: wand(wor(haveItem(items, 'Gravity'), 
+                                                     canDoSuitlessOuterMaridia(items)),
                                                  wand(haveItem(items, 'Super'), Knows.GreenGateGlitch)),
-        'Le Coude Right': lambda items: wand(wor(haveItem(items, 'Gravity'),
-                                                 haveItem(items, 'HiJump')), # the sand pit to go through is possible with no gravity or particular knowledge. FIXME is HiJump necessary?
+        'Le Coude Right': lambda items: wand(wor(haveItem(items, 'Gravity'), 
+                                                     canDoSuitlessOuterMaridia(items)),
                                              canOpenGreenDoors(items)) # toilet door
     }),
     Node('Le Coude Right', 'Maridia', {
@@ -155,7 +152,7 @@ nodes = [
                                                  canOpenYellowDoors(items))
     }, lambda items: haveItem(items, 'Morph')),
     Node('Red Brinstar Elevator', 'RedBrinstar', {
-        'Caterpillar Room Top Right': lambda items: RomPatches.has(RomPatches.NoMaridiaGreenGates),
+        'Caterpillar Room Top Right': lambda items: wand(haveItem(items, 'Morph'), RomPatches.has(RomPatches.NoMaridiaGreenGates)),
         'Red Tower Top Left': lambda items: canOpenYellowDoors(items)
     }),
     Node('East Tunnel Right', 'RedBrinstar', {
@@ -170,8 +167,8 @@ nodes = [
                                                canOpenGreenDoors(items))
     }),
     Node('Glass Tunnel Top', 'RedBrinstar', {
-        'East Tunnel Right': lambda items: SMBool(True, 0)
-    }, lambda items: canUsePowerBombs(items)) # break tube
+        'East Tunnel Right': lambda items: canUsePowerBombs(items)
+    }, lambda items: canUsePowerBombs(items))
 ]
 
 nodeDict = {}

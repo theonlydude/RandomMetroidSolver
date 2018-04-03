@@ -287,7 +287,7 @@ def canAccessHeatedNorfairFromEntrance(items):
                          wor(RomPatches.has(RomPatches.CathedralEntranceWallJump),
                              haveItem(items, 'HiJump'),
                              canFly(items))),
-                canHellRun(items, 'MainUpperNorfair'))
+                canHellRun(items, 'MainUpperNorfair')))
 
 def canAccessCrocFromNorfairEntrance(items):
     return wand(wor(canOpenGreenDoors(items),

@@ -314,7 +314,7 @@ locations = [
         'Warehouse Entrance Left': lambda items: SMBool(True, 0)
     },
     # DONE: no difficulty
-    'Available': lambda items: canOpenRedDoors(items)
+    'Available': lambda items: canOpenRedDoors(items),
     'PostAvailable': lambda items: wor(canPassBombPassages(items),
                                        RomPatches.has(RomPatches.HiJumpShotBlock))
 },
@@ -360,8 +360,8 @@ locations = [
     'Visibility': "Chozo",
     'Room': 'Speed Booster Room',
     'AccessPoints' : {
-        'Single Chamber Top Right': lambda items: canHellRun(items, 'MainUpperNorfair')
-        'Kronic Boost Room Bottom Right': lambda items: canHellRun(items, 'MainUpperNorfair')
+        'Single Chamber Top Right': lambda items: canHellRun(items, 'MainUpperNorfair'),
+        'Kronic Boost Room Bottom Right': lambda items: canHellRun(items, 'MainUpperNorfair'),
         'Warehouse Entrance Left': lambda items: canAccessHeatedNorfairFromEntrance(items)
     },
     'Available': lambda items: canOpenGreenDoors(items)
@@ -375,8 +375,8 @@ locations = [
     'Visibility': "Chozo",
     'Room': 'Wave Beam Room',
     'AccessPoints' : {
-        'Single Chamber Top Right': lambda items: canHellRun(items, 'MainUpperNorfair')
-        'Kronic Boost Room Bottom Right': lambda items: canHellRun(items, 'MainUpperNorfair')
+        'Single Chamber Top Right': lambda items: canHellRun(items, 'MainUpperNorfair'),
+        'Kronic Boost Room Bottom Right': lambda items: canHellRun(items, 'MainUpperNorfair'),
         'Warehouse Entrance Left': lambda items: canAccessHeatedNorfairFromEntrance(items)
     },
     'Available': lambda items: canOpenRedDoors(items)
@@ -464,7 +464,7 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Wrecked Ship Energy Tank Room',
     'AccessPoints' : {
-        'West Ocean Left': lambda items: wand(canOpenGreenDoors(items), canPassSpongeBath(items))
+        'West Ocean Left': lambda items: wand(canOpenGreenDoors(items), canPassSpongeBath(items)),
         'Crab Maze Left': lambda items: canPassForgottenHighway(items, False)
     },
     'Available': lambda items: Bosses.bossDead('Phantoon')
@@ -532,7 +532,7 @@ locations = [
     'Visibility': "Chozo",
     'Room': 'Plasma Room',
     'AccessPoints' : {
-        'Main Street Bottom': lambda items: canOpenGreenDoors(items) # green gate+toilet,
+        'Main Street Bottom': lambda items: canOpenGreenDoors(items), # green gate+toilet
         'Le Coude Right': lambda items: SMBool(True, 0)
     },
     # DONE: to leave the Plasma Beam room you have to kill the space pirates and return to the door
@@ -547,7 +547,7 @@ locations = [
     #  -have high jump boots
     #  -can fly (space jump or infinite bomb jump)
     #  -use short charge with speedbooster
-    'Available': lambda items: Bosses.bossDead('Draygon')),
+    'Available': lambda items: Bosses.bossDead('Draygon'),
     'PostAvailable': lambda items: wand(wor(wand(haveItem(items, 'SpeedBooster'),
                                                  Knows.ShortCharge,
                                                  Knows.KillPlasmaPiratesWithSpark),
@@ -614,7 +614,7 @@ locations = [
     'Room': 'Botwoon Energy Tank Room',
     'AccessPoints' : {
         'Main Street Bottom': lambda items: canPassMtEverest(items)
-    }
+    },
     # DONE: difficulty already handled in the functions
     'Available': lambda items: canDefeatBotwoon(items)
 },
@@ -845,7 +845,7 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Early Supers Room',
     'AccessPoints' : {
-        'Green Brinstar Elevator Right': lambda items: (True, 0
+        'Green Brinstar Elevator Right': lambda items: (True, 0)
     },
     'Available': lambda items: canOpenRedDoors(items),
     'PostAvailable': lambda items: wor(canPassBombPassages(items),
@@ -860,7 +860,7 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Early Supers Room',
     'AccessPoints' : {
-        'Green Brinstar Elevator Right': lambda items: (True, 0
+        'Green Brinstar Elevator Right': lambda items: (True, 0)
     },
     'Available': lambda items: wand(canOpenRedDoors(items),
                                     wor(wand(haveItem(items, 'Morph'), Knows.Mockball),
@@ -875,7 +875,7 @@ locations = [
     'Visibility': "Hidden",
     'Room': 'Brinstar Reserve Tank Room',
     'AccessPoints' : {
-        'Green Brinstar Elevator Right': lambda items: (True, 0
+        'Green Brinstar Elevator Right': lambda items: (True, 0)
     },
     'Available': lambda items: wand(canPassBombPassages(items),
                                     canOpenRedDoors(items),
@@ -891,7 +891,7 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Brinstar Reserve Tank Room',
     'AccessPoints' : {
-        'Green Brinstar Elevator Right': lambda items: (True, 0
+        'Green Brinstar Elevator Right': lambda items: (True, 0)
     },
     'Available': lambda items: wand(canOpenRedDoors(items),
                                     haveItem(items, 'Morph'),
@@ -1154,7 +1154,7 @@ locations = [
     'AccessPoints' : {
         'Warehouse Entrance Left': lambda items: (True, 0)
     },
-    'Available': lambda items: (True, 0)
+    'Available': lambda items: (True, 0),
     'PostAvailable': lambda items: wor(canPassBombPassages(items),
                                        RomPatches.has(RomPatches.HiJumpShotBlock))
 },
@@ -1292,8 +1292,8 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Double Chamber',
     'AccessPoints' : {
-        'Single Chamber Top Right': lambda items: canHellRun(items, 'MainUpperNorfair')
-        'Kronic Boost Room Bottom Right': lambda items: canHellRun(items, 'MainUpperNorfair')
+        'Single Chamber Top Right': lambda items: canHellRun(items, 'MainUpperNorfair'),
+        'Kronic Boost Room Bottom Right': lambda items: canHellRun(items, 'MainUpperNorfair'),
         'Warehouse Entrance Left': lambda items: canAccessHeatedNorfairFromEntrance(items)
     },
     'Available': lambda items: canOpenRedDoors(items)
@@ -1338,7 +1338,7 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Mickey Mouse Room',
     'AccessPoints' : {
-        'Lava Dive Right': lambda items: wand(canPassLavaPit(items), canPassWorstRoom(items))
+        'Lava Dive Right': lambda items: wand(canPassLavaPit(items), canPassWorstRoom(items)),
         'Three Muskateers Room Left': lambda items: canPassAmphitheaterReverse(items)
     },
     'Available': lambda items: canHellRun(items, 'LowerNorfair')

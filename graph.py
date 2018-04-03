@@ -1,10 +1,5 @@
 #!/usr/bin/python
 
-from networkx import MultiDiGraph
-
-from networkx import draw_networkx
-import matplotlib.pyplot as plt
-
 from graph_helpers import wand, wor, haveItem, canPassMoat, canPassMoatReverse, canOpenGreenDoors, canPassTerminatorBombWall, canOpenYellowDoors, canDestroyBombWalls, canOpenRedDoors, canPassSpongeBath, canPassForgottenHighway, canHellRun, canPassLavaPit, canPassWorstRoom, canPassAmphitheaterReverse, canGoUpMtEverest, canClimbRedTower, canClimbBottomRedTower, canUsePowerBombs
 from rom import RomPatches
 from smbool import SMBool
@@ -137,7 +132,7 @@ accessPoints = [
         # go up
         'Red Brinstar Elevator': lambda items: wand(canClimbRedTower(items),
                                                     wor(canOpenYellowDoors(items),
-                                                        RomPatches.has(RomPatches.RedTowerBlueDoors)))
+                                                        RomPatches.has(RomPatches.RedTowerBlueDoors))),
         'Caterpillar Room Top Right': lambda items: wand(haveItem(items, 'Morph'),
                                                          RomPatches.has(RomPatches.NoMaridiaGreenGates),
                                                          canClimbRedTower(items)),
@@ -171,27 +166,85 @@ accessPoints = [
     }, lambda items: canUsePowerBombs(items))
 ]
 
-apDict = {}
+vanillaTransitions = [
+    ('Lower Mushrooms Left', 'Green Brinstar Elevator Right'),
+    ('Morph Ball Room Left', 'Green Hill Zone Top Right'),
+    ('Moat Right', 'West Ocean Left'),
+    ('Keyhunter Room Bottom', 'Red Brinstar Elevator'),
+    ('Noob Bridge Right', 'Red Tower Top Left'),
+    ('Crab Maze Left', 'Le Coude Right'),
+    ('Kronic Boost Room Bottom Right', 'Lava Dive Right'),
+    ('Three Muskateers Room Left', 'Single Chamber Top Right'),
+    ('Warehouse Entrance Left', 'East Tunnel Right'),
+    ('East Tunnel Top Right', 'Crab Hole Bottom Left'),
+    ('Caterpillar Room Top Right', 'Red Fish Room Left'),
+    ('Glass Tunnel Top', 'Main Street Bottom')
+]
 
-for ap in accessPoints:
-    apDict[ap.Name] = ap
+class AccessGraph(object):
+    def __init__(self, transitions, bidir=True):
+        self.accessPoints = accessPoints[:]
+        self.apDict = {}
+        for ap in self.accessPoints:
+            self.apDict[ap.Name] = ap
+        for t in transitions:
+            self.addTransition(t[0], t[1], bidir)
 
-def addTransition(srcName, dstName, both=True):
-    src = apDict[srcName]
-    src.addTransition(dstName)
-    if both is True:
-        addTransition(dstName, srcName, False)        
+    def addTransition(self, srcName, dstName, both=True):
+        src = self.apDict[srcName]
+        dst = self.apDict[dstName]
+        if src.GraphArea == dst.GraphArea:
+            raise ValuError('Invalid transition : "' + srcName + '" and "' + dstName + '" are both in "' + src.GraphArea + '"')
+        src.addTransition(dstName)
+        if both is True:
+            self.addTransition(dstName, srcName, False)
 
-def addVanillaTransitions():
-    addTransition('Lower Mushrooms Left', 'Green Brinstar Elevator Right')
-    addTransition('Morph Ball Room Left', 'Green Hill Zone Top Right')
-    addTransition('Moat Right', 'West Ocean Left')
-    addTransition('Keyhunter Room Bottom', 'Red Brinstar Elevator')
-    addTransition('Noob Bridge Right', 'Red Tower Top Left')
-    addTransition('Crab Maze Left', 'Le Coude Right')
-    addTransition('Kronic Boost Room Bottom Right', 'Lava Dive Right')
-    addTransition('Three Muskateers Room Left', 'Single Chamber Top Right')
-    addTransition('Warehouse Entrance Left', 'East Tunnel Right')
-    addTransition('East Tunnel Top Right', 'Crab Hole Bottom Left')
-    addTransition('Caterpillar Room Top Right', 'Red Fish Room Left')
-    addTransition('Glass Tunnel Top', 'Main Street Bottom')
+    # availNodes: all already available nodes
+    # nodesToCheck: nodes we have to check transitions for
+    # items: collected items
+    # maxDiff: difficulty limit
+    # return newly opened access points 
+    def getNewAvailNodes(self, availNodes, nodesToCheck, items, maxDiff):
+        newAvailNodes = []
+        for node in nodesToCheck:
+            for dstName, tFunc in node.transitions.iteritems():
+                dst = self.apDict[dstName]
+                if dst in newAvailNodes or dst in availNodes:
+                    continue
+                diff = tFunc(items)
+                if diff.bool == True and diff.difficulty <= maxDiff:
+                    newAvailNodes.append(dst)
+        return newAvailNodes
+
+    # rootNode: starting AccessPoint instance
+    # items: collected items
+    # maxDiff: difficulty limit
+    # return available AccessPoint list
+    def getAvailableAccessPoints(self, rootNode, items, maxDiff):
+        availNodes = [ rootNode ]
+        newAvailNodes = availNodes
+        while len(newAvailNodes) > 0:
+            newAvailNodes = self.getNewAvailNodes(availNodes, newAvailNodes, items, maxDiff)
+            availNodes += newAvailNodes
+        return availNodes
+
+    # locations: locations to check
+    # items: collected items
+    # maxDiff: difficulty limit
+    # return available locations list
+    def getAvailableLocations(self, locations, items, maxDiff):
+        availAcessPoints = self.getAvailableAccessPoints(self.apDict['Landing Site'], items, maxDiff)
+        availAreas = set([ap.GraphArea for ap in availAcessPoints])
+        availLocs = []
+        for loc in locations:
+            if not loc['GraphArea'] in availAreas:
+                continue
+            for apName,tFunc in loc['AccessPoint'].iteritems():
+                ap = self.apDict[apName]
+                if not ap in availAcessPoints:
+                    continue
+                diff = wand(tFunc(items), loc['Available'](items))
+                if diff.bool == True and diff.difficulty <= maxDiff:
+                    availLocs.append(loc)
+                    break
+        return availLocs

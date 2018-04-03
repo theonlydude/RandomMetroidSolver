@@ -243,8 +243,10 @@ class AccessGraph(object):
                 ap = self.accessPoints[apName]
                 if not ap in availAcessPoints:
                     continue
-                diff = wand(tFunc(items), loc['Available'](items))
+                diff = tFunc(items)
                 if diff.bool == True and diff.difficulty <= maxDiff:
-                    availLocs.append(loc)
-                    break
+                    diff = loc['Available'](items)
+                    if diff.bool == True and diff.difficulty <= maxDiff:
+                        availLocs.append(loc)
+                        break
         return availLocs

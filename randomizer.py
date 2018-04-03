@@ -4,7 +4,8 @@ import argparse, random, os.path, json, sys, shutil
 
 from itemrandomizerweb import Items
 from itemrandomizerweb.Randomizer import Randomizer, RandoSettings
-from tournament_locations import locations
+from tournament_locations import locations as defaultLocations
+from graph_locations import locations as graphLocations
 from parameters import easy, medium, hard, harder, hardcore, mania, text2diff, diff2text
 from solver import ParamsLoader
 from rom import RomPatcher, RomPatches
@@ -18,6 +19,9 @@ if __name__ == "__main__":
     parser.add_argument('--dir',
                         help="output directory",
                         dest='directory', nargs='?', default='.')
+    parser.add_argument('--graph',
+                        help="experimental graph mode", action='store_true',
+                        dest='graph', default=False)
     parser.add_argument('--debug', '-d', help="activate debug logging", dest='debug',
                         action='store_true')
     parser.add_argument('--maxDifficulty', '-t',
@@ -147,15 +151,16 @@ if __name__ == "__main__":
     if 'skip_intro.ips' not in args.patches and 'skip_ceres.ips' not in args.patches:
         args.patches.append('skip_ceres.ips')
 
-    locationPool = locations
-
     RomPatches.ActivePatches = RomPatches.Total
     qty = {'missile': int(args.missileQty), 'super': int(args.superQty),
            'powerBomb': int(args.powerBombQty), 'energy': args.energyQty,
            'minors': int(args.minorQty)}
     sampleSize = 100
     randoSettings = RandoSettings(maxDifficulty, progSpeed, qty, restrictions, args.spreadItems, sampleSize, args.superFun)
-    randomizer = Randomizer(locations, randoSettings)
+    if args.graph is False:
+        randomizer = Randomizer(defaultLocations, randoSettings)
+    else:
+        randomizer = Randomizer(graphLocations, randoSettings, True)
     itemLocs = randomizer.generateItems()
     if itemLocs is None:
         print("Can't generate a randomized rom with the given parameters, try increasing the difficulty target.")

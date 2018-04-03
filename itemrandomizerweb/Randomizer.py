@@ -1,8 +1,9 @@
 import sys, random
 from itemrandomizerweb import Items
 from parameters import Knows, Settings
-from itemrandomizerweb.stdlib import Map, Array, List, Random
-from helpers import wand, Bosses, enoughStuffTourian#, canPassMetroids, canPassZebetites, enoughStuffsMotherbrain
+from itemrandomizerweb.stdlib import List
+from helpers import wand, Bosses, enoughStuffTourian
+from graph import vanillaTransitions, AccessGraph
 
 class RandoSettings(object):
     # maxDiff : max diff
@@ -103,9 +104,9 @@ class RandoSettings(object):
         if progSpeed == 'slow':
             itemLimit = 20
         elif progSpeed == 'medium':
-            itemLimit = 13
+            itemLimit = 10
         elif progSpeed == 'fast':
-            itemLimit = 8
+            itemLimit = 5
         elif progSpeed == 'fastest':
             itemLimit = 1
         return itemLimit
@@ -190,9 +191,14 @@ class RandoSettings(object):
 class Randomizer(object):
     # locations : items locations
     # settings : RandoSettings instance
-    def __init__(self, locations, settings):
+    def __init__(self, locations, settings, graph=False):
         # we assume that 'choose' dict is perfectly formed, that is all keys
         # below are defined in the appropriate weight dicts
+        if graph == True:
+            self.currentLocations = self.currentLocationsGraph
+            self.areaGraph = AccessGraph(vanillaTransitions)
+        else:
+            self.currentLocations = self.currentLocationsAvailFunc
         self.isSpreadProgression = settings.isSpreadProgression
         self.choose = settings.choose
         self.chooseItemFuncs = {
@@ -258,7 +264,7 @@ class Randomizer(object):
 #        print("POST " + str(result.bool))
         return result.bool is True and result.difficulty <= self.difficultyTarget
 
-    def currentLocations(self, items):
+    def currentLocationsAvailFunc(self, items):
         # loop on all the location pool and check if the loc is not already used and if the available function is true
         # 
         # items: list of items, each item is a dict
@@ -271,6 +277,11 @@ class Randomizer(object):
         avail = lambda loc: self.locAvailable(loc, items)
         
         return List.filter(avail, self.unusedLocations)
+
+    def currentLocationsGraph(self, items):
+        items = [item["Type"] for item in items]
+
+        return self.areaGraph.getAvailableLocations(self.unusedLocations, items, self.difficultyTarget)
 
     def canPlaceItem(self, item, itemLocations):
         # for an item check if a least one location can accept it, without checking
@@ -529,7 +540,7 @@ class Randomizer(object):
             if item['Category'] == 'Energy':
                 # if energy made us progress we must not cancel energy we already
                 # have, so add the already collected energy to progression locations
-                self.progressionItemLocs += [il for il in itemLocations if il['Category'] == 'Energy']
+                self.progressionItemLocs += [il for il in itemLocations if il['Item']['Category'] == 'Energy' and not il in self.progressionItemLocs]
         self.usedLocations.append(location)
         self.unusedLocations.remove(location)
         if collect is True:
@@ -563,7 +574,7 @@ class Randomizer(object):
         i = len(itemLocations) - 1
         while len(locList) <= self.maxCancel+1 and i >= (100 - maxLen): # maxCancel grows over time if we get stuck, +1 to get randomness even when its value is 1 
             il = itemLocations[i]
-            if il not in self.progressionItemLocs and ((il['Item']['Class'] == 'Minor' and tryMinors is True) or il['Item']['Class'] == 'Major'):
+            if il['Item']['Category'] != 'Progression' and il not in self.progressionItemLocs and ((il['Item']['Class'] == 'Minor' and tryMinors is True) or il['Item']['Class'] == 'Major'):
                 locList.append(il)
             i -= 1
         random.shuffle(locList)
@@ -572,7 +583,8 @@ class Randomizer(object):
             itemLocations.remove(itemLoc)
         else:
             # this can happen when we force a cancel for more variety, but it is not possible
-            print("aborted cancel")
+            sys.stdout.write('!')
+            sys.stdout.flush()
             return
         item = itemLoc['Item']
         loc = itemLoc['Location']

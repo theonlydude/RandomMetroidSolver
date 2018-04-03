@@ -184,16 +184,15 @@ vanillaTransitions = [
 
 class AccessGraph(object):
     def __init__(self, transitions, bidir=True):
-        self.accessPoints = accessPoints[:]
-        self.apDict = {}
-        for ap in self.accessPoints:
-            self.apDict[ap.Name] = ap
+        self.accessPoints = {}
+        for ap in accessPoints:
+            self.accessPoints[ap.Name] = ap
         for t in transitions:
             self.addTransition(t[0], t[1], bidir)
 
     def addTransition(self, srcName, dstName, both=True):
-        src = self.apDict[srcName]
-        dst = self.apDict[dstName]
+        src = self.accessPoints[srcName]
+        dst = self.accessPoints[dstName]
         if src.GraphArea == dst.GraphArea:
             raise ValuError('Invalid transition : "' + srcName + '" and "' + dstName + '" are both in "' + src.GraphArea + '"')
         src.addTransition(dstName)
@@ -209,7 +208,7 @@ class AccessGraph(object):
         newAvailNodes = []
         for node in nodesToCheck:
             for dstName, tFunc in node.transitions.iteritems():
-                dst = self.apDict[dstName]
+                dst = self.accessPoints[dstName]
                 if dst in newAvailNodes or dst in availNodes:
                     continue
                 diff = tFunc(items)
@@ -234,14 +233,14 @@ class AccessGraph(object):
     # maxDiff: difficulty limit
     # return available locations list
     def getAvailableLocations(self, locations, items, maxDiff):
-        availAcessPoints = self.getAvailableAccessPoints(self.apDict['Landing Site'], items, maxDiff)
+        availAcessPoints = self.getAvailableAccessPoints(self.accessPoints['Landing Site'], items, maxDiff)
         availAreas = set([ap.GraphArea for ap in availAcessPoints])
         availLocs = []
         for loc in locations:
             if not loc['GraphArea'] in availAreas:
                 continue
             for apName,tFunc in loc['AccessPoints'].iteritems():
-                ap = self.apDict[apName]
+                ap = self.accessPoints[apName]
                 if not ap in availAcessPoints:
                     continue
                 diff = wand(tFunc(items), loc['Available'](items))

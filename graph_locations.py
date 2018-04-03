@@ -627,7 +627,7 @@ locations = [
     'Visibility': "Chozo",
     'Room': 'Space Jump Room',
     'AccessPoints' : {
-        'Main Street Bottom': lambda items: wand(canPassMtEverest(items), canDefeatBotwoon(items))
+        'Main Street Bottom': lambda items: wand(canPassMtEverest(items), canDefeatBotwoon(items), canOpenGreenDoors(items))
     },
     # DONE: difficulty already handled in the function,
     # we need to have access to the boss and enough stuff to kill him.
@@ -847,9 +847,9 @@ locations = [
     'AccessPoints' : {
         'Green Brinstar Elevator Right': lambda items: (True, 0
     },
-    'Available': lambda items: wand(canOpenRedDoors(items),
-                                    wor(canPassBombPassages(items),
-                                        RomPatches.has(RomPatches.EarlySupersShotBlock))
+    'Available': lambda items: canOpenRedDoors(items),
+    'PostAvailable': lambda items: wor(canPassBombPassages(items),
+                                       RomPatches.has(RomPatches.EarlySupersShotBlock))
 },
 {
     'Area': "Brinstar",
@@ -994,7 +994,7 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Etecoon Super Room',
     'AccessPoints' : {
-        'Green Brinstar Elevator Right': lambda items: (True, 0
+        'Green Brinstar Elevator Right': lambda items: (True, 0)
     },
     'Available': lambda items: wand(canUsePowerBombs(items),
                                     canOpenGreenDoors(items))
@@ -1634,7 +1634,7 @@ locations = [
     'Visibility': "Hidden",
     'Room': 'The Precious Room',
     'AccessPoints' : {
-        'Main Street Bottom': lambda items: wand(canPassMtEverest(items), canDefeatBotwoon(items))
+        'Main Street Bottom': lambda items: wand(canPassMtEverest(items), canDefeatBotwoon(items), canOpenGreenDoors(items))
     },
     'Available': lambda items: (True, 0)
 }

@@ -41,6 +41,10 @@ function worker {
     solver_log="$dest/${seed}.txt"
     rom="VARIA_Randomizer_*${seed}_${p}*.sfc"
     $SOLVER $rom --param diff_presets/$p.json  --difficultyTarget 5 --displayGeneratedPath > $solver_log
+    [ $? -ne 0 ] && {
+	echo "Could not solve $rom !! Abort" >&2
+	exit 1
+    }
     mv $rom $dest
 }
 

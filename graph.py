@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
-from graph_helpers import wand, wor, haveItem, canPassMoat, canPassMoatReverse, canOpenGreenDoors, canPassTerminatorBombWall, canOpenYellowDoors, canDestroyBombWalls, canOpenRedDoors, canPassSpongeBath, canPassForgottenHighway, canHellRun, canPassLavaPit, canPassWorstRoom, canPassAmphitheaterReverse, canGoUpMtEverest, canClimbRedTower, canClimbBottomRedTower, canUsePowerBombs
+from graph_helpers import wand, wor, haveItem, canPassMoat, canPassMoatReverse, canOpenGreenDoors, canPassTerminatorBombWall, canOpenYellowDoors, canDestroyBombWalls, canOpenRedDoors, canPassSpongeBath, canPassForgottenHighway, canHellRun, canPassLavaPit, canPassWorstRoom, canPassAmphitheaterReverse, canGoUpMtEverest, canClimbRedTower, canClimbBottomRedTower, canUsePowerBombs, canAccessHeatedNorfairFromEntrance, canDoSuitlessOuterMaridia
+from parameters import Knows
 from rom import RomPatches
 from smbool import SMBool
 
@@ -239,7 +240,7 @@ class AccessGraph(object):
         for loc in locations:
             if not loc['GraphArea'] in availAreas:
                 continue
-            for apName,tFunc in loc['AccessPoint'].iteritems():
+            for apName,tFunc in loc['AccessPoints'].iteritems():
                 ap = self.apDict[apName]
                 if not ap in availAcessPoints:
                     continue

@@ -17,7 +17,7 @@ class Solver:
     # given a rom and parameters returns the estimated difficulty
     
     def __init__(self, type='console', rom=None, params=None, debug=False):
-        if debug is True:
+        if debug == True:
             logging.basicConfig(level=logging.DEBUG)
         else:
             logging.basicConfig(level=logging.INFO)
@@ -43,7 +43,7 @@ class Solver:
 
     def loadRom(self, rom):
         RomLoader.factory(rom).assignItems(self.locations)
-        if Conf.guessRomType is True and self.type == 'console':
+        if Conf.guessRomType == True and self.type == 'console':
             guessed = RomType.guess(rom)
             if guessed is not None:
                 Conf.romType = guessed
@@ -75,7 +75,7 @@ class Solver:
                     self.log.debug("{}: {}".format(conf, Conf.__dict__[conf]))
 
     def solveRom(self):
-        if self.romLoaded is False:
+        if self.romLoaded == False:
             self.log.error("rom not loaded")
             return
 
@@ -83,10 +83,10 @@ class Solver:
 
         if self.type == 'console':
             # print generated path
-            if Conf.displayGeneratedPath is True:
+            if Conf.displayGeneratedPath == True:
                 self.printPath("Generated path:", self.visitedLocations)
                 # if we've aborted, display remaining majors
-                if difficulty == -1 or itemsOk is False:
+                if difficulty == -1 or itemsOk == False:
                     self.printPath("Remaining major locations:", self.majorLocations)
                     self.printPath("Remaining minor locations:", self.minorLocations)
 

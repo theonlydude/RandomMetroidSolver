@@ -118,7 +118,7 @@ if __name__ == "__main__":
     if args.maxDifficulty:
         maxDifficulty = text2diff[args.maxDifficulty]
     else:
-        maxDifficulty = 100000
+        maxDifficulty = 1000000
 
     # same as solver, increase max difficulty 
     threshold = maxDifficulty
@@ -138,7 +138,7 @@ if __name__ == "__main__":
     # fill restrictions dict
     restrictions = { 'Suits' : args.suitsRestriction, 'SpeedScrew' : args.speedScrewRestriction, 'MajorMinor' : not args.fullRandomization }
     seedCode = 'X'
-    if restrictions['MajorMinor'] is False:
+    if restrictions['MajorMinor'] == False:
         seedCode = 'FX'
 
     # output ROM name
@@ -157,7 +157,7 @@ if __name__ == "__main__":
            'minors': int(args.minorQty)}
     sampleSize = 100
     randoSettings = RandoSettings(maxDifficulty, progSpeed, qty, restrictions, args.spreadItems, sampleSize, args.superFun)
-    if args.graph is False:
+    if args.graph == False:
         randomizer = Randomizer(defaultLocations, randoSettings)
     else:
         randomizer = Randomizer(graphLocations, randoSettings, True)
@@ -171,7 +171,7 @@ if __name__ == "__main__":
     for itemLoc in itemLocs:
         locsItems[itemLoc["Location"]["Name"]] = itemLoc["Item"]["Type"]
 
-    if args.debug is True:
+    if args.debug == True:
         for loc in locsItems:
             print('{:>50}: {:>16} '.format(loc, locsItems[loc]))
 

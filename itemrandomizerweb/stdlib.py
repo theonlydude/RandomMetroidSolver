@@ -50,13 +50,13 @@ class List:
     def filter(fun, list):
         # returns a new collection containing only the elements of the collection
         # for which the given predicate returns true
-        return [elem for elem in list if fun(elem) is True]
+        return [elem for elem in list if fun(elem) == True]
 
     @staticmethod
     def find(fun, list):
         # returns the first element for which the given function returns true
         # raise: StopIteration
-        return next(iter([elem for elem in list if fun(elem) is True]))
+        return next(iter([elem for elem in list if fun(elem) == True]))
 
     @staticmethod
     def sortBy(fun, list):
@@ -184,7 +184,7 @@ class Random:
 
         # Note we can't use addition here. The distribution will be bad if we do that.
         negative = True if (self.InternalSample()%2 == 0) else False  # decide the sign based on second sample
-        if negative is True:
+        if negative == True:
             result = -result
 
         d = result

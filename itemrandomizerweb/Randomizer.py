@@ -555,6 +555,7 @@ class Randomizer(object):
         itemLocation = None
         self.failItems = []
         posItems = self.possibleItems(curLocs, self.currentItems, pool)
+#        print(set([item['Type'] for item in posItems]))
         if len(posItems) > 0:
             # if posItems is not empty, only those in posItems will be tried (see placeItem)
             nPool = len(set([item['Type'] for item in posItems]))

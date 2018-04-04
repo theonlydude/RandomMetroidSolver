@@ -1,8 +1,9 @@
 import sys, random
 from itemrandomizerweb import Items
 from parameters import Knows, Settings
-from itemrandomizerweb.stdlib import Map, Array, List, Random
-from helpers import wand, Bosses, enoughStuffTourian#, canPassMetroids, canPassZebetites, enoughStuffsMotherbrain
+from itemrandomizerweb.stdlib import List
+from helpers import wand, Bosses, enoughStuffTourian
+from graph import vanillaTransitions, AccessGraph
 
 class RandoSettings(object):
     # maxDiff : max diff
@@ -103,9 +104,9 @@ class RandoSettings(object):
         if progSpeed == 'slow':
             itemLimit = 20
         elif progSpeed == 'medium':
-            itemLimit = 13
+            itemLimit = 10
         elif progSpeed == 'fast':
-            itemLimit = 8
+            itemLimit = 5
         elif progSpeed == 'fastest':
             itemLimit = 1
         return itemLimit
@@ -190,9 +191,14 @@ class RandoSettings(object):
 class Randomizer(object):
     # locations : items locations
     # settings : RandoSettings instance
-    def __init__(self, locations, settings):
+    def __init__(self, locations, settings, graph=False):
         # we assume that 'choose' dict is perfectly formed, that is all keys
         # below are defined in the appropriate weight dicts
+        if graph == True:
+            self.currentLocations = self.currentLocationsGraph
+            self.areaGraph = AccessGraph(vanillaTransitions)
+        else:
+            self.currentLocations = self.currentLocationsAvailFunc
         self.isSpreadProgression = settings.isSpreadProgression
         self.choose = settings.choose
         self.chooseItemFuncs = {
@@ -249,16 +255,16 @@ class Randomizer(object):
         
     def locAvailable(self, loc, items):
         result = loc["Available"](items)
-        return result.bool is True and result.difficulty <= self.difficultyTarget
+        return result.bool == True and result.difficulty <= self.difficultyTarget
 
     def locPostAvailable(self, loc, items):
         if not 'PostAvailable' in loc:
             return True
         result = loc["PostAvailable"](items)
 #        print("POST " + str(result.bool))
-        return result.bool is True and result.difficulty <= self.difficultyTarget
+        return result.bool == True and result.difficulty <= self.difficultyTarget
 
-    def currentLocations(self, items):
+    def currentLocationsAvailFunc(self, items):
         # loop on all the location pool and check if the loc is not already used and if the available function is true
         # 
         # items: list of items, each item is a dict
@@ -271,6 +277,11 @@ class Randomizer(object):
         avail = lambda loc: self.locAvailable(loc, items)
         
         return List.filter(avail, self.unusedLocations)
+
+    def currentLocationsGraph(self, items):
+        items = [item["Type"] for item in items]
+
+        return self.areaGraph.getAvailableLocations(self.unusedLocations, items, self.difficultyTarget)
 
     def canPlaceItem(self, item, itemLocations):
         # for an item check if a least one location can accept it, without checking
@@ -416,16 +427,16 @@ class Randomizer(object):
             return True
         if not item in self.currentItems:
             isProg = len(self.currentLocations(self.currentItems)) < len(self.currentLocations(self.currentItems + [item]))
-            if isProg is False and item['Type'] not in self.nonProgTypesCache:
+            if isProg == False and item['Type'] not in self.nonProgTypesCache:
                 self.nonProgTypesCache.append(item['Type'])
-            elif isProg is True and item['Type'] not in self.progTypesCache:
+            elif isProg == True and item['Type'] not in self.progTypesCache:
                 self.progTypesCache.append(item['Type'])
             return isProg
         return False
     
     def chooseLocation(self, availableLocations, item):
         locs = availableLocations
-        if self.isSpreadProgression is True and self.isProgItem(item):
+        if self.isSpreadProgression == True and self.isProgItem(item):
             locs = self.getLocsSpreadProgression(availableLocations)
         random.shuffle(locs)
         return self.getChooseFunc(self.chooseLocRanges, self.chooseLocFuncs)(locs, item)
@@ -476,11 +487,11 @@ class Randomizer(object):
         # return bool
         oldLocations = curLocs
         canPlaceIt = self.canPlaceItem(item, oldLocations)
-        if canPlaceIt is False:
+        if canPlaceIt == False:
             return False
 
         newLocations = self.currentLocations([item] + items)
-        if self.restrictions["MajorMinor"] is True:
+        if self.restrictions["MajorMinor"] == True:
             newLocationsHasMajor = List.exists(lambda l: l["Class"] == 'Major', newLocations)
         else:
             newLocationsHasMajor = True
@@ -492,9 +503,9 @@ class Randomizer(object):
         #
         # item: dict of an item
         # location: dict of a location
-        if self.restrictions['MajorMinor'] is True:        
+        if self.restrictions['MajorMinor'] == True:
             matchingClass = (location["Class"] == item["Class"])
-            if matchingClass is False:
+            if matchingClass == False:
                 return False
 
         isInBlueBrinstar = location["Name"] in ["Morphing Ball",
@@ -505,13 +516,13 @@ class Randomizer(object):
                                                 "Missile (blue Brinstar top)",
                                                 "Missile (blue Brinstar behind missile)"]
         
-        if self.restrictions['Suits'] is True:
+        if self.restrictions['Suits'] == True:
             if item["Type"] == "Gravity":
                 return ((not (location["Area"] == "Crateria" or location["Area"] == "Brinstar"))
                         or location["Name"] == "X-Ray Scope" or location["Name"] == "Energy Tank, Waterway")
             elif item["Type"] == "Varia":
                 return not (location["Area"] == "Crateria" or isInBlueBrinstar)
-        if self.restrictions['SpeedScrew'] is True:
+        if self.restrictions['SpeedScrew'] == True:
             if item["Type"] == "SpeedBooster":
                 return not isInBlueBrinstar
             if item["Type"] == "ScrewAttack":
@@ -529,10 +540,10 @@ class Randomizer(object):
             if item['Category'] == 'Energy':
                 # if energy made us progress we must not cancel energy we already
                 # have, so add the already collected energy to progression locations
-                self.progressionItemLocs += [il for il in itemLocations if il['Category'] == 'Energy']
+                self.progressionItemLocs += [il for il in itemLocations if il['Item']['Category'] == 'Energy' and not il in self.progressionItemLocs]
         self.usedLocations.append(location)
         self.unusedLocations.remove(location)
-        if collect is True:
+        if collect == True:
             self.currentItems.append(item)
             self.nonProgTypesCache = []
             self.progTypesCache = []
@@ -563,16 +574,17 @@ class Randomizer(object):
         i = len(itemLocations) - 1
         while len(locList) <= self.maxCancel+1 and i >= (100 - maxLen): # maxCancel grows over time if we get stuck, +1 to get randomness even when its value is 1 
             il = itemLocations[i]
-            if il not in self.progressionItemLocs and ((il['Item']['Class'] == 'Minor' and tryMinors is True) or il['Item']['Class'] == 'Major'):
+            if il['Item']['Category'] != 'Progression' and il not in self.progressionItemLocs and ((il['Item']['Class'] == 'Minor' and tryMinors == True) or il['Item']['Class'] == 'Major'):
                 locList.append(il)
             i -= 1
         random.shuffle(locList)
-        itemLoc = next((il for il in locList if (il['Item']['Class'] == 'Minor' and tryMinors is True) or il['Item']['Class'] == 'Major'), None)
+        itemLoc = next((il for il in locList if (il['Item']['Class'] == 'Minor' and tryMinors == True) or il['Item']['Class'] == 'Major'), None)
         if itemLoc is not None:
             itemLocations.remove(itemLoc)
         else:
             # this can happen when we force a cancel for more variety, but it is not possible
-            print("aborted cancel")
+            sys.stdout.write('!')
+            sys.stdout.flush()
             return
         item = itemLoc['Item']
         loc = itemLoc['Location']
@@ -592,7 +604,7 @@ class Randomizer(object):
         # check that there is room left in all main areas
         room = {'Brinstar' : 0, 'Norfair' : 0, 'WreckedShip' : 0, 'LowerNorfair' : 0, 'Maridia' : 0}
         for loc in self.unusedLocations:
-            majAvail = self.restrictions['MajorMinor'] is False or loc['Class'] == 'Major'
+            majAvail = self.restrictions['MajorMinor'] == False or loc['Class'] == 'Major'
             if majAvail and loc['Area'] in room:
                 room[loc['Area']] += 1
         for r in room.values():
@@ -609,8 +621,8 @@ class Randomizer(object):
         # fill up unreachable locations with "junk" to maximize the chance of the ROM
         # to be finishable
         for loc in self.restrictedLocations:
-            isMajor = self.restrictions['MajorMinor'] is False or loc['Class'] == 'Major'
-            isMinor = self.restrictions['MajorMinor'] is False or loc['Class'] == 'Minor'
+            isMajor = self.restrictions['MajorMinor'] == False or loc['Class'] == 'Major'
+            isMinor = self.restrictions['MajorMinor'] == False or loc['Class'] == 'Minor'
             itemLocation = {'Location' : loc}
             if isMinor and self.hasItemTypeInPool('Nothing'):
                 itemLocation['Item'] = self.getNextItemInPool('Nothing')
@@ -678,7 +690,7 @@ class Randomizer(object):
             sys.stdout.flush()
         isStuck = itemLocation is None
         nFreed = 0
-        if isStuck is False:
+        if isStuck == False:
             if nCancel > 0:
                 nFreed = nCancel - 1
             self.getItem(itemLocation, itemLocations)
@@ -719,7 +731,7 @@ class Randomizer(object):
             canEndGame = wand(Bosses.allBossesDead(), enoughStuffTourian(itemTypes))
 #            print(canEndGame)
 #            print(Bosses.golden4Dead)
-            if canEndGame.bool is True and canEndGame.difficulty < self.difficultyTarget:
+            if canEndGame.bool == True and canEndGame.difficulty < self.difficultyTarget:
                 # seed is finishable, place randomly all remaining items
                 while len(self.itemPool) > 0:
                     itemLocation = {

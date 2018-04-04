@@ -21,6 +21,8 @@ class RomPatches:
     RedTowerLeftPassage       = 21
     # exit red tower top to crateria or back to red tower without power bombs
     RedTowerBlueDoors         = 22
+    # shot block in crumble blocks at early supers
+    EarlySupersShotBlock      = 23
     # shot block to exit hu jump area 
     HiJumpShotBlock           = 30
     # access main upper norfair without anything

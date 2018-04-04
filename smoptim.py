@@ -52,7 +52,10 @@ class SMOptim(object):
         return self.curSMBool
 
     def getSMBoolCopy(self):
-        return copy.copy(self.curSMBool)
+        return SMBool(self.curSMBool.bool,
+                      self.curSMBool.difficulty,
+                      self.curSMBool.knows[:],
+                      self.curSMBool.items[:])
 
     def setSMBool(self, bool, diff=0):
         self.curSMBool.bool = bool
@@ -916,13 +919,13 @@ class SMOptimDiff(SMOptim):
         return (self.curSMBool.bool, self.curSMBool.difficulty)
 
 class SMOptimAll(SMOptimDiff):
-    # full package, internaly: only a tuple (bool, diff)
+    # full package, internaly: smbool
     def __init__(self):
         super(SMOptimAll, self).__init__()
 
     def setSMBoolCache(self, smbool):
         self.curSMBool.bool = smbool.bool
-        self.curSMBool.diff = smbool.diff
+        self.curSMBool.difficulty = smbool.difficulty
         self.curSMBool.items = smbool.items[:]
         self.curSMBool.knows = smbool.knows[:]
 
@@ -931,7 +934,7 @@ class SMOptimAll(SMOptimDiff):
         self.curSMBool.difficulty = difficulty
         if self.curSMBool.bool == True:
             self.curSMBool.items.append(item)
-        return (self.curSMBool.bool, self.curSMBool.difficulty)
+        return self.getSMBoolCopy()
 
     def knowsKnows(self, knows, smKnows):
         self.curSMBool.bool = smKnows[0]
@@ -940,18 +943,20 @@ class SMOptimAll(SMOptimDiff):
             self.curSMBool.knows.append(knows)
             #print("knowsKnows len(knows)={}".format(len(self.curSMBool.knows)))
         #print("knowsKnows: bool={} knows={} smKnows={}".format(self.curSMBool.bool, knows, smKnows))
-        return (self.curSMBool.bool, self.curSMBool.difficulty)
+        return self.getSMBoolCopy()
 
     def wand2(self, a, b, difficulty=0):
-        if a[0] == True and b[0] == True:
+        if a.bool == True and b.bool == True:
             self.curSMBool.bool = True
-            self.curSMBool.difficulty = a[1] + b[1] + difficulty
-            #self.curSMBool.knows =
-            #self.curSMBool.items =
+            self.curSMBool.difficulty = a.difficulty + b.difficulty + difficulty
+            self.curSMBool.knows = a.knows + b.knows
+            self.curSMBool.items = a.items + b.items
         else:
             self.curSMBool.bool = False
             self.curSMBool.difficulty = 0
-        return (self.curSMBool.bool, self.curSMBool.difficulty)
+            self.curSMBool.knows = []
+            self.curSMBool.items = []
+        return self.getSMBoolCopy()
 
     def wand(self, a, b, c=None, d=None, difficulty=0):
         if c is None and d is None:
@@ -966,28 +971,42 @@ class SMOptimAll(SMOptimDiff):
         if self.curSMBool.bool == True and difficulty != 0:
             self.curSMBool.difficulty += difficulty
 
-        #print("wand: {}".format(self.curSMBool.bool))
-        return (self.curSMBool.bool, self.curSMBool.difficulty)
+        return self.getSMBoolCopy()
 
     def wor2(self, a, b, difficulty=0):
-        if a[0] == True and b[0] == True:
-            if a[1] <= b[1]:
+        if a.bool == True and b.bool == True:
+            if a.difficulty < b.difficulty:
                 self.curSMBool.bool = True
-                self.curSMBool.difficulty = a[1] + difficulty
+                self.curSMBool.difficulty = a.difficulty + difficulty
+                self.curSMBool.knows = a.knows
+                self.curSMBool.items = a.items
+            elif a.difficulty > b.difficulty:
+                self.curSMBool.bool = True
+                self.curSMBool.difficulty = b.difficulty + difficulty
+                self.curSMBool.knows = b.knows
+                self.curSMBool.items = b.items
             else:
                 self.curSMBool.bool = True
-                self.curSMBool.difficulty = b[1] + difficulty
-        elif a[0] == True:
+                self.curSMBool.difficulty = b.difficulty + difficulty
+                self.curSMBool.knows = a.knows + b.knows
+                self.curSMBool.items = a.items + b.items
+        elif a.bool == True:
             self.curSMBool.bool = True
             self.curSMBool.difficulty = a[1] + difficulty
+            self.curSMBool.knows = a.knows
+            self.curSMBool.items = a.items
         elif b[0] == True:
             self.curSMBool.bool = True
             self.curSMBool.difficulty = b[1] + difficulty
+            self.curSMBool.knows = b.knows
+            self.curSMBool.items = b.items
         else:
             self.curSMBool.bool = False
             self.curSMBool.difficulty = 0
+            self.curSMBool.knows = []
+            self.curSMBool.items = []
 
-        return (self.curSMBool.bool, self.curSMBool.difficulty)
+        return self.getSMBoolCopy()
 
     def wor(self, a, b, c=None, d=None, difficulty=0):
         if c is None and d is None:
@@ -1002,13 +1021,15 @@ class SMOptimAll(SMOptimDiff):
         if self.curSMBool.bool == True and difficulty != 0:
             self.curSMBool.difficulty += difficulty
 
-        return (self.curSMBool.bool, self.curSMBool.difficulty)
+        return self.getSMBoolCopy()
 
     # negates boolean part of the SMBool
     def wnot(self, a):
-        self.curSMBool.bool = not a[0]
-        self.curSMBool.difficulty = a[1]
-        return (self.curSMBool.bool, self.curSMBool.difficulty)
+        self.curSMBool.bool = not a.bool
+        self.curSMBool.difficulty = a.difficulty
+        self.curSMBool.knows = a.knows
+        self.curSMBool.items = a.items
+        return self.getSMBoolCopy()
 
     def itemCountOk(self, item, count, difficulty=0):
         if self.itemCount(item) >= count:
@@ -1017,7 +1038,7 @@ class SMOptimAll(SMOptimDiff):
             self.curSMBool.items.append(item)
         else:
             self.curSMBool.bool = False
-        return (self.curSMBool.bool, self.curSMBool.difficulty)
+        return self.getSMBoolCopy()
 
     def energyReserveCountOk(self, count, difficulty=0):
         if self.energyReserveCount() >= count:
@@ -1027,4 +1048,4 @@ class SMOptimAll(SMOptimDiff):
             self.curSMBool.items.append('Reserve')
         else:
             self.curSMBool.bool = False
-        return (self.curSMBool.bool, self.curSMBool.difficulty)
+        return self.getSMBoolCopy()

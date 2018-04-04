@@ -104,7 +104,7 @@ class RandoSettings(object):
         if progSpeed == 'slow':
             itemLimit = 20
         elif progSpeed == 'medium':
-            itemLimit = 10
+            itemLimit = 11
         elif progSpeed == 'fast':
             itemLimit = 5
         elif progSpeed == 'fastest':
@@ -585,7 +585,7 @@ class Randomizer(object):
             # this can happen when we force a cancel for more variety, but it is not possible
             sys.stdout.write('!')
             sys.stdout.flush()
-            return
+            return False
         item = itemLoc['Item']
         loc = itemLoc['Location']
         if item in self.currentItems:
@@ -597,6 +597,7 @@ class Randomizer(object):
 #        print("Cancelled  " + item['Type'] + " at " + loc['Name'])
         sys.stdout.write('x')
         sys.stdout.flush()
+        return True
         
     def checkLocPool(self):
         if not any(self.isProgItem(item) for item in self.itemPool):

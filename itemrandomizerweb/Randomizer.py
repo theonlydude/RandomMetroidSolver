@@ -555,13 +555,15 @@ class Randomizer(object):
         itemLocation = None
         self.failItems = []
         posItems = self.possibleItems(curLocs, self.currentItems, pool)
-        while itemLocation is None:
+        if len(posItems) > 0:
+            # if posItems is not empty, only those in posItems will be tried (see placeItem)
+            nPool = len(set([item['Type'] for item in posItems]))
+        else:
+            # if posItems is empty, all items in the pool will be tried (see placeItem)
             nPool = len(set([item['Type'] for item in pool]))
+        while itemLocation is None and len(self.failItems) < nPool:
 #            print("P " + str(len(posItems)) + ", F " + str(len(self.failItems)) + " / " + str(nPool))
             itemLocation = self.placeItem(posItems, pool, curLocs)
-            if len(self.failItems) >= nPool:
-                break
-#        print(set([item['Type'] for item in posItems]))
         return itemLocation
 
     def cancelItem(self, itemLocations, maxLen):
@@ -585,7 +587,7 @@ class Randomizer(object):
             # this can happen when we force a cancel for more variety, but it is not possible
             sys.stdout.write('!')
             sys.stdout.flush()
-            return
+            return False
         item = itemLoc['Item']
         loc = itemLoc['Location']
         if item in self.currentItems:
@@ -597,6 +599,7 @@ class Randomizer(object):
 #        print("Cancelled  " + item['Type'] + " at " + loc['Name'])
         sys.stdout.write('x')
         sys.stdout.flush()
+        return True
         
     def checkLocPool(self):
         if not any(self.isProgItem(item) for item in self.itemPool):
@@ -680,11 +683,14 @@ class Randomizer(object):
             itemLocation = self.generateItem(curLocs, self.itemPool)
         if itemLocation is None and self.totalCancels < 250:
             # we cannot place items anymore, cancel a bunch of our last decisions
-            while len(itemLocations) > 0 and nCancel < self.maxCancel and len(self.itemPool) <= maxLen:
-                self.cancelItem(itemLocations, maxLen)
-                nCancel += 1
-            curLocs = self.currentLocations(self.currentItems)
-            itemLocation = self.generateItem(curLocs, self.itemPool)
+            doCancel = True
+            while doCancel is True and len(itemLocations) > 0 and nCancel < self.maxCancel and len(self.itemPool) <= maxLen:
+                doCancel = self.cancelItem(itemLocations, maxLen)
+                if doCancel is True:
+                    nCancel += 1
+            if nLocsIn > 0 or nCancel > 0:
+                curLocs = self.currentLocations(self.currentItems)
+                itemLocation = self.generateItem(curLocs, self.itemPool)
         else:
             sys.stdout.write('-')
             sys.stdout.flush()

@@ -18,7 +18,7 @@ class AccessPoint(object):
         self.traverse = traverse
 
     def __str__(self):
-        return "[" + self.GraphArea + "] " + self.name
+        return "[" + self.GraphArea + "] " + self.Name
 
     # for additions after construction (inter-area transitions)
     def addTransition(self, destName):
@@ -66,7 +66,7 @@ accessPoints = [
         'Green Hill Zone Top Right': lambda items: wor(haveItem(items, 'Wave'),
                                                        wand(canOpenRedDoors(items), # can do the glitch with either missile or supers
                                                             Knows.GreenGateGlitch))
-    }),
+    }, lambda items: canOpenGreenDoors(items)),
     # Wrecked Ship
     AccessPoint('West Ocean Left', 'WreckedShip', {
         'Crab Maze Left': lambda items: wand(canOpenGreenDoors(items),
@@ -88,17 +88,15 @@ accessPoints = [
     }),
     # Norfair   
     AccessPoint('Warehouse Entrance Left', 'Norfair', {
-        'Single Chamber Top Right': lambda items: wand(canAccessHeatedNorfairFromEntrance(items),
-                                                       RomPatches.has(RomPatches.SingleChamberNoCrumble)),
-        'Kronic Boost Room Bottom Right': lambda items: canAccessHeatedNorfairFromEntrance(items)
+        'Single Chamber Top Right': lambda items: canAccessHeatedNorfairFromEntrance(items),
+        'Kronic Boost Room Bottom Left': lambda items: canAccessHeatedNorfairFromEntrance(items)
     }),
     AccessPoint('Single Chamber Top Right', 'Norfair', {
         'Warehouse Entrance Left': lambda items: canHellRun(items, 'MainUpperNorfair'),
-        'Kronic Boost Room Bottom Right': lambda items: canHellRun(items, 'MainUpperNorfair')
-    }),
-    AccessPoint('Kronic Boost Room Bottom Right', 'Norfair', {
-        'Single Chamber Top Right': lambda items: wand(canHellRun(items, 'MainUpperNorfair'),
-                                                       RomPatches.has(RomPatches.SingleChamberNoCrumble)),
+        'Kronic Boost Room Bottom Left': lambda items: canHellRun(items, 'MainUpperNorfair')
+    }, lambda items: RomPatches.has(RomPatches.SingleChamberNoCrumble)),
+    AccessPoint('Kronic Boost Room Bottom Left', 'Norfair', {
+        'Single Chamber Top Right': lambda items: canHellRun(items, 'MainUpperNorfair'),
         'Warehouse Entrance Left': lambda items: canHellRun(items, 'MainUpperNorfair')
     }, lambda items: canOpenYellowDoors(items)),
     # Maridia
@@ -107,11 +105,11 @@ accessPoints = [
         'Crab Hole Bottom Left': lambda items: canOpenGreenDoors(items), # red door+green gate
     }),
     AccessPoint('Crab Hole Bottom Left', 'Maridia', {
-        'Main Street Bottom': lambda items: wand(wor(haveItem(items, 'Gravity'), 
+        'Main Street Bottom': lambda items: wand(wor(haveItem(items, 'Gravity'), # FIXME maybe HiJump or Gravity jump needed
                                                      canDoSuitlessOuterMaridia(items)),
                                                  wand(haveItem(items, 'Super'), Knows.GreenGateGlitch)),
-        'Le Coude Right': lambda items: wand(wor(haveItem(items, 'Gravity'), 
-                                                     canDoSuitlessOuterMaridia(items)),
+        'Le Coude Right': lambda items: wand(wor(haveItem(items, 'Gravity'), # FIXME maybe HiJump or Gravity jump needed
+                                                 canDoSuitlessOuterMaridia(items)),
                                              canOpenGreenDoors(items)) # toilet door
     }),
     AccessPoint('Le Coude Right', 'Maridia', {
@@ -141,18 +139,20 @@ accessPoints = [
         'East Tunnel Right': lambda items: SMBool(True, 0)
     }),
     AccessPoint('Caterpillar Room Top Right', 'RedBrinstar', {
-        'Red Brinstar Elevator': lambda items: wand(wor(RomPatches.has(RomPatches.NoMaridiaGreenGates), canOpenGreenDoors(items)),
+        'Red Brinstar Elevator': lambda items: wand(haveItem(items, 'Morph'),
+                                                    wor(RomPatches.has(RomPatches.NoMaridiaGreenGates), canOpenGreenDoors(items)),
                                                     wor(canUsePowerBombs(items),
                                                         RomPatches.has(RomPatches.RedTowerBlueDoors))),
-        'Red Tower Top Left': lambda items: wand(wor(RomPatches.has(RomPatches.NoMaridiaGreenGates), canOpenGreenDoors(items)),
+        'Red Tower Top Left': lambda items: wand(haveItem(items, 'Morph'),
+                                                 wor(RomPatches.has(RomPatches.NoMaridiaGreenGates), canOpenGreenDoors(items)),
                                                  canOpenYellowDoors(items))
-    }, lambda items: haveItem(items, 'Morph')),
+    }, lambda items: wand(haveItem(items, 'Morph'), RomPatches.has(RomPatches.NoMaridiaGreenGates))),
     AccessPoint('Red Brinstar Elevator', 'RedBrinstar', {
-        'Caterpillar Room Top Right': lambda items: wand(haveItem(items, 'Morph'), RomPatches.has(RomPatches.NoMaridiaGreenGates)),
+        'Caterpillar Room Top Right': lambda items: SMBool(True, 0), # handled by room traverse function
         'Red Tower Top Left': lambda items: canOpenYellowDoors(items)
     }),
     AccessPoint('East Tunnel Right', 'RedBrinstar', {
-        'East Tunnel Top Right': lambda items: RomPatches.has(RomPatches.NoMaridiaGreenGates),
+        'East Tunnel Top Right': lambda items: SMBool(True, 0), # handled by room traverse function
         'Glass Tunnel Top': lambda items: wand(canUsePowerBombs(items),
                                                wor(haveItem(items, 'Gravity'),
                                                    haveItem(items, 'HiJump'))),
@@ -161,7 +161,7 @@ accessPoints = [
     AccessPoint('East Tunnel Top Right', 'RedBrinstar', {
         'East Tunnel Right': lambda items: wor(RomPatches.has(RomPatches.NoMaridiaGreenGates),
                                                canOpenGreenDoors(items))
-    }),
+    }, lambda items: RomPatches.has(RomPatches.NoMaridiaGreenGates)),
     AccessPoint('Glass Tunnel Top', 'RedBrinstar', {
         'East Tunnel Right': lambda items: canUsePowerBombs(items)
     }, lambda items: canUsePowerBombs(items))
@@ -174,7 +174,7 @@ vanillaTransitions = [
     ('Keyhunter Room Bottom', 'Red Brinstar Elevator'),
     ('Noob Bridge Right', 'Red Tower Top Left'),
     ('Crab Maze Left', 'Le Coude Right'),
-    ('Kronic Boost Room Bottom Right', 'Lava Dive Right'),
+    ('Kronic Boost Room Bottom Left', 'Lava Dive Right'),
     ('Three Muskateers Room Left', 'Single Chamber Top Right'),
     ('Warehouse Entrance Left', 'East Tunnel Right'),
     ('East Tunnel Top Right', 'Crab Hole Bottom Left'),
@@ -189,6 +189,15 @@ class AccessGraph(object):
             self.accessPoints[ap.Name] = ap
         for t in transitions:
             self.addTransition(t[0], t[1], bidir)
+        self.toDot("access_graph.dot")
+
+    def toDot(self, dotFile):
+        with open(dotFile, "w") as f:
+            f.write("digraph {\n")
+            for name,ap in self.accessPoints.iteritems():
+                for t in ap.transitions:
+                    f.write('"' + str(ap) + '" -> "' + str(self.accessPoints[t]) + '"\n')
+            f.write("}\n")
 
     def addTransition(self, srcName, dstName, both=True):
         src = self.accessPoints[srcName]
@@ -227,7 +236,7 @@ class AccessGraph(object):
             newAvailNodes = self.getNewAvailNodes(availNodes, newAvailNodes, items, maxDiff)
             availNodes += newAvailNodes
         return availNodes
-
+    
     # locations: locations to check
     # items: collected items
     # maxDiff: difficulty limit
@@ -250,3 +259,4 @@ class AccessGraph(object):
                         availLocs.append(loc)
                         break
         return availLocs
+

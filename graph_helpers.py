@@ -281,7 +281,7 @@ def canAccessHeatedNorfairFromEntrance(items):
     #            heated rooms, which requires a hell run if we don't have gravity.
     #            this test is then used to access Speed, Norfair Reserve Tank, Wave and Crocomire
     #            as they are all hellruns from Bubble Mountain.
-    return wand(wor(haveItem(items, 'SpeedBooster'), # frog speedway
+    return wand(wor(wand(haveItem(items, 'SpeedBooster'), canPassBombPassages(items)), # frog speedway
                     # go through cathedral
                     wand(canOpenRedDoors(items),
                          wor(RomPatches.has(RomPatches.CathedralEntranceWallJump),

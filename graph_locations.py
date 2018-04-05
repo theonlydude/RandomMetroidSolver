@@ -298,7 +298,7 @@ locations = [
     'AccessPoints' : {
         'Warehouse Entrance Left': lambda items: canAccessCrocFromNorfairEntrance(items),
         'Single Chamber Top Right': lambda items: canAccessCrocFromMainUpperNorfair(items),
-        'Kronic Boost Room Bottom Right': lambda items: canAccessCrocFromMainUpperNorfair(items)
+        'Kronic Boost Room Bottom Left': lambda items: canAccessCrocFromMainUpperNorfair(items)
     },
     'Available': lambda items: enoughStuffCroc(items)
 },
@@ -329,7 +329,7 @@ locations = [
     'AccessPoints' : {
         'Warehouse Entrance Left': lambda items: canAccessCrocFromNorfairEntrance(items),
         'Single Chamber Top Right': lambda items: canAccessCrocFromMainUpperNorfair(items),
-        'Kronic Boost Room Bottom Right': lambda items: canAccessCrocFromMainUpperNorfair(items)
+        'Kronic Boost Room Bottom Left': lambda items: canAccessCrocFromMainUpperNorfair(items)
     },
     'Available': lambda items: wand(enoughStuffCroc(items),
                                     wor(canFly(items),
@@ -346,7 +346,7 @@ locations = [
     'Room': 'Norfair Reserve Tank Room',
     'AccessPoints' : {
         'Single Chamber Top Right': lambda items: canHellRun(items, 'MainUpperNorfair'),
-        'Kronic Boost Room Bottom Right': lambda items: canHellRun(items, 'MainUpperNorfair'),
+        'Kronic Boost Room Bottom Left': lambda items: canHellRun(items, 'MainUpperNorfair'),
         'Warehouse Entrance Left': lambda items: canAccessHeatedNorfairFromEntrance(items)
     },
     'Available': lambda items: canEnterNorfairReserveArea(items)
@@ -361,7 +361,7 @@ locations = [
     'Room': 'Speed Booster Room',
     'AccessPoints' : {
         'Single Chamber Top Right': lambda items: canHellRun(items, 'MainUpperNorfair'),
-        'Kronic Boost Room Bottom Right': lambda items: canHellRun(items, 'MainUpperNorfair'),
+        'Kronic Boost Room Bottom Left': lambda items: canHellRun(items, 'MainUpperNorfair'),
         'Warehouse Entrance Left': lambda items: canAccessHeatedNorfairFromEntrance(items)
     },
     'Available': lambda items: canOpenGreenDoors(items)
@@ -376,7 +376,7 @@ locations = [
     'Room': 'Wave Beam Room',
     'AccessPoints' : {
         'Single Chamber Top Right': lambda items: canHellRun(items, 'MainUpperNorfair'),
-        'Kronic Boost Room Bottom Right': lambda items: canHellRun(items, 'MainUpperNorfair'),
+        'Kronic Boost Room Bottom Left': lambda items: canHellRun(items, 'MainUpperNorfair'),
         'Warehouse Entrance Left': lambda items: canAccessHeatedNorfairFromEntrance(items)
     },
     'Available': lambda items: canOpenRedDoors(items)
@@ -394,7 +394,7 @@ locations = [
                                               canPassWorstRoom(items),
                                               canOpenYellowDoors(items),
                                               canOpenGreenDoors(items)),
-        'Three Muskateers Room Left': lambda items: wand(canOpenYellowDoors(item),
+        'Three Muskateers Room Left': lambda items: wand(canOpenYellowDoors(items),
                                                          canOpenGreenDoors(items))
     },
     # DONE: already set in function
@@ -1137,7 +1137,7 @@ locations = [
     'AccessPoints' : {
         'Warehouse Entrance Left': lambda items: canAccessCrocFromNorfairEntrance(items),
         'Single Chamber Top Right': lambda items: canAccessCrocFromMainUpperNorfair(items),
-        'Kronic Boost Room Bottom Right': lambda items: canAccessCrocFromMainUpperNorfair(items)
+        'Kronic Boost Room Bottom Left': lambda items: canAccessCrocFromMainUpperNorfair(items)
     },
     'Available': lambda items: wor(canFly(items), haveItem(items, 'Grapple'),
                                    wand(haveItem(items, 'HiJump'),
@@ -1182,7 +1182,7 @@ locations = [
     'AccessPoints' : {
         'Warehouse Entrance Left': lambda items: canAccessCrocFromNorfairEntrance(items),
         'Single Chamber Top Right': lambda items: canAccessCrocFromMainUpperNorfair(items),
-        'Kronic Boost Room Bottom Right': lambda items: canAccessCrocFromMainUpperNorfair(items)
+        'Kronic Boost Room Bottom Left': lambda items: canAccessCrocFromMainUpperNorfair(items)
     },
     'Available': lambda items: wand(enoughStuffCroc(items),
                                     wor(canFly(items),
@@ -1202,7 +1202,7 @@ locations = [
     'AccessPoints' : {
         'Warehouse Entrance Left': lambda items: canAccessCrocFromNorfairEntrance(items),
         'Single Chamber Top Right': lambda items: canAccessCrocFromMainUpperNorfair(items),
-        'Kronic Boost Room Bottom Right': lambda items: canAccessCrocFromMainUpperNorfair(items)
+        'Kronic Boost Room Bottom Left': lambda items: canAccessCrocFromMainUpperNorfair(items)
     },
     'Available': lambda items: enoughStuffCroc(items)
 },
@@ -1217,7 +1217,7 @@ locations = [
     'AccessPoints' : {
         'Warehouse Entrance Left': lambda items: canAccessCrocFromNorfairEntrance(items),
         'Single Chamber Top Right': lambda items: canAccessCrocFromMainUpperNorfair(items),
-        'Kronic Boost Room Bottom Right': lambda items: canAccessCrocFromMainUpperNorfair(items)
+        'Kronic Boost Room Bottom Left': lambda items: canAccessCrocFromMainUpperNorfair(items)
     },
     'Available': lambda items: wand(enoughStuffCroc(items),
                                     wor(canFly(items), haveItem(items, 'Grapple'),
@@ -1233,7 +1233,7 @@ locations = [
     'Room': 'Norfair Reserve Tank Room',
     'AccessPoints' : {
         'Single Chamber Top Right': lambda items: canHellRun(items, 'MainUpperNorfair'),
-        'Kronic Boost Room Bottom Right': lambda items: canHellRun(items, 'MainUpperNorfair'),
+        'Kronic Boost Room Bottom Left': lambda items: canHellRun(items, 'MainUpperNorfair'),
         'Warehouse Entrance Left': lambda items: canAccessHeatedNorfairFromEntrance(items)
     },
     'Available': lambda items: canEnterNorfairReserveArea(items)
@@ -1248,7 +1248,7 @@ locations = [
     'Room': 'Green Bubbles Missile Room',
     'AccessPoints' : {
         'Single Chamber Top Right': lambda items: canHellRun(items, 'MainUpperNorfair'),
-        'Kronic Boost Room Bottom Right': lambda items: canHellRun(items, 'MainUpperNorfair'),
+        'Kronic Boost Room Bottom Left': lambda items: canHellRun(items, 'MainUpperNorfair'),
         'Warehouse Entrance Left': lambda items: canAccessHeatedNorfairFromEntrance(items)
     },
     'Available': lambda items: canEnterNorfairReserveArea(items)
@@ -1263,7 +1263,7 @@ locations = [
     'Room': 'Bubble Mountain',
     'AccessPoints' : {
         'Single Chamber Top Right': lambda items: canHellRun(items, 'MainUpperNorfair'),
-        'Kronic Boost Room Bottom Right': lambda items: canHellRun(items, 'MainUpperNorfair'),
+        'Kronic Boost Room Bottom Left': lambda items: canHellRun(items, 'MainUpperNorfair'),
         'Warehouse Entrance Left': lambda items: canAccessHeatedNorfairFromEntrance(items)
     },
     'Available': lambda items: SMBool(True, 0)
@@ -1278,7 +1278,7 @@ locations = [
     'Room': 'Speed Booster Hall',
     'AccessPoints' : {
         'Single Chamber Top Right': lambda items: canHellRun(items, 'MainUpperNorfair'),
-        'Kronic Boost Room Bottom Right': lambda items: canHellRun(items, 'MainUpperNorfair'),
+        'Kronic Boost Room Bottom Left': lambda items: canHellRun(items, 'MainUpperNorfair'),
         'Warehouse Entrance Left': lambda items: canAccessHeatedNorfairFromEntrance(items)
     },
     'Available': lambda items: canOpenGreenDoors(items)
@@ -1293,7 +1293,7 @@ locations = [
     'Room': 'Double Chamber',
     'AccessPoints' : {
         'Single Chamber Top Right': lambda items: canHellRun(items, 'MainUpperNorfair'),
-        'Kronic Boost Room Bottom Right': lambda items: canHellRun(items, 'MainUpperNorfair'),
+        'Kronic Boost Room Bottom Left': lambda items: canHellRun(items, 'MainUpperNorfair'),
         'Warehouse Entrance Left': lambda items: canAccessHeatedNorfairFromEntrance(items)
     },
     'Available': lambda items: canOpenRedDoors(items)

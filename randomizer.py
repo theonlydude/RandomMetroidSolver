@@ -118,7 +118,7 @@ if __name__ == "__main__":
     if args.maxDifficulty:
         maxDifficulty = text2diff[args.maxDifficulty]
     else:
-        maxDifficulty = 1000000
+        maxDifficulty = float('inf')
 
     # same as solver, increase max difficulty 
     threshold = maxDifficulty

@@ -23,11 +23,6 @@ class AccessPoint(object):
     # for additions after construction (inter-area transitions)
     def addTransition(self, destName):
         self.transitions[destName] = lambda items: self.traverse(items)
-    
-    def getTransition(self, destName, items):
-        if not destName in self.transitions:
-            return (False, 0)
-        return self.transitions[destName](items)
 
 
 # all access points and traverse functions
@@ -92,9 +87,9 @@ accessPoints = [
         'Kronic Boost Room Bottom Left': lambda items: canAccessHeatedNorfairFromEntrance(items)
     }),
     AccessPoint('Single Chamber Top Right', 'Norfair', {
-        'Warehouse Entrance Left': lambda items: canHellRun(items, 'MainUpperNorfair'),
-        'Kronic Boost Room Bottom Left': lambda items: canHellRun(items, 'MainUpperNorfair')
-    }, lambda items: RomPatches.has(RomPatches.SingleChamberNoCrumble)),
+        'Warehouse Entrance Left': lambda items: wand(canDestroyBombWalls(items), haveItem('Morph'), canHellRun(items, 'MainUpperNorfair')),
+        'Kronic Boost Room Bottom Left': lambda items: wand(canDestroyBombWalls(items), haveItem('Morph'), canHellRun(items, 'MainUpperNorfair'))
+    }, lambda items: wand(canDestroyBombWalls(items), haveItem('Morph'), RomPatches.has(RomPatches.SingleChamberNoCrumble)),
     AccessPoint('Kronic Boost Room Bottom Left', 'Norfair', {
         'Single Chamber Top Right': lambda items: canHellRun(items, 'MainUpperNorfair'),
         'Warehouse Entrance Left': lambda items: canHellRun(items, 'MainUpperNorfair')

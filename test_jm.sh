@@ -22,6 +22,7 @@ SPREADS=("" "--spreadItems")
 FULLS=("" "--fullRandomization")
 SUITS=("" "--suitsRestriction")
 SPEEDS=("" "--speedScrewRestriction")
+DIFFS=("" "" "" "" "" "" "--maxDifficulty easy" "--maxDifficulty medium" "--maxDifficulty hard" "--maxDifficulty harder" "--maxDifficulty hardcore" "--maxDifficulty mania")
 
 function generate_params {
     SEED="$1"
@@ -52,7 +53,10 @@ function generate_params {
     let S=$RANDOM%${#SPEEDS[@]}
     SPEED=${SPEEDS[$S]}
 
-    echo "-r ${ROM} --param diff_presets/${PRESET}.json ${PATCHES} --seed ${SEED} ${PROG_SPEED} ${SUPERFUN} ${MINORS} ${MISSILES} ${SUPERS} ${POWERBOMBS} ${ENERGY} ${SPREAD} ${FULL} ${SUIT} ${SPEED}"
+    let S=$RANDOM%${#DIFFS[@]}
+    DIFF=${DIFFS[$S]}
+
+    echo "-r ${ROM} --param diff_presets/${PRESET}.json ${PATCHES} --seed ${SEED} ${PROG_SPEED} ${SUPERFUN} ${MINORS} ${MISSILES} ${SUPERS} ${POWERBOMBS} ${ENERGY} ${SPREAD} ${FULL} ${SUIT} ${SPEED} ${DIFF}"
 }
 
 if [ -z test_jm.csv ]; then
@@ -96,6 +100,8 @@ for i in $(seq 1 ${LOOPS}); do
         MIS="MISMATCH !!!!!"
         echo "Mismatch for ${SEED}" | tee -a test_jm.err
         MISMATCH_FOUND=0
+    else
+        MIS=""
     fi
 
     echo "${SEED};${PARAMS};NEW;${TIME};${STUCK};${SUM_NEW};${MIS}" | tee -a test_jm.csv

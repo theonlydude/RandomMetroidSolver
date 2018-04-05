@@ -661,8 +661,9 @@ locations = [
     'Address': 0x78518,
     'Visibility': "Visible",
     'Room': 'Early Supers Room',
-    'Available': lambda items: wand(canPassBombPassages(items),
-                                    canOpenRedDoors(items))
+    'Available': lambda items: canOpenRedDoors(items),
+    'PostAvailable': lambda items: wor(canPassBombPassages(items),
+                                       RomPatches.has(RomPatches.EarlySupersShotBlock))
 },
 {
     'Area': "Brinstar",

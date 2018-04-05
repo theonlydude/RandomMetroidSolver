@@ -1,7 +1,11 @@
 # super metroid boolean
 class SMBool:
     def __init__(self, bool, difficulty=0, knows=[], items=[]):
-        self.bool = bool
+        # to avoid storing an SMBool as the bool attribute of the SMBool
+        if bool == True:
+            self.bool = True
+        else:
+            self.bool = False
         self.difficulty = difficulty
         self.knows = knows
         self.items = items

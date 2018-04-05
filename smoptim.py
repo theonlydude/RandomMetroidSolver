@@ -17,6 +17,8 @@ class SMOptim(object):
         if store not in ['all', 'diff', 'bool']:
             raise Exception("SMOptim::factory::invalid store param")
 
+        print("SMOptim::factory store {} cache {}".format(store, cache))
+
         if store == 'all':
             return SMOptimAll(cache)
         elif store == 'diff':
@@ -58,9 +60,11 @@ class SMOptim(object):
                       self.curSMBool.knows[:],
                       self.curSMBool.items[:])
 
-    def setSMBool(self, bool, diff=0):
+    def setSMBool(self, bool, diff=0, items=[]):
         self.curSMBool.bool = bool
-        self.curSMBool.diff = diff
+        self.curSMBool.difficulty = diff
+        self.curSMBool.items = items
+        return self.curSMBool
 
     def getBool(self, dummy):
         # get access to current smbool boolean (as internaly it can be (bool, diff) or bool)
@@ -213,7 +217,7 @@ class SMOptim(object):
     def _canFly(self):
         # TODO::return spacejump item
         if self.getBool(self.haveItem('SpaceJump')) == True:
-            return SMBool(True, easy)
+            return self.setSMBool(True, easy, ['SpaceJump'])
         elif self.getBool(self.wand(self.haveItem('Morph'),
                                     self.haveItem('Bomb'),
                                     self.knowsInfiniteBombJump())) == True:
@@ -224,7 +228,7 @@ class SMOptim(object):
     def _canFlyDiagonally(self):
         # TODO::return spacejump item
         if self.getBool(self.haveItem('SpaceJump')) == True:
-            return SMBool(True, easy)
+            return self.setSMBool(True, easy, ['SpaceJump'])
         elif self.getBool(self.wand(self.haveItem('Morph'),
                                     self.haveItem('Bomb'),
                                     self.knowsDiagonalBombJump())) == True:
@@ -666,6 +670,9 @@ class SMOptim(object):
         (ammoMargin, secs) = self.canInflictEnoughDamages(18000, doubleSuper=True, givesDrops=False)
         if ammoMargin == 0:
             return SMBool(False)
+
+        #print("enoughStuffsRidley ammoMargin == {} items={}".format(ammoMargin, [(item, getattr(self, item)) for item in self.items if getattr(self, item) == True]))
+
         # print('RIDLEY', ammoMargin, secs)
         return SMBool(True, self.computeBossDifficulty(ammoMargin, secs,
                                                        Settings.bossesDifficulty['Ridley']))
@@ -987,8 +994,8 @@ class SMOptimAll(SMOptim):
         else:
             return SMBool(False)
 
-    def setSMBool(self, bool, diff=0):
-        return SMBool(bool, diff)
+    def setSMBool(self, bool, diff=0, items=[]):
+        return SMBool(bool, diff, items=items)
 
     def getBool(self, dummy):
         return dummy.bool

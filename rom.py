@@ -43,7 +43,7 @@ class RomPatches:
     
     #### Patch sets
     # total randomizer: tournament and full
-    Total = [ BlueBrinstarBlueDoor, MoatShotBlock,
+    Total = [ BlueBrinstarBlueDoor, MoatShotBlock, EarlySupersShotBlock,
               SpazerShotBlock, RedTowerLeftPassage, RedTowerBlueDoors,
               HiJumpShotBlock, CathedralEntranceWallJump,
               ReducedLavaDamage, NoGravityEnvProtection ]

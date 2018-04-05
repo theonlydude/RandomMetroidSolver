@@ -87,9 +87,9 @@ accessPoints = [
         'Kronic Boost Room Bottom Left': lambda items: canAccessHeatedNorfairFromEntrance(items)
     }),
     AccessPoint('Single Chamber Top Right', 'Norfair', {
-        'Warehouse Entrance Left': lambda items: wand(canDestroyBombWalls(items), haveItem('Morph'), canHellRun(items, 'MainUpperNorfair')),
-        'Kronic Boost Room Bottom Left': lambda items: wand(canDestroyBombWalls(items), haveItem('Morph'), canHellRun(items, 'MainUpperNorfair'))
-    }, lambda items: wand(canDestroyBombWalls(items), haveItem('Morph'), RomPatches.has(RomPatches.SingleChamberNoCrumble)),
+        'Warehouse Entrance Left': lambda items: wand(canDestroyBombWalls(items), haveItem(items, 'Morph'), canHellRun(items, 'MainUpperNorfair')),
+        'Kronic Boost Room Bottom Left': lambda items: wand(canDestroyBombWalls(items), haveItem(items, 'Morph'), canHellRun(items, 'MainUpperNorfair'))
+    }, lambda items: wand(canDestroyBombWalls(items), haveItem(items, 'Morph'), RomPatches.has(RomPatches.SingleChamberNoCrumble))),
     AccessPoint('Kronic Boost Room Bottom Left', 'Norfair', {
         'Single Chamber Top Right': lambda items: canHellRun(items, 'MainUpperNorfair'),
         'Warehouse Entrance Left': lambda items: canHellRun(items, 'MainUpperNorfair')

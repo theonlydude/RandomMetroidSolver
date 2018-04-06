@@ -27,7 +27,6 @@ locations = [
     'AccessPoints' : {
         'Landing Site': lambda items: SMBool(True, 0)
     },
-    # EXPLAINED: difficulty already handled in the canEnterAndLeaveGauntlet function
     'Available': lambda items: canEnterAndLeaveGauntlet(items)
 },
 {
@@ -41,8 +40,6 @@ locations = [
     'AccessPoints' : {
         'Landing Site': lambda items: SMBool(True, 0)
     },
-    # EXPLAINED: need to morph to enter Alcatraz. red door at Flyway.
-    #            we may not have bombs or power bomb to get out of Alcatraz.    
     'Available': lambda items: wand(haveItem(items, 'Morph'),
                                     canOpenRedDoors(items)),
     'PostAvailable': lambda items: wor(Knows.AlcatrazEscape,
@@ -72,9 +69,6 @@ locations = [
     'AccessPoints' : {
         'Green Brinstar Elevator Right': lambda items: SMBool(True, 0)
     },
-    # EXPLAINED: break the bomb wall at left of Parlor and Alcatraz,
-    #            open red door at Green Brinstar Main Shaft,
-    #            mock ball for early retreval or speed booster
     'Available': lambda items: wand(canOpenRedDoors(items),
                                     wor(wand(Knows.Mockball,
                                         haveItem(items, 'Morph')),
@@ -108,7 +102,6 @@ locations = [
     'AccessPoints' : {
         'Landing Site': lambda items: SMBool(True, 0)
     },
-    # EXPLAINED: no difficulty
     'Available': lambda items: SMBool(True, 0)
 },
 {
@@ -143,8 +136,6 @@ locations = [
     'AccessPoints' : {
         'Green Brinstar Elevator Right': lambda items: SMBool(True, 0)
     },
-    # EXPLAINED: break the bomb wall at left of Parlor and Alcatraz,
-    #            power bomb down of Green Brinstar Main Shaft
     'Available': lambda items: canUsePowerBombs(items)
 },
 {
@@ -160,11 +151,6 @@ locations = [
                                                             canDestroyBombWalls(items)),
         'Green Hill Zone Top Right': lambda items: haveItem(items, 'Morph')
     },
-    # EXPLAINED: break the bomb wall at left of Parlor and Alcatraz with power bombs,
-    #            open red door at Green Brinstar Main Shaft (down right),
-    #            power bomb at bottom of Big Pink (Charge Beam),
-    #            open red door leading to waterway,
-    #            at waterway, either do:
     #  -with gravity do a speed charge
     #  -a simple short charge from the blocks above the water
     'Available': lambda items: wand(canUsePowerBombs(items),
@@ -186,7 +172,6 @@ locations = [
                                                             canDestroyBombWalls(items)),
         'Green Hill Zone Top Right': lambda items: haveItem(items, 'Morph')
     },
-    # DONE: use Knows.ReverseGateGlitch
     'Available': lambda items: wand(canUsePowerBombs(items),
                                     wor(haveItem(items, 'Wave'),
                                         wand(haveItem(items, 'Super'),
@@ -235,7 +220,6 @@ locations = [
         'Red Tower Top Left': lambda items: SMBool(True, 0),
         'East Tunnel Right': lambda items: SMBool(True, 0)
     },
-    # DONE: no difficulty
     'Available': lambda items: wand(canOpenGreenDoors(items),
                                     wor(canPassBombPassages(items), RomPatches.has(RomPatches.SpazerShotBlock)))
 },
@@ -250,7 +234,6 @@ locations = [
     'AccessPoints' : {
         'Warehouse Entrance Left': lambda items: SMBool(True, 0)
     },
-    # DONE: no difficulty
     'Available': lambda items: wand(canAccessKraidsLair(items), Bosses.bossDead('Kraid'))
 },
 {
@@ -264,7 +247,6 @@ locations = [
     'AccessPoints' : {
         'Warehouse Entrance Left': lambda items: SMBool(True, 0)
     },
-    # DONE: no difficulty
     'Available': lambda items: wand(canAccessKraidsLair(items),
                                     enoughStuffsKraid(items)),
     'Pickup': lambda: Bosses.beatBoss('Kraid')
@@ -280,7 +262,6 @@ locations = [
     'AccessPoints' : {
         'Warehouse Entrance Left': lambda items: SMBool(True, 0)
     },
-    # DONE: harder without varia
     'Available': lambda items: wand(canOpenGreenDoors(items),
                                     canHellRun(items, 'Ice'),
                                     wor(wand(haveItem(items, 'Morph'),
@@ -297,7 +278,6 @@ locations = [
     'Room': "Crocomire's Room",
     'AccessPoints' : {
         'Warehouse Entrance Left': lambda items: canAccessCrocFromNorfairEntrance(items),
-        'Single Chamber Top Right': lambda items: canAccessCrocFromMainUpperNorfair(items),
         'Kronic Boost Room Bottom Left': lambda items: canAccessCrocFromMainUpperNorfair(items)
     },
     'Available': lambda items: enoughStuffCroc(items)
@@ -313,7 +293,6 @@ locations = [
     'AccessPoints' : {
         'Warehouse Entrance Left': lambda items: SMBool(True, 0)
     },
-    # DONE: no difficulty
     'Available': lambda items: canOpenRedDoors(items),
     'PostAvailable': lambda items: wor(canPassBombPassages(items),
                                        RomPatches.has(RomPatches.HiJumpShotBlock))
@@ -328,12 +307,11 @@ locations = [
     'Room': 'Grapple Beam Room',
     'AccessPoints' : {
         'Warehouse Entrance Left': lambda items: canAccessCrocFromNorfairEntrance(items),
-        'Single Chamber Top Right': lambda items: canAccessCrocFromMainUpperNorfair(items),
         'Kronic Boost Room Bottom Left': lambda items: canAccessCrocFromMainUpperNorfair(items)
     },
     'Available': lambda items: wand(enoughStuffCroc(items),
                                     wor(canFly(items),
-                                        haveItem(items, 'SpeedBooster'),
+                                        wand(haveItem(items, 'SpeedBooster'), wor(Knows.ShortCharge, canUsePowerBombs(items))),
                                         Knows.GreenGateGlitch))
 },
 {
@@ -345,11 +323,10 @@ locations = [
     'Visibility': "Chozo",
     'Room': 'Norfair Reserve Tank Room',
     'AccessPoints' : {
-        'Single Chamber Top Right': lambda items: canHellRun(items, 'MainUpperNorfair'),
         'Kronic Boost Room Bottom Left': lambda items: canHellRun(items, 'MainUpperNorfair'),
         'Warehouse Entrance Left': lambda items: canAccessHeatedNorfairFromEntrance(items)
     },
-    'Available': lambda items: canEnterNorfairReserveArea(items)
+    'Available': lambda items: wand(haveItem(items, 'Morph'), canEnterNorfairReserveArea(items))
 },
 {
     'Area': "Norfair",
@@ -360,7 +337,6 @@ locations = [
     'Visibility': "Chozo",
     'Room': 'Speed Booster Room',
     'AccessPoints' : {
-        'Single Chamber Top Right': lambda items: canHellRun(items, 'MainUpperNorfair'),
         'Kronic Boost Room Bottom Left': lambda items: canHellRun(items, 'MainUpperNorfair'),
         'Warehouse Entrance Left': lambda items: canAccessHeatedNorfairFromEntrance(items)
     },
@@ -375,7 +351,6 @@ locations = [
     'Visibility': "Chozo",
     'Room': 'Wave Beam Room',
     'AccessPoints' : {
-        'Single Chamber Top Right': lambda items: canHellRun(items, 'MainUpperNorfair'),
         'Kronic Boost Room Bottom Left': lambda items: canHellRun(items, 'MainUpperNorfair'),
         'Warehouse Entrance Left': lambda items: canAccessHeatedNorfairFromEntrance(items)
     },
@@ -397,7 +372,6 @@ locations = [
         'Three Muskateers Room Left': lambda items: wand(canOpenYellowDoors(items),
                                                          canOpenGreenDoors(items))
     },
-    # DONE: already set in function
     'Available': lambda items: wand(canHellRun(items, 'LowerNorfair'), enoughStuffsRidley(items)),
     'Pickup': lambda: Bosses.beatBoss('Ridley')
 },
@@ -415,7 +389,8 @@ locations = [
     },
     'Available': lambda items: wand(canHellRun(items, 'LowerNorfair'),
                                     wor(haveItem(items, 'SpaceJump'),
-                                        Knows.GreenGateGlitch)),
+                                        Knows.GreenGateGlitch),
+                                    canDestroyBombWalls(items)),
     'PostAvailable': lambda items: wor(canFly(items),
                                        wand(haveItem(items, 'HiJump'),
                                             haveItem(items, 'ScrewAttack'),
@@ -433,7 +408,7 @@ locations = [
     'Room': 'Lower Norfair Fireflea Room',
     'AccessPoints' : {
         'Lava Dive Right': lambda items: wand(canHellRun(items, 'LowerNorfair'), canPassLavaPit(items), canPassWorstRoom(items)),
-        'Three Muskateers Room Left': lambda items: canHellRun(items, 'LowerNorfair')
+        'Three Muskateers Room Left': lambda items: wand(haveItem(items, 'Morph'), canHellRun(items, 'LowerNorfair'))
     },
     'Available': lambda items: SMBool(True, 0)
 },
@@ -512,11 +487,6 @@ locations = [
     'AccessPoints' : {
         'Main Street Bottom': lambda items: wor(haveItem(items, 'Gravity'), canDoSuitlessOuterMaridia(items))
     },
-    # DONE: difficulty already handled in canDoSuitlessOuterMaridia
-    # to acces the ETank in higher part of the room:
-    #  -use grapple to attach to the block
-    #  -use speedbooster ??
-    #  -can fly (space jump or infinite bomb jump)
     'Available': lambda items: wand(canOpenRedDoors(items),
                                     wor(canFly(items),
                                         wand(haveItem(items, 'Gravity'), haveItem(items, 'SpeedBooster')),
@@ -537,10 +507,10 @@ locations = [
     },
     # DONE: to leave the Plasma Beam room you have to kill the space pirates and return to the door
     # to unlock the door:
-    #  -can access draygon room to kill him
+    #  -kill draygon
     # to kill the space pirates:
     #  -do short charges with speedbooster
-    #  -do beam charges with spin jump attacks
+    #  -use pseudo screw
     #  -have screw attack
     #  -have plasma beam
     # to go back to the door:
@@ -574,7 +544,6 @@ locations = [
                                                  canOpenGreenDoors(items),
                                                  canUsePowerBombs(items))
     },
-    # DONE: this item can be taken without gravity, but it's super hard because of the quick sands...
     'Available': lambda items: wor(haveItem(items, 'Gravity'),
                                    Knows.SuitlessSandpit) # suitless maridia conditions are in canPassMtEverest
 },
@@ -591,12 +560,6 @@ locations = [
         'Le Coude Right': lambda items: wand(canOpenYellowDoors(items),
                                              canOpenGreenDoors(items)), # toilet
     },
-    # DONE: handle puyo clip and diagonal bomb jump
-    # to access the spring ball you can either:
-    #  -use the puyo clip with ice
-    #  -use the grapple to destroy the block and then:
-    #    -use high boots jump
-    #    -fly (with space jump or diagonal bomb jump
     'Available': lambda items: wand(haveItem(items, 'Gravity'),
                                     wor(wand(haveItem(items, 'Ice'),
                                              Knows.PuyoClip),
@@ -615,8 +578,7 @@ locations = [
     'AccessPoints' : {
         'Main Street Bottom': lambda items: canPassMtEverest(items)
     },
-    # DONE: difficulty already handled in the functions
-    'Available': lambda items: canDefeatBotwoon(items)
+    'Available': lambda items: wand(haveItem(items, 'Morph'), canDefeatBotwoon(items))
 },
 {
     'Area': "Maridia",
@@ -629,15 +591,13 @@ locations = [
     'AccessPoints' : {
         'Main Street Bottom': lambda items: wand(canPassMtEverest(items), canDefeatBotwoon(items), canOpenGreenDoors(items))
     },
-    # DONE: difficulty already handled in the function,
-    # we need to have access to the boss and enough stuff to kill him.
+    'Available': lambda items: enoughStuffsDraygon(items),
+    'Pickup': lambda: Bosses.beatBoss('Draygon'),
     # to get out of draygon room:
     #   with gravity but without highjump/bomb/space jump: gravity jump
     #   dessyreqt randomizer in machosist can have suitless draygon:
     #     to exit draygon room: grapple or crystal flash (for free shine spark)
     #     to exit precious room: spring ball jump, xray scope glitch or stored spark
-    'Available': lambda items: enoughStuffsDraygon(items),
-    'Pickup': lambda: Bosses.beatBoss('Draygon'),
     'PostAvailable': lambda items: wor(wand(haveItem(items, 'Gravity'),
                                             wor(canFly(items),
                                                 Knows.GravityJump,
@@ -716,7 +676,7 @@ locations = [
         'West Ocean Left': lambda items: canOpenGreenDoors(items),
         'Crab Maze Left': lambda items: canPassForgottenHighway(items, False)
     },
-    'Available': lambda items: wand(canOpenGreenDoors(items), haveItem(items, 'Morph'), Bosses.bossDead('Phantoon'))
+    'Available': lambda items: wand(haveItem(items, 'Super'), haveItem(items, 'Morph'), Bosses.bossDead('Phantoon'))
 },
 {
     'Area': "Crateria",
@@ -787,7 +747,7 @@ locations = [
     'Available': lambda items: wand(canUsePowerBombs(items),
                                     haveItem(items, 'SpeedBooster'),
                                     wor(haveItem(items, 'Ice'),
-                                        Knows.ShortCharge))
+                                        Knows.ShortCharge)) # there's also a dboost involved...but if you can short charge, you'll figure it out
 },
 {
     'Area': "Crateria",
@@ -830,9 +790,7 @@ locations = [
     },
     # either you go the back way, using a super and the camera glitch,
     # or just beat spore spawn (so no Knows* setting needed for the glitch)
-    'Available': lambda items: wor(wand(canPassBombPassages(items),
-                                        haveItem(items, 'Super')),
-                                   SMBool(True, easy)),
+    'Available': lambda items: SMBool(True, easy),
     'PostAvailable': lambda items: wand(canOpenGreenDoors(items),
                                         canPassBombPassages(items))
 },
@@ -1107,7 +1065,7 @@ locations = [
     'Visibility': "Hidden",
     'Room': 'Cathedral',
     'AccessPoints' : {
-        'Warehouse Entrance Left': lambda items: canAccessHeatedNorfairFromEntrance(items)
+        'Warehouse Entrance Left': lambda items: wand(canHellRun(items, 'MainUpperNorfair'), canOpenRedDoors(items), haveItem(items, 'Morph'))
     },
     'Available': lambda items: SMBool(True, 0)
 },
@@ -1136,7 +1094,6 @@ locations = [
     'Room': 'Crocomire Escape',
     'AccessPoints' : {
         'Warehouse Entrance Left': lambda items: canAccessCrocFromNorfairEntrance(items),
-        'Single Chamber Top Right': lambda items: canAccessCrocFromMainUpperNorfair(items),
         'Kronic Boost Room Bottom Left': lambda items: canAccessCrocFromMainUpperNorfair(items)
     },
     'Available': lambda items: wor(canFly(items), haveItem(items, 'Grapple'),
@@ -1154,9 +1111,9 @@ locations = [
     'AccessPoints' : {
         'Warehouse Entrance Left': lambda items: SMBool(True, 0)
     },
-    'Available': lambda items: SMBool(True, 0),
+    'Available': lambda items: canOpenRedDoors(items),
     'PostAvailable': lambda items: wor(canPassBombPassages(items),
-                                       RomPatches.has(RomPatches.HiJumpShotBlock))
+                                       wand(RomPatches.has(RomPatches.HiJumpShotBlock), haveItem(items, 'Morph')))
 },
 {
     'Area': "Norfair",
@@ -1169,7 +1126,7 @@ locations = [
     'AccessPoints' : {
         'Warehouse Entrance Left': lambda items: SMBool(True, 0)
     },
-    'Available': lambda items: SMBool(True, 0)
+    'Available': lambda items: canOpenRedDoors(items)
 },
 {
     'Area': "Norfair",
@@ -1181,15 +1138,13 @@ locations = [
     'Room': 'Post Crocomire Power Bomb Room',
     'AccessPoints' : {
         'Warehouse Entrance Left': lambda items: canAccessCrocFromNorfairEntrance(items),
-        'Single Chamber Top Right': lambda items: canAccessCrocFromMainUpperNorfair(items),
         'Kronic Boost Room Bottom Left': lambda items: canAccessCrocFromMainUpperNorfair(items)
     },
     'Available': lambda items: wand(enoughStuffCroc(items),
                                     wor(canFly(items),
                                         haveItem(items, 'Grapple'),
-                                        wand(haveItem(items, 'HiJump'),
-                                             haveItem(items, 'SpeedBooster'))))
-
+                                        wand(haveItem(items, 'SpeedBooster'),
+                                             wor(haveItem(items, 'HiJump'), Knows.ShortCharge))))
 },
 {
     'Area': "Norfair",
@@ -1201,10 +1156,9 @@ locations = [
     'Room': 'Post Crocomire Missile Room',
     'AccessPoints' : {
         'Warehouse Entrance Left': lambda items: canAccessCrocFromNorfairEntrance(items),
-        'Single Chamber Top Right': lambda items: canAccessCrocFromMainUpperNorfair(items),
         'Kronic Boost Room Bottom Left': lambda items: canAccessCrocFromMainUpperNorfair(items)
     },
-    'Available': lambda items: enoughStuffCroc(items)
+    'Available': lambda items: wand(enoughStuffCroc(items), haveItem(items, 'Morph'))
 },
 {
     'Area': "Norfair",
@@ -1216,12 +1170,12 @@ locations = [
     'Room': 'Post Crocomire Jump Room',
     'AccessPoints' : {
         'Warehouse Entrance Left': lambda items: canAccessCrocFromNorfairEntrance(items),
-        'Single Chamber Top Right': lambda items: canAccessCrocFromMainUpperNorfair(items),
         'Kronic Boost Room Bottom Left': lambda items: canAccessCrocFromMainUpperNorfair(items)
     },
     'Available': lambda items: wand(enoughStuffCroc(items),
-                                    wor(canFly(items), haveItem(items, 'Grapple'),
-                                        haveItem(items, 'SpeedBooster')))
+                                    wor(canFly(items),
+                                        haveItem(items, 'Grapple'), # use the grapple rippers (intended way to get to this missile actually)
+                                        haveItem(items, 'SpeedBooster'))) # spark up
 },
 {
     'Area': "Norfair",
@@ -1232,11 +1186,10 @@ locations = [
     'Visibility': "Hidden",
     'Room': 'Norfair Reserve Tank Room',
     'AccessPoints' : {
-        'Single Chamber Top Right': lambda items: canHellRun(items, 'MainUpperNorfair'),
         'Kronic Boost Room Bottom Left': lambda items: canHellRun(items, 'MainUpperNorfair'),
         'Warehouse Entrance Left': lambda items: canAccessHeatedNorfairFromEntrance(items)
     },
-    'Available': lambda items: canEnterNorfairReserveArea(items)
+    'Available': lambda items: wand(haveItem(items, 'Morph'), canEnterNorfairReserveArea(items))
 },
 {
     'Area': "Norfair",
@@ -1247,7 +1200,6 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Green Bubbles Missile Room',
     'AccessPoints' : {
-        'Single Chamber Top Right': lambda items: canHellRun(items, 'MainUpperNorfair'),
         'Kronic Boost Room Bottom Left': lambda items: canHellRun(items, 'MainUpperNorfair'),
         'Warehouse Entrance Left': lambda items: canAccessHeatedNorfairFromEntrance(items)
     },
@@ -1262,7 +1214,6 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Bubble Mountain',
     'AccessPoints' : {
-        'Single Chamber Top Right': lambda items: canHellRun(items, 'MainUpperNorfair'),
         'Kronic Boost Room Bottom Left': lambda items: canHellRun(items, 'MainUpperNorfair'),
         'Warehouse Entrance Left': lambda items: canAccessHeatedNorfairFromEntrance(items)
     },
@@ -1277,7 +1228,6 @@ locations = [
     'Visibility': "Hidden",
     'Room': 'Speed Booster Hall',
     'AccessPoints' : {
-        'Single Chamber Top Right': lambda items: canHellRun(items, 'MainUpperNorfair'),
         'Kronic Boost Room Bottom Left': lambda items: canHellRun(items, 'MainUpperNorfair'),
         'Warehouse Entrance Left': lambda items: canAccessHeatedNorfairFromEntrance(items)
     },
@@ -1292,7 +1242,6 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Double Chamber',
     'AccessPoints' : {
-        'Single Chamber Top Right': lambda items: canHellRun(items, 'MainUpperNorfair'),
         'Kronic Boost Room Bottom Left': lambda items: canHellRun(items, 'MainUpperNorfair'),
         'Warehouse Entrance Left': lambda items: canAccessHeatedNorfairFromEntrance(items)
     },
@@ -1341,7 +1290,7 @@ locations = [
         'Lava Dive Right': lambda items: wand(canPassLavaPit(items), canPassWorstRoom(items)),
         'Three Muskateers Room Left': lambda items: canPassAmphitheaterReverse(items)
     },
-    'Available': lambda items: canHellRun(items, 'LowerNorfair')
+    'Available': lambda items: wand(canHellRun(items, 'LowerNorfair'), canPassBombPassages(items))
 },
 {
     'Area': "LowerNorfair",
@@ -1474,8 +1423,9 @@ locations = [
     },
     'Available': lambda items: wand(haveItem(items, 'Gravity'),
                                     haveItem(items, 'SpeedBooster'),
-                                    wor(canOpenGreenDoors(items), # to run from room on the right
-                                        Knows.SimpleShortCharge))
+                                    wor(canOpenGreenDoors(items), # run from room on the right
+                                        Knows.SimpleShortCharge, # run from above
+                                        Knows.ShortCharge)) # run from below 
 },
 {
     'Area': "Maridia",
@@ -1515,7 +1465,7 @@ locations = [
     'AccessPoints' : {
         'Main Street Bottom': lambda items: canPassMtEverest(items)
     },
-    'Available': lambda items: SMBool(True, 0)
+    'Available': lambda items: wor(canPassBombPassages(items), wand(haveItem(items, 'Morph'), haveItem(items, 'SpringBall')))
 },
 {
     'Area': "Maridia",
@@ -1528,7 +1478,7 @@ locations = [
     'AccessPoints' : {
         'Main Street Bottom': lambda items: canPassMtEverest(items)
     },
-    'Available': lambda items: SMBool(True, 0)
+    'Available': lambda items: wor(canPassBombPassages(items), wand(haveItem(items, 'Morph'), haveItem(items, 'SpringBall')))
 },
 {
     'Area': "Maridia",
@@ -1556,7 +1506,6 @@ locations = [
                                                  canOpenGreenDoors(items),
                                                  canUsePowerBombs(items))
     },
-    # DONE: this item can be taken without gravity, but it's super hard because of the quick sands...
     'Available': lambda items: wor(haveItem(items, 'Gravity'),
                                    Knows.SuitlessSandpit) # suitless maridia conditions are in canPassMtEverest
 },
@@ -1573,8 +1522,7 @@ locations = [
                                                  canOpenGreenDoors(items),
                                                  canUsePowerBombs(items))
     },
-    # DONE: this item can be taken without gravity, but it's super hard because of the quick sands...
-    'Available': lambda items: wor(haveItem(items, 'Gravity'),
+    'Available': lambda items: wor(haveItem(items, 'Gravity'), 
                                    Knows.SuitlessSandpit) # suitless maridia conditions are in canPassMtEverest
 },
 {
@@ -1605,7 +1553,6 @@ locations = [
                                                  canOpenGreenDoors(items),
                                                  canUsePowerBombs(items))
     },
-    # DONE: this item can be taken without gravity, but it's super hard because of the quick sands...
     'Available': lambda items: wand(haveItem(items, 'SpeedBooster'), # TODO FLO find trick to get this without speed booster and add knows
                                     haveItem(items, 'Gravity'))
 },

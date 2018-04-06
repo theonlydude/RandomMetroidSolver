@@ -47,7 +47,7 @@ class SMOptim(object):
 
     def resetSMBool(self):
         self.curSMBool.bool = False
-        self.curSMBool.diff = 0
+        self.curSMBool.difficulty = 0
         self.curSMBool.items = []
         self.curSMBool.knows = []
 
@@ -67,7 +67,7 @@ class SMOptim(object):
         return self.curSMBool
 
     def getBool(self, dummy):
-        # get access to current smbool boolean (as internaly it can be (bool, diff) or bool)
+        # get access to current smbool boolean (as internaly it can be bool or (bool, diff) or smbool)
         return self.curSMBool.bool
 
     def resetItems(self):
@@ -172,7 +172,7 @@ class SMOptim(object):
                                                                                  (Knows.__dict__[knows].bool,
                                                                                   Knows.__dict__[knows].difficulty)))
 
-    # all the functions from helpers (those starting with an _ are only called from other helpers)
+    # all the functions from helpers (those starting with an _ are cached)
     def haveItemCount(self, item, count):
         # return bool
         return self.itemCount(item) >= count
@@ -196,8 +196,10 @@ class SMOptim(object):
             return self.energyReserveCountOk(difficulty[0], difficulty=difficulty[1])
         result = reduce(lambda result, difficulty: self.wor(result, f(difficulty)),
                         difficulties[1:], f(difficulties[0]))
-        if self.curSMBool.bool == True:
-            self.curSMBool.knows.append(hellRunName+'HellRun')
+
+        if self.getBool(result) == True:
+            result = self.internal2SMBool(result)
+            result.knows = [hellRunName+'HellRun']
         return result
 
     def _heatProof(self):
@@ -206,16 +208,17 @@ class SMOptim(object):
                                   self.haveItem('Gravity')))
 
     def canHellRun(self, hellRun):
-        # TODO::return heat proof item in smbool
-        if self.getBool(self.heatProof()) == True:
-            return SMBool(True, easy)
+        isHeatProof = self.heatProof()
+        if self.getBool(isHeatProof) == True:
+            isHeatProof = self.internal2SMBool(isHeatProof)
+            isHeatProof.difficulty = easy
+            return isHeatProof
         elif self.energyReserveCount() >= 2:
             return self.energyReserveCountOkHellRun(hellRun)
         else:
             return SMBool(False)
 
     def _canFly(self):
-        # TODO::return spacejump item
         if self.getBool(self.haveItem('SpaceJump')) == True:
             return self.setSMBool(True, easy, ['SpaceJump'])
         elif self.getBool(self.wand(self.haveItem('Morph'),
@@ -226,7 +229,6 @@ class SMOptim(object):
             return SMBool(False)
 
     def _canFlyDiagonally(self):
-        # TODO::return spacejump item
         if self.getBool(self.haveItem('SpaceJump')) == True:
             return self.setSMBool(True, easy, ['SpaceJump'])
         elif self.getBool(self.wand(self.haveItem('Morph'),
@@ -806,6 +808,10 @@ class SMOptimBool(SMOptim):
         self.curSMBool.bool = self.energyReserveCount() >= count
         return self.curSMBool.bool
 
+    def internal2SMBool(self, internal):
+        # internal is a bool
+        return SMBool(internal)
+
 class SMOptimDiff(SMOptim):
     # bool and diff here, internaly: only a tuple (bool, diff)
     def __init__(self, cache):
@@ -907,6 +913,10 @@ class SMOptimDiff(SMOptim):
             self.curSMBool.bool = False
         return (self.curSMBool.bool, self.curSMBool.difficulty)
 
+    def internal2SMBool(self, internal):
+        # internal is a (bool, diff)
+        return SMBool(internal[0], internal[1])
+
 class SMOptimAll(SMOptim):
     # full package, internaly: smbool
     def __init__(self, cache):
@@ -999,3 +1009,7 @@ class SMOptimAll(SMOptim):
 
     def getBool(self, dummy):
         return dummy.bool
+
+    def internal2SMBool(self, internal):
+        # internal is a smbool
+        return internal

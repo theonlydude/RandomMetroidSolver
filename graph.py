@@ -23,11 +23,6 @@ class AccessPoint(object):
     # for additions after construction (inter-area transitions)
     def addTransition(self, destName):
         self.transitions[destName] = lambda items: self.traverse(items)
-    
-    def getTransition(self, destName, items):
-        if not destName in self.transitions:
-            return (False, 0)
-        return self.transitions[destName](items)
 
 
 # all access points and traverse functions
@@ -92,9 +87,9 @@ accessPoints = [
         'Kronic Boost Room Bottom Left': lambda items: canAccessHeatedNorfairFromEntrance(items)
     }),
     AccessPoint('Single Chamber Top Right', 'Norfair', {
-        'Warehouse Entrance Left': lambda items: canHellRun(items, 'MainUpperNorfair'),
-        'Kronic Boost Room Bottom Left': lambda items: canHellRun(items, 'MainUpperNorfair')
-    }, lambda items: RomPatches.has(RomPatches.SingleChamberNoCrumble)),
+        'Warehouse Entrance Left': lambda items: wand(canDestroyBombWalls(items), haveItem(items, 'Morph'), canHellRun(items, 'MainUpperNorfair')),
+        'Kronic Boost Room Bottom Left': lambda items: wand(canDestroyBombWalls(items), haveItem(items, 'Morph'), canHellRun(items, 'MainUpperNorfair'))
+    }, lambda items: wand(canDestroyBombWalls(items), haveItem(items, 'Morph'), RomPatches.has(RomPatches.SingleChamberNoCrumble))),
     AccessPoint('Kronic Boost Room Bottom Left', 'Norfair', {
         'Single Chamber Top Right': lambda items: canHellRun(items, 'MainUpperNorfair'),
         'Warehouse Entrance Left': lambda items: canHellRun(items, 'MainUpperNorfair')
@@ -102,24 +97,27 @@ accessPoints = [
     # Maridia
     AccessPoint('Main Street Bottom', 'Maridia', {
         'Red Fish Room Left': lambda items: canGoUpMtEverest(items),
-        'Crab Hole Bottom Left': lambda items: canOpenGreenDoors(items), # red door+green gate
+        'Crab Hole Bottom Left': lambda items: wand(haveItem(items, 'Morph'), canOpenGreenDoors(items)), # red door+green gate
     }),
     AccessPoint('Crab Hole Bottom Left', 'Maridia', {
-        'Main Street Bottom': lambda items: wand(wor(haveItem(items, 'Gravity'), # FIXME maybe HiJump or Gravity jump needed
+        'Main Street Bottom': lambda items: wand(haveItem(items, 'Morph'),
+                                                 wor(wand(haveItem(items, 'Gravity'), wor(haveItem(items, 'Ice'), haveItem(items, 'HiJump'), Knows.GravityJump)), 
                                                      canDoSuitlessOuterMaridia(items)),
                                                  wand(haveItem(items, 'Super'), Knows.GreenGateGlitch)),
-        'Le Coude Right': lambda items: wand(wor(haveItem(items, 'Gravity'), # FIXME maybe HiJump or Gravity jump needed
+        'Le Coude Right': lambda items: wand(haveItem(items, 'Morph'),
+                                             wor(wand(haveItem(items, 'Gravity'), wor(haveItem(items, 'Ice'), haveItem(items, 'HiJump'), Knows.GravityJump)), 
                                                  canDoSuitlessOuterMaridia(items)),
                                              canOpenGreenDoors(items)) # toilet door
-    }),
+    }, lambda items: haveItem(items, 'Morph')),
     AccessPoint('Le Coude Right', 'Maridia', {
-        'Crab Hole Bottom Left': lambda items: wand(canOpenYellowDoors(items),
+        'Crab Hole Bottom Left': lambda items: wand(haveItem(items, 'Morph'), 
+                                                    canOpenYellowDoors(items),
                                                     wand(wor(haveItem(items, 'Gravity'),
-                                                             haveItem(items, 'HiJump')), # the sand pit to go through is possible with no gravity or particular knowledge. FIXME is HiJump necessary?
+                                                             haveItem(items, 'HiJump')), # the sand pit to go through is possible with no gravity or particular knowledge, it is just annoying
                                                          canOpenGreenDoors(items))), # toilet door
         'Main Street Bottom': lambda items: wand(canOpenYellowDoors(items),
                                                  wand(wor(haveItem(items, 'Gravity'),
-                                                          haveItem(items, 'HiJump')), # the sand pit to go through is possible with no gravity or particular knowledge. FIXME is HiJump necessary?
+                                                          haveItem(items, 'HiJump')), # see comment above on sandpit
                                                       canOpenGreenDoors(items), # toilet door
                                                       Knows.GreenGateGlitch)),
     }),

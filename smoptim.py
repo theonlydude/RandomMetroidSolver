@@ -9,7 +9,7 @@ from parameters import Settings, easy, medium, hard, harder, hardcore, mania
 
 class SMOptim(object):
     @staticmethod
-    def factory(store='all'):
+    def factory(store='all', cache=True):
         # possible values: all, diff, bool
         # all: store the difficulty, knows and items used, bool result (solver)
         # diff: store the difficulty and the bool result (randomizer with difficulty target)
@@ -17,12 +17,14 @@ class SMOptim(object):
         if store not in ['all', 'diff', 'bool']:
             raise Exception("SMOptim::factory::invalid store param")
 
+        print("SMOptim::factory store {} cache {}".format(store, cache))
+
         if store == 'all':
-            return SMOptimAll()
+            return SMOptimAll(cache)
         elif store == 'diff':
-            return SMOptimDiff()
+            return SMOptimDiff(cache)
         elif store == 'bool':
-            return SMOptimBool()
+            return SMOptimBool(cache)
 
     items = ['ETank', 'Missile', 'Super', 'PowerBomb', 'Bomb', 'Charge', 'Ice', 'HiJump', 'SpeedBooster', 'Wave', 'Spazer', 'SpringBall', 'Varia', 'Plasma', 'Grapple', 'Morph', 'Reserve', 'Gravity', 'XRayScope', 'SpaceJump', 'ScrewAttack']
     countItems = ['ETank', 'Reserve', 'Missile', 'Super', 'PowerBomb']
@@ -35,8 +37,9 @@ class SMOptim(object):
                   '_canAccessInnerMaridia', '_canDoSuitlessMaridia', '_canPassMtEverest',
                   '_canDefeatBotwoon', '_canCrystalFlash']
 
-    def __init__(self):
+    def __init__(self, cache):
         self.curSMBool = SMBool(False)
+        self.useCache = cache
         self.createCacheFunctions()
         self.createItemsFunctions()
         self.createKnowsFunctions()
@@ -44,7 +47,7 @@ class SMOptim(object):
 
     def resetSMBool(self):
         self.curSMBool.bool = False
-        self.curSMBool.diff = 0
+        self.curSMBool.difficulty = 0
         self.curSMBool.items = []
         self.curSMBool.knows = []
 
@@ -52,14 +55,19 @@ class SMOptim(object):
         return self.curSMBool
 
     def getSMBoolCopy(self):
-        return copy.copy(self.curSMBool)
+        return SMBool(self.curSMBool.bool,
+                      self.curSMBool.difficulty,
+                      self.curSMBool.knows[:],
+                      self.curSMBool.items[:])
 
-    def setSMBool(self, bool, diff=0):
+    def setSMBool(self, bool, diff=0, items=[]):
         self.curSMBool.bool = bool
-        self.curSMBool.diff = diff
+        self.curSMBool.difficulty = diff
+        self.curSMBool.items = items
+        return self.curSMBool
 
     def getBool(self, dummy):
-        # get access to current smbool boolean (as internaly it can be (bool, diff) or bool)
+        # get access to current smbool boolean (as internaly it can be bool or (bool, diff) or smbool)
         return self.curSMBool.bool
 
     def resetItems(self):
@@ -70,7 +78,8 @@ class SMOptim(object):
         for item in SMOptim.countItems:
             setattr(self, item+'Count', 0)
 
-        self.updateCache('reset', None)
+        if self.useCache == True:
+            self.updateCache('reset', None)
 
     def updateCache(self, action, item):
         # reset: set last item added to None, recompute current
@@ -112,7 +121,8 @@ class SMOptim(object):
         if item in self.countItems:
             setattr(self, item+'Count', getattr(self, item+'Count') + 1)
 
-        self.updateCache('add', item)
+        if self.useCache == True:
+            self.updateCache('add', item)
 
     def removeItem(self, item):
         # randomizer removed an item
@@ -126,11 +136,17 @@ class SMOptim(object):
             setattr(self, item, False)
         #print("removeItem: {} {}".format(item, getattr(self, item)))
 
-        self.updateCache('remove', item)
+        if self.useCache == True:
+            self.updateCache('remove', item)
 
     def createCacheFunctions(self):
-        for fun in self.methodList:
-            setattr(self, fun[1:], lambda fun=fun: self.getCacheSMBool(fun+'SMBool'))
+        if self.useCache == True:
+            for fun in self.methodList:
+                setattr(self, fun[1:], lambda fun=fun: self.getCacheSMBool(fun+'SMBool'))
+        else:
+            # if no cache, just use _xxx functions as xxx
+            for fun in self.methodList:
+                setattr(self, fun[1:], getattr(self, fun))
 
     def getCacheSMBool(self, fun):
         smb = getattr(self, fun)
@@ -156,7 +172,7 @@ class SMOptim(object):
                                                                                  (Knows.__dict__[knows].bool,
                                                                                   Knows.__dict__[knows].difficulty)))
 
-    # all the functions from helpers (those starting with an _ are only called from other helpers)
+    # all the functions from helpers (those starting with an _ are cached)
     def haveItemCount(self, item, count):
         # return bool
         return self.itemCount(item) >= count
@@ -180,8 +196,10 @@ class SMOptim(object):
             return self.energyReserveCountOk(difficulty[0], difficulty=difficulty[1])
         result = reduce(lambda result, difficulty: self.wor(result, f(difficulty)),
                         difficulties[1:], f(difficulties[0]))
-        if self.curSMBool.bool == True:
-            self.curSMBool.knows.append(hellRunName+'HellRun')
+
+        if self.getBool(result) == True:
+            result = self.internal2SMBool(result)
+            result.knows = [hellRunName+'HellRun']
         return result
 
     def _heatProof(self):
@@ -190,22 +208,19 @@ class SMOptim(object):
                                   self.haveItem('Gravity')))
 
     def canHellRun(self, hellRun):
-        # TODO::return heat proof item in smbool
-        if self.getBool(self.heatProof()) == True:
-            return SMBool(True, easy)
+        isHeatProof = self.heatProof()
+        if self.getBool(isHeatProof) == True:
+            isHeatProof = self.internal2SMBool(isHeatProof)
+            isHeatProof.difficulty = easy
+            return isHeatProof
         elif self.energyReserveCount() >= 2:
             return self.energyReserveCountOkHellRun(hellRun)
         else:
             return SMBool(False)
 
-#    def canFly(self):
-#        self.setSMBoolCache(self._canFlySMBool)
-#        return self._canFlySMBool
-
     def _canFly(self):
-        # TODO::return spacejump item
         if self.getBool(self.haveItem('SpaceJump')) == True:
-            return SMBool(True, easy)
+            return self.setSMBool(True, easy, ['SpaceJump'])
         elif self.getBool(self.wand(self.haveItem('Morph'),
                                     self.haveItem('Bomb'),
                                     self.knowsInfiniteBombJump())) == True:
@@ -214,9 +229,8 @@ class SMOptim(object):
             return SMBool(False)
 
     def _canFlyDiagonally(self):
-        # TODO::return spacejump item
         if self.getBool(self.haveItem('SpaceJump')) == True:
-            return SMBool(True, easy)
+            return self.setSMBool(True, easy, ['SpaceJump'])
         elif self.getBool(self.wand(self.haveItem('Morph'),
                                     self.haveItem('Bomb'),
                                     self.knowsDiagonalBombJump())) == True:
@@ -276,12 +290,6 @@ class SMOptim(object):
         return self.wor(self.canUseBombs(),
                         self.canUsePowerBombs())
 
-#    def canAccessRedBrinstar(self):
-#        #print("canAccessRedBrinstar type({}) value({})".format(type(self._canAccessRedBrinstarSMBool), self._canAccessRedBrinstarSMBool))
-#        #self.curSMBool = copy.copy(self._canAccessRedBrinstarSMBool)
-#        self.setSMBoolCache(self._canAccessRedBrinstarSMBool)
-#        return self._canAccessRedBrinstarSMBool
-
     def _canAccessRedBrinstar(self):
         # EXPLAINED: we can go from Landing Site to Red Tower using two different paths:
         #             -break the bomb wall at left of Parlor and Alcatraz,
@@ -311,10 +319,6 @@ class SMOptim(object):
                                   self.canFly(),
                                   self.knowsEarlyKraid()),
                          self.canPassBombPassages())
-
-#    def canAccessWs(self):
-#        self.setSMBoolCache(self._canAccessWsSMBool)
-#        return self._canAccessWsSMBool
 
     def _canAccessWs(self):
         # EXPLAINED: from Landing Site we open the green door on the right, then in Crateria
@@ -372,11 +376,6 @@ class SMOptim(object):
         return self.wand(self.canAccessCrocomire(),
                          self.enoughStuffCroc())
 
-
-#    def canAccessLowerNorfair(self):
-#        self.setSMBoolCache(self._canAccessLowerNorfairSMBool)
-#        return self._canAccessLowerNorfairSMBool
-
     def _canAccessLowerNorfair(self):
         # EXPLAINED: the randomizer never requires to pass it without the Varia suit.
         #            from Red Tower in Brinstar to access Lava Dive room we open the yellow door
@@ -412,10 +411,6 @@ class SMOptim(object):
                                   self.wand(self.knowsSpringBallJumpFromWall(),
                                             self.haveItem('SpringBall'))))
 
-#    def canPassMtEverest(self):
-#        self.setSMBoolCache(self._canPassMtEverestSMBool)
-#        return self._canPassMtEverestSMBool
-
     def _canPassMtEverest(self):
         return self.wand(self.canAccessOuterMaridia(),
                          self.wor(self.wand(self.haveItem('Gravity'),
@@ -426,10 +421,6 @@ class SMOptim(object):
                                                      self.wand(self.haveItem('Ice'),
                                                                self.knowsTediousMountEverest()))),
                                   self.canDoSuitlessMaridia()))
-
-#    def canAccessOuterMaridia(self):
-#        self.setSMBoolCache(self._canAccessOuterMaridiaSMBool)
-#        return self._canAccessOuterMaridiaSMBool
 
     def _canAccessOuterMaridia(self):
         # EXPLAINED: access Red Tower in red brinstar,
@@ -681,6 +672,9 @@ class SMOptim(object):
         (ammoMargin, secs) = self.canInflictEnoughDamages(18000, doubleSuper=True, givesDrops=False)
         if ammoMargin == 0:
             return SMBool(False)
+
+        #print("enoughStuffsRidley ammoMargin == {} items={}".format(ammoMargin, [(item, getattr(self, item)) for item in self.items if getattr(self, item) == True]))
+
         # print('RIDLEY', ammoMargin, secs)
         return SMBool(True, self.computeBossDifficulty(ammoMargin, secs,
                                                        Settings.bossesDifficulty['Ridley']))
@@ -780,8 +774,8 @@ class SMOptim(object):
 
 class SMOptimBool(SMOptim):
     # only care about the bool, internaly: bool
-    def __init__(self):
-        super(SMOptimBool, self).__init__()
+    def __init__(self, cache):
+        super(SMOptimBool, self).__init__(cache)
 
     def setSMBoolCache(self, smbool):
         self.curSMBool.bool = smbool.bool
@@ -814,14 +808,18 @@ class SMOptimBool(SMOptim):
         self.curSMBool.bool = self.energyReserveCount() >= count
         return self.curSMBool.bool
 
+    def internal2SMBool(self, internal):
+        # internal is a bool
+        return SMBool(internal)
+
 class SMOptimDiff(SMOptim):
     # bool and diff here, internaly: only a tuple (bool, diff)
-    def __init__(self):
-        super(SMOptimDiff, self).__init__()
+    def __init__(self, cache):
+        super(SMOptimDiff, self).__init__(cache)
 
     def setSMBoolCache(self, smbool):
         self.curSMBool.bool = smbool.bool
-        self.curSMBool.diff = smbool.diff
+        self.curSMBool.difficulty = smbool.difficulty
 
     def haveItem(self, item, difficulty=0):
         self.curSMBool.bool = getattr(self, item)
@@ -915,116 +913,103 @@ class SMOptimDiff(SMOptim):
             self.curSMBool.bool = False
         return (self.curSMBool.bool, self.curSMBool.difficulty)
 
-class SMOptimAll(SMOptimDiff):
-    # full package, internaly: only a tuple (bool, diff)
-    def __init__(self):
-        super(SMOptimAll, self).__init__()
+    def internal2SMBool(self, internal):
+        # internal is a (bool, diff)
+        return SMBool(internal[0], internal[1])
+
+class SMOptimAll(SMOptim):
+    # full package, internaly: smbool
+    def __init__(self, cache):
+        super(SMOptimAll, self).__init__(cache)
 
     def setSMBoolCache(self, smbool):
         self.curSMBool.bool = smbool.bool
-        self.curSMBool.diff = smbool.diff
+        self.curSMBool.difficulty = smbool.difficulty
         self.curSMBool.items = smbool.items[:]
         self.curSMBool.knows = smbool.knows[:]
 
     def haveItem(self, item, difficulty=0):
-        self.curSMBool.bool = getattr(self, item)
-        self.curSMBool.difficulty = difficulty
-        if self.curSMBool.bool == True:
-            self.curSMBool.items.append(item)
-        return (self.curSMBool.bool, self.curSMBool.difficulty)
+        return SMBool(getattr(self, item), difficulty, items=[item])
 
     def knowsKnows(self, knows, smKnows):
-        self.curSMBool.bool = smKnows[0]
-        self.curSMBool.difficulty = smKnows[1]
-        if self.curSMBool.bool == True:
-            self.curSMBool.knows.append(knows)
-            #print("knowsKnows len(knows)={}".format(len(self.curSMBool.knows)))
-        #print("knowsKnows: bool={} knows={} smKnows={}".format(self.curSMBool.bool, knows, smKnows))
-        return (self.curSMBool.bool, self.curSMBool.difficulty)
+        return SMBool(smKnows[0], smKnows[1], knows=[knows])
 
     def wand2(self, a, b, difficulty=0):
-        if a[0] == True and b[0] == True:
-            self.curSMBool.bool = True
-            self.curSMBool.difficulty = a[1] + b[1] + difficulty
-            #self.curSMBool.knows =
-            #self.curSMBool.items =
+        if a.bool is True and b.bool is True:
+            return SMBool(True, a.difficulty + b.difficulty + difficulty,
+                          a.knows + b.knows, a.items + b.items)
         else:
-            self.curSMBool.bool = False
-            self.curSMBool.difficulty = 0
-        return (self.curSMBool.bool, self.curSMBool.difficulty)
+            return SMBool(False)
 
     def wand(self, a, b, c=None, d=None, difficulty=0):
         if c is None and d is None:
-            self.wand2(a, b)
+            ret = self.wand2(a, b)
         elif c is None:
-            self.wand2(self.wand2(a, b), d)
+            ret = self.wand2(self.wand2(a, b), d)
         elif d is None:
-            self.wand2(self.wand2(a, b), c)
+            ret = self.wand2(self.wand2(a, b), c)
         else:
-            self.wand2(self.wand2(self.wand2(a, b), c), d)
+            ret = self.wand2(self.wand2(self.wand2(a, b), c), d)
 
-        if self.curSMBool.bool == True and difficulty != 0:
-            self.curSMBool.difficulty += difficulty
+        if ret.bool is True:
+            ret.difficulty += difficulty
 
-        #print("wand: {}".format(self.curSMBool.bool))
-        return (self.curSMBool.bool, self.curSMBool.difficulty)
+        return ret
 
     def wor2(self, a, b, difficulty=0):
-        if a[0] == True and b[0] == True:
-            if a[1] <= b[1]:
-                self.curSMBool.bool = True
-                self.curSMBool.difficulty = a[1] + difficulty
+        if a.bool is True and b.bool is True:
+            if a.difficulty < b.difficulty:
+                return SMBool(True, a.difficulty + difficulty, a.knows, a.items)
+            elif a.difficulty > b.difficulty:
+                return SMBool(True, b.difficulty + difficulty, b.knows, b.items)
             else:
-                self.curSMBool.bool = True
-                self.curSMBool.difficulty = b[1] + difficulty
-        elif a[0] == True:
-            self.curSMBool.bool = True
-            self.curSMBool.difficulty = a[1] + difficulty
-        elif b[0] == True:
-            self.curSMBool.bool = True
-            self.curSMBool.difficulty = b[1] + difficulty
+                # in case of egality we return both knows
+                return SMBool(True, a.difficulty + difficulty,
+                              a.knows + b.knows, a.items + b.items)
+        elif a.bool is True:
+            return SMBool(True, a.difficulty + difficulty, a.knows, a.items)
+        elif b.bool is True:
+            return SMBool(True, b.difficulty + difficulty, b.knows, b.items)
         else:
-            self.curSMBool.bool = False
-            self.curSMBool.difficulty = 0
-
-        return (self.curSMBool.bool, self.curSMBool.difficulty)
+            return SMBool(False)
 
     def wor(self, a, b, c=None, d=None, difficulty=0):
         if c is None and d is None:
-            self.wor2(a, b)
+            ret = self.wor2(a, b)
         elif c is None:
-            self.wor2(self.wor2(a, b), d)
+            ret = self.wor2(self.wor2(a, b), d)
         elif d is None:
-            self.wor2(self.wor2(a, b), c)
+            ret = self.wor2(self.wor2(a, b), c)
         else:
-            self.wor2(self.wor2(self.wor2(a, b), c), d)
+            ret = self.wor2(self.wor2(self.wor2(a, b), c), d)
 
-        if self.curSMBool.bool == True and difficulty != 0:
-            self.curSMBool.difficulty += difficulty
+        if ret.bool is True:
+            ret.difficulty += difficulty
 
-        return (self.curSMBool.bool, self.curSMBool.difficulty)
+        return ret
 
     # negates boolean part of the SMBool
     def wnot(self, a):
-        self.curSMBool.bool = not a[0]
-        self.curSMBool.difficulty = a[1]
-        return (self.curSMBool.bool, self.curSMBool.difficulty)
+        return SMBool(not a.bool, a.difficulty, a.knows, a.items)
 
     def itemCountOk(self, item, count, difficulty=0):
         if self.itemCount(item) >= count:
-            self.curSMBool.bool = True
-            self.curSMBool.difficulty = difficulty
-            self.curSMBool.items.append(item)
+            return SMBool(True, difficulty, items = [item])
         else:
-            self.curSMBool.bool = False
-        return (self.curSMBool.bool, self.curSMBool.difficulty)
+            return SMBool(False)
 
     def energyReserveCountOk(self, count, difficulty=0):
         if self.energyReserveCount() >= count:
-            self.curSMBool.bool = True
-            self.curSMBool.difficulty = difficulty
-            self.curSMBool.items.append('ETank')
-            self.curSMBool.items.append('Reserve')
+            return SMBool(True, difficulty, items = ['ETank', 'Reserve'])
         else:
-            self.curSMBool.bool = False
-        return (self.curSMBool.bool, self.curSMBool.difficulty)
+            return SMBool(False)
+
+    def setSMBool(self, bool, diff=0, items=[]):
+        return SMBool(bool, diff, items=items)
+
+    def getBool(self, dummy):
+        return dummy.bool
+
+    def internal2SMBool(self, internal):
+        # internal is a smbool
+        return internal

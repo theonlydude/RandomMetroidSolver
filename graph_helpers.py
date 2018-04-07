@@ -290,15 +290,18 @@ def canAccessHeatedNorfairFromEntrance(items):
                 canHellRun(items, 'MainUpperNorfair'))
 
 def canAccessCrocFromNorfairEntrance(items):
-    return wand(wor(canOpenGreenDoors(items),
-                    haveItem(items, 'SpeedBooster'),
-                    canUsePowerBombs(items)),
+    return wand(wand(canOpenGreenDoors(items), # below Ice
+                     haveItem(items, 'SpeedBooster'),
+                     canUsePowerBombs(items),
+                     energyReserveCountOk(items, 2)),
+                # go through frog speedway
                 wand(wor(haveItem(items, 'SpeedBooster'), canHellRun(items, 'MainUpperNorfair')),
-                     wor(Knows.GreenGateGlitch, haveItem(items, 'Wave'))),
-                energyReserveCountOk(items, 2))
+                     wor(Knows.GreenGateGlitch, haveItem(items, 'Wave'))))
 
 def canAccessCrocFromMainUpperNorfair(items):
+    # from bubble mountain
     return wand(canHellRun(items, 'MainUpperNorfair'),
+                canPassBombPassages(items),
                 wor(Knows.GreenGateGlitch, haveItem(items, 'Wave')))
 
 def canEnterNorfairReserveArea(items):

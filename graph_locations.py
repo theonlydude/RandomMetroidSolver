@@ -499,8 +499,8 @@ locations = [
     'Address': 0x7C559,
     'Visibility': "Chozo",
     'Room': 'Plasma Room',
-    'AccessFrom' : {
-        'Main Street Bottom': lambda items: canOpenGreenDoors(items), # green gate+toilet
+    'AccessFrom' : { # simple because if draygon is dead, you can get there
+        'Main Street Bottom': lambda items: SMBool(True, 0), # green gate+toilet
         'Le Coude Right': lambda items: SMBool(True, 0)
     },
     # DONE: to leave the Plasma Beam room you have to kill the space pirates and return to the door

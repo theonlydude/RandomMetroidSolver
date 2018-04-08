@@ -204,8 +204,7 @@ def canPassBombPassages(items):
                canUsePowerBombs(items))
 
 def canAccessKraidsLair(items):
-    # EXPLAINED: from Red Tower we have to go to Warehouse Entrance, and there we have to
-    #            access the upper right platform with either:
+    # EXPLAINED: access the upper right platform with either:
     #             -hijump boots (easy regular way)
     #             -fly (space jump or infinite bomb jump)
     #             -know how to wall jump on the platform without the hijump boots
@@ -217,27 +216,26 @@ def canAccessKraidsLair(items):
                 canPassBombPassages(items))
 
 def canPassTerminatorBombWall(items):
-    return wor(wand(haveItem(items, 'SpeedBooster'), Knows.SimpleShortCharge), 
+    return wor(wand(haveItem(items, 'SpeedBooster'),
+                    wor(Knows.SimpleShortCharge, Knows.ShortCharge)), 
                canDestroyBombWalls(items))
 
 def canPassMoat(items):
-    # EXPLAINED: from Landing Site we open the green door on the right, then in Crateria
-    #            Keyhunter room we open the yellow door on the right to the Moat.
-    #            In the Moat we can either:
+    # EXPLAINED: In the Moat we can either:
     #             -use grapple or space jump (easy way)
     #             -do a continuous wall jump (https://www.youtube.com/watch?v=4HVhTwwax6g)
     #             -do a diagonal bomb jump from the middle platform (https://www.youtube.com/watch?v=5NRqQ7RbK3A&t=10m58s)
     #             -do a short charge from the Keyhunter room (https://www.youtube.com/watch?v=kFAYji2gFok)
     #             -do a gravity jump from below the right platform
     #             -do a mock ball and a bounce ball (https://www.youtube.com/watch?v=WYxtRF--834)
-    return wand(canUsePowerBombs(items),
-                wor(wor(haveItem(items, 'Grapple'),
-                        haveItem(items, 'SpaceJump'),
-                        Knows.ContinuousWallJump),
-                    wor(wand(Knows.DiagonalBombJump, canUseBombs(items)),
-                        wand(Knows.SimpleShortCharge, haveItem(items, 'SpeedBooster')),
-                        wand(Knows.GravityJump, haveItem(items, 'Gravity')),
-                        wand(Knows.MockballWs, haveItem(items, 'Morph'), haveItem(items, 'SpringBall')))))
+    return wor(wor(haveItem(items, 'Grapple'),
+                   haveItem(items, 'SpaceJump'),
+                   Knows.ContinuousWallJump),
+               wor(wand(Knows.DiagonalBombJump, canUseBombs(items)),
+                   wand(haveItem(items, 'SpeedBooster'),
+                        wor(Knows.SimpleShortCharge, Knows.ShortCharge)),
+                   wand(Knows.GravityJump, haveItem(items, 'Gravity')),
+                   wand(Knows.MockballWs, haveItem(items, 'Morph'), haveItem(items, 'SpringBall'))))
 
 def canPassMoatReverse(items):
     return wor(haveItem(items, 'Grapple'),
@@ -249,15 +247,16 @@ def canPassMoatReverse(items):
 
 def canPassSpongeBath(items):
     return wand(Bosses.bossDead('Phantoon'),
-                wor(wand(wor(haveItem(items, 'Bomb'),
-                             haveItem(items, 'PowerBomb')),
+                wor(wand(canPassBombPassages(items),
                          Knows.SpongeBathBombJump),
                     wand(haveItem(items, 'HiJump'),
                          Knows.SpongeBathHiJump),
-                    wor(haveItem(items, 'SpaceJump'),
+                    wor(haveItem(items, 'Gravity'),
+                        haveItem(items, 'SpaceJump'),
                         wand(haveItem(items, 'SpeedBooster'),
                              Knows.SpongeBathSpeed),
-                        wand(haveItem(items, 'SpringBall'),
+                        wand(haveItem(items, 'Morph'),
+                             haveItem(items, 'SpringBall'),
                              Knows.SpringBallJump))))
 
 # the water zone east of WS
@@ -267,7 +266,7 @@ def canPassForgottenHighway(items, fromWs):
                                  wor(haveItem(items, 'Ice'), 
                                      wand(haveItem(items, 'SpringBall'), Knows.SpringBallJump))) # TODO check if spring ball jump is actually possible (should be)
     else:
-        # TOFO check this
+        # TODO check this
         suitlessCondition = wor(haveItem(items, 'HiJump'),
                                 haveItem(items, 'Ice'),
                                 wand(haveItem(items, 'SpringBall'), Knows.SpringBallJump))
@@ -276,12 +275,9 @@ def canPassForgottenHighway(items, fromWs):
     return wor(haveItem(items, 'Gravity'),
                suitlessCondition)
 
-def canAccessHeatedNorfairFromEntrance(items):
-    # EXPLAINED: from Red Tower, to go to Bubble Mountain we have to pass through
-    #            heated rooms, which requires a hell run if we don't have gravity.
-    #            this test is then used to access Speed, Norfair Reserve Tank, Wave and Crocomire
-    #            as they are all hellruns from Bubble Mountain.
-    return wand(wor(wand(haveItem(items, 'SpeedBooster'), canPassBombPassages(items)), # frog speedway
+def canAccessHeatedNorfairFromEntrance(items, bubbleMountain=True):
+    return wand(wor(wand(haveItem(items, 'SpeedBooster'), # frog speedway
+                         wor(SMBool(not bubbleMountain, 0), canPassBombPassages(items))),
                     # go through cathedral
                     wand(canOpenRedDoors(items),
                          wor(RomPatches.has(RomPatches.CathedralEntranceWallJump),
@@ -294,15 +290,16 @@ def canAccessCrocFromNorfairEntrance(items):
                      haveItem(items, 'SpeedBooster'),
                      canUsePowerBombs(items),
                      energyReserveCountOk(items, 2)),
-                # go through frog speedway
-                wand(wor(haveItem(items, 'SpeedBooster'), canHellRun(items, 'MainUpperNorfair')),
-                     wor(Knows.GreenGateGlitch, haveItem(items, 'Wave'))))
+                wand(canAccessHeatedNorfairFromEntrance(items, bubbleMountain=False),
+                     wor(wand(canOpenRedDoors(items), Knows.GreenGateGlitch),
+                         haveItem(items, 'Wave'))))
 
 def canAccessCrocFromMainUpperNorfair(items):
     # from bubble mountain
     return wand(canHellRun(items, 'MainUpperNorfair'),
                 canPassBombPassages(items),
-                wor(Knows.GreenGateGlitch, haveItem(items, 'Wave')))
+                wor(wand(canOpenRedDoors(items), Knows.GreenGateGlitch),
+                    haveItem(items, 'Wave')))
 
 def canEnterNorfairReserveArea(items):
     return wand(canOpenGreenDoors(items),
@@ -315,15 +312,6 @@ def canEnterNorfairReserveArea(items):
                              Knows.SpringBallJumpFromWall))))
 
 def canPassLavaPit(items):
-    # EXPLAINED: the randomizer never requires to pass it without the Varia suit.
-    #            from Red Tower in Brinstar to access Lava Dive room we open the yellow door
-    #            in Kronic Boost room with a power bomb then pass the Lava Dive room.
-    #            To pass Lava Dive room, either:
-    #             -have gravity suit and space jump (easy way)
-    #             -have gravity and perform a gravity jump
-    #             -have hijump boots and knows the Lava Dive wall jumps, the wall jumps are
-    #              a little easier with Ice and Plasma as we can freeze the Funes, we need
-    #              at least three ETanks to do it without gravity
     nTanks4Dive = 3
     if not heatProof(items):
         nTanks4Dive = 8
@@ -334,7 +322,6 @@ def canPassLavaPit(items):
                     energyReserveCountOk(items, nTanks4Dive)))
 
 def canPassWorstRoom(items):
-    # https://www.youtube.com/watch?v=gfmEDDmSvn4
     return wor(canFly(items),
                wand(Knows.WorstRoomIceCharge, haveItem(items, 'Ice'), haveItem(items, 'Charge')),
                wand(Knows.GetAroundWallJump, haveItem(items, 'HiJump')),
@@ -344,7 +331,7 @@ def canPassWorstRoom(items):
 def canPassAmphitheaterReverse(items):
     # TODO adjust these values
     nTanks = 4
-    if RomPatches.has(RomPatches.NoGravityEnvProtection) and not haveItem(items, 'Varia'):
+    if not heatProof(items):
         nTanks = 12
     return wand(haveItem(items, 'Gravity'),
                 energyReserveCountOk(items, nTanks))
@@ -357,6 +344,7 @@ def canClimbRedTower(items):
 def canClimbBottomRedTower(items):
     return wor(RomPatches.has(RomPatches.RedTowerLeftPassage),
                haveItem(items, 'HiJump'),
+               haveItem(items, 'Ice'),
                canFly(items),
                wand(haveItem(items, 'SpeedBooster'), Knows.ShortCharge))
 
@@ -369,27 +357,22 @@ def canGoUpMtEverest(items):
                wand(canDoSuitlessOuterMaridia(items),
                     haveItem(items, 'Grapple')))
 
-
 def canPassMtEverest(items):
     return  wor(wand(haveItem(items, 'Gravity'),                      
-                     wor(haveItem(items, 'Grapple'),
-                         haveItem(items, 'SpeedBooster')),
-                     wor(canFly(items),
-                         Knows.GravityJump,
-                         wand(haveItem(items, 'Ice'), Knows.TediousMountEverest))),
-                canDoSuitlessMaridia(items))
+                     wor(wor(haveItem(items, 'Grapple'),
+                             haveItem(items, 'SpeedBooster')),
+                         wor(canFly(items),
+                             Knows.GravityJump,
+                             wand(haveItem(items, 'Ice'), Knows.TediousMountEverest)))),
+                canDoSuitlessMaridia(items),
+                wand(canDoSuitlessOuterMaridia(items), Knows.TediousMountEverest))
 
-        
+def canAccessDraygonFromMainStreet(items):
+    return wand(canDefeatBotwoon(items),
+                wor(haveItem(items, 'Gravity'),
+                    canDoSuitlessMaridia(items)))
+
 def canDoSuitlessOuterMaridia(items):
-    # EXPLAINED: access Red Tower in red brinstar,
-    #            power bomb to destroy the tunnel at Glass Tunnel,
-    #            then to climb up Main Street, either:
-    #             -have gravity (easy regular way)
-    #             -freeze the enemies to jump on them, but without a strong gun in the upper left
-    #              when the Sciser comes down you don't have enough time to hit it several times
-    #              to freeze it, as such you have to either:
-    #               -use the first Sciser from the ground and wait for it to come all the way up
-    #               -do a double jump with spring ball
     return wor(wand(haveItem(items, 'HiJump'),
                     haveItem(items, 'Ice'),
                     wor(Knows.SuitlessOuterMaridiaNoGuns,
@@ -404,19 +387,21 @@ def canDoSuitlessOuterMaridia(items):
                         haveItem(items, 'Plasma'))))
 
 def canDoSuitlessMaridia(items):
-    # EXPLAINED: this is the harder way if no gravity,
-    #            reach the Mt Everest then use the grapple to access the upper right door.
-    #            it can also be done without gravity nor grapple but the randomizer will never
-    #            require it (https://www.youtube.com/watch?v=lsbnUKcblPk).
     return wand(canDoSuitlessOuterMaridia(items),
-                wor(haveItem(items, 'Grapple'), Knows.TediousMountEverest))
+                haveItem(items, 'Grapple'))
 
+def canAccessBotwoonFromMainStreet(items):
+    return wand(canPassMtEverest(items),
+                canOpenGreenDoors(items),
+                canUsePowerBombs(items))
+
+# from main street only
 def canDefeatBotwoon(items):
-    # EXPLAINED: access Aqueduct, either with or without gravity suit,
-    #            then in Botwoon Hallway, either:
+    # EXPLAINED: in Botwoon Hallway, either:
     #             -use regular speedbooster (with gravity)
     #             -do a mochtroidclip (https://www.youtube.com/watch?v=1z_TQu1Jf1I&t=20m28s)
-    return wand(enoughStuffBotwoon(items),
+    return wand(canAccessBotwoonFromMainStreet(items),
+                enoughStuffBotwoon(items),
                 wor(wand(haveItem(items, 'SpeedBooster'),
                          haveItem(items, 'Gravity')),
                     wand(Knows.MochtroidClip, haveItem(items, 'Ice'))))
@@ -426,9 +411,6 @@ def canCrystalFlash(items):
                 itemCountOk(items, 'Missile', 2),
                 itemCountOk(items, 'Super', 2),
                 itemCountOk(items, 'PowerBomb', 3))
-
-def canDefeatDraygon(items):
-    return canDefeatBotwoon(items)
 
 def getBeamDamage(items):
     standardDamage = 20
@@ -592,7 +574,7 @@ def enoughStuffBotwoon(items):
     (ammoMargin, secs) = canInflictEnoughDamages(items, 5000, givesDrops=False)
     if ammoMargin == 0:
         return SMBool(False)
-    return SMBool(True, easy)    
+    return SMBool(True, easy)
 
 def enoughStuffsRidley(items):
     (ammoMargin, secs) = canInflictEnoughDamages(items, 18000, doubleSuper=True, givesDrops=False)
@@ -669,7 +651,7 @@ def enoughStuffsMotherbrain(items):
             bossItems.remove('ETank')
     elif nTanks < 3:
         return SMBool(False, 0)
-        
+
     return SMBool(True, computeBossDifficulty(bossItems, ammoMargin, secs, Settings.bossesDifficulty['MotherBrain']))
 
 def canPassMetroids(items):
@@ -708,7 +690,6 @@ class Pickup:
                     and self._enoughMinorTable(items, 'PowerBomb'))
 
     def enoughMajors(self, items, majorLocations):
-        # the end condition
         if self.majorsPickup == 'all':
             return len(majorLocations) == 0
         elif self.majorsPickup == 'any':

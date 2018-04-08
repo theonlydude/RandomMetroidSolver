@@ -60,7 +60,8 @@ function gen_seeds() {
     for p in $presets; do
 	mkdir -p $base_dir/$p
 	for speed in $progs; do
-	    extra="$base_extra --graph"
+	    #	    extra="$base_extra --graph"
+	    extra="$base_extra"
 	    if [[ $speed != "random" ]]; then
 		extra="$extra --speedScrewRestriction"
 	    fi

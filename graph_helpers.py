@@ -275,7 +275,8 @@ def canPassForgottenHighway(items, fromWs):
                suitlessCondition)
 
 def canExitCrabHole(items):
-    return wand(haveItem(items, 'Morph'), # morph mid-air to exit the hole
+    return wand(haveItem(items, 'Morph'), # morph to exit the hole
+                canOpenRedDoors(items), # to exit and re-enter if needed
                 wor(wand(haveItem(items, 'Gravity'), # even with gravity you need some way to climb...
                          wor(haveItem(items, 'Ice'), # ...on crabs...
                              haveItem(items, 'HiJump'), # ...or by jumping

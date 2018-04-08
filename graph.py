@@ -40,7 +40,8 @@ accessPoints = [
         'Keyhunter Room Bottom': lambda items: canPassMoatReverse(items)
     }),
     AccessPoint('Keyhunter Room Bottom', 'Crateria', {
-        'Moat Right': lambda items: canPassMoat(items),
+        'Moat Right': lambda items: wand(canOpenYellowDoors(items),
+                                         canPassMoat(items)),
         'Landing Site': lambda items: SMBool(True, 0)
     }, lambda items: canOpenYellowDoors(items)),
     AccessPoint('Morph Ball Room Left', 'Crateria', {
@@ -185,8 +186,8 @@ class AccessGraph(object):
         self.accessPoints = {}
         for ap in accessPoints:
             self.accessPoints[ap.Name] = ap
-        for t in transitions:
-            self.addTransition(t[0], t[1], bidir)
+        for srcName, dstName in transitions:
+            self.addTransition(srcName, dstName, bidir)
         self.toDot("access_graph.dot")
 
     def toDot(self, dotFile):
@@ -246,7 +247,7 @@ class AccessGraph(object):
         for loc in locations:
             if not loc['GraphArea'] in availAreas:
                 continue
-            for apName,tFunc in loc['AccessPoints'].iteritems():
+            for apName,tFunc in loc['AccessFrom'].iteritems():
                 ap = self.accessPoints[apName]
                 if not ap in availAcessPoints:
                     continue

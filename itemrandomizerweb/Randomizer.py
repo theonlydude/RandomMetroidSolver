@@ -567,7 +567,7 @@ class Randomizer(object):
             itemLocation = self.placeItem(posItems, pool, curLocs)
         return itemLocation
 
-    def cancelItem(self, itemLocations, maxLen):
+    def cancelItem(self, itemLocations, maxLen, force=False):
         # cancel an item that did not made progress
         # favor majors as they are more likely to improve the situation,
         # unless we don't have all minor types yet
@@ -582,13 +582,15 @@ class Randomizer(object):
             i -= 1
         random.shuffle(locList)
         itemLoc = next((il for il in locList if (il['Item']['Class'] == 'Minor' and tryMinors == True) or il['Item']['Class'] == 'Major'), None)
-        if itemLoc is not None:
-            itemLocations.remove(itemLoc)
-        else:
-            # this can happen when we force a cancel for more variety, but it is not possible
-            sys.stdout.write('!')
-            sys.stdout.flush()
-            return False
+        if itemLoc is None:
+            if not force:
+                # this can happen when we force a cancel for more variety, but it is not possible
+                sys.stdout.write('!')
+                sys.stdout.flush()
+                return False
+            else:
+                itemLoc = itemLocations[random.randint(0, len(itemLocations) - 1)]
+        itemLocations.remove(itemLoc)
         item = itemLoc['Item']
         loc = itemLoc['Location']
         if item in self.currentItems:
@@ -731,6 +733,10 @@ class Randomizer(object):
                 # 2. collect an item with standard pool that will unlock the situation
 #                print("Full Pool " + str(len(self.itemPool)) + ", curLocs " + str([l['Name'] for l in self.currentLocations(self.currentItems)]))
                 isStuck = self.getItemFromStandardPool(itemLocations, isStuck, maxLen)
+                if isStuck == True:
+                    # force item cancel if stuck as a last resort for early game corner cases
+                    self.cancelItem(itemLocations, maxLen, force=True)
+                    isStuck = self.getItemFromStandardPool(itemLocations, isStuck, maxLen)
         if len(self.itemPool) > 0:
             # we could not place all items, check if we can finish the game
             itemTypes = [item['Type'] for item in self.currentItems]

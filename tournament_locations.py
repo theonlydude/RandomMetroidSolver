@@ -4,7 +4,7 @@ from helpers import canEnterAndLeaveGauntlet, wand, wor, haveItem, canOpenRedDoo
 from helpers import canPassBombPassages, canDestroyBombWalls, canUsePowerBombs, SMBool
 from helpers import canFly, canAccessRedBrinstar, energyReserveCountOk, canAccessKraid
 from helpers import Bosses, enoughStuffsKraid, heatProof, energyReserveCountOk
-from helpers import energyReserveCountOkHellRun, canAccessCrocomire, canDefeatCrocomire, canAccessHeatedNorfair
+from helpers import energyReserveCountOkHellRun, canAccessCrocomire, canDefeatCrocomire, canAccessHeatedNorfair, canAccessNorfairReserve
 from helpers import canPassWorstRoom, enoughStuffsRidley, canAccessLowerNorfair
 from helpers import canAccessWs, enoughStuffsPhantoon, enoughStuffsDraygon
 from helpers import canAccessOuterMaridia, canDefeatDraygon, canPassMtEverest
@@ -268,14 +268,7 @@ locations = [
     'Address': 0x78C3E,
     'Visibility': "Chozo",
     'Room': 'Norfair Reserve Tank Room',
-    'Available': lambda items: wand(canAccessHeatedNorfair(items),
-                                    wor(wor(canFly(items),
-                                            haveItem(items, 'Grapple'),
-                                            wand(haveItem(items, 'HiJump'),
-                                                 Knows.GetAroundWallJump)),
-                                        wor(haveItem(items, 'Ice'),
-                                            wand(haveItem(items, 'SpringBall'),
-                                                 Knows.SpringBallJumpFromWall))))
+    'Available': lambda items: canAccessNorfairReserve(items)
 },
 {
     'Area': "Norfair",
@@ -363,7 +356,8 @@ locations = [
                                              Knows.SpongeBathBombJump),
                                         wand(haveItem(items, 'HiJump'),
                                              Knows.SpongeBathHiJump),
-                                        wor(haveItem(items, 'SpaceJump', difficulty=easy),
+                                        wor(haveItem(items, 'Gravity'),
+                                            haveItem(items, 'SpaceJump'),
                                             wand(haveItem(items, 'SpeedBooster'),
                                                  Knows.SpongeBathSpeed),
                                             wand(haveItem(items, 'SpringBall'),
@@ -661,7 +655,9 @@ locations = [
     'Address': 0x78518,
     'Visibility': "Visible",
     'Room': 'Early Supers Room',
-    'Available': lambda items: canOpenRedDoors(items),
+    'Available': lambda items: wand(wor(haveItem(items, 'SpeedBooster'),
+                                        canDestroyBombWalls(items)),
+                                    canOpenRedDoors(items)),
     'PostAvailable': lambda items: wor(canPassBombPassages(items),
                                        RomPatches.has(RomPatches.EarlySupersShotBlock))
 },
@@ -918,8 +914,8 @@ locations = [
     'Available': lambda items: wand(canDefeatCrocomire(items),
                                     wor(canFly(items),
                                         haveItem(items, 'Grapple'),
-                                        wand(haveItem(items, 'HiJump'),
-                                             haveItem(items, 'SpeedBooster'))))
+                                        wand(haveItem(items, 'SpeedBooster'),
+                                             wor(haveItem(items, 'HiJump'), Knows.ShortCharge))))
 
 },
 {
@@ -949,9 +945,7 @@ locations = [
     'Address': 0x78C44,
     'Visibility': "Hidden",
     'Room': 'Norfair Reserve Tank Room',
-    'Available': lambda items: wand(canAccessHeatedNorfair(items),
-                                    wor(canFly(items), haveItem(items, 'Grapple'),
-                                        wand(haveItem(items, 'HiJump'), Knows.GetAroundWallJump)))
+    'Available': lambda items: canAccessNorfairReserve(items)
 },
 {
     'Area': "Norfair",
@@ -960,10 +954,7 @@ locations = [
     'Address': 0x78C52,
     'Visibility': "Visible",
     'Room': 'Green Bubbles Missile Room',
-    'Available': lambda items: wand(canAccessHeatedNorfair(items),
-                                    wor(canFly(items),
-                                        haveItem(items, 'Grapple'),
-                                        wand(haveItem(items, 'HiJump'), Knows.GetAroundWallJump)))
+    'Available': lambda items: canAccessNorfairReserve(items)
 },
 {
     'Area': "Norfair",
@@ -1161,7 +1152,7 @@ locations = [
     'Address': 0x7C5DD,
     'Visibility': "Visible",
     'Room': 'West Sand Hole',
-    'Available': lambda items: wand(canAccessOuterMaridia(items),
+    'Available': lambda items: wand(canPassMtEverest(items),
                                     wor(haveItem(items, 'Gravity'),
                                         Knows.SuitlessSandpit))
 },
@@ -1172,7 +1163,7 @@ locations = [
     'Address': 0x7C5EB,
     'Visibility': "Visible",
     'Room': 'East Sand Hole',
-    'Available': lambda items: wand(canAccessOuterMaridia(items),
+    'Available': lambda items: wand(canPassMtEverest(items),
                                     wor(haveItem(items, 'Gravity'),
                                         Knows.SuitlessSandpit))
 },
@@ -1183,7 +1174,7 @@ locations = [
     'Address': 0x7C5F1,
     'Visibility': "Visible",
     'Room': 'East Sand Hole',
-    'Available': lambda items: wand(canAccessOuterMaridia(items),
+    'Available': lambda items: wand(canPassMtEverest(items),
                                     haveItem(items, 'Gravity'))
 },
 {

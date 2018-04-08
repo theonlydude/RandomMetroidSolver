@@ -261,6 +261,16 @@ def canAccessHeatedNorfair(items):
                     canFly(items)),
                 canHellRun(items, 'MainUpperNorfair'))
 
+def canAccessNorfairReserve(items):
+    return wand(canAccessHeatedNorfair(items),
+                wor(wor(canFly(items),
+                        haveItem(items, 'Grapple'),
+                        wand(haveItem(items, 'HiJump'),
+                             Knows.GetAroundWallJump)),
+                    wor(haveItem(items, 'Ice'),
+                        wand(haveItem(items, 'SpringBall'),
+                             Knows.SpringBallJumpFromWall))))
+
 def canAccessCrocomire(items):
     # EXPLAINED: two options there, either:
     #             -from Bubble Mountain, hellrun to Crocomire's room. at Upper Norfair
@@ -313,11 +323,11 @@ def canPassWorstRoom(items):
 def canPassMtEverest(items):
     return  wand(canAccessOuterMaridia(items),
                  wor(wand(haveItem(items, 'Gravity'),                      
-                          wor(haveItem(items, 'Grapple'),
-                              haveItem(items, 'SpeedBooster')),
-                          wor(canFly(items),
-                              Knows.GravityJump,
-                              wand(haveItem(items, 'Ice'), Knows.TediousMountEverest))),
+                          wor(wor(haveItem(items, 'Grapple'),
+                                  haveItem(items, 'SpeedBooster')),
+                              wor(canFly(items),
+                                  Knows.GravityJump,
+                                  wand(haveItem(items, 'Ice'), Knows.TediousMountEverest)))),
                      canDoSuitlessMaridia(items)))
 
 def canAccessOuterMaridia(items):

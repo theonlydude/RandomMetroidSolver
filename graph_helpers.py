@@ -261,19 +261,27 @@ def canPassSpongeBath(items):
 
 # the water zone east of WS
 def canPassForgottenHighway(items, fromWs):
+    # TODO add knows for this?
+    baseSuitLess = wand(haveItem(items, 'HiJump'),
+                        wor(haveItem(items, 'Ice'), 
+                            wand(haveItem(items, 'SpringBall'), Knows.SpringBallJump)))
     if fromWs is True:
-        suitlessCondition = wand(haveItem(items, 'HiJump'),
-                                 wor(haveItem(items, 'Ice'), 
-                                     wand(haveItem(items, 'SpringBall'), Knows.SpringBallJump))) # TODO check if spring ball jump is actually possible (should be)
+        suitlessCondition = wand(baseSuitLess, # to climb on the ledges
+                                 haveItem(items, 'SpaceJump')) # to go through the door on the right
     else:
-        # TODO check this
-        suitlessCondition = wor(haveItem(items, 'HiJump'),
-                                haveItem(items, 'Ice'),
-                                wand(haveItem(items, 'SpringBall'), Knows.SpringBallJump))
-
-    
+        suitlessCondition = baseSuitLess
+        
     return wor(haveItem(items, 'Gravity'),
                suitlessCondition)
+
+def canExitCrabHole(items):
+    return wand(haveItem(items, 'Morph'), # morph mid-air to exit the hole
+                wor(wand(haveItem(items, 'Gravity'), # even with gravity you need some way to climb...
+                         wor(haveItem(items, 'Ice'), # ...on crabs...
+                             haveItem(items, 'HiJump'), # ...or by jumping
+                             Knows.GravityJump,
+                             canFly(items))),
+                    canDoSuitlessOuterMaridia(items))) # climing crabs
 
 def canAccessHeatedNorfairFromEntrance(items, bubbleMountain=True):
     return wand(wor(wand(haveItem(items, 'SpeedBooster'), # frog speedway

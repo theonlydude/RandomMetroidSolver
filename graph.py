@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-from graph_helpers import wand, wor, haveItem, canPassMoat, canPassMoatReverse, canOpenGreenDoors, canPassTerminatorBombWall, canOpenYellowDoors, canDestroyBombWalls, canOpenRedDoors, canPassSpongeBath, canPassForgottenHighway, canHellRun, canPassLavaPit, canPassWorstRoom, canPassAmphitheaterReverse, canGoUpMtEverest, canClimbRedTower, canClimbBottomRedTower, canUsePowerBombs, canAccessHeatedNorfairFromEntrance, canDoSuitlessOuterMaridia
+from graph_helpers import wand, wor, haveItem, canPassMoat, canPassMoatReverse, canOpenGreenDoors, canPassTerminatorBombWall, canOpenYellowDoors, canDestroyBombWalls, canOpenRedDoors, canPassSpongeBath, canPassForgottenHighway, canHellRun, canPassLavaPit, canPassWorstRoom, canPassAmphitheaterReverse, canGoUpMtEverest, canClimbRedTower, canClimbBottomRedTower, canUsePowerBombs, canAccessHeatedNorfairFromEntrance, canDoSuitlessOuterMaridia, canExitCrabHole
 from parameters import Knows
 from rom import RomPatches
 from smbool import SMBool
@@ -66,7 +66,7 @@ accessPoints = [
     # Wrecked Ship
     AccessPoint('West Ocean Left', 'WreckedShip', {
         'Crab Maze Left': lambda items: wand(canOpenGreenDoors(items),
-                                             canPassSpongeBath(items), # implies dead phantoon
+                                             canPassSpongeBath(items), # implies dead phantoon and pass bomb passages
                                              canPassForgottenHighway(items, True))
     }),
     AccessPoint('Crab Maze Left', 'WreckedShip', {
@@ -101,24 +101,17 @@ accessPoints = [
         'Crab Hole Bottom Left': lambda items: wand(haveItem(items, 'Morph'), canOpenGreenDoors(items)), # red door+green gate
     }),
     AccessPoint('Crab Hole Bottom Left', 'Maridia', {
-        'Main Street Bottom': lambda items: wand(haveItem(items, 'Morph'),
-                                                 wor(wand(haveItem(items, 'Gravity'), wor(haveItem(items, 'Ice'), haveItem(items, 'HiJump'), Knows.GravityJump)), 
-                                                     canDoSuitlessOuterMaridia(items)),
+        'Main Street Bottom': lambda items: wand(canExitCrabHole(items),
                                                  wand(haveItem(items, 'Super'), Knows.GreenGateGlitch)),
-        'Le Coude Right': lambda items: wand(haveItem(items, 'Morph'),
-                                             wor(wand(haveItem(items, 'Gravity'), wor(haveItem(items, 'Ice'), haveItem(items, 'HiJump'), Knows.GravityJump)), 
-                                                 canDoSuitlessOuterMaridia(items)),
+        'Le Coude Right': lambda items: wand(canExitCrabHole(items),
                                              canOpenGreenDoors(items)) # toilet door
     }, lambda items: haveItem(items, 'Morph')),
     AccessPoint('Le Coude Right', 'Maridia', {
-        'Crab Hole Bottom Left': lambda items: wand(haveItem(items, 'Morph'), 
-                                                    canOpenYellowDoors(items),
-                                                    wand(wor(haveItem(items, 'Gravity'),
-                                                             haveItem(items, 'HiJump')), # the sand pit to go through is possible with no gravity or particular knowledge, it is just annoying
-                                                         canOpenGreenDoors(items))), # toilet door
+        'Crab Hole Bottom Left': lambda items: wand(canOpenYellowDoors(items),
+                                                    haveItem(items, 'Gravity'), # for the sand pits
+                                                    canOpenGreenDoors(items)), # toilet door
         'Main Street Bottom': lambda items: wand(canOpenYellowDoors(items),
-                                                 wand(wor(haveItem(items, 'Gravity'),
-                                                          haveItem(items, 'HiJump')), # see comment above on sandpit
+                                                 wand(haveItem(items, 'Gravity'), # for the sand pits
                                                       canOpenGreenDoors(items), # toilet door
                                                       Knows.GreenGateGlitch)),
     }),

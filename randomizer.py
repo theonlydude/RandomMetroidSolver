@@ -163,7 +163,7 @@ if __name__ == "__main__":
         randomizer = Randomizer(graphLocations, randoSettings, True)
     itemLocs = randomizer.generateItems()
     if itemLocs is None:
-        print("Can't generate a randomized rom with the given parameters, try increasing the difficulty target.")
+        print("Can't generate " + fileName + " with the given parameters, try increasing the difficulty target.")
         sys.exit(-1)
 
     # transform itemLocs in our usual dict(location, item)

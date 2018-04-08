@@ -5,9 +5,9 @@ SOLVER=./solver.py
 GET_STATS=./get_stats.py
 
 
-presets="flo noob speedrunner"
+presets="flo manu noob speedrunner"
 #presets="flo speedrunner"
-progs="slowest slow medium fast fastest"
+progs="slowest slow medium fast fastest random"
 n=20
 
 test_set=$1
@@ -38,7 +38,7 @@ function worker {
     extra=$5    
     
     echo
-    echo "**** $p $speed $i ****"
+    echo "**** $dest $i ****"
     echo $extra
     seed=$(head -c 500 /dev/urandom | tr -dc '0-9' | fold -w 7 | head -n 1 | sed 's/^0*//')
     ${PYPY} $RANDO --seed ${seed} -i $speed $extra --param diff_presets/$p.json -c AimAnyButton.ips -c itemsounds.ips -c max_ammo_display.ips -c skip_ceres.ips -c elevators_doors_speed.ips --rom ~/roms/Super\ Metroid\ \(Japan\,\ USA\)\ \(En\,Ja\).sfc
@@ -54,39 +54,49 @@ function worker {
     }
 }
 
-for p in $presets; do
-    mkdir $test_set/$p
-    for speed in $progs; do
-	dest=$test_set/$p/$speed
-	extra="--speedScrewRestriction"
-#	extra="--speedScrewRestriction --superFun Combat --superFun Movement"
-	if [[ $speed == slow* ]] || [[ $speed == "medium" ]]; then
-	    extra="$extra --spreadItems"
-	fi
-	if [[ $speed != "fastest" ]]; then
-	    extra="$extra --suitsRestriction"
-	fi
-	mkdir $dest
-	workers=0
-	for i in $(seq 1 $n); do
-	    if [ ${workers} -ge ${nb_cpu} ]; then
-		wait
-		[ ! -z "$abort_msg" ] && {
-		    echo $abort_msg
-		    exit 1
-		}
-		workers=0
+function gen_seeds() {
+    base_dir=$test_set/$1
+    base_extra=$2
+    for p in $presets; do
+	mkdir -p $base_dir/$p
+	for speed in $progs; do
+	    extra="$base_extra --graph"
+	    if [[ $speed != "random" ]]; then
+		extra="$extra --speedScrewRestriction"
 	    fi
-	    worker ${p} ${speed} ${i} ${dest} "$extra" &
-            renice -n 10 -p $!
-	    let workers=${workers}+1
+	    #	extra="--speedScrewRestriction --superFun Combat --superFun Movement"
+	    if [[ $speed == slow* ]] || [[ $speed == "medium" ]]; then
+		extra="$extra --spreadItems"
+	    fi
+	    if [[ $speed != "fastest" ]]; then
+		extra="$extra --suitsRestriction"
+	    fi
+	    dest=$base_dir/$p/$speed
+	    mkdir $dest
+	    workers=0
+	    for i in $(seq 1 $n); do
+		if [ ${workers} -ge ${nb_cpu} ]; then
+		    wait
+		    [ ! -z "$abort_msg" ] && {
+			echo $abort_msg
+			exit 1
+		    }
+		    workers=0
+		fi
+		worker ${p} ${speed} ${i} ${dest} "$extra" &
+		renice -n 10 -p $!
+		let workers=${workers}+1
+	    done
+            wait
+	    [ ! -z "$abort_msg" ] && {
+		echo $abort_msg
+		exit 1
+	    }
+	    $GET_STATS $dest/*.sfc
+	    mv *stats.csv $dest
 	done
-        wait
-	[ ! -z "$abort_msg" ] && {
-	    echo $abort_msg
-	    exit 1
-	}
-	$GET_STATS $dest/*.sfc
-	mv *stats.csv $dest
     done
-done
+}
+
+gen_seeds "classic"
+gen_seeds "full" "--fullRandomization"

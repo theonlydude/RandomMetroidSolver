@@ -351,10 +351,10 @@ def canClimbRedTower(items):
                haveItem(items, 'SpaceJump'))
 
 def canClimbBottomRedTower(items):
-    return wor(RomPatches.has(RomPatches.RedTowerLeftPassage),
-               haveItem(items, 'HiJump'),
-               haveItem(items, 'Ice'),
-               canFly(items),
+    return wor(wor(RomPatches.has(RomPatches.RedTowerLeftPassage),
+                   haveItem(items, 'HiJump'),
+                   haveItem(items, 'Ice'),
+                   canFly(items)),
                wand(haveItem(items, 'SpeedBooster'), Knows.ShortCharge))
 
 def canGoUpMtEverest(items):

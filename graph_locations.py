@@ -83,9 +83,8 @@ locations = [
     'Visibility': "Chozo",
     'Room': 'Big Pink',
     'AccessFrom' : {
-        'Green Brinstar Elevator Right': lambda items: wand(canOpenRedDoors(items),
-                                                            canDestroyBombWalls(items)),
-        'Green Hill Zone Top Right': lambda items: haveItem(items, 'Morph')
+        'Green Brinstar Elevator Right': lambda items: canOpenRedDoors(items), #pink bomb wall handled by canPassBombPassages
+        'Green Hill Zone Top Right': lambda items: SMBool(True, 0) # Morph handled by canPassBombPassages
     },
     'Available': lambda items: canPassBombPassages(items)
 },
@@ -145,9 +144,8 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Waterway Energy Tank Room',
     'AccessFrom' : {
-        'Green Brinstar Elevator Right': lambda items: wand(canOpenRedDoors(items),
-                                                            canDestroyBombWalls(items)),
-        'Green Hill Zone Top Right': lambda items: haveItem(items, 'Morph')
+        'Green Brinstar Elevator Right': lambda items: canOpenRedDoors(items), # pink bomb wall handled by canUsePowerBombs
+        'Green Hill Zone Top Right': lambda items: SMBool(True, 0) # Morph handled by canUsePowerBombs
     },
     'Available': lambda items: wand(canUsePowerBombs(items),
                                     canOpenRedDoors(items),
@@ -165,9 +163,8 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Hopper Energy Tank Room',
     'AccessFrom' : {
-        'Green Brinstar Elevator Right': lambda items: wand(canOpenRedDoors(items),
-                                                            canDestroyBombWalls(items)),
-        'Green Hill Zone Top Right': lambda items: haveItem(items, 'Morph')
+        'Green Brinstar Elevator Right': lambda items: canOpenRedDoors(items), # pink bomb wall handled by canUsePowerBombs
+        'Green Hill Zone Top Right': lambda items: SMBool(True, 0) # Morph handled by canUsePowerBombs
     },
     'Available': lambda items: wand(canUsePowerBombs(items),
                                     wor(haveItem(items, 'Wave'),
@@ -780,7 +777,7 @@ locations = [
     'Room': 'Spore Spawn Super Room',
     'AccessFrom' : {
         'Green Brinstar Elevator Right': lambda items: wand(canOpenRedDoors(items),
-                                                            canDestroyBombWalls(items)),
+                                                            wor(canDestroyBombWalls(items), haveItem(items, 'SpeedBooster'))),
         'Green Hill Zone Top Right': lambda items: haveItem(items, 'Morph')
     },
     # either you go the back way, using a super and the camera glitch,
@@ -861,7 +858,7 @@ locations = [
     'Room': 'Big Pink',
     'AccessFrom' : {
         'Green Brinstar Elevator Right': lambda items: wand(canOpenRedDoors(items),
-                                                            canDestroyBombWalls(items)),
+                                                            wor(canDestroyBombWalls(items), haveItem(items, 'SpeedBooster'))),
         'Green Hill Zone Top Right': lambda items: haveItem(items, 'Morph')
     },
     'Available': lambda items: SMBool(True, 0)
@@ -876,7 +873,7 @@ locations = [
     'Room': 'Big Pink',
     'AccessFrom' : {
         'Green Brinstar Elevator Right': lambda items: wand(canOpenRedDoors(items),
-                                                            canDestroyBombWalls(items)),
+                                                            wor(canDestroyBombWalls(items), haveItem(items, 'SpeedBooster'))),
         'Green Hill Zone Top Right': lambda items: haveItem(items, 'Morph')
     },
     'Available': lambda items: SMBool(True, 0)
@@ -890,9 +887,8 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Pink Brinstar Power Bomb Room',
     'AccessFrom' : {
-        'Green Brinstar Elevator Right': lambda items: wand(canOpenRedDoors(items),
-                                                            canDestroyBombWalls(items)),
-        'Green Hill Zone Top Right': lambda items: haveItem(items, 'Morph')
+        'Green Brinstar Elevator Right': lambda items: canOpenRedDoors(items), # pink bomb wall handled by canUsePowerBombs
+        'Green Hill Zone Top Right': lambda items: SMBool(True, 0) # Morph handled by canUsePowerBombs
     },
     'Available': lambda items: wand(canUsePowerBombs(items),
                                     haveItem(items, 'Super'))

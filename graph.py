@@ -49,13 +49,13 @@ accessPoints = [
     }),
     # Green and Pink Brinstar
     AccessPoint('Green Brinstar Elevator Right', 'GreenPinkBrinstar', {
-        'Green Hill Zone Top Right': lambda items: wand(canDestroyBombWalls(items), # pink
+        'Green Hill Zone Top Right': lambda items: wand(wor(haveItem(items, 'SpeedBooster'), canDestroyBombWalls(items)), # pink
                                                         haveItem(items, 'Morph'), # big pink
                                                         canOpenGreenDoors(items)) # also implies first red door
     }),
     AccessPoint('Green Hill Zone Top Right', 'GreenPinkBrinstar', {
         'Noob Bridge Right': lambda items: SMBool(True, 0),
-        'Green Brinstar Elevator Right': lambda items: wand(canDestroyBombWalls(items), # pink
+        'Green Brinstar Elevator Right': lambda items: wand(wor(haveItem(items, 'SpeedBooster'), canDestroyBombWalls(items)), # pink
                                                             haveItem(items, 'Morph')) # big pink
     }, lambda items: canOpenYellowDoors(items)),
     AccessPoint('Noob Bridge Right', 'GreenPinkBrinstar', {
@@ -99,12 +99,15 @@ accessPoints = [
     AccessPoint('Main Street Bottom', 'Maridia', {
         'Red Fish Room Left': lambda items: canGoUpMtEverest(items),
         'Crab Hole Bottom Left': lambda items: wand(haveItem(items, 'Morph'), canOpenGreenDoors(items)), # red door+green gate
+        'Le Coude Right': lambda items: wand(canOpenGreenDoors(items), # gate+door
+                                             haveItem(items, 'Gravity')) # for the sand pits
     }),
     AccessPoint('Crab Hole Bottom Left', 'Maridia', {
         'Main Street Bottom': lambda items: wand(canExitCrabHole(items),
                                                  wand(haveItem(items, 'Super'), Knows.GreenGateGlitch)),
         'Le Coude Right': lambda items: wand(canExitCrabHole(items),
-                                             canOpenGreenDoors(items)) # toilet door
+                                             canOpenGreenDoors(items), # toilet door
+                                             haveItem(items, 'Gravity')) # for the sand pits
     }, lambda items: haveItem(items, 'Morph')),
     AccessPoint('Le Coude Right', 'Maridia', {
         'Crab Hole Bottom Left': lambda items: wand(canOpenYellowDoors(items),

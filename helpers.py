@@ -211,7 +211,8 @@ def canAccessRedBrinstar(items):
     #             -open green door at the right of Landing Site, then open the yellow
     #              door at Crateria Keyhunter room
     return wand(haveItem(items, 'Super'),
-                wor(wand(canDestroyBombWalls(items),
+                wor(wand(wor(canDestroyBombWalls(items),
+                             wand(haveItem(items, 'SpeedBooster'), Knows.SimpleShortCharge)),
                          haveItem(items, 'Morph')),
                     canUsePowerBombs(items)))
 
@@ -245,7 +246,7 @@ def canAccessWs(items):
                         Knows.ContinuousWallJump),
                     wor(wand(Knows.DiagonalBombJump, canUseBombs(items)),
                         wand(Knows.SimpleShortCharge, haveItem(items, 'SpeedBooster')),
-                        wand(Knows.GravityJump, haveItem(items, 'Gravity')),
+                        haveItem(items, 'Gravity'), # either gravity jump from moat or go through the back entrance (maridia+forgotten highway)
                         wand(Knows.MockballWs, haveItem(items, 'Morph'), haveItem(items, 'SpringBall')))))
 
 def canAccessHeatedNorfair(items):

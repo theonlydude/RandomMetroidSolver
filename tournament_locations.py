@@ -640,11 +640,9 @@ locations = [
     # either you go the back way, using a super and the camera glitch,
     # or just beat spore spawn (so no Knows* setting needed for the glitch)
     'Available': lambda items: wand(wor(haveItem(items, 'SpeedBooster'),
-                                        canDestroyBombWalls(items)),
-                                    canOpenRedDoors(items),
-                                    wor(wand(canPassBombPassages(items),
-                                             haveItem(items, 'Super')),
-                                        SMBool(True, easy))),
+                                        canDestroyBombWalls(items),
+                                        canUsePowerBombs(items)),
+                                    canOpenRedDoors(items)),
     'PostAvailable': lambda items: wand(canOpenGreenDoors(items),
                                         canPassBombPassages(items))
 },
@@ -708,7 +706,8 @@ locations = [
     'Address': 0x78608,
     'Visibility': "Visible",
     'Room': 'Big Pink',
-    'Available': lambda items: wor(wand(canDestroyBombWalls(items),
+    'Available': lambda items: wor(wand(wor(haveItem(items, 'SpeedBooster'),
+                                            canDestroyBombWalls(items)),
                                         canOpenRedDoors(items)),
                                    canUsePowerBombs(items))
 },

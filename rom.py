@@ -36,19 +36,17 @@ class RomPatches:
 
     
     ### Other
-    # lava gives less damage than in vanilla
-    ReducedLavaDamage       = 1000
     # Gravity no longer protects from environmental damage (heat, spikes...)
-    NoGravityEnvProtection  = 1010
+    NoGravityEnvProtection  = 1000
     
     #### Patch sets
-    # total randomizer: tournament and full
-    Total = [ BlueBrinstarBlueDoor, MoatShotBlock, EarlySupersShotBlock,
-              SpazerShotBlock, RedTowerLeftPassage, RedTowerBlueDoors,
-              HiJumpShotBlock, CathedralEntranceWallJump,
-              ReducedLavaDamage, NoGravityEnvProtection ]
-
-    # total randomizer, casual seeds
+    # total randomizer
+    Total_Base = [ BlueBrinstarBlueDoor, RedTowerBlueDoors, NoGravityEnvProtection ]
+    # tournament and full
+    Total = Total_Base + [ MoatShotBlock, EarlySupersShotBlock,
+                           SpazerShotBlock, RedTowerLeftPassage, 
+                           HiJumpShotBlock, CathedralEntranceWallJump ]
+    # casual 
     Total_CX = [ BlueBrinstarMissile ] + Total
     
     # dessyreqt randomizer
@@ -94,6 +92,8 @@ class RomType:
     # "applies" ROM patches, return true if full randomization, false if not
     @staticmethod    
     def apply(romType):
+        if romType.startswith('Total_'):
+            RomPatches.ActivePatches = RomPatches.Total_Base
         if romType == 'Total_CX':
             RomPatches.ActivePatches = RomPatches.Total_CX
         elif romType in ['Total_TX', 'Total_FX']:
@@ -103,7 +103,7 @@ class RomType:
         elif romType == 'Dessy':
             RomPatches.ActivePatches = RomPatches.Dessy
         
-        return romType == 'Total_FX' or romType == 'Dessy'
+        return romType == 'Total_FX' or romType == 'Dessy' or romType == 'VARIA_FX'
     
 class RomReader:
     # read the items in the rom

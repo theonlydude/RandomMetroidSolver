@@ -3,7 +3,7 @@ from itemrandomizerweb import Items
 from parameters import Knows, Settings
 from itemrandomizerweb.stdlib import List
 from helpers import wand, Bosses, enoughStuffTourian
-from graph import vanillaTransitions, AccessGraph
+from graph import AccessGraph
 
 class RandoSettings(object):
     # maxDiff : max diff
@@ -191,12 +191,12 @@ class RandoSettings(object):
 class Randomizer(object):
     # locations : items locations
     # settings : RandoSettings instance
-    def __init__(self, locations, settings, graph=False):
+    def __init__(self, locations, settings, seedName, graphTransitions=None, bidir=True):
         # we assume that 'choose' dict is perfectly formed, that is all keys
         # below are defined in the appropriate weight dicts
-        if graph == True:
+        if graphTransitions is not None:
             self.currentLocations = self.currentLocationsGraph
-            self.areaGraph = AccessGraph(vanillaTransitions)
+            self.areaGraph = AccessGraph(graphTransitions, bidir, seedName + ".dot")
         else:
             self.currentLocations = self.currentLocationsAvailFunc
         self.isSpreadProgression = settings.isSpreadProgression
@@ -761,16 +761,3 @@ class Randomizer(object):
         print("")
         return itemLocations
 
-# IDEES :
-# - changer les choose en parametres generaux Min/Max progression/difficulty
-# * si max diff : impact sur le choix de l'item => prendre l'item qui diminue
-# le moins la difficulte totale (ou max?) des currentLocations obtenues avec
-# cet item.
-# pb de la rigidite du choix : failItems devrait suffire
-
-# chooseLocation :
-# Placer en min/max diff n'a pas l'air d'avoir d'interet car ce n'est pas rempli dans
-# l'ordre de toutes facons...
-
-# protection tournoi/race :
-# avoir un log public sur le site des dernieres seeds solvees avec nom de fichier+md5+preset.

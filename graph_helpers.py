@@ -338,10 +338,9 @@ def canPassWorstRoom(items):
 
 # go though the pirates room filled with acid
 def canPassAmphitheaterReverse(items):
-    # TODO adjust these values
     nTanks = 4
     if not heatProof(items):
-        nTanks = 12
+        nTanks = 16
     return wand(haveItem(items, 'Gravity'),
                 energyReserveCountOk(items, nTanks))
 

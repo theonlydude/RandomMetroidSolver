@@ -178,13 +178,14 @@ vanillaTransitions = [
 ]
 
 class AccessGraph(object):
-    def __init__(self, transitions, bidir=True):
+    def __init__(self, transitions, bidir=True, dotFile=None):
         self.accessPoints = {}
         for ap in accessPoints:
             self.accessPoints[ap.Name] = ap
         for srcName, dstName in transitions:
             self.addTransition(srcName, dstName, bidir)
-        self.toDot("access_graph.dot")
+        if dotFile is not None:
+            self.toDot(dotFile)
 
     def toDot(self, dotFile):
         with open(dotFile, "w") as f:
@@ -197,8 +198,6 @@ class AccessGraph(object):
     def addTransition(self, srcName, dstName, both=True):
         src = self.accessPoints[srcName]
         dst = self.accessPoints[dstName]
-        if src.GraphArea == dst.GraphArea:
-            raise ValuError('Invalid transition : "' + srcName + '" and "' + dstName + '" are both in "' + src.GraphArea + '"')
         src.addTransition(dstName)
         if both is True:
             self.addTransition(dstName, srcName, False)
@@ -235,7 +234,7 @@ class AccessGraph(object):
     # locations: locations to check
     # items: collected items
     # maxDiff: difficulty limit
-    # return available locations list
+    # return available locations list, also stores difficulty in locations
     def getAvailableLocations(self, locations, items, maxDiff):
         availAcessPoints = self.getAvailableAccessPoints(self.accessPoints['Landing Site'], items, maxDiff)
         availAreas = set([ap.GraphArea for ap in availAcessPoints])
@@ -247,11 +246,14 @@ class AccessGraph(object):
                 ap = self.accessPoints[apName]
                 if not ap in availAcessPoints:
                     continue
-                diff = tFunc(items)
-                if diff.bool == True and diff.difficulty <= maxDiff:
+                tdiff = tFunc(items)
+                if tdiff.bool == True and tdiff.difficulty <= maxDiff:
                     diff = loc['Available'](items)
+                    loc['difficulty'] = SMBool(diff.bool, max(tdiff.difficulty, diff.difficulty))
                     if diff.bool == True and diff.difficulty <= maxDiff:
                         availLocs.append(loc)
                         break
+                else:
+                    loc['difficulty'] = tdiff
         return availLocs
 

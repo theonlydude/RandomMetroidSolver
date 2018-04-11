@@ -1,13 +1,12 @@
 # object to handle the smbools and optimize them
 
-import copy
 from functools import reduce
 
 from smbool import SMBool
 from rom import RomPatches
 from parameters import Settings, easy, medium, hard, harder, hardcore, mania
 
-class SMOptim(object):
+class SMBoolManager(object):
     @staticmethod
     def factory(store='all', cache=True):
         # possible values: all, diff, bool
@@ -15,33 +14,32 @@ class SMOptim(object):
         # diff: store the difficulty and the bool result (randomizer with difficulty target)
         # bool: store only the bool result (randomizer w/o difficulty target)
         if store not in ['all', 'diff', 'bool']:
-            raise Exception("SMOptim::factory::invalid store param")
+            raise Exception("SMBM::factory::invalid store param")
 
-        print("SMOptim::factory store {} cache {}".format(store, cache))
+        print("SMBM::factory store {} cache {}".format(store, cache))
 
         if store == 'all':
-            return SMOptimAll(cache)
+            return SMBMAll(cache)
         elif store == 'diff':
-            return SMOptimDiff(cache)
+            return SMBMDiff(cache)
         elif store == 'bool':
-            return SMOptimBool(cache)
+            return SMBMBool(cache)
 
     items = ['ETank', 'Missile', 'Super', 'PowerBomb', 'Bomb', 'Charge', 'Ice', 'HiJump', 'SpeedBooster', 'Wave', 'Spazer', 'SpringBall', 'Varia', 'Plasma', 'Grapple', 'Morph', 'Reserve', 'Gravity', 'XRayScope', 'SpaceJump', 'ScrewAttack']
     countItems = ['ETank', 'Reserve', 'Missile', 'Super', 'PowerBomb']
-    methodList = ['_heatProof', '_canFly', '_canFlyDiagonally', '_canUseBombs', '_canOpenRedDoors',
-                  '_canOpenGreenDoors', '_canOpenYellowDoors', '_canUsePowerBombs',
-                  '_canDestroyBombWalls', '_canEnterAndLeaveGauntlet', '_canPassBombPassages',
-                  '_canAccessRedBrinstar', '_canAccessKraid', '_canAccessWs',
-                  '_canAccessHeatedNorfair', '_canAccessCrocomire', '_canDefeatCrocomire',
+    methodList = ['_heatProof', '_canFly', '_canUseBombs', '_canOpenRedDoors',
+                  '_canOpenYellowDoors', '_canUsePowerBombs',
+                  '_canDestroyBombWalls', '_canPassBombPassages',
+                  '_canAccessRedBrinstar', '_canAccessKraid', '_canAccessWs', '_canAccessHeatedNorfair',
+                  '_canAccessCrocomire', '_enoughStuffCroc', '_canDefeatCrocomire',
                   '_canAccessLowerNorfair', '_canPassWorstRoom', '_canAccessOuterMaridia',
-                  '_canAccessInnerMaridia', '_canDoSuitlessMaridia', '_canPassMtEverest',
-                  '_canDefeatBotwoon', '_canCrystalFlash']
+                  '_canDoSuitlessMaridia', '_canPassMtEverest',
+                  '_enoughStuffBotwoon', '_canDefeatBotwoon']
 
     def __init__(self, cache):
         self.curSMBool = SMBool(False)
         self.useCache = cache
         self.createCacheFunctions()
-        self.createItemsFunctions()
         self.createKnowsFunctions()
         self.resetItems()
 
@@ -64,7 +62,7 @@ class SMOptim(object):
         self.curSMBool.bool = bool
         self.curSMBool.difficulty = diff
         self.curSMBool.items = items
-        return self.curSMBool
+        return self.getSMBoolCopy()
 
     def getBool(self, dummy):
         # get access to current smbool boolean (as internaly it can be bool or (bool, diff) or smbool)
@@ -72,10 +70,10 @@ class SMOptim(object):
 
     def resetItems(self):
         # start without items
-        for item in SMOptim.items:
+        for item in SMBoolManager.items:
             setattr(self, item, False)
 
-        for item in SMOptim.countItems:
+        for item in SMBoolManager.countItems:
             setattr(self, item+'Count', 0)
 
         if self.useCache == True:
@@ -112,11 +110,8 @@ class SMOptim(object):
                     getattr(self, fun)()
                     setattr(self, fun+'SMBool', self.getSMBoolCopy())
 
-        #print("updateCache::{}: {}".format(fun, getattr(self, '_'+fun+'SMBool')))
-
     def addItem(self, item):
         # a new item is available
-        #print("addItem: {} previous {}".format(item, getattr(self, item)))
         setattr(self, item, True)
         if item in self.countItems:
             setattr(self, item+'Count', getattr(self, item+'Count') + 1)
@@ -125,8 +120,7 @@ class SMOptim(object):
             self.updateCache('add', item)
 
     def removeItem(self, item):
-        # randomizer removed an item
-        #print("removeItem: {} previous {}".format(item, getattr(self, item)))
+        # randomizer removed an item (or the item was added to test a post available)
         if item in self.countItems:
             count = getattr(self, item+'Count') - 1
             setattr(self, item+'Count', count)
@@ -134,7 +128,6 @@ class SMOptim(object):
                 setattr(self, item, False)
         else:
             setattr(self, item, False)
-        #print("removeItem: {} {}".format(item, getattr(self, item)))
 
         if self.useCache == True:
             self.updateCache('remove', item)
@@ -152,15 +145,6 @@ class SMOptim(object):
         smb = getattr(self, fun)
         self.setSMBoolCache(smb)
         return smb
-
-    def createItemsFunctions(self):
-        # for each item we have a function haveItem (ex: haveBomb()) which take an
-        # optional parameter: the difficulty
-        for item in SMOptim.items:
-            setattr(self, 'have'+item, lambda item=item, difficulty=0: self.haveItem(item, difficulty))
-
-        for item in SMOptim.countItems:
-            setattr(self, 'count'+item, lambda item=item: self.countItem(item))
 
     def createKnowsFunctions(self):
         # for each knows we have a function knowsKnows (ex: knowsAlcatrazEscape()) which
@@ -228,7 +212,7 @@ class SMOptim(object):
         else:
             return SMBool(False)
 
-    def _canFlyDiagonally(self):
+    def canFlyDiagonally(self):
         if self.getBool(self.haveItem('SpaceJump')) == True:
             return self.setSMBool(True, easy, ['SpaceJump'])
         elif self.getBool(self.wand(self.haveItem('Morph'),
@@ -236,7 +220,7 @@ class SMOptim(object):
                                     self.knowsDiagonalBombJump())) == True:
             return self.knowsDiagonalBombJump()
         else:
-            return SMBool(False)
+            return self.setSMBool(False)
 
     def _canUseBombs(self):
         return self.wand(self.haveItem('Morph'), self.haveItem('Bomb'))
@@ -244,7 +228,7 @@ class SMOptim(object):
     def _canOpenRedDoors(self):
         return self.wor(self.haveItem('Missile'), self.haveItem('Super'))
 
-    def _canOpenGreenDoors(self):
+    def canOpenGreenDoors(self):
         return self.haveItem('Super')
 
     def _canOpenYellowDoors(self):
@@ -259,7 +243,7 @@ class SMOptim(object):
                                            self.haveItem('PowerBomb'))),
                         self.haveItem('ScrewAttack'))
 
-    def _canEnterAndLeaveGauntlet(self):
+    def canEnterAndLeaveGauntlet(self):
         # EXPLAINED: to access Gauntlet Entrance from Landing site we can either:
         #             -fly to it (infinite bomb jumps or space jump)
         #             -shinespark to it
@@ -297,13 +281,9 @@ class SMOptim(object):
         #              morph at the lower part of Big Pink then use a super on the green door
         #             -open green door at the right of Landing Site, then open the yellow
         #              door at Crateria Keyhunter room
-        #print("haveSuper {}".format(self.haveItem('Super')))
-        #print("self.Super = {}".format(self.Super))
-        #print("canDestroyBombWalls {}".format(self.canDestroyBombWalls()))
-        #print("haveMorph {}".format(self.haveItem('Morph')))
-        #print("canUsePowerBombs {}".format(self.canUsePowerBombs()))
         return self.wand(self.haveItem('Super'),
-                         self.wor(self.wand(self.canDestroyBombWalls(),
+                         self.wor(self.wand(self.wor(self.canDestroyBombWalls(),
+                                                     self.wand(self.haveItem('SpeedBooster'), self.knowsSimpleShortCharge())),
                                             self.haveItem('Morph')),
                                   self.canUsePowerBombs()))
 
@@ -339,8 +319,7 @@ class SMOptim(object):
                                                      self.canUseBombs()),
                                            self.wand(self.knowsSimpleShortCharge(),
                                                      self.haveItem('SpeedBooster')),
-                                           self.wand(self.knowsGravityJump(),
-                                                     self.haveItem('Gravity')),
+                                           self.haveItem('Gravity'),
                                            self.wand(self.knowsMockballWs(),
                                                      self.haveItem('Morph'),
                                                      self.haveItem('SpringBall')))))
@@ -357,6 +336,16 @@ class SMOptim(object):
                                   self.haveItem('HiJump'),
                                   self.canFly()),
                          self.canHellRun('MainUpperNorfair'))
+
+    def canAccessNorfairReserve(self):
+        return self.wand(self.canAccessHeatedNorfair(),
+                         self.wor(self.wor(self.canFly(),
+                                           self.haveItem('Grapple'),
+                                           self.wand(self.haveItem('HiJump'),
+                                                     self.knowsGetAroundWallJump())),
+                                  self.wor(self.haveItem('Ice'),
+                                           self.wand(self.haveItem('SpringBall'),
+                                                     self.knowsSpringBallJumpFromWall()))))
 
     def _canAccessCrocomire(self):
         # EXPLAINED: two options there, either:
@@ -414,12 +403,12 @@ class SMOptim(object):
     def _canPassMtEverest(self):
         return self.wand(self.canAccessOuterMaridia(),
                          self.wor(self.wand(self.haveItem('Gravity'),
-                                            self.wor(self.haveItem('Grapple'),
-                                                     self.haveItem('SpeedBooster')),
-                                            self.wor(self.canFly(),
-                                                     self.knowsGravityJump(),
-                                                     self.wand(self.haveItem('Ice'),
-                                                               self.knowsTediousMountEverest()))),
+                                            self.wor(self.wor(self.haveItem('Grapple'),
+                                                              self.haveItem('SpeedBooster')),
+                                                     self.wor(self.canFly(),
+                                                              self.knowsGravityJump(),
+                                                              self.wand(self.haveItem('Ice'),
+                                                                        self.knowsTediousMountEverest())))),
                                   self.canDoSuitlessMaridia()))
 
     def _canAccessOuterMaridia(self):
@@ -448,7 +437,7 @@ class SMOptim(object):
                                                               self.haveItem('Spazer'),
                                                               self.haveItem('Plasma'))))))
 
-    def _canAccessInnerMaridia(self):
+    def canAccessInnerMaridia(self):
         # EXPLAINED: this is the easy regular way:
         #            access Red Tower in red brinstar,
         #            power bomb to destroy the tunnel at Glass Tunnel,
@@ -480,7 +469,7 @@ class SMOptim(object):
                                   self.wand(self.knowsMochtroidClip(),
                                             self.haveItem('Ice'))))
 
-    def _canCrystalFlash(self):
+    def canCrystalFlash(self):
         return self.wand(self.canUsePowerBombs(),
                          self.itemCountOk('Missile', 2),
                          self.itemCountOk('Super', 2),
@@ -654,38 +643,44 @@ class SMOptim(object):
 
         return difficulty
 
-    def enoughStuffCroc(self):
+    def _enoughStuffCroc(self):
         # say croc has ~5000 energy, and ignore its useless drops
         (ammoMargin, secs) = self.canInflictEnoughDamages(5000, givesDrops=False)
         if ammoMargin == 0:
             return SMBool(False)
-        return SMBool(True, easy)
+        self.curSMBool.difficulty = easy
+        self.curSMBool.bool = True
+        return self.getSMBoolCopy()
 
-    def enoughStuffBotwoon(self):
+    def _enoughStuffBotwoon(self):
         # say botwoon has 5000 energy : it is actually 3000 but account for missed shots
         (ammoMargin, secs) = self.canInflictEnoughDamages(5000, givesDrops=False)
         if ammoMargin == 0:
             return SMBool(False)
-        return SMBool(True, easy)
+        self.curSMBool.difficulty = easy
+        self.curSMBool.bool = True
+        return self.getSMBoolCopy()
 
     def enoughStuffsRidley(self):
         (ammoMargin, secs) = self.canInflictEnoughDamages(18000, doubleSuper=True, givesDrops=False)
         if ammoMargin == 0:
             return SMBool(False)
 
-        #print("enoughStuffsRidley ammoMargin == {} items={}".format(ammoMargin, [(item, getattr(self, item)) for item in self.items if getattr(self, item) == True]))
-
         # print('RIDLEY', ammoMargin, secs)
-        return SMBool(True, self.computeBossDifficulty(ammoMargin, secs,
-                                                       Settings.bossesDifficulty['Ridley']))
+        self.curSMBool.difficulty = self.computeBossDifficulty(ammoMargin, secs,
+                                                               Settings.bossesDifficulty['Ridley'])
+        self.curSMBool.bool = True
+        return self.getSMBoolCopy()
 
     def enoughStuffsKraid(self):
         (ammoMargin, secs) = self.canInflictEnoughDamages(1000)
         if ammoMargin == 0:
             return SMBool(False)
         #print('KRAID True ', ammoMargin, secs)
-        return SMBool(True, self.computeBossDifficulty(ammoMargin, secs,
-                                                       Settings.bossesDifficulty['Kraid']))
+        self.curSMBool.difficulty = self.computeBossDifficulty(ammoMargin, secs,
+                                                               Settings.bossesDifficulty['Kraid'])
+        self.curSMBool.bool = True
+        return self.getSMBoolCopy()
 
     def enoughStuffsDraygon(self):
         (ammoMargin, secs) = self.canInflictEnoughDamages(6000)
@@ -742,17 +737,17 @@ class SMOptim(object):
             return SMBool(False)
 
         # print('MB2', ammoMargin, secs)
-        nTanks = self.countEtank
+        nTanks = self.ETankCount
         if self.getBool(self.haveItem('Varia')) == False:
             # "remove" 3 etanks (accounting for rainbow beam damage without varia)
             if nTanks < 6:
                 return SMBool(False, 0)
-            self.countEtank -= 3
+            self.ETankCount -= 3
         elif nTanks < 3:
             return SMBool(False, 0)
 
-        diff = self.computeBossDifficulty(bossItems, ammoMargin, secs, Settings.bossesDifficulty['MotherBrain'])
-        self.countEtank = nTanks
+        diff = self.computeBossDifficulty(ammoMargin, secs, Settings.bossesDifficulty['MotherBrain'])
+        self.ETankCount = nTanks
         return SMBool(True, diff)
 
     def canPassMetroids(self):
@@ -763,19 +758,19 @@ class SMOptim(object):
 
     def canPassZebetites(self):
         # account for one zebetite, refill may be necessary
-        return wor(self.wand(self.haveItem('Ice'), self.knowsIceZebSkip()),
-                   self.wand(self.haveItem('SpeedBooster'), self.knowsSpeedZebSkip()),
-                   SMBool(self.canInflictEnoughDamages(1100, charge=False, givesDrops=False)[0] >= 1, 0))
+        return self.wor(self.wand(self.haveItem('Ice'), self.knowsIceZebSkip()),
+                        self.wand(self.haveItem('SpeedBooster'), self.knowsSpeedZebSkip()),
+                        SMBool(self.canInflictEnoughDamages(1100, charge=False, givesDrops=False)[0] >= 1, 0))
 
     def enoughStuffTourian(self):
         return self.wand(self.canPassMetroids(),
                          self.canPassZebetites(),
                          self.enoughStuffsMotherbrain())
 
-class SMOptimBool(SMOptim):
+class SMBMBool(SMBoolManager):
     # only care about the bool, internaly: bool
     def __init__(self, cache):
-        super(SMOptimBool, self).__init__(cache)
+        super(SMBMBool, self).__init__(cache)
 
     def setSMBoolCache(self, smbool):
         self.curSMBool.bool = smbool.bool
@@ -812,10 +807,10 @@ class SMOptimBool(SMOptim):
         # internal is a bool
         return SMBool(internal)
 
-class SMOptimDiff(SMOptim):
+class SMBMDiff(SMBoolManager):
     # bool and diff here, internaly: only a tuple (bool, diff)
     def __init__(self, cache):
-        super(SMOptimDiff, self).__init__(cache)
+        super(SMBMDiff, self).__init__(cache)
 
     def setSMBoolCache(self, smbool):
         self.curSMBool.bool = smbool.bool
@@ -853,7 +848,6 @@ class SMOptimDiff(SMOptim):
         if self.curSMBool.bool == True and difficulty != 0:
             self.curSMBool.difficulty += difficulty
 
-        #print("wand: {}".format(self.curSMBool.bool))
         return (self.curSMBool.bool, self.curSMBool.difficulty)
 
     def wor2(self, a, b, difficulty=0):
@@ -917,10 +911,10 @@ class SMOptimDiff(SMOptim):
         # internal is a (bool, diff)
         return SMBool(internal[0], internal[1])
 
-class SMOptimAll(SMOptim):
+class SMBMAll(SMBoolManager):
     # full package, internaly: smbool
     def __init__(self, cache):
-        super(SMOptimAll, self).__init__(cache)
+        super(SMBMAll, self).__init__(cache)
 
     def setSMBoolCache(self, smbool):
         self.curSMBool.bool = smbool.bool

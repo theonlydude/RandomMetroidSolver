@@ -1,9 +1,10 @@
 import sys, random
 from itemrandomizerweb import Items
-from parameters import Knows, Settings
+from parameters import Knows, Settings, mania
 from itemrandomizerweb.stdlib import List
-from helpers import wand, Bosses, enoughStuffTourian
+from helpers import Bosses
 from graph import AccessGraph
+from smboolmanager import SMBoolManager
 
 class RandoSettings(object):
     # maxDiff : max diff
@@ -227,6 +228,10 @@ class Randomizer(object):
         self.maxCancel = 1
         self.totalCancels = 0
         self.pickedUpLocs = []
+        if self.difficultyTarget > mania:
+            self.smbm = SMBoolManager.factory('bool')
+        else:
+            self.smbm = SMBoolManager.factory('diff')
 
     def getRestrictedLocations(self, forbiddenItems, locations):
         # list only absolutely unreachable locations, regardless of known techniques
@@ -243,7 +248,7 @@ class Randomizer(object):
         if 'SpaceJump' in forbiddenItems:
             restricted += ["Missile (Gold Torizo)"]
 
-        restricted = list(set(restricted))
+        restricted = sorted(list(set(restricted)))
 
         # add full locations
         restrictedFull = []
@@ -253,18 +258,25 @@ class Randomizer(object):
                     restrictedFull.append(loc)
         return restrictedFull
         
-    def locAvailable(self, loc, items):
-        result = loc["Available"](items)
+    def locAvailable(self, loc):
+        self.smbm.resetSMBool()
+        loc["Available"](self.smbm)
+        result = self.smbm.getSMBool()
         return result.bool == True and result.difficulty <= self.difficultyTarget
 
-    def locPostAvailable(self, loc, items):
+    def locPostAvailable(self, loc, item):
         if not 'PostAvailable' in loc:
             return True
-        result = loc["PostAvailable"](items)
+
+        self.smbm.addItem(item)
+        self.smbm.resetSMBool()
+        loc["PostAvailable"](self.smbm)
+        result = self.smbm.getSMBoolCopy()
+        self.smbm.removeItem(item)
 #        print("POST " + str(result.bool))
         return result.bool == True and result.difficulty <= self.difficultyTarget
 
-    def currentLocationsAvailFunc(self, items):
+    def currentLocationsAvailFunc(self, item=None):
         # loop on all the location pool and check if the loc is not already used and if the available function is true
         # 
         # items: list of items, each item is a dict
@@ -272,11 +284,16 @@ class Randomizer(object):
         #
         # return: list of locations
 
-        # keep only the item type, it's too slow otherwise
-        items = [item["Type"] for item in items]
-        avail = lambda loc: self.locAvailable(loc, items)
-        
-        return List.filter(avail, self.unusedLocations)
+        if item is not None:
+            self.smbm.addItem(item['Type'])
+
+        avail = lambda loc: self.locAvailable(loc)
+        ret = List.filter(avail, self.unusedLocations)
+
+        if item is not None:
+            self.smbm.removeItem(item['Type'])
+
+        return ret
 
     def currentLocationsGraph(self, items):
         items = [item["Type"] for item in items]
@@ -357,7 +374,7 @@ class Randomizer(object):
         for item in items:
             if item in self.failItems:
                 continue
-            newLocs = len(self.currentLocations(self.currentItems + [item]))
+            newLocs = len(self.currentLocations(item))
             if newLocs < minNewLocs:
                 minNewLocs = newLocs
                 ret = item
@@ -370,7 +387,7 @@ class Randomizer(object):
         for item in items:
             if item in self.failItems:
                 continue
-            newLocs = len(self.currentLocations(self.currentItems + [item]))
+            newLocs = len(self.currentLocations(item))
             if newLocs > maxNewLocs:
                 maxNewLocs = newLocs
                 ret = item
@@ -426,7 +443,7 @@ class Randomizer(object):
         if item['Type'] in self.progTypesCache:
             return True
         if not item in self.currentItems:
-            isProg = len(self.currentLocations(self.currentItems)) < len(self.currentLocations(self.currentItems + [item]))
+            isProg = len(self.currentLocations()) < len(self.currentLocations(item))
             if isProg == False and item['Type'] not in self.nonProgTypesCache:
                 self.nonProgTypesCache.append(item['Type'])
             elif isProg == True and item['Type'] not in self.progTypesCache:
@@ -459,9 +476,7 @@ class Randomizer(object):
         #
         # returns a dict with the item and the location
         item = self.getItemToPlace(items, itemPool)
-        currentItems = [i["Type"] for i in self.currentItems]
-        currentItems.append(item['Type'])
-        availableLocations = List.filter(lambda loc: self.canPlaceAtLocation(item, loc) and self.locPostAvailable(loc, currentItems), locations)
+        availableLocations = List.filter(lambda loc: self.canPlaceAtLocation(item, loc) and self.locPostAvailable(loc, item['Type']), locations)
         # if a loc is available we trigger pick up action, to make more locs available afterwards
         for loc in availableLocations:
             if 'Pickup' in loc and not loc in self.pickedUpLocs:
@@ -490,7 +505,7 @@ class Randomizer(object):
         if canPlaceIt == False:
             return False
 
-        newLocations = self.currentLocations([item] + items)
+        newLocations = self.currentLocations(item)
         if self.restrictions["MajorMinor"] == True:
             newLocationsHasMajor = List.exists(lambda l: l["Class"] == 'Major', newLocations)
         else:
@@ -545,6 +560,7 @@ class Randomizer(object):
         self.unusedLocations.remove(location)
         if collect == True:
             self.currentItems.append(item)
+            self.smbm.addItem(item['Type'])
             self.nonProgTypesCache = []
             self.progTypesCache = []
         itemLocations.append(itemLocation)
@@ -595,6 +611,7 @@ class Randomizer(object):
         loc = itemLoc['Location']
         if item in self.currentItems:
             self.currentItems.remove(item)
+            self.smbm.removeItem(item['Type'])
         self.itemPool.append(item)
         self.usedLocations.remove(loc)
         self.unusedLocations.append(loc)
@@ -662,7 +679,7 @@ class Randomizer(object):
         maxLimit = self.itemLimit + int(self.itemLimit/5)
         itemLimit = random.randint(minLimit, maxLimit)
         while len(pool) > 0 and nItems < itemLimit and locPoolOk: 
-            curLocs = self.currentLocations(self.currentItems)
+            curLocs = self.currentLocations()
             itemLocation = self.generateItem(curLocs, pool)
             if itemLocation is None:
                 break
@@ -678,7 +695,7 @@ class Randomizer(object):
 #                print("REGULAR")
         # first, try to put an item from standard pool
 #        print("PROG IN maxLen =  " + str(maxLen) + ", " + str([l['Name'] for l in self.currentLocations(self.currentItems)]))
-        curLocs = self.currentLocations(self.currentItems)
+        curLocs = self.currentLocations()
         nLocsIn = len(curLocs)
         itemLocation = None
         nCancel = 0
@@ -692,7 +709,7 @@ class Randomizer(object):
                 if doCancel is True:
                     nCancel += 1
             if nLocsIn > 0 or nCancel > 0:
-                curLocs = self.currentLocations(self.currentItems)
+                curLocs = self.currentLocations()
                 itemLocation = self.generateItem(curLocs, self.itemPool)
         else:
             sys.stdout.write('-')
@@ -705,7 +722,7 @@ class Randomizer(object):
             self.getItem(itemLocation, itemLocations)
         else:
             nFreed = nCancel
-        curLocs = self.currentLocations(self.currentItems)
+        curLocs = self.currentLocations()
         nLocsOut = len(curLocs)
         if nLocsOut - nFreed <= nLocsIn:
 #            print("up")
@@ -719,6 +736,7 @@ class Randomizer(object):
     def generateItems(self):
         itemLocations = []
         self.currentItems = []
+        self.smbm.resetItems()
         self.nonProgTypesCache = []
         self.progTypesCache = []
         isStuck = False
@@ -741,7 +759,9 @@ class Randomizer(object):
             # we could not place all items, check if we can finish the game
             itemTypes = [item['Type'] for item in self.currentItems]
 #            print(itemTypes)
-            canEndGame = wand(Bosses.allBossesDead(), enoughStuffTourian(itemTypes))
+            self.smbm.resetSMBool()
+            self.smbm.wand(Bosses.allBossesDead(), self.smbm.enoughStuffTourian())
+            canEndGame = self.smbm.getSMBool()
 #            print(canEndGame)
 #            print(Bosses.golden4Dead)
             if canEndGame.bool == True and canEndGame.difficulty < self.difficultyTarget:

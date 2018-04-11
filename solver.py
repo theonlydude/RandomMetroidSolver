@@ -9,8 +9,9 @@ from parameters import Conf, Knows, Settings, isKnows, isConf, isSettings
 from parameters import easy, medium, hard, harder, hardcore, mania, diff2text
 
 # the helper functions
-from helpers import Pickup, Bosses, wand, wor, enoughStuffTourian, SMBool
-
+from smbool import SMBool
+from smboolmanager import SMBoolManager
+from helpers import Pickup, Bosses
 from rom import RomReader, RomType, RomLoader
 
 class Solver:
@@ -22,6 +23,8 @@ class Solver:
         else:
             logging.basicConfig(level=logging.INFO)
         self.log = logging.getLogger('Solver')
+
+        self.smbm = SMBoolManager.factory('all', cache=False)
 
         if params is not None:
             for paramsFileName in params:
@@ -59,6 +62,7 @@ class Solver:
 
     def loadParams(self, params):
         ParamsLoader.factory(params).load()
+        self.smbm.createKnowsFunctions()
 
         if self.log.getEffectiveLevel() == logging.DEBUG:
             self.log.debug("loaded knows: ")
@@ -247,10 +251,15 @@ class Solver:
     def computeLocationsDifficulty(self, locations):
         for loc in locations:
             if 'PostAvailable' in loc:
-                loc['difficulty'] = wand(loc['Available'](self.collectedItems),
-                                         loc['PostAvailable'](self.collectedItems + [loc['itemName']]))
+                available = loc['Available'](self.smbm)
+
+                self.smbm.addItem(loc['itemName'])
+                postAvailable = loc['PostAvailable'](self.smbm)
+                self.smbm.removeItem(loc['itemName'])
+
+                loc['difficulty'] = self.smbm.wand(available, postAvailable)
             else:
-                loc['difficulty'] = loc['Available'](self.collectedItems)
+                loc['difficulty'] = loc['Available'](self.smbm)
 
     def computeDifficultyValue(self):
         if not self.canEndGame().bool:
@@ -331,6 +340,7 @@ class Solver:
         item = loc["itemName"]
         if item not in Conf.itemsForbidden:
             self.collectedItems.append(item)
+            self.smbm.addItem(item)
         else:
             # update the name of the item
             item = "-{}-".format(item)
@@ -356,7 +366,7 @@ class Solver:
         # - defeat metroids
         # - destroy/skip the zebetites
         # - beat Mother Brain
-        return wand(Bosses.allBossesDead(), enoughStuffTourian(self.collectedItems))            
+        return self.smbm.wand(Bosses.allBossesDead(), self.smbm.enoughStuffTourian())
     
     def getAvailableItemsList(self, locations, area, threshold, enough):
         around = [loc for loc in locations if loc['Area'] == area and loc['difficulty'].difficulty <= threshold and not Bosses.areaBossDead(area)]
@@ -583,4 +593,3 @@ if __name__ == "__main__":
         sys.exit(0)
     else:
         sys.exit(1)
-

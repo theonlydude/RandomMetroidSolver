@@ -652,7 +652,7 @@ def randomizerWebService():
     with open(presetFileName, 'w') as presetFile:
         presetFile.write(request.vars.paramsFileTarget)
 
-    params = ['pypy',  os.path.expanduser("~/RandomMetroidSolver/randomizer.py"),
+    params = ['python2',  os.path.expanduser("~/RandomMetroidSolver/randomizer.py"),
               '--seed', request.vars.seed,
               '--output', jsonFileName, '--param', presetFileName,
               '--preset', request.vars.paramsFile,

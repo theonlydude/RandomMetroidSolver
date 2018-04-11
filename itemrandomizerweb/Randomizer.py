@@ -760,7 +760,7 @@ class Randomizer(object):
             itemTypes = [item['Type'] for item in self.currentItems]
 #            print(itemTypes)
             self.smbm.resetSMBool()
-            self.smbm.wand(Bosses.allBossesDead(), self.smbm.enoughStuffTourian())
+            self.smbm.wand(Bosses.allBossesDead(self.smbm), self.smbm.enoughStuffTourian())
             canEndGame = self.smbm.getSMBool()
 #            print(canEndGame)
 #            print(Bosses.golden4Dead)

@@ -151,8 +151,8 @@ class Solver:
         diffThreshold = self.getDiffThreshold()
         while True:
             # actual while condition
-            hasEnoughMinors = self.pickup.enoughMinors(self.collectedItems, self.minorLocations)
-            hasEnoughMajors = self.pickup.enoughMajors(self.collectedItems, self.majorLocations)
+            hasEnoughMinors = self.pickup.enoughMinors(self.smbm, self.minorLocations)
+            hasEnoughMajors = self.pickup.enoughMajors(self.smbm, self.majorLocations)
             hasEnoughItems = hasEnoughMajors and hasEnoughMinors
             canEndGame = self.canEndGame()
             (isEndPossible, endDifficulty) = (canEndGame.bool, canEndGame.difficulty)
@@ -273,8 +273,8 @@ class Solver:
             difficulty = difficultyMax
 
             # check if we have taken all the requested items
-            if (self.pickup.enoughMinors(self.collectedItems, self.minorLocations)
-                and self.pickup.enoughMajors(self.collectedItems, self.majorLocations)):
+            if (self.pickup.enoughMinors(self.smbm, self.minorLocations)
+                and self.pickup.enoughMajors(self.smbm, self.majorLocations)):
                 return (difficulty, True)
             else:
                 # can finish but can't take all the requested items
@@ -366,7 +366,7 @@ class Solver:
         # - defeat metroids
         # - destroy/skip the zebetites
         # - beat Mother Brain
-        return self.smbm.wand(Bosses.allBossesDead(), self.smbm.enoughStuffTourian())
+        return self.smbm.wand(Bosses.allBossesDead(self.smbm), self.smbm.enoughStuffTourian())
     
     def getAvailableItemsList(self, locations, area, threshold, enough):
         around = [loc for loc in locations if loc['Area'] == area and loc['difficulty'].difficulty <= threshold and not Bosses.areaBossDead(area)]

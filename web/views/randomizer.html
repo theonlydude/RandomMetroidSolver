@@ -395,27 +395,27 @@ function startTheTour() {
     {
       element: "#uploadFile",
       title: "Vanilla Super Metroid ROM",
-      content: "Use an American/Japan unheadered ROM of Super Metroid. The randomized ROM is generated locally "
+      content: "Use an American/Japan unheadered ROM of Super Metroid.<br/>The randomized ROM is generated locally."
     },
     {
       element: "#seed",
       title: "Randomizer seed",
-      content: ""
+      content: "Choose a seed number between 1 and 9999999, choose 0 to generate a random one."
     },
     {
       element: "#paramsFile",
       title: "Preset used to randomize",
-      content: ""
+      content: "The preset is used by the Randomizer to know which techniques are available to reach the items locations.</br>You can create and manage your preset on the <a href=\"/RandomMetroidSolver/solver_web/solver\">Solver part of the website</a>."
     },
     {
       element: "#missileQty",
       title: "Quantity of Missiles/Super Missiles/Power Bombs",
-      content: ""
+      content: "For each minor types, the higher the number the higher the probability of choosing it when placing a minor."
     },
     {
       element: "#minorQty",
       title: "Percentage of minors available",
-      content: ""
+      content: "From 1%: minimum number of minors required to finish the game to 100%: all minors locations contain a minor (vanilla like)."
     },
     {
       element: "#energyQty",
@@ -425,22 +425,22 @@ function startTheTour() {
     {
       element: "#maxDifficulty",
       title: "Maximum difficulty for picking up an item",
-      content: ""
+      content: "Depending on the perceived difficulties of the known techniques from the preset, it will prevent the Randomizer from placing an item in a location too difficult to reach with the current items.<br/>Warning: if too low may cause the randomizer to abort."
     },
     {
       element: "#progressionSpeed",
       title: "Progression speed",
-      content: ""
+      content: "A progression item is an item which makes many new locations available once picked up, this parameter influcences how fast progression items are likely to be found. Select random to randomly choose a progression speed."
     },
     {
       element: "#spreadItemsStep",
       title: "Spread progression items",
-      content: ""
+      content: "A progression item is an item which makes many new locations available once picked up, checked it and the Randomizer will try to put the progression items as far as possible from each others, leading to a slower and more difficult progression in the game."
     },
     {
       element: "#fullRandomizationStep",
       title: "Full randomization",
-      content: ""
+      content: "By default the minors and majors items are shuffled in their respective pool, check it to have all items fully randomized."
     },
     {
       element: "#suitsRestrictionStep",
@@ -551,18 +551,16 @@ def displayNumber(id, min, max, default):
               <td>{{=INPUT(_type="file", _name="uploadFile", _id="uploadFile", _class="full")}}</td>
             </tr>
             <tr>
-              <td>Randomizer seed (0 for a random one):</td>
+              <td>Randomizer seed:</td>
               <td>{{displayNumber("seed", "0", "9999999", "0")}}</td>
             </tr>
             <tr>
-              <td>The preset used to randomize:<br/>
-              You can create and manage your preset on the Solver part of the website</td>
+              <td>Preset used to randomize: </td>
               <td>{{displaySelect("paramsFile", presets, "regular")}}</td>
             </tr>
           </table>
 	  <br/>
 	  <h4>The quantity of Minors and Energy</h4>
-	  <p>For each minors, the higher the number the higher the probability of choosing it</p>
 	  <table class="full">
             <colgroup><col class="half" /><col class="half" /></colgroup>
             <tr>
@@ -590,13 +588,12 @@ def displayNumber(id, min, max, default):
 	  <h4>Randomizer parameters</h4>
 	  <table class="full">
             <tr>
-              <td>{{displayCheckbox("useMaxDiff")}}The maximum difficulty for picking up an item:<br/>Warning: if too low may cause the randomizer to abort</td>
+              <td>{{displayCheckbox("useMaxDiff")}}Maximum difficulty for picking up an item:</td>
               <td>{{displaySelect("maxDifficulty", ['easy', 'medium', 'hard', 'harder', 'hardcore', 'mania'], "hard")}}</td>
             </tr>
 	    <tr>
 	      <td class="half">
-                Progression speed: how fast progression items are likely to be found<br/>
-                Select random to randomly choose a progression speed
+                Progression speed:
               </td>
               <td class="half">{{displaySelect("progressionSpeed", ['random', 'slowest', 'slow', 'medium', 'fast', 'fastest'], "medium")}}</td>
 	    </tr>
@@ -604,7 +601,7 @@ def displayNumber(id, min, max, default):
 	      <td colspan="2" id="spreadItemsStep">{{displayCheckbox("spreadItems")}}Spread progression items (uncheck for faster progression)</td>
 	    </tr>
 	    <tr>
-	      <td colspan="2" id="fullRandomizationStep">{{displayCheckbox("fullRandomization")}}Full randomization: place majors in all locations</td>
+	      <td colspan="2" id="fullRandomizationStep">{{displayCheckbox("fullRandomization")}}Full randomization:</td>
 	    </tr>
 	    <tr>
 	      <td colspan="2" id="suitsRestrictionStep">{{displayCheckbox("suitsRestriction")}}Suits restriction: no Gravity or Varia suits in early game</td>

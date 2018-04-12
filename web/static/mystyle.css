@@ -178,3 +178,6 @@ p {
 .btn {
     padding: 0.2em 1.5em;
 }
+.popover-content {
+    text-align: left;
+}

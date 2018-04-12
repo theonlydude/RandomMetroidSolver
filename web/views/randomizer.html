@@ -405,7 +405,7 @@ function startTheTour() {
     {
       element: "#paramsFile",
       title: "Preset used to randomize",
-      content: "The preset is used by the Randomizer to know which techniques are available to reach the items locations.</br>You can create and manage your preset on the <a href=\"/solver/solver_web/solver\">Solver part of the website</a>."
+      content: "The preset is used by the Randomizer to know which techniques are available to reach the items locations.</br>You can create and manage your preset on the <a href=\"/solver/solver_web/solver\">Solver part of the website</a>.You can use one of the predifined ones : noob, regular, veteran, speedrunner. However, creating your own preset will lead to a better experience overall, as the generated ROMs will be tailored for you."
     },
     {
       element: "#missileQty",
@@ -425,22 +425,22 @@ function startTheTour() {
     {
       element: "#maxDifficulty",
       title: "Maximum difficulty for picking up an item",
-      content: "Depending on the perceived difficulties of the known techniques from the preset, it will prevent the Randomizer from placing an item in a location too difficult to reach with the current items.<br/>Warning: if too low may cause the randomizer to abort."
+      content: "Depending on the perceived difficulties of the techniques, bosses, hell runs etc. from the preset, it will prevent the Randomizer from placing an item in a location too difficult to reach with the current items.<br/><b>Warning:</b> if too low may cause the randomizer to abort."
     },
     {
       element: "#progressionSpeed",
       title: "Progression speed",
-      content: "A progression item is an item which makes many new locations available once picked up.<br/>This parameter influcences how fast progression items are likely to be found.<br/>Select random to randomly choose a progression speed."
+      content: "A progression item is an item opening new locations once picked up : suit, movement item, or any item that opens up locations when placed by the randomizer.<br/>This parameter influences how fast progression items are likely to be found. From <b>slowest</b>, stuffing your way with as many non-progression items as possible, to <b>fastest</b>, where you will be able to visit Zebes pretty shortly.<br/>If you played the other item randomizers out there, an average Dessy seed would be between fast and fastest, and the average Total Tournament seed would be a medium/fast-ish (these are very accurate measurements)."
     },
     {
       element: "#spreadItemsStep",
       title: "Spread progression items",
-      content: "A progression item is an item which makes many new locations available once picked up.<br/>Activate this option and the Randomizer will try to put the progression items as far as possible from each others, leading to a slower and more difficult progression in the game."
+      content: "A progression item is an item opening new locations once picked up : suit, movement item, or any item that opens up locations when placed by the randomizer.<br/>Activate this option to balance the main areas in which those items are placed."
     },
     {
       element: "#fullRandomizationStep",
       title: "Full randomization",
-      content: "By default the minors and majors items are shuffled in their respective pool.<br/>Activate this option to have all items fully randomized."
+      content: "By default the minor and major items are shuffled in their respective pool.<br/>Activate this option to have all items fully randomized."
     },
     {
       element: "#suitsRestrictionStep",
@@ -450,7 +450,7 @@ function startTheTour() {
     {
       element: "#speedScrewRestrictionStep",
       title: "Early Morph",
-      content: "No SpeedBooster or Screw Attack in the very first rooms, no Screw Attack in Crateria."
+      content: "No SpeedBooster or Screw Attack in the very first rooms, no Screw Attack in Crateria.<br/>As a consequence, Morph Ball will be either at its vanilla position, or at the E-Tank in the ceiling next to it (like Total randomizer).<br/>If disabled, Morph can be found later in the game (like Dessy randomizer)."
     },
     {
       element: "#patches",
@@ -461,25 +461,25 @@ function startTheTour() {
     {
       element: "#funStep",
       title: "Super Fun Times (TM)",
-      content: "Have fun randomly removing major items!<br/>Warning: For experienced players only.<br/>Warning: May cause the Randomizer to abort.",
+      content: "Have fun randomly removing major items!<br/><b>Warning:</b> For experienced players only.<br/><b>Warning:</b> May cause the Randomizer to abort.",
       placement: "auto left"
     },
     {
       element: "#funCombatStep",
-      title: "Super Fun Times Combat",
+      title: "Super Fun Combat",
       content: "Will randomly remove some items from the Combat set:<br/><ul><li>Screw Attack</li><li>Spazer</li><li>Wave Beam</li><li>Plasma Beam</li></ul>",
       placement: "auto left"
     },
     {
       element: "#funMovementStep",
-      title: "Super Fun Times Movement",
-      content: "Will randomly remove some items from the Movement set:<br/><ul><li>High Jump</li><li>Space Jump</li><li>Grappling Beam</li><li>Spring Ball</li><li>Speed Booster</li><li>Bombs</li></ul>",
+      title: "Super Fun Movement",
+      content: "Will randomly remove some items from the Movement set:<br/><ul><li>Hi Jump</li><li>Space Jump</li><li>Grappling Beam</li><li>Spring Ball</li><li>Speed Booster</li><li>Bombs</li></ul>",
       placement: "auto left"
     },
     {
       element: "#funSuitsStep",
-      title: "Super Fun Times Suits",
-      content: "Will randomly remove some Suits.<br/>Will not activate if relevant known techniques are not enabled in the preset.",
+      title: "Suitless",
+      content: "Will randomly remove some Suits.<br/>Will not activate if relevant known techniques are not enabled in the preset : exit Draygon suitless for Gravity, and Lower Norfair hell runs for Varia",
       placement: "auto left"
     }  ]});
 
@@ -647,13 +647,13 @@ for patch in patches:
           <h4 id="funStep">Super Fun Times (TM)</h4>
 	  <table class="full">
             <tr>
-              <td id="funCombatStep">{{displayCheckbox("funCombat")}} Combat</td>
+              <td id="funCombatStep">{{displayCheckbox("funCombat")}} Super Fun Combat</td>
             </tr>
             <tr>
-              <td id="funMovementStep">{{displayCheckbox("funMovement")}} Movement</td>
+              <td id="funMovementStep">{{displayCheckbox("funMovement")}} Super Fun Movement</td>
             </tr>
             <tr>
-              <td id="funSuitsStep">{{displayCheckbox("funSuits")}} Suits</td>
+              <td id="funSuitsStep">{{displayCheckbox("funSuits")}} Suitless</td>
             </tr>
           </table>
 	</div>

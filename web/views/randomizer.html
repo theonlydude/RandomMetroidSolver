@@ -10,6 +10,9 @@ extend 'layout.html'
 <link rel="stylesheet" type="text/css" href={{=URL('static','dist/switchery.css')}} media="screen"/>
 <script src="{{=URL('static','dist/switchery.js')}}"></script>
 
+<link href={{=URL('static', 'css/bootstrap-tour.min.css')}} rel="stylesheet">
+<script src="{{=URL('static','js/bootstrap-tour.min.js')}}"></script>
+
 <title>Super Metroid VARIA Randomizer</title>
 
 <style>
@@ -58,6 +61,9 @@ body {
 }
 .hidden {
     display: none;
+}
+.buttonBack {
+    background-color: lightblue;
 }
 </style>
 
@@ -380,6 +386,103 @@ function switchCheckbox(id) {
     check.value = "off";
   }
 }
+
+function startTheTour() {
+  // the tour tutorial
+  var tour = new Tour({
+    storage: false,
+    steps: [
+    {
+      element: "#uploadFile",
+      title: "Vanilla Super Metroid ROM",
+      content: "Use an American/Japan unheadered ROM of Super Metroid. The randomized ROM is generated locally "
+    },
+    {
+      element: "#seed",
+      title: "Randomizer seed",
+      content: ""
+    },
+    {
+      element: "#paramsFile",
+      title: "Preset used to randomize",
+      content: ""
+    },
+    {
+      element: "#missileQty",
+      title: "Quantity of Missiles/Super Missiles/Power Bombs",
+      content: ""
+    },
+    {
+      element: "#minorQty",
+      title: "Percentage of minors available",
+      content: ""
+    },
+    {
+      element: "#energyQty",
+      title: "Quantity of Energy/Reserve Tanks available",
+      content: ""
+    },
+    {
+      element: "#maxDifficulty",
+      title: "Maximum difficulty for picking up an item",
+      content: ""
+    },
+    {
+      element: "#progressionSpeed",
+      title: "Progression speed",
+      content: ""
+    },
+    {
+      element: "#spreadItemsStep",
+      title: "Spread progression items",
+      content: ""
+    },
+    {
+      element: "#fullRandomizationStep",
+      title: "Full randomization",
+      content: ""
+    },
+    {
+      element: "#suitsRestrictionStep",
+      title: "Suits restriction",
+      content: ""
+    },
+    {
+      element: "#speedScrewRestrictionStep",
+      title: "Early Morph",
+      content: ""
+    },
+    {
+      element: "#patches",
+      title: "Optional patches",
+      content: "",
+      placement: "auto left"
+    },
+    {
+      element: "#funCombatStep",
+      title: "Super Fun Times Combat",
+      content: "",
+      placement: "auto left"
+    },
+    {
+      element: "#funMovementStep",
+      title: "Super Fun Times Movement",
+      content: "",
+      placement: "auto left"
+    },
+    {
+      element: "#funSuitsStep",
+      title: "Super Fun Times Suits",
+      content: "",
+      placement: "auto left"
+    }  ]});
+
+  // Initialize the tour
+  tour.init();
+
+  // Start the tour
+  tour.start();
+}
 </script>
 {{
 def displayCheckbox(id):
@@ -428,6 +531,7 @@ def displayNumber(id, min, max, default):
 
   <div class="fixed">
     <div class="menu">
+      <button class="buttonBack" onclick="startTheTour()"><span class="glyphicon glyphicon-play"/></span>Start the tutorial</button>
       {{=A('Super Metroid VARIA Randomizer and Solver', _href=URL(f='randomizer'), _class='menu')}}
       {{=A('Solve!', _href=URL(f='solver'), _class='menu')}}
       {{=A('Randomize!', _href=URL(f='randomizer'), _class='menu')}}
@@ -444,7 +548,7 @@ def displayNumber(id, min, max, default):
             <colgroup><col class="half" /><col class="half" /></colgroup>
             <tr>
               <td>Vanilla Super Metroid ROM:</td>
-              <td>{{=INPUT(_type="file", _name="uploadFile", _id="uploadFile")}}</td>
+              <td>{{=INPUT(_type="file", _name="uploadFile", _id="uploadFile", _class="full")}}</td>
             </tr>
             <tr>
               <td>Randomizer seed (0 for a random one):</td>
@@ -497,19 +601,19 @@ def displayNumber(id, min, max, default):
               <td class="half">{{displaySelect("progressionSpeed", ['random', 'slowest', 'slow', 'medium', 'fast', 'fastest'], "medium")}}</td>
 	    </tr>
 	    <tr>
-	      <td colspan="2">{{displayCheckbox("spreadItems")}}Spread progression items (uncheck for faster progression)</td>
+	      <td colspan="2" id="spreadItemsStep">{{displayCheckbox("spreadItems")}}Spread progression items (uncheck for faster progression)</td>
 	    </tr>
 	    <tr>
-	      <td colspan="2">{{displayCheckbox("fullRandomization")}}Full randomization: place majors in all locations</td>
+	      <td colspan="2" id="fullRandomizationStep">{{displayCheckbox("fullRandomization")}}Full randomization: place majors in all locations</td>
 	    </tr>
 	    <tr>
-	      <td colspan="2">{{displayCheckbox("suitsRestriction")}}Suits restriction: no Gravity or Varia suits in early game</td>
+	      <td colspan="2" id="suitsRestrictionStep">{{displayCheckbox("suitsRestriction")}}Suits restriction: no Gravity or Varia suits in early game</td>
 	    </tr>
 	    <tr>
-	      <td colspan="2">{{displayCheckbox("speedScrewRestriction")}}Early Morph: no SpeedBooster or Screw Attack in the very first rooms, no Screw Attack in Crateria</td>
+	      <td colspan="2" id="speedScrewRestrictionStep">{{displayCheckbox("speedScrewRestriction")}}Early Morph: no SpeedBooster or Screw Attack in the very first rooms, no Screw Attack in Crateria</td>
 	    </tr>
 	  </table>
-         {{=INPUT(_type="submit", _value="Randomize", _id="submitBtn")}}
+         {{=INPUT(_type="submit", _value="Randomize", _id="submitBtn", _class="btn btn-default")}}
 	</div>
 	<div class="column">
 	  <h4>Patches</h4>
@@ -526,7 +630,7 @@ def displayNumber(id, min, max, default):
               <li>Replace bomb blocks with shot blocks before Spazer</li>
 	    </ul>
 	  </p>
-	  <p>
+	  <p id="patches">
 	    Optional patches to add to the randomized ROM:<br/>
 {{
 for patch in patches:
@@ -544,13 +648,13 @@ for patch in patches:
           </p>
 	  <table class="full">
             <tr>
-              <td>{{displayCheckbox("funCombat")}} Combat (Screw Attack, all beams but Ice and Charge)</td>
+              <td id="funCombatStep">{{displayCheckbox("funCombat")}} Combat (Screw Attack, all beams but Ice and Charge)</td>
             </tr>
             <tr>
-              <td>{{displayCheckbox("funMovement")}} Movement (Hi/Space Jump, Grapple, Spring Ball, Speed, Bombs)</td>
+              <td id="funMovementStep">{{displayCheckbox("funMovement")}} Movement (Hi/Space Jump, Grapple, Spring Ball, Speed, Bombs)</td>
             </tr>
             <tr>
-              <td>{{displayCheckbox("funSuits")}} Suits (will not activate if relevant known techniques are not enabled in the preset)</td>
+              <td id="funSuitsStep">{{displayCheckbox("funSuits")}} Suits (will not activate if relevant known techniques are not enabled in the preset)</td>
             </tr>
           </table>
 	</div>

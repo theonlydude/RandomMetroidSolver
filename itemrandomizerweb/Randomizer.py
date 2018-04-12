@@ -259,20 +259,14 @@ class Randomizer(object):
         return restrictedFull
         
     def locAvailable(self, loc):
-        self.smbm.resetSMBool()
-        loc["Available"](self.smbm)
-        result = self.smbm.getSMBool()
+        result = self.smbm.eval(loc['Available'])
         return result.bool == True and result.difficulty <= self.difficultyTarget
 
     def locPostAvailable(self, loc, item):
         if not 'PostAvailable' in loc:
             return True
 
-        self.smbm.addItem(item)
-        self.smbm.resetSMBool()
-        loc["PostAvailable"](self.smbm)
-        result = self.smbm.getSMBoolCopy()
-        self.smbm.removeItem(item)
+        result = self.smbm.eval(loc['PostAvailable'], item)
 #        print("POST " + str(result.bool))
         return result.bool == True and result.difficulty <= self.difficultyTarget
 

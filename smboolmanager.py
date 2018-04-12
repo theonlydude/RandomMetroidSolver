@@ -58,6 +58,17 @@ class SMBoolManager(object):
                       self.curSMBool.knows[:],
                       self.curSMBool.items[:])
 
+    def eval(self, func, item=None):
+        self.resetSMBool()
+        func(self)
+        if item is None:
+            ret = self.getSMBool()
+        else:
+            self.addItem(item)
+            ret = self.getSMBoolCopy()
+            self.removeItem(item)
+        return ret
+
     def setSMBool(self, bool, diff=0, items=[]):
         self.curSMBool.bool = bool
         self.curSMBool.difficulty = diff

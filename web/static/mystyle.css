@@ -181,3 +181,9 @@ p {
 .popover-content {
     text-align: left;
 }
+.popover-title {
+    text-align: center;
+}
+.popover {
+    max-width: 350px;
+}

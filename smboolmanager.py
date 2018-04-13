@@ -59,12 +59,13 @@ class SMBoolManager(object):
                       self.curSMBool.items[:])
 
     def eval(self, func, item=None):
+        if item is not None:
+            self.addItem(item)
         self.resetSMBool()
         func(self)
         if item is None:
             ret = self.getSMBool()
         else:
-            self.addItem(item)
             ret = self.getSMBoolCopy()
             self.removeItem(item)
         return ret

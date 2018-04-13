@@ -351,7 +351,7 @@ class RomPatcher:
             return outFile.data
 
     @staticmethod
-    def applyIPSPatches(romFileName, optionalPatches=[]):
+    def applyIPSPatches(romFileName, optionalPatches=[], noLayout=False):
         try:
             if romFileName is not None:
                 romFile = open(romFileName, 'r+')
@@ -362,9 +362,10 @@ class RomPatcher:
             for patchName in RomPatcher.IPSPatches['Standard']:
                 RomPatcher.applyIPSPatch(romFile, patchName)
 
-            # apply layout patches
-            for patchName in RomPatcher.IPSPatches['Layout']:
-                RomPatcher.applyIPSPatch(romFile, patchName)
+            if noLayout == False:
+                # apply layout patches
+                for patchName in RomPatcher.IPSPatches['Layout']:
+                    RomPatcher.applyIPSPatch(romFile, patchName)
 
             # apply optional patches
             for patchName in optionalPatches:

@@ -93,6 +93,9 @@ if __name__ == "__main__":
     parser.add_argument('--animals',
                         help="randomly change the save the animals room",
                         dest='animals', action='store_true', default=False)
+    parser.add_argument('--nolayout',
+                        help="do not include total randomizer layout patches",
+                        dest='noLayout', action='store_true', default=False)
 
     # parse args
     args = parser.parse_args()
@@ -114,8 +117,11 @@ if __name__ == "__main__":
         seed = args.seed
     random.seed(seed)
 
+    # choose on animal patch
     if args.animals == True:
-        animalsPatches = ['animal_enemies.ips', 'animals.ips', 'draygonimals.ips', 'escapimals.ips', 'gameend.ips', 'grey_door_animals.ips', 'low_timer.ips', 'metalimals.ips', 'phantoonimals.ips', 'ridleyimals.ips']
+        animalsPatches = ['animal_enemies.ips', 'animals.ips', 'draygonimals.ips', 'escapimals.ips',
+                          'gameend.ips', 'grey_door_animals.ips', 'low_timer.ips', 'metalimals.ips',
+                          'phantoonimals.ips', 'ridleyimals.ips']
         args.patches.append(animalsPatches[random.randint(0, len(animalsPatches)-1)])
 
     # if random progression speed, choose one
@@ -199,7 +205,7 @@ if __name__ == "__main__":
             shutil.copyfile(romFileName, fileName)
 
             RomPatcher.writeItemsLocs(fileName, itemLocs)
-            RomPatcher.applyIPSPatches(fileName, args.patches)
+            RomPatcher.applyIPSPatches(fileName, args.patches, args.noLayout)
             RomPatcher.writeSeed(fileName, seed)
             RomPatcher.writeSpoiler(fileName, itemLocs)
         except Exception as e:
@@ -211,7 +217,7 @@ if __name__ == "__main__":
             data = {}
 
             data.update(RomPatcher.writeItemsLocs(None, itemLocs))
-            data.update(RomPatcher.applyIPSPatches(None, args.patches))
+            data.update(RomPatcher.applyIPSPatches(None, args.patches, args.noLayout))
             data.update(RomPatcher.writeSeed(None, seed))
             data.update(RomPatcher.writeSpoiler(None, itemLocs))
 

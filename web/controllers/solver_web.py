@@ -515,6 +515,7 @@ def randomizer():
         session.randomizer['funCombat'] = "off"
         session.randomizer['funMovement'] = "off"
         session.randomizer['funSuits'] = "off"
+        session.randomizer['layoutPatches'] = "on"
 
     # put standard presets first
     stdPresets = ['noob', 'regular', 'veteran', 'speedrunner']
@@ -587,7 +588,7 @@ def validateWebServiceParams(patchs, quantities, others, isJson=False):
         except:
             raiseHttp(400, "Wrong value for paramsFileTarget, must be a JSON string", isJson)
 
-    for check in ['useMaxDiff', 'spreadItems', 'fullRandomization', 'suitsRestriction', 'speedScrewRestriction']:
+    for check in ['useMaxDiff', 'spreadItems', 'fullRandomization', 'suitsRestriction', 'speedScrewRestriction', 'layoutPatches']:
         if check in others:
             if request.vars[check] not in ['on', 'off']:
                 raiseHttp(400, "Wrong value for {}: {}, authorized values: on/off".format(check, request.vars[check]), isJson)
@@ -603,7 +604,7 @@ def sessionWebService():
     quantities = ['missileQty', 'superQty', 'powerBombQty']
     others = ['paramsFile', 'minorQty', 'energyQty', 'useMaxDiff', 'maxDifficulty',
               'progressionSpeed', 'spreadItems', 'fullRandomization', 'suitsRestriction',
-              'speedScrewRestriction', 'funCombat', 'funMovement', 'funSuits']
+              'speedScrewRestriction', 'funCombat', 'funMovement', 'funSuits', 'layoutPatches']
     validateWebServiceParams(patchs, quantities, others)
 
     if session.randomizer is None:
@@ -627,6 +628,7 @@ def sessionWebService():
     session.randomizer['funCombat'] = request.vars.funCombat
     session.randomizer['funMovement'] = request.vars.funMovement
     session.randomizer['funSuits'] = request.vars.funSuits
+    session.randomizer['layoutPatches'] = request.vars.layoutPatches
 
 def randomizerWebService():
     # web service to compute a new random (returns json string)
@@ -641,7 +643,7 @@ def randomizerWebService():
     quantities = ['missileQty', 'superQty', 'powerBombQty']
     others = ['seed', 'paramsFile', 'paramsFileTarget', 'minorQty', 'energyQty', 'useMaxDiff',
               'maxDifficulty', 'progressionSpeed', 'spreadItems', 'fullRandomization',
-              'suitsRestriction', 'speedScrewRestriction', 'funCombat', 'funMovement', 'funSuits']
+              'suitsRestriction', 'speedScrewRestriction', 'funCombat', 'funMovement', 'funSuits', 'layoutPatches']
     validateWebServiceParams(patchs, quantities, others, isJson=True)
 
     # randomize
@@ -693,6 +695,8 @@ def randomizerWebService():
     if request.vars.funSuits == 'on':
         params.append('--superFun')
         params.append('Suits')
+    if request.vars.layoutPatches == 'off':
+        params.append('--nolayout')
 
     ret = subprocess.call(params)
 

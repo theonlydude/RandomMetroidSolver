@@ -103,7 +103,8 @@ function AjaxPresetCallCompleted(data) {
         animals : document.getElementById("animals").value,
         funCombat : document.getElementById("funCombat").value,
         funMovement : document.getElementById("funMovement").value,
-        funSuits : document.getElementById("funSuits").value
+        funSuits : document.getElementById("funSuits").value,
+        layoutPatches : document.getElementById("layoutPatches").value
       },
       dataType: "json",
       crossDomain: true
@@ -189,7 +190,8 @@ function AjaxRandomizerCallCompleted(data) {
         skip_intro : document.getElementById("skip_intro").value,
         funCombat : document.getElementById("funCombat").value,
         funMovement : document.getElementById("funMovement").value,
-        funSuits : document.getElementById("funSuits").value
+        funSuits : document.getElementById("funSuits").value,
+        layoutPatches : document.getElementById("layoutPatches").value
       },
       dataType: "html"
     });
@@ -490,8 +492,8 @@ function startTheTour(step=-1) {
 }
 </script>
 {{
-def displayCheckbox(id):
-  if id in session.randomizer and session.randomizer[id] == 'on':
+def displayCheckbox(id, defaultTrue=False):
+  if (id in session.randomizer and session.randomizer[id] == 'on') or defaultTrue == True:
 }}
     {{=INPUT(_id=id, _name=id, _type="checkbox", _checked="checked", _value="on", _class="js-switch", _onchange="switchCheckbox('{}')".format(id))}}
 {{
@@ -632,8 +634,8 @@ def displayNumber(id, min, max, default):
 	<div class="column">
 	  <h4>Patches</h4>
 	  <p>
-	    All the <a href="https://itemrando.supermetroid.run/information">patches</a> from Total Item Randomizer are included by default (except animals patches).<br/>
-	    The layout patches included by default:
+	    All the <a href="https://itemrando.supermetroid.run/information">patches</a> from Total Item Randomizer are included by default (except layout and animals patches).<br/>
+	    {{displayCheckbox("layoutPatches", True)}} Include layout patches:
 	    <ul>
               <li>Disable respawning blocks at Dachora Pit</li>
               <li>Make it possible to escape from below early Super bridge without Bombs</li>

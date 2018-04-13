@@ -90,6 +90,9 @@ if __name__ == "__main__":
                         help="randomly remove major items from the pool for maximum enjoyment",
                         dest='superFun', nargs='?', default=[], action='append',
                         choices=['Movement', 'Combat', 'Suits'])
+    parser.add_argument('--animals',
+                        help="randomly change the save the animals room",
+                        dest='animals', action='store_true', default=False)
 
     # parse args
     args = parser.parse_args()
@@ -110,6 +113,10 @@ if __name__ == "__main__":
     else:
         seed = args.seed
     random.seed(seed)
+
+    if args.animals == True:
+        animalsPatches = ['animal_enemies.ips', 'animals.ips', 'draygonimals.ips', 'escapimals.ips', 'gameend.ips', 'grey_door_animals.ips', 'low_timer.ips', 'metalimals.ips', 'phantoonimals.ips', 'ridleyimals.ips']
+        args.patches.append(animalsPatches[random.randint(0, len(animalsPatches)-1)])
 
     # if random progression speed, choose one
     progSpeed = args.progressionSpeed

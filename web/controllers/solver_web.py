@@ -482,7 +482,8 @@ patches = [
     ('spinjumprestart', "Allows Samus to start spinning in mid air after jumping or falling (by Kejardon)"),
     ('elevators_doors_speed', 'Accelerate doors and elevators transitions (by Rakki & Lioran)'),
     ('supermetroid_msu1', "Play music with MSU1 chip on SD2SNES (by DarkShock)"),
-    ('max_ammo_display', "Max Ammo Display (by Personitis) (incompatible with MSU1 patch)")
+    ('max_ammo_display', "Max Ammo Display (by Personitis) (incompatible with MSU1 patch)"),
+    ('animals', "Save the animals surprise")
 ]
 
 def randomizer():
@@ -498,6 +499,7 @@ def randomizer():
         session.randomizer['supermetroid_msu1'] = "off"
         session.randomizer['spinjumprestart'] = "off"
         session.randomizer['skip_intro'] = "off"
+        session.randomizer['animals'] = "off"
         session.randomizer['missileQty'] = "3"
         session.randomizer['superQty'] = "3"
         session.randomizer['powerBombQty'] = "1"
@@ -596,7 +598,7 @@ def validateWebServiceParams(patchs, quantities, others, isJson=False):
 def sessionWebService():
     # web service to update the session
     patchs = ['AimAnyButton', 'itemsounds', 'spinjumprestart', 'supermetroid_msu1',
-              'max_ammo_display', 'elevators_doors_speed', 'skip_intro', 'skip_ceres']
+              'max_ammo_display', 'elevators_doors_speed', 'skip_intro', 'skip_ceres', 'animals']
     quantities = ['missileQty', 'superQty', 'powerBombQty']
     others = ['paramsFile', 'minorQty', 'energyQty', 'useMaxDiff', 'maxDifficulty',
               'progressionSpeed', 'spreadItems', 'fullRandomization', 'suitsRestriction',
@@ -664,8 +666,12 @@ def randomizerWebService():
               '--progressionSpeed', request.vars.progressionSpeed]
     for patch in patches:
         if request.vars[patch[0]] == 'on':
+            if patch[0] == 'animals':
+                continue
             params.append('-c')
             params.append(patch[0] + '.ips')
+    if request.vars.animals == 'on':
+        params.append('--animals')
     if request.vars.useMaxDiff == 'on':
         params.append('--maxDifficulty')
         params.append(request.vars.maxDifficulty)

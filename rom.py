@@ -317,7 +317,9 @@ class RomPatcher:
                    'nova_boost_platform.ips', 'red_tower.ips', 'spazer.ips'],
         'Optional': ['AimAnyButton.ips', 'itemsounds.ips', 'max_ammo_display.ips',
                      'spinjumprestart.ips', 'supermetroid_msu1.ips', 'elevators_doors_speed.ips',
-                     'skip_intro.ips', 'skip_ceres.ips']
+                     'skip_intro.ips', 'skip_ceres.ips', 'animal_enemies.ips', 'animals.ips',
+                     'draygonimals.ips', 'escapimals.ips', 'gameend.ips', 'grey_door_animals.ips',
+                     'low_timer.ips', 'metalimals.ips', 'phantoonimals.ips', 'ridleyimals.ips']
     }
 
     @staticmethod

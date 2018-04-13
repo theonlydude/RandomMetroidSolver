@@ -7,12 +7,15 @@ extend 'layout.html'
 <link rel="shortcut icon" href={{=URL('static','favicon.ico')}} type="image/ico"/>
 <link rel="stylesheet" type="text/css" href={{=URL('static/css','mystyle.css')}} media="screen"/>
 
+<link href={{=URL('static', 'css/bootstrap-tour.min.css')}} rel="stylesheet">
+<script src="{{=URL('static','js/bootstrap-tour.min.js')}}"></script>
+
 <title>Super Metroid Item Randomizer Solver</title>
 
 <style>
 @media (min-width: 1200px) {
     .main {
-        margin-top: 13em; /* Add a top margin to avoid content overlay */
+        margin-top: 14em; /* Add a top margin to avoid content overlay */
     }
 }
 </style>
@@ -285,7 +288,60 @@ window.onload = function(){
     }
 }
 
+function startTheTour(step=-1) {
+  // the tour tutorial
+  var tour = new Tour({
+    storage: false,
+    steps: [
+    {
+      element: "#presetsStep",
+      title: "Presets",
+      content: "Load a previously saved presets or one of the predefined ones:<ul><li>noob</li><li>regular</li><li>veteran</li><li>speedrunner</li></ul>",
+      placement: "auto left"
+    },
+    {
+      element: "#difficulty_target",
+      title: "Difficulty Target",
+      content: "The maximum difficulty for picking up an item in the current area before moving to another area.<br/><b>Warning</b>: selecting a too hard difficulty may produce unrealistic results."
+    },
+    {
+      element: "#pickup_strategy",
+      title: "Pickup Strategy",
+      content: "The strategy for picking up major and minor items.<br/>\
+<ul><li>All:</li><ul><li>Will grab all the major and minor items.</li></ul>\
+<li>Any:</li><ul><li>No requirements on the items as long as the ROM is finishable.<br/>\
+<b>Warning</b>: The generated path may not be realistic.<br/>\
+Use this setting on seeds that are unfinishable at first, such as masochist seeds in Dessyreqt randomizer.</li></ul>\
+<li>Minimal:</li><ul><li>Majors: Will get Morph, Bomb and/or Power bombs, 3 ETanks, Varia,<br/>\
+Gravity, Speed Booster or Ice Beam, and anything else along the way.</li>\
+<li>Minors:Will pick up 10 Missiles packs, 5 Super packs and 2 Power Bomb packs.<br/>\
+If Charge Beam is not picked up along the way or not accessible, enough minors to beat Mother Brain will be picked up.</li></ul></ul>"
+    },
+    {
+      element: "#Ice",
+      title: "Hellruns",
+      content: "<b>No thanks</b>: Don't do hellruns.<br/>\
+<b>Gimme energy</b>: Get comfortable before going in.<br/>\
+<b>Default</b>: Balanced setting. For Lower Norfair's hell run \"Default\" means \"No thanks\".<br/>\
+<b>Bring the heat</b>: You don't mind doing hell runs at all.<br/>\
+<b>I run RBO</b>: Reverse Boss Order runner.<br/>"
+    },
+    {
+      element: "#Kraid",
+      title: "Bosses",
+      content: "Logic behind the presets : the ones where you find the boss difficult are calibrated to give 'hard' in vanilla situations, the default are calibrated to give 'medium' in vanilla situations, just above gives 'easy' in vanilla situations, and top settings basically discards the boss except for extreme situations (very low energy or firepower).",
+      placement: "auto left"
+    }  ]});
 
+  // Initialize the tour
+  tour.init();
+
+  // Start the tour
+  if(step != -1) {
+    tour.goTo(step);
+  }
+  tour.start();
+}
 </script>
 
 <body>
@@ -401,6 +457,7 @@ pass
 
 <div class="fixed">
   <div class="menu">
+    <button class="buttonBack" onclick="startTheTour()"><span class="glyphicon glyphicon-play"/></span>Start the tutorial</button>
     {{=A('Super Metroid VARIA Randomizer and Solver', _href=URL(f='solver'), _class='menu')}}
     {{=A('Solve!', _href=URL(f='solver'), _class='menu')}}
     {{=A('Randomize!', _href=URL(f='randomizer'), _class='menu')}}
@@ -418,9 +475,8 @@ pass
     </div>
     <div class="column">
       <div class="paddingleft">
-	<h3>Presets</h3>
+	<h3 id="presetsStep">Presets <button type="button" onclick="startTheTour(0)">?</button></h3>
 	<p>
-	  Load a previously saved presets or one of these: noob, regular, veteran, speedrunner.
 	  {{=loadForm}}
           {{=saveForm}}
 	</p>
@@ -493,11 +549,8 @@ if resultText is not None:
   <div class="column">
 <h3>Difficulty Target</h3>
 <p>
-The maximum difficulty for picking up an item in the current area before moving to another area <br/>
-(Warning: selecting a too hard difficulty may produce unrealistic results).
-</p>
-<p>
-<table>
+<table class="full">
+  <colgroup><col class="half" /><col class="half" /></colgroup>
   <tr>
     <td>Difficulty target:</td>
     <td>
@@ -507,7 +560,7 @@ The maximum difficulty for picking up an item in the current area before moving 
        _name="difficulty_target",
        _form="mainform",
        _onchange="changeHiddenSelect('difficulty_target')",
-       _class="filldropdown",
+       _class="full",
        requires=IS_IN_SET(['easy', 'medium', 'hard', 'very hard', 'hardcore', 'mania']),
        value=difficulties[conf["target"]])
 }}
@@ -521,44 +574,13 @@ The maximum difficulty for picking up an item in the current area before moving 
        value=difficulties[conf["target"]])
 }}
     </td>
+    <td><button type="button" onclick="startTheTour(1)">?</button></td>
   </tr>
 </table>
 </p>
 <h3>Pickup Strategy</h3>
-<p>
-The strategy for picking up major and minor items.
-</p>
-<ul>
-<li>All:</li>
-<ul><li>Will grab all the major and minor items.</li></ul>
-
-<li>Any:</li>
-<ul>
-  <li>
-    No requirements on the items as long as the ROM is finishable.<br/>
-    Warning: The generated path may not be realistic.<br/>
-    Use this setting on seeds that are unfinishable at first,</br>
-    such as masochist seeds in Dessyreqt randomizer.
-  </li>
-</ul>
-
-<li>Minimal:</li>
-<ul>
-<li>Majors:
-
-Will get Morph, Bomb and/or Power bombs, 3 ETanks, Varia,<br/>
-Gravity, Speed Booster or Ice Beam, and anything else along the way.
-</li>
-<li>Minors:
-
-Will pick up 10 Missiles packs, 5 Super packs and 2 Power Bomb<br/>
-packs. If Charge Beam is not picked up along the way or not<br/>
-accessible, enough minors to beat Mother Brain will be picked up.
-</li>
-</ul>
-</ul>
-<p>
-<table>
+<table class="full">
+  <colgroup><col class="half" /><col class="half" /></colgroup>
   <tr>
     <td>Pickup strategy:</td>
     <td>
@@ -568,7 +590,7 @@ accessible, enough minors to beat Mother Brain will be picked up.
         _name="pickup_strategy",
         _form="mainform",
         _onchange="changeHiddenSelect('pickup_strategy')",
-        _class="filldropdown",
+        _class="full",
         requires=IS_IN_SET(['all', 'minimal', 'any']),
         value=conf["pickup"])
 }}
@@ -582,20 +604,15 @@ accessible, enough minors to beat Mother Brain will be picked up.
         value=conf["pickup"])
 }}
     </td>
+    <td><button type="button" onclick="startTheTour(2)">?</button></td>
   </tr>
 </table>
 </p>
 
-  </div>
-  <div class="column">
     <h3>Hellruns</h3>
     <p>
-      No thanks: Don't do hellruns<br/>
-      Gimme energy: Get comfortable before going in<br/>
-      Default: Balanced setting. For Lower Norfair's hell run "Default" means "No thanks"<br/>
-      Bring the heat: You don't mind doing hell runs at all<br/>
-      I run RBO: Reverse Boss Order runner<br/>
-       <table>
+       <table class="full">
+         <colgroup><col class="half" /><col class="half" /></colgroup>
 	<tr>
 	  <td>Ice:</td>
 	  <td>
@@ -604,6 +621,7 @@ accessible, enough minors to beat Mother Brain will be picked up.
       displaySelect("Ice", hellruns, settings['Ice'])
 }}
 	  </td>
+          <td><button type="button" onclick="startTheTour(3)">?</button></td>
 	</tr>
 	<tr>
 	  <td>Main Upper Norfair:</td>
@@ -625,15 +643,12 @@ accessible, enough minors to beat Mother Brain will be picked up.
       </table>
 
     </p>
+  </div>
+  <div class="column">
     <h3>Bosses</h3>
     <p>
-      Logic behind the presets : the ones where you find the boss difficult are
-      calibrated to give 'hard' in vanilla situations, the default are calibrated
-      to give 'medium' in vanilla situations, just above gives 'easy' in vanilla
-      situations, and top settings basically discards the boss except for extreme
-      situations (very low energy or firepower)
-
-      <table>
+      <table class="full">
+        <colgroup><col class="half" /><col class="half" /></colgroup>
 	<tr>
 	  <td>Kraid:</td>
 	  <td>
@@ -642,6 +657,7 @@ accessible, enough minors to beat Mother Brain will be picked up.
       displaySelect("Kraid", kraid, settings['Kraid'])
 }}
 	  </td>
+          <td><button type="button" onclick="startTheTour(4)">?</button></td>
 	</tr>
 
 	<tr>

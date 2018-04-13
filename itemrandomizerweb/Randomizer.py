@@ -677,7 +677,7 @@ class Randomizer(object):
             self.getItem(itemLocation, itemLocations, False)
 
     def fillNonProgressionItems(self, itemLocations):
-        pool = [item for item in self.itemPool if item['Category'] == 'Energy' or not self.isProgItem(item)]
+        pool = [item for item in self.itemPool if not self.isProgItem(item)]
         poolWasEmpty = len(pool) == 0
         itemLocation = None
         nItems = 0

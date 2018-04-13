@@ -170,7 +170,10 @@ if __name__ == "__main__":
     if 'skip_intro.ips' not in args.patches and 'skip_ceres.ips' not in args.patches:
         args.patches.append('skip_ceres.ips')
 
-    RomPatches.ActivePatches = RomPatches.Total
+    if args.noLayout == True:
+        RomPatches.ActivePatches = RomPatches.Total_Base
+    else:
+        RomPatches.ActivePatches = RomPatches.Total
     qty = {'missile': int(args.missileQty), 'super': int(args.superQty),
            'powerBomb': int(args.powerBombQty), 'energy': args.energyQty,
            'minors': int(args.minorQty)}

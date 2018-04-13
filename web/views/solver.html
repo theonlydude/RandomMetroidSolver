@@ -259,6 +259,9 @@ window.onload = function(){
                     locsItem[addresses[i]+4] = bytes[addresses[i]+4]
                 }
 
+                // check if layout patches are present
+                locsItem[0x21BD80] = bytes[0x21BD80]
+
                 locsItem["romFileName"] = outFileName;
 
                 var json = JSON.stringify(locsItem)

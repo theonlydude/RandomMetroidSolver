@@ -45,13 +45,16 @@ class Solver:
         Bosses.reset()
 
     def loadRom(self, rom):
-        RomLoader.factory(rom).assignItems(self.locations)
+        romLoader = RomLoader.factory(rom)
+        romLoader.assignItems(self.locations)
         if Conf.guessRomType == True and self.type == 'console':
             guessed = RomType.guess(rom)
             if guessed is not None:
                 Conf.romType = guessed
-        self.log.info("ROM Type : " + Conf.romType)
-        self.fullRando = RomType.apply(Conf.romType)
+        layoutPresent = romLoader.layoutPresent
+        print("ROM Type: {}, Layout present: {}".format(Conf.romType, layoutPresent))
+
+        self.fullRando = RomType.apply(Conf.romType, layoutPresent)
         
         if self.log.getEffectiveLevel() == logging.DEBUG:
             self.log.debug("Display items at locations:")

@@ -135,18 +135,19 @@ def solver():
                 del tempRomJson["romFileName"]
 
                 # json keys are strings
-                romJson = {}
+                romDict = {}
                 for address in tempRomJson:
-                    romJson[int(address)] = tempRomJson[address]
+                    romDict[int(address)] = tempRomJson[address]
 
-                romLoader = RomLoader.factory(romJson)
+                romLoader = RomLoader.factory(romDict)
                 romLoader.assignItems(tournament_locations.locations)
                 romLoader.dump(jsonRomFileName)
 
                 session.romFile = base
                 if base not in session.romFiles:
                     session.romFiles.append(base)
-            except:
+            except Exception as e:
+                print("exception: {}".format(e))
                 session.flash = "Error loading the rom file"
                 error = True
 

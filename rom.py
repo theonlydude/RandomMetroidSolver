@@ -91,7 +91,7 @@ class RomType:
 
     # "applies" ROM patches, return true if full randomization, false if not
     @staticmethod    
-    def apply(romType):
+    def apply(romType, layoutPresent):
         if romType.startswith('Total_'):
             RomPatches.ActivePatches = RomPatches.Total_Base
         if romType == 'Total_CX':
@@ -99,7 +99,10 @@ class RomType:
         elif romType in ['Total_TX', 'Total_FX']:
             RomPatches.ActivePatches = RomPatches.Total
         elif romType.startswith('VARIA_'):
-            RomPatches.ActivePatches = RomPatches.Total
+            if layoutPresent == True:
+                RomPatches.ActivePatches = RomPatches.Total
+            else:
+                RomPatches.ActivePatches = RomPatches.Total_Base
         elif romType == 'Dessy':
             RomPatches.ActivePatches = RomPatches.Dessy
         
@@ -247,6 +250,15 @@ class RomReader:
                 item = self.getItem(romFile, loc["Address"], loc["Visibility"])
                 loc["itemName"] = self.items[item]["name"]
                 #print("{}: {} => {}".format(loc["Name"], loc["Class"], loc["itemName"]))
+
+    def layoutPresent(self):
+        with open(self.romFileName, "rb") as romFile:
+            romFile.seek(0x21BD80)
+            value = struct.unpack("B", romFile.read(1))
+            return value[0] == 0xD5
+
+    def layoutPresentFromFakeRom(self, fakeRom):
+        return fakeRom[0x21BD80] == 0xD5
 
 class RomPatcher:
     # standard:
@@ -567,16 +579,24 @@ class RomLoaderSfc(RomLoader):
     def assignItems(self, locations):
         # update the itemName of the locations
         self.romReader.loadItems(locations)
+        self.layoutPresent = self.romReader.layoutPresent()
 
         self.locsItems = {}
         for loc in locations:
             self.locsItems[loc['Name']] = loc['itemName']
+        self.locsItems['layoutPresent'] = self.layoutPresent
 
 class RomLoaderJson(RomLoader):
     # when called from the test suite
     def __init__(self, jsonFileName):
         with open(jsonFileName) as jsonFile:
             self.locsItems = json.load(jsonFile)
+
+            if 'layoutPresent' in self.locsItems:
+                self.layoutPresent = self.locsItems['layoutPresent']
+            else:
+                self.layoutPresent = True
+        self.locsItems['layoutPresent'] = self.layoutPresent
 
 class RomLoaderDict(RomLoader):
     # when called from the website
@@ -587,7 +607,10 @@ class RomLoaderDict(RomLoader):
         # update the itemName of the locations
         RomReader().loadItemsFromFakeRom(self.fakeRom, locations)
 
+        # check if layout patches are there
+        self.layoutPresent = RomReader().layoutPresentFromFakeRom(self.fakeRom)
+
         self.locsItems = {}
         for loc in locations:
             self.locsItems[loc['Name']] = loc['itemName']
-
+        self.locsItems['layoutPresent'] = self.layoutPresent

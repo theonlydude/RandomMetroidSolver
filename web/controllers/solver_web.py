@@ -484,7 +484,7 @@ patches = [
     ('elevators_doors_speed', 'Accelerate doors and elevators transitions (by Rakki & Lioran)'),
     ('supermetroid_msu1', "Play music with MSU1 chip on SD2SNES (by DarkShock)"),
     ('max_ammo_display', "Max Ammo Display (by Personitis) (incompatible with MSU1 patch)"),
-    ('animals', "Save the animals surprise")
+    ('animals', "Save the animals surprise (by Foosda)")
 ]
 
 def randomizer():

@@ -454,7 +454,20 @@ function startTheTour(step=-1) {
       content: "No SpeedBooster or Screw Attack in the very first rooms, no Screw Attack in Crateria.<br/>As a consequence, Morph Ball will be either at its vanilla position, or at the E-Tank in the ceiling next to it (like Total randomizer).<br/>If disabled, Morph can be found later in the game (like Dessy randomizer)."
     },
     {
-      element: "#patches",
+      element: "#layoutPatchesStep",
+      title: "Layout patches",
+      content: "The layout patches from Total Item Randomizer:\
+<ul><li>Disable respawning blocks at Dachora Pit</li>\
+<li>Make it possible to escape from below early Super bridge without Bombs</li>\
+<li>Replace bomb blocks with shot blocks before Hi-Jump</li>\
+<li>Replace bomb blocks with shot blocks at Moat</li>\
+<li>Raise platform in first heated Norfair room to not require Hi-Jump</li>\
+<li>Raise platforms in Red Tower bottom to always be able to get back up</li>\
+<li>Replace bomb blocks with shot blocks before Spazer</li></ul>",
+      placement: "auto left"
+    },
+    {
+      element: "#patchesStep",
       title: "Optional patches",
       content: "A selection of optional patches to include to enhance the gaming experience.",
       placement: "auto left"
@@ -626,34 +639,30 @@ def displayNumber(id, min, max, default):
               <td><button type="button" onclick="startTheTour(11)">?</button></td>
 	    </tr>
 	  </table>
-         {{=INPUT(_type="submit", _value="Randomize", _id="submitBtn", _class="btn btn-default")}}
 	</div>
 	<div class="column">
 	  <h4>Patches</h4>
 	  <p>
-	    The bug fix <a href="https://itemrando.supermetroid.run/information">patches</a> from Total Item Randomizer are included by default.<br/>
-	    {{displayCheckbox("layoutPatches", True)}} Include layout patches:
-	    <ul>
-              <li>Disable respawning blocks at Dachora Pit</li>
-              <li>Make it possible to escape from below early Super bridge without Bombs</li>
-              <li>Replace bomb blocks with shot blocks before Hi-Jump</li>
-              <li>Replace bomb blocks with shot blocks at Moat</li>
-              <li>Raise platform in first heated Norfair room to not require Hi-Jump</li>
-              <li>Raise platforms in Red Tower bottom to always be able to get back up</li>
-              <li>Replace bomb blocks with shot blocks before Spazer</li>
-	    </ul>
+	    The bug fix and suits <a href="https://itemrando.supermetroid.run/information">patches</a> from Total Item Randomizer are included by default.<br/>
 	  </p>
-	  <p id="patches">
-	    Optional patches to add to the randomized ROM:<br/>
+	  <table class="full">
+	    <tr>
+	      <td class="full" id="layoutPatchesStep">{{displayCheckbox("layoutPatches", True)}} Include layout patches from Total Item Randomizer</td>
+	      <td><button type="button" onclick="startTheTour(12)">?</button></td>
+	    </tr>
+	  </table>
+	  </p>
+	  <table class="full" id="patchesStep">
 {{
 for patch in patches:
+  response.write("	    <tr>", escape=False)
+  response.write("	      <td class=\"full\">", escape=False)
   displayCheckbox(patch[0])
   response.write("{}".format(patch[1]))
-
-  response.write("<br/>", escape=False)
+  response.write("	    </tr>", escape=False)
   pass
 }}
-	  </p>
+	  </table>
           <h4>Super Fun Times (TM)</h4>
           <p>
             Have fun randomly removing major items!<br/>
@@ -661,20 +670,21 @@ for patch in patches:
           </p>
 	  <table class="full">
             <tr>
-              <td id="funCombatStep">{{displayCheckbox("funCombat")}} Super Fun Combat</td>
-              <td><button type="button" onclick="startTheTour(13)">?</button></td>
-            </tr>
-            <tr>
-              <td id="funMovementStep">{{displayCheckbox("funMovement")}} Super Fun Movement</td>
+              <td class="full" id="funCombatStep">{{displayCheckbox("funCombat")}} Super Fun Combat</td>
               <td><button type="button" onclick="startTheTour(14)">?</button></td>
             </tr>
             <tr>
-              <td id="funSuitsStep">{{displayCheckbox("funSuits")}} Suitless</td>
+              <td class="full" id="funMovementStep">{{displayCheckbox("funMovement")}} Super Fun Movement</td>
               <td><button type="button" onclick="startTheTour(15)">?</button></td>
+            </tr>
+            <tr>
+              <td class="full" id="funSuitsStep">{{displayCheckbox("funSuits")}} Suitless</td>
+              <td><button type="button" onclick="startTheTour(16)">?</button></td>
             </tr>
           </table>
 	</div>
       </div>
+       {{=INPUT(_type="submit", _value="Randomize", _id="submitBtn", _class="btn btn-default buttonRandom")}}
     </form>
   </div>
 </body>

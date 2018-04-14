@@ -147,8 +147,8 @@ def solver():
                 if base not in session.romFiles:
                     session.romFiles.append(base)
             except Exception as e:
-                print("exception: {}".format(e))
-                session.flash = "Error loading the rom file"
+                print("Error loading the rom file {}, exception: {}".format(romFileName, e))
+                session.flash = "Error loading the ROM file"
                 error = True
 
         # python3:
@@ -183,8 +183,9 @@ def solver():
                     session.romFile = base
                     if base not in session.romFiles:
                         session.romFiles.append(base)
-                except:
-                    session.flash = "Error loading the rom file"
+                except Exception as e:
+                    print("Error loading the rom file {}, exception: {}".format(uploadFileName, e))
+                    session.flash = "Error loading the ROM file"
                     error = True
 
         elif len(mainForm.vars['romFile']) != 0:

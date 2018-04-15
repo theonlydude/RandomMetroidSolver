@@ -555,9 +555,15 @@ def validateWebServiceParams(patchs, quantities, others, isJson=False):
         except:
             raiseHttp(400, "Wrong value for {}: {}, must be an int".format(param, request.vars[param]), isJson)
 
+    def getFloat(param):
+        try:
+            return float(request.vars[param])
+        except:
+            raiseHttp(400, "Wrong value for {}: {}, must be a float".format(param, request.vars[param]), isJson)
+
     for qty in quantities:
-        qtyInt = getInt(qty)
-        if qtyInt not in range(1, 10):
+        qtyFloat = getFloat(qty)
+        if qtyFloat < 1.0 or qtyFloat > 9.0:
             raiseHttp(400, json.dumps("Wrong value for {}: {}, must be between 1 and 9".format(qty, request.vars[qty])), isJson)
 
     if 'seed' in others:

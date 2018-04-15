@@ -14,6 +14,12 @@ from rom import RomPatcher, RomPatches
 
 speeds = ['slowest', 'slow', 'medium', 'fast', 'fastest']
 
+def restricted_float(x):
+    x = float(x)
+    if x < 0.0 or x > 9.0:
+        raise argparse.ArgumentTypeError("%r not in range [1.0, 9.0]"%(x,))
+    return x
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Random Metroid Randomizer")
     parser.add_argument('--param', '-p', help="the input parameters", nargs='+',
@@ -54,15 +60,15 @@ if __name__ == "__main__":
     parser.add_argument('--missileQty', '-m',
                         help="quantity of missiles",
                         dest='missileQty', nargs='?', default=3,
-                        choices=[str(i) for i in range(1,10)])
+                        type=restricted_float)
     parser.add_argument('--superQty', '-q',
                         help="quantity of super missiles",
                         dest='superQty', nargs='?', default=3,
-                        choices=[str(i) for i in range(1,10)])
+                        type=restricted_float)
     parser.add_argument('--powerBombQty', '-w',
                         help="quantity of power bombs",
                         dest='powerBombQty', nargs='?', default=1,
-                        choices=[str(i) for i in range(1,10)])
+                        type=restricted_float)
     parser.add_argument('--minorQty', '-n',
                         help="quantity of minors",
                         dest='minorQty', nargs='?', default=100,

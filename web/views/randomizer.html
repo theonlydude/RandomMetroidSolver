@@ -534,14 +534,14 @@ def displaySelect(id, values, default):
   }}
 {{pass}}
 {{
-def displayNumber(id, min, max, default):
+def displayNumber(id, min, max, default, step="1"):
   if id in session.randomizer:
     value = session.randomizer[id]
   else:
     value = default
     pass
 
-  response.write("<input name=\"{}\" id=\"{}\" type=\"number\" value=\"{}\" min=\"{}\" max=\"{}\" class=\"full\" required>".format(id, id, value, min, max), escape=False)
+  response.write("<input name=\"{}\" id=\"{}\" type=\"number\" value=\"{}\" min=\"{}\" max=\"{}\" step=\"{}\" class=\"full\" required>".format(id, id, value, min, max, step), escape=False)
   pass
 }}
 <body>
@@ -587,16 +587,16 @@ def displayNumber(id, min, max, default):
             <colgroup><col class="half" /><col class="half" /></colgroup>
             <tr>
               <td>Quantity of Missiles:</td>
-              <td>{{displayNumber("missileQty", "1", "9", "3")}}</td>
+              <td>{{displayNumber("missileQty", "1", "9", "3", "0.1")}}</td>
               <td><button type="button" onclick="startTheTour(3)">?</button></td>
             </tr>
             <tr>
               <td>Quantity of Super Missiles:</td>
-              <td>{{displayNumber("superQty", "1", "9", "3")}}</td>
+              <td>{{displayNumber("superQty", "1", "9", "3", "0.1")}}</td>
             </tr>
             <tr>
               <td>Quantity of Power Bombs:</td>
-              <td>{{displayNumber("powerBombQty", "1", "9", "1")}}</td>
+              <td>{{displayNumber("powerBombQty", "1", "9", "1", "0.1")}}</td>
             </tr>
             <tr>
               <td>Percentage of minors available:</td>

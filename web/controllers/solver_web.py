@@ -477,16 +477,16 @@ def infos():
     return dict()
 
 patches = [
-    ("Removes_Gravity_Suit_heat_protection", "Remove gravity suit heat protection (by Total)"),
-    ('skip_intro', "Skip text intro (start at Ceres Station) (by Smiley)"),
-    ('skip_ceres', "Skip text intro and Ceres station (start at Landing Site) (by Total)"),
-    ('AimAnyButton', "Allows the aim buttons to be assigned to any button (by Kejardon)"),
-    ('itemsounds', "Remove fanfare when picking up an item (by Scyzer)"),
-    ('spinjumprestart', "Allows Samus to start spinning in mid air after jumping or falling (by Kejardon)"),
-    ('elevators_doors_speed', 'Accelerate doors and elevators transitions (by Rakki & Lioran)'),
-    ('supermetroid_msu1', "Play music with MSU1 chip on SD2SNES (by DarkShock)"),
-    ('max_ammo_display', "Max Ammo Display (by Personitis) (incompatible with MSU1 patch)"),
-    ('animals', "Save the animals surprise (by Foosda)")
+    ("Removes_Gravity_Suit_heat_protection", "Remove gravity suit heat protection (by Total)", True),
+    ('skip_intro', "Skip text intro (start at Ceres Station) (by Smiley)", False),
+    ('skip_ceres', "Skip text intro and Ceres station (start at Landing Site) (by Total)", True),
+    ('AimAnyButton', "Allows the aim buttons to be assigned to any button (by Kejardon)", True),
+    ('itemsounds', "Remove fanfare when picking up an item (by Scyzer)", True),
+    ('spinjumprestart', "Allows Samus to start spinning in mid air after jumping or falling (by Kejardon)", False),
+    ('elevators_doors_speed', 'Accelerate doors and elevators transitions (by Rakki & Lioran)', True),
+    ('supermetroid_msu1', "Play music with MSU1 chip on SD2SNES (by DarkShock)", False),
+    ('max_ammo_display', "Max Ammo Display (by Personitis) (incompatible with MSU1 patch)", True),
+    ('animals', "Save the animals surprise (by Foosda)", False)
 ]
 
 def randomizer():
@@ -498,11 +498,10 @@ def randomizer():
         session.randomizer['maxDifficulty'] = 'hard'
         session.randomizer['paramsFile'] = 'regular'
         for patch in patches:
-            session.randomizer[patch[0]] = "on"
-        session.randomizer['supermetroid_msu1'] = "off"
-        session.randomizer['spinjumprestart'] = "off"
-        session.randomizer['skip_intro'] = "off"
-        session.randomizer['animals'] = "off"
+            if patch[2] == True:
+                session.randomizer[patch[0]] = "on"
+            else:
+                session.randomizer[patch[0]] = "off"
         session.randomizer['missileQty'] = "3"
         session.randomizer['superQty'] = "3"
         session.randomizer['powerBombQty'] = "1"

@@ -505,7 +505,7 @@ function startTheTour(step=-1) {
 </script>
 {{
 def displayCheckbox(id, defaultTrue=False):
-  if (id in session.randomizer and session.randomizer[id] == 'on') or defaultTrue == True:
+  if (id in session.randomizer and session.randomizer[id] == 'on') or (id not in session.randomizer and defaultTrue == True):
 }}
     {{=INPUT(_id=id, _name=id, _type="checkbox", _checked="checked", _value="on", _class="js-switch", _onchange="switchCheckbox('{}')".format(id))}}
 {{
@@ -659,7 +659,7 @@ def displayNumber(id, min, max, default):
 for patch in patches:
   response.write("	    <tr>", escape=False)
   response.write("	      <td class=\"full\">", escape=False)
-  displayCheckbox(patch[0])
+  displayCheckbox(patch[0], patches[2])
   response.write("{}".format(patch[1]))
   response.write("	    </tr>", escape=False)
   pass

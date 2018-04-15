@@ -320,7 +320,7 @@ class RomPatcher:
     IPSPatches = {
         'Standard': ['credits_varia.ips', 'g4_skip.ips',
                      'seed_display.ips', 'tracking.ips', 'wake_zebes.ips',
-                     'Removes_Gravity_Suit_heat_protection', 'Mother_Brain_Cutscene_Edits',
+                     'Mother_Brain_Cutscene_Edits',
                      'Suit_acquisition_animation_skip', 'Fix_Morph_and_Missiles_Room_State',
                      'Fix_heat_damage_speed_echoes_bug', 'Disable_GT_Code',
                      'Disable_Space_Time_select_in_menu', 'Fix_Morph_Ball_Hidden_Chozo_PLMs',
@@ -331,7 +331,8 @@ class RomPatcher:
                      'spinjumprestart.ips', 'supermetroid_msu1.ips', 'elevators_doors_speed.ips',
                      'skip_intro.ips', 'skip_ceres.ips', 'animal_enemies.ips', 'animals.ips',
                      'draygonimals.ips', 'escapimals.ips', 'gameend.ips', 'grey_door_animals.ips',
-                     'low_timer.ips', 'metalimals.ips', 'phantoonimals.ips', 'ridleyimals.ips']
+                     'low_timer.ips', 'metalimals.ips', 'phantoonimals.ips', 'ridleyimals.ips',
+                     'Removes_Gravity_Suit_heat_protection']
     }
 
     @staticmethod

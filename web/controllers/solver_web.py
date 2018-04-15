@@ -477,6 +477,7 @@ def infos():
     return dict()
 
 patches = [
+    ("Removes_Gravity_Suit_heat_protection", "Remove gravity suit heat protection (by Total)"),
     ('skip_intro', "Skip text intro (start at Ceres Station) (by Smiley)"),
     ('skip_ceres', "Skip text intro and Ceres station (start at Landing Site) (by Total)"),
     ('AimAnyButton', "Allows the aim buttons to be assigned to any button (by Kejardon)"),
@@ -600,8 +601,9 @@ def validateWebServiceParams(patchs, quantities, others, isJson=False):
 
 def sessionWebService():
     # web service to update the session
-    patchs = ['AimAnyButton', 'itemsounds', 'spinjumprestart', 'supermetroid_msu1',
-              'max_ammo_display', 'elevators_doors_speed', 'skip_intro', 'skip_ceres', 'animals']
+    patchs = ['Removes_Gravity_Suit_heat_protection', 'AimAnyButton', 'itemsounds',
+              'spinjumprestart', 'supermetroid_msu1', 'max_ammo_display', 'elevators_doors_speed',
+              'skip_intro', 'skip_ceres', 'animals']
     quantities = ['missileQty', 'superQty', 'powerBombQty']
     others = ['paramsFile', 'minorQty', 'energyQty', 'useMaxDiff', 'maxDifficulty',
               'progressionSpeed', 'spreadItems', 'fullRandomization', 'suitsRestriction',
@@ -639,12 +641,14 @@ def randomizerWebService():
     response.headers['Access-Control-Allow-Origin'] = '*'
 
     # check validity of all parameters
-    patchs = ['AimAnyButton', 'itemsounds', 'spinjumprestart', 'supermetroid_msu1',
-              'max_ammo_display', 'elevators_doors_speed', 'skip_intro', 'skip_ceres']
+    patchs = ['Removes_Gravity_Suit_heat_protection', 'AimAnyButton', 'itemsounds',
+              'spinjumprestart', 'supermetroid_msu1', 'max_ammo_display', 'elevators_doors_speed',
+              'skip_intro', 'skip_ceres']
     quantities = ['missileQty', 'superQty', 'powerBombQty']
     others = ['seed', 'paramsFile', 'paramsFileTarget', 'minorQty', 'energyQty', 'useMaxDiff',
               'maxDifficulty', 'progressionSpeed', 'spreadItems', 'fullRandomization',
-              'suitsRestriction', 'speedScrewRestriction', 'funCombat', 'funMovement', 'funSuits', 'layoutPatches']
+              'suitsRestriction', 'speedScrewRestriction', 'funCombat', 'funMovement', 'funSuits',
+              'layoutPatches']
     validateWebServiceParams(patchs, quantities, others, isJson=True)
 
     # randomize
@@ -673,7 +677,10 @@ def randomizerWebService():
             if patch[0] == 'animals':
                 continue
             params.append('-c')
-            params.append(patch[0] + '.ips')
+            if patch[0] != 'Removes_Gravity_Suit_heat_protection':
+                params.append(patch[0] + '.ips')
+            else:
+                params.append(patch[0])
     if request.vars.animals == 'on':
         params.append('--animals')
     if request.vars.useMaxDiff == 'on':

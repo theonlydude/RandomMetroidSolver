@@ -49,7 +49,8 @@ if __name__ == "__main__":
                         dest='patches', nargs='?', default=[], action='append',
                         choices=['AimAnyButton.ips', 'itemsounds.ips', 'max_ammo_display.ips',
                                  'spinjumprestart.ips', 'supermetroid_msu1.ips',
-                                 'elevators_doors_speed.ips', 'skip_intro.ips', 'skip_ceres.ips'])
+                                 'elevators_doors_speed.ips', 'skip_intro.ips', 'skip_ceres.ips',
+                                 'Removes_Gravity_Suit_heat_protection'])
     parser.add_argument('--missileQty', '-m',
                         help="quantity of missiles",
                         dest='missileQty', nargs='?', default=3,

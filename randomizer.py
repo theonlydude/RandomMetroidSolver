@@ -55,8 +55,7 @@ if __name__ == "__main__":
                         dest='patches', nargs='?', default=[], action='append',
                         choices=['AimAnyButton.ips', 'itemsounds.ips', 'max_ammo_display.ips',
                                  'spinjumprestart.ips', 'supermetroid_msu1.ips',
-                                 'elevators_doors_speed.ips', 'skip_intro.ips', 'skip_ceres.ips',
-                                 'Removes_Gravity_Suit_heat_protection'])
+                                 'elevators_doors_speed.ips', 'skip_intro.ips', 'skip_ceres.ips'])
     parser.add_argument('--missileQty', '-m',
                         help="quantity of missiles",
                         dest='missileQty', nargs='?', default=3,
@@ -103,6 +102,9 @@ if __name__ == "__main__":
     parser.add_argument('--nolayout',
                         help="do not include total randomizer layout patches",
                         dest='noLayout', action='store_true', default=False)
+    parser.add_argument('--nogravheat',
+                        help="do not include total randomizer suits patches",
+                        dest='noGravHeat', action='store_true', default=False)
 
     # parse args
     args = parser.parse_args()
@@ -181,6 +183,8 @@ if __name__ == "__main__":
         RomPatches.ActivePatches = RomPatches.Total_Base
     else:
         RomPatches.ActivePatches = RomPatches.Total
+    if args.noGravHeat == True:
+        RomPatches.ActivePatches.remove(RomPatches.NoGravityEnvProtection)
     qty = {'missile': int(args.missileQty), 'super': int(args.superQty),
            'powerBomb': int(args.powerBombQty), 'energy': args.energyQty,
            'minors': int(args.minorQty)}
@@ -215,7 +219,7 @@ if __name__ == "__main__":
             shutil.copyfile(romFileName, fileName)
 
             RomPatcher.writeItemsLocs(fileName, itemLocs)
-            RomPatcher.applyIPSPatches(fileName, args.patches, args.noLayout)
+            RomPatcher.applyIPSPatches(fileName, args.patches, args.noLayout, args.noGravHeat)
             RomPatcher.writeSeed(fileName, seed)
             RomPatcher.writeSpoiler(fileName, itemLocs)
         except Exception as e:

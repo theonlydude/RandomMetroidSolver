@@ -324,15 +324,15 @@ class RomPatcher:
                      'Suit_acquisition_animation_skip', 'Fix_Morph_and_Missiles_Room_State',
                      'Fix_heat_damage_speed_echoes_bug', 'Disable_GT_Code',
                      'Disable_Space_Time_select_in_menu', 'Fix_Morph_Ball_Hidden_Chozo_PLMs',
-                     'Fix_Screw_Attack_selection_in_menu'],
+                     'Fix_Screw_Attack_selection_in_menu',
+                     'Removes_Gravity_Suit_heat_protection'],
         'Layout': ['dachora.ips', 'early_super_bridge.ips', 'high_jump.ips', 'moat.ips',
                    'nova_boost_platform.ips', 'red_tower.ips', 'spazer.ips'],
         'Optional': ['AimAnyButton.ips', 'itemsounds.ips', 'max_ammo_display.ips',
                      'spinjumprestart.ips', 'supermetroid_msu1.ips', 'elevators_doors_speed.ips',
                      'skip_intro.ips', 'skip_ceres.ips', 'animal_enemies.ips', 'animals.ips',
                      'draygonimals.ips', 'escapimals.ips', 'gameend.ips', 'grey_door_animals.ips',
-                     'low_timer.ips', 'metalimals.ips', 'phantoonimals.ips', 'ridleyimals.ips',
-                     'Removes_Gravity_Suit_heat_protection']
+                     'low_timer.ips', 'metalimals.ips', 'phantoonimals.ips', 'ridleyimals.ips']
     }
 
     @staticmethod
@@ -364,7 +364,7 @@ class RomPatcher:
             return outFile.data
 
     @staticmethod
-    def applyIPSPatches(romFileName, optionalPatches=[], noLayout=False):
+    def applyIPSPatches(romFileName, optionalPatches=[], noLayout=False, noGravHeat=False):
         try:
             if romFileName is not None:
                 romFile = open(romFileName, 'r+')
@@ -372,7 +372,10 @@ class RomPatcher:
                 romFile = FakeROM()
 
             # apply standard patches
-            for patchName in RomPatcher.IPSPatches['Standard']:
+            stdPatches = RomPatcher.IPSPatches['Standard']
+            if noGravHeat == True:
+                stdPatches = [patch for patch in stdPatches if patch != 'Removes_Gravity_Suit_heat_protection']
+            for patchName in stdPatches:
                 RomPatcher.applyIPSPatch(romFile, patchName)
 
             if noLayout == False:

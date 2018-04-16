@@ -636,7 +636,7 @@ class Randomizer(object):
         isMinorProg = any(item['Class'] == 'Minor' for item in progItems)
         isMajorProg = any(item['Class'] == 'Major' for item in progItems)
         # check that there is room left in all main areas
-        room = {'Brinstar' : 0, 'Norfair' : 0, 'WreckedShip' : 0, 'LowerNorfair' : 0, 'Maridia' : 0, 'Crateria' : 0 }
+        room = {'Brinstar' : 0, 'Norfair' : 0, 'WreckedShip' : 0, 'LowerNorfair' : 0, 'Maridia' : 0 }
         for loc in self.unusedLocations: # TODO should be accessible locations
             majAvail = self.restrictions['MajorMinor'] == False or loc['Class'] == 'Major'
             minAvail = self.restrictions['MajorMinor'] == False or loc['Class'] == 'Minor'

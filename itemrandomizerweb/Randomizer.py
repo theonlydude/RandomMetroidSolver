@@ -114,7 +114,9 @@ class RandoSettings(object):
 
     def getLocLimit(self, progSpeed):
         locLimit = -1
-        if progSpeed == 'medium':
+        if progSpeed == 'slow':
+            locLimit = 1
+        elif progSpeed == 'medium':
             locLimit = 2
         elif progSpeed == 'fast':
             locLimit = 3

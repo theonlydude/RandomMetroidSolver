@@ -630,13 +630,17 @@ class Randomizer(object):
         return True
         
     def checkLocPool(self):
-        if not any(self.isProgItem(item) for item in self.itemPool):
+        progItems = [item for item in self.itemPool if self.isProgItem(item)]
+        if len(progItems) == 0:
             return True
+        isMinorProg = any(item['Class'] == 'Minor' for item in progItems)
+        isMajorProg = any(item['Class'] == 'Major' for item in progItems)
         # check that there is room left in all main areas
-        room = {'Brinstar' : 0, 'Norfair' : 0, 'WreckedShip' : 0, 'LowerNorfair' : 0, 'Maridia' : 0}
-        for loc in self.unusedLocations:
+        room = {'Brinstar' : 0, 'Norfair' : 0, 'WreckedShip' : 0, 'LowerNorfair' : 0, 'Maridia' : 0, 'Crateria' : 0 }
+        for loc in self.unusedLocations: # TODO should be accessible locations
             majAvail = self.restrictions['MajorMinor'] == False or loc['Class'] == 'Major'
-            if majAvail and loc['Area'] in room:
+            minAvail = self.restrictions['MajorMinor'] == False or loc['Class'] == 'Minor'
+            if loc['Area'] in room and ((isMajorProg and majAvail) or (isMinorProg and minAvail)):
                 room[loc['Area']] += 1
         for r in room.values():
             if r > 0 and r <= self.locLimit:

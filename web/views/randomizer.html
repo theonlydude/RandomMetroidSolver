@@ -102,7 +102,7 @@ function AjaxPresetCallCompleted(data) {
         funMovement : document.getElementById("funMovement").value,
         funSuits : document.getElementById("funSuits").value,
 layoutPatches : document.getElementById("layoutPatches").value,
-        Removes_Gravity_Suit_heat_protection : document.getElementById("Removes_Gravity_Suit_heat_protection").value
+        noGravHeat : document.getElementById("noGravHeat").value
       },
       dataType: "json",
       crossDomain: true
@@ -190,7 +190,7 @@ function AjaxRandomizerCallCompleted(data) {
         funMovement : document.getElementById("funMovement").value,
         funSuits : document.getElementById("funSuits").value,
         layoutPatches : document.getElementById("layoutPatches").value,
-        Removes_Gravity_Suit_heat_protection : document.getElementById("Removes_Gravity_Suit_heat_protection").value
+        noGravHeat : document.getElementById("noGravHeat").value
       },
       dataType: "html"
     });
@@ -651,6 +651,9 @@ def displayNumber(id, min, max, default, step="1"):
 	    <tr>
 	      <td class="full" id="layoutPatchesStep">{{displayCheckbox("layoutPatches", True)}} Include layout patches from Total Item Randomizer</td>
 	      <td><button type="button" onclick="startTheTour(12)">?</button></td>
+	    </tr>
+	    <tr>
+	      <td class="full" id="noGravHeatStep">{{displayCheckbox("noGravHeat", True)}} Remove Gravity Suit heat protection (by Total)</td><td></td>
 	    </tr>
 	  </table>
 	  </p>

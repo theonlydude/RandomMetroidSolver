@@ -231,7 +231,7 @@ if __name__ == "__main__":
             data = {}
 
             data.update(RomPatcher.writeItemsLocs(None, itemLocs))
-            data.update(RomPatcher.applyIPSPatches(None, args.patches, args.noLayout))
+            data.update(RomPatcher.applyIPSPatches(None, args.patches, args.noLayout, args.noGravHeat))
             data.update(RomPatcher.writeSeed(None, seed))
             data.update(RomPatcher.writeSpoiler(None, itemLocs))
 

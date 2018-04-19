@@ -12,7 +12,7 @@ from parameters import easy, medium, hard, harder, hardcore, mania, diff2text
 from smbool import SMBool
 from smboolmanager import SMBoolManager
 from helpers import Pickup, Bosses
-from rom import RomReader, RomType, RomLoader
+from rom import RomType, RomLoader
 
 class Solver:
     # given a rom and parameters returns the estimated difficulty

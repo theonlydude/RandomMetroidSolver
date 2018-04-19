@@ -300,8 +300,12 @@ clear_values:
     cmp.w #$001f
     bne .ret
     
-    // Check if samus saved energy is 00, if it is, run startup code
-    lda $7ed7e2
+    // check that Game time and frames is equal zero for new game
+    // (Thanks Smiley and P.JBoy from metconst)
+    LDA $09DA
+    ORA $09DC
+    ORA $09DE
+    ORA $09E0
     bne .ret
 
     ldx #$0000

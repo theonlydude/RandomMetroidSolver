@@ -5,59 +5,59 @@ from sys import argv
 from tournament_locations import locations
 
 if __name__ == "__main__":
-    roms = argv[1:]
+    firstLogs = argv[1:]
 
-    counts = {
-        'Varia': {'Crateria': 0, 'Brinstar': 0, 'Norfair': 0, 'LowerNorfair': 0, 'WreckedShip': 0, 'Maridia': 0},
-        'Gravity': {'Crateria': 0, 'Brinstar': 0, 'Norfair': 0, 'LowerNorfair': 0, 'WreckedShip': 0, 'Maridia': 0},
-        'SpeedBooster': {'Crateria': 0, 'Brinstar': 0, 'Norfair': 0, 'LowerNorfair': 0, 'WreckedShip': 0, 'Maridia': 0},
-        'HiJump': {'Crateria': 0, 'Brinstar': 0, 'Norfair': 0, 'LowerNorfair': 0, 'WreckedShip': 0, 'Maridia': 0},
-        'Grapple': {'Crateria': 0, 'Brinstar': 0, 'Norfair': 0, 'LowerNorfair': 0, 'WreckedShip': 0, 'Maridia': 0},
-        'SpaceJump': {'Crateria': 0, 'Brinstar': 0, 'Norfair': 0, 'LowerNorfair': 0, 'WreckedShip': 0, 'Maridia': 0},
-        'Ice': {'Crateria': 0, 'Brinstar': 0, 'Norfair': 0, 'LowerNorfair': 0, 'WreckedShip': 0, 'Maridia': 0},
-        'Bomb': {'Crateria': 0, 'Brinstar': 0, 'Norfair': 0, 'LowerNorfair': 0, 'WreckedShip': 0, 'Maridia': 0},
-        'Charge': {'Crateria': 0, 'Brinstar': 0, 'Norfair': 0, 'LowerNorfair': 0, 'WreckedShip': 0, 'Maridia': 0}
-    }
-
+    itemNames = []
+    areaCounts = {}
+    areaNames = []
     locCounts = {}
     locNames = []
-    progItems = ['Varia', 'Gravity', 'SpeedBooster', 'HiJump', 'Grapple', 'SpaceJump', 'Ice', 'Bomb', 'Charge']
     
-    for rom in roms:
-        romLoader = RomLoader.factory(rom)
-        romLoader.assignItems(locations)
-
-        for loc in locations:
-            if loc['itemName'] in progItems:
-                counts[loc['itemName']][loc['Area']] = counts[loc['itemName']][loc['Area']] + 1
-                if not loc['itemName'] in locCounts:
-                    locCounts[loc['itemName']] = {}
-                if not loc['Name'] in locNames:
-                    locNames.append(loc['Name'])
-                if not loc['Name'] in locCounts[loc['itemName']]:
-                    locCounts[loc['itemName']][loc['Name']] = 0
-                locCounts[loc['itemName']][loc['Name']] += 1
+    for log in firstLogs:
+        with open(log, 'r') as logFile:
+            lines = logFile.readlines()
+        lines = [l.strip() for l in lines]
+        for i in range(1, len(lines)): # skip header
+            line = lines[i]
+            fields = line.split(';')
+            item, loc, area = fields[0], fields[1], fields[2]
+            if loc not in locNames:
+                locNames.append(loc)
+            if area not in areaNames:
+                areaNames.append(area)
+            if item not in itemNames:
+                itemNames.append(item)
+            if item not in locCounts:
+                locCounts[item] = {}
+            if item not in areaCounts:
+                areaCounts[item] = {}
+            if area not in areaCounts[item]:
+                areaCounts[item][area] = 0
+            if loc not in locCounts[item]:
+                locCounts[item][loc] = 0
+            areaCounts[item][area] += 1
+            locCounts[item][loc] += 1
 
     outFileName = 'area_stats.csv'
     with open(outFileName, 'w') as outFile:
-        outFile.write("ITEM;Crateria;Brinstar;Norfair;WreckedShip;Maridia;LowerNorfair;\n")
-        for item in ['Varia', 'Gravity', 'SpeedBooster', 'HiJump', 'Grapple', 'SpaceJump', 'Ice', 'Bomb']:
-            outFile.write("{};{};{};{};{};{};{};\n".format(item,
-                                                           counts[item]['Crateria'],
-                                                           counts[item]['Brinstar'],
-                                                           counts[item]['Norfair'],
-                                                           counts[item]['WreckedShip'],
-                                                           counts[item]['Maridia'],
-                                                           counts[item]['LowerNorfair']))
+        outFile.write("ITEM;{}\n".format(';'.join(areaNames)))
+        for item in itemNames:
+            outFile.write(item)
+            for area in areaNames:
+                c = 0
+                if area in areaCounts[item]:
+                    c = areaCounts[item][area]
+                outFile.write(';' + str(c))
+            outFile.write('\n')
     outFileName = 'loc_stats.csv'
     with open(outFileName, 'w') as outFile:
         outFile.write("LOCATION;")
-        for itemName in progItems:
+        for itemName in itemNames:
             outFile.write(itemName + ";")
         outFile.write('\n')
         for locName in locNames:
             outFile.write(locName + ";")
-            for itemName in progItems:
+            for itemName in itemNames:
                 c = 0
                 if locName in locCounts[itemName]:
                     c = locCounts[itemName][locName]

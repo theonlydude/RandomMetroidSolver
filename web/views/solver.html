@@ -264,6 +264,8 @@ window.onload = function(){
 
                 // check if layout patches are present
                 locsItem[0x21BD80] = bytes[0x21BD80]
+                // check if no grav heat patch is present
+                locsItem[0x06e37d] = bytes[0x06e37d]
 
                 locsItem["romFileName"] = outFileName;
 

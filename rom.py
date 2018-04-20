@@ -91,7 +91,7 @@ class RomType:
 
     # "applies" ROM patches, return true if full randomization, false if not
     @staticmethod    
-    def apply(romType, layoutPresent):
+    def apply(romType, patches):
         if romType.startswith('Total_'):
             RomPatches.ActivePatches = RomPatches.Total_Base
         if romType == 'Total_CX':
@@ -99,10 +99,14 @@ class RomType:
         elif romType in ['Total_TX', 'Total_FX']:
             RomPatches.ActivePatches = RomPatches.Total
         elif romType.startswith('VARIA_'):
-            if layoutPresent == True:
+            if patches['layoutPresent'] == True:
                 RomPatches.ActivePatches = RomPatches.Total
             else:
+                print("RomType::apply: no layout patches")
                 RomPatches.ActivePatches = RomPatches.Total_Base
+            if patches['gravityNoHeatProtectionPresent'] == False:
+                print("RomType::apply: Gravity heat protection")
+                RomPatches.ActivePatches.remove(RomPatches.NoGravityEnvProtection)
         elif romType == 'Dessy':
             RomPatches.ActivePatches = RomPatches.Dessy
         
@@ -180,29 +184,14 @@ class RomReader:
         '0x0': {'name': 'Nothing'}
     }
 
-    def __init__(self, romFileName=None):
-        if romFileName is not None:
-            self.romFileName = romFileName
+    patches = {
+        'layoutPresent': {'address': 0x21BD80, 'value': 0xD5},
+        'gravityNoHeatProtectionPresent': {'address': 0x06e37d, 'value': 0x01}
+    }
 
-    def getItemFromFakeRom(self, fakeRom, address, visibility):
-        value1 = fakeRom[address]
-        value2 = fakeRom[address+1]
-        value3 = fakeRom[address+4]
-
-        if (value3 == int('0x1a', 16)
-            and value2*256+value1 == int('0xeedb', 16)
-            and address != int('0x786DE', 16)):
-            return hex(0)
-
-        if visibility == 'Visible':
-            return hex(value2*256+(value1-0))
-        elif visibility == 'Chozo':
-            return hex(value2*256+(value1-84))
-        elif visibility == 'Hidden':
-            return hex(value2*256+(value1-168))
-        else:
-            # crash !
-            manger.du(cul)
+    def __init__(self, romFileName=None, dictROM=None):
+        self.romFileName = romFileName
+        self.dictROM = dictROM
 
     def getItem(self, romFile, address, visibility):
         # return the hex code of the object at the given address
@@ -223,8 +212,7 @@ class RomReader:
         elif visibility == 'Hidden':
             itemCode = hex(value2[0]*256+(value1[0]-168))
         else:
-            # crash !
-            manger.du(cul)
+            raise Exception("RomReader: unknown visibility: {}".format(visibility))
 
         # dessyreqt randomizer make some missiles non existant, detect it
         # 0x1a is to say that the item is a morphball
@@ -239,26 +227,16 @@ class RomReader:
         else:
             return itemCode
 
-    def loadItemsFromFakeRom(self, fakeRom, locations):
+    def loadItems(self, romFile, locations):
         for loc in locations:
-            item = self.getItemFromFakeRom(fakeRom, loc["Address"], loc["Visibility"])
+            item = self.getItem(romFile, loc["Address"], loc["Visibility"])
             loc["itemName"] = self.items[item]["name"]
+            #print("{}: {} => {}".format(loc["Name"], loc["Class"], loc["itemName"]))
 
-    def loadItems(self, locations):
-        with open(self.romFileName, "rb") as romFile:
-            for loc in locations:
-                item = self.getItem(romFile, loc["Address"], loc["Visibility"])
-                loc["itemName"] = self.items[item]["name"]
-                #print("{}: {} => {}".format(loc["Name"], loc["Class"], loc["itemName"]))
-
-    def layoutPresent(self):
-        with open(self.romFileName, "rb") as romFile:
-            romFile.seek(0x21BD80)
-            value = struct.unpack("B", romFile.read(1))
-            return value[0] == 0xD5
-
-    def layoutPresentFromFakeRom(self, fakeRom):
-        return fakeRom[0x21BD80] == 0xD5
+    def patchPresent(self, romFile, patchName):
+        romFile.seek(self.patches[patchName]['address'])
+        value = struct.unpack("B", romFile.read(1))
+        return value[0] == self.patches[patchName]['value']
 
 class RomPatcher:
     # standard:
@@ -527,9 +505,9 @@ class RomPatcher:
 
 class FakeROM:
     # to have the same code for real rom and the webservice
-    def __init__(self):
+    def __init__(self, data={}):
         self.curAddress = 0
-        self.data = {}
+        self.data = data
 
     def seek(self, address):
         self.curAddress = address
@@ -537,6 +515,12 @@ class FakeROM:
     def write(self, byte):
         self.data[self.curAddress] = struct.unpack("B", byte)
         self.curAddress += 1
+
+    def read(self, byteCount):
+        # in our case byteCount is always equals to 1
+        ret = struct.pack("B", self.data[self.curAddress])
+        self.curAddress += 1
+        return ret
 
     def close(self):
         pass
@@ -548,7 +532,7 @@ def isString(string):
     else:
         return type(string) == str
 
-class RomLoader:
+class RomLoader(object):
     @staticmethod
     def factory(rom):
         # can be a real rom. can be a json or a dict with the locations - items association
@@ -564,6 +548,12 @@ class RomLoader:
         elif type(rom) is dict:
             return RomLoaderDict(rom)
 
+    def __init__(self):
+        self.patches = {
+            'layoutPresent': True,
+            'gravityNoHeatProtectionPresent': True
+        }
+
     def assignItems(self, locations):
         # update the itemName and Class of the locations
         for loc in locations:
@@ -575,46 +565,56 @@ class RomLoader:
 
 
 class RomLoaderSfc(RomLoader):
-    # standard usage
+    # standard usage (when calling from the command line)
     def __init__(self, romFileName):
+        print("RomLoaderSfc::init")
+        super(RomLoaderSfc, self).__init__()
         self.romFileName = romFileName
         self.romReader = RomReader(romFileName)
 
     def assignItems(self, locations):
         # update the itemName of the locations
-        self.romReader.loadItems(locations)
-        self.layoutPresent = self.romReader.layoutPresent()
+        with open(self.romFileName, "rb") as romFile:
+            self.romReader.loadItems(romFile, locations)
+            for patch in self.patches:
+                self.patches[patch] = self.romReader.patchPresent(romFile, patch)
 
         self.locsItems = {}
         for loc in locations:
             self.locsItems[loc['Name']] = loc['itemName']
-        self.locsItems['layoutPresent'] = self.layoutPresent
+        for patch in self.patches:
+            self.locsItems[patch] = self.patches[patch]
 
 class RomLoaderJson(RomLoader):
-    # when called from the test suite
+    # when called from the test suite and the website (when loading already uploaded roms converted to json)
     def __init__(self, jsonFileName):
+        print("RomLoaderJson::init")
+        super(RomLoaderJson, self).__init__()
         with open(jsonFileName) as jsonFile:
             self.locsItems = json.load(jsonFile)
 
-            if 'layoutPresent' in self.locsItems:
-                self.layoutPresent = self.locsItems['layoutPresent']
-            else:
-                self.layoutPresent = True
-        self.locsItems['layoutPresent'] = self.layoutPresent
+        for patch in self.patches:
+            if patch in self.locsItems:
+                self.patches[patch] = self.locsItems[patch]
+            self.locsItems[patch] = self.patches[patch]
 
 class RomLoaderDict(RomLoader):
-    # when called from the website
-    def __init__(self, fakeRom):
-        self.fakeRom = fakeRom
+    # when called from the website (the js in the browser uploads a dict of address: value)
+    def __init__(self, dictROM):
+        print("RomLoaderDict::init")
+        super(RomLoaderDict, self).__init__()
+        self.dictROM = dictROM
+        self.romReader = RomReader()
 
     def assignItems(self, locations):
         # update the itemName of the locations
-        RomReader().loadItemsFromFakeRom(self.fakeRom, locations)
-
-        # check if layout patches are there
-        self.layoutPresent = RomReader().layoutPresentFromFakeRom(self.fakeRom)
+        fakeROM = FakeROM(self.dictROM)
+        self.romReader.loadItems(fakeROM, locations)
+        for patch in self.patches:
+            self.patches[patch] = self.romReader.patchPresent(fakeROM, patch)
 
         self.locsItems = {}
         for loc in locations:
             self.locsItems[loc['Name']] = loc['itemName']
-        self.locsItems['layoutPresent'] = self.layoutPresent
+        for patch in self.patches:
+            self.locsItems[patch] = self.patches[patch]

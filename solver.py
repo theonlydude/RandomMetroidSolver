@@ -51,10 +51,9 @@ class Solver:
             guessed = RomType.guess(rom)
             if guessed is not None:
                 Conf.romType = guessed
-        layoutPresent = romLoader.layoutPresent
-        print("ROM Type: {}, Layout present: {}".format(Conf.romType, layoutPresent))
+        print("ROM Type: {}, Patches present: {}".format(Conf.romType, romLoader.patches))
 
-        self.fullRando = RomType.apply(Conf.romType, layoutPresent)
+        self.fullRando = RomType.apply(Conf.romType, romLoader.patches)
         
         if self.log.getEffectiveLevel() == logging.DEBUG:
             self.log.debug("Display items at locations:")

@@ -127,7 +127,7 @@ def solver():
         # new uploaded rom ?
         error = False
         if mainForm.vars['json'] != '':
-            try:
+            #try:
                 tempRomJson = json.loads(mainForm.vars['json'])
                 romFileName = tempRomJson["romFileName"]
                 (base, ext) = os.path.splitext(romFileName)
@@ -146,10 +146,10 @@ def solver():
                 session.romFile = base
                 if base not in session.romFiles:
                     session.romFiles.append(base)
-            except Exception as e:
-                print("Error loading the rom file {}, exception: {}".format(romFileName, e))
-                session.flash = "Error loading the ROM file"
-                error = True
+            #except Exception as e:
+            #    print("Error loading the rom file {}, exception: {}".format(romFileName, e))
+            #    session.flash = "Error loading the ROM file"
+            #    error = True
 
         # python3:
         # no file: type(mainForm.vars['uploadFile'])=[<class 'str'>]

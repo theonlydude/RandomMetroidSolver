@@ -32,7 +32,7 @@ class Solver:
         self.firstLogFile = None
         if firstItemsLog is not None:
             self.firstLogFile = open(firstItemsLog, 'w')
-            self.firstLogFile.write('Item;Location\n')
+            self.firstLogFile.write('Item;Location;Area\n')
 
         # can be called from command line (console) or from web site (web)
         self.type = type
@@ -361,7 +361,7 @@ class Solver:
         if 'Pickup' in loc:
             loc['Pickup']()
         if isNew is True and self.firstLogFile is not None:
-            self.firstLogFile.write("{};{}\n".format(item, loc['Name']))
+            self.firstLogFile.write("{};{};{}\n".format(item, loc['Name'], loc['Area']))
             
         self.log.debug("collectItem: {} at {}".format(item, loc['Name']))
 

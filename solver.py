@@ -17,7 +17,7 @@ from rom import RomType, RomLoader
 class Solver:
     # given a rom and parameters returns the estimated difficulty
     
-    def __init__(self, type='console', rom=None, params=None, debug=False):
+    def __init__(self, type='console', rom=None, params=None, debug=False, firstItemsLog=None):
         if debug == True:
             logging.basicConfig(level=logging.DEBUG)
         else:
@@ -29,6 +29,10 @@ class Solver:
         if params is not None:
             for paramsFileName in params:
                 self.loadParams(paramsFileName)
+        self.firstLogFile = None
+        if firstItemsLog is not None:
+            self.firstLogFile = open(firstItemsLog, 'w')
+            self.firstLogFile.write('Item;Location\n')
 
         # can be called from command line (console) or from web site (web)
         self.type = type
@@ -86,7 +90,9 @@ class Solver:
             return
 
         (difficulty, itemsOk) = self.computeDifficulty()
-
+        if self.firstLogFile is not None:
+            self.firstLogFile.close()
+        
         if self.type == 'console':
             # print generated path
             if Conf.displayGeneratedPath == True:
@@ -340,6 +346,7 @@ class Solver:
 
     def collectItem(self, loc):
         item = loc["itemName"]
+        isNew = item not in self.collectedItems
         if item not in Conf.itemsForbidden:
             self.collectedItems.append(item)
             self.smbm.addItem(item)
@@ -353,7 +360,9 @@ class Solver:
                 loc["difficulty"] = SMBool(False)
         if 'Pickup' in loc:
             loc['Pickup']()
-
+        if isNew is True and self.firstLogFile is not None:
+            self.firstLogFile.write("{};{}\n".format(item, loc['Name']))
+            
         self.log.debug("collectItem: {} at {}".format(item, loc['Name']))
 
         # sort items by most frequent first
@@ -576,10 +585,11 @@ if __name__ == "__main__":
     parser.add_argument('--debug', '-d', help="activate debug logging", dest='debug', action='store_true')
     parser.add_argument('--difficultyTarget', '-t', help="the difficulty target that the solver will aim for", dest='difficultyTarget', nargs='?', default=None, type=int)
     parser.add_argument('--displayGeneratedPath', '-g', help="display the generated path (spoilers!)", dest='displayGeneratedPath', action='store_true')
+    parser.add_argument('--firstItemsLog', '-1', help="path to file where for each item type the first time it was found and where will be written (spoilers!)", nargs='?', default=None, type=str, dest='firstItemsLog')
 
     args = parser.parse_args()
 
-    solver = Solver(rom=args.romFileName, params=args.paramsFileName, debug=args.debug)
+    solver = Solver(rom=args.romFileName, params=args.paramsFileName, debug=args.debug, firstItemsLog=args.firstItemsLog)
 
     if args.difficultyTarget is not None:
         Conf.difficultyTarget = args.difficultyTarget

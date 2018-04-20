@@ -40,10 +40,10 @@ if __name__ == "__main__":
 
     outFileName = 'area_stats.csv'
     with open(outFileName, 'w') as outFile:
-        outFile.write("ITEM;{}\n".format(';'.join(areaNames)))
-        for item in itemNames:
+        outFile.write("ITEM;{}\n".format(';'.join(sorted(areaNames))))
+        for item in sorted(itemNames):
             outFile.write(item)
-            for area in areaNames:
+            for area in sorted(areaNames):
                 c = 0
                 if area in areaCounts[item]:
                     c = areaCounts[item][area]
@@ -51,13 +51,10 @@ if __name__ == "__main__":
             outFile.write('\n')
     outFileName = 'loc_stats.csv'
     with open(outFileName, 'w') as outFile:
-        outFile.write("LOCATION;")
-        for itemName in itemNames:
-            outFile.write(itemName + ";")
-        outFile.write('\n')
-        for locName in locNames:
+        outFile.write("LOCATION;{}\n".format(';'.join(sorted(itemNames))))
+        for locName in sorted(locNames):
             outFile.write(locName + ";")
-            for itemName in itemNames:
+            for itemName in sorted(itemNames):
                 c = 0
                 if locName in locCounts[itemName]:
                     c = locCounts[itemName][locName]

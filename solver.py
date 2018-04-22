@@ -442,10 +442,13 @@ class ParamsLoader(object):
 
         # Knows
         for param in self.params['Knows']:
-            if isKnows(param):
+            if isKnows(param) and hasattr(Knows, param):
                 setattr(Knows, param, SMBool(self.params['Knows'][param][0],
                                              self.params['Knows'][param][1],
                                              ['{}'.format(param)]))
+        # handle renamed knows
+        for old,new in Knows.newNames.iteritems():
+            setattr(Knows, new, getattr(Knows, old))
 
         # Settings
         for param in self.params['Settings']:

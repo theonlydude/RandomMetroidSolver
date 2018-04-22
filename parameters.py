@@ -79,6 +79,27 @@ class Knows:
     desc = {}
 
     # used across the game
+    WallJump = SMBool(True, easy, ['WallJump'])
+    desc['WallJump'] = {'display': 'Wall Jump',
+                        'title': 'Kick-jump from wall : wall to wall, single wall climb, wall jump to instant morph',
+                        'href': '',
+                        'rooms': [],
+                        'readonly' : True}
+
+    ShineSpark = SMBool(True, easy, ['ShineSpark'])
+    desc['ShineSpark'] = {'display': 'Shinespark',
+                          'title': 'With Speed Booster, press down to activate shinespark. Then launch it in every possible direction, from ground or mid-air.',
+                          'href': '',
+                          'rooms': [],
+                          'readonly' : True}
+
+    MidAirMorph = SMBool(True, easy, ['MidAirMorph'])
+    desc['MidAirMorph'] = {'display': 'Mid-air Morph',
+                           'title': 'Activate morph ball while jumping straight up and continue to gain height.',
+                           'href': '',
+                           'rooms': [],
+                           'readonly' : True}
+
     Mockball = SMBool(True, easy, ['Mockball'])
     desc['Mockball'] = {'display': 'Mockball',
                         'title': 'Morph from runing without loosing momentum to get Early Super and Ice Beam',
@@ -178,7 +199,34 @@ class Knows:
                             'title': 'Skip the Zebetites with a shinespark',
                             'href': 'https://www.youtube.com/watch?v=jEAgdWQ9kLQ',
                             'rooms': ['Mother Brain Room']}
+    # underwater grav-less
+    GravLessLevel0 = SMBool(True, easy, ['GravLessLevel0'])
+    desc['GravLessLevel0'] = {'display': 'Level 0',
+                              'title': 'Use crouch jump and downgrab to get out of ponds of water',
+                              'href': '',
+                              'rooms': [], # TODO spiky death, before Billy Mays, others?
+                              'readonly' : True}
 
+    SuitlessOuterMaridia = SMBool(True, hardcore, ['SuitlessOuterMaridia']) # keep SuitlessOuterMaridia as name for existing presets compatibility
+    desc['SuitlessOuterMaridia'] = {'display': 'Level 1',
+                                    'title': 'Level 0 + make your way underwater with Hi-Jump and Ice, freezing crabs and fishes. Access Botwoon with grapple.',
+                                    'href': 'https://www.youtube.com/watch?v=c2xoPigezvM',
+                                    'rooms': ['Main Street', 'Mt. Everest', 'Crab Shaft',
+                                              'Aqueduct', 'Botwoon Hallway']} # TODO add forgotten highway rooms, crab hole
+
+    GravLessLevel2 = SMBool(False, 0, ['GravLessLevel2'])
+    desc['GravLessLevel2'] = {'display': 'Level 2',
+                              'title': "Level 1 + access Draygon's lair and do the Draygon fight (exiting Draygon are separate techniques)",
+                              'href': '',
+                              'rooms': []} # TODO
+
+    SuitlessSandpit = SMBool(False, 0, ['SuitlessSandpit']) # keep SuitlessSandpit as name for existing presets compatibility
+    desc['SuitlessSandpit'] = {'display': 'Level 3',
+                               'title': 'Level 2 and : no problem getting out of sand suitless, traverse mini-draygons area, wall jumps to access items in the left sand pit, access missile location in the right sand pit.',
+                               'href': 'https://www.youtube.com/watch?v=1M2TiEVwH2I',
+                               'rooms': ['West Sand Hole', 'East Sand Hole']} # TODO add mini-draygons rooms
+
+    
     # Area difficulties
 
     # Brinstar
@@ -236,19 +284,6 @@ class Knows:
                                     'title': 'Access Gauntlet area using tricky Wall-Jumps',
                                     'href': 'https://www.youtube.com/watch?v=2a6mf-kB60U',
                                     'rooms': ['Landing Site']}
-
-    GauntletWithBombs = SMBool(True, hard, ['GauntletWithBombs'])
-    desc['GauntletWithBombs'] = {'display': 'Gauntlet With Bombs',
-                                 'title': 'Traverse Gauntlet area with only bombs',
-                                 'href': 'https://www.youtube.com/watch?v=HZ8589lLlAg',
-                                 'rooms': ['Gauntlet Entrance']}
-
-    GauntletWithPowerBombs = SMBool(True, medium, ['GauntletWithPowerBombs'])
-    desc['GauntletWithPowerBombs'] = {'display':
-                                      'Gauntlet With Power-Bombs',
-                                      'title': 'Traverse Gauntlet area with power bombs',
-                                      'href': None,
-                                      'rooms': ['Gauntlet Entrance']}
 
     # Lower Norfair
     LavaDive = SMBool(True, harder, ['LavaDive'])
@@ -315,19 +350,6 @@ class Knows:
 
     # Maridia
     # Suitless
-    SuitlessOuterMaridia = SMBool(True, hardcore, ['SuitlessOuterMaridia'])
-    desc['SuitlessOuterMaridia'] = {'display': 'Suitless Maridia',
-                                    'title': 'Make your way through Maridia (except spring ball and the sandpits) with Hi-Jump, Grapple and Ice',
-                                    'href': 'https://www.youtube.com/watch?v=c2xoPigezvM',
-                                    'rooms': ['Main Street', 'Mt. Everest', 'Crab Shaft',
-                                              'Aqueduct', 'Botwoon Hallway']}
-
-    SuitlessOuterMaridiaNoGuns = SMBool(True, mania, ['SuitlessOuterMaridiaNoGuns'])
-    desc['SuitlessOuterMaridiaNoGuns'] = {'display': 'Suitless Maridia with no Guns',
-                                          'title': 'Same as above, but with no firepower besides Ice Beam',
-                                          'href': 'https://www.youtube.com/watch?v=c2xoPigezvM',
-                                          'rooms': ['Main Street']}
-
     TediousMountEverest = SMBool(False, 0, ['TediousMountEverest'])
     desc['TediousMountEverest'] = {'display': 'Mt. Everest without anything',
                                     'title': 'Make your way through Mt. Everest with nothing but Ice (and Hi-Jump when suitless)',
@@ -365,6 +387,12 @@ class Knows:
                         'title': 'Get to Spring Ball with Gravity Suit and Ice Beam',
                         'href': 'https://www.youtube.com/watch?v=e5ZH_9paSLw',
                         'rooms': ['Pants Room']}
+    
+    SuitlessPuyoClip = SMBool(False, 0, ['SuitlessPuyoClip'])
+    desc['SuitlessPuyoClip'] = {'display': 'Suitless Puyo Clip',
+                                'title': 'Do the Puyo clip with Hi Jump and without Gravity',
+                                'href': '',
+                                'rooms': ['Pants Room']}
 
     # plasma room
     KillPlasmaPiratesWithSpark = SMBool(False, 0, ['KillPlasmaPiratesWithSpark'])
@@ -379,14 +407,8 @@ class Knows:
                                            'href': None,
                                            'rooms': ['Plasma Room']}
 
-    # sandpit
-    SuitlessSandpit = SMBool(False, 0, ['SuitlessSandpit']) # access the item in the sandpit suitless
-    desc['SuitlessSandpit'] = {'display': 'Suitless Sandpit',
-                               'title': 'Access items in sandpits without Gravity',
-                               'href': 'https://www.youtube.com/watch?v=1M2TiEVwH2I',
-                               'rooms': ['West Sand Hole', 'East Sand Hole']}
-
-    categories = [{'knows': ['Mockball', 'SimpleShortCharge', 'InfiniteBombJump', 'GreenGateGlitch',
+    categories = [{'knows': ['WallJump', 'ShineSpark', 'MidAirMorph', 
+                             'Mockball', 'SimpleShortCharge', 'InfiniteBombJump', 'GreenGateGlitch',
                              'ShortCharge', 'GravityJump', 'SpringBallJump',
                              'SpringBallJumpFromWall', 'GetAroundWallJump'],
                    'title': 'Used across the game'},
@@ -394,11 +416,12 @@ class Knows:
                    'title': 'Bosses'},
                   {'knows': ['IceZebSkip', 'SpeedZebSkip'],
                    'title': 'End Game'},
+                  {'knows': ['GravLessLevel0', 'SuitlessOuterMaridia', 'GravLessLevel2', 'GravLessLevel3'],
+                   'title': 'Underwater movement without Gravity Suit'},
                   {'knows': ['CeilingDBoost', 'AlcatrazEscape', 'ReverseGateGlitch',
                              'ReverseGateGlitchHiJumpLess', 'EarlyKraid', 'XrayDboost', 'RedTowerClimb'],
                    'title': 'Brinstar'},
-                  {'knows': ['HiJumpLessGauntletAccess', 'HiJumpGauntletAccess', 'GauntletWithBombs',
-                             'GauntletWithPowerBombs'],
+                  {'knows': ['HiJumpLessGauntletAccess', 'HiJumpGauntletAccess'],
                    'title': 'Gauntlet'},
                   {'knows': ['LavaDive', 'LavaDiveNoHiJump', 'ScrewAttackExit', 'WorstRoomIceCharge'],
                    'title': 'Lower Norfair'},
@@ -406,15 +429,18 @@ class Knows:
                    'title': 'Wrecked Ship'},
                   {'knows': ['SpongeBathBombJump', 'SpongeBathHiJump', 'SpongeBathSpeed'],
                    'title': 'Wrecked Ship Etank'},
-                  {'knows': ['SuitlessOuterMaridia', 'SuitlessOuterMaridiaNoGuns', 'SuitlessSandpit', 'TediousMountEverest'],
-                   'title': 'Suitless Maridia'},
-                  {'knows': ['DraygonRoomGrappleExit', 'DraygonRoomCrystalFlash',
-                             'PreciousRoomXRayExit'],
-                   'title': 'Maridia Suitless Draygon'},
                   {'knows': ['MochtroidClip', 'PuyoClip'],
                    'title': 'Maridia Clips'},
                   {'knows': ['KillPlasmaPiratesWithSpark', 'KillPlasmaPiratesWithCharge'],
-                   'title': 'Maridia Plasma Room'}]
+                   'title': 'Maridia Plasma Room'},
+                  {'knows': ['TediousMountEverest', 'SuitlessPuyoClip',
+                             'DraygonRoomGrappleExit', 'DraygonRoomCrystalFlash', 'PreciousRoomXRayExit'],
+                   'title': 'Maridia without Gravity Suit'}]
+
+    newNames = {
+        'SuitlessOuterMaridia' : 'GravLessLevel1',
+        'SuitlessSandpit' : 'GravLessLevel3'
+    }
 
 def isSettings(settings):
     return settings[0:len('__')] != '__'
@@ -695,6 +721,24 @@ class Settings:
         # rest of upper norfair
         'MainUpperNorfair' : hellRunPresets['MainUpperNorfair']['Default'],
         'LowerNorfair' : hellRunPresets['LowerNorfair']['Default']
+    }
+
+    hardRoomsPresets = {
+        'X-Ray' : {
+            'Default' : [(6, hard), (8, medium), (10, easy)],
+            "I don't like spikes" : [(8, hard), (10, medium), (14, easy)],
+            'Aarghh' : [(10, hard), (14, medium)]
+        },
+        'Gauntlet' : {
+            'Default' : [(0, hard), (3, medium), (6, easy)],
+            "I don't like acid" : [(2, hard), (6, medium), (10, easy)],
+            'Aarghh' : [(5, hard), (10, medium)]
+        }
+    }
+
+    hardRooms = {
+        'X-Ray' : hardRoomsPresets['X-Ray']['Default'],
+        'Gauntlet' : hardRoomsPresets['Gauntlet']['Default']
     }
     
     # various settings used in difficulty computation

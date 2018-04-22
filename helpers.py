@@ -19,30 +19,42 @@ class Helpers(object):
             'enoughStuffBotwoon', 'canDefeatBotwoon'
         ]
 
-    # all the functions from helpers (those starting with an _ are cached)
+    # return bool
     def haveItemCount(self, item, count):
-        # return bool
         return self.smbm.itemCount(item) >= count
 
+    # return integer
     def energyReserveCount(self):
-        # return integer
         return self.smbm.itemCount('ETank') + self.smbm.itemCount('Reserve')
+
+    def energyReserveCountOkDiff(self, difficulties, mult=1.0):
+        if difficulties is None or len(difficulties) == 0:
+            return SMBool(False)
+        def f(difficulty):
+            return self.smbm.energyReserveCountOk(difficulty[0]*mult, difficulty=difficulty[1])
+        result = reduce(lambda result, difficulty: self.smbm.wor(result, f(difficulty)),
+                        difficulties[1:], f(difficulties[0]))
+        return result
 
     def energyReserveCountOkHellRun(self, hellRunName):
         difficulties = Settings.hellRuns[hellRunName]
-
-        if difficulties is None or len(difficulties) == 0:
-            return SMBool(False)
-
-        # get a list: [(2, difficulty=hard), (4, difficulty=medium), (6, difficulty=easy)]
-        def f(difficulty):
-            return self.smbm.energyReserveCountOk(difficulty[0], difficulty=difficulty[1])
-        result = reduce(lambda result, difficulty: self.smbm.wor(result, f(difficulty)),
-                        difficulties[1:], f(difficulties[0]))
+        result = self.energyReserveCountOkDiff(difficulties)
 
         if self.smbm.getBool(result) == True:
             result = self.smbm.internal2SMBool(result)
             result.knows = [hellRunName+'HellRun']
+        return result
+
+    def energyReserveCountOkHardRoom(self, roomName):
+        difficulties = Settings.hardRooms[roomName]
+        mult = 1.0
+        if self.heatProof(): # env dmg reduction
+            mult = 0.5
+        result = self.energyReserveCountOkDiff(difficulties, mult)
+
+        if self.smbm.getBool(result) == True:
+            result = self.smbm.internal2SMBool(result)
+            result.knows = ['HardRoom-'+roomName]
         return result
 
     def heatProof(self):
@@ -115,23 +127,21 @@ class Helpers(object):
         #             -perform a simple short charge on the way in
         #              and use power bombs on the way out
         return self.smbm.wand(self.smbm.wor(self.smbm.canFly(),
-                                  self.smbm.haveItem('SpeedBooster'),
-                                  self.smbm.wand(self.smbm.knowsHiJumpGauntletAccess(),
-                                            self.smbm.haveItem('HiJump')),
-                                  self.smbm.knowsHiJumpLessGauntletAccess()),
-                         self.smbm.wor(self.smbm.haveItem('ScrewAttack'),
-                                  self.smbm.wand(self.smbm.knowsGauntletWithPowerBombs(),
-                                            self.smbm.canUsePowerBombs(),
-                                            self.smbm.itemCountOk('PowerBomb', 2)),
-                                  self.smbm.wand(self.smbm.knowsGauntletWithBombs(), self.smbm.canUseBombs()),
-                                  self.smbm.wand(self.smbm.haveItem('SpeedBooster'),
-                                            self.smbm.canUsePowerBombs(),
-                                            self.smbm.energyReserveCountOk(2),
-                                            self.smbm.knowsGauntletWithPowerBombs())))
+                                            self.smbm.haveItem('SpeedBooster'),
+                                            self.smbm.wand(self.smbm.knowsHiJumpGauntletAccess(),
+                                                           self.smbm.haveItem('HiJump')),
+                                            self.smbm.knowsHiJumpLessGauntletAccess()),
+                              self.smbm.wor(self.smbm.haveItem('ScrewAttack'),
+                                            self.smbm.wand(self.energyReserveCountOkHardRoom('Gauntlet'),
+                                                           self.smbm.wor(self.smbm.wand(self.smbm.canUsePowerBombs(),
+                                                                                        self.smbm.wor(self.smbm.itemCountOk('PowerBomb', 2),
+                                                                                                      self.smbm.wand(self.smbm.haveItem('SpeedBooster'),
+                                                                                                                     self.smbm.energyReserveCountOk(2)))),
+                                                                         self.smbm.canUseBombs()))))
 
     def canPassBombPassages(self):
         return self.smbm.wor(self.smbm.canUseBombs(),
-                        self.smbm.canUsePowerBombs())
+                             self.smbm.canUsePowerBombs())
 
     def canAccessRedBrinstar(self):
         # EXPLAINED: we can go from Landing Site to Red Tower using two different paths:
@@ -261,14 +271,14 @@ class Helpers(object):
 
     def canPassMtEverest(self):
         return self.smbm.wand(self.smbm.canAccessOuterMaridia(),
-                         self.smbm.wor(self.smbm.wand(self.smbm.haveItem('Gravity'),
-                                            self.smbm.wor(self.smbm.wor(self.smbm.haveItem('Grapple'),
-                                                              self.smbm.haveItem('SpeedBooster')),
-                                                     self.smbm.wor(self.smbm.canFly(),
-                                                              self.smbm.knowsGravityJump(),
-                                                              self.smbm.wand(self.smbm.haveItem('Ice'),
-                                                                        self.smbm.knowsTediousMountEverest())))),
-                                  self.smbm.canDoSuitlessMaridia()))
+                              self.smbm.wor(self.smbm.wand(self.smbm.haveItem('Gravity'),
+                                                           self.smbm.wor(self.smbm.wor(self.smbm.haveItem('Grapple'),
+                                                                                       self.smbm.haveItem('SpeedBooster')),
+                                                                         self.smbm.wor(self.smbm.canFly(),
+                                                                                       self.smbm.knowsGravityJump(),
+                                                                                       self.smbm.wand(self.smbm.haveItem('Ice'),
+                                                                                                      self.smbm.knowsTediousMountEverest())))),
+                                            self.smbm.canDoSuitlessMaridia()))
 
     def canAccessOuterMaridia(self):
         # EXPLAINED: access Red Tower in red brinstar,
@@ -281,20 +291,11 @@ class Helpers(object):
         #               -use the first Sciser from the ground and wait for it to come all the way up
         #               -do a double jump with spring ball
         return self.smbm.wand(self.smbm.canAccessRedBrinstar(),
-                         self.smbm.canUsePowerBombs(),
-                         self.smbm.wor(self.smbm.haveItem('Gravity'),
-                                  self.smbm.wor(self.smbm.wand(self.smbm.haveItem('HiJump'),
-                                                     self.smbm.haveItem('Ice'),
-                                                     self.smbm.wor(self.smbm.knowsSuitlessOuterMaridiaNoGuns(),
-                                                              self.smbm.wand(self.smbm.knowsSuitlessOuterMaridia(),
-                                                                        self.smbm.haveItem('SpringBall'),
-                                                                        self.smbm.knowsSpringBallJump()))),
-                                           self.smbm.wand(self.smbm.knowsSuitlessOuterMaridia(),
-                                                     self.smbm.haveItem('HiJump'),
-                                                     self.smbm.haveItem('Ice'),
-                                                     self.smbm.wor(self.smbm.haveItem('Wave'),
-                                                              self.smbm.haveItem('Spazer'),
-                                                              self.smbm.haveItem('Plasma'))))))
+                              self.smbm.canUsePowerBombs(),
+                              self.smbm.wor(self.smbm.haveItem('Gravity'),
+                                            self.smbm.wand(self.smbm.haveItem('HiJump'),
+                                                           self.smbm.haveItem('Ice'),
+                                                           self.smbm.knowsGravLessLevel1())))
 
     def canAccessInnerMaridia(self):
         # EXPLAINED: this is the easy regular way:
@@ -304,8 +305,11 @@ class Helpers(object):
         #            at Mt Everest, no need for grapple to access upper right door:
         #            https://www.youtube.com/watch?v=2GPx-6ARSIw&t=2m28s
         return self.smbm.wand(self.smbm.canAccessRedBrinstar(),
-                         self.smbm.canUsePowerBombs(),
-                         self.smbm.haveItem('Gravity'))
+                              self.smbm.canUsePowerBombs(),
+                              self.smbm.wor(self.smbm.haveItem('Gravity'),
+                                            self.smbm.wand(self.smbm.haveItem('HiJump'),
+                                                           self.smbm.haveItem('Ice'),
+                                                           self.smbm.knowsGravLessLevel3())))
 
     def canDoSuitlessMaridia(self):
         # EXPLAINED: this is the harder way if no gravity,
@@ -313,8 +317,8 @@ class Helpers(object):
         #            it can also be done without gravity nor grapple but the randomizer will never
         #            require it (https://www.youtube.com/watch?v=lsbnUKcblPk).
         return self.smbm.wand(self.smbm.canAccessOuterMaridia(),
-                         self.smbm.wor(self.smbm.haveItem('Grapple'),
-                                  self.smbm.knowsTediousMountEverest()))
+                              self.smbm.wor(self.smbm.haveItem('Grapple'),
+                                            self.smbm.knowsTediousMountEverest()))
 
     def canDefeatBotwoon(self):
         # EXPLAINED: access Aqueduct, either with or without gravity suit,
@@ -322,20 +326,23 @@ class Helpers(object):
         #             -use regular speedbooster (with gravity)
         #             -do a mochtroidclip (https://www.youtube.com/watch?v=1z_TQu1Jf1I&t=20m28s)
         return self.smbm.wand(self.smbm.enoughStuffBotwoon(),
-                         self.smbm.canPassMtEverest(),
-                         self.smbm.wor(self.smbm.wand(self.smbm.haveItem('SpeedBooster'),
-                                            self.smbm.haveItem('Gravity')),
-                                  self.smbm.wand(self.smbm.knowsMochtroidClip(),
-                                            self.smbm.haveItem('Ice'))))
+                              self.smbm.canPassMtEverest(),
+                              self.smbm.wor(self.smbm.wand(self.smbm.haveItem('SpeedBooster'),
+                                                           self.smbm.haveItem('Gravity')),
+                                            self.smbm.wand(self.smbm.knowsMochtroidClip(),
+                                                           self.smbm.haveItem('Ice'))))
 
     def canCrystalFlash(self):
         return self.smbm.wand(self.smbm.canUsePowerBombs(),
-                         self.smbm.itemCountOk('Missile', 2),
-                         self.smbm.itemCountOk('Super', 2),
-                         self.smbm.itemCountOk('PowerBomb', 3))
+                              self.smbm.itemCountOk('Missile', 2),
+                              self.smbm.itemCountOk('Super', 2),
+                              self.smbm.itemCountOk('PowerBomb', 3))
 
     def canDefeatDraygon(self):
-        return self.smbm.canDefeatBotwoon()
+        return self.smbm.wand(self.smbm.canDefeatBotwoon(),
+                              self.smbm.wor(self.smbm.haveItem('Gravity'),
+                                            self.smbm.wand(self.smbm.knowsGravLessLevel2(),
+                                                           self.smbm.haveItem('Grapple')))) # HiJump and Ice are checked in canDefeatBotwoon if suitless
 
     def getBeamDamage(self):
         standardDamage = 20

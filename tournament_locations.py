@@ -1,6 +1,7 @@
 from parameters import Knows, Settings, easy, medium, hard, harder, hardcore, mania
 from helpers import Bosses
 from rom import RomPatches
+from smbool import SMBool
 
 # all the items locations with the prerequisites to access them
 
@@ -153,21 +154,13 @@ locations = [
         'Room': 'X-Ray Scope Room',
         'Available': lambda sm: sm.wand(sm.canAccessRedBrinstar(),
                                         sm.canUsePowerBombs(),
-                                        sm.wor(sm.wor(sm.haveItem('Grapple'),
-                                                      sm.haveItem('SpaceJump'),
-                                                      sm.wand(sm.knowsXrayDboost(),
-                                                              sm.wor(sm.wand(sm.heatProof(),
-                                                                             sm.energyReserveCountOk(3)),
-                                                                     sm.energyReserveCountOk(6))),
-                                                      sm.wand(sm.haveItem('Ice'),
-                                                              sm.wor(sm.energyReserveCountOk(6),
-                                                                     sm.wand(sm.heatProof(),
-                                                                             sm.energyReserveCountOk(3))))),
-                                               sm.wand(sm.haveItem('Bomb'),
-                                                       sm.knowsInfiniteBombJump(),
-                                                       sm.wor(sm.energyReserveCountOk(6),
-                                                              sm.wand(sm.heatProof(),
-                                                                      sm.energyReserveCountOk(3))))))
+                                        sm.wor(sm.haveItem('Grapple'),
+                                               sm.haveItem('SpaceJump'),
+                                               sm.wand(sm.energyReserveCountOkHardRoom('X-Ray'),
+                                                       sm.wor(sm.knowsXrayDboost(),
+                                                              sm.haveItem('Ice'),
+                                                              sm.wand(sm.canUseBombs(),
+                                                                      sm.knowsInfiniteBombJump())))))
     },
     {
         'Area': "Brinstar",
@@ -392,7 +385,9 @@ locations = [
         'Available': lambda sm: sm.wand(sm.canAccessOuterMaridia(),
                                         sm.wor(sm.canFly(),
                                                sm.wand(sm.haveItem('Gravity'), sm.haveItem('SpeedBooster')),
-                                               sm.wand(sm.haveItem('HiJump'), sm.haveItem('SpringBall'), sm.knowsSpringBallJump()),
+                                               sm.wand(sm.haveItem('SpringBall'),
+                                                       sm.wor(sm.wand(sm.haveItem('HiJump'), sm.knowsSpringBallJump()),
+                                                              sm.knowsSpringBallJumpFromWall())),
                                                sm.haveItem('Grapple')))
     },
     {
@@ -456,7 +451,9 @@ locations = [
         #    -fly (with space jump or diagonal bomb jump
         'Available': lambda sm: sm.wand(sm.canAccessInnerMaridia(),
                                         sm.wor(sm.wand(sm.haveItem('Ice'),
-                                                       sm.knowsPuyoClip()),
+                                                       sm.wor(sm.wand(sm.haveItem('Gravity'),
+                                                                      sm.knowsPuyoClip()),
+                                                              sm.knowsSuitlessPuyoClip())),
                                                sm.wand(sm.haveItem('Grapple'),
                                                        sm.wor(sm.canFlyDiagonally(),
                                                               sm.haveItem('HiJump')))))
@@ -633,7 +630,8 @@ locations = [
                                                sm.canUsePowerBombs()),
                                         sm.canOpenRedDoors()),
         'PostAvailable': lambda sm: sm.wand(sm.canOpenGreenDoors(),
-                                            sm.canPassBombPassages())
+                                            sm.canPassBombPassages())#,
+                                            #SMBool(True, mania))
     },
     {
         'Area': "Brinstar",

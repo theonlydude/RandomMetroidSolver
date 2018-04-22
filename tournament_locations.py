@@ -453,7 +453,9 @@ locations = [
                                         sm.wor(sm.wand(sm.haveItem('Ice'),
                                                        sm.wor(sm.wand(sm.haveItem('Gravity'),
                                                                       sm.knowsPuyoClip()),
-                                                              sm.knowsSuitlessPuyoClip())),
+                                                              sm.wand(sm.knowsSuitlessPuyoClip(),
+                                                                      sm.haveItem('SpringBall'),
+                                                                      sm.knowsSpringBallJump()))),
                                                sm.wand(sm.haveItem('Grapple'),
                                                        sm.wor(sm.canFlyDiagonally(),
                                                               sm.haveItem('HiJump')))))

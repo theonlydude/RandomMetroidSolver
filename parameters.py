@@ -730,8 +730,8 @@ class Settings:
             'Aarghh' : [(10, hard), (14, medium)]
         },
         'Gauntlet' : {
-            'Default' : [(0, hard), (3, medium), (6, easy)],
-            "I don't like acid" : [(2, hard), (6, medium), (10, easy)],
+            'Default' : [(0, harder), (1, hard), (3, medium), (6, easy)],
+            "I don't like acid" : [(1, harder), (2, hard), (5, medium), (10, easy)],
             'Aarghh' : [(5, hard), (10, medium)]
         }
     }

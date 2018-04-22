@@ -49,7 +49,7 @@ class Helpers(object):
         difficulties = Settings.hardRooms[roomName]
         mult = 1.0
         if self.heatProof(): # env dmg reduction
-            mult = 0.5
+            mult = 2.0
         result = self.energyReserveCountOkDiff(difficulties, mult)
 
         if self.smbm.getBool(result) == True:

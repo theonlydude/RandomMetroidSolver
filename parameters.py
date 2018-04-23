@@ -442,6 +442,14 @@ class Knows:
         'SuitlessSandpit' : 'GravLessLevel3'
     }
 
+    @staticmethod
+    def renameKnows():
+        # handle renamed knows
+        for old,new in Knows.newNames.iteritems():
+            if not hasattr(Knows, new):
+                setattr(Knows, new, getattr(Knows, old))
+
+
 def isSettings(settings):
     return settings[0:len('__')] != '__'
 

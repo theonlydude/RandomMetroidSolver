@@ -77,8 +77,8 @@ class Helpers(object):
         if self.smbm.getBool(self.smbm.haveItem('SpaceJump')) == True:
             return self.smbm.setSMBool(True, easy, ['SpaceJump'])
         elif self.smbm.getBool(self.smbm.wand(self.smbm.haveItem('Morph'),
-                                    self.smbm.haveItem('Bomb'),
-                                    self.smbm.knowsInfiniteBombJump())) == True:
+                                              self.smbm.haveItem('Bomb'),
+                                              self.smbm.knowsInfiniteBombJump())) == True:
             return self.smbm.knowsInfiniteBombJump()
         else:
             return SMBool(False)
@@ -87,8 +87,8 @@ class Helpers(object):
         if self.smbm.getBool(self.smbm.haveItem('SpaceJump')) == True:
             return self.smbm.setSMBool(True, easy, ['SpaceJump'])
         elif self.smbm.getBool(self.smbm.wand(self.smbm.haveItem('Morph'),
-                                    self.smbm.haveItem('Bomb'),
-                                    self.smbm.knowsDiagonalBombJump())) == True:
+                                              self.smbm.haveItem('Bomb'),
+                                              self.smbm.knowsDiagonalBombJump())) == True:
             return self.smbm.knowsDiagonalBombJump()
         else:
             return self.smbm.setSMBool(False)
@@ -151,10 +151,10 @@ class Helpers(object):
         #             -open green door at the right of Landing Site, then open the yellow
         #              door at Crateria Keyhunter room
         return self.smbm.wand(self.smbm.haveItem('Super'),
-                         self.smbm.wor(self.smbm.wand(self.smbm.wor(self.smbm.canDestroyBombWalls(),
-                                                     self.smbm.wand(self.smbm.haveItem('SpeedBooster'), self.smbm.knowsSimpleShortCharge())),
-                                            self.smbm.haveItem('Morph')),
-                                  self.smbm.canUsePowerBombs()))
+                              self.smbm.wor(self.smbm.wand(self.smbm.wor(self.smbm.canDestroyBombWalls(),
+                                                                         self.smbm.wand(self.smbm.haveItem('SpeedBooster'), self.smbm.knowsSimpleShortCharge())),
+                                                           self.smbm.haveItem('Morph')),
+                                            self.smbm.canUsePowerBombs()))
 
     def canAccessKraid(self):
         # EXPLAINED: from Red Tower we have to go to Warehouse Entrance, and there we have to
@@ -164,10 +164,10 @@ class Helpers(object):
         #             -know how to wall jump on the platform without the hijump boots
         #            then we have to break a bomb block at Warehouse Zeela room
         return self.smbm.wand(self.smbm.canAccessRedBrinstar(),
-                         self.smbm.wor(self.smbm.haveItem('HiJump'),
-                                  self.smbm.canFly(),
-                                  self.smbm.knowsEarlyKraid()),
-                         self.smbm.canPassBombPassages())
+                              self.smbm.wor(self.smbm.haveItem('HiJump'),
+                                            self.smbm.canFly(),
+                                            self.smbm.knowsEarlyKraid()),
+                              self.smbm.canPassBombPassages())
 
     def canAccessWs(self):
         # EXPLAINED: from Landing Site we open the green door on the right, then in Crateria
@@ -180,18 +180,18 @@ class Helpers(object):
         #             -do a gravity jump from below the right platform
         #             -do a mock ball and a bounce ball (https://www.youtube.com/watch?v=WYxtRF--834)
         return self.smbm.wand(self.smbm.haveItem('Super'),
-                         self.smbm.canUsePowerBombs(),
-                         self.smbm.wor(self.smbm.wor(self.smbm.haveItem('Grapple'),
-                                           self.smbm.haveItem('SpaceJump'),
-                                           self.smbm.knowsContinuousWallJump()),
-                                  self.smbm.wor(self.smbm.wand(self.smbm.knowsDiagonalBombJump(),
-                                                     self.smbm.canUseBombs()),
-                                           self.smbm.wand(self.smbm.knowsSimpleShortCharge(),
-                                                     self.smbm.haveItem('SpeedBooster')),
-                                           self.smbm.haveItem('Gravity'),
-                                           self.smbm.wand(self.smbm.knowsMockballWs(),
-                                                     self.smbm.haveItem('Morph'),
-                                                     self.smbm.haveItem('SpringBall')))))
+                              self.smbm.canUsePowerBombs(),
+                              self.smbm.wor(self.smbm.wor(self.smbm.haveItem('Grapple'),
+                                                          self.smbm.haveItem('SpaceJump'),
+                                                          self.smbm.knowsContinuousWallJump()),
+                                            self.smbm.wor(self.smbm.wand(self.smbm.knowsDiagonalBombJump(),
+                                                                         self.smbm.canUseBombs()),
+                                                          self.smbm.wand(self.smbm.knowsSimpleShortCharge(),
+                                                                         self.smbm.haveItem('SpeedBooster')),
+                                                          self.smbm.haveItem('Gravity'),
+                                                          self.smbm.wand(self.smbm.knowsMockballWs(),
+                                                                         self.smbm.haveItem('Morph'),
+                                                                         self.smbm.haveItem('SpringBall')))))
 
     def canAccessHeatedNorfair(self):
         # EXPLAINED: from Red Tower, to go to Bubble Mountain we have to pass through
@@ -199,22 +199,22 @@ class Helpers(object):
         #            this test is then used to access Speed, Norfair Reserve Tank, Wave and Crocomire
         #            as they are all hellruns from Bubble Mountain.
         return self.smbm.wand(self.smbm.canAccessRedBrinstar(),
-                         self.smbm.wor(self.smbm.haveItem('SpeedBooster'), # frog speedway
-                                  # go through cathedral
-                                  RomPatches.has(RomPatches.CathedralEntranceWallJump),
-                                  self.smbm.haveItem('HiJump'),
-                                  self.smbm.canFly()),
-                         self.canHellRun('MainUpperNorfair'))
+                              self.smbm.wor(self.smbm.haveItem('SpeedBooster'), # frog speedway
+                                            # go through cathedral
+                                            RomPatches.has(RomPatches.CathedralEntranceWallJump),
+                                            self.smbm.haveItem('HiJump'),
+                                            self.smbm.canFly()),
+                              self.canHellRun('MainUpperNorfair'))
 
     def canAccessNorfairReserve(self):
         return self.smbm.wand(self.smbm.canAccessHeatedNorfair(),
-                         self.smbm.wor(self.smbm.wor(self.smbm.canFly(),
-                                           self.smbm.haveItem('Grapple'),
-                                           self.smbm.wand(self.smbm.haveItem('HiJump'),
-                                                     self.smbm.knowsGetAroundWallJump())),
-                                  self.smbm.wor(self.smbm.haveItem('Ice'),
-                                           self.smbm.wand(self.smbm.haveItem('SpringBall'),
-                                                     self.smbm.knowsSpringBallJumpFromWall()))))
+                              self.smbm.wor(self.smbm.wor(self.smbm.canFly(),
+                                                          self.smbm.haveItem('Grapple'),
+                                                          self.smbm.wand(self.smbm.haveItem('HiJump'),
+                                                                         self.smbm.knowsGetAroundWallJump())),
+                                            self.smbm.wor(self.smbm.haveItem('Ice'),
+                                                          self.smbm.wand(self.smbm.haveItem('SpringBall'),
+                                                                         self.smbm.knowsSpringBallJumpFromWall()))))
 
     def canAccessCrocomire(self):
         # EXPLAINED: two options there, either:
@@ -224,15 +224,15 @@ class Helpers(object):
         #              then speed booster in Crocomire Speedway (easy hell run if no varia
         #              as we only have to go in straight line, so two ETanks are required)
         return self.smbm.wor(self.smbm.wand(self.smbm.canAccessHeatedNorfair(),
-                                  self.smbm.wor(self.smbm.knowsGreenGateGlitch(), self.smbm.haveItem('Wave'))),
-                        self.smbm.wand(self.smbm.canAccessRedBrinstar(),
-                                  self.smbm.canUsePowerBombs(),
-                                  self.smbm.haveItem('SpeedBooster'),
-                                  self.smbm.energyReserveCountOk(2)))
+                                            self.smbm.wor(self.smbm.knowsGreenGateGlitch(), self.smbm.haveItem('Wave'))),
+                             self.smbm.wand(self.smbm.canAccessRedBrinstar(),
+                                            self.smbm.canUsePowerBombs(),
+                                            self.smbm.haveItem('SpeedBooster'),
+                                            self.smbm.energyReserveCountOk(2)))
 
     def canDefeatCrocomire(self):
         return self.smbm.wand(self.smbm.canAccessCrocomire(),
-                         self.smbm.enoughStuffCroc())
+                              self.smbm.enoughStuffCroc())
 
     def canAccessLowerNorfair(self):
         # EXPLAINED: the randomizer never requires to pass it without the Varia suit.
@@ -248,26 +248,26 @@ class Helpers(object):
         if self.smbm.getBool(self.smbm.heatProof()) == False:
             nTanks4Dive = 8
         return self.smbm.wand(self.canHellRun('LowerNorfair'),
-                         self.smbm.canAccessRedBrinstar(),
-                         self.smbm.canUsePowerBombs(),
-                         self.smbm.wor(self.smbm.wand(self.smbm.haveItem('Gravity'), self.smbm.haveItem('SpaceJump')),
-                                  self.smbm.wand(self.smbm.knowsGravityJump(), self.smbm.haveItem('Gravity')),
-                                  self.smbm.wand(self.smbm.wor(self.smbm.wand(self.smbm.knowsLavaDive(),
-                                                               self.smbm.haveItem('HiJump')),
-                                                     self.smbm.knowsLavaDiveNoHiJump()),
-                                            self.smbm.energyReserveCountOk(nTanks4Dive))))
+                              self.smbm.canAccessRedBrinstar(),
+                              self.smbm.canUsePowerBombs(),
+                              self.smbm.wor(self.smbm.wand(self.smbm.haveItem('Gravity'), self.smbm.haveItem('SpaceJump')),
+                                            self.smbm.wand(self.smbm.knowsGravityJump(), self.smbm.haveItem('Gravity')),
+                                            self.smbm.wand(self.smbm.wor(self.smbm.wand(self.smbm.knowsLavaDive(),
+                                                                                        self.smbm.haveItem('HiJump')),
+                                                                         self.smbm.knowsLavaDiveNoHiJump()),
+                                                           self.smbm.energyReserveCountOk(nTanks4Dive))))
 
     def canPassWorstRoom(self):
         # https://www.youtube.com/watch?v=gfmEDDmSvn4
         return self.smbm.wand(self.smbm.canAccessLowerNorfair(),
-                         self.smbm.wor(self.smbm.canFly(),
-                                  self.smbm.wand(self.smbm.knowsWorstRoomIceCharge(),
-                                            self.smbm.haveItem('Ice'),
-                                            self.smbm.haveItem('Charge')),
-                                  self.smbm.wand(self.smbm.knowsGetAroundWallJump(),
-                                            self.smbm.haveItem('HiJump')),
-                                  self.smbm.wand(self.smbm.knowsSpringBallJumpFromWall(),
-                                            self.smbm.haveItem('SpringBall'))))
+                              self.smbm.wor(self.smbm.canFly(),
+                                            self.smbm.wand(self.smbm.knowsWorstRoomIceCharge(),
+                                                           self.smbm.haveItem('Ice'),
+                                                           self.smbm.haveItem('Charge')),
+                                            self.smbm.wand(self.smbm.knowsGetAroundWallJump(),
+                                                           self.smbm.haveItem('HiJump')),
+                                            self.smbm.wand(self.smbm.knowsSpringBallJumpFromWall(),
+                                                           self.smbm.haveItem('SpringBall'))))
 
     def canPassMtEverest(self):
         return self.smbm.wand(self.smbm.canAccessOuterMaridia(),
@@ -348,29 +348,29 @@ class Helpers(object):
         standardDamage = 20
 
         if self.smbm.getBool(self.smbm.wand(self.smbm.haveItem('Ice'),
-                                  self.smbm.haveItem('Wave'),
-                                  self.smbm.haveItem('Plasma'))) == True:
+                                            self.smbm.haveItem('Wave'),
+                                            self.smbm.haveItem('Plasma'))) == True:
             standardDamage = 300
         elif self.smbm.getBool(self.smbm.wand(self.smbm.haveItem('Wave'),
-                                    self.smbm.haveItem('Plasma'))) == True:
+                                              self.smbm.haveItem('Plasma'))) == True:
             standardDamage = 250
         elif self.smbm.getBool(self.smbm.wand(self.smbm.haveItem('Ice'),
-                                    self.smbm.haveItem('Plasma'))) == True:
+                                              self.smbm.haveItem('Plasma'))) == True:
             standardDamage = 200
         elif self.smbm.getBool(self.smbm.haveItem('Plasma')) == True:
             standardDamage = 150
         elif self.smbm.getBool(self.smbm.wand(self.smbm.haveItem('Ice'),
-                                    self.smbm.haveItem('Wave'),
-                                    self.smbm.haveItem('Spazer'))) == True:
+                                              self.smbm.haveItem('Wave'),
+                                              self.smbm.haveItem('Spazer'))) == True:
             standardDamage = 100
         elif self.smbm.getBool(self.smbm.wand(self.smbm.haveItem('Wave'),
-                                    self.smbm.haveItem('Spazer'))) == True:
+                                              self.smbm.haveItem('Spazer'))) == True:
             standardDamage = 70
         elif self.smbm.getBool(self.smbm.wand(self.smbm.haveItem('Ice'),
-                                    self.smbm.haveItem('Spazer'))) == True:
+                                              self.smbm.haveItem('Spazer'))) == True:
             standardDamage = 60
         elif self.smbm.getBool(self.smbm.wand(self.smbm.haveItem('Ice'),
-                                    self.smbm.haveItem('Wave'))) == True:
+                                              self.smbm.haveItem('Wave'))) == True:
             standardDamage = 60
         elif self.smbm.getBool(self.smbm.haveItem('Wave')) == True:
             standardDamage = 50
@@ -534,7 +534,7 @@ class Helpers(object):
 
         # print('RIDLEY', ammoMargin, secs)
         self.smbm.curSMBool.difficulty = self.computeBossDifficulty(ammoMargin, secs,
-                                                               Settings.bossesDifficulty['Ridley'])
+                                                                    Settings.bossesDifficulty['Ridley'])
         self.smbm.curSMBool.bool = True
         return self.smbm.getSMBoolCopy()
 
@@ -544,7 +544,7 @@ class Helpers(object):
             return SMBool(False)
         #print('KRAID True ', ammoMargin, secs)
         self.smbm.curSMBool.difficulty = self.computeBossDifficulty(ammoMargin, secs,
-                                                               Settings.bossesDifficulty['Kraid'])
+                                                                    Settings.bossesDifficulty['Kraid'])
         self.smbm.curSMBool.bool = True
         return self.smbm.getSMBoolCopy()
 
@@ -560,14 +560,14 @@ class Helpers(object):
             fight = SMBool(False)
         return self.smbm.wor(fight,
                         self.smbm.wand(self.smbm.knowsDraygonGrappleKill(),
-                                  self.smbm.haveItem('Grapple')),
+                                       self.smbm.haveItem('Grapple')),
                         self.smbm.wand(self.smbm.knowsMicrowaveDraygon(),
-                                  self.smbm.haveItem('Plasma'),
-                                  self.smbm.haveItem('Charge'),
-                                  self.smbm.haveItem('XRayScope')),
+                                       self.smbm.haveItem('Plasma'),
+                                       self.smbm.haveItem('Charge'),
+                                       self.smbm.haveItem('XRayScope')),
                         self.smbm.wand(self.smbm.haveItem('Gravity'),
-                                  self.smbm.knowsShortCharge(),
-                                  self.smbm.haveItem('SpeedBooster')))
+                                       self.smbm.knowsShortCharge(),
+                                       self.smbm.haveItem('SpeedBooster')))
 
     def enoughStuffsPhantoon(self):
         (ammoMargin, secs) = self.canInflictEnoughDamages(2500, doubleSuper=True)
@@ -585,9 +585,9 @@ class Helpers(object):
 
         return self.smbm.wor(fight,
                         self.smbm.wand(self.smbm.knowsMicrowavePhantoon(),
-                                  self.smbm.haveItem('Plasma'),
-                                  self.smbm.haveItem('Charge'),
-                                  self.smbm.haveItem('XRayScope')))
+                                       self.smbm.haveItem('Plasma'),
+                                       self.smbm.haveItem('Charge'),
+                                       self.smbm.haveItem('XRayScope')))
 
     def enoughStuffsMotherbrain(self):
         #print('MB')
@@ -618,20 +618,20 @@ class Helpers(object):
 
     def canPassMetroids(self):
         return self.smbm.wand(self.smbm.canOpenRedDoors(),
-                         self.smbm.wor(self.smbm.haveItem('Ice'),
-                                  # to avoid leaving tourian to refill power bombs
-                                  self.smbm.itemCountOk('PowerBomb', 3)))
+                              self.smbm.wor(self.smbm.haveItem('Ice'),
+                                            # to avoid leaving tourian to refill power bombs
+                                            self.smbm.itemCountOk('PowerBomb', 3)))
 
     def canPassZebetites(self):
         # account for one zebetite, refill may be necessary
         return self.smbm.wor(self.smbm.wand(self.smbm.haveItem('Ice'), self.smbm.knowsIceZebSkip()),
-                        self.smbm.wand(self.smbm.haveItem('SpeedBooster'), self.smbm.knowsSpeedZebSkip()),
-                        SMBool(self.canInflictEnoughDamages(1100, charge=False, givesDrops=False)[0] >= 1, 0))
+                             self.smbm.wand(self.smbm.haveItem('SpeedBooster'), self.smbm.knowsSpeedZebSkip()),
+                             SMBool(self.canInflictEnoughDamages(1100, charge=False, givesDrops=False)[0] >= 1, 0))
 
     def enoughStuffTourian(self):
         return self.smbm.wand(self.canPassMetroids(),
-                         self.canPassZebetites(),
-                         self.enoughStuffsMotherbrain())
+                              self.canPassZebetites(),
+                              self.enoughStuffsMotherbrain())
 
 class Pickup:
     def __init__(self, majorsPickup, minorsPickup):

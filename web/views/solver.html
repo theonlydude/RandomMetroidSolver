@@ -383,7 +383,11 @@ def displayKnow(know):
   if knows[know][0] is True:
     checked="checked=\"checked\" value=\"on\""
     pass
-  response.write("  <td><input id=\"{}_bool\" name=\"{}_bool\" type=\"checkbox\" {} onClick=\"toggleSelect('{}')\" form=\"mainform\"></td>\n".format(know, know, checked, know), escape=False)
+  disabled=""
+  if 'readonly' in desc[know] and desc[know]['readonly'] == True:
+    disabled="disabled"
+    pass
+  response.write("  <td><input id=\"{}_bool\" name=\"{}_bool\" type=\"checkbox\" {} onClick=\"toggleSelect('{}')\" form=\"mainform\" {}></td>\n".format(know, know, checked, know, disabled), escape=False)
 
   if desc[know]['href'] is not None:
     response.write("  <td><a href=\"{}\">{}</a></td>\n".format(desc[know]['href'], desc[know]['display']), escape=False)
@@ -392,7 +396,7 @@ def displayKnow(know):
     pass
 
   disabled=""
-  if knows[know][0] is False:
+  if knows[know][0] is False or ('readonly' in desc[know] and desc[know]['readonly'] == True):
     disabled="disabled"
     pass
 

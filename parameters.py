@@ -87,21 +87,21 @@ class Knows:
     WallJump = SMBool(True, easy, ['WallJump'])
     desc['WallJump'] = {'display': 'Wall Jump',
                         'title': 'Kick-jump from wall : wall to wall, single wall climb, wall jump to instant morph',
-                        'href': '',
+                        'href': 'https://wiki.supermetroid.run/Walljump',
                         'rooms': [],
                         'readonly' : True}
 
     ShineSpark = SMBool(True, easy, ['ShineSpark'])
     desc['ShineSpark'] = {'display': 'Shinespark',
                           'title': 'With Speed Booster, press down to activate shinespark. Then launch it in every possible direction, from ground or mid-air.',
-                          'href': '',
+                          'href': 'https://wiki.supermetroid.run/Shinespark',
                           'rooms': [],
                           'readonly' : True}
 
     MidAirMorph = SMBool(True, easy, ['MidAirMorph'])
     desc['MidAirMorph'] = {'display': 'Mid-air Morph',
                            'title': 'Activate morph ball while jumping straight up and continue to gain height.',
-                           'href': '',
+                           'href': None,
                            'rooms': [],
                            'readonly' : True}
 
@@ -208,7 +208,7 @@ class Knows:
     GravLessLevel0 = SMBool(True, easy, ['GravLessLevel0'])
     desc['GravLessLevel0'] = {'display': 'Level 0',
                               'title': 'Use crouch jump and downgrab to get out of ponds of water',
-                              'href': '',
+                              'href': None,
                               'rooms': [], # TODO spiky death, before Billy Mays, others?
                               'readonly' : True}
 
@@ -222,7 +222,7 @@ class Knows:
     GravLessLevel2 = SMBool(False, 0, ['GravLessLevel2'])
     desc['GravLessLevel2'] = {'display': 'Level 2',
                               'title': "Level 1 + access Draygon's lair and do the Draygon fight (exiting Draygon are separate techniques)",
-                              'href': '',
+                              'href': None,
                               'rooms': []} # TODO
 
     SuitlessSandpit = SMBool(False, 0, ['SuitlessSandpit']) # keep SuitlessSandpit as name for existing presets compatibility

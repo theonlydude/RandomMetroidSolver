@@ -416,7 +416,7 @@ class Knows:
                    'title': 'Bosses'},
                   {'knows': ['IceZebSkip', 'SpeedZebSkip'],
                    'title': 'End Game'},
-                  {'knows': ['GravLessLevel0', 'SuitlessOuterMaridia', 'GravLessLevel2', 'GravLessLevel3'],
+                  {'knows': ['GravLessLevel0', 'SuitlessOuterMaridia', 'GravLessLevel2', 'SuitlessSandpit'],
                    'title': 'Underwater movement without Gravity Suit'},
                   {'knows': ['CeilingDBoost', 'AlcatrazEscape', 'ReverseGateGlitch',
                              'ReverseGateGlitchHiJumpLess', 'EarlyKraid', 'XrayDboost', 'RedTowerClimb'],

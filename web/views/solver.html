@@ -392,6 +392,7 @@ def displayKnow(know):
   disabled=""
   if 'readonly' in desc[know] and desc[know]['readonly'] == True:
     disabled="disabled"
+    checked="checked=\"checked\" value=\"on\""
     pass
   response.write("  <td><input id=\"{}_bool\" name=\"{}_bool\" type=\"checkbox\" {} onClick=\"toggleSelect('{}')\" form=\"mainform\" {}></td>\n".format(know, know, checked, know, disabled), escape=False)
 
@@ -407,8 +408,12 @@ def displayKnow(know):
     pass
 
   response.write("  <td><select id=\"{}_diff\" name=\"{}_diff\" {} form=\"mainform\" onchange=\"changeHiddenSelect('{}_diff')\">\n".format(know, know, disabled, know), escape=False)
-  knowDiff=knows[know][1]
-  knowDiff=knowDiff if knowDiff != 0 else mania
+  if 'readonly' in desc[know] and desc[know]['readonly'] == True:
+    knowDiff=easy
+  else:
+    knowDiff=knows[know][1]
+    knowDiff=knowDiff if knowDiff != 0 else mania
+    pass
   for difficulty in [easy, medium, hard, harder, hardcore, mania]:
     selected=""
     if knowDiff == difficulty:

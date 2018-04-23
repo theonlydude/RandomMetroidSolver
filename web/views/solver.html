@@ -333,7 +333,13 @@ If Charge Beam is not picked up along the way or not accessible, enough minors t
       title: "Bosses",
       content: "Logic behind the presets : the ones where you find the boss difficult are calibrated to give 'hard' in vanilla situations, the default are calibrated to give 'medium' in vanilla situations, just above gives 'easy' in vanilla situations, and top settings basically discards the boss except for extreme situations (very low energy or firepower).<br/>This is the estimated difficulty of the fight for a 'standard' kill. There are distinct parameters for special boss kill techniques (for example grappling Draygon, see Bosses in the Techniques section below)",
       placement: "auto left"
-    }  ]});
+    },
+    {
+      element: "#X-Ray",
+      title: "Hard rooms",
+      content: "The difficulty to go through hard rooms",
+      placement: "auto left"
+    } ]});
 
   // Initialize the tour
   tour.init();
@@ -702,6 +708,32 @@ if resultText is not None:
 {{
       motherBrain = ['It can get ugly', 'Default', 'Is this really the last boss?', 'Nice cutscene bro']
       displaySelect("MotherBrain", motherBrain, settings['MotherBrain'])
+}}
+	  </td>
+	</tr>
+      </table>
+    </p>
+    <h3>Hard rooms</h3>
+    <p>
+      <table class="full">
+        <colgroup><col class="half" /><col class="half" /></colgroup>
+	<tr>
+	  <td>X-Ray:</td>
+	  <td>
+{{
+      xray = ["Default", "I don't like spikes", "Aarghh"]
+      displaySelect("X-Ray", xray, settings["X-Ray"])
+}}
+	  </td>
+          <td><button type="button" onclick="startTheTour(5)">?</button></td>
+	</tr>
+
+	<tr>
+	  <td>Gauntlet:</td>
+	  <td>
+{{
+      gauntlet = ["Default", "I don't like acid", "Aarghh"]
+      displaySelect("Gauntlet", gauntlet, settings["Gauntlet"])
 }}
 	  </td>
 	</tr>

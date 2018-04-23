@@ -432,6 +432,8 @@ class ParamsLoader(object):
             self.params['Settings']['hellRuns'] = {}
         if 'bossesDifficulty' not in self.params['Settings']:
             self.params['Settings']['bossesDifficulty'] = {}
+        if 'hardRooms' not in self.params['Settings']:
+            self.params['Settings']['hardRooms'] = {}
 
     def load(self):
         # update the parameters in the parameters classes: Conf, Knows, Settings

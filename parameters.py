@@ -86,21 +86,21 @@ class Knows:
     # used across the game
     WallJump = SMBool(True, easy, ['WallJump'])
     desc['WallJump'] = {'display': 'Wall Jump',
-                        'title': 'Kick-jump from wall : wall to wall, single wall climb, wall jump to instant morph',
+                        'title': 'Kick-jump from wall: wall to wall, single wall climb, wall jump to instant morph',
                         'href': 'https://wiki.supermetroid.run/Walljump',
                         'rooms': [],
                         'readonly' : True}
 
     ShineSpark = SMBool(True, easy, ['ShineSpark'])
     desc['ShineSpark'] = {'display': 'Shinespark',
-                          'title': 'With Speed Booster, press down to activate shinespark. Then launch it in every possible direction, from ground or mid-air.',
+                          'title': 'With Speed Booster, press down to activate Shinespark. Then launch it in every possible direction, from ground or mid-air',
                           'href': 'https://wiki.supermetroid.run/Shinespark',
                           'rooms': [],
                           'readonly' : True}
 
     MidAirMorph = SMBool(True, easy, ['MidAirMorph'])
     desc['MidAirMorph'] = {'display': 'Mid-air Morph',
-                           'title': 'Activate morph ball while jumping straight up (keep jump pressed) to reach high places in morph ball form without bomb jumping.',
+                           'title': 'Activate Morph Ball while jumping straight up (keep jump pressed) to reach high places in Morph Ball form without bomb jumping',
                            'href': None,
                            'rooms': [],
                            'readonly' : True}

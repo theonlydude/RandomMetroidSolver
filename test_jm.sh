@@ -14,6 +14,16 @@ fi
 ROM=$1
 LOOPS=$2
 
+# get git head
+TEMP_DIR=$(mktemp)
+rm -f ${TEMP_DIR}
+mkdir -p ${TEMP_DIR}
+(
+    cd ${TEMP_DIR}
+    git clone git@github.com:theonlydude/RandomMetroidSolver.git
+)
+ORIG=${TEMP_DIR}/RandomMetroidSolver/
+
 PATCHES="-c AimAnyButton.ips -c itemsounds.ips -c spinjumprestart.ips -c supermetroid_msu1.ips -c elevators_doors_speed.ips"
 PRESETS=("manu" "noob" "speedrunner")
 SUPERFUNS=("" "" "" "--superFun Movement" "--superFun Combat" "--superFun Suits" "--superFun Movement --superFun Combat")
@@ -59,18 +69,13 @@ function generate_params {
     echo "-r ${ROM} --param diff_presets/${PRESET}.json ${PATCHES} --seed ${SEED} ${PROG_SPEED} ${SUPERFUN} ${MINORS} ${MISSILES} ${SUPERS} ${POWERBOMBS} ${ENERGY} ${SPREAD} ${FULL} ${SUIT} ${SPEED} ${DIFF}"
 }
 
-if [ -z test_jm.csv ]; then
-    echo "seed;params;old/new;time;stuck;md5sum;mismatch" > test_jm.csv
-fi
-
-MISMATCH_FOUND=1
-for i in $(seq 1 ${LOOPS}); do
+function computeSeed {
     let P=$RANDOM%${#PRESETS[@]}
     PRESET=${PRESETS[$P]}
     SEED="$RANDOM"
 
     PARAMS=$(generate_params "${SEED}" "${PRESET}")
-    OUT=$(/usr/bin/time -f "\t%E real" pypy ./randomizer.py ${PARAMS} 2>&1)
+    OUT=$(/usr/bin/time -f "\t%E real" python2 ${ORIG}/randomizer.py ${PARAMS} 2>&1)
 
     echo "${OUT}" | grep -q STUCK
     if [ $? -eq 0 ]; then
@@ -84,7 +89,7 @@ for i in $(seq 1 ${LOOPS}); do
 
     echo "${SEED};${PARAMS};OLD;${TIME};${STUCK};${SUM_OLD};" | tee -a test_jm.csv
 
-    OUT=$(/usr/bin/time -f "\t%E real" python2 ./randomizer_optim.py ${PARAMS} 2>&1)
+    OUT=$(/usr/bin/time -f "\t%E real" python2 ./randomizer.py ${PARAMS} 2>&1)
 
     echo "${OUT}" | grep -q STUCK
     if [ $? -eq 0 ]; then
@@ -105,7 +110,20 @@ for i in $(seq 1 ${LOOPS}); do
     fi
 
     echo "${SEED};${PARAMS};NEW;${TIME};${STUCK};${SUM_NEW};${MIS}" | tee -a test_jm.csv
+}
 
+if [ -z test_jm.csv ]; then
+    echo "seed;params;old/new;time;stuck;md5sum;mismatch" > test_jm.csv
+fi
+
+MISMATCH_FOUND=1
+let LOOPS=${LOOPS}/4
+for i in $(seq 1 ${LOOPS}); do
+    computeSeed &
+    computeSeed &
+    computeSeed &
+    computeSeed &
+    wait
 done | tee test_jm.log
 
 if [ ${MISMATCH_FOUND} -eq 0 ]; then
@@ -113,3 +131,5 @@ if [ ${MISMATCH_FOUND} -eq 0 ]; then
 else
     echo "No mismatch found"
 fi
+
+rm -rf ${TEMP_DIR}

@@ -4,7 +4,7 @@ from functools import reduce
 
 from smbool import SMBool
 from rom import RomPatches
-from parameters import Settings, easy, medium, hard, harder, hardcore, mania
+from helpers import Helpers
 
 class SMBoolManager(object):
     @staticmethod
@@ -27,19 +27,12 @@ class SMBoolManager(object):
 
     items = ['ETank', 'Missile', 'Super', 'PowerBomb', 'Bomb', 'Charge', 'Ice', 'HiJump', 'SpeedBooster', 'Wave', 'Spazer', 'SpringBall', 'Varia', 'Plasma', 'Grapple', 'Morph', 'Reserve', 'Gravity', 'XRayScope', 'SpaceJump', 'ScrewAttack']
     countItems = ['ETank', 'Reserve', 'Missile', 'Super', 'PowerBomb']
-    methodList = ['_heatProof', '_canFly', '_canUseBombs', '_canOpenRedDoors',
-                  '_canOpenYellowDoors', '_canUsePowerBombs',
-                  '_canDestroyBombWalls', '_canPassBombPassages',
-                  '_canAccessRedBrinstar', '_canAccessKraid', '_canAccessWs', '_canAccessHeatedNorfair',
-                  '_canAccessCrocomire', '_enoughStuffCroc', '_canDefeatCrocomire',
-                  '_canAccessLowerNorfair', '_canPassWorstRoom', '_canAccessOuterMaridia',
-                  '_canDoSuitlessMaridia', '_canPassMtEverest',
-                  '_enoughStuffBotwoon', '_canDefeatBotwoon']
 
     def __init__(self, cache):
+        self.helpers = Helpers(self)
         self.curSMBool = SMBool(False)
         self.useCache = cache
-        self.createCacheFunctions()
+        self.createCacheAndFacadeFunctions()
         self.createKnowsFunctions()
         self.resetItems()
 
@@ -95,31 +88,31 @@ class SMBoolManager(object):
         # reset: set last item added to None, recompute current
         if action == 'reset':
             self.lastItemAdded = None
-            for fun in self.methodList:
+            for fun in self.helpers.methodList:
                 self.resetSMBool()
-                getattr(self, fun)()
+                getattr(self.helpers, fun)()
                 setattr(self, fun+'SMBool', self.getSMBoolCopy())
 
         # add: copy current in bak, set lastItemAdded, recompute current
         elif action == 'add':
             self.lastItemAdded = item
-            for fun in self.methodList:
+            for fun in self.helpers.methodList:
                 setattr(self, fun+'SMBoolbak', getattr(self, fun+'SMBool'))
                 self.resetSMBool()
-                getattr(self, fun)()
+                getattr(self.helpers, fun)()
                 setattr(self, fun+'SMBool', self.getSMBoolCopy())
 
         # remove: if item removed is last added, copy bak in current, set lastItemAdded to None
         elif action == 'remove':
             if self.lastItemAdded == item:
                 self.lastItemAdded = None
-                for fun in self.methodList:
+                for fun in self.helpers.methodList:
                     setattr(self, fun+'SMBool', getattr(self, fun+'SMBoolbak'))
             else:
                 self.lastItemAdded = None
-                for fun in self.methodList:
+                for fun in self.helpers.methodList:
                     self.resetSMBool()
-                    getattr(self, fun)()
+                    getattr(self.helpers, fun)()
                     setattr(self, fun+'SMBool', self.getSMBoolCopy())
 
     def addItem(self, item):
@@ -144,14 +137,13 @@ class SMBoolManager(object):
         if self.useCache == True:
             self.updateCache('remove', item)
 
-    def createCacheFunctions(self):
-        if self.useCache == True:
-            for fun in self.methodList:
-                setattr(self, fun[1:], lambda fun=fun: self.getCacheSMBool(fun+'SMBool'))
-        else:
-            # if no cache, just use _xxx functions as xxx
-            for fun in self.methodList:
-                setattr(self, fun[1:], getattr(self, fun))
+    def createCacheAndFacadeFunctions(self):
+        for fun in dir(self.helpers):
+            if fun != 'smbm' and fun[0:2] != '__':
+                if fun in self.helpers.methodList and self.useCache == True:
+                    setattr(self, fun, lambda fun=fun: self.getCacheSMBool(fun+'SMBool'))
+                else:
+                    setattr(self, fun, getattr(self.helpers, fun))
 
     def getCacheSMBool(self, fun):
         smb = getattr(self, fun)
@@ -168,616 +160,10 @@ class SMBoolManager(object):
                                                                                  (Knows.__dict__[knows].bool,
                                                                                   Knows.__dict__[knows].difficulty)))
 
-    # all the functions from helpers (those starting with an _ are cached)
-    def haveItemCount(self, item, count):
-        # return bool
-        return self.itemCount(item) >= count
-
     def itemCount(self, item):
         # return integer
         return getattr(self, item+'Count')
 
-    def energyReserveCount(self):
-        # return integer
-        return self.itemCount('ETank') + self.itemCount('Reserve')
-
-    def energyReserveCountOkHellRun(self, hellRunName):
-        difficulties = Settings.hellRuns[hellRunName]
-
-        if difficulties is None or len(difficulties) == 0:
-            return SMBool(False)
-
-        # get a list: [(2, difficulty=hard), (4, difficulty=medium), (6, difficulty=easy)]
-        def f(difficulty):
-            return self.energyReserveCountOk(difficulty[0], difficulty=difficulty[1])
-        result = reduce(lambda result, difficulty: self.wor(result, f(difficulty)),
-                        difficulties[1:], f(difficulties[0]))
-
-        if self.getBool(result) == True:
-            result = self.internal2SMBool(result)
-            result.knows = [hellRunName+'HellRun']
-        return result
-
-    def _heatProof(self):
-        return self.wor(self.haveItem('Varia'),
-                        self.wand(self.wnot(RomPatches.has(RomPatches.NoGravityEnvProtection)),
-                                  self.haveItem('Gravity')))
-
-    def canHellRun(self, hellRun):
-        isHeatProof = self.heatProof()
-        if self.getBool(isHeatProof) == True:
-            isHeatProof = self.internal2SMBool(isHeatProof)
-            isHeatProof.difficulty = easy
-            return isHeatProof
-        elif self.energyReserveCount() >= 2:
-            return self.energyReserveCountOkHellRun(hellRun)
-        else:
-            return SMBool(False)
-
-    def _canFly(self):
-        if self.getBool(self.haveItem('SpaceJump')) == True:
-            return self.setSMBool(True, easy, ['SpaceJump'])
-        elif self.getBool(self.wand(self.haveItem('Morph'),
-                                    self.haveItem('Bomb'),
-                                    self.knowsInfiniteBombJump())) == True:
-            return self.knowsInfiniteBombJump()
-        else:
-            return SMBool(False)
-
-    def canFlyDiagonally(self):
-        if self.getBool(self.haveItem('SpaceJump')) == True:
-            return self.setSMBool(True, easy, ['SpaceJump'])
-        elif self.getBool(self.wand(self.haveItem('Morph'),
-                                    self.haveItem('Bomb'),
-                                    self.knowsDiagonalBombJump())) == True:
-            return self.knowsDiagonalBombJump()
-        else:
-            return self.setSMBool(False)
-
-    def _canUseBombs(self):
-        return self.wand(self.haveItem('Morph'), self.haveItem('Bomb'))
-
-    def _canOpenRedDoors(self):
-        return self.wor(self.haveItem('Missile'), self.haveItem('Super'))
-
-    def canOpenGreenDoors(self):
-        return self.haveItem('Super')
-
-    def _canOpenYellowDoors(self):
-        return self.wand(self.haveItem('Morph'), self.haveItem('PowerBomb'))
-
-    def _canUsePowerBombs(self):
-        return self.canOpenYellowDoors()
-
-    def _canDestroyBombWalls(self):
-        return self.wor(self.wand(self.haveItem('Morph'),
-                                  self.wor(self.haveItem('Bomb'),
-                                           self.haveItem('PowerBomb'))),
-                        self.haveItem('ScrewAttack'))
-
-    def canEnterAndLeaveGauntlet(self):
-        # EXPLAINED: to access Gauntlet Entrance from Landing site we can either:
-        #             -fly to it (infinite bomb jumps or space jump)
-        #             -shinespark to it
-        #             -wall jump with high jump boots
-        #             -wall jump without high jump boots
-        #            then inside it to break the bomb wals:
-        #             -use screw attack (easy way)
-        #             -use power bombs
-        #             -use bombs
-        #             -perform a simple short charge on the way in
-        #              and use power bombs on the way out
-        return self.wand(self.wor(self.canFly(),
-                                  self.haveItem('SpeedBooster'),
-                                  self.wand(self.knowsHiJumpGauntletAccess(),
-                                            self.haveItem('HiJump')),
-                                  self.knowsHiJumpLessGauntletAccess()),
-                         self.wor(self.haveItem('ScrewAttack'),
-                                  self.wand(self.knowsGauntletWithPowerBombs(),
-                                            self.canUsePowerBombs(),
-                                            self.itemCountOk('PowerBomb', 2)),
-                                  self.wand(self.knowsGauntletWithBombs(), self.canUseBombs()),
-                                  self.wand(self.haveItem('SpeedBooster'),
-                                            self.canUsePowerBombs(),
-                                            self.energyReserveCountOk(2),
-                                            self.knowsGauntletWithPowerBombs())))
-
-    def _canPassBombPassages(self):
-        return self.wor(self.canUseBombs(),
-                        self.canUsePowerBombs())
-
-    def _canAccessRedBrinstar(self):
-        # EXPLAINED: we can go from Landing Site to Red Tower using two different paths:
-        #             -break the bomb wall at left of Parlor and Alcatraz,
-        #              open red door at Green Brinstar Main Shaft,
-        #              morph at the lower part of Big Pink then use a super on the green door
-        #             -open green door at the right of Landing Site, then open the yellow
-        #              door at Crateria Keyhunter room
-        return self.wand(self.haveItem('Super'),
-                         self.wor(self.wand(self.wor(self.canDestroyBombWalls(),
-                                                     self.wand(self.haveItem('SpeedBooster'), self.knowsSimpleShortCharge())),
-                                            self.haveItem('Morph')),
-                                  self.canUsePowerBombs()))
-
-    def _canAccessKraid(self):
-        # EXPLAINED: from Red Tower we have to go to Warehouse Entrance, and there we have to
-        #            access the upper right platform with either:
-        #             -hijump boots (easy regular way)
-        #             -fly (space jump or infinite bomb jump)
-        #             -know how to wall jump on the platform without the hijump boots
-        #            then we have to break a bomb block at Warehouse Zeela room
-        return self.wand(self.canAccessRedBrinstar(),
-                         self.wor(self.haveItem('HiJump'),
-                                  self.canFly(),
-                                  self.knowsEarlyKraid()),
-                         self.canPassBombPassages())
-
-    def _canAccessWs(self):
-        # EXPLAINED: from Landing Site we open the green door on the right, then in Crateria
-        #            Keyhunter room we open the yellow door on the right to the Moat.
-        #            In the Moat we can either:
-        #             -use grapple or space jump (easy way)
-        #             -do a continuous wall jump (https://www.youtube.com/watch?v=4HVhTwwax6g)
-        #             -do a diagonal bomb jump from the middle platform (https://www.youtube.com/watch?v=5NRqQ7RbK3A&t=10m58s)
-        #             -do a short charge from the Keyhunter room (https://www.youtube.com/watch?v=kFAYji2gFok)
-        #             -do a gravity jump from below the right platform
-        #             -do a mock ball and a bounce ball (https://www.youtube.com/watch?v=WYxtRF--834)
-        return self.wand(self.haveItem('Super'),
-                         self.canUsePowerBombs(),
-                         self.wor(self.wor(self.haveItem('Grapple'),
-                                           self.haveItem('SpaceJump'),
-                                           self.knowsContinuousWallJump()),
-                                  self.wor(self.wand(self.knowsDiagonalBombJump(),
-                                                     self.canUseBombs()),
-                                           self.wand(self.knowsSimpleShortCharge(),
-                                                     self.haveItem('SpeedBooster')),
-                                           self.haveItem('Gravity'),
-                                           self.wand(self.knowsMockballWs(),
-                                                     self.haveItem('Morph'),
-                                                     self.haveItem('SpringBall')))))
-
-    def _canAccessHeatedNorfair(self):
-        # EXPLAINED: from Red Tower, to go to Bubble Mountain we have to pass through
-        #            heated rooms, which requires a hell run if we don't have gravity.
-        #            this test is then used to access Speed, Norfair Reserve Tank, Wave and Crocomire
-        #            as they are all hellruns from Bubble Mountain.
-        return self.wand(self.canAccessRedBrinstar(),
-                         self.wor(self.haveItem('SpeedBooster'), # frog speedway
-                                  # go through cathedral
-                                  RomPatches.has(RomPatches.CathedralEntranceWallJump),
-                                  self.haveItem('HiJump'),
-                                  self.canFly()),
-                         self.canHellRun('MainUpperNorfair'))
-
-    def canAccessNorfairReserve(self):
-        return self.wand(self.canAccessHeatedNorfair(),
-                         self.wor(self.wor(self.canFly(),
-                                           self.haveItem('Grapple'),
-                                           self.wand(self.haveItem('HiJump'),
-                                                     self.knowsGetAroundWallJump())),
-                                  self.wor(self.haveItem('Ice'),
-                                           self.wand(self.haveItem('SpringBall'),
-                                                     self.knowsSpringBallJumpFromWall()))))
-
-    def _canAccessCrocomire(self):
-        # EXPLAINED: two options there, either:
-        #             -from Bubble Mountain, hellrun to Crocomire's room. at Upper Norfair
-        #              Farming room there's a blue gate which requires a gate glitch if no wave
-        #             -the regular way, from Red Tower, power bomb in Ice Beam Gate room,
-        #              then speed booster in Crocomire Speedway (easy hell run if no varia
-        #              as we only have to go in straight line, so two ETanks are required)
-        return self.wor(self.wand(self.canAccessHeatedNorfair(),
-                                  self.wor(self.knowsGreenGateGlitch(), self.haveItem('Wave'))),
-                        self.wand(self.canAccessRedBrinstar(),
-                                  self.canUsePowerBombs(),
-                                  self.haveItem('SpeedBooster'),
-                                  self.energyReserveCountOk(2)))
-
-    def _canDefeatCrocomire(self):
-        return self.wand(self.canAccessCrocomire(),
-                         self.enoughStuffCroc())
-
-    def _canAccessLowerNorfair(self):
-        # EXPLAINED: the randomizer never requires to pass it without the Varia suit.
-        #            from Red Tower in Brinstar to access Lava Dive room we open the yellow door
-        #            in Kronic Boost room with a power bomb then pass the Lava Dive room.
-        #            To pass Lava Dive room, either:
-        #             -have gravity suit and space jump (easy way)
-        #             -have gravity and perform a gravity jump
-        #             -have hijump boots and knows the Lava Dive wall jumps, the wall jumps are
-        #              a little easier with Ice and Plasma as we can freeze the Funes, we need
-        #              at least three ETanks to do it without gravity
-        nTanks4Dive = 3
-        if self.getBool(self.heatProof()) == False:
-            nTanks4Dive = 8
-        return self.wand(self.canHellRun('LowerNorfair'),
-                         self.canAccessRedBrinstar(),
-                         self.canUsePowerBombs(),
-                         self.wor(self.wand(self.haveItem('Gravity'), self.haveItem('SpaceJump')),
-                                  self.wand(self.knowsGravityJump(), self.haveItem('Gravity')),
-                                  self.wand(self.wor(self.wand(self.knowsLavaDive(),
-                                                               self.haveItem('HiJump')),
-                                                     self.knowsLavaDiveNoHiJump()),
-                                            self.energyReserveCountOk(nTanks4Dive))))
-
-    def _canPassWorstRoom(self):
-        # https://www.youtube.com/watch?v=gfmEDDmSvn4
-        return self.wand(self.canAccessLowerNorfair(),
-                         self.wor(self.canFly(),
-                                  self.wand(self.knowsWorstRoomIceCharge(),
-                                            self.haveItem('Ice'),
-                                            self.haveItem('Charge')),
-                                  self.wand(self.knowsGetAroundWallJump(),
-                                            self.haveItem('HiJump')),
-                                  self.wand(self.knowsSpringBallJumpFromWall(),
-                                            self.haveItem('SpringBall'))))
-
-    def _canPassMtEverest(self):
-        return self.wand(self.canAccessOuterMaridia(),
-                         self.wor(self.wand(self.haveItem('Gravity'),
-                                            self.wor(self.wor(self.haveItem('Grapple'),
-                                                              self.haveItem('SpeedBooster')),
-                                                     self.wor(self.canFly(),
-                                                              self.knowsGravityJump(),
-                                                              self.wand(self.haveItem('Ice'),
-                                                                        self.knowsTediousMountEverest())))),
-                                  self.canDoSuitlessMaridia()))
-
-    def _canAccessOuterMaridia(self):
-        # EXPLAINED: access Red Tower in red brinstar,
-        #            power bomb to destroy the tunnel at Glass Tunnel,
-        #            then to climb up Main Street, either:
-        #             -have gravity (easy regular way)
-        #             -freeze the enemies to jump on them, but without a strong gun in the upper left
-        #              when the Sciser comes down you don't have enough time to hit it several times
-        #              to freeze it, as such you have to either:
-        #               -use the first Sciser from the ground and wait for it to come all the way up
-        #               -do a double jump with spring ball
-        return self.wand(self.canAccessRedBrinstar(),
-                         self.canUsePowerBombs(),
-                         self.wor(self.haveItem('Gravity'),
-                                  self.wor(self.wand(self.haveItem('HiJump'),
-                                                     self.haveItem('Ice'),
-                                                     self.wor(self.knowsSuitlessOuterMaridiaNoGuns(),
-                                                              self.wand(self.knowsSuitlessOuterMaridia(),
-                                                                        self.haveItem('SpringBall'),
-                                                                        self.knowsSpringBallJump()))),
-                                           self.wand(self.knowsSuitlessOuterMaridia(),
-                                                     self.haveItem('HiJump'),
-                                                     self.haveItem('Ice'),
-                                                     self.wor(self.haveItem('Wave'),
-                                                              self.haveItem('Spazer'),
-                                                              self.haveItem('Plasma'))))))
-
-    def canAccessInnerMaridia(self):
-        # EXPLAINED: this is the easy regular way:
-        #            access Red Tower in red brinstar,
-        #            power bomb to destroy the tunnel at Glass Tunnel,
-        #            gravity suit to move freely under water,
-        #            at Mt Everest, no need for grapple to access upper right door:
-        #            https://www.youtube.com/watch?v=2GPx-6ARSIw&t=2m28s
-        return self.wand(self.canAccessRedBrinstar(),
-                         self.canUsePowerBombs(),
-                         self.haveItem('Gravity'))
-
-    def _canDoSuitlessMaridia(self):
-        # EXPLAINED: this is the harder way if no gravity,
-        #            reach the Mt Everest then use the grapple to access the upper right door.
-        #            it can also be done without gravity nor grapple but the randomizer will never
-        #            require it (https://www.youtube.com/watch?v=lsbnUKcblPk).
-        return self.wand(self.canAccessOuterMaridia(),
-                         self.wor(self.haveItem('Grapple'),
-                                  self.knowsTediousMountEverest()))
-
-    def _canDefeatBotwoon(self):
-        # EXPLAINED: access Aqueduct, either with or without gravity suit,
-        #            then in Botwoon Hallway, either:
-        #             -use regular speedbooster (with gravity)
-        #             -do a mochtroidclip (https://www.youtube.com/watch?v=1z_TQu1Jf1I&t=20m28s)
-        return self.wand(self.enoughStuffBotwoon(),
-                         self.canPassMtEverest(),
-                         self.wor(self.wand(self.haveItem('SpeedBooster'),
-                                            self.haveItem('Gravity')),
-                                  self.wand(self.knowsMochtroidClip(),
-                                            self.haveItem('Ice'))))
-
-    def canCrystalFlash(self):
-        return self.wand(self.canUsePowerBombs(),
-                         self.itemCountOk('Missile', 2),
-                         self.itemCountOk('Super', 2),
-                         self.itemCountOk('PowerBomb', 3))
-
-    def canDefeatDraygon(self):
-        return self.canDefeatBotwoon()
-
-    def getBeamDamage(self):
-        standardDamage = 20
-
-        if self.getBool(self.wand(self.haveItem('Ice'),
-                                  self.haveItem('Wave'),
-                                  self.haveItem('Plasma'))) == True:
-            standardDamage = 300
-        elif self.getBool(self.wand(self.haveItem('Wave'),
-                                    self.haveItem('Plasma'))) == True:
-            standardDamage = 250
-        elif self.getBool(self.wand(self.haveItem('Ice'),
-                                    self.haveItem('Plasma'))) == True:
-            standardDamage = 200
-        elif self.getBool(self.haveItem('Plasma')) == True:
-            standardDamage = 150
-        elif self.getBool(self.wand(self.haveItem('Ice'),
-                                    self.haveItem('Wave'),
-                                    self.haveItem('Spazer'))) == True:
-            standardDamage = 100
-        elif self.getBool(self.wand(self.haveItem('Wave'),
-                                    self.haveItem('Spazer'))) == True:
-            standardDamage = 70
-        elif self.getBool(self.wand(self.haveItem('Ice'),
-                                    self.haveItem('Spazer'))) == True:
-            standardDamage = 60
-        elif self.getBool(self.wand(self.haveItem('Ice'),
-                                    self.haveItem('Wave'))) == True:
-            standardDamage = 60
-        elif self.getBool(self.haveItem('Wave')) == True:
-            standardDamage = 50
-        elif self.getBool(self.haveItem('Spazer')) == True:
-            standardDamage = 40
-        elif self.getBool(self.haveItem('Ice')) == True:
-            standardDamage = 30
-
-        return standardDamage
-
-    # returns a tuple with :
-    #
-    # - a floating point number : 0 if boss is unbeatable with
-    # current equipment, and an ammo "margin" (ex : 1.5 means we have 50%
-    # more firepower than absolutely necessary). Useful to compute boss
-    # difficulty when not having charge. If player has charge, the actual
-    # value is not useful, and is guaranteed to be > 2.
-    #
-    # - estimation of the fight duration in seconds (well not really, it
-    # is if you fire and land shots perfectly and constantly), giving info
-    # to compute boss fight difficulty
-    def canInflictEnoughDamages(self, bossEnergy, doubleSuper=False, charge=True, power=False, givesDrops=True):
-        # TODO: handle special beam attacks ? (http://deanyd.net/sm/index.php?title=Charge_Beam_Combos)
-
-        # http://deanyd.net/sm/index.php?title=Damage
-        standardDamage = 0
-        if self.getBool(self.haveItem('Charge')) == True and charge == True:
-            standardDamage = self.getBeamDamage()
-        # charge triples the damage
-        chargeDamage = standardDamage * 3.0
-
-        # missile 100 damages, super missile 300 damages, PBs 200 dmg, 5 in each extension
-        missilesAmount = self.itemCount('Missile') * 5
-        missilesDamage = missilesAmount * 100
-        supersAmount = self.itemCount('Super') * 5
-        oneSuper = 300.0
-        if doubleSuper == True:
-            oneSuper *= 2
-        supersDamage = supersAmount * oneSuper
-        powerDamage = 0
-        powerAmount = 0
-        if power == True and self.getBool(self.haveItem('PowerBomb')) == True:
-            powerAmount = self.itemCount('PowerBomb') * 5
-            powerDamage = powerAmount * 200
-
-        canBeatBoss = chargeDamage > 0 or givesDrops or (missilesDamage + supersDamage + powerDamage) >= bossEnergy
-        if not canBeatBoss:
-            return (0, 0)
-
-        ammoMargin = (missilesDamage + supersDamage + powerDamage) / bossEnergy
-        if chargeDamage > 0:
-            ammoMargin += 2
-
-        missilesDPS = Settings.algoSettings['missilesPerSecond'] * 100.0
-        supersDPS = Settings.algoSettings['supersPerSecond'] * 300.0
-        if doubleSuper == True:
-            supersDPS *= 2
-        if powerDamage > 0:
-            powerDPS = Settings.algoSettings['powerBombsPerSecond'] * 200.0
-        else:
-            powerDPS = 0.0
-        chargeDPS = chargeDamage * Settings.algoSettings['chargedShotsPerSecond']
-        # print("chargeDPS=" + str(chargeDPS))
-        dpsDict = {
-            missilesDPS: (missilesAmount, 100.0),
-            supersDPS: (supersAmount, oneSuper),
-            powerDPS: (powerAmount, 200.0),
-            # no boss will take more 10000 charged shots
-            chargeDPS: (10000, chargeDamage)
-        }
-        secs = 0
-        for dps in sorted(dpsDict, reverse=True):
-            amount = dpsDict[dps][0]
-            one = dpsDict[dps][1]
-            if dps == 0 or one == 0 or amount == 0:
-                continue
-            fire = min(bossEnergy / one, amount)
-            secs += fire * (one / dps)
-            bossEnergy -= fire * one
-            if bossEnergy <= 0:
-                break
-        if bossEnergy > 0:
-            # print ('!! drops !! ')
-            secs += bossEnergy * Settings.algoSettings['missileDropsPerMinute'] * 100 / 60
-            # print('ammoMargin = ' + str(ammoMargin) + ', secs = ' + str(secs))
-
-        return (ammoMargin, secs)
-
-    def computeBossDifficulty(self, ammoMargin, secs, diffTbl):
-        # actual fight duration :
-        rate = None
-        if 'Rate' in diffTbl:
-            rate = float(diffTbl['Rate'])
-        if rate is None:
-            duration = 120.0
-        else:
-            duration = secs / rate
-        # print('rate=' + str(rate) + ', duration=' + str(duration))
-        suitsCoeff = 0.5
-        if self.getBool(self.haveItem('Gravity')) == True:
-            suitsCoeff = 2
-        elif self.getBool(self.haveItem('Varia')) == True:
-            suitsCoeff = 1
-        energy = suitsCoeff * (1 + self.energyReserveCount())
-        energyDict = None
-        if 'Energy' in diffTbl:
-            energyDict = diffTbl['Energy']
-        difficulty = medium
-        # get difficulty by energy
-        if energyDict:
-            energyDict = {float(k):float(v) for k,v in energyDict.items()}
-            keyz = sorted(energyDict.keys())
-            if len(keyz) > 0:
-                current = keyz[0]
-                sup = None
-                difficulty = energyDict[current]
-                for k in keyz:
-                    if k > energy:
-                        sup=k
-                        break
-                    current = k
-                    difficulty = energyDict[k]
-                # interpolate if we can
-                if energy > current and sup is not None:
-                    difficulty += (energyDict[sup] - difficulty)/(sup - current) * (energy - current)
-    #    print("energy=" + str(energy) + ", base diff=" + str(difficulty))
-        # adjust by fight duration
-        difficulty *= (duration / 120)
-        # and by ammo margin
-        # only augment difficulty in case of no charge, don't lower it.
-        # if we have charge, ammoMargin will have a huge value (see canInflictEnoughDamages),
-        # so this does not apply
-        diffAdjust = (1 - (ammoMargin - Settings.algoSettings['ammoMarginIfNoCharge']))
-        if diffAdjust > 1:
-            difficulty *= diffAdjust
-
-        return difficulty
-
-    def _enoughStuffCroc(self):
-        # say croc has ~5000 energy, and ignore its useless drops
-        (ammoMargin, secs) = self.canInflictEnoughDamages(5000, givesDrops=False)
-        if ammoMargin == 0:
-            return SMBool(False)
-        self.curSMBool.difficulty = easy
-        self.curSMBool.bool = True
-        return self.getSMBoolCopy()
-
-    def _enoughStuffBotwoon(self):
-        # say botwoon has 5000 energy : it is actually 3000 but account for missed shots
-        (ammoMargin, secs) = self.canInflictEnoughDamages(5000, givesDrops=False)
-        if ammoMargin == 0:
-            return SMBool(False)
-        self.curSMBool.difficulty = easy
-        self.curSMBool.bool = True
-        return self.getSMBoolCopy()
-
-    def enoughStuffsRidley(self):
-        (ammoMargin, secs) = self.canInflictEnoughDamages(18000, doubleSuper=True, givesDrops=False)
-        if ammoMargin == 0:
-            return SMBool(False)
-
-        # print('RIDLEY', ammoMargin, secs)
-        self.curSMBool.difficulty = self.computeBossDifficulty(ammoMargin, secs,
-                                                               Settings.bossesDifficulty['Ridley'])
-        self.curSMBool.bool = True
-        return self.getSMBoolCopy()
-
-    def enoughStuffsKraid(self):
-        (ammoMargin, secs) = self.canInflictEnoughDamages(1000)
-        if ammoMargin == 0:
-            return SMBool(False)
-        #print('KRAID True ', ammoMargin, secs)
-        self.curSMBool.difficulty = self.computeBossDifficulty(ammoMargin, secs,
-                                                               Settings.bossesDifficulty['Kraid'])
-        self.curSMBool.bool = True
-        return self.getSMBoolCopy()
-
-    def enoughStuffsDraygon(self):
-        (ammoMargin, secs) = self.canInflictEnoughDamages(6000)
-        # print('DRAY', ammoMargin, secs)
-        if ammoMargin > 0:
-            fight = SMBool(True, self.computeBossDifficulty(ammoMargin, secs,
-                                                            Settings.bossesDifficulty['Draygon']))
-            if self.getBool(self.haveItem('Gravity')) == False:
-                fight.difficulty *= Settings.algoSettings['draygonNoGravityMalus']
-        else:
-            fight = SMBool(False)
-        return self.wor(fight,
-                        self.wand(self.knowsDraygonGrappleKill(),
-                                  self.haveItem('Grapple')),
-                        self.wand(self.knowsMicrowaveDraygon(),
-                                  self.haveItem('Plasma'),
-                                  self.haveItem('Charge'),
-                                  self.haveItem('XRayScope')),
-                        self.wand(self.haveItem('Gravity'),
-                                  self.knowsShortCharge(),
-                                  self.haveItem('SpeedBooster')))
-
-    def enoughStuffsPhantoon(self):
-        (ammoMargin, secs) = self.canInflictEnoughDamages(2500, doubleSuper=True)
-        if ammoMargin == 0:
-            return SMBool(False)
-        # print('PHANTOON', ammoMargin, secs)
-        difficulty = self.computeBossDifficulty(ammoMargin, secs,
-                                                Settings.bossesDifficulty['Phantoon'])
-        hasCharge = self.getBool(self.haveItem('Charge'))
-        if hasCharge or self.getBool(self.haveItem('ScrewAttack')) == True:
-            difficulty /= Settings.algoSettings['phantoonFlamesAvoidBonus']
-        elif not hasCharge and self.itemCount('Missile') <= 2: # few missiles is harder
-            difficulty *= Settings.algoSettings['phantoonLowMissileMalus']
-        fight = SMBool(True, difficulty)
-
-        return self.wor(fight,
-                        self.wand(self.knowsMicrowavePhantoon(),
-                                  self.haveItem('Plasma'),
-                                  self.haveItem('Charge'),
-                                  self.haveItem('XRayScope')))
-
-    def enoughStuffsMotherbrain(self):
-        #print('MB')
-        # MB1 can't be hit by charge beam
-        (ammoMargin, secs) = self.canInflictEnoughDamages(3000, charge=False, givesDrops=False)
-        if ammoMargin == 0:
-            return SMBool(False)
-
-        # we actually don't give a shit about MB1 difficulty,
-        # since we embark its health in the following calc
-        (ammoMargin, secs) = self.canInflictEnoughDamages(18000 + 3000, givesDrops=False)
-        if ammoMargin == 0:
-            return SMBool(False)
-
-        # print('MB2', ammoMargin, secs)
-        nTanks = self.ETankCount
-        if self.getBool(self.haveItem('Varia')) == False:
-            # "remove" 3 etanks (accounting for rainbow beam damage without varia)
-            if nTanks < 6:
-                return SMBool(False, 0)
-            self.ETankCount -= 3
-        elif nTanks < 3:
-            return SMBool(False, 0)
-
-        diff = self.computeBossDifficulty(ammoMargin, secs, Settings.bossesDifficulty['MotherBrain'])
-        self.ETankCount = nTanks
-        return SMBool(True, diff)
-
-    def canPassMetroids(self):
-        return self.wand(self.canOpenRedDoors(),
-                         self.wor(self.haveItem('Ice'),
-                                  # to avoid leaving tourian to refill power bombs
-                                  self.itemCountOk('PowerBomb', 3)))
-
-    def canPassZebetites(self):
-        # account for one zebetite, refill may be necessary
-        return self.wor(self.wand(self.haveItem('Ice'), self.knowsIceZebSkip()),
-                        self.wand(self.haveItem('SpeedBooster'), self.knowsSpeedZebSkip()),
-                        SMBool(self.canInflictEnoughDamages(1100, charge=False, givesDrops=False)[0] >= 1, 0))
-
-    def enoughStuffTourian(self):
-        return self.wand(self.canPassMetroids(),
-                         self.canPassZebetites(),
-                         self.enoughStuffsMotherbrain())
 
 class SMBMBool(SMBoolManager):
     # only care about the bool, internaly: bool

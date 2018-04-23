@@ -633,13 +633,24 @@ class Randomizer(object):
         
     def checkLocPool(self):
         progItems = [item for item in self.itemPool if self.isProgItem(item)]
-        if len(progItems) == 0:
+        if len(progItems) == 0 or self.locLimit <= 0:
             return True
         isMinorProg = any(item['Class'] == 'Minor' for item in progItems)
         isMajorProg = any(item['Class'] == 'Major' for item in progItems)
+        accessibleLocations = []
+        for loc in self.unusedLocations:
+            majAvail = self.restrictions['MajorMinor'] == False or loc['Class'] == 'Major'
+            minAvail = self.restrictions['MajorMinor'] == False or loc['Class'] == 'Minor'
+            if ((isMajorProg and majAvail) or (isMinorProg and minAvail)) \
+               and self.locAvailable(loc) and self.locPostAvailable(loc, None):
+                accessibleLocations.append(loc)
+        if len(accessibleLocations) <= self.locLimit:
+            sys.stdout.write('|')
+            sys.stdout.flush()
+            return False
         # check that there is room left in all main areas
         room = {'Brinstar' : 0, 'Norfair' : 0, 'WreckedShip' : 0, 'LowerNorfair' : 0, 'Maridia' : 0 }
-        for loc in self.unusedLocations: # TODO should be accessible locations
+        for loc in self.unusedLocations:
             majAvail = self.restrictions['MajorMinor'] == False or loc['Class'] == 'Major'
             minAvail = self.restrictions['MajorMinor'] == False or loc['Class'] == 'Minor'
             if loc['Area'] in room and ((isMajorProg and majAvail) or (isMinorProg and minAvail)):
@@ -700,7 +711,7 @@ class Randomizer(object):
             else:
                 nItems += 1
                 self.getItem(itemLocation, itemLocations)
-                pool = self.removeItem(itemLocation['Item']['Type'], pool)
+                pool = [item for item in self.itemPool if not self.isProgItem(item)]
             locPoolOk = self.checkLocPool()
         isStuck = not poolWasEmpty and itemLocation is None
         return isStuck
@@ -726,10 +737,10 @@ class Randomizer(object):
             if nLocsIn > 0 or nCancel > 0:
                 curLocs = self.currentLocations()
                 itemLocation = self.generateItem(curLocs, self.itemPool)
-        else:
+        isStuck = itemLocation is None
+        if not isStuck:
             sys.stdout.write('-')
             sys.stdout.flush()
-        isStuck = itemLocation is None
         nFreed = 0
         if isStuck == False:
             if nCancel > 0:

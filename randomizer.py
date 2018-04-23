@@ -108,7 +108,6 @@ if __name__ == "__main__":
 
     # parse args
     args = parser.parse_args()
-    Knows.renameKnows()
     # if diff preset given, load it
     if args.paramsFileName is not None:
         ParamsLoader.factory(args.paramsFileName[0]).load()

@@ -70,6 +70,11 @@ class Conf:
 def isKnows(knows):
     return knows[0:len('__')] != '__' and knows[0] == knows[0].upper()
 
+def staticConstructor(Class):
+    Class.renameKnows(Class)
+    return Class
+
+@staticConstructor
 class Knows:
     # the different technics to know (cf. http://deanyd.net/sm/index.php?title=Item_Randomizer)
     # and the personnal perceived difficulty.
@@ -443,11 +448,11 @@ class Knows:
     }
 
     @staticmethod
-    def renameKnows():
+    def renameKnows(Class):
         # handle renamed knows
-        for old,new in Knows.newNames.iteritems():
-            if not hasattr(Knows, new):
-                setattr(Knows, new, getattr(Knows, old))
+        for old,new in Class.newNames.iteritems():
+            if not hasattr(Class, new):
+                setattr(Class, new, getattr(Class, old))
 
 
 def isSettings(settings):

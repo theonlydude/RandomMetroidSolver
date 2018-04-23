@@ -36,16 +36,16 @@ class Helpers(object):
                         difficulties[1:], f(difficulties[0]))
         return result
 
-    def energyReserveCountOkHellRun(self, hellRunName):
+    def energyReserveCountOkHellRun(self, hellRunName, mult=1.0):
         difficulties = Settings.hellRuns[hellRunName]
-        result = self.energyReserveCountOkDiff(difficulties)
+        result = self.energyReserveCountOkDiff(difficulties, mult)
 
         if self.smbm.getBool(result) == True:
             result = self.smbm.internal2SMBool(result)
             result.knows = [hellRunName+'HellRun']
         return result
 
-    def energyReserveCountOkHardRoom(self, roomName):
+    def energyReserveCountOkHardRoom(self, roomName, mult=1.0):
         difficulties = Settings.hardRooms[roomName]
         mult = 1.0
         if self.heatProof(): # env dmg reduction
@@ -62,14 +62,14 @@ class Helpers(object):
                              self.smbm.wand(self.smbm.wnot(RomPatches.has(RomPatches.NoGravityEnvProtection)),
                                             self.smbm.haveItem('Gravity')))
 
-    def canHellRun(self, hellRun):
+    def canHellRun(self, hellRun, mult=1.0):
         isHeatProof = self.smbm.heatProof()
         if self.smbm.getBool(isHeatProof) == True:
             isHeatProof = self.smbm.internal2SMBool(isHeatProof)
             isHeatProof.difficulty = easy
             return isHeatProof
         elif self.energyReserveCount() >= 2:
-            return self.energyReserveCountOkHellRun(hellRun)
+            return self.energyReserveCountOkHellRun(hellRun, mult)
         else:
             return SMBool(False)
 
@@ -132,11 +132,12 @@ class Helpers(object):
                                                            self.smbm.haveItem('HiJump')),
                                             self.smbm.knowsHiJumpLessGauntletAccess()),
                               self.smbm.wor(self.smbm.haveItem('ScrewAttack'),
-                                            self.smbm.wand(self.energyReserveCountOkHardRoom('Gauntlet'),
-                                                           self.smbm.wor(self.smbm.wand(self.smbm.canUsePowerBombs(),
+                                            self.smbm.wor(self.smbm.wand(self.energyReserveCountOkHardRoom('Gauntlet'),
+                                                                         self.smbm.wand(self.smbm.canUsePowerBombs(),
                                                                                         self.smbm.wor(self.smbm.itemCountOk('PowerBomb', 2),
                                                                                                       self.smbm.wand(self.smbm.haveItem('SpeedBooster'),
-                                                                                                                     self.smbm.energyReserveCountOk(2)))),
+                                                                                                                     self.smbm.energyReserveCountOk(2))))),
+                                                          self.smbm.wand(self.energyReserveCountOkHardRoom('Gauntlet', 0.5),
                                                                          self.smbm.canUseBombs()))))
 
     def canPassBombPassages(self):
@@ -151,10 +152,10 @@ class Helpers(object):
         #             -open green door at the right of Landing Site, then open the yellow
         #              door at Crateria Keyhunter room
         return self.smbm.wand(self.smbm.haveItem('Super'),
-                         self.smbm.wor(self.smbm.wand(self.smbm.wor(self.smbm.canDestroyBombWalls(),
-                                                     self.smbm.wand(self.smbm.haveItem('SpeedBooster'), self.smbm.knowsSimpleShortCharge())),
-                                            self.smbm.haveItem('Morph')),
-                                  self.smbm.canUsePowerBombs()))
+                              self.smbm.wor(self.smbm.wand(self.smbm.wor(self.smbm.canDestroyBombWalls(),
+                                                                         self.smbm.wand(self.smbm.haveItem('SpeedBooster'), self.smbm.knowsSimpleShortCharge())),
+                                                           self.smbm.haveItem('Morph')),
+                                            self.smbm.canUsePowerBombs()))
 
     def canAccessKraid(self):
         # EXPLAINED: from Red Tower we have to go to Warehouse Entrance, and there we have to
@@ -224,11 +225,11 @@ class Helpers(object):
         #              then speed booster in Crocomire Speedway (easy hell run if no varia
         #              as we only have to go in straight line, so two ETanks are required)
         return self.smbm.wor(self.smbm.wand(self.smbm.canAccessHeatedNorfair(),
-                                  self.smbm.wor(self.smbm.knowsGreenGateGlitch(), self.smbm.haveItem('Wave'))),
-                        self.smbm.wand(self.smbm.canAccessRedBrinstar(),
-                                  self.smbm.canUsePowerBombs(),
-                                  self.smbm.haveItem('SpeedBooster'),
-                                  self.smbm.energyReserveCountOk(2)))
+                                            self.smbm.wor(self.smbm.knowsGreenGateGlitch(), self.smbm.haveItem('Wave'))),
+                             self.smbm.wand(self.smbm.canAccessRedBrinstar(),
+                                            self.smbm.canUsePowerBombs(),
+                                            self.smbm.haveItem('SpeedBooster'),
+                                            self.smbm.canHellRun('Ice', 2)))
 
     def canDefeatCrocomire(self):
         return self.smbm.wand(self.smbm.canAccessCrocomire(),

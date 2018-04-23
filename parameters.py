@@ -100,7 +100,7 @@ class Knows:
 
     MidAirMorph = SMBool(True, easy, ['MidAirMorph'])
     desc['MidAirMorph'] = {'display': 'Mid-air Morph',
-                           'title': 'Activate morph ball while jumping straight up and continue to gain height.',
+                           'title': 'Activate morph ball while jumping straight up (keep jump pressed) to reach high places in morph ball form without bomb jumping.',
                            'href': None,
                            'rooms': [],
                            'readonly' : True}

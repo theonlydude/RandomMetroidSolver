@@ -8,7 +8,7 @@ from itemrandomizerweb.AreaRandomizer import AreaRandomizer
 from tournament_locations import locations as defaultLocations
 from graph_locations import locations as graphLocations
 from graph import vanillaTransitions
-from parameters import easy, medium, hard, harder, hardcore, mania, text2diff, diff2text
+from parameters import Knows, easy, medium, hard, harder, hardcore, mania, text2diff, diff2text
 from solver import ParamsLoader
 from rom import RomPatcher, RomPatches
 
@@ -108,7 +108,6 @@ if __name__ == "__main__":
 
     # parse args
     args = parser.parse_args()
-
     # if diff preset given, load it
     if args.paramsFileName is not None:
         ParamsLoader.factory(args.paramsFileName[0]).load()

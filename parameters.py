@@ -70,6 +70,11 @@ class Conf:
 def isKnows(knows):
     return knows[0:len('__')] != '__' and knows[0] == knows[0].upper()
 
+def staticConstructor(Class):
+    Class.renameKnows(Class)
+    return Class
+
+@staticConstructor
 class Knows:
     # the different technics to know (cf. http://deanyd.net/sm/index.php?title=Item_Randomizer)
     # and the personnal perceived difficulty.
@@ -81,22 +86,22 @@ class Knows:
     # used across the game
     WallJump = SMBool(True, easy, ['WallJump'])
     desc['WallJump'] = {'display': 'Wall Jump',
-                        'title': 'Kick-jump from wall : wall to wall, single wall climb, wall jump to instant morph',
-                        'href': '',
+                        'title': 'Kick-jump from wall: wall to wall, single wall climb, wall jump to instant morph',
+                        'href': 'https://wiki.supermetroid.run/Walljump',
                         'rooms': [],
                         'readonly' : True}
 
     ShineSpark = SMBool(True, easy, ['ShineSpark'])
     desc['ShineSpark'] = {'display': 'Shinespark',
-                          'title': 'With Speed Booster, press down to activate shinespark. Then launch it in every possible direction, from ground or mid-air.',
-                          'href': '',
+                          'title': 'With Speed Booster, press down to activate Shinespark. Then launch it in every possible direction, from ground or mid-air',
+                          'href': 'https://wiki.supermetroid.run/Shinespark',
                           'rooms': [],
                           'readonly' : True}
 
     MidAirMorph = SMBool(True, easy, ['MidAirMorph'])
     desc['MidAirMorph'] = {'display': 'Mid-air Morph',
-                           'title': 'Activate morph ball while jumping straight up and continue to gain height.',
-                           'href': '',
+                           'title': 'Activate Morph Ball while jumping straight up (keep jump pressed) to reach high places in Morph Ball form without bomb jumping',
+                           'href': None,
                            'rooms': [],
                            'readonly' : True}
 
@@ -203,7 +208,7 @@ class Knows:
     GravLessLevel0 = SMBool(True, easy, ['GravLessLevel0'])
     desc['GravLessLevel0'] = {'display': 'Level 0',
                               'title': 'Use crouch jump and downgrab to get out of ponds of water',
-                              'href': '',
+                              'href': None,
                               'rooms': [], # TODO spiky death, before Billy Mays, others?
                               'readonly' : True}
 
@@ -217,7 +222,7 @@ class Knows:
     GravLessLevel2 = SMBool(False, 0, ['GravLessLevel2'])
     desc['GravLessLevel2'] = {'display': 'Level 2',
                               'title': "Level 1 + access Draygon's lair and do the Draygon fight (exiting Draygon are separate techniques)",
-                              'href': '',
+                              'href': None,
                               'rooms': []} # TODO
 
     SuitlessSandpit = SMBool(False, 0, ['SuitlessSandpit']) # keep SuitlessSandpit as name for existing presets compatibility
@@ -416,7 +421,7 @@ class Knows:
                    'title': 'Bosses'},
                   {'knows': ['IceZebSkip', 'SpeedZebSkip'],
                    'title': 'End Game'},
-                  {'knows': ['GravLessLevel0', 'SuitlessOuterMaridia', 'GravLessLevel2', 'GravLessLevel3'],
+                  {'knows': ['GravLessLevel0', 'SuitlessOuterMaridia', 'GravLessLevel2', 'SuitlessSandpit'],
                    'title': 'Underwater movement without Gravity Suit'},
                   {'knows': ['CeilingDBoost', 'AlcatrazEscape', 'ReverseGateGlitch',
                              'ReverseGateGlitchHiJumpLess', 'EarlyKraid', 'XrayDboost', 'RedTowerClimb'],
@@ -441,6 +446,14 @@ class Knows:
         'SuitlessOuterMaridia' : 'GravLessLevel1',
         'SuitlessSandpit' : 'GravLessLevel3'
     }
+
+    @staticmethod
+    def renameKnows(Class):
+        # handle renamed knows
+        for old,new in Class.newNames.iteritems():
+            if not hasattr(Class, new):
+                setattr(Class, new, getattr(Class, old))
+
 
 def isSettings(settings):
     return settings[0:len('__')] != '__'

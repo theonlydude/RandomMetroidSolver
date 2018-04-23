@@ -419,7 +419,7 @@ class Randomizer(object):
         progLocs = [il['Location'] for il in self.progressionItemLocs if il['Item']['Class'] == 'Major' and il['Item']['Category'] != "Energy"]
         distances = [self.areaDistance(loc, progLocs) for loc in availableLocations]
         maxDist = max(distances)
-        indices = [index for index, d in enumerate(distances) if d == maxDist]        
+        indices = [index for index, d in enumerate(distances) if d == maxDist]
         locs = [availableLocations[i] for i in indices]
 
         return locs

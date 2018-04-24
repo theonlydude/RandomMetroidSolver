@@ -12,23 +12,26 @@ class HelpersGraph(Helpers):
         self.cachedMethods = []
 
     def canAccessKraidsLair(self):
+        sm = self.smbm
         # EXPLAINED: access the upper right platform with either:
         #             -hijump boots (easy regular way)
         #             -fly (space jump or infinite bomb jump)
         #             -know how to wall jump on the platform without the hijump boots
         #            then we have to break a bomb block at Warehouse Zeela room
-        return self.smbm.wand(self.smbm.canOpenGreenDoors(),
-                              self.smbm.wor(self.smbm.haveItem('HiJump'),
-                                            self.smbm.canFly(),
-                                            self.smbm.knowsEarlyKraid()),
-                              self.smbm.canPassBombPassages())
+        return sm.wand(sm.canOpenGreenDoors(),
+                       sm.wor(sm.haveItem('HiJump'),
+                              sm.canFly(),
+                              sm.knowsEarlyKraid()),
+                       sm.canPassBombPassages())
 
     def canPassTerminatorBombWall(self):
-        return self.smbm.wor(self.smbm.wand(self.smbm.haveItem('SpeedBooster'),
-                                            self.smbm.wor(self.smbm.knowsSimpleShortCharge(), self.smbm.knowsShortCharge())), 
-                             self.smbm.canDestroyBombWalls())
+        sm = self.smbm
+        return sm.wor(sm.wand(sm.haveItem('SpeedBooster'),
+                              sm.wor(sm.knowsSimpleShortCharge(), sm.knowsShortCharge())), 
+                      sm.canDestroyBombWalls())
 
     def canPassMoat(self):
+        sm = self.smbm
         # EXPLAINED: In the Moat we can either:
         #             -use grapple or space jump (easy way)
         #             -do a continuous wall jump (https://www.youtube.com/watch?v=4HVhTwwax6g)
@@ -36,178 +39,200 @@ class HelpersGraph(Helpers):
         #             -do a short charge from the Keyhunter room (https://www.youtube.com/watch?v=kFAYji2gFok)
         #             -do a gravity jump from below the right platform
         #             -do a mock ball and a bounce ball (https://www.youtube.com/watch?v=WYxtRF--834)
-        return self.smbm.wor(self.smbm.wor(self.smbm.haveItem('Grapple'),
-                                           self.smbm.haveItem('SpaceJump'),
-                                           self.smbm.knowsContinuousWallJump()),
-                             self.smbm.wor(self.smbm.wand(self.smbm.knowsDiagonalBombJump(), self.smbm.canUseBombs()),
-                                           self.smbm.wand(self.smbm.haveItem('SpeedBooster'),
-                                                          self.smbm.wor(self.smbm.knowsSimpleShortCharge(), self.smbm.knowsShortCharge())),
-                                           self.smbm.wand(self.smbm.knowsGravityJump(), self.smbm.haveItem('Gravity')),
-                                           self.smbm.wand(self.smbm.knowsMockballWs(), self.smbm.haveItem('Morph'), self.smbm.haveItem('SpringBall'))))
+        return sm.wor(sm.wor(sm.haveItem('Grapple'),
+                             sm.haveItem('SpaceJump'),
+                             sm.knowsContinuousWallJump()),
+                             sm.wor(sm.wand(sm.knowsDiagonalBombJump(), sm.canUseBombs()),
+                                    sm.wand(sm.haveItem('SpeedBooster'),
+                                            sm.wor(sm.knowsSimpleShortCharge(), sm.knowsShortCharge())),
+                                    sm.wand(sm.knowsGravityJump(), sm.haveItem('Gravity')),
+                                    sm.wand(sm.knowsMockballWs(), sm.haveItem('Morph'), sm.haveItem('SpringBall'))))
 
     def canPassMoatReverse(self):
-        return self.smbm.wor(self.smbm.haveItem('Grapple'),
-                             self.smbm.haveItem('SpaceJump'),
-                             self.smbm.haveItem('Gravity'),
-                             self.smbm.wand(haveItem('Morph'),
-                                            self.smbm.wor(RomPatches.has(RomPatches.MoatShotBlock),
-                                                          self.smbm.canPassBombPassages())))
+        sm = self.smbm
+        return sm.wor(sm.haveItem('Grapple'),
+                      sm.haveItem('SpaceJump'),
+                      sm.haveItem('Gravity'),
+                      sm.wand(haveItem('Morph'),
+                              sm.wor(RomPatches.has(RomPatches.MoatShotBlock),
+                                     sm.canPassBombPassages())))
 
     def canPassSpongeBath(self):
-        return self.smbm.wand(Bosses.bossDead('Phantoon'),
-                              self.smbm.wor(self.smbm.wand(self.smbm.canPassBombPassages(),
-                                                           self.smbm.knowsSpongeBathBombJump()),
-                                            self.smbm.wand(self.smbm.haveItem('HiJump'),
-                                                           self.smbm.knowsSpongeBathHiJump()),
-                                            self.smbm.wor(self.smbm.haveItem('Gravity'),
-                                                          self.smbm.haveItem('SpaceJump'),
-                                                          self.smbm.wand(self.smbm.haveItem('SpeedBooster'),
-                                                                         self.smbm.knowsSpongeBathSpeed()),
-                                                          self.smbm.wand(self.smbm.haveItem('Morph'),
-                                                                         self.smbm.haveItem('SpringBall'),
-                                                                         self.smbm.knowsSpringBallJump()))))
+        sm = self.smbm
+        return sm.wand(Bosses.bossDead('Phantoon'),
+                       sm.wor(sm.wand(sm.canPassBombPassages(),
+                                      sm.knowsSpongeBathBombJump()),
+                              sm.wand(sm.haveItem('HiJump'),
+                                      sm.knowsSpongeBathHiJump()),
+                              sm.wor(sm.haveItem('Gravity'),
+                                     sm.haveItem('SpaceJump'),
+                                     sm.wand(sm.haveItem('SpeedBooster'),
+                                             sm.knowsSpongeBathSpeed()),
+                                     sm.wand(sm.haveItem('Morph'),
+                                             sm.haveItem('SpringBall'),
+                                             sm.knowsSpringBallJump()))))
 
     # the water zone east of WS
     def canPassForgottenHighway(self, fromWs):
-        # TODO add knows for this?
-        baseSuitLess = self.smbm.wand(self.smbm.haveItem('HiJump'),
-                                      self.smbm.wor(self.smbm.haveItem('Ice'), 
-                                                    self.smbm.wand(self.smbm.haveItem('SpringBall'), self.smbm.knowsSpringBallJump())))
+        sm = self.smbm
+        baseSuitLess = sm.wand(sm.haveItem('HiJump'),
+                               sm.wor(sm.haveItem('Ice'), 
+                                      sm.wand(sm.haveItem('SpringBall'), sm.knowsSpringBallJump())),
+                               sm.knowsGravLessLevel1())
         if fromWs is True:
-            suitlessCondition = self.smbm.wand(baseSuitLess, # to climb on the ledges
-                                               self.smbm.haveItem('SpaceJump')) # to go through the door on the right
+            suitlessCondition = sm.wand(baseSuitLess, # to climb on the ledges
+                                        sm.haveItem('SpaceJump')) # to go through the door on the right
         else:
             suitlessCondition = baseSuitLess
 
-        return self.smbm.wor(self.smbm.haveItem('Gravity'),
-                             suitlessCondition)
+        return sm.wor(sm.haveItem('Gravity'),
+                      suitlessCondition)
 
     def canExitCrabHole(self):
-        return self.smbm.wand(self.smbm.haveItem('Morph'), # morph to exit the hole
-                              self.smbm.canOpenRedDoors(), # to exit and re-enter if needed
-                              self.smbm.wor(self.smbm.wand(self.smbm.haveItem('Gravity'), # even with gravity you need some way to climb...
-                                                           self.smbm.wor(self.smbm.haveItem('Ice'), # ...on crabs...
-                                                                         self.smbm.haveItem('HiJump'), # ...or by jumping
-                                                                         self.smbm.knowsGravityJump(),
-                                                                         self.smbm.canFly())),
-                                            self.smbm.canDoSuitlessOuterMaridia())) # climing crabs
+        sm = self.smbm
+        return sm.wand(sm.haveItem('Morph'), # morph to exit the hole
+                       sm.canOpenRedDoors(), # to exit and re-enter if needed
+                       sm.wor(sm.wand(sm.haveItem('Gravity'), # even with gravity you need some way to climb...
+                                      sm.wor(sm.haveItem('Ice'), # ...on crabs...
+                                             sm.haveItem('HiJump'), # ...or by jumping
+                                             sm.knowsGravityJump(),
+                                             sm.canFly())),
+                              sm.canDoSuitlessOuterMaridia())) # climing crabs
 
     def canAccessHeatedNorfairFromEntrance(self, bubbleMountain=True):
-        return self.smbm.wand(self.smbm.wor(self.smbm.wand(self.smbm.haveItem('SpeedBooster'), # frog speedway
-                                                           self.smbm.wor(SMBool(not bubbleMountain, 0), self.smbm.canPassBombPassages())),
-                                            # go through cathedral
-                                            self.smbm.wand(self.smbm.canOpenRedDoors(),
-                                                           self.smbm.wor(RomPatches.has(RomPatches.CathedralEntranceWallJump),
-                                                                         self.smbm.haveItem('HiJump'),
-                                                                         self.smbm.canFly()))),
-                              self.smbm.canHellRun('MainUpperNorfair'))
+        sm = self.smbm
+        return sm.wand(sm.wor(sm.wand(sm.haveItem('SpeedBooster'), # frog speedway
+                                      sm.wor(SMBool(not bubbleMountain, 0), sm.canPassBombPassages())),
+                              # go through cathedral
+                              sm.wand(sm.canOpenRedDoors(),
+                                      sm.wor(RomPatches.has(RomPatches.CathedralEntranceWallJump),
+                                             sm.haveItem('HiJump'),
+                                             sm.canFly()))),
+                       sm.canHellRun('MainUpperNorfair'))
 
     def canAccessCrocFromNorfairEntrance(self):
-        return self.smbm.wand(self.smbm.wand(self.smbm.canOpenGreenDoors(), # below Ice
-                                             self.smbm.haveItem('SpeedBooster'),
-                                             self.smbm.canUsePowerBombs(),
-                                             self.smbm.energyReserveCountOk(2)),
-                              self.smbm.wand(self.smbm.canAccessHeatedNorfairFromEntrance(bubbleMountain=False),
-                                             self.smbm.wor(self.smbm.wand(self.smbm.canOpenRedDoors(), self.smbm.knowsGreenGateGlitch()),
-                                                           self.smbm.haveItem('Wave'))))
+        sm = self.smbm
+        return sm.wor(sm.wand(sm.canOpenGreenDoors(), # below Ice
+                              sm.haveItem('SpeedBooster'),
+                              sm.canUsePowerBombs(),
+                              sm.canHellRun('Ice', 2)),
+                      sm.wand(sm.canAccessHeatedNorfairFromEntrance(bubbleMountain=False),
+                              sm.wor(sm.wand(sm.canOpenRedDoors(), sm.knowsGreenGateGlitch()),
+                                     sm.haveItem('Wave'))))
 
     def canAccessCrocFromMainUpperNorfair(self):
+        sm = self.smbm
         # from bubble mountain
-        return self.smbm.wand(self.smbm.canHellRun('MainUpperNorfair'),
-                              self.smbm.canPassBombPassages(),
-                              self.smbm.wor(self.smbm.wand(self.smbm.canOpenRedDoors(), self.smbm.knowsGreenGateGlitch()),
-                                            self.smbm.haveItem('Wave')))
+        return sm.wand(sm.canHellRun('MainUpperNorfair'),
+                       sm.canPassBombPassages(),
+                       sm.wor(sm.wand(sm.canOpenRedDoors(), sm.knowsGreenGateGlitch()),
+                              sm.haveItem('Wave')))
 
     def canEnterNorfairReserveArea(self):
-        return self.smbm.wand(self.smbm.canOpenGreenDoors(),
-                              self.smbm.wor(self.smbm.wor(self.smbm.canFly(),
-                                                          self.smbm.haveItem('Grapple'),
-                                                          self.smbm.wand(self.smbm.haveItem('HiJump'),
-                                                                         self.smbm.knowsGetAroundWallJump())),
-                                            self.smbm.wor(self.smbm.haveItem('Ice'),
-                                                          self.smbm.wand(self.smbm.haveItem('SpringBall'),
-                                                                         self.smbm.knowsSpringBallJumpFromWall()))))
+        sm = self.smbm
+        return sm.wand(sm.canOpenGreenDoors(),
+                       sm.wor(sm.wor(sm.canFly(),
+                                     sm.haveItem('Grapple'),
+                                     sm.wand(sm.haveItem('HiJump'),
+                                             sm.knowsGetAroundWallJump())),
+                              sm.wor(sm.haveItem('Ice'),
+                                     sm.wand(sm.haveItem('SpringBall'),
+                                             sm.knowsSpringBallJumpFromWall()))))
 
     def canPassLavaPit(self):
+        sm = self.smbm
         nTanks4Dive = 3
-        if not self.smbm.heatProof():
+        if not sm.heatProof():
             nTanks4Dive = 8
-        return self.smbm.wor(self.smbm.wand(self.smbm.haveItem('Gravity'), self.smbm.haveItem('SpaceJump')),
-                             self.smbm.wand(self.smbm.knowsGravityJump(), self.smbm.haveItem('Gravity')),
-                             self.smbm.wand(self.smbm.wor(self.smbm.wand(self.smbm.knowsLavaDive(), self.smbm.haveItem('HiJump')),
-                                                          self.smbm.knowsLavaDiveNoHiJump()),
-                                            self.smbm.energyReserveCountOk(nTanks4Dive)))
+        return sm.wor(sm.wand(sm.haveItem('Gravity'), sm.haveItem('SpaceJump')),
+                      sm.wand(sm.knowsGravityJump(), sm.haveItem('Gravity')),
+                      sm.wand(sm.wor(sm.wand(sm.knowsLavaDive(), sm.haveItem('HiJump')),
+                                     sm.knowsLavaDiveNoHiJump()),
+                              sm.energyReserveCountOk(nTanks4Dive)))
 
     def canPassWorstRoom(self):
-        return self.smbm.wor(self.smbm.canFly(),
-                             self.smbm.wand(self.smbm.knowsWorstRoomIceCharge(), self.smbm.haveItem('Ice'), self.smbm.haveItem('Charge')),
-                             self.smbm.wand(self.smbm.knowsGetAroundWallJump(), self.smbm.haveItem('HiJump')),
-                             self.smbm.wand(self.smbm.knowsSpringBallJumpFromWall(), self.smbm.haveItem('SpringBall')))
+        sm = self.smbm
+        return sm.wand(sm.canDestroyBombWalls(),
+                       sm.wor(sm.canFly(),
+                              sm.wand(sm.knowsWorstRoomIceCharge(), sm.haveItem('Ice'), sm.haveItem('Charge')),
+                              sm.wand(sm.knowsGetAroundWallJump(), sm.haveItem('HiJump')),
+                              sm.wand(sm.knowsSpringBallJumpFromWall(), sm.haveItem('SpringBall'))))
 
     # go though the pirates room filled with acid
     def canPassAmphitheaterReverse(self):
+        sm = self.smbm
         nTanks = 4
-        if not self.smbm.heatProof():
+        if not sm.heatProof():
             nTanks = 16
-        return self.smbm.wand(self.smbm.haveItem('Gravity'),
-                              self.smbm.energyReserveCountOk(nTanks))
+        return sm.wand(sm.haveItem('Gravity'),
+                       sm.energyReserveCountOk(nTanks))
 
     def canClimbRedTower(self):
-        return self.smbm.wor(self.smbm.knowsRedTowerClimb(),
-                             self.smbm.haveItem('Ice'),
-                             self.smbm.haveItem('SpaceJump'))
+        sm = self.smbm
+        return sm.wor(sm.knowsRedTowerClimb(),
+                      sm.haveItem('Ice'),
+                      sm.haveItem('SpaceJump'))
 
     def canClimbBottomRedTower(self):
-        return self.smbm.wor(self.smbm.wor(RomPatches.has(RomPatches.RedTowerLeftPassage),
-                                           self.smbm.haveItem('HiJump'),
-                                           self.smbm.haveItem('Ice'),
-                                           self.smbm.canFly()),
-                             self.smbm.wand(self.smbm.haveItem('SpeedBooster'), self.smbm.knowsShortCharge()))
+        sm = self.smbm
+        return sm.wor(sm.wor(RomPatches.has(RomPatches.RedTowerLeftPassage),
+                             sm.haveItem('HiJump'),
+                             sm.haveItem('Ice'),
+                             sm.canFly()),
+                      sm.wand(sm.haveItem('SpeedBooster'), sm.knowsShortCharge()))
 
     def canGoUpMtEverest(self):
-        return self.smbm.wor(self.smbm.wand(self.smbm.haveItem('Gravity'),                      
-                                            self.smbm.wor(self.smbm.haveItem('Grapple'),
-                                                          self.smbm.haveItem('SpeedBooster')),
-                                            self.smbm.wor(self.smbm.canFly(),
-                                                          self.smbm.knowsGravityJump())),
-                             self.smbm.wand(self.smbm.canDoSuitlessOuterMaridia(),
-                                            self.smbm.haveItem('Grapple')))
+        sm = self.smbm
+        return sm.wor(sm.wand(sm.haveItem('Gravity'),                      
+                              sm.wor(sm.haveItem('Grapple'),
+                                     sm.haveItem('SpeedBooster')),
+                              sm.wor(sm.canFly(),
+                                     sm.knowsGravityJump())),
+                      sm.wand(sm.canDoSuitlessOuterMaridia(),
+                              sm.haveItem('Grapple')))
 
     def canPassMtEverest(self):
-        return  self.smbm.wor(self.smbm.wand(self.smbm.haveItem('Gravity'),                      
-                                             self.smbm.wor(self.smbm.wor(self.smbm.haveItem('Grapple'),
-                                                                         self.smbm.haveItem('SpeedBooster')),
-                                                           self.smbm.wor(self.smbm.canFly(),
-                                                                         self.smbm.knowsGravityJump(),
-                                                                         self.smbm.wand(self.smbm.haveItem('Ice'), self.smbm.knowsTediousMountEverest())))),
-                              self.smbm.canDoSuitlessMaridia(),
-                              self.smbm.wand(self.smbm.canDoSuitlessOuterMaridia(), self.smbm.knowsTediousMountEverest()))
+        sm = self.smbm
+        return  sm.wor(sm.wand(sm.haveItem('Gravity'),
+                               sm.wor(sm.wor(sm.haveItem('Grapple'),
+                                             sm.haveItem('SpeedBooster')),
+                                      sm.wor(sm.canFly(),
+                                             sm.knowsGravityJump(),
+                                             sm.wand(sm.haveItem('Ice'), sm.knowsTediousMountEverest())))),
+                       sm.canDoSuitlessMaridia(),
+                       sm.wand(sm.canDoSuitlessOuterMaridia(), sm.knowsTediousMountEverest()))
 
     def canAccessDraygonFromMainStreet(self):
-        return self.smbm.wand(self.smbm.canDefeatBotwoon(),
-                              self.smbm.wor(self.smbm.haveItem('Gravity'),
-                                            self.smbm.canDoSuitlessMaridia()))
+        sm = self.smbm
+        return sm.wand(sm.canDefeatBotwoon(),
+                       sm.wor(sm.haveItem('Gravity'),
+                              sm.wand(sm.canDoSuitlessMaridia(), sm.knowsGravLessLevel2())))
 
     def canDoSuitlessOuterMaridia(self):
-        return self.smbm.wand(self.smbm.knowsGravLessLevel1(),
-                              self.smbm.haveItem('HiJump'),
-                              self.smbm.haveItem('Ice'),
-                              self.smbm.wor(self.smbm.haveItem('Wave'),
-                                            self.smbm.haveItem('Spazer'),
-                                            self.smbm.haveItem('Plasma')))
+        sm = self.smbm
+        return sm.wand(sm.knowsGravLessLevel1(),
+                       sm.haveItem('HiJump'),
+                       sm.haveItem('Ice'))
+
+    def canDoSuitlessMaridia(self):
+        sm = self.smbm
+        return sm.wand(sm.canDoSuitlessOuterMaridia(),
+                       sm.haveItem('Grapple'))
 
     def canAccessBotwoonFromMainStreet(self):
-        return self.smbm.wand(self.smbm.canPassMtEverest(),
-                              self.smbm.canOpenGreenDoors(),
-                              self.smbm.canUsePowerBombs())
+        sm = self.smbm
+        return sm.wand(sm.canPassMtEverest(),
+                       sm.canOpenGreenDoors(),
+                       sm.canUsePowerBombs())
 
     # from main street only
     def canDefeatBotwoon(self):
+        sm = self.smbm
         # EXPLAINED: in Botwoon Hallway, either:
         #             -use regular speedbooster (with gravity)
         #             -do a mochtroidclip (https://www.youtube.com/watch?v=1z_TQu1Jf1I&t=20m28s)
-        return self.smbm.wand(self.smbm.canAccessBotwoonFromMainStreet(),
-                              self.smbm.enoughStuffBotwoon(),
-                              self.smbm.wor(self.smbm.wand(self.smbm.haveItem('SpeedBooster'),
-                                                           self.smbm.haveItem('Gravity')),
-                                            self.smbm.wand(self.smbm.knowsMochtroidClip(), self.smbm.haveItem('Ice'))))
+        return sm.wand(sm.canAccessBotwoonFromMainStreet(),
+                       sm.enoughStuffBotwoon(),
+                       sm.wor(sm.wand(sm.haveItem('SpeedBooster'),
+                                      sm.haveItem('Gravity')),
+                              sm.wand(sm.knowsMochtroidClip(), sm.haveItem('Ice'))))

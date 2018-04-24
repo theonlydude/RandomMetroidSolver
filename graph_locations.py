@@ -176,21 +176,13 @@ locations = [
         'Red Tower Top Left': lambda sm: sm.setSMBool(True)
     },
     'Available': lambda sm: sm.wand(sm.canUsePowerBombs(),
-                                    sm.wor(sm.wor(sm.haveItem('Grapple'),
-                                                  sm.haveItem('SpaceJump'),
-                                                  sm.wand(sm.knowsXrayDboost(),
-                                                          sm.wor(sm.wand(sm.heatProof(),
-                                                                         sm.energyReserveCountOk(3)),
-                                                                 sm.energyReserveCountOk(6))),
-                                                  sm.wand(sm.haveItem('Ice'),
-                                                          sm.wor(sm.energyReserveCountOk(6),
-                                                                 sm.wand(sm.heatProof(),
-                                                                         sm.energyReserveCountOk(3))))),
-                                           sm.wand(sm.haveItem('Bomb'),
-                                                   sm.knowsInfiniteBombJump(),
-                                                   sm.wor(sm.energyReserveCountOk(6),
-                                                          sm.wand(sm.heatProof(),
-                                                                  sm.energyReserveCountOk(3))))))
+                                    sm.wor(sm.haveItem('Grapple'),
+                                           sm.haveItem('SpaceJump'),
+                                           sm.wand(sm.energyReserveCountOkHardRoom('X-Ray'),
+                                                   sm.wor(sm.knowsXrayDboost(),
+                                                          sm.haveItem('Ice'),
+                                                          sm.wand(sm.canUseBombs(),
+                                                                  sm.knowsInfiniteBombJump())))))
 },
 {
     'Area': "Brinstar",

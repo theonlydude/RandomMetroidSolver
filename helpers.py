@@ -187,9 +187,10 @@ class Helpers(object):
                                                           self.smbm.knowsContinuousWallJump()),
                                             self.smbm.wor(self.smbm.wand(self.smbm.knowsDiagonalBombJump(),
                                                                          self.smbm.canUseBombs()),
-                                                          self.smbm.wand(self.smbm.knowsSimpleShortCharge(),
+                                                          self.smbm.wand(self.smbm.wor(self.smbm.knowsSimpleShortCharge(),
+                                                                                       self.smbm.knowsShortCharge()),
                                                                          self.smbm.haveItem('SpeedBooster')),
-                                                          self.smbm.haveItem('Gravity'),
+                                                          self.smbm.wand(self.smbm.knowsGravityJump(), self.smbm.haveItem('Gravity')),
                                                           self.smbm.wand(self.smbm.knowsMockballWs(),
                                                                          self.smbm.haveItem('Morph'),
                                                                          self.smbm.haveItem('SpringBall')))))

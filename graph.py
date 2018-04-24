@@ -23,7 +23,6 @@ class AccessPoint(object):
     def addTransition(self, destName):
         self.transitions[destName] = lambda sm: self.traverse(sm)
 
-
 # all access points and traverse functions
 accessPoints = [
     # Crateria and Blue Brinstar

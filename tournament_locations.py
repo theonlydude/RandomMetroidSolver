@@ -66,9 +66,13 @@ locations = [
         'Room': 'Big Pink',
         # EXPLAINED: open red door at Green Brinstar Main Shaft (down right),
         #            break the bomb wall at left of Parlor and Alcatraz
-        'Available': lambda sm: sm.wand(sm.canOpenRedDoors(),
-                                        sm.wor(sm.canPassBombPassages(),
-                                               sm.canUsePowerBombs()))
+        #            use bomb/powerbomb to enter charge beam spot
+        #            or
+        #            use power bomb left of morph ball room
+        #            use bomb/powerbomb to enter charge beam spot
+        'Available': lambda sm: sm.wor(sm.wand(sm.canOpenRedDoors(),
+                                               sm.canPassBombPassages()),
+                                       sm.canUsePowerBombs())
     },
     {
         'Area': "Brinstar",

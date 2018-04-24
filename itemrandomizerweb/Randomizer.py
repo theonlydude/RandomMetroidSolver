@@ -190,7 +190,7 @@ class RandoSettings(object):
             removableCombat = self.getForbiddenCombat()
             remove += self.getForbiddenItemsFromList(removableCombat)
         return remove
-        
+
 class Randomizer(object):
     # locations : items locations
     # settings : RandoSettings instance
@@ -281,29 +281,33 @@ class Randomizer(object):
 
         if item is not None:
             self.smbm.addItem(item['Type'])
+            print("test item {}".format(item['Type']))
 
         avail = lambda loc: self.locAvailable(loc)
-        ret = List.filter(avail, self.unusedLocations)
+        ret = sorted(List.filter(avail, self.unusedLocations), key=lambda loc: loc['Name'])
 
         if item is not None:
             self.smbm.removeItem(item['Type'])
 
-        if len(self.currentItems) == 1:
-            print("{}".format([loc['Name'] for loc in ret]))
+        if len(self.currentItems) == 67:
+            print("curItems: {}".format(sorted(list(set([it['Name'] for it in self.currentItems])))))
+            print("curlocs: {}".format([loc['Name'] for loc in ret]))
 
         return ret
 
     def currentLocationsGraph(self, item=None):
         if item is not None:
             self.smbm.addItem(item['Type'])
+            print("test item {}".format(item['Type']))
 
-        ret = self.areaGraph.getAvailableLocations(self.unusedLocations, self.smbm, self.difficultyTarget)
+        ret = sorted(self.areaGraph.getAvailableLocations(self.unusedLocations, self.smbm, self.difficultyTarget), key=lambda loc: loc['Name'])
 
         if item is not None:
             self.smbm.removeItem(item['Type'])
 
-        if len(self.currentItems) == 1:
-            print("{}".format([loc['Name'] for loc in ret]))
+        if len(self.currentItems) == 67:
+            print("curItems: {}".format(sorted(list(set([it['Name'] for it in self.currentItems])))))
+            print("curlocs: {}".format([loc['Name'] for loc in ret]))
 
         return ret
 
@@ -644,18 +648,25 @@ class Randomizer(object):
         return True
         
     def checkLocPool(self):
+        print("checkLocPool {}".format([it['Name'] for it in self.itemPool]))
         progItems = [item for item in self.itemPool if self.isProgItem(item)]
+        print("progItems {}".format([it['Name'] for it in progItems]))
+        print("curItems {}".format([it['Name'] for it in self.currentItems]))
         if len(progItems) == 0 or self.locLimit <= 0:
             return True
         isMinorProg = any(item['Class'] == 'Minor' for item in progItems)
         isMajorProg = any(item['Class'] == 'Major' for item in progItems)
         accessibleLocations = []
-        for loc in self.unusedLocations:
+        print("unusedLocs: {}".format([loc['Name'] for loc in self.unusedLocations]))
+        locs = self.currentLocations()
+        for loc in locs:
             majAvail = self.restrictions['MajorMinor'] == False or loc['Class'] == 'Major'
             minAvail = self.restrictions['MajorMinor'] == False or loc['Class'] == 'Minor'
+            print("{} locAv {} locPAv {}".format(loc['Name'], self.locAvailable(loc), self.locPostAvailable(loc, None)))
             if ((isMajorProg and majAvail) or (isMinorProg and minAvail)) \
                and self.locAvailable(loc) and self.locPostAvailable(loc, None):
                 accessibleLocations.append(loc)
+        print("accesLoc {}".format([loc['Name'] for loc in accessibleLocations]))
         if len(accessibleLocations) <= self.locLimit:
             sys.stdout.write('|')
             sys.stdout.flush()
@@ -711,7 +722,7 @@ class Randomizer(object):
         itemLocation = None
         nItems = 0
         locPoolOk = True
-#            print("NON-PROG")
+#        print("NON-PROG")
         minLimit = self.itemLimit - int(self.itemLimit/5)
         maxLimit = self.itemLimit + int(self.itemLimit/5)
         itemLimit = random.randint(minLimit, maxLimit)

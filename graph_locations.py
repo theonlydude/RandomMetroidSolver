@@ -427,7 +427,7 @@ locations = [
         'West Ocean Left': lambda sm: sm.wand(sm.canOpenGreenDoors(), sm.canPassSpongeBath()),
         'Crab Maze Left': lambda sm: sm.canPassForgottenHighway(False)
     },
-    'Available': lambda sm: Bosses.bossDead('Phantoon')
+    'Available': lambda sm: sm.setSMBool(Bosses.bossDead('Phantoon').bool)
 },
 {
     'Area': "WreckedShip",
@@ -502,7 +502,7 @@ locations = [
     #  -have high jump boots
     #  -can fly (space jump or infinite bomb jump)
     #  -use short charge with speedbooster
-    'Available': lambda sm: Bosses.bossDead('Draygon'),
+    'Available': lambda sm: sm.setSMBool(Bosses.bossDead('Draygon').bool),
     'PostAvailable': lambda sm: sm.wand(sm.wor(sm.wand(sm.haveItem('SpeedBooster'),
                                                        sm.knowsShortCharge(),
                                                        sm.knowsKillPlasmaPiratesWithSpark()),
@@ -645,7 +645,7 @@ locations = [
         'West Ocean Left': lambda sm: sm.canOpenGreenDoors(),
         'Crab Maze Left': lambda sm: sm.canPassForgottenHighway(False)
     },
-    'Available': lambda sm: Bosses.bossDead('Phantoon')
+    'Available': lambda sm: sm.setSMBool(Bosses.bossDead('Phantoon').bool)
 },
 {
     'Area': "Crateria",
@@ -772,7 +772,7 @@ locations = [
     },
     # either you go the back way, using a super and the camera glitch,
     # or just beat spore spawn (so no sm.knows() setting needed for the glitch)
-    'Available': lambda sm: sm.wor(sm.canOpenRedDoors(), sm.haveItem('Charge')), # you have to have some kind of firepower to beat him
+    'Available': lambda sm: sm.canOpenRedDoors(),
     'PostAvailable': lambda sm: sm.wand(sm.canOpenGreenDoors(),
                                         sm.canPassBombPassages())
 },
@@ -1375,7 +1375,7 @@ locations = [
         'West Ocean Left': lambda sm: sm.canOpenGreenDoors(),
         'Crab Maze Left': lambda sm: sm.canPassForgottenHighway(False)
     },
-    'Available': lambda sm: Bosses.bossDead('Phantoon')
+    'Available': lambda sm: sm.setSMBool(Bosses.bossDead('Phantoon').bool)
 },
 {
     'Area': "WreckedShip",
@@ -1389,7 +1389,7 @@ locations = [
         'West Ocean Left': lambda sm: sm.canOpenGreenDoors(),
         'Crab Maze Left': lambda sm: sm.canPassForgottenHighway(False)
     },
-    'Available': lambda sm: Bosses.bossDead('Phantoon')
+    'Available': lambda sm: sm.setSMBool(Bosses.bossDead('Phantoon').bool)
 },
 {
     'Area': "Maridia",

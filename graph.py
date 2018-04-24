@@ -98,21 +98,21 @@ accessPoints = [
         'Red Fish Room Left': lambda sm: sm.canGoUpMtEverest(),
         'Crab Hole Bottom Left': lambda sm: sm.wand(sm.haveItem('Morph'), sm.canOpenGreenDoors()), # red door+green gate
         'Le Coude Right': lambda sm: sm.wand(sm.canOpenGreenDoors(), # gate+door
-                                             sm.haveItem('Gravity')) # for the sand pits
+                                             sm.wor(sm.haveItem('Gravity'), sm.wand(sm.knowsGravLessLevel3(), sm.haveItem('HiJump')))) # for the sand pits
     }),
     AccessPoint('Crab Hole Bottom Left', 'Maridia', {
         'Main Street Bottom': lambda sm: sm.wand(sm.canExitCrabHole(),
                                                  sm.wand(sm.haveItem('Super'), sm.knowsGreenGateGlitch())),
         'Le Coude Right': lambda sm: sm.wand(sm.canExitCrabHole(),
                                              sm.canOpenGreenDoors(), # toilet door
-                                             sm.haveItem('Gravity')) # for the sand pits
+                                             sm.wor(sm.haveItem('Gravity'), sm.wand(sm.knowsGravLessLevel3(), sm.haveItem('HiJump')))) # for the sand pits
     }, lambda sm: sm.haveItem('Morph')),
     AccessPoint('Le Coude Right', 'Maridia', {
         'Crab Hole Bottom Left': lambda sm: sm.wand(sm.canOpenYellowDoors(),
-                                                    sm.haveItem('Gravity'), # for the sand pits
+                                                    sm.wor(sm.haveItem('Gravity'), sm.wand(sm.knowsGravLessLevel3(), sm.haveItem('HiJump'))), # for the sand pits
                                                     sm.canOpenGreenDoors()), # toilet door
         'Main Street Bottom': lambda sm: sm.wand(sm.canOpenYellowDoors(),
-                                                 sm.wand(sm.haveItem('Gravity'), # for the sand pits
+                                                 sm.wand(sm.wor(sm.haveItem('Gravity'), sm.wand(sm.knowsGravLessLevel3(), sm.haveItem('HiJump'))), # for the sand pits
                                                          sm.canOpenGreenDoors(), # toilet door
                                                          sm.knowsGreenGateGlitch())),
     }),

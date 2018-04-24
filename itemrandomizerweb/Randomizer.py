@@ -231,9 +231,9 @@ class Randomizer(object):
         self.totalCancels = 0
         self.pickedUpLocs = []
         if self.difficultyTarget > mania:
-            self.smbm = SMBoolManager.factory('bool')
+            self.smbm = SMBoolManager.factory('bool', cache=True, graph=graphTransitions is not None)
         else:
-            self.smbm = SMBoolManager.factory('diff')
+            self.smbm = SMBoolManager.factory('diff', cache=True, graph=graphTransitions is not None)
 
     def getRestrictedLocations(self, forbiddenItems, locations):
         # list only absolutely unreachable locations, regardless of known techniques
@@ -288,12 +288,24 @@ class Randomizer(object):
         if item is not None:
             self.smbm.removeItem(item['Type'])
 
+        if len(self.currentItems) == 1:
+            print("{}".format([loc['Name'] for loc in ret]))
+
         return ret
 
-    def currentLocationsGraph(self, items):
-        items = [item["Type"] for item in items]
+    def currentLocationsGraph(self, item=None):
+        if item is not None:
+            self.smbm.addItem(item['Type'])
 
-        return self.areaGraph.getAvailableLocations(self.unusedLocations, items, self.difficultyTarget)
+        ret = self.areaGraph.getAvailableLocations(self.unusedLocations, self.smbm, self.difficultyTarget)
+
+        if item is not None:
+            self.smbm.removeItem(item['Type'])
+
+        if len(self.currentItems) == 1:
+            print("{}".format([loc['Name'] for loc in ret]))
+
+        return ret
 
     def canPlaceItem(self, item, itemLocations):
         # for an item check if a least one location can accept it, without checking
@@ -559,7 +571,7 @@ class Randomizer(object):
             self.nonProgTypesCache = []
             self.progTypesCache = []
         itemLocations.append(itemLocation)
-#        print(str(len(self.currentItems)) + ':' + itemLocation['Item']['Type'] + ' at ' + itemLocation['Location']['Name'])
+        print(str(len(self.currentItems)) + ':' + itemLocation['Item']['Type'] + ' at ' + itemLocation['Location']['Name'])
         self.itemPool = self.removeItem(item['Type'], self.itemPool)
 
     def generateItem(self, curLocs, pool):
@@ -626,7 +638,7 @@ class Randomizer(object):
         self.usedLocations.remove(loc)
         self.unusedLocations.append(loc)
         self.totalCancels += 1
-#        print("Cancelled  " + item['Type'] + " at " + loc['Name'])
+        print("Cancelled  " + item['Type'] + " at " + loc['Name'])
         sys.stdout.write('x')
         sys.stdout.flush()
         return True

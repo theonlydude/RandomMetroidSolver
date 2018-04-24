@@ -1,6 +1,5 @@
 #!/usr/bin/python
 
-from graph_helpers import wand, wor, haveItem, canPassMoat, canPassMoatReverse, canOpenGreenDoors, canPassTerminatorBombWall, canOpenYellowDoors, canDestroyBombWalls, canOpenRedDoors, canPassSpongeBath, canPassForgottenHighway, canHellRun, canPassLavaPit, canPassWorstRoom, canPassAmphitheaterReverse, canGoUpMtEverest, canClimbRedTower, canClimbBottomRedTower, canUsePowerBombs, canAccessHeatedNorfairFromEntrance, canDoSuitlessOuterMaridia, canExitCrabHole
 from parameters import Knows
 from rom import RomPatches
 from smbool import SMBool
@@ -11,7 +10,7 @@ class AccessPoint(object):
     # transitions : intra-area transitions
     # traverse: traverse function, will be wand to the added transitions
     # TODO add SNES door attributes (or some kind of Tag property to carry it)
-    def __init__(self, name, graphArea, transitions, traverse=lambda items: SMBool(True, 0)):
+    def __init__(self, name, graphArea, transitions, traverse=lambda sm: sm.setSMBool(True)):
         self.Name = name
         self.GraphArea = graphArea
         self.transitions = transitions
@@ -22,144 +21,144 @@ class AccessPoint(object):
 
     # for additions after construction (inter-area transitions)
     def addTransition(self, destName):
-        self.transitions[destName] = lambda items: self.traverse(items)
+        self.transitions[destName] = lambda sm: self.traverse(sm)
 
 
 # all access points and traverse functions
 accessPoints = [
     # Crateria and Blue Brinstar
     AccessPoint('Landing Site', 'Crateria', {
-        'Lower Mushrooms Left': lambda items: canPassTerminatorBombWall(items),
-        'Keyhunter Room Bottom': lambda items: canOpenGreenDoors(items),
-        'Morph Ball Room Left': lambda items: canUsePowerBombs(items)
+        'Lower Mushrooms Left': lambda sm: sm.canPassTerminatorBombWall(),
+        'Keyhunter Room Bottom': lambda sm: sm.canOpenGreenDoors(),
+        'Morph Ball Room Left': lambda sm: sm.canUsePowerBombs()
     }),
     AccessPoint('Lower Mushrooms Left', 'Crateria', {
-        'Landing Site': lambda items: canPassTerminatorBombWall(items)
+        'Landing Site': lambda sm: sm.canPassTerminatorBombWall()
     }),
     AccessPoint('Moat Right', 'Crateria', {
-        'Keyhunter Room Bottom': lambda items: canPassMoatReverse(items)
+        'Keyhunter Room Bottom': lambda sm: sm.canPassMoatReverse()
     }),
     AccessPoint('Keyhunter Room Bottom', 'Crateria', {
-        'Moat Right': lambda items: wand(canOpenYellowDoors(items),
-                                         canPassMoat(items)),
-        'Landing Site': lambda items: SMBool(True, 0)
-    }, lambda items: canOpenYellowDoors(items)),
+        'Moat Right': lambda sm: sm.wand(sm.canOpenYellowDoors(),
+                                         sm.canPassMoat()),
+        'Landing Site': lambda sm: sm.setSMBool(True)
+    }, lambda sm: sm.canOpenYellowDoors()),
     AccessPoint('Morph Ball Room Left', 'Crateria', {
-         'Landing Site': lambda items: canUsePowerBombs(items)
+        'Landing Site': lambda sm: sm.canUsePowerBombs()
     }),
     # Green and Pink Brinstar
     AccessPoint('Green Brinstar Elevator Right', 'GreenPinkBrinstar', {
-        'Green Hill Zone Top Right': lambda items: wand(wor(haveItem(items, 'SpeedBooster'), canDestroyBombWalls(items)), # pink
-                                                        haveItem(items, 'Morph'), # big pink
-                                                        canOpenGreenDoors(items)) # also implies first red door
+        'Green Hill Zone Top Right': lambda sm: sm.wand(sm.wor(sm.haveItem('SpeedBooster'), sm.canDestroyBombWalls()), # pink
+                                                        sm.haveItem('Morph'), # big pink
+                                                        sm.canOpenGreenDoors()) # also implies first red door
     }),
     AccessPoint('Green Hill Zone Top Right', 'GreenPinkBrinstar', {
-        'Noob Bridge Right': lambda items: SMBool(True, 0),
-        'Green Brinstar Elevator Right': lambda items: wand(wor(haveItem(items, 'SpeedBooster'), canDestroyBombWalls(items)), # pink
-                                                            haveItem(items, 'Morph')) # big pink
-    }, lambda items: canOpenYellowDoors(items)),
+        'Noob Bridge Right': lambda sm: sm.setSMBool(True),
+        'Green Brinstar Elevator Right': lambda sm: sm.wand(sm.wor(sm.haveItem('SpeedBooster'), sm.canDestroyBombWalls()), # pink
+                                                            sm.haveItem('Morph')) # big pink
+    }, lambda sm: sm.canOpenYellowDoors()),
     AccessPoint('Noob Bridge Right', 'GreenPinkBrinstar', {
-        'Green Hill Zone Top Right': lambda items: wor(haveItem(items, 'Wave'),
-                                                       wand(canOpenRedDoors(items), # can do the glitch with either missile or supers
-                                                            Knows.GreenGateGlitch))
-    }, lambda items: canOpenGreenDoors(items)),
+        'Green Hill Zone Top Right': lambda sm: sm.wor(sm.haveItem('Wave'),
+                                                       sm.wand(sm.canOpenRedDoors(), # can do the glitch with either missile or supers
+                                                               sm.knowsGreenGateGlitch()))
+    }, lambda sm: sm.canOpenGreenDoors()),
     # Wrecked Ship
     AccessPoint('West Ocean Left', 'WreckedShip', {
-        'Crab Maze Left': lambda items: wand(canOpenGreenDoors(items),
-                                             canPassSpongeBath(items), # implies dead phantoon and pass bomb passages
-                                             canPassForgottenHighway(items, True))
+        'Crab Maze Left': lambda sm: sm.wand(sm.canOpenGreenDoors(),
+                                             sm.canPassSpongeBath(), # implies dead phantoon and pass bomb passages
+                                             sm.canPassForgottenHighway(True))
     }),
     AccessPoint('Crab Maze Left', 'WreckedShip', {
-        'West Ocean Left': lambda items: canPassForgottenHighway(items, False)
+        'West Ocean Left': lambda sm: sm.canPassForgottenHighway(False)
     }),
     # Lower Norfair
     AccessPoint('Lava Dive Right', 'LowerNorfair', {
-        'Three Muskateers Room Left': lambda items: wand(canHellRun(items, 'LowerNorfair'),
-                                                         canPassLavaPit(items),
-                                                         canPassWorstRoom(items))
+        'Three Muskateers Room Left': lambda sm: sm.wand(sm.canHellRun('LowerNorfair'),
+                                                         sm.canPassLavaPit(),
+                                                         sm.canPassWorstRoom())
     }),
     AccessPoint('Three Muskateers Room Left', 'LowerNorfair', {
-        'Lava Dive Right': lambda items: wand(canHellRun(items, 'LowerNorfair'),
-                                              canPassAmphitheaterReverse(items)) # if this is OK, reverse lava pit will be too...
+        'Lava Dive Right': lambda sm: sm.wand(sm.canHellRun('LowerNorfair'),
+                                              sm.canPassAmphitheaterReverse()) # if this is OK, reverse lava pit will be too...
     }),
     # Norfair   
     AccessPoint('Warehouse Entrance Left', 'Norfair', {
-        'Single Chamber Top Right': lambda items: canAccessHeatedNorfairFromEntrance(items),
-        'Kronic Boost Room Bottom Left': lambda items: canAccessHeatedNorfairFromEntrance(items)
+        'Single Chamber Top Right': lambda sm: sm.canAccessHeatedNorfairFromEntrance(),
+        'Kronic Boost Room Bottom Left': lambda sm: sm.canAccessHeatedNorfairFromEntrance()
     }),
     AccessPoint('Single Chamber Top Right', 'Norfair', {
-        'Warehouse Entrance Left': lambda items: wand(canDestroyBombWalls(items), haveItem(items, 'Morph'), canHellRun(items, 'MainUpperNorfair')),
-        'Kronic Boost Room Bottom Left': lambda items: wand(canDestroyBombWalls(items), haveItem(items, 'Morph'), canHellRun(items, 'MainUpperNorfair'))
-    }, lambda items: wand(canDestroyBombWalls(items), haveItem(items, 'Morph'), RomPatches.has(RomPatches.SingleChamberNoCrumble))),
+        'Warehouse Entrance Left': lambda sm: sm.wand(sm.canDestroyBombWalls(), sm.haveItem('Morph'), sm.canHellRun('MainUpperNorfair')),
+        'Kronic Boost Room Bottom Left': lambda sm: sm.wand(sm.canDestroyBombWalls(), sm.haveItem('Morph'), sm.canHellRun('MainUpperNorfair'))
+    }, lambda sm: sm.wand(sm.canDestroyBombWalls(), sm.haveItem('Morph'), RomPatches.has(RomPatches.SingleChamberNoCrumble))),
     AccessPoint('Kronic Boost Room Bottom Left', 'Norfair', {
-        'Single Chamber Top Right': lambda items: canHellRun(items, 'MainUpperNorfair'),
-        'Warehouse Entrance Left': lambda items: canHellRun(items, 'MainUpperNorfair')
-    }, lambda items: canOpenYellowDoors(items)),
+        'Single Chamber Top Right': lambda sm: sm.canHellRun('MainUpperNorfair'),
+        'Warehouse Entrance Left': lambda sm: sm.canHellRun('MainUpperNorfair')
+    }, lambda sm: sm.canOpenYellowDoors()),
     # Maridia
     AccessPoint('Main Street Bottom', 'Maridia', {
-        'Red Fish Room Left': lambda items: canGoUpMtEverest(items),
-        'Crab Hole Bottom Left': lambda items: wand(haveItem(items, 'Morph'), canOpenGreenDoors(items)), # red door+green gate
-        'Le Coude Right': lambda items: wand(canOpenGreenDoors(items), # gate+door
-                                             haveItem(items, 'Gravity')) # for the sand pits
+        'Red Fish Room Left': lambda sm: sm.canGoUpMtEverest(),
+        'Crab Hole Bottom Left': lambda sm: sm.wand(sm.haveItem('Morph'), sm.canOpenGreenDoors()), # red door+green gate
+        'Le Coude Right': lambda sm: sm.wand(sm.canOpenGreenDoors(), # gate+door
+                                             sm.haveItem('Gravity')) # for the sand pits
     }),
     AccessPoint('Crab Hole Bottom Left', 'Maridia', {
-        'Main Street Bottom': lambda items: wand(canExitCrabHole(items),
-                                                 wand(haveItem(items, 'Super'), Knows.GreenGateGlitch)),
-        'Le Coude Right': lambda items: wand(canExitCrabHole(items),
-                                             canOpenGreenDoors(items), # toilet door
-                                             haveItem(items, 'Gravity')) # for the sand pits
-    }, lambda items: haveItem(items, 'Morph')),
+        'Main Street Bottom': lambda sm: sm.wand(sm.canExitCrabHole(),
+                                                 sm.wand(sm.haveItem('Super'), sm.knowsGreenGateGlitch())),
+        'Le Coude Right': lambda sm: sm.wand(sm.canExitCrabHole(),
+                                             sm.canOpenGreenDoors(), # toilet door
+                                             sm.haveItem('Gravity')) # for the sand pits
+    }, lambda sm: sm.haveItem('Morph')),
     AccessPoint('Le Coude Right', 'Maridia', {
-        'Crab Hole Bottom Left': lambda items: wand(canOpenYellowDoors(items),
-                                                    haveItem(items, 'Gravity'), # for the sand pits
-                                                    canOpenGreenDoors(items)), # toilet door
-        'Main Street Bottom': lambda items: wand(canOpenYellowDoors(items),
-                                                 wand(haveItem(items, 'Gravity'), # for the sand pits
-                                                      canOpenGreenDoors(items), # toilet door
-                                                      Knows.GreenGateGlitch)),
+        'Crab Hole Bottom Left': lambda sm: sm.wand(sm.canOpenYellowDoors(),
+                                                    sm.haveItem('Gravity'), # for the sand pits
+                                                    sm.canOpenGreenDoors()), # toilet door
+        'Main Street Bottom': lambda sm: sm.wand(sm.canOpenYellowDoors(),
+                                                 sm.wand(sm.haveItem('Gravity'), # for the sand pits
+                                                         sm.canOpenGreenDoors(), # toilet door
+                                                         sm.knowsGreenGateGlitch())),
     }),
     AccessPoint('Red Fish Room Left', 'Maridia', {
-        'Main Street Bottom': lambda items: SMBool(True, 0) # just go down
+        'Main Street Bottom': lambda sm: sm.setSMBool(True) # just go down
     }),
     # Red Brinstar. Main nodes: Red Tower Top Left, East Tunnel Right
     AccessPoint('Red Tower Top Left', 'RedBrinstar', {
         # go up
-        'Red Brinstar Elevator': lambda items: wand(canClimbRedTower(items),
-                                                    wor(canOpenYellowDoors(items),
-                                                        RomPatches.has(RomPatches.RedTowerBlueDoors))),
-        'Caterpillar Room Top Right': lambda items: wand(haveItem(items, 'Morph'),
+        'Red Brinstar Elevator': lambda sm: sm.wand(sm.canClimbRedTower(),
+                                                    sm.wor(sm.canOpenYellowDoors(),
+                                                           RomPatches.has(RomPatches.RedTowerBlueDoors))),
+        'Caterpillar Room Top Right': lambda sm: sm.wand(sm.haveItem('Morph'),
                                                          RomPatches.has(RomPatches.NoMaridiaGreenGates),
-                                                         canClimbRedTower(items)),
+                                                         sm.canClimbRedTower()),
         # go down
-        'East Tunnel Right': lambda items: SMBool(True, 0)
+        'East Tunnel Right': lambda sm: sm.setSMBool(True)
     }),
     AccessPoint('Caterpillar Room Top Right', 'RedBrinstar', {
-        'Red Brinstar Elevator': lambda items: wand(haveItem(items, 'Morph'),
-                                                    wor(RomPatches.has(RomPatches.NoMaridiaGreenGates), canOpenGreenDoors(items)),
-                                                    wor(canUsePowerBombs(items),
-                                                        RomPatches.has(RomPatches.RedTowerBlueDoors))),
-        'Red Tower Top Left': lambda items: wand(haveItem(items, 'Morph'),
-                                                 wor(RomPatches.has(RomPatches.NoMaridiaGreenGates), canOpenGreenDoors(items)),
-                                                 canOpenYellowDoors(items))
-    }, lambda items: wand(haveItem(items, 'Morph'), RomPatches.has(RomPatches.NoMaridiaGreenGates))),
+        'Red Brinstar Elevator': lambda sm: sm.wand(sm.haveItem('Morph'),
+                                                    sm.wor(RomPatches.has(RomPatches.NoMaridiaGreenGates), sm.canOpenGreenDoors()),
+                                                    sm.wor(sm.canUsePowerBombs(),
+                                                           RomPatches.has(RomPatches.RedTowerBlueDoors))),
+        'Red Tower Top Left': lambda sm: sm.wand(sm.haveItem('Morph'),
+                                                 sm.wor(RomPatches.has(RomPatches.NoMaridiaGreenGates), sm.canOpenGreenDoors()),
+                                                 sm.canOpenYellowDoors())
+    }, lambda sm: sm.wand(sm.haveItem('Morph'), RomPatches.has(RomPatches.NoMaridiaGreenGates))),
     AccessPoint('Red Brinstar Elevator', 'RedBrinstar', {
-        'Caterpillar Room Top Right': lambda items: SMBool(True, 0), # handled by room traverse function
-        'Red Tower Top Left': lambda items: canOpenYellowDoors(items)
+        'Caterpillar Room Top Right': lambda sm: sm.setSMBool(True), # handled by room traverse function
+        'Red Tower Top Left': lambda sm: sm.canOpenYellowDoors()
     }),
     AccessPoint('East Tunnel Right', 'RedBrinstar', {
-        'East Tunnel Top Right': lambda items: SMBool(True, 0), # handled by room traverse function
-        'Glass Tunnel Top': lambda items: wand(canUsePowerBombs(items),
-                                               wor(haveItem(items, 'Gravity'),
-                                                   haveItem(items, 'HiJump'))),
-        'Red Tower Top Left': lambda items: canClimbBottomRedTower(items)
+        'East Tunnel Top Right': lambda sm: sm.setSMBool(True), # handled by room traverse function
+        'Glass Tunnel Top': lambda sm: sm.wand(sm.canUsePowerBombs(),
+                                               sm.wor(sm.haveItem('Gravity'),
+                                                      sm.haveItem('HiJump'))),
+        'Red Tower Top Left': lambda sm: sm.canClimbBottomRedTower()
     }),
     AccessPoint('East Tunnel Top Right', 'RedBrinstar', {
-        'East Tunnel Right': lambda items: wor(RomPatches.has(RomPatches.NoMaridiaGreenGates),
-                                               canOpenGreenDoors(items))
-    }, lambda items: RomPatches.has(RomPatches.NoMaridiaGreenGates)),
+        'East Tunnel Right': lambda sm: sm.wor(RomPatches.has(RomPatches.NoMaridiaGreenGates),
+                                               sm.canOpenGreenDoors())
+    }, lambda sm: RomPatches.has(RomPatches.NoMaridiaGreenGates)),
     AccessPoint('Glass Tunnel Top', 'RedBrinstar', {
-        'East Tunnel Right': lambda items: canUsePowerBombs(items)
-    }, lambda items: canUsePowerBombs(items))
+        'East Tunnel Right': lambda sm: sm.canUsePowerBombs()
+    }, lambda sm: sm.canUsePowerBombs())
 ]
 
 vanillaTransitions = [
@@ -207,14 +206,15 @@ class AccessGraph(object):
     # items: collected items
     # maxDiff: difficulty limit
     # return newly opened access points 
-    def getNewAvailNodes(self, availNodes, nodesToCheck, items, maxDiff):
+    def getNewAvailNodes(self, availNodes, nodesToCheck, smbm, maxDiff):
         newAvailNodes = []
         for node in nodesToCheck:
             for dstName, tFunc in node.transitions.iteritems():
                 dst = self.accessPoints[dstName]
                 if dst in newAvailNodes or dst in availNodes:
                     continue
-                diff = tFunc(items)
+                # diff = tFunc(smbm)
+                diff = smbm.eval(tFunc)
                 if diff.bool == True and diff.difficulty <= maxDiff:
                     newAvailNodes.append(dst)
         return newAvailNodes
@@ -223,11 +223,11 @@ class AccessGraph(object):
     # items: collected items
     # maxDiff: difficulty limit
     # return available AccessPoint list
-    def getAvailableAccessPoints(self, rootNode, items, maxDiff):
+    def getAvailableAccessPoints(self, rootNode, smbm, maxDiff):
         availNodes = [ rootNode ]
         newAvailNodes = availNodes
         while len(newAvailNodes) > 0:
-            newAvailNodes = self.getNewAvailNodes(availNodes, newAvailNodes, items, maxDiff)
+            newAvailNodes = self.getNewAvailNodes(availNodes, newAvailNodes, smbm, maxDiff)
             availNodes += newAvailNodes
         return availNodes
     
@@ -235,8 +235,8 @@ class AccessGraph(object):
     # items: collected items
     # maxDiff: difficulty limit
     # return available locations list, also stores difficulty in locations
-    def getAvailableLocations(self, locations, items, maxDiff):
-        availAcessPoints = self.getAvailableAccessPoints(self.accessPoints['Landing Site'], items, maxDiff)
+    def getAvailableLocations(self, locations, smbm, maxDiff):
+        availAcessPoints = self.getAvailableAccessPoints(self.accessPoints['Landing Site'], smbm, maxDiff)
         availAreas = set([ap.GraphArea for ap in availAcessPoints])
         availLocs = []
         for loc in locations:
@@ -246,9 +246,9 @@ class AccessGraph(object):
                 ap = self.accessPoints[apName]
                 if not ap in availAcessPoints:
                     continue
-                tdiff = tFunc(items)
+                tdiff = smbm.eval(tFunc)
                 if tdiff.bool == True and tdiff.difficulty <= maxDiff:
-                    diff = loc['Available'](items)
+                    diff = smbm.eval(loc['Available'])
                     loc['difficulty'] = SMBool(diff.bool, max(tdiff.difficulty, diff.difficulty))
                     if diff.bool == True and diff.difficulty <= maxDiff:
                         availLocs.append(loc)

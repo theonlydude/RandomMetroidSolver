@@ -8,7 +8,7 @@ class Helpers(object):
     def __init__(self, smbm):
         self.smbm = smbm
         # cacheable functions sorted to avoid dependencies
-        self.methodList = [
+        self.cachedMethods = [
             'heatProof', 'canFly', 'canUseBombs', 'canOpenRedDoors',
             'canOpenYellowDoors', 'canUsePowerBombs',
             'canDestroyBombWalls', 'canPassBombPassages',
@@ -286,11 +286,7 @@ class Helpers(object):
         #            power bomb to destroy the tunnel at Glass Tunnel,
         #            then to climb up Main Street, either:
         #             -have gravity (easy regular way)
-        #             -freeze the enemies to jump on them, but without a strong gun in the upper left
-        #              when the Sciser comes down you don't have enough time to hit it several times
-        #              to freeze it, as such you have to either:
-        #               -use the first Sciser from the ground and wait for it to come all the way up
-        #               -do a double jump with spring ball
+        #             -freeze the enemies to jump on them
         return self.smbm.wand(self.smbm.canAccessRedBrinstar(),
                               self.smbm.canUsePowerBombs(),
                               self.smbm.wor(self.smbm.haveItem('Gravity'),

@@ -469,6 +469,12 @@ function startTheTour(step=-1) {
       placement: "auto left"
     },
     {
+      element: "#noGravHeatStep",
+      title: "Optional patches",
+      content: "Patch from Total Item Randomizer to remove the Gravity Suit environmental protection (heat, spikes, electricity...), it balances more the two suits abilities. Disable it to have a more vanilla feeling.",
+      placement: "auto left"
+    },
+    {
       element: "#patchesStep",
       title: "Optional patches",
       content: "A selection of optional patches to include to enhance the gaming experience.",
@@ -653,7 +659,7 @@ def displayNumber(id, min, max, default, step="1"):
 	      <td><button type="button" onclick="startTheTour(12)">?</button></td>
 	    </tr>
 	    <tr>
-	      <td class="full" id="noGravHeatStep">{{displayCheckbox("noGravHeat", True)}} Remove Gravity Suit heat protection (by Total)</td><td></td>
+	      <td class="full" id="noGravHeatStep">{{displayCheckbox("noGravHeat", True)}} Remove Gravity Suit heat protection (by Total)</td><td><button type="button" onclick="startTheTour(13)">?</button></td>
 	    </tr>
 	  </table>
 	  </p>
@@ -676,15 +682,15 @@ for patch in patches:
 	  <table class="full">
             <tr>
               <td class="full" id="funCombatStep">{{displayCheckbox("funCombat")}} Super Fun Combat</td>
-              <td><button type="button" onclick="startTheTour(14)">?</button></td>
-            </tr>
-            <tr>
-              <td class="full" id="funMovementStep">{{displayCheckbox("funMovement")}} Super Fun Movement</td>
               <td><button type="button" onclick="startTheTour(15)">?</button></td>
             </tr>
             <tr>
-              <td class="full" id="funSuitsStep">{{displayCheckbox("funSuits")}} Suitless</td>
+              <td class="full" id="funMovementStep">{{displayCheckbox("funMovement")}} Super Fun Movement</td>
               <td><button type="button" onclick="startTheTour(16)">?</button></td>
+            </tr>
+            <tr>
+              <td class="full" id="funSuitsStep">{{displayCheckbox("funSuits")}} Suitless</td>
+              <td><button type="button" onclick="startTheTour(17)">?</button></td>
             </tr>
           </table>
 	</div>

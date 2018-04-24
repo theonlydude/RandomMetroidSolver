@@ -589,7 +589,6 @@ if __name__ == "__main__":
     parser.add_argument('--firstItemsLog', '-1', help="path to file where for each item type the first time it was found and where will be written (spoilers!)", nargs='?', default=None, type=str, dest='firstItemsLog')
 
     args = parser.parse_args()
-    Knows.renameKnows()
     solver = Solver(rom=args.romFileName, params=args.paramsFileName, debug=args.debug, firstItemsLog=args.firstItemsLog)
 
     if args.difficultyTarget is not None:

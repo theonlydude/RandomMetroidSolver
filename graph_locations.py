@@ -467,7 +467,9 @@ locations = [
     'Available': lambda sm: sm.wand(sm.canOpenRedDoors(),
                                     sm.wor(sm.canFly(),
                                            sm.wand(sm.haveItem('Gravity'), sm.haveItem('SpeedBooster')),
-                                           sm.wand(sm.haveItem('HiJump'), sm.haveItem('SpringBall'), sm.knowsSpringBallJump()),
+                                           sm.wand(sm.haveItem('SpringBall'),
+                                                   sm.wor(sm.wand(sm.haveItem('HiJump'), sm.knowsSpringBallJump()),
+                                                          sm.knowsSpringBallJumpFromWall())),
                                            sm.haveItem('Grapple')))
 },
 {
@@ -535,9 +537,15 @@ locations = [
         'Le Coude Right': lambda sm: sm.wand(sm.canOpenYellowDoors(),
                                              sm.canOpenGreenDoors()), # toilet
     },
-    'Available': lambda sm: sm.wand(sm.haveItem('Gravity'),
+    'Available': lambda sm: sm.wand(sm.wor(sm.haveItem('Gravity'),
+                                           sm.wand(sm.haveItem('HiJump'),
+                                                   sm.knowsGravLessLevel3())),
                                     sm.wor(sm.wand(sm.haveItem('Ice'),
-                                                   sm.knowsPuyoClip()),
+                                                   sm.wor(sm.wand(sm.haveItem('Gravity'),
+                                                                  sm.knowsPuyoClip()),
+                                                          sm.wand(sm.knowsSuitlessPuyoClip(),
+                                                                  sm.haveItem('SpringBall'),
+                                                                  sm.knowsSpringBallJump()))),
                                            sm.wand(sm.haveItem('Grapple'),
                                                    sm.wor(sm.canFlyDiagonally(),
                                                           sm.haveItem('HiJump')))))
@@ -609,7 +617,7 @@ locations = [
     },
     'Available': lambda sm: sm.wand(sm.canUsePowerBombs(),
                                     sm.wor(sm.haveItem('SpeedBooster'),
-                                        sm.canFly()))
+                                           sm.canFly()))
 },
 {
     'Area': "Crateria",

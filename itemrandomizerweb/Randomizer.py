@@ -218,7 +218,6 @@ class Randomizer(object):
         self.chooseLocRanges = self.getRangeDict(settings.choose['Locations'])
         self.restrictions = settings.restrictions
         self.itemPool = Items.getItemPool(settings.qty, settings.forbiddenItems)
-        self.restrictedLocations = self.getRestrictedLocations(settings.forbiddenItems, locations)
         self.difficultyTarget = settings.maxDiff
         self.sampleSize = settings.sampleSize
         self.itemLimit = settings.itemLimit
@@ -230,35 +229,32 @@ class Randomizer(object):
         self.maxCancel = 1
         self.totalCancels = 0
         self.pickedUpLocs = []
+        self.currentItems = []
+        self.nonProgTypesCache = []
+        self.progTypesCache = []
         if self.difficultyTarget > mania:
             self.smbm = SMBoolManager.factory('bool', cache=True, graph=graphTransitions is not None)
         else:
             self.smbm = SMBoolManager.factory('diff', cache=True, graph=graphTransitions is not None)
+        self.restrictedLocations = self.getRestrictedLocations(locations, settings.forbiddenItems)
+        self.smbm.resetItems()
 
-    def getRestrictedLocations(self, forbiddenItems, locations):
-        # list only absolutely unreachable locations, regardless of known techniques
-        # TODO more accurate filtering
-        restricted = []
-        if 'SpeedBooster' in forbiddenItems:
-            restricted += ["Energy Tank, Waterway", "Reserve Tank, Wrecked Ship",
-                           "Super Missile (Crateria)", "Missile (green Maridia shinespark)",
-                           "Missile (pink Maridia)", "Super Missile (pink Maridia)"]
-        if 'Gravity' in forbiddenItems:
-            restricted += ["Missile (pink Maridia)", "Super Missile (pink Maridia)",
-                           "Missile (green Maridia shinespark)", "Power Bomb (right Maridia sand pit room)",
-                           "Spring Ball" ]
-        if 'SpaceJump' in forbiddenItems:
-            restricted += ["Missile (Gold Torizo)"]
+    # list unreachable locations (possible with super fun setting)
+    def getRestrictedLocations(self, locations, forbiddenItems):
+        if len(forbiddenItems) == 0: # no super fun setting, nothing to do
+            return []
+        # give us everything and beat every boss to see what we can access
+        for item in self.itemPool:
+            self.smbm.addItem(item['Type'])
+        for boss in ['Kraid', 'Phantoon', 'Draygon', 'Ridley']:
+            Bosses.beatBoss(boss)
+        totalAvailLocs = [loc for loc in self.currentLocations() if self.locPostAvailable(loc, None)]
+        restricted = [loc for loc in locations if loc not in totalAvailLocs]
+        # clean up
+        self.smbm.resetSMBool()
+        Bosses.reset()
 
-        restricted = sorted(list(set(restricted)))
-
-        # add full locations
-        restrictedFull = []
-        for restrictLoc in restricted:
-            for loc in locations:
-                if loc['Name'] == restrictLoc:
-                    restrictedFull.append(loc)
-        return restrictedFull
+        return restricted
         
     def locAvailable(self, loc):
         result = self.smbm.eval(loc['Available'])
@@ -281,7 +277,7 @@ class Randomizer(object):
 
         if item is not None:
             self.smbm.addItem(item['Type'])
-            print("test item {}".format(item['Type']))
+#            print("test item {}".format(item['Type']))
 
         avail = lambda loc: self.locAvailable(loc)
         ret = sorted(List.filter(avail, self.unusedLocations), key=lambda loc: loc['Name'])
@@ -289,25 +285,25 @@ class Randomizer(object):
         if item is not None:
             self.smbm.removeItem(item['Type'])
 
-        if len(self.currentItems) == 99:
-            print("curItems: {}".format(sorted(list(set([it['Name'] for it in self.currentItems])))))
-            print("curlocs: {}".format([loc['Name'] for loc in ret]))
+#        if len(self.currentItems) >= 98:
+#            print("curItems: {}".format(sorted(list(set([it['Name'] for it in self.currentItems])))))
+#            print("locs: {}".format([loc['Name'] for loc in self.unusedLocations]))
 
         return ret
 
     def currentLocationsGraph(self, item=None):
         if item is not None:
             self.smbm.addItem(item['Type'])
-            print("test item {}".format(item['Type']))
+#            print("test item {}".format(item['Type']))
 
         ret = sorted(self.areaGraph.getAvailableLocations(self.unusedLocations, self.smbm, self.difficultyTarget), key=lambda loc: loc['Name'])
 
         if item is not None:
             self.smbm.removeItem(item['Type'])
 
-        if len(self.currentItems) == 99:
-            print("curItems: {}".format(sorted(list(set([it['Name'] for it in self.currentItems])))))
-            print("curlocs: {}".format([loc['Name'] for loc in ret]))
+        # if len(self.currentItems) == 99:
+        #     print("curItems: {}".format(sorted(list(set([it['Name'] for it in self.currentItems])))))
+        #     print("curlocs: {}".format([loc['Name'] for loc in ret]))
 
         return ret
 
@@ -530,10 +526,10 @@ class Randomizer(object):
         else:
             newLocationsHasMajor = True
 
-        print("checkItem {}: {} > {} ?".format(item['Type'], len(newLocations), len(oldLocations)))
-        if len(newLocations) in [78,79] and item['Type'] == 'ETank':
-            print("checkItem: curItems {}".format(sorted(list([it['Type'] for it in self.currentItems]))))
-            print("checkItem: newlocs {}".format([loc['Name'] for loc in newLocations]))
+#        print("checkItem {}: {} > {} ?".format(item['Type'], len(newLocations), len(oldLocations)))
+        # if len(newLocations) in [78,79] and item['Type'] == 'ETank':
+        #     print("checkItem: curItems {}".format(sorted(list([it['Type'] for it in self.currentItems]))))
+        #     print("checkItem: newlocs {}".format([loc['Name'] for loc in newLocations]))
 #            self.smbm.addItem('SpeedBooster')
 #            a = self.smbm.canHellRun('LowerNorfair')
 #            print("checkItem: canHellRun('LowerNorfair') {}".format(a))
@@ -603,7 +599,7 @@ class Randomizer(object):
             self.nonProgTypesCache = []
             self.progTypesCache = []
         itemLocations.append(itemLocation)
-        print(str(len(self.currentItems)) + ':' + itemLocation['Item']['Type'] + ' at ' + itemLocation['Location']['Name'])
+#        print(str(len(self.currentItems)) + ':' + itemLocation['Item']['Type'] + ' at ' + itemLocation['Location']['Name'])
         self.itemPool = self.removeItem(item['Type'], self.itemPool)
 
     def generateItem(self, curLocs, pool):
@@ -670,31 +666,31 @@ class Randomizer(object):
         self.usedLocations.remove(loc)
         self.unusedLocations.append(loc)
         self.totalCancels += 1
-        print("Cancelled  " + item['Type'] + " at " + loc['Name'])
+#        print("Cancelled  " + item['Type'] + " at " + loc['Name'])
         sys.stdout.write('x')
         sys.stdout.flush()
         return True
         
     def checkLocPool(self):
-        print("checkLocPool {}".format([it['Name'] for it in self.itemPool]))
+#        print("checkLocPool {}".format([it['Name'] for it in self.itemPool]))
         progItems = [item for item in self.itemPool if self.isProgItem(item)]
-        print("progItems {}".format([it['Name'] for it in progItems]))
-        print("curItems {}".format([it['Name'] for it in self.currentItems]))
+#        print("progItems {}".format([it['Name'] for it in progItems]))
+#        print("curItems {}".format([it['Name'] for it in self.currentItems]))
         if len(progItems) == 0 or self.locLimit <= 0:
             return True
         isMinorProg = any(item['Class'] == 'Minor' for item in progItems)
         isMajorProg = any(item['Class'] == 'Major' for item in progItems)
         accessibleLocations = []
-        print("unusedLocs: {}".format([loc['Name'] for loc in self.unusedLocations]))
+#        print("unusedLocs: {}".format([loc['Name'] for loc in self.unusedLocations]))
         locs = self.currentLocations()
         for loc in locs:
             majAvail = self.restrictions['MajorMinor'] == False or loc['Class'] == 'Major'
             minAvail = self.restrictions['MajorMinor'] == False or loc['Class'] == 'Minor'
-            print("{} locAv {} locPAv {}".format(loc['Name'], self.locAvailable(loc), self.locPostAvailable(loc, None)))
+#            print("{} locAv {} locPAv {}".format(loc['Name'], self.locAvailable(loc), self.locPostAvailable(loc, None)))
             if ((isMajorProg and majAvail) or (isMinorProg and minAvail)) \
                and self.locAvailable(loc) and self.locPostAvailable(loc, None):
                 accessibleLocations.append(loc)
-        print("accesLoc {}".format([loc['Name'] for loc in accessibleLocations]))
+#        print("accesLoc {}".format([loc['Name'] for loc in accessibleLocations]))
         if len(accessibleLocations) <= self.locLimit:
             sys.stdout.write('|')
             sys.stdout.flush()
@@ -802,8 +798,9 @@ class Randomizer(object):
         curLocs = self.currentLocations()
         nLocsOut = len(curLocs)
         if nLocsOut - nFreed <= nLocsIn:
-#            print("up")
             self.maxCancel += 1
+            # print("up, now maxCancel = " + str(self.maxCancel))
+            # print("nLocsIn=" + str(nLocsIn) + ", nLocsOut=" + str(nLocsOut) + ", unused=" + str(len(self.unusedLocations)))
         else:
 #            print("one")
             self.maxCancel = 1
@@ -812,10 +809,6 @@ class Randomizer(object):
     
     def generateItems(self):
         itemLocations = []
-        self.currentItems = []
-        self.smbm.resetItems()
-        self.nonProgTypesCache = []
-        self.progTypesCache = []
         isStuck = False
         # if major items are removed from the pool (super fun setting), fill not accessible locations with
         # items that are as useless as possible
@@ -828,7 +821,7 @@ class Randomizer(object):
                 # 2. collect an item with standard pool that will unlock the situation
 #                print("Full Pool " + str(len(self.itemPool)) + ", curLocs " + str([l['Name'] for l in self.currentLocations(self.currentItems)]))
                 isStuck = self.getItemFromStandardPool(itemLocations, isStuck, maxLen)
-                if isStuck == True:
+                if isStuck == True and len(self.itemPool) > 0:
                     # force item cancel if stuck as a last resort for early game corner cases
                     self.cancelItem(itemLocations, maxLen, [], force=True)
                     isStuck = self.getItemFromStandardPool(itemLocations, isStuck, maxLen)

@@ -119,12 +119,12 @@ if [ -z test_jm.csv ]; then
 fi
 
 MISMATCH_FOUND=1
-let LOOPS=${LOOPS}/2
+let LOOPS=${LOOPS}/4
 for i in $(seq 1 ${LOOPS}); do
     computeSeed &
     computeSeed &
-#    computeSeed &
-#    computeSeed &
+    computeSeed &
+    computeSeed &
     wait
 done | tee test_jm.log
 

@@ -289,7 +289,7 @@ class Randomizer(object):
         if item is not None:
             self.smbm.removeItem(item['Type'])
 
-        if len(self.currentItems) == 4:
+        if len(self.currentItems) == 99:
             print("curItems: {}".format(sorted(list(set([it['Name'] for it in self.currentItems])))))
             print("curlocs: {}".format([loc['Name'] for loc in ret]))
 
@@ -305,7 +305,7 @@ class Randomizer(object):
         if item is not None:
             self.smbm.removeItem(item['Type'])
 
-        if len(self.currentItems) == 4:
+        if len(self.currentItems) == 99:
             print("curItems: {}".format(sorted(list(set([it['Name'] for it in self.currentItems])))))
             print("curlocs: {}".format([loc['Name'] for loc in ret]))
 
@@ -531,23 +531,24 @@ class Randomizer(object):
             newLocationsHasMajor = True
 
         print("checkItem {}: {} > {} ?".format(item['Type'], len(newLocations), len(oldLocations)))
-        if len(newLocations) in [12,13] and item['Type'] == 'Varia':
+        if len(newLocations) in [78,79] and item['Type'] == 'ETank':
+            print("checkItem: curItems {}".format(sorted(list([it['Type'] for it in self.currentItems]))))
             print("checkItem: newlocs {}".format([loc['Name'] for loc in newLocations]))
-            self.smbm.addItem('Varia')
-            a = self.smbm.canHellRun('LowerNorfair')
-            print("checkItem: canHellRun('LowerNorfair') {}".format(a))
-            a = self.smbm.canPassWorstRoom()
-            print("checkItem: canPassWorstRoom() {}".format(a))
+#            self.smbm.addItem('SpeedBooster')
+#            a = self.smbm.canHellRun('LowerNorfair')
+#            print("checkItem: canHellRun('LowerNorfair') {}".format(a))
+#            a = self.smbm.canPassWorstRoom()
+#            print("checkItem: canPassWorstRoom() {}".format(a))
 #            a = self.smbm.canAccessLowerNorfair()
 #            print("checkItem: canAccessLowerNorfair() {}".format(a))
-            try:
-                a = self.smbm.canPassLavaPit()
-                print("checkItem: canPassLavaPit() {}".format(a))
-            except:
-                pass
+#            try:
+#                a = self.smbm.canPassLavaPit()
+#                print("checkItem: canPassLavaPit() {}".format(a))
+#            except:
+#                pass
 #            a = self.smbm.canAccessRedBrinstar()
 #            print("checkItem: canAccessRedBrinstar() {}".format(a))
-            self.smbm.removeItem('Varia')
+#            self.smbm.removeItem('SpeedBooster')
 
         return newLocationsHasMajor and len(newLocations) > len(oldLocations)
     

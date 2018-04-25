@@ -206,11 +206,12 @@ locations = [
         'Visibility': "Chozo",
         'Room': 'Ice Beam Room',
         # DONE: harder without varia
-        'Available': lambda sm: sm.wand(sm.canAccessKraid(),
+        'Available': lambda sm: sm.wand(sm.canAccessRedBrinstar(),
                                         sm.canHellRun('Ice'),
+                                        sm.canPassBombPassages(), # if you fail
                                         sm.wor(sm.wand(sm.haveItem('Morph'),
                                                        sm.knowsMockball()),
-                                               sm.haveItem('SpeedBooster'))) # FIXME : sm.knowsEarlyKraid() has nothing to do with this and is implied by canAccessKraid
+                                               sm.haveItem('SpeedBooster')))
     },
     {
         'Area': "Norfair",
@@ -243,8 +244,8 @@ locations = [
         'Room': 'Grapple Beam Room',
         'Available': lambda sm: sm.wand(sm.canDefeatCrocomire(),
                                         sm.wor(sm.canFly(),
-                                               sm.haveItem('SpeedBooster'),
-                                               sm.knowsGreenGateGlitch()))
+                                               sm.wand(sm.haveItem('SpeedBooster'), sm.wor(sm.knowsShortCharge(), sm.canUsePowerBombs())),
+                                               sm.wand(sm.haveItem('Super'), sm.knowsGreenGateGlitch())))
     },
     {
         'Area': "Norfair",
@@ -857,7 +858,7 @@ locations = [
         'Address': 0x78B46,
         'Visibility': "Hidden",
         'Room': 'Crumble Shaft',
-        'Available': lambda sm: sm.wand(sm.canAccessKraid(),
+        'Available': lambda sm: sm.wand(sm.canAccessRedBrinstar(),
                                         sm.canUsePowerBombs(),
                                         sm.canHellRun('Ice'))
     },

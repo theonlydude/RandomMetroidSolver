@@ -534,11 +534,14 @@ class Randomizer(object):
         if len(newLocations) in [78,79] and item['Type'] == 'ETank':
             print("checkItem: curItems {}".format(sorted(list([it['Type'] for it in self.currentItems]))))
             print("checkItem: newlocs {}".format([loc['Name'] for loc in newLocations]))
-#            self.smbm.addItem('SpeedBooster')
-#            a = self.smbm.canHellRun('LowerNorfair')
-#            print("checkItem: canHellRun('LowerNorfair') {}".format(a))
-#            a = self.smbm.canPassWorstRoom()
-#            print("checkItem: canPassWorstRoom() {}".format(a))
+            self.smbm.addItem('Etank')
+            try:
+                a = self.smbm.canDefeatDraygon()
+                print("checkItem: canDefeatDraygon {}".format(a))
+            except:
+                pass
+            a = self.smbm.canDefeatBotwoon()
+            print("checkItem: canDefeatBotwoon() {}".format(a))
 #            a = self.smbm.canAccessLowerNorfair()
 #            print("checkItem: canAccessLowerNorfair() {}".format(a))
 #            try:

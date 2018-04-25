@@ -14,15 +14,16 @@ fi
 ROM=$1
 LOOPS=$2
 
-# get git head
-TEMP_DIR=$(mktemp)
-rm -f ${TEMP_DIR}
-mkdir -p ${TEMP_DIR}
-(
-    cd ${TEMP_DIR}
-    git clone git@github.com:theonlydude/RandomMetroidSolver.git
-)
-ORIG=${TEMP_DIR}/RandomMetroidSolver/
+## get git head
+#TEMP_DIR=$(mktemp)
+#rm -f ${TEMP_DIR}
+#mkdir -p ${TEMP_DIR}
+#(
+#    cd ${TEMP_DIR}
+#    git clone git@github.com:theonlydude/RandomMetroidSolver.git
+#)
+#ORIG=${TEMP_DIR}/RandomMetroidSolver/
+ORIG=.
 
 PATCHES="-c AimAnyButton.ips -c itemsounds.ips -c spinjumprestart.ips -c supermetroid_msu1.ips -c elevators_doors_speed.ips"
 PRESETS=("manu" "noob" "speedrunner")
@@ -66,7 +67,7 @@ function generate_params {
     let S=$RANDOM%${#DIFFS[@]}
     DIFF=${DIFFS[$S]}
 
-    echo "-r ${ROM} --param diff_presets/${PRESET}.json ${PATCHES} --seed ${SEED} ${PROG_SPEED} ${SUPERFUN} ${MINORS} ${MISSILES} ${SUPERS} ${POWERBOMBS} ${ENERGY} ${SPREAD} ${FULL} ${SUIT} ${SPEED} ${DIFF}"
+    echo "-r ${ROM} --param diff_presets/${PRESET}.json ${PATCHES} --seed ${SEED} ${PROG_SPEED} ${SUPERFUN} ${MINORS} ${MISSILES} ${SUPERS} ${POWERBOMBS} ${ENERGY} ${SPREAD} ${FULL} ${SUIT} ${SPEED}" # ${DIFF}"
 }
 
 function computeSeed {
@@ -89,7 +90,7 @@ function computeSeed {
 
     echo "${SEED};${PARAMS};OLD;${TIME};${STUCK};${SUM_OLD};" | tee -a test_jm.csv
 
-    OUT=$(/usr/bin/time -f "\t%E real" python2 ./randomizer.py ${PARAMS} 2>&1)
+    OUT=$(/usr/bin/time -f "\t%E real" python2 ./randomizer.py ${PARAMS} --graph 2>&1)
 
     echo "${OUT}" | grep -q STUCK
     if [ $? -eq 0 ]; then
@@ -105,6 +106,7 @@ function computeSeed {
         MIS="MISMATCH !!!!!"
         echo "Mismatch for ${SEED}" | tee -a test_jm.err
         MISMATCH_FOUND=0
+        exit 1
     else
         MIS=""
     fi
@@ -117,12 +119,12 @@ if [ -z test_jm.csv ]; then
 fi
 
 MISMATCH_FOUND=1
-let LOOPS=${LOOPS}/4
+let LOOPS=${LOOPS}/2
 for i in $(seq 1 ${LOOPS}); do
     computeSeed &
     computeSeed &
-    computeSeed &
-    computeSeed &
+#    computeSeed &
+#    computeSeed &
     wait
 done | tee test_jm.log
 

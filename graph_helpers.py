@@ -24,12 +24,6 @@ class HelpersGraph(Helpers):
                               sm.knowsEarlyKraid()),
                        sm.canPassBombPassages())
 
-    def canPassTerminatorBombWall(self):
-        sm = self.smbm
-        return sm.wor(sm.wand(sm.haveItem('SpeedBooster'),
-                              sm.wor(sm.knowsSimpleShortCharge(), sm.knowsShortCharge())), 
-                      sm.canDestroyBombWalls())
-
     def canPassMoat(self):
         sm = self.smbm
         # EXPLAINED: In the Moat we can either:
@@ -142,7 +136,7 @@ class HelpersGraph(Helpers):
     def canPassLavaPit(self):
         sm = self.smbm
         nTanks4Dive = 3
-        if not sm.heatProof():
+        if sm.getBool(sm.heatProof()) == False:
             nTanks4Dive = 8
         return sm.wor(sm.wand(sm.haveItem('Gravity'), sm.haveItem('SpaceJump')),
                       sm.wand(sm.knowsGravityJump(), sm.haveItem('Gravity')),
@@ -201,12 +195,6 @@ class HelpersGraph(Helpers):
                                              sm.wand(sm.haveItem('Ice'), sm.knowsTediousMountEverest())))),
                        sm.canDoSuitlessMaridia(),
                        sm.wand(sm.canDoSuitlessOuterMaridia(), sm.knowsTediousMountEverest()))
-
-    def canAccessDraygonFromMainStreet(self):
-        sm = self.smbm
-        return sm.wand(sm.canDefeatBotwoon(),
-                       sm.wor(sm.haveItem('Gravity'),
-                              sm.wand(sm.canDoSuitlessMaridia(), sm.knowsGravLessLevel2())))
 
     def canDoSuitlessOuterMaridia(self):
         sm = self.smbm

@@ -289,7 +289,7 @@ class Randomizer(object):
         if item is not None:
             self.smbm.removeItem(item['Type'])
 
-        if len(self.currentItems) == 67:
+        if len(self.currentItems) == 4:
             print("curItems: {}".format(sorted(list(set([it['Name'] for it in self.currentItems])))))
             print("curlocs: {}".format([loc['Name'] for loc in ret]))
 
@@ -305,7 +305,7 @@ class Randomizer(object):
         if item is not None:
             self.smbm.removeItem(item['Type'])
 
-        if len(self.currentItems) == 67:
+        if len(self.currentItems) == 4:
             print("curItems: {}".format(sorted(list(set([it['Name'] for it in self.currentItems])))))
             print("curlocs: {}".format([loc['Name'] for loc in ret]))
 
@@ -454,7 +454,10 @@ class Randomizer(object):
         if item['Type'] in self.progTypesCache:
             return True
         if not item in self.currentItems:
-            isProg = len(self.currentLocations()) < len(self.currentLocations(item))
+            if item['Type'] in ['Nothing', 'NoEnergy']:
+                isProg = False
+            else:
+                isProg = len(self.currentLocations()) < len(self.currentLocations(item))
             if isProg == False and item['Type'] not in self.nonProgTypesCache:
                 self.nonProgTypesCache.append(item['Type'])
             elif isProg == True and item['Type'] not in self.progTypesCache:
@@ -511,6 +514,11 @@ class Randomizer(object):
         # items: list of items already placed
         #
         # return bool
+
+        # no need to test nothing items
+        if item['Type'] in ['Nothing', 'NoEnergy']:
+            return False
+
         oldLocations = curLocs
         canPlaceIt = self.canPlaceItem(item, oldLocations)
         if canPlaceIt == False:
@@ -521,6 +529,25 @@ class Randomizer(object):
             newLocationsHasMajor = List.exists(lambda l: l["Class"] == 'Major', newLocations)
         else:
             newLocationsHasMajor = True
+
+        print("checkItem {}: {} > {} ?".format(item['Type'], len(newLocations), len(oldLocations)))
+        if len(newLocations) in [12,13] and item['Type'] == 'Varia':
+            print("checkItem: newlocs {}".format([loc['Name'] for loc in newLocations]))
+            self.smbm.addItem('Varia')
+            a = self.smbm.canHellRun('LowerNorfair')
+            print("checkItem: canHellRun('LowerNorfair') {}".format(a))
+            a = self.smbm.canPassWorstRoom()
+            print("checkItem: canPassWorstRoom() {}".format(a))
+#            a = self.smbm.canAccessLowerNorfair()
+#            print("checkItem: canAccessLowerNorfair() {}".format(a))
+            try:
+                a = self.smbm.canPassLavaPit()
+                print("checkItem: canPassLavaPit() {}".format(a))
+            except:
+                pass
+#            a = self.smbm.canAccessRedBrinstar()
+#            print("checkItem: canAccessRedBrinstar() {}".format(a))
+            self.smbm.removeItem('Varia')
 
         return newLocationsHasMajor and len(newLocations) > len(oldLocations)
     

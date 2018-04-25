@@ -248,7 +248,9 @@ class AccessGraph(object):
                 tdiff = smbm.eval(tFunc)
                 if tdiff.bool == True and tdiff.difficulty <= maxDiff:
                     diff = smbm.eval(loc['Available'])
+                    # TODO::after the jm tests, put it back
                     loc['difficulty'] = SMBool(diff.bool, max(tdiff.difficulty, diff.difficulty))
+                    #loc['difficulty'] = SMBool(diff.bool, tdiff.difficulty + diff.difficulty)
                     if diff.bool == True and diff.difficulty <= maxDiff:
                         availLocs.append(loc)
                         break

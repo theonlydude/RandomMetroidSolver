@@ -50,8 +50,7 @@ locations = [
         # EXPLAINED: break the bomb wall at left of Parlor and Alcatraz,
         #            open red door at Green Brinstar Main Shaft,
         #            mock ball for early retreval or speed booster
-        'Available': lambda sm: sm.wand(sm.wor(sm.haveItem('SpeedBooster'),
-                                               sm.canDestroyBombWalls()),
+        'Available': lambda sm: sm.wand(sm.canPassTerminatorBombWall(),
                                         sm.canOpenRedDoors(),
                                         sm.wor(sm.wand(sm.knowsMockball(),
                                                        sm.haveItem('Morph')),
@@ -631,8 +630,7 @@ locations = [
         # brinstar access, and
         # either you go the back way, using a super and the camera glitch,
         # or just beat spore spawn (so no sm.knows() setting needed for the glitch)
-        'Available': lambda sm: sm.wand(sm.wor(sm.haveItem('SpeedBooster'),
-                                               sm.canDestroyBombWalls(),
+        'Available': lambda sm: sm.wand(sm.wor(sm.canPassTerminatorBombWall(),
                                                sm.canUsePowerBombs()),
                                         sm.canOpenRedDoors()),
         'PostAvailable': lambda sm: sm.wand(sm.canOpenGreenDoors(),
@@ -646,8 +644,7 @@ locations = [
         'Address': 0x78518,
         'Visibility': "Visible",
         'Room': 'Early Supers Room',
-        'Available': lambda sm: sm.wand(sm.wor(sm.haveItem('SpeedBooster'),
-                                               sm.canDestroyBombWalls()),
+        'Available': lambda sm: sm.wand(sm.canPassTerminatorBombWall(),
                                         sm.canOpenRedDoors()),
         'PostAvailable': lambda sm: sm.wor(sm.canPassBombPassages(),
                                            RomPatches.has(RomPatches.EarlySupersShotBlock))
@@ -659,8 +656,7 @@ locations = [
         'Address': 0x7851E,
         'Visibility': "Visible",
         'Room': 'Early Supers Room',
-        'Available': lambda sm: sm.wand(sm.wor(sm.haveItem('SpeedBooster'),
-                                               sm.canDestroyBombWalls()),
+        'Available': lambda sm: sm.wand(sm.canPassTerminatorBombWall(),
                                         sm.canOpenRedDoors(),
                                         sm.wor(sm.wand(sm.haveItem('Morph'), sm.knowsMockball()),
                                                sm.haveItem('SpeedBooster')))
@@ -685,8 +681,7 @@ locations = [
         'Visibility': "Visible",
         'Room': 'Brinstar Reserve Tank Room',
         # TODO::condition is weird, morph is required
-        'Available': lambda sm: sm.wand(sm.wor(sm.haveItem('SpeedBooster'),
-                                               sm.canDestroyBombWalls()),
+        'Available': lambda sm: sm.wand(sm.canPassTerminatorBombWall(),
                                         sm.canOpenRedDoors(),
                                         sm.haveItem('Morph'),
                                         sm.wor(sm.knowsMockball(),
@@ -699,8 +694,7 @@ locations = [
         'Address': 0x78608,
         'Visibility': "Visible",
         'Room': 'Big Pink',
-        'Available': lambda sm: sm.wor(sm.wand(sm.wor(sm.haveItem('SpeedBooster'),
-                                                      sm.canDestroyBombWalls()),
+        'Available': lambda sm: sm.wor(sm.wand(sm.canPassTerminatorBombWall(),
                                                sm.canOpenRedDoors()),
                                        sm.canUsePowerBombs())
     },
@@ -711,8 +705,7 @@ locations = [
         'Address': 0x7860E,
         'Visibility': "Visible",
         'Room': 'Big Pink',
-        'Available': lambda sm: sm.wor(sm.wand(sm.wor(sm.haveItem('SpeedBooster'),
-                                                      sm.canDestroyBombWalls()),
+        'Available': lambda sm: sm.wor(sm.wand(sm.canPassTerminatorBombWall(),
                                                sm.canOpenRedDoors()),
                                        sm.canUsePowerBombs())
     },
@@ -733,8 +726,9 @@ locations = [
         'Address': 0x78676,
         'Visibility': "Visible",
         'Room': 'Green Hill Zone',
-        'Available': lambda sm: sm.wor(sm.wand(sm.canPassBombPassages(),
-                                               sm.canOpenGreenDoors()),
+        'Available': lambda sm: sm.wor(sm.wand(sm.canPassTerminatorBombWall(),
+                                               sm.canOpenGreenDoors(),
+                                               sm.haveItem('Morph')),
                                        sm.canUsePowerBombs())
     },
     {
@@ -818,7 +812,8 @@ locations = [
                                         sm.wor(sm.canUsePowerBombs(),
                                                sm.knowsRedTowerClimb(),
                                                sm.haveItem('Ice'),
-                                               sm.haveItem('SpaceJump')))
+                                               sm.haveItem('SpaceJump')),
+                                        sm.canOpenGreenDoors())
     },
     {
         'Area': "Brinstar",
@@ -832,7 +827,9 @@ locations = [
                                         sm.wor(sm.canUsePowerBombs(),
                                                sm.knowsRedTowerClimb(),
                                                sm.haveItem('Ice'),
-                                               sm.haveItem('SpaceJump')))
+                                               sm.haveItem('SpaceJump')),
+                                        sm.canOpenGreenDoors(),
+                                        sm.canUsePowerBombs())
     },
     {
         'Area': "Brinstar",
@@ -1198,6 +1195,6 @@ locations = [
         'Address': 0x7C74D,
         'Visibility': "Hidden",
         'Room': 'The Precious Room',
-        'Available': lambda sm: sm.canDefeatBotwoon()
+        'Available': lambda sm: sm.canAccessDraygonFromMainStreet()
     }
 ]

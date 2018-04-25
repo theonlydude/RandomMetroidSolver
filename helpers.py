@@ -113,6 +113,12 @@ class Helpers(object):
     def canUsePowerBombs(self):
         return self.smbm.canOpenYellowDoors()
 
+    def canPassTerminatorBombWall(self):
+        sm = self.smbm
+        return sm.wor(sm.wand(sm.haveItem('SpeedBooster'),
+                              sm.wor(sm.knowsSimpleShortCharge(), sm.knowsShortCharge())),
+                      sm.canDestroyBombWalls())
+
     def canDestroyBombWalls(self):
         sm = self.smbm
         return sm.wor(sm.wand(sm.haveItem('Morph'),
@@ -161,8 +167,7 @@ class Helpers(object):
         #             -open green door at the right of Landing Site, then open the yellow
         #              door at Crateria Keyhunter room
         return sm.wand(sm.haveItem('Super'),
-                       sm.wor(sm.wand(sm.wor(sm.canDestroyBombWalls(),
-                                             sm.wand(sm.haveItem('SpeedBooster'), sm.knowsSimpleShortCharge())),
+                       sm.wor(sm.wand(sm.canPassTerminatorBombWall(),
                                       sm.haveItem('Morph')),
                               sm.canUsePowerBombs()))
 
@@ -366,6 +371,12 @@ class Helpers(object):
                        sm.wor(sm.haveItem('Gravity'),
                               sm.wand(sm.knowsGravLessLevel2(),
                                       sm.haveItem('Grapple')))) # HiJump and Ice are checked in canDefeatBotwoon if suitless
+
+    def canAccessDraygonFromMainStreet(self):
+        sm = self.smbm
+        return sm.wand(sm.canDefeatBotwoon(),
+                       sm.wor(sm.haveItem('Gravity'),
+                              sm.wand(sm.canDoSuitlessMaridia(), sm.knowsGravLessLevel2())))
 
     def getBeamDamage(self):
         sm = self.smbm

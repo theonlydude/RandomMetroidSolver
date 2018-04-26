@@ -244,8 +244,7 @@ class Randomizer(object):
         if len(forbiddenItems) == 0: # no super fun setting, nothing to do
             return []
         # give us everything and beat every boss to see what we can access
-        for item in self.itemPool:
-            self.smbm.addItem(item['Type'])
+        self.smbm.addItems([item['Type'] for item in self.itemPool])
         for boss in ['Kraid', 'Phantoon', 'Draygon', 'Ridley']:
             Bosses.beatBoss(boss)
         totalAvailLocs = [loc for loc in self.currentLocations() if self.locPostAvailable(loc, None)]

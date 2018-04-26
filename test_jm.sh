@@ -28,7 +28,7 @@ ORIG=.
 PATCHES="-c AimAnyButton.ips -c itemsounds.ips -c spinjumprestart.ips -c supermetroid_msu1.ips -c elevators_doors_speed.ips"
 PRESETS=("manu" "noob" "speedrunner")
 SUPERFUNS=("" "" "" "--superFun Movement" "--superFun Combat" "--superFun Suits" "--superFun Movement --superFun Combat")
-ENERGIES=("sparse" "medium" "vanilla")
+ENERGIES=("--energyQty sparse" "--energyQty medium" "--energyQty vanilla")
 SPREADS=("" "--spreadItems")
 FULLS=("" "--fullRandomization")
 SUITS=("" "--suitsRestriction")
@@ -53,7 +53,7 @@ function generate_params {
     let QTY=1+$RANDOM%9
     POWERBOMBS="--powerBombQty ${QTY}"
     let QTY=1+$RANDOM%3
-    ENERGY="--energyQty ${ENERGIES[$QTY]}"
+    ENERGY="${ENERGIES[$QTY]}"
 
     let S=$RANDOM%${#SPREADS[@]}
     SPREAD=${SPREADS[$S]}

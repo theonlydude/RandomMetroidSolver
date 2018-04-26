@@ -9,7 +9,16 @@ class HelpersGraph(Helpers):
     def __init__(self, smbm):
         self.smbm = smbm
         # cacheable functions sorted to avoid dependencies
-        self.cachedMethods = []
+        self.cachedMethods = ['canUseBombs', 'canOpenYellowDoors', 'canUsePowerBombs',
+                              'canPassBombPassages', 'canOpenRedDoors', 'heatProof', 'canFly',
+                              'canOpenGreenDoors', 'canEnterAndLeaveGauntlet',
+                              'enoughStuffCroc', 'canPassTerminatorBombWall',
+                              'canDoSuitlessOuterMaridia', 'canDoSuitlessMaridia',
+                              'canPassMtEverest', 'canAccessBotwoonFromMainStreet',
+                              'enoughStuffBotwoon', 'canAccessDraygonFromMainStreet',
+                              'canPassLavaPit', 'canPassWorstRoom',
+                              'canAccessCrocFromNorfairEntrance', 'canEnterNorfairReserveArea',
+                              'canPassSpongeBath', 'canPassMoat', 'canGoUpMtEverest']
 
     def canAccessKraidsLair(self):
         sm = self.smbm

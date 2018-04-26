@@ -247,11 +247,14 @@ class Randomizer(object):
         self.smbm.addItems([item['Type'] for item in self.itemPool])
         for boss in ['Kraid', 'Phantoon', 'Draygon', 'Ridley']:
             Bosses.beatBoss(boss)
+
         totalAvailLocs = [loc for loc in self.currentLocations() if self.locPostAvailable(loc, None)]
         restricted = [loc for loc in locations if loc not in totalAvailLocs]
         # clean up
+        self.smbm.resetItems()
         self.smbm.resetSMBool()
         Bosses.reset()
+        self.currentItems = []
 
         return restricted
         
@@ -276,7 +279,6 @@ class Randomizer(object):
 
         if item is not None:
             self.smbm.addItem(item['Type'])
-#            print("test item {}".format(item['Type']))
 
         avail = lambda loc: self.locAvailable(loc)
         ret = sorted(List.filter(avail, self.unusedLocations), key=lambda loc: loc['Name'])
@@ -284,25 +286,16 @@ class Randomizer(object):
         if item is not None:
             self.smbm.removeItem(item['Type'])
 
-#        if len(self.currentItems) >= 98:
-#            print("curItems: {}".format(sorted(list(set([it['Name'] for it in self.currentItems])))))
-#            print("locs: {}".format([loc['Name'] for loc in self.unusedLocations]))
-
         return ret
 
     def currentLocationsGraph(self, item=None):
         if item is not None:
             self.smbm.addItem(item['Type'])
-#            print("test item {}".format(item['Type']))
 
         ret = sorted(self.areaGraph.getAvailableLocations(self.unusedLocations, self.smbm, self.difficultyTarget), key=lambda loc: loc['Name'])
 
         if item is not None:
             self.smbm.removeItem(item['Type'])
-
-        # if len(self.currentItems) == 99:
-        #     print("curItems: {}".format(sorted(list(set([it['Name'] for it in self.currentItems])))))
-        #     print("curlocs: {}".format([loc['Name'] for loc in ret]))
 
         return ret
 
@@ -525,41 +518,6 @@ class Randomizer(object):
         else:
             newLocationsHasMajor = True
 
-
-#        print("checkItem {}: {} > {} ?".format(item['Type'], len(newLocations), len(oldLocations)))
-        # if len(newLocations) in [78,79] and item['Type'] == 'ETank':
-        #     print("checkItem: curItems {}".format(sorted(list([it['Type'] for it in self.currentItems]))))
-        #     print("checkItem: newlocs {}".format([loc['Name'] for loc in newLocations]))
-#            self.smbm.addItem('SpeedBooster')
-#            a = self.smbm.canHellRun('LowerNorfair')
-#            print("checkItem: canHellRun('LowerNorfair') {}".format(a))
-#            a = self.smbm.canPassWorstRoom()
-#            print("checkItem: canPassWorstRoom() {}".format(a))
-
-        # print("checkItem {}: {} > {} ?".format(item['Type'], len(newLocations), len(oldLocations)))
-        # if len(newLocations) in [78,79] and item['Type'] == 'ETank':
-        #     print("checkItem: curItems {}".format(sorted(list([it['Type'] for it in self.currentItems]))))
-        #     print("checkItem: newlocs {}".format([loc['Name'] for loc in newLocations]))
-        #     self.smbm.addItem('Etank')
-        #     try:
-        #         a = self.smbm.canDefeatDraygon()
-        #         print("checkItem: canDefeatDraygon {}".format(a))
-        #     except:
-        #         pass
-        #     a = self.smbm.canDefeatBotwoon()
-        #     print("checkItem: canDefeatBotwoon() {}".format(a))
-
-#            a = self.smbm.canAccessLowerNorfair()
-#            print("checkItem: canAccessLowerNorfair() {}".format(a))
-#            try:
-#                a = self.smbm.canPassLavaPit()
-#                print("checkItem: canPassLavaPit() {}".format(a))
-#            except:
-#                pass
-#            a = self.smbm.canAccessRedBrinstar()
-#            print("checkItem: canAccessRedBrinstar() {}".format(a))
-#            self.smbm.removeItem('SpeedBooster')
-
         return newLocationsHasMajor and len(newLocations) > len(oldLocations)
     
     def canPlaceAtLocation(self, item, location):
@@ -730,6 +688,10 @@ class Randomizer(object):
         # fill up unreachable locations with "junk" to maximize the chance of the ROM
         # to be finishable
         for loc in self.restrictedLocations:
+            # check if boss loc is in restricted locations
+            if loc['Name'] in ['Space Jump', 'Varia Suit', 'Energy Tank, Ridley', 'Right Super, Wrecked Ship']:
+                return True
+
             isMajor = self.restrictions['MajorMinor'] == False or loc['Class'] == 'Major'
             isMinor = self.restrictions['MajorMinor'] == False or loc['Class'] == 'Minor'
             itemLocation = {'Location' : loc}
@@ -753,6 +715,8 @@ class Randomizer(object):
                 break
 #            print("Fill : " + itemLocation['Item']['Type'] + " at " + itemLocation['Location']['Name'])
             self.getItem(itemLocation, itemLocations, False)
+
+        return False
 
     def fillNonProgressionItems(self, itemLocations):
         pool = [item for item in self.itemPool if not self.isProgItem(item)]
@@ -826,7 +790,10 @@ class Randomizer(object):
         isStuck = False
         # if major items are removed from the pool (super fun setting), fill not accessible locations with
         # items that are as useless as possible
-        self.fillRestrictedLocations(itemLocations)
+        abort = self.fillRestrictedLocations(itemLocations)
+        if abort == True:
+            print("Can't access to all bosses locations, abort")
+            return None
         maxLen = len(self.itemPool) # to prevent cancelling of these useless items/locations
         while len(self.itemPool) > 0 and not isStuck:
             # 1. fill up with non-progression stuff

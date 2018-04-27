@@ -37,7 +37,7 @@ locations = [
         'Address': 0x78432,
         'Visibility': "Visible",
         'Room': 'Terminator Room',
-        'Available': lambda sm: sm.wor(sm.wand(sm.haveItem('SpeedBooster'), sm.knowsSimpleShortCharge()), 
+        'Available': lambda sm: sm.wor(sm.wand(sm.haveItem('SpeedBooster'), sm.knowsSimpleShortCharge()),
                                        sm.canDestroyBombWalls())
     },
     {
@@ -906,7 +906,7 @@ locations = [
                                                sm.haveItem('Grapple'),
                                                sm.wand(sm.haveItem('SpeedBooster'),
                                                        sm.wor(sm.haveItem('HiJump'), sm.knowsShortCharge()))))
-        
+
     },
     {
         'Area': "Norfair",

@@ -344,7 +344,7 @@ class Helpers(object):
         return sm.wand(sm.canAccessOuterMaridia(),
                        sm.wor(sm.haveItem('Grapple'),
                               sm.knowsTediousMountEverest()))
-    
+
     def canDefeatBotwoon(self):
         sm = self.smbm
         # EXPLAINED: access Aqueduct, either with or without gravity suit,
@@ -703,7 +703,7 @@ class Pickup:
             canResistRainbow = (smbm.haveItemCount('ETank', 3)
                                 and smbm.haveItem('Varia')) \
                                or smbm.haveItemCount('ETank', 6)
-            
+
             return (smbm.haveItem('Morph')
                     # pass bomb block passages
                     and (smbm.haveItem('Bomb')

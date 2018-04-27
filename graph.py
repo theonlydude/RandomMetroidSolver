@@ -80,7 +80,7 @@ accessPoints = [
         'Lava Dive Right': lambda sm: sm.wand(sm.canHellRun('LowerNorfair'),
                                               sm.canPassAmphitheaterReverse()) # if this is OK, reverse lava pit will be too...
     }),
-    # Norfair   
+    # Norfair
     AccessPoint('Warehouse Entrance Left', 'Norfair', {
         'Single Chamber Top Right': lambda sm: sm.canAccessHeatedNorfairFromEntrance(),
         'Kronic Boost Room Bottom Left': lambda sm: sm.canAccessHeatedNorfairFromEntrance()
@@ -204,7 +204,7 @@ class AccessGraph(object):
     # nodesToCheck: nodes we have to check transitions for
     # items: collected items
     # maxDiff: difficulty limit
-    # return newly opened access points 
+    # return newly opened access points
     def getNewAvailNodes(self, availNodes, nodesToCheck, smbm, maxDiff):
         newAvailNodes = []
         for node in nodesToCheck:
@@ -229,7 +229,7 @@ class AccessGraph(object):
             newAvailNodes = self.getNewAvailNodes(availNodes, newAvailNodes, smbm, maxDiff)
             availNodes += newAvailNodes
         return availNodes
-    
+
     # locations: locations to check
     # items: collected items
     # maxDiff: difficulty limit
@@ -248,9 +248,7 @@ class AccessGraph(object):
                 tdiff = smbm.eval(tFunc)
                 if tdiff.bool == True and tdiff.difficulty <= maxDiff:
                     diff = smbm.eval(loc['Available'])
-                    # TODO::after the jm tests, put it back
                     loc['difficulty'] = SMBool(diff.bool, max(tdiff.difficulty, diff.difficulty))
-                    #loc['difficulty'] = SMBool(diff.bool, tdiff.difficulty + diff.difficulty)
                     if diff.bool == True and diff.difficulty <= maxDiff:
                         availLocs.append(loc)
                         break

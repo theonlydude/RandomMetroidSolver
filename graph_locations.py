@@ -142,7 +142,7 @@ locations = [
                                     sm.haveItem('SpeedBooster'),
                                     sm.wor(sm.haveItem('Gravity'),
                                            sm.knowsSimpleShortCharge(), # from the blocks above the water
-                                           sm.knowsShortCharge())) 
+                                           sm.knowsShortCharge()))
 },
 {
     'Area': "Brinstar",
@@ -689,7 +689,7 @@ locations = [
 },
 {
     'Area': "Crateria",
-    'GraphArea': "Crateria",    
+    'GraphArea': "Crateria",
     'Name': "Missile (Crateria gauntlet right)",
     'Class': "Minor",
     'Address': 0x78464,
@@ -703,7 +703,7 @@ locations = [
 },
 {
     'Area': "Crateria",
-    'GraphArea': "Crateria",    
+    'GraphArea': "Crateria",
     'Name': "Missile (Crateria gauntlet left)",
     'Class': "Minor",
     'Address': 0x7846A,
@@ -717,7 +717,7 @@ locations = [
 },
 {
     'Area': "Crateria",
-    'GraphArea': "Crateria",    
+    'GraphArea': "Crateria",
     'Name': "Super Missile (Crateria)",
     'Class': "Minor",
     'Address': 0x78478,
@@ -733,7 +733,7 @@ locations = [
 },
 {
     'Area': "Crateria",
-    'GraphArea': "Crateria",    
+    'GraphArea': "Crateria",
     'Name': "Missile (Crateria middle)",
     'Class': "Minor",
     'Address': 0x78486,
@@ -759,7 +759,7 @@ locations = [
 },
 {
     'Area': "Brinstar",
-    'GraphArea': "GreenPinkBrinstar",    
+    'GraphArea': "GreenPinkBrinstar",
     'Name': "Super Missile (pink Brinstar)",
     'Class': "Minor",
     'Address': 0x784E4,
@@ -778,7 +778,7 @@ locations = [
 },
 {
     'Area': "Brinstar",
-    'GraphArea': "GreenPinkBrinstar",    
+    'GraphArea': "GreenPinkBrinstar",
     'Name': "Missile (green Brinstar below super missile)",
     'Class': "Minor",
     'Address': 0x78518,
@@ -793,7 +793,7 @@ locations = [
 },
 {
     'Area': "Brinstar",
-    'GraphArea': "GreenPinkBrinstar",    
+    'GraphArea': "GreenPinkBrinstar",
     'Name': "Super Missile (green Brinstar top)",
     'Class': "Minor",
     'Address': 0x7851E,
@@ -808,7 +808,7 @@ locations = [
 },
 {
     'Area': "Brinstar",
-    'GraphArea': "GreenPinkBrinstar",    
+    'GraphArea': "GreenPinkBrinstar",
     'Name': "Missile (green Brinstar behind missile)",
     'Class': "Minor",
     'Address': 0x78532,
@@ -824,7 +824,7 @@ locations = [
 },
 {
     'Area': "Brinstar",
-    'GraphArea': "GreenPinkBrinstar",    
+    'GraphArea': "GreenPinkBrinstar",
     'Name': "Missile (green Brinstar behind reserve tank)",
     'Class': "Minor",
     'Address': 0x78538,
@@ -840,7 +840,7 @@ locations = [
 },
 {
     'Area': "Brinstar",
-    'GraphArea': "GreenPinkBrinstar",    
+    'GraphArea': "GreenPinkBrinstar",
     'Name': "Missile (pink Brinstar top)",
     'Class': "Minor",
     'Address': 0x78608,
@@ -855,7 +855,7 @@ locations = [
 },
 {
     'Area': "Brinstar",
-    'GraphArea': "GreenPinkBrinstar",    
+    'GraphArea': "GreenPinkBrinstar",
     'Name': "Missile (pink Brinstar bottom)",
     'Class': "Minor",
     'Address': 0x7860E,
@@ -870,7 +870,7 @@ locations = [
 },
 {
     'Area': "Brinstar",
-    'GraphArea': "GreenPinkBrinstar",    
+    'GraphArea': "GreenPinkBrinstar",
     'Name': "Power Bomb (pink Brinstar)",
     'Class': "Minor",
     'Address': 0x7865C,
@@ -885,7 +885,7 @@ locations = [
 },
 {
     'Area': "Brinstar",
-    'GraphArea': "GreenPinkBrinstar",    
+    'GraphArea': "GreenPinkBrinstar",
     'Name': "Missile (green Brinstar pipe)",
     'Class': "Minor",
     'Address': 0x78676,
@@ -911,7 +911,7 @@ locations = [
 },
 {
     'Area': "Brinstar",
-    'GraphArea': "Crateria",    
+    'GraphArea': "Crateria",
     'Name': "Missile (blue Brinstar middle)",
     'Address': 0x78798,
     'Class': "Minor",
@@ -953,7 +953,7 @@ locations = [
 },
 {
     'Area': "Brinstar",
-    'GraphArea': "Crateria",    
+    'GraphArea': "Crateria",
     'Name': "Missile (blue Brinstar top)",
     'Class': "Minor",
     'Address': 0x78836,
@@ -1039,7 +1039,7 @@ locations = [
 },
 {
     'Area': "Norfair",
-    'GraphArea': "Norfair",    
+    'GraphArea': "Norfair",
     'Name': "Missile (lava room)",
     'Class': "Minor",
     'Address': 0x78AE4,
@@ -1202,7 +1202,7 @@ locations = [
 },
 {
     'Area': "Norfair",
-    'GraphArea': "Norfair",    
+    'GraphArea': "Norfair",
     'Name': "Missile (Speed Booster)",
     'Class': "Minor",
     'Address': 0x78C74,
@@ -1406,7 +1406,7 @@ locations = [
                                     sm.haveItem('SpeedBooster'),
                                     sm.wor(sm.canOpenGreenDoors(), # run from room on the right
                                            sm.knowsSimpleShortCharge(), # run from above
-                                           sm.knowsShortCharge())) # run from below 
+                                           sm.knowsShortCharge())) # run from below
 },
 {
     'Area': "Maridia",
@@ -1499,7 +1499,7 @@ locations = [
     'AccessFrom' : {
         'Main Street Bottom': lambda sm: sm.canAccessBotwoonFromMainStreet()
     },
-    'Available': lambda sm: sm.wor(sm.haveItem('Gravity'), 
+    'Available': lambda sm: sm.wor(sm.haveItem('Gravity'),
                                    sm.knowsSuitlessSandpit()) # suitless maridia conditions are in canPassMtEverest
 },
 {

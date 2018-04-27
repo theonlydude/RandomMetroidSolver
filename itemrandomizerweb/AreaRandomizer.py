@@ -10,7 +10,7 @@ def createTransitions(bidir=True):
     tTo = []
     apNames = [ap.Name for ap in accessPoints if ap.Name != 'Landing Site']
     transitions = []
-    
+
     def findTo(trFrom):
         ap = getAccessPoint(trFrom)
         fromArea = ap.GraphArea
@@ -18,11 +18,11 @@ def createTransitions(bidir=True):
         if len(targets) == 0: # fallback if no area transition is found
             targets = [apName for apName in apNames if apName != ap.Name]
         return targets[random.randint(0, len(targets)-1)]
-    
+
     def addTransition(src, dst):
         tFrom.append(src)
         tTo.append(dst)
-        
+
     while len(apNames) > 0:
         sources = [apName for apName in apNames if apName not in tFrom]
         src = sources[random.randint(0, len(sources)-1)]
@@ -45,4 +45,4 @@ class AreaRandomizer(Randomizer):
                                              seedName,
                                              self.transitions,
                                              bidir)
-        
+

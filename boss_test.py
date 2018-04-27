@@ -51,7 +51,7 @@ def boss(name, diffFunction):
         for presetName, diffPreset in Settings.bossesDifficultyPresets[name].items():
             print("** Diff preset :" + presetName)
             Settings.bossesDifficulty[name] = diffPreset
-            print(str(Settings.bossesDifficulty[name]))        
+            print(str(Settings.bossesDifficulty[name]))
             for setName, itemSet in itemSets[name].items():
                 print('* Item set ' + setName)
                 #        print(str(itemSet))

@@ -14,7 +14,7 @@ class RomPatches:
     # blue door to access the room with etank+missile
     BlueBrinstarBlueDoor      = 10
     # missile in the first room is a major item and accessible and ceiling is a minor
-    BlueBrinstarMissile       = 11 
+    BlueBrinstarMissile       = 11
     # shot block instead of bomb blocks for spazer access
     SpazerShotBlock           = 20
     # climb back up red tower from bottom no matter what
@@ -23,7 +23,7 @@ class RomPatches:
     RedTowerBlueDoors         = 22
     # shot block in crumble blocks at early supers
     EarlySupersShotBlock      = 23
-    # shot block to exit hu jump area 
+    # shot block to exit hu jump area
     HiJumpShotBlock           = 30
     # access main upper norfair without anything
     CathedralEntranceWallJump = 31
@@ -34,36 +34,36 @@ class RomPatches:
     # remove green gates for reverse maridia access
     NoMaridiaGreenGates       = 102
 
-    
+
     ### Other
     # Gravity no longer protects from environmental damage (heat, spikes...)
     NoGravityEnvProtection  = 1000
-    
+
     #### Patch sets
     # total randomizer
     Total_Base = [ BlueBrinstarBlueDoor, RedTowerBlueDoors, NoGravityEnvProtection ]
     # tournament and full
     Total = Total_Base + [ MoatShotBlock, EarlySupersShotBlock,
-                           SpazerShotBlock, RedTowerLeftPassage, 
+                           SpazerShotBlock, RedTowerLeftPassage,
                            HiJumpShotBlock, CathedralEntranceWallJump ]
-    # casual 
+    # casual
     Total_CX = [ BlueBrinstarMissile ] + Total
-    
+
     # dessyreqt randomizer
     Dessy = []
-    
-    ### Active patches    
+
+    ### Active patches
     ActivePatches = []
 
     @staticmethod
     def has(patch):
         return SMBool(patch in RomPatches.ActivePatches)
 
-    
+
 class RomType:
     # guesses ROM type string based on filename and return it
     # if no ROM type could be guessed, returns None
-    @staticmethod    
+    @staticmethod
     def guess(fileName):
         fileName = os.path.basename(fileName)
 
@@ -90,7 +90,7 @@ class RomType:
         return None
 
     # "applies" ROM patches, return true if full randomization, false if not
-    @staticmethod    
+    @staticmethod
     def apply(romType, patches):
         if romType.startswith('Total_'):
             RomPatches.ActivePatches = RomPatches.Total_Base
@@ -109,9 +109,9 @@ class RomType:
                 RomPatches.ActivePatches.remove(RomPatches.NoGravityEnvProtection)
         elif romType == 'Dessy':
             RomPatches.ActivePatches = RomPatches.Dessy
-        
+
         return romType == 'Total_FX' or romType == 'Dessy' or romType == 'VARIA_FX'
-    
+
 class RomReader:
     # read the items in the rom
     items = {
@@ -261,11 +261,11 @@ class RomPatcher:
     # Disable Space/Time select in menu
     # Fix Morph Ball Hidden/Chozo PLM's
     # Fix Screw Attack selection in menu
-    # 
+    #
     # optional (Kejardon):
     # Allows the aim buttons to be assigned to any button
     #   AimAnyButton.ips
-    # 
+    #
     # optional (Scyzer):
     # Remove fanfare when picking up an item
     #   itemsounds.ips
@@ -279,7 +279,7 @@ class RomPatcher:
     # optional (DarkShock):
     # Play music with MSU1 chip on SD2SNES
     #   supermetroid_msu1.ips
-    # 
+    #
     # layout:
     # Disable respawning blocks at dachora pit
     #   dachora.ips

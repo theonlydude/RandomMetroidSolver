@@ -94,7 +94,7 @@ class List:
 import time
 
 class Random:
-    # Private Constants 
+    # Private Constants
     int32_maxValue = 2147483647
     int32_minValue = -2147483648
     MBIG =  int32_maxValue
@@ -108,11 +108,11 @@ class Random:
     def __init__(self, Seed=None):
         if Seed is None:
             Seed = int(time.time())
-    
+
         ii = 0
         mj = 0
         mk = 0
-    
+
         # Initialize our Seed array.
         # This algorithm comes from Numerical Recipes in C (2nd Ed.)
         subtraction = self.int32_maxValue if Seed == self.int32_minValue else abs(Seed)
@@ -137,7 +137,7 @@ class Random:
         self.inextp = 21
         Seed = 1
 
-    
+
     #/*====================================Sample====================================
     #**Action: Return a new random number [0..1) and reSeed the Seed array.
     #**Returns: A double [0..1)
@@ -152,7 +152,7 @@ class Random:
     def InternalSample(self):
         locINext = self.inext
         locINextp = self.inextp
- 
+
         locINext += 1
         if locINext >= 56:
             locINext=1
@@ -161,21 +161,21 @@ class Random:
             locINextp = 1
 
         retVal = self.SeedArray[locINext]-self.SeedArray[locINextp]
- 
+
         if retVal == self.MBIG:
             retVal -= 1
         if retVal < 0:
             retVal += self.MBIG
-          
+
         self.SeedArray[locINext] = retVal
- 
+
         self.inext = locINext
         self.inextp = locINextp
-                    
+
         return retVal
-    
+
     def GetSampleForLargeRange(self):
-        # The distribution of double value returned by Sample 
+        # The distribution of double value returned by Sample
         # is not distributed well enough for a large range.
         # If we use Sample for a range [self.int32_minValue..self.int32_maxValue)
         # We will end up getting even numbers only.
@@ -208,10 +208,10 @@ class Random:
             retValue = ((int)(self.Sample() * range) + minValue)
         else:
             retValue = (int)((long)(self.GetSampleForLargeRange() * range) + minValue)
-    
+
         #print("Next({}, {}) -> {}".format(minValue, maxValue, retValue))
         return retValue
-    
+
     #/*=====================================Next=====================================
     # **Returns: A double [0..1)
     # **Arguments: None
@@ -219,7 +219,7 @@ class Random:
     # ==============================================================================*/
     def NextDouble(self):
         return self.Sample()
-    
+
     #/*==================================NextBytes===================================
     # **Action:  Fills the byte array with random bytes [0..0x7f].  The entire array is filled.
     # **Returns:Void

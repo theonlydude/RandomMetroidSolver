@@ -251,7 +251,7 @@ def solver():
                       TR(INPUT(_type="text",
                                _name="password", _id="password",
                                requires=[IS_NOT_EMPTY(),
-                                         IS_ALPHANUMERIC(error_message='Password must be alphanumeric and max 32 chars'), 
+                                         IS_ALPHANUMERIC(error_message='Password must be alphanumeric and max 32 chars'),
                                          IS_LENGTH(32)],
                                _style='display:none')),
                       _class="threequarter")

@@ -79,7 +79,7 @@ class HelpersGraph(Helpers):
     def canPassForgottenHighway(self, fromWs):
         sm = self.smbm
         baseSuitLess = sm.wand(sm.haveItem('HiJump'),
-                               sm.wor(sm.haveItem('Ice'), 
+                               sm.wor(sm.haveItem('Ice'),
                                       sm.wand(sm.haveItem('SpringBall'), sm.knowsSpringBallJump())),
                                sm.knowsGravLessLevel1())
         if fromWs is True:
@@ -186,7 +186,7 @@ class HelpersGraph(Helpers):
 
     def canGoUpMtEverest(self):
         sm = self.smbm
-        return sm.wor(sm.wand(sm.haveItem('Gravity'),                      
+        return sm.wor(sm.wand(sm.haveItem('Gravity'),
                               sm.wor(sm.haveItem('Grapple'),
                                      sm.haveItem('SpeedBooster')),
                               sm.wor(sm.canFly(),

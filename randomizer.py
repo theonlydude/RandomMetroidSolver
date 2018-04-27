@@ -92,7 +92,7 @@ if __name__ == "__main__":
                         help="",
                         dest='progressionSpeed', nargs='?', default='medium',
                         choices=speeds + ['random'])
-    parser.add_argument('--superFun', 
+    parser.add_argument('--superFun',
                         help="randomly remove major items from the pool for maximum enjoyment",
                         dest='superFun', nargs='?', default=[], action='append',
                         choices=['Movement', 'Combat', 'Suits'])
@@ -146,7 +146,7 @@ if __name__ == "__main__":
     else:
         maxDifficulty = float('inf')
 
-    # same as solver, increase max difficulty 
+    # same as solver, increase max difficulty
     threshold = maxDifficulty
     epsilon = 0.001
     if maxDifficulty <= easy:

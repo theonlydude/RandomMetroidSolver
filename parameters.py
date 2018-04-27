@@ -45,7 +45,7 @@ class Conf:
     # if true, will override seed type if ROM filename follows default filename patterns
     # from given rando
     guessRomType=True
-    
+
     # keep getting majors of at most this difficulty before going for minors or changing area
     difficultyTarget=medium
 
@@ -231,7 +231,7 @@ class Knows:
                                'href': 'https://www.youtube.com/watch?v=1M2TiEVwH2I',
                                'rooms': ['West Sand Hole', 'East Sand Hole']} # TODO add mini-draygons rooms
 
-    
+
     # Area difficulties
 
     # Brinstar
@@ -392,7 +392,7 @@ class Knows:
                         'title': 'Get to Spring Ball with Gravity Suit and Ice Beam',
                         'href': 'https://www.youtube.com/watch?v=e5ZH_9paSLw',
                         'rooms': ['Pants Room']}
-    
+
     SuitlessPuyoClip = SMBool(False, 0, ['SuitlessPuyoClip'])
     desc['SuitlessPuyoClip'] = {'display': 'Suitless Puyo Clip',
                                 'title': 'Do the Puyo clip with Hi Jump and without Gravity',
@@ -412,7 +412,7 @@ class Knows:
                                            'href': None,
                                            'rooms': ['Plasma Room']}
 
-    categories = [{'knows': ['WallJump', 'ShineSpark', 'MidAirMorph', 
+    categories = [{'knows': ['WallJump', 'ShineSpark', 'MidAirMorph',
                              'Mockball', 'SimpleShortCharge', 'InfiniteBombJump', 'GreenGateGlitch',
                              'ShortCharge', 'GravityJump', 'SpringBallJump',
                              'SpringBallJumpFromWall', 'GetAroundWallJump'],
@@ -553,7 +553,7 @@ class Settings:
                     1 : hard,
                     2 : medium,
                     3 : easy
-                }                
+                }
             }
         },
         'Draygon' : {
@@ -588,7 +588,7 @@ class Settings:
                     8 : hard,
                     11 : medium,
                     14 : easy
-                },            
+                },
             },
             'No problemo' : {
                 'Rate' : 0.08,
@@ -611,7 +611,7 @@ class Settings:
                     11 : harder,
                     14 : hard,
                     20 : medium
-                }, 
+                },
             },
             'Default' : {
                 'Rate' : 0.12,
@@ -633,7 +633,7 @@ class Settings:
                     10 : hard,
                     14 : medium,
                     20 : easy
-                },                
+                },
             },
             'Piece of cake' : {
                 'Rate' : 0.3,
@@ -644,7 +644,7 @@ class Settings:
                     6 : hard,
                     8 : medium,
                     10 : easy
-                }                
+                }
             }
         },
         'MotherBrain' : {
@@ -657,7 +657,7 @@ class Settings:
                     16 : hard,
                     24 : medium,
                     32 : easy
-                }                
+                }
             },
             'Default' : {
                 'Rate' : 0.25,
@@ -712,14 +712,14 @@ class Settings:
             # you don't mind doing hell runs at all
             'Bring the heat' : [(2, hard), (3, medium)],
             # RBO runner
-            'I run RBO' : [(2, medium), (3, easy)] 
+            'I run RBO' : [(2, medium), (3, easy)]
         },
         'MainUpperNorfair' : {
             'No thanks' : None,
             'Gimme energy' : [(4, mania), (6, hardcore), (8, harder), (10, hard), (14, medium)],
             'Default' : [(3, mania), (5, hardcore), (6, hard), (9, medium)],
             'Bring the heat' : [(3, hardcore), (4, hard), (5, medium), (7, easy)],
-            'I run RBO' : [(3, harder), (4, hard), (5, medium), (6, easy)] 
+            'I run RBO' : [(3, harder), (4, hard), (5, medium), (6, easy)]
         },
         'LowerNorfair' : {
             'Default' : None,
@@ -727,7 +727,7 @@ class Settings:
             'I run RBO' : [(7, mania), (9, hardcore), (11, harder), (14, hard), (18, medium)]
         }
     }
-    
+
     hellRuns = {
         # Ice Beam hell run
         'Ice' : hellRunPresets['Ice']['Default'],
@@ -753,7 +753,7 @@ class Settings:
         'X-Ray' : hardRoomsPresets['X-Ray']['Default'],
         'Gauntlet' : hardRoomsPresets['Gauntlet']['Default']
     }
-    
+
     # various settings used in difficulty computation
     algoSettings = {
         # Boss Fights

@@ -16,7 +16,7 @@ from rom import RomType, RomLoader
 
 class Solver:
     # given a rom and parameters returns the estimated difficulty
-    
+
     def __init__(self, type='console', rom=None, params=None, debug=False, firstItemsLog=None):
         if debug == True:
             logging.basicConfig(level=logging.DEBUG)
@@ -43,7 +43,7 @@ class Solver:
         self.romLoaded = False
         if rom is not None:
             self.loadRom(rom)
-        
+
         self.pickup = Pickup(Conf.majorsPickup, Conf.minorsPickup)
 
         Bosses.reset()
@@ -58,7 +58,7 @@ class Solver:
         print("ROM Type: {}, Patches present: {}".format(Conf.romType, romLoader.patches))
 
         self.fullRando = RomType.apply(Conf.romType, romLoader.patches)
-        
+
         if self.log.getEffectiveLevel() == logging.DEBUG:
             self.log.debug("Display items at locations:")
             for location in self.locations:
@@ -92,7 +92,7 @@ class Solver:
         (difficulty, itemsOk) = self.computeDifficulty()
         if self.firstLogFile is not None:
             self.firstLogFile.close()
-        
+
         if self.type == 'console':
             # print generated path
             if Conf.displayGeneratedPath == True:
@@ -362,7 +362,7 @@ class Solver:
             loc['Pickup']()
         if isNew is True and self.firstLogFile is not None:
             self.firstLogFile.write("{};{};{}\n".format(item, loc['Name'], loc['Area']))
-            
+
         self.log.debug("collectItem: {} at {}".format(item, loc['Name']))
 
         # sort items by most frequent first
@@ -378,7 +378,7 @@ class Solver:
         # - destroy/skip the zebetites
         # - beat Mother Brain
         return self.smbm.wand(Bosses.allBossesDead(self.smbm), self.smbm.enoughStuffTourian())
-    
+
     def getAvailableItemsList(self, locations, area, threshold, enough):
         around = [loc for loc in locations if loc['Area'] == area and loc['difficulty'].difficulty <= threshold and not Bosses.areaBossDead(area)]
         # usually pickup action means beating a boss, so do that first if possible
@@ -386,7 +386,7 @@ class Solver:
 
         outside = [loc for loc in locations if not loc in around]
         self.log.debug("around1 = " + str([loc['Name'] for loc in around]))
-        self.log.debug("outside1 = " + str([loc['Name'] for loc in outside]))        
+        self.log.debug("outside1 = " + str([loc['Name'] for loc in outside]))
         # we want to sort the outside locations by putting the ones is the same
         # area first if we don't have enough items,
         # then we sort the remaining areas starting whith boss dead status
@@ -398,11 +398,11 @@ class Solver:
                                       else 100000,
                                       loc['difficulty'].difficulty if not Bosses.areaBossDead(loc['Area'])
                                                                       and loc['difficulty'].difficulty <= threshold
-                                      else 100000,                                      
+                                      else 100000,
                                       loc['difficulty'].difficulty))
         self.log.debug("around2 = " + str([loc['Name'] for loc in around]))
         self.log.debug("outside2 = " + str([loc['Name'] for loc in outside]))
-        
+
         return around + outside
 
 
@@ -419,7 +419,7 @@ class ParamsLoader(object):
                 sys.exit(-1)
         elif type(params) is dict:
             return ParamsLoaderDict(params)
-        
+
     def __init__(self):
         if 'Knows' not in self.params:
             self.params['Knows'] = {}

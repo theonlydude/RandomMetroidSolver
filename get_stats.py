@@ -12,7 +12,7 @@ if __name__ == "__main__":
     areaNames = []
     locCounts = {}
     locNames = []
-    
+
     for log in firstLogs:
         with open(log, 'r') as logFile:
             lines = logFile.readlines()

@@ -206,7 +206,7 @@ class AccessGraph(object):
     # maxDiff: difficulty limit
     # return newly opened access points
     def getNewAvailNodes(self, availNodes, nodesToCheck, smbm, maxDiff):
-        newAvailNodes = []
+        newAvailNodes = {}
         for node in nodesToCheck:
             for dstName, tFunc in node.transitions.iteritems():
                 dst = self.accessPoints[dstName]
@@ -215,7 +215,7 @@ class AccessGraph(object):
                 # diff = tFunc(smbm)
                 diff = smbm.eval(tFunc)
                 if diff.bool == True and diff.difficulty <= maxDiff:
-                    newAvailNodes.append(dst)
+                    newAvailNodes[dst] = diff.difficulty
         return newAvailNodes
 
     # rootNode: starting AccessPoint instance
@@ -223,20 +223,21 @@ class AccessGraph(object):
     # maxDiff: difficulty limit
     # return available AccessPoint list
     def getAvailableAccessPoints(self, rootNode, smbm, maxDiff):
-        availNodes = [ rootNode ]
+        availNodes = { rootNode : 0 }
         newAvailNodes = availNodes
         while len(newAvailNodes) > 0:
             newAvailNodes = self.getNewAvailNodes(availNodes, newAvailNodes, smbm, maxDiff)
-            availNodes += newAvailNodes
+            availNodes.update(newAvailNodes)
         return availNodes
 
     # locations: locations to check
     # items: collected items
     # maxDiff: difficulty limit
+    # rootNode: starting AccessPoint
     # return available locations list, also stores difficulty in locations
-    def getAvailableLocations(self, locations, smbm, maxDiff):
-        availAcessPoints = self.getAvailableAccessPoints(self.accessPoints['Landing Site'], smbm, maxDiff)
-        availAreas = set([ap.GraphArea for ap in availAcessPoints])
+    def getAvailableLocations(self, locations, smbm, maxDiff, rootNode='Landing Site'):
+        availAcessPoints = self.getAvailableAccessPoints(self.accessPoints[rootNode], smbm, maxDiff)
+        availAreas = set([ap.GraphArea for ap in availAcessPoints.keys()])
         availLocs = []
         for loc in locations:
             if not loc['GraphArea'] in availAreas:
@@ -245,14 +246,17 @@ class AccessGraph(object):
                 ap = self.accessPoints[apName]
                 if not ap in availAcessPoints:
                     continue
+                apDiff = availAcessPoints[ap]
                 tdiff = smbm.eval(tFunc)
                 if tdiff.bool == True and tdiff.difficulty <= maxDiff:
                     diff = smbm.eval(loc['Available'])
-                    loc['difficulty'] = SMBool(diff.bool, max(tdiff.difficulty, diff.difficulty))
+                    loc['difficulty'] = SMBool(diff.bool, max(tdiff.difficulty, diff.difficulty, apDiff))
                     if diff.bool == True and diff.difficulty <= maxDiff:
                         availLocs.append(loc)
                         break
                 else:
                     loc['difficulty'] = tdiff
+            if not 'difficulty' in loc:
+                loc['difficulty'] = SMBool(False, 0)
         return availLocs
 

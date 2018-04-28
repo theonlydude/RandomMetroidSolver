@@ -52,14 +52,24 @@ function worker {
     }
 }
 
+function get_difficulties() {
+    echo "Seed;Difficulty"
+    for slog in $*; do
+	seed=$(basename $slog .log)
+	diff=$(tail -2 $slog | head -1  | awk '{print $1}' | sed -e 's+[(,]*++g')
+	echo "${seed};${diff}"
+    done
+}
+
 function gen_seeds() {
-    base_dir=$test_set/$1
-    base_extra=$2
+    base_dir=$test_set/$1/$2
+    base_extra=$3
+    progDiff=$2
     for p in $presets; do
 	mkdir -p $base_dir/$p
 	for speed in $progs; do
-#	    extra="$base_extra --graph"
-	    extra="$base_extra"
+	    extra="$base_extra --progressionDifficulty $progDiff --graph"
+#	    extra="$base_extra --superQty 1 --powerBombQty 1 --missileQty 4.6"
 	    if [[ $speed != "random" ]]; then
 		extra="$extra --speedScrewRestriction"
 	    fi
@@ -92,10 +102,15 @@ function gen_seeds() {
 		exit 1
 	    }
 	    $GET_STATS $dest/*.1st
+	    get_difficulties $dest/*.log > $dest/difficulties.csv
 	    mv *stats.csv $dest
 	done
     done
 }
 
-gen_seeds "classic"
-gen_seeds "full" "--fullRandomization"
+gen_seeds "classic" "random"
+gen_seeds "classic" "easier"
+gen_seeds "classic" "harder"
+gen_seeds "full" "random" "--fullRandomization"
+gen_seeds "full" "easier" "--fullRandomization"
+gen_seeds "full" "harder" "--fullRandomization"

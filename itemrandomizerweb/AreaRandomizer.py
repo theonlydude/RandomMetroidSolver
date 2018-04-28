@@ -38,11 +38,11 @@ def createTransitions(bidir=True):
     return transitions
 
 class AreaRandomizer(Randomizer):
-    def __init__(self, locations, settings, seedName, bidir=True):
+    def __init__(self, locations, settings, seedName, bidir=True, dotDir=None):
         self.transitions = createTransitions(bidir)
         super(AreaRandomizer, self).__init__(locations,
                                              settings,
                                              seedName,
                                              self.transitions,
-                                             bidir)
-
+                                             bidir,
+                                             dotDir)

@@ -14,6 +14,7 @@ from rom import RomPatcher, RomPatches
 
 speeds = ['slowest', 'slow', 'medium', 'fast', 'fastest']
 energyQties = ['sparse', 'medium', 'vanilla' ]
+progDiffs = ['easier', 'random', 'harder']
 
 def restricted_float(x):
     x = float(x)
@@ -96,6 +97,10 @@ if __name__ == "__main__":
                         help="",
                         dest='progressionSpeed', nargs='?', default='medium',
                         choices=speeds + ['random'])
+    parser.add_argument('--progressionDifficulty',
+                        help="",
+                        dest='progressionDifficulty', nargs='?', default='random',
+                        choices=progDiffs + ['random'])
     parser.add_argument('--superFun',
                         help="randomly remove major items from the pool for maximum enjoyment",
                         dest='superFun', nargs='?', default=[], action='append',
@@ -140,6 +145,7 @@ if __name__ == "__main__":
     progSpeed = args.progressionSpeed
     if progSpeed == "random":
         progSpeed = speeds[random.randint(0, len(speeds)-1)]
+    progDiff = args.progressionDifficulty
 
     print("SEED: " + str(seed))
 #    print("progression speed: " + progSpeed)
@@ -210,7 +216,6 @@ if __name__ == "__main__":
     qty = {'missile': missileQty, 'super': superQty,
            'powerBomb': powerBombQty, 'energy': energyQty,
            'minors': minorQty}
-    sampleSize = 100
     if 'random' in args.superFun:
         args.superFun = []
         def addFun(fun):
@@ -222,9 +227,9 @@ if __name__ == "__main__":
     # print("qty = " + str(qty))
     # print("restrictions = " + str(restrictions))
     # print("superFun = " + str(args.superFun))
-    randoSettings = RandoSettings(maxDifficulty, progSpeed, qty, restrictions, sampleSize, args.superFun)
+    randoSettings = RandoSettings(maxDifficulty, progSpeed, progDiff, qty, restrictions, args.superFun)
     if args.area == True:
-        randomizer = AreaRandomizer(graphLocations, randoSettings, seedName)
+        randomizer = AreaRandomizer(graphLocations, randoSettings, seedName, dotDir=args.directory)
     elif args.graph == True:
         randomizer = Randomizer(graphLocations, randoSettings, seedName, vanillaTransitions)
     else:

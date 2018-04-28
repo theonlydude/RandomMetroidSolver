@@ -7,6 +7,8 @@ hard = 10
 harder = 25
 hardcore = 50
 mania = 100
+god = mania*2
+samus = god*2
 
 diff2text = {
     0: 'baby',
@@ -16,8 +18,8 @@ diff2text = {
     harder: 'very hard',
     hardcore: 'hardcore',
     mania: 'mania',
-    mania*2: 'god',
-    mania*4: 'samus'
+    god: 'god',
+    samus: 'samus'
 }
 
 text2diff = {
@@ -29,8 +31,8 @@ text2diff = {
     'very hard': harder,
     'hardcore': hardcore,
     'mania': mania,
-    'god': mania*2,
-    'samus': mania*4
+    'god': god,
+    'samus': samus
 }
 
 def isConf(conf):

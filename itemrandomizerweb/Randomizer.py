@@ -1,6 +1,6 @@
 import sys, random
 from itemrandomizerweb import Items
-from parameters import Knows, Settings, mania
+from parameters import Knows, Settings, samus
 from itemrandomizerweb.stdlib import List
 from helpers import Bosses
 from graph import AccessGraph
@@ -9,6 +9,7 @@ from smboolmanager import SMBoolManager
 class RandoSettings(object):
     # maxDiff : max diff
     # progSpeed : slowest, slow, medium, fast, fastest
+    # progDiff : easier, random, harder
     # qty : dictionary telling how many tanks and ammo will be distributed. keys are:
     #       'missile', 'super', 'powerBomb' : relative weight of ammo distribution (ex:3/3/1)
     #       'energy' : can be 'sparse' (5 tanks), 'medium' (11 tanks), 'vanilla' (14 Etanks, 4 reserves)
@@ -19,23 +20,18 @@ class RandoSettings(object):
     #                'MajorMinor' : if true, will put major items in major locations, and minor items
     #                               in minor locations
     #                'SpreadItems' : if true, will spread progression items
-    # sampleSize : possible items sample size between 1 and 100. Has to be > 1 for choose dict to be relevant.
     # superFun : super fun settings list. can contain 'Movement', 'Combat', 'Suits'. Will remove random items
     # of the relevant categorie(s). This can easily cause aborted seeds, so some basic checks will be performed
     # beforehand to know whether an item can indeed be removed.
-    def __init__(self, maxDiff, progSpeed, qty, restrictions, sampleSize, superFun):
+    def __init__(self, maxDiff, progSpeed, progDiff, qty, restrictions, superFun):
         self.progSpeed = progSpeed
+        self.progDiff = progDiff
         self.maxDiff = maxDiff
         self.qty = qty
         self.restrictions = restrictions
         self.isSpreadProgression = restrictions['SpreadItems']
-        self.sampleSize = sampleSize
         self.choose = {
-            'Locations' : {
-                'Random' : 1,
-                'MinDiff' : 0,
-                'MaxDiff' : 0
-            },
+            'Locations' : self.getChooseLocDict(progDiff),
             'Items' : self.getChooseItemDict(progSpeed)
         }
         self.progressionItemTypes = self.getProgressionItemTypes(progSpeed)
@@ -43,6 +39,26 @@ class RandoSettings(object):
         self.locLimit = self.getLocLimit(progSpeed)
         self.forbiddenItems = self.getForbiddenItems(superFun)
 
+    def getChooseLocDict(self, progDiff):
+        if progDiff == 'random':
+            return {
+                'Random' : 1,
+                'MinDiff' : 0,
+                'MaxDiff' : 0
+            }
+        if progDiff == 'easier':
+            return {
+                'Random' : 2,
+                'MinDiff' : 1,
+                'MaxDiff' : 0
+            }
+        if progDiff == 'harder':
+            return {
+                'Random' : 2,
+                'MinDiff' : 0,
+                'MaxDiff' : 1
+            }
+        
     def getChooseItemDict(self, progSpeed):
         if progSpeed == 'slowest':
             return {
@@ -194,14 +210,19 @@ class RandoSettings(object):
 class Randomizer(object):
     # locations : items locations
     # settings : RandoSettings instance
-    def __init__(self, locations, settings, seedName, graphTransitions=None, bidir=True):
+    def __init__(self, locations, settings, seedName, graphTransitions=None, bidir=True, dotDir=None):
         # we assume that 'choose' dict is perfectly formed, that is all keys
         # below are defined in the appropriate weight dicts
         if graphTransitions is not None:
             self.currentLocations = self.currentLocationsGraph
-            self.areaGraph = AccessGraph(graphTransitions, bidir, seedName + ".dot")
+            self.getLocDiff = self.getLocDiffGraph
+            dotFile = None
+            if dotDir is not None:
+                dotFile = dotDir + '/' + seedName + ".dot"
+            self.areaGraph = AccessGraph(graphTransitions, bidir, dotFile)
         else:
             self.currentLocations = self.currentLocationsAvailFunc
+            self.getLocDiff  = self.getLocDiffAvailFunc
         self.isSpreadProgression = settings.isSpreadProgression
         self.choose = settings.choose
         self.chooseItemFuncs = {
@@ -219,7 +240,6 @@ class Randomizer(object):
         self.restrictions = settings.restrictions
         self.itemPool = Items.getItemPool(settings.qty, settings.forbiddenItems)
         self.difficultyTarget = settings.maxDiff
-        self.sampleSize = settings.sampleSize
         self.itemLimit = settings.itemLimit
         self.unusedLocations = locations
         self.locLimit = settings.locLimit
@@ -232,7 +252,7 @@ class Randomizer(object):
         self.currentItems = []
         self.nonProgTypesCache = []
         self.progTypesCache = []
-        if self.difficultyTarget > mania:
+        if self.difficultyTarget > samus and settings.progDiff == 'random':
             self.smbm = SMBoolManager.factory('bool', cache=True, graph=graphTransitions is not None)
         else:
             self.smbm = SMBoolManager.factory('diff', cache=True, graph=graphTransitions is not None)
@@ -322,8 +342,6 @@ class Randomizer(object):
         for item in itemPool:
             if self.checkItem(curLocs, item, items):
                 result.append(item)
-                if len(result) >= self.sampleSize:
-                    break
         return result
 
     def removeItem(self, itemType, itemPool):
@@ -402,11 +420,28 @@ class Randomizer(object):
     def chooseLocationRandom(self, availableLocations, item):
         return availableLocations[random.randint(0, len(availableLocations)-1)]
 
+    def getLocDiffAvailFunc(self, loc):
+        return self.smbm.eval(loc['Available'])
+
+    def getLocDiffGraph(self, loc):
+        # avail difficulty already stored by graph algorithm        
+        return loc['difficulty']
+
+    def fillLocsDiff(self, locs):
+        for loc in locs:
+            postAvail = 'PostAvailable' in loc
+            avail = self.getLocDiffAvailFunc(loc)
+            if postAvail == True:
+                avail = self.smbm.wand(avail, self.smbm.eval(loc['PostAvailable']))
+            loc['difficulty'] = self.smbm.getSMBoolCopy()
+
     def chooseLocationMaxDiff(self, availableLocations, item):
-        return max(availableLocations, key=lambda loc:loc['Available'](self.currentItems).difficulty)
+        self.fillLocsDiff(availableLocations)
+        return max(availableLocations, key=lambda loc:loc['difficulty'].difficulty)
 
     def chooseLocationMinDiff(self, availableLocations, item):
-        return min(availableLocations, key=lambda loc:loc['Available'](self.currentItems).difficulty)
+        self.fillLocsDiff(availableLocations)
+        return min(availableLocations, key=lambda loc:loc['difficulty'].difficulty)
 
     # gives a general "distance" of a particular location compared to other locations
     def areaDistance(self, loc, otherLocs):

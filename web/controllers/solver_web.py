@@ -530,6 +530,9 @@ def randomizer():
         session.randomizer['funMovement'] = "off"
         session.randomizer['funSuits'] = "off"
         session.randomizer['layoutPatches'] = "on"
+        session.randomizer['randomMinors'] = "off"
+        session.randomizer['randomParams'] = "off"
+        session.randomizer['randomSuperFuns'] = "off"
 
     # put standard presets first
     stdPresets = ['noob', 'regular', 'veteran', 'speedrunner']
@@ -608,7 +611,7 @@ def validateWebServiceParams(patchs, quantities, others, isJson=False):
         except:
             raiseHttp(400, "Wrong value for paramsFileTarget, must be a JSON string", isJson)
 
-    for check in ['useMaxDiff', 'spreadItems', 'fullRandomization', 'suitsRestriction', 'speedScrewRestriction', 'layoutPatches', 'noGravHeat']:
+    for check in ['useMaxDiff', 'spreadItems', 'fullRandomization', 'suitsRestriction', 'speedScrewRestriction', 'layoutPatches', 'noGravHeat', 'randomMinors', 'randomParams', 'randomSuperFuns']:
         if check in others:
             if request.vars[check] not in ['on', 'off']:
                 raiseHttp(400, "Wrong value for {}: {}, authorized values: on/off".format(check, request.vars[check]), isJson)
@@ -625,7 +628,8 @@ def sessionWebService():
     quantities = ['missileQty', 'superQty', 'powerBombQty']
     others = ['paramsFile', 'minorQty', 'energyQty', 'useMaxDiff', 'maxDifficulty',
               'progressionSpeed', 'spreadItems', 'fullRandomization', 'suitsRestriction',
-              'speedScrewRestriction', 'funCombat', 'funMovement', 'funSuits', 'layoutPatches', 'noGravHeat']
+              'speedScrewRestriction', 'funCombat', 'funMovement', 'funSuits', 'layoutPatches', 'noGravHeat',
+              'randomMinors', 'randomParams', 'randomSuperFuns']
     validateWebServiceParams(patchs, quantities, others)
 
     if session.randomizer is None:
@@ -651,6 +655,9 @@ def sessionWebService():
     session.randomizer['funSuits'] = request.vars.funSuits
     session.randomizer['layoutPatches'] = request.vars.layoutPatches
     session.randomizer['noGravHeat'] = request.vars.noGravHeat
+    session.randomizer['randomMinors'] = request.vars.randomMinors
+    session.randomizer['randomParams'] = request.vars.randomParams
+    session.randomizer['randomSuperFuns'] = request.vars.randomSuperFuns
 
 def randomizerWebService():
     # web service to compute a new random (returns json string)
@@ -667,7 +674,7 @@ def randomizerWebService():
     others = ['seed', 'paramsFile', 'paramsFileTarget', 'minorQty', 'energyQty', 'useMaxDiff',
               'maxDifficulty', 'progressionSpeed', 'spreadItems', 'fullRandomization',
               'suitsRestriction', 'speedScrewRestriction', 'funCombat', 'funMovement', 'funSuits',
-              'layoutPatches', 'noGravHeat']
+              'layoutPatches', 'noGravHeat', 'randomMinors', 'randomParams', 'randomSuperFuns']
     validateWebServiceParams(patchs, quantities, others, isJson=True)
 
     # randomize
@@ -685,12 +692,20 @@ def randomizerWebService():
               '--seed', request.vars.seed,
               '--output', jsonFileName, '--param', presetFileName,
               '--preset', request.vars.paramsFile,
-              '--missileQty', request.vars.missileQty,
-              '--superQty', request.vars.superQty,
-              '--powerBombQty', request.vars.powerBombQty,
-              '--minorQty', request.vars.minorQty,
-              '--energyQty', request.vars.energyQty,
               '--progressionSpeed', request.vars.progressionSpeed]
+    if request.vars.randomMinors == 'on':
+        params += ['--missileQty', '0',
+                   '--superQty', '0',
+                   '--powerBombQty', '0',
+                   '--minorQty', '0',
+                   '--energyQty', 'random']
+    else:
+        params += ['--missileQty', request.vars.missileQty,
+                   '--superQty', request.vars.superQty,
+                   '--powerBombQty', request.vars.powerBombQty,
+                   '--minorQty', request.vars.minorQty,
+                   '--energyQty', request.vars.energyQty]
+
     for patch in patches:
         if request.vars[patch[0]] == 'on':
             if patch[0] == 'animals':
@@ -699,32 +714,44 @@ def randomizerWebService():
             params.append(patch[0] + '.ips')
     if request.vars.animals == 'on':
         params.append('--animals')
+
     if request.vars.useMaxDiff == 'on':
         params.append('--maxDifficulty')
         params.append(request.vars.maxDifficulty)
-    if request.vars.spreadItems == 'on':
-        params.append('--spreadItems')
     if request.vars.fullRandomization == 'on':
         params.append('--fullRandomization')
-    if request.vars.suitsRestriction == 'on':
-        params.append('--suitsRestriction')
-    if request.vars.speedScrewRestriction == 'on':
-        params.append('--speedScrewRestriction')
-    if request.vars.funCombat == 'on':
-        params.append('--superFun')
-        params.append('Combat')
-    if request.vars.funMovement == 'on':
-        params.append('--superFun')
-        params.append('Movement')
-    if request.vars.funSuits == 'on':
-        params.append('--superFun')
-        params.append('Suits')
+
+    if request.vars.randomParams == 'on':
+        params.append('--randomRestrictions')
+    else:
+        if request.vars.spreadItems == 'on':
+            params.append('--spreadItems')
+        if request.vars.suitsRestriction == 'on':
+            params.append('--suitsRestriction')
+        if request.vars.speedScrewRestriction == 'on':
+            params.append('--speedScrewRestriction')
+
+    if request.vars.randomSuperFuns == 'on':
+        params += ['--superFun', 'random']
+    else:
+        if request.vars.funCombat == 'on':
+            params.append('--superFun')
+            params.append('Combat')
+        if request.vars.funMovement == 'on':
+            params.append('--superFun')
+            params.append('Movement')
+        if request.vars.funSuits == 'on':
+            params.append('--superFun')
+            params.append('Suits')
+
     if request.vars.layoutPatches == 'off':
         params.append('--nolayout')
     if request.vars.noGravHeat == 'off':
         params.append('--nogravheat')
 
+    print("before calling: {}".format(params))
     ret = subprocess.call(params)
+    print("ret={}".format(ret))
 
     if ret == 0:
         with open(jsonFileName) as jsonFile:

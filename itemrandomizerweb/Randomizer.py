@@ -18,17 +18,17 @@ class RandoSettings(object):
     #                'SpeedScrew' : no speed or screw in the very first rooms
     #                'MajorMinor' : if true, will put major items in major locations, and minor items
     #                               in minor locations
-    # spreadProg : if true, will spread progression items
+    #                'SpreadItems' : if true, will spread progression items
     # sampleSize : possible items sample size between 1 and 100. Has to be > 1 for choose dict to be relevant.
     # superFun : super fun settings list. can contain 'Movement', 'Combat', 'Suits'. Will remove random items
     # of the relevant categorie(s). This can easily cause aborted seeds, so some basic checks will be performed
     # beforehand to know whether an item can indeed be removed.
-    def __init__(self, maxDiff, progSpeed, qty, restrictions, spreadProg, sampleSize, superFun):
+    def __init__(self, maxDiff, progSpeed, qty, restrictions, sampleSize, superFun):
         self.progSpeed = progSpeed
         self.maxDiff = maxDiff
         self.qty = qty
         self.restrictions = restrictions
-        self.isSpreadProgression = spreadProg
+        self.isSpreadProgression = restrictions['SpreadItems']
         self.sampleSize = sampleSize
         self.choose = {
             'Locations' : {

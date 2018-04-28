@@ -13,6 +13,7 @@ from solver import ParamsLoader
 from rom import RomPatcher, RomPatches
 
 speeds = ['slowest', 'slow', 'medium', 'fast', 'fastest']
+energyQties = ['sparse', 'medium', 'vanilla' ]
 
 def restricted_float(x):
     x = float(x)
@@ -71,11 +72,14 @@ if __name__ == "__main__":
     parser.add_argument('--minorQty', '-n',
                         help="quantity of minors",
                         dest='minorQty', nargs='?', default=100,
-                        choices=[str(i) for i in range(1,101)])
+                        choices=[str(i) for i in range(0,101)])
     parser.add_argument('--energyQty', '-g',
                         help="quantity of ETanks/Reserve Tanks",
                         dest='energyQty', nargs='?', default='vanilla',
-                        choices=['sparse', 'medium', 'vanilla'])
+                        choices=energyQties + ['random'])
+    parser.add_argument('--randomRestrictions',
+                        help="Randomizes (and overrides) spreadItems, suitsRestriction and speedScrewRestriction", action='store_true',
+                        dest='randomRestrictions', default=False)
     parser.add_argument('--spreadItems',
                         help="spread progression items", action='store_true',
                         dest='spreadItems', default=False)
@@ -95,7 +99,7 @@ if __name__ == "__main__":
     parser.add_argument('--superFun',
                         help="randomly remove major items from the pool for maximum enjoyment",
                         dest='superFun', nargs='?', default=[], action='append',
-                        choices=['Movement', 'Combat', 'Suits'])
+                        choices=['Movement', 'Combat', 'Suits', 'random'])
     parser.add_argument('--animals',
                         help="randomly change the save the animals room",
                         dest='animals', action='store_true', default=False)
@@ -162,7 +166,11 @@ if __name__ == "__main__":
     maxDifficulty = threshold
 
     # fill restrictions dict
-    restrictions = { 'Suits' : args.suitsRestriction, 'SpeedScrew' : args.speedScrewRestriction, 'MajorMinor' : not args.fullRandomization }
+    if not args.randomRestrictions:
+        restrictions = { 'Suits' : args.suitsRestriction, 'SpeedScrew' : args.speedScrewRestriction, 'SpreadItems' : args.spreadItems }
+    else:
+        restrictions = { 'Suits' : bool(random.getrandbits(1)), 'SpeedScrew' : bool(random.getrandbits(1)), 'SpreadItems' : bool(random.getrandbits(1))}
+    restrictions['MajorMinor'] = not args.fullRandomization
     seedCode = 'X'
     if restrictions['MajorMinor'] == False:
         seedCode = 'FX'
@@ -184,11 +192,37 @@ if __name__ == "__main__":
         RomPatches.ActivePatches = RomPatches.Total
     if args.noGravHeat == True:
         RomPatches.ActivePatches.remove(RomPatches.NoGravityEnvProtection)
-    qty = {'missile': int(args.missileQty), 'super': int(args.superQty),
-           'powerBomb': int(args.powerBombQty), 'energy': args.energyQty,
-           'minors': int(args.minorQty)}
+    missileQty = float(args.missileQty)
+    superQty = float(args.superQty)
+    powerBombQty = float(args.powerBombQty)
+    minorQty = int(args.minorQty)
+    energyQty = args.energyQty
+    if missileQty < 1:
+        missileQty = random.randint(1, 9)
+    if superQty < 1:
+        superQty = random.randint(1, 9)
+    if powerBombQty < 1:
+        powerBombQty = random.randint(1, 9)
+    if minorQty < 1:
+        minorQty = random.randint(25, 100)
+    if energyQty == 'random':
+        energyQty = energyQties[random.randint(0, len(energyQties)-1)]
+    qty = {'missile': missileQty, 'super': superQty,
+           'powerBomb': powerBombQty, 'energy': energyQty,
+           'minors': minorQty}
     sampleSize = 100
-    randoSettings = RandoSettings(maxDifficulty, progSpeed, qty, restrictions, args.spreadItems, sampleSize, args.superFun)
+    if 'random' in args.superFun:
+        args.superFun = []
+        def addFun(fun):
+            if bool(random.getrandbits(1)) == True:
+                args.superFun.append(fun)
+        addFun('Suits')
+        addFun('Combat')
+        addFun('Movement')
+    # print("qty = " + str(qty))
+    # print("restrictions = " + str(restrictions))
+    # print("superFun = " + str(args.superFun))
+    randoSettings = RandoSettings(maxDifficulty, progSpeed, qty, restrictions, sampleSize, args.superFun)
     if args.area == True:
         randomizer = AreaRandomizer(graphLocations, randoSettings, seedName)
     elif args.graph == True:

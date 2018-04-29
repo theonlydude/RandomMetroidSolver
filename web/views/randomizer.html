@@ -137,12 +137,6 @@ function ajaxFailJSON(jqXHR, textStatus) {
   $('#loadingGIF').hide();
 }
 
-window.addEventListener('load', function() {
-    initialDisable("randomMinors", ["missileQty", "superQty", "powerBombQty", "minorQty", "energyQty"]);
-    initialDisable("randomParams", ["spreadItems", "suitsRestriction", "speedScrewRestriction"]);
-    initialDisable("randomSuperFuns", ["funCombat", "funMovement", "funSuits"]);
-});
-
 function AjaxRandomizerCallCompleted(data) {
     console.log("AjaxRandomizerCallCompleted");
 
@@ -395,6 +389,20 @@ window.onload = function(){
             }
         }
     }
+
+
+    var inputs = document.getElementsByTagName("input");
+    for(var i = 0; i < inputs.length; i++) {
+        if(inputs[i].type == "checkbox") {
+            var s = new Switchery(document.getElementById(inputs[i].name), { size: 'small', color: '#ddd' });
+            globalSwitchs[inputs[i].name] = s;
+        }
+    }
+
+    initialDisable("randomMinors", ["missileQty", "superQty", "powerBombQty", "minorQty", "energyQty"]);
+    initialDisable("randomParams", ["spreadItems", "suitsRestriction", "speedScrewRestriction"]);
+    initialDisable("randomSuperFuns", ["funCombat", "funMovement", "funSuits"]);
+
 }
 function initialDisable(id, elems) {
     var check = document.getElementById(id);
@@ -403,8 +411,8 @@ function initialDisable(id, elems) {
           var e = document.getElementById(elems[i]);
           e.disabled = check.checked;
           // tell switchery
-          if(id in globalSwitchs){
-            var s = globalSwitchs[id];
+          if(elems[i] in globalSwitchs){
+            var s = globalSwitchs[elems[i]];
             if(check.checked){
               s.disable();
             } else {
@@ -584,14 +592,7 @@ def displayCheckbox(id, defaultTrue=False):
 }}
     {{=INPUT(_id=id, _name=id, _type="checkbox", _value="off", _class="js-switch", _onchange="switchCheckbox('{}')".format(id))}}
     {{pass}}
-
-  {{
-  response.write("<script type=\"text/javascript\">\nvar s = new Switchery(document.getElementById(\"{}\")\n".format(id), escape=False)
-  response.write(", { size: 'small', color: '#ddd' });\n", escape=False)
-  response.write("globalSwitchs[\"{}\"] = s;\n".format(id), escape=False)
-  response.write("</script>", escape=False)
-  pass
-  }}
+  {{pass}}
 
 {{
 def displayCheckboxRandom(id, elems):
@@ -603,12 +604,7 @@ def displayCheckboxRandom(id, elems):
 }}
     {{=INPUT(_id=id, _name=id, _type="checkbox", _value="off", _class="js-switch", _onchange="switchCheckbox('{}', {})".format(id, elems))}}
     {{pass}}
-
-  {{
-  response.write("<script type=\"text/javascript\">new Switchery(document.getElementById(\"{}\")".format(id), escape=False);
-  response.write(", { size: 'small', color: '#ddd' });</script>", escape=False)
-  pass
-  }}
+  {{pass}}
 
 {{
 def displaySelect(id, values, default):

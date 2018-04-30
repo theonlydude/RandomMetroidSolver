@@ -260,6 +260,7 @@ if __name__ == "__main__":
             RomPatcher.applyIPSPatches(fileName, args.patches, args.noLayout, args.noGravHeat)
             RomPatcher.writeSeed(fileName, seed)
             RomPatcher.writeSpoiler(fileName, itemLocs)
+            RomPatcher.writeRandoSettings(fileName, randoSettings)
         except Exception as e:
             print("Error patching {}. Is {} a valid ROM ? ({})".format(fileName, romFileName, e))
             sys.exit(-1)
@@ -272,6 +273,7 @@ if __name__ == "__main__":
             data.update(RomPatcher.applyIPSPatches(None, args.patches, args.noLayout, args.noGravHeat))
             data.update(RomPatcher.writeSeed(None, seed))
             data.update(RomPatcher.writeSpoiler(None, itemLocs))
+            data.update(RomPatcher.writeRandoSettings(None, randoSettings))
 
             fileName += '.sfc'
             data["fileName"] = fileName

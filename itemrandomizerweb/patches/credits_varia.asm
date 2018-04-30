@@ -940,81 +940,94 @@ script:
     dw {draw}, {row}*130
     dw {draw}, {row}*131
     dw {draw}, {blank}
-    dw {draw}, {row}*132
+    dw {draw}, {blank}
+    dw {draw}, {row}*132 // SNES AND ITEM RANDOMIZER CODE
+    dw {draw}, {blank}
     dw {draw}, {row}*133
-    dw {draw}, {blank}
-    dw {draw}, {blank}
-    dw {draw}, {row}*134 // SNES AND ITEM RANDOMIZER CODE
+    dw {draw}, {row}*134
     dw {draw}, {blank}
     dw {draw}, {row}*135
     dw {draw}, {row}*136
     dw {draw}, {blank}
-    dw {draw}, {row}*137
+    dw {draw}, {blank}
+    dw {draw}, {row}*137 // ROM PATCHES
+    dw {draw}, {blank}
     dw {draw}, {row}*138
-    dw {draw}, {blank}
     dw {draw}, {row}*139
+    dw {draw}, {blank}
     dw {draw}, {row}*140
-    dw {draw}, {blank}
     dw {draw}, {row}*141
+    dw {draw}, {blank}
     dw {draw}, {row}*142
-    dw {draw}, {blank}
-    dw {draw}, {blank}
-    dw {draw}, {row}*143 // ROM PATCHES
+    dw {draw}, {row}*143
     dw {draw}, {blank}
     dw {draw}, {row}*144
     dw {draw}, {row}*145
     dw {draw}, {blank}
-    dw {draw}, {row}*146
-    dw {draw}, {row}*147
+    dw {draw}, {blank}
+    dw {draw}, {row}*146 // SPECIAL THANKS TO
+    dw {draw}, {blank}
+    dw {draw}, {row}*147 // METROID CONSTRUCTION
     dw {draw}, {blank}
     dw {draw}, {row}*148
     dw {draw}, {row}*149
     dw {draw}, {blank}
-    dw {draw}, {row}*150
-    dw {draw}, {row}*151
+    dw {draw}, {row}*150 // SUPER METROID SRL COMMUNITY
     dw {draw}, {blank}
+    dw {draw}, {row}*151
     dw {draw}, {row}*152
-    dw {draw}, {row}*153
+    dw {draw}, {blank}
+    dw {draw}, {blank}
+    dw {draw}, {row}*153 // RANDOMIZER PARAMETERS
     dw {draw}, {blank}
     dw {draw}, {row}*154
+    dw {draw}, {blank}
     dw {draw}, {row}*155
     dw {draw}, {blank}
+    dw {draw}, {row}*156
     dw {draw}, {blank}
-    dw {draw}, {row}*156 // SPECIAL THANKS TO
-    dw {draw}, {blank}
-    dw {draw}, {row}*157 // METROID CONSTRUCTION
+    dw {draw}, {row}*157
     dw {draw}, {blank}
     dw {draw}, {row}*158
+    dw {draw}, {blank}
     dw {draw}, {row}*159
     dw {draw}, {blank}
-    dw {draw}, {row}*160 // SUPER METROID SRL COMMUNITY
+    dw {draw}, {row}*160
     dw {draw}, {blank}
     dw {draw}, {row}*161
+    dw {draw}, {blank}
     dw {draw}, {row}*162
     dw {draw}, {blank}
-    dw {draw}, {blank}
-    dw {draw}, {row}*163 // INFORMATION
+    dw {draw}, {row}*163
     dw {draw}, {blank}
     dw {draw}, {row}*164
+    dw {draw}, {blank}
     dw {draw}, {row}*165
     dw {draw}, {blank}
     dw {draw}, {row}*166
+    dw {draw}, {blank}
     dw {draw}, {row}*167
     dw {draw}, {blank}
     dw {draw}, {row}*168
+    dw {draw}, {blank}
     dw {draw}, {row}*169
     dw {draw}, {blank}
     dw {draw}, {row}*170
+    dw {draw}, {blank}
     dw {draw}, {row}*171
     dw {draw}, {blank}
     dw {draw}, {row}*172
+    dw {draw}, {blank}
     dw {draw}, {row}*173
     dw {draw}, {blank}
     dw {draw}, {row}*174
+    dw {draw}, {blank}
     dw {draw}, {row}*175
     dw {draw}, {blank}
     dw {draw}, {row}*176
+    dw {draw}, {blank}
     dw {draw}, {row}*177
+    dw {draw}, {blank}
     dw {draw}, {row}*178
     dw {draw}, {blank}
     dw {draw}, {blank}
@@ -1214,65 +1227,88 @@ credits:
     {purple}
     dw "         RANDOMIZER CODE        " // 129
     {big}
-    dw "             DUDE               " // 130
-    dw "             dude               " // 131
-    dw "             FLO                " // 132
-    dw "             flo                " // 133
+    dw "          DUDE AND FLO          " // 130
+    dw "          dude and flo          " // 131
     {purple}
-    dw "  SNES AND ITEM RANDOMIZER CODE " // 134
+    dw "  SNES AND ITEM RANDOMIZER CODE " // 132
     {big}
-    dw "             TOTAL              " // 135
-    dw "             total              " // 136
-    dw "           DESSYREQT            " // 137
-    dw "           dessyreqt            " // 138
-    dw "             FOOSDA             " // 139
-    dw "             foosda             " // 140
-    dw "           PERSONITIS           " // 141
-    dw "           personitis           " // 142
+    dw "       TOTAL   DESSYREQT        " // 133
+    dw "       total   dessyreqt        " // 134
+    dw "       FOOSDA  PERSONITIS       " // 135
+    dw "       foosda  personitis       " // 136
     {purple}
-    dw "          ROM PATCHES           " // 143
+    dw "          ROM PATCHES           " // 137
     {big}
-    dw "             TOTAL              " // 144
-    dw "             total              " // 145
-    dw "             FOOSDA             " // 146
-    dw "             foosda             " // 147
-    dw "             LEODOX             " // 148
-    dw "             leodox             " // 149
-    dw "       DARKSHOCK   RAKKI        " // 150
-    dw "       darkshock   rakki        " // 151
-    dw "       KEJARDON   SMILEY        " // 152
-    dw "       kejardon   smiley        " // 153
-    dw "        SCYZER   LIORAN         " // 154
-    dw "        scyzer   lioran         " // 155
+    dw "     TOTAL  FOOSDA  LEODOX      " // 138
+    dw "     total  foosda  leodox      " // 139
+    dw "   DARKSHOCK   RAKKI   SCYZER   " // 140
+    dw "   darkshock   rakki   scyzer   " // 141
+    dw "   KEJARDON   SMILEY   LIORAN   " // 142
+    dw "   kejardon   smiley   lioran   " // 143
+    dw "        SCYZER   LIORAN         " // 144
+    dw "        scyzer   lioran         " // 145
     {cyan}
-    dw "       SPECIAL THANKS TO        " // 156
+    dw "       SPECIAL THANKS TO        " // 146
     {yellow}
-    dw "      METROID CONSTRUCTION      " // 157
+    dw "      METROID CONSTRUCTION      " // 147
     {big}
-    dw "     METROIDCONSTRUCTION COM    " // 158
-    dw "     metroidconstruction.com    " // 159
+    dw "     METROIDCONSTRUCTION COM    " // 148
+    dw "     metroidconstruction.com    " // 149
     {yellow}
-    dw "  SUPER METROID SRL COMMUNITY   " // 160
+    dw "  SUPER METROID SRL COMMUNITY   " // 150
     {big}
-    dw "    DISCORD INVITE . RT2FWZT    " // 161 (rT2fWZt)
-    dw "    discord invite . rt@fwzt    " // 162
+    dw "    DISCORD INVITE . RT2FWZT    " // 151 (rT2fWZt)
+    dw "    discord invite . rt@fwzt    " // 152
     {purple}
-    dw "          INFORMATION           " // 163
-    {big}
-    dw "  CHECK YOUR RANDOMIZED ROMS    " // 164
-    dw "  check your randomized roms    " // 165
-    dw "  GET THE LIST OF TECHNIQUES    " // 166
-    dw "  get the list of techniques    " // 167
-    dw "      AND MUCH MORE ON          " // 168
-    dw "      and much more on          " // 169
-    dw "  THE SUPER METROID SOLVER AT   " // 170
-    dw "  the super metroid solver at   " // 171
-    dw "                                " // 172
-    dw "                                " // 173
-    dw "       RANDOMMETROIDSOLVER      " // 174
-    dw "       randommetroidsolver      " // 175
-    dw "        PYTHONANYWHERE COM      " // 176
-    dw "       .pythonanywhere.com      " // 177
+    dw "     RANDOMIZER PARAMETERS      " // 153
+    {orange}
+    dw " MISSILE PROBABILITY            " // 154
+    {yellow}
+    dw " .......................... X.X " // 155
+    {orange}
+    dw " SUPER PROBABILITY              " // 156
+    {yellow}
+    dw " .......................... X.X " // 157
+    {orange}
+    dw " POWER BOMB PROBABILITY         " // 158
+    {yellow}
+    dw " .......................... X.X " // 159
+    {orange}
+    dw " MINORS QUANTITY                " // 160
+    {yellow}
+    dw " .......................... XXX " // 161
+    {orange}
+    dw " ENERGY QUANTITY                " // 162
+    {yellow}
+    dw " ...................... XXXXXXX " // 163
+    {orange}
+    dw " PROGRESSION SPEED              " // 164
+    {yellow}
+    dw " ...................... XXXXXXX " // 165
+    {orange}
+    dw " SPREAD PROG ITEMS              " // 166
+    {yellow}
+    dw " .......................... XXX " // 167
+    {orange}
+    dw " SUITS RESTRICTION              " // 168
+    {yellow}
+    dw " .......................... XXX " // 169
+    {orange}
+    dw " EARLY MORPH                    " // 170
+    {yellow}
+    dw " .......................... XXX " // 171
+    {orange}
+    dw " SUPER FUN COMBAT               " // 172
+    {yellow}
+    dw " .......................... XXX " // 173
+    {orange}
+    dw " SUPER FUN MOVEMENT             " // 174
+    {yellow}
+    dw " .......................... XXX " // 175
+    {orange}
+    dw " SUPER FUN SUITS                " // 176
+    {yellow}
+    dw " .......................... XXX " // 177
     dw "                                " // 178
     dw "       RANDOMMETROIDSOLVER      " // 179
     dw "       randommetroidsolver      " // 180

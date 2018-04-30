@@ -410,6 +410,46 @@ class RomPatcher:
             return romFile.data
 
     @staticmethod
+    def writeRandoSettings(romFileName, settings):
+        if romFileName is not None:
+            romFile = open(romFileName, 'r+')
+        else:
+            romFile = FakeROM()
+
+        address = 0x273900
+        for setting in ['missile', 'super', 'powerBomb']:
+            line = " .......................... %.1f " % settings.qty[setting]
+            RomPatcher.writeCreditsString(romFile, address, 0x04, line)
+            address += 0x80
+
+        line = " .......................... %03d " % settings.qty['minors']
+        RomPatcher.writeCreditsString(romFile, address, 0x04, line)
+        address += 0x80
+
+        line = " ...................... %s " % settings.qty['energy'].upper()
+        RomPatcher.writeCreditsString(romFile, address, 0x04, line)
+        address += 0x80
+
+        line = " ...................... %s " % settings.progSpeed.upper()
+        RomPatcher.writeCreditsString(romFile, address, 0x04, line)
+        address += 0x80
+
+        for param in ['SpreadItems', 'Suits', 'SpeedScrew']:
+            line = " .......................... %s " % ' ON' if settings.restrictions[param] == True else 'OFF'
+            RomPatcher.writeCreditsString(romFile, address, 0x04, line)
+            address += 0x80
+
+        for superFun in ['Combat', 'Movement', 'Suits']:
+            line = " .......................... %s " % ' ON' if superFun in settings.superFun else 'OFF'
+            RomPatcher.writeCreditsString(romFile, address, 0x04, line)
+            address += 0x80
+
+        romFile.close()
+
+        if romFileName is None:
+            return romFile.data
+
+    @staticmethod
     def writeSpoiler(romFileName, itemLocs):
         # keep only majors, filter out Etanks and Reserve
         fItemLocs = List.sortBy(lambda il: il['Item']['Type'],

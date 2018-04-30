@@ -16,9 +16,9 @@ class AccessPoint(object):
         self.transitions = transitions
         self.traverse = traverse
         if shortName is not None:
-            self.shortName = shortName
+            self.ShortName = shortName
         else:
-            self.shortName = str(self)
+            self.ShortName = str(self)
 
     def __str__(self):
         return "[" + self.GraphArea + "] " + self.Name

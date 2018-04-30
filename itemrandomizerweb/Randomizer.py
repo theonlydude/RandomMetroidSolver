@@ -37,6 +37,7 @@ class RandoSettings(object):
         self.progressionItemTypes = self.getProgressionItemTypes(progSpeed)
         self.itemLimit = self.getItemLimit(progSpeed)
         self.locLimit = self.getLocLimit(progSpeed)
+        self.superFun = superFun
         self.forbiddenItems = self.getForbiddenItems(superFun)
 
     def getChooseLocDict(self, progDiff):

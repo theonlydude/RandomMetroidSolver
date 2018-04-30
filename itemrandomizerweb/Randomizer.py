@@ -490,10 +490,15 @@ class Randomizer(object):
 
     def chooseLocation(self, availableLocations, item):
         locs = availableLocations
-        if self.isSpreadProgression == True and self.isProgItem(item):
+        isProg = self.isProgItem(item)
+        if self.isSpreadProgression == True and isProg == True:
             locs = self.getLocsSpreadProgression(availableLocations)
         random.shuffle(locs)
-        return self.getChooseFunc(self.chooseLocRanges, self.chooseLocFuncs)(locs, item)
+        if isProg == True:
+            return self.getChooseFunc(self.chooseLocRanges, self.chooseLocFuncs)(locs, item)
+        else:
+            # choose randomly if non-progression
+            return self.chooseLocationRandom(locs, item)
 
     def getItemToPlace(self, items, itemPool):
         itemsLen = len(items)

@@ -981,19 +981,15 @@ script:
     dw {draw}, {row}*153 // RANDOMIZER PARAMETERS
     dw {draw}, {blank}
     dw {draw}, {row}*154
-    dw {draw}, {blank}
     dw {draw}, {row}*155
     dw {draw}, {blank}
     dw {draw}, {row}*156
-    dw {draw}, {blank}
     dw {draw}, {row}*157
     dw {draw}, {blank}
     dw {draw}, {row}*158
-    dw {draw}, {blank}
     dw {draw}, {row}*159
     dw {draw}, {blank}
     dw {draw}, {row}*160
-    dw {draw}, {blank}
     dw {draw}, {row}*161
     dw {draw}, {blank}
     dw {draw}, {row}*162
@@ -1261,22 +1257,15 @@ credits:
     dw "    discord invite . rt@fwzt    " // 152
     {purple}
     dw "     RANDOMIZER PARAMETERS      " // 153
-    {orange}
-    dw " MISSILE PROBABILITY            " // 154
-    {yellow}
-    dw " .......................... X.X " // 155
-    {orange}
-    dw " SUPER PROBABILITY              " // 156
-    {yellow}
-    dw " .......................... X.X " // 157
-    {orange}
-    dw " POWER BOMB PROBABILITY         " // 158
-    {yellow}
-    dw " .......................... X.X " // 159
-    {orange}
-    dw " MINORS QUANTITY                " // 160
-    {yellow}
-    dw " .......................... XXX " // 161
+    {big}
+    dw " MISSILE PROBABILITY        X X " // 154
+    dw " missile probability ...... X.X " // 155
+    dw " SUPER PROBABILITY          X X " // 156
+    dw " super probability ........ X.X " // 157
+    dw " POWER BOMB PROBABILITY     X X " // 158
+    dw " power bomb probability ... X.X " // 159
+    dw " MINORS QUANTITY           XXX% " // 160
+    dw " minors quantity ......... XXX> " // 161
     {orange}
     dw " ENERGY QUANTITY                " // 162
     {yellow}
@@ -1310,6 +1299,7 @@ credits:
     {yellow}
     dw " .......................... XXX " // 177
     dw "                                " // 178
+    {big}
     dw "       RANDOMMETROIDSOLVER      " // 179
     dw "       randommetroidsolver      " // 180
     dw "        PYTHONANYWHERE COM      " // 181

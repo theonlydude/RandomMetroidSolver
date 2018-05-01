@@ -416,16 +416,44 @@ class RomPatcher:
         else:
             romFile = FakeROM()
 
-        address = 0x273900
-        for setting in ['missile', 'super', 'powerBomb']:
-            line = " .......................... %.1f " % settings.qty[setting]
-            RomPatcher.writeCreditsString(romFile, address, 0x04, line)
-            address += 0x80
+        address = 0x2738C0
+        value = "%.1f" % settings.qty['missile']
+        line = " MISSILE PROBABILITY        %s " % value
+        RomPatcher.writeCreditsStringBig(romFile, address, line, top=True)
+        address += 0x40
 
-        line = " .......................... %03d " % settings.qty['minors']
-        RomPatcher.writeCreditsString(romFile, address, 0x04, line)
+        line = " missile probability ...... %s " % value
+        RomPatcher.writeCreditsStringBig(romFile, address, line, top=False)
+        address += 0x40
+
+        value = "%.1f" % settings.qty['super']
+        line = " SUPER PROBABILITY          %s " % value
+        RomPatcher.writeCreditsStringBig(romFile, address, line, top=True)
+        address += 0x40
+
+        line = " super probability ........ %s " % value
+        RomPatcher.writeCreditsStringBig(romFile, address, line, top=False)
+        address += 0x40
+
+        value = "%.1f" % settings.qty['powerBomb']
+        line = " POWER BOMB PROBABILITY     %s " % value
+        RomPatcher.writeCreditsStringBig(romFile, address, line, top=True)
+        address += 0x40
+
+        line = " power bomb probability ... %s " % value
+        RomPatcher.writeCreditsStringBig(romFile, address, line, top=False)
+        address += 0x40
+
+        value = "%03d%s" % (settings.qty['minors'], '%')
+        line = " MINORS QUANTITY           %s " % value
+        RomPatcher.writeCreditsStringBig(romFile, address, line, top=True)
+        address += 0x40
+
+        line = " minors quantity ......... %s " % value
+        RomPatcher.writeCreditsStringBig(romFile, address, line, top=False)
         address += 0x80
 
+        address = 0x273b00
         line = " ...................... %s " % settings.qty['energy'].upper()
         RomPatcher.writeCreditsString(romFile, address, 0x04, line)
         address += 0x80
@@ -435,12 +463,12 @@ class RomPatcher:
         address += 0x80
 
         for param in ['SpreadItems', 'Suits', 'SpeedScrew']:
-            line = " .......................... %s " % ' ON' if settings.restrictions[param] == True else 'OFF'
+            line = " ..........................%s " % ('. ON' if settings.restrictions[param] == True else ' OFF')
             RomPatcher.writeCreditsString(romFile, address, 0x04, line)
             address += 0x80
 
         for superFun in ['Combat', 'Movement', 'Suits']:
-            line = " .......................... %s " % ' ON' if superFun in settings.superFun else 'OFF'
+            line = " ..........................%s " % ('. ON' if superFun in settings.superFun else ' OFF')
             RomPatcher.writeCreditsString(romFile, address, 0x04, line)
             address += 0x80
 
@@ -512,6 +540,11 @@ class RomPatcher:
         RomPatcher.patchBytes(romFile, address, array)
 
     @staticmethod
+    def writeCreditsStringBig(romFile, address, string, top=True):
+        array = [RomPatcher.convertCreditsCharBig(char, top) for char in string]
+        RomPatcher.patchBytes(romFile, address, array)
+
+    @staticmethod
     def convertCreditsChar(color, byte):
         if byte == ' ':
             ib = 0x7f
@@ -534,6 +567,58 @@ class RomPatcher:
             return 0x007F
         else:
             return (color << 8) + ib
+
+    @staticmethod
+    def convertCreditsCharBig(byte, top=True):
+        # from: https://jathys.zophar.net/supermetroid/kejardon/TextFormat.txt
+        # 2-tile high characters:
+        # A-P = $XX20-$XX2F(TOP) and $XX30-$XX3F(BOTTOM)
+        # Q-Z = $XX40-$XX49(TOP) and $XX50-$XX59(BOTTOM)
+        # ' = $XX4A, $XX7F
+        # " = $XX4B, $XX7F
+        # . = $XX7F, $XX5A
+        # 0-9 = $XX60-$XX69(TOP) and $XX70-$XX79(BOTTOM)
+        # % = $XX6A, $XX7A
+
+        if byte == ' ':
+            ib = 0x7F
+        elif byte == "'":
+            if top == True:
+                ib = 0x4A
+            else:
+                ib = 0x7F
+        elif byte == '"':
+            if top == True:
+                ib = 0x4B
+            else:
+                ib = 0x7F
+        elif byte == '.':
+            if top == True:
+                ib = 0x7F
+            else:
+                ib = 0x5A
+        elif byte == '%':
+            if top == True:
+                ib = 0x6A
+            else:
+                ib = 0x7A
+
+        byte = ord(byte)
+        if byte >= ord('A') and byte <= ord('P'):
+            ib = byte - 0x21
+        elif byte >= ord('Q') and byte <= ord('Z'):
+            ib = byte - 0x11
+        elif byte >= ord('a') and byte <= ord('p'):
+            ib = byte - 0x31
+        elif byte >= ord('q') and byte <= ord('z'):
+            ib = byte - 0x21
+        elif byte >= ord('0') and byte <= ord('9'):
+            if top == True:
+                ib = byte + 0x30
+            else:
+                ib = byte + 0x40
+
+        return ib
 
     @staticmethod
     def patchBytes(romFile, address, array):

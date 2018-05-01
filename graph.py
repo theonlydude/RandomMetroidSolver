@@ -9,7 +9,8 @@ class AccessPoint(object):
     # graphArea : graph area the node is located in
     # transitions : intra-area transitions
     # exitInfo : dict carrying vanilla door information. 'RoomPtr': Room address, 'DoorPtr': door address
-    # entryInfo : dict carrying forced samus X/Y position with keys 'SamusX' and 'SamusY'
+    # entryInfo : dict carrying forced samus X/Y position with keys 'SamusX' and 'SamusY'.
+    #             (to be updated after reading vanillaTransitions and gather entry info from matching exit info)
     # traverse: traverse function, will be wand to the added transitions
     # shortName : short name for the credits
     # TODO add SNES door attributes (or some kind of Tag property to carry it)

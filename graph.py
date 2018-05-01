@@ -17,6 +17,7 @@ class AccessPoint(object):
         self.Name = name
         self.GraphArea = graphArea
         self.ExitInfo = exitInfo
+        self.EntryInfo = entryInfo
         self.transitions = transitions
         self.traverse = traverse
         if shortName is not None:

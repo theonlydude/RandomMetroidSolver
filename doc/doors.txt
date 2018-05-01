@@ -1,0 +1,42 @@
+
+
+Important
+*********
+
+Bitflag $40: area switch
+Disable closing cap: $00 to $03 for direction (in case of horizontal<>vertical transitions)
+Need door ASM for incompatible transitions: 5631 bytes of free space at $7EA00
+
+Access Points
+*************
+
+Gather entry information from the door leading to it (ex: to get lower
+mushrooms info, check green brinstar elevator door data):
+- door transition direction : keep direction with non-closing cap variant if H<>V transition, adapt otherwise
+- room ID : keep
+- cap x/y : keep
+- screen x/y : keep
+- distance to spawn : overwrite to 0 if incompatible transition
+- door ASM ptr : keep, and call with JSR if door ASM is needed
+
+Additional info from access point room itself :
+- X/Y position for Samus if incompatible transition : door ASM to write in free space and point to
+
+For each accesspoint, at construction give :
+- its own *exit* room ptr/door ptr
+- *entry* samus X/Y for incompatible transition
+
+Use vanilla transition array to get *entry* room/door ptr, then gather above infos and store them in
+the access point.
+
+Once AreaGraph is built, use InterAreaTransitions property to :
+- overwrite src *exit* data with dst *entry* data: room ID, cap X/Y, screen X/Y
+- depending on transition type (check compatibility with door transitions directions found),
+  adapt transition direction and distance to spawn
+- adjust bitflag in case of area transition
+- depending on transition write fix samus position door ASM in free space (if there already is an
+  exit door ASM pointer, JSR to it at the end) and write pointer to it in door info
+
+.....
+
+PROFIT !!

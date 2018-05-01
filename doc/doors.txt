@@ -33,17 +33,17 @@ Once AreaGraph is built, use InterAreaTransitions property to :
 - overwrite src *exit* data with dst *entry* data: room ID, cap X/Y, screen X/Y
 - depending on transition type (check compatibility with door transitions directions found),
   adapt transition direction and distance to spawn
-  - if "natural" transition : keep everything
+  - if "natural" transition : keep everything from *entry* data
   - if "incompatible" transition :
     - set spawn distance to 0
-    - H/V or V/V : keep original transition direction, but force non-closing cap variant
+    - H/V or V/V : keep *entry* data transition direction, but force non-closing cap variant
     - H/H : switch transition direction, with original door cap status
-- adjust bitflag : in case of area transition, OR it with 0x40
+- adjust bitflag : in case of area transition, OR *entry* data one with 0x40
 - door ASM :
-  - if "natural" transition : keep original pointer
+  - if "natural" transition : keep *entry* pointer
   - if "incompatible" transition :
     - write door ASM somewhere in free space that :
-      - call original door ASM routine if it existed
+      - call *entry* door ASM routine if it existed
       - fix samus X/Y position
       - cancel movement and force standing pose
 

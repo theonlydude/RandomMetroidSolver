@@ -108,9 +108,9 @@ function gen_seeds() {
     done
 }
 
-gen_seeds "classic" "random"
 gen_seeds "classic" "easier"
 gen_seeds "classic" "harder"
-gen_seeds "full" "random" "--fullRandomization"
+gen_seeds "classic" "normal"
 gen_seeds "full" "easier" "--fullRandomization"
 gen_seeds "full" "harder" "--fullRandomization"
+gen_seeds "full" "normal" "--fullRandomization"

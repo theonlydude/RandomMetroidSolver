@@ -9,7 +9,7 @@ from smboolmanager import SMBoolManager
 class RandoSettings(object):
     # maxDiff : max diff
     # progSpeed : slowest, slow, medium, fast, fastest
-    # progDiff : easier, random, harder
+    # progDiff : easier, normal, harder
     # qty : dictionary telling how many tanks and ammo will be distributed. keys are:
     #       'missile', 'super', 'powerBomb' : relative weight of ammo distribution (ex:3/3/1)
     #       'energy' : can be 'sparse' (5 tanks), 'medium' (11 tanks), 'vanilla' (14 Etanks, 4 reserves)
@@ -41,7 +41,7 @@ class RandoSettings(object):
         self.forbiddenItems = self.getForbiddenItems(superFun)
 
     def getChooseLocDict(self, progDiff):
-        if progDiff == 'random':
+        if progDiff == 'normal':
             return {
                 'Random' : 1,
                 'MinDiff' : 0,
@@ -59,7 +59,7 @@ class RandoSettings(object):
                 'MinDiff' : 0,
                 'MaxDiff' : 1
             }
-        
+
     def getChooseItemDict(self, progSpeed):
         if progSpeed == 'slowest':
             return {

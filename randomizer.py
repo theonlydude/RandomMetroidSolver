@@ -14,7 +14,7 @@ from rom import RomPatcher, RomPatches
 
 speeds = ['slowest', 'slow', 'medium', 'fast', 'fastest']
 energyQties = ['sparse', 'medium', 'vanilla' ]
-progDiffs = ['easier', 'random', 'harder']
+progDiffs = ['easier', 'normal', 'harder']
 
 def restricted_float(x):
     x = float(x)
@@ -99,7 +99,7 @@ if __name__ == "__main__":
                         choices=speeds + ['random'])
     parser.add_argument('--progressionDifficulty',
                         help="",
-                        dest='progressionDifficulty', nargs='?', default='random',
+                        dest='progressionDifficulty', nargs='?', default='normal',
                         choices=progDiffs + ['random'])
     parser.add_argument('--superFun',
                         help="randomly remove major items from the pool for maximum enjoyment",
@@ -145,7 +145,10 @@ if __name__ == "__main__":
     progSpeed = args.progressionSpeed
     if progSpeed == "random":
         progSpeed = speeds[random.randint(0, len(speeds)-1)]
+    # if random progression difficulty, choose one
     progDiff = args.progressionDifficulty
+    if progDiff == "random":
+        progDiff = progDiffs[random.randint(0, len(progDiffs)-1)]
 
     print("SEED: " + str(seed))
 #    print("progression speed: " + progSpeed)

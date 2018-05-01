@@ -83,7 +83,7 @@ accessPoints = [
     AccessPoint('Three Muskateers Room Left', 'LowerNorfair', {
         'Lava Dive Right': lambda sm: sm.wand(sm.canHellRun('LowerNorfair'),
                                               sm.canPassAmphitheaterReverse()) # if this is OK, reverse lava pit will be too...
-    }),
+    }, shortName="LN\\Three Musk."),
     # Norfair
     AccessPoint('Warehouse Entrance Left', 'Norfair', {
         'Single Chamber Top Right': lambda sm: sm.canAccessHeatedNorfairFromEntrance(),
@@ -182,12 +182,17 @@ vanillaTransitions = [
 class AccessGraph(object):
     def __init__(self, transitions, bidir=True, dotFile=None):
         self.accessPoints = {}
+        self.InterAreaTransitions = []
         for ap in accessPoints:
             self.accessPoints[ap.Name] = ap
         for srcName, dstName in transitions:
             self.addTransition(srcName, dstName, bidir)
         if dotFile is not None:
             self.toDot(dotFile)
+
+    def getCreditsLines(self):
+        # TODO arrange transitions shortnames to have the least amount of lines to represent them
+        pass
 
     def toDot(self, dotFile):
         with open(dotFile, "w") as f:
@@ -201,6 +206,7 @@ class AccessGraph(object):
         src = self.accessPoints[srcName]
         dst = self.accessPoints[dstName]
         src.addTransition(dstName)
+        self.InterAreaTransitions.append((src, dst))
         if both is True:
             self.addTransition(dstName, srcName, False)
 

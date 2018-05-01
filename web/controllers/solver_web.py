@@ -516,7 +516,7 @@ def randomizer():
             else:
                 session.randomizer[patch[0]] = "off"
         session.randomizer['missileQty'] = "3"
-        session.randomizer['superQty'] = "3"
+        session.randomizer['superQty'] = "2"
         session.randomizer['powerBombQty'] = "1"
         session.randomizer['minorQty'] = "100"
         session.randomizer['energyQty'] = "vanilla"
@@ -533,6 +533,7 @@ def randomizer():
         session.randomizer['randomMinors'] = "off"
         session.randomizer['randomParams'] = "off"
         session.randomizer['randomSuperFuns'] = "off"
+        session.randomizer['progressionDifficulty'] = 'normal'
 
     # put standard presets first
     stdPresets = ['noob', 'regular', 'veteran', 'speedrunner']
@@ -620,6 +621,10 @@ def validateWebServiceParams(patchs, quantities, others, isJson=False):
         if request.vars['progressionSpeed'] not in ['random', 'slowest', 'slow', 'medium', 'fast', 'fastest']:
             raiseHttp(400, "Wrong value for progressionSpeed: {}, authorized values random/slowest/slow/medium/fast/fastest".format(request.vars['progressionSpeed']), isJson)
 
+    if 'progressionDifficulty' in others:
+        if request.vars['progressionDifficulty'] not in ['random', 'easier', 'normal', 'harder']:
+            raiseHttp(400, "Wrong value for progressionDifficulty: {}, authorized values random/easier/normal/harder".format(request.vars['progressionDifficulty']), isJson)
+
 def sessionWebService():
     # web service to update the session
     patchs = ['AimAnyButton', 'itemsounds',
@@ -628,8 +633,8 @@ def sessionWebService():
     quantities = ['missileQty', 'superQty', 'powerBombQty']
     others = ['paramsFile', 'minorQty', 'energyQty', 'useMaxDiff', 'maxDifficulty',
               'progressionSpeed', 'spreadItems', 'fullRandomization', 'suitsRestriction',
-              'speedScrewRestriction', 'funCombat', 'funMovement', 'funSuits', 'layoutPatches', 'noGravHeat',
-              'randomMinors', 'randomParams', 'randomSuperFuns']
+              'speedScrewRestriction', 'funCombat', 'funMovement', 'funSuits', 'layoutPatches',
+              'noGravHeat', 'randomMinors', 'randomParams', 'randomSuperFuns', 'progressionDifficulty']
     validateWebServiceParams(patchs, quantities, others)
 
     if session.randomizer is None:
@@ -658,6 +663,7 @@ def sessionWebService():
     session.randomizer['randomMinors'] = request.vars.randomMinors
     session.randomizer['randomParams'] = request.vars.randomParams
     session.randomizer['randomSuperFuns'] = request.vars.randomSuperFuns
+    session.randomizer['progressionDifficulty'] = request.vars.progressionDifficulty
 
 def randomizerWebService():
     # web service to compute a new random (returns json string)
@@ -674,7 +680,8 @@ def randomizerWebService():
     others = ['seed', 'paramsFile', 'paramsFileTarget', 'minorQty', 'energyQty', 'useMaxDiff',
               'maxDifficulty', 'progressionSpeed', 'spreadItems', 'fullRandomization',
               'suitsRestriction', 'speedScrewRestriction', 'funCombat', 'funMovement', 'funSuits',
-              'layoutPatches', 'noGravHeat', 'randomMinors', 'randomParams', 'randomSuperFuns']
+              'layoutPatches', 'noGravHeat', 'randomMinors', 'randomParams', 'randomSuperFuns',
+              'progressionDifficulty']
     validateWebServiceParams(patchs, quantities, others, isJson=True)
 
     # randomize
@@ -692,7 +699,8 @@ def randomizerWebService():
               '--seed', request.vars.seed,
               '--output', jsonFileName, '--param', presetFileName,
               '--preset', request.vars.paramsFile,
-              '--progressionSpeed', request.vars.progressionSpeed]
+              '--progressionSpeed', request.vars.progressionSpeed,
+              '--progressionDifficulty', request.vars.progressionDifficulty]
     if request.vars.randomMinors == 'on':
         params += ['--missileQty', '0',
                    '--superQty', '0',

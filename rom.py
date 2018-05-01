@@ -451,26 +451,35 @@ class RomPatcher:
 
         line = " minors quantity ......... %s " % value
         RomPatcher.writeCreditsStringBig(romFile, address, line, top=False)
-        address += 0x80
+        address += 0x40
 
-        address = 0x273b00
-        line = " ...................... %s " % settings.qty['energy'].upper()
+        value = " "+settings.qty['energy'].upper()
+        line = " ENERGY QUANTITY ......%s " % value.rjust(8, '.')
         RomPatcher.writeCreditsString(romFile, address, 0x04, line)
-        address += 0x80
+        address += 0x40
 
-        line = " ...................... %s " % settings.progSpeed.upper()
+        value = " "+settings.progSpeed.upper()
+        line = " PROGRESSION SPEED ....%s " % value.rjust(8, '.')
         RomPatcher.writeCreditsString(romFile, address, 0x04, line)
-        address += 0x80
+        address += 0x40
 
-        for param in ['SpreadItems', 'Suits', 'SpeedScrew']:
-            line = " ..........................%s " % ('. ON' if settings.restrictions[param] == True else ' OFF')
-            RomPatcher.writeCreditsString(romFile, address, 0x04, line)
-            address += 0x80
+        line = " PROGRESSION DIFFICULTY  %s " % settings.progDiff.upper()
+        RomPatcher.writeCreditsString(romFile, address, 0x04, line)
+        address += 0x40
 
-        for superFun in ['Combat', 'Movement', 'Suits']:
-            line = " ..........................%s " % ('. ON' if superFun in settings.superFun else ' OFF')
+        for param in [(' SPREAD PROG ITEMS ........%s', 'SpreadItems'),
+                      (' SUITS RESTRICTION ........%s', 'Suits'),
+                      (' EARLY MORPH ..............%s', 'SpeedScrew')]:
+            line = param[0] % ('. ON' if settings.restrictions[param[1]] == True else ' OFF')
             RomPatcher.writeCreditsString(romFile, address, 0x04, line)
-            address += 0x80
+            address += 0x40
+
+        for superFun in [(' SUPER FUN COMBAT .........%s', 'Combat'),
+                         (' SUPER FUN MOVEMENT .......%s', 'Movement'),
+                         (' SUPER FUN SUITS ..........%s', 'Suits')]:
+            line = superFun[0] % ('. ON' if superFun[1] in settings.superFun else ' OFF')
+            RomPatcher.writeCreditsString(romFile, address, 0x04, line)
+            address += 0x40
 
         romFile.close()
 

@@ -1266,38 +1266,23 @@ credits:
     dw " power bomb probability ... X.X " // 159
     dw " MINORS QUANTITY           XXX% " // 160
     dw " minors quantity ......... XXX> " // 161
-    {orange}
-    dw " ENERGY QUANTITY                " // 162
     {yellow}
-    dw " ...................... XXXXXXX " // 163
-    {orange}
-    dw " PROGRESSION SPEED              " // 164
-    {yellow}
-    dw " ...................... XXXXXXX " // 165
-    {orange}
-    dw " SPREAD PROG ITEMS              " // 166
-    {yellow}
-    dw " .......................... XXX " // 167
-    {orange}
-    dw " SUITS RESTRICTION              " // 168
-    {yellow}
-    dw " .......................... XXX " // 169
-    {orange}
-    dw " EARLY MORPH                    " // 170
-    {yellow}
-    dw " .......................... XXX " // 171
-    {orange}
-    dw " SUPER FUN COMBAT               " // 172
-    {yellow}
-    dw " .......................... XXX " // 173
-    {orange}
-    dw " SUPER FUN MOVEMENT             " // 174
-    {yellow}
-    dw " .......................... XXX " // 175
-    {orange}
-    dw " SUPER FUN SUITS                " // 176
-    {yellow}
-    dw " .......................... XXX " // 177
+    dw " ENERGY QUANTITY ...... XXXXXXX " // 162
+    dw " PROGRESSION SPEED .... XXXXXXX " // 163
+    dw " PROGRESSION DIFFICULTY XXXXXXX " // 164
+    dw " SPREAD PROG ITEMS ........ XXX " // 165
+    dw " SUITS RESTRICTION ........ XXX " // 166
+    dw " EARLY MORPH .............. XXX " // 167
+    dw " SUPER FUN COMBAT ......... XXX " // 168
+    dw " SUPER FUN MOVEMENT ....... XXX " // 169
+    dw " SUPER FUN SUITS .......... XXX " // 170
+    dw "                                " // 171
+    dw "                                " // 172
+    dw "                                " // 173
+    dw "                                " // 174
+    dw "                                " // 175
+    dw "                                " // 176
+    dw "                                " // 177
     dw "                                " // 178
     {big}
     dw "       RANDOMMETROIDSOLVER      " // 179

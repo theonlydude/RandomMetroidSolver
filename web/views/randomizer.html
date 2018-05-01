@@ -108,7 +108,8 @@ function AjaxPresetCallCompleted(data) {
         noGravHeat : document.getElementById("noGravHeat").value,
         randomMinors : document.getElementById("randomMinors").value,
         randomParams : document.getElementById("randomParams").value,
-        randomSuperFuns : document.getElementById("randomSuperFuns").value
+        randomSuperFuns : document.getElementById("randomSuperFuns").value,
+        progressionDifficulty : document.getElementById("progressionDifficulty").value
       },
       dataType: "json",
       crossDomain: true
@@ -199,7 +200,8 @@ function AjaxRandomizerCallCompleted(data) {
         noGravHeat : document.getElementById("noGravHeat").value,
         randomMinors : document.getElementById("randomMinors").value,
         randomParams : document.getElementById("randomParams").value,
-        randomSuperFuns : document.getElementById("randomSuperFuns").value
+        randomSuperFuns : document.getElementById("randomSuperFuns").value,
+        progressionDifficulty : document.getElementById("progressionDifficulty").value
       },
       dataType: "html"
     });
@@ -503,6 +505,11 @@ function startTheTour(step=-1) {
       content: "A progression item is an item opening new locations once picked up : suit, movement item, or any item that opens up locations when placed by the Randomizer.<br/>This parameter influences how fast progression items are likely to be found. From <b>slowest</b>, stuffing your way with as many non-progression items as possible, to <b>fastest</b>, where you will be able to visit Zebes pretty shortly.<br/>Choose random to randomly choose one of the speed presets so you don't know what to expect.<br/>If you played the other Item Randomizers out there, an average Dessy seed would be between fast and fastest, and the average Total Tournament seed would be a medium/fast-ish (these are very accurate measurements)."
     },
     {
+      element: "#progressionDifficulty",
+      title: "Progression difficulty",
+      content: "This parameter influences the choice of the next location. It uses the perceived difficulties from the preset to compute the difficulty to reach the locations. Then the Randomizer chooses the <b>easier</b> or the <b>harder</b> available location.<br/>Set it to <b>normal</b> for the Randomizer to randomly choose the next location.<br/>Set it to <b>random</b> to randomly choose between <b>easier</b>, <b>harder</b> and <b>normal</b>."
+    },
+    {
       element: "#randomParamsStep",
       title: "Random the Randomizer parameters",
       content: "Randomly set the Randomizer three parameters: spread items, Suits restiction and Speedbooster/Screw Attack restriction."
@@ -715,24 +722,31 @@ def displayNumber(id, min, max, default, step="1"):
 	      <td class="half">
                 Progression speed:
               </td>
-              <td class="half">{{displaySelect("progressionSpeed", ['random', 'slowest', 'slow', 'medium', 'fast', 'fastest'], "medium")}}</td>
+              <td class="half">{{displaySelect("progressionSpeed", ["random", "slowest", "slow", "medium", "fast", "fastest"], "medium")}}</td>
               <td><button type="button" onclick="startTheTour(9)">?</button></td>
 	    </tr>
 	    <tr>
-	      <td colspan="2" id="randomParamsStep">{{displayCheckboxRandom("randomParams", ["spreadItems", "suitsRestriction", "speedScrewRestriction"])}}Randomly set the next three parameters:</td>
+	      <td class="half">
+                Progression difficulty:
+              </td>
+              <td class="half">{{displaySelect("progressionDifficulty", ["random", "easier", "normal", "harder"], "normal")}}</td>
               <td><button type="button" onclick="startTheTour(10)">?</button></td>
 	    </tr>
 	    <tr>
-	      <td colspan="2" id="spreadItemsStep">{{displayCheckbox("spreadItems")}}Spread progression items</td>
+	      <td colspan="2" id="randomParamsStep">{{displayCheckboxRandom("randomParams", ["spreadItems", "suitsRestriction", "speedScrewRestriction"])}}Randomly set the next three parameters:</td>
               <td><button type="button" onclick="startTheTour(11)">?</button></td>
 	    </tr>
 	    <tr>
-	      <td colspan="2" id="suitsRestrictionStep">{{displayCheckbox("suitsRestriction")}}Suits restriction</td>
+	      <td colspan="2" id="spreadItemsStep">{{displayCheckbox("spreadItems")}}Spread progression items</td>
               <td><button type="button" onclick="startTheTour(12)">?</button></td>
 	    </tr>
 	    <tr>
-	      <td colspan="2" id="speedScrewRestrictionStep">{{displayCheckbox("speedScrewRestriction")}}Early Morph</td>
+	      <td colspan="2" id="suitsRestrictionStep">{{displayCheckbox("suitsRestriction")}}Suits restriction</td>
               <td><button type="button" onclick="startTheTour(13)">?</button></td>
+	    </tr>
+	    <tr>
+	      <td colspan="2" id="speedScrewRestrictionStep">{{displayCheckbox("speedScrewRestriction")}}Early Morph</td>
+              <td><button type="button" onclick="startTheTour(14)">?</button></td>
 	    </tr>
 	  </table>
 	</div>
@@ -744,10 +758,10 @@ def displayNumber(id, min, max, default, step="1"):
 	  <table class="full">
 	    <tr>
 	      <td class="full" id="layoutPatchesStep">{{displayCheckbox("layoutPatches", True)}} Include layout patches from Total Item Randomizer</td>
-	      <td><button type="button" onclick="startTheTour(14)">?</button></td>
+	      <td><button type="button" onclick="startTheTour(15)">?</button></td>
 	    </tr>
 	    <tr>
-	      <td class="full" id="noGravHeatStep">{{displayCheckbox("noGravHeat", True)}} Remove Gravity Suit heat protection (by Total)</td><td><button type="button" onclick="startTheTour(15)">?</button></td>
+	      <td class="full" id="noGravHeatStep">{{displayCheckbox("noGravHeat", True)}} Remove Gravity Suit heat protection (by Total)</td><td><button type="button" onclick="startTheTour(16)">?</button></td>
 	    </tr>
 	  </table>
 	  </p>
@@ -770,19 +784,19 @@ for patch in patches:
 	  <table class="full">
 	    <tr>
 	      <td colspan="2" id="randomSuperFunsStep">{{displayCheckboxRandom("randomSuperFuns", ["funCombat", "funMovement", "funSuits"])}}Randomly set the Super Fun Times parameters:</td>
-              <td><button type="button" onclick="startTheTour(17)">?</button></td>
+              <td><button type="button" onclick="startTheTour(18)">?</button></td>
 	    </tr>
             <tr>
               <td colspan="2" class="full" id="funCombatStep">{{displayCheckbox("funCombat")}} Super Fun Combat</td>
-              <td><button type="button" onclick="startTheTour(18)">?</button></td>
-            </tr>
-            <tr>
-              <td colspan="2" class="full" id="funMovementStep">{{displayCheckbox("funMovement")}} Super Fun Movement</td>
               <td><button type="button" onclick="startTheTour(19)">?</button></td>
             </tr>
             <tr>
-              <td colspan="2" class="full" id="funSuitsStep">{{displayCheckbox("funSuits")}} Suitless</td>
+              <td colspan="2" class="full" id="funMovementStep">{{displayCheckbox("funMovement")}} Super Fun Movement</td>
               <td><button type="button" onclick="startTheTour(20)">?</button></td>
+            </tr>
+            <tr>
+              <td colspan="2" class="full" id="funSuitsStep">{{displayCheckbox("funSuits")}} Suitless</td>
+              <td><button type="button" onclick="startTheTour(21)">?</button></td>
             </tr>
           </table>
 	</div>

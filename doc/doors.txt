@@ -12,12 +12,12 @@ Access Points
 
 Gather entry information from the door leading to it (ex: to get lower
 mushrooms info, check green brinstar elevator door data):
-- door transition direction : keep direction with non-closing cap variant if H<>V transition, adapt otherwise
-- room ID : keep
-- cap x/y : keep
-- screen x/y : keep
-- distance to spawn : overwrite to 0 if incompatible transition
-- door ASM ptr : keep, and call with JSR if door ASM is needed
+- door transition direction
+- room ID
+- cap x/y
+- screen x/y
+- distance to spawn
+- door ASM ptr : if non-0, it will have to be called with JSR if door ASM is needed
 
 Additional info from access point room itself :
 - X/Y position for Samus if incompatible transition : door ASM to write in free space and point to
@@ -33,9 +33,27 @@ Once AreaGraph is built, use InterAreaTransitions property to :
 - overwrite src *exit* data with dst *entry* data: room ID, cap X/Y, screen X/Y
 - depending on transition type (check compatibility with door transitions directions found),
   adapt transition direction and distance to spawn
-- adjust bitflag in case of area transition
-- depending on transition write fix samus position door ASM in free space (if there already is an
-  exit door ASM pointer, JSR to it at the end) and write pointer to it in door info
+  - if "natural" transition : keep everything
+  - if "incompatible" transition :
+    - set spawn distance to 0
+    - H/V or V/V : keep original transition direction, but force non-closing cap variant
+    - H/H : switch transition direction, with original door cap status
+- adjust bitflag : in case of area transition, OR it with 0x40
+- door ASM :
+  - if "natural" transition : keep original pointer
+  - if "incompatible" transition :
+    - write door ASM somewhere in free space that :
+      - call original door ASM routine if it existed
+      - fix samus X/Y position
+      - cancel movement and force standing pose
+
+Here is the ASM template (remember everything is Little Endian !) :
+
+DOOR = former door ASM ptr, skip these 3 bytes if there is none
+--------
+DO OR B9 A9 XX XX 8D F6 0A A9 YY YY 8D FA 0A 9C 2C 0B 9C 2E 0B 9C 42 0B 9C 44 0B 9C 46 0B 9C 48 0B 9C 1C 0A 9C 96 0A 60
+            -----             -----
+           Samus X           Samus Y
 
 .....
 

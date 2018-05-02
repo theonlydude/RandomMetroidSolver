@@ -640,6 +640,29 @@ class RomPatcher:
             romFile.write(dByteArr[0])
             romFile.write(dByteArr[1])
 
+    @staticmethod
+    def writeTransitions(romFileName, transitions):
+        from graph import accessPoints, getAccessPoint, compatibleTransition
+
+        if romFileName is not None:
+            romFile = open(romFileName, 'r+')
+        else:
+            romFile = FakeROM()
+
+        for (srcName, destName) in transitions:
+            src = getAccessPoint(srcName)
+            dest = getAccessPoint(destName)
+            if compatibleTransition(src, dest):
+                print("OK: {} -> {}".format(srcName, destName))
+            else:
+                # we have to add some ASM
+                print("ERROR: {} -> {}".format(srcName, destName))
+
+        romFile.close()
+
+        if romFileName is None:
+            return romFile.data
+
 class FakeROM:
     # to have the same code for real rom and the webservice
     def __init__(self, data={}):

@@ -3,8 +3,8 @@
 # get info from https://github.com/DJuttmann/SM3E
 
 import sys, struct
-from rooms import roomsElevator
-rooms = roomsElevator
+from rooms import roomsDoor
+rooms = roomsDoor
 
 def concatBytes(b0, b1, b2=0):
     return b0 + (b1 << 8) + (b2 << 16)
@@ -70,14 +70,17 @@ def readDoorsData(romFile, roomInfo):
                 doorData.append({'doorPtr': hex(doorPtr),
                                  'roomPrt': hex(concatBytes(data[0], data[1])),
                                  'direction': hex(data[3]),
+                                 'capX': hex(data[4]),
+                                 'capY': hex(data[5]),
                                  'screenX': hex(data[6]),
                                  'screenY': hex(data[7]),
-                                 'distanceToSpawn': hex(concatBytes(data[8], data[9]))})
+                                 'distanceToSpawn': hex(concatBytes(data[8], data[9])),
+                                 'doorAsmPtr': hex(concatBytes(data[10], data[11], 0x8F))})
 
     roomInfo['doorData'] = doorData
     #print("Doors Data:")
     for d in doorData:
-        print("doorPtr: {}, roomPrt: {}, direction: {}, screenX: {}, screenY: {}, distanceToSpawn: {}".format(d['doorPtr'], d['roomPrt'], d['direction'], d['screenX'], d['screenY'], d['distanceToSpawn']))
+        print("\"doorPtr\": {}, \"roomPrt\": {}, \"direction\": {}, \"cap\": ({}, {}), \"screen\": ({}, {}), \"distanceToSpawn\": {}, \"doorAsmPtr\": {}".format(d['doorPtr'], d['roomPrt'], d['direction'], d['capX'], d['capY'], d['screenX'], d['screenY'], d['distanceToSpawn'], d['doorAsmPtr']))
 
 def readRooms(romFileName):
     #    RoomIndex         = b [0];

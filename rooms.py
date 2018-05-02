@@ -1,39 +1,61 @@
 roomsElevator = [
-# elevators
-# crateria
-{"address": 0x0797B5, "doorCount": 3, "name": "[Elevator to Blue Brinstar]", "direction": "down"},
-{"address": 0x079E9F, "doorCount": 4, "name": "Morph Ball Room", "direction": "up"},
-{"address": 0x07962A, "doorCount": 3, "name": "[Elevator to Red Brinstar]", "direction": "down"},
-{"address": 0x07A322, "doorCount": 7, "name": "Caterpillar Room", "direction": "up"},
-{"address": 0x079938, "doorCount": 3, "name": "[Elevator to Green Brinstar]", "direction": "down"},
-{"address": 0x079AD9, "doorCount": 11, "name": "Green Brinstar Main Shaft [etecoon room]", "direction": "up"},
-{"address": 0x0794CC, "doorCount": 3, "name": "[Elevator to Maridia]", "direction": "down"},
-{"address": 0x07D30B, "doorCount": 4, "name": "Maridia Elevator Room", "direction": "up"},
+    # crateria
+    {"address": 0x0797B5, "doorCount": 3, "name": "[Elevator to Blue Brinstar]", "direction": "down"},
+    {"address": 0x079E9F, "doorCount": 4, "name": "Morph Ball Room", "direction": "up"},
+    {"address": 0x07962A, "doorCount": 3, "name": "[Elevator to Red Brinstar]", "direction": "down"},
+    {"address": 0x07A322, "doorCount": 7, "name": "Caterpillar Room", "direction": "up"},
+    {"address": 0x079938, "doorCount": 3, "name": "[Elevator to Green Brinstar]", "direction": "down"},
+    {"address": 0x079AD9, "doorCount": 11, "name": "Green Brinstar Main Shaft [etecoon room]", "direction": "up"},
+    {"address": 0x0794CC, "doorCount": 3, "name": "[Elevator to Maridia]", "direction": "down"},
+    {"address": 0x07D30B, "doorCount": 4, "name": "Maridia Elevator Room", "direction": "up"},
 
-# brinstar
-{"address": 0x07A6A1, "doorCount": 4, "name": "Warehouse Entrance", "direction": "down"},
-{"address": 0x07A7DE, "doorCount": 8, "name": "Business Center", "direction": "up"},
+    # brinstar
+    {"address": 0x07A6A1, "doorCount": 4, "name": "Warehouse Entrance", "direction": "down"},
+    {"address": 0x07A7DE, "doorCount": 8, "name": "Business Center", "direction": "up"},
 
-# norfair
-{"address": 0x07AF3F, "doorCount": 4, "name": "[Elevator to Lower Norfair]", "direction": "down"},
-{"address": 0x07B236, "doorCount": 4, "name": "Main Hall", "direction": "up"},
+    # norfair
+    {"address": 0x07AF3F, "doorCount": 4, "name": "[Elevator to Lower Norfair]", "direction": "down"},
+    {"address": 0x07B236, "doorCount": 4, "name": "Main Hall", "direction": "up"},
+]
 
-# doors
-# wrecked ship
-{"address": 0x0795FF, "doorCount": 2, "name": "The Moat", "direction": "right"},
-{"address": 0x0793FE, "doorCount": 6, "name": "West Ocean", "direction": "left"},
+roomsDoor = [
+    # crateria
+    {"address": 0x079969, "doorCount": 2, "name": "Lower Mushrooms", "direction": "left"},
+    {"address": 0x0795FF, "doorCount": 2, "name": "The Moat", "direction": "right"},
+    {"address": 0x07948C, "doorCount": 3, "name": "Crateria Keyhunter Room", "direction": "down"},
+    {"address": 0x079E9F, "doorCount": 4, "name": "Morph Ball Room", "direction": "left"},
 
-# maridia
-{"address": 0x07CFC9, "doorCount": 5, "name": "Main Street", "direction": "down"},
-{"address": 0x07CEFB, "doorCount": 4, "name": "Glass Tunnel", "direction": "up"},
+    # green/pink brinstar
+    {"address": 0x079938, "doorCount": 3, "name": "[Elevator to Green Brinstar]", "direction": "right"},
+    {"address": 0x079E52, "doorCount": 3, "name": "Green Hill Zone", "direction": "right"},
+    {"address": 0x079FBA, "doorCount": 2, "name": "Noob Bridge", "direction": "right"},
 
-# norfair
-{"address": 0x07AE74, "doorCount": 4, "name": "Kronic Boost Room", "direction": "left"},
-{"address": 0x07AF14, "doorCount": 2, "name": "Lava Dive Room", "direction": "right"},
+    # wrecked ship
+    {"address": 0x0793FE, "doorCount": 6, "name": "West Ocean", "direction": "left"},
+    {"address": 0x07957D, "doorCount": 2, "name": "Crab Maze", "direction": "left"},
 
-# test
-{"address": 0x0792FD, "doorCount": 7, "name": "Parlor and Alcatraz", "direction": "down"},
-{"address": 0x0796BA, "doorCount": 5, "name": "Climb", "direction": "up"}
+    # lower norfair
+    {"address": 0x07AF14, "doorCount": 2, "name": "Lava Dive Room", "direction": "right"},
+    {"address": 0x07B656, "doorCount": 2, "name": "Three Muskateers' Room", "direction": "left"},
+
+    # norfair
+    {"address": 0x07A6A1, "doorCount": 4, "name": "Warehouse Entrance", "direction": "left"},
+    {"address": 0x07AD5E, "doorCount": 5, "name": "Single Chamber", "direction": "right"},
+    {"address": 0x07AE74, "doorCount": 4, "name": "Kronic Boost Room", "direction": "left"},
+
+    # maridia
+    {"address": 0x07CFC9, "doorCount": 5, "name": "Main Street", "direction": "down"},
+    {"address": 0x07D21C, "doorCount": 4, "name": "Crab Hole", "direction": "left"},
+    {"address": 0x0795A8, "doorCount": 2, "name": "[Crab Maze to Elevator]", "direction": "right"},
+    {"address": 0x07D104, "doorCount": 2, "name": "Red Fish Room", "direction": "left"},
+
+    # red brinstar
+    {"address": 0x07A253, "doorCount": 5, "name": "Red Tower", "direction": "left"},
+    {"address": 0x07A322, "doorCount": 7, "name": "Caterpillar Room", "direction": "right"},
+    {"address": 0x07962A, "doorCount": 3, "name": "[Elevator to Red Brinstar]", "direction": "up"},
+    {"address": 0x07CF80, "doorCount": 3, "name": "East Tunnel", "direction": "right"},
+    {"address": 0x07CF80, "doorCount": 3, "name": "East Tunnel", "direction": "right"},
+    {"address": 0x07CEFB, "doorCount": 4, "name": "Glass Tunnel", "direction": "up"}
 ]
 
 rooms = [

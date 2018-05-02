@@ -10,7 +10,7 @@ from graph_locations import locations as graphLocations
 from graph import vanillaTransitions
 from parameters import Knows, easy, medium, hard, harder, hardcore, mania, text2diff, diff2text
 from solver import ParamsLoader
-from rom import RomPatcher, RomPatches
+from rom import RomPatcher, RomPatches, FakeROM
 
 speeds = ['slowest', 'slow', 'medium', 'fast', 'fastest']
 energyQties = ['sparse', 'medium', 'vanilla' ]
@@ -259,12 +259,14 @@ if __name__ == "__main__":
         try:
             shutil.copyfile(romFileName, fileName)
 
-            RomPatcher.writeItemsLocs(fileName, itemLocs)
-            RomPatcher.applyIPSPatches(fileName, args.patches, args.noLayout, args.noGravHeat)
-            RomPatcher.writeSeed(fileName, seed)
-            RomPatcher.writeSpoiler(fileName, itemLocs)
-            RomPatcher.writeRandoSettings(fileName, randoSettings)
-            #RomPatcher.writeTransitions(fileName, vanillaTransitions)
+            romFile = open(fileName, 'r+')
+            RomPatcher.writeItemsLocs(romFile, itemLocs)
+            RomPatcher.applyIPSPatches(romFile, args.patches, args.noLayout, args.noGravHeat)
+            RomPatcher.writeSeed(romFile, seed)
+            RomPatcher.writeSpoiler(romFile, itemLocs)
+            RomPatcher.writeRandoSettings(romFile, randoSettings)
+            RomPatcher.writeTransitions(romFile, vanillaTransitions)
+            romFile.close()
         except Exception as e:
             print("Error patching {}. Is {} a valid ROM ? ({})".format(fileName, romFileName, e))
             sys.exit(-1)
@@ -273,12 +275,14 @@ if __name__ == "__main__":
             # web service
             data = {}
 
-            data.update(RomPatcher.writeItemsLocs(None, itemLocs))
-            data.update(RomPatcher.applyIPSPatches(None, args.patches, args.noLayout, args.noGravHeat))
-            data.update(RomPatcher.writeSeed(None, seed))
-            data.update(RomPatcher.writeSpoiler(None, itemLocs))
-            data.update(RomPatcher.writeRandoSettings(None, randoSettings))
-            #data.update(RomPatcher.writeTransitions(None, vanillaTransitions))
+            romFile = FakeROM()
+            RomPatcher.writeItemsLocs(romFile, itemLocs)
+            RomPatcher.applyIPSPatches(romFile, args.patches, args.noLayout, args.noGravHeat)
+            RomPatcher.writeSeed(romFile, seed)
+            RomPatcher.writeSpoiler(romFile, itemLocs)
+            RomPatcher.writeRandoSettings(romFile, randoSettings)
+            RomPatcher.writeTransitions(romFile, vanillaTransitions)
+            data.update(romFile.data)
 
             fileName += '.sfc'
             data["fileName"] = fileName

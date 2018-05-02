@@ -5,15 +5,25 @@ from rom import RomPatches
 from smbool import SMBool
 
 def getAccessPoint(name):
+    # return access point object from name
     for accessPoint in accessPoints:
         if accessPoint.Name == name:
             return accessPoint
 
-def compatibleTransition(src, dest):
-    return ((src.ExitInfo['direction'] == 'right' and dest.ExitInfo['direction'] == 'left') or
-            (src.ExitInfo['direction'] == 'left' and dest.ExitInfo['direction'] == 'right') or
-            (src.ExitInfo['direction'] == 'up' and dest.ExitInfo['direction'] == 'down') or
-            (src.ExitInfo['direction'] == 'down' and dest.ExitInfo['direction'] == 'up'))
+def getVanillaDestAP(name):
+    # get dest name from vanilla transition, then return the dest access point
+    for (srcName, destName) in vanillaTransitions:
+        if srcName == name:
+            return getAccessPoint(destName)
+        elif destName == name:
+            return getAccessPoint(srcName)
+
+def compatibleTransition(srcAP, destAP):
+    # check if no ASM is required
+    return ((srcAP.ExitInfo['direction'] == 'right' and destAP.ExitInfo['direction'] == 'left') or
+            (srcAP.ExitInfo['direction'] == 'left' and destAP.ExitInfo['direction'] == 'right') or
+            (srcAP.ExitInfo['direction'] == 'up' and destAP.ExitInfo['direction'] == 'down') or
+            (srcAP.ExitInfo['direction'] == 'down' and destAP.ExitInfo['direction'] == 'up'))
 
 class AccessPoint(object):
     # name : AccessPoint name

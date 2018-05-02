@@ -317,41 +317,26 @@ class RomPatcher:
     }
 
     @staticmethod
-    def writeItemsLocs(outFileName, itemLocs):
-        if outFileName is not None:
-            outFile = open(outFileName, 'r+')
-        else:
-            outFile = FakeROM()
-
+    def writeItemsLocs(romFile, itemLocs):
         for itemLoc in itemLocs:
             if itemLoc['Item']['Type'] in ['Nothing', 'NoEnergy']:
                 # put missile morphball like dessy
                 itemCode = Items.getItemTypeCode({'Code': 0xeedb}, itemLoc['Location']['Visibility'])
-                outFile.seek(itemLoc['Location']['Address'])
-                outFile.write(itemCode[0])
-                outFile.write(itemCode[1])
-                outFile.seek(itemLoc['Location']['Address'] + 4)
-                outFile.write(struct.pack('B', 0x1a))
+                romFile.seek(itemLoc['Location']['Address'])
+                romFile.write(itemCode[0])
+                romFile.write(itemCode[1])
+                romFile.seek(itemLoc['Location']['Address'] + 4)
+                romFile.write(struct.pack('B', 0x1a))
             else:
                 itemCode = Items.getItemTypeCode(itemLoc['Item'],
                                                  itemLoc['Location']['Visibility'])
-                outFile.seek(itemLoc['Location']['Address'])
-                outFile.write(itemCode[0])
-                outFile.write(itemCode[1])
-
-        outFile.close()
-
-        if outFileName is None:
-            return outFile.data
+                romFile.seek(itemLoc['Location']['Address'])
+                romFile.write(itemCode[0])
+                romFile.write(itemCode[1])
 
     @staticmethod
-    def applyIPSPatches(romFileName, optionalPatches=[], noLayout=False, noGravHeat=False):
+    def applyIPSPatches(romFile, optionalPatches=[], noLayout=False, noGravHeat=False):
         try:
-            if romFileName is not None:
-                romFile = open(romFileName, 'r+')
-            else:
-                romFile = FakeROM()
-
             # apply standard patches
             stdPatches = RomPatcher.IPSPatches['Standard']
             if noGravHeat == True:
@@ -368,12 +353,6 @@ class RomPatcher:
             for patchName in optionalPatches:
                 if patchName in RomPatcher.IPSPatches['Optional']:
                     RomPatcher.applyIPSPatch(romFile, patchName)
-
-            romFile.close()
-
-            if romFileName is None:
-                return romFile.data
-
         except Exception as e:
             print("Error patching {}. ({})".format(romFileName, e))
             sys.exit(-1)
@@ -388,12 +367,7 @@ class RomPatcher:
                 romFile.write(struct.pack('B', byte))
 
     @staticmethod
-    def writeSeed(romFileName, seed):
-        if romFileName is not None:
-            romFile = open(romFileName, 'r+')
-        else:
-            romFile = FakeROM()
-
+    def writeSeed(romFile, seed):
         random.seed(seed)
 
         seedInfo = random.randint(0, 0xFFFF)
@@ -407,18 +381,8 @@ class RomPatcher:
         romFile.write(seedInfoArr2[0])
         romFile.write(seedInfoArr2[1])
 
-        romFile.close()
-
-        if romFileName is None:
-            return romFile.data
-
     @staticmethod
-    def writeRandoSettings(romFileName, settings):
-        if romFileName is not None:
-            romFile = open(romFileName, 'r+')
-        else:
-            romFile = FakeROM()
-
+    def writeRandoSettings(romFile, settings):
         address = 0x2738C0
         value = "%.1f" % settings.qty['missile']
         line = " MISSILE PROBABILITY        %s " % value
@@ -484,13 +448,8 @@ class RomPatcher:
             RomPatcher.writeCreditsString(romFile, address, 0x04, line)
             address += 0x40
 
-        romFile.close()
-
-        if romFileName is None:
-            return romFile.data
-
     @staticmethod
-    def writeSpoiler(romFileName, itemLocs):
+    def writeSpoiler(romFile, itemLocs):
         # keep only majors, filter out Etanks and Reserve
         fItemLocs = List.sortBy(lambda il: il['Item']['Type'],
                                 List.filter(lambda il: (il['Item']['Class'] == 'Major'
@@ -517,11 +476,6 @@ class RomPatcher:
 
             return s
 
-        if romFileName is not None:
-            romFile = open(romFileName, 'r+')
-        else:
-            romFile = FakeROM()
-
         address = 0x2f5240
         for iL in fItemLocs:
             itemName = prepareString(iL['Item']['Name'])
@@ -540,11 +494,6 @@ class RomPatcher:
             address += 0x80
 
         RomPatcher.patchBytes(romFile, address, [0, 0, 0, 0])
-
-        romFile.close()
-
-        if romFileName is None:
-            return romFile.data
 
     @staticmethod
     def writeCreditsString(romFile, address, color, string):
@@ -641,27 +590,25 @@ class RomPatcher:
             romFile.write(dByteArr[1])
 
     @staticmethod
-    def writeTransitions(romFileName, transitions):
-        from graph import accessPoints, getAccessPoint, compatibleTransition
-
-        if romFileName is not None:
-            romFile = open(romFileName, 'r+')
-        else:
-            romFile = FakeROM()
+    def writeTransitions(romFile, transitions):
+        from graph import accessPoints, getAccessPoint, compatibleTransition, getVanillaDestAP, vanillaTransitions
 
         for (srcName, destName) in transitions:
-            src = getAccessPoint(srcName)
-            dest = getAccessPoint(destName)
-            if compatibleTransition(src, dest):
-                print("OK: {} -> {}".format(srcName, destName))
-            else:
-                # we have to add some ASM
-                print("ERROR: {} -> {}".format(srcName, destName))
+            srcAP = getAccessPoint(srcName)
+            destAP = getAccessPoint(destName)
+            RomPatcher.writeDoorDatas(romFile, srcAP, destAP, getVanillaDestAP(srcName))
 
-        romFile.close()
+    @staticmethod
+    def writeDoorDatas(romFile, srcAP, destAP, vanillaDestAP):
+        if destAP == vanillaDestAP:
+            print("srcAP {} and destAP {} == vanillaDestAP".format(srcAP.Name, destAP.Name))
+            return
 
-        if romFileName is None:
-            return romFile.data
+        # write vanillaDestAP in destAP
+
+        if not compatibleTransition(srcAP, destAP):
+            # we have to add some ASM
+            pass
 
 class FakeROM:
     # to have the same code for real rom and the webservice

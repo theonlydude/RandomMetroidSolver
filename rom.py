@@ -29,10 +29,13 @@ class RomPatches:
     CathedralEntranceWallJump = 31
     # moat bottom block
     MoatShotBlock             = 41
+    ## Area rando patches
     # remove crumble block for reverse lower norfair door access
     SingleChamberNoCrumble    = 101,
     # remove green gates for reverse maridia access
     NoMaridiaGreenGates       = 102
+    # disable Green Hill Yellow, Noob Bridge Green and Kronic Boost yellow doors
+    AreaRandoBlueDoors        = 103
 
 
     ### Other

@@ -3,8 +3,8 @@
 # get info from https://github.com/DJuttmann/SM3E
 
 import sys, struct
-from rooms import roomsElevator
-rooms = roomsElevator
+from rooms import roomsDoor
+rooms = roomsDoor
 
 def concatBytes(b0, b1, b2=0):
     return b0 + (b1 << 8) + (b2 << 16)
@@ -70,14 +70,17 @@ def readDoorsData(romFile, roomInfo):
                 doorData.append({'doorPtr': hex(doorPtr),
                                  'roomPrt': hex(concatBytes(data[0], data[1])),
                                  'direction': hex(data[3]),
+                                 'capX': hex(data[4]),
+                                 'capY': hex(data[5]),
                                  'screenX': hex(data[6]),
                                  'screenY': hex(data[7]),
-                                 'distanceToSpawn': hex(concatBytes(data[8], data[9]))})
+                                 'distanceToSpawn': hex(concatBytes(data[8], data[9])),
+                                 'doorAsmPtr': hex(concatBytes(data[10], data[11], 0x8F))})
 
     roomInfo['doorData'] = doorData
     #print("Doors Data:")
     for d in doorData:
-        print("doorPtr: {}, roomPrt: {}, direction: {}, screenX: {}, screenY: {}, distanceToSpawn: {}".format(d['doorPtr'], d['roomPrt'], d['direction'], d['screenX'], d['screenY'], d['distanceToSpawn']))
+        print("\"doorPtr\": {}, \"roomPrt\": {}, \"direction\": {}, \"cap\": ({}, {}), \"screen\": ({}, {}), \"distanceToSpawn\": {}, \"doorAsmPtr\": {}".format(d['doorPtr'], d['roomPrt'], d['direction'], d['capX'], d['capY'], d['screenX'], d['screenY'], d['distanceToSpawn'], d['doorAsmPtr']))
 
 def readRooms(romFileName):
     #    RoomIndex         = b [0];
@@ -94,14 +97,13 @@ def readRooms(romFileName):
 
     with open(romFileName, 'r') as romFile:
         for roomInfo in rooms:
-            romFile.seek(roomInfo['address']+9)
-
-            value = struct.unpack("B"*2, romFile.read(2))
-
-            doorsPtr = LRtoPC(concatBytes(value[0], value[1], 0x8F))
+            romFile.seek(roomInfo['address'])
+            data = struct.unpack("B"*HeaderSize, romFile.read(HeaderSize))
+            roomInfo['area'] = data[1]
+            doorsPtr = LRtoPC(concatBytes(data[9], data[10], 0x8F))
             roomInfo['doorsPtr'] = doorsPtr
             print("")
-            print("{} ({})".format(roomInfo['name'], hex(roomInfo['address'])))
+            print("{} ({}) in area: {}".format(roomInfo['name'], hex(roomInfo['address']), hex(roomInfo['area'])))
 
             readDoorsPtrs(romFile, roomInfo)
             readDoorsData(romFile, roomInfo)

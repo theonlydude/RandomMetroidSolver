@@ -53,6 +53,99 @@ class AccessPoint(object):
     def addTransition(self, destName):
         self.transitions[destName] = lambda sm: self.traverse(sm)
 
+
+class AccessGraph(object):
+    def __init__(self, transitions, bidir=True, dotFile=None):
+        self.accessPoints = {}
+        self.InterAreaTransitions = []
+        for ap in accessPoints:
+            self.accessPoints[ap.Name] = ap
+        for srcName, dstName in transitions:
+            self.addTransition(srcName, dstName, bidir)
+        if dotFile is not None:
+            self.toDot(dotFile)
+
+    def getCreditsLines(self):
+        # TODO arrange transitions shortnames to have the least amount of lines to represent them
+        pass
+
+    def toDot(self, dotFile):
+        with open(dotFile, "w") as f:
+            f.write("digraph {\n")
+            for name,ap in self.accessPoints.iteritems():
+                for t in ap.transitions:
+                    f.write('"' + str(ap) + '" -> "' + str(self.accessPoints[t]) + '"\n')
+            f.write("}\n")
+
+    def addTransition(self, srcName, dstName, both=True):
+        src = self.accessPoints[srcName]
+        dst = self.accessPoints[dstName]
+        src.addTransition(dstName)
+        self.InterAreaTransitions.append((src, dst))
+        if both is True:
+            self.addTransition(dstName, srcName, False)
+
+    # availNodes: all already available nodes
+    # nodesToCheck: nodes we have to check transitions for
+    # items: collected items
+    # maxDiff: difficulty limit
+    # return newly opened access points
+    def getNewAvailNodes(self, availNodes, nodesToCheck, smbm, maxDiff):
+        newAvailNodes = {}
+        for node in nodesToCheck:
+            for dstName, tFunc in node.transitions.iteritems():
+                dst = self.accessPoints[dstName]
+                if dst in newAvailNodes or dst in availNodes:
+                    continue
+                # diff = tFunc(smbm)
+                diff = smbm.eval(tFunc)
+                if diff.bool == True and diff.difficulty <= maxDiff:
+                    newAvailNodes[dst] = diff.difficulty
+        return newAvailNodes
+
+    # rootNode: starting AccessPoint instance
+    # items: collected items
+    # maxDiff: difficulty limit
+    # return available AccessPoint list
+    def getAvailableAccessPoints(self, rootNode, smbm, maxDiff):
+        availNodes = { rootNode : 0 }
+        newAvailNodes = availNodes
+        while len(newAvailNodes) > 0:
+            newAvailNodes = self.getNewAvailNodes(availNodes, newAvailNodes, smbm, maxDiff)
+            availNodes.update(newAvailNodes)
+        return availNodes
+
+    # locations: locations to check
+    # items: collected items
+    # maxDiff: difficulty limit
+    # rootNode: starting AccessPoint
+    # return available locations list, also stores difficulty in locations
+    def getAvailableLocations(self, locations, smbm, maxDiff, rootNode='Landing Site'):
+        availAcessPoints = self.getAvailableAccessPoints(self.accessPoints[rootNode], smbm, maxDiff)
+        availAreas = set([ap.GraphArea for ap in availAcessPoints.keys()])
+        availLocs = []
+        for loc in locations:
+            if not loc['GraphArea'] in availAreas:
+                continue
+            for apName,tFunc in loc['AccessFrom'].iteritems():
+                ap = self.accessPoints[apName]
+                if not ap in availAcessPoints:
+                    continue
+                apDiff = availAcessPoints[ap]
+                tdiff = smbm.eval(tFunc)
+                if tdiff.bool == True and tdiff.difficulty <= maxDiff:
+                    diff = smbm.eval(loc['Available'])
+                    loc['difficulty'] = SMBool(diff.bool, max(tdiff.difficulty, diff.difficulty, apDiff))
+                    if diff.bool == True and diff.difficulty <= maxDiff:
+                        availLocs.append(loc)
+                        break
+                else:
+                    loc['difficulty'] = tdiff
+            if not 'difficulty' in loc:
+                loc['difficulty'] = SMBool(False, 0)
+        return availLocs
+
+
 # all access points and traverse functions
 accessPoints = [
     # Crateria and Blue Brinstar
@@ -282,95 +375,3 @@ vanillaTransitions = [
     ('Caterpillar Room Top Right', 'Red Fish Room Left'),
     ('Glass Tunnel Top', 'Main Street Bottom')
 ]
-
-class AccessGraph(object):
-    def __init__(self, transitions, bidir=True, dotFile=None):
-        self.accessPoints = {}
-        self.InterAreaTransitions = []
-        for ap in accessPoints:
-            self.accessPoints[ap.Name] = ap
-        for srcName, dstName in transitions:
-            self.addTransition(srcName, dstName, bidir)
-        if dotFile is not None:
-            self.toDot(dotFile)
-
-    def getCreditsLines(self):
-        # TODO arrange transitions shortnames to have the least amount of lines to represent them
-        pass
-
-    def toDot(self, dotFile):
-        with open(dotFile, "w") as f:
-            f.write("digraph {\n")
-            for name,ap in self.accessPoints.iteritems():
-                for t in ap.transitions:
-                    f.write('"' + str(ap) + '" -> "' + str(self.accessPoints[t]) + '"\n')
-            f.write("}\n")
-
-    def addTransition(self, srcName, dstName, both=True):
-        src = self.accessPoints[srcName]
-        dst = self.accessPoints[dstName]
-        src.addTransition(dstName)
-        self.InterAreaTransitions.append((src, dst))
-        if both is True:
-            self.addTransition(dstName, srcName, False)
-
-    # availNodes: all already available nodes
-    # nodesToCheck: nodes we have to check transitions for
-    # items: collected items
-    # maxDiff: difficulty limit
-    # return newly opened access points
-    def getNewAvailNodes(self, availNodes, nodesToCheck, smbm, maxDiff):
-        newAvailNodes = {}
-        for node in nodesToCheck:
-            for dstName, tFunc in node.transitions.iteritems():
-                dst = self.accessPoints[dstName]
-                if dst in newAvailNodes or dst in availNodes:
-                    continue
-                # diff = tFunc(smbm)
-                diff = smbm.eval(tFunc)
-                if diff.bool == True and diff.difficulty <= maxDiff:
-                    newAvailNodes[dst] = diff.difficulty
-        return newAvailNodes
-
-    # rootNode: starting AccessPoint instance
-    # items: collected items
-    # maxDiff: difficulty limit
-    # return available AccessPoint list
-    def getAvailableAccessPoints(self, rootNode, smbm, maxDiff):
-        availNodes = { rootNode : 0 }
-        newAvailNodes = availNodes
-        while len(newAvailNodes) > 0:
-            newAvailNodes = self.getNewAvailNodes(availNodes, newAvailNodes, smbm, maxDiff)
-            availNodes.update(newAvailNodes)
-        return availNodes
-
-    # locations: locations to check
-    # items: collected items
-    # maxDiff: difficulty limit
-    # rootNode: starting AccessPoint
-    # return available locations list, also stores difficulty in locations
-    def getAvailableLocations(self, locations, smbm, maxDiff, rootNode='Landing Site'):
-        availAcessPoints = self.getAvailableAccessPoints(self.accessPoints[rootNode], smbm, maxDiff)
-        availAreas = set([ap.GraphArea for ap in availAcessPoints.keys()])
-        availLocs = []
-        for loc in locations:
-            if not loc['GraphArea'] in availAreas:
-                continue
-            for apName,tFunc in loc['AccessFrom'].iteritems():
-                ap = self.accessPoints[apName]
-                if not ap in availAcessPoints:
-                    continue
-                apDiff = availAcessPoints[ap]
-                tdiff = smbm.eval(tFunc)
-                if tdiff.bool == True and tdiff.difficulty <= maxDiff:
-                    diff = smbm.eval(loc['Available'])
-                    loc['difficulty'] = SMBool(diff.bool, max(tdiff.difficulty, diff.difficulty, apDiff))
-                    if diff.bool == True and diff.difficulty <= maxDiff:
-                        availLocs.append(loc)
-                        break
-                else:
-                    loc['difficulty'] = tdiff
-            if not 'difficulty' in loc:
-                loc['difficulty'] = SMBool(False, 0)
-        return availLocs
-

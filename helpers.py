@@ -113,10 +113,10 @@ class Helpers(object):
     def canUsePowerBombs(self):
         return self.smbm.canOpenYellowDoors()
 
-    def canPassTerminatorBombWall(self):
+    def canPassTerminatorBombWall(self, fromLandingSite=True):
         sm = self.smbm
         return sm.wor(sm.wand(sm.haveItem('SpeedBooster'),
-                              sm.wor(sm.knowsSimpleShortCharge(), sm.knowsShortCharge())),
+                              sm.wor(SMBool(not fromLandingSite, 0), sm.knowsSimpleShortCharge(), sm.knowsShortCharge())),
                       sm.canDestroyBombWalls())
 
     def canDestroyBombWalls(self):

@@ -13,7 +13,6 @@ class AccessPoint(object):
     # entryInfo : dict carrying forced samus X/Y position with keys 'SamusX' and 'SamusY'.
     #             (to be updated after reading vanillaTransitions and gather entry info from matching exit door)
     # shortName : short name for the credits
-    # TODO add SNES door attributes (or some kind of Tag property to carry it)
     def __init__(self, name, graphArea, transitions, traverse=lambda sm: sm.setSMBool(True), exitInfo=None, entryInfo=None, shortName=None):
         self.Name = name
         self.GraphArea = graphArea
@@ -42,7 +41,7 @@ accessPoints = [
         'Morph Ball Room Left': lambda sm: sm.canUsePowerBombs()
     }, shortName="C\\Landing"),
     AccessPoint('Lower Mushrooms Left', 'Crateria', {
-        'Landing Site': lambda sm: sm.canPassTerminatorBombWall()
+        'Landing Site': lambda sm: sm.canPassTerminatorBombWall(False)
     }, exitInfo = {'RoomPtr':0x79969, 'DoorPtr':0x8c22}, entryInfo = {'SamusX':0x36, 'SamusY':0x88}, shortName="C\\Mushrooms"),
     AccessPoint('Moat Right', 'Crateria', {
         'Keyhunter Room Bottom': lambda sm: sm.canPassMoatReverse()

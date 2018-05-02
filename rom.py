@@ -591,24 +591,38 @@ class RomPatcher:
 
     @staticmethod
     def writeTransitions(romFile, transitions):
-        from graph import accessPoints, getAccessPoint, compatibleTransition, getVanillaDestAP, vanillaTransitions
+        from graph import getAccessPoint, getVanillaOppositeAP
 
         for (srcName, destName) in transitions:
             srcAP = getAccessPoint(srcName)
             destAP = getAccessPoint(destName)
-            RomPatcher.writeDoorDatas(romFile, srcAP, destAP, getVanillaDestAP(srcName))
+            RomPatcher.writeDoorDatas(romFile, srcAP, destAP,
+                                      getVanillaOppositeAP(srcName),
+                                      getVanillaOppositeAP(destName))
 
     @staticmethod
-    def writeDoorDatas(romFile, srcAP, destAP, vanillaDestAP):
-        if destAP == vanillaDestAP:
-            print("srcAP {} and destAP {} == vanillaDestAP".format(srcAP.Name, destAP.Name))
+    def writeDoorDatas(romFile, srcAP, destAP, vanillaOppositeSrcAP, vanillaOppositeDestAP):
+        # TODO::fix cyclic imports between rom.py and graph.py to avoid import a every function call
+        from graph import compatibleTransition
+
+        if srcAP.Name == vanillaOppositeDestAP.Name:
+            print("srcAP: {} (==vanillaOppositeDestAP), destAP: {}".format(srcAP.Name, destAP.Name))
             return
 
-        # write vanillaDestAP in destAP
+        # useless test
+        if destAP.Name == vanillaOppositeSrcAP.Name:
+            print("srcAP: {}, destAP: {} (== vanillaOppositeSrcAP)".format(srcAP.Name, destAP.Name))
+            return
+
+        # write vanillaOppositeDestAP in destAP
+
+        # write vanillaOppositeSrcAP in srcAP
 
         if not compatibleTransition(srcAP, destAP):
-            # we have to add some ASM
-            pass
+            # we have to add some ASM in both src and dest
+            print("not compatible AP: {} <-> {}".format(srcAP.Name, destAP.Name))
+        else:
+            print("compatible AP: {} <-> {}".format(srcAP.Name, destAP.Name))
 
 class FakeROM:
     # to have the same code for real rom and the webservice

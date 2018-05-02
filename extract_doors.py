@@ -97,14 +97,13 @@ def readRooms(romFileName):
 
     with open(romFileName, 'r') as romFile:
         for roomInfo in rooms:
-            romFile.seek(roomInfo['address']+9)
-
-            value = struct.unpack("B"*2, romFile.read(2))
-
-            doorsPtr = LRtoPC(concatBytes(value[0], value[1], 0x8F))
+            romFile.seek(roomInfo['address'])
+            data = struct.unpack("B"*HeaderSize, romFile.read(HeaderSize))
+            roomInfo['area'] = data[1]
+            doorsPtr = LRtoPC(concatBytes(data[9], data[10], 0x8F))
             roomInfo['doorsPtr'] = doorsPtr
             print("")
-            print("{} ({})".format(roomInfo['name'], hex(roomInfo['address'])))
+            print("{} ({}) in area: {}".format(roomInfo['name'], hex(roomInfo['address']), hex(roomInfo['area'])))
 
             readDoorsPtrs(romFile, roomInfo)
             readDoorsData(romFile, roomInfo)

@@ -265,7 +265,8 @@ if __name__ == "__main__":
             RomPatcher.writeSeed(romFile, seed)
             RomPatcher.writeSpoiler(romFile, itemLocs)
             RomPatcher.writeRandoSettings(romFile, randoSettings)
-            RomPatcher.writeTransitions(romFile, vanillaTransitions)
+            if args.area == True:
+                RomPatcher.writeTransitions(romFile, randomizer.transitions)
             romFile.close()
         except Exception as e:
             print("Error patching {}. Is {} a valid ROM ? ({})".format(fileName, romFileName, e))
@@ -281,7 +282,8 @@ if __name__ == "__main__":
             RomPatcher.writeSeed(romFile, seed)
             RomPatcher.writeSpoiler(romFile, itemLocs)
             RomPatcher.writeRandoSettings(romFile, randoSettings)
-            RomPatcher.writeTransitions(romFile, vanillaTransitions)
+            if args.area == True:
+                RomPatcher.writeTransitions(romFile, randomizer.transitions)
             data.update(romFile.data)
 
             fileName += '.sfc'

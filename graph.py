@@ -10,7 +10,7 @@ def getAccessPoint(name):
         if accessPoint.Name == name:
             return accessPoint
 
-def getVanillaDestAP(name):
+def getVanillaOppositeAP(name):
     # get dest name from vanilla transition, then return the dest access point
     for (srcName, destName) in vanillaTransitions:
         if srcName == name:

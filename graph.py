@@ -405,9 +405,9 @@ def getDirection(src, dst):
     # compatible transition
     if exitDir == entryDir:
         return exitDir
-    # if incompatible but horizontal we just reverse
+    # if incompatible but horizontal we use entry direction (more natural)
     if isHorizontal(exitDir) and isHorizontal(entryDir):
-        return reverseDir(entryDir)
+        return entryDir
     # otherwise keep exit direction and remove cap XXX maybe keep horizontal transition in case of V>H? (untested yet)
     return removeCap(exitDir)
 
@@ -432,7 +432,7 @@ def getDoorConnections(graph):
         conn['DoorPtr'] = src.ExitInfo['DoorPtr']
         conn['DoorRoomPtr'] = src.ExitInfo['RoomPtr'] # FIXME is this necessary?
         # door properties
-        conn['RoomPtr'] = dst.ExitInfo['RoomPtr'] # room info is not exit info...
+        conn['RoomPtr'] = dst.ExitInfo['RoomPtr'] # room ptr is not exit info...
         conn['doorAsmPtr'] = dst.EntryInfo['doorAsmPtr']
         conn['direction'] = getDirection(src, dst)
         conn['bitFlag'] = getBitFlag(src.ExitInfo['area'], dst.ExitInfo['area'], # ...neither is area. FIXME move these in a RoomInfo dict in access points

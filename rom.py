@@ -597,6 +597,22 @@ class RomPatcher:
             self.romFile.write(dByteArr[0])
             self.romFile.write(dByteArr[1])
 
+    # write area randomizer transitions to ROM
+    # doorConnections : a list of connections. each connection is a dictionary describing
+    # - where to write in the ROM :
+    # DoorRoomPtr : room ptr the door to write is into (FIXME is this necessary?)
+    # DoorPtr : door pointer to write to
+    # - what to write in the ROM :
+    # RoomPtr, direction, bitflag, cap, screen, distanceToSpawn : door properties
+    # * if SamusX and SamusY are defined in the dict, custom ASM has to be written
+    #   to reposition samus, and call doorAsmPtr if non-zero. The written Door ASM
+    #   property shall point to this custom ASM.
+    # * if not, just write doorAsmPtr as the door property directly.
+    def writeDoorConnections(self, doorConnections):
+        for conn in doorConnections:
+            print("TODO")
+            # TODO
+            
     def writeTransitions(self, transitions):
         from graph import getAccessPoint, getVanillaOppositeAP
 
@@ -657,11 +673,8 @@ class RomPatcher:
                 else:
                     value += 0x1
             else:
-                # use direction from ap
-                value = ap.ExitInfo['direction']
-                if destDir in [0x3, 0x7, 0x2, 0x6] and value >= 0x4:
-                    # in case of non compatible transition and dest is vertical we don't want the closing cap
-                    value -= 0x4
+                value = vap.ExitInfo['direction']
+                value -= 0x4
         self.romFile.write(struct.pack('B', value))
 
         # write door cap x
@@ -705,10 +718,10 @@ class RomPatcher:
                 (samusX, samusY) = (1, 7)
 
             # update samus X and Y position
-            asmPatch[samusX] = vap.EntryInfo['SamusX'] & 0x00FF
-            asmPatch[samusX+1] = (vap.EntryInfo['SamusX'] & 0xFF00) >> 8
-            asmPatch[samusY] = vap.EntryInfo['SamusY'] & 0x00FF
-            asmPatch[samusY+1] = (vap.EntryInfo['SamusY'] & 0xFF00) >> 8
+            asmPatch[samusX] = ap.EntryInfo['SamusX'] & 0x00FF
+            asmPatch[samusX+1] = (ap.EntryInfo['SamusX'] & 0xFF00) >> 8
+            asmPatch[samusY] = ap.EntryInfo['SamusY'] & 0x00FF
+            asmPatch[samusY+1] = (ap.EntryInfo['SamusY'] & 0xFF00) >> 8
 
             self.romFile.write(struct.pack('B', self.asmAddress & 0x00FF))
             self.romFile.write(struct.pack('B', (self.asmAddress & 0xFF00) >> 8))

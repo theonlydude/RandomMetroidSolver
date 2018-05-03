@@ -7,7 +7,7 @@ from itemrandomizerweb.Randomizer import Randomizer, RandoSettings
 from itemrandomizerweb.AreaRandomizer import AreaRandomizer
 from tournament_locations import locations as defaultLocations
 from graph_locations import locations as graphLocations
-from graph import vanillaTransitions
+from graph import vanillaTransitions, getDoorConnections
 from parameters import Knows, easy, medium, hard, harder, hardcore, mania, text2diff, diff2text
 from solver import ParamsLoader
 from rom import RomPatcher, RomPatches, FakeROM
@@ -234,6 +234,8 @@ if __name__ == "__main__":
     if args.area == True:
         randomizer = AreaRandomizer(graphLocations, randoSettings, seedName, dotDir=args.directory)
         RomPatches.ActivePatches += RomPatches.AreaSet
+        doors = getDoorConnections(randomizer.areaGraph)
+        print(doors)
     elif args.graph == True:
         randomizer = Randomizer(graphLocations, randoSettings, seedName, vanillaTransitions)
     else:
@@ -267,7 +269,8 @@ if __name__ == "__main__":
             romPatcher.writeSpoiler(itemLocs)
             romPatcher.writeRandoSettings(randoSettings)
             if args.area == True:
-                romPatcher.writeTransitions(randomizer.transitions)
+                romPatcher.writeDoorConnections(doors)
+                #romPatcher.writeTransitions(randomizer.transitions)
             romPatcher.end()
         except Exception as e:
             print("Error patching {}. Is {} a valid ROM ? ({})".format(fileName, romFileName, e))
@@ -284,7 +287,8 @@ if __name__ == "__main__":
             romPatcher.writeSpoiler(itemLocs)
             romPatcher.writeRandoSettings(randoSettings)
             if args.area == True:
-                romPatcher.writeTransitions(randomizer.transitions)
+                romPatcher.writeDoorConnections(doors)
+#                romPatcher.writeTransitions(randomizer.transitions)
             data.update(romPatcher.romFile.data)
 
             fileName += '.sfc'

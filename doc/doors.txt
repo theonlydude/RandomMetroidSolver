@@ -37,7 +37,7 @@ Once AreaGraph is built, use InterAreaTransitions property to :
   - if "natural" transition : keep everything from *entry* data
   - if "incompatible" transition :
     - set spawn distance to 0
-    - H/V or V/V : keep *entry* data transition direction, but force non-closing cap variant
+    - H/V or V/V : keep *exit* data transition direction, but force non-closing cap variant
     - H/H : switch transition direction, with original door cap status
 - adjust bitflag : in case of area transition, OR *entry* data one with 0x40. detect area
   transition by comparing areas in room headers.

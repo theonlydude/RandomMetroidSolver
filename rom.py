@@ -317,7 +317,7 @@ class RomPatcher:
                      'skip_intro.ips', 'skip_ceres.ips', 'animal_enemies.ips', 'animals.ips',
                      'draygonimals.ips', 'escapimals.ips', 'gameend.ips', 'grey_door_animals.ips',
                      'low_timer.ips', 'metalimals.ips', 'phantoonimals.ips', 'ridleyimals.ips'],
-        'Area': ['area_rando_blue_doors.ips', 'area_rando_layout_base.ips']
+        'Area': ['area_rando_blue_doors.ips', 'area_rando_layout_base.ips', 'cancel_movement.ips']
     }
 
     def __init__(self, romFileName=None):
@@ -609,7 +609,7 @@ class RomPatcher:
     def writeDoorDatas(self, srcAP, destAP, vanillaOppositeSrcAP, vanillaOppositeDestAP):
         #print("srcAP: {}, destAP: {}, vsrcAP: {}, vdestAP: {}".format(srcAP.Name, destAP.Name, vanillaOppositeSrcAP.Name, vanillaOppositeDestAP.Name))
 
-        # TODO::fix cyclic imports between rom.py and graph.py to avoid import a every function call
+        # TODO::fix cyclic imports between rom.py and graph.py to avoid import at every function call
         from graph import isCompatibleTransition
 
         if srcAP.Name == vanillaOppositeDestAP.Name:
@@ -618,11 +618,11 @@ class RomPatcher:
 
         isCompatible = isCompatibleTransition(srcAP, destAP)
 
-        # write vanillaOppositeDestAP in destAP
+        # write vanillaOppositeDestAP in srcAP
         self.writeDoorData(srcAP, vanillaOppositeDestAP, destAP.ExitInfo['RoomPtr'],
                            isCompatible, srcAP.ExitInfo['direction'], destAP.ExitInfo['direction'])
 
-        # write vanillaOppositeSrcAP in srcAP
+        # write vanillaOppositeSrcAP in destAP
         self.writeDoorData(destAP, vanillaOppositeSrcAP, srcAP.ExitInfo['RoomPtr'],
                            isCompatible, srcAP.ExitInfo['direction'], destAP.ExitInfo['direction'])
 
@@ -643,19 +643,25 @@ class RomPatcher:
             value = vap.ExitInfo['bitFlag'] | 0x40
         self.romFile.write(struct.pack('B', value))
 
-        # TODO::finish this part
         # write direction
         value = vap.ExitInfo['direction']
         if not isCompatible:
-            if destDir in [0x3, 0x7, 0x2, 0x6] and value >= 0x4:
-                # in case of non compatible transition and dest is vertical we don't want the closing cap
-                value -= 0x4
-            elif srcDir in [0x1, 0x5, 0x0, 0x4] and destDir in [0x1, 0x5, 0x0, 0x4]:
+            # up: 0x3, 0x7
+            # down: 0x2, 0x6
+            # left: 0x1, 0x5
+            # right: 0x0, 0x4
+            if srcDir in [0x1, 0x5, 0x0, 0x4] and destDir in [0x1, 0x5, 0x0, 0x4]:
                 # in case of non compatible transition and src/dest are horizontal, switch direction
                 if destDir in [0x1, 0x5]:
                     value -= 0x1
                 else:
                     value += 0x1
+            else:
+                # use direction from ap
+                value = ap.ExitInfo['direction']
+                if destDir in [0x3, 0x7, 0x2, 0x6] and value >= 0x4:
+                    # in case of non compatible transition and dest is vertical we don't want the closing cap
+                    value -= 0x4
         self.romFile.write(struct.pack('B', value))
 
         # write door cap x
@@ -687,7 +693,7 @@ class RomPatcher:
                         0xA9, 'XX', 'XX',
                         0x8D, 0xF6, 0x0A,
                         0xA9, 'YY', 'YY',
-                        0x8D, 0xFA, 0x0A, 0x20, 0x00, 0x0A, 0x60]
+                        0x8D, 0xFA, 0x0A, 0x20, 0x00, 0xEA, 0x60]
             if vap.ExitInfo['doorAsmPtr'] != 0x0000:
                 # call original door asm ptr
                 asmPatch[1] = vap.ExitInfo['doorAsmPtr'] & 0x00FF

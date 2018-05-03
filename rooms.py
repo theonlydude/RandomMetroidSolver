@@ -52,7 +52,7 @@ roomsDoor = [
     # red brinstar
     {"address": 0x07A253, "doorCount": 5, "name": "Red Tower", "direction": "left"},
     {"address": 0x07A322, "doorCount": 7, "name": "Caterpillar Room", "direction": "right"},
-    {"address": 0x07962A, "doorCount": 3, "name": "[Elevator to Red Brinstar]", "direction": "up"},
+    {"address": 0x07962A, "doorCount": 3, "name": "[Elevator to Red Brinstar]", "direction": "all"},
     {"address": 0x07CF80, "doorCount": 3, "name": "East Tunnel", "direction": "right"},
     {"address": 0x07CF80, "doorCount": 3, "name": "East Tunnel", "direction": "right"},
     {"address": 0x07CEFB, "doorCount": 4, "name": "Glass Tunnel", "direction": "up"}

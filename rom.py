@@ -316,58 +316,64 @@ class RomPatcher:
                      'low_timer.ips', 'metalimals.ips', 'phantoonimals.ips', 'ridleyimals.ips']
     }
 
-    @staticmethod
-    def writeItemsLocs(romFile, itemLocs):
+    def __init__(self, romFileName=None):
+        self.romFileName = romFileName
+        if romFileName == None:
+            self.romFile = FakeROM()
+        else:
+            self.romFile = open(romFileName, 'r+')
+
+    def end(self):
+        self.romFile.close()
+
+    def writeItemsLocs(self, itemLocs):
         for itemLoc in itemLocs:
             if itemLoc['Item']['Type'] in ['Nothing', 'NoEnergy']:
                 # put missile morphball like dessy
                 itemCode = Items.getItemTypeCode({'Code': 0xeedb}, itemLoc['Location']['Visibility'])
-                romFile.seek(itemLoc['Location']['Address'])
-                romFile.write(itemCode[0])
-                romFile.write(itemCode[1])
-                romFile.seek(itemLoc['Location']['Address'] + 4)
-                romFile.write(struct.pack('B', 0x1a))
+                self.romFile.seek(itemLoc['Location']['Address'])
+                self.romFile.write(itemCode[0])
+                self.romFile.write(itemCode[1])
+                self.romFile.seek(itemLoc['Location']['Address'] + 4)
+                self.romFile.write(struct.pack('B', 0x1a))
             else:
                 itemCode = Items.getItemTypeCode(itemLoc['Item'],
                                                  itemLoc['Location']['Visibility'])
-                romFile.seek(itemLoc['Location']['Address'])
-                romFile.write(itemCode[0])
-                romFile.write(itemCode[1])
+                self.romFile.seek(itemLoc['Location']['Address'])
+                self.romFile.write(itemCode[0])
+                self.romFile.write(itemCode[1])
 
-    @staticmethod
-    def applyIPSPatches(romFile, optionalPatches=[], noLayout=False, noGravHeat=False):
+    def applyIPSPatches(self, optionalPatches=[], noLayout=False, noGravHeat=False):
         try:
             # apply standard patches
             stdPatches = RomPatcher.IPSPatches['Standard']
             if noGravHeat == True:
                 stdPatches = [patch for patch in stdPatches if patch != 'Removes_Gravity_Suit_heat_protection']
             for patchName in stdPatches:
-                RomPatcher.applyIPSPatch(romFile, patchName)
+                self.applyIPSPatch(patchName)
 
             if noLayout == False:
                 # apply layout patches
                 for patchName in RomPatcher.IPSPatches['Layout']:
-                    RomPatcher.applyIPSPatch(romFile, patchName)
+                    self.applyIPSPatch(patchName)
 
             # apply optional patches
             for patchName in optionalPatches:
                 if patchName in RomPatcher.IPSPatches['Optional']:
-                    RomPatcher.applyIPSPatch(romFile, patchName)
+                    self.applyIPSPatch(patchName)
         except Exception as e:
-            print("Error patching {}. ({})".format(romFileName, e))
+            print("Error patching {}. ({})".format(self.romFileName, e))
             sys.exit(-1)
 
-    @staticmethod
-    def applyIPSPatch(romFile, patchName):
+    def applyIPSPatch(self, patchName):
         print("Apply patch {}".format(patchName))
         patchData = patches[patchName]
         for address in patchData:
-            romFile.seek(address)
+            self.romFile.seek(address)
             for byte in patchData[address]:
-                romFile.write(struct.pack('B', byte))
+                self.romFile.write(struct.pack('B', byte))
 
-    @staticmethod
-    def writeSeed(romFile, seed):
+    def writeSeed(self, seed):
         random.seed(seed)
 
         seedInfo = random.randint(0, 0xFFFF)
@@ -375,81 +381,79 @@ class RomPatcher:
         seedInfoArr = Items.toByteArray(seedInfo)
         seedInfoArr2 = Items.toByteArray(seedInfo2)
 
-        romFile.seek(0x2FFF00)
-        romFile.write(seedInfoArr[0])
-        romFile.write(seedInfoArr[1])
-        romFile.write(seedInfoArr2[0])
-        romFile.write(seedInfoArr2[1])
+        self.romFile.seek(0x2FFF00)
+        self.romFile.write(seedInfoArr[0])
+        self.romFile.write(seedInfoArr[1])
+        self.romFile.write(seedInfoArr2[0])
+        self.romFile.write(seedInfoArr2[1])
 
-    @staticmethod
-    def writeRandoSettings(romFile, settings):
+    def writeRandoSettings(self, settings):
         address = 0x2738C0
         value = "%.1f" % settings.qty['missile']
         line = " MISSILE PROBABILITY        %s " % value
-        RomPatcher.writeCreditsStringBig(romFile, address, line, top=True)
+        self.writeCreditsStringBig(address, line, top=True)
         address += 0x40
 
         line = " missile probability ...... %s " % value
-        RomPatcher.writeCreditsStringBig(romFile, address, line, top=False)
+        self.writeCreditsStringBig(address, line, top=False)
         address += 0x40
 
         value = "%.1f" % settings.qty['super']
         line = " SUPER PROBABILITY          %s " % value
-        RomPatcher.writeCreditsStringBig(romFile, address, line, top=True)
+        self.writeCreditsStringBig(address, line, top=True)
         address += 0x40
 
         line = " super probability ........ %s " % value
-        RomPatcher.writeCreditsStringBig(romFile, address, line, top=False)
+        self.writeCreditsStringBig(address, line, top=False)
         address += 0x40
 
         value = "%.1f" % settings.qty['powerBomb']
         line = " POWER BOMB PROBABILITY     %s " % value
-        RomPatcher.writeCreditsStringBig(romFile, address, line, top=True)
+        self.writeCreditsStringBig(address, line, top=True)
         address += 0x40
 
         line = " power bomb probability ... %s " % value
-        RomPatcher.writeCreditsStringBig(romFile, address, line, top=False)
+        self.writeCreditsStringBig(address, line, top=False)
         address += 0x40
 
         value = "%03d%s" % (settings.qty['minors'], '%')
         line = " MINORS QUANTITY           %s " % value
-        RomPatcher.writeCreditsStringBig(romFile, address, line, top=True)
+        self.writeCreditsStringBig(address, line, top=True)
         address += 0x40
 
         line = " minors quantity ......... %s " % value
-        RomPatcher.writeCreditsStringBig(romFile, address, line, top=False)
+        self.writeCreditsStringBig(address, line, top=False)
         address += 0x40
 
         value = " "+settings.qty['energy'].upper()
         line = " ENERGY QUANTITY ......%s " % value.rjust(8, '.')
-        RomPatcher.writeCreditsString(romFile, address, 0x04, line)
+        self.writeCreditsString(address, 0x04, line)
         address += 0x40
 
         value = " "+settings.progSpeed.upper()
         line = " PROGRESSION SPEED ....%s " % value.rjust(8, '.')
-        RomPatcher.writeCreditsString(romFile, address, 0x04, line)
+        self.writeCreditsString(address, 0x04, line)
         address += 0x40
 
         line = " PROGRESSION DIFFICULTY  %s " % settings.progDiff.upper()
-        RomPatcher.writeCreditsString(romFile, address, 0x04, line)
+        self.writeCreditsString(address, 0x04, line)
         address += 0x40
 
         for param in [(' SPREAD PROG ITEMS ........%s', 'SpreadItems'),
                       (' SUITS RESTRICTION ........%s', 'Suits'),
                       (' EARLY MORPH ..............%s', 'SpeedScrew')]:
             line = param[0] % ('. ON' if settings.restrictions[param[1]] == True else ' OFF')
-            RomPatcher.writeCreditsString(romFile, address, 0x04, line)
+            self.writeCreditsString(address, 0x04, line)
             address += 0x40
 
         for superFun in [(' SUPER FUN COMBAT .........%s', 'Combat'),
                          (' SUPER FUN MOVEMENT .......%s', 'Movement'),
                          (' SUPER FUN SUITS ..........%s', 'Suits')]:
             line = superFun[0] % ('. ON' if superFun[1] in settings.superFun else ' OFF')
-            RomPatcher.writeCreditsString(romFile, address, 0x04, line)
+            self.writeCreditsString(address, 0x04, line)
             address += 0x40
 
-    @staticmethod
-    def writeSpoiler(romFile, itemLocs):
+    def writeSpoiler(self, itemLocs):
         # keep only majors, filter out Etanks and Reserve
         fItemLocs = List.sortBy(lambda il: il['Item']['Type'],
                                 List.filter(lambda il: (il['Item']['Class'] == 'Major'
@@ -481,32 +485,29 @@ class RomPatcher:
             itemName = prepareString(iL['Item']['Name'])
             locationName = prepareString(iL['Location']['Name'], isItem=False)
 
-            RomPatcher.writeCreditsString(romFile, address, 0x04, itemName)
-            RomPatcher.writeCreditsString(romFile, (address + 0x40), 0x18, locationName)
+            self.writeCreditsString(address, 0x04, itemName)
+            self.writeCreditsString((address + 0x40), 0x18, locationName)
 
             address += 0x80
 
         # we need 16 majors displayed, if we've removed majors, add some blank text
         for i in range(16 - len(fItemLocs)):
-            RomPatcher.writeCreditsString(romFile, address, 0x04, prepareString(""))
-            RomPatcher.writeCreditsString(romFile, (address + 0x40), 0x18, prepareString(""))
+            self.writeCreditsString(address, 0x04, prepareString(""))
+            self.writeCreditsString((address + 0x40), 0x18, prepareString(""))
 
             address += 0x80
 
-        RomPatcher.patchBytes(romFile, address, [0, 0, 0, 0])
+        self.patchBytes(address, [0, 0, 0, 0])
 
-    @staticmethod
-    def writeCreditsString(romFile, address, color, string):
-        array = [RomPatcher.convertCreditsChar(color, char) for char in string]
-        RomPatcher.patchBytes(romFile, address, array)
+    def writeCreditsString(self, address, color, string):
+        array = [self.convertCreditsChar(color, char) for char in string]
+        self.patchBytes(address, array)
 
-    @staticmethod
-    def writeCreditsStringBig(romFile, address, string, top=True):
-        array = [RomPatcher.convertCreditsCharBig(char, top) for char in string]
-        RomPatcher.patchBytes(romFile, address, array)
+    def writeCreditsStringBig(self, address, string, top=True):
+        array = [self.convertCreditsCharBig(char, top) for char in string]
+        self.patchBytes(address, array)
 
-    @staticmethod
-    def convertCreditsChar(color, byte):
+    def convertCreditsChar(self, color, byte):
         if byte == ' ':
             ib = 0x7f
         elif byte == '!':
@@ -529,8 +530,7 @@ class RomPatcher:
         else:
             return (color << 8) + ib
 
-    @staticmethod
-    def convertCreditsCharBig(byte, top=True):
+    def convertCreditsCharBig(self, byte, top=True):
         # from: https://jathys.zophar.net/supermetroid/kejardon/TextFormat.txt
         # 2-tile high characters:
         # A-P = $XX20-$XX2F(TOP) and $XX30-$XX3F(BOTTOM)
@@ -581,48 +581,128 @@ class RomPatcher:
 
         return ib
 
-    @staticmethod
-    def patchBytes(romFile, address, array):
-        romFile.seek(address)
+    def patchBytes(self, address, array):
+        self.romFile.seek(address)
         for dByte in array:
             dByteArr = Items.toByteArray(dByte)
-            romFile.write(dByteArr[0])
-            romFile.write(dByteArr[1])
+            self.romFile.write(dByteArr[0])
+            self.romFile.write(dByteArr[1])
 
-    @staticmethod
-    def writeTransitions(romFile, transitions):
+    def writeTransitions(self, transitions):
         from graph import getAccessPoint, getVanillaOppositeAP
 
+        self.asmAddress = 0x7EB00
         for (srcName, destName) in transitions:
             srcAP = getAccessPoint(srcName)
             destAP = getAccessPoint(destName)
-            RomPatcher.writeDoorDatas(romFile, srcAP, destAP,
-                                      getVanillaOppositeAP(srcName),
-                                      getVanillaOppositeAP(destName))
+            self.writeDoorDatas(srcAP, destAP, getVanillaOppositeAP(srcName), getVanillaOppositeAP(destName))
 
-    @staticmethod
-    def writeDoorDatas(romFile, srcAP, destAP, vanillaOppositeSrcAP, vanillaOppositeDestAP):
+    def writeDoorDatas(self, srcAP, destAP, vanillaOppositeSrcAP, vanillaOppositeDestAP):
+        #print("srcAP: {}, destAP: {}, vsrcAP: {}, vdestAP: {}".format(srcAP.Name, destAP.Name, vanillaOppositeSrcAP.Name, vanillaOppositeDestAP.Name))
+
         # TODO::fix cyclic imports between rom.py and graph.py to avoid import a every function call
-        from graph import compatibleTransition
+        from graph import isCompatibleTransition
 
         if srcAP.Name == vanillaOppositeDestAP.Name:
-            print("srcAP: {} (==vanillaOppositeDestAP), destAP: {}".format(srcAP.Name, destAP.Name))
+            # same as vanilla, no updates necessary
             return
 
-        # useless test
-        if destAP.Name == vanillaOppositeSrcAP.Name:
-            print("srcAP: {}, destAP: {} (== vanillaOppositeSrcAP)".format(srcAP.Name, destAP.Name))
-            return
+        isCompatible = isCompatibleTransition(srcAP, destAP)
 
         # write vanillaOppositeDestAP in destAP
+        self.writeDoorData(srcAP, vanillaOppositeDestAP, destAP.ExitInfo['RoomPtr'],
+                           isCompatible, srcAP.ExitInfo['direction'], destAP.ExitInfo['direction'])
 
         # write vanillaOppositeSrcAP in srcAP
+        self.writeDoorData(destAP, vanillaOppositeSrcAP, srcAP.ExitInfo['RoomPtr'],
+                           isCompatible, srcAP.ExitInfo['direction'], destAP.ExitInfo['direction'])
 
-        if not compatibleTransition(srcAP, destAP):
-            # we have to add some ASM in both src and dest
-            print("not compatible AP: {} <-> {}".format(srcAP.Name, destAP.Name))
+    def writeDoorData(self, ap, vap, roomPtr, isCompatible, srcDir, destDir):
+        # write vanilla door data (vap (dst *entry* data) in current door data (ap (src *exit* data))
+        print("write {} door data to {}".format(vap.Name, ap.Name))
+
+        self.romFile.seek(0x10000+ap.ExitInfo['DoorPtr'])
+
+        # write room ptr
+        self.romFile.write(struct.pack('B', roomPtr & 0x000FF))
+        self.romFile.write(struct.pack('B', (roomPtr & 0x0FF00) >> 8))
+
+        # write bitflag (if area switch we have to set bit 0x40, and remove it if same area)
+        if ap.ExitInfo['area'] == vap.ExitInfo['area']:
+            value = vap.ExitInfo['bitFlag'] & 0xBF
         else:
-            print("compatible AP: {} <-> {}".format(srcAP.Name, destAP.Name))
+            value = vap.ExitInfo['bitFlag'] | 0x40
+        self.romFile.write(struct.pack('B', value))
+
+        # TODO::finish this part
+        # write direction
+        value = vap.ExitInfo['direction']
+        if not isCompatible:
+            if destDir in [0x3, 0x7, 0x2, 0x6] and value >= 0x4:
+                # in case of non compatible transition and dest is vertical we don't want the closing cap
+                value -= 0x4
+            elif srcDir in [0x1, 0x5, 0x0, 0x4] and destDir in [0x1, 0x5, 0x0, 0x4]:
+                # in case of non compatible transition and src/dest are horizontal, switch direction
+                if destDir in [0x1, 0x5]:
+                    value -= 0x1
+                else:
+                    value += 0x1
+        self.romFile.write(struct.pack('B', value))
+
+        # write door cap x
+        self.romFile.write(struct.pack('B', vap.ExitInfo['cap'][0]))
+
+        # write door cap y
+        self.romFile.write(struct.pack('B', vap.ExitInfo['cap'][1]))
+
+        # write screen x
+        self.romFile.write(struct.pack('B', vap.ExitInfo['screen'][0]))
+
+        # write screen y
+        self.romFile.write(struct.pack('B', vap.ExitInfo['screen'][1]))
+
+        # write distance to spawn
+        if isCompatible:
+            self.romFile.write(struct.pack('B', vap.ExitInfo['distanceToSpawn'] & 0x00FF))
+            self.romFile.write(struct.pack('B', (vap.ExitInfo['distanceToSpawn'] & 0xFF00) >> 8))
+        else:
+            self.romFile.write(struct.pack('B', 0))
+            self.romFile.write(struct.pack('B', 0))
+
+        # write door asm ptr
+        if isCompatible:
+            self.romFile.write(struct.pack('B', vap.ExitInfo['doorAsmPtr'] & 0x00FF))
+            self.romFile.write(struct.pack('B', (vap.ExitInfo['doorAsmPtr'] & 0xFF00) >> 8))
+        else:
+            asmPatch = [0x20, 'DO', 'OR',
+                        0xA9, 'XX', 'XX',
+                        0x8D, 0xF6, 0x0A,
+                        0xA9, 'YY', 'YY',
+                        0x8D, 0xFA, 0x0A, 0x20, 0x00, 0x0A, 0x60]
+            if vap.ExitInfo['doorAsmPtr'] != 0x0000:
+                # call original door asm ptr
+                asmPatch[1] = vap.ExitInfo['doorAsmPtr'] & 0x00FF
+                asmPatch[2] = (vap.ExitInfo['doorAsmPtr'] & 0xFF00) >> 8
+                (samusX, samusY) = (4, 10)
+            else:
+                # no need to call the door asm ptr
+                asmPatch = asmPatch[3:]
+                (samusX, samusY) = (1, 7)
+
+            # update samus X and Y position
+            asmPatch[samusX] = vap.EntryInfo['SamusX'] & 0x00FF
+            asmPatch[samusX+1] = (vap.EntryInfo['SamusX'] & 0xFF00) >> 8
+            asmPatch[samusY] = vap.EntryInfo['SamusY'] & 0x00FF
+            asmPatch[samusY+1] = (vap.EntryInfo['SamusY'] & 0xFF00) >> 8
+
+            self.romFile.write(struct.pack('B', self.asmAddress & 0x00FF))
+            self.romFile.write(struct.pack('B', (self.asmAddress & 0xFF00) >> 8))
+
+            self.romFile.seek(self.asmAddress)
+            for byte in asmPatch:
+                self.romFile.write(struct.pack('B', byte))
+
+            self.asmAddress += 0x20
 
 class FakeROM:
     # to have the same code for real rom and the webservice

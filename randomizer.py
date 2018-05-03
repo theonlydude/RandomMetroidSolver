@@ -259,15 +259,15 @@ if __name__ == "__main__":
         try:
             shutil.copyfile(romFileName, fileName)
 
-            romFile = open(fileName, 'r+')
-            RomPatcher.writeItemsLocs(romFile, itemLocs)
-            RomPatcher.applyIPSPatches(romFile, args.patches, args.noLayout, args.noGravHeat)
-            RomPatcher.writeSeed(romFile, seed)
-            RomPatcher.writeSpoiler(romFile, itemLocs)
-            RomPatcher.writeRandoSettings(romFile, randoSettings)
+            romPatcher = RomPatcher(fileName)
+            romPatcher.writeItemsLocs(itemLocs)
+            romPatcher.applyIPSPatches(args.patches, args.noLayout, args.noGravHeat)
+            romPatcher.writeSeed(seed)
+            romPatcher.writeSpoiler(itemLocs)
+            romPatcher.writeRandoSettings(randoSettings)
             if args.area == True:
-                RomPatcher.writeTransitions(romFile, randomizer.transitions)
-            romFile.close()
+                romPatcher.writeTransitions(randomizer.transitions)
+            romPatcher.end()
         except Exception as e:
             print("Error patching {}. Is {} a valid ROM ? ({})".format(fileName, romFileName, e))
             sys.exit(-1)
@@ -276,15 +276,15 @@ if __name__ == "__main__":
             # web service
             data = {}
 
-            romFile = FakeROM()
-            RomPatcher.writeItemsLocs(romFile, itemLocs)
-            RomPatcher.applyIPSPatches(romFile, args.patches, args.noLayout, args.noGravHeat)
-            RomPatcher.writeSeed(romFile, seed)
-            RomPatcher.writeSpoiler(romFile, itemLocs)
-            RomPatcher.writeRandoSettings(romFile, randoSettings)
+            romPatcher = RomPatcher()
+            romPatcher.writeItemsLocs(itemLocs)
+            romPatcher.applyIPSPatches(args.patches, args.noLayout, args.noGravHeat)
+            romPatcher.writeSeed(seed)
+            romPatcher.writeSpoiler(itemLocs)
+            romPatcher.writeRandoSettings(randoSettings)
             if args.area == True:
-                RomPatcher.writeTransitions(romFile, randomizer.transitions)
-            data.update(romFile.data)
+                romPatcher.writeTransitions(randomizer.transitions)
+            data.update(romPatcher.romFile.data)
 
             fileName += '.sfc'
             data["fileName"] = fileName

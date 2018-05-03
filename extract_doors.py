@@ -34,6 +34,8 @@ def readDoorsPtrs(romFile, roomInfo):
     roomInfo['doorPtrs'] = doorPtrs
 
 def matchDirection(roomDirection, doorDirection):
+    if roomDirection == 'all':
+        return True
     if roomDirection == 'up' and doorDirection in (0x3, 0x7):
         return True
     if roomDirection == 'down' and doorDirection in (0x2, 0x6):
@@ -69,6 +71,7 @@ def readDoorsData(romFile, roomInfo):
             if matchDirection(roomInfo['direction'], data[3]):
                 doorData.append({'doorPtr': hex(doorPtr),
                                  'roomPrt': hex(concatBytes(data[0], data[1])),
+                                 'bitFlag': hex(data[2]),
                                  'direction': hex(data[3]),
                                  'capX': hex(data[4]),
                                  'capY': hex(data[5]),
@@ -80,7 +83,7 @@ def readDoorsData(romFile, roomInfo):
     roomInfo['doorData'] = doorData
     #print("Doors Data:")
     for d in doorData:
-        print("\"doorPtr\": {}, \"roomPrt\": {}, \"direction\": {}, \"cap\": ({}, {}), \"screen\": ({}, {}), \"distanceToSpawn\": {}, \"doorAsmPtr\": {}".format(d['doorPtr'], d['roomPrt'], d['direction'], d['capX'], d['capY'], d['screenX'], d['screenY'], d['distanceToSpawn'], d['doorAsmPtr']))
+        print("\"doorPtr\": {}, \"roomPrt\": {}, \"direction\": {}, \"cap\": ({}, {}), \"screen\": ({}, {}), \"distanceToSpawn\": {}, \"doorAsmPtr\": {}, \"bitFlag\": {}".format(d['doorPtr'], d['roomPrt'], d['direction'], d['capX'], d['capY'], d['screenX'], d['screenY'], d['distanceToSpawn'], d['doorAsmPtr'], d['bitFlag']))
 
 def readRooms(romFileName):
     #    RoomIndex         = b [0];

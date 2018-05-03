@@ -233,6 +233,7 @@ if __name__ == "__main__":
     randoSettings = RandoSettings(maxDifficulty, progSpeed, progDiff, qty, restrictions, args.superFun)
     if args.area == True:
         randomizer = AreaRandomizer(graphLocations, randoSettings, seedName, dotDir=args.directory)
+        RomPatches.ActivePatches += RomPatches.AreaSet
     elif args.graph == True:
         randomizer = Randomizer(graphLocations, randoSettings, seedName, vanillaTransitions)
     else:

@@ -52,6 +52,9 @@ class RomPatches:
     # casual
     Total_CX = [ BlueBrinstarMissile ] + Total
 
+    # area rando patch set
+    AreaSet = [ SingleChamberNoCrumble, NoMaridiaGreenGates, AreaRandoBlueDoors ]
+    
     # dessyreqt randomizer
     Dessy = []
 

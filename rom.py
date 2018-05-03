@@ -313,7 +313,8 @@ class RomPatcher:
                      'spinjumprestart.ips', 'supermetroid_msu1.ips', 'elevators_doors_speed.ips',
                      'skip_intro.ips', 'skip_ceres.ips', 'animal_enemies.ips', 'animals.ips',
                      'draygonimals.ips', 'escapimals.ips', 'gameend.ips', 'grey_door_animals.ips',
-                     'low_timer.ips', 'metalimals.ips', 'phantoonimals.ips', 'ridleyimals.ips']
+                     'low_timer.ips', 'metalimals.ips', 'phantoonimals.ips', 'ridleyimals.ips'],
+        'Area': ['area_rando_blue_doors.ips', 'area_rando_layout_base.ips']
     }
 
     def __init__(self, romFileName=None):
@@ -343,7 +344,7 @@ class RomPatcher:
                 self.romFile.write(itemCode[0])
                 self.romFile.write(itemCode[1])
 
-    def applyIPSPatches(self, optionalPatches=[], noLayout=False, noGravHeat=False):
+    def applyIPSPatches(self, optionalPatches=[], noLayout=False, noGravHeat=False, area=False):
         try:
             # apply standard patches
             stdPatches = RomPatcher.IPSPatches['Standard']
@@ -360,6 +361,11 @@ class RomPatcher:
             # apply optional patches
             for patchName in optionalPatches:
                 if patchName in RomPatcher.IPSPatches['Optional']:
+                    self.applyIPSPatch(patchName)
+
+            # apply area patches
+            if area == True:
+                for patchName in RomPatcher.IPSPatches['Area']:
                     self.applyIPSPatch(patchName)
         except Exception as e:
             print("Error patching {}. ({})".format(self.romFileName, e))

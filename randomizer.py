@@ -261,7 +261,7 @@ if __name__ == "__main__":
 
             romPatcher = RomPatcher(fileName)
             romPatcher.writeItemsLocs(itemLocs)
-            romPatcher.applyIPSPatches(args.patches, args.noLayout, args.noGravHeat)
+            romPatcher.applyIPSPatches(args.patches, args.noLayout, args.noGravHeat, args.area)
             romPatcher.writeSeed(seed)
             romPatcher.writeSpoiler(itemLocs)
             romPatcher.writeRandoSettings(randoSettings)
@@ -278,7 +278,7 @@ if __name__ == "__main__":
 
             romPatcher = RomPatcher()
             romPatcher.writeItemsLocs(itemLocs)
-            romPatcher.applyIPSPatches(args.patches, args.noLayout, args.noGravHeat)
+            romPatcher.applyIPSPatches(args.patches, args.noLayout, args.noGravHeat, args.area)
             romPatcher.writeSeed(seed)
             romPatcher.writeSpoiler(itemLocs)
             romPatcher.writeRandoSettings(randoSettings)

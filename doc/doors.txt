@@ -5,7 +5,8 @@ Important
 
 Bitflag $40: area switch
 Disable closing cap: $00 to $03 for direction (in case of horizontal<>vertical transitions)
-Need door ASM for incompatible transitions: 5631 bytes of free space at $7EA00
+Need door ASM for incompatible transitions: 5631 bytes of free space
+at $7EA00. Common routines will be places there. Store Door ASM after $7EB00.
 
 Access Points
 *************
@@ -52,7 +53,7 @@ Here is the ASM template (remember everything is Little Endian !) :
 
 DOOR = former door ASM ptr, skip these 3 bytes if there is none
 --------
-20 DO OR A9 XX XX 8D F6 0A A9 YY YY 8D FA 0A 9C 2C 0B 9C 2E 0B 9C 42 0B 9C 44 0B 9C 46 0B 9C 48 0B 9C 1C 0A 9C 96 0A 60
+20 DO OR A9 XX XX 8D F6 0A A9 YY YY 8D FA 0A 20 00 EA 60
             -----             -----
            Samus X           Samus Y
 

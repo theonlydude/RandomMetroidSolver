@@ -148,7 +148,7 @@ class AccessGraph(object):
             if not 'difficulty' in loc:
                 loc['difficulty'] = SMBool(False, 0)
         return availLocs
-
+    
 
 # all access points and traverse functions
 accessPoints = [
@@ -379,3 +379,71 @@ vanillaTransitions = [
     ('Caterpillar Room Top Right', 'Red Fish Room Left'),
     ('Glass Tunnel Top', 'Main Street Bottom')
 ]
+
+    # up: 0x3, 0x7
+    # down: 0x2, 0x6
+    # left: 0x1, 0x5
+    # right: 0x0, 0x4
+
+def isHorizontal(dir):
+    return dir in [0x1, 0x5, 0x0, 0x4]
+
+def reverseDir(dir):
+    if dir in [0x1, 0x5] or dir in [0x3, 0x7]:
+        return dir - 1
+    else:
+        return dir + 1
+
+def removeCap(dir):
+    if dir < 4:
+        return dir
+    return dir - 4
+
+def getDirection(src, dst):
+    exitDir = src.ExitInfo['direction']
+    entryDir = dst.EntryInfo['direction']
+    # compatible transition
+    if exitDir == entryDir:
+        return exitDir
+    # if incompatible but horizontal we just reverse
+    if isHorizontal(exitDir) and isHorizontal(entryDir):
+        return reverseDir(entryDir)
+    # otherwise keep exit direction and remove cap XXX maybe keep horizontal transition in case of V>H? (untested yet)
+    return removeCap(exitDir)
+
+def getBitFlag(srcArea, dstArea, origFlag):
+    flags = origFlag
+    if srcArea == dstArea:
+        flags &= 0xBF
+    else:
+        flags |= 0x40
+    return flags
+
+def getDoorConnections(graph):
+    for srcName, dstName in vanillaTransitions:
+        src = graph.accessPoints[srcName]
+        dst = graph.accessPoints[dstName]
+        dst.EntryInfo.update(src.ExitInfo)
+        src.EntryInfo.update(dst.ExitInfo)
+    connections = []
+    for src, dst in graph.InterAreaTransitions:
+        conn = {}
+        # where to write
+        conn['DoorPtr'] = src.ExitInfo['DoorPtr']
+        conn['DoorRoomPtr'] = src.ExitInfo['RoomPtr'] # FIXME is this necessary?
+        # door properties
+        conn['RoomPtr'] = dst.ExitInfo['RoomPtr'] # room info is not exit info...
+        conn['doorAsmPtr'] = dst.EntryInfo['doorAsmPtr']
+        conn['direction'] = getDirection(src, dst)
+        conn['bitFlag'] = getBitFlag(src.ExitInfo['area'], dst.ExitInfo['area'], # ...neither is area. FIXME move these in a RoomInfo dict in access points
+                                     dst.EntryInfo['bitFlag'])
+        conn['cap'] = dst.EntryInfo['cap']
+        conn['screen'] = dst.EntryInfo['screen']
+        if conn['direction'] != src.ExitInfo['direction']: # incompatible transition
+            conn['distanceToSpawn'] = 0
+            conn['SamusX'] = dst.EntryInfo['SamusX']
+            conn['SamusY'] = dst.EntryInfo['SamusY']
+        else:
+            conn['distanceToSpawn'] = dst.EntryInfo['distanceToSpawn']
+        connections.append(conn)
+    return connections

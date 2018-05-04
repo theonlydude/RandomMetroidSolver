@@ -646,11 +646,13 @@ class RomPatcher:
                 self.romFile.write(struct.pack('B', conn['doorAsmPtr'] & 0x00FF))
                 self.romFile.write(struct.pack('B', (conn['doorAsmPtr'] & 0xFF00) >> 8))
             else:
-                asmPatch = [0x20, 'DO', 'OR',
-                            0xA9, 'XX', 'XX',
-                            0x8D, 0xF6, 0x0A,
-                            0xA9, 'YY', 'YY',
-                            0x8D, 0xFA, 0x0A, 0x20, 0x00, 0xEA, 0x60]
+                asmPatch = [0x20, 'DO', 'OR',    # JSR $DOOR           ; call DOOR = original door ASM (optional)
+                            0xA9, 'XX', 'XX',    # LDA #$XXXX          ; XXXX = fixed Samus X position
+                            0x8D, 0xF6, 0x0A,    # STA $0AF6           ; update Samus X position in memory
+                            0xA9, 'YY', 'YY',    # LDA #$YYYY          ; YYYY = fixed Samus Y position
+                            0x8D, 0xFA, 0x0A,    # STA $0AFA           ; update Samus Y position in memory
+                            0x20, 0x00, 0xEA,    # JSR cancel_movement ; call cancel samus movement routine (see cancel_movement.asm)
+                            0x60]                # RTS                 ; return
                 if conn['doorAsmPtr'] != 0x0000:
                     # call original door asm ptr
                     asmPatch[1] = conn['doorAsmPtr'] & 0x00FF

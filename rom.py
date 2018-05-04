@@ -609,128 +609,72 @@ class RomPatcher:
     #   property shall point to this custom ASM.
     # * if not, just write doorAsmPtr as the door property directly.
     def writeDoorConnections(self, doorConnections):
-        for conn in doorConnections:
-            print("TODO")
-            # TODO
-            
-    def writeTransitions(self, transitions):
-        from graph import getAccessPoint, getVanillaOppositeAP
-
         self.asmAddress = 0x7EB00
-        for (srcName, destName) in transitions:
-            srcAP = getAccessPoint(srcName)
-            destAP = getAccessPoint(destName)
-            self.writeDoorDatas(srcAP, destAP, getVanillaOppositeAP(srcName), getVanillaOppositeAP(destName))
 
-    def writeDoorDatas(self, srcAP, destAP, vanillaOppositeSrcAP, vanillaOppositeDestAP):
-        #print("srcAP: {}, destAP: {}, vsrcAP: {}, vdestAP: {}".format(srcAP.Name, destAP.Name, vanillaOppositeSrcAP.Name, vanillaOppositeDestAP.Name))
+        for conn in doorConnections:
+            self.romFile.seek(0x10000+conn['DoorPtr'])
 
-        # TODO::fix cyclic imports between rom.py and graph.py to avoid import at every function call
-        from graph import isCompatibleTransition
+            # write room ptr
+            roomPtr = conn['RoomPtr']
+            self.romFile.write(struct.pack('B', roomPtr & 0x000FF))
+            self.romFile.write(struct.pack('B', (roomPtr & 0x0FF00) >> 8))
 
-        if srcAP.Name == vanillaOppositeDestAP.Name:
-            # same as vanilla, no updates necessary
-            return
+            # write bitflag (if area switch we have to set bit 0x40, and remove it if same area)
+            self.romFile.write(struct.pack('B', conn['bitFlag']))
 
-        isCompatible = isCompatibleTransition(srcAP, destAP)
+            # write direction
+            self.romFile.write(struct.pack('B', conn['direction']))
 
-        # write vanillaOppositeDestAP in srcAP
-        self.writeDoorData(srcAP, vanillaOppositeDestAP, destAP.ExitInfo['RoomPtr'],
-                           isCompatible, srcAP.ExitInfo['direction'], destAP.ExitInfo['direction'])
+            # write door cap x
+            self.romFile.write(struct.pack('B', conn['cap'][0]))
 
-        # write vanillaOppositeSrcAP in destAP
-        self.writeDoorData(destAP, vanillaOppositeSrcAP, srcAP.ExitInfo['RoomPtr'],
-                           isCompatible, srcAP.ExitInfo['direction'], destAP.ExitInfo['direction'])
+            # write door cap y
+            self.romFile.write(struct.pack('B', conn['cap'][1]))
 
-    def writeDoorData(self, ap, vap, roomPtr, isCompatible, srcDir, destDir):
-        # write vanilla door data (vap (dst *entry* data) in current door data (ap (src *exit* data))
-        print("write {} door data to {}".format(vap.Name, ap.Name))
+            # write screen x
+            self.romFile.write(struct.pack('B', conn['screen'][0]))
 
-        self.romFile.seek(0x10000+ap.ExitInfo['DoorPtr'])
+            # write screen y
+            self.romFile.write(struct.pack('B', conn['screen'][1]))
 
-        # write room ptr
-        self.romFile.write(struct.pack('B', roomPtr & 0x000FF))
-        self.romFile.write(struct.pack('B', (roomPtr & 0x0FF00) >> 8))
+            # write distance to spawn
+            self.romFile.write(struct.pack('B', conn['distanceToSpawn'] & 0x00FF))
+            self.romFile.write(struct.pack('B', (conn['distanceToSpawn'] & 0xFF00) >> 8))
 
-        # write bitflag (if area switch we have to set bit 0x40, and remove it if same area)
-        if ap.ExitInfo['area'] == vap.ExitInfo['area']:
-            value = vap.ExitInfo['bitFlag'] & 0xBF
-        else:
-            value = vap.ExitInfo['bitFlag'] | 0x40
-        self.romFile.write(struct.pack('B', value))
-
-        # write direction
-        value = vap.ExitInfo['direction']
-        if not isCompatible:
-            # up: 0x3, 0x7
-            # down: 0x2, 0x6
-            # left: 0x1, 0x5
-            # right: 0x0, 0x4
-            if srcDir in [0x1, 0x5, 0x0, 0x4] and destDir in [0x1, 0x5, 0x0, 0x4]:
-                # in case of non compatible transition and src/dest are horizontal, switch direction
-                if destDir in [0x1, 0x5]:
-                    value -= 0x1
+            # write door asm ptr
+            if 'SamusX' not in conn:
+                self.romFile.write(struct.pack('B', conn['doorAsmPtr'] & 0x00FF))
+                self.romFile.write(struct.pack('B', (conn['doorAsmPtr'] & 0xFF00) >> 8))
+            else:
+                asmPatch = [0x20, 'DO', 'OR',
+                            0xA9, 'XX', 'XX',
+                            0x8D, 0xF6, 0x0A,
+                            0xA9, 'YY', 'YY',
+                            0x8D, 0xFA, 0x0A, 0x20, 0x00, 0xEA, 0x60]
+                if conn['doorAsmPtr'] != 0x0000:
+                    # call original door asm ptr
+                    asmPatch[1] = conn['doorAsmPtr'] & 0x00FF
+                    asmPatch[2] = (conn['doorAsmPtr'] & 0xFF00) >> 8
+                    (samusX, samusY) = (4, 10)
                 else:
-                    value += 0x1
-            else:
-                value = vap.ExitInfo['direction']
-                value -= 0x4
-        self.romFile.write(struct.pack('B', value))
+                    # no need to call the door asm ptr
+                    asmPatch = asmPatch[3:]
+                    (samusX, samusY) = (1, 7)
 
-        # write door cap x
-        self.romFile.write(struct.pack('B', vap.ExitInfo['cap'][0]))
+                # update samus X and Y position
+                asmPatch[samusX] = conn['SamusX'] & 0x00FF
+                asmPatch[samusX+1] = (conn['SamusX'] & 0xFF00) >> 8
+                asmPatch[samusY] = conn['SamusY'] & 0x00FF
+                asmPatch[samusY+1] = (conn['SamusY'] & 0xFF00) >> 8
 
-        # write door cap y
-        self.romFile.write(struct.pack('B', vap.ExitInfo['cap'][1]))
+                self.romFile.write(struct.pack('B', self.asmAddress & 0x00FF))
+                self.romFile.write(struct.pack('B', (self.asmAddress & 0xFF00) >> 8))
 
-        # write screen x
-        self.romFile.write(struct.pack('B', vap.ExitInfo['screen'][0]))
+                self.romFile.seek(self.asmAddress)
+                for byte in asmPatch:
+                    self.romFile.write(struct.pack('B', byte))
 
-        # write screen y
-        self.romFile.write(struct.pack('B', vap.ExitInfo['screen'][1]))
-
-        # write distance to spawn
-        if isCompatible:
-            self.romFile.write(struct.pack('B', vap.ExitInfo['distanceToSpawn'] & 0x00FF))
-            self.romFile.write(struct.pack('B', (vap.ExitInfo['distanceToSpawn'] & 0xFF00) >> 8))
-        else:
-            self.romFile.write(struct.pack('B', 0))
-            self.romFile.write(struct.pack('B', 0))
-
-        # write door asm ptr
-        if isCompatible:
-            self.romFile.write(struct.pack('B', vap.ExitInfo['doorAsmPtr'] & 0x00FF))
-            self.romFile.write(struct.pack('B', (vap.ExitInfo['doorAsmPtr'] & 0xFF00) >> 8))
-        else:
-            asmPatch = [0x20, 'DO', 'OR',
-                        0xA9, 'XX', 'XX',
-                        0x8D, 0xF6, 0x0A,
-                        0xA9, 'YY', 'YY',
-                        0x8D, 0xFA, 0x0A, 0x20, 0x00, 0xEA, 0x60]
-            if vap.ExitInfo['doorAsmPtr'] != 0x0000:
-                # call original door asm ptr
-                asmPatch[1] = vap.ExitInfo['doorAsmPtr'] & 0x00FF
-                asmPatch[2] = (vap.ExitInfo['doorAsmPtr'] & 0xFF00) >> 8
-                (samusX, samusY) = (4, 10)
-            else:
-                # no need to call the door asm ptr
-                asmPatch = asmPatch[3:]
-                (samusX, samusY) = (1, 7)
-
-            # update samus X and Y position
-            asmPatch[samusX] = ap.EntryInfo['SamusX'] & 0x00FF
-            asmPatch[samusX+1] = (ap.EntryInfo['SamusX'] & 0xFF00) >> 8
-            asmPatch[samusY] = ap.EntryInfo['SamusY'] & 0x00FF
-            asmPatch[samusY+1] = (ap.EntryInfo['SamusY'] & 0xFF00) >> 8
-
-            self.romFile.write(struct.pack('B', self.asmAddress & 0x00FF))
-            self.romFile.write(struct.pack('B', (self.asmAddress & 0xFF00) >> 8))
-
-            self.romFile.seek(self.asmAddress)
-            for byte in asmPatch:
-                self.romFile.write(struct.pack('B', byte))
-
-            self.asmAddress += 0x20
+                self.asmAddress += 0x20
 
 class FakeROM:
     # to have the same code for real rom and the webservice

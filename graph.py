@@ -4,31 +4,6 @@ from parameters import Knows
 from rom import RomPatches
 from smbool import SMBool
 
-def getAccessPoint(name):
-    # return access point object from name
-    for accessPoint in accessPoints:
-        if accessPoint.Name == name:
-            return accessPoint
-
-def getVanillaOppositeAP(name):
-    # get dest name from vanilla transition, then return the dest access point
-    for (srcName, destName) in vanillaTransitions:
-        if srcName == name:
-            return getAccessPoint(destName)
-        elif destName == name:
-            return getAccessPoint(srcName)
-
-def isCompatibleTransition(srcAP, destAP):
-    # check if no ASM is required
-    # up: 0x3, 0x7
-    # down: 0x2, 0x6
-    # left: 0x1, 0x5
-    # right: 0x0, 0x4
-    return ((srcAP.ExitInfo['direction'] in [0x0, 0x4] and destAP.ExitInfo['direction'] in [0x1, 0x5]) or
-            (srcAP.ExitInfo['direction'] in [0x1, 0x5] and destAP.ExitInfo['direction'] in [0x0, 0x4]) or
-            (srcAP.ExitInfo['direction'] in [0x3, 0x7] and destAP.ExitInfo['direction'] in [0x2, 0x6]) or
-            (srcAP.ExitInfo['direction'] in [0x2, 0x6] and destAP.ExitInfo['direction'] in [0x3, 0x7]))
-
 class AccessPoint(object):
     # name : AccessPoint name
     # graphArea : graph area the node is located in

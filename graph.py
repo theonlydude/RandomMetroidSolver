@@ -363,12 +363,6 @@ vanillaTransitions = [
 def isHorizontal(dir):
     return dir in [0x1, 0x5, 0x0, 0x4]
 
-def reverseDir(dir):
-    if dir in [0x1, 0x5] or dir in [0x3, 0x7]:
-        return dir - 1
-    else:
-        return dir + 1
-
 def removeCap(dir):
     if dir < 4:
         return dir
@@ -380,9 +374,9 @@ def getDirection(src, dst):
     # compatible transition
     if exitDir == entryDir:
         return exitDir
-    # if incompatible but horizontal we just reverse
+    # if incompatible but horizontal we keep entry dir (looks more natural)
     if isHorizontal(exitDir) and isHorizontal(entryDir):
-        return reverseDir(entryDir)
+        return entryDir
     # otherwise keep exit direction and remove cap XXX maybe keep horizontal transition in case of V>H? (untested yet)
     return removeCap(exitDir)
 

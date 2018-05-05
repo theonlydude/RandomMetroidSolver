@@ -109,8 +109,9 @@ locations = [
     #  -do a damage boost with one of the two Geemers
     'Available': lambda sm: sm.wor(sm.knowsCeilingDBoost(),
                                    sm.canFly(),
-                                   sm.haveItem('HiJump'),
-                                   sm.haveItem('Ice'))
+                                   sm.wor(sm.haveItem('HiJump'),
+                                          sm.haveItem('Ice'),
+                                          sm.haveItem('SpeedBooster')))
 },
 {
     'Area': "Brinstar",

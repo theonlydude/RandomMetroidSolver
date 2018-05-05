@@ -235,7 +235,6 @@ if __name__ == "__main__":
         randomizer = AreaRandomizer(graphLocations, randoSettings, seedName, dotDir=args.directory)
         RomPatches.ActivePatches += RomPatches.AreaSet
         doors = getDoorConnections(randomizer.areaGraph)
-        print(doors)
     elif args.graph == True:
         randomizer = Randomizer(graphLocations, randoSettings, seedName, vanillaTransitions)
     else:

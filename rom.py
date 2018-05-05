@@ -600,7 +600,6 @@ class RomPatcher:
     # write area randomizer transitions to ROM
     # doorConnections : a list of connections. each connection is a dictionary describing
     # - where to write in the ROM :
-    # DoorRoomPtr : room ptr the door to write is into (FIXME is this necessary?)
     # DoorPtr : door pointer to write to
     # - what to write in the ROM :
     # RoomPtr, direction, bitflag, cap, screen, distanceToSpawn : door properties
@@ -612,6 +611,7 @@ class RomPatcher:
         self.asmAddress = 0x7EB00
 
         for conn in doorConnections:
+            print('Writing door connection ' + conn['ID'])
             self.romFile.seek(0x10000+conn['DoorPtr'])
 
             # write room ptr

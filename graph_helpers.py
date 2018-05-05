@@ -55,7 +55,7 @@ class HelpersGraph(Helpers):
         return sm.wor(sm.haveItem('Grapple'),
                       sm.haveItem('SpaceJump'),
                       sm.haveItem('Gravity'),
-                      sm.wand(haveItem('Morph'),
+                      sm.wand(sm.haveItem('Morph'),
                               sm.wor(RomPatches.has(RomPatches.MoatShotBlock),
                                      sm.canPassBombPassages())))
 

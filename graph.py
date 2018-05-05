@@ -4,31 +4,6 @@ from parameters import Knows
 from rom import RomPatches
 from smbool import SMBool
 
-def getAccessPoint(name):
-    # return access point object from name
-    for accessPoint in accessPoints:
-        if accessPoint.Name == name:
-            return accessPoint
-
-def getVanillaOppositeAP(name):
-    # get dest name from vanilla transition, then return the dest access point
-    for (srcName, destName) in vanillaTransitions:
-        if srcName == name:
-            return getAccessPoint(destName)
-        elif destName == name:
-            return getAccessPoint(srcName)
-
-def isCompatibleTransition(srcAP, destAP):
-    # check if no ASM is required
-    # up: 0x3, 0x7
-    # down: 0x2, 0x6
-    # left: 0x1, 0x5
-    # right: 0x0, 0x4
-    return ((srcAP.ExitInfo['direction'] in [0x0, 0x4] and destAP.ExitInfo['direction'] in [0x1, 0x5]) or
-            (srcAP.ExitInfo['direction'] in [0x1, 0x5] and destAP.ExitInfo['direction'] in [0x0, 0x4]) or
-            (srcAP.ExitInfo['direction'] in [0x3, 0x7] and destAP.ExitInfo['direction'] in [0x2, 0x6]) or
-            (srcAP.ExitInfo['direction'] in [0x2, 0x6] and destAP.ExitInfo['direction'] in [0x3, 0x7]))
-
 class AccessPoint(object):
     # name : AccessPoint name
     # graphArea : graph area the node is located in
@@ -388,12 +363,6 @@ vanillaTransitions = [
 def isHorizontal(dir):
     return dir in [0x1, 0x5, 0x0, 0x4]
 
-def reverseDir(dir):
-    if dir in [0x1, 0x5] or dir in [0x3, 0x7]:
-        return dir - 1
-    else:
-        return dir + 1
-
 def removeCap(dir):
     if dir < 4:
         return dir
@@ -405,7 +374,7 @@ def getDirection(src, dst):
     # compatible transition
     if exitDir == entryDir:
         return exitDir
-    # if incompatible but horizontal we use entry direction (more natural)
+    # if incompatible but horizontal we keep entry dir (looks more natural)
     if isHorizontal(exitDir) and isHorizontal(entryDir):
         return entryDir
     # otherwise keep exit direction and remove cap XXX maybe keep horizontal transition in case of V>H? (untested yet)

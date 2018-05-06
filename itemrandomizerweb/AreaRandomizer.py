@@ -34,7 +34,6 @@ def createTransitions(bidir=True):
         toRemove = [apName for apName in apNames if apName in tFrom and apName in tTo]
         for apName in toRemove:
             apNames.remove(apName)
-    print(transitions)
     return transitions
 
 class AreaRandomizer(Randomizer):

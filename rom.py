@@ -317,7 +317,7 @@ class RomPatcher:
                      'skip_intro.ips', 'skip_ceres.ips', 'animal_enemies.ips', 'animals.ips',
                      'draygonimals.ips', 'escapimals.ips', 'gameend.ips', 'grey_door_animals.ips',
                      'low_timer.ips', 'metalimals.ips', 'phantoonimals.ips', 'ridleyimals.ips'],
-        'Area': ['area_rando_blue_doors.ips', 'area_rando_layout_base.ips', 'cancel_movement.ips']
+        'Area': ['area_rando_blue_doors.ips', 'area_rando_layout_base.ips', 'cancel_movement.ips', 'BFscrollskyfix.ips']
     }
 
     def __init__(self, romFileName=None):

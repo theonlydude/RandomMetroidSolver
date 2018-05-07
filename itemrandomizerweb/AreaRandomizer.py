@@ -45,3 +45,18 @@ class AreaRandomizer(Randomizer):
                                              self.transitions,
                                              bidir,
                                              dotDir)
+
+    # adapt restrictions implementation to different area layout
+
+    def areaDistance(self, loc, otherLocs):
+        return self.areaDistanceProp(loc, otherLocs, 'GraphArea')
+
+    def suitsRestrictionsImpl(self, item, location):
+        return location['GraphArea'] != 'Crateria'
+
+    def speedScrewRestrictionImpl(self, item, location):
+        if item["Type"] == "SpeedBooster":
+            return not Randomizer.isInBlueBrinstar(location)
+        if item["Type"] == "ScrewAttack":
+            return location['GraphArea'] != 'Crateria'
+        return True

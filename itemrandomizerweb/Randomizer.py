@@ -290,14 +290,12 @@ class Randomizer(object):
 #        print("POST " + str(result.bool))
         return result.bool == True and result.difficulty <= self.difficultyTarget
 
+    # get available locations, given current items, and an optional additional item.
+    # uses only Available function of location, so it has to carry the whole access
+    # to the location.
+    # item : optional additional item
+    # return available locations list.
     def currentLocationsAvailFunc(self, item=None):
-        # loop on all the location pool and check if the loc is not already used and if the available function is true
-        #
-        # items: list of items, each item is a dict
-        # itemLocations: list of dict with the current association of (item - location)
-        #
-        # return: list of locations
-
         if item is not None:
             self.smbm.addItem(item['Type'])
 
@@ -309,6 +307,10 @@ class Randomizer(object):
 
         return ret
 
+    # get available locations, given current items, and an optional additional item.
+    # uses graph method to get avail locs.
+    # item : optional additional item
+    # return available locations list.
     def currentLocationsGraph(self, item=None):
         if item is not None:
             self.smbm.addItem(item['Type'])
@@ -320,24 +322,25 @@ class Randomizer(object):
 
         return ret
 
+    # for an item check if a least one location can accept it, given the current
+    # placement restrictions
+    #
+    # item: dict of an item
+    # itemLocations: list of locations
+    #
+    # return bool
     def canPlaceItem(self, item, itemLocations):
-        # for an item check if a least one location can accept it, without checking
-        # the available functions
-        #
-        # item: dict of an item
-        # itemLocations: list of locations
-        #
-        # return bool
         return List.exists(lambda loc: self.canPlaceAtLocation(item, loc), itemLocations)
 
+    # loop on all the items in the item pool of not already place
+    # items and return those that can be.
+    #
+    # items: list of items already placed
+    # itemLocations: list of dict with the current association of (item - location)
+    # itemPool: list of the items not already placed
+    #
+    # return list of items eligible for next placement
     def possibleItems(self, curLocs, items, itemPool):
-        # loop on all the items in the item pool of not already place items and return those that can be
-        #
-        # items: list of items already placed
-        # itemLocations: list of dict with the current association of (item - location)
-        # itemPool: list of the items not already placed
-        #
-        # return list of items eligible for next placement
         result = []
         random.shuffle(itemPool)
         for item in itemPool:
@@ -345,13 +348,13 @@ class Randomizer(object):
                 result.append(item)
         return result
 
+    # loop on the item pool to remove the first occurence of the item
+    #
+    # itemType: the name of the item to remove
+    # itemPool: the items not already placed
+    #
+    # return the itemPool without one itemType
     def removeItem(self, itemType, itemPool):
-        # recursive loop on the item pool to remove the first occurence of the item
-        #
-        # itemType: the name of the item to remove
-        # itemPool: the items not already placed
-        #
-        # return the itemPool without one itemType
         i=0
         for item in itemPool:
             if item['Type'] == itemType:
@@ -374,6 +377,7 @@ class Randomizer(object):
 
         return rangeDict
 
+    # get choose function from a weighted dict
     def getChooseFunc(self, rangeDict, funcDict):
         r = random.random()
         for v in sorted(rangeDict, key=rangeDict.get):
@@ -431,7 +435,7 @@ class Randomizer(object):
     def fillLocsDiff(self, locs):
         for loc in locs:
             postAvail = 'PostAvailable' in loc
-            avail = self.getLocDiffAvailFunc(loc)
+            avail = self.getLocDiff(loc)
             if postAvail == True:
                 avail = self.smbm.wand(avail, self.smbm.eval(loc['PostAvailable']))
             loc['difficulty'] = self.smbm.getSMBoolCopy()
@@ -444,16 +448,19 @@ class Randomizer(object):
         self.fillLocsDiff(availableLocations)
         return min(availableLocations, key=lambda loc:loc['difficulty'].difficulty)
 
-    # gives a general "distance" of a particular location compared to other locations
-    def areaDistance(self, loc, otherLocs):
-        areas = [l['Area'] for l in otherLocs]
-        cnt = areas.count(loc['Area'])
+    def areaDistanceProp(self, loc, otherLocs, prop):
+        areas = [l[prop] for l in otherLocs]
+        cnt = areas.count(loc[prop])
         d = None
         if cnt == 0:
             d = 2
         else:
             d = 1.0/cnt
         return d
+        
+    # gives a general "distance" of a particular location compared to other locations
+    def areaDistance(self, loc, otherLocs):
+        return self.areaDistanceProp(loc, otherLocs, 'Area')
 
     def getLocsSpreadProgression(self, availableLocations):
         progLocs = [il['Location'] for il in self.progressionItemLocs if il['Item']['Class'] == 'Major' and il['Item']['Category'] != "Energy"]
@@ -501,6 +508,11 @@ class Randomizer(object):
             # choose randomly if non-progression
             return self.chooseLocationRandom(locs, item)
 
+    # items: possible items to place that will open up new paths, or an empty list
+    # itemPool: non-placed items
+    #
+    # return if items is non-empty, item to place based on choose
+    # function. if items is empty, a random non-placed item.
     def getItemToPlace(self, items, itemPool):
         itemsLen = len(items)
         if itemsLen == 0:
@@ -510,14 +522,12 @@ class Randomizer(object):
             item = self.chooseItem(items)
         return item
 
+    # items: possible items to place that will open up new paths, or an empty list
+    # itemPool: non-placed items
+    # locations: locations available
+    #
+    # returns a dict with the item and the location
     def placeItem(self, items, itemPool, locations):
-        #
-        #
-        # items: possible items to place
-        # itemPool:
-        # locations: locations available
-        #
-        # returns a dict with the item and the location
         item = self.getItemToPlace(items, itemPool)
         availableLocations = List.filter(lambda loc: self.canPlaceAtLocation(item, loc) and self.locPostAvailable(loc, item['Type']), locations)
         # if a loc is available we trigger pick up action, to make more locs available afterwards
@@ -533,21 +543,17 @@ class Randomizer(object):
 
         return {'Item': item, 'Location': location}
 
+    # checks if an item opens up new locations.
+    # curLocs : currently available locations
+    # item : item to check
+    # items : already placed items
+    #
+    # return bool
     def checkItem(self, curLocs, item, items):
-        # get the list of unused locations accessible with the given items (old),
-        # the list of unused locations accessible with the given items and the new item (new).
-        # check that there's a major location in the new list for next iteration of placement.
-        # check that there's more
-        #
-        # item: dict of the item to check
-        # items: list of items already placed
-        #
-        # return bool
-
         # no need to test nothing items
         if item['Type'] in ['Nothing', 'NoEnergy']:
             return False
-
+        
         oldLocations = curLocs
         canPlaceIt = self.canPlaceItem(item, oldLocations)
         if canPlaceIt == False:
@@ -561,35 +567,53 @@ class Randomizer(object):
 
         return newLocationsHasMajor and len(newLocations) > len(oldLocations)
 
+    @staticmethod
+    def isInBlueBrinstar(location):
+        return location["Name"] in ["Morphing Ball",
+                                    "Missile (blue Brinstar middle)",
+                                    "Energy Tank, Brinstar Ceiling",
+                                    "Power Bomb (blue Brinstar)",
+                                    "Missile (blue Brinstar bottom)",
+                                    "Missile (blue Brinstar top)",
+                                    "Missile (blue Brinstar behind missile)"]
+
+    @staticmethod
+    def isSuit(item):
+        return item['Type'] in ['Gravity', 'Varia']
+
+    @staticmethod
+    def isSpeedScrew(item):
+        return item['Type'] in ['SpeedBooster', 'ScrewAttack']
+    
+    def suitsRestrictionsImpl(self, item, location):
+        if item["Type"] == "Gravity":
+            return ((not (location["Area"] == "Crateria" or location["Area"] == "Brinstar"))
+                    or location["Name"] == "X-Ray Scope" or location["Name"] == "Energy Tank, Waterway")
+        elif item["Type"] == "Varia":
+            return not (location["Area"] == "Crateria" or Randomizer.isInBlueBrinstar(location))
+
+        return True
+
+    def speedScrewRestrictionImpl(self, item, location):
+        if item["Type"] == "SpeedBooster":
+            return not Randomizer.isInBlueBrinstar(location)
+        if item["Type"] == "ScrewAttack":
+            return not (Randomizer.isInBlueBrinstar(location) or location["Area"] == "Crateria") # screw attack this early is a bit too easy. plus, with MinProgression setting, ScrewAttack always ends up at Bomb
+        return True
+
+    # check if an item can be placed at a location, given restrictions
+    # settings.
     def canPlaceAtLocation(self, item, location):
-        # check item class and location class, then for special items restrict some locations/areas
-        #
-        # item: dict of an item
-        # location: dict of a location
         if self.restrictions['MajorMinor'] == True:
             matchingClass = (location["Class"] == item["Class"])
             if matchingClass == False:
                 return False
 
-        isInBlueBrinstar = location["Name"] in ["Morphing Ball",
-                                                "Missile (blue Brinstar middle)",
-                                                "Energy Tank, Brinstar Ceiling",
-                                                "Power Bomb (blue Brinstar)",
-                                                "Missile (blue Brinstar bottom)",
-                                                "Missile (blue Brinstar top)",
-                                                "Missile (blue Brinstar behind missile)"]
+        if self.restrictions['Suits'] == True and Randomizer.isSuit(item):
+            return self.suitsRestrictionsImpl(item, location)
 
-        if self.restrictions['Suits'] == True:
-            if item["Type"] == "Gravity":
-                return ((not (location["Area"] == "Crateria" or location["Area"] == "Brinstar"))
-                        or location["Name"] == "X-Ray Scope" or location["Name"] == "Energy Tank, Waterway")
-            elif item["Type"] == "Varia":
-                return not (location["Area"] == "Crateria" or isInBlueBrinstar)
-        if self.restrictions['SpeedScrew'] == True:
-            if item["Type"] == "SpeedBooster":
-                return not isInBlueBrinstar
-            if item["Type"] == "ScrewAttack":
-                return not (isInBlueBrinstar or location["Area"] == "Crateria") # screw attack this early is a bit too easy. plus, with MinProgression setting, ScrewAttack always ends up at Bomb
+        if self.restrictions['SpeedScrew'] == True and Randomizer.isSpeedScrew(item):
+            return self.speedScrewRestrictionImpl(item, location)
 
         return True
 

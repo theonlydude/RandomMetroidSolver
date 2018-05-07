@@ -195,10 +195,6 @@ class RomReader:
         'gravityNoHeatProtectionPresent': {'address': 0x06e37d, 'value': 0x01}
     }
 
-    def __init__(self, romFileName=None, dictROM=None):
-        self.romFileName = romFileName
-        self.dictROM = dictROM
-
     def getItem(self, romFile, address, visibility):
         # return the hex code of the object at the given address
 
@@ -745,7 +741,7 @@ class RomLoaderSfc(RomLoader):
         print("RomLoaderSfc::init")
         super(RomLoaderSfc, self).__init__()
         self.romFileName = romFileName
-        self.romReader = RomReader(romFileName)
+        self.romReader = RomReader()
 
     def assignItems(self, locations):
         # update the itemName of the locations

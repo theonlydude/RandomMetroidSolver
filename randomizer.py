@@ -276,8 +276,6 @@ if __name__ == "__main__":
     else:
         if args.output is not None:
             # web service
-            data = {}
-
             romPatcher = RomPatcher()
             romPatcher.writeItemsLocs(itemLocs)
             romPatcher.applyIPSPatches(args.patches, args.noLayout, args.noGravHeat, args.area)
@@ -286,8 +284,8 @@ if __name__ == "__main__":
             romPatcher.writeRandoSettings(randoSettings)
             if args.area == True:
                 romPatcher.writeDoorConnections(doors)
-            data.update(romPatcher.romFile.data)
 
+            data = romPatcher.romFile.data
             fileName += '.sfc'
             data["fileName"] = fileName
 

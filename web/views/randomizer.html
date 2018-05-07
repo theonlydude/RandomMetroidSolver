@@ -13,6 +13,9 @@ extend 'layout.html'
 <link href={{=URL('static', 'css/bootstrap-tour.min.css')}} rel="stylesheet">
 <script src="{{=URL('static','js/bootstrap-tour.min.js')}}"></script>
 
+<script type="text/javascript" src="{{=URL('static', '/highslide/highslide.js')}}"></script>
+<link rel="stylesheet" type="text/css" href={{=URL("static", "/highslide/highslide.css")}} />
+
 <title>Super Metroid VARIA Randomizer</title>
 
 <style>
@@ -603,7 +606,7 @@ def displayCheckbox(id, defaultTrue=False):
 
 {{
 def displayCheckboxRandom(id, elems):
-  if (id in session.randomizer and session.randomizer[id] == 'on') or (id not in session.randomizer and defaultTrue == True):
+  if id in session.randomizer and session.randomizer[id] == 'on':
 }}
     {{=INPUT(_id=id, _name=id, _type="checkbox", _checked="checked", _value="on", _class="js-switch", _onchange="switchCheckbox('{}', {})".format(id, elems))}}
 {{

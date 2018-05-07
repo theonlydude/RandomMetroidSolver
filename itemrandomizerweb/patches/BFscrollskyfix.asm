@@ -28,64 +28,63 @@ lorom
 
 
 
-org $82E5D9
-
-JMP SKYFIX
+org $82E5D9			; hijack original BG code
+JMP SKYFIX			; with SKYFIX routine
 BACK:
 
-org $82F713
+org $82F713 			; free space in bank $82
 SKYFIX:
-	PHY
-	PHB
-	PEA $8300
-	PLB
-	PLB
-	LDY $078D		;current DDB pointer in bank $83
-	LDA $0007,y		;target Y screen
-	AND #$00FF
-	PHA
-	CMP #$0004
-	BNE SKIP
-	LDA $07DF
-	CMP #$C11B
-	BNE SKIP
-	PLA
-	ASL
-	ASL
-	ASL
-	CLC
-	ADC #$00B9
-	BRA STORE
+	PHY			; saves current Y (index) and B (data bank) registers
+	PHB			;
+	PEA $8300		; switches data bank to $83 (why two PLB calls here??)
+	PLB			;
+	PLB			; 
+	LDY $078D		; Door Data Bytes pointer in bank $83 for current room transition
+	LDA $0007,y		; target Y screen (DDB ptr + 7)
+	AND #$00FF		; clear high byte, since Y screen is on one byte
+	PHA			; saves target Y screen on the stack
+	CMP #$0004		; checks if Y screen is 04
+	BNE SKIP		; if not, goto SKIP
+	LDA $07DF		; loads ptr to "room FX2"
+	CMP #$C11B		; checks if it is C11B (scrolling sky ??)
+	BNE SKIP		; it not, goto SKIP
+	PLA			; retrieve Y screen from stack
+	ASL			; shift left Y screen 3 times (multiply by 8)
+	ASL			;
+	ASL			;
+	CLC			; clear carry
+	ADC #$00B9		; add B9 to Y with carry
+	BRA STORE		; goto STORE
 	
 SKIP:	
-	PLA
-	ASL
-	ASL
-	ASL
-	CLC
-	ADC #$00B1		;determine screen
+	PLA			; retrieve Y screen from stack
+	ASL			; shift left Y screen 3 times (multiply by 8)
+	ASL			;
+	ASL			;
+	CLC			; clear carry
+	ADC #$00B1		; add B1 to Y with carry: "determine screen" (original comment)
 STORE:
-	STA $12
-	PLB
-	PLY
-	INY
-	INY
-	LDA $07DF
-	LDA $0003,y
-	STA $05BE
-	LDA $0000,y
-	STA $05C0
-	LDA $0001,y
-	AND #$FF00
-	CLC
-	ADC $12
-	STA $05C1
-	LDA $0005,y
-	STA $05C3
-	LDA #$8000
-	TSB $05BC
-	WAIT:
-	BIT $05BC
+	STA $12			; store processed screen Y position to $7e0012 : "Commmon horizontal subpixel value or X coordinate"
+	PLB			; retrieve original data bank from stack
+	PLY			; retrieve original Y index from stack
+	INY			; IY += 2
+	INY			;
+	LDA $07DF		; loads ptr to "room FX2"...seems useless since A is overwritten the next instruction
+	LDA $0003,y		; gets what's at IY + 3
+	STA $05BE		; stores it at $7e05be : "Offset for VRAM. Used by 80:9632, when you enter a door"
+	LDA $0000,y		; gets what's at IY 
+	STA $05C0		; stores it at $7e05C0 : Source for VRAM update, including bank byte. Used by 80:9632, when you enter a door
+	LDA $0001,y		; gets what's at IY + 1
+	AND #$FF00		; clears low byte
+	CLC			; add A to previously processed screen Y position 
+	ADC $12			; 
+	STA $05C1		; store it to $7e05C1 : same as C0. Done in two passes because 24-bits address.
+	LDA $0005,y		; gets what's at IY+5
+	STA $05C3		; store it to $7e05C3 : "Size of VRAM update.  Used by 80:9632, when you enter a door"
+	LDA #$8000		; set highest bit to 1 at $7e05bc : write to VRAM flag 
+	TSB $05BC		; 
+WAIT:			
+	BIT $05BC		; loops until highest bit of $7e05bc is cleared : waits for VRAM to be written 
 	BMI WAIT
-	SEC
-	RTS
+	SEC			; Set Carry flag (why??)
+	RTS			; return

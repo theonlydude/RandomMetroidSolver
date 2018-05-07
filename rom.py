@@ -611,7 +611,7 @@ class RomPatcher:
         self.asmAddress = 0x7EB00
 
         for conn in doorConnections:
-            print('Writing door connection ' + conn['ID'])
+#            print('Writing door connection ' + conn['ID'])
             self.romFile.seek(0x10000+conn['DoorPtr'])
 
             # write room ptr

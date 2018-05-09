@@ -183,6 +183,8 @@ if __name__ == "__main__":
     seedCode = 'X'
     if restrictions['MajorMinor'] == False:
         seedCode = 'FX'
+    if args.area == True:
+        seedCode = 'A'+seedCode
 
     # output ROM name
     fileName = 'VARIA_Randomizer_' + seedCode + str(seed) + '_' + preset

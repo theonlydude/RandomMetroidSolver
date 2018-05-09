@@ -74,7 +74,7 @@ class RomType:
         fileName = os.path.basename(fileName)
 
         # VARIA ?
-        m = re.match(r'^VARIA_Randomizer_([F]?X)\d+.*$', fileName)
+        m = re.match(r'^VARIA_Randomizer_([A]?[F]?X)\d+.*$', fileName)
         if m is not None:
             return 'VARIA_' + m.group(1)
 
@@ -113,10 +113,12 @@ class RomType:
             if patches['gravityNoHeatProtectionPresent'] == False:
                 print("RomType::apply: Gravity heat protection")
                 RomPatches.ActivePatches.remove(RomPatches.NoGravityEnvProtection)
+            if romType.startswith('VARIA_A'):
+                RomPatches.ActivePatches += RomPatches.AreaSet
         elif romType == 'Dessy':
             RomPatches.ActivePatches = RomPatches.Dessy
 
-        return romType == 'Total_FX' or romType == 'Dessy' or romType == 'VARIA_FX'
+        return romType == 'Total_FX' or romType == 'Dessy' or romType == 'VARIA_FX' or romType == 'VARIA_AFX'
 
 class RomReader:
     # read the items in the rom

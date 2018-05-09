@@ -15,6 +15,7 @@ import tournament_locations
 from solver import Solver, ParamsLoader, DifficultyDisplayer, RomLoader
 
 romTypes = OrderedDict([('VARIA Classic', 'VARIA_X'), ('VARIA Full', 'VARIA_FX'),
+                        ('VARIA Area Classic', 'VARIA_AX'), ('VARIA Area Full', 'VARIA_AFX'),
                         ('Total Casual', 'Total_CX'), ('Total Normal', 'Total_X'),
                         ('Total Hard', 'Total_HX'), ('Total Tournament', 'Total_TX'),
                         ('Total Full', 'Total_FX'), ('Dessy Casual', 'Dessy'),
@@ -22,11 +23,15 @@ romTypes = OrderedDict([('VARIA Classic', 'VARIA_X'), ('VARIA Full', 'VARIA_FX')
                         ('Vanilla', 'Vanilla')])
 
 def guessRomType(filename):
-    match = re.findall(r'VARIA_Randomizer_[F]?X\d+', filename)
+    match = re.findall(r'VARIA_Randomizer_[A]?[F]?X\d+', filename)
     if len(match) > 0:
-        if match[0][18] == 'F':
+        if match[0][17] == 'A' and match[0][18] == 'F':
+            return "VARIA Area Full"
+        elif match[0][17] == 'A' and match[0][18] == 'X':
+            return "VARIA Area Classic"
+        elif match[0][17] == 'F':
             return "VARIA Full"
-        elif match[0][18] == 'X':
+        elif match[0][17] == 'X':
             return "VARIA Classic"
 
     match = re.findall(r'[CTFH]?X\d+', filename)
@@ -534,6 +539,7 @@ def randomizer():
         session.randomizer['randomParams'] = "off"
         session.randomizer['randomSuperFuns'] = "off"
         session.randomizer['progressionDifficulty'] = 'normal'
+        session.randomizer['areaRandomization'] = "off"
 
     # put standard presets first
     stdPresets = ['noob', 'regular', 'veteran', 'speedrunner']
@@ -612,7 +618,7 @@ def validateWebServiceParams(patchs, quantities, others, isJson=False):
         except:
             raiseHttp(400, "Wrong value for paramsFileTarget, must be a JSON string", isJson)
 
-    for check in ['useMaxDiff', 'spreadItems', 'fullRandomization', 'suitsRestriction', 'speedScrewRestriction', 'layoutPatches', 'noGravHeat', 'randomMinors', 'randomParams', 'randomSuperFuns']:
+    for check in ['useMaxDiff', 'spreadItems', 'fullRandomization', 'suitsRestriction', 'speedScrewRestriction', 'layoutPatches', 'noGravHeat', 'randomMinors', 'randomParams', 'randomSuperFuns', 'areaRandomization']:
         if check in others:
             if request.vars[check] not in ['on', 'off']:
                 raiseHttp(400, "Wrong value for {}: {}, authorized values: on/off".format(check, request.vars[check]), isJson)
@@ -634,7 +640,8 @@ def sessionWebService():
     others = ['paramsFile', 'minorQty', 'energyQty', 'useMaxDiff', 'maxDifficulty',
               'progressionSpeed', 'spreadItems', 'fullRandomization', 'suitsRestriction',
               'speedScrewRestriction', 'funCombat', 'funMovement', 'funSuits', 'layoutPatches',
-              'noGravHeat', 'randomMinors', 'randomParams', 'randomSuperFuns', 'progressionDifficulty']
+              'noGravHeat', 'randomMinors', 'randomParams', 'randomSuperFuns', 'progressionDifficulty',
+              'areaRandomization']
     validateWebServiceParams(patchs, quantities, others)
 
     if session.randomizer is None:
@@ -664,6 +671,7 @@ def sessionWebService():
     session.randomizer['randomParams'] = request.vars.randomParams
     session.randomizer['randomSuperFuns'] = request.vars.randomSuperFuns
     session.randomizer['progressionDifficulty'] = request.vars.progressionDifficulty
+    session.randomizer['areaRandomization'] = request.vars.areaRandomization
 
 def randomizerWebService():
     # web service to compute a new random (returns json string)
@@ -681,7 +689,7 @@ def randomizerWebService():
               'maxDifficulty', 'progressionSpeed', 'spreadItems', 'fullRandomization',
               'suitsRestriction', 'speedScrewRestriction', 'funCombat', 'funMovement', 'funSuits',
               'layoutPatches', 'noGravHeat', 'randomMinors', 'randomParams', 'randomSuperFuns',
-              'progressionDifficulty']
+              'progressionDifficulty', 'areaRandomization']
     validateWebServiceParams(patchs, quantities, others, isJson=True)
 
     # randomize
@@ -756,6 +764,9 @@ def randomizerWebService():
         params.append('--nolayout')
     if request.vars.noGravHeat == 'off':
         params.append('--nogravheat')
+
+    if request.vars.areaRandomization == 'on':
+        params.append('--area')
 
     print("before calling: {}".format(params))
     ret = subprocess.call(params)

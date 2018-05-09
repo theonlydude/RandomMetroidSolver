@@ -27,11 +27,18 @@ function changeRomType() {
   document.getElementById("romType").value = romType;
 }
 function guessRomType(filename) {
-  var re = /VARIA_Randomizer_[F]?X\d+/;
+  var re = /VARIA_Randomizer_[A]?[F]?X\d+/;
   var match = filename.match(re);
 
   if (match != null) {
     switch(match[0][17]) {
+      case 'A':
+        switch(match[0][18]) {
+          case 'F':
+            return "VARIA Area Full";
+          case 'X':
+            return "VARIA Area Classic";
+        }
       case 'F':
         return "VARIA Full";
       case 'X':

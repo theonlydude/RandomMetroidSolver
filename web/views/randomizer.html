@@ -131,7 +131,8 @@ function AjaxPresetCallCompleted(data) {
         randomMinors : document.getElementById("randomMinors").value,
         randomParams : document.getElementById("randomParams").value,
         randomSuperFuns : document.getElementById("randomSuperFuns").value,
-        progressionDifficulty : document.getElementById("progressionDifficulty").value
+        progressionDifficulty : document.getElementById("progressionDifficulty").value,
+        areaRandomization : document.getElementById("areaRandomization").value
       },
       dataType: "json",
       crossDomain: true
@@ -223,7 +224,8 @@ function AjaxRandomizerCallCompleted(data) {
         randomMinors : document.getElementById("randomMinors").value,
         randomParams : document.getElementById("randomParams").value,
         randomSuperFuns : document.getElementById("randomSuperFuns").value,
-        progressionDifficulty : document.getElementById("progressionDifficulty").value
+        progressionDifficulty : document.getElementById("progressionDifficulty").value,
+        areaRandomization : document.getElementById("areaRandomization").value
       },
       dataType: "html"
     });
@@ -683,7 +685,7 @@ def displayNumber(id, min, max, default, step="1"):
     <form id="mainform", name="mainform", onsubmit="doSubmit(); return false;">
       <div class="row">
 	<div class="column">
-	  <p>The Very Adaptive Randomizer of Items for Anyone (VARIA) randomizer will generate a Super Metroid ROM finishable using the known techniques of the chosen preset</p>
+	  <p>The Very Adaptive Randomizer of Items and Areas (VARIA) randomizer will generate a Super Metroid ROM finishable using the known techniques of the chosen preset</p>
           <table class="full">
             <colgroup><col class="half" /><col class="half" /></colgroup>
             <tr>

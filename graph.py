@@ -139,14 +139,14 @@ accessPoints = [
     }, shortName="C\\Landing"),
     AccessPoint('Lower Mushrooms Left', 'Crateria', {
         'Landing Site': lambda sm: sm.canPassTerminatorBombWall(False)
-    }, roomInfo = {'RoomPtr':0x79969, "area": 0x0},
+    }, roomInfo = {'RoomPtr':0x9969, "area": 0x0},
        exitInfo = {'DoorPtr':0x8c22, 'direction': 0x5, "cap": (0xe, 0x6), "bitFlag": 0x0,
                    "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
        entryInfo = {'SamusX':0x36, 'SamusY':0x88},
        shortName="C\\Mushrooms"),
     AccessPoint('Moat Right', 'Crateria', {
         'Keyhunter Room Bottom': lambda sm: sm.canPassMoatReverse()
-    }, roomInfo = {'RoomPtr':0x795ff, "area": 0x0},
+    }, roomInfo = {'RoomPtr':0x95ff, "area": 0x0},
        exitInfo = {'DoorPtr':0x8aea, 'direction': 0x4, "cap": (0x1, 0x46), "bitFlag": 0x0,
                    "screen": (0x0, 0x4), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
        entryInfo = {'SamusX':0x1cf, 'SamusY':0x88},
@@ -156,14 +156,14 @@ accessPoints = [
                                          sm.canPassMoat()),
         'Landing Site': lambda sm: sm.setSMBool(True)
     }, traverse = lambda sm: sm.canOpenYellowDoors(),
-       roomInfo = { 'RoomPtr':0x7948c, "area": 0x0 },
+       roomInfo = { 'RoomPtr':0x948c, "area": 0x0 },
        exitInfo = {'DoorPtr':0x8a42, 'direction': 0x6, "cap": (0x6, 0x2), "bitFlag": 0x0,
                    "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
        entryInfo = {'SamusX':0x14c, 'SamusY':0x2b8},
        shortName="C\\Keyhunters"),
     AccessPoint('Morph Ball Room Left', 'Crateria', {
         'Landing Site': lambda sm: sm.canUsePowerBombs()
-    }, roomInfo = { 'RoomPtr':0x799e9f, "area": 0x1},
+    }, roomInfo = { 'RoomPtr':0x9e9f, "area": 0x1},
        exitInfo = {'DoorPtr':0x8e9e, 'direction': 0x5, "cap": (0x1e, 0x6), "bitFlag": 0x0,
                    "screen": (0x1, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
        entryInfo = {'SamusX':0x34, 'SamusY':0x288},
@@ -174,7 +174,7 @@ accessPoints = [
                                                                sm.canDestroyBombWalls()), # pink
                                                         sm.haveItem('Morph'), # big pink
                                                         sm.canOpenGreenDoors()) # also implies first red door
-    }, roomInfo = {'RoomPtr':0x79938, "area": 0x0},
+    }, roomInfo = {'RoomPtr':0x9938, "area": 0x0},
        exitInfo = {'DoorPtr':0x8bfe, 'direction': 0x4, "cap": (0x1, 0x6), "bitFlag": 0x0,
                    "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
        entryInfo = {'SamusX':0xcc, 'SamusY':0x88},
@@ -185,7 +185,7 @@ accessPoints = [
                                                                    sm.canDestroyBombWalls()), # pink
                                                             sm.haveItem('Morph')) # big pink
     }, traverse=lambda sm: sm.wor(RomPatches.has(RomPatches.AreaRandoBlueDoors), sm.canOpenYellowDoors()),
-       roomInfo = {'RoomPtr':0x79e52, "area": 0x1 },
+       roomInfo = {'RoomPtr':0x9e52, "area": 0x1 },
        exitInfo = {'DoorPtr':0x8e86, 'direction': 0x4, "cap": (0x1, 0x26), "bitFlag": 0x0,
                    "screen": (0x0, 0x2), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
        entryInfo = {'SamusX':0x1c7, 'SamusY':0x88},
@@ -195,7 +195,7 @@ accessPoints = [
                                                        sm.wand(sm.canOpenRedDoors(), # can do the glitch with either missile or supers
                                                                sm.knowsGreenGateGlitch()))
     }, traverse=lambda sm: sm.wor(RomPatches.has(RomPatches.AreaRandoBlueDoors), sm.canOpenGreenDoors()),
-       roomInfo = {'RoomPtr':0x79fba, "area": 0x1 },
+       roomInfo = {'RoomPtr':0x9fba, "area": 0x1 },
        exitInfo = {'DoorPtr':0x8f0a, 'direction': 0x4, "cap": (0x1, 0x46), "bitFlag": 0x0,
                    "screen": (0x0, 0x4), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
        entryInfo = {'SamusX':0x5ce, 'SamusY':0x88},
@@ -205,14 +205,14 @@ accessPoints = [
         'Crab Maze Left': lambda sm: sm.wand(sm.canOpenGreenDoors(),
                                              sm.canPassSpongeBath(), # implies dead phantoon and pass bomb passages
                                              sm.canPassForgottenHighway(True))
-    }, roomInfo = {'RoomPtr':0x793fe, "area": 0x0},
+    }, roomInfo = {'RoomPtr':0x93fe, "area": 0x0},
        exitInfo = {'DoorPtr':0x89ca, 'direction': 0x5, "cap": (0x1e, 0x6), "bitFlag": 0x0,
                    "screen": (0x1, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
        entryInfo = {'SamusX':0x34, 'SamusY':0x488},
        shortName="W\\West Ocean"),
     AccessPoint('Crab Maze Left', 'WreckedShip', {
         'West Ocean Left': lambda sm: sm.canPassForgottenHighway(False)
-    }, roomInfo = {'RoomPtr':0x7957d, "area": 0x0},
+    }, roomInfo = {'RoomPtr':0x957d, "area": 0x0},
        exitInfo = {'DoorPtr':0x8aae, 'direction': 0x5, "cap": (0xe, 0x6), "bitFlag": 0x0,
                    "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
        entryInfo = {'SamusX':0x34, 'SamusY':0x188},
@@ -222,7 +222,7 @@ accessPoints = [
         'Three Muskateers Room Left': lambda sm: sm.wand(sm.canHellRun('LowerNorfair'),
                                                          sm.canPassLavaPit(),
                                                          sm.canPassWorstRoom())
-    }, roomInfo = {'RoomPtr':0x7af14, "area": 0x2},
+    }, roomInfo = {'RoomPtr':0xaf14, "area": 0x2},
        exitInfo = {'DoorPtr':0x96d2, 'direction': 0x4, "cap": (0x11, 0x26), "bitFlag": 0x0,
                    "screen": (0x1, 0x2), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
        entryInfo = {'SamusX':0x3d0, 'SamusY':0x88},
@@ -230,7 +230,7 @@ accessPoints = [
     AccessPoint('Three Muskateers Room Left', 'LowerNorfair', {
         'Lava Dive Right': lambda sm: sm.wand(sm.canHellRun('LowerNorfair'),
                                               sm.canPassAmphitheaterReverse()) # if this is OK, reverse lava pit will be too...
-    }, roomInfo = {'RoomPtr':0x7b656, "area": 0x2},
+    }, roomInfo = {'RoomPtr':0xb656, "area": 0x2},
        exitInfo = {'DoorPtr':0x9a4a, 'direction': 0x5, "cap": (0x5e, 0x6), "bitFlag": 0x0,
                    "screen": (0x5, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
        entryInfo = {'SamusX':0x134, 'SamusY':0x88},
@@ -239,7 +239,7 @@ accessPoints = [
     AccessPoint('Warehouse Entrance Left', 'Norfair', {
         'Single Chamber Top Right': lambda sm: sm.canAccessHeatedNorfairFromEntrance(),
         'Kronic Boost Room Bottom Left': lambda sm: sm.canAccessHeatedNorfairFromEntrance()
-    }, roomInfo = {'RoomPtr':0x7a6a1, "area": 0x1},
+    }, roomInfo = {'RoomPtr':0xa6a1, "area": 0x1},
        exitInfo = {'DoorPtr':0x922e, 'direction': 0x5, "cap": (0xe, 0x16), "bitFlag": 0x40,
                    "screen": (0x0, 0x1), "distanceToSpawn": 0x8000, "doorAsmPtr": 0xbdd1},
        entryInfo = {'SamusX':0x34, 'SamusY':0x88},
@@ -254,7 +254,7 @@ accessPoints = [
     }, traverse=lambda sm: sm.wand(sm.canDestroyBombWalls(),
                            sm.haveItem('Morph'),
                            RomPatches.has(RomPatches.SingleChamberNoCrumble)),
-        roomInfo = {'RoomPtr':0x7ad5e, "area": 0x2},
+        roomInfo = {'RoomPtr':0xad5e, "area": 0x2},
         exitInfo = {'DoorPtr':0x95fa, 'direction': 0x4, "cap": (0x11, 0x6), "bitFlag": 0x0,
                     "screen": (0x1, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
         entryInfo = {'SamusX':0x5cf, 'SamusY':0x88},
@@ -263,7 +263,7 @@ accessPoints = [
         'Single Chamber Top Right': lambda sm: sm.canHellRun('MainUpperNorfair'),
         'Warehouse Entrance Left': lambda sm: sm.canHellRun('MainUpperNorfair')
     }, traverse=lambda sm: sm.wor(RomPatches.has(RomPatches.AreaRandoBlueDoors), sm.canOpenYellowDoors()),
-       roomInfo = {'RoomPtr':0x7ae74, "area": 0x2},
+       roomInfo = {'RoomPtr':0xae74, "area": 0x2},
        exitInfo = {'DoorPtr':0x967e, 'direction': 0x5, "cap": (0x3e, 0x6), "bitFlag": 0x0,
                    "screen": (0x3, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
        entryInfo = {'SamusX':0x134, 'SamusY':0x288},
@@ -277,7 +277,7 @@ accessPoints = [
                                              sm.wor(sm.haveItem('Gravity'),
                                                     sm.wand(sm.knowsGravLessLevel3(),
                                                             sm.haveItem('HiJump')))) # for the sand pits
-    }, roomInfo = {'RoomPtr':0x7cfc9, "area": 0x4},
+    }, roomInfo = {'RoomPtr':0xcfc9, "area": 0x4},
        exitInfo = {'DoorPtr':0xa39c, 'direction': 0x6, "cap": (0x6, 0x2), "bitFlag": 0x0,
                    "screen": (0x0, 0x0), "distanceToSpawn": 0x170, "doorAsmPtr": 0x0000},
        entryInfo = {'SamusX':0x14a, 'SamusY':0x7a8},
@@ -292,7 +292,7 @@ accessPoints = [
                                                     sm.wand(sm.knowsGravLessLevel3(),
                                                             sm.haveItem('HiJump')))) # for the sand pits
     }, traverse = lambda sm: sm.haveItem('Morph'),
-       roomInfo = {'RoomPtr':0x7d21c, "area": 0x4},
+       roomInfo = {'RoomPtr':0xd21c, "area": 0x4},
        exitInfo = {'DoorPtr':0xa510, 'direction': 0x5,
                    "cap": (0x3e, 0x6), "screen": (0x3, 0x0), "bitFlag": 0x0,
                    "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
@@ -310,7 +310,7 @@ accessPoints = [
                                                                         sm.haveItem('HiJump'))), # for the sand pits
                                                          sm.canOpenGreenDoors(), # toilet door
                                                          sm.knowsGreenGateGlitch())),
-    }, roomInfo = {'RoomPtr':0x795a8, "area": 0x0},
+    }, roomInfo = {'RoomPtr':0x95a8, "area": 0x0},
        exitInfo = {'DoorPtr':0x8aa2, 'direction': 0x4, "cap": (0x1, 0x16), "bitFlag": 0x0,
                    "screen": (0x0, 0x1), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
        entryInfo = {'SamusX':0xd1, 'SamusY':0x88},
@@ -318,7 +318,7 @@ accessPoints = [
     AccessPoint('Red Fish Room Left', 'Maridia', {
         'Main Street Bottom': lambda sm: sm.haveItem('Morph') # just go down
     }, traverse=lambda sm: sm.haveItem('Morph'),
-       roomInfo = {'RoomPtr':0x7d104, "area": 0x4},
+       roomInfo = {'RoomPtr':0xd104, "area": 0x4},
        exitInfo = {'DoorPtr':0xa480, 'direction': 0x5, "cap": (0x2e, 0x36), "bitFlag": 0x40,
                    "screen": (0x2, 0x3), "distanceToSpawn": 0x8000, "doorAsmPtr": 0xe367},
        entryInfo = {'SamusX':0x34, 'SamusY':0x88},
@@ -334,7 +334,7 @@ accessPoints = [
                                                          sm.canClimbRedTower()),
         # go down
         'East Tunnel Right': lambda sm: sm.setSMBool(True)
-    }, roomInfo = {'RoomPtr':0x7a253, "area": 0x1},
+    }, roomInfo = {'RoomPtr':0xa253, "area": 0x1},
        exitInfo = {'DoorPtr':0x902a, 'direction': 0x5, "cap": (0x5e, 0x6), "bitFlag": 0x0,
                    "screen": (0x5, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
        entryInfo = {'SamusX':0x2f, 'SamusY':0x488},
@@ -350,7 +350,7 @@ accessPoints = [
                                                         sm.canOpenGreenDoors()),
                                                  sm.canOpenYellowDoors())
     }, traverse=lambda sm: sm.wand(sm.haveItem('Morph'), RomPatches.has(RomPatches.NoMaridiaGreenGates)),
-       roomInfo = {'RoomPtr':0x7a322, "area": 0x1},
+       roomInfo = {'RoomPtr':0xa322, "area": 0x1},
        exitInfo = {'DoorPtr':0x90c6, 'direction': 0x4, "cap": (0x1, 0x6), "bitFlag": 0x40,
                    "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0xbdaf},
        entryInfo = {'SamusX':0x2cd, 'SamusY':0x388},
@@ -358,7 +358,7 @@ accessPoints = [
     AccessPoint('Red Brinstar Elevator', 'RedBrinstar', {
         'Caterpillar Room Top Right': lambda sm: sm.setSMBool(True), # handled by room traverse function
         'Red Tower Top Left': lambda sm: sm.canOpenYellowDoors()
-    }, roomInfo = {'RoomPtr':0x7962a, "area": 0x0},
+    }, roomInfo = {'RoomPtr':0x962a, "area": 0x0},
        exitInfo = {'DoorPtr':0x8af6, 'direction': 0x7, "cap": (0x16, 0x2d), "bitFlag": 0x0,
                    "screen": (0x1, 0x2), "distanceToSpawn": 0x1c0, "doorAsmPtr": 0xb9f1},
        entryInfo = {'SamusX':0x80, 'SamusY':0x58},
@@ -369,7 +369,7 @@ accessPoints = [
                                                sm.wor(sm.haveItem('Gravity'),
                                                       sm.haveItem('HiJump'))),
         'Red Tower Top Left': lambda sm: sm.canClimbBottomRedTower()
-    }, roomInfo = {'RoomPtr':0x7cf80, "area": 0x4},
+    }, roomInfo = {'RoomPtr':0xcf80, "area": 0x4},
        exitInfo = {'DoorPtr':0xa384, 'direction': 0x4, "cap": (0x1, 0x6), "bitFlag": 0x40,
                    "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
        entryInfo = {'SamusX':0xce, 'SamusY':0x188},
@@ -378,7 +378,7 @@ accessPoints = [
         'East Tunnel Right': lambda sm: sm.wor(RomPatches.has(RomPatches.NoMaridiaGreenGates),
                                                sm.canOpenGreenDoors())
     }, traverse=lambda sm: RomPatches.has(RomPatches.NoMaridiaGreenGates),
-       roomInfo = {'RoomPtr':0x7cf80, "area": 0x4},
+       roomInfo = {'RoomPtr':0xcf80, "area": 0x4},
        exitInfo = {'DoorPtr':0xa390, 'direction': 0x4, "cap": (0x1, 0x16), "bitFlag": 0x0,
                    "screen": (0x0, 0x1), "distanceToSpawn": 0x8000, "doorAsmPtr": 0xe356},
        entryInfo = {'SamusX':0x3c6, 'SamusY':0x88},
@@ -386,7 +386,7 @@ accessPoints = [
     AccessPoint('Glass Tunnel Top', 'RedBrinstar', {
         'East Tunnel Right': lambda sm: sm.canUsePowerBombs()
     }, traverse=lambda sm: sm.canUsePowerBombs(),
-       roomInfo = {'RoomPtr':0x7cefb, "area": 0x4},
+       roomInfo = {'RoomPtr':0xcefb, "area": 0x4},
        exitInfo = {'DoorPtr':0xa330, 'direction': 0x7, "cap": (0x16, 0x7d), "bitFlag": 0x0,
                    "screen": (0x1, 0x7), "distanceToSpawn": 0x200, "doorAsmPtr": 0x0000},
        entryInfo = {'SamusX':0x81, 'SamusY':0x78},

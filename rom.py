@@ -1,5 +1,5 @@
 
-import re, struct, sys, random, os, json
+import re, struct, sys, random, os, json, copy
 from smbool import SMBool
 from itemrandomizerweb import Items
 from itemrandomizerweb.patches import patches
@@ -234,6 +234,43 @@ class RomReader:
             item = self.getItem(romFile, loc["Address"], loc["Visibility"])
             loc["itemName"] = self.items[item]["name"]
             #print("{}: {} => {}".format(loc["Name"], loc["Class"], loc["itemName"]))
+
+    def loadTransitions(self, romFile, biDir=True):
+        from graph import accessPoints
+
+        # store roomPtr -> roomPtr
+        transitionsPtr = {}
+        # store roomPtr -> room Name
+        rooms = {}
+        for accessPoint in accessPoints:
+            if accessPoint.Name == 'Landing Site':
+                continue
+            roomPtr = accessPoint.RoomInfo['RoomPtr']
+            rooms[roomPtr] = accessPoint.Name
+            transitionsPtr[roomPtr] = self.getTransition(romFile, accessPoint.ExitInfo['DoorPtr'])
+
+        # keep only one of the two transitions
+        if biDir == True:
+            # can't del keys in a dict while iterating it
+            transitionsCopy = copy.copy(transitionsPtr)
+            for key in transitionsCopy:
+                if key in transitionsPtr and transitionsPtr[key] in transitionsPtr:
+                    del transitionsPtr[transitionsPtr[key]]
+
+        transitions = []
+        for key in transitionsPtr:
+            transitions.append((rooms[key], rooms[transitionsPtr[key]]))
+
+        return transitions
+
+    def getTransition(self, romFile, doorPtr):
+        romFile.seek(0x10000 | doorPtr)
+
+        # room ptr is in two bytes
+        v1 = struct.unpack("B", romFile.read(1))
+        v2 = struct.unpack("B", romFile.read(1))
+
+        return v1[0] | (v2[0] << 8)
 
     def patchPresent(self, romFile, patchName):
         romFile.seek(self.patches[patchName]['address'])

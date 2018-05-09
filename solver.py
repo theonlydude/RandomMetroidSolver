@@ -57,7 +57,11 @@ class Solver:
                 Conf.romType = guessed
         print("ROM Type: {}, Patches present: {}".format(Conf.romType, romLoader.patches))
 
-        self.fullRando = RomType.apply(Conf.romType, romLoader.patches)
+        (self.fullRando, self.areaRando) = RomType.apply(Conf.romType, romLoader.patches)
+
+        if self.areaRando == True:
+            pass
+            #romLoader.
 
         if self.log.getEffectiveLevel() == logging.DEBUG:
             self.log.debug("Display items at locations:")

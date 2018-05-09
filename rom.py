@@ -95,7 +95,7 @@ class RomType:
 
         return None
 
-    # "applies" ROM patches, return true if full randomization, false if not
+    # "applies" ROM patches, return if full randomization and area randomization
     @staticmethod
     def apply(romType, patches):
         if romType.startswith('Total_'):
@@ -118,7 +118,8 @@ class RomType:
         elif romType == 'Dessy':
             RomPatches.ActivePatches = RomPatches.Dessy
 
-        return romType == 'Total_FX' or romType == 'Dessy' or romType == 'VARIA_FX' or romType == 'VARIA_AFX'
+        return ((romType == 'Total_FX' or romType == 'Dessy' or romType == 'VARIA_FX' or romType == 'VARIA_AFX'),
+                (romType == 'VARIA_AX' or romType == 'VARIA_AFX'))
 
 class RomReader:
     # read the items in the rom

@@ -238,33 +238,66 @@ class RomReader:
             loc["itemName"] = self.items[item]["name"]
             #print("{}: {} => {}".format(loc["Name"], loc["Class"], loc["itemName"]))
 
-    def loadTransitions(self, romFile, biDir=True):
+    def loadTransitions(self, romFile):
+        # return the transitions or None if vanilla transitions
         from graph import accessPoints
 
-        # store roomPtr -> roomPtr
-        transitionsPtr = {}
-        # store roomPtr -> room Name
-        rooms = {}
+        rooms = {
+            # (roomPtr, screen): name
+            (0x9969, (0x0, 0x0)): 'Lower Mushrooms Left',
+            (0x95ff, (0x1, 0x0)): 'Moat Right',
+            (0x948c, (0x1, 0x2)): 'Keyhunter Room Bottom',
+            (0x9e9f, (0x0, 0x2)): 'Morph Ball Room Left',
+            (0x9938, (0x0, 0x0)): 'Green Brinstar Elevator Right',
+            (0x9e52, (0x1, 0x0)): 'Green Hill Zone Top Right',
+            (0x9fba, (0x5, 0x0)): 'Noob Bridge Right',
+            (0x93fe, (0x0, 0x4)): 'West Ocean Left',
+            (0x957d, (0x0, 0x1)): 'Crab Maze Left',
+            (0xaf14, (0x3, 0x0)): 'Lava Dive Right',
+            (0xb656, (0x1, 0x0)): 'Three Muskateers Room Left',
+            (0xa6a1, (0x0, 0x0)): 'Warehouse Entrance Left',
+            (0xad5e, (0x5, 0x0)): 'Single Chamber Top Right',
+            (0xae74, (0x1, 0x2)): 'Kronic Boost Room Bottom Left',
+            (0xcfc9, (0x1, 0x7)): 'Main Street Bottom',
+            (0xd21c, (0x0, 0x1)): 'Crab Hole Bottom Left',
+            (0x95a8, (0x0, 0x0)): 'Le Coude Right',
+            (0xd104, (0x0, 0x0)): 'Red Fish Room Left',
+            (0xa253, (0x0, 0x4)): 'Red Tower Top Left',
+            (0xa322, (0x2, 0x3)): 'Caterpillar Room Top Right',
+            (0x962a, (0x0, 0x0)): 'Red Brinstar Elevator',
+            (0xcf80, (0x0, 0x1)): 'East Tunnel Right',
+            (0xcf80, (0x3, 0x0)): 'East Tunnel Top Right',
+            (0xcefb, (0x0, 0x0)): 'Glass Tunnel Top'
+        }
+
+        transitions = {}
         for accessPoint in accessPoints:
             if accessPoint.Name == 'Landing Site':
                 continue
-            roomPtr = accessPoint.RoomInfo['RoomPtr']
-            rooms[roomPtr] = accessPoint.Name
-            transitionsPtr[roomPtr] = self.getTransition(romFile, accessPoint.ExitInfo['DoorPtr'])
+            (destRoomPtr, destEntryScreen) = self.getTransition(romFile, accessPoint.ExitInfo['DoorPtr'])
+            destAPName = rooms[(destRoomPtr, destEntryScreen)]
+            transitions[accessPoint.Name] = destAPName
 
-        # keep only one of the two transitions
-        if biDir == True:
-            # can't del keys in a dict while iterating it
-            transitionsCopy = copy.copy(transitionsPtr)
-            for key in transitionsCopy:
-                if key in transitionsPtr and transitionsPtr[key] in transitionsPtr:
-                    del transitionsPtr[transitionsPtr[key]]
+        #print("transitions: {}".format(transitions))
 
-        transitions = []
-        for key in transitionsPtr:
-            transitions.append((rooms[key], rooms[transitionsPtr[key]]))
+        # remove bidirectionnal transitions
+        # can't del keys in a dict while iterating it
+        transitionsCopy = copy.copy(transitions)
+        for src in transitionsCopy:
+            if src in transitions:
+                dest = transitions[src]
+                if dest in transitions:
+                    if transitions[dest] == src:
+                        del transitions[dest]
 
-        return transitions
+        transitions = [(t, transitions[t]) for t in transitions]
+
+        # check if transitions are vanilla transitions
+        from graph import isVanillaTransitions
+        if isVanillaTransitions(transitions):
+            return None
+        else:
+            return transitions
 
     def getTransition(self, romFile, doorPtr):
         romFile.seek(0x10000 | doorPtr)
@@ -273,7 +306,12 @@ class RomReader:
         v1 = struct.unpack("B", romFile.read(1))
         v2 = struct.unpack("B", romFile.read(1))
 
-        return v1[0] | (v2[0] << 8)
+        romFile.seek((0x10000 | doorPtr) + 6)
+        sx = struct.unpack("B", romFile.read(1))
+        sy = struct.unpack("B", romFile.read(1))
+
+        return (v1[0] | (v2[0] << 8), (sx[0], sy[0]))
+        #return v1[0] | (v2[0] << 8)
 
     def patchPresent(self, romFile, patchName):
         romFile.seek(self.patches[patchName]['address'])
@@ -790,11 +828,16 @@ class RomLoaderSfc(RomLoader):
             for patch in self.patches:
                 self.patches[patch] = self.romReader.patchPresent(romFile, patch)
 
+            transitions = self.romReader.loadTransitions(romFile)
+
         self.locsItems = {}
         for loc in locations:
             self.locsItems[loc['Name']] = loc['itemName']
         for patch in self.patches:
             self.locsItems[patch] = self.patches[patch]
+
+        if transitions is not None:
+            self.locsItems['transitions'] = transitions
 
 class RomLoaderJson(RomLoader):
     # when called from the test suite and the website (when loading already uploaded roms converted to json)
@@ -824,8 +867,13 @@ class RomLoaderDict(RomLoader):
         for patch in self.patches:
             self.patches[patch] = self.romReader.patchPresent(fakeROM, patch)
 
+        transitions = self.romReader.loadTransitions(fakeROM)
+
         self.locsItems = {}
         for loc in locations:
             self.locsItems[loc['Name']] = loc['itemName']
         for patch in self.patches:
             self.locsItems[patch] = self.patches[patch]
+
+        if transitions is not None:
+            self.locsItems['transitions'] = transitions

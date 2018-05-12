@@ -49,19 +49,16 @@ class Solver:
         Bosses.reset()
 
     def loadRom(self, rom):
-        romLoader = RomLoader.factory(rom)
-        romLoader.assignItems(self.locations)
+        self.romLoader = RomLoader.factory(rom)
+        self.romLoader.assignItems(self.locations)
         if Conf.guessRomType == True and self.type == 'console':
             guessed = RomType.guess(rom)
             if guessed is not None:
                 Conf.romType = guessed
-        print("ROM Type: {}, Patches present: {}".format(Conf.romType, romLoader.patches))
 
-        (self.fullRando, self.areaRando) = RomType.apply(Conf.romType, romLoader.patches)
+        (self.fullRando, self.areaRando) = RomType.apply(Conf.romType, self.romLoader.patches)
 
-        if self.areaRando == True:
-            pass
-            #romLoader.
+        print("ROM Type: {}, Patches present: {}, Area Rando: {}".format(Conf.romType, self.romLoader.patches, (self.areaRando == True or 'transitions' in self.romLoader.locsItems)))
 
         if self.log.getEffectiveLevel() == logging.DEBUG:
             self.log.debug("Display items at locations:")

@@ -13,6 +13,9 @@ from smbool import SMBool
 from smboolmanager import SMBoolManager
 from helpers import Pickup, Bosses
 from rom import RomType, RomLoader
+from tournament_locations import locations as defaultLocations
+from graph_locations import locations as graphLocations
+from graph import AccessGraph
 
 class Solver:
     # given a rom and parameters returns the estimated difficulty
@@ -37,9 +40,6 @@ class Solver:
         # can be called from command line (console) or from web site (web)
         self.type = type
 
-        import tournament_locations
-        self.locations = tournament_locations.locations
-
         self.romLoaded = False
         if rom is not None:
             self.loadRom(rom)
@@ -49,16 +49,29 @@ class Solver:
         Bosses.reset()
 
     def loadRom(self, rom):
-        self.romLoader = RomLoader.factory(rom)
-        self.romLoader.assignItems(self.locations)
         if Conf.guessRomType == True and self.type == 'console':
             guessed = RomType.guess(rom)
             if guessed is not None:
                 Conf.romType = guessed
 
+        # TODO::the patches are not yet loaded in the romLoader, decouplate the locations/items assigment
+        # and reading the patchs/transitions info
+        self.romLoader = RomLoader.factory(rom)
         (self.fullRando, self.areaRando) = RomType.apply(Conf.romType, self.romLoader.patches)
 
-        print("ROM Type: {}, Patches present: {}, Area Rando: {}".format(Conf.romType, self.romLoader.patches, (self.areaRando == True or 'transitions' in self.romLoader.locsItems)))
+        if self.areaRando == True:
+            self.locations = graphLocations
+        else:
+            self.locations = defaultLocations
+
+        self.romLoader.assignItems(self.locations)
+
+        print("ROM Type: {}, Patches present: {}, Area Rando: {}".format(Conf.romType, self.romLoader.patches, (self.areaRando == True)))
+
+        if self.areaRando == True:
+            graphTransitions = self.romLoader.getTransitions()
+            self.areaGraph = AccessGraph(graphTransitions)
+            self.computeLocationsDifficulty = self.computeLocationsDifficultyGraph
 
         if self.log.getEffectiveLevel() == logging.DEBUG:
             self.log.debug("Display items at locations:")
@@ -187,8 +200,8 @@ class Solver:
             self.computeLocationsDifficulty(self.minorLocations)
 
             # keep only the available locations
-            majorAvailable = [loc for loc in self.majorLocations if loc["difficulty"].bool == True]
-            minorAvailable = [loc for loc in self.minorLocations if loc["difficulty"].bool == True]
+            majorAvailable = [loc for loc in self.majorLocations if 'difficulty' in loc and loc["difficulty"].bool == True]
+            minorAvailable = [loc for loc in self.minorLocations if 'difficulty' in loc and loc["difficulty"].bool == True]
 
             # check if we're stuck
             if len(majorAvailable) == 0 and len(minorAvailable) == 0:
@@ -270,6 +283,18 @@ class Solver:
             else:
                 loc['difficulty'] = loc['Available'](self.smbm)
 
+    def computeLocationsDifficultyGraph(self, locations):
+        availLocs = self.areaGraph.getAvailableLocations(locations, self.smbm, Conf.difficultyTarget)
+        # check post available functions too
+        for loc in availLocs:
+            if 'PostAvailable' in loc:
+                self.smbm.addItem(loc['itemName'])
+                postAvailable = loc['PostAvailable'](self.smbm)
+                self.smbm.removeItem(loc['itemName'])
+                loc['difficulty'] = self.smbm.wand(loc['difficulty'], postAvailable)
+
+        return availLocs
+
     def computeDifficultyValue(self):
         if not self.canEndGame().bool:
             # we have aborted
@@ -313,13 +338,13 @@ class Solver:
         print(message)
         print('{:>50} {:>13} {:>16} {:>14} {} {}'.format("Location Name", "Area", "Item", "Difficulty", "Knows used", "Items used"))
         print('-'*106)
-        for location in locations:
-            print('{:>50}: {:>12} {:>16} {:>14} {} {}'.format(location['Name'],
-                                                              location['Area'],
-                                                              location['itemName'],
-                                                              location['difficulty'].difficulty,
-                                                              sorted(location['difficulty'].knows),
-                                                              list(set(location['difficulty'].items))))
+        for loc in locations:
+            print('{:>50}: {:>12} {:>16} {:>14} {} {}'.format(loc['Name'],
+                                                              loc['Area'],
+                                                              loc['itemName'],
+                                                              loc['difficulty'].difficulty if 'difficulty' in loc else 'nc',
+                                                              sorted(loc['difficulty'].knows) if 'difficulty' in loc else 'nc',
+                                                              list(set(loc['difficulty'].items)) if 'difficulty' in loc else 'nc'))
 
     def collectMajor(self, loc):
         self.majorLocations.remove(loc)

@@ -812,6 +812,8 @@ class RomLoader(object):
         with open(fileName, 'w') as jsonFile:
             json.dump(self.locsItems, jsonFile)
 
+    def getTransitions(self):
+        return self.locsItems['transitions']
 
 class RomLoaderSfc(RomLoader):
     # standard usage (when calling from the command line)

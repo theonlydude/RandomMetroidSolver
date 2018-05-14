@@ -98,8 +98,9 @@ locations = [
         'Available': lambda sm: sm.wand(sm.wor(sm.canOpenRedDoors(), RomPatches.has(RomPatches.BlueBrinstarBlueDoor)),
                                         sm.wor(sm.knowsCeilingDBoost(),
                                                sm.canFly(),
-                                               sm.haveItem('HiJump'),
-                                               sm.haveItem('Ice')))
+                                               sm.wor(sm.haveItem('HiJump'),
+                                                      sm.haveItem('Ice'),
+                                                      sm.haveItem('SpeedBooster'))))
     },
     {
         'Area': "Brinstar",

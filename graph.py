@@ -83,7 +83,7 @@ class AccessGraph(object):
                 # diff = tFunc(smbm)
                 diff = smbm.eval(tFunc)
                 if diff.bool == True and diff.difficulty <= maxDiff:
-                    newAvailNodes[dst] = diff.difficulty
+                    newAvailNodes[dst] = diff
         return newAvailNodes
 
     # rootNode: starting AccessPoint instance
@@ -91,7 +91,7 @@ class AccessGraph(object):
     # maxDiff: difficulty limit
     # return available AccessPoint list
     def getAvailableAccessPoints(self, rootNode, smbm, maxDiff):
-        availNodes = { rootNode : 0 }
+        availNodes = { rootNode : SMBool(True, 0) }
         newAvailNodes = availNodes
         while len(newAvailNodes) > 0:
             newAvailNodes = self.getNewAvailNodes(availNodes, newAvailNodes, smbm, maxDiff)
@@ -118,7 +118,10 @@ class AccessGraph(object):
                 tdiff = smbm.eval(tFunc)
                 if tdiff.bool == True and tdiff.difficulty <= maxDiff:
                     diff = smbm.eval(loc['Available'])
-                    loc['difficulty'] = SMBool(diff.bool, max(tdiff.difficulty, diff.difficulty, apDiff))
+                    loc['difficulty'] = SMBool(diff.bool,
+                                               difficulty=max(tdiff.difficulty, diff.difficulty, apDiff.difficulty),
+                                               knows=tdiff.knows + diff.knows + apDiff.knows,
+                                               items=tdiff.items + diff.items + apDiff.items)
                     if diff.bool == True and diff.difficulty <= maxDiff:
                         availLocs.append(loc)
                         break

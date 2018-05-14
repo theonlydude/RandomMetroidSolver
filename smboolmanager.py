@@ -60,10 +60,8 @@ class SMBoolManager(object):
             self.addItem(item)
         self.resetSMBool()
         func(self)
-        if item is None:
-            ret = self.getSMBool()
-        else:
-            ret = self.getSMBoolCopy()
+        ret = self.getSMBoolCopy()
+        if item is not None:
             self.removeItem(item)
         return ret
 

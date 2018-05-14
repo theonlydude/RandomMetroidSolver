@@ -6,7 +6,7 @@ import sys, math, os, json, logging, argparse
 
 # the difficulties for each technics
 from parameters import Conf, Knows, Settings, isKnows, isConf, isSettings
-from parameters import easy, medium, hard, harder, hardcore, mania, diff2text
+from parameters import easy, medium, hard, harder, hardcore, mania, god, samus, diff2text
 
 # the helper functions
 from smbool import SMBool
@@ -27,11 +27,6 @@ class Solver:
             logging.basicConfig(level=logging.INFO)
         self.log = logging.getLogger('Solver')
 
-        self.smbm = SMBoolManager.factory('all', cache=False)
-
-        if params is not None:
-            for paramsFileName in params:
-                self.loadParams(paramsFileName)
         self.firstLogFile = None
         if firstItemsLog is not None:
             self.firstLogFile = open(firstItemsLog, 'w')
@@ -43,6 +38,10 @@ class Solver:
         self.romLoaded = False
         if rom is not None:
             self.loadRom(rom)
+
+        if params is not None:
+            for paramsFileName in params:
+                self.loadParams(paramsFileName)
 
         self.pickup = Pickup(Conf.majorsPickup, Conf.minorsPickup)
 
@@ -64,6 +63,7 @@ class Solver:
         else:
             self.locations = defaultLocations
 
+        self.smbm = SMBoolManager.factory('all', cache=False, graph=self.areaRando)
         self.romLoader.assignItems(self.locations)
 
         print("ROM Type: {}, Patches present: {}, Area Rando: {}".format(Conf.romType, self.romLoader.patches, (self.areaRando == True)))
@@ -284,7 +284,7 @@ class Solver:
                 loc['difficulty'] = loc['Available'](self.smbm)
 
     def computeLocationsDifficultyGraph(self, locations):
-        availLocs = self.areaGraph.getAvailableLocations(locations, self.smbm, Conf.difficultyTarget)
+        availLocs = self.areaGraph.getAvailableLocations(locations, self.smbm, samus)
         # check post available functions too
         for loc in availLocs:
             if 'PostAvailable' in loc:
@@ -292,6 +292,8 @@ class Solver:
                 postAvailable = loc['PostAvailable'](self.smbm)
                 self.smbm.removeItem(loc['itemName'])
                 loc['difficulty'] = self.smbm.wand(loc['difficulty'], postAvailable)
+
+        #print("available locs: {}".format([loc['Name'] for loc in availLocs]))
 
         return availLocs
 

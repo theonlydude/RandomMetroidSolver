@@ -419,3 +419,14 @@ class SMBMAll(SMBoolManager):
     def internal2SMBool(self, internal):
         # internal is a smbool
         return internal
+
+    def eval(self, func, item=None):
+        if item is not None:
+            self.addItem(item)
+
+        ret = func(self)
+
+        if item is not None:
+            self.removeItem(item)
+
+        return ret

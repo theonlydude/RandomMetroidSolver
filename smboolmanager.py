@@ -362,14 +362,10 @@ class SMBMAll(SMBoolManager):
 
     def wor2(self, a, b, difficulty=0):
         if a.bool is True and b.bool is True:
-            if a.difficulty < b.difficulty:
+            if a.difficulty <= b.difficulty:
                 return SMBool(True, a.difficulty + difficulty, a.knows, a.items)
-            elif a.difficulty > b.difficulty:
-                return SMBool(True, b.difficulty + difficulty, b.knows, b.items)
             else:
-                # in case of egality we return both knows
-                return SMBool(True, a.difficulty + difficulty,
-                              a.knows + b.knows, a.items + b.items)
+                return SMBool(True, b.difficulty + difficulty, b.knows, b.items)
         elif a.bool is True:
             return SMBool(True, a.difficulty + difficulty, a.knows, a.items)
         elif b.bool is True:

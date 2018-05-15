@@ -103,6 +103,8 @@ class Solver:
             self.log.error("rom not loaded")
             return
 
+        self.lastLoc = 'Landing Site'
+
         (difficulty, itemsOk) = self.computeDifficulty()
         if self.firstLogFile is not None:
             self.firstLogFile.close()
@@ -284,7 +286,7 @@ class Solver:
                 loc['difficulty'] = loc['Available'](self.smbm)
 
     def computeLocationsDifficultyGraph(self, locations):
-        availLocs = self.areaGraph.getAvailableLocations(locations, self.smbm, samus)
+        availLocs = self.areaGraph.getAvailableLocations(locations, self.smbm, samus, self.lastLoc)
         # check post available functions too
         for loc in availLocs:
             if 'PostAvailable' in loc:
@@ -395,6 +397,10 @@ class Solver:
 
         # sort items by most frequent first
         self.sortItemsByUsage()
+
+        # last loc is used as root node for the graph
+        if 'AccessFrom' in loc:
+            self.lastLoc = list(loc['AccessFrom'])[0]
 
         return loc['Area']
 

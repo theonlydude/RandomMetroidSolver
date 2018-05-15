@@ -400,7 +400,7 @@ accessPoints = [
        shortName="B\\Top East Tunnel"),
     AccessPoint('Glass Tunnel Top', 'RedBrinstar', {
         'East Tunnel Right': lambda sm: sm.canUsePowerBombs()
-    }, traverse=lambda sm: sm.canUsePowerBombs(),
+    }, traverse=lambda sm: sm.wand(sm.haveItem('HiJump'), sm.canUsePowerBombs()),
        roomInfo = {'RoomPtr':0xcefb, "area": 0x4},
        exitInfo = {'DoorPtr':0xa330, 'direction': 0x7, "cap": (0x16, 0x7d), "bitFlag": 0x0,
                    "screen": (0x1, 0x7), "distanceToSpawn": 0x200, "doorAsmPtr": 0x0000},

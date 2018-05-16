@@ -236,7 +236,7 @@ class RomReader:
         for loc in locations:
             item = self.getItem(romFile, loc["Address"], loc["Visibility"])
             loc["itemName"] = self.items[item]["name"]
-            #print("{}: {} => {}".format(loc["Name"], loc["Class"], loc["itemName"]))
+            #print("name: {} class: {} address: {} visibility: {} item: {}".format(loc["Name"], loc["Class"], loc['Address'], loc['Visibility'], item))
 
     def loadTransitions(self, romFile):
         # return the transitions or None if vanilla transitions
@@ -471,7 +471,7 @@ class RomPatcher:
         self.romFile.write(seedInfoArr2[1])
 
     def writeRandoSettings(self, settings):
-        address = 0x2738C0
+        address = 0x2736C0
         value = "%.1f" % settings.qty['missile']
         line = " MISSILE PROBABILITY        %s " % value
         self.writeCreditsStringBig(address, line, top=True)
@@ -751,6 +751,26 @@ class RomPatcher:
                     self.romFile.write(struct.pack('B', byte))
 
                 self.asmAddress += 0x20
+
+    def writeTransitionsCredits(transitions):
+        address = 0x273CC0
+        lineLength = 32
+
+        for (src, dest) in transitions:
+            src = src.ShortName
+            dest = dest.ShortName
+            # line is 32 chars long, need a space between the two access points
+            length = len(src) + len(dest) + len(" ")
+            if length > lineLength:
+                self.writeCreditsString(address, 0x04, src)
+                address += 0x40
+
+                dest = " "+dest
+                self.writeCreditsString(address, 0x04, dest.rjust(lineLength))
+                address += 0x40
+            else:
+                self.writeCreditsString(address, 0x04, src+" "*(lineLength-(len(src)+len(dest)))+dest)
+                address += 0x40
 
 class FakeROM:
     # to have the same code for real rom and the webservice

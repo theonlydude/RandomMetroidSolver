@@ -6,11 +6,14 @@ lorom
 ;it works fine for the landing site, but I made this so long ago that I don't know if it worked for rooms with ocean sky too, so be sure to try it on a backup
 ;before applying it to your hack!
 
-;8FB7AE:	bg_data room 793FE
-;Landing site: FX2: C116, BG_data: B76A
+;Landing site (791F8): FX: 8380C0, FX2: 8FC116, BG_data: 8FB76A
+;West Ocean (793FE): FX: 838112, FX2: 8FC11B, BG_data: 8FB7AE
+;Small room with two doors (7968F): FX: 83818C, FX2: 8FC11B, BG_data: 8FB80A, Y screen 0 only
+;East Ocean (794FD): FX: 838144, FX2: 8FC11B, BG_data: 8FB7F2
 
+;;; FLO: This seems to be the original BG tables...landing site only???
 ;0E 00 FE 88 80 B1 8A 00 48 00 08	when landing with the ship, Y screen 0
-;0E 00 B2 89 80 B9 8A 00 4C 00 08	top right door, Y screen 1, note 4C
+;0E 00 B2 89 80 B9 8A 00 4C 00 08	top right door, Y screen 1, note 4C ; FLO : this one does not work, what is this "note 4C"??
 ;0E 00 46 89 80 C1 8A 00 48 00 08	top left door, Y screen 2
 ;0E 00 6A 89 80 D1 8A 00 48 00 08	bottom left door, Y screen 4
 ;0E 00 C6 8A 80 D1 8A 00 48 00 08	bottom right door, Y screen 4
@@ -19,14 +22,29 @@ lorom
 ;Scrolling sky with land: 88AD9C
 ;Scrolling sky with water: 88ADA6
 
+;;; $88:AD9C             dx B180, B980, C180, C980, D180
+;;; $88:ADA6             dx B180, B980, C180, C980, D980, E180 ; No D1 here
+
+;;; West Ocean :
+;;; Left+bottom right doors, Y screen 4 (works)
+;;; Gravity Exit door : Y screen 3 (does not work)
+;;; Bowling alley Reserve tank check exit door: Y screen 1 (does not work)
+;;; Attic exit door : Y screen 0 (works)
+;;; Bowling alley path exit : Y screen 2 (works)
+
+;;; Small room wth 2 doors (fakely part of West Ocean):
+;;; Bowling alley path exit : Y screen 0 (works)
+
+;;; East Ocean:
+;;; both doors: Y screen 4 (works)
+
+;;; Landin site
 ;Byte B1: Screen Y 00
 ;Byte B9: Screen Y 01
 ;Byte C1: Screen Y 02
 ;Byte C9: Screen Y 03
 ;Byte D1: Screen Y 04
 ;Byte D9: Screen Y 05
-
-
 
 org $82E5D9			; hijack original BG code
 JMP SKYFIX			; with SKYFIX routine
@@ -36,7 +54,7 @@ org $82F713 			; free space in bank $82
 SKYFIX:
 	PHY			; saves current Y (index) and B (data bank) registers
 	PHB			;
-	PEA $8300		; switches data bank to $83 (why two PLB calls here??)
+	PEA $8300		; switches data bank to $83 (two PLB calls because B is 8 bits and a 16-bits value has been pushed)
 	PLB			;
 	PLB			; 
 	LDY $078D		; Door Data Bytes pointer in bank $83 for current room transition
@@ -46,16 +64,15 @@ SKYFIX:
 	CMP #$0004		; checks if Y screen is 04
 	BNE SKIP		; if not, goto SKIP
 	LDA $07DF		; loads ptr to "room FX2"
-	CMP #$C11B		; checks if it is C11B (scrolling sky ??)
+	CMP #$C11B		; checks if it is C11B: Ocean. Y=4+Ocean BG: this check is for both Oceans bottom doors (I suspect East Ocean has 4 screens of useless rock at the top just for the doors to be at the same coords as west ocean ones...)
 	BNE SKIP		; it not, goto SKIP
 	PLA			; retrieve Y screen from stack
 	ASL			; shift left Y screen 3 times (multiply by 8)
 	ASL			;
 	ASL			;
 	CLC			; clear carry
-	ADC #$00B9		; add B9 to Y with carry
+	ADC #$00B9		; add B9 to Y with carry => D9 (since Y is 4)
 	BRA STORE		; goto STORE
-	
 SKIP:	
 	PLA			; retrieve Y screen from stack
 	ASL			; shift left Y screen 3 times (multiply by 8)
@@ -86,5 +103,5 @@ STORE:
 WAIT:			
 	BIT $05BC		; loops until highest bit of $7e05bc is cleared : waits for VRAM to be written 
 	BMI WAIT
-	SEC			; Set Carry flag (why??)
+	SEC			; Set Carry flag for BG data code to properly detect the last BG data routine (this one) has been executed
 	RTS			; return

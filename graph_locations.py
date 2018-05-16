@@ -198,7 +198,8 @@ locations = [
         'East Tunnel Right': lambda sm: sm.setSMBool(True)
     },
     'Available': lambda sm: sm.wand(sm.canOpenGreenDoors(),
-                                    sm.wor(sm.canPassBombPassages(), RomPatches.has(RomPatches.SpazerShotBlock)))
+                                    sm.wor(sm.canPassBombPassages(),
+                                           sm.wand(sm.haveItem('Morph'), RomPatches.has(RomPatches.SpazerShotBlock))))
 },
 {
     'Area': "Brinstar",
@@ -273,7 +274,7 @@ locations = [
     },
     'Available': lambda sm: sm.canOpenRedDoors(),
     'PostAvailable': lambda sm: sm.wor(sm.canPassBombPassages(),
-                                       RomPatches.has(RomPatches.HiJumpShotBlock))
+                                       sm.wand(sm.haveItem('Morph'), RomPatches.has(RomPatches.HiJumpShotBlock)))
 },
 {
     'Area': "Norfair",

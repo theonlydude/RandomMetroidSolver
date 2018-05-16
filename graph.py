@@ -41,6 +41,7 @@ class AccessGraph(object):
     def __init__(self, transitions, bidir=True, dotFile=None):
         self.accessPoints = {}
         self.InterAreaTransitions = []
+        self.bidir = bidir
         for ap in accessPoints:
             self.accessPoints[ap.Name] = ap
         for srcName, dstName in transitions:
@@ -55,9 +56,20 @@ class AccessGraph(object):
     def toDot(self, dotFile):
         with open(dotFile, "w") as f:
             f.write("digraph {\n")
-            for name,ap in self.accessPoints.iteritems():
-                for t in ap.transitions:
-                    f.write('"' + str(ap) + '" -> "' + str(self.accessPoints[t]) + '"\n')
+            f.write('size="30,30!";\n')
+            f.write('rankdir=LR;\n')
+            f.write('ranksep=2.2;\n')
+            f.write('overlap=scale;\n')
+            f.write('edge [dir="both",arrowhead="box",arrowtail="box",arrowsize=0.5,fontsize=7,style=dotted];\n')
+            f.write('node [shape="box",fontsize=10];\n')
+            for area in set([ap.GraphArea for ap in self.accessPoints.values()]):
+                f.write(area + ";\n") # TODO area long name and color
+            drawn=[]
+            for src, dst in self.InterAreaTransitions:
+                if self.bidir is True and src.Name in drawn:
+                    continue
+                f.write('%s -> %s [taillabel="%s",headlabel="%s"];\n' % (src.GraphArea,dst.GraphArea,src.Name,dst.Name)) # TODO arrow color
+                drawn += [src.Name,dst.Name]
             f.write("}\n")
 
     def addTransition(self, srcName, dstName, both=True):
@@ -120,8 +132,8 @@ class AccessGraph(object):
                     diff = smbm.eval(loc['Available'])
                     loc['difficulty'] = SMBool(diff.bool,
                                                difficulty=max(tdiff.difficulty, diff.difficulty, apDiff.difficulty),
-                                               knows=tdiff.knows + diff.knows + apDiff.knows,
-                                               items=tdiff.items + diff.items + apDiff.items)
+                                               knows=list(set(tdiff.knows + diff.knows + apDiff.knows)),
+                                               items=list(set(tdiff.items + diff.items + apDiff.items)))
                     if diff.bool == True and diff.difficulty <= maxDiff:
                         availLocs.append(loc)
                         break
@@ -388,7 +400,7 @@ accessPoints = [
        shortName="B\\Top East Tunnel"),
     AccessPoint('Glass Tunnel Top', 'RedBrinstar', {
         'East Tunnel Right': lambda sm: sm.canUsePowerBombs()
-    }, traverse=lambda sm: sm.canUsePowerBombs(),
+    }, traverse=lambda sm: sm.wand(sm.haveItem('HiJump'), sm.canUsePowerBombs()),
        roomInfo = {'RoomPtr':0xcefb, "area": 0x4},
        exitInfo = {'DoorPtr':0xa330, 'direction': 0x7, "cap": (0x16, 0x7d), "bitFlag": 0x0,
                    "screen": (0x1, 0x7), "distanceToSpawn": 0x200, "doorAsmPtr": 0x0000},

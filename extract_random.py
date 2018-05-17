@@ -1,7 +1,7 @@
-#!/usr/bin/python3
+#!/usr/bin/python
 
 from rom import RomLoader
-from tournament_locations import locations
+from graph_locations import locations
 import os.path
 import sys
 

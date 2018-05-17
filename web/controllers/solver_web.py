@@ -11,7 +11,7 @@ from collections import OrderedDict
 # to solve the rom
 from parameters import easy, medium, hard, harder, hardcore, mania, Conf, Knows, Settings, isKnows
 from parameters import diff2text, text2diff
-import tournament_locations
+from graph_locations import locations as graphLocations
 from solver import Solver, ParamsLoader, DifficultyDisplayer, RomLoader
 
 romTypes = OrderedDict([('VARIA Classic', 'VARIA_X'), ('VARIA Full', 'VARIA_FX'),
@@ -145,7 +145,7 @@ def solver():
                     romDict[int(address)] = tempRomJson[address]
 
                 romLoader = RomLoader.factory(romDict)
-                romLoader.assignItems(tournament_locations.locations)
+                romLoader.assignItems(graphLocations)
                 romLoader.dump(jsonRomFileName)
 
                 session.romFile = base
@@ -180,7 +180,7 @@ def solver():
                         tempRom.write(uploadFileContent.read())
 
                     romLoader = RomLoader.factory(tempRomFile)
-                    romLoader.assignItems(tournament_locations.locations)
+                    romLoader.assignItems(graphLocations)
                     romLoader.dump(jsonRomFileName)
 
                     os.remove(tempRomFile)

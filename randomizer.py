@@ -5,7 +5,6 @@ import argparse, random, os.path, json, sys, shutil
 from itemrandomizerweb import Items
 from itemrandomizerweb.Randomizer import Randomizer, RandoSettings
 from itemrandomizerweb.AreaRandomizer import AreaRandomizer
-from tournament_locations import locations as defaultLocations
 from graph_locations import locations as graphLocations
 from graph import vanillaTransitions, getDoorConnections
 from parameters import Knows, easy, medium, hard, harder, hardcore, mania, text2diff, diff2text
@@ -27,11 +26,11 @@ if __name__ == "__main__":
     parser.add_argument('--param', '-p', help="the input parameters", nargs='+',
                         default=None, dest='paramsFileName')
     parser.add_argument('--dir',
-                        help="output directory",
+                        help="output directory for ROM and dot files",
                         dest='directory', nargs='?', default='.')
-    parser.add_argument('--graph',
-                        help="experimental graph mode", action='store_true',
-                        dest='graph', default=False)
+    parser.add_argument('--dot',
+                        help="generate dot file with area graph",
+                        action='store_true',dest='dot', default=False)
     parser.add_argument('--area',
                         help="experimental area mode", action='store_true',
                         dest='area', default=False)
@@ -117,6 +116,12 @@ if __name__ == "__main__":
 
     # parse args
     args = parser.parse_args()
+
+    # check that rom or output parameter is set
+    if args.rom == None and args.output == None:
+        print("missing --rom or --output parameters")
+        sys.exit(-1)
+
     # if diff preset given, load it
     if args.paramsFileName is not None:
         ParamsLoader.factory(args.paramsFileName[0]).load()
@@ -234,13 +239,15 @@ if __name__ == "__main__":
     # print("superFun = " + str(args.superFun))
     randoSettings = RandoSettings(maxDifficulty, progSpeed, progDiff, qty, restrictions, args.superFun)
     if args.area == True:
-        randomizer = AreaRandomizer(graphLocations, randoSettings, seedName, dotDir=args.directory)
+        if args.dot == True:
+            dotDir = args.directory
+        else:
+            dotDir = None
+        randomizer = AreaRandomizer(graphLocations, randoSettings, seedName, dotDir=dotDir)
         RomPatches.ActivePatches += RomPatches.AreaSet
         doors = getDoorConnections(randomizer.areaGraph)
-    elif args.graph == True:
-        randomizer = Randomizer(graphLocations, randoSettings, seedName, vanillaTransitions)
     else:
-        randomizer = Randomizer(defaultLocations, randoSettings, seedName)
+        randomizer = Randomizer(graphLocations, randoSettings, seedName, vanillaTransitions)
     itemLocs = randomizer.generateItems()
     if itemLocs is None:
         print("Can't generate " + fileName + " with the given parameters, try increasing the difficulty target.")
@@ -272,33 +279,31 @@ if __name__ == "__main__":
             if args.area == True:
                 romPatcher.writeDoorConnections(doors)
                 romPatcher.writeTransitionsCredits(randomizer.areaGraph.InterAreaTransitions)
+            else:
+                romPatcher.writeTransitionsCredits(vanillaTransitions)
             romPatcher.end()
         except Exception as e:
             print("Error patching {}. Is {} a valid ROM ? ({})".format(fileName, romFileName, e))
             sys.exit(-1)
-    else:
-        if args.output is not None:
-            # web service
-            romPatcher = RomPatcher()
-            romPatcher.writeItemsLocs(itemLocs)
-            romPatcher.applyIPSPatches(args.patches, args.noLayout, args.noGravHeat, args.area)
-            romPatcher.writeSeed(seed)
-            romPatcher.writeSpoiler(itemLocs)
-            romPatcher.writeRandoSettings(randoSettings)
-            if args.area == True:
-                romPatcher.writeDoorConnections(doors)
-                romPatcher.writeTransitionsCredits(randomizer.areaGraph.InterAreaTransitions)
-
-            data = romPatcher.romFile.data
-            fileName += '.sfc'
-            data["fileName"] = fileName
-
-            with open(args.output, 'w') as jsonFile:
-                json.dump(data, jsonFile)
+    elif args.output is not None:
+        # web service
+        romPatcher = RomPatcher()
+        romPatcher.writeItemsLocs(itemLocs)
+        romPatcher.applyIPSPatches(args.patches, args.noLayout, args.noGravHeat, args.area)
+        romPatcher.writeSeed(seed)
+        romPatcher.writeSpoiler(itemLocs)
+        romPatcher.writeRandoSettings(randoSettings)
+        if args.area == True:
+            romPatcher.writeDoorConnections(doors)
+            romPatcher.writeTransitionsCredits(randomizer.areaGraph.InterAreaTransitions)
         else:
-            # rom json
-            fileName += '.json'
-            with open(fileName, 'w') as jsonFile:
-                json.dump(locsItems, jsonFile)
+            romPatcher.writeTransitionsCredits(vanillaTransitions)
+
+        data = romPatcher.romFile.data
+        fileName += '.sfc'
+        data["fileName"] = fileName
+
+        with open(args.output, 'w') as jsonFile:
+            json.dump(data, jsonFile)
 
     print("Rom generated: {}".format(fileName))

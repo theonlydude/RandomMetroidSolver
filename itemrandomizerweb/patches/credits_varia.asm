@@ -967,8 +967,6 @@ script:
     dw {draw}, {row}*144
     dw {draw}, {blank}
     dw {draw}, {blank}
-    // Set scroll speed to 2 frames per pixel
-    dw {speed}, $0002
     dw {draw}, {row}*145 // RANDOMIZER PARAMETERS
     dw {draw}, {blank}
     dw {draw}, {row}*146 // 0x2736C0
@@ -994,6 +992,8 @@ script:
     dw {draw}, {blank}
     dw {draw}, {row}*158
     dw {draw}, {blank}
+    // change scroll speed
+    dw {speed}, $0004
     dw {draw}, {row}*159
     dw {draw}, {blank}
     dw {draw}, {row}*160
@@ -1005,7 +1005,7 @@ script:
     dw {draw}, {blank}
     dw {draw}, {row}*163 // TRANSITIONS
     dw {draw}, {blank}
-    dw {draw}, {row}*164 // 0x273CC0
+    dw {draw}, {row}*164 // 0x273B40
     dw {draw}, {blank}
     dw {draw}, {row}*165
     dw {draw}, {blank}

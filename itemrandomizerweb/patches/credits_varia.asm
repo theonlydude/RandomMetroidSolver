@@ -971,7 +971,7 @@ script:
     dw {speed}, $0002
     dw {draw}, {row}*145 // RANDOMIZER PARAMETERS
     dw {draw}, {blank}
-    dw {draw}, {row}*146
+    dw {draw}, {row}*146 // 0x2736C0
     dw {draw}, {row}*147
     dw {draw}, {blank}
     dw {draw}, {row}*148
@@ -982,6 +982,7 @@ script:
     dw {draw}, {blank}
     dw {draw}, {row}*152
     dw {draw}, {row}*153
+    dw {draw}, {blank}
     dw {draw}, {blank}
     dw {draw}, {row}*154 // ENERGY QUANTITY
     dw {draw}, {blank}
@@ -1001,9 +1002,10 @@ script:
     dw {draw}, {blank}
     dw {draw}, {row}*162
     dw {draw}, {blank}
+    dw {draw}, {blank}
     dw {draw}, {row}*163 // TRANSITIONS
     dw {draw}, {blank}
-    dw {draw}, {row}*164
+    dw {draw}, {row}*164 // 0x273CC0
     dw {draw}, {blank}
     dw {draw}, {row}*165
     dw {draw}, {blank}

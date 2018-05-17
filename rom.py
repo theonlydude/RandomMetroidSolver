@@ -752,7 +752,7 @@ class RomPatcher:
 
                 self.asmAddress += 0x20
 
-    def writeTransitionsCredits(transitions):
+    def writeTransitionsCredits(self, transitions):
         address = 0x273CC0
         lineLength = 32
 

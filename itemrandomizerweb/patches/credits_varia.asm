@@ -934,69 +934,78 @@ script:
 
     dw {draw}, {row}*128 // VARIA RANDOMIZER STAFF
     dw {draw}, {blank}
-    dw {draw}, {blank}
-    dw {draw}, {row}*129 // RANDOMIZER CODE
-    dw {draw}, {blank}
+    dw {draw}, {row}*129
     dw {draw}, {row}*130
-    dw {draw}, {row}*131
     dw {draw}, {blank}
     dw {draw}, {blank}
-    dw {draw}, {row}*132 // SNES AND ITEM RANDOMIZER CODE
+    dw {draw}, {row}*131 // SNES AND ITEM RANDOMIZER CODE
+    dw {draw}, {blank}
+    dw {draw}, {row}*132
     dw {draw}, {blank}
     dw {draw}, {row}*133
-    dw {draw}, {row}*134
+    dw {draw}, {blank}
+    dw {draw}, {blank}
+    dw {draw}, {row}*134 // ROM PATCHES
     dw {draw}, {blank}
     dw {draw}, {row}*135
+    dw {draw}, {blank}
     dw {draw}, {row}*136
     dw {draw}, {blank}
+    dw {draw}, {row}*137
     dw {draw}, {blank}
-    dw {draw}, {row}*137 // ROM PATCHES
     dw {draw}, {blank}
-    dw {draw}, {row}*138
-    dw {draw}, {row}*139
+    dw {draw}, {row}*138 // SPECIAL THANKS TO
+    dw {draw}, {blank}
+    dw {draw}, {row}*139 // METROID CONSTRUCTION
     dw {draw}, {blank}
     dw {draw}, {row}*140
     dw {draw}, {row}*141
     dw {draw}, {blank}
-    dw {draw}, {row}*142
+    dw {draw}, {row}*142 // SUPER METROID SRL COMMUNITY
+    dw {draw}, {blank}
     dw {draw}, {row}*143
-    dw {draw}, {blank}
     dw {draw}, {row}*144
-    dw {draw}, {row}*145
     dw {draw}, {blank}
     dw {draw}, {blank}
-    dw {draw}, {row}*146 // SPECIAL THANKS TO
+    dw {draw}, {row}*145 // RANDOMIZER PARAMETERS
     dw {draw}, {blank}
-    dw {draw}, {row}*147 // METROID CONSTRUCTION
+    dw {draw}, {row}*146 // 0x2736C0
+    dw {draw}, {row}*147
     dw {draw}, {blank}
     dw {draw}, {row}*148
     dw {draw}, {row}*149
     dw {draw}, {blank}
-    dw {draw}, {row}*150 // SUPER METROID SRL COMMUNITY
-    dw {draw}, {blank}
+    dw {draw}, {row}*150
     dw {draw}, {row}*151
+    dw {draw}, {blank}
     dw {draw}, {row}*152
+    dw {draw}, {row}*153
     dw {draw}, {blank}
     dw {draw}, {blank}
-    dw {draw}, {row}*153 // RANDOMIZER PARAMETERS
+    dw {draw}, {row}*154 // ENERGY QUANTITY
     dw {draw}, {blank}
-    dw {draw}, {row}*154
     dw {draw}, {row}*155
     dw {draw}, {blank}
     dw {draw}, {row}*156
+    dw {draw}, {blank}
     dw {draw}, {row}*157
     dw {draw}, {blank}
     dw {draw}, {row}*158
+    dw {draw}, {blank}
+    // change scroll speed
+    dw {speed}, $0004
     dw {draw}, {row}*159
     dw {draw}, {blank}
     dw {draw}, {row}*160
+    dw {draw}, {blank}
     dw {draw}, {row}*161
     dw {draw}, {blank}
     dw {draw}, {row}*162
     dw {draw}, {blank}
-    dw {draw}, {row}*163
     dw {draw}, {blank}
-    dw {draw}, {row}*164
+    dw {draw}, {row}*163 // TRANSITIONS
+    dw {draw}, {blank}
+    dw {draw}, {row}*164 // 0x273B40
     dw {draw}, {blank}
     dw {draw}, {row}*165
     dw {draw}, {blank}
@@ -1220,62 +1229,63 @@ credits:
     
     {pink}
     dw "     VARIA RANDOMIZER STAFF     " // 128
-    {purple}
-    dw "         RANDOMIZER CODE        " // 129
     {big}
-    dw "          DUDE AND FLO          " // 130
-    dw "          dude and flo          " // 131
+    dw "          DUDE AND FLO          " // 129
+    dw "          dude and flo          " // 130
     {purple}
-    dw "  SNES AND ITEM RANDOMIZER CODE " // 132
-    {big}
-    dw "       TOTAL   DESSYREQT        " // 133
-    dw "       total   dessyreqt        " // 134
-    dw "       FOOSDA  PERSONITIS       " // 135
-    dw "       foosda  personitis       " // 136
+    dw "  SNES AND ITEM RANDOMIZER CODE " // 131
+    {yellow}
+    dw "       TOTAL   DESSYREQT        " // 132
+    dw "       FOOSDA  PERSONITIS       " // 133
     {purple}
-    dw "          ROM PATCHES           " // 137
-    {big}
-    dw "     TOTAL  FOOSDA  LEODOX      " // 138
-    dw "     total  foosda  leodox      " // 139
-    dw "   DARKSHOCK   RAKKI   SCYZER   " // 140
-    dw "   darkshock   rakki   scyzer   " // 141
-    dw "   KEJARDON   SMILEY   LIORAN   " // 142
-    dw "   kejardon   smiley   lioran   " // 143
-    dw "        SCYZER   LIORAN         " // 144
-    dw "        scyzer   lioran         " // 145
+    dw "          ROM PATCHES           " // 134
+    {yellow}
+    dw "   TOTAL  FOOSDA  LEODOX  FLO   " // 135
+    dw "   DARKSHOCK   RAKKI   SCYZER   " // 136
+    dw "   KEJARDON   SMILEY   LIORAN   " // 137
     {cyan}
-    dw "       SPECIAL THANKS TO        " // 146
+    dw "       SPECIAL THANKS TO        " // 138
     {yellow}
-    dw "      METROID CONSTRUCTION      " // 147
+    dw "      METROID CONSTRUCTION      " // 139
     {big}
-    dw "     METROIDCONSTRUCTION COM    " // 148
-    dw "     metroidconstruction.com    " // 149
+    dw "     METROIDCONSTRUCTION COM    " // 140
+    dw "     metroidconstruction.com    " // 141
     {yellow}
-    dw "  SUPER METROID SRL COMMUNITY   " // 150
+    dw "  SUPER METROID SRL COMMUNITY   " // 142
     {big}
-    dw "    DISCORD INVITE . RT2FWZT    " // 151 (rT2fWZt)
-    dw "    discord invite . rt@fwzt    " // 152
+    dw "    DISCORD INVITE . RT2FWZT    " // 143 (rT2fWZt)
+    dw "    discord invite . rt@fwzt    " // 144
     {purple}
-    dw "     RANDOMIZER PARAMETERS      " // 153
+    dw "     RANDOMIZER PARAMETERS      " // 145
     {big}
-    dw " MISSILE PROBABILITY        X X " // 154
-    dw " missile probability ...... X.X " // 155
-    dw " SUPER PROBABILITY          X X " // 156
-    dw " super probability ........ X.X " // 157
-    dw " POWER BOMB PROBABILITY     X X " // 158
-    dw " power bomb probability ... X.X " // 159
-    dw " MINORS QUANTITY           XXX% " // 160
-    dw " minors quantity ......... XXX> " // 161
+    dw " MISSILE PROBABILITY        X X " // 146
+    dw " missile probability ...... X.X " // 147
+    dw " SUPER PROBABILITY          X X " // 148
+    dw " super probability ........ X.X " // 149
+    dw " POWER BOMB PROBABILITY     X X " // 150
+    dw " power bomb probability ... X.X " // 151
+    dw " MINORS QUANTITY           XXX% " // 152
+    dw " minors quantity ......... XXX> " // 153
     {yellow}
-    dw " ENERGY QUANTITY ...... XXXXXXX " // 162
-    dw " PROGRESSION SPEED .... XXXXXXX " // 163
-    dw " PROGRESSION DIFFICULTY XXXXXXX " // 164
-    dw " SPREAD PROG ITEMS ........ XXX " // 165
-    dw " SUITS RESTRICTION ........ XXX " // 166
-    dw " EARLY MORPH .............. XXX " // 167
-    dw " SUPER FUN COMBAT ......... XXX " // 168
-    dw " SUPER FUN MOVEMENT ....... XXX " // 169
-    dw " SUPER FUN SUITS .......... XXX " // 170
+    dw " ENERGY QUANTITY ...... XXXXXXX " // 154
+    dw " PROGRESSION SPEED .... XXXXXXX " // 155
+    dw " PROGRESSION DIFFICULTY XXXXXXX " // 156
+    dw " SPREAD PROG ITEMS ........ XXX " // 157
+    dw " SUITS RESTRICTION ........ XXX " // 158
+    dw " EARLY MORPH .............. XXX " // 159
+    dw " SUPER FUN COMBAT ......... XXX " // 160
+    dw " SUPER FUN MOVEMENT ....... XXX " // 161
+    dw " SUPER FUN SUITS .......... XXX " // 162
+    {purple}
+    dw "          TRANSITIONS           " // 163
+    {yellow}
+    dw "                                " // 164
+    dw "                                " // 165
+    dw "                                " // 166
+    dw "                                " // 167
+    dw "                                " // 168
+    dw "                                " // 169
+    dw "                                " // 170
     dw "                                " // 171
     dw "                                " // 172
     dw "                                " // 173

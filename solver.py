@@ -13,9 +13,8 @@ from smbool import SMBool
 from smboolmanager import SMBoolManager
 from helpers import Pickup, Bosses
 from rom import RomType, RomLoader
-from tournament_locations import locations as defaultLocations
 from graph_locations import locations as graphLocations
-from graph import AccessGraph
+from graph import AccessGraph, vanillaTransitions
 
 class Solver:
     # given a rom and parameters returns the estimated difficulty
@@ -34,6 +33,8 @@ class Solver:
 
         # can be called from command line (console) or from web site (web)
         self.type = type
+
+        self.locations = graphLocations
 
         self.romLoaded = False
         if rom is not None:
@@ -58,20 +59,16 @@ class Solver:
         self.romLoader = RomLoader.factory(rom)
         (self.fullRando, self.areaRando) = RomType.apply(Conf.romType, self.romLoader.patches)
 
-        if self.areaRando == True:
-            self.locations = graphLocations
-        else:
-            self.locations = defaultLocations
-
-        self.smbm = SMBoolManager.factory('all', cache=False, graph=self.areaRando)
+        self.smbm = SMBoolManager.factory('all', cache=False)
         self.romLoader.assignItems(self.locations)
 
         print("ROM Type: {}, Patches present: {}, Area Rando: {}".format(Conf.romType, self.romLoader.patches, (self.areaRando == True)))
 
         if self.areaRando == True:
             graphTransitions = self.romLoader.getTransitions()
-            self.areaGraph = AccessGraph(graphTransitions)
-            self.computeLocationsDifficulty = self.computeLocationsDifficultyGraph
+        else:
+            graphTransitions = vanillaTransitions
+        self.areaGraph = AccessGraph(graphTransitions)
 
         if self.log.getEffectiveLevel() == logging.DEBUG:
             self.log.debug("Display items at locations:")
@@ -273,19 +270,6 @@ class Solver:
         return (difficulty, itemsOk)
 
     def computeLocationsDifficulty(self, locations):
-        for loc in locations:
-            if 'PostAvailable' in loc:
-                available = loc['Available'](self.smbm)
-
-                self.smbm.addItem(loc['itemName'])
-                postAvailable = loc['PostAvailable'](self.smbm)
-                self.smbm.removeItem(loc['itemName'])
-
-                loc['difficulty'] = self.smbm.wand(available, postAvailable)
-            else:
-                loc['difficulty'] = loc['Available'](self.smbm)
-
-    def computeLocationsDifficultyGraph(self, locations):
         availLocs = self.areaGraph.getAvailableLocations(locations, self.smbm, samus, self.lastLoc)
         # check post available functions too
         for loc in availLocs:
@@ -362,18 +346,6 @@ class Solver:
         area = self.collectItem(loc)
         return area
 
-    def sortItemsByUsage(self):
-        # sort the items in this order:
-        # Morph Bomb PowerBomb Ice Gravity HiJump Wave Super Plasma SpaceJump SpeedBooster ScrewAttack Spazer SpringBall Varia Grapple Charge Missile XRayScope
-        unsortedItems = self.collectedItems[:]
-        sortedItems = []
-        for item in ['Morph', 'Bomb', 'PowerBomb', 'Ice', 'Gravity', 'HiJump', 'Wave', 'Super', 'Plasma', 'SpaceJump', 'SpeedBooster', 'ScrewAttack', 'Spazer', 'SpringBall', 'Varia', 'Grapple', 'Charge', 'Missile', 'XRayScope']:
-            if item in self.collectedItems:
-                sortedItems.append(item)
-                unsortedItems.remove(item)
-
-        self.collectedItems = sortedItems + unsortedItems
-
     def collectItem(self, loc):
         item = loc["itemName"]
         isNew = item not in self.collectedItems
@@ -395,12 +367,8 @@ class Solver:
 
         self.log.debug("collectItem: {} at {}".format(item, loc['Name']))
 
-        # sort items by most frequent first
-        self.sortItemsByUsage()
-
         # last loc is used as root node for the graph
-        if 'AccessFrom' in loc:
-            self.lastLoc = list(loc['AccessFrom'])[0]
+        self.lastLoc = list(loc['AccessFrom'])[0]
 
         return loc['Area']
 

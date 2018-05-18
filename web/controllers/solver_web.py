@@ -11,7 +11,7 @@ from collections import OrderedDict
 # to solve the rom
 from parameters import easy, medium, hard, harder, hardcore, mania, Conf, Knows, Settings, isKnows
 from parameters import diff2text, text2diff
-import tournament_locations
+from graph_locations import locations as graphLocations
 from solver import Solver, ParamsLoader, DifficultyDisplayer, RomLoader
 
 romTypes = OrderedDict([('VARIA Classic', 'VARIA_X'), ('VARIA Full', 'VARIA_FX'),
@@ -145,7 +145,7 @@ def solver():
                     romDict[int(address)] = tempRomJson[address]
 
                 romLoader = RomLoader.factory(romDict)
-                romLoader.assignItems(tournament_locations.locations)
+                romLoader.assignItems(graphLocations)
                 romLoader.dump(jsonRomFileName)
 
                 session.romFile = base
@@ -180,7 +180,7 @@ def solver():
                         tempRom.write(uploadFileContent.read())
 
                     romLoader = RomLoader.factory(tempRomFile)
-                    romLoader.assignItems(tournament_locations.locations)
+                    romLoader.assignItems(graphLocations)
                     romLoader.dump(jsonRomFileName)
 
                     os.remove(tempRomFile)
@@ -345,6 +345,10 @@ def solver():
         knowsUsed = session.result['knowsUsed']
         itemsOk = session.result['itemsOk']
 
+        # graph
+        pngFileName = session.result['pngFileName']
+        pngThumbFileName = session.result['pngThumbFileName']
+
         # display the result only once
         session.result = None
     else:
@@ -354,6 +358,8 @@ def solver():
         pathTable = None
         knowsUsed = None
         itemsOk = None
+        pngFileName = None
+        pngThumbFileName = None
 
     # set title
     response.title = 'Super Metroid Item Randomizer Solver'
@@ -384,6 +390,8 @@ def solver():
         if hardroom not in params['Settings']:
             params['Settings'][hardroom] = 'Default'
 
+    dotPngFile = True
+
     # send values to view
     return dict(mainForm=mainForm, loadForm=loadForm, saveForm=saveForm,
                 desc=Knows.desc,
@@ -392,7 +400,8 @@ def solver():
                 knows=params['Knows'], conf=conf, knowsUsed=knowsUsed,
                 resultText=resultText, pathTable=pathTable,
                 difficulty=difficulty, itemsOk=itemsOk, diffPercent=diffPercent,
-                easy=easy,medium=medium,hard=hard,harder=harder,hardcore=hardcore,mania=mania)
+                easy=easy,medium=medium,hard=hard,harder=harder,hardcore=hardcore,mania=mania,
+                pngFileName=pngFileName, pngThumbFileName=pngThumbFileName)
 
 def generate_json_from_parameters(vars, hidden):
     if hidden is True:
@@ -476,6 +485,17 @@ def compute_difficulty(jsonRomFileName, post_vars):
 
     generatedPath = solver.getPath(solver.visitedLocations)
 
+    if solver.areaRando == True:
+        dotFileName = os.path.join(os.path.expanduser('~/web2py/applications/solver/static/graph'), os.path.basename(jsonRomFileName.replace('json', 'dot')))
+        solver.areaGraph.toDot(dotFileName)
+        (pngFileName, pngThumbFileName) = generatePng(dotFileName)
+        if pngFileName is not None and pngThumbFileName is not None:
+            pngFileName = os.path.basename(pngFileName)
+            pngThumbFileName = os.path.basename(pngThumbFileName)
+    else:
+        pngFileName = None
+        pngThumbFileName = None
+
     # the different knows used during the rom
     knowsUsed = solver.getKnowsUsed()
     used = len(knowsUsed)
@@ -487,7 +507,8 @@ def compute_difficulty(jsonRomFileName, post_vars):
 
     return dict(randomizedRom=randomizedRom, difficulty=difficulty,
                 generatedPath=generatedPath, diffPercent=diffPercent,
-                knowsUsed=(used, total), itemsOk=itemsOk)
+                knowsUsed=(used, total), itemsOk=itemsOk,
+                pngFileName=pngFileName, pngThumbFileName=pngThumbFileName)
 
 def infos():
     # set title
@@ -809,3 +830,29 @@ def presetWebService():
         return params
     else:
         raise HTTP(400, "Preset not found")
+
+def generatePng(dotFileName):
+    # use dot to generate the graph's image .png
+    # use convert to generate the thumbnail
+    # dotFileName: the /directory/image.dot
+    # the png and thumbnails are generated in the same directory as the dot
+
+    splited = os.path.splitext(dotFileName)
+    pngFileName = splited[0] + '.png'
+    pngThumbFileName = splited[0] + '_thumbnail.png'
+
+    # dot -Tpng VARIA_Randomizer_AFX5399_noob.dot -oVARIA_Randomizer_AFX5399_noob.png
+    params = ['dot', '-Tpng', dotFileName, '-o'+pngFileName]
+    ret = subprocess.call(params)
+    if ret != 0:
+        print("Error calling dot {}: {}".format(params, ret))
+        return (None, None)
+
+    params = ['convert', pngFileName, '-resize', '1024', pngThumbFileName]
+    ret = subprocess.call(params)
+    if ret != 0:
+        print("Error calling convert {}: {}".format(params, ret))
+        os.remove(pngFileName)
+        return (None, None)
+
+    return (pngFileName, pngThumbFileName)

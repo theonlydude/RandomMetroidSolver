@@ -4,12 +4,11 @@ from functools import reduce
 
 from smbool import SMBool
 from rom import RomPatches
-from helpers import Helpers
 from graph_helpers import HelpersGraph
 
 class SMBoolManager(object):
     @staticmethod
-    def factory(store='all', cache=True, graph=False):
+    def factory(store='all', cache=True):
         # possible values: all, diff, bool
         # all: store the difficulty, knows and items used, bool result (solver)
         # diff: store the difficulty and the bool result (randomizer with difficulty target)
@@ -20,20 +19,17 @@ class SMBoolManager(object):
         print("SMBM::factory store {} cache {}".format(store, cache))
 
         if store == 'all':
-            return SMBMAll(cache, graph)
+            return SMBMAll(cache)
         elif store == 'diff':
-            return SMBMDiff(cache, graph)
+            return SMBMDiff(cache)
         elif store == 'bool':
-            return SMBMBool(cache, graph)
+            return SMBMBool(cache)
 
     items = ['ETank', 'Missile', 'Super', 'PowerBomb', 'Bomb', 'Charge', 'Ice', 'HiJump', 'SpeedBooster', 'Wave', 'Spazer', 'SpringBall', 'Varia', 'Plasma', 'Grapple', 'Morph', 'Reserve', 'Gravity', 'XRayScope', 'SpaceJump', 'ScrewAttack']
     countItems = ['ETank', 'Reserve', 'Missile', 'Super', 'PowerBomb']
 
-    def __init__(self, cache, graph=False):
-        if graph == True:
-            self.helpers = HelpersGraph(self)
-        else:
-            self.helpers = Helpers(self)
+    def __init__(self, cache):
+        self.helpers = HelpersGraph(self)
         self.curSMBool = SMBool(False)
         self.useCache = cache
         self.createCacheAndFacadeFunctions()
@@ -179,8 +175,8 @@ class SMBoolManager(object):
 
 class SMBMBool(SMBoolManager):
     # only care about the bool, internaly: bool
-    def __init__(self, cache, graph=False):
-        super(SMBMBool, self).__init__(cache, graph)
+    def __init__(self, cache):
+        super(SMBMBool, self).__init__(cache)
 
     def setSMBoolCache(self, smbool):
         self.curSMBool.bool = smbool.bool
@@ -219,8 +215,8 @@ class SMBMBool(SMBoolManager):
 
 class SMBMDiff(SMBoolManager):
     # bool and diff here, internaly: only a tuple (bool, diff)
-    def __init__(self, cache, graph=False):
-        super(SMBMDiff, self).__init__(cache, graph)
+    def __init__(self, cache):
+        super(SMBMDiff, self).__init__(cache)
 
     def setSMBoolCache(self, smbool):
         self.curSMBool.bool = smbool.bool
@@ -323,8 +319,8 @@ class SMBMDiff(SMBoolManager):
 
 class SMBMAll(SMBoolManager):
     # full package, internaly: smbool
-    def __init__(self, cache, graph=False):
-        super(SMBMAll, self).__init__(cache, graph)
+    def __init__(self, cache):
+        super(SMBMAll, self).__init__(cache)
 
     def setSMBoolCache(self, smbool):
         self.curSMBool.bool = smbool.bool

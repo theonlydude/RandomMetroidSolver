@@ -31,22 +31,24 @@ shinespark_end:
 
 org $0fea00
 cancel_movement:
-	;cancel samus movement:
+	;; cancel samus movement:
 	stz $0b2c ; VY subpix
 	stz $0b2e ; VY pix
 	stz $0b42 ; VX pix
 	stz $0b44 ; VX subpix
 	stz $0b46 ; momentum pix
 	stz $0b48 ; momentum subpix
-	;;samus "elevator pose"
+	;; samus "elevator pose" to avoid taking into account transition direction
 	stz $0a1c
 	stz $0a96
 	;; set cancel spark flag if a spark is active
 	lda $0A6E
 	cmp #$0002
-	beq .sparking
-	rts
-.sparking:
+	bne +
 	lda !MAGIC
 	sta !spark_flag
++
+	;; gives 128 I-frames to samus to compensate for elevator pose
+	lda #$0080
+	sta $18a8
 	rts

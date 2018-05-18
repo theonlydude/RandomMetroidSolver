@@ -211,19 +211,14 @@ class RandoSettings(object):
 class Randomizer(object):
     # locations : items locations
     # settings : RandoSettings instance
-    def __init__(self, locations, settings, seedName, graphTransitions=None, bidir=True, dotDir=None):
+    def __init__(self, locations, settings, seedName, graphTransitions, bidir=True, dotDir=None):
         # we assume that 'choose' dict is perfectly formed, that is all keys
         # below are defined in the appropriate weight dicts
-        if graphTransitions is not None:
-            self.currentLocations = self.currentLocationsGraph
-            self.getLocDiff = self.getLocDiffGraph
-            dotFile = None
-            if dotDir is not None:
-                dotFile = dotDir + '/' + seedName + ".dot"
-            self.areaGraph = AccessGraph(graphTransitions, bidir, dotFile)
-        else:
-            self.currentLocations = self.currentLocationsAvailFunc
-            self.getLocDiff  = self.getLocDiffAvailFunc
+        dotFile = None
+        if dotDir is not None:
+            dotFile = dotDir + '/' + seedName + ".dot"
+        self.areaGraph = AccessGraph(graphTransitions, bidir, dotFile)
+
         self.isSpreadProgression = settings.isSpreadProgression
         self.choose = settings.choose
         self.chooseItemFuncs = {
@@ -254,9 +249,9 @@ class Randomizer(object):
         self.nonProgTypesCache = []
         self.progTypesCache = []
         if self.difficultyTarget > samus and settings.progDiff == 'random':
-            self.smbm = SMBoolManager.factory('bool', cache=True, graph=graphTransitions is not None)
+            self.smbm = SMBoolManager.factory('bool', cache=True)
         else:
-            self.smbm = SMBoolManager.factory('diff', cache=True, graph=graphTransitions is not None)
+            self.smbm = SMBoolManager.factory('diff', cache=True)
         self.restrictedLocations = self.getRestrictedLocations(locations, settings.forbiddenItems)
         self.smbm.resetItems()
 
@@ -291,27 +286,10 @@ class Randomizer(object):
         return result.bool == True and result.difficulty <= self.difficultyTarget
 
     # get available locations, given current items, and an optional additional item.
-    # uses only Available function of location, so it has to carry the whole access
-    # to the location.
-    # item : optional additional item
-    # return available locations list.
-    def currentLocationsAvailFunc(self, item=None):
-        if item is not None:
-            self.smbm.addItem(item['Type'])
-
-        avail = lambda loc: self.locAvailable(loc)
-        ret = sorted(List.filter(avail, self.unusedLocations), key=lambda loc: loc['Name'])
-
-        if item is not None:
-            self.smbm.removeItem(item['Type'])
-
-        return ret
-
-    # get available locations, given current items, and an optional additional item.
     # uses graph method to get avail locs.
     # item : optional additional item
     # return available locations list.
-    def currentLocationsGraph(self, item=None):
+    def currentLocations(self, item=None):
         if item is not None:
             self.smbm.addItem(item['Type'])
 
@@ -425,10 +403,7 @@ class Randomizer(object):
     def chooseLocationRandom(self, availableLocations, item):
         return availableLocations[random.randint(0, len(availableLocations)-1)]
 
-    def getLocDiffAvailFunc(self, loc):
-        return self.smbm.eval(loc['Available'])
-
-    def getLocDiffGraph(self, loc):
+    def getLocDiff(self, loc):
         # avail difficulty already stored by graph algorithm        
         return loc['difficulty']
 

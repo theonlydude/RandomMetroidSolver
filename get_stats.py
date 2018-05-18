@@ -2,7 +2,6 @@
 
 from rom import RomLoader
 from sys import argv
-from tournament_locations import locations
 
 if __name__ == "__main__":
     firstLogs = argv[1:]

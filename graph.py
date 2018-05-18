@@ -1,5 +1,6 @@
 #!/usr/bin/python
 
+import copy
 from parameters import Knows
 from rom import RomPatches
 from smbool import SMBool
@@ -49,9 +50,23 @@ class AccessGraph(object):
         if dotFile is not None:
             self.toDot(dotFile)
 
-    def getCreditsLines(self):
-        # TODO arrange transitions shortnames to have the least amount of lines to represent them
-        pass
+    def getCreditsTransitions(self):
+        transitionsDict = {}
+        for (src, dest) in self.InterAreaTransitions:
+            transitionsDict[src] = dest
+
+        # remove duplicate (src, dest) - (dest, src)
+        transitionsCopy = copy.copy(transitionsDict)
+        for src in transitionsCopy:
+            if src in transitionsDict:
+                dest = transitionsDict[src]
+                if dest in transitionsDict:
+                    if transitionsDict[dest] == src:
+                        del transitionsDict[dest]
+
+        transitions = [(t, transitionsDict[t]) for t in transitionsDict]
+
+        return transitions
 
     def toDot(self, dotFile):
         with open(dotFile, "w") as f:

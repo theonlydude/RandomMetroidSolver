@@ -9,6 +9,7 @@ locations = [
 {
     'Area': "Crateria",
     'GraphArea': "Crateria",
+    'SolveArea': "Crateria",
     'Name': "Energy Tank, Gauntlet",
     'Class': "Major",
     'Address': 0x78264,
@@ -22,6 +23,7 @@ locations = [
 {
     'Area': "Crateria",
     'GraphArea': "Crateria",
+    'SolveArea': "Crateria",
     'Name': "Bomb",
     'Address': 0x78404,
     'Class': "Major",
@@ -38,6 +40,7 @@ locations = [
 {
     'Area': "Crateria",
     'GraphArea': "Crateria",
+    'SolveArea': "Crateria",
     'Name': "Energy Tank, Terminator",
     'Class': "Major",
     'Address': 0x78432,
@@ -51,6 +54,7 @@ locations = [
 {
     'Area': "Brinstar",
     'GraphArea': "GreenPinkBrinstar",
+    'SolveArea': "Green Brinstar",
     'Name': "Reserve Tank, Brinstar",
     'Class': "Major",
     'Address': 0x7852C,
@@ -67,6 +71,7 @@ locations = [
 {
     'Area': "Brinstar",
     'GraphArea': "GreenPinkBrinstar",
+    'SolveArea': "Pink Brinstar",
     'Name': "Charge Beam",
     'Class': "Major",
     'Address': 0x78614,
@@ -81,6 +86,7 @@ locations = [
 {
     'Area': "Brinstar",
     'GraphArea': "Crateria",
+    'SolveArea': "Blue Brinstar",
     'Name': "Morphing Ball",
     'Class': "Major",
     'Address': 0x786DE,
@@ -94,6 +100,7 @@ locations = [
 {
     'Area': "Brinstar",
     'GraphArea': "Crateria",
+    'SolveArea': "Blue Brinstar",
     'Name': "Energy Tank, Brinstar Ceiling",
     'Class': "Major",
     'Address': 0x7879E,
@@ -116,6 +123,7 @@ locations = [
 {
     'Area': "Brinstar",
     'GraphArea': "GreenPinkBrinstar",
+    'SolveArea': "Green Brinstar",
     'Name': "Energy Tank, Etecoons",
     'Class': "Major",
     'Address': 0x787C2,
@@ -129,6 +137,7 @@ locations = [
 {
     'Area': "Brinstar",
     'GraphArea': "GreenPinkBrinstar",
+    'SolveArea': "Pink Brinstar",
     'Name': "Energy Tank, Waterway",
     'Class': "Major",
     'Address': 0x787FA,
@@ -148,6 +157,7 @@ locations = [
 {
     'Area': "Brinstar",
     'GraphArea': "GreenPinkBrinstar",
+    'SolveArea': "Pink Brinstar",
     'Name': "Energy Tank, Brinstar Gate",
     'Class': "Major",
     'Address': 0x78824,
@@ -168,6 +178,7 @@ locations = [
 {
     'Area': "Brinstar",
     'GraphArea': "RedBrinstar",
+    'SolveArea': "Red Brinstar",
     'Name': "X-Ray Scope",
     'Class': "Major",
     'Address': 0x78876,
@@ -188,6 +199,7 @@ locations = [
 {
     'Area': "Brinstar",
     'GraphArea': "RedBrinstar",
+    'SolveArea': "Red Brinstar",
     'Name': "Spazer",
     'Class': "Major",
     'Address': 0x7896E,
@@ -204,6 +216,7 @@ locations = [
 {
     'Area': "Brinstar",
     'GraphArea': "Norfair",
+    'SolveArea': "Warehouse",
     'Name': "Energy Tank, Kraid",
     'Class': "Major",
     'Address': 0x7899C,
@@ -217,6 +230,7 @@ locations = [
 {
     'Area': "Brinstar",
     'GraphArea': "Norfair",
+    'SolveArea': "Warehouse",
     'Name': "Varia Suit",
     'Class': "Major",
     'Address': 0x78ACA,
@@ -232,6 +246,7 @@ locations = [
 {
     'Area': "Norfair",
     'GraphArea': "Norfair",
+    'SolveArea': "Norfair",
     'Name': "Ice Beam",
     'Class': "Major",
     'Address': 0x78B24,
@@ -250,6 +265,7 @@ locations = [
 {
     'Area': "Norfair",
     'GraphArea': "Norfair",
+    'SolveArea': "Crocomire",
     'Name': "Energy Tank, Crocomire",
     'Class': "Major",
     'Address': 0x78BA4,
@@ -264,6 +280,7 @@ locations = [
 {
     'Area': "Norfair",
     'GraphArea': "Norfair",
+    'SolveArea': "Norfair",
     'Name': "Hi-Jump Boots",
     'Class': "Major",
     'Address': 0x78BAC,
@@ -279,6 +296,7 @@ locations = [
 {
     'Area': "Norfair",
     'GraphArea': "Norfair",
+    'SolveArea': "Crocomire",
     'Name': "Grapple Beam",
     'Class': "Major",
     'Address': 0x78C36,
@@ -296,6 +314,7 @@ locations = [
 {
     'Area': "Norfair",
     'GraphArea': "Norfair",
+    'SolveArea': "Bubble Norfair",
     'Name': "Reserve Tank, Norfair",
     'Class': "Major",
     'Address': 0x78C3E,
@@ -310,6 +329,7 @@ locations = [
 {
     'Area': "Norfair",
     'GraphArea': "Norfair",
+    'SolveArea': "Bubble Norfair",
     'Name': "Speed Booster",
     'Class': "Major",
     'Address': 0x78C82,
@@ -324,6 +344,7 @@ locations = [
 {
     'Area': "Norfair",
     'GraphArea': "Norfair",
+    'SolveArea': "Bubble Norfair",
     'Name': "Wave Beam",
     'Class': "Major",
     'Address': 0x78CCA,
@@ -338,6 +359,7 @@ locations = [
 {
     'Area': "LowerNorfair",
     'GraphArea': "LowerNorfair",
+    'SolveArea': "Lower Norfair",
     'Name': "Energy Tank, Ridley",
     'Class': "Major",
     'Address': 0x79108,
@@ -357,6 +379,7 @@ locations = [
 {
     'Area': "LowerNorfair",
     'GraphArea': "LowerNorfair",
+    'SolveArea': "Lower Norfair",
     'Name': "Screw Attack",
     'Class': "Major",
     'Address': 0x79110,
@@ -380,6 +403,7 @@ locations = [
 {
     'Area': "LowerNorfair",
     'GraphArea': "LowerNorfair",
+    'SolveArea': "Lower Norfair",
     'Name': "Energy Tank, Firefleas",
     'Class': "Major",
     'Address': 0x79184,
@@ -394,6 +418,7 @@ locations = [
 {
     'Area': "WreckedShip",
     'GraphArea': "WreckedShip",
+    'SolveArea': "WreckedShip",
     'Name': "Reserve Tank, Wrecked Ship",
     'Class': "Major",
     'Address': 0x7C2E9,
@@ -412,6 +437,7 @@ locations = [
 {
     'Area': "WreckedShip",
     'GraphArea': "WreckedShip",
+    'SolveArea': "WreckedShip",
     'Name': "Energy Tank, Wrecked Ship",
     'Class': "Major",
     'Address': 0x7C337,
@@ -426,6 +452,7 @@ locations = [
 {
     'Area': "WreckedShip",
     'GraphArea': "WreckedShip",
+    'SolveArea': "WreckedShip",
     'Name': "Right Super, Wrecked Ship",
     'Class': "Major",
     'Address': 0x7C365,
@@ -441,6 +468,7 @@ locations = [
 {
     'Area': "WreckedShip",
     'GraphArea': "WreckedShip",
+    'SolveArea': "WreckedShip",
     'Name': "Gravity Suit",
     'Class': "Major",
     'Address': 0x7C36D,
@@ -458,6 +486,7 @@ locations = [
 {
     'Area': "Maridia",
     'GraphArea': "Maridia",
+    'SolveArea': "Maridia",
     'Name': "Energy Tank, Mama turtle",
     'Class': "Major",
     'Address': 0x7C47D,
@@ -477,6 +506,7 @@ locations = [
 {
     'Area': "Maridia",
     'GraphArea': "Maridia",
+    'SolveArea': "Maridia",
     'Name': "Plasma Beam",
     'Class': "Major",
     'Address': 0x7C559,
@@ -515,6 +545,7 @@ locations = [
 {
     'Area': "Maridia",
     'GraphArea': "Maridia",
+    'SolveArea': "Maridia",
     'Name': "Reserve Tank, Maridia",
     'Class': "Major",
     'Address': 0x7C5E3,
@@ -529,6 +560,7 @@ locations = [
 {
     'Area': "Maridia",
     'GraphArea': "Maridia",
+    'SolveArea': "Maridia",
     'Name': "Spring Ball",
     'Class': "Major",
     'Address': 0x7C6E5,
@@ -555,6 +587,7 @@ locations = [
 {
     'Area': "Maridia",
     'GraphArea': "Maridia",
+    'SolveArea': "Maridia",
     'Name': "Energy Tank, Botwoon",
     'Class': "Major",
     'Address': 0x7C755,
@@ -568,6 +601,7 @@ locations = [
 {
     'Area': "Maridia",
     'GraphArea': "Maridia",
+    'SolveArea': "Maridia",
     'Name': "Space Jump",
     'Class': "Major",
     'Address': 0x7C7A7,
@@ -609,6 +643,7 @@ locations = [
 {
     'Area': "Crateria",
     'GraphArea': "Crateria",
+    'SolveArea': "Crateria",
     'Name': "Power Bomb (Crateria surface)",
     'Class': "Minor",
     'Address': 0x781CC,
@@ -624,6 +659,7 @@ locations = [
 {
     'Area': "Crateria",
     'GraphArea': "WreckedShip",
+    'SolveArea': "WreckedShip",
     'Name': "Missile (outside Wrecked Ship bottom)",
     'Class': "Minor",
     'Address': 0x781E8,
@@ -638,6 +674,7 @@ locations = [
 {
     'Area': "Crateria",
     'GraphArea': "WreckedShip",
+    'SolveArea': "WreckedShip",
     'Name': "Missile (outside Wrecked Ship top)",
     'Class': "Minor",
     'Address': 0x781EE,
@@ -652,6 +689,7 @@ locations = [
 {
     'Area': "Crateria",
     'GraphArea': "WreckedShip",
+    'SolveArea': "WreckedShip",
     'Name': "Missile (outside Wrecked Ship middle)",
     'Class': "Minor",
     'Address': 0x781F4,
@@ -666,6 +704,7 @@ locations = [
 {
     'Area': "Crateria",
     'GraphArea': "Crateria",
+    'SolveArea': "Crateria",
     'Name': "Missile (Crateria moat)",
     'Class': "Minor",
     'Address': 0x78248,
@@ -679,6 +718,7 @@ locations = [
 {
     'Area': "Crateria",
     'GraphArea': "Crateria",
+    'SolveArea': "Crateria",
     'Name': "Missile (Crateria bottom)",
     'Class': "Minor",
     'Address': 0x783EE,
@@ -692,6 +732,7 @@ locations = [
 {
     'Area': "Crateria",
     'GraphArea': "Crateria",
+    'SolveArea': "Crateria",
     'Name': "Missile (Crateria gauntlet right)",
     'Class': "Minor",
     'Address': 0x78464,
@@ -706,6 +747,7 @@ locations = [
 {
     'Area': "Crateria",
     'GraphArea': "Crateria",
+    'SolveArea': "Crateria",
     'Name': "Missile (Crateria gauntlet left)",
     'Class': "Minor",
     'Address': 0x7846A,
@@ -720,6 +762,7 @@ locations = [
 {
     'Area': "Crateria",
     'GraphArea': "Crateria",
+    'SolveArea': "Crateria",
     'Name': "Super Missile (Crateria)",
     'Class': "Minor",
     'Address': 0x78478,
@@ -736,6 +779,7 @@ locations = [
 {
     'Area': "Crateria",
     'GraphArea': "Crateria",
+    'SolveArea': "Crateria",
     'Name': "Missile (Crateria middle)",
     'Class': "Minor",
     'Address': 0x78486,
@@ -749,6 +793,7 @@ locations = [
 {
     'Area': "Brinstar",
     'GraphArea': "GreenPinkBrinstar",
+    'SolveArea': "Green Brinstar",
     'Name': "Power Bomb (green Brinstar bottom)",
     'Class': "Minor",
     'Address': 0x784AC,
@@ -762,6 +807,7 @@ locations = [
 {
     'Area': "Brinstar",
     'GraphArea': "GreenPinkBrinstar",
+    'SolveArea': "Pink Brinstar",
     'Name': "Super Missile (pink Brinstar)",
     'Class': "Minor",
     'Address': 0x784E4,
@@ -781,6 +827,7 @@ locations = [
 {
     'Area': "Brinstar",
     'GraphArea': "GreenPinkBrinstar",
+    'SolveArea': "Green Brinstar",
     'Name': "Missile (green Brinstar below super missile)",
     'Class': "Minor",
     'Address': 0x78518,
@@ -796,6 +843,7 @@ locations = [
 {
     'Area': "Brinstar",
     'GraphArea': "GreenPinkBrinstar",
+    'SolveArea': "Green Brinstar",
     'Name': "Super Missile (green Brinstar top)",
     'Class': "Minor",
     'Address': 0x7851E,
@@ -811,6 +859,7 @@ locations = [
 {
     'Area': "Brinstar",
     'GraphArea': "GreenPinkBrinstar",
+    'SolveArea': "Green Brinstar",
     'Name': "Missile (green Brinstar behind missile)",
     'Class': "Minor",
     'Address': 0x78532,
@@ -827,6 +876,7 @@ locations = [
 {
     'Area': "Brinstar",
     'GraphArea': "GreenPinkBrinstar",
+    'SolveArea': "Green Brinstar",
     'Name': "Missile (green Brinstar behind reserve tank)",
     'Class': "Minor",
     'Address': 0x78538,
@@ -843,6 +893,7 @@ locations = [
 {
     'Area': "Brinstar",
     'GraphArea': "GreenPinkBrinstar",
+    'SolveArea': "Pink Brinstar",
     'Name': "Missile (pink Brinstar top)",
     'Class': "Minor",
     'Address': 0x78608,
@@ -858,6 +909,7 @@ locations = [
 {
     'Area': "Brinstar",
     'GraphArea': "GreenPinkBrinstar",
+    'SolveArea': "Pink Brinstar",
     'Name': "Missile (pink Brinstar bottom)",
     'Class': "Minor",
     'Address': 0x7860E,
@@ -873,6 +925,7 @@ locations = [
 {
     'Area': "Brinstar",
     'GraphArea': "GreenPinkBrinstar",
+    'SolveArea': "Pink Brinstar",
     'Name': "Power Bomb (pink Brinstar)",
     'Class': "Minor",
     'Address': 0x7865C,
@@ -888,6 +941,7 @@ locations = [
 {
     'Area': "Brinstar",
     'GraphArea': "GreenPinkBrinstar",
+    'SolveArea': "Pink Brinstar",
     'Name': "Missile (green Brinstar pipe)",
     'Class': "Minor",
     'Address': 0x78676,
@@ -901,6 +955,7 @@ locations = [
 {
     'Area': "Brinstar",
     'GraphArea': "Crateria",
+    'SolveArea': "Blue Brinstar",
     'Name': "Power Bomb (blue Brinstar)",
     'Class': "Minor",
     'Address': 0x7874C,
@@ -914,6 +969,7 @@ locations = [
 {
     'Area': "Brinstar",
     'GraphArea': "Crateria",
+    'SolveArea': "Blue Brinstar",
     'Name': "Missile (blue Brinstar middle)",
     'Address': 0x78798,
     'Class': "Minor",
@@ -929,6 +985,7 @@ locations = [
 {
     'Area': "Brinstar",
     'GraphArea': "GreenPinkBrinstar",
+    'SolveArea': "Green Brinstar",
     'Name': "Super Missile (green Brinstar bottom)",
     'Class': "Minor",
     'Address': 0x787D0,
@@ -943,6 +1000,7 @@ locations = [
 {
     'Area': "Brinstar",
     'GraphArea': "Crateria",
+    'SolveArea': "Blue Brinstar",
     'Name': "Missile (blue Brinstar bottom)",
     'Class': "Minor",
     'Address': 0x78802,
@@ -956,6 +1014,7 @@ locations = [
 {
     'Area': "Brinstar",
     'GraphArea': "Crateria",
+    'SolveArea': "Blue Brinstar",
     'Name': "Missile (blue Brinstar top)",
     'Class': "Minor",
     'Address': 0x78836,
@@ -969,6 +1028,7 @@ locations = [
 {
     'Area': "Brinstar",
     'GraphArea': "Crateria",
+    'SolveArea': "Blue Brinstar",
     'Name': "Missile (blue Brinstar behind missile)",
     'Class': "Minor",
     'Address': 0x7883C,
@@ -982,6 +1042,7 @@ locations = [
 {
     'Area': "Brinstar",
     'GraphArea': "RedBrinstar",
+    'SolveArea': "Red Brinstar",
     'Name': "Power Bomb (red Brinstar sidehopper room)",
     'Class': "Minor",
     'Address': 0x788CA,
@@ -998,6 +1059,7 @@ locations = [
 {
     'Area': "Brinstar",
     'GraphArea': "RedBrinstar",
+    'SolveArea': "Red Brinstar",
     'Name': "Power Bomb (red Brinstar spike room)",
     'Class': "Minor",
     'Address': 0x7890E,
@@ -1013,6 +1075,7 @@ locations = [
 {
     'Area': "Brinstar",
     'GraphArea': "RedBrinstar",
+    'SolveArea': "Red Brinstar",
     'Name': "Missile (red Brinstar spike room)",
     'Class': "Minor",
     'Address': 0x78914,
@@ -1029,6 +1092,7 @@ locations = [
 {
     'Area': "Brinstar",
     'GraphArea': "Norfair",
+    'SolveArea': "Warehouse",
     'Name': "Missile (Kraid)",
     'Class': "Minor",
     'Address': 0x789EC,
@@ -1042,6 +1106,7 @@ locations = [
 {
     'Area': "Norfair",
     'GraphArea': "Norfair",
+    'SolveArea': "Norfair",
     'Name': "Missile (lava room)",
     'Class': "Minor",
     'Address': 0x78AE4,
@@ -1055,6 +1120,7 @@ locations = [
 {
     'Area': "Norfair",
     'GraphArea': "Norfair",
+    'SolveArea': "Norfair",
     'Name': "Missile (below Ice Beam)",
     'Class': "Minor",
     'Address': 0x78B46,
@@ -1070,6 +1136,7 @@ locations = [
 {
     'Area': "Norfair",
     'GraphArea': "Norfair",
+    'SolveArea': "Crocomire",
     'Name': "Missile (above Crocomire)",
     'Class': "Minor",
     'Address': 0x78BC0,
@@ -1086,6 +1153,7 @@ locations = [
 {
     'Area': "Norfair",
     'GraphArea': "Norfair",
+    'SolveArea': "Norfair",
     'Name': "Missile (Hi-Jump Boots)",
     'Class': "Minor",
     'Address': 0x78BE6,
@@ -1101,6 +1169,7 @@ locations = [
 {
     'Area': "Norfair",
     'GraphArea': "Norfair",
+    'SolveArea': "Norfair",
     'Name': "Energy Tank (Hi-Jump Boots)",
     'Class': "Minor",
     'Address': 0x78BEC,
@@ -1114,6 +1183,7 @@ locations = [
 {
     'Area': "Norfair",
     'GraphArea': "Norfair",
+    'SolveArea': "Crocomire",
     'Name': "Power Bomb (Crocomire)",
     'Class': "Minor",
     'Address': 0x78C04,
@@ -1132,6 +1202,7 @@ locations = [
 {
     'Area': "Norfair",
     'GraphArea': "Norfair",
+    'SolveArea': "Crocomire",
     'Name': "Missile (below Crocomire)",
     'Class': "Minor",
     'Address': 0x78C14,
@@ -1146,6 +1217,7 @@ locations = [
 {
     'Area': "Norfair",
     'GraphArea': "Norfair",
+    'SolveArea': "Crocomire",
     'Name': "Missile (Grapple Beam)",
     'Class': "Minor",
     'Address': 0x78C2A,
@@ -1163,6 +1235,7 @@ locations = [
 {
     'Area': "Norfair",
     'GraphArea': "Norfair",
+    'SolveArea': "Bubble Norfair",
     'Name': "Missile (Norfair Reserve Tank)",
     'Class': "Minor",
     'Address': 0x78C44,
@@ -1177,6 +1250,7 @@ locations = [
 {
     'Area': "Norfair",
     'GraphArea': "Norfair",
+    'SolveArea': "Bubble Norfair",
     'Name': "Missile (bubble Norfair green door)",
     'Class': "Minor",
     'Address': 0x78C52,
@@ -1191,6 +1265,7 @@ locations = [
 {
     'Area': "Norfair",
     'GraphArea': "Norfair",
+    'SolveArea': "Bubble Norfair",
     'Name': "Missile (bubble Norfair)",
     'Class': "Minor",
     'Address': 0x78C66,
@@ -1205,6 +1280,7 @@ locations = [
 {
     'Area': "Norfair",
     'GraphArea': "Norfair",
+    'SolveArea': "Bubble Norfair",
     'Name': "Missile (Speed Booster)",
     'Class': "Minor",
     'Address': 0x78C74,
@@ -1219,6 +1295,7 @@ locations = [
 {
     'Area': "Norfair",
     'GraphArea': "Norfair",
+    'SolveArea': "Bubble Norfair",
     'Name': "Missile (Wave Beam)",
     'Class': "Minor",
     'Address': 0x78CBC,
@@ -1233,6 +1310,7 @@ locations = [
 {
     'Area': "LowerNorfair",
     'GraphArea': "LowerNorfair",
+    'SolveArea': "Lower Norfair",
     'Name': "Missile (Gold Torizo)",
     'Class': "Minor",
     'Address': 0x78E6E,
@@ -1248,6 +1326,7 @@ locations = [
 {
     'Area': "LowerNorfair",
     'GraphArea': "LowerNorfair",
+    'SolveArea': "Lower Norfair",
     'Name': "Super Missile (Gold Torizo)",
     'Class': "Minor",
     'Address': 0x78E74,
@@ -1264,6 +1343,7 @@ locations = [
 {
     'Area': "LowerNorfair",
     'GraphArea': "LowerNorfair",
+    'SolveArea': "Lower Norfair",
     'Name': "Missile (Mickey Mouse room)",
     'Class': "Minor",
     'Address': 0x78F30,
@@ -1278,6 +1358,7 @@ locations = [
 {
     'Area': "LowerNorfair",
     'GraphArea': "LowerNorfair",
+    'SolveArea': "Lower Norfair",
     'Name': "Missile (lower Norfair above fire flea room)",
     'Class': "Minor",
     'Address': 0x78FCA,
@@ -1292,6 +1373,7 @@ locations = [
 {
     'Area': "LowerNorfair",
     'GraphArea': "LowerNorfair",
+    'SolveArea': "Lower Norfair",
     'Name': "Power Bomb (lower Norfair above fire flea room)",
     'Class': "Minor",
     'Address': 0x78FD2,
@@ -1306,6 +1388,7 @@ locations = [
 {
     'Area': "LowerNorfair",
     'GraphArea': "LowerNorfair",
+    'SolveArea': "Lower Norfair",
     'Name': "Power Bomb (Power Bombs of shame)",
     'Class': "Minor",
     'Address': 0x790C0,
@@ -1322,6 +1405,7 @@ locations = [
 {
     'Area': "LowerNorfair",
     'GraphArea': "LowerNorfair",
+    'SolveArea': "Lower Norfair",
     'Name': "Missile (lower Norfair near Wave Beam)",
     'Class': "Minor",
     'Address': 0x79100,
@@ -1337,6 +1421,7 @@ locations = [
 {
     'Area': "WreckedShip",
     'GraphArea': "WreckedShip",
+    'SolveArea': "WreckedShip",
     'Name': "Missile (Wrecked Ship middle)",
     'Class': "Minor",
     'Address': 0x7C265,
@@ -1351,6 +1436,7 @@ locations = [
 {
     'Area': "WreckedShip",
     'GraphArea': "WreckedShip",
+    'SolveArea': "WreckedShip",
     'Name': "Missile (Gravity Suit)",
     'Class': "Minor",
     'Address': 0x7C2EF,
@@ -1368,6 +1454,7 @@ locations = [
 {
     'Area': "WreckedShip",
     'GraphArea': "WreckedShip",
+    'SolveArea': "WreckedShip",
     'Name': "Missile (Wrecked Ship top)",
     'Class': "Minor",
     'Address': 0x7C319,
@@ -1382,6 +1469,7 @@ locations = [
 {
     'Area': "WreckedShip",
     'GraphArea': "WreckedShip",
+    'SolveArea': "WreckedShip",
     'Name': "Super Missile (Wrecked Ship left)",
     'Class': "Minor",
     'Address': 0x7C357,
@@ -1396,6 +1484,7 @@ locations = [
 {
     'Area': "Maridia",
     'GraphArea': "Maridia",
+    'SolveArea': "Maridia",
     'Name': "Missile (green Maridia shinespark)",
     'Class': "Minor",
     'Address': 0x7C437,
@@ -1413,6 +1502,7 @@ locations = [
 {
     'Area': "Maridia",
     'GraphArea': "Maridia",
+    'SolveArea': "Maridia",
     'Name': "Super Missile (green Maridia)",
     'Class': "Minor",
     'Address': 0x7C43D,
@@ -1427,6 +1517,7 @@ locations = [
 {
     'Area': "Maridia",
     'GraphArea': "Maridia",
+    'SolveArea': "Maridia",
     'Name': "Missile (green Maridia tatori)",
     'Class': "Minor",
     'Address': 0x7C483,
@@ -1440,6 +1531,7 @@ locations = [
 {
     'Area': "Maridia",
     'GraphArea': "Maridia",
+    'SolveArea': "Maridia",
     'Name': "Super Missile (yellow Maridia)",
     'Class': "Minor",
     'Address': 0x7C4AF,
@@ -1453,6 +1545,7 @@ locations = [
 {
     'Area': "Maridia",
     'GraphArea': "Maridia",
+    'SolveArea': "Maridia",
     'Name': "Missile (yellow Maridia super missile)",
     'Class': "Minor",
     'Address': 0x7C4B5,
@@ -1466,6 +1559,7 @@ locations = [
 {
     'Area': "Maridia",
     'GraphArea': "Maridia",
+    'SolveArea': "Maridia",
     'Name': "Missile (yellow Maridia false wall)",
     'Class': "Minor",
     'Address': 0x7C533,
@@ -1479,6 +1573,7 @@ locations = [
 {
     'Area': "Maridia",
     'GraphArea': "Maridia",
+    'SolveArea': "Maridia",
     'Name': "Missile (left Maridia sand pit room)",
     'Class': "Minor",
     'Address': 0x7C5DD,
@@ -1493,6 +1588,7 @@ locations = [
 {
     'Area': "Maridia",
     'GraphArea': "Maridia",
+    'SolveArea': "Maridia",
     'Name': "Missile (right Maridia sand pit room)",
     'Class': "Minor",
     'Address': 0x7C5EB,
@@ -1507,6 +1603,7 @@ locations = [
 {
     'Area': "Maridia",
     'GraphArea': "Maridia",
+    'SolveArea': "Maridia",
     'Name': "Power Bomb (right Maridia sand pit room)",
     'Class': "Minor",
     'Address': 0x7C5F1,
@@ -1520,6 +1617,7 @@ locations = [
 {
     'Area': "Maridia",
     'GraphArea': "Maridia",
+    'SolveArea': "Maridia",
     'Name': "Missile (pink Maridia)",
     'Address': 0x7C603,
     'Class': "Minor",
@@ -1534,6 +1632,7 @@ locations = [
 {
     'Area': "Maridia",
     'GraphArea': "Maridia",
+    'SolveArea': "Maridia",
     'Name': "Super Missile (pink Maridia)",
     'Class': "Minor",
     'Address': 0x7C609,
@@ -1548,6 +1647,7 @@ locations = [
 {
     'Area': "Maridia",
     'GraphArea': "Maridia",
+    'SolveArea': "Maridia",
     'Name': "Missile (Draygon)",
     'Class': "Minor",
     'Address': 0x7C74D,

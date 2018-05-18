@@ -35,18 +35,26 @@ class Solver:
         self.type = type
 
         self.locations = graphLocations
-
-        self.romLoaded = False
-        if rom is not None:
-            self.loadRom(rom)
+        self.smbm = SMBoolManager.factory('all', cache=False)
 
         if params is not None:
             for paramsFileName in params:
                 self.loadParams(paramsFileName)
 
+        self.romLoaded = False
+        if rom is not None:
+            self.loadRom(rom)
+
         self.pickup = Pickup(Conf.majorsPickup, Conf.minorsPickup)
 
         Bosses.reset()
+
+        # the graph is adding the difficulties in the locations.
+        # in solver web mode the locations are only loaded once.
+        if self.type == 'web':
+            for loc in graphLocations:
+                if 'difficulty' in loc:
+                    del loc['difficulty']
 
     def loadRom(self, rom):
         if Conf.guessRomType == True and self.type == 'console':
@@ -59,10 +67,9 @@ class Solver:
         self.romLoader = RomLoader.factory(rom)
         (self.fullRando, self.areaRando) = RomType.apply(Conf.romType, self.romLoader.patches)
 
-        self.smbm = SMBoolManager.factory('all', cache=False)
         self.romLoader.assignItems(self.locations)
 
-        print("ROM Type: {}, Patches present: {}, Area Rando: {}".format(Conf.romType, self.romLoader.patches, (self.areaRando == True)))
+        print("ROM {} Type: {}, Patches present: {}, Area Rando: {}".format(rom, Conf.romType, self.romLoader.patches, (self.areaRando == True)))
 
         if self.areaRando == True:
             graphTransitions = self.romLoader.getTransitions()
@@ -216,7 +223,7 @@ class Solver:
 
             # first take major items of acceptable difficulty in the current area
             if (len(majorAvailable) > 0
-                   and majorAvailable[0]['Area'] == area
+                   and majorAvailable[0]['SolveArea'] == area
                    and majorAvailable[0]['difficulty'].difficulty <= diffThreshold):
                 self.collectMajor(majorAvailable.pop(0))
                 continue
@@ -233,7 +240,7 @@ class Solver:
                 self.log.debug('BOTH|M=' + majorAvailable[0]['Name'] + ', m=' + minorAvailable[0]['Name'])
                 # if both are available, decide based on area and difficulty
                 nextMajDifficulty = majorAvailable[0]['difficulty'].difficulty
-                nextMinArea = minorAvailable[0]['Area']
+                nextMinArea = minorAvailable[0]['SolveArea']
                 nextMinDifficulty = minorAvailable[0]['difficulty'].difficulty
                 if nextMinArea == area and nextMinDifficulty <= diffThreshold and not hasEnoughMinors:
                     area = self.collectMinor(minorAvailable.pop(0))
@@ -250,6 +257,7 @@ class Solver:
                 'itemName' : 'The End',
                 'Name' : 'The End',
                 'Area' : 'The End',
+                'SolveArea' : 'The End',
                 'Room': 'Mother Brain Room',
                 'difficulty' : SMBool(True, endDifficulty)
             })
@@ -305,7 +313,7 @@ class Solver:
     def getPath(self, locations):
         out = []
         for location in locations:
-            out.append([(location['Name'], location['Room']), location['Area'], location['itemName'],
+            out.append([(location['Name'], location['Room']), location['SolveArea'], location['itemName'],
                         '{0:.2f}'.format(location['difficulty'].difficulty),
                         ', '.join(sorted(location['difficulty'].knows)),
                         ', '.join(sorted(list(set(location['difficulty'].items))))])
@@ -324,11 +332,11 @@ class Solver:
 
     def printPath(self, message, locations):
         print(message)
-        print('{:>50} {:>13} {:>16} {:>14} {} {}'.format("Location Name", "Area", "Item", "Difficulty", "Knows used", "Items used"))
+        print('{:>50} {:>14} {:>16} {:>14} {} {}'.format("Location Name", "Area", "Item", "Difficulty", "Knows used", "Items used"))
         print('-'*106)
         for loc in locations:
-            print('{:>50}: {:>12} {:>16} {:>14} {} {}'.format(loc['Name'],
-                                                              loc['Area'],
+            print('{:>50}: {:>14} {:>16} {:>14} {} {}'.format(loc['Name'],
+                                                              loc['SolveArea'],
                                                               loc['itemName'],
                                                               loc['difficulty'].difficulty if 'difficulty' in loc else 'nc',
                                                               sorted(loc['difficulty'].knows) if 'difficulty' in loc else 'nc',
@@ -363,14 +371,14 @@ class Solver:
         if 'Pickup' in loc:
             loc['Pickup']()
         if isNew is True and self.firstLogFile is not None:
-            self.firstLogFile.write("{};{};{}\n".format(item, loc['Name'], loc['Area']))
+            self.firstLogFile.write("{};{};{}\n".format(item, loc['Name'], loc['SolveArea']))
 
         self.log.debug("collectItem: {} at {}".format(item, loc['Name']))
 
         # last loc is used as root node for the graph
         self.lastLoc = list(loc['AccessFrom'])[0]
 
-        return loc['Area']
+        return loc['SolveArea']
 
     def canEndGame(self):
         # to finish the game you must :
@@ -382,13 +390,13 @@ class Solver:
         return self.smbm.wand(Bosses.allBossesDead(self.smbm), self.smbm.enoughStuffTourian())
 
     def getAvailableItemsList(self, locations, area, threshold, enough):
-        around = [loc for loc in locations if loc['Area'] == area and loc['difficulty'].difficulty <= threshold and not Bosses.areaBossDead(area)]
+        around = [loc for loc in locations if loc['SolveArea'] == area and loc['difficulty'].difficulty <= threshold and not Bosses.areaBossDead(area)]
         # usually pickup action means beating a boss, so do that first if possible
         around.sort(key=lambda loc: (0 if 'Pickup' in loc else 1, loc['difficulty'].difficulty))
 
         outside = [loc for loc in locations if not loc in around]
-        self.log.debug("around1 = " + str([loc['Name'] for loc in around]))
-        self.log.debug("outside1 = " + str([loc['Name'] for loc in outside]))
+        self.log.debug("around1 = " + str([(loc['Name'], loc['difficulty']) for loc in around]))
+        self.log.debug("outside1 = " + str([(loc['Name'], loc['difficulty']) for loc in outside]))
         # we want to sort the outside locations by putting the ones is the same
         # area first if we don't have enough items,
         # then we sort the remaining areas starting whith boss dead status

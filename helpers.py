@@ -724,7 +724,13 @@ class Bosses:
     # bosses helpers to know if they are dead
     areaBosses = {
         'Brinstar': 'Kraid',
+        'Blue Brinstar': 'Kraid',
+        'Green Brinstar': 'Kraid',
+        'Pink Brinstar': 'Kraid',
+        'Red Brinstar': 'Kraid',
         'Norfair': 'Ridley',
+        'Bubble Norfair': 'Ridley',
+        'Crocomire': 'Ridley',
         'LowerNorfair': 'Ridley',
         'WreckedShip': 'Phantoon',
         'Maridia': 'Draygon'

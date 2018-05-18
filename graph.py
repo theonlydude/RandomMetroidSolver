@@ -69,6 +69,34 @@ class AccessGraph(object):
         return transitions
 
     def toDot(self, dotFile):
+        orientations = {
+            'Lava Dive Right': 'w',
+            'Noob Bridge Right': 'se',
+            'Main Street Bottom': 's',
+            'Red Tower Top Left': 'w',
+            'Red Brinstar Elevator': 'n',
+            'Moat Right': 'ne',
+            'Le Coude Right': 'ne',
+            'Warehouse Entrance Left': 'w',
+            'Green Brinstar Elevator Right': 'ne',
+            'Crab Hole Bottom Left': 'se',
+            'Lower Mushrooms Left': 'nw',
+            'East Tunnel Right': 'se',
+            'Glass Tunnel Top': 's',
+            'Green Hill Zone Top Right': 'e',
+            'East Tunnel Top Right': 'e',
+            'Crab Maze Left': 'e',
+            'Caterpillar Room Top Right': 'ne',
+            'Three Muskateers Room Left': 'n',
+            'Morph Ball Room Left': 'sw',
+            'Kronic Boost Room Bottom Left': 'se',
+            'West Ocean Left': 'w',
+            'Red Fish Room Left': 'w',
+            'Single Chamber Top Right': 'ne',
+            'Keyhunter Room Bottom': 'se'
+        }
+        colors = ['red', 'blue', 'green', 'yellow', 'skyblue', 'violet', 'orange',
+                  'lawngreen', 'crimson', 'chocolate', 'turquoise', 'tomato']
         with open(dotFile, "w") as f:
             f.write("digraph {\n")
             f.write('size="30,30!";\n')
@@ -79,12 +107,14 @@ class AccessGraph(object):
             f.write('node [shape="box",fontsize=10];\n')
             for area in set([ap.GraphArea for ap in self.accessPoints.values()]):
                 f.write(area + ";\n") # TODO area long name and color
-            drawn=[]
+            drawn = []
+            i = 0
             for src, dst in self.InterAreaTransitions:
                 if self.bidir is True and src.Name in drawn:
                     continue
-                f.write('%s -> %s [taillabel="%s",headlabel="%s"];\n' % (src.GraphArea,dst.GraphArea,src.Name,dst.Name)) # TODO arrow color
+                f.write('%s:%s -> %s:%s [taillabel="%s",headlabel="%s",color=%s];\n' % (src.GraphArea, orientations[src.Name], dst.GraphArea, orientations[dst.Name], src.Name, dst.Name, colors[i]))
                 drawn += [src.Name,dst.Name]
+                i += 1
             f.write("}\n")
 
     def addTransition(self, srcName, dstName, both=True):

@@ -1,5 +1,6 @@
 #!/usr/bin/python
 
+import copy
 from parameters import Knows
 from rom import RomPatches
 from smbool import SMBool
@@ -28,6 +29,7 @@ class AccessPoint(object):
             self.ShortName = shortName
         else:
             self.ShortName = str(self)
+        self.distance = 0
 
     def __str__(self):
         return "[" + self.GraphArea + "] " + self.Name
@@ -43,17 +45,60 @@ class AccessGraph(object):
         self.InterAreaTransitions = []
         self.bidir = bidir
         for ap in accessPoints:
+            ap.distance = 0
             self.accessPoints[ap.Name] = ap
         for srcName, dstName in transitions:
             self.addTransition(srcName, dstName, bidir)
         if dotFile is not None:
             self.toDot(dotFile)
 
-    def getCreditsLines(self):
-        # TODO arrange transitions shortnames to have the least amount of lines to represent them
-        pass
+    def getCreditsTransitions(self):
+        transitionsDict = {}
+        for (src, dest) in self.InterAreaTransitions:
+            transitionsDict[src] = dest
+
+        # remove duplicate (src, dest) - (dest, src)
+        transitionsCopy = copy.copy(transitionsDict)
+        for src in transitionsCopy:
+            if src in transitionsDict:
+                dest = transitionsDict[src]
+                if dest in transitionsDict:
+                    if transitionsDict[dest] == src:
+                        del transitionsDict[dest]
+
+        transitions = [(t, transitionsDict[t]) for t in transitionsDict]
+
+        return transitions
 
     def toDot(self, dotFile):
+        orientations = {
+            'Lava Dive Right': 'w',
+            'Noob Bridge Right': 'se',
+            'Main Street Bottom': 's',
+            'Red Tower Top Left': 'w',
+            'Red Brinstar Elevator': 'n',
+            'Moat Right': 'ne',
+            'Le Coude Right': 'ne',
+            'Warehouse Entrance Left': 'w',
+            'Green Brinstar Elevator Right': 'ne',
+            'Crab Hole Bottom Left': 'se',
+            'Lower Mushrooms Left': 'nw',
+            'East Tunnel Right': 'se',
+            'Glass Tunnel Top': 's',
+            'Green Hill Zone Top Right': 'e',
+            'East Tunnel Top Right': 'e',
+            'Crab Maze Left': 'e',
+            'Caterpillar Room Top Right': 'ne',
+            'Three Muskateers Room Left': 'n',
+            'Morph Ball Room Left': 'sw',
+            'Kronic Boost Room Bottom Left': 'se',
+            'West Ocean Left': 'w',
+            'Red Fish Room Left': 'w',
+            'Single Chamber Top Right': 'ne',
+            'Keyhunter Room Bottom': 'se'
+        }
+        colors = ['red', 'blue', 'green', 'yellow', 'skyblue', 'violet', 'orange',
+                  'lawngreen', 'crimson', 'chocolate', 'turquoise', 'tomato']
         with open(dotFile, "w") as f:
             f.write("digraph {\n")
             f.write('size="30,30!";\n')
@@ -64,12 +109,14 @@ class AccessGraph(object):
             f.write('node [shape="box",fontsize=10];\n')
             for area in set([ap.GraphArea for ap in self.accessPoints.values()]):
                 f.write(area + ";\n") # TODO area long name and color
-            drawn=[]
+            drawn = []
+            i = 0
             for src, dst in self.InterAreaTransitions:
                 if self.bidir is True and src.Name in drawn:
                     continue
-                f.write('%s -> %s [taillabel="%s",headlabel="%s"];\n' % (src.GraphArea,dst.GraphArea,src.Name,dst.Name)) # TODO arrow color
+                f.write('%s:%s -> %s:%s [taillabel="%s",headlabel="%s",color=%s];\n' % (src.GraphArea, orientations[src.Name], dst.GraphArea, orientations[dst.Name], src.Name, dst.Name, colors[i]))
                 drawn += [src.Name,dst.Name]
+                i += 1
             f.write("}\n")
 
     def addTransition(self, srcName, dstName, both=True):
@@ -85,7 +132,7 @@ class AccessGraph(object):
     # items: collected items
     # maxDiff: difficulty limit
     # return newly opened access points
-    def getNewAvailNodes(self, availNodes, nodesToCheck, smbm, maxDiff):
+    def getNewAvailNodes(self, availNodes, nodesToCheck, smbm, maxDiff, distance):
         newAvailNodes = {}
         for node in nodesToCheck:
             for dstName, tFunc in node.transitions.iteritems():
@@ -95,6 +142,7 @@ class AccessGraph(object):
                 # diff = tFunc(smbm)
                 diff = smbm.eval(tFunc)
                 if diff.bool == True and diff.difficulty <= maxDiff:
+                    dst.distance = distance
                     newAvailNodes[dst] = diff
         return newAvailNodes
 
@@ -105,9 +153,11 @@ class AccessGraph(object):
     def getAvailableAccessPoints(self, rootNode, smbm, maxDiff):
         availNodes = { rootNode : SMBool(True, 0) }
         newAvailNodes = availNodes
+        distance = 1
         while len(newAvailNodes) > 0:
-            newAvailNodes = self.getNewAvailNodes(availNodes, newAvailNodes, smbm, maxDiff)
+            newAvailNodes = self.getNewAvailNodes(availNodes, newAvailNodes, smbm, maxDiff, distance)
             availNodes.update(newAvailNodes)
+            distance += 1
         return availNodes
 
     # locations: locations to check
@@ -135,6 +185,7 @@ class AccessGraph(object):
                                                knows=list(set(tdiff.knows + diff.knows + apDiff.knows)),
                                                items=list(set(tdiff.items + diff.items + apDiff.items)))
                     if diff.bool == True and diff.difficulty <= maxDiff:
+                        loc['distance'] = ap.distance + 1
                         availLocs.append(loc)
                         break
                 else:
@@ -400,7 +451,9 @@ accessPoints = [
        shortName="B\\TOP EAST TUNNEL"),
     AccessPoint('Glass Tunnel Top', 'RedBrinstar', {
         'East Tunnel Right': lambda sm: sm.canUsePowerBombs()
-    }, traverse=lambda sm: sm.wand(sm.wor(sm.haveItem('Gravity'), sm.haveItem('HiJump')), sm.canUsePowerBombs()),
+    }, traverse=lambda sm: sm.wand(sm.wor(sm.haveItem('Gravity'),
+                                          sm.haveItem('HiJump')),
+                                   sm.canUsePowerBombs()),
        roomInfo = {'RoomPtr':0xcefb, "area": 0x4},
        exitInfo = {'DoorPtr':0xa330, 'direction': 0x7, "cap": (0x16, 0x7d), "bitFlag": 0x0,
                    "screen": (0x1, 0x7), "distanceToSpawn": 0x200, "doorAsmPtr": 0x0000},

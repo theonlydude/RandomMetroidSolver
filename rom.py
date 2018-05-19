@@ -756,21 +756,6 @@ class RomPatcher:
         address = 0x273B40
         lineLength = 32
 
-        transitionsDict = {}
-        for (src, dest) in transitions:
-            transitionsDict[src] = dest
-
-        # remove duplicate (src, dest) - (dest, src)
-        transitionsCopy = copy.copy(transitionsDict)
-        for src in transitionsCopy:
-            if src in transitionsDict:
-                dest = transitionsDict[src]
-                if dest in transitionsDict:
-                    if transitionsDict[dest] == src:
-                        del transitionsDict[dest]
-
-        transitions = [(t, transitionsDict[t]) for t in transitionsDict]
-
         for (src, dest) in transitions:
             src = src.ShortName
             dest = dest.ShortName

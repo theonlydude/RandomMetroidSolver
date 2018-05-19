@@ -10,6 +10,25 @@ extend 'layout.html'
 <link href={{=URL('static', 'css/bootstrap-tour.min.css')}} rel="stylesheet">
 <script src="{{=URL('static','js/bootstrap-tour.min.js')}}"></script>
 
+<script type="text/javascript" src="{{=URL('static', '/highslide/highslide.js')}}"></script>
+<link rel="stylesheet" type="text/css" href={{=URL("static", "/highslide/highslide.css")}} />
+<script type="text/javascript">
+hs.graphicsDir = "/solver/static/highslide/graphics/";
+hs.showCredits = 0;
+hs.zIndexCounter = 1000000;
+hs.dimmingOpacity = 0.75;
+
+if (hs.registerOverlay) {
+	// The simple semitransparent close button overlay
+	hs.registerOverlay({
+		thumbnailId: 'areathumb',
+		html: '<div class="closebutton"	onclick="return hs.close(this)" title="Close"></div>',
+		position: 'top right',
+		fade: 2 // fading the semi-transparent overlay looks bad in IE
+	});
+}
+</script>
+
 <title>Super Metroid Item Randomizer Solver</title>
 
 <style>
@@ -570,6 +589,12 @@ if resultText is not None:
   response.write("<div id=\"path_div\" style=\"display:none;\">\n", escape=False)
   response.write("<hr>\n", escape=False)
   =pathTable
+
+  if pngFileName is not None and pngThumbFileName is not None:
+    response.write("<p>The graph of the Areas transitions</p>", escape=False)
+    response.write("<a href=\"/solver/static/graph/"+pngFileName+"\" class=\"highslide\" onclick=\"return hs.expand(this, {wrapperClassName: 'borderless', dimmingOpacity: 0.75, align: 'center'})\"><img id=\"transitionsthumb\" src=\"/solver/static/graph/"+pngThumbFileName+"\" alt=\"Transitions Graph\" title=\"Click to enlarge\"/></a>", escape=False)
+    pass
+
   response.write("</div>\n", escape=False)
   pass
 }}

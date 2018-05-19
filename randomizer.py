@@ -117,11 +117,6 @@ if __name__ == "__main__":
     # parse args
     args = parser.parse_args()
 
-    # check that rom or output parameter is set
-    if args.rom == None and args.output == None:
-        print("missing --rom or --output parameters")
-        sys.exit(-1)
-
     # if diff preset given, load it
     if args.paramsFileName is not None:
         ParamsLoader.factory(args.paramsFileName[0]).load()
@@ -278,9 +273,7 @@ if __name__ == "__main__":
             romPatcher.writeRandoSettings(randoSettings)
             if args.area == True:
                 romPatcher.writeDoorConnections(doors)
-                romPatcher.writeTransitionsCredits(randomizer.areaGraph.InterAreaTransitions)
-            else:
-                romPatcher.writeTransitionsCredits(vanillaTransitions)
+            romPatcher.writeTransitionsCredits(randomizer.areaGraph.getCreditsTransitions())
             romPatcher.end()
         except Exception as e:
             print("Error patching {}. Is {} a valid ROM ? ({})".format(fileName, romFileName, e))
@@ -295,9 +288,7 @@ if __name__ == "__main__":
         romPatcher.writeRandoSettings(randoSettings)
         if args.area == True:
             romPatcher.writeDoorConnections(doors)
-            romPatcher.writeTransitionsCredits(randomizer.areaGraph.InterAreaTransitions)
-        else:
-            romPatcher.writeTransitionsCredits(vanillaTransitions)
+        romPatcher.writeTransitionsCredits(randomizer.areaGraph.getCreditsTransitions())
 
         data = romPatcher.romFile.data
         fileName += '.sfc'
@@ -305,5 +296,10 @@ if __name__ == "__main__":
 
         with open(args.output, 'w') as jsonFile:
             json.dump(data, jsonFile)
+    else:
+        # rom json
+        fileName += '.json'
+        with open(fileName, 'w') as jsonFile:
+            json.dump(locsItems, jsonFile)
 
     print("Rom generated: {}".format(fileName))

@@ -55,6 +55,7 @@ class Solver:
             for loc in graphLocations:
                 if 'difficulty' in loc:
                     del loc['difficulty']
+                loc['distance'] = 0
 
     def loadRom(self, rom):
         if Conf.guessRomType == True and self.type == 'console':
@@ -259,6 +260,7 @@ class Solver:
                 'Area' : 'The End',
                 'SolveArea' : 'The End',
                 'Room': 'Mother Brain Room',
+                'distance': 0,
                 'difficulty' : SMBool(True, endDifficulty)
             })
 
@@ -312,11 +314,11 @@ class Solver:
 
     def getPath(self, locations):
         out = []
-        for location in locations:
-            out.append([(location['Name'], location['Room']), location['SolveArea'], location['itemName'],
-                        '{0:.2f}'.format(location['difficulty'].difficulty),
-                        ', '.join(sorted(location['difficulty'].knows)),
-                        ', '.join(sorted(list(set(location['difficulty'].items))))])
+        for loc in locations:
+            out.append([(loc['Name'], loc['Room']), loc['Area'], loc['SolveArea'], loc['itemName'],
+                        '{0:.2f}'.format(loc['difficulty'].difficulty),
+                        ', '.join(sorted(loc['difficulty'].knows)),
+                        ', '.join(sorted(list(set(loc['difficulty'].items))))])
 
         return out
 
@@ -332,15 +334,17 @@ class Solver:
 
     def printPath(self, message, locations):
         print(message)
-        print('{:>50} {:>14} {:>16} {:>14} {} {}'.format("Location Name", "Area", "Item", "Difficulty", "Knows used", "Items used"))
-        print('-'*106)
+        print('{:>50} {:>12} {:>34} {:>8} {:>16} {:>14} {} {}'.format("Location Name", "Area", "Sub Area", "Distance", "Item", "Difficulty", "Knows used", "Items used"))
+        print('-'*150)
         for loc in locations:
-            print('{:>50}: {:>14} {:>16} {:>14} {} {}'.format(loc['Name'],
-                                                              loc['SolveArea'],
-                                                              loc['itemName'],
-                                                              loc['difficulty'].difficulty if 'difficulty' in loc else 'nc',
-                                                              sorted(loc['difficulty'].knows) if 'difficulty' in loc else 'nc',
-                                                              list(set(loc['difficulty'].items)) if 'difficulty' in loc else 'nc'))
+            print('{:>50}: {:>12} {:>34} {:>8} {:>16} {:>14} {} {}'.format(loc['Name'],
+                                                                           loc['Area'],
+                                                                           loc['SolveArea'],
+                                                                           loc['distance'],
+                                                                           loc['itemName'],
+                                                                           round(loc['difficulty'].difficulty, 2) if 'difficulty' in loc else 'nc',
+                                                                           sorted(loc['difficulty'].knows) if 'difficulty' in loc else 'nc',
+                                                                           list(set(loc['difficulty'].items)) if 'difficulty' in loc else 'nc'))
 
     def collectMajor(self, loc):
         self.majorLocations.remove(loc)
@@ -390,9 +394,9 @@ class Solver:
         return self.smbm.wand(Bosses.allBossesDead(self.smbm), self.smbm.enoughStuffTourian())
 
     def getAvailableItemsList(self, locations, area, threshold, enough):
-        around = [loc for loc in locations if loc['SolveArea'] == area and loc['difficulty'].difficulty <= threshold and not Bosses.areaBossDead(area)]
+        around = [loc for loc in locations if (loc['SolveArea'] == area or loc['distance'] < 3) and loc['difficulty'].difficulty <= threshold and not Bosses.areaBossDead(area)]
         # usually pickup action means beating a boss, so do that first if possible
-        around.sort(key=lambda loc: (0 if 'Pickup' in loc else 1, loc['difficulty'].difficulty))
+        around.sort(key=lambda loc: (0 if 'Pickup' in loc else 1, loc['distance'], loc['difficulty'].difficulty))
 
         outside = [loc for loc in locations if not loc in around]
         self.log.debug("around1 = " + str([(loc['Name'], loc['difficulty']) for loc in around]))
@@ -400,7 +404,8 @@ class Solver:
         # we want to sort the outside locations by putting the ones is the same
         # area first if we don't have enough items,
         # then we sort the remaining areas starting whith boss dead status
-        outside.sort(key=lambda loc: (0 if loc['Area'] == area and not enough and loc['difficulty'].difficulty <= threshold
+        outside.sort(key=lambda loc: (loc['distance'],
+                                      0 if loc['Area'] == area and not enough and loc['difficulty'].difficulty <= threshold
                                       else 1,
                                       loc['difficulty'].difficulty if not Bosses.areaBossDead(loc['Area'])
                                                                       and loc['difficulty'].difficulty <= threshold

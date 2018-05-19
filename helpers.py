@@ -723,17 +723,44 @@ class Pickup:
 class Bosses:
     # bosses helpers to know if they are dead
     areaBosses = {
+        # classic areas
         'Brinstar': 'Kraid',
-        'Blue Brinstar': 'Kraid',
-        'Green Brinstar': 'Kraid',
-        'Pink Brinstar': 'Kraid',
-        'Red Brinstar': 'Kraid',
         'Norfair': 'Ridley',
-        'Bubble Norfair': 'Ridley',
-        'Crocomire': 'Ridley',
         'LowerNorfair': 'Ridley',
         'WreckedShip': 'Phantoon',
-        'Maridia': 'Draygon'
+        'Maridia': 'Draygon',
+        # solver areas
+        'Blue Brinstar': 'Kraid',
+        'Brinstar Hills': 'Kraid',
+        'Bubble Norfair': 'Ridley',
+        'Bubble Norfair Bottom': 'Ridley',
+        'Bubble Norfair Reserve': 'Ridley',
+        'Bubble Norfair Speed': 'Ridley',
+        'Bubble Norfair Wave': 'Ridley',
+        'Crocomire': 'Ridley',
+        'Green Brinstar': 'Kraid',
+        'Green Brinstar Reserve': 'Kraid',
+        'Lower Norfair After Amphitheater': 'Ridley',
+        'Lower Norfair Before Amphitheater': 'Ridley',
+        'Lower Norfair Screw Attack': 'Ridley',
+        'Maridia Forgotten Highway': 'Draygon',
+        'Maridia Green': 'Draygon',
+        'Maridia Pink Bottom': 'Draygon',
+        'Maridia Pink Top': 'Draygon',
+        'Maridia Sandpits': 'Draygon',
+        'Norfair Entrance': 'Ridley',
+        'Norfair Grapple Escape': 'Ridley',
+        'Norfair Ice': 'Ridley',
+        'Pink Brinstar': 'Kraid',
+        'Red Brinstar': 'Kraid',
+        'Red Brinstar Top': 'Kraid',
+        'Warehouse': 'Kraid',
+        'WreckedShip': 'Phantoon',
+        'WreckedShip Back': 'Phantoon',
+        'WreckedShip Bottom': 'Phantoon',
+        'WreckedShip Gravity': 'Phantoon',
+        'WreckedShip Main': 'Phantoon',
+        'WreckedShip Top': 'Phantoon'
     }
 
     golden4Dead = {

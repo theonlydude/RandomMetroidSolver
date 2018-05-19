@@ -273,9 +273,7 @@ if __name__ == "__main__":
             romPatcher.writeRandoSettings(randoSettings)
             if args.area == True:
                 romPatcher.writeDoorConnections(doors)
-                romPatcher.writeTransitionsCredits(randomizer.areaGraph.getCreditsTransitions())
-            else:
-                romPatcher.writeTransitionsCredits(vanillaTransitions)
+            romPatcher.writeTransitionsCredits(randomizer.areaGraph.getCreditsTransitions())
             romPatcher.end()
         except Exception as e:
             print("Error patching {}. Is {} a valid ROM ? ({})".format(fileName, romFileName, e))
@@ -290,9 +288,7 @@ if __name__ == "__main__":
         romPatcher.writeRandoSettings(randoSettings)
         if args.area == True:
             romPatcher.writeDoorConnections(doors)
-            romPatcher.writeTransitionsCredits(randomizer.areaGraph.getCreditsTransitions())
-        else:
-            romPatcher.writeTransitionsCredits(vanillaTransitions)
+        romPatcher.writeTransitionsCredits(randomizer.areaGraph.getCreditsTransitions())
 
         data = romPatcher.romFile.data
         fileName += '.sfc'

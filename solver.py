@@ -340,7 +340,7 @@ class Solver:
             print('{:>50}: {:>12} {:>34} {:>8} {:>16} {:>14} {} {}'.format(loc['Name'],
                                                                            loc['Area'],
                                                                            loc['SolveArea'],
-                                                                           loc['distance'],
+                                                                           loc['distance'] if 'distance' in loc else 'nc',
                                                                            loc['itemName'],
                                                                            round(loc['difficulty'].difficulty, 2) if 'difficulty' in loc else 'nc',
                                                                            sorted(loc['difficulty'].knows) if 'difficulty' in loc else 'nc',

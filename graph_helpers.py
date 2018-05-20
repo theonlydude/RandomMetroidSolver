@@ -106,7 +106,7 @@ class HelpersGraph(Helpers):
         return sm.wand(sm.wor(sm.wand(sm.haveItem('SpeedBooster'), # frog speedway
                                       sm.wor(SMBool(not bubbleMountain, 0), sm.canPassBombPassages())),
                               # go through cathedral
-                              sm.wand(sm.canOpenRedDoors(),
+                              sm.wand(sm.canOpenGreenDoors(),
                                       sm.wor(RomPatches.has(RomPatches.CathedralEntranceWallJump),
                                              sm.haveItem('HiJump'),
                                              sm.canFly()))),

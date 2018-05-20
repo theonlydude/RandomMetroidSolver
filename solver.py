@@ -280,18 +280,16 @@ class Solver:
         return (difficulty, itemsOk)
 
     def computeLocationsDifficulty(self, locations):
-        availLocs = self.areaGraph.getAvailableLocations(locations, self.smbm, samus, self.lastLoc)
+        self.areaGraph.getAvailableLocations(locations, self.smbm, samus, self.lastLoc)
         # check post available functions too
-        for loc in availLocs:
+        for loc in locations:
             if 'PostAvailable' in loc:
                 self.smbm.addItem(loc['itemName'])
                 postAvailable = loc['PostAvailable'](self.smbm)
                 self.smbm.removeItem(loc['itemName'])
                 loc['difficulty'] = self.smbm.wand(loc['difficulty'], postAvailable)
 
-        self.log.debug("available locs: {}".format([loc['Name'] for loc in availLocs]))
-
-        return availLocs
+        self.log.debug("available locs: {}".format([loc['Name'] for loc in locations]))
 
     def computeDifficultyValue(self):
         if not self.canEndGame().bool:
@@ -380,9 +378,7 @@ class Solver:
         self.log.debug("collectItem: {} at {}".format(item, loc['Name']))
 
         # last loc is used as root node for the graph
-        #self.lastLoc = loc['accessPoint']
-        # TODO::doesn't work, debug it, keeping landing site for now
-        self.lastLoc = 'Landing Site'
+        self.lastLoc = loc['accessPoint']
 
         return loc['SolveArea']
 

@@ -171,6 +171,8 @@ class AccessGraph(object):
         availLocs = []
         for loc in locations:
             if not loc['GraphArea'] in availAreas:
+                loc['distance'] = 10000
+                loc['difficulty'] = SMBool(False, 0)
                 continue
             for apName,tFunc in loc['AccessFrom'].iteritems():
                 ap = self.accessPoints[apName]
@@ -190,8 +192,10 @@ class AccessGraph(object):
                         availLocs.append(loc)
                         break
                 else:
+                    loc['distance'] = 1000
                     loc['difficulty'] = tdiff
             if not 'difficulty' in loc:
+                loc['distance'] = 10000
                 loc['difficulty'] = SMBool(False, 0)
         return availLocs
     
@@ -304,7 +308,10 @@ accessPoints = [
        shortName="LN\\THREE MUSK."),
     # Norfair
     AccessPoint('Warehouse Entrance Left', 'Norfair', {
-        'Single Chamber Top Right': lambda sm: sm.canAccessHeatedNorfairFromEntrance(),
+        'Single Chamber Top Right': lambda sm: sm.wand(sm.canAccessHeatedNorfairFromEntrance(),
+                                                       sm.canDestroyBombWalls(),
+                                                       sm.haveItem('Morph'),
+                                                       RomPatches.has(RomPatches.SingleChamberNoCrumble)),
         'Kronic Boost Room Bottom Left': lambda sm: sm.canAccessHeatedNorfairFromEntrance()
     }, roomInfo = {'RoomPtr':0xa6a1, "area": 0x1},
        exitInfo = {'DoorPtr':0x922e, 'direction': 0x5, "cap": (0xe, 0x16), "bitFlag": 0x40,
@@ -318,16 +325,17 @@ accessPoints = [
         'Kronic Boost Room Bottom Left': lambda sm: sm.wand(sm.canDestroyBombWalls(),
                                                             sm.haveItem('Morph'),
                                                             sm.canHellRun('MainUpperNorfair'))
-    }, traverse=lambda sm: sm.wand(sm.canDestroyBombWalls(),
-                           sm.haveItem('Morph'),
-                           RomPatches.has(RomPatches.SingleChamberNoCrumble)),
+    },
         roomInfo = {'RoomPtr':0xad5e, "area": 0x2},
         exitInfo = {'DoorPtr':0x95fa, 'direction': 0x4, "cap": (0x11, 0x6), "bitFlag": 0x0,
                     "screen": (0x1, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
         entryInfo = {'SamusX':0x5cf, 'SamusY':0x88},
         shortName="N\\SINGLE CHAMBER"),
     AccessPoint('Kronic Boost Room Bottom Left', 'Norfair', {
-        'Single Chamber Top Right': lambda sm: sm.canHellRun('MainUpperNorfair'),
+        'Single Chamber Top Right': lambda sm: sm.wand(sm.canHellRun('MainUpperNorfair'),
+                                                       sm.canDestroyBombWalls(),
+                                                       sm.haveItem('Morph'),
+                                                       RomPatches.has(RomPatches.SingleChamberNoCrumble)),
         'Warehouse Entrance Left': lambda sm: sm.canHellRun('MainUpperNorfair')
     }, traverse=lambda sm: sm.wor(RomPatches.has(RomPatches.AreaRandoBlueDoors), sm.canOpenYellowDoors()),
        roomInfo = {'RoomPtr':0xae74, "area": 0x2},
@@ -337,7 +345,8 @@ accessPoints = [
        shortName="N\\KRONIC BOOST"),
     # Maridia
     AccessPoint('Main Street Bottom', 'Maridia', {
-        'Red Fish Room Left': lambda sm: sm.canGoUpMtEverest(),
+        'Red Fish Room Left': lambda sm: wm.wand(sm.canGoUpMtEverest(),
+                                                 sm.haveItem('Morph')),
         'Crab Hole Bottom Left': lambda sm: sm.wand(sm.haveItem('Morph'),
                                                     sm.canOpenGreenDoors()), # red door+green gate
         'Le Coude Right': lambda sm: sm.wand(sm.canOpenGreenDoors(), # gate+door
@@ -358,7 +367,7 @@ accessPoints = [
                                              sm.wor(sm.haveItem('Gravity'),
                                                     sm.wand(sm.knowsGravLessLevel3(),
                                                             sm.haveItem('HiJump')))) # for the sand pits
-    }, traverse = lambda sm: sm.haveItem('Morph'),
+    },
        roomInfo = {'RoomPtr':0xd21c, "area": 0x4},
        exitInfo = {'DoorPtr':0xa510, 'direction': 0x5,
                    "cap": (0x3e, 0x6), "screen": (0x3, 0x0), "bitFlag": 0x0,
@@ -370,7 +379,8 @@ accessPoints = [
                                                     sm.wor(sm.haveItem('Gravity'),
                                                            sm.wand(sm.knowsGravLessLevel3(),
                                                                    sm.haveItem('HiJump'))), # for the sand pits
-                                                    sm.canOpenGreenDoors()), # toilet door
+                                                    sm.canOpenGreenDoors(),
+                                                    sm.haveItem('Morph')), # toilet door
         'Main Street Bottom': lambda sm: sm.wand(sm.canOpenYellowDoors(),
                                                  sm.wand(sm.wor(sm.haveItem('Gravity'),
                                                                 sm.wand(sm.knowsGravLessLevel3(),
@@ -384,7 +394,7 @@ accessPoints = [
        shortName="M\\COUDE"),
     AccessPoint('Red Fish Room Left', 'Maridia', {
         'Main Street Bottom': lambda sm: sm.haveItem('Morph') # just go down
-    }, traverse=lambda sm: sm.haveItem('Morph'),
+    },
        roomInfo = {'RoomPtr':0xd104, "area": 0x4},
        exitInfo = {'DoorPtr':0xa480, 'direction': 0x5, "cap": (0x2e, 0x36), "bitFlag": 0x40,
                    "screen": (0x2, 0x3), "distanceToSpawn": 0x8000, "doorAsmPtr": 0xe367},
@@ -416,14 +426,14 @@ accessPoints = [
                                                  sm.wor(RomPatches.has(RomPatches.NoMaridiaGreenGates),
                                                         sm.canOpenGreenDoors()),
                                                  sm.canOpenYellowDoors())
-    }, traverse=lambda sm: sm.wand(sm.haveItem('Morph'), RomPatches.has(RomPatches.NoMaridiaGreenGates)),
+    },
        roomInfo = {'RoomPtr':0xa322, "area": 0x1},
        exitInfo = {'DoorPtr':0x90c6, 'direction': 0x4, "cap": (0x1, 0x6), "bitFlag": 0x40,
                    "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0xbdaf},
        entryInfo = {'SamusX':0x2cd, 'SamusY':0x388},
        shortName="B\\TOP RED TOWER"),
     AccessPoint('Red Brinstar Elevator', 'RedBrinstar', {
-        'Caterpillar Room Top Right': lambda sm: sm.setSMBool(True), # handled by room traverse function
+        'Caterpillar Room Top Right': lambda sm: sm.wand(sm.haveItem('Morph'), RomPatches.has(RomPatches.NoMaridiaGreenGates)),
         'Red Tower Top Left': lambda sm: sm.canOpenYellowDoors()
     }, roomInfo = {'RoomPtr':0x962a, "area": 0x0},
        exitInfo = {'DoorPtr':0x8af6, 'direction': 0x7, "cap": (0x16, 0x2d), "bitFlag": 0x0,

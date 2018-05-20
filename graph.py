@@ -186,6 +186,7 @@ class AccessGraph(object):
                                                items=list(set(tdiff.items + diff.items + apDiff.items)))
                     if diff.bool == True and diff.difficulty <= maxDiff:
                         loc['distance'] = ap.distance + 1
+                        loc['accessPoint'] = apName
                         availLocs.append(loc)
                         break
                 else:

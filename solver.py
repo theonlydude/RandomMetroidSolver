@@ -289,7 +289,7 @@ class Solver:
                 self.smbm.removeItem(loc['itemName'])
                 loc['difficulty'] = self.smbm.wand(loc['difficulty'], postAvailable)
 
-        #print("available locs: {}".format([loc['Name'] for loc in availLocs]))
+        self.log.debug("available locs: {}".format([loc['Name'] for loc in availLocs]))
 
         return availLocs
 
@@ -380,7 +380,9 @@ class Solver:
         self.log.debug("collectItem: {} at {}".format(item, loc['Name']))
 
         # last loc is used as root node for the graph
-        self.lastLoc = list(loc['AccessFrom'])[0]
+        #self.lastLoc = loc['accessPoint']
+        # TODO::doesn't work, debug it, keeping landing site for now
+        self.lastLoc = 'Landing Site'
 
         return loc['SolveArea']
 
@@ -394,6 +396,9 @@ class Solver:
         return self.smbm.wand(Bosses.allBossesDead(self.smbm), self.smbm.enoughStuffTourian())
 
     def getAvailableItemsList(self, locations, area, threshold, enough):
+        # locations without distance are not available
+        locations = [loc for loc in locations if 'distance' in loc]
+
         around = [loc for loc in locations if (loc['SolveArea'] == area or loc['distance'] < 3) and loc['difficulty'].difficulty <= threshold and not Bosses.areaBossDead(area)]
         # usually pickup action means beating a boss, so do that first if possible
         around.sort(key=lambda loc: (0 if 'Pickup' in loc else 1, loc['distance'], loc['difficulty'].difficulty))
@@ -415,8 +420,8 @@ class Solver:
                                                                       and loc['difficulty'].difficulty <= threshold
                                       else 100000,
                                       loc['difficulty'].difficulty))
-        self.log.debug("around2 = " + str([loc['Name'] for loc in around]))
-        self.log.debug("outside2 = " + str([loc['Name'] for loc in outside]))
+        self.log.debug("around2 = " + str([(loc['Name'], loc['difficulty']) for loc in around]))
+        self.log.debug("outside2 = " + str([(loc['Name'], loc['difficulty']) for loc in outside]))
 
         return around + outside
 

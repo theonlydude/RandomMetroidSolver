@@ -345,7 +345,7 @@ accessPoints = [
        shortName="N\\KRONIC BOOST"),
     # Maridia
     AccessPoint('Main Street Bottom', 'Maridia', {
-        'Red Fish Room Left': lambda sm: wm.wand(sm.canGoUpMtEverest(),
+        'Red Fish Room Left': lambda sm: sm.wand(sm.canGoUpMtEverest(),
                                                  sm.haveItem('Morph')),
         'Crab Hole Bottom Left': lambda sm: sm.wand(sm.haveItem('Morph'),
                                                     sm.canOpenGreenDoors()), # red door+green gate

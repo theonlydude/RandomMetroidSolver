@@ -55,7 +55,7 @@ class AccessGraph(object):
     def getCreditsTransitions(self):
         transitionsDict = {}
         for (src, dest) in self.InterAreaTransitions:
-            transitionsDict[src] = dest
+            transitionsDict[src.ShortName] = dest.ShortName
 
         # remove duplicate (src, dest) - (dest, src)
         transitionsCopy = copy.copy(transitionsDict)
@@ -68,7 +68,7 @@ class AccessGraph(object):
 
         transitions = [(t, transitionsDict[t]) for t in transitionsDict]
 
-        return transitions
+        return sorted(transitions, key=lambda x: x[0])
 
     def toDot(self, dotFile):
         orientations = {

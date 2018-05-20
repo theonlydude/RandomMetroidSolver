@@ -757,8 +757,6 @@ class RomPatcher:
         lineLength = 32
 
         for (src, dest) in transitions:
-            src = src.ShortName
-            dest = dest.ShortName
             # line is 32 chars long, need a space between the two access points
             length = len(src) + len(dest) + len(" ")
             if length > lineLength:

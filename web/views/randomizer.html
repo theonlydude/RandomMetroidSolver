@@ -370,6 +370,22 @@ window.onload = function(){
         switchCheckbox("supermetroid_msu1");
     };
 
+    var area = document.getElementById("areaRandomization");
+    area.onchange = function(){
+        var maxDiff = document.getElementById("maxDifficulty");
+        var full = document.getElementById("fullRandomization");
+
+        if(areaRandomization.checked) {
+            if(! full.checked) {
+                full.click();
+            }
+            if(maxDiff.value == "no difficulty cap"){
+                maxDiff.value = "hardcore";
+            }
+        }
+        switchCheckbox("areaRandomization");
+    };
+
     var progSpeed = document.getElementById("progressionSpeed");
     progSpeed.onchange = function(){
         var progSpeed = document.getElementById("progressionSpeed");
@@ -690,7 +706,7 @@ def displayNumber(id, min, max, default, step="1"):
             </tr>
           </table>
 	  <br/>
-	  <h4>The quantity of Minors and Energy</h4>
+	  <h4>Ammo and Energy</h4>
 	  <table class="full">
             <colgroup><col class="half" /><col class="half" /></colgroup>
 	    <tr>

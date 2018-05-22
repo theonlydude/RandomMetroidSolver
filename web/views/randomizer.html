@@ -107,7 +107,6 @@ function AjaxPresetCallCompleted(data) {
         powerBombQty : document.getElementById("powerBombQty").value,
         minorQty : document.getElementById("minorQty").value,
         energyQty : document.getElementById("energyQty").value,
-        useMaxDiff : document.getElementById("useMaxDiff").value,
         maxDifficulty : document.getElementById("maxDifficulty").value,
         progressionSpeed : document.getElementById("progressionSpeed").value,
         spreadItems : document.getElementById("spreadItems").value,
@@ -200,7 +199,6 @@ function AjaxRandomizerCallCompleted(data) {
         powerBombQty : document.getElementById("powerBombQty").value,
         minorQty : document.getElementById("minorQty").value,
         energyQty : document.getElementById("energyQty").value,
-        useMaxDiff : document.getElementById("useMaxDiff").value,
         maxDifficulty : document.getElementById("maxDifficulty").value,
         progressionSpeed : document.getElementById("progressionSpeed").value,
         spreadItems : document.getElementById("spreadItems").value,
@@ -372,19 +370,21 @@ window.onload = function(){
         switchCheckbox("supermetroid_msu1");
     };
 
-    var useMax = document.getElementById("useMaxDiff");
-    if(! useMax.checked){
-        document.getElementById("maxDifficulty").disabled = true;
-    }
-    useMax.onchange = function(){
-        var useMax = document.getElementById("useMaxDiff");
-        if(useMax.checked){
-            document.getElementById("maxDifficulty").disabled = false;
-        } else {
-            document.getElementById("maxDifficulty").disabled = true;
+    var area = document.getElementById("areaRandomization");
+    area.onchange = function(){
+        var maxDiff = document.getElementById("maxDifficulty");
+        var full = document.getElementById("fullRandomization");
+
+        if(areaRandomization.checked) {
+            if(! full.checked) {
+                full.click();
+            }
+            if(maxDiff.value == "no difficulty cap"){
+                maxDiff.value = "hardcore";
+            }
         }
-        switchCheckbox("useMaxDiff");
-    }
+        switchCheckbox("areaRandomization");
+    };
 
     var progSpeed = document.getElementById("progressionSpeed");
     progSpeed.onchange = function(){
@@ -519,11 +519,6 @@ function startTheTour(step=-1) {
       content: "By default the minor and major items are shuffled in their respective pool.<br/>Activate this option to have all items fully randomized."
     },
     {
-      element: "#areaRandomizationStep",
-      title: "Area randomization",
-      content: "Here's the different areas with the access portals: <a href=\"/solver/static/images/area_map.png\" class=\"highslide\" onclick=\"return hs.expand(this, {wrapperClassName: 'borderless', dimmingOpacity: 0.75, align: 'center'})\"><img id=\"areathumb\" src=\"/solver/static/images/area_map_thumbnail.png\" alt=\"Area Map\" title=\"Click to enlarge\"/></a><br/>The Area Randomizer will randomize the access portals.<br/>Note that escape routes are now bidirectionnals.<br/>After a non standard transition Samus will be in facing position with some invincibility frames."
-    },
-    {
       element: "#maxDifficulty",
       title: "Maximum difficulty for picking up an item",
       content: "Depending on the perceived difficulties of the techniques, bosses, hell runs etc. from the preset, it will prevent the Randomizer from placing an item in a location too difficult to reach with the current items.<br/><b>Warning:</b> if too low may cause the randomizer to abort."
@@ -559,6 +554,36 @@ function startTheTour(step=-1) {
       content: "No SpeedBooster or Screw Attack in the very first rooms, no Screw Attack in Crateria.<br/>As a consequence, Morph Ball will be either at its vanilla position, or at the E-Tank in the ceiling next to it (like Total randomizer).<br/>If disabled, Morph can be found later in the game (like Dessy randomizer)."
     },
     {
+      element: "#areaRandomizationStep",
+      title: "Area randomization",
+      content: "Here's the different areas with the access portals: <a href=\"/solver/static/images/area_map.png\" class=\"highslide\" onclick=\"return hs.expand(this, {wrapperClassName: 'borderless', dimmingOpacity: 0.75, align: 'center'})\"><img id=\"areathumb\" src=\"/solver/static/images/area_map_thumbnail.png\" alt=\"Area Map\" title=\"Click to enlarge\"/></a><br/>The Area Randomizer will randomize the access portals.<br/>Note that escape routes are now bidirectionnals.<br/>After a non standard transition Samus will be in facing position with some invincibility frames.",
+      placement: "auto left"
+    },
+    {
+      element: "#randomSuperFunsStep",
+      title: "Random Super Fun Times",
+      content: "Randomly set the Super Fun Times parameters.",
+      placement: "auto left"
+    },
+    {
+      element: "#funCombatStep",
+      title: "Super Fun Combat",
+      content: "Will randomly remove some items from the Combat set:<br/><ul><li>Screw Attack</li><li>Spazer</li><li>Wave Beam</li><li>Plasma Beam</li></ul><b>Warning:</b> May cause the Randomizer to abort if not enough techniques are known in the preset.",
+      placement: "auto left"
+    },
+    {
+      element: "#funMovementStep",
+      title: "Super Fun Movement",
+      content: "Will randomly remove some items from the Movement set:<br/><ul><li>Hi Jump</li><li>Space Jump</li><li>Grappling Beam</li><li>Spring Ball</li><li>Speed Booster</li><li>Bombs</li></ul><b>Warning:</b> May cause the Randomizer to abort if not enough techniques are known in the preset.",
+      placement: "auto left"
+    },
+    {
+      element: "#funSuitsStep",
+      title: "Suitless",
+      content: "Will randomly remove some Suits.<br/>Will not activate if relevant known techniques are not enabled in the preset : exit Draygon suitless for Gravity, and Lower Norfair hell runs for Varia.",
+      placement: "auto left"
+    },
+    {
       element: "#layoutPatchesStep",
       title: "Layout patches",
       content: "Include the anti-softlock layout patches from Total Item Randomizer. Disable at your own softlocking risk!\
@@ -582,31 +607,7 @@ function startTheTour(step=-1) {
       title: "Optional patches",
       content: "A selection of optional patches to include to enhance the gaming experience.",
       placement: "auto left"
-    },
-    {
-      element: "#randomSuperFunsStep",
-      title: "Random Super Fun Times",
-      content: "Randomly set the Super Fun Times parameters.",
-      placement: "auto left"
-    },
-    {
-      element: "#funCombatStep",
-      title: "Super Fun Combat",
-      content: "Will randomly remove some items from the Combat set:<br/><ul><li>Screw Attack</li><li>Spazer</li><li>Wave Beam</li><li>Plasma Beam</li></ul>",
-      placement: "auto left"
-    },
-    {
-      element: "#funMovementStep",
-      title: "Super Fun Movement",
-      content: "Will randomly remove some items from the Movement set:<br/><ul><li>Hi Jump</li><li>Space Jump</li><li>Grappling Beam</li><li>Spring Ball</li><li>Speed Booster</li><li>Bombs</li></ul>",
-      placement: "auto left"
-    },
-    {
-      element: "#funSuitsStep",
-      title: "Suitless",
-      content: "Will randomly remove some Suits.<br/>Will not activate if relevant known techniques are not enabled in the preset : exit Draygon suitless for Gravity, and Lower Norfair hell runs for Varia",
-      placement: "auto left"
-    }  ]});
+    } ]});
 
   // Initialize the tour
   tour.init();
@@ -681,11 +682,11 @@ def displayNumber(id, min, max, default, step="1"):
   </div>
 
   <div class="main">
-    <p><center>2018/05/01: We've updated the available techniques, don't forget to update your preset before using the Randomizer</center></p>
+    <p><center>NEW: Area randomization now available</center></p>
     <form id="mainform", name="mainform", onsubmit="doSubmit(); return false;">
       <div class="row">
 	<div class="column">
-	  <p>The Very Adaptive Randomizer of Items and Areas (VARIA) randomizer will generate a Super Metroid ROM finishable using the known techniques of the chosen preset</p>
+	  <p>The Very Adaptive Randomizer of Items and Area (VARIA) randomizer will generate a Super Metroid ROM finishable using the known techniques of the chosen preset.</p>
           <table class="full">
             <colgroup><col class="half" /><col class="half" /></colgroup>
             <tr>
@@ -705,7 +706,7 @@ def displayNumber(id, min, max, default, step="1"):
             </tr>
           </table>
 	  <br/>
-	  <h4>The quantity of Minors and Energy</h4>
+	  <h4>Ammo and Energy</h4>
 	  <table class="full">
             <colgroup><col class="half" /><col class="half" /></colgroup>
 	    <tr>
@@ -743,48 +744,78 @@ def displayNumber(id, min, max, default, step="1"):
 	      <td colspan="2" id="fullRandomizationStep">{{displayCheckbox("fullRandomization")}}Full randomization</td>
               <td><button type="button" onclick="startTheTour(7)">?</button></td>
 	    </tr>
-	    <tr>
-	      <td colspan="2" id="areaRandomizationStep">{{displayCheckbox("areaRandomization")}}Area randomization</td>
-              <td><button type="button" onclick="startTheTour(8)">?</button></td>
-	    </tr>
             <tr>
-              <td>{{displayCheckbox("useMaxDiff")}}Maximum difficulty for picking up an item:</td>
-              <td>{{displaySelect("maxDifficulty", ['easy', 'medium', 'hard', 'harder', 'hardcore', 'mania'], "hard")}}</td>
-              <td><button type="button" onclick="startTheTour(9)">?</button></td>
+              <td>Maximum difficulty for picking up an item:</td>
+              <td>{{displaySelect("maxDifficulty", ["no difficulty cap", "easy", "medium", "hard", "harder", "hardcore", "mania"], "no difficulty cap")}}</td>
+              <td><button type="button" onclick="startTheTour(8)">?</button></td>
             </tr>
 	    <tr>
 	      <td class="half">
                 Progression speed:
               </td>
               <td class="half">{{displaySelect("progressionSpeed", ["random", "slowest", "slow", "medium", "fast", "fastest"], "medium")}}</td>
-              <td><button type="button" onclick="startTheTour(10)">?</button></td>
+              <td><button type="button" onclick="startTheTour(9)">?</button></td>
 	    </tr>
 	    <tr>
 	      <td class="half">
                 Progression difficulty:
               </td>
               <td class="half">{{displaySelect("progressionDifficulty", ["random", "easier", "normal", "harder"], "normal")}}</td>
-              <td><button type="button" onclick="startTheTour(11)">?</button></td>
+              <td><button type="button" onclick="startTheTour(10)">?</button></td>
 	    </tr>
 	    <tr>
 	      <td colspan="2" id="randomParamsStep">{{displayCheckboxRandom("randomParams", ["spreadItems", "suitsRestriction", "speedScrewRestriction"])}}Randomly set the next three parameters:</td>
-              <td><button type="button" onclick="startTheTour(12)">?</button></td>
+              <td><button type="button" onclick="startTheTour(11)">?</button></td>
 	    </tr>
 	    <tr>
 	      <td colspan="2" id="spreadItemsStep">{{displayCheckbox("spreadItems")}}Spread progression items</td>
-              <td><button type="button" onclick="startTheTour(13)">?</button></td>
+              <td><button type="button" onclick="startTheTour(12)">?</button></td>
 	    </tr>
 	    <tr>
 	      <td colspan="2" id="suitsRestrictionStep">{{displayCheckbox("suitsRestriction")}}Suits restriction</td>
-              <td><button type="button" onclick="startTheTour(14)">?</button></td>
+              <td><button type="button" onclick="startTheTour(13)">?</button></td>
 	    </tr>
 	    <tr>
 	      <td colspan="2" id="speedScrewRestrictionStep">{{displayCheckbox("speedScrewRestriction")}}Early Morph</td>
-              <td><button type="button" onclick="startTheTour(15)">?</button></td>
+              <td><button type="button" onclick="startTheTour(14)">?</button></td>
 	    </tr>
 	  </table>
 	</div>
 	<div class="column">
+          <h4>Area Randomization</h4>
+          <p>
+	    Add more randomness to your seed by randomizing the access between the areas.<br/>
+	    Check the help button for the map of the areas and the access points between them.
+          </p>
+	  <table class="full">
+	    <tr>
+	      <td colspan="2" class="full" id="areaRandomizationStep">{{displayCheckbox("areaRandomization")}}Area randomization</td>
+              <td><button type="button" onclick="startTheTour(15)">?</button></td>
+	    </tr>
+          </table>
+          <h4>Super Fun Times (TM)</h4>
+          <p>
+            Have fun randomly removing major items!<br/>
+            <b>Warning:</b> For experienced players only.
+          </p>
+	  <table class="full">
+	    <tr>
+	      <td colspan="2" id="randomSuperFunsStep">{{displayCheckboxRandom("randomSuperFuns", ["funCombat", "funMovement", "funSuits"])}}Randomly set the Super Fun Times parameters:</td>
+              <td><button type="button" onclick="startTheTour(16)">?</button></td>
+	    </tr>
+            <tr>
+              <td colspan="2" class="full" id="funCombatStep">{{displayCheckbox("funCombat")}} Super Fun Combat</td>
+              <td><button type="button" onclick="startTheTour(17)">?</button></td>
+            </tr>
+            <tr>
+              <td colspan="2" class="full" id="funMovementStep">{{displayCheckbox("funMovement")}} Super Fun Movement</td>
+              <td><button type="button" onclick="startTheTour(18)">?</button></td>
+            </tr>
+            <tr>
+              <td colspan="2" class="full" id="funSuitsStep">{{displayCheckbox("funSuits")}} Suitless</td>
+              <td><button type="button" onclick="startTheTour(19)">?</button></td>
+            </tr>
+          </table>
 	  <h4>Patches</h4>
 	  <p>
 	    The bug fix <a href="https://itemrando.supermetroid.run/information">patches</a> from Total Item Randomizer are included by default.<br/>
@@ -792,10 +823,10 @@ def displayNumber(id, min, max, default, step="1"):
 	  <table class="full">
 	    <tr>
 	      <td class="full" id="layoutPatchesStep">{{displayCheckbox("layoutPatches", True)}} Include layout patches from Total Item Randomizer</td>
-	      <td><button type="button" onclick="startTheTour(16)">?</button></td>
+	      <td><button type="button" onclick="startTheTour(20)">?</button></td>
 	    </tr>
 	    <tr>
-	      <td class="full" id="noGravHeatStep">{{displayCheckbox("noGravHeat", True)}} Remove Gravity Suit heat protection (by Total)</td><td><button type="button" onclick="startTheTour(17)">?</button></td>
+	      <td class="full" id="noGravHeatStep">{{displayCheckbox("noGravHeat", True)}} Remove Gravity Suit heat protection (by Total)</td><td><button type="button" onclick="startTheTour(21)">?</button></td>
 	    </tr>
 	  </table>
 	  </p>
@@ -810,29 +841,6 @@ for patch in patches:
   pass
 }}
 	  </table>
-          <h4>Super Fun Times (TM)</h4>
-          <p>
-            Have fun randomly removing major items!<br/>
-            <b>Warning:</b> For experienced players only. May cause the Randomizer to abort.
-          </p>
-	  <table class="full">
-	    <tr>
-	      <td colspan="2" id="randomSuperFunsStep">{{displayCheckboxRandom("randomSuperFuns", ["funCombat", "funMovement", "funSuits"])}}Randomly set the Super Fun Times parameters:</td>
-              <td><button type="button" onclick="startTheTour(19)">?</button></td>
-	    </tr>
-            <tr>
-              <td colspan="2" class="full" id="funCombatStep">{{displayCheckbox("funCombat")}} Super Fun Combat</td>
-              <td><button type="button" onclick="startTheTour(20)">?</button></td>
-            </tr>
-            <tr>
-              <td colspan="2" class="full" id="funMovementStep">{{displayCheckbox("funMovement")}} Super Fun Movement</td>
-              <td><button type="button" onclick="startTheTour(21)">?</button></td>
-            </tr>
-            <tr>
-              <td colspan="2" class="full" id="funSuitsStep">{{displayCheckbox("funSuits")}} Suitless</td>
-              <td><button type="button" onclick="startTheTour(22)">?</button></td>
-            </tr>
-          </table>
 	</div>
       </div>
        {{=INPUT(_type="submit", _value="Randomize", _id="submitBtn", _class="btn btn-default buttonRandom")}}

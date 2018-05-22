@@ -329,8 +329,8 @@ locations = [
 {
     'Area': "Norfair",
     'GraphArea': "Norfair",
-    'SolveArea': "Bubble Norfair",
-    'Name': "Speed Booster Speed",
+    'SolveArea': "Bubble Norfair Speed",
+    'Name': "Speed Booster",
     'Class': "Major",
     'Address': 0x78C82,
     'Visibility': "Chozo",

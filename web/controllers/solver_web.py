@@ -615,8 +615,8 @@ def validateWebServiceParams(patchs, quantities, others, isJson=False):
             raiseHttp(400, "Wrong value for seed: {}, must be between 0 and 9999999".format(request.vars[seed]), isJson)
 
     if request.vars['maxDifficulty'] is not None:
-        if request.vars.maxDifficulty not in ['easy', 'medium', 'hard', 'harder', 'hardcore', 'mania']:
-            raiseHttp(400, "Wrong value for difficulty_target, authorized values: easy/medium/hard/harder/hardcore/mania", isJson)
+        if request.vars.maxDifficulty not in ['no difficulty cap', 'easy', 'medium', 'hard', 'harder', 'hardcore', 'mania']:
+            raiseHttp(400, "Wrong value for difficulty_target, authorized values: no difficulty cap/easy/medium/hard/harder/hardcore/mania", isJson)
 
     if IS_ALPHANUMERIC()(request.vars.paramsFile)[1] is not None:
         raiseHttp(400, "Wrong value for paramsFile, must be alphanumeric", isJson)

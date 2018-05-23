@@ -177,7 +177,11 @@ if diffPercent == 20 or diffPercent == 40 or diffPercent == 60 or diffPercent ==
   pass
 
 if diffPercent <= 20:
-  response.write("[ 'Difficulty', 'easy', new Date(1900, 0, 0), new Date(19{}, 0, 0) ]".format(diffPercent), escape=False)
+  if diffPercent < 10:
+    response.write("[ 'Difficulty', 'easy', new Date(1900, 0, 0), new Date(190{}, 0, 0) ]".format(diffPercent), escape=False)
+  else:
+    response.write("[ 'Difficulty', 'easy', new Date(1900, 0, 0), new Date(19{}, 0, 0) ]".format(diffPercent), escape=False)
+    pass
 else:
   response.write("[ 'Difficulty', 'easy', new Date(1900, 0, 0), new Date(1920, 0, 0) ],", escape=False)
   pass

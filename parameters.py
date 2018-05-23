@@ -279,6 +279,13 @@ class Knows:
                              'href': 'https://www.youtube.com/watch?v=g3goe6PZ4o0',
                              'rooms': ['Red Tower']}
 
+    Moondance = SMBool(False, mania, ['Moondance'])
+    desc['MoonDance'] = {'display': 'Moondance',
+                         'title': 'Access Etecoons area using moonfall shenanigans',
+                         'href': 'http://crocomi.re/92',
+                         'rooms': ['Green Brinstar Main Shaft']}
+
+
     # Gauntlet
     HiJumpLessGauntletAccess = SMBool(False, 0, ['HiJumpLessGauntletAccess'])
     desc['HiJumpLessGauntletAccess'] = {'display': 'Gauntlet Access w/o Hi-Jump',
@@ -426,7 +433,7 @@ class Knows:
                   {'knows': ['GravLessLevel0', 'SuitlessOuterMaridia', 'GravLessLevel2', 'SuitlessSandpit'],
                    'title': 'Underwater movement without Gravity Suit'},
                   {'knows': ['CeilingDBoost', 'AlcatrazEscape', 'ReverseGateGlitch',
-                             'ReverseGateGlitchHiJumpLess', 'EarlyKraid', 'XrayDboost', 'RedTowerClimb'],
+                             'ReverseGateGlitchHiJumpLess', 'EarlyKraid', 'XrayDboost', 'RedTowerClimb', 'Moondance'],
                    'title': 'Brinstar'},
                   {'knows': ['HiJumpLessGauntletAccess', 'HiJumpGauntletAccess'],
                    'title': 'Gauntlet'},

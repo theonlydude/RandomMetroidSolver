@@ -74,6 +74,11 @@ class HelpersGraph(Helpers):
                                              sm.haveItem('SpringBall'),
                                              sm.knowsSpringBallJump()))))
 
+    def canAccessEtecoons(self):
+        sm = self.smbm
+        return sm.wor(sm.canUsePowerBombs(),
+                      sm.wand(sm.knowsMoondance(), sm.canUseBombs(), sm.canOpenRedDoors()))
+
     # the water zone east of WS
     def canPassForgottenHighway(self, fromWs):
         sm = self.smbm

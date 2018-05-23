@@ -132,7 +132,8 @@ locations = [
     'AccessFrom' : {
         'Green Brinstar Elevator Right': lambda sm: sm.setSMBool(True)
     },
-    'Available': lambda sm: sm.canUsePowerBombs()
+    'Available': lambda sm: sm.canAccessEtecoons(),
+    'PostAvailable': lambda sm: sm.canUsePowerBombs()
 },
 {
     'Area': "Brinstar",
@@ -804,7 +805,8 @@ locations = [
     'AccessFrom' : {
         'Green Brinstar Elevator Right': lambda sm: sm.setSMBool(True)
     },
-    'Available': lambda sm: sm.canUsePowerBombs()
+    'Available': lambda sm: sm.canAccessEtecoons(),
+    'PostAvailable': lambda sm: sm.canUsePowerBombs()
 },
 {
     'Area': "Brinstar",
@@ -994,10 +996,10 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Etecoon Super Room',
     'AccessFrom' : {
-        'Green Brinstar Elevator Right': lambda sm: sm.setSMBool(True)
+        'Green Brinstar Elevator Right': lambda sm: sm.canAccessEtecoons()
     },
-    'Available': lambda sm: sm.wand(sm.canUsePowerBombs(),
-                                    sm.canOpenGreenDoors())
+    'Available': lambda sm: sm.canOpenGreenDoors(),
+    'PostAvailable': lambda sm: sm.canUsePowerBombs()
 },
 {
     'Area': "Brinstar",

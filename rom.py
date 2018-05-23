@@ -546,6 +546,10 @@ class RomPatcher:
 
         regex = re.compile(r"[^A-Z0-9\.,'!: ]+")
 
+        itemLocs = {}
+        for iL in fItemLocs:
+            itemLocs[iL['Item']['Name']] = iL['Location']['Name']
+
         def prepareString(s, isItem=True):
             s = s.upper()
             # remove chars not displayable
@@ -564,9 +568,11 @@ class RomPatcher:
             return s
 
         address = 0x2f5240
-        for iL in fItemLocs:
-            itemName = prepareString(iL['Item']['Name'])
-            locationName = prepareString(iL['Location']['Name'], isItem=False)
+        for item in ["Charge Beam", "Ice Beam", "Wave Beam", "Spazer", "Plasma Beam", "Varia Suit",
+                     "Gravity Suit", "Morph Ball", "Bomb", "Spring Ball", "Screw Attack",
+                     "Hi-Jump Boots", "Space Jump", "Speed Booster", "Grappling Beam", "X-Ray Scope"]:
+            itemName = prepareString(item)
+            locationName = prepareString(itemLocs[item], isItem=False)
 
             self.writeCreditsString(address, 0x04, itemName)
             self.writeCreditsString((address + 0x40), 0x18, locationName)

@@ -84,6 +84,10 @@ body {
 .hidden {
     display: none;
 }
+.disabledText {
+    color: grey;
+    font-style: italic;
+}
 </style>
 
 <script type="text/javascript">
@@ -436,6 +440,13 @@ function initialDisable(id, elems) {
         for(var i=0; i<elems.length; i++){
           var e = document.getElementById(elems[i]);
           e.disabled = check.checked;
+          // grey out the disabled text
+          var text = document.getElementById(elems[i]+"Text");
+          if(e.disabled) {
+              text.className = "disabledText";
+          } else {
+              text.className = "";
+          }
           // tell switchery
           if(elems[i] in globalSwitchs){
             var s = globalSwitchs[elems[i]];
@@ -461,6 +472,13 @@ function switchCheckbox(id, elems=[]) {
     elemId = elems[i];
     var e = document.getElementById(elemId);
     e.disabled = check.checked;
+    // grey out the disabled text
+    var text = document.getElementById(elems[i]+"Text");
+    if(e.disabled) {
+        text.className = "disabledText";
+    } else {
+        text.className = "";
+    }
     // tell switchery
     if(elemId in globalSwitchs){
       var s = globalSwitchs[elemId];
@@ -714,25 +732,25 @@ def displayNumber(id, min, max, default, step="1"):
               <td><button type="button" onclick="startTheTour(3)">?</button></td>
 	    </tr>
             <tr>
-              <td>Quantity of Missiles:</td>
+              <td><span id="missileQtyText">Quantity of Missiles:</span></td>
               <td>{{displayNumber("missileQty", "1", "9", "3", "0.1")}}</td>
               <td><button type="button" onclick="startTheTour(4)">?</button></td>
             </tr>
             <tr>
-              <td>Quantity of Super Missiles:</td>
+              <td><span id="superQtyText">Quantity of Super Missiles:</span></td>
               <td>{{displayNumber("superQty", "1", "9", "3", "0.1")}}</td>
             </tr>
             <tr>
-              <td>Quantity of Power Bombs:</td>
+              <td><span id="powerBombQtyText">Quantity of Power Bombs:</span></td>
               <td>{{displayNumber("powerBombQty", "1", "9", "1", "0.1")}}</td>
             </tr>
             <tr>
-              <td>Percentage of minors available:</td>
+              <td><span id="minorQtyText">Percentage of minors available:</span></td>
               <td>{{displayNumber("minorQty", "1", "100", "100")}}</td>
               <td><button type="button" onclick="startTheTour(5)">?</button></td>
             </tr>
             <tr>
-              <td>Quantity of Energy/Reserve Tanks available:</td>
+              <td><span id="energyQtyText">Quantity of Energy/Reserve Tanks available:</span></td>
               <td>{{displaySelect("energyQty", ["sparse", "medium", "vanilla"], "vanilla")}}</td>
               <td><button type="button" onclick="startTheTour(6)">?</button></td>
             </tr>
@@ -768,15 +786,15 @@ def displayNumber(id, min, max, default, step="1"):
               <td><button type="button" onclick="startTheTour(11)">?</button></td>
 	    </tr>
 	    <tr>
-	      <td colspan="2" id="spreadItemsStep">{{displayCheckbox("spreadItems")}}Spread progression items</td>
+	      <td colspan="2" id="spreadItemsStep">{{displayCheckbox("spreadItems")}}<span id="spreadItemsText">Spread progression items</span></td>
               <td><button type="button" onclick="startTheTour(12)">?</button></td>
 	    </tr>
 	    <tr>
-	      <td colspan="2" id="suitsRestrictionStep">{{displayCheckbox("suitsRestriction")}}Suits restriction</td>
+	      <td colspan="2" id="suitsRestrictionStep">{{displayCheckbox("suitsRestriction")}}<span id="suitsRestrictionText">Suits restriction</span></td>
               <td><button type="button" onclick="startTheTour(13)">?</button></td>
 	    </tr>
 	    <tr>
-	      <td colspan="2" id="speedScrewRestrictionStep">{{displayCheckbox("speedScrewRestriction")}}Early Morph</td>
+	      <td colspan="2" id="speedScrewRestrictionStep">{{displayCheckbox("speedScrewRestriction")}}<span id="speedScrewRestrictionText">Early Morph</span></td>
               <td><button type="button" onclick="startTheTour(14)">?</button></td>
 	    </tr>
 	  </table>
@@ -804,15 +822,15 @@ def displayNumber(id, min, max, default, step="1"):
               <td><button type="button" onclick="startTheTour(16)">?</button></td>
 	    </tr>
             <tr>
-              <td colspan="2" class="full" id="funCombatStep">{{displayCheckbox("funCombat")}} Super Fun Combat</td>
+              <td colspan="2" class="full" id="funCombatStep">{{displayCheckbox("funCombat")}}<span id="funCombatText">Super Fun Combat</span></td>
               <td><button type="button" onclick="startTheTour(17)">?</button></td>
             </tr>
             <tr>
-              <td colspan="2" class="full" id="funMovementStep">{{displayCheckbox("funMovement")}} Super Fun Movement</td>
+              <td colspan="2" class="full" id="funMovementStep">{{displayCheckbox("funMovement")}}<span id="funMovementText">Super Fun Movement</span></td>
               <td><button type="button" onclick="startTheTour(18)">?</button></td>
             </tr>
             <tr>
-              <td colspan="2" class="full" id="funSuitsStep">{{displayCheckbox("funSuits")}} Suitless</td>
+              <td colspan="2" class="full" id="funSuitsStep">{{displayCheckbox("funSuits")}}<span id="funSuitsText">Suitless</span></td>
               <td><button type="button" onclick="startTheTour(19)">?</button></td>
             </tr>
           </table>

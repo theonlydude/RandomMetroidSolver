@@ -280,7 +280,7 @@ class Knows:
                              'rooms': ['Red Tower']}
 
     Moondance = SMBool(False, mania, ['Moondance'])
-    desc['MoonDance'] = {'display': 'Moondance',
+    desc['Moondance'] = {'display': 'Moondance',
                          'title': 'Access Etecoons area using moonfall shenanigans',
                          'href': 'http://crocomi.re/92',
                          'rooms': ['Green Brinstar Main Shaft']}

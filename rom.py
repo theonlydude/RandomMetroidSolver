@@ -112,7 +112,8 @@ class RomType:
                 RomPatches.ActivePatches = RomPatches.Total_Base
             if patches['gravityNoHeatProtectionPresent'] == False:
                 print("RomType::apply: Gravity heat protection")
-                RomPatches.ActivePatches.remove(RomPatches.NoGravityEnvProtection)
+                if RomPatches.NoGravityEnvProtection in RomPatches.ActivePatches:
+                    RomPatches.ActivePatches.remove(RomPatches.NoGravityEnvProtection)
             if romType.startswith('VARIA_A'):
                 RomPatches.ActivePatches += RomPatches.AreaSet
         elif romType == 'Dessy':
@@ -278,7 +279,6 @@ class RomReader:
             destAPName = rooms[(destRoomPtr, destEntryScreen)]
             transitions[accessPoint.Name] = destAPName
 
-        #print("transitions: {}".format(transitions))
 
         # remove bidirectionnal transitions
         # can't del keys in a dict while iterating it
@@ -311,7 +311,6 @@ class RomReader:
         sy = struct.unpack("B", romFile.read(1))
 
         return (v1[0] | (v2[0] << 8), (sx[0], sy[0]))
-        #return v1[0] | (v2[0] << 8)
 
     def patchPresent(self, romFile, patchName):
         romFile.seek(self.patches[patchName]['address'])

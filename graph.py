@@ -57,18 +57,21 @@ class AccessGraph(object):
         for (src, dest) in self.InterAreaTransitions:
             transitionsDict[src.ShortName] = dest.ShortName
 
-        # remove duplicate (src, dest) - (dest, src)
-        transitionsCopy = copy.copy(transitionsDict)
-        for src in transitionsCopy:
-            if src in transitionsDict:
-                dest = transitionsDict[src]
-                if dest in transitionsDict:
-                    if transitionsDict[dest] == src:
-                        del transitionsDict[dest]
+        transitions = []
+        for accessPoint in ['C\\MUSHROOMS', 'C\\MOAT', 'C\\KEYHUNTERS', 'C\\MORPH', 'B\\GREEN ELEV.',
+                            'B\\GREEN HILL', 'B\\NOOB BRIDGE', 'W\\WEST OCEAN', 'W\\CRAB MAZE', 'N\\WAREHOUSE',
+                            'N\\SINGLE CHAMBER', 'N\\KRONIC BOOST', 'LN\\LAVA DIVE', 'LN\\THREE MUSK.',
+                            'M\\MAIN STREET', 'M\\CRAB HOLE', 'M\\COUDE', 'M\\RED FISH', 'B\\RED TOWER',
+                            'B\\TOP RED TOWER', 'B\\RED ELEV.', 'B\\EAST TUNNEL', 'B\\TOP EAST TUNNEL',
+                            'B\\GLASS TUNNEL']:
+            if accessPoint in transitionsDict:
+                src = accessPoint
+                dst = transitionsDict[accessPoint]
+                transitions.append((src, dst))
+                del transitionsDict[src]
+                del transitionsDict[dst]
 
-        transitions = [(t, transitionsDict[t]) for t in transitionsDict]
-
-        return sorted(transitions, key=lambda x: x[0])
+        return transitions
 
     def toDot(self, dotFile):
         orientations = {

@@ -58,12 +58,12 @@ class AccessGraph(object):
             transitionsDict[src.ShortName] = dest.ShortName
 
         transitions = []
-        for accessPoint in ['C\\MUSHROOMS', 'C\\MOAT', 'C\\KEYHUNTERS', 'C\\MORPH', 'B\\GREEN ELEV.',
+        for accessPoint in ['C\\MUSHROOMS', 'C\\PIRATES', 'C\\MOAT', 'C\\KEYHUNTERS', 'C\\MORPH', 'B\\GREEN ELEV.',
                             'B\\GREEN HILL', 'B\\NOOB BRIDGE', 'W\\WEST OCEAN', 'W\\CRAB MAZE', 'N\\WAREHOUSE',
                             'N\\SINGLE CHAMBER', 'N\\KRONIC BOOST', 'LN\\LAVA DIVE', 'LN\\THREE MUSK.',
                             'M\\MAIN STREET', 'M\\CRAB HOLE', 'M\\COUDE', 'M\\RED FISH', 'B\\RED TOWER',
                             'B\\TOP RED TOWER', 'B\\RED ELEV.', 'B\\EAST TUNNEL', 'B\\TOP EAST TUNNEL',
-                            'B\\GLASS TUNNEL']:
+                            'B\\GLASS TUNNEL', 'T\\STATUES']:
             if accessPoint in transitionsDict:
                 src = accessPoint
                 dst = transitionsDict[accessPoint]
@@ -98,10 +98,12 @@ class AccessGraph(object):
             'West Ocean Left': 'w',
             'Red Fish Room Left': 'w',
             'Single Chamber Top Right': 'ne',
-            'Keyhunter Room Bottom': 'se'
+            'Keyhunter Room Bottom': 'se',
+            'Green Pirates Shaft Bottom Right': 'e',
+            'Statues Hallway Left': 'w'
         }
         colors = ['red', 'blue', 'green', 'yellow', 'skyblue', 'violet', 'orange',
-                  'lawngreen', 'crimson', 'chocolate', 'turquoise', 'tomato']
+                  'lawngreen', 'crimson', 'chocolate', 'turquoise', 'tomato', 'navyblue', 'darkturquoise']
         with open(dotFile, "w") as f:
             f.write("digraph {\n")
             f.write('size="30,30!";\n')
@@ -218,6 +220,14 @@ accessPoints = [
                    "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
        entryInfo = {'SamusX':0x36, 'SamusY':0x88},
        shortName="C\\MUSHROOMS"),
+    AccessPoint('Green Pirates Shaft Bottom Right', 'Crateria', {
+        'Lower Mushrooms Left': lambda sm: sm.setSMBool(True)
+    }, traverse = lambda sm: sm.canOpenRedDoors(),
+       roomInfo = {'RoomPtr':0x99bd, "area": 0x0},
+       exitInfo = {'DoorPtr':0x8c52, 'direction': 0x4, "cap": (0x1, 0x6), "bitFlag": 0x0,
+                   "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
+       entryInfo = {'SamusX':0xcc, 'SamusY':0x688},
+       shortName="C\\PIRATES"),
     AccessPoint('Moat Right', 'Crateria', {
         'Keyhunter Room Bottom': lambda sm: sm.canPassMoatReverse()
     }, roomInfo = {'RoomPtr':0x95ff, "area": 0x0},
@@ -472,7 +482,15 @@ accessPoints = [
        exitInfo = {'DoorPtr':0xa330, 'direction': 0x7, "cap": (0x16, 0x7d), "bitFlag": 0x0,
                    "screen": (0x1, 0x7), "distanceToSpawn": 0x200, "doorAsmPtr": 0x0000},
        entryInfo = {'SamusX':0x81, 'SamusY':0x78},
-       shortName="B\\GLASS TUNNEL")
+       shortName="B\\GLASS TUNNEL"),
+    # Tourian
+    AccessPoint('Statues Hallway Left', 'Tourian', {},
+       roomInfo = {'RoomPtr':0xa5ed, "area": 0x0},
+       exitInfo = {'DoorPtr':0x91e6, 'direction': 0x5, "cap": (0xe, 0x66), "bitFlag": 0x0,
+                   "screen": (0x0, 0x6), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
+       entryInfo = {'SamusX':0x34, 'SamusY':0x88},
+       shortName="T\\STATUES"
+    )
 ]
 
 vanillaTransitions = [
@@ -487,7 +505,8 @@ vanillaTransitions = [
     ('Warehouse Entrance Left', 'East Tunnel Right'),
     ('East Tunnel Top Right', 'Crab Hole Bottom Left'),
     ('Caterpillar Room Top Right', 'Red Fish Room Left'),
-    ('Glass Tunnel Top', 'Main Street Bottom')
+    ('Glass Tunnel Top', 'Main Street Bottom'),
+    ('Green Pirates Shaft Bottom Right', 'Statues Hallway Left')
 ]
 
 def isVanillaTransitions(transitions):

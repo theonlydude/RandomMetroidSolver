@@ -268,7 +268,9 @@ class RomReader:
             (0x962a, (0x0, 0x0)): 'Red Brinstar Elevator',
             (0xcf80, (0x0, 0x1)): 'East Tunnel Right',
             (0xcf80, (0x3, 0x0)): 'East Tunnel Top Right',
-            (0xcefb, (0x0, 0x0)): 'Glass Tunnel Top'
+            (0xcefb, (0x0, 0x0)): 'Glass Tunnel Top',
+            (0x99bd, (0x0, 0x6)): 'Green Pirates Shaft Bottom Right',
+            (0xa5ed, (0x0, 0x0)): 'Statues Hallway Left'
         }
 
         transitions = {}

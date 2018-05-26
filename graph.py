@@ -224,8 +224,9 @@ accessPoints = [
         'Lower Mushrooms Left': lambda sm: sm.setSMBool(True)
     }, traverse = lambda sm: sm.canOpenRedDoors(),
        roomInfo = {'RoomPtr':0x99bd, "area": 0x0},
+       # the doorAsmPtr 7FE00 is set by the g4_skip.ips patch, we have to call it
        exitInfo = {'DoorPtr':0x8c52, 'direction': 0x4, "cap": (0x1, 0x6), "bitFlag": 0x0,
-                   "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
+                   "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0xfe00},
        entryInfo = {'SamusX':0xcc, 'SamusY':0x688},
        shortName="C\\PIRATES"),
     AccessPoint('Moat Right', 'Crateria', {

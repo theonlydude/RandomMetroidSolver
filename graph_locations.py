@@ -670,9 +670,7 @@ locations = [
         'West Ocean Left': lambda sm: sm.setSMBool(True),
         'Crab Maze Left': lambda sm: sm.canPassForgottenHighway(False)
     },
-    'Available': lambda sm: sm.haveItem('Morph'),
-    'PostAvailable': lambda sm: sm.wor(sm.haveItem('Gravity'),
-                                       sm.canPassBombPassages())
+    'Available': lambda sm: sm.haveItem('Morph')
 },
 {
     'Area': "Crateria",

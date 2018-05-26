@@ -155,7 +155,7 @@ function ajaxFail(jqXHR, textStatus) {
 function ajaxFailJSON(jqXHR, textStatus) {
   // cross domain calls currently return 'undefined' information... (cf. https://www.html5rocks.com/en/tutorials/cors/)
   if(jqXHR.responseJSON == null) {
-    document.getElementById("flash").innerHTML = "Something wrong happened or the VARIA randomizer aborted: try again or try to raise or disable max difficulty setting, or disable Super Fun Times (TM) setting";
+    document.getElementById("flash").innerHTML = "Something wrong happened or the VARIA randomizer aborted: please try again. If this happens again after retrying, raise or disable max difficulty setting, and/or disable Super Fun Times (TM) setting. If Area Randomization was selected, try to enable Full Randomization as well.";
   } else {
     document.getElementById("flash").innerHTML = jqXHR.responseJSON;
   }

@@ -212,8 +212,6 @@ class Randomizer(object):
     # locations : items locations
     # settings : RandoSettings instance
     def __init__(self, locations, settings, seedName, graphTransitions, bidir=True, dotDir=None):
-        # we assume that 'choose' dict is perfectly formed, that is all keys
-        # below are defined in the appropriate weight dicts
         dotFile = None
         if dotDir is not None:
             dotFile = dotDir + '/' + seedName + ".dot"
@@ -248,7 +246,7 @@ class Randomizer(object):
         self.currentItems = []
         self.nonProgTypesCache = []
         self.progTypesCache = []
-        if self.difficultyTarget > samus and settings.progDiff == 'random':
+        if self.difficultyTarget > samus and settings.progDiff == 'normal':
             self.smbm = SMBoolManager.factory('bool', cache=True)
         else:
             self.smbm = SMBoolManager.factory('diff', cache=True)
@@ -273,10 +271,6 @@ class Randomizer(object):
         self.currentItems = []
 
         return restricted
-
-    def locAvailable(self, loc):
-        result = self.smbm.eval(loc['Available'])
-        return result.bool == True and result.difficulty <= self.difficultyTarget
 
     def locPostAvailable(self, loc, item):
         if not 'PostAvailable' in loc:
@@ -698,9 +692,8 @@ class Randomizer(object):
         for loc in locs:
             majAvail = self.restrictions['MajorMinor'] == False or loc['Class'] == 'Major'
             minAvail = self.restrictions['MajorMinor'] == False or loc['Class'] == 'Minor'
-#            print("{} locAv {} locPAv {}".format(loc['Name'], self.locAvailable(loc), self.locPostAvailable(loc, None)))
             if ((isMajorProg and majAvail) or (isMinorProg and minAvail)) \
-               and self.locAvailable(loc) and self.locPostAvailable(loc, None):
+               and self.locPostAvailable(loc, None):
                 accessibleLocations.append(loc)
 #        print("accesLoc {}".format([loc['Name'] for loc in accessibleLocations]))
         if len(accessibleLocations) <= self.locLimit:

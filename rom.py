@@ -572,6 +572,9 @@ class RomPatcher:
         for item in ["Charge Beam", "Ice Beam", "Wave Beam", "Spazer", "Plasma Beam", "Varia Suit",
                      "Gravity Suit", "Morph Ball", "Bomb", "Spring Ball", "Screw Attack",
                      "Hi-Jump Boots", "Space Jump", "Speed Booster", "Grappling Beam", "X-Ray Scope"]:
+            # super fun removes items
+            if item not in itemLocs:
+                continue
             itemName = prepareString(item)
             locationName = prepareString(itemLocs[item], isItem=False)
 

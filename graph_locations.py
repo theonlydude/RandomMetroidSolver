@@ -290,7 +290,7 @@ locations = [
     'AccessFrom' : {
         'Warehouse Entrance Left': lambda sm: sm.setSMBool(True)
     },
-    'Available': lambda sm: sm.wor(sm.canOpenRedDoors(), sm.haveItem('Morph')),
+    'Available': lambda sm: sm.wand(sm.canOpenRedDoors(), sm.haveItem('Morph')),
     'PostAvailable': lambda sm: sm.wor(sm.canPassBombPassages(),
                                        sm.wand(sm.haveItem('Morph'), RomPatches.has(RomPatches.HiJumpShotBlock)))
 },
@@ -774,6 +774,7 @@ locations = [
     },
     'Available': lambda sm: sm.wand(sm.canUsePowerBombs(),
                                     sm.haveItem('SpeedBooster'),
+                                    sm.energyReserveCountOk(1),
                                     sm.wor(sm.haveItem('Ice'),
                                            sm.knowsShortCharge(),
                                            sm.knowsSimpleShortCharge())) # there's also a dboost involved in simple short charge or you have to kill the yellow enemies with some power bombs
@@ -1165,7 +1166,7 @@ locations = [
     'AccessFrom' : {
         'Warehouse Entrance Left': lambda sm: sm.setSMBool(True)
     },
-    'Available': lambda sm: sm.wor(sm.canOpenRedDoors(), sm.haveItem('Morph')),
+    'Available': lambda sm: sm.wand(sm.canOpenRedDoors(), sm.haveItem('Morph')),
     'PostAvailable': lambda sm: sm.wor(sm.canPassBombPassages(),
                                        sm.wand(RomPatches.has(RomPatches.HiJumpShotBlock), sm.haveItem('Morph')))
 },

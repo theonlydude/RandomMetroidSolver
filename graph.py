@@ -339,8 +339,7 @@ accessPoints = [
         'Kronic Boost Room Bottom Left': lambda sm: sm.wand(sm.canDestroyBombWalls(),
                                                             sm.haveItem('Morph'),
                                                             sm.canHellRun('MainUpperNorfair'))
-    },
-        roomInfo = {'RoomPtr':0xad5e, "area": 0x2},
+    },  roomInfo = {'RoomPtr':0xad5e, "area": 0x2},
         exitInfo = {'DoorPtr':0x95fa, 'direction': 0x4, "cap": (0x11, 0x6), "bitFlag": 0x0,
                     "screen": (0x1, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
         entryInfo = {'SamusX':0x5cf, 'SamusY':0x88},
@@ -350,7 +349,9 @@ accessPoints = [
                                                        sm.canDestroyBombWalls(),
                                                        sm.haveItem('Morph'),
                                                        RomPatches.has(RomPatches.SingleChamberNoCrumble)),
-        'Warehouse Entrance Left': lambda sm: sm.canHellRun('MainUpperNorfair')
+        'Warehouse Entrance Left': lambda sm: sm.wand(sm.canHellRun('MainUpperNorfair'),
+                                                      sm.wor(sm.haveItem('SpeedBooster'), # frog speedway
+                                                             sm.haveItem('Morph'))) # go all the way around
     }, traverse=lambda sm: sm.wor(RomPatches.has(RomPatches.AreaRandoBlueDoors), sm.canOpenYellowDoors()),
        roomInfo = {'RoomPtr':0xae74, "area": 0x2},
        exitInfo = {'DoorPtr':0x967e, 'direction': 0x5, "cap": (0x3e, 0x6), "bitFlag": 0x0,

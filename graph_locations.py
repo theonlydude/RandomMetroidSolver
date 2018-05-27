@@ -322,7 +322,7 @@ locations = [
     'Visibility': "Chozo",
     'Room': 'Norfair Reserve Tank Room',
     'AccessFrom' : {
-        'Kronic Boost Room Bottom Left': lambda sm: sm.canHellRun('MainUpperNorfair'),
+        'Kronic Boost Room Bottom Left': lambda sm: sm.wand(sm.haveItem('Morph'), sm.canHellRun('MainUpperNorfair')),
         'Warehouse Entrance Left': lambda sm: sm.canAccessHeatedNorfairFromEntrance()
     },
     'Available': lambda sm: sm.wand(sm.haveItem('Morph'), sm.canEnterNorfairReserveArea())
@@ -337,7 +337,7 @@ locations = [
     'Visibility': "Chozo",
     'Room': 'Speed Booster Room',
     'AccessFrom' : {
-        'Kronic Boost Room Bottom Left': lambda sm: sm.canHellRun('MainUpperNorfair'),
+        'Kronic Boost Room Bottom Left': lambda sm: sm.wand(sm.haveItem('Morph'), sm.canHellRun('MainUpperNorfair')),
         'Warehouse Entrance Left': lambda sm: sm.canAccessHeatedNorfairFromEntrance()
     },
     'Available': lambda sm: sm.canOpenGreenDoors()
@@ -1247,7 +1247,7 @@ locations = [
     'Visibility': "Hidden",
     'Room': 'Norfair Reserve Tank Room',
     'AccessFrom' : {
-        'Kronic Boost Room Bottom Left': lambda sm: sm.canHellRun('MainUpperNorfair'),
+        'Kronic Boost Room Bottom Left': lambda sm: sm.wand(sm.haveItem('Morph'), sm.canHellRun('MainUpperNorfair')),
         'Warehouse Entrance Left': lambda sm: sm.canAccessHeatedNorfairFromEntrance()
     },
     'Available': lambda sm: sm.wand(sm.haveItem('Morph'), sm.canEnterNorfairReserveArea())
@@ -1262,7 +1262,7 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Green Bubbles Missile Room',
     'AccessFrom' : {
-        'Kronic Boost Room Bottom Left': lambda sm: sm.canHellRun('MainUpperNorfair'),
+        'Kronic Boost Room Bottom Left': lambda sm: sm.wand(sm.haveItem('Morph'), sm.canHellRun('MainUpperNorfair')),
         'Warehouse Entrance Left': lambda sm: sm.canAccessHeatedNorfairFromEntrance()
     },
     'Available': lambda sm: sm.canEnterNorfairReserveArea()
@@ -1293,7 +1293,7 @@ locations = [
     'Visibility': "Hidden",
     'Room': 'Speed Booster Hall',
     'AccessFrom' : {
-        'Kronic Boost Room Bottom Left': lambda sm: sm.canHellRun('MainUpperNorfair'),
+        'Kronic Boost Room Bottom Left': lambda sm: sm.wand(sm.haveItem('Morph'), sm.canHellRun('MainUpperNorfair')),
         'Warehouse Entrance Left': lambda sm: sm.canAccessHeatedNorfairFromEntrance()
     },
     'Available': lambda sm: sm.canOpenGreenDoors()

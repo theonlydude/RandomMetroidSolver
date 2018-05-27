@@ -264,18 +264,21 @@ class Randomizer(object):
         for boss in ['Kraid', 'Phantoon', 'Draygon', 'Ridley']:
             Bosses.beatBoss(boss)
 
+        # get restricted locs
         totalAvailLocs = [loc for loc in self.currentLocations() if self.locPostAvailable(loc, None)]
         restricted = [loc for loc in locations if loc not in totalAvailLocs]
+
+        # check if we can reach Tourian
+        landingSite = self.areaGraph.accessPoints['Landing Site']
+        tourian = self.areaGraph.accessPoints['Statues Hallway Left']
+        availAccessPoints = self.areaGraph.getAvailableAccessPoints(landingSite, self.smbm, self.difficultyTarget)
+
         # clean up
         self.smbm.resetItems()
         self.smbm.resetSMBool()
         Bosses.reset()
         self.currentItems = []
 
-        # check if we can reach Tourian
-        landingSite = self.areaGraph.accessPoints['Landing Site']
-        tourian = self.areaGraph.accessPoints['Statues Hallway Left']
-        availAccessPoints = self.areaGraph.getAvailableAccessPoints(landingSite, self.smbm, self.difficultyTarget)
         if tourian in availAccessPoints:
             return restricted
         else:

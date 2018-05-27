@@ -352,7 +352,8 @@ locations = [
     'Visibility': "Chozo",
     'Room': 'Wave Beam Room',
     'AccessFrom' : {
-        'Kronic Boost Room Bottom Left': lambda sm: sm.canHellRun('MainUpperNorfair'),
+        'Kronic Boost Room Bottom Left': lambda sm: sm.wand(sm.canHellRun('MainUpperNorfair'),
+                                                            sm.haveItem('Morph')),
         'Warehouse Entrance Left': lambda sm: sm.canAccessHeatedNorfairFromEntrance()
     },
     'Available': lambda sm: sm.canOpenRedDoors()
@@ -1276,7 +1277,8 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Bubble Mountain',
     'AccessFrom' : {
-        'Kronic Boost Room Bottom Left': lambda sm: sm.canHellRun('MainUpperNorfair'),
+        'Kronic Boost Room Bottom Left': lambda sm: sm.wand(sm.canHellRun('MainUpperNorfair'),
+                                                            sm.haveItem('Morph')),
         'Warehouse Entrance Left': lambda sm: sm.canAccessHeatedNorfairFromEntrance()
     },
     'Available': lambda sm: sm.setSMBool(True)
@@ -1306,7 +1308,8 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Double Chamber',
     'AccessFrom' : {
-        'Kronic Boost Room Bottom Left': lambda sm: sm.canHellRun('MainUpperNorfair'),
+        'Kronic Boost Room Bottom Left': lambda sm: sm.wand(sm.canHellRun('MainUpperNorfair'),
+                                                            sm.haveItem('Morph')),
         'Warehouse Entrance Left': lambda sm: sm.canAccessHeatedNorfairFromEntrance()
     },
     'Available': lambda sm: sm.canOpenRedDoors()

@@ -290,7 +290,7 @@ locations = [
     'AccessFrom' : {
         'Warehouse Entrance Left': lambda sm: sm.setSMBool(True)
     },
-    'Available': lambda sm: sm.canOpenRedDoors(),
+    'Available': lambda sm: sm.wor(sm.canOpenRedDoors(), sm.haveItem('Morph')),
     'PostAvailable': lambda sm: sm.wor(sm.canPassBombPassages(),
                                        sm.wand(sm.haveItem('Morph'), RomPatches.has(RomPatches.HiJumpShotBlock)))
 },
@@ -670,7 +670,7 @@ locations = [
         'West Ocean Left': lambda sm: sm.setSMBool(True),
         'Crab Maze Left': lambda sm: sm.canPassForgottenHighway(False)
     },
-    'Available': lambda sm: sm.haveItem('Morph')
+    'Available': lambda sm: sm.canPassBombPassages()
 },
 {
     'Area': "Crateria",
@@ -775,7 +775,8 @@ locations = [
     'Available': lambda sm: sm.wand(sm.canUsePowerBombs(),
                                     sm.haveItem('SpeedBooster'),
                                     sm.wor(sm.haveItem('Ice'),
-                                           sm.knowsShortCharge())) # there's also a dboost involved...but if you can short charge, you'll figure it out
+                                           sm.knowsShortCharge(),
+                                           sm.knowsSimpleShortCharge())) # there's also a dboost involved in simple short charge or you have to kill the yellow enemies with some power bombs
 },
 {
     'Area': "Crateria",
@@ -1164,7 +1165,7 @@ locations = [
     'AccessFrom' : {
         'Warehouse Entrance Left': lambda sm: sm.setSMBool(True)
     },
-    'Available': lambda sm: sm.canOpenRedDoors(),
+    'Available': lambda sm: sm.wor(sm.canOpenRedDoors(), sm.haveItem('Morph')),
     'PostAvailable': lambda sm: sm.wor(sm.canPassBombPassages(),
                                        sm.wand(RomPatches.has(RomPatches.HiJumpShotBlock), sm.haveItem('Morph')))
 },

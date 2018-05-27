@@ -1502,6 +1502,7 @@ locations = [
     },
     'Available': lambda sm: sm.wand(sm.haveItem('Gravity'),
                                     sm.haveItem('SpeedBooster'),
+                                    sm.energyReserveCountOk(1), # for the shinespark
                                     sm.wor(sm.canOpenGreenDoors(), # run from room on the right
                                            sm.knowsSimpleShortCharge(), # run from above
                                            sm.knowsShortCharge())) # run from below

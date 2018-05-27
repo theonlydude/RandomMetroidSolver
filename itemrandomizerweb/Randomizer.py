@@ -253,7 +253,9 @@ class Randomizer(object):
         self.restrictedLocations = self.getRestrictedLocations(locations, settings.forbiddenItems)
         self.smbm.resetItems()
 
+
     # list unreachable locations (possible with super fun setting)
+    # returns unreachable locations list, or None if the seed cannot be generated with these settings
     def getRestrictedLocations(self, locations, forbiddenItems):
         if len(forbiddenItems) == 0: # no super fun setting, nothing to do
             return []
@@ -270,7 +272,14 @@ class Randomizer(object):
         Bosses.reset()
         self.currentItems = []
 
-        return restricted
+        # check if we can reach Tourian
+        landingSite = self.areaGraph.accessPoints['Landing Site']
+        tourian = self.areaGraph.accessPoints['Statues Hallway Left']
+        availAccessPoints = self.areaGraph.getAvailableAccessPoints(landingSite, self.smbm, self.difficultyTarget)
+        if tourian in availAccessPoints:
+            return restricted
+        else:
+            return None
 
     def locPostAvailable(self, loc, item):
         if not 'PostAvailable' in loc:
@@ -718,6 +727,8 @@ class Randomizer(object):
         return next(item for item in self.itemPool if item['Type'] == t)
 
     def fillRestrictedLocations(self, itemLocations):
+        if self.restrictedLocations is None: # Tourian unreachable
+            return True
         # fill up unreachable locations with "junk" to maximize the chance of the ROM
         # to be finishable
         for loc in self.restrictedLocations:

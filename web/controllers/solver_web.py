@@ -211,7 +211,11 @@ def solver():
 
     # load form
     files = sorted(os.listdir('diff_presets'))
+    stdPresets = ['noob', 'casual', 'regular', 'veteran', 'speedrunner']
     presets = [os.path.splitext(file)[0] for file in files]
+    for preset in stdPresets:
+        presets.remove(preset)
+    presets = stdPresets + presets
 
     loadForm = FORM(TABLE(COLGROUP(COL(_class="quarter"), COL(_class="half"), COL(_class="quarter")),
                           TR("Load preset: ",
@@ -562,7 +566,7 @@ def randomizer():
         session.randomizer['areaRandomization'] = "off"
 
     # put standard presets first
-    stdPresets = ['noob', 'regular', 'veteran', 'speedrunner']
+    stdPresets = ['noob', 'casual', 'regular', 'veteran', 'speedrunner']
     files = sorted(os.listdir('diff_presets'))
     presets = [os.path.splitext(file)[0] for file in files]
     for preset in stdPresets:

@@ -1153,7 +1153,8 @@ locations = [
     },
     'Available': lambda sm: sm.wor(sm.canFly(), sm.haveItem('Grapple'),
                                    sm.wand(sm.haveItem('HiJump'),
-                                           sm.haveItem('SpeedBooster')))
+                                           sm.haveItem('SpeedBooster')),
+                                   sm.wand(sm.haveItem('SpringBall'), sm.haveItem('HiJump'), sm.knowsSpringBallJump()))
 },
 {
     'Area': "Norfair",

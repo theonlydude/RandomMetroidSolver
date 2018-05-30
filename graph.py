@@ -214,7 +214,8 @@ accessPoints = [
         'Morph Ball Room Left': lambda sm: sm.canUsePowerBombs()
     }, shortName="C\\LANDING"),
     AccessPoint('Lower Mushrooms Left', 'Crateria', {
-        'Landing Site': lambda sm: sm.canPassTerminatorBombWall(False)
+        'Landing Site': lambda sm: sm.canPassTerminatorBombWall(False),
+        'Green Pirates Shaft Bottom Right': lambda sm: sm.setSMBool(True)
     }, roomInfo = {'RoomPtr':0x9969, "area": 0x0},
        exitInfo = {'DoorPtr':0x8c22, 'direction': 0x5, "cap": (0xe, 0x6), "bitFlag": 0x0,
                    "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},

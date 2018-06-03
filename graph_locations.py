@@ -18,7 +18,10 @@ locations = [
     'AccessFrom' : {
         'Landing Site': lambda sm: sm.setSMBool(True)
     },
-    'Available': lambda sm: sm.canEnterAndLeaveGauntlet()
+    'Available': lambda sm: sm.wor(sm.canEnterAndLeaveGauntlet(),
+                                   sm.wand(sm.haveItem('SpeedBooster'),
+                                           sm.knowsShortCharge(),
+                                           sm.canEnterAndLeaveGauntletQty(1, 0))) # thanks ponk! https://youtu.be/jil5zTBCF1s
 },
 {
     'Area': "Crateria",

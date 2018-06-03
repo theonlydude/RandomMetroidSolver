@@ -149,7 +149,7 @@ class Helpers(object):
                                      sm.haveItem('PowerBomb'))),
                       sm.haveItem('ScrewAttack'))
 
-    def canEnterAndLeaveGauntlet(self):
+    def canEnterAndLeaveGauntletQty(self, nPB, nTanks):
         sm = self.smbm
         # EXPLAINED: to access Gauntlet Entrance from Landing site we can either:
         #             -fly to it (infinite bomb jumps or space jump)
@@ -170,11 +170,14 @@ class Helpers(object):
                        sm.wor(sm.haveItem('ScrewAttack'),
                               sm.wor(sm.wand(self.energyReserveCountOkHardRoom('Gauntlet'),
                                              sm.wand(sm.canUsePowerBombs(),
-                                                     sm.wor(sm.itemCountOk('PowerBomb', 2),
+                                                     sm.wor(sm.itemCountOk('PowerBomb', nPB),
                                                             sm.wand(sm.haveItem('SpeedBooster'),
-                                                                    sm.energyReserveCountOk(2))))),
+                                                                    sm.energyReserveCountOk(nTanks))))),
                                      sm.wand(self.energyReserveCountOkHardRoom('Gauntlet', 0.5),
                                              sm.canUseBombs()))))
+
+    def canEnterAndLeaveGauntlet(self):
+        return self.canEnterAndLeaveGauntletQty(2, 2)
 
     def canPassBombPassages(self):
         sm = self.smbm

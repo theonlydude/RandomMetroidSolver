@@ -395,12 +395,7 @@ locations = [
                                     sm.wor(sm.haveItem('SpaceJump'),
                                            sm.wand(sm.haveItem('Super'), sm.knowsGreenGateGlitch())),
                                     sm.canDestroyBombWalls()),
-    'PostAvailable': lambda sm: sm.wor(sm.canFly(),
-                                       sm.wand(sm.haveItem('HiJump'),
-                                               sm.haveItem('ScrewAttack'),
-                                               sm.haveItem('SpeedBooster'),
-                                               sm.knowsScrewAttackExit()),
-                                       sm.wand(sm.haveItem('SpringBall'), sm.knowsSpringBallJumpFromWall()))
+    'PostAvailable': lambda sm: sm.canExitScrewAttackArea()
 },
 {
     'Area': "LowerNorfair",
@@ -1152,9 +1147,10 @@ locations = [
         'Kronic Boost Room Bottom Left': lambda sm: sm.canAccessCrocFromMainUpperNorfair()
     },
     'Available': lambda sm: sm.wor(sm.canFly(), sm.haveItem('Grapple'),
-                                   sm.wand(sm.haveItem('HiJump'),
-                                           sm.haveItem('SpeedBooster')),
-                                   sm.wand(sm.haveItem('SpringBall'), sm.haveItem('HiJump'), sm.knowsSpringBallJump()))
+                                   sm.wand(sm.haveItem('SpeedBooster'),
+                                           sm.wor(sm.haveItem('HiJump'), # jump from the blocks below
+                                                  sm.knowsShortCharge())), # spark from across the grapple blocks
+                                   sm.wand(sm.haveItem('SpringBall'), sm.haveItem('HiJump'), sm.knowsSpringBallJump())) # jump from the blocks below
 },
 {
     'Area': "Norfair",
@@ -1202,8 +1198,7 @@ locations = [
     'Available': lambda sm: sm.wand(sm.enoughStuffCroc(),
                                     sm.wor(sm.canFly(),
                                            sm.haveItem('Grapple'),
-                                           sm.wand(sm.haveItem('SpeedBooster'),
-                                                   sm.wor(sm.haveItem('HiJump'), sm.knowsShortCharge()))))
+                                           sm.haveItem('SpeedBooster'))) # spark from the room before
 },
 {
     'Area': "Norfair",
@@ -1329,7 +1324,8 @@ locations = [
         'Three Muskateers Room Left': lambda sm: sm.canPassAmphitheaterReverse()
     },
     'Available': lambda sm: sm.wand(sm.canHellRun('LowerNorfair'),
-                                    sm.haveItem('SpaceJump'))
+                                    sm.haveItem('SpaceJump')),
+    'PostAvailable': lambda sm: sm.canExitScrewAttackArea()
 },
 {
     'Area': "LowerNorfair",
@@ -1346,7 +1342,8 @@ locations = [
     },
     'Available': lambda sm: sm.wand(sm.canHellRun('LowerNorfair'),
                                     sm.wor(sm.haveItem('SpaceJump'),
-                                           sm.wand(sm.haveItem('Super'), sm.knowsGreenGateGlitch())))
+                                           sm.wand(sm.haveItem('Super'), sm.knowsGreenGateGlitch()))),
+    'PostAvailable': lambda sm: sm.canExitScrewAttackArea()
 },
 {
     'Area': "LowerNorfair",

@@ -317,6 +317,20 @@ class Helpers(object):
                               sm.wand(sm.knowsSpringBallJumpFromWall(),
                                       sm.haveItem('SpringBall'))))
 
+    def canExitScrewAttackArea(self):
+        sm = self.smbm
+
+        return sm.wor(sm.canFly(),
+                      sm.wand(sm.haveItem('HiJump'),
+                              sm.haveItem('ScrewAttack'),
+                              sm.haveItem('SpeedBooster'),
+                              sm.knowsScrewAttackExit()),
+                      sm.wand(sm.haveItem('SpringBall'),
+                              sm.knowsSpringBallJumpFromWall()),
+                      sm.wand(sm.haveItem('SpeedBooster'), # fight GT and spark out
+                              sm.wor(sm.knowsSimpleShortCharge(),
+                                     sm.knowsShortCharge())))
+
     def canPassMtEverest(self):
         sm = self.smbm
         return sm.wand(sm.canAccessOuterMaridia(),
@@ -625,7 +639,7 @@ class Helpers(object):
                               sm.haveItem('Charge'),
                               sm.haveItem('XRayScope')),
                       sm.wand(sm.haveItem('Gravity'),
-                              sm.knowsShortCharge(),
+                              sm.knowsDraygonSparkKill(),
                               sm.haveItem('SpeedBooster')))
 
     def enoughStuffsPhantoon(self):

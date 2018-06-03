@@ -135,12 +135,10 @@ class Knows:
                                          'Upper Norfair Farming Room']}
 
     ShortCharge = SMBool(False, 0, ['ShortCharge'])
-    desc['ShortCharge'] = {'display': 'Short Charge',
-                           'title': 'Activate SpeedBooster really fast, to kill draygon for example',
+    desc['ShortCharge'] = {'display': 'Tight Short Charge',
+                           'title': 'Activate SpeedBooster really fast (3 tap or stutter 3)',
                            'href': 'https://wiki.supermetroid.run/index.php?title=Short_Charge',
-                           'rooms': ['Plasma Room',
-                                     'Crateria Super Room',
-                                     "Draygon's Room"]}
+                           'rooms': []} # TODO rooms
 
     GravityJump = SMBool(True, hard, ['GravityJump'])
     desc['GravityJump'] = {'display': 'Gravity-Jump',
@@ -181,6 +179,12 @@ class Knows:
                                   'title': 'Instant kill on Draygon with electric grapple',
                                   'href': 'https://www.youtube.com/watch?v=gcemRrXqCbE',
                                   'rooms': ["Draygon's Room"]}
+
+    DraygonSparkKill = SMBool(False, mania, ['DraygonSparkKill'])
+    desc['DraygonSparkKill'] = {'display': 'Draygon Spark Kill',
+                                'title': 'Kill Draygon using Speed Booster and shinesparks',
+                                'href': '', # TODO
+                                'rooms': ["Draygon's Room"]}
 
     MicrowaveDraygon = SMBool(True, easy, ['MicrowaveDraygon'])
     desc['MicrowaveDraygon'] = {'display': 'Microwave Draygon',
@@ -419,7 +423,7 @@ class Knows:
                              'ShortCharge', 'GravityJump', 'SpringBallJump',
                              'SpringBallJumpFromWall', 'GetAroundWallJump'],
                    'title': 'Used across the game'},
-                  {'knows': ['DraygonGrappleKill', 'MicrowaveDraygon', 'MicrowavePhantoon'],
+                  {'knows': ['DraygonGrappleKill', 'DraygonSparkKill', 'MicrowaveDraygon', 'MicrowavePhantoon'],
                    'title': 'Bosses'},
                   {'knows': ['IceZebSkip', 'SpeedZebSkip'],
                    'title': 'End Game'},

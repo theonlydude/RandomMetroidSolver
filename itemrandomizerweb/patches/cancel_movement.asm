@@ -40,7 +40,10 @@ cancel_movement:
 	stz $0b48 ; momentum subpix
 	;; samus "elevator pose" to avoid taking into account transition direction
 	;; only if samus is not unmorphing to avoid game crash
-	lda #$003d 		; check for unmorph pose
+	lda #$003d 		; check for unmorph right pose
+	cmp $0a1c
+	beq .end_cancel	        ; you can't shinespark and unmorph at the same time, so skip to the end
+	lda #$003e 		; check for unmorph left pose	
 	cmp $0a1c
 	beq .end_cancel	        ; you can't shinespark and unmorph at the same time, so skip to the end
 	stz $0a1c		; set elevator pose (0)

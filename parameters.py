@@ -115,10 +115,11 @@ class Knows:
 
     SimpleShortCharge = SMBool(True, easy, ['SimpleShortCharge'])
     desc['SimpleShortCharge'] = {'display': 'Simple Short Charge',
-                                 'title': 'Activate SpeedBooster faster for Waterway ETank without gravity, and Wrecked Ship access',
+                                 'title': 'Activate SpeedBooster faster than normal by delaying run button input',
                                  'href': 'https://wiki.supermetroid.run/index.php?title=Quick_charge',
                                  'rooms': ['Parlor and Alcatraz', 'Waterway Energy Tank Room',
-                                           'Landing Site', 'Crateria Keyhunter Room']}
+                                           'Landing Site', 'Crateria Keyhunter Room',
+                                           'Crateria Super Room', 'Main Street', "Golden Torizo's Room"]}
 
     InfiniteBombJump = SMBool(True, medium, ['InfiniteBombJump'])
     desc['InfiniteBombJump'] = {'display': 'Infinite Bomb-Jump',
@@ -136,9 +137,10 @@ class Knows:
 
     ShortCharge = SMBool(False, 0, ['ShortCharge'])
     desc['ShortCharge'] = {'display': 'Tight Short Charge',
-                           'title': 'Activate SpeedBooster really fast (3 tap or stutter 3)',
+                           'title': 'Activate SpeedBooster really fast (3 taps or stutter 3)',
                            'href': 'https://wiki.supermetroid.run/index.php?title=Short_Charge',
-                           'rooms': []} # TODO rooms
+                           'rooms': ['Red Tower', 'Gauntlet Energy Tank Room', 'Plasma Room',
+                                     'Post Crocomire Jump Room', 'Crocomire Escape']}
 
     GravityJump = SMBool(True, hard, ['GravityJump'])
     desc['GravityJump'] = {'display': 'Gravity-Jump',

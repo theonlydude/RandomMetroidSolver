@@ -207,13 +207,6 @@ class Knows:
                             'href': 'https://www.youtube.com/watch?v=jEAgdWQ9kLQ',
                             'rooms': ['Mother Brain Room']}
     # underwater grav-less
-    GravLessLevel0 = SMBool(True, easy, ['GravLessLevel0'])
-    desc['GravLessLevel0'] = {'display': 'Level 0',
-                              'title': 'Use crouch jump and downgrab to get out of ponds of water',
-                              'href': None,
-                              'rooms': [], # TODO spiky death, before Billy Mays, others?
-                              'readonly' : True}
-
     SuitlessOuterMaridia = SMBool(True, hardcore, ['SuitlessOuterMaridia']) # keep SuitlessOuterMaridia as name for existing presets compatibility
     desc['SuitlessOuterMaridia'] = {'display': 'Level 1',
                                     'title': 'Level 0 + make your way underwater with Hi-Jump and Ice, freezing crabs and fishes. Access Botwoon with grapple.',
@@ -430,7 +423,7 @@ class Knows:
                    'title': 'Bosses'},
                   {'knows': ['IceZebSkip', 'SpeedZebSkip'],
                    'title': 'End Game'},
-                  {'knows': ['GravLessLevel0', 'SuitlessOuterMaridia', 'GravLessLevel2', 'SuitlessSandpit'],
+                  {'knows': ['SuitlessOuterMaridia', 'GravLessLevel2', 'SuitlessSandpit'],
                    'title': 'Underwater movement without Gravity Suit'},
                   {'knows': ['CeilingDBoost', 'AlcatrazEscape', 'ReverseGateGlitch',
                              'ReverseGateGlitchHiJumpLess', 'EarlyKraid', 'XrayDboost', 'RedTowerClimb', 'Moondance'],
@@ -747,14 +740,16 @@ class Settings:
 
     hardRoomsPresets = {
         'X-Ray' : {
-            'Default' : [(6, hard), (8, medium), (10, easy)],
+            'Aarghh' : [(10, hard), (14, medium)],
             "I don't like spikes" : [(8, hard), (10, medium), (14, easy)],
-            'Aarghh' : [(10, hard), (14, medium)]
+            'Default' : [(6, hard), (8, medium), (10, easy)],
+            "I don't mind spikes" : [(4, hard), (6, medium), (8, easy)],
+            'D-Boost master': [(1, hardcore), (2, harder), (3, hard), (4, medium), (6, easy)],
         },
         'Gauntlet' : {
-            'Default' : [(0, harder), (1, hard), (3, medium), (6, easy)],
+            'Aarghh' : [(5, hard), (10, medium)],
             "I don't like acid" : [(1, harder), (2, hard), (5, medium), (10, easy)],
-            'Aarghh' : [(5, hard), (10, medium)]
+            'Default' : [(0, harder), (1, hard), (3, medium), (6, easy)]
         }
     }
 

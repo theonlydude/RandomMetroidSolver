@@ -39,16 +39,20 @@ cancel_movement:
 	stz $0b46 ; momentum pix
 	stz $0b48 ; momentum subpix
 	;; samus "elevator pose" to avoid taking into account transition direction
-	stz $0a1c
-	stz $0a96
+	;; only if samus is not unmorphing to avoid game crash
+	lda #$003d 		; check for unmorph pose
+	cmp $0a1c
+	beq .end_cancel	        ; you can't shinespark and unmorph at the same time, so skip to the end
+	stz $0a1c		; set elevator pose (0)
+	stz $0a96		; reset animation timer
 	;; set cancel spark flag if a spark is active
 	lda $0A6E
 	cmp #$0002
-	bne +
+	bne .end_cancel
 	lda !MAGIC
 	sta !spark_flag
-+
-	;; gives 128 I-frames to samus to compensate for elevator pose
+.end_cancel:
+	;; gives 128 I-frames to samus to handle disorientation
 	lda #$0080
 	sta $18a8
 	rts

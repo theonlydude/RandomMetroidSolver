@@ -1,5 +1,5 @@
 
-# the difficulties for each technics
+import math
 from smbool import SMBool
 from rom import RomPatches
 from parameters import Settings, easy, medium, hard, harder, hardcore, mania
@@ -45,11 +45,31 @@ class Helpers(object):
             result.knows = [hellRunName+'HellRun']
         return result
 
+    # gives damage reduction factor with the current suits
+    # envDmg : if true (default) will return environmental damage reduction
+    def getDmgReduction(self, envDmg=True):
+        ret = 1.0
+        sm = self.smbm
+        hasVaria = sm.getBool(sm.haveItem('Varia'))
+        hasGrav = sm.getBool(sm.haveItem('Gravity'))
+        if RomPatches.has(RomPatches.NoGravityEnvProtection):
+            if hasVaria:
+                if envDmg:
+                    ret = 4.0
+                else:
+                    ret = 2.0
+            if hasGrav and not envDmg:
+                ret = 4.0
+        else:
+            if hasVaria:
+                ret = 2.0
+            if hasGrav:
+                ret = 4.0
+        return ret
+
     def energyReserveCountOkHardRoom(self, roomName, mult=1.0):
         difficulties = Settings.hardRooms[roomName]
-        mult = 1.0
-        if self.heatProof(): # env dmg reduction
-            mult = 2.0
+        mult *= self.getDmgReduction()
         result = self.energyReserveCountOkDiff(difficulties, mult)
 
         if self.smbm.getBool(result) == True:
@@ -63,13 +83,16 @@ class Helpers(object):
                                             self.smbm.haveItem('Gravity')))
 
     def canHellRun(self, hellRun, mult=1.0):
-        isHeatProof = self.smbm.heatProof()
-        if self.smbm.getBool(isHeatProof) == True:
-            isHeatProof = self.smbm.internal2SMBool(isHeatProof)
+        sm = self.smbm
+
+        isHeatProof = sm.heatProof()
+        if sm.getBool(isHeatProof) == True:
+            isHeatProof = sm.internal2SMBool(isHeatProof)
             isHeatProof.difficulty = easy
             return isHeatProof
         elif self.energyReserveCount() >= 2:
-            return self.energyReserveCountOkHellRun(hellRun, mult)
+            return sm.wand(self.energyReserveCountOkHellRun(hellRun, mult),
+                           sm.wor(self.canCrystalFlash(int(math.ceil(2/mult))), SMBool(hellRun != 'LowerNorfair')))
         else:
             return SMBool(False)
 
@@ -358,12 +381,12 @@ class Helpers(object):
                               sm.wand(sm.knowsMochtroidClip(),
                                       sm.haveItem('Ice'))))
 
-    def canCrystalFlash(self):
+    def canCrystalFlash(self, n=1):
         sm = self.smbm
         return sm.wand(sm.canUsePowerBombs(),
-                       sm.itemCountOk('Missile', 2),
-                       sm.itemCountOk('Super', 2),
-                       sm.itemCountOk('PowerBomb', 3))
+                       sm.itemCountOk('Missile', 2*n),
+                       sm.itemCountOk('Super', 2*n),
+                       sm.itemCountOk('PowerBomb', 2*n+1))
 
     def canDefeatDraygon(self):
         sm = self.smbm

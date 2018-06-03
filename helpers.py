@@ -534,6 +534,7 @@ class Helpers(object):
 
         return (ammoMargin, secs)
 
+    # return diff score, or -1 if below minimum energy in diffTbl
     def computeBossDifficulty(self, ammoMargin, secs, diffTbl):
         # actual fight duration :
         rate = None
@@ -560,6 +561,8 @@ class Helpers(object):
             keyz = sorted(energyDict.keys())
             if len(keyz) > 0:
                 current = keyz[0]
+                if energy < current:
+                    return -1
                 sup = None
                 difficulty = energyDict[current]
                 for k in keyz:
@@ -608,8 +611,11 @@ class Helpers(object):
             return SMBool(False)
 
         # print('RIDLEY', ammoMargin, secs)
-        self.smbm.curSMBool.difficulty = self.computeBossDifficulty(ammoMargin, secs,
-                                                                    Settings.bossesDifficulty['Ridley'])
+        diff = self.computeBossDifficulty(ammoMargin, secs,
+                                          Settings.bossesDifficulty['Ridley'])
+        if diff < 0:
+            return SMBool(False)
+        self.smbm.curSMBool.difficulty = diff
         self.smbm.curSMBool.bool = True
         return self.smbm.getSMBoolCopy()
 
@@ -618,8 +624,11 @@ class Helpers(object):
         if ammoMargin == 0:
             return SMBool(False)
         #print('KRAID True ', ammoMargin, secs)
-        self.smbm.curSMBool.difficulty = self.computeBossDifficulty(ammoMargin, secs,
-                                                                    Settings.bossesDifficulty['Kraid'])
+        diff = self.computeBossDifficulty(ammoMargin, secs,
+                                          Settings.bossesDifficulty['Kraid'])
+        if diff < 0:
+            return SMBool(False)
+        self.smbm.curSMBool.difficulty = diff
         self.smbm.curSMBool.bool = True
         return self.smbm.getSMBoolCopy()
 
@@ -628,8 +637,12 @@ class Helpers(object):
         (ammoMargin, secs) = self.canInflictEnoughDamages(6000)
         # print('DRAY', ammoMargin, secs)
         if ammoMargin > 0:
-            fight = SMBool(True, self.computeBossDifficulty(ammoMargin, secs,
-                                                            Settings.bossesDifficulty['Draygon']))
+            diff = self.computeBossDifficulty(ammoMargin, secs,
+                                              Settings.bossesDifficulty['Draygon'])
+            if diff < 0:
+                fight = SMBool(False)
+            else:
+                fight = SMBool(True, diff)
             if sm.getBool(sm.haveItem('Gravity')) == False:
                 fight.difficulty *= Settings.algoSettings['draygonNoGravityMalus']
         else:
@@ -653,6 +666,8 @@ class Helpers(object):
         # print('PHANTOON', ammoMargin, secs)
         difficulty = self.computeBossDifficulty(ammoMargin, secs,
                                                 Settings.bossesDifficulty['Phantoon'])
+        if difficulty < 0:
+            return SMBool(False)
         hasCharge = sm.getBool(sm.haveItem('Charge'))
         if hasCharge or sm.getBool(sm.haveItem('ScrewAttack')) == True:
             difficulty /= Settings.algoSettings['phantoonFlamesAvoidBonus']
@@ -690,6 +705,8 @@ class Helpers(object):
             return SMBool(False, 0)
 
         diff = self.computeBossDifficulty(ammoMargin, secs, Settings.bossesDifficulty['MotherBrain'])
+        if diff < 0:
+            return SMBool(False)
         self.smbm.ETankCount = nTanks
         return SMBool(True, diff)
 

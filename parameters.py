@@ -548,7 +548,8 @@ class Settings:
             'Used to it' : {
                 'Rate' : 0.02,
                 'Energy' : {
-                    1 : (hardcore + mania)/2,
+                    0.5 : mania,
+                    1 : (mania+hardcore)/2,
                     2 : harder,
                     2.5 : hard,
                     4 : medium,
@@ -558,6 +559,7 @@ class Settings:
             'No problemo' : {
                 'Rate' : 0.02,
                 'Energy' : {
+                    0.5 : harder,
                     1 : hard,
                     2 : medium,
                     3 : easy

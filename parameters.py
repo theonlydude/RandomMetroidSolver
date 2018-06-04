@@ -526,7 +526,7 @@ class Settings:
             'A lot of trouble' : {
                 'Rate' : 0.01,
                 'Energy' : {
-                    1 : mania,
+                    1.5 : mania,
                     3 : hardcore,
                     4 : harder,
                     5 : hard,
@@ -548,7 +548,7 @@ class Settings:
             'Used to it' : {
                 'Rate' : 0.02,
                 'Energy' : {
-                    0.5 : mania,
+                    0.5 : 150,
                     1 : (mania+hardcore)/2,
                     2 : harder,
                     2.5 : hard,

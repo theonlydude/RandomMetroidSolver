@@ -170,7 +170,7 @@ class Knows:
 
     GetAroundWallJump = SMBool(True, hard, ['GetAroundWallJump'])
     desc['GetAroundWallJump'] = {'display': 'Get around Wall-Jump',
-                                 'title': 'Tricky Wall-Jumps where you have to get around the platform you want to Wall-Jump on (access Norfair Reserve, go through Worst Room in the game, exit Plasma Room)',
+                                 'title': 'Tricky Wall-Jumps where you have to get around the platform you want to Wall-Jump on using Hi-Jump boots',
                                  'href': 'https://www.youtube.com/watch?v=2GPx-6ARSIw&t=137s',
                                  'rooms': ['The Worst Room In The Game',
                                            'Bubble Mountain', 'Plasma Room']}

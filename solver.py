@@ -405,7 +405,8 @@ class Solver:
         # we want to sort the outside locations by putting the ones is the same
         # area first if we don't have enough items,
         # then we sort the remaining areas starting whith boss dead status
-        outside.sort(key=lambda loc: (loc['distance'],
+        outside.sort(key=lambda loc: (loc['distance'] if loc['difficulty'].difficulty <= threshold
+                                      else 100000,
                                       0 if loc['Area'] == area and not enough and loc['difficulty'].difficulty <= threshold
                                       else 1,
                                       loc['difficulty'].difficulty if not Bosses.areaBossDead(loc['Area'])

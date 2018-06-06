@@ -246,6 +246,7 @@ class Randomizer(object):
         self.currentItems = []
         self.nonProgTypesCache = []
         self.progTypesCache = []
+        self.setCurAccessPoint()
         if self.difficultyTarget > samus and settings.progDiff == 'normal':
             self.smbm = SMBoolManager.factory('bool', cache=True)
         else:
@@ -253,7 +254,10 @@ class Randomizer(object):
         self.restrictedLocations = self.getRestrictedLocations(locations, settings.forbiddenItems)
         self.smbm.resetItems()
 
-
+    def setCurAccessPoint(self, ap='Landing Site'):
+        self.curAccessPoint = ap
+#        print('current AP = ' + ap)
+    
     # list unreachable locations (possible with super fun setting)
     # returns unreachable locations list, or None if the seed cannot be generated with these settings
     def getRestrictedLocations(self, locations, forbiddenItems):
@@ -299,7 +303,7 @@ class Randomizer(object):
         if item is not None:
             self.smbm.addItem(item['Type'])
 
-        ret = sorted(self.areaGraph.getAvailableLocations(self.unusedLocations, self.smbm, self.difficultyTarget), key=lambda loc: loc['Name'])
+        ret = sorted(self.areaGraph.getAvailableLocations(self.unusedLocations, self.smbm, self.difficultyTarget, self.curAccessPoint), key=lambda loc: loc['Name'])
 
         if item is not None:
             self.smbm.removeItem(item['Type'])
@@ -605,6 +609,7 @@ class Randomizer(object):
         location = itemLocation['Location']
         if self.isProgItem(item):
             self.progressionItemLocs.append(itemLocation)
+            self.setCurAccessPoint(location['accessPoint'])
             if item['Category'] == 'Energy':
                 # if energy made us progress we must not cancel energy we already
                 # have, so add the already collected energy to progression locations
@@ -668,12 +673,19 @@ class Randomizer(object):
                 return False
             else:
                 # forced cancel
+                sys.stdout.write('?')
+                sys.stdout.flush()
                 cancelFrom = [il for il in itemLocations if not il in self.progressionItemLocs]
                 if len(cancelFrom) == 0:
                     cancelFrom = itemLocations
-                itemLoc = cancelFrom[random.randint(0, len(cancelFrom) - 1)]
+                itemLoc = cancelFrom[-1]
                 if itemLoc in self.progressionItemLocs:
                     self.progressionItemLocs.remove(itemLoc)
+                    if len(self.progressionItemLocs) == 0:
+                        self.setCurAccessPoint()
+                    else:
+                        self.setCurAccessPoint(self.progressionItemLocs[-1]['Location']['accessPoint'])
+
         itemLocations.remove(itemLoc)
         item = itemLoc['Item']
         loc = itemLoc['Location']
@@ -850,7 +862,7 @@ class Randomizer(object):
 #                print("Full Pool " + str(len(self.itemPool)) + ", curLocs " + str([l['Name'] for l in self.currentLocations(self.currentItems)]))
                 isStuck = self.getItemFromStandardPool(itemLocations, isStuck, maxLen)
                 if isStuck == True and len(self.itemPool) > 0:
-                    # force item cancel if stuck as a last resort for early game corner cases
+                    # force item cancel if stuck as a last resort for early game corner cases XXX consider resetting everything if few items placed??
                     self.cancelItem(itemLocations, maxLen, [], force=True)
                     isStuck = self.getItemFromStandardPool(itemLocations, isStuck, maxLen)
         if len(self.itemPool) > 0:

@@ -422,8 +422,7 @@ accessPoints = [
         'Red Brinstar Elevator': lambda sm: sm.wand(sm.canClimbRedTower(),
                                                     sm.wor(sm.canOpenYellowDoors(),
                                                            RomPatches.has(RomPatches.RedTowerBlueDoors))),
-        'Caterpillar Room Top Right': lambda sm: sm.wand(sm.haveItem('Morph'),
-                                                         RomPatches.has(RomPatches.NoMaridiaGreenGates),
+        'Caterpillar Room Top Right': lambda sm: sm.wand(sm.canPassRedTowerToMaridiaNode(),
                                                          sm.canClimbRedTower()),
         # go down
         'East Tunnel Right': lambda sm: sm.setSMBool(True)
@@ -433,14 +432,10 @@ accessPoints = [
        entryInfo = {'SamusX':0x2f, 'SamusY':0x488},
        shortName="B\\RED TOWER"),
     AccessPoint('Caterpillar Room Top Right', 'RedBrinstar', {
-        'Red Brinstar Elevator': lambda sm: sm.wand(sm.haveItem('Morph'),
-                                                    sm.wor(RomPatches.has(RomPatches.NoMaridiaGreenGates),
-                                                           sm.canOpenGreenDoors()),
+        'Red Brinstar Elevator': lambda sm: sm.wand(sm.canPassMaridiaToRedTowerNode(),
                                                     sm.wor(sm.canUsePowerBombs(),
                                                            RomPatches.has(RomPatches.RedTowerBlueDoors))),
-        'Red Tower Top Left': lambda sm: sm.wand(sm.haveItem('Morph'),
-                                                 sm.wor(RomPatches.has(RomPatches.NoMaridiaGreenGates),
-                                                        sm.canOpenGreenDoors()),
+        'Red Tower Top Left': lambda sm: sm.wand(sm.canPassMaridiaToRedTowerNode(),
                                                  sm.canOpenYellowDoors())
     },
        roomInfo = {'RoomPtr':0xa322, "area": 0x1},
@@ -449,7 +444,7 @@ accessPoints = [
        entryInfo = {'SamusX':0x2cd, 'SamusY':0x388},
        shortName="B\\TOP RED TOWER"),
     AccessPoint('Red Brinstar Elevator', 'RedBrinstar', {
-        'Caterpillar Room Top Right': lambda sm: sm.wand(sm.haveItem('Morph'), RomPatches.has(RomPatches.NoMaridiaGreenGates)),
+        'Caterpillar Room Top Right': lambda sm: sm.canPassRedTowerToMaridiaNode(),
         'Red Tower Top Left': lambda sm: sm.canOpenYellowDoors()
     }, roomInfo = {'RoomPtr':0x962a, "area": 0x0},
        exitInfo = {'DoorPtr':0x8af6, 'direction': 0x7, "cap": (0x16, 0x2d), "bitFlag": 0x0,
@@ -545,7 +540,7 @@ def getDirection(src, dst):
     # if incompatible but horizontal we keep entry dir (looks more natural)
     if isHorizontal(exitDir) and isHorizontal(entryDir):
         return entryDir
-    # otherwise keep exit direction and remove cap XXX maybe keep horizontal transition in case of V>H? (untested yet)
+    # otherwise keep exit direction and remove cap
     return removeCap(exitDir)
 
 def getBitFlag(srcArea, dstArea, origFlag):

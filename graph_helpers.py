@@ -106,6 +106,17 @@ class HelpersGraph(Helpers):
                                              sm.canFly())),
                               sm.canDoSuitlessOuterMaridia())) # climing crabs
 
+    def canPassMaridiaToRedTowerNode(self):
+        sm = self.smbm
+        return sm.wand(sm.haveItem('Morph'),
+                       sm.wor(RomPatches.has(RomPatches.NoMaridiaGreenGates),
+                              sm.canOpenGreenDoors()))
+
+    def canPassRedTowerToMaridiaNode(self):
+        sm = self.smbm
+        return sm.wand(sm.haveItem('Morph'),
+                       RomPatches.has(RomPatches.NoMaridiaGreenGates))
+
     def canAccessHeatedNorfairFromEntrance(self, bubbleMountain=True):
         sm = self.smbm
         return sm.wand(sm.wor(sm.wand(sm.haveItem('SpeedBooster'), # frog speedway

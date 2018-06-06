@@ -1053,8 +1053,7 @@ locations = [
     'Room': 'Beta Power Bomb Room',
     'AccessFrom' : {
         'Red Brinstar Elevator': lambda sm: sm.setSMBool(True),
-        'Caterpillar Room Top Right': lambda sm: sm.setSMBool(True),
-        'Red Tower Top Left': lambda sm: sm.canClimbRedTower()
+        'Caterpillar Room Top Right': lambda sm: sm.canPassMaridiaToRedTowerNode()
     },
     'Available': lambda sm: sm.wand(sm.canOpenGreenDoors(),
                                     sm.canUsePowerBombs())
@@ -1070,8 +1069,7 @@ locations = [
     'Room': 'Alpha Power Bomb Room',
     'AccessFrom' : {
         'Red Brinstar Elevator': lambda sm: sm.setSMBool(True),
-        'Caterpillar Room Top Right': lambda sm: sm.setSMBool(True),
-        'Red Tower Top Left': lambda sm: sm.canClimbRedTower()
+        'Caterpillar Room Top Right': lambda sm: sm.canPassMaridiaToRedTowerNode()
     },
     'Available': lambda sm: sm.canOpenGreenDoors()
 },
@@ -1086,8 +1084,7 @@ locations = [
     'Room': 'Alpha Power Bomb Room',
     'AccessFrom' : {
         'Red Brinstar Elevator': lambda sm: sm.setSMBool(True),
-        'Caterpillar Room Top Right': lambda sm: sm.setSMBool(True),
-        'Red Tower Top Left': lambda sm: sm.canClimbRedTower()
+        'Caterpillar Room Top Right': lambda sm: sm.canPassMaridiaToRedTowerNode()
     },
     'Available': lambda sm: sm.wand(sm.canOpenGreenDoors(),
                                     sm.canUsePowerBombs())

@@ -36,7 +36,8 @@ itemSets = {
     'Ridley' : {
         'Standard' : stuff(['Plasma', 'Charge', 'Wave', 'Ice', 'Varia', 'Gravity'], 7, 10, 6, 3),
         'ChargeLess' : stuff(['Varia', 'Gravity'], 9, 10, 9, 3),
-        'Tough' : stuff(['Spazer', 'Charge', 'Wave', 'Ice', 'Varia', 'Gravity'], 4, 10, 3, 3)
+        'Tough' : stuff(['Spazer', 'Charge', 'Wave', 'Ice', 'Varia', 'Gravity'], 4, 10, 3, 3),
+        'Crazy' : stuff(['Charge', 'Varia'], 1, 2, 1, 1)
     },
     'MotherBrain' : {
         'Standard' : stuff(['Plasma', 'Charge', 'Wave', 'Ice', 'Varia', 'Gravity'], 9, 10, 6, 3),

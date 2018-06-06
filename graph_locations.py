@@ -81,8 +81,7 @@ locations = [
     'Visibility': "Chozo",
     'Room': 'Big Pink',
     'AccessFrom' : {
-        'Green Brinstar Elevator Right': lambda sm: sm.canOpenRedDoors(), #pink bomb wall handled by canPassBombPassages
-        'Green Hill Zone Top Right': lambda sm: sm.setSMBool(True) # Morph handled by canPassBombPassages
+        'Big Pink': lambda sm: sm.setSMBool(True)
     },
     'Available': lambda sm: sm.canPassBombPassages()
 },
@@ -148,8 +147,7 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Waterway Energy Tank Room',
     'AccessFrom' : {
-        'Green Brinstar Elevator Right': lambda sm: sm.canOpenRedDoors(), # pink bomb wall handled by canUsePowerBombs
-        'Green Hill Zone Top Right': lambda sm: sm.setSMBool(True) # Morph handled by canUsePowerBombs
+        'Big Pink': lambda sm: sm.setSMBool(True)
     },
     'Available': lambda sm: sm.wand(sm.canUsePowerBombs(),
                                     sm.canOpenRedDoors(),
@@ -168,8 +166,7 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Hopper Energy Tank Room',
     'AccessFrom' : {
-        'Green Brinstar Elevator Right': lambda sm: sm.canOpenRedDoors(), # pink bomb wall handled by canUsePowerBombs
-        'Green Hill Zone Top Right': lambda sm: sm.setSMBool(True) # Morph handled by canUsePowerBombs
+        'Big Pink': lambda sm: sm.setSMBool(True)
     },
     'Available': lambda sm: sm.wand(sm.canUsePowerBombs(),
                                     sm.wor(sm.haveItem('Wave'),
@@ -816,9 +813,7 @@ locations = [
     'Visibility': "Chozo",
     'Room': 'Spore Spawn Super Room',
     'AccessFrom' : {
-        'Green Brinstar Elevator Right': lambda sm: sm.wand(sm.canOpenRedDoors(),
-                                                            sm.wor(sm.canDestroyBombWalls(), sm.haveItem('SpeedBooster'))),
-        'Green Hill Zone Top Right': lambda sm: sm.haveItem('Morph')
+        'Big Pink': lambda sm: sm.setSMBool(True)
     },
     # either you go the back way, using a super and the camera glitch,
     # or just beat spore spawn (so no sm.knows() setting needed for the glitch)
@@ -902,9 +897,7 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Big Pink',
     'AccessFrom' : {
-        'Green Brinstar Elevator Right': lambda sm: sm.wand(sm.canOpenRedDoors(),
-                                                            sm.wor(sm.canDestroyBombWalls(), sm.haveItem('SpeedBooster'))),
-        'Green Hill Zone Top Right': lambda sm: sm.haveItem('Morph')
+        'Big Pink': lambda sm: sm.setSMBool(True)
     },
     'Available': lambda sm: sm.setSMBool(True)
 },
@@ -918,9 +911,7 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Big Pink',
     'AccessFrom' : {
-        'Green Brinstar Elevator Right': lambda sm: sm.wand(sm.canOpenRedDoors(),
-                                                            sm.wor(sm.canDestroyBombWalls(), sm.haveItem('SpeedBooster'))),
-        'Green Hill Zone Top Right': lambda sm: sm.haveItem('Morph')
+        'Big Pink': lambda sm: sm.setSMBool(True)
     },
     'Available': lambda sm: sm.setSMBool(True)
 },
@@ -934,8 +925,7 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Pink Brinstar Power Bomb Room',
     'AccessFrom' : {
-        'Green Brinstar Elevator Right': lambda sm: sm.canOpenRedDoors(), # pink bomb wall handled by canUsePowerBombs
-        'Green Hill Zone Top Right': lambda sm: sm.setSMBool(True) # Morph handled by canUsePowerBombs
+        'Big Pink': lambda sm: sm.setSMBool(True)
     },
     'Available': lambda sm: sm.wand(sm.canUsePowerBombs(),
                                     sm.haveItem('Super'))

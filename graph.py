@@ -13,16 +13,18 @@ class AccessPoint(object):
     # exitInfo : dict carrying vanilla door information : 'DoorPtr': door address, 'direction', 'cap', 'screen', 'bitFlag', 'distanceToSpawn', 'doorAsmPtr' : door properties
     # entryInfo : dict carrying forced samus X/Y position with keys 'SamusX' and 'SamusY'.
     #             (to be updated after reading vanillaTransitions and gather entry info from matching exit door)
-    # roomInfo : dict with 'RoomPtr' : room address, ''
+    # roomInfo : dict with 'RoomPtr' : room address, 'area'
     # shortName : short name for the credits
+    # internal : if true, shall not be used for connecting areas
     def __init__(self, name, graphArea, transitions,
                  traverse=lambda sm: sm.setSMBool(True),
-                 exitInfo=None, entryInfo=None, roomInfo=None, shortName=None):
+                 exitInfo=None, entryInfo=None, roomInfo=None, shortName=None, internal=False):
         self.Name = name
         self.GraphArea = graphArea
         self.ExitInfo = exitInfo
         self.EntryInfo = entryInfo
         self.RoomInfo = roomInfo
+        self.Internal = internal
         self.transitions = transitions
         self.traverse = traverse
         if shortName is not None:
@@ -36,8 +38,10 @@ class AccessPoint(object):
 
     # for additions after construction (inter-area transitions)
     def addTransition(self, destName):
-        self.transitions[destName] = lambda sm: self.traverse(sm)
-
+        if self.Internal is False:
+            self.transitions[destName] = lambda sm: self.traverse(sm)
+        else:
+            raise "Nope"
 
 class AccessGraph(object):
     def __init__(self, transitions, bidir=True, dotFile=None):
@@ -256,20 +260,23 @@ accessPoints = [
        shortName="C\\MORPH"),
     # Green and Pink Brinstar
     AccessPoint('Green Brinstar Elevator Right', 'GreenPinkBrinstar', {
-        'Green Hill Zone Top Right': lambda sm: sm.wand(sm.wor(sm.haveItem('SpeedBooster'),
-                                                               sm.canDestroyBombWalls()), # pink
-                                                        sm.haveItem('Morph'), # big pink
-                                                        sm.canOpenGreenDoors()) # also implies first red door
+        'Big Pink': lambda sm: sm.wand(sm.wor(sm.haveItem('SpeedBooster'),
+                                              sm.canDestroyBombWalls()),
+                                       sm.canOpenRedDoors())
     }, roomInfo = {'RoomPtr':0x9938, "area": 0x0},
        exitInfo = {'DoorPtr':0x8bfe, 'direction': 0x4, "cap": (0x1, 0x6), "bitFlag": 0x0,
                    "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
        entryInfo = {'SamusX':0xcc, 'SamusY':0x88},
        shortName="B\\GREEN ELEV."),
+    AccessPoint('Big Pink', 'GreenPinkBrinstar', {
+        'Green Hill Zone Top Right': lambda sm: sm.wand(sm.haveItem('Morph'),
+                                                        sm.canOpenGreenDoors()),
+        'Green Brinstar Elevator Right': lambda sm: sm.wor(sm.haveItem('SpeedBooster'),
+                                                           sm.canDestroyBombWalls())
+    }, internal=True),
     AccessPoint('Green Hill Zone Top Right', 'GreenPinkBrinstar', {
         'Noob Bridge Right': lambda sm: sm.setSMBool(True),
-        'Green Brinstar Elevator Right': lambda sm: sm.wand(sm.wor(sm.haveItem('SpeedBooster'),
-                                                                   sm.canDestroyBombWalls()), # pink
-                                                            sm.haveItem('Morph')) # big pink
+        'Big Pink': lambda sm: sm.haveItem('Morph')
     }, traverse=lambda sm: sm.wor(RomPatches.has(RomPatches.AreaRandoBlueDoors), sm.canOpenYellowDoors()),
        roomInfo = {'RoomPtr':0x9e52, "area": 0x1 },
        exitInfo = {'DoorPtr':0x8e86, 'direction': 0x4, "cap": (0x1, 0x26), "bitFlag": 0x0,

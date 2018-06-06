@@ -666,8 +666,7 @@ locations = [
     'Visibility': "Visible",
     'Room': 'West Ocean',
     'AccessFrom' : {
-        'West Ocean Left': lambda sm: sm.setSMBool(True),
-        'Crab Maze Left': lambda sm: sm.canPassForgottenHighway(False)
+        'West Ocean Left': lambda sm: sm.setSMBool(True)
     },
     'Available': lambda sm: sm.canPassBombPassages()
 },

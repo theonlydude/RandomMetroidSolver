@@ -275,7 +275,7 @@ class RomReader:
 
         transitions = {}
         for accessPoint in accessPoints:
-            if accessPoint.Name == 'Landing Site':
+            if accessPoint.Name == 'Landing Site' or accessPoint.Internal == True:
                 continue
             (destRoomPtr, destEntryScreen) = self.getTransition(romFile, accessPoint.ExitInfo['DoorPtr'])
             destAPName = rooms[(destRoomPtr, destEntryScreen)]

@@ -224,8 +224,8 @@ class Solver:
 
             # first take major items of acceptable difficulty in the current area
             if (len(majorAvailable) > 0
-                   and majorAvailable[0]['SolveArea'] == area
-                   and majorAvailable[0]['difficulty'].difficulty <= diffThreshold):
+                and majorAvailable[0]['SolveArea'] == area
+                and majorAvailable[0]['difficulty'].difficulty <= diffThreshold):
                 self.collectMajor(majorAvailable.pop(0))
                 continue
             # next item decision
@@ -243,7 +243,11 @@ class Solver:
                 nextMajDifficulty = majorAvailable[0]['difficulty'].difficulty
                 nextMinArea = minorAvailable[0]['SolveArea']
                 nextMinDifficulty = minorAvailable[0]['difficulty'].difficulty
-                if nextMinArea == area and nextMinDifficulty <= diffThreshold and not hasEnoughMinors:
+
+                # if not all the minors type are collected, start with minors
+                if nextMinDifficulty <= diffThreshold and not self.haveAllMinorTypes():
+                    area = self.collectMinor(minorAvailable.pop(0))
+                elif nextMinArea == area and nextMinDifficulty <= diffThreshold and not hasEnoughMinors:
                     area = self.collectMinor(minorAvailable.pop(0))
                 # difficulty over area (this is a difficulty estimator,
                 # not a speedrunning simulator)
@@ -289,7 +293,10 @@ class Solver:
                 self.smbm.removeItem(loc['itemName'])
                 loc['difficulty'] = self.smbm.wand(loc['difficulty'], postAvailable)
 
-        self.log.debug("available locs: {}".format([loc['Name'] for loc in locations]))
+        if self.log.getEffectiveLevel() == logging.DEBUG:
+            self.log.debug("available locs:")
+            for loc in locations:
+                self.log.debug("{}: {}".format(loc['Name'], loc['difficulty']))
 
     def computeDifficultyValue(self):
         if not self.canEndGame().bool:
@@ -381,6 +388,13 @@ class Solver:
         self.lastLoc = loc['accessPoint']
 
         return loc['SolveArea']
+
+    def haveAllMinorTypes(self):
+        # the first minor of each type can be seen as a major, so check for them first before going to far in zebes
+        hasPB = 'PowerBomb' in self.collectedItems
+        hasSuper = 'Super' in self.collectedItems
+        hasMissile = 'Missile' in self.collectedItems
+        return (hasPB and hasSuper and hasMissile)
 
     def canEndGame(self):
         # to finish the game you must :

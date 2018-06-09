@@ -399,13 +399,13 @@ accessPoints = [
        entryInfo = {'SamusX':0x28, 'SamusY':0x188},
        shortName="M\\CRAB HOLE"),
     AccessPoint('Le Coude Right', 'Maridia', {
-        'Crab Hole Bottom Left': lambda sm: sm.wand(sm.canOpenYellowDoors(),
+        'Crab Hole Bottom Left': lambda sm: sm.wand(sm.wor(sm.canOpenYellowDoors(), RomPatches.has(RomPatches.AreaRandoBlueDoors)),
                                                     sm.wor(sm.haveItem('Gravity'),
                                                            sm.wand(sm.knowsGravLessLevel3(),
                                                                    sm.haveItem('HiJump'))), # for the sand pits
                                                     sm.canOpenGreenDoors(),
                                                     sm.haveItem('Morph')), # toilet door
-        'Main Street Bottom': lambda sm: sm.wand(sm.canOpenYellowDoors(),
+        'Main Street Bottom': lambda sm: sm.wand(sm.wor(sm.canOpenYellowDoors(), RomPatches.has(RomPatches.AreaRandoBlueDoors)),
                                                  sm.wand(sm.wor(sm.haveItem('Gravity'),
                                                                 sm.wand(sm.knowsGravLessLevel3(),
                                                                         sm.haveItem('HiJump'))), # for the sand pits

@@ -207,7 +207,6 @@ locations = [
     'Visibility': "Chozo",
     'Room': 'Spazer Room',
     'AccessFrom' : {
-        'Red Tower Top Left': lambda sm: sm.setSMBool(True),
         'East Tunnel Right': lambda sm: sm.setSMBool(True)
     },
     'Available': lambda sm: sm.wand(sm.canOpenGreenDoors(),
@@ -565,7 +564,7 @@ locations = [
     'Room': 'Spring Ball Room',
     'AccessFrom' : {
         'Main Street Bottom': lambda sm: sm.canOpenGreenDoors(), # gate
-        'Le Coude Right': lambda sm: sm.wand(sm.canOpenYellowDoors(),
+        'Le Coude Right': lambda sm: sm.wand(sm.wor(sm.canOpenYellowDoors(), RomPatches.has(RomPatches.AreaRandoBlueDoors)),
                                              sm.canOpenGreenDoors()), # toilet
     },
     'Available': lambda sm: sm.wand(sm.wor(sm.haveItem('Gravity'),

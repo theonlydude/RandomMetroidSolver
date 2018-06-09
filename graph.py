@@ -208,6 +208,17 @@ class AccessGraph(object):
                 loc['difficulty'] = SMBool(False, 0)
         return availLocs
     
+    def canAccess(self, smbm, rootLoc, destAccessPointName, maxDiff):
+        # used by the solver to check that you can come back from a location.
+        # usefull for noob preset which can't come back up red tower for example.
+        item = rootLoc['itemName']
+        smbm.addItem(item)
+        destAccessPoint = self.accessPoints[destAccessPointName]
+        srcAccessPoint = self.accessPoints[rootLoc['accessPoint']]
+        availAccessPoints = self.getAvailableAccessPoints(srcAccessPoint, smbm, maxDiff)
+        can = destAccessPoint in availAccessPoints
+        smbm.removeItem(item)
+        return can
 
 # all access points and traverse functions
 accessPoints = [

@@ -243,9 +243,17 @@ class Solver:
                 nextMajDifficulty = majorAvailable[0]['difficulty'].difficulty
                 nextMinArea = minorAvailable[0]['SolveArea']
                 nextMinDifficulty = minorAvailable[0]['difficulty'].difficulty
+                nextMajComeBack = majorAvailable[0]['comeBack']
+                nextMinComeBack = minorAvailable[0]['comeBack']
 
+                # first take item from loc where you can come back
+                if nextMajComeBack != nextMinComeBack:
+                    if nextMajComeBack == True:
+                        area = self.collectMajor(majorAvailable.pop(0))
+                    else:
+                        area = self.collectMinor(minorAvailable.pop(0))
                 # if not all the minors type are collected, start with minors
-                if nextMinDifficulty <= diffThreshold and not self.haveAllMinorTypes():
+                elif nextMinDifficulty <= diffThreshold and not self.haveAllMinorTypes():
                     area = self.collectMinor(minorAvailable.pop(0))
                 elif nextMinArea == area and nextMinDifficulty <= diffThreshold and not hasEnoughMinors:
                     area = self.collectMinor(minorAvailable.pop(0))
@@ -292,11 +300,15 @@ class Solver:
                 postAvailable = loc['PostAvailable'](self.smbm)
                 self.smbm.removeItem(loc['itemName'])
                 loc['difficulty'] = self.smbm.wand(loc['difficulty'], postAvailable)
+            # also check if we can come back to landing site from the location
+            if loc['difficulty'].bool == True:
+                loc['comeBack'] = self.areaGraph.canAccess(self.smbm, loc, 'Landing Site', samus)
 
         if self.log.getEffectiveLevel() == logging.DEBUG:
             self.log.debug("available locs:")
             for loc in locations:
-                self.log.debug("{}: {}".format(loc['Name'], loc['difficulty']))
+                if loc['difficulty'].bool == True:
+                    self.log.debug("{}: {}".format(loc['Name'], loc['difficulty']))
 
     def computeDifficultyValue(self):
         if not self.canEndGame().bool:
@@ -409,7 +421,7 @@ class Solver:
         # locations without distance are not available
         locations = [loc for loc in locations if 'distance' in loc]
 
-        around = [loc for loc in locations if (loc['SolveArea'] == area or loc['distance'] < 3) and loc['difficulty'].difficulty <= threshold and not Bosses.areaBossDead(area)]
+        around = [loc for loc in locations if (loc['SolveArea'] == area or loc['distance'] < 3) and loc['difficulty'].difficulty <= threshold and not Bosses.areaBossDead(area) and 'comeBack' in loc and loc['comeBack'] == True]
         # usually pickup action means beating a boss, so do that first if possible
         around.sort(key=lambda loc: (0 if 'Pickup' in loc else 1, loc['distance'], loc['difficulty'].difficulty))
 
@@ -419,7 +431,9 @@ class Solver:
         # we want to sort the outside locations by putting the ones is the same
         # area first if we don't have enough items,
         # then we sort the remaining areas starting whith boss dead status
-        outside.sort(key=lambda loc: (loc['distance'] if loc['difficulty'].difficulty <= threshold
+        outside.sort(key=lambda loc: (0 if 'comeBack' in loc and loc['comeBack'] == True
+                                      else 1,
+                                      loc['distance'] if loc['difficulty'].difficulty <= threshold
                                       else 100000,
                                       0 if loc['Area'] == area and not enough and loc['difficulty'].difficulty <= threshold
                                       else 1,

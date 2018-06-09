@@ -302,7 +302,7 @@ class Solver:
                 loc['difficulty'] = self.smbm.wand(loc['difficulty'], postAvailable)
             # also check if we can come back to landing site from the location
             if loc['difficulty'].bool == True:
-                loc['comeBack'] = self.areaGraph.canAccess(self.smbm, loc, 'Landing Site', samus)
+                loc['comeBack'] = self.areaGraph.canAccess(self.smbm, loc, loc['itemName'], 'Landing Site', samus)
 
         if self.log.getEffectiveLevel() == logging.DEBUG:
             self.log.debug("available locs:")

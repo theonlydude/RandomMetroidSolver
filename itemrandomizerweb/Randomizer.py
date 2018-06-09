@@ -607,7 +607,11 @@ class Randomizer(object):
         sys.stdout.flush()
         item = itemLocation['Item']
         location = itemLocation['Location']
-        if self.isProgItem(item):
+
+        # check if we can comme back to the current AP, if not consider the item like a prog item for cancels
+        comeBack = self.areaGraph.canAccess(self.smbm, location, item['Name'], self.curAccessPoint, self.difficultyTarget)
+
+        if self.isProgItem(item) or comeBack == False:
             self.progressionItemLocs.append(itemLocation)
             self.setCurAccessPoint(location['accessPoint'])
             if item['Category'] == 'Energy':

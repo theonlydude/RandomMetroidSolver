@@ -8,7 +8,7 @@ def getAccessPoint(apName):
 def createTransitions(bidir=True):
     tFrom = []
     tTo = []
-    apNames = [ap.Name for ap in accessPoints if ap.Name != 'Landing Site' and ap.Internal == False]
+    apNames = [ap.Name for ap in accessPoints if ap.Internal == False]
     transitions = []
 
     def findTo(trFrom):

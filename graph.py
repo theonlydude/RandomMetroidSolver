@@ -207,7 +207,7 @@ class AccessGraph(object):
                 loc['distance'] = 10000
                 loc['difficulty'] = SMBool(False, 0)
         return availLocs
-    
+
 
 # all access points and traverse functions
 accessPoints = [
@@ -216,7 +216,8 @@ accessPoints = [
         'Lower Mushrooms Left': lambda sm: sm.canPassTerminatorBombWall(),
         'Keyhunter Room Bottom': lambda sm: sm.canOpenGreenDoors(),
         'Morph Ball Room Left': lambda sm: sm.canUsePowerBombs()
-    }, shortName="C\\LANDING"),
+    }, internal=True,
+       shortName="C\\LANDING"),
     AccessPoint('Lower Mushrooms Left', 'Crateria', {
         'Landing Site': lambda sm: sm.canPassTerminatorBombWall(False),
         'Green Pirates Shaft Bottom Right': lambda sm: sm.setSMBool(True)

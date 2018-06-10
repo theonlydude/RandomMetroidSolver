@@ -32,23 +32,38 @@ function worker {
     speed=$2
     i=$3
     dest=$4
-    extra=$5    
-    
+    extra=$5
     echo
     echo "**** $dest $i ****"
     echo $extra
     seed=$(head -c 500 /dev/urandom | tr -dc '0-9' | fold -w 7 | head -n 1 | sed 's/^0*//')
+    errfile=/tmp/VARIA_stats_worker_${seed}_${speed}_${p}
+    echo "errfile = $errfile"
     $RANDO --seed ${seed} -i $speed $extra --param diff_presets/$p.json
+    [ $? -ne 0 ] && {
+	echo "RANDO failed"  > $errfile
+	echo "preset : $preset" >> $errfile
+	echo "seed : $seed" >> $errfile
+	echo "speed : $speed" >> $errfile
+	echo "extra options : $extra" >> $errfile
+	return
+    }
     rom=$(ls VARIA_Randomizer_*${seed}_${p}*.json)
+    dot=$(ls VARIA_Randomizer_*${seed}_${p}*.dot 2> /dev/null)
     rom1st=${dest}/${rom/json/1st}
     solver_log=${dest}/${rom/json/log}
     ls $rom > /dev/null 2>&1 && {
 	$SOLVER $rom --param diff_presets/$p.json  --difficultyTarget 5 --displayGeneratedPath -1 $rom1st > $solver_log
 	[ $? -ne 0 ] && {
-	    abort_msg="Could not solve $rom !! $abort_msg"
+	    echo "SOLVER failed"  > $errfile
+	    echo "rom : $rom" >> $errfile
+	    echo "extra options : $extra" >> $errfile
 	    return
 	}
 	mv $rom $dest
+	[ ! -z "$dot" ] && {
+	    mv $dot $dest
+	}
     }
 }
 
@@ -61,14 +76,35 @@ function get_difficulties() {
     done
 }
 
+function reset_workers() {
+    workers=0
+    rm /tmp/VARIA_stats_worker* 2> /dev/null
+}
+
+function wait_workers() {
+    wait
+    errfiles=$(ls -1 /tmp/VARIA_stats_worker* 2> /dev/null)
+    for errfile in $errfiles; do
+	echo
+	echo "Worker ERROR $errfile :"
+	cat $errfile
+	echo
+    done
+    if [ -z "$errfiles" ]; then
+	reset_workers
+    else
+	exit 1
+    fi
+}
+
 function gen_seeds() {
-    base_dir=$test_set/$1/$2
-    base_extra=$3
-    progDiff=$2
+    base_dir=$test_set/$1/$2/$3
+    base_extra=$4
+    progDiff=$3
     for p in $presets; do
 	mkdir -p $base_dir/$p
 	for speed in $progs; do
-	    extra="$base_extra --progressionDifficulty $progDiff --graph"
+	    extra="$base_extra --progressionDifficulty $progDiff"
 #	    extra="$base_extra --superQty 1 --powerBombQty 1 --missileQty 4.6"
 	    if [[ $speed != "random" ]]; then
 		extra="$extra --speedScrewRestriction"
@@ -82,25 +118,16 @@ function gen_seeds() {
 	    fi
 	    dest=$base_dir/$p/$speed
 	    mkdir $dest
-	    workers=0
+	    reset_workers
 	    for i in $(seq 1 $n); do
 		if [ ${workers} -ge ${nb_cpu} ]; then
-		    wait
-		    [ ! -z "$abort_msg" ] && {
-			echo $abort_msg
-			exit 1
-		    }
-		    workers=0
+		    wait_workers
 		fi
 		worker ${p} ${speed} ${i} ${dest} "$extra" &
 		renice -n 10 -p $!
 		let workers=${workers}+1
 	    done
-            wait
-	    [ ! -z "$abort_msg" ] && {
-		echo $abort_msg
-		exit 1
-	    }
+	    wait_workers
 	    $GET_STATS $dest/*.1st
 	    get_difficulties $dest/*.log > $dest/difficulties.csv
 	    mv *stats.csv $dest
@@ -108,9 +135,19 @@ function gen_seeds() {
     done
 }
 
-gen_seeds "classic" "easier"
-gen_seeds "classic" "harder"
-gen_seeds "classic" "normal"
-gen_seeds "full" "easier" "--fullRandomization"
-gen_seeds "full" "harder" "--fullRandomization"
-gen_seeds "full" "normal" "--fullRandomization"
+gen_seeds "standard" "classic" "easier"
+gen_seeds "standard" "classic" "harder"
+gen_seeds "standard" "classic" "normal"
+gen_seeds "standard" "full" "easier" "--fullRandomization"
+gen_seeds "standard" "full" "harder" "--fullRandomization"
+gen_seeds "standard" "full" "normal" "--fullRandomization"
+
+gen_seeds "area" "classic" "easier" "--area --dot"
+gen_seeds "area" "classic" "harder" "--area --dot"
+gen_seeds "area" "classic" "normal" "--area --dot"
+gen_seeds "area" "full" "easier" "--fullRandomization --area --dot"
+gen_seeds "area" "full" "harder" "--fullRandomization --area --dot"
+gen_seeds "area" "full" "normal" "--fullRandomization --area --dot"
+
+# TODO add stats for super fun, minors/energy qties/proportions, difficulty cap
+

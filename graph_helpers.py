@@ -125,7 +125,8 @@ class HelpersGraph(Helpers):
                               sm.wand(sm.canOpenGreenDoors(),
                                       sm.wor(RomPatches.has(RomPatches.CathedralEntranceWallJump),
                                              sm.haveItem('HiJump'),
-                                             sm.canFly()))),
+                                             sm.canFly(),
+                                             sm.haveItem('SpeedBooster')))), # spark
                        sm.canHellRun('MainUpperNorfair'))
 
     def canAccessCrocFromNorfairEntrance(self):

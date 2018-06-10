@@ -1,0 +1,29 @@
+ETank
+-----
+Normal : EED7 -> E099+0x1F = $84:E0B8 => PC:$02:60B8
+Chozo  : EF2B -> E44A+0X2A = $84:E474 => PC:$02:6474
+Hidden : EF7F -> E911+0x2E = $84:E93F => PC:$02:693F
+
+Reserve
+-------
+Normal : EF27 -> E41D+0x27 = $84:E444 => PC:$02:6444
+Chozo  : EF7B -> E8D7+0x32 = $84:E909 => PC:$02:6909
+Hidden : EFCF -> EE0D+0x36 = $84:EE43 => PC:$02:6E43
+
+Missile
+-------
+Normal : EEDB -> E0BE+0x1F = $84:E0DD => PC:$02:60DD
+Chozo  : EF2F -> E47C+0x2A = $84:E4A6 => PC:$02:64A6
+Hidden : EF83 -> E949+0x2E = $84:E977 => PC:$02:6977
+
+Super
+-----
+Normal : EEDF -> E0E3+0x1F = $84:E102 => PC:$02:6102
+Chozo  : EF33 -> E4AE+0x2A = $84:E4D8 => PC:$02:64D8
+Hidden : EF87 -> E981+0x2E = $84:E9AF => PC:$02:69AF
+
+PowerBomb
+---------
+Normal : EEE3 -> E108+0x1F = $84:E127 => PC:$02:6127
+Chozo  : EF37 -> E4E0+0x2A = $84:E50A => PC:$02:650A
+Hidden : EF8B -> E9B9+0x2E = $84:E9E7 => PC:$02:69E7

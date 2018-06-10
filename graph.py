@@ -235,7 +235,7 @@ accessPoints = [
     }, roomInfo = {'RoomPtr':0x9969, "area": 0x0},
        exitInfo = {'DoorPtr':0x8c22, 'direction': 0x5, "cap": (0xe, 0x6), "bitFlag": 0x0,
                    "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
-       entryInfo = {'SamusX':0x36, 'SamusY':0x88},
+       entryInfo = {'SamusX':0x36, 'SamusY':0x88, 'song': 0x9},
        shortName="C\\MUSHROOMS"),
     AccessPoint('Green Pirates Shaft Bottom Right', 'Crateria', {
         'Lower Mushrooms Left': lambda sm: sm.setSMBool(True)
@@ -244,14 +244,14 @@ accessPoints = [
        # the doorAsmPtr 7FE00 is set by the g4_skip.ips patch, we have to call it
        exitInfo = {'DoorPtr':0x8c52, 'direction': 0x4, "cap": (0x1, 0x6), "bitFlag": 0x0,
                    "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0xfe00},
-       entryInfo = {'SamusX':0xcc, 'SamusY':0x688},
+       entryInfo = {'SamusX':0xcc, 'SamusY':0x688, 'song': 0x9},
        shortName="C\\PIRATES"),
     AccessPoint('Moat Right', 'Crateria', {
         'Keyhunter Room Bottom': lambda sm: sm.canPassMoatReverse()
     }, roomInfo = {'RoomPtr':0x95ff, "area": 0x0},
        exitInfo = {'DoorPtr':0x8aea, 'direction': 0x4, "cap": (0x1, 0x46), "bitFlag": 0x0,
                    "screen": (0x0, 0x4), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
-       entryInfo = {'SamusX':0x1cf, 'SamusY':0x88},
+       entryInfo = {'SamusX':0x1cf, 'SamusY':0x88, 'song': 0xc},
        shortName="C\\MOAT"),
     AccessPoint('Keyhunter Room Bottom', 'Crateria', {
         'Moat Right': lambda sm: sm.wand(sm.canOpenYellowDoors(),
@@ -261,7 +261,7 @@ accessPoints = [
        roomInfo = { 'RoomPtr':0x948c, "area": 0x0 },
        exitInfo = {'DoorPtr':0x8a42, 'direction': 0x6, "cap": (0x6, 0x2), "bitFlag": 0x0,
                    "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
-       entryInfo = {'SamusX':0x14c, 'SamusY':0x2b8},
+       entryInfo = {'SamusX':0x14c, 'SamusY':0x2b8, 'song': 0xc},
        shortName="C\\KEYHUNTERS"),
     AccessPoint('Morph Ball Room Left', 'Crateria', {
         'Landing Site': lambda sm: sm.canUsePowerBombs()
@@ -320,7 +320,7 @@ accessPoints = [
     }, roomInfo = {'RoomPtr':0x957d, "area": 0x0},
        exitInfo = {'DoorPtr':0x8aae, 'direction': 0x5, "cap": (0xe, 0x6), "bitFlag": 0x0,
                    "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
-       entryInfo = {'SamusX':0x34, 'SamusY':0x188},
+       entryInfo = {'SamusX':0x34, 'SamusY':0x188, 'song': 0xc},
        shortName="W\\CRAB MAZE"),
     # Lower Norfair
     AccessPoint('Lava Dive Right', 'LowerNorfair', {
@@ -330,7 +330,7 @@ accessPoints = [
     }, roomInfo = {'RoomPtr':0xaf14, "area": 0x2},
        exitInfo = {'DoorPtr':0x96d2, 'direction': 0x4, "cap": (0x11, 0x26), "bitFlag": 0x0,
                    "screen": (0x1, 0x2), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
-       entryInfo = {'SamusX':0x3d0, 'SamusY':0x88},
+       entryInfo = {'SamusX':0x3d0, 'SamusY':0x88, 'song': 0x15},
        shortName="LN\\LAVA DIVE"),
     AccessPoint('Three Muskateers Room Left', 'LowerNorfair', {
         'Lava Dive Right': lambda sm: sm.wand(sm.canHellRun('LowerNorfair'),
@@ -376,7 +376,7 @@ accessPoints = [
        roomInfo = {'RoomPtr':0xae74, "area": 0x2},
        exitInfo = {'DoorPtr':0x967e, 'direction': 0x5, "cap": (0x3e, 0x6), "bitFlag": 0x0,
                    "screen": (0x3, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
-       entryInfo = {'SamusX':0x134, 'SamusY':0x288},
+       entryInfo = {'SamusX':0x134, 'SamusY':0x288, 'song': 0x15},
        shortName="N\\KRONIC BOOST"),
     # Maridia
     AccessPoint('Main Street Bottom', 'Maridia', {
@@ -596,5 +596,7 @@ def getDoorConnections(graph):
             conn['SamusY'] = dst.EntryInfo['SamusY']
         else:
             conn['distanceToSpawn'] = dst.EntryInfo['distanceToSpawn']
+        if 'song' in dst.EntryInfo:
+            conn['song'] = dst.EntryInfo['song']
         connections.append(conn)
     return connections

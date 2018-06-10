@@ -609,7 +609,7 @@ class Randomizer(object):
         location = itemLocation['Location']
 
         # check if we can comme back to the current AP, if not consider the item like a prog item for cancels
-        comeBack = self.areaGraph.canAccess(self.smbm, location, item['Name'], self.curAccessPoint, self.difficultyTarget)
+        comeBack = self.areaGraph.canAccess(self.smbm, location, item['Type'], self.curAccessPoint, self.difficultyTarget)
 
         if self.isProgItem(item) or comeBack == False:
             self.progressionItemLocs.append(itemLocation)

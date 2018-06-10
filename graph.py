@@ -203,6 +203,7 @@ class AccessGraph(object):
                 else:
                     loc['distance'] = 1000
                     loc['difficulty'] = tdiff
+                    loc['accessPoint'] = apName
             if not 'difficulty' in loc:
                 loc['distance'] = 10000
                 loc['difficulty'] = SMBool(False, 0)

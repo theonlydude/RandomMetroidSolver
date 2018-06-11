@@ -4,6 +4,7 @@ from parameters import Knows, Settings, samus
 from itemrandomizerweb.stdlib import List
 from helpers import Bosses
 from graph import AccessGraph
+from graph_access import accessPoints
 from smboolmanager import SMBoolManager
 
 class RandoSettings(object):
@@ -215,7 +216,7 @@ class Randomizer(object):
         dotFile = None
         if dotDir is not None:
             dotFile = dotDir + '/' + seedName + ".dot"
-        self.areaGraph = AccessGraph(graphTransitions, bidir, dotFile)
+        self.areaGraph = AccessGraph(accessPoints, graphTransitions, bidir, dotFile)
 
         self.isSpreadProgression = settings.isSpreadProgression
         self.choose = settings.choose
@@ -236,6 +237,7 @@ class Randomizer(object):
         self.difficultyTarget = settings.maxDiff
         self.itemLimit = settings.itemLimit
         self.unusedLocations = locations
+        self.origLocations = locations[:]
         self.locLimit = settings.locLimit
         self.usedLocations = []
         self.progressionItemLocs = []
@@ -299,14 +301,25 @@ class Randomizer(object):
     # uses graph method to get avail locs.
     # item : optional additional item
     # return available locations list.
-    def currentLocations(self, item=None):
+    def currentLocations(self, item=None, locs=None, ap=None, post=False):
+        itemType = None
+        if locs is None:
+            locs = self.unusedLocations
         if item is not None:
-            self.smbm.addItem(item['Type'])
+            itemType = item['Type']
+            self.smbm.addItem(itemType)
+        if ap is None:
+            ap = self.curAccessPoint
 
-        ret = sorted(self.areaGraph.getAvailableLocations(self.unusedLocations, self.smbm, self.difficultyTarget, self.curAccessPoint), key=lambda loc: loc['Name'])
-
+        ret = sorted(self.areaGraph.getAvailableLocations(locs,
+                                                          self.smbm,
+                                                          self.difficultyTarget,
+                                                          ap),
+                     key=lambda loc: loc['Name'])
+        if post is True:
+            ret = [loc for loc in ret if self.locPostAvailable(loc, itemType)]
         if item is not None:
-            self.smbm.removeItem(item['Type'])
+            self.smbm.removeItem(itemType)
 
         return ret
 
@@ -473,7 +486,7 @@ class Randomizer(object):
             if item['Type'] in ['Nothing', 'NoEnergy']:
                 isProg = False
             else:
-                isProg = len(self.currentLocations()) < len(self.currentLocations(item))
+                isProg = len(self.currentLocations(post=True)) < len(self.currentLocations(item, post=True))
             if isProg == False and item['Type'] not in self.nonProgTypesCache:
                 self.nonProgTypesCache.append(item['Type'])
             elif isProg == True and item['Type'] not in self.progTypesCache:
@@ -609,8 +622,15 @@ class Randomizer(object):
         location = itemLocation['Location']
 
         # check if we can comme back to the current AP, if not consider the item like a prog item for cancels
-        comeBack = self.areaGraph.canAccess(self.smbm, location, item['Type'], self.curAccessPoint, self.difficultyTarget)
+        comeBack = self.areaGraph.canAccess(self.smbm, location['accessPoint'], self.curAccessPoint, self.difficultyTarget, item['Type'])
 
+        # FIXME instead of considering this progression item, store previous AP, and consider this as a turning point.
+        # if after the decision we're stuck at some point, force cancel everything from this turning point.
+        # use a stack for multiple decisions.
+        # also this should allow us to store AP every time, not just at prog locs (TBC).
+        # if not comeBack:
+        #     print('NO COMEBACK')
+        
         if self.isProgItem(item) or comeBack == False:
             self.progressionItemLocs.append(itemLocation)
             self.setCurAccessPoint(location['accessPoint'])
@@ -645,6 +665,16 @@ class Randomizer(object):
             itemLocation = self.placeItem(posItems, pool, curLocs)
         return itemLocation
 
+    def isRemoveRegress(self, itemLoc):
+        itemType = itemLoc['Item']['Type']
+        nCur = len(self.currentLocations(locs=self.origLocations, post=True, ap='Landing Site'))
+        self.smbm.removeItem(itemType)
+        nRem = len(self.currentLocations(locs=self.origLocations, post=True, ap='Landing Site'))
+        self.smbm.addItem(itemType)
+#        print('isRemoveRegress ' + itemType + ': ' + str(nCur) + ',' + str(nRem))
+
+        return nRem < nCur
+
     def cancelItem(self, itemLocations, maxLen, posItems, force=False):
         # cancel an item that did not made progress
         # we know what items can unlock the situation (posItems)
@@ -663,7 +693,8 @@ class Randomizer(object):
                and il not in self.progressionItemLocs \
                and ((not onlyMinors and not onlyMajors and isMajor) or \
                     (onlyMinors and isMinor) or \
-                    (onlyMajors and isMajor)):
+                    (onlyMajors and isMajor)) \
+               and not self.isRemoveRegress(il):
                locList.append(il)
             i -= 1
         itemLoc = None

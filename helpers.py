@@ -69,7 +69,7 @@ class Helpers(object):
 
     def energyReserveCountOkHardRoom(self, roomName, mult=1.0):
         difficulties = Settings.hardRooms[roomName]
-        mult /= self.getDmgReduction()
+        mult *= self.getDmgReduction()
         result = self.energyReserveCountOkDiff(difficulties, mult)
 
         if self.smbm.getBool(result) == True:

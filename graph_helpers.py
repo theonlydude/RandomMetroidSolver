@@ -16,7 +16,8 @@ class HelpersGraph(Helpers):
                               'canPassMtEverest', 'canAccessBotwoonFromMainStreet',
                               'enoughStuffBotwoon', 'canAccessDraygonFromMainStreet',
                               'canPassLavaPit', 'canPassWorstRoom',
-                              'canAccessCrocFromNorfairEntrance', 'canEnterNorfairReserveArea',
+                              #'canAccessCrocFromNorfairEntrance',
+                              'canEnterNorfairReserveArea',
                               'canPassSpongeBath', 'canPassMoat', 'canGoUpMtEverest']
 
     def canAccessKraidsLair(self):
@@ -117,35 +118,13 @@ class HelpersGraph(Helpers):
         return sm.wand(sm.haveItem('Morph'),
                        RomPatches.has(RomPatches.NoMaridiaGreenGates))
 
-    def canAccessHeatedNorfairFromEntrance(self, bubbleMountain=True):
+    def canGrappleEscape(self):
         sm = self.smbm
-        return sm.wand(sm.wor(sm.wand(sm.haveItem('SpeedBooster'), # frog speedway
-                                      sm.wor(SMBool(not bubbleMountain, 0), sm.canPassBombPassages())),
-                              # go through cathedral
-                              sm.wand(sm.canOpenGreenDoors(),
-                                      sm.wor(RomPatches.has(RomPatches.CathedralEntranceWallJump),
-                                             sm.haveItem('HiJump'),
-                                             sm.canFly(),
-                                             sm.haveItem('SpeedBooster')))), # spark
-                       sm.canHellRun('MainUpperNorfair'))
-
-    def canAccessCrocFromNorfairEntrance(self):
-        sm = self.smbm
-        return sm.wor(sm.wand(sm.canOpenGreenDoors(), # below Ice
-                              sm.haveItem('SpeedBooster'),
-                              sm.canUsePowerBombs(),
-                              sm.canHellRun('Ice', 2)),
-                      sm.wand(sm.canAccessHeatedNorfairFromEntrance(bubbleMountain=False),
-                              sm.wor(sm.wand(sm.canOpenRedDoors(), sm.knowsGreenGateGlitch()),
-                                     sm.haveItem('Wave'))))
-
-    def canAccessCrocFromMainUpperNorfair(self):
-        sm = self.smbm
-        # from bubble mountain
-        return sm.wand(sm.canHellRun('MainUpperNorfair'),
-                       sm.canPassBombPassages(),
-                       sm.wor(sm.wand(sm.canOpenRedDoors(), sm.knowsGreenGateGlitch()),
-                              sm.haveItem('Wave')))
+        return sm.wor(sm.canFly(), sm.haveItem('Grapple'),
+                      sm.wand(sm.haveItem('SpeedBooster'),
+                              sm.wor(sm.haveItem('HiJump'), # jump from the blocks below
+                                     sm.knowsShortCharge())), # spark from across the grapple blocks
+                      sm.wand(sm.haveItem('SpringBall'), sm.haveItem('HiJump'), sm.knowsSpringBallJump())) # jump from the blocks below
 
     def canEnterNorfairReserveArea(self):
         sm = self.smbm
@@ -249,3 +228,9 @@ class HelpersGraph(Helpers):
                        sm.wor(sm.wand(sm.haveItem('SpeedBooster'),
                                       sm.haveItem('Gravity')),
                               sm.wand(sm.knowsMochtroidClip(), sm.haveItem('Ice'))))
+
+    def canAccessDraygonFromMainStreet(self):
+        sm = self.smbm
+        return sm.wand(sm.canDefeatBotwoon(),
+                       sm.wor(sm.haveItem('Gravity'),
+                              sm.wand(sm.canDoSuitlessMaridia(), sm.knowsGravLessLevel2())))

@@ -272,10 +272,12 @@ locations = [
     'Visibility': "Visible",
     'Room': "Crocomire's Room",
     'AccessFrom' : {
-        'Warehouse Entrance Left': lambda sm: sm.canAccessCrocFromNorfairEntrance(),
-        'Kronic Boost Room Bottom Left': lambda sm: sm.canAccessCrocFromMainUpperNorfair()
+        'Croc Zone': lambda sm: sm.setSMBool(True)
     },
-    'Available': lambda sm: sm.enoughStuffCroc()
+    'Available': lambda sm: sm.wand(sm.enoughStuffCroc(),
+                                    sm.wor(sm.haveItem('Grapple'),
+                                           sm.haveItem('SpaceJump'),
+                                           sm.energyReserveCountOk(3/sm.getDmgReduction())))
 },
 {
     'Area': "Norfair",
@@ -303,8 +305,7 @@ locations = [
     'Visibility': "Chozo",
     'Room': 'Grapple Beam Room',
     'AccessFrom' : {
-        'Warehouse Entrance Left': lambda sm: sm.canAccessCrocFromNorfairEntrance(),
-        'Kronic Boost Room Bottom Left': lambda sm: sm.canAccessCrocFromMainUpperNorfair()
+        'Croc Zone': lambda sm: sm.setSMBool(True)
     },
     'Available': lambda sm: sm.wand(sm.enoughStuffCroc(),
                                     sm.wor(sm.canFly(),
@@ -321,8 +322,7 @@ locations = [
     'Visibility': "Chozo",
     'Room': 'Norfair Reserve Tank Room',
     'AccessFrom' : {
-        'Kronic Boost Room Bottom Left': lambda sm: sm.wand(sm.haveItem('Morph'), sm.canHellRun('MainUpperNorfair')),
-        'Warehouse Entrance Left': lambda sm: sm.canAccessHeatedNorfairFromEntrance()
+        'Bubble Mountain': lambda sm: sm.canHellRun('MainUpperNorfair'),
     },
     'Available': lambda sm: sm.wand(sm.haveItem('Morph'), sm.canEnterNorfairReserveArea())
 },
@@ -336,10 +336,9 @@ locations = [
     'Visibility': "Chozo",
     'Room': 'Speed Booster Room',
     'AccessFrom' : {
-        'Kronic Boost Room Bottom Left': lambda sm: sm.wand(sm.haveItem('Morph'), sm.canHellRun('MainUpperNorfair')),
-        'Warehouse Entrance Left': lambda sm: sm.canAccessHeatedNorfairFromEntrance()
+        'Bubble Mountain': lambda sm: sm.canOpenGreenDoors()
     },
-    'Available': lambda sm: sm.canOpenGreenDoors()
+    'Available': lambda sm: sm.canHellRun('MainUpperNorfair')
 },
 {
     'Area': "Norfair",
@@ -351,9 +350,7 @@ locations = [
     'Visibility': "Chozo",
     'Room': 'Wave Beam Room',
     'AccessFrom' : {
-        'Kronic Boost Room Bottom Left': lambda sm: sm.wand(sm.canHellRun('MainUpperNorfair'),
-                                                            sm.haveItem('Morph')),
-        'Warehouse Entrance Left': lambda sm: sm.canAccessHeatedNorfairFromEntrance()
+        'Bubble Mountain': lambda sm: sm.canHellRun('MainUpperNorfair')
     },
     'Available': lambda sm: sm.canOpenRedDoors()
 },
@@ -1131,14 +1128,9 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Crocomire Escape',
     'AccessFrom' : {
-        'Warehouse Entrance Left': lambda sm: sm.canAccessCrocFromNorfairEntrance(),
-        'Kronic Boost Room Bottom Left': lambda sm: sm.canAccessCrocFromMainUpperNorfair()
+        'Croc Zone': lambda sm: sm.canHellRun('MainUpperNorfair', 1.25)
     },
-    'Available': lambda sm: sm.wor(sm.canFly(), sm.haveItem('Grapple'),
-                                   sm.wand(sm.haveItem('SpeedBooster'),
-                                           sm.wor(sm.haveItem('HiJump'), # jump from the blocks below
-                                                  sm.knowsShortCharge())), # spark from across the grapple blocks
-                                   sm.wand(sm.haveItem('SpringBall'), sm.haveItem('HiJump'), sm.knowsSpringBallJump())) # jump from the blocks below
+    'Available': lambda sm: sm.canGrappleEscape()
 },
 {
     'Area': "Norfair",
@@ -1180,8 +1172,7 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Post Crocomire Power Bomb Room',
     'AccessFrom' : {
-        'Warehouse Entrance Left': lambda sm: sm.canAccessCrocFromNorfairEntrance(),
-        'Kronic Boost Room Bottom Left': lambda sm: sm.canAccessCrocFromMainUpperNorfair()
+        'Croc Zone': lambda sm: sm.energyReserveCountOk(1)
     },
     'Available': lambda sm: sm.wand(sm.enoughStuffCroc(),
                                     sm.wor(sm.canFly(),
@@ -1198,8 +1189,7 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Post Crocomire Missile Room',
     'AccessFrom' : {
-        'Warehouse Entrance Left': lambda sm: sm.canAccessCrocFromNorfairEntrance(),
-        'Kronic Boost Room Bottom Left': lambda sm: sm.canAccessCrocFromMainUpperNorfair()
+        'Croc Zone': lambda sm: sm.setSMBool(True)
     },
     'Available': lambda sm: sm.wand(sm.enoughStuffCroc(), sm.haveItem('Morph'))
 },
@@ -1213,12 +1203,10 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Post Crocomire Jump Room',
     'AccessFrom' : {
-        'Warehouse Entrance Left': lambda sm: sm.canAccessCrocFromNorfairEntrance(),
-        'Kronic Boost Room Bottom Left': lambda sm: sm.canAccessCrocFromMainUpperNorfair()
+        'Croc Zone': lambda sm: sm.setSMBool(True)
     },
     'Available': lambda sm: sm.wand(sm.enoughStuffCroc(),
                                     sm.wor(sm.canFly(),
-                                           sm.haveItem('Grapple'), # use the grapple rippers (intended way to get to this missile actually)
                                            sm.haveItem('SpeedBooster'))) # spark up
 },
 {
@@ -1231,8 +1219,7 @@ locations = [
     'Visibility': "Hidden",
     'Room': 'Norfair Reserve Tank Room',
     'AccessFrom' : {
-        'Kronic Boost Room Bottom Left': lambda sm: sm.wand(sm.haveItem('Morph'), sm.canHellRun('MainUpperNorfair')),
-        'Warehouse Entrance Left': lambda sm: sm.canAccessHeatedNorfairFromEntrance()
+        'Bubble Mountain': lambda sm: sm.canHellRun('MainUpperNorfair')
     },
     'Available': lambda sm: sm.wand(sm.haveItem('Morph'), sm.canEnterNorfairReserveArea())
 },
@@ -1246,8 +1233,7 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Green Bubbles Missile Room',
     'AccessFrom' : {
-        'Kronic Boost Room Bottom Left': lambda sm: sm.wand(sm.haveItem('Morph'), sm.canHellRun('MainUpperNorfair')),
-        'Warehouse Entrance Left': lambda sm: sm.canAccessHeatedNorfairFromEntrance()
+        'Bubble Mountain': lambda sm: sm.canHellRun('MainUpperNorfair', 2)
     },
     'Available': lambda sm: sm.canEnterNorfairReserveArea()
 },
@@ -1261,9 +1247,7 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Bubble Mountain',
     'AccessFrom' : {
-        'Kronic Boost Room Bottom Left': lambda sm: sm.wand(sm.canHellRun('MainUpperNorfair'),
-                                                            sm.haveItem('Morph')),
-        'Warehouse Entrance Left': lambda sm: sm.canAccessHeatedNorfairFromEntrance()
+        'Bubble Mountain': lambda sm: sm.setSMBool(True)
     },
     'Available': lambda sm: sm.setSMBool(True)
 },
@@ -1277,10 +1261,9 @@ locations = [
     'Visibility': "Hidden",
     'Room': 'Speed Booster Hall',
     'AccessFrom' : {
-        'Kronic Boost Room Bottom Left': lambda sm: sm.wand(sm.haveItem('Morph'), sm.canHellRun('MainUpperNorfair')),
-        'Warehouse Entrance Left': lambda sm: sm.canAccessHeatedNorfairFromEntrance()
+        'Bubble Mountain': lambda sm: sm.canOpenGreenDoors()
     },
-    'Available': lambda sm: sm.canOpenGreenDoors()
+    'Available': lambda sm: sm.canHellRun('MainUpperNorfair')
 },
 {
     'Area': "Norfair",
@@ -1292,9 +1275,7 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Double Chamber',
     'AccessFrom' : {
-        'Kronic Boost Room Bottom Left': lambda sm: sm.wand(sm.canHellRun('MainUpperNorfair'),
-                                                            sm.haveItem('Morph')),
-        'Warehouse Entrance Left': lambda sm: sm.canAccessHeatedNorfairFromEntrance()
+        'Bubble Mountain': lambda sm: sm.canHellRun('MainUpperNorfair')
     },
     'Available': lambda sm: sm.canOpenRedDoors()
 },

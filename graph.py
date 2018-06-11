@@ -175,8 +175,8 @@ class AccessGraph(object):
     # rootNode: starting AccessPoint
     # return available locations list, also stores difficulty in locations
     def getAvailableLocations(self, locations, smbm, maxDiff, rootNode='Landing Site'):
-        availAcessPoints = self.getAvailableAccessPoints(self.accessPoints[rootNode], smbm, maxDiff)
-        availAreas = set([ap.GraphArea for ap in availAcessPoints.keys()])
+        availAccessPoints = self.getAvailableAccessPoints(self.accessPoints[rootNode], smbm, maxDiff)
+        availAreas = set([ap.GraphArea for ap in availAccessPoints.keys()])
         availLocs = []
         for loc in locations:
             if not loc['GraphArea'] in availAreas:
@@ -185,9 +185,9 @@ class AccessGraph(object):
                 continue
             for apName,tFunc in loc['AccessFrom'].iteritems():
                 ap = self.accessPoints[apName]
-                if not ap in availAcessPoints:
+                if not ap in availAccessPoints:
                     continue
-                apDiff = availAcessPoints[ap]
+                apDiff = availAccessPoints[ap]
                 tdiff = smbm.eval(tFunc)
                 if tdiff.bool == True and tdiff.difficulty <= maxDiff:
                     diff = smbm.eval(loc['Available'])
@@ -207,6 +207,7 @@ class AccessGraph(object):
             if not 'difficulty' in loc:
                 loc['distance'] = 10000
                 loc['difficulty'] = SMBool(False, 0)
+
         return availLocs
 
     def canAccess(self, smbm, rootLoc, item, destAccessPointName, maxDiff):

@@ -6,7 +6,7 @@ from itemrandomizerweb import Items
 from itemrandomizerweb.Randomizer import Randomizer, RandoSettings
 from itemrandomizerweb.AreaRandomizer import AreaRandomizer
 from graph_locations import locations as graphLocations
-from graph import vanillaTransitions, getDoorConnections
+from graph_access import vanillaTransitions, getDoorConnections
 from parameters import Knows, easy, medium, hard, harder, hardcore, mania, text2diff, diff2text
 from solver import ParamsLoader
 from rom import RomPatcher, RomPatches, FakeROM

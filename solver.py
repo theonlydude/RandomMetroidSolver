@@ -14,7 +14,8 @@ from smboolmanager import SMBoolManager
 from helpers import Pickup, Bosses
 from rom import RomType, RomLoader
 from graph_locations import locations as graphLocations
-from graph import AccessGraph, vanillaTransitions
+from graph import AccessGraph
+from graph_access import vanillaTransitions, accessPoints
 
 class Solver:
     # given a rom and parameters returns the estimated difficulty
@@ -76,7 +77,7 @@ class Solver:
             graphTransitions = self.romLoader.getTransitions()
         else:
             graphTransitions = vanillaTransitions
-        self.areaGraph = AccessGraph(graphTransitions)
+        self.areaGraph = AccessGraph(accessPoints, graphTransitions)
 
         if self.log.getEffectiveLevel() == logging.DEBUG:
             self.log.debug("Display items at locations:")
@@ -302,7 +303,7 @@ class Solver:
                 loc['difficulty'] = self.smbm.wand(loc['difficulty'], postAvailable)
             # also check if we can come back to landing site from the location
             if loc['difficulty'].bool == True:
-                loc['comeBack'] = self.areaGraph.canAccess(self.smbm, loc, loc['itemName'], 'Landing Site', samus)
+                loc['comeBack'] = self.areaGraph.canAccess(self.smbm, loc['accessPoint'], 'Landing Site', samus, loc['itemName'])
 
         if self.log.getEffectiveLevel() == logging.DEBUG:
             self.log.debug("available locs:")

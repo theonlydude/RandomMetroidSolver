@@ -1,6 +1,6 @@
 import random
 from itemrandomizerweb.Randomizer import Randomizer
-from graph import vanillaTransitions, accessPoints, AccessGraph
+from graph_access import vanillaTransitions, accessPoints
 
 def getAccessPoint(apName):
     return next(ap for ap in accessPoints if ap.Name == apName)

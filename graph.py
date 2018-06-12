@@ -189,20 +189,24 @@ class AccessGraph(object):
                 tdiff = smbm.eval(tFunc)
                 if tdiff.bool == True and tdiff.difficulty <= maxDiff:
                     diff = smbm.eval(loc['Available'])
-                    loc['difficulty'] = SMBool(diff.bool,
-                                               difficulty=max(tdiff.difficulty, diff.difficulty, apDiff.difficulty),
-                                               knows=list(set(tdiff.knows + diff.knows + apDiff.knows)),
-                                               items=list(set(tdiff.items + diff.items + apDiff.items)))
-                    if diff.bool == True and diff.difficulty <= maxDiff:
+                    locDiff = SMBool(diff.bool,
+                                     difficulty=max(tdiff.difficulty, diff.difficulty, apDiff.difficulty),
+                                     knows=list(set(tdiff.knows + diff.knows + apDiff.knows)),
+                                     items=list(set(tdiff.items + diff.items + apDiff.items)))
+                    if locDiff.bool == True and locDiff.difficulty <= maxDiff:
                         loc['distance'] = ap.distance + 1
                         loc['accessPoint'] = apName
+                        loc['difficulty'] = locDiff
                         availLocs.append(loc)
                         break
+                    else:
+                        loc['distance'] = 1000 + tdiff.difficulty
+                        loc['difficulty'] = SMBool(False, 0)
                 else:
-                    loc['distance'] = 1000 + tdiff.difficulty
+                    loc['distance'] = 10000 + tdiff.difficulty
                     loc['difficulty'] = SMBool(False, 0)
             if not 'difficulty' in loc:
-                loc['distance'] = 10000
+                loc['distance'] = 100000
                 loc['difficulty'] = SMBool(False, 0)
 
         return availLocs

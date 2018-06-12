@@ -241,7 +241,7 @@ class RomReader:
 
     def loadTransitions(self, romFile):
         # return the transitions or None if vanilla transitions
-        from graph import accessPoints
+        from graph_access import accessPoints
 
         rooms = {
             # (roomPtr, screen): name
@@ -295,7 +295,7 @@ class RomReader:
         transitions = [(t, transitions[t]) for t in transitions]
 
         # check if transitions are vanilla transitions
-        from graph import isVanillaTransitions
+        from graph_access import isVanillaTransitions
         if isVanillaTransitions(transitions):
             return None
         else:

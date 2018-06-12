@@ -358,16 +358,16 @@ vanillaTransitions = [
     ('Green Pirates Shaft Bottom Right', 'Statues Hallway Left')
 ]
 
-# def isVanillaTransitions(transitions):
-#     for src, dest in transitions:
-#         found = False
-#         for vsrc, vdest in vanillaTransitions:
-#             if (src == vsrc and dest == vdest) or (src == vdest and dest == vsrc):
-#                 found = True
-#                 break
-#         if found == False:
-#             return False
-#     return True
+def isVanillaTransitions(transitions):
+    for src, dest in transitions:
+        found = False
+        for vsrc, vdest in vanillaTransitions:
+            if (src == vsrc and dest == vdest) or (src == vdest and dest == vsrc):
+                found = True
+                break
+        if found == False:
+            return False
+    return True
 
     # up: 0x3, 0x7
     # down: 0x2, 0x6

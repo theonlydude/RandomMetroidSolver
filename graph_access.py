@@ -140,11 +140,10 @@ accessPoints = [
                                                       sm.haveItem('Wave')),
                                                sm.canOpenGreenDoors()),
                                        # below ice
-                                       sm.wand(sm.canOpenGreenDoors(), # below Ice
+                                       sm.wand(sm.canOpenGreenDoors(),
                                                sm.haveItem('SpeedBooster'),
                                                sm.canUsePowerBombs(),
                                                sm.canHellRun('Ice', 2)))
-                                       
     }, roomInfo = {'RoomPtr':0xa6a1, "area": 0x1},
        exitInfo = {'DoorPtr':0x922e, 'direction': 0x5, "cap": (0xe, 0x16), "bitFlag": 0x40,
                    "screen": (0x0, 0x1), "distanceToSpawn": 0x8000, "doorAsmPtr": 0xbdd1},
@@ -183,9 +182,11 @@ accessPoints = [
        entryInfo = {'SamusX':0x134, 'SamusY':0x288, 'song': 0x15},
        shortName="N\\KRONIC BOOST"),
     AccessPoint('Croc Zone', 'Norfair', {
-        'Warehouse Entrance Left': lambda sm: sm.wand(sm.canHellRun('MainUpperNorfair', 1.25),
-                                                      sm.canGrappleEscape(),
-                                                      sm.haveItem('Super')),
+        'Warehouse Entrance Left': lambda sm: sm.wor(sm.wand(sm.haveItem('SpeedBooster'), # frog speedway
+                                                             sm.canHellRun('MainUpperNorfair', 2)),
+                                                     sm.wand(sm.canHellRun('MainUpperNorfair', 1.25),
+                                                             sm.canGrappleEscape(),
+                                                             sm.haveItem('Super'))),
         'Bubble Mountain': lambda sm: sm.wand(sm.canPassBombPassages(),
                                               sm.canHellRun('MainUpperNorfair', 2)),
         'Kronic Boost Room Bottom Left': lambda sm: sm.wand(sm.canHellRun('MainUpperNorfair'),

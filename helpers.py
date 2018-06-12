@@ -492,9 +492,9 @@ class Helpers(object):
             return SMBool(False, 0)
 
         diff = self.computeBossDifficulty(ammoMargin, secs, Settings.bossesDifficulty['MotherBrain'])
+        self.smbm.ETankCount = nTanks
         if diff < 0:
             return SMBool(False)
-        self.smbm.ETankCount = nTanks
         return SMBool(True, diff)
 
     def canPassMetroids(self):

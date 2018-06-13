@@ -621,8 +621,8 @@ class Randomizer(object):
         item = itemLocation['Item']
         location = itemLocation['Location']
 
-        # check if we can come back to the current AP
-#        comeBack = self.areaGraph.canAccess(self.smbm, location['accessPoint'], self.curAccessPoint, self.difficultyTarget, item['Type'])
+        # # check if we can come back to the current AP
+        # comeBack = self.areaGraph.canAccess(self.smbm, location['accessPoint'], self.curAccessPoint, self.difficultyTarget, item['Type'])
         # if not comeBack:
         #     print('NO COMEBACK')
         
@@ -684,8 +684,7 @@ class Randomizer(object):
             il = itemLocations[i]
             isMajor = il['Item']['Class'] == 'Major' or self.restrictions['MajorMinor'] == False
             isMinor = il['Item']['Class'] == 'Minor' or self.restrictions['MajorMinor'] == False
-            if il['Item']['Category'] != 'Progression' \
-               and il not in self.progressionItemLocs \
+            if il not in self.progressionItemLocs \
                and ((not onlyMinors and not onlyMajors and isMajor) or \
                     (onlyMinors and isMinor) or \
                     (onlyMajors and isMajor)) \

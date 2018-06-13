@@ -621,19 +621,13 @@ class Randomizer(object):
         item = itemLocation['Item']
         location = itemLocation['Location']
 
-        # check if we can comme back to the current AP, if not consider the item like a prog item for cancels
-        comeBack = self.areaGraph.canAccess(self.smbm, location['accessPoint'], self.curAccessPoint, self.difficultyTarget, item['Type'])
-
-        # FIXME instead of considering this progression item, store previous AP, and consider this as a turning point.
-        # if after the decision we're stuck at some point, force cancel everything from this turning point.
-        # use a stack for multiple decisions.
-        # also this should allow us to store AP every time, not just at prog locs (TBC).
+        # check if we can come back to the current AP
+#        comeBack = self.areaGraph.canAccess(self.smbm, location['accessPoint'], self.curAccessPoint, self.difficultyTarget, item['Type'])
         # if not comeBack:
         #     print('NO COMEBACK')
         
-        if self.isProgItem(item) or comeBack == False:
+        if self.isProgItem(item):
             self.progressionItemLocs.append(itemLocation)
-            self.setCurAccessPoint(location['accessPoint'])
             if item['Category'] == 'Energy':
                 # if energy made us progress we must not cancel energy we already
                 # have, so add the already collected energy to progression locations
@@ -641,6 +635,7 @@ class Randomizer(object):
         self.usedLocations.append(location)
         self.unusedLocations.remove(location)
         if collect == True:
+            self.setCurAccessPoint(location['accessPoint'])
             self.currentItems.append(item)
             self.smbm.addItem(item['Type'])
             self.nonProgTypesCache = []
@@ -694,7 +689,8 @@ class Randomizer(object):
                and ((not onlyMinors and not onlyMajors and isMajor) or \
                     (onlyMinors and isMinor) or \
                     (onlyMajors and isMajor)) \
-               and not self.isRemoveRegress(il):
+               and not self.isRemoveRegress(il) \
+               and self.areaGraph.canAccess(self.smbm, self.curAccessPoint, il['Location']['accessPoint'], self.difficultyTarget):
                locList.append(il)
             i -= 1
         itemLoc = None

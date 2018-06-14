@@ -538,7 +538,7 @@ def randomizer():
     if session.randomizer is None:
         session.randomizer = {}
 
-        session.randomizer['maxDifficulty'] = 'no difficulty cap'
+        session.randomizer['maxDifficulty'] = 'hardcore'
         session.randomizer['paramsFile'] = 'regular'
         for patch in patches:
             if patch[2] == True:

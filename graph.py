@@ -139,7 +139,7 @@ class AccessGraph(object):
     # items: collected items
     # maxDiff: difficulty limit
     # return newly opened access points
-    def getNewAvailNodes(self, availNodes, nodesToCheck, smbm, maxDiff, distance):
+    def getNewAvailNodes(self, availNodes, nodesToCheck, smbm, maxDiff):
         newAvailNodes = {}
         for node in nodesToCheck:
             for dstName, tFunc in node.transitions.iteritems():
@@ -149,7 +149,10 @@ class AccessGraph(object):
                 # diff = tFunc(smbm)
                 diff = smbm.eval(tFunc)
                 if diff.bool == True and diff.difficulty <= maxDiff:
-                    dst.distance = distance
+                    if node.GraphArea == dst.GraphArea:
+                        dst.distance = node.distance
+                    else:
+                        dst.distance = node.distance + 1
                     newAvailNodes[dst] = diff
         return newAvailNodes
 
@@ -160,12 +163,10 @@ class AccessGraph(object):
     def getAvailableAccessPoints(self, rootNode, smbm, maxDiff):
         availNodes = { rootNode : SMBool(True, 0) }
         newAvailNodes = availNodes
-        distance = 1
-        rootNode.distance = distance
+        rootNode.distance = 0
         while len(newAvailNodes) > 0:
-            newAvailNodes = self.getNewAvailNodes(availNodes, newAvailNodes, smbm, maxDiff, distance)
+            newAvailNodes = self.getNewAvailNodes(availNodes, newAvailNodes, smbm, maxDiff)
             availNodes.update(newAvailNodes)
-            distance += 1
         return availNodes
 
     # locations: locations to check

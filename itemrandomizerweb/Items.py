@@ -192,6 +192,31 @@ NoEnergy = {
     'Message': 0x0
 }
 
+def isBeam(item):
+    return item['Category'] == 'Beam' or item['Type'] == 'Ice'
+
+BeamBits = {
+    'Wave'   : 0x1,
+    'Ice'    : 0x2,
+    'Spazer' : 0x4,
+    'Plasma' : 0x8,
+    'Charge' : 0x1000
+}
+
+ItemBits = {
+    'Varia'        : 0x1,
+    'SpringBall'   : 0x2,
+    'Morph'        : 0x4,
+    'ScrewAttack'  : 0x8,
+    'Gravity'      : 0x20,
+    'HiJump'       : 0x100,
+    'SpaceJump'    : 0x200,
+    'Bomb'         : 0x1000,
+    'SpeedBooster' : 0x2000,
+    'Grapple'      : 0x4000,
+    'XRayScope'    : 0x8000
+}
+
 def toByteArray(itemCode):
     return (struct.pack('B', itemCode & 0xff), struct.pack('B', itemCode >> 8))
 

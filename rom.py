@@ -421,6 +421,57 @@ class RomPatcher:
                 self.romFile.seek(itemLoc['Location']['Address'])
                 self.romFile.write(itemCode[0])
                 self.romFile.write(itemCode[1])
+            if itemLoc['Location']['Name'] == 'Morphing Ball':
+                self.patchMorphBallEye(itemLoc['Item'])
+
+    # trigger morph eye enemy on whatever item we put there,
+    # not just morph ball
+    def patchMorphBallEye(self, item):
+#        print('Eye item = ' + item['Type'])
+        # category to check
+        if Items.isBeam(item):
+            cat = 0xA8 # collected beams
+        elif item['Type'] == 'ETank':
+            cat = 0xC4 # max health
+        elif item['Type'] == 'Reserve':
+            cat = 0xD4 # max reserves
+        elif item['Type'] == 'Missile':
+            cat = 0xC8 # max missiles
+        elif item['Type'] == 'Super':
+            cat = 0xCC # max supers
+        elif item['Type'] == 'PowerBomb':
+            cat = 0xD0 # max PBs
+        else:
+            cat = 0xA4 # collected items
+        # comparison/branch instruction
+        # the branch is taken if we did NOT collect item yet
+        if item['Category'] == 'Energy' or item['Category'] == 'Ammo':
+            comp = 0xC9 # CMP (immediate)
+            branch = 0x30 # BMI
+        else:
+            comp = 0x89 # BIT (immediate)
+            branch = 0xF0 # BEQ
+        # what to compare to
+        if item['Type'] == 'ETank':
+            operand = 0x65 # < 100
+        elif item['Type'] == 'Reserve' or item['Category'] == 'Ammo':
+            operand = 0x1 # < 1
+        elif Items.isBeam(item):
+            operand = Items.BeamBits[item['Type']]
+        else:
+            operand = Items.ItemBits[item['Type']]
+        # endianness
+        op0 = operand & 0x00FF
+        op1 = (operand & 0xFF00) >> 8
+        # actually patch enemy AI
+        self.romFile.seek(0x1410E6)
+        self.romFile.write(struct.pack('B', cat))
+        self.romFile.seek(0x1410E8)
+        self.romFile.write(struct.pack('B', comp))
+        self.romFile.write(struct.pack('B', op0))
+        self.romFile.write(struct.pack('B', op1))
+        self.romFile.write(struct.pack('B', branch))
+
 
     def applyIPSPatches(self, optionalPatches=[], noLayout=False, noGravHeat=False, area=False):
         try:

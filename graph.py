@@ -161,6 +161,7 @@ class AccessGraph(object):
         availNodes = { rootNode : SMBool(True, 0) }
         newAvailNodes = availNodes
         distance = 1
+        rootNode.distance = distance
         while len(newAvailNodes) > 0:
             newAvailNodes = self.getNewAvailNodes(availNodes, newAvailNodes, smbm, maxDiff, distance)
             availNodes.update(newAvailNodes)

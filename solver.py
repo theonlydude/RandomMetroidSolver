@@ -445,24 +445,24 @@ class Solver:
                                      else 1,
                                      0 if 'comeBack' in loc and loc['comeBack'] == True
                                      else 1,
-                                     loc['distance'] if loc['difficulty'].difficulty <= threshold
-                                     else 100000,
                                      0 if loc['SolveArea'] == area and loc['difficulty'].difficulty <= threshold
                                      else 1,
+                                     loc['distance'] if loc['difficulty'].difficulty <= threshold
+                                     else 100000,
                                      loc['difficulty'].difficulty))
 
         outside = [loc for loc in locations if not loc in around]
-        self.log.debug("around1 = " + str([(loc['Name'], loc['difficulty'], loc['distance']) for loc in around]))
-        self.log.debug("outside1 = " + str([(loc['Name'], loc['difficulty'], loc['distance']) for loc in outside]))
+        self.log.debug("around1 = " + str([(loc['Name'], loc['difficulty'], loc['distance'], loc['comeBack'], loc['SolveArea']) for loc in around]))
+        self.log.debug("outside1 = " + str([(loc['Name'], loc['difficulty'], loc['distance'], loc['comeBack'], loc['SolveArea']) for loc in outside]))
         # we want to sort the outside locations by putting the ones is the same
         # area first if we don't have enough items,
         # then we sort the remaining areas starting whith boss dead status
-        outside.sort(key=lambda loc: (0 if 'comeBack' in loc and loc['comeBack'] == True
+        outside.sort(key=lambda loc: (0 if loc['SolveArea'] == area and loc['difficulty'].difficulty <= threshold
+                                      else 1,
+                                      0 if 'comeBack' in loc and loc['comeBack'] == True
                                       else 1,
                                       loc['distance'] if loc['difficulty'].difficulty <= threshold
                                       else 100000,
-                                      0 if loc['SolveArea'] == area and not enough and loc['difficulty'].difficulty <= threshold
-                                      else 1,
                                       loc['difficulty'].difficulty if not Bosses.areaBossDead(loc['Area'])
                                                                       and loc['difficulty'].difficulty <= threshold
                                                                       and 'Pickup' in loc
@@ -471,8 +471,8 @@ class Solver:
                                                                       and loc['difficulty'].difficulty <= threshold
                                       else 100000,
                                       loc['difficulty'].difficulty))
-        self.log.debug("around2 = " + str([(loc['Name'], loc['difficulty'], loc['distance']) for loc in around]))
-        self.log.debug("outside2 = " + str([(loc['Name'], loc['difficulty'], loc['distance']) for loc in outside]))
+        self.log.debug("around2 = " + str([(loc['Name'], loc['difficulty'], loc['distance'], loc['comeBack'], loc['SolveArea']) for loc in around]))
+        self.log.debug("outside2 = " + str([(loc['Name'], loc['difficulty'], loc['distance'], loc['comeBack'], loc['SolveArea']) for loc in outside]))
 
         return around + outside
 

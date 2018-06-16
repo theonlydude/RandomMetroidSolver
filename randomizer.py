@@ -32,7 +32,7 @@ if __name__ == "__main__":
                         help="generate dot file with area graph",
                         action='store_true',dest='dot', default=False)
     parser.add_argument('--area',
-                        help="experimental area mode", action='store_true',
+                        help="area mode", action='store_true',
                         dest='area', default=False)
     parser.add_argument('--debug', '-d', help="activate debug logging", dest='debug',
                         action='store_true')

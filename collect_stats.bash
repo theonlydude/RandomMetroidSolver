@@ -5,8 +5,7 @@ SOLVER=./solver.py
 GET_STATS=./get_stats.py
 
 
-presets="flo manu noob speedrunner"
-#presets="flo speedrunner"
+presets="flo manu speedrunner noob"
 progs="slowest slow medium fast fastest random"
 n=20
 
@@ -83,14 +82,20 @@ function reset_workers() {
 
 function wait_workers() {
     wait
+    QUIT=1
     errfiles=$(ls -1 /tmp/VARIA_stats_worker* 2> /dev/null)
     for errfile in $errfiles; do
 	echo
 	echo "Worker ERROR $errfile :"
 	cat $errfile
 	echo
+	grep -q 'SOLVER failed' $errfile
+	if [ $? -eq 0 ]; then
+	    QUIT=0
+	fi
+	rm -f $errfile
     done
-    if [ -z "$errfiles" ]; then
+    if [ ${QUIT} -eq 1 ]; then
 	reset_workers
     else
 	exit 1
@@ -135,19 +140,41 @@ function gen_seeds() {
     done
 }
 
-gen_seeds "standard" "classic" "easier"
-gen_seeds "standard" "classic" "harder"
-gen_seeds "standard" "classic" "normal"
-gen_seeds "standard" "full" "easier" "--fullRandomization"
-gen_seeds "standard" "full" "harder" "--fullRandomization"
-gen_seeds "standard" "full" "normal" "--fullRandomization"
+for A in "standard" "area"; do
+    for B in "classic" "full"; do
+	for C in "easier" "harder" "normal"; do
+	    PARAMS=""
+	    if [ $A = "area" ]; then
+		PARAMS="${PARAMS} --area --dot"
+	    fi
+	    if [ $B = "full" ]; then
+		PARAMS="${PARAMS} --fullRandomization"
+	    fi
+	    gen_seeds "$A" "$B" "$C" "$PARAMS"
+	done
+    done
+done
 
-gen_seeds "area" "classic" "easier" "--area --dot"
-gen_seeds "area" "classic" "harder" "--area --dot"
-gen_seeds "area" "classic" "normal" "--area --dot"
-gen_seeds "area" "full" "easier" "--fullRandomization --area --dot"
-gen_seeds "area" "full" "harder" "--fullRandomization --area --dot"
-gen_seeds "area" "full" "normal" "--fullRandomization --area --dot"
+# do it again with random
+DIFFS=("" "" "" "" "" "" "--maxDifficulty easy" "--maxDifficulty medium" "--maxDifficulty hard" "--maxDifficulty harder" "--maxDifficulty hardcore" "--maxDifficulty mania")
 
-# TODO add stats for super fun, minors/energy qties/proportions, difficulty cap
+for A in "standard" "area"; do
+    for B in "classic" "full"; do
+	PARAMS=""
+	if [ $A = "area" ]; then
+	    PARAMS="${PARAMS} --area --dot"
+	fi
+	if [ $B = "full" ]; then
+	    PARAMS="${PARAMS} --fullRandomization"
+	fi
 
+	# add randomized parameters
+	PARAMS="${PARAMS} --randomRestrictions --superFun random --energyQty random --missileQty 0 --superQty 0 --powerBombQty 0 --minorQty 0"
+
+	let S=$RANDOM%${#DIFFS[@]}
+	DIFF=${DIFFS[$S]}
+	PARAMS="${PARAMS} ${DIFF}"
+
+	gen_seeds "$A" "$B" "random" "$PARAMS"
+    done
+done

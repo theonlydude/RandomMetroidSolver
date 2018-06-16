@@ -177,7 +177,7 @@ class Solver:
 
         isEndPossible = False
         endDifficulty = mania
-        area = 'Crateria'
+        area = 'Crateria Landing Site'
         diffThreshold = self.getDiffThreshold()
         while True:
             # actual while condition
@@ -246,23 +246,40 @@ class Solver:
                 nextMinDifficulty = minorAvailable[0]['difficulty'].difficulty
                 nextMajComeBack = majorAvailable[0]['comeBack']
                 nextMinComeBack = minorAvailable[0]['comeBack']
+                nextMajDistance = majorAvailable[0]['distance']
+                nextMinDistance = minorAvailable[0]['distance']
+
+                self.log.debug("diff area back dist - diff area back dist")
+                self.log.debug("maj: {} '{}' {} {}, min: {} '{}' {} {}".format(nextMajDifficulty, majorAvailable[0]['SolveArea'], nextMajComeBack, nextMajDistance, nextMinDifficulty, nextMinArea, nextMinComeBack, nextMinDistance))
 
                 # first take item from loc where you can come back
                 if nextMajComeBack != nextMinComeBack:
+                    self.log.debug("!= combeback")
                     if nextMajComeBack == True:
+                        area = self.collectMajor(majorAvailable.pop(0))
+                    else:
+                        area = self.collectMinor(minorAvailable.pop(0))
+                # take the closer one
+                elif nextMajDistance != nextMinDistance:
+                    self.log.debug("!= distance")
+                    if nextMajDistance < nextMinDistance:
                         area = self.collectMajor(majorAvailable.pop(0))
                     else:
                         area = self.collectMinor(minorAvailable.pop(0))
                 # if not all the minors type are collected, start with minors
                 elif nextMinDifficulty <= diffThreshold and not self.haveAllMinorTypes():
+                    self.log.debug("not all minors types")
                     area = self.collectMinor(minorAvailable.pop(0))
                 elif nextMinArea == area and nextMinDifficulty <= diffThreshold and not hasEnoughMinors:
+                    self.log.debug("not enough minors")
                     area = self.collectMinor(minorAvailable.pop(0))
                 # difficulty over area (this is a difficulty estimator,
                 # not a speedrunning simulator)
                 elif nextMinDifficulty < nextMajDifficulty and not hasEnoughMinors:
+                    self.log.debug("min easier and not enough minors")
                     area = self.collectMinor(minorAvailable.pop(0))
                 else:
+                    self.log.debug("maj easier")
                     area = self.collectMajor(majorAvailable.pop(0))
         # main loop end
         if isEndPossible:
@@ -424,11 +441,19 @@ class Solver:
 
         around = [loc for loc in locations if (loc['SolveArea'] == area or loc['distance'] < 3) and loc['difficulty'].difficulty <= threshold and not Bosses.areaBossDead(area) and 'comeBack' in loc and loc['comeBack'] == True]
         # usually pickup action means beating a boss, so do that first if possible
-        around.sort(key=lambda loc: (0 if 'Pickup' in loc else 1, loc['distance'], loc['difficulty'].difficulty))
+        around.sort(key=lambda loc: (0 if 'Pickup' in loc
+                                     else 1,
+                                     0 if 'comeBack' in loc and loc['comeBack'] == True
+                                     else 1,
+                                     loc['distance'] if loc['difficulty'].difficulty <= threshold
+                                     else 100000,
+                                     0 if loc['SolveArea'] == area and loc['difficulty'].difficulty <= threshold
+                                     else 1,
+                                     loc['difficulty'].difficulty))
 
         outside = [loc for loc in locations if not loc in around]
-        self.log.debug("around1 = " + str([(loc['Name'], loc['difficulty']) for loc in around]))
-        self.log.debug("outside1 = " + str([(loc['Name'], loc['difficulty']) for loc in outside]))
+        self.log.debug("around1 = " + str([(loc['Name'], loc['difficulty'], loc['distance']) for loc in around]))
+        self.log.debug("outside1 = " + str([(loc['Name'], loc['difficulty'], loc['distance']) for loc in outside]))
         # we want to sort the outside locations by putting the ones is the same
         # area first if we don't have enough items,
         # then we sort the remaining areas starting whith boss dead status
@@ -436,7 +461,7 @@ class Solver:
                                       else 1,
                                       loc['distance'] if loc['difficulty'].difficulty <= threshold
                                       else 100000,
-                                      0 if loc['Area'] == area and not enough and loc['difficulty'].difficulty <= threshold
+                                      0 if loc['SolveArea'] == area and not enough and loc['difficulty'].difficulty <= threshold
                                       else 1,
                                       loc['difficulty'].difficulty if not Bosses.areaBossDead(loc['Area'])
                                                                       and loc['difficulty'].difficulty <= threshold
@@ -446,8 +471,8 @@ class Solver:
                                                                       and loc['difficulty'].difficulty <= threshold
                                       else 100000,
                                       loc['difficulty'].difficulty))
-        self.log.debug("around2 = " + str([(loc['Name'], loc['difficulty']) for loc in around]))
-        self.log.debug("outside2 = " + str([(loc['Name'], loc['difficulty']) for loc in outside]))
+        self.log.debug("around2 = " + str([(loc['Name'], loc['difficulty'], loc['distance']) for loc in around]))
+        self.log.debug("outside2 = " + str([(loc['Name'], loc['difficulty'], loc['distance']) for loc in outside]))
 
         return around + outside
 

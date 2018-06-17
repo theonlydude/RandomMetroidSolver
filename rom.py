@@ -894,7 +894,10 @@ class RomLoader(object):
             json.dump(self.locsItems, jsonFile)
 
     def getTransitions(self):
-        return self.locsItems['transitions']
+        if 'transitions' in self.locsItems:
+            return self.locsItems['transitions']
+        else:
+            return None
 
 class RomLoaderSfc(RomLoader):
     # standard usage (when calling from the command line)

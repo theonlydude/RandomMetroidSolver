@@ -73,10 +73,10 @@ class Solver:
 
         print("ROM {} Type: {}, Patches present: {}, Area Rando: {}".format(rom, Conf.romType, self.romLoader.patches, (self.areaRando == True)))
 
-        if self.areaRando == True:
-            graphTransitions = self.romLoader.getTransitions()
-        else:
+        graphTransitions = self.romLoader.getTransitions()
+        if graphTransitions is None:
             graphTransitions = vanillaTransitions
+
         self.areaGraph = AccessGraph(accessPoints, graphTransitions)
 
         if self.log.getEffectiveLevel() == logging.DEBUG:

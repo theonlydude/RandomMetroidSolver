@@ -6,7 +6,7 @@ import sys, math, os, json, logging, argparse
 
 # the difficulties for each technics
 from parameters import Conf, Knows, Settings, isKnows, isConf, isSettings
-from parameters import easy, medium, hard, harder, hardcore, mania, god, samus, diff2text
+from parameters import easy, medium, hard, harder, hardcore, mania, god, samus, impossibru, diff2text
 
 # the helper functions
 from smbool import SMBool
@@ -310,7 +310,7 @@ class Solver:
         return (difficulty, itemsOk)
 
     def computeLocationsDifficulty(self, locations):
-        self.areaGraph.getAvailableLocations(locations, self.smbm, samus, self.lastLoc)
+        self.areaGraph.getAvailableLocations(locations, self.smbm, impossibru, self.lastLoc)
         # check post available functions too
         for loc in locations:
             if 'PostAvailable' in loc:
@@ -320,7 +320,7 @@ class Solver:
                 loc['difficulty'] = self.smbm.wand(loc['difficulty'], postAvailable)
             # also check if we can come back to landing site from the location
             if loc['difficulty'].bool == True:
-                loc['comeBack'] = self.areaGraph.canAccess(self.smbm, loc['accessPoint'], 'Landing Site', samus, loc['itemName'])
+                loc['comeBack'] = self.areaGraph.canAccess(self.smbm, loc['accessPoint'], 'Landing Site', impossibru, loc['itemName'])
 
         if self.log.getEffectiveLevel() == logging.DEBUG:
             self.log.debug("available locs:")

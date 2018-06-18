@@ -6,7 +6,7 @@ import sys, math, os, json, logging, argparse
 
 # the difficulties for each technics
 from parameters import Conf, Knows, Settings, isKnows, isConf, isSettings
-from parameters import easy, medium, hard, harder, hardcore, mania, god, samus, impossibru, diff2text
+from parameters import easy, medium, hard, harder, hardcore, mania, god, samus, impossibru, infinity, diff2text
 
 # the helper functions
 from smbool import SMBool
@@ -310,7 +310,7 @@ class Solver:
         return (difficulty, itemsOk)
 
     def computeLocationsDifficulty(self, locations):
-        self.areaGraph.getAvailableLocations(locations, self.smbm, impossibru, self.lastLoc)
+        self.areaGraph.getAvailableLocations(locations, self.smbm, infinity, self.lastLoc)
         # check post available functions too
         for loc in locations:
             if 'PostAvailable' in loc:
@@ -320,7 +320,7 @@ class Solver:
                 loc['difficulty'] = self.smbm.wand(loc['difficulty'], postAvailable)
             # also check if we can come back to landing site from the location
             if loc['difficulty'].bool == True:
-                loc['comeBack'] = self.areaGraph.canAccess(self.smbm, loc['accessPoint'], 'Landing Site', impossibru, loc['itemName'])
+                loc['comeBack'] = self.areaGraph.canAccess(self.smbm, loc['accessPoint'], 'Landing Site', infinity, loc['itemName'])
 
         if self.log.getEffectiveLevel() == logging.DEBUG:
             self.log.debug("available locs:")
@@ -562,55 +562,27 @@ class DifficultyDisplayer:
     def __init__(self, difficulty):
         self.difficulty = difficulty
 
-    def text(self):
-        if self.difficulty >= easy and self.difficulty < medium:
-            difficultyText = diff2text[easy]
-        elif self.difficulty >= medium and self.difficulty < hard:
-            difficultyText = diff2text[medium]
-        elif self.difficulty >= hard and self.difficulty < harder:
-            difficultyText = diff2text[hard]
-        elif self.difficulty >= harder and self.difficulty < hardcore:
-            difficultyText = diff2text[harder]
-        elif self.difficulty >= hardcore and self.difficulty < mania:
-            difficultyText = diff2text[hardcore]
-        else:
-            difficultyText = diff2text[mania]
-
-        return difficultyText
-
     def scale(self):
-        previous = 0
-        for d in sorted(diff2text):
-            if self.difficulty >= d:
-                previous = d
-            else:
-                displayString = diff2text[previous]
-                displayString += ' '
-                scale = d - previous
-                pos = int(self.difficulty - previous)
-                displayString += '-' * pos
-                displayString += '^'
-                displayString += '-' * (scale - pos)
-                displayString += ' '
-                displayString += diff2text[d]
-                break
+        if self.difficulty >= impossibru:
+            return "IMPOSSIBRU!"
+        else:
+            previous = 0
+            for d in sorted(diff2text):
+                if self.difficulty >= d:
+                    previous = d
+                else:
+                    displayString = diff2text[previous]
+                    displayString += ' '
+                    scale = d - previous
+                    pos = int(self.difficulty - previous)
+                    displayString += '-' * pos
+                    displayString += '^'
+                    displayString += '-' * (scale - pos)
+                    displayString += ' '
+                    displayString += diff2text[d]
+                    break
 
-        return displayString
-
-    def normalize(self):
-        if self.difficulty == -1:
-            return (None, None)
-
-        previous = 0
-        for d in sorted(diff2text):
-            if self.difficulty >= d:
-                previous = d
-            else:
-                baseDiff = diff2text[previous]
-                normalized = int(5*float(self.difficulty - previous)/float(d - previous))
-                break
-
-        return (baseDiff, normalized)
+            return displayString
 
     def percent(self):
         # return the difficulty as a percent
@@ -618,6 +590,8 @@ class DifficultyDisplayer:
             return -1
         elif self.difficulty in [0, easy]:
             return 0
+        elif self.difficulty >= mania:
+            return 100
 
         difficultiesPercent = {
             easy: 0,
@@ -625,12 +599,10 @@ class DifficultyDisplayer:
             hard: 40,
             harder: 60,
             hardcore: 80,
-            mania: 100,
-            mania*2: 100,
-            mania*4: 100
+            mania: 100
         }
 
-        difficulty = self.difficulty if self.difficulty < mania else mania
+        difficulty = self.difficulty
 
         lower = 0
         percent = 100

@@ -1,4 +1,5 @@
 from smbool import SMBool
+import sys
 
 # the different difficulties available
 easy = 1
@@ -10,6 +11,7 @@ mania = 100
 god = mania*2
 samus = god*2
 impossibru = samus*2
+infinity = sys.maxint
 
 diff2text = {
     0: 'baby',
@@ -21,7 +23,8 @@ diff2text = {
     mania: 'mania',
     god: 'god',
     samus: 'samus',
-    impossibru: 'impossibru'
+    impossibru: 'impossibru',
+    infinity: 'infinity'
 }
 
 text2diff = {
@@ -35,7 +38,8 @@ text2diff = {
     'mania': mania,
     'god': god,
     'samus': samus,
-    'impossibru': impossibru
+    'impossibru': impossibru,
+    'infinity': infinity
 }
 
 def isConf(conf):

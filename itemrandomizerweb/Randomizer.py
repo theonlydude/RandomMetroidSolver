@@ -158,7 +158,7 @@ class RandoSettings(object):
     def getForbiddenSuits(self, dontRemove):
         removable = []
         # can we remove gravity?
-        if Knows.SuitlessOuterMaridia.bool or Knows.SuitlessOuterMaridiaNoGuns.bool:
+        if Knows.SuitlessOuterMaridia.bool:
             if Knows.DraygonRoomCrystalFlash.bool:
                 if Knows.PreciousRoomXRayExit.bool:
                     removable.append('Gravity')
@@ -668,7 +668,7 @@ class Randomizer(object):
             self.nonProgTypesCache = []
             self.progTypesCache = []
         itemLocations.append(itemLocation)
-#        print(str(len(self.currentItems)) + ':' + itemLocation['Item']['Type'] + ' at ' + itemLocation['Location']['Name'])
+#        print(str(len(self.currentItems)) + ':' + itemLocation['Item']['Type'] + ' at ' + itemLocation['Location']['Name'] + ' diff: ' + str(itemLocation['Location']['difficulty']))
         self.itemPool = self.removeItem(item['Type'], self.itemPool)
 
     def generateItem(self, curLocs, pool):

@@ -300,6 +300,8 @@ if __name__ == "__main__":
         # rom json
         fileName += '.json'
         with open(fileName, 'w') as jsonFile:
+            if args.area == True:
+                locsItems['transitions'] = randomizer.transitions
             json.dump(locsItems, jsonFile)
 
     print("Rom generated: {}".format(fileName))

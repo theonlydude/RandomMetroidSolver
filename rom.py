@@ -894,7 +894,10 @@ class RomLoader(object):
             json.dump(self.locsItems, jsonFile)
 
     def getTransitions(self):
-        return self.locsItems['transitions']
+        if 'transitions' in self.locsItems:
+            return self.locsItems['transitions']
+        else:
+            return None
 
 class RomLoaderSfc(RomLoader):
     # standard usage (when calling from the command line)
@@ -919,8 +922,7 @@ class RomLoaderSfc(RomLoader):
         for patch in self.patches:
             self.locsItems[patch] = self.patches[patch]
 
-        if transitions is not None:
-            self.locsItems['transitions'] = transitions
+        self.locsItems['transitions'] = transitions
 
 class RomLoaderJson(RomLoader):
     # when called from the test suite and the website (when loading already uploaded roms converted to json)
@@ -958,5 +960,4 @@ class RomLoaderDict(RomLoader):
         for patch in self.patches:
             self.locsItems[patch] = self.patches[patch]
 
-        if transitions is not None:
-            self.locsItems['transitions'] = transitions
+        self.locsItems['transitions'] = transitions

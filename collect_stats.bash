@@ -5,7 +5,7 @@ SOLVER=./solver.py
 GET_STATS=./get_stats.py
 
 
-presets="flo manu speedrunner noob"
+presets="noob flo manu speedrunner"
 progs="slowest slow medium fast fastest random"
 n=20
 
@@ -107,9 +107,12 @@ function gen_seeds() {
     base_extra=$4
     progDiff=$3
     for p in $presets; do
+	if [ $p = 'noob' ]; then
+	    noob='--maxDifficulty harder'
+	fi
 	mkdir -p $base_dir/$p
 	for speed in $progs; do
-	    extra="$base_extra --progressionDifficulty $progDiff"
+	    extra="$base_extra --progressionDifficulty $progDiff $noob"
 #	    extra="$base_extra --superQty 1 --powerBombQty 1 --missileQty 4.6"
 	    if [[ $speed != "random" ]]; then
 		extra="$extra --speedScrewRestriction"
@@ -140,21 +143,6 @@ function gen_seeds() {
     done
 }
 
-for A in "standard" "area"; do
-    for B in "classic" "full"; do
-	for C in "easier" "harder" "normal"; do
-	    PARAMS=""
-	    if [ $A = "area" ]; then
-		PARAMS="${PARAMS} --area --dot"
-	    fi
-	    if [ $B = "full" ]; then
-		PARAMS="${PARAMS} --fullRandomization"
-	    fi
-	    gen_seeds "$A" "$B" "$C" "$PARAMS"
-	done
-    done
-done
-
 # do it again with random
 DIFFS=("" "" "" "" "" "" "--maxDifficulty easy" "--maxDifficulty medium" "--maxDifficulty hard" "--maxDifficulty harder" "--maxDifficulty hardcore" "--maxDifficulty mania")
 
@@ -178,3 +166,19 @@ for A in "standard" "area"; do
 	gen_seeds "$A" "$B" "random" "$PARAMS"
     done
 done
+
+for A in "standard" "area"; do
+    for B in "classic" "full"; do
+	for C in "easier" "harder" "normal"; do
+	    PARAMS=""
+	    if [ $A = "area" ]; then
+		PARAMS="${PARAMS} --area --dot"
+	    fi
+	    if [ $B = "full" ]; then
+		PARAMS="${PARAMS} --fullRandomization"
+	    fi
+	    gen_seeds "$A" "$B" "$C" "$PARAMS"
+	done
+    done
+done
+

@@ -641,7 +641,7 @@ class Randomizer(object):
             self.nonProgTypesCache = []
             self.progTypesCache = []
         itemLocations.append(itemLocation)
-#        print(str(len(self.currentItems)) + ':' + itemLocation['Item']['Type'] + ' at ' + itemLocation['Location']['Name'])
+#        print(str(len(self.currentItems)) + ':' + itemLocation['Item']['Type'] + ' at ' + itemLocation['Location']['Name'] + ' diff: ' + str(itemLocation['Location']['difficulty']))
         self.itemPool = self.removeItem(item['Type'], self.itemPool)
 
     def generateItem(self, curLocs, pool):

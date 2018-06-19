@@ -259,7 +259,7 @@ class Randomizer(object):
     def setCurAccessPoint(self, ap='Landing Site'):
         self.curAccessPoint = ap
 #        print('current AP = ' + ap)
-    
+
     # list unreachable locations (possible with super fun setting)
     # returns unreachable locations list, or None if the seed cannot be generated with these settings
     def getRestrictedLocations(self, locations, forbiddenItems):
@@ -475,24 +475,30 @@ class Randomizer(object):
     def hasItemTypeInPool(self, t):
         return any(item['Type'] == t for item in self.itemPool)
 
-    def isProgItem(self, item):
-        if item['Type'] in self.progressionItemTypes:
+    def isJunk(self, item):
+        if item['Type'] in ['Nothing', 'NoEnergy']:
             return True
-        if item['Type'] in self.nonProgTypesCache:
+    
+    def isProgItemNow(self, item):
+        if self.isJunk(item):
             return False
         if item['Type'] in self.progTypesCache:
             return True
-        if not item in self.currentItems:
-            if item['Type'] in ['Nothing', 'NoEnergy']:
-                isProg = False
-            else:
-                isProg = len(self.currentLocations(post=True)) < len(self.currentLocations(item, post=True))
-            if isProg == False and item['Type'] not in self.nonProgTypesCache:
-                self.nonProgTypesCache.append(item['Type'])
-            elif isProg == True and item['Type'] not in self.progTypesCache:
-                self.progTypesCache.append(item['Type'])
-            return isProg
-        return False
+        if item['Type'] in self.nonProgTypesCache:
+            return False
+        isProg = len(self.currentLocations(post=True)) < len(self.currentLocations(item, post=True))
+        if isProg == False and item['Type'] not in self.nonProgTypesCache:
+            self.nonProgTypesCache.append(item['Type'])
+        elif isProg == True and item['Type'] not in self.progTypesCache:
+            self.progTypesCache.append(item['Type'])
+        return isProg
+    
+    def isProgItem(self, item):
+        if self.isJunk(item):
+            return False
+        if item['Type'] in self.progressionItemTypes:
+            return True
+        return self.isProgItemNow(item)
 
     def chooseLocation(self, availableLocations, item):
         locs = availableLocations
@@ -527,7 +533,8 @@ class Randomizer(object):
     # returns a dict with the item and the location
     def placeItem(self, items, itemPool, locations):
         item = self.getItemToPlace(items, itemPool)
-        availableLocations = List.filter(lambda loc: self.canPlaceAtLocation(item, loc) and self.locPostAvailable(loc, item['Type']), locations)
+        locations = [loc for loc in locations if self.locPostAvailable(loc, item['Type'])]
+        availableLocations = List.filter(lambda loc: self.canPlaceAtLocation(item, loc, checkSoftlock=True), locations)
         # if a loc is available we trigger pick up action, to make more locs available afterwards
         for loc in availableLocations:
             if 'Pickup' in loc and not loc in self.pickedUpLocs:
@@ -599,9 +606,32 @@ class Randomizer(object):
             return not (Randomizer.isInBlueBrinstar(location) or location["Area"] == "Crateria") # screw attack this early is a bit too easy. plus, with MinProgression setting, ScrewAttack always ends up at Bomb
         return True
 
+    # is softlock possible from the player POV when checking the loc?
+    # usually these locs are checked last when playing, so placing
+    # an important item there has an impact on progression speed
+    def isSoftlockPossible(self, item, loc):
+        if loc['Name'] == 'Bomb':
+            # disable check for bombs as it is the beginning
+            return False
+        # we know that loc is avail and post avail with the item
+        # if it is not post avail without it, then the item prevents the
+        # possible softlock
+        if not self.locPostAvailable(loc, None):
+            return True
+        # if the loc forces us to go to an area we can't come back from
+        comeBack = self.areaGraph.canAccess(self.smbm, loc['accessPoint'], self.curAccessPoint, self.difficultyTarget, item['Type'])
+        if not comeBack:
+            return True
+        # item allows us to come back from a softlock possible zone
+        comeBackWithout = self.areaGraph.canAccess(self.smbm, loc['accessPoint'], self.curAccessPoint, self.difficultyTarget, None)
+        if not comeBackWithout:
+            return True
+        return False
+
+
     # check if an item can be placed at a location, given restrictions
     # settings.
-    def canPlaceAtLocation(self, item, location):
+    def canPlaceAtLocation(self, item, location, checkSoftlock=False):
         if self.restrictions['MajorMinor'] == True:
             matchingClass = (location["Class"] == item["Class"])
             if matchingClass == False:
@@ -613,6 +643,8 @@ class Randomizer(object):
         if self.restrictions['SpeedScrew'] == True and Randomizer.isSpeedScrew(item):
             return self.speedScrewRestrictionImpl(item, location)
 
+        # TODO add setting with probabilities to include softlock-possible locations (do this check only for prog now items)
+
         return True
 
     def getItem(self, itemLocation, itemLocations, collect=True):
@@ -621,11 +653,6 @@ class Randomizer(object):
         item = itemLocation['Item']
         location = itemLocation['Location']
 
-        # # check if we can come back to the current AP
-        # comeBack = self.areaGraph.canAccess(self.smbm, location['accessPoint'], self.curAccessPoint, self.difficultyTarget, item['Type'])
-        # if not comeBack:
-        #     print('NO COMEBACK')
-        
         if self.isProgItem(item):
             self.progressionItemLocs.append(itemLocation)
             if item['Category'] == 'Energy':

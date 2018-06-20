@@ -455,7 +455,7 @@ class Randomizer(object):
         else:
             d = 1.0/cnt
         return d
-        
+
     # gives a general "distance" of a particular location compared to other locations
     def areaDistance(self, loc, otherLocs):
         return self.areaDistanceProp(loc, otherLocs, 'Area')
@@ -689,9 +689,9 @@ class Randomizer(object):
 
     def isRemoveRegress(self, itemLoc):
         itemType = itemLoc['Item']['Type']
-        nCur = len(self.currentLocations(locs=self.origLocations, post=True, ap='Landing Site'))
+        nCur = len(self.currentLocations(locs=self.origLocations, post=True))
         self.smbm.removeItem(itemType)
-        nRem = len(self.currentLocations(locs=self.origLocations, post=True, ap='Landing Site'))
+        nRem = len(self.currentLocations(locs=self.origLocations, post=True))
         self.smbm.addItem(itemType)
 #        print('isRemoveRegress ' + itemType + ': ' + str(nCur) + ',' + str(nRem))
 

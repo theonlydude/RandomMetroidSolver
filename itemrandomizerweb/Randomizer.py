@@ -432,11 +432,9 @@ class Randomizer(object):
 
     def fillLocsDiff(self, locs):
         for loc in locs:
-            postAvail = 'PostAvailable' in loc
-            avail = self.getLocDiff(loc)
-            if postAvail == True:
-                avail = self.smbm.wand(avail, self.smbm.eval(loc['PostAvailable']))
-            loc['difficulty'] = self.smbm.getSMBoolCopy()
+            if 'PostAvailable' in loc:
+                self.smbm.wand(self.getLocDiff(loc), self.smbm.eval(loc['PostAvailable']))
+                loc['difficulty'] = self.smbm.getSMBoolCopy()
 
     def chooseLocationMaxDiff(self, availableLocations, item):
         self.fillLocsDiff(availableLocations)

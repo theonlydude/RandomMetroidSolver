@@ -141,19 +141,19 @@ class AccessGraph(object):
     # return newly opened access points
     def getNewAvailNodes(self, availNodes, nodesToCheck, smbm, maxDiff):
         newAvailNodes = {}
-        for node in nodesToCheck:
-            for dstName, tFunc in node.transitions.iteritems():
+        for src in nodesToCheck:
+            for dstName, tFunc in src.transitions.iteritems():
                 dst = self.accessPoints[dstName]
                 if dst in newAvailNodes or dst in availNodes:
                     continue
                 # diff = tFunc(smbm)
                 diff = smbm.eval(tFunc)
                 if diff.bool == True and diff.difficulty <= maxDiff:
-                    if node.GraphArea == dst.GraphArea:
-                        dst.distance = node.distance
+                    if src.GraphArea == dst.GraphArea:
+                        dst.distance = src.distance
                     else:
-                        dst.distance = node.distance + 1
-                    newAvailNodes[dst] = diff
+                        dst.distance = src.distance + 1
+                    newAvailNodes[dst] = { 'difficulty' : diff, 'from' : src }
         return newAvailNodes
 
     # rootNode: starting AccessPoint instance
@@ -161,7 +161,7 @@ class AccessGraph(object):
     # maxDiff: difficulty limit
     # return available AccessPoint list
     def getAvailableAccessPoints(self, rootNode, smbm, maxDiff):
-        availNodes = { rootNode : SMBool(True, 0) }
+        availNodes = { rootNode : { 'difficulty' : SMBool(True, 0), 'from' : None } }
         newAvailNodes = availNodes
         rootNode.distance = 0
         while len(newAvailNodes) > 0:
@@ -169,13 +169,34 @@ class AccessGraph(object):
             availNodes.update(newAvailNodes)
         return availNodes
 
+    def getPath(self, srcAp, dstAp, availAps):
+        path = []
+        root = dstAp
+        while root != None:
+            path = [root] + path
+            root = availAps[root]['from']
+
+        return path
+
+    def getPathDifficulty(self, path, availAps):
+        pdiff = SMBool(True, 0)
+        for ap in path:
+            diff = availAps[ap]['difficulty']
+            pdiff = SMBool(True,
+                           difficulty=max(pdiff.difficulty, diff.difficulty),
+                           knows=list(set(pdiff.knows + diff.knows)),
+                           items=list(set(pdiff.items + diff.items)))
+
+        return pdiff
+
     # locations: locations to check
     # items: collected items
     # maxDiff: difficulty limit
     # rootNode: starting AccessPoint
     # return available locations list, also stores difficulty in locations
     def getAvailableLocations(self, locations, smbm, maxDiff, rootNode='Landing Site'):
-        availAccessPoints = self.getAvailableAccessPoints(self.accessPoints[rootNode], smbm, maxDiff)
+        rootAp = self.accessPoints[rootNode]
+        availAccessPoints = self.getAvailableAccessPoints(rootAp, smbm, maxDiff)
         availAreas = set([ap.GraphArea for ap in availAccessPoints.keys()])
         availLocs = []
         for loc in locations:
@@ -187,14 +208,15 @@ class AccessGraph(object):
                 ap = self.accessPoints[apName]
                 if not ap in availAccessPoints:
                     continue
-                apDiff = availAccessPoints[ap]
                 tdiff = smbm.eval(tFunc)
                 if tdiff.bool == True and tdiff.difficulty <= maxDiff:
                     diff = smbm.eval(loc['Available'])
+                    path = self.getPath(rootAp, ap, availAccessPoints)
+                    pdiff = self.getPathDifficulty(path, availAccessPoints)
                     locDiff = SMBool(diff.bool,
-                                     difficulty=max(tdiff.difficulty, diff.difficulty, apDiff.difficulty),
-                                     knows=list(set(tdiff.knows + diff.knows + apDiff.knows)),
-                                     items=list(set(tdiff.items + diff.items + apDiff.items)))
+                                     difficulty=max(tdiff.difficulty, diff.difficulty, pdiff.difficulty),
+                                     knows=list(set(tdiff.knows + diff.knows + pdiff.knows)),
+                                     items=list(set(tdiff.items + diff.items + pdiff.items)))
                     if locDiff.bool == True and locDiff.difficulty <= maxDiff:
                         loc['distance'] = ap.distance + 1
                         loc['accessPoint'] = apName

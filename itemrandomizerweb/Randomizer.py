@@ -40,6 +40,7 @@ class RandoSettings(object):
         self.locLimit = self.getLocLimit(progSpeed)
         self.superFun = superFun
         self.forbiddenItems = self.getForbiddenItems(superFun)
+        self.possibleSoftlockProb = self.getPossibleSoftlockProb(progSpeed)
 
     def getChooseLocDict(self, progDiff):
         if progDiff == 'normal':
@@ -93,6 +94,18 @@ class RandoSettings(object):
                 'MaxProgression' : 1
             }
         return None
+
+    def getPossibleSoftlockProb(self, progSpeed):
+        if progSpeed == 'slowest':
+            return 1
+        if progSpeed == 'slow':
+            return 0.66
+        if progSpeed == 'medium':
+            return 0.33
+        if progSpeed == 'fast':
+            return 0.1
+        if progSpeed == 'fastest':
+            return 0
 
     def getProgressionItemTypes(self, progSpeed):
         progTypes = [item['Type'] for item in Items.Items if item['Category'] == 'Progression']
@@ -239,9 +252,9 @@ class Randomizer(object):
         self.unusedLocations = locations
         self.origLocations = locations[:]
         self.locLimit = settings.locLimit
-        self.usedLocations = []
         self.progressionItemLocs = []
         self.progressionItemTypes = settings.progressionItemTypes
+        self.possibleSoftlockProb = settings.possibleSoftlockProb
         self.maxCancel = 1
         self.totalCancels = 0
         self.pickedUpLocs = []
@@ -613,19 +626,21 @@ class Randomizer(object):
         if loc['Name'] == 'Bomb':
             # disable check for bombs as it is the beginning
             return False
-        # we know that loc is avail and post avail with the item
-        # if it is not post avail without it, then the item prevents the
-        # possible softlock
-        if not self.locPostAvailable(loc, None):
-            return True
         # if the loc forces us to go to an area we can't come back from
         comeBack = self.areaGraph.canAccess(self.smbm, loc['accessPoint'], self.curAccessPoint, self.difficultyTarget, item['Type'])
         if not comeBack:
             return True
-        # item allows us to come back from a softlock possible zone
-        comeBackWithout = self.areaGraph.canAccess(self.smbm, loc['accessPoint'], self.curAccessPoint, self.difficultyTarget, None)
-        if not comeBackWithout:
-            return True
+        if self.isProgItemNow(item) and random.random() >= self.possibleSoftlockProb: # depends on prog speed
+            # we know that loc is avail and post avail with the item
+            # if it is not post avail without it, then the item prevents the
+            # possible softlock
+            if not self.locPostAvailable(loc, None):
+                return True
+            # item allows us to come back from a softlock possible zone
+            comeBackWithout = self.areaGraph.canAccess(self.smbm, loc['accessPoint'], self.curAccessPoint, self.difficultyTarget, None)
+            if not comeBackWithout:
+                return True
+
         return False
 
 
@@ -643,7 +658,8 @@ class Randomizer(object):
         if self.restrictions['SpeedScrew'] == True and Randomizer.isSpeedScrew(item):
             return self.speedScrewRestrictionImpl(item, location)
 
-        # TODO add setting with probabilities to include softlock-possible locations (do this check only for prog now items)
+        if checkSoftlock == True:
+            return not self.isSoftlockPossible(item, location)
 
         return True
 
@@ -653,20 +669,21 @@ class Randomizer(object):
         item = itemLocation['Item']
         location = itemLocation['Location']
 
-        if self.isProgItem(item):
+        if self.isProgItemNow(item):
             self.progressionItemLocs.append(itemLocation)
             if item['Category'] == 'Energy':
                 # if energy made us progress we must not cancel energy we already
                 # have, so add the already collected energy to progression locations
                 self.progressionItemLocs += [il for il in itemLocations if il['Item']['Category'] == 'Energy' and not il in self.progressionItemLocs]
-        self.usedLocations.append(location)
-        self.unusedLocations.remove(location)
         if collect == True:
+            # walk the graph one last time to get proper access point
+            self.currentLocations(item)
             self.setCurAccessPoint(location['accessPoint'])
             self.currentItems.append(item)
             self.smbm.addItem(item['Type'])
             self.nonProgTypesCache = []
             self.progTypesCache = []
+        self.unusedLocations.remove(location)
         itemLocations.append(itemLocation)
 #        print(str(len(self.currentItems)) + ':' + itemLocation['Item']['Type'] + ' at ' + itemLocation['Location']['Name'] + ' diff: ' + str(itemLocation['Location']['difficulty']))
         self.itemPool = self.removeItem(item['Type'], self.itemPool)
@@ -737,6 +754,7 @@ class Randomizer(object):
                     cancelFrom = itemLocations
                 itemLoc = cancelFrom[-1]
                 if itemLoc in self.progressionItemLocs:
+                    sys.stdout.write('P')
                     self.progressionItemLocs.remove(itemLoc)
                     if len(self.progressionItemLocs) == 0:
                         self.setCurAccessPoint()
@@ -750,7 +768,6 @@ class Randomizer(object):
             self.currentItems.remove(item)
             self.smbm.removeItem(item['Type'])
         self.itemPool.append(item)
-        self.usedLocations.remove(loc)
         self.unusedLocations.append(loc)
         self.totalCancels += 1
 #        print("Cancelled  " + item['Type'] + " at " + loc['Name'])
@@ -835,6 +852,8 @@ class Randomizer(object):
         return False
 
     def fillNonProgressionItems(self, itemLocations):
+        if self.totalCancels > 66:
+            return False
         pool = [item for item in self.itemPool if not self.isProgItem(item)]
         poolWasEmpty = len(pool) == 0
         itemLocation = None
@@ -857,6 +876,12 @@ class Randomizer(object):
         isStuck = not poolWasEmpty and itemLocation is None
         return isStuck
 
+    def onlyBossesLeft(self):
+        for loc in self.unusedLocations:
+            if 'Pickup' not in loc:
+                return False
+        return True
+
     def getItemFromStandardPool(self, itemLocations, isStuck, maxLen):
 #                print("REGULAR")
         # first, try to put an item from standard pool
@@ -867,7 +892,10 @@ class Randomizer(object):
         nCancel = 0
         if not isStuck:
             itemLocation = self.generateItem(curLocs, self.itemPool)
-        if itemLocation is None and self.totalCancels < 250:
+        if itemLocation is None and self.totalCancels < 100:
+            # first, check if we're only stuck by bosses (impossible difficulty cap parameter)
+            if self.onlyBossesLeft():
+                return (True, True)
             # we cannot place items anymore, cancel a bunch of our last decisions
             doCancel = True
             posItems = self.possibleItems(curLocs, self.currentItems, self.itemPool)
@@ -899,7 +927,7 @@ class Randomizer(object):
 #            print("one")
             self.maxCancel = 1
 #        print("PROG OUT " + str([l['Name'] for l in curLocs]) + ", stuck? " + str(isStuck))
-        return isStuck
+        return (isStuck, False)
 
     def generateItems(self):
         itemLocations = []
@@ -917,8 +945,8 @@ class Randomizer(object):
             if len(self.itemPool) > 0:
                 # 2. collect an item with standard pool that will unlock the situation
 #                print("Full Pool " + str(len(self.itemPool)) + ", curLocs " + str([l['Name'] for l in self.currentLocations(self.currentItems)]))
-                isStuck = self.getItemFromStandardPool(itemLocations, isStuck, maxLen)
-                if isStuck == True and len(self.itemPool) > 0:
+                isStuck, onlyBosses = self.getItemFromStandardPool(itemLocations, isStuck, maxLen)
+                if isStuck == True and len(self.itemPool) > 0 and onlyBosses == False:
                     # force item cancel if stuck as a last resort for early game corner cases XXX consider resetting everything if few items placed??
                     self.cancelItem(itemLocations, maxLen, [], force=True)
                     isStuck = self.getItemFromStandardPool(itemLocations, isStuck, maxLen)
@@ -947,4 +975,3 @@ class Randomizer(object):
                 return None
         print("")
         return itemLocations
-

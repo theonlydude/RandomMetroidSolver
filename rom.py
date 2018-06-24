@@ -32,11 +32,10 @@ class RomPatches:
     ## Area rando patches
     # remove crumble block for reverse lower norfair door access
     SingleChamberNoCrumble    = 101,
-    # remove green gates for reverse maridia access
-    NoMaridiaGreenGates       = 102
-    # disable Green Hill Yellow, Noob Bridge Green and Kronic Boost yellow doors
+    # remove green gates for reverse maridia access, crab green gate in maridia and blue gate in green brinstar
+    AreaRandoGates            = 102
+    # disable Green Hill Yellow, Noob Bridge Green, Coude Yellow, and Kronic Boost yellow doors
     AreaRandoBlueDoors        = 103
-
 
     ### Other
     # Gravity no longer protects from environmental damage (heat, spikes...)
@@ -53,7 +52,7 @@ class RomPatches:
     Total_CX = [ BlueBrinstarMissile ] + Total
 
     # area rando patch set
-    AreaSet = [ SingleChamberNoCrumble, NoMaridiaGreenGates, AreaRandoBlueDoors ]
+    AreaSet = [ SingleChamberNoCrumble, AreaRandoGates, AreaRandoBlueDoors ]
     
     # dessyreqt randomizer
     Dessy = []
@@ -392,7 +391,7 @@ class RomPatcher:
                      'skip_intro.ips', 'skip_ceres.ips', 'animal_enemies.ips', 'animals.ips',
                      'draygonimals.ips', 'escapimals.ips', 'gameend.ips', 'grey_door_animals.ips',
                      'low_timer.ips', 'metalimals.ips', 'phantoonimals.ips', 'ridleyimals.ips'],
-        'Area': ['area_rando_blue_doors.ips', 'area_rando_layout_base.ips', 'area_rando_door_transition.ips', 'BFscrollskyfix.ips']
+        'Area': ['area_rando_blue_doors.ips', 'area_rando_layout_base.ips', 'area_rando_door_transition.ips' ]
     }
 
     def __init__(self, romFileName=None):
@@ -747,10 +746,12 @@ class RomPatcher:
 
         for conn in doorConnections:
 #            print('Writing door connection ' + conn['ID'])
+            roomPtr = conn['RoomPtr']
+            if roomPtr == 0x93fe: # west ocean
+                self.patchWestOcean(conn['DoorPtr'])
             self.romFile.seek(0x10000+conn['DoorPtr'])
 
             # write room ptr
-            roomPtr = conn['RoomPtr']
             self.romFile.write(struct.pack('B', roomPtr & 0x000FF))
             self.romFile.write(struct.pack('B', (roomPtr & 0x0FF00) >> 8))
 
@@ -814,6 +815,14 @@ class RomPatcher:
                     self.romFile.write(struct.pack('B', byte))
 
                 self.asmAddress += 0x20
+
+    # change BG table to avoid scrolling sky bug when transitioning to west ocean
+    def patchWestOcean(self, doorPtr):
+        # endian convert
+        (D0, D1) = (doorPtr & 0x00FF, (doorPtr & 0xFF00) >> 8)
+        self.romFile.seek(0x7B7BB)
+        self.romFile.write(struct.pack('B', D0))
+        self.romFile.write(struct.pack('B', D1))
 
     def writeTransitionsCredits(self, transitions):
         address = 0x273B40

@@ -110,17 +110,22 @@ class HelpersGraph(Helpers):
     def canPassMaridiaToRedTowerNode(self):
         sm = self.smbm
         return sm.wand(sm.haveItem('Morph'),
-                       sm.wor(RomPatches.has(RomPatches.NoMaridiaGreenGates),
+                       sm.wor(RomPatches.has(RomPatches.AreaRandoGates),
                               sm.canOpenGreenDoors()))
 
     def canPassRedTowerToMaridiaNode(self):
         sm = self.smbm
         return sm.wand(sm.haveItem('Morph'),
-                       RomPatches.has(RomPatches.NoMaridiaGreenGates))
+                       RomPatches.has(RomPatches.AreaRandoGates))
 
     def canGrappleEscape(self):
         sm = self.smbm
-        return sm.wor(sm.canFly(), sm.haveItem('Grapple'),
+        return sm.wor(sm.wor(sm.haveItem('SpaceJump'),
+                             sm.wand(sm.haveItem('Bomb'), # IBJ from lava...either have grav or freeze the enemy there
+                                     sm.knowsInfiniteBombJump(),
+                                     sm.wor(sm.haveItem('Gravity'),
+                                            sm.haveItem('Ice')))),
+                      sm.haveItem('Grapple'),
                       sm.wand(sm.haveItem('SpeedBooster'),
                               sm.wor(sm.haveItem('HiJump'), # jump from the blocks below
                                      sm.knowsShortCharge())), # spark from across the grapple blocks

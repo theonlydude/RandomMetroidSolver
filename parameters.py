@@ -725,7 +725,7 @@ class Settings:
             # get comfortable before going in
             'Gimme energy' : [(4, hardcore), (5, harder), (6, hard), (10, medium)],
             # balanced setting
-            'Default' : [(2, hardcore), (3, hard), (4, medium)],
+            'Default' : [(3, harder), (4, hard), (5, medium)],
             # you don't mind doing hell runs at all
             'Bring the heat' : [(2, hard), (3, medium)],
             # RBO runner
@@ -733,8 +733,8 @@ class Settings:
         },
         'MainUpperNorfair' : {
             'No thanks' : None,
-            'Gimme energy' : [(4, mania), (6, hardcore), (8, harder), (10, hard), (14, medium)],
-            'Default' : [(3, mania), (5, hardcore), (6, hard), (9, medium)],
+            'Gimme energy' : [(5, mania), (6, hardcore), (8, harder), (10, hard), (14, medium)],
+            'Default' : [(4, mania), (5, hardcore), (6, hard), (9, medium)],
             'Bring the heat' : [(3, hardcore), (4, hard), (5, medium), (7, easy)],
             'I run RBO' : [(3, harder), (4, hard), (5, medium), (6, easy)]
         },

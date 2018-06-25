@@ -80,8 +80,9 @@ accessPoints = [
        shortName="B\\GREEN HILL"),
     AccessPoint('Noob Bridge Right', 'GreenPinkBrinstar', {
         'Green Hill Zone Top Right': lambda sm: sm.wor(sm.haveItem('Wave'),
-                                                       sm.wand(sm.canOpenRedDoors(), # can do the glitch with either missile or supers
-                                                               sm.knowsGreenGateGlitch()))
+                                                       sm.wor(sm.wand(sm.canOpenRedDoors(), # can do the glitch with either missile or supers
+                                                                      sm.knowsGreenGateGlitch()),
+                                                              RomPatches.has(RomPatches.AreaRandoGates)))
     }, traverse=lambda sm: sm.wor(RomPatches.has(RomPatches.AreaRandoBlueDoors), sm.canOpenGreenDoors()),
        roomInfo = {'RoomPtr':0x9fba, "area": 0x1 },
        exitInfo = {'DoorPtr':0x8f0a, 'direction': 0x4, "cap": (0x1, 0x46), "bitFlag": 0x0,
@@ -143,7 +144,7 @@ accessPoints = [
                                        sm.wand(sm.canOpenGreenDoors(),
                                                sm.haveItem('SpeedBooster'),
                                                sm.canUsePowerBombs(),
-                                               sm.canHellRun('Ice', 2)))
+                                               sm.canHellRun('Ice', 1.5)))
     }, roomInfo = {'RoomPtr':0xa6a1, "area": 0x1},
        exitInfo = {'DoorPtr':0x922e, 'direction': 0x5, "cap": (0xe, 0x16), "bitFlag": 0x40,
                    "screen": (0x0, 0x1), "distanceToSpawn": 0x8000, "doorAsmPtr": 0xbdd1},
@@ -215,11 +216,14 @@ accessPoints = [
         'Red Fish Room Left': lambda sm: sm.wand(sm.canGoUpMtEverest(),
                                                  sm.haveItem('Morph')),
         'Crab Hole Bottom Left': lambda sm: sm.wand(sm.haveItem('Morph'),
-                                                    sm.canOpenGreenDoors()), # red door+green gate
+                                                    sm.wor(sm.canOpenGreenDoors(), # red door+green gate
+                                                           sm.wand(sm.canOpenRedDoors(),
+                                                                   RomPatches.has(RomPatches.AreaRandoGates)))),
         'Le Coude Right': lambda sm: sm.wand(sm.canOpenGreenDoors(), # gate+door
                                              sm.wor(sm.haveItem('Gravity'),
                                                     sm.wand(sm.knowsGravLessLevel3(),
-                                                            sm.haveItem('HiJump')))) # for the sand pits
+                                                            sm.haveItem('HiJump'),
+                                                            sm.haveItem('Ice')))) # for the sand pits
     }, roomInfo = {'RoomPtr':0xcfc9, "area": 0x4},
        exitInfo = {'DoorPtr':0xa39c, 'direction': 0x6, "cap": (0x6, 0x2), "bitFlag": 0x0,
                    "screen": (0x0, 0x0), "distanceToSpawn": 0x170, "doorAsmPtr": 0x0000},
@@ -227,13 +231,15 @@ accessPoints = [
        shortName="M\\MAIN STREET"),
     AccessPoint('Crab Hole Bottom Left', 'Maridia', {
         'Main Street Bottom': lambda sm: sm.wand(sm.canExitCrabHole(),
-                                                 sm.wand(sm.haveItem('Super'),
-                                                         sm.knowsGreenGateGlitch())),
+                                                 sm.wor(sm.wand(sm.haveItem('Super'),
+                                                                sm.knowsGreenGateGlitch()),
+                                                        RomPatches.has(RomPatches.AreaRandoGates))),
         'Le Coude Right': lambda sm: sm.wand(sm.canExitCrabHole(),
                                              sm.canOpenGreenDoors(), # toilet door
                                              sm.wor(sm.haveItem('Gravity'),
                                                     sm.wand(sm.knowsGravLessLevel3(),
-                                                            sm.haveItem('HiJump')))) # for the sand pits
+                                                            sm.haveItem('HiJump'),
+                                                            sm.haveItem('Ice')))) # for the sand pits
     },
        roomInfo = {'RoomPtr':0xd21c, "area": 0x4},
        exitInfo = {'DoorPtr':0xa510, 'direction': 0x5,
@@ -245,13 +251,15 @@ accessPoints = [
         'Crab Hole Bottom Left': lambda sm: sm.wand(sm.wor(sm.canOpenYellowDoors(), RomPatches.has(RomPatches.AreaRandoBlueDoors)),
                                                     sm.wor(sm.haveItem('Gravity'),
                                                            sm.wand(sm.knowsGravLessLevel3(),
-                                                                   sm.haveItem('HiJump'))), # for the sand pits
+                                                                   sm.haveItem('HiJump'),
+                                                                   sm.haveItem('Ice'))), # for the sand pits
                                                     sm.canOpenGreenDoors(),
                                                     sm.haveItem('Morph')), # toilet door
         'Main Street Bottom': lambda sm: sm.wand(sm.wor(sm.canOpenYellowDoors(), RomPatches.has(RomPatches.AreaRandoBlueDoors)),
                                                  sm.wand(sm.wor(sm.haveItem('Gravity'),
                                                                 sm.wand(sm.knowsGravLessLevel3(),
-                                                                        sm.haveItem('HiJump'))), # for the sand pits
+                                                                        sm.haveItem('HiJump'),
+                                                                        sm.haveItem('Ice'))), # for the sand pits
                                                          sm.canOpenGreenDoors(), # toilet door
                                                          sm.knowsGreenGateGlitch())),
     }, roomInfo = {'RoomPtr':0x95a8, "area": 0x0},
@@ -314,9 +322,9 @@ accessPoints = [
        entryInfo = {'SamusX':0xce, 'SamusY':0x188},
        shortName="B\\EAST TUNNEL"),
     AccessPoint('East Tunnel Top Right', 'RedBrinstar', {
-        'East Tunnel Right': lambda sm: sm.wor(RomPatches.has(RomPatches.NoMaridiaGreenGates),
+        'East Tunnel Right': lambda sm: sm.wor(RomPatches.has(RomPatches.AreaRandoGates),
                                                sm.canOpenGreenDoors())
-    }, traverse=lambda sm: RomPatches.has(RomPatches.NoMaridiaGreenGates),
+    }, traverse=lambda sm: RomPatches.has(RomPatches.AreaRandoGates),
        roomInfo = {'RoomPtr':0xcf80, "area": 0x4},
        exitInfo = {'DoorPtr':0xa390, 'direction': 0x4, "cap": (0x1, 0x16), "bitFlag": 0x0,
                    "screen": (0x0, 0x1), "distanceToSpawn": 0x8000, "doorAsmPtr": 0xe356},

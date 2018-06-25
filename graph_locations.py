@@ -1098,7 +1098,7 @@ locations = [
     'Visibility': "Hidden",
     'Room': 'Cathedral',
     'AccessFrom' : {
-        'Warehouse Entrance Left': lambda sm: sm.wand(sm.canHellRun('MainUpperNorfair'), sm.canOpenRedDoors())
+        'Warehouse Entrance Left': lambda sm: sm.wand(sm.canHellRun('MainUpperNorfair', 0.75), sm.canOpenRedDoors())
     },
     'Available': lambda sm: sm.haveItem('Morph')
 },

@@ -704,9 +704,9 @@ class Randomizer(object):
 
     def isRemoveRegress(self, itemLoc):
         itemType = itemLoc['Item']['Type']
-        nCur = len(self.currentLocations(locs=self.origLocations, post=True))
+        nCur = len(self.currentLocations(locs=self.origLocations, post=True, ap='Landing Site'))
         self.smbm.removeItem(itemType)
-        nRem = len(self.currentLocations(locs=self.origLocations, post=True))
+        nRem = len(self.currentLocations(locs=self.origLocations, post=True, ap='Landing Site'))
         self.smbm.addItem(itemType)
 #        print('isRemoveRegress ' + itemType + ': ' + str(nCur) + ',' + str(nRem))
 

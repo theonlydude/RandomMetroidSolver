@@ -204,6 +204,8 @@ BeamBits = {
 }
 
 ItemBits = {
+    'Nothing'      : 0x0,
+    'NoEnergy'     : 0x0,
     'Varia'        : 0x1,
     'SpringBall'   : 0x2,
     'Morph'        : 0x4,

@@ -497,13 +497,13 @@ class Randomizer(object):
             return True
         if item['Type'] in self.nonProgTypesCache:
             return False
-        isProg = len(self.currentLocations(post=True)) < len(self.currentLocations(item, post=True))
+        isProg = len(self.currentLocations()) < len(self.currentLocations(item))
         if isProg == False and item['Type'] not in self.nonProgTypesCache:
             self.nonProgTypesCache.append(item['Type'])
         elif isProg == True and item['Type'] not in self.progTypesCache:
             self.progTypesCache.append(item['Type'])
         return isProg
-    
+
     def isProgItem(self, item):
         if self.isJunk(item):
             return False
@@ -666,8 +666,9 @@ class Randomizer(object):
         sys.stdout.flush()
         item = itemLocation['Item']
         location = itemLocation['Location']
-
-        if self.isProgItemNow(item):
+        isProg = self.isProgItemNow(item)
+        if isProg == True:
+#            print("PROG+ " + itemLocation['Item']['Type'] + " at " + itemLocation['Location']['Name'])
             self.progressionItemLocs.append(itemLocation)
             if item['Category'] == 'Energy':
                 # if energy made us progress we must not cancel energy we already

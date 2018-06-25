@@ -222,7 +222,7 @@ class Knows:
     # underwater grav-less
     SuitlessOuterMaridia = SMBool(True, hardcore, ['SuitlessOuterMaridia']) # keep SuitlessOuterMaridia as name for existing presets compatibility
     desc['SuitlessOuterMaridia'] = {'display': 'Level 1',
-                                    'title': 'Level 0 + make your way underwater with Hi-Jump and Ice, freezing crabs and fishes. Access Botwoon with grapple.',
+                                    'title': 'Make your way underwater with Hi-Jump and Ice, freezing crabs and fishes. Access Botwoon with grapple.',
                                     'href': 'https://www.youtube.com/watch?v=c2xoPigezvM',
                                     'rooms': ['Main Street', 'Mt. Everest', 'Crab Shaft',
                                               'Aqueduct', 'Botwoon Hallway']} # TODO add forgotten highway rooms, crab hole
@@ -290,7 +290,6 @@ class Knows:
                          'title': 'Access Etecoons area using moonfall shenanigans',
                          'href': 'http://crocomi.re/92',
                          'rooms': ['Green Brinstar Main Shaft']}
-
 
     # Gauntlet
     HiJumpLessGauntletAccess = SMBool(False, 0, ['HiJumpLessGauntletAccess'])

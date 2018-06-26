@@ -274,7 +274,8 @@ class Randomizer(object):
 #        print('current AP = ' + ap)
 
     # list unreachable locations (possible with super fun setting)
-    # returns unreachable locations list, or None if the seed cannot be generated with these settings
+    # and check area transitions validity
+    # return unreachable locations. raise RuntimeError if area transitions are invalid.
     def checkReach(self, locations, forbiddenItems):
         # give us everything and beat every boss to see what we can access
         self.smbm.addItems([item['Type'] for item in self.itemPool])
@@ -299,7 +300,7 @@ class Randomizer(object):
         # actual AP check
         for apName,ap in self.areaGraph.accessPoints.iteritems():
             if not ap in availAccessPoints:
-                raise 'Invalid transitions'
+                raise RuntimeError('Invalid transitions')
 
         return restricted
 

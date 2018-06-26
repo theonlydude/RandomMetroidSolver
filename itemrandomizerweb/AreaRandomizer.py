@@ -49,7 +49,7 @@ class AreaRandomizer(Randomizer):
                                                      bidir,
                                                      dotDir)
                 transitionsOk = True
-            except:
+            except RuntimeError:
                 transitionsOk = False
 
     # adapt restrictions implementation to different area layout

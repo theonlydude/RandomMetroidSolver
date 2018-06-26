@@ -266,7 +266,7 @@ class Randomizer(object):
             self.smbm = SMBoolManager.factory('bool', cache=True)
         else:
             self.smbm = SMBoolManager.factory('diff', cache=True)
-        self.restrictedLocations = self.getRestrictedLocations(locations, settings.forbiddenItems)
+        self.restrictedLocations = self.checkReach(locations, settings.forbiddenItems)
         self.smbm.resetItems()
 
     def setCurAccessPoint(self, ap='Landing Site'):
@@ -275,33 +275,33 @@ class Randomizer(object):
 
     # list unreachable locations (possible with super fun setting)
     # returns unreachable locations list, or None if the seed cannot be generated with these settings
-    def getRestrictedLocations(self, locations, forbiddenItems):
-        if len(forbiddenItems) == 0: # no super fun setting, nothing to do
-            return []
+    def checkReach(self, locations, forbiddenItems):
         # give us everything and beat every boss to see what we can access
         self.smbm.addItems([item['Type'] for item in self.itemPool])
         for boss in ['Kraid', 'Phantoon', 'Draygon', 'Ridley']:
             Bosses.beatBoss(boss)
 
         # get restricted locs
-        totalAvailLocs = [loc for loc in self.currentLocations() if self.locPostAvailable(loc, None)]
-        restricted = [loc for loc in locations if loc not in totalAvailLocs]
+        if len(forbiddenItems) > 0: # super fun setting
+            totalAvailLocs = [loc for loc in self.currentLocations(post=True)]
+            restricted = [loc for loc in locations if loc not in totalAvailLocs]
+        else:
+            restricted = []
 
-        # check if we can reach Tourian
+        # check if we can reach all APs
         landingSite = self.areaGraph.accessPoints['Landing Site']
-        tourian = self.areaGraph.accessPoints['Statues Hallway Left']
         availAccessPoints = self.areaGraph.getAvailableAccessPoints(landingSite, self.smbm, self.difficultyTarget)
-
         # clean up
         self.smbm.resetItems()
         self.smbm.resetSMBool()
         Bosses.reset()
         self.currentItems = []
+        # actual AP check
+        for apName,ap in self.areaGraph.accessPoints.iteritems():
+            if not ap in availAccessPoints:
+                raise 'Invalid transitions'
 
-        if tourian in availAccessPoints:
-            return restricted
-        else:
-            return None
+        return restricted
 
     def locPostAvailable(self, loc, item):
         if not 'PostAvailable' in loc:

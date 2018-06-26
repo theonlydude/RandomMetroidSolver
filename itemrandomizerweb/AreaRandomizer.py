@@ -38,13 +38,19 @@ def createTransitions(bidir=True):
 
 class AreaRandomizer(Randomizer):
     def __init__(self, locations, settings, seedName, bidir=True, dotDir=None):
-        self.transitions = createTransitions(bidir)
-        super(AreaRandomizer, self).__init__(locations,
-                                             settings,
-                                             seedName,
-                                             self.transitions,
-                                             bidir,
-                                             dotDir)
+        transitionsOk = False
+        while not transitionsOk:
+            try:
+                self.transitions = createTransitions(bidir)
+                super(AreaRandomizer, self).__init__(locations,
+                                                     settings,
+                                                     seedName,
+                                                     self.transitions,
+                                                     bidir,
+                                                     dotDir)
+                transitionsOk = True
+            except:
+                transitionsOk = False
 
     # adapt restrictions implementation to different area layout
 

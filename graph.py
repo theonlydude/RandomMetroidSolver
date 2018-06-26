@@ -30,16 +30,21 @@ class AccessPoint(object):
         else:
             self.ShortName = str(self)
         self.distance = 0
+        # inter-area connection
+        self.ConnectedTo = None
 
     def __str__(self):
         return "[" + self.GraphArea + "] " + self.Name
 
-    # for additions after construction (inter-area transitions)
-    def addTransition(self, destName):
+    # connect to inter-area access point
+    def connect(self, destName):
+        if self.ConnectedTo is not None:
+            del self.transitions[self.ConnectedTo]
         if self.Internal is False:
             self.transitions[destName] = lambda sm: self.traverse(sm)
+            self.ConnectedTo = destName
         else:
-            raise "Nope"
+            raise RuntimeError("Cannot add an internal access point as inter-are transition")
 
 class AccessGraph(object):
     def __init__(self, accessPointList, transitions, bidir=True, dotFile=None):
@@ -129,7 +134,7 @@ class AccessGraph(object):
     def addTransition(self, srcName, dstName, both=True):
         src = self.accessPoints[srcName]
         dst = self.accessPoints[dstName]
-        src.addTransition(dstName)
+        src.connect(dstName)
         self.InterAreaTransitions.append((src, dst))
         if both is True:
             self.addTransition(dstName, srcName, False)

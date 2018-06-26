@@ -815,8 +815,6 @@ class Randomizer(object):
         return next(item for item in self.itemPool if item['Type'] == t)
 
     def fillRestrictedLocations(self, itemLocations):
-        if self.restrictedLocations is None: # Tourian unreachable
-            return True
         # fill up unreachable locations with "junk" to maximize the chance of the ROM
         # to be finishable
         for loc in self.restrictedLocations:

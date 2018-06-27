@@ -211,7 +211,7 @@ def solver():
 
     # load form
     files = sorted(os.listdir('diff_presets'))
-    stdPresets = ['noob', 'casual', 'regular', 'veteran', 'speedrunner']
+    stdPresets = ['noob', 'casual', 'regular', 'veteran', 'speedrunner', 'master']
     presets = [os.path.splitext(file)[0] for file in files]
     for preset in stdPresets:
         presets.remove(preset)
@@ -566,7 +566,7 @@ def randomizer():
         session.randomizer['areaRandomization'] = "off"
 
     # put standard presets first
-    stdPresets = ['noob', 'casual', 'regular', 'veteran', 'speedrunner']
+    stdPresets = ['noob', 'casual', 'regular', 'veteran', 'speedrunner', 'master']
     files = sorted(os.listdir('diff_presets'))
     presets = [os.path.splitext(file)[0] for file in files]
     for preset in stdPresets:

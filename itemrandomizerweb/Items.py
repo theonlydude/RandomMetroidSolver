@@ -297,6 +297,12 @@ def removeForbiddenItems(forbiddenItems, itemPool, noEnergyAdded):
 def getItemPool(qty, forbiddenItems):
     noEnergyAdded = False
 
+    # this function is called from the Randomizer constructor and the constructor can be called several times
+    if List.exists(lambda item: item["Type"] == 'NoEnergy', Items):
+        Items.remove(NoEnergy)
+    if List.exists(lambda item: item["Type"] == 'Nothing', Items):
+        Items.remove(Nothing)
+
     if qty['energy'] == 'sparse':
         # 5 (there's always a reserve and an etank added by the first call to addItem with Items as parameter)
         if random.random() < 0.5:

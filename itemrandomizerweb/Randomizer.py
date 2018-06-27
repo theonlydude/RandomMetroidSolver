@@ -201,6 +201,7 @@ class RandoSettings(object):
         return removable
 
     def getForbiddenMovement(self, dontRemove):
+        # TODO more accurate check on what can be removed here
         movementItems = ['SpaceJump', 'Bomb', 'HiJump', 'SpeedBooster', 'Grapple', 'SpringBall']
         return [item for item in movementItems if not item in dontRemove]
 

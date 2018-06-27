@@ -39,7 +39,8 @@ def createTransitions(bidir=True):
 class AreaRandomizer(Randomizer):
     def __init__(self, locations, settings, seedName, bidir=True, dotDir=None):
         transitionsOk = False
-        while not transitionsOk:
+        attempts = 0
+        while not transitionsOk and attempts < 10:
             try:
                 self.transitions = createTransitions(bidir)
                 super(AreaRandomizer, self).__init__(locations,
@@ -51,6 +52,9 @@ class AreaRandomizer(Randomizer):
                 transitionsOk = True
             except RuntimeError:
                 transitionsOk = False
+                attempts += 1
+        if not transitionsOk:
+            raise RuntimeError("Impossible seed! (too much fun in the settings, probably)")
 
     # adapt restrictions implementation to different area layout
 

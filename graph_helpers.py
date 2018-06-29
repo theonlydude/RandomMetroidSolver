@@ -190,7 +190,7 @@ class HelpersGraph(Helpers):
                               sm.wor(sm.haveItem('Grapple'),
                                      sm.haveItem('SpeedBooster')),
                               sm.wor(sm.canFly(),
-                                     sm.knowsGravityJump())),
+                                     sm.wand(sm.haveItem('HiJump'), sm.knowsGravityJump()))),
                       sm.wand(sm.canDoSuitlessOuterMaridia(),
                               sm.haveItem('Grapple')))
 

@@ -14,6 +14,10 @@ from parameters import diff2text, text2diff
 from graph_locations import locations as graphLocations
 from solver import Solver, ParamsLoader, DifficultyDisplayer, RomLoader
 
+def maxPresetsReach():
+    # to prevent a spammer to create presets in a loop and fill the fs
+    return len(os.listdir('diff_presets')) >= 2048
+
 romTypes = OrderedDict([('VARIA Classic', 'VARIA_X'), ('VARIA Full', 'VARIA_FX'),
                         ('VARIA Area Classic', 'VARIA_AX'), ('VARIA Area Full', 'VARIA_AFX'),
                         ('Total Casual', 'Total_CX'), ('Total Normal', 'Total_X'),
@@ -210,7 +214,7 @@ def solver():
         redirect(URL(r=request, f='solver'))
 
     # load form
-    files = sorted(os.listdir('diff_presets'))
+    files = sorted(os.listdir('diff_presets'), key=lambda v: v.upper())
     stdPresets = ['noob', 'casual', 'regular', 'veteran', 'speedrunner', 'master']
     presets = [os.path.splitext(file)[0] for file in files]
     for preset in stdPresets:
@@ -295,13 +299,18 @@ def solver():
                 redirect(URL(r=request, f='solver'))
 
         else:
-            # write the presets file
-            paramsDict = generate_json_from_parameters(request.post_vars, hidden=True)
-            paramsDict['password'] = passwordSHA256
-            ParamsLoader.factory(paramsDict).dump(fullPath)
-            session.paramsFile = saveFile
-            session.flash = "Preset {} created".format(saveFile)
-            redirect(URL(r=request, f='solver'))
+            # check that there's no more than 2K presets (there's less than 2K sm rando players in the world)
+            if not maxPresetsReach():
+                # write the presets file
+                paramsDict = generate_json_from_parameters(request.post_vars, hidden=True)
+                paramsDict['password'] = passwordSHA256
+                ParamsLoader.factory(paramsDict).dump(fullPath)
+                session.paramsFile = saveFile
+                session.flash = "Preset {} created".format(saveFile)
+                redirect(URL(r=request, f='solver'))
+            else:
+                session.flash = "Sorry, there's already 2048 presets on the website, can't add more"
+                redirect(URL(r=request, f='solver'))
 
     # conf parameters
     conf = {}
@@ -567,7 +576,7 @@ def randomizer():
 
     # put standard presets first
     stdPresets = ['noob', 'casual', 'regular', 'veteran', 'speedrunner', 'master']
-    files = sorted(os.listdir('diff_presets'))
+    files = sorted(os.listdir('diff_presets'), key=lambda v: v.upper())
     presets = [os.path.splitext(file)[0] for file in files]
     for preset in stdPresets:
         presets.remove(preset)

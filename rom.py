@@ -73,7 +73,7 @@ class RomType:
         fileName = os.path.basename(fileName)
 
         # VARIA ?
-        m = re.match(r'^*.VARIA_Randomizer_([A]?[F]?X)\d+.*$', fileName)
+        m = re.match(r'^.*VARIA_Randomizer_([A]?[F]?X)\d+.*$', fileName)
         if m is not None:
             return 'VARIA_' + m.group(1)
 

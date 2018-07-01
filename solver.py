@@ -498,13 +498,6 @@ class ParamsLoader(object):
         if 'Settings' not in self.params:
             self.params['Settings'] = {}
 
-        if 'hellRuns' not in self.params['Settings']:
-            self.params['Settings']['hellRuns'] = {}
-        if 'bossesDifficulty' not in self.params['Settings']:
-            self.params['Settings']['bossesDifficulty'] = {}
-        if 'hardRooms' not in self.params['Settings']:
-            self.params['Settings']['hardRooms'] = {}
-
     def load(self):
         # update the parameters in the parameters classes: Conf, Knows, Settings
         # Conf
@@ -519,9 +512,20 @@ class ParamsLoader(object):
                                              self.params['Knows'][param][1],
                                              ['{}'.format(param)]))
         # Settings
-        for param in self.params['Settings']:
-            if isSettings(param) and len(self.params['Settings'][param]) > 0:
-                setattr(Settings, param, self.params['Settings'][param])
+        ## hard rooms
+        for hardRoom in ['X-Ray', 'Gauntlet']:
+            if hardRoom in self.params['Settings']:
+                Settings.hardRooms[hardRoom] = Settings.hardRoomsPresets[hardRoom][self.params['Settings'][hardRoom]]
+
+        ## bosses
+        for boss in ['Kraid', 'Phantoon', 'Draygon', 'Ridley', 'MotherBrain']:
+            if boss in self.params['Settings']:
+                Settings.bossesDifficulty[boss] = Settings.bossesDifficultyPresets[boss][self.params['Settings'][boss]]
+
+        ## hellruns
+        for hellRun in ['Ice', 'MainUpperNorfair', 'LowerNorfair']:
+            if hellRun in self.params['Settings']:
+                Settings.hellRuns[hellRun] = Settings.hellRunPresets[hellRun][self.params['Settings'][hellRun]]
 
     def dump(self, fileName):
         with open(fileName, 'w') as jsonFile:

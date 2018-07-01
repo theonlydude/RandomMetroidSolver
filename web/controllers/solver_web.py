@@ -385,21 +385,12 @@ def solver():
 
     # add missing settings
     for boss in ['Kraid', 'Phantoon', 'Draygon', 'Ridley', 'MotherBrain']:
-        if boss not in params['Settings']['bossesDifficulty']:
-            params['Settings']['bossesDifficulty'][boss] = Settings.bossesDifficulty[boss]
         if boss not in params['Settings']:
             params['Settings'][boss] = 'Default'
     for hellrun in ['Ice', 'MainUpperNorfair', 'LowerNorfair']:
-        if hellrun not in params['Settings']['hellRuns']:
-            params['Settings']['hellRuns'][hellrun] = Settings.hellRuns[hellrun]
         if hellrun not in params['Settings']:
             params['Settings'][hellrun] = 'Default'
     for hardroom in ['X-Ray', 'Gauntlet']:
-        # the hard rooms presets is not present in the existing sessions
-        if 'hardRoomsPresets' not in params['Settings']:
-            params['Settings']['hardRoomsPresets'] = {}
-        if hardroom not in params['Settings']['hardRoomsPresets']:
-            params['Settings']['hardRoomsPresets'][hardroom] = Settings.hardRoomsPresets[hardroom]
         if hardroom not in params['Settings']:
             params['Settings'][hardroom] = 'Default'
 
@@ -422,7 +413,7 @@ def generate_json_from_parameters(vars, hidden):
     else:
         hidden = ""
 
-    paramsDict = {'Knows': {}, 'Conf': {}, 'Settings': {'hellRuns': {}, 'bossesDifficulty': {}, 'hardRooms': {}}}
+    paramsDict = {'Knows': {}, 'Conf': {}, 'Settings': {}}
 
     # Knows
     for var in Knows.__dict__:
@@ -467,19 +458,16 @@ def generate_json_from_parameters(vars, hidden):
     for hellRun in ['Ice', 'MainUpperNorfair', 'LowerNorfair']:
         value = vars[hellRun+hidden]
         if value is not None:
-            paramsDict['Settings']['hellRuns'][hellRun] = Settings.hellRunPresets[hellRun][value]
             paramsDict['Settings'][hellRun] = value
 
     for boss in ['Kraid', 'Phantoon', 'Draygon', 'Ridley', 'MotherBrain']:
         value = vars[boss+hidden]
         if value is not None:
-            paramsDict['Settings']['bossesDifficulty'][boss] = Settings.bossesDifficultyPresets[boss][value]
             paramsDict['Settings'][boss] = value
 
     for room in ['X-Ray', 'Gauntlet']:
         value = vars[room+hidden]
         if value is not None:
-            paramsDict['Settings']['hardRooms'][room] = Settings.hardRoomsPresets[room][value]
             paramsDict['Settings'][room] = value
 
     return paramsDict

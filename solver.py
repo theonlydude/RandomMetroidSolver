@@ -67,9 +67,8 @@ class Solver:
         # TODO::the patches are not yet loaded in the romLoader, decouplate the locations/items assigment
         # and reading the patchs/transitions info
         self.romLoader = RomLoader.factory(rom)
-        (self.fullRando, self.areaRando) = RomType.apply(Conf.romType, self.romLoader.patches)
-
         self.romLoader.assignItems(self.locations)
+        (self.fullRando, self.areaRando) = RomType.apply(Conf.romType, self.romLoader.patches)
 
         print("ROM {} Type: {}, Patches present: {}, Area Rando: {}".format(rom, Conf.romType, self.romLoader.patches, (self.areaRando == True)))
 

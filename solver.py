@@ -59,10 +59,9 @@ class Solver:
                 loc['distance'] = 0
 
     def loadRom(self, rom):
-        if Conf.guessRomType == True and self.type == 'console':
-            guessed = RomType.guess(rom)
-            if guessed is not None:
-                Conf.romType = guessed
+        guessed = RomType.guess(rom)
+        if guessed is not None:
+            Conf.romType = guessed
 
         # TODO::the patches are not yet loaded in the romLoader, decouplate the locations/items assigment
         # and reading the patchs/transitions info
@@ -357,14 +356,18 @@ class Solver:
         return out
 
     def getKnowsUsed(self):
-        knows = []
+        knowsUsed = []
         for loc in self.visitedLocations:
-            knows += loc['difficulty'].knows
+            knowsUsed += loc['difficulty'].knows
 
         # get unique knows
-        knows = list(set(knows))
+        knowsUsed = len(list(set(knowsUsed)))
 
-        return knows
+        # get total of known knows
+        knowsKnown = len([knows for  knows in Knows.__dict__ if isKnows(knows) and getattr(Knows, knows)[0] == True])
+        knowsKnown += len([hellRun for hellRun in Settings.hellRuns if Settings.hellRuns[hellRun] is not None])
+
+        return (knowsUsed, knowsKnown)
 
     def printPath(self, message, locations):
         print(message)
@@ -644,9 +647,9 @@ if __name__ == "__main__":
 
     #solver.solveRom()
     diff = solver.solveRom()
-    knowsUsed = solver.getKnowsUsed()
-    print("{} : diff : {}".format(diff, args.romFileName))
-    print("{} : knows Used : {}".format(len(knowsUsed), args.romFileName))
+    (knowsUsed, total) = solver.getKnowsUsed()
+    print("{}: diff : {}".format(diff, args.romFileName))
+    print("{}/{}: knows Used : {}".format(knowsUsed, total, args.romFileName))
     if diff[0] >= 0:
         sys.exit(0)
     else:

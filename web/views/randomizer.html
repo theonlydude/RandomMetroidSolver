@@ -692,10 +692,11 @@ def displayNumber(id, min, max, default, step="1"):
   <div class="fixed">
     <div class="menu">
       <button class="buttonBack" onclick="startTheTour()"><span class="glyphicon glyphicon-play"/></span>Start the tutorial</button>
-      {{=A('Super Metroid VARIA Randomizer and Solver', _href=URL(f='randomizer'), _class='menu')}}
-      {{=A('Solve!', _href=URL(f='solver'), _class='menu')}}
-      {{=A('Randomize!', _href=URL(f='randomizer'), _class='menu')}}
-      {{=A('Information & Contact', _href=URL(f='infos'), _class='menu')}}
+    {{=A("Super Metroid VARIA Randomizer and Solver", _href=URL(f="solver"), _class="menu")}}
+    {{=A("Presets", _href=URL(f="presets"), _class="menu")}}
+    {{=A("Solver", _href=URL(f="solver"), _class="menu")}}
+    {{=A("Randomizer", _href=URL(f="randomizer"), _class="menu")}}
+    {{=A("Information & Contact", _href=URL(f="infos"), _class="menu")}}
     </div>
   </div>
 

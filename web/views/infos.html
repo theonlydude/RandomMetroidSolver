@@ -15,34 +15,29 @@ body {
 <body>
 <div class="fixed">
   <div class="menu">
-    {{=A('Super Metroid VARIA Randomizer and Solver', _href=URL(f='solver'), _class='menu')}}
-    {{=A('Solve!', _href=URL(f='solver'), _class='menu')}}
-    {{=A('Randomize!', _href=URL(f='randomizer'), _class='menu')}}
-    {{=A('Information & Contact', _href=URL(f='infos'), _class='menu')}}
+    {{=A("Super Metroid VARIA Randomizer and Solver", _href=URL(f="solver"), _class="menu")}}
+    {{=A("Presets", _href=URL(f="presets"), _class="menu")}}
+    {{=A("Solver", _href=URL(f="solver"), _class="menu")}}
+    {{=A("Randomizer", _href=URL(f="randomizer"), _class="menu")}}
+    {{=A("Information & Contact", _href=URL(f="infos"), _class="menu")}}
   </div>
 </div>
   <p>
-    To solve a Super Metroid randomized ROM click on <a href="{{=URL(f='solver')}}">Solve!</a>.
+    To solve a Super Metroid randomized ROM click on <a href="{{=URL(f='solver')}}">Solver</a>.
   </p>
   <p>
-    To randomize a ROM with the VARIA randomizer click on <a href="{{=URL(f='randomizer')}}">Randomize!</a>.
+    To randomize a ROM with the VARIA Randomizer click on <a href="{{=URL(f='randomizer')}}">Randomizer</a>.
   </p>
-  <h2>Randomizers</h2>
   <p>
-    There are three items randomizers for Super Metroid:
-    <ul>
-      <li><a href="https://itemrando.supermetroid.run/randomize">The tournament randomizer (online)</a></li>
-      <li><a href="https://dessyreqt.github.io/smrandomizer/">Dessyreqt randomizer</a></li>
-      <li><a href="http://randommetroidsolver.pythonanywhere.com/randomizer">Very Adaptive Randomizer of Items and Areas (VARIA) randomizer (online)</a></li>
-    </ul>
+    To manage your preset click on <a href="{{=URL(f='presets')}}">Presets</a>.
   </p>
-  <h2>Source Code of the solver and the VARIA randomizer</h2>
+  <h2>Source Code of the VARIA Randomizer and Solver</h2>
   <p>
     The source code is available on <a href="https://github.com/theonlydude/RandomMetroidSolver">GitHub</a>
   </p>
   <h2>Thanks to</h2>
   <p>
-    Huge thanks to the people who developped the Super Metroid Randomizers and Super Metroid patches.
+    Huge thanks to the people who developped Super Metroid, the previous Super Metroid Randomizers, Super Metroid patches, Metroid Construction and Super Metroid Discords.
   </p>
   <h2>Contact</h2>
   <p>
@@ -55,4 +50,156 @@ body {
       <li>ouichegeante#4081</li>
     </ul>
   </p>
+  <h2>Change Log</h2>
+  <ul>
+    <li>
+      <h4>2018/06/27</h4>
+      <p>
+	Hello @randomizer !</br>
+	We've relased the new version of the VARIA Randomizer, dubbed "feeling lost in Zebes again".</br>
+	New stuff:
+	<ul>
+	  <li>- Area randomization official release (randomization of the access points between the main Zebes areas)</li>
+	  <li>- Solver: More human-like pathing</li>
+	  <li>- Rando: The maximum difficulty is now set to hardcore by default (no difficulty cap was the previous default)</li>
+	  <li>- Rando: The eye at Morph Ball will now open for any item, not only Morph Ball</li>
+	  <li>- Presets: Updated all built-in presets for better balance between them. Added casual and master presets.</li>
+	  <li>- Presets: Added new, harder settings for X-Ray room</li>
+	  <li>- Presets: Short charge is now for 3 taps or stutter 3 (thanks @ponk !). Enabled by default only in speedrunner and master presets.</li>
+	</ul>
+	Bugfixes:
+	<ul>
+	  <li>- Area Rando: The scrolling sky background bug has been fixed (thanks to Smiley from metconst!)</li>
+	  <li>- Area Rando: The music will correctly change when entering a new area</li>
+	  <li>- Area Rando: Unmorphing while passing a transition door no longer crash the game</li>
+	  <li>- Lot of bugs corrected in the access condition of the items locations</li>
+	</ul>
+	For the next big release we'll do a complete redesign of the website to make it more user friendly.</br>
+	If you have some feature requests for the next release, you can create create them on github and we'll see what we can do.
+      </p>
+    </li>
+    <li>
+    <h4>2018/05/01</h4>
+    <p>
+      Hello @randomizer,</br>
+      We've released a new version of the VARIA Randomizer dubbed "Randomize the Randomizer":
+      <ul>
+	<li>-New options to randomize the parameters used by the Randomizer</li>
+	<li>-The parameters used are now displayed in the credits</li>
+	<li>-As we had for Bosses and Hellruns, we now have difficulties for hard rooms: X-Ray and Gauntlet, so we've removed a few techniques for these rooms</li>
+	<li>-Now there's techniques for better settings of Gravity-less movement underwater</li>
+	<li>-New Randomizer's parameter to influence choice of the next location based on its difficulty</li>
+      </ul>
+      As a result don't forget to update your presets before using the Randomizer.
+    </p>
+    </li>
+    <li>
+      <h4>2018/04/21</h4>
+      <p>
+	Hi @randomizer!</br>
+	We updated the VARIA (http://randommetroidsolver.pythonanywhere.com/) to fix two issues:
+	<ul>
+	  <li>1) The "too much spospo" bug. Now, the probability you would have to fight it is ~30% in slowest/slow, ~5% in medium, and ~0% in fast/fastest. All in all if you choose a random speed, there is a 1/7 chance to have to do the fight.</li>
+	  <li>2) When "start at Ceres" was selected instead of "start at landing site", the stats counters in the credits were wrong and glitched out. It is now fixed, thanks @andrew (original credits/stats patch author), Smiley and PJBoy from metconst for their help, this was a tricky one to fix.</li>
+	  </ul>
+	Enjoy!
+      </p>
+    </li>
+    <li>
+      <h4>2018/04/14</h4>
+      <p>
+	Hello,</br>
+	We've made a new release for the VARIA Randomizer (http://randommetroidsolver.pythonanywhere.com/randomizer):
+	<ul>
+	  <li>-the layout patches are now optional (for EasyDanger)</li>
+	  <li>-the save the animals suprise patches are now available (for andrew)</li>
+	  <li>-there's now a tutorial and contextual help to explain the parameters of the Randomizer and Solver in greater details</li>
+	  <li>-the randomized ROMs are now generated a lot faster (between x2 and x3 gain)</li>
+	</ul>
+      </p>
+    </li>
+    <li>
+      <h4>2018/04/09</h4>
+      <p>
+	Hi @randomizer !<br>
+	We made an update to the VARIA randomizer and solver ( http://randommetroidsolver.pythonanywhere.com/ ). Not much in terms of new features, but lots of work behind the scenes:
+	<ul>
+	  <li>- stabilized and improved randomizer algorithm: now it can be trolly with minor items as well (especially in slow/slowest speeds), be sure to try it! ;)</li>
+	  <li>- fixed logic bugs affecting both rando and solver</li>
+	  <li>- fixed Normal/Hard Total ROM patch set mapping for solver</li>
+	</ul>
+	This is an intermediate release, there's more in the works, namely: drastic performance improvements, a tutorial for the website explaining the plethora of settings and other surprises!
+      </p>
+    </li>
+    <li>
+      <h4>2018/03/16</h4>
+      <p>
+	Hello @randomizer !</br>
+	We updated the VARIA (http://randommetroidsolver.pythonanywhere.com/randomizer). Among the obligatory bugfixes, the following new features are available:
+	<ul>
+	  <li>- Skip intro/start at Ceres option, as suggested by @Di10 and @BlackEliteJohn</li>
+	  <li>- Added optional patch to speed up doors and elevators transitions</li>
+	  <li>- Added a Super Fun Times feature for those who like the feeling of Dessy rando masochist seeds</li>
+	  <li>- Ability to have a random progression speed instead of choosing one</li>
+	</ul>
+      </p>
+    </li>
+    <li>
+      <h4>2018/03/13</h4>
+      <p>
+	@randomizer Hello,</br>
+	Using the presets (for each technique you can say if you know it and your perceived difficulty for it) from the solver we've made a new randomizer: the VARIA randomizer (Very Adaptive Randomizer of Items for Anyone)</br>
+	It can be found here: http://randommetroidsolver.pythonanywhere.com/randomizer</br>
+	Its features:
+	<ul>
+	  <li>-generate a randomized ROM which can be finished using the techniques of the given preset</li>
+	  <li>-can limit the max difficulty for reaching a location</li>
+	  <li>-can choose the probability of each minors and the percentage of minors available</li>
+	  <li>-can choose the quantity of Energy/Reserve Tanks</li>
+	  <li>-can do a full randomization of the majors</li>
+	  <li>-can influence how fast the randomizer places the progression items</li>
+	  <li>-can spread the progression items in all areas with maximum distance between them</li>
+	  <li>-several optional patches are available:
+	    <ul>
+	      <li>-allow the aim buttons to be assign to any button</li>
+	      <li>-remove fanfare when picking up an item</li>
+	      <li>-allow Samus to start spinning in mid air after jumping or falling</li>
+	      <li>-play the music with MSU1 chip on SD2SNES</li>
+	    </ul>
+	</ul>
+      </p>
+    </li>
+    <li>
+      <h4>2018/01/30</h4>
+      <p>
+	Hello,</br>
+	We've added a few things to the randomized roms solver (http://randommetroidsolver.pythonanywhere.com/):
+	<ul>
+	  <li>-display the number of techniques used to solve the rom</li>
+	  <li>-in the spoiler display the techniques used for each location</li>
+	  <li>-for each techniques display the rooms where it's used with links to the wiki</li>
+	  <li>-update the CSS of the website</li>
+	</ul>
+      </p>
+    </li>
+    <li>
+      <h4>2018/01/22</h4>
+      <p>
+	Hello,</br>
+	With a friend we've developed a solver for the randomized Super Metroid roms: http://randommetroidsolver.pythonanywhere.com/</br>
+	Tell it what you know (and how hard you find particular tricks), and it'll tell you if you can finish your seed, and how hard it will be, without spoiling the seed.</br>
+	It's useful for people who hasn't yet mastered all the Super Metroid tricks required by the randomizers.</br>
+	Features:
+	<ul>
+	  <li>- works with randomized roms from Dessyreqt randomizer and (Total, Foosda, Leodox) randomizer</li>
+	  <li>- somewhat realistic navigation algorithm</li>
+	  <li>- pretty much all tricks and difficult rooms/areas have their setting, with video explanation when we found one, so you can actually learn the tricks if you want</li>
+	  <li>- website front end</li>
+	  <li>- save/load your presets on the website without having to create an account</li>
+	  <li>- boss difficulty is estimated as well</li>
+	  <li>- hell runs are taken into account in navigation</li>
+	</ul>
+      </p>
+    </li>
+  </ul>
 </body>

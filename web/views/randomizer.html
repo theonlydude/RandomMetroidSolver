@@ -92,6 +92,65 @@ body {
 
 <script type="text/javascript">
 
+function getComplexity() {
+  var radios = document.getElementsByName("complexity");
+
+  for(var i=0, length=radios.length; i<length; i++) {
+    if(radios[i].checked) {
+      return radios[i].value;
+    }
+  }
+}
+
+function setComplexity() {
+{{
+  if "complexity" in session.randomizer:
+    response.write("  var complexity = \"{}\";".format(session.randomizer["complexity"]), escape=False)
+  else:
+    response.write("  var complexity = \"simple\";", escape=False)
+    pass
+}}
+
+  var radios = document.getElementsByName('complexity');
+
+  for(var i=0, length=radios.length; i<length; i++) {
+    if(radios[i].value == complexity) {
+      radios[i].checked = true;
+      changeComplexity(radios[i]);
+      break;
+    }
+  }
+}
+
+function changeComplexity(radioButton) {
+  if(radioButton.id == "simpleRadio") {
+    var show = [];
+    var hide = ["seedVisibility", "ammoVisibility", "fullVisibility", "maxDiffVisibility", "progDiffVisibility", "randomParamsVisibility", "spreadItemsVisibility", "suitsRestrictionVisibility", "speedScrewRestrictionVisibility", "superFunVisibility", "patchesVisibility"];
+    showHide(show, hide);
+  } else if(radioButton.id == "mediumRadio") {
+    var show = ["fullVisibility", "maxDiffVisibility", "progDiffVisibility"];
+    var hide = ["seedVisibility", "ammoVisibility", "randomParamsVisibility", "spreadItemsVisibility", "suitsRestrictionVisibility", "speedScrewRestrictionVisibility", "superFunVisibility", "patchesVisibility"];
+    showHide(show, hide);
+  } else {
+    var show = ["seedVisibility", "ammoVisibility", "fullVisibility", "maxDiffVisibility", "progDiffVisibility", "randomParamsVisibility", "spreadItemsVisibility", "suitsRestrictionVisibility", "speedScrewRestrictionVisibility", "superFunVisibility", "patchesVisibility"];
+    var hide = [];
+    showHide(show, hide);
+  }
+}
+
+function showHide(show, hide) {
+  for(var i=0; i<show.length; i++) {
+    var showId = show[i];
+    var elem = document.getElementById(showId);
+    elem.classList.remove("hidden");
+  }
+  for(var i=0; i<hide.length; i++) {
+    var hideId = hide[i];
+    var elem = document.getElementById(hideId);
+    elem.classList.add("hidden");
+  }
+}
+
 var globalSwitchs = {};
 
 function AjaxPresetCallCompleted(data) {
@@ -227,7 +286,8 @@ function AjaxRandomizerCallCompleted(data) {
         randomParams : document.getElementById("randomParams").value,
         randomSuperFuns : document.getElementById("randomSuperFuns").value,
         progressionDifficulty : document.getElementById("progressionDifficulty").value,
-        areaRandomization : document.getElementById("areaRandomization").value
+        areaRandomization : document.getElementById("areaRandomization").value,
+        complexity : getComplexity()
       },
       dataType: "html"
     });
@@ -433,6 +493,7 @@ window.onload = function(){
     initialDisable("randomParams", ["spreadItems", "suitsRestriction", "speedScrewRestriction"]);
     initialDisable("randomSuperFuns", ["funCombat", "funMovement", "funSuits"]);
 
+    setComplexity();
 }
 function initialDisable(id, elems) {
     var check = document.getElementById(id);
@@ -512,26 +573,6 @@ function startTheTour(step=-1) {
       content: "The preset is used by the Randomizer to know which techniques are available to reach the items locations.</br>You can create and manage your preset on the <a href=\"/solver/solver_web/presets\">Presets part of the website</a>.<br/>You can use one of the predefined ones:<ul><li>noob</li><li>casual</li><li>regular</li><li>veteran</li><li>speedrunner</li><li>master</li></ul><br/>However, creating your own preset will lead to a better experience overall, as the generated ROMs will be tailored for you."
     },
     {
-      element: "#randomMinorsStep",
-      title: "Random minors/energy quantities",
-      content: "Randomly set the minors probabilities, the minors quantity (between 25% and 100%) and the energy quantity."
-    },
-    {
-      element: "#missileQty",
-      title: "Quantity of Missiles/Super Missiles/Power Bombs",
-      content: "For each minor types, the higher the number the higher the probability of choosing it when placing a minor."
-    },
-    {
-      element: "#minorQty",
-      title: "Percentage of minors available",
-      content: "From 1%: minimum number of minors required to finish the game to 100%: all minors locations contain a minor (vanilla like)."
-    },
-    {
-      element: "#energyQty",
-      title: "Quantity of Energy/Reserve Tanks available",
-      content: "Choose how many Energy/Reserve Tanks will be available, from 5 in sparse, 11 in medium and 18 in vanilla."
-    },
-    {
       element: "#fullRandomizationStep",
       title: "Full randomization",
       content: "By default the minor and major items are shuffled in their respective pool.<br/>Activate this option to have all items fully randomized."
@@ -570,6 +611,26 @@ function startTheTour(step=-1) {
       element: "#speedScrewRestrictionStep",
       title: "Early Morph",
       content: "No SpeedBooster or Screw Attack in the very first rooms, no Screw Attack in Crateria.<br/>As a consequence, Morph Ball will be either at its vanilla position, or at the E-Tank in the ceiling next to it (like Total randomizer).<br/>If disabled, Morph can be found later in the game (like Dessy randomizer)."
+    },
+    {
+      element: "#randomMinorsStep",
+      title: "Random minors/energy quantities",
+      content: "Randomly set the minors probabilities, the minors quantity (between 25% and 100%) and the energy quantity."
+    },
+    {
+      element: "#missileQty",
+      title: "Quantity of Missiles/Super Missiles/Power Bombs",
+      content: "For each minor types, the higher the number the higher the probability of choosing it when placing a minor."
+    },
+    {
+      element: "#minorQty",
+      title: "Percentage of minors available",
+      content: "From 1%: minimum number of minors required to finish the game to 100%: all minors locations contain a minor (vanilla like)."
+    },
+    {
+      element: "#energyQty",
+      title: "Quantity of Energy/Reserve Tanks available",
+      content: "Choose how many Energy/Reserve Tanks will be available, from 5 in sparse, 11 in medium and 18 in vanilla."
     },
     {
       element: "#areaRandomizationStep",
@@ -691,7 +752,7 @@ def displayNumber(id, min, max, default, step="1"):
 
   <div class="fixed">
     <div class="menu">
-      <button class="buttonBack" onclick="startTheTour()"><span class="glyphicon glyphicon-play"/></span>Start the tutorial</button>
+      <!-- <button class="buttonBack" onclick="startTheTour()"><span class="glyphicon glyphicon-play"/></span>Start the tutorial</button> -->
     {{=A("Super Metroid VARIA Randomizer and Solver", _href=URL(f="solver"), _class="menu")}}
     {{=A("Presets", _href=URL(f="presets"), _class="menu")}}
     {{=A("Solver", _href=URL(f="solver"), _class="menu")}}
@@ -701,8 +762,14 @@ def displayNumber(id, min, max, default, step="1"):
   </div>
 
   <div class="main">
-    <p><center>NEW: Area randomization now available</center></p>
     <form id="mainform", name="mainform", onsubmit="doSubmit(); return false;">
+      <div id="complexityRadios" class="center">
+	<p>Parameters complexity:
+	  <input type="radio" name="complexity" id="simpleRadio" value="simple" onclick="changeComplexity(this);">Simple
+	  <input type="radio" name="complexity" id="mediumRadio" value="medium" onclick="changeComplexity(this);">Medium
+	  <input type="radio" name="complexity" id="advancedRadio" value="advanced" onclick="changeComplexity(this);">Advanced
+	</p>
+      </div>
       <div class="row">
 	<div class="column">
 	  <p>The Very Adaptive Randomizer of Items and Area (VARIA) randomizer will generate a Super Metroid ROM finishable using the known techniques of the chosen preset.</p>
@@ -713,10 +780,10 @@ def displayNumber(id, min, max, default, step="1"):
               <td>{{=INPUT(_type="file", _name="uploadFile", _id="uploadFile", _class="full")}}</td>
               <td><button type="button" onclick="startTheTour(0)">?</button></td>
             </tr>
-            <tr>
-              <td>Randomizer seed:</td>
-              <td>{{displayNumber("seed", "0", "9999999", "0")}}</td>
-              <td><button type="button" onclick="startTheTour(1)">?</button></td>
+            <tr id="seedVisibility">
+	      <td>Randomizer seed:</td>
+	      <td>{{displayNumber("seed", "0", "9999999", "0")}}</td>
+	      <td><button type="button" onclick="startTheTour(1)">?</button></td>
             </tr>
             <tr>
               <td>Preset used to randomize: </td>
@@ -724,81 +791,82 @@ def displayNumber(id, min, max, default, step="1"):
               <td><button type="button" onclick="startTheTour(2)">?</button></td>
             </tr>
           </table>
-	  <br/>
-	  <h4>Ammo and Energy</h4>
-	  <table class="full">
-            <colgroup><col class="half" /><col class="half" /></colgroup>
-	    <tr>
-	      <td colspan="2" id="randomMinorsStep">{{displayCheckboxRandom("randomMinors", ["missileQty", "superQty", "powerBombQty", "minorQty", "energyQty"])}}Randomly set the minors/energy quantities:</td>
-              <td><button type="button" onclick="startTheTour(3)">?</button></td>
-	    </tr>
-            <tr>
-              <td><span id="missileQtyText">Quantity of Missiles:</span></td>
-              <td>{{displayNumber("missileQty", "1", "9", "3", "0.1")}}</td>
-              <td><button type="button" onclick="startTheTour(4)">?</button></td>
-            </tr>
-            <tr>
-              <td><span id="superQtyText">Quantity of Super Missiles:</span></td>
-              <td>{{displayNumber("superQty", "1", "9", "3", "0.1")}}</td>
-            </tr>
-            <tr>
-              <td><span id="powerBombQtyText">Quantity of Power Bombs:</span></td>
-              <td>{{displayNumber("powerBombQty", "1", "9", "1", "0.1")}}</td>
-            </tr>
-            <tr>
-              <td><span id="minorQtyText">Percentage of minors available:</span></td>
-              <td>{{displayNumber("minorQty", "1", "100", "100")}}</td>
-              <td><button type="button" onclick="startTheTour(5)">?</button></td>
-            </tr>
-            <tr>
-              <td><span id="energyQtyText">Quantity of Energy/Reserve Tanks available:</span></td>
-              <td>{{displaySelect("energyQty", ["sparse", "medium", "vanilla"], "vanilla")}}</td>
-              <td><button type="button" onclick="startTheTour(6)">?</button></td>
-            </tr>
-	  </table>
-	  <br/>
+	  </br>
 	  <h4>Randomizer parameters</h4>
 	  <table class="full">
-	    <tr>
+	    <tr id="fullVisibility">
 	      <td colspan="2" id="fullRandomizationStep">{{displayCheckbox("fullRandomization")}}Full randomization</td>
-              <td><button type="button" onclick="startTheTour(7)">?</button></td>
+              <td><button type="button" onclick="startTheTour(3)">?</button></td>
 	    </tr>
-            <tr>
+            <tr id="maxDiffVisibility">
               <td>Maximum difficulty for picking up an item:</td>
               <td>{{displaySelect("maxDifficulty", ["no difficulty cap", "easy", "medium", "hard", "harder", "hardcore", "mania"], "no difficulty cap")}}</td>
-              <td><button type="button" onclick="startTheTour(8)">?</button></td>
+              <td><button type="button" onclick="startTheTour(4)">?</button></td>
             </tr>
 	    <tr>
 	      <td class="half">
                 Progression speed:
               </td>
               <td class="half">{{displaySelect("progressionSpeed", ["random", "slowest", "slow", "medium", "fast", "fastest"], "medium")}}</td>
-              <td><button type="button" onclick="startTheTour(9)">?</button></td>
+              <td><button type="button" onclick="startTheTour(5)">?</button></td>
 	    </tr>
-	    <tr>
+	    <tr id="progDiffVisibility">
 	      <td class="half">
                 Progression difficulty:
               </td>
               <td class="half">{{displaySelect("progressionDifficulty", ["random", "easier", "normal", "harder"], "normal")}}</td>
+              <td><button type="button" onclick="startTheTour(6)">?</button></td>
+	    </tr>
+	    <tr id="randomParamsVisibility">
+	      <td colspan="2" id="randomParamsStep">{{displayCheckboxRandom("randomParams", ["spreadItems", "suitsRestriction", "speedScrewRestriction"])}}Randomly set the next three parameters:</td>
+              <td><button type="button" onclick="startTheTour(7)">?</button></td>
+	    </tr>
+	    <tr id="spreadItemsVisibility">
+	      <td colspan="2" id="spreadItemsStep">{{displayCheckbox("spreadItems")}}<span id="spreadItemsText">Spread progression items</span></td>
+              <td><button type="button" onclick="startTheTour(8)">?</button></td>
+	    </tr>
+	    <tr id="suitsRestrictionVisibility">
+	      <td colspan="2" id="suitsRestrictionStep">{{displayCheckbox("suitsRestriction")}}<span id="suitsRestrictionText">Suits restriction</span></td>
+              <td><button type="button" onclick="startTheTour(9)">?</button></td>
+	    </tr>
+	    <tr id="speedScrewRestrictionVisibility">
+	      <td colspan="2" id="speedScrewRestrictionStep">{{displayCheckbox("speedScrewRestriction")}}<span id="speedScrewRestrictionText">Early Morph</span></td>
               <td><button type="button" onclick="startTheTour(10)">?</button></td>
 	    </tr>
-	    <tr>
-	      <td colspan="2" id="randomParamsStep">{{displayCheckboxRandom("randomParams", ["spreadItems", "suitsRestriction", "speedScrewRestriction"])}}Randomly set the next three parameters:</td>
-              <td><button type="button" onclick="startTheTour(11)">?</button></td>
-	    </tr>
-	    <tr>
-	      <td colspan="2" id="spreadItemsStep">{{displayCheckbox("spreadItems")}}<span id="spreadItemsText">Spread progression items</span></td>
-              <td><button type="button" onclick="startTheTour(12)">?</button></td>
-	    </tr>
-	    <tr>
-	      <td colspan="2" id="suitsRestrictionStep">{{displayCheckbox("suitsRestriction")}}<span id="suitsRestrictionText">Suits restriction</span></td>
-              <td><button type="button" onclick="startTheTour(13)">?</button></td>
-	    </tr>
-	    <tr>
-	      <td colspan="2" id="speedScrewRestrictionStep">{{displayCheckbox("speedScrewRestriction")}}<span id="speedScrewRestrictionText">Early Morph</span></td>
-              <td><button type="button" onclick="startTheTour(14)">?</button></td>
-	    </tr>
 	  </table>
+	  <div id="ammoVisibility">
+	    <h4>Ammo and Energy</h4>
+	    <table class="full">
+              <colgroup><col class="half" /><col class="half" /></colgroup>
+	      <tr>
+		<td colspan="2" id="randomMinorsStep">{{displayCheckboxRandom("randomMinors", ["missileQty", "superQty", "powerBombQty", "minorQty", "energyQty"])}}Randomly set the minors/energy quantities:</td>
+		<td><button type="button" onclick="startTheTour(11)">?</button></td>
+	      </tr>
+              <tr>
+		<td><span id="missileQtyText">Quantity of Missiles:</span></td>
+		<td>{{displayNumber("missileQty", "1", "9", "3", "0.1")}}</td>
+		<td><button type="button" onclick="startTheTour(12)">?</button></td>
+              </tr>
+              <tr>
+		<td><span id="superQtyText">Quantity of Super Missiles:</span></td>
+		<td>{{displayNumber("superQty", "1", "9", "3", "0.1")}}</td>
+              </tr>
+              <tr>
+		<td><span id="powerBombQtyText">Quantity of Power Bombs:</span></td>
+		<td>{{displayNumber("powerBombQty", "1", "9", "1", "0.1")}}</td>
+              </tr>
+              <tr>
+		<td><span id="minorQtyText">Percentage of minors available:</span></td>
+		<td>{{displayNumber("minorQty", "1", "100", "100")}}</td>
+		<td><button type="button" onclick="startTheTour(13)">?</button></td>
+              </tr>
+              <tr>
+		<td><span id="energyQtyText">Quantity of Energy/Reserve Tanks available:</span></td>
+		<td>{{displaySelect("energyQty", ["sparse", "medium", "vanilla"], "vanilla")}}</td>
+		<td><button type="button" onclick="startTheTour(14)">?</button></td>
+              </tr>
+	    </table>
+	  </div>
 	</div>
 	<div class="column">
           <h4>Area Randomization</h4>
@@ -812,44 +880,46 @@ def displayNumber(id, min, max, default, step="1"):
               <td><button type="button" onclick="startTheTour(15)">?</button></td>
 	    </tr>
           </table>
-          <h4>Super Fun Times (TM)</h4>
-          <p>
-            Have fun randomly removing major items!<br/>
-            <b>Warning:</b> For experienced players only.
-          </p>
-	  <table class="full">
-	    <tr>
-	      <td colspan="2" id="randomSuperFunsStep">{{displayCheckboxRandom("randomSuperFuns", ["funCombat", "funMovement", "funSuits"])}}Randomly set the Super Fun Times parameters:</td>
-              <td><button type="button" onclick="startTheTour(16)">?</button></td>
-	    </tr>
-            <tr>
-              <td colspan="2" class="full" id="funCombatStep">{{displayCheckbox("funCombat")}}<span id="funCombatText">Super Fun Combat</span></td>
-              <td><button type="button" onclick="startTheTour(17)">?</button></td>
-            </tr>
-            <tr>
-              <td colspan="2" class="full" id="funMovementStep">{{displayCheckbox("funMovement")}}<span id="funMovementText">Super Fun Movement</span></td>
-              <td><button type="button" onclick="startTheTour(18)">?</button></td>
-            </tr>
-            <tr>
-              <td colspan="2" class="full" id="funSuitsStep">{{displayCheckbox("funSuits")}}<span id="funSuitsText">Suitless</span></td>
-              <td><button type="button" onclick="startTheTour(19)">?</button></td>
-            </tr>
-          </table>
-	  <h4>Patches</h4>
-	  <p>
-	    The bug fix <a href="https://itemrando.supermetroid.run/information">patches</a> from Total Item Randomizer are included by default.<br/>
-	  </p>
-	  <table class="full">
-	    <tr>
-	      <td class="full" id="layoutPatchesStep">{{displayCheckbox("layoutPatches", True)}} Include layout patches from Total Item Randomizer</td>
-	      <td><button type="button" onclick="startTheTour(20)">?</button></td>
-	    </tr>
-	    <tr>
-	      <td class="full" id="noGravHeatStep">{{displayCheckbox("noGravHeat", True)}} Remove Gravity Suit heat protection (by Total)</td><td><button type="button" onclick="startTheTour(21)">?</button></td>
-	    </tr>
-	  </table>
-	  </p>
-	  <table class="full" id="patchesStep">
+	  <div id="superFunVisibility">
+            <h4>Super Fun Times (TM)</h4>
+            <p>
+              Have fun randomly removing major items!<br/>
+              <b>Warning:</b> For experienced players only.
+            </p>
+	    <table class="full">
+	      <tr>
+		<td colspan="2" id="randomSuperFunsStep">{{displayCheckboxRandom("randomSuperFuns", ["funCombat", "funMovement", "funSuits"])}}Randomly set the Super Fun Times parameters:</td>
+		<td><button type="button" onclick="startTheTour(16)">?</button></td>
+	      </tr>
+              <tr>
+		<td colspan="2" class="full" id="funCombatStep">{{displayCheckbox("funCombat")}}<span id="funCombatText">Super Fun Combat</span></td>
+		<td><button type="button" onclick="startTheTour(17)">?</button></td>
+              </tr>
+              <tr>
+		<td colspan="2" class="full" id="funMovementStep">{{displayCheckbox("funMovement")}}<span id="funMovementText">Super Fun Movement</span></td>
+		<td><button type="button" onclick="startTheTour(18)">?</button></td>
+              </tr>
+              <tr>
+		<td colspan="2" class="full" id="funSuitsStep">{{displayCheckbox("funSuits")}}<span id="funSuitsText">Suitless</span></td>
+		<td><button type="button" onclick="startTheTour(19)">?</button></td>
+              </tr>
+            </table>
+	  </div>
+	  <div id="patchesVisibility">
+	    <h4>Patches</h4>
+	    <p>
+	      The bug fix <a href="https://itemrando.supermetroid.run/information">patches</a> from Total Item Randomizer are included by default.<br/>
+	    </p>
+	    <table class="full">
+	      <tr>
+		<td class="full" id="layoutPatchesStep">{{displayCheckbox("layoutPatches", True)}} Include layout patches from Total Item Randomizer</td>
+		<td><button type="button" onclick="startTheTour(20)">?</button></td>
+	      </tr>
+	      <tr>
+		<td class="full" id="noGravHeatStep">{{displayCheckbox("noGravHeat", True)}} Remove Gravity Suit heat protection (by Total)</td><td><button type="button" onclick="startTheTour(21)">?</button></td>
+	      </tr>
+	    </table>
+	    <table class="full" id="patchesStep">
 {{
 for patch in patches:
   response.write("	    <tr>", escape=False)
@@ -859,7 +929,8 @@ for patch in patches:
   response.write("	    </tr>", escape=False)
   pass
 }}
-	  </table>
+	    </table>
+	  </div>
 	</div>
       </div>
        {{=INPUT(_type="submit", _value="Randomize", _id="submitBtn", _class="btn btn-default buttonRandom")}}

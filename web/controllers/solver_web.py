@@ -603,6 +603,7 @@ def randomizer():
         session.randomizer['randomSuperFuns'] = "off"
         session.randomizer['progressionDifficulty'] = 'normal'
         session.randomizer['areaRandomization'] = "off"
+        session.randomizer['complexity'] = "simple"
 
     # put standard presets first
     stdPresets = ['noob', 'casual', 'regular', 'veteran', 'speedrunner', 'master']
@@ -694,6 +695,10 @@ def validateWebServiceParams(patchs, quantities, others, isJson=False):
         if request.vars['progressionDifficulty'] not in ['random', 'easier', 'normal', 'harder']:
             raiseHttp(400, "Wrong value for progressionDifficulty: {}, authorized values random/easier/normal/harder".format(request.vars['progressionDifficulty']), isJson)
 
+    if 'complexity' in others:
+        if request.vars['complexity'] not in ['simple', 'medium', 'advanced']:
+            raiseHttp(400, "Wrong value for complexity: {}, authorized values simple/medium/advanced".format(request.vars['complexity']), isJson)
+
 def sessionWebService():
     # web service to update the session
     patchs = ['AimAnyButton', 'itemsounds',
@@ -704,7 +709,7 @@ def sessionWebService():
               'progressionSpeed', 'spreadItems', 'fullRandomization', 'suitsRestriction',
               'speedScrewRestriction', 'funCombat', 'funMovement', 'funSuits', 'layoutPatches',
               'noGravHeat', 'randomMinors', 'randomParams', 'randomSuperFuns', 'progressionDifficulty',
-              'areaRandomization']
+              'areaRandomization', 'complexity']
     validateWebServiceParams(patchs, quantities, others)
 
     if session.randomizer is None:
@@ -734,6 +739,7 @@ def sessionWebService():
     session.randomizer['randomSuperFuns'] = request.vars.randomSuperFuns
     session.randomizer['progressionDifficulty'] = request.vars.progressionDifficulty
     session.randomizer['areaRandomization'] = request.vars.areaRandomization
+    session.randomizer['complexity'] = request.vars.complexity
 
 def randomizerWebService():
     # web service to compute a new random (returns json string)

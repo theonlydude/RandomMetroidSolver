@@ -140,11 +140,10 @@ body {
 <script type="text/javascript">
 
 function getComplexity() {
-  var radios = document.getElementsByName("complexity");
-
-  for(var i=0, length=radios.length; i<length; i++) {
-    if(radios[i].checked) {
-      return radios[i].value;
+  tablinks = document.getElementsByClassName("tablinks");
+  for (i = 0; i < tablinks.length; i++) {
+    if(tablinks[i].className.includes("active")) {
+      return tablinks[i].id;
     }
   }
 }
@@ -807,7 +806,7 @@ def displayNumber(id, min, max, default, step="1"):
   </div>
 
   <div class="main">
-    <div id="complexityRadios" class="center">
+    <div id="complexityTabs" class="center">
       <div class="tab">
         <button class="tablinks" id="simple" onclick="changeComplexity(event, 'simple');">Simple</button>
         <button class="tablinks" id="medium" onclick="changeComplexity(event, 'medium');">Medium</button>

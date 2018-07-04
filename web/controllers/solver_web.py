@@ -591,7 +591,7 @@ def randomizer():
         session.randomizer['energyQty'] = "vanilla"
         session.randomizer['progressionSpeed'] = "medium"
         session.randomizer['spreadItems'] = "on"
-        session.randomizer['fullRandomization'] = "off"
+        session.randomizer['fullRandomization'] = "on"
         session.randomizer['suitsRestriction'] = "on"
         session.randomizer['speedScrewRestriction'] = "on"
         session.randomizer['funCombat'] = "off"

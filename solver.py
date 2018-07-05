@@ -59,17 +59,15 @@ class Solver:
                 loc['distance'] = 0
 
     def loadRom(self, rom):
-        if Conf.guessRomType == True and self.type == 'console':
-            guessed = RomType.guess(rom)
-            if guessed is not None:
-                Conf.romType = guessed
+        guessed = RomType.guess(rom)
+        if guessed is not None:
+            Conf.romType = guessed
 
         # TODO::the patches are not yet loaded in the romLoader, decouplate the locations/items assigment
         # and reading the patchs/transitions info
         self.romLoader = RomLoader.factory(rom)
-        (self.fullRando, self.areaRando) = RomType.apply(Conf.romType, self.romLoader.patches)
-
         self.romLoader.assignItems(self.locations)
+        (self.fullRando, self.areaRando) = RomType.apply(Conf.romType, self.romLoader.patches)
 
         print("ROM {} Type: {}, Patches present: {}, Area Rando: {}".format(rom, Conf.romType, self.romLoader.patches, (self.areaRando == True)))
 
@@ -358,14 +356,18 @@ class Solver:
         return out
 
     def getKnowsUsed(self):
-        knows = []
+        knowsUsed = []
         for loc in self.visitedLocations:
-            knows += loc['difficulty'].knows
+            knowsUsed += loc['difficulty'].knows
 
         # get unique knows
-        knows = list(set(knows))
+        knowsUsed = len(list(set(knowsUsed)))
 
-        return knows
+        # get total of known knows
+        knowsKnown = len([knows for  knows in Knows.__dict__ if isKnows(knows) and getattr(Knows, knows)[0] == True])
+        knowsKnown += len([hellRun for hellRun in Settings.hellRuns if Settings.hellRuns[hellRun] is not None])
+
+        return (knowsUsed, knowsKnown)
 
     def printPath(self, message, locations):
         print(message)
@@ -499,13 +501,6 @@ class ParamsLoader(object):
         if 'Settings' not in self.params:
             self.params['Settings'] = {}
 
-        if 'hellRuns' not in self.params['Settings']:
-            self.params['Settings']['hellRuns'] = {}
-        if 'bossesDifficulty' not in self.params['Settings']:
-            self.params['Settings']['bossesDifficulty'] = {}
-        if 'hardRooms' not in self.params['Settings']:
-            self.params['Settings']['hardRooms'] = {}
-
     def load(self):
         # update the parameters in the parameters classes: Conf, Knows, Settings
         # Conf
@@ -520,9 +515,20 @@ class ParamsLoader(object):
                                              self.params['Knows'][param][1],
                                              ['{}'.format(param)]))
         # Settings
-        for param in self.params['Settings']:
-            if isSettings(param) and len(self.params['Settings'][param]) > 0:
-                setattr(Settings, param, self.params['Settings'][param])
+        ## hard rooms
+        for hardRoom in ['X-Ray', 'Gauntlet']:
+            if hardRoom in self.params['Settings']:
+                Settings.hardRooms[hardRoom] = Settings.hardRoomsPresets[hardRoom][self.params['Settings'][hardRoom]]
+
+        ## bosses
+        for boss in ['Kraid', 'Phantoon', 'Draygon', 'Ridley', 'MotherBrain']:
+            if boss in self.params['Settings']:
+                Settings.bossesDifficulty[boss] = Settings.bossesDifficultyPresets[boss][self.params['Settings'][boss]]
+
+        ## hellruns
+        for hellRun in ['Ice', 'MainUpperNorfair', 'LowerNorfair']:
+            if hellRun in self.params['Settings']:
+                Settings.hellRuns[hellRun] = Settings.hellRunPresets[hellRun][self.params['Settings'][hellRun]]
 
     def dump(self, fileName):
         with open(fileName, 'w') as jsonFile:
@@ -641,9 +647,9 @@ if __name__ == "__main__":
 
     #solver.solveRom()
     diff = solver.solveRom()
-    knowsUsed = solver.getKnowsUsed()
-    print("{} : diff : {}".format(diff, args.romFileName))
-    print("{} : knows Used : {}".format(len(knowsUsed), args.romFileName))
+    (knowsUsed, total) = solver.getKnowsUsed()
+    print("{}: diff : {}".format(diff, args.romFileName))
+    print("{}/{}: knows Used : {}".format(knowsUsed, total, args.romFileName))
     if diff[0] >= 0:
         sys.exit(0)
     else:

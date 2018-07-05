@@ -51,9 +51,6 @@ class Conf:
     # - Dessy : Dessyreqt randomizer seeds
     # - Vanilla : original game
     romType='Total_TX'
-    # if true, will override seed type if ROM filename follows default filename patterns
-    # from given rando
-    guessRomType=True
 
     # keep getting majors of at most this difficulty before going for minors or changing area
     difficultyTarget=medium

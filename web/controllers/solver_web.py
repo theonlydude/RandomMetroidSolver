@@ -14,6 +14,10 @@ from parameters import diff2text, text2diff
 from graph_locations import locations as graphLocations
 from solver import Solver, ParamsLoader, DifficultyDisplayer, RomLoader
 
+def maxPresetsReach():
+    # to prevent a spammer to create presets in a loop and fill the fs
+    return len(os.listdir('diff_presets')) >= 2048
+
 romTypes = OrderedDict([('VARIA Classic', 'VARIA_X'), ('VARIA Full', 'VARIA_FX'),
                         ('VARIA Area Classic', 'VARIA_AX'), ('VARIA Area Full', 'VARIA_AFX'),
                         ('Total Casual', 'Total_CX'), ('Total Normal', 'Total_X'),
@@ -63,7 +67,7 @@ def guessRomType(filename):
     # default to TX
     return "Total Tournament"
 
-def solver():
+def presets():
     # load conf from session if available
     loaded = False
     if session.paramsFile is None:
@@ -111,22 +115,205 @@ def solver():
         romFile = None
         romType = 'Total Tournament'
 
+    # load form
+    files = sorted(os.listdir('diff_presets'), key=lambda v: v.upper())
+    stdPresets = ['noob', 'casual', 'regular', 'veteran', 'speedrunner', 'master']
+    presets = [os.path.splitext(file)[0] for file in files]
+    for preset in stdPresets:
+        presets.remove(preset)
+    presets = stdPresets + presets
+
+    loadForm = FORM(TABLE(COLGROUP(COL(_class="quarter"), COL(_class="half"), COL(_class="quarter")),
+                          TR("Load preset: ",
+                             SELECT(*presets,
+                                    **dict(_name="paramsFile",
+                                           value=session.paramsFile,
+                                           _onchange="this.form.submit()",
+                                           _class="filldropdown")),
+                             INPUT(_type="submit",_value="Load", _class="full")),
+                          _class="threequarter"),
+                    _id="loadform", _name="loadform")
+
+    if loadForm.process(formname='loadform').accepted:
+        # check that the presets file exists
+        paramsFile = loadForm.vars['paramsFile']
+        fullPath = 'diff_presets/{}.json'.format(paramsFile)
+        if os.path.isfile(fullPath):
+            # load it
+            params = ParamsLoader.factory(fullPath).params
+            session.paramsFile = paramsFile
+            # params changed, no longer display the old result to avoid confusion
+            session.result = None
+            session.paramsDict = None
+            redirect(URL(r=request, f='presets'))
+        else:
+            session.flash = "Presets file not found"
+
+    # save form
+    saveTable = TABLE(COLGROUP(COL(_class="quarter"), COL(_class="half"), COL(_class="quarter")),
+                      TR("Update preset:",
+                         SELECT(*presets, **dict(_name="paramsFile",
+                                                 value=session.paramsFile,
+                                                 _class="filldropdown")),
+                         INPUT(_type="button",_value="Update", _class="full", _onclick="askPassword()")),
+                      TR("New preset:",
+                         INPUT(_type="text",
+                               _name="saveFile",
+                               requires=[IS_ALPHANUMERIC(error_message='Preset name must be alphanumeric and max 32 chars'),
+                                         IS_LENGTH(32)],
+                               _class="full"),
+                         INPUT(_type="button",_value="Create", _class="full", _onclick="askPassword()")),
+                      TR(INPUT(_type="text",
+                               _name="password", _id="password",
+                               requires=[IS_NOT_EMPTY(),
+                                         IS_ALPHANUMERIC(error_message='Password must be alphanumeric and max 32 chars'),
+                                         IS_LENGTH(32)],
+                               _style='display:none')),
+                      _class="threequarter")
+    saveForm = FORM(saveTable, _id="saveform", _name="saveform")
+
+    if saveForm.process(formname='saveform').accepted:
+        # update or creation ?
+        saveFile = saveForm.vars['saveFile']
+        if saveFile == "":
+            saveFile = saveForm.vars['paramsFile']
+
+        # check if the presets file already exists
+        password = saveForm.vars['password']
+        password = password.encode('utf-8')
+        passwordSHA256 = hashlib.sha256(password).hexdigest()
+        fullPath = 'diff_presets/{}.json'.format(saveFile)
+        if os.path.isfile(fullPath):
+            # load it
+            oldParams = ParamsLoader.factory(fullPath).params
+
+            # check if password match
+            if 'password' in oldParams and passwordSHA256 == oldParams['password']:
+                # update the presets file
+                paramsDict = generate_json_from_parameters(request.post_vars, hidden=True)
+                paramsDict['password'] = passwordSHA256
+                ParamsLoader.factory(paramsDict).dump(fullPath)
+                session.paramsFile = saveFile
+                session.flash = "Preset {} updated".format(saveFile)
+                redirect(URL(r=request, f='presets'))
+            else:
+                session.flash = "Password mismatch with existing presets file {}".format(saveFile)
+                redirect(URL(r=request, f='presets'))
+
+        else:
+            # check that there's no more than 2K presets (there's less than 2K sm rando players in the world)
+            if not maxPresetsReach():
+                # write the presets file
+                paramsDict = generate_json_from_parameters(request.post_vars, hidden=True)
+                paramsDict['password'] = passwordSHA256
+                ParamsLoader.factory(paramsDict).dump(fullPath)
+                session.paramsFile = saveFile
+                session.flash = "Preset {} created".format(saveFile)
+                redirect(URL(r=request, f='presets'))
+            else:
+                session.flash = "Sorry, there's already 2048 presets on the website, can't add more"
+                redirect(URL(r=request, f='presets'))
+
+    # conf parameters
+    conf = {}
+    if 'difficultyTarget' in params['Conf']:
+        conf["target"] = params['Conf']['difficultyTarget']
+    else:
+        conf["target"] = Conf.difficultyTarget
+    if 'majorsPickup' in params['Conf']:
+        conf["pickup"] = params['Conf']['majorsPickup']
+    else:
+        conf["pickup"] = Conf.majorsPickup
+    if 'itemsForbidden' in params['Conf']:
+        conf["itemsForbidden"] = params['Conf']['itemsForbidden']
+    else:
+        conf["itemsForbidden"] = []
+
+    resultText = None
+    difficulty = None
+    diffPercent = None
+    pathTable = None
+    knowsUsed = None
+    itemsOk = None
+    pngFileName = None
+    pngThumbFileName = None
+
+    # set title
+    response.title = 'Super Metroid Item Randomizer Solver'
+
+    # add missing knows
+    for know in Knows.__dict__:
+        if isKnows(know):
+            if know not in params['Knows'].keys():
+                params['Knows'][know] = Knows.__dict__[know]
+
+    # add missing settings
+    for boss in ['Kraid', 'Phantoon', 'Draygon', 'Ridley', 'MotherBrain']:
+        if boss not in params['Settings']:
+            params['Settings'][boss] = 'Default'
+    for hellrun in ['Ice', 'MainUpperNorfair', 'LowerNorfair']:
+        if hellrun not in params['Settings']:
+            params['Settings'][hellrun] = 'Default'
+    for hardroom in ['X-Ray', 'Gauntlet']:
+        if hardroom not in params['Settings']:
+            params['Settings'][hardroom] = 'Default'
+
+    # send values to view
+    return dict(mainForm=None, loadForm=loadForm, saveForm=saveForm,
+                desc=Knows.desc,
+                difficulties=diff2text,
+                categories=Knows.categories, settings=params['Settings'],
+                knows=params['Knows'], conf=conf, knowsUsed=knowsUsed,
+                resultText=resultText, pathTable=pathTable,
+                difficulty=difficulty, itemsOk=itemsOk, diffPercent=diffPercent,
+                easy=easy,medium=medium,hard=hard,harder=harder,hardcore=hardcore,mania=mania,
+                pngFileName=pngFileName, pngThumbFileName=pngThumbFileName)
+
+def solver():
+    if session.paramsFile is None:
+        # default preset
+        session.paramsFile = 'regular'
+
+    # filter the displayed roms to display only the ones uploaded in this session
+    if session.romFiles is None:
+        session.romFiles = []
+        roms = []
+    elif len(session.romFiles) == 0:
+        roms = []
+    else:
+        files = sorted(os.listdir('roms'))
+        bases = [os.path.splitext(file)[0] for file in files]
+        filtered = [base for base in bases if base in session.romFiles]
+        roms = [file+'.sfc' for file in filtered]
+
+    # main form
+    if session.romFile is not None:
+        romFile = session.romFile+'.sfc'
+    else:
+        romFile = None
+
+    files = sorted(os.listdir('diff_presets'), key=lambda v: v.upper())
+    stdPresets = ['noob', 'casual', 'regular', 'veteran', 'speedrunner', 'master']
+    presets = [os.path.splitext(file)[0] for file in files]
+    for preset in stdPresets:
+        presets.remove(preset)
+    presets = stdPresets + presets
+
     mainForm = FORM(TABLE(TR("Randomized Super Metroid ROM: ",
                              INPUT(_type="file", _name="uploadFile", _id="uploadFile")),
+                          TR("Preset: ",
+                             SELECT(*presets,
+                                    **dict(_name="paramsFile",
+                                           value=session.paramsFile,
+                                           _class="filldropdown"))),
                           TR("Already uploaded rom in this session: ",
                              SELECT(*roms, **dict(_name="romFile",
                                                   _id="romFile",
                                                   value=romFile,
-                                                  _class="filldropdown",
-                                                  _onchange="changeRomType()"))),
-                          TR("ROM type: ", SELECT(*romTypes.keys(),
-                                                  _name="romType",
-                                                  _id="romType",
-                                                  value=romType,
                                                   _class="filldropdown"))),
                           INPUT(_type="submit",_value="Compute difficulty"),
                           INPUT(_type="text", _name="json", _id="json", _style='display:none'),
-                    _id="mainform", _name="mainform", _onsubmit="doSubmit();")
+                    _id="mainform", _name="mainform", _onsubmit="doSubmit();"))
 
     if mainForm.process(formname='mainform').accepted:
         # new uploaded rom ?
@@ -205,128 +392,19 @@ def solver():
             if not os.path.isfile(jsonRomFileName):
                 session.flash = "Missing json rom file on the server"
             else:
-                session.result = compute_difficulty(jsonRomFileName, request.post_vars)
+                session.result = compute_difficulty(jsonRomFileName, mainForm.vars['paramsFile'], request.post_vars)
 
         redirect(URL(r=request, f='solver'))
-
-    # load form
-    files = sorted(os.listdir('diff_presets'))
-    stdPresets = ['noob', 'casual', 'regular', 'veteran', 'speedrunner', 'master']
-    presets = [os.path.splitext(file)[0] for file in files]
-    for preset in stdPresets:
-        presets.remove(preset)
-    presets = stdPresets + presets
-
-    loadForm = FORM(TABLE(COLGROUP(COL(_class="quarter"), COL(_class="half"), COL(_class="quarter")),
-                          TR("Load preset: ",
-                             SELECT(*presets,
-                                    **dict(_name="paramsFile",
-                                           value=session.paramsFile,
-                                           _onchange="this.form.submit()",
-                                           _class="filldropdown")),
-                             INPUT(_type="submit",_value="Load", _class="full")),
-                          _class="threequarter"),
-                    _id="loadform", _name="loadform")
-
-    if loadForm.process(formname='loadform').accepted:
-        # check that the presets file exists
-        paramsFile = loadForm.vars['paramsFile']
-        fullPath = 'diff_presets/{}.json'.format(paramsFile)
-        if os.path.isfile(fullPath):
-            # load it
-            params = ParamsLoader.factory(fullPath).params
-            session.paramsFile = paramsFile
-            # params changed, no longer display the old result to avoid confusion
-            session.result = None
-            session.paramsDict = None
-            redirect(URL(r=request, f='solver'))
-        else:
-            session.flash = "Presets file not found"
-
-    # save form
-    saveTable = TABLE(COLGROUP(COL(_class="quarter"), COL(_class="half"), COL(_class="quarter")),
-                      TR("Update preset:",
-                         SELECT(*presets, **dict(_name="paramsFile",
-                                                 value=session.paramsFile,
-                                                 _class="filldropdown")),
-                         INPUT(_type="button",_value="Update", _class="full", _onclick="askPassword()")),
-                      TR("New preset:",
-                         INPUT(_type="text",
-                               _name="saveFile",
-                               requires=[IS_ALPHANUMERIC(error_message='Preset name must be alphanumeric and max 32 chars'),
-                                         IS_LENGTH(32)],
-                               _class="full"),
-                         INPUT(_type="button",_value="Create", _class="full", _onclick="askPassword()")),
-                      TR(INPUT(_type="text",
-                               _name="password", _id="password",
-                               requires=[IS_NOT_EMPTY(),
-                                         IS_ALPHANUMERIC(error_message='Password must be alphanumeric and max 32 chars'),
-                                         IS_LENGTH(32)],
-                               _style='display:none')),
-                      _class="threequarter")
-    saveForm = FORM(saveTable, _id="saveform", _name="saveform")
-
-    if saveForm.process(formname='saveform').accepted:
-        # update or creation ?
-        saveFile = saveForm.vars['saveFile']
-        if saveFile == "":
-            saveFile = saveForm.vars['paramsFile']
-
-        # check if the presets file already exists
-        password = saveForm.vars['password']
-        password = password.encode('utf-8')
-        passwordSHA256 = hashlib.sha256(password).hexdigest()
-        fullPath = 'diff_presets/{}.json'.format(saveFile)
-        if os.path.isfile(fullPath):
-            # load it
-            oldParams = ParamsLoader.factory(fullPath).params
-
-            # check if password match
-            if 'password' in oldParams and passwordSHA256 == oldParams['password']:
-                # update the presets file
-                paramsDict = generate_json_from_parameters(request.post_vars, hidden=True)
-                paramsDict['password'] = passwordSHA256
-                ParamsLoader.factory(paramsDict).dump(fullPath)
-                session.paramsFile = saveFile
-                session.flash = "Preset {} updated".format(saveFile)
-                redirect(URL(r=request, f='solver'))
-            else:
-                session.flash = "Password mismatch with existing presets file {}".format(saveFile)
-                redirect(URL(r=request, f='solver'))
-
-        else:
-            # write the presets file
-            paramsDict = generate_json_from_parameters(request.post_vars, hidden=True)
-            paramsDict['password'] = passwordSHA256
-            ParamsLoader.factory(paramsDict).dump(fullPath)
-            session.paramsFile = saveFile
-            session.flash = "Preset {} created".format(saveFile)
-            redirect(URL(r=request, f='solver'))
-
-    # conf parameters
-    conf = {}
-    if 'difficultyTarget' in params['Conf']:
-        conf["target"] = params['Conf']['difficultyTarget']
-    else:
-        conf["target"] = Conf.difficultyTarget
-    if 'majorsPickup' in params['Conf']:
-        conf["pickup"] = params['Conf']['majorsPickup']
-    else:
-        conf["pickup"] = Conf.majorsPickup
-    if 'itemsForbidden' in params['Conf']:
-        conf["itemsForbidden"] = params['Conf']['itemsForbidden']
-    else:
-        conf["itemsForbidden"] = []
 
     # display result
     if session.result is not None:
         if session.result['difficulty'] == -1:
-            resultText = "The rom \"{}\" is not finishable with the known technics".format(session.result['randomizedRom'])
+            resultText = "The rom \"{}\" of type \"{}\" is not finishable with the known technics".format(session.result['randomizedRom'], session.result['romType'])
         else:
             if session.result['itemsOk'] is False:
-                resultText = "The rom \"{}\" is finishable but not all the requested items can be picked up with the known technics. Estimated difficulty is: ".format(session.result['randomizedRom'])
+                resultText = "The rom \"{}\" of type \"{}\" is finishable but not all the requested items can be picked up with the known technics. Estimated difficulty is: ".format(session.result['randomizedRom'], session.result['romType'])
             else:
-                resultText = "The rom \"{}\" estimated difficulty is: ".format(session.result['randomizedRom'])
+                resultText = "The rom \"{}\" of type \"{}\" estimated difficulty is: ".format(session.result['randomizedRom'], session.result['romType'])
 
         difficulty = session.result['difficulty']
         diffPercent = session.result['diffPercent']
@@ -366,42 +444,14 @@ def solver():
         pngThumbFileName = None
 
     # set title
-    response.title = 'Super Metroid Item Randomizer Solver'
-
-    # add missing knows
-    for know in Knows.__dict__:
-        if isKnows(know):
-            if know not in params['Knows'].keys():
-                params['Knows'][know] = Knows.__dict__[know]
-
-    # add missing settings
-    for boss in ['Kraid', 'Phantoon', 'Draygon', 'Ridley', 'MotherBrain']:
-        if boss not in params['Settings']['bossesDifficulty']:
-            params['Settings']['bossesDifficulty'][boss] = Settings.bossesDifficulty[boss]
-        if boss not in params['Settings']:
-            params['Settings'][boss] = 'Default'
-    for hellrun in ['Ice', 'MainUpperNorfair', 'LowerNorfair']:
-        if hellrun not in params['Settings']['hellRuns']:
-            params['Settings']['hellRuns'][hellrun] = Settings.hellRuns[hellrun]
-        if hellrun not in params['Settings']:
-            params['Settings'][hellrun] = 'Default'
-    for hardroom in ['X-Ray', 'Gauntlet']:
-        # the hard rooms presets is not present in the existing sessions
-        if 'hardRoomsPresets' not in params['Settings']:
-            params['Settings']['hardRoomsPresets'] = {}
-        if hardroom not in params['Settings']['hardRoomsPresets']:
-            params['Settings']['hardRoomsPresets'][hardroom] = Settings.hardRoomsPresets[hardroom]
-        if hardroom not in params['Settings']:
-            params['Settings'][hardroom] = 'Default'
-
-    dotPngFile = True
+    response.title = 'Super Metroid VARIA Solver'
 
     # send values to view
-    return dict(mainForm=mainForm, loadForm=loadForm, saveForm=saveForm,
+    return dict(mainForm=mainForm, loadForm=None, saveForm=None,
                 desc=Knows.desc,
                 difficulties=diff2text,
-                categories=Knows.categories, settings=params['Settings'],
-                knows=params['Knows'], conf=conf, knowsUsed=knowsUsed,
+                categories=Knows.categories, settings=None,
+                knows=None, conf=None, knowsUsed=knowsUsed,
                 resultText=resultText, pathTable=pathTable,
                 difficulty=difficulty, itemsOk=itemsOk, diffPercent=diffPercent,
                 easy=easy,medium=medium,hard=hard,harder=harder,hardcore=hardcore,mania=mania,
@@ -413,7 +463,7 @@ def generate_json_from_parameters(vars, hidden):
     else:
         hidden = ""
 
-    paramsDict = {'Knows': {}, 'Conf': {}, 'Settings': {'hellRuns': {}, 'bossesDifficulty': {}, 'hardRooms': {}}}
+    paramsDict = {'Knows': {}, 'Conf': {}, 'Settings': {}}
 
     # Knows
     for var in Knows.__dict__:
@@ -458,32 +508,26 @@ def generate_json_from_parameters(vars, hidden):
     for hellRun in ['Ice', 'MainUpperNorfair', 'LowerNorfair']:
         value = vars[hellRun+hidden]
         if value is not None:
-            paramsDict['Settings']['hellRuns'][hellRun] = Settings.hellRunPresets[hellRun][value]
             paramsDict['Settings'][hellRun] = value
 
     for boss in ['Kraid', 'Phantoon', 'Draygon', 'Ridley', 'MotherBrain']:
         value = vars[boss+hidden]
         if value is not None:
-            paramsDict['Settings']['bossesDifficulty'][boss] = Settings.bossesDifficultyPresets[boss][value]
             paramsDict['Settings'][boss] = value
 
     for room in ['X-Ray', 'Gauntlet']:
         value = vars[room+hidden]
         if value is not None:
-            paramsDict['Settings']['hardRooms'][room] = Settings.hardRoomsPresets[room][value]
             paramsDict['Settings'][room] = value
 
     return paramsDict
 
-def compute_difficulty(jsonRomFileName, post_vars):
+def compute_difficulty(jsonRomFileName, presetName, post_vars):
     randomizedRom = os.path.basename(jsonRomFileName.replace('json', 'sfc'))
-
-    # generate json from parameters
-    paramsDict = generate_json_from_parameters(post_vars, hidden=False)
-    session.paramsDict = paramsDict
+    presetFileName = "diff_presets/{}.json".format(presetName)
 
     # call solver
-    solver = Solver(type='web', rom=jsonRomFileName, params=[paramsDict])
+    solver = Solver(type='web', rom=jsonRomFileName, params=[presetFileName])
     (difficulty, itemsOk) = solver.solveRom()
     diffPercent = DifficultyDisplayer(difficulty).percent()
 
@@ -501,17 +545,12 @@ def compute_difficulty(jsonRomFileName, post_vars):
         pngThumbFileName = None
 
     # the different knows used during the rom
-    knowsUsed = solver.getKnowsUsed()
-    used = len(knowsUsed)
-
-    # the number of knows set to True
-    total = len([param for param in paramsDict['Knows'] if paramsDict['Knows'][param][0] is True])
-    if 'hellRuns' in paramsDict['Settings']:
-        total += len([hellRun for hellRun in paramsDict['Settings']['hellRuns'] if paramsDict['Settings']['hellRuns'][hellRun] is not None])
+    (used, total) = solver.getKnowsUsed()
+    romType = guessRomType(randomizedRom)
 
     return dict(randomizedRom=randomizedRom, difficulty=difficulty,
                 generatedPath=generatedPath, diffPercent=diffPercent,
-                knowsUsed=(used, total), itemsOk=itemsOk,
+                knowsUsed=(used, total), itemsOk=itemsOk, romType=romType,
                 pngFileName=pngFileName, pngThumbFileName=pngThumbFileName)
 
 def infos():
@@ -552,7 +591,7 @@ def randomizer():
         session.randomizer['energyQty'] = "vanilla"
         session.randomizer['progressionSpeed'] = "medium"
         session.randomizer['spreadItems'] = "on"
-        session.randomizer['fullRandomization'] = "off"
+        session.randomizer['fullRandomization'] = "on"
         session.randomizer['suitsRestriction'] = "on"
         session.randomizer['speedScrewRestriction'] = "on"
         session.randomizer['funCombat'] = "off"
@@ -564,10 +603,11 @@ def randomizer():
         session.randomizer['randomSuperFuns'] = "off"
         session.randomizer['progressionDifficulty'] = 'normal'
         session.randomizer['areaRandomization'] = "off"
+        session.randomizer['complexity'] = "simple"
 
     # put standard presets first
     stdPresets = ['noob', 'casual', 'regular', 'veteran', 'speedrunner', 'master']
-    files = sorted(os.listdir('diff_presets'))
+    files = sorted(os.listdir('diff_presets'), key=lambda v: v.upper())
     presets = [os.path.splitext(file)[0] for file in files]
     for preset in stdPresets:
         presets.remove(preset)
@@ -655,6 +695,10 @@ def validateWebServiceParams(patchs, quantities, others, isJson=False):
         if request.vars['progressionDifficulty'] not in ['random', 'easier', 'normal', 'harder']:
             raiseHttp(400, "Wrong value for progressionDifficulty: {}, authorized values random/easier/normal/harder".format(request.vars['progressionDifficulty']), isJson)
 
+    if 'complexity' in others:
+        if request.vars['complexity'] not in ['simple', 'medium', 'advanced']:
+            raiseHttp(400, "Wrong value for complexity: {}, authorized values simple/medium/advanced".format(request.vars['complexity']), isJson)
+
 def sessionWebService():
     # web service to update the session
     patchs = ['AimAnyButton', 'itemsounds',
@@ -665,7 +709,7 @@ def sessionWebService():
               'progressionSpeed', 'spreadItems', 'fullRandomization', 'suitsRestriction',
               'speedScrewRestriction', 'funCombat', 'funMovement', 'funSuits', 'layoutPatches',
               'noGravHeat', 'randomMinors', 'randomParams', 'randomSuperFuns', 'progressionDifficulty',
-              'areaRandomization']
+              'areaRandomization', 'complexity']
     validateWebServiceParams(patchs, quantities, others)
 
     if session.randomizer is None:
@@ -695,6 +739,7 @@ def sessionWebService():
     session.randomizer['randomSuperFuns'] = request.vars.randomSuperFuns
     session.randomizer['progressionDifficulty'] = request.vars.progressionDifficulty
     session.randomizer['areaRandomization'] = request.vars.areaRandomization
+    session.randomizer['complexity'] = request.vars.complexity
 
 def randomizerWebService():
     # web service to compute a new random (returns json string)

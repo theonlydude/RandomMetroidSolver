@@ -1,0 +1,53 @@
+.br-theme-bars-1to10 .br-widget {
+  height: 50px;
+  white-space: nowrap;
+}
+.br-theme-bars-1to10 .br-widget a {
+  display: block;
+  width: 12px;
+  padding: 5px 0;
+  height: 28px;
+  float: left;
+  background-color: #c4c1c0;
+  margin: 1px;
+  text-align: center;
+}
+.br-theme-bars-1to10 .br-widget a.br-active,
+.br-theme-bars-1to10 .br-widget a.br-selected {
+  background-color: #42403f;
+}
+.br-theme-bars-1to10 .br-widget .br-current-rating {
+  line-height: 2;
+  float: left;
+  padding: 0 20px 0 20px;
+  color: #42403f;
+  font-weight: 400;
+}
+.br-theme-bars-1to10 .br-readonly a {
+  cursor: default;
+}
+.br-theme-bars-1to10 .br-readonly a.br-active,
+.br-theme-bars-1to10 .br-readonly a.br-selected {
+  background-color: #7f7b79;
+}
+.br-theme-bars-1to10 .br-readonly .br-current-rating {
+  color: #7f7b79;
+}
+@media print {
+  .br-theme-bars-1to10 .br-widget a {
+    border: 1px solid #b3b3b3;
+    background: white;
+    height: 38px;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+  }
+  .br-theme-bars-1to10 .br-widget a.br-active,
+  .br-theme-bars-1to10 .br-widget a.br-selected {
+    border: 1px solid black;
+    background: white;
+  }
+  .br-theme-bars-1to10 .br-widget .br-current-rating {
+    color: black;
+  }
+}

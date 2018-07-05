@@ -20,6 +20,21 @@ extend 'layout.html'
 }
 </style>
 
+<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css">
+<link rel="stylesheet" href="{{=URL('static','barrating/themes/bars-1to10.css')}}">
+
+<script src="{{=URL('static','barrating/jquery.barrating.min.js')}}"></script>
+<script type="text/javascript">
+{{
+  for category in categories:
+    for know in category['knows']:
+      response.write("$(function() { " + "$('#{}_diff')".format(know) + ".barrating('show', {theme: 'bars-1to10'}); });\n", escape=False)
+      pass
+    pass
+  pass
+}}
+</script>
+
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 <script type="text/javascript">
 function askPassword() {
@@ -44,13 +59,9 @@ function toggleSelect(elem)
   var isChecked = document.getElementById(boolElem).checked;
   document.getElementById(diffElem).disabled = !isChecked;
   document.getElementById(boolElemHidden).checked = isChecked;
-}
-function toggleOnlySelect(elem)
-{
-  var boolElem = elem + "_bool";
-  var boolElemHidden = boolElem + "_hidden";
-  var isChecked = document.getElementById(boolElem).checked;
-  document.getElementById(boolElemHidden).checked = isChecked;
+
+  // change the readonly status in bar rating too
+  $("#"+elem+"_diff").barrating('readonly', !isChecked);
 }
 function changeHiddenSelect(diffElem)
 {
@@ -58,6 +69,19 @@ function changeHiddenSelect(diffElem)
 
   document.getElementById(diffElemHidden).value = document.getElementById(diffElem).value;
   document.getElementById(diffElemHidden).selectedIndex = document.getElementById(diffElem).selectedIndex;
+}
+
+window.onload = function(){
+{{
+  for category in categories:
+    for know in category['knows']:
+      if knows[know][0] is False or ('readonly' in desc[know] and desc[know]['readonly'] == True):
+        response.write("$('#{}_diff').barrating('readonly', true);\n".format(know), escape=False)
+        pass
+      pass
+    pass
+  pass
+}}
 }
 
 function startTheTour(step=-1) {

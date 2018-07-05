@@ -421,10 +421,12 @@ class Helpers(object):
 
     def adjustHealthDropDiff(self, difficulty):
         dmgRed = self.getDmgReduction(envDmg=False)
+        # 2 is Varia suit, considered standard eqt for boss fights
+        # there's certainly a smarter way to do this but...
         if dmgRed < 2:
             difficulty *= Settings.algoSettings['dmgReductionDifficultyFactor']
         elif dmgRed > 2:
-            difficulty *= Settings.algoSettings['dmgReductionDifficultyFactor']
+            difficulty /= Settings.algoSettings['dmgReductionDifficultyFactor']
         return difficulty
 
     def enoughStuffsDraygon(self):

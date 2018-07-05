@@ -153,6 +153,15 @@ class HelpersGraph(Helpers):
                                      sm.knowsLavaDiveNoHiJump()),
                               sm.energyReserveCountOk(nTanks4Dive)))
 
+    def canPassLowerNorfairChozo(self):
+        sm = self.smbm
+        return sm.wand(sm.canHellRun('LowerNorfair', 1.5), # 1.5 to require one more CF if no heat protection because of distance to cover, wait times, acid...
+                       sm.canUsePowerBombs(),
+                       sm.haveItem('Super'), # you'll have to exit screw attack area at some point
+                       sm.wor(sm.haveItem('SpaceJump'),
+                              RomPatches.has(RomPatches.LNChozoSJCheckDisabled)))
+
+
     def canPassWorstRoom(self):
         sm = self.smbm
         return sm.wand(sm.canDestroyBombWalls(),

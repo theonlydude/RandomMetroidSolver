@@ -113,6 +113,9 @@ if __name__ == "__main__":
     parser.add_argument('--nogravheat',
                         help="do not include total randomizer suits patches",
                         dest='noGravHeat', action='store_true', default=False)
+    parser.add_argument('--novariatweaks',
+                        help="do not include VARIA randomizer tweaks",
+                        dest='noVariaTweaks', action='store_true', default=False)
 
     # parse args
     args = parser.parse_args()
@@ -203,6 +206,8 @@ if __name__ == "__main__":
         RomPatches.ActivePatches = RomPatches.Total
     if args.noGravHeat == True:
         RomPatches.ActivePatches.remove(RomPatches.NoGravityEnvProtection)
+    if args.noVariaTweaks == False:
+        RomPatches.ActivePatches += RomPatches.VariaTweaks
     missileQty = float(args.missileQty)
     superQty = float(args.superQty)
     powerBombQty = float(args.powerBombQty)

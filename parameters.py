@@ -255,13 +255,13 @@ class Knows:
     ReverseGateGlitch = SMBool(True, medium, ['ReverseGateGlitch'])
     desc['ReverseGateGlitch'] = {'display': 'Reverse Gate Glitch',
                                  'title': 'Open wave gate in Pink Brinstar from bottom left corner with Hi-Jump',
-                                 'href': 'https://www.youtube.com/watch?v=cykJDBBSBrc',
+                                 'href': 'https://wiki.supermetroid.run/Pink_Brinstar_Hopper_Room',
                                  'rooms': ['Pink Brinstar Hopper Room']}
 
     ReverseGateGlitchHiJumpLess = SMBool(False, 0, ['ReverseGateGlitchHiJumpLess'])
     desc['ReverseGateGlitchHiJumpLess'] = {'display': 'Reverse Gate Glitch w/o Hi-Jump',
                                            'title': 'Open wave gate in Pink Brinstar from bottom left corner without Hi-Jump',
-                                           'href': None,
+                                           'href': 'https://wiki.supermetroid.run/Pink_Brinstar_Hopper_Room',
                                            'rooms': ['Pink Brinstar Hopper Room']}
 
     EarlyKraid = SMBool(True, easy, ['EarlyKraid'])
@@ -281,6 +281,12 @@ class Knows:
                              'title': 'Climb Red Tower without Ice or Space-Jump',
                              'href': 'https://www.youtube.com/watch?v=g3goe6PZ4o0',
                              'rooms': ['Red Tower']}
+
+    RonPopeilScrew = SMBool(False, 0, ['RonPopeilScrew'])
+    desc['RonPopeilScrew'] = {'display': 'Bomb-less Ron Popeil Missiles',
+                              'title': 'Access the most behind missile in Green Brinstar Reserve with Morph and Screw Attack',
+                              'href': 'https://wiki.supermetroid.run/Brinstar_Reserve_Tank_Room',
+                              'rooms': ['Brinstar Reserve Tank Room']}
 
     Moondance = SMBool(False, mania, ['Moondance'])
     desc['Moondance'] = {'display': 'Moondance',
@@ -311,7 +317,7 @@ class Knows:
     LavaDiveNoHiJump = SMBool(False, 0, ['LavaDiveNoHiJump'])
     desc['LavaDiveNoHiJump'] = {'display': 'Hi-Jump less Lava Dive',
                                 'title': 'Enter Lower Norfair with just the Varia suit',
-                                'href': 'https://www.youtube.com/watch?v=pdyBy_54dB0',
+                                'href': 'https://www.youtube.com/watch?v=qmlSDfw8FXQ',
                                 'rooms': ['Lava Dive Room']}
 
     WorstRoomIceCharge = SMBool(True, mania, ['WorstRoomIceCharge'])
@@ -435,7 +441,7 @@ class Knows:
                   {'knows': ['SuitlessOuterMaridia', 'GravLessLevel2', 'SuitlessSandpit'],
                    'title': 'Underwater movement without Gravity Suit'},
                   {'knows': ['CeilingDBoost', 'AlcatrazEscape', 'ReverseGateGlitch',
-                             'ReverseGateGlitchHiJumpLess', 'EarlyKraid', 'XrayDboost', 'RedTowerClimb', 'Moondance'],
+                             'ReverseGateGlitchHiJumpLess', 'EarlyKraid', 'XrayDboost', 'RedTowerClimb', 'RonPopeilScrew', 'Moondance'],
                    'title': 'Brinstar'},
                   {'knows': ['HiJumpLessGauntletAccess', 'HiJumpGauntletAccess'],
                    'title': 'Gauntlet'},

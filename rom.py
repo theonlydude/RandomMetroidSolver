@@ -23,7 +23,7 @@ class RomPatches:
     RedTowerBlueDoors         = 22
     # shot block in crumble blocks at early supers
     EarlySupersShotBlock      = 23
-    # shot block to exit hu jump area
+    # shot block to exit hi jump area
     HiJumpShotBlock           = 30
     # access main upper norfair without anything
     CathedralEntranceWallJump = 31
@@ -40,6 +40,10 @@ class RomPatches:
     ### Other
     # Gravity no longer protects from environmental damage (heat, spikes...)
     NoGravityEnvProtection  = 1000
+    # Wrecked Ship etank accessible when Phantoo is alive
+    WsEtankPhantoonAlive    = 1001
+    # Lower Norfair chozo (vanilla access to GT/Screw Area) : disable space jump check
+    LNChozoSJCheckDisabled  = 1002
 
     #### Patch sets
     # total randomizer
@@ -53,6 +57,9 @@ class RomPatches:
 
     # area rando patch set
     AreaSet = [ SingleChamberNoCrumble, AreaRandoGates, AreaRandoBlueDoors ]
+
+    # VARIA specific patch set
+    VariaTweaks = [ WsEtankPhantoonAlive, LNChozoSJCheckDisabled ]
     
     # dessyreqt randomizer
     Dessy = []
@@ -113,6 +120,8 @@ class RomType:
                 print("RomType::apply: Gravity heat protection")
                 if RomPatches.NoGravityEnvProtection in RomPatches.ActivePatches:
                     RomPatches.ActivePatches.remove(RomPatches.NoGravityEnvProtection)
+            if patches['variaTweaks'] == True:
+                RomPatches.ActivePatches += RomPatches.VariaTweaks
             if romType.startswith('VARIA_A'):
                 RomPatches.ActivePatches += RomPatches.AreaSet
         elif romType == 'Dessy':
@@ -195,7 +204,8 @@ class RomReader:
 
     patches = {
         'layoutPresent': {'address': 0x21BD80, 'value': 0xD5},
-        'gravityNoHeatProtectionPresent': {'address': 0x06e37d, 'value': 0x01}
+        'gravityNoHeatProtectionPresent': {'address': 0x06e37d, 'value': 0x01},
+        'variaTweaks': {'address': 0x7CC4D, 'value': 0x37}
     }
 
     def getItem(self, romFile, address, visibility):
@@ -383,7 +393,8 @@ class RomPatcher:
                      'Fix_heat_damage_speed_echoes_bug', 'Disable_GT_Code',
                      'Disable_Space_Time_select_in_menu', 'Fix_Morph_Ball_Hidden_Chozo_PLMs',
                      'Fix_Screw_Attack_selection_in_menu',
-                     'Removes_Gravity_Suit_heat_protection'],
+                     'Removes_Gravity_Suit_heat_protection',
+                     'ws_etank.ips', 'ln_chozo_sj_check_disable.ips'],
         'Layout': ['dachora.ips', 'early_super_bridge.ips', 'high_jump.ips', 'moat.ips',
                    'nova_boost_platform.ips', 'red_tower.ips', 'spazer.ips'],
         'Optional': ['AimAnyButton.ips', 'itemsounds.ips', 'max_ammo_display.ips',
@@ -890,7 +901,8 @@ class RomLoader(object):
     def __init__(self):
         self.patches = {
             'layoutPresent': True,
-            'gravityNoHeatProtectionPresent': True
+            'gravityNoHeatProtectionPresent': True,
+            'variaTweaks': True
         }
 
     def assignItems(self, locations):

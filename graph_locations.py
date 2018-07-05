@@ -387,9 +387,8 @@ locations = [
         'Lava Dive Right': lambda sm: sm.canPassLavaPit(),
         'Three Muskateers Room Left': lambda sm: sm.canPassAmphitheaterReverse()
     },
-    'Available': lambda sm: sm.wand(sm.canHellRun('LowerNorfair'),
-                                    sm.wor(sm.haveItem('SpaceJump'),
-                                           sm.wand(sm.haveItem('Super'), sm.knowsGreenGateGlitch())),
+    'Available': lambda sm: sm.wand(sm.wor(sm.canPassLowerNorfairChozo(),
+                                           sm.wand(sm.canHellRun('LowerNorfair'), sm.haveItem('Super'), sm.knowsGreenGateGlitch())),
                                     sm.canDestroyBombWalls()),
     'PostAvailable': lambda sm: sm.canExitScrewAttackArea()
 },
@@ -440,7 +439,8 @@ locations = [
         'West Ocean Left': lambda sm: sm.wand(sm.canOpenGreenDoors(), sm.canPassSpongeBath()),
         'Crab Maze Left': lambda sm: sm.canPassForgottenHighway(False)
     },
-    'Available': lambda sm: sm.setSMBool(Bosses.bossDead('Phantoon').bool)
+    'Available': lambda sm: sm.wor(Bosses.bossDead('Phantoon'),
+                                   RomPatches.has(RomPatches.WsEtankPhantoonAlive))
 },
 {
     'Area': "WreckedShip",
@@ -861,10 +861,13 @@ locations = [
     'AccessFrom' : {
         'Green Brinstar Elevator Right': lambda sm: sm.setSMBool(True)
     },
-    'Available': lambda sm: sm.wand(sm.canPassBombPassages(),
+    'Available': lambda sm: sm.wand(sm.haveItem('Morph'),
+                                    sm.wor(sm.knowsMockball(),
+                                           sm.haveItem('SpeedBooster')),
                                     sm.canOpenRedDoors(),
-                                    sm.wor(sm.wand(sm.haveItem('Morph'), sm.knowsMockball()),
-                                           sm.haveItem('SpeedBooster')))
+                                    sm.wor(sm.canPassBombPassages(),
+                                           sm.wand(sm.knowsRonPopeilScrew(),
+                                                   sm.haveItem('ScrewAttack'))))
 },
 {
     'Area': "Brinstar",
@@ -1292,8 +1295,9 @@ locations = [
         'Lava Dive Right': lambda sm: sm.canPassLavaPit(),
         'Three Muskateers Room Left': lambda sm: sm.canPassAmphitheaterReverse()
     },
-    'Available': lambda sm: sm.wand(sm.canHellRun('LowerNorfair'),
-                                    sm.haveItem('SpaceJump')),
+    'Available': lambda sm: sm.wand(sm.canPassLowerNorfairChozo(),
+                                    sm.wor(sm.haveItem('SpaceJump'),
+                                           sm.haveItem('SpringBall'))), # for the crumble blocks
     'PostAvailable': lambda sm: sm.canExitScrewAttackArea()
 },
 {
@@ -1309,9 +1313,8 @@ locations = [
         'Lava Dive Right': lambda sm: sm.canPassLavaPit(),
         'Three Muskateers Room Left': lambda sm: sm.canPassAmphitheaterReverse()
     },
-    'Available': lambda sm: sm.wand(sm.canHellRun('LowerNorfair'),
-                                    sm.wor(sm.haveItem('SpaceJump'),
-                                           sm.wand(sm.haveItem('Super'), sm.knowsGreenGateGlitch()))),
+    'Available': lambda sm: sm.wor(sm.canPassLowerNorfairChozo(),
+                                   sm.wand(sm.canHellRun('LowerNorfair'), sm.haveItem('Super'), sm.knowsGreenGateGlitch())),
     'PostAvailable': lambda sm: sm.canExitScrewAttackArea()
 },
 {

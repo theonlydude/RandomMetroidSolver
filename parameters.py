@@ -795,10 +795,17 @@ class Settings:
         # boss fight difficulty will be linearly increased between this value
         # and 1
         'ammoMarginIfNoCharge' : 1.5,
-        # divide the difficulty by this amount if charge or screw attack
-        'phantoonFlamesAvoidBonus' : 1.2,
+        # divide the difficulty by this amount if charge
+        'phantoonFlamesAvoidBonusCharge' : 1.2,
+        # divide the difficulty by this amount if screw
+        'phantoonFlamesAvoidBonusScrew' : 1.5,
         # multiply the difficulty by this amount if no charge and few missiles
         'phantoonLowMissileMalus' : 1.2,
         # multiply the difficulty by this amount if you have to fight with water physics
-        'draygonNoGravityMalus' : 2.0
+        'draygonNoGravityMalus' : 2.0,
+        # dmg reduction factor for bosses giving drops.
+        # Varia (2) is considered "standard" dmg reduction.
+        # this is to take into account the impact of health drops
+        # relative to how hard the boss hits
+        'dmgReductionDifficultyFactor' : 1.5
     }

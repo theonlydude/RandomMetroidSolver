@@ -419,6 +419,14 @@ class Helpers(object):
         self.smbm.curSMBool.bool = True
         return self.smbm.getSMBoolCopy()
 
+    def adjustHealthDropDiff(self, difficulty):
+        dmgRed = self.getDmgReduction(envDmg=False)
+        if dmgRed < 2:
+            difficulty *= Settings.algoSettings['dmgReductionDifficultyFactor']
+        elif dmgRed > 2:
+            difficulty *= Settings.algoSettings['dmgReductionDifficultyFactor']
+        return difficulty
+
     def enoughStuffsDraygon(self):
         sm = self.smbm
         (ammoMargin, secs) = self.canInflictEnoughDamages(6000)
@@ -432,6 +440,7 @@ class Helpers(object):
                 fight = SMBool(True, diff)
             if sm.getBool(sm.haveItem('Gravity')) == False:
                 fight.difficulty *= Settings.algoSettings['draygonNoGravityMalus']
+            fight.difficulty = self.adjustHealthDropDiff(fight.difficulty)
         else:
             fight = SMBool(False)
         return sm.wor(fight,
@@ -456,10 +465,14 @@ class Helpers(object):
         if difficulty < 0:
             return SMBool(False)
         hasCharge = sm.getBool(sm.haveItem('Charge'))
-        if hasCharge or sm.getBool(sm.haveItem('ScrewAttack')) == True:
-            difficulty /= Settings.algoSettings['phantoonFlamesAvoidBonus']
+        hasScrew = sm.getBool(sm.haveItem('ScrewAttack'))
+        if hasScrew:
+            difficulty /= Settings.algoSettings['phantoonFlamesAvoidBonusScrew']
+        elif hasCharge:
+            difficulty /= Settings.algoSettings['phantoonFlamesAvoidBonusCharge']
         elif not hasCharge and sm.itemCount('Missile') <= 2: # few missiles is harder
             difficulty *= Settings.algoSettings['phantoonLowMissileMalus']
+        difficulty = self.adjustHealthDropDiff(difficulty)
         fight = SMBool(True, difficulty)
 
         return sm.wor(fight,

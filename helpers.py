@@ -91,8 +91,11 @@ class Helpers(object):
             isHeatProof.difficulty = easy
             return isHeatProof
         elif self.energyReserveCount() >= 2:
-            return sm.wand(self.energyReserveCountOkHellRun(hellRun, mult),
-                           sm.wor(self.canCrystalFlash(int(math.ceil(2/mult))), SMBool(hellRun != 'LowerNorfair')))
+            if hellRun != 'LowerNorfair':
+                return self.energyReserveCountOkHellRun(hellRun, mult)
+            else:
+                return sm.wand(self.energyReserveCountOkHellRun(hellRun, mult),
+                               self.canCrystalFlash(int(math.ceil(2/mult))))
         else:
             return SMBool(False)
 

@@ -22,18 +22,7 @@ extend 'layout.html'
 
 <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css">
 <link rel="stylesheet" href="{{=URL('static','barrating/themes/bars-1to10.css')}}">
-
 <script src="{{=URL('static','barrating/jquery.barrating.min.js')}}"></script>
-<script type="text/javascript">
-{{
-  for category in categories:
-    for know in category['knows']:
-      response.write("$(function() { " + "$('#{}_diff')".format(know) + ".barrating('show', {theme: 'bars-1to10'}); });\n", escape=False)
-      pass
-    pass
-  pass
-}}
-</script>
 
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 <script type="text/javascript">
@@ -75,8 +64,15 @@ window.onload = function(){
 {{
   for category in categories:
     for know in category['knows']:
+      response.write("$(function() { " + "$('#{}_diff')".format(know) + ".barrating('show', {theme: 'bars-1to10'}); });\n", escape=False)
+      pass
+    pass
+  pass
+
+for category in categories:
+    for know in category['knows']:
       if knows[know][0] is False or ('readonly' in desc[know] and desc[know]['readonly'] == True):
-        response.write("$('#{}_diff').barrating('readonly', true);\n".format(know), escape=False)
+        response.write("  $(function() { " + "$('#{}_diff').barrating('readonly', true);".format(know) + "});\n", escape=False)
         pass
       pass
     pass

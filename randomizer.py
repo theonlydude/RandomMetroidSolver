@@ -305,6 +305,7 @@ if __name__ == "__main__":
             with open(fileName, 'w') as jsonFile:
                 if args.area == True:
                     locsItems['transitions'] = randomizer.transitions
+                # TODO: add patches
                 json.dump(locsItems, jsonFile)
         if romPatcher is not None:
             romPatcher.writeItemsLocs(itemLocs)

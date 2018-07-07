@@ -562,7 +562,6 @@ def infos():
 patches = [
     ('skip_intro', "Skip text intro (start at Ceres Station) (by Smiley)", False),
     ('skip_ceres', "Skip text intro and Ceres station (start at Landing Site) (by Total)", True),
-    ('AimAnyButton', "Allows the aim buttons to be assigned to any button (by Kejardon)", True),
     ('itemsounds', "Remove fanfare when picking up an item (by Scyzer)", True),
     ('spinjumprestart', "Allows Samus to start spinning in mid air after jumping or falling (by Kejardon)", False),
     ('elevators_doors_speed', 'Accelerate doors and elevators transitions (by Rakki & Lioran)', True),
@@ -701,7 +700,7 @@ def validateWebServiceParams(patchs, quantities, others, isJson=False):
 
 def sessionWebService():
     # web service to update the session
-    patchs = ['AimAnyButton', 'itemsounds',
+    patchs = ['itemsounds',
               'spinjumprestart', 'supermetroid_msu1', 'max_ammo_display', 'elevators_doors_speed',
               'skip_intro', 'skip_ceres', 'animals']
     quantities = ['missileQty', 'superQty', 'powerBombQty']
@@ -749,9 +748,9 @@ def randomizerWebService():
     response.headers['Access-Control-Allow-Origin'] = '*'
 
     # check validity of all parameters
-    patchs = ['AimAnyButton', 'itemsounds',
-              'spinjumprestart', 'supermetroid_msu1', 'max_ammo_display', 'elevators_doors_speed',
-              'skip_intro', 'skip_ceres']
+    patchs = ['itemsounds', 'spinjumprestart', 'supermetroid_msu1',
+              'max_ammo_display', 'elevators_doors_speed', 'skip_intro',
+              'skip_ceres']
     quantities = ['missileQty', 'superQty', 'powerBombQty']
     others = ['seed', 'paramsFile', 'paramsFileTarget', 'minorQty', 'energyQty',
               'maxDifficulty', 'progressionSpeed', 'spreadItems', 'fullRandomization',
@@ -789,6 +788,10 @@ def randomizerWebService():
                    '--powerBombQty', request.vars.powerBombQty,
                    '--minorQty', request.vars.minorQty,
                    '--energyQty', request.vars.energyQty]
+
+    # always set AimAnyButton
+    params.append('-c')
+    params.append('AimAnyButton.ips')
 
     for patch in patches:
         if request.vars[patch[0]] == 'on':

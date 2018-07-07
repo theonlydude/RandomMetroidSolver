@@ -116,6 +116,9 @@ if __name__ == "__main__":
     parser.add_argument('--novariatweaks',
                         help="do not include VARIA randomizer tweaks",
                         dest='noVariaTweaks', action='store_true', default=False)
+    parser.add_argument('--controls',
+                        help="specify controls, comma-separated, in that order: Shot,Jump,Dash,ItemSelect,ItemCancel,AngleUp,AngleDown. Possible values: A,B,X,Y,L,R,Select,None",
+                        dest='controls')
 
     # parse args
     args = parser.parse_args()
@@ -234,6 +237,22 @@ if __name__ == "__main__":
         addFun('Suits')
         addFun('Combat')
         addFun('Movement')
+    ctrlDict = None
+    if args.controls:
+        ctrlList = args.controls.split(',')
+        if len(ctrlList) != 7:
+            raise ValueError("Invalid control list size")
+        ctrlKeys = ["Shot", "Jump", "Dash", "ItemSelect", "ItemCancel", "AngleUp", "AngleDown"]
+        ctrlDict = {}
+        i = 0
+        for k in ctrlKeys:
+            b = ctrlList[i]
+            if b in RomPatcher.buttons:
+                ctrlDict[k] = b
+                i += 1
+            else:
+                raise ValueError("Invalid button name : " + str(b))
+
     # print("qty = " + str(qty))
     # print("restrictions = " + str(restrictions))
     # print("superFun = " + str(args.superFun))
@@ -262,30 +281,27 @@ if __name__ == "__main__":
         for loc in locsItems:
             print('{:>50}: {:>16} '.format(loc, locsItems[loc]))
 
+#    try:
+    romPatcher = None
+    webService = False
     if args.rom is not None:
         # patch local rom
         romFileName = args.rom
         fileName += '.sfc'
-
-        try:
-            shutil.copyfile(romFileName, fileName)
-
-            romPatcher = RomPatcher(fileName)
-            romPatcher.writeItemsLocs(itemLocs)
-            romPatcher.applyIPSPatches(args.patches, args.noLayout, args.noGravHeat, args.area)
-            romPatcher.writeSeed(seed)
-            romPatcher.writeSpoiler(itemLocs)
-            romPatcher.writeRandoSettings(randoSettings)
-            if args.area == True:
-                romPatcher.writeDoorConnections(doors)
-            romPatcher.writeTransitionsCredits(randomizer.areaGraph.getCreditsTransitions())
-            romPatcher.end()
-        except Exception as e:
-            print("Error patching {}. Is {} a valid ROM ? ({})".format(fileName, romFileName, e))
-            sys.exit(-1)
+        shutil.copyfile(romFileName, fileName)
+        romPatcher = RomPatcher(fileName)
     elif args.output is not None:
         # web service
         romPatcher = RomPatcher()
+        webService = True
+    else:
+        # rom json
+        fileName += '.json'
+        with open(fileName, 'w') as jsonFile:
+            if args.area == True:
+                locsItems['transitions'] = randomizer.transitions
+            json.dump(locsItems, jsonFile)
+    if romPatcher is not None:
         romPatcher.writeItemsLocs(itemLocs)
         romPatcher.applyIPSPatches(args.patches, args.noLayout, args.noGravHeat, args.area)
         romPatcher.writeSeed(seed)
@@ -294,19 +310,17 @@ if __name__ == "__main__":
         if args.area == True:
             romPatcher.writeDoorConnections(doors)
         romPatcher.writeTransitionsCredits(randomizer.areaGraph.getCreditsTransitions())
-
+        if ctrlDict is not None:
+            romPatcher.writeControls(ctrlDict)
+        romPatcher.end()
+    if webService == True:
         data = romPatcher.romFile.data
         fileName += '.sfc'
         data["fileName"] = fileName
-
         with open(args.output, 'w') as jsonFile:
             json.dump(data, jsonFile)
-    else:
-        # rom json
-        fileName += '.json'
-        with open(fileName, 'w') as jsonFile:
-            if args.area == True:
-                locsItems['transitions'] = randomizer.transitions
-            json.dump(locsItems, jsonFile)
+    # except Exception as e:
+    #     print("Error patching {}. Is {} a valid ROM ? ({}: {})".format(fileName, romFileName, type(e).__name__, e))
+    #     sys.exit(-1)
 
     print("Rom generated: {}".format(fileName))

@@ -797,44 +797,41 @@ class RomPatcher:
             self.romFile.write(struct.pack('B', conn['distanceToSpawn'] & 0x00FF))
             self.romFile.write(struct.pack('B', (conn['distanceToSpawn'] & 0xFF00) >> 8))
 
-            # write door asm ptr
-            if 'SamusX' not in conn and 'song' not in conn:
-                # compatible transition and song
-                self.romFile.write(struct.pack('B', conn['doorAsmPtr'] & 0x00FF))
-                self.romFile.write(struct.pack('B', (conn['doorAsmPtr'] & 0xFF00) >> 8))
+            # write door asm
+            asmPatch = []
+            # call original door asm ptr if needed
+            if conn['doorAsmPtr'] != 0x0000:
+                # endian convert
+                (D0, D1) = (conn['doorAsmPtr'] & 0x00FF, (conn['doorAsmPtr'] & 0xFF00) >> 8)
+                asmPatch += [ 0x20, D0, D1 ]        # JSR $doorAsmPtr
+            # incompatible transition
+            if 'SamusX' in conn:
+                # endian convert
+                (X0, X1) = (conn['SamusX'] & 0x00FF, (conn['SamusX'] & 0xFF00) >> 8)
+                (Y0, Y1) = (conn['SamusY'] & 0x00FF, (conn['SamusY'] & 0xFF00) >> 8)
+                # force samus position
+                asmPatch += [ 0x20, 0x00, 0xEA ]    # JSR cancel_movement ; see area_rando_door_transition.asm
+                asmPatch += [ 0xA9, X0,   X1   ]    # LDA #$SamusX        ; fixed Samus X position
+                asmPatch += [ 0x8D, 0xF6, 0x0A ]    # STA $0AF6           ; update Samus X position in memory
+                asmPatch += [ 0xA9, Y0,   Y1   ]    # LDA #$SamusY        ; fixed Samus Y position
+                asmPatch += [ 0x8D, 0xFA, 0x0A ]    # STA $0AFA           ; update Samus Y position in memory
             else:
-                # we have to write door ASM
-                asmPatch = []
-                # call original door asm ptr if needed
-                if conn['doorAsmPtr'] != 0x0000:
-                    # endian convert
-                    (D0, D1) = (conn['doorAsmPtr'] & 0x00FF, (conn['doorAsmPtr'] & 0xFF00) >> 8)
-                    asmPatch += [ 0x20, D0, D1 ]        # JSR $doorAsmPtr
-                # incompatible transition
-                if 'SamusX' in conn:
-                    # endian convert
-                    (X0, X1) = (conn['SamusX'] & 0x00FF, (conn['SamusX'] & 0xFF00) >> 8)
-                    (Y0, Y1) = (conn['SamusY'] & 0x00FF, (conn['SamusY'] & 0xFF00) >> 8)
-                    # force samus position
-                    asmPatch += [ 0x20, 0x00, 0xEA ]    # JSR cancel_movement ; see area_rando_door_transition.asm
-                    asmPatch += [ 0xA9, X0,   X1   ]    # LDA #$SamusX        ; fixed Samus X position
-                    asmPatch += [ 0x8D, 0xF6, 0x0A ]    # STA $0AF6           ; update Samus X position in memory
-                    asmPatch += [ 0xA9, Y0,   Y1   ]    # LDA #$SamusY        ; fixed Samus Y position
-                    asmPatch += [ 0x8D, 0xFA, 0x0A ]    # STA $0AFA           ; update Samus Y position in memory
-                # change song if needed
-                if 'song' in conn:
-                    asmPatch += [ 0xA9, conn['song'], 0xFF ]       # LDA #$song       ; A is argument for change_song
-                    asmPatch += [ 0x20, 0x3D,         0XEA ]       # JSR change_song  ; see area_rando_door_transition.asm
-                # return
-                asmPatch += [ 0x60 ]   # RTS
-                self.romFile.write(struct.pack('B', self.asmAddress & 0x00FF))
-                self.romFile.write(struct.pack('B', (self.asmAddress & 0xFF00) >> 8))
+                # still give I-frames
+                asmPatch += [ 0x20, 0x36, 0xEA ]    # JSR .end_cancel     ; see area_rando_door_transition.asm
+            # change song if needed
+            if 'song' in conn:
+                asmPatch += [ 0xA9, conn['song'], 0xFF ]       # LDA #$song       ; A is argument for change_song
+                asmPatch += [ 0x20, 0x3D,         0XEA ]       # JSR change_song  ; see area_rando_door_transition.asm
+            # return
+            asmPatch += [ 0x60 ]   # RTS
+            self.romFile.write(struct.pack('B', self.asmAddress & 0x00FF))
+            self.romFile.write(struct.pack('B', (self.asmAddress & 0xFF00) >> 8))
 
-                self.romFile.seek(self.asmAddress)
-                for byte in asmPatch:
-                    self.romFile.write(struct.pack('B', byte))
+            self.romFile.seek(self.asmAddress)
+            for byte in asmPatch:
+                self.romFile.write(struct.pack('B', byte))
 
-                self.asmAddress += 0x20
+            self.asmAddress += 0x20
 
     # change BG table to avoid scrolling sky bug when transitioning to west ocean
     def patchWestOcean(self, doorPtr):

@@ -327,7 +327,7 @@ class RomReader:
         romFile.seek(self.patches[patchName]['address'])
         value = struct.unpack("B", romFile.read(1))
         return value[0] == self.patches[patchName]['value']
-
+    
 class RomPatcher:
     # standard:
     # Intro/Ceres Skip and initial door flag setup
@@ -853,6 +853,41 @@ class RomPatcher:
                 self.writeCreditsString(address, 0x04, src+" "*(lineLength-(len(src)+len(dest)))+dest)
                 address += 0x40
 
+    buttons = {
+        "Select" : [0x00, 0x20],
+        "A"      : [0x80, 0x00],
+        "B"      : [0x00, 0x80],
+        "X"      : [0x40, 0x00],
+        "Y"      : [0x00, 0x40],
+        "L"      : [0x20, 0x00],
+        "R"      : [0x10, 0x00],
+        "None"   : [0x00, 0x00]
+    }
+
+    controls = {
+        "Shot"       : [0xb331, 0x1722d],
+        "Jump"       : [0xb325, 0x17233],
+        "Dash"       : [0xb32b, 0x17239],
+        "ItemSelect" : [0xb33d, 0x17245],
+        "ItemCancel" : [0xb337, 0x1723f],
+        "AngleUp"    : [0xb343, 0x1724b],
+        "AngleDown"  : [0xb349, 0x17251]
+    }
+
+    # write custom contols to ROM.
+    # controlsDict : possible keys are "Shot", "Jump", "Dash", "ItemSelect", "ItemCancel", "AngleUp", "AngleDown"
+    #                possible values are "A", "B", "X", "Y", "L", "R", "Select", "None"
+    def writeControls(self, controlsDict):
+        for ctrl, button in controlsDict.iteritems():
+            if ctrl not in RomPatcher.controls:
+                raise ValueError("Invalid control name : " + str(ctrl))
+            if button not in RomPatcher.buttons:
+                raise ValueError("Invalid button name : " + str(button))
+            for addr in RomPatcher.controls[ctrl]:
+                self.romFile.seek(addr)
+                self.romFile.write(struct.pack('B', RomPatcher.buttons[button][0]))
+                self.romFile.write(struct.pack('B', RomPatcher.buttons[button][1]))
+
 class FakeROM:
     # to have the same code for real rom and the webservice
     def __init__(self, data={}):
@@ -902,7 +937,7 @@ class RomLoader(object):
         self.patches = {
             'layoutPresent': True,
             'gravityNoHeatProtectionPresent': True,
-            'variaTweaks': True
+            'variaTweaks': False
         }
 
     def assignItems(self, locations):

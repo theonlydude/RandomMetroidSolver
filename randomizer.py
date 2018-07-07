@@ -34,6 +34,9 @@ if __name__ == "__main__":
     parser.add_argument('--area',
                         help="area mode", action='store_true',
                         dest='area', default=False)
+    parser.add_argument('--areaLayoutBase',
+                        help="use simple layout patch for area mode", action='store_true',
+                        dest='areaLayoutBase', default=False)
     parser.add_argument('--debug', '-d', help="activate debug logging", dest='debug',
                         action='store_true')
     parser.add_argument('--maxDifficulty', '-t',
@@ -264,6 +267,8 @@ if __name__ == "__main__":
             dotDir = None
         randomizer = AreaRandomizer(graphLocations, randoSettings, seedName, dotDir=dotDir)
         RomPatches.ActivePatches += RomPatches.AreaSet
+        if args.areaLayoutBase == True:
+            RomPatches.ActivePatches.remove(RomPatches.AreaRandoGatesOther)
         doors = getDoorConnections(randomizer.areaGraph)
     else:
         randomizer = Randomizer(graphLocations, randoSettings, seedName, vanillaTransitions)
@@ -281,46 +286,46 @@ if __name__ == "__main__":
         for loc in locsItems:
             print('{:>50}: {:>16} '.format(loc, locsItems[loc]))
 
-#    try:
-    romPatcher = None
-    webService = False
-    if args.rom is not None:
-        # patch local rom
-        romFileName = args.rom
-        fileName += '.sfc'
-        shutil.copyfile(romFileName, fileName)
-        romPatcher = RomPatcher(fileName)
-    elif args.output is not None:
-        # web service
-        romPatcher = RomPatcher()
-        webService = True
-    else:
-        # rom json
-        fileName += '.json'
-        with open(fileName, 'w') as jsonFile:
+    try:
+        romPatcher = None
+        webService = False
+        if args.rom is not None:
+            # patch local rom
+            romFileName = args.rom
+            fileName += '.sfc'
+            shutil.copyfile(romFileName, fileName)
+            romPatcher = RomPatcher(fileName)
+        elif args.output is not None:
+            # web service
+            romPatcher = RomPatcher()
+            webService = True
+        else:
+            # rom json
+            fileName += '.json'
+            with open(fileName, 'w') as jsonFile:
+                if args.area == True:
+                    locsItems['transitions'] = randomizer.transitions
+                json.dump(locsItems, jsonFile)
+        if romPatcher is not None:
+            romPatcher.writeItemsLocs(itemLocs)
+            romPatcher.applyIPSPatches(args.patches, args.noLayout, args.noGravHeat, args.area, args.areaLayoutBase)
+            romPatcher.writeSeed(seed)
+            romPatcher.writeSpoiler(itemLocs)
+            romPatcher.writeRandoSettings(randoSettings)
             if args.area == True:
-                locsItems['transitions'] = randomizer.transitions
-            json.dump(locsItems, jsonFile)
-    if romPatcher is not None:
-        romPatcher.writeItemsLocs(itemLocs)
-        romPatcher.applyIPSPatches(args.patches, args.noLayout, args.noGravHeat, args.area)
-        romPatcher.writeSeed(seed)
-        romPatcher.writeSpoiler(itemLocs)
-        romPatcher.writeRandoSettings(randoSettings)
-        if args.area == True:
-            romPatcher.writeDoorConnections(doors)
-        romPatcher.writeTransitionsCredits(randomizer.areaGraph.getCreditsTransitions())
-        if ctrlDict is not None:
-            romPatcher.writeControls(ctrlDict)
-        romPatcher.end()
-    if webService == True:
-        data = romPatcher.romFile.data
-        fileName += '.sfc'
-        data["fileName"] = fileName
-        with open(args.output, 'w') as jsonFile:
-            json.dump(data, jsonFile)
-    # except Exception as e:
-    #     print("Error patching {}. Is {} a valid ROM ? ({}: {})".format(fileName, romFileName, type(e).__name__, e))
-    #     sys.exit(-1)
+                romPatcher.writeDoorConnections(doors)
+            romPatcher.writeTransitionsCredits(randomizer.areaGraph.getCreditsTransitions())
+            if ctrlDict is not None:
+                romPatcher.writeControls(ctrlDict)
+            romPatcher.end()
+        if webService == True:
+            data = romPatcher.romFile.data
+            fileName += '.sfc'
+            data["fileName"] = fileName
+            with open(args.output, 'w') as jsonFile:
+                json.dump(data, jsonFile)
+    except Exception as e:
+        print("Error patching {}. Is {} a valid ROM ? ({}: {})".format(fileName, romFileName, type(e).__name__, e))
+        sys.exit(-1)
 
     print("Rom generated: {}".format(fileName))

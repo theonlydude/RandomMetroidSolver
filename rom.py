@@ -32,10 +32,13 @@ class RomPatches:
     ## Area rando patches
     # remove crumble block for reverse lower norfair door access
     SingleChamberNoCrumble    = 101,
-    # remove green gates for reverse maridia access, crab green gate in maridia and blue gate in green brinstar
-    AreaRandoGates            = 102
+    # remove green gates for reverse maridia access
+    AreaRandoGatesBase        = 102
+    # remove crab green gate in maridia and blue gate in green brinstar
+    AreaRandoGatesOther       = 103
     # disable Green Hill Yellow, Noob Bridge Green, Coude Yellow, and Kronic Boost yellow doors
-    AreaRandoBlueDoors        = 103
+    AreaRandoBlueDoors        = 104
+    
 
     ### Other
     # Gravity no longer protects from environmental damage (heat, spikes...)
@@ -56,7 +59,7 @@ class RomPatches:
     Total_CX = [ BlueBrinstarMissile ] + Total
 
     # area rando patch set
-    AreaSet = [ SingleChamberNoCrumble, AreaRandoGates, AreaRandoBlueDoors ]
+    AreaSet = [ SingleChamberNoCrumble, AreaRandoGatesBase, AreaRandoGatesOther, AreaRandoBlueDoors ]
 
     # VARIA specific patch set
     VariaTweaks = [ WsEtankPhantoonAlive, LNChozoSJCheckDisabled ]
@@ -204,8 +207,9 @@ class RomReader:
 
     patches = {
         'layoutPresent': {'address': 0x21BD80, 'value': 0xD5},
-        'gravityNoHeatProtectionPresent': {'address': 0x06e37d, 'value': 0x01},
-        'variaTweaks': {'address': 0x7CC4D, 'value': 0x37}
+        'gravityNoHeatProtectionPresent': {'address': 0x06e37d, 'value': 0x01},        
+        'variaTweaks': {'address': 0x7CC4D, 'value': 0x37},
+        'areaLayout': {'address':0x252FA7, 'value':0xF8}
     }
 
     def getItem(self, romFile, address, visibility):
@@ -402,7 +406,7 @@ class RomPatcher:
                      'skip_intro.ips', 'skip_ceres.ips', 'animal_enemies.ips', 'animals.ips',
                      'draygonimals.ips', 'escapimals.ips', 'gameend.ips', 'grey_door_animals.ips',
                      'low_timer.ips', 'metalimals.ips', 'phantoonimals.ips', 'ridleyimals.ips'],
-        'Area': ['area_rando_blue_doors.ips', 'area_rando_layout_base.ips', 'area_rando_door_transition.ips' ]
+        'Area': ['area_rando_blue_doors.ips', 'area_rando_layout.ips', 'area_rando_door_transition.ips' ]
     }
 
     def __init__(self, romFileName=None):
@@ -483,7 +487,7 @@ class RomPatcher:
         self.romFile.write(struct.pack('B', branch))
 
 
-    def applyIPSPatches(self, optionalPatches=[], noLayout=False, noGravHeat=False, area=False):
+    def applyIPSPatches(self, optionalPatches=[], noLayout=False, noGravHeat=False, area=False, areaLayoutBase=False):
         try:
             # apply standard patches
             stdPatches = RomPatcher.IPSPatches['Standard']
@@ -504,6 +508,9 @@ class RomPatcher:
 
             # apply area patches
             if area == True:
+                if areaLayoutBase == True:
+                    RomPatcher.IPSPatches['Area'].remove('area_rando_layout.ips')
+                    RomPatcher.IPSPatches['Area'].append('area_rando_layout_base.ips')
                 for patchName in RomPatcher.IPSPatches['Area']:
                     self.applyIPSPatch(patchName)
         except Exception as e:
@@ -935,9 +942,13 @@ class RomLoader(object):
 
     def __init__(self):
         self.patches = {
+            # total rando anti-softlock
             'layoutPresent': True,
             'gravityNoHeatProtectionPresent': True,
-            'variaTweaks': False
+            # WS etank without killing phantoon + LN torizo no space jump check
+            'variaTweaks': False,
+            # complementary layout patches for area rando: see RomPatches.AreaRandoGatesOther
+            'areaLayout' : False
         }
 
     def assignItems(self, locations):

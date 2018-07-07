@@ -82,7 +82,7 @@ accessPoints = [
         'Green Hill Zone Top Right': lambda sm: sm.wor(sm.haveItem('Wave'),
                                                        sm.wor(sm.wand(sm.canOpenRedDoors(), # can do the glitch with either missile or supers
                                                                       sm.knowsGreenGateGlitch()),
-                                                              RomPatches.has(RomPatches.AreaRandoGates)))
+                                                              RomPatches.has(RomPatches.AreaRandoGatesOther)))
     }, traverse=lambda sm: sm.wor(RomPatches.has(RomPatches.AreaRandoBlueDoors), sm.canOpenGreenDoors()),
        roomInfo = {'RoomPtr':0x9fba, "area": 0x1 },
        exitInfo = {'DoorPtr':0x8f0a, 'direction': 0x4, "cap": (0x1, 0x46), "bitFlag": 0x0,
@@ -218,7 +218,7 @@ accessPoints = [
         'Crab Hole Bottom Left': lambda sm: sm.wand(sm.haveItem('Morph'),
                                                     sm.wor(sm.canOpenGreenDoors(), # red door+green gate
                                                            sm.wand(sm.canOpenRedDoors(),
-                                                                   RomPatches.has(RomPatches.AreaRandoGates)))),
+                                                                   RomPatches.has(RomPatches.AreaRandoGatesOther)))),
         'Le Coude Right': lambda sm: sm.wand(sm.canOpenGreenDoors(), # gate+door
                                              sm.wor(sm.haveItem('Gravity'),
                                                     sm.wand(sm.knowsGravLessLevel3(),
@@ -233,7 +233,7 @@ accessPoints = [
         'Main Street Bottom': lambda sm: sm.wand(sm.canExitCrabHole(),
                                                  sm.wor(sm.wand(sm.haveItem('Super'),
                                                                 sm.knowsGreenGateGlitch()),
-                                                        RomPatches.has(RomPatches.AreaRandoGates))),
+                                                        RomPatches.has(RomPatches.AreaRandoGatesOther))),
         'Le Coude Right': lambda sm: sm.wand(sm.canExitCrabHole(),
                                              sm.canOpenGreenDoors(), # toilet door
                                              sm.wor(sm.haveItem('Gravity'),
@@ -322,9 +322,9 @@ accessPoints = [
        entryInfo = {'SamusX':0xce, 'SamusY':0x188},
        shortName="B\\EAST TUNNEL"),
     AccessPoint('East Tunnel Top Right', 'RedBrinstar', {
-        'East Tunnel Right': lambda sm: sm.wor(RomPatches.has(RomPatches.AreaRandoGates),
+        'East Tunnel Right': lambda sm: sm.wor(RomPatches.has(RomPatches.AreaRandoGatesBase),
                                                sm.canOpenGreenDoors())
-    }, traverse=lambda sm: RomPatches.has(RomPatches.AreaRandoGates),
+    }, traverse=lambda sm: RomPatches.has(RomPatches.AreaRandoGatesBase),
        roomInfo = {'RoomPtr':0xcf80, "area": 0x4},
        exitInfo = {'DoorPtr':0xa390, 'direction': 0x4, "cap": (0x1, 0x16), "bitFlag": 0x0,
                    "screen": (0x0, 0x1), "distanceToSpawn": 0x8000, "doorAsmPtr": 0xe356},

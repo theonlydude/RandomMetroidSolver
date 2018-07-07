@@ -110,13 +110,13 @@ class HelpersGraph(Helpers):
     def canPassMaridiaToRedTowerNode(self):
         sm = self.smbm
         return sm.wand(sm.haveItem('Morph'),
-                       sm.wor(RomPatches.has(RomPatches.AreaRandoGates),
+                       sm.wor(RomPatches.has(RomPatches.AreaRandoGatesBase),
                               sm.canOpenGreenDoors()))
 
     def canPassRedTowerToMaridiaNode(self):
         sm = self.smbm
         return sm.wand(sm.haveItem('Morph'),
-                       RomPatches.has(RomPatches.AreaRandoGates))
+                       RomPatches.has(RomPatches.AreaRandoGatesBase))
 
     def canGrappleEscape(self):
         sm = self.smbm

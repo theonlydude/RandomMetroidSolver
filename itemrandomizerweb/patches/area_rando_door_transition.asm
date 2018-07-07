@@ -9,15 +9,27 @@ arch snes.cpu
 
 ;;; Constants :
 ;;; For spark hijack
-!spark_flag = $0741 ; free ram (used from pause screen stuff) to store global shinespark cancel flag
-!MAGIC = #$caca	    ; magic value for spark flag check
-!samus_health = $09c2
+!spark_flag            = $0741  ; free ram (used from pause screen stuff) to store global shinespark cancel flag
+!MAGIC                 = #$caca ; magic value for spark flag check
+!samus_health          = $09c2
 ;;; For movement cancel
-!current_pose = $0a1c
-!contact_dmg_idx = $0a6e
-!iframes = $18a8
+!current_pose          = $0a1c
+!contact_dmg_idx       = $0a6e
+!iframes               = $18a8
 ;;; For song change
-!song_routine = $808fc1
+!song_routine          = $808fc1
+;;; For refill
+!samus_max_health      = $09c4
+!samus_reserve         = $09d6
+!samus_max_reserve     = $09d4
+!samus_missiles        = $09c6
+!samus_max_missiles    = $09c8
+!samus_supers          = $09ca
+!samus_max_supers      = $09cc
+!samus_pbs             = $09ce
+!samus_max_pbs         = $09d0
+!samus_reserve         = $09d6
+!samus_max_reserve     = $09d4
 
 ;;; hijack shinespark end check to avoid teleport transition spark bug
 org $90d2ba
@@ -79,4 +91,18 @@ change_song:
 	jsl !song_routine   	; change song
 	lda #$0005         	; load song track 5 (First track from song data)
 	jsl !song_routine
+	rts
+
+;;; "ship refill" for tourian elevator
+full_refill:
+	lda !samus_max_health
+	sta !samus_health
+	lda !samus_max_reserve
+	sta !samus_reserve
+	lda !samus_max_missiles
+	sta !samus_missiles
+	lda !samus_max_supers
+	sta !samus_supers
+	lda !samus_max_pbs
+	sta !samus_pbs
 	rts

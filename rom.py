@@ -830,6 +830,7 @@ class RomPatcher:
                 self.romFile.write(struct.pack('B', byte))
 
             self.asmAddress += 0x20
+        self.writeTourianRefill()
 
     # change BG table to avoid scrolling sky bug when transitioning to west ocean
     def patchWestOcean(self, doorPtr):
@@ -838,6 +839,14 @@ class RomPatcher:
         self.romFile.seek(0x7B7BB)
         self.romFile.write(struct.pack('B', D0))
         self.romFile.write(struct.pack('B', D1))
+
+    # add ASM to Tourian "door" down elevator to trigger full refill (ammo + energy)
+    def writeTourianRefill(self):
+        tourianDoor = 0x19222
+        self.romFile.seek(tourianDoor + 10) # go to door ASM ptr field
+        # $0F:EA52 is full_refill routine address. see area_rando_door_transition.asm
+        self.romFile.write(struct.pack('B', 0x52))
+        self.romFile.write(struct.pack('B', 0xEA))
 
     def writeTransitionsCredits(self, transitions):
         address = 0x273B40

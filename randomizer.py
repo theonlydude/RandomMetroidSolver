@@ -265,7 +265,11 @@ if __name__ == "__main__":
             dotDir = args.directory
         else:
             dotDir = None
-        randomizer = AreaRandomizer(graphLocations, randoSettings, seedName, dotDir=dotDir)
+        try:
+            randomizer = AreaRandomizer(graphLocations, randoSettings, seedName, dotDir=dotDir)
+        except RuntimeError:
+            print("DIAG: Cannot generate area layout. Retry, and change the super fun settings if the problem happens again.")
+            sys.exit(-1)
         RomPatches.ActivePatches += RomPatches.AreaSet
         if args.areaLayoutBase == True:
             RomPatches.ActivePatches.remove(RomPatches.AreaRandoGatesOther)

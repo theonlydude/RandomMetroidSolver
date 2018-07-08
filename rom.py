@@ -400,10 +400,10 @@ class RomPatcher:
                      'Disable_Space_Time_select_in_menu', 'Fix_Morph_Ball_Hidden_Chozo_PLMs',
                      'Fix_Screw_Attack_selection_in_menu',
                      'Removes_Gravity_Suit_heat_protection',
-                     'ws_etank.ips', 'ln_chozo_sj_check_disable.ips'],
+                     'AimAnyButton.ips', 'ws_etank.ips', 'ln_chozo_sj_check_disable.ips', 'endingtotals.ips'],
         'Layout': ['dachora.ips', 'early_super_bridge.ips', 'high_jump.ips', 'moat.ips',
                    'nova_boost_platform.ips', 'red_tower.ips', 'spazer.ips'],
-        'Optional': ['AimAnyButton.ips', 'itemsounds.ips', 'max_ammo_display.ips',
+        'Optional': ['itemsounds.ips', 'max_ammo_display.ips',
                      'spinjumprestart.ips', 'supermetroid_msu1.ips', 'elevators_doors_speed.ips',
                      'skip_intro.ips', 'skip_ceres.ips', 'animal_enemies.ips', 'animals.ips',
                      'draygonimals.ips', 'escapimals.ips', 'gameend.ips', 'grey_door_animals.ips',
@@ -832,6 +832,7 @@ class RomPatcher:
                 self.romFile.write(struct.pack('B', byte))
 
             self.asmAddress += 0x20
+        self.writeTourianRefill()
 
     # change BG table to avoid scrolling sky bug when transitioning to west ocean
     def patchWestOcean(self, doorPtr):
@@ -840,6 +841,14 @@ class RomPatcher:
         self.romFile.seek(0x7B7BB)
         self.romFile.write(struct.pack('B', D0))
         self.romFile.write(struct.pack('B', D1))
+
+    # add ASM to Tourian "door" down elevator to trigger full refill (ammo + energy)
+    def writeTourianRefill(self):
+        tourianDoor = 0x19222
+        self.romFile.seek(tourianDoor + 10) # go to door ASM ptr field
+        # $0F:EA52 is full_refill routine address. see area_rando_door_transition.asm
+        self.romFile.write(struct.pack('B', 0x52))
+        self.romFile.write(struct.pack('B', 0xEA))
 
     def writeTransitionsCredits(self, transitions):
         address = 0x273B40

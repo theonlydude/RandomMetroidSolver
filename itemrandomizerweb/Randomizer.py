@@ -931,11 +931,12 @@ class Randomizer(object):
     def generateItems(self):
         itemLocations = []
         isStuck = False
+        onlyBosses = False
         # if major items are removed from the pool (super fun setting), fill not accessible locations with
         # items that are as useless as possible
         abort = self.fillRestrictedLocations(itemLocations)
         if abort == True:
-            print("Can't access to all bosses locations, abort")
+            print("DIAG: Can't access to all bosses locations, abort. Retry, and change the super fun settings if the problem happens again.")
             return None
         maxLen = len(self.itemPool) # to prevent cancelling of these useless items/locations
         while len(self.itemPool) > 0 and not isStuck:
@@ -971,6 +972,10 @@ class Randomizer(object):
                 print("\nSTUCK ! ")
                 print("REM LOCS = "  + str([loc['Name'] for loc in self.unusedLocations]))
                 print("REM ITEMS = "  + str([item['Type'] for item in self.itemPool]))
+                if onlyBosses == True:
+                    print("DIAG: Stuck because of boss fights. Try to increase max difficulty or health/ammo.")
+                else:
+                    print("DIAG: Stuck because of navigation. Retry, and change the super fun settings if the problem happens again.")
                 return None
         print("")
         return itemLocations

@@ -239,7 +239,7 @@ def presets():
     pngThumbFileName = None
 
     # set title
-    response.title = 'Super Metroid Item Randomizer Solver'
+    response.title = 'Super Metroid VARIA Presets'
 
     # add missing knows
     for know in Knows.__dict__:
@@ -555,7 +555,7 @@ def compute_difficulty(jsonRomFileName, presetName, post_vars):
 
 def infos():
     # set title
-    response.title = 'Super Metroid Item Randomizer Solver'
+    response.title = 'Super Metroid VARIA Randomizer and Solver'
 
     return dict()
 
@@ -907,3 +907,9 @@ def generatePng(dotFileName):
         return (None, None)
 
     return (pngFileName, pngThumbFileName)
+
+def home():
+    # set title
+    response.title = 'Super Metroid VARIA Randomizer and Solver'
+
+    return dict()

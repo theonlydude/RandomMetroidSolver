@@ -331,7 +331,9 @@ function AjaxRandomizerCallCompleted(data) {
         randomSuperFuns : document.getElementById("randomSuperFuns").value,
         progressionDifficulty : document.getElementById("progressionDifficulty").value,
         areaRandomization : document.getElementById("areaRandomization").value,
-        complexity : getComplexity()
+        complexity : getComplexity(),
+        areaLayout : document.getElementById("areaLayout").value,
+        variaTweaks : document.getElementById("variaTweaks").value
       },
       dataType: "html"
     });
@@ -683,6 +685,12 @@ function startTheTour(step=-1) {
       placement: "auto left"
     },
     {
+      element: "#areaLayoutStep",
+      title: "Area randomization layout modification",
+      content: "Remove Crab green gate in Marida and blue gate in Green Brinstar, add new platform in Green Hill Zone to access transition door.",
+      placement: "auto left"
+    },
+    {
       element: "#randomSuperFunsStep",
       title: "Random Super Fun Times",
       content: "Randomly set the Super Fun Times parameters.",
@@ -723,6 +731,12 @@ function startTheTour(step=-1) {
       element: "#noGravHeatStep",
       title: "Optional patches",
       content: "Patch from Total Item Randomizer to remove the Gravity Suit environmental protection (heat, spikes, electricity...), it balances more the two suits abilities. Disable it to have a more vanilla feeling.",
+      placement: "auto left"
+    },
+    {
+      element: "#variaTweaksStep",
+      title: "Optional patches",
+      content: "Activate Wrecked Ship Etank without killing Phantoon and Lower Norfair Torizo without Space Jump",
       placement: "auto left"
     },
     {
@@ -796,8 +810,7 @@ def displayNumber(id, min, max, default, step="1"):
 
   <div class="fixed">
     <div class="menu">
-      <!-- <button class="buttonBack" onclick="startTheTour()"><span class="glyphicon glyphicon-play"/></span>Start the tutorial</button> -->
-    {{=A("Super Metroid VARIA Randomizer and Solver", _href=URL(f="solver"), _class="menu")}}
+    {{=A("Super Metroid VARIA Randomizer and Solver", _href=URL(f="home"), _class="menu")}}
     {{=A("Presets", _href=URL(f="presets"), _class="menu")}}
     {{=A("Solver", _href=URL(f="solver"), _class="menu")}}
     {{=A("Randomizer", _href=URL(f="randomizer"), _class="menu_selected")}}
@@ -812,13 +825,6 @@ def displayNumber(id, min, max, default, step="1"):
         <button class="tablinks" id="medium" onclick="changeComplexity(event, 'medium');">Medium</button>
         <button class="tablinks" id="advanced" onclick="changeComplexity(event, 'advanced');">Advanced</button>
       </div>
-<!--
-	<p>Parameters complexity:
-	  <input type="radio" name="complexity" id="simpleRadio" value="simple" onclick="changeComplexity(this);">Simple
-	  <input type="radio" name="complexity" id="mediumRadio" value="medium" onclick="changeComplexity(this);">Medium
-	  <input type="radio" name="complexity" id="advancedRadio" value="advanced" onclick="changeComplexity(this);">Advanced
-	</p>
--->
     </div>
     <form id="mainform", name="mainform", onsubmit="doSubmit(); return false;">
       <div id="tabRando" class="tabcontent">
@@ -931,6 +937,9 @@ def displayNumber(id, min, max, default, step="1"):
 	        <td colspan="2" class="full" id="areaRandomizationStep">{{displayCheckbox("areaRandomization")}}Area randomization</td>
                 <td><button type="button" onclick="startTheTour(15)">?</button></td>
 	      </tr>
+	      <tr>
+		<td colspan="2" class="full" id="areaLayoutStep">{{displayCheckbox("areaLayout", True)}} Additional layout patches for easier navigation</td><td><button type="button" onclick="startTheTour(23)">?</button></td>
+	      </tr>
             </table>
 	    <div id="superFunVisibility">
               <h4>Super Fun Times (TM)</h4>
@@ -970,7 +979,11 @@ def displayNumber(id, min, max, default, step="1"):
 	        <tr>
 		  <td class="full" id="noGravHeatStep">{{displayCheckbox("noGravHeat", True)}} Remove Gravity Suit heat protection (by Total)</td><td><button type="button" onclick="startTheTour(21)">?</button></td>
 	        </tr>
+	        <tr>
+		  <td class="full" id="variaTweaksStep">{{displayCheckbox("variaTweaks", True)}} Activate Wrecked Ship Etank without killing Phantoon and Lower Norfair Torizo without Space Jump (by Flo)</td><td><button type="button" onclick="startTheTour(22)">?</button></td>
+	        </tr>
 	      </table>
+	      <br/>
 	      <table class="full" id="patchesStep">
 {{
 for patch in patches:

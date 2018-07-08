@@ -1295,9 +1295,7 @@ locations = [
         'Lava Dive Right': lambda sm: sm.canPassLavaPit(),
         'Three Muskateers Room Left': lambda sm: sm.canPassAmphitheaterReverse()
     },
-    'Available': lambda sm: sm.wand(sm.canPassLowerNorfairChozo(),
-                                    sm.wor(sm.haveItem('SpaceJump'),
-                                           sm.haveItem('SpringBall'))), # for the crumble blocks
+    'Available': lambda sm: sm.canPassLowerNorfairChozo(),
     'PostAvailable': lambda sm: sm.canExitScrewAttackArea()
 },
 {

@@ -239,7 +239,7 @@ def presets():
     pngThumbFileName = None
 
     # set title
-    response.title = 'Super Metroid Item Randomizer Solver'
+    response.title = 'Super Metroid VARIA Presets'
 
     # add missing knows
     for know in Knows.__dict__:
@@ -555,7 +555,7 @@ def compute_difficulty(jsonRomFileName, presetName, post_vars):
 
 def infos():
     # set title
-    response.title = 'Super Metroid Item Randomizer Solver'
+    response.title = 'Super Metroid VARIA Randomizer and Solver'
 
     return dict()
 
@@ -603,6 +603,8 @@ def randomizer():
         session.randomizer['progressionDifficulty'] = 'normal'
         session.randomizer['areaRandomization'] = "off"
         session.randomizer['complexity'] = "simple"
+        session.randomizer['areaLayout'] = "on"
+        session.randomizer['variaTweaks'] = "on"
 
     # put standard presets first
     stdPresets = ['noob', 'casual', 'regular', 'veteran', 'speedrunner', 'master']
@@ -702,7 +704,7 @@ def sessionWebService():
     # web service to update the session
     patchs = ['itemsounds',
               'spinjumprestart', 'supermetroid_msu1', 'max_ammo_display', 'elevators_doors_speed',
-              'skip_intro', 'skip_ceres', 'animals']
+              'skip_intro', 'skip_ceres', 'animals', 'areaLayout', 'variaTweaks']
     quantities = ['missileQty', 'superQty', 'powerBombQty']
     others = ['paramsFile', 'minorQty', 'energyQty', 'maxDifficulty',
               'progressionSpeed', 'spreadItems', 'fullRandomization', 'suitsRestriction',
@@ -739,6 +741,8 @@ def sessionWebService():
     session.randomizer['progressionDifficulty'] = request.vars.progressionDifficulty
     session.randomizer['areaRandomization'] = request.vars.areaRandomization
     session.randomizer['complexity'] = request.vars.complexity
+    session.randomizer['areaLayout'] = request.vars.areaLayout
+    session.randomizer['variaTweaks'] = request.vars.variaTweaks
 
 def randomizerWebService():
     # web service to compute a new random (returns json string)
@@ -750,7 +754,7 @@ def randomizerWebService():
     # check validity of all parameters
     patchs = ['itemsounds', 'spinjumprestart', 'supermetroid_msu1',
               'max_ammo_display', 'elevators_doors_speed', 'skip_intro',
-              'skip_ceres']
+              'skip_ceres', 'areaLayout', 'variaTweaks']
     quantities = ['missileQty', 'superQty', 'powerBombQty']
     others = ['seed', 'paramsFile', 'paramsFileTarget', 'minorQty', 'energyQty',
               'maxDifficulty', 'progressionSpeed', 'spreadItems', 'fullRandomization',
@@ -795,12 +799,16 @@ def randomizerWebService():
 
     for patch in patches:
         if request.vars[patch[0]] == 'on':
-            if patch[0] == 'animals':
+            if patch[0] in ['animals', 'areaLayout', 'variaTweaks']:
                 continue
             params.append('-c')
             params.append(patch[0] + '.ips')
     if request.vars.animals == 'on':
         params.append('--animals')
+    if request.vars.areaLayout == 'off':
+        params.append('--areaLayoutBase')
+    if request.vars.variaTweaks == 'off':
+        params.append('--novariatweaks')
 
     if request.vars.maxDifficulty != 'no difficulty cap':
         params.append('--maxDifficulty')
@@ -907,3 +915,9 @@ def generatePng(dotFileName):
         return (None, None)
 
     return (pngFileName, pngThumbFileName)
+
+def home():
+    # set title
+    response.title = 'Super Metroid VARIA Randomizer and Solver'
+
+    return dict()

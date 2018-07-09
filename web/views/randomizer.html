@@ -161,14 +161,14 @@ function setComplexity() {
 function changeComplexity(evt, name) {
   if(name == "simple") {
     var show = [];
-    var hide = ["seedVisibility", "ammoVisibility", "fullVisibility", "maxDiffVisibility", "progDiffVisibility", "randomParamsVisibility", "spreadItemsVisibility", "suitsRestrictionVisibility", "speedScrewRestrictionVisibility", "superFunVisibility", "patchesVisibility"];
+    var hide = ["seedVisibility", "ammoVisibility", "fullVisibility", "maxDiffVisibility", "progDiffVisibility", "randomParamsVisibility", "spreadItemsVisibility", "suitsRestrictionVisibility", "speedScrewRestrictionVisibility", "superFunVisibility", "patchesVisibility", "areaPatchVisibility"];
     showHide(show, hide);
   } else if(name == "medium") {
     var show = ["fullVisibility", "maxDiffVisibility", "progDiffVisibility"];
-    var hide = ["seedVisibility", "ammoVisibility", "randomParamsVisibility", "spreadItemsVisibility", "suitsRestrictionVisibility", "speedScrewRestrictionVisibility", "superFunVisibility", "patchesVisibility"];
+    var hide = ["seedVisibility", "ammoVisibility", "randomParamsVisibility", "spreadItemsVisibility", "suitsRestrictionVisibility", "speedScrewRestrictionVisibility", "superFunVisibility", "patchesVisibility", "areaPatchVisibility"];
     showHide(show, hide);
   } else {
-    var show = ["seedVisibility", "ammoVisibility", "fullVisibility", "maxDiffVisibility", "progDiffVisibility", "randomParamsVisibility", "spreadItemsVisibility", "suitsRestrictionVisibility", "speedScrewRestrictionVisibility", "superFunVisibility", "patchesVisibility"];
+    var show = ["seedVisibility", "ammoVisibility", "fullVisibility", "maxDiffVisibility", "progDiffVisibility", "randomParamsVisibility", "spreadItemsVisibility", "suitsRestrictionVisibility", "speedScrewRestrictionVisibility", "superFunVisibility", "patchesVisibility", "areaPatchVisibility"];
     var hide = [];
     showHide(show, hide);
   }
@@ -238,7 +238,9 @@ function AjaxPresetCallCompleted(data) {
         randomParams : document.getElementById("randomParams").value,
         randomSuperFuns : document.getElementById("randomSuperFuns").value,
         progressionDifficulty : document.getElementById("progressionDifficulty").value,
-        areaRandomization : document.getElementById("areaRandomization").value
+        areaRandomization : document.getElementById("areaRandomization").value,
+        areaLayout : document.getElementById("areaLayout").value,
+        variaTweaks : document.getElementById("variaTweaks").value
       },
       dataType: "json",
       crossDomain: true
@@ -937,7 +939,7 @@ def displayNumber(id, min, max, default, step="1"):
 	        <td colspan="2" class="full" id="areaRandomizationStep">{{displayCheckbox("areaRandomization")}}Area randomization</td>
                 <td><button type="button" onclick="startTheTour(15)">?</button></td>
 	      </tr>
-	      <tr>
+	      <tr id="areaPatchVisibility">
 		<td colspan="2" class="full" id="areaLayoutStep">{{displayCheckbox("areaLayout", True)}} Additional layout patches for easier navigation</td><td><button type="button" onclick="startTheTour(23)">?</button></td>
 	      </tr>
             </table>

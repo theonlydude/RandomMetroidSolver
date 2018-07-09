@@ -15,21 +15,41 @@ body {
 <body>
   <div class="fixed">
     <div class="menu">
-      {{=A("Super Metroid VARIA Randomizer and Solver", _href=URL(f="solver"), _class="menu_selected")}}
+      {{=A("Super Metroid VARIA Randomizer and Solver", _href=URL(f="home"), _class="menu_selected")}}
       {{=A("Presets", _href=URL(f="presets"), _class="menu")}}
       {{=A("Solver", _href=URL(f="solver"), _class="menu")}}
       {{=A("Randomizer", _href=URL(f="randomizer"), _class="menu")}}
       {{=A("Information & Contact", _href=URL(f="infos"), _class="menu")}}
     </div>
   </div>
+  <p>
+    LOGO
+  </p>
   <h3>Welcome to the home of the VARIA (Very Adaptive Randomizer of Items and Areas) Randomizer and Solver.</h3>
-  <p>
-    To solve a Super Metroid randomized ROM click on <a href="{{=URL(f='solver')}}">Solver</a>.
-  </p>
-  <p>
-    To randomize a ROM with the VARIA Randomizer click on <a href="{{=URL(f='randomizer')}}">Randomizer</a>.
-  </p>
-  <p>
-    To manage your preset click on <a href="{{=URL(f='presets')}}">Presets</a>.
-  </p>
+  <table>
+    <tr>
+      <td>
+	<div class="square">
+	  <p>
+	    You can create your preset which contains the techniques you know and your preferences. The preset is used to randomize and to solve ROMs.<br/>
+	    To manage your preset click on <a href="{{=URL(f='presets')}}">Presets</a>.
+	  </p>
+	</div>
+      </td>
+      <td>
+	<div class="square">
+	  <p>
+	    To randomize a ROM with the VARIA Randomizer click on <a href="{{=URL(f='randomizer')}}">Randomizer</a>.
+	  </p>
+	</div>
+      </td>
+      <td>
+	<div class="square">
+	  <p>
+	    To solve a Super Metroid randomized ROM click on <a href="{{=URL(f='solver')}}">Solver</a>.
+	  </p>
+	</div>
+      </td>
+    </tr>
+  </table>
 </body>

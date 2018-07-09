@@ -219,3 +219,6 @@ p {
     margin-right: 30%;
     margin-top: 1em;
 }
+.square {
+    border-style: solid;
+}

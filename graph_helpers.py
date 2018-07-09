@@ -147,11 +147,12 @@ class HelpersGraph(Helpers):
         nTanks4Dive = 3
         if sm.getBool(sm.heatProof()) == False:
             nTanks4Dive = 8
-        return sm.wor(sm.wand(sm.haveItem('Gravity'), sm.haveItem('SpaceJump')),
-                      sm.wand(sm.knowsGravityJump(), sm.haveItem('Gravity')),
-                      sm.wand(sm.wor(sm.wand(sm.knowsLavaDive(), sm.haveItem('HiJump')),
-                                     sm.knowsLavaDiveNoHiJump()),
-                              sm.energyReserveCountOk(nTanks4Dive)))
+        return sm.wand(sm.wor(sm.wand(sm.haveItem('Gravity'), sm.haveItem('SpaceJump')),
+                              sm.wand(sm.knowsGravityJump(), sm.haveItem('Gravity')),
+                              sm.wand(sm.wor(sm.wand(sm.knowsLavaDive(), sm.haveItem('HiJump')),
+                                             sm.knowsLavaDiveNoHiJump()),
+                                      sm.energyReserveCountOk(nTanks4Dive))),
+                       sm.canUsePowerBombs()) # power bomb blocks left and right of LN entrance without any items before
 
     def canPassLowerNorfairChozo(self):
         sm = self.smbm

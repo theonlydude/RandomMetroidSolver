@@ -205,6 +205,33 @@ If Charge Beam is not picked up along the way or not accessible, enough minors t
 
 <body>
 {{
+def displaySelectController(name):
+  response.write("<select id=\"{}\" name=\"{}\" form=\"mainform\">\n".format(name, name), escape=False)
+
+  tmp_map = {
+    "button_a": "Item Cancel",
+    "button_b": "Jump",
+    "button_x": "Item Select",
+    "button_y": "Shoot",
+    "button_l": "Angle Up",
+    "button_r": "Dash",
+    "button_s": "Angle Down"
+  }
+
+  value = tmp_map[name]
+
+  for action in ["Shoot", "Jump", "Dash", "Item Select", "Item Cancel", "Angle Up", "Angle Down"]:
+    selected=""
+    if value == action:
+      selected="selected=\"selected\""
+      pass
+
+    response.write("  <option value=\"{}\" {}>{}</option>\n".format(action, selected, action), escape=False)
+    pass
+
+  response.write("</select>\n", escape=False)
+  pass
+
 def displaySelect(name, values, value):
   response.write("<select id=\"{}\" name=\"{}\" form=\"mainform\" onchange=\"changeHiddenSelect('{}')\" class=\"filldropdown\">\n".format(name, name, name), escape=False)
 
@@ -339,14 +366,14 @@ pass
   </p>
 
   <div class="tab">
-    <button id="defaultOpen" class="tablinks" onclick="changeTab(event, 'Global')">Global</button>
+    <button class="tablinks" onclick="changeTab(event, 'Global')">Global</button>
     <button class="tablinks" onclick="changeTab(event, 'Techniques1')">Techniques (1/6)</button>
     <button class="tablinks" onclick="changeTab(event, 'Techniques2')">Techniques (2/6)</button>
     <button class="tablinks" onclick="changeTab(event, 'Techniques3')">Techniques (3/6)</button>
     <button class="tablinks" onclick="changeTab(event, 'Techniques4')">Techniques (4/6)</button>
     <button class="tablinks" onclick="changeTab(event, 'Techniques5')">Techniques (5/6)</button>
     <button class="tablinks" onclick="changeTab(event, 'Techniques6')">Techniques (6/6)</button>
-    <button class="tablinks" onclick="changeTab(event, 'Mapping')">Joystick Mapping</button>
+    <button id="defaultOpen" class="tablinks" onclick="changeTab(event, 'Mapping')">Joystick Mapping</button>
   </div>
 
   <div id="Global" class="tabcontent"><br/>
@@ -584,5 +611,33 @@ for category in categories["page6"]:
 
 pass
 }}
+  </div>
+
+  <div id="Mapping" class="tabcontent">
+    <div class="controller_container">
+      <img id="snes_controller" src="/solver/static/images/snes-controller.png" alt="Snes Controller" title="Snes Controller" class="center_img"/>
+
+      <div class="controller_a">
+	{{ displaySelectController("button_a") }}
+      </div>
+      <div class="controller_b">
+	{{ displaySelectController("button_b") }}
+      </div>
+      <div class="controller_x">
+	{{ displaySelectController("button_x") }}
+      </div>
+      <div class="controller_y">
+	{{ displaySelectController("button_y") }}
+      </div>
+      <div class="controller_l">
+	{{ displaySelectController("button_l") }}
+      </div>
+      <div class="controller_r">
+	{{ displaySelectController("button_r") }}
+      </div>
+      <div class="controller_s">
+	{{ displaySelectController("button_s") }}
+      </div>
+    </div>
   </div>
 </body>

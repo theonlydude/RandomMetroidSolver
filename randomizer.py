@@ -120,7 +120,7 @@ if __name__ == "__main__":
                         help="do not include VARIA randomizer tweaks",
                         dest='noVariaTweaks', action='store_true', default=False)
     parser.add_argument('--controls',
-                        help="specify controls, comma-separated, in that order: Shot,Jump,Dash,ItemSelect,ItemCancel,AngleUp,AngleDown. Possible values: A,B,X,Y,L,R,Select,None",
+                        help="specify controls, comma-separated, in that order: Shoot,Jump,Dash,ItemSelect,ItemCancel,AngleUp,AngleDown. Possible values: A,B,X,Y,L,R,Select,None",
                         dest='controls')
 
     # parse args

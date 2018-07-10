@@ -121,14 +121,14 @@ window.onload = function(){
   document.getElementById("defaultOpen").click();
 
 {{
-  for category in categories:
+  for category in categories["page1"] + categories["page2"] + categories["page3"] + categories["page4"]:
     for know in category['knows']:
       response.write("$(function() { " + "$('#{}_diff')".format(know) + ".barrating('show', {theme: 'bars-1to10'}); });\n", escape=False)
       pass
     pass
   pass
 
-for category in categories:
+for category in categories["page1"] + categories["page2"] + categories["page3"] + categories["page4"]:
     for know in category['knows']:
       if knows[know][0] is False or ('readonly' in desc[know] and desc[know]['readonly'] == True):
         response.write("  $(function() { " + "$('#{}_diff').barrating('readonly', true);".format(know) + "});\n", escape=False)
@@ -340,8 +340,8 @@ pass
     <button id="defaultOpen" class="tablinks" onclick="changeTab(event, 'Global')">Global</button>
     <button class="tablinks" onclick="changeTab(event, 'Techniques1')">Techniques (1/4)</button>
     <button class="tablinks" onclick="changeTab(event, 'Techniques2')">Techniques (2/4)</button>
-    <button class="tablinks" onclick="changeTab(event, 'Techniques2')">Techniques (3/4)</button>
-    <button class="tablinks" onclick="changeTab(event, 'Techniques2')">Techniques (4/4)</button>
+    <button class="tablinks" onclick="changeTab(event, 'Techniques3')">Techniques (3/4)</button>
+    <button class="tablinks" onclick="changeTab(event, 'Techniques4')">Techniques (4/4)</button>
     <button class="tablinks" onclick="changeTab(event, 'Mapping')">Joystick Mapping</button>
   </div>
 
@@ -528,12 +528,54 @@ pass
       Clicking on most of the techniques will send you to an explanation or a tutorial.
     </p>
 {{
-for category in categories:
+for category in categories["page1"]:
   displayCategory(category)
   pass
 
 pass
 }}
-
   </div>
+
+  <div id="Techniques2" class="tabcontent">
+    <p>
+      For each technique you can choose if you know it and your perceived difficulty.</br>
+      Clicking on most of the techniques will send you to an explanation or a tutorial.
+    </p>
+{{
+for category in categories["page2"]:
+  displayCategory(category)
+  pass
+
+pass
+}}
+  </div>
+
+  <div id="Techniques3" class="tabcontent">
+    <p>
+      For each technique you can choose if you know it and your perceived difficulty.</br>
+      Clicking on most of the techniques will send you to an explanation or a tutorial.
+    </p>
+{{
+for category in categories["page3"]:
+  displayCategory(category)
+  pass
+
+pass
+}}
+  </div>
+
+  <div id="Techniques4" class="tabcontent">
+    <p>
+      For each technique you can choose if you know it and your perceived difficulty.</br>
+      Clicking on most of the techniques will send you to an explanation or a tutorial.
+    </p>
+{{
+for category in categories["page4"]:
+  displayCategory(category)
+  pass
+
+pass
+}}
+  </div>
+
 </body>

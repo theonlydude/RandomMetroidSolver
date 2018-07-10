@@ -429,35 +429,46 @@ class Knows:
                                            'href': None,
                                            'rooms': ['Plasma Room']}
 
-    categories = [{'knows': ['WallJump', 'ShineSpark', 'MidAirMorph',
-                             'Mockball', 'SimpleShortCharge', 'InfiniteBombJump', 'GreenGateGlitch',
-                             'ShortCharge', 'GravityJump', 'SpringBallJump',
-                             'SpringBallJumpFromWall', 'GetAroundWallJump'],
-                   'title': 'Used across the game'},
-                  {'knows': ['DraygonGrappleKill', 'DraygonSparkKill', 'MicrowaveDraygon', 'MicrowavePhantoon'],
-                   'title': 'Bosses'},
-                  {'knows': ['IceZebSkip', 'SpeedZebSkip'],
-                   'title': 'End Game'},
-                  {'knows': ['SuitlessOuterMaridia', 'GravLessLevel2', 'SuitlessSandpit'],
-                   'title': 'Underwater movement without Gravity Suit'},
-                  {'knows': ['CeilingDBoost', 'AlcatrazEscape', 'ReverseGateGlitch',
-                             'ReverseGateGlitchHiJumpLess', 'EarlyKraid', 'XrayDboost', 'RedTowerClimb', 'RonPopeilScrew', 'Moondance'],
-                   'title': 'Brinstar'},
-                  {'knows': ['HiJumpLessGauntletAccess', 'HiJumpGauntletAccess'],
-                   'title': 'Gauntlet'},
-                  {'knows': ['LavaDive', 'LavaDiveNoHiJump', 'ScrewAttackExit', 'WorstRoomIceCharge'],
-                   'title': 'Lower Norfair'},
-                  {'knows': ['ContinuousWallJump', 'DiagonalBombJump', 'MockballWs'],
-                   'title': 'Wrecked Ship'},
-                  {'knows': ['SpongeBathBombJump', 'SpongeBathHiJump', 'SpongeBathSpeed'],
-                   'title': 'Wrecked Ship Etank'},
-                  {'knows': ['MochtroidClip', 'PuyoClip'],
-                   'title': 'Maridia Clips'},
-                  {'knows': ['KillPlasmaPiratesWithSpark', 'KillPlasmaPiratesWithCharge'],
-                   'title': 'Maridia Plasma Room'},
-                  {'knows': ['TediousMountEverest', 'SuitlessPuyoClip',
-                             'DraygonRoomGrappleExit', 'DraygonRoomCrystalFlash', 'PreciousRoomXRayExit'],
-                   'title': 'Maridia without Gravity Suit'}]
+    categories = {
+        'page1': [
+            {'knows': ['WallJump', 'ShineSpark', 'MidAirMorph',
+                       'Mockball', 'SimpleShortCharge', 'InfiniteBombJump', 'GreenGateGlitch',
+                       'GravityJump', 'SpringBallJump', 'GetAroundWallJump',
+                       'SpringBallJumpFromWall', 'ShortCharge'],
+             'title': 'Used across the game'},
+            {'knows': ['DraygonGrappleKill', 'DraygonSparkKill', 'MicrowaveDraygon', 'MicrowavePhantoon'],
+             'title': 'Bosses'}
+        ],
+        'page2': [
+            {'knows': ['AlcatrazEscape', 'HiJumpLessGauntletAccess', 'HiJumpGauntletAccess'],
+             'title': 'Crateria'},
+            {'knows': ['CeilingDBoost', 'ReverseGateGlitch',
+                       'ReverseGateGlitchHiJumpLess', 'EarlyKraid', 'XrayDboost',
+                       'RedTowerClimb', 'RonPopeilScrew', 'Moondance'],
+             'title': 'Brinstar'}
+        ],
+        'page3': [
+            {'knows': ['ContinuousWallJump', 'DiagonalBombJump', 'MockballWs'],
+             'title': 'Wrecked Ship'},
+            {'knows': ['SpongeBathBombJump', 'SpongeBathHiJump', 'SpongeBathSpeed'],
+             'title': 'Wrecked Ship Etank'},
+            {'knows': ['SuitlessOuterMaridia', 'GravLessLevel2', 'SuitlessSandpit'],
+             'title': 'Underwater movement without Gravity Suit'},
+            {'knows': ['LavaDive', 'LavaDiveNoHiJump', 'ScrewAttackExit', 'WorstRoomIceCharge'],
+             'title': 'Lower Norfair'},
+            {'knows': ['IceZebSkip', 'SpeedZebSkip'],
+             'title': 'End Game'}
+        ],
+        'page4': [
+            {'knows': ['MochtroidClip', 'PuyoClip'],
+             'title': 'Maridia Clips'},
+            {'knows': ['KillPlasmaPiratesWithSpark', 'KillPlasmaPiratesWithCharge'],
+             'title': 'Maridia Plasma Room'},
+            {'knows': ['TediousMountEverest', 'SuitlessPuyoClip',
+                       'DraygonRoomGrappleExit', 'DraygonRoomCrystalFlash', 'PreciousRoomXRayExit'],
+             'title': 'Maridia without Gravity Suit'}
+        ]
+    }
 
     newNames = {
         'SuitlessOuterMaridia' : 'GravLessLevel1',

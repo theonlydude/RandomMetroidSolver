@@ -13,6 +13,13 @@ extend 'layout.html'
 <title>Super Metroid VARIA Presets</title>
 
 <style>
+/* Style the tab */
+.tab {
+    overflow: hidden;
+    border: 1px solid #ccc;
+    background-color: #f1f1f1;
+}
+
 /* Style the buttons that are used to open the tab content */
 .tab button {
     background-color: inherit;
@@ -121,21 +128,16 @@ window.onload = function(){
   document.getElementById("defaultOpen").click();
 
 {{
-  for category in categories["page1"] + categories["page2"] + categories["page3"] + categories["page4"]:
+  for category in categories["page1"] + categories["page2"] + categories["page3"] + categories["page4"] + categories["page5"] + categories["page6"]:
     for know in category['knows']:
       response.write("$(function() { " + "$('#{}_diff')".format(know) + ".barrating('show', {theme: 'bars-1to10'}); });\n", escape=False)
-      pass
-    pass
-  pass
-
-for category in categories["page1"] + categories["page2"] + categories["page3"] + categories["page4"]:
-    for know in category['knows']:
       if knows[know][0] is False or ('readonly' in desc[know] and desc[know]['readonly'] == True):
         response.write("  $(function() { " + "$('#{}_diff').barrating('readonly', true);".format(know) + "});\n", escape=False)
         pass
       pass
     pass
   pass
+pass
 }}
 }
 
@@ -338,14 +340,16 @@ pass
 
   <div class="tab">
     <button id="defaultOpen" class="tablinks" onclick="changeTab(event, 'Global')">Global</button>
-    <button class="tablinks" onclick="changeTab(event, 'Techniques1')">Techniques (1/4)</button>
-    <button class="tablinks" onclick="changeTab(event, 'Techniques2')">Techniques (2/4)</button>
-    <button class="tablinks" onclick="changeTab(event, 'Techniques3')">Techniques (3/4)</button>
-    <button class="tablinks" onclick="changeTab(event, 'Techniques4')">Techniques (4/4)</button>
+    <button class="tablinks" onclick="changeTab(event, 'Techniques1')">Techniques (1/6)</button>
+    <button class="tablinks" onclick="changeTab(event, 'Techniques2')">Techniques (2/6)</button>
+    <button class="tablinks" onclick="changeTab(event, 'Techniques3')">Techniques (3/6)</button>
+    <button class="tablinks" onclick="changeTab(event, 'Techniques4')">Techniques (4/6)</button>
+    <button class="tablinks" onclick="changeTab(event, 'Techniques5')">Techniques (5/6)</button>
+    <button class="tablinks" onclick="changeTab(event, 'Techniques6')">Techniques (6/6)</button>
     <button class="tablinks" onclick="changeTab(event, 'Mapping')">Joystick Mapping</button>
   </div>
 
-  <div id="Global" class="tabcontent">
+  <div id="Global" class="tabcontent"><br/>
     <div class="row">
       <div class="column">
 	<h3>Difficulty Target</h3>
@@ -523,10 +527,6 @@ pass
   </div>
 
   <div id="Techniques1" class="tabcontent">
-    <p>
-      For each technique you can choose if you know it and your perceived difficulty.</br>
-      Clicking on most of the techniques will send you to an explanation or a tutorial.
-    </p>
 {{
 for category in categories["page1"]:
   displayCategory(category)
@@ -537,10 +537,6 @@ pass
   </div>
 
   <div id="Techniques2" class="tabcontent">
-    <p>
-      For each technique you can choose if you know it and your perceived difficulty.</br>
-      Clicking on most of the techniques will send you to an explanation or a tutorial.
-    </p>
 {{
 for category in categories["page2"]:
   displayCategory(category)
@@ -551,10 +547,6 @@ pass
   </div>
 
   <div id="Techniques3" class="tabcontent">
-    <p>
-      For each technique you can choose if you know it and your perceived difficulty.</br>
-      Clicking on most of the techniques will send you to an explanation or a tutorial.
-    </p>
 {{
 for category in categories["page3"]:
   displayCategory(category)
@@ -565,10 +557,6 @@ pass
   </div>
 
   <div id="Techniques4" class="tabcontent">
-    <p>
-      For each technique you can choose if you know it and your perceived difficulty.</br>
-      Clicking on most of the techniques will send you to an explanation or a tutorial.
-    </p>
 {{
 for category in categories["page4"]:
   displayCategory(category)
@@ -578,4 +566,23 @@ pass
 }}
   </div>
 
+  <div id="Techniques5" class="tabcontent">
+{{
+for category in categories["page5"]:
+  displayCategory(category)
+  pass
+
+pass
+}}
+  </div>
+
+  <div id="Techniques6" class="tabcontent">
+{{
+for category in categories["page6"]:
+  displayCategory(category)
+  pass
+
+pass
+}}
+  </div>
 </body>

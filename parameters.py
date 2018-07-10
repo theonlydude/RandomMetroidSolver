@@ -435,9 +435,7 @@ class Knows:
                        'Mockball', 'SimpleShortCharge', 'InfiniteBombJump', 'GreenGateGlitch',
                        'GravityJump', 'SpringBallJump', 'GetAroundWallJump',
                        'SpringBallJumpFromWall', 'ShortCharge'],
-             'title': 'Used across the game'},
-            {'knows': ['DraygonGrappleKill', 'DraygonSparkKill', 'MicrowaveDraygon', 'MicrowavePhantoon'],
-             'title': 'Bosses'}
+             'title': 'Used across the game'}
         ],
         'page2': [
             {'knows': ['AlcatrazEscape', 'HiJumpLessGauntletAccess', 'HiJumpGauntletAccess'],
@@ -451,15 +449,21 @@ class Knows:
             {'knows': ['ContinuousWallJump', 'DiagonalBombJump', 'MockballWs'],
              'title': 'Wrecked Ship'},
             {'knows': ['SpongeBathBombJump', 'SpongeBathHiJump', 'SpongeBathSpeed'],
-             'title': 'Wrecked Ship Etank'},
+             'title': 'Wrecked Ship Etank'}
+        ],
+        'page4': [
             {'knows': ['SuitlessOuterMaridia', 'GravLessLevel2', 'SuitlessSandpit'],
              'title': 'Underwater movement without Gravity Suit'},
             {'knows': ['LavaDive', 'LavaDiveNoHiJump', 'ScrewAttackExit', 'WorstRoomIceCharge'],
-             'title': 'Lower Norfair'},
+             'title': 'Lower Norfair'}
+        ],
+        'page5': [
+            {'knows': ['DraygonGrappleKill', 'DraygonSparkKill', 'MicrowaveDraygon', 'MicrowavePhantoon'],
+             'title': 'Bosses'},
             {'knows': ['IceZebSkip', 'SpeedZebSkip'],
              'title': 'End Game'}
         ],
-        'page4': [
+        'page6': [
             {'knows': ['MochtroidClip', 'PuyoClip'],
              'title': 'Maridia Clips'},
             {'knows': ['KillPlasmaPiratesWithSpark', 'KillPlasmaPiratesWithCharge'],

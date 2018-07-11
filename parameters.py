@@ -435,20 +435,25 @@ class Knows:
                        'Mockball', 'SimpleShortCharge', 'InfiniteBombJump', 'GreenGateGlitch',
                        'GravityJump', 'SpringBallJump', 'GetAroundWallJump',
                        'SpringBallJumpFromWall', 'ShortCharge'],
-             'title': 'Used across the game'}
+             'title': 'Used across the game'},
+            {'knows': ['DraygonGrappleKill', 'DraygonSparkKill', 'MicrowaveDraygon', 'MicrowavePhantoon'],
+             'title': 'Bosses'},
+            {'knows': ['IceZebSkip', 'SpeedZebSkip'],
+             'title': 'End Game'}
         ],
         'page2': [
-            {'knows': ['AlcatrazEscape', 'HiJumpLessGauntletAccess', 'HiJumpGauntletAccess'],
+            {'knows': ['AlcatrazEscape', 'HiJumpGauntletAccess', 'HiJumpLessGauntletAccess'],
              'title': 'Crateria'},
-            {'knows': ['CeilingDBoost', 'ReverseGateGlitch',
-                       'ReverseGateGlitchHiJumpLess', 'EarlyKraid', 'XrayDboost',
-                       'RedTowerClimb', 'RonPopeilScrew', 'Moondance'],
+            {'knows': ['CeilingDBoost', 'EarlyKraid',
+                       'ReverseGateGlitch', 'ReverseGateGlitchHiJumpLess', 
+                       'RedTowerClimb', 'XrayDboost',
+                       'RonPopeilScrew', 'Moondance'],
              'title': 'Brinstar'}
         ],
         'page3': [
             {'knows': ['ContinuousWallJump', 'DiagonalBombJump', 'MockballWs'],
              'title': 'Wrecked Ship'},
-            {'knows': ['SpongeBathBombJump', 'SpongeBathHiJump', 'SpongeBathSpeed'],
+            {'knows': ['SpongeBathHiJump', 'SpongeBathSpeed', 'SpongeBathBombJump'],
              'title': 'Wrecked Ship Etank'}
         ],
         'page4': [
@@ -458,12 +463,6 @@ class Knows:
              'title': 'Lower Norfair'}
         ],
         'page5': [
-            {'knows': ['DraygonGrappleKill', 'DraygonSparkKill', 'MicrowaveDraygon', 'MicrowavePhantoon'],
-             'title': 'Bosses'},
-            {'knows': ['IceZebSkip', 'SpeedZebSkip'],
-             'title': 'End Game'}
-        ],
-        'page6': [
             {'knows': ['MochtroidClip', 'PuyoClip'],
              'title': 'Maridia Clips'},
             {'knows': ['KillPlasmaPiratesWithSpark', 'KillPlasmaPiratesWithCharge'],

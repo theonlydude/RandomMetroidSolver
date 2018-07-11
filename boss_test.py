@@ -5,7 +5,7 @@ import sys
 from parameters import *
 from helpers import *
 from smboolmanager import *
-from solver import ParamsLoader
+from utils import ParamsLoader
 
 def stuff(base, nEtanks, nMissiles, nSupers, nPowerBombs):
     ret = base

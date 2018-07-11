@@ -8,7 +8,7 @@ from itemrandomizerweb.AreaRandomizer import AreaRandomizer
 from graph_locations import locations as graphLocations
 from graph_access import vanillaTransitions, getDoorConnections
 from parameters import Knows, easy, medium, hard, harder, hardcore, mania, text2diff, diff2text
-from solver import ParamsLoader
+from utils import ParamsLoader
 from rom import RomPatcher, RomPatches, FakeROM
 
 speeds = ['slowest', 'slow', 'medium', 'fast', 'fastest']

@@ -430,16 +430,13 @@ class Knows:
                                            'rooms': ['Plasma Room']}
 
     categories = {
-        'Common/Bosses/End': [
-            {'knows': ['WallJump', 'ShineSpark', 'MidAirMorph',
-                       'Mockball', 'SimpleShortCharge', 'InfiniteBombJump', 'GreenGateGlitch',
-                       'GravityJump', 'GetAroundWallJump', 'SpringBallJump',
-                       'SpringBallJumpFromWall', 'ShortCharge'],
-             'title': 'Used across the game'},
-            {'knows': ['DraygonGrappleKill', 'DraygonSparkKill', 'MicrowaveDraygon', 'MicrowavePhantoon'],
-             'title': 'Bosses'},
-            {'knows': ['IceZebSkip', 'SpeedZebSkip'],
-             'title': 'End Game'}
+        'Common': [
+            {'knows': ['WallJump', 'ShineSpark', 'MidAirMorph'],
+             'title': 'Basics'},
+             {'knows': ['Mockball', 'SimpleShortCharge', 'InfiniteBombJump', 'GreenGateGlitch',
+                       'GravityJump', 'GetAroundWallJump',
+                       'SpringBallJump', 'SpringBallJumpFromWall', 'ShortCharge'],
+             'title': 'Used across the game'}
         ],
         'Crateria/Brinstar': [
             {'knows': ['AlcatrazEscape', 'HiJumpGauntletAccess', 'HiJumpLessGauntletAccess'],
@@ -452,20 +449,33 @@ class Knows:
         ],
         'Wrecked Ship': [
             {'knows': ['ContinuousWallJump', 'DiagonalBombJump', 'MockballWs'],
-             'title': 'Wrecked Ship'},
+             'title': 'Access'},
             {'knows': ['SpongeBathHiJump', 'SpongeBathSpeed', 'SpongeBathBombJump'],
-             'title': 'Wrecked Ship Etank'}
+             'title': 'Sponge Bath'}
         ],
-        'Maridia': [
-            {'knows': ['MochtroidClip', 'KillPlasmaPiratesWithCharge', 'KillPlasmaPiratesWithSpark', 'PuyoClip'],
-             'title': 'Maridia'},
-            {'knows': ['DraygonRoomGrappleExit', 'DraygonRoomCrystalFlash', 'PreciousRoomXRayExit',
-                       'TediousMountEverest', 'SuitlessPuyoClip'],
-             'title': 'Maridia without Gravity Suit'}
+        'Maridia 1/2': [
+            {'knows': ['SuitlessOuterMaridia', 'GravLessLevel2', 'SuitlessSandpit'],
+             'title': 'Underwater movement without Gravity Suit'},
+            {'knows': ['MochtroidClip', 'PuyoClip'],
+             'title': 'Clips'},
+            {'knows': ['KillPlasmaPiratesWithCharge', 'KillPlasmaPiratesWithSpark'],
+             'title': 'Plasma Room'},
+        ],
+        'Maridia 2/2': [
+            {'knows': ['DraygonRoomGrappleExit', 'DraygonRoomCrystalFlash', 'PreciousRoomXRayExit'],
+             'title': 'Suitless Draygon Exit'},
+            {'knows': ['TediousMountEverest', 'SuitlessPuyoClip'],
+             'title': 'Obscure suitless stuff'}
         ],
         'Lower Norfair': [
             {'knows': ['LavaDive', 'LavaDiveNoHiJump', 'ScrewAttackExit', 'WorstRoomIceCharge'],
              'title': 'Lower Norfair'}
+        ],
+        'Bosses/End': [
+            {'knows': ['DraygonGrappleKill', 'DraygonSparkKill', 'MicrowaveDraygon', 'MicrowavePhantoon'],
+             'title': 'Bosses'},
+            {'knows': ['IceZebSkip', 'SpeedZebSkip'],
+             'title': 'End Game'}
         ]
     }
 

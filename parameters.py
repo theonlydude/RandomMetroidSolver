@@ -826,3 +826,16 @@ class Settings:
         # relative to how hard the boss hits
         'dmgReductionDifficultyFactor' : 1.5
     }
+
+def isButton(button):
+    return button[0:len('__')] != '__'
+
+class Controller:
+    # controller mapping
+    A = "Jump"
+    B = "Dash"
+    X = "Shoot"
+    Y = "Item Cancel"
+    L = "Angle Down"
+    R = "Angle Up"
+    Select = "Item Select"

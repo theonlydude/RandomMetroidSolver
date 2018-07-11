@@ -9,10 +9,13 @@ import datetime, os, hashlib, json, re, subprocess, tempfile
 from collections import OrderedDict
 
 # to solve the rom
-from parameters import easy, medium, hard, harder, hardcore, mania, Conf, Knows, Settings, isKnows
+from parameters import easy, medium, hard, harder, hardcore, mania
+from parameters import Conf, Knows, Settings, Controller, isKnows, isButton
 from parameters import diff2text, text2diff
 from graph_locations import locations as graphLocations
-from solver import Solver, ParamsLoader, DifficultyDisplayer, RomLoader
+from solver import Solver, DifficultyDisplayer
+from rom import RomLoader
+from utils import ParamsLoader
 
 def maxPresetsReach():
     # to prevent a spammer to create presets in a loop and fill the fs
@@ -258,6 +261,12 @@ def presets():
         if hardroom not in params['Settings']:
             params['Settings'][hardroom] = 'Default'
 
+    # add missing controller buttons
+    for button in Controller.__dict__:
+        if isButton(button):
+            if button not in params['Controller'].keys():
+                params['Controller'][button] = Controller.__dict__[button]
+
     # send values to view
     return dict(mainForm=None, loadForm=loadForm, saveForm=saveForm,
                 desc=Knows.desc,
@@ -267,7 +276,8 @@ def presets():
                 resultText=resultText, pathTable=pathTable,
                 difficulty=difficulty, itemsOk=itemsOk, diffPercent=diffPercent,
                 easy=easy,medium=medium,hard=hard,harder=harder,hardcore=hardcore,mania=mania,
-                pngFileName=pngFileName, pngThumbFileName=pngThumbFileName)
+                pngFileName=pngFileName, pngThumbFileName=pngThumbFileName,
+                controller=params['Controller'], session=session, presets=presets)
 
 def solver():
     if session.paramsFile is None:
@@ -463,7 +473,7 @@ def generate_json_from_parameters(vars, hidden):
     else:
         hidden = ""
 
-    paramsDict = {'Knows': {}, 'Conf': {}, 'Settings': {}}
+    paramsDict = {'Knows': {}, 'Conf': {}, 'Settings': {}, 'Controller': {}}
 
     # Knows
     for var in Knows.__dict__:
@@ -519,6 +529,15 @@ def generate_json_from_parameters(vars, hidden):
         value = vars[room+hidden]
         if value is not None:
             paramsDict['Settings'][room] = value
+
+    # Controller
+    for button in Controller.__dict__:
+        if isButton(button):
+            value = vars[button]
+            if value is None:
+                paramsDict['Controller'][button] = Controller.__dict__[button]
+            else:
+                paramsDict['Controller'][button] = value
 
     return paramsDict
 
@@ -744,6 +763,16 @@ def sessionWebService():
     session.randomizer['areaLayout'] = request.vars.areaLayout
     session.randomizer['variaTweaks'] = request.vars.variaTweaks
 
+def getCustomMapping(controlMapping):
+    if len(controlMapping) == 0:
+        return (False, None)
+
+    inv = {}
+    for button in controlMapping:
+        inv[controlMapping[button]] = button
+
+    return (True, "{},{},{},{},{},{},{}".format(inv["Shoot"], inv["Jump"], inv["Dash"], inv["Item Select"], inv["Item Cancel"], inv["Angle Up"], inv["Angle Down"]))
+
 def randomizerWebService():
     # web service to compute a new random (returns json string)
     print("randomizerWebService")
@@ -847,6 +876,12 @@ def randomizerWebService():
 
     if request.vars.areaRandomization == 'on':
         params.append('--area')
+
+    # load content of preset to get controller mapping
+    controlMapping = ParamsLoader.factory(presetFileName).params['Controller']
+    (custom, controlParam) = getCustomMapping(controlMapping)
+    if custom == True:
+        params += ['--controls', controlParam]
 
     print("before calling: {}".format(params))
     ret = subprocess.call(params)

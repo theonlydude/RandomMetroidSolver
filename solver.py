@@ -2,7 +2,7 @@
 
 # https://itemrando.supermetroid.run/randomize
 
-import sys, math, os, json, logging, argparse
+import sys, math, logging, argparse
 
 # the difficulties for each technics
 from parameters import Conf, Knows, Settings, isKnows, isConf, isSettings
@@ -16,13 +16,14 @@ from rom import RomType, RomLoader
 from graph_locations import locations as graphLocations
 from graph import AccessGraph
 from graph_access import vanillaTransitions, accessPoints
+from utils import ParamsLoader
 
 class Solver:
     # given a rom and parameters returns the estimated difficulty
 
     def __init__(self, type='console', rom=None, params=None, debug=False, firstItemsLog=None):
         if debug == True:
-            logging.basicConfig(level=logging.DEBUG)
+            logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
         else:
             logging.basicConfig(level=logging.INFO)
         self.log = logging.getLogger('Solver')
@@ -85,22 +86,12 @@ class Solver:
         self.romLoaded = True
 
     def loadParams(self, params):
-        ParamsLoader.factory(params).load()
+        paramsLoader = ParamsLoader.factory(params)
+        paramsLoader.load()
         self.smbm.createKnowsFunctions()
 
         if self.log.getEffectiveLevel() == logging.DEBUG:
-            self.log.debug("loaded knows: ")
-            for knows in Knows.__dict__:
-                if isKnows(knows):
-                    self.log.debug("{}: {}".format(knows, Knows.__dict__[knows]))
-            self.log.debug("loaded settings:")
-            for setting in Settings.__dict__:
-                if isSettings(setting):
-                    self.log.debug("{}: {}".format(setting, Settings.__dict__[setting]))
-            self.log.debug("loaded conf:")
-            for conf in Conf.__dict__:
-                if isConf(conf):
-                    self.log.debug("{}: {}".format(conf, Conf.__dict__[conf]))
+            paramsLoader.printToScreen()
 
     def solveRom(self):
         if self.romLoaded == False:
@@ -477,92 +468,6 @@ class Solver:
         self.log.debug("outside2 = " + str([(loc['Name'], loc['difficulty'], loc['distance'], loc['comeBack'], loc['SolveArea']) for loc in outside]))
 
         return around + outside
-
-
-class ParamsLoader(object):
-    @staticmethod
-    def factory(params):
-        # can be a json, a python file or a dict with the parameters
-        if type(params) is str:
-            ext = os.path.splitext(params)
-            if ext[1].lower() == '.json':
-                return ParamsLoaderJson(params)
-            else:
-                print("wrong parameters file type: {}".format(ext[1]))
-                sys.exit(-1)
-        elif type(params) is dict:
-            return ParamsLoaderDict(params)
-
-    def __init__(self):
-        if 'Knows' not in self.params:
-            self.params['Knows'] = {}
-        if 'Conf' not in self.params:
-            self.params['Conf'] = {}
-        if 'Settings' not in self.params:
-            self.params['Settings'] = {}
-
-    def load(self):
-        # update the parameters in the parameters classes: Conf, Knows, Settings
-        # Conf
-        for param in self.params['Conf']:
-            if isConf(param):
-                setattr(Conf, param, self.params['Conf'][param])
-
-        # Knows
-        for param in self.params['Knows']:
-            if isKnows(param) and hasattr(Knows, param):
-                setattr(Knows, param, SMBool(self.params['Knows'][param][0],
-                                             self.params['Knows'][param][1],
-                                             ['{}'.format(param)]))
-        # Settings
-        ## hard rooms
-        for hardRoom in ['X-Ray', 'Gauntlet']:
-            if hardRoom in self.params['Settings']:
-                Settings.hardRooms[hardRoom] = Settings.hardRoomsPresets[hardRoom][self.params['Settings'][hardRoom]]
-
-        ## bosses
-        for boss in ['Kraid', 'Phantoon', 'Draygon', 'Ridley', 'MotherBrain']:
-            if boss in self.params['Settings']:
-                Settings.bossesDifficulty[boss] = Settings.bossesDifficultyPresets[boss][self.params['Settings'][boss]]
-
-        ## hellruns
-        for hellRun in ['Ice', 'MainUpperNorfair', 'LowerNorfair']:
-            if hellRun in self.params['Settings']:
-                Settings.hellRuns[hellRun] = Settings.hellRunPresets[hellRun][self.params['Settings'][hellRun]]
-
-    def dump(self, fileName):
-        with open(fileName, 'w') as jsonFile:
-            json.dump(self.params, jsonFile)
-
-    def printToScreen(self):
-        print("self.params: {}".format(self.params))
-
-        print("loaded knows: ")
-        for knows in Knows.__dict__:
-            if isKnows(knows):
-                print("{}: {}".format(knows, Knows.__dict__[knows]))
-        print("loaded settings:")
-        for setting in Settings.__dict__:
-            if isSettings(setting):
-                print("{}: {}".format(setting, Settings.__dict__[setting]))
-        print("loaded conf:")
-        for conf in Conf.__dict__:
-            if isConf(conf):
-                print("{}: {}".format(conf, Conf.__dict__[conf]))
-
-
-class ParamsLoaderJson(ParamsLoader):
-    # when called from the test suite
-    def __init__(self, jsonFileName):
-        with open(jsonFileName) as jsonFile:
-            self.params = json.load(jsonFile)
-        super(ParamsLoaderJson, self).__init__()
-
-class ParamsLoaderDict(ParamsLoader):
-    # when called from the website
-    def __init__(self, params):
-        self.params = params
-        super(ParamsLoaderDict, self).__init__()
 
 class DifficultyDisplayer:
     def __init__(self, difficulty):

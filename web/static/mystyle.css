@@ -222,3 +222,57 @@ p {
 .square {
     border-style: solid;
 }
+.center_img {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: 80%;
+}
+.button_a {
+    background-position: 25% 75%;
+}
+.controller_container {
+    position: relative;
+}
+.controller_a {
+    position: absolute;
+    left: 69%;
+    top: 57%;
+    z-index: 2;
+}
+.controller_b {
+    position: absolute;
+    left: 64%;
+    top: 70%;
+    z-index: 2;
+}
+.controller_x {
+    position: absolute;
+    left: 63%;
+    top: 44%;
+    z-index: 2;
+}
+.controller_y {
+    position: absolute;
+    left: 58%;
+    top: 57%;
+    z-index: 2;
+}
+.controller_l {
+    position: absolute;
+    left: 32%;
+    top: 17%;
+    z-index: 2;
+}
+.controller_r {
+    position: absolute;
+    left: 62%;
+    top: 17%;
+    z-index: 2;
+}
+.controller_s {
+    position: absolute;
+    left: 42%;
+    top: 62%;
+    z-index: 2;
+}

@@ -8,7 +8,7 @@ from itemrandomizerweb.AreaRandomizer import AreaRandomizer
 from graph_locations import locations as graphLocations
 from graph_access import vanillaTransitions, getDoorConnections
 from parameters import Knows, easy, medium, hard, harder, hardcore, mania, text2diff, diff2text
-from solver import ParamsLoader
+from utils import ParamsLoader
 from rom import RomPatcher, RomPatches, FakeROM
 
 speeds = ['slowest', 'slow', 'medium', 'fast', 'fastest']
@@ -120,7 +120,7 @@ if __name__ == "__main__":
                         help="do not include VARIA randomizer tweaks",
                         dest='noVariaTweaks', action='store_true', default=False)
     parser.add_argument('--controls',
-                        help="specify controls, comma-separated, in that order: Shot,Jump,Dash,ItemSelect,ItemCancel,AngleUp,AngleDown. Possible values: A,B,X,Y,L,R,Select,None",
+                        help="specify controls, comma-separated, in that order: Shoot,Jump,Dash,ItemSelect,ItemCancel,AngleUp,AngleDown. Possible values: A,B,X,Y,L,R,Select,None",
                         dest='controls')
 
     # parse args

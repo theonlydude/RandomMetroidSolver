@@ -77,16 +77,15 @@ def presets():
         # default preset
         session.paramsFile = 'regular'
 
-    if request.post_vars._formname is not None:
+    if request.vars.action is not None:
         # press solve, load or save button
-        if request.post_vars._formname in ['saveform', 'mainform']:
+        if request.vars.action in ['saveform', 'mainform']:
             # store the changes in case the form won't be accepted
-            paramsDict = generate_json_from_parameters(request.post_vars,
-                                                       hidden=(request.post_vars._formname == 'saveform'))
+            paramsDict = generate_json_from_parameters(request.vars)
             session.paramsDict = paramsDict
             params = ParamsLoader.factory(session.paramsDict).params
             loaded = True
-        elif request.post_vars._formname in ['loadform']:
+        elif request.vars.action in ['loadform']:
             # nothing to load, we'll load the new params file with the load form code
             pass
     else:
@@ -97,18 +96,6 @@ def presets():
 
     if not loaded:
         params = ParamsLoader.factory('diff_presets/{}.json'.format(session.paramsFile)).params
-
-    # filter the displayed roms to display only the ones uploaded in this session
-    if session.romFiles is None:
-        session.romFiles = []
-        roms = []
-    elif len(session.romFiles) == 0:
-        roms = []
-    else:
-        files = sorted(os.listdir('roms'))
-        bases = [os.path.splitext(file)[0] for file in files]
-        filtered = [base for base in bases if base in session.romFiles]
-        roms = [file+'.sfc' for file in filtered]
 
     # main form
     if session.romFile is not None:
@@ -126,20 +113,10 @@ def presets():
         presets.remove(preset)
     presets = stdPresets + presets
 
-    loadForm = FORM(TABLE(COLGROUP(COL(_class="quarter"), COL(_class="half"), COL(_class="quarter")),
-                          TR("Load preset: ",
-                             SELECT(*presets,
-                                    **dict(_name="paramsFile",
-                                           value=session.paramsFile,
-                                           _onchange="this.form.submit()",
-                                           _class="filldropdown")),
-                             INPUT(_type="submit",_value="Load", _class="full")),
-                          _class="threequarter"),
-                    _id="loadform", _name="loadform")
-
-    if loadForm.process(formname='loadform').accepted:
+    # in web2py.js, in disableElement, remove 'working...' to have action with correct value
+    if request.vars.action == 'Load':
         # check that the presets file exists
-        paramsFile = loadForm.vars['paramsFile']
+        paramsFile = request.vars['paramsFileLoad']
         fullPath = 'diff_presets/{}.json'.format(paramsFile)
         if os.path.isfile(fullPath):
             # load it
@@ -152,34 +129,12 @@ def presets():
         else:
             session.flash = "Presets file not found"
 
-    # save form
-    saveTable = TABLE(COLGROUP(COL(_class="quarter"), COL(_class="half"), COL(_class="quarter")),
-                      TR("Update preset:",
-                         SELECT(*presets, **dict(_name="paramsFile",
-                                                 value=session.paramsFile,
-                                                 _class="filldropdown")),
-                         INPUT(_type="button",_value="Update", _class="full", _onclick="askPassword()")),
-                      TR("New preset:",
-                         INPUT(_type="text",
-                               _name="saveFile",
-                               requires=[IS_ALPHANUMERIC(error_message='Preset name must be alphanumeric and max 32 chars'),
-                                         IS_LENGTH(32)],
-                               _class="full"),
-                         INPUT(_type="button",_value="Create", _class="full", _onclick="askPassword()")),
-                      TR(INPUT(_type="text",
-                               _name="password", _id="password",
-                               requires=[IS_NOT_EMPTY(),
-                                         IS_ALPHANUMERIC(error_message='Password must be alphanumeric and max 32 chars'),
-                                         IS_LENGTH(32)],
-                               _style='display:none')),
-                      _class="threequarter")
-    saveForm = FORM(saveTable, _id="saveform", _name="saveform")
-
-    if saveForm.process(formname='saveform').accepted:
+    if request.vars.action in ['Update', 'Create']:
         # update or creation ?
-        saveFile = saveForm.vars['saveFile']
-        if saveFile == "":
-            saveFile = saveForm.vars['paramsFile']
+        if request.post_vars.action == 'Create':
+            saveFile = saveForm.vars['saveFile']
+        else:
+            saveFile = saveForm.vars['paramsFileUpdate']
 
         # check if the presets file already exists
         password = saveForm.vars['password']
@@ -193,7 +148,7 @@ def presets():
             # check if password match
             if 'password' in oldParams and passwordSHA256 == oldParams['password']:
                 # update the presets file
-                paramsDict = generate_json_from_parameters(request.post_vars, hidden=True)
+                paramsDict = generate_json_from_parameters(request.post_vars)
                 paramsDict['password'] = passwordSHA256
                 ParamsLoader.factory(paramsDict).dump(fullPath)
                 session.paramsFile = saveFile
@@ -207,7 +162,7 @@ def presets():
             # check that there's no more than 2K presets (there's less than 2K sm rando players in the world)
             if not maxPresetsReach():
                 # write the presets file
-                paramsDict = generate_json_from_parameters(request.post_vars, hidden=True)
+                paramsDict = generate_json_from_parameters(request.post_vars)
                 paramsDict['password'] = passwordSHA256
                 ParamsLoader.factory(paramsDict).dump(fullPath)
                 session.paramsFile = saveFile
@@ -268,7 +223,7 @@ def presets():
                 params['Controller'][button] = Controller.__dict__[button]
 
     # send values to view
-    return dict(mainForm=None, loadForm=loadForm, saveForm=saveForm,
+    return dict(mainForm=None, loadForm=None, saveForm=None,
                 desc=Knows.desc,
                 difficulties=diff2text,
                 categories=Knows.categories, settings=params['Settings'],
@@ -467,31 +422,27 @@ def solver():
                 easy=easy,medium=medium,hard=hard,harder=harder,hardcore=hardcore,mania=mania,
                 pngFileName=pngFileName, pngThumbFileName=pngThumbFileName)
 
-def generate_json_from_parameters(vars, hidden):
-    if hidden is True:
-        hidden = "_hidden"
-    else:
-        hidden = ""
+def generate_json_from_parameters(vars):
 
     paramsDict = {'Knows': {}, 'Conf': {}, 'Settings': {}, 'Controller': {}}
 
     # Knows
     for var in Knows.__dict__:
         if isKnows(var):
-            boolVar = vars[var+"_bool"+hidden]
+            boolVar = vars[var+"_bool"]
             if boolVar is None:
                 paramsDict['Knows'][var] = [False, 0]
             else:
-                diffVar = vars[var+"_diff"+hidden]
+                diffVar = vars[var+"_diff"]
                 if diffVar is not None:
                     paramsDict['Knows'][var] = [True, text2diff[diffVar]]
 
     # Conf
-    diffTarget = vars["difficulty_target"+hidden]
+    diffTarget = vars["difficulty_target"]
     if diffTarget is not None:
         paramsDict['Conf']['difficultyTarget'] = text2diff[diffTarget]
 
-    pickupStrategy = vars["pickup_strategy"+hidden]
+    pickupStrategy = vars["pickup_strategy"]
     if pickupStrategy is not None:
         if pickupStrategy == 'all':
             paramsDict['Conf']['majorsPickup'] = 'all'
@@ -505,7 +456,7 @@ def generate_json_from_parameters(vars, hidden):
 
     itemsForbidden = []
     for item in ['ETank', 'Missile', 'Super', 'PowerBomb', 'Bomb', 'Charge', 'Ice', 'HiJump', 'SpeedBooster', 'Wave', 'Spazer', 'SpringBall', 'Varia', 'Plasma', 'Grapple', 'Morph', 'Reserve', 'Gravity', 'XRayScope', 'SpaceJump', 'ScrewAttack']:
-        boolvar = vars[item+"_bool"+hidden]
+        boolvar = vars[item+"_bool"]
         if boolvar is not None:
             itemsForbidden.append(item)
 
@@ -516,17 +467,17 @@ def generate_json_from_parameters(vars, hidden):
 
     # Settings
     for hellRun in ['Ice', 'MainUpperNorfair', 'LowerNorfair']:
-        value = vars[hellRun+hidden]
+        value = vars[hellRun]
         if value is not None:
             paramsDict['Settings'][hellRun] = value
 
     for boss in ['Kraid', 'Phantoon', 'Draygon', 'Ridley', 'MotherBrain']:
-        value = vars[boss+hidden]
+        value = vars[boss]
         if value is not None:
             paramsDict['Settings'][boss] = value
 
     for room in ['X-Ray', 'Gauntlet']:
-        value = vars[room+hidden]
+        value = vars[room]
         if value is not None:
             paramsDict['Settings'][room] = value
 

@@ -276,3 +276,7 @@ p {
     top: 62%;
     z-index: 2;
 }
+.presetform {
+    margin-top: 1em;
+    margin-bottom: 1em;
+}

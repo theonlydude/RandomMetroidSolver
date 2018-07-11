@@ -94,7 +94,7 @@ function askPassword() {
 
   if (password != null) {
     document.getElementById("password").value = password;
-    document.saveform.submit();
+    document.presetForm.submit();
   }
 }
 function doSubmit() {
@@ -106,21 +106,12 @@ function doSubmit() {
 function toggleSelect(elem)
 {
   var boolElem = elem + "_bool";
-  var boolElemHidden = boolElem + "_hidden";
   var diffElem = elem + "_diff";
   var isChecked = document.getElementById(boolElem).checked;
   document.getElementById(diffElem).disabled = !isChecked;
-  document.getElementById(boolElemHidden).checked = isChecked;
 
   // change the readonly status in bar rating too
   $("#"+elem+"_diff").barrating('readonly', !isChecked);
-}
-function changeHiddenSelect(diffElem)
-{
-  var diffElemHidden = diffElem + "_hidden";
-
-  document.getElementById(diffElemHidden).value = document.getElementById(diffElem).value;
-  document.getElementById(diffElemHidden).selectedIndex = document.getElementById(diffElem).selectedIndex;
 }
 
 window.onload = function(){
@@ -130,7 +121,7 @@ window.onload = function(){
 {{
   for category in categories["page1"] + categories["page2"] + categories["page3"] + categories["page4"] + categories["page5"] + categories["page6"]:
     for know in category['knows']:
-      response.write("$(function() { " + "$('#{}_diff')".format(know) + ".barrating('show', {theme: 'bars-1to10'}); });\n", escape=False)
+      response.write("  $(function() { " + "$('#{}_diff')".format(know) + ".barrating('show', {theme: 'bars-1to10'}); });\n", escape=False)
       if knows[know][0] is False or ('readonly' in desc[know] and desc[know]['readonly'] == True):
         response.write("  $(function() { " + "$('#{}_diff').barrating('readonly', true);".format(know) + "});\n", escape=False)
         pass
@@ -203,40 +194,9 @@ If Charge Beam is not picked up along the way or not accessible, enough minors t
 }
 </script>
 
-<body>
 {{
-def displaySelectController(name):
-  response.write("<select id=\"{}\" name=\"{}\" form=\"mainform\">\n".format(name, name), escape=False)
-
-  value = controller[name]
-
-  for action in ["Shoot", "Jump", "Dash", "Item Select", "Item Cancel", "Angle Up", "Angle Down"]:
-    selected=""
-    if value == action:
-      selected="selected=\"selected\""
-      pass
-
-    response.write("  <option value=\"{}\" {}>{}</option>\n".format(action, selected, action), escape=False)
-    pass
-
-  response.write("</select>\n", escape=False)
-  pass
-
 def displaySelect(name, values, value):
-  response.write("<select id=\"{}\" name=\"{}\" form=\"mainform\" onchange=\"changeHiddenSelect('{}')\" class=\"filldropdown\">\n".format(name, name, name), escape=False)
-
-  for difficulty in values:
-    selected=""
-    if value == difficulty:
-      selected="selected=\"selected\""
-      pass
-
-    response.write("  <option value=\"{}\" {}>{}</option>\n".format(difficulty, selected, difficulty), escape=False)
-    pass
-
-  response.write("</select>\n", escape=False)
-
-  response.write("<select id=\"{}_hidden\" name=\"{}_hidden\" form=\"saveform\" style='display:none'>\n".format(name, name), escape=False)
+  response.write("<select id=\"{}\" name=\"{}\" form=\"presetForm\" class=\"filldropdown\">\n".format(name, name, name), escape=False)
 
   for difficulty in values:
     selected=""
@@ -249,6 +209,7 @@ def displaySelect(name, values, value):
 
   response.write("</select>\n", escape=False)
   pass
+
 
 def displayKnow(know):
   response.write("<tr>\n", escape=False)
@@ -262,7 +223,7 @@ def displayKnow(know):
     disabled="disabled"
     checked="checked=\"checked\" value=\"on\""
     pass
-  response.write("  <td><input id=\"{}_bool\" name=\"{}_bool\" type=\"checkbox\" {} onClick=\"toggleSelect('{}')\" form=\"mainform\" {}></td>\n".format(know, know, checked, know, disabled), escape=False)
+  response.write("  <td><input id=\"{}_bool\" name=\"{}_bool\" type=\"checkbox\" {} onClick=\"toggleSelect('{}')\" form=\"presetForm\" {}></td>\n".format(know, know, checked, know, disabled), escape=False)
 
   if desc[know]['href'] is not None:
     response.write("  <td><a href=\"{}\">{}</a></td>\n".format(desc[know]['href'], desc[know]['display']), escape=False)
@@ -275,7 +236,7 @@ def displayKnow(know):
     disabled="disabled"
     pass
 
-  response.write("  <td><select id=\"{}_diff\" name=\"{}_diff\" {} form=\"mainform\" onchange=\"changeHiddenSelect('{}_diff')\">\n".format(know, know, disabled, know), escape=False)
+  response.write("  <td><select id=\"{}_diff\" name=\"{}_diff\" {} form=\"presetForm\">\n".format(know, know, disabled, know), escape=False)
   if 'readonly' in desc[know] and desc[know]['readonly'] == True:
     knowDiff=easy
   else:
@@ -307,24 +268,9 @@ def displayKnow(know):
     pass
   response.write("</td>", escape=False)
 
-  response.write("  <input id=\"{}_bool_hidden\" name=\"{}_bool_hidden\" type=\"checkbox\" {} form=\"saveform\" style='display:none'>\n".format(know, know, checked, know), escape=False)
-
-  response.write("  <select id=\"{}_diff_hidden\" name=\"{}_diff_hidden\" form=\"saveform\" style='display:none'>\n".format(know, know), escape=False)
-  knowDiff=knows[know][1]
-  knowDiff=knowDiff if knowDiff != 0 else mania
-  for difficulty in [easy, medium, hard, harder, hardcore, mania]:
-    selected=""
-    if knowDiff == difficulty:
-      selected="selected=\"selected\""
-      pass
-
-    response.write("    <option value=\"{}\" {}>{}</option>\n".format(difficulties[difficulty], selected, difficulties[difficulty]), escape=False)
-    pass
-
-  response.write("</select>\n", escape=False)
-
   response.write("</tr>\n", escape=False)
   pass
+
 
 def displayCategory(category):
   response.write("<h2>{}</h2>\n".format(category['title']), escape=False)
@@ -349,58 +295,40 @@ pass
       {{=A("Information & Contact", _href=URL(f="infos"), _class="menu")}}
     </div>
   </div>
-  <h3 id="presetsStep">Presets <button type="button" onclick="startTheTour(0)">?</button></h3>
-  <form id="presetForm" id="presetForm">
-    <table>
+
+  <form id="presetForm" id="presetForm" class="presetform">
+    <table class="half">
       <colgroup><col class="quarter" /><col class="half" /><col class="quarter"></colgroup>
       <tr>
 	<td>Load preset: </td>
-	<td>{{=SELECT(*presets,
-                      **dict(_name="paramsFile",
-                             value=session.paramsFile,
-                             _onchange="this.form.submit()",
-                             _class="filldropdown"))}}
-	</td>
-	<td>{{=INPUT(_type="submit",_value="Load", _name="action", _class="full")}}</td>
+	<td>{{=SELECT(*presets, **dict(_name="paramsFileLoad", value=session.paramsFile, _class="filldropdown"))}}</td>
+	<td>{{=INPUT(_type="submit", _name="action", _value="Load", _class="full")}}</td>
       </tr>
       <tr>
 	<td>Update preset:</td>
-	<td>{{=SELECT(*presets, **dict(_name="paramsFile",
-                                       value=session.paramsFile,
-                                       _class="filldropdown"))}}
-	</td>
-	<td>{{=INPUT(_type="button",_value="Update", _class="full", _onclick="askPassword()")}}</td>
+	<td>{{=SELECT(*presets, **dict(_name="paramsFileUpdate", value=session.paramsFile, _class="filldropdown"))}}</td>
+	<td>{{=INPUT(_type="button", _name="action", _value="Update", _class="full", _onclick="askPassword()")}}</td>
       </tr>
       <tr>
         <td>New preset:</td>
-	<td>{{=INPUT(_type="text",
-                     _name="saveFile",
-                     requires=[IS_ALPHANUMERIC(error_message='Preset name must be alphanumeric and max 32 chars'),
-                               IS_LENGTH(32)],
-                     _class="full")}}
-	</td>
-	<td>{{INPUT(_type="button",_value="Create", _class="full", _onclick="askPassword()")}}</td>
+	<td>{{=INPUT(_type="text", _name="saveFile", requires=[IS_ALPHANUMERIC(error_message='Preset name must be alphanumeric and max 32 chars'), IS_LENGTH(32)], _class="full")}}</td>
+	<td>{{=INPUT(_type="button", _name="action", _value="Create", _class="full", _onclick="askPassword()")}}</td>
       </tr>
       <tr>
-	<td>{{=INPUT(_type="text",
-                     _name="password", _id="password",
-                     requires=[IS_NOT_EMPTY(),
-                               IS_ALPHANUMERIC(error_message='Password must be alphanumeric and max 32 chars'),
-                               IS_LENGTH(32)],
-                     _style='display:none')}}
-	</td>
+	<td>{{=INPUT(_type="text", _name="password", _id="password", requires=[IS_NOT_EMPTY(), IS_ALPHANUMERIC(error_message='Password must be alphanumeric and max 32 chars'), IS_LENGTH(32)], _style='display:none')}}</td>
       </tr>
     </table>
+    </form>
 
     <div class="tab">
-      <button class="tablinks" onclick="changeTab(event, 'Global')">Global</button>
+      <button class="tablinks" onclick="changeTab(event, 'Global')" id="defaultOpen" >Global</button>
       <button class="tablinks" onclick="changeTab(event, 'Techniques1')">Techniques (1/6)</button>
       <button class="tablinks" onclick="changeTab(event, 'Techniques2')">Techniques (2/6)</button>
       <button class="tablinks" onclick="changeTab(event, 'Techniques3')">Techniques (3/6)</button>
       <button class="tablinks" onclick="changeTab(event, 'Techniques4')">Techniques (4/6)</button>
       <button class="tablinks" onclick="changeTab(event, 'Techniques5')">Techniques (5/6)</button>
       <button class="tablinks" onclick="changeTab(event, 'Techniques6')">Techniques (6/6)</button>
-      <button id="defaultOpen" class="tablinks" onclick="changeTab(event, 'Mapping')">Gamepad Mapping</button>
+      <button class="tablinks" onclick="changeTab(event, 'Mapping')">Gamepad Mapping</button>
     </div>
 
     <div id="Global" class="tabcontent"><br/>
@@ -416,18 +344,8 @@ pass
 =SELECT('easy', 'medium', 'hard', 'very hard', 'hardcore', 'mania',
        _id="difficulty_target",
        _name="difficulty_target",
-       _form="mainform",
-       _onchange="changeHiddenSelect('difficulty_target')",
+       _form="presetForm",
        _class="full",
-       requires=IS_IN_SET(['easy', 'medium', 'hard', 'very hard', 'hardcore', 'mania']),
-       value=difficulties[conf["target"]])
-}}
-{{
-=SELECT('easy', 'medium', 'hard', 'very hard', 'hardcore', 'mania',
-       _id="difficulty_target_hidden",
-       _name="difficulty_target_hidden",
-       _form="saveform",
-       _style='display:none',
        requires=IS_IN_SET(['easy', 'medium', 'hard', 'very hard', 'hardcore', 'mania']),
        value=difficulties[conf["target"]])
 }}
@@ -445,18 +363,8 @@ pass
 =SELECT('all', 'minimal', 'any',
         _id="pickup_strategy",
         _name="pickup_strategy",
-        _form="mainform",
-        _onchange="changeHiddenSelect('pickup_strategy')",
+        _form="presetForm",
         _class="full",
-        requires=IS_IN_SET(['all', 'minimal', 'any']),
-        value=conf["pickup"])
-}}
-{{
-=SELECT('all', 'minimal', 'any',
-        _id="pickup_strategy_hidden",
-        _name="pickup_strategy_hidden",
-        _form="saveform",
-        _style='display:none',
         requires=IS_IN_SET(['all', 'minimal', 'any']),
         value=conf["pickup"])
 }}
@@ -643,29 +551,28 @@ pass
     <div id="Mapping" class="tabcontent">
       <div class="controller_container">
 	<img id="snes_controller" src="/solver/static/images/snes-controller.png" alt="Snes Controller" title="Snes Controller" class="center_img"/>
-
+	{{ actions = ["Shoot", "Jump", "Dash", "Item Select", "Item Cancel", "Angle Up", "Angle Down"] }}
 	<div class="controller_a">
-	{{ displaySelectController("A") }}
+	{{ displaySelect("A", actions, controller["A"]) }}
 	</div>
 	<div class="controller_b">
-	{{ displaySelectController("B") }}
+	{{ displaySelect("B", actions, controller["B"]) }}
 	</div>
 	<div class="controller_x">
-	{{ displaySelectController("X") }}
+	{{ displaySelect("X", actions, controller["X"]) }}
 	</div>
 	<div class="controller_y">
-	{{ displaySelectController("Y") }}
+	{{ displaySelect("Y", actions, controller["Y"]) }}
 	</div>
 	<div class="controller_l">
-	{{ displaySelectController("L") }}
+	{{ displaySelect("L", actions, controller["L"]) }}
 	</div>
 	<div class="controller_r">
-	{{ displaySelectController("R") }}
+	{{ displaySelect("R", actions, controller["R"]) }}
 	</div>
 	<div class="controller_s">
-	{{ displaySelectController("Select") }}
+	{{ displaySelect("Select", actions, controller["Select"]) }}
 	</div>
       </div>
     </div>
   </form>
-</body>

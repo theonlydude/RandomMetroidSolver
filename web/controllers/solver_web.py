@@ -79,13 +79,13 @@ def presets():
 
     if request.vars.action is not None:
         # press solve, load or save button
-        if request.vars.action in ['saveform', 'mainform']:
+        if request.vars.action in ['Update', 'Create']:
             # store the changes in case the form won't be accepted
             paramsDict = generate_json_from_parameters(request.vars)
             session.paramsDict = paramsDict
             params = ParamsLoader.factory(session.paramsDict).params
             loaded = True
-        elif request.vars.action in ['loadform']:
+        elif request.vars.action in ['Load']:
             # nothing to load, we'll load the new params file with the load form code
             pass
     else:
@@ -97,15 +97,7 @@ def presets():
     if not loaded:
         params = ParamsLoader.factory('diff_presets/{}.json'.format(session.paramsFile)).params
 
-    # main form
-    if session.romFile is not None:
-        romFile = session.romFile+'.sfc'
-        romType = guessRomType(romFile)
-    else:
-        romFile = None
-        romType = 'Total Tournament'
-
-    # load form
+    # load presets
     files = sorted(os.listdir('diff_presets'), key=lambda v: v.upper())
     stdPresets = ['noob', 'casual', 'regular', 'veteran', 'speedrunner', 'master']
     presets = [os.path.splitext(file)[0] for file in files]
@@ -129,7 +121,7 @@ def presets():
         else:
             session.flash = "Presets file not found"
 
-    if request.vars.action in ['Update', 'Create']:
+    elif request.vars.action in ['Update', 'Create']:
         # update or creation ?
         if request.post_vars.action == 'Create':
             saveFile = saveForm.vars['saveFile']
@@ -187,15 +179,6 @@ def presets():
     else:
         conf["itemsForbidden"] = []
 
-    resultText = None
-    difficulty = None
-    diffPercent = None
-    pathTable = None
-    knowsUsed = None
-    itemsOk = None
-    pngFileName = None
-    pngThumbFileName = None
-
     # set title
     response.title = 'Super Metroid VARIA Presets'
 
@@ -223,16 +206,11 @@ def presets():
                 params['Controller'][button] = Controller.__dict__[button]
 
     # send values to view
-    return dict(mainForm=None, loadForm=None, saveForm=None,
-                desc=Knows.desc,
-                difficulties=diff2text,
+    return dict(desc=Knows.desc, difficulties=diff2text,
                 categories=Knows.categories, settings=params['Settings'],
-                knows=params['Knows'], conf=conf, knowsUsed=knowsUsed,
-                resultText=resultText, pathTable=pathTable,
-                difficulty=difficulty, itemsOk=itemsOk, diffPercent=diffPercent,
+                knows=params['Knows'], conf=conf,
                 easy=easy,medium=medium,hard=hard,harder=harder,hardcore=hardcore,mania=mania,
-                pngFileName=pngFileName, pngThumbFileName=pngThumbFileName,
-                controller=params['Controller'], session=session, presets=presets)
+                controller=params['Controller'], presets=presets)
 
 def solver():
     if session.paramsFile is None:

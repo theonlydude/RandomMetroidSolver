@@ -132,7 +132,7 @@ def presets():
 
     elif request.vars.action in ['Update', 'Create']:
         # update or creation ?
-        if request.post_vars.action == 'Create':
+        if request.vars.action == 'Create':
             saveFile = saveForm.vars['saveFile']
         else:
             saveFile = saveForm.vars['paramsFileUpdate']
@@ -149,7 +149,7 @@ def presets():
             # check if password match
             if 'password' in oldParams and passwordSHA256 == oldParams['password']:
                 # update the presets file
-                paramsDict = generate_json_from_parameters(request.post_vars)
+                paramsDict = generate_json_from_parameters(request.vars)
                 paramsDict['password'] = passwordSHA256
                 ParamsLoader.factory(paramsDict).dump(fullPath)
                 session.paramsFile = saveFile
@@ -163,7 +163,7 @@ def presets():
             # check that there's no more than 2K presets (there's less than 2K sm rando players in the world)
             if not maxPresetsReach():
                 # write the presets file
-                paramsDict = generate_json_from_parameters(request.post_vars)
+                paramsDict = generate_json_from_parameters(request.vars)
                 paramsDict['password'] = passwordSHA256
                 ParamsLoader.factory(paramsDict).dump(fullPath)
                 session.paramsFile = saveFile
@@ -205,32 +205,70 @@ def presets():
                 easy=easy, medium=medium, hard=hard, harder=harder, hardcore=hardcore, mania=mania,
                 controller=params['Controller'], presets=presets)
 
-def solver():
-    # load conf from session if available
-    params = loadPreset()
+def initSolverSession():
+    if session.solver is None:
+        session.solver = {}
 
+        session.solver['preset'] = 'regular'
+        session.solver['difficultyTarget'] = Conf.difficultyTarget
+        session.solver['pickupStrategy'] = Conf.majorsPickup
+        session.solver['itemsForbidden'] = []
+        session.solver['romFiles'] = []
+        session.solver['romFile'] = None
+        session.solver['result'] = None
+
+def updateSolverSession():
+    if session.solver is None:
+        session.solver = {}
+
+    session.solver['preset'] = request.vars.paramsFile
+    session.solver['difficultyTarget'] = text2diff[request.vars.difficultyTarget]
+    session.solver['pickupStrategy'] = request.vars.pickupStrategy
+
+    itemsForbidden = []
+    for item in ['ETank', 'Missile', 'Super', 'PowerBomb', 'Bomb', 'Charge', 'Ice', 'HiJump', 'SpeedBooster', 'Wave', 'Spazer', 'SpringBall', 'Varia', 'Plasma', 'Grapple', 'Morph', 'Reserve', 'Gravity', 'XRayScope', 'SpaceJump', 'ScrewAttack']:
+        boolvar = request.vars[item+"_bool"]
+        if boolvar is not None:
+            itemsForbidden.append(item)
+
+    session.solver['itemsForbidden'] = itemsForbidden
+
+def getROMsList():
     # filter the displayed roms to display only the ones uploaded in this session
-    if session.romFiles is None:
-        session.romFiles = []
+    if session.solver['romFiles'] is None:
+        session.solver['romFiles'] = []
         roms = []
-    elif len(session.romFiles) == 0:
+    elif len(session.solver['romFiles']) == 0:
         roms = []
     else:
         files = sorted(os.listdir('roms'))
         bases = [os.path.splitext(file)[0] for file in files]
-        filtered = [base for base in bases if base in session.romFiles]
+        filtered = [base for base in bases if base in session.solver['romFiles']]
         roms = [file+'.sfc' for file in filtered]
 
-    # main form
-    if session.romFile is not None:
-        romFile = session.romFile+'.sfc'
+    return roms
+
+def getLastSolvedROM():
+    if session.solver['romFile'] is not None:
+        return session.solver['romFile'] + '.sfc'
     else:
-        romFile = None
+        return None
+
+def solver():
+    # init session
+    initSolverSession()
+
+    ROMs = getROMsList()
+
+    # last solved ROM
+    lastRomFile = getLastSolvedROM()
 
     # load presets list
     presets = loadPresetsList()
 
     if request.vars.action == 'Compute difficulty':
+        updateSolverSession()
+
         # new uploaded rom ?
         error = False
         if request.vars['romJson'] != '':
@@ -250,18 +288,14 @@ def solver():
                 romLoader.assignItems(graphLocations)
                 romLoader.dump(jsonRomFileName)
 
-                session.romFile = base
-                if base not in session.romFiles:
-                    session.romFiles.append(base)
+                session.solver['romFile'] = base
+                if base not in session.solver['romFiles']:
+                    session.solver['romFiles'].append(base)
             except Exception as e:
-                print("Error loading the rom file {}, exception: {}".format(romFileName, e))
-                session.flash = "Error loading the ROM file"
+                print("Error loading the ROM file {}, exception: {}".format(romFileName, e))
+                session.flash = "Error loading the json ROM file"
                 error = True
 
-        # python3:
-        # no file: type(request.vars['uploadFile'])=[<class 'str'>]
-        # file:    type(request.vars['uploadFile'])=[<class 'cgi.FieldStorage'>]
-        # python2:
         # no file: type(request.vars['uploadFile'])=[<type 'str'>]
         # file:    type(request.vars['uploadFile'])=[<type 'instance'>]
         elif request.vars['uploadFile'] is not None and type(request.vars['uploadFile']) != str:
@@ -287,17 +321,17 @@ def solver():
 
                     os.remove(tempRomFile)
 
-                    session.romFile = base
-                    if base not in session.romFiles:
-                        session.romFiles.append(base)
+                    session.solver['romFile'] = base
+                    if base not in session.solver['romFiles']:
+                        session.solver['romFiles'].append(base)
                 except Exception as e:
-                    print("Error loading the rom file {}, exception: {}".format(uploadFileName, e))
+                    print("Error loading the ROM file {}, exception: {}".format(uploadFileName, e))
                     session.flash = "Error loading the ROM file"
                     error = True
 
         elif len(request.vars['romFile']) != 0:
-            session.romFile = os.path.splitext(request.vars['romFile'])[0]
-            jsonRomFileName = 'roms/' + session.romFile + '.json'
+            session.solver['romFile'] = os.path.splitext(request.vars['romFile'])[0]
+            jsonRomFileName = 'roms/' + session.solver['romFile'] + '.json'
         else:
             session.flash = "No rom file selected for upload"
             error = True
@@ -305,29 +339,28 @@ def solver():
         if not error:
             # check that the json file exists
             if not os.path.isfile(jsonRomFileName):
-                session.flash = "Missing json rom file on the server"
+                session.flash = "Missing json ROM file on the server"
             else:
-                session.result = compute_difficulty(jsonRomFileName, request.vars['paramsFile'], request.post_vars)
+                session.solver['result'] = computeDifficulty(jsonRomFileName, request.vars['preset'])
 
         redirect(URL(r=request, f='solver'))
 
     # display result
-    if session.result is not None:
-        if session.result['difficulty'] == -1:
-            resultText = "The rom \"{}\" of type \"{}\" is not finishable with the known technics".format(session.result['randomizedRom'], session.result['romType'])
-        else:
-            if session.result['itemsOk'] is False:
-                resultText = "The rom \"{}\" of type \"{}\" is finishable but not all the requested items can be picked up with the known technics. Estimated difficulty is: ".format(session.result['randomizedRom'], session.result['romType'])
-            else:
-                resultText = "The rom \"{}\" of type \"{}\" estimated difficulty is: ".format(session.result['randomizedRom'], session.result['romType'])
+    if session.solver['result'] is not None:
+        result = session.solver['result']
 
-        difficulty = session.result['difficulty']
-        diffPercent = session.result['diffPercent']
+        if session.solver['result']['difficulty'] == -1:
+            result['resultText'] = "The rom \"{}\" of type \"{}\" is not finishable with the known technics".format(session.solver['result']['randomizedRom'], session.solver['result']['romType'])
+        else:
+            if session.solver['result']['itemsOk'] is False:
+                result['resultText'] = "The rom \"{}\" of type \"{}\" is finishable but not all the requested items can be picked up with the known technics. Estimated difficulty is: ".format(session.solver['result']['randomizedRom'], session.solver['result']['romType'])
+            else:
+                result['resultText'] = "The rom \"{}\" of type \"{}\" estimated difficulty is: ".format(session.solver['result']['randomizedRom'], session.solver['result']['romType'])
 
         # add generated path (spoiler !)
         pathTable = TABLE(TR(TH("Location Name"), TH("Area"), TH("SubArea"), TH("Item"),
                              TH("Difficulty"), TH("Techniques used"), TH("Items used")))
-        for location, area, subarea, item, diff, techniques, items in session.result['generatedPath']:
+        for location, area, subarea, item, diff, techniques, items in session.solver['result']['generatedPath']:
             # not picked up items start with an '-'
             if item[0] != '-':
                 pathTable.append(TR(A(location[0],
@@ -339,55 +372,24 @@ def solver():
                                     area, subarea, DIV(item, _class='linethrough'),
                                     diff, techniques, items))
 
-        knowsUsed = session.result['knowsUsed']
-        itemsOk = session.result['itemsOk']
-
-        # graph
-        pngFileName = session.result['pngFileName']
-        pngThumbFileName = session.result['pngThumbFileName']
+        result['pathTable'] = pathTable
 
         # display the result only once
-        session.result = None
+        session.solver['result'] = None
     else:
-        resultText = None
-        difficulty = None
-        diffPercent = None
-        pathTable = None
-        knowsUsed = None
-        itemsOk = None
-        pngFileName = None
-        pngThumbFileName = None
-
-    # conf parameters
-    conf = {}
-    if 'difficultyTarget' in params['Conf']:
-        conf["target"] = params['Conf']['difficultyTarget']
-    else:
-        conf["target"] = Conf.difficultyTarget
-    if 'majorsPickup' in params['Conf']:
-        conf["pickup"] = params['Conf']['majorsPickup']
-    else:
-        conf["pickup"] = Conf.majorsPickup
-    if 'itemsForbidden' in params['Conf']:
-        conf["itemsForbidden"] = params['Conf']['itemsForbidden']
-    else:
-        conf["itemsForbidden"] = []
+        result = None
 
     # set title
     response.title = 'Super Metroid VARIA Solver'
 
     # send values to view
-    return dict(desc=Knows.desc, presets=presets, roms=roms, romFile=romFile,
-                difficulties=diff2text,
-                categories=Knows.categories,
-                conf=conf, knowsUsed=knowsUsed,
-                resultText=resultText, pathTable=pathTable,
-                difficulty=difficulty, itemsOk=itemsOk, diffPercent=diffPercent,
-                easy=easy,medium=medium,hard=hard,harder=harder,hardcore=hardcore,mania=mania,
-                pngFileName=pngFileName, pngThumbFileName=pngThumbFileName)
+    return dict(desc=Knows.desc, presets=presets, roms=ROMs, lastRomFile=lastRomFile,
+                difficulties=diff2text, categories=Knows.categories,
+                result=result,
+                easy=easy, medium=medium, hard=hard, harder=harder, hardcore=hardcore, mania=mania)
 
 def generate_json_from_parameters(vars):
-
+    # TODO: not up to date
     paramsDict = {'Knows': {}, 'Conf': {}, 'Settings': {}, 'Controller': {}}
 
     # Knows
@@ -456,7 +458,7 @@ def generate_json_from_parameters(vars):
 
     return paramsDict
 
-def compute_difficulty(jsonRomFileName, presetName, post_vars):
+def computeDifficulty(jsonRomFileName, presetName):
     randomizedRom = os.path.basename(jsonRomFileName.replace('json', 'sfc'))
     presetFileName = "diff_presets/{}.json".format(presetName)
 

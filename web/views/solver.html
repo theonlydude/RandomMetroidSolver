@@ -35,68 +35,6 @@ if (hs.registerOverlay) {
 
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 <script type="text/javascript">
-function guessRomType(filename) {
-  var re = /VARIA_Randomizer_[A]?[F]?X\d+/;
-  var match = filename.match(re);
-
-  if (match != null) {
-    switch(match[0][17]) {
-      case 'A':
-        switch(match[0][18]) {
-          case 'F':
-            return "VARIA Area Full";
-          case 'X':
-            return "VARIA Area Classic";
-        }
-      case 'F':
-        return "VARIA Full";
-      case 'X':
-        return "VARIA Classic";
-    }
-  }
-
-  var re = /[CTFH]?X\d+/;
-  var match = filename.match(re);
-
-  if (match != null) {
-    switch(match[0][0]) {
-      case 'C':
-        return "Total Casual";
-      case 'T':
-        return "Total Tournament";
-      case 'F':
-        return "Total Full";
-      case 'H':
-        return "Total Hard";
-      case 'X':
-        return "Total Normal";
-    }
-  }
-
-  var re = /[CMS]?\d+/;
-  var match = filename.match(re);
-
-  if (match != null) {
-    switch(match[0][0]) {
-      case 'C':
-        return "Dessy Casual";
-      case 'M':
-        return "Dessy Masochist";
-      case 'S':
-        return "Dessy Speedrunner";
-    }
-  }
-
-  var re = /Super[ _]*Metroid/;
-  var match = filename.match(re);
-
-  if (match != null) {
-    return "Vanilla";
-  }
-
-  // default to TX
-  return "Total Tournament";
-}
 function showPath()
 {
   if(document.getElementById('displayPath').checked) {
@@ -269,11 +207,8 @@ window.onload = function(){
 
                 var json = JSON.stringify(romData);
 
-                var output = document.getElementById("json");
+                var output = document.getElementById("romJson");
                 output.value = json;
-
-                var romType = guessRomType(file.name);
-                document.getElementById("romType").value = romType;
 
                 var option = document.createElement('option');
                 option.text = option.value = file.name;
@@ -287,10 +222,7 @@ window.onload = function(){
         }, false);
     }
 }
-
 </script>
-
-<body>
 
 <div class="fixed">
   <div class="menu">
@@ -304,8 +236,62 @@ window.onload = function(){
 
 <p>
   Choose your randomized ROM to solve, the preset to use then press 'Compute Difficulty'.
-  {{=mainForm}}
 </p>
+<form id="solverForm" id="solverForm" class="presetform">
+  <table class="half">
+    <colgroup><col class="half" /><col class="half" /></colgroup>
+    <tr>
+      <td>Randomized Super Metroid ROM: </td>
+      <td>{{=INPUT(_type="file", _name="uploadFile", _id="uploadFile")}}</td>
+    </tr>
+    <tr>
+      <td>Preset: </td>
+      <td>{{=SELECT(*presets, **dict(_name="paramsFile", value=session.paramsFile, _class="filldropdown"))}}</td>
+    </tr>
+    <tr>
+      <td>Already uploaded rom in this session: </td>
+      <td>{{=SELECT(*roms, **dict(_name="romFile", _id="romFile", value=romFile, _class="filldropdown"))}}</td>
+    </tr>
+    <tr>
+      <td>{{=INPUT(_type="submit", _value="Compute difficulty", _name="action", _class="full")}}</td>
+      <td></td>
+    </tr>
+  </table>
+  {{=INPUT(_type="text", _name="romJson", _id="romJson", _style="display:none")}}
+</form>
+
+<h3>Difficulty Target</h3>
+<table class="half">
+  <colgroup><col class="half" /><col class="half" /></colgroup>
+  <tr>
+    <td>Difficulty target:</td>
+    <td>
+      {{
+      =SELECT('easy', 'medium', 'hard', 'very hard', 'hardcore', 'mania',
+              _id="difficulty_target", _name="difficulty_target", _form="solverForm", _class="full",
+              requires=IS_IN_SET(['easy', 'medium', 'hard', 'very hard', 'hardcore', 'mania']),
+              value=difficulties[conf["target"]])
+      }}
+    </td>
+    <td><button type="button" onclick="startTheTour(1)">?</button></td>
+  </tr>
+</table>
+<h3>Pickup Strategy</h3>
+<table class="half">
+  <colgroup><col class="half" /><col class="half" /></colgroup>
+  <tr>
+    <td>Pickup strategy:</td>
+    <td>
+      {{
+      =SELECT('all', 'minimal', 'any',
+              _id="pickup_strategy", _name="pickup_strategy", _form="solverForm", _class="full",
+              requires=IS_IN_SET(['all', 'minimal', 'any']),
+              value=conf["pickup"])
+      }}
+    </td>
+    <td><button type="button" onclick="startTheTour(2)">?</button></td>
+  </tr>
+</table>
 
 <div class="main">
 

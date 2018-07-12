@@ -70,7 +70,7 @@ def guessRomType(filename):
     # default to TX
     return "Total Tournament"
 
-def presets():
+def loadPreset():
     # load conf from session if available
     loaded = False
     if session.paramsFile is None:
@@ -97,13 +97,22 @@ def presets():
     if not loaded:
         params = ParamsLoader.factory('diff_presets/{}.json'.format(session.paramsFile)).params
 
-    # load presets
+    return params
+
+def loadPresetsList():
     files = sorted(os.listdir('diff_presets'), key=lambda v: v.upper())
     stdPresets = ['noob', 'casual', 'regular', 'veteran', 'speedrunner', 'master']
     presets = [os.path.splitext(file)[0] for file in files]
     for preset in stdPresets:
         presets.remove(preset)
-    presets = stdPresets + presets
+    return stdPresets + presets
+
+def presets():
+    # load conf from session if available
+    params = loadPreset()
+
+    # load presets list
+    presets = loadPresetsList()
 
     # in web2py.js, in disableElement, remove 'working...' to have action with correct value
     if request.vars.action == 'Load':
@@ -164,21 +173,6 @@ def presets():
                 session.flash = "Sorry, there's already 2048 presets on the website, can't add more"
                 redirect(URL(r=request, f='presets'))
 
-    # conf parameters
-    conf = {}
-    if 'difficultyTarget' in params['Conf']:
-        conf["target"] = params['Conf']['difficultyTarget']
-    else:
-        conf["target"] = Conf.difficultyTarget
-    if 'majorsPickup' in params['Conf']:
-        conf["pickup"] = params['Conf']['majorsPickup']
-    else:
-        conf["pickup"] = Conf.majorsPickup
-    if 'itemsForbidden' in params['Conf']:
-        conf["itemsForbidden"] = params['Conf']['itemsForbidden']
-    else:
-        conf["itemsForbidden"] = []
-
     # set title
     response.title = 'Super Metroid VARIA Presets'
 
@@ -207,15 +201,13 @@ def presets():
 
     # send values to view
     return dict(desc=Knows.desc, difficulties=diff2text,
-                categories=Knows.categories, settings=params['Settings'],
-                knows=params['Knows'], conf=conf,
-                easy=easy,medium=medium,hard=hard,harder=harder,hardcore=hardcore,mania=mania,
+                categories=Knows.categories, settings=params['Settings'], knows=params['Knows'],
+                easy=easy, medium=medium, hard=hard, harder=harder, hardcore=hardcore, mania=mania,
                 controller=params['Controller'], presets=presets)
 
 def solver():
-    if session.paramsFile is None:
-        # default preset
-        session.paramsFile = 'regular'
+    # load conf from session if available
+    params = loadPreset()
 
     # filter the displayed roms to display only the ones uploaded in this session
     if session.romFiles is None:
@@ -235,35 +227,15 @@ def solver():
     else:
         romFile = None
 
-    files = sorted(os.listdir('diff_presets'), key=lambda v: v.upper())
-    stdPresets = ['noob', 'casual', 'regular', 'veteran', 'speedrunner', 'master']
-    presets = [os.path.splitext(file)[0] for file in files]
-    for preset in stdPresets:
-        presets.remove(preset)
-    presets = stdPresets + presets
+    # load presets list
+    presets = loadPresetsList()
 
-    mainForm = FORM(TABLE(TR("Randomized Super Metroid ROM: ",
-                             INPUT(_type="file", _name="uploadFile", _id="uploadFile")),
-                          TR("Preset: ",
-                             SELECT(*presets,
-                                    **dict(_name="paramsFile",
-                                           value=session.paramsFile,
-                                           _class="filldropdown"))),
-                          TR("Already uploaded rom in this session: ",
-                             SELECT(*roms, **dict(_name="romFile",
-                                                  _id="romFile",
-                                                  value=romFile,
-                                                  _class="filldropdown"))),
-                          INPUT(_type="submit",_value="Compute difficulty"),
-                          INPUT(_type="text", _name="json", _id="json", _style='display:none'),
-                    _id="mainform", _name="mainform", _onsubmit="doSubmit();"))
-
-    if mainForm.process(formname='mainform').accepted:
+    if request.vars.action == 'Compute difficulty':
         # new uploaded rom ?
         error = False
-        if mainForm.vars['json'] != '':
+        if request.vars['romJson'] != '':
             try:
-                tempRomJson = json.loads(mainForm.vars['json'])
+                tempRomJson = json.loads(request.vars['romJson'])
                 romFileName = tempRomJson["romFileName"]
                 (base, ext) = os.path.splitext(romFileName)
                 jsonRomFileName = 'roms/' + base + '.json'
@@ -287,14 +259,14 @@ def solver():
                 error = True
 
         # python3:
-        # no file: type(mainForm.vars['uploadFile'])=[<class 'str'>]
-        # file:    type(mainForm.vars['uploadFile'])=[<class 'cgi.FieldStorage'>]
+        # no file: type(request.vars['uploadFile'])=[<class 'str'>]
+        # file:    type(request.vars['uploadFile'])=[<class 'cgi.FieldStorage'>]
         # python2:
-        # no file: type(mainForm.vars['uploadFile'])=[<type 'str'>]
-        # file:    type(mainForm.vars['uploadFile'])=[<type 'instance'>]
-        elif mainForm.vars['uploadFile'] is not None and type(mainForm.vars['uploadFile']) != str:
-            uploadFileName = mainForm.vars['uploadFile'].filename
-            uploadFileContent = mainForm.vars['uploadFile'].file
+        # no file: type(request.vars['uploadFile'])=[<type 'str'>]
+        # file:    type(request.vars['uploadFile'])=[<type 'instance'>]
+        elif request.vars['uploadFile'] is not None and type(request.vars['uploadFile']) != str:
+            uploadFileName = request.vars['uploadFile'].filename
+            uploadFileContent = request.vars['uploadFile'].file
 
             (base, ext) = os.path.splitext(uploadFileName)
             jsonRomFileName = 'roms/' + base + '.json'
@@ -323,8 +295,8 @@ def solver():
                     session.flash = "Error loading the ROM file"
                     error = True
 
-        elif len(mainForm.vars['romFile']) != 0:
-            session.romFile = os.path.splitext(mainForm.vars['romFile'])[0]
+        elif len(request.vars['romFile']) != 0:
+            session.romFile = os.path.splitext(request.vars['romFile'])[0]
             jsonRomFileName = 'roms/' + session.romFile + '.json'
         else:
             session.flash = "No rom file selected for upload"
@@ -335,7 +307,7 @@ def solver():
             if not os.path.isfile(jsonRomFileName):
                 session.flash = "Missing json rom file on the server"
             else:
-                session.result = compute_difficulty(jsonRomFileName, mainForm.vars['paramsFile'], request.post_vars)
+                session.result = compute_difficulty(jsonRomFileName, request.vars['paramsFile'], request.post_vars)
 
         redirect(URL(r=request, f='solver'))
 
@@ -386,15 +358,29 @@ def solver():
         pngFileName = None
         pngThumbFileName = None
 
+    # conf parameters
+    conf = {}
+    if 'difficultyTarget' in params['Conf']:
+        conf["target"] = params['Conf']['difficultyTarget']
+    else:
+        conf["target"] = Conf.difficultyTarget
+    if 'majorsPickup' in params['Conf']:
+        conf["pickup"] = params['Conf']['majorsPickup']
+    else:
+        conf["pickup"] = Conf.majorsPickup
+    if 'itemsForbidden' in params['Conf']:
+        conf["itemsForbidden"] = params['Conf']['itemsForbidden']
+    else:
+        conf["itemsForbidden"] = []
+
     # set title
     response.title = 'Super Metroid VARIA Solver'
 
     # send values to view
-    return dict(mainForm=mainForm, loadForm=None, saveForm=None,
-                desc=Knows.desc,
+    return dict(desc=Knows.desc, presets=presets, roms=roms, romFile=romFile,
                 difficulties=diff2text,
-                categories=Knows.categories, settings=None,
-                knows=None, conf=None, knowsUsed=knowsUsed,
+                categories=Knows.categories,
+                conf=conf, knowsUsed=knowsUsed,
                 resultText=resultText, pathTable=pathTable,
                 difficulty=difficulty, itemsOk=itemsOk, diffPercent=diffPercent,
                 easy=easy,medium=medium,hard=hard,harder=harder,hardcore=hardcore,mania=mania,

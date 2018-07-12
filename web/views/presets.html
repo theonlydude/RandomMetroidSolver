@@ -12,56 +12,6 @@ extend 'layout.html'
 
 <title>Super Metroid VARIA Presets</title>
 
-<style>
-/* Style the tab */
-.tab {
-    overflow: hidden;
-    border: 1px solid #ccc;
-    background-color: #f1f1f1;
-}
-
-/* Style the buttons that are used to open the tab content */
-.tab button {
-    background-color: inherit;
-    color: #000;
-    float: left;
-    border: none;
-    outline: none;
-    cursor: pointer;
-    padding: 14px 16px;
-    transition: 0.3s;
-}
-
-/* Change background color of buttons on hover */
-.tab button:hover {
-    background-color: #ddd;
-    color: #000;
-}
-
-/* Create an active/current tablink class */
-.tab button.active {
-    background-color: #ccc;
-    color: #000;
-}
-
-/* Style the tab content */
-.tabcontent {
-    padding: 6px 12px;
-    border: 1px solid #ccc;
-    border-top: none;
-    margin-bottom: 1em;
-}
-.tabcontent {
-    animation: fadeEffect 1s; /* Fading effect takes 1 second */
-}
-
-/* Go from zero to full opacity */
-@keyframes fadeEffect {
-    from {opacity: 0;}
-    to {opacity: 1;}
-}
-</style>
-
 <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css">
 <link rel="stylesheet" href="{{=URL('static','barrating/themes/bars-1to10.css')}}">
 <script src="{{=URL('static','barrating/jquery.barrating.min.js')}}"></script>
@@ -287,210 +237,125 @@ def displayCategory(category):
 pass
 }}
 
-  <div class="fixed">
-    <div class="menu">
-      {{=A("Super Metroid VARIA Randomizer and Solver", _href=URL(f="home"), _class="menu")}}
-      {{=A("Presets", _href=URL(f="presets"), _class="menu_selected")}}
-      {{=A("Solver", _href=URL(f="solver"), _class="menu")}}
-      {{=A("Randomizer", _href=URL(f="randomizer"), _class="menu")}}
-      {{=A("Information & Contact", _href=URL(f="infos"), _class="menu")}}
+<div class="fixed">
+  <div class="menu">
+    {{=A("Super Metroid VARIA Randomizer and Solver", _href=URL(f="home"), _class="menu")}}
+    {{=A("Presets", _href=URL(f="presets"), _class="menu_selected")}}
+    {{=A("Solver", _href=URL(f="solver"), _class="menu")}}
+    {{=A("Randomizer", _href=URL(f="randomizer"), _class="menu")}}
+    {{=A("Information & Contact", _href=URL(f="infos"), _class="menu")}}
+  </div>
+</div>
+
+<form id="presetForm" id="presetForm" class="presetform">
+  <table class="half">
+    <colgroup><col class="quarter" /><col class="half" /><col class="quarter"></colgroup>
+    <tr>
+      <td>Load preset: </td>
+      <td>{{=SELECT(*presets, **dict(_name="paramsFileLoad", value=session.paramsFile, _class="filldropdown"))}}</td>
+      <td>{{=INPUT(_type="submit", _name="action", _value="Load", _class="full")}}</td>
+    </tr>
+    <tr>
+      <td>Update preset:</td>
+      <td>{{=SELECT(*presets, **dict(_name="paramsFileUpdate", value=session.paramsFile, _class="filldropdown"))}}</td>
+      <td>{{=INPUT(_type="button", _name="action", _value="Update", _class="full", _onclick="askPassword()")}}</td>
+    </tr>
+    <tr>
+      <td>New preset:</td>
+      <td>{{=INPUT(_type="text", _name="saveFile", requires=[IS_ALPHANUMERIC(error_message='Preset name must be alphanumeric and max 32 chars'), IS_LENGTH(32)], _class="full")}}</td>
+      <td>{{=INPUT(_type="button", _name="action", _value="Create", _class="full", _onclick="askPassword()")}}</td>
+    </tr>
+  </table>
+  {{=INPUT(_type="text", _name="password", _id="password", requires=[IS_NOT_EMPTY(), IS_ALPHANUMERIC(error_message='Password must be alphanumeric and max 32 chars'), IS_LENGTH(32)], _style='display:none')}}
+</form>
+
+<div class="tab">
+  <button class="tablinks" onclick="changeTab(event, 'Global')" id="defaultOpen" >Global</button>
+  <button class="tablinks" onclick="changeTab(event, 'Techniques1')">Common</button>
+  <button class="tablinks" onclick="changeTab(event, 'Techniques2')">Crateria/Brinstar</button>
+  <button class="tablinks" onclick="changeTab(event, 'Techniques3')">Wrecked Ship</button>
+  <button class="tablinks" onclick="changeTab(event, 'Techniques4')">Maridia 1/2</button>
+  <button class="tablinks" onclick="changeTab(event, 'Techniques5')">Maridia 2/2</button>
+  <button class="tablinks" onclick="changeTab(event, 'Techniques6')">Lower Norfair</button>
+  <button class="tablinks" onclick="changeTab(event, 'Techniques7')">Bosses/End</button>
+  <button class="tablinks" onclick="changeTab(event, 'Mapping')">Gamepad Mapping</button>
+</div>
+
+<div id="Global" class="tabcontent"><br/>
+  <div class="row">
+    <div class="column">
+      <h3>Hellruns</h3>
+      <table class="full">
+        <colgroup><col class="half" /><col class="half" /></colgroup>
+	<tr>
+	  <td>Ice:</td>
+	  <td>{{hellruns = ['No thanks', 'Gimme energy', 'Default', 'Bring the heat', 'I run RBO']
+	        displaySelect("Ice", hellruns, settings['Ice'])}}</td>
+          <td><button type="button" onclick="startTheTour(3)">?</button></td>
+	</tr>
+	<tr>
+	  <td>Main Upper Norfair:</td>
+	  <td>{{displaySelect("MainUpperNorfair", hellruns, settings['MainUpperNorfair'])}}</td>
+	</tr>
+	<tr>
+	  <td>Lower Norfair:</td>
+	  <td>{{hellruns = ['Default', 'Bring the heat', 'I run RBO']
+	        displaySelect("LowerNorfair", hellruns, settings['LowerNorfair'])}}</td>
+	</tr>
+      </table>
+      <h3>Hard rooms</h3>
+      <table class="full">
+        <colgroup><col class="half" /><col class="half" /></colgroup>
+	<tr>
+	  <td>X-Ray:</td>
+	  <td>{{xray = ["Aarghh", "I don't like spikes", "Default", "I don't mind spikes", "D-Boost master"]
+	        displaySelect("X-Ray", xray, settings["X-Ray"])}}</td>
+          <td><button type="button" onclick="startTheTour(5)">?</button></td>
+	</tr>
+	<tr>
+	  <td>Gauntlet:</td>
+	  <td>{{gauntlet = ["Aarghh", "I don't like acid", "Default"]
+	        displaySelect("Gauntlet", gauntlet, settings["Gauntlet"])}}</td>
+	</tr>
+      </table>
+    </div>
+    <div class="column">
+      <h3>Bosses</h3>
+      <table class="full">
+        <colgroup><col class="half" /><col class="half" /></colgroup>
+	<tr>
+	  <td>Kraid:</td>
+	  <td>{{kraid = ["He's annoying", 'Default', 'Quick Kill']
+                displaySelect("Kraid", kraid, settings['Kraid'])}}</td>
+          <td><button type="button" onclick="startTheTour(4)">?</button></td>
+	</tr>
+	<tr>
+	  <td>Draygon:</td>
+	  <td>{{draygon = ['A lot of trouble', 'Default', 'Used to it', 'No problemo']
+                displaySelect("Draygon", draygon, settings['Draygon'])}}</td>
+	</tr>
+	<tr>
+	  <td>Ridley:</td>
+	  <td>{{ridley = ["I'm scared!", 'Default', 'Used to it', 'Piece of cake']
+	        displaySelect("Ridley", ridley, settings['Ridley'])}}
+	  </td>
+	</tr>
+	<tr>
+	  <td>Phantoon:</td>
+	  <td>{{phantoon = ['A lot of trouble', 'Default', 'Used to it', 'No problemo']
+	        displaySelect("Phantoon", phantoon, settings['Phantoon'])}}</td>
+	</tr>
+	<tr>
+	  <td>Mother Brain:</td>
+	  <td>{{motherBrain = ['It can get ugly', 'Default', 'Is this really the last boss?', 'Nice cutscene bro']
+	        displaySelect("MotherBrain", motherBrain, settings['MotherBrain'])}}</td>
+	</tr>
+      </table>
     </div>
   </div>
+</div>
 
-  <form id="presetForm" id="presetForm" class="presetform">
-    <table class="half">
-      <colgroup><col class="quarter" /><col class="half" /><col class="quarter"></colgroup>
-      <tr>
-	<td>Load preset: </td>
-	<td>{{=SELECT(*presets, **dict(_name="paramsFileLoad", value=session.paramsFile, _class="filldropdown"))}}</td>
-	<td>{{=INPUT(_type="submit", _name="action", _value="Load", _class="full")}}</td>
-      </tr>
-      <tr>
-	<td>Update preset:</td>
-	<td>{{=SELECT(*presets, **dict(_name="paramsFileUpdate", value=session.paramsFile, _class="filldropdown"))}}</td>
-	<td>{{=INPUT(_type="button", _name="action", _value="Update", _class="full", _onclick="askPassword()")}}</td>
-      </tr>
-      <tr>
-        <td>New preset:</td>
-	<td>{{=INPUT(_type="text", _name="saveFile", requires=[IS_ALPHANUMERIC(error_message='Preset name must be alphanumeric and max 32 chars'), IS_LENGTH(32)], _class="full")}}</td>
-	<td>{{=INPUT(_type="button", _name="action", _value="Create", _class="full", _onclick="askPassword()")}}</td>
-      </tr>
-      <tr>
-	<td>{{=INPUT(_type="text", _name="password", _id="password", requires=[IS_NOT_EMPTY(), IS_ALPHANUMERIC(error_message='Password must be alphanumeric and max 32 chars'), IS_LENGTH(32)], _style='display:none')}}</td>
-      </tr>
-    </table>
-    </form>
-
-    <div class="tab">
-      <button class="tablinks" onclick="changeTab(event, 'Global')" id="defaultOpen" >Global</button>
-      <button class="tablinks" onclick="changeTab(event, 'Techniques1')">Common</button>
-      <button class="tablinks" onclick="changeTab(event, 'Techniques2')">Crateria/Brinstar</button>
-      <button class="tablinks" onclick="changeTab(event, 'Techniques3')">Wrecked Ship</button>
-      <button class="tablinks" onclick="changeTab(event, 'Techniques4')">Maridia 1/2</button>
-      <button class="tablinks" onclick="changeTab(event, 'Techniques5')">Maridia 2/2</button>
-      <button class="tablinks" onclick="changeTab(event, 'Techniques6')">Lower Norfair</button>
-      <button class="tablinks" onclick="changeTab(event, 'Techniques7')">Bosses/End</button>
-      <button class="tablinks" onclick="changeTab(event, 'Mapping')">Gamepad Mapping</button>
-    </div>
-
-    <div id="Global" class="tabcontent"><br/>
-      <div class="row">
-	<div class="column">
-	  <h3>Difficulty Target</h3>
-	  <table class="full">
-	    <colgroup><col class="half" /><col class="half" /></colgroup>
-	    <tr>
-	      <td>Difficulty target:</td>
-	      <td>
-{{
-=SELECT('easy', 'medium', 'hard', 'very hard', 'hardcore', 'mania',
-       _id="difficulty_target",
-       _name="difficulty_target",
-       _form="presetForm",
-       _class="full",
-       requires=IS_IN_SET(['easy', 'medium', 'hard', 'very hard', 'hardcore', 'mania']),
-       value=difficulties[conf["target"]])
-}}
-              </td>
-	      <td><button type="button" onclick="startTheTour(1)">?</button></td>
-	    </tr>
-	  </table>
-	  <h3>Pickup Strategy</h3>
-	  <table class="full">
-	    <colgroup><col class="half" /><col class="half" /></colgroup>
-	    <tr>
-	      <td>Pickup strategy:</td>
-	      <td>
-{{
-=SELECT('all', 'minimal', 'any',
-        _id="pickup_strategy",
-        _name="pickup_strategy",
-        _form="presetForm",
-        _class="full",
-        requires=IS_IN_SET(['all', 'minimal', 'any']),
-        value=conf["pickup"])
-}}
-	      </td>
-	      <td><button type="button" onclick="startTheTour(2)">?</button></td>
-	    </tr>
-	  </table>
-
-	  <h3>Hellruns</h3>
-	  <table class="full">
-            <colgroup><col class="half" /><col class="half" /></colgroup>
-	    <tr>
-	      <td>Ice:</td>
-	      <td>
-{{
-      hellruns = ['No thanks', 'Gimme energy', 'Default', 'Bring the heat', 'I run RBO']
-      displaySelect("Ice", hellruns, settings['Ice'])
-}}
-	      </td>
-              <td><button type="button" onclick="startTheTour(3)">?</button></td>
-	    </tr>
-	    <tr>
-	      <td>Main Upper Norfair:</td>
-	      <td>
-{{
-      displaySelect("MainUpperNorfair", hellruns, settings['MainUpperNorfair'])
-}}
-	      </td>
-	    </tr>
-	    <tr>
-	      <td>Lower Norfair:</td>
-	      <td>
-{{
-      hellruns = ['Default', 'Bring the heat', 'I run RBO']
-      displaySelect("LowerNorfair", hellruns, settings['LowerNorfair'])
-}}
-	      </td>
-	    </tr>
-	  </table>
-	</div>
-	<div class="column">
-	  <h3>Bosses</h3>
-	  <table class="full">
-            <colgroup><col class="half" /><col class="half" /></colgroup>
-	    <tr>
-	      <td>Kraid:</td>
-	      <td>
-{{
-      kraid = ["He's annoying", 'Default', 'Quick Kill']
-      displaySelect("Kraid", kraid, settings['Kraid'])
-}}
-	      </td>
-              <td><button type="button" onclick="startTheTour(4)">?</button></td>
-	    </tr>
-
-	    <tr>
-	      <td>Draygon:</td>
-	      <td>
-{{
-      draygon = ['A lot of trouble', 'Default', 'Used to it', 'No problemo']
-      displaySelect("Draygon", draygon, settings['Draygon'])
-}}
-	      </td>
-	    </tr>
-
-	    <tr>
-	      <td>Ridley:</td>
-	      <td>
-{{
-      ridley = ["I'm scared!", 'Default', 'Used to it', 'Piece of cake']
-      displaySelect("Ridley", ridley, settings['Ridley'])
-}}
-	      </td>
-	    </tr>
-
-	    <tr>
-	      <td>Phantoon:</td>
-	      <td>
-{{
-      phantoon = ['A lot of trouble', 'Default', 'Used to it', 'No problemo']
-      displaySelect("Phantoon", phantoon, settings['Phantoon'])
-}}
-	      </td>
-	    </tr>
-
-	    <tr>
-	      <td>Mother Brain:</td>
-	      <td>
-{{
-      motherBrain = ['It can get ugly', 'Default', 'Is this really the last boss?', 'Nice cutscene bro']
-      displaySelect("MotherBrain", motherBrain, settings['MotherBrain'])
-}}
-	      </td>
-	    </tr>
-	  </table>
-	  <h3>Hard rooms</h3>
-	  <table class="full">
-            <colgroup><col class="half" /><col class="half" /></colgroup>
-	    <tr>
-	      <td>X-Ray:</td>
-	      <td>
-{{
-      xray = ["Aarghh", "I don't like spikes", "Default", "I don't mind spikes", "D-Boost master"]
-      displaySelect("X-Ray", xray, settings["X-Ray"])
-}}
-	      </td>
-              <td><button type="button" onclick="startTheTour(5)">?</button></td>
-	    </tr>
-
-	    <tr>
-	      <td>Gauntlet:</td>
-	      <td>
-{{
-      gauntlet = ["Aarghh", "I don't like acid", "Default"]
-      displaySelect("Gauntlet", gauntlet, settings["Gauntlet"])
-}}
-	      </td>
-	    </tr>
-	  </table>
-	</div>
-      </div>
-    </div>
-
-    <div id="Techniques1" class="tabcontent">
+<div id="Techniques1" class="tabcontent">
 {{
 for category in categories["Common"]:
   displayCategory(category)
@@ -498,9 +363,9 @@ for category in categories["Common"]:
 
 pass
 }}
-    </div>
+</div>
 
-    <div id="Techniques2" class="tabcontent">
+<div id="Techniques2" class="tabcontent">
 {{
 for category in categories["Crateria/Brinstar"]:
   displayCategory(category)
@@ -508,9 +373,9 @@ for category in categories["Crateria/Brinstar"]:
 
 pass
 }}
-    </div>
+</div>
 
-    <div id="Techniques3" class="tabcontent">
+<div id="Techniques3" class="tabcontent">
 {{
 for category in categories["Wrecked Ship"]:
   displayCategory(category)
@@ -518,9 +383,9 @@ for category in categories["Wrecked Ship"]:
 
 pass
 }}
-    </div>
+</div>
 
-    <div id="Techniques4" class="tabcontent">
+<div id="Techniques4" class="tabcontent">
 {{
 for category in categories["Maridia 1/2"]:
   displayCategory(category)
@@ -528,9 +393,9 @@ for category in categories["Maridia 1/2"]:
 
 pass
 }}
-    </div>
+</div>
 
-    <div id="Techniques5" class="tabcontent">
+<div id="Techniques5" class="tabcontent">
 {{
 for category in categories["Maridia 2/2"]:
   displayCategory(category)
@@ -538,9 +403,9 @@ for category in categories["Maridia 2/2"]:
 
 pass
 }}
-    </div>
+</div>
 
-    <div id="Techniques6" class="tabcontent">
+<div id="Techniques6" class="tabcontent">
 {{
 for category in categories["Lower Norfair"]:
   displayCategory(category)
@@ -548,9 +413,9 @@ for category in categories["Lower Norfair"]:
 
 pass
 }}
-    </div>
+</div>
 
-    <div id="Techniques7" class="tabcontent">
+<div id="Techniques7" class="tabcontent">
 {{
 for category in categories["Bosses/End"]:
   displayCategory(category)
@@ -558,33 +423,32 @@ for category in categories["Bosses/End"]:
 
 pass
 }}
-    </div>
+</div>
 
-    <div id="Mapping" class="tabcontent">
-      <div class="controller_container">
-	<img id="snes_controller" src="/solver/static/images/snes-controller.png" alt="Snes Controller" title="Snes Controller" class="center_img"/>
-	{{ actions = ["Shoot", "Jump", "Dash", "Item Select", "Item Cancel", "Angle Up", "Angle Down"] }}
-	<div class="controller_a">
-	{{ displaySelect("A", actions, controller["A"]) }}
-	</div>
-	<div class="controller_b">
-	{{ displaySelect("B", actions, controller["B"]) }}
-	</div>
-	<div class="controller_x">
-	{{ displaySelect("X", actions, controller["X"]) }}
-	</div>
-	<div class="controller_y">
-	{{ displaySelect("Y", actions, controller["Y"]) }}
-	</div>
-	<div class="controller_l">
-	{{ displaySelect("L", actions, controller["L"]) }}
-	</div>
-	<div class="controller_r">
-	{{ displaySelect("R", actions, controller["R"]) }}
-	</div>
-	<div class="controller_s">
-	{{ displaySelect("Select", actions, controller["Select"]) }}
-	</div>
-      </div>
+<div id="Mapping" class="tabcontent">
+  <div class="controller_container">
+    <img id="snes_controller" src="/solver/static/images/snes-controller.png" alt="Snes Controller" title="Snes Controller" class="center_img"/>
+    {{ actions = ["Shoot", "Jump", "Dash", "Item Select", "Item Cancel", "Angle Up", "Angle Down"] }}
+    <div class="controller_a">
+      {{ displaySelect("A", actions, controller["A"]) }}
     </div>
-  </form>
+    <div class="controller_b">
+      {{ displaySelect("B", actions, controller["B"]) }}
+    </div>
+    <div class="controller_x">
+      {{ displaySelect("X", actions, controller["X"]) }}
+    </div>
+    <div class="controller_y">
+      {{ displaySelect("Y", actions, controller["Y"]) }}
+    </div>
+    <div class="controller_l">
+      {{ displaySelect("L", actions, controller["L"]) }}
+    </div>
+    <div class="controller_r">
+      {{ displaySelect("R", actions, controller["R"]) }}
+    </div>
+    <div class="controller_s">
+      {{ displaySelect("Select", actions, controller["Select"]) }}
+    </div>
+  </div>
+</div>

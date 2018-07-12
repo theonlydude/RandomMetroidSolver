@@ -160,6 +160,10 @@ h3, form {
     margin: 0.1em;
 }
 
+h2 {
+    margin-top: 0.3em;
+    margin-bottom: 0.3em;
+}
 .paddingleft {
     padding-left: 10px;
 }

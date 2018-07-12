@@ -49,6 +49,7 @@ extend 'layout.html'
     padding: 6px 12px;
     border: 1px solid #ccc;
     border-top: none;
+    margin-bottom: 1em;
 }
 .tabcontent {
     animation: fadeEffect 1s; /* Fading effect takes 1 second */
@@ -119,7 +120,7 @@ window.onload = function(){
   document.getElementById("defaultOpen").click();
 
 {{
-  for category in categories["page1"] + categories["page2"] + categories["page3"] + categories["page4"] + categories["page5"] + categories["page6"]:
+  for category in categories["Common"] + categories["Crateria/Brinstar"] + categories["Wrecked Ship"] + categories["Maridia 1/2"] + categories["Maridia 2/2"] + categories["Lower Norfair"] + categories["Bosses/End"]:
     for know in category['knows']:
       response.write("  $(function() { " + "$('#{}_diff')".format(know) + ".barrating('show', {theme: 'bars-1to10'}); });\n", escape=False)
       if knows[know][0] is False or ('readonly' in desc[know] and desc[know]['readonly'] == True):
@@ -322,12 +323,13 @@ pass
 
     <div class="tab">
       <button class="tablinks" onclick="changeTab(event, 'Global')" id="defaultOpen" >Global</button>
-      <button class="tablinks" onclick="changeTab(event, 'Techniques1')">Techniques (1/6)</button>
-      <button class="tablinks" onclick="changeTab(event, 'Techniques2')">Techniques (2/6)</button>
-      <button class="tablinks" onclick="changeTab(event, 'Techniques3')">Techniques (3/6)</button>
-      <button class="tablinks" onclick="changeTab(event, 'Techniques4')">Techniques (4/6)</button>
-      <button class="tablinks" onclick="changeTab(event, 'Techniques5')">Techniques (5/6)</button>
-      <button class="tablinks" onclick="changeTab(event, 'Techniques6')">Techniques (6/6)</button>
+      <button class="tablinks" onclick="changeTab(event, 'Techniques1')">Common</button>
+      <button class="tablinks" onclick="changeTab(event, 'Techniques2')">Crateria/Brinstar</button>
+      <button class="tablinks" onclick="changeTab(event, 'Techniques3')">Wrecked Ship</button>
+      <button class="tablinks" onclick="changeTab(event, 'Techniques4')">Maridia 1/2</button>
+      <button class="tablinks" onclick="changeTab(event, 'Techniques5')">Maridia 2/2</button>
+      <button class="tablinks" onclick="changeTab(event, 'Techniques6')">Lower Norfair</button>
+      <button class="tablinks" onclick="changeTab(event, 'Techniques7')">Bosses/End</button>
       <button class="tablinks" onclick="changeTab(event, 'Mapping')">Gamepad Mapping</button>
     </div>
 
@@ -490,7 +492,7 @@ pass
 
     <div id="Techniques1" class="tabcontent">
 {{
-for category in categories["page1"]:
+for category in categories["Common"]:
   displayCategory(category)
   pass
 
@@ -500,7 +502,7 @@ pass
 
     <div id="Techniques2" class="tabcontent">
 {{
-for category in categories["page2"]:
+for category in categories["Crateria/Brinstar"]:
   displayCategory(category)
   pass
 
@@ -510,7 +512,7 @@ pass
 
     <div id="Techniques3" class="tabcontent">
 {{
-for category in categories["page3"]:
+for category in categories["Wrecked Ship"]:
   displayCategory(category)
   pass
 
@@ -520,7 +522,7 @@ pass
 
     <div id="Techniques4" class="tabcontent">
 {{
-for category in categories["page4"]:
+for category in categories["Maridia 1/2"]:
   displayCategory(category)
   pass
 
@@ -530,7 +532,7 @@ pass
 
     <div id="Techniques5" class="tabcontent">
 {{
-for category in categories["page5"]:
+for category in categories["Maridia 2/2"]:
   displayCategory(category)
   pass
 
@@ -540,7 +542,17 @@ pass
 
     <div id="Techniques6" class="tabcontent">
 {{
-for category in categories["page6"]:
+for category in categories["Lower Norfair"]:
+  displayCategory(category)
+  pass
+
+pass
+}}
+    </div>
+
+    <div id="Techniques7" class="tabcontent">
+{{
+for category in categories["Bosses/End"]:
   displayCategory(category)
   pass
 

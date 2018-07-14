@@ -2,10 +2,10 @@
 
 # https://itemrando.supermetroid.run/randomize
 
-import sys, math, logging, argparse
+import sys, math, logging, argparse, re, json, os, subprocess
 
 # the difficulties for each technics
-from parameters import Conf, Knows, Settings, isKnows, isConf, isSettings
+from parameters import Knows, Settings, isKnows, isSettings
 from parameters import easy, medium, hard, harder, hardcore, mania, god, samus, impossibru, infinity, diff2text
 
 # the helper functions
@@ -16,17 +16,38 @@ from rom import RomType, RomLoader
 from graph_locations import locations as graphLocations
 from graph import AccessGraph
 from graph_access import vanillaTransitions, accessPoints
-from utils import ParamsLoader
+from utils import PresetLoader
+
+class Conf:
+    # ROM type, between :
+    # - Total_TX/FX/CX/X/HX : Total's randomizer seeds, Tournament/Full/Casual/Normal/Hard
+    # - Dessy : Dessyreqt randomizer seeds
+    # - Vanilla : original game
+    romType = 'Total_TX'
+
+    # keep getting majors of at most this difficulty before going for minors or changing area
+    difficultyTarget = medium
+
+    # display the generated path (spoilers!)
+    displayGeneratedPath = False
+
+    # choose how many items are required (possible value: minimal/all/any)
+    itemsPickup = 'minimal'
+
+    # the list of items to not pick up
+    itemsForbidden = []
 
 class Solver:
     # given a rom and parameters returns the estimated difficulty
 
-    def __init__(self, type='console', rom=None, params=None, debug=False, firstItemsLog=None):
+    def __init__(self, rom, presetFileName, difficultyTarget, pickupStrategy, itemsForbidden=[], type='console', debug=False, firstItemsLog=None, displayGeneratedPath=False, output=None):
         if debug == True:
             logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
         else:
             logging.basicConfig(level=logging.INFO)
         self.log = logging.getLogger('Solver')
+
+        self.setConf(difficultyTarget, pickupStrategy, itemsForbidden, displayGeneratedPath)
 
         self.firstLogFile = None
         if firstItemsLog is not None:
@@ -39,27 +60,23 @@ class Solver:
         self.locations = graphLocations
         self.smbm = SMBoolManager.factory('all', cache=False)
 
-        if params is not None:
-            for paramsFileName in params:
-                self.loadParams(paramsFileName)
+        if presetFileName is not None:
+            self.loadPreset(presetFileName)
 
-        self.romLoaded = False
-        if rom is not None:
-            self.loadRom(rom)
+        self.loadRom(rom)
 
-        self.pickup = Pickup(Conf.majorsPickup, Conf.minorsPickup)
+        self.pickup = Pickup(Conf.itemsPickup)
 
         Bosses.reset()
 
-        # the graph is adding the difficulties in the locations.
-        # in solver web mode the locations are only loaded once.
-        if self.type == 'web':
-            for loc in graphLocations:
-                if 'difficulty' in loc:
-                    del loc['difficulty']
-                loc['distance'] = 0
+    def setConf(self, difficultyTarget, pickupStrategy, itemsForbidden, displayGeneratedPath):
+        Conf.difficultyTarget = difficultyTarget
+        Conf.itemsPickup = pickupStrategy
+        Conf.displayGeneratedPath = displayGeneratedPath
+        Conf.itemsForbidden = itemsForbidden
 
     def loadRom(self, rom):
+        # TODO: with the new ROM json format, rewrite this
         guessed = RomType.guess(rom)
         if guessed is not None:
             Conf.romType = guessed
@@ -83,21 +100,15 @@ class Solver:
             for location in self.locations:
                 self.log.debug('{:>50}: {:>16}'.format(location["Name"], location['itemName']))
 
-        self.romLoaded = True
-
-    def loadParams(self, params):
-        paramsLoader = ParamsLoader.factory(params)
-        paramsLoader.load()
+    def loadPreset(self, presetFileName):
+        presetLoader = PresetLoader.factory(presetFileName)
+        presetLoader.load()
         self.smbm.createKnowsFunctions()
 
         if self.log.getEffectiveLevel() == logging.DEBUG:
-            paramsLoader.printToScreen()
+            presetLoader.printToScreen()
 
     def solveRom(self):
-        if self.romLoaded == False:
-            self.log.error("rom not loaded")
-            return
-
         self.lastLoc = 'Landing Site'
 
         (difficulty, itemsOk) = self.computeDifficulty()
@@ -162,7 +173,7 @@ class Solver:
         previous = -1
         current = 0
 
-        self.log.debug("{}/{}: available major: {}, available minor: {}, visited: {}".format(Conf.majorsPickup, str(Conf.minorsPickup), len(self.majorLocations), len(self.minorLocations), len(self.visitedLocations)))
+        self.log.debug("{}: available major: {}, available minor: {}, visited: {}".format(Conf.itemsPickup, len(self.majorLocations), len(self.minorLocations), len(self.visitedLocations)))
 
         isEndPossible = False
         endDifficulty = mania
@@ -288,7 +299,7 @@ class Solver:
 
         self.log.debug("difficulty={}".format(difficulty))
         self.log.debug("itemsOk={}".format(itemsOk))
-        self.log.debug("{}/{}: remaining major: {}, remaining minor: {}, visited: {}".format(Conf.majorsPickup, Conf.minorsPickup, len(self.majorLocations), len(self.minorLocations), len(self.visitedLocations)))
+        self.log.debug("{}: remaining major: {}, remaining minor: {}, visited: {}".format(Conf.itemsPickup, len(self.majorLocations), len(self.minorLocations), len(self.visitedLocations)))
 
         self.log.debug("remaining majors:")
         for loc in self.majorLocations:
@@ -532,30 +543,153 @@ class DifficultyDisplayer:
 
         return percent
 
+def guessRomType(filename):
+    match = re.findall(r'VARIA_Randomizer_[A]?[F]?X\d+', filename)
+    if len(match) > 0:
+        if match[0][17] == 'A' and match[0][18] == 'F':
+            return "VARIA Area Full"
+        elif match[0][17] == 'A' and match[0][18] == 'X':
+            return "VARIA Area Classic"
+        elif match[0][17] == 'F':
+            return "VARIA Full"
+        elif match[0][17] == 'X':
+            return "VARIA Classic"
+
+    match = re.findall(r'[CTFH]?X\d+', filename)
+    if len(match) > 0:
+        if match[0][0] == 'C':
+            return "Total Casual"
+        elif match[0][0] == 'T':
+            return "Total Tournament"
+        elif match[0][0] == 'F':
+            return "Total Full"
+        elif match[0][0] == 'H':
+            return "Total Hard"
+        elif match[0][0] == 'X':
+            return "Total Normal"
+
+    match = re.findall(r'[CMS]?\d+', filename)
+    if len(match) > 0:
+        if match[0][0] == 'C':
+            return "Dessy Casual"
+        elif match[0][0] == 'M':
+            return "Dessy Masochist"
+        elif match[0][0] == 'S':
+            return "Dessy Speedrunner"
+
+    match = re.findall(r'Super[ _]*Metroid', filename)
+    if len(match) > 0:
+        return "Vanilla"
+
+    # default to TX
+    return "Total Tournament"
+
+def generatePng(dotFileName):
+    # use dot to generate the graph's image .png
+    # use convert to generate the thumbnail
+    # dotFileName: the /directory/image.dot
+    # the png and thumbnails are generated in the same directory as the dot
+
+    splited = os.path.splitext(dotFileName)
+    pngFileName = splited[0] + '.png'
+    pngThumbFileName = splited[0] + '_thumbnail.png'
+
+    # dot -Tpng VARIA_Randomizer_AFX5399_noob.dot -oVARIA_Randomizer_AFX5399_noob.png
+    params = ['dot', '-Tpng', dotFileName, '-o'+pngFileName]
+    ret = subprocess.call(params)
+    if ret != 0:
+        print("Error calling dot {}: {}".format(params, ret))
+        return (None, None)
+
+    params = ['convert', pngFileName, '-resize', '1024', pngThumbFileName]
+    ret = subprocess.call(params)
+    if ret != 0:
+        print("Error calling convert {}: {}".format(params, ret))
+        os.remove(pngFileName)
+        return (None, None)
+
+    return (pngFileName, pngThumbFileName)
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Random Metroid Solver")
     parser.add_argument('romFileName', help="the input rom")
-    parser.add_argument('--param', '-p', help="the input parameters", nargs='+', default=None, dest='paramsFileName')
+    parser.add_argument('--preset', '-p', help="the preset file", nargs='?',
+                        default=None, dest='presetFileName')
 
+    parser.add_argument('--difficultyTarget', '-t',
+                        help="the difficulty target that the solver will aim for",
+                        dest='difficultyTarget', nargs='?', default=None, type=int)
+    parser.add_argument('--pickupStrategy', '-s', help="Pickup strategy for the Solver",
+                        dest='pickupStrategy', nargs='?', default=None)
+    parser.add_argument('--itemsForbidden', '-f', help="Item not picked up during solving",
+                        dest='itemsForbidden', nargs='+', default=[], action='append')
+
+    parser.add_argument('--type', '-y', help="web or console", dest='type', nargs='?',
+                        default='console', choices=['web', 'console'])
     parser.add_argument('--debug', '-d', help="activate debug logging", dest='debug', action='store_true')
-    parser.add_argument('--difficultyTarget', '-t', help="the difficulty target that the solver will aim for", dest='difficultyTarget', nargs='?', default=None, type=int)
-    parser.add_argument('--displayGeneratedPath', '-g', help="display the generated path (spoilers!)", dest='displayGeneratedPath', action='store_true')
-    parser.add_argument('--firstItemsLog', '-1', help="path to file where for each item type the first time it was found and where will be written (spoilers!)", nargs='?', default=None, type=str, dest='firstItemsLog')
+    parser.add_argument('--firstItemsLog', '-1',
+                        help="path to file where for each item type the first time it was found and where will be written (spoilers!)",
+                        nargs='?', default=None, type=str, dest='firstItemsLog')
+    parser.add_argument('--displayGeneratedPath', '-g', help="display the generated path (spoilers!)",
+                        dest='displayGeneratedPath', action='store_true')
+    parser.add_argument('--output', '-o', help="When called from the website, contains the result of the solver",
+                        dest='output', nargs='?', default=None)
 
     args = parser.parse_args()
-    solver = Solver(rom=args.romFileName, params=args.paramsFileName, debug=args.debug, firstItemsLog=args.firstItemsLog)
 
-    if args.difficultyTarget is not None:
-        Conf.difficultyTarget = args.difficultyTarget
+    if args.presetFileName is None:
+        args.presetFileName = 'regular'
 
-    Conf.displayGeneratedPath = args.displayGeneratedPath
-
-    #solver.solveRom()
-    diff = solver.solveRom()
-    (knowsUsed, total) = solver.getKnowsUsed()
-    print("{}: diff : {}".format(diff, args.romFileName))
-    print("{}/{}: knows Used : {}".format(knowsUsed, total, args.romFileName))
-    if diff[0] >= 0:
-        sys.exit(0)
+    if args.difficultyTarget is None:
+        difficultyTarget = Conf.difficultyTarget
     else:
-        sys.exit(1)
+        difficultyTarget = args.difficultyTarget
+
+    if args.pickupStrategy is None:
+        pickupStrategy = Conf.itemsPickup
+    else:
+        pickupStrategy = args.pickupStrategy
+
+    # itemsForbidden is like that: [['Varia'], ['Reserve'], ['Gravity']], fix it
+    args.itemsForbidden = [item[0] for item in args.itemsForbidden]
+
+    solver = Solver(args.romFileName, args.presetFileName, difficultyTarget,
+                    pickupStrategy, args.itemsForbidden, type=args.type, debug=args.debug,
+                    firstItemsLog=args.firstItemsLog, displayGeneratedPath=args.displayGeneratedPath,
+                    output=args.output)
+
+    (difficulty, itemsOk) = solver.solveRom()
+    (used, total) = solver.getKnowsUsed()
+
+    if args.output is None:
+        print("({}, {}): diff : {}".format(difficulty, itemsOk, args.romFileName))
+        print("{}/{}: knows Used : {}".format(used, total, args.romFileName))
+        if diff[0] >= 0:
+            sys.exit(0)
+        else:
+            sys.exit(1)
+    else:
+        if solver.areaRando == True:
+            dotFileName = os.path.basename(os.path.splitext(args.romFileName)[0])+'.json'
+            dotFileName = os.path.join(os.path.expanduser('~/web2py/applications/solver/static/graph'), dotFileName)
+            solver.areaGraph.toDot(dotFileName)
+            (pngFileName, pngThumbFileName) = generatePng(dotFileName)
+            if pngFileName is not None and pngThumbFileName is not None:
+                pngFileName = os.path.basename(pngFileName)
+                pngThumbFileName = os.path.basename(pngThumbFileName)
+        else:
+            pngFileName = None
+            pngThumbFileName = None
+
+        randomizedRom=args.romFileName
+        diffPercent = DifficultyDisplayer(difficulty).percent()
+        generatedPath = solver.getPath(solver.visitedLocations)
+        romType = guessRomType(randomizedRom)
+
+        result = dict(randomizedRom=randomizedRom, difficulty=difficulty,
+                      generatedPath=generatedPath, diffPercent=diffPercent,
+                      knowsUsed=(used, total), itemsOk=itemsOk, romType=romType,
+                      pngFileName=pngFileName, pngThumbFileName=pngThumbFileName)
+
+        with open(args.output, 'w') as jsonFile:
+            json.dump(result, jsonFile)

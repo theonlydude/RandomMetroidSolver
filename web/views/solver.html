@@ -239,18 +239,29 @@ function startTheTour(step=-1) {
     storage: false,
     steps: [
     {
-      element: "#presetsStep",
-      title: "Presets",
-      content: "Load your preset or one of the predefined ones:<ul><li>noob</li><li>casual</li><li>regular</li><li>veteran</li><li>speedrunner</li><li>master</li></ul>Any preset can be used as a starting point to create your own using the New preset field. You will be asked a password when creating your preset, to be able to update it afterwards using the Update preset field.",
+      element: "#uploadFile",
+      title: "ROM file",
+      content: "The randomized ROM that you want to solve."
+    },
+    {
+      element: "#romFile",
+      title: "Already uploaded ROM files",
+      content: "Solve again an already uploaded ROM file."
+    },
+    {
+      element: "#preset",
+      title: "Preset",
+      content: "The preset is used by the Solver to know which techniques are available to reach the items locations.<br/>You can create and manage your preset on the <a href=\"/solver/solver_web/presets\">Presets part of the website</a>.<br/>Load your preset or one of the predefined ones:<ul><li>noob</li><li>casual</li><li>regular</li><li>veteran</li><li>speedrunner</li><li>master</li></ul>.",
       placement: "auto left"
     },
     {
-      element: "#difficulty_target",
+      element: "#difficultyTarget",
       title: "Difficulty Target",
-      content: "The maximum difficulty for picking up an item in the current area before moving to another area.<br/><b>Warning</b>: selecting a too hard difficulty may produce unrealistic results."
+      content: "The maximum difficulty for picking up an item in the current area before moving to another area.<br/><b>Warning</b>: selecting a too hard difficulty may produce unrealistic results.",
+      placement: "auto left"
     },
     {
-      element: "#pickup_strategy",
+      element: "#pickupStrategy",
       title: "Pickup Strategy",
       content: "The strategy for picking up major and minor items.<br/>\
 <ul><li>All:</li><ul><li>Will grab all the major and minor items.</li></ul>\
@@ -260,21 +271,12 @@ Use this setting on seeds that are unfinishable at first, such as masochist seed
 <li>Minimal:</li><ul><li>Majors: Will get Morph, Bomb and/or Power bombs, 3 ETanks, Varia,<br/>\
 Gravity, Speed Booster or Ice Beam, and anything else along the way.</li>\
 <li>Minors:Will pick up 10 Missiles packs, 5 Super packs and 2 Power Bomb packs.<br/>\
-If Charge Beam is not picked up along the way or not accessible, enough minors to beat Mother Brain will be picked up.</li></ul></ul>"
+If Charge Beam is not picked up along the way or not accessible, enough minors to beat Mother Brain will be picked up.</li></ul></ul>",
+      placement: "auto left"
     },
     {
-      element: "#",
-      title: "",
-      content: ""
-    },
-    {
-      element: "#",
-      title: "",
-      content: ""
-    },
-    {
-      element: "#",
-      title: "",
+      element: "#forbiddenItemsStep",
+      title: "Forbidden Items",
       content: "For testing purpose you can choose to not pick up some items."
     } ]});
 
@@ -313,62 +315,50 @@ If Charge Beam is not picked up along the way or not accessible, enough minors t
 </div>
 
 <p>
-  Choose your randomized ROM to solve, the preset to use then press 'Compute Difficulty'.
+  Using the techniques known in the chosen preset check if a ROM can be finish and its estimated difficulty.<br/>
+  Choose your randomized ROM to solve, the preset to use then press 'Solve'.
 </p>
-<form id="solverForm" id="solverForm" class="presetform" method="post" enctype="multipart/form-data" onsubmit="doSubmit();">
+<form id="solverForm" class="presetform" method="post" enctype="multipart/form-data" onsubmit="doSubmit();">
   <div class="row">
     <div class="column">
       <table class="full">
 	<colgroup><col class="half" /><col class="half" /></colgroup>
 	<tr>
 	  <td>Randomized Super Metroid ROM: </td>
-	  <td>{{=INPUT(_type="file", _name="uploadFile", _id="uploadFile")}}</td>
-	  <td><button type="button" onclick="startTheTour(2)">?</button></td>
+	  <td><input id="uploadFile" name="uploadFile" type="file"/></td>
+	  <td><button type="button" onclick="startTheTour(0)">?</button></td>
 	</tr>
 	<tr>
 	  <td>Already uploaded ROMs in this session: </td>
 	  <td>{{=SELECT(*roms, **dict(_name="romFile", _id="romFile", value=lastRomFile, _class="filldropdown"))}}</td>
-	  <td><button type="button" onclick="startTheTour(2)">?</button></td>
+	  <td><button type="button" onclick="startTheTour(1)">?</button></td>
 	</tr>
       </table>
     </div>
     <div class="column">
       <table class="full">
+	<colgroup><col class="half" /><col class="half" /></colgroup>
 	<tr>
 	  <td>Preset: </td>
-	  <td>{{=SELECT(*presets, **dict(_name="preset", value=session.solver["preset"], _class="filldropdown"))}}</td>
+	  <td>{{=SELECT(*presets, **dict(_id="preset", _name="preset", value=session.solver["preset"], _class="filldropdown"))}}</td>
 	  <td><button type="button" onclick="startTheTour(2)">?</button></td>
 	</tr>
 	<tr>
 	  <td>Difficulty target:</td>
-	  <td>
-	    {{
-	    =SELECT("easy", "medium", "hard", "very hard", "hardcore", "mania",
-                _id="difficultyTarget", _name="difficultyTarget", _class="full",
-                requires=IS_IN_SET(["easy", "medium", "hard", "very hard", "hardcore", "mania"]),
-                value=difficulties[session.solver["difficultyTarget"]])
-	    }}
-	  </td>
-	  <td><button type="button" onclick="startTheTour(1)">?</button></td>
+	  <td>{{=SELECT("easy", "medium", "hard", "very hard", "hardcore", "mania", _id="difficultyTarget", _name="difficultyTarget", _class="full", value=difficulties[session.solver["difficultyTarget"]])}}</td>
+	  <td><button type="button" onclick="startTheTour(3)">?</button></td>
 	</tr>
 	<tr>
 	  <td>Pickup strategy:</td>
-	  <td>
-	    {{
-	    =SELECT("all", "minimal", "any",
-              _id="pickupStrategy", _name="pickupStrategy", _form="solverForm", _class="full",
-              requires=IS_IN_SET(["all", "minimal", "any"]),
-              value=session.solver["pickupStrategy"])
-	    }}
-	  </td>
-	  <td><button type="button" onclick="startTheTour(2)">?</button></td>
+	  <td>{{=SELECT("all", "minimal", "any", _id="pickupStrategy", _name="pickupStrategy", _form="solverForm", _class="full", value=session.solver["pickupStrategy"])}}</td>
+	  <td><button type="button" onclick="startTheTour(4)">?</button></td>
 	</tr>
       </table>
     </div>
   </div>
-  {{=INPUT(_type="text", _name="romJson", _id="romJson", _style="display:none")}}
+  <input id="romJson" name="romJson" style="display:none" type="text"/>
 
-  <h3>Items not picked up <button type="button" onclick="startTheTour(2)">?</button></h3>
+  <h3>Items not picked up <button  id="forbiddenItemsStep" type="button" onclick="startTheTour(5)">?</button></h3>
   <table class="full">
     <tr>
 {{
@@ -379,21 +369,21 @@ If Charge Beam is not picked up along the way or not accessible, enough minors t
     else:
       checked = ""
       pass
-    response.write("<td><input id=\"{}_bool\" name=\"{}_bool\" type=\"checkbox\" {}>\n".format(item, item, checked), escape=False)
+    response.write("      <td><input id=\"{}_bool\" name=\"{}_bool\" type=\"checkbox\" {}>".format(item, item, checked), escape=False)
 
-    response.write("{}<br/>".format(item), escape=False)
-    response.write("</td>", escape=False)
+    response.write("{}".format(item), escape=False)
+    response.write("</td>\n", escape=False)
 
     i += 1
     if i % 7 == 0:
-      response.write("</tr><tr>", escape=False)
+      response.write("    </tr>\n    <tr>\n", escape=False)
       pass
     pass
 }}
     </tr>
   </table>
 
-  {{=INPUT(_type="submit", _value="Compute difficulty", _name="action", _class="btn btn-default buttonRandom")}}
+  {{=INPUT(_type="submit", _value="Solve", _name="action", _class="btn btn-default buttonRandom")}}
 </form>
 
 <div class="main">
@@ -453,4 +443,3 @@ if result is not None:
 }}
 
 </div>
-</body>

@@ -400,7 +400,7 @@ class RomPatcher:
                      'Disable_Space_Time_select_in_menu', 'Fix_Morph_Ball_Hidden_Chozo_PLMs',
                      'Fix_Screw_Attack_selection_in_menu',
                      'Removes_Gravity_Suit_heat_protection',
-                     'AimAnyButton.ips', 'ws_etank.ips', 'ln_chozo_sj_check_disable.ips', 'endingtotals.ips'],
+                     'AimAnyButton.ips', 'ws_etank.ips', 'ln_chozo_sj_check_disable.ips'], #, 'endingtotals.ips'],
         'Layout': ['dachora.ips', 'early_super_bridge.ips', 'high_jump.ips', 'moat.ips',
                    'nova_boost_platform.ips', 'red_tower.ips', 'spazer.ips'],
         'Optional': ['itemsounds.ips', 'max_ammo_display.ips',

@@ -535,18 +535,21 @@ class Helpers(object):
                               self.enoughStuffsMotherbrain())
 
 class Pickup:
-    def __init__(self, majorsPickup, minorsPickup):
-        self.majorsPickup = majorsPickup
-        self.minorsPickup = minorsPickup
-
+    def __init__(self, itemsPickup):
+        self.itemsPickup = itemsPickup
+        self.minorsPickupMinimal = {
+            'Missile' : 10,
+            'Super' : 5,
+            'PowerBomb' : 2
+        }
     def _enoughMinorTable(self, smbm, minorType):
-        return smbm.haveItemCount(minorType, int(self.minorsPickup[minorType]))
+        return smbm.haveItemCount(minorType, int(self.minorsPickupMinimal[minorType]))
 
     def enoughMinors(self, smbm, minorLocations):
-        if self.minorsPickup == 'all':
+        if self.itemsPickup == 'all':
             # need them all
             return len(minorLocations) == 0
-        elif self.minorsPickup == 'any':
+        elif self.itemsPickup == 'any':
             return True
         else:
             canEnd = smbm.enoughStuffTourian().bool
@@ -557,11 +560,11 @@ class Pickup:
 
     def enoughMajors(self, smbm, majorLocations):
         # the end condition
-        if self.majorsPickup == 'all':
+        if self.itemsPickup == 'all':
             return len(majorLocations) == 0
-        elif self.majorsPickup == 'any':
+        elif self.itemsPickup == 'any':
             return True
-        elif self.majorsPickup == 'minimal':
+        elif self.itemsPickup == 'minimal':
             canResistRainbow = (smbm.haveItemCount('ETank', 3)
                                 and smbm.haveItem('Varia')) \
                                or smbm.haveItemCount('ETank', 6)

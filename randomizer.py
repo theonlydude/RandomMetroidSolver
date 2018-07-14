@@ -8,7 +8,7 @@ from itemrandomizerweb.AreaRandomizer import AreaRandomizer
 from graph_locations import locations as graphLocations
 from graph_access import vanillaTransitions, getDoorConnections
 from parameters import Knows, easy, medium, hard, harder, hardcore, mania, text2diff, diff2text
-from utils import ParamsLoader
+from utils import PresetLoader
 from rom import RomPatcher, RomPatches, FakeROM
 
 speeds = ['slowest', 'slow', 'medium', 'fast', 'fastest']
@@ -128,7 +128,7 @@ if __name__ == "__main__":
 
     # if diff preset given, load it
     if args.paramsFileName is not None:
-        ParamsLoader.factory(args.paramsFileName[0]).load()
+        PresetLoader.factory(args.paramsFileName[0]).load()
         preset = os.path.splitext(os.path.basename(args.paramsFileName[0]))[0]
 
         if args.preset is not None:

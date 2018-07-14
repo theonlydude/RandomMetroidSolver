@@ -239,7 +239,7 @@ pass
 
 <div class="fixed">
   <div class="menu">
-    {{=A("Super Metroid VARIA Randomizer and Solver", _href=URL(f="home"), _class="menu")}}
+    {{=A("Super Metroid VARIA Randomizer and Solver", _href=URL(f="presets"), _class="menu")}}
     {{=A("Presets", _href=URL(f="presets"), _class="menu_selected")}}
     {{=A("Solver", _href=URL(f="solver"), _class="menu")}}
     {{=A("Randomizer", _href=URL(f="randomizer"), _class="menu")}}
@@ -252,21 +252,21 @@ pass
     <colgroup><col class="quarter" /><col class="half" /><col class="quarter"></colgroup>
     <tr>
       <td>Load preset: </td>
-      <td>{{=SELECT(*presets, **dict(_name="paramsFileLoad", value=session.paramsFile, _class="filldropdown"))}}</td>
-      <td>{{=INPUT(_type="submit", _name="action", _value="Load", _class="full")}}</td>
+      <td>{{=SELECT(*presets, **dict(_name="presetLoad", value=session.presets["preset"], _class="filldropdown"))}}</td>
+      <td><input class="full" name="action" type="submit" value="Load"/></td>
     </tr>
     <tr>
       <td>Update preset:</td>
-      <td>{{=SELECT(*presets, **dict(_name="paramsFileUpdate", value=session.paramsFile, _class="filldropdown"))}}</td>
-      <td>{{=INPUT(_type="button", _name="action", _value="Update", _class="full", _onclick="askPassword()")}}</td>
+      <td>{{=SELECT(*presets, **dict(_name="presetUpdate", value=session.presets["preset"], _class="filldropdown"))}}</td>
+      <td><input class="full" name="action" onclick="askPassword()" type="submit" value="Update"/></td>
     </tr>
     <tr>
       <td>New preset:</td>
-      <td>{{=INPUT(_type="text", _name="saveFile", requires=[IS_ALPHANUMERIC(error_message='Preset name must be alphanumeric and max 32 chars'), IS_LENGTH(32)], _class="full")}}</td>
-      <td>{{=INPUT(_type="button", _name="action", _value="Create", _class="full", _onclick="askPassword()")}}</td>
+      <td><input class="full" name="presetCreate" type="text"/></td>
+      <td><input class="full" name="action" onclick="askPassword()" type="submit" value="Create"/></td>
     </tr>
   </table>
-  {{=INPUT(_type="text", _name="password", _id="password", requires=[IS_NOT_EMPTY(), IS_ALPHANUMERIC(error_message='Password must be alphanumeric and max 32 chars'), IS_LENGTH(32)], _style='display:none')}}
+  <input id="password" name="password" style="display:none" type="text"/>
 </form>
 
 <div class="tab">

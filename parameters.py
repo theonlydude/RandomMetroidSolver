@@ -42,37 +42,6 @@ text2diff = {
     'infinity': infinity
 }
 
-def isConf(conf):
-    return conf[0:len('__')] != '__'
-
-class Conf:
-    # ROM type, between :
-    # - Total_TX/FX/CX/X/HX : Total's randomizer seeds, Tournament/Full/Casual/Normal/Hard
-    # - Dessy : Dessyreqt randomizer seeds
-    # - Vanilla : original game
-    romType='Total_TX'
-
-    # keep getting majors of at most this difficulty before going for minors or changing area
-    difficultyTarget=medium
-
-    # display the generated path (spoilers!)
-    displayGeneratedPath=False
-
-    # choose how many items are required
-    majorsPickup = 'minimal'
-    #majorsPickup = 'all'
-    #majorsPickup = 'any'
-    minorsPickup = {
-       'Missile' : 10,
-       'Super' : 5,
-       'PowerBomb' : 2
-    }
-    #minorsPickup = 'all'
-    #minorsPickup = 'any'
-
-    # the list of items to not pick up
-    itemsForbidden = []
-
 def isKnows(knows):
     return knows[0:len('__')] != '__' and knows[0] == knows[0].upper()
 

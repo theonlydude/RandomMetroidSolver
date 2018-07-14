@@ -5,7 +5,7 @@ import sys
 from parameters import *
 from helpers import *
 from smboolmanager import *
-from utils import ParamsLoader
+from utils import PresetLoader
 
 def stuff(base, nEtanks, nMissiles, nSupers, nPowerBombs):
     ret = base
@@ -68,7 +68,7 @@ def boss(name, diffFunction):
 if __name__ == "__main__":
     if len(sys.argv) >= 2:
         params = sys.argv[1]
-        ParamsLoader.factory(params).load()
+        PresetLoader.factory(params).load()
     h = Helpers(sm)
     boss('Kraid', h.enoughStuffsKraid)
     boss('Phantoon', h.enoughStuffsPhantoon)

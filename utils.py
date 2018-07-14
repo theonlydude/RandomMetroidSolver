@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 import os, json, random
-from parameters import Conf, Knows, Settings, Controller, isKnows, isConf, isSettings, isButton
+from parameters import Knows, Settings, Controller, isKnows, isSettings, isButton
 from smbool import SMBool
 
 # gauss random in [0, r] range
@@ -22,12 +22,12 @@ class ParamsLoader(object):
         if type(params) is str:
             ext = os.path.splitext(params)
             if ext[1].lower() == '.json':
-                return ParamsLoaderJson(params)
+                return PresetLoaderJson(params)
             else:
                 print("wrong parameters file type: {}".format(ext[1]))
                 sys.exit(-1)
         elif type(params) is dict:
-            return ParamsLoaderDict(params)
+            return PresetLoaderDict(params)
         else:
             print("wrong parameters input, is neither a string nor a json file name: {}".format(params))
             sys.exit(-1)
@@ -35,19 +35,13 @@ class ParamsLoader(object):
     def __init__(self):
         if 'Knows' not in self.params:
             self.params['Knows'] = {}
-        if 'Conf' not in self.params:
-            self.params['Conf'] = {}
         if 'Settings' not in self.params:
             self.params['Settings'] = {}
         if 'Controller' not in self.params:
             self.params['Controller'] = {}
 
     def load(self):
-        # update the parameters in the parameters classes: Conf, Knows, Settings
-        # Conf
-        for param in self.params['Conf']:
-            if isConf(param):
-                setattr(Conf, param, self.params['Conf'][param])
+        # update the parameters in the parameters classes: Knows, Settings
 
         # Knows
         for param in self.params['Knows']:
@@ -91,24 +85,20 @@ class ParamsLoader(object):
         for setting in Settings.__dict__:
             if isSettings(setting):
                 print("{}: {}".format(setting, Settings.__dict__[setting]))
-        print("loaded conf:")
-        for conf in Conf.__dict__:
-            if isConf(conf):
-                print("{}: {}".format(conf, Conf.__dict__[conf]))
         print("loaded controller:")
         for button in Controller.__dict__:
             if isButton(button):
                 print("{}: {}".format(button, Controller.__dict__[button]))
 
-class ParamsLoaderJson(ParamsLoader):
+class PresetLoaderJson(PresetLoader):
     # when called from the test suite
     def __init__(self, jsonFileName):
         with open(jsonFileName) as jsonFile:
             self.params = json.load(jsonFile)
-        super(ParamsLoaderJson, self).__init__()
+        super(PresetLoaderJson, self).__init__()
 
-class ParamsLoaderDict(ParamsLoader):
+class PresetLoaderDict(PresetLoader):
     # when called from the website
     def __init__(self, params):
         self.params = params
-        super(ParamsLoaderDict, self).__init__()
+        super(PresetLoaderDict, self).__init__()

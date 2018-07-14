@@ -5,17 +5,18 @@ path = os.path.expanduser('~/RandomMetroidSolver')
 if os.path.exists(path) and path not in sys.path:
     sys.path.append(path)
 
-import datetime, os, hashlib, json, re, subprocess, tempfile
+import datetime, os, hashlib, json, subprocess, tempfile
 from collections import OrderedDict
 
 # to solve the rom
 from parameters import easy, medium, hard, harder, hardcore, mania
-from parameters import Conf, Knows, Settings, Controller, isKnows, isButton
+from parameters import Knows, Settings, Controller, isKnows, isButton
+from solver import Conf
 from parameters import diff2text, text2diff
 from graph_locations import locations as graphLocations
 from solver import Solver, DifficultyDisplayer
 from rom import RomLoader
-from utils import ParamsLoader
+from utils import PresetLoader
 
 def maxPresetsReach():
     # to prevent a spammer to create presets in a loop and fill the fs
@@ -29,73 +30,32 @@ romTypes = OrderedDict([('VARIA Classic', 'VARIA_X'), ('VARIA Full', 'VARIA_FX')
                         ('Dessy Speedrunner', 'Dessy'), ('Dessy Masochist', 'Dessy'),
                         ('Vanilla', 'Vanilla')])
 
-def guessRomType(filename):
-    match = re.findall(r'VARIA_Randomizer_[A]?[F]?X\d+', filename)
-    if len(match) > 0:
-        if match[0][17] == 'A' and match[0][18] == 'F':
-            return "VARIA Area Full"
-        elif match[0][17] == 'A' and match[0][18] == 'X':
-            return "VARIA Area Classic"
-        elif match[0][17] == 'F':
-            return "VARIA Full"
-        elif match[0][17] == 'X':
-            return "VARIA Classic"
-
-    match = re.findall(r'[CTFH]?X\d+', filename)
-    if len(match) > 0:
-        if match[0][0] == 'C':
-            return "Total Casual"
-        elif match[0][0] == 'T':
-            return "Total Tournament"
-        elif match[0][0] == 'F':
-            return "Total Full"
-        elif match[0][0] == 'H':
-            return "Total Hard"
-        elif match[0][0] == 'X':
-            return "Total Normal"
-
-    match = re.findall(r'[CMS]?\d+', filename)
-    if len(match) > 0:
-        if match[0][0] == 'C':
-            return "Dessy Casual"
-        elif match[0][0] == 'M':
-            return "Dessy Masochist"
-        elif match[0][0] == 'S':
-            return "Dessy Speedrunner"
-
-    match = re.findall(r'Super[ _]*Metroid', filename)
-    if len(match) > 0:
-        return "Vanilla"
-
-    # default to TX
-    return "Total Tournament"
-
 def loadPreset():
     # load conf from session if available
     loaded = False
-    if session.paramsFile is None:
+    if session.presets['preset'] is None:
         # default preset
-        session.paramsFile = 'regular'
+        session.presets['preset'] = 'regular'
 
     if request.vars.action is not None:
         # press solve, load or save button
         if request.vars.action in ['Update', 'Create']:
             # store the changes in case the form won't be accepted
-            paramsDict = generate_json_from_parameters(request.vars)
-            session.paramsDict = paramsDict
-            params = ParamsLoader.factory(session.paramsDict).params
+            presetDict = genJsonFromParams(request.vars)
+            session.presets['presetDict'] = presetDict
+            params = PresetLoader.factory(presetDict).params
             loaded = True
         elif request.vars.action in ['Load']:
             # nothing to load, we'll load the new params file with the load form code
             pass
     else:
         # no forms button pressed
-        if session.paramsDict is not None:
-            params = ParamsLoader.factory(session.paramsDict).params
+        if session.presets['presetDict'] is not None:
+            params = PresetLoader.factory(session.presets['presetDict']).params
             loaded = True
 
     if not loaded:
-        params = ParamsLoader.factory('diff_presets/{}.json'.format(session.paramsFile)).params
+        params = PresetLoader.factory('diff_presets/{}.json'.format(session.presets['preset'])).params
 
     return params
 
@@ -107,52 +67,103 @@ def loadPresetsList():
         presets.remove(preset)
     return stdPresets + presets
 
+def validatePresetsParams(action):
+    if action == 'Create':
+        if IS_NOT_EMPTY()(request.vars.password)[1] is not None:
+            return (False, "Password is empty")
+        if IS_ALPHANUMERIC()(request.vars.password)[1] is not None:
+            return (False, "Password must be alphanumeric")
+        if IS_LENGTH(32)(request.vars.password)[1] is not None:
+            return (False, "Password must be max 32 chars")
+        if IS_ALPHANUMERIC()(request.vars.presetCreate)[1] is not None:
+            return (False, "Preset name must be alphanumeric")
+        if IS_LENGTH(32)(request.vars.presetCreate)[1] is not None:
+            return (False, "Preset name must be max 32 chars")
+    elif action == 'Update':
+        if IS_ALPHANUMERIC()(request.vars.presetUpdate)[1] is not None:
+            return (False, "Preset name must be alphanumeric")
+        if IS_LENGTH(32)(request.vars.presetUpdate)[1] is not None:
+            return (False, "Preset name must be max 32 chars")
+    elif action == 'Load':
+        if IS_ALPHANUMERIC()(request.vars.presetLoad)[1] is not None:
+            return (False, "Preset name must be alphanumeric")
+        if IS_LENGTH(32)(request.vars.presetLoad)[1] is not None:
+            return (False, "Preset name must be max 32 chars")
+
+    if action in ['Create', 'Update']:
+        # check that there's not two buttons for the same action
+        map = {}
+        for button in Controller.__dict__:
+            if isButton(button):
+                value = request.vars[button]
+                if value is None:
+                    return (False, "Button {} not set".format(button))
+                else:
+                    if value in map:
+                        return (False, "Action {} set for two buttons: {} and {}".format(value, button, map[value]))
+                    map[value] = button
+
+    return (True, None)
+
+def initPresetsSession():
+    if session.presets is None:
+        session.presets = {}
+
+        session.presets['preset'] = 'regular'
+        session.presets['presetDict'] = None
+
 def presets():
+    initPresetsSession()
+
     # load conf from session if available
     params = loadPreset()
 
     # load presets list
     presets = loadPresetsList()
 
+    if request.vars.action is not None:
+        (ok, msg) = validatePresetsParams(request.vars.action)
+        if not ok:
+            session.flash = msg
+            redirect(URL(r=request, f='presets'))
+
     # in web2py.js, in disableElement, remove 'working...' to have action with correct value
     if request.vars.action == 'Load':
         # check that the presets file exists
-        paramsFile = request.vars['paramsFileLoad']
-        fullPath = 'diff_presets/{}.json'.format(paramsFile)
+        presetName = request.vars['presetLoad']
+        fullPath = 'diff_presets/{}.json'.format(presetName)
         if os.path.isfile(fullPath):
             # load it
-            params = ParamsLoader.factory(fullPath).params
-            session.paramsFile = paramsFile
-            # params changed, no longer display the old result to avoid confusion
-            session.result = None
-            session.paramsDict = None
+            params = PresetLoader.factory(fullPath).params
+            session.presets['preset'] = presetName
+            session.presets["presetDict"] = None
             redirect(URL(r=request, f='presets'))
         else:
             session.flash = "Presets file not found"
 
     elif request.vars.action in ['Update', 'Create']:
         # update or creation ?
-        if request.post_vars.action == 'Create':
-            saveFile = saveForm.vars['saveFile']
+        if request.vars.action == 'Create':
+            saveFile = request.vars['presetCreate']
         else:
-            saveFile = saveForm.vars['paramsFileUpdate']
+            saveFile = request.vars['presetUpdate']
 
         # check if the presets file already exists
-        password = saveForm.vars['password']
+        password = request.vars['password']
         password = password.encode('utf-8')
         passwordSHA256 = hashlib.sha256(password).hexdigest()
         fullPath = 'diff_presets/{}.json'.format(saveFile)
         if os.path.isfile(fullPath):
             # load it
-            oldParams = ParamsLoader.factory(fullPath).params
+            oldParams = PresetLoader.factory(fullPath).params
 
             # check if password match
             if 'password' in oldParams and passwordSHA256 == oldParams['password']:
                 # update the presets file
-                paramsDict = generate_json_from_parameters(request.post_vars)
+                paramsDict = genJsonFromParams(request.vars)
                 paramsDict['password'] = passwordSHA256
-                ParamsLoader.factory(paramsDict).dump(fullPath)
-                session.paramsFile = saveFile
+                PresetLoader.factory(paramsDict).dump(fullPath)
+                session.presets["preset"] = saveFile
                 session.flash = "Preset {} updated".format(saveFile)
                 redirect(URL(r=request, f='presets'))
             else:
@@ -163,10 +174,10 @@ def presets():
             # check that there's no more than 2K presets (there's less than 2K sm rando players in the world)
             if not maxPresetsReach():
                 # write the presets file
-                paramsDict = generate_json_from_parameters(request.post_vars)
+                paramsDict = genJsonFromParams(request.vars)
                 paramsDict['password'] = passwordSHA256
-                ParamsLoader.factory(paramsDict).dump(fullPath)
-                session.paramsFile = saveFile
+                PresetLoader.factory(paramsDict).dump(fullPath)
+                session.presets["preset"] = saveFile
                 session.flash = "Preset {} created".format(saveFile)
                 redirect(URL(r=request, f='presets'))
             else:
@@ -205,32 +216,164 @@ def presets():
                 easy=easy, medium=medium, hard=hard, harder=harder, hardcore=hardcore, mania=mania,
                 controller=params['Controller'], presets=presets)
 
-def solver():
-    # load conf from session if available
-    params = loadPreset()
+def initSolverSession():
+    if session.solver is None:
+        session.solver = {}
 
+        session.solver['preset'] = 'regular'
+        session.solver['difficultyTarget'] = Conf.difficultyTarget
+        session.solver['pickupStrategy'] = Conf.itemsPickup
+        session.solver['itemsForbidden'] = []
+        session.solver['romFiles'] = []
+        session.solver['romFile'] = None
+        session.solver['result'] = None
+
+def updateSolverSession():
+    if session.solver is None:
+        session.solver = {}
+
+    session.solver['preset'] = request.vars.preset
+    session.solver['difficultyTarget'] = text2diff[request.vars.difficultyTarget]
+    session.solver['pickupStrategy'] = request.vars.pickupStrategy
+
+    itemsForbidden = []
+    for item in ['ETank', 'Missile', 'Super', 'PowerBomb', 'Bomb', 'Charge', 'Ice', 'HiJump', 'SpeedBooster', 'Wave', 'Spazer', 'SpringBall', 'Varia', 'Plasma', 'Grapple', 'Morph', 'Reserve', 'Gravity', 'XRayScope', 'SpaceJump', 'ScrewAttack']:
+        boolvar = request.vars[item+"_bool"]
+        if boolvar is not None:
+            itemsForbidden.append(item)
+
+    session.solver['itemsForbidden'] = itemsForbidden
+
+def getROMsList():
     # filter the displayed roms to display only the ones uploaded in this session
-    if session.romFiles is None:
-        session.romFiles = []
+    if session.solver['romFiles'] is None:
+        session.solver['romFiles'] = []
         roms = []
-    elif len(session.romFiles) == 0:
+    elif len(session.solver['romFiles']) == 0:
         roms = []
     else:
         files = sorted(os.listdir('roms'))
         bases = [os.path.splitext(file)[0] for file in files]
-        filtered = [base for base in bases if base in session.romFiles]
+        filtered = [base for base in bases if base in session.solver['romFiles']]
         roms = [file+'.sfc' for file in filtered]
 
-    # main form
-    if session.romFile is not None:
-        romFile = session.romFile+'.sfc'
+    return roms
+
+def getLastSolvedROM():
+    if session.solver['romFile'] is not None:
+        return session.solver['romFile'] + '.sfc'
     else:
-        romFile = None
+        return None
+
+def prepareResult():
+    if session.solver['result'] is not None:
+        result = session.solver['result']
+
+        if session.solver['result']['difficulty'] == -1:
+            result['resultText'] = "The rom \"{}\" of type \"{}\" is not finishable with the known technics".format(session.solver['result']['randomizedRom'], session.solver['result']['romType'])
+        else:
+            if session.solver['result']['itemsOk'] is False:
+                result['resultText'] = "The rom \"{}\" of type \"{}\" is finishable but not all the requested items can be picked up with the known technics. Estimated difficulty is: ".format(session.solver['result']['randomizedRom'], session.solver['result']['romType'])
+            else:
+                result['resultText'] = "The rom \"{}\" of type \"{}\" estimated difficulty is: ".format(session.solver['result']['randomizedRom'], session.solver['result']['romType'])
+
+        # add generated path (spoiler !)
+        pathTable = TABLE(TR(TH("Location Name"), TH("Area"), TH("SubArea"), TH("Item"),
+                             TH("Difficulty"), TH("Techniques used"), TH("Items used")))
+        for location, area, subarea, item, diff, techniques, items in session.solver['result']['generatedPath']:
+            # not picked up items start with an '-'
+            if item[0] != '-':
+                pathTable.append(TR(A(location[0],
+                                      _href="https://wiki.supermetroid.run/{}".format(location[1].replace(' ', '_').replace("'", '%27'))),
+                                      area, subarea, item, diff, techniques, items))
+            else:
+                pathTable.append(TR(A(location[0],
+                                      _href="https://wiki.supermetroid.run/{}".format(location[1].replace(' ', '_').replace("'", '%27'))),
+                                    area, subarea, DIV(item, _class='linethrough'),
+                                    diff, techniques, items))
+
+        result['pathTable'] = pathTable
+
+        # display the result only once
+        session.solver['result'] = None
+    else:
+        result = None
+
+    return result
+
+def validateSolverParams():
+    for param in ['preset', 'difficultyTarget', 'pickupStrategy']:
+        if request.vars[param] is None:
+            return (False, "Missing parameter {}".format(param))
+
+    session.solver['preset'] = request.vars.preset
+
+    difficultyTargetChoices = ["easy", "medium", "hard", "very hard", "hardcore", "mania"]
+    if request.vars.difficultyTarget not in difficultyTargetChoices:
+        return (False, "Wrong value for difficultyTarget: {}, authorized values: {}".format(request.vars.difficultyTarget, difficultyTargetChoices))
+
+    pickupStrategyChoices = ["all", "minimal", "any"]
+    if request.vars.pickupStrategy not in pickupStrategyChoices:
+        return (False, "Wrong value for pickupStrategy: {}, authorized values: {}".format(request.vars.pickupStrategy, pickupStrategyChoice))
+
+
+    itemsForbidden = []
+    for item in ['ETank', 'Missile', 'Super', 'PowerBomb', 'Bomb', 'Charge', 'Ice', 'HiJump', 'SpeedBooster', 'Wave', 'Spazer', 'SpringBall', 'Varia', 'Plasma', 'Grapple', 'Morph', 'Reserve', 'Gravity', 'XRayScope', 'SpaceJump', 'ScrewAttack']:
+        boolvar = request.vars[item+"_bool"]
+        if boolvar is not None:
+            if boolvar != 'on':
+                return (False, "Wrong value for {}: {}, authorized values: on/off".format(item, boolvar))
+
+    if request.vars.romJson is None and request.vars.uploadFile is None and request.vars.romFile is None:
+        return (False, "Missing ROM to solve")
+
+
+    if request.vars.romFile is not None:
+        if IS_MATCH('[a-zA-Z0-9_\.]*')(request.vars.romFile)[1] is not None:
+            return (False, "Wrong value for romFile, must be valid file name: {}".format(request.vars.romFile))
+
+        if IS_LENGTH(maxsize=256, minsize=1)(request.vars.romFile)[1] is not None:
+            return (False, "Wrong length for romFile, name must be between 1 and 256 characters: {}".format(request.vars.romFile))
+
+    if request.vars.romJson is not None and len(request.vars.romJson) > 0:
+        try:
+            json.loads(request.vars.romJson)
+        except:
+            return (False, "Wrong value for romJson, must be a JSON string: [{}]".format(request.vars.romJson))
+
+    if request.vars.uploadFile is not None:
+        if type(request.vars.uploadFile) == str:
+            if IS_MATCH('[a-zA-Z0-9_\.]*')(request.vars.uploadFile)[1] is not None:
+                return (False, "Wrong value for uploadFile, must be a valid file name: {}".format(request.vars.uploadFile))
+
+            if IS_LENGTH(maxsize=256, minsize=1)(request.vars.uploadFile)[1] is not None:
+                return (False, "Wrong length for uploadFile, name must be between 1 and 256 characters: {}".format(request.vars.uploadFile))
+        else:
+            # the file uploaded. TODO: how to check it ?
+            pass
+
+    return (True, None)
+
+def solver():
+    # init session
+    initSolverSession()
+
+    ROMs = getROMsList()
+
+    # last solved ROM
+    lastRomFile = getLastSolvedROM()
 
     # load presets list
     presets = loadPresetsList()
 
-    if request.vars.action == 'Compute difficulty':
+    if request.vars.action == 'Solve':
+        (ok, msg) = validateSolverParams()
+        if not ok:
+            session.flash = msg
+            redirect(URL(r=request, f='solver'))
+
+        updateSolverSession()
+
         # new uploaded rom ?
         error = False
         if request.vars['romJson'] != '':
@@ -250,18 +393,14 @@ def solver():
                 romLoader.assignItems(graphLocations)
                 romLoader.dump(jsonRomFileName)
 
-                session.romFile = base
-                if base not in session.romFiles:
-                    session.romFiles.append(base)
+                session.solver['romFile'] = base
+                if base not in session.solver['romFiles']:
+                    session.solver['romFiles'].append(base)
             except Exception as e:
-                print("Error loading the rom file {}, exception: {}".format(romFileName, e))
-                session.flash = "Error loading the ROM file"
+                print("Error loading the ROM file {}, exception: {}".format(romFileName, e))
+                session.flash = "Error loading the json ROM file"
                 error = True
 
-        # python3:
-        # no file: type(request.vars['uploadFile'])=[<class 'str'>]
-        # file:    type(request.vars['uploadFile'])=[<class 'cgi.FieldStorage'>]
-        # python2:
         # no file: type(request.vars['uploadFile'])=[<type 'str'>]
         # file:    type(request.vars['uploadFile'])=[<type 'instance'>]
         elif request.vars['uploadFile'] is not None and type(request.vars['uploadFile']) != str:
@@ -287,17 +426,17 @@ def solver():
 
                     os.remove(tempRomFile)
 
-                    session.romFile = base
-                    if base not in session.romFiles:
-                        session.romFiles.append(base)
+                    session.solver['romFile'] = base
+                    if base not in session.solver['romFiles']:
+                        session.solver['romFiles'].append(base)
                 except Exception as e:
-                    print("Error loading the rom file {}, exception: {}".format(uploadFileName, e))
+                    print("Error loading the ROM file {}, exception: {}".format(uploadFileName, e))
                     session.flash = "Error loading the ROM file"
                     error = True
 
-        elif len(request.vars['romFile']) != 0:
-            session.romFile = os.path.splitext(request.vars['romFile'])[0]
-            jsonRomFileName = 'roms/' + session.romFile + '.json'
+        elif request.vars['romFile'] is not None and len(request.vars['romFile']) != 0:
+            session.solver['romFile'] = os.path.splitext(request.vars['romFile'])[0]
+            jsonRomFileName = 'roms/' + session.solver['romFile'] + '.json'
         else:
             session.flash = "No rom file selected for upload"
             error = True
@@ -305,90 +444,30 @@ def solver():
         if not error:
             # check that the json file exists
             if not os.path.isfile(jsonRomFileName):
-                session.flash = "Missing json rom file on the server"
+                session.flash = "Missing json ROM file on the server"
             else:
-                session.result = compute_difficulty(jsonRomFileName, request.vars['paramsFile'], request.post_vars)
+                (ok, result) = computeDifficulty(jsonRomFileName)
+                if not ok:
+                    session.flash = result
+                    redirect(URL(r=request, f='solver'))
+                session.solver['result'] = result
 
         redirect(URL(r=request, f='solver'))
 
     # display result
-    if session.result is not None:
-        if session.result['difficulty'] == -1:
-            resultText = "The rom \"{}\" of type \"{}\" is not finishable with the known technics".format(session.result['randomizedRom'], session.result['romType'])
-        else:
-            if session.result['itemsOk'] is False:
-                resultText = "The rom \"{}\" of type \"{}\" is finishable but not all the requested items can be picked up with the known technics. Estimated difficulty is: ".format(session.result['randomizedRom'], session.result['romType'])
-            else:
-                resultText = "The rom \"{}\" of type \"{}\" estimated difficulty is: ".format(session.result['randomizedRom'], session.result['romType'])
-
-        difficulty = session.result['difficulty']
-        diffPercent = session.result['diffPercent']
-
-        # add generated path (spoiler !)
-        pathTable = TABLE(TR(TH("Location Name"), TH("Area"), TH("SubArea"), TH("Item"),
-                             TH("Difficulty"), TH("Techniques used"), TH("Items used")))
-        for location, area, subarea, item, diff, techniques, items in session.result['generatedPath']:
-            # not picked up items start with an '-'
-            if item[0] != '-':
-                pathTable.append(TR(A(location[0],
-                                      _href="https://wiki.supermetroid.run/{}".format(location[1].replace(' ', '_').replace("'", '%27'))),
-                                      area, subarea, item, diff, techniques, items))
-            else:
-                pathTable.append(TR(A(location[0],
-                                      _href="https://wiki.supermetroid.run/{}".format(location[1].replace(' ', '_').replace("'", '%27'))),
-                                    area, subarea, DIV(item, _class='linethrough'),
-                                    diff, techniques, items))
-
-        knowsUsed = session.result['knowsUsed']
-        itemsOk = session.result['itemsOk']
-
-        # graph
-        pngFileName = session.result['pngFileName']
-        pngThumbFileName = session.result['pngThumbFileName']
-
-        # display the result only once
-        session.result = None
-    else:
-        resultText = None
-        difficulty = None
-        diffPercent = None
-        pathTable = None
-        knowsUsed = None
-        itemsOk = None
-        pngFileName = None
-        pngThumbFileName = None
-
-    # conf parameters
-    conf = {}
-    if 'difficultyTarget' in params['Conf']:
-        conf["target"] = params['Conf']['difficultyTarget']
-    else:
-        conf["target"] = Conf.difficultyTarget
-    if 'majorsPickup' in params['Conf']:
-        conf["pickup"] = params['Conf']['majorsPickup']
-    else:
-        conf["pickup"] = Conf.majorsPickup
-    if 'itemsForbidden' in params['Conf']:
-        conf["itemsForbidden"] = params['Conf']['itemsForbidden']
-    else:
-        conf["itemsForbidden"] = []
+    result = prepareResult()
 
     # set title
     response.title = 'Super Metroid VARIA Solver'
 
     # send values to view
-    return dict(desc=Knows.desc, presets=presets, roms=roms, romFile=romFile,
-                difficulties=diff2text,
-                categories=Knows.categories,
-                conf=conf, knowsUsed=knowsUsed,
-                resultText=resultText, pathTable=pathTable,
-                difficulty=difficulty, itemsOk=itemsOk, diffPercent=diffPercent,
-                easy=easy,medium=medium,hard=hard,harder=harder,hardcore=hardcore,mania=mania,
-                pngFileName=pngFileName, pngThumbFileName=pngThumbFileName)
+    return dict(desc=Knows.desc, presets=presets, roms=ROMs, lastRomFile=lastRomFile,
+                difficulties=diff2text, categories=Knows.categories,
+                result=result,
+                easy=easy, medium=medium, hard=hard, harder=harder, hardcore=hardcore, mania=mania)
 
-def generate_json_from_parameters(vars):
-
-    paramsDict = {'Knows': {}, 'Conf': {}, 'Settings': {}, 'Controller': {}}
+def genJsonFromParams(vars):
+    paramsDict = {'Knows': {}, 'Settings': {}, 'Controller': {}}
 
     # Knows
     for var in Knows.__dict__:
@@ -400,34 +479,6 @@ def generate_json_from_parameters(vars):
                 diffVar = vars[var+"_diff"]
                 if diffVar is not None:
                     paramsDict['Knows'][var] = [True, text2diff[diffVar]]
-
-    # Conf
-    diffTarget = vars["difficulty_target"]
-    if diffTarget is not None:
-        paramsDict['Conf']['difficultyTarget'] = text2diff[diffTarget]
-
-    pickupStrategy = vars["pickup_strategy"]
-    if pickupStrategy is not None:
-        if pickupStrategy == 'all':
-            paramsDict['Conf']['majorsPickup'] = 'all'
-            paramsDict['Conf']['minorsPickup'] = 'all'
-        elif pickupStrategy == 'any':
-            paramsDict['Conf']['majorsPickup'] = 'any'
-            paramsDict['Conf']['minorsPickup'] = 'any'
-        else:
-            paramsDict['Conf']['majorsPickup'] = 'minimal'
-            paramsDict['Conf']['minorsPickup'] = {'Missile' : 10, 'Super' : 5, 'PowerBomb' : 2}
-
-    itemsForbidden = []
-    for item in ['ETank', 'Missile', 'Super', 'PowerBomb', 'Bomb', 'Charge', 'Ice', 'HiJump', 'SpeedBooster', 'Wave', 'Spazer', 'SpringBall', 'Varia', 'Plasma', 'Grapple', 'Morph', 'Reserve', 'Gravity', 'XRayScope', 'SpaceJump', 'ScrewAttack']:
-        boolvar = vars[item+"_bool"]
-        if boolvar is not None:
-            itemsForbidden.append(item)
-
-    paramsDict['Conf']['itemsForbidden'] = itemsForbidden
-
-    if vars['romType'] is not None:
-        paramsDict['Conf']['romType'] = romTypes[vars['romType']]
 
     # Settings
     for hellRun in ['Ice', 'MainUpperNorfair', 'LowerNorfair']:
@@ -456,36 +507,38 @@ def generate_json_from_parameters(vars):
 
     return paramsDict
 
-def compute_difficulty(jsonRomFileName, presetName, post_vars):
+def computeDifficulty(jsonRomFileName):
     randomizedRom = os.path.basename(jsonRomFileName.replace('json', 'sfc'))
-    presetFileName = "diff_presets/{}.json".format(presetName)
 
-    # call solver
-    solver = Solver(type='web', rom=jsonRomFileName, params=[presetFileName])
-    (difficulty, itemsOk) = solver.solveRom()
-    diffPercent = DifficultyDisplayer(difficulty).percent()
+    presetFileName = "diff_presets/{}.json".format(session.solver['preset'])
+    jsonFileName = tempfile.mkstemp()[1]
 
-    generatedPath = solver.getPath(solver.visitedLocations)
+    params = [
+        'python2',  os.path.expanduser("~/RandomMetroidSolver/solver.py"),
+        str(jsonRomFileName),
+        '--preset', presetFileName,
+        '--difficultyTarget', str(session.solver['difficultyTarget']),
+        '--pickupStrategy', session.solver['pickupStrategy'],
+        '--type', 'web',
+        '--output', jsonFileName
+    ]
 
-    if solver.areaRando == True:
-        dotFileName = os.path.join(os.path.expanduser('~/web2py/applications/solver/static/graph'), os.path.basename(jsonRomFileName.replace('json', 'dot')))
-        solver.areaGraph.toDot(dotFileName)
-        (pngFileName, pngThumbFileName) = generatePng(dotFileName)
-        if pngFileName is not None and pngThumbFileName is not None:
-            pngFileName = os.path.basename(pngFileName)
-            pngThumbFileName = os.path.basename(pngThumbFileName)
+    for item in session.solver['itemsForbidden']:
+        params += ['--itemsForbidden', item]
+
+    print("before calling solver: {}".format(params))
+    ret = subprocess.call(params)
+    print("ret={}".format(ret))
+
+    if ret == 0:
+        with open(jsonFileName) as jsonFile:
+            result = json.load(jsonFile)
+        os.remove(jsonFileName)
     else:
-        pngFileName = None
-        pngThumbFileName = None
+        os.remove(jsonFileName)
+        return (False, "Solver: something wrong happened while solving the ROM")
 
-    # the different knows used during the rom
-    (used, total) = solver.getKnowsUsed()
-    romType = guessRomType(randomizedRom)
-
-    return dict(randomizedRom=randomizedRom, difficulty=difficulty,
-                generatedPath=generatedPath, diffPercent=diffPercent,
-                knowsUsed=(used, total), itemsOk=itemsOk, romType=romType,
-                pngFileName=pngFileName, pngThumbFileName=pngThumbFileName)
+    return (True, result)
 
 def infos():
     # set title
@@ -793,7 +846,7 @@ def randomizerWebService():
         params.append('--area')
 
     # load content of preset to get controller mapping
-    controlMapping = ParamsLoader.factory(presetFileName).params['Controller']
+    controlMapping = PresetLoader.factory(presetFileName).params['Controller']
     (custom, controlParam) = getCustomMapping(controlMapping)
     if custom == True:
         params += ['--controls', controlParam]
@@ -834,37 +887,11 @@ def presetWebService():
     # check that the presets file exists
     if os.path.isfile(fullPath):
         # load it
-        params = ParamsLoader.factory(fullPath).params
+        params = PresetLoader.factory(fullPath).params
         params = json.dumps(params)
         return params
     else:
         raise HTTP(400, "Preset not found")
-
-def generatePng(dotFileName):
-    # use dot to generate the graph's image .png
-    # use convert to generate the thumbnail
-    # dotFileName: the /directory/image.dot
-    # the png and thumbnails are generated in the same directory as the dot
-
-    splited = os.path.splitext(dotFileName)
-    pngFileName = splited[0] + '.png'
-    pngThumbFileName = splited[0] + '_thumbnail.png'
-
-    # dot -Tpng VARIA_Randomizer_AFX5399_noob.dot -oVARIA_Randomizer_AFX5399_noob.png
-    params = ['dot', '-Tpng', dotFileName, '-o'+pngFileName]
-    ret = subprocess.call(params)
-    if ret != 0:
-        print("Error calling dot {}: {}".format(params, ret))
-        return (None, None)
-
-    params = ['convert', pngFileName, '-resize', '1024', pngThumbFileName]
-    ret = subprocess.call(params)
-    if ret != 0:
-        print("Error calling convert {}: {}".format(params, ret))
-        os.remove(pngFileName)
-        return (None, None)
-
-    return (pngFileName, pngThumbFileName)
 
 def home():
     # set title

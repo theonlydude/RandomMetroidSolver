@@ -15,7 +15,7 @@ def randGaussBounds(r, slope=8):
         n = int(r)
     return n
 
-class ParamsLoader(object):
+class PresetLoader(object):
     @staticmethod
     def factory(params):
         # can be a json, a python file or a dict with the parameters

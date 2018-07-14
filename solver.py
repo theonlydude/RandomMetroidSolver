@@ -664,7 +664,7 @@ if __name__ == "__main__":
     if args.output is None:
         print("({}, {}): diff : {}".format(difficulty, itemsOk, args.romFileName))
         print("{}/{}: knows Used : {}".format(used, total, args.romFileName))
-        if diff[0] >= 0:
+        if difficulty >= 0:
             sys.exit(0)
         else:
             sys.exit(1)

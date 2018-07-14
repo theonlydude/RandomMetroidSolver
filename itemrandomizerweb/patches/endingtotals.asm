@@ -13,7 +13,7 @@ arch snes.cpu
 	
 org $84889F
 	JSL COLLECTTANK
-org $84EFE0
+org $84F030 			; FLO: changed original adress to avoid conflict with itemsounds patch
 COLLECTTANK:
 	PHA
 	LDA !CollectedItems

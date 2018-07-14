@@ -686,7 +686,7 @@ function startTheTour(step=-1) {
     },
     {
       element: "#areaLayoutStep",
-      title: "Area randomization layout modification",
+      title: "Area randomization additional layout modifications",
       content: "Remove Crab green gate in Marida and blue gate in Green Brinstar, add new platform in Green Hill Zone to access transition door.",
       placement: "auto left"
     },
@@ -810,7 +810,7 @@ def displayNumber(id, min, max, default, step="1"):
 
   <div class="fixed">
     <div class="menu">
-    {{=A("Super Metroid VARIA Randomizer and Solver", _href=URL(f="home"), _class="menu")}}
+    {{=A("Super Metroid VARIA Randomizer and Solver", _href=URL(f="randomizer"), _class="menu")}}
     {{=A("Presets", _href=URL(f="presets"), _class="menu")}}
     {{=A("Solver", _href=URL(f="solver"), _class="menu")}}
     {{=A("Randomizer", _href=URL(f="randomizer"), _class="menu_selected")}}
@@ -938,7 +938,7 @@ def displayNumber(id, min, max, default, step="1"):
                 <td><button type="button" onclick="startTheTour(15)">?</button></td>
 	      </tr>
 	      <tr id="areaPatchVisibility">
-		<td colspan="2" class="full" id="areaLayoutStep">{{displayCheckbox("areaLayout", True)}} Additional layout patches for easier navigation</td><td><button type="button" onclick="startTheTour(23)">?</button></td>
+		<td colspan="2" class="full" id="areaLayoutStep">{{displayCheckbox("areaLayout", True)}} Additional layout patches for easier navigation</td><td><button type="button" onclick="startTheTour(16)">?</button></td>
 	      </tr>
             </table>
 	    <div id="superFunVisibility">
@@ -950,19 +950,19 @@ def displayNumber(id, min, max, default, step="1"):
 	      <table class="full">
 	        <tr>
 		  <td colspan="2" id="randomSuperFunsStep">{{displayCheckboxRandom("randomSuperFuns", ["funCombat", "funMovement", "funSuits"])}}Randomly set the Super Fun Times parameters:</td>
-		  <td><button type="button" onclick="startTheTour(16)">?</button></td>
+		  <td><button type="button" onclick="startTheTour(17)">?</button></td>
 	        </tr>
                 <tr>
 		  <td colspan="2" class="full" id="funCombatStep">{{displayCheckbox("funCombat")}}<span id="funCombatText">Super Fun Combat</span></td>
-		  <td><button type="button" onclick="startTheTour(17)">?</button></td>
-                </tr>
-                <tr>
-		  <td colspan="2" class="full" id="funMovementStep">{{displayCheckbox("funMovement")}}<span id="funMovementText">Super Fun Movement</span></td>
 		  <td><button type="button" onclick="startTheTour(18)">?</button></td>
                 </tr>
                 <tr>
-		  <td colspan="2" class="full" id="funSuitsStep">{{displayCheckbox("funSuits")}}<span id="funSuitsText">Suitless</span></td>
+		  <td colspan="2" class="full" id="funMovementStep">{{displayCheckbox("funMovement")}}<span id="funMovementText">Super Fun Movement</span></td>
 		  <td><button type="button" onclick="startTheTour(19)">?</button></td>
+                </tr>
+                <tr>
+		  <td colspan="2" class="full" id="funSuitsStep">{{displayCheckbox("funSuits")}}<span id="funSuitsText">Suitless</span></td>
+		  <td><button type="button" onclick="startTheTour(20)">?</button></td>
                 </tr>
               </table>
 	    </div>
@@ -974,13 +974,13 @@ def displayNumber(id, min, max, default, step="1"):
 	      <table class="full">
 	        <tr>
 		  <td class="full" id="layoutPatchesStep">{{displayCheckbox("layoutPatches", True)}} Include layout patches from Total Item Randomizer</td>
-		  <td><button type="button" onclick="startTheTour(20)">?</button></td>
+		  <td><button type="button" onclick="startTheTour(21)">?</button></td>
 	        </tr>
 	        <tr>
-		  <td class="full" id="noGravHeatStep">{{displayCheckbox("noGravHeat", True)}} Remove Gravity Suit heat protection (by Total)</td><td><button type="button" onclick="startTheTour(21)">?</button></td>
+		  <td class="full" id="noGravHeatStep">{{displayCheckbox("noGravHeat", True)}} Remove Gravity Suit heat protection (by Total)</td><td><button type="button" onclick="startTheTour(22)">?</button></td>
 	        </tr>
 	        <tr>
-		  <td class="full" id="variaTweaksStep">{{displayCheckbox("variaTweaks", True)}} Activate Wrecked Ship Etank without killing Phantoon and Lower Norfair Torizo without Space Jump (by Flo)</td><td><button type="button" onclick="startTheTour(22)">?</button></td>
+		  <td class="full" id="variaTweaksStep">{{displayCheckbox("variaTweaks", True)}} VARIA tweaks (by Flo)</td><td><button type="button" onclick="startTheTour(23)">?</button></td>
 	        </tr>
 	      </table>
 	      <br/>

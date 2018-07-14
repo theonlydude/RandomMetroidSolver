@@ -1,8 +1,19 @@
 #!/usr/bin/python
 
-import os, json
+import os, json, random
 from parameters import Conf, Knows, Settings, Controller, isKnows, isConf, isSettings, isButton
 from smbool import SMBool
+
+# gauss random in [0, r] range
+# the higher the slope, the less probable extreme values are
+def randGaussBounds(r, slope=8):
+    r = float(r)
+    n = int(round(random.gauss(r/2, r/slope), 0))
+    if n < 0:
+        n = 0
+    if n > r:
+        n = int(r)
+    return n
 
 class ParamsLoader(object):
     @staticmethod

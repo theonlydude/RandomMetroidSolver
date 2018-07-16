@@ -353,7 +353,8 @@ class Solver:
             out.append([(loc['Name'], loc['Room']), loc['Area'], loc['SolveArea'], loc['itemName'],
                         '{0:.2f}'.format(loc['difficulty'].difficulty),
                         ', '.join(sorted(loc['difficulty'].knows)),
-                        ', '.join(sorted(list(set(loc['difficulty'].items))))])
+                        ', '.join(sorted(list(set(loc['difficulty'].items)))),
+                        [ap.Name for ap in loc['path']] if 'path' in loc else None])
 
         return out
 

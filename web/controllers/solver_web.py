@@ -278,9 +278,18 @@ def prepareResult():
                 result['resultText'] = "The rom \"{}\" of type \"{}\" estimated difficulty is: ".format(session.solver['result']['randomizedRom'], session.solver['result']['romType'])
 
         # add generated path (spoiler !)
+        lastAP = None
         pathTable = TABLE(TR(TH("Location Name"), TH("Area"), TH("SubArea"), TH("Item"),
-                             TH("Difficulty"), TH("Techniques used"), TH("Items used")))
-        for location, area, subarea, item, diff, techniques, items in session.solver['result']['generatedPath']:
+                             TH("Difficulty"), TH("Techniques used"), TH("Items used")),
+                          _class="full")
+        for location, area, subarea, item, diff, techniques, items, path in session.solver['result']['generatedPath']:
+            if path is not None:
+                lastAP = path[-1]
+                if not (len(path) == 1 and path[0] == lastAP):
+                    pathTable.append(TR(TD("Path"),
+                                        TD(" -> ".join(path), _colspan="6"),
+                                        _class="grey"))
+
             # not picked up items start with an '-'
             if item[0] != '-':
                 pathTable.append(TR(A(location[0],

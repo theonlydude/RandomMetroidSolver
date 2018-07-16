@@ -128,7 +128,7 @@ class RomType:
             if romType.startswith('VARIA_A'):
                 RomPatches.ActivePatches += RomPatches.AreaSet
                 if patches['areaLayout'] == False:
-                    RomPatches.ActivePatches -= RomPatches.AreaRandoGatesOther
+                    RomPatches.ActivePatches.remove(RomPatches.AreaRandoGatesOther)
         elif romType == 'Dessy':
             RomPatches.ActivePatches = RomPatches.Dessy
 

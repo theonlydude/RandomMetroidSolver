@@ -375,7 +375,14 @@ class Solver:
         print(message)
         print('{:>50} {:>12} {:>34} {:>8} {:>16} {:>14} {} {}'.format("Location Name", "Area", "Sub Area", "Distance", "Item", "Difficulty", "Knows used", "Items used"))
         print('-'*150)
+        lastAP = None
         for loc in locations:
+            if 'path' in loc:
+                path = [ap.Name for ap in loc['path']]
+                lastAP = path[-1]
+                if not (len(path) == 1 and path[0] == lastAP):
+                    path = " -> ".join(path)
+                    print('{:>50}: {}'.format('Access points gone through', path))
             print('{:>50}: {:>12} {:>34} {:>8} {:>16} {:>14} {} {}'.format(loc['Name'],
                                                                            loc['Area'],
                                                                            loc['SolveArea'],

@@ -226,6 +226,7 @@ class AccessGraph(object):
                         loc['distance'] = ap.distance + 1
                         loc['accessPoint'] = apName
                         loc['difficulty'] = locDiff
+                        loc['path'] = path
                         availLocs.append(loc)
                         break
                     else:

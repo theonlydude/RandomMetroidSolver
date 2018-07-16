@@ -4,9 +4,8 @@
 ;Allows an uneven or random number of items (up to 255 separate item pickups)
 ;Adds a single decimal point value, to give more accurate results to random item ammounts
 
-
 !CollectedItems = $7ED86E
-!TotalItems = #$64	;TOTAL number if items in the game. This includes ALL items: missiles, upgrades, etc
+!TotalItems     = #$64	;TOTAL number if items in the game. This includes ALL items: missiles, upgrades, etc
 
 LOROM
 arch snes.cpu
@@ -41,7 +40,7 @@ org $8BE627
 	LDA $4216					;Load number of (collected items * 100)
 	STA $4204					;Store to devisor A
 	SEP #$20
-	LDA !TotalItems					;Load total number of game items
+	LDA !TotalItems					;Load total number of game items ; FLO: this has to be changed at ROM patch phase
 	STA $4206					;Store to devisor B
 	NOP : NOP : NOP : NOP : NOP : NOP : NOP
 	REP #$20

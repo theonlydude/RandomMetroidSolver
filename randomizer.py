@@ -313,7 +313,7 @@ if __name__ == "__main__":
                 json.dump(locsItems, jsonFile)
         if romPatcher is not None:
             romPatcher.writeItemsLocs(itemLocs)
-            romPatcher.applyIPSPatches(args.patches, args.noLayout, args.noGravHeat, args.area, args.areaLayoutBase)
+            romPatcher.applyIPSPatches(args.patches, args.noLayout, args.noGravHeat, args.area, args.areaLayoutBase, args.noVariaTweaks)
             romPatcher.writeSeed(seed)
             romPatcher.writeSpoiler(itemLocs)
             romPatcher.writeRandoSettings(randoSettings)

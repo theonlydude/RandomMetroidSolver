@@ -331,3 +331,6 @@ p {
     from {opacity: 0;}
     to {opacity: 1;}
 }
+.grey {
+    background-color: #f1f1f1;
+}

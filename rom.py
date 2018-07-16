@@ -400,7 +400,7 @@ class RomPatcher:
                      'Disable_Space_Time_select_in_menu', 'Fix_Morph_Ball_Hidden_Chozo_PLMs',
                      'Fix_Screw_Attack_selection_in_menu',
                      'Removes_Gravity_Suit_heat_protection',
-                     'AimAnyButton.ips', 'ws_etank.ips', 'ln_chozo_sj_check_disable.ips'], #, 'endingtotals.ips'],
+                     'AimAnyButton.ips', 'ws_etank.ips', 'ln_chozo_sj_check_disable.ips', 'endingtotals.ips'],
         'Layout': ['dachora.ips', 'early_super_bridge.ips', 'high_jump.ips', 'moat.ips',
                    'nova_boost_platform.ips', 'red_tower.ips', 'spazer.ips'],
         'Optional': ['itemsounds.ips', 'max_ammo_display.ips',
@@ -422,6 +422,7 @@ class RomPatcher:
         self.romFile.close()
 
     def writeItemsLocs(self, itemLocs):
+        nItems = 0
         for itemLoc in itemLocs:
             if itemLoc['Item']['Type'] in ['Nothing', 'NoEnergy']:
                 # put missile morphball like dessy
@@ -432,6 +433,7 @@ class RomPatcher:
                 self.romFile.seek(itemLoc['Location']['Address'] + 4)
                 self.romFile.write(struct.pack('B', 0x1a))
             else:
+                nItems += 1
                 itemCode = Items.getItemTypeCode(itemLoc['Item'],
                                                  itemLoc['Location']['Visibility'])
                 self.romFile.seek(itemLoc['Location']['Address'])
@@ -439,6 +441,9 @@ class RomPatcher:
                 self.romFile.write(itemCode[1])
             if itemLoc['Location']['Name'] == 'Morphing Ball':
                 self.patchMorphBallEye(itemLoc['Item'])
+        # write total number of actual items for item percentage patch
+        self.romFile.seek(0x5E63B)
+        self.romFile.write(struct.pack('B', nItems))
 
     # trigger morph eye enemy on whatever item we put there,
     # not just morph ball
@@ -488,6 +493,17 @@ class RomPatcher:
         self.romFile.write(struct.pack('B', op1))
         self.romFile.write(struct.pack('B', branch))
 
+    def writeWord(self, w):
+        (w0, w1) = (w & 0x00FF, (w & 0xFF00) >> 8)
+        self.romFile.write(struct.pack('B', w0))
+        self.romFile.write(struct.pack('B', w1))
+
+    def patchBT(self):
+        # write door ASM ptrs from bomb_torizo.asm for BT room entry and exit doors
+        self.romFile.seek(0x18bc2 + 10) # entry door
+        self.writeWord(0xe9a0)
+        self.romFile.seek(0x18baa + 10) # exit door
+        self.writeWord(0xe9a7)
 
     def applyIPSPatches(self, optionalPatches=[], noLayout=False, noGravHeat=False, area=False, areaLayoutBase=False):
         try:
@@ -837,10 +853,8 @@ class RomPatcher:
     # change BG table to avoid scrolling sky bug when transitioning to west ocean
     def patchWestOcean(self, doorPtr):
         # endian convert
-        (D0, D1) = (doorPtr & 0x00FF, (doorPtr & 0xFF00) >> 8)
         self.romFile.seek(0x7B7BB)
-        self.romFile.write(struct.pack('B', D0))
-        self.romFile.write(struct.pack('B', D1))
+        self.writeWord(doorPtr)
 
     # add ASM to Tourian "door" down elevator to trigger full refill (ammo + energy)
     def writeTourianRefill(self):

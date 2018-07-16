@@ -400,7 +400,8 @@ class RomPatcher:
                      'Disable_Space_Time_select_in_menu', 'Fix_Morph_Ball_Hidden_Chozo_PLMs',
                      'Fix_Screw_Attack_selection_in_menu',
                      'Removes_Gravity_Suit_heat_protection',
-                     'AimAnyButton.ips', 'ws_etank.ips', 'ln_chozo_sj_check_disable.ips', 'endingtotals.ips'],
+                     'AimAnyButton.ips', 'endingtotals.ips'],
+        'VariaTweaks' : ['ws_etank.ips', 'ln_chozo_sj_check_disable.ips', 'bomb_torizo.ips'],
         'Layout': ['dachora.ips', 'early_super_bridge.ips', 'high_jump.ips', 'moat.ips',
                    'nova_boost_platform.ips', 'red_tower.ips', 'spazer.ips'],
         'Optional': ['itemsounds.ips', 'max_ammo_display.ips',
@@ -498,25 +499,22 @@ class RomPatcher:
         self.romFile.write(struct.pack('B', w0))
         self.romFile.write(struct.pack('B', w1))
 
-    def patchBT(self):
-        # write door ASM ptrs from bomb_torizo.asm for BT room entry and exit doors
-        self.romFile.seek(0x18bc2 + 10) # entry door
-        self.writeWord(0xe9a0)
-        self.romFile.seek(0x18baa + 10) # exit door
-        self.writeWord(0xe9a7)
-
-    def applyIPSPatches(self, optionalPatches=[], noLayout=False, noGravHeat=False, area=False, areaLayoutBase=False):
+    def applyIPSPatches(self, optionalPatches=[], noLayout=False, noGravHeat=False, area=False, areaLayoutBase=False, noVariaTweaks=False):
         try:
             # apply standard patches
-            stdPatches = RomPatcher.IPSPatches['Standard']
+            stdPatches = RomPatcher.IPSPatches['Standard'][:]
             if noGravHeat == True:
-                stdPatches = [patch for patch in stdPatches if patch != 'Removes_Gravity_Suit_heat_protection']
+                stdPatches.remove('Removes_Gravity_Suit_heat_protection')
             for patchName in stdPatches:
                 self.applyIPSPatch(patchName)
 
             if noLayout == False:
                 # apply layout patches
                 for patchName in RomPatcher.IPSPatches['Layout']:
+                    self.applyIPSPatch(patchName)
+            if noVariaTweaks == False:
+                # VARIA tweaks
+                for patchName in RomPatcher.IPSPatches['VariaTweaks']:
                     self.applyIPSPatch(patchName)
 
             # apply optional patches

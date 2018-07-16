@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import os, json, random
+import os, json, random, sys
 from parameters import Knows, Settings, Controller, isKnows, isSettings, isButton
 from smbool import SMBool
 

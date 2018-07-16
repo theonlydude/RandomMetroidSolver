@@ -891,7 +891,7 @@ def presetWebService():
         params = json.dumps(params)
         return params
     else:
-        raise HTTP(400, "Preset not found")
+        raise HTTP(400, "Preset '{}' not found".format(fullPath))
 
 def home():
     # set title

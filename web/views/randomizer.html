@@ -616,12 +616,12 @@ function startTheTour(step=-1) {
     {
       element: "#paramsFile",
       title: "Preset used to randomize",
-      content: "The preset is used by the Randomizer to know which techniques are available to reach the items locations.</br>You can create and manage your preset on the <a href=\"/solver/solver_web/presets\">Presets part of the website</a>.<br/>You can use one of the predefined ones:<ul><li>noob</li><li>casual</li><li>regular</li><li>veteran</li><li>speedrunner</li><li>master</li></ul><br/>However, creating your own preset will lead to a better experience overall, as the generated ROMs will be tailored for you."
+      content: "The preset is used by the Randomizer to know which techniques are available to reach the items locations.</br>You can create and manage your preset on the <a href=\"/solver/solver_web/presets\">Presets part of the website</a>.<br/>You can use one of the predefined ones:<ul><li>noob</li><li>casual</li><li>regular</li><li>casual</li><li>veteran</li><li>speedrunner</li><li>master</li></ul><br/>However, creating your own preset will lead to a better experience overall, as the generated ROMs will be tailored for you."
     },
     {
       element: "#fullRandomizationStep",
       title: "Full randomization",
-      content: "By default the minor and major items are shuffled in their respective pool.<br/>Activate this option to have all items fully randomized."
+      content: "Activate this option to have all items fully randomized.<br/>If disabled, the randomizer will behave like Total randomizer, with major and minor item pools.<br/>Minor items are Missile, Super Missile and Power Bomb packs. Major items are all the rest, including energy.<br/><b>Note:</b> High-Jump boots energy tank location is considered minor, and right Super Missile in Wrecked ship is considered major for balancing purposes."
     },
     {
       element: "#maxDifficulty",
@@ -641,7 +641,7 @@ function startTheTour(step=-1) {
     {
       element: "#randomParamsStep",
       title: "Random the Randomizer parameters",
-      content: "Randomly set the Randomizer three parameters: spread items, Suits restiction and Speedbooster/Screw Attack restriction."
+      content: "Randomly set the Randomizer three parameters: spread items, Suits restiction and Early Morph."
     },
     {
       element: "#spreadItemsStep",
@@ -736,7 +736,10 @@ function startTheTour(step=-1) {
     {
       element: "#variaTweaksStep",
       title: "Optional patches",
-      content: "Activate Wrecked Ship Etank without killing Phantoon and Lower Norfair Torizo without Space Jump",
+      content: "Include minor tweaks for the game to behave 'as it should' in a randomizer context :\
+<ul><li>Bomb Torizo fight is triggered when picking up the item he's holding, not by having Bomb</li>\
+<li>Access item at Wrecked Ship Etank location without killing Phantoon (via Forgotten Highway)</li>\
+<li>Activate Lower Norfair Chozo (left of entrance) without Space Jump</li></ul>",
       placement: "auto left"
     },
     {

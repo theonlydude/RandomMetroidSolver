@@ -423,7 +423,7 @@ class RomPatcher:
         self.romFile.close()
 
     def writeItemsLocs(self, itemLocs):
-        nItems = 0
+        self.nItems = 0
         for itemLoc in itemLocs:
             if itemLoc['Item']['Type'] in ['Nothing', 'NoEnergy']:
                 # put missile morphball like dessy
@@ -434,7 +434,7 @@ class RomPatcher:
                 self.romFile.seek(itemLoc['Location']['Address'] + 4)
                 self.romFile.write(struct.pack('B', 0x1a))
             else:
-                nItems += 1
+                self.nItems += 1
                 itemCode = Items.getItemTypeCode(itemLoc['Item'],
                                                  itemLoc['Location']['Visibility'])
                 self.romFile.seek(itemLoc['Location']['Address'])
@@ -442,9 +442,6 @@ class RomPatcher:
                 self.romFile.write(itemCode[1])
             if itemLoc['Location']['Name'] == 'Morphing Ball':
                 self.patchMorphBallEye(itemLoc['Item'])
-        # write total number of actual items for item percentage patch
-        self.romFile.seek(0x5E63B)
-        self.romFile.write(struct.pack('B', nItems))
 
     # trigger morph eye enemy on whatever item we put there,
     # not just morph ball
@@ -507,6 +504,9 @@ class RomPatcher:
                 stdPatches.remove('Removes_Gravity_Suit_heat_protection')
             for patchName in stdPatches:
                 self.applyIPSPatch(patchName)
+            # write total number of actual items for item percentage patch (patch the patch)
+            self.romFile.seek(0x5E651)
+            self.romFile.write(struct.pack('B', self.nItems))
 
             if noLayout == False:
                 # apply layout patches

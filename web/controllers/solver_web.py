@@ -600,7 +600,7 @@ def randomizer():
         session.randomizer['progressionDifficulty'] = 'normal'
         session.randomizer['areaRandomization'] = "off"
         session.randomizer['complexity'] = "simple"
-        session.randomizer['areaLayout'] = "on"
+        session.randomizer['areaLayout'] = "off"
         session.randomizer['variaTweaks'] = "on"
 
     # put standard presets first

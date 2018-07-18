@@ -503,13 +503,23 @@ window.onload = function(){
     area.onchange = function(){
         var maxDiff = document.getElementById("maxDifficulty");
         var full = document.getElementById("fullRandomization");
+        var patches = document.getElementById("areaLayout");
 
-        if(areaRandomization.checked) {
+        if(areaRandomization.checked){
+            console.log("areaRandomization.checked ok");
             if(! full.checked) {
                 full.click();
             }
             if(maxDiff.value == "no difficulty cap"){
                 maxDiff.value = "hardcore";
+            }
+            if(! patches.checked){
+                console.log("! patches.checked");
+                patches.click();
+            }
+        } else {
+            if(patches.checked){
+                patches.click();
             }
         }
         switchCheckbox("areaRandomization");
@@ -960,7 +970,7 @@ def displayNumber(id, min, max, default, step="1"):
                 <td><button type="button" onclick="startTheTour(15)">?</button></td>
 	      </tr>
 	      <tr id="areaPatchVisibility">
-		<td colspan="2" class="full" id="areaLayoutStep">{{displayCheckbox("areaLayout", True)}} Additional layout patches for easier navigation</td><td><button type="button" onclick="startTheTour(16)">?</button></td>
+		<td colspan="2" class="full" id="areaLayoutStep">{{displayCheckbox("areaLayout", False)}} Additional layout patches for easier navigation</td><td><button type="button" onclick="startTheTour(16)">?</button></td>
 	      </tr>
             </table>
 	    <div id="superFunVisibility">
@@ -1005,7 +1015,6 @@ def displayNumber(id, min, max, default, step="1"):
 		  <td class="full" id="variaTweaksStep">{{displayCheckbox("variaTweaks", True)}} VARIA tweaks (by Flo)</td><td><button type="button" onclick="startTheTour(23)">?</button></td>
 	        </tr>
 	      </table>
-	      <br/>
 	      <table class="full" id="patchesStep">
 {{
 for patch in patches:

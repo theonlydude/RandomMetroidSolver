@@ -556,14 +556,15 @@ def infos():
     return dict()
 
 patches = [
-    ('skip_intro', "Skip text intro (start at Ceres Station) (by Smiley)", False),
-    ('skip_ceres', "Skip text intro and Ceres station (start at Landing Site) (by Total)", True),
-    ('itemsounds', "Remove fanfare when picking up an item (by Scyzer)", True),
-    ('spinjumprestart', "Allows Samus to start spinning in mid air after jumping or falling (by Kejardon)", False),
-    ('elevators_doors_speed', 'Accelerate doors and elevators transitions (by Rakki & Lioran)', True),
-    ('supermetroid_msu1', "Play music with MSU1 chip on SD2SNES (by DarkShock)", False),
-    ('max_ammo_display', "Max Ammo Display (by Personitis) (incompatible with MSU1 patch)", True),
-    ('animals', "Save the animals surprise (by Foosda)", False)
+    # name, desc, default on, visible on medium
+    ('skip_intro', "Skip text intro (start at Ceres Station) (by Smiley)", False, False),
+    ('skip_ceres', "Skip text intro and Ceres station (start at Landing Site) (by Total)", True, False),
+    ('itemsounds', "Remove fanfare when picking up an item (by Scyzer)", True, True),
+    ('spinjumprestart', "Allows Samus to start spinning in mid air after jumping or falling (by Kejardon)", False, False),
+    ('elevators_doors_speed', 'Accelerate doors and elevators transitions (by Rakki & Lioran)', True, True),
+    ('supermetroid_msu1', "Play music with MSU1 chip on SD2SNES (by DarkShock)", False, False),
+    ('max_ammo_display', "Max Ammo Display (by Personitis) (incompatible with MSU1 patch)", True, False),
+    ('animals', "Save the animals surprise (by Foosda)", False, False)
 ]
 
 def randomizer():

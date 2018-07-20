@@ -161,14 +161,33 @@ function setComplexity() {
 function changeComplexity(evt, name) {
   if(name == "simple") {
     var show = [];
-    var hide = ["seedVisibility", "ammoVisibility", "fullVisibility", "maxDiffVisibility", "progDiffVisibility", "randomParamsVisibility", "spreadItemsVisibility", "suitsRestrictionVisibility", "speedScrewRestrictionVisibility", "superFunVisibility", "patchesVisibility", "areaPatchVisibility"];
+    var hide = ["seedVisibility", "ammoVisibility", "maxDiffVisibility", "progDiffVisibility", "randomParamsVisibility", "spreadItemsVisibility", "suitsRestrictionVisibility", "speedScrewRestrictionVisibility", "superFunVisibility", "patchesVisibility", "areaPatchVisibility"];
     showHide(show, hide);
   } else if(name == "medium") {
-    var show = ["fullVisibility", "maxDiffVisibility", "progDiffVisibility"];
-    var hide = ["seedVisibility", "ammoVisibility", "randomParamsVisibility", "spreadItemsVisibility", "suitsRestrictionVisibility", "speedScrewRestrictionVisibility", "superFunVisibility", "patchesVisibility", "areaPatchVisibility"];
+    var show = ["maxDiffVisibility", "progDiffVisibility", "patchesVisibility"
+{{
+for patch in patches:
+  if patch[3] == True:
+    response.write(", \"{}Visibitily\"".format(patch[0]), escape=False)
+    pass
+  pass
+}}];
+    var hide = ["seedVisibility", "ammoVisibility", "randomParamsVisibility", "spreadItemsVisibility", "suitsRestrictionVisibility", "speedScrewRestrictionVisibility", "superFunVisibility", "areaPatchVisibility", "mainPatchesVisibitily", "mainPatchesTextVisibitily"
+{{
+for patch in patches:
+  if patch[3] == False:
+    response.write(", \"{}Visibitily\"".format(patch[0]), escape=False)
+    pass
+  pass
+}}];
     showHide(show, hide);
   } else {
-    var show = ["seedVisibility", "ammoVisibility", "fullVisibility", "maxDiffVisibility", "progDiffVisibility", "randomParamsVisibility", "spreadItemsVisibility", "suitsRestrictionVisibility", "speedScrewRestrictionVisibility", "superFunVisibility", "patchesVisibility", "areaPatchVisibility"];
+    var show = ["seedVisibility", "ammoVisibility", "maxDiffVisibility", "progDiffVisibility", "randomParamsVisibility", "spreadItemsVisibility", "suitsRestrictionVisibility", "speedScrewRestrictionVisibility", "superFunVisibility", "patchesVisibility", "areaPatchVisibility", "mainPatchesVisibitily", "mainPatchesTextVisibitily"
+{{
+for patch in patches:
+  response.write(", \"{}Visibitily\"".format(patch[0]), escape=False)
+  pass
+}}];
     var hide = [];
     showHide(show, hide);
   }
@@ -484,13 +503,23 @@ window.onload = function(){
     area.onchange = function(){
         var maxDiff = document.getElementById("maxDifficulty");
         var full = document.getElementById("fullRandomization");
+        var patches = document.getElementById("areaLayout");
 
-        if(areaRandomization.checked) {
+        if(areaRandomization.checked){
+            console.log("areaRandomization.checked ok");
             if(! full.checked) {
                 full.click();
             }
             if(maxDiff.value == "no difficulty cap"){
                 maxDiff.value = "hardcore";
+            }
+            if(! patches.checked){
+                console.log("! patches.checked");
+                patches.click();
+            }
+        } else {
+            if(patches.checked){
+                patches.click();
             }
         }
         switchCheckbox("areaRandomization");
@@ -855,7 +884,7 @@ def displayNumber(id, min, max, default, step="1"):
 	    <br/>
 	    <h4>Randomizer parameters</h4>
 	    <table class="full">
-	      <tr id="fullVisibility">
+	      <tr>
 	        <td colspan="2" id="fullRandomizationStep">{{displayCheckbox("fullRandomization")}}Full randomization</td>
                 <td><button type="button" onclick="startTheTour(3)">?</button></td>
 	      </tr>
@@ -941,7 +970,7 @@ def displayNumber(id, min, max, default, step="1"):
                 <td><button type="button" onclick="startTheTour(15)">?</button></td>
 	      </tr>
 	      <tr id="areaPatchVisibility">
-		<td colspan="2" class="full" id="areaLayoutStep">{{displayCheckbox("areaLayout", True)}} Additional layout patches for easier navigation</td><td><button type="button" onclick="startTheTour(16)">?</button></td>
+		<td colspan="2" class="full" id="areaLayoutStep">{{displayCheckbox("areaLayout", False)}} Additional layout patches for easier navigation</td><td><button type="button" onclick="startTheTour(16)">?</button></td>
 	      </tr>
             </table>
 	    <div id="superFunVisibility">
@@ -971,10 +1000,10 @@ def displayNumber(id, min, max, default, step="1"):
 	    </div>
 	    <div id="patchesVisibility">
 	      <h4>Patches</h4>
-	      <p>
+	      <p id="mainPatchesTextVisibitily">
 	        The bug fix <a href="https://itemrando.supermetroid.run/information">patches</a> from Total Item Randomizer are included by default.<br/>
 	      </p>
-	      <table class="full">
+	      <table class="full" id="mainPatchesVisibitily">
 	        <tr>
 		  <td class="full" id="layoutPatchesStep">{{displayCheckbox("layoutPatches", True)}} Include layout patches from Total Item Randomizer</td>
 		  <td><button type="button" onclick="startTheTour(21)">?</button></td>
@@ -986,12 +1015,11 @@ def displayNumber(id, min, max, default, step="1"):
 		  <td class="full" id="variaTweaksStep">{{displayCheckbox("variaTweaks", True)}} VARIA tweaks (by Flo)</td><td><button type="button" onclick="startTheTour(23)">?</button></td>
 	        </tr>
 	      </table>
-	      <br/>
 	      <table class="full" id="patchesStep">
 {{
 for patch in patches:
   response.write("	    <tr>", escape=False)
-  response.write("	      <td class=\"full\">", escape=False)
+  response.write("	      <td class=\"full\" id=\"{}Visibitily\">".format(patch[0]), escape=False)
   displayCheckbox(patch[0], patches[2])
   response.write("{}".format(patch[1]))
   response.write("	    </tr>", escape=False)

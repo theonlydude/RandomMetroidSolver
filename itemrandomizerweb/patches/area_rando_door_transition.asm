@@ -53,9 +53,11 @@ shinespark_end:
 	rts
 
 org $0fea00
-print "cancel_movement:"
-print pc	
-cancel_movement:
+print "incompatible_doors:"
+print pc
+;;; routine called from door ASM when connecting two incompatible doors
+;;; stops samus, forces her in elevator pose and gives iframes
+incompatible_doors:
 	;; cancel samus movement:
 	stz $0b2c ; VY subpix
 	stz $0b2e ; VY pix
@@ -80,7 +82,7 @@ cancel_movement:
 	inx : inx
 	cpx #$0006
 	bne --
-	; - reset animation timer
+	;; - reset animation timer
 	stz $0a96
 	;; set cancel spark flag if a spark is active
 	lda !contact_dmg_idx
@@ -91,15 +93,16 @@ cancel_movement:
 .end:
 print "giveiframes:"
 print pc
+;;; gives 128 I-frames to samus
+;;; also called from door ASM when connecting compatible doors
 giveiframes:
-	;; gives 128 I-frames to samus to handle disorientation
 	lda #$0080
 	sta !iframes
 	rts
 
 print "change_song:"
-print pc	
-;;; changes current song: shall be #$ff<song> in A
+print pc
+;;; changes current song for transitions that require it: shall be #$ff<song> in A
 change_song:
 	pha			; save song to load
 	lda #$0000		; stops current song
@@ -110,6 +113,8 @@ change_song:
 	jsl !song_routine
 	rts
 
+print "full_refill:"
+print pc	
 ;;; "ship refill" for tourian elevator
 full_refill:
 	lda !samus_max_health

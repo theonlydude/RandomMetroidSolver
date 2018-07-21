@@ -840,18 +840,19 @@ class RomPatcher:
                 (X0, X1) = (conn['SamusX'] & 0x00FF, (conn['SamusX'] & 0xFF00) >> 8)
                 (Y0, Y1) = (conn['SamusY'] & 0x00FF, (conn['SamusY'] & 0xFF00) >> 8)
                 # force samus position
-                asmPatch += [ 0x20, 0x00, 0xEA ]    # JSR cancel_movement ; see area_rando_door_transition.asm
+                # see area_rando_door_transition.asm. assemble it to print routines SNES addresses.
+                asmPatch += [ 0x20, 0x00, 0xEA ]    # JSR incompatible_doors
                 asmPatch += [ 0xA9, X0,   X1   ]    # LDA #$SamusX        ; fixed Samus X position
                 asmPatch += [ 0x8D, 0xF6, 0x0A ]    # STA $0AF6           ; update Samus X position in memory
                 asmPatch += [ 0xA9, Y0,   Y1   ]    # LDA #$SamusY        ; fixed Samus Y position
                 asmPatch += [ 0x8D, 0xFA, 0x0A ]    # STA $0AFA           ; update Samus Y position in memory
             else:
                 # still give I-frames
-                asmPatch += [ 0x20, 0x36, 0xEA ]    # JSR .end_cancel     ; see area_rando_door_transition.asm
+                asmPatch += [ 0x20, 0x40, 0xEA ]    # JSR giveiframes
             # change song if needed
             if 'song' in conn:
                 asmPatch += [ 0xA9, conn['song'], 0xFF ]       # LDA #$song       ; A is argument for change_song
-                asmPatch += [ 0x20, 0x3D,         0XEA ]       # JSR change_song  ; see area_rando_door_transition.asm
+                asmPatch += [ 0x20, 0x47,         0XEA ]       # JSR change_song
             # return
             asmPatch += [ 0x60 ]   # RTS
             self.romFile.write(struct.pack('B', self.asmAddress & 0x00FF))
@@ -874,8 +875,9 @@ class RomPatcher:
     def writeTourianRefill(self):
         tourianDoor = 0x19222
         self.romFile.seek(tourianDoor + 10) # go to door ASM ptr field
-        # $0F:EA52 is full_refill routine address. see area_rando_door_transition.asm
-        self.romFile.write(struct.pack('B', 0x52))
+        # write full_refill routine address
+        # aseemble area_rando_door_transition.asm to print it if modified
+        self.romFile.write(struct.pack('B', 0x5C))
         self.romFile.write(struct.pack('B', 0xEA))
 
     def writeTransitionsCredits(self, transitions):

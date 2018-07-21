@@ -14,6 +14,7 @@ arch snes.cpu
 !samus_health          = $09c2
 ;;; For movement cancel
 !current_pose          = $0a1c
+!poses_transitions     = $0a2a	
 !contact_dmg_idx       = $0a6e
 !iframes               = $18a8
 ;;; For song change
@@ -52,7 +53,11 @@ shinespark_end:
 	rts
 
 org $0fea00
-cancel_movement:
+print "incompatible_doors:"
+print pc
+;;; routine called from door ASM when connecting two incompatible doors
+;;; stops samus, forces her in elevator pose and gives iframes
+incompatible_doors:
 	;; cancel samus movement:
 	stz $0b2c ; VY subpix
 	stz $0b2e ; VY pix
@@ -60,29 +65,44 @@ cancel_movement:
 	stz $0b44 ; VX subpix
 	stz $0b46 ; momentum pix
 	stz $0b48 ; momentum subpix
-	;; samus "elevator pose" to avoid taking into account transition direction
-	;; only if samus is not unmorphing to avoid game crash
-	lda #$003d 		; check for unmorph right pose
-	cmp !current_pose
-	beq .end_cancel	        ; you can't shinespark and unmorph at the same time, so skip to the end
-	lda #$003e 		; check for unmorph left pose	
-	cmp !current_pose
-	beq .end_cancel	        ; you can't shinespark and unmorph at the same time, so skip to the end
-	stz !current_pose	; set elevator pose (0)
-	stz $0a96		; reset animation timer
+	;; force samus "elevator pose" to avoid taking into account transition direction
+	;; for this, reflect "stable elevator pose" state :
+	;; - set 12 bytes of pose-handling stuff to zero
+	ldx #$0000
+-
+	stz !current_pose,x
+	inx : inx
+	cpx #$000c
+	bne -
+	;; - set 6 bytes pose transition stuff to FF
+	lda #$ffff
+	ldx #$0000
+--
+	sta !poses_transitions,x
+	inx : inx
+	cpx #$0006
+	bne --
+	;; - reset animation timer
+	stz $0a96
 	;; set cancel spark flag if a spark is active
 	lda !contact_dmg_idx
 	cmp #$0002		; contact damage is 2 if samus is sparking
-	bne .end_cancel
+	bne .end
 	lda !MAGIC
 	sta !spark_flag
-.end_cancel:
-	;; gives 128 I-frames to samus to handle disorientation
+.end:
+print "giveiframes:"
+print pc
+;;; gives 128 I-frames to samus
+;;; also called from door ASM when connecting compatible doors
+giveiframes:
 	lda #$0080
 	sta !iframes
 	rts
 
-;;; changes current song: shall be #$ff<song> in A
+print "change_song:"
+print pc
+;;; changes current song for transitions that require it: shall be #$ff<song> in A
 change_song:
 	pha			; save song to load
 	lda #$0000		; stops current song
@@ -93,6 +113,8 @@ change_song:
 	jsl !song_routine
 	rts
 
+print "full_refill:"
+print pc	
 ;;; "ship refill" for tourian elevator
 full_refill:
 	lda !samus_max_health

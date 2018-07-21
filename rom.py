@@ -1056,5 +1056,9 @@ class RomLoaderJson(RomLoaderDict):
     # when called from the test suite and the website (when loading already uploaded roms converted to json)
     def __init__(self, jsonFileName):
         with open(jsonFileName) as jsonFile:
-            dictROM = json.load(jsonFile)
+            tmpDictROM = json.load(jsonFile)
+            dictROM = {}
+            # in json keys are strings
+            for address in tmpDictROM:
+                dictROM[int(address)] = tmpDictROM[address]
             super(RomLoaderJson, self).__init__(dictROM)

@@ -12,19 +12,13 @@ from parameters import easy, medium, hard, harder, hardcore, mania, god, samus, 
 from smbool import SMBool
 from smboolmanager import SMBoolManager
 from helpers import Pickup, Bosses
-from rom import RomType, RomLoader
+from rom import RomLoader
 from graph_locations import locations as graphLocations
 from graph import AccessGraph
 from graph_access import vanillaTransitions, accessPoints
 from utils import PresetLoader
 
 class Conf:
-    # ROM type, between :
-    # - Total_TX/FX/CX/X/HX : Total's randomizer seeds, Tournament/Full/Casual/Normal/Hard
-    # - Dessy : Dessyreqt randomizer seeds
-    # - Vanilla : original game
-    romType = 'Total_TX'
-
     # keep getting majors of at most this difficulty before going for minors or changing area
     difficultyTarget = medium
 
@@ -76,18 +70,11 @@ class Solver:
         Conf.itemsForbidden = itemsForbidden
 
     def loadRom(self, rom):
-        # TODO: with the new ROM json format, rewrite this
-        guessed = RomType.guess(rom)
-        if guessed is not None:
-            Conf.romType = guessed
-
-        # TODO::the patches are not yet loaded in the romLoader, decouplate the locations/items assigment
-        # and reading the patchs/transitions info
         self.romLoader = RomLoader.factory(rom)
-        self.romLoader.assignItems(self.locations)
-        (self.fullRando, self.areaRando) = RomType.apply(Conf.romType, self.romLoader.patches)
+        self.fullRando = self.romLoader.assignItems(self.locations)
+        self.areaRando = self.romLoader.loadPatches()
 
-        print("ROM {} Type: {}, Patches present: {}, Area Rando: {}".format(rom, Conf.romType, self.romLoader.patches, (self.areaRando == True)))
+        print("ROM {} full: {} area: {} patches: {}".format(rom, self.fullRando, self.areaRando, self.romLoader.getPatches()))
 
         graphTransitions = self.romLoader.getTransitions()
         if graphTransitions is None:
@@ -383,7 +370,7 @@ class Solver:
                 lastAP = path[-1]
                 if not (len(path) == 1 and path[0] == lastAP):
                     path = " -> ".join(path)
-                    print('{:>50}: {}'.format('Access points gone through', path))
+                    print('{:>50}: {}'.format('Path', path))
             print('{:>50}: {:>12} {:>34} {:>8} {:>16} {:>14} {} {}'.format(loc['Name'],
                                                                            loc['Area'],
                                                                            loc['SolveArea'],
@@ -551,47 +538,6 @@ class DifficultyDisplayer:
 
         return percent
 
-def guessRomType(filename):
-    match = re.findall(r'VARIA_Randomizer_[A]?[F]?X\d+', filename)
-    if len(match) > 0:
-        if match[0][17] == 'A' and match[0][18] == 'F':
-            return "VARIA Area Full"
-        elif match[0][17] == 'A' and match[0][18] == 'X':
-            return "VARIA Area Classic"
-        elif match[0][17] == 'F':
-            return "VARIA Full"
-        elif match[0][17] == 'X':
-            return "VARIA Classic"
-
-    match = re.findall(r'[CTFH]?X\d+', filename)
-    if len(match) > 0:
-        if match[0][0] == 'C':
-            return "Total Casual"
-        elif match[0][0] == 'T':
-            return "Total Tournament"
-        elif match[0][0] == 'F':
-            return "Total Full"
-        elif match[0][0] == 'H':
-            return "Total Hard"
-        elif match[0][0] == 'X':
-            return "Total Normal"
-
-    match = re.findall(r'[CMS]?\d+', filename)
-    if len(match) > 0:
-        if match[0][0] == 'C':
-            return "Dessy Casual"
-        elif match[0][0] == 'M':
-            return "Dessy Masochist"
-        elif match[0][0] == 'S':
-            return "Dessy Speedrunner"
-
-    match = re.findall(r'Super[ _]*Metroid', filename)
-    if len(match) > 0:
-        return "Vanilla"
-
-    # default to TX
-    return "Total Tournament"
-
 def generatePng(dotFileName):
     # use dot to generate the graph's image .png
     # use convert to generate the thumbnail
@@ -622,7 +568,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Random Metroid Solver")
     parser.add_argument('romFileName', help="the input rom")
     parser.add_argument('--preset', '-p', help="the preset file", nargs='?',
-                        default=None, dest='presetFileName')
+                        default='diff_presets/regular.json', dest='presetFileName')
 
     parser.add_argument('--difficultyTarget', '-t',
                         help="the difficulty target that the solver will aim for",
@@ -692,7 +638,7 @@ if __name__ == "__main__":
         randomizedRom=args.romFileName
         diffPercent = DifficultyDisplayer(difficulty).percent()
         generatedPath = solver.getPath(solver.visitedLocations)
-        romType = guessRomType(randomizedRom)
+        romType = "TO BE IMPLEMENTED IN A BETTER WAY"
 
         result = dict(randomizedRom=randomizedRom, difficulty=difficulty,
                       generatedPath=generatedPath, diffPercent=diffPercent,

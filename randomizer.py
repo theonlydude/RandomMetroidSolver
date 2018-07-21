@@ -207,7 +207,7 @@ if __name__ == "__main__":
         args.patches.append('skip_ceres.ips')
 
     if args.noLayout == True:
-        RomPatches.ActivePatches = RomPatches.Total_Base
+        RomPatches.ActivePatches = RomPatches.TotalBase
     else:
         RomPatches.ActivePatches = RomPatches.Total
     if args.noGravHeat == True:

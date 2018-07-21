@@ -31,7 +31,7 @@ class RomPatches:
     MoatShotBlock             = 41
     ## Area rando patches
     # remove crumble block for reverse lower norfair door access
-    SingleChamberNoCrumble    = 101,
+    SingleChamberNoCrumble    = 101
     # remove green gates for reverse maridia access
     AreaRandoGatesBase        = 102
     # remove crab green gate in maridia and blue gate in green brinstar
@@ -50,13 +50,16 @@ class RomPatches:
 
     #### Patch sets
     # total randomizer
-    Total_Base = [ BlueBrinstarBlueDoor, RedTowerBlueDoors, NoGravityEnvProtection ]
+    TotalBase = [ BlueBrinstarBlueDoor, RedTowerBlueDoors, NoGravityEnvProtection ]
     # tournament and full
-    Total = Total_Base + [ MoatShotBlock, EarlySupersShotBlock,
-                           SpazerShotBlock, RedTowerLeftPassage,
-                           HiJumpShotBlock, CathedralEntranceWallJump ]
+    TotalLayout = [ MoatShotBlock, EarlySupersShotBlock,
+                    SpazerShotBlock, RedTowerLeftPassage,
+                    HiJumpShotBlock, CathedralEntranceWallJump ]
+
+    Total = TotalBase + TotalLayout
+
     # casual
-    Total_CX = [ BlueBrinstarMissile ] + Total
+    TotalCasual = [ BlueBrinstarMissile ] + Total
 
     # area rando patch set
     AreaSet = [ SingleChamberNoCrumble, AreaRandoGatesBase, AreaRandoGatesOther, AreaRandoBlueDoors ]
@@ -73,67 +76,6 @@ class RomPatches:
     @staticmethod
     def has(patch):
         return SMBool(patch in RomPatches.ActivePatches)
-
-
-class RomType:
-    # guesses ROM type string based on filename and return it
-    # if no ROM type could be guessed, returns None
-    @staticmethod
-    def guess(fileName):
-        fileName = os.path.basename(fileName)
-
-        # VARIA ?
-        m = re.match(r'^.*VARIA_Randomizer_([A]?[F]?X)\d+.*$', fileName)
-        if m is not None:
-            return 'VARIA_' + m.group(1)
-
-        # total ?
-        m = re.match(r'^.*?([CTFH]?X)\d+.*$', fileName)
-        if m is not None:
-            return 'Total_' + m.group(1)
-
-        # dessy ?
-        m = re.match(r'^.*[CMS]\d+.*$', fileName)
-        if m is not None:
-            return 'Dessy'
-
-        # vanilla ?
-        m = re.match(r'^.*Super[ _]*Metroid.*$', fileName)
-        if m is not None:
-            return 'Vanilla'
-
-        return None
-
-    # "applies" ROM patches, return if full randomization and area randomization
-    @staticmethod
-    def apply(romType, patches):
-        if romType.startswith('Total_'):
-            RomPatches.ActivePatches = RomPatches.Total_Base
-        if romType == 'Total_CX':
-            RomPatches.ActivePatches = RomPatches.Total_CX
-        elif romType in ['Total_TX', 'Total_FX']:
-            RomPatches.ActivePatches = RomPatches.Total
-        elif romType.startswith('VARIA_'):
-            if patches['layoutPresent'] == True:
-                RomPatches.ActivePatches = RomPatches.Total
-            else:
-                print("RomType::apply: no layout patches")
-                RomPatches.ActivePatches = RomPatches.Total_Base
-            if patches['gravityNoHeatProtectionPresent'] == False:
-                print("RomType::apply: Gravity heat protection")
-                if RomPatches.NoGravityEnvProtection in RomPatches.ActivePatches:
-                    RomPatches.ActivePatches.remove(RomPatches.NoGravityEnvProtection)
-            if patches['variaTweaks'] == True:
-                RomPatches.ActivePatches += RomPatches.VariaTweaks
-            if romType.startswith('VARIA_A'):
-                RomPatches.ActivePatches += RomPatches.AreaSet
-                if patches['areaLayout'] == False:
-                    RomPatches.ActivePatches.remove(RomPatches.AreaRandoGatesOther)
-        elif romType == 'Dessy':
-            RomPatches.ActivePatches = RomPatches.Dessy
-
-        return ((romType == 'Total_FX' or romType == 'Dessy' or romType == 'VARIA_FX' or romType == 'VARIA_AFX'),
-                (romType == 'VARIA_AX' or romType == 'VARIA_AFX'))
 
 class RomReader:
     # read the items in the rom
@@ -208,19 +150,26 @@ class RomReader:
     }
 
     patches = {
-        'layoutPresent': {'address': 0x21BD80, 'value': 0xD5},
-        'gravityNoHeatProtectionPresent': {'address': 0x06e37d, 'value': 0x01},        
+        'startCeres': {'address': 0x5A593, 'value': 0x2F},
+        'startLS': {'address': 0x16EDA, 'value': 0x1F},
+        'layout': {'address': 0x21BD80, 'value': 0xD5},
+        'casual': {'address': 0x22E879, 'value': 0xF8},
+        'gravityNoHeatProtection': {'address': 0x06e37d, 'value': 0x01},
         'variaTweaks': {'address': 0x7CC4D, 'value': 0x37},
-        'areaLayout': {'address':0x252FA7, 'value':0xF8}
+        'area': {'address': 0x22D564, 'value': 0xF2},
+        'areaLayout': {'address': 0x252FA7, 'value': 0xF8}
     }
 
-    def getItem(self, romFile, address, visibility):
+    def __init__(self, romFile):
+        self.romFile = romFile
+
+    def getItem(self, address, visibility):
         # return the hex code of the object at the given address
 
-        romFile.seek(address)
+        self.romFile.seek(address)
         # value is in two bytes
-        value1 = struct.unpack("B", romFile.read(1))
-        value2 = struct.unpack("B", romFile.read(1))
+        value1 = struct.unpack("B", self.romFile.read(1))
+        value2 = struct.unpack("B", self.romFile.read(1))
 
         # match itemVisibility with
         # | Visible -> 0
@@ -239,8 +188,8 @@ class RomReader:
         # 0x1a is to say that the item is a morphball
         # 0xeedb is missile item
         # 0x786de is Morphing Ball location
-        romFile.seek(address+4)
-        value3 = struct.unpack("B", romFile.read(1))
+        self.romFile.seek(address+4)
+        value3 = struct.unpack("B", self.romFile.read(1))
         if (value3[0] == int('0x1a', 16)
             and int(itemCode, 16) == int('0xeedb', 16)
             and address != int('0x786DE', 16)):
@@ -248,13 +197,17 @@ class RomReader:
         else:
             return itemCode
 
-    def loadItems(self, romFile, locations):
+    def loadItems(self, locations):
+        isFull = False
         for loc in locations:
-            item = self.getItem(romFile, loc["Address"], loc["Visibility"])
+            item = self.getItem(loc["Address"], loc["Visibility"])
             loc["itemName"] = self.items[item]["name"]
-            #print("name: {} class: {} address: {} visibility: {} item: {}".format(loc["Name"], loc["Class"], loc['Address'], loc['Visibility'], item))
+            if loc['Class'] == 'Major' and self.items[item]['name'] in ['Missile', 'Super', 'PowerBomb']:
+                isFull = True
 
-    def loadTransitions(self, romFile):
+        return isFull
+
+    def loadTransitions(self):
         # return the transitions or None if vanilla transitions
         from graph_access import accessPoints
 
@@ -292,7 +245,7 @@ class RomReader:
         for accessPoint in accessPoints:
             if accessPoint.Name == 'Landing Site' or accessPoint.Internal == True:
                 continue
-            (destRoomPtr, destEntryScreen) = self.getTransition(romFile, accessPoint.ExitInfo['DoorPtr'])
+            (destRoomPtr, destEntryScreen) = self.getTransition(accessPoint.ExitInfo['DoorPtr'])
             destAPName = rooms[(destRoomPtr, destEntryScreen)]
             transitions[accessPoint.Name] = destAPName
 
@@ -316,24 +269,88 @@ class RomReader:
         else:
             return transitions
 
-    def getTransition(self, romFile, doorPtr):
-        romFile.seek(0x10000 | doorPtr)
+    def getTransition(self, doorPtr):
+        self.romFile.seek(0x10000 | doorPtr)
 
         # room ptr is in two bytes
-        v1 = struct.unpack("B", romFile.read(1))
-        v2 = struct.unpack("B", romFile.read(1))
+        v1 = struct.unpack("B", self.romFile.read(1))
+        v2 = struct.unpack("B", self.romFile.read(1))
 
-        romFile.seek((0x10000 | doorPtr) + 6)
-        sx = struct.unpack("B", romFile.read(1))
-        sy = struct.unpack("B", romFile.read(1))
+        self.romFile.seek((0x10000 | doorPtr) + 6)
+        sx = struct.unpack("B", self.romFile.read(1))
+        sy = struct.unpack("B", self.romFile.read(1))
 
         return (v1[0] | (v2[0] << 8), (sx[0], sy[0]))
 
-    def patchPresent(self, romFile, patchName):
-        romFile.seek(self.patches[patchName]['address'])
-        value = struct.unpack("B", romFile.read(1))
+    def patchPresent(self, patchName):
+        self.romFile.seek(self.patches[patchName]['address'])
+        value = struct.unpack("B", self.romFile.read(1))
         return value[0] == self.patches[patchName]['value']
-    
+
+    def getPatches(self):
+        # for display in the solver
+        result = {}
+        for patch in self.patches:
+            result[patch] = self.patchPresent(patch)
+        return result
+
+    def getDict(self):
+        # get the address/value dict for dump
+        romData = {}
+
+        # locations items
+        addresses = [0x78264, 0x78404, 0x78432, 0x7852C, 0x78614, 0x786DE, 0x7879E, 0x787C2, 0x787FA, 0x78824, 0x78876, 0x7896E, 0x7899C, 0x78ACA, 0x78B24, 0x78BA4, 0x78BAC, 0x78C36, 0x78C3E, 0x78C82, 0x78CCA, 0x79108, 0x79110, 0x79184, 0x7C2E9, 0x7C337, 0x7C365, 0x7C36D, 0x7C47D, 0x7C559, 0x7C5E3, 0x7C6E5, 0x7C755, 0x7C7A7, 0x781CC, 0x781E8, 0x781EE, 0x781F4, 0x78248, 0x783EE, 0x78464, 0x7846A, 0x78478, 0x78486, 0x784AC, 0x784E4, 0x78518, 0x7851E, 0x78532, 0x78538, 0x78608, 0x7860E, 0x7865C, 0x78676, 0x7874C, 0x78798, 0x787D0, 0x78802, 0x78836, 0x7883C, 0x788CA, 0x7890E, 0x78914, 0x789EC, 0x78AE4, 0x78B46, 0x78BC0, 0x78BE6, 0x78BEC, 0x78C04, 0x78C14, 0x78C2A, 0x78C44, 0x78C52, 0x78C66, 0x78C74, 0x78CBC, 0x78E6E, 0x78E74, 0x78F30, 0x78FCA, 0x78FD2, 0x790C0, 0x79100, 0x7C265, 0x7C2EF, 0x7C319, 0x7C357, 0x7C437, 0x7C43D, 0x7C483, 0x7C4AF, 0x7C4B5, 0x7C533, 0x7C5DD, 0x7C5EB, 0x7C5F1, 0x7C603, 0x7C609, 0x7C74D]
+        for address in addresses:
+            self.romFile.seek(address)
+            romData[address] = struct.unpack("B", self.romFile.read(1))
+            romData[address+1] = struct.unpack("B", self.romFile.read(1))
+            self.romFile.seek(address+4)
+            romData[address+4] = struct.unpack("B", self.romFile.read(1))
+
+        # start ceres
+        self.romFile.seek(0x5A593)
+        romData[0x5A593] = struct.unpack("B", self.romFile.read(1))
+
+        # start landing site
+        self.romFile.seek(0x16EDA)
+        romData[0x16EDA] = struct.unpack("B", self.romFile.read(1))
+
+        # layout
+        self.romFile.seek(0x21BD80)
+        romData[0x21BD80] = struct.unpack("B", self.romFile.read(1))
+
+        # casual
+        self.romFile.seek(0x22E879)
+        romData[0x22E879] = struct.unpack("B", self.romFile.read(1))
+
+        # no grav heat
+        self.romFile.seek(0x06e37d)
+        romData[0x06e37d] = struct.unpack("B", self.romFile.read(1))
+
+        # varia tweaks
+        self.romFile.seek(0x7CC4D)
+        romData[0x7CC4D] = struct.unpack("B", self.romFile.read(1))
+
+        # area
+        self.romFile.seek(0x22D564)
+        romData[0x22D564] = struct.unpack("B", self.romFile.read(1))
+
+        # area more layout
+        self.romFile.seek(0x252FA7)
+        romData[0x252FA7] = struct.unpack("B", self.romFile.read(1))
+
+        # transitions
+        addresses = [0x18c22, 0x18aea, 0x18a42, 0x18e9e, 0x18bfe, 0x18e86, 0x18f0a, 0x189ca, 0x18aae, 0x196d2, 0x19a4a, 0x1922e, 0x195fa, 0x1967e, 0x1a39c, 0x1a510, 0x18aa2, 0x1a480, 0x1902a, 0x190c6, 0x18af6, 0x1a384, 0x1a390, 0x1a330, 0x18c52, 0x191e6]
+        for address in addresses:
+            self.romFile.seek(address)
+            romData[address] = struct.unpack("B", self.romFile.read(1))
+            romData[address+1] = struct.unpack("B", self.romFile.read(1))
+            self.romFile.seek(address+6)
+            romData[address+6] = struct.unpack("B", self.romFile.read(1))
+            romData[address+7] = struct.unpack("B", self.romFile.read(1))
+
+        return romData
+
 class RomPatcher:
     # standard:
     # Intro/Ceres Skip and initial door flag setup
@@ -530,8 +547,7 @@ class RomPatcher:
                 for patchName in RomPatcher.IPSPatches['Area']:
                     self.applyIPSPatch(patchName)
         except Exception as e:
-            print("Error patching {}. ({})".format(self.romFileName, e))
-            sys.exit(-1)
+            raise Exception("Error patching {}. ({})".format(self.romFileName, e))
 
     def applyIPSPatch(self, patchName):
         print("Apply patch {}".format(patchName))
@@ -916,7 +932,7 @@ class RomPatcher:
                 self.romFile.write(struct.pack('B', RomPatcher.buttons[button][1]))
 
 class FakeROM:
-    # to have the same code for real rom and the webservice
+    # to have the same code for real ROM and the webservice
     def __init__(self, data={}):
         self.curAddress = 0
         self.data = data
@@ -947,7 +963,7 @@ def isString(string):
 class RomLoader(object):
     @staticmethod
     def factory(rom):
-        # can be a real rom. can be a json or a dict with the locations - items association
+        # can be a real rom. can be a json or a dict with the ROM address/values
         if isString(rom):
             ext = os.path.splitext(rom)
             if ext[1].lower() == '.sfc' or ext[1].lower() == '.smc':
@@ -955,96 +971,88 @@ class RomLoader(object):
             elif ext[1].lower() == '.json':
                 return RomLoaderJson(rom)
             else:
-                print("wrong rom file type: {}".format(ext[1]))
-                sys.exit(-1)
+                raise Exception("wrong rom file type: {}".format(ext[1]))
         elif type(rom) is dict:
             return RomLoaderDict(rom)
 
-    def __init__(self):
-        self.patches = {
-            # total rando anti-softlock
-            'layoutPresent': True,
-            'gravityNoHeatProtectionPresent': True,
-            # WS etank without killing phantoon + LN torizo no space jump check
-            'variaTweaks': False,
-            # complementary layout patches for area rando: see RomPatches.AreaRandoGatesOther
-            'areaLayout' : False
-        }
-
     def assignItems(self, locations):
-        # update the itemName and Class of the locations
-        for loc in locations:
-            loc['itemName'] = self.locsItems[loc['Name']]
-
-    def dump(self, fileName):
-        with open(fileName, 'w') as jsonFile:
-            json.dump(self.locsItems, jsonFile)
+        return self.romReader.loadItems(locations)
 
     def getTransitions(self):
-        if 'transitions' in self.locsItems:
-            return self.locsItems['transitions']
-        else:
-            return None
+        return self.romReader.loadTransitions()
+
+    def hasPatch(self, patchName):
+        return self.romReader.patchPresent(patchName)
+
+    def loadPatches(self):
+        RomPatches.ActivePatches = []
+        isArea = False
+
+        # check total base (blue bt and red tower blue door)
+        if self.hasPatch("startCeres") or self.hasPatch("startLS"):
+            RomPatches.ActivePatches += [RomPatches.BlueBrinstarBlueDoor,
+                                         RomPatches.RedTowerBlueDoors]
+
+        # check total soft lock protection
+        if self.hasPatch("layout"):
+            RomPatches.ActivePatches += RomPatches.TotalLayout
+
+        # check total casual (blue brinstar missile swap)
+        if self.hasPatch("casual"):
+            RomPatches.ActivePatches.append(RomPatches.BlueBrinstarMissile)
+
+        # check gravity heat protection
+        if self.hasPatch("gravityNoHeatProtection"):
+            RomPatches.ActivePatches.append(RomPatches.NoGravityEnvProtection)
+
+        # check varia tweaks
+        if self.hasPatch("variaTweaks"):
+            RomPatches.ActivePatches += RomPatches.VariaTweaks
+
+        # check area
+        if self.hasPatch("area"):
+            RomPatches.ActivePatches += [RomPatches.SingleChamberNoCrumble,
+                                         RomPatches.AreaRandoGatesBase,
+                                         RomPatches.AreaRandoBlueDoors]
+            isArea = True
+
+        # check area layout
+        if self.hasPatch("areaLayout"):
+            RomPatches.ActivePatches.append(RomPatches.AreaRandoGatesOther)
+
+        return isArea
+
+    def getPatches(self):
+        return self.romReader.getPatches()
 
 class RomLoaderSfc(RomLoader):
     # standard usage (when calling from the command line)
     def __init__(self, romFileName):
-        print("RomLoaderSfc::init")
         super(RomLoaderSfc, self).__init__()
-        self.romFileName = romFileName
-        self.romReader = RomReader()
+        romFile = open(romFileName, "rb")
+        self.romReader = RomReader(romFile)
 
-    def assignItems(self, locations):
-        # update the itemName of the locations
-        with open(self.romFileName, "rb") as romFile:
-            self.romReader.loadItems(romFile, locations)
-            for patch in self.patches:
-                self.patches[patch] = self.romReader.patchPresent(romFile, patch)
+    def dump(self, fileName):
+        dictROM = self.romReader.getDict()
 
-            transitions = self.romReader.loadTransitions(romFile)
-
-        self.locsItems = {}
-        for loc in locations:
-            self.locsItems[loc['Name']] = loc['itemName']
-        for patch in self.patches:
-            self.locsItems[patch] = self.patches[patch]
-
-        self.locsItems['transitions'] = transitions
-
-class RomLoaderJson(RomLoader):
-    # when called from the test suite and the website (when loading already uploaded roms converted to json)
-    def __init__(self, jsonFileName):
-        print("RomLoaderJson::init")
-        super(RomLoaderJson, self).__init__()
-        with open(jsonFileName) as jsonFile:
-            self.locsItems = json.load(jsonFile)
-
-        for patch in self.patches:
-            if patch in self.locsItems:
-                self.patches[patch] = self.locsItems[patch]
-            self.locsItems[patch] = self.patches[patch]
+        with open(fileName, 'w') as jsonFile:
+            json.dump(dictROM, jsonFile)
 
 class RomLoaderDict(RomLoader):
     # when called from the website (the js in the browser uploads a dict of address: value)
     def __init__(self, dictROM):
-        print("RomLoaderDict::init")
         super(RomLoaderDict, self).__init__()
         self.dictROM = dictROM
-        self.romReader = RomReader()
-
-    def assignItems(self, locations):
-        # update the itemName of the locations
         fakeROM = FakeROM(self.dictROM)
-        self.romReader.loadItems(fakeROM, locations)
-        for patch in self.patches:
-            self.patches[patch] = self.romReader.patchPresent(fakeROM, patch)
+        self.romReader = RomReader(fakeROM)
 
-        transitions = self.romReader.loadTransitions(fakeROM)
+    def dump(self, fileName):
+        with open(fileName, 'w') as jsonFile:
+            json.dump(self.dictROM, jsonFile)
 
-        self.locsItems = {}
-        for loc in locations:
-            self.locsItems[loc['Name']] = loc['itemName']
-        for patch in self.patches:
-            self.locsItems[patch] = self.patches[patch]
-
-        self.locsItems['transitions'] = transitions
+class RomLoaderJson(RomLoaderDict):
+    # when called from the test suite and the website (when loading already uploaded roms converted to json)
+    def __init__(self, jsonFileName):
+        with open(jsonFileName) as jsonFile:
+            dictROM = json.load(jsonFile)
+            super(RomLoaderJson, self).__init__(dictROM)

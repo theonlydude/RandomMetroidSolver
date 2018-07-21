@@ -22,14 +22,6 @@ def maxPresetsReach():
     # to prevent a spammer to create presets in a loop and fill the fs
     return len(os.listdir('diff_presets')) >= 2048
 
-romTypes = OrderedDict([('VARIA Classic', 'VARIA_X'), ('VARIA Full', 'VARIA_FX'),
-                        ('VARIA Area Classic', 'VARIA_AX'), ('VARIA Area Full', 'VARIA_AFX'),
-                        ('Total Casual', 'Total_CX'), ('Total Normal', 'Total_X'),
-                        ('Total Hard', 'Total_HX'), ('Total Tournament', 'Total_TX'),
-                        ('Total Full', 'Total_FX'), ('Dessy Casual', 'Dessy'),
-                        ('Dessy Speedrunner', 'Dessy'), ('Dessy Masochist', 'Dessy'),
-                        ('Vanilla', 'Vanilla')])
-
 def loadPreset():
     # load conf from session if available
     loaded = False

@@ -150,8 +150,8 @@ class RomReader:
     }
 
     patches = {
-        'startCeres': {'address': 0x5A593, 'value': 0x2F, 'desc': "Blue Brinstar and Red Tower blue doors"},
-        'startLS': {'address': 0x16EDA, 'value': 0x1F, 'desc': "Blue Brinstar and Red Tower blue doors"},
+        'startCeres': {'address': 0x7F1F, 'value': 0xB6, 'desc': "Blue Brinstar and Red Tower blue doors"},
+        'startLS': {'address': 0x7F17, 'value': 0xB6, 'desc': "Blue Brinstar and Red Tower blue doors"},
         'layout': {'address': 0x21BD80, 'value': 0xD5, 'desc': "Anti soft lock layout modifications"},
         'casual': {'address': 0x22E879, 'value': 0xF8, 'desc': "Switch Blue Brinstar Etank and missile"},
         'gravityNoHeatProtection': {'address': 0x06e37d, 'value': 0x01, 'desc': "Gravity suit heat protection removed"},
@@ -309,12 +309,12 @@ class RomReader:
             romData[address+4] = struct.unpack("B", self.romFile.read(1))
 
         # start ceres
-        self.romFile.seek(0x5A593)
-        romData[0x5A593] = struct.unpack("B", self.romFile.read(1))
+        self.romFile.seek(0x7F1F)
+        romData[0x7F1F] = struct.unpack("B", self.romFile.read(1))
 
         # start landing site
-        self.romFile.seek(0x16EDA)
-        romData[0x16EDA] = struct.unpack("B", self.romFile.read(1))
+        self.romFile.seek(0x7F17)
+        romData[0x7F17] = struct.unpack("B", self.romFile.read(1))
 
         # layout
         self.romFile.seek(0x21BD80)

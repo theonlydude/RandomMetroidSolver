@@ -74,7 +74,9 @@ class Solver:
         self.fullRando = self.romLoader.assignItems(self.locations)
         self.areaRando = self.romLoader.loadPatches()
 
-        print("ROM {} full: {} area: {} patches: {}".format(rom, self.fullRando, self.areaRando, self.romLoader.getPatches()))
+        self.patches = self.romLoader.getPatches()
+        print("ROM {} full: {} area: {} patches: {}".format(rom, self.fullRando,
+                                                            self.areaRando, self.patches))
 
         graphTransitions = self.romLoader.getTransitions()
         if graphTransitions is None:
@@ -635,14 +637,14 @@ if __name__ == "__main__":
             pngFileName = None
             pngThumbFileName = None
 
-        randomizedRom=args.romFileName
+        randomizedRom = os.path.basename(os.path.splitext(args.romFileName)[0])+'.sfc'
         diffPercent = DifficultyDisplayer(difficulty).percent()
         generatedPath = solver.getPath(solver.visitedLocations)
-        romType = "TO BE IMPLEMENTED IN A BETTER WAY"
+        patches = solver.patches
 
         result = dict(randomizedRom=randomizedRom, difficulty=difficulty,
                       generatedPath=generatedPath, diffPercent=diffPercent,
-                      knowsUsed=(used, total), itemsOk=itemsOk, romType=romType,
+                      knowsUsed=(used, total), itemsOk=itemsOk, patches=patches,
                       pngFileName=pngFileName, pngThumbFileName=pngThumbFileName)
 
         with open(args.output, 'w') as jsonFile:

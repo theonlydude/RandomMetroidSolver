@@ -411,6 +411,22 @@ if result is not None and result["difficulty"] != -1:
 }}
 <div id="timeline" style="height: 95px; width: 50%;"></div>
 
+{{
+  if result is not None and len(result["patches"]) != 0:
+}}
+    <p>
+      Detected patches:
+    </p>
+    <ul>
+{{
+    for patch in sorted(result["patches"]):
+      response.write("<li>{}</li>".format(patch), escape=False)
+      pass
+}}
+    </ul>
+{{
+    pass
+}}
 <p>
   To solve this ROM {{=result["knowsUsed"][0]}} distinct techniques have been used out of the {{=result["knowsUsed"][1]}} known techniques.
 </p>

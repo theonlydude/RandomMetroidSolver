@@ -108,7 +108,11 @@ def presets():
     initPresetsSession()
 
     # load conf from session if available
-    params = loadPreset()
+    try:
+        params = loadPreset()
+    except Exception as e:
+        session.flash = "Error loading the preset"
+        redirect(URL(r=request, f='presets'))
 
     # load presets list
     presets = loadPresetsList()
@@ -126,10 +130,14 @@ def presets():
         fullPath = 'diff_presets/{}.json'.format(presetName)
         if os.path.isfile(fullPath):
             # load it
-            params = PresetLoader.factory(fullPath).params
-            session.presets['preset'] = presetName
-            session.presets["presetDict"] = None
-            redirect(URL(r=request, f='presets'))
+            try:
+                params = PresetLoader.factory(fullPath).params
+                session.presets['preset'] = presetName
+                session.presets["presetDict"] = None
+                redirect(URL(r=request, f='presets'))
+            except Exception as e:
+                session.flash = "Error loading the preset"
+                redirect(URL(r=request, f='presets'))
         else:
             session.flash = "Presets file not found"
 
@@ -147,7 +155,11 @@ def presets():
         fullPath = 'diff_presets/{}.json'.format(saveFile)
         if os.path.isfile(fullPath):
             # load it
-            oldParams = PresetLoader.factory(fullPath).params
+            try:
+                oldParams = PresetLoader.factory(fullPath).params
+            except Exception as e:
+                session.flash = "Error loading the preset"
+                redirect(URL(r=request, f='presets'))
 
             # check if password match
             if 'password' in oldParams and passwordSHA256 == oldParams['password']:
@@ -262,12 +274,12 @@ def prepareResult():
         result = session.solver['result']
 
         if session.solver['result']['difficulty'] == -1:
-            result['resultText'] = "The rom \"{}\" of type \"{}\" is not finishable with the known technics".format(session.solver['result']['randomizedRom'], session.solver['result']['romType'])
+            result['resultText'] = "The ROM \"{}\" is not finishable with the known technics".format(session.solver['result']['randomizedRom'])
         else:
             if session.solver['result']['itemsOk'] is False:
-                result['resultText'] = "The rom \"{}\" of type \"{}\" is finishable but not all the requested items can be picked up with the known technics. Estimated difficulty is: ".format(session.solver['result']['randomizedRom'], session.solver['result']['romType'])
+                result['resultText'] = "The ROM \"{}\" is finishable but not all the requested items can be picked up with the known technics. Estimated difficulty is: ".format(session.solver['result']['randomizedRom'])
             else:
-                result['resultText'] = "The rom \"{}\" of type \"{}\" estimated difficulty is: ".format(session.solver['result']['randomizedRom'], session.solver['result']['romType'])
+                result['resultText'] = "The ROM \"{}\" estimated difficulty is: ".format(session.solver['result']['randomizedRom'])
 
         # add generated path (spoiler !)
         lastAP = None
@@ -848,7 +860,13 @@ def randomizerWebService():
         params.append('--area')
 
     # load content of preset to get controller mapping
-    controlMapping = PresetLoader.factory(presetFileName).params['Controller']
+    try:
+        controlMapping = PresetLoader.factory(presetFileName).params['Controller']
+    except Exception as e:
+        os.remove(jsonFileName)
+        os.remove(presetFileName)
+        raise HTTP(400, json.dumps("randomizerWebService: can't load the preset"))
+
     (custom, controlParam) = getCustomMapping(controlMapping)
     if custom == True:
         params += ['--controls', controlParam]
@@ -889,7 +907,10 @@ def presetWebService():
     # check that the presets file exists
     if os.path.isfile(fullPath):
         # load it
-        params = PresetLoader.factory(fullPath).params
+        try:
+            params = PresetLoader.factory(fullPath).params
+        except Exception as e:
+            raise HTTP(400, "Can't load the preset")
         params = json.dumps(params)
         return params
     else:

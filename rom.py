@@ -150,14 +150,14 @@ class RomReader:
     }
 
     patches = {
-        'startCeres': {'address': 0x5A593, 'value': 0x2F},
-        'startLS': {'address': 0x16EDA, 'value': 0x1F},
-        'layout': {'address': 0x21BD80, 'value': 0xD5},
-        'casual': {'address': 0x22E879, 'value': 0xF8},
-        'gravityNoHeatProtection': {'address': 0x06e37d, 'value': 0x01},
-        'variaTweaks': {'address': 0x7CC4D, 'value': 0x37},
-        'area': {'address': 0x22D564, 'value': 0xF2},
-        'areaLayout': {'address': 0x252FA7, 'value': 0xF8}
+        'startCeres': {'address': 0x5A593, 'value': 0x2F, 'desc': "Blue Brinstar and Red Tower blue doors"},
+        'startLS': {'address': 0x16EDA, 'value': 0x1F, 'desc': "Blue Brinstar and Red Tower blue doors"},
+        'layout': {'address': 0x21BD80, 'value': 0xD5, 'desc': "Anti soft lock layout modifications"},
+        'casual': {'address': 0x22E879, 'value': 0xF8, 'desc': "Switch Blue Brinstar Etank and missile"},
+        'gravityNoHeatProtection': {'address': 0x06e37d, 'value': 0x01, 'desc': "Gravity suit heat protection removed"},
+        'variaTweaks': {'address': 0x7CC4D, 'value': 0x37, 'desc': "VARIA tweaks"},
+        'area': {'address': 0x22D564, 'value': 0xF2, 'desc': "Area layout modifications"},
+        'areaLayout': {'address': 0x252FA7, 'value': 0xF8, 'desc': "Area layout additional modifications"}
     }
 
     def __init__(self, romFile):
@@ -289,9 +289,10 @@ class RomReader:
 
     def getPatches(self):
         # for display in the solver
-        result = {}
+        result = []
         for patch in self.patches:
-            result[patch] = self.patchPresent(patch)
+            if self.patchPresent(patch) == True:
+                result.append(self.patches[patch]['desc'])
         return result
 
     def getDict(self):

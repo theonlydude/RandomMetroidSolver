@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import os, json, random, sys
+import os, json, random
 from parameters import Knows, Settings, Controller, isKnows, isSettings, isButton
 from smbool import SMBool
 
@@ -24,13 +24,11 @@ class PresetLoader(object):
             if ext[1].lower() == '.json':
                 return PresetLoaderJson(params)
             else:
-                print("wrong parameters file type: {}".format(ext[1]))
-                sys.exit(-1)
+                raise Exception("PresetLoader: wrong parameters file type: {}".format(ext[1]))
         elif type(params) is dict:
             return PresetLoaderDict(params)
         else:
-            print("wrong parameters input, is neither a string nor a json file name: {}".format(params))
-            sys.exit(-1)
+            raise Exception("wrong parameters input, is neither a string nor a json file name: {}".format(params))
 
     def __init__(self):
         if 'Knows' not in self.params:

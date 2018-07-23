@@ -111,6 +111,7 @@ def presets():
     try:
         params = loadPreset()
     except Exception as e:
+        session.presets['preset'] = 'regular'
         session.flash = "Error loading the preset"
         redirect(URL(r=request, f='presets'))
 

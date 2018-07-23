@@ -112,7 +112,7 @@ def presets():
         params = loadPreset()
     except Exception as e:
         session.presets['preset'] = 'regular'
-        session.flash = "Error loading the preset"
+        session.flash = "Error loading the preset: {}".format(e)
         redirect(URL(r=request, f='presets'))
 
     # load presets list
@@ -135,12 +135,11 @@ def presets():
                 params = PresetLoader.factory(fullPath).params
                 session.presets['preset'] = presetName
                 session.presets["presetDict"] = None
-                redirect(URL(r=request, f='presets'))
             except Exception as e:
-                session.flash = "Error loading the preset"
-                redirect(URL(r=request, f='presets'))
+                session.flash = "Error loading the preset {}: {}".format(presetName, e)
         else:
             session.flash = "Presets file not found"
+        redirect(URL(r=request, f='presets'))
 
     elif request.vars.action in ['Update', 'Create']:
         # update or creation ?
@@ -159,7 +158,7 @@ def presets():
             try:
                 oldParams = PresetLoader.factory(fullPath).params
             except Exception as e:
-                session.flash = "Error loading the preset"
+                session.flash = "Error loading the preset {}: {}".format(saveFile, e)
                 redirect(URL(r=request, f='presets'))
 
             # check if password match

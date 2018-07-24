@@ -100,29 +100,45 @@ class Solver:
     def solveRom(self):
         self.lastLoc = 'Landing Site'
 
-        (difficulty, itemsOk) = self.computeDifficulty()
+        (self.difficulty, self.itemsOk) = self.computeDifficulty()
         if self.firstLogFile is not None:
             self.firstLogFile.close()
 
-        if self.type == 'console':
-            # print generated path
-            if Conf.displayGeneratedPath == True:
-                self.printPath("Generated path:", self.visitedLocations)
-                # if we've aborted, display remaining majors
-                if difficulty == -1:
-                    self.printPath("Next locs which could have been available if more techniques were known:", self.tryRemainingLocs(self.majorLocations + self.minorLocations))
-                if difficulty == -1 or itemsOk == False:
-                    remainMajors = [loc for loc in self.majorLocations if loc['difficulty'].bool == False and loc['itemName'] not in ['Nothing', 'NoEnergy']]
-                    if len(remainMajors) > 0:
-                        self.printPath("Remaining major locations:", remainMajors)
-                    remainMinors = [loc for loc in self.minorLocations if loc['difficulty'].bool == False and loc['itemName'] not in ['Nothing', 'NoEnergy']]
-                    if len(remainMinors) > 0:
-                        self.printPath("Remaining minor locations:", remainMinors)
+        return (self.difficulty, self.itemsOk)
 
-            # display difficulty scale
-            self.displayDifficulty(difficulty)
+    def displayOutput(self):
+        # print generated path
+        if Conf.displayGeneratedPath == True:
+            self.printPath("Generated path ({}/101):".format(len(self.visitedLocations)), self.visitedLocations)
 
-        return (difficulty, itemsOk)
+            # if we've aborted, display missing techniques and remaining locations
+            if self.difficulty == -1:
+                self.printPath("Next locs which could have been available if more techniques were known:", self.tryRemainingLocs(self.majorLocations + self.minorLocations))
+
+                remainMajors = [loc for loc in self.majorLocations if loc['difficulty'].bool == False and loc['itemName'] not in ['Nothing', 'NoEnergy']]
+                if len(remainMajors) > 0:
+                    self.printPath("Remaining major locations:", remainMajors, displayAPs=False)
+
+                remainMinors = [loc for loc in self.minorLocations if loc['difficulty'].bool == False and loc['itemName'] not in ['Nothing', 'NoEnergy']]
+                if len(remainMinors) > 0:
+                    self.printPath("Remaining minor locations:", remainMinors, displayAPs=False)
+
+            else:
+                # if some locs are not picked up display those which are available and those which are not
+                skippedMajors = [loc for loc in self.majorLocations if loc['difficulty'].bool == True and loc['itemName'] not in ['Nothing', 'NoEnergy']]
+                if len(skippedMajors) > 0:
+                    self.printPath("Skipped major locations:", skippedMajors, displayAPs=False)
+                else:
+                    print("No skipped major locations")
+
+                unavailMajors = [loc for loc in self.majorLocations if loc['difficulty'].bool == False and loc['itemName'] not in ['Nothing', 'NoEnergy']]
+                if len(unavailMajors) > 0:
+                    self.printPath("Unaccessible major locations:", unavailMajors, displayAPs=False)
+                else:
+                    print("No unaccessible major locations")
+
+        # display difficulty scale
+        self.displayDifficulty(self.difficulty)
 
     def displayDifficulty(self, difficulty):
         if difficulty >= 0:
@@ -367,14 +383,14 @@ class Solver:
 
         return (knowsUsed, knowsKnown)
 
-    def printPath(self, message, locations):
+    def printPath(self, message, locations, displayAPs=True):
         print("")
         print(message)
         print('{:>50} {:>12} {:>34} {:>8} {:>16} {:>14} {} {}'.format("Location Name", "Area", "Sub Area", "Distance", "Item", "Difficulty", "Knows used", "Items used"))
         print('-'*150)
         lastAP = None
         for loc in locations:
-            if 'path' in loc:
+            if displayAPs == True and 'path' in loc:
                 path = [ap.Name for ap in loc['path']]
                 lastAP = path[-1]
                 if not (len(path) == 1 and path[0] == lastAP):
@@ -595,7 +611,7 @@ if __name__ == "__main__":
                         help="the difficulty target that the solver will aim for",
                         dest='difficultyTarget', nargs='?', default=None, type=int)
     parser.add_argument('--pickupStrategy', '-s', help="Pickup strategy for the Solver",
-                        dest='pickupStrategy', nargs='?', default=None)
+                        dest='pickupStrategy', nargs='?', default=None, choices=['minimal', 'all', 'any'])
     parser.add_argument('--itemsForbidden', '-f', help="Item not picked up during solving",
                         dest='itemsForbidden', nargs='+', default=[], action='append')
 
@@ -637,8 +653,11 @@ if __name__ == "__main__":
     (used, total) = solver.getKnowsUsed()
 
     if args.output is None:
+        solver.displayOutput()
+
         print("({}, {}): diff : {}".format(difficulty, itemsOk, args.romFileName))
         print("{}/{}: knows Used : {}".format(used, total, args.romFileName))
+
         if difficulty >= 0:
             sys.exit(0)
         else:

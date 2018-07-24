@@ -38,6 +38,10 @@ function changeTab(evt, tabName) {
     // Show the current tab, and add an "active" class to the button that opened the tab
     document.getElementById(tabName).style.display = "block";
     evt.currentTarget.className += " active";
+
+    // store current tab
+    var curTab = document.getElementById("currenttab");
+    curTab.value = tabName;
 }
 
 function askPassword() {
@@ -66,8 +70,20 @@ function toggleSelect(elem)
 }
 
 window.onload = function(){
+{{
+if "currentTab" in session.presets:
+}}
+  var tab = document.getElementsByName("{{=session.presets['currentTab']}}")[0];
+  tab.click();
+{{
+else:
+}}
   // Get the element with id="defaultOpen" and click on it
   document.getElementById("defaultOpen").click();
+  document.getElementsByClassName("currenttab").value = "Global";
+{{
+  pass
+}}
 
 {{
   for category in categories["Common"] + categories["Crateria/Brinstar"] + categories["Wrecked Ship"] + categories["Maridia 1/2"] + categories["Maridia 2/2"] + categories["Lower Norfair"] + categories["Bosses/End"]:
@@ -267,18 +283,19 @@ pass
     </tr>
   </table>
   <input id="password" name="password" style="display:none" type="text"/>
+  <input id="currenttab" name="currenttab" style="display:none" type="text"/>
 </form>
 
 <div class="tab">
-  <button class="tablinks" onclick="changeTab(event, 'Global')" id="defaultOpen" >Global</button>
-  <button class="tablinks" onclick="changeTab(event, 'Techniques1')">Common</button>
-  <button class="tablinks" onclick="changeTab(event, 'Techniques2')">Crateria/Brinstar</button>
-  <button class="tablinks" onclick="changeTab(event, 'Techniques3')">Wrecked Ship</button>
-  <button class="tablinks" onclick="changeTab(event, 'Techniques4')">Maridia 1/2</button>
-  <button class="tablinks" onclick="changeTab(event, 'Techniques5')">Maridia 2/2</button>
-  <button class="tablinks" onclick="changeTab(event, 'Techniques6')">Lower Norfair</button>
-  <button class="tablinks" onclick="changeTab(event, 'Techniques7')">Bosses/End</button>
-  <button class="tablinks" onclick="changeTab(event, 'Mapping')">Gamepad Mapping</button>
+  <button class="tablinks" onclick="changeTab(event, 'Global')" id="defaultOpen" name="Global">Global</button>
+  <button class="tablinks" onclick="changeTab(event, 'Techniques1')" name="Techniques1">Common</button>
+  <button class="tablinks" onclick="changeTab(event, 'Techniques2')" name="Techniques2">Crateria/Brinstar</button>
+  <button class="tablinks" onclick="changeTab(event, 'Techniques3')" name="Techniques3">Wrecked Ship</button>
+  <button class="tablinks" onclick="changeTab(event, 'Techniques4')" name="Techniques4">Maridia 1/2</button>
+  <button class="tablinks" onclick="changeTab(event, 'Techniques5')" name="Techniques5">Maridia 2/2</button>
+  <button class="tablinks" onclick="changeTab(event, 'Techniques6')" name="Techniques6">Lower Norfair</button>
+  <button class="tablinks" onclick="changeTab(event, 'Techniques7')" name="Techniques7">Bosses/End</button>
+  <button class="tablinks" onclick="changeTab(event, 'Mapping')" name="Mapping">Gamepad Mapping</button>
 </div>
 
 <div id="Global" class="tabcontent"><br/>

@@ -95,6 +95,9 @@ def validatePresetsParams(action):
                         return (False, "Action {} set for two buttons: {} and {}".format(value, button, map[value]))
                     map[value] = button
 
+    if request.vars.currenttab not in ['Global', 'Techniques1', 'Techniques2', 'Techniques3', 'Techniques4', 'Techniques5', 'Techniques6', 'Techniques7', 'Mapping']:
+        return (False, "Wrong value for current tab: [{}]".format(request.vars.currenttab))
+
     return (True, None)
 
 def initPresetsSession():
@@ -103,6 +106,7 @@ def initPresetsSession():
 
         session.presets['preset'] = 'regular'
         session.presets['presetDict'] = None
+        session.presets['currentTab'] = 'Global'
 
 def presets():
     initPresetsSession()
@@ -111,7 +115,8 @@ def presets():
     try:
         params = loadPreset()
     except Exception as e:
-        session.flash = "Error loading the preset"
+        session.presets['preset'] = 'regular'
+        session.flash = "Error loading the preset: {}".format(e)
         redirect(URL(r=request, f='presets'))
 
     # load presets list
@@ -122,6 +127,8 @@ def presets():
         if not ok:
             session.flash = msg
             redirect(URL(r=request, f='presets'))
+        else:
+            session.presets['currentTab'] = request.vars.currenttab
 
     # in web2py.js, in disableElement, remove 'working...' to have action with correct value
     if request.vars.action == 'Load':
@@ -134,12 +141,11 @@ def presets():
                 params = PresetLoader.factory(fullPath).params
                 session.presets['preset'] = presetName
                 session.presets["presetDict"] = None
-                redirect(URL(r=request, f='presets'))
             except Exception as e:
-                session.flash = "Error loading the preset"
-                redirect(URL(r=request, f='presets'))
+                session.flash = "Error loading the preset {}: {}".format(presetName, e)
         else:
             session.flash = "Presets file not found"
+        redirect(URL(r=request, f='presets'))
 
     elif request.vars.action in ['Update', 'Create']:
         # update or creation ?
@@ -158,7 +164,7 @@ def presets():
             try:
                 oldParams = PresetLoader.factory(fullPath).params
             except Exception as e:
-                session.flash = "Error loading the preset"
+                session.flash = "Error loading the preset {}: {}".format(saveFile, e)
                 redirect(URL(r=request, f='presets'))
 
             # check if password match
@@ -269,6 +275,35 @@ def getLastSolvedROM():
     else:
         return None
 
+def genPathTable(locations, displayAPs=True):
+    if locations is None or len(locations) == 0:
+        return None
+
+    lastAP = None
+    pathTable = TABLE(TR(TH("Location Name"), TH("Area"), TH("SubArea"), TH("Item"),
+                         TH("Difficulty"), TH("Techniques used"), TH("Items used")),
+                      _class="full")
+    for location, area, subarea, item, diff, techniques, items, path in locations:
+        if path is not None:
+            lastAP = path[-1]
+            if displayAPs == True and not (len(path) == 1 and path[0] == lastAP):
+                pathTable.append(TR(TD("Path"),
+                                    TD(" -> ".join(path), _colspan="6"),
+                                    _class="grey"))
+
+        # not picked up items start with an '-'
+        if item[0] != '-':
+            pathTable.append(TR(A(location[0],
+                                  _href="https://wiki.supermetroid.run/{}".format(location[1].replace(' ', '_').replace("'", '%27'))),
+                                  area, subarea, item, diff, techniques, items))
+        else:
+            pathTable.append(TR(A(location[0],
+                                  _href="https://wiki.supermetroid.run/{}".format(location[1].replace(' ', '_').replace("'", '%27'))),
+                                area, subarea, DIV(item, _class='linethrough'),
+                                diff, techniques, items))
+
+    return pathTable
+
 def prepareResult():
     if session.solver['result'] is not None:
         result = session.solver['result']
@@ -282,30 +317,12 @@ def prepareResult():
                 result['resultText'] = "The ROM \"{}\" estimated difficulty is: ".format(session.solver['result']['randomizedRom'])
 
         # add generated path (spoiler !)
-        lastAP = None
-        pathTable = TABLE(TR(TH("Location Name"), TH("Area"), TH("SubArea"), TH("Item"),
-                             TH("Difficulty"), TH("Techniques used"), TH("Items used")),
-                          _class="full")
-        for location, area, subarea, item, diff, techniques, items, path in session.solver['result']['generatedPath']:
-            if path is not None:
-                lastAP = path[-1]
-                if not (len(path) == 1 and path[0] == lastAP):
-                    pathTable.append(TR(TD("Path"),
-                                        TD(" -> ".join(path), _colspan="6"),
-                                        _class="grey"))
-
-            # not picked up items start with an '-'
-            if item[0] != '-':
-                pathTable.append(TR(A(location[0],
-                                      _href="https://wiki.supermetroid.run/{}".format(location[1].replace(' ', '_').replace("'", '%27'))),
-                                      area, subarea, item, diff, techniques, items))
-            else:
-                pathTable.append(TR(A(location[0],
-                                      _href="https://wiki.supermetroid.run/{}".format(location[1].replace(' ', '_').replace("'", '%27'))),
-                                    area, subarea, DIV(item, _class='linethrough'),
-                                    diff, techniques, items))
-
-        result['pathTable'] = pathTable
+        result['pathTable'] = genPathTable(session.solver['result']['generatedPath'])
+        result['pathremainTry'] = genPathTable(session.solver['result']['remainTry'])
+        result['pathremainMajors'] = genPathTable(session.solver['result']['remainMajors'], False)
+        result['pathremainMinors'] = genPathTable(session.solver['result']['remainMinors'], False)
+        result['pathskippedMajors'] = genPathTable(session.solver['result']['skippedMajors'], False)
+        result['pathunavailMajors'] = genPathTable(session.solver['result']['unavailMajors'], False)
 
         # display the result only once
         session.solver['result'] = None

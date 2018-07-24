@@ -100,23 +100,61 @@ class Solver:
     def solveRom(self):
         self.lastLoc = 'Landing Site'
 
-        (difficulty, itemsOk) = self.computeDifficulty()
+        (self.difficulty, self.itemsOk) = self.computeDifficulty()
         if self.firstLogFile is not None:
             self.firstLogFile.close()
 
-        if self.type == 'console':
-            # print generated path
-            if Conf.displayGeneratedPath == True:
-                self.printPath("Generated path:", self.visitedLocations)
-                # if we've aborted, display remaining majors
-                if difficulty == -1 or itemsOk == False:
-                    self.printPath("Remaining major locations:", self.majorLocations)
-                    self.printPath("Remaining minor locations:", self.minorLocations)
+        return (self.difficulty, self.itemsOk)
 
-            # display difficulty scale
-            self.displayDifficulty(difficulty)
+    def getRemainMajors(self):
+        return [loc for loc in self.majorLocations if loc['difficulty'].bool == False and loc['itemName'] not in ['Nothing', 'NoEnergy']]
 
-        return (difficulty, itemsOk)
+    def getRemainMinors(self):
+        if self.fullRando == True:
+            return None
+        else:
+            return [loc for loc in self.minorLocations if loc['difficulty'].bool == False and loc['itemName'] not in ['Nothing', 'NoEnergy']]
+
+    def getSkippedMajors(self):
+        return [loc for loc in self.majorLocations if loc['difficulty'].bool == True and loc['itemName'] not in ['Nothing', 'NoEnergy']]
+
+    def getUnavailMajors(self):
+        return [loc for loc in self.majorLocations if loc['difficulty'].bool == False and loc['itemName'] not in ['Nothing', 'NoEnergy']]
+
+    def displayOutput(self):
+        # print generated path
+        if Conf.displayGeneratedPath == True:
+            self.printPath("Generated path ({}/101):".format(len(self.visitedLocations)), self.visitedLocations)
+
+            # if we've aborted, display missing techniques and remaining locations
+            if self.difficulty == -1:
+                self.printPath("Next locs which could have been available if more techniques were known:", self.tryRemainingLocs())
+
+                remainMajors = self.getRemainMajors()
+                if len(remainMajors) > 0:
+                    self.printPath("Remaining major locations:", remainMajors, displayAPs=False)
+
+                remainMinors = self.getRemainMinors()
+                if remainMinors is not None and len(remainMinors) > 0:
+                    self.printPath("Remaining minor locations:", remainMinors, displayAPs=False)
+
+            else:
+                # if some locs are not picked up display those which are available
+                # and those which are not
+                skippedMajors = self.getSkippedMajors()
+                if len(skippedMajors) > 0:
+                    self.printPath("Skipped major locations:", skippedMajors, displayAPs=False)
+                else:
+                    print("No skipped major locations")
+
+                unavailMajors = self.getUnavailMajors()
+                if len(unavailMajors) > 0:
+                    self.printPath("Unaccessible major locations:", unavailMajors, displayAPs=False)
+                else:
+                    print("No unaccessible major locations")
+
+        # display difficulty scale
+        self.displayDifficulty(self.difficulty)
 
     def displayDifficulty(self, difficulty):
         if difficulty >= 0:
@@ -337,6 +375,9 @@ class Solver:
                 return (difficulty, False)
 
     def getPath(self, locations):
+        if locations is None:
+            return None
+
         out = []
         for loc in locations:
             out.append([(loc['Name'], loc['Room']), loc['Area'], loc['SolveArea'], loc['itemName'],
@@ -361,13 +402,14 @@ class Solver:
 
         return (knowsUsed, knowsKnown)
 
-    def printPath(self, message, locations):
+    def printPath(self, message, locations, displayAPs=True):
+        print("")
         print(message)
         print('{:>50} {:>12} {:>34} {:>8} {:>16} {:>14} {} {}'.format("Location Name", "Area", "Sub Area", "Distance", "Item", "Difficulty", "Knows used", "Items used"))
         print('-'*150)
         lastAP = None
         for loc in locations:
-            if 'path' in loc:
+            if displayAPs == True and 'path' in loc:
                 path = [ap.Name for ap in loc['path']]
                 lastAP = path[-1]
                 if not (len(path) == 1 and path[0] == lastAP):
@@ -381,6 +423,20 @@ class Solver:
                                                                            round(loc['difficulty'].difficulty, 2) if 'difficulty' in loc else 'nc',
                                                                            sorted(loc['difficulty'].knows) if 'difficulty' in loc else 'nc',
                                                                            list(set(loc['difficulty'].items)) if 'difficulty' in loc else 'nc'))
+
+    def tryRemainingLocs(self):
+        # use preset which knows every techniques to test the remaining locs to
+        # find which technique could allow to continue the seed
+        locations = self.majorLocations if self.fullRando == True else self.majorLocations + self.minorLocations
+
+        presetFileName = 'diff_presets/master.json'
+        presetLoader = PresetLoader.factory(presetFileName)
+        presetLoader.load()
+        self.smbm.createKnowsFunctions()
+
+        self.areaGraph.getAvailableLocations(locations, self.smbm, infinity, self.lastLoc)
+
+        return [loc for loc in locations if loc['difficulty'].bool == True]
 
     def collectMajor(self, loc):
         self.majorLocations.remove(loc)
@@ -576,7 +632,7 @@ if __name__ == "__main__":
                         help="the difficulty target that the solver will aim for",
                         dest='difficultyTarget', nargs='?', default=None, type=int)
     parser.add_argument('--pickupStrategy', '-s', help="Pickup strategy for the Solver",
-                        dest='pickupStrategy', nargs='?', default=None)
+                        dest='pickupStrategy', nargs='?', default=None, choices=['minimal', 'all', 'any'])
     parser.add_argument('--itemsForbidden', '-f', help="Item not picked up during solving",
                         dest='itemsForbidden', nargs='+', default=[], action='append')
 
@@ -618,8 +674,11 @@ if __name__ == "__main__":
     (used, total) = solver.getKnowsUsed()
 
     if args.output is None:
+        solver.displayOutput()
+
         print("({}, {}): diff : {}".format(difficulty, itemsOk, args.romFileName))
         print("{}/{}: knows Used : {}".format(used, total, args.romFileName))
+
         if difficulty >= 0:
             sys.exit(0)
         else:
@@ -642,10 +701,25 @@ if __name__ == "__main__":
         generatedPath = solver.getPath(solver.visitedLocations)
         patches = solver.patches
 
+        if difficulty == -1:
+            remainTry = solver.getPath(solver.tryRemainingLocs())
+            remainMajors = solver.getPath(solver.getRemainMajors())
+            remainMinors = solver.getPath(solver.getRemainMinors())
+            skippedMajors = None
+            unavailMajors = None
+        else:
+            remainTry = None
+            remainMajors = None
+            remainMinors = None
+            skippedMajors = solver.getPath(solver.getSkippedMajors())
+            unavailMajors = solver.getPath(solver.getUnavailMajors())
+
         result = dict(randomizedRom=randomizedRom, difficulty=difficulty,
                       generatedPath=generatedPath, diffPercent=diffPercent,
                       knowsUsed=(used, total), itemsOk=itemsOk, patches=patches,
-                      pngFileName=pngFileName, pngThumbFileName=pngThumbFileName)
+                      pngFileName=pngFileName, pngThumbFileName=pngThumbFileName,
+                      remainTry=remainTry, remainMajors=remainMajors, remainMinors=remainMinors,
+                      skippedMajors=skippedMajors, unavailMajors=unavailMajors)
 
         with open(args.output, 'w') as jsonFile:
             json.dump(result, jsonFile)

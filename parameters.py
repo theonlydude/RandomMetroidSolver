@@ -535,6 +535,7 @@ class Settings:
             'Default' : {
                 'Rate' : 0.015,
                 'Energy' : {
+                    0.5 : samus,
                     1 : mania,
                     2 : hardcore,
                     4 : harder,
@@ -579,6 +580,7 @@ class Settings:
             'Default' : {
                 'Rate' : 0.05,
                 'Energy' : {
+                    0.5 : samus,
                     1 : mania,
                     6 : hardcore,
                     8 : harder,
@@ -624,6 +626,7 @@ class Settings:
             'Default' : {
                 'Rate' : 0.12,
                 'Energy' : {
+                    0.5 : samus,
                     1 : mania,
                     6 : hardcore,
                     8 : harder,
@@ -720,19 +723,22 @@ class Settings:
             # you don't mind doing hell runs at all
             'Bring the heat' : [(2, hard), (3, medium)],
             # RBO runner
-            'I run RBO' : [(2, medium), (3, easy)]
+            'I run RBO' : [(2, medium), (3, easy)],
+            'Solution' : [(2, hardcore), (3, harder), (4, hard), (5, medium)],
         },
         'MainUpperNorfair' : {
             'No thanks' : None,
             'Gimme energy' : [(5, mania), (6, hardcore), (8, harder), (10, hard), (14, medium)],
             'Default' : [(4, mania), (5, hardcore), (6, hard), (9, medium)],
             'Bring the heat' : [(3, hardcore), (4, hard), (5, medium), (7, easy)],
-            'I run RBO' : [(3, harder), (4, hard), (5, medium), (6, easy)]
+            'I run RBO' : [(3, harder), (4, hard), (5, medium), (6, easy)],
+            'Solution' : [(3, samus), (4, mania), (5, hardcore), (6, hard), (9, medium)]
         },
         'LowerNorfair' : {
             'Default' : None,
             'Bring the heat' : [(9, mania), (12, hardcore), (14, harder), (18, hard)],
-            'I run RBO' : [(7, mania), (9, hardcore), (11, harder), (14, hard), (18, medium)]
+            'I run RBO' : [(7, mania), (9, hardcore), (11, harder), (14, hard), (18, medium)],
+            'Solution' : [(7, impossibru), (18, mania)]
         }
     }
 
@@ -751,6 +757,7 @@ class Settings:
             'Default' : [(6, hard), (8, medium), (10, easy)],
             "I don't mind spikes" : [(4, hard), (6, medium), (8, easy)],
             'D-Boost master': [(1, hardcore), (2, harder), (3, hard), (4, medium), (6, easy)],
+            'Solution' : [(1, samus), (4, mania), (6, hard), (8, medium), (10, easy)],
         },
         'Gauntlet' : {
             'Aarghh' : [(5, hard), (10, medium)],

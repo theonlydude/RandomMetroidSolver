@@ -465,6 +465,9 @@ class RomPatcher:
     # not just morph ball
     def patchMorphBallEye(self, item):
 #        print('Eye item = ' + item['Type'])
+        # consider Nothing as missile, because if it is at morph ball it will actually be a missile
+        isAmmo = item['Category'] == 'Ammo' or item['Category'] == 'Nothing'
+        isMissile = item['Type'] == 'Missile' or item['Category'] == 'Nothing'
         # category to check
         if Items.isBeam(item):
             cat = 0xA8 # collected beams
@@ -472,7 +475,7 @@ class RomPatcher:
             cat = 0xC4 # max health
         elif item['Type'] == 'Reserve':
             cat = 0xD4 # max reserves
-        elif item['Type'] == 'Missile':
+        elif isMissile:
             cat = 0xC8 # max missiles
         elif item['Type'] == 'Super':
             cat = 0xCC # max supers
@@ -482,7 +485,7 @@ class RomPatcher:
             cat = 0xA4 # collected items
         # comparison/branch instruction
         # the branch is taken if we did NOT collect item yet
-        if item['Category'] == 'Energy' or item['Category'] == 'Ammo':
+        if item['Category'] == 'Energy' or isAmmo:
             comp = 0xC9 # CMP (immediate)
             branch = 0x30 # BMI
         else:
@@ -491,7 +494,7 @@ class RomPatcher:
         # what to compare to
         if item['Type'] == 'ETank':
             operand = 0x65 # < 100
-        elif item['Type'] == 'Reserve' or item['Category'] == 'Ammo':
+        elif item['Type'] == 'Reserve' or isAmmo:
             operand = 0x1 # < 1
         elif Items.isBeam(item):
             operand = Items.BeamBits[item['Type']]

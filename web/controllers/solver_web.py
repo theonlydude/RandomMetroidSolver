@@ -275,6 +275,35 @@ def getLastSolvedROM():
     else:
         return None
 
+def genPathTable(locations, displayAPs=True):
+    if locations is None or len(locations) == 0:
+        return None
+
+    lastAP = None
+    pathTable = TABLE(TR(TH("Location Name"), TH("Area"), TH("SubArea"), TH("Item"),
+                         TH("Difficulty"), TH("Techniques used"), TH("Items used")),
+                      _class="full")
+    for location, area, subarea, item, diff, techniques, items, path in locations:
+        if path is not None:
+            lastAP = path[-1]
+            if displayAPs == True and not (len(path) == 1 and path[0] == lastAP):
+                pathTable.append(TR(TD("Path"),
+                                    TD(" -> ".join(path), _colspan="6"),
+                                    _class="grey"))
+
+        # not picked up items start with an '-'
+        if item[0] != '-':
+            pathTable.append(TR(A(location[0],
+                                  _href="https://wiki.supermetroid.run/{}".format(location[1].replace(' ', '_').replace("'", '%27'))),
+                                  area, subarea, item, diff, techniques, items))
+        else:
+            pathTable.append(TR(A(location[0],
+                                  _href="https://wiki.supermetroid.run/{}".format(location[1].replace(' ', '_').replace("'", '%27'))),
+                                area, subarea, DIV(item, _class='linethrough'),
+                                diff, techniques, items))
+
+    return pathTable
+
 def prepareResult():
     if session.solver['result'] is not None:
         result = session.solver['result']
@@ -288,30 +317,12 @@ def prepareResult():
                 result['resultText'] = "The ROM \"{}\" estimated difficulty is: ".format(session.solver['result']['randomizedRom'])
 
         # add generated path (spoiler !)
-        lastAP = None
-        pathTable = TABLE(TR(TH("Location Name"), TH("Area"), TH("SubArea"), TH("Item"),
-                             TH("Difficulty"), TH("Techniques used"), TH("Items used")),
-                          _class="full")
-        for location, area, subarea, item, diff, techniques, items, path in session.solver['result']['generatedPath']:
-            if path is not None:
-                lastAP = path[-1]
-                if not (len(path) == 1 and path[0] == lastAP):
-                    pathTable.append(TR(TD("Path"),
-                                        TD(" -> ".join(path), _colspan="6"),
-                                        _class="grey"))
-
-            # not picked up items start with an '-'
-            if item[0] != '-':
-                pathTable.append(TR(A(location[0],
-                                      _href="https://wiki.supermetroid.run/{}".format(location[1].replace(' ', '_').replace("'", '%27'))),
-                                      area, subarea, item, diff, techniques, items))
-            else:
-                pathTable.append(TR(A(location[0],
-                                      _href="https://wiki.supermetroid.run/{}".format(location[1].replace(' ', '_').replace("'", '%27'))),
-                                    area, subarea, DIV(item, _class='linethrough'),
-                                    diff, techniques, items))
-
-        result['pathTable'] = pathTable
+        result['pathTable'] = genPathTable(session.solver['result']['generatedPath'])
+        result['pathremainTry'] = genPathTable(session.solver['result']['remainTry'])
+        result['pathremainMajors'] = genPathTable(session.solver['result']['remainMajors'], False)
+        result['pathremainMinors'] = genPathTable(session.solver['result']['remainMinors'], False)
+        result['pathskippedMajors'] = genPathTable(session.solver['result']['skippedMajors'], False)
+        result['pathunavailMajors'] = genPathTable(session.solver['result']['unavailMajors'], False)
 
         # display the result only once
         session.solver['result'] = None

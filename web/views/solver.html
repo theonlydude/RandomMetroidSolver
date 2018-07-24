@@ -450,13 +450,64 @@ if result is not None:
   Display the generated path (spoilers)
 
   <div id="path_div" style="display:none;">
-  <hr>
+  <br/>
   {{=result["pathTable"]}}
+
+{{
+  if result["difficulty"] == -1:
+}}
+    <br/>
+    <h4>Next locs which could have been available if more techniques were known</h4>
+    {{=result["pathremainTry"]}}
+
+{{
+    if result["pathremainMajors"] is not None and len(result["pathremainMajors"]) > 0:
+}}
+      <br/>
+      <h4>Remaining major locations</h4>
+      {{=result["pathremainMajors"]}}
+{{
+      pass
+}}
+
+{{
+    if result["pathremainMinors"] is not None and len(result["pathremainMinors"]) > 0:
+}}
+      <br/>
+      <h4>Remaining minor locations</h4>
+      {{=result["pathremainMinors"]}}
+{{
+      pass
+}}
+
+{{
+  else:
+    if result["pathskippedMajors"] is not None and len(result["pathskippedMajors"]) > 0:
+}}
+      <br/>
+      <h4>Skipped major locations</h4>
+      {{=result["pathskippedMajors"]}}
+{{
+      pass
+}}
+{{
+    if result["pathunavailMajors"] is not None and len(result["pathunavailMajors"]) > 0:
+}}
+      <br/>
+      <h4>Unaccessible major locations</h4>
+      {{=result["pathunavailMajors"]}}
+{{
+      pass
+}}
+
+{{
+    pass
+}}
 
 {{
   if result["pngFileName"] is not None and result["pngThumbFileName"] is not None:
 }}
-    <p>The graph of the Areas transitions</p>
+    <h4>The graph of the Areas transitions</h4>
     <a href="/solver/static/graph/{{=result["pngFileName"]}}" class="highslide" onclick="return hs.expand(this, {wrapperClassName: 'borderless', dimmingOpacity: 0.75, align: 'center'})"><img id="transitionsthumb" src="/solver/static/graph/{{=result["pngThumbFileName"]}}" alt="Transitions Graph" title="Click to enlarge"/></a>
 {{
     pass

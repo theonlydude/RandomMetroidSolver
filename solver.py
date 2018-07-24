@@ -106,6 +106,21 @@ class Solver:
 
         return (self.difficulty, self.itemsOk)
 
+    def getRemainMajors(self):
+        return [loc for loc in self.majorLocations if loc['difficulty'].bool == False and loc['itemName'] not in ['Nothing', 'NoEnergy']]
+
+    def getRemainMinors(self):
+        if self.fullRando == True:
+            return None
+        else:
+            return [loc for loc in self.minorLocations if loc['difficulty'].bool == False and loc['itemName'] not in ['Nothing', 'NoEnergy']]
+
+    def getSkippedMajors(self):
+        return [loc for loc in self.majorLocations if loc['difficulty'].bool == True and loc['itemName'] not in ['Nothing', 'NoEnergy']]
+
+    def getUnavailMajors(self):
+        return [loc for loc in self.majorLocations if loc['difficulty'].bool == False and loc['itemName'] not in ['Nothing', 'NoEnergy']]
+
     def displayOutput(self):
         # print generated path
         if Conf.displayGeneratedPath == True:
@@ -113,26 +128,26 @@ class Solver:
 
             # if we've aborted, display missing techniques and remaining locations
             if self.difficulty == -1:
-                self.printPath("Next locs which could have been available if more techniques were known:", self.tryRemainingLocs(self.majorLocations if self.fullRando == True else self.majorLocations + self.minorLocations))
+                self.printPath("Next locs which could have been available if more techniques were known:", self.tryRemainingLocs())
 
-                remainMajors = [loc for loc in self.majorLocations if loc['difficulty'].bool == False and loc['itemName'] not in ['Nothing', 'NoEnergy']]
+                remainMajors = self.getRemainMajors()
                 if len(remainMajors) > 0:
                     self.printPath("Remaining major locations:", remainMajors, displayAPs=False)
 
-                if self.fullRando == False:
-                    remainMinors = [loc for loc in self.minorLocations if loc['difficulty'].bool == False and loc['itemName'] not in ['Nothing', 'NoEnergy']]
-                    if len(remainMinors) > 0:
-                        self.printPath("Remaining minor locations:", remainMinors, displayAPs=False)
+                remainMinors = self.getRemainMinors()
+                if remainMinors is not None and len(remainMinors) > 0:
+                    self.printPath("Remaining minor locations:", remainMinors, displayAPs=False)
 
             else:
-                # if some locs are not picked up display those which are available and those which are not
-                skippedMajors = [loc for loc in self.majorLocations if loc['difficulty'].bool == True and loc['itemName'] not in ['Nothing', 'NoEnergy']]
+                # if some locs are not picked up display those which are available
+                # and those which are not
+                skippedMajors = self.getSkippedMajors()
                 if len(skippedMajors) > 0:
                     self.printPath("Skipped major locations:", skippedMajors, displayAPs=False)
                 else:
                     print("No skipped major locations")
 
-                unavailMajors = [loc for loc in self.majorLocations if loc['difficulty'].bool == False and loc['itemName'] not in ['Nothing', 'NoEnergy']]
+                unavailMajors = self.getUnavailMajors()
                 if len(unavailMajors) > 0:
                     self.printPath("Unaccessible major locations:", unavailMajors, displayAPs=False)
                 else:
@@ -360,6 +375,9 @@ class Solver:
                 return (difficulty, False)
 
     def getPath(self, locations):
+        if locations is None:
+            return None
+
         out = []
         for loc in locations:
             out.append([(loc['Name'], loc['Room']), loc['Area'], loc['SolveArea'], loc['itemName'],
@@ -406,9 +424,11 @@ class Solver:
                                                                            sorted(loc['difficulty'].knows) if 'difficulty' in loc else 'nc',
                                                                            list(set(loc['difficulty'].items)) if 'difficulty' in loc else 'nc'))
 
-    def tryRemainingLocs(self, locations):
+    def tryRemainingLocs(self):
         # use preset which knows every techniques to test the remaining locs to
         # find which technique could allow to continue the seed
+        locations = self.majorLocations if self.fullRando == True else self.majorLocations + self.minorLocations
+
         presetFileName = 'diff_presets/master.json'
         presetLoader = PresetLoader.factory(presetFileName)
         presetLoader.load()
@@ -681,10 +701,25 @@ if __name__ == "__main__":
         generatedPath = solver.getPath(solver.visitedLocations)
         patches = solver.patches
 
+        if difficulty == -1:
+            remainTry = solver.getPath(solver.tryRemainingLocs())
+            remainMajors = solver.getPath(solver.getRemainMajors())
+            remainMinors = solver.getPath(solver.getRemainMinors())
+            skippedMajors = None
+            unavailMajors = None
+        else:
+            remainTry = None
+            remainMajors = None
+            remainMinors = None
+            skippedMajors = solver.getPath(solver.getSkippedMajors())
+            unavailMajors = solver.getPath(solver.getUnavailMajors())
+
         result = dict(randomizedRom=randomizedRom, difficulty=difficulty,
                       generatedPath=generatedPath, diffPercent=diffPercent,
                       knowsUsed=(used, total), itemsOk=itemsOk, patches=patches,
-                      pngFileName=pngFileName, pngThumbFileName=pngThumbFileName)
+                      pngFileName=pngFileName, pngThumbFileName=pngThumbFileName,
+                      remainTry=remainTry, remainMajors=remainMajors, remainMinors=remainMinors,
+                      skippedMajors=skippedMajors, unavailMajors=unavailMajors)
 
         with open(args.output, 'w') as jsonFile:
             json.dump(result, jsonFile)

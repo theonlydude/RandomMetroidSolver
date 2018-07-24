@@ -113,15 +113,16 @@ class Solver:
 
             # if we've aborted, display missing techniques and remaining locations
             if self.difficulty == -1:
-                self.printPath("Next locs which could have been available if more techniques were known:", self.tryRemainingLocs(self.majorLocations + self.minorLocations))
+                self.printPath("Next locs which could have been available if more techniques were known:", self.tryRemainingLocs(self.majorLocations if self.fullRando == True else self.majorLocations + self.minorLocations))
 
                 remainMajors = [loc for loc in self.majorLocations if loc['difficulty'].bool == False and loc['itemName'] not in ['Nothing', 'NoEnergy']]
                 if len(remainMajors) > 0:
                     self.printPath("Remaining major locations:", remainMajors, displayAPs=False)
 
-                remainMinors = [loc for loc in self.minorLocations if loc['difficulty'].bool == False and loc['itemName'] not in ['Nothing', 'NoEnergy']]
-                if len(remainMinors) > 0:
-                    self.printPath("Remaining minor locations:", remainMinors, displayAPs=False)
+                if self.fullRando == False:
+                    remainMinors = [loc for loc in self.minorLocations if loc['difficulty'].bool == False and loc['itemName'] not in ['Nothing', 'NoEnergy']]
+                    if len(remainMinors) > 0:
+                        self.printPath("Remaining minor locations:", remainMinors, displayAPs=False)
 
             else:
                 # if some locs are not picked up display those which are available and those which are not

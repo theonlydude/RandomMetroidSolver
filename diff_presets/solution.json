@@ -1,0 +1,238 @@
+{
+  "Controller": {
+    "A": "Jump",
+    "B": "Dash",
+    "L": "Angle Down",
+    "R": "Angle Up",
+    "Y": "Item Cancel",
+    "X": "Shoot",
+    "Select": "Item Select"
+  },
+  "password": "94aeb7486a094e800e3cd8437bec904d60a55dacf0e316e5f8da3dc6a1e3ac05",
+  "Knows": {
+    "MicrowavePhantoon": [
+      true,
+      10
+    ],
+    "GreenGateGlitch": [
+      true,
+      5
+    ],
+    "ScrewAttackExit": [
+      true,
+      10
+    ],
+    "WorstRoomIceCharge": [
+      true,
+      100
+    ],
+    "RedTowerClimb": [
+      true,
+      10
+    ],
+    "ShortCharge": [
+      true,
+      50
+    ],
+    "MockballWs": [
+      true,
+      50
+    ],
+    "RonPopeilScrew": [
+      true,
+      100
+    ],
+    "MidAirMorph": [
+      false,
+      0
+    ],
+    "CeilingDBoost": [
+      true,
+      1
+    ],
+    "AlcatrazEscape": [
+      true,
+      10
+    ],
+    "GetAroundWallJump": [
+      true,
+      10
+    ],
+    "TediousMountEverest": [
+      true,
+      100
+    ],
+    "SpringBallJumpFromWall": [
+      true,
+      25
+    ],
+    "ContinuousWallJump": [
+      true,
+      100
+    ],
+    "LavaDive": [
+      true,
+      25
+    ],
+    "HiJumpLessGauntletAccess": [
+      true,
+      25
+    ],
+    "SuitlessPuyoClip": [
+      true,
+      100
+    ],
+    "Mockball": [
+      true,
+      1
+    ],
+    "PreciousRoomXRayExit": [
+      true,
+      100
+    ],
+    "DraygonRoomCrystalFlash": [
+      true,
+      100
+    ],
+    "SuitlessSandpit": [
+      true,
+      100
+    ],
+    "SpongeBathSpeed": [
+      true,
+      1
+    ],
+    "MicrowaveDraygon": [
+      true,
+      5
+    ],
+    "Moondance": [
+      true,
+      100
+    ],
+    "PuyoClip": [
+      true,
+      100
+    ],
+    "SpongeBathHiJump": [
+      true,
+      1
+    ],
+    "SpongeBathBombJump": [
+      true,
+      100
+    ],
+    "DraygonRoomGrappleExit": [
+      true,
+      100
+    ],
+    "XrayDboost": [
+      true,
+      50
+    ],
+    "ReverseGateGlitch": [
+      true,
+      5
+    ],
+    "DraygonSparkKill": [
+      true,
+      25
+    ],
+    "InfiniteBombJump": [
+      true,
+      5
+    ],
+    "SuitlessOuterMaridia": [
+      true,
+      25
+    ],
+    "GravLessLevel1": [
+      false,
+      0
+    ],
+    "GravityJump": [
+      true,
+      10
+    ],
+    "GravLessLevel3": [
+      false,
+      0
+    ],
+    "KillPlasmaPiratesWithCharge": [
+      true,
+      5
+    ],
+    "LavaDiveNoHiJump": [
+      true,
+      100
+    ],
+    "ShineSpark": [
+      false,
+      0
+    ],
+    "SpeedZebSkip": [
+      true,
+      50
+    ],
+    "KillPlasmaPiratesWithSpark": [
+      true,
+      50
+    ],
+    "SpringBallJump": [
+      true,
+      10
+    ],
+    "WallJump": [
+      false,
+      0
+    ],
+    "SimpleShortCharge": [
+      true,
+      1
+    ],
+    "DiagonalBombJump": [
+      true,
+      100
+    ],
+    "IceZebSkip": [
+      true,
+      10
+    ],
+    "MochtroidClip": [
+      true,
+      10
+    ],
+    "GravLessLevel2": [
+      true,
+      100
+    ],
+    "HiJumpGauntletAccess": [
+      true,
+      25
+    ],
+    "EarlyKraid": [
+      true,
+      1
+    ],
+    "ReverseGateGlitchHiJumpLess": [
+      true,
+      50
+    ],
+    "DraygonGrappleKill": [
+      true,
+      5
+    ]
+  },
+  "Settings": {
+    "Kraid": "Default",
+    "MainUpperNorfair": "Solution",
+    "Phantoon": "Default",
+    "Ice": "Solution",
+    "Ridley": "Default",
+    "MotherBrain": "Default",
+    "LowerNorfair": "Solution",
+    "Gauntlet": "Default",
+    "X-Ray": "Solution",
+    "Draygon": "Default"
+  }
+}

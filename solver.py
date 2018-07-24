@@ -109,9 +109,11 @@ class Solver:
             if Conf.displayGeneratedPath == True:
                 self.printPath("Generated path:", self.visitedLocations)
                 # if we've aborted, display remaining majors
+                if difficulty == -1:
+                    self.printPath("Next locs which could have been available if more techniques were known:", self.tryRemainingLocs(self.majorLocations + self.minorLocations))
                 if difficulty == -1 or itemsOk == False:
-                    self.printPath("Remaining major locations:", self.majorLocations)
-                    self.printPath("Remaining minor locations:", self.minorLocations)
+                    self.printPath("Remaining major locations:", [loc for loc in self.majorLocations if loc['difficulty'].bool == False])
+                    self.printPath("Remaining minor locations:", [loc for loc in self.minorLocations if loc['difficulty'].bool == False])
 
             # display difficulty scale
             self.displayDifficulty(difficulty)
@@ -362,6 +364,7 @@ class Solver:
         return (knowsUsed, knowsKnown)
 
     def printPath(self, message, locations):
+        print("")
         print(message)
         print('{:>50} {:>12} {:>34} {:>8} {:>16} {:>14} {} {}'.format("Location Name", "Area", "Sub Area", "Distance", "Item", "Difficulty", "Knows used", "Items used"))
         print('-'*150)
@@ -381,6 +384,18 @@ class Solver:
                                                                            round(loc['difficulty'].difficulty, 2) if 'difficulty' in loc else 'nc',
                                                                            sorted(loc['difficulty'].knows) if 'difficulty' in loc else 'nc',
                                                                            list(set(loc['difficulty'].items)) if 'difficulty' in loc else 'nc'))
+
+    def tryRemainingLocs(self, locations):
+        # use preset which knows every techniques to test the remaining locs to
+        # find which technique could allow to continue the seed
+        presetFileName = 'diff_presets/master.json'
+        presetLoader = PresetLoader.factory(presetFileName)
+        presetLoader.load()
+        self.smbm.createKnowsFunctions()
+
+        self.areaGraph.getAvailableLocations(locations, self.smbm, infinity, self.lastLoc)
+
+        return [loc for loc in locations if loc['difficulty'].bool == True]
 
     def collectMajor(self, loc):
         self.majorLocations.remove(loc)

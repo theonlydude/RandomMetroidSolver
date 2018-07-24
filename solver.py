@@ -112,8 +112,12 @@ class Solver:
                 if difficulty == -1:
                     self.printPath("Next locs which could have been available if more techniques were known:", self.tryRemainingLocs(self.majorLocations + self.minorLocations))
                 if difficulty == -1 or itemsOk == False:
-                    self.printPath("Remaining major locations:", [loc for loc in self.majorLocations if loc['difficulty'].bool == False])
-                    self.printPath("Remaining minor locations:", [loc for loc in self.minorLocations if loc['difficulty'].bool == False])
+                    remainMajors = [loc for loc in self.majorLocations if loc['difficulty'].bool == False and loc['itemName'] not in ['Nothing', 'NoEnergy']]
+                    if len(remainMajors) > 0:
+                        self.printPath("Remaining major locations:", remainMajors)
+                    remainMinors = [loc for loc in self.minorLocations if loc['difficulty'].bool == False and loc['itemName'] not in ['Nothing', 'NoEnergy']]
+                    if len(remainMinors) > 0:
+                        self.printPath("Remaining minor locations:", remainMinors)
 
             # display difficulty scale
             self.displayDifficulty(difficulty)

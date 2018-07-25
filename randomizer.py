@@ -122,6 +122,8 @@ if __name__ == "__main__":
     parser.add_argument('--controls',
                         help="specify controls, comma-separated, in that order: Shoot,Jump,Dash,ItemSelect,ItemCancel,AngleUp,AngleDown. Possible values: A,B,X,Y,L,R,Select,None",
                         dest='controls')
+    parser.add_argument('--hideItems', help="Like in dessy's rando hide half of the items",
+                        dest="hideItems", action='store_true', default=False)
 
     # parse args
     args = parser.parse_args()
@@ -281,11 +283,19 @@ if __name__ == "__main__":
         print("Can't generate " + fileName + " with the given parameters, try increasing the difficulty target.")
         sys.exit(-1)
 
+    # hide some items like in dessy's
+    if args.hideItems == True:
+        for itemLoc in itemLocs:
+            if (itemLoc['Item']['Type'] not in ['Nothing', 'NoEnergy']
+                and itemLoc['Location']['CanHidden'] == True
+                and itemLoc['Location']['Visibility'] == 'Visible'):
+                if bool(random.getrandbits(1)) == True:
+                    itemLoc['Location']['Visibility'] = 'Hidden'
+
     # transform itemLocs in our usual dict(location, item)
     locsItems = {}
     for itemLoc in itemLocs:
         locsItems[itemLoc["Location"]["Name"]] = itemLoc["Item"]["Type"]
-
     if args.debug == True:
         for loc in locsItems:
             print('{:>50}: {:>16} '.format(loc, locsItems[loc]))

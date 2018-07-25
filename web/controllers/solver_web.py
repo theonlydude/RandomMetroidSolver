@@ -280,7 +280,9 @@ def genPathTable(locations, displayAPs=True):
         return None
 
     lastAP = None
-    pathTable = TABLE(TR(TH("Location Name"), TH("Area"), TH("SubArea"), TH("Item"),
+    pathTable = TABLE(COLGROUP(COL(_class="locName"), COL(_class="area"), COL(_class="subarea"), COL(_class="item"),
+                               COL(_class="difficulty"), COL(_class="knowsUsed"), COL(_class="itemsUsed")),
+                      TR(TH("Location Name"), TH("Area"), TH("SubArea"), TH("Item"),
                          TH("Difficulty"), TH("Techniques used"), TH("Items used")),
                       _class="full")
     for location, area, subarea, item, diff, techniques, items, path in locations:

@@ -57,6 +57,9 @@ def loadPresetsList():
     presets = [os.path.splitext(file)[0] for file in files]
     for preset in stdPresets:
         presets.remove(preset)
+    # remove solution preset from the list
+    if 'solution' in presets:
+        presets.remove('solution')
     return stdPresets + presets
 
 def validatePresetsParams(action):
@@ -626,13 +629,7 @@ def randomizer():
         session.randomizer['areaLayout'] = "off"
         session.randomizer['variaTweaks'] = "on"
 
-    # put standard presets first
-    stdPresets = ['noob', 'casual', 'regular', 'veteran', 'speedrunner', 'master']
-    files = sorted(os.listdir('diff_presets'), key=lambda v: v.upper())
-    presets = [os.path.splitext(file)[0] for file in files]
-    for preset in stdPresets:
-        presets.remove(preset)
-    presets = stdPresets + presets
+    presets = loadPresetsList()
 
     return dict(presets=presets, patches=patches)
 

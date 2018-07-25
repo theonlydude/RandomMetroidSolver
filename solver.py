@@ -429,7 +429,7 @@ class Solver:
         # find which technique could allow to continue the seed
         locations = self.majorLocations if self.fullRando == True else self.majorLocations + self.minorLocations
 
-        presetFileName = 'diff_presets/solution.json'
+        presetFileName = os.path.expanduser('~/RandomMetroidSolver/diff_presets/solution.json')
         presetLoader = PresetLoader.factory(presetFileName)
         presetLoader.load()
         self.smbm.createKnowsFunctions()

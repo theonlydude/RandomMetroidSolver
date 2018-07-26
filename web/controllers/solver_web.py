@@ -593,9 +593,7 @@ patches = [
     ('animals', "Save the animals surprise (by Foosda)", False, False)
 ]
 
-def randomizer():
-    response.title = 'Super Metroid VARIA Randomizer'
-
+def initRandomizerSession():
     if session.randomizer is None:
         session.randomizer = {}
 
@@ -628,6 +626,10 @@ def randomizer():
         session.randomizer['complexity'] = "simple"
         session.randomizer['areaLayout'] = "off"
         session.randomizer['variaTweaks'] = "on"
+        session.randomizer['hideItems'] = "off"
+
+def randomizer():
+    response.title = 'Super Metroid VARIA Randomizer'
 
     presets = loadPresetsList()
 
@@ -700,7 +702,7 @@ def validateWebServiceParams(patchs, quantities, others, isJson=False):
         except:
             raiseHttp(400, "Wrong value for paramsFileTarget, must be a JSON string", isJson)
 
-    for check in ['spreadItems', 'fullRandomization', 'suitsRestriction', 'speedScrewRestriction', 'layoutPatches', 'noGravHeat', 'randomMinors', 'randomParams', 'randomSuperFuns', 'areaRandomization']:
+    for check in ['spreadItems', 'fullRandomization', 'suitsRestriction', 'speedScrewRestriction', 'layoutPatches', 'noGravHeat', 'randomMinors', 'randomParams', 'randomSuperFuns', 'areaRandomization', 'hideItems']:
         if check in others:
             if request.vars[check] not in ['on', 'off']:
                 raiseHttp(400, "Wrong value for {}: {}, authorized values: on/off".format(check, request.vars[check]), isJson)
@@ -727,7 +729,7 @@ def sessionWebService():
               'progressionSpeed', 'spreadItems', 'fullRandomization', 'suitsRestriction',
               'speedScrewRestriction', 'funCombat', 'funMovement', 'funSuits', 'layoutPatches',
               'noGravHeat', 'randomMinors', 'randomParams', 'randomSuperFuns', 'progressionDifficulty',
-              'areaRandomization', 'complexity']
+              'areaRandomization', 'complexity', 'hideItems']
     validateWebServiceParams(patchs, quantities, others)
 
     if session.randomizer is None:
@@ -760,6 +762,7 @@ def sessionWebService():
     session.randomizer['complexity'] = request.vars.complexity
     session.randomizer['areaLayout'] = request.vars.areaLayout
     session.randomizer['variaTweaks'] = request.vars.variaTweaks
+    session.randomizer['hideItems'] = request.vars.hideItems
 
 def getCustomMapping(controlMapping):
     if len(controlMapping) == 0:
@@ -787,7 +790,7 @@ def randomizerWebService():
               'maxDifficulty', 'progressionSpeed', 'spreadItems', 'fullRandomization',
               'suitsRestriction', 'speedScrewRestriction', 'funCombat', 'funMovement', 'funSuits',
               'layoutPatches', 'noGravHeat', 'randomMinors', 'randomParams', 'randomSuperFuns',
-              'progressionDifficulty', 'areaRandomization']
+              'progressionDifficulty', 'areaRandomization', 'hideItems']
     validateWebServiceParams(patchs, quantities, others, isJson=True)
 
     # randomize
@@ -853,6 +856,9 @@ def randomizerWebService():
             params.append('--suitsRestriction')
         if request.vars.speedScrewRestriction == 'on':
             params.append('--speedScrewRestriction')
+
+    if request.vars.hideItems == 'on':
+        params.append('--hideItems')
 
     if request.vars.randomSuperFuns == 'on':
         params += ['--superFun', 'random']

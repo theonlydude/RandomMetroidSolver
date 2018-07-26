@@ -128,6 +128,13 @@ if __name__ == "__main__":
     # parse args
     args = parser.parse_args()
 
+    if args.output is None and args.rom is None:
+        print "Need --output or --rom parameter"
+        sys.exit(-1)
+    elif args.output is not None and args.rom is not None:
+        print "Can't have both --output and --rom parameters"
+        sys.exit(-1)
+
     # if diff preset given, load it
     if args.paramsFileName is not None:
         PresetLoader.factory(args.paramsFileName[0]).load()
@@ -301,46 +308,40 @@ if __name__ == "__main__":
             print('{:>50}: {:>16} '.format(loc, locsItems[loc]))
 
     try:
-        romPatcher = None
-        webService = False
+        # args.rom is not None: generate local rom named filename.sfc with args.rom as source
+        # args.output is not None: generate local json named args.output
         if args.rom is not None:
             # patch local rom
             romFileName = args.rom
-            fileName += '.sfc'
-            shutil.copyfile(romFileName, fileName)
-            romPatcher = RomPatcher(fileName)
-        elif args.output is not None:
-            # web service
-            romPatcher = RomPatcher()
-            webService = True
+            outFileName += '.sfc'
+            shutil.copyfile(romFileName, outFileName)
+            romPatcher = RomPatcher(outFileName)
         else:
-            # rom json
-            fileName += '.json'
-            with open(fileName, 'w') as jsonFile:
-                if args.area == True:
-                    locsItems['transitions'] = randomizer.transitions
-                # TODO: add patches
-                json.dump(locsItems, jsonFile)
-        if romPatcher is not None:
-            romPatcher.writeItemsLocs(itemLocs)
-            romPatcher.applyIPSPatches(args.patches, args.noLayout, args.noGravHeat, args.area, args.areaLayoutBase, args.noVariaTweaks)
-            romPatcher.writeSeed(seed)
-            romPatcher.writeSpoiler(itemLocs)
-            romPatcher.writeRandoSettings(randoSettings)
-            if args.area == True:
-                romPatcher.writeDoorConnections(doors)
-            romPatcher.writeTransitionsCredits(randomizer.areaGraph.getCreditsTransitions())
-            if ctrlDict is not None:
-                romPatcher.writeControls(ctrlDict)
-            romPatcher.end()
-        if webService == True:
+            outFileName = args.output
+            romPatcher = RomPatcher()
+
+        romPatcher.writeItemsLocs(itemLocs)
+        romPatcher.applyIPSPatches(args.patches, args.noLayout, args.noGravHeat, args.area, args.areaLayoutBase, args.noVariaTweaks)
+        romPatcher.writeSeed(seed)
+        romPatcher.writeSpoiler(itemLocs)
+        romPatcher.writeRandoSettings(randoSettings)
+        if args.area == True:
+            romPatcher.writeDoorConnections(doors)
+        romPatcher.writeTransitionsCredits(randomizer.areaGraph.getCreditsTransitions())
+        if ctrlDict is not None:
+            romPatcher.writeControls(ctrlDict)
+        romPatcher.end()
+
+        if args.rom is None:
             data = romPatcher.romFile.data
             fileName += '.sfc'
             data["fileName"] = fileName
-            with open(args.output, 'w') as jsonFile:
+            # TODO: add error msg in json to be displayed by the web site
+            data["msg"] = "manger du steak"
+            with open(outFileName, 'w') as jsonFile:
                 json.dump(data, jsonFile)
     except Exception as e:
-        print("Error patching {}. Is {} a valid ROM ? ({}: {})".format(fileName, romFileName, type(e).__name__, e))
+        print("Error patching {}: ({}: {})".format(outFileName, type(e).__name__, e))
         sys.exit(-1)
 
     print("Rom generated: {}".format(fileName))

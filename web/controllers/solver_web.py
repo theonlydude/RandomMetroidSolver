@@ -907,9 +907,16 @@ def randomizerWebService():
         os.remove(presetFileName)
         return json.dumps(locsItems)
     else:
+        # extract error from json
+        try:
+            with open(jsonFileName) as jsonFile:
+                msg = json.load(jsonFile)['errorMsg']
+        except:
+            msg = "randomizerWebService: something wrong happened"
+
         os.remove(jsonFileName)
         os.remove(presetFileName)
-        raise HTTP(400, json.dumps("randomizerWebService: something wrong happened"))
+        raise HTTP(400, json.dumps(msg))
 
 def presetWebService():
     # web service to get the content of the preset file

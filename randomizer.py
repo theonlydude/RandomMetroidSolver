@@ -15,6 +15,12 @@ speeds = ['slowest', 'slow', 'medium', 'fast', 'fastest']
 energyQties = ['sparse', 'medium', 'vanilla' ]
 progDiffs = ['easier', 'normal', 'harder']
 
+def dumpErrorMsg(outFileName, msg):
+    if outFileName is None:
+        return
+    with open(outFileName, 'w') as jsonFile:
+        json.dump({"errorMsg": msg}, jsonFile)
+
 def restricted_float(x):
     x = float(x)
     if x < 0.0 or x > 9.0:
@@ -277,7 +283,9 @@ if __name__ == "__main__":
         try:
             randomizer = AreaRandomizer(graphLocations, randoSettings, seedName, dotDir=dotDir)
         except RuntimeError:
-            print("DIAG: Cannot generate area layout. Retry, and change the super fun settings if the problem happens again.")
+            msg = "Cannot generate area layout. Retry, and change the super fun settings if the problem happens again."
+            dumpErrorMsg(args.output, msg)
+            print("DIAG: {}".format(msg))
             sys.exit(-1)
         RomPatches.ActivePatches += RomPatches.AreaSet
         if args.areaLayoutBase == True:
@@ -287,7 +295,8 @@ if __name__ == "__main__":
         randomizer = Randomizer(graphLocations, randoSettings, seedName, vanillaTransitions)
     itemLocs = randomizer.generateItems()
     if itemLocs is None:
-        print("Can't generate " + fileName + " with the given parameters, try increasing the difficulty target.")
+        dumpErrorMsg(args.output, randomizer.errorMsg)
+        print("Can't generate " + fileName + " with the given parameters: {}".format(randomizer.errorMsg))
         sys.exit(-1)
 
     # hide some items like in dessy's
@@ -336,12 +345,14 @@ if __name__ == "__main__":
             data = romPatcher.romFile.data
             fileName += '.sfc'
             data["fileName"] = fileName
-            # TODO: add error msg in json to be displayed by the web site
-            data["msg"] = "manger du steak"
+            # error msg in json to be displayed by the web site
+            data["errorMsg"] = randomizer.errorMsg
             with open(outFileName, 'w') as jsonFile:
                 json.dump(data, jsonFile)
     except Exception as e:
-        print("Error patching {}: ({}: {})".format(outFileName, type(e).__name__, e))
+        msg = "Error patching {}: ({}: {})".format(outFileName, type(e).__name__, e)
+        dumpErrorMsg(args.output, msg)
+        print(msg)
         sys.exit(-1)
 
     print("Rom generated: {}".format(fileName))

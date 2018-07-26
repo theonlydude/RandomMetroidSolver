@@ -313,7 +313,7 @@ if __name__ == "__main__":
         if args.rom is not None:
             # patch local rom
             romFileName = args.rom
-            outFileName += '.sfc'
+            outFileName = fileName + '.sfc'
             shutil.copyfile(romFileName, outFileName)
             romPatcher = RomPatcher(outFileName)
         else:

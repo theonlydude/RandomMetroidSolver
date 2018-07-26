@@ -631,6 +631,8 @@ def initRandomizerSession():
 def randomizer():
     response.title = 'Super Metroid VARIA Randomizer'
 
+    initRandomizerSession()
+
     presets = loadPresetsList()
 
     return dict(presets=presets, patches=patches)

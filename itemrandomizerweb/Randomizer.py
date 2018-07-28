@@ -3,6 +3,7 @@ from itemrandomizerweb import Items
 from parameters import Knows, Settings, samus
 from itemrandomizerweb.stdlib import List
 from helpers import Bosses
+from utils import randGaussBounds
 from graph import AccessGraph
 from graph_access import accessPoints
 from smboolmanager import SMBoolManager
@@ -157,12 +158,7 @@ class RandoSettings(object):
 
     def getForbiddenItemsFromList(self, itemList):
         remove = []
-        nItems = float(len(itemList))
-        n = int(round(random.gauss(nItems/2, nItems/8), 0))
-        if n < 0:
-            n = 0
-        if n > len(itemList):
-            n = len(itemList)
+        n = randGaussBounds(len(itemList))
         for i in range(n):
             idx = random.randint(0, len(itemList) - 1)
             remove.append(itemList.pop(idx))

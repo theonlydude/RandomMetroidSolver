@@ -1,4 +1,6 @@
 from itemrandomizerweb.stdlib import List
+from utils import randGaussBounds
+
 import struct
 import random
 
@@ -204,8 +206,6 @@ BeamBits = {
 }
 
 ItemBits = {
-    'Nothing'      : 0x0,
-    'NoEnergy'     : 0x0,
     'Varia'        : 0x1,
     'SpringBall'   : 0x2,
     'Morph'        : 0x4,
@@ -304,34 +304,36 @@ def getItemPool(qty, forbiddenItems):
         Items.remove(Nothing)
 
     if qty['energy'] == 'sparse':
-        # 5 (there's always a reserve and an etank added by the first call to addItem with Items as parameter)
+        # 4-6
         if random.random() < 0.5:
             itemPool = addItem('Reserve', Items)
         else:
             itemPool = addItem('ETank', Items)
-        itemPool = addItem('ETank', itemPool)
-        itemPool = addItem('ETank', itemPool)
-
+        # 3 in the pool (1 E, 1 R + the previous one)
+        rest = 1 + randGaussBounds(2)
+        for i in range(rest):
+            itemPool = addItem('ETank', itemPool)
         # complete up to 18 energies with nothing item
         Items.append(NoEnergy)
         noEnergyAdded = True
-        for i in range(13):
+        for i in range(18 - 3 - rest):
             itemPool = addItem('NoEnergy', itemPool)
     elif qty['energy'] == 'medium':
-        # 11
+        # 8-12
         itemPool = addItem('ETank', Items)
         for i in range(3):
             if random.random() < 0.5:
                 itemPool = addItem('Reserve', itemPool)
             else:
                 itemPool = addItem('ETank', itemPool)
-
-        for i in range(5):
+        # 6 already in the pool (2 E, 1 R, + the previous 3)
+        rest = 2 + randGaussBounds(4)
+        for i in range(rest):
             itemPool = addItem('ETank', itemPool)
 
         Items.append(NoEnergy)
         noEnergyAdded = True
-        for i in range(7):
+        for i in range(18 - 6 - rest):
             itemPool = addItem('NoEnergy', itemPool)
     else:
         # 18

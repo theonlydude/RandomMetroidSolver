@@ -4,11 +4,9 @@ RANDO=./randomizer.py
 SOLVER=./solver.py
 GET_STATS=./get_stats.py
 
-
 presets="noob flo manu speedrunner"
 progs="slowest slow medium fast fastest random"
 n=20
-
 test_set=$1
 
 nb_cpu=$(grep processor /proc/cpuinfo | wc -l)
@@ -18,6 +16,13 @@ nb_cpu=$(grep processor /proc/cpuinfo | wc -l)
 
 [ -d "$test_set" ] && {
     echo "$test_set already exists" >&2
+    exit 1
+}
+
+errlog=stats_errors_${test_set}.log
+
+[ -f "$errlog" ] && {
+    echo "$errlog already exists" >&2
     exit 1
 }
 
@@ -41,7 +46,7 @@ function worker {
     $RANDO --seed ${seed} -i $speed $extra --param diff_presets/$p.json
     [ $? -ne 0 ] && {
 	echo "RANDO failed"  > $errfile
-	echo "preset : $preset" >> $errfile
+	echo "preset : $p" >> $errfile
 	echo "seed : $seed" >> $errfile
 	echo "speed : $speed" >> $errfile
 	echo "extra options : $extra" >> $errfile
@@ -87,7 +92,7 @@ function wait_workers() {
     for errfile in $errfiles; do
 	echo
 	echo "Worker ERROR $errfile :"
-	cat $errfile
+	cat $errfile | tee -a $errlog 
 	echo
 	grep -q 'SOLVER failed' $errfile
 	if [ $? -eq 0 ]; then
@@ -107,9 +112,9 @@ function gen_seeds() {
     base_extra=$4
     progDiff=$3
     for p in $presets; do
-	if [ $p = 'noob' ]; then
-	    noob='--maxDifficulty harder'
-	fi
+	# if [ $p = 'noob' ]; then
+	#     noob='--maxDifficulty harder'
+	# fi
 	mkdir -p $base_dir/$p
 	for speed in $progs; do
 	    extra="$base_extra --progressionDifficulty $progDiff $noob"
@@ -146,7 +151,7 @@ function gen_seeds() {
 # do it again with random
 DIFFS=("" "" "" "" "" "" "--maxDifficulty easy" "--maxDifficulty medium" "--maxDifficulty hard" "--maxDifficulty harder" "--maxDifficulty hardcore" "--maxDifficulty mania")
 
-for A in "standard" "area"; do
+for A in "area" "standard"; do
     for B in "classic" "full"; do
 	PARAMS=""
 	if [ $A = "area" ]; then
@@ -157,7 +162,8 @@ for A in "standard" "area"; do
 	fi
 
 	# add randomized parameters
-	PARAMS="${PARAMS} --randomRestrictions --superFun random --energyQty random --missileQty 0 --superQty 0 --powerBombQty 0 --minorQty 0"
+	#	PARAMS="${PARAMS} --randomRestrictions --superFun random --energyQty random --missileQty 0 --superQty 0 --powerBombQty 0 --minorQty 0"
+	PARAMS="${PARAMS} --randomRestrictions --energyQty random --missileQty 0 --superQty 0 --powerBombQty 0 --minorQty 0"
 
 	let S=$RANDOM%${#DIFFS[@]}
 	DIFF=${DIFFS[$S]}

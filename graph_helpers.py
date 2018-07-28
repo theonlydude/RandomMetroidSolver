@@ -93,8 +93,9 @@ class HelpersGraph(Helpers):
         else:
             suitlessCondition = baseSuitLess
 
-        return sm.wor(sm.haveItem('Gravity'),
-                      suitlessCondition)
+        return sm.wand(sm.wor(sm.haveItem('Gravity'),
+                              suitlessCondition),
+                       sm.haveItem('Morph')) # for crab maze
 
     def canExitCrabHole(self):
         sm = self.smbm

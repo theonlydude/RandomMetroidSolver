@@ -118,7 +118,8 @@ accessPoints = [
        shortName="LN\\LAVA DIVE"),
     AccessPoint('Three Muskateers Room Left', 'LowerNorfair', {
         'Lava Dive Right': lambda sm: sm.wand(sm.canHellRun('LowerNorfair'),
-                                              sm.canPassAmphitheaterReverse()) # if this is OK, reverse lava pit will be too...
+                                              sm.canPassAmphitheaterReverse(),  # if this is OK, reverse lava pit will be too...
+                                              sm.canUsePowerBombs())
     }, roomInfo = {'RoomPtr':0xb656, "area": 0x2},
        exitInfo = {'DoorPtr':0x9a4a, 'direction': 0x5, "cap": (0x5e, 0x6), "bitFlag": 0x0,
                    "screen": (0x5, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},

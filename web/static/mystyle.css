@@ -334,3 +334,24 @@ p {
 .grey {
     background-color: #f1f1f1;
 }
+.locName {
+    width: 25%;
+}
+.area {
+    width: 10%;
+}
+.subarea {
+    width: 15%;
+}
+.item {
+    width: 5%;
+}
+.difficulty {
+    width: 5%;
+}
+.knowsUsed {
+    width: 20%;
+}
+.itemsUsed {
+    width: 20%;
+}

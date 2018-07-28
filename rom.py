@@ -168,19 +168,19 @@ class RomReader:
 
         self.romFile.seek(address)
         # value is in two bytes
-        value1 = struct.unpack("B", self.romFile.read(1))
-        value2 = struct.unpack("B", self.romFile.read(1))
+        value1 = struct.unpack("B", self.romFile.read(1))[0]
+        value2 = struct.unpack("B", self.romFile.read(1))[0]
 
         # match itemVisibility with
         # | Visible -> 0
         # | Chozo -> 0x54 (84)
         # | Hidden -> 0xA8 (168)
         if visibility == 'Visible':
-            itemCode = hex(value2[0]*256+(value1[0]-0))
+            itemCode = hex(value2*256+(value1-0))
         elif visibility == 'Chozo':
-            itemCode = hex(value2[0]*256+(value1[0]-84))
+            itemCode = hex(value2*256+(value1-84))
         elif visibility == 'Hidden':
-            itemCode = hex(value2[0]*256+(value1[0]-168))
+            itemCode = hex(value2*256+(value1-168))
         else:
             raise Exception("RomReader: unknown visibility: {}".format(visibility))
 
@@ -189,8 +189,8 @@ class RomReader:
         # 0xeedb is missile item
         # 0x786de is Morphing Ball location
         self.romFile.seek(address+4)
-        value3 = struct.unpack("B", self.romFile.read(1))
-        if (value3[0] == int('0x1a', 16)
+        value3 = struct.unpack("B", self.romFile.read(1))[0]
+        if (value3 == int('0x1a', 16)
             and int(itemCode, 16) == int('0xeedb', 16)
             and address != int('0x786DE', 16)):
             return hex(0)
@@ -273,19 +273,19 @@ class RomReader:
         self.romFile.seek(0x10000 | doorPtr)
 
         # room ptr is in two bytes
-        v1 = struct.unpack("B", self.romFile.read(1))
-        v2 = struct.unpack("B", self.romFile.read(1))
+        v1 = struct.unpack("B", self.romFile.read(1))[0]
+        v2 = struct.unpack("B", self.romFile.read(1))[0]
 
         self.romFile.seek((0x10000 | doorPtr) + 6)
-        sx = struct.unpack("B", self.romFile.read(1))
-        sy = struct.unpack("B", self.romFile.read(1))
+        sx = struct.unpack("B", self.romFile.read(1))[0]
+        sy = struct.unpack("B", self.romFile.read(1))[0]
 
-        return (v1[0] | (v2[0] << 8), (sx[0], sy[0]))
+        return (v1 | (v2 << 8), (sx, sy))
 
     def patchPresent(self, patchName):
         self.romFile.seek(self.patches[patchName]['address'])
-        value = struct.unpack("B", self.romFile.read(1))
-        return value[0] == self.patches[patchName]['value']
+        value = struct.unpack("B", self.romFile.read(1))[0]
+        return value == self.patches[patchName]['value']
 
     def getPatches(self):
         # for display in the solver
@@ -303,52 +303,52 @@ class RomReader:
         addresses = [0x78264, 0x78404, 0x78432, 0x7852C, 0x78614, 0x786DE, 0x7879E, 0x787C2, 0x787FA, 0x78824, 0x78876, 0x7896E, 0x7899C, 0x78ACA, 0x78B24, 0x78BA4, 0x78BAC, 0x78C36, 0x78C3E, 0x78C82, 0x78CCA, 0x79108, 0x79110, 0x79184, 0x7C2E9, 0x7C337, 0x7C365, 0x7C36D, 0x7C47D, 0x7C559, 0x7C5E3, 0x7C6E5, 0x7C755, 0x7C7A7, 0x781CC, 0x781E8, 0x781EE, 0x781F4, 0x78248, 0x783EE, 0x78464, 0x7846A, 0x78478, 0x78486, 0x784AC, 0x784E4, 0x78518, 0x7851E, 0x78532, 0x78538, 0x78608, 0x7860E, 0x7865C, 0x78676, 0x7874C, 0x78798, 0x787D0, 0x78802, 0x78836, 0x7883C, 0x788CA, 0x7890E, 0x78914, 0x789EC, 0x78AE4, 0x78B46, 0x78BC0, 0x78BE6, 0x78BEC, 0x78C04, 0x78C14, 0x78C2A, 0x78C44, 0x78C52, 0x78C66, 0x78C74, 0x78CBC, 0x78E6E, 0x78E74, 0x78F30, 0x78FCA, 0x78FD2, 0x790C0, 0x79100, 0x7C265, 0x7C2EF, 0x7C319, 0x7C357, 0x7C437, 0x7C43D, 0x7C483, 0x7C4AF, 0x7C4B5, 0x7C533, 0x7C5DD, 0x7C5EB, 0x7C5F1, 0x7C603, 0x7C609, 0x7C74D]
         for address in addresses:
             self.romFile.seek(address)
-            romData[address] = struct.unpack("B", self.romFile.read(1))
-            romData[address+1] = struct.unpack("B", self.romFile.read(1))
+            romData[address] = struct.unpack("B", self.romFile.read(1))[0]
+            romData[address+1] = struct.unpack("B", self.romFile.read(1))[0]
             self.romFile.seek(address+4)
-            romData[address+4] = struct.unpack("B", self.romFile.read(1))
+            romData[address+4] = struct.unpack("B", self.romFile.read(1))[0]
 
         # start ceres
         self.romFile.seek(0x7F1F)
-        romData[0x7F1F] = struct.unpack("B", self.romFile.read(1))
+        romData[0x7F1F] = struct.unpack("B", self.romFile.read(1))[0]
 
         # start landing site
         self.romFile.seek(0x7F17)
-        romData[0x7F17] = struct.unpack("B", self.romFile.read(1))
+        romData[0x7F17] = struct.unpack("B", self.romFile.read(1))[0]
 
         # layout
         self.romFile.seek(0x21BD80)
-        romData[0x21BD80] = struct.unpack("B", self.romFile.read(1))
+        romData[0x21BD80] = struct.unpack("B", self.romFile.read(1))[0]
 
         # casual
         self.romFile.seek(0x22E879)
-        romData[0x22E879] = struct.unpack("B", self.romFile.read(1))
+        romData[0x22E879] = struct.unpack("B", self.romFile.read(1))[0]
 
         # no grav heat
         self.romFile.seek(0x06e37d)
-        romData[0x06e37d] = struct.unpack("B", self.romFile.read(1))
+        romData[0x06e37d] = struct.unpack("B", self.romFile.read(1))[0]
 
         # varia tweaks
         self.romFile.seek(0x7CC4D)
-        romData[0x7CC4D] = struct.unpack("B", self.romFile.read(1))
+        romData[0x7CC4D] = struct.unpack("B", self.romFile.read(1))[0]
 
         # area
         self.romFile.seek(0x22D564)
-        romData[0x22D564] = struct.unpack("B", self.romFile.read(1))
+        romData[0x22D564] = struct.unpack("B", self.romFile.read(1))[0]
 
         # area more layout
         self.romFile.seek(0x252FA7)
-        romData[0x252FA7] = struct.unpack("B", self.romFile.read(1))
+        romData[0x252FA7] = struct.unpack("B", self.romFile.read(1))[0]
 
         # transitions
         addresses = [0x18c22, 0x18aea, 0x18a42, 0x18e9e, 0x18bfe, 0x18e86, 0x18f0a, 0x189ca, 0x18aae, 0x196d2, 0x19a4a, 0x1922e, 0x195fa, 0x1967e, 0x1a39c, 0x1a510, 0x18aa2, 0x1a480, 0x1902a, 0x190c6, 0x18af6, 0x1a384, 0x1a390, 0x1a330, 0x18c52, 0x191e6]
         for address in addresses:
             self.romFile.seek(address)
-            romData[address] = struct.unpack("B", self.romFile.read(1))
-            romData[address+1] = struct.unpack("B", self.romFile.read(1))
+            romData[address] = struct.unpack("B", self.romFile.read(1))[0]
+            romData[address+1] = struct.unpack("B", self.romFile.read(1))[0]
             self.romFile.seek(address+6)
-            romData[address+6] = struct.unpack("B", self.romFile.read(1))
-            romData[address+7] = struct.unpack("B", self.romFile.read(1))
+            romData[address+6] = struct.unpack("B", self.romFile.read(1))[0]
+            romData[address+7] = struct.unpack("B", self.romFile.read(1))[0]
 
         return romData
 
@@ -947,7 +947,7 @@ class FakeROM:
         self.curAddress = address
 
     def write(self, byte):
-        self.data[self.curAddress] = struct.unpack("B", byte)
+        self.data[self.curAddress] = struct.unpack("B", byte)[0]
         self.curAddress += 1
 
     def read(self, byteCount):

@@ -15,6 +15,12 @@ speeds = ['slowest', 'slow', 'medium', 'fast', 'fastest']
 energyQties = ['sparse', 'medium', 'vanilla' ]
 progDiffs = ['easier', 'normal', 'harder']
 
+def dumpErrorMsg(outFileName, msg):
+    if outFileName is None:
+        return
+    with open(outFileName, 'w') as jsonFile:
+        json.dump({"errorMsg": msg}, jsonFile)
+
 def restricted_float(x):
     x = float(x)
     if x < 0.0 or x > 9.0:
@@ -122,9 +128,18 @@ if __name__ == "__main__":
     parser.add_argument('--controls',
                         help="specify controls, comma-separated, in that order: Shoot,Jump,Dash,ItemSelect,ItemCancel,AngleUp,AngleDown. Possible values: A,B,X,Y,L,R,Select,None",
                         dest='controls')
+    parser.add_argument('--hideItems', help="Like in dessy's rando hide half of the items",
+                        dest="hideItems", action='store_true', default=False)
 
     # parse args
     args = parser.parse_args()
+
+    if args.output is None and args.rom is None:
+        print "Need --output or --rom parameter"
+        sys.exit(-1)
+    elif args.output is not None and args.rom is not None:
+        print "Can't have both --output and --rom parameters"
+        sys.exit(-1)
 
     # if diff preset given, load it
     if args.paramsFileName is not None:
@@ -268,7 +283,9 @@ if __name__ == "__main__":
         try:
             randomizer = AreaRandomizer(graphLocations, randoSettings, seedName, dotDir=dotDir)
         except RuntimeError:
-            print("DIAG: Cannot generate area layout. Retry, and change the super fun settings if the problem happens again.")
+            msg = "Cannot generate area layout. Retry, and change the super fun settings if the problem happens again."
+            dumpErrorMsg(args.output, msg)
+            print("DIAG: {}".format(msg))
             sys.exit(-1)
         RomPatches.ActivePatches += RomPatches.AreaSet
         if args.areaLayoutBase == True:
@@ -278,59 +295,64 @@ if __name__ == "__main__":
         randomizer = Randomizer(graphLocations, randoSettings, seedName, vanillaTransitions)
     itemLocs = randomizer.generateItems()
     if itemLocs is None:
-        print("Can't generate " + fileName + " with the given parameters, try increasing the difficulty target.")
+        dumpErrorMsg(args.output, randomizer.errorMsg)
+        print("Can't generate " + fileName + " with the given parameters: {}".format(randomizer.errorMsg))
         sys.exit(-1)
+
+    # hide some items like in dessy's
+    if args.hideItems == True:
+        for itemLoc in itemLocs:
+            if (itemLoc['Item']['Type'] not in ['Nothing', 'NoEnergy']
+                and itemLoc['Location']['CanHidden'] == True
+                and itemLoc['Location']['Visibility'] == 'Visible'):
+                if bool(random.getrandbits(1)) == True:
+                    itemLoc['Location']['Visibility'] = 'Hidden'
 
     # transform itemLocs in our usual dict(location, item)
     locsItems = {}
     for itemLoc in itemLocs:
         locsItems[itemLoc["Location"]["Name"]] = itemLoc["Item"]["Type"]
-
     if args.debug == True:
         for loc in locsItems:
             print('{:>50}: {:>16} '.format(loc, locsItems[loc]))
 
     try:
-        romPatcher = None
-        webService = False
+        # args.rom is not None: generate local rom named filename.sfc with args.rom as source
+        # args.output is not None: generate local json named args.output
         if args.rom is not None:
             # patch local rom
             romFileName = args.rom
-            fileName += '.sfc'
-            shutil.copyfile(romFileName, fileName)
-            romPatcher = RomPatcher(fileName)
-        elif args.output is not None:
-            # web service
-            romPatcher = RomPatcher()
-            webService = True
+            outFileName = fileName + '.sfc'
+            shutil.copyfile(romFileName, outFileName)
+            romPatcher = RomPatcher(outFileName)
         else:
-            # rom json
-            fileName += '.json'
-            with open(fileName, 'w') as jsonFile:
-                if args.area == True:
-                    locsItems['transitions'] = randomizer.transitions
-                # TODO: add patches
-                json.dump(locsItems, jsonFile)
-        if romPatcher is not None:
-            romPatcher.writeItemsLocs(itemLocs)
-            romPatcher.applyIPSPatches(args.patches, args.noLayout, args.noGravHeat, args.area, args.areaLayoutBase, args.noVariaTweaks)
-            romPatcher.writeSeed(seed)
-            romPatcher.writeSpoiler(itemLocs)
-            romPatcher.writeRandoSettings(randoSettings)
-            if args.area == True:
-                romPatcher.writeDoorConnections(doors)
-            romPatcher.writeTransitionsCredits(randomizer.areaGraph.getCreditsTransitions())
-            if ctrlDict is not None:
-                romPatcher.writeControls(ctrlDict)
-            romPatcher.end()
-        if webService == True:
+            outFileName = args.output
+            romPatcher = RomPatcher()
+
+        romPatcher.writeItemsLocs(itemLocs)
+        romPatcher.applyIPSPatches(args.patches, args.noLayout, args.noGravHeat, args.area, args.areaLayoutBase, args.noVariaTweaks)
+        romPatcher.writeSeed(seed)
+        romPatcher.writeSpoiler(itemLocs)
+        romPatcher.writeRandoSettings(randoSettings)
+        if args.area == True:
+            romPatcher.writeDoorConnections(doors)
+        romPatcher.writeTransitionsCredits(randomizer.areaGraph.getCreditsTransitions())
+        if ctrlDict is not None:
+            romPatcher.writeControls(ctrlDict)
+        romPatcher.end()
+
+        if args.rom is None:
             data = romPatcher.romFile.data
             fileName += '.sfc'
             data["fileName"] = fileName
-            with open(args.output, 'w') as jsonFile:
+            # error msg in json to be displayed by the web site
+            data["errorMsg"] = randomizer.errorMsg
+            with open(outFileName, 'w') as jsonFile:
                 json.dump(data, jsonFile)
     except Exception as e:
-        print("Error patching {}. Is {} a valid ROM ? ({}: {})".format(fileName, romFileName, type(e).__name__, e))
+        msg = "Error patching {}: ({}: {})".format(outFileName, type(e).__name__, e)
+        dumpErrorMsg(args.output, msg)
+        print(msg)
         sys.exit(-1)
 
     print("Rom generated: {}".format(fileName))

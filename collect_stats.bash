@@ -3,11 +3,21 @@
 RANDO=./randomizer.py
 SOLVER=./solver.py
 GET_STATS=./get_stats.py
+DUMP=./dump_rom.py
 
 presets="noob flo manu speedrunner"
 progs="slowest slow medium fast fastest random"
 n=20
-test_set=$1
+vanilla_rom=$1
+if [ -z "$1" ]; then
+    echo "Missing vanilla ROM"
+    exit 1
+fi
+if [ ! -f "$1" ]; then
+    echo "Can't find vanilla ROM [$1]"
+    exit 1
+fi
+test_set=$2
 
 nb_cpu=$(grep processor /proc/cpuinfo | wc -l)
 #nb_cpu=1
@@ -43,7 +53,7 @@ function worker {
     seed=$(head -c 500 /dev/urandom | tr -dc '0-9' | fold -w 7 | head -n 1 | sed 's/^0*//')
     errfile=/tmp/VARIA_stats_worker_${seed}_${speed}_${p}
     echo "errfile = $errfile"
-    $RANDO --seed ${seed} -i $speed $extra --param diff_presets/$p.json
+    $RANDO --rom ${vanilla_rom} --seed ${seed} -i $speed $extra --param diff_presets/$p.json
     [ $? -ne 0 ] && {
 	echo "RANDO failed"  > $errfile
 	echo "preset : $p" >> $errfile
@@ -52,19 +62,22 @@ function worker {
 	echo "extra options : $extra" >> $errfile
 	return
     }
-    rom=$(ls VARIA_Randomizer_*${seed}_${p}*.json)
-    dot=$(ls VARIA_Randomizer_*${seed}_${p}*.dot 2> /dev/null)
-    rom1st=${dest}/${rom/json/1st}
-    solver_log=${dest}/${rom/json/log}
-    ls $rom > /dev/null 2>&1 && {
-	$SOLVER $rom --param diff_presets/$p.json  --difficultyTarget 5 --displayGeneratedPath -1 $rom1st > $solver_log
+    rom=$(ls -1 VARIA_Randomizer_*${seed}_${p}*.sfc)
+    dot=$(ls -1 VARIA_Randomizer_*${seed}_${p}*.dot 2> /dev/null)
+    rom1st=${dest}/${rom/sfc/1st}
+    solver_log=${dest}/${rom/sfc/log}
+    romjson=${dest}/${rom/sfc/json}
+    [ -f $rom ] && {
+	$SOLVER $rom --preset diff_presets/$p.json  --difficultyTarget 5 --displayGeneratedPath -1 $rom1st > $solver_log
 	[ $? -ne 0 ] && {
 	    echo "SOLVER failed"  > $errfile
 	    echo "rom : $rom" >> $errfile
 	    echo "extra options : $extra" >> $errfile
 	    return
 	}
-	mv $rom $dest
+	# .sfc -> .json
+	$DUMP $rom ${romjson}
+	rm -f $rom
 	[ ! -z "$dot" ] && {
 	    mv $dot $dest
 	}

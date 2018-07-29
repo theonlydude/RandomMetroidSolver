@@ -3,7 +3,7 @@ from itemrandomizerweb import Items
 from parameters import Knows, Settings, samus
 from itemrandomizerweb.stdlib import List
 from helpers import Bosses
-from utils import randGaussBounds
+from utils import randGaussBounds, getRangeDict, chooseFromRange
 from graph import AccessGraph
 from graph_access import accessPoints
 from smboolmanager import SMBoolManager
@@ -13,8 +13,8 @@ class RandoSettings(object):
     # progSpeed : slowest, slow, medium, fast, fastest
     # progDiff : easier, normal, harder
     # qty : dictionary telling how many tanks and ammo will be distributed. keys are:
-    #       'missile', 'super', 'powerBomb' : relative weight of ammo distribution (ex:3/3/1)
-    #       'energy' : can be 'sparse' (5 tanks), 'medium' (11 tanks), 'vanilla' (14 Etanks, 4 reserves)
+    #       'ammo': a dict with 'Missile', 'Super', 'PowerBomb' keys. relative weight of ammo distribution (ex:3/3/1)
+    #       'energy' : can be 'sparse' (4-6 tanks), 'medium' (8-12 tanks), 'vanilla' (14 Etanks, 4 reserves)
     #       'minors' : percentage of ammo to distribute. 100 being vanilla
     # restrictions : item placement restrictions dict. values are booleans. keys :
     #                'Suits' : no suits early game
@@ -235,13 +235,13 @@ class Randomizer(object):
             'MinProgression' : self.chooseItemMinProgression,
             'MaxProgression' : self.chooseItemMaxProgression
         }
-        self.chooseItemRanges = self.getRangeDict(settings.choose['Items'])
+        self.chooseItemRanges = getRangeDict(settings.choose['Items'])
         self.chooseLocFuncs = {
             'Random' : self.chooseLocationRandom,
             'MinDiff' : self.chooseLocationMinDiff,
             'MaxDiff' : self.chooseLocationMaxDiff
         }
-        self.chooseLocRanges = self.getRangeDict(settings.choose['Locations'])
+        self.chooseLocRanges = getRangeDict(settings.choose['Locations'])
         self.restrictions = settings.restrictions
         self.itemPool = Items.getItemPool(settings.qty, settings.forbiddenItems)
         self.difficultyTarget = settings.maxDiff
@@ -375,28 +375,11 @@ class Randomizer(object):
 
         return itemPool
 
-    # from a relative weight dictionary, gives a normalized range dictionary
-    # example :
-    # { 'a' : 10, 'b' : 17, 'c' : 3 } => {'c': 0.1, 'a':0.4333333, 'b':1 }
-    def getRangeDict(self, weightDict):
-        total = float(sum(weightDict.values()))
-        rangeDict = {}
-        current = 0.0
-        for k in sorted(weightDict, key=weightDict.get):
-            w = float(weightDict[k]) / total
-            current += w
-            rangeDict[k] = current
-
-        return rangeDict
-
     # get choose function from a weighted dict
     def getChooseFunc(self, rangeDict, funcDict):
-        r = random.random()
-        for v in sorted(rangeDict, key=rangeDict.get):
-            f = funcDict[v]
-            if r < rangeDict[v]:
-                return f
-        return f
+        v = chooseFromRange(rangeDict)
+
+        return funcDict[v]
 
     def chooseItemRandom(self, items):
         return items[random.randint(0, len(items)-1)]

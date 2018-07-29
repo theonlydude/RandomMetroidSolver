@@ -72,7 +72,7 @@ if __name__ == "__main__":
                         type=restricted_float)
     parser.add_argument('--superQty', '-q',
                         help="quantity of super missiles",
-                        dest='superQty', nargs='?', default=3,
+                        dest='superQty', nargs='?', default=2,
                         type=restricted_float)
     parser.add_argument('--powerBombQty', '-w',
                         help="quantity of power bombs",
@@ -244,9 +244,11 @@ if __name__ == "__main__":
         minorQty = random.randint(25, 100)
     if energyQty == 'random':
         energyQty = energyQties[random.randint(0, len(energyQties)-1)]
-    qty = {'missile': missileQty, 'super': superQty,
-           'powerBomb': powerBombQty, 'energy': energyQty,
-           'minors': minorQty}
+    qty = {'energy': energyQty,
+           'minors': minorQty,
+           'ammo': { 'Missile': missileQty,
+                     'Super': superQty,
+                     'PowerBomb': powerBombQty } }
     if 'random' in args.superFun:
         args.superFun = []
         def addFun(fun):

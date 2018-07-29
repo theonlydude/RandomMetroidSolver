@@ -577,7 +577,7 @@ class RomPatcher:
 
     def writeRandoSettings(self, settings):
         address = 0x2736C0
-        value = "%.1f" % settings.qty['missile']
+        value = "%.1f" % settings.qty['ammo']['Missile']
         line = " MISSILE PROBABILITY        %s " % value
         self.writeCreditsStringBig(address, line, top=True)
         address += 0x40
@@ -586,7 +586,7 @@ class RomPatcher:
         self.writeCreditsStringBig(address, line, top=False)
         address += 0x40
 
-        value = "%.1f" % settings.qty['super']
+        value = "%.1f" % settings.qty['ammo']['Super']
         line = " SUPER PROBABILITY          %s " % value
         self.writeCreditsStringBig(address, line, top=True)
         address += 0x40
@@ -595,7 +595,7 @@ class RomPatcher:
         self.writeCreditsStringBig(address, line, top=False)
         address += 0x40
 
-        value = "%.1f" % settings.qty['powerBomb']
+        value = "%.1f" % settings.qty['ammo']['PowerBomb']
         line = " POWER BOMB PROBABILITY     %s " % value
         self.writeCreditsStringBig(address, line, top=True)
         address += 0x40

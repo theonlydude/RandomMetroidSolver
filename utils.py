@@ -5,8 +5,8 @@ from parameters import Knows, Settings, Controller, isKnows, isSettings, isButto
 from smbool import SMBool
 
 # gauss random in [0, r] range
-# the higher the slope, the less probable extreme values are
-def randGaussBounds(r, slope=8):
+# the higher the slope, the less probable extreme values are.
+def randGaussBounds(r, slope=5):
     r = float(r)
     n = int(round(random.gauss(r/2, r/slope), 0))
     if n < 0:
@@ -14,6 +14,29 @@ def randGaussBounds(r, slope=8):
     if n > r:
         n = int(r)
     return n
+
+# from a relative weight dictionary, gives a normalized range dictionary
+# example :
+# { 'a' : 10, 'b' : 17, 'c' : 3 } => {'c': 0.1, 'a':0.4333333, 'b':1 }
+def getRangeDict(weightDict):
+    total = float(sum(weightDict.values()))
+    rangeDict = {}
+    current = 0.0
+    for k in sorted(weightDict, key=weightDict.get):
+        w = float(weightDict[k]) / total
+        current += w
+        rangeDict[k] = current
+
+    return rangeDict
+
+def chooseFromRange(rangeDict):
+    r = random.random()
+    val = None
+    for v in sorted(rangeDict, key=rangeDict.get):
+        val = v
+        if r < rangeDict[v]:
+            return v
+    return val
 
 class PresetLoader(object):
     @staticmethod

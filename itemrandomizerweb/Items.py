@@ -1,10 +1,11 @@
 from itemrandomizerweb.stdlib import List
-from utils import randGaussBounds
+from utils import randGaussBounds, getRangeDict, chooseFromRange
 
 import struct
 import random
 
-# https://github.com/tewtal/itemrandomizerweb/blob/master/ItemRandomizer/Items.fs
+# base items list : one of each type. we'll use it for base item pool
+# and add duplicate items for ammo/energy
 Items = [
     {
         'Type': 'ETank',
@@ -233,118 +234,83 @@ def getItemTypeCode(item, itemVisibility):
     itemCode = item['Code'] + modifier
     return toByteArray(itemCode)
 
+# add item from original item list (NoEnergy and Nothing items have to be added manually)
 def addItem(itemType, itemPool):
-    return [List.find(lambda item: item["Type"] == itemType, Items)] + itemPool
+    itemPool.append(List.find(lambda item: item["Type"] == itemType, Items))
 
-def addAmmo(itemPool, qty):
+# remove from pool an item of given type. item type has to be in original Items list.
+def removeItem(itemType, itemPool):
+    itemPool.remove(List.find(lambda item: item["Type"] == itemType, Items))
+
+# add ammo given quantity settings
+def addAmmo(qty, itemPool):
     # always add enough minors to pass zebetites (1100 damages) and mother brain 1 (3000 damages)
-    # ie: 1 missiles and 1 supper, and 2 (supers or missiles)
+    # accounting for missile refill. so 15-5.
+    # refill after each zeb, refill after breaking the glass.
     for i in range(2):
-        if random.random() < 0.5:
-            itemPool = addItem('Missile', itemPool)
-        else:
-            itemPool = addItem('Super', itemPool)
+        addItem('Missile', itemPool)
 
     # there's 66 minors locations, 5 minors items are already in the pool
     minorLocations = ((66 - 5) * qty['minors']) / 100
     maxItems = len(itemPool) + int(minorLocations)
-
-    # we won't generate all the minors, add the nothing item
-    if qty['minors'] != 100:
-        Items.append(Nothing)
-
-    # depending on quantity, compute thresholds
-    sumQty = float(qty['missile'] + qty['super'] + qty['powerBomb'])
-    missileThreshold = qty['missile'] / sumQty
-    superThreshold = missileThreshold + qty['super'] / sumQty
-    powerBombThreshold = superThreshold + qty['powerBomb'] / sumQty
-
+    rangeDict = getRangeDict(qty['ammo'])
     while len(itemPool) < maxItems:
-        rand = random.random()
-        if rand <= missileThreshold:
-            item = 'Missile'
-        elif rand <= superThreshold:
-            item = 'Super'
-        else:
-            item = 'PowerBomb'
-
-        itemPool = addItem(item, itemPool)
+        item = chooseFromRange(rangeDict)
+        addItem(item, itemPool)
 
     for i in range(100 - maxItems):
-        itemPool = addItem('Nothing', itemPool)
+        itemPool.append(Nothing)
 
     return itemPool
 
-def removeItem(itemType, itemPool):
-    i=0
-    for item in itemPool:
-        if item['Type'] == itemType:
-            return itemPool[0:i] + itemPool[i+1:]
-        i+=1
-
-    raise Exception("Item {} no present in itemPool".format(itemType))
-
-def removeForbiddenItems(forbiddenItems, itemPool, noEnergyAdded):
-    if noEnergyAdded is False:
-        Items.append(NoEnergy)
-
+def removeForbiddenItems(forbiddenItems, itemPool):
     for item in forbiddenItems:
-#        print("remove item {}".format(item))
-        itemPool = removeItem(item, itemPool)
-        itemPool = addItem('NoEnergy', itemPool)
-    return itemPool
+        removeItem(item, itemPool)
+        itemPool.append(NoEnergy)
 
-def getItemPool(qty, forbiddenItems):
-    noEnergyAdded = False
-
-    # this function is called from the Randomizer constructor and the constructor can be called several times
-    if List.exists(lambda item: item["Type"] == 'NoEnergy', Items):
-        Items.remove(NoEnergy)
-    if List.exists(lambda item: item["Type"] == 'Nothing', Items):
-        Items.remove(Nothing)
-
-    if qty['energy'] == 'sparse':
+def addEnergy(qty, itemPool):
+    energyQty = qty['energy']
+    if energyQty == 'sparse':
         # 4-6
         if random.random() < 0.5:
-            itemPool = addItem('Reserve', Items)
+            addItem('Reserve', itemPool)
         else:
-            itemPool = addItem('ETank', Items)
+            addItem('ETank', itemPool)
         # 3 in the pool (1 E, 1 R + the previous one)
-        rest = 1 + randGaussBounds(2)
+        rest = 1 + randGaussBounds(2, 5)
         for i in range(rest):
-            itemPool = addItem('ETank', itemPool)
+            addItem('ETank', itemPool)
         # complete up to 18 energies with nothing item
-        Items.append(NoEnergy)
-        noEnergyAdded = True
         for i in range(18 - 3 - rest):
-            itemPool = addItem('NoEnergy', itemPool)
+            itemPool.append(NoEnergy)
     elif qty['energy'] == 'medium':
         # 8-12
-        itemPool = addItem('ETank', Items)
+        # add up to 3 Reserves or ETanks (cannot add more than 3 reserves)
         for i in range(3):
             if random.random() < 0.5:
-                itemPool = addItem('Reserve', itemPool)
+                addItem('Reserve', itemPool)
             else:
-                itemPool = addItem('ETank', itemPool)
-        # 6 already in the pool (2 E, 1 R, + the previous 3)
-        rest = 2 + randGaussBounds(4)
+                addItem('ETank', itemPool)
+        # 5 already in the pool (1 E, 1 R, + the previous 3)
+        rest = 3 + randGaussBounds(4, 3.7)
         for i in range(rest):
-            itemPool = addItem('ETank', itemPool)
-
-        Items.append(NoEnergy)
-        noEnergyAdded = True
+            addItem('ETank', itemPool)
+        # fill the rest with NoEnergy
         for i in range(18 - 6 - rest):
-            itemPool = addItem('NoEnergy', itemPool)
+            itemPool.append(NoEnergy)
     else:
-        # 18
-        itemPool = addItem('Reserve', Items)
-        for i in range(2):
-            itemPool = addItem('Reserve', itemPool)
+        # add the vanilla 3 reserves and 13 Etanks
+        for i in range(3):
+            addItem('Reserve', itemPool)
         for i in range(13):
-            itemPool = addItem('ETank', itemPool)
+            addItem('ETank', itemPool)
 
-    itemPool = addAmmo(itemPool, qty)
-
-    itemPool = removeForbiddenItems(forbiddenItems, itemPool, noEnergyAdded)
+def getItemPool(qty, forbiddenItems):
+    # copy original items list (does not contain the 'nothing' types)
+    itemPool = Items[:]
+    # always add energy before ammo, as addAmmo will fill up item pool
+    addEnergy(qty, itemPool)
+    addAmmo(qty, itemPool)
+    removeForbiddenItems(forbiddenItems, itemPool)
 
     return itemPool

@@ -665,11 +665,6 @@ function startTheTour(step=-1) {
       content: "Like in Dessy's randomizer, hides half of the visible items.<br/>Items always visible:<ul><li>Energy Tank, Gauntlet</li><li>Energy Tank, Terminator</li><li>Morphing Ball</li><li>Missile (Crateria moat)</li><li>Missile (green Brinstar below super missile)</li><li>Missile (above Crocomire)</li><li>Power Bomb (lower Norfair above fire flea room)</li><li>Missile (Gravity Suit)</li><li>Missile (green Maridia shinespark)</li></ul>"
     },
     {
-      element: "#randomMinorsStep",
-      title: "Random minors/energy quantities",
-      content: "Randomly set the minors probabilities, the minors quantity (between 25% and 100%) and the energy quantity."
-    },
-    {
       element: "#missileQty",
       title: "Quantity of Missiles/Super Missiles/Power Bombs",
       content: "For each minor types, the higher the number the higher the probability of choosing it when placing a minor."
@@ -698,12 +693,6 @@ function startTheTour(step=-1) {
 <li>Remove blue gate in Green Hill Zone</li>\
 <li>New platform in Green Hill Zone to access transition door</li>\
 <li>Made access paths to the three most 'hidden' portals more obvious so you don't forget to check them</li></ul>",
-      placement: "auto left"
-    },
-    {
-      element: "#randomSuperFunsStep",
-      title: "Random Super Fun Times",
-      content: "Randomly set the Super Fun Times parameters.",
       placement: "auto left"
     },
     {
@@ -879,22 +868,22 @@ def displayNumber(id, min, max, default, step="1"):
 	      <tr id="spreadItemsVisibility">
 		<td class="small"><div class="random"><button id="spreadItemsRandom" type="button" onclick="randomize(event, 'spreadItems')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
 	        <td colspan="2" id="spreadItemsStep">{{displayCheckbox("spreadItems")}}<span id="spreadItemsText">Spread progression items</span></td>
-                <td><button type="button" onclick="startTheTour(8)">?</button></td>
+                <td><button type="button" onclick="startTheTour(7)">?</button></td>
 	      </tr>
 	      <tr id="suitsRestrictionVisibility">
 		<td class="small"><div class="random"><button id="suitsRestrictionRandom" type="button" onclick="randomize(event, 'suitsRestriction')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
 	        <td colspan="2" id="suitsRestrictionStep">{{displayCheckbox("suitsRestriction")}}<span id="suitsRestrictionText">Suits restriction</span></td>
-                <td><button type="button" onclick="startTheTour(9)">?</button></td>
+                <td><button type="button" onclick="startTheTour(8)">?</button></td>
 	      </tr>
 	      <tr id="speedScrewRestrictionVisibility">
 		<td class="small"><div class="random"><button id="speedScrewRestrictionRandom" type="button" onclick="randomize(event, 'speedScrewRestriction')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
 	        <td colspan="2" id="speedScrewRestrictionStep">{{displayCheckbox("speedScrewRestriction")}}<span id="speedScrewRestrictionText">Early Morph</span></td>
-                <td><button type="button" onclick="startTheTour(10)">?</button></td>
+                <td><button type="button" onclick="startTheTour(9)">?</button></td>
 	      </tr>
 	      <tr id="hideItemsVisibility">
 		<td class="small"><div class="random"><button id="hideItemsRandom" type="button" onclick="randomize(event, 'hideItems')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
 		<td colspan="2" id="hideItemsStep">{{displayCheckbox("hideItems")}}<span id="hideItemsText">Hide some items</span></td>
-		<td><button type="button" onclick="startTheTour(11)">?</button></td>
+		<td><button type="button" onclick="startTheTour(10)">?</button></td>
 	      </tr>
 	    </table>
 	    <div id="ammoVisibility">
@@ -905,7 +894,7 @@ def displayNumber(id, min, max, default, step="1"):
 		  <td class="small"><div class="random"><button id="missileQtyRandom" type="button" onclick="randomize(event, 'missileQty')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
 		  <td><span id="missileQtyText">Quantity of Missiles:</span></td>
 		  <td>{{displayNumber("missileQty", "1", "9", "3", "0.1")}}</td>
-		  <td><button type="button" onclick="startTheTour(13)">?</button></td>
+		  <td><button type="button" onclick="startTheTour(11)">?</button></td>
                 </tr>
                 <tr>
 		  <td class="small"><div class="random"><button id="superQtyRandom" type="button" onclick="randomize(event, 'superQty')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
@@ -921,13 +910,13 @@ def displayNumber(id, min, max, default, step="1"):
 		  <td class="small"><div class="random"><button id="minorQtyRandom" type="button" onclick="randomize(event, 'minorQty')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
 		  <td><span id="minorQtyText">Percentage of minors available:</span></td>
 		  <td>{{displayNumber("minorQty", "1", "100", "100")}}</td>
-		  <td><button type="button" onclick="startTheTour(14)">?</button></td>
+		  <td><button type="button" onclick="startTheTour(12)">?</button></td>
                 </tr>
                 <tr>
 		  <td class="small"><div class="random"><button id="energyQtyRandom" type="button" onclick="randomize(event, 'energyQty')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
 		  <td><span id="energyQtyText">Quantity of Energy/Reserve Tanks available:</span></td>
 		  <td>{{displaySelect("energyQty", ["sparse", "medium", "vanilla"], "vanilla")}}</td>
-		  <td><button type="button" onclick="startTheTour(15)">?</button></td>
+		  <td><button type="button" onclick="startTheTour(13)">?</button></td>
                 </tr>
 	      </table>
 	    </div>
@@ -941,10 +930,10 @@ def displayNumber(id, min, max, default, step="1"):
 	    <table class="full">
 	      <tr>
 	        <td colspan="2" class="full" id="areaRandomizationStep">{{displayCheckbox("areaRandomization")}}Area randomization</td>
-                <td><button type="button" onclick="startTheTour(16)">?</button></td>
+                <td><button type="button" onclick="startTheTour(14)">?</button></td>
 	      </tr>
 	      <tr id="areaPatchVisibility">
-		<td colspan="2" class="full" id="areaLayoutStep">{{displayCheckbox("areaLayout", False)}} Additional layout patches for easier navigation</td><td><button type="button" onclick="startTheTour(17)">?</button></td>
+		<td colspan="2" class="full" id="areaLayoutStep">{{displayCheckbox("areaLayout", False)}} Additional layout patches for easier navigation</td><td><button type="button" onclick="startTheTour(15)">?</button></td>
 	      </tr>
             </table>
 	    <div id="superFunVisibility">
@@ -957,17 +946,17 @@ def displayNumber(id, min, max, default, step="1"):
                 <tr>
 		  <td class="small"><div class="random"><button id="funCombatRandom" type="button" onclick="randomize(event, 'funCombat')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
 		  <td colspan="2" class="full" id="funCombatStep">{{displayCheckbox("funCombat")}}<span id="funCombatText">Super Fun Combat</span></td>
-		  <td><button type="button" onclick="startTheTour(19)">?</button></td>
+		  <td><button type="button" onclick="startTheTour(16)">?</button></td>
                 </tr>
                 <tr>
 		  <td class="small"><div class="random"><button id="funMovementRandom" type="button" onclick="randomize(event, 'funMovement')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
 		  <td colspan="2" class="full" id="funMovementStep">{{displayCheckbox("funMovement")}}<span id="funMovementText">Super Fun Movement</span></td>
-		  <td><button type="button" onclick="startTheTour(20)">?</button></td>
+		  <td><button type="button" onclick="startTheTour(17)">?</button></td>
                 </tr>
                 <tr>
 		  <td class="small"><div class="random"><button id="funSuitsRandom" type="button" onclick="randomize(event, 'funSuits')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
 		  <td colspan="2" class="full" id="funSuitsStep">{{displayCheckbox("funSuits")}}<span id="funSuitsText">Suitless</span></td>
-		  <td><button type="button" onclick="startTheTour(21)">?</button></td>
+		  <td><button type="button" onclick="startTheTour(18)">?</button></td>
                 </tr>
               </table>
 	    </div>
@@ -979,13 +968,13 @@ def displayNumber(id, min, max, default, step="1"):
 	      <table class="full" id="mainPatchesVisibitily">
 	        <tr>
 		  <td class="full" id="layoutPatchesStep">{{displayCheckbox("layoutPatches", True)}} Include layout patches from Total Item Randomizer</td>
-		  <td><button type="button" onclick="startTheTour(22)">?</button></td>
+		  <td><button type="button" onclick="startTheTour(19)">?</button></td>
 	        </tr>
 	        <tr>
-		  <td class="full" id="noGravHeatStep">{{displayCheckbox("noGravHeat", True)}} Remove Gravity Suit heat protection (by Total)</td><td><button type="button" onclick="startTheTour(23)">?</button></td>
+		  <td class="full" id="noGravHeatStep">{{displayCheckbox("noGravHeat", True)}} Remove Gravity Suit heat protection (by Total)</td><td><button type="button" onclick="startTheTour(20)">?</button></td>
 	        </tr>
 	        <tr>
-		  <td class="full" id="variaTweaksStep">{{displayCheckbox("variaTweaks", True)}} VARIA tweaks (by Flo)</td><td><button type="button" onclick="startTheTour(24)">?</button></td>
+		  <td class="full" id="variaTweaksStep">{{displayCheckbox("variaTweaks", True)}} VARIA tweaks (by Flo)</td><td><button type="button" onclick="startTheTour(21)">?</button></td>
 	        </tr>
 	      </table>
 	      <table class="full" id="patchesStep">

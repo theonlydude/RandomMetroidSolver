@@ -198,6 +198,17 @@ if __name__ == "__main__":
         threshold = mania - epsilon
     maxDifficulty = threshold
 
+    if args.fullRandomization == 'random':
+        args.fullRandomization = bool(random.getrandbits(1))
+    if args.spreadItems == 'random':
+        args.spreadItems = bool(random.getrandbits(1))
+    if args.suitsRestriction == 'random':
+        args.suitsRestriction = bool(random.getrandbits(1))
+    if args.speedScrewRestriction == 'random':
+        args.speedScrewRestriction = bool(random.getrandbits(1))
+    if args.hideItems == 'random':
+        args.hideItems = bool(random.getrandbits(1))
+
     # fill restrictions dict
     restrictions = { 'Suits' : args.suitsRestriction, 'SpeedScrew' : args.speedScrewRestriction, 'SpreadItems' : args.spreadItems }
     restrictions['MajorMinor'] = not args.fullRandomization
@@ -256,17 +267,6 @@ if __name__ == "__main__":
             else:
                 superFun.append(fun)
         args.superFun = superFun
-
-    if args.spreadItems == 'random':
-        args.spreadItems = bool(random.getrandbits(1))
-    if args.fullRandomization == 'random':
-        args.fullRandomization = bool(random.getrandbits(1))
-    if args.suitsRestriction == 'random':
-        args.suitsRestriction = bool(random.getrandbits(1))
-    if args.speedScrewRestriction == 'random':
-        args.speedScrewRestriction = bool(random.getrandbits(1))
-    if args.hideItems == 'random':
-        args.hideItems = bool(random.getrandbits(1))
 
     ctrlDict = None
     if args.controls:

@@ -853,7 +853,7 @@ def randomizerWebService():
         if request.vars[id] == 'on':
             params += ['--superFun', fun]
         elif request.vars[id] == 'random':
-            prams += ['--superFun', "{}Random".format(fun)]
+            params += ['--superFun', "{}Random".format(fun)]
 
     addSuperFun('funCombat', params)
     addSuperFun('funMovement', params)

@@ -327,45 +327,28 @@ function AjaxRandomizerCallCompleted(data) {
     document.getElementById("submitBtn").data = "Randomize";
     console.log("button text set back to randomize");
 
+    var dataDict = {"complexity": getComplexity()};
+    var elems = ["paramsFile", "itemsounds", "spinjumprestart", "supermetroid_msu1", "max_ammo_display", "elevators_doors_speed", "skip_ceres", "skip_intro", "animals", "layoutPatches", "noGravHeat", "areaLayout", "variaTweaks", "areaRandomization"];
+    var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "energyQty", "maxDifficulty", "progressionSpeed", "spreadItems", "fullRandomization", "suitsRestriction", "speedScrewRestriction", "funCombat", "funMovement", "funSuits", "progressionDifficulty", "hideItems"];
+
+    for(var i=0; i<elems.length; i++) {
+       console.log("elem="+elems[i]);
+       dataDict[elems[i]] = document.getElementById(elems[i]).value;
+    }
+    for(var i=0; i<randomElems.length; i++) {
+       // check if random dice is checked
+       if(document.getElementById(randomElems[i]+"Random").className.search("active") != -1) {
+         dataDict[randomElems[i]] = "random";
+       } else {
+         dataDict[randomElems[i]] = document.getElementById(randomElems[i]).value;
+       }
+    }
+
     // call webservice to update the session
     var request = $.ajax({
       url: "{{=URL(f='sessionWebService')}}",
       method: "POST",
-      data: {
-        paramsFile : document.getElementById("paramsFile").value,
-        missileQty : document.getElementById("missileQty").value,
-        superQty : document.getElementById("superQty").value,
-        powerBombQty : document.getElementById("powerBombQty").value,
-        minorQty : document.getElementById("minorQty").value,
-        energyQty : document.getElementById("energyQty").value,
-        maxDifficulty : document.getElementById("maxDifficulty").value,
-        progressionSpeed : document.getElementById("progressionSpeed").value,
-        spreadItems : document.getElementById("spreadItems").value,
-        fullRandomization : document.getElementById("fullRandomization").value,
-        suitsRestriction : document.getElementById("suitsRestriction").value,
-        speedScrewRestriction : document.getElementById("speedScrewRestriction").value,
-        itemsounds : document.getElementById("itemsounds").value,
-        spinjumprestart : document.getElementById("spinjumprestart").value,
-        supermetroid_msu1 : document.getElementById("supermetroid_msu1").value,
-        max_ammo_display : document.getElementById("max_ammo_display").value,
-        animals : document.getElementById("animals").value,
-        elevators_doors_speed : document.getElementById("elevators_doors_speed").value,
-        skip_ceres : document.getElementById("skip_ceres").value,
-        skip_intro : document.getElementById("skip_intro").value,
-        funCombat : document.getElementById("funCombat").value,
-        funMovement : document.getElementById("funMovement").value,
-        funSuits : document.getElementById("funSuits").value,
-        layoutPatches : document.getElementById("layoutPatches").value,
-        noGravHeat : document.getElementById("noGravHeat").value,
-        randomMinors : document.getElementById("randomMinors").value,
-        randomSuperFuns : document.getElementById("randomSuperFuns").value,
-        progressionDifficulty : document.getElementById("progressionDifficulty").value,
-        areaRandomization : document.getElementById("areaRandomization").value,
-        complexity : getComplexity(),
-        areaLayout : document.getElementById("areaLayout").value,
-        variaTweaks : document.getElementById("variaTweaks").value,
-        hideItems : document.getElementById("hideItems").value
-      },
+      data: dataDict,
       dataType: "html"
     });
 
@@ -576,35 +559,7 @@ window.onload = function(){
         }
     }
 
-    initialDisable("randomMinors", ["missileQty", "superQty", "powerBombQty", "minorQty", "energyQty"]);
-    initialDisable("randomSuperFuns", ["funCombat", "funMovement", "funSuits"]);
-
     setComplexity();
-}
-function initialDisable(id, elems) {
-    var check = document.getElementById(id);
-    if(check.checked){
-        for(var i=0; i<elems.length; i++){
-          var e = document.getElementById(elems[i]);
-          e.disabled = check.checked;
-          // grey out the disabled text
-          var text = document.getElementById(elems[i]+"Text");
-          if(e.disabled) {
-              text.className = "disabledText";
-          } else {
-              text.className = "";
-          }
-          // tell switchery
-          if(elems[i] in globalSwitchs){
-            var s = globalSwitchs[elems[i]];
-            if(check.checked){
-              s.disable();
-            } else {
-              s.enable();
-            }
-          }
-        }
-    }
 }
 
 function switchCheckbox(id, elems=[]) {
@@ -812,18 +767,6 @@ def displayCheckbox(id, defaultTrue=False):
   else:
 }}
     {{=INPUT(_id=id, _name=id, _type="checkbox", _value="off", _class="js-switch", _onchange="switchCheckbox('{}')".format(id))}}
-    {{pass}}
-  {{pass}}
-
-{{
-def displayCheckboxRandom(id, elems):
-  if id in session.randomizer and session.randomizer[id] == 'on':
-}}
-    {{=INPUT(_id=id, _name=id, _type="checkbox", _checked="checked", _value="on", _class="js-switch", _onchange="switchCheckbox('{}', {})".format(id, elems))}}
-{{
-  else:
-}}
-    {{=INPUT(_id=id, _name=id, _type="checkbox", _value="off", _class="js-switch", _onchange="switchCheckbox('{}', {})".format(id, elems))}}
     {{pass}}
   {{pass}}
 

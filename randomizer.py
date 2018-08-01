@@ -176,7 +176,7 @@ if __name__ == "__main__":
     # if no max diff, set it very high
     if args.maxDifficulty:
         if args.maxDifficulty == 'random':
-            diffs = ['easy', 'medium', 'hard', 'harder', 'very hard', 'hardcore', 'mania']
+            diffs = ['hard', 'harder', 'very hard', 'hardcore', 'mania']
             maxDifficulty = text2diff[diffs[random.randint(0, len(diffs)-1)]]
         else:
             maxDifficulty = text2diff[args.maxDifficulty]
@@ -305,7 +305,13 @@ if __name__ == "__main__":
             RomPatches.ActivePatches.remove(RomPatches.AreaRandoGatesOther)
         doors = getDoorConnections(randomizer.areaGraph)
     else:
-        randomizer = Randomizer(graphLocations, randoSettings, seedName, vanillaTransitions)
+        try:
+            randomizer = Randomizer(graphLocations, randoSettings, seedName, vanillaTransitions)
+        except RuntimeError:
+            msg = "Locations unreachable detected with preset/super fun/max diff. Retry, and change the Super Fun settings and or Maximum difficulty if the problem happens again."
+            dumpErrorMsg(args.output, msg)
+            print("DIAG: {}".format(msg))
+            sys.exit(-1)
     itemLocs = randomizer.generateItems()
     if itemLocs is None:
         dumpErrorMsg(args.output, randomizer.errorMsg)

@@ -139,6 +139,37 @@ body {
 
 <script type="text/javascript">
 
+function randomize(evt, name) {
+  var isActive;
+  if(evt.currentTarget.className.search("active") != -1) {
+    evt.currentTarget.className = evt.currentTarget.className.replace(" active", "");
+    isActive = false;
+  } else {
+    evt.currentTarget.className += " active";
+    isActive = true;
+  }
+
+  elemId = name;
+  var e = document.getElementById(elemId);
+  e.disabled = isActive;
+  // grey out the disabled text
+  var text = document.getElementById(elemId+"Text");
+  if(e.disabled) {
+      text.className = "disabledText";
+  } else {
+      text.className = "";
+  }
+  // tell switchery
+  if(elemId in globalSwitchs){
+    var s = globalSwitchs[elemId];
+    if(isActive){
+      s.disable();
+    } else {
+      s.enable();
+    }
+  }
+}
+
 function getComplexity() {
   tablinks = document.getElementsByClassName("tablinks");
   for (i = 0; i < tablinks.length; i++) {
@@ -161,7 +192,7 @@ function setComplexity() {
 function changeComplexity(evt, name) {
   if(name == "simple") {
     var show = [];
-    var hide = ["seedVisibility", "ammoVisibility", "maxDiffVisibility", "progDiffVisibility", "randomParamsVisibility", "spreadItemsVisibility", "suitsRestrictionVisibility", "speedScrewRestrictionVisibility", "superFunVisibility", "patchesVisibility", "areaPatchVisibility", "hideItemsVisibility"];
+    var hide = ["seedVisibility", "ammoVisibility", "maxDiffVisibility", "progDiffVisibility", "spreadItemsVisibility", "suitsRestrictionVisibility", "speedScrewRestrictionVisibility", "superFunVisibility", "patchesVisibility", "areaPatchVisibility", "hideItemsVisibility"];
     showHide(show, hide);
   } else if(name == "medium") {
     var show = ["maxDiffVisibility", "progDiffVisibility", "patchesVisibility"
@@ -172,7 +203,7 @@ for patch in patches:
     pass
   pass
 }}];
-    var hide = ["seedVisibility", "ammoVisibility", "randomParamsVisibility", "spreadItemsVisibility", "suitsRestrictionVisibility", "speedScrewRestrictionVisibility", "superFunVisibility", "areaPatchVisibility", "mainPatchesVisibitily", "mainPatchesTextVisibitily", "hideItemsVisibility"
+    var hide = ["seedVisibility", "ammoVisibility", "spreadItemsVisibility", "suitsRestrictionVisibility", "speedScrewRestrictionVisibility", "superFunVisibility", "areaPatchVisibility", "mainPatchesVisibitily", "mainPatchesTextVisibitily", "hideItemsVisibility"
 {{
 for patch in patches:
   if patch[3] == False:
@@ -182,7 +213,7 @@ for patch in patches:
 }}];
     showHide(show, hide);
   } else {
-    var show = ["seedVisibility", "ammoVisibility", "maxDiffVisibility", "progDiffVisibility", "randomParamsVisibility", "spreadItemsVisibility", "suitsRestrictionVisibility", "speedScrewRestrictionVisibility", "superFunVisibility", "patchesVisibility", "areaPatchVisibility", "mainPatchesVisibitily", "mainPatchesTextVisibitily", "hideItemsVisibility"
+    var show = ["seedVisibility", "ammoVisibility", "maxDiffVisibility", "progDiffVisibility", "spreadItemsVisibility", "suitsRestrictionVisibility", "speedScrewRestrictionVisibility", "superFunVisibility", "patchesVisibility", "areaPatchVisibility", "mainPatchesVisibitily", "mainPatchesTextVisibitily", "hideItemsVisibility"
 {{
 for patch in patches:
   response.write(", \"{}Visibitily\"".format(patch[0]), escape=False)
@@ -219,48 +250,28 @@ var globalSwitchs = {};
 function AjaxPresetCallCompleted(data) {
     console.log("AjaxPresetCallCompleted");
 
+    var dataDict = {paramsFileTarget : data};
+    var elems = ["seed", "paramsFile", "itemsounds", "spinjumprestart", "supermetroid_msu1", "max_ammo_display", "elevators_doors_speed", "skip_ceres", "skip_intro", "animals", "layoutPatches", "noGravHeat", "areaLayout", "variaTweaks", "areaRandomization"];
+    var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "energyQty", "maxDifficulty", "progressionSpeed", "spreadItems", "fullRandomization", "suitsRestriction", "speedScrewRestriction", "funCombat", "funMovement", "funSuits", "progressionDifficulty", "hideItems"];
+
+    for(var i=0; i<elems.length; i++) {
+       dataDict[elems[i]] = document.getElementById(elems[i]).value;
+    }
+    for(var i=0; i<randomElems.length; i++) {
+       // check if random dice is checked
+       if(document.getElementById(randomElems[i]+"Random").className.search("active") != -1) {
+         dataDict[randomElems[i]] = "random";
+       } else {
+         dataDict[randomElems[i]] = document.getElementById(randomElems[i]).value;
+       }
+    }
+
     // call web service with parameters
     var request = $.ajax({
       //url: "http://ouicherandomizer.pythonanywhere.com/randomizer/solver_web/randomizerWebService",
       url: "{{=URL(f='randomizerWebService')}}",
       method: "POST",
-      data: {
-        seed : document.getElementById("seed").value,
-        paramsFile : document.getElementById("paramsFile").value,
-        paramsFileTarget : data,
-        missileQty : document.getElementById("missileQty").value,
-        superQty : document.getElementById("superQty").value,
-        powerBombQty : document.getElementById("powerBombQty").value,
-        minorQty : document.getElementById("minorQty").value,
-        energyQty : document.getElementById("energyQty").value,
-        maxDifficulty : document.getElementById("maxDifficulty").value,
-        progressionSpeed : document.getElementById("progressionSpeed").value,
-        spreadItems : document.getElementById("spreadItems").value,
-        fullRandomization : document.getElementById("fullRandomization").value,
-        suitsRestriction : document.getElementById("suitsRestriction").value,
-        speedScrewRestriction : document.getElementById("speedScrewRestriction").value,
-        itemsounds : document.getElementById("itemsounds").value,
-        spinjumprestart : document.getElementById("spinjumprestart").value,
-        supermetroid_msu1 : document.getElementById("supermetroid_msu1").value,
-        max_ammo_display : document.getElementById("max_ammo_display").value,
-        elevators_doors_speed : document.getElementById("elevators_doors_speed").value,
-        skip_ceres : document.getElementById("skip_ceres").value,
-        skip_intro : document.getElementById("skip_intro").value,
-        animals : document.getElementById("animals").value,
-        funCombat : document.getElementById("funCombat").value,
-        funMovement : document.getElementById("funMovement").value,
-        funSuits : document.getElementById("funSuits").value,
-        layoutPatches : document.getElementById("layoutPatches").value,
-        noGravHeat : document.getElementById("noGravHeat").value,
-        randomMinors : document.getElementById("randomMinors").value,
-        randomParams : document.getElementById("randomParams").value,
-        randomSuperFuns : document.getElementById("randomSuperFuns").value,
-        progressionDifficulty : document.getElementById("progressionDifficulty").value,
-        areaRandomization : document.getElementById("areaRandomization").value,
-        areaLayout : document.getElementById("areaLayout").value,
-        variaTweaks : document.getElementById("variaTweaks").value,
-        hideItems : document.getElementById("hideItems").value
-      },
+      data: dataDict,
       dataType: "json",
       crossDomain: true
     });
@@ -347,7 +358,6 @@ function AjaxRandomizerCallCompleted(data) {
         layoutPatches : document.getElementById("layoutPatches").value,
         noGravHeat : document.getElementById("noGravHeat").value,
         randomMinors : document.getElementById("randomMinors").value,
-        randomParams : document.getElementById("randomParams").value,
         randomSuperFuns : document.getElementById("randomSuperFuns").value,
         progressionDifficulty : document.getElementById("progressionDifficulty").value,
         areaRandomization : document.getElementById("areaRandomization").value,
@@ -567,7 +577,6 @@ window.onload = function(){
     }
 
     initialDisable("randomMinors", ["missileQty", "superQty", "powerBombQty", "minorQty", "energyQty"]);
-    initialDisable("randomParams", ["spreadItems", "suitsRestriction", "speedScrewRestriction"]);
     initialDisable("randomSuperFuns", ["funCombat", "funMovement", "funSuits"]);
 
     setComplexity();
@@ -668,11 +677,6 @@ function startTheTour(step=-1) {
       element: "#progressionDifficulty",
       title: "Progression difficulty",
       content: "This parameter influences the choice of the next location. It uses the perceived difficulties from the preset to compute the difficulty to reach the locations. Then if <b>easier</b> or <b>harder</b> is selected, the easiest or hardest location will have a higher chance of being chosen.<br/>Set it to <b>normal</b> for the Randomizer to randomly choose the next location.<br/>Set it to <b>random</b> to randomly choose between <b>easier</b>, <b>harder</b> and <b>normal</b>.<br/><b>Note:</b> this setting has less of an influence on actual seed difficulty than Progression Speed."
-    },
-    {
-      element: "#randomParamsStep",
-      title: "Random the Randomizer parameters",
-      content: "Randomly set the Randomizer three parameters: spread items, Suits restiction and Early Morph."
     },
     {
       element: "#spreadItemsStep",
@@ -896,76 +900,77 @@ def displayNumber(id, min, max, default, step="1"):
 	    <h4>Randomizer parameters</h4>
 	    <table class="full">
 	      <tr>
-	        <td colspan="2" id="fullRandomizationStep">{{displayCheckbox("fullRandomization")}}Full randomization</td>
+		<td class="small"><div class="random"><button id="fullRandomizationRandom" type="button" onclick="randomize(event, 'fullRandomization')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
+	        <td colspan="2" id="fullRandomizationStep">{{displayCheckbox("fullRandomization")}}<span id="fullRandomizationText">Full randomization</span></td>
                 <td><button type="button" onclick="startTheTour(3)">?</button></td>
 	      </tr>
               <tr id="maxDiffVisibility">
-                <td>Maximum difficulty for picking up an item:</td>
+		<td class="small"><div class="random"><button id="maxDifficultyRandom" type="button" onclick="randomize(event, 'maxDifficulty')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
+                <td><span id="maxDifficultyText">Maximum difficulty for picking up an item:</span></td>
                 <td>{{displaySelect("maxDifficulty", ["no difficulty cap", "easy", "medium", "hard", "harder", "hardcore", "mania"], "no difficulty cap")}}</td>
                 <td><button type="button" onclick="startTheTour(4)">?</button></td>
               </tr>
 	      <tr>
-	        <td class="half">
-                  Progression speed:
-                </td>
+		<td class="small"><div class="random"><button id="progressionSpeedRandom" type="button" onclick="randomize(event, 'progressionSpeed')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
+	        <td class="half"><span id="progressionSpeedText">Progression speed:</span></td>
                 <td class="half">{{displaySelect("progressionSpeed", ["random", "slowest", "slow", "medium", "fast", "fastest"], "medium")}}</td>
                 <td><button type="button" onclick="startTheTour(5)">?</button></td>
 	      </tr>
 	      <tr id="progDiffVisibility">
-	        <td class="half">
-                  Progression difficulty:
-                </td>
+		<td class="small"><div class="random"><button id="progressionDifficultyRandom" type="button" onclick="randomize(event, 'progressionDifficulty')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
+	        <td class="half"><span id="progressionDifficultyText">Progression difficulty:</span></td>
                 <td class="half">{{displaySelect("progressionDifficulty", ["random", "easier", "normal", "harder"], "normal")}}</td>
                 <td><button type="button" onclick="startTheTour(6)">?</button></td>
 	      </tr>
-	      <tr id="randomParamsVisibility">
-	        <td colspan="2" id="randomParamsStep">{{displayCheckboxRandom("randomParams", ["spreadItems", "suitsRestriction", "speedScrewRestriction"])}}Randomly set the next three parameters:</td>
-                <td><button type="button" onclick="startTheTour(7)">?</button></td>
-	      </tr>
 	      <tr id="spreadItemsVisibility">
+		<td class="small"><div class="random"><button id="spreadItemsRandom" type="button" onclick="randomize(event, 'spreadItems')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
 	        <td colspan="2" id="spreadItemsStep">{{displayCheckbox("spreadItems")}}<span id="spreadItemsText">Spread progression items</span></td>
                 <td><button type="button" onclick="startTheTour(8)">?</button></td>
 	      </tr>
 	      <tr id="suitsRestrictionVisibility">
+		<td class="small"><div class="random"><button id="suitsRestrictionRandom" type="button" onclick="randomize(event, 'suitsRestriction')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
 	        <td colspan="2" id="suitsRestrictionStep">{{displayCheckbox("suitsRestriction")}}<span id="suitsRestrictionText">Suits restriction</span></td>
                 <td><button type="button" onclick="startTheTour(9)">?</button></td>
 	      </tr>
 	      <tr id="speedScrewRestrictionVisibility">
+		<td class="small"><div class="random"><button id="speedScrewRestrictionRandom" type="button" onclick="randomize(event, 'speedScrewRestriction')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
 	        <td colspan="2" id="speedScrewRestrictionStep">{{displayCheckbox("speedScrewRestriction")}}<span id="speedScrewRestrictionText">Early Morph</span></td>
                 <td><button type="button" onclick="startTheTour(10)">?</button></td>
 	      </tr>
 	      <tr id="hideItemsVisibility">
-		<td colspan="2" id="hideItemsStep">{{displayCheckbox("hideItems")}}Hide some items</td>
+		<td class="small"><div class="random"><button id="hideItemsRandom" type="button" onclick="randomize(event, 'hideItems')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
+		<td colspan="2" id="hideItemsStep">{{displayCheckbox("hideItems")}}<span id="hideItemsText">Hide some items</span></td>
 		<td><button type="button" onclick="startTheTour(11)">?</button></td>
 	      </tr>
 	    </table>
 	    <div id="ammoVisibility">
 	      <h4>Ammo and Energy</h4>
 	      <table class="full">
-                <colgroup><col class="half" /><col class="half" /></colgroup>
-	        <tr>
-		  <td colspan="2" id="randomMinorsStep">{{displayCheckboxRandom("randomMinors", ["missileQty", "superQty", "powerBombQty", "minorQty", "energyQty"])}}Randomly set the minors/energy quantities:</td>
-		  <td><button type="button" onclick="startTheTour(12)">?</button></td>
-	        </tr>
+                <colgroup><col class="small"/><col class="half" /><col class="half" /><col class="small"/></colgroup>
                 <tr>
+		  <td class="small"><div class="random"><button id="missileQtyRandom" type="button" onclick="randomize(event, 'missileQty')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
 		  <td><span id="missileQtyText">Quantity of Missiles:</span></td>
 		  <td>{{displayNumber("missileQty", "1", "9", "3", "0.1")}}</td>
 		  <td><button type="button" onclick="startTheTour(13)">?</button></td>
                 </tr>
                 <tr>
+		  <td class="small"><div class="random"><button id="superQtyRandom" type="button" onclick="randomize(event, 'superQty')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
 		  <td><span id="superQtyText">Quantity of Super Missiles:</span></td>
 		  <td>{{displayNumber("superQty", "1", "9", "3", "0.1")}}</td>
                 </tr>
                 <tr>
+		  <td class="small"><div class="random"><button id="powerBombQtyRandom" type="button" onclick="randomize(event, 'powerBombQty')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
 		  <td><span id="powerBombQtyText">Quantity of Power Bombs:</span></td>
 		  <td>{{displayNumber("powerBombQty", "1", "9", "1", "0.1")}}</td>
                 </tr>
                 <tr>
+		  <td class="small"><div class="random"><button id="minorQtyRandom" type="button" onclick="randomize(event, 'minorQty')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
 		  <td><span id="minorQtyText">Percentage of minors available:</span></td>
 		  <td>{{displayNumber("minorQty", "1", "100", "100")}}</td>
 		  <td><button type="button" onclick="startTheTour(14)">?</button></td>
                 </tr>
                 <tr>
+		  <td class="small"><div class="random"><button id="energyQtyRandom" type="button" onclick="randomize(event, 'energyQty')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
 		  <td><span id="energyQtyText">Quantity of Energy/Reserve Tanks available:</span></td>
 		  <td>{{displaySelect("energyQty", ["sparse", "medium", "vanilla"], "vanilla")}}</td>
 		  <td><button type="button" onclick="startTheTour(15)">?</button></td>
@@ -995,19 +1000,18 @@ def displayNumber(id, min, max, default, step="1"):
                 <b>Warning:</b> For experienced players only.
               </p>
 	      <table class="full">
-	        <tr>
-		  <td colspan="2" id="randomSuperFunsStep">{{displayCheckboxRandom("randomSuperFuns", ["funCombat", "funMovement", "funSuits"])}}Randomly set the Super Fun Times parameters:</td>
-		  <td><button type="button" onclick="startTheTour(18)">?</button></td>
-	        </tr>
                 <tr>
+		  <td class="small"><div class="random"><button id="funCombatRandom" type="button" onclick="randomize(event, 'funCombat')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
 		  <td colspan="2" class="full" id="funCombatStep">{{displayCheckbox("funCombat")}}<span id="funCombatText">Super Fun Combat</span></td>
 		  <td><button type="button" onclick="startTheTour(19)">?</button></td>
                 </tr>
                 <tr>
+		  <td class="small"><div class="random"><button id="funMovementRandom" type="button" onclick="randomize(event, 'funMovement')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
 		  <td colspan="2" class="full" id="funMovementStep">{{displayCheckbox("funMovement")}}<span id="funMovementText">Super Fun Movement</span></td>
 		  <td><button type="button" onclick="startTheTour(20)">?</button></td>
                 </tr>
                 <tr>
+		  <td class="small"><div class="random"><button id="funSuitsRandom" type="button" onclick="randomize(event, 'funSuits')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
 		  <td colspan="2" class="full" id="funSuitsStep">{{displayCheckbox("funSuits")}}<span id="funSuitsText">Suitless</span></td>
 		  <td><button type="button" onclick="startTheTour(21)">?</button></td>
                 </tr>

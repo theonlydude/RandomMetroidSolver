@@ -48,7 +48,7 @@ if __name__ == "__main__":
     parser.add_argument('--maxDifficulty', '-t',
                         help="the maximum difficulty generated seed will be for given parameters",
                         dest='maxDifficulty', nargs='?', default=None,
-                        choices=['easy', 'medium', 'hard', 'harder', 'hardcore', 'mania'])
+                        choices=['easy', 'medium', 'hard', 'harder', 'hardcore', 'mania', 'random'])
     parser.add_argument('--seed', '-s', help="randomization seed to use", dest='seed',
                         nargs='?', default=0, type=int)
     parser.add_argument('--rom', '-r',
@@ -86,21 +86,19 @@ if __name__ == "__main__":
                         help="quantity of ETanks/Reserve Tanks",
                         dest='energyQty', nargs='?', default='vanilla',
                         choices=energyQties + ['random'])
-    parser.add_argument('--randomRestrictions',
-                        help="Randomizes (and overrides) spreadItems, suitsRestriction and speedScrewRestriction", action='store_true',
-                        dest='randomRestrictions', default=False)
     parser.add_argument('--spreadItems',
-                        help="spread progression items", action='store_true',
-                        dest='spreadItems', default=False)
+                        help="spread progression items", nargs='?', const=True, default=False, dest='spreadItems')
     parser.add_argument('--fullRandomization',
-                        help="will place majors in all locations", action='store_true',
-                        dest='fullRandomization', default=False)
+                        help="will place majors in all locations",
+                        dest='fullRandomization', nargs='?', const=True, default=False)
     parser.add_argument('--suitsRestriction',
-                        help="no suits in early game", action='store_true',
-                        dest='suitsRestriction', default=False)
+                        help="no suits in early game",
+                        dest='suitsRestriction', nargs='?', const=True, default=False)
     parser.add_argument('--speedScrewRestriction',
-                        help="no speed or screw in the very first rooms", action='store_true',
-                        dest='speedScrewRestriction', default=False)
+                        help="no speed or screw in the very first rooms",
+                        dest='speedScrewRestriction', nargs='?', const=True, default=False)
+    parser.add_argument('--hideItems', help="Like in dessy's rando hide half of the items",
+                        dest="hideItems", nargs='?', const=True, default=False)
     parser.add_argument('--progressionSpeed', '-i',
                         help="",
                         dest='progressionSpeed', nargs='?', default='medium',
@@ -112,7 +110,7 @@ if __name__ == "__main__":
     parser.add_argument('--superFun',
                         help="randomly remove major items from the pool for maximum enjoyment",
                         dest='superFun', nargs='?', default=[], action='append',
-                        choices=['Movement', 'Combat', 'Suits', 'random'])
+                        choices=['Movement', 'Combat', 'Suits', 'MovementRandom', 'CombatRandom', 'SuitsRandom'])
     parser.add_argument('--animals',
                         help="randomly change the save the animals room",
                         dest='animals', action='store_true', default=False)
@@ -128,8 +126,6 @@ if __name__ == "__main__":
     parser.add_argument('--controls',
                         help="specify controls, comma-separated, in that order: Shoot,Jump,Dash,ItemSelect,ItemCancel,AngleUp,AngleDown. Possible values: A,B,X,Y,L,R,Select,None",
                         dest='controls')
-    parser.add_argument('--hideItems', help="Like in dessy's rando hide half of the items",
-                        dest="hideItems", action='store_true', default=False)
 
     # parse args
     args = parser.parse_args()
@@ -179,7 +175,11 @@ if __name__ == "__main__":
 
     # if no max diff, set it very high
     if args.maxDifficulty:
-        maxDifficulty = text2diff[args.maxDifficulty]
+        if args.maxDifficulty == 'random':
+            diffs = ['easy', 'medium', 'hard', 'harder', 'very hard', 'hardcore', 'mania']
+            maxDifficulty = text2diff[diffs[random.randint(0, len(diffs)-1)]]
+        else:
+            maxDifficulty = text2diff[args.maxDifficulty]
     else:
         maxDifficulty = float('inf')
 
@@ -199,10 +199,7 @@ if __name__ == "__main__":
     maxDifficulty = threshold
 
     # fill restrictions dict
-    if not args.randomRestrictions:
-        restrictions = { 'Suits' : args.suitsRestriction, 'SpeedScrew' : args.speedScrewRestriction, 'SpreadItems' : args.spreadItems }
-    else:
-        restrictions = { 'Suits' : bool(random.getrandbits(1)), 'SpeedScrew' : bool(random.getrandbits(1)), 'SpreadItems' : bool(random.getrandbits(1))}
+    restrictions = { 'Suits' : args.suitsRestriction, 'SpeedScrew' : args.speedScrewRestriction, 'SpreadItems' : args.spreadItems }
     restrictions['MajorMinor'] = not args.fullRandomization
     seedCode = 'X'
     if restrictions['MajorMinor'] == False:
@@ -249,14 +246,28 @@ if __name__ == "__main__":
            'ammo': { 'Missile': missileQty,
                      'Super': superQty,
                      'PowerBomb': powerBombQty } }
-    if 'random' in args.superFun:
-        args.superFun = []
-        def addFun(fun):
-            if bool(random.getrandbits(1)) == True:
-                args.superFun.append(fun)
-        addFun('Suits')
-        addFun('Combat')
-        addFun('Movement')
+
+    if len(args.superFun) > 0:
+        superFun = []
+        for fun in args.superFun:
+            if fun.find('Random') != -1:
+                if bool(random.getrandbits(1)) == True:
+                    superFun.append(fun[0:fun.find('Random')])
+            else:
+                superFun.append(fun)
+        args.superFun = superFun
+
+    if args.spreadItems == 'random':
+        args.spreadItems = bool(random.getrandbits(1))
+    if args.fullRandomization == 'random':
+        args.fullRandomization = bool(random.getrandbits(1))
+    if args.suitsRestriction == 'random':
+        args.suitsRestriction = bool(random.getrandbits(1))
+    if args.speedScrewRestriction == 'random':
+        args.speedScrewRestriction = bool(random.getrandbits(1))
+    if args.hideItems == 'random':
+        args.hideItems = bool(random.getrandbits(1))
+
     ctrlDict = None
     if args.controls:
         ctrlList = args.controls.split(',')

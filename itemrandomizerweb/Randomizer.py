@@ -223,6 +223,7 @@ class Randomizer(object):
     # locations : items locations
     # settings : RandoSettings instance
     def __init__(self, locations, settings, seedName, graphTransitions, bidir=True, dotDir=None):
+        self.errorMsg = ''
         dotFile = None
         if dotDir is not None:
             dotFile = dotDir + '/' + seedName + ".dot"

@@ -139,18 +139,25 @@ body {
 
 <script type="text/javascript">
 
-function randomize(evt, name) {
+function randomize(evt, elemId) {
+  var e = document.getElementById(elemId);
+
   var isActive;
   if(evt.currentTarget.className.search("active") != -1) {
     evt.currentTarget.className = evt.currentTarget.className.replace(" active", "");
     isActive = false;
+
+    defaultValues = {"missileQty": 3, "superQty": 2, "powerBombQty": 1, "minorQty": 100};
+
+    if(e.value.length == 0 && elemId in defaultValues) {
+      e.value = defaultValues[elemId];
+    }
+
   } else {
     evt.currentTarget.className += " active";
     isActive = true;
   }
 
-  elemId = name;
-  var e = document.getElementById(elemId);
   e.disabled = isActive;
   // grey out the disabled text
   var text = document.getElementById(elemId+"Text");

@@ -809,18 +809,11 @@ def randomizerWebService():
               '--preset', request.vars.paramsFile,
               '--progressionSpeed', request.vars.progressionSpeed,
               '--progressionDifficulty', request.vars.progressionDifficulty]
-    if request.vars.randomMinors == 'on':
-        params += ['--missileQty', '0',
-                   '--superQty', '0',
-                   '--powerBombQty', '0',
-                   '--minorQty', '0',
-                   '--energyQty', 'random']
-    else:
-        params += ['--missileQty', request.vars.missileQty,
-                   '--superQty', request.vars.superQty,
-                   '--powerBombQty', request.vars.powerBombQty,
-                   '--minorQty', request.vars.minorQty,
-                   '--energyQty', request.vars.energyQty]
+    params += ['--missileQty', request.vars.missileQty if request.vars.missileQty != 'random' else '0',
+               '--superQty', request.vars.superQty if request.vars.superQty != 'random' else '0',
+               '--powerBombQty', request.vars.powerBombQty if request.vars.powerBombQty != 'random' else '0',
+               '--minorQty', request.vars.minorQty if request.vars.minorQty != 'random' else '0',
+               '--energyQty', request.vars.energyQty]
 
     # always set AimAnyButton
     params.append('-c')
@@ -843,34 +836,28 @@ def randomizerWebService():
         params.append('--maxDifficulty')
         params.append(request.vars.maxDifficulty)
 
-    if request.vars.fullRandomization == 'on':
-        params.append('--fullRandomization')
+    def addParamRandom(id, params):
+        if request.vars[id] in ['on', 'random']:
+            params.append('--{}'.format(id))
+        if request.vars[id] == 'random':
+            params.append('random')
 
-    if request.vars.randomParams == 'on':
-        params.append('--randomRestrictions')
-    else:
-        if request.vars.spreadItems == 'on':
-            params.append('--spreadItems')
-        if request.vars.suitsRestriction == 'on':
-            params.append('--suitsRestriction')
-        if request.vars.speedScrewRestriction == 'on':
-            params.append('--speedScrewRestriction')
+    addParamRandom('fullRandomization', params)
+    addParamRandom('spreadItems', params)
+    addParamRandom('suitsRestriction', params)
+    addParamRandom('speedScrewRestriction', params)
+    addParamRandom('hideItems', params)
 
-    if request.vars.hideItems == 'on':
-        params.append('--hideItems')
+    def addSuperFun(id, params):
+        fun = id[len('fun'):]
+        if request.vars[id] == 'on':
+            params += ['--superFun', fun]
+        elif request.vars[id] == 'random':
+            prams += ['--superFun', "{}Random".format(fun)]
 
-    if request.vars.randomSuperFuns == 'on':
-        params += ['--superFun', 'random']
-    else:
-        if request.vars.funCombat == 'on':
-            params.append('--superFun')
-            params.append('Combat')
-        if request.vars.funMovement == 'on':
-            params.append('--superFun')
-            params.append('Movement')
-        if request.vars.funSuits == 'on':
-            params.append('--superFun')
-            params.append('Suits')
+    addSuperFun('funCombat', params)
+    addSuperFun('funMovement', params)
+    addSuperFun('funSuits', params)
 
     if request.vars.layoutPatches == 'off':
         params.append('--nolayout')

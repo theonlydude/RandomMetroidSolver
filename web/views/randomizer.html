@@ -179,6 +179,16 @@ function getComplexity() {
   }
 }
 
+function setRandom() {
+{{
+  for id in ["missileQty", "superQty", "powerBombQty", "minorQty", "energyQty", "maxDifficulty", "progressionSpeed", "spreadItems", "fullRandomization", "suitsRestriction", "speedScrewRestriction", "funCombat", "funMovement", "funSuits", "progressionDifficulty", "hideItems"]:
+    if id in session.randomizer and session.randomizer[id] == "random":
+      response.write('  document.getElementById("{}Random").click();'.format(id), escape=False)
+      pass
+    pass
+}}
+}
+
 function setComplexity() {
 {{
   if "complexity" in session.randomizer:
@@ -332,7 +342,6 @@ function AjaxRandomizerCallCompleted(data) {
     var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "energyQty", "maxDifficulty", "progressionSpeed", "spreadItems", "fullRandomization", "suitsRestriction", "speedScrewRestriction", "funCombat", "funMovement", "funSuits", "progressionDifficulty", "hideItems"];
 
     for(var i=0; i<elems.length; i++) {
-       console.log("elem="+elems[i]);
        dataDict[elems[i]] = document.getElementById(elems[i]).value;
     }
     for(var i=0; i<randomElems.length; i++) {
@@ -560,6 +569,8 @@ window.onload = function(){
     }
 
     setComplexity();
+
+    setRandom();
 }
 
 function switchCheckbox(id, elems=[]) {

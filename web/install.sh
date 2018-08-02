@@ -5,7 +5,7 @@ ln -s ~/RandomMetroidSolver/web/static/area_map_thumbnail.png ~/web2py/applicati
 ln -s ~/RandomMetroidSolver/web/static/area_map.png ~/web2py/applications/solver/static/images/area_map.png
 ln -s ~/RandomMetroidSolver/web/static/snes-controller.png ~/web2py/applications/solver/static/images/snes-controller.png
 ln -s ~/RandomMetroidSolver/web/static/ajax-loader.gif ~/web2py/applications/solver/static/images/ajax-loader.gif
-ln -s ~/RandomMetroidSolver/web/static/mystyle.css ~/web2py/applications/solver/static/css/mystyle.css
+ln -s ~/RandomMetroidSolver/web/static/mystyle_20180802.css ~/web2py/applications/solver/static/css/mystyle_20180802.css
 ln -s ~/RandomMetroidSolver/web/static/bootstrap-tour.min.css ~/web2py/applications/solver/static/css/bootstrap-tour.min.css
 ln -s ~/RandomMetroidSolver/web/static/barrating ~/web2py/applications/solver/static/barrating
 ln -s ~/RandomMetroidSolver/web/static/bootstrap-tour.min.js ~/web2py/applications/solver/static/js/bootstrap-tour.min.js

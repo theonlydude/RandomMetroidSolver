@@ -1,0 +1,72 @@
+#!/usr/bin/env python
+
+import sys
+
+from utils import randGaussBounds
+from itemrandomizerweb.Items import getItemPool 
+import random
+
+fun = ['HiJump', 'SpeedBooster', 'Plasma', 'ScrewAttack', 'Wave', 'Spazer', 'SpringBall']
+
+if __name__ == "__main__":
+    with open("itemStats.csv", "w") as csvOut:
+        csvOut.write("energyQty;minorQty;nFun;MissProb;SuperProb;PowerProb;nItems;nTanks;nMinors;nMissiles;nSupers;nPowers;MissAccuracy;SuperAccuracy;PowerAccuracy\n")
+        for i in range(10000):
+            if (i+1) % 100 == 0:
+                print(i+1)
+            isVanilla = random.random() < 0.5
+            minQty = 100
+            energyQty = 'vanilla'
+            forbidden = []
+            if not isVanilla:
+                minQty = random.randint(1, 99)
+                if random.random() < 0.5:
+                    energyQty = 'medium'
+                else:
+                    energyQty = 'sparse'
+                funPick = fun[:]
+                for i in range(randGaussBounds(len(fun))):
+                    item = funPick[random.randint(0, len(funPick)-1)]
+                    forbidden.append(item)
+                    funPick.remove(item)
+            missProb = random.randint(1, 9)
+            superProb = random.randint(1, 9)
+            pbProb = random.randint(1, 9)
+            qty = {
+                'minors' : minQty,
+                'energy' : energyQty,
+                'ammo' : {
+                    'Missile' : missProb,
+                    'Super' : superProb,
+                    'PowerBomb' : pbProb
+                }
+            }
+            # write params
+            csvOut.write("%s;%d;%d;%d;%d;%d;" % (energyQty, minQty, len(forbidden), missProb, superProb, pbProb))
+            # get items
+            itemPool = getItemPool(qty, forbidden)
+            # compute stats
+            nItems = len([item for item in itemPool if item['Category'] != 'Nothing'])
+            nTanks = len([item for item in itemPool if item['Category'] == 'Energy'])
+            nMinors = len([item for item in itemPool if item['Category'] == 'Ammo'])
+            nMissiles = len([item for item in itemPool if item['Type'] == 'Missile'])
+            nSupers = len([item for item in itemPool if item['Type'] == 'Super'])
+            nPowers = len([item for item in itemPool if item['Type'] == 'PowerBomb'])
+            csvOut.write("%d;%d;%d;%d;%d;%d;" % (nItems, nTanks, nMinors, nMissiles, nSupers, nPowers))
+            totalProbs = missProb + superProb + pbProb
+            def getAccuracy(prob, res):
+                th = float(prob)/totalProbs
+                actual = float(res)/nMinors
+                return actual/th * 100
+            missAcc = getAccuracy(missProb, nMissiles)
+            supersAcc = getAccuracy(superProb, nSupers)
+            pbAcc = getAccuracy(pbProb, nPowers)
+            csvOut.write("%f;%f;%f\n" % (missAcc, supersAcc, pbAcc))
+            if len(itemPool) != 100:
+                raise ValueError("Not 100 items !!!")
+            if isVanilla and nItems != 100:
+                raise ValueError("Not 100 actual items in vanilla !!!")
+            if energyQty == 'sparse' and (nTanks < 4 or nTanks > 6):
+                raise ValueError("Energy qty invalid !!")
+            if energyQty == 'medium' and (nTanks < 8 or nTanks > 12):
+                raise ValueError("Energy qty invalid !!")

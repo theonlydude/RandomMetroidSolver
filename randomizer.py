@@ -86,6 +86,10 @@ if __name__ == "__main__":
                         help="quantity of ETanks/Reserve Tanks",
                         dest='energyQty', nargs='?', default='vanilla',
                         choices=energyQties + ['random'])
+    parser.add_argument('--strictMinors',
+                        help="minors quantities values will be strictly followed instead of being probabilities",
+                        action='store_true',
+                        dest='strictMinors', default=False)
     parser.add_argument('--randomRestrictions',
                         help="Randomizes (and overrides) spreadItems, suitsRestriction and speedScrewRestriction", action='store_true',
                         dest='randomRestrictions', default=False)
@@ -248,7 +252,8 @@ if __name__ == "__main__":
            'minors': minorQty,
            'ammo': { 'Missile': missileQty,
                      'Super': superQty,
-                     'PowerBomb': powerBombQty } }
+                     'PowerBomb': powerBombQty },
+           'strictMinors' : args.strictMinors }
     if 'random' in args.superFun:
         args.superFun = []
         def addFun(fun):

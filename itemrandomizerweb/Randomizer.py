@@ -18,7 +18,10 @@ class RandoSettings(object):
     #       'minors' : percentage of ammo to distribute. 100 being vanilla
     # restrictions : item placement restrictions dict. values are booleans. keys :
     #                'Suits' : no suits early game
-    #                'SpeedScrew' : no speed or screw in the very first rooms
+    #                'Morph' : Morph ball placement.
+    #                          early to get it in the first two rooms.
+    #                          late to get it after the beginning of the game (crateria/blue brinstar)
+    #                          random for morph to be placed randomly.
     #                'MajorMinor' : if true, will put major items in major locations, and minor items
     #                               in minor locations
     #                'SpreadItems' : if true, will spread progression items
@@ -582,6 +585,10 @@ class Randomizer(object):
     @staticmethod
     def isSpeedScrew(item):
         return item['Type'] in ['SpeedBooster', 'ScrewAttack']
+
+    @staticmethod
+    def isMorph(item):
+        return item['Type'] == 'Morph'
     
     def suitsRestrictionsImpl(self, item, location):
         if item["Type"] == "Gravity":
@@ -593,11 +600,10 @@ class Randomizer(object):
         return True
 
     def speedScrewRestrictionImpl(self, item, location):
-        if item["Type"] == "SpeedBooster":
-            return not Randomizer.isInBlueBrinstar(location)
-        if item["Type"] == "ScrewAttack":
-            return not (Randomizer.isInBlueBrinstar(location) or location["Area"] == "Crateria") # screw attack this early is a bit too easy. plus, with MinProgression setting, ScrewAttack always ends up at Bomb
-        return True
+        return not Randomizer.isInBlueBrinstar(location)
+
+    def morphPlacementImpl(self, item, location):
+        return location['GraphArea'] != 'Crateria'
 
     # is softlock possible from the player POV when checking the loc?
     # usually these locs are checked last when playing, so placing
@@ -635,8 +641,11 @@ class Randomizer(object):
         if self.restrictions['Suits'] == True and Randomizer.isSuit(item):
             return self.suitsRestrictionsImpl(item, location)
 
-        if self.restrictions['SpeedScrew'] == True and Randomizer.isSpeedScrew(item):
+        if self.restrictions['Morph'] == 'early' and Randomizer.isSpeedScrew(item):
             return self.speedScrewRestrictionImpl(item, location)
+
+        if self.restrictions['Morph'] == 'late' and Randomizer.isMorph(item):
+            return self.morphPlacementImpl(item, location)
 
         if checkSoftlock == True:
             return not self.isSoftlockPossible(item, location)

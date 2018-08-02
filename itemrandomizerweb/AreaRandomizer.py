@@ -63,10 +63,3 @@ class AreaRandomizer(Randomizer):
 
     def suitsRestrictionsImpl(self, item, location):
         return location['GraphArea'] != 'Crateria'
-
-    def speedScrewRestrictionImpl(self, item, location):
-        if item["Type"] == "SpeedBooster":
-            return not Randomizer.isInBlueBrinstar(location)
-        if item["Type"] == "ScrewAttack":
-            return location['GraphArea'] != 'Crateria'
-        return True

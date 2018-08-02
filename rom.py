@@ -628,11 +628,19 @@ class RomPatcher:
         address += 0x40
 
         for param in [(' SPREAD PROG ITEMS ........%s', 'SpreadItems'),
-                      (' SUITS RESTRICTION ........%s', 'Suits'),
-                      (' EARLY MORPH ..............%s', 'SpeedScrew')]:
+                      (' SUITS RESTRICTION ........%s', 'Suits')]:
             line = param[0] % ('. ON' if settings.restrictions[param[1]] == True else ' OFF')
             self.writeCreditsString(address, 0x04, line)
             address += 0x40
+        morphStr  = ' MORPH PLACEMENT .....'
+        if settings.restrictions['Morph'] == 'early':
+            morphStr += '. EARLY'
+        elif settings.restrictions['Morph'] == 'late':
+            morphStr += '.. LATE'
+        elif settings.restrictions['Morph'] == 'random':
+            morphStr += ' RANDOM'
+        self.writeCreditsString(address, 0x04, morphStr)
+        address += 0x40
 
         for superFun in [(' SUPER FUN COMBAT .........%s', 'Combat'),
                          (' SUPER FUN MOVEMENT .......%s', 'Movement'),

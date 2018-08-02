@@ -618,9 +618,6 @@ def initRandomizerSession():
         session.randomizer['funMovement'] = "off"
         session.randomizer['funSuits'] = "off"
         session.randomizer['layoutPatches'] = "on"
-        session.randomizer['randomMinors'] = "off"
-        session.randomizer['randomParams'] = "off"
-        session.randomizer['randomSuperFuns'] = "off"
         session.randomizer['progressionDifficulty'] = 'normal'
         session.randomizer['areaRandomization'] = "off"
         session.randomizer['complexity'] = "simple"
@@ -671,6 +668,8 @@ def validateWebServiceParams(patchs, quantities, others, isJson=False):
             raiseHttp(400, "Wrong value for {}: {}, must be a float".format(param, request.vars[param]), isJson)
 
     for qty in quantities:
+        if request.vars[qty] == 'random':
+            continue
         qtyFloat = getFloat(qty)
         if qtyFloat < 1.0 or qtyFloat > 9.0:
             raiseHttp(400, json.dumps("Wrong value for {}: {}, must be between 1 and 9".format(qty, request.vars[qty])), isJson)
@@ -681,7 +680,7 @@ def validateWebServiceParams(patchs, quantities, others, isJson=False):
             raiseHttp(400, "Wrong value for seed: {}, must be between 0 and 9999999".format(request.vars[seed]), isJson)
 
     if request.vars['maxDifficulty'] is not None:
-        if request.vars.maxDifficulty not in ['no difficulty cap', 'easy', 'medium', 'hard', 'harder', 'hardcore', 'mania']:
+        if request.vars.maxDifficulty not in ['no difficulty cap', 'easy', 'medium', 'hard', 'harder', 'hardcore', 'mania', 'random']:
             raiseHttp(400, "Wrong value for difficulty_target, authorized values: no difficulty cap/easy/medium/hard/harder/hardcore/mania", isJson)
 
     if IS_ALPHANUMERIC()(request.vars.paramsFile)[1] is not None:
@@ -690,12 +689,13 @@ def validateWebServiceParams(patchs, quantities, others, isJson=False):
     if IS_LENGTH(maxsize=32, minsize=1)(request.vars.paramsFile)[1] is not None:
         raiseHttp(400, "Wrong length for paramsFile, name must be between 1 and 32 characters", isJson)
 
-    minorQtyInt = getInt('minorQty')
-    if minorQtyInt < 1 or minorQtyInt > 100:
-        raiseHttp(400, "Wrong value for minorQty, must be between 1 and 100", isJson)
+    if request.vars.minorQty != 'random':
+        minorQtyInt = getInt('minorQty')
+        if minorQtyInt < 1 or minorQtyInt > 100:
+            raiseHttp(400, "Wrong value for minorQty, must be between 1 and 100", isJson)
 
     if 'energyQty' in others:
-        if request.vars.energyQty not in ['sparse', 'medium', 'vanilla']:
+        if request.vars.energyQty not in ['sparse', 'medium', 'vanilla', 'random']:
             raiseHttp(400, "Wrong value for energyQty: authorized values: sparse/medium/vanilla", isJson)
 
     if 'paramsFileTarget' in others:
@@ -704,18 +704,18 @@ def validateWebServiceParams(patchs, quantities, others, isJson=False):
         except:
             raiseHttp(400, "Wrong value for paramsFileTarget, must be a JSON string", isJson)
 
-    for check in ['spreadItems', 'fullRandomization', 'suitsRestriction', 'speedScrewRestriction', 'layoutPatches', 'noGravHeat', 'randomMinors', 'randomParams', 'randomSuperFuns', 'areaRandomization', 'hideItems']:
+    for check in ['spreadItems', 'fullRandomization', 'suitsRestriction', 'speedScrewRestriction', 'layoutPatches', 'noGravHeat', 'areaRandomization', 'hideItems']:
         if check in others:
-            if request.vars[check] not in ['on', 'off']:
+            if request.vars[check] not in ['on', 'off', 'random']:
                 raiseHttp(400, "Wrong value for {}: {}, authorized values: on/off".format(check, request.vars[check]), isJson)
 
     if 'progressionSpeed' in others:
-        if request.vars['progressionSpeed'] not in ['random', 'slowest', 'slow', 'medium', 'fast', 'fastest']:
-            raiseHttp(400, "Wrong value for progressionSpeed: {}, authorized values random/slowest/slow/medium/fast/fastest".format(request.vars['progressionSpeed']), isJson)
+        if request.vars['progressionSpeed'] not in ['slowest', 'slow', 'medium', 'fast', 'fastest', 'random']:
+            raiseHttp(400, "Wrong value for progressionSpeed: {}, authorized values slowest/slow/medium/fast/fastest".format(request.vars['progressionSpeed']), isJson)
 
     if 'progressionDifficulty' in others:
-        if request.vars['progressionDifficulty'] not in ['random', 'easier', 'normal', 'harder']:
-            raiseHttp(400, "Wrong value for progressionDifficulty: {}, authorized values random/easier/normal/harder".format(request.vars['progressionDifficulty']), isJson)
+        if request.vars['progressionDifficulty'] not in ['easier', 'normal', 'harder', 'random']:
+            raiseHttp(400, "Wrong value for progressionDifficulty: {}, authorized values easier/normal/harder".format(request.vars['progressionDifficulty']), isJson)
 
     if 'complexity' in others:
         if request.vars['complexity'] not in ['simple', 'medium', 'advanced']:
@@ -730,7 +730,7 @@ def sessionWebService():
     others = ['paramsFile', 'minorQty', 'energyQty', 'maxDifficulty',
               'progressionSpeed', 'spreadItems', 'fullRandomization', 'suitsRestriction',
               'speedScrewRestriction', 'funCombat', 'funMovement', 'funSuits', 'layoutPatches',
-              'noGravHeat', 'randomMinors', 'randomParams', 'randomSuperFuns', 'progressionDifficulty',
+              'noGravHeat', 'progressionDifficulty',
               'areaRandomization', 'complexity', 'hideItems']
     validateWebServiceParams(patchs, quantities, others)
 
@@ -756,9 +756,6 @@ def sessionWebService():
     session.randomizer['funSuits'] = request.vars.funSuits
     session.randomizer['layoutPatches'] = request.vars.layoutPatches
     session.randomizer['noGravHeat'] = request.vars.noGravHeat
-    session.randomizer['randomMinors'] = request.vars.randomMinors
-    session.randomizer['randomParams'] = request.vars.randomParams
-    session.randomizer['randomSuperFuns'] = request.vars.randomSuperFuns
     session.randomizer['progressionDifficulty'] = request.vars.progressionDifficulty
     session.randomizer['areaRandomization'] = request.vars.areaRandomization
     session.randomizer['complexity'] = request.vars.complexity
@@ -791,8 +788,8 @@ def randomizerWebService():
     others = ['seed', 'paramsFile', 'paramsFileTarget', 'minorQty', 'energyQty',
               'maxDifficulty', 'progressionSpeed', 'spreadItems', 'fullRandomization',
               'suitsRestriction', 'speedScrewRestriction', 'funCombat', 'funMovement', 'funSuits',
-              'layoutPatches', 'noGravHeat', 'randomMinors', 'randomParams', 'randomSuperFuns',
-              'progressionDifficulty', 'areaRandomization', 'hideItems']
+              'layoutPatches', 'noGravHeat', 'progressionDifficulty', 'areaRandomization',
+              'hideItems']
     validateWebServiceParams(patchs, quantities, others, isJson=True)
 
     # randomize
@@ -812,18 +809,11 @@ def randomizerWebService():
               '--preset', request.vars.paramsFile,
               '--progressionSpeed', request.vars.progressionSpeed,
               '--progressionDifficulty', request.vars.progressionDifficulty]
-    if request.vars.randomMinors == 'on':
-        params += ['--missileQty', '0',
-                   '--superQty', '0',
-                   '--powerBombQty', '0',
-                   '--minorQty', '0',
-                   '--energyQty', 'random']
-    else:
-        params += ['--missileQty', request.vars.missileQty,
-                   '--superQty', request.vars.superQty,
-                   '--powerBombQty', request.vars.powerBombQty,
-                   '--minorQty', request.vars.minorQty,
-                   '--energyQty', request.vars.energyQty]
+    params += ['--missileQty', request.vars.missileQty if request.vars.missileQty != 'random' else '0',
+               '--superQty', request.vars.superQty if request.vars.superQty != 'random' else '0',
+               '--powerBombQty', request.vars.powerBombQty if request.vars.powerBombQty != 'random' else '0',
+               '--minorQty', request.vars.minorQty if request.vars.minorQty != 'random' else '0',
+               '--energyQty', request.vars.energyQty]
 
     # always set AimAnyButton
     params.append('-c')
@@ -846,34 +836,28 @@ def randomizerWebService():
         params.append('--maxDifficulty')
         params.append(request.vars.maxDifficulty)
 
-    if request.vars.fullRandomization == 'on':
-        params.append('--fullRandomization')
+    def addParamRandom(id, params):
+        if request.vars[id] in ['on', 'random']:
+            params.append('--{}'.format(id))
+        if request.vars[id] == 'random':
+            params.append('random')
 
-    if request.vars.randomParams == 'on':
-        params.append('--randomRestrictions')
-    else:
-        if request.vars.spreadItems == 'on':
-            params.append('--spreadItems')
-        if request.vars.suitsRestriction == 'on':
-            params.append('--suitsRestriction')
-        if request.vars.speedScrewRestriction == 'on':
-            params.append('--speedScrewRestriction')
+    addParamRandom('fullRandomization', params)
+    addParamRandom('spreadItems', params)
+    addParamRandom('suitsRestriction', params)
+    addParamRandom('speedScrewRestriction', params)
+    addParamRandom('hideItems', params)
 
-    if request.vars.hideItems == 'on':
-        params.append('--hideItems')
+    def addSuperFun(id, params):
+        fun = id[len('fun'):]
+        if request.vars[id] == 'on':
+            params += ['--superFun', fun]
+        elif request.vars[id] == 'random':
+            params += ['--superFun', "{}Random".format(fun)]
 
-    if request.vars.randomSuperFuns == 'on':
-        params += ['--superFun', 'random']
-    else:
-        if request.vars.funCombat == 'on':
-            params.append('--superFun')
-            params.append('Combat')
-        if request.vars.funMovement == 'on':
-            params.append('--superFun')
-            params.append('Movement')
-        if request.vars.funSuits == 'on':
-            params.append('--superFun')
-            params.append('Suits')
+    addSuperFun('funCombat', params)
+    addSuperFun('funMovement', params)
+    addSuperFun('funSuits', params)
 
     if request.vars.layoutPatches == 'off':
         params.append('--nolayout')

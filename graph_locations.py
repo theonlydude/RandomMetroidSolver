@@ -1700,7 +1700,8 @@ locations = [
     'AccessFrom' : {
         'Main Street Bottom': lambda sm: sm.canAccessBotwoonFromMainStreet()
     },
-    'Available': lambda sm: sm.wand(sm.haveItem('SpeedBooster'), # TODO FLO find trick to get this without speed booster and add knows
+    'Available': lambda sm: sm.wand(sm.wor(sm.haveItem('SpeedBooster'),
+                                           sm.wand(sm.knowsSnailClip(), sm.haveItem('Morph'))),
                                     sm.haveItem('Gravity'))
 },
 {
@@ -1716,7 +1717,8 @@ locations = [
     'AccessFrom' : {
         'Main Street Bottom': lambda sm: sm.canAccessBotwoonFromMainStreet()
     },
-    'Available': lambda sm: sm.wand(sm.haveItem('SpeedBooster'), # TODO FLO find trick to get this without speed booster and add knows
+    'Available': lambda sm: sm.wand(sm.wor(sm.haveItem('SpeedBooster'),
+                                           sm.wand(sm.knowsSnailClip(), sm.haveItem('Morph'))),
                                     sm.haveItem('Gravity'))
 },
 {

@@ -355,3 +355,42 @@ p {
 .itemsUsed {
     width: 20%;
 }
+.small {
+    padding: 0;
+    margin: 0;
+}
+.dice_rotate {
+    transform: rotate(30deg);
+    font-size: 150%;
+    display: inline-block;
+    margin: 0.1em;
+}
+
+
+.random {
+    overflow: hidden;
+    border: 1px solid #ccc;
+    background-color: #f1f1f1;
+}
+.random button {
+    background-color: inherit;
+    color: #000;
+    float: left;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    padding: 0.1em 0.1em;
+    transition: 0.3s;
+}
+.random button:hover {
+    background-color: #ddd;
+    color: #000;
+}
+.random button:focus {
+    background-color: #ddd;
+    color: #000;
+}
+.random button.active {
+    background-color: #ccc;
+    color: #000;
+}

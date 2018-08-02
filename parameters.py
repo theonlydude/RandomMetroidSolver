@@ -379,7 +379,7 @@ class Knows:
                         'href': 'https://www.youtube.com/watch?v=e5ZH_9paSLw',
                         'rooms': ['Pants Room']}
 
-    SnailClip = SMBool(True, hardcore, ['SnailClip'])
+    SnailClip = SMBool(False, 0, ['SnailClip'])
     desc['SnailClip'] = {'display': 'Snail Clip',
                          'title': 'Access Aqueduct Missile and Super Missile without SpeedBooster',
                          'href': 'https://www.youtube.com/watch?v=fBQubU6h11U&t=70s',

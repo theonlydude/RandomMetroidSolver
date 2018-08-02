@@ -253,10 +253,25 @@ def addAmmo(qty, itemPool):
     # there's 66 minors locations, 5 minors items are already in the pool
     minorLocations = ((66 - 5) * qty['minors']) / 100
     maxItems = len(itemPool) + int(minorLocations)
-    rangeDict = getRangeDict(qty['ammo'])
-    while len(itemPool) < maxItems:
-        item = chooseFromRange(rangeDict)
-        addItem(item, itemPool)
+    ammoQty = qty['ammo']
+    if not qty['strictMinors']:
+        rangeDict = getRangeDict(ammoQty)
+        while len(itemPool) < maxItems:
+            item = chooseFromRange(rangeDict)
+            addItem(item, itemPool)
+    else:
+        totalProps = ammoQty['Missile'] + ammoQty['Super'] + ammoQty['PowerBomb']
+        totalMinorLocations = 66 * qty['minors'] / 100
+        def getRatio(ammo):
+            thisAmmo = len([item for item in itemPool if item['Type'] == ammo])
+            return float(thisAmmo)/totalMinorLocations
+        def fillAmmoType(ammo, checkRatio=True):
+            ratio = float(ammoQty[ammo])/totalProps
+            while len(itemPool) < maxItems and (not checkRatio or getRatio(ammo) < ratio):
+                addItem(ammo, itemPool)
+        fillAmmoType('Missile')
+        fillAmmoType('Super')
+        fillAmmoType('PowerBomb', False)
 
     for i in range(100 - maxItems):
         itemPool.append(Nothing)

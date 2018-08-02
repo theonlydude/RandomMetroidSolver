@@ -10,11 +10,12 @@ fun = ['HiJump', 'SpeedBooster', 'Plasma', 'ScrewAttack', 'Wave', 'Spazer', 'Spr
 
 if __name__ == "__main__":
     with open("itemStats.csv", "w") as csvOut:
-        csvOut.write("energyQty;minorQty;nFun;MissProb;SuperProb;PowerProb;nItems;nTanks;nMinors;nMissiles;nSupers;nPowers;MissAccuracy;SuperAccuracy;PowerAccuracy\n")
+        csvOut.write("energyQty;minorQty;nFun;strictMinors;MissProb;SuperProb;PowerProb;nItems;nTanks;nMinors;nMissiles;nSupers;nPowers;MissAccuracy;SuperAccuracy;PowerAccuracy\n")
         for i in range(10000):
             if (i+1) % 100 == 0:
                 print(i+1)
             isVanilla = random.random() < 0.5
+            strictMinors = bool(random.getrandbits(1))
             minQty = 100
             energyQty = 'vanilla'
             forbidden = []
@@ -39,10 +40,11 @@ if __name__ == "__main__":
                     'Missile' : missProb,
                     'Super' : superProb,
                     'PowerBomb' : pbProb
-                }
+                },
+                'strictMinors' : strictMinors
             }
             # write params
-            csvOut.write("%s;%d;%d;%d;%d;%d;" % (energyQty, minQty, len(forbidden), missProb, superProb, pbProb))
+            csvOut.write("%s;%d;%d;%s;%d;%d;%d;" % (energyQty, minQty, len(forbidden), str(strictMinors), missProb, superProb, pbProb))
             # get items
             itemPool = getItemPool(qty, forbidden)
             # compute stats

@@ -14,7 +14,7 @@ from rom import RomPatcher, RomPatches, FakeROM
 speeds = ['slowest', 'slow', 'medium', 'fast', 'fastest']
 energyQties = ['sparse', 'medium', 'vanilla' ]
 progDiffs = ['easier', 'normal', 'harder']
-morphPlacements = ['early', 'late', 'random']
+morphPlacements = ['early', 'late', 'normal']
 
 def dumpErrorMsg(outFileName, msg):
     if outFileName is None:
@@ -102,7 +102,7 @@ if __name__ == "__main__":
     parser.add_argument('--morphPlacement',
                         help="morph placement",
                         dest='morphPlacement', nargs='?', default='early',
-                        choices=morphPlacements)
+                        choices=morphPlacements + ['random'])
     parser.add_argument('--hideItems', help="Like in dessy's rando hide half of the items",
                         dest="hideItems", nargs='?', const=True, default=False)
     parser.add_argument('--progressionSpeed', '-i',
@@ -212,6 +212,8 @@ if __name__ == "__main__":
         args.suitsRestriction = bool(random.getrandbits(1))
     if args.hideItems == 'random':
         args.hideItems = bool(random.getrandbits(1))
+    if args.morphPlacement == 'random':
+        args.morphPlacement = morphPlacements[random.randint(0, len(morphPlacements)-1)]
 
     # fill restrictions dict
     restrictions = { 'Suits' : args.suitsRestriction, 'Morph' : args.morphPlacement, 'SpreadItems' : args.spreadItems }

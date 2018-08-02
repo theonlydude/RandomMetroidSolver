@@ -637,8 +637,8 @@ class RomPatcher:
             morphStr += '. EARLY'
         elif settings.restrictions['Morph'] == 'late':
             morphStr += '.. LATE'
-        elif settings.restrictions['Morph'] == 'random':
-            morphStr += ' RANDOM'
+        elif settings.restrictions['Morph'] == 'normal':
+            morphStr += ' NORMAL'
         self.writeCreditsString(address, 0x04, morphStr)
         address += 0x40
 

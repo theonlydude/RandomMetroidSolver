@@ -379,6 +379,12 @@ class Knows:
                         'href': 'https://www.youtube.com/watch?v=e5ZH_9paSLw',
                         'rooms': ['Pants Room']}
 
+    SnailClip = SMBool(True, hardcore, ['SnailClip'])
+    desc['SnailClip'] = {'display': 'Snail Clip',
+                         'title': 'Access Aqueduct Missile and Super Missile without SpeedBooster',
+                         'href': 'https://www.youtube.com/watch?v=fBQubU6h11U&t=70s',
+                         'rooms': ['Aqueduct']}
+
     SuitlessPuyoClip = SMBool(False, 0, ['SuitlessPuyoClip'])
     desc['SuitlessPuyoClip'] = {'display': 'Suitless Puyo Clip',
                                 'title': 'Do the Puyo clip with Hi Jump and without Gravity',
@@ -425,7 +431,7 @@ class Knows:
         'Maridia 1/2': [
             {'knows': ['SuitlessOuterMaridia', 'GravLessLevel2', 'SuitlessSandpit'],
              'title': 'Underwater movement without Gravity Suit'},
-            {'knows': ['MochtroidClip', 'PuyoClip'],
+            {'knows': ['MochtroidClip', 'PuyoClip', 'SnailClip'],
              'title': 'Clips'},
             {'knows': ['KillPlasmaPiratesWithCharge', 'KillPlasmaPiratesWithSpark'],
              'title': 'Plasma Room'},

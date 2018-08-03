@@ -152,6 +152,14 @@ class Helpers(object):
                                      sm.haveItem('PowerBomb'))),
                       sm.haveItem('ScrewAttack'))
 
+    def canDestroyBombWallsUnderwater(self):
+        sm = self.smbm
+        return sm.wor(sm.wand(sm.haveItem('Gravity'),
+                              sm.canDestroyBombWalls()),
+                      sm.wand(sm.haveItem('Morph'),
+                              sm.wor(sm.haveItem('Bomb'),
+                                     sm.haveItem('PowerBomb'))))
+
     def canEnterAndLeaveGauntletQty(self, nPB, nTanks):
         sm = self.smbm
         # EXPLAINED: to access Gauntlet Entrance from Landing site we can either:

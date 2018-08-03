@@ -224,7 +224,8 @@ accessPoints = [
                                              sm.wor(sm.haveItem('Gravity'),
                                                     sm.wand(sm.knowsGravLessLevel3(),
                                                             sm.haveItem('HiJump'),
-                                                            sm.haveItem('Ice')))) # for the sand pits
+                                                            sm.haveItem('Ice'))), # for the sand pits
+                                             sm.canDestroyBombWallsUnderwater())
     }, roomInfo = {'RoomPtr':0xcfc9, "area": 0x4},
        exitInfo = {'DoorPtr':0xa39c, 'direction': 0x6, "cap": (0x6, 0x2), "bitFlag": 0x0,
                    "screen": (0x0, 0x0), "distanceToSpawn": 0x170, "doorAsmPtr": 0x0000},
@@ -237,6 +238,7 @@ accessPoints = [
                                                         RomPatches.has(RomPatches.AreaRandoGatesOther))),
         'Le Coude Right': lambda sm: sm.wand(sm.canExitCrabHole(),
                                              sm.canOpenGreenDoors(), # toilet door
+                                             sm.canDestroyBombWallsUnderwater(),
                                              sm.wor(sm.haveItem('Gravity'),
                                                     sm.wand(sm.knowsGravLessLevel3(),
                                                             sm.haveItem('HiJump'),
@@ -249,14 +251,16 @@ accessPoints = [
        entryInfo = {'SamusX':0x28, 'SamusY':0x188},
        shortName="M\\CRAB HOLE"),
     AccessPoint('Le Coude Right', 'Maridia', {
-        'Crab Hole Bottom Left': lambda sm: sm.wand(sm.wor(sm.canOpenYellowDoors(), RomPatches.has(RomPatches.AreaRandoBlueDoors)),
-                                                    sm.wor(sm.haveItem('Gravity'),
-                                                           sm.wand(sm.knowsGravLessLevel3(),
-                                                                   sm.haveItem('HiJump'),
-                                                                   sm.haveItem('Ice'))), # for the sand pits
-                                                    sm.canOpenGreenDoors(),
-                                                    sm.haveItem('Morph')), # toilet door
+        'Crab Hole Bottom Left': lambda sm: sm.wand(sm.wand(sm.wor(sm.canOpenYellowDoors(), RomPatches.has(RomPatches.AreaRandoBlueDoors)),
+                                                            sm.wor(sm.haveItem('Gravity'),
+                                                                   sm.wand(sm.knowsGravLessLevel3(),
+                                                                           sm.haveItem('HiJump'),
+                                                                           sm.haveItem('Ice')))), # for the sand pits
+                                                    sm.wand(sm.canOpenGreenDoors(),
+                                                            sm.canDestroyBombWallsUnderwater(),
+                                                            sm.haveItem('Morph'))), # toilet door
         'Main Street Bottom': lambda sm: sm.wand(sm.wor(sm.canOpenYellowDoors(), RomPatches.has(RomPatches.AreaRandoBlueDoors)),
+                                                 sm.canDestroyBombWallsUnderwater(),
                                                  sm.wand(sm.wor(sm.haveItem('Gravity'),
                                                                 sm.wand(sm.knowsGravLessLevel3(),
                                                                         sm.haveItem('HiJump'),

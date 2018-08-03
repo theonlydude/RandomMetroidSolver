@@ -408,7 +408,7 @@ locations = [
     'Room': 'Screw Attack Room',
     'AccessFrom' : {
         'Lava Dive Right': lambda sm: sm.canPassLavaPit(),
-        'Three Muskateers Room Left': lambda sm: sm.canPassAmphitheaterReverse()
+        'Three Muskateers Room Left': lambda sm: sm.wand(sm.haveItem('Morph'), sm.canPassAmphitheaterReverse())
     },
     'Available': lambda sm: sm.wand(sm.wor(sm.canPassLowerNorfairChozo(),
                                            sm.wand(sm.canHellRun('LowerNorfair'), sm.haveItem('Super'), sm.knowsGreenGateGlitch())),
@@ -1371,7 +1371,7 @@ locations = [
     'Room': "Golden Torizo's Room",
     'AccessFrom' : {
         'Lava Dive Right': lambda sm: sm.canPassLavaPit(),
-        'Three Muskateers Room Left': lambda sm: sm.canPassAmphitheaterReverse()
+        'Three Muskateers Room Left': lambda sm: sm.wand(sm.haveItem('Morph'), sm.canPassAmphitheaterReverse())
     },
     'Available': lambda sm: sm.canPassLowerNorfairChozo(),
     'PostAvailable': lambda sm: sm.canExitScrewAttackArea()
@@ -1388,7 +1388,7 @@ locations = [
     'Room': "Golden Torizo's Room",
     'AccessFrom' : {
         'Lava Dive Right': lambda sm: sm.canPassLavaPit(),
-        'Three Muskateers Room Left': lambda sm: sm.canPassAmphitheaterReverse()
+        'Three Muskateers Room Left': lambda sm: sm.wand(sm.haveItem('Morph'), sm.canPassAmphitheaterReverse())
     },
     'Available': lambda sm: sm.wor(sm.canPassLowerNorfairChozo(),
                                    sm.wand(sm.canHellRun('LowerNorfair'), sm.haveItem('Super'), sm.knowsGreenGateGlitch())),
@@ -1406,7 +1406,7 @@ locations = [
     'Room': 'Mickey Mouse Room',
     'AccessFrom' : {
         'Lava Dive Right': lambda sm: sm.wand(sm.canPassLavaPit(), sm.canPassWorstRoom()),
-        'Three Muskateers Room Left': lambda sm: sm.canPassAmphitheaterReverse()
+        'Three Muskateers Room Left': lambda sm: sm.wand(sm.haveItem('Morph'), sm.canPassAmphitheaterReverse())
     },
     'Available': lambda sm: sm.wand(sm.canHellRun('LowerNorfair'), sm.canPassBombPassages())
 },
@@ -1422,7 +1422,7 @@ locations = [
     'Room': 'Lower Norfair Spring Ball Maze Room',
     'AccessFrom' : {
         'Lava Dive Right': lambda sm: sm.wand(sm.canPassLavaPit(), sm.canPassWorstRoom()),
-        'Three Muskateers Room Left': lambda sm: sm.setSMBool(True)
+        'Three Muskateers Room Left': lambda sm: sm.haveItem('Morph')
     },
     'Available': lambda sm: sm.canHellRun('LowerNorfair')
 },
@@ -1438,7 +1438,7 @@ locations = [
     'Room': 'Lower Norfair Escape Power Bomb Room',
     'AccessFrom' : {
         'Lava Dive Right': lambda sm: sm.wand(sm.canPassLavaPit(), sm.canPassWorstRoom()),
-        'Three Muskateers Room Left': lambda sm: sm.setSMBool(True)
+        'Three Muskateers Room Left': lambda sm: sm.haveItem('Morph')
     },
     'Available': lambda sm: sm.wand(sm.canHellRun('LowerNorfair'), sm.haveItem('Morph'))
 },
@@ -1454,7 +1454,7 @@ locations = [
     'Room': 'Wasteland',
     'AccessFrom' : {
         'Lava Dive Right': lambda sm: sm.wand(sm.canPassLavaPit(), sm.canPassWorstRoom()),
-        'Three Muskateers Room Left': lambda sm: sm.setSMBool(True)
+        'Three Muskateers Room Left': lambda sm: sm.haveItem('Morph')
     },
     'Available': lambda sm: sm.wand(sm.canHellRun('LowerNorfair'),
                                     sm.canOpenGreenDoors(),
@@ -1472,7 +1472,7 @@ locations = [
     'Room': "Three Muskateers' Room",
     'AccessFrom' : {
         'Lava Dive Right': lambda sm: sm.wand(sm.canPassLavaPit(), sm.canPassWorstRoom()),
-        'Three Muskateers Room Left': lambda sm: sm.setSMBool(True)
+        'Three Muskateers Room Left': lambda sm: sm.haveItem('Morph')
     },
     'Available': lambda sm: sm.wand(sm.canHellRun('LowerNorfair'),
                                     sm.canPassBombPassages())

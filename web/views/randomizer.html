@@ -188,7 +188,7 @@ function getComplexity() {
 
 function setRandom() {
 {{
-  for id in ["missileQty", "superQty", "powerBombQty", "minorQty", "energyQty", "maxDifficulty", "progressionSpeed", "spreadItems", "fullRandomization", "suitsRestriction", "speedScrewRestriction", "funCombat", "funMovement", "funSuits", "progressionDifficulty", "hideItems"]:
+  for id in ["missileQty", "superQty", "powerBombQty", "minorQty", "energyQty", "maxDifficulty", "progressionSpeed", "spreadItems", "fullRandomization", "suitsRestriction", "morphPlacement", "funCombat", "funMovement", "funSuits", "progressionDifficulty", "hideItems"]:
     if id in session.randomizer and session.randomizer[id] == "random":
       response.write('  document.getElementById("{}Random").click();'.format(id), escape=False)
       pass
@@ -209,7 +209,7 @@ function setComplexity() {
 function changeComplexity(evt, name) {
   if(name == "simple") {
     var show = [];
-    var hide = ["seedVisibility", "ammoVisibility", "maxDiffVisibility", "progDiffVisibility", "spreadItemsVisibility", "suitsRestrictionVisibility", "speedScrewRestrictionVisibility", "superFunVisibility", "patchesVisibility", "areaPatchVisibility", "hideItemsVisibility"];
+    var hide = ["seedVisibility", "ammoVisibility", "maxDiffVisibility", "progDiffVisibility", "spreadItemsVisibility", "suitsRestrictionVisibility", "morphPlacementVisibility", "superFunVisibility", "patchesVisibility", "areaPatchVisibility", "hideItemsVisibility"];
     showHide(show, hide);
   } else if(name == "medium") {
     var show = ["maxDiffVisibility", "progDiffVisibility", "patchesVisibility"
@@ -220,7 +220,7 @@ for patch in patches:
     pass
   pass
 }}];
-    var hide = ["seedVisibility", "ammoVisibility", "spreadItemsVisibility", "suitsRestrictionVisibility", "speedScrewRestrictionVisibility", "superFunVisibility", "areaPatchVisibility", "mainPatchesVisibitily", "mainPatchesTextVisibitily", "hideItemsVisibility"
+    var hide = ["seedVisibility", "ammoVisibility", "spreadItemsVisibility", "suitsRestrictionVisibility", "morphPlacementVisibility", "superFunVisibility", "areaPatchVisibility", "mainPatchesVisibitily", "mainPatchesTextVisibitily", "hideItemsVisibility"
 {{
 for patch in patches:
   if patch[3] == False:
@@ -230,7 +230,7 @@ for patch in patches:
 }}];
     showHide(show, hide);
   } else {
-    var show = ["seedVisibility", "ammoVisibility", "maxDiffVisibility", "progDiffVisibility", "spreadItemsVisibility", "suitsRestrictionVisibility", "speedScrewRestrictionVisibility", "superFunVisibility", "patchesVisibility", "areaPatchVisibility", "mainPatchesVisibitily", "mainPatchesTextVisibitily", "hideItemsVisibility"
+    var show = ["seedVisibility", "ammoVisibility", "maxDiffVisibility", "progDiffVisibility", "spreadItemsVisibility", "suitsRestrictionVisibility", "morphPlacementVisibility", "superFunVisibility", "patchesVisibility", "areaPatchVisibility", "mainPatchesVisibitily", "mainPatchesTextVisibitily", "hideItemsVisibility"
 {{
 for patch in patches:
   response.write(", \"{}Visibitily\"".format(patch[0]), escape=False)
@@ -269,7 +269,7 @@ function AjaxPresetCallCompleted(data) {
 
     var dataDict = {paramsFileTarget : data};
     var elems = ["seed", "paramsFile", "itemsounds", "spinjumprestart", "supermetroid_msu1", "max_ammo_display", "elevators_doors_speed", "skip_ceres", "skip_intro", "animals", "layoutPatches", "noGravHeat", "areaLayout", "variaTweaks", "areaRandomization"];
-    var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "energyQty", "maxDifficulty", "progressionSpeed", "spreadItems", "fullRandomization", "suitsRestriction", "speedScrewRestriction", "funCombat", "funMovement", "funSuits", "progressionDifficulty", "hideItems"];
+    var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "energyQty", "maxDifficulty", "progressionSpeed", "spreadItems", "fullRandomization", "suitsRestriction", "morphPlacement", "funCombat", "funMovement", "funSuits", "progressionDifficulty", "hideItems"];
 
     for(var i=0; i<elems.length; i++) {
        dataDict[elems[i]] = document.getElementById(elems[i]).value;
@@ -346,7 +346,7 @@ function AjaxRandomizerCallCompleted(data) {
 
     var dataDict = {"complexity": getComplexity()};
     var elems = ["paramsFile", "itemsounds", "spinjumprestart", "supermetroid_msu1", "max_ammo_display", "elevators_doors_speed", "skip_ceres", "skip_intro", "animals", "layoutPatches", "noGravHeat", "areaLayout", "variaTweaks", "areaRandomization"];
-    var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "energyQty", "maxDifficulty", "progressionSpeed", "spreadItems", "fullRandomization", "suitsRestriction", "speedScrewRestriction", "funCombat", "funMovement", "funSuits", "progressionDifficulty", "hideItems"];
+    var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "energyQty", "maxDifficulty", "progressionSpeed", "spreadItems", "fullRandomization", "suitsRestriction", "morphPlacement", "funCombat", "funMovement", "funSuits", "progressionDifficulty", "hideItems"];
 
     for(var i=0; i<elems.length; i++) {
        dataDict[elems[i]] = document.getElementById(elems[i]).value;
@@ -652,6 +652,11 @@ function startTheTour(step=-1) {
       content: "This parameter influences the choice of the next location. It uses the perceived difficulties from the preset to compute the difficulty to reach the locations. Then if <b>easier</b> or <b>harder</b> is selected, the easiest or hardest location will have a higher chance of being chosen.<br/>Set it to <b>normal</b> for the Randomizer to randomly choose the next location.<br/>Set it to <b>random</b> to randomly choose between <b>easier</b>, <b>harder</b> and <b>normal</b>.<br/><b>Note:</b> this setting has less of an influence on actual seed difficulty than Progression Speed.<br/>Click on the dice button to randomly set this parameter."
     },
     {
+      element: "#morphPlacementStep",
+      title: "Morph Placement",
+      content: "TODO::update text. No SpeedBooster or Screw Attack in the very first rooms, no Screw Attack in Crateria.<br/>As a consequence, Morph Ball will be either at its vanilla position, or at the E-Tank in the ceiling next to it (like Total randomizer).<br/>If disabled, Morph can be found later in the game (like Dessy randomizer).<br/>Click on the dice button to randomly set this parameter."
+    },
+    {
       element: "#spreadItemsStep",
       title: "Spread progression items",
       content: "A progression item is an item opening new locations once picked up : suit, movement item, or any item that opens up locations when placed by the randomizer.<br/>Activate this option to balance the main areas in which those items are placed.<br/>Click on the dice button to randomly set this parameter."
@@ -660,11 +665,6 @@ function startTheTour(step=-1) {
       element: "#suitsRestrictionStep",
       title: "Suits restriction",
       content: "Prevent Gravity or Varia suits to be placed early in the game.<br/>Click on the dice button to randomly set this parameter."
-    },
-    {
-      element: "#speedScrewRestrictionStep",
-      title: "Early Morph",
-      content: "No SpeedBooster or Screw Attack in the very first rooms, no Screw Attack in Crateria.<br/>As a consequence, Morph Ball will be either at its vanilla position, or at the E-Tank in the ceiling next to it (like Total randomizer).<br/>If disabled, Morph can be found later in the game (like Dessy randomizer).<br/>Click on the dice button to randomly set this parameter."
     },
     {
       element: "#hideItemsStep",
@@ -872,19 +872,20 @@ def displayNumber(id, min, max, default, step="1"):
                 <td class="half">{{displaySelect("progressionDifficulty", ["easier", "normal", "harder"], "normal")}}</td>
                 <td><button type="button" onclick="startTheTour(6)">?</button></td>
 	      </tr>
+	      <tr id="morphPlacementVisibility">
+		<td class="small"><div class="random"><button id="morphPlacementRandom" type="button" onclick="randomize(event, 'morphPlacement')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
+	        <td class="half"><span id="morphPlacementText">Morph Placement:</span></td>
+	        <td class="half" id="morphPlacementStep">{{displaySelect("morphPlacement", ["early", "normal", "late"], "normal")}}</td>
+                <td><button type="button" onclick="startTheTour(7)">?</button></td>
+	      </tr>
 	      <tr id="spreadItemsVisibility">
 		<td class="small"><div class="random"><button id="spreadItemsRandom" type="button" onclick="randomize(event, 'spreadItems')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
 	        <td colspan="2" id="spreadItemsStep">{{displayCheckbox("spreadItems")}}<span id="spreadItemsText">Spread progression items</span></td>
-                <td><button type="button" onclick="startTheTour(7)">?</button></td>
+                <td><button type="button" onclick="startTheTour(8)">?</button></td>
 	      </tr>
 	      <tr id="suitsRestrictionVisibility">
 		<td class="small"><div class="random"><button id="suitsRestrictionRandom" type="button" onclick="randomize(event, 'suitsRestriction')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
 	        <td colspan="2" id="suitsRestrictionStep">{{displayCheckbox("suitsRestriction")}}<span id="suitsRestrictionText">Suits restriction</span></td>
-                <td><button type="button" onclick="startTheTour(8)">?</button></td>
-	      </tr>
-	      <tr id="speedScrewRestrictionVisibility">
-		<td class="small"><div class="random"><button id="speedScrewRestrictionRandom" type="button" onclick="randomize(event, 'speedScrewRestriction')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
-	        <td colspan="2" id="speedScrewRestrictionStep">{{displayCheckbox("speedScrewRestriction")}}<span id="speedScrewRestrictionText">Early Morph</span></td>
                 <td><button type="button" onclick="startTheTour(9)">?</button></td>
 	      </tr>
 	      <tr id="hideItemsVisibility">

@@ -613,7 +613,7 @@ def initRandomizerSession():
         session.randomizer['spreadItems'] = "on"
         session.randomizer['fullRandomization'] = "on"
         session.randomizer['suitsRestriction'] = "on"
-        session.randomizer['speedScrewRestriction'] = "on"
+        session.randomizer['morphPlacement'] = "normal"
         session.randomizer['funCombat'] = "off"
         session.randomizer['funMovement'] = "off"
         session.randomizer['funSuits'] = "off"
@@ -704,10 +704,14 @@ def validateWebServiceParams(patchs, quantities, others, isJson=False):
         except:
             raiseHttp(400, "Wrong value for paramsFileTarget, must be a JSON string", isJson)
 
-    for check in ['spreadItems', 'fullRandomization', 'suitsRestriction', 'speedScrewRestriction', 'layoutPatches', 'noGravHeat', 'areaRandomization', 'hideItems']:
+    for check in ['spreadItems', 'fullRandomization', 'suitsRestriction', 'layoutPatches', 'noGravHeat', 'areaRandomization', 'hideItems']:
         if check in others:
             if request.vars[check] not in ['on', 'off', 'random']:
                 raiseHttp(400, "Wrong value for {}: {}, authorized values: on/off".format(check, request.vars[check]), isJson)
+
+    if 'morphPlacement' in others:
+        if request.vars['morphPlacement'] not in ['early', 'late', 'normal', 'random']:
+            raiseHttp(400, "Wrong value for morphPlacement: {}, authorized values early/late/normal".format(request.vars['morphPlacement']), isJson)
 
     if 'progressionSpeed' in others:
         if request.vars['progressionSpeed'] not in ['slowest', 'slow', 'medium', 'fast', 'fastest', 'random']:
@@ -729,8 +733,8 @@ def sessionWebService():
     quantities = ['missileQty', 'superQty', 'powerBombQty']
     others = ['paramsFile', 'minorQty', 'energyQty', 'maxDifficulty',
               'progressionSpeed', 'spreadItems', 'fullRandomization', 'suitsRestriction',
-              'speedScrewRestriction', 'funCombat', 'funMovement', 'funSuits', 'layoutPatches',
-              'noGravHeat', 'progressionDifficulty',
+              'funCombat', 'funMovement', 'funSuits', 'layoutPatches',
+              'noGravHeat', 'progressionDifficulty', 'morphPlacement',
               'areaRandomization', 'complexity', 'hideItems']
     validateWebServiceParams(patchs, quantities, others)
 
@@ -750,7 +754,7 @@ def sessionWebService():
     session.randomizer['spreadItems'] = request.vars.spreadItems
     session.randomizer['fullRandomization'] = request.vars.fullRandomization
     session.randomizer['suitsRestriction'] = request.vars.suitsRestriction
-    session.randomizer['speedScrewRestriction'] = request.vars.speedScrewRestriction
+    session.randomizer['morphPlacement'] = request.vars.morphPlacement
     session.randomizer['funCombat'] = request.vars.funCombat
     session.randomizer['funMovement'] = request.vars.funMovement
     session.randomizer['funSuits'] = request.vars.funSuits
@@ -787,7 +791,7 @@ def randomizerWebService():
     quantities = ['missileQty', 'superQty', 'powerBombQty']
     others = ['seed', 'paramsFile', 'paramsFileTarget', 'minorQty', 'energyQty',
               'maxDifficulty', 'progressionSpeed', 'spreadItems', 'fullRandomization',
-              'suitsRestriction', 'speedScrewRestriction', 'funCombat', 'funMovement', 'funSuits',
+              'suitsRestriction', 'morphPlacement', 'funCombat', 'funMovement', 'funSuits',
               'layoutPatches', 'noGravHeat', 'progressionDifficulty', 'areaRandomization',
               'hideItems']
     validateWebServiceParams(patchs, quantities, others, isJson=True)
@@ -808,7 +812,8 @@ def randomizerWebService():
               '--output', jsonFileName, '--param', presetFileName,
               '--preset', request.vars.paramsFile,
               '--progressionSpeed', request.vars.progressionSpeed,
-              '--progressionDifficulty', request.vars.progressionDifficulty]
+              '--progressionDifficulty', request.vars.progressionDifficulty,
+              '--morphPlacement', request.vars.morphPlacement]
     params += ['--missileQty', request.vars.missileQty if request.vars.missileQty != 'random' else '0',
                '--superQty', request.vars.superQty if request.vars.superQty != 'random' else '0',
                '--powerBombQty', request.vars.powerBombQty if request.vars.powerBombQty != 'random' else '0',
@@ -845,7 +850,6 @@ def randomizerWebService():
     addParamRandom('fullRandomization', params)
     addParamRandom('spreadItems', params)
     addParamRandom('suitsRestriction', params)
-    addParamRandom('speedScrewRestriction', params)
     addParamRandom('hideItems', params)
 
     def addSuperFun(id, params):

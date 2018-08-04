@@ -236,9 +236,9 @@ locations = [
     'Visibility': "Hidden",
     'Room': 'Warehouse Energy Tank Room',
     'AccessFrom' : {
-        'Warehouse Entrance Left': lambda sm: sm.setSMBool(True)
+        'Warehouse Zeela Room Left': lambda sm: sm.setSMBool(True)
     },
-    'Available': lambda sm: sm.wand(sm.canAccessKraidsLair(), Bosses.bossDead('Kraid'))
+    'Available': lambda sm: sm.setSMBool(Bosses.bossDead('Kraid').bool)
 },
 {
     'Area': "Brinstar",
@@ -251,9 +251,9 @@ locations = [
     'Visibility': "Chozo",
     'Room': 'Varia Suit Room',
     'AccessFrom' : {
-        'Warehouse Entrance Left': lambda sm: sm.setSMBool(True)
+        'Warehouse Zeela Room Left': lambda sm: sm.setSMBool(True)
     },
-    'Available': lambda sm: sm.wand(sm.canAccessKraidsLair(),
+    'Available': lambda sm: sm.wand(sm.canPassBombPassages(),
                                     sm.enoughStuffsKraid()),
     'Pickup': lambda: Bosses.beatBoss('Kraid')
 },
@@ -1151,7 +1151,7 @@ locations = [
     'Visibility': "Hidden",
     'Room': 'Warehouse Keyhunter Room',
     'AccessFrom' : {
-        'Warehouse Entrance Left': lambda sm: sm.canAccessKraidsLair()
+        'Warehouse Zeela Room Left': lambda sm: sm.setSMBool(True)
     },
     'Available': lambda sm: sm.canUsePowerBombs()
 },

@@ -293,6 +293,7 @@ class Randomizer(object):
         # check if we can reach all APs
         landingSite = self.areaGraph.accessPoints['Landing Site']
         availAccessPoints = self.areaGraph.getAvailableAccessPoints(landingSite, self.smbm, self.difficultyTarget)
+
         # clean up
         self.smbm.resetItems()
         self.smbm.resetSMBool()
@@ -301,7 +302,7 @@ class Randomizer(object):
         # actual AP check
         for apName,ap in self.areaGraph.accessPoints.iteritems():
             if not ap in availAccessPoints:
-                raise RuntimeError('Invalid transitions')
+                raise RuntimeError('Invalid transitions: {}'.format(ap))
 
         return restricted
 

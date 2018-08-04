@@ -125,6 +125,15 @@ accessPoints = [
                    "screen": (0x5, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
        entryInfo = {'SamusX':0x134, 'SamusY':0x88},
        shortName="LN\\THREE MUSK."),
+    # Warehouse
+    AccessPoint('Warehouse Zeela Room Left', 'Warehouse', {},
+       roomInfo = {'RoomPtr': 0xa471, "area": 0x1},
+       exitInfo = {'DoorPtr': 0x913e, 'direction': 0x5, "cap": (0x2e, 0x6), "bitFlag": 0x0,
+                   "screen": (0x2, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0xbd3f},
+        # TODO: add it
+       entryInfo = {'SamusX': 0x0, 'SamusY': 0x0},
+       shortName="W\\ZEELA"
+    ),
     # Norfair
     AccessPoint('Warehouse Entrance Left', 'Norfair', {
         'Bubble Mountain': lambda sm: sm.wor(sm.wand(sm.haveItem('SpeedBooster'), # frog speedway
@@ -145,12 +154,21 @@ accessPoints = [
                                        sm.wand(sm.canOpenGreenDoors(),
                                                sm.haveItem('SpeedBooster'),
                                                sm.canUsePowerBombs(),
-                                               sm.canHellRun('Ice', 1.5)))
+                                               sm.canHellRun('Ice', 1.5))),
+        'Warehouse Entrance Right': lambda sm: sm.canAccessKraidsLair()
     }, roomInfo = {'RoomPtr':0xa6a1, "area": 0x1},
        exitInfo = {'DoorPtr':0x922e, 'direction': 0x5, "cap": (0xe, 0x16), "bitFlag": 0x40,
                    "screen": (0x0, 0x1), "distanceToSpawn": 0x8000, "doorAsmPtr": 0xbdd1},
        entryInfo = {'SamusX':0x34, 'SamusY':0x88},
-       shortName="N\\WAREHOUSE"),
+       shortName="N\\WAREHOUSE L"),
+    AccessPoint('Warehouse Entrance Right', 'Norfair', {
+        'Warehouse Entrance Left': lambda sm: sm.haveItem('Super')
+    }, roomInfo = {'RoomPtr': 0xa6a1, "area": 0x1},
+       exitInfo = {'DoorPtr': 0x923a, 'direction': 0x4, "cap": (0x1, 0x6), "bitFlag": 0x0,
+                   "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
+        # TODO add it
+       entryInfo = {'SamusX': 0x0, 'SamusY': 0x0},
+       shortName="N\\WAREHOUSE R"),
     AccessPoint('Single Chamber Top Right', 'Norfair', {
         'Bubble Mountain': lambda sm: sm.wand(sm.canDestroyBombWalls(),
                                               sm.haveItem('Morph'),
@@ -368,7 +386,8 @@ vanillaTransitions = [
     ('East Tunnel Top Right', 'Crab Hole Bottom Left'),
     ('Caterpillar Room Top Right', 'Red Fish Room Left'),
     ('Glass Tunnel Top', 'Main Street Bottom'),
-    ('Green Pirates Shaft Bottom Right', 'Statues Hallway Left')
+    ('Green Pirates Shaft Bottom Right', 'Statues Hallway Left'),
+    ('Warehouse Entrance Right', 'Warehouse Zeela Room Left')
 ]
 
 def isVanillaTransitions(transitions):

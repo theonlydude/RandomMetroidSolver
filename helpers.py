@@ -426,6 +426,12 @@ class Helpers(object):
                                           Settings.bossesDifficulty['Kraid'])
         if diff < 0:
             return SMBool(False)
+
+        # need missile or super to open the eye door
+        self.smbm.wor(self.smbm.haveItem('Missile'), self.smbm.haveItem('Super'))
+        if self.smbm.curSMBool.bool == False:
+                return SMBool(False)
+
         self.smbm.curSMBool.difficulty = diff
         self.smbm.curSMBool.bool = True
         return self.smbm.getSMBoolCopy()

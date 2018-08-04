@@ -38,8 +38,12 @@ roomsDoor = [
     {"address": 0x07AF14, "doorCount": 2, "name": "Lava Dive Room", "direction": "right"},
     {"address": 0x07B656, "doorCount": 2, "name": "Three Muskateers' Room", "direction": "left"},
 
+    # warehouse
+    {"address": 0x07A471, "doorCount": 3, "name": "Warehouse Zeela Room", "direction": "left"},
+
     # norfair
     {"address": 0x07A6A1, "doorCount": 4, "name": "Warehouse Entrance", "direction": "left"},
+    {"address": 0x07A6A1, "doorCount": 4, "name": "Warehouse Entrance", "direction": "right"},
     {"address": 0x07AD5E, "doorCount": 5, "name": "Single Chamber", "direction": "right"},
     {"address": 0x07AE74, "doorCount": 4, "name": "Kronic Boost Room", "direction": "left"},
 

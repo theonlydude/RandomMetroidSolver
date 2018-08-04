@@ -26,12 +26,10 @@ class HelpersGraph(Helpers):
         #             -hijump boots (easy regular way)
         #             -fly (space jump or infinite bomb jump)
         #             -know how to wall jump on the platform without the hijump boots
-        #            then we have to break a bomb block at Warehouse Zeela room
         return sm.wand(sm.canOpenGreenDoors(),
                        sm.wor(sm.haveItem('HiJump'),
                               sm.canFly(),
-                              sm.knowsEarlyKraid()),
-                       sm.canPassBombPassages())
+                              sm.knowsEarlyKraid()))
 
     def canPassMoat(self):
         sm = self.smbm

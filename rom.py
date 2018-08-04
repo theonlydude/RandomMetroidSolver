@@ -238,7 +238,9 @@ class RomReader:
             (0xcf80, (0x3, 0x0)): 'East Tunnel Top Right',
             (0xcefb, (0x0, 0x0)): 'Glass Tunnel Top',
             (0x99bd, (0x0, 0x6)): 'Green Pirates Shaft Bottom Right',
-            (0xa5ed, (0x0, 0x0)): 'Statues Hallway Left'
+            (0xa5ed, (0x0, 0x0)): 'Statues Hallway Left',
+            (0xa471, (0x0, 0x0)): 'Warehouse Zeela Room Left',
+            (0xa6a1, (0x2, 0x0)): 'Warehouse Entrance Right'
         }
 
         transitions = {}

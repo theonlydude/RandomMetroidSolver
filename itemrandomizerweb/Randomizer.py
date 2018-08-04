@@ -10,7 +10,7 @@ from smboolmanager import SMBoolManager
 
 class RandoSettings(object):
     # maxDiff : max diff
-    # progSpeed : slowest, slow, medium, fast, fastest
+    # progSpeed : slowest, slow, medium, fast, fastest, basic
     # progDiff : easier, normal, harder
     # qty : dictionary telling how many tanks and ammo will be distributed. keys are:
     #       'ammo': a dict with 'Missile', 'Super', 'PowerBomb' keys. relative weight of ammo distribution (ex:3/3/1)
@@ -79,7 +79,7 @@ class RandoSettings(object):
                 'Random' : 75,
                 'MaxProgression' : 0
             }
-        if progSpeed == 'medium':
+        if progSpeed == 'medium' or progSpeed == 'basic':
             return {
                 'MinProgression' : 0,
                 'Random' : 1,
@@ -108,7 +108,7 @@ class RandoSettings(object):
             return 0.33
         if progSpeed == 'fast':
             return 0.1
-        if progSpeed == 'fastest':
+        if progSpeed == 'fastest' or progSpeed == 'basic':
             return 0
 
     def getProgressionItemTypes(self, progSpeed):
@@ -133,7 +133,9 @@ class RandoSettings(object):
             return progTypes
         else:
             progTypes.remove('SpeedBooster')
-        return progTypes # only morph, varia, gravity
+        if progSpeed == 'fastest':
+            return progTypes # only morph, varia, gravity
+        return [] # basic speed
 
     def getItemLimit(self, progSpeed):
         itemLimit = 100
@@ -145,6 +147,8 @@ class RandoSettings(object):
             itemLimit = 5
         elif progSpeed == 'fastest':
             itemLimit = 1
+        elif progSpeed == 'basic':
+            itemLimit = 0
         return itemLimit
 
     def getLocLimit(self, progSpeed):
@@ -157,6 +161,7 @@ class RandoSettings(object):
             locLimit = 3
         elif progSpeed == 'fastest':
             locLimit = 4
+        # locLimit is irrelevant for basic speed, as itemLimit is 0
         return locLimit
 
     def getForbiddenItemsFromList(self, itemList):
@@ -841,7 +846,7 @@ class Randomizer(object):
         return False
 
     def fillNonProgressionItems(self, itemLocations):
-        if self.totalCancels > 66:
+        if self.totalCancels > 66 or self.itemLimit == 0:
             return False
         pool = [item for item in self.itemPool if not self.isProgItem(item)]
         poolWasEmpty = len(pool) == 0

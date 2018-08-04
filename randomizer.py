@@ -11,7 +11,7 @@ from parameters import Knows, easy, medium, hard, harder, hardcore, mania, text2
 from utils import PresetLoader
 from rom import RomPatcher, RomPatches, FakeROM
 
-speeds = ['slowest', 'slow', 'medium', 'fast', 'fastest']
+speeds = ['slowest', 'slow', 'medium', 'fast', 'fastest', 'basic']
 energyQties = ['sparse', 'medium', 'vanilla' ]
 progDiffs = ['easier', 'normal', 'harder']
 morphPlacements = ['early', 'late', 'normal']

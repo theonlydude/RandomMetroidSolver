@@ -130,8 +130,7 @@ accessPoints = [
        roomInfo = {'RoomPtr': 0xa471, "area": 0x1},
        exitInfo = {'DoorPtr': 0x913e, 'direction': 0x5, "cap": (0x2e, 0x6), "bitFlag": 0x0,
                    "screen": (0x2, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0xbd3f},
-        # TODO: add it
-       entryInfo = {'SamusX': 0x0, 'SamusY': 0x0},
+       entryInfo = {'SamusX':0x34, 'SamusY':0x88, 'song':0x12},
        shortName="W\\ZEELA"
     ),
     # Norfair
@@ -166,8 +165,7 @@ accessPoints = [
     }, roomInfo = {'RoomPtr': 0xa6a1, "area": 0x1},
        exitInfo = {'DoorPtr': 0x923a, 'direction': 0x4, "cap": (0x1, 0x6), "bitFlag": 0x0,
                    "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
-        # TODO add it
-       entryInfo = {'SamusX': 0x0, 'SamusY': 0x0},
+       entryInfo = {'SamusX': 0x2c7, 'SamusY': 0x98},
        shortName="N\\WAREHOUSE R"),
     AccessPoint('Single Chamber Top Right', 'Norfair', {
         'Bubble Mountain': lambda sm: sm.wand(sm.canDestroyBombWalls(),

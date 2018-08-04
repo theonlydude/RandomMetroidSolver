@@ -632,14 +632,10 @@ class RomPatcher:
             line = param[0] % ('. ON' if settings.restrictions[param[1]] == True else ' OFF')
             self.writeCreditsString(address, 0x04, line)
             address += 0x40
-        morphStr  = ' MORPH PLACEMENT .....'
-        if settings.restrictions['Morph'] == 'early':
-            morphStr += '. EARLY'
-        elif settings.restrictions['Morph'] == 'late':
-            morphStr += '.. LATE'
-        elif settings.restrictions['Morph'] == 'normal':
-            morphStr += ' NORMAL'
-        self.writeCreditsString(address, 0x04, morphStr)
+
+        value = " "+settings.restrictions['Morph'].upper()
+        line  = " MORPH PLACEMENT .....%s" % value.rjust(9, '.')
+        self.writeCreditsString(address, 0x04, line)
         address += 0x40
 
         for superFun in [(' SUPER FUN COMBAT .........%s', 'Combat'),

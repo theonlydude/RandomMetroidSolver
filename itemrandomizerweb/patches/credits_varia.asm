@@ -1272,7 +1272,7 @@ credits:
     dw " PROGRESSION DIFFICULTY XXXXXXX " // 156
     dw " SPREAD PROG ITEMS ........ XXX " // 157
     dw " SUITS RESTRICTION ........ XXX " // 158
-    dw " EARLY MORPH .............. XXX " // 159
+    dw " MORPH PLACEMENT ....... XXXXXX " // 159
     dw " SUPER FUN COMBAT ......... XXX " // 160
     dw " SUPER FUN MOVEMENT ....... XXX " // 161
     dw " SUPER FUN SUITS .......... XXX " // 162

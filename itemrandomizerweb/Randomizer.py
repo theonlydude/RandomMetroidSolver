@@ -241,6 +241,7 @@ class RandoState(object):
         self.currentItems = rando.currentItems[:]
         self.itemLocations = rando.itemLocations[:]
         self.states = rando.states[:]
+        self.progressionItemLocs = rando.progressionItemLocs[:]
         self.progressionStatesIndices = rando.progressionStatesIndices[:]
         self.bosses = [boss for boss in Bosses.golden4Dead if Bosses.golden4Dead[boss] == True]
         self.curLocs = curLocs
@@ -249,14 +250,15 @@ class RandoState(object):
     def apply(self, rando):
         rando.progTypesCache = []
         rando.nonProgTypesCache = []
-        rando.unusedLocations = self.unusedLocations[:]
-        rando.pickedUpLocs = self.pickedUpLocs[:]
-        rando.currentItems = self.currentItems[:]
-        rando.itemLocations = self.itemLocations[:]
+        rando.unusedLocations = self.unusedLocations
+        rando.pickedUpLocs = self.pickedUpLocs
+        rando.currentItems = self.currentItems
+        rando.itemLocations = self.itemLocations
         rando.setCurAccessPoint(self.curAccessPoint)
-        rando.states = self.states[:]
-        rando.itemPool = self.itemPool[:]
-        rando.progressionStatesIndices = self.progressionStatesIndices[:]
+        rando.states = self.states
+        rando.itemPool = self.itemPool
+        rando.progressionStatesIndices = self.progressionStatesIndices
+        rando.progressionItemLocs = self.progressionItemLocs
         rando.smbm.resetItems()
         rando.smbm.addItems([item['Type'] for item in self.currentItems])
         Bosses.reset()
@@ -312,6 +314,7 @@ class Randomizer(object):
         self.states = []
         # indices in states list that mark a progression item collection
         self.progressionStatesIndices = []
+        self.progressionItemLocs = []
         # maximum index in states list to try a rollback on
         self.maxRollbackPoint = -1
         # minimum index in states list to try a rollback on
@@ -742,11 +745,12 @@ class Randomizer(object):
             self.progTypesCache = []
         self.unusedLocations.remove(location)
         self.itemLocations.append(itemLocation)
-        print(str(len(self.currentItems)) + ':' + item['Type'] + ' at ' + location['Name'] + ' diff: ' + str(location['difficulty']))
+#        print(str(len(self.currentItems)) + ':' + item['Type'] + ' at ' + location['Name'] + ' diff: ' + str(location['difficulty']))
         self.removeItem(item['Type'])
         if collect == True:
             if isProg == True:
                 self.progressionStatesIndices.append(len(self.states))
+                self.progressionItemLocs.append(itemLocation)
             curLocs.remove(location)
             self.states.append(RandoState(self, curLocs))
 
@@ -836,7 +840,7 @@ class Randomizer(object):
     # goes back in the previous states to find one where
     # we can put a progression item
     def rollback(self):
-        print("rollback BEGIN : " + str(len(self.currentItems)))
+#        print("rollback BEGIN : " + str(len(self.currentItems)))
         nRollbacks = 0
         i = 0
         itemLoc = None
@@ -846,14 +850,14 @@ class Randomizer(object):
             self.initRollbackPoints()
             i = self.maxRollbackPoint
             while (i >= self.minRollbackPoint) and (itemLoc is None):
-                sys.stdout.write('<' + str(i))
+                sys.stdout.write('<')
                 sys.stdout.flush()
                 state = states[i]
                 state.apply(self)
                 posItems = self.possibleItems(state.curLocs, self.itemPool)
                 if len(posItems) > 0: # new locs can be opened
-                    print([item['Type'] for item in posItems])
-                    print([loc['Name'] for loc in state.curLocs])
+#                    print([item['Type'] for item in posItems])
+#                    print([loc['Name'] for loc in state.curLocs])
                     itemLoc = self.generateItem(state.curLocs, self.itemPool)
                 nRollbacks += 1
                 i -= 1
@@ -861,7 +865,7 @@ class Randomizer(object):
                 sys.stdout.write('!')
                 sys.stdout.flush()
                 self.progressionStatesIndices.pop()
-        print("rollback END : " + str(len(self.currentItems)) + ", nRollbacks=" + str(nRollbacks))
+#        print("rollback END : " + str(len(self.currentItems)) + ", nRollbacks=" + str(nRollbacks))
 
     # check if only bosses locations are left. when stuck, that just means
     # difficulty settings were not possible.
@@ -932,7 +936,7 @@ class Randomizer(object):
             print("DIAG: {}".format(self.errorMsg))
             return None
         self.states.append(RandoState(self, self.currentLocations()))
-        print(str(len(self.itemPool)) + " items in pool")
+#        print(str(len(self.itemPool)) + " items in pool")
         while len(self.itemPool) > 0 and not isStuck:
             # fill up with non-progression stuff
             self.fillNonProgressionItems()
@@ -946,7 +950,7 @@ class Randomizer(object):
                         # we can do something about stuck state
                         self.rollback()
                         isStuck = self.getItemFromStandardPool()
-        print(str(len(self.itemPool)) + " remaining items in pool")
+#        print(str(len(self.itemPool)) + " remaining items in pool")
         if len(self.itemPool) > 0:
             # we could not place all items, check if we can finish the game
             if self.canEndGame():

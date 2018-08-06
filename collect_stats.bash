@@ -19,8 +19,8 @@ if [ ! -f "$1" ]; then
 fi
 test_set=$2
 
-nb_cpu=$(grep processor /proc/cpuinfo | wc -l)
-#nb_cpu=1
+#nb_cpu=$(grep processor /proc/cpuinfo | wc -l)
+nb_cpu=1
 
 [ -z "$test_set" ] && test_set="seeds"
 
@@ -132,9 +132,9 @@ function gen_seeds() {
 	for speed in $progs; do
 	    extra="$base_extra --progressionDifficulty $progDiff $noob"
 #	    extra="$base_extra --superQty 1 --powerBombQty 1 --missileQty 4.6"
-	    if [[ $speed != "random" ]]; then
-		extra="$extra --speedScrewRestriction"
-	    fi
+	    # if [[ $speed != "random" ]]; then
+	    # 	extra="$extra --morphPlacement early"
+	    # fi
 	    #	extra="--speedScrewRestriction --superFun Combat --superFun Movement"
 	    if [[ $speed == slow* ]] || [[ $speed == "medium" ]]; then
 		extra="$extra --spreadItems"
@@ -176,7 +176,7 @@ for A in "area" "standard"; do
 
 	# add randomized parameters
 	#	PARAMS="${PARAMS} --randomRestrictions --superFun random --energyQty random --missileQty 0 --superQty 0 --powerBombQty 0 --minorQty 0"
-	PARAMS="${PARAMS} --randomRestrictions --energyQty random --missileQty 0 --superQty 0 --powerBombQty 0 --minorQty 0"
+	PARAMS="${PARAMS} --morphPlacement random --energyQty random --missileQty 0 --superQty 0 --powerBombQty 0 --minorQty 0"
 
 	let S=$RANDOM%${#DIFFS[@]}
 	DIFF=${DIFFS[$S]}

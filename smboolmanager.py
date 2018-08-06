@@ -123,14 +123,14 @@ class SMBoolManager(object):
             self.updateCache('add', item)
 
     def addItems(self, items):
-        # called by the randomizer with super fun times
+        if len(items) == 0:
+            return
         for item in items:
             setattr(self, item, True)
             if item in self.countItems:
                 setattr(self, item+'Count', getattr(self, item+'Count') + 1)
-
         if self.useCache == True:
-            self.updateCache('add', item)
+            self.updateCache('add', None)
 
     def removeItem(self, item):
         # randomizer removed an item (or the item was added to test a post available)

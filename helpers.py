@@ -428,9 +428,9 @@ class Helpers(object):
             return SMBool(False)
 
         # need missile or super to open the eye door
-        self.smbm.wor(self.smbm.haveItem('Missile'), self.smbm.haveItem('Super'))
-        if self.smbm.curSMBool.bool == False:
-                return SMBool(False)
+        if self.smbm.eval(lambda sm: sm.wor(sm.haveItem('Missile'), sm.haveItem('Super'))).bool == False:
+            self.smbm.printItems()
+            return SMBool(False)
 
         self.smbm.curSMBool.difficulty = diff
         self.smbm.curSMBool.bool = True

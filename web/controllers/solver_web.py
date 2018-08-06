@@ -714,8 +714,8 @@ def validateWebServiceParams(patchs, quantities, others, isJson=False):
             raiseHttp(400, "Wrong value for morphPlacement: {}, authorized values early/late/normal".format(request.vars['morphPlacement']), isJson)
 
     if 'progressionSpeed' in others:
-        if request.vars['progressionSpeed'] not in ['slowest', 'slow', 'medium', 'fast', 'fastest', 'random']:
-            raiseHttp(400, "Wrong value for progressionSpeed: {}, authorized values slowest/slow/medium/fast/fastest".format(request.vars['progressionSpeed']), isJson)
+        if request.vars['progressionSpeed'] not in ['slowest', 'slow', 'medium', 'fast', 'fastest', 'random', 'basic']:
+            raiseHttp(400, "Wrong value for progressionSpeed: {}, authorized values slowest/slow/medium/fast/fastest/basic".format(request.vars['progressionSpeed']), isJson)
 
     if 'progressionDifficulty' in others:
         if request.vars['progressionDifficulty'] not in ['easier', 'normal', 'harder', 'random']:

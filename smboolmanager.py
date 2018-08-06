@@ -36,6 +36,10 @@ class SMBoolManager(object):
         self.createKnowsFunctions()
         self.resetItems()
 
+    def printItems(self):
+        for item in self.items:
+            print("{}: {}".format(item, getattr(self, item)))
+
     def resetSMBool(self):
         self.curSMBool.bool = False
         self.curSMBool.difficulty = 0

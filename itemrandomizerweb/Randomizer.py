@@ -402,6 +402,15 @@ class Randomizer(object):
     def canPlaceItem(self, item, locs):
         return List.exists(lambda loc: self.canPlaceAtLocation(item, loc), locs)
 
+    # organize an item pool in a type-indexed dictionary
+    def getPoolDict(self, pool):
+        poolDict = {}
+        for item in pool:
+            if item['Type'] not in poolDict:
+                poolDict[item['Type']] = []
+            poolDict[item['Type']].append(item)
+        return poolDict
+
     # loop on all the items in the item pool of not already placed
     # items and return those that open up new locations.
     #
@@ -411,10 +420,12 @@ class Randomizer(object):
     # return list of items eligible for next placement
     def possibleItems(self, curLocs, itemPool):
         result = []
-        random.shuffle(itemPool)
-        for item in itemPool:
-            if self.checkItem(curLocs, item, self.currentItems):
-                result.append(item)
+        poolDict = self.getPoolDict(itemPool)
+        for itemType,items in poolDict.iteritems():
+            if self.checkItem(curLocs, items[0], self.currentItems):
+                for item in items:
+                    result.append(item)
+        random.shuffle(result)
         return result
 
     # removes an item of given type from the pool.
@@ -826,20 +837,24 @@ class Randomizer(object):
     def rollback(self):
         i = 0
         itemLoc = None
-        while i >= 0:
+        while i >= 0 and itemLoc is None:
             states = self.states[:]
             self.initRollbackPoints()
             i = self.maxRollbackPoint
             while (i >= self.minRollbackPoint) and (itemLoc is None):
-                sys.stdout.write('<')
+                sys.stdout.write('<' + str(i))
                 sys.stdout.flush()
                 state = states[i]
                 state.apply(self)
                 posItems = self.possibleItems(state.curLocs, self.itemPool)
                 if len(posItems) > 0: # new locs can be opened
+                    print([item['Type'] for item in posItems])
+                    print([loc['Name'] for loc in state.curLocs])
                     itemLoc = self.generateItem(state.curLocs, self.itemPool)
                 i -= 1
-            if itemLoc is None:
+            if itemLoc is None and i >= 0:
+                sys.stdout.write('!')
+                sys.stdout.flush()
                 self.progressionStatesIndices.pop()
 
     # check if only bosses locations are left. when stuck, that just means
@@ -849,7 +864,7 @@ class Randomizer(object):
             if 'Pickup' not in loc:
                 return False
         return True
-    
+
     # if not all items could be placed (the player cannot finish the seed 100%),
     # check if we can still finish the game (the player can finish the seed any%)
     def canEndGame(self):
@@ -910,6 +925,7 @@ class Randomizer(object):
             self.errorMsg = "Can't access to all bosses locations, abort. Retry, and change the super fun settings if the problem happens again."
             print("DIAG: {}".format(self.errorMsg))
             return None
+        self.states.append(RandoState(self, self.currentLocations()))
         while len(self.itemPool) > 0 and not isStuck:
             # fill up with non-progression stuff
             self.fillNonProgressionItems()

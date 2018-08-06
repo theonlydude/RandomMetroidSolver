@@ -315,10 +315,6 @@ class Randomizer(object):
         # indices in states list that mark a progression item collection
         self.progressionStatesIndices = []
         self.progressionItemLocs = []
-        # maximum index in states list to try a rollback on
-        self.maxRollbackPoint = -1
-        # minimum index in states list to try a rollback on
-        self.minRollbackPoint = -1
         # progression items tried for a given rollback point
         self.rollbackItemsTried = {}
         # create smbm and perform sanity checks
@@ -330,7 +326,7 @@ class Randomizer(object):
 
     def setCurAccessPoint(self, ap='Landing Site'):
         self.curAccessPoint = ap
-#        print('current AP = ' + ap)
+        print('current AP = ' + ap)
 
     # list unreachable locations (possible with super fun setting)
     # and check area transitions validity
@@ -745,7 +741,7 @@ class Randomizer(object):
             self.progTypesCache = []
         self.unusedLocations.remove(location)
         self.itemLocations.append(itemLocation)
-#        print(str(len(self.currentItems)) + ':' + item['Type'] + ' at ' + location['Name'] + ' diff: ' + str(location['difficulty']))
+        print(str(len(self.currentItems)) + ':' + item['Type'] + ' at ' + location['Name'] + ' diff: ' + str(location['difficulty']))
         self.removeItem(item['Type'])
         if collect == True:
             if isProg == True:
@@ -831,41 +827,64 @@ class Randomizer(object):
         return isStuck
 
     def initRollbackPoints(self):
-        self.maxRollbackPoint = len(self.states) - 1
+        maxRollbackPoint = len(self.states) - 1
         if len(self.progressionStatesIndices) > 0:
-            self.minRollbackPoint = self.progressionStatesIndices[-1]
+            minRollbackPoint = self.progressionStatesIndices[-1]
         else:
-            self.minRollbackPoint = 0
+            minRollbackPoint = 0
+        return minRollbackPoint, maxRollbackPoint
+
+    def initRollback(self):
+        self.states.pop() # last state is current state, so it's useless
+        if len(self.progressionStatesIndices) > 0 and self.progressionStatesIndices[-1] == len(self.states):
+            # the state we just removed was a progression state (highly unlikely, but let's be safe)
+            self.progressionStatesIndices.pop()
+
+    def hasTried(self, itemLoc, idx):
+        return (idx in self.rollbackItemsTried) and (itemLoc['Item']['Type'] in self.rollbackItemsTried[idx])
+
+    def updateRollbackItemsTried(self, itemLoc, idx):
+        if itemLoc is not None:
+            itemType = itemLoc['Item']['Type']
+            if not idx in self.rollbackItemsTried:
+                self.rollbackItemsTried[idx] = []
+            self.rollbackItemsTried[idx].append(itemType)
+        # for i in list(self.rollbackItemsTried.keys()):
+        #     if i > idx:
+        #         del self.rollbackItemsTried[i]
 
     # goes back in the previous states to find one where
     # we can put a progression item
     def rollback(self):
-#        print("rollback BEGIN : " + str(len(self.currentItems)))
-        nRollbacks = 0
+        print("rollback BEGIN : " + str(len(self.currentItems)))
+        self.initRollback()
         i = 0
         itemLoc = None
-        self.states.pop() # last state is current state, so it's useless
         while i >= 0 and itemLoc is None:
             states = self.states[:]
-            self.initRollbackPoints()
-            i = self.maxRollbackPoint
-            while (i >= self.minRollbackPoint) and (itemLoc is None):
+            minRollbackPoint, maxRollbackPoint = self.initRollbackPoints()
+            i = maxRollbackPoint
+            while (i >= minRollbackPoint) and (itemLoc is None):
                 sys.stdout.write('<')
                 sys.stdout.flush()
                 state = states[i]
                 state.apply(self)
                 posItems = self.possibleItems(state.curLocs, self.itemPool)
                 if len(posItems) > 0: # new locs can be opened
-#                    print([item['Type'] for item in posItems])
-#                    print([loc['Name'] for loc in state.curLocs])
+                    print([item['Type'] for item in posItems])
+                    print([loc['Name'] for loc in state.curLocs])
                     itemLoc = self.generateItem(state.curLocs, self.itemPool)
-                nRollbacks += 1
+                    if itemLoc is not None and self.hasTried(itemLoc, i):
+                        # been there, done that
+                        itemLoc = None
                 i -= 1
+            # nothing, let's rollback further a progression item
             if itemLoc is None and i >= 0:
                 sys.stdout.write('!')
                 sys.stdout.flush()
                 self.progressionStatesIndices.pop()
-#        print("rollback END : " + str(len(self.currentItems)) + ", nRollbacks=" + str(nRollbacks))
+        self.updateRollbackItemsTried(itemLoc, i)
+        print("rollback END : " + str(len(self.currentItems)))
 
     # check if only bosses locations are left. when stuck, that just means
     # difficulty settings were not possible.
@@ -932,7 +951,7 @@ class Randomizer(object):
         # items that are as useless as possible
         abort = self.fillRestrictedLocations()
         if abort == True:
-            self.errorMsg = "Can't access to all bosses locations, abort. Retry, and change the super fun settings if the problem happens again."
+            self.errorMsg = "Can't access all bosses locations, abort. Retry, and change the super fun settings if the problem happens again."
             print("DIAG: {}".format(self.errorMsg))
             return None
         self.states.append(RandoState(self, self.currentLocations()))
@@ -970,7 +989,7 @@ class Randomizer(object):
                     self.errorMsg = "Stuck because of boss fights. Try to increase max difficulty or health/ammo."
                     print("DIAG: {}".format(self.errorMsg))
                 else:
-                    self.errorMsg = "Stuck because of navigation. Retry, and disable super fun settings if the problem happens again."
+                    self.errorMsg = "Stuck because of navigation. Retry, and disable either super fun settings/late morph ball/suits restriction if the problem happens again."
                     print("DIAG: {}".format(self.errorMsg))
                 return None
         print("")

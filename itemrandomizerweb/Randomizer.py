@@ -326,7 +326,7 @@ class Randomizer(object):
 
     def setCurAccessPoint(self, ap='Landing Site'):
         self.curAccessPoint = ap
-#        print('current AP = ' + ap)
+        print('current AP = ' + ap)
 
     # list unreachable locations (possible with super fun setting)
     # and check area transitions validity
@@ -741,7 +741,7 @@ class Randomizer(object):
             self.progTypesCache = []
         self.unusedLocations.remove(location)
         self.itemLocations.append(itemLocation)
-#        print(str(len(self.currentItems)) + ':' + item['Type'] + ' at ' + location['Name'] + ' diff: ' + str(location['difficulty']))
+        print(str(len(self.currentItems)) + ':' + item['Type'] + ' at ' + location['Name'] + ' diff: ' + str(location['difficulty']))
         self.removeItem(item['Type'])
         if collect == True:
             if isProg == True:

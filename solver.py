@@ -153,6 +153,8 @@ class Solver:
                 else:
                     print("No unaccessible major locations")
 
+            self.smbm.printMinors()
+
         # display difficulty scale
         self.displayDifficulty(self.difficulty)
 
@@ -279,35 +281,40 @@ class Solver:
                 self.log.debug("diff area back dist - diff area back dist")
                 self.log.debug("maj: {} '{}' {} {}, min: {} '{}' {} {}".format(nextMajDifficulty, majorAvailable[0]['SolveArea'], nextMajComeBack, nextMajDistance, nextMinDifficulty, nextMinArea, nextMinComeBack, nextMinDistance))
 
-                # first take item from loc where you can come back
-                if nextMajComeBack != nextMinComeBack:
-                    self.log.debug("!= combeback")
-                    if nextMajComeBack == True:
-                        area = self.collectMajor(majorAvailable.pop(0))
-                    else:
-                        area = self.collectMinor(minorAvailable.pop(0))
-                # take the closer one
-                elif nextMajDistance != nextMinDistance:
-                    self.log.debug("!= distance")
-                    if nextMajDistance < nextMinDistance:
-                        area = self.collectMajor(majorAvailable.pop(0))
-                    else:
-                        area = self.collectMinor(minorAvailable.pop(0))
-                # if not all the minors type are collected, start with minors
-                elif nextMinDifficulty <= diffThreshold and not self.haveAllMinorTypes():
-                    self.log.debug("not all minors types")
-                    area = self.collectMinor(minorAvailable.pop(0))
-                elif nextMinArea == area and nextMinDifficulty <= diffThreshold and not hasEnoughMinors:
-                    self.log.debug("not enough minors")
-                    area = self.collectMinor(minorAvailable.pop(0))
-                # difficulty over area (this is a difficulty estimator,
-                # not a speedrunning simulator)
-                elif nextMinDifficulty < nextMajDifficulty and not hasEnoughMinors:
-                    self.log.debug("min easier and not enough minors")
-                    area = self.collectMinor(minorAvailable.pop(0))
-                else:
-                    self.log.debug("maj easier")
+                if hasEnoughMinors == True and self.haveAllMinorTypes() == True and self.smbm.haveItem('Charge'):
+                    # first take item from loc where you can come back
                     area = self.collectMajor(majorAvailable.pop(0))
+                else:
+                    # first take item from loc where you can come back
+                    if nextMajComeBack != nextMinComeBack:
+                        self.log.debug("!= combeback")
+                        if nextMajComeBack == True:
+                            area = self.collectMajor(majorAvailable.pop(0))
+                        else:
+                            area = self.collectMinor(minorAvailable.pop(0))
+                    # take the closer one
+                    elif nextMajDistance != nextMinDistance:
+                        self.log.debug("!= distance")
+                        if nextMajDistance < nextMinDistance:
+                            area = self.collectMajor(majorAvailable.pop(0))
+                        else:
+                            area = self.collectMinor(minorAvailable.pop(0))
+                    # if not all the minors type are collected, start with minors
+                    elif nextMinDifficulty <= diffThreshold and not self.haveAllMinorTypes():
+                        self.log.debug("not all minors types")
+                        area = self.collectMinor(minorAvailable.pop(0))
+                    elif nextMinArea == area and nextMinDifficulty <= diffThreshold:
+                        self.log.debug("not enough minors")
+                        area = self.collectMinor(minorAvailable.pop(0))
+                    # difficulty over area (this is a difficulty estimator,
+                    # not a speedrunning simulator)
+                    elif nextMinDifficulty < nextMajDifficulty:
+                        self.log.debug("min easier and not enough minors")
+                        area = self.collectMinor(minorAvailable.pop(0))
+                    else:
+                        self.log.debug("maj easier")
+                        area = self.collectMajor(majorAvailable.pop(0))
+
         # main loop end
         if isEndPossible:
             self.visitedLocations.append({

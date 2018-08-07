@@ -514,12 +514,17 @@ class Helpers(object):
             return SMBool(False)
 
         # print('MB2', ammoMargin, secs)
-        nTanks = self.smbm.ETankCount
+        nTanks = self.smbm.ETankCount + self.smbm.ReserveCount
         if self.smbm.getBool(self.smbm.haveItem('Varia')) == False:
             # "remove" 3 etanks (accounting for rainbow beam damage without varia)
             if nTanks < 6:
                 return SMBool(False, 0)
-            self.smbm.ETankCount -= 3
+            # we have at least 2 etanks (max reserves is 4)
+            self.smbm.ETankCount -= 2
+            if self.smbm.ReserveCount > 0:
+                self.smbm.ReserveCount -= 1
+            else:
+                self.smbm.ETankCount -= 1
         elif nTanks < 3:
             return SMBool(False, 0)
 

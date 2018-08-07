@@ -1,4 +1,4 @@
-import sys, random
+import sys, random, time
 from itemrandomizerweb import Items
 from parameters import Knows, Settings, samus
 from itemrandomizerweb.stdlib import List
@@ -326,7 +326,7 @@ class Randomizer(object):
 
     def setCurAccessPoint(self, ap='Landing Site'):
         self.curAccessPoint = ap
-        print('current AP = ' + ap)
+#        print('current AP = ' + ap)
 
     # list unreachable locations (possible with super fun setting)
     # and check area transitions validity
@@ -741,7 +741,7 @@ class Randomizer(object):
             self.progTypesCache = []
         self.unusedLocations.remove(location)
         self.itemLocations.append(itemLocation)
-        print(str(len(self.currentItems)) + ':' + item['Type'] + ' at ' + location['Name'] + ' diff: ' + str(location['difficulty']))
+#        print(str(len(self.currentItems)) + ':' + item['Type'] + ' at ' + location['Name'] + ' diff: ' + str(location['difficulty']))
         self.removeItem(item['Type'])
         if collect == True:
             if isProg == True:
@@ -852,7 +852,7 @@ class Randomizer(object):
     # goes back in the previous states to find one where
     # we can put a progression item
     def rollback(self):
-        print("rollback BEGIN : " + str(len(self.currentItems)))
+#        print("rollback BEGIN : " + str(len(self.currentItems)))
         self.initRollback()
         i = 0
         possibleStates = []
@@ -882,7 +882,7 @@ class Randomizer(object):
             (state, itemLoc) = possibleStates[random.randint(0, len(possibleStates)-1)]
             self.updateRollbackItemsTried(itemLoc, i)
             state.apply(self)
-        print("rollback END : " + str(len(self.currentItems)))
+#        print("rollback END : " + str(len(self.currentItems)))
 
     # check if only bosses locations are left. when stuck, that just means
     # difficulty settings were not possible.
@@ -954,7 +954,9 @@ class Randomizer(object):
             return None
         self.states.append(RandoState(self, self.currentLocations()))
 #        print(str(len(self.itemPool)) + " items in pool")
-        while len(self.itemPool) > 0 and not isStuck:
+        runtime_s = 0
+        startDate = time.clock()
+        while len(self.itemPool) > 0 and not isStuck and runtime_s <= 30:
             # fill up with non-progression stuff
             isStuck = self.fillNonProgressionItems()
             if len(self.itemPool) > 0:
@@ -968,6 +970,7 @@ class Randomizer(object):
                         # we can do something about stuck state
                         self.rollback()
                         isStuck = self.getItemFromStandardPool()
+            runtime_s = time.clock() - startDate
 #        print(str(len(self.itemPool)) + " remaining items in pool")
         if len(self.itemPool) > 0:
             # we could not place all items, check if we can finish the game

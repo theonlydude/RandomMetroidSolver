@@ -19,8 +19,8 @@ if [ ! -f "$1" ]; then
 fi
 test_set=$2
 
-#nb_cpu=$(grep processor /proc/cpuinfo | wc -l)
-nb_cpu=1
+nb_cpu=$(grep processor /proc/cpuinfo | wc -l)
+#nb_cpu=1
 
 [ -z "$test_set" ] && test_set="seeds"
 

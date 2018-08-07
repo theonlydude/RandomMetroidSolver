@@ -40,6 +40,9 @@ class SMBoolManager(object):
         for item in self.items:
             print("{}: {}".format(item, getattr(self, item)))
 
+    def printMinors(self):
+        print("Missile: {}, Super: {}, PowerBomb: {}".format(self.itemCount('Missile'), self.itemCount('Super'), self.itemCount('PowerBomb')))
+
     def resetSMBool(self):
         self.curSMBool.bool = False
         self.curSMBool.difficulty = 0

@@ -237,7 +237,6 @@ class RandoState(object):
         self.unusedLocations = rando.unusedLocations[:]
         self.itemPool = rando.itemPool[:]
         self.curAccessPoint = rando.curAccessPoint
-        self.pickedUpLocs = rando.pickedUpLocs[:]
         self.currentItems = rando.currentItems[:]
         self.itemLocations = rando.itemLocations[:]
         self.states = rando.states[:]
@@ -251,7 +250,6 @@ class RandoState(object):
         rando.progTypesCache = []
         rando.nonProgTypesCache = []
         rando.unusedLocations = self.unusedLocations
-        rando.pickedUpLocs = self.pickedUpLocs
         rando.currentItems = self.currentItems
         rando.itemLocations = self.itemLocations
         rando.setCurAccessPoint(self.curAccessPoint)
@@ -264,6 +262,7 @@ class RandoState(object):
         Bosses.reset()
         for boss in self.bosses:
             Bosses.beatBoss(boss)
+
 
 # randomizer algorithm main class. generateItems method will generate a complete seed, or fail (depending on settings) 
 class Randomizer(object):
@@ -299,16 +298,14 @@ class Randomizer(object):
         self.possibleSoftlockProb = settings.possibleSoftlockProb
         # init everything
         self.unusedLocations = locations
-        self.origLocations = locations[:]
         self.itemPool = Items.getItemPool(settings.qty, settings.forbiddenItems)
-        # locations on which the pickup function has been called
-        self.pickedUpLocs = []
         # collected items
         self.currentItems = []
         # progresion/non progression types cache
         self.nonProgTypesCache = []
         self.progTypesCache = []
         # start at landing site
+        self.curAccessPoint = None
         self.setCurAccessPoint()
         # states saved at each item collection
         self.states = []
@@ -325,8 +322,9 @@ class Randomizer(object):
         self.restrictedLocations = self.checkReach(locations, settings.forbiddenItems)
 
     def setCurAccessPoint(self, ap='Landing Site'):
-        self.curAccessPoint = ap
-#        print('current AP = ' + ap)
+        if ap != self.curAccessPoint:
+            self.curAccessPoint = ap
+#            print('current AP = ' + ap)
 
     # list unreachable locations (possible with super fun setting)
     # and check area transitions validity
@@ -587,9 +585,9 @@ class Randomizer(object):
         availableLocations = List.filter(lambda loc: self.canPlaceAtLocation(item, loc, checkSoftlock=True), locations)
         # if a loc is available we trigger pick up action, to make more locs available afterwards
         for loc in availableLocations:
-            if 'Pickup' in loc and not loc in self.pickedUpLocs:
+            if 'Pickup' in loc:
+#                print("PICKUP call for " + loc['Name'])
                 loc['Pickup']()
-                self.pickedUpLocs.append(loc)
         if len(availableLocations) == 0:
             if not item in self.failItems:
                 self.failItems.append(item)
@@ -741,7 +739,8 @@ class Randomizer(object):
             self.progTypesCache = []
         self.unusedLocations.remove(location)
         self.itemLocations.append(itemLocation)
-#        print(str(len(self.currentItems)) + ':' + item['Type'] + ' at ' + location['Name'] + ' diff: ' + str(location['difficulty']))
+        # print(str(len(self.currentItems)) + ':' + item['Type'] + ' at ' + location['Name'] + ' diff: ' + str(location['difficulty']))
+        # print("PLACEMENT, curLocs=" + str([loc['Name'] for loc in curLocs]))
         self.removeItem(item['Type'])
         if collect == True:
             if isProg == True:
@@ -854,6 +853,7 @@ class Randomizer(object):
     # we can put a progression item
     def rollback(self):
 #        print("rollback BEGIN : " + str(len(self.currentItems)))
+        nStatesAtStart = len(self.states)
         self.initRollback()
         i = 0
         possibleStates = []
@@ -862,8 +862,6 @@ class Randomizer(object):
             minRollbackPoint, maxRollbackPoint = self.initRollbackPoints()
             i = maxRollbackPoint
             while i >= minRollbackPoint and len(possibleStates) < 3:
-                sys.stdout.write('<')
-                sys.stdout.flush()
                 state = states[i]
                 state.apply(self)
                 posItems = self.possibleItems(state.curLocs, self.itemPool)
@@ -883,6 +881,8 @@ class Randomizer(object):
             (state, itemLoc) = possibleStates[random.randint(0, len(possibleStates)-1)]
             self.updateRollbackItemsTried(itemLoc, i)
             state.apply(self)
+            sys.stdout.write('<'*(nStatesAtStart - len(self.states)))
+            sys.stdout.flush()
 #        print("rollback END : " + str(len(self.currentItems)))
 
     # check if only bosses locations are left. when stuck, that just means
@@ -968,8 +968,15 @@ class Randomizer(object):
                     # if we're stuck, give up if only bosses locations are left (bosses difficulty settings problems)
                     onlyBosses = self.onlyBossesLeft()
                     if not onlyBosses:
-                        # we can do something about stuck state
-                        self.rollback()
+                        # check that we're actually stuck
+                        nCurLocs = len(self.states[-1].curLocs)
+                        nLocsLeft = len(self.unusedLocations)
+                        # print("nCurLocs=" + str(nCurLocs) + ", nLocsLeft=" + str(nLocsLeft))
+                        # print("curLocs:" + str([loc['Name'] for loc in self.states[-1].curLocs]))
+                        # print("unused: " + str([loc['Name'] for loc in self.unusedLocations]))
+                        if nCurLocs < nLocsLeft:
+                            # rollback to make progress if we can't access everything yet
+                            self.rollback()
                         isStuck = self.getItemFromStandardPool()
             runtime_s = time.clock() - startDate
 #        print(str(len(self.itemPool)) + " remaining items in pool")

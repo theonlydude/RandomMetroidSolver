@@ -227,7 +227,7 @@ locations = [
 },
 {
     'Area': "Brinstar",
-    'GraphArea': "Norfair",
+    'GraphArea': "Warehouse",
     'SolveArea': "Warehouse",
     'Name': "Energy Tank, Kraid",
     'Class': "Major",
@@ -242,7 +242,7 @@ locations = [
 },
 {
     'Area': "Brinstar",
-    'GraphArea': "Norfair",
+    'GraphArea': "Warehouse",
     'SolveArea': "Warehouse",
     'Name': "Varia Suit",
     'Class': "Major",
@@ -1142,7 +1142,7 @@ locations = [
 },
 {
     'Area': "Brinstar",
-    'GraphArea': "Norfair",
+    'GraphArea': "Warehouse",
     'SolveArea': "Warehouse",
     'Name': "Missile (Kraid)",
     'Class': "Minor",

@@ -36,12 +36,14 @@ class SMBoolManager(object):
         self.createKnowsFunctions()
         self.resetItems()
 
-    def printItems(self):
+    def getItems(self):
+        # get a dict of collected items and how many (to be displayed on the solver spoiler)
+        itemsDict = {}
         for item in self.items:
-            print("{}: {}".format(item, getattr(self, item)))
-
-    def printMinors(self):
-        print("Missile: {}, Super: {}, PowerBomb: {}".format(self.itemCount('Missile'), self.itemCount('Super'), self.itemCount('PowerBomb')))
+            itemsDict[item] = getattr(self, item)
+        for item in self.countItems:
+            itemsDict[item] = getattr(self, item+"Count")
+        return itemsDict
 
     def resetSMBool(self):
         self.curSMBool.bool = False

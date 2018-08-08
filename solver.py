@@ -153,7 +153,9 @@ class Solver:
                 else:
                     print("No unaccessible major locations")
 
-            self.smbm.printMinors()
+            items = self.smbm.getItems()
+            print("ETank: {}, Reserve: {}, Missile: {}, Super: {}, PowerBomb: {}".format(items['ETank'], items['Reserve'], items['Missile'], items['Super'], items['PowerBomb']))
+            print("Majors: {}".format(sorted([item for item in items if items[item] == True])))
 
         # display difficulty scale
         self.displayDifficulty(self.difficulty)

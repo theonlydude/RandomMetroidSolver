@@ -467,7 +467,7 @@ class Solver:
         if 'Pickup' in loc:
             loc['Pickup']()
         if isNew is True and self.firstLogFile is not None:
-            self.firstLogFile.write("{};{};{}\n".format(item, loc['Name'], loc['SolveArea']))
+            self.firstLogFile.write("{};{};{};{}\n".format(item, loc['Name'], loc['Area'], loc['GraphArea']))
 
         self.log.debug("collectItem: {} at {}".format(item, loc['Name']))
 

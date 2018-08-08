@@ -5,8 +5,8 @@ SOLVER=./solver.py
 GET_STATS=./get_stats.py
 DUMP=./dump_rom.py
 
-presets="noob flo manu speedrunner"
-progs="slowest slow medium fast fastest random"
+presets="noob casual regular veteran speedrunner master"
+progs="slowest slow medium fast fastest random basic"
 n=20
 vanilla_rom=$1
 if [ -z "$1" ]; then
@@ -161,35 +161,35 @@ function gen_seeds() {
     done
 }
 
-# do it again with random
-DIFFS=("" "" "" "" "" "" "--maxDifficulty easy" "--maxDifficulty medium" "--maxDifficulty hard" "--maxDifficulty harder" "--maxDifficulty hardcore" "--maxDifficulty mania")
+# # do it again with random
+# DIFFS=("" "" "" "" "" "" "--maxDifficulty easy" "--maxDifficulty medium" "--maxDifficulty hard" "--maxDifficulty harder" "--maxDifficulty hardcore" "--maxDifficulty mania")
 
-for A in "area" "standard"; do
-    for B in "classic" "full"; do
-	PARAMS=""
-	if [ $A = "area" ]; then
-	    PARAMS="${PARAMS} --area --dot"
-	fi
-	if [ $B = "full" ]; then
-	    PARAMS="${PARAMS} --fullRandomization"
-	fi
+# for A in "area" "standard"; do
+#     for B in "classic" "full"; do
+# 	PARAMS=""
+# 	if [ $A = "area" ]; then
+# 	    PARAMS="${PARAMS} --area --dot"
+# 	fi
+# 	if [ $B = "full" ]; then
+# 	    PARAMS="${PARAMS} --fullRandomization"
+# 	fi
 
-	# add randomized parameters
-	#	PARAMS="${PARAMS} --randomRestrictions --superFun random --energyQty random --missileQty 0 --superQty 0 --powerBombQty 0 --minorQty 0"
-	PARAMS="${PARAMS} --morphPlacement random --energyQty random --missileQty 0 --superQty 0 --powerBombQty 0 --minorQty 0"
+# 	# add randomized parameters
+# 	#	PARAMS="${PARAMS} --randomRestrictions --superFun random --energyQty random --missileQty 0 --superQty 0 --powerBombQty 0 --minorQty 0"
+# 	PARAMS="${PARAMS} --morphPlacement random --energyQty random --missileQty 0 --superQty 0 --powerBombQty 0 --minorQty 0"
 
-	let S=$RANDOM%${#DIFFS[@]}
-	DIFF=${DIFFS[$S]}
-	PARAMS="${PARAMS} ${DIFF}"
+# 	let S=$RANDOM%${#DIFFS[@]}
+# 	DIFF=${DIFFS[$S]}
+# 	PARAMS="${PARAMS} ${DIFF}"
 
-	gen_seeds "$A" "$B" "random" "$PARAMS"
-    done
-done
+# 	gen_seeds "$A" "$B" "random" "$PARAMS"
+#     done
+# done
 
 for A in "standard" "area"; do
     for B in "classic" "full"; do
 	for C in "easier" "harder" "normal"; do
-	    PARAMS=""
+	    PARAMS="--maxDifficulty hardcore"
 	    if [ $A = "area" ]; then
 		PARAMS="${PARAMS} --area --dot"
 	    fi

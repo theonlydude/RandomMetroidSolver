@@ -89,8 +89,7 @@ if __name__ == "__main__":
                         choices=energyQties + ['random'])
     parser.add_argument('--strictMinors',
                         help="minors quantities values will be strictly followed instead of being probabilities",
-                        action='store_true',
-                        dest='strictMinors', default=False)
+                        dest='strictMinors', nargs='?', const=True, default=False)
     parser.add_argument('--spreadItems',
                         help="spread progression items", nargs='?', const=True, default=False, dest='spreadItems')
     parser.add_argument('--fullRandomization',
@@ -214,6 +213,8 @@ if __name__ == "__main__":
         args.hideItems = bool(random.getrandbits(1))
     if args.morphPlacement == 'random':
         args.morphPlacement = morphPlacements[random.randint(0, len(morphPlacements)-1)]
+    if args.strictMinors == 'random':
+        args.strictMinors = bool(random.getrandbits(1))
 
     # fill restrictions dict
     restrictions = { 'Suits' : args.suitsRestriction, 'Morph' : args.morphPlacement, 'SpreadItems' : args.spreadItems }

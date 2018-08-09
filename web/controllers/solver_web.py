@@ -586,10 +586,10 @@ patches = [
     ('skip_intro', "Skip text intro (start at Ceres Station) (by Smiley)", False, False),
     ('skip_ceres', "Skip text intro and Ceres station (start at Landing Site) (by Total)", True, False),
     ('itemsounds', "Remove fanfare when picking up an item (by Scyzer)", True, True),
-    ('spinjumprestart', "Allows Samus to start spinning in mid air after jumping or falling (by Kejardon)", False, False),
+    ('spinjumprestart', "Allows Samus to start spinning in mid air after jumping or falling (by Kejardon)", False, True),
     ('elevators_doors_speed', 'Accelerate doors and elevators transitions (by Rakki & Lioran)', True, True),
     ('animals', "Save the animals surprise (by Foosda)", False, False),
-    ('No_Music', "Disable background music (by Kejardon)", False, False)
+    ('No_Music', "Disable background music (by Kejardon)", False, True)
 ]
 
 def initRandomizerSession():

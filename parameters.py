@@ -404,6 +404,31 @@ class Knows:
                                            'href': None,
                                            'rooms': ['Plasma Room']}
 
+    # spring ball access
+    AccessSpringBallWithSpringBallBombJumps = SMBool(False, 0, ['AccessSpringBallWithSpringBallBombJumps'])
+    desc['AccessSpringBallWithSpringBallBombJumps'] = {'display': 'Access Spring Ball location with bomb jumps and spring ball',
+                                                       'title': 'With Gravity and no Hi-Jump, bounce on the sand and bomb jump up to get through the grapple hole',
+                                                       'href': None,
+                                                       'rooms': ['Pants Room']}
+
+    AccessSpringBallWithBombJumps = SMBool(False, 0, ['AccessSpringBallWithBombJumps'])
+    desc['AccessSpringBallWithBombJumps'] = {'display': 'Access Spring Ball location with bomb jumps only',
+                                             'title': 'With Gravity and no Hi-Jump, bomb jump up from the sand to get through the grapple hole',
+                                             'href': None,
+                                             'rooms': ['Pants Room']}
+
+    AccessSpringBallWithSpringBallJump = SMBool(False, 0, ['AccessSpringBallWithSpringBallJump'])
+    desc['AccessSpringBallWithSpringBallJump'] = {'display': 'Access Spring Ball location with a spring ball jump',
+                                                  'title': 'With Gravity and no Hi-Jump, use a spring ball jump, either from the sand or a ledge to get through the grapple hole',
+                                                  'href': None,
+                                                  'rooms': ['Pants Room']}
+
+    AccessSpringBallWithXRayClimb = SMBool(False, 0, ['AccessSpringBallWithXRayClimb'])
+    desc['AccessSpringBallWithXRayClimb'] = {'display': 'Access Spring Ball location with X-Ray climbing',
+                                             'title': 'Use inbounds X-Ray climbing to get past the grapple hole. Can be required suitless if suitless movement level 3 is enabled.',
+                                             'href': None,
+                                             'rooms': ['Pants Room']}
+
     categories = {
         'Common': [
             {'knows': ['WallJump', 'ShineSpark', 'MidAirMorph'],
@@ -437,6 +462,9 @@ class Knows:
              'title': 'Plasma Room'},
         ],
         'Maridia 2/2': [
+            {'knows': ['AccessSpringBallWithSpringBallBombJumps', 'AccessSpringBallWithBombJumps',
+                       'AccessSpringBallWithSpringBallJump', 'AccessSpringBallWithXRayClimb'],
+             'title': 'Spring Ball Access'},
             {'knows': ['DraygonRoomGrappleExit', 'DraygonRoomCrystalFlash', 'PreciousRoomXRayExit'],
              'title': 'Suitless Draygon Exit'},
             {'knows': ['TediousMountEverest', 'SuitlessPuyoClip'],

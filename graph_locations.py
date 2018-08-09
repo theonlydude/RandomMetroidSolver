@@ -596,19 +596,26 @@ locations = [
         'Le Coude Right': lambda sm: sm.wand(sm.wor(sm.canOpenYellowDoors(), RomPatches.has(RomPatches.AreaRandoBlueDoors)),
                                              sm.canOpenGreenDoors()), # toilet
     },
-    'Available': lambda sm: sm.wand(sm.wor(sm.haveItem('Gravity'),
+    'Available': lambda sm: sm.wand(sm.wor(sm.haveItem('Gravity'), # access pants room
                                            sm.wand(sm.haveItem('HiJump'),
                                                    sm.haveItem('Ice'),
                                                    sm.knowsGravLessLevel3())),
-                                    sm.wor(sm.wand(sm.haveItem('Ice'),
+                                    sm.wor(sm.wand(sm.haveItem('Ice'), # puyo clip
                                                    sm.wor(sm.wand(sm.haveItem('Gravity'),
                                                                   sm.knowsPuyoClip()),
-                                                          sm.wand(sm.knowsSuitlessPuyoClip(),
-                                                                  sm.haveItem('SpringBall'),
-                                                                  sm.knowsSpringBallJump()))),
-                                           sm.wand(sm.haveItem('Grapple'),
+                                                          sm.knowsSuitlessPuyoClip())),
+                                           sm.wand(sm.haveItem('Grapple'), # go through grapple block
+                                                   sm.haveItem('Gravity'),
                                                    sm.wor(sm.canFlyDiagonally(),
-                                                          sm.haveItem('HiJump')))))
+                                                          sm.haveItem('HiJump'),
+                                                          sm.wand(sm.haveItem('Bomb'),
+                                                                  sm.wor(sm.knowsAccessSpringBallWithBombJumps(),
+                                                                         sm.wand(sm.haveItem('SpringBall'),
+                                                                                 sm.knowsAccessSpringBallWithSpringBallBombJumps()))),
+                                                          sm.wand(sm.haveItem('SpringBall'), sm.knowsAccessSpringBallWithSpringBallJump()))),
+                                           sm.wand(sm.haveItem('XRayScope'), sm.knowsAccessSpringBallWithXRayClimb()))), # XRay climb
+    'PostAvailable': lambda sm: sm.wor(sm.haveItem('Gravity'),
+                                       sm.wand(sm.haveItem('SpringBall'), sm.knowsSpringBallJump()))
 },
 {
     'Area': "Maridia",

@@ -212,13 +212,14 @@ class HelpersGraph(Helpers):
                                              sm.knowsGravityJump(),
                                              sm.wand(sm.haveItem('Ice'), sm.knowsTediousMountEverest())))),
                        sm.canDoSuitlessMaridia(),
-                       sm.wand(sm.canDoSuitlessOuterMaridia(), sm.knowsTediousMountEverest()))
+                       sm.wand(sm.haveItem('Ice'), sm.canDoSuitlessOuterMaridia(), sm.knowsTediousMountEverest()))
 
     def canDoSuitlessOuterMaridia(self):
         sm = self.smbm
         return sm.wand(sm.knowsGravLessLevel1(),
                        sm.haveItem('HiJump'),
-                       sm.haveItem('Ice'))
+                       sm.wor(sm.haveItem('Ice'),
+                              sm.wand(sm.haveItem('SpringBall'), sm.knowsSpringBallJump())))
 
     def canDoSuitlessMaridia(self):
         sm = self.smbm

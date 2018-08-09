@@ -598,6 +598,7 @@ locations = [
     },
     'Available': lambda sm: sm.wand(sm.wor(sm.haveItem('Gravity'),
                                            sm.wand(sm.haveItem('HiJump'),
+                                                   sm.haveItem('Ice'),
                                                    sm.knowsGravLessLevel3())),
                                     sm.wor(sm.wand(sm.haveItem('Ice'),
                                                    sm.wor(sm.wand(sm.haveItem('Gravity'),

@@ -588,8 +588,6 @@ patches = [
     ('itemsounds', "Remove fanfare when picking up an item (by Scyzer)", True, True),
     ('spinjumprestart', "Allows Samus to start spinning in mid air after jumping or falling (by Kejardon)", False, False),
     ('elevators_doors_speed', 'Accelerate doors and elevators transitions (by Rakki & Lioran)', True, True),
-    ('supermetroid_msu1', "Play music with MSU1 chip on SD2SNES (by DarkShock)", False, False),
-    ('max_ammo_display', "Max Ammo Display (by Personitis) (incompatible with MSU1 patch)", True, False),
     ('animals', "Save the animals surprise (by Foosda)", False, False)
 ]
 
@@ -624,6 +622,7 @@ def initRandomizerSession():
         session.randomizer['areaLayout'] = "off"
         session.randomizer['variaTweaks'] = "on"
         session.randomizer['hideItems'] = "off"
+        session.randomizer['strictMinors'] = "off"
 
 def randomizer():
     response.title = 'Super Metroid VARIA Randomizer'
@@ -704,7 +703,7 @@ def validateWebServiceParams(patchs, quantities, others, isJson=False):
         except:
             raiseHttp(400, "Wrong value for paramsFileTarget, must be a JSON string", isJson)
 
-    for check in ['spreadItems', 'fullRandomization', 'suitsRestriction', 'layoutPatches', 'noGravHeat', 'areaRandomization', 'hideItems']:
+    for check in ['spreadItems', 'fullRandomization', 'suitsRestriction', 'layoutPatches', 'noGravHeat', 'areaRandomization', 'hideItems', 'strictMinors']:
         if check in others:
             if request.vars[check] not in ['on', 'off', 'random']:
                 raiseHttp(400, "Wrong value for {}: {}, authorized values: on/off".format(check, request.vars[check]), isJson)
@@ -735,7 +734,7 @@ def sessionWebService():
               'progressionSpeed', 'spreadItems', 'fullRandomization', 'suitsRestriction',
               'funCombat', 'funMovement', 'funSuits', 'layoutPatches',
               'noGravHeat', 'progressionDifficulty', 'morphPlacement',
-              'areaRandomization', 'complexity', 'hideItems']
+              'areaRandomization', 'complexity', 'hideItems', 'strictMinors']
     validateWebServiceParams(patchs, quantities, others)
 
     if session.randomizer is None:
@@ -766,6 +765,7 @@ def sessionWebService():
     session.randomizer['areaLayout'] = request.vars.areaLayout
     session.randomizer['variaTweaks'] = request.vars.variaTweaks
     session.randomizer['hideItems'] = request.vars.hideItems
+    session.randomizer['strictMinors'] = request.vars.strictMinors
 
 def getCustomMapping(controlMapping):
     if len(controlMapping) == 0:
@@ -785,15 +785,14 @@ def randomizerWebService():
     response.headers['Access-Control-Allow-Origin'] = '*'
 
     # check validity of all parameters
-    patchs = ['itemsounds', 'spinjumprestart', 'supermetroid_msu1',
-              'max_ammo_display', 'elevators_doors_speed', 'skip_intro',
+    patchs = ['itemsounds', 'spinjumprestart', 'elevators_doors_speed', 'skip_intro',
               'skip_ceres', 'areaLayout', 'variaTweaks']
     quantities = ['missileQty', 'superQty', 'powerBombQty']
     others = ['seed', 'paramsFile', 'paramsFileTarget', 'minorQty', 'energyQty',
               'maxDifficulty', 'progressionSpeed', 'spreadItems', 'fullRandomization',
               'suitsRestriction', 'morphPlacement', 'funCombat', 'funMovement', 'funSuits',
               'layoutPatches', 'noGravHeat', 'progressionDifficulty', 'areaRandomization',
-              'hideItems']
+              'hideItems', 'strictMinors']
     validateWebServiceParams(patchs, quantities, others, isJson=True)
 
     # randomize
@@ -820,9 +819,8 @@ def randomizerWebService():
                '--minorQty', request.vars.minorQty if request.vars.minorQty != 'random' else '0',
                '--energyQty', request.vars.energyQty]
 
-    # always set AimAnyButton
-    params.append('-c')
-    params.append('AimAnyButton.ips')
+    # always set AimAnyButton, max ammo display and msu1
+    params += ['-c', 'AimAnyButton.ips', '-c', 'max_ammo_display.ips', '-c', 'supermetroid_msu1.ips']
 
     for patch in patches:
         if request.vars[patch[0]] == 'on':
@@ -851,6 +849,7 @@ def randomizerWebService():
     addParamRandom('spreadItems', params)
     addParamRandom('suitsRestriction', params)
     addParamRandom('hideItems', params)
+    addParamRandom('strictMinors', params)
 
     def addSuperFun(id, params):
         fun = id[len('fun'):]

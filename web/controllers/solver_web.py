@@ -588,7 +588,8 @@ patches = [
     ('itemsounds', "Remove fanfare when picking up an item (by Scyzer)", True, True),
     ('spinjumprestart', "Allows Samus to start spinning in mid air after jumping or falling (by Kejardon)", False, False),
     ('elevators_doors_speed', 'Accelerate doors and elevators transitions (by Rakki & Lioran)', True, True),
-    ('animals', "Save the animals surprise (by Foosda)", False, False)
+    ('animals', "Save the animals surprise (by Foosda)", False, False),
+    ('No_Music', "Disable background music (by Kejardon)", False, False)
 ]
 
 def initRandomizerSession():
@@ -726,7 +727,7 @@ def validateWebServiceParams(patchs, quantities, others, isJson=False):
 
 def sessionWebService():
     # web service to update the session
-    patchs = ['itemsounds',
+    patchs = ['itemsounds', 'No_Music',
               'spinjumprestart', 'elevators_doors_speed',
               'skip_intro', 'skip_ceres', 'animals', 'areaLayout', 'variaTweaks']
     quantities = ['missileQty', 'superQty', 'powerBombQty']
@@ -786,7 +787,7 @@ def randomizerWebService():
 
     # check validity of all parameters
     patchs = ['itemsounds', 'spinjumprestart', 'elevators_doors_speed', 'skip_intro',
-              'skip_ceres', 'areaLayout', 'variaTweaks']
+              'skip_ceres', 'areaLayout', 'variaTweaks', 'No_Music']
     quantities = ['missileQty', 'superQty', 'powerBombQty']
     others = ['seed', 'paramsFile', 'paramsFileTarget', 'minorQty', 'energyQty',
               'maxDifficulty', 'progressionSpeed', 'spreadItems', 'fullRandomization',
@@ -824,7 +825,10 @@ def randomizerWebService():
             if patch[0] in ['animals', 'areaLayout', 'variaTweaks']:
                 continue
             params.append('-c')
-            params.append(patch[0] + '.ips')
+            if patch[0] == 'No_Music':
+                params.append(patch[0])
+            else:
+                params.append(patch[0] + '.ips')
     if request.vars.animals == 'on':
         params.append('--animals')
     if request.vars.areaLayout == 'off':

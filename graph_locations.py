@@ -592,7 +592,7 @@ locations = [
     'Visibility': "Chozo",
     'Room': 'Spring Ball Room',
     'AccessFrom' : {
-        'Main Street Bottom': lambda sm: sm.canOpenGreenDoors(), # gate
+        'Main Street Bottom': lambda sm: sm.wor(sm.canOpenGreenDoors(), RomPatches.has(RomPatches.AreaRandoGatesOther)), # gate
         'Le Coude Right': lambda sm: sm.wand(sm.wor(sm.canOpenYellowDoors(), RomPatches.has(RomPatches.AreaRandoBlueDoors)),
                                              sm.canOpenGreenDoors()), # toilet
     },

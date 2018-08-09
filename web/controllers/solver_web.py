@@ -70,6 +70,8 @@ def validatePresetsParams(action):
             return (False, "Password must be alphanumeric")
         if IS_LENGTH(32)(request.vars.password)[1] is not None:
             return (False, "Password must be max 32 chars")
+        if IS_NOT_EMPTY()(request.vars.presetCreate)[1] is not None:
+            return (False, "Preset name is empty")
         if IS_ALPHANUMERIC()(request.vars.presetCreate)[1] is not None:
             return (False, "Preset name must be alphanumeric")
         if IS_LENGTH(32)(request.vars.presetCreate)[1] is not None:

@@ -597,7 +597,7 @@ function startTheTour(step=-1) {
     {
       element: "#paramsFile",
       title: "Preset used to randomize",
-      content: "The preset is used by the Randomizer to know which techniques are available to reach the items locations.</br>You can create and manage your preset on the <a href=\"/solver/solver_web/presets\">Presets part of the website</a>.<br/>You can use one of the predefined ones:<ul><li>noob</li><li>casual</li><li>regular</li><li>casual</li><li>veteran</li><li>speedrunner</li><li>master</li></ul><br/>However, creating your own preset will lead to a better experience overall, as the generated ROMs will be tailored for you."
+      content: "The preset is used by the Randomizer to know which techniques are available to reach the items locations.</br>You can create and manage your preset on the <a href=\"/solver/solver_web/presets\">Presets part of the website</a>.<br/>You can use one of the predefined ones:<ul><li>noob</li><li>casual</li><li>regular</li><li>veteran</li><li>speedrunner</li><li>master</li></ul><br/>However, creating your own preset will lead to a better experience overall, as the generated ROMs will be tailored for you."
     },
     {
       element: "#fullRandomizationStep",
@@ -612,17 +612,17 @@ function startTheTour(step=-1) {
     {
       element: "#progressionSpeed",
       title: "Progression speed",
-      content: "A progression item is an item opening new locations once picked up : suit, movement item, or any item that opens up locations when placed by the Randomizer.<br/>This parameter influences how fast progression items are likely to be found. From <b>slowest</b>, stuffing your way with as many non-progression items as possible, to <b>fastest</b>, where you will be able to visit Zebes pretty shortly.<br/>Choose random to randomly choose one of the speed presets so you don't know what to expect.<br/>If you played the other Item Randomizers out there, an average Dessy seed would be between fast and fastest, and the average Total Tournament seed would be a medium/fast-ish (these are very accurate measurements).<br/>The basic progression speed mimics Dessy/Total algorithm (putting all the progression items first)<br/><b>Note:</b> usually, slower settings will result in more difficult seeds, and faster settings in easier seeds.<br/>Click on the dice button to randomly set this parameter."
+      content: "A progression item is an item opening new locations once picked up : suit, movement item, or any item that opens up locations when placed by the Randomizer.<br/>This parameter influences how fast progression items are likely to be found. From <b>slowest</b>, stuffing your way with as many non-progression items as possible, to <b>fastest</b>, where you will be able to visit Zebes pretty shortly.<br/>You can also pick <b>basic</b>, in which case VARIA will place the items exactly like Dessyreqt Randomizer, or Total Randomizer in its Normal/Casual setting.<br/><b>Note:</b> usually, slower settings will result in more difficult seeds, and faster settings in easier seeds. Basic progression speed usually result in easy/fast seeds, but not always.<br/>Click on the dice button to randomly set this parameter."
     },
     {
       element: "#progressionDifficulty",
       title: "Progression difficulty",
-      content: "This parameter influences the choice of the next location. It uses the perceived difficulties from the preset to compute the difficulty to reach the locations. Then if <b>easier</b> or <b>harder</b> is selected, the easiest or hardest location will have a higher chance of being chosen.<br/>Set it to <b>normal</b> for the Randomizer to randomly choose the next location.<br/>Set it to <b>random</b> to randomly choose between <b>easier</b>, <b>harder</b> and <b>normal</b>.<br/><b>Note:</b> this setting has less of an influence on actual seed difficulty than Progression Speed.<br/>Click on the dice button to randomly set this parameter."
+      content: "This parameter influences the choice of the next location. It uses the perceived difficulties from the preset to compute the difficulty to reach the locations. Then if <b>easier</b> or <b>harder</b> is selected, the easiest or hardest location will have a higher chance of being chosen.<br/>Set it to <b>normal</b> for the Randomizer to randomly choose the next location.<br/><b>Note:</b> this setting has less of an influence on actual seed difficulty than Progression Speed.<br/>Click on the dice button to randomly set this parameter."
     },
     {
       element: "#morphPlacementStep",
       title: "Morph Placement",
-      content: "TODO: add text"
+      content: "Influences where VARIA will place Morphing Ball :<ul><li><b>early</b> (default): Morph will be either at its vanilla spot, or in the ceiling at the Blue Brinstar Energy Tank spot (like Total Randomizer)</li><li><b>normal</b>: Morph will be placed randomly (like Dessy Randomizer)</li><li><b>late</b>: Prevents Morph to be placed in the first area of the game (Crateria/Blue Brinstar). Best suited when used along area randomization, to find Morph in peculiar places.</li></ul>"
     },
     {
       element: "#spreadItemsStep",
@@ -641,8 +641,8 @@ function startTheTour(step=-1) {
     },
     {
       element: "#strictMinorsStep",
-      title: "Strict Minors distribution",
-      content: "Instead of using the Minors quantities as probabilities, inforce a strict distribution to try to match the quantities.<br/>Click on the dice button to randomly set this parameter."
+      title: "Strict ammo distribution",
+      content: "Instead of using the Minors quantities as probabilities, enforce a strict distribution to match the proportions as exactly as possible.<br/>Click on the dice button to randomly set this parameter."
     },
     {
       element: "#missileQty",
@@ -657,7 +657,7 @@ function startTheTour(step=-1) {
     {
       element: "#energyQty",
       title: "Quantity of Energy/Reserve Tanks available",
-      content: "Choose how many Energy/Reserve Tanks will be available, from 5 in sparse, 11 in medium and 18 in vanilla.<br/>Click on the dice button to randomly set this parameter."
+      content: "Choose how many Energy/Reserve Tanks will be available, from 4-6 in sparse, 8-12 in medium and 18 in vanilla.<br/>Click on the dice button to randomly set this parameter."
     },
     {
       element: "#areaRandomizationStep",

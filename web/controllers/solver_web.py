@@ -314,10 +314,10 @@ def prepareResult():
         result = session.solver['result']
 
         if session.solver['result']['difficulty'] == -1:
-            result['resultText'] = "The ROM \"{}\" is not finishable with the known technics".format(session.solver['result']['randomizedRom'])
+            result['resultText'] = "The ROM \"{}\" is not finishable with the known techniques".format(session.solver['result']['randomizedRom'])
         else:
             if session.solver['result']['itemsOk'] is False:
-                result['resultText'] = "The ROM \"{}\" is finishable but not all the requested items can be picked up with the known technics. Estimated difficulty is: ".format(session.solver['result']['randomizedRom'])
+                result['resultText'] = "The ROM \"{}\" is finishable but not all the requested items can be picked up with the known techniques. Estimated difficulty is: ".format(session.solver['result']['randomizedRom'])
             else:
                 result['resultText'] = "The ROM \"{}\" estimated difficulty is: ".format(session.solver['result']['randomizedRom'])
 
@@ -818,9 +818,6 @@ def randomizerWebService():
                '--powerBombQty', request.vars.powerBombQty if request.vars.powerBombQty != 'random' else '0',
                '--minorQty', request.vars.minorQty if request.vars.minorQty != 'random' else '0',
                '--energyQty', request.vars.energyQty]
-
-    # always set AimAnyButton, max ammo display and msu1
-    params += ['-c', 'AimAnyButton.ips', '-c', 'max_ammo_display.ips', '-c', 'supermetroid_msu1.ips']
 
     for patch in patches:
         if request.vars[patch[0]] == 'on':

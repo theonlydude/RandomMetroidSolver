@@ -28,7 +28,8 @@ class RandoSettings(object):
     # superFun : super fun settings list. can contain 'Movement', 'Combat', 'Suits'. Will remove random items
     # of the relevant categorie(s). This can easily cause aborted seeds, so some basic checks will be performed
     # beforehand to know whether an item can indeed be removed.
-    def __init__(self, maxDiff, progSpeed, progDiff, qty, restrictions, superFun):
+    # runtimeLimit_s : maximum runtime limit in seconds for generateItems functions. If <= 0, will be unlimited.
+    def __init__(self, maxDiff, progSpeed, progDiff, qty, restrictions, superFun, runtimeLimit_s):
         self.progSpeed = progSpeed
         self.progDiff = progDiff
         self.maxDiff = maxDiff
@@ -45,6 +46,9 @@ class RandoSettings(object):
         self.superFun = superFun
         self.forbiddenItems = self.getForbiddenItems(superFun)
         self.possibleSoftlockProb = self.getPossibleSoftlockProb(progSpeed)
+        self.runtimeLimit_s = runtimeLimit_s
+        if self.runtimeLimit_s <= 0:
+            self.runtimeLimit_s = sys.maxint
 
     def getChooseLocDict(self, progDiff):
         if progDiff == 'normal':
@@ -296,6 +300,7 @@ class Randomizer(object):
         self.locLimit = settings.locLimit
         self.progressionItemTypes = settings.progressionItemTypes
         self.possibleSoftlockProb = settings.possibleSoftlockProb
+        self.runtimeLimit_s = settings.runtimeLimit_s
         # init everything
         self.unusedLocations = locations
         self.itemPool = Items.getItemPool(settings.qty, settings.forbiddenItems)
@@ -957,7 +962,7 @@ class Randomizer(object):
 #        print(str(len(self.itemPool)) + " items in pool")
         runtime_s = 0
         startDate = time.clock()
-        while len(self.itemPool) > 0 and not isStuck and runtime_s <= 30:
+        while len(self.itemPool) > 0 and not isStuck and runtime_s <= self.runtimeLimit_s:
             # fill up with non-progression stuff
             isStuck = self.fillNonProgressionItems()
             if len(self.itemPool) > 0:

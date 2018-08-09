@@ -611,7 +611,7 @@ def initRandomizerSession():
         session.randomizer['spreadItems'] = "on"
         session.randomizer['fullRandomization'] = "on"
         session.randomizer['suitsRestriction'] = "on"
-        session.randomizer['morphPlacement'] = "normal"
+        session.randomizer['morphPlacement'] = "early"
         session.randomizer['funCombat'] = "off"
         session.randomizer['funMovement'] = "off"
         session.randomizer['funSuits'] = "off"

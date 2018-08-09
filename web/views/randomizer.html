@@ -211,8 +211,10 @@ function changeComplexity(evt, name) {
     var show = [];
     var hide = ["seedVisibility", "ammoVisibility", "maxDiffVisibility", "progDiffVisibility", "spreadItemsVisibility", "suitsRestrictionVisibility", "morphPlacementVisibility", "superFunVisibility", "patchesVisibility", "areaPatchVisibility", "hideItemsVisibility"];
     showHide(show, hide);
-  } else if(name == "medium") {
-    var show = ["maxDiffVisibility", "progDiffVisibility", "patchesVisibility"
+  }
+
+  else if(name == "medium") {
+    var show = ["maxDiffVisibility", "progDiffVisibility", "patchesVisibility", "morphPlacementVisibility"
 {{
 for patch in patches:
   if patch[3] == True:
@@ -220,7 +222,7 @@ for patch in patches:
     pass
   pass
 }}];
-    var hide = ["seedVisibility", "ammoVisibility", "spreadItemsVisibility", "suitsRestrictionVisibility", "morphPlacementVisibility", "superFunVisibility", "areaPatchVisibility", "mainPatchesVisibitily", "mainPatchesTextVisibitily", "hideItemsVisibility"
+    var hide = ["seedVisibility", "ammoVisibility", "spreadItemsVisibility", "suitsRestrictionVisibility", "superFunVisibility", "areaPatchVisibility", "mainPatchesVisibitily", "mainPatchesTextVisibitily", "hideItemsVisibility"
 {{
 for patch in patches:
   if patch[3] == False:
@@ -229,7 +231,9 @@ for patch in patches:
   pass
 }}];
     showHide(show, hide);
-  } else {
+  }
+
+  else {
     var show = ["seedVisibility", "ammoVisibility", "maxDiffVisibility", "progDiffVisibility", "spreadItemsVisibility", "suitsRestrictionVisibility", "morphPlacementVisibility", "superFunVisibility", "patchesVisibility", "areaPatchVisibility", "mainPatchesVisibitily", "mainPatchesTextVisibitily", "hideItemsVisibility"
 {{
 for patch in patches:
@@ -515,12 +519,8 @@ window.onload = function(){
     progSpeed.onchange = function(){
         var progSpeed = document.getElementById("progressionSpeed");
         if(progSpeed.value == 'slow' || progSpeed.value == 'slowest'){
-            var morphPlacement = document.getElementById("morphPlacement");
             var spreadItems = document.getElementById("spreadItems");
 
-            if(morphPlacement.value != "late"){
-                morphPlacement.value = "late";
-            }
             if(! spreadItems.checked){
                 spreadItems.click();
             }
@@ -530,13 +530,6 @@ window.onload = function(){
 
             if(spreadItems.checked){
                 spreadItems.click();
-            }
-        }
-        if(progSpeed.value == 'fastest'){
-            var morphPlacement = document.getElementById("morphPlacement");
-
-            if(morphPlacement.value != "early"){
-                morphPlacement.value = "early";
             }
         }
     }

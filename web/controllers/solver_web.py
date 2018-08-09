@@ -727,7 +727,7 @@ def validateWebServiceParams(patchs, quantities, others, isJson=False):
 def sessionWebService():
     # web service to update the session
     patchs = ['itemsounds',
-              'spinjumprestart', 'supermetroid_msu1', 'max_ammo_display', 'elevators_doors_speed',
+              'spinjumprestart', 'elevators_doors_speed',
               'skip_intro', 'skip_ceres', 'animals', 'areaLayout', 'variaTweaks']
     quantities = ['missileQty', 'superQty', 'powerBombQty']
     others = ['paramsFile', 'minorQty', 'energyQty', 'maxDifficulty',

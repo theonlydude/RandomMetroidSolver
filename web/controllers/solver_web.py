@@ -813,6 +813,9 @@ def randomizerWebService():
     validateWebServiceParams(patchs, quantities, others, isJson=True)
 
     # randomize
+    DB = db.DB()
+    id = DB.initRando()
+
     presetFileName = tempfile.mkstemp()[1] + '.json'
     jsonFileName = tempfile.mkstemp()[1]
 
@@ -825,7 +828,8 @@ def randomizerWebService():
 
     params = ['python2',  os.path.expanduser("~/RandomMetroidSolver/randomizer.py"),
               '--seed', request.vars.seed,
-              '--output', jsonFileName, '--param', presetFileName,
+              '--output', jsonFileName,
+              '--param', presetFileName,
               '--preset', request.vars.paramsFile,
               '--progressionSpeed', request.vars.progressionSpeed,
               '--progressionDifficulty', request.vars.progressionDifficulty,
@@ -899,13 +903,21 @@ def randomizerWebService():
     if custom == True:
         params += ['--controls', controlParam]
 
+    DB.addRandoParams(id, params)
+
     print("before calling: {}".format(params))
+    start = datetime.now()
     ret = subprocess.call(params)
-    print("ret={}".format(ret))
+    end = datetime.now()
+    duration = (end - start).total_seconds()
+    print("ret: {}, duration: {}s".format(ret, duration))
 
     if ret == 0:
         with open(jsonFileName) as jsonFile:
             locsItems = json.load(jsonFile)
+
+        DB.addRandoResult(id, ret, duration, '')
+        DB.close()
 
         os.remove(jsonFileName)
         os.remove(presetFileName)
@@ -917,6 +929,9 @@ def randomizerWebService():
                 msg = json.load(jsonFile)['errorMsg']
         except:
             msg = "randomizerWebService: something wrong happened"
+
+        DB.addRandoResult(id, ret, duration, msg)
+        DB.close()
 
         os.remove(jsonFileName)
         os.remove(presetFileName)

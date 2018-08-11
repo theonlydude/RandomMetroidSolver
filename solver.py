@@ -709,6 +709,7 @@ if __name__ == "__main__":
         diffPercent = DifficultyDisplayer(difficulty).percent()
         generatedPath = solver.getPath(solver.visitedLocations)
         patches = solver.patches
+        collectedItems = solver.smbm.getItems()
 
         if difficulty == -1:
             remainTry = solver.getPath(solver.tryRemainingLocs())
@@ -728,7 +729,7 @@ if __name__ == "__main__":
                       knowsUsed=(used, total), itemsOk=itemsOk, patches=patches,
                       pngFileName=pngFileName, pngThumbFileName=pngThumbFileName,
                       remainTry=remainTry, remainMajors=remainMajors, remainMinors=remainMinors,
-                      skippedMajors=skippedMajors, unavailMajors=unavailMajors)
+                      skippedMajors=skippedMajors, unavailMajors=unavailMajors, collectedItems=collectedItems)
 
         with open(args.output, 'w') as jsonFile:
             json.dump(result, jsonFile)

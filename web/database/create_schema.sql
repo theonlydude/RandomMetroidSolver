@@ -27,8 +27,7 @@ create table if not exists solver_items_forbidden (
 create table if not exists solver_result (
   solver_id int unsigned not null,
   return_code tinyint,
-  duration time,
-  randomized_rom tinytext,
+  duration float,
   difficulty int,
   knows_used tinyint,
   knows_known tinyint,
@@ -50,7 +49,7 @@ create table if not exists solver_collected_items (
   foreign key (solver_id) references solver(id)
 );
 
---randomizer
+-- randomizer
 create table if not exists randomizer (
   id int unsigned not null auto_increment,
   action_time datetime not null,
@@ -69,7 +68,7 @@ create table if not exists randomizer_params (
 create table if not exists randomizer_result (
   randomizer_id int unsigned not null,
   return_code tinyint,
-  duration time,
+  duration float,
   error_msg text,
   primary key (randomizer_id),
   foreign key (randomizer_id) references randomizer(id)

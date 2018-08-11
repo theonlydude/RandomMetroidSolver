@@ -6,6 +6,7 @@ if os.path.exists(path) and path not in sys.path:
     sys.path.append(path)
 
 import datetime, os, hashlib, json, subprocess, tempfile
+from datetime import datetime
 from collections import OrderedDict
 
 # to solve the rom
@@ -17,6 +18,7 @@ from graph_locations import locations as graphLocations
 from solver import Solver, DifficultyDisplayer
 from rom import RomLoader
 from utils import PresetLoader
+import db
 
 def maxPresetsReach():
     # to prevent a spammer to create presets in a loop and fill the fs
@@ -550,6 +552,9 @@ def computeDifficulty(jsonRomFileName):
     presetFileName = "diff_presets/{}.json".format(session.solver['preset'])
     jsonFileName = tempfile.mkstemp()[1]
 
+    DB = db.DB()
+    id = DB.initSolver()
+
     params = [
         'python2',  os.path.expanduser("~/RandomMetroidSolver/solver.py"),
         str(jsonRomFileName),
@@ -563,19 +568,28 @@ def computeDifficulty(jsonRomFileName):
     for item in session.solver['itemsForbidden']:
         params += ['--itemsForbidden', item]
 
+    DB.addSolverParams(id, randomizedRom, session.solver['preset'], session.solver['difficultyTarget'],
+                       session.solver['pickupStrategy'], session.solver['itemsForbidden'])
+
     print("before calling solver: {}".format(params))
+    start = datetime.now()
     ret = subprocess.call(params)
-    print("ret={}".format(ret))
+    end = datetime.now()
+    duration = (end - start).total_seconds()
+    print("ret: {}, duration: {}s".format(ret, duration))
 
     if ret == 0:
         with open(jsonFileName) as jsonFile:
             result = json.load(jsonFile)
-        os.remove(jsonFileName)
     else:
-        os.remove(jsonFileName)
-        return (False, "Solver: something wrong happened while solving the ROM")
+        result = "Solver: something wrong happened while solving the ROM"
 
-    return (True, result)
+    DB.addSolverResult(id, ret, duration, result)
+    DB.close()
+
+    os.remove(jsonFileName)
+
+    return (ret == 0, result)
 
 def infos():
     # set title

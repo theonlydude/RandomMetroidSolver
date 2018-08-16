@@ -123,7 +123,7 @@ class DB:
                     dbParams.append((paramName, paramValue))
             elif params[i][0:len('-')] == '-':
                 # patch -c, TODO: store them
-                i += 1
+                i += 2
             else:
                 # shouldn't happen
                 print("DB.addRandoParams unknown param: {}".format(params[i]))

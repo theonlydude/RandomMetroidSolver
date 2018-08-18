@@ -98,13 +98,12 @@ class HelpersGraph(Helpers):
     def canExitCrabHole(self):
         sm = self.smbm
         return sm.wand(sm.haveItem('Morph'), # morph to exit the hole
-                       sm.canOpenRedDoors(), # to exit and re-enter if needed
                        sm.wor(sm.wand(sm.haveItem('Gravity'), # even with gravity you need some way to climb...
                                       sm.wor(sm.haveItem('Ice'), # ...on crabs...
                                              sm.haveItem('HiJump'), # ...or by jumping
                                              sm.knowsGravityJump(),
                                              sm.canFly())),
-                              sm.canDoSuitlessOuterMaridia())) # climing crabs
+                              sm.wand(sm.haveItem('Ice'), sm.canDoSuitlessOuterMaridia()))) # climbing crabs
 
     def canPassMaridiaToRedTowerNode(self):
         sm = self.smbm
@@ -120,9 +119,10 @@ class HelpersGraph(Helpers):
     def canGrappleEscape(self):
         sm = self.smbm
         return sm.wor(sm.wor(sm.haveItem('SpaceJump'),
-                             sm.wand(sm.haveItem('Bomb'), # IBJ from lava...either have grav or freeze the enemy there
+                             sm.wand(sm.haveItem('Bomb'), # IBJ from lava...either have grav or freeze the enemy there if hellrunning (otherwise single DBJ at the end)
                                      sm.knowsInfiniteBombJump(),
-                                     sm.wor(sm.haveItem('Gravity'),
+                                     sm.wor(sm.heatProof(),
+                                            sm.haveItem('Gravity'),
                                             sm.haveItem('Ice')))),
                       sm.haveItem('Grapple'),
                       sm.wand(sm.haveItem('SpeedBooster'),

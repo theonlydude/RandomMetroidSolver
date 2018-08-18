@@ -32,6 +32,7 @@ class DB:
         except Exception as e:
             print("DB.close::error: {}".format(e))
 
+    # write data
     def initSolver(self):
         if self.dbAvailable == False:
             return None
@@ -149,3 +150,72 @@ class DB:
         except Exception as e:
             print("DB.addRandoResult::error execute \"{}\" error: {}".format(sql, e))
             self.dbAvailable = False
+
+    # read data
+    def execSelect(self, sql):
+        if self.dbAvailable == False:
+            return None
+
+        try:
+            self.cursor.execute(sql)
+            return self.cursor.fetchall()
+        except Exception as e:
+            print("DB.execSelect::error execute \"{}\" error: {}".format(sql, e))
+            self.dbAvailable = False
+
+    def getUsage(self, table, weeks):
+        sql="select date(action_time), count(*) from {} where action_time > DATE_SUB(CURDATE(), INTERVAL {} WEEK) group by date(action_time) order by 1;".format(table, weeks)
+        return self.execSelect(sql)
+
+    def getSolverUsage(self):
+        return self.getUsage('solver', 1)
+
+    def getRandomizerUsage(self):
+        return self.getUsage('randomizer', 1)
+
+    def getSolverPresets(self, weeks):
+        sql="select distinct(sp.preset) from solver s join solver_params sp on s.id = sp.solver_id where s.action_time > DATE_SUB(CURDATE(), INTERVAL {} WEEK);".format(weeks)
+        presets = self.execSelect(sql)
+        if presets == None:
+            return None
+
+        # db returns tuples
+        presets = [preset[0] for preset in presets]
+
+        # pivot
+        sql="SELECT date(s.action_time)"
+        for preset in presets:
+            sql += ", SUM(CASE WHEN sp.preset = '{}' THEN 1 ELSE 0 END) AS count_{}".format(preset, preset)
+        sql += " FROM solver s join solver_params sp on s.id = sp.solver_id where s.action_time > DATE_SUB(CURDATE(), INTERVAL {} WEEK) GROUP BY date(s.action_time);".format(weeks)
+
+        return (presets, self.execSelect(sql))
+
+    def getSolverResults(self, weeks):
+        sql="select date(s.action_time), sr.return_code, count(*) from solver s join solver_result sr on s.id = sr.solver_id where s.action_time > DATE_SUB(CURDATE(), INTERVAL {} WEEK) group by date(s.action_time), sr.return_code order by 1;".format(weeks)
+        return self.execSelect(sql)
+
+    def getSolverDurations(self, weeks):
+        sql="select s.action_time, sr.duration from solver s join solver_result sr on s.id = sr.solver_id where s.action_time > DATE_SUB(CURDATE(), INTERVAL {} WEEK) order by 1;".format(weeks)
+        return self.execSelect(sql)
+
+    def getRandomizerPresets(self, weeks):
+        sql="select distinct(value) from randomizer r join randomizer_params rp on r.id = rp.randomizer_id where rp.name = 'preset' and r.action_time > DATE_SUB(CURDATE(), INTERVAL {} WEEK);".format(weeks)
+        presets = self.execSelect(sql)
+        if presets == None:
+            return None
+
+        # db returns tuples
+        presets = [preset[0] for preset in presets]
+
+        # pivot
+        sql="SELECT date(r.action_time)"
+        for preset in presets:
+            sql += ", SUM(CASE WHEN rp.value = '{}' THEN 1 ELSE 0 END) AS count_{}".format(preset, preset)
+        sql += " FROM randomizer r join randomizer_params rp on r.id = rp.randomizer_id where rp.name = 'preset' and r.action_time > DATE_SUB(CURDATE(), INTERVAL {} WEEK) GROUP BY date(r.action_time);".format(weeks)
+
+        return (presets, self.execSelect(sql))
+
+
+
+
+

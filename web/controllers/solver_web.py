@@ -971,3 +971,16 @@ def home():
     response.title = 'Super Metroid VARIA Randomizer and Solver'
 
     return dict()
+
+def stats():
+    response.title = 'Super Metroid VARIA Randomizer and Solver statistics'
+
+    DB = db.DB()
+
+    solverStats = DB.getSolverUsage()
+    randomizerStats = DB.getRandomizerUsage()
+    solverPresets = DB.getSolverPresets(1)
+    randomizerPresets = DB.getRandomizerPresets(1)
+
+    return dict(solverStats=solverStats, randomizerStats=randomizerStats,
+                solverPresets=solverPresets, randomizerPresets=randomizerPresets)

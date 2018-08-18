@@ -1,0 +1,143 @@
+{{
+extend 'layout.html'
+}}
+
+<meta name="description" content="Statistics of the VARIA Randomizer and Solver"/>
+<link rel="shortcut icon" href={{=URL('static','favicon.ico')}} type="image/ico"/>
+<link rel="stylesheet" type="text/css" href={{=URL('static/css','mystyle_20180802.css')}} media="screen"/>
+<script type = "text/javascript" src = "https://www.gstatic.com/charts/loader.js"></script>
+<script type = "text/javascript">google.charts.load('current', {packages: ['corechart']});</script>
+
+<title>Super Metroid VARIA Randomizer and Solver statistics</title>
+
+<style>
+.main {
+    margin-bottom: 1em;
+}
+</style>
+
+<script language = "JavaScript">
+function drawCharts() {
+  drawSolverUsage();
+  drawRandomizerUsage();
+  drawSolverPresets();
+  drawRandomizerPresets();
+}
+
+function drawSolverUsage() {
+  // Define the chart to be drawn.
+  var data = google.visualization.arrayToDataTable([
+[{type: 'date', label: 'Date'}, "Count"]
+{{
+max = 0
+for (date, count) in solverStats:
+  response.write(", [\"Date({}, {}, {})\", {}]".format(date.year, date.month-1, date.day, count), escape=False)
+  if count > max:
+    max = count
+    pass
+  pass
+}}]);
+
+  var options = {
+    title: 'ROMs solved each day',
+    vAxis: { ticks: {{=range(0,max)}} }
+  };
+
+  // Instantiate and draw the chart.
+  var chart = new google.visualization.ColumnChart(document.getElementById("solverUsage"));
+  chart.draw(data, options);
+}
+
+function drawRandomizerUsage() {
+   // Define the chart to be drawn.
+   var data = google.visualization.arrayToDataTable([
+[{type: 'date', label: 'Date'}, "Count"]
+{{
+max = 0
+for (date, count) in randomizerStats:
+  response.write(", [\"Date({}, {}, {})\", {}]".format(date.year, date.month-1, date.day, count), escape=False)
+  if count > max:
+    max = count
+    pass
+  pass
+}}]);
+
+  var options = {
+    title: 'ROMs randomized each day',
+    vAxis: { ticks: {{=range(0,max)}} }
+  };
+
+   // Instantiate and draw the chart.
+   var chart = new google.visualization.ColumnChart(document.getElementById("randomizerUsage"));
+   chart.draw(data, options);
+}
+
+function drawSolverPresets() {
+  // Define the chart to be drawn.
+  var data = google.visualization.arrayToDataTable([
+[{type: 'date', label: 'Date'}, {{response.write(", ".join(["'{}'".format(p) for p in solverPresets[0]]), escape=False)}}]
+{{
+
+for row in solverPresets[1]:
+  response.write(", [\"Date({}, {}, {})\", {}]".format(row[0].year, row[0].month-1, row[0].day, ", ".join([str(x) for x in row[1:]])), escape=False)
+  pass
+}}]);
+
+  var options = {
+    title: 'presets used to solve each day',
+    vAxis: { ticks: {{=range(0, len(solverPresets[1]))}} },
+    isStacked: true
+  };
+
+  // Instantiate and draw the chart.
+  var chart = new google.visualization.ColumnChart(document.getElementById("solverPresets"));
+  chart.draw(data, options);
+}
+
+function drawRandomizerPresets() {
+  // Define the chart to be drawn.
+  var data = google.visualization.arrayToDataTable([
+[{type: 'date', label: 'Date'}, {{response.write(", ".join(["'{}'".format(p) for p in randomizerPresets[0]]), escape=False)}}]
+{{
+
+for row in randomizerPresets[1]:
+  response.write(", [\"Date({}, {}, {})\", {}]".format(row[0].year, row[0].month-1, row[0].day, ", ".join([str(x) for x in row[1:]])), escape=False)
+  pass
+}}]);
+
+  var options = {
+    title: 'presets used to randomize each day',
+    vAxis: { ticks: {{=range(0, len(randomizerPresets[1]))}} },
+    isStacked: true
+  };
+
+  // Instantiate and draw the chart.
+  var chart = new google.visualization.ColumnChart(document.getElementById("randomizerPresets"));
+  chart.draw(data, options);
+}
+
+google.charts.setOnLoadCallback(drawCharts);
+</script>
+
+<div class="fixed">
+  <div class="menu">
+    {{=A("Super Metroid VARIA Randomizer and Solver", _href=URL(f="solver"), _class="menu")}}
+    {{=A("Presets", _href=URL(f="presets"), _class="menu")}}
+    {{=A("Solver", _href=URL(f="solver"), _class="menu")}}
+    {{=A("Randomizer", _href=URL(f="randomizer"), _class="menu")}}
+    {{=A("Information & Contact", _href=URL(f="infos"), _class="menu")}}
+  </div>
+</div>
+
+<div class="row">
+  <div class="column">
+    <h4>Randomizer statistics</h4>
+    <div id = "randomizerUsage" style = "width: 550px; height: 400px; margin: 0 auto"></div>
+    <div id = "randomizerPresets" style = "width: 550px; height: 400px; margin: 0 auto"></div>
+  </div>
+  <div class="column">
+    <h4>Solver statistics</h4>
+    <div id = "solverUsage" style = "width: 550px; height: 400px; margin: 0 auto"></div>
+    <div id = "solverPresets" style = "width: 550px; height: 400px; margin: 0 auto"></div>
+  </div>
+</div>

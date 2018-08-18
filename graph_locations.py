@@ -373,7 +373,8 @@ locations = [
     'AccessFrom' : {
         'Bubble Mountain': lambda sm: sm.canHellRun('MainUpperNorfair')
     },
-    'Available': lambda sm: sm.canOpenRedDoors()
+    'Available': lambda sm: sm.canOpenRedDoors(),
+    'PostAvailable': lambda sm: sm.haveItem('Morph')
 },
 {
     'Area': "LowerNorfair",

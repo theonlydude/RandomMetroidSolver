@@ -977,10 +977,15 @@ def stats():
 
     DB = db.DB()
 
-    solverStats = DB.getSolverUsage()
-    randomizerStats = DB.getRandomizerUsage()
-    solverPresets = DB.getSolverPresets(1)
-    randomizerPresets = DB.getRandomizerPresets(1)
+    solverStats = DB.getSolverUsage(2)
+    randomizerStats = DB.getRandomizerUsage(2)
+
+    solverPresets = DB.getSolverPresets(2)
+    randomizerPresets = DB.getRandomizerPresets(2)
+
+    solverDurations = DB.getSolverDurations(2)
+    randomizerDurations = DB.getRandomizerDurations(2)
 
     return dict(solverStats=solverStats, randomizerStats=randomizerStats,
-                solverPresets=solverPresets, randomizerPresets=randomizerPresets)
+                solverPresets=solverPresets, randomizerPresets=randomizerPresets,
+                solverDurations=solverDurations, randomizerDurations=randomizerDurations)

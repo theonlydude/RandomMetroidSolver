@@ -167,11 +167,11 @@ class DB:
         sql="select date(action_time), count(*) from {} where action_time > DATE_SUB(CURDATE(), INTERVAL {} WEEK) group by date(action_time) order by 1;".format(table, weeks)
         return self.execSelect(sql)
 
-    def getSolverUsage(self):
-        return self.getUsage('solver', 1)
+    def getSolverUsage(self, weeks):
+        return self.getUsage('solver', weeks)
 
-    def getRandomizerUsage(self):
-        return self.getUsage('randomizer', 1)
+    def getRandomizerUsage(self, weeks):
+        return self.getUsage('randomizer', weeks)
 
     def getSolverPresets(self, weeks):
         sql="select distinct(sp.preset) from solver s join solver_params sp on s.id = sp.solver_id where s.action_time > DATE_SUB(CURDATE(), INTERVAL {} WEEK);".format(weeks)
@@ -215,7 +215,6 @@ class DB:
 
         return (presets, self.execSelect(sql))
 
-
-
-
-
+    def getRandomizerDurations(self, weeks):
+        sql="select r.action_time, rr.duration from randomizer r join randomizer_result rr on r.id = rr.randomizer_id where r.action_time > DATE_SUB(CURDATE(), INTERVAL {} WEEK) order by 1;".format(weeks)
+        return self.execSelect(sql)

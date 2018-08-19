@@ -25,97 +25,133 @@ function drawCharts() {
 }
 
 function drawSolverPresets() {
-  // Define the chart to be drawn.
-  var data = google.visualization.arrayToDataTable([
-[{type: 'date', label: 'Date'}, {{response.write(", ".join(["'{}'".format(p) for p in solverPresets[0]]), escape=False)}}]
 {{
-
-maxTick = 0
-for row in solverPresets[1]:
-  maxRow = max([int(x) for x in row[1:]])
-  if maxRow > maxTick:
-    maxTick = maxRow
+  if solverPresets == None:
+    response.write("  return;", escape=False)
     pass
-  response.write(", [\"Date({}, {}, {})\", {}]".format(row[0].year, row[0].month-1, row[0].day, ", ".join([str(x) for x in row[1:]])), escape=False)
-  pass
-}}]);
+  else:
+}}
+    // Define the chart to be drawn.
+    var data = google.visualization.arrayToDataTable([
+      [{type: 'date', label: 'Date'}, {{response.write(", ".join(["'{}'".format(p) for p in solverPresets[0]]), escape=False)}}]
+{{
+    maxTick = 0
+    for row in solverPresets[1]:
+      maxRow = max([int(x) for x in row[1:]])
+      if maxRow > maxTick:
+        maxTick = maxRow
+        pass
+      response.write(", [\"Date({}, {}, {})\", {}]".format(row[0].year, row[0].month-1, row[0].day, ", ".join([str(x) for x in row[1:]])), escape=False)
+      pass
+}}
+    ]);
 
-  var options = {
-    title: 'presets used to solve each day',
-    vAxis: { ticks: {{=range(0, maxTick+1)}} },
-    isStacked: true
-  };
+    var options = {
+      title: 'presets used to solve each day',
+      vAxis: { ticks: {{=range(0, maxTick+1)}} },
+      isStacked: true
+    };
 
-  // Instantiate and draw the chart.
-  var chart = new google.visualization.ColumnChart(document.getElementById("solverPresets"));
-  chart.draw(data, options);
+    // Instantiate and draw the chart.
+    var chart = new google.visualization.ColumnChart(document.getElementById("solverPresets"));
+    chart.draw(data, options);
+{{
+    pass
+}}
 }
 
 function drawRandomizerPresets() {
-  // Define the chart to be drawn.
-  var data = google.visualization.arrayToDataTable([
-[{type: 'date', label: 'Date'}, {{response.write(", ".join(["'{}'".format(p) for p in randomizerPresets[0]]), escape=False)}}]
 {{
-
-maxTick = 0
-for row in randomizerPresets[1]:
-  maxRow = max([int(x) for x in row[1:]])
-  if maxRow > maxTick:
-    maxTick = maxRow
+  if randomizerPresets == None:
+    response.write("  return;", escape=False)
     pass
-  response.write(", [\"Date({}, {}, {})\", {}]".format(row[0].year, row[0].month-1, row[0].day, ", ".join([str(x) for x in row[1:]])), escape=False)
-  pass
-}}]);
+  else:
+}}
+    // Define the chart to be drawn.
+    var data = google.visualization.arrayToDataTable([
+    type: 'date', label: 'Date'}, {{response.write(", ".join(["'{}'".format(p) for p in randomizerPresets[0]]), escape=False)}}]
+{{
+    xTick = 0
+    for row in randomizerPresets[1]:
+      maxRow = max([int(x) for x in row[1:]])
+      if maxRow > maxTick:
+        maxTick = maxRow
+        pass
+      response.write(", [\"Date({}, {}, {})\", {}]".format(row[0].year, row[0].month-1, row[0].day, ", ".join([str(x) for x in row[1:]])), escape=False)
+      pass
+}}
+    ]);
 
-  var options = {
-    title: 'presets used to randomize each day',
-    vAxis: { ticks: {{=range(0, maxTick+1)}} },
-    isStacked: true
-  };
+    var options = {
+      title: 'presets used to randomize each day',
+      vAxis: { ticks: {{=range(0, maxTick+1)}} },
+      isStacked: true
+    };
 
-  // Instantiate and draw the chart.
-  var chart = new google.visualization.ColumnChart(document.getElementById("randomizerPresets"));
-  chart.draw(data, options);
+    // Instantiate and draw the chart.
+    var chart = new google.visualization.ColumnChart(document.getElementById("randomizerPresets"));
+    chart.draw(data, options);
+{{
+    pass
+}}
 }
 
 function drawSolverDurations() {
-  // Define the chart to be drawn.
-  var data = google.visualization.arrayToDataTable([
-[{type: 'date', label: 'Date'}, "Duration"]
 {{
+  if solverDurations == None:
+    response.write("  return;", escape=False)
+    pass
+  else:
+}}
+    // Define the chart to be drawn.
+    var data = google.visualization.arrayToDataTable([
+    [{type: 'date', label: 'Date'}, "Duration"]
+{{
+    for (date, duration) in solverDurations:
+      response.write(", [\"Date({}, {}, {}, {}, {}, {})\", {}]".format(date.year, date.month-1, date.day, date.hour, date.minute, date.second, duration), escape=False)
+      pass
+}}
+    ]);
 
-for (date, duration) in solverDurations:
-  response.write(", [\"Date({}, {}, {}, {}, {}, {})\", {}]".format(date.year, date.month-1, date.day, date.hour, date.minute, date.second, duration), escape=False)
-  pass
-}}]);
+      var options = {
+        title: 'Duration in second of ROMs solved'
+      };
 
-  var options = {
-    title: 'Duration in second of ROMs solved'
-  };
-
-  // Instantiate and draw the chart.
-  var chart = new google.visualization.ColumnChart(document.getElementById("solverDurations"));
-  chart.draw(data, options);
+      // Instantiate and draw the chart.
+      var chart = new google.visualization.ColumnChart(document.getElementById("solverDurations"));
+      chart.draw(data, options);
+{{
+    pass
+}}
 }
 
 function drawRandomizerDurations() {
-  // Define the chart to be drawn.
-  var data = google.visualization.arrayToDataTable([
-[{type: 'date', label: 'Date'}, "Duration"]
 {{
+  if randomizerDurations == None:
+    response.write("  return;", escape=False)
+    pass
+  else:
+}}
+    // Define the chart to be drawn.
+    var data = google.visualization.arrayToDataTable([
+    [{type: 'date', label: 'Date'}, "Duration"]
+{{
+    for (date, duration) in randomizerDurations:
+      response.write(", [\"Date({}, {}, {}, {}, {}, {})\", {}]".format(date.year, date.month-1, date.day, date.hour, date.minute, date.second, duration), escape=False)
+      pass
+}}
+    ]);
 
-for (date, duration) in randomizerDurations:
-  response.write(", [\"Date({}, {}, {}, {}, {}, {})\", {}]".format(date.year, date.month-1, date.day, date.hour, date.minute, date.second, duration), escape=False)
-  pass
-}}]);
+    var options = {
+      title: 'Duration in second of ROMs generated'
+    };
 
-  var options = {
-    title: 'Duration in second of ROMs generated'
-  };
-
-  // Instantiate and draw the chart.
-  var chart = new google.visualization.ColumnChart(document.getElementById("randomizerDurations"));
-  chart.draw(data, options);
+    // Instantiate and draw the chart.
+    var chart = new google.visualization.ColumnChart(document.getElementById("randomizerDurations"));
+    chart.draw(data, options);
+{{
+    pass
+}}
 }
 
 google.charts.setOnLoadCallback(drawCharts);

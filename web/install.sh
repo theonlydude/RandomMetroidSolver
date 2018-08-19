@@ -17,4 +17,5 @@ ln -s ~/RandomMetroidSolver/web/views/presets.html ~/web2py/applications/solver/
 ln -s ~/RandomMetroidSolver/web/views/solver.html ~/web2py/applications/solver/views/solver_web/solver.html
 ln -s ~/RandomMetroidSolver/web/views/randomizer.html ~/web2py/applications/solver/views/solver_web/randomizer.html
 ln -s ~/RandomMetroidSolver/web/views/infos.html ~/web2py/applications/solver/views/solver_web/infos.html
+ln -s ~/RandomMetroidSolver/web/views/stats.html ~/web2py/applications/solver/views/solver_web/stats.html
 ln -s ~/RandomMetroidSolver/web/controllers/solver_web.py ~/web2py/applications/solver/controllers/solver_web.py

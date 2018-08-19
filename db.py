@@ -77,7 +77,7 @@ class DB:
                     if count > 0:
                         self.cursor.execute(sql % (id, item, count))
 
-                sql = "insert into solver_result values (%d, %d, %f, %d, %d, %d, '%s', %d, %d, %d, %d, %d);" % (id, returnCode, duration, result['difficulty'], result['knowsUsed'][0], result['knowsUsed'][1], result['itemsOk'], lenNone(result['remainTry']), lenNone(result['remainMajors']), lenNone(result['remainMinors']), lenNone(result['skippedMajors']), lenNone(result['unavailMajors']))
+                sql = "insert into solver_result values (%d, %d, %f, %d, %d, %d, %s, %d, %d, %d, %d, %d);" % (id, returnCode, duration, result['difficulty'], result['knowsUsed'][0], result['knowsUsed'][1], result['itemsOk'], lenNone(result['remainTry']), lenNone(result['remainMajors']), lenNone(result['remainMinors']), lenNone(result['skippedMajors']), lenNone(result['unavailMajors']))
             else:
                 sql = "insert into solver_result (id, return_code, duration) values (%d, %d, %f);" % (id, returnCode, duration)
 

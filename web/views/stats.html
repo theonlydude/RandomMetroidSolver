@@ -69,7 +69,7 @@ function drawRandomizerPresets() {
 }}
     // Define the chart to be drawn.
     var data = google.visualization.arrayToDataTable([
-    type: 'date', label: 'Date'}, {{response.write(", ".join(["'{}'".format(p) for p in randomizerPresets[0]]), escape=False)}}]
+    [{type: 'date', label: 'Date'}, {{response.write(", ".join(["'{}'".format(p) for p in randomizerPresets[0]]), escape=False)}}]
 {{
     xTick = 0
     for row in randomizerPresets[1]:

@@ -42,12 +42,7 @@ function drawSolverPresets() {
     var data = google.visualization.arrayToDataTable([
       [{type: 'date', label: 'Date'}, {{response.write(", ".join(["'{}'".format(p) for p in solverPresets[0]]), escape=False)}}]
 {{
-    maxTick = 0
     for row in solverPresets[1]:
-      maxRow = max([int(x) for x in row[1:]])
-      if maxRow > maxTick:
-        maxTick = maxRow
-        pass
       response.write(", [\"Date({}, {}, {})\", {}]".format(row[0].year, row[0].month-1, row[0].day, ", ".join([str(x) for x in row[1:]])), escape=False)
       pass
 }}
@@ -55,7 +50,6 @@ function drawSolverPresets() {
 
     var options = {
       title: 'presets used to solve each day',
-      vAxis: { ticks: {{=range(0, maxTick+1)}} },
       isStacked: true
     };
 
@@ -78,12 +72,7 @@ function drawRandomizerPresets() {
     var data = google.visualization.arrayToDataTable([
     [{type: 'date', label: 'Date'}, {{response.write(", ".join(["'{}'".format(p) for p in randomizerPresets[0]]), escape=False)}}]
 {{
-    xTick = 0
     for row in randomizerPresets[1]:
-      maxRow = max([int(x) for x in row[1:]])
-      if maxRow > maxTick:
-        maxTick = maxRow
-        pass
       response.write(", [\"Date({}, {}, {})\", {}]".format(row[0].year, row[0].month-1, row[0].day, ", ".join([str(x) for x in row[1:]])), escape=False)
       pass
 }}
@@ -91,7 +80,6 @@ function drawRandomizerPresets() {
 
     var options = {
       title: 'presets used to randomize each day',
-      vAxis: { ticks: {{=range(0, maxTick+1)}} },
       isStacked: true
     };
 
@@ -221,10 +209,10 @@ google.charts.setOnLoadCallback(drawCharts);
 }}
 
 <h4>Solver data</h4>
-{{=displayData(solverData)}}
+{{displayData(solverData)}}
 
 <h4>Randomizer data</h4>
-{{=displayData(randomizerData)}}
+{{displayData(randomizerData)}}
 
 <h4>Errors</h4>
 {{

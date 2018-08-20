@@ -227,12 +227,12 @@ sr.return_code, sr.duration, sr.difficulty, sr.knows_used, sr.knows_known, sr.it
 sci.collected_items,
 sif.forbidden_items
 from solver s
-  join solver_params sp on s.id = sp.solver_id
-  join solver_result sr on s.id = sr.solver_id
-  join (select solver_id, group_concat(\"(\", item, \", \", count, \")\" order by item) as collected_items from solver_collected_items group by solver_id) sci on s.id = sci.solver_id
-  join (select solver_id, group_concat(item order by item) as forbidden_items from solver_items_forbidden group by solver_id) sif on s.id = sif.solver_id
+  left join solver_params sp on s.id = sp.solver_id
+  left join solver_result sr on s.id = sr.solver_id
+  left join (select solver_id, group_concat(\"(\", item, \", \", count, \")\" order by item) as collected_items from solver_collected_items group by solver_id) sci on s.id = sci.solver_id
+  left join (select solver_id, group_concat(item order by item) as forbidden_items from solver_items_forbidden group by solver_id) sif on s.id = sif.solver_id
 where s.action_time > DATE_SUB(CURDATE(), INTERVAL {} WEEK)
-order by s.id""".format(weeks)
+order by s.id;""".format(weeks)
 
         header=["id", "actionTime", "romFileName", "preset", "difficultyTarget", "pickupStrategy", "returnCode", "duration", "difficulty", "knowsUsed", "knowsKnown", "itemsOk", "remainTry", "remainMajors", "remainMinors", "skippedMajors", "unavailMajors", "collectedItems", "forbiddenItems"]
         return (header, self.execSelect(sql))
@@ -242,8 +242,8 @@ order by s.id""".format(weeks)
 rp.params,
 rr.return_code, rr.duration, rr.error_msg
 from randomizer r
-  join (select randomizer_id, group_concat(\"(\", name, \", \", value, \")\" order by name) as params from randomizer_params group by randomizer_id) rp on r.id = rp.randomizer_id
-  join randomizer_result rr on r.id = rr.randomizer_id
+  left join (select randomizer_id, group_concat(\"(\", name, \", \", value, \")\" order by name) as params from randomizer_params group by randomizer_id) rp on r.id = rp.randomizer_id
+  left join randomizer_result rr on r.id = rr.randomizer_id
 where r.action_time > DATE_SUB(CURDATE(), INTERVAL {} WEEK)
 order by r.id;""".format(weeks)
 

@@ -218,3 +218,34 @@ class DB:
     def getRandomizerDurations(self, weeks):
         sql="select r.action_time, rr.duration from randomizer r join randomizer_result rr on r.id = rr.randomizer_id where r.action_time > DATE_SUB(CURDATE(), INTERVAL {} WEEK) order by 1;".format(weeks)
         return self.execSelect(sql)
+
+    def getSolverData(self, weeks):
+        # return all data csv style
+        sql="""select s.id, s.action_time,
+sp.romFileName, sp.preset, sp.difficultyTarget, sp.pickupStrategy,
+sr.return_code, sr.duration, sr.difficulty, sr.knows_used, sr.knows_known, sr.items_ok, sr.len_remainTry, sr.len_remainMajors, sr.len_remainMinors, sr.len_skippedMajors, sr.len_unavailMajors,
+sci.collected_items,
+sif.forbidden_items
+from solver s
+  join solver_params sp on s.id = sp.solver_id
+  join solver_result sr on s.id = sr.solver_id
+  join (select solver_id, group_concat(\"(\", item, \", \", count, \")\" order by item) as collected_items from solver_collected_items group by solver_id) sci on s.id = sci.solver_id
+  join (select solver_id, group_concat(item order by item) as forbidden_items from solver_items_forbidden group by solver_id) sif on s.id = sif.solver_id
+where s.action_time > DATE_SUB(CURDATE(), INTERVAL {} WEEK)
+order by s.id""".format(weeks)
+
+        header=["id", "actionTime", "romFileName", "preset", "difficultyTarget", "pickupStrategy", "returnCode", "duration", "difficulty", "knowsUsed", "knowsKnown", "itemsOk", "remainTry", "remainMajors", "remainMinors", "skippedMajors", "unavailMajors", "collectedItems", "forbiddenItems"]
+        return (header, self.execSelect(sql))
+
+    def getRandomizerData(self, weeks):
+        sql="""select r.id, r.action_time,
+rp.params,
+rr.return_code, rr.duration, rr.error_msg
+from randomizer r
+  join (select randomizer_id, group_concat(\"(\", name, \", \", value, \")\" order by name) as params from randomizer_params group by randomizer_id) rp on r.id = rp.randomizer_id
+  join randomizer_result rr on r.id = rr.randomizer_id
+where r.action_time > DATE_SUB(CURDATE(), INTERVAL {} WEEK)
+order by r.id;""".format(weeks)
+
+        header = ["id", "actionTime", "params", "returnCode", "duration", "errorMsg"]
+        return (header, self.execSelect(sql))

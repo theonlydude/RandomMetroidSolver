@@ -14,6 +14,13 @@ extend 'layout.html'
 .main {
     margin-bottom: 1em;
 }
+table {
+    border-collapse: collapse;
+}
+
+table, th, td {
+    border: 1px solid black;
+}
 </style>
 
 <script language = "JavaScript">
@@ -179,3 +186,42 @@ google.charts.setOnLoadCallback(drawCharts);
     <div id = "solverDurations" style = "width: 550px; height: 400px; margin: 0 auto"></div>
   </div>
 </div>
+
+{{
+  def displayData(data):
+    if data == None:
+      response.write("No data\n", escape=False)
+    else:
+      response.write("<table class=\"full\">\n", escape=False)
+      response.write("  <colgroup>\n", escape=False)
+      for col in data[0]:
+        response.write("    <col class=\"{}\">\n".format(col), escape=False)
+        pass
+
+      response.write("  </colgroup>\n", escape=False)
+      response.write("  <tr>\n", escape=False)
+
+      for col in data[0]:
+        response.write("    <th>{}</th>\n".format(col), escape=False)
+        pass
+
+      response.write("  </tr>\n", escape=False)
+
+      for row in data[1]:
+        response.write("  <tr>\n", escape=False)
+        for col in row:
+          response.write("    <td style=\"white-space: nowrap\">{}</td>\n".format(col), escape=False)
+          pass
+        response.write("  </tr>\n", escape=False)
+        pass
+
+      response.write("</table>\n", escape=False)
+      pass
+    pass
+}}
+
+<h4>Solver data</h4>
+{{=displayData(solverData)}}
+
+<h4>Randomizer data</h4>
+{{=displayData(randomizerData)}}

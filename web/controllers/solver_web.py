@@ -976,16 +976,17 @@ def stats():
     response.title = 'Super Metroid VARIA Randomizer and Solver statistics'
 
     DB = db.DB()
+    weeks = 2
 
-    solverStats = DB.getSolverUsage(2)
-    randomizerStats = DB.getRandomizerUsage(2)
+    solverPresets = DB.getSolverPresets(weeks)
+    randomizerPresets = DB.getRandomizerPresets(weeks)
 
-    solverPresets = DB.getSolverPresets(2)
-    randomizerPresets = DB.getRandomizerPresets(2)
+    solverDurations = DB.getSolverDurations(weeks)
+    randomizerDurations = DB.getRandomizerDurations(weeks)
 
-    solverDurations = DB.getSolverDurations(2)
-    randomizerDurations = DB.getRandomizerDurations(2)
+    solverData = DB.getSolverData(weeks)
+    randomizerData = DB.getRandomizerData(weeks)
 
-    return dict(solverStats=solverStats, randomizerStats=randomizerStats,
-                solverPresets=solverPresets, randomizerPresets=randomizerPresets,
-                solverDurations=solverDurations, randomizerDurations=randomizerDurations)
+    return dict(solverPresets=solverPresets, randomizerPresets=randomizerPresets,
+                solverDurations=solverDurations, randomizerDurations=randomizerDurations,
+                solverData=solverData, randomizerData=randomizerData)

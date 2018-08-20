@@ -225,3 +225,18 @@ google.charts.setOnLoadCallback(drawCharts);
 
 <h4>Randomizer data</h4>
 {{=displayData(randomizerData)}}
+
+<h4>Errors</h4>
+{{
+  if len(errors) == 0:
+    response.write("No errors", escape=False)
+  else:
+    response.write("<table>", escape=False)
+    for error in errors:
+      response.write("  <tr><td><a href=\"https://randommetroidsolver.pythonanywhere.com/admin/default/index?send=%2Fadmin%2Fdefault%2Fticket%2Fsolver%2F{}\">{}</td></tr>".format(error, error), escape=False)
+      pass
+    response.write("</table>", escape=False)
+    pass
+}}
+
+<br/>

@@ -5,7 +5,7 @@ path = os.path.expanduser('~/RandomMetroidSolver')
 if os.path.exists(path) and path not in sys.path:
     sys.path.append(path)
 
-import datetime, os, hashlib, json, subprocess, tempfile
+import datetime, os, hashlib, json, subprocess, tempfile, glob
 from datetime import datetime
 from collections import OrderedDict
 
@@ -972,6 +972,20 @@ def home():
 
     return dict()
 
+def getErrors():
+    # check dir exists
+    errDir = os.path.expanduser("~/web2py/applications/solver/errors")
+    if os.path.isdir(errDir):
+        # list error files
+        errFiles = glob.glob(os.path.join(errDir, "*"))
+
+        # sort by date
+        errFiles.sort(key=os.path.getmtime)
+        errFiles = [os.path.basename(f) for f in errFiles]
+        return errFiles
+    else:
+        return []
+
 def stats():
     response.title = 'Super Metroid VARIA Randomizer and Solver statistics'
 
@@ -987,6 +1001,8 @@ def stats():
     solverData = DB.getSolverData(weeks)
     randomizerData = DB.getRandomizerData(weeks)
 
+    errors = getErrors()
+
     return dict(solverPresets=solverPresets, randomizerPresets=randomizerPresets,
                 solverDurations=solverDurations, randomizerDurations=randomizerDurations,
-                solverData=solverData, randomizerData=randomizerData)
+                solverData=solverData, randomizerData=randomizerData, errors=errors)

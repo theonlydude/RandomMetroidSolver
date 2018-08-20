@@ -642,11 +642,11 @@ function startTheTour(step=-1) {
     {
       element: "#strictMinorsStep",
       title: "Strict ammo distribution",
-      content: "Instead of using the Minors quantities as probabilities, enforce a strict distribution to match the proportions as exactly as possible.<br/>Click on the dice button to randomly set this parameter."
+      content: "Instead of using the Minors proportions as probabilities, enforce a strict distribution to match the proportions as exactly as possible.<br/>Click on the dice button to randomly set this parameter."
     },
     {
       element: "#missileQty",
-      title: "Quantity of Missiles/Super Missiles/Power Bombs",
+      title: "Proportion of Missiles/Super Missiles/Power Bombs",
       content: "For each minor types, the higher the number the higher the probability of choosing it when placing a minor.<br/>Click on the dice button to randomly set this parameter."
     },
     {
@@ -878,18 +878,18 @@ def displayNumber(id, min, max, default, step="1"):
                 </tr>
                 <tr>
 		  <td class="small"><div class="random"><button id="missileQtyRandom" type="button" onclick="randomize(event, 'missileQty')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
-		  <td><span id="missileQtyText">Quantity of Missiles:</span></td>
+		  <td><span id="missileQtyText">Proportion of Missiles:</span></td>
 		  <td>{{displayNumber("missileQty", "1", "9", "3", "0.1")}}</td>
 		  <td><button type="button" onclick="startTheTour(12)">?</button></td>
                 </tr>
                 <tr>
 		  <td class="small"><div class="random"><button id="superQtyRandom" type="button" onclick="randomize(event, 'superQty')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
-		  <td><span id="superQtyText">Quantity of Super Missiles:</span></td>
+		  <td><span id="superQtyText">Proportion of Super Missiles:</span></td>
 		  <td>{{displayNumber("superQty", "1", "9", "3", "0.1")}}</td>
                 </tr>
                 <tr>
 		  <td class="small"><div class="random"><button id="powerBombQtyRandom" type="button" onclick="randomize(event, 'powerBombQty')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
-		  <td><span id="powerBombQtyText">Quantity of Power Bombs:</span></td>
+		  <td><span id="powerBombQtyText">Proportion of Power Bombs:</span></td>
 		  <td>{{displayNumber("powerBombQty", "1", "9", "1", "0.1")}}</td>
                 </tr>
                 <tr>

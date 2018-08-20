@@ -26,7 +26,7 @@ create table if not exists solver_items_forbidden (
 
 create table if not exists solver_result (
   solver_id int unsigned not null,
-  return_code tinyint,
+  return_code tinyint unsigned,
   duration float,
   difficulty int,
   knows_used tinyint,
@@ -67,7 +67,7 @@ create table if not exists randomizer_params (
 
 create table if not exists randomizer_result (
   randomizer_id int unsigned not null,
-  return_code tinyint,
+  return_code tinyint unsigned,
   duration float,
   error_msg text,
   primary key (randomizer_id),

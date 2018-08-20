@@ -144,7 +144,11 @@ class DB:
         if self.dbAvailable == False:
             return None
 
+        def escapeMsg(msg):
+            return msg.replace("'", "''")
+
         try:
+            msg = escapeMsg(msg)
             sql = "insert into randomizer_result (randomizer_id, return_code, duration, error_msg) values (%d, %d, %f, '%s');"
             self.cursor.execute(sql % (id, returnCode, duration, msg))
         except Exception as e:
@@ -239,13 +243,25 @@ order by s.id;""".format(weeks)
 
     def getRandomizerData(self, weeks):
         sql="""select r.id, r.action_time,
-rp.params,
-rr.return_code, rr.duration, rr.error_msg
+rr.return_code, rr.duration, rr.error_msg,
+rp.params
 from randomizer r
-  left join (select randomizer_id, group_concat(\"(\", name, \", \", value, \")\" order by name) as params from randomizer_params group by randomizer_id) rp on r.id = rp.randomizer_id
+  left join (select randomizer_id, group_concat(\"'\", name, \"': '\", value, \"'\" order by name) as params from randomizer_params group by randomizer_id) rp on r.id = rp.randomizer_id
   left join randomizer_result rr on r.id = rr.randomizer_id
 where r.action_time > DATE_SUB(CURDATE(), INTERVAL {} WEEK)
 order by r.id;""".format(weeks)
 
-        header = ["id", "actionTime", "params", "returnCode", "duration", "errorMsg"]
-        return (header, self.execSelect(sql))
+        data = self.execSelect(sql)
+        if data == None:
+            return None
+
+        outData = []
+        paramsSet = set()
+        for row in data:
+            params = row[5]
+            dictParams = eval('{' + params + '}')
+            outData.append(row[0:-1] + (dictParams,))
+            paramsSet.update(dictParams.keys())
+
+        header = ["id", "actionTime", "returnCode", "duration", "errorMsg"]
+        return (header, outData, sorted(list(paramsSet)))

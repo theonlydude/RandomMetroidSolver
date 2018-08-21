@@ -227,7 +227,7 @@ class DB:
         # return all data csv style
         sql="""select s.id, s.action_time,
 sp.romFileName, sp.preset, sp.difficultyTarget, sp.pickupStrategy,
-sr.return_code, sr.duration, sr.difficulty, sr.knows_used, sr.knows_known, sr.items_ok, sr.len_remainTry, sr.len_remainMajors, sr.len_remainMinors, sr.len_skippedMajors, sr.len_unavailMajors,
+sr.return_code, lpad(round(sr.duration, 2), 5, '0'), sr.difficulty, sr.knows_used, sr.knows_known, sr.items_ok, sr.len_remainTry, sr.len_remainMajors, sr.len_remainMinors, sr.len_skippedMajors, sr.len_unavailMajors,
 sci.collected_items,
 sif.forbidden_items
 from solver s
@@ -243,7 +243,7 @@ order by s.id;""".format(weeks)
 
     def getRandomizerData(self, weeks):
         sql="""select r.id, r.action_time,
-rr.return_code, rr.duration, rr.error_msg,
+rr.return_code, lpad(round(rr.duration, 2), 5, '0'), rr.error_msg,
 rp.params
 from randomizer r
   left join (select randomizer_id, group_concat(\"'\", name, \"': '\", value, \"'\" order by name) as params from randomizer_params group by randomizer_id) rp on r.id = rp.randomizer_id

@@ -286,23 +286,30 @@ google.charts.setOnLoadCallback(drawCharts);
       response.write("  <tr>\n", escape=False)
 
       i = 0
-      for col in data[0]:
+      # standard columns execpt last one (error msg)
+      for col in data[0][0:-1]:
         response.write("    <th onclick=\"sortTable('randomizerData', {})\">{}</th>\n".format(i, col), escape=False)
         i += 1
         pass
+      # dynamic parameters
       paramList = data[2]
       for col in paramList:
         response.write("    <th onclick=\"sortTable('randomizerData', {})\">{}</th>\n".format(i, col), escape=False)
         i += 1
         pass
+      # put error message at the end
+      col = data[0][-1]
+      response.write("    <th onclick=\"sortTable('randomizerData', {})\">{}</th>\n".format(i, col), escape=False)
 
       response.write("  </tr>\n", escape=False)
 
       for row in data[1]:
         response.write("  <tr>\n", escape=False)
-        for col in row[0:-1]:
+        # standard params except dynamic ones and error msg
+        for col in row[0:-2]:
           response.write("    <td style=\"white-space: nowrap\">{}</td>\n".format(col), escape=False)
           pass
+        # dynamic parameters
         paramDict = row[-1]
         for param in paramList:
           if param in paramDict:
@@ -311,6 +318,9 @@ google.charts.setOnLoadCallback(drawCharts);
             response.write("    <td>false</td>\n", escape=False)
             pass
           pass
+        # error msg
+        col = row[-2]
+        response.write("    <td style=\"white-space: nowrap\">{}</td>\n".format(col), escape=False)
 
         response.write("  </tr>\n", escape=False)
         pass

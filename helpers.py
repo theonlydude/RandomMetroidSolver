@@ -2,7 +2,7 @@
 import math
 from smbool import SMBool
 from rom import RomPatches
-from parameters import Settings, easy, medium, hard, harder, hardcore, mania
+from parameters import Settings, easy, medium, hard, harder, hardcore, mania, diff2text
 
 class Helpers(object):
     def __init__(self, smbm):
@@ -679,3 +679,12 @@ class Bosses:
                          Bosses.bossDead('Phantoon'),
                          Bosses.bossDead('Draygon'),
                          Bosses.bossDead('Ridley'))
+
+
+def diffValue2txt(diff):
+    last = 0
+    for d in sorted(diff2text.keys()):
+        if diff >= last and diff < d:
+            return diff2text[last]
+        last = d
+    return None

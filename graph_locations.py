@@ -374,7 +374,11 @@ locations = [
         'Bubble Mountain': lambda sm: sm.canHellRun('MainUpperNorfair')
     },
     'Available': lambda sm: sm.canOpenRedDoors(),
-    'PostAvailable': lambda sm: sm.haveItem('Morph')
+    'PostAvailable': lambda sm: sm.wor(sm.haveItem('Morph'), # exit through lower passage under the spikes
+                                       sm.wand(sm.wor(sm.haveItem('SpaceJump'), # exit through blue gate
+                                                      sm.haveItem('Grapple')),
+                                               sm.wor(sm.wand(sm.knowsGreenGateGlitch(), sm.heatProof()), # hell run + green gate glitch is too much
+                                                      sm.haveItem('Wave'))))
 },
 {
     'Area': "LowerNorfair",

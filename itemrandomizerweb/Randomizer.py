@@ -266,6 +266,7 @@ class RandoState(object):
         Bosses.reset()
         for boss in self.bosses:
             Bosses.beatBoss(boss)
+        rando.curLocs = None
 
 
 # randomizer algorithm main class. generateItems method will generate a complete seed, or fail (depending on settings) 
@@ -311,6 +312,7 @@ class Randomizer(object):
         self.progTypesCache = []
         # start at landing site
         self.curAccessPoint = None
+        self.curLocs = None
         self.setCurAccessPoint()
         # states saved at each item collection
         self.states = []
@@ -375,6 +377,9 @@ class Randomizer(object):
     # item : optional additional item
     # return available locations list.
     def currentLocations(self, item=None, locs=None, ap=None, post=False):
+        isSimpleCall = item is None and locs is None and ap is None and post == False
+        if self.curLocs is not None and isSimpleCall:
+            return self.curLocs
         itemType = None
         if locs is None:
             locs = self.unusedLocations
@@ -393,6 +398,8 @@ class Randomizer(object):
             ret = [loc for loc in ret if self.locPostAvailable(loc, itemType)]
         if item is not None:
             self.smbm.removeItem(itemType)
+        if isSimpleCall:
+            self.curLocs = ret
         return ret
 
     # for an item check if a least one location can accept it, given the current
@@ -753,6 +760,7 @@ class Randomizer(object):
                 self.progressionItemLocs.append(itemLocation)
             if location in curLocs:
                 curLocs.remove(location)
+            self.curLocs = None
             self.states.append(RandoState(self, curLocs))
 
     # check if remaining locations pool is conform to rando settings when filling up
@@ -958,7 +966,8 @@ class Randomizer(object):
             self.errorMsg = "Can't access all bosses locations, abort. Retry, and change the super fun settings if the problem happens again."
             print("DIAG: {}".format(self.errorMsg))
             return None
-        self.states.append(RandoState(self, self.currentLocations()))
+        self.curLocs = self.currentLocations()
+        self.states.append(RandoState(self, self.curLocs))
 #        print(str(len(self.itemPool)) + " items in pool")
         runtime_s = 0
         startDate = time.clock()

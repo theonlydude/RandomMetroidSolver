@@ -1,8 +1,8 @@
 import sys, random, time
 from itemrandomizerweb import Items
-from parameters import Knows, Settings, samus
+from parameters import Knows, Settings, samus, infinity
 from itemrandomizerweb.stdlib import List
-from helpers import Bosses
+from helpers import Bosses, diffValue2txt
 from utils import randGaussBounds, getRangeDict, chooseFromRange
 from graph import AccessGraph
 from graph_access import accessPoints
@@ -898,19 +898,26 @@ class Randomizer(object):
             sys.stdout.flush()
 #        print("rollback END : " + str(len(self.currentItems)))
 
-    # check if only bosses locations are left. when stuck, that just means
-    # difficulty settings were not possible.
-    def onlyBossesLeft(self):
-        for loc in self.unusedLocations:
-            if 'Pickup' not in loc:
-                return False
-        return True
+    # check if bosses are blocking the last remaining locations
+    def onlyBossesLeft(self, bossesKilled):
+        # fake kill all bosses and see if we can access the rest of the game
+        Bosses.reset()
+        for boss in ['Kraid', 'Phantoon', 'Ridley', 'Draygon']:
+            Bosses.beatBoss(boss)
+        # get bosses locations and newly accessible locations (for bosses that open up locs)
+        locs = self.currentLocations(post=True) + [loc for loc in self.unusedLocations if 'Pickup' in loc]
+        ret = (len(locs) == len(self.unusedLocations))
+        # restore currently killed bosses
+        Bosses.reset()
+        for boss in bossesKilled:
+            Bosses.beatBoss(boss)
+        return ret
 
-    # when diff was stepped up due to boss fights, get a string that
-    # tells locations and associated difficulties
-    def getBossLocsDiffs(self, maxDiff):
-        # TODO
-        pass
+    # when max diff was stepped up due to boss fights, get a string that
+    # tells locations above initial target and associated difficulties
+    def getAboveMaxDiffLocsStr(self, maxDiff):
+        locs = [il['Location'] for il in self.itemLocations if il['Location']['difficulty'].difficulty > maxDiff]
+        return '[ ' + ' ; '.join([loc['Name'] + ': ' + diffValue2txt(loc['difficulty'].difficulty) for loc in locs]) + ' ]'
 
     # if not all items could be placed (the player cannot finish the seed 100%),
     # check if we can still finish the game (the player can finish the seed any%)
@@ -919,7 +926,7 @@ class Randomizer(object):
         self.smbm.resetSMBool()
         self.smbm.wand(Bosses.allBossesDead(self.smbm), self.smbm.enoughStuffTourian())
         isEndGame = self.smbm.getSMBool()
-        return isEndGame.bool == True and isEndGame.difficulty < self.difficultyTarget
+        return isEndGame.bool
 
     def getNextItemInPool(self, t):
         return next(item for item in self.itemPool if item['Type'] == t)
@@ -986,7 +993,7 @@ class Randomizer(object):
                     isStuck = self.getItemFromStandardPool()
                 if isStuck:
                     # if we're stuck, give up if only bosses locations are left (bosses difficulty settings problems)
-                    onlyBosses = self.onlyBossesLeft()
+                    onlyBosses = self.onlyBossesLeft(self.states[-1].bosses)
                     if not onlyBosses:
                         # check that we're actually stuck
                         nCurLocs = len(self.states[-1].curLocs)
@@ -1001,7 +1008,7 @@ class Randomizer(object):
                     else:
                         # stuck by boss fights. disable max difficulty (warn the user afterwards)
                         prevDiffTarget = self.difficultyTarget
-                        self.difficultyTarget = samus
+                        self.difficultyTarget = infinity
                         isStuck = False
             runtime_s = time.clock() - startDate
 #        print(str(len(self.itemPool)) + " remaining items in pool")
@@ -1024,7 +1031,7 @@ class Randomizer(object):
                 print("DIAG: {}".format(self.errorMsg))
                 return None
         if prevDiffTarget is not None:
-            bossLocsDiffs = self.getBossLocsDiffs(prevDiffTarget)
-            print("DIAG: Boss fights forced up to up the maximum difficulty. Locations affected : " + bossLocsDiffs)
+            bossLocsDiffs = self.getAboveMaxDiffLocsStr(prevDiffTarget)
+            print("\nDIAG: Boss fights forced us to up the maximum difficulty. Affected locations : " + bossLocsDiffs)
         print("")
         return self.itemLocations

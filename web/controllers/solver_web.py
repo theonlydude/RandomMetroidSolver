@@ -809,7 +809,7 @@ def randomizerWebService():
               'maxDifficulty', 'progressionSpeed', 'spreadItems', 'fullRandomization',
               'suitsRestriction', 'morphPlacement', 'funCombat', 'funMovement', 'funSuits',
               'layoutPatches', 'noGravHeat', 'progressionDifficulty', 'areaRandomization',
-              'hideItems', 'strictMinors']
+              'hideItems', 'strictMinors', 'complexity']
     validateWebServiceParams(patchs, quantities, others, isJson=True)
 
     # randomize
@@ -903,7 +903,7 @@ def randomizerWebService():
     if custom == True:
         params += ['--controls', controlParam]
 
-    DB.addRandoParams(id, params)
+    DB.addRandoParams(id, params + ['--complexity', request.vars.complexity])
 
     print("before calling: {}".format(params))
     start = datetime.now()

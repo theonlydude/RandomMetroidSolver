@@ -263,5 +263,12 @@ order by r.id;""".format(weeks)
             outData.append(row[0:-1] + (dictParams,))
             paramsSet.update(dictParams.keys())
 
+        # custom sort of the params
+        paramsHead = []
+        for param in ['seed', 'complexity', 'preset', 'area', 'fullRandomization', 'progressionSpeed', 'maxDifficulty', 'morphPlacement', 'spreadItems', 'suitsRestriction', 'energyQty', 'minorQty', 'missileQty', 'superQty', 'powerBombQty', 'progressionDifficulty']:
+            if param in paramsSet:
+                paramsHead.append(param)
+                paramsSet.remove(param)
+
         header = ["id", "actionTime", "returnCode", "duration", "errorMsg"]
-        return (header, outData, sorted(list(paramsSet)))
+        return (header, outData, paramsHead + sorted(list(paramsSet)))

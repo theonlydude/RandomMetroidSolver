@@ -5,7 +5,7 @@ path = os.path.expanduser('~/RandomMetroidSolver')
 if os.path.exists(path) and path not in sys.path:
     sys.path.append(path)
 
-import datetime, os, hashlib, json, subprocess, tempfile, glob
+import datetime, os, hashlib, json, subprocess, tempfile, glob, random
 from datetime import datetime
 from collections import OrderedDict
 
@@ -826,8 +826,12 @@ def randomizerWebService():
     with open(presetFileName, 'w') as presetFile:
         presetFile.write(request.vars.paramsFileTarget)
 
+    seed = request.vars.seed
+    if seed == '0':
+        seed = str(random.randint(0, 9999999))
+
     params = ['python2',  os.path.expanduser("~/RandomMetroidSolver/randomizer.py"),
-              '--seed', request.vars.seed,
+              '--seed', seed,
               '--output', jsonFileName,
               '--param', presetFileName,
               '--preset', request.vars.paramsFile,

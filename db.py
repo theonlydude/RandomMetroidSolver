@@ -104,9 +104,9 @@ class DB:
 
         # extract the parameters for the database
         dbParams = []
-        skipParams = ['seed', 'output', 'param', 'controls']
+        skipParams = ['output', 'param', 'controls']
         superFuns = []
-        i = 2 # skip first parameters
+        i = 2 # skip first parameters (python2 and randomizer.py)
         while i < len(params):
             if params[i][0:len('--')] == '--':
                 paramName = params[i][len('--'):]

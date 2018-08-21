@@ -5,7 +5,8 @@ path = os.path.expanduser('~/RandomMetroidSolver')
 if os.path.exists(path) and path not in sys.path:
     sys.path.append(path)
 
-import datetime, os, hashlib, json, subprocess, tempfile
+import datetime, os, hashlib, json, subprocess, tempfile, glob
+from datetime import datetime
 from collections import OrderedDict
 
 # to solve the rom
@@ -17,6 +18,7 @@ from graph_locations import locations as graphLocations
 from solver import Solver, DifficultyDisplayer
 from rom import RomLoader
 from utils import PresetLoader
+import db
 
 def maxPresetsReach():
     # to prevent a spammer to create presets in a loop and fill the fs
@@ -70,6 +72,8 @@ def validatePresetsParams(action):
             return (False, "Password must be alphanumeric")
         if IS_LENGTH(32)(request.vars.password)[1] is not None:
             return (False, "Password must be max 32 chars")
+        if IS_NOT_EMPTY()(request.vars.presetCreate)[1] is not None:
+            return (False, "Preset name is empty")
         if IS_ALPHANUMERIC()(request.vars.presetCreate)[1] is not None:
             return (False, "Preset name must be alphanumeric")
         if IS_LENGTH(32)(request.vars.presetCreate)[1] is not None:
@@ -548,6 +552,9 @@ def computeDifficulty(jsonRomFileName):
     presetFileName = "diff_presets/{}.json".format(session.solver['preset'])
     jsonFileName = tempfile.mkstemp()[1]
 
+    DB = db.DB()
+    id = DB.initSolver()
+
     params = [
         'python2',  os.path.expanduser("~/RandomMetroidSolver/solver.py"),
         str(jsonRomFileName),
@@ -561,19 +568,28 @@ def computeDifficulty(jsonRomFileName):
     for item in session.solver['itemsForbidden']:
         params += ['--itemsForbidden', item]
 
+    DB.addSolverParams(id, randomizedRom, session.solver['preset'], session.solver['difficultyTarget'],
+                       session.solver['pickupStrategy'], session.solver['itemsForbidden'])
+
     print("before calling solver: {}".format(params))
+    start = datetime.now()
     ret = subprocess.call(params)
-    print("ret={}".format(ret))
+    end = datetime.now()
+    duration = (end - start).total_seconds()
+    print("ret: {}, duration: {}s".format(ret, duration))
 
     if ret == 0:
         with open(jsonFileName) as jsonFile:
             result = json.load(jsonFile)
-        os.remove(jsonFileName)
     else:
-        os.remove(jsonFileName)
-        return (False, "Solver: something wrong happened while solving the ROM")
+        result = "Solver: something wrong happened while solving the ROM"
 
-    return (True, result)
+    DB.addSolverResult(id, ret, duration, result)
+    DB.close()
+
+    os.remove(jsonFileName)
+
+    return (ret == 0, result)
 
 def infos():
     # set title
@@ -586,10 +602,10 @@ patches = [
     ('skip_intro', "Skip text intro (start at Ceres Station) (by Smiley)", False, False),
     ('skip_ceres', "Skip text intro and Ceres station (start at Landing Site) (by Total)", True, False),
     ('itemsounds', "Remove fanfare when picking up an item (by Scyzer)", True, True),
-    ('spinjumprestart', "Allows Samus to start spinning in mid air after jumping or falling (by Kejardon)", False, False),
+    ('spinjumprestart', "Allows Samus to start spinning in mid air after jumping or falling (by Kejardon)", False, True),
     ('elevators_doors_speed', 'Accelerate doors and elevators transitions (by Rakki & Lioran)', True, True),
     ('animals', "Save the animals surprise (by Foosda)", False, False),
-    ('No_Music', "Disable background music (by Kejardon)", False, False)
+    ('No_Music', "Disable background music (by Kejardon)", False, True)
 ]
 
 def initRandomizerSession():
@@ -797,6 +813,9 @@ def randomizerWebService():
     validateWebServiceParams(patchs, quantities, others, isJson=True)
 
     # randomize
+    DB = db.DB()
+    id = DB.initRando()
+
     presetFileName = tempfile.mkstemp()[1] + '.json'
     jsonFileName = tempfile.mkstemp()[1]
 
@@ -809,7 +828,8 @@ def randomizerWebService():
 
     params = ['python2',  os.path.expanduser("~/RandomMetroidSolver/randomizer.py"),
               '--seed', request.vars.seed,
-              '--output', jsonFileName, '--param', presetFileName,
+              '--output', jsonFileName,
+              '--param', presetFileName,
               '--preset', request.vars.paramsFile,
               '--progressionSpeed', request.vars.progressionSpeed,
               '--progressionDifficulty', request.vars.progressionDifficulty,
@@ -883,13 +903,21 @@ def randomizerWebService():
     if custom == True:
         params += ['--controls', controlParam]
 
+    DB.addRandoParams(id, params)
+
     print("before calling: {}".format(params))
+    start = datetime.now()
     ret = subprocess.call(params)
-    print("ret={}".format(ret))
+    end = datetime.now()
+    duration = (end - start).total_seconds()
+    print("ret: {}, duration: {}s".format(ret, duration))
 
     if ret == 0:
         with open(jsonFileName) as jsonFile:
             locsItems = json.load(jsonFile)
+
+        DB.addRandoResult(id, ret, duration, '')
+        DB.close()
 
         os.remove(jsonFileName)
         os.remove(presetFileName)
@@ -901,6 +929,9 @@ def randomizerWebService():
                 msg = json.load(jsonFile)['errorMsg']
         except:
             msg = "randomizerWebService: something wrong happened"
+
+        DB.addRandoResult(id, ret, duration, msg)
+        DB.close()
 
         os.remove(jsonFileName)
         os.remove(presetFileName)
@@ -940,3 +971,38 @@ def home():
     response.title = 'Super Metroid VARIA Randomizer and Solver'
 
     return dict()
+
+def getErrors():
+    # check dir exists
+    errDir = os.path.expanduser("~/web2py/applications/solver/errors")
+    if os.path.isdir(errDir):
+        # list error files
+        errFiles = glob.glob(os.path.join(errDir, "*"))
+
+        # sort by date
+        errFiles.sort(key=os.path.getmtime)
+        errFiles = [os.path.basename(f) for f in errFiles]
+        return errFiles
+    else:
+        return []
+
+def stats():
+    response.title = 'Super Metroid VARIA Randomizer and Solver statistics'
+
+    DB = db.DB()
+    weeks = 2
+
+    solverPresets = DB.getSolverPresets(weeks)
+    randomizerPresets = DB.getRandomizerPresets(weeks)
+
+    solverDurations = DB.getSolverDurations(weeks)
+    randomizerDurations = DB.getRandomizerDurations(weeks)
+
+    solverData = DB.getSolverData(weeks)
+    randomizerData = DB.getRandomizerData(weeks)
+
+    errors = getErrors()
+
+    return dict(solverPresets=solverPresets, randomizerPresets=randomizerPresets,
+                solverDurations=solverDurations, randomizerDurations=randomizerDurations,
+                solverData=solverData, randomizerData=randomizerData, errors=errors)

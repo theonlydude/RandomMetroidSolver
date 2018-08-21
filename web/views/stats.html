@@ -242,7 +242,7 @@ google.charts.setOnLoadCallback(drawCharts);
     if data == None:
       response.write("No data\n", escape=False)
     else:
-      response.write("<table class=\"full\">\n", escape=False)
+      response.write("<table  id=\"solverData\" class=\"full\">\n", escape=False)
       response.write("  <colgroup>\n", escape=False)
       for col in data[0]:
         response.write("    <col class=\"{}\">\n".format(col), escape=False)
@@ -251,8 +251,10 @@ google.charts.setOnLoadCallback(drawCharts);
       response.write("  </colgroup>\n", escape=False)
       response.write("  <tr>\n", escape=False)
 
+      i = 0
       for col in data[0]:
-        response.write("    <th>{}</th>\n".format(col), escape=False)
+        response.write("    <th onclick=\"sortTable('solverData', {})\">{}</th>\n".format(i, col), escape=False)
+        i += 1
         pass
 
       response.write("  </tr>\n", escape=False)

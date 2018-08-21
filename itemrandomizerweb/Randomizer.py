@@ -906,6 +906,12 @@ class Randomizer(object):
                 return False
         return True
 
+    # when diff was stepped up due to boss fights, get a string that
+    # tells locations and associated difficulties
+    def getBossLocsDiffs(self, maxDiff):
+        # TODO
+        pass
+
     # if not all items could be placed (the player cannot finish the seed 100%),
     # check if we can still finish the game (the player can finish the seed any%)
     def canEndGame(self):
@@ -958,7 +964,6 @@ class Randomizer(object):
     def generateItems(self):
         self.itemLocations = []
         isStuck = False
-        onlyBosses = False
         # if major items are removed from the pool (super fun setting), fill not accessible locations with
         # items that are as useless as possible
         abort = self.fillRestrictedLocations()
@@ -971,6 +976,7 @@ class Randomizer(object):
 #        print(str(len(self.itemPool)) + " items in pool")
         runtime_s = 0
         startDate = time.clock()
+        prevDiffTarget = None
         while len(self.itemPool) > 0 and not isStuck and runtime_s <= self.runtimeLimit_s:
             # fill up with non-progression stuff
             isStuck = self.fillNonProgressionItems()
@@ -992,6 +998,11 @@ class Randomizer(object):
                             # rollback to make progress if we can't access everything yet
                             self.rollback()
                         isStuck = self.getItemFromStandardPool()
+                    else:
+                        # stuck by boss fights. disable max difficulty (warn the user afterwards)
+                        prevDiffTarget = self.difficultyTarget
+                        self.difficultyTarget = samus
+                        isStuck = False
             runtime_s = time.clock() - startDate
 #        print(str(len(self.itemPool)) + " remaining items in pool")
         if len(self.itemPool) > 0:
@@ -1009,12 +1020,11 @@ class Randomizer(object):
                 print("\nSTUCK ! ")
                 print("REM LOCS = "  + str([loc['Name'] for loc in self.unusedLocations]))
                 print("REM ITEMS = "  + str([item['Type'] for item in self.itemPool]))
-                if onlyBosses == True:
-                    self.errorMsg = "Stuck because of boss fights. Try to increase max difficulty or health/ammo."
-                    print("DIAG: {}".format(self.errorMsg))
-                else:
-                    self.errorMsg = "Stuck because of navigation. Retry, and disable either super fun settings/late morph ball/suits restriction if the problem happens again."
-                    print("DIAG: {}".format(self.errorMsg))
+                self.errorMsg = "Stuck because of navigation. Retry, and disable either super fun settings/late morph ball/suits restriction if the problem happens again."
+                print("DIAG: {}".format(self.errorMsg))
                 return None
+        if prevDiffTarget is not None:
+            bossLocsDiffs = self.getBossLocsDiffs(prevDiffTarget)
+            print("DIAG: Boss fights forced up to up the maximum difficulty. Locations affected : " + bossLocsDiffs)
         print("")
         return self.itemLocations

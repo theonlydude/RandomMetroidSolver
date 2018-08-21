@@ -19,11 +19,73 @@ table {
 }
 
 table, th, td {
-    border: 1px solid black;
+    border: 1px solid #ddd;
+}
+th {
+    cursor: pointer;
+}
+tr:nth-child(even) {
+    background-color: #f2f2f2
 }
 </style>
 
 <script language = "JavaScript">
+// https://www.w3schools.com/howto/howto_js_sort_table.asp
+function sortTable(id, n) {
+  var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+  table = document.getElementById(id);
+  switching = true;
+  // Set the sorting direction to ascending:
+  dir = "asc"; 
+  /* Make a loop that will continue until
+  no switching has been done: */
+  while (switching) {
+    // Start by saying: no switching is done:
+    switching = false;
+    rows = table.rows;
+    /* Loop through all table rows (except the
+    first, which contains table headers): */
+    for (i = 1; i < (rows.length - 1); i++) {
+      // Start by saying there should be no switching:
+      shouldSwitch = false;
+      /* Get the two elements you want to compare,
+      one from current row and one from the next: */
+      x = rows[i].getElementsByTagName("TD")[n];
+      y = rows[i + 1].getElementsByTagName("TD")[n];
+      /* Check if the two rows should switch place,
+      based on the direction, asc or desc: */
+      if (dir == "asc") {
+        if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+          // If so, mark as a switch and break the loop:
+          shouldSwitch = true;
+          break;
+        }
+      } else if (dir == "desc") {
+        if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+          // If so, mark as a switch and break the loop:
+          shouldSwitch = true;
+          break;
+        }
+      }
+    }
+    if (shouldSwitch) {
+      /* If a switch has been marked, make the switch
+      and mark that a switch has been done: */
+      rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+      switching = true;
+      // Each time a switch is done, increase this count by 1:
+      switchcount ++; 
+    } else {
+      /* If no switching has been done AND the direction is "asc",
+      set the direction to "desc" and run the while loop again. */
+      if (switchcount == 0 && dir == "asc") {
+        dir = "desc";
+        switching = true;
+      }
+    }
+  }
+}
+
 function drawCharts() {
   drawSolverPresets();
   drawRandomizerPresets();
@@ -213,19 +275,23 @@ google.charts.setOnLoadCallback(drawCharts);
 
 <h4>Randomizer data</h4>
 {{
+    # data[0]: list of column headers, data[1]: rows (last column is a dict of the params), data[2]: list of params
     data = randomizerData
     if data == None:
       response.write("No data\n", escape=False)
     else:
-      response.write("<table class=\"full\">\n", escape=False)
+      response.write("<table id=\"randomizerData\" class=\"full\">\n", escape=False)
       response.write("  <tr>\n", escape=False)
 
+      i = 0
       for col in data[0]:
-        response.write("    <th>{}</th>\n".format(col), escape=False)
+        response.write("    <th onclick=\"sortTable('randomizerData', {})\">{}</th>\n".format(i, col), escape=False)
+        i += 1
         pass
       paramList = data[2]
       for col in paramList:
-        response.write("    <th>{}</th>\n".format(col), escape=False)
+        response.write("    <th onclick=\"sortTable('randomizerData', {})\">{}</th>\n".format(i, col), escape=False)
+        i += 1
         pass
 
       response.write("  </tr>\n", escape=False)

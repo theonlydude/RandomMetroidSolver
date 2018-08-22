@@ -45,8 +45,8 @@ function sortTable(id, n) {
     switching = false;
     rows = table.rows;
     /* Loop through all table rows (except the
-    first, which contains table headers): */
-    for (i = 1; i < (rows.length - 1); i++) {
+    first and last, which contains table headers): */
+    for (i = 1; i < (rows.length - 2); i++) {
       // Start by saying there should be no switching:
       shouldSwitch = false;
       /* Get the two elements you want to compare,
@@ -244,20 +244,13 @@ google.charts.setOnLoadCallback(drawCharts);
       response.write("No data\n", escape=False)
     else:
       response.write("<table  id=\"solverData\" class=\"full\">\n", escape=False)
-      response.write("  <colgroup>\n", escape=False)
-      for col in data[0]:
-        response.write("    <col class=\"{}\">\n".format(col), escape=False)
-        pass
 
-      response.write("  </colgroup>\n", escape=False)
       response.write("  <tr>\n", escape=False)
-
       i = 0
       for col in data[0]:
         response.write("    <th onclick=\"sortTable('solverData', {})\">{}</th>\n".format(i, col), escape=False)
         i += 1
         pass
-
       response.write("  </tr>\n", escape=False)
 
       for row in data[1]:
@@ -267,6 +260,14 @@ google.charts.setOnLoadCallback(drawCharts);
           pass
         response.write("  </tr>\n", escape=False)
         pass
+
+      response.write("  <tr>\n", escape=False)
+      i = 0
+      for col in data[0]:
+        response.write("    <th onclick=\"sortTable('solverData', {})\">{}</th>\n".format(i, col), escape=False)
+        i += 1
+        pass
+      response.write("  </tr>\n", escape=False)
 
       response.write("</table>\n", escape=False)
       pass
@@ -327,6 +328,26 @@ google.charts.setOnLoadCallback(drawCharts);
 
         response.write("  </tr>\n", escape=False)
         pass
+
+      response.write("  <tr>\n", escape=False)
+
+      i = 0
+      # standard columns execpt last one (error msg)
+      for col in data[0][0:-1]:
+        response.write("    <th onclick=\"sortTable('randomizerData', {})\">{}</th>\n".format(i, col), escape=False)
+        i += 1
+        pass
+      # dynamic parameters
+      paramList = data[2]
+      for col in paramList:
+        response.write("    <th onclick=\"sortTable('randomizerData', {})\">{}</th>\n".format(i, col), escape=False)
+        i += 1
+        pass
+      # put error message at the end
+      col = data[0][-1]
+      response.write("    <th onclick=\"sortTable('randomizerData', {})\">{}</th>\n".format(i, col), escape=False)
+
+      response.write("  </tr>\n", escape=False)
 
       response.write("</table>\n", escape=False)
       pass

@@ -7,6 +7,7 @@ extend 'layout.html'
 <link rel="stylesheet" type="text/css" href={{=URL('static/css','mystyle_20180802.css')}} media="screen"/>
 <script type = "text/javascript" src = "https://www.gstatic.com/charts/loader.js"></script>
 <script type = "text/javascript">google.charts.load('current', {packages: ['corechart']});</script>
+<script type="text/javascript" src="{{=URL('static', '/js/excellentexport.js')}}"></script>
 
 <title>Super Metroid VARIA Randomizer and Solver statistics</title>
 
@@ -275,6 +276,8 @@ google.charts.setOnLoadCallback(drawCharts);
 <h4>Solver data</h4>
 {{displayData(solverData)}}
 
+<a download="solver.csv" href="#" onclick="return ExcellentExport.csv(this, 'solverData');">Export to CSV</a>
+
 <h4>Randomizer data</h4>
 {{
     # data[0]: list of column headers, data[1]: rows (last column is a dict of the params), data[2]: list of params
@@ -330,6 +333,7 @@ google.charts.setOnLoadCallback(drawCharts);
     pass
 }}
 
+<a download="randomizer.csv" href="#" onclick="return ExcellentExport.csv(this, 'randomizerData');">Export to CSV</a>
 
 <h4>Errors</h4>
 {{

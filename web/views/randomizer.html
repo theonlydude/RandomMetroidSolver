@@ -333,7 +333,7 @@ function AjaxRandomizerCallCompleted(data) {
         var bytes = new Uint8Array(e.target.result);
 
         for(var key in data) {
-            if(key === "fileName") { continue; }
+            if(key === "fileName" || key === "errorMsg") { continue; }
             bytes[key] = data[key];
         }
 
@@ -341,6 +341,15 @@ function AjaxRandomizerCallCompleted(data) {
 
         var outFileName = data['fileName']
         saveAs(blob, outFileName)
+    }
+
+    // info message to display ?
+    if("errorMsg" in data && data["errorMsg"].length > 0) {
+        document.getElementById("flash").innerHTML = data["errorMsg"];
+        $('#flash').show();
+        displayFlash = true;
+    } else {
+        displayFlash = false;
     }
 
     // set backup button text to Randomize
@@ -374,7 +383,9 @@ function AjaxRandomizerCallCompleted(data) {
     request.fail(ajaxFail);
 
     // remove "working" message
-    $('#flash').hide();
+    if(displayFlash == false){
+        $('#flash').hide();
+    }
     $('#overlay').hide();
     $('#loadingGIF').hide();
 }

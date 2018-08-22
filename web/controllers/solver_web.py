@@ -304,12 +304,12 @@ def genPathTable(locations, displayAPs=True):
         if item[0] != '-':
             pathTable.append(TR(A(location[0],
                                   _href="https://wiki.supermetroid.run/{}".format(location[1].replace(' ', '_').replace("'", '%27'))),
-                                  area, subarea, item, diff, techniques, items))
+                                  area, subarea, item, diff, techniques, items, _class=item))
         else:
             pathTable.append(TR(A(location[0],
                                   _href="https://wiki.supermetroid.run/{}".format(location[1].replace(' ', '_').replace("'", '%27'))),
                                 area, subarea, DIV(item, _class='linethrough'),
-                                diff, techniques, items))
+                                diff, techniques, items, _class=item))
 
     return pathTable
 
@@ -920,7 +920,12 @@ def randomizerWebService():
         with open(jsonFileName) as jsonFile:
             locsItems = json.load(jsonFile)
 
-        DB.addRandoResult(id, ret, duration, '')
+        # check if an info message has been returned
+        msg = ''
+        if len(locsItems['errorMsg']) > 0:
+            msg = locsItems['errorMsg']
+
+        DB.addRandoResult(id, ret, duration, msg)
         DB.close()
 
         os.remove(jsonFileName)

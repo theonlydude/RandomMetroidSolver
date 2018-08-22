@@ -214,7 +214,7 @@ function changeComplexity(evt, name) {
   }
 
   else if(name == "medium") {
-    var show = ["maxDiffVisibility", "progDiffVisibility", "patchesVisibility", "morphPlacementVisibility"
+    var show = ["maxDiffVisibility", "patchesVisibility", "morphPlacementVisibility", "ammoVisibility"
 {{
 for patch in patches:
   if patch[3] == True:
@@ -222,7 +222,7 @@ for patch in patches:
     pass
   pass
 }}];
-    var hide = ["seedVisibility", "ammoVisibility", "spreadItemsVisibility", "suitsRestrictionVisibility", "superFunVisibility", "areaPatchVisibility", "mainPatchesVisibitily", "mainPatchesTextVisibitily", "hideItemsVisibility"
+    var hide = ["seedVisibility", "progDiffVisibility", "spreadItemsVisibility", "suitsRestrictionVisibility", "strictMinorsVisibility", "missileQtyVisibility", "superQtyVisibility", "powerBombQtyVisibility", "superFunVisibility", "areaPatchVisibility", "mainPatchesVisibitily", "mainPatchesTextVisibitily", "hideItemsVisibility"
 {{
 for patch in patches:
   if patch[3] == False:
@@ -234,7 +234,7 @@ for patch in patches:
   }
 
   else {
-    var show = ["seedVisibility", "ammoVisibility", "maxDiffVisibility", "progDiffVisibility", "spreadItemsVisibility", "suitsRestrictionVisibility", "morphPlacementVisibility", "superFunVisibility", "patchesVisibility", "areaPatchVisibility", "mainPatchesVisibitily", "mainPatchesTextVisibitily", "hideItemsVisibility"
+    var show = ["seedVisibility", "ammoVisibility", "maxDiffVisibility", "progDiffVisibility", "spreadItemsVisibility", "suitsRestrictionVisibility", "morphPlacementVisibility", "strictMinorsVisibility", "missileQtyVisibility", "superQtyVisibility", "powerBombQtyVisibility", "superFunVisibility", "patchesVisibility", "areaPatchVisibility", "mainPatchesVisibitily", "mainPatchesTextVisibitily", "hideItemsVisibility"
 {{
 for patch in patches:
   response.write(", \"{}Visibitily\"".format(patch[0]), escape=False)
@@ -333,7 +333,7 @@ function AjaxRandomizerCallCompleted(data) {
         var bytes = new Uint8Array(e.target.result);
 
         for(var key in data) {
-            if(key === "fileName") { continue; }
+            if(key === "fileName" || key === "errorMsg") { continue; }
             bytes[key] = data[key];
         }
 
@@ -341,6 +341,15 @@ function AjaxRandomizerCallCompleted(data) {
 
         var outFileName = data['fileName']
         saveAs(blob, outFileName)
+    }
+
+    // info message to display ?
+    if("errorMsg" in data && data["errorMsg"].length > 0) {
+        document.getElementById("flash").innerHTML = data["errorMsg"];
+        $('#flash').show();
+        displayFlash = true;
+    } else {
+        displayFlash = false;
     }
 
     // set backup button text to Randomize
@@ -374,7 +383,9 @@ function AjaxRandomizerCallCompleted(data) {
     request.fail(ajaxFail);
 
     // remove "working" message
-    $('#flash').hide();
+    if(displayFlash == false){
+        $('#flash').hide();
+    }
     $('#overlay').hide();
     $('#loadingGIF').hide();
 }
@@ -871,23 +882,23 @@ def displayNumber(id, min, max, default, step="1"):
 	      <h4>Ammo and Energy</h4>
 	      <table class="full">
                 <colgroup><col class="small"/><col class="half" /><col class="half" /><col class="small"/></colgroup>
-                <tr>
+                <tr id="strictMinorsVisibility">
 		  <td class="small"><div class="random"><button id="strictMinorsRandom" type="button" onclick="randomize(event, 'strictMinors')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
 		  <td colspan="2" id="strictMinorsStep">{{displayCheckbox("strictMinors")}}<span id="strictMinorsText">Strict Minors distribution</span></td>
 		  <td><button type="button" onclick="startTheTour(11)">?</button></td>
                 </tr>
-                <tr>
+                <tr id="missileQtyVisibility">
 		  <td class="small"><div class="random"><button id="missileQtyRandom" type="button" onclick="randomize(event, 'missileQty')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
 		  <td><span id="missileQtyText">Proportion of Missiles:</span></td>
 		  <td>{{displayNumber("missileQty", "1", "9", "3", "0.1")}}</td>
 		  <td><button type="button" onclick="startTheTour(12)">?</button></td>
                 </tr>
-                <tr>
+                <tr id="superQtyVisibility">
 		  <td class="small"><div class="random"><button id="superQtyRandom" type="button" onclick="randomize(event, 'superQty')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
 		  <td><span id="superQtyText">Proportion of Super Missiles:</span></td>
 		  <td>{{displayNumber("superQty", "1", "9", "3", "0.1")}}</td>
                 </tr>
-                <tr>
+                <tr id="powerBombQtyVisibility">
 		  <td class="small"><div class="random"><button id="powerBombQtyRandom" type="button" onclick="randomize(event, 'powerBombQty')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
 		  <td><span id="powerBombQtyText">Proportion of Power Bombs:</span></td>
 		  <td>{{displayNumber("powerBombQty", "1", "9", "1", "0.1")}}</td>

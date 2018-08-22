@@ -7,6 +7,7 @@ extend 'layout.html'
 <link rel="stylesheet" type="text/css" href={{=URL('static/css','mystyle_20180802.css')}} media="screen"/>
 <script type = "text/javascript" src = "https://www.gstatic.com/charts/loader.js"></script>
 <script type = "text/javascript">google.charts.load('current', {packages: ['corechart']});</script>
+<script type="text/javascript" src="{{=URL('static', '/js/excellentexport.js')}}"></script>
 
 <title>Super Metroid VARIA Randomizer and Solver statistics</title>
 
@@ -44,8 +45,8 @@ function sortTable(id, n) {
     switching = false;
     rows = table.rows;
     /* Loop through all table rows (except the
-    first, which contains table headers): */
-    for (i = 1; i < (rows.length - 1); i++) {
+    first and last, which contains table headers): */
+    for (i = 1; i < (rows.length - 2); i++) {
       // Start by saying there should be no switching:
       shouldSwitch = false;
       /* Get the two elements you want to compare,
@@ -243,20 +244,13 @@ google.charts.setOnLoadCallback(drawCharts);
       response.write("No data\n", escape=False)
     else:
       response.write("<table  id=\"solverData\" class=\"full\">\n", escape=False)
-      response.write("  <colgroup>\n", escape=False)
-      for col in data[0]:
-        response.write("    <col class=\"{}\">\n".format(col), escape=False)
-        pass
 
-      response.write("  </colgroup>\n", escape=False)
       response.write("  <tr>\n", escape=False)
-
       i = 0
       for col in data[0]:
         response.write("    <th onclick=\"sortTable('solverData', {})\">{}</th>\n".format(i, col), escape=False)
         i += 1
         pass
-
       response.write("  </tr>\n", escape=False)
 
       for row in data[1]:
@@ -267,6 +261,14 @@ google.charts.setOnLoadCallback(drawCharts);
         response.write("  </tr>\n", escape=False)
         pass
 
+      response.write("  <tr>\n", escape=False)
+      i = 0
+      for col in data[0]:
+        response.write("    <th onclick=\"sortTable('solverData', {})\">{}</th>\n".format(i, col), escape=False)
+        i += 1
+        pass
+      response.write("  </tr>\n", escape=False)
+
       response.write("</table>\n", escape=False)
       pass
     pass
@@ -274,6 +276,8 @@ google.charts.setOnLoadCallback(drawCharts);
 
 <h4>Solver data</h4>
 {{displayData(solverData)}}
+
+<a download="solver.csv" href="#" onclick="return ExcellentExport.csv(this, 'solverData');">Export to CSV</a>
 
 <h4>Randomizer data</h4>
 {{
@@ -325,11 +329,32 @@ google.charts.setOnLoadCallback(drawCharts);
         response.write("  </tr>\n", escape=False)
         pass
 
+      response.write("  <tr>\n", escape=False)
+
+      i = 0
+      # standard columns execpt last one (error msg)
+      for col in data[0][0:-1]:
+        response.write("    <th onclick=\"sortTable('randomizerData', {})\">{}</th>\n".format(i, col), escape=False)
+        i += 1
+        pass
+      # dynamic parameters
+      paramList = data[2]
+      for col in paramList:
+        response.write("    <th onclick=\"sortTable('randomizerData', {})\">{}</th>\n".format(i, col), escape=False)
+        i += 1
+        pass
+      # put error message at the end
+      col = data[0][-1]
+      response.write("    <th onclick=\"sortTable('randomizerData', {})\">{}</th>\n".format(i, col), escape=False)
+
+      response.write("  </tr>\n", escape=False)
+
       response.write("</table>\n", escape=False)
       pass
     pass
 }}
 
+<a download="randomizer.csv" href="#" onclick="return ExcellentExport.csv(this, 'randomizerData');">Export to CSV</a>
 
 <h4>Errors</h4>
 {{

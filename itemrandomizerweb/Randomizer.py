@@ -900,13 +900,14 @@ class Randomizer(object):
 
     # check if bosses are blocking the last remaining locations
     def onlyBossesLeft(self, bossesKilled):
+        prevLocs = self.currentLocations(post=True)
         # fake kill all bosses and see if we can access the rest of the game
         Bosses.reset()
         for boss in ['Kraid', 'Phantoon', 'Ridley', 'Draygon']:
             Bosses.beatBoss(boss)
         # get bosses locations and newly accessible locations (for bosses that open up locs)
         locs = self.currentLocations(post=True) + [loc for loc in self.unusedLocations if 'Pickup' in loc]
-        ret = (len(locs) == len(self.unusedLocations))
+        ret = (len(locs) > len(prevLocs) and len(locs) == len(self.unusedLocations))
         # restore currently killed bosses
         Bosses.reset()
         for boss in bossesKilled:
@@ -1007,7 +1008,8 @@ class Randomizer(object):
                         isStuck = self.getItemFromStandardPool()
                     else:
                         # stuck by boss fights. disable max difficulty (warn the user afterwards)
-                        prevDiffTarget = self.difficultyTarget
+                        if prevDiffTarget is None:
+                            prevDiffTarget = self.difficultyTarget
                         self.difficultyTarget = infinity
                         isStuck = False
             runtime_s = time.clock() - startDate
@@ -1032,6 +1034,7 @@ class Randomizer(object):
                 return None
         if prevDiffTarget is not None:
             bossLocsDiffs = self.getAboveMaxDiffLocsStr(prevDiffTarget)
-            print("\nDIAG: Boss fights forced us to up the maximum difficulty. Affected locations : " + bossLocsDiffs)
+            self.errorMsg = "Boss fights forced us to up the maximum difficulty. Affected locations: {}".format(bossLocsDiffs)
+            print("\nDIAG: {}".format(self.errorMsg))
         print("")
         return self.itemLocations

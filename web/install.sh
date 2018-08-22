@@ -19,3 +19,4 @@ ln -s ~/RandomMetroidSolver/web/views/randomizer.html ~/web2py/applications/solv
 ln -s ~/RandomMetroidSolver/web/views/infos.html ~/web2py/applications/solver/views/solver_web/infos.html
 ln -s ~/RandomMetroidSolver/web/views/stats.html ~/web2py/applications/solver/views/solver_web/stats.html
 ln -s ~/RandomMetroidSolver/web/controllers/solver_web.py ~/web2py/applications/solver/controllers/solver_web.py
+ln -s ~/RandomMetroidSolver/web/static/excellentexport.js ~/web2py/applications/solver/static/js/excellentexport.js

@@ -34,10 +34,93 @@ if (hs.registerOverlay) {
 .main {
     margin-bottom: 1em;
 }
+.clickable {
+    cursor: pointer;
+}
+.centerTable {
+    margin-left: auto;
+    margin-right: auto;
+    width: 50%;
+}
+.ETankHL {
+    background-color: #FFA200;
+}
+.MissileHL {
+    background-color: #FF3E43;
+}
+.SuperHL {
+    background-color: #74D012;
+}
+.PowerBombHL {
+    background-color: #d2f53c;
+}
+.BombHL {
+    background-color: #F8D74F;
+}
+.ChargeHL {
+    background-color: #9898B0;
+}
+.IceHL {
+    background-color: #90A8E0;
+}
+.HiJumpHL {
+    background-color: #E2A67A;
+}
+.SpeedBoosterHL {
+    background-color: #88E810;
+}
+.WaveHL {
+    background-color: #E0A8E0;
+}
+.SpazerHL {
+    background-color: #008080;
+}
+.SpringBallHL {
+    background-color: #fffac8;
+}
+.VariaHL {
+    background-color: #FF8872;
+}
+.PlasmaHL {
+    background-color: #aaffc3;
+}
+.GrappleHL {
+    background-color: #B87FFF;
+}
+.MorphHL {
+    background-color: #7DFFEF;
+}
+.ReserveHL {
+    background-color: #F7FF7D;
+}
+.GravityHL {
+    background-color: #FF72F4;
+}
+.XRayScopeHL {
+    background-color: #89A7FF;
+}
+.SpaceJumpHL {
+    background-color: #808000;
+}
+.ScrewAttackHL {
+    background-color: #B87000;
+}
 </style>
 
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 <script type="text/javascript">
+function selectItem(itemName) {
+    items = document.getElementsByClassName(itemName);
+
+    for (i = 0; i < items.length; i++) {
+        if(items[i].className.indexOf(itemName+"HL") != -1){
+            items[i].className = items[i].className.replace(" "+itemName+"HL", "");
+        } else {
+            items[i].className += " "+itemName+"HL";
+        }
+    }
+}
+
 function doSubmit() {
   if(window.File && window.FileList && window.FileReader) {
     document.getElementById("uploadFile").disabled = true;
@@ -450,6 +533,57 @@ if result is not None:
   Display the generated path (spoilers)
 
   <div id="path_div" style="display:none;">
+  <br/>
+  <p class="half centerTable">Click on items to highlight them in the spoiler:</p>
+  <table class="half centerTable">
+    <tr>
+      <td onclick="selectItem('ETank')" class="clickable ETank">Energy Tank</td>
+      <td onclick="selectItem('Reserve')" class="clickable Reserve">Reserve Tank</td>
+    </tr>
+  </table>
+  <table class="half centerTable">
+    <tr>
+      <td onclick="selectItem('Missile')" class="clickable Missile">Missile</td>
+      <td onclick="selectItem('Super')" class="clickable Super">Super Missile</td>
+      <td onclick="selectItem('PowerBomb')" class="clickable PowerBomb">Power Bomb</td>
+    </tr>
+  </table>
+  <table class="half centerTable">
+    <tr>
+      <td onclick="selectItem('Grapple')" class="clickable Grapple">Grapple</td>
+      <td onclick="selectItem('XRayScope')" class="clickable XRayScope">X-ray</td>
+    </tr>
+  </table>
+  <table class="half centerTable">
+    <tr>
+      <td onclick="selectItem('Charge')" class="clickable Charge">Charge</td>
+      <td onclick="selectItem('Ice')" class="clickable Ice">Ice</td>
+      <td onclick="selectItem('Wave')" class="clickable Wave">Wave</td>
+      <td onclick="selectItem('Spazer')" class="clickable Spazer">Spazer</td>
+      <td onclick="selectItem('Plasma')" class="clickable Plasma">Plasma</td>
+    </tr>
+  </table>
+  <table class="half centerTable">
+    <tr>
+      <td onclick="selectItem('Varia')" class="clickable Varia">Varia Suit</td>
+      <td onclick="selectItem('Gravity')" class="clickable Gravity">Gravity Suit</td>
+    </tr>
+  </table>
+  <table class="half centerTable">
+    <tr>
+      <td onclick="selectItem('Morph')" class="clickable Morph">Morphing Ball</td>
+      <td onclick="selectItem('Bomb')" class="clickable Bomb">Bomb</td>
+      <td onclick="selectItem('SpringBall')" class="clickable SpringBall">Spring Ball</td>
+      <td onclick="selectItem('ScrewAttack')" class="clickable ScrewAttack">Screw Attack</td>
+    </tr>
+  </table>
+  <table class="half centerTable">
+    <tr>
+      <td onclick="selectItem('HiJump')" class="clickable HiJump">Hi-Jump Boots</td>
+      <td onclick="selectItem('SpaceJump')" class="clickable SpaceJump">Space Jump</td>
+      <td onclick="selectItem('SpeedBooster')" class="clickable SpeedBooster">Speed Booster</td>
+    </tr>
+  </table>
   <br/>
   {{=result["pathTable"]}}
 

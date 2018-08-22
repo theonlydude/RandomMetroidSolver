@@ -1034,6 +1034,7 @@ class Randomizer(object):
                 return None
         if prevDiffTarget is not None:
             bossLocsDiffs = self.getAboveMaxDiffLocsStr(prevDiffTarget)
-            print("\nDIAG: Boss fights forced us to up the maximum difficulty. Affected locations : " + bossLocsDiffs)
+            self.errorMsg = "Boss fights forced us to up the maximum difficulty. Affected locations: {}".format(bossLocsDiffs)
+            print("\nDIAG: {}".format(self.errorMsg))
         print("")
         return self.itemLocations

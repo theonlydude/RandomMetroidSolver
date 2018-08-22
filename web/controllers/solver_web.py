@@ -920,7 +920,12 @@ def randomizerWebService():
         with open(jsonFileName) as jsonFile:
             locsItems = json.load(jsonFile)
 
-        DB.addRandoResult(id, ret, duration, '')
+        # check if an info message has been returned
+        msg = ''
+        if len(locsItems['errorMsg']) > 0:
+            msg = locsItems['errorMsg']
+
+        DB.addRandoResult(id, ret, duration, msg)
         DB.close()
 
         os.remove(jsonFileName)

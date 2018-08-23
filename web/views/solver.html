@@ -46,68 +46,8 @@ if (hs.registerOverlay) {
 .tdGrey {
     border: 1px solid #ddd;
 }
-.ETankHL {
-    background-color: #FFA200;
-}
-.MissileHL {
-    background-color: #FF3E43;
-}
-.SuperHL {
-    background-color: #74D012;
-}
-.PowerBombHL {
-    background-color: #d2f53c;
-}
-.BombHL {
-    background-color: #F8D74F;
-}
-.ChargeHL {
-    background-color: #9898B0;
-}
-.IceHL {
-    background-color: #90A8E0;
-}
-.HiJumpHL {
-    background-color: #E2A67A;
-}
-.SpeedBoosterHL {
-    background-color: #88E810;
-}
-.WaveHL {
-    background-color: #E0A8E0;
-}
-.SpazerHL {
-    background-color: #008080;
-}
-.SpringBallHL {
-    background-color: #fffac8;
-}
-.VariaHL {
-    background-color: #FF8872;
-}
-.PlasmaHL {
-    background-color: #aaffc3;
-}
-.GrappleHL {
-    background-color: #B87FFF;
-}
-.MorphHL {
-    background-color: #7DFFEF;
-}
-.ReserveHL {
-    background-color: #F7FF7D;
-}
-.GravityHL {
-    background-color: #FF72F4;
-}
-.XRayScopeHL {
-    background-color: #89A7FF;
-}
-.SpaceJumpHL {
-    background-color: #808000;
-}
-.ScrewAttackHL {
-    background-color: #B87000;
+.HL {
+    background-color: #F8B000
 }
 .hidden {
     display: none;
@@ -214,10 +154,10 @@ function selectItem(itemName) {
     items = document.getElementsByClassName(itemName);
 
     for (i = 0; i < items.length; i++) {
-        if(items[i].className.indexOf(itemName+"HL") != -1){
-            items[i].className = items[i].className.replace(" "+itemName+"HL", "");
+        if(items[i].className.indexOf("HL") != -1){
+            items[i].className = items[i].className.replace(" HL", "");
         } else {
-            items[i].className += " "+itemName+"HL";
+            items[i].className += " HL";
         }
     }
 }

@@ -33,6 +33,7 @@ if (hs.registerOverlay) {
 <style>
 .main {
     margin-bottom: 1em;
+    margin-top: 1em;
 }
 .clickable {
     cursor: pointer;
@@ -108,10 +109,107 @@ if (hs.registerOverlay) {
 .ScrewAttackHL {
     background-color: #B87000;
 }
+.hidden {
+    display: none;
+}
+/* Style the tab */
+.tab {
+    overflow: hidden;
+    border: 1px solid #ccc;
+    background-color: #f1f1f1;
+}
+
+/* Style the buttons that are used to open the tab content */
+.tab button {
+    background-color: inherit;
+    color: #000;
+    float: left;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    padding: 14px 16px;
+    transition: 0.3s;
+}
+
+/* Change background color of buttons on hover */
+.tab button:hover {
+    background-color: #ddd;
+    color: #000;
+}
+
+/* Create an active/current tablink class */
+.tab button.active {
+    background-color: #ccc;
+    color: #000;
+}
+
+/* Style the tab content */
+.tabcontent {
+    padding: 6px 12px;
+    border: 1px solid #ccc;
+    border-top: none;
+}
+.tabcontent {
+    animation: fadeEffect 1s; /* Fading effect takes 1 second */
+}
+
+/* Go from zero to full opacity */
+@keyframes fadeEffect {
+    from {opacity: 0;}
+    to {opacity: 1;}
+}
 </style>
 
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 <script type="text/javascript">
+function setComplexity() {
+{{
+  if "complexity" in session.solver:
+    response.write("  document.getElementById(\"{}\").click();".format(session.solver["complexity"]), escape=False)
+    response.write("  document.getElementById(\"complexity\").value = '{}';".format(session.solver["complexity"]), escape=False)
+  else:
+    response.write("  document.getElementById(\"simple\").click();", escape=False)
+    response.write("  document.getElementById(\"complexity\").value = 'simple';", escape=False)
+    pass
+}}
+}
+
+function changeComplexity(evt, name) {
+  if(name == "simple") {
+    var show = [];
+    var hide = ["forbiddenItemsVisibility"];
+    showHide(show, hide);
+  } else {
+    var show = ["forbiddenItemsVisibility"];
+    var hide = [];
+    showHide(show, hide);
+  }
+
+  // store current complexity
+  document.getElementById("complexity").value = name;
+
+  // set current button to active
+  tablinks = document.getElementsByClassName("tablinks");
+  for (i = 0; i < tablinks.length; i++) {
+      tablinks[i].className = tablinks[i].className.replace(" active", "");
+  }
+
+  evt.currentTarget.className += " active";
+}
+
+function showHide(show, hide) {
+  for(var i=0; i<show.length; i++) {
+    var showId = show[i];
+    var elem = document.getElementById(showId);
+    elem.classList.remove("hidden");
+  }
+  for(var i=0; i<hide.length; i++) {
+    var hideId = hide[i];
+    var elem = document.getElementById(hideId);
+    elem.classList.add("hidden");
+  }
+}
+
 function selectItem(itemName) {
     items = document.getElementsByClassName(itemName);
 
@@ -235,6 +333,8 @@ pass
 }}
 
 window.onload = function(){
+    setComplexity();
+
     //Check File API support
     if(window.File && window.FileList && window.FileReader)
     {
@@ -408,53 +508,63 @@ If Charge Beam is not picked up along the way or not accessible, enough minors t
   </div>
 </div>
 
-<p>
-  Using the techniques known in the chosen preset check if a ROM can be finish and its estimated difficulty.<br/>
-  Choose your randomized ROM to solve, the preset to use then press 'Solve'.
-</p>
-<form id="solverForm" class="presetform" method="post" enctype="multipart/form-data" onsubmit="doSubmit();">
-  <div class="row">
-    <div class="column">
-      <table class="full">
-	<colgroup><col class="half" /><col class="half" /></colgroup>
-	<tr>
-	  <td>Randomized Super Metroid ROM: </td>
-	  <td><input id="uploadFile" name="uploadFile" type="file"/></td>
-	  <td><button type="button" onclick="startTheTour(0)">?</button></td>
-	</tr>
-	<tr>
-	  <td>Already uploaded ROMs in this session: </td>
-	  <td>{{=SELECT(*roms, **dict(_name="romFile", _id="romFile", value=lastRomFile, _class="filldropdown"))}}</td>
-	  <td><button type="button" onclick="startTheTour(1)">?</button></td>
-	</tr>
-      </table>
-    </div>
-    <div class="column">
-      <table class="full">
-	<colgroup><col class="half" /><col class="half" /></colgroup>
-	<tr>
-	  <td>Preset: </td>
-	  <td>{{=SELECT(*presets, **dict(_id="preset", _name="preset", value=session.solver["preset"], _class="filldropdown"))}}</td>
-	  <td><button type="button" onclick="startTheTour(2)">?</button></td>
-	</tr>
-	<tr>
-	  <td>Difficulty target:</td>
-	  <td>{{=SELECT("easy", "medium", "hard", "very hard", "hardcore", "mania", _id="difficultyTarget", _name="difficultyTarget", _class="full", value=difficulties[session.solver["difficultyTarget"]])}}</td>
-	  <td><button type="button" onclick="startTheTour(3)">?</button></td>
-	</tr>
-	<tr>
-	  <td>Pickup strategy:</td>
-	  <td>{{=SELECT("all", "minimal", "any", _id="pickupStrategy", _name="pickupStrategy", _form="solverForm", _class="full", value=session.solver["pickupStrategy"])}}</td>
-	  <td><button type="button" onclick="startTheTour(4)">?</button></td>
-	</tr>
-      </table>
+<div class="main">
+  <div id="complexityTabs" class="center">
+    <div class="tab">
+      <button class="tablinks" id="simple" onclick="changeComplexity(event, 'simple');">Simple</button>
+      <button class="tablinks" id="advanced" onclick="changeComplexity(event, 'advanced');">Advanced</button>
     </div>
   </div>
-  <input id="romJson" name="romJson" style="display:none" type="text"/>
 
-  <h3>Items not picked up <button  id="forbiddenItemsStep" type="button" onclick="startTheTour(5)">?</button></h3>
-  <table class="full">
-    <tr>
+  <div id="tabRando" class="tabcontent">
+    <p>
+      Using the techniques known in the chosen preset check if a ROM can be finish and its estimated difficulty.<br/>
+      Choose your randomized ROM to solve, the preset to use then press 'Solve'.
+    </p>
+    <form id="solverForm" class="presetform" method="post" enctype="multipart/form-data" onsubmit="doSubmit();">
+      <div class="row">
+	<div class="column">
+	  <table class="full">
+	    <colgroup><col class="half" /><col class="half" /></colgroup>
+	    <tr>
+	      <td>Randomized Super Metroid ROM: </td>
+	      <td><input id="uploadFile" name="uploadFile" type="file"/></td>
+	      <td><button type="button" onclick="startTheTour(0)">?</button></td>
+	    </tr>
+	    <tr>
+	      <td>Already uploaded ROMs in this session: </td>
+	      <td>{{=SELECT(*roms, **dict(_name="romFile", _id="romFile", value=lastRomFile, _class="filldropdown"))}}</td>
+	      <td><button type="button" onclick="startTheTour(1)">?</button></td>
+	    </tr>
+	  </table>
+	</div>
+	<div class="column">
+	  <table class="full">
+	    <colgroup><col class="half" /><col class="half" /></colgroup>
+	    <tr>
+	      <td>Preset: </td>
+	      <td>{{=SELECT(*presets, **dict(_id="preset", _name="preset", value=session.solver["preset"], _class="filldropdown"))}}</td>
+	      <td><button type="button" onclick="startTheTour(2)">?</button></td>
+	    </tr>
+	  <tr>
+	    <td>Difficulty target:</td>
+	    <td>{{=SELECT("easy", "medium", "hard", "very hard", "hardcore", "mania", _id="difficultyTarget", _name="difficultyTarget", _class="full", value=difficulties[session.solver["difficultyTarget"]])}}</td>
+	    <td><button type="button" onclick="startTheTour(3)">?</button></td>
+	  </tr>
+	    <tr>
+	      <td>Pickup strategy:</td>
+	      <td>{{=SELECT("all", "minimal", "any", _id="pickupStrategy", _name="pickupStrategy", _form="solverForm", _class="full", value=session.solver["pickupStrategy"])}}</td>
+	      <td><button type="button" onclick="startTheTour(4)">?</button></td>
+	    </tr>
+	  </table>
+	</div>
+      </div>
+      <input id="romJson" name="romJson" style="display:none" type="text"/>
+
+      <div id="forbiddenItemsVisibility">
+	<h3>Items not picked up <button  id="forbiddenItemsStep" type="button" onclick="startTheTour(5)">?</button></h3>
+	<table class="full">
+	  <tr>
 {{
   i = 0
   for item in ['Bomb', 'Charge', 'ETank', 'Grapple', 'Gravity', 'HiJump', 'Ice', 'Missile', 'Morph', 'Plasma', 'PowerBomb', 'Reserve', 'ScrewAttack', 'SpaceJump', 'Spazer', 'SpeedBooster', 'SpringBall', 'Super', 'Varia', 'Wave', 'XRayScope']:
@@ -474,13 +584,13 @@ If Charge Beam is not picked up along the way or not accessible, enough minors t
       pass
     pass
 }}
-    </tr>
-  </table>
+	  </tr>
+	</table>
+      </div>
+      <input id="complexity" name="complexity" style="display:none" type="text"/>
+      {{=INPUT(_type="submit", _value="Solve", _name="action", _class="btn btn-default buttonRandom")}}
+    </form>
 
-  {{=INPUT(_type="submit", _value="Solve", _name="action", _class="btn btn-default buttonRandom")}}
-</form>
-
-<div class="main">
 
 {{
 if result is not None:
@@ -495,7 +605,7 @@ if result is not None:
 {{
 if result is not None and result["difficulty"] != -1:
 }}
-<div id="timeline" style="height: 95px; width: 50%;"></div>
+    <div id="timeline" style="height: 95px; width: 50%;"></div>
 
 {{
   if result is not None and len(result["patches"]) != 0:
@@ -513,15 +623,15 @@ if result is not None and result["difficulty"] != -1:
 {{
     pass
 }}
-<p>
-  To solve this ROM {{=result["knowsUsed"][0]}} distinct techniques have been used out of the {{=result["knowsUsed"][1]}} known techniques.
-</p>
+    <p>
+      To solve this ROM {{=result["knowsUsed"][0]}} distinct techniques have been used out of the {{=result["knowsUsed"][1]}} known techniques.
+    </p>
 {{
   if result["itemsOk"] is False:
 }}
-<p>
-  Warning: the ROM is finishable, but we couldn't pickup all the requested items.
-</p>
+    <p>
+      Warning: the ROM is finishable, but we couldn't pickup all the requested items.
+    </p>
 
 {{
     pass
@@ -532,70 +642,70 @@ if result is not None and result["difficulty"] != -1:
 {{
 if result is not None:
 }}
-  <input id="displayPath" name="displayPath" type="checkbox" onClick="showPath()">
-  Display the generated path (spoilers)
+    <input id="displayPath" name="displayPath" type="checkbox" onClick="showPath()">
+    Display the generated path (spoilers)
 
-  <div id="path_div" style="display:none;">
-  <br/>
-  <p class="half centerTable">Click on items to highlight them in the spoiler:</p>
-  <table class="half centerTable">
-    <tr>
-      <td onclick="selectItem('ETank')" class="tdGrey clickable ETank">Energy Tank</td>
-      <td onclick="selectItem('Reserve')" class="tdGrey clickable Reserve">Reserve Tank</td>
-    </tr>
-  </table>
-  <table class="half centerTable">
-    <tr>
-      <td onclick="selectItem('Missile')" class="tdGrey clickable Missile">Missile</td>
-      <td onclick="selectItem('Super')" class="tdGrey clickable Super">Super Missile</td>
-      <td onclick="selectItem('PowerBomb')" class="tdGrey clickable PowerBomb">Power Bomb</td>
-    </tr>
-  </table>
-  <table class="half centerTable">
-    <tr>
-      <td onclick="selectItem('Grapple')" class="tdGrey clickable Grapple">Grapple</td>
-      <td onclick="selectItem('XRayScope')" class="tdGrey clickable XRayScope">X-ray</td>
-    </tr>
-  </table>
-  <table class="half centerTable">
-    <tr>
-      <td onclick="selectItem('Charge')" class="tdGrey clickable Charge">Charge</td>
-      <td onclick="selectItem('Ice')" class="tdGrey clickable Ice">Ice</td>
-      <td onclick="selectItem('Wave')" class="tdGrey clickable Wave">Wave</td>
-      <td onclick="selectItem('Spazer')" class="tdGrey clickable Spazer">Spazer</td>
-      <td onclick="selectItem('Plasma')" class="tdGrey clickable Plasma">Plasma</td>
-    </tr>
-  </table>
-  <table class="half centerTable">
-    <tr>
-      <td onclick="selectItem('Varia')" class="tdGrey clickable Varia">Varia Suit</td>
-      <td onclick="selectItem('Gravity')" class="tdGrey clickable Gravity">Gravity Suit</td>
-    </tr>
-  </table>
-  <table class="half centerTable">
-    <tr>
-      <td onclick="selectItem('Morph')" class="tdGrey clickable Morph">Morphing Ball</td>
-      <td onclick="selectItem('Bomb')" class="tdGrey clickable Bomb">Bomb</td>
-      <td onclick="selectItem('SpringBall')" class="tdGrey clickable SpringBall">Spring Ball</td>
-      <td onclick="selectItem('ScrewAttack')" class="tdGrey clickable ScrewAttack">Screw Attack</td>
-    </tr>
-  </table>
-  <table class="half centerTable">
-    <tr>
-      <td onclick="selectItem('HiJump')" class="tdGrey clickable HiJump">Hi-Jump Boots</td>
-      <td onclick="selectItem('SpaceJump')" class="tdGrey clickable SpaceJump">Space Jump</td>
-      <td onclick="selectItem('SpeedBooster')" class="tdGrey clickable SpeedBooster">Speed Booster</td>
-    </tr>
-  </table>
-  <br/>
+    <div id="path_div" style="display:none;">
+      <br/>
+      <p class="half centerTable">Click on items to highlight them in the spoiler:</p>
+      <table class="half centerTable">
+	<tr>
+	  <td onclick="selectItem('ETank')" class="tdGrey clickable ETank">Energy Tank</td>
+	  <td onclick="selectItem('Reserve')" class="tdGrey clickable Reserve">Reserve Tank</td>
+	</tr>
+      </table>
+      <table class="half centerTable">
+	<tr>
+	  <td onclick="selectItem('Missile')" class="tdGrey clickable Missile">Missile</td>
+	  <td onclick="selectItem('Super')" class="tdGrey clickable Super">Super Missile</td>
+	  <td onclick="selectItem('PowerBomb')" class="tdGrey clickable PowerBomb">Power Bomb</td>
+	</tr>
+      </table>
+      <table class="half centerTable">
+	<tr>
+	  <td onclick="selectItem('Grapple')" class="tdGrey clickable Grapple">Grapple</td>
+	  <td onclick="selectItem('XRayScope')" class="tdGrey clickable XRayScope">X-ray</td>
+	</tr>
+      </table>
+      <table class="half centerTable">
+	<tr>
+	  <td onclick="selectItem('Charge')" class="tdGrey clickable Charge">Charge</td>
+	  <td onclick="selectItem('Ice')" class="tdGrey clickable Ice">Ice</td>
+	  <td onclick="selectItem('Wave')" class="tdGrey clickable Wave">Wave</td>
+	  <td onclick="selectItem('Spazer')" class="tdGrey clickable Spazer">Spazer</td>
+	  <td onclick="selectItem('Plasma')" class="tdGrey clickable Plasma">Plasma</td>
+	</tr>
+      </table>
+      <table class="half centerTable">
+	<tr>
+	  <td onclick="selectItem('Varia')" class="tdGrey clickable Varia">Varia Suit</td>
+	  <td onclick="selectItem('Gravity')" class="tdGrey clickable Gravity">Gravity Suit</td>
+	</tr>
+      </table>
+      <table class="half centerTable">
+	<tr>
+	  <td onclick="selectItem('Morph')" class="tdGrey clickable Morph">Morphing Ball</td>
+	  <td onclick="selectItem('Bomb')" class="tdGrey clickable Bomb">Bomb</td>
+	  <td onclick="selectItem('SpringBall')" class="tdGrey clickable SpringBall">Spring Ball</td>
+	  <td onclick="selectItem('ScrewAttack')" class="tdGrey clickable ScrewAttack">Screw Attack</td>
+	</tr>
+      </table>
+      <table class="half centerTable">
+	<tr>
+	  <td onclick="selectItem('HiJump')" class="tdGrey clickable HiJump">Hi-Jump Boots</td>
+	  <td onclick="selectItem('SpaceJump')" class="tdGrey clickable SpaceJump">Space Jump</td>
+	  <td onclick="selectItem('SpeedBooster')" class="tdGrey clickable SpeedBooster">Speed Booster</td>
+	</tr>
+      </table>
+      <br/>
   {{=result["pathTable"]}}
 
 {{
   if result["difficulty"] == -1:
 }}
-    <br/>
-    <h4>Next locs which could have been available if more techniques were known</h4>
-    {{=result["pathremainTry"]}}
+      <br/>
+      <h4>Next locs which could have been available if more techniques were known</h4>
+      {{=result["pathremainTry"]}}
 
 {{
     if result["pathremainMajors"] is not None and len(result["pathremainMajors"]) > 0:
@@ -644,14 +754,14 @@ if result is not None:
 {{
   if result["pngFileName"] is not None and result["pngThumbFileName"] is not None:
 }}
-    <h4>The graph of the Areas transitions</h4>
-    <a href="/solver/static/graph/{{=result["pngFileName"]}}" class="highslide" onclick="return hs.expand(this, {wrapperClassName: 'borderless', dimmingOpacity: 0.75, align: 'center'})"><img id="transitionsthumb" src="/solver/static/graph/{{=result["pngThumbFileName"]}}" alt="Transitions Graph" title="Click to enlarge"/></a>
+      <h4>The graph of the Areas transitions</h4>
+      <a href="/solver/static/graph/{{=result["pngFileName"]}}" class="highslide" onclick="return hs.expand(this, {wrapperClassName: 'borderless', dimmingOpacity: 0.75, align: 'center'})"><img id="transitionsthumb" src="/solver/static/graph/{{=result["pngThumbFileName"]}}" alt="Transitions Graph" title="Click to enlarge"/></a>
 {{
     pass
 }}
-  </div>
+    </div>
 {{
   pass
 }}
-
+  </div>
 </div>

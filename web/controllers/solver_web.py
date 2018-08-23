@@ -244,6 +244,7 @@ def initSolverSession():
         session.solver['romFiles'] = []
         session.solver['romFile'] = None
         session.solver['result'] = None
+        session.solver['complexity'] = 'simple'
 
 def updateSolverSession():
     if session.solver is None:
@@ -252,6 +253,7 @@ def updateSolverSession():
     session.solver['preset'] = request.vars.preset
     session.solver['difficultyTarget'] = text2diff[request.vars.difficultyTarget]
     session.solver['pickupStrategy'] = request.vars.pickupStrategy
+    session.solver['complexity'] = request.vars.complexity
 
     itemsForbidden = []
     for item in ['ETank', 'Missile', 'Super', 'PowerBomb', 'Bomb', 'Charge', 'Ice', 'HiJump', 'SpeedBooster', 'Wave', 'Spazer', 'SpringBall', 'Varia', 'Plasma', 'Grapple', 'Morph', 'Reserve', 'Gravity', 'XRayScope', 'SpaceJump', 'ScrewAttack']:
@@ -341,7 +343,7 @@ def prepareResult():
     return result
 
 def validateSolverParams():
-    for param in ['preset', 'difficultyTarget', 'pickupStrategy']:
+    for param in ['preset', 'difficultyTarget', 'pickupStrategy', 'complexity']:
         if request.vars[param] is None:
             return (False, "Missing parameter {}".format(param))
 
@@ -355,6 +357,9 @@ def validateSolverParams():
     if request.vars.pickupStrategy not in pickupStrategyChoices:
         return (False, "Wrong value for pickupStrategy: {}, authorized values: {}".format(request.vars.pickupStrategy, pickupStrategyChoice))
 
+    complexityChoices = ["simple", "advanced"]
+    if request.vars.complexity not in complexityChoices:
+        return (False, "Wrong value for complexity: {}, authorized values: {}".format(request.vars.complexity, complexityChoices))
 
     itemsForbidden = []
     for item in ['ETank', 'Missile', 'Super', 'PowerBomb', 'Bomb', 'Charge', 'Ice', 'HiJump', 'SpeedBooster', 'Wave', 'Spazer', 'SpringBall', 'Varia', 'Plasma', 'Grapple', 'Morph', 'Reserve', 'Gravity', 'XRayScope', 'SpaceJump', 'ScrewAttack']:

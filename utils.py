@@ -2,6 +2,7 @@
 
 import os, json, random
 from parameters import Knows, Settings, Controller, isKnows, isSettings, isButton
+from parameters import easy, medium, hard, harder, hardcore, mania
 from smbool import SMBool
 
 # gauss random in [0, r] range
@@ -60,6 +61,7 @@ class PresetLoader(object):
             self.params['Settings'] = {}
         if 'Controller' not in self.params:
             self.params['Controller'] = {}
+        self.params['score'] = self.computeScore()
 
     def load(self):
         # update the parameters in the parameters classes: Knows, Settings
@@ -110,6 +112,98 @@ class PresetLoader(object):
         for button in Controller.__dict__:
             if isButton(button):
                 print("{}: {}".format(button, Controller.__dict__[button]))
+        print("loaded score: {}".format(self.params['score']))
+
+    def computeScore(self):
+        # the more techniques you know and the smaller the difficulty of the techniques, the higher the score
+        diff2score = {
+            easy: 6,
+            medium: 5,
+            hard: 4,
+            harder: 3,
+            hardcore: 2,
+            mania: 1,
+        }
+
+        boss2score = {
+            "He's annoying": 1,
+            'A lot of trouble': 1,
+            "I'm scared!": 1,
+            "It can get ugly": 1,
+            'Default': 2,
+            'Quick Kill': 3,
+            'Used to it': 3,
+            'Is this really the last boss?': 3,
+            'No problemo': 4,
+            'Piece of cake': 4,
+            'Nice cutscene bro': 4
+        }
+
+        hellrun2score = {
+            'No thanks': 0,
+            'Gimme energy': 2,
+            'Default': 4,
+            'Bring the heat': 6,
+            'I run RBO': 8
+        }
+
+        hellrunLN2score = {
+            'Default': 0,
+            'Bring the heat': 6,
+            'I run RBO': 12
+        }
+
+        xray2score = {
+            'Aarghh': 0,
+            "I don't like spikes": 1,
+            'Default': 2,
+            "I don't mind spikes": 3,
+            'D-Boost master': 4
+        }
+
+        gauntlet2score = {
+            'Aarghh': 0,
+            "I don't like acid": 1,
+            'Default': 2
+        }
+
+        score = 0
+
+        # knows
+        for know in Knows.__dict__:
+            if isKnows(know):
+                if know in self.params['Knows']:
+                    if self.params['Knows'][know][0] == True:
+                        score += diff2score[self.params['Knows'][know][1]]
+                else:
+                    # if old preset with not all the knows, use default values for the know
+                    if Knows.__dict__[know][0] == True:
+                        score += diff2score[Knows.__dict__[know][1]]
+
+        # hard rooms
+        hardRoom = 'X-Ray'
+        if hardRoom in self.params['Settings']:
+            score += xray2score[self.params['Settings'][hardRoom]]
+
+        hardRoom = 'Gauntlet'
+        if hardRoom in self.params['Settings']:
+            score += gauntlet2score[self.params['Settings'][hardRoom]]
+
+        # bosses
+        for boss in ['Kraid', 'Phantoon', 'Draygon', 'Ridley', 'MotherBrain']:
+            if boss in self.params['Settings']:
+                score += boss2score[self.params['Settings'][boss]]
+
+        # hellruns
+        for hellRun in ['Ice', 'MainUpperNorfair']:
+            if hellRun in self.params['Settings']:
+                score += hellrun2score[self.params['Settings'][hellRun]]
+
+        hellRun = 'LowerNorfair'
+        if hellRun in self.params['Settings']:
+            score += hellrunLN2score[self.params['Settings'][hellRun]]
+
+        return score
 
 class PresetLoaderJson(PresetLoader):
     # when called from the test suite

@@ -141,6 +141,7 @@ class PresetLoader(object):
 
         hellrun2score = {
             'No thanks': 0,
+            'Solution': 0,
             'Gimme energy': 2,
             'Default': 4,
             'Bring the heat': 6,
@@ -149,12 +150,14 @@ class PresetLoader(object):
 
         hellrunLN2score = {
             'Default': 0,
+            'Solution': 0,
             'Bring the heat': 6,
             'I run RBO': 12
         }
 
         xray2score = {
             'Aarghh': 0,
+            'Solution': 0,
             "I don't like spikes": 1,
             'Default': 2,
             "I don't mind spikes": 3,

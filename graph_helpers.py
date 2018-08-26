@@ -197,8 +197,8 @@ class HelpersGraph(Helpers):
         sm = self.smbm
         return sm.wor(sm.wand(sm.haveItem('Gravity'),
                               sm.wor(sm.haveItem('Grapple'),
-                                     sm.haveItem('SpeedBooster')),
-                              sm.wor(sm.canFly(),
+                                     sm.haveItem('SpeedBooster'),
+                                     sm.canFly(),
                                      sm.wand(sm.haveItem('HiJump'), sm.knowsGravityJump()))),
                       sm.wand(sm.canDoSuitlessOuterMaridia(),
                               sm.haveItem('Grapple')))

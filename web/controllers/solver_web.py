@@ -22,7 +22,16 @@ import db
 
 def maxPresetsReach():
     # to prevent a spammer to create presets in a loop and fill the fs
-    return len(os.listdir('diff_presets')) >= 2048
+    return len(os.listdir('community_presets')) >= 2048
+
+def isStdPreset(preset):
+    return preset in ['noob', 'casual', 'regular', 'veteran', 'speedrunner', 'master', 'samus', 'solution']
+
+def getPresetDir(preset):
+    if isStdPreset(preset):
+        return 'standard_presets'
+    else:
+        return 'community_presets'
 
 def loadPreset():
     # load conf from session if available
@@ -49,20 +58,15 @@ def loadPreset():
             loaded = True
 
     if not loaded:
-        params = PresetLoader.factory('diff_presets/{}.json'.format(session.presets['preset'])).params
+        params = PresetLoader.factory('{}/{}.json'.format(getPresetDir(session.presets['preset']), session.presets['preset'])).params
 
     return params
 
 def loadPresetsList():
-    files = sorted(os.listdir('diff_presets'), key=lambda v: v.upper())
-    stdPresets = ['noob', 'casual', 'regular', 'veteran', 'speedrunner', 'master']
-    presets = [os.path.splitext(file)[0] for file in files]
-    for preset in stdPresets:
-        presets.remove(preset)
-    # remove solution preset from the list
-    if 'solution' in presets:
-        presets.remove('solution')
-    return stdPresets + presets
+    files = sorted(os.listdir('community_presets'), key=lambda v: v.upper())
+    stdPresets = ['noob', 'casual', 'regular', 'veteran', 'speedrunner', 'master', 'samus']
+    comPresets = [os.path.splitext(file)[0] for file in files]
+    return stdPresets + comPresets
 
 def validatePresetsParams(action):
     if action == 'Create':
@@ -141,7 +145,7 @@ def presets():
     if request.vars.action == 'Load':
         # check that the presets file exists
         presetName = request.vars['presetLoad']
-        fullPath = 'diff_presets/{}.json'.format(presetName)
+        fullPath = '{}/{}.json'.format(getPresetDir(presetName), presetName)
         if os.path.isfile(fullPath):
             # load it
             try:
@@ -157,21 +161,21 @@ def presets():
     elif request.vars.action in ['Update', 'Create']:
         # update or creation ?
         if request.vars.action == 'Create':
-            saveFile = request.vars['presetCreate']
+            preset = request.vars['presetCreate']
         else:
-            saveFile = request.vars['presetUpdate']
+            preset = request.vars['presetUpdate']
 
         # check if the presets file already exists
         password = request.vars['password']
         password = password.encode('utf-8')
         passwordSHA256 = hashlib.sha256(password).hexdigest()
-        fullPath = 'diff_presets/{}.json'.format(saveFile)
+        fullPath = '{}/{}.json'.format(getPresetDir(presets), preset)
         if os.path.isfile(fullPath):
             # load it
             try:
                 oldParams = PresetLoader.factory(fullPath).params
             except Exception as e:
-                session.flash = "Error loading the preset {}: {}".format(saveFile, e)
+                session.flash = "Error loading the preset {}: {}".format(preset, e)
                 redirect(URL(r=request, f='presets'))
 
             # check if password match
@@ -180,11 +184,11 @@ def presets():
                 paramsDict = genJsonFromParams(request.vars)
                 paramsDict['password'] = passwordSHA256
                 PresetLoader.factory(paramsDict).dump(fullPath)
-                session.presets["preset"] = saveFile
-                session.flash = "Preset {} updated".format(saveFile)
+                session.presets["preset"] = preset
+                session.flash = "Preset {} updated".format(preset)
                 redirect(URL(r=request, f='presets'))
             else:
-                session.flash = "Password mismatch with existing presets file {}".format(saveFile)
+                session.flash = "Password mismatch with existing presets file {}".format(preset)
                 redirect(URL(r=request, f='presets'))
 
         else:
@@ -194,8 +198,8 @@ def presets():
                 paramsDict = genJsonFromParams(request.vars)
                 paramsDict['password'] = passwordSHA256
                 PresetLoader.factory(paramsDict).dump(fullPath)
-                session.presets["preset"] = saveFile
-                session.flash = "Preset {} created".format(saveFile)
+                session.presets["preset"] = preset
+                session.flash = "Preset {} created".format(preset)
                 redirect(URL(r=request, f='presets'))
             else:
                 session.flash = "Sorry, there's already 2048 presets on the website, can't add more"
@@ -554,7 +558,7 @@ def genJsonFromParams(vars):
 def computeDifficulty(jsonRomFileName):
     randomizedRom = os.path.basename(jsonRomFileName.replace('json', 'sfc'))
 
-    presetFileName = "diff_presets/{}.json".format(session.solver['preset'])
+    presetFileName = "{}/{}.json".format(getPresetDir(session.solver['preset']), session.solver['preset'])
     jsonFileName = tempfile.mkstemp()[1]
 
     DB = db.DB()
@@ -966,7 +970,7 @@ def presetWebService():
 
     print("presetWebService: paramsFile={}".format(paramsFile))
 
-    fullPath = 'diff_presets/{}.json'.format(paramsFile)
+    fullPath = '{}/{}.json'.format(getPresetDir(paramsFile), paramsFile)
 
     # check that the presets file exists
     if os.path.isfile(fullPath):

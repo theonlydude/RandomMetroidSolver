@@ -438,7 +438,7 @@ class Solver:
         # find which technique could allow to continue the seed
         locations = self.majorLocations if self.fullRando == True else self.majorLocations + self.minorLocations
 
-        presetFileName = os.path.expanduser('~/RandomMetroidSolver/diff_presets/solution.json')
+        presetFileName = os.path.expanduser('~/RandomMetroidSolver/standard_presets/solution.json')
         presetLoader = PresetLoader.factory(presetFileName)
         presetLoader.load()
         self.smbm.createKnowsFunctions()
@@ -635,7 +635,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Random Metroid Solver")
     parser.add_argument('romFileName', help="the input rom")
     parser.add_argument('--preset', '-p', help="the preset file", nargs='?',
-                        default='diff_presets/regular.json', dest='presetFileName')
+                        default='standard_presets/regular.json', dest='presetFileName')
 
     parser.add_argument('--difficultyTarget', '-t',
                         help="the difficulty target that the solver will aim for",

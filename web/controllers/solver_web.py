@@ -169,7 +169,7 @@ def presets():
         password = request.vars['password']
         password = password.encode('utf-8')
         passwordSHA256 = hashlib.sha256(password).hexdigest()
-        fullPath = '{}/{}.json'.format(getPresetDir(presets), preset)
+        fullPath = '{}/{}.json'.format(getPresetDir(preset), preset)
         if os.path.isfile(fullPath):
             # load it
             try:

@@ -22,3 +22,4 @@ ln -s ~/RandomMetroidSolver/web/controllers/solver_web.py ~/web2py/applications/
 ln -s ~/RandomMetroidSolver/web/static/excellentexport.js ~/web2py/applications/solver/static/js/excellentexport.js
 ln -s ~/RandomMetroidSolver/standard_presets ~/web2py/standard_presets
 ln -s ~/RandomMetroidSolver/community_presets ~/web2py/community_presets
+ln -s ~/RandomMetroidSolver/web/static/super_metroid_logo.png ~/web2py/applications/solver/static/images/super_metroid_logo.png

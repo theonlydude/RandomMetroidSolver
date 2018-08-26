@@ -10,6 +10,32 @@
 body {
     padding-top: 1em;
 }
+blockquote.style1 {
+  font: 14px/20px italic Times, serif;
+  padding: 8px;
+  background-color: #faebbc;
+  border-top: 1px solid #e1cc89;
+  border-bottom: 1px solid #e1cc89;
+  margin: 5px;
+  background-image: url(images/openquote1.gif);
+  background-position: top left;
+  background-repeat: no-repeat;
+  text-indent: 23px;
+}
+blockquote.style1 span {
+     display: block;
+     background-image: url(images/closequote1.gif);
+     background-repeat: no-repeat;
+     background-position: bottom right;
+}
+td {
+    padding-left: 5px;
+    padding-right: 5px;
+    padding-top: 0px;
+    padding-bottom: 0px;
+
+    border: 1px solid #ddd;
+}
 </style>
 
 <body>
@@ -17,41 +43,55 @@ body {
     <div class="menu">
       {{=A("Super Metroid VARIA Randomizer and Solver", _href=URL(f="home"), _class="menu_selected")}}
       {{=A("Presets", _href=URL(f="presets"), _class="menu")}}
-      {{=A("Solver", _href=URL(f="solver"), _class="menu")}}
       {{=A("Randomizer", _href=URL(f="randomizer"), _class="menu")}}
+      {{=A("Solver", _href=URL(f="solver"), _class="menu")}}
       {{=A("Information & Contact", _href=URL(f="infos"), _class="menu")}}
     </div>
   </div>
-  <p>
-    LOGO VARIA RANDOMIZER
+  <h2 class="center">Welcome to the home of the VARIA (Very Adaptive Randomizer of Items and Areas) Randomizer and Solver</h2>
+  <p class="center">
+    <img src="/solver/static/images/super_metroid_logo.png" alt="logo">
   </p>
-  <h3>Welcome to the home of the VARIA (Very Adaptive Randomizer of Items and Areas) Randomizer and Solver for Super Metroid.</h3>
   <p>
-    Here you'll be able to manage your preset of the techniques you know, generate some randomized Super Metroid ROMs and also solve them.
+    <h3>Dude 1:1-3</h3>
+    <blockquote>
+      1 In the beginning was the Preset, and the Preset was with God, and the Preset was God.<br/>
+      2 He was with God in the beginning.<br/>
+      3 Through him all things were made; without him nothing was made that has been made.<br/>
+    </blockquote>
+  <p>
+  <p>
+    The VARIA website is divided in three parts:
+    <ul>
+      <li>manage your preset</li>
+      <li>generate randomized Super Metroid ROMs</li>
+      <li>solve randomized Super Metroid ROMs (from VARIA/Total/Dessy randomizers)</li>
+    </ul>
   </p>
   <table>
     <tr>
-      <td>
-	<div class="square">
-	  <p>
-	    You can create your preset which contains the techniques you know and your preferences. The preset is used to randomize and to solve ROMs.<br/>
-	    To create and manage your preset click on <a href="{{=URL(f='presets')}}">Presets</a>.
-	  </p>
-	</div>
+      <td class="third">
+	<p>
+	  At the center of the VARIA experience is the preset.<br/>
+	  A preset contains the list of all the techniques that you know in Super Metroid with your perceived difficulty.
+	</p>
+	<p>
+	  To create and manage your preset click on <a href="{{=URL(f='presets')}}">Presets</a>.
+	</p>
       </td>
-      <td>
-	<div class="square">
-	  <p>
-	    To randomize a ROM with the VARIA Randomizer click on <a href="{{=URL(f='randomizer')}}">Randomizer</a>.
-	  </p>
-	</div>
+      <td class="third">
+	<p>
+	  Use your preset to generate randomized Super Metroid ROMs that will only required techniques that you know.</br>
+	  The items locations are randomized, you can also randomize accesses between areas.<br/>
+	  To randomize a ROM with the VARIA Randomizer click on <a href="{{=URL(f='randomizer')}}">Randomizer</a>.
+	</p>
       </td>
-      <td>
-	<div class="square">
-	  <p>
-	    To solve a Super Metroid randomized ROM click on <a href="{{=URL(f='solver')}}">Solver</a>.
-	  </p>
-	</div>
+      <td class="third">
+	<p>
+	  Using your preset you can check if you can finish a Super Metroid randomized ROM and get an estimation of the difficulty.<br/>
+	  The Solver also provides a spoiler path to follow will the techniques/items used at each locations.<br/>
+	  To solve a Super Metroid randomized ROM click on <a href="{{=URL(f='solver')}}">Solver</a>.
+	</p>
       </td>
     </tr>
   </table>

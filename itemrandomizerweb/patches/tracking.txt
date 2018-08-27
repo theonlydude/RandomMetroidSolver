@@ -1,0 +1,19 @@
+Stat tracking ID's
+0-1         RTA Frames
+2           Number of door transitions entered
+3-4         Frames spent in door transitions
+5-6         Frames spent aligning doors
+7-8         Time spent in Crateria
+9-10        Time spent in Brinstar
+11-12       Time spent in Norfair
+13-14       Time spent in Wrecked Ship
+15-16       Time spent in Maridia
+17-18       Time spent in Tourian
+19          Number of uncharged shots (nonfunctioning)
+20          Number of charged shots
+21          Number of SBAs
+22          Number of missiles used
+23          number of supers used
+24          number of PBs used
+25          Number of times Item Switched (nonfunctioning)
+26          Number of bombs laid

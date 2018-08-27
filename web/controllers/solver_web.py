@@ -1016,7 +1016,7 @@ def stats():
     response.title = 'Super Metroid VARIA Randomizer and Solver statistics'
 
     DB = db.DB()
-    weeks = 2
+    weeks = 1
 
     solverPresets = DB.getSolverPresets(weeks)
     randomizerPresets = DB.getRandomizerPresets(weeks)

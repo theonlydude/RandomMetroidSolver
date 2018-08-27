@@ -122,17 +122,6 @@ def initPresetsSession():
 def presets():
     initPresetsSession()
 
-    # load conf from session if available
-    try:
-        params = loadPreset()
-    except Exception as e:
-        session.presets['preset'] = 'regular'
-        session.flash = "Error loading the preset: {}".format(e)
-        redirect(URL(r=request, f='presets'))
-
-    # load presets list
-    presets = loadPresetsList()
-
     if request.vars.action is not None:
         (ok, msg) = validatePresetsParams(request.vars.action)
         if not ok:
@@ -183,10 +172,14 @@ def presets():
                 # update the presets file
                 paramsDict = genJsonFromParams(request.vars)
                 paramsDict['password'] = passwordSHA256
-                PresetLoader.factory(paramsDict).dump(fullPath)
-                session.presets["preset"] = preset
-                session.flash = "Preset {} updated".format(preset)
-                redirect(URL(r=request, f='presets'))
+                try:
+                    PresetLoader.factory(paramsDict).dump(fullPath)
+                    session.presets["preset"] = preset
+                    session.flash = "Preset {} updated".format(preset)
+                    redirect(URL(r=request, f='presets'))
+                except Exception as e:
+                    session.flash = "Error writing the preset {}: {}".format(preset, e)
+                    redirect(URL(r=request, f='presets'))
             else:
                 session.flash = "Password mismatch with existing presets file {}".format(preset)
                 redirect(URL(r=request, f='presets'))
@@ -197,16 +190,31 @@ def presets():
                 # write the presets file
                 paramsDict = genJsonFromParams(request.vars)
                 paramsDict['password'] = passwordSHA256
-                PresetLoader.factory(paramsDict).dump(fullPath)
-                session.presets["preset"] = preset
-                session.flash = "Preset {} created".format(preset)
-                redirect(URL(r=request, f='presets'))
+                try:
+                    PresetLoader.factory(paramsDict).dump(fullPath)
+                    session.presets["preset"] = preset
+                    session.flash = "Preset {} created".format(preset)
+                    redirect(URL(r=request, f='presets'))
+                except Exception as e:
+                    session.flash = "Error writing the preset {}: {}".format(preset, e)
+                    redirect(URL(r=request, f='presets'))
             else:
                 session.flash = "Sorry, there's already 2048 presets on the website, can't add more"
                 redirect(URL(r=request, f='presets'))
 
     # set title
     response.title = 'Super Metroid VARIA Presets'
+
+    # load conf from session if available
+    try:
+        params = loadPreset()
+    except Exception as e:
+        session.presets['preset'] = 'regular'
+        session.flash = "Error loading the preset: {}".format(e)
+        redirect(URL(r=request, f='presets'))
+
+    # load presets list
+    presets = loadPresetsList()
 
     # add missing knows
     for know in Knows.__dict__:
@@ -1008,7 +1016,7 @@ def stats():
     response.title = 'Super Metroid VARIA Randomizer and Solver statistics'
 
     DB = db.DB()
-    weeks = 2
+    weeks = 1
 
     solverPresets = DB.getSolverPresets(weeks)
     randomizerPresets = DB.getRandomizerPresets(weeks)

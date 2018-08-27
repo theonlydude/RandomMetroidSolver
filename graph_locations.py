@@ -127,7 +127,8 @@ locations = [
                                    sm.canFly(),
                                    sm.wor(sm.haveItem('HiJump'),
                                           sm.haveItem('Ice'),
-                                          sm.haveItem('SpeedBooster')))
+                                          sm.wand(sm.haveItem('SpeedBooster'),
+                                                  sm.wor(sm.knowsSimpleShortCharge(), sm.knowsShortCharge()))))
 },
 {
     'Area': "Brinstar",

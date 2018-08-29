@@ -112,13 +112,13 @@ def validatePresetsParams(action):
     return (True, None)
 
 def getSkillLevelBarData(preset):
-    result = {'standards': []}
+    result = {'standards': {}}
     result['custom'] = (preset, PresetLoader.factory('{}/{}.json'.format(getPresetDir(preset), preset)).params['score'])
 
     # get score of standard presets
     for preset in ['noob', 'casual', 'regular', 'veteran', 'speedrunner', 'master', 'samus']:
         score = PresetLoader.factory('{}/{}.json'.format(getPresetDir(preset), preset)).params['score']
-        result['standards'].append((preset, score))
+        result['standards'][preset] = score
 
     # TODO: normalize result (or not ?)
     return result

@@ -111,6 +111,18 @@ def validatePresetsParams(action):
 
     return (True, None)
 
+def getSkillLevelBarData(preset):
+    result = {'standards': []}
+    result['custom'] = (preset, PresetLoader.factory('{}/{}.json'.format(getPresetDir(preset), preset)).params['score'])
+
+    # get score of standard presets
+    for preset in ['noob', 'casual', 'regular', 'veteran', 'speedrunner', 'master', 'samus']:
+        score = PresetLoader.factory('{}/{}.json'.format(getPresetDir(preset), preset)).params['score']
+        result['standards'].append((preset, score))
+
+    # TODO: normalize result (or not ?)
+    return result
+
 def initPresetsSession():
     if session.presets is None:
         session.presets = {}
@@ -239,11 +251,17 @@ def presets():
             if button not in params['Controller'].keys():
                 params['Controller'][button] = Controller.__dict__[button]
 
+    # compute score for skill bar
+    try:
+        skillBarData = getSkillLevelBarData(session.presets['preset'])
+    except:
+        skillBarData = None
+
     # send values to view
     return dict(desc=Knows.desc, difficulties=diff2text,
                 categories=Knows.categories, settings=params['Settings'], knows=params['Knows'],
                 easy=easy, medium=medium, hard=hard, harder=harder, hardcore=hardcore, mania=mania,
-                controller=params['Controller'], presets=presets)
+                controller=params['Controller'], presets=presets, skillBarData=skillBarData)
 
 def initSolverSession():
     if session.solver is None:

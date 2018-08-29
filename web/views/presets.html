@@ -180,16 +180,16 @@ if skillBarData is not None:
         dataTable.addColumn({ type: 'date', id: 'End' });
         dataTable.addRows([
 {{
-  score = 100 + skillBarData["custom"][1]
-  lower = 100 + skillBarData["standards"]["noob"]
-  upper = 100 + skillBarData["standards"]["samus"]
+  score = 100 + skillBarData["custom"][1]*4
+  lower = 100 + skillBarData["standards"]["noob"]*4
+  upper = 100 + skillBarData["standards"]["samus"]*4
 
   previousStdScore = lower
   previousPreset = 'noob'
   stop = False
   for preset in ['casual', 'regular', 'veteran', 'speedrunner', 'master', 'samus']:
     if stop == False:
-      stdScore = 100 + skillBarData["standards"][preset]
+      stdScore = 100 + skillBarData["standards"][preset]*4
       if stdScore <= score:
         response.write("[ 'Skill', '{}', new Date({}, 0, 0), new Date({}, 0, 0) ],\n".format(previousPreset, previousStdScore, stdScore), escape=False)
       else:
@@ -228,7 +228,7 @@ function allReady() {
 
       for (i = 0; i < labels.length; i++) {
         // console.log(labels[i].textContent)
-        if (labels[i].textContent.substring(0,1) == '0') {
+        if (labels[i].textContent.substring(0,1) == '0' || labels[i].textContent.substring(0,1) == '1') {
           // console.log("found")
           labels[i].parentNode.removeChild(labels[i]);
           i--;

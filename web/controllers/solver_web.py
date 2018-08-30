@@ -66,7 +66,7 @@ def loadPresetsList():
     files = sorted(os.listdir('community_presets'), key=lambda v: v.upper())
     stdPresets = ['noob', 'casual', 'regular', 'veteran', 'speedrunner', 'master', 'samus']
     comPresets = [os.path.splitext(file)[0] for file in files]
-    return stdPresets + comPresets
+    return (stdPresets, comPresets)
 
 def validatePresetsParams(action):
     if action == 'Create':
@@ -226,7 +226,7 @@ def presets():
         redirect(URL(r=request, f='presets'))
 
     # load presets list
-    presets = loadPresetsList()
+    (stdPresets, comPresets) = loadPresetsList()
 
     # add missing knows
     for know in Knows.__dict__:
@@ -261,7 +261,8 @@ def presets():
     return dict(desc=Knows.desc, difficulties=diff2text,
                 categories=Knows.categories, settings=params['Settings'], knows=params['Knows'],
                 easy=easy, medium=medium, hard=hard, harder=harder, hardcore=hardcore, mania=mania,
-                controller=params['Controller'], presets=presets, skillBarData=skillBarData)
+                controller=params['Controller'], stdPresets=stdPresets, comPresets=comPresets,
+                skillBarData=skillBarData)
 
 def initSolverSession():
     if session.solver is None:
@@ -432,14 +433,6 @@ def solver():
     # init session
     initSolverSession()
 
-    ROMs = getROMsList()
-
-    # last solved ROM
-    lastRomFile = getLastSolvedROM()
-
-    # load presets list
-    presets = loadPresetsList()
-
     if request.vars.action == 'Solve':
         (ok, msg) = validateSolverParams()
         if not ok:
@@ -534,9 +527,17 @@ def solver():
     # set title
     response.title = 'Super Metroid VARIA Solver'
 
+    ROMs = getROMsList()
+
+    # last solved ROM
+    lastRomFile = getLastSolvedROM()
+
+    # load presets list
+    (stdPresets, comPresets) = loadPresetsList()
+
     # send values to view
-    return dict(desc=Knows.desc, presets=presets, roms=ROMs, lastRomFile=lastRomFile,
-                difficulties=diff2text, categories=Knows.categories,
+    return dict(desc=Knows.desc, stdPresets=stdPresets, comPresets=comPresets, roms=ROMs,
+                lastRomFile=lastRomFile, difficulties=diff2text, categories=Knows.categories,
                 result=result,
                 easy=easy, medium=medium, hard=hard, harder=harder, hardcore=hardcore, mania=mania)
 

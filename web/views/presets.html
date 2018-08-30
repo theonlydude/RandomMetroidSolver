@@ -191,9 +191,9 @@ if skillBarData is not None:
     if stop == False:
       stdScore = 100 + skillBarData["standards"][preset]*4
       if stdScore <= score:
-        response.write("[ 'Skill', '{}', new Date({}, 0, 0), new Date({}, 0, 0) ],\n".format(previousPreset, previousStdScore, stdScore), escape=False)
+        response.write("[ 'Skill', '{}', new Date({}), new Date({}) ],\n".format(previousPreset, previousStdScore, stdScore), escape=False)
       else:
-        response.write("[ 'Skill', '{}', new Date({}, 0, 0), new Date({}, 0, 0) ]".format(previousPreset, previousStdScore, score), escape=False)
+        response.write("[ 'Skill', '{}', new Date({}), new Date({}) ]".format(previousPreset, previousStdScore, score), escape=False)
         stop = True
         pass
       previousStdScore = stdScore
@@ -206,13 +206,13 @@ if skillBarData is not None:
         var options = {
           hAxis: {
 {{
-  response.write("          minValue: new Date({}, 0, 0),\n".format(lower), escape=False)
-  response.write("          maxValue: new Date({}, 0, 0)\n".format(upper), escape=False)
+  response.write("          minValue: new Date({}),\n".format(lower), escape=False)
+  response.write("          maxValue: new Date({})\n".format(upper), escape=False)
 }}
           },
           timeline: { groupByRowLabel: true},
           tooltip: { trigger: 'none' },
-          colors: ['#6daa53', '#f1be0b', '#e69235', '#d13434', '#000000', '#123456'],
+          colors: ['#6daa53', '#f1be0b', '#e69235', '#d13434', '#123456', '#000000'],
           avoidOverlappingGridLines: false
         };
 

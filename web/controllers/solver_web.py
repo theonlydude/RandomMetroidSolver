@@ -173,10 +173,13 @@ def presets():
         fullPath = '{}/{}.json'.format(getPresetDir(preset), preset)
         if os.path.isfile(fullPath):
             # load it
+            end = False
             try:
                 oldParams = PresetLoader.factory(fullPath).params
             except Exception as e:
                 session.flash = "Error loading the preset {}: {}".format(preset, e)
+                end = True
+            if end == True:
                 redirect(URL(r=request, f='presets'))
 
             # check if password match
@@ -188,10 +191,9 @@ def presets():
                     PresetLoader.factory(paramsDict).dump(fullPath)
                     session.presets["preset"] = preset
                     session.flash = "Preset {} updated".format(preset)
-                    redirect(URL(r=request, f='presets'))
                 except Exception as e:
                     session.flash = "Error writing the preset {}: {}".format(preset, e)
-                    redirect(URL(r=request, f='presets'))
+                redirect(URL(r=request, f='presets'))
             else:
                 session.flash = "Password mismatch with existing presets file {}".format(preset)
                 redirect(URL(r=request, f='presets'))
@@ -206,10 +208,9 @@ def presets():
                     PresetLoader.factory(paramsDict).dump(fullPath)
                     session.presets["preset"] = preset
                     session.flash = "Preset {} created".format(preset)
-                    redirect(URL(r=request, f='presets'))
                 except Exception as e:
                     session.flash = "Error writing the preset {}: {}".format(preset, e)
-                    redirect(URL(r=request, f='presets'))
+                redirect(URL(r=request, f='presets'))
             else:
                 session.flash = "Sorry, there's already 2048 presets on the website, can't add more"
                 redirect(URL(r=request, f='presets'))
@@ -261,7 +262,7 @@ def presets():
     return dict(desc=Knows.desc, difficulties=diff2text,
                 categories=Knows.categories, settings=params['Settings'], knows=params['Knows'],
                 easy=easy, medium=medium, hard=hard, harder=harder, hardcore=hardcore, mania=mania,
-                controller=params['Controller'], stdPresets=stdPresets, comPresets=comPresets,
+                controller=params['Controller'], presets=stdPresets+comPresets,
                 skillBarData=skillBarData)
 
 def initSolverSession():

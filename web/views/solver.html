@@ -330,18 +330,12 @@ function initAwesomplete(){
   Awesomplete.$('.dropdown-input').addEventListener("awesomplete-selectcomplete", function(event) {
     // disable standard preset button
     // console.log( event.text.label, event.text.value );
-    var e = document.getElementById("stdPreset");
-    e.disabled = true;
-    var text = document.getElementById("stdPresetText");
-    text.className = "disabledText";
+    enableStdPreset(false);
   });
 
   // if community presets is not empty, disable standard preset
   if(document.getElementById("comPreset2").value.length > 0){
-    var e = document.getElementById("stdPreset");
-    e.disabled = true;
-    var text = document.getElementById("stdPresetText");
-    text.className = "disabledText";
+    enableStdPreset(false);
   }
 }
 
@@ -354,6 +348,20 @@ function hookFormSubmit(){
           .appendTo('#solverForm');
       return true;
   });
+}
+
+function enableStdPreset(enable) {
+    if(enable == true){
+        var e = document.getElementById("stdPreset");
+        e.disabled = false;
+        var text = document.getElementById("stdPresetText");
+        text.className = "";
+    }else{
+        var e = document.getElementById("stdPreset");
+        e.disabled = true;
+        var text = document.getElementById("stdPresetText");
+        text.className = "disabledText";
+    }
 }
 
 window.onload = function(){
@@ -453,16 +461,10 @@ window.onload = function(){
                   if(preset == "noob" || preset == "casual" || preset == "regular" || preset == "veteran" || preset == "speedrunner" || preset == "master" || preset == "samus"){
                     document.getElementById("stdPreset").value = preset;
                     document.getElementById("comPreset2").value = "";
-                    var e = document.getElementById("stdPreset");
-                    e.disabled = false;
-                    var text = document.getElementById("stdPresetText");
-                    text.className = "";
+                    enableStdPreset(true);
                   } else {
                     document.getElementById("comPreset2").value = preset;
-                    var e = document.getElementById("stdPreset");
-                    e.disabled = true;
-                    var text = document.getElementById("stdPresetText");
-                    text.className = "disabledText";
+                    enableStdPreset(false);
                   }
                 }
             }

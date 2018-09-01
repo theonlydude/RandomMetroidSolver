@@ -269,7 +269,8 @@ def initSolverSession():
     if session.solver is None:
         session.solver = {}
 
-        session.solver['preset'] = 'regular'
+        session.solver['stdPreset'] = 'regular'
+        session.solver['comPreset'] = ''
         session.solver['difficultyTarget'] = Conf.difficultyTarget
         session.solver['pickupStrategy'] = Conf.itemsPickup
         session.solver['itemsForbidden'] = []
@@ -282,7 +283,14 @@ def updateSolverSession():
     if session.solver is None:
         session.solver = {}
 
-    session.solver['preset'] = request.vars.preset
+    if request.vars.stdPreset == None:
+        session.solver['stdPreset'] = 'regular'
+    else:
+        session.solver['stdPreset'] = request.vars.stdPreset
+    if request.vars.comPreset == None:
+        session.solver['comPreset'] = ''
+    else:
+        session.solver['comPreset'] = request.vars.comPreset
     session.solver['difficultyTarget'] = text2diff[request.vars.difficultyTarget]
     session.solver['pickupStrategy'] = request.vars.pickupStrategy
     session.solver['complexity'] = request.vars.complexity
@@ -375,11 +383,27 @@ def prepareResult():
     return result
 
 def validateSolverParams():
-    for param in ['preset', 'difficultyTarget', 'pickupStrategy', 'complexity']:
+    for param in ['difficultyTarget', 'pickupStrategy', 'complexity']:
         if request.vars[param] is None:
             return (False, "Missing parameter {}".format(param))
 
-    session.solver['preset'] = request.vars.preset
+    if request.vars.stdPreset == None and request.vars.comPreset == None:
+        return (False, "Missing parameter stdPreset and comPreset")
+    elif request.vars.stdPreset == None:
+        preset = request.vars.comPreset
+    else:
+        preset = request.vars.stdPreset
+
+    if IS_ALPHANUMERIC()(preset)[1] is not None:
+        return (False, "Wrong value for preset, must be alphanumeric")
+
+    if IS_LENGTH(maxsize=32, minsize=1)(preset)[1] is not None:
+        return (False, "Wrong length for preset, name must be between 1 and 32 characters")
+
+    # check that preset exists
+    fullPath = '{}/{}.json'.format(getPresetDir(preset), preset)
+    if not os.path.isfile(fullPath):
+        return (False, "Unknown preset: {}".format(preset))
 
     difficultyTargetChoices = ["easy", "medium", "hard", "very hard", "hardcore", "mania"]
     if request.vars.difficultyTarget not in difficultyTargetChoices:
@@ -441,6 +465,11 @@ def solver():
             redirect(URL(r=request, f='solver'))
 
         updateSolverSession()
+
+        if request.vars.stdPreset == None:
+            preset = request.vars.comPreset
+        else:
+            preset = request.vars.stdPreset
 
         # new uploaded rom ?
         error = False
@@ -514,7 +543,7 @@ def solver():
             if not os.path.isfile(jsonRomFileName):
                 session.flash = "Missing json ROM file on the server"
             else:
-                (ok, result) = computeDifficulty(jsonRomFileName)
+                (ok, result) = computeDifficulty(jsonRomFileName, preset)
                 if not ok:
                     session.flash = result
                     redirect(URL(r=request, f='solver'))
@@ -585,10 +614,10 @@ def genJsonFromParams(vars):
 
     return paramsDict
 
-def computeDifficulty(jsonRomFileName):
+def computeDifficulty(jsonRomFileName, preset):
     randomizedRom = os.path.basename(jsonRomFileName.replace('json', 'sfc'))
 
-    presetFileName = "{}/{}.json".format(getPresetDir(session.solver['preset']), session.solver['preset'])
+    presetFileName = "{}/{}.json".format(getPresetDir(preset), preset)
     jsonFileName = tempfile.mkstemp()[1]
 
     DB = db.DB()
@@ -607,7 +636,7 @@ def computeDifficulty(jsonRomFileName):
     for item in session.solver['itemsForbidden']:
         params += ['--itemsForbidden', item]
 
-    DB.addSolverParams(id, randomizedRom, session.solver['preset'], session.solver['difficultyTarget'],
+    DB.addSolverParams(id, randomizedRom, preset, session.solver['difficultyTarget'],
                        session.solver['pickupStrategy'], session.solver['itemsForbidden'])
 
     print("before calling solver: {}".format(params))

@@ -329,11 +329,30 @@ function initAwesomplete(){
 
   Awesomplete.$('.dropdown-input').addEventListener("awesomplete-selectcomplete", function(event) {
     // disable standard preset button
-    console.log( event.text.label, event.text.value );
+    // console.log( event.text.label, event.text.value );
     var e = document.getElementById("stdPreset");
     e.disabled = true;
     var text = document.getElementById("stdPresetText");
     text.className = "disabledText";
+  });
+
+  // if community presets is not empty, disable standard preset
+  if(document.getElementById("comPreset2").value.length > 0){
+    var e = document.getElementById("stdPreset");
+    e.disabled = true;
+    var text = document.getElementById("stdPresetText");
+    text.className = "disabledText";
+  }
+}
+
+function hookFormSubmit(){
+  // awesomplete value is not added to get, add it manually...
+  $("#solverForm").submit( function(eventObj) {
+      $('<input />').attr('type', 'hidden')
+          .attr('name', "comPreset")
+          .attr('value', document.getElementById("comPreset2").value)
+          .appendTo('#solverForm');
+      return true;
   });
 }
 
@@ -341,6 +360,8 @@ window.onload = function(){
     initAwesomplete();
 
     setComplexity();
+
+    hookFormSubmit();
 
     //Check File API support
     if(window.File && window.FileList && window.FileReader)
@@ -429,7 +450,20 @@ window.onload = function(){
 
                 var preset = guessVARIAPreset(file.name);
                 if(preset != null) {
-                  document.getElementById("preset").value = preset;
+                  if(preset == "noob" || preset == "casual" || preset == "regular" || preset == "veteran" || preset == "speedrunner" || preset == "master" || preset == "samus"){
+                    document.getElementById("stdPreset").value = preset;
+                    document.getElementById("comPreset2").value = "";
+                    var e = document.getElementById("stdPreset");
+                    e.disabled = false;
+                    var text = document.getElementById("stdPresetText");
+                    text.className = "";
+                  } else {
+                    document.getElementById("comPreset2").value = preset;
+                    var e = document.getElementById("stdPreset");
+                    e.disabled = true;
+                    var text = document.getElementById("stdPresetText");
+                    text.className = "disabledText";
+                  }
                 }
             }
 
@@ -550,12 +584,12 @@ If Charge Beam is not picked up along the way or not accessible, enough minors t
 	    </tr>
 	    <tr>
 	      <td><span id="stdPresetText">Standard Presets: </span></td>
-	      <td>{{=SELECT(*stdPresets, **dict(_id="stdPreset", _name="stdPreset", value=session.solver["preset"], _class="filldropdown"))}}</td>
+	      <td>{{=SELECT(*stdPresets, **dict(_id="stdPreset", _name="stdPreset", value=session.solver["stdPreset"], _class="filldropdown"))}}</td>
 	      <td><button type="button" onclick="startTheTour(2)">?</button></td>
 	    </tr>
 	    <tr>
 	      <td>Community Presets: </td>
-	      <td class="full"><input data-list="{{=", ".join(comPresets)}}" class="dropdown-input full" /><div style="float: right; width: 12px;"><button class="dropdown-btn" type="button"><span class="caret"></span></button></div></label></td>
+	      <td class="full"><input form="solverForm" type="text" id="comPreset2" data-list="{{=", ".join(comPresets)}}" class="dropdown-input full" value="{{=session.solver['comPreset']}}"/><div style="float: right; width: 12px;"><button class="dropdown-btn" type="button"><span class="caret"></span></button></div></td>
 	      <td><button type="button" onclick="startTheTour(2)">?</button></td>
 	    </tr>
 	  </table>

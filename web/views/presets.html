@@ -10,6 +10,8 @@ extend 'layout.html'
 <link href={{=URL('static', 'css/bootstrap-tour.min.css')}} rel="stylesheet">
 <script src="{{=URL('static','js/bootstrap-tour.min.js')}}"></script>
 
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+
 <title>Super Metroid VARIA Presets</title>
 
 <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css">
@@ -159,6 +161,87 @@ If Charge Beam is not picked up along the way or not accessible, enough minors t
   }
   tour.start();
 }
+
+{{
+if skillBarData is not None:
+}}
+      google.charts.load('current', {'packages':['timeline']});
+      google.charts.setOnLoadCallback(drawChart);
+
+
+      function drawChart() {
+        var container = document.getElementById('timeline');
+        var chart = new google.visualization.Timeline(container);
+        var dataTable = new google.visualization.DataTable();
+
+        dataTable.addColumn({ type: 'string', id: 'Role' });
+        dataTable.addColumn({ type: 'string', id: 'Difficulty' });
+        dataTable.addColumn({ type: 'date', id: 'Start' });
+        dataTable.addColumn({ type: 'date', id: 'End' });
+        dataTable.addRows([
+{{
+  score = 100 + skillBarData["custom"][1]*4
+  lower = 100 + skillBarData["standards"]["noob"]*4
+  upper = 100 + skillBarData["standards"]["samus"]*4
+
+  previousStdScore = lower
+  previousPreset = 'noob'
+  stop = False
+  for preset in ['casual', 'regular', 'veteran', 'speedrunner', 'master', 'samus']:
+    if stop == False:
+      stdScore = 100 + skillBarData["standards"][preset]*4
+      if stdScore <= score:
+        response.write("[ 'Skill', '{}', new Date({}), new Date({}) ],\n".format(previousPreset, previousStdScore, stdScore), escape=False)
+      else:
+        response.write("[ 'Skill', '{}', new Date({}), new Date({}) ]".format(previousPreset, previousStdScore, score), escape=False)
+        stop = True
+        pass
+      previousStdScore = stdScore
+      previousPreset = preset
+      pass
+    pass
+}}
+          ]);
+
+        var options = {
+          hAxis: {
+{{
+  response.write("          minValue: new Date({}),\n".format(lower), escape=False)
+  response.write("          maxValue: new Date({})\n".format(upper), escape=False)
+}}
+          },
+          timeline: { groupByRowLabel: true},
+          tooltip: { trigger: 'none' },
+          colors: ['#6daa53', '#f1be0b', '#e69235', '#d13434', '#123456', '#000000'],
+          avoidOverlappingGridLines: false
+        };
+
+function allReady() {
+    var e = document.getElementById('timeline');
+    // svg elements don't have inner/outerHTML properties, so use the parents
+    alert(e.getElementsByTagName('svg')[0].parentNode.innerHTML);
+}
+
+    google.visualization.events.addListener(chart, 'ready', function () {
+      // remove haxis label
+      var labels = container.getElementsByTagName('text');
+
+      for (i = 0; i < labels.length; i++) {
+        // console.log(labels[i].textContent)
+        if (labels[i].textContent.substring(0,1) == '0' || labels[i].textContent.substring(0,1) == '1') {
+          // console.log("found")
+          labels[i].parentNode.removeChild(labels[i]);
+          i--;
+        }
+      }
+
+    });
+//google.visualization.events.addListener(chart, 'ready', allReady);
+        chart.draw(dataTable, options);
+}
+{{
+  pass
+}}
 </script>
 
 {{
@@ -264,26 +347,40 @@ pass
 </div>
 
 <form id="presetForm" id="presetForm" class="presetform" method="post">
-  <table class="half">
-    <colgroup><col class="quarter" /><col class="half" /><col class="quarter"></colgroup>
-    <tr>
-      <td>Load preset: </td>
-      <td>{{=SELECT(*presets, **dict(_name="presetLoad", value=session.presets["preset"], _class="filldropdown"))}}</td>
-      <td><input class="full" name="action" type="submit" value="Load"/></td>
-    </tr>
-    <tr>
-      <td>Update preset:</td>
-      <td>{{=SELECT(*presets, **dict(_name="presetUpdate", value=session.presets["preset"], _class="filldropdown"))}}</td>
-      <td><input class="full" name="action" onclick="askPassword()" type="submit" value="Update"/></td>
-    </tr>
-    <tr>
-      <td>New preset:</td>
-      <td><input class="full" name="presetCreate" type="text"/></td>
-      <td><input class="full" name="action" onclick="askPassword()" type="submit" value="Create"/></td>
-    </tr>
-  </table>
-  <input id="password" name="password" style="display:none" type="text"/>
-  <input id="currenttab" name="currenttab" style="display:none" type="text"/>
+  <div class="row">
+    <div class="column">
+      <table class="full">
+	<colgroup><col class="quarter" /><col class="half" /><col class="quarter"></colgroup>
+	<tr>
+	  <td>Load preset: </td>
+	  <td>{{=SELECT(*presets, **dict(_name="presetLoad", value=session.presets["preset"], _class="filldropdown"))}}</td>
+	  <td><input class="full" name="action" type="submit" value="Load"/></td>
+	</tr>
+	<tr>
+	  <td>Update preset:</td>
+	  <td>{{=SELECT(*presets, **dict(_name="presetUpdate", value=session.presets["preset"], _class="filldropdown"))}}</td>
+	  <td><input class="full" name="action" onclick="askPassword()" type="submit" value="Update"/></td>
+	</tr>
+	<tr>
+	  <td>New preset:</td>
+	  <td><input class="full" name="presetCreate" type="text"/></td>
+	  <td><input class="full" name="action" onclick="askPassword()" type="submit" value="Create"/></td>
+	</tr>
+      </table>
+      <input id="password" name="password" style="display:none" type="text"/>
+      <input id="currenttab" name="currenttab" style="display:none" type="text"/>
+    </div>
+    <div class="column">
+
+{{
+if skillBarData is not None:
+}}
+      <div id="timeline" style="height: 95px; width: 95%;"></div>
+{{
+  pass
+}}
+    </div>
+  </div>
 </form>
 
 <div class="tab">

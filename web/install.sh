@@ -23,3 +23,5 @@ ln -s ~/RandomMetroidSolver/web/static/excellentexport.js ~/web2py/applications/
 ln -s ~/RandomMetroidSolver/standard_presets ~/web2py/standard_presets
 ln -s ~/RandomMetroidSolver/community_presets ~/web2py/community_presets
 ln -s ~/RandomMetroidSolver/web/static/super_metroid_logo.png ~/web2py/applications/solver/static/images/super_metroid_logo.png
+ln -s ~/RandomMetroidSolver/web/static/awesomplete.css ~/web2py/applications/solver/static/css/awesomplete.css
+ln -s ~/RandomMetroidSolver/web/static/awesomplete.js ~/web2py/applications/solver/static/js/awesomplete.js

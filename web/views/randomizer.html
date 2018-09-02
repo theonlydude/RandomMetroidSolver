@@ -535,8 +535,25 @@ window.onload = function(){
             if(! spreadItems.checked){
                 spreadItems.click();
             }
+            var suitsRestriction = document.getElementById("suitsRestriction");
+
+            if(! suitsRestriction.checked){
+                suitsRestriction.click();
+            }
         }
         if(progSpeed.value == 'fast' || progSpeed.value == 'fastest'){
+            var spreadItems = document.getElementById("spreadItems");
+
+            if(spreadItems.checked){
+                spreadItems.click();
+            }
+            var suitsRestriction = document.getElementById("suitsRestriction");
+
+            if(suitsRestriction.checked){
+                suitsRestriction.click();
+            }
+        }
+        if(progSpeed.value == "basic"){
             var spreadItems = document.getElementById("spreadItems");
 
             if(spreadItems.checked){

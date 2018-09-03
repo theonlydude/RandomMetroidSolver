@@ -681,7 +681,8 @@ def initRandomizerSession():
         session.randomizer = {}
 
         session.randomizer['maxDifficulty'] = 'hardcore'
-        session.randomizer['paramsFile'] = 'regular'
+        session.randomizer['stdPreset'] = 'regular'
+        session.randomizer['comPreset'] = ''
         for patch in patches:
             if patch[2] == True:
                 session.randomizer[patch[0]] = "on"
@@ -714,9 +715,9 @@ def randomizer():
 
     initRandomizerSession()
 
-    presets = loadPresetsList()
+    (stdPresets, comPresets) = loadPresetsList()
 
-    return dict(presets=presets, patches=patches)
+    return dict(stdPresets=stdPresets, comPresets=comPresets, patches=patches)
 
 def raiseHttp(code, msg, isJson=False):
     print("raiseHttp: code {} msg {} isJson {}".format(code, msg, isJson))
@@ -737,7 +738,25 @@ def validateWebServiceParams(patchs, quantities, others, isJson=False):
             raiseHttp(400, "Wrong value for {}: {}, authorized values: on/off".format(patch, request.vars[patch]), isJson)
 
     if request.vars['skip_intro'] == request.vars['skip_ceres']:
-        raiseHttp(400, "You must choose one and only one patch for skipping the intro/Ceres station")
+        raiseHttp(400, "You must choose one and only one patch for skipping the intro/Ceres station", isJson)
+
+    if request.vars.stdPreset == None and request.vars.comPreset == None:
+        raiseHttp(400, "Missing parameter stdPreset and comPreset", isJson)
+    elif request.vars.stdPreset == None:
+        preset = request.vars.comPreset
+    else:
+        preset = request.vars.stdPreset
+
+    if IS_ALPHANUMERIC()(preset)[1] is not None:
+        raiseHttp(400, "Wrong value for preset, must be alphanumeric", isJson)
+
+    if IS_LENGTH(maxsize=32, minsize=1)(preset)[1] is not None:
+        raiseHttp(400, "Wrong length for preset, name must be between 1 and 32 characters", isJson)
+
+    # check that preset exists
+    fullPath = '{}/{}.json'.format(getPresetDir(preset), preset)
+    if not os.path.isfile(fullPath):
+        raiseHttp(400, "Unknown preset: {}".format(preset), isJson)
 
     def getInt(param):
         try:
@@ -766,12 +785,6 @@ def validateWebServiceParams(patchs, quantities, others, isJson=False):
     if request.vars['maxDifficulty'] is not None:
         if request.vars.maxDifficulty not in ['no difficulty cap', 'easy', 'medium', 'hard', 'harder', 'hardcore', 'mania', 'random']:
             raiseHttp(400, "Wrong value for difficulty_target, authorized values: no difficulty cap/easy/medium/hard/harder/hardcore/mania", isJson)
-
-    if IS_ALPHANUMERIC()(request.vars.paramsFile)[1] is not None:
-        raiseHttp(400, "Wrong value for paramsFile, must be alphanumeric", isJson)
-
-    if IS_LENGTH(maxsize=32, minsize=1)(request.vars.paramsFile)[1] is not None:
-        raiseHttp(400, "Wrong length for paramsFile, name must be between 1 and 32 characters", isJson)
 
     if request.vars.minorQty != 'random':
         minorQtyInt = getInt('minorQty')
@@ -815,7 +828,7 @@ def sessionWebService():
               'spinjumprestart', 'elevators_doors_speed',
               'skip_intro', 'skip_ceres', 'animals', 'areaLayout', 'variaTweaks']
     quantities = ['missileQty', 'superQty', 'powerBombQty']
-    others = ['paramsFile', 'minorQty', 'energyQty', 'maxDifficulty',
+    others = ['minorQty', 'energyQty', 'maxDifficulty',
               'progressionSpeed', 'spreadItems', 'fullRandomization', 'suitsRestriction',
               'funCombat', 'funMovement', 'funSuits', 'layoutPatches',
               'noGravHeat', 'progressionDifficulty', 'morphPlacement',
@@ -826,7 +839,14 @@ def sessionWebService():
         session.randomizer = {}
 
     session.randomizer['maxDifficulty'] = request.vars.maxDifficulty
-    session.randomizer['paramsFile'] = request.vars.paramsFile
+    if request.vars.stdPreset == None:
+        session.randomizer['stdPreset'] = 'regular'
+    else:
+        session.randomizer['stdPreset'] = request.vars.stdPreset
+    if request.vars.comPreset == None:
+        session.randomizer['comPreset'] = ''
+    else:
+        session.randomizer['comPreset'] = request.vars.comPreset
     for patch in patches:
         session.randomizer[patch[0]] = request.vars[patch[0]]
     session.randomizer['missileQty'] = request.vars.missileQty
@@ -873,7 +893,7 @@ def randomizerWebService():
     patchs = ['itemsounds', 'spinjumprestart', 'elevators_doors_speed', 'skip_intro',
               'skip_ceres', 'areaLayout', 'variaTweaks', 'No_Music']
     quantities = ['missileQty', 'superQty', 'powerBombQty']
-    others = ['seed', 'paramsFile', 'paramsFileTarget', 'minorQty', 'energyQty',
+    others = ['seed', 'paramsFileTarget', 'minorQty', 'energyQty',
               'maxDifficulty', 'progressionSpeed', 'spreadItems', 'fullRandomization',
               'suitsRestriction', 'morphPlacement', 'funCombat', 'funMovement', 'funSuits',
               'layoutPatches', 'noGravHeat', 'progressionDifficulty', 'areaRandomization',
@@ -898,11 +918,16 @@ def randomizerWebService():
     if seed == '0':
         seed = str(random.randint(0, 9999999))
 
+    if request.vars.stdPreset == None:
+        preset = request.vars.comPreset
+    else:
+        preset = request.vars.stdPreset
+
     params = ['python2',  os.path.expanduser("~/RandomMetroidSolver/randomizer.py"),
               '--seed', seed,
               '--output', jsonFileName,
               '--param', presetFileName,
-              '--preset', request.vars.paramsFile,
+              '--preset', preset,
               '--progressionSpeed', request.vars.progressionSpeed,
               '--progressionDifficulty', request.vars.progressionDifficulty,
               '--morphPlacement', request.vars.morphPlacement]
@@ -1016,20 +1041,22 @@ def randomizerWebService():
 
 def presetWebService():
     # web service to get the content of the preset file
-    if request.vars.paramsFile is None:
-        raise HTTP(400, "Missing paramsFile parameter")
+    if request.vars.stdPreset == None and request.vars.comPreset == None:
+        raiseHttp(400, "Missing parameter stdPreset and comPreset")
+    elif request.vars.stdPreset == None:
+        preset = request.vars.comPreset
+    else:
+        preset = request.vars.stdPreset
 
-    paramsFile = request.vars.paramsFile
-
-    if IS_ALPHANUMERIC()(paramsFile)[1] is not None:
+    if IS_ALPHANUMERIC()(preset)[1] is not None:
         raise HTTP(400, "Preset name must be alphanumeric")
 
-    if IS_LENGTH(maxsize=32, minsize=1)(paramsFile)[1] is not None:
+    if IS_LENGTH(maxsize=32, minsize=1)(preset)[1] is not None:
         raise HTTP(400, "Preset name must be between 1 and 32 characters")
 
-    print("presetWebService: paramsFile={}".format(paramsFile))
+    print("presetWebService: preset={}".format(preset))
 
-    fullPath = '{}/{}.json'.format(getPresetDir(paramsFile), paramsFile)
+    fullPath = '{}/{}.json'.format(getPresetDir(preset), preset)
 
     # check that the presets file exists
     if os.path.isfile(fullPath):

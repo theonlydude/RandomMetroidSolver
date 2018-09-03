@@ -11,6 +11,9 @@ define load_stat $dfd8b0        // Load stat, stat id in A, value returned in A
 define timer1 $05b8
 define timer2 $05ba
 
+// beggining of stats region
+define stats $7ffc00
+
 // Temp variables (define here to make sure they're not reused, make sure they're 2 bytes apart)
 // These variables are cleared to 0x00 on hard and soft reset
 define door_timer_tmp $7fff00
@@ -18,6 +21,11 @@ define door_adjust_tmp $7fff02
 define add_time_tmp $7fff04
 define region_timer_tmp $7fff06
 define region_tmp $7fff08
+define pause_timer_idx  #$ff0a
+define pause_timer_lo $7fff0a
+define pause_timer_hi $7fff0c
+define add_time_32_tmp_lo $7fff0e
+define add_time_32_tmp_hi $7fff1a
 
 // -------------------------------
 // HIJACKS
@@ -57,7 +65,22 @@ org $90c107
 
 org $90f800
 fire_sba_local:
-    jml fire_sba
+	jml fire_sba
+
+
+// screen finished fading out
+org $828cea
+	jmp pausing_local
+
+// screen starts fading in
+org $82939c
+	jmp resuming_local
+
+org $82fc00
+pausing_local:
+	jml pausing
+resuming_local:
+	jml resuming
 
 // -------------------------------
 // CODE (using bank A1 free space)
@@ -84,6 +107,37 @@ add_time:
     jsl {store_stat}  
     rts
 
+// same as above, using 32bits date for couting long times (> 65535 frames, ~18min)
+// X = offset in bank 7F for 32-bit tmp var, Y = stat to add to
+add_time_32:
+	// first, do the 32-bit subtraction
+	lda $7f0000,x
+	sta {add_time_32_tmp_lo}
+	inx
+	inx
+	lda $7f0000,x
+	sta {add_time_32_tmp_hi}
+	sec				// set carry for borrow purpose
+	lda {timer1}
+	sbc {add_time_32_tmp_lo}	// perform subtraction on the LSBs
+	sta {add_time_32_tmp_lo}
+	lda {timer2}			// do the same for the MSBs, with carry
+	sbc {add_time_32_tmp_hi}
+	sta {add_time_32_tmp_hi}
+	// add to current 32 bit stat value (don't use load_stat/store_stat for shorter code)
+	tya
+	asl
+	tax
+	lda {stats},x
+	clc				// clear carry
+	adc {add_time_32_tmp_lo}	// add LSBs
+	sta {stats},x
+	inx
+	inx
+	lda {stats},x
+	adc {add_time_32_tmp_hi}	// add the MSBs using carry
+	sta {stats},x
+	rts
 
 // Samus hit a door block (Gamestate change to $09 just before hitting $0a)
 door_entered:
@@ -92,6 +146,7 @@ door_entered:
 
     lda {timer1}
     sta {door_timer_tmp} // Save RTA time to temp variable
+
 
     // Run hijacked code and return
     plp
@@ -204,3 +259,27 @@ bombs_laid:
     lda $0cd2
     inc
     jml $90c10b
+
+// stopped fading out, game state about to change to 0Dh
+pausing:
+	// Save RTA time to temp variable
+	lda {timer1}
+	sta {pause_timer_lo}
+	lda {timer2}
+	sta {pause_timer_hi}
+	// run hijacked code and return
+	inc $0998
+	jml $828ced
+
+// start fading in, game state about to change to 12h
+resuming:
+	// add time spent in pause to stat at 27-28 spot
+	phy // XXX don't know whether Y is actually used in vanilla code, save it for safety
+	ldy #$001b
+	ldx {pause_timer_idx}
+	jsr add_time_32
+	ply
+
+	// run hijacked code and return
+	inc $0998
+	jml $82939f

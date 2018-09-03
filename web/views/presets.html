@@ -10,7 +10,8 @@ extend 'layout.html'
 <link href={{=URL('static', 'css/bootstrap-tour.min.css')}} rel="stylesheet">
 <script src="{{=URL('static','js/bootstrap-tour.min.js')}}"></script>
 
-<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script type="text/javascript" src="{{=URL('static', 'js/awesomplete.js')}}"></script>
+<link rel="stylesheet" type="text/css" href={{=URL("static", "css/awesomplete.css")}} />
 
 <title>Super Metroid VARIA Presets</title>
 
@@ -19,7 +20,77 @@ extend 'layout.html'
 <script src="{{=URL('static','barrating/jquery.barrating.min.js')}}"></script>
 
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+
+<style>
+.disabledText {
+    color: grey;
+    font-style: italic;
+}
+</style>
+
 <script type="text/javascript">
+function hookSubmit(){
+  // awesomplete value is not added to get, add it manually...
+  $("#presetForm").submit( function(eventObj) {
+      $('<input />').attr('type', 'hidden')
+          .attr('id', "comPreset")
+          .attr('name', "comPreset")
+          .attr('value', document.getElementById("comPreset2").value)
+          .appendTo("#presetForm");
+      return true;
+  });
+}
+function initAwesomplete(){
+  var comboplete = new Awesomplete('input.dropdown-input', {
+  	minChars: 0,
+        autoFirst: true,
+        maxItems: 2048,
+        sort: function(a,b) {
+          return a.localeCompare(b);
+        }
+  });
+  Awesomplete.$('.dropdown-btn').addEventListener("click", function() {
+  	if (comboplete.ul.childNodes.length === 0) {
+  		comboplete.minChars = 0;
+  		comboplete.evaluate();
+  	}
+  	else if (comboplete.ul.hasAttribute('hidden')) {
+  		comboplete.open();
+  	}
+  	else {
+  		comboplete.close();
+  	}
+  });
+
+  Awesomplete.$('.dropdown-input').addEventListener("awesomplete-selectcomplete", function(event) {
+    // disable standard preset button
+    enableStdPreset(false);
+  });
+
+  // if community presets is not empty, disable standard preset
+  var comPreset = document.getElementById("comPreset2");
+  if(comPreset != null && comPreset.value.length > 0){
+    enableStdPreset(false);
+  }
+
+  hookSubmit();
+
+  // TODO::add a event on the comPreset2 input when a key is pressed in it => disable stdPreset
+}
+
+function enableStdPreset(enable) {
+    if(enable == true){
+        var e = document.getElementById("stdPreset");
+        e.disabled = false;
+        var text = document.getElementById("stdPresetText");
+        text.className = "";
+    }else{
+        var e = document.getElementById("stdPreset");
+        e.disabled = true;
+        var text = document.getElementById("stdPresetText");
+        text.className = "disabledText";
+    }
+}
 
 function changeTab(evt, tabName) {
     // Declare all variables
@@ -51,14 +122,8 @@ function askPassword() {
 
   if (password != null) {
     document.getElementById("password").value = password;
-    document.presetForm.submit();
+    document.getElementById("presetForm").submit();
   }
-}
-function doSubmit() {
-  if(window.File && window.FileList && window.FileReader) {
-    document.getElementById("uploadFile").disabled = true;
-  }
-  return true;
 }
 function toggleSelect(elem)
 {
@@ -99,6 +164,8 @@ else:
   pass
 pass
 }}
+
+  initAwesomplete();
 }
 
 function startTheTour(step=-1) {
@@ -111,24 +178,6 @@ function startTheTour(step=-1) {
       title: "Presets",
       content: "Load your preset or one of the predefined ones:<ul><li>noob</li><li>casual</li><li>regular</li><li>veteran</li><li>speedrunner</li><li>master</li><li>samus</li></ul>Any preset can be used as a starting point to create your own using the New preset field. You will be asked a password when creating your preset, to be able to update it afterwards using the Update preset field.",
       placement: "auto left"
-    },
-    {
-      element: "#difficulty_target",
-      title: "Difficulty Target",
-      content: "The maximum difficulty for picking up an item in the current area before moving to another area.<br/><b>Warning</b>: selecting a too hard difficulty may produce unrealistic results."
-    },
-    {
-      element: "#pickup_strategy",
-      title: "Pickup Strategy",
-      content: "The strategy for picking up major and minor items.<br/>\
-<ul><li>All:</li><ul><li>Will grab all the major and minor items.</li></ul>\
-<li>Any:</li><ul><li>No requirements on the items as long as the ROM is finishable.<br/>\
-<b>Warning</b>: The generated path may not be realistic.<br/>\
-Use this setting on seeds that are unfinishable at first, such as masochist seeds in Dessyreqt randomizer.</li></ul>\
-<li>Minimal:</li><ul><li>Majors: Will get Morph, Bomb and/or Power bombs, 3 ETanks, Varia,<br/>\
-Gravity, Speed Booster or Ice Beam, and anything else along the way.</li>\
-<li>Minors:Will pick up 10 Missiles packs, 5 Super packs and 2 Power Bomb packs.<br/>\
-If Charge Beam is not picked up along the way or not accessible, enough minors to beat Mother Brain will be picked up.</li></ul></ul>"
     },
     {
       element: "#Ice",
@@ -227,9 +276,7 @@ function allReady() {
       var labels = container.getElementsByTagName('text');
 
       for (i = 0; i < labels.length; i++) {
-        // console.log(labels[i].textContent)
         if (labels[i].textContent.substring(0,1) == '0' || labels[i].textContent.substring(0,1) == '1') {
-          // console.log("found")
           labels[i].parentNode.removeChild(labels[i]);
           i--;
         }
@@ -346,25 +393,26 @@ pass
   </div>
 </div>
 
-<form id="presetForm" id="presetForm" class="presetform" method="post">
+<form id="presetForm" class="presetform" method="post">
   <div class="row">
     <div class="column">
       <table class="full">
 	<colgroup><col class="quarter" /><col class="half" /><col class="quarter"></colgroup>
 	<tr>
-	  <td>Load preset: </td>
-	  <td>{{=SELECT(*presets, **dict(_name="presetLoad", value=session.presets["preset"], _class="filldropdown"))}}</td>
-	  <td><input class="full" name="action" type="submit" value="Load"/></td>
+	  <td><span id="stdPresetText">Standard Presets: </span></td>
+	  <td>{{=SELECT(*stdPresets, **dict(_name="stdPreset", _id="stdPreset", value=session.presets["stdPreset"], _class="filldropdown"))}}</td>
 	</tr>
 	<tr>
-	  <td>Update preset:</td>
-	  <td>{{=SELECT(*presets, **dict(_name="presetUpdate", value=session.presets["preset"], _class="filldropdown"))}}</td>
-	  <td><input class="full" name="action" onclick="askPassword()" type="submit" value="Update"/></td>
+	  <td>Community Presets:</td>
+	  <td class="full"><input id="comPreset2" data-list="{{=", ".join(comPresets)}}" class="dropdown-input full" value="{{=session.presets['comPreset']}}"/><div style="float: right; width: 12px;"><button class="dropdown-btn" type="button"><span class="caret"></span></button></div></td>
 	</tr>
 	<tr>
-	  <td>New preset:</td>
-	  <td><input class="full" name="presetCreate" type="text"/></td>
-	  <td><input class="full" name="action" onclick="askPassword()" type="submit" value="Create"/></td>
+	  <td></td>
+	  <td>
+	    <!-- TODO: align buttons correctly -->
+	    <input class="quarter" name="action" type="submit" value="Load"/>
+	    <input class="quarter" name="action" onclick="askPassword();" type="submit" value="Update"/>
+	    <input class="quarter" name="action" onclick="askPassword()" type="submit" value="Create"/>
 	</tr>
       </table>
       <input id="password" name="password" style="display:none" type="text"/>
@@ -405,7 +453,7 @@ if skillBarData is not None:
 	  <td>Ice:</td>
 	  <td>{{hellruns = ['No thanks', 'Gimme energy', 'Default', 'Bring the heat', 'I run RBO']
 	        displaySelect("Ice", hellruns, settings['Ice'])}}</td>
-          <td><button type="button" onclick="startTheTour(3)">?</button></td>
+          <td><button type="button" onclick="startTheTour(1)">?</button></td>
 	</tr>
 	<tr>
 	  <td>Main Upper Norfair:</td>
@@ -424,7 +472,7 @@ if skillBarData is not None:
 	  <td>X-Ray:</td>
 	  <td>{{xray = ["Aarghh", "I don't like spikes", "Default", "I don't mind spikes", "D-Boost master"]
 	        displaySelect("X-Ray", xray, settings["X-Ray"])}}</td>
-          <td><button type="button" onclick="startTheTour(5)">?</button></td>
+          <td><button type="button" onclick="startTheTour(3)">?</button></td>
 	</tr>
 	<tr>
 	  <td>Gauntlet:</td>
@@ -441,7 +489,7 @@ if skillBarData is not None:
 	  <td>Kraid:</td>
 	  <td>{{kraid = ["He's annoying", 'Default', 'Quick Kill']
                 displaySelect("Kraid", kraid, settings['Kraid'])}}</td>
-          <td><button type="button" onclick="startTheTour(4)">?</button></td>
+          <td><button type="button" onclick="startTheTour(2)">?</button></td>
 	</tr>
 	<tr>
 	  <td>Draygon:</td>

@@ -113,24 +113,6 @@ function startTheTour(step=-1) {
       placement: "auto left"
     },
     {
-      element: "#difficulty_target",
-      title: "Difficulty Target",
-      content: "The maximum difficulty for picking up an item in the current area before moving to another area.<br/><b>Warning</b>: selecting a too hard difficulty may produce unrealistic results."
-    },
-    {
-      element: "#pickup_strategy",
-      title: "Pickup Strategy",
-      content: "The strategy for picking up major and minor items.<br/>\
-<ul><li>All:</li><ul><li>Will grab all the major and minor items.</li></ul>\
-<li>Any:</li><ul><li>No requirements on the items as long as the ROM is finishable.<br/>\
-<b>Warning</b>: The generated path may not be realistic.<br/>\
-Use this setting on seeds that are unfinishable at first, such as masochist seeds in Dessyreqt randomizer.</li></ul>\
-<li>Minimal:</li><ul><li>Majors: Will get Morph, Bomb and/or Power bombs, 3 ETanks, Varia,<br/>\
-Gravity, Speed Booster or Ice Beam, and anything else along the way.</li>\
-<li>Minors:Will pick up 10 Missiles packs, 5 Super packs and 2 Power Bomb packs.<br/>\
-If Charge Beam is not picked up along the way or not accessible, enough minors to beat Mother Brain will be picked up.</li></ul></ul>"
-    },
-    {
       element: "#Ice",
       title: "Hellruns",
       content: "<b>No thanks</b>: Don't do hellruns.<br/>\
@@ -405,7 +387,7 @@ if skillBarData is not None:
 	  <td>Ice:</td>
 	  <td>{{hellruns = ['No thanks', 'Gimme energy', 'Default', 'Bring the heat', 'I run RBO']
 	        displaySelect("Ice", hellruns, settings['Ice'])}}</td>
-          <td><button type="button" onclick="startTheTour(3)">?</button></td>
+          <td><button type="button" onclick="startTheTour(1)">?</button></td>
 	</tr>
 	<tr>
 	  <td>Main Upper Norfair:</td>
@@ -424,7 +406,7 @@ if skillBarData is not None:
 	  <td>X-Ray:</td>
 	  <td>{{xray = ["Aarghh", "I don't like spikes", "Default", "I don't mind spikes", "D-Boost master"]
 	        displaySelect("X-Ray", xray, settings["X-Ray"])}}</td>
-          <td><button type="button" onclick="startTheTour(5)">?</button></td>
+          <td><button type="button" onclick="startTheTour(3)">?</button></td>
 	</tr>
 	<tr>
 	  <td>Gauntlet:</td>
@@ -441,7 +423,7 @@ if skillBarData is not None:
 	  <td>Kraid:</td>
 	  <td>{{kraid = ["He's annoying", 'Default', 'Quick Kill']
                 displaySelect("Kraid", kraid, settings['Kraid'])}}</td>
-          <td><button type="button" onclick="startTheTour(4)">?</button></td>
+          <td><button type="button" onclick="startTheTour(2)">?</button></td>
 	</tr>
 	<tr>
 	  <td>Draygon:</td>

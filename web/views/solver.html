@@ -491,10 +491,14 @@ function startTheTour(step=-1) {
       content: "Solve again an already uploaded ROM file."
     },
     {
-      element: "#preset",
-      title: "Preset",
-      content: "The preset is used by the Solver to know which techniques are available to reach the items locations.<br/>You can create and manage your preset on the <a href=\"/solver/solver_web/presets\">Presets part of the website</a>.<br/>Load your preset or one of the predefined ones:<ul><li>noob</li><li>casual</li><li>regular</li><li>veteran</li><li>speedrunner</li><li>master</li><li>samus</li></ul>",
-      placement: "auto left"
+      element: "#stdPreset",
+      title: "Standard Preset",
+      content: "The preset is used by the Solver to know which techniques are available to reach the items locations.<br/>You can create and manage your preset on the <a href=\"/solver/solver_web/presets\">Presets part of the website</a>.<br/>Load one of the predefined presets, sorted in increased difficulty:<ul><li>noob</li><li>casual</li><li>regular</li><li>veteran</li><li>speedrunner</li><li>master</li><li>samus</li></ul>"
+    },
+    {
+      element: "#comPreset2",
+      title: "Community Preset",
+      content: "The preset is used by the Solver to know which techniques are available to reach the items locations.<br/>You can create and manage your preset on the <a href=\"/solver/solver_web/presets\">Presets part of the website</a>.<br/>Load your personal preset."
     },
     {
       element: "#difficultyTarget",
@@ -592,7 +596,7 @@ If Charge Beam is not picked up along the way or not accessible, enough minors t
 	    <tr>
 	      <td>Community Presets: </td>
 	      <td class="full"><input form="solverForm" type="text" id="comPreset2" data-list="{{=", ".join(comPresets)}}" class="dropdown-input full" value="{{=session.solver['comPreset']}}"/><div style="float: right; width: 12px;"><button class="dropdown-btn" type="button"><span class="caret"></span></button></div></td>
-	      <td><button type="button" onclick="startTheTour(2)">?</button></td>
+	      <td><button type="button" onclick="startTheTour(3)">?</button></td>
 	    </tr>
 	  </table>
 	</div>
@@ -602,12 +606,12 @@ If Charge Beam is not picked up along the way or not accessible, enough minors t
 	  <tr>
 	    <td>Difficulty target:</td>
 	    <td>{{=SELECT("easy", "medium", "hard", "very hard", "hardcore", "mania", _id="difficultyTarget", _name="difficultyTarget", _class="full", value=difficulties[session.solver["difficultyTarget"]])}}</td>
-	    <td><button type="button" onclick="startTheTour(3)">?</button></td>
+	    <td><button type="button" onclick="startTheTour(4)">?</button></td>
 	  </tr>
 	    <tr>
 	      <td>Pickup strategy:</td>
 	      <td>{{=SELECT("all", "minimal", "any", _id="pickupStrategy", _name="pickupStrategy", _form="solverForm", _class="full", value=session.solver["pickupStrategy"])}}</td>
-	      <td><button type="button" onclick="startTheTour(4)">?</button></td>
+	      <td><button type="button" onclick="startTheTour(5)">?</button></td>
 	    </tr>
 	  </table>
 	</div>

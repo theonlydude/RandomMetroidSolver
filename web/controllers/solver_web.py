@@ -36,9 +36,6 @@ def getPresetDir(preset):
 def loadPreset():
     # load conf from session if available
     loaded = False
-    if session.presets['preset'] is None:
-        # default preset
-        session.presets['preset'] = 'regular'
 
     if request.vars.action is not None:
         # press solve, load or save button
@@ -58,7 +55,14 @@ def loadPreset():
             loaded = True
 
     if not loaded:
-        params = PresetLoader.factory('{}/{}.json'.format(getPresetDir(session.presets['preset']), session.presets['preset'])).params
+        if len(session.presets['comPreset']) > 0:
+            try:
+                params = PresetLoader.factory('{}/{}.json'.format(getPresetDir(session.presets['comPreset']), session.presets['comPreset'])).params
+                loaded = True
+            except:
+                pass
+        if loaded == False:
+            params = PresetLoader.factory('{}/{}.json'.format(getPresetDir(session.presets['stdPreset']), session.presets['stdPreset'])).params
 
     return params
 
@@ -69,6 +73,18 @@ def loadPresetsList():
     return (stdPresets, comPresets)
 
 def validatePresetsParams(action):
+    if request.vars.stdPreset == None:
+        preset = request.vars.comPreset
+    else:
+        preset = request.vars.stdPreset
+
+    if IS_NOT_EMPTY()(preset)[1] is not None:
+        return (False, "Preset name is empty")
+    if IS_ALPHANUMERIC()(preset)[1] is not None:
+        return (False, "Preset name must be alphanumeric: {}".format(preset))
+    if IS_LENGTH(32)(preset)[1] is not None:
+        return (False, "Preset name must be max 32 chars: {}".format(preset))
+
     if action == 'Create':
         if IS_NOT_EMPTY()(request.vars.password)[1] is not None:
             return (False, "Password is empty")
@@ -76,22 +92,6 @@ def validatePresetsParams(action):
             return (False, "Password must be alphanumeric")
         if IS_LENGTH(32)(request.vars.password)[1] is not None:
             return (False, "Password must be max 32 chars")
-        if IS_NOT_EMPTY()(request.vars.presetCreate)[1] is not None:
-            return (False, "Preset name is empty")
-        if IS_ALPHANUMERIC()(request.vars.presetCreate)[1] is not None:
-            return (False, "Preset name must be alphanumeric")
-        if IS_LENGTH(32)(request.vars.presetCreate)[1] is not None:
-            return (False, "Preset name must be max 32 chars")
-    elif action == 'Update':
-        if IS_ALPHANUMERIC()(request.vars.presetUpdate)[1] is not None:
-            return (False, "Preset name must be alphanumeric")
-        if IS_LENGTH(32)(request.vars.presetUpdate)[1] is not None:
-            return (False, "Preset name must be max 32 chars")
-    elif action == 'Load':
-        if IS_ALPHANUMERIC()(request.vars.presetLoad)[1] is not None:
-            return (False, "Preset name must be alphanumeric")
-        if IS_LENGTH(32)(request.vars.presetLoad)[1] is not None:
-            return (False, "Preset name must be max 32 chars")
 
     if action in ['Create', 'Update']:
         # check that there's not two buttons for the same action
@@ -127,9 +127,20 @@ def initPresetsSession():
     if session.presets is None:
         session.presets = {}
 
-        session.presets['preset'] = 'regular'
+        session.presets['stdPreset'] = 'regular'
+        session.presets['comPreset'] = ''
         session.presets['presetDict'] = None
         session.presets['currentTab'] = 'Global'
+
+def updatePresetsSession():
+    if request.vars.stdPreset == None:
+        session.presets['stdPreset'] = 'regular'
+    else:
+        session.presets['stdPreset'] = request.vars.stdPreset
+    if request.vars.comPreset == None:
+        session.presets['comPreset'] = ''
+    else:
+        session.presets['comPreset'] = request.vars.comPreset
 
 def presets():
     initPresetsSession()
@@ -142,30 +153,30 @@ def presets():
         else:
             session.presets['currentTab'] = request.vars.currenttab
 
+        if request.vars.stdPreset == None:
+            preset = request.vars.comPreset
+        else:
+            preset = request.vars.stdPreset
+
+        print("preset={}".format(preset))
+
     # in web2py.js, in disableElement, remove 'working...' to have action with correct value
     if request.vars.action == 'Load':
         # check that the presets file exists
-        presetName = request.vars['presetLoad']
-        fullPath = '{}/{}.json'.format(getPresetDir(presetName), presetName)
+        fullPath = '{}/{}.json'.format(getPresetDir(preset), preset)
         if os.path.isfile(fullPath):
             # load it
             try:
                 params = PresetLoader.factory(fullPath).params
-                session.presets['preset'] = presetName
+                updatePresetsSession()
                 session.presets["presetDict"] = None
             except Exception as e:
-                session.flash = "Error loading the preset {}: {}".format(presetName, e)
+                session.flash = "Error loading the preset {}: {}".format(preset, e)
         else:
-            session.flash = "Presets file not found"
+            session.flash = "Presets file not found: {}".format(fullPath)
         redirect(URL(r=request, f='presets'))
 
     elif request.vars.action in ['Update', 'Create']:
-        # update or creation ?
-        if request.vars.action == 'Create':
-            preset = request.vars['presetCreate']
-        else:
-            preset = request.vars['presetUpdate']
-
         # check if the presets file already exists
         password = request.vars['password']
         password = password.encode('utf-8')
@@ -189,7 +200,7 @@ def presets():
                 paramsDict['password'] = passwordSHA256
                 try:
                     PresetLoader.factory(paramsDict).dump(fullPath)
-                    session.presets["preset"] = preset
+                    updatePresetsSession()
                     session.flash = "Preset {} updated".format(preset)
                 except Exception as e:
                     session.flash = "Error writing the preset {}: {}".format(preset, e)
@@ -206,7 +217,7 @@ def presets():
                 paramsDict['password'] = passwordSHA256
                 try:
                     PresetLoader.factory(paramsDict).dump(fullPath)
-                    session.presets["preset"] = preset
+                    updatePresetsSession()
                     session.flash = "Preset {} created".format(preset)
                 except Exception as e:
                     session.flash = "Error writing the preset {}: {}".format(preset, e)
@@ -219,11 +230,15 @@ def presets():
     response.title = 'Super Metroid VARIA Presets'
 
     # load conf from session if available
+    error = False
     try:
         params = loadPreset()
     except Exception as e:
-        session.presets['preset'] = 'regular'
+        session.presets['stdPreset'] = 'regular'
+        session.presets['comPreset'] = ''
         session.flash = "Error loading the preset: {}".format(e)
+        error = True
+    if error == True:
         redirect(URL(r=request, f='presets'))
 
     # load presets list
@@ -253,6 +268,7 @@ def presets():
                 params['Controller'][button] = Controller.__dict__[button]
 
     # compute score for skill bar
+    # TODO::check why it no longer works
     try:
         skillBarData = getSkillLevelBarData(session.presets['preset'])
     except:
@@ -262,7 +278,7 @@ def presets():
     return dict(desc=Knows.desc, difficulties=diff2text,
                 categories=Knows.categories, settings=params['Settings'], knows=params['Knows'],
                 easy=easy, medium=medium, hard=hard, harder=harder, hardcore=hardcore, mania=mania,
-                controller=params['Controller'], presets=stdPresets+comPresets,
+                controller=params['Controller'], stdPresets=stdPresets, comPresets=comPresets,
                 skillBarData=skillBarData)
 
 def initSolverSession():

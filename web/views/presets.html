@@ -397,22 +397,26 @@ pass
   <div class="row">
     <div class="column">
       <table class="full">
-	<colgroup><col class="quarter" /><col class="half" /><col class="quarter"></colgroup>
+	<colgroup><col class="quarter" /><col class="quarter" /><col class="quarter" /><col class="quarter"></colgroup>
 	<tr>
 	  <td><span id="stdPresetText">Standard Presets: </span></td>
-	  <td>{{=SELECT(*stdPresets, **dict(_name="stdPreset", _id="stdPreset", value=session.presets["stdPreset"], _class="filldropdown"))}}</td>
+	  <td colspan="3">{{=SELECT(*stdPresets, **dict(_name="stdPreset", _id="stdPreset", value=session.presets["stdPreset"], _class="filldropdown"))}}</td>
 	</tr>
 	<tr>
 	  <td>Community Presets:</td>
-	  <td class="full"><input id="comPreset2" data-list="{{=", ".join(comPresets)}}" class="dropdown-input full" value="{{=session.presets['comPreset']}}"/><div style="float: right; width: 12px;"><button class="dropdown-btn" type="button"><span class="caret"></span></button></div></td>
+	  <td class="full" colspan="3"><input id="comPreset2" data-list="{{=", ".join(comPresets)}}" class="dropdown-input full" value="{{=session.presets['comPreset']}}"/><div style="float: right; width: 12px;"><button class="dropdown-btn" type="button"><span class="caret"></span></button></div></td>
 	</tr>
 	<tr>
 	  <td></td>
 	  <td>
-	    <!-- TODO: align buttons correctly -->
-	    <input class="quarter" name="action" type="submit" value="Load"/>
-	    <input class="quarter" name="action" onclick="askPassword();" type="submit" value="Update"/>
-	    <input class="quarter" name="action" onclick="askPassword()" type="submit" value="Create"/>
+	    <input class="full" name="action" type="submit" value="Load"/>
+	  </td>
+	  <td>
+	    <input class="full" name="action" onclick="askPassword();" type="submit" value="Update"/>
+	  </td>
+	  <td>
+	    <input class="full" name="action" onclick="askPassword()" type="submit" value="Create"/>
+	  </td>
 	</tr>
       </table>
       <input id="password" name="password" style="display:none" type="text"/>

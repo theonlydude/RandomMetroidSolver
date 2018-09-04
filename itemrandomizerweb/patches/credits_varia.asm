@@ -1343,12 +1343,12 @@ credits:
     dw " power bombs                    " // 214
     dw " BOMBS                          " // 215
     dw " bombs                          " // 216
-    dw " FINAL TIME         00'00'00^00 " // 217
-    dw " final time                     " // 218
+    dw " TOTAL TIME         00'00'00^00 " // 217
+    dw " total time                     " // 218
     dw "       THANKS FOR PLAYING       " // 219
     dw "       thanks for playing       " // 220
-    dw " TIME IN PAUSE      00'00'00^00 " // 221
-    dw " time in pause                  " // 222
+    dw " INCLUDING PAUSE    00'00'00^00 " // 221
+    dw " including pause                " // 222
     {cyan}
     dw "     PLAY THIS RANDOMIZER AT    " // 223
     dw $0000                              // End of credits tilemap

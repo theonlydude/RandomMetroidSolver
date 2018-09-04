@@ -1036,7 +1036,7 @@ script:
     dw {draw}, {row}*178
     dw {draw}, {blank}
     dw {draw}, {blank}
-    dw {draw}, {row}*221 // PLAY THIS RANDOMIZER AT
+    dw {draw}, {row}*223 // PLAY THIS RANDOMIZER AT
     dw {draw}, {blank}
     dw {draw}, {row}*179
     dw {draw}, {row}*180
@@ -1170,14 +1170,16 @@ script:
     dw {draw}, {blank}
     dw {draw}, {blank}
     dw {draw}, {blank}
-    dw {draw}, {blank}
-    dw {draw}, {blank}
     dw {draw}, {row}*217
     dw {draw}, {row}*218
     dw {draw}, {blank}
+    dw {draw}, {row}*221
+    dw {draw}, {row}*222
+    dw {draw}, {blank}
+    dw {draw}, {blank}
     dw {draw}, {blank}
     dw {draw}, {row}*219
-    dw {draw}, {row}*220        
+    dw {draw}, {row}*220
     dw {draw}, {blank}
     dw {draw}, {blank}
     dw {draw}, {blank}
@@ -1215,6 +1217,7 @@ stats:
     dw 23,      {row}*211,  1, 0    // Super Missiles
     dw 24,      {row}*213,  1, 0    // Power Bombs
     dw 26,      {row}*215,  1, 0    // Bombs
+    dw 27,      {row}*221,  3, 0    // Time in pause
     dw 0,               0,  0, 0    // end of table
 
 warnpc $dfffff
@@ -1233,16 +1236,16 @@ credits:
     dw "          DUDE AND FLO          " // 129
     dw "          dude and flo          " // 130
     {purple}
-    dw "  SNES AND ITEM RANDOMIZER CODE " // 131
+    dw "    ORIGINAL ITEM RANDOMIZERS   " // 131
     {yellow}
     dw "       TOTAL   DESSYREQT        " // 132
-    dw "       FOOSDA  PERSONITIS       " // 133
     {purple}
-    dw "          ROM PATCHES           " // 134
+    dw "            SNES CODE           " // 133
     {yellow}
-    dw "   TOTAL  FOOSDA  LEODOX  FLO   " // 135
-    dw "   DARKSHOCK   RAKKI   SCYZER   " // 136
-    dw "   KEJARDON   SMILEY   LIORAN   " // 137
+    dw "   TOTAL      FOOSDA      FLO   " // 134
+    dw "   DARKSHOCK   RAKKI   SCYZER   " // 135
+    dw "   KEJARDON   SMILEY   LIORAN   " // 136
+    dw "      PERSONITIS    LEODOX      " // 137
     {cyan}
     dw "       SPECIAL THANKS TO        " // 138
     {yellow}
@@ -1344,8 +1347,10 @@ credits:
     dw " final time                     " // 218
     dw "       THANKS FOR PLAYING       " // 219
     dw "       thanks for playing       " // 220
+    dw " TIME IN PAUSE      00'00'00^00 " // 221
+    dw " time in pause                  " // 222
     {cyan}
-    dw "     PLAY THIS RANDOMIZER AT    " // 221
+    dw "     PLAY THIS RANDOMIZER AT    " // 223
     dw $0000                              // End of credits tilemap
 
 warnpc $ceffff

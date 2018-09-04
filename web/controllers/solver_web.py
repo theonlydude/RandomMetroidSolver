@@ -171,7 +171,7 @@ def presets():
                 updatePresetsSession()
                 session.presets["presetDict"] = None
             except Exception as e:
-                session.flash = "Error loading the preset {}: {}".format(preset, e)
+                session.flash = "L:Error loading the preset {}: {}".format(preset, e)
         else:
             session.flash = "Presets file not found: {}".format(fullPath)
         redirect(URL(r=request, f='presets'))
@@ -188,7 +188,7 @@ def presets():
             try:
                 oldParams = PresetLoader.factory(fullPath).params
             except Exception as e:
-                session.flash = "Error loading the preset {}: {}".format(preset, e)
+                session.flash = "UC:Error loading the preset {}: {}".format(preset, e)
                 end = True
             if end == True:
                 redirect(URL(r=request, f='presets'))
@@ -236,7 +236,7 @@ def presets():
     except Exception as e:
         session.presets['stdPreset'] = 'regular'
         session.presets['comPreset'] = ''
-        session.flash = "Error loading the preset: {}".format(e)
+        session.flash = "S:Error loading the preset: {}".format(e)
         error = True
     if error == True:
         redirect(URL(r=request, f='presets'))
@@ -268,9 +268,12 @@ def presets():
                 params['Controller'][button] = Controller.__dict__[button]
 
     # compute score for skill bar
-    # TODO::check why it no longer works
     try:
-        skillBarData = getSkillLevelBarData(session.presets['preset'])
+        if len(session.presets['comPreset']) > 0:
+            preset = session.presets['comPreset']
+        else:
+            preset = session.presets['stdPreset']
+        skillBarData = getSkillLevelBarData(preset)
     except:
         skillBarData = None
 

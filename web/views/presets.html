@@ -74,8 +74,13 @@ function initAwesomplete(){
   }
 
   hookSubmit();
+}
 
-  // TODO::add a event on the comPreset2 input when a key is pressed in it => disable stdPreset
+function inputKeyPress(){
+  var comPreset = document.getElementById("comPreset2");
+  if(comPreset != null && comPreset.value.length > 0){
+    enableStdPreset(false);
+  }
 }
 
 function enableStdPreset(enable) {
@@ -404,7 +409,7 @@ pass
 	</tr>
 	<tr>
 	  <td>Community Presets:</td>
-	  <td class="full" colspan="3"><input id="comPreset2" data-list="{{=", ".join(comPresets)}}" class="dropdown-input full" value="{{=session.presets['comPreset']}}"/><div style="float: right; width: 12px;"><button class="dropdown-btn" type="button"><span class="caret"></span></button></div></td>
+	  <td class="full" colspan="3"><input id="comPreset2" data-list="{{=", ".join(comPresets)}}" class="dropdown-input full" value="{{=session.presets['comPreset']}}" oninput="inputKeyPress()"/><div style="float: right; width: 12px;"><button class="dropdown-btn" type="button"><span class="caret"></span></button></div></td>
 	</tr>
 	<tr>
 	  <td></td>

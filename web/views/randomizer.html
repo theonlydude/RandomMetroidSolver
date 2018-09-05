@@ -576,11 +576,14 @@ window.onload = function(){
 
     var area = document.getElementById("areaRandomization");
     area.onchange = function(){
+        var area = document.getElementById("areaRandomization");
         var maxDiff = document.getElementById("maxDifficulty");
         var full = document.getElementById("fullRandomization");
         var patches = document.getElementById("areaLayout");
+        var lateMorph = document.getElementById("morphPlacement");
+        var suits = document.getElementById("suitsRestriction");
 
-        if(areaRandomization.checked){
+        if(area.checked){
             if(! full.checked) {
                 full.click();
             }
@@ -590,6 +593,12 @@ window.onload = function(){
             if(! patches.checked){
                 patches.click();
             }
+            // uncheck suits restrictions when late morph + area
+            if(lateMorph.options[lateMorph.selectedIndex].text == "late"){
+                if(suits.checked){
+                    suits.click();
+                }
+            }
         } else {
             if(patches.checked){
                 patches.click();
@@ -597,6 +606,22 @@ window.onload = function(){
         }
         switchCheckbox("areaRandomization");
     };
+
+    // uncheck suits restrictions when late morph + area
+    var lateMorph = document.getElementById("morphPlacement");
+    lateMorph.onchange = function(){
+        var lateMorph = document.getElementById("morphPlacement");
+        var area = document.getElementById("areaRandomization");
+        var suits = document.getElementById("suitsRestriction");
+
+        if(lateMorph.options[lateMorph.selectedIndex].text == "late"){
+            if(area.checked){
+                if(suits.checked){
+                    suits.click();
+                }
+            }
+        }
+    }
 
     var progSpeed = document.getElementById("progressionSpeed");
     progSpeed.onchange = function(){

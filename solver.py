@@ -236,7 +236,8 @@ class Solver:
 
             # compute the difficulty of all the locations
             self.computeLocationsDifficulty(self.majorLocations)
-            self.computeLocationsDifficulty(self.minorLocations)
+            if self.fullRando == False:
+                self.computeLocationsDifficulty(self.minorLocations)
 
             # keep only the available locations
             majorAvailable = [loc for loc in self.majorLocations if 'difficulty' in loc and loc["difficulty"].bool == True]

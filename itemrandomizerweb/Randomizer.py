@@ -906,12 +906,15 @@ class Randomizer(object):
         for boss in ['Kraid', 'Phantoon', 'Ridley', 'Draygon']:
             Bosses.beatBoss(boss)
         # get bosses locations and newly accessible locations (for bosses that open up locs)
-        locs = self.currentLocations(post=True) + [loc for loc in self.unusedLocations if 'Pickup' in loc]
+        newLocs = self.currentLocations(post=True)
+        locs = newLocs + [loc for loc in self.unusedLocations if 'Pickup' in loc and not loc in newLocs]
         ret = (len(locs) > len(prevLocs) and len(locs) == len(self.unusedLocations))
         # restore currently killed bosses
         Bosses.reset()
         for boss in bossesKilled:
             Bosses.beatBoss(boss)
+        # if ret:
+        #     print("onlyBossesLeft locs : " + str([loc['Name'] for loc in locs]))
         return ret
 
     # when max diff was stepped up due to boss fights, get a string that

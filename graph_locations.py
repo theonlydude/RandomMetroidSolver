@@ -600,7 +600,8 @@ locations = [
     'AccessFrom' : {
         'Main Street Bottom': lambda sm: sm.wor(sm.canOpenGreenDoors(), sm.wand(sm.canOpenRedDoors(), RomPatches.has(RomPatches.AreaRandoGatesOther))), # gate
         'Le Coude Right': lambda sm: sm.wand(sm.wor(sm.canOpenYellowDoors(), RomPatches.has(RomPatches.AreaRandoBlueDoors)),
-                                             sm.canOpenGreenDoors()), # toilet
+                                             sm.canOpenGreenDoors(),
+                                             sm.canDestroyBombWallsUnderwater()) # toilet
     },
     'Available': lambda sm: sm.wand(sm.wor(sm.haveItem('Gravity'), # access pants room
                                            sm.wand(sm.haveItem('HiJump'),

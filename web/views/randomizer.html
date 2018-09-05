@@ -632,9 +632,12 @@ window.onload = function(){
             if(! spreadItems.checked){
                 spreadItems.click();
             }
-            var suitsRestriction = document.getElementById("suitsRestriction");
 
-            if(! suitsRestriction.checked){
+            // set suits restriction only if not area + late morph
+            var suitsRestriction = document.getElementById("suitsRestriction");
+            var lateMorph = document.getElementById("morphPlacement");
+            var area = document.getElementById("areaRandomization");
+            if(! suitsRestriction.checked && ! (area.checked && lateMorph.options[lateMorph.selectedIndex].text == "late")){
                 suitsRestriction.click();
             }
         }

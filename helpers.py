@@ -67,6 +67,7 @@ class Helpers(object):
                 ret = 4.0
         return ret
 
+    # higher values for mult means room is that much "easier" (HP mult)
     def energyReserveCountOkHardRoom(self, roomName, mult=1.0):
         difficulties = Settings.hardRooms[roomName]
         mult *= self.getDmgReduction()
@@ -82,6 +83,7 @@ class Helpers(object):
                              self.smbm.wand(self.smbm.wnot(RomPatches.has(RomPatches.NoGravityEnvProtection)),
                                             self.smbm.haveItem('Gravity')))
 
+    # higher values for mult means hell run is that much "easier" (HP mult)
     def canHellRun(self, hellRun, mult=1.0):
         sm = self.smbm
 
@@ -94,6 +96,9 @@ class Helpers(object):
             if hellRun != 'LowerNorfair':
                 return self.energyReserveCountOkHellRun(hellRun, mult)
             else:
+                tanks = self.energyReserveCount()
+                if tanks >= 14:
+                    mult *= 2.0
                 return sm.wand(self.energyReserveCountOkHellRun(hellRun, mult),
                                self.canCrystalFlash(int(math.ceil(2/mult))))
         else:

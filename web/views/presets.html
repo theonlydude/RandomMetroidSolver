@@ -179,10 +179,19 @@ function startTheTour(step=-1) {
     storage: false,
     steps: [
     {
-      element: "#presetsStep",
-      title: "Presets",
-      content: "Load your preset or one of the predefined ones:<ul><li>noob</li><li>casual</li><li>regular</li><li>veteran</li><li>speedrunner</li><li>master</li><li>samus</li></ul>Any preset can be used as a starting point to create your own using the New preset field. You will be asked a password when creating your preset, to be able to update it afterwards using the Update preset field.",
-      placement: "auto left"
+      element: "#stdPreset",
+      title: "Standard Preset",
+      content: "The standard presets are base presets to create yours upon.<br/>Load one of the predefined presets, sorted in increased difficulty:<ul><li>noob</li><li>casual</li><li>regular</li><li>veteran</li><li>speedrunner</li><li>master</li><li>samus</li></ul>"
+    },
+    {
+      element: "#comPreset2",
+      title: "Community Preset",
+      content: "The community presets are the one created by the community."
+    },
+    {
+      element: "#createButton",
+      title: "Actions",
+      content: "The three actions available:<ul><li>Load: Load your preset or one of the predefined ones</li><li>Update: Update your preset after you've mastered a new technique</li><li>Create: Any preset can be used as a starting point to create your own</li></ul>."
     },
     {
       element: "#Ice",
@@ -194,17 +203,18 @@ function startTheTour(step=-1) {
 <b>I run RBO</b>: Reverse Boss Order runner.<br/>"
     },
     {
-      element: "#Kraid",
-      title: "Bosses",
-      content: "Logic behind the presets : the ones where you find the boss difficult are calibrated to give 'hard' in vanilla situations, the default are calibrated to give 'medium' in vanilla situations, just above gives 'easy' in vanilla situations, and top settings basically discards the boss except for extreme situations (very low energy or firepower).<br/>This is the estimated difficulty of the fight for a 'standard' kill. There are distinct parameters for special boss kill techniques (for example grappling Draygon, see Bosses in the Techniques section below)",
-      placement: "auto left"
-    },
-    {
       element: "#X-Ray",
       title: "Hard rooms",
       content: "Some rooms have an intended 'easy way' of traversing them : with Screw Attack for the Gauntlet Area, with Grapple or Space Jump for X-Ray. This is the difficulty when not placed in those conditions. Settings are displayed from easier to harder, they change the amount of energy required to go through the rooms.<br/><b>X-Ray</b>: difficulty of using the D-Boost (see in the techniques section below), Bomb Jump or Ice climb techniques.<br/><b>Gauntlet</b>: difficulty of traversing it with Bombs or Power Bombs.",
       placement: "auto left"
-    } ]});
+    },
+    {
+      element: "#Kraid",
+      title: "Bosses",
+      content: "Logic behind the presets : the ones where you find the boss difficult are calibrated to give 'hard' in vanilla situations, the default are calibrated to give 'medium' in vanilla situations, just above gives 'easy' in vanilla situations, and top settings basically discards the boss except for extreme situations (very low energy or firepower).<br/>This is the estimated difficulty of the fight for a 'standard' kill. There are distinct parameters for special boss kill techniques (for example grappling Draygon, see Bosses in the Techniques section below)",
+      placement: "auto left"
+    }
+ ]});
 
   // Initialize the tour
   tour.init();
@@ -406,10 +416,12 @@ pass
 	<tr>
 	  <td><span id="stdPresetText">Standard Presets: </span></td>
 	  <td colspan="3">{{=SELECT(*stdPresets, **dict(_name="stdPreset", _id="stdPreset", value=session.presets["stdPreset"], _class="filldropdown"))}}</td>
+	  <td><button type="button" onclick="startTheTour(0)">?</button></td>
 	</tr>
 	<tr>
 	  <td>Community Presets:</td>
 	  <td class="full" colspan="3"><input id="comPreset2" data-list="{{=", ".join(comPresets)}}" class="dropdown-input full" value="{{=session.presets['comPreset']}}" oninput="inputKeyPress()"/><div style="float: right; width: 12px;"><button class="dropdown-btn" type="button"><span class="caret"></span></button></div></td>
+	  <td><button type="button" onclick="startTheTour(1)">?</button></td>
 	</tr>
 	<tr>
 	  <td></td>
@@ -420,8 +432,9 @@ pass
 	    <input class="full" name="action" onclick="askPassword();" type="submit" value="Update"/>
 	  </td>
 	  <td>
-	    <input class="full" name="action" onclick="askPassword()" type="submit" value="Create"/>
+	    <input id="createButton" class="full" name="action" onclick="askPassword()" type="submit" value="Create"/>
 	  </td>
+	  <td><button type="button" onclick="startTheTour(2)">?</button></td>
 	</tr>
       </table>
       <input id="password" name="password" style="display:none" type="text"/>
@@ -462,7 +475,7 @@ if skillBarData is not None:
 	  <td>Ice:</td>
 	  <td>{{hellruns = ['No thanks', 'Gimme energy', 'Default', 'Bring the heat', 'I run RBO']
 	        displaySelect("Ice", hellruns, settings['Ice'])}}</td>
-          <td><button type="button" onclick="startTheTour(1)">?</button></td>
+          <td><button type="button" onclick="startTheTour(3)">?</button></td>
 	</tr>
 	<tr>
 	  <td>Main Upper Norfair:</td>
@@ -481,7 +494,7 @@ if skillBarData is not None:
 	  <td>X-Ray:</td>
 	  <td>{{xray = ["Aarghh", "I don't like spikes", "Default", "I don't mind spikes", "D-Boost master"]
 	        displaySelect("X-Ray", xray, settings["X-Ray"])}}</td>
-          <td><button type="button" onclick="startTheTour(3)">?</button></td>
+          <td><button type="button" onclick="startTheTour(4)">?</button></td>
 	</tr>
 	<tr>
 	  <td>Gauntlet:</td>
@@ -498,7 +511,7 @@ if skillBarData is not None:
 	  <td>Kraid:</td>
 	  <td>{{kraid = ["He's annoying", 'Default', 'Quick Kill']
                 displaySelect("Kraid", kraid, settings['Kraid'])}}</td>
-          <td><button type="button" onclick="startTheTour(2)">?</button></td>
+          <td><button type="button" onclick="startTheTour(5)">?</button></td>
 	</tr>
 	<tr>
 	  <td>Draygon:</td>

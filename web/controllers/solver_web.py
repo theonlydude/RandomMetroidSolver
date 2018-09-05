@@ -598,9 +598,7 @@ def genJsonFromParams(vars):
         if isKnows(var):
             boolVar = vars[var+"_bool"]
             if boolVar is None:
-                # ugly from renameKnows in parameters.py
-                if var not in ["GravLessLevel1", "GravLessLevel3"]:
-                    paramsDict['Knows'][var] = [False, 0]
+                paramsDict['Knows'][var] = [False, 0]
             else:
                 diffVar = vars[var+"_diff"]
                 if diffVar is not None:

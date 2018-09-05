@@ -155,7 +155,7 @@ class HelpersGraph(Helpers):
 
     def canPassLowerNorfairChozo(self):
         sm = self.smbm
-        return sm.wand(sm.canHellRun('LowerNorfair', 1.5), # 1.5 to require one more CF if no heat protection because of distance to cover, wait times, acid...
+        return sm.wand(sm.canHellRun('LowerNorfair', 0.75), # 0.75 to require one more CF if no heat protection because of distance to cover, wait times, acid...
                        sm.canUsePowerBombs(),
                        sm.haveItem('Super'), # you'll have to exit screw attack area at some point
                        sm.wor(sm.haveItem('SpaceJump'),

@@ -28,6 +28,15 @@ if __name__ == "__main__":
             if know in loader.params['Knows']:
                 del loader.params['Knows'][know]
 
+        newNames = {
+            'SuitlessOuterMaridia' : 'GravLessLevel1',
+            'SuitlessSandpit' : 'GravLessLevel3'
+        }
+        for oldKnow in newNames:
+            if oldKnow in loader.params['Knows']:
+                loader.params['Knows'][newNames[oldKnow]] = loader.params['Knows'][oldKnow]
+                del loader.params['Knows'][oldKnow]
+
 #        for know in ['SuitlessOuterMaridia', 'SuitlessSandpit', 'GravLessLevel1', 'GravLessLevel3']:
 #            if know in loader.params['Knows']:
 #                print "{} in {}: {}".format(know, preset, loader.params['Knows'][know])

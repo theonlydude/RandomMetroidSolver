@@ -45,11 +45,6 @@ text2diff = {
 def isKnows(knows):
     return knows[0:len('__')] != '__' and knows[0] == knows[0].upper()
 
-def staticConstructor(Class):
-    Class.renameKnows(Class)
-    return Class
-
-@staticConstructor
 class Knows:
     # the different technics to know (cf. http://deanyd.net/sm/index.php?title=Item_Randomizer)
     # and the personnal perceived difficulty.
@@ -186,8 +181,8 @@ class Knows:
                             'href': 'https://www.youtube.com/watch?v=jEAgdWQ9kLQ',
                             'rooms': ['Mother Brain Room']}
     # underwater grav-less
-    SuitlessOuterMaridia = SMBool(True, hardcore, ['SuitlessOuterMaridia']) # keep SuitlessOuterMaridia as name for existing presets compatibility
-    desc['SuitlessOuterMaridia'] = {'display': 'Level 1',
+    GravLessLevel1 = SMBool(True, hardcore, ['GravLessLevel1'])
+    desc['GravLessLevel1'] = {'display': 'Level 1',
                                     'title': 'Make your way underwater with Hi-Jump and Ice, freezing crabs and fishes. Access Botwoon with grapple.',
                                     'href': 'https://www.youtube.com/watch?v=c2xoPigezvM',
                                     'rooms': ['Main Street', 'Mt. Everest', 'Crab Shaft',
@@ -199,8 +194,8 @@ class Knows:
                               'href': None,
                               'rooms': []} # TODO
 
-    SuitlessSandpit = SMBool(False, 0, ['SuitlessSandpit']) # keep SuitlessSandpit as name for existing presets compatibility
-    desc['SuitlessSandpit'] = {'display': 'Level 3',
+    GravLessLevel3 = SMBool(False, 0, ['GravLessLevel3'])
+    desc['GravLessLevel3'] = {'display': 'Level 3',
                                'title': 'Level 2 and : no problem getting out of sand suitless, traverse mini-draygons area, wall jumps to access items in the left sand pit, access missile location in the right sand pit.',
                                'href': 'https://www.youtube.com/watch?v=1M2TiEVwH2I',
                                'rooms': ['West Sand Hole', 'East Sand Hole']} # TODO add mini-draygons rooms
@@ -454,7 +449,7 @@ class Knows:
              'title': 'Sponge Bath'}
         ],
         'Maridia 1/2': [
-            {'knows': ['SuitlessOuterMaridia', 'GravLessLevel2', 'SuitlessSandpit'],
+            {'knows': ['GravLessLevel1', 'GravLessLevel2', 'GravLessLevel3'],
              'title': 'Underwater movement without Gravity Suit'},
             {'knows': ['MochtroidClip', 'PuyoClip', 'SnailClip'],
              'title': 'Clips'},
@@ -481,19 +476,6 @@ class Knows:
              'title': 'End Game'}
         ]
     }
-
-    newNames = {
-        'SuitlessOuterMaridia' : 'GravLessLevel1',
-        'SuitlessSandpit' : 'GravLessLevel3'
-    }
-
-    @staticmethod
-    def renameKnows(Class):
-        # handle renamed knows
-        for old,new in Class.newNames.iteritems():
-            if not hasattr(Class, new):
-                setattr(Class, new, getattr(Class, old))
-
 
 def isSettings(settings):
     return settings[0:len('__')] != '__'

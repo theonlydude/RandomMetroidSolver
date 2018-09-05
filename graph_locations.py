@@ -585,7 +585,7 @@ locations = [
         'Main Street Bottom': lambda sm: sm.canAccessBotwoonFromMainStreet()
     },
     'Available': lambda sm: sm.wor(sm.haveItem('Gravity'),
-                                   sm.knowsSuitlessSandpit()) # suitless maridia conditions are in canAccessBotwoonFromMainStreet
+                                   sm.knowsGravLessLevel3()) # suitless maridia conditions are in canAccessBotwoonFromMainStreet
 },
 {
     'Area': "Maridia",
@@ -1670,7 +1670,7 @@ locations = [
         'Main Street Bottom': lambda sm: sm.canAccessBotwoonFromMainStreet()
     },
     'Available': lambda sm: sm.wor(sm.haveItem('Gravity'),
-                                   sm.knowsSuitlessSandpit()) # suitless maridia conditions are in canPassMtEverest
+                                   sm.knowsGravLessLevel3()) # suitless maridia conditions are in canPassMtEverest
 },
 {
     'Area': "Maridia",
@@ -1686,7 +1686,7 @@ locations = [
         'Main Street Bottom': lambda sm: sm.canAccessBotwoonFromMainStreet()
     },
     'Available': lambda sm: sm.wor(sm.haveItem('Gravity'),
-                                   sm.knowsSuitlessSandpit()) # suitless maridia conditions are in canPassMtEverest
+                                   sm.knowsGravLessLevel3()) # suitless maridia conditions are in canPassMtEverest
 },
 {
     'Area': "Maridia",

@@ -456,23 +456,32 @@ window.onload = function(){
                 select.add(option, 0);
                 select.value = option.value;
 
-                var preset = guessVARIAPreset(file.name);
-                if(preset != null) {
-                  if(preset == "noob" || preset == "casual" || preset == "regular" || preset == "veteran" || preset == "speedrunner" || preset == "master" || preset == "samus"){
-                    document.getElementById("stdPreset").value = preset;
-                    document.getElementById("comPreset2").value = "";
-                    enableStdPreset(true);
-                  } else {
-                    document.getElementById("comPreset2").value = preset;
-                    enableStdPreset(false);
-                  }
-                }
+                setGuessedPreset(file.name);
             }
 
             reader.readAsArrayBuffer(file);
 
         }, false);
     }
+}
+
+function lastRomFileChanged(elem) {
+  var romName = elem.options[elem.selectedIndex].text;;
+  setGuessedPreset(romName);
+}
+
+function setGuessedPreset(romName){
+  var preset = guessVARIAPreset(romName);
+  if(preset != null) {
+    if(preset == "noob" || preset == "casual" || preset == "regular" || preset == "veteran" || preset == "speedrunner" || preset == "master" || preset == "samus"){
+      document.getElementById("stdPreset").value = preset;
+      document.getElementById("comPreset2").value = "";
+      enableStdPreset(true);
+    } else {
+      document.getElementById("comPreset2").value = preset;
+      enableStdPreset(false);
+    }
+  }
 }
 
 function startTheTour(step=-1) {
@@ -585,7 +594,7 @@ If Charge Beam is not picked up along the way or not accessible, enough minors t
 	    </tr>
 	    <tr>
 	      <td>Already uploaded ROMs in this session: </td>
-	      <td>{{=SELECT(*roms, **dict(_name="romFile", _id="romFile", value=lastRomFile, _class="filldropdown"))}}</td>
+	      <td>{{=SELECT(*roms, **dict(_name="romFile", _id="romFile", value=lastRomFile, _class="filldropdown", _onchange="lastRomFileChanged(this);"))}}</td>
 	      <td><button type="button" onclick="startTheTour(1)">?</button></td>
 	    </tr>
 	    <tr>

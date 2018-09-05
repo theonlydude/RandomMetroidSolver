@@ -429,3 +429,28 @@ class SMBMAll(SMBoolManager):
             self.removeItem(item)
 
         return ret
+
+    def updateCache(self, action, item):
+        # reset: set last item added to None, recompute current
+        if action == 'reset':
+            self.lastItemAdded = None
+            for fun in self.helpers.cachedMethods:
+                setattr(self, fun+'SMBool', getattr(self.helpers, fun)())
+
+        # add: copy current in bak, set lastItemAdded, recompute current
+        elif action == 'add':
+            self.lastItemAdded = item
+            for fun in self.helpers.cachedMethods:
+                setattr(self, fun+'SMBoolbak', getattr(self, fun+'SMBool'))
+                setattr(self, fun+'SMBool', getattr(self.helpers, fun)())
+
+        # remove: if item removed is last added, copy bak in current, set lastItemAdded to None
+        elif action == 'remove':
+            if self.lastItemAdded == item:
+                self.lastItemAdded = None
+                for fun in self.helpers.cachedMethods:
+                    setattr(self, fun+'SMBool', getattr(self, fun+'SMBoolbak'))
+            else:
+                self.lastItemAdded = None
+                for fun in self.helpers.cachedMethods:
+                    setattr(self, fun+'SMBool', getattr(self.helpers, fun)())

@@ -178,6 +178,13 @@ function initAwesomplete(){
   }
 }
 
+function inputKeyPress(){
+  var comPreset = document.getElementById("comPreset");
+  if(comPreset != null && comPreset.value.length > 0){
+    enableStdPreset(false);
+  }
+}
+
 function enableStdPreset(enable) {
     if(enable == true){
         var e = document.getElementById("stdPreset");
@@ -958,7 +965,7 @@ def displayNumber(id, min, max, default, step="1"):
               </tr>
 	      <tr>
 		<td>Community Presets: </td>
-		<td class="full"><input id="comPreset" data-list="{{=", ".join(comPresets)}}" class="dropdown-input full" value="{{=session.randomizer['comPreset']}}"/><div style="float: right; width: 12px;"><button class="dropdown-btn" type="button"><span class="caret"></span></button></div></td>
+		<td class="full"><input id="comPreset" data-list="{{=", ".join(comPresets)}}" class="dropdown-input full" value="{{=session.randomizer['comPreset']}}" oninput="inputKeyPress()"/><div style="float: right; width: 12px;"><button class="dropdown-btn" type="button"><span class="caret"></span></button></div></td>
 		<td><button type="button" onclick="startTheTour(3)">?</button></td>
 	      </tr>
             </table>

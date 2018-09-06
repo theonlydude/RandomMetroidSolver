@@ -342,6 +342,13 @@ function initAwesomplete(){
   }
 }
 
+function inputKeyPress(){
+  var comPreset = document.getElementById("comPreset2");
+  if(comPreset != null && comPreset.value.length > 0){
+    enableStdPreset(false);
+  }
+}
+
 function hookFormSubmit(){
   // awesomplete value is not added to get, add it manually...
   $("#solverForm").submit( function(eventObj) {
@@ -607,7 +614,7 @@ If Charge Beam is not picked up along the way or not accessible, enough minors t
 	    </tr>
 	    <tr>
 	      <td>Community Presets: </td>
-	      <td class="full"><input form="solverForm" type="text" id="comPreset2" data-list="{{=", ".join(comPresets)}}" class="dropdown-input full" value="{{=session.solver['comPreset']}}"/><div style="float: right; width: 12px;"><button class="dropdown-btn" type="button"><span class="caret"></span></button></div></td>
+	      <td class="full"><input form="solverForm" type="text" id="comPreset2" data-list="{{=", ".join(comPresets)}}" class="dropdown-input full" value="{{=session.solver['comPreset']}}" oninput="inputKeyPress()"/><div style="float: right; width: 12px;"><button class="dropdown-btn" type="button"><span class="caret"></span></button></div></td>
 	      <td><button type="button" onclick="startTheTour(3)">?</button></td>
 	    </tr>
 	  </table>

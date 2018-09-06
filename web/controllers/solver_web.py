@@ -112,13 +112,22 @@ def validatePresetsParams(action):
     return (True, None)
 
 def getSkillLevelBarData(preset):
+    params = PresetLoader.factory('{}/{}.json'.format(getPresetDir(preset), preset)).params
+
     result = {'standards': {}}
-    result['custom'] = (preset, PresetLoader.factory('{}/{}.json'.format(getPresetDir(preset), preset)).params['score'])
+    result['custom'] = (preset, params['score'])
 
     # get score of standard presets
     for preset in ['noob', 'casual', 'regular', 'veteran', 'speedrunner', 'master', 'samus']:
         score = PresetLoader.factory('{}/{}.json'.format(getPresetDir(preset), preset)).params['score']
         result['standards'][preset] = score
+
+    # add stats on the preset
+    result['name'] = preset
+    result['knowsKnown'] = len([know for know in params['Knows'] if params['Knows'][know][0] == True])
+    DB = db.DB()
+    result['generatedSeeds'] = DB.getGeneratedSeeds(result['custom'][0])
+    DB.close()
 
     # TODO: normalize result (or not ?)
     return result

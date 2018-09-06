@@ -272,3 +272,13 @@ order by r.id;""".format(weeks)
 
         header = ["id", "actionTime", "returnCode", "duration", "errorMsg"]
         return (header, outData, paramsHead + sorted(list(paramsSet)))
+
+    def getGeneratedSeeds(self, preset):
+        sql="""select count(*) from randomizer_params where name = 'preset' and value = '{}';""".format(preset)
+        print("db sql= {}".format(sql))
+        data = self.execSelect(sql)
+        if data == None:
+            return 0
+        else:
+            print("db result = [ {} ]".format(data[0][0]))
+            return data[0][0]

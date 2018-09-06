@@ -26,6 +26,19 @@ extend 'layout.html'
     color: grey;
     font-style: italic;
 }
+.almostFull {
+    width: 95%;
+}
+.textTop {
+    padding: 0px;
+    vertical-align: top;
+}
+.noBorder {
+    border-bottom: 0px solid #fff;
+}
+.sixteen {
+    width: 16%;
+}
 </style>
 
 <script type="text/javascript">
@@ -412,7 +425,7 @@ pass
   <div class="row">
     <div class="column">
       <table class="full">
-	<colgroup><col class="quarter" /><col class="quarter" /><col class="quarter" /><col class="quarter"></colgroup>
+	<colgroup><col class="half" /><col class="sixteen" /><col class="sixteen" /><col class="sixteen"></colgroup>
 	<tr>
 	  <td><span id="stdPresetText">Standard Presets: </span></td>
 	  <td colspan="3">{{=SELECT(*stdPresets, **dict(_name="stdPreset", _id="stdPreset", value=session.presets["stdPreset"], _class="filldropdown"))}}</td>
@@ -445,7 +458,20 @@ pass
 {{
 if skillBarData is not None:
 }}
-      <div id="timeline" style="height: 95px; width: 95%;"></div>
+      <table class="almostFull">
+	<colgroup><col class="quarter" /><col class="threequarter" /></colgroup>
+	<tr>
+	  <td class="textTop noBorder">
+	    <h3>{{=skillBarData["custom"][0]}}</h3>
+	    <strong>Techniques known</strong>: {{=skillBarData["knowsKnown"]}}<br/>
+	    <strong>Skill score</strong>: {{=skillBarData["custom"][1]}}<br/>
+	    <strong>Seeds generated</strong>: {{=skillBarData["generatedSeeds"]}}
+	  </td>
+	  <td class="noBorder">
+	    <div id="timeline" style="height: 95px; width: 100%;"></div>
+	  </td>
+	</tr>
+      </table>
 {{
   pass
 }}

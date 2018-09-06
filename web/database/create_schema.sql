@@ -64,6 +64,7 @@ create table if not exists randomizer_params (
   primary key (randomizer_id, name),
   foreign key (randomizer_id) references randomizer(id)
 );
+create index randomizer_params_idx01 on randomizer_params(name);
 
 create table if not exists randomizer_result (
   randomizer_id int unsigned not null,

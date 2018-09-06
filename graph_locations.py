@@ -327,9 +327,13 @@ locations = [
         'Croc Zone': lambda sm: sm.setSMBool(True)
     },
     'Available': lambda sm: sm.wand(sm.enoughStuffCroc(),
-                                    sm.wor(sm.canFly(),
-                                           sm.wand(sm.haveItem('SpeedBooster'), sm.wor(sm.knowsShortCharge(), sm.canUsePowerBombs())),
-                                           sm.wand(sm.haveItem('Super'), sm.knowsGreenGateGlitch())))
+                                    sm.wor(sm.wand(sm.haveItem('Morph'),
+                                                   sm.canFly()),
+                                           sm.wand(sm.haveItem('SpeedBooster'),
+                                                   sm.wor(sm.knowsShortCharge(),
+                                                          sm.canUsePowerBombs())),
+                                           sm.wand(sm.haveItem('Super'),
+                                                   sm.knowsGreenGateGlitch())))
 },
 {
     'Area': "Norfair",
@@ -1297,8 +1301,15 @@ locations = [
         'Croc Zone': lambda sm: sm.setSMBool(True)
     },
     'Available': lambda sm: sm.wand(sm.enoughStuffCroc(),
-                                    sm.wor(sm.canFly(),
-                                           sm.haveItem('SpeedBooster'))) # spark up
+                                    sm.wor(sm.wor(sm.wand(sm.haveItem('Morph'), # from below
+                                                          sm.canFly()),
+                                                  sm.wand(sm.haveItem('SpeedBooster'),
+                                                          sm.wor(sm.knowsShortCharge(),
+                                                                 sm.canUsePowerBombs()))),
+                                           sm.wand(sm.haveItem('Super'), # from grapple room
+                                                   sm.knowsGreenGateGlitch(),
+                                                   sm.wor(sm.canFly(),
+                                                          sm.haveItem('Grapple'))))) # TODO::test if accessible with a spark, and how many etanks required
 },
 {
     'Area': "Norfair",

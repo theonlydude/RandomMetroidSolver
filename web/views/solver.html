@@ -326,6 +326,9 @@ function initAwesomplete(){
   		comboplete.close();
   	}
   });
+  Awesomplete.$('.dropdown-btn').addEventListener("blur", function() {
+       comboplete.close();
+  });
 
   Awesomplete.$('.dropdown-input').addEventListener("awesomplete-selectcomplete", function(event) {
     // disable standard preset button

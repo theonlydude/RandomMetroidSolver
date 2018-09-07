@@ -1309,7 +1309,10 @@ locations = [
                                            sm.wand(sm.haveItem('Super'), # from grapple room
                                                    sm.knowsGreenGateGlitch(),
                                                    sm.wor(sm.canFly(),
-                                                          sm.haveItem('Grapple'))))) # TODO::test if accessible with a spark, and how many etanks required
+                                                          sm.haveItem('Grapple'))))), # TODO::test if accessible with a spark, and how many etanks required
+    'PostAvailable': lambda sm: sm.wor(sm.haveItem('Morph'), # normal exit
+                                       sm.wor(sm.haveItem('SpaceJump'), # go back to grapple room
+                                              sm.wand(sm.haveItem('SpeedBooster'), sm.haveItem('HiJump')))) # jump from the yellow plateform ennemy
 },
 {
     'Area': "Norfair",

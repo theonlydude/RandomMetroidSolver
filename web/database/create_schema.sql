@@ -74,3 +74,10 @@ create table if not exists randomizer_result (
   primary key (randomizer_id),
   foreign key (randomizer_id) references randomizer(id)
 );
+
+create table if not exists preset_action (
+  preset varchar(32) not null,
+  action_time datetime not null,
+  action varchar(6) not null,
+  primary key (preset, action_time)
+);

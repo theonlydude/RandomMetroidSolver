@@ -127,6 +127,7 @@ def getSkillLevelBarData(preset):
     result['knowsKnown'] = len([know for know in params['Knows'] if params['Knows'][know][0] == True])
     DB = db.DB()
     result['generatedSeeds'] = DB.getGeneratedSeeds(result['custom'][0])
+    result['lastAction'] = DB.getPresetLastActionDate(result['custom'][0])
     DB.close()
 
     # TODO: normalize result (or not ?)
@@ -166,8 +167,6 @@ def presets():
             preset = request.vars.comPreset
         else:
             preset = request.vars.stdPreset
-
-        print("preset={}".format(preset))
 
     # in web2py.js, in disableElement, remove 'working...' to have action with correct value
     if request.vars.action == 'Load':
@@ -209,6 +208,9 @@ def presets():
                 paramsDict['password'] = passwordSHA256
                 try:
                     PresetLoader.factory(paramsDict).dump(fullPath)
+                    DB = db.DB()
+                    DB.addPresetAction(preset, 'update')
+                    DB.close()
                     updatePresetsSession()
                     session.flash = "Preset {} updated".format(preset)
                 except Exception as e:
@@ -226,6 +228,9 @@ def presets():
                 paramsDict['password'] = passwordSHA256
                 try:
                     PresetLoader.factory(paramsDict).dump(fullPath)
+                    DB = db.DB()
+                    DB.addPresetAction(preset, 'create')
+                    DB.close()
                     updatePresetsSession()
                     session.flash = "Preset {} created".format(preset)
                 except Exception as e:

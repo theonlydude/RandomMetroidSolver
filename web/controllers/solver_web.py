@@ -55,14 +55,7 @@ def loadPreset():
             loaded = True
 
     if not loaded:
-        if len(session.presets['comPreset']) > 0:
-            try:
-                params = PresetLoader.factory('{}/{}.json'.format(getPresetDir(session.presets['comPreset']), session.presets['comPreset'])).params
-                loaded = True
-            except:
-                pass
-        if loaded == False:
-            params = PresetLoader.factory('{}/{}.json'.format(getPresetDir(session.presets['stdPreset']), session.presets['stdPreset'])).params
+        params = PresetLoader.factory('{}/{}.json'.format(getPresetDir(session.presets['preset']), session.presets['preset'])).params
 
     return params
 
@@ -73,10 +66,10 @@ def loadPresetsList():
     return (stdPresets, comPresets)
 
 def validatePresetsParams(action):
-    if request.vars.stdPreset == None:
-        preset = request.vars.comPreset
+    if action == 'Create':
+        preset = request.vars.presetCreate
     else:
-        preset = request.vars.stdPreset
+        preset = request.vars.preset
 
     if IS_NOT_EMPTY()(preset)[1] is not None:
         return (False, "Preset name is empty")
@@ -112,19 +105,22 @@ def validatePresetsParams(action):
     return (True, None)
 
 def getSkillLevelBarData(preset):
-    params = PresetLoader.factory('{}/{}.json'.format(getPresetDir(preset), preset)).params
-
     result = {'standards': {}}
-    result['custom'] = (preset, params['score'])
+    result['name'] = preset
+    try:
+        params = PresetLoader.factory('{}/{}.json'.format(getPresetDir(preset), preset)).params
+        result['custom'] = (preset, params['score'])
+        # add stats on the preset
+        result['knowsKnown'] = len([know for know in params['Knows'] if params['Knows'][know][0] == True])
+    except:
+        result['custom'] = (preset, 'N/A')
+        result['knowsKnown'] = 'N/A'
 
     # get score of standard presets
     for preset in ['noob', 'casual', 'regular', 'veteran', 'speedrunner', 'master', 'samus']:
         score = PresetLoader.factory('{}/{}.json'.format(getPresetDir(preset), preset)).params['score']
         result['standards'][preset] = score
 
-    # add stats on the preset
-    result['name'] = preset
-    result['knowsKnown'] = len([know for know in params['Knows'] if params['Knows'][know][0] == True])
     DB = db.DB()
     result['generatedSeeds'] = DB.getGeneratedSeeds(result['custom'][0])
     result['lastAction'] = DB.getPresetLastActionDate(result['custom'][0])
@@ -137,20 +133,17 @@ def initPresetsSession():
     if session.presets is None:
         session.presets = {}
 
-        session.presets['stdPreset'] = 'regular'
-        session.presets['comPreset'] = ''
+        session.presets['preset'] = 'regular'
         session.presets['presetDict'] = None
         session.presets['currentTab'] = 'Global'
 
 def updatePresetsSession():
-    if request.vars.stdPreset == None:
-        session.presets['stdPreset'] = 'regular'
+    if request.vars.action == 'Create':
+        session.presets['preset'] = request.vars.presetCreate
+    elif request.vars.preset == None:
+        session.presets['preset'] = 'regular'
     else:
-        session.presets['stdPreset'] = request.vars.stdPreset
-    if request.vars.comPreset == None:
-        session.presets['comPreset'] = ''
-    else:
-        session.presets['comPreset'] = request.vars.comPreset
+        session.presets['preset'] = request.vars.preset
 
 def presets():
     initPresetsSession()
@@ -163,10 +156,10 @@ def presets():
         else:
             session.presets['currentTab'] = request.vars.currenttab
 
-        if request.vars.stdPreset == None:
-            preset = request.vars.comPreset
+        if request.vars.action == 'Create':
+            preset = request.vars.presetCreate
         else:
-            preset = request.vars.stdPreset
+            preset = request.vars.preset
 
     # in web2py.js, in disableElement, remove 'working...' to have action with correct value
     if request.vars.action == 'Load':
@@ -248,8 +241,7 @@ def presets():
     try:
         params = loadPreset()
     except Exception as e:
-        session.presets['stdPreset'] = 'regular'
-        session.presets['comPreset'] = ''
+        session.presets['preset'] = 'regular'
         session.flash = "S:Error loading the preset: {}".format(e)
         error = True
     if error == True:
@@ -282,14 +274,7 @@ def presets():
                 params['Controller'][button] = Controller.__dict__[button]
 
     # compute score for skill bar
-    try:
-        if len(session.presets['comPreset']) > 0:
-            preset = session.presets['comPreset']
-        else:
-            preset = session.presets['stdPreset']
-        skillBarData = getSkillLevelBarData(preset)
-    except:
-        skillBarData = None
+    skillBarData = getSkillLevelBarData(session.presets['preset'])
 
     # send values to view
     return dict(desc=Knows.desc, difficulties=diff2text,
@@ -302,8 +287,7 @@ def initSolverSession():
     if session.solver is None:
         session.solver = {}
 
-        session.solver['stdPreset'] = 'regular'
-        session.solver['comPreset'] = ''
+        session.solver['preset'] = 'regular'
         session.solver['difficultyTarget'] = Conf.difficultyTarget
         session.solver['pickupStrategy'] = Conf.itemsPickup
         session.solver['itemsForbidden'] = []
@@ -316,14 +300,10 @@ def updateSolverSession():
     if session.solver is None:
         session.solver = {}
 
-    if request.vars.stdPreset == None:
-        session.solver['stdPreset'] = 'regular'
+    if request.vars.preset == None:
+        session.solver['preset'] = 'regular'
     else:
-        session.solver['stdPreset'] = request.vars.stdPreset
-    if request.vars.comPreset == None:
-        session.solver['comPreset'] = ''
-    else:
-        session.solver['comPreset'] = request.vars.comPreset
+        session.solver['preset'] = request.vars.preset
     session.solver['difficultyTarget'] = text2diff[request.vars.difficultyTarget]
     session.solver['pickupStrategy'] = request.vars.pickupStrategy
     session.solver['complexity'] = request.vars.complexity

@@ -5,17 +5,16 @@ extend 'layout.html'
 
 <meta name="description" content="Solver for the randomized Super Metroid roms"/>
 <link rel="shortcut icon" href={{=URL('static','favicon.ico')}} type="image/ico"/>
-<link rel="stylesheet" type="text/css" href={{=URL('static/css','mystyle_20180802.css')}} media="screen"/>
+<link rel="stylesheet" type="text/css" href={{=URL('static/css','mystyle_20180908.css')}} media="screen"/>
 
 <link href={{=URL('static', 'css/bootstrap-tour.min.css')}} rel="stylesheet">
 <script src="{{=URL('static','js/bootstrap-tour.min.js')}}"></script>
 
-<script type="text/javascript" src="{{=URL('static', 'js/awesomplete.js')}}"></script>
-<link rel="stylesheet" type="text/css" href={{=URL("static", "css/awesomplete.css")}} />
+<script type="text/javascript" src="{{=URL('static', 'js/chosen.jquery.min.js')}}"></script>
+<link rel="stylesheet" type="text/css" href={{=URL("static", "css/chosen.min.css")}} />
 
 <title>Super Metroid VARIA Presets</title>
 
-<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css">
 <link rel="stylesheet" href="{{=URL('static','barrating/themes/bars-1to10.css')}}">
 <script src="{{=URL('static','barrating/jquery.barrating.min.js')}}"></script>
 
@@ -42,77 +41,6 @@ extend 'layout.html'
 </style>
 
 <script type="text/javascript">
-function hookSubmit(){
-  // awesomplete value is not added to get, add it manually...
-  $("#presetForm").submit( function(eventObj) {
-      $('<input />').attr('type', 'hidden')
-          .attr('id', "comPreset")
-          .attr('name', "comPreset")
-          .attr('value', document.getElementById("comPreset2").value)
-          .appendTo("#presetForm");
-      return true;
-  });
-}
-function initAwesomplete(){
-  var comboplete = new Awesomplete('input.dropdown-input', {
-  	minChars: 0,
-        autoFirst: true,
-        maxItems: 2048,
-        sort: function(a,b) {
-          return a.localeCompare(b);
-        }
-  });
-  Awesomplete.$('.dropdown-btn').addEventListener("click", function() {
-  	if (comboplete.ul.childNodes.length === 0) {
-  		comboplete.minChars = 0;
-  		comboplete.evaluate();
-  	}
-  	else if (comboplete.ul.hasAttribute('hidden')) {
-  		comboplete.open();
-  	}
-  	else {
-  		comboplete.close();
-  	}
-  });
-  Awesomplete.$('.dropdown-btn').addEventListener("blur", function() {
-       comboplete.close();
-  });
-
-  Awesomplete.$('.dropdown-input').addEventListener("awesomplete-selectcomplete", function(event) {
-    // disable standard preset button
-    enableStdPreset(false);
-  });
-
-  // if community presets is not empty, disable standard preset
-  var comPreset = document.getElementById("comPreset2");
-  if(comPreset != null && comPreset.value.length > 0){
-    enableStdPreset(false);
-  }
-
-  hookSubmit();
-}
-
-function inputKeyPress(){
-  var comPreset = document.getElementById("comPreset2");
-  if(comPreset != null && comPreset.value.length > 0){
-    enableStdPreset(false);
-  }
-}
-
-function enableStdPreset(enable) {
-    if(enable == true){
-        var e = document.getElementById("stdPreset");
-        e.disabled = false;
-        var text = document.getElementById("stdPresetText");
-        text.className = "";
-    }else{
-        var e = document.getElementById("stdPreset");
-        e.disabled = true;
-        var text = document.getElementById("stdPresetText");
-        text.className = "disabledText";
-    }
-}
-
 function changeTab(evt, tabName) {
     // Declare all variables
     var i, tabcontent, tablinks;
@@ -186,7 +114,7 @@ else:
 pass
 }}
 
-  initAwesomplete();
+  $(".chzn-select").chosen();
 }
 
 function startTheTour(step=-1) {
@@ -195,14 +123,9 @@ function startTheTour(step=-1) {
     storage: false,
     steps: [
     {
-      element: "#stdPreset",
-      title: "Standard Preset",
-      content: "The standard presets are base presets to create yours upon.<br/>Load one of the predefined presets, sorted in increased difficulty:<ul><li>noob</li><li>casual</li><li>regular</li><li>veteran</li><li>speedrunner</li><li>master</li><li>samus</li></ul>"
-    },
-    {
-      element: "#comPreset2",
-      title: "Community Preset",
-      content: "The community presets are the one created by the community."
+      element: "#preset",
+      title: "Preset",
+      content: "The standard presets are base presets to create yours upon.<br/>Load one of the predefined presets, sorted in increased difficulty or you own:<ul><li>noob</li><li>casual</li><li>regular</li><li>veteran</li><li>speedrunner</li><li>master</li><li>samus</li></ul>"
     },
     {
       element: "#createButton",
@@ -426,18 +349,18 @@ pass
 
 <form id="presetForm" class="presetform" method="post">
   <div class="row">
-    <div class="column">
+    <div class="columnThird">
       <table class="full">
-	<colgroup><col class="half" /><col class="sixteen" /><col class="sixteen" /><col class="sixteen"></colgroup>
+	<colgroup><col class="quarter" /><col class="quarter" /><col class="quarter" /><col class="quarter"></colgroup>
 	<tr>
-	  <td><span id="stdPresetText">Standard Presets: </span></td>
-	  <td colspan="3">{{=SELECT(*stdPresets, **dict(_name="stdPreset", _id="stdPreset", value=session.presets["stdPreset"], _class="filldropdown"))}}</td>
+	  <td>Preset:</td>
+	  <td colspan="3">{{=SELECT(OPTGROUP(*stdPresets, **dict(_label="Standard presets")), OPTGROUP(*comPresets, **dict(_label="Community presets")), **dict(_name="preset", _id="preset", value=session.presets["preset"], _class="filldropdown chzn-select"))}}</td>
 	  <td><button type="button" onclick="startTheTour(0)">?</button></td>
 	</tr>
 	<tr>
-	  <td>Community Presets:</td>
-	  <td class="full" colspan="3"><input id="comPreset2" data-list="{{=", ".join(comPresets)}}" class="dropdown-input full" value="{{=session.presets['comPreset']}}" oninput="inputKeyPress()"/><div style="float: right; width: 12px;"><button class="dropdown-btn" type="button"><span class="caret"></span></button></div></td>
-	  <td><button type="button" onclick="startTheTour(1)">?</button></td>
+	  <td>New preset:</td>
+	  <td colspan="3"><input class="full" name="presetCreate" type="text"/></td>
+	  <td><button type="button" onclick="startTheTour(0)">?</button></td>
 	</tr>
 	<tr>
 	  <td></td>
@@ -450,32 +373,41 @@ pass
 	  <td>
 	    <input id="createButton" class="full" name="action" onclick="askPassword()" type="submit" value="Create"/>
 	  </td>
-	  <td><button type="button" onclick="startTheTour(2)">?</button></td>
+	  <td><button type="button" onclick="startTheTour(1)">?</button></td>
 	</tr>
       </table>
       <input id="password" name="password" style="display:none" type="text"/>
       <input id="currenttab" name="currenttab" style="display:none" type="text"/>
     </div>
-    <div class="column">
-
-{{
-if skillBarData is not None:
-}}
+    <div class="columnThird">
       <table class="full">
-	<colgroup><col class="quarter" /><col class="threequarter" /></colgroup>
 	<tr>
-	  <td class="textTop noBorder">
-	    <h3>{{=skillBarData["custom"][0]}}</h3>
-	    <strong>Techniques known</strong>: {{=skillBarData["knowsKnown"]}}<br/>
-	    <strong>Skill score</strong>: {{=skillBarData["custom"][1]}}<br/>
-	    <strong>Seeds generated</strong>: {{=skillBarData["generatedSeeds"]}}<br/>
-	    <strong>Last updated</strong>: {{=skillBarData["lastAction"]}}
-	  </td>
-	  <td class="noBorder">
-	    <div id="timeline" style="height: 95px; width: 100%;"></div>
+	  <td>
+	    <h3 class="center">{{=skillBarData["custom"][0]}}</h3>
 	  </td>
 	</tr>
       </table>
+      <table class="full">
+	<tr>
+	  <td>Techniques known:</td>
+	  <td>{{=skillBarData["knowsKnown"]}}</td>
+	  <td>Skill score:</td>
+	  <td>{{=skillBarData["custom"][1]}}</td>
+	</tr>
+	<tr>
+	  <td>Seeds generated:</td>
+	  <td>{{=skillBarData["generatedSeeds"]}}</td>
+	  <td>Last updated:</td>
+	  <td>{{=skillBarData["lastAction"]}}</td>
+	</tr>
+      </table>
+    </div>
+    <div class="columnThird">
+{{
+if skillBarData is not None:
+}}
+      Skill level bar:
+      <div id="timeline" style="height: 95px; width: 100%;"></div>
 {{
   pass
 }}
@@ -505,7 +437,7 @@ if skillBarData is not None:
 	  <td>Ice:</td>
 	  <td>{{hellruns = ['No thanks', 'Gimme energy', 'Default', 'Bring the heat', 'I run RBO']
 	        displaySelect("Ice", hellruns, settings['Ice'])}}</td>
-          <td><button type="button" onclick="startTheTour(3)">?</button></td>
+          <td><button type="button" onclick="startTheTour(2)">?</button></td>
 	</tr>
 	<tr>
 	  <td>Main Upper Norfair:</td>
@@ -524,7 +456,7 @@ if skillBarData is not None:
 	  <td>X-Ray:</td>
 	  <td>{{xray = ["Aarghh", "I don't like spikes", "Default", "I don't mind spikes", "D-Boost master"]
 	        displaySelect("X-Ray", xray, settings["X-Ray"])}}</td>
-          <td><button type="button" onclick="startTheTour(4)">?</button></td>
+          <td><button type="button" onclick="startTheTour(3)">?</button></td>
 	</tr>
 	<tr>
 	  <td>Gauntlet:</td>
@@ -541,7 +473,7 @@ if skillBarData is not None:
 	  <td>Kraid:</td>
 	  <td>{{kraid = ["He's annoying", 'Default', 'Quick Kill']
                 displaySelect("Kraid", kraid, settings['Kraid'])}}</td>
-          <td><button type="button" onclick="startTheTour(5)">?</button></td>
+          <td><button type="button" onclick="startTheTour(4)">?</button></td>
 	</tr>
 	<tr>
 	  <td>Draygon:</td>

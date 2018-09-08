@@ -181,6 +181,11 @@ p {
     width: 50%;
     padding-left: 10px;
 }
+.columnThird {
+    float: left;
+    width: 33%;
+    padding-left: 10px;
+}
 .row:after {
     content: "";
     display: table;
@@ -188,6 +193,9 @@ p {
 }
 @media (max-width: 800px) {
     .column {
+        width: 100%;
+    }
+    .columnThird {
         width: 100%;
     }
 }

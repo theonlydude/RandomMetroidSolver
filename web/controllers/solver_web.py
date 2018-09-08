@@ -683,8 +683,7 @@ def initRandomizerSession():
         session.randomizer = {}
 
         session.randomizer['maxDifficulty'] = 'hardcore'
-        session.randomizer['stdPreset'] = 'regular'
-        session.randomizer['comPreset'] = ''
+        session.randomizer['preset'] = 'regular'
         for patch in patches:
             if patch[2] == True:
                 session.randomizer[patch[0]] = "on"
@@ -742,12 +741,7 @@ def validateWebServiceParams(patchs, quantities, others, isJson=False):
     if request.vars['skip_intro'] == request.vars['skip_ceres']:
         raiseHttp(400, "You must choose one and only one patch for skipping the intro/Ceres station", isJson)
 
-    if request.vars.stdPreset == None and request.vars.comPreset == None:
-        raiseHttp(400, "Missing parameter stdPreset and comPreset", isJson)
-    elif request.vars.stdPreset == None:
-        preset = request.vars.comPreset
-    else:
-        preset = request.vars.stdPreset
+    preset = request.vars.preset
 
     if IS_ALPHANUMERIC()(preset)[1] is not None:
         raiseHttp(400, "Wrong value for preset, must be alphanumeric", isJson)
@@ -832,7 +826,7 @@ def sessionWebService():
     quantities = ['missileQty', 'superQty', 'powerBombQty']
     others = ['minorQty', 'energyQty', 'maxDifficulty',
               'progressionSpeed', 'spreadItems', 'fullRandomization', 'suitsRestriction',
-              'funCombat', 'funMovement', 'funSuits', 'layoutPatches',
+              'funCombat', 'funMovement', 'funSuits', 'layoutPatches', 'preset',
               'noGravHeat', 'progressionDifficulty', 'morphPlacement',
               'areaRandomization', 'complexity', 'hideItems', 'strictMinors']
     validateWebServiceParams(patchs, quantities, others)
@@ -841,14 +835,7 @@ def sessionWebService():
         session.randomizer = {}
 
     session.randomizer['maxDifficulty'] = request.vars.maxDifficulty
-    if request.vars.stdPreset == None:
-        session.randomizer['stdPreset'] = 'regular'
-    else:
-        session.randomizer['stdPreset'] = request.vars.stdPreset
-    if request.vars.comPreset == None:
-        session.randomizer['comPreset'] = ''
-    else:
-        session.randomizer['comPreset'] = request.vars.comPreset
+    session.randomizer['preset'] = request.vars.preset
     for patch in patches:
         session.randomizer[patch[0]] = request.vars[patch[0]]
     session.randomizer['missileQty'] = request.vars.missileQty
@@ -895,7 +882,7 @@ def randomizerWebService():
     patchs = ['itemsounds', 'spinjumprestart', 'elevators_doors_speed', 'skip_intro',
               'skip_ceres', 'areaLayout', 'variaTweaks', 'No_Music']
     quantities = ['missileQty', 'superQty', 'powerBombQty']
-    others = ['seed', 'paramsFileTarget', 'minorQty', 'energyQty',
+    others = ['seed', 'paramsFileTarget', 'minorQty', 'energyQty', 'preset',
               'maxDifficulty', 'progressionSpeed', 'spreadItems', 'fullRandomization',
               'suitsRestriction', 'morphPlacement', 'funCombat', 'funMovement', 'funSuits',
               'layoutPatches', 'noGravHeat', 'progressionDifficulty', 'areaRandomization',
@@ -920,10 +907,7 @@ def randomizerWebService():
     if seed == '0':
         seed = str(random.randint(0, 9999999))
 
-    if request.vars.stdPreset == None:
-        preset = request.vars.comPreset
-    else:
-        preset = request.vars.stdPreset
+    preset = request.vars.preset
 
     params = ['python2',  os.path.expanduser("~/RandomMetroidSolver/randomizer.py"),
               '--seed', seed,
@@ -1043,12 +1027,9 @@ def randomizerWebService():
 
 def presetWebService():
     # web service to get the content of the preset file
-    if request.vars.stdPreset == None and request.vars.comPreset == None:
-        raiseHttp(400, "Missing parameter stdPreset and comPreset")
-    elif request.vars.stdPreset == None:
-        preset = request.vars.comPreset
-    else:
-        preset = request.vars.stdPreset
+    if request.vars.preset == None:
+        raiseHttp(400, "Missing parameter preset")
+    preset = request.vars.preset
 
     if IS_ALPHANUMERIC()(preset)[1] is not None:
         raise HTTP(400, "Preset name must be alphanumeric")

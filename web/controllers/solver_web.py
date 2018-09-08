@@ -300,10 +300,7 @@ def updateSolverSession():
     if session.solver is None:
         session.solver = {}
 
-    if request.vars.preset == None:
-        session.solver['preset'] = 'regular'
-    else:
-        session.solver['preset'] = request.vars.preset
+    session.solver['preset'] = request.vars.preset
     session.solver['difficultyTarget'] = text2diff[request.vars.difficultyTarget]
     session.solver['pickupStrategy'] = request.vars.pickupStrategy
     session.solver['complexity'] = request.vars.complexity
@@ -400,12 +397,9 @@ def validateSolverParams():
         if request.vars[param] is None:
             return (False, "Missing parameter {}".format(param))
 
-    if request.vars.stdPreset == None and request.vars.comPreset == None:
-        return (False, "Missing parameter stdPreset and comPreset")
-    elif request.vars.stdPreset == None:
-        preset = request.vars.comPreset
-    else:
-        preset = request.vars.stdPreset
+    if request.vars.preset == None:
+        return (False, "Missing parameter preset")
+    preset = request.vars.preset
 
     if IS_ALPHANUMERIC()(preset)[1] is not None:
         return (False, "Wrong value for preset, must be alphanumeric")
@@ -479,10 +473,7 @@ def solver():
 
         updateSolverSession()
 
-        if request.vars.stdPreset == None:
-            preset = request.vars.comPreset
-        else:
-            preset = request.vars.stdPreset
+        preset = request.vars.preset
 
         # new uploaded rom ?
         error = False

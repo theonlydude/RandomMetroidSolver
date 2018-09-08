@@ -28,8 +28,8 @@ if (hs.registerOverlay) {
 <link href={{=URL('static', 'css/bootstrap-tour.min.css')}} rel="stylesheet">
 <script src="{{=URL('static','js/bootstrap-tour.min.js')}}"></script>
 
-<script type="text/javascript" src="{{=URL('static', 'js/awesomplete.js')}}"></script>
-<link rel="stylesheet" type="text/css" href={{=URL("static", "css/awesomplete.css")}} />
+<script type="text/javascript" src="{{=URL('static', 'js/chosen.jquery.min.js')}}"></script>
+<link rel="stylesheet" type="text/css" href={{=URL("static", "css/chosen.min.css")}} />
 
 <title>Super Metroid VARIA Solver</title>
 
@@ -305,81 +305,11 @@ function allReady() {
 pass
 }}
 
-function initAwesomplete(){
-  var comboplete = new Awesomplete('input.dropdown-input', {
-  	minChars: 0,
-        autoFirst: true,
-        maxItems: 2048,
-        sort: function(a,b) {
-          return a.localeCompare(b);
-        }
-  });
-  Awesomplete.$('.dropdown-btn').addEventListener("click", function() {
-  	if (comboplete.ul.childNodes.length === 0) {
-  		comboplete.minChars = 0;
-  		comboplete.evaluate();
-  	}
-  	else if (comboplete.ul.hasAttribute('hidden')) {
-  		comboplete.open();
-  	}
-  	else {
-  		comboplete.close();
-  	}
-  });
-  Awesomplete.$('.dropdown-btn').addEventListener("blur", function() {
-       comboplete.close();
-  });
-
-  Awesomplete.$('.dropdown-input').addEventListener("awesomplete-selectcomplete", function(event) {
-    // disable standard preset button
-    // console.log( event.text.label, event.text.value );
-    enableStdPreset(false);
-  });
-
-  // if community presets is not empty, disable standard preset
-  if(document.getElementById("comPreset2").value.length > 0){
-    enableStdPreset(false);
-  }
-}
-
-function inputKeyPress(){
-  var comPreset = document.getElementById("comPreset2");
-  if(comPreset != null && comPreset.value.length > 0){
-    enableStdPreset(false);
-  }
-}
-
-function hookFormSubmit(){
-  // awesomplete value is not added to get, add it manually...
-  $("#solverForm").submit( function(eventObj) {
-      $('<input />').attr('type', 'hidden')
-          .attr('name', "comPreset")
-          .attr('value', document.getElementById("comPreset2").value)
-          .appendTo('#solverForm');
-      return true;
-  });
-}
-
-function enableStdPreset(enable) {
-    if(enable == true){
-        var e = document.getElementById("stdPreset");
-        e.disabled = false;
-        var text = document.getElementById("stdPresetText");
-        text.className = "";
-    }else{
-        var e = document.getElementById("stdPreset");
-        e.disabled = true;
-        var text = document.getElementById("stdPresetText");
-        text.className = "disabledText";
-    }
-}
 
 window.onload = function(){
-    initAwesomplete();
+    $(".chzn-select").chosen();
 
     setComplexity();
-
-    hookFormSubmit();
 
     //Check File API support
     if(window.File && window.FileList && window.FileReader)
@@ -500,24 +430,19 @@ function startTheTour(step=-1) {
     storage: false,
     steps: [
     {
-      element: "#uploadFile",
+      element: "#uploadFileStep",
       title: "ROM file",
       content: "The randomized ROM that you want to solve."
     },
     {
-      element: "#romFile",
+      element: "#romFileStep",
       title: "Already uploaded ROM files",
       content: "Solve again an already uploaded ROM file."
     },
     {
-      element: "#stdPreset",
-      title: "Standard Preset",
-      content: "The preset is used by the Solver to know which techniques are available to reach the items locations.<br/>You can create and manage your preset on the <a href=\"/solver/solver_web/presets\">Presets part of the website</a>.<br/>Load one of the predefined presets, sorted in increased difficulty:<ul><li>noob</li><li>casual</li><li>regular</li><li>veteran</li><li>speedrunner</li><li>master</li><li>samus</li></ul>"
-    },
-    {
-      element: "#comPreset2",
-      title: "Community Preset",
-      content: "The preset is used by the Solver to know which techniques are available to reach the items locations.<br/>You can create and manage your preset on the <a href=\"/solver/solver_web/presets\">Presets part of the website</a>.<br/>Load your personal preset."
+      element: "#presetStep",
+      title: "Preset",
+      content: "The preset is used by the Solver to know which techniques are available to reach the items locations.<br/>You can create and manage your preset on the <a href=\"/solver/solver_web/presets\">Presets part of the website</a>.<br/>Load one of the predefined presets, sorted in increased difficulty or you own:<ul><li>noob</li><li>casual</li><li>regular</li><li>veteran</li><li>speedrunner</li><li>master</li><li>samus</li></ul>"
     },
     {
       element: "#difficultyTarget",
@@ -600,22 +525,17 @@ If Charge Beam is not picked up along the way or not accessible, enough minors t
 	    <tr>
 	      <td>Randomized Super Metroid ROM: </td>
 	      <td><input id="uploadFile" name="uploadFile" type="file"/></td>
-	      <td><button type="button" onclick="startTheTour(0)">?</button></td>
+	      <td id="uploadFileStep"><button type="button" onclick="startTheTour(0)">?</button></td>
 	    </tr>
 	    <tr>
 	      <td>Already uploaded ROMs in this session: </td>
 	      <td>{{=SELECT(*roms, **dict(_name="romFile", _id="romFile", value=lastRomFile, _class="filldropdown", _onchange="lastRomFileChanged(this);"))}}</td>
-	      <td><button type="button" onclick="startTheTour(1)">?</button></td>
+	      <td id="romFileStep"><button type="button" onclick="startTheTour(1)">?</button></td>
 	    </tr>
 	    <tr>
-	      <td><span id="stdPresetText">Standard Presets: </span></td>
-	      <td>{{=SELECT(*stdPresets, **dict(_id="stdPreset", _name="stdPreset", value=session.solver["stdPreset"], _class="filldropdown"))}}</td>
-	      <td><button type="button" onclick="startTheTour(2)">?</button></td>
-	    </tr>
-	    <tr>
-	      <td>Community Presets: </td>
-	      <td class="full"><input form="solverForm" type="text" id="comPreset2" data-list="{{=", ".join(comPresets)}}" class="dropdown-input full" value="{{=session.solver['comPreset']}}" oninput="inputKeyPress()"/><div style="float: right; width: 12px;"><button class="dropdown-btn" type="button"><span class="caret"></span></button></div></td>
-	      <td><button type="button" onclick="startTheTour(3)">?</button></td>
+	      <td>Preset:</td>
+	      <td>{{=SELECT(OPTGROUP(*stdPresets, **dict(_label="Standard presets")), OPTGROUP(*comPresets, **dict(_label="Community presets")), **dict(_name="preset", _id="preset", value=session.solver["preset"], _class="filldropdown chzn-select"))}}</td>
+	      <td id="presetStep"><button type="button" onclick="startTheTour(2)">?</button></td>
 	    </tr>
 	  </table>
 	</div>
@@ -625,12 +545,12 @@ If Charge Beam is not picked up along the way or not accessible, enough minors t
 	  <tr>
 	    <td>Difficulty target:</td>
 	    <td>{{=SELECT("easy", "medium", "hard", "very hard", "hardcore", "mania", _id="difficultyTarget", _name="difficultyTarget", _class="full", value=difficulties[session.solver["difficultyTarget"]])}}</td>
-	    <td><button type="button" onclick="startTheTour(4)">?</button></td>
+	    <td><button type="button" onclick="startTheTour(3)">?</button></td>
 	  </tr>
 	    <tr>
 	      <td>Pickup strategy:</td>
 	      <td>{{=SELECT("all", "minimal", "any", _id="pickupStrategy", _name="pickupStrategy", _form="solverForm", _class="full", value=session.solver["pickupStrategy"])}}</td>
-	      <td><button type="button" onclick="startTheTour(5)">?</button></td>
+	      <td><button type="button" onclick="startTheTour(4)">?</button></td>
 	    </tr>
 	  </table>
 	</div>

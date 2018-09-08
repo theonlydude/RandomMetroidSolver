@@ -1090,6 +1090,9 @@ script:
     dw {draw}, {row}*202
     dw {draw}, {row}*203
     dw {draw}, {blank}
+    dw {draw}, {row}*221
+    dw {draw}, {row}*222
+    dw {draw}, {blank}
     dw {draw}, {blank}
     dw {draw}, {row}*204
     dw {draw}, {blank}
@@ -1172,9 +1175,6 @@ script:
     dw {draw}, {blank}
     dw {draw}, {row}*217
     dw {draw}, {row}*218
-    dw {draw}, {blank}
-    dw {draw}, {row}*221
-    dw {draw}, {row}*222
     dw {draw}, {blank}
     dw {draw}, {blank}
     dw {draw}, {blank}
@@ -1343,12 +1343,12 @@ credits:
     dw " power bombs                    " // 214
     dw " BOMBS                          " // 215
     dw " bombs                          " // 216
-    dw " TOTAL TIME         00'00'00^00 " // 217
-    dw " total time                     " // 218
+    dw " FINAL TIME         00'00'00^00 " // 217
+    dw " final time                     " // 218
     dw "       THANKS FOR PLAYING       " // 219
     dw "       thanks for playing       " // 220
-    dw " INCLUDING PAUSE    00'00'00^00 " // 221
-    dw " including pause                " // 222
+    dw " PAUSE MENU         00'00'00^00 " // 221
+    dw " pause menu                     " // 222
     {cyan}
     dw "     PLAY THIS RANDOMIZER AT    " // 223
     dw $0000                              // End of credits tilemap

@@ -153,34 +153,41 @@ door_entered:
     inc $0998
     jml $82e1b7
 
+update_region_time:
+	// Store time spent in last room/area unless region_tmp is 0
+	lda {region_tmp}
+	beq +
+	tax
+	lda {region_timer_tmp}
+	jsr add_time    
++
+	rts
+store_region_time:
+	// Store the current frame and the current region to temp variables
+	lda {timer1}
+	sta {region_timer_tmp}
+	rts
+
 // Samus gains control back after door (Gamestate change back to $08 after door transition)
 door_exited:
-    // Increment saved value with time spent in door transition
-    lda {door_timer_tmp}
-    ldx #$0003
-    jsr add_time
+	// Increment saved value with time spent in door transition
+	lda {door_timer_tmp}
+	ldx #$0003
+	jsr add_time
+	// update time spent in region since last store_region_time call
+	jsr update_region_time
+	jsr store_region_time
+	// Store (region*2) + 7 to region_tmp (This uses stat id 7-18 for region timers)
+	lda $7e079f
+	asl
+	clc
+	adc #$0007    
+	sta {region_tmp}
 
-    // Store time spent in last room/area unless region_tmp is 0
-    lda {region_tmp}
-    beq +
-    tax
-    lda {region_timer_tmp}
-    jsr add_time
-
-    
-+   // Store the current frame and the current region to temp variables
-    lda {timer1}
-    sta {region_timer_tmp}
-    lda $7e079f
-    asl
-    clc
-    adc #$0007    
-    sta {region_tmp}    // Store (region*2) + 7 to region_tmp (This uses stat id 7-18 for region timers)
-
-    // Run hijacked code and return
-    lda #$0008
-    sta $0998
-    jml $82e76a
+	// Run hijacked code and return
+	lda #$0008
+	sta $0998
+	jml $82e76a
 
 // Door adjust start
 door_adjust_start:
@@ -267,6 +274,8 @@ pausing:
 	sta {pause_timer_lo}
 	lda {timer2}
 	sta {pause_timer_hi}
+	// don't count time spent in pause in region counters
+	jsr update_region_time
 	// run hijacked code and return
 	inc $0998
 	jml $828ced
@@ -279,7 +288,8 @@ resuming:
 	ldx {pause_timer_idx}
 	jsr add_time_32
 	ply
-
+	// don't count  time spent in pause in region counters
+	jsr store_region_time
 	// run hijacked code and return
 	inc $0998
 	jml $82939f

@@ -413,14 +413,8 @@ function lastRomFileChanged(elem) {
 function setGuessedPreset(romName){
   var preset = guessVARIAPreset(romName);
   if(preset != null) {
-    if(preset == "noob" || preset == "casual" || preset == "regular" || preset == "veteran" || preset == "speedrunner" || preset == "master" || preset == "samus"){
-      document.getElementById("stdPreset").value = preset;
-      document.getElementById("comPreset2").value = "";
-      enableStdPreset(true);
-    } else {
-      document.getElementById("comPreset2").value = preset;
-      enableStdPreset(false);
-    }
+    document.getElementById("preset").value = preset;
+    $("#preset").trigger("chosen:updated");
   }
 }
 

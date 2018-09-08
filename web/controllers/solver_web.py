@@ -61,7 +61,7 @@ def loadPreset():
 
 def loadPresetsList():
     files = sorted(os.listdir('community_presets'), key=lambda v: v.upper())
-    stdPresets = ['noob', 'casual', 'regular', 'veteran', 'speedrunner', 'master', 'samus']
+    stdPresets = ['noob', 'casual', 'regular', 'veteran', 'speedrunner', 'master']
     comPresets = [os.path.splitext(file)[0] for file in files]
     return (stdPresets, comPresets)
 

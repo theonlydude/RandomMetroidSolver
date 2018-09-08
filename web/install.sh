@@ -23,5 +23,7 @@
 [ -L ~/web2py/standard_presets ] || ln -s ~/RandomMetroidSolver/standard_presets ~/web2py/standard_presets
 [ -L ~/web2py/community_presets ] || ln -s ~/RandomMetroidSolver/community_presets ~/web2py/community_presets
 [ -L ~/web2py/applications/solver/static/images/super_metroid_logo.png ] || ln -s ~/RandomMetroidSolver/web/static/super_metroid_logo.png ~/web2py/applications/solver/static/images/super_metroid_logo.png
-[ -L ~/web2py/applications/solver/static/css/chosen.min.css ] || ln -s ~/RandomMetroidSolver/web/static/chosen.min.css ~/web2py/applications/solver/static/css/chosen.min.css
+[ -L ~/web2py/applications/solver/static/css/chosen.css ] || ln -s ~/RandomMetroidSolver/web/static/chosen.css ~/web2py/applications/solver/static/css/chosen.css
 [ -L ~/web2py/applications/solver/static/js/chosen.jquery.min.js ] || ln -s ~/RandomMetroidSolver/web/static/chosen.jquery.min.js ~/web2py/applications/solver/static/js/chosen.jquery.min.js
+[ -L ~/web2py/applications/solver/static/images/chosen-sprite.png ] || ln -s ~/RandomMetroidSolver/web/static/chosen-sprite.png ~/web2py/applications/solver/static/images/chosen-sprite.png
+[ -L ~/web2py/applications/solver/static/images/chosen-sprite@2x.png ] || ln -s ~/RandomMetroidSolver/web/static/chosen-sprite@2x.png ~/web2py/applications/solver/static/images/chosen-sprite@2x.png

@@ -179,7 +179,7 @@ class RandoSettings(object):
     def getForbiddenSuits(self, dontRemove):
         removable = []
         # can we remove gravity?
-        if Knows.SuitlessOuterMaridia.bool:
+        if Knows.GravLessLevel1.bool:
             if Knows.DraygonRoomCrystalFlash.bool:
                 if Knows.PreciousRoomXRayExit.bool:
                     removable.append('Gravity')

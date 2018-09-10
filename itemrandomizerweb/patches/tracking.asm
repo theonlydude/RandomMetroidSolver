@@ -82,6 +82,13 @@ pausing_local:
 resuming_local:
 	jml resuming
 
+org $91eb05
+	jmp pumps_local
+	
+org $91fff0
+pumps_local:
+	jml pumps
+
 // -------------------------------
 // CODE (using bank A1 free space)
 // -------------------------------
@@ -293,3 +300,26 @@ resuming:
 	// run hijacked code and return
 	inc $0998
 	jml $82939f
+
+// count arm pumps: hijack collision detection routine where the arm pump bug occurs 
+pumps:
+	// check if we're running...
+	lda $0a23
+	and #$00ff
+	dec
+	bne .end
+	// ... and actually holding left or right buttons
+	lda $8b	   // ctrl1 held buttons
+	bit #$0100 // right
+	bne .pump
+	bit #$0200 // left
+	bne .pump
+	bra .end
+.pump:
+	// if so, increment pump pixels stat
+	lda #$001d
+	jsl {inc_stat}
+.end:
+	// run hijacked code and return
+	lda $0a1e
+	jml $91eb08

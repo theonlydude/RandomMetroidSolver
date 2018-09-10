@@ -1093,3 +1093,6 @@ def stats():
     return dict(solverPresets=solverPresets, randomizerPresets=randomizerPresets,
                 solverDurations=solverDurations, randomizerDurations=randomizerDurations,
                 solverData=solverData, randomizerData=randomizerData, errors=errors)
+
+def tracker():
+    return dict()

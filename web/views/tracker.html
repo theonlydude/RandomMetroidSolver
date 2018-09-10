@@ -1,0 +1,96 @@
+{{
+extend 'layout.html'
+}}
+
+<meta name="description" content="Solver for the randomized Super Metroid roms"/>
+<link rel="shortcut icon" href={{=URL('static','favicon.ico')}} type="image/ico"/>
+<link rel="stylesheet" type="text/css" href={{=URL('static','css/mystyle_20180908.css')}} media="screen"/>
+
+<link href={{=URL('static', 'css/bootstrap-tour.min.css')}} rel="stylesheet">
+<script src="{{=URL('static','js/bootstrap-tour.min.js')}}"></script>
+
+
+<script type="text/javascript" src="{{=URL('static', 'js/leader-line.min.js')}}"></script>
+
+<title>Super Metroid VARIA Randomizer Tracker</title>
+
+<style>
+.main {
+    margin-bottom: 0.5em;
+    margin-top: 0.5em;
+}
+.map_container {
+    position: relative;
+}
+.baseButton {
+    cursor: pointer;
+    position: absolute;
+    z-index: 2;
+    width: 20px;
+    height: 30px;
+}
+.addBorder {
+    border: 1px solid #ddd;
+}
+.lowerMushroomsLeft {
+    left: 19.5%;
+    top: 15%;
+}
+.moatRight {
+    left: 49.5%;
+    top: 9%;
+}
+</style>
+
+<script type="text/javascript">
+var firstClick = "";
+var secondClick = "";
+
+function clickPortal(elemId) {
+  if(firstClick == ""){
+    firstClick = elemId;
+    document.getElementById(firstClick).className += " addBorder";
+    console.log("firstClick="+firstClick);
+  } else if(firstClick == elemId){
+    var firstClickElem = document.getElementById(firstClick);
+    firstClickElem.className = firstClickElem.className.replace(" addBorder", "");
+    firstClick = "";
+  } else if(secondClick == "" && elemId != firstClick) {
+    secondClick = elemId;
+
+    var firstClickElem = document.getElementById(firstClick);
+    var secondClickElem = document.getElementById(secondClick);
+
+    console.log("secondClick="+secondClick);
+
+    new LeaderLine(firstClickElem, secondClickElem);
+
+    firstClickElem.className = firstClickElem.className.replace(" addBorder", "");
+    firstClick = "";
+    secondClick = "";
+
+    console.log("line created");
+  }
+}
+</script>
+
+<body>
+  <div class="fixed">
+    <div class="menu">
+    {{=A("Super Metroid VARIA Randomizer and Solver", _href=URL(f="home"), _class="menu")}}
+    {{=A("Presets", _href=URL(f="presets"), _class="menu")}}
+    {{=A("Randomizer", _href=URL(f="randomizer"), _class="menu")}}
+    {{=A("Solver", _href=URL(f="solver"), _class="menu")}}
+    {{=A("Tracker", _href=URL(f="tracker"), _class="menu_selected")}}
+    {{=A("Information & Contact", _href=URL(f="infos"), _class="menu")}}
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="map_container">
+      <img src="/solver/static/images/area_map.png" class="center">
+      <div id="lowerMushroomsLeft" class="baseButton lowerMushroomsLeft" onclick="clickPortal('lowerMushroomsLeft')"></div>
+      <div id="moatRight" class="baseButton moatRight" onclick="clickPortal('moatRight')"></div>
+    </div>
+  </div>
+</body>

@@ -25,97 +25,58 @@ LOOPS=$2
 #ORIG=${TEMP_DIR}/RandomMetroidSolver/
 ORIG=.
 
-PATCHES="-c AimAnyButton.ips -c itemsounds.ips -c spinjumprestart.ips -c supermetroid_msu1.ips -c elevators_doors_speed.ips"
-PRESETS=("manu" "noob" "speedrunner")
-SUPERFUNS=("" "" "" "--superFun Movement" "--superFun Combat" "--superFun Suits" "--superFun Movement --superFun Combat")
-ENERGIES=("--energyQty sparse" "--energyQty medium" "--energyQty vanilla")
-SPREADS=("" "--spreadItems")
-FULLS=("" "--fullRandomization")
-SUITS=("" "--suitsRestriction")
-SPEEDS=("" "--speedScrewRestriction")
+PRESETS=("regular" "noob" "master")
 DIFFS=("" "" "" "" "" "" "--maxDifficulty easy" "--maxDifficulty medium" "--maxDifficulty hard" "--maxDifficulty harder" "--maxDifficulty hardcore" "--maxDifficulty mania")
+AREAS=("" "--area")
 
 function generate_params {
     SEED="$1"
     PRESET="$2"
 
-    PROG_SPEED="--progressionSpeed random"
-
-    let S=$RANDOM%${#SUPERFUNS[@]}
-    SUPERFUN=${SUPERFUNS[$S]}
-
-    let QTY=1+$RANDOM%100
-    MINORS="--minorQty ${QTY}"
-    let QTY=1+$RANDOM%9
-    MISSILES="--missileQty ${QTY}"
-    let QTY=1+$RANDOM%9
-    SUPERS="--superQty ${QTY}"
-    let QTY=1+$RANDOM%9
-    POWERBOMBS="--powerBombQty ${QTY}"
-    let QTY=1+$RANDOM%3
-    ENERGY="${ENERGIES[$QTY]}"
-
-    let S=$RANDOM%${#SPREADS[@]}
-    SPREAD=${SPREADS[$S]}
-    let S=$RANDOM%${#FULLS[@]}
-    FULL=${FULLS[$S]}
-    let S=$RANDOM%${#SUITS[@]}
-    SUIT=${SUITS[$S]}
-    let S=$RANDOM%${#SPEEDS[@]}
-    SPEED=${SPEEDS[$S]}
-
     let S=$RANDOM%${#DIFFS[@]}
     DIFF=${DIFFS[$S]}
+    let S=$RANDOM%${#AREAS[@]}
+    AREA=${AREAS[$S]}
 
-    echo "-r ${ROM} --param diff_presets/${PRESET}.json ${PATCHES} --seed ${SEED} ${PROG_SPEED} ${SUPERFUN} ${MINORS} ${MISSILES} ${SUPERS} ${POWERBOMBS} ${ENERGY} ${SPREAD} ${FULL} ${SUIT} ${SPEED}" # ${DIFF}"
+    echo "-r ${ROM} --param standard_presets/${PRESET}.json --seed ${SEED} --progressionSpeed random --morphPlacement random --progressionDifficulty random --missileQty 0 --superQty 0 --powerBombQty 0 --minorQty 0 --energyQty random --fullRandomization random --spreadItems random --suitsRestriction random --hideItems random --strictMinors random --superFun CombatRandom --superFun MovementRandom --superFun SuitsRandom ${DIFF} ${AREA}"
 }
 
 function computeSeed {
+    # generate seed
     let P=$RANDOM%${#PRESETS[@]}
     PRESET=${PRESETS[$P]}
     SEED="$RANDOM"
 
     PARAMS=$(generate_params "${SEED}" "${PRESET}")
-    OUT=$(/usr/bin/time -f "\t%E real" python2 ${ORIG}/randomizer.py ${PARAMS} 2>&1)
-
-    echo "${OUT}" | grep -q STUCK
-    if [ $? -eq 0 ]; then
-        STUCK="yes"
-    else
-        STUCK="no"
+    python2 ./randomizer.py ${PARAMS}
+    if [ $? -ne 0 ]; then
+	echo "${SEED};${PARAMS};OLD;0;yes;n/a;" | tee -a test_jm.csv
+	return
     fi
+
     TIME=$(echo "${OUT}" | grep real | awk '{print $1}')
     SUM_OLD=$(md5sum VARIA_Randomizer_*X${SEED}_${PRESET}.sfc | cut -d ' ' -f 1)
-    rm -f VARIA_Randomizer_*X${SEED}_${PRESET}.sfc
 
-    echo "${SEED};${PARAMS};OLD;${TIME};${STUCK};${SUM_OLD};" | tee -a test_jm.csv
+    echo "${SEED};${PARAMS};RANDO;${TIME};${STUCK};${SUM_OLD};" | tee -a test_jm.csv
 
-    OUT=$(/usr/bin/time -f "\t%E real" python2 ./randomizer.py ${PARAMS} --graph 2>&1)
+    # solve seed twice
+    ROM=$(ls -1 VARIA_Randomizer_*X${SEED}_${PRESET}.sfc)
 
-    echo "${OUT}" | grep -q STUCK
-    if [ $? -eq 0 ]; then
-        STUCK="yes"
+    python2 ./solver.py ${ROM} --preset standard_presets/${PRESET}.json -g | grep -v 'SMBM::factory' > ${ROM}.nocache
+    python2 ./solver.py ${ROM} --preset standard_presets/${PRESET}.json -g -c | grep -v 'SMBM::factory' > ${ROM}.cache
+
+    DIFF=$(diff ${ROM}.cache ${ROM}.nocache)
+
+    if [ -z "${DIFF}" ]; then
+	rm -f ${ROM} ${ROM}.nocache ${ROM}.cache
+	echo "${SEED};${ROM};SOLVER;${PRESET};n/a;OK;" | tee -a test_jm.csv
     else
-        STUCK="no"
+	echo "${SEED};${ROM};SOLVER;${PRESET};n/a;NOK;" | tee -a test_jm.csv
     fi
-    TIME=$(echo "${OUT}" | grep real | awk '{print $1}')
-    SUM_NEW=$(md5sum VARIA_Randomizer_*X${SEED}_${PRESET}.sfc | cut -d ' ' -f 1)
-    rm -f VARIA_Randomizer_*X${SEED}_${PRESET}.sfc
-
-    if [ "$SUM_OLD" != "$SUM_NEW" ]; then
-        MIS="MISMATCH !!!!!"
-        echo "Mismatch for ${SEED}" | tee -a test_jm.err
-        MISMATCH_FOUND=0
-        exit 1
-    else
-        MIS=""
-    fi
-
-    echo "${SEED};${PARAMS};NEW;${TIME};${STUCK};${SUM_NEW};${MIS}" | tee -a test_jm.csv
 }
 
 if [ -z test_jm.csv ]; then
-    echo "seed;params;old/new;time;stuck;md5sum;mismatch" > test_jm.csv
+    echo "seed;params;rando/solver;time/preset;stuck;md5sum/result;" > test_jm.csv
 fi
 
 MISMATCH_FOUND=1

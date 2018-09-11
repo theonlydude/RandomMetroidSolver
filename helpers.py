@@ -397,6 +397,8 @@ class Helpers(object):
             return SMBool(False)
         self.smbm.curSMBool.difficulty = easy
         self.smbm.curSMBool.bool = True
+        self.smbm.curSMBool.items = []
+        self.smbm.curSMBool.knows = []
         return self.smbm.getSMBoolCopy()
 
     def enoughStuffBotwoon(self):
@@ -406,6 +408,8 @@ class Helpers(object):
             return SMBool(False)
         self.smbm.curSMBool.difficulty = easy
         self.smbm.curSMBool.bool = True
+        self.smbm.curSMBool.items = []
+        self.smbm.curSMBool.knows = []
         return self.smbm.getSMBoolCopy()
 
     def enoughStuffsRidley(self):
@@ -420,6 +424,8 @@ class Helpers(object):
             return SMBool(False)
         self.smbm.curSMBool.difficulty = diff
         self.smbm.curSMBool.bool = True
+        self.smbm.curSMBool.items = []
+        self.smbm.curSMBool.knows = []
         return self.smbm.getSMBoolCopy()
 
     def enoughStuffsKraid(self):
@@ -438,6 +444,8 @@ class Helpers(object):
 
         self.smbm.curSMBool.difficulty = diff
         self.smbm.curSMBool.bool = True
+        self.smbm.curSMBool.items = []
+        self.smbm.curSMBool.knows = []
         return self.smbm.getSMBoolCopy()
 
     def adjustHealthDropDiff(self, difficulty):

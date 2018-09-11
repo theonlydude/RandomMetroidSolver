@@ -198,11 +198,11 @@ class SMBMBool(SMBoolManager):
         self.curSMBool.bool = smKnows[0]
         return self.curSMBool.bool
 
-    def wand(self, a, b, c=True, d=True, difficulty=0):
+    def wand(self, a, b, c=True, d=True):
         self.curSMBool.bool = a and b and c and d
         return self.curSMBool.bool
 
-    def wor(self, a, b, c=False, d=False, difficulty=0):
+    def wor(self, a, b, c=False, d=False):
         self.curSMBool.bool = a or b or c or d
         return self.curSMBool.bool
 
@@ -241,16 +241,16 @@ class SMBMDiff(SMBoolManager):
         self.curSMBool.difficulty = smKnows[1]
         return (self.curSMBool.bool, self.curSMBool.difficulty)
 
-    def wand2(self, a, b, difficulty=0):
+    def wand2(self, a, b):
         if a[0] == True and b[0] == True:
             self.curSMBool.bool = True
-            self.curSMBool.difficulty = a[1] + b[1] + difficulty
+            self.curSMBool.difficulty = a[1] + b[1]
         else:
             self.curSMBool.bool = False
             self.curSMBool.difficulty = 0
         return (self.curSMBool.bool, self.curSMBool.difficulty)
 
-    def wand(self, a, b, c=None, d=None, difficulty=0):
+    def wand(self, a, b, c=None, d=None):
         if c is None and d is None:
             self.wand2(a, b)
         elif c is None:
@@ -260,32 +260,29 @@ class SMBMDiff(SMBoolManager):
         else:
             self.wand2(self.wand2(self.wand2(a, b), c), d)
 
-        if self.curSMBool.bool == True and difficulty != 0:
-            self.curSMBool.difficulty += difficulty
-
         return (self.curSMBool.bool, self.curSMBool.difficulty)
 
-    def wor2(self, a, b, difficulty=0):
+    def wor2(self, a, b):
         if a[0] == True and b[0] == True:
             if a[1] <= b[1]:
                 self.curSMBool.bool = True
-                self.curSMBool.difficulty = a[1] + difficulty
+                self.curSMBool.difficulty = a[1]
             else:
                 self.curSMBool.bool = True
-                self.curSMBool.difficulty = b[1] + difficulty
+                self.curSMBool.difficulty = b[1]
         elif a[0] == True:
             self.curSMBool.bool = True
-            self.curSMBool.difficulty = a[1] + difficulty
+            self.curSMBool.difficulty = a[1]
         elif b[0] == True:
             self.curSMBool.bool = True
-            self.curSMBool.difficulty = b[1] + difficulty
+            self.curSMBool.difficulty = b[1]
         else:
             self.curSMBool.bool = False
             self.curSMBool.difficulty = 0
 
         return (self.curSMBool.bool, self.curSMBool.difficulty)
 
-    def wor(self, a, b, c=None, d=None, difficulty=0):
+    def wor(self, a, b, c=None, d=None):
         if c is None and d is None:
             self.wor2(a, b)
         elif c is None:
@@ -294,9 +291,6 @@ class SMBMDiff(SMBoolManager):
             self.wor2(self.wor2(a, b), c)
         else:
             self.wor2(self.wor2(self.wor2(a, b), c), d)
-
-        if self.curSMBool.bool == True and difficulty != 0:
-            self.curSMBool.difficulty += difficulty
 
         return (self.curSMBool.bool, self.curSMBool.difficulty)
 
@@ -343,14 +337,14 @@ class SMBMAll(SMBoolManager):
     def knowsKnows(self, knows, smKnows):
         return SMBool(smKnows[0], smKnows[1], knows=[knows])
 
-    def wand2(self, a, b, difficulty=0):
+    def wand2(self, a, b):
         if a.bool is True and b.bool is True:
-            return SMBool(True, a.difficulty + b.difficulty + difficulty,
+            return SMBool(True, a.difficulty + b.difficulty,
                           a.knows + b.knows, a.items + b.items)
         else:
             return SMBool(False)
 
-    def wand(self, a, b, c=None, d=None, difficulty=0):
+    def wand(self, a, b, c=None, d=None):
         if c is None and d is None:
             ret = self.wand2(a, b)
         elif c is None:
@@ -360,25 +354,22 @@ class SMBMAll(SMBoolManager):
         else:
             ret = self.wand2(self.wand2(self.wand2(a, b), c), d)
 
-        if ret.bool is True:
-            ret.difficulty += difficulty
-
         return ret
 
-    def wor2(self, a, b, difficulty=0):
+    def wor2(self, a, b):
         if a.bool is True and b.bool is True:
             if a.difficulty <= b.difficulty:
-                return SMBool(True, a.difficulty + difficulty, a.knows, a.items)
+                return SMBool(True, a.difficulty, a.knows, a.items)
             else:
-                return SMBool(True, b.difficulty + difficulty, b.knows, b.items)
+                return SMBool(True, b.difficulty, b.knows, b.items)
         elif a.bool is True:
-            return SMBool(True, a.difficulty + difficulty, a.knows, a.items)
+            return SMBool(True, a.difficulty, a.knows, a.items)
         elif b.bool is True:
-            return SMBool(True, b.difficulty + difficulty, b.knows, b.items)
+            return SMBool(True, b.difficulty, b.knows, b.items)
         else:
             return SMBool(False)
 
-    def wor(self, a, b, c=None, d=None, difficulty=0):
+    def wor(self, a, b, c=None, d=None):
         if c is None and d is None:
             ret = self.wor2(a, b)
         elif c is None:
@@ -387,9 +378,6 @@ class SMBMAll(SMBoolManager):
             ret = self.wor2(self.wor2(a, b), c)
         else:
             ret = self.wor2(self.wor2(self.wor2(a, b), c), d)
-
-        if ret.bool is True:
-            ret.difficulty += difficulty
 
         return ret
 
@@ -416,8 +404,8 @@ class SMBMAll(SMBoolManager):
         return dummy.bool
 
     def internal2SMBool(self, internal):
-        # internal is a smbool
-        return internal
+        # internal is a smbool, return a copy to avoid having internal updated later (if internal is store in cache)
+        return SMBool(internal.bool, internal.difficulty, internal.items[:], internal.knows[:])
 
     def eval(self, func, item=None):
         if item is not None:

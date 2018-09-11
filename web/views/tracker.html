@@ -29,47 +29,187 @@ extend 'layout.html'
     width: 20px;
     height: 30px;
 }
+.baseButtonRot {
+    cursor: pointer;
+    position: absolute;
+    z-index: 2;
+    width: 30px;
+    height: 20px;
+}
 .addBorder {
     border: 1px solid #ddd;
 }
 .lowerMushroomsLeft {
-    left: 19.5%;
-    top: 15%;
+    left: 19.25%;
+    top: 13.8%;
 }
 .moatRight {
-    left: 49.5%;
-    top: 9%;
+    left: 49%;
+    top: 7.8%;
+}
+.greenPiratesShaftBottomRight {
+    left: 24.3%;
+    top: 13.8%;
+}
+.keyhunterRoomBottom {
+    left: 45.2%;
+    top: 12.6%;
+}
+.morphBallRoomLeft {
+    left: 29.71%;
+    top: 48.8%;
+}
+.greenBrinstarElevatorRight {
+    left: 6.25%;
+    top: 29.8%;
+}
+.greenHillZoneTopRight {
+    left: 16.8%;
+    top: 64.8%;
+}
+.noobBridgeRight {
+    left: 28.06%;
+    top: 69.3%;
+}
+.westOceanLeft {
+    left: 60.4%;
+    top: 8%;
+}
+.crabMazeLeft {
+    left: 81.3%;
+    top: 15.7%;
+}
+.lavaDiveRight {
+    left: 81.6%;
+    top: 80.5%;
+}
+.threeMuskateersRoomLeft {
+    left: 85.1%;
+    top: 70%;
+}
+.warehouseZeelaRoomLeft {
+    left: 51.1%;
+    top: 64.4%;
+}
+.warehouseEntranceLeft {
+    left: 42.35%;
+    top: 67%;
+}
+.warehouseEntranceRight {
+    left: 45.85%;
+    top: 67%;
+}
+.singleChamberTopRight {
+    left: 62.05%;
+    top: 74.7%;
+}
+.kronicBoostRoomBottomLeft {
+    left: 58.05%;
+    top: 85.4%;
+}
+.mainStreetBottom {
+    left: 67.65%;
+    top: 59.3%;
+}
+.crabHoleBottomLeft {
+    left: 71.9%;
+    top: 59.3%;
+}
+.leCoudeRight {
+    left: 90.65%;
+    top: 15.1%;
+}
+.redFishRoomLeft {
+    left: 68.2%;
+    top: 44%;
+}
+.redTowerTopLeft {
+    left: 51.3%;
+    top: 51.6%;
+}
+.caterpillarRoomTopRight {
+    left: 58.58%;
+    top: 42.5%;
+}
+.redBrinstarElevator {
+    left: 55.6%;
+    top: 9.7%;
+}
+.eastTunnelRight {
+    left: 59.7%;
+    top: 59.2%;
+}
+.eastTunnelTopRight {
+    left: 62.1%;
+    top: 57.7%;
+}
+.glassTunnelTop {
+    left: 57.6%;
+    top: 56.9%;
+}
+.statuesHallwayLeft {
+    left: 22.9%;
+    top: 17.3%;
 }
 </style>
 
 <script type="text/javascript">
+// when clicking on a portal, highlight it.
+  // when clicking again on it, remove highlight.
+// when clicking on another portal, add line between them, remove highlight on first
+
 var firstClick = "";
 var secondClick = "";
 
+var lines = {};
+var leaderLines = {};
+
 function clickPortal(elemId) {
   if(firstClick == ""){
-    firstClick = elemId;
-    document.getElementById(firstClick).className += " addBorder";
-    console.log("firstClick="+firstClick);
+    // highlight first element
+    if(! (elemId in lines)){
+      firstClick = elemId;
+      document.getElementById(firstClick).className += " addBorder";
+      //console.log("first: "+elemId+" not in line")
+    } else {
+      //console.log("first: "+elemId+" already in line")
+    }
   } else if(firstClick == elemId){
     var firstClickElem = document.getElementById(firstClick);
     firstClickElem.className = firstClickElem.className.replace(" addBorder", "");
     firstClick = "";
+    //console.log(elemId+" unselected");
   } else if(secondClick == "" && elemId != firstClick) {
-    secondClick = elemId;
 
-    var firstClickElem = document.getElementById(firstClick);
-    var secondClickElem = document.getElementById(secondClick);
+    if((firstClick in lines) || (elemId in lines)) {
+      //console.log(firstClick+" or "+elemId+" already in line");
+    } else {
+      secondClick = elemId;
 
-    console.log("secondClick="+secondClick);
+      //console.log(firstClick+" or "+secondClick+" not already in line");
 
-    new LeaderLine(firstClickElem, secondClickElem);
+      var firstClickElem = document.getElementById(firstClick);
+      var secondClickElem = document.getElementById(secondClick);
 
-    firstClickElem.className = firstClickElem.className.replace(" addBorder", "");
-    firstClick = "";
-    secondClick = "";
+      //console.log("secondClick="+secondClick);
 
-    console.log("line created");
+      var line = new LeaderLine(firstClickElem, secondClickElem, {startPlug: 'disc', endPlug: 'disc'});
+
+      firstClickElem.className = firstClickElem.className.replace(" addBorder", "");
+
+      lines[firstClick] = secondClick;
+      lines[secondClick] = firstClick;
+
+      leaderLines[firstClick] = line;
+      leaderLines[secondClick] = line;
+
+      firstClick = "";
+      secondClick = "";
+
+      //console.log("line created");
+    }
+  } else {
+    //console.log("else: firstClick: "+firstClick+" secondClick: "+secondClick);
   }
 }
 </script>
@@ -91,6 +231,32 @@ function clickPortal(elemId) {
       <img src="/solver/static/images/area_map.png" class="center">
       <div id="lowerMushroomsLeft" class="baseButton lowerMushroomsLeft" onclick="clickPortal('lowerMushroomsLeft')"></div>
       <div id="moatRight" class="baseButton moatRight" onclick="clickPortal('moatRight')"></div>
+      <div id="greenPiratesShaftBottomRight" class="baseButton greenPiratesShaftBottomRight" onclick="clickPortal('greenPiratesShaftBottomRight')"></div>
+      <div id="keyhunterRoomBottom" class="baseButtonRot keyhunterRoomBottom" onclick="clickPortal('keyhunterRoomBottom')"></div>
+      <div id="morphBallRoomLeft" class="baseButton morphBallRoomLeft" onclick="clickPortal('morphBallRoomLeft')"></div>
+      <div id="greenBrinstarElevatorRight" class="baseButton greenBrinstarElevatorRight" onclick="clickPortal('greenBrinstarElevatorRight')"></div>
+      <div id="greenHillZoneTopRight" class="baseButton greenHillZoneTopRight" onclick="clickPortal('greenHillZoneTopRight')"></div>
+      <div id="noobBridgeRight" class="baseButton noobBridgeRight" onclick="clickPortal('noobBridgeRight')"></div>
+      <div id="westOceanLeft" class="baseButton westOceanLeft" onclick="clickPortal('westOceanLeft')"></div>
+      <div id="crabMazeLeft" class="baseButton crabMazeLeft" onclick="clickPortal('crabMazeLeft')"></div>
+      <div id="lavaDiveRight" class="baseButton lavaDiveRight" onclick="clickPortal('lavaDiveRight')"></div>
+      <div id="threeMuskateersRoomLeft" class="baseButton threeMuskateersRoomLeft" onclick="clickPortal('threeMuskateersRoomLeft')"></div>
+      <div id="warehouseZeelaRoomLeft" class="baseButton warehouseZeelaRoomLeft" onclick="clickPortal('warehouseZeelaRoomLeft')"></div>
+      <div id="warehouseEntranceLeft" class="baseButton warehouseEntranceLeft" onclick="clickPortal('warehouseEntranceLeft')"></div>
+      <div id="warehouseEntranceRight" class="baseButton warehouseEntranceRight" onclick="clickPortal('warehouseEntranceRight')"></div>
+      <div id="singleChamberTopRight" class="baseButton singleChamberTopRight" onclick="clickPortal('singleChamberTopRight')"></div>
+      <div id="kronicBoostRoomBottomLeft" class="baseButton kronicBoostRoomBottomLeft" onclick="clickPortal('kronicBoostRoomBottomLeft')"></div>
+      <div id="mainStreetBottom" class="baseButtonRot mainStreetBottom" onclick="clickPortal('mainStreetBottom')"></div>
+      <div id="crabHoleBottomLeft" class="baseButton crabHoleBottomLeft" onclick="clickPortal('crabHoleBottomLeft')"></div>
+      <div id="leCoudeRight" class="baseButton leCoudeRight" onclick="clickPortal('leCoudeRight')"></div>
+      <div id="redFishRoomLeft" class="baseButton redFishRoomLeft" onclick="clickPortal('redFishRoomLeft')"></div>
+      <div id="redTowerTopLeft" class="baseButton redTowerTopLeft" onclick="clickPortal('redTowerTopLeft')"></div>
+      <div id="caterpillarRoomTopRight" class="baseButton caterpillarRoomTopRight" onclick="clickPortal('caterpillarRoomTopRight')"></div>
+      <div id="redBrinstarElevator" class="baseButtonRot redBrinstarElevator" onclick="clickPortal('redBrinstarElevator')"></div>
+      <div id="eastTunnelRight" class="baseButton eastTunnelRight" onclick="clickPortal('eastTunnelRight')"></div>
+      <div id="eastTunnelTopRight" class="baseButton eastTunnelTopRight" onclick="clickPortal('eastTunnelTopRight')"></div>
+      <div id="glassTunnelTop" class="baseButtonRot glassTunnelTop" onclick="clickPortal('glassTunnelTop')"></div>
+      <div id="statuesHallwayLeft" class="baseButton statuesHallwayLeft" onclick="clickPortal('statuesHallwayLeft')"></div>
     </div>
   </div>
 </body>

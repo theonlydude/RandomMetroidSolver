@@ -18,5 +18,5 @@ Stat tracking ID's (32 bit values are stored low word first)
 25          Number of times Item Switched (nonfunctioning)
 26          Number of bombs laid
 27-28	    Time spent in pause
-29	    pixels saved arm pumping
+29-30	    time savec arm pumping
 

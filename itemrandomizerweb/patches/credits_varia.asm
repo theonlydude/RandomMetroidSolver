@@ -1218,7 +1218,7 @@ stats:
     dw 24,      {row}*213,  1, 0    // Power Bombs
     dw 26,      {row}*215,  1, 0    // Bombs
     dw 27,      {row}*221,  3, 0    // Time in pause
-    dw 29,      {row}*224,  1, 0    // pixels saved arm pumping
+    dw 29,      {row}*224,  3, 0    // time saved arm pumping
     dw 0,               0,  0, 0    // end of table
 
 warnpc $dfffff
@@ -1352,8 +1352,9 @@ credits:
     dw " pause menu                     " // 222
     {cyan}
     dw "     PLAY THIS RANDOMIZER AT    " // 223
-    dw " ARM PUMP PIXELS                " // 224
-    dw " arm pump pixels                " // 225
+    {big}
+    dw " ARM PUMPING GAIN   00'00'00^00 " // 224
+    dw " arm pumping gain               " // 225
     dw $0000                              // End of credits tilemap
 
 warnpc $ceffff

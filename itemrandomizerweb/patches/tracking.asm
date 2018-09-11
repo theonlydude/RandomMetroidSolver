@@ -18,14 +18,28 @@ define stats $7ffc00
 // These variables are cleared to 0x00 on hard and soft reset
 define door_timer_tmp $7fff00
 define door_adjust_tmp $7fff02
+
 define add_time_tmp $7fff04
+
 define region_timer_tmp $7fff06
 define region_tmp $7fff08
+
 define pause_timer_idx  #$ff0a
 define pause_timer_lo $7fff0a
 define pause_timer_hi $7fff0c
+
 define add_time_32_tmp_lo $7fff0e
 define add_time_32_tmp_hi $7fff1a
+
+define pump_rem	$7fff1c
+define vx_16 $7fff1e
+
+// constants
+define last_movement_type $0a23
+define vx_pix $0b42
+define vx_subpix_hi $0b45
+define mx_pix $0b46
+define mx_subpix_hi $0b49
 
 // -------------------------------
 // HIJACKS
@@ -181,7 +195,7 @@ door_exited:
 	lda {door_timer_tmp}
 	ldx #$0003
 	jsr add_time
-	// update time spent in region since last store_region_time call
+	// update time spent in region since last store_region_time call,
 	jsr update_region_time
 	jsr store_region_time
 	// Store (region*2) + 7 to region_tmp (This uses stat id 7-18 for region timers)
@@ -303,22 +317,71 @@ resuming:
 
 // count arm pumps: hijack collision detection routine where the arm pump bug occurs 
 pumps:
-	// check if we're running...
-	lda $0a23
+	// check if we're running :
+	// last_movement_type is 1
+	lda {last_movement_type}
 	and #$00ff
 	dec
-	bne .end
-	// ... and actually holding left or right buttons
-	lda $8b	   // ctrl1 held buttons
-	bit #$0100 // right
-	bne .pump
-	bit #$0200 // left
-	bne .pump
-	bra .end
+	bne +
+	// X momentum is at least 2: walking/underwater running "full speed"
+	// since we don't have accel value, do this to avoid being too wrong
+	// in frame gain computations because of too low speed values
+	lda {mx_pix}
+	cmp #$0002
+	bcs .pump
++
+	jmp .end
 .pump:
-	// if so, increment pump pixels stat
+	// compute arm pump time saved
+	// first, compute speed in 16th of a pixel per frame :
+	// vx_16=(vx+mx)*16 + vx_subpix/4096 + mx_subpix/4096
+	// NOTE: samus max running speed with speed booster is lower than 10px/frame,
+	//       so vx_16 will always be at most one byte long, to be used
+	//	 as divisor for SNES hardware 16b/8b division
+	lda {vx_pix}
+	clc
+	adc {mx_pix}
+	asl;asl;asl;asl
+	sta {vx_16}
+	lda {vx_subpix_hi}
+	and #$00ff
+	lsr;lsr;lsr;lsr
+	adc {vx_16}
+	sta {vx_16}
+	lda {mx_subpix_hi}
+	and #$00ff
+	lsr;lsr;lsr;lsr
+	adc {vx_16}
+	sta {vx_16}
+
+	// t=d/v, with :
+	// - t: time saved by this pump in frames
+	// - d: distance, in 16th of a pixel
+	// - v: speed, in 16th of a pixel per frame
+
+	// d = 16(1 px)+last remainder
+	clc
+	lda #$0010
+	adc {pump_rem}
+	sta $4204
+	// switch to 8-bit mode for divisor
+	sep #$20
+	lda {vx_16}
+	sta $4206
+	// back to 16-bit mode
+	rep #$20
+	// load arm pump time saved stat
 	lda #$001d
-	jsl {inc_stat}
+	jsl {load_stat}
+	// division result is available by now
+	// add quotient to stat
+	clc
+	adc $4214
+	ldx #$001d
+	jsl {store_stat}
+	// store remainder for next arm pump
+	lda $4216
+	sta {pump_rem}
 .end:
 	// run hijacked code and return
 	lda $0a1e

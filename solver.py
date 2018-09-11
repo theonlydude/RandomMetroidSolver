@@ -34,7 +34,7 @@ class Conf:
 class Solver:
     # given a rom and parameters returns the estimated difficulty
 
-    def __init__(self, rom, presetFileName, difficultyTarget, pickupStrategy, itemsForbidden=[], type='console', debug=False, firstItemsLog=None, displayGeneratedPath=False, output=None):
+    def __init__(self, rom, presetFileName, difficultyTarget, pickupStrategy, itemsForbidden=[], type='console', debug=False, firstItemsLog=None, displayGeneratedPath=False, output=None, cache=False):
         if debug == True:
             logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
         else:
@@ -52,7 +52,7 @@ class Solver:
         self.type = type
 
         self.locations = graphLocations
-        self.smbm = SMBoolManager.factory('all', cache=False)
+        self.smbm = SMBoolManager.factory('all', cache=cache)
 
         if presetFileName is not None:
             self.loadPreset(presetFileName)
@@ -656,6 +656,7 @@ if __name__ == "__main__":
                         dest='displayGeneratedPath', action='store_true')
     parser.add_argument('--output', '-o', help="When called from the website, contains the result of the solver",
                         dest='output', nargs='?', default=None)
+    parser.add_argument('--cache', '-c', help="Activate cache in smbm", dest='cache', action='store_true')
 
     args = parser.parse_args()
 
@@ -678,7 +679,7 @@ if __name__ == "__main__":
     solver = Solver(args.romFileName, args.presetFileName, difficultyTarget,
                     pickupStrategy, args.itemsForbidden, type=args.type, debug=args.debug,
                     firstItemsLog=args.firstItemsLog, displayGeneratedPath=args.displayGeneratedPath,
-                    output=args.output)
+                    output=args.output, cache=args.cache)
 
     (difficulty, itemsOk) = solver.solveRom()
     (used, total) = solver.getKnowsUsed()

@@ -154,54 +154,15 @@ extend 'layout.html'
 </style>
 
 <script type="text/javascript">
-// when clicking on a portal, highlight it.
-  // when clicking again on it, remove highlight.
-// when clicking on another portal, add line between them, remove highlight on first
-
 var firstClick = "";
 var secondClick = "";
 
 var lines = {};
 var leaderLines = {};
 
-var colors = {
-  // crateria
-  lowerMushroomsLeft: '#D37100',
-  moatRight: '#D37100',
-  greenPiratesShaftBottomRight: '#D37100',
-  keyhunterRoomBottom: '#D37100',
-  morphBallRoomLeft: '#D37100',
-  // green brinstar
-  greenBrinstarElevatorRight: '#80E810',
-  greenHillZoneTopRight: '#80E810',
-  noobBridgeRight: '#80E810',
-  // wrecked ship
-  westOceanLeft: '#00F8F0',
-  crabMazeLeft: '#00F8F0',
-  // lower norfair
-  lavaDiveRight: '#920000',
-  threeMuskateersRoomLeft: '#920000',
-  // norfair
-  warehouseZeelaRoomLeft: '#920000',
-  warehouseEntranceLeft: '#920000',
-  warehouseEntranceRight: '#920000',
-  singleChamberTopRight: '#920000',
-  kronicBoostRoomBottomLeft: '#920000',
-  // maridia
-  mainStreetBottom: '#0000C3',
-  crabHoleBottomLeft: '#0000C3',
-  leCoudeRight: '#0000C3',
-  redFishRoomLeft: '#0000C3',
-  // red brinstar
-  redTowerTopLeft: '#80E810',
-  caterpillarRoomTopRight: '#80E810',
-  redBrinstarElevator: '#80E810',
-  eastTunnelRight: '#80E810',
-  eastTunnelTopRight: '#80E810',
-  glassTunnelTop: '#80E810',
-  // tourian
-  statuesHallwayLeft: '#B000C0'
-};
+var colors = ['grey', 'lime', 'pink',  'orange', 'yellow', 'purple', 'red', '#bfef45', 'white', 'cyan', 'magenta', 'olive', 'green', 'blue'];
+
+var nextColor = 0;
 
 function clickPortal(elemId) {
   if(firstClick == ""){
@@ -232,22 +193,19 @@ function clickPortal(elemId) {
 
       //console.log("secondClick="+secondClick);
 
-      var r = Math.floor(Math.random() * 255);
-      var g = Math.floor(Math.random() * 255);
-      var b = Math.floor(Math.random() * 255);
-      var color = 'rgb('+r+', '+g+', '+b+')'
-
       var line = new LeaderLine(firstClickElem, secondClickElem,
                                 {startPlug: 'disc',
                                  endPlug: 'disc',
                                  dropShadow: true,
-                                 //startPlugColor: colors[firstClick],
-                                 //endPlugColor: colors[secondClick],
-                                 startPlugColor: color,
-                                 endPlugColor: color,
+                                 startPlugColor: colors[nextColor],
+                                 endPlugColor: colors[nextColor],
                                  size: 6,
-                                 gradient: true});
+                                 gradient: true,
+                                 outlineColor: 'rgb(255, 255, 255)',
+                                 outline: true,
+                                 outlineSize: 0.15});
 
+      nextColor += 1;
       firstClickElem.className = firstClickElem.className.replace(" addBorder", "");
 
       lines[firstClick] = secondClick;

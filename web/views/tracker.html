@@ -15,6 +15,10 @@ extend 'layout.html'
 <title>Super Metroid VARIA Randomizer Tracker</title>
 
 <style>
+.absolute {
+    position: absolute;
+    width: 10%;
+}
 .ten {
     width: 10%;
 }
@@ -170,6 +174,8 @@ var colors = ['grey', 'lime', 'pink',  'orange', 'yellow', 'purple', 'red', '#bf
 
 var nextColor = 0;
 
+var linesSeq = new Array();
+
 function clickPortal(elemId) {
   if(firstClick == ""){
     // highlight first element
@@ -220,6 +226,8 @@ function clickPortal(elemId) {
       leaderLines[firstClick] = line;
       leaderLines[secondClick] = line;
 
+      linesSeq.push(firstClick);
+
       firstClick = "";
       secondClick = "";
 
@@ -247,6 +255,21 @@ function clearLines() {
   leaderLines = {};
   nextColor = 0;
 }
+
+function deleteLine() {
+  var startPoint = linesSeq.pop();
+  var endPoint = lines[startPoint];
+
+  delete lines[startPoint];
+  delete lines[endPoint];
+
+  leaderLines[startPoint].remove();
+
+  delete leaderLines[startPoint];
+  delete leaderLines[endPoint];
+
+  nextColor -= 1;
+}
 </script>
 
 <div class="fixed">
@@ -264,10 +287,21 @@ function clearLines() {
   <table class="full">
     <colgroup><col class="ten" /><col class="ninety" /></colgroup>
     <tr>
-      <td>
-	<button type="button" onclick="clearLines()">Clear</button>
+      <td class="absolute">
+	  <table class="full">
+	    <tr>
+	      <td>
+		<button class="full" type="button" onclick="clearLines()">Clear</button>
+	      </td>
+	    </tr>
+	    <tr>
+	      <td>
+		<button class="full" type="button" onclick="deleteLine()">Delete latest</button>
+	      </td>
+	    <tr>
+	  </table>
       </td>
-      <td>
+      <td rowspan="2">
 	<div class="map_container">
 	  <img src="/solver/static/images/area_map.png" class="center">
 	  <div id="lowerMushroomsLeft" class="baseButton lowerMushroomsLeft" onclick="clickPortal('lowerMushroomsLeft')"></div>

@@ -29,7 +29,7 @@ class RandoSettings(object):
     # of the relevant categorie(s). This can easily cause aborted seeds, so some basic checks will be performed
     # beforehand to know whether an item can indeed be removed.
     # runtimeLimit_s : maximum runtime limit in seconds for generateItems functions. If <= 0, will be unlimited.
-    def __init__(self, maxDiff, progSpeed, progDiff, qty, restrictions, superFun, runtimeLimit_s):
+    def __init__(self, maxDiff, progSpeed, progDiff, qty, restrictions, superFun, runtimeLimit_s, cache):
         self.progSpeed = progSpeed
         self.progDiff = progDiff
         self.maxDiff = maxDiff
@@ -49,6 +49,7 @@ class RandoSettings(object):
         self.runtimeLimit_s = runtimeLimit_s
         if self.runtimeLimit_s <= 0:
             self.runtimeLimit_s = sys.maxint
+        self.cache = cache
 
     def getChooseLocDict(self, progDiff):
         if progDiff == 'normal':
@@ -323,9 +324,9 @@ class Randomizer(object):
         self.rollbackItemsTried = {}
         # create smbm and perform sanity checks
         if self.difficultyTarget > samus and settings.progDiff == 'normal':
-            self.smbm = SMBoolManager.factory('bool', cache=True)
+            self.smbm = SMBoolManager.factory('bool', cache=settings.cache)
         else:
-            self.smbm = SMBoolManager.factory('diff', cache=True)
+            self.smbm = SMBoolManager.factory('diff', cache=settings.cache)
         self.restrictedLocations = self.checkReach(locations, settings.forbiddenItems)
 
     def setCurAccessPoint(self, ap='Landing Site'):

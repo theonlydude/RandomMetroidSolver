@@ -15,10 +15,6 @@ extend 'layout.html'
 <title>Super Metroid VARIA Randomizer Tracker</title>
 
 <style>
-.absolute {
-    position: absolute;
-    width: 10%;
-}
 .ten {
     width: 10%;
 }
@@ -253,10 +249,15 @@ function clearLines() {
   }
   lines = {};
   leaderLines = {};
+  linesSeq = [];
   nextColor = 0;
 }
 
 function deleteLine() {
+  if(linesSeq.length == 0){
+    return;
+  }
+
   var startPoint = linesSeq.pop();
   var endPoint = lines[startPoint];
 
@@ -274,7 +275,7 @@ function deleteLine() {
 
 <div class="fixed">
   <div class="menu">
-    {{=A("Super Metroid VARIA Randomizer and Solver", _href=URL(f="home"), _class="menu")}}
+    {{=A("Home", _href=URL(f="home"), _class="menu")}}
     {{=A("Presets", _href=URL(f="presets"), _class="menu")}}
     {{=A("Randomizer", _href=URL(f="randomizer"), _class="menu")}}
     {{=A("Solver", _href=URL(f="solver"), _class="menu")}}
@@ -287,7 +288,7 @@ function deleteLine() {
   <table class="full">
     <colgroup><col class="ten" /><col class="ninety" /></colgroup>
     <tr>
-      <td class="absolute">
+      <td>
 	  <table class="full">
 	    <tr>
 	      <td>

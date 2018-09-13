@@ -721,7 +721,7 @@ def randomizer():
     return dict(stdPresets=stdPresets, comPresets=comPresets, patches=patches)
 
 def raiseHttp(code, msg, isJson=False):
-    print("raiseHttp: code {} msg {} isJson {}".format(code, msg, isJson))
+    #print("raiseHttp: code {} msg {} isJson {}".format(code, msg, isJson))
     if isJson is True:
         msg = json.dumps(msg)
 
@@ -1096,3 +1096,72 @@ def stats():
 
 def tracker():
     return dict()
+
+def validatePoint(point):
+    if request.vars[point] == None:
+        raiseHttp(400, "Missing parameter {}".format(point), True)
+
+    pointValue = request.vars[point]
+
+    if pointValue not in ['lowerMushroomsLeft', 'moatRight', 'greenPiratesShaftBottomRight',
+                          'keyhunterRoomBottom', 'morphBallRoomLeft', 'greenBrinstarElevatorRight',
+                          'greenHillZoneTopRight', 'noobBridgeRight', 'westOceanLeft', 'crabMazeLeft',
+                          'lavaDiveRight', 'threeMuskateersRoomLeft', 'warehouseZeelaRoomLeft',
+                          'warehouseEntranceLeft', 'warehouseEntranceRight', 'singleChamberTopRight',
+                          'kronicBoostRoomBottomLeft', 'mainStreetBottom', 'crabHoleBottomLeft', 'leCoudeRight',
+                          'redFishRoomLeft', 'redTowerTopLeft', 'caterpillarRoomTopRight', 'redBrinstarElevator',
+                          'eastTunnelRight', 'eastTunnelTopRight', 'glassTunnelTop', 'statuesHallwayLeft']:
+        raiseHttp(400, "Wrong value for {}: {}".format(point, pointValue), True)
+
+def validateTrackerParams():
+    if request.vars.action == None:
+        raiseHttp(400, "Missing parameter action", True)
+    action = request.vars.action
+
+    if action not in ['add', 'remove', 'clear', 'get']:
+        raiseHttp(400, "Unknown action {}, must be add/remove/clear/get".format(action), True)
+
+    if action == 'add':
+        # startPoint and endPoint
+        validatePoint("startPoint")
+        validatePoint("endPoint")
+
+def trackerWebService():
+    # web service to store tracker actions
+
+    # check params
+    validateTrackerParams()
+
+    # init session
+    if session.tracker is None:
+        session.tracker = {}
+        session.tracker["lines"] = {}
+        session.tracker["linesSeq"] = []
+
+    # handle action
+    action = request.vars.action
+    print("trackerWebService: action={}".format(action))
+
+    if action == 'add':
+        startPoint = request.vars.startPoint
+        endPoint = request.vars.endPoint
+        session.tracker["lines"][startPoint] = endPoint
+        session.tracker["lines"][endPoint] = startPoint
+        session.tracker["linesSeq"].append(startPoint)
+
+    elif action == 'remove':
+        if len(session.tracker["linesSeq"]) > 0:
+            startPoint = session.tracker["linesSeq"].pop()
+            endPoint = session.tracker["lines"][startPoint]
+
+            del session.tracker["lines"][startPoint]
+            del session.tracker["lines"][endPoint]
+    elif action == 'clear':
+        session.tracker["lines"] = {}
+        session.tracker["linesSeq"] = []
+    elif action == 'get':
+        return json.dumps({"lines": session.tracker["lines"],
+                           "linesSeq": session.tracker["linesSeq"]})
+
+    # return something
+    raiseHttp(200, "OK", True)

@@ -7,17 +7,6 @@ from parameters import Settings, easy, medium, hard, harder, hardcore, mania, di
 class Helpers(object):
     def __init__(self, smbm):
         self.smbm = smbm
-        # cacheable functions sorted to avoid dependencies
-        self.cachedMethods = [
-            'heatProof', 'canFly', 'canUseBombs', 'canOpenRedDoors',
-            'canOpenYellowDoors', 'canUsePowerBombs',
-            'canDestroyBombWalls', 'canPassBombPassages',
-            'canAccessRedBrinstar', 'canAccessKraid', 'canAccessWs', 'canAccessHeatedNorfair',
-            'canAccessCrocomire', 'enoughStuffCroc', 'canDefeatCrocomire',
-            'canAccessLowerNorfair', 'canPassWorstRoom', 'canAccessOuterMaridia',
-            'canDoSuitlessMaridia', 'canPassMtEverest',
-            'enoughStuffBotwoon', 'canDefeatBotwoon'
-        ]
 
     # return bool
     def haveItemCount(self, item, count):

@@ -133,7 +133,6 @@ if __name__ == "__main__":
                         dest='controls')
     parser.add_argument('--runtime', help="Maximum runtime limit in seconds. If 0 or negative, no runtime limit. Default is 30.", dest='runtimeLimit_s',
                         nargs='?', default=30, type=int)
-    parser.add_argument('--cache', help="Activate cache in smbm", dest='cache', action='store_true')
 
     # parse args
     args = parser.parse_args()
@@ -297,7 +296,7 @@ if __name__ == "__main__":
     # print("qty = " + str(qty))
     # print("restrictions = " + str(restrictions))
     # print("superFun = " + str(args.superFun))
-    randoSettings = RandoSettings(maxDifficulty, progSpeed, progDiff, qty, restrictions, args.superFun, args.runtimeLimit_s, args.cache)
+    randoSettings = RandoSettings(maxDifficulty, progSpeed, progDiff, qty, restrictions, args.superFun, args.runtimeLimit_s)
     if args.area == True:
         if args.dot == True:
             dotDir = args.directory

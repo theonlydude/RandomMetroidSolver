@@ -28,6 +28,9 @@ extend 'layout.html'
 .map_container {
     position: relative;
 }
+.top {
+    vertical-align: top;
+}
 .baseButton {
     cursor: pointer;
     position: absolute;
@@ -227,6 +230,11 @@ function addLine(startPoint, endPoint) {
 }
 
 function clearLines() {
+  var result = confirm("Delete all the lines ?");
+  if(result == false){
+    return;
+  }
+
   for (var startPoint in lines) {
     if(lines[startPoint] != "") {
       var endPoint = lines[startPoint];
@@ -317,6 +325,44 @@ function stopAnimation(elem) {
     line.dash = false;
   }
 }
+
+function startTheTour(step=-1) {
+  // the tour tutorial
+  var tour = new Tour({
+    storage: false,
+    steps: [
+    {
+      element: "#tutorialStep",
+      title: "Tutorial",
+      content: "Welcome to the VARIA Area Tracker.<br/><p>This tracker allows you to track the connections between the areas portals.<br/>To use it, click on a portal, it'll highlight it, then click on a second portal, it'll draw a line between the two portals.<br/>You can delete the latest added line with the 'Delete latest' button and all of them with the 'Clear' button.<br/>The tracker features an auto save functionnality, so you can do your area seed in multiple seatings.</p>"
+    },
+    {
+      element: "#wsstatusStep",
+      title: "Status",
+      content: "The modifications made are saved if you don't finish your seed in one run and you need to come back to it later. After each modification this status bar tells you if the save is ok."
+    },
+    {
+      element: "#clearStep",
+      title: "Clear the lines",
+      content: "Allows you to delete all the already created lines in one step."
+    },
+    {
+      element: "#deleteStep",
+      title: "Delete line",
+      content: "Delete the last added line."
+    }
+ ]});
+
+  // Initialize the tour
+  tour.init();
+
+  // Start the tour
+  if(step != -1) {
+    tour.goTo(step);
+  }
+  tour.start();
+}
+
 </script>
 
 <div class="fixed">
@@ -334,27 +380,31 @@ function stopAnimation(elem) {
   <table class="full">
     <colgroup><col class="ten" /><col class="ninety" /></colgroup>
     <tr>
-      <td>
+      <td class="top">
 	  <table class="full">
 	    <tr>
 	      <td>
-		Connect the portals
+		Click the '?' button
 	      </td>
+	      <td id="tutorialStep"><button type="button" onclick="startTheTour(0)">?</button></td>
 	    </tr>
 	    <tr>
 	      <td>
 		<input id="wsstatus" class="full" type="text" disabled></input>
 	      </td>
+	      <td id="wsstatusStep"><button type="button" onclick="startTheTour(1)">?</button></td>
 	    </tr>
 	    <tr>
 	      <td>
 		<button class="full" type="button" onclick="clearLines()">Clear</button>
 	      </td>
+	      <td id="clearStep"><button type="button" onclick="startTheTour(2)">?</button></td>
 	    </tr>
 	    <tr>
 	      <td>
 		<button class="full" type="button" onclick="deleteLine()">Delete latest</button>
 	      </td>
+	      <td id="deleteStep"><button type="button" onclick="startTheTour(3)">?</button></td>
 	    <tr>
 	  </table>
       </td>

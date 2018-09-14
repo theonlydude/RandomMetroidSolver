@@ -1095,6 +1095,8 @@ def stats():
                 solverData=solverData, randomizerData=randomizerData, errors=errors)
 
 def tracker():
+    response.title = 'Super Metroid VARIA Randomizer and Solver Area Tracker'
+
     return dict()
 
 def validatePoint(point):

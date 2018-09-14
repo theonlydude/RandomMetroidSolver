@@ -8,7 +8,7 @@ from graph_helpers import HelpersGraph
 
 class SMBoolManager(object):
     @staticmethod
-    def factory(store='all', cache=True):
+    def factory(store='all'):
         # possible values: all, diff, bool
         # all: store the difficulty, knows and items used, bool result (solver)
         # diff: store the difficulty and the bool result (randomizer with difficulty target)
@@ -16,23 +16,22 @@ class SMBoolManager(object):
         if store not in ['all', 'diff', 'bool']:
             raise Exception("SMBM::factory::invalid store param")
 
-        print("SMBM::factory store {} cache {}".format(store, cache))
+        print("SMBM::factory store {}".format(store))
 
         if store == 'all':
-            return SMBMAll(cache)
+            return SMBMAll()
         elif store == 'diff':
-            return SMBMDiff(cache)
+            return SMBMDiff()
         elif store == 'bool':
-            return SMBMBool(cache)
+            return SMBMBool()
 
     items = ['ETank', 'Missile', 'Super', 'PowerBomb', 'Bomb', 'Charge', 'Ice', 'HiJump', 'SpeedBooster', 'Wave', 'Spazer', 'SpringBall', 'Varia', 'Plasma', 'Grapple', 'Morph', 'Reserve', 'Gravity', 'XRayScope', 'SpaceJump', 'ScrewAttack']
     countItems = ['ETank', 'Reserve', 'Missile', 'Super', 'PowerBomb']
 
-    def __init__(self, cache):
+    def __init__(self):
         self.helpers = HelpersGraph(self)
         self.curSMBool = SMBool(False)
-        self.useCache = cache
-        self.createCacheAndFacadeFunctions()
+        self.createFacadeFunctions()
         self.createKnowsFunctions()
         self.resetItems()
 
@@ -88,48 +87,11 @@ class SMBoolManager(object):
         for item in SMBoolManager.countItems:
             setattr(self, item+'Count', 0)
 
-        if self.useCache == True:
-            self.updateCache('reset', None)
-
-    def updateCache(self, action, item):
-        # reset: set last item added to None, recompute current
-        if action == 'reset':
-            self.lastItemAdded = None
-            for fun in self.helpers.cachedMethods:
-                self.resetSMBool()
-                getattr(self.helpers, fun)()
-                setattr(self, fun+'SMBool', self.getSMBoolCopy())
-
-        # add: copy current in bak, set lastItemAdded, recompute current
-        elif action == 'add':
-            self.lastItemAdded = item
-            for fun in self.helpers.cachedMethods:
-                setattr(self, fun+'SMBoolbak', getattr(self, fun+'SMBool'))
-                self.resetSMBool()
-                getattr(self.helpers, fun)()
-                setattr(self, fun+'SMBool', self.getSMBoolCopy())
-
-        # remove: if item removed is last added, copy bak in current, set lastItemAdded to None
-        elif action == 'remove':
-            if self.lastItemAdded == item:
-                self.lastItemAdded = None
-                for fun in self.helpers.cachedMethods:
-                    setattr(self, fun+'SMBool', getattr(self, fun+'SMBoolbak'))
-            else:
-                self.lastItemAdded = None
-                for fun in self.helpers.cachedMethods:
-                    self.resetSMBool()
-                    getattr(self.helpers, fun)()
-                    setattr(self, fun+'SMBool', self.getSMBoolCopy())
-
     def addItem(self, item):
         # a new item is available
         setattr(self, item, True)
         if item in self.countItems:
             setattr(self, item+'Count', getattr(self, item+'Count') + 1)
-
-        if self.useCache == True:
-            self.updateCache('add', item)
 
     def addItems(self, items):
         if len(items) == 0:
@@ -138,8 +100,6 @@ class SMBoolManager(object):
             setattr(self, item, True)
             if item in self.countItems:
                 setattr(self, item+'Count', getattr(self, item+'Count') + 1)
-        if self.useCache == True:
-            self.updateCache('add', None)
 
     def removeItem(self, item):
         # randomizer removed an item (or the item was added to test a post available)
@@ -151,21 +111,10 @@ class SMBoolManager(object):
         else:
             setattr(self, item, False)
 
-        if self.useCache == True:
-            self.updateCache('remove', item)
-
-    def createCacheAndFacadeFunctions(self):
+    def createFacadeFunctions(self):
         for fun in dir(self.helpers):
             if fun != 'smbm' and fun[0:2] != '__':
-                if fun in self.helpers.cachedMethods and self.useCache == True:
-                    setattr(self, fun, lambda fun=fun: self.getCacheSMBool(fun+'SMBool'))
-                else:
-                    setattr(self, fun, getattr(self.helpers, fun))
-
-    def getCacheSMBool(self, fun):
-        smb = getattr(self, fun)
-        self.setSMBoolCache(smb)
-        return smb
+                setattr(self, fun, getattr(self.helpers, fun))
 
     def createKnowsFunctions(self):
         # for each knows we have a function knowsKnows (ex: knowsAlcatrazEscape()) which
@@ -184,11 +133,8 @@ class SMBoolManager(object):
 
 class SMBMBool(SMBoolManager):
     # only care about the bool, internaly: bool
-    def __init__(self, cache):
-        super(SMBMBool, self).__init__(cache)
-
-    def setSMBoolCache(self, smbool):
-        self.curSMBool.bool = smbool.bool
+    def __init__(self):
+        super(SMBMBool, self).__init__()
 
     def haveItem(self, item, difficulty=0):
         self.curSMBool.bool = getattr(self, item)
@@ -224,12 +170,8 @@ class SMBMBool(SMBoolManager):
 
 class SMBMDiff(SMBoolManager):
     # bool and diff here, internaly: only a tuple (bool, diff)
-    def __init__(self, cache):
-        super(SMBMDiff, self).__init__(cache)
-
-    def setSMBoolCache(self, smbool):
-        self.curSMBool.bool = smbool.bool
-        self.curSMBool.difficulty = smbool.difficulty
+    def __init__(self):
+        super(SMBMDiff, self).__init__()
 
     def haveItem(self, item, difficulty=0):
         self.curSMBool.bool = getattr(self, item)
@@ -322,14 +264,8 @@ class SMBMDiff(SMBoolManager):
 
 class SMBMAll(SMBoolManager):
     # full package, internaly: smbool
-    def __init__(self, cache):
-        super(SMBMAll, self).__init__(cache)
-
-    def setSMBoolCache(self, smbool):
-        self.curSMBool.bool = smbool.bool
-        self.curSMBool.difficulty = smbool.difficulty
-        self.curSMBool.items = smbool.items[:]
-        self.curSMBool.knows = smbool.knows[:]
+    def __init__(self):
+        super(SMBMAll, self).__init__()
 
     def haveItem(self, item, difficulty=0):
         return SMBool(getattr(self, item), difficulty, items=[item])
@@ -417,28 +353,3 @@ class SMBMAll(SMBoolManager):
             self.removeItem(item)
 
         return ret
-
-    def updateCache(self, action, item):
-        # reset: set last item added to None, recompute current
-        if action == 'reset':
-            self.lastItemAdded = None
-            for fun in self.helpers.cachedMethods:
-                setattr(self, fun+'SMBool', getattr(self.helpers, fun)())
-
-        # add: copy current in bak, set lastItemAdded, recompute current
-        elif action == 'add':
-            self.lastItemAdded = item
-            for fun in self.helpers.cachedMethods:
-                setattr(self, fun+'SMBoolbak', getattr(self, fun+'SMBool'))
-                setattr(self, fun+'SMBool', getattr(self.helpers, fun)())
-
-        # remove: if item removed is last added, copy bak in current, set lastItemAdded to None
-        elif action == 'remove':
-            if self.lastItemAdded == item:
-                self.lastItemAdded = None
-                for fun in self.helpers.cachedMethods:
-                    setattr(self, fun+'SMBool', getattr(self, fun+'SMBoolbak'))
-            else:
-                self.lastItemAdded = None
-                for fun in self.helpers.cachedMethods:
-                    setattr(self, fun+'SMBool', getattr(self.helpers, fun)())

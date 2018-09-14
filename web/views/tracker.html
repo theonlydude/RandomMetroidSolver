@@ -28,6 +28,9 @@ extend 'layout.html'
 .map_container {
     position: relative;
 }
+.top {
+    vertical-align: top;
+}
 .baseButton {
     cursor: pointer;
     position: absolute;
@@ -170,72 +173,71 @@ var colors = ['grey', 'lime', 'pink',  'orange', 'yellow', 'purple', 'red', '#bf
 
 var nextColor = 0;
 
+var linesSeq = new Array();
+
 function clickPortal(elemId) {
   if(firstClick == ""){
     // highlight first element
     if(! (elemId in lines)){
       firstClick = elemId;
       document.getElementById(firstClick).className += " addBorder";
-      //console.log("first: "+elemId+" not in line")
-    } else {
-      //console.log("first: "+elemId+" already in line")
     }
   } else if(firstClick == elemId){
     var firstClickElem = document.getElementById(firstClick);
     firstClickElem.className = firstClickElem.className.replace(" addBorder", "");
     firstClick = "";
-    //console.log(elemId+" unselected");
   } else if(secondClick == "" && elemId != firstClick) {
 
-    if((firstClick in lines) || (elemId in lines)) {
-      //console.log(firstClick+" or "+elemId+" already in line");
-    } else {
+    if(! ((firstClick in lines) || (elemId in lines))) {
       secondClick = elemId;
 
-      //console.log(firstClick+" or "+secondClick+" not already in line");
+      addLine(firstClick, secondClick);
 
-      var firstClickElem = document.getElementById(firstClick);
-      var secondClickElem = document.getElementById(secondClick);
-
-      //console.log("secondClick="+secondClick);
-
-      var line = new LeaderLine(firstClickElem, secondClickElem,
-                                {startPlug: 'disc',
-                                 endPlug: 'disc',
-                                 dropShadow: true,
-                                 startPlugColor: colors[nextColor],
-                                 endPlugColor: colors[nextColor],
-                                 size: 6,
-                                 gradient: true,
-                                 outlineColor: 'rgb(255, 255, 255)',
-                                 outline: true,
-                                 outlineSize: 0.15});
-
-      nextColor += 1;
-      firstClickElem.className = firstClickElem.className.replace(" addBorder", "");
-
-      lines[firstClick] = secondClick;
-      lines[secondClick] = firstClick;
-
-      leaderLines[firstClick] = line;
-      leaderLines[secondClick] = line;
+      ajaxCall({action: "add", startPoint: firstClick, endPoint: secondClick}, "Saving...");
 
       firstClick = "";
       secondClick = "";
-
-      //console.log("line created");
     }
-  } else {
-    //console.log("else: firstClick: "+firstClick+" secondClick: "+secondClick);
   }
 }
 
+function addLine(startPoint, endPoint) {
+  var startPointElem = document.getElementById(startPoint);
+  var endPointElem = document.getElementById(endPoint);
+
+  var line = new LeaderLine(startPointElem, endPointElem,
+                            {startPlug: 'disc',
+                             endPlug: 'disc',
+                             dropShadow: true,
+                             startPlugColor: colors[nextColor],
+                             endPlugColor: colors[nextColor],
+                             size: 6,
+                             gradient: true,
+                             outlineColor: 'rgb(255, 255, 255)',
+                             outline: true,
+                             outlineSize: 0.15});
+
+  nextColor += 1;
+  startPointElem.className = startPointElem.className.replace(" addBorder", "");
+
+  lines[startPoint] = endPoint;
+  lines[endPoint] = startPoint;
+
+  leaderLines[startPoint] = line;
+  leaderLines[endPoint] = line;
+
+  linesSeq.push(startPoint);
+}
+
 function clearLines() {
-  //console.log("calling clearLines");
+  var result = confirm("Delete all the lines ?");
+  if(result == false){
+    return;
+  }
+
   for (var startPoint in lines) {
     if(lines[startPoint] != "") {
       var endPoint = lines[startPoint];
-      //console.log("removing line between "+startPoint+" and "+endPoint);
       lines[startPoint] = "";
       lines[endPoint] = "";
       leaderLines[startPoint].remove();
@@ -245,13 +247,127 @@ function clearLines() {
   }
   lines = {};
   leaderLines = {};
+  linesSeq = [];
   nextColor = 0;
+  ajaxCall({action: "clear"}, "Clearing...");
 }
+
+function deleteLine() {
+  if(linesSeq.length == 0){
+    return;
+  }
+
+  var startPoint = linesSeq.pop();
+  var endPoint = lines[startPoint];
+
+  delete lines[startPoint];
+  delete lines[endPoint];
+
+  leaderLines[startPoint].remove();
+
+  delete leaderLines[startPoint];
+  delete leaderLines[endPoint];
+
+  nextColor -= 1;
+  ajaxCall({action: "remove"}, "Removing...");
+}
+
+function ajaxCall(dataDict, msg, okFunc=ajaxOkJSON) {
+    var request = $.ajax({
+      url: "{{=URL(f='trackerWebService')}}",
+      method: "POST",
+      data: dataDict,
+      dataType: "json",
+      crossDomain: true
+    });
+
+    document.getElementById("wsstatus").value = msg;
+
+    request.done(okFunc);
+    request.fail(ajaxFailJSON);
+}
+
+function ajaxFailJSON(jqXHR, textStatus) {
+  console.log("error ["+jqXHR.responseJSON+"] ["+textStatus+"]");
+
+  if(jqXHR.responseJSON == null) {
+    document.getElementById("wsstatus").value = "Unknown error";
+  } else {
+    document.getElementById("wsstatus").value = jqXHR.responseJSON;
+  }
+}
+
+function ajaxOkJSON(data) {
+  document.getElementById("wsstatus").value = "Saved";
+}
+window.onload = function(){
+  ajaxCall({action: "get"}, "Loading...", ajaxOkGet);
+}
+function ajaxOkGet(jsonData) {
+  var arrayLength = jsonData["linesSeq"].length;
+  for(var i=0; i<arrayLength; i++) {
+    addLine(jsonData["linesSeq"][i], jsonData["lines"][jsonData["linesSeq"][i]]);
+  }
+
+  document.getElementById("wsstatus").value = "Loaded";
+}
+
+function startAnimation(elem) {
+  if(elem.id in leaderLines) {
+    var line = leaderLines[elem.id];
+    line.dash = {animation: true};
+  }
+}
+
+function stopAnimation(elem) {
+  if(elem.id in leaderLines) {
+    var line = leaderLines[elem.id];
+    line.dash = false;
+  }
+}
+
+function startTheTour(step=-1) {
+  // the tour tutorial
+  var tour = new Tour({
+    storage: false,
+    steps: [
+    {
+      element: "#tutorialStep",
+      title: "Tutorial",
+      content: "Welcome to the VARIA Area Tracker.<br/><p>This tracker allows you to track the connections between the areas portals.<br/>To use it, click on a portal, it'll highlight it, then click on a second portal, it'll draw a line between the two portals.<br/>You can delete the latest added line with the 'Delete latest' button and all of them with the 'Clear' button.<br/>The tracker features an auto save functionnality, so you can do your area seed in multiple seatings.</p>"
+    },
+    {
+      element: "#wsstatusStep",
+      title: "Status",
+      content: "The modifications made are saved if you don't finish your seed in one run and you need to come back to it later. After each modification this status bar tells you if the save is ok."
+    },
+    {
+      element: "#clearStep",
+      title: "Clear the lines",
+      content: "Allows you to delete all the already created lines in one step."
+    },
+    {
+      element: "#deleteStep",
+      title: "Delete line",
+      content: "Delete the last added line."
+    }
+ ]});
+
+  // Initialize the tour
+  tour.init();
+
+  // Start the tour
+  if(step != -1) {
+    tour.goTo(step);
+  }
+  tour.start();
+}
+
 </script>
 
 <div class="fixed">
   <div class="menu">
-    {{=A("Super Metroid VARIA Randomizer and Solver", _href=URL(f="home"), _class="menu")}}
+    {{=A("Home", _href=URL(f="home"), _class="menu")}}
     {{=A("Presets", _href=URL(f="presets"), _class="menu")}}
     {{=A("Randomizer", _href=URL(f="randomizer"), _class="menu")}}
     {{=A("Solver", _href=URL(f="solver"), _class="menu")}}
@@ -264,40 +380,65 @@ function clearLines() {
   <table class="full">
     <colgroup><col class="ten" /><col class="ninety" /></colgroup>
     <tr>
-      <td>
-	<button type="button" onclick="clearLines()">Clear</button>
+      <td class="top">
+	  <table class="full">
+	    <tr>
+	      <td>
+		Click the '?' button
+	      </td>
+	      <td id="tutorialStep"><button type="button" onclick="startTheTour(0)">?</button></td>
+	    </tr>
+	    <tr>
+	      <td>
+		<input id="wsstatus" class="full" type="text" disabled></input>
+	      </td>
+	      <td id="wsstatusStep"><button type="button" onclick="startTheTour(1)">?</button></td>
+	    </tr>
+	    <tr>
+	      <td>
+		<button class="full" type="button" onclick="clearLines()">Clear</button>
+	      </td>
+	      <td id="clearStep"><button type="button" onclick="startTheTour(2)">?</button></td>
+	    </tr>
+	    <tr>
+	      <td>
+		<button class="full" type="button" onclick="deleteLine()">Delete latest</button>
+	      </td>
+	      <td id="deleteStep"><button type="button" onclick="startTheTour(3)">?</button></td>
+	    <tr>
+	  </table>
       </td>
-      <td>
+      <td rowspan="2">
 	<div class="map_container">
 	  <img src="/solver/static/images/area_map.png" class="center">
-	  <div id="lowerMushroomsLeft" class="baseButton lowerMushroomsLeft" onclick="clickPortal('lowerMushroomsLeft')"></div>
-	  <div id="moatRight" class="baseButton moatRight" onclick="clickPortal('moatRight')"></div>
-	  <div id="greenPiratesShaftBottomRight" class="baseButton greenPiratesShaftBottomRight" onclick="clickPortal('greenPiratesShaftBottomRight')"></div>
-	  <div id="keyhunterRoomBottom" class="baseButtonRot keyhunterRoomBottom" onclick="clickPortal('keyhunterRoomBottom')"></div>
-	  <div id="morphBallRoomLeft" class="baseButton morphBallRoomLeft" onclick="clickPortal('morphBallRoomLeft')"></div>
-	  <div id="greenBrinstarElevatorRight" class="baseButton greenBrinstarElevatorRight" onclick="clickPortal('greenBrinstarElevatorRight')"></div>
-	  <div id="greenHillZoneTopRight" class="baseButton greenHillZoneTopRight" onclick="clickPortal('greenHillZoneTopRight')"></div>
-	  <div id="noobBridgeRight" class="baseButton noobBridgeRight" onclick="clickPortal('noobBridgeRight')"></div>
-	  <div id="westOceanLeft" class="baseButton westOceanLeft" onclick="clickPortal('westOceanLeft')"></div>
-	  <div id="crabMazeLeft" class="baseButton crabMazeLeft" onclick="clickPortal('crabMazeLeft')"></div>
-	  <div id="lavaDiveRight" class="baseButton lavaDiveRight" onclick="clickPortal('lavaDiveRight')"></div>
-	  <div id="threeMuskateersRoomLeft" class="baseButton threeMuskateersRoomLeft" onclick="clickPortal('threeMuskateersRoomLeft')"></div>
-	  <div id="warehouseZeelaRoomLeft" class="baseButton warehouseZeelaRoomLeft" onclick="clickPortal('warehouseZeelaRoomLeft')"></div>
-	  <div id="warehouseEntranceLeft" class="baseButton warehouseEntranceLeft" onclick="clickPortal('warehouseEntranceLeft')"></div>
-	  <div id="warehouseEntranceRight" class="baseButton warehouseEntranceRight" onclick="clickPortal('warehouseEntranceRight')"></div>
-	  <div id="singleChamberTopRight" class="baseButton singleChamberTopRight" onclick="clickPortal('singleChamberTopRight')"></div>
-	  <div id="kronicBoostRoomBottomLeft" class="baseButton kronicBoostRoomBottomLeft" onclick="clickPortal('kronicBoostRoomBottomLeft')"></div>
-	  <div id="mainStreetBottom" class="baseButtonRot mainStreetBottom" onclick="clickPortal('mainStreetBottom')"></div>
-	  <div id="crabHoleBottomLeft" class="baseButton crabHoleBottomLeft" onclick="clickPortal('crabHoleBottomLeft')"></div>
-	  <div id="leCoudeRight" class="baseButton leCoudeRight" onclick="clickPortal('leCoudeRight')"></div>
-	  <div id="redFishRoomLeft" class="baseButton redFishRoomLeft" onclick="clickPortal('redFishRoomLeft')"></div>
-	  <div id="redTowerTopLeft" class="baseButton redTowerTopLeft" onclick="clickPortal('redTowerTopLeft')"></div>
-	  <div id="caterpillarRoomTopRight" class="baseButton caterpillarRoomTopRight" onclick="clickPortal('caterpillarRoomTopRight')"></div>
-	  <div id="redBrinstarElevator" class="baseButtonRot redBrinstarElevator" onclick="clickPortal('redBrinstarElevator')"></div>
-	  <div id="eastTunnelRight" class="baseButton eastTunnelRight" onclick="clickPortal('eastTunnelRight')"></div>
-	  <div id="eastTunnelTopRight" class="baseButton eastTunnelTopRight" onclick="clickPortal('eastTunnelTopRight')"></div>
-	  <div id="glassTunnelTop" class="baseButtonRot glassTunnelTop" onclick="clickPortal('glassTunnelTop')"></div>
-	  <div id="statuesHallwayLeft" class="baseButton statuesHallwayLeft" onclick="clickPortal('statuesHallwayLeft')"></div>
+	  <div id="lowerMushroomsLeft" class="baseButton lowerMushroomsLeft" onclick="clickPortal('lowerMushroomsLeft')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
+	  <div id="moatRight" class="baseButton moatRight" onclick="clickPortal('moatRight')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
+	  <div id="greenPiratesShaftBottomRight" class="baseButton greenPiratesShaftBottomRight" onclick="clickPortal('greenPiratesShaftBottomRight')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
+	  <div id="keyhunterRoomBottom" class="baseButtonRot keyhunterRoomBottom" onclick="clickPortal('keyhunterRoomBottom')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
+	  <div id="morphBallRoomLeft" class="baseButton morphBallRoomLeft" onclick="clickPortal('morphBallRoomLeft')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
+	  <div id="greenBrinstarElevatorRight" class="baseButton greenBrinstarElevatorRight" onclick="clickPortal('greenBrinstarElevatorRight')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
+	  <div id="greenHillZoneTopRight" class="baseButton greenHillZoneTopRight" onclick="clickPortal('greenHillZoneTopRight')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
+	  <div id="noobBridgeRight" class="baseButton noobBridgeRight" onclick="clickPortal('noobBridgeRight')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
+	  <div id="westOceanLeft" class="baseButton westOceanLeft" onclick="clickPortal('westOceanLeft')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
+	  <div id="crabMazeLeft" class="baseButton crabMazeLeft" onclick="clickPortal('crabMazeLeft')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
+	  <div id="lavaDiveRight" class="baseButton lavaDiveRight" onclick="clickPortal('lavaDiveRight')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
+	  <div id="threeMuskateersRoomLeft" class="baseButton threeMuskateersRoomLeft" onclick="clickPortal('threeMuskateersRoomLeft')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
+	  <div id="warehouseZeelaRoomLeft" class="baseButton warehouseZeelaRoomLeft" onclick="clickPortal('warehouseZeelaRoomLeft')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
+	  <div id="warehouseEntranceLeft" class="baseButton warehouseEntranceLeft" onclick="clickPortal('warehouseEntranceLeft')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
+	  <div id="warehouseEntranceRight" class="baseButton warehouseEntranceRight" onclick="clickPortal('warehouseEntranceRight')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
+	  <div id="singleChamberTopRight" class="baseButton singleChamberTopRight" onclick="clickPortal('singleChamberTopRight')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
+	  <div id="kronicBoostRoomBottomLeft" class="baseButton kronicBoostRoomBottomLeft" onclick="clickPortal('kronicBoostRoomBottomLeft')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
+	  <div id="mainStreetBottom" class="baseButtonRot mainStreetBottom" onclick="clickPortal('mainStreetBottom')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
+	  <div id="crabHoleBottomLeft" class="baseButton crabHoleBottomLeft" onclick="clickPortal('crabHoleBottomLeft')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
+	  <div id="leCoudeRight" class="baseButton leCoudeRight" onclick="clickPortal('leCoudeRight')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
+	  <div id="redFishRoomLeft" class="baseButton redFishRoomLeft" onclick="clickPortal('redFishRoomLeft')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
+	  <div id="redTowerTopLeft" class="baseButton redTowerTopLeft" onclick="clickPortal('redTowerTopLeft')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
+	  <div id="caterpillarRoomTopRight" class="baseButton caterpillarRoomTopRight" onclick="clickPortal('caterpillarRoomTopRight')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
+	  <div id="redBrinstarElevator" class="baseButtonRot redBrinstarElevator" onclick="clickPortal('redBrinstarElevator')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
+	  <div id="eastTunnelRight" class="baseButton eastTunnelRight" onclick="clickPortal('eastTunnelRight')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
+	  <div id="eastTunnelTopRight" class="baseButton eastTunnelTopRight" onclick="clickPortal('eastTunnelTopRight')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
+	  <div id="glassTunnelTop" class="baseButtonRot glassTunnelTop" onclick="clickPortal('glassTunnelTop')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
+	  <div id="statuesHallwayLeft" class="baseButton statuesHallwayLeft" onclick="clickPortal('statuesHallwayLeft')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
 	</div>
       </td>
     </tr>

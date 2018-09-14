@@ -8,17 +8,6 @@ from helpers import Helpers, Bosses
 class HelpersGraph(Helpers):
     def __init__(self, smbm):
         self.smbm = smbm
-        # cacheable functions sorted to avoid dependencies
-        self.cachedMethods = ['canUseBombs', 'canOpenYellowDoors', 'canUsePowerBombs',
-                              'canPassBombPassages', 'canOpenRedDoors', 'heatProof', 'canFly',
-                              'canOpenGreenDoors', 'canEnterAndLeaveGauntlet',
-                              'enoughStuffCroc', 'canDoSuitlessOuterMaridia', 'canDoSuitlessMaridia',
-                              'canPassMtEverest', 'canAccessBotwoonFromMainStreet',
-                              'enoughStuffBotwoon', 'canAccessDraygonFromMainStreet',
-                              'canPassLavaPit', 'canPassWorstRoom',
-                              #'canAccessCrocFromNorfairEntrance',
-                              'canEnterNorfairReserveArea',
-                              'canPassSpongeBath', 'canPassMoat', 'canGoUpMtEverest']
 
     def canAccessKraidsLair(self):
         sm = self.smbm

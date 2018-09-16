@@ -511,6 +511,7 @@ class Helpers(object):
                               sm.haveItem('Charge'),
                               sm.haveItem('XRayScope')))
 
+    @Cache.decorator
     def enoughStuffsMotherbrain(self):
         sm = self.smbm
         #print('MB')
@@ -547,6 +548,7 @@ class Helpers(object):
             return SMBool(False)
         return SMBool(True, diff)
 
+    @Cache.decorator
     def canPassMetroids(self):
         sm = self.smbm
         return sm.wand(sm.canOpenRedDoors(),
@@ -554,6 +556,7 @@ class Helpers(object):
                               # to avoid leaving tourian to refill power bombs
                               sm.itemCountOk('PowerBomb', 3)))
 
+    @Cache.decorator
     def canPassZebetites(self):
         sm = self.smbm
         # account for one zebetite, refill may be necessary
@@ -561,6 +564,7 @@ class Helpers(object):
                       sm.wand(sm.haveItem('SpeedBooster'), sm.knowsSpeedZebSkip()),
                       SMBool(self.canInflictEnoughDamages(1100, charge=False, givesDrops=False)[0] >= 1, 0))
 
+    @Cache.decorator
     def enoughStuffTourian(self):
         return self.smbm.wand(self.canPassMetroids(),
                               self.canPassZebetites(),

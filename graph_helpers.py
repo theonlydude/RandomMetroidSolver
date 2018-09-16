@@ -108,11 +108,13 @@ class HelpersGraph(Helpers):
                        sm.wor(RomPatches.has(RomPatches.AreaRandoGatesBase),
                               sm.canOpenGreenDoors()))
 
+    @Cache.decorator
     def canPassRedTowerToMaridiaNode(self):
         sm = self.smbm
         return sm.wand(sm.haveItem('Morph'),
                        RomPatches.has(RomPatches.AreaRandoGatesBase))
 
+    @Cache.decorator
     def canGrappleEscape(self):
         sm = self.smbm
         return sm.wor(sm.wor(sm.haveItem('SpaceJump'),

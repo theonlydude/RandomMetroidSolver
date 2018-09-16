@@ -29,7 +29,7 @@ class RandoSettings(object):
     # of the relevant categorie(s). This can easily cause aborted seeds, so some basic checks will be performed
     # beforehand to know whether an item can indeed be removed.
     # runtimeLimit_s : maximum runtime limit in seconds for generateItems functions. If <= 0, will be unlimited.
-    def __init__(self, maxDiff, progSpeed, progDiff, qty, restrictions, superFun, runtimeLimit_s):
+    def __init__(self, maxDiff, progSpeed, progDiff, qty, restrictions, superFun, runtimeLimit_s, cache):
         self.progSpeed = progSpeed
         self.progDiff = progDiff
         self.maxDiff = maxDiff
@@ -49,6 +49,7 @@ class RandoSettings(object):
         self.runtimeLimit_s = runtimeLimit_s
         if self.runtimeLimit_s <= 0:
             self.runtimeLimit_s = sys.maxint
+        self.cache = cache
 
     def getChooseLocDict(self, progDiff):
         if progDiff == 'normal':
@@ -57,13 +58,13 @@ class RandoSettings(object):
                 'MinDiff' : 0,
                 'MaxDiff' : 0
             }
-        if progDiff == 'easier':
+        elif progDiff == 'easier':
             return {
                 'Random' : 2,
                 'MinDiff' : 1,
                 'MaxDiff' : 0
             }
-        if progDiff == 'harder':
+        elif progDiff == 'harder':
             return {
                 'Random' : 2,
                 'MinDiff' : 0,
@@ -77,31 +78,30 @@ class RandoSettings(object):
                 'Random' : 2,
                 'MaxProgression' : 0
             }
-        if progSpeed == 'slow':
+        elif progSpeed == 'slow':
             return {
                 'MinProgression' : 25,
                 'Random' : 75,
                 'MaxProgression' : 0
             }
-        if progSpeed == 'medium' or progSpeed == 'basic':
+        elif progSpeed == 'medium' or progSpeed == 'basic':
             return {
                 'MinProgression' : 0,
                 'Random' : 1,
                 'MaxProgression' : 0
             }
-        if progSpeed == 'fast':
+        elif progSpeed == 'fast':
             return {
                 'MinProgression' : 0,
                 'Random' : 75,
                 'MaxProgression' : 25
             }
-        if progSpeed == 'fastest':
+        elif progSpeed == 'fastest':
             return {
                 'MinProgression' : 0,
                 'Random' : 2,
                 'MaxProgression' : 1
             }
-        return None
 
     def getPossibleSoftlockProb(self, progSpeed):
         if progSpeed == 'slowest':
@@ -322,16 +322,13 @@ class Randomizer(object):
         # progression items tried for a given rollback point
         self.rollbackItemsTried = {}
         # create smbm and perform sanity checks
-        if self.difficultyTarget > samus and settings.progDiff == 'normal':
-            self.smbm = SMBoolManager.factory('bool')
-        else:
-            self.smbm = SMBoolManager.factory('diff')
+        self.smbm = SMBoolManager()
         self.restrictedLocations = self.checkReach(locations, settings.forbiddenItems)
 
     def setCurAccessPoint(self, ap='Landing Site'):
         if ap != self.curAccessPoint:
             self.curAccessPoint = ap
-#            print('current AP = ' + ap)
+            #print('current AP = ' + ap)
 
     # list unreachable locations (possible with super fun setting)
     # and check area transitions validity
@@ -355,7 +352,6 @@ class Randomizer(object):
 
         # clean up
         self.smbm.resetItems()
-        self.smbm.resetSMBool()
         Bosses.reset()
         self.currentItems = []
         # actual AP check
@@ -369,7 +365,7 @@ class Randomizer(object):
         if not 'PostAvailable' in loc:
             return True
         result = self.smbm.eval(loc['PostAvailable'], item)
-#        print("POST " + str(result.bool))
+        #print("POST " + str(result.bool))
         return result.bool == True and result.difficulty <= self.difficultyTarget
 
     # get available locations, given current items, and an optional additional item.
@@ -400,6 +396,10 @@ class Randomizer(object):
             self.smbm.removeItem(itemType)
         if isSimpleCall:
             self.curLocs = ret
+
+        #if len(self.currentItems) == 28:
+        #    print("avail locs: {}".format([l['Name'] for l in ret]))
+
         return ret
 
     # for an item check if a least one location can accept it, given the current
@@ -486,6 +486,8 @@ class Randomizer(object):
         return item
 
     def chooseLocationRandom(self, availableLocations, item):
+        #print("RANDOM")
+        #print("chooseLocationRandom: {}".format([l['Name'] for l in availableLocations]))
         return availableLocations[random.randint(0, len(availableLocations)-1)]
 
     def getLocDiff(self, loc):
@@ -495,15 +497,18 @@ class Randomizer(object):
     def fillLocsDiff(self, locs):
         for loc in locs:
             if 'PostAvailable' in loc:
-                self.smbm.wand(self.getLocDiff(loc), self.smbm.eval(loc['PostAvailable']))
-                loc['difficulty'] = self.smbm.getSMBoolCopy()
+                loc['difficulty'] = self.smbm.wand(self.getLocDiff(loc), self.smbm.eval(loc['PostAvailable']))
 
     def chooseLocationMaxDiff(self, availableLocations, item):
+        #print("MAX")
         self.fillLocsDiff(availableLocations)
+        #print("chooseLocationMaxDiff: {}".format([(l['Name'], l['difficulty']) for l in availableLocations]))
         return max(availableLocations, key=lambda loc:loc['difficulty'].difficulty)
 
     def chooseLocationMinDiff(self, availableLocations, item):
+        #print("MIN")
         self.fillLocsDiff(availableLocations)
+        #print("chooseLocationMinDiff: {}".format([(l['Name'], l['difficulty']) for l in availableLocations]))
         return min(availableLocations, key=lambda loc:loc['difficulty'].difficulty)
 
     def areaDistanceProp(self, loc, otherLocs, prop):
@@ -566,6 +571,8 @@ class Randomizer(object):
         if self.isSpreadProgression == True and isProg == True:
             locs = self.getLocsSpreadProgression(availableLocations)
         random.shuffle(locs)
+        #print("chooseLocation: {}".format([l['Name'] for l in locs]))
+        #print("chooseLocation isProg: {}".format(isProg))
         if isProg == True:
             return self.getChooseFunc(self.chooseLocRanges, self.chooseLocFuncs)(locs, item)
         else:
@@ -598,12 +605,13 @@ class Randomizer(object):
         # if a loc is available we trigger pick up action, to make more locs available afterwards
         for loc in availableLocations:
             if 'Pickup' in loc:
-#                print("PICKUP call for " + loc['Name'])
+                #print("PICKUP call for " + loc['Name'])
                 loc['Pickup']()
         if len(availableLocations) == 0:
             if not item in self.failItems:
                 self.failItems.append(item)
             return None
+        #print("placeItem: {}".format([l['Name'] for l in availableLocations]))
         location = self.chooseLocation(availableLocations, item)
 
         return {'Item': item, 'Location': location}
@@ -719,7 +727,8 @@ class Randomizer(object):
         itemLocation = None
         self.failItems = []
         posItems = self.possibleItems(curLocs, pool)
-#        print(set([item['Type'] for item in posItems]))
+        #print("posItems: {}".format([i['Name'] for i in posItems]))
+        #print(set([item['Type'] for item in posItems]))
         if len(posItems) > 0:
             # if posItems is not empty, only those in posItems will be tried (see placeItem)
             nPool = len(set([item['Type'] for item in posItems]))
@@ -727,7 +736,7 @@ class Randomizer(object):
             # if posItems is empty, all items in the pool will be tried (see placeItem)
             nPool = len(set([item['Type'] for item in pool]))
         while itemLocation is None and len(self.failItems) < nPool:
-#            print("P " + str(len(posItems)) + ", F " + str(len(self.failItems)) + " / " + str(nPool))
+            #print("P " + str(len(posItems)) + ", F " + str(len(self.failItems)) + " / " + str(nPool))
             itemLocation = self.placeItem(posItems, pool, curLocs)
         return itemLocation
 
@@ -744,6 +753,7 @@ class Randomizer(object):
         if collect == True:
             # walk the graph one last time to get proper access point and store with the state
             curLocs = self.currentLocations(item)
+            #print("getItem: loc: {} ap: {}".format(location['Name'], location['accessPoint']))
             self.setCurAccessPoint(location['accessPoint'])
             self.currentItems.append(item)
             self.smbm.addItem(item['Type'])
@@ -751,8 +761,9 @@ class Randomizer(object):
             self.progTypesCache = []
         self.unusedLocations.remove(location)
         self.itemLocations.append(itemLocation)
-        # print(str(len(self.currentItems)) + ':' + item['Type'] + ' at ' + location['Name'] + ' diff: ' + str(location['difficulty']))
-        # print("PLACEMENT, curLocs=" + str([loc['Name'] for loc in curLocs]))
+        #print(str(len(self.currentItems)) + ':' + item['Type'] + ' at ' + location['Name'] + ' diff: ' + str(location['difficulty']))
+        #if curLocs != None:
+        #   print("PLACEMENT, curLocs=" + str([loc['Name'] for loc in curLocs]))
         self.removeItem(item['Type'])
         if collect == True:
             if isProg == True:
@@ -766,16 +777,16 @@ class Randomizer(object):
     # check if remaining locations pool is conform to rando settings when filling up
     # with non-progression items
     def checkLocPool(self):
-#        print("checkLocPool {}".format([it['Name'] for it in self.itemPool]))
+        #print("checkLocPool {}".format([it['Name'] for it in self.itemPool]))
         progItems = [item for item in self.itemPool if self.isProgItem(item)]
-#        print("progItems {}".format([it['Name'] for it in progItems]))
-#        print("curItems {}".format([it['Name'] for it in self.currentItems]))
+        #print("progItems {}".format([it['Name'] for it in progItems]))
+        #print("curItems {}".format([it['Name'] for it in self.currentItems]))
         if len(progItems) == 0 or self.locLimit <= 0:
             return True
         isMinorProg = any(item['Class'] == 'Minor' for item in progItems)
         isMajorProg = any(item['Class'] == 'Major' for item in progItems)
         accessibleLocations = []
-#        print("unusedLocs: {}".format([loc['Name'] for loc in self.unusedLocations]))
+        #print("unusedLocs: {}".format([loc['Name'] for loc in self.unusedLocations]))
         locs = self.currentLocations()
         for loc in locs:
             majAvail = self.restrictions['MajorMinor'] == False or loc['Class'] == 'Major'
@@ -783,7 +794,7 @@ class Randomizer(object):
             if ((isMajorProg and majAvail) or (isMinorProg and minAvail)) \
                and self.locPostAvailable(loc, None):
                 accessibleLocations.append(loc)
-#        print("accesLoc {}".format([loc['Name'] for loc in accessibleLocations]))
+        #print("accesLoc {}".format([loc['Name'] for loc in accessibleLocations]))
         if len(accessibleLocations) <= self.locLimit:
             sys.stdout.write('|')
             sys.stdout.flush()
@@ -811,7 +822,7 @@ class Randomizer(object):
         itemLocation = None
         nItems = 0
         locPoolOk = True
-#        print("NON-PROG")
+        #print("NON-PROG")
         minLimit = self.itemLimit - int(self.itemLimit/5)
         maxLimit = self.itemLimit + int(self.itemLimit/5)
         itemLimit = random.randint(minLimit, maxLimit)
@@ -822,6 +833,7 @@ class Randomizer(object):
                 break
             else:
                 nItems += 1
+                #print("fillNonProgressionItems: {} at {}".format(itemLocation['Item']['Name'], itemLocation['Location']['Name']))
                 self.getItem(itemLocation)
                 pool = [item for item in self.itemPool if not self.isProgItem(item)]
             locPoolOk = self.checkLocPool()
@@ -831,11 +843,13 @@ class Randomizer(object):
     # return True if stuck, False if not
     def getItemFromStandardPool(self):
         curLocs = self.currentLocations()
+        #print("getItemFromStandardPool: I:{} L:{}".format([i['Name'] for i in self.itemPool],[l['Name'] for l in curLocs]))
         itemLocation = self.generateItem(curLocs, self.itemPool)
         isStuck = itemLocation is None
         if not isStuck:
             sys.stdout.write('-')
             sys.stdout.flush()
+            #print("getItemFromStandardPool: {} at {}".format(itemLocation['Item']['Name'], itemLocation['Location']['Name']))
             self.getItem(itemLocation)
         return isStuck
 
@@ -865,7 +879,7 @@ class Randomizer(object):
     # goes back in the previous states to find one where
     # we can put a progression item
     def rollback(self):
-#        print("rollback BEGIN : " + str(len(self.currentItems)))
+        #print("rollback BEGIN : " + str(len(self.currentItems)))
         nStatesAtStart = len(self.states)
         self.initRollback()
         i = 0
@@ -879,8 +893,8 @@ class Randomizer(object):
                 state.apply(self)
                 posItems = self.possibleItems(state.curLocs, self.itemPool)
                 if len(posItems) > 0: # new locs can be opened
-                    # print([item['Type'] for item in posItems])
-                    # print([loc['Name'] for loc in state.curLocs])
+                    #print([item['Type'] for item in posItems])
+                    #print([loc['Name'] for loc in state.curLocs])
                     itemLoc = self.generateItem(state.curLocs, self.itemPool)
                     if itemLoc is not None and not self.hasTried(itemLoc, i):
                         possibleStates.append((state, itemLoc))
@@ -896,7 +910,7 @@ class Randomizer(object):
             state.apply(self)
             sys.stdout.write('<'*(nStatesAtStart - len(self.states)))
             sys.stdout.flush()
-#        print("rollback END : " + str(len(self.currentItems)))
+        #print("rollback END : " + str(len(self.currentItems)))
 
     # check if bosses are blocking the last remaining locations
     def onlyBossesLeft(self, bossesKilled):
@@ -927,10 +941,7 @@ class Randomizer(object):
     # check if we can still finish the game (the player can finish the seed any%)
     def canEndGame(self):
         itemTypes = [item['Type'] for item in self.currentItems]
-        self.smbm.resetSMBool()
-        self.smbm.wand(Bosses.allBossesDead(self.smbm), self.smbm.enoughStuffTourian())
-        isEndGame = self.smbm.getSMBool()
-        return isEndGame.bool
+        return self.smbm.wand(Bosses.allBossesDead(self.smbm), self.smbm.enoughStuffTourian())
 
     def getNextItemInPool(self, t):
         return next(item for item in self.itemPool if item['Type'] == t)
@@ -965,7 +976,7 @@ class Randomizer(object):
                 itemLocation['Item'] = self.getNextItemInPool('ETank')
             else:
                 break
-#            print("Fill : " + itemLocation['Item']['Type'] + " at " + itemLocation['Location']['Name'])
+            #print("Fill : " + itemLocation['Item']['Type'] + " at " + itemLocation['Location']['Name'])
             self.getItem(itemLocation, False)
 
         return False
@@ -984,7 +995,7 @@ class Randomizer(object):
             return None
         self.curLocs = self.currentLocations()
         self.states.append(RandoState(self, self.curLocs))
-#        print(str(len(self.itemPool)) + " items in pool")
+        #print(str(len(self.itemPool)) + " items in pool")
         runtime_s = 0
         startDate = time.clock()
         prevDiffTarget = None
@@ -1016,7 +1027,7 @@ class Randomizer(object):
                         self.difficultyTarget = infinity
                         isStuck = False
             runtime_s = time.clock() - startDate
-#        print(str(len(self.itemPool)) + " remaining items in pool")
+        #print(str(len(self.itemPool)) + " remaining items in pool")
         if len(self.itemPool) > 0:
             # we could not place all items, check if we can finish the game
             if self.canEndGame():
@@ -1026,7 +1037,7 @@ class Randomizer(object):
                         'Item' : self.itemPool[0],
                         'Location' : self.unusedLocations[random.randint(0, len(self.unusedLocations) - 1)]
                     }
-#                    print("Fill : " + itemLocation['Item']['Type'] + " at " + itemLocation['Location']['Name'])
+                    #print("Fill : " + itemLocation['Item']['Type'] + " at " + itemLocation['Location']['Name'])
                     self.getItem(itemLocation, False)
             else:
                 print("\nSTUCK ! ")

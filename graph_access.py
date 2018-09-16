@@ -2,6 +2,7 @@
 from graph import AccessPoint
 from parameters import Knows
 from rom import RomPatches
+from smbool import SMBool
 
 # all access points and traverse functions
 accessPoints = [
@@ -14,14 +15,14 @@ accessPoints = [
        shortName="C\\LANDING"),
     AccessPoint('Lower Mushrooms Left', 'Crateria', {
         'Landing Site': lambda sm: sm.canPassTerminatorBombWall(False),
-        'Green Pirates Shaft Bottom Right': lambda sm: sm.setSMBool(True)
+        'Green Pirates Shaft Bottom Right': lambda sm: SMBool(True)
     }, roomInfo = {'RoomPtr':0x9969, "area": 0x0},
        exitInfo = {'DoorPtr':0x8c22, 'direction': 0x5, "cap": (0xe, 0x6), "bitFlag": 0x0,
                    "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
        entryInfo = {'SamusX':0x36, 'SamusY':0x88, 'song': 0x9},
        shortName="C\\MUSHROOMS"),
     AccessPoint('Green Pirates Shaft Bottom Right', 'Crateria', {
-        'Lower Mushrooms Left': lambda sm: sm.setSMBool(True)
+        'Lower Mushrooms Left': lambda sm: SMBool(True)
     }, traverse = lambda sm: sm.canOpenRedDoors(),
        roomInfo = {'RoomPtr':0x99bd, "area": 0x0},
        # the doorAsmPtr 7FE00 is set by the g4_skip.ips patch, we have to call it
@@ -39,7 +40,7 @@ accessPoints = [
     AccessPoint('Keyhunter Room Bottom', 'Crateria', {
         'Moat Right': lambda sm: sm.wand(sm.canOpenYellowDoors(),
                                          sm.canPassMoat()),
-        'Landing Site': lambda sm: sm.setSMBool(True)
+        'Landing Site': lambda sm: SMBool(True)
     }, traverse = lambda sm: sm.canOpenYellowDoors(),
        roomInfo = { 'RoomPtr':0x948c, "area": 0x0 },
        exitInfo = {'DoorPtr':0x8a42, 'direction': 0x6, "cap": (0x6, 0x2), "bitFlag": 0x0,
@@ -70,7 +71,7 @@ accessPoints = [
                                                            sm.canDestroyBombWalls())
     }, internal=True),
     AccessPoint('Green Hill Zone Top Right', 'GreenPinkBrinstar', {
-        'Noob Bridge Right': lambda sm: sm.setSMBool(True),
+        'Noob Bridge Right': lambda sm: SMBool(True),
         'Big Pink': lambda sm: sm.haveItem('Morph')
     }, traverse=lambda sm: sm.wor(RomPatches.has(RomPatches.AreaRandoBlueDoors), sm.canOpenYellowDoors()),
        roomInfo = {'RoomPtr':0x9e52, "area": 0x1 },
@@ -306,7 +307,7 @@ accessPoints = [
         'Caterpillar Room Top Right': lambda sm: sm.wand(sm.canPassRedTowerToMaridiaNode(),
                                                          sm.canClimbRedTower()),
         # go down
-        'East Tunnel Right': lambda sm: sm.setSMBool(True)
+        'East Tunnel Right': lambda sm: SMBool(True)
     }, roomInfo = {'RoomPtr':0xa253, "area": 0x1},
        exitInfo = {'DoorPtr':0x902a, 'direction': 0x5, "cap": (0x5e, 0x6), "bitFlag": 0x0,
                    "screen": (0x5, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
@@ -333,7 +334,7 @@ accessPoints = [
        entryInfo = {'SamusX':0x80, 'SamusY':0x58},
        shortName="B\\RED ELEV."),
     AccessPoint('East Tunnel Right', 'RedBrinstar', {
-        'East Tunnel Top Right': lambda sm: sm.setSMBool(True), # handled by room traverse function
+        'East Tunnel Top Right': lambda sm: SMBool(True), # handled by room traverse function
         'Glass Tunnel Top': lambda sm: sm.wand(sm.canUsePowerBombs(),
                                                sm.wor(sm.haveItem('Gravity'),
                                                       sm.haveItem('HiJump'))),

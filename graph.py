@@ -2,6 +2,7 @@
 
 import copy
 from smbool import SMBool
+from rom import RomPatches
 
 class AccessPoint(object):
     # name : AccessPoint name
@@ -15,7 +16,7 @@ class AccessPoint(object):
     # shortName : short name for the credits
     # internal : if true, shall not be used for connecting areas
     def __init__(self, name, graphArea, transitions,
-                 traverse=lambda sm: sm.setSMBool(True),
+                 traverse=lambda sm: SMBool(True),
                  exitInfo=None, entryInfo=None, roomInfo=None, shortName=None, internal=False):
         self.Name = name
         self.GraphArea = graphArea
@@ -149,8 +150,9 @@ class AccessGraph(object):
     # return newly opened access points
     def getNewAvailNodes(self, availNodes, nodesToCheck, smbm, maxDiff):
         newAvailNodes = {}
-        for src in nodesToCheck:
-            for dstName, tFunc in src.transitions.iteritems():
+        for src in sorted(nodesToCheck, key=lambda x: x.Name):
+            for dstName in sorted(src.transitions.keys()):
+                tFunc = src.transitions[dstName]
                 dst = self.accessPoints[dstName]
                 if dst in newAvailNodes or dst in availNodes:
                     continue
@@ -162,6 +164,8 @@ class AccessGraph(object):
                     else:
                         dst.distance = src.distance + 1
                     newAvailNodes[dst] = { 'difficulty' : diff, 'from' : src }
+
+                #print("{} -> {}: {}".format(src.Name, dstName, diff))
         return newAvailNodes
 
     # rootNode: starting AccessPoint instance
@@ -217,9 +221,13 @@ class AccessGraph(object):
                 if not ap in availAccessPoints:
                     continue
                 tdiff = smbm.eval(tFunc)
+                #if loc['Name'] == "Missile (above Crocomire)":
+                #    print("root: {} ap: {}".format(rootNode, apName))
                 if tdiff.bool == True and tdiff.difficulty <= maxDiff:
                     diff = smbm.eval(loc['Available'])
                     path = self.getPath(rootAp, ap, availAccessPoints)
+                    #if loc['Name'] == "Missile (above Crocomire)":
+                    #    print("path: {}".format([a.Name for a in path]))
                     pdiff = self.getPathDifficulty(path, availAccessPoints)
                     locDiff = SMBool(diff.bool,
                                      difficulty=max(tdiff.difficulty, diff.difficulty, pdiff.difficulty),
@@ -231,6 +239,8 @@ class AccessGraph(object):
                         loc['difficulty'] = locDiff
                         loc['path'] = path
                         availLocs.append(loc)
+                        #if loc['Name'] == "Missile (above Crocomire)":
+                        #    print("diff: {} tdiff: {} pdiff: {}".format(diff, tdiff, pdiff))
                         break
                     else:
                         loc['distance'] = 1000 + tdiff.difficulty

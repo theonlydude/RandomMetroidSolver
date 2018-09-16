@@ -4,11 +4,13 @@ from functools import reduce
 from smbool import SMBool
 from rom import RomPatches
 from helpers import Helpers, Bosses
+from cache import Cache
 
 class HelpersGraph(Helpers):
     def __init__(self, smbm):
         self.smbm = smbm
 
+    @Cache.decorator
     def canAccessKraidsLair(self):
         sm = self.smbm
         # EXPLAINED: access the upper right platform with either:
@@ -20,6 +22,7 @@ class HelpersGraph(Helpers):
                               sm.canFly(),
                               sm.knowsEarlyKraid()))
 
+    @Cache.decorator
     def canPassMoat(self):
         sm = self.smbm
         # EXPLAINED: In the Moat we can either:
@@ -38,6 +41,7 @@ class HelpersGraph(Helpers):
                                     sm.wand(sm.knowsGravityJump(), sm.haveItem('Gravity')),
                                     sm.wand(sm.knowsMockballWs(), sm.haveItem('Morph'), sm.haveItem('SpringBall'))))
 
+    @Cache.decorator
     def canPassMoatReverse(self):
         sm = self.smbm
         return sm.wor(sm.haveItem('Grapple'),
@@ -47,6 +51,7 @@ class HelpersGraph(Helpers):
                               sm.wor(RomPatches.has(RomPatches.MoatShotBlock),
                                      sm.canPassBombPassages())))
 
+    @Cache.decorator
     def canPassSpongeBath(self):
         sm = self.smbm
         return sm.wand(Bosses.bossDead('Phantoon'),
@@ -62,6 +67,7 @@ class HelpersGraph(Helpers):
                                              sm.haveItem('SpringBall'),
                                              sm.knowsSpringBallJump()))))
 
+    @Cache.decorator
     def canAccessEtecoons(self):
         sm = self.smbm
         return sm.wor(sm.canUsePowerBombs(),
@@ -84,6 +90,7 @@ class HelpersGraph(Helpers):
                               suitlessCondition),
                        sm.haveItem('Morph')) # for crab maze
 
+    @Cache.decorator
     def canExitCrabHole(self):
         sm = self.smbm
         return sm.wand(sm.haveItem('Morph'), # morph to exit the hole
@@ -94,6 +101,7 @@ class HelpersGraph(Helpers):
                                              sm.canFly())),
                               sm.wand(sm.haveItem('Ice'), sm.canDoSuitlessOuterMaridia()))) # climbing crabs
 
+    @Cache.decorator
     def canPassMaridiaToRedTowerNode(self):
         sm = self.smbm
         return sm.wand(sm.haveItem('Morph'),
@@ -119,6 +127,7 @@ class HelpersGraph(Helpers):
                                      sm.knowsShortCharge())), # spark from across the grapple blocks
                       sm.wand(sm.haveItem('SpringBall'), sm.haveItem('HiJump'), sm.knowsSpringBallJump())) # jump from the blocks below
 
+    @Cache.decorator
     def canEnterNorfairReserveArea(self):
         sm = self.smbm
         return sm.wand(sm.canOpenGreenDoors(),
@@ -130,10 +139,11 @@ class HelpersGraph(Helpers):
                                      sm.wand(sm.haveItem('SpringBall'),
                                              sm.knowsSpringBallJumpFromWall()))))
 
+    @Cache.decorator
     def canPassLavaPit(self):
         sm = self.smbm
         nTanks4Dive = 3
-        if sm.getBool(sm.heatProof()) == False:
+        if sm.heatProof().bool == False:
             nTanks4Dive = 8
         return sm.wand(sm.wor(sm.wand(sm.haveItem('Gravity'), sm.haveItem('SpaceJump')),
                               sm.wand(sm.knowsGravityJump(), sm.haveItem('Gravity')),
@@ -142,6 +152,7 @@ class HelpersGraph(Helpers):
                                       sm.energyReserveCountOk(nTanks4Dive))),
                        sm.canUsePowerBombs()) # power bomb blocks left and right of LN entrance without any items before
 
+    @Cache.decorator
     def canPassLowerNorfairChozo(self):
         sm = self.smbm
         return sm.wand(sm.canHellRun('LowerNorfair', 0.75), # 0.75 to require one more CF if no heat protection because of distance to cover, wait times, acid...
@@ -151,6 +162,7 @@ class HelpersGraph(Helpers):
                               RomPatches.has(RomPatches.LNChozoSJCheckDisabled)))
 
 
+    @Cache.decorator
     def canPassWorstRoom(self):
         sm = self.smbm
         return sm.wand(sm.canDestroyBombWalls(),
@@ -160,6 +172,7 @@ class HelpersGraph(Helpers):
                               sm.wand(sm.knowsSpringBallJumpFromWall(), sm.haveItem('SpringBall'))))
 
     # go though the pirates room filled with acid
+    @Cache.decorator
     def canPassAmphitheaterReverse(self):
         sm = self.smbm
         nTanks = 4
@@ -168,12 +181,14 @@ class HelpersGraph(Helpers):
         return sm.wand(sm.haveItem('Gravity'),
                        sm.energyReserveCountOk(nTanks))
 
+    @Cache.decorator
     def canClimbRedTower(self):
         sm = self.smbm
         return sm.wor(sm.knowsRedTowerClimb(),
                       sm.haveItem('Ice'),
                       sm.haveItem('SpaceJump'))
 
+    @Cache.decorator
     def canClimbBottomRedTower(self):
         sm = self.smbm
         return sm.wor(sm.wor(RomPatches.has(RomPatches.RedTowerLeftPassage),
@@ -182,6 +197,7 @@ class HelpersGraph(Helpers):
                              sm.canFly()),
                       sm.wand(sm.haveItem('SpeedBooster'), sm.knowsShortCharge()))
 
+    @Cache.decorator
     def canGoUpMtEverest(self):
         sm = self.smbm
         return sm.wor(sm.wand(sm.haveItem('Gravity'),
@@ -192,6 +208,7 @@ class HelpersGraph(Helpers):
                       sm.wand(sm.canDoSuitlessOuterMaridia(),
                               sm.haveItem('Grapple')))
 
+    @Cache.decorator
     def canPassMtEverest(self):
         sm = self.smbm
         return  sm.wor(sm.wand(sm.haveItem('Gravity'),
@@ -203,6 +220,7 @@ class HelpersGraph(Helpers):
                        sm.canDoSuitlessMaridia(),
                        sm.wand(sm.haveItem('Ice'), sm.canDoSuitlessOuterMaridia(), sm.knowsTediousMountEverest()))
 
+    @Cache.decorator
     def canDoSuitlessOuterMaridia(self):
         sm = self.smbm
         return sm.wand(sm.knowsGravLessLevel1(),
@@ -210,11 +228,13 @@ class HelpersGraph(Helpers):
                        sm.wor(sm.haveItem('Ice'),
                               sm.wand(sm.haveItem('SpringBall'), sm.knowsSpringBallJump())))
 
+    @Cache.decorator
     def canDoSuitlessMaridia(self):
         sm = self.smbm
         return sm.wand(sm.canDoSuitlessOuterMaridia(),
                        sm.haveItem('Grapple'))
 
+    @Cache.decorator
     def canAccessBotwoonFromMainStreet(self):
         sm = self.smbm
         return sm.wand(sm.canPassMtEverest(),
@@ -222,6 +242,7 @@ class HelpersGraph(Helpers):
                        sm.canUsePowerBombs())
 
     # from main street only
+    @Cache.decorator
     def canDefeatBotwoon(self):
         sm = self.smbm
         # EXPLAINED: in Botwoon Hallway, either:
@@ -233,6 +254,7 @@ class HelpersGraph(Helpers):
                                       sm.haveItem('Gravity')),
                               sm.wand(sm.knowsMochtroidClip(), sm.haveItem('Ice'))))
 
+    @Cache.decorator
     def canAccessDraygonFromMainStreet(self):
         sm = self.smbm
         return sm.wand(sm.canDefeatBotwoon(),

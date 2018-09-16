@@ -21,10 +21,6 @@ extend 'layout.html'
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 
 <style>
-.disabledText {
-    color: grey;
-    font-style: italic;
-}
 .almostFull {
     width: 95%;
 }
@@ -351,6 +347,7 @@ pass
   </div>
 </div>
 
+<div class="main">
 <form id="presetForm" class="presetform" method="post">
   <div class="row">
     <div class="columnThird">
@@ -601,4 +598,5 @@ pass
       {{ displaySelect("Select", actions, controller["Select"]) }}
     </div>
   </div>
+</div>
 </div>

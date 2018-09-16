@@ -656,7 +656,6 @@ if __name__ == "__main__":
                         dest='displayGeneratedPath', action='store_true')
     parser.add_argument('--output', '-o', help="When called from the website, contains the result of the solver",
                         dest='output', nargs='?', default=None)
-    parser.add_argument('--cache', help="Activate cache in smbm", dest='cache', action='store_true')
 
     args = parser.parse_args()
 

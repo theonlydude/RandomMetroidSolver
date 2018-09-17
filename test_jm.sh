@@ -15,15 +15,15 @@ ROM=$1
 LOOPS=$2
 
 # get git head
-#TEMP_DIR=$(mktemp)
-#rm -f ${TEMP_DIR}
-#mkdir -p ${TEMP_DIR}
-#(
-#    cd ${TEMP_DIR}
-#    git clone git@github.com:theonlydude/RandomMetroidSolver.git
-#)
-#ORIG=${TEMP_DIR}/RandomMetroidSolver/
-ORIG=/tmp/tmp.KtU7aob2Ba/RandomMetroidSolver/
+TEMP_DIR=$(mktemp)
+rm -f ${TEMP_DIR}
+mkdir -p ${TEMP_DIR}
+(
+    cd ${TEMP_DIR}
+    git clone git@github.com:theonlydude/RandomMetroidSolver.git
+)
+ORIG=${TEMP_DIR}/RandomMetroidSolver/
+#ORIG=/tmp/tmp.KtU7aob2Ba/RandomMetroidSolver/
 #ORIG=.
 
 PRESETS=("regular" "noob" "master")
@@ -48,7 +48,7 @@ function computeSeed {
     PARAMS=$(generate_params "${SEED}" "${PRESET}")
     CSV=test_jm.csv
     if [ ! -f "${CSV}" ]; then
-	echo "seed;diff_cap;rtime old;rtime cache;rtime nocache;stime old;stime cache; stime nocache;md5sum ok;params;" | tee -a ${CSV}
+	echo "seed;diff_cap;rtime old;rtime new;stime old;stime new;;md5sum ok;params;" | tee -a ${CSV}
     fi
 
     OLD_MD5="old n/a"
@@ -57,32 +57,30 @@ function computeSeed {
 	RTIME_OLD="n/a"
     else
 	RTIME_OLD=$(echo "${OUT}" | grep real | awk '{print $1}')
-	ROM_GEN=$(ls -1 VARIA_Randomizer_*X${SEED}_${PRESET}.sfc)
+	ROM_GEN=$(ls -1 VARIA_Randomizer_*X${SEED}_${PRESET}.sfc 2>/dev/null)
 	if [ $? -eq 0 ]; then
 	    OLD_MD5=$(md5sum ${ROM_GEN} | awk '{print $1}')
 	fi
     fi
 
-    PARAMS="${PARAMS} --cache"
-
-    CACHE_MD5="cache n/a"
+    NEW_MD5="new n/a"
     OUT=$(/usr/bin/time -f "\t%E real" python2 ./randomizer.py ${PARAMS} 2>&1)
     if [ $? -ne 0 ]; then
-	RTIME_CACHE="n/a"
+	RTIME_NEW="n/a"
     else
-	RTIME_CACHE=$(echo "${OUT}" | grep real | awk '{print $1}')
-	ROM_GEN=$(ls -1 VARIA_Randomizer_*X${SEED}_${PRESET}.sfc)
+	RTIME_NEW=$(echo "${OUT}" | grep real | awk '{print $1}')
+	ROM_GEN=$(ls -1 VARIA_Randomizer_*X${SEED}_${PRESET}.sfc 2>/dev/null)
 	if [ $? -eq 0 ]; then
-	    CACHE_MD5=$(md5sum ${ROM_GEN} | awk '{print $1}')
+	    NEW_MD5=$(md5sum ${ROM_GEN} | awk '{print $1}')
 	fi
     fi
 
-    if [ "${OLD_MD5}" != "${CACHE_MD5}" ]; then
-	if [ "${OLD_MD5}" = "old n/a" ] && [ "${CACHE_MD5}" = "cache n/a" ]; then
+    if [ "${OLD_MD5}" != "${NEW_MD5}" ]; then
+	if [ "${OLD_MD5}" = "old n/a" ] && [ "${NEW_MD5}" = "new n/a" ]; then
 	    MD5="n/a"
 	else
 	    MD5="mismatch"
-	    echo "OLD: ${OLD_MD5} CACHE: ${CACHE_MD5}"
+	    echo "OLD: ${OLD_MD5} NEW: ${NEW_MD5}"
 	    STOP="now"
 	fi
     else
@@ -101,26 +99,19 @@ function computeSeed {
     else
 	STIME_OLD=$(echo "${OUT}" | grep real | awk '{print $1}')
     fi
-    OUT=$(/usr/bin/time -f "\t%E real" python2 ./solver.py ${ROM_GEN} --preset standard_presets/${PRESET}.json -g 2>&1) > ${ROM_GEN}.nocache
+    OUT=$(/usr/bin/time -f "\t%E real" python2 ./solver.py ${ROM_GEN} --preset standard_presets/${PRESET}.json -g 2>&1) > ${ROM_GEN}.new
     if [ $? -ne 0 ]; then
-	STIME_NOCACHE="n/a"
+	STIME_NEW="n/a"
     else
-	STIME_NOCACHE=$(echo "${OUT}" | grep real | awk '{print $1}')
-    fi
-    OUT=$(/usr/bin/time -f "\t%E real" python2 ./solver.py ${ROM_GEN} --preset standard_presets/${PRESET}.json -g --cache 2>&1) > ${ROM_GEN}.cache
-    if [ $? -ne 0 ]; then
-	STIME_CACHE="n/a"
-    else
-	STIME_CACHE=$(echo "${OUT}" | grep real | awk '{print $1}')
+	STIME_NEW=$(echo "${OUT}" | grep real | awk '{print $1}')
     fi
 
-    echo "${SEED};${DIFF_CAP};${RTIME_OLD};${RTIME_CACHE};${RTIME_NOCACHE};${STIME_OLD};${STIME_CACHE};${STIME_NOCACHE};${MD5};${PARAMS};" | tee -a ${CSV}
+    echo "${SEED};${DIFF_CAP};${RTIME_OLD};${RTIME_NEW};${STIME_OLD};${STIME_NEW};${MD5};${PARAMS};" | tee -a ${CSV}
 
-    DIFF1=$(diff ${ROM_GEN}.old ${ROM_GEN}.nocache)
-    DIFF2=$(diff ${ROM_GEN}.cache ${ROM_GEN}.nocache)
+    DIFF=$(diff ${ROM_GEN}.old ${ROM_GEN}.new)
 
-    if [ -z "${DIFF1}" -a -z "${DIFF2}" ]; then
-	rm -f ${ROM_GEN} ${ROM_GEN}.nocache ${ROM_GEN}.cache ${ROM_GEN}.old
+    if [ -z "${DIFF}" ]; then
+	rm -f ${ROM_GEN} ${ROM_GEN}.new ${ROM_GEN}.old
 	echo "${SEED};${ROM_GEN};SOLVER;${PRESET};OK;" | tee -a test_jm.csv
     else
 	echo "${SEED};${ROM_GEN};SOLVER;${PRESET};NOK;" | tee -a test_jm.csv

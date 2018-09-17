@@ -14,99 +14,123 @@ fi
 ROM=$1
 LOOPS=$2
 
-## get git head
-#TEMP_DIR=$(mktemp)
-#rm -f ${TEMP_DIR}
-#mkdir -p ${TEMP_DIR}
-#(
-#    cd ${TEMP_DIR}
-#    git clone git@github.com:theonlydude/RandomMetroidSolver.git
-#)
-#ORIG=${TEMP_DIR}/RandomMetroidSolver/
-ORIG=.
+# get git head
+TEMP_DIR=$(mktemp)
+rm -f ${TEMP_DIR}
+mkdir -p ${TEMP_DIR}
+(
+    cd ${TEMP_DIR}
+    git clone git@github.com:theonlydude/RandomMetroidSolver.git
+)
+ORIG=${TEMP_DIR}/RandomMetroidSolver/
+#ORIG=/tmp/tmp.KtU7aob2Ba/RandomMetroidSolver/
+#ORIG=.
 
 PRESETS=("regular" "noob" "master")
-DIFFS=("--maxDifficulty easy" "--maxDifficulty medium" "--maxDifficulty hard" "--maxDifficulty harder" "--maxDifficulty hardcore" "--maxDifficulty mania")
 AREAS=("" "--area")
 
 function generate_params {
     SEED="$1"
     PRESET="$2"
-    DIFF_CAP="$3"
 
     let S=$RANDOM%${#AREAS[@]}
     AREA=${AREAS[$S]}
 
-    echo -n "-r ${ROM} --param standard_presets/${PRESET}.json --seed ${SEED} --progressionSpeed random --morphPlacement random --progressionDifficulty random --missileQty 0 --superQty 0 --powerBombQty 0 --minorQty 0 --energyQty random --fullRandomization random --spreadItems random --suitsRestriction random --hideItems random --strictMinors random --superFun CombatRandom --superFun MovementRandom --superFun SuitsRandom ${AREA}"
-    if [ "${DIFF_CAP}" = "diffcap" ]; then
-	echo -n " --maxDifficulty random"
-    fi
-    echo ""
+    echo "-r ${ROM} --param standard_presets/${PRESET}.json --seed ${SEED} --progressionSpeed random --morphPlacement random --progressionDifficulty random --missileQty 0 --superQty 0 --powerBombQty 0 --minorQty 0 --energyQty random --fullRandomization random --spreadItems random --suitsRestriction random --hideItems random --strictMinors random --superFun CombatRandom --superFun MovementRandom --superFun SuitsRandom --maxDifficulty random ${AREA}"
 }
 
 function computeSeed {
     # generate seed
-    DIFF_CAP="${1}"
-
     let P=$RANDOM%${#PRESETS[@]}
     PRESET=${PRESETS[$P]}
     SEED="$RANDOM"
 
-    PARAMS=$(generate_params "${SEED}" "${PRESET}" "${DIFF_CAP}")
-    CSV=test_jm_${DIFF_CAP}.csv
+    PARAMS=$(generate_params "${SEED}" "${PRESET}")
+    CSV=test_jm.csv
     if [ ! -f "${CSV}" ]; then
-	echo "seed;diff_cap;time cache;time nocache;params;" | tee -a ${CSV}
+	echo "seed;diff_cap;rtime old;rtime new;stime old;stime new;;md5sum ok;params;" | tee -a ${CSV}
     fi
 
+    OLD_MD5="old n/a"
+    OUT=$(/usr/bin/time -f "\t%E real" python2 ${ORIG}/randomizer.py ${PARAMS} 2>&1)
+    if [ $? -ne 0 ]; then
+	RTIME_OLD="n/a"
+    else
+	RTIME_OLD=$(echo "${OUT}" | grep real | awk '{print $1}')
+	ROM_GEN=$(ls -1 VARIA_Randomizer_*X${SEED}_${PRESET}.sfc 2>/dev/null)
+	if [ $? -eq 0 ]; then
+	    OLD_MD5=$(md5sum ${ROM_GEN} | awk '{print $1}')
+	fi
+    fi
+
+    NEW_MD5="new n/a"
     OUT=$(/usr/bin/time -f "\t%E real" python2 ./randomizer.py ${PARAMS} 2>&1)
     if [ $? -ne 0 ]; then
-	TIME_NOCACHE="n/a"
+	RTIME_NEW="n/a"
     else
-	TIME_NOCACHE=$(echo "${OUT}" | grep real | awk '{print $1}')
-	rm -f VARIA_Randomizer_*X${SEED}_${PRESET}.sfc
+	RTIME_NEW=$(echo "${OUT}" | grep real | awk '{print $1}')
+	ROM_GEN=$(ls -1 VARIA_Randomizer_*X${SEED}_${PRESET}.sfc 2>/dev/null)
+	if [ $? -eq 0 ]; then
+	    NEW_MD5=$(md5sum ${ROM_GEN} | awk '{print $1}')
+	fi
     fi
 
-    PARAMS="${PARAMS} --cache"
+    if [ "${OLD_MD5}" != "${NEW_MD5}" ]; then
+	if [ "${OLD_MD5}" = "old n/a" ] && [ "${NEW_MD5}" = "new n/a" ]; then
+	    MD5="n/a"
+	else
+	    MD5="mismatch"
+	    echo "OLD: ${OLD_MD5} NEW: ${NEW_MD5}"
+	    STOP="now"
+	fi
+    else
+	MD5=${OLD_MD5}
+    fi
 
-    OUT=$(/usr/bin/time -f "\t%E real" python2 ./randomizer.py ${PARAMS} 2>&1)
+    # solve seed
+    ROM_GEN=$(ls -1 VARIA_Randomizer_*X${SEED}_${PRESET}.sfc)
     if [ $? -ne 0 ]; then
-	TIME_CACHE="n/a"
-    else
-	TIME_CACHE=$(echo "${OUT}" | grep real | awk '{print $1}')
-	rm -f VARIA_Randomizer_*X${SEED}_${PRESET}.sfc
+	return
     fi
 
-    echo "${SEED};${DIFF_CAP};${TIME_CACHE};${TIME_NOCACHE};${PARAMS};" | tee -a ${CSV}
+    OUT=$(/usr/bin/time -f "\t%E real" python2 ${ORIG}/solver.py ${ROM_GEN} --preset standard_presets/${PRESET}.json -g 2>&1) > ${ROM_GEN}.old
+    if [ $? -ne 0 ]; then
+	STIME_OLD="n/a"
+    else
+	STIME_OLD=$(echo "${OUT}" | grep real | awk '{print $1}')
+    fi
+    OUT=$(/usr/bin/time -f "\t%E real" python2 ./solver.py ${ROM_GEN} --preset standard_presets/${PRESET}.json -g 2>&1) > ${ROM_GEN}.new
+    if [ $? -ne 0 ]; then
+	STIME_NEW="n/a"
+    else
+	STIME_NEW=$(echo "${OUT}" | grep real | awk '{print $1}')
+    fi
 
-#    # solve seed twice
-#    ROM=$(ls -1 VARIA_Randomizer_*X${SEED}_${PRESET}.sfc)
-#
-#    python2 ./solver.py ${ROM} --preset standard_presets/${PRESET}.json -g | grep -v 'SMBM::factory' > ${ROM}.nocache
-#    python2 ./solver.py ${ROM} --preset standard_presets/${PRESET}.json -g -c | grep -v 'SMBM::factory' > ${ROM}.cache
-#
-#    DIFF=$(diff ${ROM}.cache ${ROM}.nocache)
-#
-#    if [ -z "${DIFF}" ]; then
-#	rm -f ${ROM} ${ROM}.nocache ${ROM}.cache
-#	echo "${SEED};${ROM};SOLVER;${PRESET};n/a;OK;" | tee -a test_jm.csv
-#    else
-#	echo "${SEED};${ROM};SOLVER;${PRESET};n/a;NOK;" | tee -a test_jm.csv
-#    fi
+    echo "${SEED};${DIFF_CAP};${RTIME_OLD};${RTIME_NEW};${STIME_OLD};${STIME_NEW};${MD5};${PARAMS};" | tee -a ${CSV}
+
+    DIFF=$(diff ${ROM_GEN}.old ${ROM_GEN}.new)
+
+    if [ -z "${DIFF}" ]; then
+	rm -f ${ROM_GEN} ${ROM_GEN}.new ${ROM_GEN}.old
+	echo "${SEED};${ROM_GEN};SOLVER;${PRESET};OK;" | tee -a test_jm.csv
+    else
+	echo "${SEED};${ROM_GEN};SOLVER;${PRESET};NOK;" | tee -a test_jm.csv
+	STOP="now"
+    fi
 }
 
-#if [ -z test_jm.csv ]; then
-#    echo "seed;params;rando/solver;time/preset;stuck;md5sum/result;" > test_jm.csv
-#fi
+STOP=""
+let LOOPS=${LOOPS}/4
+for i in $(seq 1 ${LOOPS}); do
+    computeSeed &
+    computeSeed &
+    computeSeed &
+    computeSeed &
+    wait
 
-#let LOOPS=${LOOPS}/2
-for DIFF_CAP in "diffcap" "nodiffcap"; do
-    for i in $(seq 1 ${LOOPS}); do
-	computeSeed "${DIFF_CAP}" #&
-	#computeSeed "${DIFF_CAP}" &
-	#computeSeed "${DIFF_CAP}" &
-	#computeSeed "${DIFF_CAP}" &
-	#wait
-    done | tee test_jm.log
-done
+    if [ "${STOP}" = "now" ]; then
+	exit 1
+    fi
+done | tee test_jm.log
 
 #rm -rf ${TEMP_DIR}

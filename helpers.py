@@ -3,6 +3,7 @@ import math
 from smbool import SMBool
 from rom import RomPatches
 from parameters import Settings, easy, medium, hard, harder, hardcore, mania, diff2text
+from cache import Cache
 
 class Helpers(object):
     def __init__(self, smbm):
@@ -13,6 +14,7 @@ class Helpers(object):
         return self.smbm.itemCount(item) >= count
 
     # return integer
+    @Cache.decorator
     def energyReserveCount(self):
         return self.smbm.itemCount('ETank') + self.smbm.itemCount('Reserve')
 
@@ -29,8 +31,7 @@ class Helpers(object):
         difficulties = Settings.hellRuns[hellRunName]
         result = self.energyReserveCountOkDiff(difficulties, mult)
 
-        if self.smbm.getBool(result) == True:
-            result = self.smbm.internal2SMBool(result)
+        if result == True:
             result.knows = [hellRunName+'HellRun']
         return result
 
@@ -39,8 +40,8 @@ class Helpers(object):
     def getDmgReduction(self, envDmg=True):
         ret = 1.0
         sm = self.smbm
-        hasVaria = sm.getBool(sm.haveItem('Varia'))
-        hasGrav = sm.getBool(sm.haveItem('Gravity'))
+        hasVaria = sm.haveItem('Varia')
+        hasGrav = sm.haveItem('Gravity')
         if RomPatches.has(RomPatches.NoGravityEnvProtection):
             if hasVaria:
                 if envDmg:
@@ -62,11 +63,11 @@ class Helpers(object):
         mult *= self.getDmgReduction()
         result = self.energyReserveCountOkDiff(difficulties, mult)
 
-        if self.smbm.getBool(result) == True:
-            result = self.smbm.internal2SMBool(result)
+        if result == True:
             result.knows = ['HardRoom-'+roomName]
         return result
 
+    @Cache.decorator
     def heatProof(self):
         return self.smbm.wor(self.smbm.haveItem('Varia'),
                              self.smbm.wand(self.smbm.wnot(RomPatches.has(RomPatches.NoGravityEnvProtection)),
@@ -77,10 +78,8 @@ class Helpers(object):
         sm = self.smbm
 
         isHeatProof = sm.heatProof()
-        if sm.getBool(isHeatProof) == True:
-            isHeatProof = sm.internal2SMBool(isHeatProof)
-            isHeatProof.difficulty = easy
-            return isHeatProof
+        if isHeatProof == True:
+            return SMBool(isHeatProof.bool, easy, isHeatProof.knows, isHeatProof.items)
         elif self.energyReserveCount() >= 2:
             if hellRun != 'LowerNorfair':
                 return self.energyReserveCountOkHellRun(hellRun, mult)
@@ -88,48 +87,56 @@ class Helpers(object):
                 tanks = self.energyReserveCount()
                 if tanks >= 14:
                     mult *= 2.0
-                return sm.wand(self.energyReserveCountOkHellRun(hellRun, mult),
-                               self.canCrystalFlash(int(math.ceil(2/mult))))
+                ret = sm.wand(self.energyReserveCountOkHellRun(hellRun, mult),
+                              self.canCrystalFlash(int(math.ceil(2/mult))))
+                return ret
         else:
             return SMBool(False)
 
+    @Cache.decorator
     def canFly(self):
         sm = self.smbm
-        if sm.getBool(sm.haveItem('SpaceJump')) == True:
-            return sm.setSMBool(True, easy, ['SpaceJump'])
-        elif sm.getBool(sm.wand(sm.haveItem('Morph'),
-                                sm.haveItem('Bomb'),
-                                sm.knowsInfiniteBombJump())) == True:
+        if sm.haveItem('SpaceJump') == True:
+            return SMBool(True, easy, items=['SpaceJump'])
+        elif sm.wand(sm.haveItem('Morph'),
+                     sm.haveItem('Bomb'),
+                     sm.knowsInfiniteBombJump()) == True:
             return sm.knowsInfiniteBombJump()
         else:
             return SMBool(False)
 
+    @Cache.decorator
     def canFlyDiagonally(self):
         sm = self.smbm
-        if sm.getBool(sm.haveItem('SpaceJump')) == True:
-            return sm.setSMBool(True, easy, ['SpaceJump'])
-        elif sm.getBool(sm.wand(sm.haveItem('Morph'),
-                                sm.haveItem('Bomb'),
-                                sm.knowsDiagonalBombJump())) == True:
+        if sm.haveItem('SpaceJump') == True:
+            return SMBool(True, easy, items=['SpaceJump'])
+        elif sm.wand(sm.haveItem('Morph'),
+                     sm.haveItem('Bomb'),
+                     sm.knowsDiagonalBombJump()) == True:
             return sm.knowsDiagonalBombJump()
         else:
-            return sm.setSMBool(False)
+            return SMBool(False)
 
+    @Cache.decorator
     def canUseBombs(self):
         sm = self.smbm
         return sm.wand(sm.haveItem('Morph'), sm.haveItem('Bomb'))
 
+    @Cache.decorator
     def canOpenRedDoors(self):
         sm = self.smbm
         return sm.wor(sm.haveItem('Missile'), sm.haveItem('Super'))
 
+    @Cache.decorator
     def canOpenGreenDoors(self):
         return self.smbm.haveItem('Super')
 
+    @Cache.decorator
     def canOpenYellowDoors(self):
         sm = self.smbm
         return sm.wand(sm.haveItem('Morph'), sm.haveItem('PowerBomb'))
 
+    @Cache.decorator
     def canUsePowerBombs(self):
         return self.smbm.canOpenYellowDoors()
 
@@ -139,6 +146,7 @@ class Helpers(object):
                               sm.wor(SMBool(not fromLandingSite, 0), sm.knowsSimpleShortCharge(), sm.knowsShortCharge())),
                       sm.canDestroyBombWalls())
 
+    @Cache.decorator
     def canDestroyBombWalls(self):
         sm = self.smbm
         return sm.wor(sm.wand(sm.haveItem('Morph'),
@@ -146,6 +154,7 @@ class Helpers(object):
                                      sm.haveItem('PowerBomb'))),
                       sm.haveItem('ScrewAttack'))
 
+    @Cache.decorator
     def canDestroyBombWallsUnderwater(self):
         sm = self.smbm
         return sm.wor(sm.wand(sm.haveItem('Gravity'),
@@ -181,14 +190,17 @@ class Helpers(object):
                                      sm.wand(self.energyReserveCountOkHardRoom('Gauntlet', 0.5),
                                              sm.canUseBombs()))))
 
+    @Cache.decorator
     def canEnterAndLeaveGauntlet(self):
         return self.canEnterAndLeaveGauntletQty(2, 2)
 
+    @Cache.decorator
     def canPassBombPassages(self):
         sm = self.smbm
         return sm.wor(sm.canUseBombs(),
                       sm.canUsePowerBombs())
 
+    @Cache.decorator
     def canExitScrewAttackArea(self):
         sm = self.smbm
 
@@ -210,40 +222,41 @@ class Helpers(object):
                        sm.itemCountOk('Super', 2*n),
                        sm.itemCountOk('PowerBomb', 2*n+1))
 
+    @Cache.decorator
     def getBeamDamage(self):
         sm = self.smbm
         standardDamage = 20
 
-        if sm.getBool(sm.wand(sm.haveItem('Ice'),
-                              sm.haveItem('Wave'),
-                              sm.haveItem('Plasma'))) == True:
+        if sm.wand(sm.haveItem('Ice'),
+                   sm.haveItem('Wave'),
+                   sm.haveItem('Plasma')) == True:
             standardDamage = 300
-        elif sm.getBool(sm.wand(sm.haveItem('Wave'),
-                                sm.haveItem('Plasma'))) == True:
+        elif sm.wand(sm.haveItem('Wave'),
+                     sm.haveItem('Plasma')) == True:
             standardDamage = 250
-        elif sm.getBool(sm.wand(sm.haveItem('Ice'),
-                                sm.haveItem('Plasma'))) == True:
+        elif sm.wand(sm.haveItem('Ice'),
+                     sm.haveItem('Plasma')) == True:
             standardDamage = 200
-        elif sm.getBool(sm.haveItem('Plasma')) == True:
+        elif sm.haveItem('Plasma') == True:
             standardDamage = 150
-        elif sm.getBool(sm.wand(sm.haveItem('Ice'),
-                                sm.haveItem('Wave'),
-                                sm.haveItem('Spazer'))) == True:
+        elif sm.wand(sm.haveItem('Ice'),
+                     sm.haveItem('Wave'),
+                     sm.haveItem('Spazer')) == True:
             standardDamage = 100
-        elif sm.getBool(sm.wand(sm.haveItem('Wave'),
-                                sm.haveItem('Spazer'))) == True:
+        elif sm.wand(sm.haveItem('Wave'),
+                     sm.haveItem('Spazer')) == True:
             standardDamage = 70
-        elif sm.getBool(sm.wand(sm.haveItem('Ice'),
-                                sm.haveItem('Spazer'))) == True:
+        elif sm.wand(sm.haveItem('Ice'),
+                     sm.haveItem('Spazer')) == True:
             standardDamage = 60
-        elif sm.getBool(sm.wand(sm.haveItem('Ice'),
-                                sm.haveItem('Wave'))) == True:
+        elif sm.wand(sm.haveItem('Ice'),
+                     sm.haveItem('Wave')) == True:
             standardDamage = 60
-        elif sm.getBool(sm.haveItem('Wave')) == True:
+        elif sm.haveItem('Wave') == True:
             standardDamage = 50
-        elif sm.getBool(sm.haveItem('Spazer')) == True:
+        elif sm.haveItem('Spazer') == True:
             standardDamage = 40
-        elif sm.getBool(sm.haveItem('Ice')) == True:
+        elif sm.haveItem('Ice') == True:
             standardDamage = 30
 
         return standardDamage
@@ -261,26 +274,27 @@ class Helpers(object):
     # to compute boss fight difficulty
     def canInflictEnoughDamages(self, bossEnergy, doubleSuper=False, charge=True, power=False, givesDrops=True):
         # TODO: handle special beam attacks ? (http://deanyd.net/sm/index.php?title=Charge_Beam_Combos)
+        sm = self.smbm
 
         # http://deanyd.net/sm/index.php?title=Damage
         standardDamage = 0
-        if self.smbm.getBool(self.smbm.haveItem('Charge')) == True and charge == True:
+        if sm.haveItem('Charge') == True and charge == True:
             standardDamage = self.getBeamDamage()
         # charge triples the damage
         chargeDamage = standardDamage * 3.0
 
         # missile 100 damages, super missile 300 damages, PBs 200 dmg, 5 in each extension
-        missilesAmount = self.smbm.itemCount('Missile') * 5
+        missilesAmount = sm.itemCount('Missile') * 5
         missilesDamage = missilesAmount * 100
-        supersAmount = self.smbm.itemCount('Super') * 5
+        supersAmount = sm.itemCount('Super') * 5
         oneSuper = 300.0
         if doubleSuper == True:
             oneSuper *= 2
         supersDamage = supersAmount * oneSuper
         powerDamage = 0
         powerAmount = 0
-        if power == True and self.smbm.getBool(self.smbm.haveItem('PowerBomb')) == True:
-            powerAmount = self.smbm.itemCount('PowerBomb') * 5
+        if power == True and sm.haveItem('PowerBomb') == True:
+            powerAmount = sm.itemCount('PowerBomb') * 5
             powerDamage = powerAmount * 200
 
         canBeatBoss = chargeDamage > 0 or givesDrops or (missilesDamage + supersDamage + powerDamage) >= bossEnergy
@@ -328,6 +342,8 @@ class Helpers(object):
 
     # return diff score, or -1 if below minimum energy in diffTbl
     def computeBossDifficulty(self, ammoMargin, secs, diffTbl):
+        sm = self.smbm
+
         # actual fight duration :
         rate = None
         if 'Rate' in diffTbl:
@@ -338,9 +354,9 @@ class Helpers(object):
             duration = secs / rate
         # print('rate=' + str(rate) + ', duration=' + str(duration))
         suitsCoeff = 0.5
-        if self.smbm.getBool(self.smbm.haveItem('Gravity')) == True:
+        if sm.haveItem('Gravity') == True:
             suitsCoeff = 2
-        elif self.smbm.getBool(self.smbm.haveItem('Varia')) == True:
+        elif sm.haveItem('Varia') == True:
             suitsCoeff = 1
         energy = suitsCoeff * (1 + self.energyReserveCount())
         energyDict = None
@@ -379,28 +395,25 @@ class Helpers(object):
 
         return difficulty
 
+    @Cache.decorator
     def enoughStuffCroc(self):
         # say croc has ~5000 energy, and ignore its useless drops
         (ammoMargin, secs) = self.canInflictEnoughDamages(5000, givesDrops=False)
         if ammoMargin == 0:
             return SMBool(False)
-        self.smbm.curSMBool.difficulty = easy
-        self.smbm.curSMBool.bool = True
-        self.smbm.curSMBool.items = []
-        self.smbm.curSMBool.knows = []
-        return self.smbm.getSMBoolCopy()
+        else:
+            return SMBool(True, easy)
 
+    @Cache.decorator
     def enoughStuffBotwoon(self):
         # say botwoon has 5000 energy : it is actually 3000 but account for missed shots
         (ammoMargin, secs) = self.canInflictEnoughDamages(5000, givesDrops=False)
         if ammoMargin == 0:
             return SMBool(False)
-        self.smbm.curSMBool.difficulty = easy
-        self.smbm.curSMBool.bool = True
-        self.smbm.curSMBool.items = []
-        self.smbm.curSMBool.knows = []
-        return self.smbm.getSMBoolCopy()
+        else:
+            return SMBool(True, easy)
 
+    @Cache.decorator
     def enoughStuffsRidley(self):
         (ammoMargin, secs) = self.canInflictEnoughDamages(18000, doubleSuper=True, power=True, givesDrops=False)
         if ammoMargin == 0:
@@ -411,13 +424,12 @@ class Helpers(object):
                                           Settings.bossesDifficulty['Ridley'])
         if diff < 0:
             return SMBool(False)
-        self.smbm.curSMBool.difficulty = diff
-        self.smbm.curSMBool.bool = True
-        self.smbm.curSMBool.items = []
-        self.smbm.curSMBool.knows = []
-        return self.smbm.getSMBoolCopy()
+        else:
+            return SMBool(True, diff)
 
+    @Cache.decorator
     def enoughStuffsKraid(self):
+        sm = self.smbm
         (ammoMargin, secs) = self.canInflictEnoughDamages(1000)
         if ammoMargin == 0:
             return SMBool(False)
@@ -428,14 +440,10 @@ class Helpers(object):
             return SMBool(False)
 
         # need missile or super to open the eye door
-        if self.smbm.eval(lambda sm: sm.wor(sm.haveItem('Missile'), sm.haveItem('Super'))).bool == False:
+        if sm.wor(sm.haveItem('Missile'), sm.haveItem('Super')) == False:
             return SMBool(False)
-
-        self.smbm.curSMBool.difficulty = diff
-        self.smbm.curSMBool.bool = True
-        self.smbm.curSMBool.items = []
-        self.smbm.curSMBool.knows = []
-        return self.smbm.getSMBoolCopy()
+        else:
+            return SMBool(True, diff)
 
     def adjustHealthDropDiff(self, difficulty):
         dmgRed = self.getDmgReduction(envDmg=False)
@@ -447,6 +455,7 @@ class Helpers(object):
             difficulty /= Settings.algoSettings['dmgReductionDifficultyFactor']
         return difficulty
 
+    @Cache.decorator
     def enoughStuffsDraygon(self):
         sm = self.smbm
         (ammoMargin, secs) = self.canInflictEnoughDamages(6000)
@@ -458,7 +467,7 @@ class Helpers(object):
                 fight = SMBool(False)
             else:
                 fight = SMBool(True, diff)
-            if sm.getBool(sm.haveItem('Gravity')) == False:
+            if sm.haveItem('Gravity') == False:
                 fight.difficulty *= Settings.algoSettings['draygonNoGravityMalus']
             fight.difficulty = self.adjustHealthDropDiff(fight.difficulty)
         else:
@@ -474,6 +483,7 @@ class Helpers(object):
                               sm.knowsDraygonSparkKill(),
                               sm.haveItem('SpeedBooster')))
 
+    @Cache.decorator
     def enoughStuffsPhantoon(self):
         sm = self.smbm
         (ammoMargin, secs) = self.canInflictEnoughDamages(2500, doubleSuper=True)
@@ -484,8 +494,8 @@ class Helpers(object):
                                                 Settings.bossesDifficulty['Phantoon'])
         if difficulty < 0:
             return SMBool(False)
-        hasCharge = sm.getBool(sm.haveItem('Charge'))
-        hasScrew = sm.getBool(sm.haveItem('ScrewAttack'))
+        hasCharge = sm.haveItem('Charge')
+        hasScrew = sm.haveItem('ScrewAttack')
         if hasScrew:
             difficulty /= Settings.algoSettings['phantoonFlamesAvoidBonusScrew']
         elif hasCharge:
@@ -501,7 +511,9 @@ class Helpers(object):
                               sm.haveItem('Charge'),
                               sm.haveItem('XRayScope')))
 
+    @Cache.decorator
     def enoughStuffsMotherbrain(self):
+        sm = self.smbm
         #print('MB')
         # MB1 can't be hit by charge beam
         (ammoMargin, secs) = self.canInflictEnoughDamages(3000, charge=False, givesDrops=False)
@@ -515,27 +527,28 @@ class Helpers(object):
             return SMBool(False)
 
         # print('MB2', ammoMargin, secs)
-        (etankBkp, reserveBkp) = (self.smbm.ETankCount, self.smbm.ReserveCount)
-        nTanks = self.smbm.ETankCount + self.smbm.ReserveCount
-        if self.smbm.getBool(self.smbm.haveItem('Varia')) == False:
+        (etankBkp, reserveBkp) = (sm.ETankCount, sm.ReserveCount)
+        nTanks = sm.ETankCount + sm.ReserveCount
+        if sm.haveItem('Varia') == False:
             # "remove" 3 etanks (accounting for rainbow beam damage without varia)
             if nTanks < 6:
                 return SMBool(False, 0)
             # we have at least 2 etanks (max reserves is 4)
-            self.smbm.ETankCount -= 2
-            if self.smbm.ReserveCount > 0:
-                self.smbm.ReserveCount -= 1
+            sm.ETankCount -= 2
+            if sm.ReserveCount > 0:
+                sm.ReserveCount -= 1
             else:
-                self.smbm.ETankCount -= 1
+                sm.ETankCount -= 1
         elif nTanks < 3:
             return SMBool(False, 0)
 
         diff = self.computeBossDifficulty(ammoMargin, secs, Settings.bossesDifficulty['MotherBrain'])
-        (self.smbm.ETankCount, self.smbm.ReserveCount) = (etankBkp, reserveBkp)
+        (sm.ETankCount, sm.ReserveCount) = (etankBkp, reserveBkp)
         if diff < 0:
             return SMBool(False)
         return SMBool(True, diff)
 
+    @Cache.decorator
     def canPassMetroids(self):
         sm = self.smbm
         return sm.wand(sm.canOpenRedDoors(),
@@ -543,6 +556,7 @@ class Helpers(object):
                               # to avoid leaving tourian to refill power bombs
                               sm.itemCountOk('PowerBomb', 3)))
 
+    @Cache.decorator
     def canPassZebetites(self):
         sm = self.smbm
         # account for one zebetite, refill may be necessary
@@ -550,6 +564,7 @@ class Helpers(object):
                       sm.wand(sm.haveItem('SpeedBooster'), sm.knowsSpeedZebSkip()),
                       SMBool(self.canInflictEnoughDamages(1100, charge=False, givesDrops=False)[0] >= 1, 0))
 
+    @Cache.decorator
     def enoughStuffTourian(self):
         return self.smbm.wand(self.canPassMetroids(),
                               self.canPassZebetites(),
@@ -573,7 +588,7 @@ class Pickup:
         elif self.itemsPickup == 'any':
             return True
         else:
-            canEnd = smbm.enoughStuffTourian().bool
+            canEnd = smbm.enoughStuffTourian()
             return (canEnd
                     and self._enoughMinorTable(smbm, 'Missile')
                     and self._enoughMinorTable(smbm, 'Super')
@@ -597,7 +612,7 @@ class Pickup:
                     # mother brain rainbow attack
                     and canResistRainbow
                     # lower norfair access
-                    and (smbm.haveItem('Varia') or smbm.wnot(RomPatches.has(RomPatches.NoGravityEnvProtection)).bool) # gravity is checked below
+                    and (smbm.haveItem('Varia') or smbm.wnot(RomPatches.has(RomPatches.NoGravityEnvProtection))) # gravity is checked below
                     # speed or ice to access botwoon
                     and (smbm.haveItem('SpeedBooster')
                          or smbm.haveItem('Ice'))

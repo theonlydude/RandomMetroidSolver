@@ -21,10 +21,6 @@ extend 'layout.html'
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 
 <style>
-.disabledText {
-    color: grey;
-    font-style: italic;
-}
 .almostFull {
     width: 95%;
 }
@@ -343,14 +339,16 @@ pass
 
 <div class="fixed">
   <div class="menu">
-    {{=A("Super Metroid VARIA Randomizer and Solver", _href=URL(f="home"), _class="menu")}}
+    {{=A("Home", _href=URL(f="home"), _class="menu")}}
     {{=A("Presets", _href=URL(f="presets"), _class="menu_selected")}}
     {{=A("Randomizer", _href=URL(f="randomizer"), _class="menu")}}
     {{=A("Solver", _href=URL(f="solver"), _class="menu")}}
+    {{=A("Tracker", _href=URL(f="tracker"), _class="menu")}}
     {{=A("Information & Contact", _href=URL(f="infos"), _class="menu")}}
   </div>
 </div>
 
+<div class="main">
 <form id="presetForm" class="presetform" method="post">
   <div class="row">
     <div class="columnThird">
@@ -601,4 +599,5 @@ pass
       {{ displaySelect("Select", actions, controller["Select"]) }}
     </div>
   </div>
+</div>
 </div>

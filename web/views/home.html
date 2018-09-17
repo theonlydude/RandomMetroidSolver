@@ -7,9 +7,6 @@
 <title>Super Metroid VARIA Randomizer and Solver</title>
 
 <style>
-body {
-    padding-top: 1em;
-}
 blockquote.style1 {
   font: 14px/20px italic Times, serif;
   padding: 8px;
@@ -38,16 +35,18 @@ td {
 }
 </style>
 
-<body>
-  <div class="fixed">
-    <div class="menu">
-      {{=A("Super Metroid VARIA Randomizer and Solver", _href=URL(f="home"), _class="menu_selected")}}
-      {{=A("Presets", _href=URL(f="presets"), _class="menu")}}
-      {{=A("Randomizer", _href=URL(f="randomizer"), _class="menu")}}
-      {{=A("Solver", _href=URL(f="solver"), _class="menu")}}
-      {{=A("Information & Contact", _href=URL(f="infos"), _class="menu")}}
-    </div>
+
+<div class="fixed">
+  <div class="menu">
+    {{=A("Home", _href=URL(f="home"), _class="menu_selected")}}
+    {{=A("Presets", _href=URL(f="presets"), _class="menu")}}
+    {{=A("Randomizer", _href=URL(f="randomizer"), _class="menu")}}
+    {{=A("Solver", _href=URL(f="solver"), _class="menu")}}
+    {{=A("Tracker", _href=URL(f="tracker"), _class="menu")}}
+    {{=A("Information & Contact", _href=URL(f="infos"), _class="menu")}}
   </div>
+</div>
+<div class="main">
   <h2 class="center">Welcome to the home of the VARIA (Very Adaptive Randomizer of Items and Areas) Randomizer and Solver</h2>
   <p class="center">
     <img src="/solver/static/images/super_metroid_logo.png" alt="logo">
@@ -95,4 +94,4 @@ td {
       </td>
     </tr>
   </table>
-</body>
+</div>

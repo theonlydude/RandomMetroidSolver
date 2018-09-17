@@ -52,7 +52,7 @@ class Solver:
         self.type = type
 
         self.locations = graphLocations
-        self.smbm = SMBoolManager.factory('all')
+        self.smbm = SMBoolManager()
 
         if presetFileName is not None:
             self.loadPreset(presetFileName)

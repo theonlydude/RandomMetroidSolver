@@ -1,7 +1,5 @@
 #!/usr/bin/python
 
-# https://itemrando.supermetroid.run/randomize
-
 import sys, math, logging, argparse, re, json, os, subprocess
 
 # the difficulties for each technics
@@ -31,10 +29,318 @@ class Conf:
     # the list of items to not pick up
     itemsForbidden = []
 
-class Solver:
+class SolverState(object):
+    def fromSolver(self, solver):
+        # rom
+        self.state = {}
+        self.state["fullRando"] = solver.fullRando
+        self.state["areaRando"] = solver.areaRando
+        self.state["patches"] = solver.patches
+        self.state["locsData"] = self.getLocsData(solver.locations)
+        self.state["graphTransitions"] = solver.graphTransitions
+        # preset
+        self.state["presetFileName"] = solver.presetFileName
+        # items collected / locs visited / bosses killed
+        self.state["collectedItems"] = solver.collectedItems
+        self.state["visitedLocations"] = self.getVisitedLocations(solver.visitedLocations)
+        self.state["lastLoc"] = solver.lastLoc
+        self.state["bosses"] = [boss for boss in Bosses.golden4Dead if Bosses.golden4Dead[boss] == True]
+        self.state["availableLocations"] = self.getAvailableLocations(solver.majorLocations)
+
+    def toSolver(self, solver):
+        # rom
+        solver.fullRando = self.state["fullRando"]
+        solver.areaRando = self.state["areaRando"]
+        solver.patches = self.setPatches(self.state["patches"])
+        self.setLocsData(solver.locations)
+        solver.graphTransitions = self.state["graphTransitions"]
+        # preset
+        solver.presetFileName = self.state["presetFileName"]
+        # items collected / locs visited / bosses killed
+        solver.collectedItems = self.state["collectedItems"]
+        (solver.visitedLocations, solver.majorLocations) = self.setLocations(self.state["visitedLocations"],
+                                                                             solver.locations)
+        solver.lastLoc = self.state["lastLoc"]
+        Bosses.reset()
+        for boss in self.state["bosses"]:
+            Bosses.beatBoss(boss)
+        solver.availableLocations = self.state["availableLocations"]
+
+    def getLocsData(self, locations):
+        ret = {}
+        for loc in locations:
+            ret[loc["Name"]] = {"itemName": loc["itemName"]}
+            if "accessPoint" in loc:
+                ret[loc["Name"]]["accessPoint"] = loc["accessPoint"]
+        return ret
+
+    def setLocsData(self, locations):
+        for loc in locations:
+            loc["itemName"] = self.state["locsData"][loc["Name"]]["itemName"]
+            if "accessPoint" in self.state["locsData"][loc["Name"]]:
+                loc["accessPoint"] = self.state["locsData"][loc["Name"]]["accessPoint"]
+
+    def getVisitedLocations(self, visitedLocations):
+        # need to keep the order (for cancelation)
+        ret = {}
+        i = 0
+        for loc in visitedLocations:
+            ret[loc["Name"]] = i
+            i += 1
+        return ret
+
+    def setLocations(self, visitedLocations, locations):
+        retVis = []
+        retMaj = []
+        for loc in locations:
+            if loc["Name"] in visitedLocations:
+                # visitedLocations contains an index
+                retVis.append((visitedLocations[loc["Name"]], loc))
+            else:
+                retMaj.append(loc)
+        #print("setLocations: retVis: {}".format(retVis))
+        #print("setLocations: retMaj: {}".format(retMaj))
+        retVis.sort(key=lambda x: x[0])
+        return ([loc for (i, loc) in retVis], retMaj)
+
+    def getAvailableLocations(self, locations):
+        ret = {}
+        for loc in locations:
+            if "difficulty" in loc and loc["difficulty"].bool == True:
+                diff = loc["difficulty"]
+                ret[loc["Name"]] = {"difficulty": diff.difficulty,
+                                    "knows": diff.knows,
+                                    "items": diff.items,
+                                    "comeBack": loc['comeBack'],
+                                    "item": loc["itemName"]}
+        return ret
+
+    def setPatches(self, patchesData):
+        # json's dicts keys are strings
+        ret = {}
+        for address in patchesData:
+            ret[int(address)] = patchesData[address]
+        return ret
+
+    def fromJson(self, stateJsonFileName):
+        with open(stateJsonFileName, 'r') as jsonFile:
+            self.state = json.load(jsonFile)
+#        print("Loaded Json State:")
+#        for key in self.state:
+#            if key in ["availableLocations", "collectedItems", "visitedLocations"]:
+#                print("{}: {}".format(key, self.state[key]))
+#        print("")
+
+    def toJson(self, outputFileName):
+        with open(outputFileName, 'w') as jsonFile:
+            json.dump(self.state, jsonFile)
+#        print("Dumped Json State:")
+#        for key in self.state:
+#            if key in ["availableLocations", "collectedItems", "visitedLocations"]:
+#                print("{}: {}".format(key, self.state[key]))
+#        print("")
+
+class CommonSolver(object):
+    def loadRom(self, rom, interactive=False):
+        self.romFileName = rom
+        self.romLoader = RomLoader.factory(rom)
+        self.fullRando = self.romLoader.assignItems(self.locations)
+        self.areaRando = self.romLoader.loadPatches()
+
+        if interactive == False:
+            self.patches = self.romLoader.getPatches()
+        else:
+            self.patches = self.romLoader.getRawPatches()
+        print("ROM {} full: {} area: {} patches: {}".format(rom, self.fullRando,
+                                                            self.areaRando, self.patches))
+
+        self.graphTransitions = self.romLoader.getTransitions()
+        if self.graphTransitions is None:
+            self.graphTransitions = vanillaTransitions
+
+        self.areaGraph = AccessGraph(accessPoints, self.graphTransitions)
+
+        if self.log.getEffectiveLevel() == logging.DEBUG:
+            self.log.debug("Display items at locations:")
+            for location in self.locations:
+                self.log.debug('{:>50}: {:>16}'.format(location["Name"], location['itemName']))
+
+    def loadPreset(self, presetFileName):
+        presetLoader = PresetLoader.factory(presetFileName)
+        presetLoader.load()
+        self.smbm.createKnowsFunctions()
+
+        if self.log.getEffectiveLevel() == logging.DEBUG:
+            presetLoader.printToScreen()
+
+    def computeLocationsDifficulty(self, locations):
+        self.areaGraph.getAvailableLocations(locations, self.smbm, infinity, self.lastLoc)
+        # check post available functions too
+        for loc in locations:
+            if 'PostAvailable' in loc:
+                self.smbm.addItem(loc['itemName'])
+                postAvailable = loc['PostAvailable'](self.smbm)
+                self.smbm.removeItem(loc['itemName'])
+                loc['difficulty'] = self.smbm.wand(loc['difficulty'], postAvailable)
+            # also check if we can come back to landing site from the location
+            if loc['difficulty'].bool == True:
+                loc['comeBack'] = self.areaGraph.canAccess(self.smbm, loc['accessPoint'], 'Landing Site', infinity, loc['itemName'])
+
+        if self.log.getEffectiveLevel() == logging.DEBUG:
+            self.log.debug("available locs:")
+            for loc in locations:
+                if loc['difficulty'].bool == True:
+                    self.log.debug("{}: {}".format(loc['Name'], loc['difficulty']))
+
+    def collectMajor(self, loc):
+        self.majorLocations.remove(loc)
+        self.visitedLocations.append(loc)
+        area = self.collectItem(loc)
+        return area
+
+    def collectMinor(self, loc):
+        self.minorLocations.remove(loc)
+        self.visitedLocations.append(loc)
+        area = self.collectItem(loc)
+        return area
+
+    def collectItem(self, loc):
+        item = loc["itemName"]
+        if item not in Conf.itemsForbidden:
+            self.collectedItems.append(item)
+            self.smbm.addItem(item)
+        else:
+            # update the name of the item
+            item = "-{}-".format(item)
+            loc["itemName"] = item
+            self.collectedItems.append(item)
+            # we still need the boss difficulty
+            if 'Pickup' not in loc:
+                loc["difficulty"] = SMBool(False)
+        if 'Pickup' in loc:
+            loc['Pickup']()
+        if self.firstLogFile is not None:
+            if item not in self.collectedItems:
+                self.firstLogFile.write("{};{};{};{}\n".format(item, loc['Name'], loc['Area'], loc['GraphArea']))
+
+        self.log.debug("collectItem: {} at {}".format(item, loc['Name']))
+
+        # last loc is used as root node for the graph
+        self.lastLoc = loc['accessPoint']
+
+        return loc['SolveArea']
+
+class InteractiveSolver(CommonSolver):
+    def __init__(self, output, debug=False):
+        if debug == True:
+            logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
+        else:
+            logging.basicConfig(level=logging.INFO)
+        self.log = logging.getLogger('Solver')
+
+        self.outputFileName = output
+        self.firstLogFile = None
+
+    def dumpState(self):
+        state = SolverState()
+        state.fromSolver(self)
+        state.toJson(self.outputFileName)
+
+    def initialize(self, rom, presetFileName):
+        # load rom and preset, return first state
+        self.locations = graphLocations
+        self.smbm = SMBoolManager()
+
+        self.presetFileName = presetFileName
+        self.loadPreset(self.presetFileName)
+
+        self.loadRom(rom, interactive=True)
+
+        self.collectedItems = []
+        self.visitedLocations = []
+        self.lastLoc = 'Landing Site'
+        self.majorLocations = self.locations[:]
+
+        # compute new available locations
+        self.computeLocationsDifficulty(self.majorLocations)
+
+        self.dumpState()
+
+    def iterate(self, stateJson, locName, action):
+        self.locations = graphLocations
+        self.smbm = SMBoolManager()
+
+        state = SolverState()
+        state.fromJson(stateJson)
+        state.toSolver(self)
+
+        RomLoader.factory(self.patches).loadPatches()
+
+        self.loadPreset(self.presetFileName)
+        self.areaGraph = AccessGraph(accessPoints, self.graphTransitions)
+
+        if action == 'clear':
+            self.clear()
+        else:
+            # add already collected items to smbm
+            self.smbm.addItems(self.collectedItems)
+
+            if action == 'add':
+                # pickup item at locName
+                self.pickItemAt(locName)
+            elif action == 'remove':
+                # remove last collected item
+                self.cancelLast()
+
+        # compute new available locations
+        self.computeLocationsDifficulty(self.majorLocations)
+
+        # return them
+        self.dumpState()
+
+    def getLoc(self, locName):
+        for loc in self.majorLocations:
+            if loc["Name"] == locName:
+                return loc
+        raise Exception("Location '{}' not found in remaining locations".format(locName))
+
+    def pickItemAt(self, locName):
+        # collect new item at newLoc
+        if locName not in self.availableLocations:
+            raise Exception("Location '{}' not found in available locations".format(locName))
+        self.collectMajor(self.getLoc(locName))
+
+    def cancelLast(self):
+        # loc
+        loc = self.visitedLocations.pop()
+        self.majorLocations.append(loc)
+
+        # pickup func
+        if 'Unpickup' in loc:
+            loc['Unpickup']()
+
+        # access point
+        self.lastLoc = self.visitedLocations[-1]["accessPoint"]
+
+        # item
+        item = loc["itemName"]
+        if item not in ["Nothing", "NoEnergy"]:
+            if item != self.collectedItems[-1]:
+                raise Exception("Item of last collected loc {}: {} is different from last collected item: {}".format(loc["Name"], item, self.collectedItems[-1]))
+            self.smbm.removeItem(item)
+            self.collectedItems.pop()
+
+    def clear(self):
+        self.collectedItems = []
+        self.visitedLocations = []
+        self.lastLoc = 'Landing Site'
+        self.majorLocations = self.locations[:]
+        Bosses.reset()
+
+class StandardSolver(CommonSolver):
     # given a rom and parameters returns the estimated difficulty
 
-    def __init__(self, rom, presetFileName, difficultyTarget, pickupStrategy, itemsForbidden=[], type='console', debug=False, firstItemsLog=None, displayGeneratedPath=False, output=None):
+    def __init__(self, rom, presetFileName, difficultyTarget, pickupStrategy, itemsForbidden=[], type='console', debug=False, firstItemsLog=None, displayGeneratedPath=False, outputFileName=None):
         if debug == True:
             logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
         else:
@@ -50,52 +356,24 @@ class Solver:
 
         # can be called from command line (console) or from web site (web)
         self.type = type
+        self.output = Out.factory(self.type, self)
+        self.outputFileName = outputFileName
 
         self.locations = graphLocations
         self.smbm = SMBoolManager()
 
-        if presetFileName is not None:
-            self.loadPreset(presetFileName)
+        self.presetFileName = presetFileName
+        self.loadPreset(self.presetFileName)
 
         self.loadRom(rom)
 
         self.pickup = Pickup(Conf.itemsPickup)
-
-        Bosses.reset()
 
     def setConf(self, difficultyTarget, pickupStrategy, itemsForbidden, displayGeneratedPath):
         Conf.difficultyTarget = difficultyTarget
         Conf.itemsPickup = pickupStrategy
         Conf.displayGeneratedPath = displayGeneratedPath
         Conf.itemsForbidden = itemsForbidden
-
-    def loadRom(self, rom):
-        self.romLoader = RomLoader.factory(rom)
-        self.fullRando = self.romLoader.assignItems(self.locations)
-        self.areaRando = self.romLoader.loadPatches()
-
-        self.patches = self.romLoader.getPatches()
-        print("ROM {} full: {} area: {} patches: {}".format(rom, self.fullRando,
-                                                            self.areaRando, self.patches))
-
-        graphTransitions = self.romLoader.getTransitions()
-        if graphTransitions is None:
-            graphTransitions = vanillaTransitions
-
-        self.areaGraph = AccessGraph(accessPoints, graphTransitions)
-
-        if self.log.getEffectiveLevel() == logging.DEBUG:
-            self.log.debug("Display items at locations:")
-            for location in self.locations:
-                self.log.debug('{:>50}: {:>16}'.format(location["Name"], location['itemName']))
-
-    def loadPreset(self, presetFileName):
-        presetLoader = PresetLoader.factory(presetFileName)
-        presetLoader.load()
-        self.smbm.createKnowsFunctions()
-
-        if self.log.getEffectiveLevel() == logging.DEBUG:
-            presetLoader.printToScreen()
 
     def solveRom(self):
         self.lastLoc = 'Landing Site'
@@ -104,7 +382,9 @@ class Solver:
         if self.firstLogFile is not None:
             self.firstLogFile.close()
 
-        return (self.difficulty, self.itemsOk)
+        (self.knowsUsed, self.knowsKnown) = self.getKnowsUsed()
+
+        self.output.out()
 
     def getRemainMajors(self):
         return [loc for loc in self.majorLocations if loc['difficulty'].bool == False and loc['itemName'] not in ['Nothing', 'NoEnergy']]
@@ -121,51 +401,6 @@ class Solver:
     def getUnavailMajors(self):
         return [loc for loc in self.majorLocations if loc['difficulty'].bool == False and loc['itemName'] not in ['Nothing', 'NoEnergy']]
 
-    def displayOutput(self):
-        # print generated path
-        if Conf.displayGeneratedPath == True:
-            self.printPath("Generated path ({}/101):".format(len(self.visitedLocations)), self.visitedLocations)
-
-            # if we've aborted, display missing techniques and remaining locations
-            if self.difficulty == -1:
-                self.printPath("Next locs which could have been available if more techniques were known:", self.tryRemainingLocs())
-
-                remainMajors = self.getRemainMajors()
-                if len(remainMajors) > 0:
-                    self.printPath("Remaining major locations:", remainMajors, displayAPs=False)
-
-                remainMinors = self.getRemainMinors()
-                if remainMinors is not None and len(remainMinors) > 0:
-                    self.printPath("Remaining minor locations:", remainMinors, displayAPs=False)
-
-            else:
-                # if some locs are not picked up display those which are available
-                # and those which are not
-                skippedMajors = self.getSkippedMajors()
-                if len(skippedMajors) > 0:
-                    self.printPath("Skipped major locations:", skippedMajors, displayAPs=False)
-                else:
-                    print("No skipped major locations")
-
-                unavailMajors = self.getUnavailMajors()
-                if len(unavailMajors) > 0:
-                    self.printPath("Unaccessible major locations:", unavailMajors, displayAPs=False)
-                else:
-                    print("No unaccessible major locations")
-
-            items = self.smbm.getItems()
-            print("ETank: {}, Reserve: {}, Missile: {}, Super: {}, PowerBomb: {}".format(items['ETank'], items['Reserve'], items['Missile'], items['Super'], items['PowerBomb']))
-            print("Majors: {}".format(sorted([item for item in items if items[item] == True])))
-
-        # display difficulty scale
-        self.displayDifficulty(self.difficulty)
-
-    def displayDifficulty(self, difficulty):
-        if difficulty >= 0:
-            text = DifficultyDisplayer(difficulty).scale()
-            print("Estimated difficulty: {}".format(text))
-        else:
-            print("Aborted run, can't finish the game with the given prerequisites")
 
     def getDiffThreshold(self):
         target = Conf.difficultyTarget
@@ -240,11 +475,11 @@ class Solver:
                 self.computeLocationsDifficulty(self.minorLocations)
 
             # keep only the available locations
-            majorAvailable = [loc for loc in self.majorLocations if 'difficulty' in loc and loc["difficulty"].bool == True]
-            minorAvailable = [loc for loc in self.minorLocations if 'difficulty' in loc and loc["difficulty"].bool == True]
+            majorsAvailable = [loc for loc in self.majorLocations if 'difficulty' in loc and loc["difficulty"].bool == True]
+            minorsAvailable = [loc for loc in self.minorLocations if 'difficulty' in loc and loc["difficulty"].bool == True]
 
             # check if we're stuck
-            if len(majorAvailable) == 0 and len(minorAvailable) == 0:
+            if len(majorsAvailable) == 0 and len(minorsAvailable) == 0:
                 if not isEndPossible:
                     self.log.debug("STUCK MAJORS and MINORS")
                 else:
@@ -252,71 +487,14 @@ class Solver:
                 break
 
             # sort them on difficulty and proximity
-            majorAvailable = self.getAvailableItemsList(majorAvailable, area, diffThreshold, hasEnoughMajors)
-            minorAvailable = self.getAvailableItemsList(minorAvailable, area, diffThreshold, hasEnoughMinors)
+            majorsAvailable = self.getAvailableItemsList(majorsAvailable, area, diffThreshold)
+            if self.fullRando == True:
+                minorsAvailable = majorsAvailable
+            else:
+                minorsAvailable = self.getAvailableItemsList(minorsAvailable, area, diffThreshold)
 
-            # first take major items of acceptable difficulty in the current area
-            if (len(majorAvailable) > 0
-                and majorAvailable[0]['SolveArea'] == area
-                and majorAvailable[0]['difficulty'].difficulty <= diffThreshold):
-                self.collectMajor(majorAvailable.pop(0))
-                continue
-            # next item decision
-            if len(minorAvailable) == 0 and len(majorAvailable) > 0:
-                self.log.debug('MAJOR')
-                area = self.collectMajor(majorAvailable.pop(0))
-            elif len(majorAvailable) == 0 and len(minorAvailable) > 0:
-                # we don't check for hasEnoughMinors here, because we would be stuck, so pickup
-                # what we can and hope it gets better
-                self.log.debug('MINOR')
-                area = self.collectMinor(minorAvailable.pop(0))
-            elif len(majorAvailable) > 0 and len(minorAvailable) > 0:
-                self.log.debug('BOTH|M=' + majorAvailable[0]['Name'] + ', m=' + minorAvailable[0]['Name'])
-                # if both are available, decide based on area and difficulty
-                nextMajDifficulty = majorAvailable[0]['difficulty'].difficulty
-                nextMinArea = minorAvailable[0]['SolveArea']
-                nextMinDifficulty = minorAvailable[0]['difficulty'].difficulty
-                nextMajComeBack = majorAvailable[0]['comeBack']
-                nextMinComeBack = minorAvailable[0]['comeBack']
-                nextMajDistance = majorAvailable[0]['distance']
-                nextMinDistance = minorAvailable[0]['distance']
-
-                self.log.debug("diff area back dist - diff area back dist")
-                self.log.debug("maj: {} '{}' {} {}, min: {} '{}' {} {}".format(nextMajDifficulty, majorAvailable[0]['SolveArea'], nextMajComeBack, nextMajDistance, nextMinDifficulty, nextMinArea, nextMinComeBack, nextMinDistance))
-
-                if hasEnoughMinors == True and self.haveAllMinorTypes() == True and self.smbm.haveItem('Charge'):
-                    # first take item from loc where you can come back
-                    area = self.collectMajor(majorAvailable.pop(0))
-                else:
-                    # first take item from loc where you can come back
-                    if nextMajComeBack != nextMinComeBack:
-                        self.log.debug("!= combeback")
-                        if nextMajComeBack == True:
-                            area = self.collectMajor(majorAvailable.pop(0))
-                        else:
-                            area = self.collectMinor(minorAvailable.pop(0))
-                    # take the closer one
-                    elif nextMajDistance != nextMinDistance:
-                        self.log.debug("!= distance")
-                        if nextMajDistance < nextMinDistance:
-                            area = self.collectMajor(majorAvailable.pop(0))
-                        else:
-                            area = self.collectMinor(minorAvailable.pop(0))
-                    # if not all the minors type are collected, start with minors
-                    elif nextMinDifficulty <= diffThreshold and not self.haveAllMinorTypes():
-                        self.log.debug("not all minors types")
-                        area = self.collectMinor(minorAvailable.pop(0))
-                    elif nextMinArea == area and nextMinDifficulty <= diffThreshold:
-                        self.log.debug("not enough minors")
-                        area = self.collectMinor(minorAvailable.pop(0))
-                    # difficulty over area (this is a difficulty estimator,
-                    # not a speedrunning simulator)
-                    elif nextMinDifficulty < nextMajDifficulty:
-                        self.log.debug("min easier and not enough minors")
-                        area = self.collectMinor(minorAvailable.pop(0))
-                    else:
-                        self.log.debug("maj easier")
-                        area = self.collectMajor(majorAvailable.pop(0))
+            # choose one to pick up
+            area = self.nextDecision(majorsAvailable, minorsAvailable, hasEnoughMinors, diffThreshold, area)
 
         # main loop end
         if isEndPossible:
@@ -346,168 +524,12 @@ class Solver:
 
         return (difficulty, itemsOk)
 
-    def computeLocationsDifficulty(self, locations):
-        self.areaGraph.getAvailableLocations(locations, self.smbm, infinity, self.lastLoc)
-        # check post available functions too
-        for loc in locations:
-            if 'PostAvailable' in loc:
-                self.smbm.addItem(loc['itemName'])
-                postAvailable = loc['PostAvailable'](self.smbm)
-                self.smbm.removeItem(loc['itemName'])
-                loc['difficulty'] = self.smbm.wand(loc['difficulty'], postAvailable)
-            # also check if we can come back to landing site from the location
-            if loc['difficulty'].bool == True:
-                loc['comeBack'] = self.areaGraph.canAccess(self.smbm, loc['accessPoint'], 'Landing Site', infinity, loc['itemName'])
-
-        if self.log.getEffectiveLevel() == logging.DEBUG:
-            self.log.debug("available locs:")
-            for loc in locations:
-                if loc['difficulty'].bool == True:
-                    self.log.debug("{}: {}".format(loc['Name'], loc['difficulty']))
-
-    def computeDifficultyValue(self):
-        if not self.canEndGame().bool:
-            # we have aborted
-            return (-1, False)
-        else:
-            # return the maximum difficulty
-            difficultyMax = 0
-            for loc in self.visitedLocations:
-                difficultyMax = max(difficultyMax, loc['difficulty'].difficulty)
-            difficulty = difficultyMax
-
-            # check if we have taken all the requested items
-            if (self.pickup.enoughMinors(self.smbm, self.minorLocations)
-                and self.pickup.enoughMajors(self.smbm, self.majorLocations)):
-                return (difficulty, True)
-            else:
-                # can finish but can't take all the requested items
-                return (difficulty, False)
-
-    def getPath(self, locations):
-        if locations is None:
-            return None
-
-        out = []
-        for loc in locations:
-            out.append([(loc['Name'], loc['Room']), loc['Area'], loc['SolveArea'], loc['itemName'],
-                        '{0:.2f}'.format(loc['difficulty'].difficulty),
-                        ', '.join(sorted(loc['difficulty'].knows)),
-                        ', '.join(sorted(list(set(loc['difficulty'].items)))),
-                        [ap.Name for ap in loc['path']] if 'path' in loc else None])
-
-        return out
-
-    def getKnowsUsed(self):
-        knowsUsed = []
-        for loc in self.visitedLocations:
-            knowsUsed += loc['difficulty'].knows
-
-        # get unique knows
-        knowsUsed = len(list(set(knowsUsed)))
-
-        # get total of known knows
-        knowsKnown = len([knows for  knows in Knows.__dict__ if isKnows(knows) and getattr(Knows, knows)[0] == True])
-        knowsKnown += len([hellRun for hellRun in Settings.hellRuns if Settings.hellRuns[hellRun] is not None])
-
-        return (knowsUsed, knowsKnown)
-
-    def printPath(self, message, locations, displayAPs=True):
-        print("")
-        print(message)
-        print('{:>50} {:>12} {:>34} {:>8} {:>16} {:>14} {} {}'.format("Location Name", "Area", "Sub Area", "Distance", "Item", "Difficulty", "Knows used", "Items used"))
-        print('-'*150)
-        lastAP = None
-        for loc in locations:
-            if displayAPs == True and 'path' in loc:
-                path = [ap.Name for ap in loc['path']]
-                lastAP = path[-1]
-                if not (len(path) == 1 and path[0] == lastAP):
-                    path = " -> ".join(path)
-                    print('{:>50}: {}'.format('Path', path))
-            print('{:>50}: {:>12} {:>34} {:>8} {:>16} {:>14} {} {}'.format(loc['Name'],
-                                                                           loc['Area'],
-                                                                           loc['SolveArea'],
-                                                                           loc['distance'] if 'distance' in loc else 'nc',
-                                                                           loc['itemName'],
-                                                                           round(loc['difficulty'].difficulty, 2) if 'difficulty' in loc else 'nc',
-                                                                           sorted(loc['difficulty'].knows) if 'difficulty' in loc else 'nc',
-                                                                           list(set(loc['difficulty'].items)) if 'difficulty' in loc else 'nc'))
-
-    def tryRemainingLocs(self):
-        # use preset which knows every techniques to test the remaining locs to
-        # find which technique could allow to continue the seed
-        locations = self.majorLocations if self.fullRando == True else self.majorLocations + self.minorLocations
-
-        presetFileName = os.path.expanduser('~/RandomMetroidSolver/standard_presets/solution.json')
-        presetLoader = PresetLoader.factory(presetFileName)
-        presetLoader.load()
-        self.smbm.createKnowsFunctions()
-
-        self.areaGraph.getAvailableLocations(locations, self.smbm, infinity, self.lastLoc)
-
-        return [loc for loc in locations if loc['difficulty'].bool == True]
-
-    def collectMajor(self, loc):
-        self.majorLocations.remove(loc)
-        self.visitedLocations.append(loc)
-        area = self.collectItem(loc)
-        return area
-
-    def collectMinor(self, loc):
-        self.minorLocations.remove(loc)
-        self.visitedLocations.append(loc)
-        area = self.collectItem(loc)
-        return area
-
-    def collectItem(self, loc):
-        item = loc["itemName"]
-        isNew = item not in self.collectedItems
-        if item not in Conf.itemsForbidden:
-            self.collectedItems.append(item)
-            self.smbm.addItem(item)
-        else:
-            # update the name of the item
-            item = "-{}-".format(item)
-            loc["itemName"] = item
-            self.collectedItems.append(item)
-            # we still need the boss difficulty
-            if 'Pickup' not in loc:
-                loc["difficulty"] = SMBool(False)
-        if 'Pickup' in loc:
-            loc['Pickup']()
-        if isNew is True and self.firstLogFile is not None:
-            self.firstLogFile.write("{};{};{};{}\n".format(item, loc['Name'], loc['Area'], loc['GraphArea']))
-
-        self.log.debug("collectItem: {} at {}".format(item, loc['Name']))
-
-        # last loc is used as root node for the graph
-        self.lastLoc = loc['accessPoint']
-
-        return loc['SolveArea']
-
-    def haveAllMinorTypes(self):
-        # the first minor of each type can be seen as a major, so check for them first before going to far in zebes
-        hasPB = 'PowerBomb' in self.collectedItems
-        hasSuper = 'Super' in self.collectedItems
-        hasMissile = 'Missile' in self.collectedItems
-        return (hasPB and hasSuper and hasMissile)
-
-    def canEndGame(self):
-        # to finish the game you must :
-        # - beat golden 4 : we force pickup of the 4 items
-        #   behind the bosses to ensure that
-        # - defeat metroids
-        # - destroy/skip the zebetites
-        # - beat Mother Brain
-        return self.smbm.wand(Bosses.allBossesDead(self.smbm), self.smbm.enoughStuffTourian())
-
-    def getAvailableItemsList(self, locations, area, threshold, enough):
+    def getAvailableItemsList(self, locations, area, threshold):
         # locations without distance are not available
         locations = [loc for loc in locations if 'distance' in loc]
 
         around = [loc for loc in locations if (loc['SolveArea'] == area or loc['distance'] < 3) and loc['difficulty'].difficulty <= threshold and not Bosses.areaBossDead(area) and 'comeBack' in loc and loc['comeBack'] == True]
-        # usually pickup action means beating a boss, so do that first if possible
+        # pickup action means beating a boss, so do that first if possible
         around.sort(key=lambda loc: (0 if 'Pickup' in loc
                                      else 1,
                                      0 if 'comeBack' in loc and loc['comeBack'] == True
@@ -542,6 +564,315 @@ class Solver:
         self.log.debug("outside2 = " + str([(loc['Name'], loc['difficulty'], loc['distance'], loc['comeBack'], loc['SolveArea']) for loc in outside]))
 
         return around + outside
+
+    def nextDecision(self, majorsAvailable, minorsAvailable, hasEnoughMinors, diffThreshold, area):
+        # first take major items of acceptable difficulty in the current area
+        if (len(majorsAvailable) > 0
+            and majorsAvailable[0]['SolveArea'] == area
+            and majorsAvailable[0]['difficulty'].difficulty <= diffThreshold):
+            return self.collectMajor(majorsAvailable.pop(0))
+        # next item decision
+        if len(minorsAvailable) == 0 and len(majorsAvailable) > 0:
+            self.log.debug('MAJOR')
+            return self.collectMajor(majorsAvailable.pop(0))
+        elif len(majorsAvailable) == 0 and len(minorsAvailable) > 0:
+            # we don't check for hasEnoughMinors here, because we would be stuck, so pickup
+            # what we can and hope it gets better
+            self.log.debug('MINOR')
+            return self.collectMinor(minorsAvailable.pop(0))
+        elif len(majorsAvailable) > 0 and len(minorsAvailable) > 0:
+            self.log.debug('BOTH|M=' + majorsAvailable[0]['Name'] + ', m=' + minorsAvailable[0]['Name'])
+            # if both are available, decide based on area and difficulty
+            nextMajDifficulty = majorsAvailable[0]['difficulty'].difficulty
+            nextMinArea = minorsAvailable[0]['SolveArea']
+            nextMinDifficulty = minorsAvailable[0]['difficulty'].difficulty
+            nextMajComeBack = majorsAvailable[0]['comeBack']
+            nextMinComeBack = minorsAvailable[0]['comeBack']
+            nextMajDistance = majorsAvailable[0]['distance']
+            nextMinDistance = minorsAvailable[0]['distance']
+
+            self.log.debug("diff area back dist - diff area back dist")
+            self.log.debug("maj: {} '{}' {} {}, min: {} '{}' {} {}".format(nextMajDifficulty, majorsAvailable[0]['SolveArea'], nextMajComeBack, nextMajDistance, nextMinDifficulty, nextMinArea, nextMinComeBack, nextMinDistance))
+
+            if hasEnoughMinors == True and self.haveAllMinorTypes() == True and self.smbm.haveItem('Charge'):
+                # we have charge, no longer need minors
+                return self.collectMajor(majorsAvailable.pop(0))
+            else:
+                # first take item from loc where you can come back
+                if nextMajComeBack != nextMinComeBack:
+                    self.log.debug("!= combeback")
+                    if nextMajComeBack == True:
+                        return self.collectMajor(majorsAvailable.pop(0))
+                    else:
+                        return self.collectMinor(minorsAvailable.pop(0))
+                # take the closer one
+                elif nextMajDistance != nextMinDistance:
+                    self.log.debug("!= distance")
+                    if nextMajDistance < nextMinDistance:
+                        return self.collectMajor(majorsAvailable.pop(0))
+                    else:
+                        return self.collectMinor(minorsAvailable.pop(0))
+                # if not all the minors type are collected, start with minors
+                elif nextMinDifficulty <= diffThreshold and not self.haveAllMinorTypes():
+                    self.log.debug("not all minors types")
+                    return self.collectMinor(minorsAvailable.pop(0))
+                elif nextMinArea == area and nextMinDifficulty <= diffThreshold:
+                    self.log.debug("not enough minors")
+                    return self.collectMinor(minorsAvailable.pop(0))
+                # difficulty over area (this is a difficulty estimator,
+                # not a speedrunning simulator)
+                elif nextMinDifficulty < nextMajDifficulty:
+                    self.log.debug("min easier and not enough minors")
+                    return self.collectMinor(minorsAvailable.pop(0))
+                else:
+                    self.log.debug("maj easier")
+                    return self.collectMajor(majorsAvailable.pop(0))
+
+    def computeDifficultyValue(self):
+        if not self.canEndGame().bool:
+            # we have aborted
+            return (-1, False)
+        else:
+            # return the maximum difficulty
+            difficultyMax = 0
+            for loc in self.visitedLocations:
+                difficultyMax = max(difficultyMax, loc['difficulty'].difficulty)
+            difficulty = difficultyMax
+
+            # check if we have taken all the requested items
+            if (self.pickup.enoughMinors(self.smbm, self.minorLocations)
+                and self.pickup.enoughMajors(self.smbm, self.majorLocations)):
+                return (difficulty, True)
+            else:
+                # can finish but can't take all the requested items
+                return (difficulty, False)
+
+    def getKnowsUsed(self):
+        knowsUsed = []
+        for loc in self.visitedLocations:
+            knowsUsed += loc['difficulty'].knows
+
+        # get unique knows
+        knowsUsed = len(list(set(knowsUsed)))
+
+        # get total of known knows
+        knowsKnown = len([knows for  knows in Knows.__dict__ if isKnows(knows) and getattr(Knows, knows)[0] == True])
+        knowsKnown += len([hellRun for hellRun in Settings.hellRuns if Settings.hellRuns[hellRun] is not None])
+
+        return (knowsUsed, knowsKnown)
+
+    def tryRemainingLocs(self):
+        # use preset which knows every techniques to test the remaining locs to
+        # find which technique could allow to continue the seed
+        locations = self.majorLocations if self.fullRando == True else self.majorLocations + self.minorLocations
+
+        presetFileName = os.path.expanduser('~/RandomMetroidSolver/standard_presets/solution.json')
+        presetLoader = PresetLoader.factory(presetFileName)
+        presetLoader.load()
+        self.smbm.createKnowsFunctions()
+
+        self.areaGraph.getAvailableLocations(locations, self.smbm, infinity, self.lastLoc)
+
+        return [loc for loc in locations if loc['difficulty'].bool == True]
+
+    def haveAllMinorTypes(self):
+        # the first minor of each type can be seen as a major, so check for them first before going to far in zebes
+        hasPB = 'PowerBomb' in self.collectedItems
+        hasSuper = 'Super' in self.collectedItems
+        hasMissile = 'Missile' in self.collectedItems
+        return (hasPB and hasSuper and hasMissile)
+
+    def canEndGame(self):
+        # to finish the game you must :
+        # - beat golden 4 : we force pickup of the 4 items
+        #   behind the bosses to ensure that
+        # - defeat metroids
+        # - destroy/skip the zebetites
+        # - beat Mother Brain
+        return self.smbm.wand(Bosses.allBossesDead(self.smbm), self.smbm.enoughStuffTourian())
+
+class Out(object):
+    @staticmethod
+    def factory(output, solver):
+        if output == 'web':
+            return OutWeb(solver)
+        elif output == 'console':
+            return OutConsole(solver)
+        else:
+            raise Exception("Wrong output type for the Solver: {}".format(output))
+
+class OutWeb:
+    def __init__(self, solver):
+        self.solver = solver
+
+    def out(self):
+        s = self.solver
+        if s.areaRando == True:
+            dotFileName = os.path.basename(os.path.splitext(s.romFileName)[0])+'.json'
+            dotFileName = os.path.join(os.path.expanduser('~/web2py/applications/solver/static/graph'), dotFileName)
+            s.areaGraph.toDot(dotFileName)
+            (pngFileName, pngThumbFileName) = self.generatePng(dotFileName)
+            if pngFileName is not None and pngThumbFileName is not None:
+                pngFileName = os.path.basename(pngFileName)
+                pngThumbFileName = os.path.basename(pngThumbFileName)
+        else:
+            pngFileName = None
+            pngThumbFileName = None
+
+        randomizedRom = os.path.basename(os.path.splitext(s.romFileName)[0])+'.sfc'
+        diffPercent = DifficultyDisplayer(s.difficulty).percent()
+        generatedPath = self.getPath(s.visitedLocations)
+        collectedItems = s.smbm.getItems()
+
+        if s.difficulty == -1:
+            remainTry = self.getPath(s.tryRemainingLocs())
+            remainMajors = self.getPath(s.getRemainMajors())
+            remainMinors = self.getPath(s.getRemainMinors())
+            skippedMajors = None
+            unavailMajors = None
+        else:
+            remainTry = None
+            remainMajors = None
+            remainMinors = None
+            skippedMajors = self.getPath(s.getSkippedMajors())
+            unavailMajors = self.getPath(s.getUnavailMajors())
+
+        result = dict(randomizedRom=randomizedRom, difficulty=s.difficulty,
+                      generatedPath=generatedPath, diffPercent=diffPercent,
+                      knowsUsed=(s.knowsUsed, s.knowsKnown), itemsOk=s.itemsOk, patches=s.patches,
+                      pngFileName=pngFileName, pngThumbFileName=pngThumbFileName,
+                      remainTry=remainTry, remainMajors=remainMajors, remainMinors=remainMinors,
+                      skippedMajors=skippedMajors, unavailMajors=unavailMajors,
+                      collectedItems=collectedItems)
+
+        with open(s.outputFileName, 'w') as jsonFile:
+            json.dump(result, jsonFile)
+
+    def getPath(self, locations):
+        if locations is None:
+            return None
+
+        out = []
+        for loc in locations:
+            out.append([(loc['Name'], loc['Room']), loc['Area'], loc['SolveArea'], loc['itemName'],
+                        '{0:.2f}'.format(loc['difficulty'].difficulty),
+                        ', '.join(sorted(loc['difficulty'].knows)),
+                        ', '.join(sorted(list(set(loc['difficulty'].items)))),
+                        [ap.Name for ap in loc['path']] if 'path' in loc else None])
+
+        return out
+
+    def generatePng(self, dotFileName):
+        # use dot to generate the graph's image .png
+        # use convert to generate the thumbnail
+        # dotFileName: the /directory/image.dot
+        # the png and thumbnails are generated in the same directory as the dot
+
+        splited = os.path.splitext(dotFileName)
+        pngFileName = splited[0] + '.png'
+        pngThumbFileName = splited[0] + '_thumbnail.png'
+
+        # dot -Tpng VARIA_Randomizer_AFX5399_noob.dot -oVARIA_Randomizer_AFX5399_noob.png
+        params = ['dot', '-Tpng', dotFileName, '-o'+pngFileName]
+        ret = subprocess.call(params)
+        if ret != 0:
+            print("Error calling dot {}: {}".format(params, ret))
+            return (None, None)
+
+        params = ['convert', pngFileName, '-resize', '1024', pngThumbFileName]
+        ret = subprocess.call(params)
+        if ret != 0:
+            print("Error calling convert {}: {}".format(params, ret))
+            os.remove(pngFileName)
+            return (None, None)
+
+        return (pngFileName, pngThumbFileName)
+
+class OutConsole:
+    def __init__(self, solver):
+        self.solver = solver
+
+    def out(self):
+        s = self.solver
+        self.displayOutput()
+
+        print("({}, {}): diff : {}".format(s.difficulty, s.itemsOk, s.romFileName))
+        print("{}/{}: knows Used : {}".format(s.knowsUsed, s.knowsKnown, s.romFileName))
+
+        if s.difficulty >= 0:
+            sys.exit(0)
+        else:
+            sys.exit(1)
+
+    def printPath(self, message, locations, displayAPs=True):
+        print("")
+        print(message)
+        print('{:>50} {:>12} {:>34} {:>8} {:>16} {:>14} {} {}'.format("Location Name", "Area", "Sub Area", "Distance", "Item", "Difficulty", "Knows used", "Items used"))
+        print('-'*150)
+        lastAP = None
+        for loc in locations:
+            if displayAPs == True and 'path' in loc:
+                path = [ap.Name for ap in loc['path']]
+                lastAP = path[-1]
+                if not (len(path) == 1 and path[0] == lastAP):
+                    path = " -> ".join(path)
+                    print('{:>50}: {}'.format('Path', path))
+            print('{:>50}: {:>12} {:>34} {:>8} {:>16} {:>14} {} {}'.format(loc['Name'],
+                                                                           loc['Area'],
+                                                                           loc['SolveArea'],
+                                                                           loc['distance'] if 'distance' in loc else 'nc',
+                                                                           loc['itemName'],
+                                                                           round(loc['difficulty'].difficulty, 2) if 'difficulty' in loc else 'nc',
+                                                                           sorted(loc['difficulty'].knows) if 'difficulty' in loc else 'nc',
+                                                                           list(set(loc['difficulty'].items)) if 'difficulty' in loc else 'nc'))
+
+    def displayOutput(self):
+        s = self.solver
+
+        # print generated path
+        if Conf.displayGeneratedPath == True:
+            self.printPath("Generated path ({}/101):".format(len(s.visitedLocations)), s.visitedLocations)
+
+            # if we've aborted, display missing techniques and remaining locations
+            if s.difficulty == -1:
+                self.printPath("Next locs which could have been available if more techniques were known:", s.tryRemainingLocs())
+
+                remainMajors = s.getRemainMajors()
+                if len(remainMajors) > 0:
+                    self.printPath("Remaining major locations:", remainMajors, displayAPs=False)
+
+                remainMinors = s.getRemainMinors()
+                if remainMinors is not None and len(remainMinors) > 0:
+                    self.printPath("Remaining minor locations:", remainMinors, displayAPs=False)
+
+            else:
+                # if some locs are not picked up display those which are available
+                # and those which are not
+                skippedMajors = s.getSkippedMajors()
+                if len(skippedMajors) > 0:
+                    self.printPath("Skipped major locations:", skippedMajors, displayAPs=False)
+                else:
+                    print("No skipped major locations")
+
+                unavailMajors = s.getUnavailMajors()
+                if len(unavailMajors) > 0:
+                    self.printPath("Unaccessible major locations:", unavailMajors, displayAPs=False)
+                else:
+                    print("No unaccessible major locations")
+
+            items = s.smbm.getItems()
+            print("ETank: {}, Reserve: {}, Missile: {}, Super: {}, PowerBomb: {}".format(items['ETank'], items['Reserve'], items['Missile'], items['Super'], items['PowerBomb']))
+            print("Majors: {}".format(sorted([item for item in items if items[item] == True])))
+
+        # display difficulty scale
+        self.displayDifficulty(s.difficulty)
+
+    def displayDifficulty(self, difficulty):
+        if difficulty >= 0:
+            text = DifficultyDisplayer(difficulty).scale()
+            print("Estimated difficulty: {}".format(text))
+        else:
+            print("Aborted run, can't finish the game with the given prerequisites")
 
 class DifficultyDisplayer:
     def __init__(self, difficulty):
@@ -606,61 +937,29 @@ class DifficultyDisplayer:
 
         return percent
 
-def generatePng(dotFileName):
-    # use dot to generate the graph's image .png
-    # use convert to generate the thumbnail
-    # dotFileName: the /directory/image.dot
-    # the png and thumbnails are generated in the same directory as the dot
+def interactiveSolver(args):
+    # to init, requires interactive/romFileName/presetFileName/output parameters
+    # to iterate, requires interactive/state/loc/action/output parameters
+    if args.romFileName != None and args.presetFileName != None and args.output != None:
+        # init
+        solver = InteractiveSolver(args.output, args.debug)
+        solver.initialize(args.romFileName, args.presetFileName)
+    elif args.state != None and args.action != None and args.output != None:
+        # iterate
+        if args.action == "add" and args.loc == None:
+            print("Missing loc parameter when using action add")
+            sys.exit(1)
 
-    splited = os.path.splitext(dotFileName)
-    pngFileName = splited[0] + '.png'
-    pngThumbFileName = splited[0] + '_thumbnail.png'
+        solver = InteractiveSolver(args.output, args.debug)
+        solver.iterate(args.state, args.loc, args.action)
+    else:
+        print("Wrong parameters for interactive mode")
+        sys.exit(1)
 
-    # dot -Tpng VARIA_Randomizer_AFX5399_noob.dot -oVARIA_Randomizer_AFX5399_noob.png
-    params = ['dot', '-Tpng', dotFileName, '-o'+pngFileName]
-    ret = subprocess.call(params)
-    if ret != 0:
-        print("Error calling dot {}: {}".format(params, ret))
-        return (None, None)
-
-    params = ['convert', pngFileName, '-resize', '1024', pngThumbFileName]
-    ret = subprocess.call(params)
-    if ret != 0:
-        print("Error calling convert {}: {}".format(params, ret))
-        os.remove(pngFileName)
-        return (None, None)
-
-    return (pngFileName, pngThumbFileName)
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Random Metroid Solver")
-    parser.add_argument('romFileName', help="the input rom")
-    parser.add_argument('--preset', '-p', help="the preset file", nargs='?',
-                        default='standard_presets/regular.json', dest='presetFileName')
-
-    parser.add_argument('--difficultyTarget', '-t',
-                        help="the difficulty target that the solver will aim for",
-                        dest='difficultyTarget', nargs='?', default=None, type=int)
-    parser.add_argument('--pickupStrategy', '-s', help="Pickup strategy for the Solver",
-                        dest='pickupStrategy', nargs='?', default=None, choices=['minimal', 'all', 'any'])
-    parser.add_argument('--itemsForbidden', '-f', help="Item not picked up during solving",
-                        dest='itemsForbidden', nargs='+', default=[], action='append')
-
-    parser.add_argument('--type', '-y', help="web or console", dest='type', nargs='?',
-                        default='console', choices=['web', 'console'])
-    parser.add_argument('--debug', '-d', help="activate debug logging", dest='debug', action='store_true')
-    parser.add_argument('--firstItemsLog', '-1',
-                        help="path to file where for each item type the first time it was found and where will be written (spoilers!)",
-                        nargs='?', default=None, type=str, dest='firstItemsLog')
-    parser.add_argument('--displayGeneratedPath', '-g', help="display the generated path (spoilers!)",
-                        dest='displayGeneratedPath', action='store_true')
-    parser.add_argument('--output', '-o', help="When called from the website, contains the result of the solver",
-                        dest='output', nargs='?', default=None)
-
-    args = parser.parse_args()
-
-    if args.presetFileName is None:
-        args.presetFileName = 'regular'
+def standardSolver(args):
+    if args.romFileName is None:
+        print("Parameter --romFileName mandatory when not in interactive mode")
+        sys.exit(1)
 
     if args.difficultyTarget is None:
         difficultyTarget = Conf.difficultyTarget
@@ -675,62 +974,56 @@ if __name__ == "__main__":
     # itemsForbidden is like that: [['Varia'], ['Reserve'], ['Gravity']], fix it
     args.itemsForbidden = [item[0] for item in args.itemsForbidden]
 
-    solver = Solver(args.romFileName, args.presetFileName, difficultyTarget,
-                    pickupStrategy, args.itemsForbidden, type=args.type, debug=args.debug,
-                    firstItemsLog=args.firstItemsLog, displayGeneratedPath=args.displayGeneratedPath,
-                    output=args.output)
+    solver = StandardSolver(args.romFileName, args.presetFileName, difficultyTarget,
+                            pickupStrategy, args.itemsForbidden, type=args.type,
+                            debug=args.debug, firstItemsLog=args.firstItemsLog,
+                            displayGeneratedPath=args.displayGeneratedPath,
+                            outputFileName=args.output)
 
-    (difficulty, itemsOk) = solver.solveRom()
-    (used, total) = solver.getKnowsUsed()
+    solver.solveRom()
 
-    if args.output is None:
-        solver.displayOutput()
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Random Metroid Solver")
+    parser.add_argument('--romFileName', '-r', help="the input rom", nargs='?',
+                        default=None, dest="romFileName")
+    parser.add_argument('--preset', '-p', help="the preset file", nargs='?',
+                        default=None, dest='presetFileName')
+    parser.add_argument('--difficultyTarget', '-t',
+                        help="the difficulty target that the solver will aim for",
+                        dest='difficultyTarget', nargs='?', default=None, type=int)
+    parser.add_argument('--pickupStrategy', '-s', help="Pickup strategy for the Solver",
+                        dest='pickupStrategy', nargs='?', default=None,
+                        choices=['minimal', 'all', 'any'])
+    parser.add_argument('--itemsForbidden', '-f', help="Item not picked up during solving",
+                        dest='itemsForbidden', nargs='+', default=[], action='append')
 
-        print("({}, {}): diff : {}".format(difficulty, itemsOk, args.romFileName))
-        print("{}/{}: knows Used : {}".format(used, total, args.romFileName))
+    parser.add_argument('--type', '-y', help="web or console", dest='type', nargs='?',
+                        default='console', choices=['web', 'console'])
+    parser.add_argument('--debug', '-d', help="activate debug logging", dest='debug', action='store_true')
+    parser.add_argument('--firstItemsLog', '-1',
+                        help="path to file where for each item type the first time it was found and where will be written (spoilers!)",
+                        nargs='?', default=None, type=str, dest='firstItemsLog')
+    parser.add_argument('--displayGeneratedPath', '-g', help="display the generated path (spoilers!)",
+                        dest='displayGeneratedPath', action='store_true')
+    # standard/interactive, web site
+    parser.add_argument('--output', '-o', help="When called from the website, contains the result of the solver",
+                        dest='output', nargs='?', default=None)
+    # interactive, web site
+    parser.add_argument('--interactive', '-i', help="Activate interactive mode for the solver",
+                        dest='interactive', action='store_true')
+    parser.add_argument('--state', help="JSON file of the Solver state (used in interactive mode)",
+                        dest="state", nargs='?', default=None)
+    parser.add_argument('--loc', help="Name of the location to action on (used in interactive mode)",
+                        dest="loc", nargs='?', default=None)
+    parser.add_argument('--action', help="Pickup item at location, remove last pickedup location, clear all (used in interactive mode)",
+                        dest="action", nargs="?", default=None, choices=['add', 'remove', 'clear'])
 
-        if difficulty >= 0:
-            sys.exit(0)
-        else:
-            sys.exit(1)
+    args = parser.parse_args()
+
+    if args.presetFileName is None:
+        args.presetFileName = 'standard_presets/regular.json'
+
+    if args.interactive == True:
+        interactiveSolver(args)
     else:
-        if solver.areaRando == True:
-            dotFileName = os.path.basename(os.path.splitext(args.romFileName)[0])+'.json'
-            dotFileName = os.path.join(os.path.expanduser('~/web2py/applications/solver/static/graph'), dotFileName)
-            solver.areaGraph.toDot(dotFileName)
-            (pngFileName, pngThumbFileName) = generatePng(dotFileName)
-            if pngFileName is not None and pngThumbFileName is not None:
-                pngFileName = os.path.basename(pngFileName)
-                pngThumbFileName = os.path.basename(pngThumbFileName)
-        else:
-            pngFileName = None
-            pngThumbFileName = None
-
-        randomizedRom = os.path.basename(os.path.splitext(args.romFileName)[0])+'.sfc'
-        diffPercent = DifficultyDisplayer(difficulty).percent()
-        generatedPath = solver.getPath(solver.visitedLocations)
-        patches = solver.patches
-        collectedItems = solver.smbm.getItems()
-
-        if difficulty == -1:
-            remainTry = solver.getPath(solver.tryRemainingLocs())
-            remainMajors = solver.getPath(solver.getRemainMajors())
-            remainMinors = solver.getPath(solver.getRemainMinors())
-            skippedMajors = None
-            unavailMajors = None
-        else:
-            remainTry = None
-            remainMajors = None
-            remainMinors = None
-            skippedMajors = solver.getPath(solver.getSkippedMajors())
-            unavailMajors = solver.getPath(solver.getUnavailMajors())
-
-        result = dict(randomizedRom=randomizedRom, difficulty=difficulty,
-                      generatedPath=generatedPath, diffPercent=diffPercent,
-                      knowsUsed=(used, total), itemsOk=itemsOk, patches=patches,
-                      pngFileName=pngFileName, pngThumbFileName=pngThumbFileName,
-                      remainTry=remainTry, remainMajors=remainMajors, remainMinors=remainMinors,
-                      skippedMajors=skippedMajors, unavailMajors=unavailMajors, collectedItems=collectedItems)
-
-        with open(args.output, 'w') as jsonFile:
-            json.dump(result, jsonFile)
+        standardSolver(args)

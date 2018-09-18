@@ -43,7 +43,7 @@ class PresetLoader(object):
     @staticmethod
     def factory(params):
         # can be a json, a python file or a dict with the parameters
-        if type(params) is str:
+        if type(params) in [str, unicode]:
             ext = os.path.splitext(params)
             if ext[1].lower() == '.json':
                 return PresetLoaderJson(params)
@@ -52,7 +52,7 @@ class PresetLoader(object):
         elif type(params) is dict:
             return PresetLoaderDict(params)
         else:
-            raise Exception("wrong parameters input, is neither a string nor a json file name: {}".format(params))
+            raise Exception("wrong parameters input, is neither a string nor a json file name: {}::{}".format(params, type(params)))
 
     def __init__(self):
         if 'Knows' not in self.params:

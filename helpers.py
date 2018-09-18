@@ -685,6 +685,10 @@ class Bosses:
         Bosses.golden4Dead[boss] = True
 
     @staticmethod
+    def unbeatBoss(boss):
+        Bosses.golden4Dead[boss] = False
+
+    @staticmethod
     def areaBossDead(area):
         if area not in Bosses.areaBosses:
             return True

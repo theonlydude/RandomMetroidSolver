@@ -341,7 +341,7 @@ class Helpers(object):
         return (ammoMargin, secs)
 
     # return diff score, or -1 if below minimum energy in diffTbl
-    def computeBossDifficulty(self, ammoMargin, secs, diffTbl):
+    def computeBossDifficulty(self, ammoMargin, secs, diffTbl, energyDiff=0):
         sm = self.smbm
 
         # actual fight duration :
@@ -358,7 +358,7 @@ class Helpers(object):
             suitsCoeff = 2
         elif sm.haveItem('Varia') == True:
             suitsCoeff = 1
-        energy = suitsCoeff * (1 + self.energyReserveCount())
+        energy = suitsCoeff * (1 + self.energyReserveCount() + energyDiff)
         energyDict = None
         if 'Energy' in diffTbl:
             energyDict = diffTbl['Energy']
@@ -527,28 +527,17 @@ class Helpers(object):
             return SMBool(False)
 
         # print('MB2', ammoMargin, secs)
-        reset = False
-        nTanks = sm.ETankCount + sm.ReserveCount
+        nTanks = sm.energyReserveCount()
+        energyDiff = 0
         if sm.haveItem('Varia') == False:
             # "remove" 3 etanks (accounting for rainbow beam damage without varia)
             if nTanks < 6:
                 return SMBool(False, 0)
-            (etankBkp, reserveBkp) = (sm.ETankCount, sm.ReserveCount)
-            # we have at least 2 etanks (max reserves is 4)
-            sm.ETankCount -= 2
-            if sm.ReserveCount > 0:
-                sm.ReserveCount -= 1
-            else:
-                sm.ETankCount -= 1
-            Cache.reset()
-            reset = True
+            energyDiff = -3
         elif nTanks < 3:
             return SMBool(False, 0)
 
-        diff = self.computeBossDifficulty(ammoMargin, secs, Settings.bossesDifficulty['MotherBrain'])
-        if reset == True:
-            (sm.ETankCount, sm.ReserveCount) = (etankBkp, reserveBkp)
-            Cache.reset()
+        diff = self.computeBossDifficulty(ammoMargin, secs, Settings.bossesDifficulty['MotherBrain'], energyDiff)
         if diff < 0:
             return SMBool(False)
         return SMBool(True, diff)

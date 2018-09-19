@@ -15,7 +15,7 @@ from parameters import Knows, Settings, Controller, isKnows, isButton
 from solver import Conf
 from parameters import diff2text, text2diff
 from graph_locations import locations as graphLocations
-from solver import Solver, DifficultyDisplayer
+from solver import StandardSolver, DifficultyDisplayer
 from rom import RomLoader
 from utils import PresetLoader
 import db
@@ -627,7 +627,7 @@ def computeDifficulty(jsonRomFileName, preset):
 
     params = [
         'python2',  os.path.expanduser("~/RandomMetroidSolver/solver.py"),
-        str(jsonRomFileName),
+        '-r', str(jsonRomFileName),
         '--preset', presetFileName,
         '--difficultyTarget', str(session.solver['difficultyTarget']),
         '--pickupStrategy', session.solver['pickupStrategy'],

@@ -297,6 +297,15 @@ class RomReader:
                 result.append(self.patches[patch]['desc'])
         return result
 
+    def getRawPatches(self):
+        # for interactive solver
+        result = {}
+        for patchName in self.patches:
+            self.romFile.seek(self.patches[patchName]['address'])
+            value = struct.unpack("B", self.romFile.read(1))[0]
+            result[self.patches[patchName]['address']] = value
+        return result
+
     def getDict(self):
         # get the address/value dict for dump
         romData = {}
@@ -1037,6 +1046,10 @@ class RomLoader(object):
 
     def getPatches(self):
         return self.romReader.getPatches()
+
+    def getRawPatches(self):
+        # used in interactive solver
+        return self.romReader.getRawPatches()
 
 class RomLoaderSfc(RomLoader):
     # standard usage (when calling from the command line)

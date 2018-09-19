@@ -256,7 +256,8 @@ locations = [
     },
     'Available': lambda sm: sm.wand(sm.canPassBombPassages(),
                                     sm.enoughStuffsKraid()),
-    'Pickup': lambda: Bosses.beatBoss('Kraid')
+    'Pickup': lambda: Bosses.beatBoss('Kraid'),
+    'Unpickup': lambda: Bosses.unbeatBoss('Kraid')
 },
 {
     'Area': "Norfair",
@@ -407,7 +408,8 @@ locations = [
                                                          sm.canOpenGreenDoors())
     },
     'Available': lambda sm: sm.wand(sm.canHellRun('LowerNorfair'), sm.enoughStuffsRidley()),
-    'Pickup': lambda: Bosses.beatBoss('Ridley')
+    'Pickup': lambda: Bosses.beatBoss('Ridley'),
+    'Unpickup': lambda: Bosses.unbeatBoss('Ridley')
 },
 {
     'Area': "LowerNorfair",
@@ -496,7 +498,8 @@ locations = [
         'Crab Maze Left': lambda sm: sm.canPassForgottenHighway(False)
     },
     'Available': lambda sm: sm.wand(sm.canOpenGreenDoors(), sm.enoughStuffsPhantoon(), sm.canPassBombPassages()),
-    'Pickup': lambda: Bosses.beatBoss('Phantoon')
+    'Pickup': lambda: Bosses.beatBoss('Phantoon'),
+    'Unpickup': lambda: Bosses.unbeatBoss('Phantoon')
 },
 {
     'Area': "WreckedShip",
@@ -662,6 +665,7 @@ locations = [
     },
     'Available': lambda sm: sm.enoughStuffsDraygon(),
     'Pickup': lambda: Bosses.beatBoss('Draygon'),
+    'Unpickup': lambda: Bosses.unbeatBoss('Draygon'),
     # to get out of draygon room:
     #   with gravity but without highjump/bomb/space jump: gravity jump
     #   dessyreqt randomizer in machosist can have suitless draygon:

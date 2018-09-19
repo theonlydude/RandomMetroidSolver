@@ -99,7 +99,7 @@ function computeSeed {
     else
 	STIME_OLD=$(echo "${OUT}" | grep real | awk '{print $1}')
     fi
-    OUT=$(/usr/bin/time -f "\t%E real" python2 ./solver.py ${ROM_GEN} --preset standard_presets/${PRESET}.json -g 2>&1) > ${ROM_GEN}.new
+    OUT=$(/usr/bin/time -f "\t%E real" python2 ./solver.py -r ${ROM_GEN} --preset standard_presets/${PRESET}.json -g 2>&1) > ${ROM_GEN}.new
     if [ $? -ne 0 ]; then
 	STIME_NEW="n/a"
     else

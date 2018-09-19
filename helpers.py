@@ -527,23 +527,28 @@ class Helpers(object):
             return SMBool(False)
 
         # print('MB2', ammoMargin, secs)
-        (etankBkp, reserveBkp) = (sm.ETankCount, sm.ReserveCount)
+        reset = False
         nTanks = sm.ETankCount + sm.ReserveCount
         if sm.haveItem('Varia') == False:
             # "remove" 3 etanks (accounting for rainbow beam damage without varia)
             if nTanks < 6:
                 return SMBool(False, 0)
+            (etankBkp, reserveBkp) = (sm.ETankCount, sm.ReserveCount)
             # we have at least 2 etanks (max reserves is 4)
             sm.ETankCount -= 2
             if sm.ReserveCount > 0:
                 sm.ReserveCount -= 1
             else:
                 sm.ETankCount -= 1
+            Cache.reset()
+            reset = True
         elif nTanks < 3:
             return SMBool(False, 0)
 
         diff = self.computeBossDifficulty(ammoMargin, secs, Settings.bossesDifficulty['MotherBrain'])
-        (sm.ETankCount, sm.ReserveCount) = (etankBkp, reserveBkp)
+        if reset == True:
+            (sm.ETankCount, sm.ReserveCount) = (etankBkp, reserveBkp)
+            Cache.reset()
         if diff < 0:
             return SMBool(False)
         return SMBool(True, diff)

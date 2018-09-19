@@ -221,12 +221,12 @@ class AccessGraph(object):
                 if not ap in availAccessPoints:
                     continue
                 tdiff = smbm.eval(tFunc)
-                #if loc['Name'] == "Missile (above Crocomire)":
+                #if loc['Name'] == "Missile (lava room)":
                 #    print("root: {} ap: {}".format(rootNode, apName))
                 if tdiff.bool == True and tdiff.difficulty <= maxDiff:
                     diff = smbm.eval(loc['Available'])
                     path = self.getPath(rootAp, ap, availAccessPoints)
-                    #if loc['Name'] == "Missile (above Crocomire)":
+                    #if loc['Name'] == "Missile (lava room)":
                     #    print("path: {}".format([a.Name for a in path]))
                     pdiff = self.getPathDifficulty(path, availAccessPoints)
                     locDiff = SMBool(diff.bool,
@@ -239,7 +239,7 @@ class AccessGraph(object):
                         loc['difficulty'] = locDiff
                         loc['path'] = path
                         availLocs.append(loc)
-                        #if loc['Name'] == "Missile (above Crocomire)":
+                        #if loc['Name'] == "Missile (lava room)":
                         #    print("diff: {} tdiff: {} pdiff: {}".format(diff, tdiff, pdiff))
                         break
                     else:

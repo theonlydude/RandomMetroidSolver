@@ -12,7 +12,7 @@ class Cache:
         def _decorator(self):
             if func.__name__ in Cache.cache:
 #                print("cache found for {}: {}".format(func.__name__, Cache.cache[func.__name__]))
-#                ret = func(self, *args, **kwargs)
+#                ret = func(self)
 #                if ret != Cache.cache[func.__name__]:
 #                    print("ERROR: cache ({}) != current ({}) for {}".format(Cache.cache[func.__name__], ret, func.__name__))
                 return Cache.cache[func.__name__]

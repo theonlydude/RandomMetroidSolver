@@ -29,3 +29,15 @@
 [ -L ~/web2py/applications/solver/static/images/chosen-sprite@2x.png ] || ln -s ~/RandomMetroidSolver/web/static/chosen-sprite@2x.png ~/web2py/applications/solver/static/images/chosen-sprite@2x.png
 [ -L ~/web2py/applications/solver/static/js/leader-line.min.js ] || ln -s ~/RandomMetroidSolver/web/static/leader-line.min.js ~/web2py/applications/solver/static/js/leader-line.min.js
 [ -L ~/web2py/applications/solver/views/solver_web/tracker.html ] || ln -s ~/RandomMetroidSolver/web/views/tracker.html ~/web2py/applications/solver/views/solver_web/tracker.html
+[ -L ~/web2py/applications/solver/static/images/marker_easy.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/marker_easy.png ~/web2py/applications/solver/static/images/marker_easy.png
+[ -L ~/web2py/applications/solver/static/images/marker_medium.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/marker_medium.png ~/web2py/applications/solver/static/images/marker_medium.png
+[ -L ~/web2py/applications/solver/static/images/marker_hard.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/marker_hard.png ~/web2py/applications/solver/static/images/marker_hard.png
+[ -L ~/web2py/applications/solver/static/images/marker_harder.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/marker_harder.png ~/web2py/applications/solver/static/images/marker_harder.png
+[ -L ~/web2py/applications/solver/static/images/marker_hardcore.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/marker_hardcore.png ~/web2py/applications/solver/static/images/marker_hardcore.png
+[ -L ~/web2py/applications/solver/static/images/marker_mania.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/marker_mania.png ~/web2py/applications/solver/static/images/marker_mania.png
+[ -L ~/web2py/applications/solver/static/images/marker_over_easy.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/marker_over_easy.png ~/web2py/applications/solver/static/images/marker_over_easy.png
+[ -L ~/web2py/applications/solver/static/images/marker_over_medium.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/marker_over_medium.png ~/web2py/applications/solver/static/images/marker_over_medium.png
+[ -L ~/web2py/applications/solver/static/images/marker_over_hard.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/marker_over_hard.png ~/web2py/applications/solver/static/images/marker_over_hard.png
+[ -L ~/web2py/applications/solver/static/images/marker_over_harder.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/marker_over_harder.png ~/web2py/applications/solver/static/images/marker_over_harder.png
+[ -L ~/web2py/applications/solver/static/images/marker_over_hardcore.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/marker_over_hardcore.png ~/web2py/applications/solver/static/images/marker_over_hardcore.png
+[ -L ~/web2py/applications/solver/static/images/marker_over_mania.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/marker_over_mania.png ~/web2py/applications/solver/static/images/marker_over_mania.png

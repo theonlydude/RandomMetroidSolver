@@ -45,7 +45,8 @@ class SolverState(object):
         self.state["visitedLocations"] = self.getVisitedLocations(solver.visitedLocations)
         self.state["lastLoc"] = solver.lastLoc
         self.state["bosses"] = [boss for boss in Bosses.golden4Dead if Bosses.golden4Dead[boss] == True]
-        self.state["availableLocations"] = self.getAvailableLocations(solver.majorLocations)
+        self.state["availableLocationsWeb"] = self.getAvailableLocations(solver.majorLocations)
+        self.state["visitedLocationsWeb"] = self.getAvailableLocations(solver.visitedLocations)
 
     def toSolver(self, solver):
         # rom
@@ -64,7 +65,7 @@ class SolverState(object):
         Bosses.reset()
         for boss in self.state["bosses"]:
             Bosses.beatBoss(boss)
-        solver.availableLocations = self.state["availableLocations"]
+        solver.availableLocationsWeb = self.state["availableLocationsWeb"]
 
     def getLocsData(self, locations):
         ret = {}
@@ -103,16 +104,36 @@ class SolverState(object):
         retVis.sort(key=lambda x: x[0])
         return ([loc for (i, loc) in retVis], retMaj)
 
+    def diff4isolver(self, difficulty):
+        if difficulty < medium:
+            return "easy"
+        elif difficulty < hard:
+            return "medium"
+        elif difficulty < harder:
+            return "hard"
+        elif difficulty < hardcore:
+            return "harder"
+        elif difficulty < mania:
+            return "hardcore"
+        else:
+            return "mania"
+
+    def locName4isolver(self, locName):
+        # remove space and special characters
+        # sed -e 's+ ++g' -e 's+,++g' -e 's+(++g' -e 's+)++g' -e 's+-++g'
+        return locName.translate(None, " ,()-")
+
     def getAvailableLocations(self, locations):
         ret = {}
         for loc in locations:
             if "difficulty" in loc and loc["difficulty"].bool == True:
                 diff = loc["difficulty"]
-                ret[loc["Name"]] = {"difficulty": diff.difficulty,
-                                    "knows": diff.knows,
-                                    "items": diff.items,
-                                    "comeBack": loc['comeBack'],
-                                    "item": loc["itemName"]}
+                locName = self.locName4isolver(loc["Name"])
+                ret[locName] = {"difficulty": self.diff4isolver(diff.difficulty),
+                                "knows": diff.knows,
+                                "items": diff.items,
+                                "comeBack": loc['comeBack'],
+                                "item": loc["itemName"]}
         return ret
 
     def setPatches(self, patchesData):
@@ -127,7 +148,7 @@ class SolverState(object):
             self.state = json.load(jsonFile)
 #        print("Loaded Json State:")
 #        for key in self.state:
-#            if key in ["availableLocations", "collectedItems", "visitedLocations"]:
+#            if key in ["availableLocationsWeb", "collectedItems", "visitedLocations"]:
 #                print("{}: {}".format(key, self.state[key]))
 #        print("")
 
@@ -136,7 +157,7 @@ class SolverState(object):
             json.dump(self.state, jsonFile)
 #        print("Dumped Json State:")
 #        for key in self.state:
-#            if key in ["availableLocations", "collectedItems", "visitedLocations"]:
+#            if key in ["availableLocationsWeb", "collectedItems", "visitedLocations"]:
 #                print("{}: {}".format(key, self.state[key]))
 #        print("")
 
@@ -306,7 +327,7 @@ class InteractiveSolver(CommonSolver):
 
     def pickItemAt(self, locName):
         # collect new item at newLoc
-        if locName not in self.availableLocations:
+        if locName not in self.availableLocationsWeb:
             raise Exception("Location '{}' not found in available locations".format(locName))
         self.collectMajor(self.getLoc(locName))
 
@@ -1016,7 +1037,7 @@ if __name__ == "__main__":
     parser.add_argument('--loc', help="Name of the location to action on (used in interactive mode)",
                         dest="loc", nargs='?', default=None)
     parser.add_argument('--action', help="Pickup item at location, remove last pickedup location, clear all (used in interactive mode)",
-                        dest="action", nargs="?", default=None, choices=['add', 'remove', 'clear'])
+                        dest="action", nargs="?", default=None, choices=['init', 'add', 'remove', 'clear', 'get'])
 
     args = parser.parse_args()
 

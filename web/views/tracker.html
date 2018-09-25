@@ -341,6 +341,16 @@ function ajaxOkJSON(data) {
 
 window.onload = function(){
   ajaxCall({action: "get"}, "download", ajaxOkGet);
+
+  // display the help on first connection to the tracker
+{{
+  if session.tracker["firstTime"] == True:
+    session.tracker["firstTime"] = False
+}}
+    startTheTour(0);
+{{
+    pass
+}}
 }
 
 function ajaxOkGet(jsonData) {

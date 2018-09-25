@@ -1097,6 +1097,13 @@ def stats():
 def tracker():
     response.title = 'Super Metroid VARIA Randomizer and Solver Area Tracker'
 
+    # init session
+    if session.tracker is None:
+        session.tracker = {}
+        session.tracker["lines"] = {}
+        session.tracker["linesSeq"] = []
+        session.tracker["firstTime"] = True
+
     return dict()
 
 def validatePoint(point):
@@ -1133,12 +1140,6 @@ def trackerWebService():
 
     # check params
     validateTrackerParams()
-
-    # init session
-    if session.tracker is None:
-        session.tracker = {}
-        session.tracker["lines"] = {}
-        session.tracker["linesSeq"] = []
 
     # handle action
     action = request.vars.action

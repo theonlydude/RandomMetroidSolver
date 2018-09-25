@@ -41,3 +41,10 @@
 [ -L ~/web2py/applications/solver/static/images/marker_over_harder.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/marker_over_harder.png ~/web2py/applications/solver/static/images/marker_over_harder.png
 [ -L ~/web2py/applications/solver/static/images/marker_over_hardcore.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/marker_over_hardcore.png ~/web2py/applications/solver/static/images/marker_over_hardcore.png
 [ -L ~/web2py/applications/solver/static/images/marker_over_mania.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/marker_over_mania.png ~/web2py/applications/solver/static/images/marker_over_mania.png
+[ -L ~/web2py/applications/solver/static/images/bin.svg ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/bin.svg ~/web2py/applications/solver/static/images/bin.svg
+[ -L ~/web2py/applications/solver/static/images/checkmark.svg ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/checkmark.svg ~/web2py/applications/solver/static/images/checkmark.svg
+[ -L ~/web2py/applications/solver/static/images/cloud_download.svg ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/cloud_download.svg ~/web2py/applications/solver/static/images/cloud_download.svg
+[ -L ~/web2py/applications/solver/static/images/cloud_upload.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/cloud_upload.png ~/web2py/applications/solver/static/images/cloud_upload.png
+[ -L ~/web2py/applications/solver/static/images/help.svg ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/help.svg ~/web2py/applications/solver/static/images/help.svg
+[ -L ~/web2py/applications/solver/static/images/repeat.svg ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/repeat.svg ~/web2py/applications/solver/static/images/repeat.svg
+[ -L ~/web2py/applications/solver/static/images/warning.svg ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/warning.svg ~/web2py/applications/solver/static/images/warning.svg

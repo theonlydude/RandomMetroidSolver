@@ -1110,6 +1110,7 @@ def tracker():
         session.tracker["area"] = {}
         session.tracker["area"]["lines"] = {}
         session.tracker["area"]["linesSeq"] = []
+        session.tracker["area"]["firstTime"] = True
 
     if "item" not in session.tracker:
         session.tracker["item"] = {}
@@ -1230,7 +1231,7 @@ def returnState(state):
         return json.dumps({"availableLocations": session.tracker["item"]["state"]["availableLocationsWeb"],
                            "visitedLocations": session.tracker["item"]["state"]["visitedLocationsWeb"]})
     else:
-        print("no state to return")
+        raiseHttp(200, "OK", True)
 
 def callSolverInit(jsonRomFileName, presetFileName):
     #./solver.py -r VARIA_Randomizer_X18753_regular.sfc --preset standard_presets/regular.json --interactive --output state_0.json

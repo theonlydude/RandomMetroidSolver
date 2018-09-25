@@ -1234,7 +1234,6 @@ def returnState(state):
         raiseHttp(200, "OK", True)
 
 def callSolverInit(jsonRomFileName, presetFileName):
-    #./solver.py -r VARIA_Randomizer_X18753_regular.sfc --preset standard_presets/regular.json --interactive --output state_0.json
     jsonOutFileName = tempfile.mkstemp()[1]
     params = [
         'python2',  os.path.expanduser("~/RandomMetroidSolver/solver.py"),

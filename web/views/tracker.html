@@ -237,6 +237,24 @@ img {
 .marker_over_mania {
     background-image: url("/solver/static/images/marker_over_mania.png");
 }
+.marker_visited_easy {
+    background-image: url("/solver/static/images/marker_visited_easy.png");
+}
+.marker_visited_medium {
+    background-image: url("/solver/static/images/marker_visited_medium.png");
+}
+.marker_visited_hard {
+    background-image: url("/solver/static/images/marker_visited_hard.png");
+}
+.marker_visited_harder {
+    background-image: url("/solver/static/images/marker_visited_harder.png");
+}
+.marker_visited_hardcore {
+    background-image: url("/solver/static/images/marker_visited_hardcore.png");
+}
+.marker_visited_mania {
+    background-image: url("/solver/static/images/marker_visited_mania.png");
+}
 .marker_easy {
     background-image: url("/solver/static/images/marker_easy.png");
 }
@@ -697,11 +715,10 @@ function clickPortal(elemId) {
     // highlight first element
     if(! (elemId in lines)){
       firstClick = elemId;
-      document.getElementById(firstClick).className += " addBorder";
+      $("#"+firstClick).addClass("addBorder");
     }
   } else if(firstClick == elemId){
-    var firstClickElem = document.getElementById(firstClick);
-    firstClickElem.className = firstClickElem.className.replace(" addBorder", "");
+    $("#"+firstClick).removeClass("addBorder");
     firstClick = "";
   } else if(secondClick == "" && elemId != firstClick) {
 
@@ -735,7 +752,7 @@ function addLine(startPoint, endPoint) {
                              outlineSize: 0.15});
 
   nextColor += 1;
-  startPointElem.className = startPointElem.className.replace(" addBorder", "");
+  $("#"+startPoint).removeClass("addBorder");
 
   lines[startPoint] = endPoint;
   lines[endPoint] = startPoint;
@@ -864,15 +881,15 @@ window.onload = function(){
 
   // display the help on first connection to the tracker
 {{
-  if session.tracker["firstTime"] == True:
-    session.tracker["firstTime"] = False
+  if session.tracker["area"]["firstTime"] == True:
+    session.tracker["area"]["firstTime"] = False
 }}
     startTheTour(0);
 {{
     pass
 }}
 
-  // TODO::temporary call for testing purposes
+  // TODO::temporary calls for testing purposes
   $("#MorphingBall").addClass("marker_harder");
   $("#EnergyTankBrinstarCeiling").addClass("marker_easy");
 
@@ -1071,8 +1088,6 @@ function mouseOver(elem) {
   var newTop = locsInfo[elem.id].top - 0.75;
   var newLeft = locsInfo[elem.id].left - 0.5;
   $(elem).css({"top": newTop+"%", "left": newLeft+"%"});
-
-  showTooltip(elem.id);
 }
 
 function mouseOut(elem) {
@@ -1082,8 +1097,6 @@ function mouseOut(elem) {
   var newTop = locsInfo[elem.id].top;
   var newLeft = locsInfo[elem.id].left;
   $(elem).css({"top": newTop+"%", "left": newLeft+"%"});
-
-  hideTooltip(elem.id);
 }
 
 function initSolver() {
@@ -1101,7 +1114,7 @@ function initSolver() {
 }
 
 function clickLoc(elem) {
-  // check that lock is the available list
+  // check that lock is in the available list
 
   // call webservice
   // use ok func which change class to selected
@@ -1146,6 +1159,9 @@ function ajaxOkGetItem(jsonData) {
       locsInfo[locName]["state"] = "available";
       locsInfo[locName]["difficulty"] = locData["difficulty"];
       locsInfo[locName]["tooltip"] = {name: locName, item: "?", items: locData["items"], knows: locData["knows"]};
+
+      $("#"+locName).attr("class", "baseLoc marker_"+locData["difficulty"]);
+      $("#"+locName+'[data-toggle="tooltip"]').attr("title", locName+": ?");
     }
   }
   if("visitedLocations" in jsonData) {
@@ -1154,36 +1170,14 @@ function ajaxOkGetItem(jsonData) {
       var locData = jsonData["visitedLocations"][locName];
       locsInfo[locName]["state"] = "visited";
       locsInfo[locName]["difficulty"] = locData["difficulty"];
-      locsInfo[locName]["tooltip"] = {name: locName, item: "?", items: locData["items"], knows: locData["knows"]};
+      locsInfo[locName]["tooltip"] = {name: locName, item: locData["item"], items: locData["items"], knows: locData["knows"]};
 
+      $("#"+locName).attr("class", "baseLoc marker_visited_"+locData["difficulty"];
+      $("#"+locName+'[data-toggle="tooltip"]').attr("title", locName+": "+locData["item"]);
     }
   }
 
   setWSIcon("checkmark");
-}
-
-// TODO::use bootstrap tooltip like in the area tracker
-function showTooltip(locName){
-  if("tooltip" in locsInfo[locName]) {
-    console.log("display "+locName+" tooltip");
-
-    var elem = document.getElementById("tooltip");
-    
-    elem.style.top = (locsInfo[locName].top + 1) + "%";
-    elem.style.left = (locsInfo[locName].left - 1) + "%";
-    elem.style.display = "block";
-    // TODO::construct tooltip
-    elem.innerHTML = "manger du steak";
-
-    var top = locsInfo[locName].top + 1;
-    console.log("top: "+top+"%");
-  } else {
-    console.log("no tooltip for "+locName);
-  }
-}
-
-function hideTooltip(){
-  document.getElementById("tooltip").style.display = "none";
 }
 
 
@@ -1263,107 +1257,107 @@ function startTheTour(step=-1) {
     <div id="eastTunnelTopRight" class="baseButton" onclick="clickPortal('eastTunnelTopRight')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
     <div id="glassTunnelTop" class="baseButtonRot" onclick="clickPortal('glassTunnelTop')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
     <div id="statuesHallwayLeft" class="baseButton" onclick="clickPortal('statuesHallwayLeft')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
-    <div id="EnergyTankGauntlet" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="Bomb" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="EnergyTankTerminator" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="ReserveTankBrinstar" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="ChargeBeam" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="MorphingBall" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="EnergyTankBrinstarCeiling" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="EnergyTankEtecoons" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="EnergyTankWaterway" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="EnergyTankBrinstarGate" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="XRayScope" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="Spazer" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="EnergyTankKraid" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="VariaSuit" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="IceBeam" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="EnergyTankCrocomire" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="HiJumpBoots" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="GrappleBeam" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="ReserveTankNorfair" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="SpeedBooster" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="WaveBeam" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="EnergyTankRidley" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="ScrewAttack" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="EnergyTankFirefleas" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="ReserveTankWreckedShip" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="EnergyTankWreckedShip" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="RightSuperWreckedShip" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="GravitySuit" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="EnergyTankMamaturtle" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="PlasmaBeam" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="ReserveTankMaridia" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="SpringBall" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="EnergyTankBotwoon" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="SpaceJump" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="PowerBombCrateriasurface" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="MissileoutsideWreckedShipbottom" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="MissileoutsideWreckedShiptop" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="MissileoutsideWreckedShipmiddle" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="MissileCrateriamoat" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="MissileCrateriabottom" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="MissileCrateriagauntletright" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="MissileCrateriagauntletleft" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="SuperMissileCrateria" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="MissileCrateriamiddle" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="PowerBombgreenBrinstarbottom" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="SuperMissilepinkBrinstar" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="MissilegreenBrinstarbelowsupermissile" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="SuperMissilegreenBrinstartop" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="MissilegreenBrinstarbehindmissile" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="MissilegreenBrinstarbehindreservetank" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="MissilepinkBrinstartop" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="MissilepinkBrinstarbottom" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="PowerBombpinkBrinstar" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="MissilegreenBrinstarpipe" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="PowerBombblueBrinstar" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="MissileblueBrinstarmiddle" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="SuperMissilegreenBrinstarbottom" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="MissileblueBrinstarbottom" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="MissileblueBrinstartop" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="MissileblueBrinstarbehindmissile" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="PowerBombredBrinstarsidehopperroom" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="PowerBombredBrinstarspikeroom" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="MissileredBrinstarspikeroom" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="MissileKraid" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="Missilelavaroom" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="MissilebelowIceBeam" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="MissileaboveCrocomire" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="MissileHiJumpBoots" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="EnergyTankHiJumpBoots" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="PowerBombCrocomire" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="MissilebelowCrocomire" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="MissileGrappleBeam" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="MissileNorfairReserveTank" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="MissilebubbleNorfairgreendoor" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="MissilebubbleNorfair" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="MissileSpeedBooster" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="MissileWaveBeam" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="MissileGoldTorizo" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="SuperMissileGoldTorizo" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="MissileMickeyMouseroom" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="MissilelowerNorfairabovefireflearoom" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="PowerBomblowerNorfairabovefireflearoom" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="PowerBombPowerBombsofshame" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="MissilelowerNorfairnearWaveBeam" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="MissileWreckedShipmiddle" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="MissileGravitySuit" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="MissileWreckedShiptop" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="SuperMissileWreckedShipleft" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="MissilegreenMaridiashinespark" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="SuperMissilegreenMaridia" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="MissilegreenMaridiatatori" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="SuperMissileyellowMaridia" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="MissileyellowMaridiasupermissile" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="MissileyellowMaridiafalsewall" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="MissileleftMaridiasandpitroom" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="MissilerightMaridiasandpitroom" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="PowerBombrightMaridiasandpitroom" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="MissilepinkMaridia" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="SuperMissilepinkMaridia" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <div id="MissileDraygon" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"></div>
-    <span id="tooltip" class="tooltip">Tooltip text</span>
+
+    <div id="EnergyTankGauntlet" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="Bomb" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="EnergyTankTerminator" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="ReserveTankBrinstar" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="ChargeBeam" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="MorphingBall" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="EnergyTankBrinstarCeiling" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="EnergyTankEtecoons" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="EnergyTankWaterway" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="EnergyTankBrinstarGate" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="XRayScope" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="Spazer" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="EnergyTankKraid" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="VariaSuit" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="IceBeam" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="EnergyTankCrocomire" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="HiJumpBoots" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="GrappleBeam" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="ReserveTankNorfair" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="SpeedBooster" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="WaveBeam" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="EnergyTankRidley" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="ScrewAttack" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="EnergyTankFirefleas" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="ReserveTankWreckedShip" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="EnergyTankWreckedShip" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="RightSuperWreckedShip" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="GravitySuit" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="EnergyTankMamaturtle" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="PlasmaBeam" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="ReserveTankMaridia" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="SpringBall" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="EnergyTankBotwoon" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="SpaceJump" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="PowerBombCrateriasurface" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="MissileoutsideWreckedShipbottom" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="MissileoutsideWreckedShiptop" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="MissileoutsideWreckedShipmiddle" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="MissileCrateriamoat" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="MissileCrateriabottom" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="MissileCrateriagauntletright" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="MissileCrateriagauntletleft" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="SuperMissileCrateria" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="MissileCrateriamiddle" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="PowerBombgreenBrinstarbottom" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="SuperMissilepinkBrinstar" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="MissilegreenBrinstarbelowsupermissile" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="SuperMissilegreenBrinstartop" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="MissilegreenBrinstarbehindmissile" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="MissilegreenBrinstarbehindreservetank" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="MissilepinkBrinstartop" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="MissilepinkBrinstarbottom" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="PowerBombpinkBrinstar" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="MissilegreenBrinstarpipe" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="PowerBombblueBrinstar" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="MissileblueBrinstarmiddle" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="SuperMissilegreenBrinstarbottom" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="MissileblueBrinstarbottom" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="MissileblueBrinstartop" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="MissileblueBrinstarbehindmissile" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="PowerBombredBrinstarsidehopperroom" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="PowerBombredBrinstarspikeroom" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="MissileredBrinstarspikeroom" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="MissileKraid" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="Missilelavaroom" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="MissilebelowIceBeam" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="MissileaboveCrocomire" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="MissileHiJumpBoots" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="EnergyTankHiJumpBoots" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="PowerBombCrocomire" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="MissilebelowCrocomire" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="MissileGrappleBeam" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="MissileNorfairReserveTank" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="MissilebubbleNorfairgreendoor" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="MissilebubbleNorfair" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="MissileSpeedBooster" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="MissileWaveBeam" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="MissileGoldTorizo" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="SuperMissileGoldTorizo" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="MissileMickeyMouseroom" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="MissilelowerNorfairabovefireflearoom" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="PowerBomblowerNorfairabovefireflearoom" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="PowerBombPowerBombsofshame" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="MissilelowerNorfairnearWaveBeam" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="MissileWreckedShipmiddle" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="MissileGravitySuit" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="MissileWreckedShiptop" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="SuperMissileWreckedShipleft" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="MissilegreenMaridiashinespark" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="SuperMissilegreenMaridia" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="MissilegreenMaridiatatori" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="SuperMissileyellowMaridia" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="MissileyellowMaridiasupermissile" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="MissileyellowMaridiafalsewall" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="MissileleftMaridiasandpitroom" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="MissilerightMaridiasandpitroom" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="PowerBombrightMaridiasandpitroom" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="MissilepinkMaridia" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="SuperMissilepinkMaridia" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
+    <div id="MissileDraygon" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title=""></div>
 
     <div id="repeat" class="repeat"><img src="/solver/static/images/repeat.svg" alt="Cancel Last" onclick="deleteLine()" data-toggle="tooltip" title="Remove last added"></div>
     <div id="bin" class="bin"><img src="/solver/static/images/bin.svg" alt="Clear" onclick="clearLines()" data-toggle="tooltip" title="Remove all"></div>
@@ -1375,33 +1369,5 @@ function startTheTour(step=-1) {
       <img id="upload" src="/solver/static/images/cloud_upload.png" alt="cloud_upload" style="display: none" data-toggle="tooltip" title="Web service uploading">
     </div>
 
-    <div id="lowerMushroomsLeft" class="baseButton lowerMushroomsLeft" onclick="clickPortal('lowerMushroomsLeft')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
-    <div id="moatRight" class="baseButton moatRight" onclick="clickPortal('moatRight')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
-    <div id="greenPiratesShaftBottomRight" class="baseButton greenPiratesShaftBottomRight" onclick="clickPortal('greenPiratesShaftBottomRight')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
-    <div id="keyhunterRoomBottom" class="baseButtonRot keyhunterRoomBottom" onclick="clickPortal('keyhunterRoomBottom')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
-    <div id="morphBallRoomLeft" class="baseButton morphBallRoomLeft" onclick="clickPortal('morphBallRoomLeft')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
-    <div id="greenBrinstarElevatorRight" class="baseButton greenBrinstarElevatorRight" onclick="clickPortal('greenBrinstarElevatorRight')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
-    <div id="greenHillZoneTopRight" class="baseButton greenHillZoneTopRight" onclick="clickPortal('greenHillZoneTopRight')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
-    <div id="noobBridgeRight" class="baseButton noobBridgeRight" onclick="clickPortal('noobBridgeRight')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
-    <div id="westOceanLeft" class="baseButton westOceanLeft" onclick="clickPortal('westOceanLeft')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
-    <div id="crabMazeLeft" class="baseButton crabMazeLeft" onclick="clickPortal('crabMazeLeft')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
-    <div id="lavaDiveRight" class="baseButton lavaDiveRight" onclick="clickPortal('lavaDiveRight')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
-    <div id="threeMuskateersRoomLeft" class="baseButton threeMuskateersRoomLeft" onclick="clickPortal('threeMuskateersRoomLeft')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
-    <div id="warehouseZeelaRoomLeft" class="baseButton warehouseZeelaRoomLeft" onclick="clickPortal('warehouseZeelaRoomLeft')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
-    <div id="warehouseEntranceLeft" class="baseButton warehouseEntranceLeft" onclick="clickPortal('warehouseEntranceLeft')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
-    <div id="warehouseEntranceRight" class="baseButton warehouseEntranceRight" onclick="clickPortal('warehouseEntranceRight')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
-    <div id="singleChamberTopRight" class="baseButton singleChamberTopRight" onclick="clickPortal('singleChamberTopRight')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
-    <div id="kronicBoostRoomBottomLeft" class="baseButton kronicBoostRoomBottomLeft" onclick="clickPortal('kronicBoostRoomBottomLeft')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
-    <div id="mainStreetBottom" class="baseButtonRot mainStreetBottom" onclick="clickPortal('mainStreetBottom')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
-    <div id="crabHoleBottomLeft" class="baseButton crabHoleBottomLeft" onclick="clickPortal('crabHoleBottomLeft')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
-    <div id="leCoudeRight" class="baseButton leCoudeRight" onclick="clickPortal('leCoudeRight')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
-    <div id="redFishRoomLeft" class="baseButton redFishRoomLeft" onclick="clickPortal('redFishRoomLeft')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
-    <div id="redTowerTopLeft" class="baseButton redTowerTopLeft" onclick="clickPortal('redTowerTopLeft')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
-    <div id="caterpillarRoomTopRight" class="baseButton caterpillarRoomTopRight" onclick="clickPortal('caterpillarRoomTopRight')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
-    <div id="redBrinstarElevator" class="baseButtonRot redBrinstarElevator" onclick="clickPortal('redBrinstarElevator')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
-    <div id="eastTunnelRight" class="baseButton eastTunnelRight" onclick="clickPortal('eastTunnelRight')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
-    <div id="eastTunnelTopRight" class="baseButton eastTunnelTopRight" onclick="clickPortal('eastTunnelTopRight')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
-    <div id="glassTunnelTop" class="baseButtonRot glassTunnelTop" onclick="clickPortal('glassTunnelTop')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
-    <div id="statuesHallwayLeft" class="baseButton statuesHallwayLeft" onclick="clickPortal('statuesHallwayLeft')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
   </div>
 </div>

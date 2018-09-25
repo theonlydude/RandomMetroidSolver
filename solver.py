@@ -31,25 +31,36 @@ class Conf:
 
 class SolverState(object):
     def fromSolver(self, solver):
-        # rom
         self.state = {}
+        # bool
         self.state["fullRando"] = solver.fullRando
+        # bool
         self.state["areaRando"] = solver.areaRando
+        # dict of raw patches
         self.state["patches"] = solver.patches
+        # dict {locName: {itemName: "xxx", "accessPoint": "xxx"}, ...}
         self.state["locsData"] = self.getLocsData(solver.locations)
+        # list [(ap1, ap2), (ap3, ap4), ...]
         self.state["graphTransitions"] = solver.graphTransitions
-        # preset
+        # preset file name
         self.state["presetFileName"] = solver.presetFileName
-        # items collected / locs visited / bosses killed
+        ## items collected / locs visited / bosses killed
+        # list [item1, item2, ...]
         self.state["collectedItems"] = solver.collectedItems
+        # dict {locName: {index: 0, difficulty: (bool, diff, ...), ...} with index being the position of the loc in visitedLocations
         self.state["visitedLocations"] = self.getVisitedLocations(solver.visitedLocations)
+        # dict {locName: (bool, diff, [know1, ...], [item1, ...]), ...}
+        self.state["availableLocations"] = self.getAvailableLocations(solver.majorLocations)
+        # string of last access point
         self.state["lastLoc"] = solver.lastLoc
+        # list of killed bosses: ["boss1", "boss2"]
         self.state["bosses"] = [boss for boss in Bosses.golden4Dead if Bosses.golden4Dead[boss] == True]
-        self.state["availableLocationsWeb"] = self.getAvailableLocations(solver.majorLocations)
-        self.state["visitedLocationsWeb"] = self.getAvailableLocations(solver.visitedLocations)
+        # dict {locNameWeb: {infos}, ...}
+        self.state["availableLocationsWeb"] = self.getAvailableLocationsWeb(solver.majorLocations)
+        # dict {locNameWeb: {infos}, ...}
+        self.state["visitedLocationsWeb"] = self.getAvailableLocationsWeb(solver.visitedLocations)
 
     def toSolver(self, solver):
-        # rom
         solver.fullRando = self.state["fullRando"]
         solver.areaRando = self.state["areaRando"]
         solver.patches = self.setPatches(self.state["patches"])
@@ -60,6 +71,7 @@ class SolverState(object):
         # items collected / locs visited / bosses killed
         solver.collectedItems = self.state["collectedItems"]
         (solver.visitedLocations, solver.majorLocations) = self.setLocations(self.state["visitedLocations"],
+                                                                             self.state["availableLocations"],
                                                                              solver.locations)
         solver.lastLoc = self.state["lastLoc"]
         Bosses.reset()
@@ -86,21 +98,25 @@ class SolverState(object):
         ret = {}
         i = 0
         for loc in visitedLocations:
-            ret[loc["Name"]] = i
+            diff = loc["difficulty"]
+            ret[loc["Name"]] = {"index": i, "difficulty": (diff.bool, diff.difficulty, diff.knows, diff.items)}
             i += 1
         return ret
 
-    def setLocations(self, visitedLocations, locations):
+    def setLocations(self, visitedLocations, availableLocations, locations):
         retVis = []
         retMaj = []
         for loc in locations:
             if loc["Name"] in visitedLocations:
                 # visitedLocations contains an index
-                retVis.append((visitedLocations[loc["Name"]], loc))
+                diff = visitedLocations[loc["Name"]]["difficulty"]
+                loc["difficulty"] = SMBool(diff[0], diff[1], diff[2], diff[3])
+                retVis.append((visitedLocations[loc["Name"]]["index"], loc))
             else:
+                if loc["Name"] in availableLocations:
+                    diff = availableLocations[loc["Name"]]
+                    loc["difficulty"] = SMBool(diff[0], diff[1], diff[2], diff[3])
                 retMaj.append(loc)
-        #print("setLocations: retVis: {}".format(retVis))
-        #print("setLocations: retMaj: {}".format(retMaj))
         retVis.sort(key=lambda x: x[0])
         return ([loc for (i, loc) in retVis], retMaj)
 
@@ -123,7 +139,7 @@ class SolverState(object):
         # sed -e 's+ ++g' -e 's+,++g' -e 's+(++g' -e 's+)++g' -e 's+-++g'
         return locName.translate(None, " ,()-")
 
-    def getAvailableLocations(self, locations):
+    def getAvailableLocationsWeb(self, locations):
         ret = {}
         for loc in locations:
             if "difficulty" in loc and loc["difficulty"].bool == True:
@@ -132,8 +148,18 @@ class SolverState(object):
                 ret[locName] = {"difficulty": self.diff4isolver(diff.difficulty),
                                 "knows": diff.knows,
                                 "items": diff.items,
-                                "comeBack": loc['comeBack'],
-                                "item": loc["itemName"]}
+                                # TODO::add this later (need to put it in visited/available locs
+                                #"comeBack": loc['comeBack'],
+                                "item": loc["itemName"],
+                                "name": loc["Name"]}
+        return ret
+
+    def getAvailableLocations(self, locations):
+        ret = {}
+        for loc in locations:
+            if "difficulty" in loc and loc["difficulty"].bool == True:
+                diff = loc["difficulty"]
+                ret[loc["Name"]] = (diff.bool, diff.difficulty, diff.knows, diff.items)
         return ret
 
     def setPatches(self, patchesData):
@@ -148,7 +174,7 @@ class SolverState(object):
             self.state = json.load(jsonFile)
 #        print("Loaded Json State:")
 #        for key in self.state:
-#            if key in ["availableLocationsWeb", "collectedItems", "visitedLocations"]:
+#            if key in ["availableLocationsWeb", "visitedLocationsWeb", "collectedItems", "visitedLocations"]:
 #                print("{}: {}".format(key, self.state[key]))
 #        print("")
 
@@ -157,7 +183,7 @@ class SolverState(object):
             json.dump(self.state, jsonFile)
 #        print("Dumped Json State:")
 #        for key in self.state:
-#            if key in ["availableLocationsWeb", "collectedItems", "visitedLocations"]:
+#            if key in ["availableLocationsWeb", "visitedLocationsWeb", "collectedItems", "visitedLocations"]:
 #                print("{}: {}".format(key, self.state[key]))
 #        print("")
 
@@ -329,7 +355,7 @@ class InteractiveSolver(CommonSolver):
         # collect new item at newLoc
         if locName not in self.availableLocationsWeb:
             raise Exception("Location '{}' not found in available locations".format(locName))
-        self.collectMajor(self.getLoc(locName))
+        self.collectMajor(self.getLoc(self.availableLocationsWeb[locName]["name"]))
 
     def cancelLast(self):
         # loc

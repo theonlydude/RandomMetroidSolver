@@ -1227,7 +1227,7 @@ def validateItemTrackerParams():
 
 def returnState(state):
     if len(session.tracker["item"]["state"]) > 0:
-        print("state returned: avail {}, vis {}".format(session.tracker["item"]["state"]["availableLocationsWeb"], session.tracker["item"]["state"]["visitedLocationsWeb"]))
+        #print("state returned to frontend: availWeb {}, visWeb {}".format(session.tracker["item"]["state"]["availableLocationsWeb"], session.tracker["item"]["state"]["visitedLocationsWeb"]))
         return json.dumps({"availableLocations": session.tracker["item"]["state"]["availableLocationsWeb"],
                            "visitedLocations": session.tracker["item"]["state"]["visitedLocationsWeb"]})
     else:
@@ -1256,7 +1256,7 @@ def callSolverInit(jsonRomFileName, presetFileName):
             state = json.load(jsonFile)
         os.remove(jsonOutFileName)
         session.tracker["item"]["state"] = state
-        returnState(state)
+        return returnState(state)
     else:
         os.remove(jsonOutFileName)
         raiseHttp(400, "Something wrong happened while initializing solving of the ROM", True)
@@ -1295,11 +1295,11 @@ def callSolverAction(action, locName=None):
         os.remove(jsonOutFileName)
         os.remove(jsonInFileName)
         session.tracker["item"]["state"] = state
-        returnState(state)
+        return returnState(state)
     else:
         os.remove(jsonOutFileName)
         os.remove(jsonInFileName)
-        raiseHttp(400, "Something wrong happened while iterating solving of the ROM", True)
+        raiseHttp(400, "Something wrong happened while iteratively solving the ROM", True)
     
 def itemTrackerWebService():
     # web service for the interactive solver
@@ -1323,7 +1323,7 @@ def itemTrackerWebService():
 
         presetFileName = '{}/{}.json'.format(getPresetDir(request.vars.preset), request.vars.preset)
         session.tracker["item"]["preset"] = request.vars.preset
-        callSolverInit(jsonRomFileName, presetFileName)
+        return callSolverInit(jsonRomFileName, presetFileName)
     elif action == 'get':
         return returnState(session.tracker["item"]["state"])
     else:

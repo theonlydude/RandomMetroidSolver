@@ -33,6 +33,46 @@ td {
 .top {
     vertical-align: top;
 }
+
+img {
+    max-width: 100%;
+    height: auto;
+}
+.cloud {
+    position: absolute;
+    z-index: 2;
+    width: 4%;
+    height: 4%;
+    top: 2%;
+    left: 0%;
+}
+.repeat {
+    cursor: pointer;
+    position: absolute;
+    z-index: 2;
+    width: 4%;
+    height: 4%;
+    top: 2%;
+    left: 6.5%;
+}
+.bin {
+    cursor: pointer;
+    position: absolute;
+    z-index: 2;
+    width: 4%;
+    height: 4%;
+    top: 2%;
+    left: 11%;
+}
+.help {
+    cursor: pointer;
+    position: absolute;
+    z-index: 2;
+    width: 4%;
+    height: 4%;
+    top: 2%;
+    left: 15.5%;
+}
 .baseButton {
     cursor: pointer;
     position: absolute;
@@ -195,7 +235,7 @@ function clickPortal(elemId) {
 
       addLine(firstClick, secondClick);
 
-      ajaxCall({action: "add", startPoint: firstClick, endPoint: secondClick}, "Saving...");
+      ajaxCall({action: "add", startPoint: firstClick, endPoint: secondClick}, "upload");
 
       firstClick = "";
       secondClick = "";
@@ -251,7 +291,7 @@ function clearLines() {
   leaderLines = {};
   linesSeq = [];
   nextColor = 0;
-  ajaxCall({action: "clear"}, "Clearing...");
+  ajaxCall({action: "clear"}, "upload");
 }
 
 function deleteLine() {
@@ -271,7 +311,7 @@ function deleteLine() {
   delete leaderLines[endPoint];
 
   nextColor -= 1;
-  ajaxCall({action: "remove"}, "Removing...");
+  ajaxCall({action: "remove"}, "upload");
 }
 
 function ajaxCall(dataDict, msg, okFunc=ajaxOkJSON) {
@@ -283,7 +323,7 @@ function ajaxCall(dataDict, msg, okFunc=ajaxOkJSON) {
       crossDomain: true
     });
 
-    document.getElementById("wsstatus").value = msg;
+    setWSIcon(msg);
 
     request.done(okFunc);
     request.fail(ajaxFailJSON);
@@ -292,26 +332,34 @@ function ajaxCall(dataDict, msg, okFunc=ajaxOkJSON) {
 function ajaxFailJSON(jqXHR, textStatus) {
   console.log("error ["+jqXHR.responseJSON+"] ["+textStatus+"]");
 
-  if(jqXHR.responseJSON == null) {
-    document.getElementById("wsstatus").value = "Unknown error";
-  } else {
-    document.getElementById("wsstatus").value = jqXHR.responseJSON;
-  }
+  setWSIcon("warning");
 }
 
 function ajaxOkJSON(data) {
-  document.getElementById("wsstatus").value = "Saved";
+  setWSIcon("checkmark");
 }
+
 window.onload = function(){
-  ajaxCall({action: "get"}, "Loading...", ajaxOkGet);
+  ajaxCall({action: "get"}, "download", ajaxOkGet);
+
+  // display the help on first connection to the tracker
+{{
+  if session.tracker["firstTime"] == True:
+    session.tracker["firstTime"] = False
+}}
+    startTheTour(0);
+{{
+    pass
+}}
 }
+
 function ajaxOkGet(jsonData) {
   var arrayLength = jsonData["linesSeq"].length;
   for(var i=0; i<arrayLength; i++) {
     addLine(jsonData["linesSeq"][i], jsonData["lines"][jsonData["linesSeq"][i]]);
   }
 
-  document.getElementById("wsstatus").value = "Loaded";
+  setWSIcon("checkmark");
 }
 
 function startAnimation(elem) {
@@ -328,32 +376,27 @@ function stopAnimation(elem) {
   }
 }
 
+function setWSIcon(icon) {
+  var names = ["checkmark", "warning", "download", "upload"];
+  for(var i=0; i<names.length; i++) {
+    if(names[i] == icon){
+      document.getElementById(names[i]).style.display = "block";
+    } else {
+      document.getElementById(names[i]).style.display = "none";
+    }
+  }
+}
+
 function startTheTour(step=-1) {
   // the tour tutorial
   var tour = new Tour({
     storage: false,
-    steps: [
-    {
-      element: "#tutorialStep",
+    steps: [{
+      element: "#help",
       title: "Tutorial",
-      content: "Welcome to the VARIA Area Tracker.<br/><p>This tracker allows you to track the connections between the areas portals.<br/>To use it, click on a portal, it'll highlight it, then click on a second portal, it'll draw a line between the two portals.<br/>You can delete the latest added line with the 'Delete latest' button and all of them with the 'Clear' button.<br/>The tracker features an auto save functionnality, so you can do your area seed in multiple seatings.</p>"
-    },
-    {
-      element: "#wsstatusStep",
-      title: "Status",
-      content: "The modifications made are saved if you don't finish your seed in one run and you need to come back to it later. After each modification this status bar tells you if the save is ok."
-    },
-    {
-      element: "#clearStep",
-      title: "Clear the lines",
-      content: "Allows you to delete all the already created lines in one step."
-    },
-    {
-      element: "#deleteStep",
-      title: "Delete line",
-      content: "Delete the last added line."
-    }
- ]});
+      content: "Welcome to the VARIA Area Tracker.<br/><p>This tracker allows you to track the connections between the areas portals.<br/>To use it, click on a portal, it'll highlight it, then click on a second portal, it'll draw a line between the two portals.<br/>You can delete the latest added line with the <img src=\"/solver/static/images/repeat.svg\" alt=\"Cancel Last\" style=\"width: 32px\"> button and all of them with the <img src=\"/solver/static/images/bin.svg\" alt=\"Remove all\" style=\"width: 32px\"> button.<br/>The tracker features an auto save functionnality, so you can do your area seed in multiple seatings.<br/>The different status icons of the auto save:<ul><li><img src=\"/solver/static/images/checkmark.svg\" style=\"width: 32px\"> Save ok</li><li><img src=\"/solver/static/images/cloud_upload.png\" style=\"width: 32px\"> Upload in progress</li><li><img src=\"/solver/static/images/cloud_download.svg\" style=\"width: 32px\"> Download in progress</li><li><img src=\"/solver/static/images/warning.svg\" style=\"width: 32px\"> Something wrong happened</li></ul></p><p><a href='https://dryicons.com/icon-packs/stylistica-icons-set'>Icons by Dryicons</a></p>"
+    }]
+  });
 
   // Initialize the tour
   tour.init();
@@ -373,76 +416,52 @@ function startTheTour(step=-1) {
     {{=A("Presets", _href=URL(f="presets"), _class="menu")}}
     {{=A("Randomizer", _href=URL(f="randomizer"), _class="menu")}}
     {{=A("Solver", _href=URL(f="solver"), _class="menu")}}
-    {{=A("Tracker", _href=URL(f="tracker"), _class="menu_selected")}}
+    {{=A("Area Tracker", _href=URL(f="tracker"), _class="menu_selected")}}
     {{=A("Information & Contact", _href=URL(f="infos"), _class="menu")}}
   </div>
 </div>
 
 <div class="main">
-  <table class="full">
-    <colgroup><col class="ten" /><col class="ninety" /></colgroup>
-    <tr>
-      <td class="top">
-	  <table class="full">
-	    <tr>
-	      <td>
-		Click the '?' button
-	      </td>
-	      <td id="tutorialStep"><button type="button" onclick="startTheTour(0)">?</button></td>
-	    </tr>
-	    <tr>
-	      <td>
-		<input id="wsstatus" class="full" type="text" disabled></input>
-	      </td>
-	      <td id="wsstatusStep"><button type="button" onclick="startTheTour(1)">?</button></td>
-	    </tr>
-	    <tr>
-	      <td>
-		<button class="full" type="button" onclick="clearLines()">Clear</button>
-	      </td>
-	      <td id="clearStep"><button type="button" onclick="startTheTour(2)">?</button></td>
-	    </tr>
-	    <tr>
-	      <td>
-		<button class="full" type="button" onclick="deleteLine()">Delete latest</button>
-	      </td>
-	      <td id="deleteStep"><button type="button" onclick="startTheTour(3)">?</button></td>
-	    <tr>
-	  </table>
-      </td>
-      <td rowspan="2">
-	<div class="map_container">
-	  <img src="/solver/static/images/area_map.png" class="center">
-	  <div id="lowerMushroomsLeft" class="baseButton lowerMushroomsLeft" onclick="clickPortal('lowerMushroomsLeft')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
-	  <div id="moatRight" class="baseButton moatRight" onclick="clickPortal('moatRight')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
-	  <div id="greenPiratesShaftBottomRight" class="baseButton greenPiratesShaftBottomRight" onclick="clickPortal('greenPiratesShaftBottomRight')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
-	  <div id="keyhunterRoomBottom" class="baseButtonRot keyhunterRoomBottom" onclick="clickPortal('keyhunterRoomBottom')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
-	  <div id="morphBallRoomLeft" class="baseButton morphBallRoomLeft" onclick="clickPortal('morphBallRoomLeft')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
-	  <div id="greenBrinstarElevatorRight" class="baseButton greenBrinstarElevatorRight" onclick="clickPortal('greenBrinstarElevatorRight')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
-	  <div id="greenHillZoneTopRight" class="baseButton greenHillZoneTopRight" onclick="clickPortal('greenHillZoneTopRight')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
-	  <div id="noobBridgeRight" class="baseButton noobBridgeRight" onclick="clickPortal('noobBridgeRight')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
-	  <div id="westOceanLeft" class="baseButton westOceanLeft" onclick="clickPortal('westOceanLeft')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
-	  <div id="crabMazeLeft" class="baseButton crabMazeLeft" onclick="clickPortal('crabMazeLeft')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
-	  <div id="lavaDiveRight" class="baseButton lavaDiveRight" onclick="clickPortal('lavaDiveRight')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
-	  <div id="threeMuskateersRoomLeft" class="baseButton threeMuskateersRoomLeft" onclick="clickPortal('threeMuskateersRoomLeft')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
-	  <div id="warehouseZeelaRoomLeft" class="baseButton warehouseZeelaRoomLeft" onclick="clickPortal('warehouseZeelaRoomLeft')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
-	  <div id="warehouseEntranceLeft" class="baseButton warehouseEntranceLeft" onclick="clickPortal('warehouseEntranceLeft')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
-	  <div id="warehouseEntranceRight" class="baseButton warehouseEntranceRight" onclick="clickPortal('warehouseEntranceRight')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
-	  <div id="singleChamberTopRight" class="baseButton singleChamberTopRight" onclick="clickPortal('singleChamberTopRight')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
-	  <div id="kronicBoostRoomBottomLeft" class="baseButton kronicBoostRoomBottomLeft" onclick="clickPortal('kronicBoostRoomBottomLeft')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
-	  <div id="mainStreetBottom" class="baseButtonRot mainStreetBottom" onclick="clickPortal('mainStreetBottom')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
-	  <div id="crabHoleBottomLeft" class="baseButton crabHoleBottomLeft" onclick="clickPortal('crabHoleBottomLeft')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
-	  <div id="leCoudeRight" class="baseButton leCoudeRight" onclick="clickPortal('leCoudeRight')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
-	  <div id="redFishRoomLeft" class="baseButton redFishRoomLeft" onclick="clickPortal('redFishRoomLeft')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
-	  <div id="redTowerTopLeft" class="baseButton redTowerTopLeft" onclick="clickPortal('redTowerTopLeft')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
-	  <div id="caterpillarRoomTopRight" class="baseButton caterpillarRoomTopRight" onclick="clickPortal('caterpillarRoomTopRight')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
-	  <div id="redBrinstarElevator" class="baseButtonRot redBrinstarElevator" onclick="clickPortal('redBrinstarElevator')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
-	  <div id="eastTunnelRight" class="baseButton eastTunnelRight" onclick="clickPortal('eastTunnelRight')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
-	  <div id="eastTunnelTopRight" class="baseButton eastTunnelTopRight" onclick="clickPortal('eastTunnelTopRight')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
-	  <div id="glassTunnelTop" class="baseButtonRot glassTunnelTop" onclick="clickPortal('glassTunnelTop')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
-	  <div id="statuesHallwayLeft" class="baseButton statuesHallwayLeft" onclick="clickPortal('statuesHallwayLeft')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
-	</div>
-      </td>
-    </tr>
-  </table>
+  <div class="map_container">
+    <img src="/solver/static/images/area_map.png" class="center">
+
+    <div id="repeat" class="repeat"><img src="/solver/static/images/repeat.svg" alt="Cancel Last" onclick="deleteLine()" data-toggle="tooltip" title="Remove last added"></div>
+    <div id="bin" class="bin"><img src="/solver/static/images/bin.svg" alt="Clear" onclick="clearLines()" data-toggle="tooltip" title="Remove all"></div>
+    <div id="help" class="help"><img src="/solver/static/images/help.svg" alt="Help" onclick="startTheTour(0)" data-toggle="tooltip" title="Display the help"></div>
+    <div id="cloud" class="cloud">
+      <img id="checkmark" src="/solver/static/images/checkmark.svg" alt="checkmark" data-toggle="tooltip" title="Web service OK">
+      <img id="warning" src="/solver/static/images/warning.svg" alt="warning" style="display: none" data-toggle="tooltip" title="Web service ERROR">
+      <img id="download" src="/solver/static/images/cloud_download.svg" alt="cloud_download" style="display: none" data-toggle="tooltip" title="Web service downloading">
+      <img id="upload" src="/solver/static/images/cloud_upload.png" alt="cloud_upload" style="display: none" data-toggle="tooltip" title="Web service uploading">
+    </div>
+
+    <div id="lowerMushroomsLeft" class="baseButton lowerMushroomsLeft" onclick="clickPortal('lowerMushroomsLeft')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
+    <div id="moatRight" class="baseButton moatRight" onclick="clickPortal('moatRight')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
+    <div id="greenPiratesShaftBottomRight" class="baseButton greenPiratesShaftBottomRight" onclick="clickPortal('greenPiratesShaftBottomRight')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
+    <div id="keyhunterRoomBottom" class="baseButtonRot keyhunterRoomBottom" onclick="clickPortal('keyhunterRoomBottom')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
+    <div id="morphBallRoomLeft" class="baseButton morphBallRoomLeft" onclick="clickPortal('morphBallRoomLeft')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
+    <div id="greenBrinstarElevatorRight" class="baseButton greenBrinstarElevatorRight" onclick="clickPortal('greenBrinstarElevatorRight')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
+    <div id="greenHillZoneTopRight" class="baseButton greenHillZoneTopRight" onclick="clickPortal('greenHillZoneTopRight')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
+    <div id="noobBridgeRight" class="baseButton noobBridgeRight" onclick="clickPortal('noobBridgeRight')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
+    <div id="westOceanLeft" class="baseButton westOceanLeft" onclick="clickPortal('westOceanLeft')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
+    <div id="crabMazeLeft" class="baseButton crabMazeLeft" onclick="clickPortal('crabMazeLeft')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
+    <div id="lavaDiveRight" class="baseButton lavaDiveRight" onclick="clickPortal('lavaDiveRight')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
+    <div id="threeMuskateersRoomLeft" class="baseButton threeMuskateersRoomLeft" onclick="clickPortal('threeMuskateersRoomLeft')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
+    <div id="warehouseZeelaRoomLeft" class="baseButton warehouseZeelaRoomLeft" onclick="clickPortal('warehouseZeelaRoomLeft')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
+    <div id="warehouseEntranceLeft" class="baseButton warehouseEntranceLeft" onclick="clickPortal('warehouseEntranceLeft')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
+    <div id="warehouseEntranceRight" class="baseButton warehouseEntranceRight" onclick="clickPortal('warehouseEntranceRight')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
+    <div id="singleChamberTopRight" class="baseButton singleChamberTopRight" onclick="clickPortal('singleChamberTopRight')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
+    <div id="kronicBoostRoomBottomLeft" class="baseButton kronicBoostRoomBottomLeft" onclick="clickPortal('kronicBoostRoomBottomLeft')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
+    <div id="mainStreetBottom" class="baseButtonRot mainStreetBottom" onclick="clickPortal('mainStreetBottom')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
+    <div id="crabHoleBottomLeft" class="baseButton crabHoleBottomLeft" onclick="clickPortal('crabHoleBottomLeft')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
+    <div id="leCoudeRight" class="baseButton leCoudeRight" onclick="clickPortal('leCoudeRight')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
+    <div id="redFishRoomLeft" class="baseButton redFishRoomLeft" onclick="clickPortal('redFishRoomLeft')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
+    <div id="redTowerTopLeft" class="baseButton redTowerTopLeft" onclick="clickPortal('redTowerTopLeft')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
+    <div id="caterpillarRoomTopRight" class="baseButton caterpillarRoomTopRight" onclick="clickPortal('caterpillarRoomTopRight')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
+    <div id="redBrinstarElevator" class="baseButtonRot redBrinstarElevator" onclick="clickPortal('redBrinstarElevator')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
+    <div id="eastTunnelRight" class="baseButton eastTunnelRight" onclick="clickPortal('eastTunnelRight')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
+    <div id="eastTunnelTopRight" class="baseButton eastTunnelTopRight" onclick="clickPortal('eastTunnelTopRight')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
+    <div id="glassTunnelTop" class="baseButtonRot glassTunnelTop" onclick="clickPortal('glassTunnelTop')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
+    <div id="statuesHallwayLeft" class="baseButton statuesHallwayLeft" onclick="clickPortal('statuesHallwayLeft')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)"></div>
+  </div>
 </div>

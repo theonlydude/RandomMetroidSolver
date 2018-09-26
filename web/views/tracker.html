@@ -95,7 +95,7 @@ img {
     top: 2%;
     left: 11%;
 }
-.titleArea {
+.titleItem {
     position: absolute;
     z-index: 2;
     width: 4%;
@@ -923,7 +923,7 @@ window.onload = function(){
 
   // display the help on first connection to the tracker
 {{
-  if session.tracker["area"]["firstTime"] == True:
+  if "firstTime" in session.tracker["area"] and session.tracker["area"]["firstTime"] == True:
     session.tracker["area"]["firstTime"] = False
 }}
     startTheTour(0);

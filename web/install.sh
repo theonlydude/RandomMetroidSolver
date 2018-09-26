@@ -49,3 +49,5 @@
 [ -L ~/web2py/applications/solver/static/images/repeat.svg ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/repeat.svg ~/web2py/applications/solver/static/images/repeat.svg
 [ -L ~/web2py/applications/solver/static/images/warning.svg ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/warning.svg ~/web2py/applications/solver/static/images/warning.svg
 [ -L ~/web2py/applications/solver/static/images/play.svg ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/play.svg ~/web2py/applications/solver/static/images/play.svg
+[ -L ~/web2py/applications/solver/static/images/portal.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/portal.png ~/web2py/applications/solver/static/images/portal.png
+[ -L ~/web2py/applications/solver/static/images/marker_visited.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/marker_visited.png ~/web2py/applications/solver/static/images/marker_visited.png

@@ -15,11 +15,15 @@ extend 'layout.html'
 <title>Super Metroid VARIA Randomizer Tracker</title>
 
 <style>
+/* tutorial popup bigger for the tracker*/
+.popover {
+    max-width: 70%;
+    max-height: 50%;
+    overflow-y: scroll;
+}
+
 .main-container {
     background-color: #000;
-}
-td {
-    border-bottom: 1px solid #000;
 }
 .ten {
     width: 10%;
@@ -40,6 +44,18 @@ img {
     max-width: 100%;
     height: auto;
 }
+.solverPopup {
+    background-color: #ffffff;
+    position: absolute;
+    z-index: 4;
+    width: 40%;
+    height: auto;
+    top: 2em;
+    left: 30%;
+    display: none;
+    padding: 0.5%;
+    border: 2px solid gray;
+}
 .cloud {
     position: absolute;
     z-index: 2;
@@ -47,24 +63,6 @@ img {
     height: 4%;
     top: 2%;
     left: 0%;
-}
-.repeat {
-    cursor: pointer;
-    position: absolute;
-    z-index: 2;
-    width: 4%;
-    height: 4%;
-    top: 2%;
-    left: 6.5%;
-}
-.bin {
-    cursor: pointer;
-    position: absolute;
-    z-index: 2;
-    width: 4%;
-    height: 4%;
-    top: 2%;
-    left: 11%;
 }
 .help {
     cursor: pointer;
@@ -74,6 +72,67 @@ img {
     height: 4%;
     top: 2%;
     left: 15.5%;
+}
+.titleArea {
+    position: absolute;
+    z-index: 2;
+    width: 4%;
+    height: 4%;
+    top: 2%;
+    left: 0%;
+}
+.repeatArea {
+    cursor: pointer;
+    position: absolute;
+    z-index: 2;
+    width: 4%;
+    height: 4%;
+    top: 2%;
+    left: 6.5%;
+}
+.binArea {
+    cursor: pointer;
+    position: absolute;
+    z-index: 2;
+    width: 4%;
+    height: 4%;
+    top: 2%;
+    left: 11%;
+}
+.titleArea {
+    position: absolute;
+    z-index: 2;
+    width: 4%;
+    height: 4%;
+    top: 6.5%;
+    left: 0%;
+}
+.startItem {
+    cursor: pointer;
+    position: absolute;
+    z-index: 2;
+    width: 4%;
+    height: 4%;
+    top: 6.5%;
+    left: 2%;
+}
+.repeatItem {
+    cursor: pointer;
+    position: absolute;
+    z-index: 2;
+    width: 4%;
+    height: 4%;
+    top: 6.5%;
+    left: 6.5%;
+}
+.binItem {
+    cursor: pointer;
+    position: absolute;
+    z-index: 2;
+    width: 4%;
+    height: 4%;
+    top: 6.5%;
+    left: 11%;
 }
 .baseButton {
     cursor: pointer;
@@ -1095,6 +1154,15 @@ function mouseOut(elem) {
   $(elem).css({"top": newTop+"%", "left": newLeft+"%"});
 }
 
+function displayPopup() {
+  // display popup
+  document.getElementById("solverPopup").style.display = "block";
+}
+
+function hidePopup() {
+  document.getElementById("solverPopup").style.display = "none";
+}
+
 function initSolver() {
   console.log("initSolver");
   // check that romJson is set
@@ -1107,24 +1175,27 @@ function initSolver() {
 
   // prepare parameters for WS
   ajaxCallItem({action: "init", romJson: value, preset: document.getElementById("preset").value}, "download", ajaxOkGetItem);
+
+  hidePopup();
 }
 
 function clickLoc(elem) {
   // check that lock is in the available list
-
-  // call webservice
-  // use ok func which change class to selected
-  ajaxCallItem({action: "add", locName: elem.id}, "upload", ajaxOkGetItem);
+  var locName = elem.id;
+  if("state" in locsInfo[locName] && locsInfo[locName]["state"] == "available") {
+    // call webservice
+    ajaxCallItem({action: "add", locName: locName}, "upload", ajaxOkGetItem);
+  }
 }
 
 function deleteLoc() {
   // call webservice
-  // use ok func which change class of deleted loc
+  ajaxCallItem({action: "remove"}, "upload", ajaxOkGetItem);
 }
 
 function clearLocs() {
   //call webservice
-  // use ok func to reset all locs
+  ajaxCallItem({action: "clear"}, "upload", ajaxOkGetItem);
 }
 
 function ajaxCallItem(dataDict, msg, okFunc=ajaxOkJSON) {
@@ -1190,7 +1261,7 @@ function startTheTour(step=-1) {
     steps: [{
       element: "#help",
       title: "Tutorial",
-      content: "Welcome to the VARIA Area Tracker.<br/><p>This tracker allows you to track the connections between the areas portals.<br/>To use it, click on a portal, it'll highlight it, then click on a second portal, it'll draw a line between the two portals.<br/>You can delete the latest added line with the <img src=\"/solver/static/images/repeat.svg\" alt=\"Cancel Last\" style=\"width: 32px\"> button and all of them with the <img src=\"/solver/static/images/bin.svg\" alt=\"Remove all\" style=\"width: 32px\"> button.<br/>The tracker features an auto save functionnality, so you can do your area seed in multiple seatings.<br/>The different status icons of the auto save:<ul><li><img src=\"/solver/static/images/checkmark.svg\" style=\"width: 32px\"> Save ok</li><li><img src=\"/solver/static/images/cloud_upload.png\" style=\"width: 32px\"> Upload in progress</li><li><img src=\"/solver/static/images/cloud_download.svg\" style=\"width: 32px\"> Download in progress</li><li><img src=\"/solver/static/images/warning.svg\" style=\"width: 32px\"> Something wrong happened</li></ul></p><p><a href='https://dryicons.com/icon-packs/stylistica-icons-set'>Icons by Dryicons</a></p>"
+      content: "<h2>Welcome to the VARIA Area & Item Tracker.</h2><h4>Area Tracker</h4><p>The Area Tracker allows you to track the connections between the areas portals.<br/>To use it, click on a portal <img src=\"/solver/static/images/portal.png\" alt=\"Portal\" style=\"width: 32px\">, it'll highlight it, then click on a second portal, it'll draw a line between the two portals.<br/>You can delete the latest added line with the <img src=\"/solver/static/images/repeat.svg\" alt=\"Cancel Last\" style=\"width: 32px\"> button and all of them with the <img src=\"/solver/static/images/bin.svg\" alt=\"Remove all\" style=\"width: 32px\"> button.<br/><h4>Item Tracker</h4><p>The Item Tracker allows you to use the Solver in interactive mode.<br/>To use it, click on the <img src=\"/solver/static/images/play.svg\" alt=\"Start\" style=\"width: 32px\"> button to upload your ROM and choose your preset (like on the Solver page).<br/>Then the available locations will be displayed on the map, click on them after you've collected the item of the location in the game, it'll update the next available locations.<br/>The color of the icon on the available locations matchs the difficulty to reach the location:<ul><li><img src=\"/solver/static/images/marker_easy.png\" alt=\"easy\" style=\"width: 32px\">: easy</li><li><img src=\"/solver/static/images/marker_medium.png\" alt=\"medium\" style=\"width: 32px\">: medium</li><li><img src=\"/solver/static/images/marker_hard.png\" alt=\"hard\" style=\"width: 32px\">: hard</li><li><img src=\"/solver/static/images/marker_harder.png\" alt=\"harder\" style=\"width: 32px\">: very hard</li><li><img src=\"/solver/static/images/marker_hardcore.png\" alt=\"hardcore\" style=\"width: 32px\">: hardcore</li><li><img src=\"/solver/static/images/marker_mania.png\" alt=\"mania\" style=\"width: 32px\">: mania</li></ul>When a location has been visited its icon change to this: .<br/>When overing the mouse cursor on an available or visited location a tooltip will be displayed with various information on the location.</p><h4>Auto Save</h4><p>Both trackers feature an auto save functionnality, so you can do your seed in multiple seatings.<br/>The different status icons of the auto save:<ul><li><img src=\"/solver/static/images/checkmark.svg\" style=\"width: 32px\"> Save ok</li><li><img src=\"/solver/static/images/cloud_upload.png\" style=\"width: 32px\"> Upload in progress</li><li><img src=\"/solver/static/images/cloud_download.svg\" style=\"width: 32px\"> Download in progress</li><li><img src=\"/solver/static/images/warning.svg\" style=\"width: 32px\"> Something wrong happened (try reloading the page)</li></ul></p><p>You can display this help again by clicking on the <img src=\"/solver/static/images/help.svg\" alt=\"help\" style=\"width: 32px\"> button</p><p><h4>Thanks to</h4><ul><li>Location icons from Alli_Cat's <a href='https://github.com/allibear17/Super-Metroid-Location-Tracker'>Location Tracker</a></li><li>Action icons from <a href='https://dryicons.com/icon-packs/stylistica-icons-set'>Dryicons</a></li></ul></p>"
     }]
   });
 
@@ -1219,10 +1290,24 @@ function startTheTour(step=-1) {
 
 <div class="main">
 
-  <input id="uploadFile" name="uploadFile" type="file"/>
-  <input id="romJson" name="romJson" style="display:none" type="text"/>
-  {{=SELECT(OPTGROUP(*stdPresets, **dict(_label="Standard presets")), OPTGROUP(*comPresets, **dict(_label="Community presets")), **dict(_name="preset", _id="preset", value=session.tracker["item"]["preset"], _class="filldropdown chzn-select"))}}
-  <button type="button" onclick="initSolver()">Init</button>
+  <div id="solverPopup" class="solverPopup">
+    <table class="full">
+      <colgroup><col class="half" /><col class="half" /></colgroup>
+      <tr>
+	<td>Randomized Super Metroid ROM: </td>
+	<td><input id="uploadFile" name="uploadFile" type="file"/></td>
+      </tr>
+      <tr>
+	<td>Preset:</td>
+	<td>{{=SELECT(OPTGROUP(*stdPresets, **dict(_label="Standard presets")), OPTGROUP(*comPresets, **dict(_label="Community presets")), **dict(_name="preset", _id="preset", value=session.tracker["item"]["preset"], _class="filldropdown chzn-select"))}}</td>
+      </tr>
+      <tr>
+	<td><button type="button" onclick="initSolver()" class="full">Init</button></td>
+	<td><button type="button" onclick="hidePopup()" class="full">Cancel</button></td>
+      </tr>
+    </table>
+    <input id="romJson" name="romJson" style="display:none" type="text"/>
+  </div>
 
   <div class="map_container">
     <img id="map" src="/solver/static/images/area_map.png" class="center">
@@ -1356,9 +1441,17 @@ function startTheTour(step=-1) {
     <div id="SuperMissilepinkMaridia" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)"></div>
     <div id="MissileDraygon" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)"></div>
 
-    <div id="repeat" class="repeat"><img src="/solver/static/images/repeat.svg" alt="Cancel Last" onclick="deleteLine()" data-toggle="tooltip" title="Remove last added"></div>
-    <div id="bin" class="bin"><img src="/solver/static/images/bin.svg" alt="Clear" onclick="clearLines()" data-toggle="tooltip" title="Remove all"></div>
+    <div id="titleArea" class="titleArea">Area</div>
+    <div id="repeatArea" class="repeatArea"><img src="/solver/static/images/repeat.svg" alt="Cancel Last" onclick="deleteLine()" data-toggle="tooltip" title="Remove last added"></div>
+    <div id="binArea" class="binArea"><img src="/solver/static/images/bin.svg" alt="Clear" onclick="clearLines()" data-toggle="tooltip" title="Remove all"></div>
+
+    <div id="titleItem" class="titleItem">Item</div>
+    <div id="startItem" class="startItem"><img src="/solver/static/images/play.svg" alt="Start" onclick="displayPopup()" data-toggle="tooltip" title="Start the Solver"></div>
+    <div id="repeatItem" class="repeatItem"><img src="/solver/static/images/repeat.svg" alt="Cancel Last" onclick="deleteLoc()" data-toggle="tooltip" title="Remove last added"></div>
+    <div id="binItem" class="binItem"><img src="/solver/static/images/bin.svg" alt="Clear" onclick="clearLocs()" data-toggle="tooltip" title="Remove all"></div>
+
     <div id="help" class="help"><img src="/solver/static/images/help.svg" alt="Help" onclick="startTheTour(0)" data-toggle="tooltip" title="Display the help"></div>
+
     <div id="cloud" class="cloud">
       <img id="checkmark" src="/solver/static/images/checkmark.svg" alt="checkmark" data-toggle="tooltip" title="Web service OK">
       <img id="warning" src="/solver/static/images/warning.svg" alt="warning" style="display: none" data-toggle="tooltip" title="Web service ERROR">

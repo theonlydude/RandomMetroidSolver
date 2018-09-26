@@ -48,3 +48,4 @@
 [ -L ~/web2py/applications/solver/static/images/help.svg ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/help.svg ~/web2py/applications/solver/static/images/help.svg
 [ -L ~/web2py/applications/solver/static/images/repeat.svg ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/repeat.svg ~/web2py/applications/solver/static/images/repeat.svg
 [ -L ~/web2py/applications/solver/static/images/warning.svg ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/warning.svg ~/web2py/applications/solver/static/images/warning.svg
+[ -L ~/web2py/applications/solver/static/images/play.svg ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/play.svg ~/web2py/applications/solver/static/images/play.svg

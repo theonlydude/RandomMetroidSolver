@@ -126,8 +126,8 @@ accessPoints = [
                    "screen": (0x5, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
        entryInfo = {'SamusX':0x134, 'SamusY':0x88},
        shortName="LN\\THREE MUSK."),
-    # Warehouse
-    AccessPoint('Warehouse Zeela Room Left', 'Warehouse', {},
+    # Kraid
+    AccessPoint('Warehouse Zeela Room Left', 'Kraid', {},
        roomInfo = {'RoomPtr': 0xa471, "area": 0x1},
        exitInfo = {'DoorPtr': 0x913e, 'direction': 0x5, "cap": (0x2e, 0x6), "bitFlag": 0x0,
                    "screen": (0x2, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0xbd3f},

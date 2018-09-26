@@ -228,8 +228,8 @@ locations = [
 },
 {
     'Area': "Brinstar",
-    'GraphArea': "Warehouse",
-    'SolveArea': "Warehouse",
+    'GraphArea': "Kraid",
+    'SolveArea': "Kraid",
     'Name': "Energy Tank, Kraid",
     'Class': "Major",
     'CanHidden': True,
@@ -243,8 +243,8 @@ locations = [
 },
 {
     'Area': "Brinstar",
-    'GraphArea': "Warehouse",
-    'SolveArea': "Warehouse",
+    'GraphArea': "Kraid",
+    'SolveArea': "Kraid",
     'Name': "Varia Suit",
     'Class': "Major",
     'CanHidden': True,
@@ -1169,8 +1169,8 @@ locations = [
 },
 {
     'Area': "Brinstar",
-    'GraphArea': "Warehouse",
-    'SolveArea': "Warehouse",
+    'GraphArea': "Kraid",
+    'SolveArea': "Kraid",
     'Name': "Missile (Kraid)",
     'Class': "Minor",
     'CanHidden': True,

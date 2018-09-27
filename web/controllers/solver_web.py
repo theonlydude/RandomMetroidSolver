@@ -1229,7 +1229,8 @@ def returnState(state):
     if len(session.tracker["item"]["state"]) > 0:
         #print("state returned to frontend: availWeb {}, visWeb {}".format(session.tracker["item"]["state"]["availableLocationsWeb"], session.tracker["item"]["state"]["visitedLocationsWeb"]))
         return json.dumps({"availableLocations": session.tracker["item"]["state"]["availableLocationsWeb"],
-                           "visitedLocations": session.tracker["item"]["state"]["visitedLocationsWeb"]})
+                           "visitedLocations": session.tracker["item"]["state"]["visitedLocationsWeb"],
+                           "areaRando": session.tracker["item"]["state"]["areaRando"]})
     else:
         raiseHttp(200, "OK", True)
 

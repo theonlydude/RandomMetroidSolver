@@ -795,6 +795,30 @@ function clickPortal(elemId) {
   }
 }
 
+function addVanillaTransitions() {
+  var vanillaTransitions = [
+    ['lowerMushroomsLeft', 'greenBrinstarElevatorRight'],
+    ['morphBallRoomLeft', 'greenHillZoneTopRight'],
+    ['moatRight', 'westOceanLeft'],
+    ['keyhunterRoomBottom', 'redBrinstarElevator'],
+    ['noobBridgeRight', 'redTowerTopLeft'],
+    ['crabMazeLeft', 'leCoudeRight'],
+    ['kronicBoostRoomBottomLeft', 'lavaDiveRight'],
+    ['threeMuskateersRoomLeft', 'singleChamberTopRight'],
+    ['warehouseEntranceLeft', 'eastTunnelRight'],
+    ['eastTunnelTopRight', 'crabHoleBottomLeft'],
+    ['caterpillarRoomTopRight', 'redFishRoomLeft'],
+    ['glassTunnelTop', 'mainStreetBottom'],
+    ['greenPiratesShaftBottomRight', 'statuesHallwayLeft'],
+    ['warehouseEntranceRight', 'warehouseZeelaRoomLeft']
+  ]
+
+  for(var i=0; i<vanillaTransitions.length; i++) {
+    addLine(vanillaTransitions[i][0], vanillaTransitions[i][1]);
+    ajaxCallArea({action: "add", startPoint: vanillaTransitions[i][0], endPoint: vanillaTransitions[i][1]}, "upload");
+  }
+}
+
 function addLine(startPoint, endPoint) {
   var startPointElem = document.getElementById(startPoint);
   var endPointElem = document.getElementById(endPoint);
@@ -1182,6 +1206,8 @@ function hidePopup() {
   document.getElementById("solverPopup").style.display = "none";
 }
 
+var init = false;
+
 function initSolver() {
   console.log("initSolver");
   // check that romJson is set
@@ -1194,6 +1220,8 @@ function initSolver() {
 
   // reset everything
   resetLocsInfo();
+
+  init = true;
 
   // prepare parameters for WS
   ajaxCallItem({action: "init", romJson: value, preset: document.getElementById("preset").value}, "download", ajaxOkGetItem);
@@ -1308,6 +1336,14 @@ function ajaxOkGetItem(jsonData) {
       var tooltip = locData["name"]+": "+locData["item"]+"<br>Techniques: "+locData["knows"]+"<br>Items: "+locData["items"];
       $("#"+locName+'[data-toggle="tooltip"]').attr("title", tooltip).tooltip('fixTitle');
     }
+  }
+  if(init == true) {
+    if("areaRando" in jsonData) {
+      if(jsonData["areaRando"] == false && linesSeq.length == 0) {
+        addVanillaTransitions();
+      }
+    }
+    init = false;
   }
 
   setWSIcon("checkmark");

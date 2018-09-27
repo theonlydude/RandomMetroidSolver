@@ -367,7 +367,10 @@ class InteractiveSolver(CommonSolver):
             loc['Unpickup']()
 
         # access point
-        self.lastLoc = self.visitedLocations[-1]["accessPoint"]
+        if len(self.visitedLocations) == 0:
+            self.lastLoc = "Landing Site"
+        else:
+            self.lastLoc = self.visitedLocations[-1]["accessPoint"]
 
         # item
         item = loc["itemName"]

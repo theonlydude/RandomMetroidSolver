@@ -18,7 +18,7 @@ extend 'layout.html'
 /* tutorial popup bigger for the tracker*/
 .popover {
     max-width: 70%;
-    max-height: 70%;
+    max-height: 95vh;
     overflow-y: scroll;
 }
 .main-container {
@@ -297,22 +297,22 @@ img {
 .marker_visited_mania {
     background-image: url("/solver/static/images/marker_visited.png");
 }
-.marker_easy {
+.marker_available_easy {
     background-image: url("/solver/static/images/marker_easy.png");
 }
-.marker_medium {
+.marker_available_medium {
     background-image: url("/solver/static/images/marker_medium.png");
 }
-.marker_hard {
+.marker_available_hard {
     background-image: url("/solver/static/images/marker_hard.png");
 }
-.marker_harder {
+.marker_available_harder {
     background-image: url("/solver/static/images/marker_harder.png");
 }
-.marker_hardcore {
+.marker_available_hardcore {
     background-image: url("/solver/static/images/marker_hardcore.png");
 }
-.marker_mania {
+.marker_available_mania {
     background-image: url("/solver/static/images/marker_mania.png");
 }
 .baseLoc {
@@ -1120,17 +1120,29 @@ var locsInfo = {
 };
 
 function mouseOver(elem) {
-  elem.className = elem.className.replace("baseLoc", "baseLocOver");
-  elem.className = elem.className.replace("marker_", "marker_over_");
+  $(elem).removeClass("baseLoc");
+  $(elem).addClass("baseLocOver");
 
-  var newTop = locsInfo[elem.id].top - 0.75;
-  var newLeft = locsInfo[elem.id].left - 0.5;
+  var locName = elem.id;
+  var className = "marker_"+locsInfo[locName]["state"]+"_"+locsInfo[locName]["difficulty"];
+  var classNameOver = "marker_over_"+locsInfo[locName]["difficulty"];
+  $(elem).removeClass("className");
+  $(elem).addClass("classNameOver");
+
+  var newTop = locsInfo[locName].top - 0.75;
+  var newLeft = locsInfo[locName].left - 0.5;
   $(elem).css({"top": newTop+"%", "left": newLeft+"%"});
 }
 
 function mouseOut(elem) {
-  elem.className = elem.className.replace("baseLocOver", "baseLoc");
-  elem.className = elem.className.replace("marker_over_", "marker_");
+  $(elem).removeClass("baseLocOver");
+  $(elem).addClass("baseLoc");
+
+  var locName = elem.id;
+  var className = "marker_"+locsInfo[locName]["state"]+"_"+locsInfo[locName]["difficulty"];
+  var classNameOver = "marker_over_"+locsInfo[locName]["difficulty"];
+  $(elem).removeClass("classNameOver");
+  $(elem).addClass("className");
 
   var newTop = locsInfo[elem.id].top;
   var newLeft = locsInfo[elem.id].left;
@@ -1156,6 +1168,9 @@ function initSolver() {
     return;
   }
 
+  // reset everything
+  resetLocsInfo();
+
   // prepare parameters for WS
   ajaxCallItem({action: "init", romJson: value, preset: document.getElementById("preset").value}, "download", ajaxOkGetItem);
 
@@ -1172,12 +1187,27 @@ function clickLoc(elem) {
 }
 
 function deleteLoc() {
-  // call webservice
+  // no need to update the loc info and css as it will go from visited to available
   ajaxCallItem({action: "remove"}, "upload", ajaxOkGetItem);
 }
 
+function resetLocsInfo() {
+  // remove info and reset css
+  for(var locName in locsInfo) {
+    for(var key in ["state", "difficulty", "tooltip"]) {
+      if(key in locsInfo[locName]) {
+        delete locsInfo[locName][key];
+      }
+    }
+    $("#"+locName).attr("class", "baseLoc");
+    $("#"+locName+'[data-toggle="tooltip"]').attr("title", "");
+  }
+}
+
 function clearLocs() {
-  //call webservice
+  resetLocsInfo();
+
+  // reset the state server side
   ajaxCallItem({action: "clear"}, "upload", ajaxOkGetItem);
 }
 
@@ -1211,7 +1241,7 @@ function ajaxOkGetItem(jsonData) {
       locsInfo[locName]["difficulty"] = locData["difficulty"];
       locsInfo[locName]["tooltip"] = {name: locName, item: "?", items: locData["items"], knows: locData["knows"]};
 
-      $("#"+locName).attr("class", "baseLoc marker_"+locData["difficulty"]);
+      $("#"+locName).attr("class", "baseLoc marker_available_"+locData["difficulty"]);
       $("#"+locName+'[data-toggle="tooltip"]').attr("title", locName+": ?");
     }
   }

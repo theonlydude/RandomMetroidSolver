@@ -50,4 +50,9 @@
 [ -L ~/web2py/applications/solver/static/images/warning.svg ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/warning.svg ~/web2py/applications/solver/static/images/warning.svg
 [ -L ~/web2py/applications/solver/static/images/play.svg ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/play.svg ~/web2py/applications/solver/static/images/play.svg
 [ -L ~/web2py/applications/solver/static/images/portal.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/portal.png ~/web2py/applications/solver/static/images/portal.png
-[ -L ~/web2py/applications/solver/static/images/marker_visited.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/marker_visited.png ~/web2py/applications/solver/static/images/marker_visited.png
+[ -L ~/web2py/applications/solver/static/images/marker_visited_easy.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/marker_visited_easy.png ~/web2py/applications/solver/static/images/marker_visited_easy.png
+[ -L ~/web2py/applications/solver/static/images/marker_visited_medium.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/marker_visited_medium.png ~/web2py/applications/solver/static/images/marker_visited_medium.png
+[ -L ~/web2py/applications/solver/static/images/marker_visited_hard.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/marker_visited_hard.png ~/web2py/applications/solver/static/images/marker_visited_hard.png
+[ -L ~/web2py/applications/solver/static/images/marker_visited_harder.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/marker_visited_harder.png ~/web2py/applications/solver/static/images/marker_visited_harder.png
+[ -L ~/web2py/applications/solver/static/images/marker_visited_hardcore.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/marker_visited_hardcore.png ~/web2py/applications/solver/static/images/marker_visited_hardcore.png
+[ -L ~/web2py/applications/solver/static/images/marker_visited_mania.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/marker_visited_mania.png ~/web2py/applications/solver/static/images/marker_visited_mania.png

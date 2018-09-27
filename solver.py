@@ -303,10 +303,7 @@ class InteractiveSolver(CommonSolver):
 
         self.loadRom(rom, interactive=True)
 
-        self.collectedItems = []
-        self.visitedLocations = []
-        self.lastLoc = 'Landing Site'
-        self.majorLocations = self.locations[:]
+        self.clear()
 
         # compute new available locations
         self.computeLocationsDifficulty(self.majorLocations)
@@ -327,7 +324,7 @@ class InteractiveSolver(CommonSolver):
         self.areaGraph = AccessGraph(accessPoints, self.graphTransitions)
 
         if action == 'clear':
-            self.clear()
+            self.clear(True)
         else:
             # add already collected items to smbm
             self.smbm.addItems(self.collectedItems)
@@ -359,6 +356,9 @@ class InteractiveSolver(CommonSolver):
 
     def cancelLast(self):
         # loc
+        if len(self.visitedLocations) == 0:
+            return
+
         loc = self.visitedLocations.pop()
         self.majorLocations.append(loc)
 
@@ -380,12 +380,17 @@ class InteractiveSolver(CommonSolver):
             self.smbm.removeItem(item)
             self.collectedItems.pop()
 
-    def clear(self):
+    def clear(self, reload=False):
         self.collectedItems = []
         self.visitedLocations = []
         self.lastLoc = 'Landing Site'
-        self.majorLocations = self.locations[:]
+        self.majorLocations = self.locations
+        if reload == True:
+            for loc in self.majorLocations:
+                if "difficulty" in loc:
+                    del loc["difficulty"]
         Bosses.reset()
+        self.smbm.resetItems()
 
 class StandardSolver(CommonSolver):
     # given a rom and parameters returns the estimated difficulty

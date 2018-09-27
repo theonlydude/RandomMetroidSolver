@@ -787,11 +787,11 @@ function addLine(startPoint, endPoint) {
                              dropShadow: true,
                              startPlugColor: colors[nextColor],
                              endPlugColor: colors[nextColor],
-                             size: 6,
+                             size: 4,
                              gradient: true,
                              outlineColor: 'rgb(255, 255, 255)',
                              outline: true,
-                             outlineSize: 0.15});
+                             outlineSize: 0.10});
 
   nextColor += 1;
   $("#"+startPoint).removeClass("addBorder");
@@ -1119,6 +1119,8 @@ var locsInfo = {
   MissileDraygon: {left: 97.65, top: 44.7}
 };
 
+var curOverElem = null;
+
 function mouseOver(elem) {
   $(elem).removeClass("baseLoc");
   $(elem).addClass("baseLocOver");
@@ -1126,12 +1128,14 @@ function mouseOver(elem) {
   var locName = elem.id;
   var className = "marker_"+locsInfo[locName]["state"]+"_"+locsInfo[locName]["difficulty"];
   var classNameOver = "marker_over_"+locsInfo[locName]["difficulty"];
-  $(elem).removeClass("className");
-  $(elem).addClass("classNameOver");
+  $(elem).removeClass(className);
+  $(elem).addClass(classNameOver);
 
   var newTop = locsInfo[locName].top - 0.75;
   var newLeft = locsInfo[locName].left - 0.5;
   $(elem).css({"top": newTop+"%", "left": newLeft+"%"});
+
+  curOverElem = elem;
 }
 
 function mouseOut(elem) {
@@ -1141,12 +1145,14 @@ function mouseOut(elem) {
   var locName = elem.id;
   var className = "marker_"+locsInfo[locName]["state"]+"_"+locsInfo[locName]["difficulty"];
   var classNameOver = "marker_over_"+locsInfo[locName]["difficulty"];
-  $(elem).removeClass("classNameOver");
-  $(elem).addClass("className");
+  $(elem).removeClass(classNameOver);
+  $(elem).addClass(className);
 
   var newTop = locsInfo[elem.id].top;
   var newLeft = locsInfo[elem.id].left;
   $(elem).css({"top": newTop+"%", "left": newLeft+"%"});
+
+  curOverElem = null;
 }
 
 function displayPopup() {
@@ -1183,11 +1189,17 @@ function clickLoc(elem) {
   if("state" in locsInfo[locName] && locsInfo[locName]["state"] == "available") {
     // call webservice
     ajaxCallItem({action: "add", locName: locName}, "upload", ajaxOkGetItem);
+
+    if(curOverElem !=  null) {
+      mouseOut(curOverElem);
+    }
   }
 }
 
 function deleteLoc() {
-  // no need to update the loc info and css as it will go from visited to available
+  // reset everything
+  resetLocsInfo();
+
   ajaxCallItem({action: "remove"}, "upload", ajaxOkGetItem);
 }
 
@@ -1239,10 +1251,10 @@ function ajaxOkGetItem(jsonData) {
       var locData = jsonData["availableLocations"][locName];
       locsInfo[locName]["state"] = "available";
       locsInfo[locName]["difficulty"] = locData["difficulty"];
-      locsInfo[locName]["tooltip"] = {name: locName, item: "?", items: locData["items"], knows: locData["knows"]};
+      locsInfo[locName]["tooltip"] = {name: locData["name"], item: "?", items: locData["items"], knows: locData["knows"]};
 
       $("#"+locName).attr("class", "baseLoc marker_available_"+locData["difficulty"]);
-      $("#"+locName+'[data-toggle="tooltip"]').attr("title", locName+": ?");
+      $("#"+locName+'[data-toggle="tooltip"]').attr("title", locData["name"]+": ?");
     }
   }
   if("visitedLocations" in jsonData) {
@@ -1254,7 +1266,7 @@ function ajaxOkGetItem(jsonData) {
       locsInfo[locName]["tooltip"] = {name: locName, item: locData["item"], items: locData["items"], knows: locData["knows"]};
 
       $("#"+locName).attr("class", "baseLoc marker_visited_"+locData["difficulty"]);
-      $("#"+locName+'[data-toggle="tooltip"]').attr("title", locName+": "+locData["item"]);
+      $("#"+locName+'[data-toggle="tooltip"]').attr("title", locData["name"]+": "+locData["item"]);
     }
   }
 

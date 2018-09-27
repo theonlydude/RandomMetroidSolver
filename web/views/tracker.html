@@ -19,6 +19,9 @@ extend 'layout.html'
 .tooltip-inner {
     text-align: left;
 }
+.tooltip {
+    position: fixed;
+}
 /* tutorial popup bigger for the tracker*/
 .popover {
     max-width: 70%;
@@ -50,80 +53,86 @@ img {
 .cloud {
     position: absolute;
     z-index: 2;
-    width: 3%;
-    height: 3%;
-    top: 1%;
-    left: 0%;
+    width: 2.5%;
+    height: 3.75%;
+    top: 0.5%;
+    left: 0.1%;
 }
 .help {
     cursor: pointer;
     position: absolute;
     z-index: 2;
-    width: 3%;
-    height: 3%;
-    top: 1%;
-    left: 15.5%;
+    width: 2.5%;
+    height: 3.75%;
+    top: 0.5%;
+    left: 2.75%;
 }
 .titleArea {
     position: absolute;
     z-index: 2;
     width: 10%;
-    height: 3%;
+    height: 3.75%;
     top: 1%;
-    left: 0%;
+    left: 6%;
+    color: #ffffff;
+    font-size: 1.25vw;
+    font-weight: bold;
 }
 .repeatArea {
     cursor: pointer;
     position: absolute;
     z-index: 2;
-    width: 3%;
-    height: 3%;
-    top: 1%;
-    left: 6.5%;
+    width: 2.5%;
+    height: 3.75%;
+    top: 0.5%;
+    left: 13.25%;
 }
 .binArea {
     cursor: pointer;
     position: absolute;
     z-index: 2;
-    width: 3%;
-    height: 3%;
-    top: 1%;
-    left: 11%;
+    width: 2.5%;
+    height: 3.75%;
+    top: 0.5%;
+    left: 16%;
 }
 .titleItem {
     position: absolute;
     z-index: 2;
     width: 10%;
-    height: 3%;
-    top: 6.5%;
-    left: 0%;
+    height: 3.75%;
+    top: 5.25%;
+    left: 6%;
+    color: #ffffff;
+    font-size: 1.25vw;
+    font-weight: bold;
 }
 .startItem {
     cursor: pointer;
     position: absolute;
     z-index: 2;
-    width: 3%;
-    height: 3%;
-    top: 6.5%;
-    left: 2%;
+    width: 2.5%;
+    height: 3.75%;
+    top: 4.75%;
+    left: 10.5%;
 }
 .repeatItem {
     cursor: pointer;
     position: absolute;
     z-index: 2;
-    width: 3%;
-    height: 3%;
-    top: 6.5%;
-    left: 6.5%;
+    width: 2.5%;
+    height: 3.75%;
+    top: 4.75%;
+    left: 13.25%;
 }
 .binItem {
     cursor: pointer;
     position: absolute;
     z-index: 2;
-    width: 3%;
-    height: 3%;
-    top: 6.5%;
-    left: 11%;
+    width: 2.5%;
+    height: 3.75%;
+    top: 4.75%;
+    left: 16%;
 }
 .baseButton {
     cursor: pointer;
@@ -133,8 +142,16 @@ img {
     height: 2.7472527%;
 }
 .log {
-    top: 15%;
-    left: 2%;
+    top: 9.5%;
+    left: 0%;
+    position: absolute;
+    width: 18.5%;
+    height: 18%;
+}
+.logText {
+    width:100%;
+    height:100%;
+    font-size: 0.85vw;
 }
 .baseButtonRot {
     cursor: pointer;
@@ -1180,6 +1197,8 @@ function initSolver() {
   ajaxCallItem({action: "init", romJson: value, preset: document.getElementById("preset").value}, "download", ajaxOkGetItem);
 
   hidePopup();
+
+  addLog("start interactive solver");
 }
 
 function clickLoc(elem) {
@@ -1192,10 +1211,14 @@ function clickLoc(elem) {
     if(curOverElem !=  null) {
       mouseOut(curOverElem);
     }
+
+    addLog(locsInfo[locName]["tooltip"]["item"]+"@"+locsInfo[locName]["tooltip"]["name"]);
   }
 }
 
 function deleteLoc() {
+  addLog("delete last visited location");
+
   // reset everything
   resetLocsInfo();
 
@@ -1220,6 +1243,20 @@ function clearLocs() {
 
   // reset the state server side
   ajaxCallItem({action: "clear"}, "upload", ajaxOkGetItem);
+
+  addLog("Clearing the visited locations");
+}
+
+function addLog(msg) {
+  // append text
+  var ta = $("#logText");
+
+  ta.val(function(i, text) {
+    return text + "\n" + msg;
+  });
+
+  // scroll to display last added line
+  ta.scrollTop(ta[0].scrollHeight);
 }
 
 function ajaxCallItem(dataDict, msg, okFunc=ajaxOkJSON) {
@@ -1250,11 +1287,11 @@ function ajaxOkGetItem(jsonData) {
       var locData = jsonData["availableLocations"][locName];
       locsInfo[locName]["state"] = "available";
       locsInfo[locName]["difficulty"] = locData["difficulty"];
-      locsInfo[locName]["tooltip"] = {name: locData["name"], item: "?", items: locData["items"], knows: locData["knows"]};
+      locsInfo[locName]["tooltip"] = {name: locData["name"], item: locData["item"], items: locData["items"], knows: locData["knows"]};
 
       $("#"+locName).attr("class", "baseLoc marker_available_"+locData["difficulty"]);
       var tooltip = locData["name"]+": ?<br>Techniques: "+locData["knows"]+"<br>Items: "+locData["items"];
-      $("#"+locName+'[data-toggle="tooltip"]').attr("title", tooltip);
+      $("#"+locName+'[data-toggle="tooltip"]').attr("title", tooltip).tooltip('fixTitle');
     }
   }
   if("visitedLocations" in jsonData) {
@@ -1267,12 +1304,9 @@ function ajaxOkGetItem(jsonData) {
 
       $("#"+locName).attr("class", "baseLoc marker_visited_"+locData["difficulty"]);
       var tooltip = locData["name"]+": "+locData["item"]+"<br>Techniques: "+locData["knows"]+"<br>Items: "+locData["items"];
-      $("#"+locName+'[data-toggle="tooltip"]').attr("title", tooltip);
+      $("#"+locName+'[data-toggle="tooltip"]').attr("title", tooltip).tooltip('fixTitle');
     }
   }
-
-  // update tooltips
-  $('[data-toggle="tooltip"').tooltip();
 
   setWSIcon("checkmark");
 }
@@ -1312,7 +1346,7 @@ function startTheTour(step=-1) {
     {{=A("Presets", _href=URL(f="presets"), _class="menu")}}
     {{=A("Randomizer", _href=URL(f="randomizer"), _class="menu")}}
     {{=A("Solver", _href=URL(f="solver"), _class="menu")}}
-    {{=A("Area Tracker", _href=URL(f="tracker"), _class="menu_selected")}}
+    {{=A("Trackers", _href=URL(f="tracker"), _class="menu_selected")}}
     {{=A("Information & Contact", _href=URL(f="infos"), _class="menu")}}
   </div>
 </div>
@@ -1470,26 +1504,26 @@ function startTheTour(step=-1) {
     <div id="SuperMissilepinkMaridia" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
     <div id="MissileDraygon" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
 
-    <div id="titleArea" class="titleArea">Area</div>
-    <div id="repeatArea" class="repeatArea"><img src="/solver/static/images/repeat.svg" alt="Cancel Last" onclick="deleteLine()" data-toggle="tooltip" title="Remove last added"></div>
-    <div id="binArea" class="binArea"><img src="/solver/static/images/bin.svg" alt="Clear" onclick="clearLines()" data-toggle="tooltip" title="Remove all"></div>
+    <div id="titleArea" class="titleArea">AREA</div>
+    <div id="repeatArea" class="repeatArea"><img src="/solver/static/images/repeat.svg" alt="Cancel Last" onclick="deleteLine()" data-toggle="tooltip" title="Remove last added transition" data-placement="bottom" data-container="body"></div>
+    <div id="binArea" class="binArea"><img src="/solver/static/images/bin.svg" alt="Clear" onclick="clearLines()" data-toggle="tooltip" title="Remove all the transitions" data-placement="bottom" data-container="body"></div>
 
-    <div id="titleItem" class="titleItem">Item</div>
-    <div id="startItem" class="startItem"><img src="/solver/static/images/play.svg" alt="Start" onclick="displayPopup()" data-toggle="tooltip" title="Start the Solver"></div>
-    <div id="repeatItem" class="repeatItem"><img src="/solver/static/images/repeat.svg" alt="Cancel Last" onclick="deleteLoc()" data-toggle="tooltip" title="Remove last added"></div>
-    <div id="binItem" class="binItem"><img src="/solver/static/images/bin.svg" alt="Clear" onclick="clearLocs()" data-toggle="tooltip" title="Remove all"></div>
+    <div id="titleItem" class="titleItem">ITEM</div>
+    <div id="startItem" class="startItem"><img src="/solver/static/images/play.svg" alt="Start" onclick="displayPopup()" data-toggle="tooltip" title="Start the Interactive Solver" data-placement="bottom" data-container="body"></div>
+    <div id="repeatItem" class="repeatItem"><img src="/solver/static/images/repeat.svg" alt="Cancel Last" onclick="deleteLoc()" data-toggle="tooltip" title="Remove last visited location" data-placement="bottom" data-container="body"></div>
+    <div id="binItem" class="binItem"><img src="/solver/static/images/bin.svg" alt="Clear" onclick="clearLocs()" data-toggle="tooltip" title="Remove all visited locations" data-placement="bottom" data-container="body"></div>
 
-    <div id="help" class="help"><img src="/solver/static/images/help.svg" alt="Help" onclick="startTheTour(0)" data-toggle="tooltip" title="Display the help"></div>
+    <div id="help" class="help"><img src="/solver/static/images/help.svg" alt="Help" onclick="startTheTour(0)" data-toggle="tooltip" title="Display the help" data-placement="bottom" data-container="body"></div>
 
     <div id="cloud" class="cloud">
-      <img id="checkmark" src="/solver/static/images/checkmark.svg" alt="checkmark" data-toggle="tooltip" title="Web service OK">
-      <img id="warning" src="/solver/static/images/warning.svg" alt="warning" style="display: none" data-toggle="tooltip" title="Web service ERROR">
-      <img id="download" src="/solver/static/images/cloud_download.svg" alt="cloud_download" style="display: none" data-toggle="tooltip" title="Web service downloading">
-      <img id="upload" src="/solver/static/images/cloud_upload.png" alt="cloud_upload" style="display: none" data-toggle="tooltip" title="Web service uploading">
+      <img id="checkmark" src="/solver/static/images/checkmark.svg" alt="checkmark" data-toggle="tooltip" title="Web service OK" data-placement="bottom" data-container="body">
+      <img id="warning" src="/solver/static/images/warning.svg" alt="warning" style="display: none" data-toggle="tooltip" title="Web service ERROR" data-placement="bottom" data-container="body">
+      <img id="download" src="/solver/static/images/cloud_download.svg" alt="cloud_download" style="display: none" data-toggle="tooltip" title="Web service downloading" data-placement="bottom" data-container="body">
+      <img id="upload" src="/solver/static/images/cloud_upload.png" alt="cloud_upload" style="display: none" data-toggle="tooltip" title="Web service uploading" data-placement="bottom" data-container="body">
     </div>
 
     <div id="log" class="log">
-      <textarea rows="8" cols="50" readonly placeholder="log">bla bla bla</textarea>
+      <textarea id="logText" class="logText" readonly><==VARIA Item Tracker log==></textarea>
     </div>
 
   </div>

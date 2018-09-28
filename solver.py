@@ -146,8 +146,8 @@ class SolverState(object):
                 diff = loc["difficulty"]
                 locName = self.locName4isolver(loc["Name"])
                 ret[locName] = {"difficulty": self.diff4isolver(diff.difficulty),
-                                "knows": diff.knows,
-                                "items": diff.items,
+                                "knows": list(set(diff.knows)),
+                                "items": list(set(diff.items)),
                                 # TODO::add this later (need to put it in visited/available locs
                                 #"comeBack": loc['comeBack'],
                                 "item": loc["itemName"],

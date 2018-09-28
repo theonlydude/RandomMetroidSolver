@@ -5,7 +5,7 @@
 [ -L ~/web2py/applications/solver/static/images/area_map.png ] || ln -s ~/RandomMetroidSolver/web/static/area_map.png ~/web2py/applications/solver/static/images/area_map.png
 [ -L ~/web2py/applications/solver/static/images/snes-controller.png ] || ln -s ~/RandomMetroidSolver/web/static/snes-controller.png ~/web2py/applications/solver/static/images/snes-controller.png
 [ -L ~/web2py/applications/solver/static/images/ajax-loader.gif ] || ln -s ~/RandomMetroidSolver/web/static/ajax-loader.gif ~/web2py/applications/solver/static/images/ajax-loader.gif
-[ -L ~/web2py/applications/solver/static/css/mystyle_20180908.css ] || ln -s ~/RandomMetroidSolver/web/static/mystyle_20180908.css ~/web2py/applications/solver/static/css/mystyle_20180908.css
+[ -L ~/web2py/applications/solver/static/css/mystyle_20180928.css ] || ln -s ~/RandomMetroidSolver/web/static/mystyle_20180928.css ~/web2py/applications/solver/static/css/mystyle_20180928.css
 [ -L ~/web2py/applications/solver/static/css/bootstrap-tour.min.css ] || ln -s ~/RandomMetroidSolver/web/static/bootstrap-tour.min.css ~/web2py/applications/solver/static/css/bootstrap-tour.min.css
 [ -L ~/web2py/applications/solver/static/barrating ] || ln -s ~/RandomMetroidSolver/web/static/barrating ~/web2py/applications/solver/static/barrating
 [ -L ~/web2py/applications/solver/static/js/bootstrap-tour.min.js ] || ln -s ~/RandomMetroidSolver/web/static/bootstrap-tour.min.js ~/web2py/applications/solver/static/js/bootstrap-tour.min.js

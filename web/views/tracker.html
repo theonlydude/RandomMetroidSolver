@@ -1164,37 +1164,43 @@ var locsInfo = {
 var curOverElem = null;
 
 function mouseOver(elem) {
-  $(elem).removeClass("baseLoc");
-  $(elem).addClass("baseLocOver");
-
   var locName = elem.id;
-  var className = "marker_"+locsInfo[locName]["state"]+"_"+locsInfo[locName]["difficulty"];
-  var classNameOver = "marker_over_"+locsInfo[locName]["difficulty"];
-  $(elem).removeClass(className);
-  $(elem).addClass(classNameOver);
 
-  var newTop = locsInfo[locName].top - 0.75;
-  var newLeft = locsInfo[locName].left - 0.5;
-  $(elem).css({"top": newTop+"%", "left": newLeft+"%"});
+  if("state" in locsInfo[locName]) {
+    $(elem).removeClass("baseLoc");
+    $(elem).addClass("baseLocOver");
 
-  curOverElem = elem;
+    var className = "marker_"+locsInfo[locName]["state"]+"_"+locsInfo[locName]["difficulty"];
+    var classNameOver = "marker_over_"+locsInfo[locName]["difficulty"];
+    $(elem).removeClass(className);
+    $(elem).addClass(classNameOver);
+
+    var newTop = locsInfo[locName].top - 0.75;
+    var newLeft = locsInfo[locName].left - 0.5;
+    $(elem).css({"top": newTop+"%", "left": newLeft+"%"});
+
+    curOverElem = elem;
+  }
 }
 
 function mouseOut(elem) {
-  $(elem).removeClass("baseLocOver");
-  $(elem).addClass("baseLoc");
-
   var locName = elem.id;
-  var className = "marker_"+locsInfo[locName]["state"]+"_"+locsInfo[locName]["difficulty"];
-  var classNameOver = "marker_over_"+locsInfo[locName]["difficulty"];
-  $(elem).removeClass(classNameOver);
-  $(elem).addClass(className);
 
-  var newTop = locsInfo[elem.id].top;
-  var newLeft = locsInfo[elem.id].left;
-  $(elem).css({"top": newTop+"%", "left": newLeft+"%"});
+  if("state" in locsInfo[locName]) {
+    $(elem).removeClass("baseLocOver");
+    $(elem).addClass("baseLoc");
 
-  curOverElem = null;
+    var className = "marker_"+locsInfo[locName]["state"]+"_"+locsInfo[locName]["difficulty"];
+    var classNameOver = "marker_over_"+locsInfo[locName]["difficulty"];
+    $(elem).removeClass(classNameOver);
+    $(elem).addClass(className);
+
+    var newTop = locsInfo[elem.id].top;
+    var newLeft = locsInfo[elem.id].left;
+    $(elem).css({"top": newTop+"%", "left": newLeft+"%"});
+
+    curOverElem = null;
+  }
 }
 
 function displayPopup() {
@@ -1257,14 +1263,19 @@ function deleteLoc() {
 
 function resetLocsInfo() {
   // remove info and reset css
+  var keys = ["state", "difficulty", "tooltip"];
   for(var locName in locsInfo) {
-    for(var key in ["state", "difficulty", "tooltip"]) {
+    for(var i in keys) {
+      var key = keys[i];
+      // console.log("is "+keys[key]+" in locsInfo["+locName+"] ?");
       if(key in locsInfo[locName]) {
+        // console.log("delete locsInfo["+locName+"]["+key+"]");
         delete locsInfo[locName][key];
       }
     }
     $("#"+locName).attr("class", "baseLoc");
-    $("#"+locName+'[data-toggle="tooltip"]').attr("title", "");
+    $("#"+locName+'[data-toggle="tooltip"]').attr("title", "").tooltip('fixTitle');
+    $("#"+locName+'[data-toggle="tooltip"]').attr("data-original-title", "").tooltip('fixTitle');
   }
 }
 
@@ -1543,21 +1554,21 @@ function startTheTour(step=-1) {
     <div id="MissileDraygon" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
 
     <div id="titleArea" class="titleArea">AREA</div>
-    <div id="repeatArea" class="repeatArea"><img src="/solver/static/images/repeat.svg" alt="Cancel Last" onclick="deleteLine()" data-toggle="tooltip" title="Remove last added transition" data-placement="bottom" data-container="body"></div>
-    <div id="binArea" class="binArea"><img src="/solver/static/images/bin.svg" alt="Clear" onclick="clearLines()" data-toggle="tooltip" title="Remove all the transitions" data-placement="bottom" data-container="body"></div>
+    <div id="repeatArea" class="repeatArea"><img src="/solver/static/images/repeat.svg" alt="Cancel Last" onclick="deleteLine()" data-toggle="tooltip" title="Remove last added transition" data-placement="bottom" data-container="body" data-html="true"></div>
+    <div id="binArea" class="binArea"><img src="/solver/static/images/bin.svg" alt="Clear" onclick="clearLines()" data-toggle="tooltip" title="Remove all the transitions" data-placement="bottom" data-container="body" data-html="true"></div>
 
     <div id="titleItem" class="titleItem">ITEM</div>
-    <div id="startItem" class="startItem"><img src="/solver/static/images/play.svg" alt="Start" onclick="displayPopup()" data-toggle="tooltip" title="Start the Interactive Solver" data-placement="bottom" data-container="body"></div>
-    <div id="repeatItem" class="repeatItem"><img src="/solver/static/images/repeat.svg" alt="Cancel Last" onclick="deleteLoc()" data-toggle="tooltip" title="Remove last visited location" data-placement="bottom" data-container="body"></div>
-    <div id="binItem" class="binItem"><img src="/solver/static/images/bin.svg" alt="Clear" onclick="clearLocs()" data-toggle="tooltip" title="Remove all visited locations" data-placement="bottom" data-container="body"></div>
+    <div id="startItem" class="startItem"><img src="/solver/static/images/play.svg" alt="Start" onclick="displayPopup()" data-toggle="tooltip" title="Start the Interactive Solver" data-placement="bottom" data-container="body" data-html="true"></div>
+    <div id="repeatItem" class="repeatItem"><img src="/solver/static/images/repeat.svg" alt="Cancel Last" onclick="deleteLoc()" data-toggle="tooltip" title="Remove last visited location" data-placement="bottom" data-container="body" data-html="true"></div>
+    <div id="binItem" class="binItem"><img src="/solver/static/images/bin.svg" alt="Clear" onclick="clearLocs()" data-toggle="tooltip" title="Remove all visited locations" data-placement="bottom" data-container="body" data-html="true"></div>
 
-    <div id="help" class="help"><img src="/solver/static/images/help.svg" alt="Help" onclick="startTheTour(0)" data-toggle="tooltip" title="Display the help" data-placement="bottom" data-container="body"></div>
+    <div id="help" class="help"><img src="/solver/static/images/help.svg" alt="Help" onclick="startTheTour(0)" data-toggle="tooltip" title="Display the help" data-placement="bottom" data-container="body" data-html="true"></div>
 
     <div id="cloud" class="cloud">
-      <img id="checkmark" src="/solver/static/images/checkmark.svg" alt="checkmark" data-toggle="tooltip" title="Web service OK" data-placement="bottom" data-container="body">
-      <img id="warning" src="/solver/static/images/warning.svg" alt="warning" style="display: none" data-toggle="tooltip" title="Web service ERROR" data-placement="bottom" data-container="body">
-      <img id="download" src="/solver/static/images/cloud_download.svg" alt="cloud_download" style="display: none" data-toggle="tooltip" title="Web service downloading" data-placement="bottom" data-container="body">
-      <img id="upload" src="/solver/static/images/cloud_upload.png" alt="cloud_upload" style="display: none" data-toggle="tooltip" title="Web service uploading" data-placement="bottom" data-container="body">
+      <img id="checkmark" src="/solver/static/images/checkmark.svg" alt="checkmark" data-toggle="tooltip" title="Web service OK" data-placement="bottom" data-container="body" data-html="true">
+      <img id="warning" src="/solver/static/images/warning.svg" alt="warning" style="display: none" data-toggle="tooltip" title="Web service ERROR" data-placement="bottom" data-container="body" data-html="true">
+      <img id="download" src="/solver/static/images/cloud_download.svg" alt="cloud_download" style="display: none" data-toggle="tooltip" title="Web service downloading" data-placement="bottom" data-container="body" data-html="true">
+      <img id="upload" src="/solver/static/images/cloud_upload.png" alt="cloud_upload" style="display: none" data-toggle="tooltip" title="Web service uploading" data-placement="bottom" data-container="body" data-html="true">
     </div>
 
     <div id="log" class="log">

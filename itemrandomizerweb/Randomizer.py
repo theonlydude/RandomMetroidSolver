@@ -928,6 +928,10 @@ class Randomizer(object):
             Bosses.beatBoss(boss)
         # if ret:
         #     print("onlyBossesLeft locs : " + str([loc['Name'] for loc in locs]))
+        #     print("current AP : " + self.curAccessPoint)
+        #     nodes = self.areaGraph.getAvailableAccessPoints(self.areaGraph.accessPoints[self.curAccessPoint], self.smbm, self.difficultyTarget)
+        #     print("avail APs : " + str([ap.Name for ap in nodes]))
+        #     print("curLocs : " + str([loc['Name'] for loc in self.curLocs]))
         return ret
 
     # when max diff was stepped up due to boss fights, get a string that

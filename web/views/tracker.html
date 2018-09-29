@@ -279,6 +279,139 @@ img {
 }
 
 
+.lowerMushroomsLeftGps {
+    left: 18.75%;
+    top: 12%;
+}
+.moatRightGps {
+    left: 48.5%;
+    top: 6%;
+}
+.greenPiratesShaftBottomRightGps {
+    left: 23.85%;
+    top: 12%;
+}
+.keyhunterRoomBottomGps {
+    left: 44.98%;
+    top: 10.2%;
+}
+.morphBallRoomLeftGps {
+    left: 29.23%;
+    top: 46.8%;
+}
+.greenBrinstarElevatorRightGps {
+    left: 5.73%;
+    top: 28%;
+}
+.greenHillZoneTopRightGps {
+    left: 16.3%;
+    top: 63%;
+}
+.noobBridgeRightGps {
+    left: 27.55%;
+    top: 67.5%;
+}
+.westOceanLeftGps {
+    left: 59.9%;
+    top: 6.2%;
+}
+.crabMazeLeftGps {
+    left: 80.8%;
+    top: 13.8%;
+}
+.lavaDiveRightGps {
+    left: 81.15%;
+    top: 78.6%;
+}
+.threeMuskateersRoomLeftGps {
+    left: 84.6%;
+    top: 68.3%;
+}
+.warehouseZeelaRoomLeftGps {
+    left: 50.63%;
+    top: 62.5%;
+}
+.warehouseEntranceLeftGps {
+    left: 41.9%;
+    top: 65.2%;
+}
+.warehouseEntranceRightGps {
+    left: 45.36%;
+    top: 65.3%;
+}
+.singleChamberTopRightGps {
+    left: 61.55%;
+    top: 72.8%;
+}
+.kronicBoostRoomBottomLeftGps {
+    left: 57.55%;
+    top: 83.5%;
+}
+.mainStreetBottomGps {
+    left: 67.5%;
+    top: 56.8%;
+}
+.crabHoleBottomLeftGps {
+    left: 71.45%;
+    top: 57.3%;
+}
+.leCoudeRightGps {
+    left: 90.16%;
+    top: 13.1%;
+}
+.redFishRoomLeftGps {
+    left: 67.7%;
+    top: 42.2%;
+}
+.redTowerTopLeftGps {
+    left: 50.81%;
+    top: 49.7%;
+}
+.caterpillarRoomTopRightGps {
+    left: 58.1%;
+    top: 40.6%;
+}
+.redBrinstarElevatorGps {
+    left: 55.45%;
+    top: 7.3%;
+}
+.eastTunnelRightGps {
+    left: 59.25%;
+    top: 57.4%;
+}
+.eastTunnelTopRightGps {
+    left: 61.65%;
+    top: 55.8%;
+}
+.glassTunnelTopGps {
+    left: 57.4%;
+    top: 54.5%;
+}
+.statuesHallwayLeftGps {
+    left: 22.45%;
+    top: 15.4%;
+}
+.landingSiteGps {
+    left: 38.1%;
+    top: 5%;
+}
+.bigPinkGps {
+    left: 13.15%;
+    top: 57%;
+}
+.crocZoneGps {
+    left: 46%;
+    top: 83.5%;
+}
+.bubbleMountainGps {
+    left: 54.6%;
+    top: 73%;
+}
+.lastLoc {
+    position: absolute;
+    width: 2.25%;
+}
+
 .marker_over_easy {
     background-image: url("/solver/static/images/marker_over_easy.png");
 }
@@ -959,100 +1092,9 @@ function setWSIcon(icon) {
 //-----------------------------------------------------------
 // ITEMS TRACKER
 
-window.onload = function(){
-  ajaxCallArea({action: "get"}, "download", ajaxOkGetArea);
-  ajaxCallItem({action: "get"}, "download", ajaxOkGetItem);
-
-  // display the help on first connection to the tracker
-{{
-  if "firstTime" in session.tracker["area"] and session.tracker["area"]["firstTime"] == True:
-    session.tracker["area"]["firstTime"] = False
-}}
-    startTheTour(0);
-{{
-    pass
-}}
-
-  var filesInput = document.getElementById("uploadFile");
-  filesInput.addEventListener("change", function(event) {
-    var files = event.target.files; //It returns a FileList object
-    var file = files[0];
-  
-    var reader = new FileReader();
-  
-    reader.onload = function(e) {
-  	// check sfc or smc extention
-        var re = /(?:\.([^.]+))?$/;
-  	var ext = re.exec(file.name)[1];
-        if( ! (ext === "sfc" || ext === "smc") ) {
-            document.getElementById("uploadFile").value = "";
-            alert("wrong extension: "+ext);
-            return false;
-        }
-  
-        var re = /((.*)\.[^.]+)?$/;
-        var base = re.exec(file.name)[1];
-  
-        var outFileName = file.name.replace(/\.[^/.]+$/, ".json");
-  
-        var fileSize = file.size;
-  	if( fileSize > 4*1024*1024 ) {
-            document.getElementById("uploadFile").value = "";
-            alert("Wrong ROM file size: "+fileSize.toString());
-            return false;
-        }
-  
-        var bytes = new Uint8Array(e.target.result);
-  
-        // locations items
-        var addresses = new Array(0x78264, 0x78404, 0x78432, 0x7852C, 0x78614, 0x786DE, 0x7879E, 0x787C2, 0x787FA, 0x78824, 0x78876, 0x7896E, 0x7899C, 0x78ACA, 0x78B24, 0x78BA4, 0x78BAC, 0x78C36, 0x78C3E, 0x78C82, 0x78CCA, 0x79108, 0x79110, 0x79184, 0x7C2E9, 0x7C337, 0x7C365, 0x7C36D, 0x7C47D, 0x7C559, 0x7C5E3, 0x7C6E5, 0x7C755, 0x7C7A7, 0x781CC, 0x781E8, 0x781EE, 0x781F4, 0x78248, 0x783EE, 0x78464, 0x7846A, 0x78478, 0x78486, 0x784AC, 0x784E4, 0x78518, 0x7851E, 0x78532, 0x78538, 0x78608, 0x7860E, 0x7865C, 0x78676, 0x7874C, 0x78798, 0x787D0, 0x78802, 0x78836, 0x7883C, 0x788CA, 0x7890E, 0x78914, 0x789EC, 0x78AE4, 0x78B46, 0x78BC0, 0x78BE6, 0x78BEC, 0x78C04, 0x78C14, 0x78C2A, 0x78C44, 0x78C52, 0x78C66, 0x78C74, 0x78CBC, 0x78E6E, 0x78E74, 0x78F30, 0x78FCA, 0x78FD2, 0x790C0, 0x79100, 0x7C265, 0x7C2EF, 0x7C319, 0x7C357, 0x7C437, 0x7C43D, 0x7C483, 0x7C4AF, 0x7C4B5, 0x7C533, 0x7C5DD, 0x7C5EB, 0x7C5F1, 0x7C603, 0x7C609, 0x7C74D);
-        var romData = {};
-  
-        var arrayLength = addresses.length;
-        for(var i=0; i<arrayLength; i++) {
-            romData[addresses[i]] = bytes[addresses[i]];
-            romData[addresses[i]+1] = bytes[addresses[i]+1];
-            romData[addresses[i]+4] = bytes[addresses[i]+4];
-        }
-  
-        // startCeres
-        romData[0x7F1F] = bytes[0x7F1F];
-        // startLS
-        romData[0x7F17] = bytes[0x7F17];
-        // layout
-        romData[0x21BD80] = bytes[0x21BD80];
-        // casual
-        romData[0x22E879] = bytes[0x22E879];
-        // gravity
-        romData[0x06e37d] = bytes[0x06e37d];
-        // varia tweaks
-        romData[0x7CC4D] = bytes[0x7CC4D];
-        // area
-        romData[0x22D564] = bytes[0x22D564];
-        // area layout
-        romData[0x252FA7] = bytes[0x252FA7];
-  
-        // transitions
-        var addresses = new Array(0x18c22, 0x18aea, 0x18a42, 0x18e9e, 0x18bfe, 0x18e86, 0x18f0a, 0x189ca, 0x18aae, 0x196d2, 0x19a4a, 0x1922e, 0x195fa, 0x1967e, 0x1a39c, 0x1a510, 0x18aa2, 0x1a480, 0x1902a, 0x190c6, 0x18af6, 0x1a384, 0x1a390, 0x1a330, 0x18c52, 0x191e6, 0x1913e, 0x1923a);
-        var arrayLength = addresses.length;
-        for(var i=0; i<arrayLength; i++) {
-            romData[addresses[i]] = bytes[addresses[i]]
-            romData[addresses[i]+1] = bytes[addresses[i]+1];
-            romData[addresses[i]+6] = bytes[addresses[i]+6];
-            romData[addresses[i]+7] = bytes[addresses[i]+7];
-        }
-  
-        romData["romFileName"] = outFileName;
-  
-        var json = JSON.stringify(romData);
-  
-        var output = document.getElementById("romJson");
-        output.value = json;
-    }
-  
-    reader.readAsArrayBuffer(file);
-  }, false);
-}
+var init = false;
+var lastLoc = "landingSite";
+var curOverElem = null;
 
 // can add more variables:
 //  -state: posible values: ["available", "visited"]
@@ -1161,7 +1203,100 @@ var locsInfo = {
   MissileDraygon: {left: 97.65, top: 44.7}
 };
 
-var curOverElem = null;
+window.onload = function(){
+  ajaxCallArea({action: "get"}, "download", ajaxOkGetArea);
+  ajaxCallItem({action: "get"}, "download", ajaxOkGetItem);
+
+  // display the help on first connection to the tracker
+{{
+  if "firstTime" in session.tracker["area"] and session.tracker["area"]["firstTime"] == True:
+    session.tracker["area"]["firstTime"] = False
+}}
+    startTheTour(0);
+{{
+    pass
+}}
+
+  var filesInput = document.getElementById("uploadFile");
+  filesInput.addEventListener("change", function(event) {
+    var files = event.target.files; //It returns a FileList object
+    var file = files[0];
+  
+    var reader = new FileReader();
+  
+    reader.onload = function(e) {
+  	// check sfc or smc extention
+        var re = /(?:\.([^.]+))?$/;
+  	var ext = re.exec(file.name)[1];
+        if( ! (ext === "sfc" || ext === "smc") ) {
+            document.getElementById("uploadFile").value = "";
+            alert("wrong extension: "+ext);
+            return false;
+        }
+  
+        var re = /((.*)\.[^.]+)?$/;
+        var base = re.exec(file.name)[1];
+  
+        var outFileName = file.name.replace(/\.[^/.]+$/, ".json");
+  
+        var fileSize = file.size;
+  	if( fileSize > 4*1024*1024 ) {
+            document.getElementById("uploadFile").value = "";
+            alert("Wrong ROM file size: "+fileSize.toString());
+            return false;
+        }
+  
+        var bytes = new Uint8Array(e.target.result);
+  
+        // locations items
+        var addresses = new Array(0x78264, 0x78404, 0x78432, 0x7852C, 0x78614, 0x786DE, 0x7879E, 0x787C2, 0x787FA, 0x78824, 0x78876, 0x7896E, 0x7899C, 0x78ACA, 0x78B24, 0x78BA4, 0x78BAC, 0x78C36, 0x78C3E, 0x78C82, 0x78CCA, 0x79108, 0x79110, 0x79184, 0x7C2E9, 0x7C337, 0x7C365, 0x7C36D, 0x7C47D, 0x7C559, 0x7C5E3, 0x7C6E5, 0x7C755, 0x7C7A7, 0x781CC, 0x781E8, 0x781EE, 0x781F4, 0x78248, 0x783EE, 0x78464, 0x7846A, 0x78478, 0x78486, 0x784AC, 0x784E4, 0x78518, 0x7851E, 0x78532, 0x78538, 0x78608, 0x7860E, 0x7865C, 0x78676, 0x7874C, 0x78798, 0x787D0, 0x78802, 0x78836, 0x7883C, 0x788CA, 0x7890E, 0x78914, 0x789EC, 0x78AE4, 0x78B46, 0x78BC0, 0x78BE6, 0x78BEC, 0x78C04, 0x78C14, 0x78C2A, 0x78C44, 0x78C52, 0x78C66, 0x78C74, 0x78CBC, 0x78E6E, 0x78E74, 0x78F30, 0x78FCA, 0x78FD2, 0x790C0, 0x79100, 0x7C265, 0x7C2EF, 0x7C319, 0x7C357, 0x7C437, 0x7C43D, 0x7C483, 0x7C4AF, 0x7C4B5, 0x7C533, 0x7C5DD, 0x7C5EB, 0x7C5F1, 0x7C603, 0x7C609, 0x7C74D);
+        var romData = {};
+  
+        var arrayLength = addresses.length;
+        for(var i=0; i<arrayLength; i++) {
+            romData[addresses[i]] = bytes[addresses[i]];
+            romData[addresses[i]+1] = bytes[addresses[i]+1];
+            romData[addresses[i]+4] = bytes[addresses[i]+4];
+        }
+  
+        // startCeres
+        romData[0x7F1F] = bytes[0x7F1F];
+        // startLS
+        romData[0x7F17] = bytes[0x7F17];
+        // layout
+        romData[0x21BD80] = bytes[0x21BD80];
+        // casual
+        romData[0x22E879] = bytes[0x22E879];
+        // gravity
+        romData[0x06e37d] = bytes[0x06e37d];
+        // varia tweaks
+        romData[0x7CC4D] = bytes[0x7CC4D];
+        // area
+        romData[0x22D564] = bytes[0x22D564];
+        // area layout
+        romData[0x252FA7] = bytes[0x252FA7];
+  
+        // transitions
+        var addresses = new Array(0x18c22, 0x18aea, 0x18a42, 0x18e9e, 0x18bfe, 0x18e86, 0x18f0a, 0x189ca, 0x18aae, 0x196d2, 0x19a4a, 0x1922e, 0x195fa, 0x1967e, 0x1a39c, 0x1a510, 0x18aa2, 0x1a480, 0x1902a, 0x190c6, 0x18af6, 0x1a384, 0x1a390, 0x1a330, 0x18c52, 0x191e6, 0x1913e, 0x1923a);
+        var arrayLength = addresses.length;
+        for(var i=0; i<arrayLength; i++) {
+            romData[addresses[i]] = bytes[addresses[i]]
+            romData[addresses[i]+1] = bytes[addresses[i]+1];
+            romData[addresses[i]+6] = bytes[addresses[i]+6];
+            romData[addresses[i]+7] = bytes[addresses[i]+7];
+        }
+  
+        romData["romFileName"] = outFileName;
+  
+        var json = JSON.stringify(romData);
+  
+        var output = document.getElementById("romJson");
+        output.value = json;
+    }
+  
+    reader.readAsArrayBuffer(file);
+  }, false);
+}
 
 function mouseOver(elem) {
   var locName = elem.id;
@@ -1211,8 +1346,6 @@ function displayPopup() {
 function hidePopup() {
   document.getElementById("solverPopup").style.display = "none";
 }
-
-var init = false;
 
 function initSolver() {
   console.log("initSolver");
@@ -1277,6 +1410,8 @@ function resetLocsInfo() {
     $("#"+locName+'[data-toggle="tooltip"]').attr("title", "").tooltip('fixTitle');
     $("#"+locName+'[data-toggle="tooltip"]').attr("data-original-title", "").tooltip('fixTitle');
   }
+  lastLoc = "landingSite";
+  $("#lastLoc").attr("class", "lastLoc "+lastLoc+"Gps");
 }
 
 function clearLocs() {
@@ -1356,6 +1491,12 @@ function ajaxOkGetItem(jsonData) {
     }
     init = false;
   }
+  if("lastLoc" in jsonData) {
+    console.log("lastLoc updated: "+jsonData["lastLoc"]);
+    lastLoc = jsonData["lastLoc"];
+  }
+  console.log("lastLoc: "+jsonData["lastLoc"]);
+  $("#lastLoc").attr("class", "lastLoc "+lastLoc+"Gps");
 
   setWSIcon("checkmark");
 }
@@ -1373,7 +1514,7 @@ function startTheTour(step=-1) {
     steps: [{
       element: "#help",
       title: "VARIA Area & Item Tracker",
-      content: "<h2 class=\"center\">Welcome to the VARIA Area & Item Tracker</h2><h4>Area Tracker</h4><p>The Area Tracker allows you to track the connections between the areas portals.<br/>To use it, click on a portal <img src=\"/solver/static/images/portal.png\" alt=\"Portal\" style=\"width: 32px\">, it'll highlight it, then click on a second portal, it'll draw a line between the two portals.<br/>You can delete the latest added line with the <img src=\"/solver/static/images/repeat.svg\" alt=\"Cancel Last\" style=\"width: 32px\"> button and all of them with the <img src=\"/solver/static/images/bin.svg\" alt=\"Remove all\" style=\"width: 32px\"> button.<br/><h4>Item Tracker</h4><p>The Item Tracker allows you to use the Solver in interactive mode.<br/>To use it, click on the <img src=\"/solver/static/images/play.svg\" alt=\"Start\" style=\"width: 32px\"> button to upload your ROM and choose your preset (like on the Solver page).<br/>Then the available locations will be displayed on the map, click on a location after you've collected the item of the location in the game, it'll update the next available locations.<br/>The color of the icon on the available locations matchs the difficulty to reach the location:<table><tr><td><img src=\"/solver/static/images/marker_easy.png\" alt=\"easy\" style=\"width: 32px\"> easy</td><td><img src=\"/solver/static/images/marker_medium.png\" alt=\"medium\" style=\"width: 32px\"> medium</td></td><td><img src=\"/solver/static/images/marker_hard.png\" alt=\"hard\" style=\"width: 32px\"> hard</td></tr><tr><td><img src=\"/solver/static/images/marker_harder.png\" alt=\"harder\" style=\"width: 32px\"> very hard</td><td><img src=\"/solver/static/images/marker_hardcore.png\" alt=\"hardcore\" style=\"width: 32px\"> hardcore</td><td><img src=\"/solver/static/images/marker_mania.png\" alt=\"mania\" style=\"width: 32px\"> mania</td></tr></table>When a location has been visited its icon change to this: <img src=\"/solver/static/images/marker_visited_easy.png\" alt=\"Visited\" style=\"width: 32px\">, one color for each difficulty.<br/>When overing the mouse cursor on an available or visited location a tooltip will be displayed with the location's name, the techniques and items used to access it.<br/>After the location has been visited the collected item is displayed too.</p><h4>Auto Save</h4><p>Both trackers feature an auto save functionnality, so you can do your seed in multiple seatings.<br/>The different status icons of the auto save:<table><tr><td><img src=\"/solver/static/images/checkmark.svg\" style=\"width: 32px\"> Save ok</td><td><img src=\"/solver/static/images/cloud_upload.png\" style=\"width: 32px\"> Upload in progress</td></tr><tr><td><img src=\"/solver/static/images/cloud_download.svg\" style=\"width: 32px\"> Download in progress</td><td><img src=\"/solver/static/images/warning.svg\" style=\"width: 32px\"> Something wrong happened (try reloading the page)</td></tr></table></p><p>You can display this help again by clicking on the <img src=\"/solver/static/images/help.svg\" alt=\"help\" style=\"width: 32px\"> button.</p><p><h4>Thanks to</h4><ul><li>Location icons from Alli_Cat's <a href='https://github.com/allibear17/Super-Metroid-Location-Tracker'>Location Tracker</a></li><li>Action icons from <a href='https://dryicons.com/icon-packs/stylistica-icons-set'>Dryicons</a></li></ul></p>"
+      content: "<h2 class=\"center\">Welcome to the VARIA Area & Item Tracker</h2><h4>Area Tracker</h4><p>The Area Tracker allows you to track the connections between the areas portals.<br/>To use it, click on a portal <img src=\"/solver/static/images/portal.png\" alt=\"Portal\" style=\"width: 32px\">, it'll highlight it, then click on a second portal, it'll draw a line between the two portals.<br/>You can delete the latest added line with the <img src=\"/solver/static/images/repeat.svg\" alt=\"Cancel Last\" style=\"width: 32px\"> button and all of them with the <img src=\"/solver/static/images/bin.svg\" alt=\"Remove all\" style=\"width: 32px\"> button.<br/><h4>Item Tracker</h4><p>The Item Tracker allows you to use the Solver in interactive mode.<br/>To use it, click on the <img src=\"/solver/static/images/play.svg\" alt=\"Start\" style=\"width: 32px\"> button to upload your ROM and choose your preset (like on the Solver page).<br/>Then the available locations will be displayed on the map, click on a location after you've collected the item of the location in the game, it'll update the next available locations.<br/>The color of the icon on the available locations matchs the difficulty to reach the location:<table><tr><td><img src=\"/solver/static/images/marker_easy.png\" alt=\"easy\" style=\"width: 32px\"> easy</td><td><img src=\"/solver/static/images/marker_medium.png\" alt=\"medium\" style=\"width: 32px\"> medium</td></td><td><img src=\"/solver/static/images/marker_hard.png\" alt=\"hard\" style=\"width: 32px\"> hard</td></tr><tr><td><img src=\"/solver/static/images/marker_harder.png\" alt=\"harder\" style=\"width: 32px\"> very hard</td><td><img src=\"/solver/static/images/marker_hardcore.png\" alt=\"hardcore\" style=\"width: 32px\"> hardcore</td><td><img src=\"/solver/static/images/marker_mania.png\" alt=\"mania\" style=\"width: 32px\"> mania</td></tr></table>When a location has been visited its icon change to this: <img src=\"/solver/static/images/marker_visited_easy.png\" alt=\"Visited\" style=\"width: 32px\">, one color for each difficulty.<br/>When overing the mouse cursor on an available or visited location a tooltip will be displayed with the location's name, the techniques and items used to access it.<br/>After the location has been visited the collected item is displayed too.<br/>The locations availability are computed from the current access point which is displayed with this: <img src=\"/solver/static/images/gps.png\" alt=\"last access point\" style=\"width: 32px\"></p><h4>Auto Save</h4><p>Both trackers feature an auto save functionnality, so you can do your seed in multiple seatings.<br/>The different status icons of the auto save:<table><tr><td><img src=\"/solver/static/images/checkmark.svg\" style=\"width: 32px\"> Save ok</td><td><img src=\"/solver/static/images/cloud_upload.png\" style=\"width: 32px\"> Upload in progress</td></tr><tr><td><img src=\"/solver/static/images/cloud_download.svg\" style=\"width: 32px\"> Download in progress</td><td><img src=\"/solver/static/images/warning.svg\" style=\"width: 32px\"> Something wrong happened (try reloading the page)</td></tr></table></p><p>You can display this help again by clicking on the <img src=\"/solver/static/images/help.svg\" alt=\"help\" style=\"width: 32px\"> button.</p><p><h4>Thanks to</h4><ul><li>Location icons from Alli_Cat's <a href='https://github.com/allibear17/Super-Metroid-Location-Tracker'>Location Tracker</a></li><li>Action icons from <a href='https://dryicons.com/icon-packs/stylistica-icons-set'>Dryicons</a></li></ul></p>"
     }]
   });
 
@@ -1575,5 +1716,8 @@ function startTheTour(step=-1) {
       <textarea id="logText" class="logText" readonly><==VARIA Item Tracker log==></textarea>
     </div>
 
+    <div id="lastLoc">
+      <img src="/solver/static/images/gps.png" alt="last access point" data-toggle="tooltip" title="Current access point" data-placement="bottom" data-container="body" data-html="true">
+    </div>
   </div>
 </div>

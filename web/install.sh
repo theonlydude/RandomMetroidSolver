@@ -56,3 +56,4 @@
 [ -L ~/web2py/applications/solver/static/images/marker_visited_harder.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/marker_visited_harder.png ~/web2py/applications/solver/static/images/marker_visited_harder.png
 [ -L ~/web2py/applications/solver/static/images/marker_visited_hardcore.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/marker_visited_hardcore.png ~/web2py/applications/solver/static/images/marker_visited_hardcore.png
 [ -L ~/web2py/applications/solver/static/images/marker_visited_mania.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/marker_visited_mania.png ~/web2py/applications/solver/static/images/marker_visited_mania.png
+[ -L ~/web2py/applications/solver/static/images/gps.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/gps.png ~/web2py/applications/solver/static/images/gps.png

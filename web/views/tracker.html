@@ -1130,7 +1130,7 @@ var locsInfo = {
   XRayScope: {left: 42.7, top: 55.27},
   Spazer: {left: 57, top: 58.3},
   EnergyTankKraid: {left: 50.97, top: 66.8},
-  VariaSuit: {left: 64.4, top: 66.75},
+  VariaSuit: {left: 64.4, top: 66.75, boss: "Kraid"},
   IceBeam: {left: 38.6, top: 73.99},
   EnergyTankCrocomire: {left: 52, top: 86.05},
   HiJumpBoots: {left: 40.4, top: 80},
@@ -1138,19 +1138,19 @@ var locsInfo = {
   ReserveTankNorfair: {left: 51.02, top: 73.99},
   SpeedBooster: {left: 69.05, top: 73.95},
   WaveBeam: {left: 61.4, top: 76.9},
-  EnergyTankRidley: {left: 78.35, top: 92},
+  EnergyTankRidley: {left: 78.35, top: 92, boss: "Ridley"},
   ScrewAttack: {left: 76.45, top: 90.4},
   EnergyTankFirefleas: {left: 92.5, top: 82.8},
   ReserveTankWreckedShip: {left: 71.71, top: 5.7},
   EnergyTankWreckedShip: {left: 74.7, top: 7.3},
-  RightSuperWreckedShip: {left: 77.4, top: 13.3},
+  RightSuperWreckedShip: {left: 77.4, top: 13.3, boss: "Phantoon"},
   GravitySuit: {left: 66.97, top: 7.2},
   EnergyTankMamaturtle: {left: 74.93, top: 52.3},
   PlasmaBeam: {left: 84.2, top: 36.87},
   ReserveTankMaridia: {left: 77.55, top: 56.85},
   SpringBall: {left: 89.1, top: 58.4},
   EnergyTankBotwoon: {left: 85.3, top: 46.2},
-  SpaceJump: {left: 93.9, top: 49.3},
+  SpaceJump: {left: 93.9, top: 49.3, boss: "Draygon"},
   PowerBombCrateriasurface: {left: 44.5, top: 3.9},
   MissileoutsideWreckedShipbottom: {left: 61.35, top: 10.1},
   MissileoutsideWreckedShiptop: {left: 62.1, top: 2.75},
@@ -1485,12 +1485,18 @@ function ajaxCallItem(dataDict, msg, okFunc=ajaxOkJSON) {
     request.fail(ajaxFailJSON);
 }
 
-function getTooltip(locData, item, visited) {
+function getTooltip(locName, locData, item, visited) {
+  var tooltip = "<center>"+locData["name"]+"</center>";
+
+  if("boss" in locsInfo[locName]) {
+    tooltip += "Boss: "+locsInfo[locName]["boss"]+"<br>";
+  }
+
   if(visited == true) {
-    return "<center>"+locData["name"]+"</center>Item: "+item;
+    return tooltip+"Item: "+item;
 
   } else {
-    return "<center>"+locData["name"]+"</center>Techniques: "+(locData["knows"].length > 0 ? locData["knows"] : "None")+"<br>Items: "+(locData["items"].length > 0 ? locData["items"] : "None");
+    return tooltip+"Techniques: "+(locData["knows"].length > 0 ? locData["knows"] : "None")+"<br>Items: "+(locData["items"].length > 0 ? locData["items"] : "None");
 
   }
 }
@@ -1511,7 +1517,7 @@ function ajaxOkGetItem(jsonData) {
       locsInfo[locName]["tooltip"] = {name: locData["name"], item: locData["item"], items: locData["items"], knows: locData["knows"]};
 
       $("#"+locName).attr("class", "baseLoc marker_available_"+locData["difficulty"]);
-      var tooltip = getTooltip(locData, "?", false);
+      var tooltip = getTooltip(locName, locData, "?", false);
       $("#"+locName+'[data-toggle="tooltip"]').attr("title", tooltip).tooltip('fixTitle');
     }
   }
@@ -1524,7 +1530,7 @@ function ajaxOkGetItem(jsonData) {
       locsInfo[locName]["tooltip"] = {name: locName, item: locData["item"], items: locData["items"], knows: locData["knows"]};
 
       $("#"+locName).attr("class", "baseLoc marker_visited_"+locData["difficulty"]);
-      var tooltip = getTooltip(locData, locData["item"], true);
+      var tooltip = getTooltip(locName, locData, locData["item"], true);
       $("#"+locName+'[data-toggle="tooltip"]').attr("title", tooltip).tooltip('fixTitle');
     }
   }

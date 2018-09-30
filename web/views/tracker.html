@@ -1501,7 +1501,7 @@ function ajaxOkGetItem(jsonData) {
       locsInfo[locName]["tooltip"] = {name: locData["name"], item: locData["item"], items: locData["items"], knows: locData["knows"]};
 
       $("#"+locName).attr("class", "baseLoc marker_available_"+locData["difficulty"]);
-      var tooltip = locData["name"]+": ?<br>Techniques: "+locData["knows"]+"<br>Items: "+locData["items"];
+      var tooltip = "<center>"+locData["name"]+"</center>Item: ?<br>Techniques: "+locData["knows"]+"<br>Items: "+locData["items"];
       $("#"+locName+'[data-toggle="tooltip"]').attr("title", tooltip).tooltip('fixTitle');
     }
   }
@@ -1514,7 +1514,7 @@ function ajaxOkGetItem(jsonData) {
       locsInfo[locName]["tooltip"] = {name: locName, item: locData["item"], items: locData["items"], knows: locData["knows"]};
 
       $("#"+locName).attr("class", "baseLoc marker_visited_"+locData["difficulty"]);
-      var tooltip = locData["name"]+": "+locData["item"]+"<br>Techniques: "+locData["knows"]+"<br>Items: "+locData["items"];
+      var tooltip = locData["name"]+"<br>Item: "+locData["item"]+"<br>Techniques: "+locData["knows"]+"<br>Items: "+locData["items"];
       $("#"+locName+'[data-toggle="tooltip"]').attr("title", tooltip).tooltip('fixTitle');
     }
   }

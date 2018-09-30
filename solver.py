@@ -31,24 +31,36 @@ class Conf:
 
 class SolverState(object):
     def fromSolver(self, solver):
-        # rom
         self.state = {}
+        # bool
         self.state["fullRando"] = solver.fullRando
+        # bool
         self.state["areaRando"] = solver.areaRando
+        # dict of raw patches
         self.state["patches"] = solver.patches
+        # dict {locName: {itemName: "xxx", "accessPoint": "xxx"}, ...}
         self.state["locsData"] = self.getLocsData(solver.locations)
+        # list [(ap1, ap2), (ap3, ap4), ...]
         self.state["graphTransitions"] = solver.graphTransitions
-        # preset
+        # preset file name
         self.state["presetFileName"] = solver.presetFileName
-        # items collected / locs visited / bosses killed
+        ## items collected / locs visited / bosses killed
+        # list [item1, item2, ...]
         self.state["collectedItems"] = solver.collectedItems
+        # dict {locName: {index: 0, difficulty: (bool, diff, ...), ...} with index being the position of the loc in visitedLocations
         self.state["visitedLocations"] = self.getVisitedLocations(solver.visitedLocations)
-        self.state["lastLoc"] = solver.lastLoc
-        self.state["bosses"] = [boss for boss in Bosses.golden4Dead if Bosses.golden4Dead[boss] == True]
+        # dict {locName: (bool, diff, [know1, ...], [item1, ...]), ...}
         self.state["availableLocations"] = self.getAvailableLocations(solver.majorLocations)
+        # string of last access point
+        self.state["lastLoc"] = solver.lastLoc
+        # list of killed bosses: ["boss1", "boss2"]
+        self.state["bosses"] = [boss for boss in Bosses.golden4Dead if Bosses.golden4Dead[boss] == True]
+        # dict {locNameWeb: {infos}, ...}
+        self.state["availableLocationsWeb"] = self.getAvailableLocationsWeb(solver.majorLocations)
+        # dict {locNameWeb: {infos}, ...}
+        self.state["visitedLocationsWeb"] = self.getAvailableLocationsWeb(solver.visitedLocations)
 
     def toSolver(self, solver):
-        # rom
         solver.fullRando = self.state["fullRando"]
         solver.areaRando = self.state["areaRando"]
         solver.patches = self.setPatches(self.state["patches"])
@@ -59,12 +71,13 @@ class SolverState(object):
         # items collected / locs visited / bosses killed
         solver.collectedItems = self.state["collectedItems"]
         (solver.visitedLocations, solver.majorLocations) = self.setLocations(self.state["visitedLocations"],
+                                                                             self.state["availableLocations"],
                                                                              solver.locations)
         solver.lastLoc = self.state["lastLoc"]
         Bosses.reset()
         for boss in self.state["bosses"]:
             Bosses.beatBoss(boss)
-        solver.availableLocations = self.state["availableLocations"]
+        solver.availableLocationsWeb = self.state["availableLocationsWeb"]
 
     def getLocsData(self, locations):
         ret = {}
@@ -85,34 +98,66 @@ class SolverState(object):
         ret = {}
         i = 0
         for loc in visitedLocations:
-            ret[loc["Name"]] = i
+            diff = loc["difficulty"]
+            ret[loc["Name"]] = {"index": i, "difficulty": (diff.bool, diff.difficulty, diff.knows, diff.items)}
             i += 1
         return ret
 
-    def setLocations(self, visitedLocations, locations):
+    def setLocations(self, visitedLocations, availableLocations, locations):
         retVis = []
         retMaj = []
         for loc in locations:
             if loc["Name"] in visitedLocations:
                 # visitedLocations contains an index
-                retVis.append((visitedLocations[loc["Name"]], loc))
+                diff = visitedLocations[loc["Name"]]["difficulty"]
+                loc["difficulty"] = SMBool(diff[0], diff[1], diff[2], diff[3])
+                retVis.append((visitedLocations[loc["Name"]]["index"], loc))
             else:
+                if loc["Name"] in availableLocations:
+                    diff = availableLocations[loc["Name"]]
+                    loc["difficulty"] = SMBool(diff[0], diff[1], diff[2], diff[3])
                 retMaj.append(loc)
-        #print("setLocations: retVis: {}".format(retVis))
-        #print("setLocations: retMaj: {}".format(retMaj))
         retVis.sort(key=lambda x: x[0])
         return ([loc for (i, loc) in retVis], retMaj)
+
+    def diff4isolver(self, difficulty):
+        if difficulty < medium:
+            return "easy"
+        elif difficulty < hard:
+            return "medium"
+        elif difficulty < harder:
+            return "hard"
+        elif difficulty < hardcore:
+            return "harder"
+        elif difficulty < mania:
+            return "hardcore"
+        else:
+            return "mania"
+
+    def locName4isolver(self, locName):
+        # remove space and special characters
+        # sed -e 's+ ++g' -e 's+,++g' -e 's+(++g' -e 's+)++g' -e 's+-++g'
+        return locName.translate(None, " ,()-")
+
+    def getAvailableLocationsWeb(self, locations):
+        ret = {}
+        for loc in locations:
+            if "difficulty" in loc and loc["difficulty"].bool == True:
+                diff = loc["difficulty"]
+                locName = self.locName4isolver(loc["Name"])
+                ret[locName] = {"difficulty": self.diff4isolver(diff.difficulty),
+                                "knows": list(set(diff.knows)),
+                                "items": list(set(diff.items)),
+                                "item": loc["itemName"],
+                                "name": loc["Name"]}
+        return ret
 
     def getAvailableLocations(self, locations):
         ret = {}
         for loc in locations:
             if "difficulty" in loc and loc["difficulty"].bool == True:
                 diff = loc["difficulty"]
-                ret[loc["Name"]] = {"difficulty": diff.difficulty,
-                                    "knows": diff.knows,
-                                    "items": diff.items,
-                                    "comeBack": loc['comeBack'],
-                                    "item": loc["itemName"]}
+                ret[loc["Name"]] = (diff.bool, diff.difficulty, diff.knows, diff.items)
         return ret
 
     def setPatches(self, patchesData):
@@ -127,7 +172,7 @@ class SolverState(object):
             self.state = json.load(jsonFile)
 #        print("Loaded Json State:")
 #        for key in self.state:
-#            if key in ["availableLocations", "collectedItems", "visitedLocations"]:
+#            if key in ["availableLocationsWeb", "visitedLocationsWeb", "collectedItems", "visitedLocations"]:
 #                print("{}: {}".format(key, self.state[key]))
 #        print("")
 
@@ -136,7 +181,7 @@ class SolverState(object):
             json.dump(self.state, jsonFile)
 #        print("Dumped Json State:")
 #        for key in self.state:
-#            if key in ["availableLocations", "collectedItems", "visitedLocations"]:
+#            if key in ["availableLocationsWeb", "visitedLocationsWeb", "collectedItems", "visitedLocations"]:
 #                print("{}: {}".format(key, self.state[key]))
 #        print("")
 
@@ -255,11 +300,9 @@ class InteractiveSolver(CommonSolver):
         self.loadPreset(self.presetFileName)
 
         self.loadRom(rom, interactive=True)
+        self.locations = self.addMotherBrainLoc(self.locations)
 
-        self.collectedItems = []
-        self.visitedLocations = []
-        self.lastLoc = 'Landing Site'
-        self.majorLocations = self.locations[:]
+        self.clear()
 
         # compute new available locations
         self.computeLocationsDifficulty(self.majorLocations)
@@ -267,7 +310,7 @@ class InteractiveSolver(CommonSolver):
         self.dumpState()
 
     def iterate(self, stateJson, locName, action):
-        self.locations = graphLocations
+        self.locations = self.addMotherBrainLoc(graphLocations)
         self.smbm = SMBoolManager()
 
         state = SolverState()
@@ -280,7 +323,7 @@ class InteractiveSolver(CommonSolver):
         self.areaGraph = AccessGraph(accessPoints, self.graphTransitions)
 
         if action == 'clear':
-            self.clear()
+            self.clear(True)
         else:
             # add already collected items to smbm
             self.smbm.addItems(self.collectedItems)
@@ -306,12 +349,15 @@ class InteractiveSolver(CommonSolver):
 
     def pickItemAt(self, locName):
         # collect new item at newLoc
-        if locName not in self.availableLocations:
+        if locName not in self.availableLocationsWeb:
             raise Exception("Location '{}' not found in available locations".format(locName))
-        self.collectMajor(self.getLoc(locName))
+        self.collectMajor(self.getLoc(self.availableLocationsWeb[locName]["name"]))
 
     def cancelLast(self):
         # loc
+        if len(self.visitedLocations) == 0:
+            return
+
         loc = self.visitedLocations.pop()
         self.majorLocations.append(loc)
 
@@ -320,7 +366,10 @@ class InteractiveSolver(CommonSolver):
             loc['Unpickup']()
 
         # access point
-        self.lastLoc = self.visitedLocations[-1]["accessPoint"]
+        if len(self.visitedLocations) == 0:
+            self.lastLoc = "Landing Site"
+        else:
+            self.lastLoc = self.visitedLocations[-1]["accessPoint"]
 
         # item
         item = loc["itemName"]
@@ -330,12 +379,34 @@ class InteractiveSolver(CommonSolver):
             self.smbm.removeItem(item)
             self.collectedItems.pop()
 
-    def clear(self):
+    def clear(self, reload=False):
         self.collectedItems = []
         self.visitedLocations = []
         self.lastLoc = 'Landing Site'
-        self.majorLocations = self.locations[:]
+        self.majorLocations = self.locations
+        if reload == True:
+            for loc in self.majorLocations:
+                if "difficulty" in loc:
+                    del loc["difficulty"]
         Bosses.reset()
+        self.smbm.resetItems()
+
+    def addMotherBrainLoc(self, locations):
+        # in the interactive solver mother brain is a new loc
+        locations.append({
+            'Area': "Tourian",
+            'GraphArea': "Tourian",
+            'SolveArea': "Tourian",
+            'Name': "Mother Brain",
+            'Visibility': "Visible",
+            'Room': 'Mother Brain Room',
+            'itemName': "Nothing",
+            'AccessFrom' : {
+                'Statues Hallway Left': lambda sm: SMBool(True)
+            },
+            'Available': lambda sm: sm.wand(Bosses.allBossesDead(sm), sm.enoughStuffTourian())
+        })
+        return locations
 
 class StandardSolver(CommonSolver):
     # given a rom and parameters returns the estimated difficulty
@@ -1016,7 +1087,7 @@ if __name__ == "__main__":
     parser.add_argument('--loc', help="Name of the location to action on (used in interactive mode)",
                         dest="loc", nargs='?', default=None)
     parser.add_argument('--action', help="Pickup item at location, remove last pickedup location, clear all (used in interactive mode)",
-                        dest="action", nargs="?", default=None, choices=['add', 'remove', 'clear'])
+                        dest="action", nargs="?", default=None, choices=['init', 'add', 'remove', 'clear', 'get'])
 
     args = parser.parse_args()
 

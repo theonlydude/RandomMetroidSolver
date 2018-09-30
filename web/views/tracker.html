@@ -1219,6 +1219,7 @@ var locsInfo = {
 
 window.onload = function(){
   ajaxCallItem({action: "get"}, "download", onloadWS);
+  $("#lastLoc").attr("class", "lastLoc "+lastLoc+"Gps");
 
   // display the help on first connection to the tracker
 {{

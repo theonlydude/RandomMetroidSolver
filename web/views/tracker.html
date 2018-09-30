@@ -1322,10 +1322,12 @@ function mouseOver(elem) {
     $(elem).removeClass("baseLoc");
     $(elem).addClass("baseLocOver");
 
-    var className = "marker_"+locsInfo[locName]["state"]+"_"+locsInfo[locName]["difficulty"];
-    var classNameOver = "marker_over_"+locsInfo[locName]["difficulty"];
-    $(elem).removeClass(className);
-    $(elem).addClass(classNameOver);
+    if(locsInfo[locName]["state"] == "available"){
+      var className = "marker_"+locsInfo[locName]["state"]+"_"+locsInfo[locName]["difficulty"];
+      var classNameOver = "marker_over_"+locsInfo[locName]["difficulty"];
+      $(elem).removeClass(className);
+      $(elem).addClass(classNameOver);
+    }
 
     var newTop = locsInfo[locName].top - 0.75;
     var newLeft = locsInfo[locName].left - 0.5;
@@ -1342,10 +1344,12 @@ function mouseOut(elem) {
     $(elem).removeClass("baseLocOver");
     $(elem).addClass("baseLoc");
 
-    var className = "marker_"+locsInfo[locName]["state"]+"_"+locsInfo[locName]["difficulty"];
-    var classNameOver = "marker_over_"+locsInfo[locName]["difficulty"];
-    $(elem).removeClass(classNameOver);
-    $(elem).addClass(className);
+    if(locsInfo[locName]["state"] == "available"){
+      var className = "marker_"+locsInfo[locName]["state"]+"_"+locsInfo[locName]["difficulty"];
+      var classNameOver = "marker_over_"+locsInfo[locName]["difficulty"];
+      $(elem).removeClass(classNameOver);
+      $(elem).addClass(className);
+    }
 
     var newTop = locsInfo[elem.id].top;
     var newLeft = locsInfo[elem.id].left;

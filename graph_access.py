@@ -140,11 +140,7 @@ accessPoints = [
                                                      sm.canPassBombPassages()),
                                              # go through cathedral
                                              sm.wand(sm.canOpenGreenDoors(),
-                                                     sm.canHellRun('MainUpperNorfair'),
-                                                     sm.wor(RomPatches.has(RomPatches.CathedralEntranceWallJump),
-                                                            sm.haveItem('HiJump'),
-                                                            sm.canFly(),
-                                                            sm.haveItem('SpeedBooster')))), # spark
+                                                     sm.canEnterCathedral())),
         'Croc Zone': lambda sm: sm.wor(sm.wand(sm.haveItem('SpeedBooster'), # frog speedway
                                                sm.canHellRun('MainUpperNorfair', 2),
                                                sm.wor(sm.wand(sm.canOpenRedDoors(), sm.knowsGreenGateGlitch()),

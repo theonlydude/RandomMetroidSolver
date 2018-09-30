@@ -271,7 +271,13 @@ class Knows:
                                     'href': 'https://www.youtube.com/watch?v=2a6mf-kB60U',
                                     'rooms': ['Landing Site']}
 
-    # Lower Norfair
+    # Norfair
+    NovaBoost = SMBool(False, 0, ['NovaBoost'])
+    desc['NovaBoost'] = {'display': 'Nova Boost',
+                         'title': 'Use a D-Boost on the Nova to enter Cathedral',
+                         'href': 'https://www.twitch.tv/videos/144055441',
+                         'rooms': ['Cathedral Entrance']}
+
     LavaDive = SMBool(True, harder, ['LavaDive'])
     desc['LavaDive'] = {'display': 'Lava Dive',
                         'title': 'Enter Lower Norfair with Varia and Hi-Jump',
@@ -465,7 +471,9 @@ class Knows:
             {'knows': ['TediousMountEverest', 'SuitlessPuyoClip'],
              'title': 'Obscure suitless stuff'}
         ],
-        'Lower Norfair': [
+        'Norfair': [
+            {'knows': ['NovaBoost'],
+              'title': 'Upper Norfair'},
             {'knows': ['LavaDive', 'LavaDiveNoHiJump', 'ScrewAttackExit', 'WorstRoomIceCharge'],
              'title': 'Lower Norfair'}
         ],

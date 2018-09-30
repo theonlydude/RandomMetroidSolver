@@ -122,7 +122,7 @@ class PresetLoader(object):
             hard: 4,
             harder: 3,
             hardcore: 2,
-            mania: 1,
+            mania: 1
         }
 
         boss2score = {

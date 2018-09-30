@@ -114,6 +114,17 @@ class HelpersGraph(Helpers):
         return sm.wand(sm.haveItem('Morph'),
                        RomPatches.has(RomPatches.AreaRandoGatesBase))
 
+    def canEnterCathedral(self, mult=1.0):
+        sm = self.smbm
+        return sm.wand(sm.canOpenRedDoors(),
+                       sm.wor(sm.wand(sm.canHellRun('MainUpperNorfair', mult),
+                                      sm.wor(RomPatches.has(RomPatches.CathedralEntranceWallJump),
+                                             sm.haveItem('HiJump'),
+                                             sm.canFly(),
+                                             sm.haveItem('SpeedBooster'))), # spark
+                              sm.wand(sm.canHellRun('MainUpperNorfair', 0.5*mult),
+                                      sm.knowsNovaBoost())))
+
     @Cache.decorator
     def canGrappleEscape(self):
         sm = self.smbm

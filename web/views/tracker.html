@@ -1485,6 +1485,10 @@ function ajaxCallItem(dataDict, msg, okFunc=ajaxOkJSON) {
     request.fail(ajaxFailJSON);
 }
 
+function getTooltip(locData, item) {
+  return "<center>"+locData["name"]+"</center>Item: "+item+"<br>Techniques: "+(locData["knows"].length > 0 ? locData["knows"] : "None")+"<br>Items: "+(locData["items"].length > 0 ? locData["items"] : "None");
+}
+
 function ajaxOkGetItem(jsonData) {
   // get dicts availableLocations and visitedLocations
   console.log("json received: [ "+jsonData+" ]");
@@ -1501,7 +1505,7 @@ function ajaxOkGetItem(jsonData) {
       locsInfo[locName]["tooltip"] = {name: locData["name"], item: locData["item"], items: locData["items"], knows: locData["knows"]};
 
       $("#"+locName).attr("class", "baseLoc marker_available_"+locData["difficulty"]);
-      var tooltip = "<center>"+locData["name"]+"</center>Item: ?<br>Techniques: "+locData["knows"]+"<br>Items: "+locData["items"];
+      var tooltip = getTooltip(locData, "?");
       $("#"+locName+'[data-toggle="tooltip"]').attr("title", tooltip).tooltip('fixTitle');
     }
   }
@@ -1514,7 +1518,7 @@ function ajaxOkGetItem(jsonData) {
       locsInfo[locName]["tooltip"] = {name: locName, item: locData["item"], items: locData["items"], knows: locData["knows"]};
 
       $("#"+locName).attr("class", "baseLoc marker_visited_"+locData["difficulty"]);
-      var tooltip = locData["name"]+"<br>Item: "+locData["item"]+"<br>Techniques: "+locData["knows"]+"<br>Items: "+locData["items"];
+      var tooltip = getTooltip(locData, locData["item"]);
       $("#"+locName+'[data-toggle="tooltip"]').attr("title", tooltip).tooltip('fixTitle');
     }
   }

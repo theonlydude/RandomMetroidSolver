@@ -1060,7 +1060,7 @@ def presetWebService():
 
 def home():
     # set title
-    response.title = 'Super Metroid VARIA Randomizer and Solver'
+    response.title = 'Super Metroid VARIA Randomizer, Solver and Trackers'
 
     return dict()
 

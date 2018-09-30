@@ -151,6 +151,7 @@ img {
     position: absolute;
     width: 18.5%;
     height: 18%;
+    display: none;
 }
 .logText {
     width:100%;
@@ -1385,6 +1386,7 @@ function initSolver() {
   ajaxCallItem({action: "init", romJson: value, preset: document.getElementById("preset").value}, "download", ajaxOkGetItem);
 
   hidePopup();
+  document.getElementById("log").style.display = "block";
 
   addLog("start interactive solver");
 }
@@ -1526,6 +1528,7 @@ function ajaxOkGetItem(jsonData) {
   }
   console.log("lastLoc: "+jsonData["lastLoc"]);
   $("#lastLoc").attr("class", "lastLoc "+lastLoc+"Gps");
+  document.getElementById("log").style.display = "block";
 
   setWSIcon("checkmark");
 }

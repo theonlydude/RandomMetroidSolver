@@ -59,8 +59,6 @@ class SolverState(object):
         self.state["availableLocationsWeb"] = self.getAvailableLocationsWeb(solver.majorLocations)
         # dict {locNameWeb: {infos}, ...}
         self.state["visitedLocationsWeb"] = self.getAvailableLocationsWeb(solver.visitedLocations)
-        # bool
-        self.state["canEndGame"] = solver.canEndGame().bool
 
     def toSolver(self, solver):
         solver.fullRando = self.state["fullRando"]
@@ -150,8 +148,6 @@ class SolverState(object):
                 ret[locName] = {"difficulty": self.diff4isolver(diff.difficulty),
                                 "knows": list(set(diff.knows)),
                                 "items": list(set(diff.items)),
-                                # TODO::add this later (need to put it in visited/available locs
-                                #"comeBack": loc['comeBack'],
                                 "item": loc["itemName"],
                                 "name": loc["Name"]}
         return ret
@@ -279,15 +275,6 @@ class CommonSolver(object):
 
         return loc['SolveArea']
 
-    def canEndGame(self):
-        # to finish the game you must :
-        # - beat golden 4 : we force pickup of the 4 items
-        #   behind the bosses to ensure that
-        # - defeat metroids
-        # - destroy/skip the zebetites
-        # - beat Mother Brain
-        return self.smbm.wand(Bosses.allBossesDead(self.smbm), self.smbm.enoughStuffTourian())
-
 class InteractiveSolver(CommonSolver):
     def __init__(self, output, debug=False):
         if debug == True:
@@ -313,6 +300,7 @@ class InteractiveSolver(CommonSolver):
         self.loadPreset(self.presetFileName)
 
         self.loadRom(rom, interactive=True)
+        self.locations = self.addMotherBrainLoc(self.locations)
 
         self.clear()
 
@@ -322,7 +310,7 @@ class InteractiveSolver(CommonSolver):
         self.dumpState()
 
     def iterate(self, stateJson, locName, action):
-        self.locations = graphLocations
+        self.locations = self.addMotherBrainLoc(graphLocations)
         self.smbm = SMBoolManager()
 
         state = SolverState()
@@ -402,6 +390,23 @@ class InteractiveSolver(CommonSolver):
                     del loc["difficulty"]
         Bosses.reset()
         self.smbm.resetItems()
+
+    def addMotherBrainLoc(self, locations):
+        # in the interactive solver mother brain is a new loc
+        locations.append({
+            'Area': "Tourian",
+            'GraphArea': "Tourian",
+            'SolveArea': "Tourian",
+            'Name': "Mother Brain",
+            'Visibility': "Visible",
+            'Room': 'Mother Brain Room',
+            'itemName': "Nothing",
+            'AccessFrom' : {
+                'Statues Hallway Left': lambda sm: SMBool(True)
+            },
+            'Available': lambda sm: sm.wand(Bosses.allBossesDead(sm), sm.enoughStuffTourian())
+        })
+        return locations
 
 class StandardSolver(CommonSolver):
     # given a rom and parameters returns the estimated difficulty
@@ -747,6 +752,15 @@ class StandardSolver(CommonSolver):
         hasSuper = 'Super' in self.collectedItems
         hasMissile = 'Missile' in self.collectedItems
         return (hasPB and hasSuper and hasMissile)
+
+    def canEndGame(self):
+        # to finish the game you must :
+        # - beat golden 4 : we force pickup of the 4 items
+        #   behind the bosses to ensure that
+        # - defeat metroids
+        # - destroy/skip the zebetites
+        # - beat Mother Brain
+        return self.smbm.wand(Bosses.allBossesDead(self.smbm), self.smbm.enoughStuffTourian())
 
 class Out(object):
     @staticmethod

@@ -1237,8 +1237,7 @@ def returnState(state):
         return json.dumps({"availableLocations": session.tracker["item"]["state"]["availableLocationsWeb"],
                            "visitedLocations": session.tracker["item"]["state"]["visitedLocationsWeb"],
                            "areaRando": session.tracker["item"]["state"]["areaRando"],
-                           "lastLoc": locName4isolver(session.tracker["item"]["state"]["lastLoc"]),
-                           "canEndGame": session.tracker["item"]["state"]["canEndGame"]})
+                           "lastLoc": locName4isolver(session.tracker["item"]["state"]["lastLoc"])})
     else:
         raiseHttp(200, "OK", True)
 

@@ -887,6 +887,10 @@ img {
     left: 97.65%;
     top: 44.7%;
 }
+#MotherBrain {
+    left: 22%;
+    top: 33.2%;
+}
 </style>
 
 <script type="text/javascript">
@@ -1204,7 +1208,8 @@ var locsInfo = {
   PowerBombrightMaridiasandpitroom: {left: 80.5, top: 56.8},
   MissilepinkMaridia: {left: 80.5, top: 47.85},
   SuperMissilepinkMaridia: {left: 81.5, top: 47.85},
-  MissileDraygon: {left: 97.65, top: 44.7}
+  MissileDraygon: {left: 97.65, top: 44.7},
+  MotherBrain: {left: 22, top: 33.2}
 };
 
 window.onload = function(){
@@ -1389,6 +1394,11 @@ function clickLoc(elem) {
     }
 
     addLog(locsInfo[locName]["tooltip"]["item"]+"@"+locsInfo[locName]["tooltip"]["name"]);
+
+    // if mother brain loc, add end message in log
+   if(locName == "MotherBrain") {
+     addLog("SEE YOU NEXT MISSION");
+   }
   }
 }
 
@@ -1700,6 +1710,7 @@ function startTheTour(step=-1) {
     <div id="MissilepinkMaridia" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
     <div id="SuperMissilepinkMaridia" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
     <div id="MissileDraygon" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="MotherBrain" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
 
     <div id="titleArea" class="titleArea">AREA</div>
     <div id="repeatArea" class="repeatArea"><img src="/solver/static/images/repeat.svg" alt="Cancel Last" onclick="deleteLine()" data-toggle="tooltip" title="Remove last added transition" data-placement="bottom" data-container="body" data-html="true"></div>

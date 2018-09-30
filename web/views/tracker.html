@@ -9,6 +9,8 @@ extend 'layout.html'
 <link href={{=URL('static', 'css/bootstrap-tour.min.css')}} rel="stylesheet">
 <script src="{{=URL('static','js/bootstrap-tour.min.js')}}"></script>
 
+<script type="text/javascript" src="{{=URL('static', 'js/chosen.jquery.min.js')}}"></script>
+<link rel="stylesheet" type="text/css" href={{=URL("static", "css/chosen.css")}} />
 
 <script type="text/javascript" src="{{=URL('static', 'js/leader-line.min.js')}}"></script>
 
@@ -980,10 +982,12 @@ function addLine(startPoint, endPoint) {
   linesSeq.push(startPoint);
 }
 
-function clearLines() {
-  var result = confirm("Delete all the lines ?");
-  if(result == false){
-    return;
+function clearLines(ask) {
+  if(ask == true) {
+    var result = confirm("Delete all the lines ?");
+    if(result == false){
+      return;
+    }
   }
 
   for (var startPoint in lines) {
@@ -1341,6 +1345,8 @@ function mouseOut(elem) {
 function displayPopup() {
   // display popup
   document.getElementById("solverPopup").style.display = "block";
+  // chosen must be activated when it's visible, else it doesn't work...
+  $(".chzn-select").chosen();
 }
 
 function hidePopup() {
@@ -1359,6 +1365,7 @@ function initSolver() {
 
   // reset everything
   resetLocsInfo();
+  clearLines(false);
 
   init = true;
 
@@ -1696,7 +1703,7 @@ function startTheTour(step=-1) {
 
     <div id="titleArea" class="titleArea">AREA</div>
     <div id="repeatArea" class="repeatArea"><img src="/solver/static/images/repeat.svg" alt="Cancel Last" onclick="deleteLine()" data-toggle="tooltip" title="Remove last added transition" data-placement="bottom" data-container="body" data-html="true"></div>
-    <div id="binArea" class="binArea"><img src="/solver/static/images/bin.svg" alt="Clear" onclick="clearLines()" data-toggle="tooltip" title="Remove all the transitions" data-placement="bottom" data-container="body" data-html="true"></div>
+    <div id="binArea" class="binArea"><img src="/solver/static/images/bin.svg" alt="Clear" onclick="clearLines(true)" data-toggle="tooltip" title="Remove all the transitions" data-placement="bottom" data-container="body" data-html="true"></div>
 
     <div id="titleItem" class="titleItem">ITEM</div>
     <div id="startItem" class="startItem"><img src="/solver/static/images/play.svg" alt="Start" onclick="displayPopup()" data-toggle="tooltip" title="Start the Interactive Solver" data-placement="bottom" data-container="body" data-html="true"></div>

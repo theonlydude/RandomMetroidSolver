@@ -59,6 +59,8 @@ class SolverState(object):
         self.state["availableLocationsWeb"] = self.getAvailableLocationsWeb(solver.majorLocations)
         # dict {locNameWeb: {infos}, ...}
         self.state["visitedLocationsWeb"] = self.getAvailableLocationsWeb(solver.visitedLocations)
+        # bool
+        self.state["canEndGame"] = solver.canEndGame().bool
 
     def toSolver(self, solver):
         solver.fullRando = self.state["fullRando"]
@@ -276,6 +278,15 @@ class CommonSolver(object):
         self.lastLoc = loc['accessPoint']
 
         return loc['SolveArea']
+
+    def canEndGame(self):
+        # to finish the game you must :
+        # - beat golden 4 : we force pickup of the 4 items
+        #   behind the bosses to ensure that
+        # - defeat metroids
+        # - destroy/skip the zebetites
+        # - beat Mother Brain
+        return self.smbm.wand(Bosses.allBossesDead(self.smbm), self.smbm.enoughStuffTourian())
 
 class InteractiveSolver(CommonSolver):
     def __init__(self, output, debug=False):
@@ -736,15 +747,6 @@ class StandardSolver(CommonSolver):
         hasSuper = 'Super' in self.collectedItems
         hasMissile = 'Missile' in self.collectedItems
         return (hasPB and hasSuper and hasMissile)
-
-    def canEndGame(self):
-        # to finish the game you must :
-        # - beat golden 4 : we force pickup of the 4 items
-        #   behind the bosses to ensure that
-        # - defeat metroids
-        # - destroy/skip the zebetites
-        # - beat Mother Brain
-        return self.smbm.wand(Bosses.allBossesDead(self.smbm), self.smbm.enoughStuffTourian())
 
 class Out(object):
     @staticmethod

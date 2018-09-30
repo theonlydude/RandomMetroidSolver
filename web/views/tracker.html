@@ -1586,9 +1586,11 @@ function startTheTour(step=-1) {
 	<td>Preset:</td>
 	<td>{{=SELECT(OPTGROUP(*stdPresets, **dict(_label="Standard presets")), OPTGROUP(*comPresets, **dict(_label="Community presets")), **dict(_name="preset", _id="preset", value=session.tracker["item"]["preset"], _class="filldropdown chzn-select"))}}</td>
       </tr>
+    </table>
+    <table>
       <tr>
-	<td><button type="button" onclick="initSolver()" class="full">Init</button></td>
-	<td><button type="button" onclick="hidePopup()" class="full">Cancel</button></td>
+	<td class="half"><button type="button" onclick="initSolver()" class="full">Init</button></td>
+	<td class="half"><button type="button" onclick="hidePopup()" class="full">Cancel</button></td>
       </tr>
     </table>
     <input id="romJson" name="romJson" style="display:none" type="text"/>

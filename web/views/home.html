@@ -7,31 +7,22 @@
 <title>Super Metroid VARIA Randomizer and Solver</title>
 
 <style>
-blockquote.style1 {
-  font: 14px/20px italic Times, serif;
-  padding: 8px;
-  background-color: #faebbc;
-  border-top: 1px solid #e1cc89;
-  border-bottom: 1px solid #e1cc89;
-  margin: 5px;
-  background-image: url(images/openquote1.gif);
-  background-position: top left;
-  background-repeat: no-repeat;
-  text-indent: 23px;
-}
-blockquote.style1 span {
-     display: block;
-     background-image: url(images/closequote1.gif);
-     background-repeat: no-repeat;
-     background-position: bottom right;
-}
 td {
     padding-left: 5px;
     padding-right: 5px;
     padding-top: 0px;
     padding-bottom: 0px;
 
-    border: 1px solid #ddd;
+    border: 0px solid #ddd;
+
+    vertical-align: top;
+
+/*    background-color: #000000;
+}
+body {
+    background-color: #000000;
+    color: white;
+*/
 }
 </style>
 
@@ -47,50 +38,59 @@ td {
   </div>
 </div>
 <div class="main">
-  <h2 class="center">Welcome to the home of the VARIA (Very Adaptive Randomizer of Items and Areas) Randomizer and Solver</h2>
   <p class="center">
-    <img src="/solver/static/images/super_metroid_logo.png" alt="logo">
+    <img src="/solver/static/images/super_metroid_logo.png" alt="logo" class="half">
   </p>
-  <p>
-    <h3>Adam 1:1-3</h3>
-    <blockquote>
-      1 In the beginning was the Preset, and the Preset was with Old Bird, and the Preset was Old Bird.<br/>
-      2 He was with Old Bird in the beginning.<br/>
-      3 Through him all things were made; without him nothing was made that has been made.<br/>
-    </blockquote>
-  <p>
-  <p>
-    The VARIA website is divided in three parts:
-    <ul>
-      <li>manage your preset</li>
-      <li>generate randomized Super Metroid ROMs</li>
-      <li>solve randomized Super Metroid ROMs (from VARIA/Total/Dessy randomizers)</li>
-    </ul>
-  </p>
+  <h2 class="center">Welcome to the home of the VARIA (Very Adaptive Randomizer of Items and Areas) Randomizer, Solver and Trackers</h2>
   <table>
     <tr>
-      <td class="third">
-	<p>
-	  At the center of the VARIA experience is the preset.<br/>
-	  A preset contains the list of all the techniques that you know in Super Metroid with your perceived difficulty.
-	</p>
-	<p>
-	  To create and manage your preset click on <a href="{{=URL(f='presets')}}">Presets</a>.
-	</p>
+      <td class="half">
+	<h4>Presets</h4>
+	<ul>
+	  <li>At the center of the VARIA experience is the preset</li>
+	  <li>All the techniques which can be required in a randomized Super Metroid ROM are listed</li>
+	  <li>For each technique you can tell if you know it and your perceived difficulty</li>
+	  <li>Also take into account the hard rooms (Gauntlet, Xray) and the bosses</li>
+	  <li>Standards presets of increased difficulty are included, as a base to create your one</li>
+	  <li>A skill level bar allow you to compare your preset to the standards and community presets</li>
+	  <li>Tutorial available for most of the techniques</li>
+	  <li>The rooms where the technique can be used are listed</li>
+	  <li>Put your gamepad mapping in your preset</li>
+	</ul>
       </td>
-      <td class="third">
-	<p>
-	  Use your preset to generate randomized Super Metroid ROMs that will only required techniques that you know.</br>
-	  The items locations are randomized, you can also randomize accesses between areas.<br/>
-	  To randomize a ROM with the VARIA Randomizer click on <a href="{{=URL(f='randomizer')}}">Randomizer</a>.
-	</p>
+      <td class="half">
+	<h4>Randomizer</h4>
+	<ul>
+	  <li>Use your preset to generate randomized Super Metroid ROMs that will only required techniques that you know</li>
+	  <li>Full item randomization (like Dessy) or majors/minors randomization (like Total)</li>
+	  <li>Area randomization: randomize the access between the main areas of the game</li>
+	  <li>Different progression speed, from slowest, stuffing your way with as many non-progression items as possible, to fastest, where you will be able to visit Zebes pretty shortly</li>
+	  <li>Choose the distribution of minors</li>
+	  <li>Choose the quantity of minors and energy</li>
+	  <li>Various optional patches are available to enhance the gameplay</li>
+	  <li>Super Fun Times: Have fun randomly removing major item</li>
+	</ul>
       </td>
-      <td class="third">
-	<p>
-	  Using your preset you can check if you can finish a Super Metroid randomized ROM and get an estimation of the difficulty.<br/>
-	  The Solver also provides a spoiler path to follow will the techniques/items used at each locations.<br/>
-	  To solve a Super Metroid randomized ROM click on <a href="{{=URL(f='solver')}}">Solver</a>.
-	</p>
+    </tr>
+    <tr>
+      <td class="half">
+	<h4>Solver</h4>
+	<ul>
+	  <li>Using your preset you can check if you can finish a Super Metroid randomized ROM (Dessy/Total/VARIA randomizers are supported) and get an estimation of the difficulty.</li>
+	  <li>Display an optional spoiler giving you a realistic path to follow to finish the seed.</li>
+	  <li>All the techniques and items used to reach a location are displayed</li>
+	  <li>You can click on an item to highlight all occurences of it in the spoiler for easy spotting</li>
+	  <li>The solver can collect all items or only the minimal required</li>
+	  <li>Give a maximum difficulty for visiting locations</li>
+	</ul>
+      </td>
+      <td class="half">
+	<h4>Area and Item Trackers</h4>
+	<ul>
+	  <li>Area tracker: add lines between the area portals when playing an Area randomized seed</li>
+	  <li>Interactive Item tracker: the available locations are displayed on the map, click on them to collect the item and display the next available locations</li>
+	  <li>The current state of the trackers is automatically saved, allowing you to finish your seed in multiple seatings</li>
+	</ul>
       </td>
     </tr>
   </table>

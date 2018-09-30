@@ -1095,7 +1095,12 @@ function setWSIcon(icon) {
   }
 }
 
+function onloadWS(jsonData) {
+  // we have to call the two web services sequentially or the lines can be misplaced
+  ajaxOkGetItem(jsonData);
 
+  ajaxCallArea({action: "get"}, "download", ajaxOkGetArea);
+}
 
 //-----------------------------------------------------------
 // ITEMS TRACKER
@@ -1213,8 +1218,7 @@ var locsInfo = {
 };
 
 window.onload = function(){
-  ajaxCallArea({action: "get"}, "download", ajaxOkGetArea);
-  ajaxCallItem({action: "get"}, "download", ajaxOkGetItem);
+  ajaxCallItem({action: "get"}, "download", onloadWS);
 
   // display the help on first connection to the tracker
 {{

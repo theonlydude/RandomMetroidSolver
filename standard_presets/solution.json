@@ -18,6 +18,7 @@
       true,
       5
     ],
+    "NovaBoost": [true, 100],
     "ScrewAttackExit": [
       true,
       10
@@ -94,9 +95,29 @@
       true,
       100
     ],
-    "SuitlessSandpit": [
+    "GravLessLevel3": [
       true,
       100
+    ],
+    "AccessSpringBallWithSpringBallBombJumps": [
+      true,
+      10
+    ],
+    "AccessSpringBallWithXRayClimb": [
+      true,
+      100
+    ],
+    "AccessSpringBallWithBombJumps": [
+      true,
+      50
+    ],
+    "AccessSpringBallWithSpringBallJump": [
+      true,
+      50
+    ],
+    "SnailClip": [
+      true,
+      50
     ],
     "SpongeBathSpeed": [
       true,
@@ -147,16 +168,12 @@
       25
     ],
     "GravLessLevel1": [
-      false,
-      0
+      true,
+      25
     ],
     "GravityJump": [
       true,
       10
-    ],
-    "GravLessLevel3": [
-      false,
-      0
     ],
     "KillPlasmaPiratesWithCharge": [
       true,

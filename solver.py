@@ -139,6 +139,15 @@ class SolverState(object):
         # sed -e 's+ ++g' -e 's+,++g' -e 's+(++g' -e 's+)++g' -e 's+-++g'
         return locName.translate(None, " ,()-")
 
+    def knows2isolver(self, knows):
+        result = []
+        for know in knows:
+            if know in Knows.desc:
+                result.append(Knows.desc[know]['display'])
+            else:
+                result.append(know)
+        return list(set(result))
+
     def getAvailableLocationsWeb(self, locations):
         ret = {}
         for loc in locations:
@@ -146,7 +155,7 @@ class SolverState(object):
                 diff = loc["difficulty"]
                 locName = self.locName4isolver(loc["Name"])
                 ret[locName] = {"difficulty": self.diff4isolver(diff.difficulty),
-                                "knows": list(set([Knows.desc[know]['display'] for know in diff.knows])),
+                                "knows": self.knows2isolver(diff.knows),
                                 "items": list(set(diff.items)),
                                 "item": loc["itemName"],
                                 "name": loc["Name"]}

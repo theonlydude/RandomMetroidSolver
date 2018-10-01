@@ -146,7 +146,7 @@ class SolverState(object):
                 diff = loc["difficulty"]
                 locName = self.locName4isolver(loc["Name"])
                 ret[locName] = {"difficulty": self.diff4isolver(diff.difficulty),
-                                "knows": list(set(diff.knows)),
+                                "knows": list(set([Knows.desc[know]['display'] for know in diff.knows])),
                                 "items": list(set(diff.items)),
                                 "item": loc["itemName"],
                                 "name": loc["Name"]}

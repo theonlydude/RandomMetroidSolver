@@ -1128,8 +1128,7 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Beta Power Bomb Room',
     'AccessFrom' : {
-        'Red Brinstar Elevator': lambda sm: SMBool(True),
-        'Caterpillar Room Top Right': lambda sm: sm.canPassMaridiaToRedTowerNode()
+        'Red Brinstar Elevator': lambda sm: SMBool(True)
     },
     'Available': lambda sm: sm.wand(sm.canOpenGreenDoors(),
                                     sm.canUsePowerBombs())
@@ -1145,8 +1144,7 @@ locations = [
     'Visibility': "Chozo",
     'Room': 'Alpha Power Bomb Room',
     'AccessFrom' : {
-        'Red Brinstar Elevator': lambda sm: SMBool(True),
-        'Caterpillar Room Top Right': lambda sm: sm.canPassMaridiaToRedTowerNode()
+        'Red Brinstar Elevator': lambda sm: SMBool(True)
     },
     'Available': lambda sm: sm.canOpenGreenDoors()
 },
@@ -1161,8 +1159,7 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Alpha Power Bomb Room',
     'AccessFrom' : {
-        'Red Brinstar Elevator': lambda sm: SMBool(True),
-        'Caterpillar Room Top Right': lambda sm: sm.canPassMaridiaToRedTowerNode()
+        'Red Brinstar Elevator': lambda sm: SMBool(True)
     },
     'Available': lambda sm: sm.wand(sm.canOpenGreenDoors(),
                                     sm.canUsePowerBombs())

@@ -182,6 +182,7 @@ class AccessGraph(object):
         while len(newAvailNodes) > 0:
             newAvailNodes = self.getNewAvailNodes(availNodes, newAvailNodes, smbm, maxDiff)
             availNodes.update(newAvailNodes)
+
         return availNodes
 
     def getPath(self, srcAp, dstAp, availAps):
@@ -229,7 +230,7 @@ class AccessGraph(object):
                 if tdiff.bool == True and tdiff.difficulty <= maxDiff:
                     diff = smbm.eval(loc['Available'])
                     path = self.getPath(rootAp, ap, availAccessPoints)
-                    #if loc['Name'] == "Missile (lava room)":
+                    # if loc['Name'] == "Power Bomb (red Brinstar spike room)":
                     #    print("path: {}".format([a.Name for a in path]))
                     pdiff = self.getPathDifficulty(path, availAccessPoints)
                     locDiff = SMBool(diff.bool,

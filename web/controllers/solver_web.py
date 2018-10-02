@@ -439,7 +439,7 @@ def validateSolverParams():
         if IS_MATCH('[a-zA-Z0-9_\.]*')(request.vars.romFile)[1] is not None:
             return (False, "Wrong value for romFile, must be valid file name: {}".format(request.vars.romFile))
 
-        if IS_LENGTH(maxsize=256, minsize=1)(request.vars.romFile)[1] is not None:
+        if IS_LENGTH(maxsize=255, minsize=1)(request.vars.romFile)[1] is not None:
             return (False, "Wrong length for romFile, name must be between 1 and 256 characters: {}".format(request.vars.romFile))
 
     if request.vars.romJson is not None and len(request.vars.romJson) > 0:
@@ -454,7 +454,7 @@ def validateSolverParams():
                 return (False, "Wrong value for uploadFile, must be a valid file name: {}".format(request.vars.uploadFile))
 
             if IS_LENGTH(maxsize=256, minsize=1)(request.vars.uploadFile)[1] is not None:
-                return (False, "Wrong length for uploadFile, name must be between 1 and 256 characters: {}".format(request.vars.uploadFile))
+                return (False, "Wrong length for uploadFile, name must be between 1 and 255 characters: {}".format(request.vars.uploadFile))
         else:
             # the file uploaded. TODO: how to check it ?
             pass
@@ -1093,11 +1093,15 @@ def stats():
     solverData = DB.getSolverData(weeks)
     randomizerData = DB.getRandomizerData(weeks)
 
+    isolver = DB.getISolver(weeks)
+    isolverData = DB.getISolverData(weeks)
+
     errors = getErrors()
 
     return dict(solverPresets=solverPresets, randomizerPresets=randomizerPresets,
                 solverDurations=solverDurations, randomizerDurations=randomizerDurations,
-                solverData=solverData, randomizerData=randomizerData, errors=errors)
+                solverData=solverData, randomizerData=randomizerData,
+                isolver=isolver, isolverData=isolverData, errors=errors)
 
 def tracker():
     response.title = 'Super Metroid VARIA Randomizer and Solver Area and Item Tracker'
@@ -1220,6 +1224,17 @@ def validateItemTrackerParams():
         except:
             raiseHttp(400, "Wrong value for romJson, must be a JSON string: [{}]".format(request.vars.romJson))
 
+        # ROM file name
+        uploadFile = request.vars.fileName
+        if uploadFile is None:
+            raiseHttp(400, "Missing ROM file name", True)
+        if IS_NOT_EMPTY()(uploadFile)[1] is not None:
+            raiseHttp(400, "File name is empty", True)
+        if IS_MATCH('[a-zA-Z0-9_\.]*')(uploadFile)[1] is not None:
+            return (False, "Wrong value for ROM file name, must be valid file name: {}".format(request.vars.romFile))
+        if IS_LENGTH(maxsize=255, minsize=1)(request.vars.romFile)[1] is not None:
+            return (False, "Wrong length for ROM file name, name must be between 1 and 255 characters: {}".format(request.vars.romFile))
+
     elif action == 'add':
         # new location
         if request.vars.locName not in ['EnergyTankGauntlet', 'Bomb', 'EnergyTankTerminator', 'ReserveTankBrinstar', 'ChargeBeam', 'MorphingBall', 'EnergyTankBrinstarCeiling', 'EnergyTankEtecoons', 'EnergyTankWaterway', 'EnergyTankBrinstarGate', 'XRayScope', 'Spazer', 'EnergyTankKraid', 'VariaSuit', 'IceBeam', 'EnergyTankCrocomire', 'HiJumpBoots', 'GrappleBeam', 'ReserveTankNorfair', 'SpeedBooster', 'WaveBeam', 'EnergyTankRidley', 'ScrewAttack', 'EnergyTankFirefleas', 'ReserveTankWreckedShip', 'EnergyTankWreckedShip', 'RightSuperWreckedShip', 'GravitySuit', 'EnergyTankMamaturtle', 'PlasmaBeam', 'ReserveTankMaridia', 'SpringBall', 'EnergyTankBotwoon', 'SpaceJump', 'PowerBombCrateriasurface', 'MissileoutsideWreckedShipbottom', 'MissileoutsideWreckedShiptop', 'MissileoutsideWreckedShipmiddle', 'MissileCrateriamoat', 'MissileCrateriabottom', 'MissileCrateriagauntletright', 'MissileCrateriagauntletleft', 'SuperMissileCrateria', 'MissileCrateriamiddle', 'PowerBombgreenBrinstarbottom', 'SuperMissilepinkBrinstar', 'MissilegreenBrinstarbelowsupermissile', 'SuperMissilegreenBrinstartop', 'MissilegreenBrinstarbehindmissile', 'MissilegreenBrinstarbehindreservetank', 'MissilepinkBrinstartop', 'MissilepinkBrinstarbottom', 'PowerBombpinkBrinstar', 'MissilegreenBrinstarpipe', 'PowerBombblueBrinstar', 'MissileblueBrinstarmiddle', 'SuperMissilegreenBrinstarbottom', 'MissileblueBrinstarbottom', 'MissileblueBrinstartop', 'MissileblueBrinstarbehindmissile', 'PowerBombredBrinstarsidehopperroom', 'PowerBombredBrinstarspikeroom', 'MissileredBrinstarspikeroom', 'MissileKraid', 'Missilelavaroom', 'MissilebelowIceBeam', 'MissileaboveCrocomire', 'MissileHiJumpBoots', 'EnergyTankHiJumpBoots', 'PowerBombCrocomire', 'MissilebelowCrocomire', 'MissileGrappleBeam', 'MissileNorfairReserveTank', 'MissilebubbleNorfairgreendoor', 'MissilebubbleNorfair', 'MissileSpeedBooster', 'MissileWaveBeam', 'MissileGoldTorizo', 'SuperMissileGoldTorizo', 'MissileMickeyMouseroom', 'MissilelowerNorfairabovefireflearoom', 'PowerBomblowerNorfairabovefireflearoom', 'PowerBombPowerBombsofshame', 'MissilelowerNorfairnearWaveBeam', 'MissileWreckedShipmiddle', 'MissileGravitySuit', 'MissileWreckedShiptop', 'SuperMissileWreckedShipleft', 'MissilegreenMaridiashinespark', 'SuperMissilegreenMaridia', 'MissilegreenMaridiatatori', 'SuperMissileyellowMaridia', 'MissileyellowMaridiasupermissile', 'MissileyellowMaridiafalsewall', 'MissileleftMaridiasandpitroom', 'MissilerightMaridiasandpitroom', 'PowerBombrightMaridiasandpitroom', 'MissilepinkMaridia', 'SuperMissilepinkMaridia', 'MissileDraygon', 'MotherBrain']:
@@ -1241,7 +1256,7 @@ def returnState(state):
     else:
         raiseHttp(200, "OK", True)
 
-def callSolverInit(jsonRomFileName, presetFileName):
+def callSolverInit(jsonRomFileName, presetFileName, preset, romFileName):
     jsonOutFileName = tempfile.mkstemp()[1]
     params = [
         'python2',  os.path.expanduser("~/RandomMetroidSolver/solver.py"),
@@ -1260,6 +1275,10 @@ def callSolverInit(jsonRomFileName, presetFileName):
     print("ret: {}, duration: {}s".format(ret, duration))
 
     if ret == 0:
+        DB = db.DB()
+        DB.addISolver(preset, romFileName)
+        DB.close()
+
         with open(jsonOutFileName) as jsonFile:
             state = json.load(jsonFile)
         os.remove(jsonOutFileName)
@@ -1331,7 +1350,8 @@ def itemTrackerWebService():
 
         presetFileName = '{}/{}.json'.format(getPresetDir(request.vars.preset), request.vars.preset)
         session.tracker["item"]["preset"] = request.vars.preset
-        return callSolverInit(jsonRomFileName, presetFileName)
+        return callSolverInit(jsonRomFileName, presetFileName,
+                              request.vars.preset, request.vars.fileName)
     elif action == 'get':
         return returnState(session.tracker["item"]["state"])
     else:

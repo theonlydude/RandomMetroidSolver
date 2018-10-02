@@ -1255,7 +1255,8 @@ window.onload = function(){
         var base = re.exec(file.name)[1];
   
         var outFileName = file.name.replace(/\.[^/.]+$/, ".json");
-  
+        document.getElementById("fileName").value = file.name;
+
         var fileSize = file.size;
   	if( fileSize > 4*1024*1024 ) {
             document.getElementById("uploadFile").value = "";
@@ -1387,7 +1388,7 @@ function initSolver() {
   init = true;
 
   // prepare parameters for WS
-  ajaxCallItem({action: "init", romJson: value, preset: document.getElementById("preset").value}, "download", ajaxOkGetItem);
+  ajaxCallItem({action: "init", romJson: value, preset: document.getElementById("preset").value, fileName: document.getElementById("fileName").value}, "download", ajaxOkGetItem);
 
   hidePopup();
   // document.getElementById("log").style.display = "block";
@@ -1601,7 +1602,6 @@ function startTheTour(step=-1) {
 </div>
 
 <div class="main">
-
   <div id="solverPopup" class="solverPopup">
     <table class="full">
       <colgroup><col class="half" /><col class="half" /></colgroup>
@@ -1621,6 +1621,7 @@ function startTheTour(step=-1) {
       </tr>
     </table>
     <input id="romJson" name="romJson" style="display:none" type="text"/>
+    <input id="fileName" name="fileName" style="display:none" type="text"/>
   </div>
 
   <div class="map_container">

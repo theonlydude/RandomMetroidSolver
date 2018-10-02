@@ -166,6 +166,17 @@ class DB:
             print("DB.initPresets::error execute: {} error: {}".format(sql, e))
             self.dbAvailable = False
 
+    def addISolver(self, preset, romFileName):
+        if self.dbAvailable == False:
+            return None
+
+        try:
+            sql = "insert into isolver (init_time, preset, romFileName) values (now(), '%s', '%s');"
+            self.cursor.execute(sql % (preset, romFileName))
+        except Exception as e:
+            print("DB.addISolver::error execute: {} error: {}".format(sql, e))
+            self.dbAvailable = False
+
     # read data
     def execSelect(self, sql):
         if self.dbAvailable == False:
@@ -299,3 +310,30 @@ order by r.id;""".format(weeks)
             return 'N/A'
         data = data[0][0] if data[0][0] != None else 'N/A'
         return data
+
+    def getISolver(self, weeks):
+        sql = "select distinct(preset) from isolver where init_time > DATE_SUB(CURDATE(), INTERVAL {} WEEK);".format(weeks)
+        presets = self.execSelect(sql)
+        if presets == None:
+            return None
+
+        # db returns tuples
+        presets = [preset[0] for preset in presets]
+
+        # pivot
+        sql = "SELECT date(init_time)"
+        for preset in presets:
+            sql += ", SUM(CASE WHEN preset = '{}' THEN 1 ELSE 0 END) AS count_{}".format(preset, preset)
+        sql += " FROM isolver where init_time > DATE_SUB(CURDATE(), INTERVAL {} WEEK) GROUP BY date(init_time);".format(weeks)
+
+        return (presets, self.execSelect(sql))
+
+    def getISolverData(self, weeks):
+        # return all data csv style
+        sql = """select init_time, preset, romFileName
+from isolver
+where init_time > DATE_SUB(CURDATE(), INTERVAL {} WEEK)
+order by init_time;""".format(weeks)
+
+        header = ["initTime", "preset", "romFileName"]
+        return (header, self.execSelect(sql))

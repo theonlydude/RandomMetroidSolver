@@ -1015,7 +1015,7 @@ def interactiveSolver(args):
     # to iterate, requires interactive/state/loc/action/output parameters
     if args.romFileName != None and args.presetFileName != None and args.output != None:
         # init
-        solver = InteractiveSolver(args.output, args.debug)
+        solver = InteractiveSolver(args.output)
         solver.initialize(args.romFileName, args.presetFileName)
     elif args.state != None and args.action != None and args.output != None:
         # iterate

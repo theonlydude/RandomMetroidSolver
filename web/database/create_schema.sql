@@ -81,3 +81,11 @@ create table if not exists preset_action (
   action varchar(6) not null,
   primary key (preset, action_time)
 );
+
+-- will loose one entry if same preset at the same second, can live with that
+create table if not exists isolver (
+  init_time datetime not null,
+  preset varchar(32) not null,
+  romFileName tinytext,
+  primary key (init_time, preset)
+);

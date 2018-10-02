@@ -89,6 +89,7 @@ function drawCharts() {
   drawRandomizerPresets();
   drawSolverDurations();
   drawRandomizerDurations();
+  drawISolver();
 }
 
 function drawSolverPresets() {
@@ -209,6 +210,36 @@ function drawRandomizerDurations() {
 }}
 }
 
+function drawISolver() {
+{{
+  if isolver == None:
+    response.write("  return;", escape=False)
+    pass
+  else:
+}}
+    // Define the chart to be drawn.
+    var data = google.visualization.arrayToDataTable([
+      [{type: 'date', label: 'Date'}, {{response.write(", ".join(["'{}'".format(p) for p in isolver[0]]), escape=False)}}]
+{{
+    for row in isolver[1]:
+      response.write(", [\"Date({}, {}, {})\", {}]".format(row[0].year, row[0].month-1, row[0].day, ", ".join([str(x) for x in row[1:]])), escape=False)
+      pass
+}}
+    ]);
+
+    var options = {
+      title: "Interactive Solver usage",
+      isStacked: true
+    };
+
+    // Instantiate and draw the chart.
+    var chart = new google.visualization.ColumnChart(document.getElementById("isolver"));
+    chart.draw(data, options);
+{{
+    pass
+}}
+}
+
 google.charts.setOnLoadCallback(drawCharts);
 </script>
 
@@ -236,13 +267,19 @@ google.charts.setOnLoadCallback(drawCharts);
     <div id = "solverDurations" style = "height: 400px; margin: 0 auto"></div>
   </div>
 </div>
+<div class="row">
+  <div class="column">
+    <h4>Interactive Solver statistics</h4>
+    <div id = "isolver" style = "height: 400px; margin: 0 auto"></div>
+  </div>
+</div>
 
 {{
-  def displayData(data):
+  def displayData(id, data):
     if data == None:
       response.write("No data\n", escape=False)
     else:
-      response.write("<table  id=\"solverData\" class=\"full\">\n", escape=False)
+      response.write("<table  id=\"id\" class=\"full\">\n", escape=False)
 
       response.write("  <tr>\n", escape=False)
       i = 0
@@ -252,12 +289,14 @@ google.charts.setOnLoadCallback(drawCharts);
         pass
       response.write("  </tr>\n", escape=False)
 
-      for row in data[1]:
-        response.write("  <tr>\n", escape=False)
-        for col in row:
-          response.write("    <td style=\"white-space: nowrap\">{}</td>\n".format(col), escape=False)
+      if data[1] != None:
+        for row in data[1]:
+          response.write("  <tr>\n", escape=False)
+          for col in row:
+            response.write("    <td style=\"white-space: nowrap\">{}</td>\n".format(col), escape=False)
+            pass
+          response.write("  </tr>\n", escape=False)
           pass
-        response.write("  </tr>\n", escape=False)
         pass
 
       response.write("  <tr>\n", escape=False)
@@ -274,9 +313,14 @@ google.charts.setOnLoadCallback(drawCharts);
 }}
 
 <h4>Solver data</h4>
-{{displayData(solverData)}}
+{{displayData("solverData", solverData)}}
 
 <a download="solver.csv" href="#" onclick="return ExcellentExport.csv(this, 'solverData');">Export to CSV</a>
+
+<h4>Interactive Solver data</h4>
+{{displayData("isolverData", isolverData)}}
+
+<a download="isolver.csv" href="#" onclick="return ExcellentExport.csv(this, 'isolverData');">Export to CSV</a>
 
 <h4>Randomizer data</h4>
 {{
@@ -306,26 +350,28 @@ google.charts.setOnLoadCallback(drawCharts);
 
       response.write("  </tr>\n", escape=False)
 
-      for row in data[1]:
-        response.write("  <tr>\n", escape=False)
-        # standard params except dynamic ones and error msg
-        for col in row[0:-2]:
-          response.write("    <td style=\"white-space: nowrap\">{}</td>\n".format(col), escape=False)
-          pass
-        # dynamic parameters
-        paramDict = row[-1]
-        for param in paramList:
-          if param in paramDict:
-            response.write("    <td style=\"white-space: nowrap\">{}</td>\n".format('true' if paramDict[param] == 'None' else paramDict[param]), escape=False)
-          else:
-            response.write("    <td>false</td>\n", escape=False)
+      if data[1] != None:
+        for row in data[1]:
+          response.write("  <tr>\n", escape=False)
+          # standard params except dynamic ones and error msg
+          for col in row[0:-2]:
+            response.write("    <td style=\"white-space: nowrap\">{}</td>\n".format(col), escape=False)
             pass
-          pass
-        # error msg
-        col = row[-2]
-        response.write("    <td style=\"white-space: nowrap\">{}</td>\n".format(col), escape=False)
+          # dynamic parameters
+          paramDict = row[-1]
+          for param in paramList:
+            if param in paramDict:
+              response.write("    <td style=\"white-space: nowrap\">{}</td>\n".format('true' if paramDict[param] == 'None' else paramDict[param]), escape=False)
+            else:
+              response.write("    <td>false</td>\n", escape=False)
+              pass
+            pass
+          # error msg
+          col = row[-2]
+          response.write("    <td style=\"white-space: nowrap\">{}</td>\n".format(col), escape=False)
 
-        response.write("  </tr>\n", escape=False)
+          response.write("  </tr>\n", escape=False)
+          pass
         pass
 
       response.write("  <tr>\n", escape=False)

@@ -274,7 +274,7 @@ class Knows:
     # Norfair
     NovaBoost = SMBool(False, 0, ['NovaBoost'])
     desc['NovaBoost'] = {'display': 'Nova Boost',
-                         'title': 'Use a D-Boost on the Nova to enter Cathedral',
+                         'title': 'Use a D-Boost on the Sova to enter Cathedral',
                          'href': 'https://www.twitch.tv/videos/144055441',
                          'rooms': ['Cathedral Entrance']}
 

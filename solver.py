@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import sys, math, logging, argparse, re, json, os, subprocess
+import sys, math, argparse, re, json, os, subprocess, logging
 
 # the difficulties for each technics
 from parameters import Knows, Settings, isKnows, isSettings
@@ -15,6 +15,7 @@ from graph_locations import locations as graphLocations
 from graph import AccessGraph
 from graph_access import vanillaTransitions, accessPoints
 from utils import PresetLoader
+import log
 
 class Conf:
     # keep getting majors of at most this difficulty before going for minors or changing area
@@ -139,6 +140,15 @@ class SolverState(object):
         # sed -e 's+ ++g' -e 's+,++g' -e 's+(++g' -e 's+)++g' -e 's+-++g'
         return locName.translate(None, " ,()-")
 
+    def knows2isolver(self, knows):
+        result = []
+        for know in knows:
+            if know in Knows.desc:
+                result.append(Knows.desc[know]['display'])
+            else:
+                result.append(know)
+        return list(set(result))
+
     def getAvailableLocationsWeb(self, locations):
         ret = {}
         for loc in locations:
@@ -146,7 +156,7 @@ class SolverState(object):
                 diff = loc["difficulty"]
                 locName = self.locName4isolver(loc["Name"])
                 ret[locName] = {"difficulty": self.diff4isolver(diff.difficulty),
-                                "knows": list(set(diff.knows)),
+                                "knows": self.knows2isolver(diff.knows),
                                 "items": list(set(diff.items)),
                                 "item": loc["itemName"],
                                 "name": loc["Name"]}
@@ -276,12 +286,8 @@ class CommonSolver(object):
         return loc['SolveArea']
 
 class InteractiveSolver(CommonSolver):
-    def __init__(self, output, debug=False):
-        if debug == True:
-            logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
-        else:
-            logging.basicConfig(level=logging.INFO)
-        self.log = logging.getLogger('Solver')
+    def __init__(self, output):
+        self.log = log.get('Solver')
 
         self.outputFileName = output
         self.firstLogFile = None
@@ -411,12 +417,8 @@ class InteractiveSolver(CommonSolver):
 class StandardSolver(CommonSolver):
     # given a rom and parameters returns the estimated difficulty
 
-    def __init__(self, rom, presetFileName, difficultyTarget, pickupStrategy, itemsForbidden=[], type='console', debug=False, firstItemsLog=None, displayGeneratedPath=False, outputFileName=None):
-        if debug == True:
-            logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
-        else:
-            logging.basicConfig(level=logging.INFO)
-        self.log = logging.getLogger('Solver')
+    def __init__(self, rom, presetFileName, difficultyTarget, pickupStrategy, itemsForbidden=[], type='console', firstItemsLog=None, displayGeneratedPath=False, outputFileName=None):
+        self.log = log.get('Solver')
 
         self.setConf(difficultyTarget, pickupStrategy, itemsForbidden, displayGeneratedPath)
 
@@ -1013,7 +1015,7 @@ def interactiveSolver(args):
     # to iterate, requires interactive/state/loc/action/output parameters
     if args.romFileName != None and args.presetFileName != None and args.output != None:
         # init
-        solver = InteractiveSolver(args.output, args.debug)
+        solver = InteractiveSolver(args.output)
         solver.initialize(args.romFileName, args.presetFileName)
     elif args.state != None and args.action != None and args.output != None:
         # iterate
@@ -1021,7 +1023,7 @@ def interactiveSolver(args):
             print("Missing loc parameter when using action add")
             sys.exit(1)
 
-        solver = InteractiveSolver(args.output, args.debug)
+        solver = InteractiveSolver(args.output)
         solver.iterate(args.state, args.loc, args.action)
     else:
         print("Wrong parameters for interactive mode")
@@ -1047,7 +1049,7 @@ def standardSolver(args):
 
     solver = StandardSolver(args.romFileName, args.presetFileName, difficultyTarget,
                             pickupStrategy, args.itemsForbidden, type=args.type,
-                            debug=args.debug, firstItemsLog=args.firstItemsLog,
+                            firstItemsLog=args.firstItemsLog,
                             displayGeneratedPath=args.displayGeneratedPath,
                             outputFileName=args.output)
 
@@ -1093,6 +1095,8 @@ if __name__ == "__main__":
 
     if args.presetFileName is None:
         args.presetFileName = 'standard_presets/regular.json'
+
+    log.init(args.debug)
 
     if args.interactive == True:
         interactiveSolver(args)

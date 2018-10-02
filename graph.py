@@ -3,6 +3,7 @@
 import copy
 from smbool import SMBool
 from rom import RomPatches
+import log
 
 class AccessPoint(object):
     # name : AccessPoint name
@@ -49,6 +50,8 @@ class AccessPoint(object):
 
 class AccessGraph(object):
     def __init__(self, accessPointList, transitions, bidir=True, dotFile=None):
+        self.log = log.get('Graph')
+
         self.accessPoints = {}
         self.InterAreaTransitions = []
         self.bidir = bidir
@@ -165,7 +168,7 @@ class AccessGraph(object):
                         dst.distance = src.distance + 1
                     newAvailNodes[dst] = { 'difficulty' : diff, 'from' : src }
 
-                #print("{} -> {}: {}".format(src.Name, dstName, diff))
+                #self.log.debug("{} -> {}: {}".format(src.Name, dstName, diff))
         return newAvailNodes
 
     # rootNode: starting AccessPoint instance
@@ -262,7 +265,7 @@ class AccessGraph(object):
         srcAccessPoint = self.accessPoints[srcAccessPointName]
         availAccessPoints = self.getAvailableAccessPoints(srcAccessPoint, smbm, maxDiff)
         can = destAccessPoint in availAccessPoints
-#        print("canAccess: avail = " + str([ap.Name for ap in availAccessPoints.keys()]))
+        self.log.debug("canAccess: avail = {}".format([ap.Name for ap in availAccessPoints.keys()]))
         if item is not None:
             smbm.removeItem(item)
         return can

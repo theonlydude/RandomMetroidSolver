@@ -10,6 +10,7 @@ from graph_access import vanillaTransitions, getDoorConnections
 from parameters import Knows, easy, medium, hard, harder, hardcore, mania, text2diff, diff2text
 from utils import PresetLoader
 from rom import RomPatcher, RomPatches, FakeROM
+import log
 
 speeds = ['slowest', 'slow', 'medium', 'fast', 'fastest', 'basic']
 energyQties = ['sparse', 'medium', 'vanilla' ]
@@ -296,6 +297,7 @@ if __name__ == "__main__":
     # print("qty = " + str(qty))
     # print("restrictions = " + str(restrictions))
     # print("superFun = " + str(args.superFun))
+    log.init(args.debug)
     randoSettings = RandoSettings(maxDifficulty, progSpeed, progDiff, qty, restrictions, args.superFun, args.runtimeLimit_s)
     if args.area == True:
         if args.dot == True:

@@ -185,7 +185,8 @@ class AccessGraph(object):
 
         return availNodes
 
-    def getPath(self, srcAp, dstAp, availAps):
+    # gets path from the root AP used to compute availAps
+    def getPath(self, dstAp, availAps):
         path = []
         root = dstAp
         while root != None:
@@ -229,7 +230,7 @@ class AccessGraph(object):
                 #    print("root: {} ap: {}".format(rootNode, apName))
                 if tdiff.bool == True and tdiff.difficulty <= maxDiff:
                     diff = smbm.eval(loc['Available'])
-                    path = self.getPath(rootAp, ap, availAccessPoints)
+                    path = self.getPath(ap, availAccessPoints)
                     # if loc['Name'] == "Power Bomb (red Brinstar spike room)":
                     #    print("path: {}".format([a.Name for a in path]))
                     pdiff = self.getPathDifficulty(path, availAccessPoints)

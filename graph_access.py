@@ -297,9 +297,7 @@ accessPoints = [
     # Red Brinstar. Main nodes: Red Tower Top Left, East Tunnel Right
     AccessPoint('Red Tower Top Left', 'RedBrinstar', {
         # go up
-        'Red Brinstar Elevator': lambda sm: sm.wand(sm.canClimbRedTower(),
-                                                    sm.wor(sm.canOpenYellowDoors(),
-                                                           RomPatches.has(RomPatches.RedTowerBlueDoors))),
+        'Red Brinstar Elevator': lambda sm: sm.canClimbRedTower(),
         'Caterpillar Room Top Right': lambda sm: sm.wand(sm.canPassRedTowerToMaridiaNode(),
                                                          sm.canClimbRedTower()),
         # go down
@@ -310,9 +308,7 @@ accessPoints = [
        entryInfo = {'SamusX':0x2f, 'SamusY':0x488},
        shortName="B\\RED TOWER"),
     AccessPoint('Caterpillar Room Top Right', 'RedBrinstar', {
-        'Red Brinstar Elevator': lambda sm: sm.wand(sm.canPassMaridiaToRedTowerNode(),
-                                                    sm.wor(sm.canUsePowerBombs(),
-                                                           RomPatches.has(RomPatches.RedTowerBlueDoors))),
+        'Red Brinstar Elevator': lambda sm: sm.canPassMaridiaToRedTowerNode(),
         'Red Tower Top Left': lambda sm: sm.wand(sm.canPassMaridiaToRedTowerNode(),
                                                  sm.canOpenYellowDoors())
     },
@@ -324,7 +320,9 @@ accessPoints = [
     AccessPoint('Red Brinstar Elevator', 'RedBrinstar', {
         'Caterpillar Room Top Right': lambda sm: sm.canPassRedTowerToMaridiaNode(),
         'Red Tower Top Left': lambda sm: sm.canOpenYellowDoors()
-    }, roomInfo = {'RoomPtr':0x962a, "area": 0x0},
+    }, traverse=lambda sm:sm.wor(sm.canOpenYellowDoors(),
+                                 RomPatches.has(RomPatches.RedTowerBlueDoors)),
+       roomInfo = {'RoomPtr':0x962a, "area": 0x0},
        exitInfo = {'DoorPtr':0x8af6, 'direction': 0x7, "cap": (0x16, 0x2d), "bitFlag": 0x0,
                    "screen": (0x1, 0x2), "distanceToSpawn": 0x1c0, "doorAsmPtr": 0xb9f1},
        entryInfo = {'SamusX':0x80, 'SamusY':0x58},

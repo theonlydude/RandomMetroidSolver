@@ -1293,7 +1293,7 @@ locations = [
     'AccessFrom' : {
         'Croc Zone': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: sm.wand(sm.enoughStuffCroc(), sm.haveItem('Morph'))
+    'Available': lambda sm: sm.wand(sm.canOpenRedDoors(), sm.enoughStuffCroc(), sm.haveItem('Morph'))
 },
 {
     'Area': "Norfair",

@@ -1670,10 +1670,47 @@ window.onload = function(){
   
         var output = document.getElementById("romJson");
         output.value = json;
+
+        setGuessedPreset(file.name);
     }
   
     reader.readAsArrayBuffer(file);
   }, false);
+}
+
+function setGuessedPreset(romName){
+  var preset = guessVARIAPreset(romName);
+  if(preset != null) {
+    document.getElementById("preset").value = preset;
+    $("#preset").trigger("chosen:updated");
+  }
+}
+
+function guessVARIAPreset(filename) {
+  var re = /VARIA_Randomizer_[A]?[F]?X\d+_(\w+)/;
+  var match = filename.match(re);
+  if(match != null) {
+    var data = match[1];
+    console.log(data);
+
+    var re = /^(.*)_([a-zA-Z0-9]+)$/;
+    var match = data.match(re);
+
+    console.log(match);
+
+    if(match != null){
+      var pS = match[2];
+      if(pS == "slowest" || pS == "slow" || pS == "medium" || pS == "fast" || pS == "fastest" || pS == "basic") {
+        return match[1];
+      } else {
+        return match[1] + '_' + match[2];
+      }
+    } else {
+      return data;
+    }
+  } else {
+    return null;
+  }
 }
 
 function mouseOver(elem) {

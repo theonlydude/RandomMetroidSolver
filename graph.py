@@ -3,6 +3,7 @@
 import copy
 from smbool import SMBool
 from rom import RomPatches
+from parameters import infinity
 import log
 
 class AccessPoint(object):
@@ -206,6 +207,27 @@ class AccessGraph(object):
 
         return pdiff
 
+    def getAvailAPPaths(self, availAccessPoints, locsAPs):
+        paths = {}
+        for ap in availAccessPoints:
+            if ap.Name in locsAPs:
+                path = self.getPath(ap, availAccessPoints)
+                pdiff = self.getPathDifficulty(path, availAccessPoints)
+                paths[ap.Name] = {"path": path, "pdiff": pdiff, "distance": len(path)}
+        return paths
+
+    def getSortedAPs(self, paths, locAccessFrom):
+        ret = []
+
+        for apName in locAccessFrom:
+            if apName not in paths:
+                continue
+            difficulty = paths[apName]["pdiff"].difficulty
+            ret.append((difficulty if difficulty != -1 else infinity,  paths[apName]["distance"], apName))
+        # sort by difficulty first, then distance
+        ret.sort(key=lambda x: (x[0], x[1]))
+        return [apName for (diff, dist, apName) in ret]
+
     # locations: locations to check
     # items: collected items
     # maxDiff: difficulty limit
@@ -216,24 +238,43 @@ class AccessGraph(object):
         availAccessPoints = self.getAvailableAccessPoints(rootAp, smbm, maxDiff)
         availAreas = set([ap.GraphArea for ap in availAccessPoints.keys()])
         availLocs = []
+
+        # get all the current locations APs first to only compute these paths
+        locsAPs = set()
         for loc in locations:
-            if not loc['GraphArea'] in availAreas:
+            for ap in loc["AccessFrom"]:
+                locsAPs.add(ap)
+
+        # sort availAccessPoints based on difficulty to take easier paths first
+        availAPPaths = self.getAvailAPPaths(availAccessPoints, locsAPs)
+
+        for loc in locations:
+            if loc['GraphArea'] not in availAreas:
                 loc['distance'] = 10000
                 loc['difficulty'] = SMBool(False, 0)
+                #if loc['Name'] == "Spring Ball":
+                #    print("loc: {} locDiff is area nok".format(loc["Name"]))
                 continue
-            for apName,tFunc in loc['AccessFrom'].iteritems():
+
+            for apName in self.getSortedAPs(availAPPaths, loc['AccessFrom']):
+                if apName == None:
+                    loc['distance'] = 10000
+                    loc['difficulty'] = SMBool(False, 0)
+                    #if loc['Name'] == "Spring Ball":
+                    #    print("loc: {} ap is none".format(loc["Name"]))
+                    break
+
+                tFunc = loc['AccessFrom'][apName]
                 ap = self.accessPoints[apName]
-                if not ap in availAccessPoints:
-                    continue
                 tdiff = smbm.eval(tFunc)
-                #if loc['Name'] == "Missile (lava room)":
-                #    print("root: {} ap: {}".format(rootNode, apName))
+                #if loc['Name'] == "Spring Ball":
+                #    print("{} root: {} ap: {}".format(loc['Name'], rootNode, apName))
                 if tdiff.bool == True and tdiff.difficulty <= maxDiff:
                     diff = smbm.eval(loc['Available'])
-                    path = self.getPath(ap, availAccessPoints)
-                    # if loc['Name'] == "Power Bomb (red Brinstar spike room)":
-                    #    print("path: {}".format([a.Name for a in path]))
-                    pdiff = self.getPathDifficulty(path, availAccessPoints)
+                    path = availAPPaths[apName]["path"]
+                    #if loc['Name'] == "Spring Ball":
+                    #    print("{} path: {}".format(loc['Name'], [a.Name for a in path]))
+                    pdiff = availAPPaths[apName]["pdiff"]
                     locDiff = SMBool(diff.bool,
                                      difficulty=max(tdiff.difficulty, diff.difficulty, pdiff.difficulty),
                                      knows=list(set(tdiff.knows + diff.knows + pdiff.knows)),
@@ -244,19 +285,25 @@ class AccessGraph(object):
                         loc['difficulty'] = locDiff
                         loc['path'] = path
                         availLocs.append(loc)
-                        #if loc['Name'] == "Missile (lava room)":
-                        #    print("diff: {} tdiff: {} pdiff: {}".format(diff, tdiff, pdiff))
+                        #if loc['Name'] == "Spring Ball":
+                        #    print("{} diff: {} tdiff: {} pdiff: {}".format(loc['Name'], diff, tdiff, pdiff))
                         break
                     else:
                         loc['distance'] = 1000 + tdiff.difficulty
                         loc['difficulty'] = SMBool(False, 0)
+                        #if loc['Name'] == "Spring Ball":
+                        #    print("loc: {} locDiff is false".format(loc["Name"]))
                 else:
                     loc['distance'] = 10000 + tdiff.difficulty
                     loc['difficulty'] = SMBool(False, 0)
-            if not 'difficulty' in loc:
+                    #if loc['Name'] == "Spring Ball":
+                    #    print("loc: {} tdiff is false".format(loc["Name"]))
+
+            if 'difficulty' not in loc:
                 loc['distance'] = 100000
                 loc['difficulty'] = SMBool(False, 0)
 
+        #print("availableLocs: {}".format([loc["Name"] for loc in availLocs]))
         return availLocs
 
     # test access from an access point to another, given an optional item
@@ -267,7 +314,7 @@ class AccessGraph(object):
         srcAccessPoint = self.accessPoints[srcAccessPointName]
         availAccessPoints = self.getAvailableAccessPoints(srcAccessPoint, smbm, maxDiff)
         can = destAccessPoint in availAccessPoints
-        self.log.debug("canAccess: avail = {}".format([ap.Name for ap in availAccessPoints.keys()]))
+        #self.log.debug("canAccess: avail = {}".format([ap.Name for ap in availAccessPoints.keys()]))
         if item is not None:
             smbm.removeItem(item)
         return can

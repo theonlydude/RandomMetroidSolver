@@ -1506,7 +1506,6 @@ function onloadWS(jsonData) {
 
 var init = false;
 var lastLoc = "landingSite";
-var curOverElem = null;
 
 // can add more variables:
 //  -state: posible values: ["available", "visited"]
@@ -1766,8 +1765,6 @@ function mouseOver(elem) {
     var newTop = locsInfo[locName].top - 0.75;
     var newLeft = locsInfo[locName].left - 0.5;
     $(elem).css({"top": newTop+"%", "left": newLeft+"%"});
-
-    curOverElem = elem;
   }
 }
 
@@ -1788,8 +1785,6 @@ function mouseOut(elem) {
     var newTop = locsInfo[elem.id].top;
     var newLeft = locsInfo[elem.id].left;
     $(elem).css({"top": newTop+"%", "left": newLeft+"%"});
-
-    curOverElem = null;
   }
 }
 
@@ -1835,10 +1830,6 @@ function clickLoc(elem) {
   if("state" in locsInfo[locName] && locsInfo[locName]["state"] == "available") {
     // call webservice
     ajaxCallItem({action: "add", locName: locName}, "upload", ajaxOkGetItem);
-
-    if(curOverElem !=  null) {
-      mouseOut(curOverElem);
-    }
 
     addLog(locsInfo[locName]["tooltip"]["item"]+"@"+locsInfo[locName]["tooltip"]["name"]);
 
@@ -1963,8 +1954,14 @@ function ajaxOkGetItem(jsonData) {
       locsInfo[locName]["difficulty"] = locData["difficulty"];
       locsInfo[locName]["tooltip"] = {name: locName, item: locData["item"], items: locData["items"], knows: locData["knows"]};
 
+      // keep current loc zoomed
+      var base = "baseLoc";
+      if($("#"+locName).hasClass("baseLocOver")) {
+        base = "baseLocOver";
+      }
+
       var className = "marker_visited_"+locData["difficulty"]+"_"+locData["item"];
-      $("#"+locName).attr("class", "baseLoc "+className);
+      $("#"+locName).attr("class", base+" "+className);
       var tooltip = getTooltip(locName, locData, locData["item"], true);
       $("#"+locName+'[data-toggle="tooltip"]').attr("title", tooltip).tooltip('fixTitle');
     }

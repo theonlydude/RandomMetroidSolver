@@ -7,7 +7,7 @@ from utils import randGaussBounds, getRangeDict, chooseFromRange
 from graph import AccessGraph
 from graph_access import accessPoints
 from smboolmanager import SMBoolManager
-import log
+import log, logging
 
 class RandoSettings(object):
     # maxDiff : max diff

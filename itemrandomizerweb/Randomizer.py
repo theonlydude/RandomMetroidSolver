@@ -603,12 +603,12 @@ class Randomizer(object):
     def placeItem(self, items, itemPool, locations):
         item = self.getItemToPlace(items, itemPool)
         locations = [loc for loc in locations if self.locPostAvailable(loc, item['Type'])]
-        availableLocations = List.filter(lambda loc: self.canPlaceAtLocation(item, loc, checkSoftlock=True), locations)
         # if a loc is available we trigger pick up action, to make more locs available afterwards
-        for loc in availableLocations:
+        for loc in locations:
             if 'Pickup' in loc:
                 self.log.debug("PICKUP call for: {}".format(loc['Name']))
                 loc['Pickup']()
+        availableLocations = List.filter(lambda loc: self.canPlaceAtLocation(item, loc, checkSoftlock=True), locations)
         if len(availableLocations) == 0:
             if not item in self.failItems:
                 self.failItems.append(item)

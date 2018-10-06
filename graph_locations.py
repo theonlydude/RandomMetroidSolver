@@ -536,7 +536,8 @@ locations = [
     'Available': lambda sm: sm.wand(sm.canOpenRedDoors(),
                                     sm.wor(sm.canFly(),
                                            sm.wand(sm.haveItem('Gravity'), sm.haveItem('SpeedBooster')),
-                                           sm.wand(sm.haveItem('SpringBall'),
+                                           sm.wand(sm.haveItem('Morph'),
+                                                   sm.haveItem('SpringBall'),
                                                    sm.wor(sm.wand(sm.haveItem('HiJump'), sm.knowsSpringBallJump()),
                                                           sm.knowsSpringBallJumpFromWall())),
                                            sm.haveItem('Grapple')))

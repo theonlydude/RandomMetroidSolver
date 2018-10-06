@@ -21,7 +21,7 @@
 [ -L ~/web2py/applications/solver/controllers/solver_web.py ] || ln -s ~/RandomMetroidSolver/web/controllers/solver_web.py ~/web2py/applications/solver/controllers/solver_web.py
 [ -L ~/web2py/applications/solver/static/js/excellentexport.js ] || ln -s ~/RandomMetroidSolver/web/static/excellentexport.js ~/web2py/applications/solver/static/js/excellentexport.js
 [ -L ~/web2py/standard_presets ] || ln -s ~/RandomMetroidSolver/standard_presets ~/web2py/standard_presets
-[ -L ~/web2py/community_presets ] || ln -s ~/RandomMetroidSolver/community_presets ~/web2py/community_presets
+[ -L ~/web2py/community_presets -o -d ~/web2py/community_presets ] || ln -s ~/RandomMetroidSolver/community_presets ~/web2py/community_presets
 [ -L ~/web2py/applications/solver/static/images/super_metroid_logo.png ] || ln -s ~/RandomMetroidSolver/web/static/super_metroid_logo.png ~/web2py/applications/solver/static/images/super_metroid_logo.png
 [ -L ~/web2py/applications/solver/static/css/chosen.css ] || ln -s ~/RandomMetroidSolver/web/static/chosen.css ~/web2py/applications/solver/static/css/chosen.css
 [ -L ~/web2py/applications/solver/static/js/chosen.jquery.min.js ] || ln -s ~/RandomMetroidSolver/web/static/chosen.jquery.min.js ~/web2py/applications/solver/static/js/chosen.jquery.min.js
@@ -43,6 +43,7 @@
 [ -L ~/web2py/applications/solver/static/images/marker_over_mania.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/marker_over_mania.png ~/web2py/applications/solver/static/images/marker_over_mania.png
 [ -L ~/web2py/applications/solver/static/images/bin.svg ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/bin.svg ~/web2py/applications/solver/static/images/bin.svg
 [ -L ~/web2py/applications/solver/static/images/checkmark.svg ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/checkmark.svg ~/web2py/applications/solver/static/images/checkmark.svg
+[ -L ~/web2py/applications/solver/static/images/refresh.svg ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/refresh.svg ~/web2py/applications/solver/static/images/refresh.svg
 [ -L ~/web2py/applications/solver/static/images/cloud_download.svg ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/cloud_download.svg ~/web2py/applications/solver/static/images/cloud_download.svg
 [ -L ~/web2py/applications/solver/static/images/cloud_upload.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/cloud_upload.png ~/web2py/applications/solver/static/images/cloud_upload.png
 [ -L ~/web2py/applications/solver/static/images/help.svg ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/help.svg ~/web2py/applications/solver/static/images/help.svg

@@ -238,44 +238,52 @@ class SuperFunProvider(object):
         n = randGaussBounds(len(itemList))
         for i in range(n):
             idx = random.randint(0, len(itemList) - 1)
-            remove.append(itemList.pop(idx))
+            item = itemList.pop(idx)
+            if item is not None:
+                remove.append(item)
         return remove
 
     def addForbidden(self, removable):
-        self.forbiddenItems += self.getForbiddenItemsFromList(removable)
+        forb = self.getForbiddenItemsFromList(removable)
+        self.forbiddenItems += forb
         self.checkPool()
         self.addRestricted()
+        return len(forb)
 
     def getForbiddenSuits(self):
         removableSuits = [suit for suit in self.suits if self.checkPool(suit)]
         if len(removableSuits) > 0:
             # remove at least one
-            self.forbiddenItems.append(removableSuits.pop())
-            self.addForbidden(removableSuits)
+            if self.addForbidden(removableSuits) == 0:
+                self.forbiddenItems.append(removableSuits.pop())
+                self.checkPool()
+                self.addRestricted()
         else:
             self.errorMsgs.append("Could not remove any suit")
 
     def getForbiddenMovement(self):
         removableMovement = [mvt for mvt in self.movementItems if self.checkPool(mvt)]
         if len(removableMovement) > 0:
-            # remove at least one
+            # remove at least the most important
             self.forbiddenItems.append(removableMovement.pop(0))
-            self.addForbidden(removableMovement)
+            self.addForbidden(removableMovement + [None])
         else:
             self.errorMsgs.append('Could not remove any movement item')
 
     def getForbiddenCombat(self):
         removableCombat = [cbt for cbt in self.combatItems if self.checkPool(cbt)]
         if len(removableCombat) > 0:
+            fake = [None, None] # placeholders to avoid tricking the gaussian into removing too much stuff
             # do not remove screw if morph placement is late FIXME : this is nasty, but is due to simplistice morph placement restriction implementation
             if self.rando.restrictions['Morph'] == 'late':
                 removableCombat.pop(0)
+                fake.pop()
             # remove at least one (will be screw or plasma)
             self.forbiddenItems.append(removableCombat.pop(0))
             # if plasme is still available, remove it as well
             if len(removableCombat) > 0 and removableCombat[0] == 'Plasma':
                 self.forbiddenItems.append(removableCombat.pop(0))
-            self.addForbidden(removableCombat)
+            self.addForbidden(removableCombat + fake)
         else:
             self.errorMsgs.append('Could not remove any combat item')
 

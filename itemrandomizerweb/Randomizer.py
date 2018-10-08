@@ -45,7 +45,6 @@ class RandoSettings(object):
         self.itemLimit = self.getItemLimit(progSpeed)
         self.locLimit = self.getLocLimit(progSpeed)
         self.superFun = superFun
-        self.forbiddenItems = self.getForbiddenItems(superFun)
         self.possibleSoftlockProb = self.getPossibleSoftlockProb(progSpeed)
         self.runtimeLimit_s = runtimeLimit_s
         if self.runtimeLimit_s <= 0:
@@ -168,6 +167,72 @@ class RandoSettings(object):
         # locLimit is irrelevant for basic speed, as itemLimit is 0
         return locLimit
 
+# dat class name
+class SuperFunProvider(object):
+    # give the rando since we have to access services from it
+    def __init__(self, superFun, qty, rando):
+        self.superFun = superFun
+        self.qty = qty
+        self.rando = rando
+        self.locations = rando.unusedLocations
+        self.sm = self.rando.smbm
+        self.areaGraph = self.rando.areaGraph
+        self.forbiddenItems = []
+        self.restrictedLocs = []
+        self.lastRestricted = []
+        self.bossesLocs = ['Space Jump', 'Varia Suit', 'Energy Tank, Ridley', 'Right Super, Wrecked Ship']
+        self.suits = ['Varia', 'Gravity']
+        # organized by priority
+        self.movementItems = ['SpaceJump', 'HiJump', 'SpeedBooster', 'Bomb', 'Grapple', 'SpringBall']
+        # organized by priority
+        self.combatItems = ['ScrewAttack', 'Plasma', 'Wave', 'Spazer']
+
+    def getItemPool(self, forbidden=[]):
+        return Items.getItemPool(self.qty, self.forbiddenItems + forbidden)
+
+    def checkPool(self, forbidden=None):
+        ret = True
+        if forbidden is not None:
+            pool = self.getItemPool([forbidden])
+        else:
+            pool = self.getItemPool()
+        # give us everything and beat every boss to see what we can access
+        self.sm.resetItems()
+        self.sm.addItems([item['Type'] for item in pool])
+        for boss in ['Kraid', 'Phantoon', 'Draygon', 'Ridley']:
+            Bosses.beatBoss(boss)
+
+        # get restricted locs
+        totalAvailLocs = [loc for loc in self.rando.currentLocations(post=True)]
+        self.lastRestricted = [loc for loc in self.locations if loc not in totalAvailLocs]
+
+        # check if we can reach all APs
+        landingSite = self.areaGraph.accessPoints['Landing Site']
+        availAccessPoints = self.areaGraph.getAvailableAccessPoints(landingSite, self.sm, self.rando.difficultyTarget)
+        for apName,ap in self.areaGraph.accessPoints.iteritems():
+            if not ap in availAccessPoints:
+                ret = False
+                break
+
+        # check if we can reach all bosses
+        if ret:
+            for loc in self.lastRestricted:
+                if loc['Name'] in self.bossesLocs:
+                    ret = False
+                    break
+
+        # cleanup
+        self.sm.resetItems()
+        Bosses.reset()
+
+        return ret
+
+    def addRestricted(self):
+        self.checkPool()
+        for r in self.lastRestricted:
+            if r not in self.restrictedLocs:
+                self.restrictedLocs.append(r)
+
     def getForbiddenItemsFromList(self, itemList):
         remove = []
         n = randGaussBounds(len(itemList))
@@ -176,60 +241,57 @@ class RandoSettings(object):
             remove.append(itemList.pop(idx))
         return remove
 
-    def getForbiddenSuits(self, dontRemove):
-        removable = []
-        # can we remove gravity?
-        if Knows.GravLessLevel1.bool:
-            if Knows.DraygonRoomCrystalFlash.bool:
-                if Knows.PreciousRoomXRayExit.bool:
-                    removable.append('Gravity')
-                elif Knows.DraygonRoomGrappleExit.bool and not Knows.SpringBallJump.bool:
-                    removable.append('Gravity')
-                    dontRemove.append('Grapple')
-                elif not Knows.DraygonRoomGrappleExit.bool and Knows.SpringBallJump.bool:
-                    removable.append('Gravity')
-                    dontRemove.append('SpringBall')
-                elif Knows.DraygonRoomGrappleExit.bool and Knows.SpringBallJump.bool:
-                    if random.random() < 0.5:
-                        dontRemove.append('SpringBall')
-                    else:
-                        dontRemove.append('Grapple')
-                    removable.append('Gravity')
-            elif Knows.DraygonRoomGrappleExit.bool:
-                if Knows.PreciousRoomXRayExit.bool:
-                    removable.append('Gravity')
-                    dontRemove.append('Grapple')
-                elif Knows.SpringBallJump.bool:
-                    removable.append('Gravity')
-                    dontRemove.append('Grapple')
-                    dontRemove.append('SpringBall')
-        # can we remove varia?
-        if Settings.hellRuns['LowerNorfair'] is not None and self.qty['energy'] != 'sparse':
-            removable.append('Varia')
-        return removable
+    def addForbidden(self, removable):
+        self.forbiddenItems += self.getForbiddenItemsFromList(removable)
+        self.checkPool()
+        self.addRestricted()
 
-    def getForbiddenMovement(self, dontRemove):
-        # TODO more accurate check on what can be removed here
-        movementItems = ['SpaceJump', 'Bomb', 'HiJump', 'SpeedBooster', 'Grapple', 'SpringBall']
-        return [item for item in movementItems if not item in dontRemove]
+    def getForbiddenSuits(self):
+        removableSuits = [suit for suit in self.suits if self.checkPool(suit)]
+        if len(removableSuits) > 0:
+            # remove at least one
+            self.forbiddenItems.append(removableSuits.pop())
+            self.addForbidden(removableSuits)
+        else:
+            self.errorMsgs.append("Could not remove any suit")
+
+    def getForbiddenMovement(self):
+        removableMovement = [mvt for mvt in self.movementItems if self.checkPool(mvt)]
+        if len(removableMovement) > 0:
+            # remove at least one
+            self.forbiddenItems.append(removableMovement.pop(0))
+            self.addForbidden(removableMovement)
+        else:
+            self.errorMsgs.append('Could not remove any movement item')
 
     def getForbiddenCombat(self):
-        combatItems = ['ScrewAttack', 'Wave', 'Spazer', 'Plasma']
-        return combatItems
+        removableCombat = [cbt for cbt in self.combatItems if self.checkPool(cbt)]
+        if len(removableCombat) > 0:
+            # do not remove screw if morph placement is late FIXME : this is nasty, but is due to simplistice morph placement restriction implementation
+            if self.rando.restrictions['Morph'] == 'late':
+                removableCombat.pop(0)
+            # remove at least one (will be screw or plasma)
+            self.forbiddenItems.append(removableCombat.pop(0))
+            # if plasme is still available, remove it as well
+            if len(removableCombat) > 0 and removableCombat[0] == 'Plasma':
+                self.forbiddenItems.append(removableCombat.pop(0))
+            self.addForbidden(removableCombat)
+        else:
+            self.errorMsgs.append('Could not remove any combat item')
 
-    def getForbiddenItems(self, superFun):
-        remove = []
-        dontRemove = []
-        if 'Suits' in superFun: # impact on movement item
-            removableSuits = self.getForbiddenSuits(dontRemove)
-            remove += self.getForbiddenItemsFromList(removableSuits)
-        if 'Movement' in superFun:
-            removableMovement = self.getForbiddenMovement(dontRemove)
-            remove += self.getForbiddenItemsFromList(removableMovement)
-        if 'Combat' in superFun:
-            removableCombat = self.getForbiddenCombat()
-            remove += self.getForbiddenItemsFromList(removableCombat)
-        return remove
+    def getForbidden(self):
+        self.forbiddenItems = []
+        self.restrictedLocs = []
+        self.errorMsgs = []
+        if 'Suits' in self.superFun: # impact on movement item
+            self.getForbiddenSuits()
+        if 'Movement' in self.superFun:
+            self.getForbiddenMovement()
+        if 'Combat' in self.superFun:
+            self.getForbiddenCombat()
+        # final sanity check even if no super fun
+        if not self.checkPool():
+            raise RuntimeError('Invalid transitions')
 
 # current state of randomizer algorithm. can be saved and restored at any point.
 # useful to rollback state when algorithm is stuck
@@ -305,8 +367,8 @@ class Randomizer(object):
         self.possibleSoftlockProb = settings.possibleSoftlockProb
         self.runtimeLimit_s = settings.runtimeLimit_s
         # init everything
+        self.smbm = SMBoolManager()
         self.unusedLocations = locations
-        self.itemPool = Items.getItemPool(settings.qty, settings.forbiddenItems)
         # collected items
         self.currentItems = []
         # progresion/non progression types cache
@@ -323,45 +385,18 @@ class Randomizer(object):
         self.progressionItemLocs = []
         # progression items tried for a given rollback point
         self.rollbackItemsTried = {}
-        # create smbm and perform sanity checks
-        self.smbm = SMBoolManager()
-        self.restrictedLocations = self.checkReach(locations, settings.forbiddenItems)
+        # handle super fun settings
+        fun = SuperFunProvider(settings.superFun, settings.qty, self)
+        fun.getForbidden() # will raise RuntimeError if impossible to finish the game
+        for err in fun.errorMsgs:
+            self.errorMsg += "Super Fun: " + err + '\n'
+        self.itemPool = Items.getItemPool(settings.qty, fun.forbiddenItems)
+        self.restrictedLocations = fun.restrictedLocs
 
     def setCurAccessPoint(self, ap='Landing Site'):
         if ap != self.curAccessPoint:
             self.curAccessPoint = ap
             self.log.debug('current AP: {}'.format(ap))
-
-    # list unreachable locations (possible with super fun setting)
-    # and check area transitions validity
-    # return unreachable locations. raise RuntimeError if area transitions are invalid.
-    def checkReach(self, locations, forbiddenItems):
-        # give us everything and beat every boss to see what we can access
-        self.smbm.addItems([item['Type'] for item in self.itemPool])
-        for boss in ['Kraid', 'Phantoon', 'Draygon', 'Ridley']:
-            Bosses.beatBoss(boss)
-
-        # get restricted locs
-        if len(forbiddenItems) > 0: # super fun setting
-            totalAvailLocs = [loc for loc in self.currentLocations(post=True)]
-            restricted = [loc for loc in locations if loc not in totalAvailLocs]
-        else:
-            restricted = []
-
-        # check if we can reach all APs
-        landingSite = self.areaGraph.accessPoints['Landing Site']
-        availAccessPoints = self.areaGraph.getAvailableAccessPoints(landingSite, self.smbm, self.difficultyTarget)
-
-        # clean up
-        self.smbm.resetItems()
-        Bosses.reset()
-        self.currentItems = []
-        # actual AP check
-        for apName,ap in self.areaGraph.accessPoints.iteritems():
-            if not ap in availAccessPoints:
-                raise RuntimeError('Invalid transitions: {}'.format(ap))
-
-        return restricted
 
     def locPostAvailable(self, loc, item):
         if not 'PostAvailable' in loc:
@@ -953,13 +988,8 @@ class Randomizer(object):
 
     # fill up unreachable locations with "junk" to maximize the chance of the ROM
     # to be finishable
-    # return True if seed generation shall be aborted
     def fillRestrictedLocations(self):
         for loc in self.restrictedLocations:
-            # check if boss loc is in restricted locations
-            if loc['Name'] in ['Space Jump', 'Varia Suit', 'Energy Tank, Ridley', 'Right Super, Wrecked Ship']:
-                return True
-
             isMajor = self.restrictions['MajorMinor'] == False or loc['Class'] == 'Major'
             isMinor = self.restrictions['MajorMinor'] == False or loc['Class'] == 'Minor'
             itemLocation = {'Location' : loc}
@@ -984,8 +1014,6 @@ class Randomizer(object):
             self.log.debug("Fill: {} at {}".format(itemLocation['Item']['Type'], itemLocation['Location']['Name']))
             self.getItem(itemLocation, False)
 
-        return False
-
     # only function to use (once) from outside of the Randomizer class.
     # returns a list of item/location dicts with 'Item' and 'Location' as keys.
     def generateItems(self):
@@ -993,11 +1021,7 @@ class Randomizer(object):
         isStuck = False
         # if major items are removed from the pool (super fun setting), fill not accessible locations with
         # items that are as useless as possible
-        abort = self.fillRestrictedLocations()
-        if abort == True:
-            self.errorMsg = "Can't access all bosses locations, abort. Retry, and change the super fun settings if the problem happens again."
-            print("DIAG: {}".format(self.errorMsg))
-            return None
+        self.fillRestrictedLocations()
         self.curLocs = self.currentLocations()
         self.states.append(RandoState(self, self.curLocs))
         self.log.debug("{} items in pool".format(len(self.itemPool)))
@@ -1048,12 +1072,12 @@ class Randomizer(object):
                 print("\nSTUCK ! ")
                 print("REM LOCS = "  + str([loc['Name'] for loc in self.unusedLocations]))
                 print("REM ITEMS = "  + str([item['Type'] for item in self.itemPool]))
-                self.errorMsg = "Stuck because of navigation. Retry, and disable either super fun settings/late morph ball/suits restriction if the problem happens again."
-                print("DIAG: {}".format(self.errorMsg))
-                return None
+                self.errorMsg += "Stuck because of navigation. Retry, and disable either super fun settings/late morph ball/suits restriction if the problem happens again."
+                self.itemLocations = None
         if prevDiffTarget is not None:
             bossLocsDiffs = self.getAboveMaxDiffLocsStr(prevDiffTarget)
-            self.errorMsg = "Boss fights forced us to up the maximum difficulty. Affected locations: {}".format(bossLocsDiffs)
+            self.errorMsg += "Boss fights forced us to up the maximum difficulty. Affected locations: {}".format(bossLocsDiffs)
+        if len(self.errorMsg) > 0:
             print("\nDIAG: {}".format(self.errorMsg))
         print("")
         return self.itemLocations

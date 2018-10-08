@@ -289,9 +289,6 @@ class SuperFunProvider(object):
             self.getForbiddenMovement()
         if 'Combat' in self.superFun:
             self.getForbiddenCombat()
-        # final sanity check even if no super fun
-        if not self.checkPool():
-            raise RuntimeError('Invalid transitions')
 
 # current state of randomizer algorithm. can be saved and restored at any point.
 # useful to rollback state when algorithm is stuck
@@ -387,7 +384,11 @@ class Randomizer(object):
         self.rollbackItemsTried = {}
         # handle super fun settings
         fun = SuperFunProvider(settings.superFun, settings.qty, self)
-        fun.getForbidden() # will raise RuntimeError if impossible to finish the game
+        fun.getForbidden()
+        # check if we can reach everything
+        if not fun.checkPool():
+            raise RuntimeError('Invalid transitions')
+        # store unapplied super fun messages
         for err in fun.errorMsgs:
             self.errorMsg += "Super Fun: " + err + '\n'
         self.itemPool = Items.getItemPool(settings.qty, fun.forbiddenItems)

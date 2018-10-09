@@ -397,8 +397,8 @@ class Randomizer(object):
         if not fun.checkPool():
             raise RuntimeError('Invalid transitions')
         # store unapplied super fun messages
-        for err in fun.errorMsgs:
-            self.errorMsg += "Super Fun: " + err + '\n'
+        if len(fun.errorMsgs) > 0:
+            self.errorMsg += "Super Fun: " + ', '.join(fun.errorMsgs)
         self.itemPool = Items.getItemPool(settings.qty, fun.forbiddenItems)
         self.restrictedLocations = fun.restrictedLocs
 

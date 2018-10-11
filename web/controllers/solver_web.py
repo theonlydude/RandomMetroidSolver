@@ -503,7 +503,7 @@ def solver():
                 if base not in session.solver['romFiles']:
                     session.solver['romFiles'].append(base)
             except Exception as e:
-                print("Error loading the ROM file {}, exception: {}".format(romFileName, e))
+                print("Error loading the ROM file, exception: {}".format(e))
                 session.flash = "Error loading the json ROM file"
                 error = True
 

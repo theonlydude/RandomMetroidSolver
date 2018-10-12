@@ -60,6 +60,8 @@ class SolverState(object):
         self.state["availableLocationsWeb"] = self.getAvailableLocationsWeb(solver.majorLocations)
         # dict {locNameWeb: {infos}, ...}
         self.state["visitedLocationsWeb"] = self.getAvailableLocationsWeb(solver.visitedLocations)
+        # dict {locNameWeb: {infos}, ...}
+        self.state["remainLocationsWeb"] = self.getRemainLocationsWeb(solver.majorLocations)
 
     def toSolver(self, solver):
         solver.fullRando = self.state["fullRando"]
@@ -78,7 +80,6 @@ class SolverState(object):
         Bosses.reset()
         for boss in self.state["bosses"]:
             Bosses.beatBoss(boss)
-        solver.availableLocationsWeb = self.state["availableLocationsWeb"]
 
     def getLocsData(self, locations):
         ret = {}
@@ -122,7 +123,9 @@ class SolverState(object):
         return ([loc for (i, loc) in retVis], retMaj)
 
     def diff4isolver(self, difficulty):
-        if difficulty < medium:
+        if difficulty == -1:
+            return "break"
+        elif difficulty < medium:
             return "easy"
         elif difficulty < hard:
             return "medium"
@@ -160,6 +163,17 @@ class SolverState(object):
                                 "items": list(set(diff.items)),
                                 "item": loc["itemName"],
                                 "name": loc["Name"]}
+        return ret
+
+    def getRemainLocationsWeb(self, locations):
+        ret = {}
+        for loc in locations:
+            if "difficulty" not in loc or ("difficulty" in loc and loc["difficulty"].bool == False):
+                locName = self.locName4isolver(loc["Name"])
+                ret[locName] = {"item": loc["itemName"],
+                                "name": loc["Name"],
+                                "knows": ["Sequence Break"],
+                                "items": []}
         return ret
 
     def getAvailableLocations(self, locations):
@@ -347,7 +361,114 @@ class InteractiveSolver(CommonSolver):
         # return them
         self.dumpState()
 
-    def getLoc(self, locName):
+    def locNameWeb2Internal(self, locNameWeb):
+        locs = {
+          "EnergyTankGauntlet": "Energy Tank, Gauntlet",
+          "Bomb": "Bomb",
+          "EnergyTankTerminator": "Energy Tank, Terminator",
+          "ReserveTankBrinstar": "Reserve Tank, Brinstar",
+          "ChargeBeam": "Charge Beam",
+          "MorphingBall": "Morphing Ball",
+          "EnergyTankBrinstarCeiling": "Energy Tank, Brinstar Ceiling",
+          "EnergyTankEtecoons": "Energy Tank, Etecoons",
+          "EnergyTankWaterway": "Energy Tank, Waterway",
+          "EnergyTankBrinstarGate": "Energy Tank, Brinstar Gate",
+          "XRayScope": "X-Ray Scope",
+          "Spazer": "Spazer",
+          "EnergyTankKraid": "Energy Tank, Kraid",
+          "VariaSuit": "Varia Suit",
+          "IceBeam": "Ice Beam",
+          "EnergyTankCrocomire": "Energy Tank, Crocomire",
+          "HiJumpBoots": "Hi-Jump Boots",
+          "GrappleBeam": "Grapple Beam",
+          "ReserveTankNorfair": "Reserve Tank, Norfair",
+          "SpeedBooster": "Speed Booster",
+          "WaveBeam": "Wave Beam",
+          "EnergyTankRidley": "Energy Tank, Ridley",
+          "ScrewAttack": "Screw Attack",
+          "EnergyTankFirefleas": "Energy Tank, Firefleas",
+          "ReserveTankWreckedShip": "Reserve Tank, Wrecked Ship",
+          "EnergyTankWreckedShip": "Energy Tank, Wrecked Ship",
+          "RightSuperWreckedShip": "Right Super, Wrecked Ship",
+          "GravitySuit": "Gravity Suit",
+          "EnergyTankMamaturtle": "Energy Tank, Mama turtle",
+          "PlasmaBeam": "Plasma Beam",
+          "ReserveTankMaridia": "Reserve Tank, Maridia",
+          "SpringBall": "Spring Ball",
+          "EnergyTankBotwoon": "Energy Tank, Botwoon",
+          "SpaceJump": "Space Jump",
+          "PowerBombCrateriasurface": "Power Bomb (Crateria surface)",
+          "MissileoutsideWreckedShipbottom": "Missile (outside Wrecked Ship bottom)",
+          "MissileoutsideWreckedShiptop": "Missile (outside Wrecked Ship top)",
+          "MissileoutsideWreckedShipmiddle": "Missile (outside Wrecked Ship middle)",
+          "MissileCrateriamoat": "Missile (Crateria moat)",
+          "MissileCrateriabottom": "Missile (Crateria bottom)",
+          "MissileCrateriagauntletright": "Missile (Crateria gauntlet right)",
+          "MissileCrateriagauntletleft": "Missile (Crateria gauntlet left)",
+          "SuperMissileCrateria": "Super Missile (Crateria)",
+          "MissileCrateriamiddle": "Missile (Crateria middle)",
+          "PowerBombgreenBrinstarbottom": "Power Bomb (green Brinstar bottom)",
+          "SuperMissilepinkBrinstar": "Super Missile (pink Brinstar)",
+          "MissilegreenBrinstarbelowsupermissile": "Missile (green Brinstar below super missile)",
+          "SuperMissilegreenBrinstartop": "Super Missile (green Brinstar top)",
+          "MissilegreenBrinstarbehindmissile": "Missile (green Brinstar behind missile)",
+          "MissilegreenBrinstarbehindreservetank": "Missile (green Brinstar behind reserve tank)",
+          "MissilepinkBrinstartop": "Missile (pink Brinstar top)",
+          "MissilepinkBrinstarbottom": "Missile (pink Brinstar bottom)",
+          "PowerBombpinkBrinstar": "Power Bomb (pink Brinstar)",
+          "MissilegreenBrinstarpipe": "Missile (green Brinstar pipe)",
+          "PowerBombblueBrinstar": "Power Bomb (blue Brinstar)",
+          "MissileblueBrinstarmiddle": "Missile (blue Brinstar middle)",
+          "SuperMissilegreenBrinstarbottom": "Super Missile (green Brinstar bottom)",
+          "MissileblueBrinstarbottom": "Missile (blue Brinstar bottom)",
+          "MissileblueBrinstartop": "Missile (blue Brinstar top)",
+          "MissileblueBrinstarbehindmissile": "Missile (blue Brinstar behind missile)",
+          "PowerBombredBrinstarsidehopperroom": "Power Bomb (red Brinstar sidehopper room)",
+          "PowerBombredBrinstarspikeroom": "Power Bomb (red Brinstar spike room)",
+          "MissileredBrinstarspikeroom": "Missile (red Brinstar spike room)",
+          "MissileKraid": "Missile (Kraid)",
+          "Missilelavaroom": "Missile (lava room)",
+          "MissilebelowIceBeam": "Missile (below Ice Beam)",
+          "MissileaboveCrocomire": "Missile (above Crocomire)",
+          "MissileHiJumpBoots": "Missile (Hi-Jump Boots)",
+          "EnergyTankHiJumpBoots": "Energy Tank (Hi-Jump Boots)",
+          "PowerBombCrocomire": "Power Bomb (Crocomire)",
+          "MissilebelowCrocomire": "Missile (below Crocomire)",
+          "MissileGrappleBeam": "Missile (Grapple Beam)",
+          "MissileNorfairReserveTank": "Missile (Norfair Reserve Tank)",
+          "MissilebubbleNorfairgreendoor": "Missile (bubble Norfair green door)",
+          "MissilebubbleNorfair": "Missile (bubble Norfair)",
+          "MissileSpeedBooster": "Missile (Speed Booster)",
+          "MissileWaveBeam": "Missile (Wave Beam)",
+          "MissileGoldTorizo": "Missile (Gold Torizo)",
+          "SuperMissileGoldTorizo": "Super Missile (Gold Torizo)",
+          "MissileMickeyMouseroom": "Missile (Mickey Mouse room)",
+          "MissilelowerNorfairabovefireflearoom": "Missile (lower Norfair above fire flea room)",
+          "PowerBomblowerNorfairabovefireflearoom": "Power Bomb (lower Norfair above fire flea room)",
+          "PowerBombPowerBombsofshame": "Power Bomb (Power Bombs of shame)",
+          "MissilelowerNorfairnearWaveBeam": "Missile (lower Norfair near Wave Beam)",
+          "MissileWreckedShipmiddle": "Missile (Wrecked Ship middle)",
+          "MissileGravitySuit": "Missile (Gravity Suit)",
+          "MissileWreckedShiptop": "Missile (Wrecked Ship top)",
+          "SuperMissileWreckedShipleft": "Super Missile (Wrecked Ship left)",
+          "MissilegreenMaridiashinespark": "Missile (green Maridia shinespark)",
+          "SuperMissilegreenMaridia": "Super Missile (green Maridia)",
+          "MissilegreenMaridiatatori": "Missile (green Maridia tatori)",
+          "SuperMissileyellowMaridia": "Super Missile (yellow Maridia)",
+          "MissileyellowMaridiasupermissile": "Missile (yellow Maridia super missile)",
+          "MissileyellowMaridiafalsewall": "Missile (yellow Maridia false wall)",
+          "MissileleftMaridiasandpitroom": "Missile (left Maridia sand pit room)",
+          "MissilerightMaridiasandpitroom": "Missile (right Maridia sand pit room)",
+          "PowerBombrightMaridiasandpitroom": "Power Bomb (right Maridia sand pit room)",
+          "MissilepinkMaridia": "Missile (pink Maridia)",
+          "SuperMissilepinkMaridia": "Super Missile (pink Maridia)",
+          "MissileDraygon": "Missile (Draygon)",
+          "MotherBrain": "Mother Brain"
+        }
+        return locs[locNameWeb]
+
+    def getLoc(self, locNameWeb):
+        locName = self.locNameWeb2Internal(locNameWeb)
         for loc in self.majorLocations:
             if loc["Name"] == locName:
                 return loc
@@ -355,9 +476,13 @@ class InteractiveSolver(CommonSolver):
 
     def pickItemAt(self, locName):
         # collect new item at newLoc
-        if locName not in self.availableLocationsWeb:
-            raise Exception("Location '{}' not found in available locations".format(locName))
-        self.collectMajor(self.getLoc(self.availableLocationsWeb[locName]["name"]))
+        loc = self.getLoc(locName)
+        if "difficulty" not in loc:
+            # sequence break
+            loc["difficulty"] = SMBool(True, -1)
+            # take first ap of the loc
+            loc["accessPoint"] = loc["AccessFrom"].keys()[0]
+        self.collectMajor(loc)
 
     def cancelLast(self):
         # loc

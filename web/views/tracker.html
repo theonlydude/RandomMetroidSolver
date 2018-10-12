@@ -35,6 +35,10 @@ extend 'layout.html'
 .main-container {
     background-color: #000;
 }
+.diffHelp {
+    background-color: #000;
+    width: 32px;
+}
 .map_container {
     position: relative;
 }
@@ -144,21 +148,6 @@ img {
     z-index: 2;
     width: 1.2210012%;
     height: 2.7472527%;
-}
-.log {
-    top: 9.5%;
-    left: 0%;
-    position: absolute;
-    width: 18.5%;
-    height: 18%;
-    display: none;
-}
-.logText {
-    width:100%;
-    height:100%;
-    font-size: 0.85vw;
-    background-color: #000;
-    color: #fff;
 }
 .baseButtonRot {
     cursor: pointer;
@@ -417,6 +406,9 @@ img {
     width: 2.25%;
 }
 
+.marker_over_break {
+    background-image: url("/solver/static/images/marker_over_break.png");
+}
 .marker_over_easy {
     background-image: url("/solver/static/images/marker_over_easy.png");
 }
@@ -434,6 +426,9 @@ img {
 }
 .marker_over_mania {
     background-image: url("/solver/static/images/marker_over_mania.png");
+}
+.marker_available_break {
+    background-image: url("/solver/static/images/marker_break.png");
 }
 .marker_available_easy {
     background-image: url("/solver/static/images/marker_easy.png");
@@ -849,6 +844,9 @@ img {
 .marker_visited_medium_Nothing {
     background-image: url("/solver/static/images/marker_visited_medium.png");
 }
+.marker_visited_break_Nothing {
+    background-image: url("/solver/static/images/marker_visited_break.png");
+}
 .marker_visited_easy_NoEnergy {
     background-image: url("/solver/static/images/marker_visited_easy.png");
 }
@@ -866,6 +864,72 @@ img {
 }
 .marker_visited_medium_NoEnergy {
     background-image: url("/solver/static/images/marker_visited_medium.png");
+}
+.marker_visited_break_NoEnergy {
+    background-image: url("/solver/static/images/marker_visited_break.png");
+}
+.marker_visited_break_Bomb {
+    background-image: url("/solver/static/images/marker_visited_break_Bomb.png");
+}
+.marker_visited_break_Charge {
+    background-image: url("/solver/static/images/marker_visited_break_Charge.png");
+}
+.marker_visited_break_ETank {
+    background-image: url("/solver/static/images/marker_visited_break_ETank.png");
+}
+.marker_visited_break_Grapple {
+    background-image: url("/solver/static/images/marker_visited_break_Grapple.png");
+}
+.marker_visited_break_Gravity {
+    background-image: url("/solver/static/images/marker_visited_break_Gravity.png");
+}
+.marker_visited_break_HiJump {
+    background-image: url("/solver/static/images/marker_visited_break_HiJump.png");
+}
+.marker_visited_break_Ice {
+    background-image: url("/solver/static/images/marker_visited_break_Ice.png");
+}
+.marker_visited_break_Missile {
+    background-image: url("/solver/static/images/marker_visited_break_Missile.png");
+}
+.marker_visited_break_Morph {
+    background-image: url("/solver/static/images/marker_visited_break_Morph.png");
+}
+.marker_visited_break_Plasma {
+    background-image: url("/solver/static/images/marker_visited_break_Plasma.png");
+}
+.marker_visited_break_PowerBomb {
+    background-image: url("/solver/static/images/marker_visited_break_PowerBomb.png");
+}
+.marker_visited_break_Reserve {
+    background-image: url("/solver/static/images/marker_visited_break_Reserve.png");
+}
+.marker_visited_break_ScrewAttack {
+    background-image: url("/solver/static/images/marker_visited_break_ScrewAttack.png");
+}
+.marker_visited_break_SpaceJump {
+    background-image: url("/solver/static/images/marker_visited_break_SpaceJump.png");
+}
+.marker_visited_break_Spazer {
+    background-image: url("/solver/static/images/marker_visited_break_Spazer.png");
+}
+.marker_visited_break_SpeedBooster {
+    background-image: url("/solver/static/images/marker_visited_break_SpeedBooster.png");
+}
+.marker_visited_break_SpringBall {
+    background-image: url("/solver/static/images/marker_visited_break_SpringBall.png");
+}
+.marker_visited_break_Super {
+    background-image: url("/solver/static/images/marker_visited_break_Super.png");
+}
+.marker_visited_break_Varia {
+    background-image: url("/solver/static/images/marker_visited_break_Varia.png");
+}
+.marker_visited_break_Wave {
+    background-image: url("/solver/static/images/marker_visited_break_Wave.png");
+}
+.marker_visited_break_XRayScope {
+    background-image: url("/solver/static/images/marker_visited_break_XRayScope.png");
 }
 .baseLoc {
     cursor: pointer;
@@ -1522,9 +1586,8 @@ var init = false;
 var lastLoc = "landingSite";
 
 // can add more variables:
-//  -state: posible values: ["available", "visited"]
+//  -state: posible values: ["available", "visited", "breakable"]
 //  -difficulty: possible values: ["easy", "medium", "hard", "harder", "hardcore", "mania"]
-//  -tooltip: {name: "xxx", item: "xxx", items: [], knows: []}
 var locsInfo = {
   EnergyTankGauntlet: {left: 29.4, top: 5.4},
   Bomb: {left: 37, top: 11.35},
@@ -1839,9 +1902,6 @@ function initSolver() {
   ajaxCallItem({action: "init", romJson: value, preset: document.getElementById("preset").value, fileName: document.getElementById("fileName").value}, "download", ajaxOkGetItem);
 
   hidePopup();
-  // document.getElementById("log").style.display = "block";
-
-  addLog("start interactive solver");
 }
 
 function clickLoc(elem) {
@@ -1851,11 +1911,9 @@ function clickLoc(elem) {
 
   // check that lock is in the available list
   var locName = elem.id;
-  if("state" in locsInfo[locName] && locsInfo[locName]["state"] == "available") {
+  if("state" in locsInfo[locName] && (locsInfo[locName]["state"] == "available" || locsInfo[locName]["state"] == "break")) {
     // call webservice
     ajaxCallItem({action: "add", locName: locName}, "upload", ajaxOkGetItem);
-
-    addLog(locsInfo[locName]["tooltip"]["item"]+"@"+locsInfo[locName]["tooltip"]["name"]);
 
     // if mother brain loc, add end message in log
    if(locName == "MotherBrain") {
@@ -1869,8 +1927,6 @@ function deleteLoc() {
     return;
   }
 
-  addLog("delete last visited location");
-
   // reset everything
   resetLocsInfo();
 
@@ -1879,7 +1935,7 @@ function deleteLoc() {
 
 function resetLocsInfo() {
   // remove info and reset css
-  var keys = ["state", "difficulty", "tooltip"];
+  var keys = ["state", "difficulty"];
   for(var locName in locsInfo) {
     for(var i in keys) {
       var key = keys[i];
@@ -1911,20 +1967,6 @@ function clearLocs() {
 
   // reset the state server side
   ajaxCallItem({action: "clear"}, "upload", ajaxOkGetItem);
-
-  addLog("Clearing the visited locations");
-}
-
-function addLog(msg) {
-  // append text
-  var ta = $("#logText");
-
-  ta.val(function(i, text) {
-    return text + "\n" + msg;
-  });
-
-  // scroll to display last added line
-  ta.scrollTop(ta[0].scrollHeight);
 }
 
 function ajaxCallItem(dataDict, msg, okFunc=ajaxOkJSON) {
@@ -1971,20 +2013,19 @@ function ajaxOkGetItem(jsonData) {
       var locData = jsonData["availableLocations"][locName];
       locsInfo[locName]["state"] = "available";
       locsInfo[locName]["difficulty"] = locData["difficulty"];
-      locsInfo[locName]["tooltip"] = {name: locData["name"], item: locData["item"], items: locData["items"], knows: locData["knows"]};
 
       $("#"+locName).attr("class", "baseLoc marker_available_"+locData["difficulty"]);
       var tooltip = getTooltip(locName, locData, "?", false);
       $("#"+locName+'[data-toggle="tooltip"]').attr("title", tooltip).tooltip('fixTitle');
     }
   }
+
   if("visitedLocations" in jsonData) {
     for(var locName in jsonData["visitedLocations"]) {
       console.log(locName+" is visited");
       var locData = jsonData["visitedLocations"][locName];
       locsInfo[locName]["state"] = "visited";
       locsInfo[locName]["difficulty"] = locData["difficulty"];
-      locsInfo[locName]["tooltip"] = {name: locName, item: locData["item"], items: locData["items"], knows: locData["knows"]};
 
       // keep current loc zoomed
       var base = "baseLoc";
@@ -1998,6 +2039,28 @@ function ajaxOkGetItem(jsonData) {
       $("#"+locName+'[data-toggle="tooltip"]').attr("title", tooltip).tooltip('fixTitle');
     }
   }
+
+  // set remaining locations as sequence breakable
+  if("remainLocations" in jsonData) {
+    for(var locName in jsonData["remainLocations"]) {
+      console.log(locName+": sequence breakable");
+      var locData = jsonData["remainLocations"][locName];
+      locsInfo[locName]["state"] = "break";
+      locsInfo[locName]["difficulty"] = locData["difficulty"];
+
+      // keep current loc zoomed
+      var base = "baseLoc";
+      if($("#"+locName).hasClass("baseLocOver")) {
+        base = "baseLocOver";
+      }
+
+      var className = "marker_available_break";
+      $("#"+locName).attr("class", base+" "+className);
+      var tooltip = getTooltip(locName, locData, "?", false);
+      $("#"+locName+'[data-toggle="tooltip"]').attr("title", tooltip).tooltip('fixTitle');
+    }
+  }
+
   if(init == true) {
     if("areaRando" in jsonData) {
       if(jsonData["areaRando"] == false && linesSeq.length == 0) {
@@ -2012,7 +2075,6 @@ function ajaxOkGetItem(jsonData) {
   }
   console.log("lastLoc: "+jsonData["lastLoc"]);
   $("#lastLoc").attr("class", "lastLoc "+lastLoc+"Gps");
-  // document.getElementById("log").style.display = "block";
 
   setWSIcon("checkmark");
 
@@ -2037,7 +2099,7 @@ function startTheTour(step=-1) {
     steps: [{
       element: "#help",
       title: "VARIA Area & Item Tracker",
-      content: "<h2 class=\"center\">Welcome to the VARIA Area & Item Tracker</h2><h4>Area Tracker</h4><p>The Area Tracker allows you to track the connections between the areas portals.<br/>To use it, click on a portal <img src=\"/solver/static/images/portal.png\" alt=\"Portal\" style=\"width: 20px\">, it'll highlight it, then click on a second portal, it'll draw a line between the two portals.<br/>You can delete the latest added line with the <img src=\"/solver/static/images/repeat.svg\" alt=\"Cancel Last\" style=\"width: 32px\"> button and all of them with the <img src=\"/solver/static/images/bin.svg\" alt=\"Remove all\" style=\"width: 32px\"> button.<br/><h4>Item Tracker</h4><p>The Item Tracker allows you to use the Solver in interactive mode.<br/>To use it, click on the <img src=\"/solver/static/images/play.svg\" alt=\"Start\" style=\"width: 32px\"> button to upload your ROM and choose your preset (like on the Solver page).<br/>Then the available locations will be displayed on the map, click on a location after you've collected the item of the location in the game, it'll update the next available locations.<br/>The color of the icon on the available locations matchs the difficulty to reach the location:<table><tr><td><img src=\"/solver/static/images/marker_easy.png\" alt=\"easy\" style=\"width: 32px\"> easy</td><td><img src=\"/solver/static/images/marker_medium.png\" alt=\"medium\" style=\"width: 32px\"> medium</td></td><td><img src=\"/solver/static/images/marker_hard.png\" alt=\"hard\" style=\"width: 32px\"> hard</td></tr><tr><td><img src=\"/solver/static/images/marker_harder.png\" alt=\"harder\" style=\"width: 32px\"> very hard</td><td><img src=\"/solver/static/images/marker_hardcore.png\" alt=\"hardcore\" style=\"width: 32px\"> hardcore</td><td><img src=\"/solver/static/images/marker_mania.png\" alt=\"mania\" style=\"width: 32px\"> mania</td></tr></table>When a location has been visited its icon displays the collected item: <img src=\"/solver/static/images/marker_visited_easy_Gravity.png\" alt=\"Visited\" style=\"width: 32px\"> or this if no item was found: <img src=\"/solver/static/images/marker_visited_easy.png\" alt=\"Visited\" style=\"width: 32px\">, one color for each difficulty.<br/>When overing the mouse cursor on an available location a tooltip is displayed with the location's name, the techniques and items used to access it.<br/>After the location has been visited only the collected item is displayed.<br/>The locations availability are computed from the current access point which is displayed with this: <img src=\"/solver/static/images/gps.png\" alt=\"last access point\" style=\"width: 32px\"></p><h4>Auto Save</h4><p>Both trackers feature an auto save functionnality, so you can do your seed in multiple seatings.<br/>The different status icons of the auto save:<table><tr><td><img src=\"/solver/static/images/refresh.svg\" style=\"width: 32px\"> Loading in progress</td><td><img src=\"/solver/static/images/checkmark.svg\" style=\"width: 32px\"> Save ok</td></tr><tr><td><img src=\"/solver/static/images/cloud_upload.png\" style=\"width: 32px\"> Upload in progress</td><td><img src=\"/solver/static/images/cloud_download.svg\" style=\"width: 32px\"> Download in progress</td></tr><tr><td colspan=\"2\"><img src=\"/solver/static/images/warning.svg\" style=\"width: 32px\"> Something wrong happened (try reloading the page)</td></tr></table></p><p>You can display this help again by clicking on the <img src=\"/solver/static/images/help.svg\" alt=\"help\" style=\"width: 32px\"> button.</p><p><h4>Thanks to</h4><ul><li>Location icons from Alli_Cat's <a href='https://github.com/allibear17/Super-Metroid-Location-Tracker'>Location Tracker</a></li><li>Action icons from <a href='https://dryicons.com/icon-packs/stylistica-icons-set'>Dryicons</a></li></ul></p>"
+      content: "<h2 class=\"center\">Welcome to the VARIA Area & Item Tracker</h2><h4>Area Tracker</h4><p>The Area Tracker allows you to track the connections between the areas portals.<br/>To use it, click on a portal <img src=\"/solver/static/images/portal.png\" alt=\"Portal\" style=\"width: 20px\">, it'll highlight it, then click on a second portal, it'll draw a line between the two portals.<br/>You can delete the latest added line with the <img src=\"/solver/static/images/repeat.svg\" alt=\"Cancel Last\" style=\"width: 32px\"> button and all of them with the <img src=\"/solver/static/images/bin.svg\" alt=\"Remove all\" style=\"width: 32px\"> button.<br/><h4>Item Tracker</h4><p>The Item Tracker allows you to use the Solver in interactive mode.<br/>To use it, click on the <img src=\"/solver/static/images/play.svg\" alt=\"Start\" style=\"width: 32px\"> button to upload your ROM and choose your preset (like on the Solver page).<br/>Then the available locations will be displayed on the map, click on a location after you've collected the item of the location in the game, it'll update the next available locations.<br/>The color of the icon on the available locations matchs the difficulty to reach the location:<table><tr><td><img src=\"/solver/static/images/marker_easy.png\" alt=\"easy\" style=\"width: 32px; background-color: #000;\"> easy</td><td><img src=\"/solver/static/images/marker_medium.png\" alt=\"medium\" class=\"diffHelp\"> medium</td></td><td><img src=\"/solver/static/images/marker_hard.png\" alt=\"hard\" class=\"diffHelp\"> hard</td></tr><tr><td><img src=\"/solver/static/images/marker_harder.png\" alt=\"harder\" class=\"diffHelp\"> very hard</td><td><img src=\"/solver/static/images/marker_hardcore.png\" alt=\"hardcore\" class=\"diffHelp\"> hardcore</td><td><img src=\"/solver/static/images/marker_mania.png\" alt=\"mania\" class=\"diffHelp\"> mania</td></tr><tr><td colspan=\"3\"><img src=\"/solver/static/images/marker_break.png\" alt=\"break\" class=\"diffHelp\"> sequence break</td></tr></table>The locations not available are displayed with the Sequence Break icon, allowing you to collect them when you sequence break.<br/>When a location has been visited its icon displays the collected item: <img src=\"/solver/static/images/marker_visited_easy_Gravity.png\" alt=\"Visited\" style=\"width: 32px\"> or this if no item was found: <img src=\"/solver/static/images/marker_visited_easy.png\" alt=\"Visited\" style=\"width: 32px\">, one color for each difficulty.<br/>When overing the mouse cursor on an available location a tooltip is displayed with the location's name, the techniques and items used to access it.<br/>After the location has been visited only the collected item is displayed.<br/>The locations availability are computed from the current access point which is displayed with this: <img src=\"/solver/static/images/gps.png\" alt=\"last access point\" style=\"width: 32px\"></p><h4>Auto Save</h4><p>Both trackers feature an auto save functionnality, so you can do your seed in multiple seatings.<br/>The different status icons of the auto save:<table><tr><td><img src=\"/solver/static/images/refresh.svg\" style=\"width: 32px\"> Loading in progress</td><td><img src=\"/solver/static/images/checkmark.svg\" style=\"width: 32px\"> Save ok</td></tr><tr><td><img src=\"/solver/static/images/cloud_upload.png\" style=\"width: 32px\"> Upload in progress</td><td><img src=\"/solver/static/images/cloud_download.svg\" style=\"width: 32px\"> Download in progress</td></tr><tr><td colspan=\"2\"><img src=\"/solver/static/images/warning.svg\" style=\"width: 32px\"> Something wrong happened (try reloading the page)</td></tr></table></p><p>You can display this help again by clicking on the <img src=\"/solver/static/images/help.svg\" alt=\"help\" style=\"width: 32px\"> button.</p><p><h4>Thanks to</h4><ul><li>Location icons from Alli_Cat's <a href='https://github.com/allibear17/Super-Metroid-Location-Tracker'>Location Tracker</a></li><li>Action icons from <a href='https://dryicons.com/icon-packs/stylistica-icons-set'>Dryicons</a></li></ul></p>"
     }]
   });
 
@@ -2237,10 +2299,6 @@ function startTheTour(step=-1) {
       <img id="warning" src="/solver/static/images/warning.svg" alt="warning" style="display: none" data-toggle="tooltip" title="Web service ERROR" data-placement="bottom" data-container="body" data-html="true">
       <img id="download" src="/solver/static/images/cloud_download.svg" alt="cloud_download" style="display: none" data-toggle="tooltip" title="Web service downloading" data-placement="bottom" data-container="body" data-html="true">
       <img id="upload" src="/solver/static/images/cloud_upload.png" alt="cloud_upload" style="display: none" data-toggle="tooltip" title="Web service uploading" data-placement="bottom" data-container="body" data-html="true">
-    </div>
-
-    <div id="log" class="log">
-      <textarea id="logText" class="logText" readonly><==VARIA Item Tracker log==></textarea>
     </div>
 
     <div id="lastLoc">

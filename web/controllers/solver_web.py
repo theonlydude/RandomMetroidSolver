@@ -1249,10 +1249,13 @@ def locName4isolver(locName):
 def returnState(state):
     if len(session.tracker["item"]["state"]) > 0:
         #print("state returned to frontend: availWeb {}, visWeb {}".format(session.tracker["item"]["state"]["availableLocationsWeb"], session.tracker["item"]["state"]["visitedLocationsWeb"]))
-        return json.dumps({"availableLocations": session.tracker["item"]["state"]["availableLocationsWeb"],
-                           "visitedLocations": session.tracker["item"]["state"]["visitedLocationsWeb"],
-                           "areaRando": session.tracker["item"]["state"]["areaRando"],
-                           "lastLoc": locName4isolver(session.tracker["item"]["state"]["lastLoc"])})
+        state = session.tracker["item"]["state"]
+        return json.dumps({"availableLocations": state["availableLocationsWeb"],
+                           "visitedLocations": state["visitedLocationsWeb"],
+                           # compatibility with existing sessions
+                           "remainLocations": state["remainLocationsWeb"] if "remainLocationsWeb" in state else [],
+                           "areaRando": state["areaRando"],
+                           "lastLoc": locName4isolver(state["lastLoc"])})
     else:
         raiseHttp(200, "OK", True)
 

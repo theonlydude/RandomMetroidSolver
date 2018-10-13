@@ -518,7 +518,9 @@ locations = [
     'Available': lambda sm: sm.wand(sm.canPassBombPassages(),
                                     Bosses.bossDead('Phantoon'),
                                     sm.wor(sm.heatProof(),
-                                           sm.energyReserveCountOk(1)))
+                                           sm.energyReserveCountOk(1),
+                                           sm.haveItem("SpaceJump"),
+                                           sm.haveItem("Grapple")))
 },
 {
     'Area': "Maridia",
@@ -1544,7 +1546,9 @@ locations = [
         'Crab Maze Left': lambda sm: sm.canPassForgottenHighway(False)
     },
     'Available': lambda sm: sm.wand(sm.wor(sm.heatProof(),
-                                           sm.energyReserveCountOk(1)),
+                                           sm.energyReserveCountOk(1),
+                                           sm.haveItem("SpaceJump"),
+                                           sm.haveItem("Grapple")),
                                     Bosses.bossDead('Phantoon'),
                                     sm.canPassBombPassages())
 },

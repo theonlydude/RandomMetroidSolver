@@ -504,11 +504,10 @@ class InteractiveSolver(CommonSolver):
 
         # item
         item = loc["itemName"]
-        if item not in ["Nothing", "NoEnergy"]:
-            if item != self.collectedItems[-1]:
-                raise Exception("Item of last collected loc {}: {} is different from last collected item: {}".format(loc["Name"], item, self.collectedItems[-1]))
-            self.smbm.removeItem(item)
-            self.collectedItems.pop()
+        if item != self.collectedItems[-1]:
+            raise Exception("Item of last collected loc {}: {} is different from last collected item: {}".format(loc["Name"], item, self.collectedItems[-1]))
+        self.smbm.removeItem(item)
+        self.collectedItems.pop()
 
     def clear(self, reload=False):
         self.collectedItems = []

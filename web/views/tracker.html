@@ -1354,6 +1354,53 @@ img {
     left: 22%;
     top: 33.2%;
 }
+
+#frame {
+    position: absolute;
+    z-index: 0;
+    left: 38%;
+    top: 16%;
+    width: 17%;
+}
+.g4 {
+    position: absolute;
+    z-index: 0;
+    left: 40%;
+    top: 18%;
+    width: 13%;
+}
+.kraid {
+    display: none;
+    position: absolute;
+    z-index: 0;
+    left: 40%;
+    top: 26.12%;
+    width: 6.4%;
+}
+.phantoon {
+    display: none;
+    position: absolute;
+    z-index: 0;
+    left: 44.763%;
+    top: 28.1%;
+    width: 4.12%;
+}
+.draygon {
+    display: none;
+    position: absolute;
+    z-index: 0;
+    left: 47.15%;
+    top: 26.6%;
+    width: 5.88%;
+}
+.ridley {
+    display: none;
+    position: absolute;
+    z-index: 0;
+    left: 43.73%;
+    top: 17.95%;
+    width: 7.94%;
+}
 </style>
 
 <script type="text/javascript">
@@ -2009,7 +2056,7 @@ function ajaxOkGetItem(jsonData) {
 
   if("availableLocations" in jsonData) {
     for(var locName in jsonData["availableLocations"]) {
-      console.log(locName+" is available");
+      // console.log(locName+" is available");
       var locData = jsonData["availableLocations"][locName];
       locsInfo[locName]["state"] = "available";
       locsInfo[locName]["difficulty"] = locData["difficulty"];
@@ -2017,12 +2064,20 @@ function ajaxOkGetItem(jsonData) {
       $("#"+locName).attr("class", "baseLoc marker_available_"+locData["difficulty"]);
       var tooltip = getTooltip(locName, locData, "?", false);
       $("#"+locName+'[data-toggle="tooltip"]').attr("title", tooltip).tooltip('fixTitle');
+
+      // check if a boss was at that location
+      if("boss" in locsInfo[locName]) {
+        var boss = locsInfo[locName]["boss"];
+        if(boss != "Mother Brain") {
+          document.getElementById(boss).style.display = "none";
+        }
+      }
     }
   }
 
   if("visitedLocations" in jsonData) {
     for(var locName in jsonData["visitedLocations"]) {
-      console.log(locName+" is visited");
+      // console.log(locName+" is visited");
       var locData = jsonData["visitedLocations"][locName];
       locsInfo[locName]["state"] = "visited";
       locsInfo[locName]["difficulty"] = locData["difficulty"];
@@ -2037,13 +2092,21 @@ function ajaxOkGetItem(jsonData) {
       $("#"+locName).attr("class", base+" "+className);
       var tooltip = getTooltip(locName, locData, locData["item"], true);
       $("#"+locName+'[data-toggle="tooltip"]').attr("title", tooltip).tooltip('fixTitle');
+
+      // check if a boss was at that location
+      if("boss" in locsInfo[locName]) {
+        var boss = locsInfo[locName]["boss"];
+        if(boss != "Mother Brain") {
+          document.getElementById(boss).style.display = "block";
+        }
+      }
     }
   }
 
   // set remaining locations as sequence breakable
   if("remainLocations" in jsonData) {
     for(var locName in jsonData["remainLocations"]) {
-      console.log(locName+": sequence breakable");
+      // console.log(locName+": sequence breakable");
       var locData = jsonData["remainLocations"][locName];
       locsInfo[locName]["state"] = "break";
       locsInfo[locName]["difficulty"] = locData["difficulty"];
@@ -2058,6 +2121,14 @@ function ajaxOkGetItem(jsonData) {
       $("#"+locName).attr("class", base+" "+className);
       var tooltip = getTooltip(locName, locData, "?", false);
       $("#"+locName+'[data-toggle="tooltip"]').attr("title", tooltip).tooltip('fixTitle');
+
+      // check if a boss was at that location
+      if("boss" in locsInfo[locName]) {
+        var boss = locsInfo[locName]["boss"];
+        if(boss != "Mother Brain") {
+          document.getElementById(boss).style.display = "none";
+        }
+      }
     }
   }
 
@@ -2303,6 +2374,27 @@ function startTheTour(step=-1) {
 
     <div id="lastLoc">
       <img src="/solver/static/images/gps.png" alt="last access point" data-toggle="tooltip" title="Current access point" data-placement="bottom" data-container="body" data-html="true">
+    </div>
+
+<!--
+    <div id="frame">
+        <img src="/solver/static/images/frame.png" alt="frame" title="frame">
+    </div>
+-->
+    <div class="g4">
+        <img src="/solver/static/images/golden_four.png" alt="g4" title="g4" class="full">
+    </div>
+    <div id="Kraid" class="boss kraid">
+        <img src="/solver/static/images/kraid.png" alt="kraid" title="kraid" class="full">
+    </div>
+    <div id="Phantoon" class="boss phantoon">
+        <img src="/solver/static/images/phantoon.png" alt="phantoon" title="phantoon" class="full">
+    </div>
+    <div id="Draygon" class="boss draygon">
+        <img src="/solver/static/images/draygon.png" alt="draygon" title="draygon" class="full">
+    </div>
+    <div id="Ridley" class="boss ridley">
+        <img src="/solver/static/images/ridley.png" alt="ridley" title="ridley" class="full">
     </div>
   </div>
 </div>

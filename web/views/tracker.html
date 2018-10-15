@@ -3298,7 +3298,6 @@ function resetItems() {
 
   var items = ["Charge", "Ice", "Wave", "Spazer", "Plasma", "Varia", "Gravity", "Morph", "Bomb", "SpringBall", "ScrewAttack", "HiJump", "SpaceJump", "SpeedBooster", "Missile", "Super", "PowerBomb", "Grapple", "XRayScope"];
   for(var item in items) {
-    console.log("item: "+items[item]);
     document.getElementById(items[item]+"_pause").style.display = "none";
   }
 }
@@ -3308,7 +3307,6 @@ function addItem(itemName) {
     return;
   }
   if(itemName in itemCount) {
-    console.log("add minor: "+itemName);
     itemCount[itemName] += 1
     if(itemName == "Missile" || itemName == "Super" || itemName == "PowerBomb") {
       document.getElementById(itemName+"_pause").style.display = "block";
@@ -3322,7 +3320,6 @@ function addItem(itemName) {
       }
     }
   } else {
-    console.log("add item: "+itemName);
     document.getElementById(itemName+"_pause").style.display = "block";
   }
 }

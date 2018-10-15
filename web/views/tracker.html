@@ -3312,12 +3312,6 @@ function addItem(itemName) {
       document.getElementById(itemName+"_pause").style.display = "block";
     } else {
       document.getElementById(itemName+"_"+itemCount[itemName]+"_pause").style.display = "block";
-      if(itemName == "Reserve") {
-        document.getElementById("auto").style.display = "block";
-        document.getElementById("reserve_text").style.display = "block";
-        document.getElementById("reserve_0").style.display = "block";
-        document.getElementById("reserve_00").style.display = "block";
-      }
     }
   } else {
     document.getElementById(itemName+"_pause").style.display = "block";
@@ -3329,13 +3323,23 @@ function pad(x, n) {
 }
 
 function setReserveCount() {
+  for(var i=1; i<=4; i++) {
+    document.getElementById("reserve_"+i).style.display = "none";
+  }
+  document.getElementById("auto").style.display = "none";
+  document.getElementById("reserve_text").style.display = "none";
+  document.getElementById("reserve_0").style.display = "none";
+  document.getElementById("reserve_00").style.display = "none";
+
   if(itemCount["Reserve"] == 0) {
     return;
   }
 
-  for(var i=1; i<=4; i++) {
-    document.getElementById("reserve_"+i).style.display = "none";
-  }
+  document.getElementById("auto").style.display = "block";
+  document.getElementById("reserve_text").style.display = "block";
+  document.getElementById("reserve_0").style.display = "block";
+  document.getElementById("reserve_00").style.display = "block";
+
   document.getElementById("reserve_"+itemCount["Reserve"]).style.display = "block";
 }
 
@@ -3347,6 +3351,10 @@ function setItemCount(itemName) {
     for(var j=9; j<=900; j*=10) {
       document.getElementById(itemName+"_"+j+"_"+i+"_pause").style.display = "none";
     }
+  }
+
+  if(count == 0) {
+    return;
   }
 
   count = pad(count, 3);

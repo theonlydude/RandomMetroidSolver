@@ -163,6 +163,8 @@ class SolverState(object):
                                 "items": list(set(diff.items)),
                                 "item": loc["itemName"],
                                 "name": loc["Name"]}
+                if "comeBack" in loc:
+                    ret[locName]["comeBack"] = loc["comeBack"]
         return ret
 
     def getRemainLocationsWeb(self, locations):

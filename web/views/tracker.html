@@ -3138,7 +3138,7 @@ function ajaxCallItem(dataDict, msg, okFunc=ajaxOkJSON) {
     request.fail(ajaxFailJSON);
 }
 
-function getTooltip(locName, locData, item, visited) {
+function getTooltip(locName, locData, item, visited, canComeBack) {
   var tooltip = "<center>"+locData["name"]+"</center>";
 
   if("boss" in locsInfo[locName]) {
@@ -3149,7 +3149,7 @@ function getTooltip(locName, locData, item, visited) {
     return tooltip+"Item: "+item;
 
   } else {
-    return tooltip+"Techniques: "+(locData["knows"].length > 0 ? locData["knows"] : "None")+"<br>Items: "+(locData["items"].length > 0 ? locData["items"] : "None");
+    return tooltip+"Techniques: "+(locData["knows"].length > 0 ? locData["knows"] : "None")+"<br>Items: "+(locData["items"].length > 0 ? locData["items"] : "None")+("comeBack" in locData && locData["comeBack"] == false ? "<br>WARNING: Can't come back" : "");
 
   }
 }

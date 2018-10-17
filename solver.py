@@ -848,22 +848,51 @@ class StandardSolver(CommonSolver):
                     self.log.debug("not enough minors")
                     return self.collectMinor(minorsAvailable.pop(0))
                 # difficulty over area (this is a difficulty estimator, not a speedrunning simulator)
-                elif nextMinDifficulty < nextMajDifficulty:
-                    self.log.debug("min easier and not enough minors")
-                    return self.collectMinor(minorsAvailable.pop(0))
-                elif nextMajDifficulty < nextMinDifficulty:
-                    self.log.debug("maj easier")
-                    return self.collectMajor(majorsAvailable.pop(0))
-                # take the closer one
-                elif nextMajDistance != nextMinDistance:
-                    self.log.debug("!= distance")
-                    if nextMajDistance < nextMinDistance:
-                        return self.collectMajor(majorsAvailable.pop(0))
-                    else:
+                elif nextMinDifficulty <= diffThreshold and nextMajDistance <= diffThreshold:
+                    # take the closer one
+                    if nextMajDistance != nextMinDistance:
+                        self.log.debug("!= distance")
+                        if nextMajDistance < nextMinDistance:
+                            return self.collectMajor(majorsAvailable.pop(0))
+                        else:
+                            return self.collectMinor(minorsAvailable.pop(0))
+                    # take the easier
+                    elif nextMinDifficulty < nextMajDifficulty:
+                        self.log.debug("min easier and not enough minors")
                         return self.collectMinor(minorsAvailable.pop(0))
-                # same difficulty and distance for minor and major, take major first
+                    elif nextMajDifficulty < nextMinDifficulty:
+                        self.log.debug("maj easier")
+                        return self.collectMajor(majorsAvailable.pop(0))
+                    # same difficulty and distance for minor and major, take major first
+                    else:
+                        return self.collectMajor(majorsAvailable.pop(0))
+                elif nextMinDifficulty > diffThreshold and nextMajDistance > diffThreshold:
+                    # take the easier
+                    if nextMinDifficulty < nextMajDifficulty:
+                        self.log.debug("min easier and not enough minors")
+                        return self.collectMinor(minorsAvailable.pop(0))
+                    elif nextMajDifficulty < nextMinDifficulty:
+                        self.log.debug("maj easier")
+                        return self.collectMajor(majorsAvailable.pop(0))
+                    # take the closer one
+                    elif nextMajDistance != nextMinDistance:
+                        self.log.debug("!= distance")
+                        if nextMajDistance < nextMinDistance:
+                            return self.collectMajor(majorsAvailable.pop(0))
+                        else:
+                            return self.collectMinor(minorsAvailable.pop(0))
+                    # same difficulty and distance for minor and major, take major first
+                    else:
+                        return self.collectMajor(majorsAvailable.pop(0))
                 else:
-                    return self.collectMajor(majorsAvailable.pop(0))
+                    if nextMinDifficulty < nextMajDifficulty:
+                        self.log.debug("min easier and not enough minors")
+                        return self.collectMinor(minorsAvailable.pop(0))
+                    else:
+                        self.log.debug("maj easier")
+                        return self.collectMajor(majorsAvailable.pop(0))
+
+        raise Exception("Can't take a decision")
 
     def computeDifficultyValue(self):
         if not self.canEndGame().bool:

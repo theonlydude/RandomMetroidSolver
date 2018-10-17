@@ -743,6 +743,8 @@ class StandardSolver(CommonSolver):
         for loc in locations:
             loc["areaWeight"] = graphLocs[loc["GraphArea"]]
 
+        print("WARNING: use no come back heuristic")
+
         return True
 
     def getAvailableItemsList(self, locations, area, threshold):

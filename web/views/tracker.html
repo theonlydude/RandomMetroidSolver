@@ -3138,7 +3138,7 @@ function ajaxCallItem(dataDict, msg, okFunc=ajaxOkJSON) {
     request.fail(ajaxFailJSON);
 }
 
-function getTooltip(locName, locData, item, visited, canComeBack) {
+function getTooltip(locName, locData, item, visited) {
   var tooltip = "<center>"+locData["name"]+"</center>";
 
   if("boss" in locsInfo[locName]) {

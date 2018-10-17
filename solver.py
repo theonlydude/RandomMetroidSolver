@@ -255,7 +255,7 @@ class CommonSolver(object):
                 loc['difficulty'] = self.smbm.wand(loc['difficulty'], postAvailable)
             # also check if we can come back to landing site from the location
             if loc['difficulty'].bool == True:
-                loc['comeBack'] = self.areaGraph.canAccess(self.smbm, loc['accessPoint'], 'Landing Site', infinity, loc['itemName'])
+                loc['comeBack'] = self.areaGraph.canAccess(self.smbm, loc['accessPoint'], self.lastLoc, infinity, loc['itemName'])
 
         if self.log.getEffectiveLevel() == logging.DEBUG:
             self.log.debug("available locs:")

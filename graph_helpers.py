@@ -127,11 +127,20 @@ class HelpersGraph(Helpers):
 
     @Cache.decorator
     def canExitCathedral(self):
-        # can do a shinespark or use space jump to exit or can use bomb/powerbomb jumps
-        # TODO::check if wall jumps are enough
+        # from top: can use bomb/powerbomb jumps
+        # from bottom: can do a shinespark or use space jump
+        #              can do it with highjump + wall jump
+        #              can do it with only two wall jumps (the first one is delayed like on alcatraz)
+        #              can do it with a spring ball jump from wall
         sm = self.smbm
-        return sm.wand(sm.wor(sm.canHellRun('MainUpperNorfair', 0.75), sm.heatProof()),
-                       sm.wor(sm.canPassBombPassages(), sm.haveItem("SpeedBooster"), sm.haveItem("SpaceJump")))
+        return sm.wand(sm.wor(sm.canHellRun('MainUpperNorfair', 0.75),
+                              sm.heatProof()),
+                       sm.wor(sm.wor(sm.canPassBombPassages(),
+                                     sm.haveItem("SpeedBooster")),
+                              sm.wor(sm.haveItem("SpaceJump"),
+                                     sm.haveItem("HiJump"),
+                                     sm.knowsWallJumpCathedralExit(),
+                                     sm.wand(sm.knowsSpringBallJumpFromWall(), sm.haveItem('Morph'), sm.haveItem('SpringBall')))))
 
     @Cache.decorator
     def canGrappleEscape(self):

@@ -272,6 +272,12 @@ class Knows:
                                     'rooms': ['Landing Site']}
 
     # Norfair
+    WallJumpCathedralExit = SMBool(False, 0, ['WallJumpCathedralExit'])
+    desc['WallJumpCathedralExit'] = {'display': 'Wall Jump to exit Cathedral',
+                                     'title': 'Use a delayed wall jump to exit Cathedral',
+                                     'href': None,
+                                     'rooms': ['Cathedral Entrance']}
+
     NovaBoost = SMBool(False, 0, ['NovaBoost'])
     desc['NovaBoost'] = {'display': 'Nova Boost',
                          'title': 'Use a D-Boost on the Sova to enter Cathedral',
@@ -472,7 +478,7 @@ class Knows:
              'title': 'Obscure suitless stuff'}
         ],
         'Norfair': [
-            {'knows': ['NovaBoost'],
+            {'knows': ['WallJumpCathedralExit', 'NovaBoost'],
               'title': 'Upper Norfair'},
             {'knows': ['LavaDive', 'LavaDiveNoHiJump', 'ScrewAttackExit', 'WorstRoomIceCharge'],
              'title': 'Lower Norfair'}

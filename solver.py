@@ -743,7 +743,8 @@ class StandardSolver(CommonSolver):
         for loc in locations:
             loc["areaWeight"] = graphLocs[loc["GraphArea"]]
 
-        print("WARNING: use no come back heuristic")
+        if len(graphLocs) > 1:
+            print("WARNING: use no come back heuristic")
 
         return True
 
@@ -839,13 +840,6 @@ class StandardSolver(CommonSolver):
                         return self.collectMajor(majorsAvailable.pop(0))
                     else:
                         return self.collectMinor(minorsAvailable.pop(0))
-                # take the closer one
-                elif nextMajDistance != nextMinDistance:
-                    self.log.debug("!= distance")
-                    if nextMajDistance < nextMinDistance:
-                        return self.collectMajor(majorsAvailable.pop(0))
-                    else:
-                        return self.collectMinor(minorsAvailable.pop(0))
                 # if not all the minors type are collected, start with minors
                 elif nextMinDifficulty <= diffThreshold and not self.haveAllMinorTypes():
                     self.log.debug("not all minors types")
@@ -853,13 +847,22 @@ class StandardSolver(CommonSolver):
                 elif nextMinArea == area and nextMinDifficulty <= diffThreshold:
                     self.log.debug("not enough minors")
                     return self.collectMinor(minorsAvailable.pop(0))
-                # difficulty over area (this is a difficulty estimator,
-                # not a speedrunning simulator)
+                # difficulty over area (this is a difficulty estimator, not a speedrunning simulator)
                 elif nextMinDifficulty < nextMajDifficulty:
                     self.log.debug("min easier and not enough minors")
                     return self.collectMinor(minorsAvailable.pop(0))
-                else:
+                elif nextMajDifficulty < nextMinDifficulty:
                     self.log.debug("maj easier")
+                    return self.collectMajor(majorsAvailable.pop(0))
+                # take the closer one
+                elif nextMajDistance != nextMinDistance:
+                    self.log.debug("!= distance")
+                    if nextMajDistance < nextMinDistance:
+                        return self.collectMajor(majorsAvailable.pop(0))
+                    else:
+                        return self.collectMinor(minorsAvailable.pop(0))
+                # same difficulty and distance for minor and major, take major first
+                else:
                     return self.collectMajor(majorsAvailable.pop(0))
 
     def computeDifficultyValue(self):

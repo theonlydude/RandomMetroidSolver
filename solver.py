@@ -737,14 +737,16 @@ class StandardSolver(CommonSolver):
             else:
                 graphLocs[loc["GraphArea"]] = 1
 
+        if len(graphLocs) == 1:
+            return False
+
         for graphLoc in graphLocs:
             graphLocs[graphLoc] = 1.0/graphLocs[graphLoc]
 
         for loc in locations:
             loc["areaWeight"] = graphLocs[loc["GraphArea"]]
 
-        if len(graphLocs) > 1:
-            print("WARNING: use no come back heuristic")
+        print("WARNING: use no come back heuristic")
 
         return True
 
@@ -776,9 +778,9 @@ class StandardSolver(CommonSolver):
         # then we sort the remaining areas starting whith boss dead status
         outside.sort(key=lambda loc: (loc["areaWeight"] if "areaWeight" in loc
                                       else 0,
-                                      0 if loc['SolveArea'] == area and loc['difficulty'].difficulty <= threshold
-                                      else 1,
                                       0 if 'comeBack' in loc and loc['comeBack'] == True
+                                      else 1,
+                                      0 if loc['SolveArea'] == area and loc['difficulty'].difficulty <= threshold
                                       else 1,
                                       loc['distance'] if loc['difficulty'].difficulty <= threshold
                                       else 100000,

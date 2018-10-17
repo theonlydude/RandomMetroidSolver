@@ -126,6 +126,14 @@ class HelpersGraph(Helpers):
                                       sm.knowsNovaBoost())))
 
     @Cache.decorator
+    def canExitCathedral(self):
+        # can do a shinespark or use space jump to exit or can use bomb/powerbomb jumps
+        # TODO::check if wall jumps are enough
+        sm = self.smbm
+        return sm.wand(sm.wor(sm.canHellRun('MainUpperNorfair', 0.75), sm.heatProof()),
+                       sm.wor(sm.canPassBombPassages(), sm.haveItem("SpeedBooster"), sm.haveItem("SpaceJump")))
+
+    @Cache.decorator
     def canGrappleEscape(self):
         sm = self.smbm
         return sm.wor(sm.wor(sm.haveItem('SpaceJump'),

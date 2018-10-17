@@ -768,7 +768,8 @@ class StandardSolver(CommonSolver):
         # first take major items of acceptable difficulty in the current area
         if (len(majorsAvailable) > 0
             and majorsAvailable[0]['SolveArea'] == area
-            and majorsAvailable[0]['difficulty'].difficulty <= diffThreshold):
+            and majorsAvailable[0]['difficulty'].difficulty <= diffThreshold
+            and majorsAvailable[0]['comeBack'] == True):
             return self.collectMajor(majorsAvailable.pop(0))
         # next item decision
         if len(minorsAvailable) == 0 and len(majorsAvailable) > 0:
@@ -781,7 +782,7 @@ class StandardSolver(CommonSolver):
             return self.collectMinor(minorsAvailable.pop(0))
         elif len(majorsAvailable) > 0 and len(minorsAvailable) > 0:
             self.log.debug('BOTH|M=' + majorsAvailable[0]['Name'] + ', m=' + minorsAvailable[0]['Name'])
-            # if both are available, decide based on area and difficulty
+            # if both are available, decide based on area, difficulty and comeBack
             nextMajDifficulty = majorsAvailable[0]['difficulty'].difficulty
             nextMinArea = minorsAvailable[0]['SolveArea']
             nextMinDifficulty = minorsAvailable[0]['difficulty'].difficulty

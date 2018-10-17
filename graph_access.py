@@ -208,9 +208,9 @@ accessPoints = [
                                                             sm.haveItem('Morph'))
     }, internal=True),
     AccessPoint('Bubble Mountain', 'Norfair', {
-        'Warehouse Entrance Left': lambda sm: sm.wand(sm.canPassBombPassages(), # to access bottom left door OR to exit cathedral
-                                                      sm.wor(sm.haveItem('SpeedBooster'),
-                                                             sm.canHellRun('MainUpperNorfair', 0.75))),
+        # bottom left door -> frog speed way OR exit cathedral
+        'Warehouse Entrance Left': lambda sm: sm.wor(sm.wand(sm.canPassBombPassages(), sm.haveItem('SpeedBooster')),
+                                                     sm.canExitCathedral()),
         'Single Chamber Top Right': lambda sm: sm.wand(sm.canHellRun('MainUpperNorfair', 1.25),
                                                        sm.canDestroyBombWalls(),
                                                        sm.haveItem('Morph'),

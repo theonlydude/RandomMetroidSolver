@@ -723,13 +723,39 @@ class StandardSolver(CommonSolver):
 
         return (difficulty, itemsOk)
 
+    def handleNoComeBack(self, locations):
+        # check if all the available locations have the no come back flag
+        # if so add a new parameter with the number of locations in each graph area
+        graphLocs = {}
+        for loc in locations:
+            if "comeBack" not in loc:
+                return False
+            if loc["comeBack"] == True:
+                return False
+            if loc["GraphArea"] in graphLocs:
+                graphLocs[loc["GraphArea"]] += 1
+            else:
+                graphLocs[loc["GraphArea"]] = 1
+
+        for graphLoc in graphLocs:
+            graphLocs[graphLoc] = 1.0/graphLocs[graphLoc]
+
+        for loc in locations:
+            loc["areaWeight"] = graphLocs[loc["GraphArea"]]
+
+        return True
+
     def getAvailableItemsList(self, locations, area, threshold):
         # locations without distance are not available
         locations = [loc for loc in locations if 'distance' in loc]
 
+        cleanAreaWeight = self.handleNoComeBack(locations)
+
         around = [loc for loc in locations if (loc['SolveArea'] == area or loc['distance'] < 3) and loc['difficulty'].difficulty <= threshold and not Bosses.areaBossDead(area) and 'comeBack' in loc and loc['comeBack'] == True]
         # pickup action means beating a boss, so do that first if possible
-        around.sort(key=lambda loc: (0 if 'Pickup' in loc
+        around.sort(key=lambda loc: (loc["areaWeight"] if "areaWeight" in loc
+                                     else 0,
+                                     0 if 'Pickup' in loc
                                      else 1,
                                      0 if 'comeBack' in loc and loc['comeBack'] == True
                                      else 1,
@@ -745,7 +771,9 @@ class StandardSolver(CommonSolver):
         # we want to sort the outside locations by putting the ones is the same
         # area first if we don't have enough items,
         # then we sort the remaining areas starting whith boss dead status
-        outside.sort(key=lambda loc: (0 if loc['SolveArea'] == area and loc['difficulty'].difficulty <= threshold
+        outside.sort(key=lambda loc: (loc["areaWeight"] if "areaWeight" in loc
+                                      else 0,
+                                      0 if loc['SolveArea'] == area and loc['difficulty'].difficulty <= threshold
                                       else 1,
                                       0 if 'comeBack' in loc and loc['comeBack'] == True
                                       else 1,
@@ -761,6 +789,10 @@ class StandardSolver(CommonSolver):
                                       loc['difficulty'].difficulty))
         self.log.debug("around2 = " + str([(loc['Name'], loc['difficulty'], loc['distance'], loc['comeBack'], loc['SolveArea']) for loc in around]))
         self.log.debug("outside2 = " + str([(loc['Name'], loc['difficulty'], loc['distance'], loc['comeBack'], loc['SolveArea']) for loc in outside]))
+
+        if cleanAreaWeight == True:
+            for loc in locations:
+                del loc["areaWeight"]
 
         return around + outside
 

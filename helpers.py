@@ -537,6 +537,7 @@ class Helpers(object):
         elif nTanks < 3:
             return SMBool(False, 0)
 
+        #print("ammoMargin: {}, secs: {}, settings: {}, energyDiff: {}".format(ammoMargin, secs, Settings.bossesDifficulty['MotherBrain'], energyDiff))
         diff = self.computeBossDifficulty(ammoMargin, secs, Settings.bossesDifficulty['MotherBrain'], energyDiff)
         if diff < 0:
             return SMBool(False)

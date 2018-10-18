@@ -165,6 +165,9 @@ class SolverState(object):
                                 "name": loc["Name"]}
                 if "comeBack" in loc:
                     ret[locName]["comeBack"] = loc["comeBack"]
+                # for debug purpose
+                #if "path" in loc:
+                #    ret[locName]["path"] = [a.Name for a in loc["path"]]
         return ret
 
     def getRemainLocationsWeb(self, locations):

@@ -625,7 +625,7 @@ def computeDifficulty(jsonRomFileName, preset):
     randomizedRom = os.path.basename(jsonRomFileName.replace('json', 'sfc'))
 
     presetFileName = "{}/{}.json".format(getPresetDir(preset), preset)
-    jsonFileName = tempfile.mkstemp()[1]
+    (fd, jsonFileName) = tempfile.mkstemp()
 
     DB = db.DB()
     id = DB.initSolver()
@@ -662,6 +662,7 @@ def computeDifficulty(jsonRomFileName, preset):
     DB.addSolverResult(id, ret, duration, result)
     DB.close()
 
+    os.close(fd)
     os.remove(jsonFileName)
 
     return (ret == 0, result)
@@ -898,8 +899,9 @@ def randomizerWebService():
     DB = db.DB()
     id = DB.initRando()
 
-    presetFileName = tempfile.mkstemp()[1] + '.json'
-    jsonFileName = tempfile.mkstemp()[1]
+    (fd1, presetFileName) = tempfile.mkstemp()
+    presetFileName += '.json'
+    (fd2, jsonFileName) = tempfile.mkstemp()
 
     print("randomizerWebService, params validated")
     for var in request.vars:
@@ -983,8 +985,10 @@ def randomizerWebService():
     try:
         controlMapping = PresetLoader.factory(presetFileName).params['Controller']
     except Exception as e:
-        os.remove(jsonFileName)
+        os.close(fd1)
         os.remove(presetFileName)
+        os.close(fd2)
+        os.remove(jsonFileName)
         raise HTTP(400, json.dumps("randomizerWebService: can't load the preset"))
 
     (custom, controlParam) = getCustomMapping(controlMapping)
@@ -1012,8 +1016,10 @@ def randomizerWebService():
         DB.addRandoResult(id, ret, duration, msg)
         DB.close()
 
-        os.remove(jsonFileName)
+        os.close(fd1)
         os.remove(presetFileName)
+        os.close(fd2)
+        os.remove(jsonFileName)
         return json.dumps(locsItems)
     else:
         # extract error from json
@@ -1026,8 +1032,10 @@ def randomizerWebService():
         DB.addRandoResult(id, ret, duration, msg)
         DB.close()
 
-        os.remove(jsonFileName)
+        os.close(fd1)
         os.remove(presetFileName)
+        os.close(fd2)
+        os.remove(jsonFileName)
         raise HTTP(400, json.dumps(msg))
 
 def presetWebService():
@@ -1260,7 +1268,7 @@ def returnState(state):
         raiseHttp(200, "OK", True)
 
 def callSolverInit(jsonRomFileName, presetFileName, preset, romFileName):
-    jsonOutFileName = tempfile.mkstemp()[1]
+    (fd, jsonOutFileName) = tempfile.mkstemp()
     params = [
         'python2',  os.path.expanduser("~/RandomMetroidSolver/solver.py"),
         '-r', str(jsonRomFileName),
@@ -1284,10 +1292,12 @@ def callSolverInit(jsonRomFileName, presetFileName, preset, romFileName):
 
         with open(jsonOutFileName) as jsonFile:
             state = json.load(jsonFile)
+        os.close(fd)
         os.remove(jsonOutFileName)
         session.tracker["item"]["state"] = state
         return returnState(state)
     else:
+        os.close(fd)
         os.remove(jsonOutFileName)
         raiseHttp(400, "Something wrong happened while initializing solving of the ROM", True)
 
@@ -1296,8 +1306,8 @@ def callSolverAction(action, locName=None):
     if "state" not in session.tracker["item"]:
         raiseHttp(400, "Missing Solver state in the session", True)
 
-    jsonInFileName = tempfile.mkstemp()[1]
-    jsonOutFileName = tempfile.mkstemp()[1]
+    (fd1, jsonInFileName) = tempfile.mkstemp()
+    (fd2, jsonOutFileName) = tempfile.mkstemp()
     params = [
         'python2',  os.path.expanduser("~/RandomMetroidSolver/solver.py"),
         '--interactive',
@@ -1322,13 +1332,17 @@ def callSolverAction(action, locName=None):
     if ret == 0:
         with open(jsonOutFileName) as jsonFile:
             state = json.load(jsonFile)
-        os.remove(jsonOutFileName)
+        os.close(fd1)
         os.remove(jsonInFileName)
+        os.close(fd2)
+        os.remove(jsonOutFileName)
         session.tracker["item"]["state"] = state
         return returnState(state)
     else:
-        os.remove(jsonOutFileName)
+        os.close(fd1)
         os.remove(jsonInFileName)
+        os.close(fd2)
+        os.remove(jsonOutFileName)
         raiseHttp(400, "Something wrong happened while iteratively solving the ROM", True)
     
 def itemTrackerWebService():

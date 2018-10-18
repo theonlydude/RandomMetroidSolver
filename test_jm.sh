@@ -63,29 +63,29 @@ function computeSeed {
 	fi
     fi
 
-    NEW_MD5="new n/a"
-    OUT=$(/usr/bin/time -f "\t%E real" python2 ./randomizer.py ${PARAMS} 2>&1)
-    if [ $? -ne 0 ]; then
-	RTIME_NEW="n/a"
-    else
-	RTIME_NEW=$(echo "${OUT}" | grep real | awk '{print $1}')
-	ROM_GEN=$(ls -1 VARIA_Randomizer_*X${SEED}_${PRESET}.sfc 2>/dev/null)
-	if [ $? -eq 0 ]; then
-	    NEW_MD5=$(md5sum ${ROM_GEN} | awk '{print $1}')
-	fi
-    fi
+#    NEW_MD5="new n/a"
+#    OUT=$(/usr/bin/time -f "\t%E real" python2 ./randomizer.py ${PARAMS} 2>&1)
+#    if [ $? -ne 0 ]; then
+#	RTIME_NEW="n/a"
+#    else
+#	RTIME_NEW=$(echo "${OUT}" | grep real | awk '{print $1}')
+#	ROM_GEN=$(ls -1 VARIA_Randomizer_*X${SEED}_${PRESET}.sfc 2>/dev/null)
+#	if [ $? -eq 0 ]; then
+#	    NEW_MD5=$(md5sum ${ROM_GEN} | awk '{print $1}')
+#	fi
+#    fi
 
-    if [ "${OLD_MD5}" != "${NEW_MD5}" ]; then
-	if [ "${OLD_MD5}" = "old n/a" ] && [ "${NEW_MD5}" = "new n/a" ]; then
-	    MD5="n/a"
-	else
-	    MD5="mismatch"
-	    echo "OLD: ${OLD_MD5} NEW: ${NEW_MD5}"
-	    STOP="now"
-	fi
-    else
-	MD5=${OLD_MD5}
-    fi
+#    if [ "${OLD_MD5}" != "${NEW_MD5}" ]; then
+#	if [ "${OLD_MD5}" = "old n/a" ] && [ "${NEW_MD5}" = "new n/a" ]; then
+#	    MD5="n/a"
+#	else
+#	    MD5="mismatch"
+#	    echo "OLD: ${OLD_MD5} NEW: ${NEW_MD5}"
+#	    STOP="now"
+#	fi
+#    else
+#	MD5=${OLD_MD5}
+#    fi
 
     # solve seed
     ROM_GEN=$(ls -1 VARIA_Randomizer_*X${SEED}_${PRESET}.sfc)
@@ -93,30 +93,36 @@ function computeSeed {
 	return
     fi
 
-    OUT=$(/usr/bin/time -f "\t%E real" python2 ${ORIG}/solver.py ${ROM_GEN} --preset standard_presets/${PRESET}.json -g 2>&1) > ${ROM_GEN}.old
+    OUT=$(/usr/bin/time -f "\t%E real" python2 ${ORIG}/solver.py -r ${ROM_GEN} --preset standard_presets/${PRESET}.json -g 2>&1) > ${ROM_GEN}.old
     if [ $? -ne 0 ]; then
+        echo "${SEED};${DIFF_CAP};${RTIME_OLD};${RTIME_NEW};${STIME_OLD};${STIME_NEW};${MD5};${PARAMS};" | tee -a ${CSV}
+        echo "Can't solve ${ROM_GEN}" | tee -a ${CSV}
+        exit 0
 	STIME_OLD="n/a"
     else
 	STIME_OLD=$(echo "${OUT}" | grep real | awk '{print $1}')
     fi
-    OUT=$(/usr/bin/time -f "\t%E real" python2 ./solver.py -r ${ROM_GEN} --preset standard_presets/${PRESET}.json -g 2>&1) > ${ROM_GEN}.new
-    if [ $? -ne 0 ]; then
-	STIME_NEW="n/a"
-    else
-	STIME_NEW=$(echo "${OUT}" | grep real | awk '{print $1}')
-    fi
+#    OUT=$(/usr/bin/time -f "\t%E real" python2 ./solver.py -r ${ROM_GEN} --preset standard_presets/${PRESET}.json -g 2>&1) > ${ROM_GEN}.new
+#    if [ $? -ne 0 ]; then
+#        echo "${SEED};${DIFF_CAP};${RTIME_OLD};${RTIME_NEW};${STIME_OLD};${STIME_NEW};${MD5};${PARAMS};" | tee -a ${CSV}
+#        echo "Can't solve ${ROM_GEN}" | tee -a ${CSV}
+#        exit 0
+#	STIME_NEW="n/a"
+#    else
+#	STIME_NEW=$(echo "${OUT}" | grep real | awk '{print $1}')
+#    fi
 
     echo "${SEED};${DIFF_CAP};${RTIME_OLD};${RTIME_NEW};${STIME_OLD};${STIME_NEW};${MD5};${PARAMS};" | tee -a ${CSV}
 
-    DIFF=$(diff ${ROM_GEN}.old ${ROM_GEN}.new)
-
-    if [ -z "${DIFF}" ]; then
+#    DIFF=$(diff ${ROM_GEN}.old ${ROM_GEN}.new)
+#
+#    if [ -z "${DIFF}" ]; then
 	rm -f ${ROM_GEN} ${ROM_GEN}.new ${ROM_GEN}.old
-	echo "${SEED};${ROM_GEN};SOLVER;${PRESET};OK;" | tee -a test_jm.csv
-    else
-	echo "${SEED};${ROM_GEN};SOLVER;${PRESET};NOK;" | tee -a test_jm.csv
-	STOP="now"
-    fi
+#	echo "${SEED};${ROM_GEN};SOLVER;${PRESET};OK;" | tee -a test_jm.csv
+#    else
+#	echo "${SEED};${ROM_GEN};SOLVER;${PRESET};NOK;" | tee -a test_jm.csv
+#	STOP="now"
+#    fi
 }
 
 STOP=""
@@ -133,4 +139,5 @@ for i in $(seq 1 ${LOOPS}); do
     fi
 done | tee test_jm.log
 
+echo "DONE"
 #rm -rf ${TEMP_DIR}

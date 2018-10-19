@@ -215,9 +215,9 @@ class SolverState(object):
 #        print("")
 
 class CommonSolver(object):
-    def loadRom(self, rom, interactive=False):
+    def loadRom(self, rom, interactive=False, magic=None):
         self.romFileName = rom
-        self.romLoader = RomLoader.factory(rom)
+        self.romLoader = RomLoader.factory(rom, magic)
         self.fullRando = self.romLoader.assignItems(self.locations)
         self.areaRando = self.romLoader.loadPatches()
 
@@ -546,7 +546,7 @@ class InteractiveSolver(CommonSolver):
 class StandardSolver(CommonSolver):
     # given a rom and parameters returns the estimated difficulty
 
-    def __init__(self, rom, presetFileName, difficultyTarget, pickupStrategy, itemsForbidden=[], type='console', firstItemsLog=None, displayGeneratedPath=False, outputFileName=None):
+    def __init__(self, rom, presetFileName, difficultyTarget, pickupStrategy, itemsForbidden=[], type='console', firstItemsLog=None, displayGeneratedPath=False, outputFileName=None, magic=None):
         self.log = log.get('Solver')
 
         self.setConf(difficultyTarget, pickupStrategy, itemsForbidden, displayGeneratedPath)
@@ -567,7 +567,7 @@ class StandardSolver(CommonSolver):
         self.presetFileName = presetFileName
         self.loadPreset(self.presetFileName)
 
-        self.loadRom(rom)
+        self.loadRom(rom, magic=magic)
 
         self.pickup = Pickup(Conf.itemsPickup)
 
@@ -1249,7 +1249,7 @@ def standardSolver(args):
                             pickupStrategy, args.itemsForbidden, type=args.type,
                             firstItemsLog=args.firstItemsLog,
                             displayGeneratedPath=args.displayGeneratedPath,
-                            outputFileName=args.output)
+                            outputFileName=args.output, magic=args.raceMagic)
 
     solver.solveRom()
 
@@ -1276,6 +1276,8 @@ if __name__ == "__main__":
                         nargs='?', default=None, type=str, dest='firstItemsLog')
     parser.add_argument('--displayGeneratedPath', '-g', help="display the generated path (spoilers!)",
                         dest='displayGeneratedPath', action='store_true')
+    parser.add_argument('--race', help="Race mode magic number", dest='raceMagic',
+                        type=int, choices=range(0, 0x10000))
     # standard/interactive, web site
     parser.add_argument('--output', '-o', help="When called from the website, contains the result of the solver",
                         dest='output', nargs='?', default=None)

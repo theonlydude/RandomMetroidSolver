@@ -160,16 +160,32 @@ class RomReader:
         'areaLayout': {'address': 0x252FA7, 'value': 0xF8, 'desc': "Area layout additional modifications"}
     }
 
-    def __init__(self, romFile):
+    def __init__(self, romFile, magic=None):
         self.romFile = romFile
+        self.race = None
+        if magic is not None:
+            from race_mode import RaceModeReader
+            self.race = RaceModeReader(self, magic)
+
+    def readWord(self):
+        r0 = struct.unpack("B", self.romFile.read(1))[0]
+        r1 = struct.unpack("B", self.romFile.read(1))[0]
+        word = (r1 << 8) + r0
+        return word
+
+    def getItemBytes(self):
+        value1 = struct.unpack("B", self.romFile.read(1))[0]
+        value2 = struct.unpack("B", self.romFile.read(1))[0]
+        return (value1, value2)
 
     def getItem(self, address, visibility):
         # return the hex code of the object at the given address
-
         self.romFile.seek(address)
         # value is in two bytes
-        value1 = struct.unpack("B", self.romFile.read(1))[0]
-        value2 = struct.unpack("B", self.romFile.read(1))[0]
+        if self.race is None:
+            (value1, value2) = self.getItemBytes()
+        else:
+            (value1, value2) = self.race.getItemBytes(address)
 
         # match itemVisibility with
         # | Visible -> 0
@@ -442,34 +458,56 @@ class RomPatcher:
         'Area': ['area_rando_blue_doors.ips', 'area_rando_layout.ips', 'area_rando_door_transition.ips' ]
     }
 
-    def __init__(self, romFileName=None):
+    def __init__(self, romFileName=None, magic=None):
         self.romFileName = romFileName
+        self.race = None
         if romFileName == None:
             self.romFile = FakeROM()
         else:
             self.romFile = open(romFileName, 'r+')
+        if magic is not None:
+            from race_mode import RaceModePatcher
+            self.race = RaceModePatcher(self, magic)
 
     def end(self):
         self.romFile.close()
 
+    def writeWord(self, w):
+        (w0, w1) = (w & 0x00FF, (w & 0xFF00) >> 8)
+        self.romFile.write(struct.pack('B', w0))
+        self.romFile.write(struct.pack('B', w1))
+
+    def writeItemCode(self, item, visibility, address):
+        itemCode = Items.getItemTypeCode(item, visibility)
+        if self.race is None:
+            self.romFile.seek(address)
+            self.writeWord(itemCode)
+        else:
+            self.race.writeItemCode(address, itemCode)
+
+    def writeNothing(self, itemLoc):
+        loc = itemLoc['Location']
+        # missile
+        self.writeItemCode({'Code': 0xeedb}, loc['Visibility'], loc['Address'])
+        self.romFile.seek(loc['Address'] + 4)
+        # morph ball slot. all Nothing at non-Morph loc will disappear
+        # when morph loc item is collected
+        self.romFile.write(struct.pack('B', 0x1a))
+
+    def writeItem(self, itemLoc):
+        loc = itemLoc['Location']
+        self.writeItemCode(itemLoc['Item'], loc['Visibility'], loc['Address'])
+
     def writeItemsLocs(self, itemLocs):
         self.nItems = 0
+        if self.race is not None:
+            self.race.fuzz()
         for itemLoc in itemLocs:
             if itemLoc['Item']['Type'] in ['Nothing', 'NoEnergy']:
-                # put missile morphball like dessy
-                itemCode = Items.getItemTypeCode({'Code': 0xeedb}, itemLoc['Location']['Visibility'])
-                self.romFile.seek(itemLoc['Location']['Address'])
-                self.romFile.write(itemCode[0])
-                self.romFile.write(itemCode[1])
-                self.romFile.seek(itemLoc['Location']['Address'] + 4)
-                self.romFile.write(struct.pack('B', 0x1a))
+                self.writeNothing(itemLoc)
             else:
                 self.nItems += 1
-                itemCode = Items.getItemTypeCode(itemLoc['Item'],
-                                                 itemLoc['Location']['Visibility'])
-                self.romFile.seek(itemLoc['Location']['Address'])
-                self.romFile.write(itemCode[0])
-                self.romFile.write(itemCode[1])
+                self.writeItem(itemLoc)
             if itemLoc['Location']['Name'] == 'Morphing Ball':
                 self.patchMorphBallEye(itemLoc['Item'])
 
@@ -524,17 +562,14 @@ class RomPatcher:
         self.romFile.write(struct.pack('B', op1))
         self.romFile.write(struct.pack('B', branch))
 
-    def writeWord(self, w):
-        (w0, w1) = (w & 0x00FF, (w & 0xFF00) >> 8)
-        self.romFile.write(struct.pack('B', w0))
-        self.romFile.write(struct.pack('B', w1))
-
     def applyIPSPatches(self, optionalPatches=[], noLayout=False, noGravHeat=False, area=False, areaLayoutBase=False, noVariaTweaks=False):
         try:
             # apply standard patches
             stdPatches = RomPatcher.IPSPatches['Standard'][:]
             if noGravHeat == True:
                 stdPatches.remove('Removes_Gravity_Suit_heat_protection')
+            if self.race is not None:
+                stdPatches.append('race_mode.ips')
             for patchName in stdPatches:
                 self.applyIPSPatch(patchName)
             # write total number of actual items for item percentage patch (patch the patch)
@@ -575,17 +610,15 @@ class RomPatcher:
 
     def writeSeed(self, seed):
         random.seed(seed)
-
         seedInfo = random.randint(0, 0xFFFF)
         seedInfo2 = random.randint(0, 0xFFFF)
-        seedInfoArr = Items.toByteArray(seedInfo)
-        seedInfoArr2 = Items.toByteArray(seedInfo2)
-
         self.romFile.seek(0x2FFF00)
-        self.romFile.write(seedInfoArr[0])
-        self.romFile.write(seedInfoArr[1])
-        self.romFile.write(seedInfoArr2[0])
-        self.romFile.write(seedInfoArr2[1])
+        self.writeWord(seedInfo)
+        self.writeWord(seedInfo2)
+
+    def writeMagic(self):
+        if self.race is not None:
+            self.race.writeMagic()
 
     def writeRandoSettings(self, settings):
         address = 0x2736C0
@@ -796,10 +829,8 @@ class RomPatcher:
 
     def patchBytes(self, address, array):
         self.romFile.seek(address)
-        for dByte in array:
-            dByteArr = Items.toByteArray(dByte)
-            self.romFile.write(dByteArr[0])
-            self.romFile.write(dByteArr[1])
+        for w in array:
+            self.writeWord(w)
 
     # write area randomizer transitions to ROM
     # doorConnections : a list of connections. each connection is a dictionary describing
@@ -984,12 +1015,12 @@ def isString(string):
 
 class RomLoader(object):
     @staticmethod
-    def factory(rom):
+    def factory(rom, magic=None):
         # can be a real rom. can be a json or a dict with the ROM address/values
         if isString(rom):
             ext = os.path.splitext(rom)
             if ext[1].lower() == '.sfc' or ext[1].lower() == '.smc':
-                return RomLoaderSfc(rom)
+                return RomLoaderSfc(rom, magic)
             elif ext[1].lower() == '.json':
                 return RomLoaderJson(rom)
             else:
@@ -1053,10 +1084,10 @@ class RomLoader(object):
 
 class RomLoaderSfc(RomLoader):
     # standard usage (when calling from the command line)
-    def __init__(self, romFileName):
+    def __init__(self, romFileName, magic=None):
         super(RomLoaderSfc, self).__init__()
         romFile = open(romFileName, "rb")
-        self.romReader = RomReader(romFile)
+        self.romReader = RomReader(romFile, magic)
 
     def dump(self, fileName):
         dictROM = self.romReader.getDict()

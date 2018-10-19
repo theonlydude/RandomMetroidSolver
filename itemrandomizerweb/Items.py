@@ -220,9 +220,6 @@ ItemBits = {
     'XRayScope'    : 0x8000
 }
 
-def toByteArray(itemCode):
-    return (struct.pack('B', itemCode & 0xff), struct.pack('B', itemCode >> 8))
-
 def getItemTypeCode(item, itemVisibility):
     if itemVisibility == 'Visible':
         modifier = 0
@@ -232,7 +229,7 @@ def getItemTypeCode(item, itemVisibility):
         modifier = 168
 
     itemCode = item['Code'] + modifier
-    return toByteArray(itemCode)
+    return itemCode
 
 # add item from original item list (NoEnergy and Nothing items have to be added manually)
 def addItem(itemType, itemPool):

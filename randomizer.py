@@ -54,7 +54,7 @@ if __name__ == "__main__":
     parser.add_argument('--seed', '-s', help="randomization seed to use", dest='seed',
                         nargs='?', default=0, type=int)
     parser.add_argument('--rom', '-r',
-                        help="the vanilia ROM",
+                        help="the vanilla ROM",
                         dest='rom', nargs='?', default=None)
     parser.add_argument('--output',
                         help="to choose the name of the generated json (for the webservice)",
@@ -134,6 +134,8 @@ if __name__ == "__main__":
                         dest='controls')
     parser.add_argument('--runtime', help="Maximum runtime limit in seconds. If 0 or negative, no runtime limit. Default is 30.", dest='runtimeLimit_s',
                         nargs='?', default=30, type=int)
+    parser.add_argument('--race', help="Race mode magic number", dest='raceMagic',
+                        type=int, choices=range(0, 0x10000))
 
     # parse args
     args = parser.parse_args()
@@ -160,7 +162,10 @@ if __name__ == "__main__":
         seed = random.randint(0, 9999999)
     else:
         seed = args.seed
-    random.seed(seed)
+    seed4rand = seed
+    if args.raceMagic is not None:
+        seed4rand = seed ^ args.raceMagic
+    random.seed(seed4rand)
 
     # choose on animal patch
     if args.animals == True:
@@ -354,14 +359,14 @@ if __name__ == "__main__":
             romFileName = args.rom
             outFileName = fileName + '.sfc'
             shutil.copyfile(romFileName, outFileName)
-            romPatcher = RomPatcher(outFileName)
+            romPatcher = RomPatcher(outFileName, magic=args.raceMagic)
         else:
             outFileName = args.output
-            romPatcher = RomPatcher()
+            romPatcher = RomPatcher(magic=args.raceMagic)
 
         romPatcher.writeItemsLocs(itemLocs)
         romPatcher.applyIPSPatches(args.patches, args.noLayout, args.noGravHeat, args.area, args.areaLayoutBase, args.noVariaTweaks)
-        romPatcher.writeSeed(seed)
+        romPatcher.writeSeed(seed) # lol if race mode
         romPatcher.writeSpoiler(itemLocs)
         romPatcher.writeRandoSettings(randoSettings)
         if args.area == True:
@@ -369,6 +374,7 @@ if __name__ == "__main__":
         romPatcher.writeTransitionsCredits(randomizer.areaGraph.getCreditsTransitions())
         if ctrlDict is not None:
             romPatcher.writeControls(ctrlDict)
+        romPatcher.writeMagic()
         romPatcher.end()
 
         if args.rom is None:

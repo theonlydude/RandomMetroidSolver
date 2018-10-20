@@ -500,8 +500,6 @@ class RomPatcher:
 
     def writeItemsLocs(self, itemLocs):
         self.nItems = 0
-        if self.race is not None:
-            self.race.fuzz()
         for itemLoc in itemLocs:
             if itemLoc['Item']['Type'] in ['Nothing', 'NoEnergy']:
                 self.writeNothing(itemLoc)
@@ -721,6 +719,7 @@ class RomPatcher:
 
             return s
 
+        isRace = self.race is not None
         address = 0x2f5240
         for item in ["Charge Beam", "Ice Beam", "Wave Beam", "Spazer", "Plasma Beam", "Varia Suit",
                      "Gravity Suit", "Morph Ball", "Bomb", "Spring Ball", "Screw Attack",
@@ -731,8 +730,8 @@ class RomPatcher:
             itemName = prepareString(item)
             locationName = prepareString(itemLocs[item], isItem=False)
 
-            self.writeCreditsString(address, 0x04, itemName)
-            self.writeCreditsString((address + 0x40), 0x18, locationName)
+            self.writeCreditsString(address, 0x04, itemName, isRace)
+            self.writeCreditsString((address + 0x40), 0x18, locationName, isRace)
 
             address += 0x80
 
@@ -745,9 +744,9 @@ class RomPatcher:
 
         self.patchBytes(address, [0, 0, 0, 0])
 
-    def writeCreditsString(self, address, color, string):
+    def writeCreditsString(self, address, color, string, isRace=False):
         array = [self.convertCreditsChar(color, char) for char in string]
-        self.patchBytes(address, array)
+        self.patchBytes(address, array, isRace)
 
     def writeCreditsStringBig(self, address, string, top=True):
         array = [self.convertCreditsCharBig(char, top) for char in string]
@@ -827,10 +826,13 @@ class RomPatcher:
 
         return ib
 
-    def patchBytes(self, address, array):
+    def patchBytes(self, address, array, isRace=False):
         self.romFile.seek(address)
         for w in array:
-            self.writeWord(w)
+            if not isRace:
+                self.writeWord(w)
+            else:
+                self.race.writeWordMagic(w)
 
     # write area randomizer transitions to ROM
     # doorConnections : a list of connections. each connection is a dictionary describing

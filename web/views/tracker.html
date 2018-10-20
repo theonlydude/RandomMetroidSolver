@@ -2706,9 +2706,11 @@ function stopAnimation(elem) {
 // COMMON
 
 function ajaxFailJSON(jqXHR, textStatus) {
-  console.log("error ["+jqXHR.responseJSON+"] ["+textStatus+"]");
+  console.log("error ["+jqXHR.responseJSON+"] ["+jqXHR.responseText+"] ["+textStatus+"]");
 
   setWSIcon("warning");
+  document.getElementById("flash").innerHTML = jqXHR.responseText;
+  $('#flash').show();
 }
 
 function ajaxOkJSON(data) {
@@ -2930,6 +2932,11 @@ window.onload = function(){
             romData[addresses[i]+7] = bytes[addresses[i]+7];
         }
   
+        // bank B8
+        for(var i=0x1C0000; i<=0x1C7FFF; i++){
+          romData[i] = bytes[i];
+        }
+
         romData["romFileName"] = outFileName;
   
         var json = JSON.stringify(romData);

@@ -79,7 +79,7 @@ class DB:
 
                 sql = "insert into solver_result values (%d, %d, %f, %d, %d, %d, %s, %d, %d, %d, %d, %d);" % (id, returnCode, duration, result['difficulty'], result['knowsUsed'][0], result['knowsUsed'][1], result['itemsOk'], lenNone(result['remainTry']), lenNone(result['remainMajors']), lenNone(result['remainMinors']), lenNone(result['skippedMajors']), lenNone(result['unavailMajors']))
             else:
-                sql = "insert into solver_result (id, return_code, duration) values (%d, %d, %f);" % (id, returnCode, duration)
+                sql = "insert into solver_result (solver_id, return_code, duration) values (%d, %d, %f);" % (id, returnCode, duration)
 
             self.cursor.execute(sql)
         except Exception as e:
@@ -104,7 +104,7 @@ class DB:
 
         # extract the parameters for the database
         dbParams = []
-        skipParams = ['output', 'param', 'controls']
+        skipParams = ['output', 'param', 'controls', 'race']
         superFuns = []
         i = 2 # skip first parameters (python2 and randomizer.py)
         while i < len(params):
@@ -177,21 +177,35 @@ class DB:
             print("DB.addISolver::error execute: {} error: {}".format(sql, e))
             self.dbAvailable = False
 
-    # read data
-    def execSelect(self, sql):
+    def addRace(self, md5sum, interval, magic):
         if self.dbAvailable == False:
             return None
 
         try:
-            self.cursor.execute(sql)
+            sql = "insert into race (md5sum, create_time, interval_hours, magic) values ('%s', now(), %d, %d);"
+            self.cursor.execute(sql % (md5sum, interval, magic))
+        except Exception as e:
+            print("DB.addISolver::error execute: {} error: {}".format(sql, e))
+            self.dbAvailable = False
+
+    # read data
+    def execSelect(self, sql, params=None):
+        if self.dbAvailable == False:
+            return None
+
+        try:
+            if params == None:
+                self.cursor.execute(sql)
+            else:
+                self.cursor.execute(sql % params)
             return self.cursor.fetchall()
         except Exception as e:
             print("DB.execSelect::error execute \"{}\" error: {}".format(sql, e))
             self.dbAvailable = False
 
     def getUsage(self, table, weeks):
-        sql = "select date(action_time), count(*) from {} where action_time > DATE_SUB(CURDATE(), INTERVAL {} WEEK) group by date(action_time) order by 1;".format(table, weeks)
-        return self.execSelect(sql)
+        sql = "select date(action_time), count(*) from {} where action_time > DATE_SUB(CURDATE(), INTERVAL %d WEEK) group by date(action_time) order by 1;".format(table)
+        return self.execSelect(sql, (weeks,))
 
     def getSolverUsage(self, weeks):
         return self.getUsage('solver', weeks)
@@ -200,8 +214,8 @@ class DB:
         return self.getUsage('randomizer', weeks)
 
     def getSolverPresets(self, weeks):
-        sql = "select distinct(sp.preset) from solver s join solver_params sp on s.id = sp.solver_id where s.action_time > DATE_SUB(CURDATE(), INTERVAL {} WEEK);".format(weeks)
-        presets = self.execSelect(sql)
+        sql = "select distinct(sp.preset) from solver s join solver_params sp on s.id = sp.solver_id where s.action_time > DATE_SUB(CURDATE(), INTERVAL %d WEEK);"
+        presets = self.execSelect(sql, (weeks,))
         if presets == None:
             return None
 
@@ -217,16 +231,16 @@ class DB:
         return (presets, self.execSelect(sql))
 
     def getSolverResults(self, weeks):
-        sql = "select date(s.action_time), sr.return_code, count(*) from solver s join solver_result sr on s.id = sr.solver_id where s.action_time > DATE_SUB(CURDATE(), INTERVAL {} WEEK) group by date(s.action_time), sr.return_code order by 1;".format(weeks)
-        return self.execSelect(sql)
+        sql = "select date(s.action_time), sr.return_code, count(*) from solver s join solver_result sr on s.id = sr.solver_id where s.action_time > DATE_SUB(CURDATE(), INTERVAL %d WEEK) group by date(s.action_time), sr.return_code order by 1;"
+        return self.execSelect(sql, (weeks,))
 
     def getSolverDurations(self, weeks):
-        sql = "select s.action_time, sr.duration from solver s join solver_result sr on s.id = sr.solver_id where s.action_time > DATE_SUB(CURDATE(), INTERVAL {} WEEK) order by 1;".format(weeks)
-        return self.execSelect(sql)
+        sql = "select s.action_time, sr.duration from solver s join solver_result sr on s.id = sr.solver_id where s.action_time > DATE_SUB(CURDATE(), INTERVAL %d WEEK) order by 1;"
+        return self.execSelect(sql, (weeks,))
 
     def getRandomizerPresets(self, weeks):
-        sql = "select distinct(value) from randomizer r join randomizer_params rp on r.id = rp.randomizer_id where rp.name = 'preset' and r.action_time > DATE_SUB(CURDATE(), INTERVAL {} WEEK);".format(weeks)
-        presets = self.execSelect(sql)
+        sql = "select distinct(value) from randomizer r join randomizer_params rp on r.id = rp.randomizer_id where rp.name = 'preset' and r.action_time > DATE_SUB(CURDATE(), INTERVAL %d WEEK);"
+        presets = self.execSelect(sql, (weeks,))
         if presets == None:
             return None
 
@@ -242,8 +256,8 @@ class DB:
         return (presets, self.execSelect(sql))
 
     def getRandomizerDurations(self, weeks):
-        sql = "select r.action_time, rr.duration from randomizer r join randomizer_result rr on r.id = rr.randomizer_id where r.action_time > DATE_SUB(CURDATE(), INTERVAL {} WEEK) order by 1;".format(weeks)
-        return self.execSelect(sql)
+        sql = "select r.action_time, rr.duration from randomizer r join randomizer_result rr on r.id = rr.randomizer_id where r.action_time > DATE_SUB(CURDATE(), INTERVAL %d WEEK) order by 1;"
+        return self.execSelect(sql, (weeks,))
 
     def getSolverData(self, weeks):
         # return all data csv style
@@ -257,11 +271,11 @@ from solver s
   left join solver_result sr on s.id = sr.solver_id
   left join (select solver_id, group_concat(\"(\", item, \", \", count, \")\" order by item) as collected_items from solver_collected_items group by solver_id) sci on s.id = sci.solver_id
   left join (select solver_id, group_concat(item order by item) as forbidden_items from solver_items_forbidden group by solver_id) sif on s.id = sif.solver_id
-where s.action_time > DATE_SUB(CURDATE(), INTERVAL {} WEEK)
-order by s.id;""".format(weeks)
+where s.action_time > DATE_SUB(CURDATE(), INTERVAL %d WEEK)
+order by s.id;"""
 
         header = ["id", "actionTime", "romFileName", "preset", "difficultyTarget", "pickupStrategy", "returnCode", "duration", "difficulty", "knowsUsed", "knowsKnown", "itemsOk", "remainTry", "remainMajors", "remainMinors", "skippedMajors", "unavailMajors", "collectedItems", "forbiddenItems"]
-        return (header, self.execSelect(sql))
+        return (header, self.execSelect(sql, (weeks,)))
 
     def getRandomizerData(self, weeks):
         sql = """select r.id, r.action_time,
@@ -270,10 +284,10 @@ rp.params
 from randomizer r
   left join (select randomizer_id, group_concat(\"'\", name, \"': '\", value, \"'\" order by name) as params from randomizer_params group by randomizer_id) rp on r.id = rp.randomizer_id
   left join randomizer_result rr on r.id = rr.randomizer_id
-where r.action_time > DATE_SUB(CURDATE(), INTERVAL {} WEEK)
-order by r.id;""".format(weeks)
+where r.action_time > DATE_SUB(CURDATE(), INTERVAL %d WEEK)
+order by r.id;"""
 
-        data = self.execSelect(sql)
+        data = self.execSelect(sql, (weeks,))
         if data == None:
             return None
 
@@ -296,24 +310,24 @@ order by r.id;""".format(weeks)
         return (header, outData, paramsHead + sorted(list(paramsSet)))
 
     def getGeneratedSeeds(self, preset):
-        sql = "select count(*) from randomizer_params where name = 'preset' and value = '{}';".format(preset)
-        data = self.execSelect(sql)
+        sql = "select count(*) from randomizer_params where name = 'preset' and value = '%s';"
+        data = self.execSelect(sql, (preset,))
         if data == None:
             return 0
         else:
             return data[0][0]
 
     def getPresetLastActionDate(self, preset):
-        sql = "select max(action_time) from preset_action where preset = '{}';".format(preset)
-        data = self.execSelect(sql)
+        sql = "select max(action_time) from preset_action where preset = '%s';"
+        data = self.execSelect(sql, (preset,))
         if data == None:
             return 'N/A'
         data = data[0][0] if data[0][0] != None else 'N/A'
         return data
 
     def getISolver(self, weeks):
-        sql = "select distinct(preset) from isolver where init_time > DATE_SUB(CURDATE(), INTERVAL {} WEEK);".format(weeks)
-        presets = self.execSelect(sql)
+        sql = "select distinct(preset) from isolver where init_time > DATE_SUB(CURDATE(), INTERVAL %d WEEK);"
+        presets = self.execSelect(sql, (weeks,))
         if presets == None:
             return None
 
@@ -332,8 +346,31 @@ order by r.id;""".format(weeks)
         # return all data csv style
         sql = """select init_time, preset, romFileName
 from isolver
-where init_time > DATE_SUB(CURDATE(), INTERVAL {} WEEK)
-order by init_time;""".format(weeks)
+where init_time > DATE_SUB(CURDATE(), INTERVAL %d WEEK)
+order by init_time;"""
 
         header = ["initTime", "preset", "romFileName"]
-        return (header, self.execSelect(sql))
+        return (header, self.execSelect(sql, (weeks,)))
+
+    def checkIsRace(self, md5sum):
+        # return true if seed is race protected
+        sql = """select 1
+from race
+where md5sum = '%s';"""
+        result = self.execSelect(sql, (md5sum,))
+        if result == None:
+            return False
+        return len(result) > 0
+
+    def checkCanSolveRace(self, md5sum):
+        # return magic number if race protected seed can be solved, else None
+        sql = """select magic
+from race
+where md5sum = '%s'
+  and now() > date_add(create_time, interval interval_hours hour);"""
+        result = self.execSelect(sql, (md5sum,))
+        if result == None or len(result) == 0:
+            return None
+        else:
+            # db returns a list of tuples
+            return result[0][0]

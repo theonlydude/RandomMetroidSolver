@@ -6,7 +6,7 @@ if os.path.exists(path) and path not in sys.path:
     sys.path.append(path)
 
 import datetime, os, hashlib, json, subprocess, tempfile, glob, random
-from datetime import datetime
+from datetime import datetime, date
 from collections import OrderedDict
 
 # to solve the rom
@@ -14,7 +14,6 @@ from parameters import easy, medium, hard, harder, hardcore, mania
 from parameters import Knows, Settings, Controller, isKnows, isButton
 from solver import Conf
 from parameters import diff2text, text2diff
-from graph_locations import locations as graphLocations
 from solver import StandardSolver, DifficultyDisplayer, InteractiveSolver
 from rom import RomLoader
 from utils import PresetLoader
@@ -455,11 +454,32 @@ def validateSolverParams():
 
             if IS_LENGTH(maxsize=256, minsize=1)(request.vars.uploadFile)[1] is not None:
                 return (False, "Wrong length for uploadFile, name must be between 1 and 255 characters: {}".format(request.vars.uploadFile))
-        else:
-            # the file uploaded. TODO: how to check it ?
-            pass
 
     return (True, None)
+
+def canSolveROM(jsonRomFileName):
+    with open(jsonRomFileName) as jsonFile:
+        tempDictROM = json.load(jsonFile)
+
+    romDict = {}
+    for address in tempDictROM:
+        romDict[int(address)] = tempDictROM[address]
+
+    # check if the ROM is not a race one protected against solving
+    md5sum = getMd5sum(romDict)
+
+    DB = db.DB()
+
+    isRace = DB.checkIsRace(md5sum)
+    print("canSolveROM::isRace {}: {}".format(jsonRomFileName, isRace))
+    if isRace == False:
+        DB.close()
+        return (True, None)
+
+    magic = DB.checkCanSolveRace(md5sum)
+    DB.close()
+    print("canSolveROM {} magic: {}".format(jsonRomFileName, magic))
+    return (magic != None, magic)
 
 def generateJsonROM(romJsonStr):
     tempRomJson = json.loads(romJsonStr)
@@ -468,14 +488,8 @@ def generateJsonROM(romJsonStr):
     jsonRomFileName = 'roms/' + base + '.json'
     del tempRomJson["romFileName"]
 
-    # json keys are strings
-    romDict = {}
-    for address in tempRomJson:
-        romDict[int(address)] = tempRomJson[address]
-
-    romLoader = RomLoader.factory(romDict)
-    romLoader.assignItems(graphLocations)
-    romLoader.dump(jsonRomFileName)
+    with open(jsonRomFileName, 'w') as jsonFile:
+        json.dump(tempRomJson, jsonFile)
 
     return (base, jsonRomFileName)
 
@@ -506,39 +520,6 @@ def solver():
                 print("Error loading the ROM file, exception: {}".format(e))
                 session.flash = "Error loading the json ROM file"
                 error = True
-
-        # no file: type(request.vars['uploadFile'])=[<type 'str'>]
-        # file:    type(request.vars['uploadFile'])=[<type 'instance'>]
-        elif request.vars['uploadFile'] is not None and type(request.vars['uploadFile']) != str:
-            uploadFileName = request.vars['uploadFile'].filename
-            uploadFileContent = request.vars['uploadFile'].file
-
-            (base, ext) = os.path.splitext(uploadFileName)
-            jsonRomFileName = 'roms/' + base + '.json'
-
-            if ext not in ['.sfc', '.smc']:
-                session.flash = "Rom file must be .sfc or .smc"
-                error = True
-            else:
-                # try loading it and create a json from it
-                try:
-                    tempRomFile = 'roms/' + base + '.sfc'
-                    with open(tempRomFile, 'wb') as tempRom:
-                        tempRom.write(uploadFileContent.read())
-
-                    romLoader = RomLoader.factory(tempRomFile)
-                    romLoader.assignItems(graphLocations)
-                    romLoader.dump(jsonRomFileName)
-
-                    os.remove(tempRomFile)
-
-                    session.solver['romFile'] = base
-                    if base not in session.solver['romFiles']:
-                        session.solver['romFiles'].append(base)
-                except Exception as e:
-                    print("Error loading the ROM file {}, exception: {}".format(uploadFileName, e))
-                    session.flash = "Error loading the ROM file"
-                    error = True
 
         elif request.vars['romFile'] is not None and len(request.vars['romFile']) != 0:
             session.solver['romFile'] = os.path.splitext(request.vars['romFile'])[0]
@@ -624,6 +605,10 @@ def genJsonFromParams(vars):
 def computeDifficulty(jsonRomFileName, preset):
     randomizedRom = os.path.basename(jsonRomFileName.replace('json', 'sfc'))
 
+    (canSolve, magic) = canSolveROM(jsonRomFileName)
+    if canSolve == False:
+        return (False, "Race seed is protected from solving")
+
     presetFileName = "{}/{}.json".format(getPresetDir(preset), preset)
     (fd, jsonFileName) = tempfile.mkstemp()
 
@@ -639,6 +624,9 @@ def computeDifficulty(jsonRomFileName, preset):
         '--type', 'web',
         '--output', jsonFileName
     ]
+
+    if magic != None:
+        params += ['--race', str(magic)]
 
     for item in session.solver['itemsForbidden']:
         params += ['--itemsForbidden', item]
@@ -824,6 +812,12 @@ def validateWebServiceParams(patchs, quantities, others, isJson=False):
         if request.vars['complexity'] not in ['simple', 'medium', 'advanced']:
             raiseHttp(400, "Wrong value for complexity: {}, authorized values simple/medium/advanced".format(request.vars['complexity']), isJson)
 
+    # check race mode
+    if 'raceMode' in request.vars:
+        raceHour = getInt('raceMode')
+        if raceHour < 1 or raceHour > 72:
+            raiseHttp(400, "Wrong number of hours for race mode: {}, must be >=1 and <= 72".format(request.vars.raceMode), isJson)
+
 def sessionWebService():
     # web service to update the session
     patchs = ['itemsounds', 'No_Music',
@@ -899,6 +893,12 @@ def randomizerWebService():
     DB = db.DB()
     id = DB.initRando()
 
+    # race mode
+    useRace = False
+    if request.vars.raceMode is not None:
+        magic = getMagic()
+        useRace = True
+
     (fd1, presetFileName) = tempfile.mkstemp()
     presetFileName += '.json'
     (fd2, jsonFileName) = tempfile.mkstemp()
@@ -929,6 +929,9 @@ def randomizerWebService():
                '--powerBombQty', request.vars.powerBombQty if request.vars.powerBombQty != 'random' else '0',
                '--minorQty', request.vars.minorQty if request.vars.minorQty != 'random' else '0',
                '--energyQty', request.vars.energyQty]
+
+    if useRace == True:
+        params += ['--race', str(magic)]
 
     for patch in patches:
         if request.vars[patch[0]] == 'on':
@@ -1014,12 +1017,26 @@ def randomizerWebService():
             msg = locsItems['errorMsg']
 
         DB.addRandoResult(id, ret, duration, msg)
+
+        if useRace == True:
+            dictROM = {}
+            # in json keys are strings
+            for address in locsItems:
+                if address in ["fileName", "errorMsg"]:
+                    continue
+                dictROM[int(address)] = locsItems[address]
+            md5sum = getMd5sum(dictROM)
+
+            interval = int(request.vars.raceMode)
+            DB.addRace(md5sum, interval, magic)
+
         DB.close()
 
         os.close(fd1)
         os.remove(presetFileName)
         os.close(fd2)
         os.remove(jsonFileName)
+
         return json.dumps(locsItems)
     else:
         # extract error from json
@@ -1105,6 +1122,8 @@ def stats():
     isolverData = DB.getISolverData(weeks)
 
     errors = getErrors()
+
+    DB.close()
 
     return dict(solverPresets=solverPresets, randomizerPresets=randomizerPresets,
                 solverDurations=solverDurations, randomizerDurations=randomizerDurations,
@@ -1268,6 +1287,10 @@ def returnState(state):
         raiseHttp(200, "OK", True)
 
 def callSolverInit(jsonRomFileName, presetFileName, preset, romFileName):
+    (canSolve, magic) = canSolveROM(jsonRomFileName)
+    if canSolve == False:
+        raiseHttp(400, "Race seed is protected from solving")
+
     (fd, jsonOutFileName) = tempfile.mkstemp()
     params = [
         'python2',  os.path.expanduser("~/RandomMetroidSolver/solver.py"),
@@ -1277,6 +1300,9 @@ def callSolverInit(jsonRomFileName, presetFileName, preset, romFileName):
         '--action', "init",
         '--interactive'
     ]
+
+    if magic != None:
+        params += ['--race', str(magic)]
 
     print("before calling isolver: {}".format(params))
     start = datetime.now()
@@ -1376,3 +1402,20 @@ def itemTrackerWebService():
 
     # return something is not already done
     raiseHttp(200, "OK", True)
+
+def getMagic():
+    return random.randint(1, 0xffff)
+
+def getMd5sum(romDict):
+    # keep only the items bytes
+    addresses = [0x78264, 0x78404, 0x78432, 0x7852C, 0x78614, 0x786DE, 0x7879E, 0x787C2, 0x787FA, 0x78824, 0x78876, 0x7896E, 0x7899C, 0x78ACA, 0x78B24, 0x78BA4, 0x78BAC, 0x78C36, 0x78C3E, 0x78C82, 0x78CCA, 0x79108, 0x79110, 0x79184, 0x7C2E9, 0x7C337, 0x7C365, 0x7C36D, 0x7C47D, 0x7C559, 0x7C5E3, 0x7C6E5, 0x7C755, 0x7C7A7, 0x781CC, 0x781E8, 0x781EE, 0x781F4, 0x78248, 0x783EE, 0x78464, 0x7846A, 0x78478, 0x78486, 0x784AC, 0x784E4, 0x78518, 0x7851E, 0x78532, 0x78538, 0x78608, 0x7860E, 0x7865C, 0x78676, 0x7874C, 0x78798, 0x787D0, 0x78802, 0x78836, 0x7883C, 0x788CA, 0x7890E, 0x78914, 0x789EC, 0x78AE4, 0x78B46, 0x78BC0, 0x78BE6, 0x78BEC, 0x78C04, 0x78C14, 0x78C2A, 0x78C44, 0x78C52, 0x78C66, 0x78C74, 0x78CBC, 0x78E6E, 0x78E74, 0x78F30, 0x78FCA, 0x78FD2, 0x790C0, 0x79100, 0x7C265, 0x7C2EF, 0x7C319, 0x7C357, 0x7C437, 0x7C43D, 0x7C483, 0x7C4AF, 0x7C4B5, 0x7C533, 0x7C5DD, 0x7C5EB, 0x7C5F1, 0x7C603, 0x7C609, 0x7C74D]
+    values = []
+    for address in addresses:
+        values.append(romDict[address])
+        values.append(romDict[address+1])
+    # add bank B8
+    address = 0x1C0000
+    while address <= 0x1C7FFF:
+        values.append(romDict[address] if address in romDict else 0xFF)
+        address += 1
+    return hashlib.md5(json.dumps(values)).hexdigest()

@@ -35,6 +35,9 @@ if (hs.registerOverlay) {
 <script type="text/javascript" src="{{=URL('static', 'js/chosen.jquery.min.js')}}"></script>
 <link rel="stylesheet" type="text/css" href={{=URL("static", "css/chosen.css")}} />
 
+<script type="text/javascript" src="{{=URL('static', '/jquery-ui/jquery-ui.min.js')}}"></script>
+<link rel="stylesheet" type="text/css" href={{=URL("static", "/jquery-ui/jquery-ui.min.css")}} />
+
 <title>Super Metroid VARIA Randomizer</title>
 
 <style>
@@ -143,7 +146,7 @@ function setComplexity() {
 function changeComplexity(evt, name) {
   if(name == "simple") {
     var show = [];
-    var hide = ["seedVisibility", "ammoVisibility", "maxDiffVisibility", "progDiffVisibility", "spreadItemsVisibility", "suitsRestrictionVisibility", "morphPlacementVisibility", "superFunVisibility", "patchesVisibility", "areaPatchVisibility", "hideItemsVisibility"];
+    var hide = ["seedVisibility", "ammoVisibility", "maxDiffVisibility", "progDiffVisibility", "spreadItemsVisibility", "suitsRestrictionVisibility", "morphPlacementVisibility", "superFunVisibility", "patchesVisibility", "areaPatchVisibility", "hideItemsVisibility", "raceModeVisibility"];
     showHide(show, hide);
   }
 
@@ -156,7 +159,7 @@ for patch in patches:
     pass
   pass
 }}];
-    var hide = ["seedVisibility", "progDiffVisibility", "spreadItemsVisibility", "suitsRestrictionVisibility", "strictMinorsVisibility", "missileQtyVisibility", "superQtyVisibility", "powerBombQtyVisibility", "superFunVisibility", "areaPatchVisibility", "mainPatchesVisibitily", "mainPatchesTextVisibitily", "hideItemsVisibility"
+    var hide = ["seedVisibility", "progDiffVisibility", "spreadItemsVisibility", "suitsRestrictionVisibility", "strictMinorsVisibility", "missileQtyVisibility", "superQtyVisibility", "powerBombQtyVisibility", "superFunVisibility", "areaPatchVisibility", "mainPatchesVisibitily", "mainPatchesTextVisibitily", "hideItemsVisibility", "raceModeVisibility"
 {{
 for patch in patches:
   if patch[3] == False:
@@ -168,7 +171,7 @@ for patch in patches:
   }
 
   else {
-    var show = ["seedVisibility", "ammoVisibility", "maxDiffVisibility", "progDiffVisibility", "spreadItemsVisibility", "suitsRestrictionVisibility", "morphPlacementVisibility", "strictMinorsVisibility", "missileQtyVisibility", "superQtyVisibility", "powerBombQtyVisibility", "superFunVisibility", "patchesVisibility", "areaPatchVisibility", "mainPatchesVisibitily", "mainPatchesTextVisibitily", "hideItemsVisibility"
+    var show = ["seedVisibility", "ammoVisibility", "maxDiffVisibility", "progDiffVisibility", "spreadItemsVisibility", "suitsRestrictionVisibility", "morphPlacementVisibility", "strictMinorsVisibility", "missileQtyVisibility", "superQtyVisibility", "powerBombQtyVisibility", "superFunVisibility", "patchesVisibility", "areaPatchVisibility", "mainPatchesVisibitily", "mainPatchesTextVisibitily", "hideItemsVisibility", "raceModeVisibility"
 {{
 for patch in patches:
   response.write(", \"{}Visibitily\"".format(patch[0]), escape=False)
@@ -219,6 +222,13 @@ function AjaxPresetCallCompleted(data) {
        } else {
          dataDict[randomElems[i]] = document.getElementById(randomElems[i]).value;
        }
+    }
+
+    // add race mode
+    var raceMode = document.getElementById("raceMode");
+    if(raceMode.checked) {
+      var maxHourRace = document.getElementById("maxHourRace");
+      dataDict["raceMode"] = maxHourRace.value;
     }
 
     // call web service with parameters
@@ -526,6 +536,25 @@ window.onload = function(){
         }
     }
 
+    // race mode is disabled by default
+    var text = document.getElementById("raceModeText");
+    var maxHourRace = document.getElementById("maxHourRace");
+    text.className = "disabledText";
+    maxHourRace.disabled = true;
+
+    var raceMode = document.getElementById("raceMode");
+    raceMode.onchange = function() {
+      var raceMode = document.getElementById("raceMode");
+      var text = document.getElementById("raceModeText");
+      var maxHourRace = document.getElementById("maxHourRace");
+      if(raceMode.checked){
+        text.className = "";
+        maxHourRace.disabled = false;
+      } else {
+        text.className = "disabledText";
+        maxHourRace.disabled = true;
+      }
+    }
 
     var inputs = document.getElementsByTagName("input");
     for(var i = 0; i < inputs.length; i++) {
@@ -592,6 +621,11 @@ function startTheTour(step=-1) {
       element: "#presetStep",
       title: "Standard Preset",
       content: "The preset is used by the Randomizer to know which techniques are available to reach the items locations.</br>You can create and manage your preset on the <a href=\"/solver/solver_web/presets\">Presets part of the website</a>.<br/>Load one of the standard presets (sorted in increased difficulty), or your own from the community presets.<br/>Creating your own preset will lead to a better experience overall, as the generated ROMs will be tailored for you."
+    },
+    {
+      element: "#raceStep",
+      title: "Race",
+      content: "You can choose how many hours must past before a Race Mode seed can be solve on the VARIA website.<br/>Items data in it are obfuscated to prevent cheating with a Super Metroid Editor like SMILE."
     },
     {
       element: "#fullRandomizationStep",
@@ -813,6 +847,11 @@ def displayNumber(id, min, max, default, step="1"):
 		<td>{{=SELECT(OPTGROUP(*stdPresets, **dict(_label="Standard presets")), OPTGROUP(*comPresets, **dict(_label="Community presets")), **dict(_name="preset", _id="preset", value=session.randomizer["preset"], _class="filldropdown chzn-select"))}}</td>
 		<td id="presetStep"><button type="button" onclick="startTheTour(2)">?</button></td>
               </tr>
+	      <tr id="raceModeVisibility">
+		<td>{{displayCheckbox("raceMode")}}<span id="raceModeText">Race Mode</span></td>
+		<td>{{displaySelect("maxHourRace", [1,2,3,4,5,6,7,8,9,10,11,12,24,48,72], 1)}}</td>
+		<td id="raceStep"><button type="button" onclick="startTheTour(3)">?</button></td>
+	      </tr>
             </table>
 	    <br/>
 	    <h4>Randomizer parameters</h4>
@@ -820,46 +859,46 @@ def displayNumber(id, min, max, default, step="1"):
 	      <tr>
 		<td class="small"><div class="random"><button id="fullRandomizationRandom" type="button" onclick="randomize(event, 'fullRandomization')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
 	        <td colspan="2" id="fullRandomizationStep">{{displayCheckbox("fullRandomization")}}<span id="fullRandomizationText">Full randomization</span></td>
-                <td><button type="button" onclick="startTheTour(3)">?</button></td>
+                <td><button type="button" onclick="startTheTour(4)">?</button></td>
 	      </tr>
               <tr id="maxDiffVisibility">
 		<td class="small"><div class="random"><button id="maxDifficultyRandom" type="button" onclick="randomize(event, 'maxDifficulty')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
                 <td><span id="maxDifficultyText">Maximum difficulty for picking up an item:</span></td>
                 <td>{{displaySelect("maxDifficulty", ["no difficulty cap", "easy", "medium", "hard", "harder", "hardcore", "mania"], "no difficulty cap")}}</td>
-                <td><button type="button" onclick="startTheTour(4)">?</button></td>
+                <td><button type="button" onclick="startTheTour(5)">?</button></td>
               </tr>
 	      <tr>
 		<td class="small"><div class="random"><button id="progressionSpeedRandom" type="button" onclick="randomize(event, 'progressionSpeed')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
 	        <td class="half"><span id="progressionSpeedText">Progression speed:</span></td>
                 <td class="half">{{displaySelect("progressionSpeed", ["slowest", "slow", "medium", "fast", "fastest", "basic"], "medium")}}</td>
-                <td><button type="button" onclick="startTheTour(5)">?</button></td>
+                <td><button type="button" onclick="startTheTour(6)">?</button></td>
 	      </tr>
 	      <tr id="progDiffVisibility">
 		<td class="small"><div class="random"><button id="progressionDifficultyRandom" type="button" onclick="randomize(event, 'progressionDifficulty')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
 	        <td class="half"><span id="progressionDifficultyText">Progression difficulty:</span></td>
                 <td class="half">{{displaySelect("progressionDifficulty", ["easier", "normal", "harder"], "normal")}}</td>
-                <td><button type="button" onclick="startTheTour(6)">?</button></td>
+                <td><button type="button" onclick="startTheTour(7)">?</button></td>
 	      </tr>
 	      <tr id="morphPlacementVisibility">
 		<td class="small"><div class="random"><button id="morphPlacementRandom" type="button" onclick="randomize(event, 'morphPlacement')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
 	        <td class="half"><span id="morphPlacementText">Morph Placement:</span></td>
 	        <td class="half" id="morphPlacementStep">{{displaySelect("morphPlacement", ["early", "normal", "late"], "normal")}}</td>
-                <td><button type="button" onclick="startTheTour(7)">?</button></td>
+                <td><button type="button" onclick="startTheTour(8)">?</button></td>
 	      </tr>
 	      <tr id="spreadItemsVisibility">
 		<td class="small"><div class="random"><button id="spreadItemsRandom" type="button" onclick="randomize(event, 'spreadItems')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
 	        <td colspan="2" id="spreadItemsStep">{{displayCheckbox("spreadItems")}}<span id="spreadItemsText">Spread progression items</span></td>
-                <td><button type="button" onclick="startTheTour(8)">?</button></td>
+                <td><button type="button" onclick="startTheTour(9)">?</button></td>
 	      </tr>
 	      <tr id="suitsRestrictionVisibility">
 		<td class="small"><div class="random"><button id="suitsRestrictionRandom" type="button" onclick="randomize(event, 'suitsRestriction')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
 	        <td colspan="2" id="suitsRestrictionStep">{{displayCheckbox("suitsRestriction")}}<span id="suitsRestrictionText">Suits restriction</span></td>
-                <td><button type="button" onclick="startTheTour(9)">?</button></td>
+                <td><button type="button" onclick="startTheTour(10)">?</button></td>
 	      </tr>
 	      <tr id="hideItemsVisibility">
 		<td class="small"><div class="random"><button id="hideItemsRandom" type="button" onclick="randomize(event, 'hideItems')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
 		<td colspan="2" id="hideItemsStep">{{displayCheckbox("hideItems")}}<span id="hideItemsText">Hide some items</span></td>
-		<td><button type="button" onclick="startTheTour(10)">?</button></td>
+		<td><button type="button" onclick="startTheTour(11)">?</button></td>
 	      </tr>
 	    </table>
 	    <div id="ammoVisibility">
@@ -869,13 +908,13 @@ def displayNumber(id, min, max, default, step="1"):
                 <tr id="strictMinorsVisibility">
 		  <td class="small"><div class="random"><button id="strictMinorsRandom" type="button" onclick="randomize(event, 'strictMinors')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
 		  <td colspan="2" id="strictMinorsStep">{{displayCheckbox("strictMinors")}}<span id="strictMinorsText">Strict Minors distribution</span></td>
-		  <td><button type="button" onclick="startTheTour(11)">?</button></td>
+		  <td><button type="button" onclick="startTheTour(12)">?</button></td>
                 </tr>
                 <tr id="missileQtyVisibility">
 		  <td class="small"><div class="random"><button id="missileQtyRandom" type="button" onclick="randomize(event, 'missileQty')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
 		  <td><span id="missileQtyText">Proportion of Missiles:</span></td>
 		  <td>{{displayNumber("missileQty", "1", "9", "3", "0.1")}}</td>
-		  <td><button type="button" onclick="startTheTour(12)">?</button></td>
+		  <td><button type="button" onclick="startTheTour(13)">?</button></td>
                 </tr>
                 <tr id="superQtyVisibility">
 		  <td class="small"><div class="random"><button id="superQtyRandom" type="button" onclick="randomize(event, 'superQty')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
@@ -891,13 +930,13 @@ def displayNumber(id, min, max, default, step="1"):
 		  <td class="small"><div class="random"><button id="minorQtyRandom" type="button" onclick="randomize(event, 'minorQty')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
 		  <td><span id="minorQtyText">Percentage of minors available:</span></td>
 		  <td>{{displayNumber("minorQty", "1", "100", "100")}}</td>
-		  <td><button type="button" onclick="startTheTour(13)">?</button></td>
+		  <td><button type="button" onclick="startTheTour(14)">?</button></td>
                 </tr>
                 <tr>
 		  <td class="small"><div class="random"><button id="energyQtyRandom" type="button" onclick="randomize(event, 'energyQty')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
 		  <td><span id="energyQtyText">Quantity of Energy/Reserve Tanks available:</span></td>
 		  <td>{{displaySelect("energyQty", ["sparse", "medium", "vanilla"], "vanilla")}}</td>
-		  <td><button type="button" onclick="startTheTour(14)">?</button></td>
+		  <td><button type="button" onclick="startTheTour(15)">?</button></td>
                 </tr>
 	      </table>
 	    </div>
@@ -911,10 +950,10 @@ def displayNumber(id, min, max, default, step="1"):
 	    <table class="full">
 	      <tr>
 	        <td colspan="2" class="full" id="areaRandomizationStep">{{displayCheckbox("areaRandomization")}}Area randomization</td>
-                <td><button type="button" onclick="startTheTour(15)">?</button></td>
+                <td><button type="button" onclick="startTheTour(16)">?</button></td>
 	      </tr>
 	      <tr id="areaPatchVisibility">
-		<td colspan="2" class="full" id="areaLayoutStep">{{displayCheckbox("areaLayout", False)}} Additional layout patches for easier navigation</td><td><button type="button" onclick="startTheTour(16)">?</button></td>
+		<td colspan="2" class="full" id="areaLayoutStep">{{displayCheckbox("areaLayout", False)}} Additional layout patches for easier navigation</td><td><button type="button" onclick="startTheTour(17)">?</button></td>
 	      </tr>
             </table>
 	    <div id="superFunVisibility">
@@ -927,35 +966,35 @@ def displayNumber(id, min, max, default, step="1"):
                 <tr>
 		  <td class="small"><div class="random"><button id="funCombatRandom" type="button" onclick="randomize(event, 'funCombat')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
 		  <td colspan="2" class="full" id="funCombatStep">{{displayCheckbox("funCombat")}}<span id="funCombatText">Super Fun Combat</span></td>
-		  <td><button type="button" onclick="startTheTour(17)">?</button></td>
+		  <td><button type="button" onclick="startTheTour(18)">?</button></td>
                 </tr>
                 <tr>
 		  <td class="small"><div class="random"><button id="funMovementRandom" type="button" onclick="randomize(event, 'funMovement')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
 		  <td colspan="2" class="full" id="funMovementStep">{{displayCheckbox("funMovement")}}<span id="funMovementText">Super Fun Movement</span></td>
-		  <td><button type="button" onclick="startTheTour(18)">?</button></td>
+		  <td><button type="button" onclick="startTheTour(19)">?</button></td>
                 </tr>
                 <tr>
 		  <td class="small"><div class="random"><button id="funSuitsRandom" type="button" onclick="randomize(event, 'funSuits')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
 		  <td colspan="2" class="full" id="funSuitsStep">{{displayCheckbox("funSuits")}}<span id="funSuitsText">Suitless</span></td>
-		  <td><button type="button" onclick="startTheTour(19)">?</button></td>
+		  <td><button type="button" onclick="startTheTour(20)">?</button></td>
                 </tr>
               </table>
 	    </div>
 	    <div id="patchesVisibility">
-	      <h4 id="patchesStep">Patches<span class="right"><button type="button" onclick="startTheTour(20)">?</button></span></h4>
+	      <h4 id="patchesStep">Patches<span class="right"><button type="button" onclick="startTheTour(21)">?</button></span></h4>
 	      <p id="mainPatchesTextVisibitily">
 	        The bug fix <a href="https://itemrando.supermetroid.run/information">patches</a> from Total Item Randomizer are included by default.
 	      </p>
 	      <table class="full" id="mainPatchesVisibitily">
 	        <tr>
 		  <td class="full" id="layoutPatchesStep">{{displayCheckbox("layoutPatches", True)}} Include layout patches from Total Item Randomizer</td>
-		  <td><button type="button" onclick="startTheTour(21)">?</button></td>
+		  <td><button type="button" onclick="startTheTour(22)">?</button></td>
 	        </tr>
 	        <tr>
-		  <td class="full" id="noGravHeatStep">{{displayCheckbox("noGravHeat", True)}} Remove Gravity Suit heat protection (by Total)</td><td><button type="button" onclick="startTheTour(22)">?</button></td>
+		  <td class="full" id="noGravHeatStep">{{displayCheckbox("noGravHeat", True)}} Remove Gravity Suit heat protection (by Total)</td><td><button type="button" onclick="startTheTour(23)">?</button></td>
 	        </tr>
 	        <tr>
-		  <td class="full" id="variaTweaksStep">{{displayCheckbox("variaTweaks", True)}} VARIA tweaks (by Flo)</td><td><button type="button" onclick="startTheTour(23)">?</button></td>
+		  <td class="full" id="variaTweaksStep">{{displayCheckbox("variaTweaks", True)}} VARIA tweaks (by Flo)</td><td><button type="button" onclick="startTheTour(24)">?</button></td>
 	        </tr>
 	      </table>
 	      <table class="full" id="patchesStep">

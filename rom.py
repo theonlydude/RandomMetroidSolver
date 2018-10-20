@@ -1024,11 +1024,11 @@ class RomLoader(object):
             if ext[1].lower() == '.sfc' or ext[1].lower() == '.smc':
                 return RomLoaderSfc(rom, magic)
             elif ext[1].lower() == '.json':
-                return RomLoaderJson(rom)
+                return RomLoaderJson(rom, magic)
             else:
                 raise Exception("wrong rom file type: {}".format(ext[1]))
         elif type(rom) is dict:
-            return RomLoaderDict(rom)
+            return RomLoaderDict(rom, magic)
 
     def assignItems(self, locations):
         return self.romReader.loadItems(locations)
@@ -1099,11 +1099,11 @@ class RomLoaderSfc(RomLoader):
 
 class RomLoaderDict(RomLoader):
     # when called from the website (the js in the browser uploads a dict of address: value)
-    def __init__(self, dictROM):
+    def __init__(self, dictROM, magic=None):
         super(RomLoaderDict, self).__init__()
         self.dictROM = dictROM
         fakeROM = FakeROM(self.dictROM)
-        self.romReader = RomReader(fakeROM)
+        self.romReader = RomReader(fakeROM, magic)
 
     def dump(self, fileName):
         with open(fileName, 'w') as jsonFile:
@@ -1111,11 +1111,11 @@ class RomLoaderDict(RomLoader):
 
 class RomLoaderJson(RomLoaderDict):
     # when called from the test suite and the website (when loading already uploaded roms converted to json)
-    def __init__(self, jsonFileName):
+    def __init__(self, jsonFileName, magic=None):
         with open(jsonFileName) as jsonFile:
             tmpDictROM = json.load(jsonFile)
             dictROM = {}
             # in json keys are strings
             for address in tmpDictROM:
                 dictROM[int(address)] = tmpDictROM[address]
-            super(RomLoaderJson, self).__init__(dictROM)
+            super(RomLoaderJson, self).__init__(dictROM, magic)

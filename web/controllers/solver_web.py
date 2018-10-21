@@ -64,6 +64,12 @@ def loadPresetsList():
     comPresets = [os.path.splitext(file)[0] for file in files]
     return (stdPresets, comPresets)
 
+def loadRandoPresetsList():
+    files = sorted(os.listdir('rando_presets'), key=lambda v: v.upper())
+    randoPresets = [os.path.splitext(file)[0] for file in files]
+    randoPresets.append("")
+    return randoPresets
+
 def validatePresetsParams(action):
     if action == 'Create':
         preset = request.vars.presetCreate
@@ -704,6 +710,7 @@ def initRandomizerSession():
         session.randomizer['variaTweaks'] = "on"
         session.randomizer['hideItems'] = "off"
         session.randomizer['strictMinors'] = "off"
+        session.randomizer['randoPreset'] = ""
 
 def randomizer():
     response.title = 'Super Metroid VARIA Randomizer'
@@ -711,8 +718,9 @@ def randomizer():
     initRandomizerSession()
 
     (stdPresets, comPresets) = loadPresetsList()
+    randoPresets = loadRandoPresetsList()
 
-    return dict(stdPresets=stdPresets, comPresets=comPresets, patches=patches)
+    return dict(stdPresets=stdPresets, comPresets=comPresets, patches=patches, randoPresets=randoPresets)
 
 def raiseHttp(code, msg, isJson=False):
     #print("raiseHttp: code {} msg {} isJson {}".format(code, msg, isJson))
@@ -828,7 +836,7 @@ def sessionWebService():
               'progressionSpeed', 'spreadItems', 'fullRandomization', 'suitsRestriction',
               'funCombat', 'funMovement', 'funSuits', 'layoutPatches', 'preset',
               'noGravHeat', 'progressionDifficulty', 'morphPlacement',
-              'areaRandomization', 'complexity', 'hideItems', 'strictMinors']
+              'areaRandomization', 'complexity', 'hideItems', 'strictMinors', 'randoPreset']
     validateWebServiceParams(patchs, quantities, others)
 
     if session.randomizer is None:
@@ -860,6 +868,11 @@ def sessionWebService():
     session.randomizer['variaTweaks'] = request.vars.variaTweaks
     session.randomizer['hideItems'] = request.vars.hideItems
     session.randomizer['strictMinors'] = request.vars.strictMinors
+    session.randomizer['randoPreset'] = request.vars.randoPreset
+
+    # to create a new rando preset, uncomment next lines
+    #with open('rando_presets/new.json', 'w') as jsonFile:
+    #    json.dump(session.randomizer, jsonFile)
 
 def getCustomMapping(controlMapping):
     if len(controlMapping) == 0:
@@ -1082,6 +1095,40 @@ def presetWebService():
         return params
     else:
         raise HTTP(400, "Preset '{}' not found".format(fullPath))
+
+def randoPresetWebService():
+    # web service to get the content of the rando preset file
+    if request.vars.randoPreset == None:
+        raiseHttp(400, "Missing parameter rando preset")
+    preset = request.vars.randoPreset
+
+    if IS_ALPHANUMERIC()(preset)[1] is not None:
+        raise HTTP(400, "Preset name must be alphanumeric")
+
+    if IS_LENGTH(maxsize=32, minsize=1)(preset)[1] is not None:
+        raise HTTP(400, "Preset name must be between 1 and 32 characters")
+
+    print("randoPresetWebService: preset={}".format(preset))
+
+    fullPath = 'rando_presets/{}.json'.format(preset)
+
+    # check that the presets file exists
+    if os.path.isfile(fullPath):
+        # load it
+        try:
+            loadRandoPreset(fullPath)
+        except Exception as e:
+            raise HTTP(400, "Can't load the rando preset: {}".format(preset))
+    else:
+        raise HTTP(400, "Rando preset '{}' not found".format(fullPath))
+
+def loadRandoPreset(presetFullPath):
+    with open(presetFullPath) as jsonFile:
+        randoPreset = json.load(jsonFile)
+
+    # update session
+    for key in randoPreset:
+        session.randomizer[key] = randoPreset[key]
 
 def home():
     # set title

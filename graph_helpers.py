@@ -177,7 +177,7 @@ class HelpersGraph(Helpers):
         if sm.heatProof().bool == False:
             nTanks4Dive = 8
         return sm.wand(sm.wor(sm.wand(sm.haveItem('Gravity'), sm.haveItem('SpaceJump')),
-                              sm.wand(sm.knowsGravityJump(), sm.haveItem('Gravity')),
+                              sm.wand(sm.knowsGravityJump(), sm.haveItem('Gravity'), sm.wor(sm.haveItem('HiJump'), sm.knowsLavaDive())),
                               sm.wand(sm.wor(sm.wand(sm.knowsLavaDive(), sm.haveItem('HiJump')),
                                              sm.knowsLavaDiveNoHiJump()),
                                       sm.energyReserveCountOk(nTanks4Dive))),

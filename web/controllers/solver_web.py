@@ -1117,6 +1117,7 @@ def randoPresetWebService():
         # load it
         try:
             loadRandoPreset(fullPath)
+            session.randomizer['randoPreset'] = preset
         except Exception as e:
             raise HTTP(400, "Can't load the rando preset: {}".format(preset))
     else:

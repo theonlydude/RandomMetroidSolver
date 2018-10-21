@@ -638,7 +638,7 @@ function startTheTour(step=-1) {
     {
       element: "#presetStep",
       title: "Standard Preset",
-      content: "The preset is used by the Randomizer to know which techniques are available to reach the items locations.</br>You can create and manage your preset on the <a href=\"/solver/solver_web/presets\">Presets part of the website</a>.<br/>Load one of the standard presets (sorted in increased difficulty), or your own from the community presets.<br/>For the duration of the league the Season_Races preset is added to standard presets.<br/>Creating your own preset will lead to a better experience overall, as the generated ROMs will be tailored for you."
+      content: "The preset is used by the Randomizer to know which techniques are available to reach the items locations.</br>You can create and manage your preset on the <a href=\"/solver/solver_web/presets\">Presets part of the website</a>.<br/>Load one of the standard presets (sorted in increased difficulty), or your own from the community presets.<br/>Creating your own preset will lead to a better experience overall, as the generated ROMs will be tailored for you."
     },
     {
       element: "#randoPresetStep",
@@ -729,19 +729,19 @@ function startTheTour(step=-1) {
     {
       element: "#funCombatStep",
       title: "Super Fun Combat",
-      content: "Will randomly remove some items from the Combat set:<br/><ul><li>Screw Attack</li><li>Spazer</li><li>Wave Beam</li><li>Plasma Beam</li></ul><b>Warning:</b> May cause the Randomizer to abort if not enough techniques are known in the preset.<br/>Click on the dice button to randomly set this parameter.",
+      content: "Forces removal of Plasma Beam, and Screw Attack if the preset and settings allow it.<br/>In addition, can randomly remove some items from the Combat set:<br/><ul><li>Spazer</li><li>Wave Beam</li></ul>Click on the dice button to randomly set this parameter.",
       placement: "auto left"
     },
     {
       element: "#funMovementStep",
       title: "Super Fun Movement",
-      content: "Will randomly remove some items from the Movement set:<br/><ul><li>Hi Jump</li><li>Space Jump</li><li>Grappling Beam</li><li>Spring Ball</li><li>Speed Booster</li><li>Bombs</li></ul><b>Warning:</b> May cause the Randomizer to abort if not enough techniques are known in the preset.<br/>Click on the dice button to randomly set this parameter.",
+      content: "Forces removal of Space Jump if the preset allows it.<br/>In addition, can randomly remove some items from the Movement set:<br/><ul><li>Hi Jump</li><li>Grappling Beam</li><li>Spring Ball</li><li>Speed Booster</li><li>Bombs</li></ul>Click on the dice button to randomly set this parameter.",
       placement: "auto left"
     },
     {
       element: "#funSuitsStep",
       title: "Suitless",
-      content: "Will randomly remove some Suits.<br/>Will not activate if relevant known techniques are not enabled in the preset : exit Draygon suitless for Gravity, and Lower Norfair hell runs for Varia.<br/>Click on the dice button to randomly set this parameter.",
+      content: "If the preset and seed layout allow it, will force removal of at least one suit.<br/>Click on the dice button to randomly set this parameter.",
       placement: "auto left"
     },
     {

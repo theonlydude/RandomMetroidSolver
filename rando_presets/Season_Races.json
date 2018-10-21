@@ -20,7 +20,7 @@
   "powerBombQty": "1",
   "minorQty": "100",
   "suitsRestriction": "on",
-  "preset": "regular",
+  "preset": "Season_Races",
   "skip_intro": "off",
   "spinjumprestart": "off",
   "areaLayout": "off",
@@ -28,7 +28,6 @@
   "animals": "off",
   "itemsounds": "off",
   "energyQty": "vanilla",
-  "complexity": "advanced",
   "funSuits": "off",
   "variaTweaks": "on"
 }

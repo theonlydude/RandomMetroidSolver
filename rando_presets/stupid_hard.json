@@ -20,7 +20,7 @@
   "powerBombQty": "1",
   "minorQty": "1",
   "suitsRestriction": "on",
-  "preset": "regular",
+  "preset": "master",
   "animals": "on",
   "spinjumprestart": "off",
   "noGravHeat": "on",
@@ -28,7 +28,6 @@
   "skip_intro": "off",
   "itemsounds": "on",
   "energyQty": "sparse",
-  "complexity": "advanced",
   "funSuits": "on",
   "variaTweaks": "on"
 }

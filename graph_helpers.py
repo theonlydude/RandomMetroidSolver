@@ -167,7 +167,8 @@ class HelpersGraph(Helpers):
                                              sm.knowsGetAroundWallJump())),
                               sm.wor(sm.haveItem('Ice'),
                                      sm.wand(sm.haveItem('SpringBall'),
-                                             sm.knowsSpringBallJumpFromWall()))))
+                                             sm.knowsSpringBallJumpFromWall()),
+                                     sm.knowsNorfairReserveDBoost())))
 
     @Cache.decorator
     def canPassLavaPit(self):

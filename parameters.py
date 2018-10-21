@@ -272,10 +272,10 @@ class Knows:
                                     'rooms': ['Landing Site']}
 
     # Norfair
-    WallJumpCathedralExit = SMBool(False, 0, ['WallJumpCathedralExit'])
+    WallJumpCathedralExit = SMBool(True, medium, ['WallJumpCathedralExit'])
     desc['WallJumpCathedralExit'] = {'display': 'Wall Jump to exit Cathedral',
                                      'title': 'Use a delayed wall jump to exit Cathedral',
-                                     'href': None,
+                                     'href': 'https://www.youtube.com/watch?v=CqQik2z6IkE',
                                      'rooms': ['Cathedral Entrance']}
 
     NovaBoost = SMBool(False, 0, ['NovaBoost'])
@@ -283,6 +283,24 @@ class Knows:
                          'title': 'Use a D-Boost on the Sova to enter Cathedral',
                          'href': 'https://www.twitch.tv/videos/144055441',
                          'rooms': ['Cathedral Entrance']}
+
+    NorfairReserveDBoost = SMBool(False, 0, ['NorfairReserveDBoost'])
+    desc['NorfairReserveDBoost'] = {'display': 'Norfair Reserve Damage Boost',
+                                    'title': 'Use a D-Boost to reach Norfair Reserve area',
+                                    'href': None,
+                                    'rooms': ['Bubble Mountain']}
+
+    CrocPBsDBoost = SMBool(False, 0, ['CrocPBsDBoost'])
+    desc['CrocPBsDBoost'] = {'display': 'Crocomire Power Bombs Damage Boost',
+                             'title': 'Use a D-Boost to reach Crocomire Power Bombs',
+                             'href': None,
+                             'rooms': ['Post Crocomire Farming Room']}
+
+    CrocPBsIce = SMBool(False, 0, ['CrocPBsIce'])
+    desc['CrocPBsIce'] = {'display': 'Crocomire Power Bombs with Ice Beam',
+                          'title': 'Get the farm bugs up and freeze them to reach Crocomire Power Bombs',
+                          'href': 'https://www.youtube.com/watch?v=tM6Y6pg5a-E',
+                          'rooms': ['Post Crocomire Farming Room']}
 
     LavaDive = SMBool(True, harder, ['LavaDive'])
     desc['LavaDive'] = {'display': 'Lava Dive',
@@ -478,7 +496,7 @@ class Knows:
              'title': 'Obscure suitless stuff'}
         ],
         'Norfair': [
-            {'knows': ['WallJumpCathedralExit', 'NovaBoost'],
+            {'knows': ['WallJumpCathedralExit', 'NorfairReserveDBoost', 'CrocPBsIce', 'CrocPBsDBoost', 'NovaBoost'],
               'title': 'Upper Norfair'},
             {'knows': ['LavaDive', 'LavaDiveNoHiJump', 'ScrewAttackExit', 'WorstRoomIceCharge'],
              'title': 'Lower Norfair'}

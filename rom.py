@@ -6,6 +6,17 @@ from itemrandomizerweb.patches import patches
 from itemrandomizerweb import Items
 from itemrandomizerweb.stdlib import List
 
+def readWord(romFile):
+    r0 = struct.unpack("B", romFile.read(1))[0]
+    r1 = struct.unpack("B", romFile.read(1))[0]
+    word = (r1 << 8) + r0
+    return word
+
+def writeWord(romFile, w):
+    (w0, w1) = (w & 0x00FF, (w & 0xFF00) >> 8)
+    romFile.write(struct.pack('B', w0))
+    romFile.write(struct.pack('B', w1))
+
 # layout patches added by randomizers
 class RomPatches:
     #### Patches definitions
@@ -168,10 +179,7 @@ class RomReader:
             self.race = RaceModeReader(self, magic)
 
     def readWord(self):
-        r0 = struct.unpack("B", self.romFile.read(1))[0]
-        r1 = struct.unpack("B", self.romFile.read(1))[0]
-        word = (r1 << 8) + r0
-        return word
+        return readWord(self.romFile)
 
     def getItemBytes(self):
         value1 = struct.unpack("B", self.romFile.read(1))[0]
@@ -473,9 +481,7 @@ class RomPatcher:
         self.romFile.close()
 
     def writeWord(self, w):
-        (w0, w1) = (w & 0x00FF, (w & 0xFF00) >> 8)
-        self.romFile.write(struct.pack('B', w0))
-        self.romFile.write(struct.pack('B', w1))
+        writeWord(self.romFile, w)
 
     def writeItemCode(self, item, visibility, address):
         itemCode = Items.getItemTypeCode(item, visibility)
@@ -721,6 +727,14 @@ class RomPatcher:
 
         isRace = self.race is not None
         address = 0x2f5240
+        if isRace:
+            addr = address - 0x40
+            for i in range(0x20):
+                self.romFile.seek(addr)
+                w = readWord(self.romFile)
+                self.romFile.seek(addr)
+                self.race.writeWordMagic(w)
+                addr += 0x2
         for item in ["Charge Beam", "Ice Beam", "Wave Beam", "Spazer", "Plasma Beam", "Varia Suit",
                      "Gravity Suit", "Morph Ball", "Bomb", "Spring Ball", "Screw Attack",
                      "Hi-Jump Boots", "Space Jump", "Speed Booster", "Grappling Beam", "X-Ray Scope"]:
@@ -737,12 +751,12 @@ class RomPatcher:
 
         # we need 16 majors displayed, if we've removed majors, add some blank text
         for i in range(16 - len(fItemLocs)):
-            self.writeCreditsString(address, 0x04, prepareString(""))
-            self.writeCreditsString((address + 0x40), 0x18, prepareString(""))
+            self.writeCreditsString(address, 0x04, prepareString(""), isRace)
+            self.writeCreditsString((address + 0x40), 0x18, prepareString(""), isRace)
 
             address += 0x80
 
-        self.patchBytes(address, [0, 0, 0, 0])
+        self.patchBytes(address, [0, 0, 0, 0], isRace)
 
     def writeCreditsString(self, address, color, string, isRace=False):
         array = [self.convertCreditsChar(color, char) for char in string]

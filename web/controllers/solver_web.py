@@ -1151,6 +1151,17 @@ def getErrors():
     else:
         return []
 
+def getFsUsage():
+    fsData = os.statvfs('/home')
+    print(fsData)
+    percent = round(100 - (100.0 * fsData.f_bavail / fsData.f_blocks), 2)
+    if percent < 80:
+        return ('OK', percent)
+    elif percent < 95:
+        return ('WARNING', percent)
+    else:
+        return ('CRITICAL', percent)
+
 def stats():
     response.title = 'Super Metroid VARIA Randomizer and Solver statistics'
 
@@ -1173,10 +1184,13 @@ def stats():
 
     DB.close()
 
+    (fsStatus, fsPercent) = getFsUsage()
+
     return dict(solverPresets=solverPresets, randomizerPresets=randomizerPresets,
                 solverDurations=solverDurations, randomizerDurations=randomizerDurations,
                 solverData=solverData, randomizerData=randomizerData,
-                isolver=isolver, isolverData=isolverData, errors=errors)
+                isolver=isolver, isolverData=isolverData, errors=errors,
+                fsStatus=fsStatus, fsPercent=fsPercent)
 
 def tracker():
     response.title = 'Super Metroid VARIA Randomizer and Solver Area and Item Tracker'

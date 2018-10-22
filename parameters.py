@@ -299,7 +299,7 @@ class Knows:
     CrocPBsIce = SMBool(False, 0, ['CrocPBsIce'])
     desc['CrocPBsIce'] = {'display': 'Crocomire Power Bombs with Ice Beam',
                           'title': 'Get the farm bugs up and freeze them to reach Crocomire Power Bombs',
-                          'href': 'https://youtu.be/PglBIsdAiFI',
+                          'href': 'https://www.youtube.com/watch?v=ERer642mil8',
                           'rooms': ['Post Crocomire Farming Room']}
 
     LavaDive = SMBool(True, harder, ['LavaDive'])

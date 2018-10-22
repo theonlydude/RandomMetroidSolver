@@ -131,7 +131,7 @@ class Knows:
     SpringBallJumpFromWall = SMBool(True, harder, ['SpringBallJumpFromWall'])
     desc['SpringBallJumpFromWall'] = {'display': 'SpringBall-Jump from wall',
                                       'title': 'Do a SpringBall jump after a Wall jump to exit Screw Attack area, climb Worst Room without Hi-Jump',
-                                      'href': None,
+                                      'href': 'https://youtu.be/3bTe2MN7mS4',
                                       'rooms': ['Screw Attack Room',
                                                 'The Worst Room In The Game',
                                                 'Bubble Mountain']}
@@ -165,7 +165,7 @@ class Knows:
     MicrowavePhantoon = SMBool(True, medium, ['MicrowavePhantoon'])
     desc['MicrowavePhantoon'] = {'display': 'Microwave Phantoon',
                                  'title': 'Same as Draygon, with a few missiles to start',
-                                 'href': None,
+                                 'href': 'https://youtu.be/tox6blvT5Ao',
                                  'rooms': ["Phantoon's Room"]}
 
     # End Game
@@ -287,7 +287,7 @@ class Knows:
     NorfairReserveDBoost = SMBool(False, 0, ['NorfairReserveDBoost'])
     desc['NorfairReserveDBoost'] = {'display': 'Norfair Reserve Damage Boost',
                                     'title': 'Use a D-Boost to reach Norfair Reserve area',
-                                    'href': None,
+                                    'href': 'https://youtu.be/PglBIsdAiFI',
                                     'rooms': ['Bubble Mountain']}
 
     CrocPBsDBoost = SMBool(False, 0, ['CrocPBsDBoost'])
@@ -299,7 +299,7 @@ class Knows:
     CrocPBsIce = SMBool(False, 0, ['CrocPBsIce'])
     desc['CrocPBsIce'] = {'display': 'Crocomire Power Bombs with Ice Beam',
                           'title': 'Get the farm bugs up and freeze them to reach Crocomire Power Bombs',
-                          'href': 'https://www.youtube.com/watch?v=tM6Y6pg5a-E',
+                          'href': 'https://youtu.be/PglBIsdAiFI',
                           'rooms': ['Post Crocomire Farming Room']}
 
     LavaDive = SMBool(True, harder, ['LavaDive'])
@@ -323,7 +323,7 @@ class Knows:
     ScrewAttackExit = SMBool(True, medium, ['ScrewAttackExit'])
     desc['ScrewAttackExit'] = {'display': 'Screw Attack Exit',
                                'title': 'Gain momentum from Golden Torizo Energy Recharge room, then Wall-Jump in Screw Attack room',
-                               'href': None,
+                               'href': 'https://youtu.be/l-L6zzpqim4',
                                'rooms': ['Screw Attack Room']}
 
     # wrecked ship
@@ -420,38 +420,38 @@ class Knows:
     KillPlasmaPiratesWithSpark = SMBool(False, 0, ['KillPlasmaPiratesWithSpark'])
     desc['KillPlasmaPiratesWithSpark'] = {'display': 'Kill Plasma Pirates with Spark',
                                           'title': 'Use shinesparks to kill the pirates in Plasma Beam room',
-                                          'href': None,
+                                          'href': 'https://youtu.be/nORE1HkP64E',
                                           'rooms': ['Plasma Room']}
 
     KillPlasmaPiratesWithCharge = SMBool(True, hard, ['KillPlasmaPiratesWithCharge'])
     desc['KillPlasmaPiratesWithCharge'] = {'display': 'Kill Plasma Pirates with Charge',
                                            'title': 'Use pseudo-screw to kill the pirates in Plasma Beam room',
-                                           'href': None,
+                                           'href': 'https://youtu.be/hn6nrjUGmSk',
                                            'rooms': ['Plasma Room']}
 
     # spring ball access
     AccessSpringBallWithSpringBallBombJumps = SMBool(False, 0, ['AccessSpringBallWithSpringBallBombJumps'])
     desc['AccessSpringBallWithSpringBallBombJumps'] = {'display': 'Access Spring Ball location with bomb jumps and spring ball',
                                                        'title': 'With Gravity and no Hi-Jump, bounce on the sand and bomb jump up to get through the grapple hole',
-                                                       'href': None,
+                                                       'href': 'https://youtu.be/VbR6z3aZuWg',
                                                        'rooms': ['Pants Room']}
 
     AccessSpringBallWithBombJumps = SMBool(False, 0, ['AccessSpringBallWithBombJumps'])
     desc['AccessSpringBallWithBombJumps'] = {'display': 'Access Spring Ball location with bomb jumps only',
                                              'title': 'With Gravity and no Hi-Jump, bomb jump up from the sand to get through the grapple hole',
-                                             'href': None,
+                                             'href': 'https://youtu.be/8s_Tng-3oZM',
                                              'rooms': ['Pants Room']}
 
     AccessSpringBallWithSpringBallJump = SMBool(False, 0, ['AccessSpringBallWithSpringBallJump'])
     desc['AccessSpringBallWithSpringBallJump'] = {'display': 'Access Spring Ball location with a spring ball jump',
                                                   'title': 'With Gravity and no Hi-Jump, use a spring ball jump, either from the sand or a ledge to get through the grapple hole',
-                                                  'href': None,
+                                                  'href': 'https://youtu.be/YrmAqwJxbYs',
                                                   'rooms': ['Pants Room']}
 
     AccessSpringBallWithXRayClimb = SMBool(False, 0, ['AccessSpringBallWithXRayClimb'])
     desc['AccessSpringBallWithXRayClimb'] = {'display': 'Access Spring Ball location with X-Ray climbing',
                                              'title': 'Use inbounds X-Ray climbing to get past the grapple hole. Can be required suitless if suitless movement level 3 is enabled.',
-                                             'href': None,
+                                             'href': 'https://youtu.be/I-f5X5cNypA',
                                              'rooms': ['Pants Room']}
 
     categories = {

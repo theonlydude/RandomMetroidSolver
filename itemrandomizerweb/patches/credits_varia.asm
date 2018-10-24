@@ -196,6 +196,9 @@ patch_load:
     plb
     rtl
 
+
+////////////////////////// CREDITS /////////////////////////////
+
 // Hijack after decompression of regular credits tilemaps
 org $8be0d1
     jsl copy

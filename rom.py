@@ -6,6 +6,17 @@ from itemrandomizerweb.patches import patches
 from itemrandomizerweb import Items
 from itemrandomizerweb.stdlib import List
 
+def readWord(romFile):
+    r0 = struct.unpack("B", romFile.read(1))[0]
+    r1 = struct.unpack("B", romFile.read(1))[0]
+    word = (r1 << 8) + r0
+    return word
+
+def writeWord(romFile, w):
+    (w0, w1) = (w & 0x00FF, (w & 0xFF00) >> 8)
+    romFile.write(struct.pack('B', w0))
+    romFile.write(struct.pack('B', w1))
+
 # layout patches added by randomizers
 class RomPatches:
     #### Patches definitions
@@ -168,10 +179,7 @@ class RomReader:
             self.race = RaceModeReader(self, magic)
 
     def readWord(self):
-        r0 = struct.unpack("B", self.romFile.read(1))[0]
-        r1 = struct.unpack("B", self.romFile.read(1))[0]
-        word = (r1 << 8) + r0
-        return word
+        return readWord(self.romFile)
 
     def getItemBytes(self):
         value1 = struct.unpack("B", self.romFile.read(1))[0]
@@ -473,9 +481,7 @@ class RomPatcher:
         self.romFile.close()
 
     def writeWord(self, w):
-        (w0, w1) = (w & 0x00FF, (w & 0xFF00) >> 8)
-        self.romFile.write(struct.pack('B', w0))
-        self.romFile.write(struct.pack('B', w1))
+        writeWord(self.romFile, w)
 
     def writeItemCode(self, item, visibility, address):
         itemCode = Items.getItemTypeCode(item, visibility)
@@ -500,8 +506,6 @@ class RomPatcher:
 
     def writeItemsLocs(self, itemLocs):
         self.nItems = 0
-        if self.race is not None:
-            self.race.fuzz()
         for itemLoc in itemLocs:
             if itemLoc['Item']['Type'] in ['Nothing', 'NoEnergy']:
                 self.writeNothing(itemLoc)
@@ -721,7 +725,16 @@ class RomPatcher:
 
             return s
 
+        isRace = self.race is not None
         address = 0x2f5240
+        if isRace:
+            addr = address - 0x40
+            for i in range(0x20):
+                self.romFile.seek(addr)
+                w = readWord(self.romFile)
+                self.romFile.seek(addr)
+                self.race.writeWordMagic(w)
+                addr += 0x2
         for item in ["Charge Beam", "Ice Beam", "Wave Beam", "Spazer", "Plasma Beam", "Varia Suit",
                      "Gravity Suit", "Morph Ball", "Bomb", "Spring Ball", "Screw Attack",
                      "Hi-Jump Boots", "Space Jump", "Speed Booster", "Grappling Beam", "X-Ray Scope"]:
@@ -731,23 +744,23 @@ class RomPatcher:
             itemName = prepareString(item)
             locationName = prepareString(itemLocs[item], isItem=False)
 
-            self.writeCreditsString(address, 0x04, itemName)
-            self.writeCreditsString((address + 0x40), 0x18, locationName)
+            self.writeCreditsString(address, 0x04, itemName, isRace)
+            self.writeCreditsString((address + 0x40), 0x18, locationName, isRace)
 
             address += 0x80
 
         # we need 16 majors displayed, if we've removed majors, add some blank text
         for i in range(16 - len(fItemLocs)):
-            self.writeCreditsString(address, 0x04, prepareString(""))
-            self.writeCreditsString((address + 0x40), 0x18, prepareString(""))
+            self.writeCreditsString(address, 0x04, prepareString(""), isRace)
+            self.writeCreditsString((address + 0x40), 0x18, prepareString(""), isRace)
 
             address += 0x80
 
-        self.patchBytes(address, [0, 0, 0, 0])
+        self.patchBytes(address, [0, 0, 0, 0], isRace)
 
-    def writeCreditsString(self, address, color, string):
+    def writeCreditsString(self, address, color, string, isRace=False):
         array = [self.convertCreditsChar(color, char) for char in string]
-        self.patchBytes(address, array)
+        self.patchBytes(address, array, isRace)
 
     def writeCreditsStringBig(self, address, string, top=True):
         array = [self.convertCreditsCharBig(char, top) for char in string]
@@ -827,10 +840,13 @@ class RomPatcher:
 
         return ib
 
-    def patchBytes(self, address, array):
+    def patchBytes(self, address, array, isRace=False):
         self.romFile.seek(address)
         for w in array:
-            self.writeWord(w)
+            if not isRace:
+                self.writeWord(w)
+            else:
+                self.race.writeWordMagic(w)
 
     # write area randomizer transitions to ROM
     # doorConnections : a list of connections. each connection is a dictionary describing
@@ -1022,11 +1038,11 @@ class RomLoader(object):
             if ext[1].lower() == '.sfc' or ext[1].lower() == '.smc':
                 return RomLoaderSfc(rom, magic)
             elif ext[1].lower() == '.json':
-                return RomLoaderJson(rom)
+                return RomLoaderJson(rom, magic)
             else:
                 raise Exception("wrong rom file type: {}".format(ext[1]))
         elif type(rom) is dict:
-            return RomLoaderDict(rom)
+            return RomLoaderDict(rom, magic)
 
     def assignItems(self, locations):
         return self.romReader.loadItems(locations)
@@ -1097,11 +1113,11 @@ class RomLoaderSfc(RomLoader):
 
 class RomLoaderDict(RomLoader):
     # when called from the website (the js in the browser uploads a dict of address: value)
-    def __init__(self, dictROM):
+    def __init__(self, dictROM, magic=None):
         super(RomLoaderDict, self).__init__()
         self.dictROM = dictROM
         fakeROM = FakeROM(self.dictROM)
-        self.romReader = RomReader(fakeROM)
+        self.romReader = RomReader(fakeROM, magic)
 
     def dump(self, fileName):
         with open(fileName, 'w') as jsonFile:
@@ -1109,11 +1125,11 @@ class RomLoaderDict(RomLoader):
 
 class RomLoaderJson(RomLoaderDict):
     # when called from the test suite and the website (when loading already uploaded roms converted to json)
-    def __init__(self, jsonFileName):
+    def __init__(self, jsonFileName, magic=None):
         with open(jsonFileName) as jsonFile:
             tmpDictROM = json.load(jsonFile)
             dictROM = {}
             # in json keys are strings
             for address in tmpDictROM:
                 dictROM[int(address)] = tmpDictROM[address]
-            super(RomLoaderJson, self).__init__(dictROM)
+            super(RomLoaderJson, self).__init__(dictROM, magic)

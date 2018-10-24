@@ -320,10 +320,15 @@ window.onload = function(){
                 var addresses = new Array(0x18c22, 0x18aea, 0x18a42, 0x18e9e, 0x18bfe, 0x18e86, 0x18f0a, 0x189ca, 0x18aae, 0x196d2, 0x19a4a, 0x1922e, 0x195fa, 0x1967e, 0x1a39c, 0x1a510, 0x18aa2, 0x1a480, 0x1902a, 0x190c6, 0x18af6, 0x1a384, 0x1a390, 0x1a330, 0x18c52, 0x191e6, 0x1913e, 0x1923a);
                 var arrayLength = addresses.length;
                 for(var i=0; i<arrayLength; i++) {
-                    romData[addresses[i]] = bytes[addresses[i]]
+                    romData[addresses[i]] = bytes[addresses[i]];
                     romData[addresses[i]+1] = bytes[addresses[i]+1];
                     romData[addresses[i]+6] = bytes[addresses[i]+6];
                     romData[addresses[i]+7] = bytes[addresses[i]+7];
+                }
+
+                // bank B8
+                for(var i=0x1C0000; i<=0x1C7FFF; i++){
+                  romData[i] = bytes[i];
                 }
 
                 romData["romFileName"] = outFileName;
@@ -345,7 +350,10 @@ window.onload = function(){
             reader.readAsArrayBuffer(file);
 
         }, false);
+    } else {
+        alert("This website requires the HTML5 File API, please upgrade your browser to a newer version.");
     }
+
 }
 
 function lastRomFileChanged(elem) {
@@ -379,7 +387,7 @@ function startTheTour(step=-1) {
     {
       element: "#presetStep",
       title: "Preset",
-      content: "The preset is used by the Solver to know which techniques are available to reach the items locations.<br/>You can create and manage your preset on the <a href=\"/solver/solver_web/presets\">Presets part of the website</a>.<br/>Load one of the standard presets (sorted in increased difficulty) or you own from the community presets."
+      content: "The preset is used by the Solver to know which techniques are available to reach the items locations.<br/>You can create and manage your preset on the <a href=\"/solver/solver_web/presets\">Presets part of the website</a>.<br/>Load one of the standard presets (sorted in increased difficulty) or you own from the community presets.<br/>For the duration of the league the Season_Races preset is added to standard presets."
     },
     {
       element: "#difficultyTarget",

@@ -25,6 +25,18 @@ th {
 tr:nth-child(even) {
     background-color: #f2f2f2
 }
+.OK {
+    background-color: green;
+    color: white;
+}
+.WARNING {
+    background-color: orange;
+    color: white;
+}
+.CRITICAL {
+    background-color: red;
+    color: white;
+}
 </style>
 
 <script language = "JavaScript">
@@ -413,6 +425,11 @@ google.charts.setOnLoadCallback(drawCharts);
     response.write("</table>", escape=False)
     pass
 }}
+
+<h4>FS usage</h4>
+<p class="{{=fsStatus}}">
+  {{=fsStatus}}: {{=fsPercent}}%
+</p>
 
 <br/>
 </div>

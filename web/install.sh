@@ -265,3 +265,5 @@ find ~/web2py/applications/solver/static -xtype l -exec rm -f {} \;
 [ -L ~/web2py/applications/solver/static/images/2_reserve.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/tracker/pause/2_reserve.png ~/web2py/applications/solver/static/images/2_reserve.png
 [ -L ~/web2py/applications/solver/static/images/3_reserve.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/tracker/pause/3_reserve.png ~/web2py/applications/solver/static/images/3_reserve.png
 [ -L ~/web2py/applications/solver/static/images/4_reserve.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/tracker/pause/4_reserve.png ~/web2py/applications/solver/static/images/4_reserve.png
+
+[ -L ~/web2py/rando_presets ] || ln -s ~/RandomMetroidSolver/rando_presets ~/web2py/rando_presets

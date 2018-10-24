@@ -252,7 +252,7 @@ class AccessGraph(object):
             if loc['GraphArea'] not in availAreas:
                 loc['distance'] = 10000
                 loc['difficulty'] = SMBool(False, 0)
-                #if loc['Name'] == "Spring Ball":
+                #if loc['Name'] == "Right Super, Wrecked Ship":
                 #    print("loc: {} locDiff is area nok".format(loc["Name"]))
                 continue
 
@@ -260,19 +260,19 @@ class AccessGraph(object):
                 if apName == None:
                     loc['distance'] = 10000
                     loc['difficulty'] = SMBool(False, 0)
-                    #if loc['Name'] == "Spring Ball":
+                    #if loc['Name'] == "Right Super, Wrecked Ship":
                     #    print("loc: {} ap is none".format(loc["Name"]))
                     break
 
                 tFunc = loc['AccessFrom'][apName]
                 ap = self.accessPoints[apName]
                 tdiff = smbm.eval(tFunc)
-                #if loc['Name'] == "Spring Ball":
+                #if loc['Name'] == "Right Super, Wrecked Ship":
                 #    print("{} root: {} ap: {}".format(loc['Name'], rootNode, apName))
                 if tdiff.bool == True and tdiff.difficulty <= maxDiff:
                     diff = smbm.eval(loc['Available'])
                     path = availAPPaths[apName]["path"]
-                    #if loc['Name'] == "Spring Ball":
+                    #if loc['Name'] == "Right Super, Wrecked Ship":
                     #    print("{} path: {}".format(loc['Name'], [a.Name for a in path]))
                     pdiff = availAPPaths[apName]["pdiff"]
                     locDiff = SMBool(diff.bool,
@@ -285,18 +285,18 @@ class AccessGraph(object):
                         loc['difficulty'] = locDiff
                         loc['path'] = path
                         availLocs.append(loc)
-                        #if loc['Name'] == "Spring Ball":
-                        #    print("{} diff: {} tdiff: {} pdiff: {}".format(loc['Name'], diff, tdiff, pdiff))
+                        #if loc['Name'] == "Right Super, Wrecked Ship":
+                        #    print("{} diff: {} tdiff: {} pdiff: {}, ap: {}".format(loc['Name'], diff, tdiff, pdiff, apName))
                         break
                     else:
                         loc['distance'] = 1000 + tdiff.difficulty
                         loc['difficulty'] = SMBool(False, 0)
-                        #if loc['Name'] == "Spring Ball":
+                        #if loc['Name'] == "Right Super, Wrecked Ship":
                         #    print("loc: {} locDiff is false".format(loc["Name"]))
                 else:
                     loc['distance'] = 10000 + tdiff.difficulty
                     loc['difficulty'] = SMBool(False, 0)
-                    #if loc['Name'] == "Spring Ball":
+                    #if loc['Name'] == "Right Super, Wrecked Ship":
                     #    print("loc: {} tdiff is false".format(loc["Name"]))
 
             if 'difficulty' not in loc:
@@ -310,6 +310,7 @@ class AccessGraph(object):
     def canAccess(self, smbm, srcAccessPointName, destAccessPointName, maxDiff, item=None):
         if item is not None:
             smbm.addItem(item)
+        #print("canAccess: item: {}, src: {}, dest: {}".format(item, srcAccessPointName, destAccessPointName))
         destAccessPoint = self.accessPoints[destAccessPointName]
         srcAccessPoint = self.accessPoints[srcAccessPointName]
         availAccessPoints = self.getAvailableAccessPoints(srcAccessPoint, smbm, maxDiff)
@@ -317,5 +318,6 @@ class AccessGraph(object):
         #self.log.debug("canAccess: avail = {}".format([ap.Name for ap in availAccessPoints.keys()]))
         if item is not None:
             smbm.removeItem(item)
+        #print("canAccess: {}".format(can))
         return can
 

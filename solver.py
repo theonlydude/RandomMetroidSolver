@@ -316,7 +316,7 @@ class InteractiveSolver(CommonSolver):
         state.fromSolver(self)
         state.toJson(self.outputFileName)
 
-    def initialize(self, rom, presetFileName):
+    def initialize(self, rom, presetFileName, magic=None):
         # load rom and preset, return first state
         self.locations = graphLocations
         self.smbm = SMBoolManager()
@@ -324,7 +324,7 @@ class InteractiveSolver(CommonSolver):
         self.presetFileName = presetFileName
         self.loadPreset(self.presetFileName)
 
-        self.loadRom(rom, interactive=True)
+        self.loadRom(rom, interactive=True, magic=magic)
         self.locations = self.addMotherBrainLoc(self.locations)
 
         self.clear()
@@ -1214,7 +1214,7 @@ def interactiveSolver(args):
     if args.romFileName != None and args.presetFileName != None and args.output != None:
         # init
         solver = InteractiveSolver(args.output)
-        solver.initialize(args.romFileName, args.presetFileName)
+        solver.initialize(args.romFileName, args.presetFileName, magic=args.raceMagic)
     elif args.state != None and args.action != None and args.output != None:
         # iterate
         if args.action == "add" and args.loc == None:

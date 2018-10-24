@@ -1276,9 +1276,13 @@ locations = [
         'Croc Zone': lambda sm: sm.energyReserveCountOk(1)
     },
     'Available': lambda sm: sm.wand(sm.enoughStuffCroc(),
-                                    sm.wor(sm.canFly(),
-                                           sm.haveItem('Grapple'),
-                                           sm.haveItem('SpeedBooster'))) # spark from the room before
+                                    sm.wor(sm.wor(sm.canFly(),
+                                                  sm.haveItem('Grapple'),
+                                                  sm.haveItem('SpeedBooster')), # spark from the room before
+                                           sm.wor(sm.haveItem('HiJump'), # run and jump from yellow platform
+                                                  sm.wand(sm.haveItem('Ice'),
+                                                          sm.knowsCrocPBsIce()),
+                                                  sm.knowsCrocPBsDBoost())))
 },
 {
     'Area': "Norfair",

@@ -380,7 +380,7 @@ locations = [
     'Visibility': "Chozo",
     'Room': 'Wave Beam Room',
     'AccessFrom' : {
-        'Bubble Mountain': lambda sm: sm.canHellRun('MainUpperNorfair')
+        'Bubble Mountain': lambda sm: sm.canHellRun('MainUpperNorfair', 0.75)
     },
     'Available': lambda sm: sm.canOpenRedDoors(),
     'PostAvailable': lambda sm: sm.wor(sm.haveItem('Morph'), # exit through lower passage under the spikes
@@ -1393,7 +1393,7 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Double Chamber',
     'AccessFrom' : {
-        'Bubble Mountain': lambda sm: sm.canHellRun('MainUpperNorfair')
+        'Bubble Mountain': lambda sm: sm.canHellRun('MainUpperNorfair', 0.75)
     },
     'Available': lambda sm: sm.canOpenRedDoors()
 },

@@ -1226,7 +1226,7 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Crocomire Escape',
     'AccessFrom' : {
-        'Croc Zone': lambda sm: sm.canHellRun('MainUpperNorfair', 1.25)
+        'Croc Zone': lambda sm: sm.canHellRun('MainUpperNorfair')
     },
     'Available': lambda sm: sm.canGrappleEscape()
 },

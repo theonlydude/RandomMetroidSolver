@@ -729,6 +729,18 @@ def raiseHttp(code, msg, isJson=False):
 
     raise HTTP(code, msg)
 
+def getInt(param):
+    try:
+        return int(request.vars[param])
+    except:
+        raiseHttp(400, "Wrong value for {}: {}, must be an int".format(param, request.vars[param]), isJson)
+
+def getFloat(param):
+    try:
+        return float(request.vars[param])
+    except:
+        raiseHttp(400, "Wrong value for {}: {}, must be a float".format(param, request.vars[param]), isJson)
+
 def validateWebServiceParams(patchs, quantities, others, isJson=False):
     parameters = patchs + quantities + others
 
@@ -755,18 +767,6 @@ def validateWebServiceParams(patchs, quantities, others, isJson=False):
     fullPath = '{}/{}.json'.format(getPresetDir(preset), preset)
     if not os.path.isfile(fullPath):
         raiseHttp(400, "Unknown preset: {}".format(preset), isJson)
-
-    def getInt(param):
-        try:
-            return int(request.vars[param])
-        except:
-            raiseHttp(400, "Wrong value for {}: {}, must be an int".format(param, request.vars[param]), isJson)
-
-    def getFloat(param):
-        try:
-            return float(request.vars[param])
-        except:
-            raiseHttp(400, "Wrong value for {}: {}, must be a float".format(param, request.vars[param]), isJson)
 
     for qty in quantities:
         if request.vars[qty] == 'random':
@@ -1153,7 +1153,6 @@ def getErrors():
 
 def getFsUsage():
     fsData = os.statvfs('/home')
-    print(fsData)
     percent = round(100 - (100.0 * fsData.f_bavail / fsData.f_blocks), 2)
     if percent < 80:
         return ('OK', percent)
@@ -1161,6 +1160,21 @@ def getFsUsage():
         return ('WARNING', percent)
     else:
         return ('CRITICAL', percent)
+
+def randoParamsWebService():
+    # get a string of the randomizer parameters for a given seed
+    if request.vars.seed == None:
+        raiseHttp(400, "Missing parameter seed", False)
+
+    seed = getInt('seed')
+    if seed < 0 or seed > 9999999:
+        raiseHttp(400, "Wrong value for seed: {}, must be between 0 and 9999999".format(request.vars[seed]), False)
+
+    DB = db.DB()
+    params = DB.getRandomizerSeedParams(seed)
+    DB.close()
+
+    return params
 
 def stats():
     response.title = 'Super Metroid VARIA Randomizer and Solver statistics'

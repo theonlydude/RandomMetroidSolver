@@ -294,6 +294,7 @@ order by r.id;"""
         outData = []
         paramsSet = set()
         for row in data:
+            # use a dict for the parameters
             params = row[5]
             dictParams = eval('{' + params + '}')
             outData.append(row[0:-1] + (dictParams,))
@@ -308,6 +309,14 @@ order by r.id;"""
 
         header = ["id", "actionTime", "returnCode", "duration", "errorMsg"]
         return (header, outData, paramsHead + sorted(list(paramsSet)))
+
+    def getRandomizerSeedParams(self, randomizer_id):
+        sql = "select group_concat(\"--\", name, \" \", case when value = 'None' then \"\" else value end order by name separator ' ') from randomizer_params where randomizer_id = %d;"
+        data = self.execSelect(sql, (randomizer_id,))
+        if data == None:
+            return ""
+        else:
+            return data[0][0]
 
     def getGeneratedSeeds(self, preset):
         sql = "select count(*) from randomizer_params where name = 'preset' and value = '%s';"

@@ -2,6 +2,7 @@ import sys, random, time
 from itemrandomizerweb import Items
 from parameters import Knows, Settings, samus, infinity
 from itemrandomizerweb.stdlib import List
+from smbool import SMBool
 from helpers import Bosses, diffValue2txt
 from utils import randGaussBounds, getRangeDict, chooseFromRange
 from graph import AccessGraph
@@ -186,6 +187,14 @@ class SuperFunProvider(object):
         self.movementItems = ['SpaceJump', 'HiJump', 'SpeedBooster', 'Bomb', 'Grapple', 'SpringBall']
         # organized by priority
         self.combatItems = ['ScrewAttack', 'Plasma', 'Wave', 'Spazer']
+        # OMG
+        self.bossChecks = {
+            'Kraid' : self.sm.enoughStuffsKraid,
+            'Phantoon' : self.sm.enoughStuffsPhantoon,
+            'Draygon' : self.sm.enoughStuffsDraygon,
+            'Ridley' : self.sm.enoughStuffsRidley
+        }
+        self.okay = lambda: SMBool(True, 0)
 
     def getItemPool(self, forbidden=[]):
         return Items.getItemPool(self.qty, self.forbiddenItems + forbidden)
@@ -197,9 +206,10 @@ class SuperFunProvider(object):
         else:
             pool = self.getItemPool()
         # give us everything and beat every boss to see what we can access
+        self.disableBossChecks()
         self.sm.resetItems()
         self.sm.addItems([item['Type'] for item in pool])
-        for boss in ['Kraid', 'Phantoon', 'Draygon', 'Ridley']:
+        for boss in self.bossChecks:
             Bosses.beatBoss(boss)
 
         # get restricted locs
@@ -224,8 +234,21 @@ class SuperFunProvider(object):
         # cleanup
         self.sm.resetItems()
         Bosses.reset()
+        self.restoreBossChecks()
 
         return ret
+
+    def disableBossChecks(self):
+        self.sm.enoughStuffsKraid = self.okay
+        self.sm.enoughStuffsPhantoon = self.okay
+        self.sm.enoughStuffsDraygon = self.okay
+        self.sm.enoughStuffsRidley = self.okay
+
+    def restoreBossChecks(self):
+        self.sm.enoughStuffsKraid = self.bossChecks['Kraid']
+        self.sm.enoughStuffsPhantoon = self.bossChecks['Phantoon']
+        self.sm.enoughStuffsDraygon = self.bossChecks['Draygon']
+        self.sm.enoughStuffsRidley = self.bossChecks['Ridley']
 
     def addRestricted(self):
         self.checkPool()

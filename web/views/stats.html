@@ -40,6 +40,31 @@ tr:nth-child(even) {
 </style>
 
 <script language = "JavaScript">
+function getRandoParams(id) {
+    // call web service with parameters
+    var request = $.ajax({
+      url: "{{=URL(f='randoParamsWebService')}}",
+      method: "POST",
+      data: {seed: id},
+      dataType: "text",
+      crossDomain: true
+    });
+
+    request.done(ajaxRandoParamsCallCompleted);
+    request.fail(ajaxFail);
+}
+
+function ajaxFail(jqXHR, textStatus) {
+  document.getElementById("flash").innerHTML = jqXHR.responseText;
+  $('#flash').show();
+}
+
+function ajaxRandoParamsCallCompleted(data) {
+  console.log("ajaxRandoParamsCallCompleted: [ "+data+" ]");
+
+  alert(data);
+}
+
 // https://www.w3schools.com/howto/howto_js_sort_table.asp
 function sortTable(id, n) {
   var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
@@ -381,6 +406,9 @@ google.charts.setOnLoadCallback(drawCharts);
           # error msg
           col = row[-2]
           response.write("    <td style=\"white-space: nowrap\">{}</td>\n".format(col), escape=False)
+
+          # display button to copy the params
+          response.write("    <td><button type=\"button\" onclick=\"getRandoParams({})\">D</button></td>\n".format(row[0]), escape=False)
 
           response.write("  </tr>\n", escape=False)
           pass

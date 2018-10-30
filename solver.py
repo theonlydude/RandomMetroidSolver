@@ -280,6 +280,11 @@ class CommonSolver(object):
 
     def collectItem(self, loc):
         item = loc["itemName"]
+
+        if self.firstLogFile is not None:
+            if item not in self.collectedItems:
+                self.firstLogFile.write("{};{};{};{}\n".format(item, loc['Name'], loc['Area'], loc['GraphArea']))
+
         if item not in Conf.itemsForbidden:
             self.collectedItems.append(item)
             self.smbm.addItem(item)
@@ -293,9 +298,6 @@ class CommonSolver(object):
                 loc["difficulty"] = SMBool(False)
         if 'Pickup' in loc:
             loc['Pickup']()
-        if self.firstLogFile is not None:
-            if item not in self.collectedItems:
-                self.firstLogFile.write("{};{};{};{}\n".format(item, loc['Name'], loc['Area'], loc['GraphArea']))
 
         self.log.debug("collectItem: {} at {}".format(item, loc['Name']))
 

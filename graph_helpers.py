@@ -192,7 +192,6 @@ class HelpersGraph(Helpers):
                        sm.wor(sm.haveItem('SpaceJump'),
                               RomPatches.has(RomPatches.LNChozoSJCheckDisabled)))
 
-
     @Cache.decorator
     def canPassWorstRoom(self):
         sm = self.smbm

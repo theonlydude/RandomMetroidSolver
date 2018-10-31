@@ -674,13 +674,12 @@ class RomPatcher:
 
         line = " PROGRESSION DIFFICULTY  %s " % settings.progDiff.upper()
         self.writeCreditsString(address, 0x04, line)
-        address += 0x40
+        address += 0x80 # skip old spread items spot
 
-        for param in [(' SPREAD PROG ITEMS ........%s', 'SpreadItems'),
-                      (' SUITS RESTRICTION ........%s', 'Suits')]:
-            line = param[0] % ('. ON' if settings.restrictions[param[1]] == True else ' OFF')
-            self.writeCreditsString(address, 0x04, line)
-            address += 0x40
+        param = (' SUITS RESTRICTION ........%s', 'Suits')
+        line = param[0] % ('. ON' if settings.restrictions[param[1]] == True else ' OFF')
+        self.writeCreditsString(address, 0x04, line)
+        address += 0x40
 
         value = " "+settings.restrictions['Morph'].upper()
         line  = " MORPH PLACEMENT .....%s" % value.rjust(9, '.')
@@ -696,12 +695,13 @@ class RomPatcher:
 
     def writeSpoiler(self, itemLocs):
         # keep only majors, filter out Etanks and Reserve
-        fItemLocs = List.sortBy(lambda il: il['Item']['Type'],
-                                List.filter(lambda il: (il['Item']['Class'] == 'Major'
-                                                        and il['Item']['Type'] not in ['ETank', 'Reserve',
-                                                                                       'NoEnergy', 'Nothing']),
-                                            itemLocs))
-
+        fItemLocs = List.filter(lambda il: (il['Item']['Class'] == 'Major'
+                                            and il['Item']['Type'] not in ['ETank', 'Reserve',
+                                                                           'NoEnergy', 'Nothing']),
+                                itemLocs)
+        # add location of the first instance of each minor
+        for t in ['Missile', 'Super', 'PowerBomb']:
+            fItemLocs.append(next(il for il in itemLocs if il['Item']['Type'] == t))
         regex = re.compile(r"[^A-Z0-9\.,'!: ]+")
 
         itemLocs = {}
@@ -735,9 +735,12 @@ class RomPatcher:
                 self.romFile.seek(addr)
                 self.race.writeWordMagic(w)
                 addr += 0x2
-        for item in ["Charge Beam", "Ice Beam", "Wave Beam", "Spazer", "Plasma Beam", "Varia Suit",
-                     "Gravity Suit", "Morph Ball", "Bomb", "Spring Ball", "Screw Attack",
-                     "Hi-Jump Boots", "Space Jump", "Speed Booster", "Grappling Beam", "X-Ray Scope"]:
+        for item in ["Charge Beam", "Ice Beam", "Wave Beam", "Spazer", "Plasma Beam",
+                     "Varia Suit", "Gravity Suit",
+                     "Morph Ball", "Bomb", "Spring Ball", "Screw Attack",
+                     "Hi-Jump Boots", "Space Jump", "Speed Booster",
+                     "Grappling Beam", "X-Ray Scope",
+                     "Missile", "Super Missile", "Power Bomb"]:
             # super fun removes items
             if item not in itemLocs:
                 continue

@@ -933,7 +933,7 @@ script:
     dw {draw}, {blank}
     dw {draw}, {blank}
 
-    // Custom item randomizer credits text        
+    // Custom item randomizer credits text : max 248 dw {draw} statements
 
     dw {draw}, {row}*128 // VARIA RANDOMIZER STAFF
     dw {draw}, {blank}
@@ -972,71 +972,42 @@ script:
     dw {draw}, {blank}
     dw {draw}, {row}*145 // RANDOMIZER PARAMETERS
     dw {draw}, {blank}
-    dw {draw}, {row}*146 // 0x2736C0
+    dw {draw}, {row}*146 // MISSILE PROB
     dw {draw}, {row}*147
     dw {draw}, {blank}
-    dw {draw}, {row}*148
+    dw {draw}, {row}*148 // SUPER PROB
     dw {draw}, {row}*149
     dw {draw}, {blank}
-    dw {draw}, {row}*150
+    dw {draw}, {row}*150 // PB PROB
     dw {draw}, {row}*151
     dw {draw}, {blank}
-    dw {draw}, {row}*152
+    dw {draw}, {row}*152 // MINORS QTY
     dw {draw}, {row}*153
     dw {draw}, {blank}
     dw {draw}, {blank}
     dw {draw}, {row}*154 // ENERGY QUANTITY
     dw {draw}, {blank}
-    dw {draw}, {row}*155
+    dw {draw}, {row}*155 // PROG SPEED
     dw {draw}, {blank}
-    dw {draw}, {row}*156
+    dw {draw}, {row}*156 // PROG DIFF
     dw {draw}, {blank}
-    dw {draw}, {row}*157
-    dw {draw}, {blank}
-    dw {draw}, {row}*158
+    dw {draw}, {row}*158 // SUITS RESTRICTION
     dw {draw}, {blank}
     // change scroll speed
     dw {speed}, $0004
-    dw {draw}, {row}*159
+    dw {draw}, {row}*159 // MORPH PLACEMENT
     dw {draw}, {blank}
-    dw {draw}, {row}*160
+    dw {draw}, {row}*160 // SUPER FUN COMBAT
     dw {draw}, {blank}
-    dw {draw}, {row}*161
+    dw {draw}, {row}*161 // SUPER FUN MOVEMENT
     dw {draw}, {blank}
-    dw {draw}, {row}*162
+    dw {draw}, {row}*162 // SUPER FUN SUITS
     dw {draw}, {blank}
     dw {draw}, {blank}
-    dw {draw}, {row}*163 // TRANSITIONS
     dw {draw}, {blank}
-    dw {draw}, {row}*164 // 0x273B40
     dw {draw}, {blank}
-    dw {draw}, {row}*165
     dw {draw}, {blank}
-    dw {draw}, {row}*166
     dw {draw}, {blank}
-    dw {draw}, {row}*167
-    dw {draw}, {blank}
-    dw {draw}, {row}*168
-    dw {draw}, {blank}
-    dw {draw}, {row}*169
-    dw {draw}, {blank}
-    dw {draw}, {row}*170
-    dw {draw}, {blank}
-    dw {draw}, {row}*171
-    dw {draw}, {blank}
-    dw {draw}, {row}*172
-    dw {draw}, {blank}
-    dw {draw}, {row}*173
-    dw {draw}, {blank}
-    dw {draw}, {row}*174
-    dw {draw}, {blank}
-    dw {draw}, {row}*175
-    dw {draw}, {blank}
-    dw {draw}, {row}*176
-    dw {draw}, {blank}
-    dw {draw}, {row}*177
-    dw {draw}, {blank}
-    dw {draw}, {row}*178
     dw {draw}, {blank}
     dw {draw}, {blank}
     dw {draw}, {row}*223 // PLAY THIS RANDOMIZER AT
@@ -1055,69 +1026,69 @@ script:
     dw {draw}, {blank}
     
     dw {draw}, {blank}
-    dw {draw}, {row}*183
+    dw {draw}, {row}*183 // GAMEPLAY STATS
     dw {draw}, {blank}
     dw {draw}, {blank}
-    dw {draw}, {row}*184
+    dw {draw}, {row}*184 // SPEEDRUNNING STATS
     dw {draw}, {blank}
 
     // Set scroll speed to 3 frames per pixel
     dw {speed}, $0003
-    dw {draw}, {row}*185
+    dw {draw}, {row}*185 // DOOR TRANSITIONS
     dw {draw}, {row}*186
     dw {draw}, {blank}
-    dw {draw}, {row}*187
+    dw {draw}, {row}*187 // TIME IN DOORS
     dw {draw}, {row}*188
     dw {draw}, {blank}
-    dw {draw}, {row}*189
+    dw {draw}, {row}*189 // TIME ADJUSTING DOOR
     dw {draw}, {row}*190
     dw {draw}, {blank}
-    dw {draw}, {row}*224
+    dw {draw}, {row}*224 // ARM PUMP
     dw {draw}, {row}*225
     dw {draw}, {blank}
     dw {draw}, {blank}
-    dw {draw}, {row}*191
+    dw {draw}, {row}*191 // TIME SPENT
     dw {draw}, {blank}
-    dw {draw}, {row}*192
+    dw {draw}, {row}*192 // CRATERIA
     dw {draw}, {row}*193
     dw {draw}, {blank}
-    dw {draw}, {row}*194
+    dw {draw}, {row}*194 // BRINSTAR
     dw {draw}, {row}*195
     dw {draw}, {blank}
-    dw {draw}, {row}*196
+    dw {draw}, {row}*196 // NORFAIR
     dw {draw}, {row}*197
     dw {draw}, {blank}
-    dw {draw}, {row}*198
+    dw {draw}, {row}*198 // WS
     dw {draw}, {row}*199
     dw {draw}, {blank}
-    dw {draw}, {row}*200
+    dw {draw}, {row}*200 // MARIDIA
     dw {draw}, {row}*201
     dw {draw}, {blank}
-    dw {draw}, {row}*202
+    dw {draw}, {row}*202 // TOURIAN
     dw {draw}, {row}*203
     dw {draw}, {blank}
-    dw {draw}, {row}*221
+    dw {draw}, {row}*221 // PAUSE MENU
     dw {draw}, {row}*222
     dw {draw}, {blank}
     dw {draw}, {blank}
-    dw {draw}, {row}*204
+    dw {draw}, {row}*204 // SHOTS AND AMMO
     dw {draw}, {blank}
-    dw {draw}, {row}*205
+    dw {draw}, {row}*205 // CHARGED
     dw {draw}, {row}*206
     dw {draw}, {blank}
-    dw {draw}, {row}*207
+    dw {draw}, {row}*207 // SBA
     dw {draw}, {row}*208
     dw {draw}, {blank}
-    dw {draw}, {row}*209
+    dw {draw}, {row}*209 // MISSILES
     dw {draw}, {row}*210
     dw {draw}, {blank}
-    dw {draw}, {row}*211
+    dw {draw}, {row}*211 // SUPERS
     dw {draw}, {row}*212
     dw {draw}, {blank}
-    dw {draw}, {row}*213
+    dw {draw}, {row}*213 // PBs
     dw {draw}, {row}*214
     dw {draw}, {blank}
-    dw {draw}, {row}*215
+    dw {draw}, {row}*215 // BOMBS
     dw {draw}, {row}*216
 
    
@@ -1127,61 +1098,77 @@ script:
     dw {draw}, {row}*640
     dw {draw}, {blank}
     dw {draw}, {blank}
-    dw {draw}, {row}*641
+
+    dw {draw}, {row}*673 // Missile
+    dw {draw}, {row}*674
+    dw {draw}, {blank}
+    dw {draw}, {row}*675 // Super
+    dw {draw}, {row}*676
+    dw {draw}, {blank}
+    dw {draw}, {row}*677 // PB
+    dw {draw}, {row}*678
+    dw {draw}, {blank}	
+    dw {draw}, {row}*641 // Charge
     dw {draw}, {row}*642
     dw {draw}, {blank}
-    dw {draw}, {row}*643
+    dw {draw}, {row}*643 // Ice
     dw {draw}, {row}*644
     dw {draw}, {blank}
-    dw {draw}, {row}*645
+    dw {draw}, {row}*645 // WAve
     dw {draw}, {row}*646
     dw {draw}, {blank}
-    dw {draw}, {row}*647
+    dw {draw}, {row}*647 // Spazer
     dw {draw}, {row}*648
     dw {draw}, {blank}
-    dw {draw}, {row}*649
+    dw {draw}, {row}*649 // Plasma
     dw {draw}, {row}*650
     dw {draw}, {blank}
-    dw {draw}, {row}*651
+    dw {draw}, {row}*651 // Varia
     dw {draw}, {row}*652
     dw {draw}, {blank}
-    dw {draw}, {row}*653
+    dw {draw}, {row}*653 // Gravity
     dw {draw}, {row}*654
     dw {draw}, {blank}
-    dw {draw}, {row}*655
+    dw {draw}, {row}*655 // Morph
     dw {draw}, {row}*656
     dw {draw}, {blank}
-    dw {draw}, {row}*657
+    dw {draw}, {row}*657 // Bomb
     dw {draw}, {row}*658
     dw {draw}, {blank}
-    dw {draw}, {row}*659
+    dw {draw}, {row}*659 // Spring Ball
     dw {draw}, {row}*660
     dw {draw}, {blank}
-    dw {draw}, {row}*661
+    dw {draw}, {row}*661 // Screw
     dw {draw}, {row}*662
     dw {draw}, {blank}
-    dw {draw}, {row}*663
+    dw {draw}, {row}*663 // HiJump
     dw {draw}, {row}*664
     dw {draw}, {blank}
-    dw {draw}, {row}*665
+    dw {draw}, {row}*665 // Space Jump
     dw {draw}, {row}*666
     dw {draw}, {blank}
-    dw {draw}, {row}*667
+    dw {draw}, {row}*667 // Speed
     dw {draw}, {row}*668
     dw {draw}, {blank}
-    dw {draw}, {row}*669
+    dw {draw}, {row}*669 // Grapple
     dw {draw}, {row}*670
     dw {draw}, {blank}
-    dw {draw}, {row}*671
+    dw {draw}, {row}*671 // XRay
     dw {draw}, {row}*672
-
+    dw {draw}, {blank}
+    // Last info
     dw {draw}, {blank}
     dw {draw}, {blank}
-    dw {draw}, {row}*217
+    dw {draw}, {blank}
+    dw {draw}, {blank}
+    dw {draw}, {row}*217 // Final Time
     dw {draw}, {row}*218
     dw {draw}, {blank}
     dw {draw}, {blank}
-    dw {draw}, {row}*219
+    dw {draw}, {blank}
+    dw {draw}, {blank}
+    dw {draw}, {blank}
+    dw {draw}, {row}*219 // Thanks
     dw {draw}, {row}*220
     dw {draw}, {blank}
     dw {draw}, {blank}
@@ -1277,12 +1264,13 @@ credits:
     dw " ENERGY QUANTITY ...... XXXXXXX " // 154
     dw " PROGRESSION SPEED .... XXXXXXX " // 155
     dw " PROGRESSION DIFFICULTY XXXXXXX " // 156
-    dw " SPREAD PROG ITEMS ........ XXX " // 157
+    dw " SPREAD PROG ITEMS ........ XXX " // 157 : UNUSED
     dw " SUITS RESTRICTION ........ XXX " // 158
     dw " MORPH PLACEMENT ....... XXXXXX " // 159
     dw " SUPER FUN COMBAT ......... XXX " // 160
     dw " SUPER FUN MOVEMENT ....... XXX " // 161
     dw " SUPER FUN SUITS .......... XXX " // 162
+// --- Transitions are no longer displayed : this space is reusable
     {purple}
     dw "          TRANSITIONS           " // 163
     {yellow}
@@ -1301,6 +1289,7 @@ credits:
     dw "                                " // 176
     dw "                                " // 177
     dw "                                " // 178
+// End of reusable space	
     {big}
     dw "       RANDOMMETROIDSOLVER      " // 179
     dw "       randommetroidsolver      " // 180
@@ -1368,4 +1357,4 @@ warnpc $ceffff
 org $ded200
 itemlocations:
     {pink}
-    dw "      MAJOR ITEM LOCATIONS      " // 640
+    dw "         ITEM LOCATIONS         " // 640

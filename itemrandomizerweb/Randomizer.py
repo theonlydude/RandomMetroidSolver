@@ -26,7 +26,6 @@ class RandoSettings(object):
     #                          random for morph to be placed randomly.
     #                'MajorMinor' : if true, will put major items in major locations, and minor items
     #                               in minor locations
-    #                'SpreadItems' : if true, will spread progression items
     # superFun : super fun settings list. can contain 'Movement', 'Combat', 'Suits'. Will remove random items
     # of the relevant categorie(s). This can easily cause aborted seeds, so some basic checks will be performed
     # beforehand to know whether an item can indeed be removed.
@@ -37,7 +36,7 @@ class RandoSettings(object):
         self.maxDiff = maxDiff
         self.qty = qty
         self.restrictions = restrictions
-        self.isSpreadProgression = restrictions['SpreadItems']
+        self.spreadProb = self.getSpreadFactor(progSpeed)
         self.choose = {
             'Locations' : self.getChooseLocDict(progDiff),
             'Items' : self.getChooseItemDict(progSpeed)
@@ -50,6 +49,17 @@ class RandoSettings(object):
         self.runtimeLimit_s = runtimeLimit_s
         if self.runtimeLimit_s <= 0:
             self.runtimeLimit_s = sys.maxint
+
+    def getSpreadFactor(self, progSpeed):
+        if progSpeed == 'slowest':
+            return 0.66
+        elif progSpeed == 'slow':
+            return 0.5
+        elif progSpeed == 'medium':
+            return 0.33
+        elif progSpeed == 'fast':
+            return 0.1
+        return 0
 
     def getChooseLocDict(self, progDiff):
         if progDiff == 'normal':
@@ -144,11 +154,11 @@ class RandoSettings(object):
     def getItemLimit(self, progSpeed):
         itemLimit = 100
         if progSpeed == 'slow':
-            itemLimit = 20
+            itemLimit = 18
         elif progSpeed == 'medium':
-            itemLimit = 11
+            itemLimit = 9
         elif progSpeed == 'fast':
-            itemLimit = 5
+            itemLimit = 4
         elif progSpeed == 'fastest':
             itemLimit = 1
         elif progSpeed == 'basic':
@@ -373,7 +383,7 @@ class Randomizer(object):
         # process settings
         self.log = log.get('Rando')
 
-        self.isSpreadProgression = settings.isSpreadProgression
+        self.spreadProb = settings.spreadProb
         self.choose = settings.choose
         self.chooseItemFuncs = {
             'Random' : self.chooseItemRandom,
@@ -637,7 +647,7 @@ class Randomizer(object):
     def chooseLocation(self, availableLocations, item):
         locs = availableLocations
         isProg = self.isProgItem(item)
-        if self.isSpreadProgression == True and isProg == True:
+        if isProg == True and random.random() < self.spreadProb:
             locs = self.getLocsSpreadProgression(availableLocations)
         random.shuffle(locs)
         self.log.debug("chooseLocation: {}".format([l['Name'] for l in locs]))

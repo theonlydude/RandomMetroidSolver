@@ -91,8 +91,6 @@ if __name__ == "__main__":
     parser.add_argument('--strictMinors',
                         help="minors quantities values will be strictly followed instead of being probabilities",
                         dest='strictMinors', nargs='?', const=True, default=False)
-    parser.add_argument('--spreadItems',
-                        help="spread progression items", nargs='?', const=True, default=False, dest='spreadItems')
     parser.add_argument('--fullRandomization',
                         help="will place majors in all locations",
                         dest='fullRandomization', nargs='?', const=True, default=False)
@@ -213,8 +211,6 @@ if __name__ == "__main__":
 
     if args.fullRandomization == 'random':
         args.fullRandomization = bool(random.getrandbits(1))
-    if args.spreadItems == 'random':
-        args.spreadItems = bool(random.getrandbits(1))
     if args.suitsRestriction == 'random':
         args.suitsRestriction = bool(random.getrandbits(1))
     if args.hideItems == 'random':
@@ -225,7 +221,7 @@ if __name__ == "__main__":
         args.strictMinors = bool(random.getrandbits(1))
 
     # fill restrictions dict
-    restrictions = { 'Suits' : args.suitsRestriction, 'Morph' : args.morphPlacement, 'SpreadItems' : args.spreadItems }
+    restrictions = { 'Suits' : args.suitsRestriction, 'Morph' : args.morphPlacement }
     restrictions['MajorMinor'] = not args.fullRandomization
     seedCode = 'X'
     if restrictions['MajorMinor'] == False:

@@ -302,7 +302,7 @@ order by r.id;"""
 
         # custom sort of the params
         paramsHead = []
-        for param in ['seed', 'complexity', 'preset', 'area', 'fullRandomization', 'progressionSpeed', 'maxDifficulty', 'morphPlacement', 'spreadItems', 'suitsRestriction', 'energyQty', 'minorQty', 'missileQty', 'superQty', 'powerBombQty', 'progressionDifficulty']:
+        for param in ['seed', 'complexity', 'preset', 'area', 'fullRandomization', 'progressionSpeed', 'maxDifficulty', 'morphPlacement', 'suitsRestriction', 'energyQty', 'minorQty', 'missileQty', 'superQty', 'powerBombQty', 'progressionDifficulty']:
             if param in paramsSet:
                 paramsHead.append(param)
                 paramsSet.remove(param)

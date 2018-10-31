@@ -695,7 +695,6 @@ def initRandomizerSession():
         session.randomizer['minorQty'] = "100"
         session.randomizer['energyQty'] = "vanilla"
         session.randomizer['progressionSpeed'] = "medium"
-        session.randomizer['spreadItems'] = "on"
         session.randomizer['fullRandomization'] = "on"
         session.randomizer['suitsRestriction'] = "on"
         session.randomizer['morphPlacement'] = "early"
@@ -799,7 +798,7 @@ def validateWebServiceParams(patchs, quantities, others, isJson=False):
         except:
             raiseHttp(400, "Wrong value for paramsFileTarget, must be a JSON string", isJson)
 
-    for check in ['spreadItems', 'fullRandomization', 'suitsRestriction', 'layoutPatches', 'noGravHeat', 'areaRandomization', 'hideItems', 'strictMinors']:
+    for check in ['fullRandomization', 'suitsRestriction', 'layoutPatches', 'noGravHeat', 'areaRandomization', 'hideItems', 'strictMinors']:
         if check in others:
             if request.vars[check] not in ['on', 'off', 'random']:
                 raiseHttp(400, "Wrong value for {}: {}, authorized values: on/off".format(check, request.vars[check]), isJson)
@@ -833,7 +832,7 @@ def sessionWebService():
               'skip_intro', 'skip_ceres', 'animals', 'areaLayout', 'variaTweaks']
     quantities = ['missileQty', 'superQty', 'powerBombQty']
     others = ['minorQty', 'energyQty', 'maxDifficulty',
-              'progressionSpeed', 'spreadItems', 'fullRandomization', 'suitsRestriction',
+              'progressionSpeed', 'fullRandomization', 'suitsRestriction',
               'funCombat', 'funMovement', 'funSuits', 'layoutPatches', 'preset',
               'noGravHeat', 'progressionDifficulty', 'morphPlacement',
               'areaRandomization', 'complexity', 'hideItems', 'strictMinors', 'randoPreset']
@@ -852,7 +851,6 @@ def sessionWebService():
     session.randomizer['minorQty'] = request.vars.minorQty
     session.randomizer['energyQty'] = request.vars.energyQty
     session.randomizer['progressionSpeed'] = request.vars.progressionSpeed
-    session.randomizer['spreadItems'] = request.vars.spreadItems
     session.randomizer['fullRandomization'] = request.vars.fullRandomization
     session.randomizer['suitsRestriction'] = request.vars.suitsRestriction
     session.randomizer['morphPlacement'] = request.vars.morphPlacement
@@ -896,7 +894,7 @@ def randomizerWebService():
               'skip_ceres', 'areaLayout', 'variaTweaks', 'No_Music']
     quantities = ['missileQty', 'superQty', 'powerBombQty']
     others = ['seed', 'paramsFileTarget', 'minorQty', 'energyQty', 'preset',
-              'maxDifficulty', 'progressionSpeed', 'spreadItems', 'fullRandomization',
+              'maxDifficulty', 'progressionSpeed', 'fullRandomization',
               'suitsRestriction', 'morphPlacement', 'funCombat', 'funMovement', 'funSuits',
               'layoutPatches', 'noGravHeat', 'progressionDifficulty', 'areaRandomization',
               'hideItems', 'strictMinors', 'complexity']
@@ -973,7 +971,6 @@ def randomizerWebService():
             params.append('random')
 
     addParamRandom('fullRandomization', params)
-    addParamRandom('spreadItems', params)
     addParamRandom('suitsRestriction', params)
     addParamRandom('hideItems', params)
     addParamRandom('strictMinors', params)

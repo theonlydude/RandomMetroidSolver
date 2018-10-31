@@ -1,7 +1,6 @@
 {
   "elevators_doors_speed": "on",
   "progressionDifficulty": "easier",
-  "spreadItems": "off",
   "funMovement": "off",
   "randoPreset": "",
   "skip_ceres": "on",

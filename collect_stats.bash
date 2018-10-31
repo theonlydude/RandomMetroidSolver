@@ -136,9 +136,6 @@ function gen_seeds() {
 	    # 	extra="$extra --morphPlacement early"
 	    # fi
 	    #	extra="--speedScrewRestriction --superFun Combat --superFun Movement"
-	    if [[ $speed == slow* ]] || [[ $speed == "medium" ]]; then
-		extra="$extra --spreadItems"
-	    fi
 	    if [[ $speed != "fastest" ]]; then
 		extra="$extra --suitsRestriction"
 	    fi

@@ -752,8 +752,8 @@ class RomPatcher:
 
             address += 0x80
 
-        # we need 16 majors displayed, if we've removed majors, add some blank text
-        for i in range(16 - len(fItemLocs)):
+        # we need 19 items displayed, if we've removed majors, add some blank text
+        for i in range(19 - len(fItemLocs)):
             self.writeCreditsString(address, 0x04, prepareString(""), isRace)
             self.writeCreditsString((address + 0x40), 0x18, prepareString(""), isRace)
 

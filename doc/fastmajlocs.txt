@@ -1,0 +1,35 @@
+Crateria :
+"Energy Tank, Gauntlet"
+"Bomb"
+"Missile (blue Brinstar bottom)"
+"Missile (Crateria middle)"
+
+Brinstar :
+"Reserve Tank, Brinstar"
+"Charge Beam"
+"Morphing Ball"
+"X-Ray Scope"
+"Spazer"
+"Super Missile (pink Brinstar)"
+"Power Bomb (red Brinstar spike room)"
+
+Norfair:
+"Varia Suit"
+"Ice Beam"
+"Hi-Jump Boots"
+"Grapple Beam"
+"Speed Booster"
+"Wave Beam"
+
+Lower Norfair:
+"Energy Tank, Ridley"
+"Screw Attack"
+
+Wrecked Ship:
+"Energy Tank, Wrecked Ship"
+"Right Super, Wrecked Ship"
+
+Maridia:
+"Plasma Beam"
+"Spring Ball"
+"Space Jump"

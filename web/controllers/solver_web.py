@@ -539,11 +539,15 @@ def solver():
             if not os.path.isfile(jsonRomFileName):
                 session.flash = "Missing json ROM file on the server"
             else:
-                (ok, result) = computeDifficulty(jsonRomFileName, preset)
-                if not ok:
-                    session.flash = result
-                    redirect(URL(r=request, f='solver'))
-                session.solver['result'] = result
+                try:
+                    (ok, result) = computeDifficulty(jsonRomFileName, preset)
+                    if not ok:
+                        session.flash = result
+                        redirect(URL(r=request, f='solver'))
+                    session.solver['result'] = result
+                except Exception as e:
+                    print("Error loading the ROM file, exception: {}".format(e))
+                    session.flash = "Error loading the ROM file"
 
         redirect(URL(r=request, f='solver'))
 

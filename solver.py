@@ -62,6 +62,8 @@ class SolverState(object):
         self.state["visitedLocationsWeb"] = self.getAvailableLocationsWeb(solver.visitedLocations)
         # dict {locNameWeb: {infos}, ...}
         self.state["remainLocationsWeb"] = self.getRemainLocationsWeb(solver.majorLocations)
+        # bool
+        self.state["isPlando"] = solver.isPlando
 
     def toSolver(self, solver):
         solver.fullRando = self.state["fullRando"]
@@ -80,6 +82,7 @@ class SolverState(object):
         Bosses.reset()
         for boss in self.state["bosses"]:
             Bosses.beatBoss(boss)
+        solver.isPlando = self.state["isPlando"] if "isPlando" in self.state else False
 
     def getLocsData(self, locations):
         ret = {}
@@ -318,8 +321,10 @@ class InteractiveSolver(CommonSolver):
         state.fromSolver(self)
         state.toJson(self.outputFileName)
 
-    def initialize(self, rom, presetFileName, magic=None):
+    def initialize(self, rom, presetFileName, magic, isPlando):
         # load rom and preset, return first state
+        self.isPlando = isPlando
+
         self.locations = graphLocations
         self.smbm = SMBoolManager()
 
@@ -336,7 +341,7 @@ class InteractiveSolver(CommonSolver):
 
         self.dumpState()
 
-    def iterate(self, stateJson, locName, action):
+    def iterate(self, stateJson, locName, action, item):
         self.locations = self.addMotherBrainLoc(graphLocations)
         self.smbm = SMBoolManager()
 
@@ -356,8 +361,11 @@ class InteractiveSolver(CommonSolver):
             self.smbm.addItems(self.collectedItems)
 
             if action == 'add':
-                # pickup item at locName
-                self.pickItemAt(locName)
+                if self.isPlando == True:
+                    self.setItemAt(locName, item)
+                else:
+                    # pickup item at locName
+                    self.pickItemAt(locName)
             elif action == 'remove':
                 # remove last collected item
                 self.cancelLast()
@@ -481,9 +489,12 @@ class InteractiveSolver(CommonSolver):
                 return loc
         raise Exception("Location '{}' not found in remaining locations".format(locName))
 
-    def pickItemAt(self, locName):
+    def pickItemAt(self, locName, itemName=None):
         # collect new item at newLoc
         loc = self.getLoc(locName)
+        # plando mode
+        if itemName != None:
+            loc["itemName"] = itemName
         if "difficulty" not in loc:
             # sequence break
             loc["difficulty"] = SMBool(True, -1)
@@ -1216,15 +1227,20 @@ def interactiveSolver(args):
     if args.romFileName != None and args.presetFileName != None and args.output != None:
         # init
         solver = InteractiveSolver(args.output)
-        solver.initialize(args.romFileName, args.presetFileName, magic=args.raceMagic)
+        solver.initialize(args.romFileName, args.presetFileName, magic=args.raceMagic, isPlando=args.plando)
     elif args.state != None and args.action != None and args.output != None:
         # iterate
-        if args.action == "add" and args.loc == None:
-            print("Missing loc parameter when using action add")
-            sys.exit(1)
+        if args.action == "add":
+            if args.loc == None:
+                print("Missing loc parameter when using action add")
+                sys.exit(1)
+            if args.plando == True:
+                if args.item == None:
+                    print("Missing item parameter when using action add in plando mode")
+                    sys.exit(1)
 
         solver = InteractiveSolver(args.output)
-        solver.iterate(args.state, args.loc, args.action)
+        solver.iterate(args.state, args.loc, args.action, args.item)
     else:
         print("Wrong parameters for interactive mode")
         sys.exit(1)
@@ -1292,6 +1308,10 @@ if __name__ == "__main__":
                         dest="loc", nargs='?', default=None)
     parser.add_argument('--action', help="Pickup item at location, remove last pickedup location, clear all (used in interactive mode)",
                         dest="action", nargs="?", default=None, choices=['init', 'add', 'remove', 'clear', 'get'])
+    parser.add_argument('--plando', help="Plando mode (used in interactive mode)",
+                        dest="plando", action="store_true")
+    parser.add_argument('--item', help="Name of the item to place in plando mode (used in interactive mode)",
+                        dest="item", nargs='?', default=None)
 
     args = parser.parse_args()
 

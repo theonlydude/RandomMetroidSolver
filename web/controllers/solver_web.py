@@ -1334,14 +1334,21 @@ def validateItemTrackerParams():
         if IS_NOT_EMPTY()(uploadFile)[1] is not None:
             raiseHttp(400, "File name is empty", True)
         if IS_MATCH('[a-zA-Z0-9_\.]*')(uploadFile)[1] is not None:
-            return (False, "Wrong value for ROM file name, must be valid file name: {}".format(request.vars.romFile))
+            raiseHttp(400, "Wrong value for ROM file name, must be valid file name: {}".format(request.vars.romFile), True)
         if IS_LENGTH(maxsize=255, minsize=1)(request.vars.romFile)[1] is not None:
-            return (False, "Wrong length for ROM file name, name must be between 1 and 255 characters: {}".format(request.vars.romFile))
+            raiseHttp(400, "Wrong length for ROM file name, name must be between 1 and 255 characters: {}".format(request.vars.romFile), True)
+
+        isPlando = request.vars.isPlando
+        if isPlando not in ["", "on"]:
+            raiseHttp(400, "Wrong value for isPlando: {}".format(isPlando), True)
 
     elif action == 'add':
         # new location
         if request.vars.locName not in ['EnergyTankGauntlet', 'Bomb', 'EnergyTankTerminator', 'ReserveTankBrinstar', 'ChargeBeam', 'MorphingBall', 'EnergyTankBrinstarCeiling', 'EnergyTankEtecoons', 'EnergyTankWaterway', 'EnergyTankBrinstarGate', 'XRayScope', 'Spazer', 'EnergyTankKraid', 'VariaSuit', 'IceBeam', 'EnergyTankCrocomire', 'HiJumpBoots', 'GrappleBeam', 'ReserveTankNorfair', 'SpeedBooster', 'WaveBeam', 'EnergyTankRidley', 'ScrewAttack', 'EnergyTankFirefleas', 'ReserveTankWreckedShip', 'EnergyTankWreckedShip', 'RightSuperWreckedShip', 'GravitySuit', 'EnergyTankMamaturtle', 'PlasmaBeam', 'ReserveTankMaridia', 'SpringBall', 'EnergyTankBotwoon', 'SpaceJump', 'PowerBombCrateriasurface', 'MissileoutsideWreckedShipbottom', 'MissileoutsideWreckedShiptop', 'MissileoutsideWreckedShipmiddle', 'MissileCrateriamoat', 'MissileCrateriabottom', 'MissileCrateriagauntletright', 'MissileCrateriagauntletleft', 'SuperMissileCrateria', 'MissileCrateriamiddle', 'PowerBombgreenBrinstarbottom', 'SuperMissilepinkBrinstar', 'MissilegreenBrinstarbelowsupermissile', 'SuperMissilegreenBrinstartop', 'MissilegreenBrinstarbehindmissile', 'MissilegreenBrinstarbehindreservetank', 'MissilepinkBrinstartop', 'MissilepinkBrinstarbottom', 'PowerBombpinkBrinstar', 'MissilegreenBrinstarpipe', 'PowerBombblueBrinstar', 'MissileblueBrinstarmiddle', 'SuperMissilegreenBrinstarbottom', 'MissileblueBrinstarbottom', 'MissileblueBrinstartop', 'MissileblueBrinstarbehindmissile', 'PowerBombredBrinstarsidehopperroom', 'PowerBombredBrinstarspikeroom', 'MissileredBrinstarspikeroom', 'MissileKraid', 'Missilelavaroom', 'MissilebelowIceBeam', 'MissileaboveCrocomire', 'MissileHiJumpBoots', 'EnergyTankHiJumpBoots', 'PowerBombCrocomire', 'MissilebelowCrocomire', 'MissileGrappleBeam', 'MissileNorfairReserveTank', 'MissilebubbleNorfairgreendoor', 'MissilebubbleNorfair', 'MissileSpeedBooster', 'MissileWaveBeam', 'MissileGoldTorizo', 'SuperMissileGoldTorizo', 'MissileMickeyMouseroom', 'MissilelowerNorfairabovefireflearoom', 'PowerBomblowerNorfairabovefireflearoom', 'PowerBombPowerBombsofshame', 'MissilelowerNorfairnearWaveBeam', 'MissileWreckedShipmiddle', 'MissileGravitySuit', 'MissileWreckedShiptop', 'SuperMissileWreckedShipleft', 'MissilegreenMaridiashinespark', 'SuperMissilegreenMaridia', 'MissilegreenMaridiatatori', 'SuperMissileyellowMaridia', 'MissileyellowMaridiasupermissile', 'MissileyellowMaridiafalsewall', 'MissileleftMaridiasandpitroom', 'MissilerightMaridiasandpitroom', 'PowerBombrightMaridiasandpitroom', 'MissilepinkMaridia', 'SuperMissilepinkMaridia', 'MissileDraygon', 'MotherBrain']:
-            raiseHttp(400, "Unknown location name {}".format(request.vars.locName), True)
+            raiseHttp(400, "Unknown location name: {}".format(request.vars.locName), True)
+
+        if request.vars.itemName not in [None, 'ETank', 'Missile', 'Super', 'PowerBomb', 'Bomb', 'Charge', 'Ice', 'HiJump', 'SpeedBooster', 'Wave', 'Spazer', 'SpringBall', 'Varia', 'Plasma', 'Grapple', 'Morph', 'Reserve', 'Gravity', 'XRayScope', 'SpaceJump', 'ScrewAttack', 'Nothing']:
+                raiseHttp(400, "Unknown item name: {}".format(request.vars.itemName), True)
 
 def locName4isolver(locName):
     # remove space and special characters
@@ -1362,7 +1369,7 @@ def returnState(state):
     else:
         raiseHttp(200, "OK", True)
 
-def callSolverInit(jsonRomFileName, presetFileName, preset, romFileName):
+def callSolverInit(jsonRomFileName, presetFileName, preset, romFileName, isPlando):
     (canSolve, magic) = canSolveROM(jsonRomFileName)
     if canSolve == False:
         raiseHttp(400, "Race seed is protected from solving")
@@ -1379,6 +1386,8 @@ def callSolverInit(jsonRomFileName, presetFileName, preset, romFileName):
 
     if magic != None:
         params += ['--race', str(magic)]
+    if isPlando == True:
+        params += ['--plando']
 
     print("before calling isolver: {}".format(params))
     start = datetime.now()
@@ -1469,14 +1478,16 @@ def itemTrackerWebService():
 
         presetFileName = '{}/{}.json'.format(getPresetDir(request.vars.preset), request.vars.preset)
         session.tracker["item"]["preset"] = request.vars.preset
+
+        isPlando = (request.vars.isPlando == "on")
         return callSolverInit(jsonRomFileName, presetFileName,
-                              request.vars.preset, request.vars.fileName)
+                              request.vars.preset, request.vars.fileName, isPlando)
     elif action == 'get':
         return returnState(session.tracker["item"]["state"])
     else:
         return callSolverAction(action, request.vars.locName)
 
-    # return something is not already done
+    # return something if not already done
     raiseHttp(200, "OK", True)
 
 def getMagic():

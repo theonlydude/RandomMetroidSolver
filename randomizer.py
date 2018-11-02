@@ -367,7 +367,7 @@ if __name__ == "__main__":
         romPatcher.writeRandoSettings(randoSettings, itemLocs)
         if args.area == True:
             romPatcher.writeDoorConnections(doors)
-        romPatcher.writeTransitionsCredits(randomizer.areaGraph.getCreditsTransitions())
+#        romPatcher.writeTransitionsCredits(randomizer.areaGraph.getCreditsTransitions())
         if ctrlDict is not None:
             romPatcher.writeControls(ctrlDict)
         romPatcher.writeMagic()

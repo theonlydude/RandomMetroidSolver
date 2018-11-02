@@ -980,8 +980,23 @@ script:
     dw {draw}, {blank}
     dw {draw}, {row}*158 // SUITS RESTRICTION
     dw {draw}, {blank}
+    dw {draw}, {row}*159 // MORPH PLACEMENT
+    dw {draw}, {blank}
+	
+    // change scroll speed
+    dw {speed}, $0003
+	
+    dw {draw}, {row}*160 // SUPER FUN COMBAT
+    dw {draw}, {blank}
+    dw {draw}, {row}*161 // SUPER FUN MOVEMENT
+    dw {draw}, {blank}
+    dw {draw}, {row}*162 // SUPER FUN SUITS
+    dw {draw}, {blank}
     dw {draw}, {blank}
     dw {draw}, {row}*157 // ITEMS DISTRIBUTION
+    dw {draw}, {blank}
+    dw {draw}, {row}*152 // ENERGY
+    dw {draw}, {row}*153
     dw {draw}, {blank}
     dw {draw}, {row}*146 // MISSILES
     dw {draw}, {row}*147
@@ -989,25 +1004,13 @@ script:
     dw {draw}, {row}*148 // SUPERS
     dw {draw}, {row}*149
     dw {draw}, {blank}
-    // change scroll speed
-    dw {speed}, $0004
     dw {draw}, {row}*150 // PBs
     dw {draw}, {row}*151
     dw {draw}, {blank}
-    dw {draw}, {row}*152 // ENERGY
-    dw {draw}, {row}*153
-    dw {draw}, {blank}
-    dw {draw}, {blank}
-    dw {draw}, {row}*159 // MORPH PLACEMENT
-    dw {draw}, {blank}
-    dw {draw}, {row}*160 // SUPER FUN COMBAT
-    dw {draw}, {blank}
-    dw {draw}, {row}*161 // SUPER FUN MOVEMENT
-    dw {draw}, {blank}
-    dw {draw}, {row}*162 // SUPER FUN SUITS
+    dw {draw}, {row}*163 // AMMO DISTRIBUTION
+    dw {draw}, {row}*164
     dw {draw}, {blank}
 	
-    dw {draw}, {blank}
     dw {draw}, {blank}
     dw {draw}, {blank}
     dw {draw}, {blank}
@@ -1025,7 +1028,6 @@ script:
     dw {draw}, {blank}
     dw {draw}, {blank}
     dw {draw}, {blank}
-    dw {draw}, {blank}
     
     dw {draw}, {row}*183 // GAMEPLAY STATS
     dw {draw}, {blank}
@@ -1034,7 +1036,7 @@ script:
     dw {draw}, {blank}
 
     // Set scroll speed to 3 frames per pixel
-    dw {speed}, $0003
+//    dw {speed}, $0003
     dw {draw}, {row}*185 // DOOR TRANSITIONS
     dw {draw}, {row}*186
     dw {draw}, {blank}
@@ -1256,12 +1258,12 @@ credits:
     dw "     RANDOMIZER PARAMETERS      " // 145
     {big}
     // item distribution data start 
-    dw " MISSILES               XX  X X " // 146
-    dw " missiles ............. xx  x.x " // 147
-    dw " SUPERS                 XX  X X " // 148
-    dw " supers ............... xx  x.x " // 149
-    dw " POWER BOMBS            XX  X X " // 150
-    dw " power bombs .......... xx  x.x " // 151
+    dw " MISSILE PACKS               XX " // 146
+    dw " missile packs ............. xx " // 147
+    dw " SUPER PACKS                 XX " // 148
+    dw " super packs ............... xx " // 149
+    dw " POWER BOMB PACKS            XX " // 150
+    dw " power bomb packs .......... xx " // 151
     dw " HEALTH TANKS                XX " // 152
     dw " health tanks .............. xx " // 153
     // params data start
@@ -1279,11 +1281,11 @@ credits:
     dw " SUPER FUN COMBAT ......... XXX " // 160
     dw " SUPER FUN MOVEMENT ....... XXX " // 161
     dw " SUPER FUN SUITS .......... XXX " // 162
-// --- Transitions are no longer displayed : this space is reusable
-
-    dw "          TRANSITIONS           " // 163
-    {yellow}
-    dw "                                " // 164
+    // item distrib data end
+    {big}
+    dw " AMMO DISTRIBUTION  X X X X X X " // 163
+    dw " ammo distribution  x.x x.x x.x " // 164
+// --- this space is reusable
     dw "                                " // 165
     dw "                                " // 166
     dw "                                " // 167

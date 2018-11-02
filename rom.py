@@ -645,40 +645,40 @@ class RomPatcher:
         dist = self.getMinorsDistribution(itemLocs)
 
         address = 0x2736C0
-        value = "%02d  %.1f" % (dist['Missile']['Quantity'], dist['Missile']['Proportion'])
-        line = " MISSILES               %s " % value
+        value = "%02d" % dist['Missile']['Quantity']
+        line = " MISSILE PACKS               %s " % value
         self.writeCreditsStringBig(address, line, top=True)
         address += 0x40
 
-        line = " missiles ............. %s " % value
+        line = " missile packs ............. %s " % value
         self.writeCreditsStringBig(address, line, top=False)
         address += 0x40
 
-        value = "%02d  %.1f" % (dist['Super']['Quantity'], dist['Super']['Proportion'])
-        line = " SUPERS                 %s " % value
+        value = "%02d" % dist['Super']['Quantity']
+        line = " SUPER PACKS                 %s " % value
         self.writeCreditsStringBig(address, line, top=True)
         address += 0x40
 
-        line = " supers ............... %s " % value
+        line = " super packs ............... %s " % value
         self.writeCreditsStringBig(address, line, top=False)
         address += 0x40
 
-        value = "%02d  %.1f" % (dist['PowerBomb']['Quantity'], dist['PowerBomb']['Proportion'])
-        line = " POWER BOMBS            %s " % value
+        value = "%02d" % dist['PowerBomb']['Quantity']
+        line = " POWER BOMB PACKS            %s " % value
         self.writeCreditsStringBig(address, line, top=True)
         address += 0x40
 
-        line = " power bombs .......... %s " % value
+        line = " power bomb packs .......... %s " % value
         self.writeCreditsStringBig(address, line, top=False)
         address += 0x40
 
         tanks = self.getItemQty(itemLocs, 'ETank') + self.getItemQty(itemLocs, 'Reserve')
         value = "%02d" % tanks
-        line = " HEALTH TANKS              %s " % value
+        line = " HEALTH TANKS                %s " % value
         self.writeCreditsStringBig(address, line, top=True)
         address += 0x40
 
-        line = " health tanks ............ %s " % value
+        line = " health tanks .............. %s " % value
         self.writeCreditsStringBig(address, line, top=False)
         address += 0x40
 
@@ -694,7 +694,7 @@ class RomPatcher:
 
         line = " PROGRESSION DIFFICULTY  %s " % settings.progDiff.upper()
         self.writeCreditsString(address, 0x04, line)
-        address += 0x80 # skip old spread items spot
+        address += 0x80 # skip item distrib title
 
         param = (' SUITS RESTRICTION ........%s', 'Suits')
         line = param[0] % ('. ON' if settings.restrictions[param[1]] == True else ' OFF')
@@ -712,6 +712,15 @@ class RomPatcher:
             line = superFun[0] % ('. ON' if superFun[1] in settings.superFun else ' OFF')
             self.writeCreditsString(address, 0x04, line)
             address += 0x40
+
+        value = "%.1f %.1f %.1f" % (dist['Missile']['Proportion'], dist['Super']['Proportion'], dist['PowerBomb']['Proportion'])
+        line = " AMMO DISTRIBUTION  %s " % value
+        self.writeCreditsStringBig(address, line, top=True)
+        address += 0x40
+
+        line = " ammo distribution  %s " % value
+        self.writeCreditsStringBig(address, line, top=False)
+        address += 0x40
 
     def writeSpoiler(self, itemLocs):
         # keep only majors, filter out Etanks and Reserve

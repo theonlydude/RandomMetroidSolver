@@ -624,41 +624,61 @@ class RomPatcher:
         if self.race is not None:
             self.race.writeMagic()
 
-    def writeRandoSettings(self, settings):
+    def getItemQty(self, itemLocs, itemType):
+        return len([il for il in itemLocs if il['Item']['Type'] == itemType])
+
+    def getMinorsDistribution(self, itemLocs):
+        dist = {}
+        minQty = 100
+        minors = ['Missile', 'Super', 'PowerBomb']
+        for m in minors:
+            q = float(self.getItemQty(itemLocs, m))
+            dist[m] = {'Quantity' : q }
+            if q < minQty:
+                minQty = q
+        for m in minors:
+            dist[m]['Proportion'] = dist[m]['Quantity']/minQty
+        
+        return dist
+
+    def writeRandoSettings(self, settings, itemLocs):
+        dist = self.getMinorsDistribution(itemLocs)
+
         address = 0x2736C0
-        value = "%.1f" % settings.qty['ammo']['Missile']
-        line = " MISSILE PROBABILITY        %s " % value
+        value = "%02d  %.1f" % (dist['Missile']['Quantity'], dist['Missile']['Proportion'])
+        line = " MISSILES               %s " % value
         self.writeCreditsStringBig(address, line, top=True)
         address += 0x40
 
-        line = " missile probability ...... %s " % value
+        line = " missiles ............. %s " % value
         self.writeCreditsStringBig(address, line, top=False)
         address += 0x40
 
-        value = "%.1f" % settings.qty['ammo']['Super']
-        line = " SUPER PROBABILITY          %s " % value
+        value = "%02d  %.1f" % (dist['Super']['Quantity'], dist['Super']['Proportion'])
+        line = " SUPERS                 %s " % value
         self.writeCreditsStringBig(address, line, top=True)
         address += 0x40
 
-        line = " super probability ........ %s " % value
+        line = " supers ............... %s " % value
         self.writeCreditsStringBig(address, line, top=False)
         address += 0x40
 
-        value = "%.1f" % settings.qty['ammo']['PowerBomb']
-        line = " POWER BOMB PROBABILITY     %s " % value
+        value = "%02d  %.1f" % (dist['PowerBomb']['Quantity'], dist['PowerBomb']['Proportion'])
+        line = " POWER BOMBS            %s " % value
         self.writeCreditsStringBig(address, line, top=True)
         address += 0x40
 
-        line = " power bomb probability ... %s " % value
+        line = " power bombs .......... %s " % value
         self.writeCreditsStringBig(address, line, top=False)
         address += 0x40
 
-        value = "%03d%s" % (settings.qty['minors'], '%')
-        line = " MINORS QUANTITY           %s " % value
+        tanks = self.getItemQty(itemLocs, 'ETank') + self.getItemQty(itemLocs, 'Reserve')
+        value = "%02d" % tanks
+        line = " HEALTH TANKS              %s " % value
         self.writeCreditsStringBig(address, line, top=True)
         address += 0x40
 
-        line = " minors quantity ......... %s " % value
+        line = " health tanks ............ %s " % value
         self.writeCreditsStringBig(address, line, top=False)
         address += 0x40
 

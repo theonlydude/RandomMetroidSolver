@@ -972,19 +972,6 @@ script:
     dw {draw}, {blank}
     dw {draw}, {row}*145 // RANDOMIZER PARAMETERS
     dw {draw}, {blank}
-    dw {draw}, {row}*146 // MISSILE PROB
-    dw {draw}, {row}*147
-    dw {draw}, {blank}
-    dw {draw}, {row}*148 // SUPER PROB
-    dw {draw}, {row}*149
-    dw {draw}, {blank}
-    dw {draw}, {row}*150 // PB PROB
-    dw {draw}, {row}*151
-    dw {draw}, {blank}
-    dw {draw}, {row}*152 // MINORS QTY
-    dw {draw}, {row}*153
-    dw {draw}, {blank}
-    dw {draw}, {blank}
     dw {draw}, {row}*154 // ENERGY QUANTITY
     dw {draw}, {blank}
     dw {draw}, {row}*155 // PROG SPEED
@@ -993,8 +980,24 @@ script:
     dw {draw}, {blank}
     dw {draw}, {row}*158 // SUITS RESTRICTION
     dw {draw}, {blank}
+    dw {draw}, {blank}
+    dw {draw}, {row}*157 // ITEMS DISTRIBUTION
+    dw {draw}, {blank}
+    dw {draw}, {row}*146 // MISSILES
+    dw {draw}, {row}*147
+    dw {draw}, {blank}
+    dw {draw}, {row}*148 // SUPERS
+    dw {draw}, {row}*149
+    dw {draw}, {blank}
     // change scroll speed
     dw {speed}, $0004
+    dw {draw}, {row}*150 // PBs
+    dw {draw}, {row}*151
+    dw {draw}, {blank}
+    dw {draw}, {row}*152 // ENERGY
+    dw {draw}, {row}*153
+    dw {draw}, {blank}
+    dw {draw}, {blank}
     dw {draw}, {row}*159 // MORPH PLACEMENT
     dw {draw}, {blank}
     dw {draw}, {row}*160 // SUPER FUN COMBAT
@@ -1003,7 +1006,7 @@ script:
     dw {draw}, {blank}
     dw {draw}, {row}*162 // SUPER FUN SUITS
     dw {draw}, {blank}
-    dw {draw}, {blank}
+	
     dw {draw}, {blank}
     dw {draw}, {blank}
     dw {draw}, {blank}
@@ -1023,9 +1026,7 @@ script:
     dw {draw}, {blank}
     dw {draw}, {blank}
     dw {draw}, {blank}
-    dw {draw}, {blank}
     
-    dw {draw}, {blank}
     dw {draw}, {row}*183 // GAMEPLAY STATS
     dw {draw}, {blank}
     dw {draw}, {blank}
@@ -1220,7 +1221,8 @@ credits:
     // Numbers are mapped in a special way as described below:
     // 0123456789%& '´
     // }!@#$%&/()>~.
-    
+	
+    // This is not exactly in display order
     {pink}
     dw "     VARIA RANDOMIZER STAFF     " // 128
     {big}
@@ -1250,28 +1252,35 @@ credits:
     dw "    DISCORD INVITE . RT2FWZT    " // 143 (rT2fWZt)
     dw "    discord invite . rt@fwzt    " // 144
     {purple}
+    // params title
     dw "     RANDOMIZER PARAMETERS      " // 145
     {big}
-    dw " MISSILE PROBABILITY        X X " // 146
-    dw " missile probability ...... X.X " // 147
-    dw " SUPER PROBABILITY          X X " // 148
-    dw " super probability ........ X.X " // 149
-    dw " POWER BOMB PROBABILITY     X X " // 150
-    dw " power bomb probability ... X.X " // 151
-    dw " MINORS QUANTITY           XXX% " // 152
-    dw " minors quantity ......... XXX> " // 153
+    // item distribution data start 
+    dw " MISSILES               XX  X X " // 146
+    dw " missiles ............. xx  x.x " // 147
+    dw " SUPERS                 XX  X X " // 148
+    dw " supers ............... xx  x.x " // 149
+    dw " POWER BOMBS            XX  X X " // 150
+    dw " power bombs .......... xx  x.x " // 151
+    dw " HEALTH TANKS                XX " // 152
+    dw " health tanks .............. xx " // 153
+    // params data start
     {yellow}
     dw " ENERGY QUANTITY ...... XXXXXXX " // 154
     dw " PROGRESSION SPEED .... XXXXXXX " // 155
     dw " PROGRESSION DIFFICULTY XXXXXXX " // 156
-    dw " SPREAD PROG ITEMS ........ XXX " // 157 : UNUSED
+    // item distrib title	
+    {purple}
+    dw "       ITEMS DISTRIBUTION       " // 157
+    // params data end
+    {yellow}
     dw " SUITS RESTRICTION ........ XXX " // 158
     dw " MORPH PLACEMENT ....... XXXXXX " // 159
     dw " SUPER FUN COMBAT ......... XXX " // 160
     dw " SUPER FUN MOVEMENT ....... XXX " // 161
     dw " SUPER FUN SUITS .......... XXX " // 162
 // --- Transitions are no longer displayed : this space is reusable
-    {purple}
+
     dw "          TRANSITIONS           " // 163
     {yellow}
     dw "                                " // 164

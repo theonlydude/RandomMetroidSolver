@@ -364,7 +364,7 @@ if __name__ == "__main__":
         romPatcher.applyIPSPatches(args.patches, args.noLayout, args.noGravHeat, args.area, args.areaLayoutBase, args.noVariaTweaks)
         romPatcher.writeSeed(seed) # lol if race mode
         romPatcher.writeSpoiler(itemLocs)
-        romPatcher.writeRandoSettings(randoSettings)
+        romPatcher.writeRandoSettings(randoSettings, itemLocs)
         if args.area == True:
             romPatcher.writeDoorConnections(doors)
         romPatcher.writeTransitionsCredits(randomizer.areaGraph.getCreditsTransitions())

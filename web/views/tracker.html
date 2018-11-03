@@ -3028,7 +3028,7 @@ function mouseOut(elem) {
   }
 }
 
-function displayPopup() {
+function displayPopup(isPlando) {
   if(loaded == false) {
     return;
   }
@@ -3037,10 +3037,15 @@ function displayPopup() {
   document.getElementById("solverPopup").style.display = "block";
   // chosen must be activated when it's visible, else it doesn't work...
   $(".chzn-select").chosen();
+
+  if(isPlando == true) {
+    document.getElementById("isPlando").value = "on";
+  }
 }
 
 function hidePopup() {
   document.getElementById("solverPopup").style.display = "none";
+  document.getElementById("isPlando").value = "";
 }
 
 function initSolver() {
@@ -3060,7 +3065,10 @@ function initSolver() {
   init = true;
 
   // prepare parameters for WS
-  ajaxCallItem({action: "init", romJson: value, preset: document.getElementById("preset").value, fileName: document.getElementById("fileName").value}, "download", ajaxOkGetItem);
+  ajaxCallItem({action: "init", romJson: value,
+                preset: document.getElementById("preset").value,
+                fileName: document.getElementById("fileName").value,
+                isPlando: document.getElementById("isPlando").value}, "download", ajaxOkGetItem);
 
   hidePopup();
 }
@@ -3386,6 +3394,11 @@ function startTheTour(step=-1) {
       element: "#help",
       title: "VARIA Area & Item Tracker",
       content: "<h2 class=\"center\">Welcome to the VARIA Area & Item Tracker</h2><h4>Area Tracker</h4><p>The Area Tracker allows you to track the connections between the areas portals.<br/>To use it, click on a portal <img src=\"/solver/static/images/portal.png\" alt=\"Portal\" style=\"width: 20px\">, it'll highlight it, then click on a second portal, it'll draw a line between the two portals.<br/>You can delete the latest added line with the <img src=\"/solver/static/images/repeat.svg\" alt=\"Cancel Last\" style=\"width: 32px\"> button and all of them with the <img src=\"/solver/static/images/bin.svg\" alt=\"Remove all\" style=\"width: 32px\"> button.<br/><h4>Item Tracker</h4><p>The Item Tracker allows you to use the Solver in interactive mode.<br/>To use it, click on the <img src=\"/solver/static/images/play.svg\" alt=\"Start\" style=\"width: 32px\"> button to upload your ROM and choose your preset (like on the Solver page).<br/>Then the available locations will be displayed on the map, click on a location after you've collected the item of the location in the game, it'll update the next available locations.<br/>The color of the icon on the available locations matchs the difficulty to reach the location:<table><tr><td><img src=\"/solver/static/images/marker_easy.gif\" alt=\"easy\" style=\"width: 32px; background-color: #000;\"> easy</td><td><img src=\"/solver/static/images/marker_medium.gif\" alt=\"medium\" class=\"diffHelp\"> medium</td></td><td><img src=\"/solver/static/images/marker_hard.gif\" alt=\"hard\" class=\"diffHelp\"> hard</td></tr><tr><td><img src=\"/solver/static/images/marker_harder.gif\" alt=\"harder\" class=\"diffHelp\"> very hard</td><td><img src=\"/solver/static/images/marker_hardcore.gif\" alt=\"hardcore\" class=\"diffHelp\"> hardcore</td><td><img src=\"/solver/static/images/marker_mania.gif\" alt=\"mania\" class=\"diffHelp\"> mania</td></tr><tr><td colspan=\"3\"><img src=\"/solver/static/images/marker_break.png\" alt=\"break\" class=\"diffHelp\"> sequence break</td></tr></table>The locations not available are displayed with the Sequence Break icon, allowing you to collect them when you sequence break.<br/>When a location has been visited its icon displays the collected item: <img src=\"/solver/static/images/marker_visited_easy_Gravity.png\" alt=\"Visited\" style=\"width: 32px\"> or this if no item was found: <img src=\"/solver/static/images/marker_visited_easy.png\" alt=\"Visited\" style=\"width: 32px\">, one color for each difficulty.<br/>When overing the mouse cursor on an available location a tooltip is displayed with the location's name, the techniques and items used to access it.<br/>After the location has been visited only the collected item is displayed.<br/>The locations availability are computed from the current access point which is displayed with this: <img src=\"/solver/static/images/gps.png\" alt=\"last access point\" style=\"width: 32px\"></p><h4>Auto Save</h4><p>Both trackers feature an auto save functionnality, so you can do your seed in multiple seatings.<br/>The different status icons of the auto save:<table><tr><td><img src=\"/solver/static/images/refresh.svg\" style=\"width: 32px\"> Loading in progress</td><td><img src=\"/solver/static/images/checkmark.svg\" style=\"width: 32px\"> Save ok</td></tr><tr><td><img src=\"/solver/static/images/cloud_upload.png\" style=\"width: 32px\"> Upload in progress</td><td><img src=\"/solver/static/images/cloud_download.svg\" style=\"width: 32px\"> Download in progress</td></tr><tr><td colspan=\"2\"><img src=\"/solver/static/images/warning.svg\" style=\"width: 32px\"> Something wrong happened (try reloading the page)</td></tr></table></p><p>You can display this help again by clicking on the <img src=\"/solver/static/images/help.svg\" alt=\"help\" style=\"width: 32px\"> button.</p><p><h4>Thanks to</h4><ul><li>Animated location icons by Djlo</li><li>Location icons from Alli_Cat's <a href='https://github.com/allibear17/Super-Metroid-Location-Tracker'>Location Tracker</a></li><li>G4 sprite from Crossproduct's <a href=\"https://www.twitch.tv/crossproduct\">smrandohelper</a></li><li>Action icons from <a href='https://dryicons.com/icon-packs/stylistica-icons-set'>Dryicons</a></li></ul></p>"
+    },
+    {
+      element: "#helpPlando",
+      title: "VARIA Plando Creator",
+      content: "<h2 class=\"center\">Welcome to the VARIA Plando Generator</h2><p>The Plando (a Plando is a Super Metroid seed with manually placed items) Generator allows you to create your own Plando in interactive mode.<br/>To use it, click on the <img src=\"/solver/static/images/play.svg\" alt=\"Start\" style=\"width: 32px\"> button to upload your ROM and choose your preset (like on the Solver page).<br/>Then the available locations will be displayed on the map, click on a location and a popup will be displayed allowing you to choose which item to place.</p>"
     }]
   });
 
@@ -3433,10 +3446,14 @@ function startTheTour(step=-1) {
     </table>
     <input id="romJson" name="romJson" style="display:none" type="text"/>
     <input id="fileName" name="fileName" style="display:none" type="text"/>
+    <input id="isPlando" name="isPlando" style="display:none" type="text"/>
   </div>
 
   <div class="map_container">
+    <!-- the map -->
     <img id="map" src="/solver/static/images/area_map.png" class="center">
+
+    <!-- the access points -->
     <div id="lowerMushroomsLeft" class="baseButton" onclick="clickPortal('lowerMushroomsLeft')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Lower Mushrooms Left"></div>
     <div id="moatRight" class="baseButton" onclick="clickPortal('moatRight')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Moat Right"></div>
     <div id="greenPiratesShaftBottomRight" class="baseButton" onclick="clickPortal('greenPiratesShaftBottomRight')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Green Pirates Shaft Bottom Right"></div>
@@ -3466,6 +3483,7 @@ function startTheTour(step=-1) {
     <div id="glassTunnelTop" class="baseButtonRot" onclick="clickPortal('glassTunnelTop')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Glass Tunnel Top"></div>
     <div id="statuesHallwayLeft" class="baseButton" onclick="clickPortal('statuesHallwayLeft')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Statues Hallway Left"></div>
 
+    <!-- the locations -->
     <div id="EnergyTankGauntlet" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true" data-placement="bottom"></div>
     <div id="Bomb" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true" data-placement="bottom"></div>
     <div id="EnergyTankTerminator" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true" data-placement="bottom"></div>
@@ -3568,17 +3586,28 @@ function startTheTour(step=-1) {
     <div id="MissileDraygon" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
     <div id="MotherBrain" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
 
+    <!-- area tracker buttons -->
     <div id="titleArea" class="titleArea">AREA</div>
     <div id="repeatArea" class="repeatArea"><img src="/solver/static/images/repeat.svg" alt="Cancel Last" onclick="deleteLine()" data-toggle="tooltip" title="Remove last added transition" data-placement="bottom" data-container="body" data-html="true"></div>
     <div id="binArea" class="binArea"><img src="/solver/static/images/bin.svg" alt="Clear" onclick="clearLines(true)" data-toggle="tooltip" title="Remove all the transitions" data-placement="bottom" data-container="body" data-html="true"></div>
 
+    <!-- item tracker buttons -->
     <div id="titleItem" class="titleItem">ITEM</div>
-    <div id="startItem" class="startItem"><img src="/solver/static/images/play.svg" alt="Start" onclick="displayPopup()" data-toggle="tooltip" title="Start the Interactive Solver" data-placement="bottom" data-container="body" data-html="true"></div>
+    <div id="startItem" class="startItem"><img src="/solver/static/images/play.svg" alt="Start" onclick="displayPopup(false)" data-toggle="tooltip" title="Start the Interactive Solver" data-placement="bottom" data-container="body" data-html="true"></div>
     <div id="repeatItem" class="repeatItem"><img src="/solver/static/images/repeat.svg" alt="Cancel Last" onclick="deleteLoc()" data-toggle="tooltip" title="Remove last visited location" data-placement="bottom" data-container="body" data-html="true"></div>
     <div id="binItem" class="binItem"><img src="/solver/static/images/bin.svg" alt="Clear" onclick="clearLocs()" data-toggle="tooltip" title="Remove all visited locations" data-placement="bottom" data-container="body" data-html="true"></div>
 
     <div id="help" class="help"><img src="/solver/static/images/help.svg" alt="Help" onclick="startTheTour(0)" data-toggle="tooltip" title="Display the help" data-placement="bottom" data-container="body" data-html="true"></div>
 
+    <!-- plando buttons -->
+    <div id="titlePlando" class="titlePlando">PLANDO</div>
+    <div id="startPlando" class="startPlando"><img src="/solver/static/images/play.svg" alt="Start" onclick="displayPopup(true)" data-toggle="tooltip" title="Start the Plando creator" data-placement="bottom" data-container="body" data-html="true"></div>
+    <div id="repeatPlando" class="repeatPlando"><img src="/solver/static/images/repeat.svg" alt="Cancel Last" onclick="deleteLoc()" data-toggle="tooltip" title="Remove last placed item" data-placement="bottom" data-container="body" data-html="true"></div>
+    <div id="binPlando" class="binPlando"><img src="/solver/static/images/bin.svg" alt="Clear" onclick="clearLocs()" data-toggle="tooltip" title="Remove all placed items" data-placement="bottom" data-container="body" data-html="true"></div>
+
+    <div id="helpPlando" class="helpPlando"><img src="/solver/static/images/help.svg" alt="Help" onclick="startTheTour(1)" data-toggle="tooltip" title="Display the Plando help" data-placement="bottom" data-container="body" data-html="true"></div>
+
+    <!-- web service status -->
     <div id="cloud" class="cloud">
       <img id="refresh" src="/solver/static/images/refresh.svg" alt="refresh" data-toggle="tooltip" title="Loading in progress" data-placement="bottom" data-container="body" data-html="true">
       <img id="checkmark" src="/solver/static/images/checkmark.svg" alt="checkmark" style="display: none" data-toggle="tooltip" title="Web service OK" data-placement="bottom" data-container="body" data-html="true">
@@ -3587,6 +3616,7 @@ function startTheTour(step=-1) {
       <img id="upload" src="/solver/static/images/cloud_upload.png" alt="cloud_upload" style="display: none" data-toggle="tooltip" title="Web service uploading" data-placement="bottom" data-container="body" data-html="true">
     </div>
 
+    <!-- gps marker -->
     <div id="lastLoc">
       <img src="/solver/static/images/gps.png" alt="last access point" data-toggle="tooltip" title="Current access point" data-placement="bottom" data-container="body" data-html="true">
     </div>

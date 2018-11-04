@@ -1340,7 +1340,7 @@ def validateItemTrackerParams():
             raiseHttp(400, "File name is empty", True)
         if IS_MATCH('[a-zA-Z0-9_\.]*')(uploadFile)[1] is not None:
             raiseHttp(400, "Wrong value for ROM file name, must be valid file name: {}".format(request.vars.romFile), True)
-        if IS_LENGTH(maxsize=255, minsize=1)(request.vars.romFile)[1] is not None:
+        if IS_LENGTH(maxsize=255, minsize=1)(uploadFile)[1] is not None:
             raiseHttp(400, "Wrong length for ROM file name, name must be between 1 and 255 characters: {}".format(request.vars.romFile), True)
 
         isPlando = request.vars.isPlando
@@ -1370,7 +1370,8 @@ def returnState(state):
                            # compatibility with existing sessions
                            "remainLocations": state["remainLocationsWeb"] if "remainLocationsWeb" in state else [],
                            "areaRando": state["areaRando"],
-                           "lastLoc": locName4isolver(state["lastLoc"])})
+                           "lastLoc": locName4isolver(state["lastLoc"]),
+                           "isPlando": state["isPlando"]})
     else:
         raiseHttp(200, "OK", True)
 
@@ -1417,7 +1418,7 @@ def callSolverInit(jsonRomFileName, presetFileName, preset, romFileName, isPland
         os.remove(jsonOutFileName)
         raiseHttp(400, "Something wrong happened while initializing solving of the ROM", True)
 
-def callSolverAction(action, locName=None):
+def callSolverAction(action, locName=None, itemName=None):
     # check that we have a state in the session
     if "state" not in session.tracker["item"]:
         raiseHttp(400, "Missing Solver state in the session", True)
@@ -1433,6 +1434,11 @@ def callSolverAction(action, locName=None):
     ]
     if action == 'add':
         params += ['--loc', locName]
+        if isPlando == True:
+            params += ['--item', itemName]
+
+    if isPlando == True:
+        params += ['--plando']
 
     # dump state as input
     with open(jsonInFileName, 'w') as jsonFile:
@@ -1490,7 +1496,7 @@ def itemTrackerWebService():
     elif action == 'get':
         return returnState(session.tracker["item"]["state"])
     else:
-        return callSolverAction(action, request.vars.locName)
+        return callSolverAction(action, request.vars.locName, request.vars.itemName)
 
     # return something if not already done
     raiseHttp(200, "OK", True)

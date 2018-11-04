@@ -142,6 +142,64 @@ img {
     top: 4.75%;
     left: 16%;
 }
+
+.titlePlando {
+    position: absolute;
+    z-index: 2;
+    width: 10%;
+    height: 3.75%;
+    top: 1%;
+    left: 80%;
+    color: #ffffff;
+    font-size: 1.25vw;
+    font-weight: bold;
+}
+.startPlando {
+    cursor: pointer;
+    position: absolute;
+    z-index: 2;
+    width: 2.5%;
+    height: 3.75%;
+    top: 0.5%;
+    left: 88.95%;
+}
+.repeatPlando {
+    cursor: pointer;
+    position: absolute;
+    z-index: 2;
+    width: 2.5%;
+    height: 3.75%;
+    top: 0.5%;
+    left: 91.7%;
+}
+.binPlando {
+    cursor: pointer;
+    position: absolute;
+    z-index: 2;
+    width: 2.5%;
+    height: 3.75%;
+    top: 0.5%;
+    left: 94.45%;
+}
+.savePlando {
+    cursor: pointer;
+    position: absolute;
+    z-index: 2;
+    width: 2.5%;
+    height: 3.75%;
+    top: 0.5%;
+    left: 97.2%;
+}
+.helpPlando {
+    cursor: pointer;
+    position: absolute;
+    z-index: 2;
+    width: 2.5%;
+    height: 3.75%;
+    top: 0.5%;
+    left: 86.2%;
+}
+
 .baseButton {
     cursor: pointer;
     position: absolute;
@@ -2740,6 +2798,7 @@ function onloadWS(jsonData) {
 
 var init = false;
 var lastLoc = "landingSite";
+var isPlando = false;
 
 // can add more variables:
 //  -state: posible values: ["available", "visited", "breakable"]
@@ -3028,6 +3087,10 @@ function mouseOut(elem) {
   }
 }
 
+function save() {
+  console.log("save");
+}
+
 function displayPopup(isPlando) {
   if(loaded == false) {
     return;
@@ -3078,17 +3141,27 @@ function clickLoc(elem) {
     return;
   }
 
-  // check that lock is in the available list
-  var locName = elem.id;
-  if("state" in locsInfo[locName] && (locsInfo[locName]["state"] == "available" || locsInfo[locName]["state"] == "break")) {
-    // call webservice
-    ajaxCallItem({action: "add", locName: locName}, "upload", ajaxOkGetItem);
-
-    // if mother brain loc, add end message in log
-   if(locName == "MotherBrain") {
-     alert("SEE YOU NEXT MISSION");
-   }
+  if(isPlando == true) {
+    // display item selector
+    document.getElementById("itemPopup").style.display = "block";
+    return;
+  } else {
+    // check that lock is in the available list
+    var locName = elem.id;
+    if("state" in locsInfo[locName] && (locsInfo[locName]["state"] == "available" || locsInfo[locName]["state"] == "break")) {
+      // call webservice
+      ajaxCallItem({action: "add", locName: locName}, "upload", ajaxOkGetItem);
+  
+      // if mother brain loc, add end message in log
+     if(locName == "MotherBrain") {
+       alert("SEE YOU NEXT MISSION");
+     }
+    }
   }
+}
+
+function hideItemPopup() {
+  document.getElementById("itemPopup").style.display = "none";
 }
 
 function deleteLoc() {
@@ -3175,6 +3248,8 @@ function ajaxOkGetItem(jsonData) {
   if(jsonData == "OK") {
     return;
   }
+
+  isPlando = jsonData["isPlando"];
 
   resetItems();
 
@@ -3273,10 +3348,8 @@ function ajaxOkGetItem(jsonData) {
     init = false;
   }
   if("lastLoc" in jsonData) {
-    console.log("lastLoc updated: "+jsonData["lastLoc"]);
     lastLoc = jsonData["lastLoc"];
   }
-  console.log("lastLoc: "+jsonData["lastLoc"]);
   $("#lastLoc").attr("class", "lastLoc "+lastLoc+"Gps");
 
   setWSIcon("checkmark");
@@ -3398,7 +3471,8 @@ function startTheTour(step=-1) {
     {
       element: "#helpPlando",
       title: "VARIA Plando Creator",
-      content: "<h2 class=\"center\">Welcome to the VARIA Plando Generator</h2><p>The Plando (a Plando is a Super Metroid seed with manually placed items) Generator allows you to create your own Plando in interactive mode.<br/>To use it, click on the <img src=\"/solver/static/images/play.svg\" alt=\"Start\" style=\"width: 32px\"> button to upload your ROM and choose your preset (like on the Solver page).<br/>Then the available locations will be displayed on the map, click on a location and a popup will be displayed allowing you to choose which item to place.</p>"
+      content: "<h2 class=\"center\">Welcome to the VARIA Plando Generator</h2><p>The Plando (a Plando is a Super Metroid seed with manually placed items) Generator allows you to create your own Plando in interactive mode.<br/>To use it, click on the <img src=\"/solver/static/images/play.svg\" alt=\"Start\" style=\"width: 32px\"> button to upload your ROM and choose your preset (like on the Solver page).<br/>Then the available locations will be displayed on the map, click on a location and a popup will be displayed allowing you to choose which item to place.</p>",
+      placement: "auto left"
     }]
   });
 
@@ -3447,6 +3521,16 @@ function startTheTour(step=-1) {
     <input id="romJson" name="romJson" style="display:none" type="text"/>
     <input id="fileName" name="fileName" style="display:none" type="text"/>
     <input id="isPlando" name="isPlando" style="display:none" type="text"/>
+  </div>
+
+  <div id="itemPopup" class="itemPopup">
+    <table class="full">
+      <colgroup><col class="half" /><col class="half" /></colgroup>
+      <tr>
+	<td>Item to place:</td>
+	<td><input id="uploadFile" name="uploadFile" type="file"/></td>
+      </tr>
+    </table>
   </div>
 
   <div class="map_container">
@@ -3604,6 +3688,7 @@ function startTheTour(step=-1) {
     <div id="startPlando" class="startPlando"><img src="/solver/static/images/play.svg" alt="Start" onclick="displayPopup(true)" data-toggle="tooltip" title="Start the Plando creator" data-placement="bottom" data-container="body" data-html="true"></div>
     <div id="repeatPlando" class="repeatPlando"><img src="/solver/static/images/repeat.svg" alt="Cancel Last" onclick="deleteLoc()" data-toggle="tooltip" title="Remove last placed item" data-placement="bottom" data-container="body" data-html="true"></div>
     <div id="binPlando" class="binPlando"><img src="/solver/static/images/bin.svg" alt="Clear" onclick="clearLocs()" data-toggle="tooltip" title="Remove all placed items" data-placement="bottom" data-container="body" data-html="true"></div>
+    <div id="savePlando" class="savePlando"><img src="/solver/static/images/save.svg" alt="Save" onclick="save()" data-toggle="tooltip" title="Download plando ROM" data-placement="bottom" data-container="body" data-html="true"></div>
 
     <div id="helpPlando" class="helpPlando"><img src="/solver/static/images/help.svg" alt="Help" onclick="startTheTour(1)" data-toggle="tooltip" title="Display the Plando help" data-placement="bottom" data-container="body" data-html="true"></div>
 

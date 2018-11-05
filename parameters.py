@@ -236,7 +236,7 @@ class Knows:
 
     XrayDboost = SMBool(False, 0, ['XrayDboost'])
     desc['XrayDboost'] = {'display': 'X-Ray Damage Boost',
-                          'title': 'Get to X-Ray location without Space-Jump or Grapple',
+                          'title': 'Get to X-Ray location without Space-Jump, Grapple (no energy requirements), Ice or Bombs (see Hard Room settings)',
                           'href': 'https://www.twitch.tv/videos/168724062',
                           'rooms': ['Red Brinstar Fireflea Room']}
 

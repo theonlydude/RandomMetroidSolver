@@ -282,6 +282,7 @@ def removeForbiddenItems(forbiddenItems, itemPool):
     for item in forbiddenItems:
         removeItem(item, itemPool)
         itemPool.append(NoEnergy)
+    return itemPool
 
 def addEnergy(qty, itemPool):
     energyQty = qty['energy']
@@ -320,7 +321,7 @@ def addEnergy(qty, itemPool):
         for i in range(13):
             addItem('ETank', itemPool)
 
-def getItemPool(qty, forbiddenItems):
+def getItemPool(qty, forbiddenItems=[]):
     # copy original items list (does not contain the 'nothing' types)
     itemPool = Items[:]
     # always add energy before ammo, as addAmmo will fill up item pool

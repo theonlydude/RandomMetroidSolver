@@ -46,6 +46,7 @@ class RandoSettings(object):
         self.locLimit = self.getLocLimit(progSpeed)
         self.superFun = superFun
         self.possibleSoftlockProb = self.getPossibleSoftlockProb(progSpeed)
+        self.minorHelpProb = self.getMinorHelpProb(progSpeed)
         self.runtimeLimit_s = runtimeLimit_s
         if self.runtimeLimit_s <= 0:
             self.runtimeLimit_s = sys.maxint
@@ -125,6 +126,17 @@ class RandoSettings(object):
         if progSpeed == 'fastest' or progSpeed == 'basic':
             return 0
 
+    def getMinorHelpProb(self, progSpeed):
+        if self.restrictions['MajorMinor'] == False:
+            return 0
+        if progSpeed == 'slowest':
+            return 0.16
+        elif progSpeed == 'slow':
+            return 0.33
+        elif progSpeed == 'medium':
+            return 0.5
+        return 1
+
     def getProgressionItemTypes(self, progSpeed):
         progTypes = [item['Type'] for item in Items.Items if item['Category'] == 'Progression']
         progTypes.append('Charge')
@@ -154,11 +166,11 @@ class RandoSettings(object):
     def getItemLimit(self, progSpeed):
         itemLimit = 100
         if progSpeed == 'slow':
-            itemLimit = 18
+            itemLimit = 20
         elif progSpeed == 'medium':
-            itemLimit = 9
+            itemLimit = 11
         elif progSpeed == 'fast':
-            itemLimit = 4
+            itemLimit = 5
         elif progSpeed == 'fastest':
             itemLimit = 1
         elif progSpeed == 'basic':
@@ -384,6 +396,7 @@ class Randomizer(object):
         self.log = log.get('Rando')
 
         self.spreadProb = settings.spreadProb
+        self.minorHelpProb = settings.minorHelpProb
         self.choose = settings.choose
         self.chooseItemFuncs = {
             'Random' : self.chooseItemRandom,
@@ -475,9 +488,6 @@ class Randomizer(object):
             self.smbm.removeItem(itemType)
         if isSimpleCall:
             self.curLocs = ret
-
-        #if len(self.currentItems) == 28:
-        #    print("avail locs: {}".format([l['Name'] for l in ret]))
 
         return ret
 
@@ -614,10 +624,12 @@ class Randomizer(object):
         return locs
 
     def hasItemType(self, t):
-        return any(item['Type'] == t for item in self.currentItems)
+        return self.hasItemTypeInPool(t, self.currentItems)
 
-    def hasItemTypeInPool(self, t):
-        return any(item['Type'] == t for item in self.itemPool)
+    def hasItemTypeInPool(self, t, pool=None):
+        if pool is None:
+            pool = self.itemPool
+        return any(item['Type'] == t for item in pool)
 
     def isJunk(self, item):
         if item['Type'] in ['Nothing', 'NoEnergy']:
@@ -891,11 +903,23 @@ class Randomizer(object):
                 return False
         return True
 
+    def getNonProgItemPool(self):
+        pool = [item for item in self.itemPool if not self.isProgItem(item)]
+
+        # enabled only, in major/minor split, and depends on prog speed
+        if random.random() < self.minorHelpProb:
+            helpfulMinors = [item for item in self.itemPool if item['Class'] == 'Minor' and not self.hasItemTypeInPool(item['Type'], pool)]
+            if len(helpfulMinors) > 0:
+                pool.append(helpfulMinors[random.randint(0, len(helpfulMinors)-1)])
+
+        return pool
+
     # return True if stuck, False if not
     def fillNonProgressionItems(self):
         if self.itemLimit <= 0:
             return False
-        pool = [item for item in self.itemPool if not self.isProgItem(item)]
+        pool = self.getNonProgItemPool()
+        self.log.debug("fillNonProgressionItems poolset=" + str(list(set([item['Type'] for item in pool]))))
         poolWasEmpty = len(pool) == 0
         itemLocation = None
         nItems = 0
@@ -1025,8 +1049,10 @@ class Randomizer(object):
         itemTypes = [item['Type'] for item in self.currentItems]
         return self.smbm.wand(Bosses.allBossesDead(self.smbm), self.smbm.enoughStuffTourian())
 
-    def getNextItemInPool(self, t):
-        return next(item for item in self.itemPool if item['Type'] == t)
+    def getNextItemInPool(self, t, pool=None):
+        if pool is None:
+            pool = self.itemPool
+        return next(item for item in pool if item['Type'] == t)
 
     # fill up unreachable locations with "junk" to maximize the chance of the ROM
     # to be finishable

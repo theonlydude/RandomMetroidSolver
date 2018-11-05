@@ -400,12 +400,8 @@ locations = [
     'Visibility': "Hidden",
     'Room': 'Ridley Tank Room',
     'AccessFrom' : {
-        'Lava Dive Right': lambda sm: sm.wand(sm.canPassLavaPit(),
-                                              sm.canPassWorstRoom(),
-                                              sm.canOpenYellowDoors(),
-                                              sm.canOpenGreenDoors()),
-        'Three Muskateers Room Left': lambda sm: sm.wand(sm.canOpenYellowDoors(),
-                                                         sm.canOpenGreenDoors())
+        'LN After Amphitheater': lambda sm: sm.wand(sm.canOpenYellowDoors(),
+                                                    sm.canOpenGreenDoors())
     },
     'Available': lambda sm: sm.wand(sm.canHellRun('LowerNorfair'), sm.enoughStuffsRidley()),
     'Pickup': lambda: Bosses.beatBoss('Ridley'),
@@ -421,14 +417,11 @@ locations = [
     'Address': 0x79110,
     'Visibility': "Chozo",
     'Room': 'Screw Attack Room',
+    # everything is handled by the graph
     'AccessFrom' : {
-        'Lava Dive Right': lambda sm: sm.canPassLavaPit(),
-        'Three Muskateers Room Left': lambda sm: sm.wand(sm.haveItem('Morph'), sm.canPassAmphitheaterReverse())
+        'Screw Attack Bottom': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: sm.wand(sm.wor(sm.canPassLowerNorfairChozo(),
-                                           sm.wand(sm.canHellRun('LowerNorfair'), sm.haveItem('Super'), sm.knowsGreenGateGlitch())),
-                                    sm.canDestroyBombWalls()),
-    'PostAvailable': lambda sm: sm.canExitScrewAttackArea()
+    'Available': lambda sm: SMBool(True)
 },
 {
     'Area': "LowerNorfair",
@@ -441,10 +434,14 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Lower Norfair Fireflea Room',
     'AccessFrom' : {
-        'Lava Dive Right': lambda sm: sm.wand(sm.canHellRun('LowerNorfair'), sm.canPassLavaPit(), sm.canPassWorstRoom()),
-        'Three Muskateers Room Left': lambda sm: sm.wand(sm.haveItem('Morph'), sm.canHellRun('LowerNorfair'))
+        'LN After Amphitheater': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: SMBool(True)
+    'Available': lambda sm: SMBool(True),
+    # avoid doing the super annoying wall jump in the dark...
+    'PostAvailable': lambda sm: sm.wor(sm.haveItem('Ice'),
+                                       sm.haveItem('HiJump'),
+                                       sm.canFly(),
+                                       sm.canSpringBallJump())
 },
 {
     'Area': "WreckedShip",
@@ -457,14 +454,11 @@ locations = [
     'Visibility': "Chozo",
     'Room': 'Bowling Alley',
     'AccessFrom' : {
-        'West Ocean Left': lambda sm: sm.canOpenGreenDoors(),
-        'Crab Maze Left': lambda sm: sm.canPassForgottenHighway(False)
+        'Wrecked Ship Main': lambda sm: SMBool(True)
     },
     'Available': lambda sm: sm.wand(sm.canUsePowerBombs(),
                                     sm.haveItem('SpeedBooster'),
-                                    sm.wor(sm.heatProof(),
-                                           sm.energyReserveCountOk(1)),
-                                    Bosses.bossDead('Phantoon'))
+                                    sm.canPassBowling())
 },
 {
     'Area': "WreckedShip",
@@ -477,8 +471,7 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Wrecked Ship Energy Tank Room',
     'AccessFrom' : {
-        'West Ocean Left': lambda sm: sm.wand(sm.canOpenGreenDoors(), sm.canPassSpongeBath()),
-        'Crab Maze Left': lambda sm: sm.canPassForgottenHighway(False)
+        'Wrecked Ship Back': lambda sm: sm.canOpenRedDoors()
     },
     'Available': lambda sm: sm.wor(Bosses.bossDead('Phantoon'),
                                    RomPatches.has(RomPatches.WsEtankPhantoonAlive))
@@ -494,8 +487,7 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Wrecked Ship East Super Room',
     'AccessFrom' : {
-        'West Ocean Left': lambda sm: sm.canOpenGreenDoors(),
-        'Crab Maze Left': lambda sm: sm.canPassForgottenHighway(False)
+        'Wrecked Ship Main': lambda sm: SMBool(True)
     },
     'Available': lambda sm: sm.wand(sm.canOpenGreenDoors(), sm.enoughStuffsPhantoon(), sm.canPassBombPassages()),
     'Pickup': lambda: Bosses.beatBoss('Phantoon'),
@@ -512,15 +504,10 @@ locations = [
     'Visibility': "Chozo",
     'Room': 'Gravity Suit Room',
     'AccessFrom' : {
-        'West Ocean Left': lambda sm: sm.canOpenGreenDoors(),
-        'Crab Maze Left': lambda sm: sm.canPassForgottenHighway(False)
+        'Wrecked Ship Main': lambda sm: SMBool(True)
     },
     'Available': lambda sm: sm.wand(sm.canPassBombPassages(),
-                                    Bosses.bossDead('Phantoon'),
-                                    sm.wor(sm.heatProof(),
-                                           sm.energyReserveCountOk(1),
-                                           sm.haveItem("SpaceJump"),
-                                           sm.haveItem("Grapple")))
+                                    sm.canPassBowling())
 },
 {
     'Area': "Maridia",
@@ -538,8 +525,7 @@ locations = [
     'Available': lambda sm: sm.wand(sm.canOpenRedDoors(),
                                     sm.wor(sm.canFly(),
                                            sm.wand(sm.haveItem('Gravity'), sm.haveItem('SpeedBooster')),
-                                           sm.wand(sm.haveItem('Morph'),
-                                                   sm.haveItem('SpringBall'),
+                                           sm.wand(sm.canUseSpringBall(),
                                                    sm.wor(sm.wand(sm.haveItem('HiJump'), sm.knowsSpringBallJump()),
                                                           sm.knowsSpringBallJumpFromWall())),
                                            sm.haveItem('Grapple')))
@@ -636,7 +622,7 @@ locations = [
                                            sm.wand(sm.haveItem('XRayScope'), sm.knowsAccessSpringBallWithXRayClimb())), # XRay climb
                                     sm.haveItem('Morph')),
     'PostAvailable': lambda sm: sm.wor(sm.haveItem('Gravity'),
-                                       sm.wand(sm.haveItem('SpringBall'), sm.knowsSpringBallJump()))
+                                       sm.canSpringBallJump())
 },
 {
     'Area': "Maridia",
@@ -686,15 +672,13 @@ locations = [
                                                               sm.knowsDraygonRoomGrappleExit()),
                                                       sm.wand(sm.haveItem('XRayScope'),
                                                               sm.knowsPreciousRoomXRayExit()),
-                                                      sm.wand(sm.haveItem('SpringBall'),
-                                                              sm.knowsSpringBallJump()))),
+                                                      sm.canSpringBallJump())),
                                        # spark-less exit (no CF)
                                        sm.wand(sm.wand(sm.haveItem('Grapple'),
                                                        sm.knowsDraygonRoomGrappleExit()),
                                                sm.wor(sm.wand(sm.haveItem('XRayScope'),
                                                               sm.knowsPreciousRoomXRayExit()),
-                                                      sm.wand(sm.haveItem('SpringBall'),
-                                                              sm.knowsSpringBallJump()))))
+                                                      sm.canSpringBallJump())))
 },
 ###### MINORS
 {
@@ -740,8 +724,7 @@ locations = [
     'Visibility': "Hidden",
     'Room': 'West Ocean',
     'AccessFrom' : {
-        'West Ocean Left': lambda sm: sm.canOpenGreenDoors(),
-        'Crab Maze Left': lambda sm: sm.canPassForgottenHighway(False)
+        'Wrecked Ship Main': lambda sm: SMBool(True)
     },
     'Available': lambda sm: Bosses.bossDead('Phantoon')
 },
@@ -756,8 +739,7 @@ locations = [
     'Visibility': "Visible",
     'Room': 'West Ocean',
     'AccessFrom' : {
-        'West Ocean Left': lambda sm: sm.canOpenGreenDoors(),
-        'Crab Maze Left': lambda sm: sm.canPassForgottenHighway(False)
+        'Wrecked Ship Main': lambda sm: SMBool(True)
     },
     'Available': lambda sm: sm.wand(sm.haveItem('Super'), sm.haveItem('Morph'), Bosses.bossDead('Phantoon'))
 },
@@ -1412,11 +1394,10 @@ locations = [
     'Visibility': "Visible",
     'Room': "Golden Torizo's Room",
     'AccessFrom' : {
-        'Lava Dive Right': lambda sm: sm.canPassLavaPit(),
-        'Three Muskateers Room Left': lambda sm: sm.wand(sm.haveItem('Morph'), sm.canPassAmphitheaterReverse())
+        'LN Above GT': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: sm.canPassLowerNorfairChozo(),
-    'PostAvailable': lambda sm: sm.canExitScrewAttackArea()
+    'Available': lambda sm: sm.canHellRun('LowerNorfair'),
+    'PostAvailable': lambda sm: sm.enoughStuffGT()
 },
 {
     'Area': "LowerNorfair",
@@ -1429,12 +1410,10 @@ locations = [
     'Visibility': "Hidden",
     'Room': "Golden Torizo's Room",
     'AccessFrom' : {
-        'Lava Dive Right': lambda sm: sm.canPassLavaPit(),
-        'Three Muskateers Room Left': lambda sm: sm.wand(sm.haveItem('Morph'), sm.canPassAmphitheaterReverse())
+        'Screw Attack Bottom': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: sm.wor(sm.canPassLowerNorfairChozo(),
-                                   sm.wand(sm.canHellRun('LowerNorfair'), sm.haveItem('Super'), sm.knowsGreenGateGlitch())),
-    'PostAvailable': lambda sm: sm.canExitScrewAttackArea()
+    'Available': lambda sm: SMBool(True),
+    'PostAvailable': lambda sm: sm.enoughStuffGT()
 },
 {
     'Area': "LowerNorfair",
@@ -1447,10 +1426,9 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Mickey Mouse Room',
     'AccessFrom' : {
-        'Lava Dive Right': lambda sm: sm.wand(sm.canPassLavaPit(), sm.canPassWorstRoom()),
-        'Three Muskateers Room Left': lambda sm: sm.wand(sm.haveItem('Morph'), sm.canPassAmphitheaterReverse())
+        'LN Entrance': lambda sm: sm.wand(sm.canUsePowerBombs(), sm.canPassWorstRoom()),
     },
-    'Available': lambda sm: sm.wand(sm.canHellRun('LowerNorfair'), sm.canPassBombPassages())
+    'Available': lambda sm: sm.canHellRun('LowerNorfair')
 },
 {
     'Area': "LowerNorfair",
@@ -1463,7 +1441,6 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Lower Norfair Spring Ball Maze Room',
     'AccessFrom' : {
-        'Lava Dive Right': lambda sm: sm.wand(sm.canPassLavaPit(), sm.canPassWorstRoom()),
         'Three Muskateers Room Left': lambda sm: sm.haveItem('Morph')
     },
     'Available': lambda sm: sm.canHellRun('LowerNorfair')
@@ -1479,7 +1456,6 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Lower Norfair Escape Power Bomb Room',
     'AccessFrom' : {
-        'Lava Dive Right': lambda sm: sm.wand(sm.canPassLavaPit(), sm.canPassWorstRoom()),
         'Three Muskateers Room Left': lambda sm: sm.haveItem('Morph')
     },
     'Available': lambda sm: sm.wand(sm.canHellRun('LowerNorfair'), sm.haveItem('Morph'))
@@ -1495,8 +1471,7 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Wasteland',
     'AccessFrom' : {
-        'Lava Dive Right': lambda sm: sm.wand(sm.canPassLavaPit(), sm.canPassWorstRoom()),
-        'Three Muskateers Room Left': lambda sm: sm.haveItem('Morph')
+        'LN After Amphitheater': lambda sm: SMBool(True)
     },
     'Available': lambda sm: sm.wand(sm.canHellRun('LowerNorfair'),
                                     sm.canOpenGreenDoors(),
@@ -1513,8 +1488,7 @@ locations = [
     'Visibility': "Visible",
     'Room': "Three Muskateers' Room",
     'AccessFrom' : {
-        'Lava Dive Right': lambda sm: sm.wand(sm.canPassLavaPit(), sm.canPassWorstRoom()),
-        'Three Muskateers Room Left': lambda sm: sm.haveItem('Morph')
+        'Three Muskateers Room Left': lambda sm: SMBool(True)
     },
     'Available': lambda sm: sm.wand(sm.canHellRun('LowerNorfair'),
                                     sm.canPassBombPassages())
@@ -1530,8 +1504,7 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Wrecked Ship Main Shaft',
     'AccessFrom' : {
-        'West Ocean Left': lambda sm: sm.canOpenGreenDoors(),
-        'Crab Maze Left': lambda sm: sm.canPassForgottenHighway(False)
+        'Wrecked Ship Main': lambda sm: SMBool(True)
     },
     'Available': lambda sm: sm.canPassBombPassages()
 },
@@ -1546,14 +1519,9 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Bowling Alley',
     'AccessFrom' : {
-        'West Ocean Left': lambda sm: sm.canOpenGreenDoors(),
-        'Crab Maze Left': lambda sm: sm.canPassForgottenHighway(False)
+        'Wrecked Ship Main': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: sm.wand(sm.wor(sm.heatProof(),
-                                           sm.energyReserveCountOk(1),
-                                           sm.haveItem("SpaceJump"),
-                                           sm.haveItem("Grapple")),
-                                    Bosses.bossDead('Phantoon'),
+    'Available': lambda sm: sm.wand(sm.canPassBowling(),
                                     sm.canPassBombPassages())
 },
 {
@@ -1567,8 +1535,7 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Wrecked Ship East Missile Room',
     'AccessFrom' : {
-        'West Ocean Left': lambda sm: sm.canOpenGreenDoors(),
-        'Crab Maze Left': lambda sm: sm.canPassForgottenHighway(False)
+        'Wrecked Ship Main': lambda sm: SMBool(True)
     },
     'Available': lambda sm: Bosses.bossDead('Phantoon')
 },
@@ -1583,8 +1550,7 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Wrecked Ship West Super Room',
     'AccessFrom' : {
-        'West Ocean Left': lambda sm: sm.canOpenGreenDoors(),
-        'Crab Maze Left': lambda sm: sm.canPassForgottenHighway(False)
+        'Wrecked Ship Main': lambda sm: SMBool(True)
     },
     'Available': lambda sm: Bosses.bossDead('Phantoon')
 },
@@ -1652,7 +1618,7 @@ locations = [
     'AccessFrom' : {
         'Main Street Bottom': lambda sm: sm.canPassMtEverest()
     },
-    'Available': lambda sm: sm.wor(sm.canPassBombPassages(), sm.wand(sm.haveItem('Morph'), sm.haveItem('SpringBall')))
+    'Available': lambda sm: sm.wor(sm.canPassBombPassages(), sm.canUseSpringBall())
 },
 {
     'Area': "Maridia",
@@ -1667,7 +1633,7 @@ locations = [
     'AccessFrom' : {
         'Main Street Bottom': lambda sm: sm.canPassMtEverest()
     },
-    'Available': lambda sm: sm.wor(sm.canPassBombPassages(), sm.wand(sm.haveItem('Morph'), sm.haveItem('SpringBall')))
+    'Available': lambda sm: sm.wor(sm.canPassBombPassages(), sm.canUseSpringBall())
 },
 {
     'Area': "Maridia",

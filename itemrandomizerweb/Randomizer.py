@@ -193,9 +193,9 @@ class RandoSettings(object):
 # dat class name
 class SuperFunProvider(object):
     # give the rando since we have to access services from it
-    def __init__(self, superFun, qty, rando):
+    def __init__(self, superFun, basePool, rando):
         self.superFun = superFun
-        self.qty = qty
+        self.basePool = basePool
         self.rando = rando
         self.locations = rando.unusedLocations
         self.sm = self.rando.smbm
@@ -219,14 +219,17 @@ class SuperFunProvider(object):
         self.okay = lambda: SMBool(True, 0)
 
     def getItemPool(self, forbidden=[]):
-        return Items.getItemPool(self.qty, self.forbiddenItems + forbidden)
+        pool = self.basePool[:]
+        return Items.removeForbiddenItems(self.forbiddenItems + forbidden, pool)
 
     def checkPool(self, forbidden=None):
+        self.rando.log.debug("forbidden=" + str(forbidden))
         ret = True
         if forbidden is not None:
             pool = self.getItemPool([forbidden])
         else:
             pool = self.getItemPool()
+        self.rando.log.debug('pool='+str(list(set([i['Type'] for i in pool]))))
         # give us everything and beat every boss to see what we can access
         self.disableBossChecks()
         self.sm.resetItems()
@@ -237,6 +240,7 @@ class SuperFunProvider(object):
         # get restricted locs
         totalAvailLocs = [loc for loc in self.rando.currentLocations(post=True)]
         self.lastRestricted = [loc for loc in self.locations if loc not in totalAvailLocs]
+        self.rando.log.debug("restricted=" + str([loc['Name'] for loc in self.lastRestricted]))
 
         # check if we can reach all APs
         landingSite = self.areaGraph.accessPoints['Landing Site']
@@ -296,6 +300,7 @@ class SuperFunProvider(object):
         return len(forb)
 
     def getForbiddenSuits(self):
+        self.rando.log.debug("getForbiddenSuits")
         removableSuits = [suit for suit in self.suits if self.checkPool(suit)]
         if len(removableSuits) > 0:
             # remove at least one
@@ -307,6 +312,7 @@ class SuperFunProvider(object):
             self.errorMsgs.append("Could not remove any suit")
 
     def getForbiddenMovement(self):
+        self.rando.log.debug("getForbiddenMovement")
         removableMovement = [mvt for mvt in self.movementItems if self.checkPool(mvt)]
         if len(removableMovement) > 0:
             # remove at least the most important
@@ -316,6 +322,7 @@ class SuperFunProvider(object):
             self.errorMsgs.append('Could not remove any movement item')
 
     def getForbiddenCombat(self):
+        self.rando.log.debug("getForbiddenCombat")
         removableCombat = [cbt for cbt in self.combatItems if self.checkPool(cbt)]
         if len(removableCombat) > 0:
             fake = [None, None] # placeholders to avoid tricking the gaussian into removing too much stuff
@@ -437,15 +444,17 @@ class Randomizer(object):
         # progression items tried for a given rollback point
         self.rollbackItemsTried = {}
         # handle super fun settings
-        fun = SuperFunProvider(settings.superFun, settings.qty, self)
+        basePool = Items.getItemPool(settings.qty)
+        fun = SuperFunProvider(settings.superFun, basePool, self)
         fun.getForbidden()
         # check if we can reach everything
+        self.log.debug("LAST CHECKPOOL")
         if not fun.checkPool():
             raise RuntimeError('Invalid transitions')
         # store unapplied super fun messages
         if len(fun.errorMsgs) > 0:
             self.errorMsg += "Super Fun: " + ', '.join(fun.errorMsgs) + ' '
-        self.itemPool = Items.getItemPool(settings.qty, fun.forbiddenItems)
+        self.itemPool = fun.getItemPool()
         self.restrictedLocations = fun.restrictedLocs
 
     def setCurAccessPoint(self, ap='Landing Site'):
@@ -457,7 +466,6 @@ class Randomizer(object):
         if not 'PostAvailable' in loc:
             return True
         result = self.smbm.eval(loc['PostAvailable'], item)
-        self.log.debug("POST: {}".format(result.bool))
         return result.bool == True and result.difficulty <= self.difficultyTarget
 
     # get available locations, given current items, and an optional additional item.

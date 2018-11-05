@@ -524,7 +524,8 @@ class Settings:
     # If no information is given here, the fight will be
     # considered to be 2 minutes, regardless of anything else.
     #
-    # 2. Energy : a dictionary where key is etanks+reserves you have,
+    # 2. Energy : a dictionary where key is total energy you have divided by 100
+    # (the initial 99 energy count as 1).
     # value is estimated difficulty *for a 2-minute fight*, with Varia
     # suit only.
     # If not defined, the one below will be chosen, or the minimum one if
@@ -706,11 +707,13 @@ class Settings:
                 }
             }
         },
+        # 2 = 6 tanks/no suits. 4 = 3 tanks + Varia
         'MotherBrain' : {
             "It can get ugly" : {
                 'Rate' : 0.18,
                 'Energy' : {
-                    4 : mania, # less than 4 is actually impossible
+                    2 : impossibru,
+                    4 : mania,
                     8 : hardcore,
                     12 : harder,
                     16 : hard,
@@ -721,7 +724,8 @@ class Settings:
             'Default' : {
                 'Rate' : 0.25,
                 'Energy' : {
-                    4 : mania, # less than 4 is actually impossible
+                    2 : impossibru,
+                    4 : mania,
                     8 : hardcore,
                     12 : harder,
                     16 : hard,
@@ -732,7 +736,8 @@ class Settings:
             'Is this really the last boss?': {
                 'Rate' : 0.5,
                 'Energy' : {
-                    4 : mania, # less than 4 is actually impossible
+                    2 : impossibru,
+                    4 : mania,
                     6 : hardcore,
                     8 : harder,
                     12 : hard,
@@ -743,7 +748,8 @@ class Settings:
             'Nice cutscene bro' : {
                 'Rate' : 0.6,
                 'Energy' : {
-                    4 : hard, # less than 4 is actually impossible
+                    2 : mania,
+                    4 : hard,
                     8 : medium,
                     12 : easy
                 }

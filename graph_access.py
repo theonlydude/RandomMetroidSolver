@@ -128,7 +128,7 @@ accessPoints = [
                                                   sm.canHellRun('LowerNorfair'),
                                                   sm.wand(sm.haveItem('Super'), sm.knowsGreenGateGlitch()),
                                                   sm.canDestroyBombWalls()),
-        'LN After Amphitheater': lambda sm: sm.wand(sm.canHellRun('LowerNorfair'),
+        'Firefleas': lambda sm: sm.wand(sm.canHellRun('LowerNorfair'),
                                                     sm.canPassWorstRoom(),
                                                     sm.canUsePowerBombs())
     }, internal=True),
@@ -141,16 +141,28 @@ accessPoints = [
                                           sm.canExitScrewAttackArea(),
                                           sm.haveItem('Super'))
     }, internal=True),
-    AccessPoint('LN After Amphitheater', 'LowerNorfair', {
+    AccessPoint('Firefleas', 'LowerNorfair', {
         'LN Entrance': lambda sm: sm.wand(sm.canHellRun('LowerNorfair'),
                                           sm.canPassAmphitheaterReverse(),
                                           sm.canUsePowerBombs()),
         'Three Muskateers Room Left': lambda sm: sm.wand(sm.canHellRun('LowerNorfair'),
-                                                         sm.haveItem('Morph'))
+                                                         sm.haveItem('Morph')),
+        'Ridley Zone': lambda sm: sm.wand(sm.canHellRun('LowerNorfair'),
+                                          sm.canOpenGreenDoors(),
+                                          sm.canOpenYellowDoors())
+    }, internal=True),
+    AccessPoint('Ridley Zone', 'LowerNorfair', {
+        'Firefleas': lambda sm: sm.wand(sm.canHellRun('LowerNorfair'),
+                                        sm.canUsePowerBombs(),
+                                        sm.wor(sm.haveItem('SpringBall'),
+                                               sm.haveItem('Bomb'),
+                                               SMBool(sm.haveItemCount('PowerBomb', 2)),
+                                               sm.wand(sm.haveItem('SpeedBooster'),
+                                                       sm.knowsShortCharge())))
     }, internal=True),
     AccessPoint('Three Muskateers Room Left', 'LowerNorfair', {
-        'LN After Amphitheater': lambda sm: sm.wand(sm.canHellRun('LowerNorfair'),
-                                                    sm.haveItem('Morph'))
+        'Firefleas': lambda sm: sm.wand(sm.canHellRun('LowerNorfair'),
+                                        sm.haveItem('Morph'))
     }, roomInfo = {'RoomPtr':0xb656, "area": 0x2},
        exitInfo = {'DoorPtr':0x9a4a, 'direction': 0x5, "cap": (0x5e, 0x6), "bitFlag": 0x0,
                    "screen": (0x5, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},

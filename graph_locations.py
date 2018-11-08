@@ -400,8 +400,7 @@ locations = [
     'Visibility': "Hidden",
     'Room': 'Ridley Tank Room',
     'AccessFrom' : {
-        'LN After Amphitheater': lambda sm: sm.wand(sm.canOpenYellowDoors(),
-                                                    sm.canOpenGreenDoors())
+        'Ridley Zone': lambda sm: SMBool(True)
     },
     'Available': lambda sm: sm.wand(sm.canHellRun('LowerNorfair'), sm.enoughStuffsRidley()),
     'Pickup': lambda: Bosses.beatBoss('Ridley'),
@@ -434,7 +433,7 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Lower Norfair Fireflea Room',
     'AccessFrom' : {
-        'LN After Amphitheater': lambda sm: SMBool(True)
+        'Firefleas': lambda sm: SMBool(True)
     },
     'Available': lambda sm: SMBool(True),
     # avoid doing the super annoying wall jump in the dark...
@@ -1441,7 +1440,7 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Lower Norfair Spring Ball Maze Room',
     'AccessFrom' : {
-        'Three Muskateers Room Left': lambda sm: sm.haveItem('Morph')
+        'Firefleas': lambda sm: SMBool(True)
     },
     'Available': lambda sm: sm.canHellRun('LowerNorfair')
 },
@@ -1456,9 +1455,9 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Lower Norfair Escape Power Bomb Room',
     'AccessFrom' : {
-        'Three Muskateers Room Left': lambda sm: sm.haveItem('Morph')
+        'Firefleas': lambda sm: sm.canPassBombPassages()
     },
-    'Available': lambda sm: sm.wand(sm.canHellRun('LowerNorfair'), sm.haveItem('Morph'))
+    'Available': lambda sm: sm.canHellRun('LowerNorfair')
 },
 {
     'Area': "LowerNorfair",
@@ -1471,11 +1470,9 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Wasteland',
     'AccessFrom' : {
-        'LN After Amphitheater': lambda sm: SMBool(True)
+        'Ridley Zone': lambda sm: sm.canUsePowerBombs()
     },
-    'Available': lambda sm: sm.wand(sm.canHellRun('LowerNorfair'),
-                                    sm.canOpenGreenDoors(),
-                                    sm.canOpenYellowDoors())
+    'Available': lambda sm: sm.canHellRun('LowerNorfair')
 },
 {
     'Area': "LowerNorfair",

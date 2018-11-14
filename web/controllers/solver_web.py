@@ -477,7 +477,7 @@ def canSolveROM(jsonRomFileName):
     DB = db.DB()
 
     isRace = DB.checkIsRace(md5sum)
-    print("canSolveROM::isRace {}: {}".format(jsonRomFileName, isRace))
+    print("canSolveROM::{} md5: {} isRace {}: {}".format(jsonRomFileName, md5sum, isRace))
     if isRace == False:
         DB.close()
         return (True, None)

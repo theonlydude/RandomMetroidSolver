@@ -506,13 +506,19 @@ class RomPatcher:
 
     def writeItemsLocs(self, itemLocs):
         self.nItems = 0
+        self.nothingAtMorph = False
         for itemLoc in itemLocs:
+            isMorph = itemLoc['Location']['Name'] == 'Morphing Ball'
             if itemLoc['Item']['Type'] in ['Nothing', 'NoEnergy']:
                 self.writeNothing(itemLoc)
+                if isMorph:
+                    # nothing at morph gives a missile pack
+                    self.nothingAtMorph = True
+                    self.nItems += 1
             else:
                 self.nItems += 1
                 self.writeItem(itemLoc)
-            if itemLoc['Location']['Name'] == 'Morphing Ball':
+            if isMorph:
                 self.patchMorphBallEye(itemLoc['Item'])
 
     # trigger morph eye enemy on whatever item we put there,
@@ -625,7 +631,10 @@ class RomPatcher:
             self.race.writeMagic()
 
     def getItemQty(self, itemLocs, itemType):
-        return len([il for il in itemLocs if il['Item']['Type'] == itemType])
+        q = len([il for il in itemLocs if il['Item']['Type'] == itemType])
+        if itemType == 'Missile' and self.nothingAtMorph == True:
+            q += 1
+        return q
 
     def getMinorsDistribution(self, itemLocs):
         dist = {}

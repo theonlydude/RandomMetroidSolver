@@ -819,7 +819,12 @@ locations = [
     },
     'Available': lambda sm: sm.wand(sm.canUsePowerBombs(),
                                     sm.haveItem('SpeedBooster'),
-                                    sm.energyReserveCountOk(1),
+                                    # reserves are hard to trigger midspark when not having ETanks
+                                    sm.wor(sm.wand(sm.energyReserveCountOk(2), SMBool(sm.haveItemCount('ETank', 1))), # need energy to get out
+                                           sm.wand(SMBool(sm.haveItemCount('ETank', 1)),
+                                                   sm.wor(sm.haveItem('Grapple'), # use grapple/space or dmg protection to get out
+                                                          sm.haveItem('SpaceJump'),
+                                                          sm.heatProof()))),
                                     sm.wor(sm.haveItem('Ice'),
                                            sm.knowsShortCharge(),
                                            sm.knowsSimpleShortCharge())) # there's also a dboost involved in simple short charge or you have to kill the yellow enemies with some power bombs
@@ -1566,10 +1571,10 @@ locations = [
     },
     'Available': lambda sm: sm.wand(sm.haveItem('Gravity'),
                                     sm.haveItem('SpeedBooster'),
-                                    sm.energyReserveCountOk(1), # for the shinespark
-                                    sm.wor(sm.canOpenGreenDoors(), # run from room on the right
+                                    sm.wor(sm.wand(sm.canOpenGreenDoors(), # run from room on the right
+                                                   SMBool(sm.haveItemCount('ETank', 1))), # etank for the spark since sparking from low ground
                                            sm.knowsSimpleShortCharge(), # run from above
-                                           sm.knowsShortCharge())) # run from below
+                                           sm.knowsShortCharge())) # run from below and jump
 },
 {
     'Area': "Maridia",

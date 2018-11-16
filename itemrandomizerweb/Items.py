@@ -240,15 +240,16 @@ def removeItem(itemType, itemPool):
     itemPool.remove(List.find(lambda item: item["Type"] == itemType, Items))
 
 # add ammo given quantity settings
-def addAmmo(qty, itemPool):
+def addAmmo(qty, itemPool, sm):
     # always add enough minors to pass zebetites (1100 damages) and mother brain 1 (3000 damages)
-    # accounting for missile refill. so 15-5.
-    # refill after each zeb, refill after breaking the glass.
-    for i in range(2):
+    # accounting for missile refill. so 15-10, or 10-10 if ice zeb skip is known (Ice is always in item pool)
+    addItem('Missile', itemPool)
+    addItem('Super', itemPool)
+    nbMinors = 66 - 5 # 66 minor locs, 3 already in the pool, + the 2 above
+    if not sm.knowsIceZebSkip():
         addItem('Missile', itemPool)
-
-    # there's 66 minors locations, 5 minors items are already in the pool
-    minorLocations = ((66 - 5) * qty['minors']) / 100
+        nbMinors -= 1
+    minorLocations = (nbMinors * qty['minors']) / 100
     maxItems = len(itemPool) + int(minorLocations)
     ammoQty = qty['ammo']
     if not qty['strictMinors']:
@@ -318,12 +319,11 @@ def addEnergy(qty, itemPool):
         for i in range(13):
             addItem('ETank', itemPool)
 
-def getItemPool(qty, forbiddenItems=[]):
+def getItemPool(qty, sm):
     # copy original items list (does not contain the 'nothing' types)
     itemPool = Items[:]
     # always add energy before ammo, as addAmmo will fill up item pool
     addEnergy(qty, itemPool)
-    addAmmo(qty, itemPool)
-    removeForbiddenItems(forbiddenItems, itemPool)
+    addAmmo(qty, itemPool, sm)
 
     return itemPool

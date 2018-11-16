@@ -444,7 +444,7 @@ class Randomizer(object):
         # progression items tried for a given rollback point
         self.rollbackItemsTried = {}
         # handle super fun settings
-        basePool = Items.getItemPool(settings.qty)
+        basePool = Items.getItemPool(settings.qty, self.smbm)
         fun = SuperFunProvider(settings.superFun, basePool, self)
         fun.getForbidden()
         # check if we can reach everything

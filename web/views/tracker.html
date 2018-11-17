@@ -58,6 +58,18 @@ img {
     padding: 0.5%;
     border: 2px solid gray;
 }
+.itemPopup {
+    background-color: #ffffff;
+    position: absolute;
+    z-index: 4;
+    width: 40%;
+    height: auto;
+    top: 2em;
+    left: 30%;
+    display: none;
+    padding: 0.5%;
+    border: 2px solid gray;
+}
 .cloud {
     position: absolute;
     z-index: 2;
@@ -3141,23 +3153,31 @@ function clickLoc(elem) {
     return;
   }
 
+  var locName = elem.id;
+
   if(isPlando == true) {
+    document.getElementById("itemPopupText").innerHTML = "Item to place at "+locName+":";
+
     // display item selector
     document.getElementById("itemPopup").style.display = "block";
     return;
   } else {
     // check that lock is in the available list
-    var locName = elem.id;
     if("state" in locsInfo[locName] && (locsInfo[locName]["state"] == "available" || locsInfo[locName]["state"] == "break")) {
       // call webservice
       ajaxCallItem({action: "add", locName: locName}, "upload", ajaxOkGetItem);
   
-      // if mother brain loc, add end message in log
+      // if mother brain loc, display end message
      if(locName == "MotherBrain") {
        alert("SEE YOU NEXT MISSION");
      }
     }
   }
+}
+
+function placeItem() {
+  var item = document.getElementById("item").value;
+  ajaxCallItem({action: "add", locName: locName, itemName: item, isPlando: true}, "upload", ajaxOkGetItem);
 }
 
 function hideItemPopup() {
@@ -3527,8 +3547,16 @@ function startTheTour(step=-1) {
     <table class="full">
       <colgroup><col class="half" /><col class="half" /></colgroup>
       <tr>
-	<td>Item to place:</td>
-	<td><input id="uploadFile" name="uploadFile" type="file"/></td>
+	<td><p id="itemPopupText">Item to place at LOC:</p></td>
+	<td>
+	  <select class="filldropdown" id="item" name="item"><optgroup label="Minors"><option value="Missile">Missile</option><option value="Super">Super Missile</option><option value="PowerBomb">Power Bomb</option></optgroup><optgroup label="Energy"><option value="ETank">Energy Tank</option><option value="Reserve">Reserve Tank</option></optgroup><optgroup label="Beams"><option value="Charge">Charge Beam</option><option value="Ice">Ice Beam</option><option value="Wave">Wave Beam</option><option value="Spazer">Spazer</option><option value="Plasma">Plasma Beam</option></optgroup><optgroup label="Suits"><option value="Varia">Varia Suit</option><option value="Gravity">Gravity Suit</option></optgroup><optgroup label="Miscellaneous"><option value="Morph">Morph Ball</option><option value="Bomb">Bomb</option><option value="SpringBall">Spring Ball</option><option value="ScrewAttack">Screw Attack</option></optgroup><optgroup label="Boots"><option value="HiJump">Hi-Jump Boots</option><option value="SpaceJump">Space Jump</option><option value="SpeedBooster">Speed Booster</option></optgroup></select>
+	</td>
+      </tr>
+    </table>
+    <table>
+      <tr>
+	<td class="half"><button type="button" onclick="placeItem()" class="full">Place</button></td>
+	<td class="half"><button type="button" onclick="hideItemPopup()" class="full">Cancel</button></td>
       </tr>
     </table>
   </div>

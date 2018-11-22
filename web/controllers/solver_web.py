@@ -1418,7 +1418,7 @@ def callSolverInit(jsonRomFileName, presetFileName, preset, romFileName, isPland
         os.remove(jsonOutFileName)
         raiseHttp(400, "Something wrong happened while initializing solving of the ROM", True)
 
-def callSolverAction(action, locName=None, itemName=None):
+def callSolverAction(action, locName=None, itemName=None, isPlando=False):
     # check that we have a state in the session
     if "state" not in session.tracker["item"]:
         raiseHttp(400, "Missing Solver state in the session", True)
@@ -1481,6 +1481,8 @@ def itemTrackerWebService():
     action = request.vars.action
     print("itemTrackerWebService: action={}".format(action))
 
+    isPlando = (request.vars.isPlando == "on")
+
     if action == 'init':
         try:
             (base, jsonRomFileName) = generateJsonROM(request.vars.romJson)
@@ -1490,13 +1492,12 @@ def itemTrackerWebService():
         presetFileName = '{}/{}.json'.format(getPresetDir(request.vars.preset), request.vars.preset)
         session.tracker["item"]["preset"] = request.vars.preset
 
-        isPlando = (request.vars.isPlando == "on")
         return callSolverInit(jsonRomFileName, presetFileName,
                               request.vars.preset, request.vars.fileName, isPlando)
     elif action == 'get':
         return returnState(session.tracker["item"]["state"])
     else:
-        return callSolverAction(action, request.vars.locName, request.vars.itemName)
+        return callSolverAction(action, request.vars.locName, request.vars.itemName, isPlando)
 
     # return something if not already done
     raiseHttp(200, "OK", True)

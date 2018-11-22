@@ -269,10 +269,10 @@ class CommonSolver(object):
                 if loc['difficulty'].bool == True:
                     self.log.debug("{}: {}".format(loc['Name'], loc['difficulty']))
 
-    def collectMajor(self, loc):
+    def collectMajor(self, loc, itemName=None):
         self.majorLocations.remove(loc)
         self.visitedLocations.append(loc)
-        area = self.collectItem(loc)
+        area = self.collectItem(loc, itemName)
         return area
 
     def collectMinor(self, loc):
@@ -281,8 +281,9 @@ class CommonSolver(object):
         area = self.collectItem(loc)
         return area
 
-    def collectItem(self, loc):
-        item = loc["itemName"]
+    def collectItem(self, loc, item=None):
+        if item == None:
+            item = loc["itemName"]
 
         if self.firstLogFile is not None:
             if item not in self.collectedItems:
@@ -489,18 +490,29 @@ class InteractiveSolver(CommonSolver):
                 return loc
         raise Exception("Location '{}' not found in remaining locations".format(locName))
 
-    def pickItemAt(self, locName, itemName=None):
+    def pickItemAt(self, locName):
         # collect new item at newLoc
         loc = self.getLoc(locName)
-        # plando mode
-        if itemName != None:
-            loc["itemName"] = itemName
         if "difficulty" not in loc:
             # sequence break
             loc["difficulty"] = SMBool(True, -1)
             # take first ap of the loc
             loc["accessPoint"] = loc["AccessFrom"].keys()[0]
         self.collectMajor(loc)
+
+    def setItemAt(self, locName, itemName):
+        # set itemName at locName
+        loc = self.getLoc(locName)
+        # plando mode
+        loc["itemName"] = itemName
+
+        if "difficulty" not in loc:
+            # sequence break
+            loc["difficulty"] = SMBool(True, -1)
+            # take first ap of the loc
+            loc["accessPoint"] = loc["AccessFrom"].keys()[0]
+
+        self.collectMajor(loc, itemName)
 
     def cancelLast(self):
         # loc

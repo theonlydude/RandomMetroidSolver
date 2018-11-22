@@ -3157,6 +3157,7 @@ function clickLoc(elem) {
 
   if(isPlando == true) {
     document.getElementById("itemPopupText").innerHTML = "Item to place at "+locName+":";
+    document.getElementById("locName").value = locName;
 
     // display item selector
     document.getElementById("itemPopup").style.display = "block";
@@ -3177,7 +3178,8 @@ function clickLoc(elem) {
 
 function placeItem() {
   var item = document.getElementById("item").value;
-  ajaxCallItem({action: "add", locName: locName, itemName: item, isPlando: true}, "upload", ajaxOkGetItem);
+  var locName = document.getElementById("locName").value;
+  ajaxCallItem({action: "add", locName: locName, itemName: item, isPlando: "on"}, "upload", ajaxOkGetItem);
 }
 
 function hideItemPopup() {
@@ -3270,6 +3272,10 @@ function ajaxOkGetItem(jsonData) {
   }
 
   isPlando = jsonData["isPlando"];
+
+  if(isPlando == true) {
+    hideItemPopup();
+  }
 
   resetItems();
 
@@ -3544,6 +3550,7 @@ function startTheTour(step=-1) {
   </div>
 
   <div id="itemPopup" class="itemPopup">
+    <input id="locName" name="locName" style="display:none" type="text"/>
     <table class="full">
       <colgroup><col class="half" /><col class="half" /></colgroup>
       <tr>

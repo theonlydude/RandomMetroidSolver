@@ -1306,8 +1306,8 @@ def validateItemTrackerParams():
         raiseHttp(400, "Missing parameter action", True)
     action = request.vars.action
 
-    if action not in ['init', 'add', 'remove', 'clear', 'get']:
-        raiseHttp(400, "Unknown action {}, must be init/add/remove/clear/get".format(action), True)
+    if action not in ['init', 'add', 'remove', 'clear', 'get', 'save']:
+        raiseHttp(400, "Unknown action {}, must be init/add/remove/clear/get/save".format(action), True)
 
     if action == 'init':
         # preset
@@ -1458,8 +1458,11 @@ def callSolverAction(action, locName=None, itemName=None, isPlando=False):
         os.remove(jsonInFileName)
         os.close(fd2)
         os.remove(jsonOutFileName)
-        session.tracker["item"]["state"] = state
-        return returnState(state)
+        if action == 'save':
+            return state
+        else:
+            session.tracker["item"]["state"] = state
+            return returnState(state)
     else:
         os.close(fd1)
         os.remove(jsonInFileName)

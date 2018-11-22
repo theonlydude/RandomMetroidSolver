@@ -14,6 +14,8 @@ extend 'layout.html'
 
 <script type="text/javascript" src="{{=URL('static', 'js/leader-line.min.js')}}"></script>
 
+<script src="{{=URL('static','js/FileSaver.js')}}"></script>
+
 <title>Super Metroid VARIA Randomizer Tracker</title>
 
 <style>
@@ -3101,6 +3103,57 @@ function mouseOut(elem) {
 
 function save() {
   console.log("save");
+
+  var uploadFile = document.getElementById("uploadFile");
+  if(uploadFile.files.length == 0) {
+    var saveFile = document.getElementById("saveFile");
+    if(saveFile.files.length == 0) {
+      // display popup to choose the local ROM
+      document.getElementById("savePopup").style.display = "block";
+    } else {
+      // call WS
+      ajaxCallItem({action: "save"}, "download", ajaxOkSave);
+    }
+  } else {
+    // call WS
+    ajaxCallItem({action: "save"}, "download", ajaxOkSave);
+  }
+}
+
+function ajaxOkSave(data) {
+  console.log("ajaxSaveOk");
+
+  var uploadFile = document.getElementById("uploadFile");
+  if(uploadFile.files.length == 0) {
+    uploadFile = document.getElementById("saveFile");
+  }
+
+  var file = uploadFile.files[0];
+
+  var reader = new FileReader();
+  reader.readAsArrayBuffer(file)
+
+  reader.onload = function(e) {
+      var bytes = new Uint8Array(e.target.result);
+
+      for(var key in data) {
+          if(key === "fileName" || key === "errorMsg") { continue; }
+          bytes[key] = data[key];
+      }
+
+      var blob = new Blob([bytes], {type: "octet/stream"})
+
+      var outFileName = data['fileName']
+      saveAs(blob, outFileName)
+  }
+
+  // info message to display ?
+  if("errorMsg" in data && data["errorMsg"].length > 0) {
+    document.getElementById("flash").innerHTML = data["errorMsg"];
+    $('#flash').show();
+  }
+
+  hideSavePopup();
 }
 
 function displayPopup(isPlando) {
@@ -3184,6 +3237,10 @@ function placeItem() {
 
 function hideItemPopup() {
   document.getElementById("itemPopup").style.display = "none";
+}
+
+function hideSavePopup() {
+  document.getElementById("savePopup").style.display = "none";
 }
 
 function deleteLoc() {
@@ -3564,6 +3621,22 @@ function startTheTour(step=-1) {
       <tr>
 	<td class="half"><button type="button" onclick="placeItem()" class="full">Place</button></td>
 	<td class="half"><button type="button" onclick="hideItemPopup()" class="full">Cancel</button></td>
+      </tr>
+    </table>
+  </div>
+
+  <div id="savePopup" class="itemPopup">
+    <table class="full">
+      <colgroup><col class="half" /><col class="half" /></colgroup>
+      <tr>
+	<td>Randomized Super Metroid ROM: </td>
+	<td><input id="saveFile" name="saveFile" type="file"/></td>
+      </tr>
+    </table>
+    <table>
+      <tr>
+	<td class="half"><button type="button" onclick="save()" class="full">Save</button></td>
+	<td class="half"><button type="button" onclick="hideSavePopup()" class="full">Cancel</button></td>
       </tr>
     </table>
   </div>

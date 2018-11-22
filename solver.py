@@ -357,6 +357,9 @@ class InteractiveSolver(CommonSolver):
 
         if action == 'clear':
             self.clear(True)
+        elif action == 'save':
+            # TODO::implement me
+            pass
         else:
             # add already collected items to smbm
             self.smbm.addItems(self.collectedItems)

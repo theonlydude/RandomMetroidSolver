@@ -504,11 +504,17 @@ class RomPatcher:
         loc = itemLoc['Location']
         self.writeItemCode(itemLoc['Item'], loc['Visibility'], loc['Address'])
 
+    def writeNotSet(self, itemLoc):
+        loc = itemLoc['Location']
+        self.writeItemCode(itemLoc['Item'], "Visible", loc['Address'])
+
     def writeItemsLocs(self, itemLocs):
         self.nItems = 0
         for itemLoc in itemLocs:
             if itemLoc['Item']['Type'] in ['Nothing', 'NoEnergy']:
                 self.writeNothing(itemLoc)
+            elif itemLoc['Item']['Type'] == "NotSet":
+                self.writeNotSet(itemLoc)
             else:
                 self.nItems += 1
                 self.writeItem(itemLoc)

@@ -358,8 +358,7 @@ class InteractiveSolver(CommonSolver):
         if action == 'clear':
             self.clear(True)
         elif action == 'save':
-            # TODO::implement me
-            pass
+            return savePlando()
         else:
             # add already collected items to smbm
             self.smbm.addItems(self.collectedItems)
@@ -379,6 +378,33 @@ class InteractiveSolver(CommonSolver):
 
         # return them
         self.dumpState()
+
+    def savePlando(self):
+        # set special code for unset locs
+        locsItems = {}
+        itemLocs = []
+        for loc in self.visitedLocations:
+            locsItems[loc["Name"]] = loc["itemName"]
+        for loc in self.locations:
+            if loc["Name"] in locsItems:
+                itemLocs.append({'Location': loc, 'Item': {'Type': locsItems[loc["Name"]]}})
+            else:
+                itemLocs.append({'Location': loc, 'Item': {'Type': "NotSet"}})
+
+        # patch the ROM
+        romPatcher = RomPatcher()
+        romPatcher.writeItemsLocs(itemLocs)
+        romPatcher.applyIPSPatches(args.patches, args.noLayout, args.noGravHeat, args.area, args.areaLayoutBase, args.noVariaTweaks)
+        romPatcher.writeSpoiler(itemLocs)
+        romPatcher.end()
+
+        data = romPatcher.romFile.data
+        fileName = 'plando.sfc'
+        data["fileName"] = fileName
+        # error msg in json to be displayed by the web site
+        data["errorMsg"] = ""
+        with open(self.outputFileName, 'w') as jsonFile:
+            json.dump(data, jsonFile)
 
     def locNameWeb2Internal(self, locNameWeb):
         locs = {

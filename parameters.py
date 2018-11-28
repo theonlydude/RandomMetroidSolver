@@ -180,13 +180,20 @@ class Knows:
                             'title': 'Skip the Zebetites with a shinespark',
                             'href': 'https://www.youtube.com/watch?v=jEAgdWQ9kLQ',
                             'rooms': ['Mother Brain Room']}
+    # maridia mama turtle
+    HiJumpMamaTurtle = SMBool(False, 0, ['HiJumpMamaTurtle'])
+    desc['HiJumpMamaTurtle'] = {'display': 'Mama Turtle E-Tank with High-Jump',
+                                'title': 'Access Mama Turtle E-Tank with only High-Jump',
+                                'href': 'https://www.youtube.com/watch?v=1DINqLnINc8',
+                                'rooms': ['Mama Turtle Room']}
+
     # underwater grav-less
     GravLessLevel1 = SMBool(True, hardcore, ['GravLessLevel1'])
     desc['GravLessLevel1'] = {'display': 'Level 1',
-                                    'title': 'Make your way underwater with Hi-Jump and Ice, freezing crabs and fishes. Access Botwoon with grapple.',
-                                    'href': 'https://www.youtube.com/watch?v=c2xoPigezvM',
-                                    'rooms': ['Main Street', 'Mt. Everest', 'Crab Shaft',
-                                              'Aqueduct', 'Botwoon Hallway']} # TODO add forgotten highway rooms, crab hole
+                              'title': 'Make your way underwater with Hi-Jump and Ice, freezing crabs and fishes. Access Botwoon with grapple.',
+                              'href': 'https://www.youtube.com/watch?v=c2xoPigezvM',
+                              'rooms': ['Main Street', 'Mt. Everest', 'Crab Shaft',
+                                        'Aqueduct', 'Botwoon Hallway']} # TODO add forgotten highway rooms, crab hole
 
     GravLessLevel2 = SMBool(False, 0, ['GravLessLevel2'])
     desc['GravLessLevel2'] = {'display': 'Level 2',
@@ -479,6 +486,8 @@ class Knows:
              'title': 'Sponge Bath'}
         ],
         'Maridia 1/2': [
+            {'knows': ['HiJumpMamaTurtle'],
+             'title': 'Mama Turtle'},
             {'knows': ['GravLessLevel1', 'GravLessLevel2', 'GravLessLevel3'],
              'title': 'Underwater movement without Gravity Suit'},
             {'knows': ['MochtroidClip', 'PuyoClip', 'SnailClip'],

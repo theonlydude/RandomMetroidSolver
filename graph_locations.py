@@ -522,12 +522,16 @@ locations = [
         'Main Street Bottom': lambda sm: sm.wor(sm.haveItem('Gravity'), sm.canDoSuitlessOuterMaridia())
     },
     'Available': lambda sm: sm.wand(sm.canOpenRedDoors(),
-                                    sm.wor(sm.canFly(),
-                                           sm.wand(sm.haveItem('Gravity'), sm.haveItem('SpeedBooster')),
-                                           sm.wand(sm.canUseSpringBall(),
-                                                   sm.wor(sm.wand(sm.haveItem('HiJump'), sm.knowsSpringBallJump()),
-                                                          sm.knowsSpringBallJumpFromWall())),
-                                           sm.haveItem('Grapple')))
+                                    sm.wor(sm.wor(sm.canFly(),
+                                                  sm.wand(sm.haveItem('Gravity'),
+                                                          sm.haveItem('SpeedBooster')),
+                                                  sm.wand(sm.haveItem('HiJump'),
+                                                          sm.knowsHiJumpMamaTurtle())),
+                                           sm.wor(sm.wand(sm.canUseSpringBall(),
+                                                          sm.wor(sm.wand(sm.haveItem('HiJump'),
+                                                                         sm.knowsSpringBallJump()),
+                                                                 sm.knowsSpringBallJumpFromWall())),
+                                                  sm.haveItem('Grapple'))))
 },
 {
     'Area': "Maridia",
@@ -1587,7 +1591,8 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Main Street',
     'AccessFrom' : {
-        'Main Street Bottom': lambda sm: sm.wor(sm.haveItem('Gravity'), sm.canDoSuitlessOuterMaridia())
+        'Main Street Bottom': lambda sm: sm.wor(sm.haveItem('Gravity'),
+                                                sm.canDoSuitlessOuterMaridia())
         # we could add eas access from red fish room here, but if you miss it you can't retry
     },
     'Available': lambda sm: sm.haveItem('Morph')
@@ -1603,7 +1608,8 @@ locations = [
     'Visibility': "Hidden",
     'Room': 'Mama Turtle Room',
     'AccessFrom' : {
-        'Main Street Bottom': lambda sm: sm.wor(sm.haveItem('Gravity'), sm.canDoSuitlessOuterMaridia())
+        'Main Street Bottom': lambda sm: sm.wor(sm.haveItem('Gravity'),
+                                                sm.canDoSuitlessOuterMaridia())
     },
     'Available': lambda sm: sm.canOpenRedDoors()
 },
@@ -1620,7 +1626,8 @@ locations = [
     'AccessFrom' : {
         'Main Street Bottom': lambda sm: sm.canPassMtEverest()
     },
-    'Available': lambda sm: sm.wor(sm.canPassBombPassages(), sm.canUseSpringBall())
+    'Available': lambda sm: sm.wor(sm.canPassBombPassages(),
+                                   sm.canUseSpringBall())
 },
 {
     'Area': "Maridia",

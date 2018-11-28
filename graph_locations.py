@@ -526,7 +526,9 @@ locations = [
                                                   sm.wand(sm.haveItem('Gravity'),
                                                           sm.haveItem('SpeedBooster')),
                                                   sm.wand(sm.haveItem('HiJump'),
-                                                          sm.knowsHiJumpMamaTurtle())),
+                                                          sm.knowsHiJumpMamaTurtle(),
+                                                          sm.wor(sm.haveItem('Morph'), # to turn
+                                                                 sm.haveItem('XRayScope')))),
                                            sm.wor(sm.wand(sm.canUseSpringBall(),
                                                           sm.wor(sm.wand(sm.haveItem('HiJump'),
                                                                          sm.knowsSpringBallJump()),

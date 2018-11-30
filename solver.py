@@ -10,7 +10,8 @@ from parameters import easy, medium, hard, harder, hardcore, mania, god, samus, 
 from smbool import SMBool
 from smboolmanager import SMBoolManager
 from helpers import Pickup, Bosses
-from rom import RomLoader
+from rom import RomLoader, RomPatcher
+from itemrandomizerweb import Items
 from graph_locations import locations as graphLocations
 from graph import AccessGraph
 from graph_access import vanillaTransitions, accessPoints
@@ -358,7 +359,7 @@ class InteractiveSolver(CommonSolver):
         if action == 'clear':
             self.clear(True)
         elif action == 'save':
-            return savePlando()
+            return self.savePlando()
         else:
             # add already collected items to smbm
             self.smbm.addItems(self.collectedItems)
@@ -387,14 +388,14 @@ class InteractiveSolver(CommonSolver):
             locsItems[loc["Name"]] = loc["itemName"]
         for loc in self.locations:
             if loc["Name"] in locsItems:
-                itemLocs.append({'Location': loc, 'Item': {'Type': locsItems[loc["Name"]]}})
+                itemLocs.append({'Location': loc, 'Item': Items.getItem(locsItems[loc["Name"]])})
             else:
-                itemLocs.append({'Location': loc, 'Item': {'Type': "NotSet"}})
+                itemLocs.append({'Location': loc, 'Item': Items.getItem("NotSet")})
 
         # patch the ROM
         romPatcher = RomPatcher()
         romPatcher.writeItemsLocs(itemLocs)
-        romPatcher.applyIPSPatches(args.patches, args.noLayout, args.noGravHeat, args.area, args.areaLayoutBase, args.noVariaTweaks)
+        romPatcher.writeItemsNumber()
         romPatcher.writeSpoiler(itemLocs)
         romPatcher.end()
 
@@ -1348,7 +1349,7 @@ if __name__ == "__main__":
     parser.add_argument('--loc', help="Name of the location to action on (used in interactive mode)",
                         dest="loc", nargs='?', default=None)
     parser.add_argument('--action', help="Pickup item at location, remove last pickedup location, clear all (used in interactive mode)",
-                        dest="action", nargs="?", default=None, choices=['init', 'add', 'remove', 'clear', 'get'])
+                        dest="action", nargs="?", default=None, choices=['init', 'add', 'remove', 'clear', 'get', 'save'])
     parser.add_argument('--plando', help="Plando mode (used in interactive mode)",
                         dest="plando", action="store_true")
     parser.add_argument('--item', help="Name of the item to place in plando mode (used in interactive mode)",

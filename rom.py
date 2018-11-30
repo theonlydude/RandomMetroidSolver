@@ -511,6 +511,8 @@ class RomPatcher:
     def writeItemsLocs(self, itemLocs):
         self.nItems = 0
         for itemLoc in itemLocs:
+            if itemLoc['Location']['Name'] == 'Mother Brain':
+                continue
             if itemLoc['Item']['Type'] in ['Nothing', 'NoEnergy']:
                 self.writeNothing(itemLoc)
             elif itemLoc['Item']['Type'] == "NotSet":
@@ -572,6 +574,11 @@ class RomPatcher:
         self.romFile.write(struct.pack('B', op1))
         self.romFile.write(struct.pack('B', branch))
 
+    def writeItemsNumber(self):
+        # write total number of actual items for item percentage patch (patch the patch)
+        self.romFile.seek(0x5E651)
+        self.romFile.write(struct.pack('B', self.nItems))
+
     def applyIPSPatches(self, optionalPatches=[], noLayout=False, noGravHeat=False, area=False, areaLayoutBase=False, noVariaTweaks=False):
         try:
             # apply standard patches
@@ -582,9 +589,7 @@ class RomPatcher:
                 stdPatches.append('race_mode.ips')
             for patchName in stdPatches:
                 self.applyIPSPatch(patchName)
-            # write total number of actual items for item percentage patch (patch the patch)
-            self.romFile.seek(0x5E651)
-            self.romFile.write(struct.pack('B', self.nItems))
+            self.writeItemsNumber()
 
             if noLayout == False:
                 # apply layout patches

@@ -195,6 +195,15 @@ NoEnergy = {
     'Message': 0x0
 }
 
+NotSet = {
+    'Type': 'NotSet',
+    'Category': 'Nothing',
+    'Class': 'Major',
+    'Code': 0x0,
+    'Name': "Not Set",
+    'Message': 0x0
+}
+
 def isBeam(item):
     return item['Category'] == 'Beam' or item['Type'] == 'Ice'
 
@@ -230,6 +239,19 @@ def getItemTypeCode(item, itemVisibility):
 
     itemCode = item['Code'] + modifier
     return itemCode
+
+# called from the plando save to recreate the {loc, item} used in the rando
+def getItem(itemType):
+    if itemType == 'Nothing':
+        return Nothing
+    elif itemType == 'NoEnergy':
+        return NoEnergy
+    elif itemType == 'NotSet':
+        return NotSet
+    else:
+        for item in Items:
+            if item["Type"] == itemType:
+                return item
 
 # add item from original item list (NoEnergy and Nothing items have to be added manually)
 def addItem(itemType, itemPool):

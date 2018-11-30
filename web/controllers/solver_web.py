@@ -1459,7 +1459,7 @@ def callSolverAction(action, locName=None, itemName=None, isPlando=False):
         os.close(fd2)
         os.remove(jsonOutFileName)
         if action == 'save':
-            return state
+            return json.dumps(state)
         else:
             session.tracker["item"]["state"] = state
             return returnState(state)

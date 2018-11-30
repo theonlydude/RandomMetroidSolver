@@ -338,6 +338,9 @@ class InteractiveSolver(CommonSolver):
 
         self.clear()
 
+        if self.isPlando == True:
+            self.loadPlandoLocs()
+
         # compute new available locations
         self.computeLocationsDifficulty(self.majorLocations)
 
@@ -380,23 +383,134 @@ class InteractiveSolver(CommonSolver):
         # return them
         self.dumpState()
 
+    def getLocNameFromAddress(self, address):
+        addressName = {
+            0x8264: "Energy Tank, Gauntlet",
+            0x8404: "Bomb",
+            0x8432: "Energy Tank, Terminator",
+            0x852C: "Reserve Tank, Brinstar",
+            0x8614: "Charge Beam",
+            0x86DE: "Morphing Ball",
+            0x879E: "Energy Tank, Brinstar Ceiling",
+            0x87C2: "Energy Tank, Etecoons",
+            0x87FA: "Energy Tank, Waterway",
+            0x8824: "Energy Tank, Brinstar Gate",
+            0x8876: "X-Ray Scope",
+            0x896E: "Spazer",
+            0x899C: "Energy Tank, Kraid",
+            0x8ACA: "Varia Suit",
+            0x8B24: "Ice Beam",
+            0x8BA4: "Energy Tank, Crocomire",
+            0x8BAC: "Hi-Jump Boots",
+            0x8C36: "Grapple Beam",
+            0x8C3E: "Reserve Tank, Norfair",
+            0x8C82: "Speed Booster",
+            0x8CCA: "Wave Beam",
+            0x9108: "Energy Tank, Ridley",
+            0x9110: "Screw Attack",
+            0x9184: "Energy Tank, Firefleas",
+            0xC2E9: "Reserve Tank, Wrecked Ship",
+            0xC337: "Energy Tank, Wrecked Ship",
+            0xC365: "Right Super, Wrecked Ship",
+            0xC36D: "Gravity Suit",
+            0xC47D: "Energy Tank, Mama turtle",
+            0xC559: "Plasma Beam",
+            0xC5E3: "Reserve Tank, Maridia",
+            0xC6E5: "Spring Ball",
+            0xC755: "Energy Tank, Botwoon",
+            0xC7A7: "Space Jump",
+            0x81CC: "Power Bomb (Crateria surface)",
+            0x81E8: "Missile (outside Wrecked Ship bottom)",
+            0x81EE: "Missile (outside Wrecked Ship top)",
+            0x81F4: "Missile (outside Wrecked Ship middle)",
+            0x8248: "Missile (Crateria moat)",
+            0x83EE: "Missile (Crateria bottom)",
+            0x8464: "Missile (Crateria gauntlet right)",
+            0x846A: "Missile (Crateria gauntlet left)",
+            0x8478: "Super Missile (Crateria)",
+            0x8486: "Missile (Crateria middle)",
+            0x84AC: "Power Bomb (green Brinstar bottom)",
+            0x84E4: "Super Missile (pink Brinstar)",
+            0x8518: "Missile (green Brinstar below super missile)",
+            0x851E: "Super Missile (green Brinstar top)",
+            0x8532: "Missile (green Brinstar behind missile)",
+            0x8538: "Missile (green Brinstar behind reserve tank)",
+            0x8608: "Missile (pink Brinstar top)",
+            0x860E: "Missile (pink Brinstar bottom)",
+            0x865C: "Power Bomb (pink Brinstar)",
+            0x8676: "Missile (green Brinstar pipe)",
+            0x874C: "Power Bomb (blue Brinstar)",
+            0x8798: "Missile (blue Brinstar middle)",
+            0x87D0: "Super Missile (green Brinstar bottom)",
+            0x8802: "Missile (blue Brinstar bottom)",
+            0x8836: "Missile (blue Brinstar top)",
+            0x883C: "Missile (blue Brinstar behind missile)",
+            0x88CA: "Power Bomb (red Brinstar sidehopper room)",
+            0x890E: "Power Bomb (red Brinstar spike room)",
+            0x8914: "Missile (red Brinstar spike room)",
+            0x89EC: "Missile (Kraid)",
+            0x8AE4: "Missile (lava room)",
+            0x8B46: "Missile (below Ice Beam)",
+            0x8BC0: "Missile (above Crocomire)",
+            0x8BE6: "Missile (Hi-Jump Boots)",
+            0x8BEC: "Energy Tank (Hi-Jump Boots)",
+            0x8C04: "Power Bomb (Crocomire)",
+            0x8C14: "Missile (below Crocomire)",
+            0x8C2A: "Missile (Grapple Beam)",
+            0x8C44: "Missile (Norfair Reserve Tank)",
+            0x8C52: "Missile (bubble Norfair green door)",
+            0x8C66: "Missile (bubble Norfair)",
+            0x8C74: "Missile (Speed Booster)",
+            0x8CBC: "Missile (Wave Beam)",
+            0x8E6E: "Missile (Gold Torizo)",
+            0x8E74: "Super Missile (Gold Torizo)",
+            0x8F30: "Missile (Mickey Mouse room)",
+            0x8FCA: "Missile (lower Norfair above fire flea room)",
+            0x8FD2: "Power Bomb (lower Norfair above fire flea room)",
+            0x90C0: "Power Bomb (Power Bombs of shame)",
+            0x9100: "Missile (lower Norfair near Wave Beam)",
+            0xC265: "Missile (Wrecked Ship middle)",
+            0xC2EF: "Missile (Gravity Suit)",
+            0xC319: "Missile (Wrecked Ship top)",
+            0xC357: "Super Missile (Wrecked Ship left)",
+            0xC437: "Missile (green Maridia shinespark)",
+            0xC43D: "Super Missile (green Maridia)",
+            0xC483: "Missile (green Maridia tatori)",
+            0xC4AF: "Super Missile (yellow Maridia)",
+            0xC4B5: "Missile (yellow Maridia super missile)",
+            0xC533: "Missile (yellow Maridia false wall)",
+            0xC5DD: "Missile (left Maridia sand pit room)",
+            0xC5EB: "Missile (right Maridia sand pit room)",
+            0xC5F1: "Power Bomb (right Maridia sand pit room)",
+            0xC603: "Missile (pink Maridia)",
+            0xC609: "Super Missile (pink Maridia)",
+            0xC74D: "Missile (Draygon)"
+        }
+        return addressName[address]
+
+    def loadPlandoLocs(self):
+        # get the addresses of the already filled locs, with the correct order
+        addresses = self.romLoader.getPlandoAddresses()
+
+        for address in addresses:
+            loc = self.getLocNameFromAddress(address)
+            self.pickItemAt(loc["Name"])
+
     def savePlando(self):
-        # set special code for unset locs
+        # store filled locations addresses in the ROM for next creating session
         locsItems = {}
         itemLocs = []
         for loc in self.visitedLocations:
             locsItems[loc["Name"]] = loc["itemName"]
         for loc in self.locations:
-            if loc["Name"] in locsItems:
-                itemLocs.append({'Location': loc, 'Item': Items.getItem(locsItems[loc["Name"]])})
-            else:
-                itemLocs.append({'Location': loc, 'Item': Items.getItem("NotSet")})
+            itemLocs.append({'Location': loc, 'Item': Items.getItem(locsItems[loc["Name"]])})
 
         # patch the ROM
         romPatcher = RomPatcher()
         romPatcher.writeItemsLocs(itemLocs)
         romPatcher.writeItemsNumber()
         romPatcher.writeSpoiler(itemLocs)
+        romPatcher.writePlandoAddresses(self.visitedLocations)
         romPatcher.end()
 
         data = romPatcher.romFile.data

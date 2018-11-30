@@ -387,6 +387,19 @@ class RomReader:
 
         return romData
 
+    def getPlandoAddresses(self):
+        self.romFile.seek(0x2F6000)
+        addresses = []
+        i = 0
+        # loop only 100 times (there's 100 locations)
+        while True and i < 100:
+            address = self.readWord()
+            if address == 0xFFFF:
+                return addresses
+            else:
+                addresses.append(address)
+                i += 1
+
 class RomPatcher:
     # standard:
     # Intro/Ceres Skip and initial door flag setup
@@ -504,10 +517,6 @@ class RomPatcher:
         loc = itemLoc['Location']
         self.writeItemCode(itemLoc['Item'], loc['Visibility'], loc['Address'])
 
-    def writeNotSet(self, itemLoc):
-        loc = itemLoc['Location']
-        self.writeItemCode(itemLoc['Item'], "Visible", loc['Address'])
-
     def writeItemsLocs(self, itemLocs):
         self.nItems = 0
         for itemLoc in itemLocs:
@@ -515,8 +524,6 @@ class RomPatcher:
                 continue
             if itemLoc['Item']['Type'] in ['Nothing', 'NoEnergy']:
                 self.writeNothing(itemLoc)
-            elif itemLoc['Item']['Type'] == "NotSet":
-                self.writeNotSet(itemLoc)
             else:
                 self.nItems += 1
                 self.writeItem(itemLoc)
@@ -1014,6 +1021,18 @@ class RomPatcher:
                 self.romFile.write(struct.pack('B', RomPatcher.buttons[button][0]))
                 self.romFile.write(struct.pack('B', RomPatcher.buttons[button][1]))
 
+    def writePlandoAddresses(self, locations):
+        self.romFile.seek(0x2F6000)
+        for loc in locations:
+            if loc['Name'] == 'Mother Brain':
+                continue
+            self.writeWord(loc['Address'] & 0xFFFF)
+
+        # fill remaining addresses with 0xFFFF
+        locsNumber = 100
+        for i in range(0, locsNumber-len(locations)):
+            self.writeWord(0xFFFF)
+
 class FakeROM:
     # to have the same code for real ROM and the webservice
     def __init__(self, data={}):
@@ -1111,6 +1130,9 @@ class RomLoader(object):
     def getRawPatches(self):
         # used in interactive solver
         return self.romReader.getRawPatches()
+
+    def getPlandoAddresses(self):
+        return self.romReader.getPlandoAddresses()
 
 class RomLoaderSfc(RomLoader):
     # standard usage (when calling from the command line)

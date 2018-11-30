@@ -195,15 +195,6 @@ NoEnergy = {
     'Message': 0x0
 }
 
-NotSet = {
-    'Type': 'NotSet',
-    'Category': 'Nothing',
-    'Class': 'Major',
-    'Code': 0x0,
-    'Name': "Not Set",
-    'Message': 0x0
-}
-
 def isBeam(item):
     return item['Category'] == 'Beam' or item['Type'] == 'Ice'
 
@@ -246,8 +237,6 @@ def getItem(itemType):
         return Nothing
     elif itemType == 'NoEnergy':
         return NoEnergy
-    elif itemType == 'NotSet':
-        return NotSet
     else:
         for item in Items:
             if item["Type"] == itemType:

@@ -409,8 +409,10 @@ class Helpers(object):
 
     @Cache.decorator
     def enoughStuffBotwoon(self):
-        # say botwoon has 5000 energy : it is actually 3000 but account for missed shots
-        (ammoMargin, secs) = self.canInflictEnoughDamages(5000, givesDrops=False)
+        # say botwoon has 4000 energy : it is actually 3000 but account for missed shots
+        # 4000 to allow for low% botwoon without charge beam (10 - 10 | missiles - supers)
+        # there is a setup to "never" miss a shot by only shooting him when he exits through the top left hole
+        (ammoMargin, secs) = self.canInflictEnoughDamages(4000, givesDrops=False)
         if ammoMargin == 0:
             return SMBool(False)
         else:

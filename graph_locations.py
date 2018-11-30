@@ -790,8 +790,12 @@ locations = [
     'AccessFrom' : {
         'Landing Site': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: sm.wand(sm.canEnterAndLeaveGauntlet(),
-                                    sm.canPassBombPassages())
+    'Available': lambda sm: sm.wor(sm.wand(sm.canEnterAndLeaveGauntlet(),
+                                           sm.canPassBombPassages()),
+                                   sm.wand(sm.knowsShortCharge(), # https://www.youtube.com/watch?v=JU6BFcjuR4c
+                                           sm.haveItem('SpeedBooster'),
+                                           sm.canUsePowerBombs(),
+                                           sm.energyReserveCountOk(1)))
 },
 {
     'Area': "Crateria",
@@ -806,8 +810,12 @@ locations = [
     'AccessFrom' : {
         'Landing Site': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: sm.wand(sm.canEnterAndLeaveGauntlet(),
-                                    sm.canPassBombPassages())
+    'Available': lambda sm: sm.wor(sm.wand(sm.canEnterAndLeaveGauntlet(),
+                                           sm.canPassBombPassages()),
+                                   sm.wand(sm.knowsShortCharge(), # https://www.youtube.com/watch?v=JU6BFcjuR4c
+                                           sm.haveItem('SpeedBooster'),
+                                           sm.canUsePowerBombs(),
+                                           sm.energyReserveCountOk(1)))
 },
 {
     'Area': "Crateria",
@@ -1705,7 +1713,9 @@ locations = [
     'AccessFrom' : {
         'Main Street Bottom': lambda sm: sm.canAccessBotwoonFromMainStreet()
     },
-    'Available': lambda sm: sm.haveItem('Gravity')
+    'Available': lambda sm: sm.wor(sm.haveItem('Gravity'),
+                                   sm.wand(sm.knowsGravLessLevel3(),
+                                           sm.canSpringBallJump())) # https://www.youtube.com/watch?v=7LYYxphRRT0
 },
 {
     'Area': "Maridia",

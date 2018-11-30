@@ -3538,6 +3538,9 @@ function setItemCount(itemName) {
 
 }
 
+$(window).scroll(function(){
+  $("#itemPopup").stop().animate({"marginTop": ($(window).scrollTop()) + "px"}, "fast" );
+});
 
 //-----------------------------------------------------------
 // TUTORIAL

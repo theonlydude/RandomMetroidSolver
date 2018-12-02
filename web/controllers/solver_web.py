@@ -472,7 +472,10 @@ def canSolveROM(jsonRomFileName):
         romDict[int(address)] = tempDictROM[address]
 
     # check if the ROM is not a race one protected against solving
-    md5sum = getMd5sum(romDict)
+    try:
+        md5sum = getMd5sum(romDict)
+    except:
+        return (False, None)
 
     DB = db.DB()
 

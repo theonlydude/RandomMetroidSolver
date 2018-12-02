@@ -792,10 +792,11 @@ locations = [
     },
     'Available': lambda sm: sm.wor(sm.wand(sm.canEnterAndLeaveGauntlet(),
                                            sm.canPassBombPassages()),
-                                   sm.wand(sm.knowsShortCharge(), # https://www.youtube.com/watch?v=JU6BFcjuR4c
-                                           sm.haveItem('SpeedBooster'),
+                                   sm.wand(sm.wand(sm.knowsShortCharge(),
+                                                   sm.haveItem('SpeedBooster')),
                                            sm.canUsePowerBombs(),
-                                           sm.energyReserveCountOk(1)))
+                                           sm.itemCountOk('ETank', 1),
+                                           sm.knowsLowGauntlet()))
 },
 {
     'Area': "Crateria",
@@ -812,10 +813,11 @@ locations = [
     },
     'Available': lambda sm: sm.wor(sm.wand(sm.canEnterAndLeaveGauntlet(),
                                            sm.canPassBombPassages()),
-                                   sm.wand(sm.knowsShortCharge(), # https://www.youtube.com/watch?v=JU6BFcjuR4c
-                                           sm.haveItem('SpeedBooster'),
+                                   sm.wand(sm.wand(sm.knowsShortCharge(),
+                                                   sm.haveItem('SpeedBooster')),
                                            sm.canUsePowerBombs(),
-                                           sm.energyReserveCountOk(1)))
+                                           sm.itemCountOk('ETank', 1),
+                                           sm.knowsLowGauntlet()))
 },
 {
     'Area': "Crateria",

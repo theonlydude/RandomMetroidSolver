@@ -278,6 +278,12 @@ class Knows:
                                     'href': 'https://www.youtube.com/watch?v=2a6mf-kB60U',
                                     'rooms': ['Landing Site']}
 
+    LowGauntlet = SMBool(False, 0, ['LowGauntlet'])
+    desc['LowGauntlet'] = {'display': 'Gauntlet Minors Access',
+                           'title': 'Access Gauntlet minors with SpeedBooster, 1 Etank and 1 Power Bomb pack',
+                           'href': 'https://www.youtube.com/watch?v=JU6BFcjuR4c',
+                           'rooms': ['Landing Site', 'Gauntlet Entrance', 'Gauntlet Energy Tank Room']}
+
     # Norfair
     WallJumpCathedralExit = SMBool(True, medium, ['WallJumpCathedralExit'])
     desc['WallJumpCathedralExit'] = {'display': 'Wall Jump to exit Cathedral',
@@ -471,7 +477,7 @@ class Knows:
              'title': 'Used across the game'}
         ],
         'Crateria/Brinstar': [
-            {'knows': ['AlcatrazEscape', 'HiJumpGauntletAccess', 'HiJumpLessGauntletAccess'],
+            {'knows': ['AlcatrazEscape', 'HiJumpGauntletAccess', 'HiJumpLessGauntletAccess', 'LowGauntlet'],
              'title': 'Crateria'},
             {'knows': ['CeilingDBoost', 'EarlyKraid',
                        'ReverseGateGlitch', 'ReverseGateGlitchHiJumpLess', 

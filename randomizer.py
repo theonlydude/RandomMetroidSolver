@@ -219,6 +219,8 @@ if __name__ == "__main__":
     if args.hideItems == 'random':
         args.hideItems = bool(random.getrandbits(1))
     if args.morphPlacement == 'random':
+        if args.suitsRestriction == True and args.area == True:
+            morphPlacements.remove('late')
         args.morphPlacement = morphPlacements[random.randint(0, len(morphPlacements)-1)]
     if args.strictMinors == 'random':
         args.strictMinors = bool(random.getrandbits(1))

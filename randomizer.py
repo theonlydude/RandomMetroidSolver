@@ -130,6 +130,9 @@ if __name__ == "__main__":
     parser.add_argument('--controls',
                         help="specify controls, comma-separated, in that order: Shoot,Jump,Dash,ItemSelect,ItemCancel,AngleUp,AngleDown. Possible values: A,B,X,Y,L,R,Select,None",
                         dest='controls')
+    parser.add_argument('--moonwalk',
+                        help="Enables moonwalk by default",
+                        dest='moonWalk', action='store_true', default=False)
     parser.add_argument('--runtime', help="Maximum runtime limit in seconds. If 0 or negative, no runtime limit. Default is 30.", dest='runtimeLimit_s',
                         nargs='?', default=30, type=int)
     parser.add_argument('--race', help="Race mode magic number", dest='raceMagic',
@@ -212,10 +215,15 @@ if __name__ == "__main__":
     if args.fullRandomization == 'random':
         args.fullRandomization = bool(random.getrandbits(1))
     if args.suitsRestriction == 'random':
-        args.suitsRestriction = bool(random.getrandbits(1))
+        if args.morphPlacement == 'late' and args.area == True:
+            args.suitsRestriction = False
+        else:
+            args.suitsRestriction = bool(random.getrandbits(1))
     if args.hideItems == 'random':
         args.hideItems = bool(random.getrandbits(1))
     if args.morphPlacement == 'random':
+        if args.suitsRestriction == True and args.area == True:
+            morphPlacements.remove('late')
         args.morphPlacement = morphPlacements[random.randint(0, len(morphPlacements)-1)]
     if args.strictMinors == 'random':
         args.strictMinors = bool(random.getrandbits(1))
@@ -370,6 +378,8 @@ if __name__ == "__main__":
 #        romPatcher.writeTransitionsCredits(randomizer.areaGraph.getCreditsTransitions())
         if ctrlDict is not None:
             romPatcher.writeControls(ctrlDict)
+        if args.moonWalk == True:
+            romPatcher.enableMoonWalk()
         romPatcher.writeMagic()
         romPatcher.end()
 

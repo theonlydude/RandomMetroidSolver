@@ -1041,6 +1041,12 @@ class RomPatcher:
                 self.romFile.write(struct.pack('B', RomPatcher.buttons[button][0]))
                 self.romFile.write(struct.pack('B', RomPatcher.buttons[button][1]))
 
+    def enableMoonWalk(self):
+        self.romFile.seek(0xB35D)
+        # replace STZ with STA since A is non-zero at this point
+        self.romFile.write(struct.pack('B', 0x8D))
+
+
 class FakeROM:
     # to have the same code for real ROM and the webservice
     def __init__(self, data={}):

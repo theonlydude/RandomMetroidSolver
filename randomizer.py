@@ -130,6 +130,9 @@ if __name__ == "__main__":
     parser.add_argument('--controls',
                         help="specify controls, comma-separated, in that order: Shoot,Jump,Dash,ItemSelect,ItemCancel,AngleUp,AngleDown. Possible values: A,B,X,Y,L,R,Select,None",
                         dest='controls')
+    parser.add_argument('--moonwalk',
+                        help="Enables moonwalk by default",
+                        dest='moonWalk', action='store_true', default=False)
     parser.add_argument('--runtime', help="Maximum runtime limit in seconds. If 0 or negative, no runtime limit. Default is 30.", dest='runtimeLimit_s',
                         nargs='?', default=30, type=int)
     parser.add_argument('--race', help="Race mode magic number", dest='raceMagic',
@@ -370,6 +373,8 @@ if __name__ == "__main__":
 #        romPatcher.writeTransitionsCredits(randomizer.areaGraph.getCreditsTransitions())
         if ctrlDict is not None:
             romPatcher.writeControls(ctrlDict)
+        if args.moonWalk == True:
+            romPatcher.enableMoonWalk()
         romPatcher.writeMagic()
         romPatcher.end()
 

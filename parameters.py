@@ -315,6 +315,12 @@ class Knows:
                           'href': 'https://www.youtube.com/watch?v=ERer642mil8',
                           'rooms': ['Post Crocomire Farming Room']}
 
+    IceMissileFromCroc = SMBool(False, 0, ['IceMissileFromCroc'])
+    desc['IceMissileFromCroc'] = {'display': 'Missile under Ice beam from Crocomire',
+                                  'title': 'Access missile pack under Ice beam location by reverse sparking Crocomire speedway',
+                                  'href': 'https://clips.twitch.tv/CrackyConfidentMomEagleEye',
+                                  'rooms': ['Crocomire Speedway']}
+
     LavaDive = SMBool(True, harder, ['LavaDive'])
     desc['LavaDive'] = {'display': 'Lava Dive',
                         'title': 'Enter Lower Norfair with Varia and Hi-Jump',
@@ -511,7 +517,7 @@ class Knows:
              'title': 'Obscure suitless stuff'}
         ],
         'Norfair': [
-            {'knows': ['WallJumpCathedralExit', 'NorfairReserveDBoost', 'CrocPBsIce', 'CrocPBsDBoost', 'NovaBoost'],
+            {'knows': ['WallJumpCathedralExit', 'NorfairReserveDBoost', 'CrocPBsIce', 'CrocPBsDBoost', 'IceMissileFromCroc', 'NovaBoost'],
               'title': 'Upper Norfair'},
             {'knows': ['LavaDive', 'LavaDiveNoHiJump', 'ScrewAttackExit', 'WorstRoomIceCharge'],
              'title': 'Lower Norfair'}

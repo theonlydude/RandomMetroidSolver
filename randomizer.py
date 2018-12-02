@@ -215,7 +215,10 @@ if __name__ == "__main__":
     if args.fullRandomization == 'random':
         args.fullRandomization = bool(random.getrandbits(1))
     if args.suitsRestriction == 'random':
-        args.suitsRestriction = bool(random.getrandbits(1))
+        if args.morphPlacement == 'late' and args.area == True:
+            args.suitsRestriction = False
+        else:
+            args.suitsRestriction = bool(random.getrandbits(1))
     if args.hideItems == 'random':
         args.hideItems = bool(random.getrandbits(1))
     if args.morphPlacement == 'random':

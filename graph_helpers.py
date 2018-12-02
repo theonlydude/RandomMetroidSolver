@@ -234,6 +234,32 @@ class HelpersGraph(Helpers):
                               sm.wand(sm.knowsGetAroundWallJump(), sm.haveItem('HiJump')),
                               sm.wand(sm.knowsSpringBallJumpFromWall(), sm.canUseSpringBall())))
 
+    @Cache.decorator
+    def canPassThreeMuskateers(self):
+        sm = self.smbm
+        destroy = sm.wor(sm.haveItem('ScrewAttack'),
+                         sm.wand(sm.heatProof(), # this takes a loooong time ...
+                                 sm.wor(sm.haveItem('Spazer'),
+                                        sm.haveItem('Ice'),
+                                        sm.haveItem('Plasma'))))
+        if destroy.bool == True:
+            return destroy
+        # if no adapted beams or screw attack, check if we can go both ways
+        # (no easy refill around) with supers and/or health
+
+        # - super only?
+        ki = 1800.0
+        sup = 300.0
+        if sm.itemCount('Super')*5*sup >= 6*ki:
+            return (True, 0)
+
+        # - or with taking damage as well?
+        dmgKi = 200.0 / sm.getDmgReduction(False)
+        if (sm.itemCount('Super')*5*sup)/ki + (sm.energyReserveCount()*100 - 2)/dmgKi >= 6:
+            return sm.heatProof() # require heat proof as long as taking damage is necessary
+
+        return SMBool(False, 0)
+
     # go though the pirates room filled with acid
     @Cache.decorator
     def canPassAmphitheaterReverse(self):

@@ -129,8 +129,8 @@ accessPoints = [
                                                   sm.wand(sm.haveItem('Super'), sm.knowsGreenGateGlitch()),
                                                   sm.canDestroyBombWalls()),
         'Firefleas': lambda sm: sm.wand(sm.canHellRun('LowerNorfair'),
-                                                    sm.canPassWorstRoom(),
-                                                    sm.canUsePowerBombs())
+                                        sm.canPassWorstRoom(),
+                                        sm.canUsePowerBombs())
     }, internal=True),
     AccessPoint('LN Above GT', 'LowerNorfair', {
         'Screw Attack Bottom': lambda sm: sm.wand(sm.canHellRun('LowerNorfair'),
@@ -146,10 +146,15 @@ accessPoints = [
                                           sm.canPassAmphitheaterReverse(),
                                           sm.canUsePowerBombs()),
         'Three Muskateers Room Left': lambda sm: sm.wand(sm.canHellRun('LowerNorfair'),
-                                                         sm.haveItem('Morph')),
+                                                         sm.haveItem('Morph'),
+                                                         sm.canPassThreeMuskateers()),
         'Ridley Zone': lambda sm: sm.wand(sm.canHellRun('LowerNorfair'),
                                           sm.canOpenGreenDoors(),
-                                          sm.canOpenYellowDoors())
+                                          sm.canOpenYellowDoors()),
+        'Screw Attack Bottom': lambda sm: sm.wand(sm.canHellRun('LowerNorfair'),
+                                                  sm.canPassAmphitheaterReverse(),
+                                                  sm.canDestroyBombWalls(),
+                                                  sm.wand(sm.haveItem('Super'), sm.knowsGreenGateGlitch()))
     }, internal=True),
     AccessPoint('Ridley Zone', 'LowerNorfair', {
         'Firefleas': lambda sm: sm.wand(sm.canHellRun('LowerNorfair'),
@@ -162,7 +167,8 @@ accessPoints = [
     }, internal=True),
     AccessPoint('Three Muskateers Room Left', 'LowerNorfair', {
         'Firefleas': lambda sm: sm.wand(sm.canHellRun('LowerNorfair'),
-                                        sm.haveItem('Morph'))
+                                        sm.haveItem('Morph'),
+                                        sm.canPassThreeMuskateers())
     }, roomInfo = {'RoomPtr':0xb656, "area": 0x2},
        exitInfo = {'DoorPtr':0x9a4a, 'direction': 0x5, "cap": (0x5e, 0x6), "bitFlag": 0x0,
                    "screen": (0x5, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},

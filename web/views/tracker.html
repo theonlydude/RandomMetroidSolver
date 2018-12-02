@@ -3010,6 +3010,11 @@ window.onload = function(){
           romData[i] = bytes[i];
         }
 
+        // plando addresses
+        for(var i=0x2F6000; i<=0x2F6064; i++) {
+          romData[i] = bytes[i];
+        }
+
         romData["romFileName"] = outFileName;
   
         var json = JSON.stringify(romData);
@@ -3037,6 +3042,10 @@ function setGuessedPreset(romName){
 function guessVARIAPreset(filename) {
   var re = /VARIA_Randomizer_[A]?[F]?X\d+_(\w+)/;
   var match = filename.match(re);
+  if(match == null) {
+    re = /VARIA_Plandomizer_[A]?[F]?X\d+_(\w+)/;
+    match = filename.match(re);
+  }
   if(match != null) {
     var data = match[1];
     console.log(data);
@@ -3102,8 +3111,6 @@ function mouseOut(elem) {
 }
 
 function save() {
-  console.log("save");
-
   var uploadFile = document.getElementById("uploadFile");
   if(uploadFile.files.length == 0) {
     var saveFile = document.getElementById("saveFile");
@@ -3214,7 +3221,6 @@ function clickLoc(elem) {
 
     // display item selector
     document.getElementById("itemPopup").style.display = "block";
-    return;
   } else {
     // check that lock is in the available list
     if("state" in locsInfo[locName] && (locsInfo[locName]["state"] == "available" || locsInfo[locName]["state"] == "break")) {
@@ -3556,8 +3562,8 @@ function startTheTour(step=-1) {
     },
     {
       element: "#helpPlando",
-      title: "VARIA Plando Creator",
-      content: "<h2 class=\"center\">Welcome to the VARIA Plando Generator</h2><p>The Plando (a Plando is a Super Metroid seed with manually placed items) Generator allows you to create your own Plando in interactive mode.<br/>To use it, click on the <img src=\"/solver/static/images/play.svg\" alt=\"Start\" style=\"width: 32px\"> button to upload your ROM and choose your preset (like on the Solver page).<br/>Then the available locations will be displayed on the map, click on a location and a popup will be displayed allowing you to choose which item to place.</p>",
+      title: "VARIA Plando Generator",
+      content: "<h2 class=\"center\">Welcome to the VARIA Plando Generator</h2><p>The Plando (a Plando is a Super Metroid seed with manually placed items) Generator allows you to create your own Plando in interactive mode.<br/>To use it, click on the <img src=\"/solver/static/images/play.svg\" alt=\"Start\" style=\"width: 32px\"> button to upload your ROM and choose your preset (like on the Solver page).<br/>As a base for your Plando ROM you should generate a seed on the Randomizer page with all the optional patches that you require.<br/>The available locations will be displayed on the map, click on a location and a popup will be displayed allowing you to choose which item to place.<br/>You can put the same major item at several locations, it'll only be displayed in the game at the first location encoutered. Once the major has been picked up the next locations for this major will be empty.</p><p>When you're done click on the <img src=\"/solver/static/images/save.svg\"alt=\"Save\" style=\"width: 32px\"> button to save the Plando on your Computer. You can resume working on it later by uploading the saved Plando ROM.</p><h4>Warning</h4><p>The Plando Generator is for items only, not areas.</p>",
       placement: "auto left"
     }]
   });

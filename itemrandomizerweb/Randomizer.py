@@ -53,13 +53,13 @@ class RandoSettings(object):
 
     def getSpreadFactor(self, progSpeed):
         if progSpeed == 'slowest':
-            return 1
+            return 0.9
         elif progSpeed == 'slow':
-            return 0.75
+            return 0.7
         elif progSpeed == 'medium':
-            return 0.5
+            return 0.4
         elif progSpeed == 'fast':
-            return 0.25
+            return 0.1
         return 0
 
     def getChooseLocDict(self, progDiff):

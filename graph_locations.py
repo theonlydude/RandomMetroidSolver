@@ -1210,14 +1210,14 @@ locations = [
     'Visibility': "Hidden",
     'Room': 'Crumble Shaft',
     'AccessFrom' : {
-        'Warehouse Entrance Left': lambda sm: SMBool(True),
+        'Warehouse Entrance Left': lambda sm: sm.wand(sm.canOpenGreenDoors(),
+                                    sm.canUsePowerBombs(),
+                                    sm.canHellRun('Ice')),
         'Croc Zone': lambda sm: sm.wand(sm.canHellRun('MainUpperNorfair'),
                                         sm.haveItem('SpeedBooster'),
                                         sm.knowsIceMissileFromCroc())
     },
-    'Available': lambda sm: sm.wand(sm.canOpenGreenDoors(),
-                                    sm.canUsePowerBombs(),
-                                    sm.canHellRun('Ice'))
+    'Available': lambda sm: SMBool(True)
 },
 {
     'Area': "Norfair",

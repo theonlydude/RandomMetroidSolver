@@ -498,14 +498,14 @@ class Knows:
              'title': 'Sponge Bath'}
         ],
         'Maridia 1/2': [
-            {'knows': ['HiJumpMamaTurtle'],
-             'title': 'Mama Turtle'},
             {'knows': ['GravLessLevel1', 'GravLessLevel2', 'GravLessLevel3'],
              'title': 'Underwater movement without Gravity Suit'},
             {'knows': ['MochtroidClip', 'PuyoClip', 'SnailClip'],
              'title': 'Clips'},
             {'knows': ['KillPlasmaPiratesWithCharge', 'KillPlasmaPiratesWithSpark'],
              'title': 'Plasma Room'},
+            {'knows': ['HiJumpMamaTurtle'],
+             'title': 'Mama Turtle'}
         ],
         'Maridia 2/2': [
             {'knows': ['AccessSpringBallWithSpringBallBombJumps', 'AccessSpringBallWithBombJumps',

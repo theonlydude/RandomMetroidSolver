@@ -252,12 +252,12 @@ class HelpersGraph(Helpers):
         sup = 300.0
         nbKi = 6.0
         if sm.itemCount('Super')*5*sup >= nbKi*ki:
-            return (True, 0)
+            return SMBool(True, 0, items=['Super'])
 
         # - or with taking damage as well?
         dmgKi = 200.0 / sm.getDmgReduction(False)
         if (sm.itemCount('Super')*5*sup)/ki + (sm.energyReserveCount()*100 - 2)/dmgKi >= nbKi:
-            return sm.heatProof() # require heat proof as long as taking damage is necessary
+            return sm.wand(sm.heatProof(), SMBool(True, 0, items=['Super', 'ETank'])) # require heat proof as long as taking damage is necessary
 
         return SMBool(False, 0)
 

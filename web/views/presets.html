@@ -602,6 +602,15 @@ pass
     <div class="controller_s">
       {{ displaySelect("Select", actions, controller["Select"]) }}
     </div>
+    <div class="controller_moonwalk">
+{{
+if controller["Moonwalk"] == True:
+  checked = "checked=\"checked\" value=\"on\""
+else:
+  checked = ""
+  pass
+}}
+      <input id="Moonwalk" name="Moonwalk" type="checkbox" form="presetForm" {{=checked}}>Moonwalk</div>
   </div>
 </div>
 </div>

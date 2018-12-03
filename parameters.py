@@ -896,3 +896,4 @@ class Controller:
     L = "Angle Down"
     R = "Angle Up"
     Select = "Item Select"
+    Moonwalk = False

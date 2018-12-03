@@ -97,12 +97,16 @@ def validatePresetsParams(action):
         for button in Controller.__dict__:
             if isButton(button):
                 value = request.vars[button]
-                if value is None:
-                    return (False, "Button {} not set".format(button))
+                if button == "Moonwalk":
+                    if value not in [None, 'on']:
+                        return (False, "Invalid value for Moonwalk: {}".format(value))
                 else:
-                    if value in map:
-                        return (False, "Action {} set for two buttons: {} and {}".format(value, button, map[value]))
-                    map[value] = button
+                    if value is None:
+                        return (False, "Button {} not set".format(button))
+                    else:
+                        if value in map:
+                            return (False, "Action {} set for two buttons: {} and {}".format(value, button, map[value]))
+                        map[value] = button
 
     if request.vars.currenttab not in ['Global', 'Techniques1', 'Techniques2', 'Techniques3', 'Techniques4', 'Techniques5', 'Techniques6', 'Techniques7', 'Mapping']:
         return (False, "Wrong value for current tab: [{}]".format(request.vars.currenttab))
@@ -611,7 +615,13 @@ def genJsonFromParams(vars):
             if value is None:
                 paramsDict['Controller'][button] = Controller.__dict__[button]
             else:
-                paramsDict['Controller'][button] = value
+                if button == "Moonwalk":
+                    if value != None and value == "on":
+                        paramsDict['Controller'][button] = True
+                    else:
+                        paramsDict['Controller'][button] = False
+                else:
+                    paramsDict['Controller'][button] = value
 
     return paramsDict
 
@@ -1014,6 +1024,8 @@ def randomizerWebService():
     (custom, controlParam) = getCustomMapping(controlMapping)
     if custom == True:
         params += ['--controls', controlParam]
+        if "Moonwalk" in controlMapping and controlMapping["Moonwalk"] == True:
+            params.append('--moonwalk')
 
     DB.addRandoParams(id, params + ['--complexity', request.vars.complexity])
 

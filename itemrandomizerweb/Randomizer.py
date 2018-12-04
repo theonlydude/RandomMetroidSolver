@@ -10,6 +10,8 @@ from graph_access import accessPoints
 from smboolmanager import SMBoolManager
 import log, logging
 
+progSpeeds = ['slowest', 'slow', 'medium', 'fast', 'fastest', 'basic']
+
 class RandoSettings(object):
     # maxDiff : max diff
     # progSpeed : slowest, slow, medium, fast, fastest, basic
@@ -36,20 +38,18 @@ class RandoSettings(object):
         self.maxDiff = maxDiff
         self.qty = qty
         self.restrictions = restrictions
-        self.spreadProb = self.getSpreadFactor(progSpeed)
-        self.choose = {
-            'Locations' : self.getChooseLocDict(progDiff),
-            'Items' : self.getChooseItemDict(progSpeed)
-        }
-        self.progressionItemTypes = self.getProgressionItemTypes(progSpeed)
-        self.itemLimit = self.getItemLimit(progSpeed)
-        self.locLimit = self.getLocLimit(progSpeed)
         self.superFun = superFun
-        self.possibleSoftlockProb = self.getPossibleSoftlockProb(progSpeed)
-        self.minorHelpProb = self.getMinorHelpProb(progSpeed)
         self.runtimeLimit_s = runtimeLimit_s
         if self.runtimeLimit_s <= 0:
             self.runtimeLimit_s = sys.maxint
+
+    def getChooseLocs(self):
+        return self.getChooseLocDict(self.progDiff)
+
+    def getChooseItems(self, progSpeed=None):
+        if progSpeed is None:
+            progSpeed = self.progSpeed
+        return self.getChooseItemDict(progSpeed)
 
     def getSpreadFactor(self, progSpeed):
         if progSpeed == 'slowest':
@@ -402,27 +402,20 @@ class Randomizer(object):
         # process settings
         self.log = log.get('Rando')
 
-        self.spreadProb = settings.spreadProb
-        self.minorHelpProb = settings.minorHelpProb
-        self.choose = settings.choose
+        self.settings = settings
         self.chooseItemFuncs = {
             'Random' : self.chooseItemRandom,
             'MinProgression' : self.chooseItemMinProgression,
             'MaxProgression' : self.chooseItemMaxProgression
         }
-        self.chooseItemRanges = getRangeDict(settings.choose['Items'])
         self.chooseLocFuncs = {
             'Random' : self.chooseLocationRandom,
             'MinDiff' : self.chooseLocationMinDiff,
             'MaxDiff' : self.chooseLocationMaxDiff
         }
-        self.chooseLocRanges = getRangeDict(settings.choose['Locations'])
+        self.chooseLocRanges = getRangeDict(settings.getChooseLocs())
         self.restrictions = settings.restrictions
         self.difficultyTarget = settings.maxDiff
-        self.itemLimit = settings.itemLimit
-        self.locLimit = settings.locLimit
-        self.progressionItemTypes = settings.progressionItemTypes
-        self.possibleSoftlockProb = settings.possibleSoftlockProb
         self.runtimeLimit_s = settings.runtimeLimit_s
         # init everything
         self.smbm = SMBoolManager()
@@ -456,6 +449,19 @@ class Randomizer(object):
             self.errorMsg += "Super Fun: " + ', '.join(fun.errorMsgs) + ' '
         self.itemPool = fun.getItemPool()
         self.restrictedLocations = fun.restrictedLocs
+
+    # determine randomizer parameters, either statically (all speeds but variable), or dynamically (variable speed)
+    def determineParameters(self):
+        speed = self.settings.progSpeed
+        if speed == 'variable':
+            speed = progSpeeds[random.randint(0, len(progSpeeds)-1)]
+        self.spreadProb = self.settings.getSpreadFactor(speed)
+        self.minorHelpProb = self.settings.getMinorHelpProb(speed)
+        self.chooseItemRanges = getRangeDict(self.settings.getChooseItems(speed))
+        self.itemLimit = self.settings.getItemLimit(speed)
+        self.locLimit = self.settings.getLocLimit(speed)
+        self.progressionItemTypes = self.settings.getProgressionItemTypes(speed)
+        self.possibleSoftlockProb = self.settings.getPossibleSoftlockProb(speed)
 
     def setCurAccessPoint(self, ap='Landing Site'):
         if ap != self.curAccessPoint:
@@ -1105,6 +1111,8 @@ class Randomizer(object):
         startDate = time.clock()
         prevDiffTarget = None
         while len(self.itemPool) > 0 and not isStuck and runtime_s <= self.runtimeLimit_s:
+            # dynamic params determination (useful for variable speed)
+            self.determineParameters()
             # fill up with non-progression stuff
             isStuck = self.fillNonProgressionItems()
             if len(self.itemPool) > 0:
@@ -1112,7 +1120,7 @@ class Randomizer(object):
                 if not isStuck:
                     isStuck = self.getItemFromStandardPool()
                 if isStuck:
-                    # if we're stuck, give up if only bosses locations are left (bosses difficulty settings problems)
+                    # if we're stuck, check if only bosses locations are left (bosses difficulty settings problems)
                     onlyBosses = self.onlyBossesLeft(self.states[-1].bosses)
                     if not onlyBosses:
                         # check that we're actually stuck
@@ -1122,7 +1130,7 @@ class Randomizer(object):
                         self.log.debug("curLocs: {}".format([loc['Name'] for loc in self.states[-1].curLocs]))
                         self.log.debug("unused: {}".format([loc['Name'] for loc in self.unusedLocations]))
                         if nCurLocs < nLocsLeft:
-                            # rollback to make progress if we can't access everything yet
+                            # stuck, rollback to make progress if we can't access everything yet
                             self.rollback()
                         isStuck = self.getItemFromStandardPool()
                     else:

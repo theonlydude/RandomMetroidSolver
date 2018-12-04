@@ -3,7 +3,7 @@
 import argparse, random, os.path, json, sys, shutil
 
 from itemrandomizerweb import Items
-from itemrandomizerweb.Randomizer import Randomizer, RandoSettings
+from itemrandomizerweb.Randomizer import Randomizer, RandoSettings, progSpeeds
 from itemrandomizerweb.AreaRandomizer import AreaRandomizer
 from graph_locations import locations as graphLocations
 from graph_access import vanillaTransitions, getDoorConnections
@@ -12,7 +12,7 @@ from utils import PresetLoader
 from rom import RomPatcher, RomPatches, FakeROM
 import log
 
-speeds = ['slowest', 'slow', 'medium', 'fast', 'fastest', 'basic']
+speeds = progSpeeds + ['variable']
 energyQties = ['sparse', 'medium', 'vanilla' ]
 progDiffs = ['easier', 'normal', 'harder']
 morphPlacements = ['early', 'late', 'normal']

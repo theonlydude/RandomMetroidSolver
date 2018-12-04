@@ -151,10 +151,14 @@ function getComplexity() {
 
 function setRandom() {
 {{
-  for id in ["missileQty", "superQty", "powerBombQty", "minorQty", "energyQty", "maxDifficulty", "progressionSpeed", "fullRandomization", "suitsRestriction", "morphPlacement", "funCombat", "funMovement", "funSuits", "progressionDifficulty", "hideItems", "strictMinors"]:
+  for id in ["missileQty", "superQty", "powerBombQty", "minorQty", "energyQty", "maxDifficulty", "fullRandomization", "suitsRestriction", "morphPlacement", "funCombat", "funMovement", "funSuits", "progressionDifficulty", "hideItems", "strictMinors"]:
     if id in session.randomizer and session.randomizer[id] == "random":
       response.write('  document.getElementById("{}Random").click();'.format(id), escape=False)
       pass
+    pass
+  if "progressionSpeed" in session.randomizer and type(session.randomizer["progressionSpeed"]) == list and len(session.randomizer["progressionSpeed"]) > 1:
+    response.write('  $("#psMultiselect").val({});'.format(session.randomizer["progressionSpeed"]), escape=False)
+    response.write('  document.getElementById("progressionSpeedRandom").click();', escape=False)
     pass
 }}
 }
@@ -828,7 +832,19 @@ def displayCheckbox(id, defaultTrue=False):
 {{
 def displaySelect(id, values, default):
   if id in session.randomizer:
-    value = session.randomizer[id]
+    if id == "progressionSpeed":
+      if type(session.randomizer["progressionSpeed"]) == list:
+        if len(session.randomizer["progressionSpeed"]) == 1:
+          value = session.randomizer[id][0]
+        else:
+          value = default
+          pass
+      else:
+        value = session.randomizer[id]
+        pass
+    else:
+      value = session.randomizer[id]
+      pass
   else:
     value = default
     pass

@@ -907,8 +907,6 @@ def randomizerWebService():
     # set header to authorize cross domain AJAX
     response.headers['Access-Control-Allow-Origin'] = '*'
 
-    print("progressionSpeed: type: {} value: {}".format(type(request.vars.progressionSpeed), request.vars.progressionSpeed))
-
     # check validity of all parameters
     patchs = ['itemsounds', 'spinjumprestart', 'elevators_doors_speed', 'skip_intro',
               'skip_ceres', 'areaLayout', 'variaTweaks', 'No_Music']

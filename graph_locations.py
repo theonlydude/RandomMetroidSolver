@@ -1211,8 +1211,8 @@ locations = [
     'Room': 'Crumble Shaft',
     'AccessFrom' : {
         'Warehouse Entrance Left': lambda sm: sm.wand(sm.canOpenGreenDoors(),
-                                    sm.canUsePowerBombs(),
-                                    sm.canHellRun('Ice')),
+                                                      sm.canUsePowerBombs(),
+                                                      sm.canHellRun('Ice')),
         'Croc Zone': lambda sm: sm.wand(sm.canHellRun('MainUpperNorfair'),
                                         sm.haveItem('SpeedBooster'),
                                         sm.knowsIceMissileFromCroc())

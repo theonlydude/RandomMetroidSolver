@@ -249,7 +249,7 @@ if __name__ == "__main__":
     # output ROM name
     fileName = 'VARIA_Randomizer_' + seedCode + str(seed) + '_' + preset
     if args.progressionSpeed != "random":
-        fileName += "_" + args.progressionSpeed
+        fileName += "_" + progSpeed
     seedName = fileName
     if args.directory != '.':
         fileName = args.directory + '/' + fileName

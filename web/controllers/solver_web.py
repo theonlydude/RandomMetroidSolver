@@ -825,8 +825,9 @@ def validateWebServiceParams(patchs, quantities, others, isJson=False):
             raiseHttp(400, "Wrong value for morphPlacement: {}, authorized values early/late/normal".format(request.vars['morphPlacement']), isJson)
 
     if 'progressionSpeed' in others:
-        if request.vars['progressionSpeed'] not in ['slowest', 'slow', 'medium', 'fast', 'fastest', 'random', 'basic']:
-            raiseHttp(400, "Wrong value for progressionSpeed: {}, authorized values slowest/slow/medium/fast/fastest/basic".format(request.vars['progressionSpeed']), isJson)
+        for progSpeed in request.vars['progressionSpeed'].split(','):
+            if progSpeed not in ['slowest', 'slow', 'medium', 'fast', 'fastest', 'random', 'basic']:
+                raiseHttp(400, "Wrong value for progressionSpeed: {}, authorized values slowest/slow/medium/fast/fastest/basic".format(progSpeed), isJson)
 
     if 'progressionDifficulty' in others:
         if request.vars['progressionDifficulty'] not in ['easier', 'normal', 'harder', 'random']:
@@ -867,7 +868,7 @@ def sessionWebService():
     session.randomizer['powerBombQty'] = request.vars.powerBombQty
     session.randomizer['minorQty'] = request.vars.minorQty
     session.randomizer['energyQty'] = request.vars.energyQty
-    session.randomizer['progressionSpeed'] = request.vars.progressionSpeed
+    session.randomizer['progressionSpeed'] = request.vars.progressionSpeed.split(',')
     session.randomizer['fullRandomization'] = request.vars.fullRandomization
     session.randomizer['suitsRestriction'] = request.vars.suitsRestriction
     session.randomizer['morphPlacement'] = request.vars.morphPlacement
@@ -905,6 +906,8 @@ def randomizerWebService():
 
     # set header to authorize cross domain AJAX
     response.headers['Access-Control-Allow-Origin'] = '*'
+
+    print("progressionSpeed: type: {} value: {}".format(type(request.vars.progressionSpeed), request.vars.progressionSpeed))
 
     # check validity of all parameters
     patchs = ['itemsounds', 'spinjumprestart', 'elevators_doors_speed', 'skip_intro',

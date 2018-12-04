@@ -70,9 +70,25 @@ if (hs.registerOverlay) {
          top: 40%;
     }
 }
+#psMultiselectDiv {
+    display: none;
+}
 </style>
 
 <script type="text/javascript">
+var expanded = false;
+
+function showPSCheckboxes() {
+  var checkboxes = document.getElementById("psCheckboxes");
+  if (!expanded) {
+    checkboxes.style.display = "block";
+    expanded = true;
+  } else {
+    checkboxes.style.display = "none";
+    expanded = false;
+  }
+}
+
 function randomize(evt, elemId) {
   var e = document.getElementById(elemId);
 
@@ -107,6 +123,19 @@ function randomize(evt, elemId) {
       s.disable();
     } else {
       s.enable();
+    }
+  }
+
+  // special case for prog speed
+  if(elemId == "progressionSpeed") {
+    if(isActive == true) {
+      document.getElementById("progressionSpeed").style.display = "none";
+      document.getElementById("psMultiselectDiv").style.display = "block";
+      // chosen must be activated when it's visible, else it doesn't work...
+      $("#psMultiselect").chosen();
+    } else {
+      document.getElementById("progressionSpeed").style.display = "block";
+      document.getElementById("psMultiselectDiv").style.display = "none";
     }
   }
 }
@@ -207,7 +236,7 @@ function AjaxPresetCallCompleted(data) {
 
     var dataDict = {paramsFileTarget : data, "complexity": getComplexity()};
     var elems = ["seed", "itemsounds", "spinjumprestart", "elevators_doors_speed", "skip_ceres", "skip_intro", "animals", "layoutPatches", "noGravHeat", "areaLayout", "variaTweaks", "areaRandomization", "No_Music", "preset"];
-    var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "energyQty", "maxDifficulty", "progressionSpeed", "fullRandomization", "suitsRestriction", "morphPlacement", "funCombat", "funMovement", "funSuits", "progressionDifficulty", "hideItems", "strictMinors"];
+    var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "energyQty", "maxDifficulty", "fullRandomization", "suitsRestriction", "morphPlacement", "funCombat", "funMovement", "funSuits", "progressionDifficulty", "hideItems", "strictMinors"];
 
     for(var i=0; i<elems.length; i++) {
        dataDict[elems[i]] = document.getElementById(elems[i]).value;
@@ -220,6 +249,8 @@ function AjaxPresetCallCompleted(data) {
          dataDict[randomElems[i]] = document.getElementById(randomElems[i]).value;
        }
     }
+
+    dataDict["progressionSpeed"] = getProgSpeed();
 
     // add race mode
     var raceMode = document.getElementById("raceMode");
@@ -258,6 +289,16 @@ function ajaxFailJSON(jqXHR, textStatus) {
   $('#flash').show();
   $('#overlay').hide();
   $('#loadingGIF').hide();
+}
+
+function getProgSpeed() {
+  // multi select value for random prog speed
+  console.log("psMultiselect value: "+$("#psMultiselect").val());
+  if(document.getElementById("progressionSpeedRandom").className.search("active") != -1) {
+    return $("#psMultiselect").val().join();
+  } else {
+    return document.getElementById("progressionSpeed").value;
+  }
 }
 
 function AjaxRandomizerCallCompleted(data) {
@@ -299,7 +340,7 @@ function AjaxRandomizerCallCompleted(data) {
 
     var dataDict = {"complexity": getComplexity()};
     var elems = ["itemsounds", "spinjumprestart", "elevators_doors_speed", "skip_ceres", "skip_intro", "animals", "layoutPatches", "noGravHeat", "areaLayout", "variaTweaks", "areaRandomization", "No_Music", "preset", "randoPreset"];
-    var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "energyQty", "maxDifficulty", "progressionSpeed", "fullRandomization", "suitsRestriction", "morphPlacement", "funCombat", "funMovement", "funSuits", "progressionDifficulty", "hideItems", "strictMinors"];
+    var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "energyQty", "maxDifficulty", "fullRandomization", "suitsRestriction", "morphPlacement", "funCombat", "funMovement", "funSuits", "progressionDifficulty", "hideItems", "strictMinors"];
 
     for(var i=0; i<elems.length; i++) {
        dataDict[elems[i]] = document.getElementById(elems[i]).value;
@@ -312,6 +353,8 @@ function AjaxRandomizerCallCompleted(data) {
          dataDict[randomElems[i]] = document.getElementById(randomElems[i]).value;
        }
     }
+
+    dataDict["progressionSpeed"] = getProgSpeed();
 
     // call webservice to update the session
     var request = $.ajax({
@@ -538,8 +581,11 @@ window.onload = function(){
     var inputs = document.getElementsByTagName("input");
     for(var i = 0; i < inputs.length; i++) {
         if(inputs[i].type == "checkbox") {
-            var s = new Switchery(document.getElementById(inputs[i].name), { size: 'small', color: '#ddd' });
-            globalSwitchs[inputs[i].name] = s;
+            // progression speed checkboxes don't need switchery, so they don't have a name property
+            if(inputs[i].name != "") {
+              var s = new Switchery(document.getElementById(inputs[i].name), { size: 'small', color: '#ddd' });
+              globalSwitchs[inputs[i].name] = s;
+            }
         }
     }
 
@@ -547,7 +593,8 @@ window.onload = function(){
 
     setRandom();
 
-    $(".chzn-select").chosen();
+    $("#preset").chosen();
+    $("#randoPreset").chosen();
 }
 
 function switchCheckbox(id, elems=[]) {
@@ -878,7 +925,19 @@ def displayNumber(id, min, max, default, step="1"):
 	      <tr>
 		<td class="small"><div class="random"><button id="progressionSpeedRandom" type="button" onclick="randomize(event, 'progressionSpeed')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
 	        <td class="half"><span id="progressionSpeedText">Progression speed:</span></td>
-                <td class="half">{{displaySelect("progressionSpeed", ["slowest", "slow", "medium", "fast", "fastest", "basic"], "medium")}}</td>
+                <td class="half">
+		  {{displaySelect("progressionSpeed", ["slowest", "slow", "medium", "fast", "fastest", "basic"], "medium")}}
+		  <div id="psMultiselectDiv">
+		    <select id="psMultiselect" data-placeholder="Speeds to randomize..." class="filldropdown chzn-select" multiple>
+		      <option value="slowest" selected="selected">slowest</option>
+		      <option value="slow" selected="selected">slow</option>
+		      <option value="medium" selected="selected">medium</option>
+		      <option value="fast" selected="selected">fast</option>
+		      <option value="fastest" selected="selected">fastest</option>
+		      <option value="basic" selected="selected">basic</option>
+		    </select>
+		  </div>
+		</td>
                 <td><button type="button" onclick="startTheTour(7)">?</button></td>
 	      </tr>
 	      <tr id="progDiffVisibility">

@@ -694,7 +694,7 @@ function startTheTour(step=-1) {
       content: "Depending on the perceived difficulties of the techniques, bosses, hell runs etc. from the preset, it will prevent the Randomizer from placing an item in a location too difficult to reach with the current items.<br/><b>Warning:</b> if too low may cause the randomizer to abort.<br/>Click on the dice button to randomly set this parameter."
     },
     {
-      element: "#progressionSpeed",
+      element: "#progSpeedTuto",
       title: "Progression speed",
       content: "A progression item is an item opening new locations once picked up : suit, movement item, or any item that opens up locations when placed by the Randomizer.<br/>This parameter influences how fast progression items are likely to be found. From <b>slowest</b>, stuffing your way with as many non-progression items as possible, to <b>fastest</b>, where you will be able to visit Zebes pretty shortly.<br/>You can also pick <b>basic</b>, in which case VARIA will place the items exactly like Dessyreqt Randomizer, or Total Randomizer in its Normal/Casual setting.<br/><b>Note:</b> usually, slower settings will result in more difficult seeds, and faster settings in easier seeds. Basic progression speed usually result in easy/fast seeds, but not always.<br/><b>Note:</b>Click on the dice button to randomly set this parameter.<br/>In the progression speed random mode you can choose on which progression speeds the randomization will take place."
     },
@@ -955,7 +955,7 @@ def displayNumber(id, min, max, default, step="1"):
 		    </select>
 		  </div>
 		</td>
-                <td><button type="button" onclick="startTheTour(7)">?</button></td>
+                <td><button id="progSpeedTuto" type="button" onclick="startTheTour(7)">?</button></td>
 	      </tr>
 	      <tr id="progDiffVisibility">
 		<td class="small"><div class="random"><button id="progressionDifficultyRandom" type="button" onclick="randomize(event, 'progressionDifficulty')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>

@@ -182,10 +182,9 @@ if __name__ == "__main__":
     if progSpeed == "random":
         progSpeed = speeds[random.randint(0, len(speeds)-1)]
     mulSpeeds = progSpeed.split(',')
-    if len(mulSpeeds) == 1:
-        progSpeed = mulSpeeds[0]
-    else:
-        progSpeed = mulSpeeds[random.randint(0, len(mulSpeeds)-1)]
+    progSpeed = mulSpeeds[random.randint(0, len(mulSpeeds)-1)]
+    if len(mulSpeeds) > 1:
+        args.progressionSpeed = 'random'
     if progSpeed not in speeds:
         print 'Invalid progression speed : ' + progSpeed
         sys.exit(-1)
@@ -249,7 +248,7 @@ if __name__ == "__main__":
     # output ROM name
     fileName = 'VARIA_Randomizer_' + seedCode + str(seed) + '_' + preset
     if args.progressionSpeed != "random":
-        fileName += "_" + progSpeed
+        fileName += "_" + args.progressionSpeed
     seedName = fileName
     if args.directory != '.':
         fileName = args.directory + '/' + fileName

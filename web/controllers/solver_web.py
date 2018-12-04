@@ -826,7 +826,7 @@ def validateWebServiceParams(patchs, quantities, others, isJson=False):
 
     if 'progressionSpeed' in others:
         for progSpeed in request.vars['progressionSpeed'].split(','):
-            if progSpeed not in ['slowest', 'slow', 'medium', 'fast', 'fastest', 'random', 'basic']:
+            if progSpeed not in ['slowest', 'slow', 'medium', 'fast', 'fastest', 'random', 'basic', 'variable']:
                 raiseHttp(400, "Wrong value for progressionSpeed: {}, authorized values slowest/slow/medium/fast/fastest/basic".format(progSpeed), isJson)
 
     if 'progressionDifficulty' in others:

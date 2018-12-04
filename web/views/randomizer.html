@@ -926,7 +926,7 @@ def displayNumber(id, min, max, default, step="1"):
 		<td class="small"><div class="random"><button id="progressionSpeedRandom" type="button" onclick="randomize(event, 'progressionSpeed')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
 	        <td class="half"><span id="progressionSpeedText">Progression speed:</span></td>
                 <td class="half">
-		  {{displaySelect("progressionSpeed", ["slowest", "slow", "medium", "fast", "fastest", "basic"], "medium")}}
+		  {{displaySelect("progressionSpeed", ["slowest", "slow", "medium", "fast", "fastest", "basic", "variable"], "medium")}}
 		  <div id="psMultiselectDiv">
 		    <select id="psMultiselect" data-placeholder="Speeds to randomize..." class="filldropdown chzn-select" multiple>
 		      <option value="slowest" selected="selected">slowest</option>
@@ -935,6 +935,7 @@ def displayNumber(id, min, max, default, step="1"):
 		      <option value="fast" selected="selected">fast</option>
 		      <option value="fastest" selected="selected">fastest</option>
 		      <option value="basic" selected="selected">basic</option>
+		      <option value="variable" selected="variable">variable</option>
 		    </select>
 		  </div>
 		</td>

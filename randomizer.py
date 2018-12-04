@@ -104,9 +104,8 @@ if __name__ == "__main__":
     parser.add_argument('--hideItems', help="Like in dessy's rando hide half of the items",
                         dest="hideItems", nargs='?', const=True, default=False)
     parser.add_argument('--progressionSpeed', '-i',
-                        help="",
-                        dest='progressionSpeed', nargs='?', default='medium',
-                        choices=speeds + ['random'])
+                        help="progression speed, from " + str(speeds) + ". 'random' picks a random speed from these. Pick a random speed from a subset using comma-separated values, like 'slow,medium,fast'.",
+                        dest='progressionSpeed', nargs='?', default='medium')
     parser.add_argument('--progressionDifficulty',
                         help="",
                         dest='progressionDifficulty', nargs='?', default='normal',
@@ -135,8 +134,8 @@ if __name__ == "__main__":
                         dest='moonWalk', action='store_true', default=False)
     parser.add_argument('--runtime', help="Maximum runtime limit in seconds. If 0 or negative, no runtime limit. Default is 30.", dest='runtimeLimit_s',
                         nargs='?', default=30, type=int)
-    parser.add_argument('--race', help="Race mode magic number", dest='raceMagic',
-                        type=int, choices=range(0, 0x10000))
+    parser.add_argument('--race', help="Race mode magic number, between 1 and 65535", dest='raceMagic',
+                        type=int)
 
     # parse args
     args = parser.parse_args()
@@ -165,6 +164,9 @@ if __name__ == "__main__":
         seed = args.seed
     seed4rand = seed
     if args.raceMagic is not None:
+        if args.raceMagic <= 0 or args.raceMagic >= 0x10000:
+            print "Invalid magic"
+            sys.exit(-1)
         seed4rand = seed ^ args.raceMagic
     random.seed(seed4rand)
 
@@ -176,14 +178,21 @@ if __name__ == "__main__":
         args.patches.append(animalsPatches[random.randint(0, len(animalsPatches)-1)])
 
     # if random progression speed, choose one
-    progSpeed = args.progressionSpeed
+    progSpeed = str(args.progressionSpeed)
     if progSpeed == "random":
         progSpeed = speeds[random.randint(0, len(speeds)-1)]
+    mulSpeeds = progSpeed.split(',')
+    if len(mulSpeeds) == 1:
+        progSpeed = mulSpeeds[0]
+    else:
+        progSpeed = mulSpeeds[random.randint(0, len(mulSpeeds)-1)]
+    if progSpeed not in speeds:
+        print 'Invalid progression speed : ' + progSpeed
+        sys.exit(-1)
     # if random progression difficulty, choose one
     progDiff = args.progressionDifficulty
     if progDiff == "random":
         progDiff = progDiffs[random.randint(0, len(progDiffs)-1)]
-
     print("SEED: " + str(seed))
 #    print("progression speed: " + progSpeed)
 

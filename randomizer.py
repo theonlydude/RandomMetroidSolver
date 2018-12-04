@@ -178,7 +178,7 @@ if __name__ == "__main__":
         args.patches.append(animalsPatches[random.randint(0, len(animalsPatches)-1)])
 
     # if random progression speed, choose one
-    progSpeed = str(args.progressionSpeed)
+    progSpeed = str(args.progressionSpeed).lower()
     if progSpeed == "random":
         progSpeed = speeds[random.randint(0, len(speeds)-1)]
     mulSpeeds = progSpeed.split(',')

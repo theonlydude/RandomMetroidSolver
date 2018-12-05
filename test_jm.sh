@@ -15,18 +15,19 @@ ROM=$1
 LOOPS=$2
 
 # get git head
-TEMP_DIR=$(mktemp)
-rm -f ${TEMP_DIR}
-mkdir -p ${TEMP_DIR}
-(
-    cd ${TEMP_DIR}
-    git clone git@github.com:theonlydude/RandomMetroidSolver.git
-)
-ORIG=${TEMP_DIR}/RandomMetroidSolver/
+#TEMP_DIR=$(mktemp)
+#rm -f ${TEMP_DIR}
+#mkdir -p ${TEMP_DIR}
+#(
+#    cd ${TEMP_DIR}
+#    git clone git@github.com:theonlydude/RandomMetroidSolver.git
+#)
+#ORIG=${TEMP_DIR}/RandomMetroidSolver/
 #ORIG=/tmp/tmp.KtU7aob2Ba/RandomMetroidSolver/
-#ORIG=.
+ORIG=.
 
-PRESETS=("regular" "noob" "master")
+#PRESETS=("regular" "noob" "master")
+PRESETS=("master")
 AREAS=("" "--area")
 
 function generate_params {
@@ -36,7 +37,9 @@ function generate_params {
     let S=$RANDOM%${#AREAS[@]}
     AREA=${AREAS[$S]}
 
-    echo "-r ${ROM} --param standard_presets/${PRESET}.json --seed ${SEED} --progressionSpeed random --morphPlacement random --progressionDifficulty random --missileQty 0 --superQty 0 --powerBombQty 0 --minorQty 0 --energyQty random --fullRandomization random --suitsRestriction random --hideItems random --strictMinors random --superFun CombatRandom --superFun MovementRandom --superFun SuitsRandom --maxDifficulty random ${AREA}"
+    #echo "-r ${ROM} --param standard_presets/${PRESET}.json --seed ${SEED} --progressionSpeed random --morphPlacement random --progressionDifficulty random --missileQty 0 --superQty 0 --powerBombQty 0 --minorQty 0 --energyQty random --fullRandomization random --suitsRestriction random --hideItems random --strictMinors random --superFun CombatRandom --superFun MovementRandom --superFun SuitsRandom --maxDifficulty random ${AREA}"
+
+    echo "-r ${ROM} --param standard_presets/master.json --fullRandomization --suitsRestriction --morphPlacement early --maxDifficulty mania --progressionSpeed slowest,slow --progressionDifficulty harder --missileQty 9 --superQty 1 --powerBombQty 1 --minorQty 1 --energyQty medium --superFun Movement --superFun Combat --superFun Suits --patch itemsounds.ips --patch elevators_doors_speed.ips --seed ${SEED}"
 }
 
 function computeSeed {
@@ -90,6 +93,7 @@ function computeSeed {
     # solve seed
     ROM_GEN=$(ls -1 VARIA_Randomizer_*X${SEED}_${PRESET}.sfc)
     if [ $? -ne 0 ]; then
+	echo "error;${SEED};${DIFF_CAP};${RTIME_OLD};${RTIME_NEW};${STIME_OLD};${STIME_NEW};${MD5};${PARAMS};" | tee -a ${CSV}
 	return
     fi
 

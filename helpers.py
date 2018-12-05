@@ -197,12 +197,12 @@ class Helpers(object):
                                       sm.haveItem('HiJump')),
                               sm.knowsHiJumpLessGauntletAccess()),
                        sm.wor(sm.haveItem('ScrewAttack'),
-                              sm.wor(sm.wand(self.energyReserveCountOkHardRoom('Gauntlet'),
+                              sm.wor(sm.wand(sm.energyReserveCountOkHardRoom('Gauntlet'),
                                              sm.wand(sm.canUsePowerBombs(),
                                                      sm.wor(sm.itemCountOk('PowerBomb', nPB),
                                                             sm.wand(sm.haveItem('SpeedBooster'),
                                                                     sm.energyReserveCountOk(nTanks))))),
-                                     sm.wand(self.energyReserveCountOkHardRoom('Gauntlet', 0.5),
+                                     sm.wand(sm.energyReserveCountOkHardRoom('Gauntlet', 0.5),
                                              sm.canUseBombs()))))
 
     @Cache.decorator

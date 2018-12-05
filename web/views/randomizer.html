@@ -151,7 +151,7 @@ function getComplexity() {
 
 function setRandom() {
 {{
-  for id in ["missileQty", "superQty", "powerBombQty", "minorQty", "energyQty", "maxDifficulty", "fullRandomization", "suitsRestriction", "morphPlacement", "funCombat", "funMovement", "funSuits", "progressionDifficulty", "hideItems", "strictMinors"]:
+  for id in ["missileQty", "superQty", "powerBombQty", "minorQty", "energyQty", "maxDifficulty", "fullRandomization", "suitsRestriction", "morphPlacement", "funCombat", "funMovement", "funSuits", "progressionDifficulty", "hideItems", "strictMinors", "progressionSpeed"]:
     if id in session.randomizer and session.randomizer[id] == "random":
       response.write('  document.getElementById("{}Random").click();'.format(id), escape=False)
       pass

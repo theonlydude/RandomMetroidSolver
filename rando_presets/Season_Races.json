@@ -12,7 +12,7 @@
   "noGravHeat": "on",
   "missileQty": "3",
   "morphPlacement": "early",
-  "progressionSpeed": "random",
+  "progressionSpeed": ["slowest", "slow", "medium", "fast", "fastest", "basic"],
   "No_Music": "off",
   "areaRandomization": "off",
   "maxDifficulty": "harder",

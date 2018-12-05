@@ -157,7 +157,8 @@ function setRandom() {
       pass
     pass
   if "progressionSpeed" in session.randomizer and type(session.randomizer["progressionSpeed"]) == list and len(session.randomizer["progressionSpeed"]) > 1:
-    response.write('  $("#psMultiselect").val({});'.format(session.randomizer["progressionSpeed"]), escape=False)
+    # prog speed are in utf-8 after loading from json and displayed in js like [u'slowest', u'slow']
+    response.write('  $("#psMultiselect").val({});'.format([ps.encode('ascii') for ps in session.randomizer["progressionSpeed"]]), escape=False)
     response.write('  document.getElementById("progressionSpeedRandom").click();', escape=False)
     pass
 }}

@@ -672,7 +672,7 @@ function startTheTour(step=-1) {
     {
       element: "#presetStep",
       title: "Standard Preset",
-      content: "The preset is used by the Randomizer to know which techniques are available to reach the items locations.</br>You can create and manage your preset on the <a href=\"/solver/solver_web/presets\">Presets part of the website</a>.<br/>Load one of the standard presets (sorted in increased difficulty), or your own from the community presets.<br/>Creating your own preset will lead to a better experience overall, as the generated ROMs will be tailored for you."
+      content: "<p>The preset is used by the Randomizer to know which techniques are available to reach the items locations.</p><p>You can create and manage your preset on the <a href=\"/solver/solver_web/presets\">Presets part of the website</a>.</p><p>Load one of the standard presets (sorted in increased difficulty), or your own from the community presets.</p><p>Creating your own preset will lead to a better experience overall, as the generated ROMs will be tailored for you.</p>"
     },
     {
       element: "#randoPresetStep",
@@ -687,12 +687,12 @@ function startTheTour(step=-1) {
     {
       element: "#fullRandomizationStep",
       title: "Full randomization",
-      content: "Activate this option to have all items fully randomized.<br/>If disabled, the randomizer will behave like Total randomizer, with major and minor item pools.<br/>Minor items are Missile, Super Missile and Power Bomb packs. Major items are all the rest, including energy.<br/><b>Note:</b> High-Jump boots energy tank location is considered minor, and right Super Missile in Wrecked ship is considered major for balancing purposes.<br/>Click on the dice button to randomly set this parameter."
+      content: "<p>Activate this option to have all items fully randomized.<br/>If disabled, the randomizer will behave like Total randomizer, with major and minor item pools.</p><p>Minor items are Missile, Super Missile and Power Bomb packs. Major items are all the rest, including energy.</p><p><b>Note:</b> High-Jump boots Energy Tank location is considered minor, and right Super Missile in Wrecked ship is considered major for balancing purposes.</p><p>Click on the dice button to randomly set this parameter.</p>"
     },
     {
       element: "#maxDifficulty",
       title: "Maximum difficulty for picking up an item",
-      content: "Depending on the perceived difficulties of the techniques, bosses, hell runs etc. from the preset, it will prevent the Randomizer from placing an item in a location too difficult to reach with the current items.<br/><b>Warning:</b> if too low may cause the randomizer to abort.<br/>Click on the dice button to randomly set this parameter."
+      content: "<p>Depending on the perceived difficulties of the techniques, bosses, hell runs etc. from the preset, it will prevent the Randomizer from placing an item in a location too difficult to reach with the current items.</p><p><b>Warning:</b> if too low may cause the randomizer to abort.</p><p>Click on the dice button to randomly set this parameter.</p>"
     },
     {
       element: "#progSpeedTuto",
@@ -702,47 +702,47 @@ function startTheTour(step=-1) {
     {
       element: "#progressionDifficulty",
       title: "Progression difficulty",
-      content: "This parameter influences the choice of the next location. It uses the perceived difficulties from the preset to compute the difficulty to reach the locations. Then if <b>easier</b> or <b>harder</b> is selected, the easiest or hardest location will have a higher chance of being chosen.<br/>Set it to <b>normal</b> for the Randomizer to randomly choose the next location.<br/><b>Note:</b> this setting has less of an influence on actual seed difficulty than Progression Speed.<br/>Click on the dice button to randomly set this parameter."
+      content: "<p>This parameter influences the choice of the next location. It uses the perceived difficulties from the preset to compute the difficulty to reach the locations. Then if <b>easier</b> or <b>harder</b> is selected, the easiest or hardest location will have a higher chance of being chosen.<br/>Set it to <b>normal</b> for the Randomizer to randomly choose the next location.</p><p><b>Note:</b> this setting has less of an influence on actual seed difficulty than Progression Speed.</p><p>Click on the dice button to randomly set this parameter.</p>"
     },
     {
       element: "#morphPlacementStep",
       title: "Morph Placement",
-      content: "Influences where VARIA will place Morphing Ball :<ul><li><b>early</b> (default): Morph will be either at its vanilla spot, or in the ceiling at the Blue Brinstar Energy Tank spot (like Total Randomizer)</li><li><b>normal</b>: Morph will be placed randomly (like Dessy Randomizer)</li><li><b>late</b>: Prevents Morph to be placed in the first area of the game (Crateria/Blue Brinstar). Best suited when used along area randomization, to find Morph in peculiar places.</li></ul>"
+      content: "<p>Influences where VARIA will place Morphing Ball :<ul><li><b>early</b> (default): Morph will be either at its vanilla spot, or in the ceiling at the Blue Brinstar Energy Tank spot (like Total Randomizer)</li><li><b>normal</b>: Morph will be placed randomly (like Dessy Randomizer)</li><li><b>late</b>: Prevents Morph to be placed in the first area of the game (Crateria/Blue Brinstar). Best suited when used along area randomization, to find Morph in peculiar places.</li></ul></p><p>Click on the dice button to randomly set this parameter.</p>"
     },
     {
       element: "#suitsRestrictionStep",
       title: "Suits restriction",
-      content: "Prevent Gravity or Varia suits to be placed early in the game.<br/>Click on the dice button to randomly set this parameter."
+      content: "<p>Prevent Gravity or Varia suits to be placed early in the game.</p><p>Click on the dice button to randomly set this parameter.</p>"
     },
     {
       element: "#hideItemsStep",
       title: "Hide Items",
-      content: "Like in Dessy's randomizer, hides half of the visible items.<br/>Items always visible:<ul><li>Energy Tank, Gauntlet</li><li>Energy Tank, Terminator</li><li>Morphing Ball</li><li>Missile (Crateria moat)</li><li>Missile (green Brinstar below super missile)</li><li>Missile (above Crocomire)</li><li>Power Bomb (lower Norfair above fire flea room)</li><li>Missile (Gravity Suit)</li><li>Missile (green Maridia shinespark)</li></ul>Click on the dice button to randomly set this parameter."
+      content: "<p>Like in Dessy's randomizer, hides half of the visible items.<br/>Items always visible:<ul><li>Energy Tank, Gauntlet</li><li>Energy Tank, Terminator</li><li>Morphing Ball</li><li>Missile (Crateria moat)</li><li>Missile (green Brinstar below super missile)</li><li>Missile (above Crocomire)</li><li>Power Bomb (lower Norfair above fire flea room)</li><li>Missile (Gravity Suit)</li><li>Missile (green Maridia shinespark)</li></ul></p><p>Click on the dice button to randomly set this parameter.</p>"
     },
     {
       element: "#strictMinorsStep",
       title: "Strict ammo distribution",
-      content: "Instead of using the Minors proportions as probabilities, enforce a strict distribution to match the proportions as exactly as possible.<br/>Click on the dice button to randomly set this parameter."
+      content: "<p>Instead of using the Minors proportions as probabilities, enforce a strict distribution to match the proportions as exactly as possible.</p><p>Click on the dice button to randomly set this parameter.</p>"
     },
     {
       element: "#missileQty",
       title: "Proportion of Missiles/Super Missiles/Power Bombs",
-      content: "For each minor types, the higher the number the higher the probability of choosing it when placing a minor.<br/>Click on the dice button to randomly set this parameter."
+      content: "<p>For each minor types, the higher the number the higher the probability of choosing it when placing a minor.</p><p>Click on the dice button to randomly set this parameter.</p>"
     },
     {
       element: "#minorQty",
       title: "Percentage of minors available",
-      content: "From 1%: minimum number of minors required to finish the game to 100%: all minors locations contain a minor (vanilla like).<br/>Click on the dice button to randomly set this parameter."
+      content: "<p>From 1%: minimum number of minors required to finish the game to 100%: all minors locations contain a minor (vanilla like).</p><p>Click on the dice button to randomly set this parameter.</p>"
     },
     {
       element: "#energyQty",
       title: "Quantity of Energy/Reserve Tanks available",
-      content: "Choose how many Energy/Reserve Tanks will be available, from 4-6 in sparse, 8-12 in medium and 18 in vanilla.<br/>Click on the dice button to randomly set this parameter."
+      content: "<p>Choose how many Energy/Reserve Tanks will be available, from 4-6 in sparse, 8-12 in medium and 18 in vanilla.</p><p>Click on the dice button to randomly set this parameter.</p>"
     },
     {
       element: "#areaRandomizationStep",
       title: "Area randomization",
-      content: "Randomize areas together using bidirectional access portals: <a href=\"/solver/static/images/area_map.png\" class=\"highslide\" onclick=\"return hs.expand(this, {wrapperClassName: 'borderless', dimmingOpacity: 0.75, align: 'center'})\"><img id=\"areathumb\" src=\"/solver/static/images/area_map_thumbnail.png\" alt=\"Area Map\" title=\"Click to enlarge\"/></a><br/>All portals can be linked to one another, even if it means following an incompatible transition (Left-Left, Up-Right, ...).<br/>You can go through all portals and back, even those where you can't do that in vanilla, so:<ul><li>Some doors have been turned to blue</li><li>Both Maridia exit green gates have been removed</li><li>Crumble blocks preventing access to Lower Nofair through its exit have been removed</li></ul>Use the <a href=\"/solver/solver_web/tracker\">area tracker</a> to find your way more easily.<br/><b>Note:</b> enabling it also auto-enables Full Randomization and set difficulty cap to hardcore (if it wasn't already easier) to avoid generating too hard seeds, but it can still be changed afterwards.",
+      content: "<p>Randomize areas together using bidirectional access portals: <a href=\"/solver/static/images/area_map.png\" class=\"highslide\" onclick=\"return hs.expand(this, {wrapperClassName: 'borderless', dimmingOpacity: 0.75, align: 'center'})\"><img id=\"areathumb\" src=\"/solver/static/images/area_map_thumbnail.png\" alt=\"Area Map\" title=\"Click to enlarge\"/></a><br/>All portals can be linked to one another, even if it means following an incompatible transition (Left-Left, Up-Right, ...).<br/>You can go through all portals and back, even those where you can't do that in vanilla, so:<ul><li>Some doors have been turned to blue</li><li>Both Maridia exit green gates have been removed</li><li>Crumble blocks preventing access to Lower Nofair through its exit have been removed</li></ul></p><p>Use the <a href=\"/solver/solver_web/tracker\">Area Tracker</a> to find your way more easily.</p><p><b>Note:</b> enabling it also auto-enables Full Randomization and set difficulty cap to hardcore (if it wasn't already easier) to avoid generating too hard seeds, but it can still be changed afterwards.</p>",
       placement: "auto left"
     },
     {
@@ -770,7 +770,7 @@ function startTheTour(step=-1) {
     {
       element: "#funSuitsStep",
       title: "Suitless",
-      content: "If the preset and seed layout allow it, will force removal of at least one suit.<br/>Click on the dice button to randomly set this parameter.",
+      content: "<p>If the preset and seed layout allow it, will force removal of at least one suit.</p><p>Click on the dice button to randomly set this parameter.</p>",
       placement: "auto left"
     },
     {

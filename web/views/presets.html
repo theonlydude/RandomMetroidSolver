@@ -610,7 +610,7 @@ else:
   checked = ""
   pass
 }}
-      <input id="Moonwalk" name="Moonwalk" type="checkbox" form="presetForm" {{=checked}}>Moonwalk</div>
+      <input id="Moonwalk" name="Moonwalk" type="checkbox" form="presetForm" {{response.write(checked, escape=False)}}>Moonwalk</div>
   </div>
 </div>
 </div>

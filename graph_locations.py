@@ -613,6 +613,9 @@ locations = [
                                     sm.wor(sm.wand(sm.haveItem('Ice'), # puyo clip
                                                    sm.wor(sm.wand(sm.haveItem('Gravity'),
                                                                   sm.knowsPuyoClip()),
+                                                          sm.wand(sm.haveItem('Gravity'),
+                                                                  sm.haveItem('XRayScope'),
+                                                                  sm.knowsPuyoClipXRay()),
                                                           sm.knowsSuitlessPuyoClip())),
                                            sm.wand(sm.haveItem('Grapple'), # go through grapple block
                                                    sm.haveItem('Gravity'),

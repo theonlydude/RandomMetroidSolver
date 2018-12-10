@@ -817,9 +817,9 @@ class Settings:
         },
         'LowerNorfair' : {
             'Default' : None,
-            'Bring the heat' : [(9, mania), (12, hardcore), (14, harder), (18, hard)],
-            'I run RBO' : [(7, mania), (9, hardcore), (11, harder), (14, hard), (18, medium)],
-            'Solution' : [(7, impossibru), (18, mania)]
+            'Bring the heat' : [(10, mania), (13, hardcore), (18, harder)],
+            'I run RBO' : [(8, mania), (9, hardcore), (11, harder), (14, hard), (18, medium)],
+            'Solution' : [(8, impossibru), (18, mania)]
         }
     }
 

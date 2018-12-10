@@ -802,7 +802,7 @@ class Settings:
             # balanced setting
             'Default' : [(3, harder), (4, hard), (5, medium)],
             # you don't mind doing hell runs at all
-            'Bring the heat' : [(2, hard), (3, medium)],
+            'Bring the heat' : [(2, harder), (3, hard), (4, medium)],
             # RBO runner
             'I run RBO' : [(2, medium), (3, easy)],
             'Solution' : [(2, hardcore), (3, harder), (4, hard), (5, medium)],
@@ -811,7 +811,7 @@ class Settings:
             'No thanks' : None,
             'Gimme energy' : [(5, mania), (6, hardcore), (8, harder), (10, hard), (14, medium)],
             'Default' : [(4, mania), (5, hardcore), (6, hard), (9, medium)],
-            'Bring the heat' : [(3, hardcore), (4, hard), (5, medium), (7, easy)],
+            'Bring the heat' : [(3, mania), (4, harder), (5, hard), (7, medium)],
             'I run RBO' : [(3, harder), (4, hard), (5, medium), (6, easy)],
             'Solution' : [(3, samus), (4, mania), (5, hardcore), (6, hard), (9, medium)]
         },

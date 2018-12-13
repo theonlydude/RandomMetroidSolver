@@ -1079,8 +1079,6 @@ class Randomizer(object):
                 itemLocation['Item'] = self.getNextItemInPool('Nothing')
             elif isMajor and self.hasItemTypeInPool('NoEnergy'):
                 itemLocation['Item'] = self.getNextItemInPool('NoEnergy')
-            elif isMajor and self.hasItemTypeInPool('XRayScope'):
-                itemLocation['Item'] = self.getNextItemInPool('XRayScope')
             elif isMinor and self.hasItemTypeInPool('Missile'):
                 itemLocation['Item'] = self.getNextItemInPool('Missile')
             elif isMinor and self.hasItemTypeInPool('Super'):

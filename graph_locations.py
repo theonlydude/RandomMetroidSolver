@@ -572,7 +572,9 @@ locations = [
                                                sm.wand(sm.haveItem('HiJump'),
                                                        sm.knowsGetAroundWallJump()),
                                                sm.wand(sm.haveItem('SpeedBooster'),
-                                                       sm.knowsShortCharge())))
+                                                       sm.knowsShortCharge()),
+                                               sm.wand(sm.canSpringBallJump(),
+                                                       sm.knowsSpringBallJumpFromWall())))
 },
 {
     'Area': "Maridia",

@@ -3,14 +3,16 @@
 import sys
 
 from utils import randGaussBounds
-from itemrandomizerweb.Items import getItemPool 
+from itemrandomizerweb.Items import getItemPool, removeForbiddenItems
 import random
+from smboolmanager import SMBoolManager
 
 fun = ['HiJump', 'SpeedBooster', 'Plasma', 'ScrewAttack', 'Wave', 'Spazer', 'SpringBall']
 
 if __name__ == "__main__":
+    sm = SMBoolManager()
     with open("itemStats.csv", "w") as csvOut:
-        csvOut.write("energyQty;minorQty;nFun;strictMinors;MissProb;SuperProb;PowerProb;nItems;nTanks;nMinors;nMissiles;nSupers;nPowers;MissAccuracy;SuperAccuracy;PowerAccuracy\n")
+        csvOut.write("energyQty;minorQty;nFun;strictMinors;MissProb;SuperProb;PowerProb;nItems;nTanks;nTanksTotal;nMinors;nMissiles;nSupers;nPowers;MissAccuracy;SuperAccuracy;PowerAccuracy\n")
         for i in range(10000):
             if (i+1) % 100 == 0:
                 print(i+1)
@@ -46,15 +48,17 @@ if __name__ == "__main__":
             # write params
             csvOut.write("%s;%d;%d;%s;%d;%d;%d;" % (energyQty, minQty, len(forbidden), str(strictMinors), missProb, superProb, pbProb))
             # get items
-            itemPool = getItemPool(qty, forbidden)
+            itemPool = getItemPool(qty, sm)
+            itemPool = removeForbiddenItems(forbidden, itemPool)
             # compute stats
             nItems = len([item for item in itemPool if item['Category'] != 'Nothing'])
             nTanks = len([item for item in itemPool if item['Category'] == 'Energy'])
+            nEnergyTotal = len([item for item in itemPool if item['Category'] == 'Energy' or item['Type'] == 'NoEnergy']) - len(forbidden)
             nMinors = len([item for item in itemPool if item['Category'] == 'Ammo'])
             nMissiles = len([item for item in itemPool if item['Type'] == 'Missile'])
             nSupers = len([item for item in itemPool if item['Type'] == 'Super'])
             nPowers = len([item for item in itemPool if item['Type'] == 'PowerBomb'])
-            csvOut.write("%d;%d;%d;%d;%d;%d;" % (nItems, nTanks, nMinors, nMissiles, nSupers, nPowers))
+            csvOut.write("%d;%d;%d;%d;%d;%d;%d;" % (nItems, nTanks, nEnergyTotal, nMinors, nMissiles, nSupers, nPowers))
             totalProbs = missProb + superProb + pbProb
             def getAccuracy(prob, res):
                 th = float(prob)/totalProbs

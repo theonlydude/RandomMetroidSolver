@@ -283,6 +283,7 @@ def removeForbiddenItems(forbiddenItems, itemPool):
     return itemPool
 
 def addEnergy(qty, itemPool):
+    total = 18
     energyQty = qty['energy']
     if energyQty == 'sparse':
         # 4-6
@@ -291,11 +292,12 @@ def addEnergy(qty, itemPool):
         else:
             addItem('ETank', itemPool)
         # 3 in the pool (1 E, 1 R + the previous one)
+        alreadyInPool = 3
         rest = 1 + randGaussBounds(2, 5)
         for i in range(rest):
             addItem('ETank', itemPool)
         # complete up to 18 energies with nothing item
-        for i in range(18 - 3 - rest):
+        for i in range(total - alreadyInPool - rest):
             itemPool.append(NoEnergy)
     elif qty['energy'] == 'medium':
         # 8-12
@@ -306,11 +308,12 @@ def addEnergy(qty, itemPool):
             else:
                 addItem('ETank', itemPool)
         # 5 already in the pool (1 E, 1 R, + the previous 3)
+        alreadyInPool = 5
         rest = 3 + randGaussBounds(4, 3.7)
         for i in range(rest):
             addItem('ETank', itemPool)
         # fill the rest with NoEnergy
-        for i in range(18 - 6 - rest):
+        for i in range(total - alreadyInPool - rest):
             itemPool.append(NoEnergy)
     else:
         # add the vanilla 3 reserves and 13 Etanks

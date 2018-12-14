@@ -3,7 +3,8 @@
 import sys
 
 from utils import randGaussBounds
-from itemrandomizerweb.Items import getItemPool 
+from itemrandomizerweb.Items import ItemManager
+from smboolmanager import SMBoolManager
 import random
 
 fun = ['HiJump', 'SpeedBooster', 'Plasma', 'ScrewAttack', 'Wave', 'Spazer', 'SpringBall']
@@ -46,7 +47,10 @@ if __name__ == "__main__":
             # write params
             csvOut.write("%s;%d;%d;%s;%d;%d;%d;" % (energyQty, minQty, len(forbidden), str(strictMinors), missProb, superProb, pbProb))
             # get items
-            itemPool = getItemPool(qty, forbidden)
+            smboolManager = SMBoolManager()
+            itemManager = ItemManager('Major', qty, smboolManager)
+            itemPool = itemManager.getItemPool()
+            itemPool = itemManager.removeForbiddenItems(forbidden)
             # compute stats
             nItems = len([item for item in itemPool if item['Category'] != 'Nothing'])
             nTanks = len([item for item in itemPool if item['Category'] == 'Energy'])

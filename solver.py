@@ -218,6 +218,7 @@ class CommonSolver(object):
     def loadRom(self, rom, interactive=False, magic=None):
         self.romFileName = rom
         self.romLoader = RomLoader.factory(rom, magic)
+        # TODO::handle chozo
         self.fullRando = self.romLoader.assignItems(self.locations)
         self.areaRando = self.romLoader.loadPatches()
 
@@ -630,8 +631,9 @@ class StandardSolver(CommonSolver):
         # if equality between major and minor, take major first.
 
         if not self.fullRando:
-            self.majorLocations = [loc for loc in self.locations if loc["Class"] == "Major"]
-            self.minorLocations = [loc for loc in self.locations if loc["Class"] == "Minor"]
+            # TODO::handle chozo
+            self.majorLocations = [loc for loc in self.locations if "Major" in loc["Class"]]
+            self.minorLocations = [loc for loc in self.locations if "Minor" in loc["Class"]]
         else:
             self.majorLocations = self.locations[:] # copy
             self.minorLocations = self.majorLocations

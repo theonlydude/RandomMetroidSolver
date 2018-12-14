@@ -1,9 +1,8 @@
 
 import re, struct, sys, random, os, json, copy
 from smbool import SMBool
-from itemrandomizerweb import Items
+from itemrandomizerweb.Items import ItemManager
 from itemrandomizerweb.patches import patches
-from itemrandomizerweb import Items
 from itemrandomizerweb.stdlib import List
 
 def readWord(romFile):
@@ -226,7 +225,7 @@ class RomReader:
         for loc in locations:
             item = self.getItem(loc["Address"], loc["Visibility"])
             loc["itemName"] = self.items[item]["name"]
-            if loc['Class'] == 'Major' and self.items[item]['name'] in ['Missile', 'Super', 'PowerBomb']:
+            if 'Major' in loc['Class'] and self.items[item]['name'] in ['Missile', 'Super', 'PowerBomb']:
                 isFull = True
 
         return isFull
@@ -484,7 +483,7 @@ class RomPatcher:
         writeWord(self.romFile, w)
 
     def writeItemCode(self, item, visibility, address):
-        itemCode = Items.getItemTypeCode(item, visibility)
+        itemCode = ItemManager.getItemTypeCode(item, visibility)
         if self.race is None:
             self.romFile.seek(address)
             self.writeWord(itemCode)
@@ -529,7 +528,7 @@ class RomPatcher:
         isAmmo = item['Category'] == 'Ammo' or item['Category'] == 'Nothing'
         isMissile = item['Type'] == 'Missile' or item['Category'] == 'Nothing'
         # category to check
-        if Items.isBeam(item):
+        if ItemManager.isBeam(item):
             cat = 0xA8 # collected beams
         elif item['Type'] == 'ETank':
             cat = 0xC4 # max health
@@ -556,10 +555,10 @@ class RomPatcher:
             operand = 0x65 # < 100
         elif item['Type'] == 'Reserve' or isAmmo:
             operand = 0x1 # < 1
-        elif Items.isBeam(item):
-            operand = Items.BeamBits[item['Type']]
+        elif ItemManager.isBeam(item):
+            operand = ItemManager.BeamBits[item['Type']]
         else:
-            operand = Items.ItemBits[item['Type']]
+            operand = ItemManager.ItemBits[item['Type']]
         # endianness
         op0 = operand & 0x00FF
         op1 = (operand & 0xFF00) >> 8
@@ -733,7 +732,7 @@ class RomPatcher:
 
     def writeSpoiler(self, itemLocs):
         # keep only majors, filter out Etanks and Reserve
-        fItemLocs = List.filter(lambda il: (il['Item']['Class'] == 'Major'
+        fItemLocs = List.filter(lambda il: ('Major' in il['Item']['Class']
                                             and il['Item']['Type'] not in ['ETank', 'Reserve',
                                                                            'NoEnergy', 'Nothing']),
                                 itemLocs)

@@ -1,5 +1,5 @@
 import sys, random, time
-from itemrandomizerweb import Items
+from itemrandomizerweb.Items import ItemManager
 from parameters import Knows, Settings, samus, infinity
 from itemrandomizerweb.stdlib import List
 from smbool import SMBool
@@ -26,8 +26,10 @@ class RandoSettings(object):
     #                          early to get it in the first two rooms.
     #                          late to get it after the beginning of the game (crateria/blue brinstar)
     #                          random for morph to be placed randomly.
-    #                'MajorMinor' : if true, will put major items in major locations, and minor items
+    #                'MajorMinor' : if 'Major', will put major items in major locations, and minor items
     #                               in minor locations
+    #                               if 'Chozo', will put major items in chozo locations, and minor items in others
+    #                               if 'Full', no restriction
     # superFun : super fun settings list. can contain 'Movement', 'Combat', 'Suits'. Will remove random items
     # of the relevant categorie(s). This can easily cause aborted seeds, so some basic checks will be performed
     # beforehand to know whether an item can indeed be removed.
@@ -127,7 +129,7 @@ class RandoSettings(object):
             return 0
 
     def getMinorHelpProb(self, progSpeed):
-        if self.restrictions['MajorMinor'] == False:
+        if self.restrictions['MajorMinor'] == 'Full':
             return 0
         if progSpeed == 'slowest':
             return 0.16
@@ -138,7 +140,7 @@ class RandoSettings(object):
         return 1
 
     def getProgressionItemTypes(self, progSpeed):
-        progTypes = [item['Type'] for item in Items.Items if item['Category'] == 'Progression']
+        progTypes = ItemManager.getProgTypes()
         progTypes.append('Charge')
         if progSpeed == 'slowest':
             return progTypes
@@ -193,9 +195,9 @@ class RandoSettings(object):
 # dat class name
 class SuperFunProvider(object):
     # give the rando since we have to access services from it
-    def __init__(self, superFun, basePool, rando):
+    def __init__(self, superFun, itemManager, rando):
         self.superFun = superFun
-        self.basePool = basePool
+        self.itemManager = itemManager
         self.rando = rando
         self.locations = rando.unusedLocations
         self.sm = self.rando.smbm
@@ -219,8 +221,8 @@ class SuperFunProvider(object):
         self.okay = lambda: SMBool(True, 0)
 
     def getItemPool(self, forbidden=[]):
-        pool = self.basePool[:]
-        return Items.removeForbiddenItems(self.forbiddenItems + forbidden, pool)
+        self.itemManager.getItemPool()
+        return self.itemManager.removeForbiddenItems(self.forbiddenItems + forbidden)
 
     def checkPool(self, forbidden=None):
         self.rando.log.debug("forbidden=" + str(forbidden))
@@ -437,8 +439,8 @@ class Randomizer(object):
         # progression items tried for a given rollback point
         self.rollbackItemsTried = {}
         # handle super fun settings
-        basePool = Items.getItemPool(settings.qty, self.smbm)
-        fun = SuperFunProvider(settings.superFun, basePool, self)
+        itemManager = ItemManager(self.restrictions['MajorMinor'], settings.qty, self.smbm)
+        fun = SuperFunProvider(settings.superFun, itemManager, self)
         fun.getForbidden()
         # check if we can reach everything
         self.log.debug("LAST CHECKPOOL")
@@ -448,7 +450,30 @@ class Randomizer(object):
         if len(fun.errorMsgs) > 0:
             self.errorMsg += "Super Fun: " + ', '.join(fun.errorMsgs) + ' '
         self.itemPool = fun.getItemPool()
+        print("itempool: {}".format([item['Type'] for item in self.itemPool]))
         self.restrictedLocations = fun.restrictedLocs
+
+    # with the new chozo split the tests change, a loc can have one or two classes, an item just one
+    def isLocMajor(self, loc):
+        return self.restrictions['MajorMinor'] == "Full" or self.restrictions['MajorMinor'] in loc['Class']
+
+    def isLocMinor(self, loc):
+        return self.restrictions['MajorMinor'] == "Full" or self.restrictions['MajorMinor'] not in loc['Class']
+
+    def isItemMajor(self, item):
+        if self.restrictions['MajorMinor'] == "Full":
+            return False
+        else:
+            return item['Class'] == self.restrictions['MajorMinor']
+
+    def isItemMinor(self, item):
+        return item['Class'] == "Minor"
+
+    def isItemLocMatching(self, loc, item):
+        if self.restrictions['MajorMinor'] in loc['Class']:
+            return item['Class'] == self.restrictions['MajorMinor']
+        else:
+            return item['Class'] == "Minor"
 
     # determine randomizer parameters, either statically (all speeds but variable), or dynamically (variable speed)
     def determineParameters(self):
@@ -629,7 +654,7 @@ class Randomizer(object):
         return self.areaDistanceProp(loc, otherLocs, 'Area')
 
     def getLocsSpreadProgression(self, availableLocations):
-        progLocs = [il['Location'] for il in self.progressionItemLocs if il['Item']['Class'] == 'Major' and il['Item']['Category'] != "Energy"]
+        progLocs = [il['Location'] for il in self.progressionItemLocs if self.restrictions["MajorMinor"] == il['Item']['Class'] and il['Item']['Category'] != "Energy"]
         distances = [self.areaDistance(loc, progLocs) for loc in availableLocations]
         maxDist = max(distances)
         indices = [index for index, d in enumerate(distances) if d == maxDist]
@@ -736,8 +761,8 @@ class Randomizer(object):
         if canPlaceIt == False:
             return False
         newLocations = self.currentLocations(item)
-        if self.restrictions["MajorMinor"] == True:
-            newLocationsHasMajor = List.exists(lambda l: l["Class"] == 'Major', newLocations)
+        if self.restrictions["MajorMinor"] != "Full":
+            newLocationsHasMajor = List.exists(lambda l: self.restrictions["MajorMinor"] in l["Class"], newLocations)
         else:
             newLocationsHasMajor = True
 
@@ -807,9 +832,8 @@ class Randomizer(object):
     # check if an item can be placed at a location, given restrictions
     # settings.
     def canPlaceAtLocation(self, item, location, checkSoftlock=False):
-        if self.restrictions['MajorMinor'] == True:
-            matchingClass = (location["Class"] == item["Class"])
-            if matchingClass == False:
+        if self.restrictions['MajorMinor'] != "Full":
+            if self.isItemLocMatching(location, item) == False:
                 return False
 
         if self.restrictions['Suits'] == True and Randomizer.isSuit(item):
@@ -887,14 +911,14 @@ class Randomizer(object):
         self.log.debug("curItems {}".format([it['Name'] for it in self.currentItems]))
         if len(progItems) == 0 or self.locLimit <= 0:
             return True
-        isMinorProg = any(item['Class'] == 'Minor' for item in progItems)
-        isMajorProg = any(item['Class'] == 'Major' for item in progItems)
+        isMinorProg = any(self.isItemMinor(item) for item in progItems)
+        isMajorProg = any(self.isItemMajor(item) for item in progItems)
         accessibleLocations = []
         self.log.debug("unusedLocs: {}".format([loc['Name'] for loc in self.unusedLocations]))
         locs = self.currentLocations()
         for loc in locs:
-            majAvail = self.restrictions['MajorMinor'] == False or loc['Class'] == 'Major'
-            minAvail = self.restrictions['MajorMinor'] == False or loc['Class'] == 'Minor'
+            majAvail = self.isLocMajor(loc)
+            minAvail = self.isLocMinor(loc)
             if ((isMajorProg and majAvail) or (isMinorProg and minAvail)) \
                and self.locPostAvailable(loc, None):
                 accessibleLocations.append(loc)
@@ -906,8 +930,8 @@ class Randomizer(object):
         # check that there is room left in all main areas
         room = {'Brinstar' : 0, 'Norfair' : 0, 'WreckedShip' : 0, 'LowerNorfair' : 0, 'Maridia' : 0 }
         for loc in self.unusedLocations:
-            majAvail = self.restrictions['MajorMinor'] == False or loc['Class'] == 'Major'
-            minAvail = self.restrictions['MajorMinor'] == False or loc['Class'] == 'Minor'
+            majAvail = self.isLocMajor(loc)
+            minAvail = self.isLocMinor(loc)
             if loc['Area'] in room and ((isMajorProg and majAvail) or (isMinorProg and minAvail)):
                 room[loc['Area']] += 1
         for r in room.values():
@@ -1072,8 +1096,8 @@ class Randomizer(object):
     # to be finishable
     def fillRestrictedLocations(self):
         for loc in self.restrictedLocations:
-            isMajor = self.restrictions['MajorMinor'] == False or loc['Class'] == 'Major'
-            isMinor = self.restrictions['MajorMinor'] == False or loc['Class'] == 'Minor'
+            isMajor = self.isLocMajor(loc)
+            isMinor = self.isLocMinor(loc)
             itemLocation = {'Location' : loc}
             if isMinor and self.hasItemTypeInPool('Nothing'):
                 itemLocation['Item'] = self.getNextItemInPool('Nothing')

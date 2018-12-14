@@ -2,7 +2,6 @@
 
 import argparse, random, os.path, json, sys, shutil
 
-from itemrandomizerweb import Items
 from itemrandomizerweb.Randomizer import Randomizer, RandoSettings, progSpeeds
 from itemrandomizerweb.AreaRandomizer import AreaRandomizer
 from graph_locations import locations as graphLocations
@@ -16,6 +15,7 @@ speeds = progSpeeds + ['variable']
 energyQties = ['sparse', 'medium', 'vanilla' ]
 progDiffs = ['easier', 'normal', 'harder']
 morphPlacements = ['early', 'late', 'normal']
+majorsSplits = ['Full', 'Major', 'Chozo']
 
 def dumpErrorMsg(outFileName, msg):
     if outFileName is None:
@@ -91,9 +91,9 @@ if __name__ == "__main__":
     parser.add_argument('--strictMinors',
                         help="minors quantities values will be strictly followed instead of being probabilities",
                         dest='strictMinors', nargs='?', const=True, default=False)
-    parser.add_argument('--fullRandomization',
-                        help="will place majors in all locations",
-                        dest='fullRandomization', nargs='?', const=True, default=False)
+    parser.add_argument('--majorsSplit',
+                        help="how to split majors/minors: Full, Major, Chozo",
+                        dest='majorsSplit', nargs='?', choices=majorsSplits + ['random'], default='full')
     parser.add_argument('--suitsRestriction',
                         help="no suits in early game",
                         dest='suitsRestriction', nargs='?', const=True, default=False)
@@ -220,8 +220,8 @@ if __name__ == "__main__":
         threshold = mania - epsilon
     maxDifficulty = threshold
 
-    if args.fullRandomization == 'random':
-        args.fullRandomization = bool(random.getrandbits(1))
+    if args.majorsSplit == 'random':
+        args.majorsSplit = majorsSplits[random.randint(0, len(majorsSplits)-1)]
     if args.suitsRestriction == 'random':
         if args.morphPlacement == 'late' and args.area == True:
             args.suitsRestriction = False
@@ -238,10 +238,12 @@ if __name__ == "__main__":
 
     # fill restrictions dict
     restrictions = { 'Suits' : args.suitsRestriction, 'Morph' : args.morphPlacement }
-    restrictions['MajorMinor'] = not args.fullRandomization
+    restrictions['MajorMinor'] = args.majorsSplit
     seedCode = 'X'
-    if restrictions['MajorMinor'] == False:
+    if restrictions['MajorMinor'] == 'Full':
         seedCode = 'FX'
+    elif restrictions['MajorMinor'] == 'Chozo':
+        seedCode = 'CX'
     if args.area == True:
         seedCode = 'A'+seedCode
 

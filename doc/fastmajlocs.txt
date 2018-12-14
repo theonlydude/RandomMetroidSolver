@@ -35,6 +35,7 @@ Maridia:
 "Space Jump"
 
 
-24 chozo statues:
-
-
+24 chozo statues
+16 majors
+14 etanks
+4 reserves

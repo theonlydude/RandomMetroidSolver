@@ -367,6 +367,7 @@ class RandoState(object):
         self.states = rando.states[:]
         self.progressionItemLocs = rando.progressionItemLocs[:]
         self.progressionStatesIndices = rando.progressionStatesIndices[:]
+        self.hadChozoLeft = rando.hadChozoLeft
         self.bosses = [boss for boss in Bosses.golden4Dead if Bosses.golden4Dead[boss] == True]
         self.curLocs = curLocs
 
@@ -382,6 +383,7 @@ class RandoState(object):
         rando.itemPool = self.itemPool
         rando.progressionStatesIndices = self.progressionStatesIndices
         rando.progressionItemLocs = self.progressionItemLocs
+        rando.hadChozoLeft = self.hadChozoLeft
         rando.smbm.resetItems()
         rando.smbm.addItems([item['Type'] for item in self.currentItems])
         Bosses.reset()
@@ -450,7 +452,14 @@ class Randomizer(object):
         if len(fun.errorMsgs) > 0:
             self.errorMsg += "Super Fun: " + ', '.join(fun.errorMsgs) + ' '
         self.itemPool = fun.getItemPool()
-        print("itempool: {}".format([item['Type'] for item in self.itemPool]))
+        # temporarily swap item pool in chozo mode, until all chozo item are placed in chozo locs
+        if self.restrictions['MajorMinor'] == 'Chozo':
+            self.chozoItemPool = [item for item in self.itemPool if item['Class'] == 'Chozo']
+            self.nonChozoItemPool = [item for item in self.itemPool if item['Class'] != 'Chozo'] # this will be swapped back
+            self.itemPool = self.chozoItemPool
+            self.chozoDiffTarget = self.difficultyTarget # backup diff target
+            self.difficultyTarget = infinity
+#        print("itempool: {}".format([item['Type'] for item in self.itemPool]))
         self.restrictedLocations = fun.restrictedLocs
 
     # with the new chozo split the tests change, a loc can have one or two classes, an item just one
@@ -829,12 +838,29 @@ class Randomizer(object):
 
         return False
 
+    def isChozoLeft(self):
+        return any(item['Class'] == 'Chozo' for item in self.itemPool)
+
+    def locClassCheck(self, item, location):
+        # in chozo mode, place chozo items first with no diff cap
+        # so the seed is theoretically finishable without checking
+        # any other location
+        if self.restrictions['MajorMinor'] == 'Chozo':
+            if self.isChozoLeft():
+                return 'Chozo' == item['Class'] and 'Chozo' in location['Class']
+            else:
+                return True
+
+        if self.restrictions['MajorMinor'] != "Full":
+            return self.isItemLocMatching(location, item)
+
+        return True
+
     # check if an item can be placed at a location, given restrictions
     # settings.
     def canPlaceAtLocation(self, item, location, checkSoftlock=False):
-        if self.restrictions['MajorMinor'] != "Full":
-            if self.isItemLocMatching(location, item) == False:
-                return False
+        if not self.locClassCheck(item, location):
+            return False
 
         if self.restrictions['Suits'] == True and Randomizer.isSuit(item):
             return self.suitsRestrictionsImpl(item, location)
@@ -889,9 +915,9 @@ class Randomizer(object):
             self.progTypesCache = []
         self.unusedLocations.remove(location)
         self.itemLocations.append(itemLocation)
-        self.log.debug("{}: {} at {} diff: {}".format(len(self.currentItems), item['Type'], location['Name'], location['difficulty']))
-        if curLocs != None:
-           self.log.debug("PLACEMENT, curLocs={}".format([loc['Name'] for loc in curLocs]))
+        self.log.debug("PLACEMENT {}: {} at {} diff: {}".format(len(self.currentItems), item['Type'], location['Name'], location['difficulty']))
+        # if curLocs != None:
+        #    self.log.debug("PLACEMENT, curLocs={}".format([loc['Name'] for loc in curLocs]))
         self.removeItem(item['Type'])
         if collect == True:
             if isProg == True:
@@ -905,16 +931,16 @@ class Randomizer(object):
     # check if remaining locations pool is conform to rando settings when filling up
     # with non-progression items
     def checkLocPool(self):
-        self.log.debug("checkLocPool {}".format([it['Name'] for it in self.itemPool]))
+ #       self.log.debug("checkLocPool {}".format([it['Name'] for it in self.itemPool]))
         progItems = [item for item in self.itemPool if self.isProgItem(item)]
         self.log.debug("progItems {}".format([it['Name'] for it in progItems]))
-        self.log.debug("curItems {}".format([it['Name'] for it in self.currentItems]))
+ #       self.log.debug("curItems {}".format([it['Name'] for it in self.currentItems]))
         if len(progItems) == 0 or self.locLimit <= 0:
             return True
         isMinorProg = any(self.isItemMinor(item) for item in progItems)
         isMajorProg = any(self.isItemMajor(item) for item in progItems)
         accessibleLocations = []
-        self.log.debug("unusedLocs: {}".format([loc['Name'] for loc in self.unusedLocations]))
+#        self.log.debug("unusedLocs: {}".format([loc['Name'] for loc in self.unusedLocations]))
         locs = self.currentLocations()
         for loc in locs:
             majAvail = self.isLocMajor(loc)
@@ -1048,7 +1074,7 @@ class Randomizer(object):
             (state, itemLoc) = possibleStates[random.randint(0, len(possibleStates)-1)]
             self.updateRollbackItemsTried(itemLoc, i)
             state.apply(self)
-            sys.stdout.write('<'*(nStatesAtStart - len(self.states)))
+            sys.stdout.write('<'*(nStatesAtStart - len(self.states) - 1))
             sys.stdout.flush()
         self.log.debug("rollback END: {}".format(len(self.currentItems)))
 
@@ -1120,6 +1146,16 @@ class Randomizer(object):
             self.log.debug("Fill: {} at {}".format(itemLocation['Item']['Type'], itemLocation['Location']['Name']))
             self.getItem(itemLocation, False)
 
+    def chozoCheck(self):
+        if self.restrictions['MajorMinor'] == 'Chozo':
+            if not self.isChozoLeft() and self.hadChozoLeft:
+                # filled all chozo locs, go back to normal placement
+#                print('SWAP')
+                self.itemPool = self.nonChozoItemPool
+                self.difficultyTarget = self.chozoDiffTarget
+            self.hadChozoLeft = self.isChozoLeft()
+            # FIXME : when all chozo have been placed, the rest is placed with no regard to access difficulty to already placed locations
+
     # only function to use (once) from outside of the Randomizer class.
     # returns a list of item/location dicts with 'Item' and 'Location' as keys.
     def generateItems(self):
@@ -1129,8 +1165,9 @@ class Randomizer(object):
         # items that are as useless as possible
         self.fillRestrictedLocations()
         self.curLocs = self.currentLocations()
+        self.hadChozoLeft = self.isChozoLeft()
         self.states.append(RandoState(self, self.curLocs))
-        self.log.debug("{} items in pool".format(len(self.itemPool)))
+#        self.log.debug("{} items in pool".format(len(self.itemPool)))
         runtime_s = 0
         startDate = time.clock()
         prevDiffTarget = None
@@ -1139,6 +1176,7 @@ class Randomizer(object):
             self.determineParameters()
             # fill up with non-progression stuff
             isStuck = self.fillNonProgressionItems()
+            self.chozoCheck()
             if len(self.itemPool) > 0:
                 # collect an item with standard pool
                 if not isStuck:
@@ -1150,9 +1188,9 @@ class Randomizer(object):
                         # check that we're actually stuck
                         nCurLocs = len(self.states[-1].curLocs)
                         nLocsLeft = len(self.unusedLocations)
-                        self.log.debug("nCurLocs={}, nLocsLeft={}".format(nCurLocs, nLocsLeft))
-                        self.log.debug("curLocs: {}".format([loc['Name'] for loc in self.states[-1].curLocs]))
-                        self.log.debug("unused: {}".format([loc['Name'] for loc in self.unusedLocations]))
+                        # self.log.debug("nCurLocs={}, nLocsLeft={}".format(nCurLocs, nLocsLeft))
+                        # self.log.debug("curLocs: {}".format([loc['Name'] for loc in self.states[-1].curLocs]))
+                        # self.log.debug("unused: {}".format([loc['Name'] for loc in self.unusedLocations]))
                         if nCurLocs < nLocsLeft:
                             # stuck, rollback to make progress if we can't access everything yet
                             self.rollback()
@@ -1163,6 +1201,7 @@ class Randomizer(object):
                             prevDiffTarget = self.difficultyTarget
                         self.difficultyTarget = infinity
                         isStuck = False
+            self.chozoCheck()
             runtime_s = time.clock() - startDate
         self.log.debug("{} remaining items in pool".format(len(self.itemPool)))
         if len(self.itemPool) > 0:

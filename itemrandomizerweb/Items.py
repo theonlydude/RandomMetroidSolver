@@ -188,12 +188,12 @@ class ItemManager:
         self.qty = qty
         self.sm = sm
         self.majorsSplit = majorsSplit
-        self.majorClass = 'Chozo' if majorsSplit == 'Chozo' else 'Major'
+#        self.majorClass = 'Chozo' if majorsSplit == 'Chozo' else 'Major'
         self.itemPool = []
 
     def addItem(self, itemType, itemClass=None):
-        if itemClass == None:
-            itemClass = self.majorClass
+        # if itemClass == None:
+        #     itemClass = self.majorClass
         self.itemPool.append(self.getItem(itemType, itemClass))
 
     def addMinor(self, minorType):
@@ -202,7 +202,7 @@ class ItemManager:
     # remove from pool an item of given type. item type has to be in original Items list.
     def removeItem(self, itemType):
         for idx, item in enumerate(self.itemPool):
-            if item["Type"] == itemType and item["Class"] == self.majorClass:
+            if item["Type"] == itemType:# and item["Class"] == self.majorClass:
                 self.itemPool = self.itemPool[0:idx] + self.itemPool[idx+1:]
                 break
 
@@ -216,7 +216,8 @@ class ItemManager:
     def getItem(self, itemType, itemClass):
         # TODO::use objects instead of dicts ?
         item = copy.copy(ItemManager.Items[itemType])
-        item['Class'] = itemClass
+        if itemClass is not None:
+            item['Class'] = itemClass
         item['Type'] = itemType
         return item
 
@@ -326,6 +327,9 @@ class ItemPoolGeneratorChozo(ItemPoolGenerator):
         self.addAmmo()
 
         return self.itemManager.itemPool
+
+    # FIXME when removing forbidden items in chozo mode, mark the chozo item replacements as chozo
+
 
 class ItemPoolGeneratorMajors(ItemPoolGenerator):
     def addEnergy(self):

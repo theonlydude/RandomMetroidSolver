@@ -93,7 +93,7 @@ if __name__ == "__main__":
                         dest='strictMinors', nargs='?', const=True, default=False)
     parser.add_argument('--majorsSplit',
                         help="how to split majors/minors: Full, Major, Chozo",
-                        dest='majorsSplit', nargs='?', choices=majorsSplits + ['random'], default='full')
+                        dest='majorsSplit', nargs='?', choices=majorsSplits + ['random'], default='Full')
     parser.add_argument('--suitsRestriction',
                         help="no suits in early game",
                         dest='suitsRestriction', nargs='?', const=True, default=False)
@@ -243,7 +243,7 @@ if __name__ == "__main__":
     if restrictions['MajorMinor'] == 'Full':
         seedCode = 'FX'
     elif restrictions['MajorMinor'] == 'Chozo':
-        seedCode = 'CX'
+        seedCode = 'ZX'
     if args.area == True:
         seedCode = 'A'+seedCode
 

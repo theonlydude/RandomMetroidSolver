@@ -220,15 +220,86 @@ class RomReader:
         else:
             return itemCode
 
+    def getMajorsSplit(self):
+        address = 0x17B6C
+        self.romFile.seek(address)
+        split = chr(struct.unpack("B", self.romFile.read(1))[0])
+        if split in ['F', 'M', 'Z']:
+            splits = {
+                'F': 'Full',
+                'Z': 'Chozo',
+                'M': 'Major'
+            }
+            return splits[split]
+        else:
+            return None
+
     def loadItems(self, locations):
-        isFull = False
+        majorsSplit = self.getMajorsSplit()
+
+        if majorsSplit == None:
+            isFull = False
+            chozoItems = {}
         for loc in locations:
             item = self.getItem(loc["Address"], loc["Visibility"])
             loc["itemName"] = self.items[item]["name"]
-            if 'Major' in loc['Class'] and self.items[item]['name'] in ['Missile', 'Super', 'PowerBomb']:
-                isFull = True
+            if majorsSplit == None:
+                if 'Major' in loc['Class'] and self.items[item]['name'] in ['Missile', 'Super', 'PowerBomb']:
+                    isFull = True
+                if 'Minor' in loc['Class'] and self.items[item]['name'] not in ['Missile', 'Super', 'PowerBomb']:
+                    isFull = True
+                if 'Chozo' in loc['Class']:
+                    if loc['itemName'] in chozoItems:
+                        chozoItems[loc['itemName']] = chozoItems[loc['itemName']] + 1
+                    else:
+                        chozoItems[loc['itemName']] = 1
 
-        return isFull
+        # if majors split is not written in the seed, use an heuristic
+        if majorsSplit == None:
+            isChozo = self.isChozoSeed(chozoItems)
+            print("majorsSplit == None, isChozo: {}, isFull: {}".format(isChozo, isFull))
+
+            if isChozo == True:
+                return 'Chozo'
+            elif isFull == True:
+                return 'Full'
+            else:
+                return 'Major'
+        else:
+            return majorsSplit
+
+    def isChozoSeed(self, chozoItems):
+        # we have 2 Missiles, 2 Supers and 1 PB in the chozo locations
+        if 'Missile' not in chozoItems:
+            return False
+        if chozoItems['Missile'] != 2:
+            return False
+        if 'Super' not in chozoItems:
+            return False
+        if chozoItems['Super'] != 2:
+            return False
+        if 'PowerBomb' not in chozoItems:
+            return False
+        if chozoItems['PowerBomb'] != 1:
+            return False
+
+        # we have at least 3 E and 1 R
+        if 'ETank' not in chozoItems:
+            return False
+        if chozoItems['ETank'] < 3:
+            return False
+        if 'Reserve' not in chozoItems:
+            return False
+
+        # all the majors items which can't be superfuned
+        if 'Charge' not in chozoItems:
+            return False
+        if 'Morph' not in chozoItems:
+            return False
+        if 'Ice' not in chozoItems:
+            return False
+
+        return True
 
     def loadTransitions(self):
         # return the transitions or None if vanilla transitions
@@ -628,6 +699,17 @@ class RomPatcher:
     def writeMagic(self):
         if self.race is not None:
             self.race.writeMagic()
+
+    def writeMajorsSplit(self, majorsSplit):
+        address = 0x17B6C
+        if majorsSplit == 'Chozo':
+            char = 'Z'
+        elif majorsSplit == 'Full':
+            char = 'F'
+        else:
+            char = 'M'
+        self.romFile.seek(address)
+        self.romFile.write(struct.pack('B', ord(char)))
 
     def getItemQty(self, itemLocs, itemType):
         q = len([il for il in itemLocs if il['Item']['Type'] == itemType])

@@ -188,12 +188,10 @@ class ItemManager:
         self.qty = qty
         self.sm = sm
         self.majorsSplit = majorsSplit
-#        self.majorClass = 'Chozo' if majorsSplit == 'Chozo' else 'Major'
+        self.majorClass = 'Chozo' if majorsSplit == 'Chozo' else 'Major'
         self.itemPool = []
 
     def addItem(self, itemType, itemClass=None):
-        # if itemClass == None:
-        #     itemClass = self.majorClass
         self.itemPool.append(self.getItem(itemType, itemClass))
 
     def addMinor(self, minorType):
@@ -202,7 +200,7 @@ class ItemManager:
     # remove from pool an item of given type. item type has to be in original Items list.
     def removeItem(self, itemType):
         for idx, item in enumerate(self.itemPool):
-            if item["Type"] == itemType:# and item["Class"] == self.majorClass:
+            if item["Type"] == itemType:
                 self.itemPool = self.itemPool[0:idx] + self.itemPool[idx+1:]
                 break
 
@@ -210,7 +208,7 @@ class ItemManager:
         # the pool is the one managed by the Randomizer
         for itemType in forbiddenItems:
             self.removeItem(itemType)
-            self.addItem('NoEnergy')
+            self.addItem('NoEnergy', self.majorClass)
         return self.itemPool
 
     def getItem(self, itemType, itemClass):
@@ -286,36 +284,36 @@ class ItemPoolGeneratorChozo(ItemPoolGenerator):
             rest = randGaussBounds(2, 5)
             if rest >= 1:
                 if random.random() < 0.5:
-                    self.itemManager.addItem('Reserve')
+                    self.itemManager.addItem('Reserve', 'Minor')
                 else:
-                    self.itemManager.addItem('ETank')
+                    self.itemManager.addItem('ETank', 'Minor')
             for i in range(rest-1):
-                self.itemManager.addItem('ETank')
+                self.itemManager.addItem('ETank', 'Minor')
             # complete up to 18 energies with nothing item
             for i in range(total - alreadyInPool - rest):
-                self.itemManager.addItem('NoEnergy')
+                self.itemManager.addItem('NoEnergy', 'Minor')
         elif energyQty == 'medium':
             # 8-12
             # add up to 3 Reserves or ETanks (cannot add more than 3 reserves)
             for i in range(3):
                 if random.random() < 0.5:
-                    self.itemManager.addItem('Reserve')
+                    self.itemManager.addItem('Reserve', 'Minor')
                 else:
-                    self.itemManager.addItem('ETank')
+                    self.itemManager.addItem('ETank', 'Minor')
             # 7 already in the pool (3 E, 1 R, + the previous 3)
             alreadyInPool = 7
             rest = 1 + randGaussBounds(4, 3.7)
             for i in range(rest):
-                self.itemManager.addItem('ETank')
+                self.itemManager.addItem('ETank', 'Minor')
             # fill the rest with NoEnergy
             for i in range(total - alreadyInPool - rest):
-                self.itemManager.addItem('NoEnergy')
+                self.itemManager.addItem('NoEnergy', 'Minor')
         else:
             # add the vanilla 3 reserves and 13 Etanks
             for i in range(3):
-                self.itemManager.addItem('Reserve')
+                self.itemManager.addItem('Reserve', 'Minor')
             for i in range(11):
-                self.itemManager.addItem('ETank')
+                self.itemManager.addItem('ETank', 'Minor')
 
     def getItemPool(self):
         self.itemManager.itemPool = []
@@ -327,9 +325,6 @@ class ItemPoolGeneratorChozo(ItemPoolGenerator):
         self.addAmmo()
 
         return self.itemManager.itemPool
-
-    # FIXME when removing forbidden items in chozo mode, mark the chozo item replacements as chozo
-
 
 class ItemPoolGeneratorMajors(ItemPoolGenerator):
     def addEnergy(self):

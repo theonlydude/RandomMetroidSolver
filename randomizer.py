@@ -391,6 +391,7 @@ if __name__ == "__main__":
         if args.moonWalk == True:
             romPatcher.enableMoonWalk()
         romPatcher.writeMagic()
+        romPatcher.writeMajorsSplit(args.majorsSplit)
         romPatcher.end()
 
         if args.rom is None:

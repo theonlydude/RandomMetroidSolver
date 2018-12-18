@@ -257,8 +257,6 @@ class RomReader:
         # if majors split is not written in the seed, use an heuristic
         if majorsSplit == None:
             isChozo = self.isChozoSeed(chozoItems)
-            print("majorsSplit == None, isChozo: {}, isFull: {}".format(isChozo, isFull))
-
             if isChozo == True:
                 return 'Chozo'
             elif isFull == True:

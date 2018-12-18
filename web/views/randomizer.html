@@ -151,7 +151,7 @@ function getComplexity() {
 
 function setRandom() {
 {{
-  for id in ["missileQty", "superQty", "powerBombQty", "minorQty", "energyQty", "maxDifficulty", "fullRandomization", "suitsRestriction", "morphPlacement", "funCombat", "funMovement", "funSuits", "progressionDifficulty", "hideItems", "strictMinors", "progressionSpeed"]:
+  for id in ["missileQty", "superQty", "powerBombQty", "minorQty", "energyQty", "maxDifficulty", "majorsSplit", "suitsRestriction", "morphPlacement", "funCombat", "funMovement", "funSuits", "progressionDifficulty", "hideItems", "strictMinors", "progressionSpeed"]:
     if id in session.randomizer and session.randomizer[id] == "random":
       response.write('  document.getElementById("{}Random").click();'.format(id), escape=False)
       pass
@@ -241,7 +241,7 @@ function AjaxPresetCallCompleted(data) {
 
     var dataDict = {paramsFileTarget : data, "complexity": getComplexity()};
     var elems = ["seed", "itemsounds", "spinjumprestart", "elevators_doors_speed", "skip_ceres", "skip_intro", "animals", "layoutPatches", "noGravHeat", "areaLayout", "variaTweaks", "areaRandomization", "No_Music", "preset"];
-    var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "energyQty", "maxDifficulty", "fullRandomization", "suitsRestriction", "morphPlacement", "funCombat", "funMovement", "funSuits", "progressionDifficulty", "hideItems", "strictMinors"];
+    var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "energyQty", "maxDifficulty", "majorsSplit", "suitsRestriction", "morphPlacement", "funCombat", "funMovement", "funSuits", "progressionDifficulty", "hideItems", "strictMinors"];
 
     for(var i=0; i<elems.length; i++) {
        dataDict[elems[i]] = document.getElementById(elems[i]).value;
@@ -345,7 +345,7 @@ function AjaxRandomizerCallCompleted(data) {
 
     var dataDict = {"complexity": getComplexity()};
     var elems = ["itemsounds", "spinjumprestart", "elevators_doors_speed", "skip_ceres", "skip_intro", "animals", "layoutPatches", "noGravHeat", "areaLayout", "variaTweaks", "areaRandomization", "No_Music", "preset", "randoPreset"];
-    var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "energyQty", "maxDifficulty", "fullRandomization", "suitsRestriction", "morphPlacement", "funCombat", "funMovement", "funSuits", "progressionDifficulty", "hideItems", "strictMinors"];
+    var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "energyQty", "maxDifficulty", "majorsSplit", "suitsRestriction", "morphPlacement", "funCombat", "funMovement", "funSuits", "progressionDifficulty", "hideItems", "strictMinors"];
 
     for(var i=0; i<elems.length; i++) {
        dataDict[elems[i]] = document.getElementById(elems[i]).value;
@@ -497,14 +497,14 @@ window.onload = function(){
     area.onchange = function(){
         var area = document.getElementById("areaRandomization");
         var maxDiff = document.getElementById("maxDifficulty");
-        var full = document.getElementById("fullRandomization");
+        var majorsSplit = document.getElementById("majorsSplit");
         var patches = document.getElementById("areaLayout");
         var lateMorph = document.getElementById("morphPlacement");
         var suits = document.getElementById("suitsRestriction");
 
         if(area.checked){
-            if(! full.checked) {
-                full.click();
+            if(majorsSplit.value != "Full") {
+                majorsSplit.value = "Full";
             }
             if(maxDiff.value == "no difficulty cap"){
                 maxDiff.value = "hardcore";
@@ -685,14 +685,14 @@ function startTheTour(step=-1) {
       content: "When enabled, makes it difficult to cheat by using a Super Metroid editor like SMILE.<br/>You can choose how many hours must pass before a Race Mode seed can be solved on the VARIA website (default is 24)."
     },
     {
-      element: "#fullRandomizationStep",
-      title: "Full randomization",
-      content: "<p>Activate this option to have all items fully randomized.<br/>If disabled, the randomizer will behave like Total randomizer, with major and minor item pools.</p><p>Minor items are Missile, Super Missile and Power Bomb packs. Major items are all the rest, including energy.</p><p><b>Note:</b> High-Jump boots Energy Tank location is considered minor, and right Super Missile in Wrecked ship is considered major for balancing purposes.</p><p>Click on the dice button to randomly set this parameter.</p>"
+      element: "#majorsSplitStep",
+      title: "Majors Split",
+      content: "<p>Chooze how you want to split the Majors and the Minors items:<ul><li>Full: All items are shuffled in all locations</li><li>Majors/Minors: Behave like Total randomizer, with major and minor item pools.</p><p>Minor items are Missile, Super Missile and Power Bomb packs. Major items are all the rest, including energy.</p><p><b>Note:</b> High-Jump boots Energy Tank location is considered minor, and right Super Missile in Wrecked ship is considered major for balancing purposes.</li><li>Chozo: Put all the required items to finish the seed in the Chozo statues locations. The Majors items are: 2 Missile packs, 2 Super Missile packs, 1 Power Bomb pack, 3 Etanks, 1 Reserve Tank, all Beams. The Minors items are all the remaining Missiles, Super Missiles, Power Bombs and Energies</li></ul></p><p>Check the map for the list of Majors and Chozo locations: <a href=\"/solver/static/images/chozo_map.png\" class=\"highslide\" onclick=\"return hs.expand(this, {wrapperClassName: 'borderless', dimmingOpacity: 0.75, align: 'center'})\"><img id=\"chozoThumb\" src=\"/solver/static/images/chozo_map_thumbnail.png\" alt=\"Chozo Map\" title=\"Click to enlarge\"/></a></p><p>Click on the dice button to randomly set this parameter.</p>"
     },
     {
       element: "#maxDifficulty",
       title: "Maximum difficulty for picking up an item",
-      content: "<p>Depending on the perceived difficulties of the techniques, bosses, hell runs etc. from the preset, it will prevent the Randomizer from placing an item in a location too difficult to reach with the current items.</p><p><b>Warning:</b> if too low may cause the randomizer to abort.</p><p>Click on the dice button to randomly set this parameter.</p>"
+      content: "<p>Depending on the perceived difficulties of the techniques, bosses, hell runs etc. from the preset, it will prevent the Randomizer from placing an item in a location too difficult to reach with the current items.</p><p><b>Warning:</b> if too low may cause the randomizer to up the difficulty for some boss fight.</p><p>Click on the dice button to randomly set this parameter.</p>"
     },
     {
       element: "#progSpeedTuto",
@@ -742,7 +742,7 @@ function startTheTour(step=-1) {
     {
       element: "#areaRandomizationStep",
       title: "Area randomization",
-      content: "<p>Randomize areas together using bidirectional access portals: <a href=\"/solver/static/images/area_map.png\" class=\"highslide\" onclick=\"return hs.expand(this, {wrapperClassName: 'borderless', dimmingOpacity: 0.75, align: 'center'})\"><img id=\"areathumb\" src=\"/solver/static/images/area_map_thumbnail.png\" alt=\"Area Map\" title=\"Click to enlarge\"/></a><br/>All portals can be linked to one another, even if it means following an incompatible transition (Left-Left, Up-Right, ...).<br/>You can go through all portals and back, even those where you can't do that in vanilla, so:<ul><li>Some doors have been turned to blue</li><li>Both Maridia exit green gates have been removed</li><li>Crumble blocks preventing access to Lower Nofair through its exit have been removed</li></ul></p><p>Use the <a href=\"/solver/solver_web/tracker\">Area Tracker</a> to find your way more easily.</p><p><b>Note:</b> enabling it also auto-enables Full Randomization and set difficulty cap to hardcore (if it wasn't already easier) to avoid generating too hard seeds, but it can still be changed afterwards.</p>",
+      content: "<p>Randomize areas together using bidirectional access portals: <a href=\"/solver/static/images/area_map.png\" class=\"highslide\" onclick=\"return hs.expand(this, {wrapperClassName: 'borderless', dimmingOpacity: 0.75, align: 'center'})\"><img id=\"areathumb\" src=\"/solver/static/images/area_map_thumbnail.png\" alt=\"Area Map\" title=\"Click to enlarge\"/></a><br/>All portals can be linked to one another, even if it means following an incompatible transition (Left-Left, Up-Right, ...).<br/>You can go through all portals and back, even those where you can't do that in vanilla, so:<ul><li>Some doors have been turned to blue</li><li>Both Maridia exit green gates have been removed</li><li>Crumble blocks preventing access to Lower Nofair through its exit have been removed</li></ul></p><p>Use the <a href=\"/solver/solver_web/tracker\">Area Tracker</a> to find your way more easily.</p><p><b>Note:</b> enabling it also auto-enables Majors Split to Full Randomization and set difficulty cap to hardcore (if it wasn't already easier) to avoid generating too hard seeds, but it can still be changed afterwards.</p>",
       placement: "auto left"
     },
     {
@@ -929,8 +929,9 @@ def displayNumber(id, min, max, default, step="1"):
 	    <h4>Randomizer parameters</h4>
 	    <table class="full">
 	      <tr>
-		<td class="small"><div class="random"><button id="fullRandomizationRandom" type="button" onclick="randomize(event, 'fullRandomization')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
-	        <td colspan="2" id="fullRandomizationStep">{{displayCheckbox("fullRandomization")}}<span id="fullRandomizationText">Full randomization</span></td>
+		<td class="small"><div class="random"><button id="majorsSplitRandom" type="button" onclick="randomize(event, 'majorsSplit')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
+		<td><span id="majorsSplitText">Majors Split</span></td>
+	        <td id="majorsSplitStep">{{displaySelect("majorsSplit", ["Full", "Major", "Chozo"])}}</td>
                 <td><button type="button" onclick="startTheTour(5)">?</button></td>
 	      </tr>
               <tr id="maxDiffVisibility">

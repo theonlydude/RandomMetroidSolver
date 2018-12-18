@@ -268,3 +268,6 @@ find ~/web2py/applications/solver/static -xtype l -exec rm -f {} \;
 
 [ -L ~/web2py/rando_presets ] || ln -s ~/RandomMetroidSolver/rando_presets ~/web2py/rando_presets
 [ -L ~/web2py/applications/solver/static/images/league.png ] || ln -s ~/RandomMetroidSolver/web/static/league.png ~/web2py/applications/solver/static/images/league.png
+
+[ -L ~/web2py/applications/solver/static/images/chozo_map_thumbnail.png ] || ln -s ~/RandomMetroidSolver/web/static/chozo_map_thumbnail.png ~/web2py/applications/solver/static/images/chozo_map_thumbnail.png
+[ -L ~/web2py/applications/solver/static/images/chozo_map.png ] || ln -s ~/RandomMetroidSolver/web/static/chozo_map.png ~/web2py/applications/solver/static/images/chozo_map.png

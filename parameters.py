@@ -423,6 +423,12 @@ class Knows:
                         'href': 'https://www.youtube.com/watch?v=e5ZH_9paSLw',
                         'rooms': ['Pants Room']}
 
+    PuyoClipXRay = SMBool(False, 0, ['PuyoClipXRay'])
+    desc['PuyoClipXRay'] = {'display': 'Puyo Clip with X-Ray',
+                            'title': 'Get to Spring Ball with Gravity Suit, Ice Beam and X-Ray',
+                            'href': 'https://youtu.be/83JajzNyZtQ',
+                            'rooms': ['Pants Room']}
+
     SnailClip = SMBool(False, 0, ['SnailClip'])
     desc['SnailClip'] = {'display': 'Snail Clip',
                          'title': 'Access Aqueduct Missile and Super Missile without SpeedBooster',
@@ -500,7 +506,7 @@ class Knows:
         'Maridia 1/2': [
             {'knows': ['GravLessLevel1', 'GravLessLevel2', 'GravLessLevel3'],
              'title': 'Underwater movement without Gravity Suit'},
-            {'knows': ['MochtroidClip', 'PuyoClip', 'SnailClip'],
+            {'knows': ['MochtroidClip', 'PuyoClip', 'PuyoClipXRay', 'SnailClip'],
              'title': 'Clips'},
             {'knows': ['KillPlasmaPiratesWithCharge', 'KillPlasmaPiratesWithSpark'],
              'title': 'Plasma Room'},
@@ -796,7 +802,7 @@ class Settings:
             # balanced setting
             'Default' : [(3, harder), (4, hard), (5, medium)],
             # you don't mind doing hell runs at all
-            'Bring the heat' : [(2, hard), (3, medium)],
+            'Bring the heat' : [(2, harder), (3, hard), (4, medium)],
             # RBO runner
             'I run RBO' : [(2, medium), (3, easy)],
             'Solution' : [(2, hardcore), (3, harder), (4, hard), (5, medium)],
@@ -805,15 +811,15 @@ class Settings:
             'No thanks' : None,
             'Gimme energy' : [(5, mania), (6, hardcore), (8, harder), (10, hard), (14, medium)],
             'Default' : [(4, mania), (5, hardcore), (6, hard), (9, medium)],
-            'Bring the heat' : [(3, hardcore), (4, hard), (5, medium), (7, easy)],
+            'Bring the heat' : [(3, mania), (4, harder), (5, hard), (7, medium)],
             'I run RBO' : [(3, harder), (4, hard), (5, medium), (6, easy)],
             'Solution' : [(3, samus), (4, mania), (5, hardcore), (6, hard), (9, medium)]
         },
         'LowerNorfair' : {
             'Default' : None,
-            'Bring the heat' : [(9, mania), (12, hardcore), (14, harder), (18, hard)],
-            'I run RBO' : [(7, mania), (9, hardcore), (11, harder), (14, hard), (18, medium)],
-            'Solution' : [(7, impossibru), (18, mania)]
+            'Bring the heat' : [(10, mania), (13, hardcore), (18, harder)],
+            'I run RBO' : [(8, mania), (9, hardcore), (11, harder), (14, hard), (18, medium)],
+            'Solution' : [(8, impossibru), (18, mania)]
         }
     }
 

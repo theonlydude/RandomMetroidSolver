@@ -931,7 +931,7 @@ def displayNumber(id, min, max, default, step="1"):
 	      <tr>
 		<td class="small"><div class="random"><button id="majorsSplitRandom" type="button" onclick="randomize(event, 'majorsSplit')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
 		<td><span id="majorsSplitText">Majors Split</span></td>
-	        <td id="majorsSplitStep">{{displaySelect("majorsSplit", ["Full", "Major", "Chozo"])}}</td>
+	        <td id="majorsSplitStep">{{displaySelect("majorsSplit", ["Full", "Major", "Chozo"], "Full")}}</td>
                 <td><button type="button" onclick="startTheTour(5)">?</button></td>
 	      </tr>
               <tr id="maxDiffVisibility">

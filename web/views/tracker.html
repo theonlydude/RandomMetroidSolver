@@ -2965,6 +2965,9 @@ window.onload = function(){
           romData[i] = bytes[i];
         }
 
+        // majors split
+        romData[0x17B6C] = bytes[0x17B6C];
+
         romData["romFileName"] = outFileName;
   
         var json = JSON.stringify(romData);
@@ -2990,7 +2993,7 @@ function setGuessedPreset(romName){
 }
 
 function guessVARIAPreset(filename) {
-  var re = /VARIA_Randomizer_[A]?[F]?X\d+_(\w+)/;
+  var re = /VARIA_Randomizer_[A]?[F]?[Z]?X\d+_(\w+)/;
   var match = filename.match(re);
   if(match != null) {
     var data = match[1];

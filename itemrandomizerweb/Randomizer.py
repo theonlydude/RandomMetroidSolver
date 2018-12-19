@@ -177,6 +177,8 @@ class RandoSettings(object):
             itemLimit = 1
         elif progSpeed == 'basic':
             itemLimit = 0
+        if self.restrictions['MajorMinor'] == 'Chozo':
+            itemLimit /= 4
         return itemLimit
 
     def getLocLimit(self, progSpeed):
@@ -190,6 +192,8 @@ class RandoSettings(object):
         elif progSpeed == 'fastest':
             locLimit = 4
         # locLimit is irrelevant for basic speed, as itemLimit is 0
+        if self.restrictions['MajorMinor'] == 'Chozo':
+            locLimit *= 4
         return locLimit
 
 # dat class name

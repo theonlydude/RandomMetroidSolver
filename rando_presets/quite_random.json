@@ -5,7 +5,7 @@
   "skip_ceres": "on",
   "hideItems": "off",
   "funCombat": "off",
-  "fullRandomization": "on",
+  "majorsSplit": "Full",
   "strictMinors": "off",
   "layoutPatches": "on",
   "missileQty": "3",

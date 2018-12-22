@@ -334,7 +334,8 @@ locations = [
                                                    sm.wor(sm.knowsShortCharge(),
                                                           sm.canUsePowerBombs())),
                                            sm.wand(sm.haveItem('Morph'),
-                                                   sm.haveItem('SpeedBooster'),
+                                                   sm.wor(sm.haveItem('SpeedBooster'),
+                                                          sm.canSpringBallJump()),
                                                    sm.haveItem('HiJump')), # jump from the yellow plateform ennemy
                                            sm.wand(sm.haveItem('Super'),
                                                    sm.knowsGreenGateGlitch())))

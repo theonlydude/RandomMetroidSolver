@@ -3313,7 +3313,15 @@ function clickLoc(elem) {
 function placeItem() {
   var item = document.getElementById("item").value;
   var locName = document.getElementById("locName").value;
-  ajaxCallItem({action: "add", locName: locName, itemName: item, isPlando: "on"}, "upload", ajaxOkGetItem);
+
+  // check if not already 14 etanks or 4 reserves
+  if(item == "ETank" && itemCount["ETank"] == 14) {
+    alert("Can't add more Energy tank");
+  } else if (item == "Reserve" && itemCount["Reserve"] == 4) {
+    alert("Can't add more Reserve tank");
+  } else {
+    ajaxCallItem({action: "add", locName: locName, itemName: item, isPlando: "on"}, "upload", ajaxOkGetItem);
+  }
 }
 
 function hideItemPopup() {

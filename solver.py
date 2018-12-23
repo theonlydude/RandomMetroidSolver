@@ -257,10 +257,17 @@ class CommonSolver(object):
         # check post available functions too
         for loc in locations:
             if 'PostAvailable' in loc:
+                already = self.smbm.haveItem(loc['itemName'])
+                isCount = self.smbm.isCountItem(loc['itemName'])
+
                 self.smbm.addItem(loc['itemName'])
                 postAvailable = loc['PostAvailable'](self.smbm)
-                self.smbm.removeItem(loc['itemName'])
+
+                if not already or isCount == True:
+                    self.smbm.removeItem(loc['itemName'])
+
                 loc['difficulty'] = self.smbm.wand(loc['difficulty'], postAvailable)
+
             # also check if we can come back to landing site from the location
             if loc['difficulty'].bool == True:
                 loc['comeBack'] = self.areaGraph.canAccess(self.smbm, loc['accessPoint'], self.lastLoc, infinity, loc['itemName'])

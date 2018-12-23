@@ -11,7 +11,7 @@ locations = [
     'GraphArea': "Crateria",
     'SolveArea': "Crateria Gauntlet",
     'Name': "Energy Tank, Gauntlet",
-    'Class': "Major",
+    'Class': ["Major", "Chozo"],
     'CanHidden': False,
     'Address': 0x78264,
     'Visibility': "Visible",
@@ -30,7 +30,7 @@ locations = [
     'SolveArea': "Crateria Bombs",
     'Name': "Bomb",
     'Address': 0x78404,
-    'Class': "Major",
+    'Class': ["Major", "Chozo"],
     'CanHidden': True,
     'Visibility': "Chozo",
     'Room': 'Bomb Torizo Room',
@@ -47,7 +47,7 @@ locations = [
     'GraphArea': "Crateria",
     'SolveArea': "Crateria Terminator",
     'Name': "Energy Tank, Terminator",
-    'Class': "Major",
+    'Class': ["Major"],
     'CanHidden': False,
     'Address': 0x78432,
     'Visibility': "Visible",
@@ -62,7 +62,7 @@ locations = [
     'GraphArea': "GreenPinkBrinstar",
     'SolveArea': "Green Brinstar Reserve",
     'Name': "Reserve Tank, Brinstar",
-    'Class': "Major",
+    'Class': ["Major", "Chozo"],
     'CanHidden': True,
     'Address': 0x7852C,
     'Visibility': "Chozo",
@@ -80,7 +80,7 @@ locations = [
     'GraphArea': "GreenPinkBrinstar",
     'SolveArea': "Pink Brinstar",
     'Name': "Charge Beam",
-    'Class': "Major",
+    'Class': ["Major", "Chozo"],
     'CanHidden': True,
     'Address': 0x78614,
     'Visibility': "Chozo",
@@ -95,7 +95,7 @@ locations = [
     'GraphArea': "Crateria",
     'SolveArea': "Blue Brinstar",
     'Name': "Morphing Ball",
-    'Class': "Major",
+    'Class': ["Major", "Chozo"],
     'CanHidden': False,
     'Address': 0x786DE,
     'Visibility': "Visible",
@@ -110,7 +110,7 @@ locations = [
     'GraphArea': "Crateria",
     'SolveArea': "Blue Brinstar",
     'Name': "Energy Tank, Brinstar Ceiling",
-    'Class': "Major",
+    'Class': ["Major"],
     'CanHidden': True,
     'Address': 0x7879E,
     'Visibility': "Hidden",
@@ -135,7 +135,7 @@ locations = [
     'GraphArea': "GreenPinkBrinstar",
     'SolveArea': "Green Brinstar",
     'Name': "Energy Tank, Etecoons",
-    'Class': "Major",
+    'Class': ["Major"],
     'CanHidden': True,
     'Address': 0x787C2,
     'Visibility': "Visible",
@@ -151,7 +151,7 @@ locations = [
     'GraphArea': "GreenPinkBrinstar",
     'SolveArea': "Pink Brinstar",
     'Name': "Energy Tank, Waterway",
-    'Class': "Major",
+    'Class': ["Major"],
     'CanHidden': True,
     'Address': 0x787FA,
     'Visibility': "Visible",
@@ -171,7 +171,7 @@ locations = [
     'GraphArea': "GreenPinkBrinstar",
     'SolveArea': "Pink Brinstar",
     'Name': "Energy Tank, Brinstar Gate",
-    'Class': "Major",
+    'Class': ["Major"],
     'CanHidden': True,
     'Address': 0x78824,
     'Visibility': "Visible",
@@ -192,7 +192,7 @@ locations = [
     'GraphArea': "RedBrinstar",
     'SolveArea': "Red Brinstar",
     'Name': "X-Ray Scope",
-    'Class': "Major",
+    'Class': ["Major", "Chozo"],
     'CanHidden': True,
     'Address': 0x78876,
     'Visibility': "Chozo",
@@ -214,7 +214,7 @@ locations = [
     'GraphArea': "RedBrinstar",
     'SolveArea': "Red Brinstar",
     'Name': "Spazer",
-    'Class': "Major",
+    'Class': ["Major", "Chozo"],
     'CanHidden': True,
     'Address': 0x7896E,
     'Visibility': "Chozo",
@@ -231,7 +231,7 @@ locations = [
     'GraphArea': "Kraid",
     'SolveArea': "Kraid",
     'Name': "Energy Tank, Kraid",
-    'Class': "Major",
+    'Class': ["Major"],
     'CanHidden': True,
     'Address': 0x7899C,
     'Visibility': "Hidden",
@@ -246,7 +246,7 @@ locations = [
     'GraphArea': "Kraid",
     'SolveArea': "Kraid",
     'Name': "Varia Suit",
-    'Class': "Major",
+    'Class': ["Major", "Chozo"],
     'CanHidden': True,
     'Address': 0x78ACA,
     'Visibility': "Chozo",
@@ -264,7 +264,7 @@ locations = [
     'GraphArea': "Norfair",
     'SolveArea': "Norfair Ice",
     'Name': "Ice Beam",
-    'Class': "Major",
+    'Class': ["Major", "Chozo"],
     'CanHidden': True,
     'Address': 0x78B24,
     'Visibility': "Chozo",
@@ -284,7 +284,7 @@ locations = [
     'GraphArea': "Norfair",
     'SolveArea': "Crocomire",
     'Name': "Energy Tank, Crocomire",
-    'Class': "Major",
+    'Class': ["Major"],
     'CanHidden': True,
     'Address': 0x78BA4,
     'Visibility': "Visible",
@@ -302,7 +302,7 @@ locations = [
     'GraphArea': "Norfair",
     'SolveArea': "Norfair Entrance",
     'Name': "Hi-Jump Boots",
-    'Class': "Major",
+    'Class': ["Major", "Chozo"],
     'CanHidden': True,
     'Address': 0x78BAC,
     'Visibility': "Chozo",
@@ -319,7 +319,7 @@ locations = [
     'GraphArea': "Norfair",
     'SolveArea': "Crocomire",
     'Name': "Grapple Beam",
-    'Class': "Major",
+    'Class': ["Major", "Chozo"],
     'CanHidden': True,
     'Address': 0x78C36,
     'Visibility': "Chozo",
@@ -344,7 +344,7 @@ locations = [
     'GraphArea': "Norfair",
     'SolveArea': "Bubble Norfair Reserve",
     'Name': "Reserve Tank, Norfair",
-    'Class': "Major",
+    'Class': ["Major"],
     'CanHidden': True,
     'Address': 0x78C3E,
     'Visibility': "Chozo",
@@ -359,7 +359,7 @@ locations = [
     'GraphArea': "Norfair",
     'SolveArea': "Bubble Norfair Speed",
     'Name': "Speed Booster",
-    'Class': "Major",
+    'Class': ["Major", "Chozo"],
     'CanHidden': True,
     'Address': 0x78C82,
     'Visibility': "Chozo",
@@ -374,7 +374,7 @@ locations = [
     'GraphArea': "Norfair",
     'SolveArea': "Bubble Norfair Wave",
     'Name': "Wave Beam",
-    'Class': "Major",
+    'Class': ["Major", "Chozo"],
     'CanHidden': True,
     'Address': 0x78CCA,
     'Visibility': "Chozo",
@@ -394,18 +394,13 @@ locations = [
     'GraphArea': "LowerNorfair",
     'SolveArea': "Lower Norfair After Amphitheater",
     'Name': "Energy Tank, Ridley",
-    'Class': "Major",
+    'Class': ["Major", "Chozo"],
     'CanHidden': True,
     'Address': 0x79108,
     'Visibility': "Hidden",
     'Room': 'Ridley Tank Room',
     'AccessFrom' : {
-        'Lava Dive Right': lambda sm: sm.wand(sm.canPassLavaPit(),
-                                              sm.canPassWorstRoom(),
-                                              sm.canOpenYellowDoors(),
-                                              sm.canOpenGreenDoors()),
-        'Three Muskateers Room Left': lambda sm: sm.wand(sm.canOpenYellowDoors(),
-                                                         sm.canOpenGreenDoors())
+        'Ridley Zone': lambda sm: SMBool(True)
     },
     'Available': lambda sm: sm.wand(sm.canHellRun('LowerNorfair'), sm.enoughStuffsRidley()),
     'Pickup': lambda: Bosses.beatBoss('Ridley'),
@@ -416,69 +411,66 @@ locations = [
     'GraphArea': "LowerNorfair",
     'SolveArea': "Lower Norfair Screw Attack",
     'Name': "Screw Attack",
-    'Class': "Major",
+    'Class': ["Major", "Chozo"],
     'CanHidden': True,
     'Address': 0x79110,
     'Visibility': "Chozo",
     'Room': 'Screw Attack Room',
+    # everything is handled by the graph
     'AccessFrom' : {
-        'Lava Dive Right': lambda sm: sm.canPassLavaPit(),
-        'Three Muskateers Room Left': lambda sm: sm.wand(sm.haveItem('Morph'), sm.canPassAmphitheaterReverse())
+        'Screw Attack Bottom': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: sm.wand(sm.wor(sm.canPassLowerNorfairChozo(),
-                                           sm.wand(sm.canHellRun('LowerNorfair'), sm.haveItem('Super'), sm.knowsGreenGateGlitch())),
-                                    sm.canDestroyBombWalls()),
-    'PostAvailable': lambda sm: sm.canExitScrewAttackArea()
+    'Available': lambda sm: SMBool(True)
 },
 {
     'Area': "LowerNorfair",
     'GraphArea': "LowerNorfair",
     'SolveArea': "Lower Norfair After Amphitheater",
     'Name': "Energy Tank, Firefleas",
-    'Class': "Major",
+    'Class': ["Major"],
     'CanHidden': True,
     'Address': 0x79184,
     'Visibility': "Visible",
     'Room': 'Lower Norfair Fireflea Room',
     'AccessFrom' : {
-        'Lava Dive Right': lambda sm: sm.wand(sm.canHellRun('LowerNorfair'), sm.canPassLavaPit(), sm.canPassWorstRoom()),
-        'Three Muskateers Room Left': lambda sm: sm.wand(sm.haveItem('Morph'), sm.canHellRun('LowerNorfair'))
+        'Firefleas': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: SMBool(True)
+    'Available': lambda sm: SMBool(True),
+    # avoid doing the super annoying wall jump in the dark...
+    'PostAvailable': lambda sm: sm.wor(sm.haveItem('Ice'),
+                                       sm.haveItem('HiJump'),
+                                       sm.canFly(),
+                                       sm.canSpringBallJump())
 },
 {
     'Area': "WreckedShip",
     'GraphArea': "WreckedShip",
     'SolveArea': "WreckedShip Gravity",
     'Name': "Reserve Tank, Wrecked Ship",
-    'Class': "Major",
+    'Class': ["Major"],
     'CanHidden': True,
     'Address': 0x7C2E9,
     'Visibility': "Chozo",
     'Room': 'Bowling Alley',
     'AccessFrom' : {
-        'West Ocean Left': lambda sm: sm.canOpenGreenDoors(),
-        'Crab Maze Left': lambda sm: sm.canPassForgottenHighway(False)
+        'Wrecked Ship Main': lambda sm: SMBool(True)
     },
     'Available': lambda sm: sm.wand(sm.canUsePowerBombs(),
                                     sm.haveItem('SpeedBooster'),
-                                    sm.wor(sm.heatProof(),
-                                           sm.energyReserveCountOk(1)),
-                                    Bosses.bossDead('Phantoon'))
+                                    sm.canPassBowling())
 },
 {
     'Area': "WreckedShip",
     'GraphArea': "WreckedShip",
     'SolveArea': "WreckedShip Back",
     'Name': "Energy Tank, Wrecked Ship",
-    'Class': "Major",
+    'Class': ["Major", "Chozo"],
     'CanHidden': True,
     'Address': 0x7C337,
     'Visibility': "Visible",
     'Room': 'Wrecked Ship Energy Tank Room',
     'AccessFrom' : {
-        'West Ocean Left': lambda sm: sm.wand(sm.canOpenGreenDoors(), sm.canPassSpongeBath()),
-        'Crab Maze Left': lambda sm: sm.canPassForgottenHighway(False)
+        'Wrecked Ship Back': lambda sm: sm.canOpenRedDoors()
     },
     'Available': lambda sm: sm.wor(Bosses.bossDead('Phantoon'),
                                    RomPatches.has(RomPatches.WsEtankPhantoonAlive))
@@ -488,14 +480,13 @@ locations = [
     'GraphArea': "WreckedShip",
     'SolveArea': "WreckedShip Main",
     'Name': "Right Super, Wrecked Ship",
-    'Class': "Major",
+    'Class': ["Major", "Chozo"],
     'CanHidden': True,
     'Address': 0x7C365,
     'Visibility': "Visible",
     'Room': 'Wrecked Ship East Super Room',
     'AccessFrom' : {
-        'West Ocean Left': lambda sm: sm.canOpenGreenDoors(),
-        'Crab Maze Left': lambda sm: sm.canPassForgottenHighway(False)
+        'Wrecked Ship Main': lambda sm: SMBool(True)
     },
     'Available': lambda sm: sm.wand(sm.canOpenGreenDoors(), sm.enoughStuffsPhantoon(), sm.canPassBombPassages()),
     'Pickup': lambda: Bosses.beatBoss('Phantoon'),
@@ -506,28 +497,23 @@ locations = [
     'GraphArea': "WreckedShip",
     'SolveArea': "WreckedShip Gravity",
     'Name': "Gravity Suit",
-    'Class': "Major",
+    'Class': ["Major"],
     'CanHidden': True,
     'Address': 0x7C36D,
     'Visibility': "Chozo",
     'Room': 'Gravity Suit Room',
     'AccessFrom' : {
-        'West Ocean Left': lambda sm: sm.canOpenGreenDoors(),
-        'Crab Maze Left': lambda sm: sm.canPassForgottenHighway(False)
+        'Wrecked Ship Main': lambda sm: SMBool(True)
     },
     'Available': lambda sm: sm.wand(sm.canPassBombPassages(),
-                                    Bosses.bossDead('Phantoon'),
-                                    sm.wor(sm.heatProof(),
-                                           sm.energyReserveCountOk(1),
-                                           sm.haveItem("SpaceJump"),
-                                           sm.haveItem("Grapple")))
+                                    sm.canPassBowling())
 },
 {
     'Area': "Maridia",
     'GraphArea': "Maridia",
     'SolveArea': "Maridia Green",
     'Name': "Energy Tank, Mama turtle",
-    'Class': "Major",
+    'Class': ["Major"],
     'CanHidden': True,
     'Address': 0x7C47D,
     'Visibility': "Visible",
@@ -536,20 +522,24 @@ locations = [
         'Main Street Bottom': lambda sm: sm.wor(sm.haveItem('Gravity'), sm.canDoSuitlessOuterMaridia())
     },
     'Available': lambda sm: sm.wand(sm.canOpenRedDoors(),
-                                    sm.wor(sm.canFly(),
-                                           sm.wand(sm.haveItem('Gravity'), sm.haveItem('SpeedBooster')),
-                                           sm.wand(sm.haveItem('Morph'),
-                                                   sm.haveItem('SpringBall'),
-                                                   sm.wor(sm.wand(sm.haveItem('HiJump'), sm.knowsSpringBallJump()),
-                                                          sm.knowsSpringBallJumpFromWall())),
-                                           sm.haveItem('Grapple')))
+                                    sm.wor(sm.wor(sm.canFly(),
+                                                  sm.wand(sm.haveItem('Gravity'),
+                                                          sm.haveItem('SpeedBooster')),
+                                                  sm.wand(sm.haveItem('HiJump'),
+                                                          sm.haveItem('SpeedBooster'),
+                                                          sm.knowsHiJumpMamaTurtle())),
+                                           sm.wor(sm.wand(sm.canUseSpringBall(),
+                                                          sm.wor(sm.wand(sm.haveItem('HiJump'),
+                                                                         sm.knowsSpringBallJump()),
+                                                                 sm.knowsSpringBallJumpFromWall())),
+                                                  sm.haveItem('Grapple'))))
 },
 {
     'Area': "Maridia",
     'GraphArea': "Maridia",
     'SolveArea': "Maridia Forgotten Highway",
     'Name': "Plasma Beam",
-    'Class': "Major",
+    'Class': ["Major", "Chozo"],
     'CanHidden': True,
     'Address': 0x7C559,
     'Visibility': "Chozo",
@@ -582,14 +572,16 @@ locations = [
                                                sm.wand(sm.haveItem('HiJump'),
                                                        sm.knowsGetAroundWallJump()),
                                                sm.wand(sm.haveItem('SpeedBooster'),
-                                                       sm.knowsShortCharge())))
+                                                       sm.knowsShortCharge()),
+                                               sm.wand(sm.canSpringBallJump(),
+                                                       sm.knowsSpringBallJumpFromWall())))
 },
 {
     'Area': "Maridia",
     'GraphArea': "Maridia",
     'SolveArea': "Maridia Pink Bottom",
     'Name': "Reserve Tank, Maridia",
-    'Class': "Major",
+    'Class': ["Major"],
     'CanHidden': True,
     'Address': 0x7C5E3,
     'Visibility': "Chozo",
@@ -605,7 +597,7 @@ locations = [
     'GraphArea': "Maridia",
     'SolveArea': "Maridia Sandpits",
     'Name': "Spring Ball",
-    'Class': "Major",
+    'Class': ["Major", "Chozo"],
     'CanHidden': True,
     'Address': 0x7C6E5,
     'Visibility': "Chozo",
@@ -623,6 +615,9 @@ locations = [
                                     sm.wor(sm.wand(sm.haveItem('Ice'), # puyo clip
                                                    sm.wor(sm.wand(sm.haveItem('Gravity'),
                                                                   sm.knowsPuyoClip()),
+                                                          sm.wand(sm.haveItem('Gravity'),
+                                                                  sm.haveItem('XRayScope'),
+                                                                  sm.knowsPuyoClipXRay()),
                                                           sm.knowsSuitlessPuyoClip())),
                                            sm.wand(sm.haveItem('Grapple'), # go through grapple block
                                                    sm.haveItem('Gravity'),
@@ -636,14 +631,14 @@ locations = [
                                            sm.wand(sm.haveItem('XRayScope'), sm.knowsAccessSpringBallWithXRayClimb())), # XRay climb
                                     sm.haveItem('Morph')),
     'PostAvailable': lambda sm: sm.wor(sm.haveItem('Gravity'),
-                                       sm.wand(sm.haveItem('SpringBall'), sm.knowsSpringBallJump()))
+                                       sm.canSpringBallJump())
 },
 {
     'Area': "Maridia",
     'GraphArea': "Maridia",
     'SolveArea': "Maridia Pink Top",
     'Name': "Energy Tank, Botwoon",
-    'Class': "Major",
+    'Class': ["Major"],
     'CanHidden': True,
     'Address': 0x7C755,
     'Visibility': "Visible",
@@ -658,7 +653,7 @@ locations = [
     'GraphArea': "Maridia",
     'SolveArea': "Maridia Pink Top",
     'Name': "Space Jump",
-    'Class': "Major",
+    'Class': ["Major", "Chozo"],
     'CanHidden': True,
     'Address': 0x7C7A7,
     'Visibility': "Chozo",
@@ -686,15 +681,13 @@ locations = [
                                                               sm.knowsDraygonRoomGrappleExit()),
                                                       sm.wand(sm.haveItem('XRayScope'),
                                                               sm.knowsPreciousRoomXRayExit()),
-                                                      sm.wand(sm.haveItem('SpringBall'),
-                                                              sm.knowsSpringBallJump()))),
+                                                      sm.canSpringBallJump())),
                                        # spark-less exit (no CF)
                                        sm.wand(sm.wand(sm.haveItem('Grapple'),
                                                        sm.knowsDraygonRoomGrappleExit()),
                                                sm.wor(sm.wand(sm.haveItem('XRayScope'),
                                                               sm.knowsPreciousRoomXRayExit()),
-                                                      sm.wand(sm.haveItem('SpringBall'),
-                                                              sm.knowsSpringBallJump()))))
+                                                      sm.canSpringBallJump())))
 },
 ###### MINORS
 {
@@ -702,7 +695,7 @@ locations = [
     'GraphArea': "Crateria",
     'SolveArea': "Crateria Landing Site",
     'Name': "Power Bomb (Crateria surface)",
-    'Class': "Minor",
+    'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x781CC,
     'Visibility': "Visible",
@@ -719,7 +712,7 @@ locations = [
     'GraphArea': "WreckedShip",
     'SolveArea': "WreckedShip Bottom",
     'Name': "Missile (outside Wrecked Ship bottom)",
-    'Class': "Minor",
+    'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x781E8,
     'Visibility': "Visible",
@@ -734,14 +727,13 @@ locations = [
     'GraphArea': "WreckedShip",
     'SolveArea': "WreckedShip",
     'Name': "Missile (outside Wrecked Ship top)",
-    'Class': "Minor",
+    'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x781EE,
     'Visibility': "Hidden",
     'Room': 'West Ocean',
     'AccessFrom' : {
-        'West Ocean Left': lambda sm: sm.canOpenGreenDoors(),
-        'Crab Maze Left': lambda sm: sm.canPassForgottenHighway(False)
+        'Wrecked Ship Main': lambda sm: SMBool(True)
     },
     'Available': lambda sm: Bosses.bossDead('Phantoon')
 },
@@ -751,13 +743,12 @@ locations = [
     'SolveArea': "WreckedShip Top",
     'Name': "Missile (outside Wrecked Ship middle)",
     'CanHidden': True,
-    'Class': "Minor",
+    'Class': ["Minor"],
     'Address': 0x781F4,
     'Visibility': "Visible",
     'Room': 'West Ocean',
     'AccessFrom' : {
-        'West Ocean Left': lambda sm: sm.canOpenGreenDoors(),
-        'Crab Maze Left': lambda sm: sm.canPassForgottenHighway(False)
+        'Wrecked Ship Main': lambda sm: SMBool(True)
     },
     'Available': lambda sm: sm.wand(sm.haveItem('Super'), sm.haveItem('Morph'), Bosses.bossDead('Phantoon'))
 },
@@ -766,7 +757,7 @@ locations = [
     'GraphArea': "Crateria",
     'SolveArea': "Crateria Landing Site",
     'Name': "Missile (Crateria moat)",
-    'Class': "Minor",
+    'Class': ["Minor"],
     'CanHidden': False,
     'Address': 0x78248,
     'Visibility': "Visible",
@@ -781,7 +772,7 @@ locations = [
     'GraphArea': "Crateria",
     'SolveArea': "Crateria Landing Site",
     'Name': "Missile (Crateria bottom)",
-    'Class': "Minor",
+    'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x783EE,
     'Visibility': "Visible",
@@ -796,7 +787,7 @@ locations = [
     'GraphArea': "Crateria",
     'SolveArea': "Crateria Gauntlet",
     'Name': "Missile (Crateria gauntlet right)",
-    'Class': "Minor",
+    'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x78464,
     'Visibility': "Visible",
@@ -804,15 +795,20 @@ locations = [
     'AccessFrom' : {
         'Landing Site': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: sm.wand(sm.canEnterAndLeaveGauntlet(),
-                                    sm.canPassBombPassages())
+    'Available': lambda sm: sm.wor(sm.wand(sm.canEnterAndLeaveGauntlet(),
+                                           sm.canPassBombPassages()),
+                                   sm.wand(sm.wand(sm.knowsShortCharge(),
+                                                   sm.haveItem('SpeedBooster')),
+                                           sm.canUsePowerBombs(),
+                                           sm.itemCountOk('ETank', 1),
+                                           sm.knowsLowGauntlet()))
 },
 {
     'Area': "Crateria",
     'GraphArea': "Crateria",
     'SolveArea': "Crateria Gauntlet",
     'Name': "Missile (Crateria gauntlet left)",
-    'Class': "Minor",
+    'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x7846A,
     'Visibility': "Visible",
@@ -820,15 +816,20 @@ locations = [
     'AccessFrom' : {
         'Landing Site': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: sm.wand(sm.canEnterAndLeaveGauntlet(),
-                                    sm.canPassBombPassages())
+    'Available': lambda sm: sm.wor(sm.wand(sm.canEnterAndLeaveGauntlet(),
+                                           sm.canPassBombPassages()),
+                                   sm.wand(sm.wand(sm.knowsShortCharge(),
+                                                   sm.haveItem('SpeedBooster')),
+                                           sm.canUsePowerBombs(),
+                                           sm.itemCountOk('ETank', 1),
+                                           sm.knowsLowGauntlet()))
 },
 {
     'Area': "Crateria",
     'GraphArea': "Crateria",
     'SolveArea': "Crateria Landing Site",
     'Name': "Super Missile (Crateria)",
-    'Class': "Minor",
+    'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x78478,
     'Visibility': "Visible",
@@ -838,7 +839,12 @@ locations = [
     },
     'Available': lambda sm: sm.wand(sm.canUsePowerBombs(),
                                     sm.haveItem('SpeedBooster'),
-                                    sm.energyReserveCountOk(1),
+                                    # reserves are hard to trigger midspark when not having ETanks
+                                    sm.wor(sm.wand(sm.energyReserveCountOk(2), SMBool(sm.haveItemCount('ETank', 1))), # need energy to get out
+                                           sm.wand(SMBool(sm.haveItemCount('ETank', 1)),
+                                                   sm.wor(sm.haveItem('Grapple'), # use grapple/space or dmg protection to get out
+                                                          sm.haveItem('SpaceJump'),
+                                                          sm.heatProof()))),
                                     sm.wor(sm.haveItem('Ice'),
                                            sm.knowsShortCharge(),
                                            sm.knowsSimpleShortCharge())) # there's also a dboost involved in simple short charge or you have to kill the yellow enemies with some power bombs
@@ -848,7 +854,7 @@ locations = [
     'GraphArea': "Crateria",
     'SolveArea': "Crateria Landing Site",
     'Name': "Missile (Crateria middle)",
-    'Class': "Minor",
+    'Class': ["Minor", "Chozo"],
     'CanHidden': True,
     'Address': 0x78486,
     'Visibility': "Visible",
@@ -863,7 +869,7 @@ locations = [
     'GraphArea': "GreenPinkBrinstar",
     'SolveArea': "Green Brinstar",
     'Name': "Power Bomb (green Brinstar bottom)",
-    'Class': "Minor",
+    'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x784AC,
     'Visibility': "Chozo",
@@ -879,7 +885,7 @@ locations = [
     'GraphArea': "GreenPinkBrinstar",
     'SolveArea': "Pink Brinstar",
     'Name': "Super Missile (pink Brinstar)",
-    'Class': "Minor",
+    'Class': ["Minor", "Chozo"],
     'CanHidden': True,
     'Address': 0x784E4,
     'Visibility': "Chozo",
@@ -898,7 +904,7 @@ locations = [
     'GraphArea': "GreenPinkBrinstar",
     'SolveArea': "Green Brinstar",
     'Name': "Missile (green Brinstar below super missile)",
-    'Class': "Minor",
+    'Class': ["Minor"],
     'CanHidden': False,
     'Address': 0x78518,
     'Visibility': "Visible",
@@ -915,7 +921,7 @@ locations = [
     'GraphArea': "GreenPinkBrinstar",
     'SolveArea': "Green Brinstar Reserve",
     'Name': "Super Missile (green Brinstar top)",
-    'Class': "Minor",
+    'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x7851E,
     'Visibility': "Visible",
@@ -932,7 +938,7 @@ locations = [
     'GraphArea': "GreenPinkBrinstar",
     'SolveArea': "Green Brinstar Reserve",
     'Name': "Missile (green Brinstar behind missile)",
-    'Class': "Minor",
+    'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x78532,
     'Visibility': "Hidden",
@@ -953,7 +959,7 @@ locations = [
     'GraphArea': "GreenPinkBrinstar",
     'SolveArea': "Green Brinstar Reserve",
     'Name': "Missile (green Brinstar behind reserve tank)",
-    'Class': "Minor",
+    'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x78538,
     'Visibility': "Visible",
@@ -971,7 +977,7 @@ locations = [
     'GraphArea': "GreenPinkBrinstar",
     'SolveArea': "Pink Brinstar",
     'Name': "Missile (pink Brinstar top)",
-    'Class': "Minor",
+    'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x78608,
     'Visibility': "Visible",
@@ -986,7 +992,7 @@ locations = [
     'GraphArea': "GreenPinkBrinstar",
     'SolveArea': "Pink Brinstar",
     'Name': "Missile (pink Brinstar bottom)",
-    'Class': "Minor",
+    'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x7860E,
     'Visibility': "Visible",
@@ -1001,7 +1007,7 @@ locations = [
     'GraphArea': "GreenPinkBrinstar",
     'SolveArea': "Pink Brinstar",
     'Name': "Power Bomb (pink Brinstar)",
-    'Class': "Minor",
+    'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x7865C,
     'Visibility': "Visible",
@@ -1017,7 +1023,7 @@ locations = [
     'GraphArea': "GreenPinkBrinstar",
     'SolveArea': "Brinstar Hills",
     'Name': "Missile (green Brinstar pipe)",
-    'Class': "Minor",
+    'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x78676,
     'Visibility': "Visible",
@@ -1032,7 +1038,7 @@ locations = [
     'GraphArea': "Crateria",
     'SolveArea': "Blue Brinstar",
     'Name': "Power Bomb (blue Brinstar)",
-    'Class': "Minor",
+    'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x7874C,
     'Visibility': "Visible",
@@ -1048,7 +1054,7 @@ locations = [
     'SolveArea': "Blue Brinstar",
     'Name': "Missile (blue Brinstar middle)",
     'Address': 0x78798,
-    'Class': "Minor",
+    'Class': ["Minor"],
     'CanHidden': True,
     'Visibility': "Visible",
     'Room': 'Blue Brinstar Energy Tank Room',
@@ -1064,7 +1070,7 @@ locations = [
     'GraphArea': "GreenPinkBrinstar",
     'SolveArea': "Green Brinstar",
     'Name': "Super Missile (green Brinstar bottom)",
-    'Class': "Minor",
+    'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x787D0,
     'Visibility': "Visible",
@@ -1080,7 +1086,7 @@ locations = [
     'GraphArea': "Crateria",
     'SolveArea': "Blue Brinstar",
     'Name': "Missile (blue Brinstar bottom)",
-    'Class': "Minor",
+    'Class': ["Minor", "Chozo"],
     'CanHidden': True,
     'Address': 0x78802,
     'Visibility': "Chozo",
@@ -1095,7 +1101,7 @@ locations = [
     'GraphArea': "Crateria",
     'SolveArea': "Blue Brinstar",
     'Name': "Missile (blue Brinstar top)",
-    'Class': "Minor",
+    'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x78836,
     'Visibility': "Visible",
@@ -1110,7 +1116,7 @@ locations = [
     'GraphArea': "Crateria",
     'SolveArea': "Blue Brinstar",
     'Name': "Missile (blue Brinstar behind missile)",
-    'Class': "Minor",
+    'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x7883C,
     'Visibility': "Hidden",
@@ -1125,7 +1131,7 @@ locations = [
     'GraphArea': "RedBrinstar",
     'SolveArea': "Red Brinstar Top",
     'Name': "Power Bomb (red Brinstar sidehopper room)",
-    'Class': "Minor",
+    'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x788CA,
     'Visibility': "Visible",
@@ -1141,7 +1147,7 @@ locations = [
     'GraphArea': "RedBrinstar",
     'SolveArea': "Red Brinstar Top",
     'Name': "Power Bomb (red Brinstar spike room)",
-    'Class': "Minor",
+    'Class': ["Minor", "Chozo"],
     'CanHidden': True,
     'Address': 0x7890E,
     'Visibility': "Chozo",
@@ -1156,7 +1162,7 @@ locations = [
     'GraphArea': "RedBrinstar",
     'SolveArea': "Red Brinstar Top",
     'Name': "Missile (red Brinstar spike room)",
-    'Class': "Minor",
+    'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x78914,
     'Visibility': "Visible",
@@ -1172,7 +1178,7 @@ locations = [
     'GraphArea': "Kraid",
     'SolveArea': "Kraid",
     'Name': "Missile (Kraid)",
-    'Class': "Minor",
+    'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x789EC,
     'Visibility': "Hidden",
@@ -1187,7 +1193,7 @@ locations = [
     'GraphArea': "Norfair",
     'SolveArea': "Norfair Entrance",
     'Name': "Missile (lava room)",
-    'Class': "Minor",
+    'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x78AE4,
     'Visibility': "Hidden",
@@ -1203,24 +1209,27 @@ locations = [
     'GraphArea': "Norfair",
     'SolveArea': "Norfair Ice",
     'Name': "Missile (below Ice Beam)",
-    'Class': "Minor",
+    'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x78B46,
     'Visibility': "Hidden",
     'Room': 'Crumble Shaft',
     'AccessFrom' : {
-        'Warehouse Entrance Left': lambda sm: SMBool(True)
+        'Warehouse Entrance Left': lambda sm: sm.wand(sm.canOpenGreenDoors(),
+                                                      sm.canUsePowerBombs(),
+                                                      sm.canHellRun('Ice')),
+        'Croc Zone': lambda sm: sm.wand(sm.canHellRun('MainUpperNorfair'),
+                                        sm.haveItem('SpeedBooster'),
+                                        sm.knowsIceMissileFromCroc())
     },
-    'Available': lambda sm: sm.wand(sm.canOpenGreenDoors(),
-                                    sm.canUsePowerBombs(),
-                                    sm.canHellRun('Ice'))
+    'Available': lambda sm: SMBool(True)
 },
 {
     'Area': "Norfair",
     'GraphArea': "Norfair",
     'SolveArea': "Norfair Grapple Escape",
     'Name': "Missile (above Crocomire)",
-    'Class': "Minor",
+    'Class': ["Minor"],
     'CanHidden': False,
     'Address': 0x78BC0,
     'Visibility': "Visible",
@@ -1235,7 +1244,7 @@ locations = [
     'GraphArea': "Norfair",
     'SolveArea': "Norfair Entrance",
     'Name': "Missile (Hi-Jump Boots)",
-    'Class': "Minor",
+    'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x78BE6,
     'Visibility': "Visible",
@@ -1253,7 +1262,7 @@ locations = [
     'SolveArea': "Norfair Entrance",
     'Name': "Energy Tank (Hi-Jump Boots)",
     'CanHidden': True,
-    'Class': "Minor",
+    'Class': ["Minor"],
     'Address': 0x78BEC,
     'Visibility': "Visible",
     'Room': 'Hi Jump Energy Tank Room',
@@ -1267,7 +1276,7 @@ locations = [
     'GraphArea': "Norfair",
     'SolveArea': "Crocomire",
     'Name': "Power Bomb (Crocomire)",
-    'Class': "Minor",
+    'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x78C04,
     'Visibility': "Visible",
@@ -1289,7 +1298,7 @@ locations = [
     'GraphArea': "Norfair",
     'SolveArea': "Crocomire",
     'Name': "Missile (below Crocomire)",
-    'Class': "Minor",
+    'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x78C14,
     'Visibility': "Visible",
@@ -1304,7 +1313,7 @@ locations = [
     'GraphArea': "Norfair",
     'SolveArea': "Crocomire",
     'Name': "Missile (Grapple Beam)",
-    'Class': "Minor",
+    'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x78C2A,
     'Visibility': "Visible",
@@ -1331,7 +1340,7 @@ locations = [
     'GraphArea': "Norfair",
     'SolveArea': "Bubble Norfair Reserve",
     'Name': "Missile (Norfair Reserve Tank)",
-    'Class': "Minor",
+    'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x78C44,
     'Visibility': "Hidden",
@@ -1346,7 +1355,7 @@ locations = [
     'GraphArea': "Norfair",
     'SolveArea': "Bubble Norfair Reserve",
     'Name': "Missile (bubble Norfair green door)",
-    'Class': "Minor",
+    'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x78C52,
     'Visibility': "Visible",
@@ -1361,7 +1370,7 @@ locations = [
     'GraphArea': "Norfair",
     'SolveArea': "Bubble Norfair Bottom",
     'Name': "Missile (bubble Norfair)",
-    'Class': "Minor",
+    'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x78C66,
     'Visibility': "Visible",
@@ -1376,7 +1385,7 @@ locations = [
     'GraphArea': "Norfair",
     'SolveArea': "Bubble Norfair Speed",
     'Name': "Missile (Speed Booster)",
-    'Class': "Minor",
+    'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x78C74,
     'Visibility': "Hidden",
@@ -1391,7 +1400,7 @@ locations = [
     'GraphArea': "Norfair",
     'SolveArea': "Bubble Norfair Wave",
     'Name': "Missile (Wave Beam)",
-    'Class': "Minor",
+    'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x78CBC,
     'Visibility': "Visible",
@@ -1406,65 +1415,60 @@ locations = [
     'GraphArea': "LowerNorfair",
     'SolveArea': "Lower Norfair Screw Attack",
     'Name': "Missile (Gold Torizo)",
-    'Class': "Minor",
+    'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x78E6E,
     'Visibility': "Visible",
     'Room': "Golden Torizo's Room",
     'AccessFrom' : {
-        'Lava Dive Right': lambda sm: sm.canPassLavaPit(),
-        'Three Muskateers Room Left': lambda sm: sm.wand(sm.haveItem('Morph'), sm.canPassAmphitheaterReverse())
+        'LN Above GT': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: sm.canPassLowerNorfairChozo(),
-    'PostAvailable': lambda sm: sm.canExitScrewAttackArea()
+    'Available': lambda sm: sm.canHellRun('LowerNorfair'),
+    'PostAvailable': lambda sm: sm.enoughStuffGT()
 },
 {
     'Area': "LowerNorfair",
     'GraphArea': "LowerNorfair",
     'SolveArea': "Lower Norfair Screw Attack",
     'Name': "Super Missile (Gold Torizo)",
-    'Class': "Minor",
+    'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x78E74,
     'Visibility': "Hidden",
     'Room': "Golden Torizo's Room",
     'AccessFrom' : {
-        'Lava Dive Right': lambda sm: sm.canPassLavaPit(),
-        'Three Muskateers Room Left': lambda sm: sm.wand(sm.haveItem('Morph'), sm.canPassAmphitheaterReverse())
+        'Screw Attack Bottom': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: sm.wor(sm.canPassLowerNorfairChozo(),
-                                   sm.wand(sm.canHellRun('LowerNorfair'), sm.haveItem('Super'), sm.knowsGreenGateGlitch())),
-    'PostAvailable': lambda sm: sm.canExitScrewAttackArea()
+    'Available': lambda sm: SMBool(True),
+    'PostAvailable': lambda sm: sm.enoughStuffGT()
 },
 {
     'Area': "LowerNorfair",
     'GraphArea': "LowerNorfair",
     'SolveArea': "Lower Norfair Before Amphitheater",
     'Name': "Missile (Mickey Mouse room)",
-    'Class': "Minor",
+    'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x78F30,
     'Visibility': "Visible",
     'Room': 'Mickey Mouse Room',
     'AccessFrom' : {
-        'Lava Dive Right': lambda sm: sm.wand(sm.canPassLavaPit(), sm.canPassWorstRoom()),
-        'Three Muskateers Room Left': lambda sm: sm.wand(sm.haveItem('Morph'), sm.canPassAmphitheaterReverse())
+        'LN Entrance': lambda sm: sm.wand(sm.canUsePowerBombs(), sm.canPassWorstRoom()),
     },
-    'Available': lambda sm: sm.wand(sm.canHellRun('LowerNorfair'), sm.canPassBombPassages())
+    'Available': lambda sm: sm.canHellRun('LowerNorfair')
 },
 {
     'Area': "LowerNorfair",
     'GraphArea': "LowerNorfair",
     'SolveArea': "Lower Norfair After Amphitheater",
     'Name': "Missile (lower Norfair above fire flea room)",
-    'Class': "Minor",
+    'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x78FCA,
     'Visibility': "Visible",
     'Room': 'Lower Norfair Spring Ball Maze Room',
     'AccessFrom' : {
-        'Lava Dive Right': lambda sm: sm.wand(sm.canPassLavaPit(), sm.canPassWorstRoom()),
-        'Three Muskateers Room Left': lambda sm: sm.haveItem('Morph')
+        'Firefleas': lambda sm: SMBool(True)
     },
     'Available': lambda sm: sm.canHellRun('LowerNorfair')
 },
@@ -1473,48 +1477,43 @@ locations = [
     'GraphArea': "LowerNorfair",
     'SolveArea': "Lower Norfair After Amphitheater",
     'Name': "Power Bomb (lower Norfair above fire flea room)",
-    'Class': "Minor",
+    'Class': ["Minor"],
     'CanHidden': False,
     'Address': 0x78FD2,
     'Visibility': "Visible",
     'Room': 'Lower Norfair Escape Power Bomb Room',
     'AccessFrom' : {
-        'Lava Dive Right': lambda sm: sm.wand(sm.canPassLavaPit(), sm.canPassWorstRoom()),
-        'Three Muskateers Room Left': lambda sm: sm.haveItem('Morph')
+        'Firefleas': lambda sm: sm.canPassBombPassages()
     },
-    'Available': lambda sm: sm.wand(sm.canHellRun('LowerNorfair'), sm.haveItem('Morph'))
+    'Available': lambda sm: sm.canHellRun('LowerNorfair')
 },
 {
     'Area': "LowerNorfair",
     'GraphArea': "LowerNorfair",
     'SolveArea': "Lower Norfair After Amphitheater",
     'Name': "Power Bomb (Power Bombs of shame)",
-    'Class': "Minor",
+    'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x790C0,
     'Visibility': "Visible",
     'Room': 'Wasteland',
     'AccessFrom' : {
-        'Lava Dive Right': lambda sm: sm.wand(sm.canPassLavaPit(), sm.canPassWorstRoom()),
-        'Three Muskateers Room Left': lambda sm: sm.haveItem('Morph')
+        'Ridley Zone': lambda sm: sm.canUsePowerBombs()
     },
-    'Available': lambda sm: sm.wand(sm.canHellRun('LowerNorfair'),
-                                    sm.canOpenGreenDoors(),
-                                    sm.canOpenYellowDoors())
+    'Available': lambda sm: sm.canHellRun('LowerNorfair')
 },
 {
     'Area': "LowerNorfair",
     'GraphArea': "LowerNorfair",
     'SolveArea': "Lower Norfair After Amphitheater",
     'Name': "Missile (lower Norfair near Wave Beam)",
-    'Class': "Minor",
+    'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x79100,
     'Visibility': "Visible",
     'Room': "Three Muskateers' Room",
     'AccessFrom' : {
-        'Lava Dive Right': lambda sm: sm.wand(sm.canPassLavaPit(), sm.canPassWorstRoom()),
-        'Three Muskateers Room Left': lambda sm: sm.haveItem('Morph')
+        'Three Muskateers Room Left': lambda sm: SMBool(True)
     },
     'Available': lambda sm: sm.wand(sm.canHellRun('LowerNorfair'),
                                     sm.canPassBombPassages())
@@ -1524,14 +1523,13 @@ locations = [
     'GraphArea': "WreckedShip",
     'SolveArea': "WreckedShip Main",
     'Name': "Missile (Wrecked Ship middle)",
-    'Class': "Minor",
+    'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x7C265,
     'Visibility': "Visible",
     'Room': 'Wrecked Ship Main Shaft',
     'AccessFrom' : {
-        'West Ocean Left': lambda sm: sm.canOpenGreenDoors(),
-        'Crab Maze Left': lambda sm: sm.canPassForgottenHighway(False)
+        'Wrecked Ship Main': lambda sm: SMBool(True)
     },
     'Available': lambda sm: sm.canPassBombPassages()
 },
@@ -1540,20 +1538,15 @@ locations = [
     'GraphArea': "WreckedShip",
     'SolveArea': "WreckedShip Gravity",
     'Name': "Missile (Gravity Suit)",
-    'Class': "Minor",
+    'Class': ["Minor", "Chozo"],
     'CanHidden': False,
     'Address': 0x7C2EF,
     'Visibility': "Visible",
     'Room': 'Bowling Alley',
     'AccessFrom' : {
-        'West Ocean Left': lambda sm: sm.canOpenGreenDoors(),
-        'Crab Maze Left': lambda sm: sm.canPassForgottenHighway(False)
+        'Wrecked Ship Main': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: sm.wand(sm.wor(sm.heatProof(),
-                                           sm.energyReserveCountOk(1),
-                                           sm.haveItem("SpaceJump"),
-                                           sm.haveItem("Grapple")),
-                                    Bosses.bossDead('Phantoon'),
+    'Available': lambda sm: sm.wand(sm.canPassBowling(),
                                     sm.canPassBombPassages())
 },
 {
@@ -1561,14 +1554,13 @@ locations = [
     'GraphArea': "WreckedShip",
     'SolveArea': "WreckedShip Top",
     'Name': "Missile (Wrecked Ship top)",
-    'Class': "Minor",
+    'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x7C319,
     'Visibility': "Visible",
     'Room': 'Wrecked Ship East Missile Room',
     'AccessFrom' : {
-        'West Ocean Left': lambda sm: sm.canOpenGreenDoors(),
-        'Crab Maze Left': lambda sm: sm.canPassForgottenHighway(False)
+        'Wrecked Ship Main': lambda sm: SMBool(True)
     },
     'Available': lambda sm: Bosses.bossDead('Phantoon')
 },
@@ -1577,14 +1569,13 @@ locations = [
     'GraphArea': "WreckedShip",
     'SolveArea': "WreckedShip Main",
     'Name': "Super Missile (Wrecked Ship left)",
-    'Class': "Minor",
+    'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x7C357,
     'Visibility': "Visible",
     'Room': 'Wrecked Ship West Super Room',
     'AccessFrom' : {
-        'West Ocean Left': lambda sm: sm.canOpenGreenDoors(),
-        'Crab Maze Left': lambda sm: sm.canPassForgottenHighway(False)
+        'Wrecked Ship Main': lambda sm: SMBool(True)
     },
     'Available': lambda sm: Bosses.bossDead('Phantoon')
 },
@@ -1593,7 +1584,7 @@ locations = [
     'GraphArea': "Maridia",
     'SolveArea': "Maridia Green",
     'Name': "Missile (green Maridia shinespark)",
-    'Class': "Minor",
+    'Class': ["Minor"],
     'CanHidden': False,
     'Address': 0x7C437,
     'Visibility': "Visible",
@@ -1603,23 +1594,24 @@ locations = [
     },
     'Available': lambda sm: sm.wand(sm.haveItem('Gravity'),
                                     sm.haveItem('SpeedBooster'),
-                                    sm.energyReserveCountOk(1), # for the shinespark
-                                    sm.wor(sm.canOpenGreenDoors(), # run from room on the right
+                                    sm.wor(sm.wand(sm.canOpenGreenDoors(), # run from room on the right
+                                                   SMBool(sm.haveItemCount('ETank', 1))), # etank for the spark since sparking from low ground
                                            sm.knowsSimpleShortCharge(), # run from above
-                                           sm.knowsShortCharge())) # run from below
+                                           sm.knowsShortCharge())) # run from below and jump
 },
 {
     'Area': "Maridia",
     'GraphArea': "Maridia",
     'SolveArea': "Maridia Green",
     'Name': "Super Missile (green Maridia)",
-    'Class': "Minor",
+    'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x7C43D,
     'Visibility': "Visible",
     'Room': 'Main Street',
     'AccessFrom' : {
-        'Main Street Bottom': lambda sm: sm.wor(sm.haveItem('Gravity'), sm.canDoSuitlessOuterMaridia())
+        'Main Street Bottom': lambda sm: sm.wor(sm.haveItem('Gravity'),
+                                                sm.canDoSuitlessOuterMaridia())
         # we could add eas access from red fish room here, but if you miss it you can't retry
     },
     'Available': lambda sm: sm.haveItem('Morph')
@@ -1629,13 +1621,14 @@ locations = [
     'GraphArea': "Maridia",
     'SolveArea': "Maridia Green",
     'Name': "Missile (green Maridia tatori)",
-    'Class': "Minor",
+    'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x7C483,
     'Visibility': "Hidden",
     'Room': 'Mama Turtle Room',
     'AccessFrom' : {
-        'Main Street Bottom': lambda sm: sm.wor(sm.haveItem('Gravity'), sm.canDoSuitlessOuterMaridia())
+        'Main Street Bottom': lambda sm: sm.wor(sm.haveItem('Gravity'),
+                                                sm.canDoSuitlessOuterMaridia())
     },
     'Available': lambda sm: sm.canOpenRedDoors()
 },
@@ -1644,7 +1637,7 @@ locations = [
     'GraphArea': "Maridia",
     'SolveArea': "Maridia Pink Bottom",
     'Name': "Super Missile (yellow Maridia)",
-    'Class': "Minor",
+    'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x7C4AF,
     'Visibility': "Visible",
@@ -1652,14 +1645,15 @@ locations = [
     'AccessFrom' : {
         'Main Street Bottom': lambda sm: sm.canPassMtEverest()
     },
-    'Available': lambda sm: sm.wor(sm.canPassBombPassages(), sm.wand(sm.haveItem('Morph'), sm.haveItem('SpringBall')))
+    'Available': lambda sm: sm.wor(sm.canPassBombPassages(),
+                                   sm.canUseSpringBall())
 },
 {
     'Area': "Maridia",
     'GraphArea': "Maridia",
     'SolveArea': "Maridia Pink Bottom",
     'Name': "Missile (yellow Maridia super missile)",
-    'Class': "Minor",
+    'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x7C4B5,
     'Visibility': "Visible",
@@ -1667,14 +1661,14 @@ locations = [
     'AccessFrom' : {
         'Main Street Bottom': lambda sm: sm.canPassMtEverest()
     },
-    'Available': lambda sm: sm.wor(sm.canPassBombPassages(), sm.wand(sm.haveItem('Morph'), sm.haveItem('SpringBall')))
+    'Available': lambda sm: sm.wor(sm.canPassBombPassages(), sm.canUseSpringBall())
 },
 {
     'Area': "Maridia",
     'GraphArea': "Maridia",
     'SolveArea': "Maridia Pink Bottom",
     'Name': "Missile (yellow Maridia false wall)",
-    'Class': "Minor",
+    'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x7C533,
     'Visibility': "Visible",
@@ -1689,7 +1683,7 @@ locations = [
     'GraphArea': "Maridia",
     'SolveArea': "Maridia Pink Bottom",
     'Name': "Missile (left Maridia sand pit room)",
-    'Class': "Minor",
+    'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x7C5DD,
     'Visibility': "Visible",
@@ -1705,7 +1699,7 @@ locations = [
     'GraphArea': "Maridia",
     'SolveArea': "Maridia Pink Bottom",
     'Name': "Missile (right Maridia sand pit room)",
-    'Class': "Minor",
+    'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x7C5EB,
     'Visibility': "Visible",
@@ -1721,7 +1715,7 @@ locations = [
     'GraphArea': "Maridia",
     'SolveArea': "Maridia Pink Bottom",
     'Name': "Power Bomb (right Maridia sand pit room)",
-    'Class': "Minor",
+    'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x7C5F1,
     'Visibility': "Visible",
@@ -1729,7 +1723,9 @@ locations = [
     'AccessFrom' : {
         'Main Street Bottom': lambda sm: sm.canAccessBotwoonFromMainStreet()
     },
-    'Available': lambda sm: sm.haveItem('Gravity')
+    'Available': lambda sm: sm.wor(sm.haveItem('Gravity'),
+                                   sm.wand(sm.knowsGravLessLevel3(),
+                                           sm.canSpringBallJump())) # https://www.youtube.com/watch?v=7LYYxphRRT0
 },
 {
     'Area': "Maridia",
@@ -1737,7 +1733,7 @@ locations = [
     'SolveArea': "Maridia Pink Bottom",
     'Name': "Missile (pink Maridia)",
     'Address': 0x7C603,
-    'Class': "Minor",
+    'Class': ["Minor"],
     'CanHidden': True,
     'Visibility': "Visible",
     'Room': 'Aqueduct',
@@ -1753,7 +1749,7 @@ locations = [
     'GraphArea': "Maridia",
     'SolveArea': "Maridia Pink Bottom",
     'Name': "Super Missile (pink Maridia)",
-    'Class': "Minor",
+    'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x7C609,
     'Visibility': "Visible",
@@ -1770,7 +1766,7 @@ locations = [
     'GraphArea': "Maridia",
     'SolveArea': "Maridia Pink Top",
     'Name': "Missile (Draygon)",
-    'Class': "Minor",
+    'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x7C74D,
     'Visibility': "Hidden",

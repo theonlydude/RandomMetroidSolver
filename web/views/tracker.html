@@ -4,7 +4,7 @@ extend 'layout.html'
 
 <meta name="description" content="Solver for the randomized Super Metroid roms"/>
 <link rel="shortcut icon" href={{=URL('static','favicon.ico')}} type="image/ico"/>
-<link rel="stylesheet" type="text/css" href={{=URL('static','css/mystyle_20180928.css')}} media="screen"/>
+<link rel="stylesheet" type="text/css" href={{=URL('static','css/mystyle_20181203.css')}} media="screen"/>
 
 <link href={{=URL('static', 'css/bootstrap-tour.min.css')}} rel="stylesheet">
 <script src="{{=URL('static','js/bootstrap-tour.min.js')}}"></script>
@@ -34,7 +34,7 @@ extend 'layout.html'
     max-height: 95vh;
     overflow-y: scroll;
 }
-.main-container {
+body {
     background-color: #000;
 }
 .diffHelp {
@@ -384,6 +384,14 @@ img {
     left: 59.9%;
     top: 6.2%;
 }
+.wreckedShipMainGps {
+    left: 72.05%;
+    top: 8%;
+}
+.wreckedShipBackGps {
+    left: 76.8%;
+    top: 7%;
+}
 .crabMazeLeftGps {
     left: 80.8%;
     top: 13.8%;
@@ -391,6 +399,26 @@ img {
 .lavaDiveRightGps {
     left: 81.15%;
     top: 78.6%;
+}
+.lNEntranceGps {
+    left: 76.8%;
+    top: 83.5%;
+}
+.lNAboveGTGps {
+    left: 72%;
+    top: 86.5%;
+}
+.screwAttackBottomGps {
+    left: 75.8%;
+    top: 86%;
+}
+.firefleasGps {
+    left: 91.1%;
+    top: 77%;
+}
+.ridleyZoneGps {
+    left: 80.6%;
+    top: 88%;
 }
 .threeMuskateersRoomLeftGps {
     left: 84.6%;
@@ -3055,6 +3083,9 @@ window.onload = function(){
           romData[i] = bytes[i];
         }
 
+        // majors split
+        romData[0x17B6C] = bytes[0x17B6C];
+
         romData["romFileName"] = outFileName;
   
         var json = JSON.stringify(romData);
@@ -3080,7 +3111,7 @@ function setGuessedPreset(romName){
 }
 
 function guessVARIAPreset(filename) {
-  var re = /VARIA_Randomizer_[A]?[F]?X\d+_(\w+)/;
+  var re = /VARIA_Randomizer_[A]?[F]?[Z]?X\d+_(\w+)/;
   var match = filename.match(re);
   if(match == null) {
     re = /VARIA_Plandomizer_[A]?[F]?X\d+_(\w+)/;
@@ -3097,7 +3128,7 @@ function guessVARIAPreset(filename) {
 
     if(match != null){
       var pS = match[2];
-      if(pS == "slowest" || pS == "slow" || pS == "medium" || pS == "fast" || pS == "fastest" || pS == "basic") {
+      if(pS == "slowest" || pS == "slow" || pS == "medium" || pS == "fast" || pS == "fastest" || pS == "basic" || pS == "VARIAble") {
         return match[1];
       } else {
         return match[1] + '_' + match[2];
@@ -3640,12 +3671,16 @@ function startTheTour(step=-1) {
 
 <div class="fixed">
   <div class="menu">
-    {{=A("Home", _href=URL(f="home"), _class="menu")}}
-    {{=A("Presets", _href=URL(f="presets"), _class="menu")}}
-    {{=A("Randomizer", _href=URL(f="randomizer"), _class="menu")}}
-    {{=A("Solver", _href=URL(f="solver"), _class="menu")}}
-    {{=A("Trackers", _href=URL(f="tracker"), _class="menu_selected")}}
-    {{=A("Information & Contact", _href=URL(f="infos"), _class="menu")}}
+    <table class="full menuTable">
+      <tr>
+	<td>{{=A("Home", _href=URL(f="home"), _class="menu")}}</td>
+	<td>{{=A("Presets", _href=URL(f="presets"), _class="menu")}}</td>
+	<td>{{=A("Randomizer", _href=URL(f="randomizer"), _class="menu")}}</td>
+	<td>{{=A("Solver", _href=URL(f="solver"), _class="menu")}}</td>
+	<td class="menu_selected">{{=A("Trackers", _href=URL(f="tracker"), _class="menu")}}</td>
+	<td>{{=A("Information & Contact", _href=URL(f="infos"), _class="menu")}}</td>
+      </tr>
+    </table>
   </div>
 </div>
 

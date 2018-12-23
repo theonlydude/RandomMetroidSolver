@@ -97,12 +97,16 @@ def validatePresetsParams(action):
         for button in Controller.__dict__:
             if isButton(button):
                 value = request.vars[button]
-                if value is None:
-                    return (False, "Button {} not set".format(button))
+                if button == "Moonwalk":
+                    if value not in [None, 'on']:
+                        return (False, "Invalid value for Moonwalk: {}".format(value))
                 else:
-                    if value in map:
-                        return (False, "Action {} set for two buttons: {} and {}".format(value, button, map[value]))
-                    map[value] = button
+                    if value is None:
+                        return (False, "Button {} not set".format(button))
+                    else:
+                        if value in map:
+                            return (False, "Action {} set for two buttons: {} and {}".format(value, button, map[value]))
+                        map[value] = button
 
     if request.vars.currenttab not in ['Global', 'Techniques1', 'Techniques2', 'Techniques3', 'Techniques4', 'Techniques5', 'Techniques6', 'Techniques7', 'Mapping']:
         return (False, "Wrong value for current tab: [{}]".format(request.vars.currenttab))
@@ -472,12 +476,15 @@ def canSolveROM(jsonRomFileName):
         romDict[int(address)] = tempDictROM[address]
 
     # check if the ROM is not a race one protected against solving
-    md5sum = getMd5sum(romDict)
+    try:
+        md5sum = getMd5sum(romDict)
+    except:
+        return (False, None)
 
     DB = db.DB()
 
     isRace = DB.checkIsRace(md5sum)
-    print("canSolveROM::isRace {}: {}".format(jsonRomFileName, isRace))
+    print("canSolveROM::{} md5: {} isRace: {}".format(jsonRomFileName, md5sum, isRace))
     if isRace == False:
         DB.close()
         return (True, None)
@@ -608,7 +615,13 @@ def genJsonFromParams(vars):
             if value is None:
                 paramsDict['Controller'][button] = Controller.__dict__[button]
             else:
-                paramsDict['Controller'][button] = value
+                if button == "Moonwalk":
+                    if value != None and value == "on":
+                        paramsDict['Controller'][button] = True
+                    else:
+                        paramsDict['Controller'][button] = False
+                else:
+                    paramsDict['Controller'][button] = value
 
     return paramsDict
 
@@ -699,7 +712,7 @@ def initRandomizerSession():
         session.randomizer['minorQty'] = "100"
         session.randomizer['energyQty'] = "vanilla"
         session.randomizer['progressionSpeed'] = "medium"
-        session.randomizer['fullRandomization'] = "on"
+        session.randomizer['majorsSplit'] = "Full"
         session.randomizer['suitsRestriction'] = "on"
         session.randomizer['morphPlacement'] = "early"
         session.randomizer['funCombat'] = "off"
@@ -714,6 +727,14 @@ def initRandomizerSession():
         session.randomizer['hideItems'] = "off"
         session.randomizer['strictMinors'] = "off"
         session.randomizer['randoPreset'] = ""
+
+    # fix session
+    if 'fullRandomization' in session.randomizer:
+        if session.randomizer['fullRandomization'] == True:
+            session.randomizer['majorsSplit'] = 'Full'
+        else:
+            session.randomizer['majorsSplit'] = 'Major'
+        del session.randomizer['fullRandomization']
 
 def randomizer():
     response.title = 'Super Metroid VARIA Randomizer'
@@ -802,7 +823,7 @@ def validateWebServiceParams(patchs, quantities, others, isJson=False):
         except:
             raiseHttp(400, "Wrong value for paramsFileTarget, must be a JSON string", isJson)
 
-    for check in ['fullRandomization', 'suitsRestriction', 'layoutPatches', 'noGravHeat', 'areaRandomization', 'hideItems', 'strictMinors']:
+    for check in ['suitsRestriction', 'layoutPatches', 'noGravHeat', 'areaRandomization', 'hideItems', 'strictMinors']:
         if check in others:
             if request.vars[check] not in ['on', 'off', 'random']:
                 raiseHttp(400, "Wrong value for {}: {}, authorized values: on/off".format(check, request.vars[check]), isJson)
@@ -812,8 +833,9 @@ def validateWebServiceParams(patchs, quantities, others, isJson=False):
             raiseHttp(400, "Wrong value for morphPlacement: {}, authorized values early/late/normal".format(request.vars['morphPlacement']), isJson)
 
     if 'progressionSpeed' in others:
-        if request.vars['progressionSpeed'] not in ['slowest', 'slow', 'medium', 'fast', 'fastest', 'random', 'basic']:
-            raiseHttp(400, "Wrong value for progressionSpeed: {}, authorized values slowest/slow/medium/fast/fastest/basic".format(request.vars['progressionSpeed']), isJson)
+        for progSpeed in request.vars['progressionSpeed'].split(','):
+            if progSpeed not in ['slowest', 'slow', 'medium', 'fast', 'fastest', 'random', 'basic', 'VARIAble']:
+                raiseHttp(400, "Wrong value for progressionSpeed: {}, authorized values slowest/slow/medium/fast/fastest/basic/VARIAble".format(progSpeed), isJson)
 
     if 'progressionDifficulty' in others:
         if request.vars['progressionDifficulty'] not in ['easier', 'normal', 'harder', 'random']:
@@ -822,6 +844,10 @@ def validateWebServiceParams(patchs, quantities, others, isJson=False):
     if 'complexity' in others:
         if request.vars['complexity'] not in ['simple', 'medium', 'advanced']:
             raiseHttp(400, "Wrong value for complexity: {}, authorized values simple/medium/advanced".format(request.vars['complexity']), isJson)
+
+    if 'majorsSplit' in others:
+        if request.vars['majorsSplit'] not in ['Full', 'Major', 'Chozo', 'random']:
+            raiseHttp(400, "Wrong value for majorsSplit: {}, authorized values Full/Major/Chozo/random".format(request.vars['majorsSplit']), isJson)
 
     # check race mode
     if 'raceMode' in request.vars:
@@ -836,7 +862,7 @@ def sessionWebService():
               'skip_intro', 'skip_ceres', 'animals', 'areaLayout', 'variaTweaks']
     quantities = ['missileQty', 'superQty', 'powerBombQty']
     others = ['minorQty', 'energyQty', 'maxDifficulty',
-              'progressionSpeed', 'fullRandomization', 'suitsRestriction',
+              'progressionSpeed', 'majorsSplit', 'suitsRestriction',
               'funCombat', 'funMovement', 'funSuits', 'layoutPatches', 'preset',
               'noGravHeat', 'progressionDifficulty', 'morphPlacement',
               'areaRandomization', 'complexity', 'hideItems', 'strictMinors', 'randoPreset']
@@ -854,8 +880,8 @@ def sessionWebService():
     session.randomizer['powerBombQty'] = request.vars.powerBombQty
     session.randomizer['minorQty'] = request.vars.minorQty
     session.randomizer['energyQty'] = request.vars.energyQty
-    session.randomizer['progressionSpeed'] = request.vars.progressionSpeed
-    session.randomizer['fullRandomization'] = request.vars.fullRandomization
+    session.randomizer['progressionSpeed'] = request.vars.progressionSpeed.split(',')
+    session.randomizer['majorsSplit'] = request.vars.majorsSplit
     session.randomizer['suitsRestriction'] = request.vars.suitsRestriction
     session.randomizer['morphPlacement'] = request.vars.morphPlacement
     session.randomizer['funCombat'] = request.vars.funCombat
@@ -898,7 +924,7 @@ def randomizerWebService():
               'skip_ceres', 'areaLayout', 'variaTweaks', 'No_Music']
     quantities = ['missileQty', 'superQty', 'powerBombQty']
     others = ['seed', 'paramsFileTarget', 'minorQty', 'energyQty', 'preset',
-              'maxDifficulty', 'progressionSpeed', 'fullRandomization',
+              'maxDifficulty', 'progressionSpeed', 'majorsSplit',
               'suitsRestriction', 'morphPlacement', 'funCombat', 'funMovement', 'funSuits',
               'layoutPatches', 'noGravHeat', 'progressionDifficulty', 'areaRandomization',
               'hideItems', 'strictMinors', 'complexity']
@@ -938,7 +964,8 @@ def randomizerWebService():
               '--preset', preset,
               '--progressionSpeed', request.vars.progressionSpeed,
               '--progressionDifficulty', request.vars.progressionDifficulty,
-              '--morphPlacement', request.vars.morphPlacement]
+              '--morphPlacement', request.vars.morphPlacement,
+              '--majorsSplit', request.vars.majorsSplit]
     params += ['--missileQty', request.vars.missileQty if request.vars.missileQty != 'random' else '0',
                '--superQty', request.vars.superQty if request.vars.superQty != 'random' else '0',
                '--powerBombQty', request.vars.powerBombQty if request.vars.powerBombQty != 'random' else '0',
@@ -974,7 +1001,6 @@ def randomizerWebService():
         if request.vars[id] == 'random':
             params.append('random')
 
-    addParamRandom('fullRandomization', params)
     addParamRandom('suitsRestriction', params)
     addParamRandom('hideItems', params)
     addParamRandom('strictMinors', params)
@@ -1011,6 +1037,8 @@ def randomizerWebService():
     (custom, controlParam) = getCustomMapping(controlMapping)
     if custom == True:
         params += ['--controls', controlParam]
+        if "Moonwalk" in controlMapping and controlMapping["Moonwalk"] == True:
+            params.append('--moonwalk')
 
     DB.addRandoParams(id, params + ['--complexity', request.vars.complexity])
 
@@ -1109,9 +1137,11 @@ def randoPresetWebService():
     if IS_LENGTH(maxsize=32, minsize=1)(preset)[1] is not None:
         raise HTTP(400, "Preset name must be between 1 and 32 characters")
 
-    if request.vars['complexity'] not in ['simple', 'medium', 'advanced']:
-        raiseHttp(400, "Wrong value for complexity: {}, authorized values simple/medium/advanced".format(request.vars['complexity']), isJson)
-    session.randomizer['complexity'] = request.vars.complexity
+    # we had a user which had kept its page opened since before last push in prod
+    if request.vars.complexity != None:
+        if request.vars.complexity not in ['simple', 'medium', 'advanced']:
+            raiseHttp(400, "Wrong value for complexity: {}, authorized values simple/medium/advanced".format(request.vars.complexity))
+        session.randomizer['complexity'] = request.vars.complexity
 
     print("randoPresetWebService: preset={}".format(preset))
 

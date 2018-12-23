@@ -9,7 +9,7 @@ find ~/web2py/applications/solver/static -xtype l -exec rm -f {} \;
 [ -L ~/web2py/applications/solver/static/images/area_map.png ] || ln -s ~/RandomMetroidSolver/web/static/area_map.png ~/web2py/applications/solver/static/images/area_map.png
 [ -L ~/web2py/applications/solver/static/images/snes-controller.png ] || ln -s ~/RandomMetroidSolver/web/static/snes-controller.png ~/web2py/applications/solver/static/images/snes-controller.png
 [ -L ~/web2py/applications/solver/static/images/ajax-loader.gif ] || ln -s ~/RandomMetroidSolver/web/static/ajax-loader.gif ~/web2py/applications/solver/static/images/ajax-loader.gif
-[ -L ~/web2py/applications/solver/static/css/mystyle_20180928.css ] || ln -s ~/RandomMetroidSolver/web/static/mystyle_20180928.css ~/web2py/applications/solver/static/css/mystyle_20180928.css
+[ -L ~/web2py/applications/solver/static/css/mystyle_20181203.css ] || ln -s ~/RandomMetroidSolver/web/static/mystyle_20181203.css ~/web2py/applications/solver/static/css/mystyle_20181203.css
 [ -L ~/web2py/applications/solver/static/css/bootstrap-tour.min.css ] || ln -s ~/RandomMetroidSolver/web/static/bootstrap-tour.min.css ~/web2py/applications/solver/static/css/bootstrap-tour.min.css
 [ -L ~/web2py/applications/solver/static/barrating ] || ln -s ~/RandomMetroidSolver/web/static/barrating ~/web2py/applications/solver/static/barrating
 [ -L ~/web2py/applications/solver/static/js/bootstrap-tour.min.js ] || ln -s ~/RandomMetroidSolver/web/static/bootstrap-tour.min.js ~/web2py/applications/solver/static/js/bootstrap-tour.min.js
@@ -268,3 +268,7 @@ find ~/web2py/applications/solver/static -xtype l -exec rm -f {} \;
 [ -L ~/web2py/applications/solver/static/images/4_reserve.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/tracker/pause/4_reserve.png ~/web2py/applications/solver/static/images/4_reserve.png
 
 [ -L ~/web2py/rando_presets ] || ln -s ~/RandomMetroidSolver/rando_presets ~/web2py/rando_presets
+[ -L ~/web2py/applications/solver/static/images/league.png ] || ln -s ~/RandomMetroidSolver/web/static/league.png ~/web2py/applications/solver/static/images/league.png
+
+[ -L ~/web2py/applications/solver/static/images/chozo_map_thumbnail.png ] || ln -s ~/RandomMetroidSolver/web/static/chozo_map_thumbnail.png ~/web2py/applications/solver/static/images/chozo_map_thumbnail.png
+[ -L ~/web2py/applications/solver/static/images/chozo_map.png ] || ln -s ~/RandomMetroidSolver/web/static/chozo_map.png ~/web2py/applications/solver/static/images/chozo_map.png

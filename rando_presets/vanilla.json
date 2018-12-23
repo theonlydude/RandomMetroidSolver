@@ -6,7 +6,7 @@
   "skip_ceres": "off",
   "hideItems": "off",
   "funCombat": "off",
-  "fullRandomization": "on",
+  "majorsSplit": "Full",
   "strictMinors": "on",
   "layoutPatches": "off",
   "noGravHeat": "off",

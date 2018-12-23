@@ -35,8 +35,8 @@ class Conf:
 class SolverState(object):
     def fromSolver(self, solver):
         self.state = {}
-        # bool
-        self.state["fullRando"] = solver.fullRando
+        # string
+        self.state["majorsSplit"] = solver.majorsSplit
         # bool
         self.state["areaRando"] = solver.areaRando
         # dict of raw patches
@@ -68,7 +68,14 @@ class SolverState(object):
         self.state["isPlando"] = solver.isPlando
 
     def toSolver(self, solver):
-        solver.fullRando = self.state["fullRando"]
+        if 'majorsSplit' in self.state:
+            solver.majorsSplit = self.state["majorsSplit"]
+        else:
+            # compatibility with existing sessions
+            if self.state['fullRando'] == True:
+                solver.majorsSplit = 'Full'
+            else:
+                solver.majorsSplit = 'Major'
         solver.areaRando = self.state["areaRando"]
         solver.patches = self.setPatches(self.state["patches"])
         self.setLocsData(solver.locations)
@@ -223,15 +230,14 @@ class CommonSolver(object):
     def loadRom(self, rom, interactive=False, magic=None):
         self.romFileName = rom
         self.romLoader = RomLoader.factory(rom, magic)
-        self.fullRando = self.romLoader.assignItems(self.locations)
+        self.majorsSplit = self.romLoader.assignItems(self.locations)
         self.areaRando = self.romLoader.loadPatches()
 
         if interactive == False:
             self.patches = self.romLoader.getPatches()
         else:
             self.patches = self.romLoader.getRawPatches()
-        print("ROM {} full: {} area: {} patches: {}".format(rom, self.fullRando,
-                                                            self.areaRando, self.patches))
+        print("ROM {} majors: {} area: {} patches: {}".format(rom, self.majorsSplit, self.areaRando, self.patches))
 
         self.graphTransitions = self.romLoader.getTransitions()
         if self.graphTransitions is None:
@@ -779,7 +785,7 @@ class StandardSolver(CommonSolver):
         return [loc for loc in self.majorLocations if loc['difficulty'].bool == False and loc['itemName'] not in ['Nothing', 'NoEnergy']]
 
     def getRemainMinors(self):
-        if self.fullRando == True:
+        if self.majorsSplit == 'Full':
             return None
         else:
             return [loc for loc in self.minorLocations if loc['difficulty'].bool == False and loc['itemName'] not in ['Nothing', 'NoEnergy']]
@@ -814,10 +820,14 @@ class StandardSolver(CommonSolver):
         # the next collected item is the one with the smallest difficulty,
         # if equality between major and minor, take major first.
 
-        if not self.fullRando:
-            self.majorLocations = [loc for loc in self.locations if loc["Class"] == "Major"]
-            self.minorLocations = [loc for loc in self.locations if loc["Class"] == "Minor"]
+        if self.majorsSplit == 'Major':
+            self.majorLocations = [loc for loc in self.locations if "Major" in loc["Class"]]
+            self.minorLocations = [loc for loc in self.locations if "Minor" in loc["Class"]]
+        elif self.majorsSplit == 'Chozo':
+            self.majorLocations = [loc for loc in self.locations if "Chozo" in loc["Class"]]
+            self.minorLocations = [loc for loc in self.locations if "Chozo" not in loc["Class"]]
         else:
+            # Full
             self.majorLocations = self.locations[:] # copy
             self.minorLocations = self.majorLocations
 
@@ -860,7 +870,7 @@ class StandardSolver(CommonSolver):
 
             # compute the difficulty of all the locations
             self.computeLocationsDifficulty(self.majorLocations)
-            if self.fullRando == False:
+            if self.majorsSplit != 'Full':
                 self.computeLocationsDifficulty(self.minorLocations)
 
             # keep only the available locations
@@ -877,7 +887,7 @@ class StandardSolver(CommonSolver):
 
             # sort them on difficulty and proximity
             majorsAvailable = self.getAvailableItemsList(majorsAvailable, area, diffThreshold)
-            if self.fullRando == True:
+            if self.majorsSplit == 'Full':
                 minorsAvailable = majorsAvailable
             else:
                 minorsAvailable = self.getAvailableItemsList(minorsAvailable, area, diffThreshold)
@@ -890,6 +900,7 @@ class StandardSolver(CommonSolver):
             self.visitedLocations.append({
                 'item' : 'The End',
                 'itemName' : 'The End',
+                'Class': ['Major'],
                 'Name' : 'The End',
                 'Area' : 'The End',
                 'SolveArea' : 'The End',
@@ -1122,7 +1133,7 @@ class StandardSolver(CommonSolver):
     def tryRemainingLocs(self):
         # use preset which knows every techniques to test the remaining locs to
         # find which technique could allow to continue the seed
-        locations = self.majorLocations if self.fullRando == True else self.majorLocations + self.minorLocations
+        locations = self.majorLocations if self.majorsSplit == 'Full' else self.majorLocations + self.minorLocations
 
         presetFileName = os.path.expanduser('~/RandomMetroidSolver/standard_presets/solution.json')
         presetLoader = PresetLoader.factory(presetFileName)
@@ -1265,7 +1276,7 @@ class OutConsole:
     def printPath(self, message, locations, displayAPs=True):
         print("")
         print(message)
-        print('{:>50} {:>12} {:>34} {:>8} {:>16} {:>14} {} {}'.format("Location Name", "Area", "Sub Area", "Distance", "Item", "Difficulty", "Knows used", "Items used"))
+        print('{} {:>48} {:>12} {:>34} {:>8} {:>16} {:>14} {} {}'.format("Z", "Location Name", "Area", "Sub Area", "Distance", "Item", "Difficulty", "Knows used", "Items used"))
         print('-'*150)
         lastAP = None
         for loc in locations:
@@ -1275,14 +1286,16 @@ class OutConsole:
                 if not (len(path) == 1 and path[0] == lastAP):
                     path = " -> ".join(path)
                     print('{:>50}: {}'.format('Path', path))
-            print('{:>50}: {:>12} {:>34} {:>8} {:>16} {:>14} {} {}'.format(loc['Name'],
-                                                                           loc['Area'],
-                                                                           loc['SolveArea'],
-                                                                           loc['distance'] if 'distance' in loc else 'nc',
-                                                                           loc['itemName'],
-                                                                           round(loc['difficulty'].difficulty, 2) if 'difficulty' in loc else 'nc',
-                                                                           sorted(loc['difficulty'].knows) if 'difficulty' in loc else 'nc',
-                                                                           list(set(loc['difficulty'].items)) if 'difficulty' in loc else 'nc'))
+            line = '{} {:>48}: {:>12} {:>34} {:>8} {:>16} {:>14} {} {}'
+            print(line.format('Z' if 'Chozo' in loc['Class'] else ' ',
+                              loc['Name'],
+                              loc['Area'],
+                              loc['SolveArea'],
+                              loc['distance'] if 'distance' in loc else 'nc',
+                              loc['itemName'],
+                              round(loc['difficulty'].difficulty, 2) if 'difficulty' in loc else 'nc',
+                              sorted(loc['difficulty'].knows) if 'difficulty' in loc else 'nc',
+                              list(set(loc['difficulty'].items)) if 'difficulty' in loc else 'nc'))
 
     def displayOutput(self):
         s = self.solver

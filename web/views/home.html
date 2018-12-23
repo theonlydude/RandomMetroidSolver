@@ -2,7 +2,7 @@
 
 <meta name="description" content="Super Metroid VARIA Randomizer, Solver an Trackers"/>
 <link rel="shortcut icon" href={{=URL('static','favicon.ico')}} type="image/ico"/>
-<link rel="stylesheet" type="text/css" href={{=URL('static/css','mystyle_20180928.css')}} media="screen"/>
+<link rel="stylesheet" type="text/css" href={{=URL('static/css','mystyle_20181203.css')}} media="screen"/>
 
 <title>Super Metroid VARIA Randomizer, Solver and Trackers</title>
 
@@ -27,20 +27,69 @@ a:hover {
 a:active {
     color: black;
 }
+.league {
+    position: absolute;
+    z-index:2;
+    width: 30%;
+    top: 0%;
+    right: 0%;
+
+}
+.leagueImg {
+    width: 100%;
+    height: auto;
+}
+.main {
+    margin-top: 1.5em;
+}
+.cr {
+  width: 300px;
+  padding-top: 16px;
+  padding-left: 30px;
+  padding-bottom: 8px;
+  padding-right: 32px;
+  text-align: center;
+}
+
+.cr-sticky {
+  position: fixed;
+}
+.cr-top {
+  top: 28px;
+}
+.cr-left {
+  left: -100px;
+}
+.cr-top.cr-left {
+  transform: rotate(-45deg);
+}
+.cr-orange {
+  background-color: #FDCF1E;
+}
 </style>
 
 
 <div class="fixed">
   <div class="menu">
-    {{=A("Home", _href=URL(f="home"), _class="menu_selected")}}
-    {{=A("Presets", _href=URL(f="presets"), _class="menu")}}
-    {{=A("Randomizer", _href=URL(f="randomizer"), _class="menu")}}
-    {{=A("Solver", _href=URL(f="solver"), _class="menu")}}
-    {{=A("Trackers", _href=URL(f="tracker"), _class="menu")}}
-    {{=A("Information & Contact", _href=URL(f="infos"), _class="menu")}}
+    <table class="full menuTable">
+      <tr>
+	<td class="menu_selected">{{=A("Home", _href=URL(f="home"), _class="menu")}}</td>
+	<td>{{=A("Presets", _href=URL(f="presets"), _class="menu")}}</td>
+	<td>{{=A("Randomizer", _href=URL(f="randomizer"), _class="menu")}}</td>
+	<td>{{=A("Solver", _href=URL(f="solver"), _class="menu")}}</td>
+	<td>{{=A("Trackers", _href=URL(f="tracker"), _class="menu")}}</td>
+	<td>{{=A("Information & Contact", _href=URL(f="infos"), _class="menu")}}</td>
+      </tr>
+    </table>
   </div>
 </div>
 <div class="main">
+  <div class="league">
+    <a href="https://www.twitch.tv/randomizerleague" target="_blank">
+      <img src="/solver/static/images/league.png" alt="league" class="leagueImg">
+    </a>
+  </div>
+  <div class="cr cr-top cr-left cr-sticky cr-orange"><a href="/infos#latest" target="_blank" style="color: #000;">Latest release:<br/>2018/12/17<br/>What's new ?</a></div>
   <div class="center">
     <img src="/solver/static/images/logo_varia.png" alt="logo" class="threequarter">
   </div>

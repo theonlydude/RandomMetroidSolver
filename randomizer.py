@@ -2,8 +2,7 @@
 
 import argparse, random, os.path, json, sys, shutil
 
-from itemrandomizerweb import Items
-from itemrandomizerweb.Randomizer import Randomizer, RandoSettings
+from itemrandomizerweb.Randomizer import Randomizer, RandoSettings, progSpeeds
 from itemrandomizerweb.AreaRandomizer import AreaRandomizer
 from graph_locations import locations as graphLocations
 from graph_access import vanillaTransitions, getDoorConnections
@@ -12,10 +11,11 @@ from utils import PresetLoader
 from rom import RomPatcher, RomPatches, FakeROM
 import log
 
-speeds = ['slowest', 'slow', 'medium', 'fast', 'fastest', 'basic']
+speeds = progSpeeds + ['variable']
 energyQties = ['sparse', 'medium', 'vanilla' ]
 progDiffs = ['easier', 'normal', 'harder']
 morphPlacements = ['early', 'late', 'normal']
+majorsSplits = ['Full', 'Major', 'Chozo']
 
 def dumpErrorMsg(outFileName, msg):
     if outFileName is None:
@@ -91,9 +91,9 @@ if __name__ == "__main__":
     parser.add_argument('--strictMinors',
                         help="minors quantities values will be strictly followed instead of being probabilities",
                         dest='strictMinors', nargs='?', const=True, default=False)
-    parser.add_argument('--fullRandomization',
-                        help="will place majors in all locations",
-                        dest='fullRandomization', nargs='?', const=True, default=False)
+    parser.add_argument('--majorsSplit',
+                        help="how to split majors/minors: Full, Major, Chozo",
+                        dest='majorsSplit', nargs='?', choices=majorsSplits + ['random'], default='Full')
     parser.add_argument('--suitsRestriction',
                         help="no suits in early game",
                         dest='suitsRestriction', nargs='?', const=True, default=False)
@@ -104,9 +104,8 @@ if __name__ == "__main__":
     parser.add_argument('--hideItems', help="Like in dessy's rando hide half of the items",
                         dest="hideItems", nargs='?', const=True, default=False)
     parser.add_argument('--progressionSpeed', '-i',
-                        help="",
-                        dest='progressionSpeed', nargs='?', default='medium',
-                        choices=speeds + ['random'])
+                        help="progression speed, from " + str(speeds) + ". 'random' picks a random speed from these. Pick a random speed from a subset using comma-separated values, like 'slow,medium,fast'.",
+                        dest='progressionSpeed', nargs='?', default='medium')
     parser.add_argument('--progressionDifficulty',
                         help="",
                         dest='progressionDifficulty', nargs='?', default='normal',
@@ -130,10 +129,13 @@ if __name__ == "__main__":
     parser.add_argument('--controls',
                         help="specify controls, comma-separated, in that order: Shoot,Jump,Dash,ItemSelect,ItemCancel,AngleUp,AngleDown. Possible values: A,B,X,Y,L,R,Select,None",
                         dest='controls')
+    parser.add_argument('--moonwalk',
+                        help="Enables moonwalk by default",
+                        dest='moonWalk', action='store_true', default=False)
     parser.add_argument('--runtime', help="Maximum runtime limit in seconds. If 0 or negative, no runtime limit. Default is 30.", dest='runtimeLimit_s',
                         nargs='?', default=30, type=int)
-    parser.add_argument('--race', help="Race mode magic number", dest='raceMagic',
-                        type=int, choices=range(0, 0x10000))
+    parser.add_argument('--race', help="Race mode magic number, between 1 and 65535", dest='raceMagic',
+                        type=int)
 
     # parse args
     args = parser.parse_args()
@@ -162,6 +164,9 @@ if __name__ == "__main__":
         seed = args.seed
     seed4rand = seed
     if args.raceMagic is not None:
+        if args.raceMagic <= 0 or args.raceMagic >= 0x10000:
+            print "Invalid magic"
+            sys.exit(-1)
         seed4rand = seed ^ args.raceMagic
     random.seed(seed4rand)
 
@@ -173,14 +178,20 @@ if __name__ == "__main__":
         args.patches.append(animalsPatches[random.randint(0, len(animalsPatches)-1)])
 
     # if random progression speed, choose one
-    progSpeed = args.progressionSpeed
+    progSpeed = str(args.progressionSpeed).lower()
     if progSpeed == "random":
         progSpeed = speeds[random.randint(0, len(speeds)-1)]
+    mulSpeeds = progSpeed.split(',')
+    progSpeed = mulSpeeds[random.randint(0, len(mulSpeeds)-1)]
+    if len(mulSpeeds) > 1:
+        args.progressionSpeed = 'random'
+    if progSpeed not in speeds:
+        print 'Invalid progression speed : ' + progSpeed
+        sys.exit(-1)
     # if random progression difficulty, choose one
     progDiff = args.progressionDifficulty
     if progDiff == "random":
         progDiff = progDiffs[random.randint(0, len(progDiffs)-1)]
-
     print("SEED: " + str(seed))
 #    print("progression speed: " + progSpeed)
 
@@ -209,23 +220,30 @@ if __name__ == "__main__":
         threshold = mania - epsilon
     maxDifficulty = threshold
 
-    if args.fullRandomization == 'random':
-        args.fullRandomization = bool(random.getrandbits(1))
+    if args.majorsSplit == 'random':
+        args.majorsSplit = majorsSplits[random.randint(0, len(majorsSplits)-1)]
     if args.suitsRestriction == 'random':
-        args.suitsRestriction = bool(random.getrandbits(1))
+        if args.morphPlacement == 'late' and args.area == True:
+            args.suitsRestriction = False
+        else:
+            args.suitsRestriction = bool(random.getrandbits(1))
     if args.hideItems == 'random':
         args.hideItems = bool(random.getrandbits(1))
     if args.morphPlacement == 'random':
+        if args.suitsRestriction == True and args.area == True:
+            morphPlacements.remove('late')
         args.morphPlacement = morphPlacements[random.randint(0, len(morphPlacements)-1)]
     if args.strictMinors == 'random':
         args.strictMinors = bool(random.getrandbits(1))
 
     # fill restrictions dict
     restrictions = { 'Suits' : args.suitsRestriction, 'Morph' : args.morphPlacement }
-    restrictions['MajorMinor'] = not args.fullRandomization
+    restrictions['MajorMinor'] = args.majorsSplit
     seedCode = 'X'
-    if restrictions['MajorMinor'] == False:
+    if restrictions['MajorMinor'] == 'Full':
         seedCode = 'FX'
+    elif restrictions['MajorMinor'] == 'Chozo':
+        seedCode = 'ZX'
     if args.area == True:
         seedCode = 'A'+seedCode
 
@@ -364,13 +382,16 @@ if __name__ == "__main__":
         romPatcher.applyIPSPatches(args.patches, args.noLayout, args.noGravHeat, args.area, args.areaLayoutBase, args.noVariaTweaks)
         romPatcher.writeSeed(seed) # lol if race mode
         romPatcher.writeSpoiler(itemLocs)
-        romPatcher.writeRandoSettings(randoSettings)
+        romPatcher.writeRandoSettings(randoSettings, itemLocs)
         if args.area == True:
             romPatcher.writeDoorConnections(doors)
-        romPatcher.writeTransitionsCredits(randomizer.areaGraph.getCreditsTransitions())
+#        romPatcher.writeTransitionsCredits(randomizer.areaGraph.getCreditsTransitions())
         if ctrlDict is not None:
             romPatcher.writeControls(ctrlDict)
+        if args.moonWalk == True:
+            romPatcher.enableMoonWalk()
         romPatcher.writeMagic()
+        romPatcher.writeMajorsSplit(args.majorsSplit)
         romPatcher.end()
 
         if args.rom is None:

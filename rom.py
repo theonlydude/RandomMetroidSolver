@@ -1,9 +1,8 @@
 
 import re, struct, sys, random, os, json, copy
 from smbool import SMBool
-from itemrandomizerweb import Items
+from itemrandomizerweb.Items import ItemManager
 from itemrandomizerweb.patches import patches
-from itemrandomizerweb import Items
 from itemrandomizerweb.stdlib import List
 
 def readWord(romFile):
@@ -221,15 +220,84 @@ class RomReader:
         else:
             return itemCode
 
+    def getMajorsSplit(self):
+        address = 0x17B6C
+        self.romFile.seek(address)
+        split = chr(struct.unpack("B", self.romFile.read(1))[0])
+        if split in ['F', 'M', 'Z']:
+            splits = {
+                'F': 'Full',
+                'Z': 'Chozo',
+                'M': 'Major'
+            }
+            return splits[split]
+        else:
+            return None
+
     def loadItems(self, locations):
-        isFull = False
+        majorsSplit = self.getMajorsSplit()
+
+        if majorsSplit == None:
+            isFull = False
+            chozoItems = {}
         for loc in locations:
             item = self.getItem(loc["Address"], loc["Visibility"])
             loc["itemName"] = self.items[item]["name"]
-            if loc['Class'] == 'Major' and self.items[item]['name'] in ['Missile', 'Super', 'PowerBomb']:
-                isFull = True
+            if majorsSplit == None:
+                if 'Major' in loc['Class'] and self.items[item]['name'] in ['Missile', 'Super', 'PowerBomb']:
+                    isFull = True
+                if 'Minor' in loc['Class'] and self.items[item]['name'] not in ['Missile', 'Super', 'PowerBomb']:
+                    isFull = True
+                if 'Chozo' in loc['Class']:
+                    if loc['itemName'] in chozoItems:
+                        chozoItems[loc['itemName']] = chozoItems[loc['itemName']] + 1
+                    else:
+                        chozoItems[loc['itemName']] = 1
 
-        return isFull
+        # if majors split is not written in the seed, use an heuristic
+        if majorsSplit == None:
+            isChozo = self.isChozoSeed(chozoItems)
+            if isChozo == True:
+                return 'Chozo'
+            elif isFull == True:
+                return 'Full'
+            else:
+                return 'Major'
+        else:
+            return majorsSplit
+
+    def isChozoSeed(self, chozoItems):
+        # we have 2 Missiles, 2 Supers and 1 PB in the chozo locations
+        if 'Missile' not in chozoItems:
+            return False
+        if chozoItems['Missile'] != 2:
+            return False
+        if 'Super' not in chozoItems:
+            return False
+        if chozoItems['Super'] != 2:
+            return False
+        if 'PowerBomb' not in chozoItems:
+            return False
+        if chozoItems['PowerBomb'] != 1:
+            return False
+
+        # we have at least 3 E and 1 R
+        if 'ETank' not in chozoItems:
+            return False
+        if chozoItems['ETank'] < 3:
+            return False
+        if 'Reserve' not in chozoItems:
+            return False
+
+        # all the majors items which can't be superfuned
+        if 'Charge' not in chozoItems:
+            return False
+        if 'Morph' not in chozoItems:
+            return False
+        if 'Ice' not in chozoItems:
+            return False
+
+        return True
 
     def loadTransitions(self):
         # return the transitions or None if vanilla transitions
@@ -497,7 +565,7 @@ class RomPatcher:
         writeWord(self.romFile, w)
 
     def writeItemCode(self, item, visibility, address):
-        itemCode = Items.getItemTypeCode(item, visibility)
+        itemCode = ItemManager.getItemTypeCode(item, visibility)
         if self.race is None:
             self.romFile.seek(address)
             self.writeWord(itemCode)
@@ -519,15 +587,21 @@ class RomPatcher:
 
     def writeItemsLocs(self, itemLocs):
         self.nItems = 0
+        self.nothingAtMorph = False
         for itemLoc in itemLocs:
             if itemLoc['Location']['Name'] == 'Mother Brain':
                 continue
+            isMorph = itemLoc['Location']['Name'] == 'Morphing Ball'
             if itemLoc['Item']['Type'] in ['Nothing', 'NoEnergy']:
                 self.writeNothing(itemLoc)
+                if isMorph:
+                    # nothing at morph gives a missile pack
+                    self.nothingAtMorph = True
+                    self.nItems += 1
             else:
                 self.nItems += 1
                 self.writeItem(itemLoc)
-            if itemLoc['Location']['Name'] == 'Morphing Ball':
+            if isMorph:
                 self.patchMorphBallEye(itemLoc['Item'])
 
     # trigger morph eye enemy on whatever item we put there,
@@ -538,7 +612,7 @@ class RomPatcher:
         isAmmo = item['Category'] == 'Ammo' or item['Category'] == 'Nothing'
         isMissile = item['Type'] == 'Missile' or item['Category'] == 'Nothing'
         # category to check
-        if Items.isBeam(item):
+        if ItemManager.isBeam(item):
             cat = 0xA8 # collected beams
         elif item['Type'] == 'ETank':
             cat = 0xC4 # max health
@@ -565,10 +639,10 @@ class RomPatcher:
             operand = 0x65 # < 100
         elif item['Type'] == 'Reserve' or isAmmo:
             operand = 0x1 # < 1
-        elif Items.isBeam(item):
-            operand = Items.BeamBits[item['Type']]
+        elif ItemManager.isBeam(item):
+            operand = ItemManager.BeamBits[item['Type']]
         else:
-            operand = Items.ItemBits[item['Type']]
+            operand = ItemManager.ItemBits[item['Type']]
         # endianness
         op0 = operand & 0x00FF
         op1 = (operand & 0xFF00) >> 8
@@ -642,41 +716,75 @@ class RomPatcher:
         if self.race is not None:
             self.race.writeMagic()
 
-    def writeRandoSettings(self, settings):
+    def writeMajorsSplit(self, majorsSplit):
+        address = 0x17B6C
+        if majorsSplit == 'Chozo':
+            char = 'Z'
+        elif majorsSplit == 'Full':
+            char = 'F'
+        else:
+            char = 'M'
+        self.romFile.seek(address)
+        self.romFile.write(struct.pack('B', ord(char)))
+
+    def getItemQty(self, itemLocs, itemType):
+        q = len([il for il in itemLocs if il['Item']['Type'] == itemType])
+        if itemType == 'Missile' and self.nothingAtMorph == True:
+            q += 1
+        return q
+
+    def getMinorsDistribution(self, itemLocs):
+        dist = {}
+        minQty = 100
+        minors = ['Missile', 'Super', 'PowerBomb']
+        for m in minors:
+            q = float(self.getItemQty(itemLocs, m))
+            dist[m] = {'Quantity' : q }
+            if q < minQty:
+                minQty = q
+        for m in minors:
+            dist[m]['Proportion'] = dist[m]['Quantity']/minQty
+        
+        return dist
+
+    def writeRandoSettings(self, settings, itemLocs):
+        dist = self.getMinorsDistribution(itemLocs)
+
         address = 0x2736C0
-        value = "%.1f" % settings.qty['ammo']['Missile']
-        line = " MISSILE PROBABILITY        %s " % value
+        value = "%02d" % dist['Missile']['Quantity']
+        line = " MISSILE PACKS               %s " % value
         self.writeCreditsStringBig(address, line, top=True)
         address += 0x40
 
-        line = " missile probability ...... %s " % value
+        line = " missile packs ............. %s " % value
         self.writeCreditsStringBig(address, line, top=False)
         address += 0x40
 
-        value = "%.1f" % settings.qty['ammo']['Super']
-        line = " SUPER PROBABILITY          %s " % value
+        value = "%02d" % dist['Super']['Quantity']
+        line = " SUPER PACKS                 %s " % value
         self.writeCreditsStringBig(address, line, top=True)
         address += 0x40
 
-        line = " super probability ........ %s " % value
+        line = " super packs ............... %s " % value
         self.writeCreditsStringBig(address, line, top=False)
         address += 0x40
 
-        value = "%.1f" % settings.qty['ammo']['PowerBomb']
-        line = " POWER BOMB PROBABILITY     %s " % value
+        value = "%02d" % dist['PowerBomb']['Quantity']
+        line = " POWER BOMB PACKS            %s " % value
         self.writeCreditsStringBig(address, line, top=True)
         address += 0x40
 
-        line = " power bomb probability ... %s " % value
+        line = " power bomb packs .......... %s " % value
         self.writeCreditsStringBig(address, line, top=False)
         address += 0x40
 
-        value = "%03d%s" % (settings.qty['minors'], '%')
-        line = " MINORS QUANTITY           %s " % value
+        tanks = self.getItemQty(itemLocs, 'ETank') + self.getItemQty(itemLocs, 'Reserve')
+        value = "%02d" % tanks
+        line = " HEALTH TANKS                %s " % value
         self.writeCreditsStringBig(address, line, top=True)
         address += 0x40
 
-        line = " minors quantity ......... %s " % value
+        line = " health tanks .............. %s " % value
         self.writeCreditsStringBig(address, line, top=False)
         address += 0x40
 
@@ -692,7 +800,7 @@ class RomPatcher:
 
         line = " PROGRESSION DIFFICULTY  %s " % settings.progDiff.upper()
         self.writeCreditsString(address, 0x04, line)
-        address += 0x80 # skip old spread items spot
+        address += 0x80 # skip item distrib title
 
         param = (' SUITS RESTRICTION ........%s', 'Suits')
         line = param[0] % ('. ON' if settings.restrictions[param[1]] == True else ' OFF')
@@ -711,9 +819,18 @@ class RomPatcher:
             self.writeCreditsString(address, 0x04, line)
             address += 0x40
 
+        value = "%.1f %.1f %.1f" % (dist['Missile']['Proportion'], dist['Super']['Proportion'], dist['PowerBomb']['Proportion'])
+        line = " AMMO DISTRIBUTION  %s " % value
+        self.writeCreditsStringBig(address, line, top=True)
+        address += 0x40
+
+        line = " ammo distribution  %s " % value
+        self.writeCreditsStringBig(address, line, top=False)
+        address += 0x40
+
     def writeSpoiler(self, itemLocs):
         # keep only majors, filter out Etanks and Reserve
-        fItemLocs = List.filter(lambda il: (il['Item']['Class'] == 'Major'
+        fItemLocs = List.filter(lambda il: ('Major' in il['Item']['Class']
                                             and il['Item']['Type'] not in ['ETank', 'Reserve',
                                                                            'NoEnergy', 'Nothing']),
                                 itemLocs)
@@ -1032,6 +1149,11 @@ class RomPatcher:
         locsNumber = 100
         for i in range(0, locsNumber-len(locations)):
             self.writeWord(0xFFFF)
+
+    def enableMoonWalk(self):
+        self.romFile.seek(0xB35D)
+        # replace STZ with STA since A is non-zero at this point
+        self.romFile.write(struct.pack('B', 0x8D))
 
 class FakeROM:
     # to have the same code for real ROM and the webservice

@@ -92,16 +92,22 @@ accessPoints = [
        shortName="B\\NOOB BRIDGE"),
     # Wrecked Ship
     AccessPoint('West Ocean Left', 'WreckedShip', {
-        'Crab Maze Left': lambda sm: sm.wand(sm.canOpenGreenDoors(),
-                                             sm.canPassSpongeBath(), # implies dead phantoon and pass bomb passages
-                                             sm.canPassForgottenHighway(True))
+        'Wrecked Ship Main': lambda sm: sm.canOpenGreenDoors()
     }, roomInfo = {'RoomPtr':0x93fe, "area": 0x0},
        exitInfo = {'DoorPtr':0x89ca, 'direction': 0x5, "cap": (0x1e, 0x6), "bitFlag": 0x0,
                    "screen": (0x1, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
        entryInfo = {'SamusX':0x34, 'SamusY':0x488},
        shortName="W\\WEST OCEAN"),
+    AccessPoint('Wrecked Ship Main', 'WreckedShip', {
+        'West Ocean Left': lambda sm: SMBool(True),
+        'Wrecked Ship Back': lambda sm: sm.canPassSpongeBath() # implies dead phantoon and pass bomb passages
+    }, internal=True),
+    AccessPoint('Wrecked Ship Back', 'WreckedShip', {
+        'Wrecked Ship Main': lambda sm: SMBool(True),
+        'Crab Maze Left': lambda sm: sm.canPassForgottenHighway(True)
+    }, internal=True),
     AccessPoint('Crab Maze Left', 'WreckedShip', {
-        'West Ocean Left': lambda sm: sm.canPassForgottenHighway(False)
+        'Wrecked Ship Back': lambda sm: sm.canPassForgottenHighway(False)
     }, roomInfo = {'RoomPtr':0x957d, "area": 0x0},
        exitInfo = {'DoorPtr':0x8aae, 'direction': 0x5, "cap": (0xe, 0x6), "bitFlag": 0x0,
                    "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
@@ -109,18 +115,60 @@ accessPoints = [
        shortName="W\\CRAB MAZE"),
     # Lower Norfair
     AccessPoint('Lava Dive Right', 'LowerNorfair', {
-        'Three Muskateers Room Left': lambda sm: sm.wand(sm.canHellRun('LowerNorfair'),
-                                                         sm.canPassLavaPit(),
-                                                         sm.canPassWorstRoom())
+        'LN Entrance': lambda sm: sm.canPassLavaPit()
     }, roomInfo = {'RoomPtr':0xaf14, "area": 0x2},
        exitInfo = {'DoorPtr':0x96d2, 'direction': 0x4, "cap": (0x11, 0x26), "bitFlag": 0x0,
                    "screen": (0x1, 0x2), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
        entryInfo = {'SamusX':0x3d0, 'SamusY':0x88, 'song': 0x15},
        shortName="LN\\LAVA DIVE"),
+    AccessPoint('LN Entrance', 'LowerNorfair', {
+        'Lava Dive Right': lambda sm: sm.canPassLavaPitReverse(),
+        'LN Above GT': lambda sm: sm.canPassLowerNorfairChozo(),
+        'Screw Attack Bottom': lambda sm: sm.wand(sm.canUsePowerBombs(),
+                                                  sm.canHellRun('LowerNorfair'),
+                                                  sm.wand(sm.haveItem('Super'), sm.knowsGreenGateGlitch()),
+                                                  sm.canDestroyBombWalls()),
+        'Firefleas': lambda sm: sm.wand(sm.canHellRun('LowerNorfair'),
+                                        sm.canPassWorstRoom(),
+                                        sm.canUsePowerBombs())
+    }, internal=True),
+    AccessPoint('LN Above GT', 'LowerNorfair', {
+        'Screw Attack Bottom': lambda sm: sm.wand(sm.canHellRun('LowerNorfair'),
+                                                  sm.enoughStuffGT())
+    }, internal=True),
+    AccessPoint('Screw Attack Bottom', 'LowerNorfair', {
+        'LN Entrance': lambda sm: sm.wand(sm.canHellRun('LowerNorfair'),
+                                          sm.canExitScrewAttackArea(),
+                                          sm.haveItem('Super'))
+    }, internal=True),
+    AccessPoint('Firefleas', 'LowerNorfair', {
+        'LN Entrance': lambda sm: sm.wand(sm.canHellRun('LowerNorfair'),
+                                          sm.canPassAmphitheaterReverse(),
+                                          sm.canUsePowerBombs()),
+        'Three Muskateers Room Left': lambda sm: sm.wand(sm.canHellRun('LowerNorfair'),
+                                                         sm.haveItem('Morph'),
+                                                         sm.canPassThreeMuskateers()),
+        'Ridley Zone': lambda sm: sm.wand(sm.canHellRun('LowerNorfair'),
+                                          sm.canOpenGreenDoors(),
+                                          sm.canOpenYellowDoors()),
+        'Screw Attack Bottom': lambda sm: sm.wand(sm.canHellRun('LowerNorfair'),
+                                                  sm.canPassAmphitheaterReverse(),
+                                                  sm.canDestroyBombWalls(),
+                                                  sm.wand(sm.haveItem('Super'), sm.knowsGreenGateGlitch()))
+    }, internal=True),
+    AccessPoint('Ridley Zone', 'LowerNorfair', {
+        'Firefleas': lambda sm: sm.wand(sm.canHellRun('LowerNorfair'),
+                                        sm.canUsePowerBombs(),
+                                        sm.wor(sm.haveItem('SpringBall'),
+                                               sm.haveItem('Bomb'),
+                                               SMBool(sm.haveItemCount('PowerBomb', 2)),
+                                               sm.wand(sm.haveItem('SpeedBooster'),
+                                                       sm.knowsShortCharge())))
+    }, internal=True),
     AccessPoint('Three Muskateers Room Left', 'LowerNorfair', {
-        'Lava Dive Right': lambda sm: sm.wand(sm.canHellRun('LowerNorfair'),
-                                              sm.canPassAmphitheaterReverse(),  # if this is OK, reverse lava pit will be too...
-                                              sm.canUsePowerBombs())
+        'Firefleas': lambda sm: sm.wand(sm.canHellRun('LowerNorfair'),
+                                        sm.haveItem('Morph'),
+                                        sm.canPassThreeMuskateers())
     }, roomInfo = {'RoomPtr':0xb656, "area": 0x2},
        exitInfo = {'DoorPtr':0x9a4a, 'direction': 0x5, "cap": (0x5e, 0x6), "bitFlag": 0x0,
                    "screen": (0x5, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},

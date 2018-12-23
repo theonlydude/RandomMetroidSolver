@@ -2,18 +2,22 @@
 
 <meta name="description" content="Solver for the randomized Super Metroid roms"/>
 <link rel="shortcut icon" href={{=URL('static','favicon.ico')}} type="image/ico"/>
-<link rel="stylesheet" type="text/css" href={{=URL('static/css','mystyle_20180928.css')}} media="screen"/>
+<link rel="stylesheet" type="text/css" href={{=URL('static/css','mystyle_20181203.css')}} media="screen"/>
 
 <title>Super Metroid Item VARIA Randomizer and Solver</title>
 
 <div class="fixed">
   <div class="menu">
-    {{=A("Home", _href=URL(f="home"), _class="menu")}}
-    {{=A("Presets", _href=URL(f="presets"), _class="menu")}}
-    {{=A("Randomizer", _href=URL(f="randomizer"), _class="menu")}}
-    {{=A("Solver", _href=URL(f="solver"), _class="menu")}}
-    {{=A("Trackers", _href=URL(f="tracker"), _class="menu")}}
-    {{=A("Information & Contact", _href=URL(f="infos"), _class="menu_selected")}}
+    <table class="full menuTable">
+      <tr>
+	<td>{{=A("Home", _href=URL(f="home"), _class="menu")}}</td>
+	<td>{{=A("Presets", _href=URL(f="presets"), _class="menu")}}</td>
+	<td>{{=A("Randomizer", _href=URL(f="randomizer"), _class="menu")}}</td>
+	<td>{{=A("Solver", _href=URL(f="solver"), _class="menu")}}</td>
+	<td>{{=A("Trackers", _href=URL(f="tracker"), _class="menu")}}</td>
+	<td class="menu_selected">{{=A("Information & Contact", _href=URL(f="infos"), _class="menu")}}</td>
+      </tr>
+    </table>
   </div>
 </div>
 <div class="main">
@@ -43,8 +47,49 @@
   <p>
     You can consult the statistics on the Randomizer and Solver activity on the {{=A("statistics page", _href=URL(f="stats"))}}.
   </p>
+  <a name="latest"></a>
   <h2>Change Log</h2>
   <ul>
+    <li>
+      <h4>2018/12/17</h4>
+      <p>
+	Hello @randomizer,<br/>
+	We've released an intermediate version of the VARIA Randomizer, Solver and Trackers (http://randommetroidsolver.pythonanywhere.com/).<br/>
+	New stuff:
+	<ul>
+	  <li>randomizer: New progression speed: VARIAble; it randomly switches the progression speed after each progression item placed</li>
+	  <li>randomizer: When randomizing the progression speed you can choose which progression speeds are available for randomization</li>
+	  <li>preset: New technique: Puyo Clip with X-Ray</li>
+	  <li>preset: Lower Norfair hellrun is now activated in the speedrunner preset</li>
+	  <li>randomizer: new preset highway2hell: favors suitless seeds</li>
+	  <li>randomizer: new preset quite random: randomizes a few significant settings to have various seeds</li>
+	</ul>
+      </p>
+    </li>
+    <li>
+      <h4>2018/12/03</h4>
+      <p>
+	Hello @randomizer,<br/>
+	We've released a new version of the VARIA Randomizer, Solver and Trackers (http://randommetroidsolver.pythonanywhere.com/) dubbed "Teenage Mutant Mama Turtle".<br/>
+	New stuff:
+	<ul>
+	  <li>preset: New technique: Mama Turtle Etank with High Jump (thanks rand(0))</li>
+	  <li>preset: New technique: 1 Etank/1 Power Bomb pack/Speed Booster access to Gauntlet minors (thanks rand(0))</li>
+	  <li>preset: New technique: Reverse Crocomire speedway</li>
+	  <li>preset: Moonwalk can now be stored in the Controller preset</li>
+	  <li>home: Display a link to the Randomizer League</li>
+	  <li>logic: Right sand pit Power Bombs in suitless level 3 can now be accessed with a Spring Ball jump (thanks rand(0))</li>
+	  <li>randomizer: fix case when Late Morph and Suits restrictions are both enabled</li>
+	</ul>
+	Bug fix:
+	<ul>
+	  <li>logic: fix Etank requirement to exit Crateria Super Missile</li>
+	  <li>logic: fix Forgotten Highway Traversal when suitless</li>
+	  <li>logic: fix Mother Brain Energy requirements when suitless</li>
+	  <li>logic: various bug fixes affecting low% / super fun seeds</li>
+	</ul>
+      </p>
+    </li>
     <li>
       <h4>2018/10/31</h4>
       <p>

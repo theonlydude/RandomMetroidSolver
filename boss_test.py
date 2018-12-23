@@ -46,7 +46,7 @@ itemSets = {
     }
 }
 
-sm = SMBoolManager.factory('diff')
+sm = SMBoolManager()#.factory('diff')
 
 def boss(name, diffFunction):
     with open(name + ".csv", "w") as csvOut:

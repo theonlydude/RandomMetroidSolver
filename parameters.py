@@ -180,13 +180,20 @@ class Knows:
                             'title': 'Skip the Zebetites with a shinespark',
                             'href': 'https://www.youtube.com/watch?v=jEAgdWQ9kLQ',
                             'rooms': ['Mother Brain Room']}
+    # maridia mama turtle
+    HiJumpMamaTurtle = SMBool(False, 0, ['HiJumpMamaTurtle'])
+    desc['HiJumpMamaTurtle'] = {'display': 'Mama Turtle E-Tank with High-Jump',
+                                'title': 'Access Mama Turtle E-Tank with High-Jump and Speed Booster (and Morph or X-Ray to turn around without moving)',
+                                'href': 'https://www.youtube.com/watch?v=1DINqLnINc8',
+                                'rooms': ['Mama Turtle Room']}
+
     # underwater grav-less
     GravLessLevel1 = SMBool(True, hardcore, ['GravLessLevel1'])
     desc['GravLessLevel1'] = {'display': 'Level 1',
-                                    'title': 'Make your way underwater with Hi-Jump and Ice, freezing crabs and fishes. Access Botwoon with grapple.',
-                                    'href': 'https://www.youtube.com/watch?v=c2xoPigezvM',
-                                    'rooms': ['Main Street', 'Mt. Everest', 'Crab Shaft',
-                                              'Aqueduct', 'Botwoon Hallway']} # TODO add forgotten highway rooms, crab hole
+                              'title': 'Make your way underwater with Hi-Jump and Ice, freezing crabs and fishes. Access Botwoon with grapple.',
+                              'href': 'https://www.youtube.com/watch?v=c2xoPigezvM',
+                              'rooms': ['Main Street', 'Mt. Everest', 'Crab Shaft',
+                                        'Aqueduct', 'Botwoon Hallway']} # TODO add forgotten highway rooms, crab hole
 
     GravLessLevel2 = SMBool(False, 0, ['GravLessLevel2'])
     desc['GravLessLevel2'] = {'display': 'Level 2',
@@ -236,7 +243,7 @@ class Knows:
 
     XrayDboost = SMBool(False, 0, ['XrayDboost'])
     desc['XrayDboost'] = {'display': 'X-Ray Damage Boost',
-                          'title': 'Get to X-Ray location without Space-Jump or Grapple',
+                          'title': 'Get to X-Ray location without Space-Jump, Grapple (no energy requirements), Ice or Bombs (see Hard Room settings)',
                           'href': 'https://www.twitch.tv/videos/168724062',
                           'rooms': ['Red Brinstar Fireflea Room']}
 
@@ -271,6 +278,12 @@ class Knows:
                                     'href': 'https://www.youtube.com/watch?v=2a6mf-kB60U',
                                     'rooms': ['Landing Site']}
 
+    LowGauntlet = SMBool(False, 0, ['LowGauntlet'])
+    desc['LowGauntlet'] = {'display': 'Gauntlet Minors Access',
+                           'title': 'Access Gauntlet minors with SpeedBooster, 1 Etank and 1 Power Bomb pack',
+                           'href': 'https://www.youtube.com/watch?v=JU6BFcjuR4c',
+                           'rooms': ['Landing Site', 'Gauntlet Entrance', 'Gauntlet Energy Tank Room']}
+
     # Norfair
     WallJumpCathedralExit = SMBool(True, medium, ['WallJumpCathedralExit'])
     desc['WallJumpCathedralExit'] = {'display': 'Wall Jump to exit Cathedral',
@@ -301,6 +314,12 @@ class Knows:
                           'title': 'Get the farm bugs up and freeze them to reach Crocomire Power Bombs',
                           'href': 'https://www.youtube.com/watch?v=ERer642mil8',
                           'rooms': ['Post Crocomire Farming Room']}
+
+    IceMissileFromCroc = SMBool(False, 0, ['IceMissileFromCroc'])
+    desc['IceMissileFromCroc'] = {'display': 'Missile under Ice beam from Crocomire',
+                                  'title': 'Access missile pack under Ice beam location by reverse sparking Crocomire speedway',
+                                  'href': 'https://clips.twitch.tv/CrackyConfidentMomEagleEye',
+                                  'rooms': ['Crocomire Speedway']}
 
     LavaDive = SMBool(True, harder, ['LavaDive'])
     desc['LavaDive'] = {'display': 'Lava Dive',
@@ -404,6 +423,12 @@ class Knows:
                         'href': 'https://www.youtube.com/watch?v=e5ZH_9paSLw',
                         'rooms': ['Pants Room']}
 
+    PuyoClipXRay = SMBool(False, 0, ['PuyoClipXRay'])
+    desc['PuyoClipXRay'] = {'display': 'Puyo Clip with X-Ray',
+                            'title': 'Get to Spring Ball with Gravity Suit, Ice Beam and X-Ray',
+                            'href': 'https://youtu.be/83JajzNyZtQ',
+                            'rooms': ['Pants Room']}
+
     SnailClip = SMBool(False, 0, ['SnailClip'])
     desc['SnailClip'] = {'display': 'Snail Clip',
                          'title': 'Access Aqueduct Missile and Super Missile without SpeedBooster',
@@ -464,7 +489,7 @@ class Knows:
              'title': 'Used across the game'}
         ],
         'Crateria/Brinstar': [
-            {'knows': ['AlcatrazEscape', 'HiJumpGauntletAccess', 'HiJumpLessGauntletAccess'],
+            {'knows': ['AlcatrazEscape', 'HiJumpGauntletAccess', 'HiJumpLessGauntletAccess', 'LowGauntlet'],
              'title': 'Crateria'},
             {'knows': ['CeilingDBoost', 'EarlyKraid',
                        'ReverseGateGlitch', 'ReverseGateGlitchHiJumpLess', 
@@ -481,10 +506,12 @@ class Knows:
         'Maridia 1/2': [
             {'knows': ['GravLessLevel1', 'GravLessLevel2', 'GravLessLevel3'],
              'title': 'Underwater movement without Gravity Suit'},
-            {'knows': ['MochtroidClip', 'PuyoClip', 'SnailClip'],
+            {'knows': ['MochtroidClip', 'PuyoClip', 'PuyoClipXRay', 'SnailClip'],
              'title': 'Clips'},
             {'knows': ['KillPlasmaPiratesWithCharge', 'KillPlasmaPiratesWithSpark'],
              'title': 'Plasma Room'},
+            {'knows': ['HiJumpMamaTurtle'],
+             'title': 'Mama Turtle'}
         ],
         'Maridia 2/2': [
             {'knows': ['AccessSpringBallWithSpringBallBombJumps', 'AccessSpringBallWithBombJumps',
@@ -496,7 +523,7 @@ class Knows:
              'title': 'Obscure suitless stuff'}
         ],
         'Norfair': [
-            {'knows': ['WallJumpCathedralExit', 'NorfairReserveDBoost', 'CrocPBsIce', 'CrocPBsDBoost', 'NovaBoost'],
+            {'knows': ['WallJumpCathedralExit', 'NorfairReserveDBoost', 'CrocPBsIce', 'CrocPBsDBoost', 'IceMissileFromCroc', 'NovaBoost'],
               'title': 'Upper Norfair'},
             {'knows': ['LavaDive', 'LavaDiveNoHiJump', 'ScrewAttackExit', 'WorstRoomIceCharge'],
              'title': 'Lower Norfair'}
@@ -524,7 +551,8 @@ class Settings:
     # If no information is given here, the fight will be
     # considered to be 2 minutes, regardless of anything else.
     #
-    # 2. Energy : a dictionary where key is etanks+reserves you have,
+    # 2. Energy : a dictionary where key is total energy you have divided by 100
+    # (the initial 99 energy count as 1).
     # value is estimated difficulty *for a 2-minute fight*, with Varia
     # suit only.
     # If not defined, the one below will be chosen, or the minimum one if
@@ -706,11 +734,13 @@ class Settings:
                 }
             }
         },
+        # 2 = 6 tanks/no suits. 4 = 3 tanks + Varia
         'MotherBrain' : {
             "It can get ugly" : {
                 'Rate' : 0.18,
                 'Energy' : {
-                    4 : mania, # less than 4 is actually impossible
+                    2 : impossibru,
+                    4 : mania,
                     8 : hardcore,
                     12 : harder,
                     16 : hard,
@@ -721,7 +751,8 @@ class Settings:
             'Default' : {
                 'Rate' : 0.25,
                 'Energy' : {
-                    4 : mania, # less than 4 is actually impossible
+                    2 : impossibru,
+                    4 : mania,
                     8 : hardcore,
                     12 : harder,
                     16 : hard,
@@ -732,7 +763,8 @@ class Settings:
             'Is this really the last boss?': {
                 'Rate' : 0.5,
                 'Energy' : {
-                    4 : mania, # less than 4 is actually impossible
+                    2 : impossibru,
+                    4 : mania,
                     6 : hardcore,
                     8 : harder,
                     12 : hard,
@@ -743,7 +775,8 @@ class Settings:
             'Nice cutscene bro' : {
                 'Rate' : 0.6,
                 'Energy' : {
-                    4 : hard, # less than 4 is actually impossible
+                    2 : mania,
+                    4 : hard,
                     8 : medium,
                     12 : easy
                 }
@@ -769,7 +802,7 @@ class Settings:
             # balanced setting
             'Default' : [(3, harder), (4, hard), (5, medium)],
             # you don't mind doing hell runs at all
-            'Bring the heat' : [(2, hard), (3, medium)],
+            'Bring the heat' : [(2, harder), (3, hard), (4, medium)],
             # RBO runner
             'I run RBO' : [(2, medium), (3, easy)],
             'Solution' : [(2, hardcore), (3, harder), (4, hard), (5, medium)],
@@ -778,15 +811,15 @@ class Settings:
             'No thanks' : None,
             'Gimme energy' : [(5, mania), (6, hardcore), (8, harder), (10, hard), (14, medium)],
             'Default' : [(4, mania), (5, hardcore), (6, hard), (9, medium)],
-            'Bring the heat' : [(3, hardcore), (4, hard), (5, medium), (7, easy)],
+            'Bring the heat' : [(3, mania), (4, harder), (5, hard), (7, medium)],
             'I run RBO' : [(3, harder), (4, hard), (5, medium), (6, easy)],
             'Solution' : [(3, samus), (4, mania), (5, hardcore), (6, hard), (9, medium)]
         },
         'LowerNorfair' : {
             'Default' : None,
-            'Bring the heat' : [(9, mania), (12, hardcore), (14, harder), (18, hard)],
-            'I run RBO' : [(7, mania), (9, hardcore), (11, harder), (14, hard), (18, medium)],
-            'Solution' : [(7, impossibru), (18, mania)]
+            'Bring the heat' : [(10, mania), (13, hardcore), (18, harder)],
+            'I run RBO' : [(8, mania), (9, hardcore), (11, harder), (14, hard), (18, medium)],
+            'Solution' : [(8, impossibru), (18, mania)]
         }
     }
 
@@ -869,3 +902,4 @@ class Controller:
     L = "Angle Down"
     R = "Angle Up"
     Select = "Item Select"
+    Moonwalk = False

@@ -6,7 +6,7 @@
   "skip_ceres": "on",
   "hideItems": "random",
   "funCombat": "random",
-  "fullRandomization": "random",
+  "majorsSplit": "random",
   "strictMinors": "random",
   "layoutPatches": "on",
   "missileQty": "random",

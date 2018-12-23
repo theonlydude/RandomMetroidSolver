@@ -1,6 +1,7 @@
 #!/bin/bash
 
-> test_jm.log
+LOG=test_jm.log
+> ${LOG}
 #> test_jm.err
 #> test_jm.csv
 
@@ -15,18 +16,21 @@ ROM=$1
 LOOPS=$2
 
 # get git head
-TEMP_DIR=$(mktemp)
-rm -f ${TEMP_DIR}
-mkdir -p ${TEMP_DIR}
-(
-    cd ${TEMP_DIR}
-    git clone git@github.com:theonlydude/RandomMetroidSolver.git
-)
-ORIG=${TEMP_DIR}/RandomMetroidSolver/
+#TEMP_DIR=$(mktemp)
+#rm -f ${TEMP_DIR}
+#mkdir -p ${TEMP_DIR}
+#(
+#    cd ${TEMP_DIR}
+#    git clone git@github.com:theonlydude/RandomMetroidSolver.git
+#    cd RandomMetroidSolver
+#    git reset --hard d50d9fd347f138c525a13d741820c53feddafbb0
+#)
+#ORIG=${TEMP_DIR}/RandomMetroidSolver/
 #ORIG=/tmp/tmp.KtU7aob2Ba/RandomMetroidSolver/
-#ORIG=.
+ORIG=.
 
-PRESETS=("regular" "noob" "master")
+#PRESETS=("regular" "noob" "master")
+PRESETS=("speedrunner")
 AREAS=("" "--area")
 
 function generate_params {
@@ -36,13 +40,18 @@ function generate_params {
     let S=$RANDOM%${#AREAS[@]}
     AREA=${AREAS[$S]}
 
-    echo "-r ${ROM} --param standard_presets/${PRESET}.json --seed ${SEED} --progressionSpeed random --morphPlacement random --progressionDifficulty random --missileQty 0 --superQty 0 --powerBombQty 0 --minorQty 0 --energyQty random --fullRandomization random --suitsRestriction random --hideItems random --strictMinors random --superFun CombatRandom --superFun MovementRandom --superFun SuitsRandom --maxDifficulty random ${AREA}"
+    #echo "-r ${ROM} --param standard_presets/${PRESET}.json --seed ${SEED} --progressionSpeed random --morphPlacement random --progressionDifficulty random --missileQty 0 --superQty 0 --powerBombQty 0 --minorQty 0 --energyQty random --fullRandomization random --suitsRestriction random --hideItems random --strictMinors random --superFun CombatRandom --superFun MovementRandom --superFun SuitsRandom --maxDifficulty random ${AREA}"
+
+    #echo "-r ${ROM} --param standard_presets/master.json --fullRandomization --suitsRestriction --morphPlacement early --maxDifficulty mania --progressionSpeed slowest --progressionDifficulty harder --missileQty 9 --superQty 1 --powerBombQty 1 --minorQty 1 --energyQty medium --superFun Movement --superFun Combat --superFun Suits --patch itemsounds.ips --patch elevators_doors_speed.ips --seed ${SEED}"
+
+    echo "-r ${ROM} --param standard_presets/speedrunner.json --areaLayoutBase  --energyQty vanilla --fullRandomization  --maxDifficulty hardcore --minorQty 100 --missileQty 1.5 --morphPlacement early --powerBombQty 1 --progressionDifficulty harder --progressionSpeed slow --strictMinors  --suitsRestriction  --superFun Suits --superQty 1 --seed ${SEED}"
 }
 
 function computeSeed {
     # generate seed
     let P=$RANDOM%${#PRESETS[@]}
-    PRESET=${PRESETS[$P]}
+    #PRESET=${PRESETS[$P]}
+    PRESET="speedrunner"
     SEED="$RANDOM"
 
     PARAMS=$(generate_params "${SEED}" "${PRESET}")
@@ -54,7 +63,8 @@ function computeSeed {
     OLD_MD5="old n/a"
     OUT=$(/usr/bin/time -f "\t%E real" python2 ${ORIG}/randomizer.py ${PARAMS} 2>&1)
     if [ $? -ne 0 ]; then
-	RTIME_OLD="n/a"
+	$OLD="error"
+	echo "${OUT}" >> ${LOG}
     else
 	RTIME_OLD=$(echo "${OUT}" | grep real | awk '{print $1}')
 	ROM_GEN=$(ls -1 VARIA_Randomizer_*X${SEED}_${PRESET}.sfc 2>/dev/null)
@@ -88,8 +98,9 @@ function computeSeed {
 #    fi
 
     # solve seed
-    ROM_GEN=$(ls -1 VARIA_Randomizer_*X${SEED}_${PRESET}.sfc)
+    ROM_GEN=$(ls -1 VARIA_Randomizer_*X${SEED}_${PRESET}_slow.sfc)
     if [ $? -ne 0 ]; then
+	echo "error;${SEED};${DIFF_CAP};${RTIME_OLD};${RTIME_NEW};${STIME_OLD};${STIME_NEW};${MD5};${PARAMS};" | tee -a ${CSV}
 	return
     fi
 
@@ -137,7 +148,7 @@ for i in $(seq 1 ${LOOPS}); do
     if [ "${STOP}" = "now" ]; then
 	exit 1
     fi
-done | tee test_jm.log
+done
 
 echo "DONE"
 #rm -rf ${TEMP_DIR}

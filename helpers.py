@@ -87,8 +87,11 @@ class Helpers(object):
                 tanks = self.energyReserveCount()
                 if tanks >= 14:
                     mult *= 2.0
+                nCF = int(math.ceil(2/mult))
                 ret = sm.wand(self.energyReserveCountOkHellRun(hellRun, mult),
-                              self.canCrystalFlash(int(math.ceil(2/mult))))
+                              self.canCrystalFlash(nCF))
+#                nPB = self.smbm.itemCount('PowerBomb')
+#                print("canHellRun LN. tanks=" + str(tanks) + ", nCF=" + str(nCF) + ", nPB=" + str(nPB) + ", mult=" + str(mult) + ", heatProof=" + str(isHeatProof.bool) + ", ret=" + str(ret))
                 return ret
         else:
             return SMBool(False)
@@ -140,6 +143,18 @@ class Helpers(object):
     def canUsePowerBombs(self):
         return self.smbm.canOpenYellowDoors()
 
+    @Cache.decorator
+    def canUseSpringBall(self):
+        sm = self.smbm
+        return sm.wand(sm.haveItem('Morph'),
+                       sm.haveItem('SpringBall'))
+
+    @Cache.decorator
+    def canSpringBallJump(self):
+        sm = self.smbm
+        return sm.wand(sm.canUseSpringBall(),
+                       sm.knowsSpringBallJump())
+
     def canPassTerminatorBombWall(self, fromLandingSite=True):
         sm = self.smbm
         return sm.wor(sm.wand(sm.haveItem('SpeedBooster'),
@@ -182,12 +197,12 @@ class Helpers(object):
                                       sm.haveItem('HiJump')),
                               sm.knowsHiJumpLessGauntletAccess()),
                        sm.wor(sm.haveItem('ScrewAttack'),
-                              sm.wor(sm.wand(self.energyReserveCountOkHardRoom('Gauntlet'),
+                              sm.wor(sm.wand(sm.energyReserveCountOkHardRoom('Gauntlet'),
                                              sm.wand(sm.canUsePowerBombs(),
                                                      sm.wor(sm.itemCountOk('PowerBomb', nPB),
                                                             sm.wand(sm.haveItem('SpeedBooster'),
                                                                     sm.energyReserveCountOk(nTanks))))),
-                                     sm.wand(self.energyReserveCountOkHardRoom('Gauntlet', 0.5),
+                                     sm.wand(sm.energyReserveCountOkHardRoom('Gauntlet', 0.5),
                                              sm.canUseBombs()))))
 
     @Cache.decorator
@@ -199,21 +214,6 @@ class Helpers(object):
         sm = self.smbm
         return sm.wor(sm.canUseBombs(),
                       sm.canUsePowerBombs())
-
-    @Cache.decorator
-    def canExitScrewAttackArea(self):
-        sm = self.smbm
-
-        return sm.wor(sm.canFly(),
-                      sm.wand(sm.haveItem('HiJump'),
-                              sm.haveItem('ScrewAttack'),
-                              sm.haveItem('SpeedBooster'),
-                              sm.knowsScrewAttackExit()),
-                      sm.wand(sm.haveItem('SpringBall'),
-                              sm.knowsSpringBallJumpFromWall()),
-                      sm.wand(sm.haveItem('SpeedBooster'), # fight GT and spark out
-                              sm.wor(sm.knowsSimpleShortCharge(),
-                                     sm.knowsShortCharge())))
 
     def canCrystalFlash(self, n=1):
         sm = self.smbm
@@ -272,7 +272,7 @@ class Helpers(object):
     # - estimation of the fight duration in seconds (well not really, it
     # is if you fire and land shots perfectly and constantly), giving info
     # to compute boss fight difficulty
-    def canInflictEnoughDamages(self, bossEnergy, doubleSuper=False, charge=True, power=False, givesDrops=True):
+    def canInflictEnoughDamages(self, bossEnergy, doubleSuper=False, charge=True, power=False, givesDrops=True, ignoreMissiles=False):
         # TODO: handle special beam attacks ? (http://deanyd.net/sm/index.php?title=Charge_Beam_Combos)
         sm = self.smbm
 
@@ -285,7 +285,10 @@ class Helpers(object):
 
         # missile 100 damages, super missile 300 damages, PBs 200 dmg, 5 in each extension
         missilesAmount = sm.itemCount('Missile') * 5
-        missilesDamage = missilesAmount * 100
+        if ignoreMissiles == True:
+            missilesDamage = 0
+        else:
+            missilesDamage = missilesAmount * 100
         supersAmount = sm.itemCount('Super') * 5
         oneSuper = 300.0
         if doubleSuper == True:
@@ -406,11 +409,22 @@ class Helpers(object):
 
     @Cache.decorator
     def enoughStuffBotwoon(self):
-        # say botwoon has 5000 energy : it is actually 3000 but account for missed shots
-        (ammoMargin, secs) = self.canInflictEnoughDamages(5000, givesDrops=False)
+        # say botwoon has 4000 energy : it is actually 3000 but account for missed shots
+        # 4000 to allow for low% botwoon without charge beam (10 - 10 | missiles - supers)
+        # there is a setup to "never" miss a shot by only shooting him when he exits through the top left hole
+        (ammoMargin, secs) = self.canInflictEnoughDamages(4000, givesDrops=False)
         if ammoMargin == 0:
             return SMBool(False)
         else:
+            return SMBool(True, easy)
+
+    @Cache.decorator
+    def enoughStuffGT(self):
+        (ammoMargin, secs) = self.canInflictEnoughDamages(3000, ignoreMissiles=True) # requires 10 supers or charge for the fight
+        if ammoMargin == 0:
+            return SMBool(False)
+        else:
+            # TODO add energy check
             return SMBool(True, easy)
 
     @Cache.decorator

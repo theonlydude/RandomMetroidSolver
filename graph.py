@@ -252,7 +252,7 @@ class AccessGraph(object):
             if loc['GraphArea'] not in availAreas:
                 loc['distance'] = 10000
                 loc['difficulty'] = SMBool(False, 0)
-                #if loc['Name'] == "Right Super, Wrecked Ship":
+                # if loc['Name'] == "Screw Attack":
                 #    print("loc: {} locDiff is area nok".format(loc["Name"]))
                 continue
 
@@ -260,7 +260,7 @@ class AccessGraph(object):
                 if apName == None:
                     loc['distance'] = 10000
                     loc['difficulty'] = SMBool(False, 0)
-                    #if loc['Name'] == "Right Super, Wrecked Ship":
+                    # if loc['Name'] == "Screw Attack":
                     #    print("loc: {} ap is none".format(loc["Name"]))
                     break
 
@@ -272,7 +272,7 @@ class AccessGraph(object):
                 if tdiff.bool == True and tdiff.difficulty <= maxDiff:
                     diff = smbm.eval(loc['Available'])
                     path = availAPPaths[apName]["path"]
-                    #if loc['Name'] == "Right Super, Wrecked Ship":
+                    # if loc['Name'] == "Screw Attack":
                     #    print("{} path: {}".format(loc['Name'], [a.Name for a in path]))
                     pdiff = availAPPaths[apName]["pdiff"]
                     locDiff = SMBool(diff.bool,
@@ -285,18 +285,18 @@ class AccessGraph(object):
                         loc['difficulty'] = locDiff
                         loc['path'] = path
                         availLocs.append(loc)
-                        #if loc['Name'] == "Right Super, Wrecked Ship":
-                        #    print("{} diff: {} tdiff: {} pdiff: {}, ap: {}".format(loc['Name'], diff, tdiff, pdiff, apName))
+                        # if loc['Name'] == "Screw Attack":
+                        #    print("{} diff: {} tdiff: {} pdiff: {}".format(loc['Name'], diff, tdiff, pdiff))
                         break
                     else:
                         loc['distance'] = 1000 + tdiff.difficulty
                         loc['difficulty'] = SMBool(False, 0)
-                        #if loc['Name'] == "Right Super, Wrecked Ship":
+                        # if loc['Name'] == "Screw Attack":
                         #    print("loc: {} locDiff is false".format(loc["Name"]))
                 else:
                     loc['distance'] = 10000 + tdiff.difficulty
                     loc['difficulty'] = SMBool(False, 0)
-                    #if loc['Name'] == "Right Super, Wrecked Ship":
+                    # if loc['Name'] == "Screw Attack":
                     #    print("loc: {} tdiff is false".format(loc["Name"]))
 
             if 'difficulty' not in loc:

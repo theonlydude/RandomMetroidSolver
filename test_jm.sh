@@ -16,21 +16,20 @@ ROM=$1
 LOOPS=$2
 
 # get git head
-#TEMP_DIR=$(mktemp)
-#rm -f ${TEMP_DIR}
-#mkdir -p ${TEMP_DIR}
-#(
-#    cd ${TEMP_DIR}
-#    git clone git@github.com:theonlydude/RandomMetroidSolver.git
-#    cd RandomMetroidSolver
-#    git reset --hard d50d9fd347f138c525a13d741820c53feddafbb0
-#)
-#ORIG=${TEMP_DIR}/RandomMetroidSolver/
+TEMP_DIR=$(mktemp)
+rm -f ${TEMP_DIR}
+mkdir -p ${TEMP_DIR}
+(
+    cd ${TEMP_DIR}
+    git clone git@github.com:theonlydude/RandomMetroidSolver.git
+    cd RandomMetroidSolver
+    #git reset --hard 14e9088f07f64e093c53b773b016f5042765044b
+)
+ORIG=${TEMP_DIR}/RandomMetroidSolver/
 #ORIG=/tmp/tmp.KtU7aob2Ba/RandomMetroidSolver/
-ORIG=.
+#ORIG=.
 
-#PRESETS=("regular" "noob" "master")
-PRESETS=("speedrunner")
+PRESETS=("regular" "noob" "master")
 AREAS=("" "--area")
 
 function generate_params {
@@ -40,18 +39,13 @@ function generate_params {
     let S=$RANDOM%${#AREAS[@]}
     AREA=${AREAS[$S]}
 
-    #echo "-r ${ROM} --param standard_presets/${PRESET}.json --seed ${SEED} --progressionSpeed random --morphPlacement random --progressionDifficulty random --missileQty 0 --superQty 0 --powerBombQty 0 --minorQty 0 --energyQty random --fullRandomization random --suitsRestriction random --hideItems random --strictMinors random --superFun CombatRandom --superFun MovementRandom --superFun SuitsRandom --maxDifficulty random ${AREA}"
-
-    #echo "-r ${ROM} --param standard_presets/master.json --fullRandomization --suitsRestriction --morphPlacement early --maxDifficulty mania --progressionSpeed slowest --progressionDifficulty harder --missileQty 9 --superQty 1 --powerBombQty 1 --minorQty 1 --energyQty medium --superFun Movement --superFun Combat --superFun Suits --patch itemsounds.ips --patch elevators_doors_speed.ips --seed ${SEED}"
-
-    echo "-r ${ROM} --param standard_presets/speedrunner.json --areaLayoutBase  --energyQty vanilla --fullRandomization  --maxDifficulty hardcore --minorQty 100 --missileQty 1.5 --morphPlacement early --powerBombQty 1 --progressionDifficulty harder --progressionSpeed slow --strictMinors  --suitsRestriction  --superFun Suits --superQty 1 --seed ${SEED}"
+    echo "-r ${ROM} --param standard_presets/${PRESET}.json --seed ${SEED} --progressionSpeed random --morphPlacement random --progressionDifficulty random --missileQty 0 --superQty 0 --powerBombQty 0 --minorQty 0 --energyQty random --majorsSplit random --suitsRestriction random --hideItems random --strictMinors random --superFun CombatRandom --superFun MovementRandom --superFun SuitsRandom --maxDifficulty random ${AREA}"
 }
 
 function computeSeed {
     # generate seed
     let P=$RANDOM%${#PRESETS[@]}
-    #PRESET=${PRESETS[$P]}
-    PRESET="speedrunner"
+    PRESET=${PRESETS[$P]}
     SEED="$RANDOM"
 
     PARAMS=$(generate_params "${SEED}" "${PRESET}")
@@ -63,7 +57,7 @@ function computeSeed {
     OLD_MD5="old n/a"
     OUT=$(/usr/bin/time -f "\t%E real" python2 ${ORIG}/randomizer.py ${PARAMS} 2>&1)
     if [ $? -ne 0 ]; then
-	$OLD="error"
+	OLD="error"
 	echo "${OUT}" >> ${LOG}
     else
 	RTIME_OLD=$(echo "${OUT}" | grep real | awk '{print $1}')
@@ -73,35 +67,35 @@ function computeSeed {
 	fi
     fi
 
-#    NEW_MD5="new n/a"
-#    OUT=$(/usr/bin/time -f "\t%E real" python2 ./randomizer.py ${PARAMS} 2>&1)
-#    if [ $? -ne 0 ]; then
-#	RTIME_NEW="n/a"
-#    else
-#	RTIME_NEW=$(echo "${OUT}" | grep real | awk '{print $1}')
-#	ROM_GEN=$(ls -1 VARIA_Randomizer_*X${SEED}_${PRESET}.sfc 2>/dev/null)
-#	if [ $? -eq 0 ]; then
-#	    NEW_MD5=$(md5sum ${ROM_GEN} | awk '{print $1}')
-#	fi
-#    fi
+    NEW_MD5="new n/a"
+    OUT=$(/usr/bin/time -f "\t%E real" python2 ./randomizer.py ${PARAMS} 2>&1)
+    if [ $? -ne 0 ]; then
+	RTIME_NEW="n/a"
+    else
+	RTIME_NEW=$(echo "${OUT}" | grep real | awk '{print $1}')
+	ROM_GEN=$(ls -1 VARIA_Randomizer_*X${SEED}_${PRESET}.sfc 2>/dev/null)
+	if [ $? -eq 0 ]; then
+	    NEW_MD5=$(md5sum ${ROM_GEN} | awk '{print $1}')
+	fi
+    fi
 
-#    if [ "${OLD_MD5}" != "${NEW_MD5}" ]; then
-#	if [ "${OLD_MD5}" = "old n/a" ] && [ "${NEW_MD5}" = "new n/a" ]; then
-#	    MD5="n/a"
-#	else
-#	    MD5="mismatch"
-#	    echo "OLD: ${OLD_MD5} NEW: ${NEW_MD5}"
-#	    STOP="now"
-#	fi
-#    else
-#	MD5=${OLD_MD5}
-#    fi
+    if [ "${OLD_MD5}" != "${NEW_MD5}" ]; then
+	if [ "${OLD_MD5}" = "old n/a" ] && [ "${NEW_MD5}" = "new n/a" ]; then
+	    MD5="n/a"
+	else
+	    MD5="mismatch"
+	    echo "OLD: ${OLD_MD5} NEW: ${NEW_MD5}"
+	    STOP="now"
+	fi
+    else
+	MD5=${OLD_MD5}
+    fi
 
     # solve seed
-    ROM_GEN=$(ls -1 VARIA_Randomizer_*X${SEED}_${PRESET}_slow.sfc)
+    ROM_GEN=$(ls -1 VARIA_Randomizer_*X${SEED}_${PRESET}.sfc)
     if [ $? -ne 0 ]; then
 	echo "error;${SEED};${DIFF_CAP};${RTIME_OLD};${RTIME_NEW};${STIME_OLD};${STIME_NEW};${MD5};${PARAMS};" | tee -a ${CSV}
-	return
+	exit 0
     fi
 
     OUT=$(/usr/bin/time -f "\t%E real" python2 ${ORIG}/solver.py -r ${ROM_GEN} --preset standard_presets/${PRESET}.json -g 2>&1) > ${ROM_GEN}.old
@@ -113,27 +107,27 @@ function computeSeed {
     else
 	STIME_OLD=$(echo "${OUT}" | grep real | awk '{print $1}')
     fi
-#    OUT=$(/usr/bin/time -f "\t%E real" python2 ./solver.py -r ${ROM_GEN} --preset standard_presets/${PRESET}.json -g 2>&1) > ${ROM_GEN}.new
-#    if [ $? -ne 0 ]; then
-#        echo "${SEED};${DIFF_CAP};${RTIME_OLD};${RTIME_NEW};${STIME_OLD};${STIME_NEW};${MD5};${PARAMS};" | tee -a ${CSV}
-#        echo "Can't solve ${ROM_GEN}" | tee -a ${CSV}
-#        exit 0
-#	STIME_NEW="n/a"
-#    else
-#	STIME_NEW=$(echo "${OUT}" | grep real | awk '{print $1}')
-#    fi
+    OUT=$(/usr/bin/time -f "\t%E real" python2 ./solver.py -r ${ROM_GEN} --preset standard_presets/${PRESET}.json -g 2>&1) > ${ROM_GEN}.new
+    if [ $? -ne 0 ]; then
+        echo "${SEED};${DIFF_CAP};${RTIME_OLD};${RTIME_NEW};${STIME_OLD};${STIME_NEW};${MD5};${PARAMS};" | tee -a ${CSV}
+        echo "Can't solve ${ROM_GEN}" | tee -a ${CSV}
+        exit 0
+	STIME_NEW="n/a"
+    else
+	STIME_NEW=$(echo "${OUT}" | grep real | awk '{print $1}')
+    fi
 
     echo "${SEED};${DIFF_CAP};${RTIME_OLD};${RTIME_NEW};${STIME_OLD};${STIME_NEW};${MD5};${PARAMS};" | tee -a ${CSV}
 
-#    DIFF=$(diff ${ROM_GEN}.old ${ROM_GEN}.new)
-#
-#    if [ -z "${DIFF}" ]; then
+    DIFF=$(diff ${ROM_GEN}.old ${ROM_GEN}.new)
+
+    if [ -z "${DIFF}" ]; then
 	rm -f ${ROM_GEN} ${ROM_GEN}.new ${ROM_GEN}.old
-#	echo "${SEED};${ROM_GEN};SOLVER;${PRESET};OK;" | tee -a test_jm.csv
-#    else
-#	echo "${SEED};${ROM_GEN};SOLVER;${PRESET};NOK;" | tee -a test_jm.csv
-#	STOP="now"
-#    fi
+	echo "${SEED};${ROM_GEN};SOLVER;${PRESET};OK;" | tee -a test_jm.csv
+    else
+	echo "${SEED};${ROM_GEN};SOLVER;${PRESET};NOK;" | tee -a test_jm.csv
+	STOP="now"
+    fi
 }
 
 STOP=""
@@ -151,4 +145,4 @@ for i in $(seq 1 ${LOOPS}); do
 done
 
 echo "DONE"
-#rm -rf ${TEMP_DIR}
+rm -rf ${TEMP_DIR}

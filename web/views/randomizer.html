@@ -311,10 +311,10 @@ function AjaxRandomizerCallCompleted(data) {
 
     // with items/Locations patch the local rom in memory
     var filesInput = document.getElementById("uploadFile");
-    var file = filesInput.files[0]
+    var file = filesInput.files[0];
 
     var reader = new FileReader();
-    reader.readAsArrayBuffer(file)
+    reader.readAsArrayBuffer(file);
 
     reader.onload = function(e) {
         var bytes = new Uint8Array(e.target.result);
@@ -324,10 +324,10 @@ function AjaxRandomizerCallCompleted(data) {
             bytes[key] = data[key];
         }
 
-        var blob = new Blob([bytes], {type: "octet/stream"})
+        var blob = new Blob([bytes], {type: "octet/stream"});
 
-        var outFileName = data['fileName']
-        saveAs(blob, outFileName)
+        var outFileName = data['fileName'];
+        saveAs(blob, outFileName);
     }
 
     // info message to display ?

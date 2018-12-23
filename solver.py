@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import sys, math, argparse, re, json, os, subprocess, logging
+from time import gmtime, strftime
 
 # the difficulties for each technics
 from parameters import Knows, Settings, isKnows, isSettings
@@ -10,7 +11,8 @@ from parameters import easy, medium, hard, harder, hardcore, mania, god, samus, 
 from smbool import SMBool
 from smboolmanager import SMBoolManager
 from helpers import Pickup, Bosses
-from rom import RomLoader
+from rom import RomLoader, RomPatcher
+from itemrandomizerweb import Items
 from graph_locations import locations as graphLocations
 from graph import AccessGraph
 from graph_access import vanillaTransitions, accessPoints
@@ -62,6 +64,8 @@ class SolverState(object):
         self.state["visitedLocationsWeb"] = self.getAvailableLocationsWeb(solver.visitedLocations)
         # dict {locNameWeb: {infos}, ...}
         self.state["remainLocationsWeb"] = self.getRemainLocationsWeb(solver.majorLocations)
+        # bool
+        self.state["isPlando"] = solver.isPlando
 
     def toSolver(self, solver):
         if 'majorsSplit' in self.state:
@@ -87,6 +91,7 @@ class SolverState(object):
         Bosses.reset()
         for boss in self.state["bosses"]:
             Bosses.beatBoss(boss)
+        solver.isPlando = self.state["isPlando"] if "isPlando" in self.state else False
 
     def getLocsData(self, locations):
         ret = {}
@@ -258,10 +263,17 @@ class CommonSolver(object):
         # check post available functions too
         for loc in locations:
             if 'PostAvailable' in loc:
+                already = self.smbm.haveItem(loc['itemName'])
+                isCount = self.smbm.isCountItem(loc['itemName'])
+
                 self.smbm.addItem(loc['itemName'])
                 postAvailable = loc['PostAvailable'](self.smbm)
-                self.smbm.removeItem(loc['itemName'])
+
+                if not already or isCount == True:
+                    self.smbm.removeItem(loc['itemName'])
+
                 loc['difficulty'] = self.smbm.wand(loc['difficulty'], postAvailable)
+
             # also check if we can come back to landing site from the location
             if loc['difficulty'].bool == True:
                 loc['comeBack'] = self.areaGraph.canAccess(self.smbm, loc['accessPoint'], self.lastLoc, infinity, loc['itemName'])
@@ -272,10 +284,10 @@ class CommonSolver(object):
                 if loc['difficulty'].bool == True:
                     self.log.debug("{}: {}".format(loc['Name'], loc['difficulty']))
 
-    def collectMajor(self, loc):
+    def collectMajor(self, loc, itemName=None):
         self.majorLocations.remove(loc)
         self.visitedLocations.append(loc)
-        area = self.collectItem(loc)
+        area = self.collectItem(loc, itemName)
         return area
 
     def collectMinor(self, loc):
@@ -284,8 +296,9 @@ class CommonSolver(object):
         area = self.collectItem(loc)
         return area
 
-    def collectItem(self, loc):
-        item = loc["itemName"]
+    def collectItem(self, loc, item=None):
+        if item == None:
+            item = loc["itemName"]
 
         if self.firstLogFile is not None:
             if item not in self.collectedItems:
@@ -324,8 +337,10 @@ class InteractiveSolver(CommonSolver):
         state.fromSolver(self)
         state.toJson(self.outputFileName)
 
-    def initialize(self, rom, presetFileName, magic=None):
+    def initialize(self, rom, presetFileName, magic, isPlando):
         # load rom and preset, return first state
+        self.isPlando = isPlando
+
         self.locations = graphLocations
         self.smbm = SMBoolManager()
 
@@ -337,12 +352,15 @@ class InteractiveSolver(CommonSolver):
 
         self.clear()
 
+        if self.isPlando == True:
+            self.loadPlandoLocs()
+
         # compute new available locations
         self.computeLocationsDifficulty(self.majorLocations)
 
         self.dumpState()
 
-    def iterate(self, stateJson, locName, action):
+    def iterate(self, stateJson, locName, action, item):
         self.locations = self.addMotherBrainLoc(graphLocations)
         self.smbm = SMBoolManager()
 
@@ -357,13 +375,18 @@ class InteractiveSolver(CommonSolver):
 
         if action == 'clear':
             self.clear(True)
+        elif action == 'save':
+            return self.savePlando()
         else:
             # add already collected items to smbm
             self.smbm.addItems(self.collectedItems)
 
             if action == 'add':
-                # pickup item at locName
-                self.pickItemAt(locName)
+                if self.isPlando == True:
+                    self.setItemAt(locName, item)
+                else:
+                    # pickup item at locName
+                    self.pickItemAt(locName)
             elif action == 'remove':
                 # remove last collected item
                 self.cancelLast()
@@ -373,6 +396,154 @@ class InteractiveSolver(CommonSolver):
 
         # return them
         self.dumpState()
+
+    def getLocNameFromAddress(self, address):
+        addressName = {
+            0x8264: "EnergyTankGauntlet",
+            0x8404: "Bomb",
+            0x8432: "EnergyTankTerminator",
+            0x852C: "ReserveTankBrinstar",
+            0x8614: "ChargeBeam",
+            0x86DE: "MorphingBall",
+            0x879E: "EnergyTankBrinstarCeiling",
+            0x87C2: "EnergyTankEtecoons",
+            0x87FA: "EnergyTankWaterway",
+            0x8824: "EnergyTankBrinstarGate",
+            0x8876: "XRayScope",
+            0x896E: "Spazer",
+            0x899C: "EnergyTankKraid",
+            0x8ACA: "VariaSuit",
+            0x8B24: "IceBeam",
+            0x8BA4: "EnergyTankCrocomire",
+            0x8BAC: "HiJumpBoots",
+            0x8C36: "GrappleBeam",
+            0x8C3E: "ReserveTankNorfair",
+            0x8C82: "SpeedBooster",
+            0x8CCA: "WaveBeam",
+            0x9108: "EnergyTankRidley",
+            0x9110: "ScrewAttack",
+            0x9184: "EnergyTankFirefleas",
+            0xC2E9: "ReserveTankWreckedShip",
+            0xC337: "EnergyTankWreckedShip",
+            0xC365: "RightSuperWreckedShip",
+            0xC36D: "GravitySuit",
+            0xC47D: "EnergyTankMamaturtle",
+            0xC559: "PlasmaBeam",
+            0xC5E3: "ReserveTankMaridia",
+            0xC6E5: "SpringBall",
+            0xC755: "EnergyTankBotwoon",
+            0xC7A7: "SpaceJump",
+            0x81CC: "PowerBombCrateriasurface",
+            0x81E8: "MissileoutsideWreckedShipbottom",
+            0x81EE: "MissileoutsideWreckedShiptop",
+            0x81F4: "MissileoutsideWreckedShipmiddle",
+            0x8248: "MissileCrateriamoat",
+            0x83EE: "MissileCrateriabottom",
+            0x8464: "MissileCrateriagauntletright",
+            0x846A: "MissileCrateriagauntletleft",
+            0x8478: "SuperMissileCrateria",
+            0x8486: "MissileCrateriamiddle",
+            0x84AC: "PowerBombgreenBrinstarbottom",
+            0x84E4: "SuperMissilepinkBrinstar",
+            0x8518: "MissilegreenBrinstarbelowsupermissile",
+            0x851E: "SuperMissilegreenBrinstartop",
+            0x8532: "MissilegreenBrinstarbehindmissile",
+            0x8538: "MissilegreenBrinstarbehindreservetank",
+            0x8608: "MissilepinkBrinstartop",
+            0x860E: "MissilepinkBrinstarbottom",
+            0x865C: "PowerBombpinkBrinstar",
+            0x8676: "MissilegreenBrinstarpipe",
+            0x874C: "PowerBombblueBrinstar",
+            0x8798: "MissileblueBrinstarmiddle",
+            0x87D0: "SuperMissilegreenBrinstarbottom",
+            0x8802: "MissileblueBrinstarbottom",
+            0x8836: "MissileblueBrinstartop",
+            0x883C: "MissileblueBrinstarbehindmissile",
+            0x88CA: "PowerBombredBrinstarsidehopperroom",
+            0x890E: "PowerBombredBrinstarspikeroom",
+            0x8914: "MissileredBrinstarspikeroom",
+            0x89EC: "MissileKraid",
+            0x8AE4: "Missilelavaroom",
+            0x8B46: "MissilebelowIceBeam",
+            0x8BC0: "MissileaboveCrocomire",
+            0x8BE6: "MissileHi-JumpBoots",
+            0x8BEC: "EnergyTankHi-JumpBoots",
+            0x8C04: "PowerBombCrocomire",
+            0x8C14: "MissilebelowCrocomire",
+            0x8C2A: "MissileGrappleBeam",
+            0x8C44: "MissileNorfairReserveTank",
+            0x8C52: "MissilebubbleNorfairgreendoor",
+            0x8C66: "MissilebubbleNorfair",
+            0x8C74: "MissileSpeedBooster",
+            0x8CBC: "MissileWaveBeam",
+            0x8E6E: "MissileGoldTorizo",
+            0x8E74: "SuperMissileGoldTorizo",
+            0x8F30: "MissileMickeyMouseroom",
+            0x8FCA: "MissilelowerNorfairabovefireflearoom",
+            0x8FD2: "PowerBomblowerNorfairabovefireflearoom",
+            0x90C0: "PowerBombPowerBombsofshame",
+            0x9100: "MissilelowerNorfairnearWaveBeam",
+            0xC265: "MissileWreckedShipmiddle",
+            0xC2EF: "MissileGravitySuit",
+            0xC319: "MissileWreckedShiptop",
+            0xC357: "SuperMissileWreckedShipleft",
+            0xC437: "MissilegreenMaridiashinespark",
+            0xC43D: "SuperMissilegreenMaridia",
+            0xC483: "MissilegreenMaridiatatori",
+            0xC4AF: "SuperMissileyellowMaridia",
+            0xC4B5: "MissileyellowMaridiasupermissile",
+            0xC533: "MissileyellowMaridiafalsewall",
+            0xC5DD: "MissileleftMaridiasandpitroom",
+            0xC5EB: "MissilerightMaridiasandpitroom",
+            0xC5F1: "PowerBombrightMaridiasandpitroom",
+            0xC603: "MissilepinkMaridia",
+            0xC609: "SuperMissilepinkMaridia",
+            0xC74D: "MissileDraygon",
+        }
+        return addressName[address]
+
+    def loadPlandoLocs(self):
+        # get the addresses of the already filled locs, with the correct order
+        addresses = self.romLoader.getPlandoAddresses()
+
+        # create a copy of the locations to avoid removing locs from self.locations
+        self.majorLocations = self.locations[:]
+
+        for address in addresses:
+            # TODO::compute only the difficulty of the current loc
+            self.computeLocationsDifficulty(self.majorLocations)
+
+            locName = self.getLocNameFromAddress(address)
+            self.pickItemAt(locName)
+
+    def savePlando(self):
+        # store filled locations addresses in the ROM for next creating session
+        locsItems = {}
+        itemLocs = []
+        for loc in self.visitedLocations:
+            locsItems[loc["Name"]] = loc["itemName"]
+        for loc in self.locations:
+            if loc["Name"] in locsItems:
+                itemLocs.append({'Location': loc, 'Item': Items.getItem(locsItems[loc["Name"]])})
+            else:
+                itemLocs.append({'Location': loc, 'Item': Items.getItem(loc["itemName"])})
+
+        # patch the ROM
+        romPatcher = RomPatcher()
+        romPatcher.writeItemsLocs(itemLocs)
+        romPatcher.writeItemsNumber()
+        romPatcher.writeSpoiler(itemLocs)
+        romPatcher.writePlandoAddresses(self.visitedLocations)
+        romPatcher.end()
+
+        data = romPatcher.romFile.data
+        preset = os.path.splitext(os.path.basename(self.presetFileName))[0]
+        fileName = 'VARIA_Plandomizer_X{}_{}.sfc'.format(strftime("%Y%m%d%H%M%S", gmtime()), preset)
+        data["fileName"] = fileName
+        # error msg in json to be displayed by the web site
+        data["errorMsg"] = ""
+        with open(self.outputFileName, 'w') as jsonFile:
+            json.dump(data, jsonFile)
 
     def locNameWeb2Internal(self, locNameWeb):
         locs = {
@@ -496,6 +667,20 @@ class InteractiveSolver(CommonSolver):
             # take first ap of the loc
             loc["accessPoint"] = loc["AccessFrom"].keys()[0]
         self.collectMajor(loc)
+
+    def setItemAt(self, locName, itemName):
+        # set itemName at locName
+        loc = self.getLoc(locName)
+        # plando mode
+        loc["itemName"] = itemName
+
+        if "difficulty" not in loc:
+            # sequence break
+            loc["difficulty"] = SMBool(True, -1)
+            # take first ap of the loc
+            loc["accessPoint"] = loc["AccessFrom"].keys()[0]
+
+        self.collectMajor(loc, itemName)
 
     def cancelLast(self):
         # loc
@@ -1229,15 +1414,20 @@ def interactiveSolver(args):
     if args.romFileName != None and args.presetFileName != None and args.output != None:
         # init
         solver = InteractiveSolver(args.output)
-        solver.initialize(args.romFileName, args.presetFileName, magic=args.raceMagic)
+        solver.initialize(args.romFileName, args.presetFileName, magic=args.raceMagic, isPlando=args.plando)
     elif args.state != None and args.action != None and args.output != None:
         # iterate
-        if args.action == "add" and args.loc == None:
-            print("Missing loc parameter when using action add")
-            sys.exit(1)
+        if args.action == "add":
+            if args.loc == None:
+                print("Missing loc parameter when using action add")
+                sys.exit(1)
+            if args.plando == True:
+                if args.item == None:
+                    print("Missing item parameter when using action add in plando mode")
+                    sys.exit(1)
 
         solver = InteractiveSolver(args.output)
-        solver.iterate(args.state, args.loc, args.action)
+        solver.iterate(args.state, args.loc, args.action, args.item)
     else:
         print("Wrong parameters for interactive mode")
         sys.exit(1)
@@ -1304,7 +1494,11 @@ if __name__ == "__main__":
     parser.add_argument('--loc', help="Name of the location to action on (used in interactive mode)",
                         dest="loc", nargs='?', default=None)
     parser.add_argument('--action', help="Pickup item at location, remove last pickedup location, clear all (used in interactive mode)",
-                        dest="action", nargs="?", default=None, choices=['init', 'add', 'remove', 'clear', 'get'])
+                        dest="action", nargs="?", default=None, choices=['init', 'add', 'remove', 'clear', 'get', 'save'])
+    parser.add_argument('--plando', help="Plando mode (used in interactive mode)",
+                        dest="plando", action="store_true")
+    parser.add_argument('--item', help="Name of the item to place in plando mode (used in interactive mode)",
+                        dest="item", nargs='?', default=None)
 
     args = parser.parse_args()
 

@@ -93,6 +93,9 @@ class SMBoolManager(object):
                                                                                  (Knows.__dict__[knows].bool,
                                                                                   Knows.__dict__[knows].difficulty)))
 
+    def isCountItem(self, item):
+        return item in ['Missile', 'Super', 'PowerBomb', 'ETank', 'Reserve']
+
     def itemCount(self, item):
         # return integer
         return getattr(self, item+'Count')

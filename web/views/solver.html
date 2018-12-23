@@ -55,6 +55,10 @@ if (hs.registerOverlay) {
 function guessVARIAPreset(filename) {
   var re = /VARIA_Randomizer_[A]?[F]?[Z]?X\d+_(\w+)/;
   var match = filename.match(re);
+  if(match == null) {
+    re = /VARIA_Plandomizer_[A]?[F]?X\d+_(\w+)/;
+    match = filename.match(re);
+  }
   if(match != null) {
     var data = match[1];
     console.log(data);

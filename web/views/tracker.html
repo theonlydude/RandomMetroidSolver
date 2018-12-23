@@ -14,6 +14,8 @@ extend 'layout.html'
 
 <script type="text/javascript" src="{{=URL('static', 'js/leader-line.min.js')}}"></script>
 
+<script src="{{=URL('static','js/FileSaver.js')}}"></script>
+
 <title>Super Metroid VARIA Randomizer Tracker</title>
 
 <style>
@@ -46,7 +48,22 @@ img {
     max-width: 100%;
     height: auto;
 }
+.greyed {
+    opacity: 0.5;
+}
 .solverPopup {
+    background-color: #ffffff;
+    position: absolute;
+    z-index: 4;
+    width: 40%;
+    height: auto;
+    top: 2em;
+    left: 30%;
+    display: none;
+    padding: 0.5%;
+    border: 2px solid gray;
+}
+.itemPopup {
     background-color: #ffffff;
     position: absolute;
     z-index: 4;
@@ -142,6 +159,64 @@ img {
     top: 4.75%;
     left: 16%;
 }
+
+.titlePlando {
+    position: absolute;
+    z-index: 2;
+    width: 10%;
+    height: 3.75%;
+    top: 1%;
+    left: 80%;
+    color: #ffffff;
+    font-size: 1.25vw;
+    font-weight: bold;
+}
+.startPlando {
+    cursor: pointer;
+    position: absolute;
+    z-index: 2;
+    width: 2.5%;
+    height: 3.75%;
+    top: 0.5%;
+    left: 88.95%;
+}
+.repeatPlando {
+    cursor: pointer;
+    position: absolute;
+    z-index: 2;
+    width: 2.5%;
+    height: 3.75%;
+    top: 0.5%;
+    left: 91.7%;
+}
+.binPlando {
+    cursor: pointer;
+    position: absolute;
+    z-index: 2;
+    width: 2.5%;
+    height: 3.75%;
+    top: 0.5%;
+    left: 94.45%;
+}
+.savePlando {
+    cursor: pointer;
+    position: absolute;
+    z-index: 2;
+    width: 2.5%;
+    height: 3.75%;
+    top: 0.5%;
+    left: 97.2%;
+}
+.helpPlando {
+    cursor: pointer;
+    position: absolute;
+    z-index: 2;
+    width: 2.5%;
+    height: 3.75%;
+    top: 0.5%;
+    left: 86.2%;
+}
+
 .baseButton {
     cursor: pointer;
     position: absolute;
@@ -2763,11 +2838,49 @@ function onloadWS(jsonData) {
   ajaxCallArea({action: "get"}, "download", ajaxOkGetArea);
 }
 
+function setActive() {
+  var itemElems = ["repeatItem", "binItem"];
+  var plandoElems = ["repeatPlando", "binPlando", "savePlando"];
+  if(isPlando == false) {
+    for(var i=0; i<itemElems.length; i++) {
+      $("#"+itemElems[i]).removeClass("greyed");
+    }
+    for(var i=0; i<plandoElems.length; i++) {
+      $("#"+plandoElems[i]).addClass("greyed");
+    }
+  } else {
+    for(var i=0; i<itemElems.length; i++) {
+      $("#"+itemElems[i]).addClass("greyed");
+    }
+    for(var i=0; i<plandoElems.length; i++) {
+      $("#"+plandoElems[i]).removeClass("greyed");
+    }
+  }
+}
+
+function isActive(elemId) {
+  if(elemId.includes("Plando")) {
+    if(isPlando == true) {
+      return true;
+    } else {
+      return elemId == "startPlando";
+    }
+  }
+  if(elemId.includes("Item")) {
+    if(isPlando == false) {
+      return true;
+    } else {
+      return elemId == "startItem";
+    }
+  }
+}
+
 //-----------------------------------------------------------
 // ITEMS TRACKER
 
 var init = false;
 var lastLoc = "landingSite";
+var isPlando = false;
 
 // can add more variables:
 //  -state: posible values: ["available", "visited", "breakable"]
@@ -2965,6 +3078,11 @@ window.onload = function(){
           romData[i] = bytes[i];
         }
 
+        // plando addresses
+        for(var i=0x2F6000; i<=0x2F6064; i++) {
+          romData[i] = bytes[i];
+        }
+
         // majors split
         romData[0x17B6C] = bytes[0x17B6C];
 
@@ -2995,6 +3113,10 @@ function setGuessedPreset(romName){
 function guessVARIAPreset(filename) {
   var re = /VARIA_Randomizer_[A]?[F]?[Z]?X\d+_(\w+)/;
   var match = filename.match(re);
+  if(match == null) {
+    re = /VARIA_Plandomizer_[A]?[F]?X\d+_(\w+)/;
+    match = filename.match(re);
+  }
   if(match != null) {
     var data = match[1];
     console.log(data);
@@ -3059,7 +3181,64 @@ function mouseOut(elem) {
   }
 }
 
-function displayPopup() {
+function save() {
+  if(! isActive("savePlando")) {
+    return;
+  }
+
+  var uploadFile = document.getElementById("uploadFile");
+  if(uploadFile.files.length == 0) {
+    var saveFile = document.getElementById("saveFile");
+    if(saveFile.files.length == 0) {
+      // display popup to choose the local ROM
+      document.getElementById("savePopup").style.display = "block";
+    } else {
+      // call WS
+      ajaxCallItem({action: "save"}, "download", ajaxOkSave);
+    }
+  } else {
+    // call WS
+    ajaxCallItem({action: "save"}, "download", ajaxOkSave);
+  }
+}
+
+function ajaxOkSave(data) {
+  console.log("ajaxSaveOk");
+
+  var uploadFile = document.getElementById("uploadFile");
+  if(uploadFile.files.length == 0) {
+    uploadFile = document.getElementById("saveFile");
+  }
+
+  var file = uploadFile.files[0];
+
+  var reader = new FileReader();
+  reader.readAsArrayBuffer(file)
+
+  reader.onload = function(e) {
+      var bytes = new Uint8Array(e.target.result);
+
+      for(var key in data) {
+          if(key === "fileName" || key === "errorMsg") { continue; }
+          bytes[key] = data[key];
+      }
+
+      var blob = new Blob([bytes], {type: "octet/stream"})
+
+      var outFileName = data['fileName']
+      saveAs(blob, outFileName)
+  }
+
+  // info message to display ?
+  if("errorMsg" in data && data["errorMsg"].length > 0) {
+    document.getElementById("flash").innerHTML = data["errorMsg"];
+    $('#flash').show();
+  }
+
+  hideSavePopup();
+}
+
+function displayPopup(isPlando) {
   if(loaded == false) {
     return;
   }
@@ -3068,10 +3247,15 @@ function displayPopup() {
   document.getElementById("solverPopup").style.display = "block";
   // chosen must be activated when it's visible, else it doesn't work...
   $(".chzn-select").chosen();
+
+  if(isPlando == true) {
+    document.getElementById("isPlando").value = "on";
+  }
 }
 
 function hidePopup() {
   document.getElementById("solverPopup").style.display = "none";
+  document.getElementById("isPlando").value = "";
 }
 
 function initSolver() {
@@ -3091,7 +3275,10 @@ function initSolver() {
   init = true;
 
   // prepare parameters for WS
-  ajaxCallItem({action: "init", romJson: value, preset: document.getElementById("preset").value, fileName: document.getElementById("fileName").value}, "download", ajaxOkGetItem);
+  ajaxCallItem({action: "init", romJson: value,
+                preset: document.getElementById("preset").value,
+                fileName: document.getElementById("fileName").value,
+                isPlando: document.getElementById("isPlando").value}, "download", ajaxOkGetItem);
 
   hidePopup();
 }
@@ -3101,21 +3288,58 @@ function clickLoc(elem) {
     return;
   }
 
-  // check that lock is in the available list
   var locName = elem.id;
-  if("state" in locsInfo[locName] && (locsInfo[locName]["state"] == "available" || locsInfo[locName]["state"] == "break")) {
-    // call webservice
-    ajaxCallItem({action: "add", locName: locName}, "upload", ajaxOkGetItem);
 
-    // if mother brain loc, add end message in log
-   if(locName == "MotherBrain") {
-     alert("SEE YOU NEXT MISSION");
-   }
+  if(isPlando == true) {
+    document.getElementById("itemPopupText").innerHTML = "Item to place at "+locName+":";
+    document.getElementById("locName").value = locName;
+
+    // display item selector
+    document.getElementById("itemPopup").style.display = "block";
+  } else {
+    // check that lock is in the available list
+    if("state" in locsInfo[locName] && (locsInfo[locName]["state"] == "available" || locsInfo[locName]["state"] == "break")) {
+      // call webservice
+      ajaxCallItem({action: "add", locName: locName}, "upload", ajaxOkGetItem);
+  
+      // if mother brain loc, display end message
+     if(locName == "MotherBrain") {
+       alert("SEE YOU NEXT MISSION");
+     }
+    }
   }
 }
 
-function deleteLoc() {
+function placeItem() {
+  var item = document.getElementById("item").value;
+  var locName = document.getElementById("locName").value;
+
+  // check if not already 14 etanks or 4 reserves
+  if(item == "ETank" && itemCount["ETank"] == 14) {
+    alert("Can't add more Energy tank");
+  } else if (item == "Reserve" && itemCount["Reserve"] == 4) {
+    alert("Can't add more Reserve tank");
+  } else {
+    ajaxCallItem({action: "add", locName: locName, itemName: item, isPlando: "on"}, "upload", ajaxOkGetItem);
+  }
+}
+
+function hideItemPopup() {
+  document.getElementById("itemPopup").style.display = "none";
+}
+
+function hideSavePopup() {
+  document.getElementById("savePopup").style.display = "none";
+}
+
+function deleteLoc(isPlando) {
   if(loaded == false) {
+    return;
+  }
+  if(isPlando == true && ! isActive("repeatPlando")) {
+    return;
+  }
+  if(isPlando == false && ! isActive("repeatItem")) {
     return;
   }
 
@@ -3145,8 +3369,14 @@ function resetLocsInfo() {
   $("#lastLoc").attr("class", "lastLoc "+lastLoc+"Gps");
 }
 
-function clearLocs() {
+function clearLocs(isPlando) {
   if(loaded == false) {
+    return;
+  }
+  if(isPlando == true && ! isActive("binPlando")) {
+    return;
+  }
+  if(isPlando == false && ! isActive("binItem")) {
     return;
   }
 
@@ -3198,6 +3428,14 @@ function ajaxOkGetItem(jsonData) {
   if(jsonData == "OK") {
     return;
   }
+
+  isPlando = jsonData["isPlando"];
+
+  if(isPlando == true) {
+    hideItemPopup();
+  }
+
+  setActive();
 
   resetItems();
 
@@ -3296,10 +3534,8 @@ function ajaxOkGetItem(jsonData) {
     init = false;
   }
   if("lastLoc" in jsonData) {
-    console.log("lastLoc updated: "+jsonData["lastLoc"]);
     lastLoc = jsonData["lastLoc"];
   }
-  console.log("lastLoc: "+jsonData["lastLoc"]);
   $("#lastLoc").attr("class", "lastLoc "+lastLoc+"Gps");
 
   setWSIcon("checkmark");
@@ -3405,6 +3641,9 @@ function setItemCount(itemName) {
 
 }
 
+$(window).scroll(function(){
+  $("#itemPopup").stop().animate({"marginTop": ($(window).scrollTop()) + "px"}, "fast" );
+});
 
 //-----------------------------------------------------------
 // TUTORIAL
@@ -3417,6 +3656,12 @@ function startTheTour(step=-1) {
       element: "#help",
       title: "VARIA Area & Item Tracker",
       content: "<h2 class=\"center\">Welcome to the VARIA Area & Item Tracker</h2><h4>Area Tracker</h4><p>The Area Tracker allows you to track the connections between the areas portals.<br/>To use it, click on a portal <img src=\"/solver/static/images/portal.png\" alt=\"Portal\" style=\"width: 20px\">, it'll highlight it, then click on a second portal, it'll draw a line between the two portals.<br/>You can delete the latest added line with the <img src=\"/solver/static/images/repeat.svg\" alt=\"Cancel Last\" style=\"width: 32px\"> button and all of them with the <img src=\"/solver/static/images/bin.svg\" alt=\"Remove all\" style=\"width: 32px\"> button.<br/><h4>Item Tracker</h4><p>The Item Tracker allows you to use the Solver in interactive mode.<br/>To use it, click on the <img src=\"/solver/static/images/play.svg\" alt=\"Start\" style=\"width: 32px\"> button to upload your ROM and choose your preset (like on the Solver page).<br/>Then the available locations will be displayed on the map, click on a location after you've collected the item of the location in the game, it'll update the next available locations.<br/>The color of the icon on the available locations matchs the difficulty to reach the location:<table><tr><td><img src=\"/solver/static/images/marker_easy.gif\" alt=\"easy\" style=\"width: 32px; background-color: #000;\"> easy</td><td><img src=\"/solver/static/images/marker_medium.gif\" alt=\"medium\" class=\"diffHelp\"> medium</td></td><td><img src=\"/solver/static/images/marker_hard.gif\" alt=\"hard\" class=\"diffHelp\"> hard</td></tr><tr><td><img src=\"/solver/static/images/marker_harder.gif\" alt=\"harder\" class=\"diffHelp\"> very hard</td><td><img src=\"/solver/static/images/marker_hardcore.gif\" alt=\"hardcore\" class=\"diffHelp\"> hardcore</td><td><img src=\"/solver/static/images/marker_mania.gif\" alt=\"mania\" class=\"diffHelp\"> mania</td></tr><tr><td colspan=\"3\"><img src=\"/solver/static/images/marker_break.png\" alt=\"break\" class=\"diffHelp\"> sequence break</td></tr></table>The locations not available are displayed with the Sequence Break icon, allowing you to collect them when you sequence break.<br/>When a location has been visited its icon displays the collected item: <img src=\"/solver/static/images/marker_visited_easy_Gravity.png\" alt=\"Visited\" style=\"width: 32px\"> or this if no item was found: <img src=\"/solver/static/images/marker_visited_easy.png\" alt=\"Visited\" style=\"width: 32px\">, one color for each difficulty.<br/>When overing the mouse cursor on an available location a tooltip is displayed with the location's name, the techniques and items used to access it.<br/>After the location has been visited only the collected item is displayed.<br/>The locations availability are computed from the current access point which is displayed with this: <img src=\"/solver/static/images/gps.png\" alt=\"last access point\" style=\"width: 32px\"></p><h4>Auto Save</h4><p>Both trackers feature an auto save functionnality, so you can do your seed in multiple seatings.<br/>The different status icons of the auto save:<table><tr><td><img src=\"/solver/static/images/refresh.svg\" style=\"width: 32px\"> Loading in progress</td><td><img src=\"/solver/static/images/checkmark.svg\" style=\"width: 32px\"> Save ok</td></tr><tr><td><img src=\"/solver/static/images/cloud_upload.png\" style=\"width: 32px\"> Upload in progress</td><td><img src=\"/solver/static/images/cloud_download.svg\" style=\"width: 32px\"> Download in progress</td></tr><tr><td colspan=\"2\"><img src=\"/solver/static/images/warning.svg\" style=\"width: 32px\"> Something wrong happened (try reloading the page)</td></tr></table></p><p>You can display this help again by clicking on the <img src=\"/solver/static/images/help.svg\" alt=\"help\" style=\"width: 32px\"> button.</p><p><h4>Thanks to</h4><ul><li>Animated location icons by Djlo</li><li>Location icons from Alli_Cat's <a href='https://github.com/allibear17/Super-Metroid-Location-Tracker'>Location Tracker</a></li><li>G4 sprite from Crossproduct's <a href=\"https://www.twitch.tv/crossproduct\">smrandohelper</a></li><li>Action icons from <a href='https://dryicons.com/icon-packs/stylistica-icons-set'>Dryicons</a></li></ul></p>"
+    },
+    {
+      element: "#helpPlando",
+      title: "VARIA Plando Generator",
+      content: "<h2 class=\"center\">Welcome to the VARIA Plando Generator</h2><p>The Plando (a Plando is a Super Metroid seed with manually placed items) Generator allows you to create your own Plando in interactive mode.<br/>To use it, click on the <img src=\"/solver/static/images/play.svg\" alt=\"Start\" style=\"width: 32px\"> button to upload your ROM and choose your preset (like on the Solver page).<br/>As a base for your Plando ROM you should generate a seed on the Randomizer page with all the optional patches that you need.<br/>The available locations will be displayed on the map, click on a location and a popup will be displayed allowing you to choose which item to place.<br/>You can put the same major item at several locations.</p><p>When you're done click on the <img src=\"/solver/static/images/save.svg\"alt=\"Save\" style=\"width: 32px\"> button to save the Plando on your Computer. You can resume working on it later by uploading the saved Plando ROM.</p><h4>Warning</h4><p>The Plando Generator is for items only, not areas.</p>",
+      placement: "auto left"
     }]
   });
 
@@ -3468,10 +3713,49 @@ function startTheTour(step=-1) {
     </table>
     <input id="romJson" name="romJson" style="display:none" type="text"/>
     <input id="fileName" name="fileName" style="display:none" type="text"/>
+    <input id="isPlando" name="isPlando" style="display:none" type="text"/>
+  </div>
+
+  <div id="itemPopup" class="itemPopup">
+    <input id="locName" name="locName" style="display:none" type="text"/>
+    <table class="full">
+      <colgroup><col class="half" /><col class="half" /></colgroup>
+      <tr>
+	<td><p id="itemPopupText">Item to place at LOC:</p></td>
+	<td>
+	  <select class="filldropdown" id="item" name="item"><optgroup label="Nothing"><option value="Nothing">Nothing</option></optgroup><optgroup label="Minors"><option value="Missile">Missile</option><option value="Super">Super Missile</option><option value="PowerBomb">Power Bomb</option></optgroup><optgroup label="Energy"><option value="ETank">Energy Tank</option><option value="Reserve">Reserve Tank</option></optgroup><optgroup label="Beams"><option value="Charge">Charge Beam</option><option value="Ice">Ice Beam</option><option value="Wave">Wave Beam</option><option value="Spazer">Spazer</option><option value="Plasma">Plasma Beam</option></optgroup><optgroup label="Suits"><option value="Varia">Varia Suit</option><option value="Gravity">Gravity Suit</option></optgroup><optgroup label="Miscellaneous"><option value="Morph">Morph Ball</option><option value="Bomb">Bomb</option><option value="SpringBall">Spring Ball</option><option value="ScrewAttack">Screw Attack</option></optgroup><optgroup label="Boots"><option value="HiJump">Hi-Jump Boots</option><option value="SpaceJump">Space Jump</option><option value="SpeedBooster">Speed Booster</option></optgroup></select>
+	</td>
+      </tr>
+    </table>
+    <table>
+      <tr>
+	<td class="half"><button type="button" onclick="placeItem()" class="full">Place</button></td>
+	<td class="half"><button type="button" onclick="hideItemPopup()" class="full">Cancel</button></td>
+      </tr>
+    </table>
+  </div>
+
+  <div id="savePopup" class="itemPopup">
+    <table class="full">
+      <colgroup><col class="half" /><col class="half" /></colgroup>
+      <tr>
+	<td>Randomized Super Metroid ROM: </td>
+	<td><input id="saveFile" name="saveFile" type="file"/></td>
+      </tr>
+    </table>
+    <table>
+      <tr>
+	<td class="half"><button type="button" onclick="save()" class="full">Save</button></td>
+	<td class="half"><button type="button" onclick="hideSavePopup()" class="full">Cancel</button></td>
+      </tr>
+    </table>
   </div>
 
   <div class="map_container">
+    <!-- the map -->
     <img id="map" src="/solver/static/images/area_map.png" class="center">
+
+    <!-- the access points -->
     <div id="lowerMushroomsLeft" class="baseButton" onclick="clickPortal('lowerMushroomsLeft')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Lower Mushrooms Left"></div>
     <div id="moatRight" class="baseButton" onclick="clickPortal('moatRight')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Moat Right"></div>
     <div id="greenPiratesShaftBottomRight" class="baseButton" onclick="clickPortal('greenPiratesShaftBottomRight')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Green Pirates Shaft Bottom Right"></div>
@@ -3501,6 +3785,7 @@ function startTheTour(step=-1) {
     <div id="glassTunnelTop" class="baseButtonRot" onclick="clickPortal('glassTunnelTop')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Glass Tunnel Top"></div>
     <div id="statuesHallwayLeft" class="baseButton" onclick="clickPortal('statuesHallwayLeft')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Statues Hallway Left"></div>
 
+    <!-- the locations -->
     <div id="EnergyTankGauntlet" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true" data-placement="bottom"></div>
     <div id="Bomb" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true" data-placement="bottom"></div>
     <div id="EnergyTankTerminator" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true" data-placement="bottom"></div>
@@ -3603,17 +3888,29 @@ function startTheTour(step=-1) {
     <div id="MissileDraygon" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
     <div id="MotherBrain" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
 
+    <!-- area tracker buttons -->
     <div id="titleArea" class="titleArea">AREA</div>
     <div id="repeatArea" class="repeatArea"><img src="/solver/static/images/repeat.svg" alt="Cancel Last" onclick="deleteLine()" data-toggle="tooltip" title="Remove last added transition" data-placement="bottom" data-container="body" data-html="true"></div>
     <div id="binArea" class="binArea"><img src="/solver/static/images/bin.svg" alt="Clear" onclick="clearLines(true)" data-toggle="tooltip" title="Remove all the transitions" data-placement="bottom" data-container="body" data-html="true"></div>
 
+    <!-- item tracker buttons -->
     <div id="titleItem" class="titleItem">ITEM</div>
-    <div id="startItem" class="startItem"><img src="/solver/static/images/play.svg" alt="Start" onclick="displayPopup()" data-toggle="tooltip" title="Start the Interactive Solver" data-placement="bottom" data-container="body" data-html="true"></div>
-    <div id="repeatItem" class="repeatItem"><img src="/solver/static/images/repeat.svg" alt="Cancel Last" onclick="deleteLoc()" data-toggle="tooltip" title="Remove last visited location" data-placement="bottom" data-container="body" data-html="true"></div>
-    <div id="binItem" class="binItem"><img src="/solver/static/images/bin.svg" alt="Clear" onclick="clearLocs()" data-toggle="tooltip" title="Remove all visited locations" data-placement="bottom" data-container="body" data-html="true"></div>
+    <div id="startItem" class="startItem"><img src="/solver/static/images/play.svg" alt="Start" onclick="displayPopup(false)" data-toggle="tooltip" title="Start the Interactive Solver" data-placement="bottom" data-container="body" data-html="true"></div>
+    <div id="repeatItem" class="repeatItem"><img src="/solver/static/images/repeat.svg" alt="Cancel Last" onclick="deleteLoc(false)" data-toggle="tooltip" title="Remove last visited location" data-placement="bottom" data-container="body" data-html="true"></div>
+    <div id="binItem" class="binItem"><img src="/solver/static/images/bin.svg" alt="Clear" onclick="clearLocs(false)" data-toggle="tooltip" title="Remove all visited locations" data-placement="bottom" data-container="body" data-html="true"></div>
 
     <div id="help" class="help"><img src="/solver/static/images/help.svg" alt="Help" onclick="startTheTour(0)" data-toggle="tooltip" title="Display the help" data-placement="bottom" data-container="body" data-html="true"></div>
 
+    <!-- plando buttons -->
+    <div id="titlePlando" class="titlePlando">PLANDO</div>
+    <div id="startPlando" class="startPlando"><img src="/solver/static/images/play.svg" alt="Start" onclick="displayPopup(true)" data-toggle="tooltip" title="Start the Plando creator" data-placement="bottom" data-container="body" data-html="true"></div>
+    <div id="repeatPlando" class="repeatPlando"><img src="/solver/static/images/repeat.svg" alt="Cancel Last" onclick="deleteLoc(true)" data-toggle="tooltip" title="Remove last placed item" data-placement="bottom" data-container="body" data-html="true"></div>
+    <div id="binPlando" class="binPlando"><img src="/solver/static/images/bin.svg" alt="Clear" onclick="clearLocs(true)" data-toggle="tooltip" title="Remove all placed items" data-placement="bottom" data-container="body" data-html="true"></div>
+    <div id="savePlando" class="savePlando"><img src="/solver/static/images/save.svg" alt="Save" onclick="save()" data-toggle="tooltip" title="Download plando ROM" data-placement="bottom" data-container="body" data-html="true"></div>
+
+    <div id="helpPlando" class="helpPlando"><img src="/solver/static/images/help.svg" alt="Help" onclick="startTheTour(1)" data-toggle="tooltip" title="Display the Plando help" data-placement="bottom" data-container="body" data-html="true"></div>
+
+    <!-- web service status -->
     <div id="cloud" class="cloud">
       <img id="refresh" src="/solver/static/images/refresh.svg" alt="refresh" data-toggle="tooltip" title="Loading in progress" data-placement="bottom" data-container="body" data-html="true">
       <img id="checkmark" src="/solver/static/images/checkmark.svg" alt="checkmark" style="display: none" data-toggle="tooltip" title="Web service OK" data-placement="bottom" data-container="body" data-html="true">
@@ -3622,6 +3919,7 @@ function startTheTour(step=-1) {
       <img id="upload" src="/solver/static/images/cloud_upload.png" alt="cloud_upload" style="display: none" data-toggle="tooltip" title="Web service uploading" data-placement="bottom" data-container="body" data-html="true">
     </div>
 
+    <!-- gps marker -->
     <div id="lastLoc">
       <img src="/solver/static/images/gps.png" alt="last access point" data-toggle="tooltip" title="Current access point" data-placement="bottom" data-container="body" data-html="true">
     </div>

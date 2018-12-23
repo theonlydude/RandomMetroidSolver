@@ -12,7 +12,7 @@ from smbool import SMBool
 from smboolmanager import SMBoolManager
 from helpers import Pickup, Bosses
 from rom import RomLoader, RomPatcher
-from itemrandomizerweb import Items
+from itemrandomizerweb.Items import ItemManager
 from graph_locations import locations as graphLocations
 from graph import AccessGraph
 from graph_access import vanillaTransitions, accessPoints
@@ -524,9 +524,9 @@ class InteractiveSolver(CommonSolver):
             locsItems[loc["Name"]] = loc["itemName"]
         for loc in self.locations:
             if loc["Name"] in locsItems:
-                itemLocs.append({'Location': loc, 'Item': Items.getItem(locsItems[loc["Name"]])})
+                itemLocs.append({'Location': loc, 'Item': ItemManager.getItem(locsItems[loc["Name"]])})
             else:
-                itemLocs.append({'Location': loc, 'Item': Items.getItem(loc["itemName"])})
+                itemLocs.append({'Location': loc, 'Item': ItemManager.getItem(loc["itemName"])})
 
         # patch the ROM
         romPatcher = RomPatcher()

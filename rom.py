@@ -242,6 +242,7 @@ class RomReader:
             chozoItems = {}
         for loc in locations:
             if 'Address' not in loc:
+                loc["itemName"] = "Nothing"
                 continue
             item = self.getItem(loc["Address"], loc["Visibility"])
             loc["itemName"] = self.items[item]["name"]

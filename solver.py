@@ -630,10 +630,10 @@ class StandardSolver(CommonSolver):
         # if equality between major and minor, take major first.
 
         if self.majorsSplit == 'Major':
-            self.majorLocations = [loc for loc in self.locations if "Major" in loc["Class"]]
+            self.majorLocations = [loc for loc in self.locations if "Major" in loc["Class"] or "Boss" in loc["Class"]]
             self.minorLocations = [loc for loc in self.locations if "Minor" in loc["Class"]]
         elif self.majorsSplit == 'Chozo':
-            self.majorLocations = [loc for loc in self.locations if "Chozo" in loc["Class"]]
+            self.majorLocations = [loc for loc in self.locations if "Chozo" in loc["Class"] or "Boss" in loc["Class"]]
             self.minorLocations = [loc for loc in self.locations if "Chozo" not in loc["Class"]]
         else:
             # Full

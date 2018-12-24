@@ -241,6 +241,8 @@ class RomReader:
             isFull = False
             chozoItems = {}
         for loc in locations:
+            if 'Address' not in loc:
+                continue
             item = self.getItem(loc["Address"], loc["Visibility"])
             loc["itemName"] = self.items[item]["name"]
             if majorsSplit == None:
@@ -301,48 +303,15 @@ class RomReader:
 
     def loadTransitions(self):
         # return the transitions or None if vanilla transitions
-        from graph_access import accessPoints
-
-        rooms = {
-            # (roomPtr, screen): name
-            (0x9969, (0x0, 0x0)): 'Lower Mushrooms Left',
-            (0x95ff, (0x1, 0x0)): 'Moat Right',
-            (0x948c, (0x1, 0x2)): 'Keyhunter Room Bottom',
-            (0x9e9f, (0x0, 0x2)): 'Morph Ball Room Left',
-            (0x9938, (0x0, 0x0)): 'Green Brinstar Elevator Right',
-            (0x9e52, (0x1, 0x0)): 'Green Hill Zone Top Right',
-            (0x9fba, (0x5, 0x0)): 'Noob Bridge Right',
-            (0x93fe, (0x0, 0x4)): 'West Ocean Left',
-            (0x957d, (0x0, 0x1)): 'Crab Maze Left',
-            (0xaf14, (0x3, 0x0)): 'Lava Dive Right',
-            (0xb656, (0x1, 0x0)): 'Three Muskateers Room Left',
-            (0xa6a1, (0x0, 0x0)): 'Warehouse Entrance Left',
-            (0xad5e, (0x5, 0x0)): 'Single Chamber Top Right',
-            (0xae74, (0x1, 0x2)): 'Kronic Boost Room Bottom Left',
-            (0xcfc9, (0x1, 0x7)): 'Main Street Bottom',
-            (0xd21c, (0x0, 0x1)): 'Crab Hole Bottom Left',
-            (0x95a8, (0x0, 0x0)): 'Le Coude Right',
-            (0xd104, (0x0, 0x0)): 'Red Fish Room Left',
-            (0xa253, (0x0, 0x4)): 'Red Tower Top Left',
-            (0xa322, (0x2, 0x3)): 'Caterpillar Room Top Right',
-            (0x962a, (0x0, 0x0)): 'Red Brinstar Elevator',
-            (0xcf80, (0x0, 0x1)): 'East Tunnel Right',
-            (0xcf80, (0x3, 0x0)): 'East Tunnel Top Right',
-            (0xcefb, (0x0, 0x0)): 'Glass Tunnel Top',
-            (0x99bd, (0x0, 0x6)): 'Green Pirates Shaft Bottom Right',
-            (0xa5ed, (0x0, 0x0)): 'Statues Hallway Left',
-            (0xa471, (0x0, 0x0)): 'Warehouse Zeela Room Left',
-            (0xa6a1, (0x2, 0x0)): 'Warehouse Entrance Right'
-        }
-
+        from graph_access import accessPoints, getRooms
+        rooms = getRooms()
         transitions = {}
         for accessPoint in accessPoints:
-            if accessPoint.Name == 'Landing Site' or accessPoint.Internal == True:
+            if accessPoint.Internal == True:
                 continue
             (destRoomPtr, destEntryScreen) = self.getTransition(accessPoint.ExitInfo['DoorPtr'])
             destAPName = rooms[(destRoomPtr, destEntryScreen)]
             transitions[accessPoint.Name] = destAPName
-
 
         # remove bidirectionnal transitions
         # can't del keys in a dict while iterating it
@@ -355,13 +324,7 @@ class RomReader:
                         del transitions[dest]
 
         transitions = [(t, transitions[t]) for t in transitions]
-
-        # check if transitions are vanilla transitions
-        from graph_access import isVanillaTransitions
-        if isVanillaTransitions(transitions):
-            return None
-        else:
-            return transitions
+        return transitions
 
     def getTransition(self, doorPtr):
         self.romFile.seek(0x10000 | doorPtr)
@@ -574,6 +537,8 @@ class RomPatcher:
 
     def writeNothing(self, itemLoc):
         loc = itemLoc['Location']
+        if 'Address' not in loc:
+            return
         # missile
         self.writeItemCode({'Code': 0xeedb}, loc['Visibility'], loc['Address'])
         self.romFile.seek(loc['Address'] + 4)
@@ -583,6 +548,8 @@ class RomPatcher:
 
     def writeItem(self, itemLoc):
         loc = itemLoc['Location']
+        if 'Address' not in loc:
+            return
         self.writeItemCode(itemLoc['Item'], loc['Visibility'], loc['Address'])
 
     def writeItemsLocs(self, itemLocs):
@@ -660,7 +627,7 @@ class RomPatcher:
         self.romFile.seek(0x5E651)
         self.romFile.write(struct.pack('B', self.nItems))
 
-    def applyIPSPatches(self, optionalPatches=[], noLayout=False, noGravHeat=False, area=False, areaLayoutBase=False, noVariaTweaks=False):
+    def applyIPSPatches(self, optionalPatches=[], noLayout=False, noGravHeat=False, area=False, bosses=False, areaLayoutBase=False, noVariaTweaks=False):
         try:
             # apply standard patches
             stdPatches = RomPatcher.IPSPatches['Standard'][:]
@@ -693,6 +660,8 @@ class RomPatcher:
                     RomPatcher.IPSPatches['Area'].append('area_rando_layout_base.ips')
                 for patchName in RomPatcher.IPSPatches['Area']:
                     self.applyIPSPatch(patchName)
+            elif bosses == True:
+                self.applyIPSPatch('area_rando_door_transition.ips')
         except Exception as e:
             raise Exception("Error patching {}. ({})".format(self.romFileName, e))
 
@@ -1068,7 +1037,6 @@ class RomPatcher:
                 self.romFile.write(struct.pack('B', byte))
 
             self.asmAddress += 0x20
-        self.writeTourianRefill()
 
     # change BG table to avoid scrolling sky bug when transitioning to west ocean
     def patchWestOcean(self, doorPtr):
@@ -1141,7 +1109,7 @@ class RomPatcher:
     def writePlandoAddresses(self, locations):
         self.romFile.seek(0x2F6000)
         for loc in locations:
-            if loc['Name'] == 'Mother Brain':
+            if 'Address' not in loc:
                 continue
             self.writeWord(loc['Address'] & 0xFFFF)
 

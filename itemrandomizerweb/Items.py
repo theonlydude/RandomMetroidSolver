@@ -143,6 +143,12 @@ class ItemManager:
             'Class': 'Major',
             'Code': 0xeedb,
             'Name': "No Energy"
+        },
+        'Boss': {
+            'Category': 'Nothing',
+            'Class': 'Minor',
+            'Code': 0xeedb,
+            'Name': "Boss Location Filler"
         }
     }
 
@@ -191,8 +197,17 @@ class ItemManager:
         self.majorClass = 'Chozo' if majorsSplit == 'Chozo' else 'Major'
         self.itemPool = []
 
+    def newItemPool(self):
+        self.itemPool = []
+        # for the bosses
+        for i in range(5):
+            self.addMinor('Boss')
+
+    def getItemPool(self):
+        return self.itemPool
+
     def addItem(self, itemType, itemClass=None):
-        self.itemPool.append(self.getItem(itemType, itemClass))
+        self.itemPool.append(ItemManager.getItem(itemType, itemClass))
 
     def addMinor(self, minorType):
         self.addItem(minorType, 'Minor')
@@ -220,7 +235,7 @@ class ItemManager:
         item['Type'] = itemType
         return item
 
-    def getItemPool(self):
+    def createItemPool(self):
         itemPoolGenerator = ItemPoolGenerator.factory(self.majorsSplit, self, self.qty, self.sm)
         return itemPoolGenerator.getItemPool()
 
@@ -250,22 +265,22 @@ class ItemPoolGenerator(object):
             self.itemManager.addMinor('Missile')
             nbMinors -= 1
         minorLocations = (nbMinors * self.qty['minors']) / 100
-        maxItems = len(self.itemManager.itemPool) + int(minorLocations)
+        maxItems = len(self.itemManager.getItemPool()) + int(minorLocations)
         ammoQty = self.qty['ammo']
         if not self.qty['strictMinors']:
             rangeDict = getRangeDict(ammoQty)
-            while len(self.itemManager.itemPool) < maxItems:
+            while len(self.itemManager.getItemPool()) < maxItems:
                 item = chooseFromRange(rangeDict)
                 self.itemManager.addMinor(item)
         else:
             totalProps = ammoQty['Missile'] + ammoQty['Super'] + ammoQty['PowerBomb']
             totalMinorLocations = 66 * self.qty['minors'] / 100
             def getRatio(ammo):
-                thisAmmo = len([item for item in self.itemManager.itemPool if item['Type'] == ammo])
+                thisAmmo = len([item for item in self.itemManager.getItemPool() if item['Type'] == ammo])
                 return float(thisAmmo)/totalMinorLocations
             def fillAmmoType(ammo, checkRatio=True):
                 ratio = float(ammoQty[ammo])/totalProps
-                while len(self.itemManager.itemPool) < maxItems and (not checkRatio or getRatio(ammo) < ratio):
+                while len(self.itemManager.getItemPool()) < maxItems and (not checkRatio or getRatio(ammo) < ratio):
                     self.itemManager.addMinor(ammo)
             fillAmmoType('Missile')
             fillAmmoType('Super')
@@ -317,7 +332,7 @@ class ItemPoolGeneratorChozo(ItemPoolGenerator):
                 self.itemManager.addItem('ETank', 'Minor')
 
     def getItemPool(self):
-        self.itemManager.itemPool = []
+        self.itemManager.newItemPool()
         # 25 locs: 16 majors, 3 etanks, 1 reserve, 2 missile, 2 supers, 1 pb
         for itemType in ['ETank', 'ETank', 'ETank', 'Reserve', 'Missile', 'Missile', 'Super', 'Super', 'PowerBomb', 'Bomb', 'Charge', 'Ice', 'HiJump', 'SpeedBooster', 'Wave', 'Spazer', 'SpringBall', 'Varia', 'Plasma', 'Grapple', 'Morph', 'Gravity', 'XRayScope', 'SpaceJump', 'ScrewAttack']:
             self.itemManager.addItem(itemType, 'Chozo')
@@ -325,7 +340,7 @@ class ItemPoolGeneratorChozo(ItemPoolGenerator):
         self.addEnergy()
         self.addAmmo()
 
-        return self.itemManager.itemPool
+        return self.itemManager.getItemPool()
 
 class ItemPoolGeneratorMajors(ItemPoolGenerator):
     def addEnergy(self):
@@ -370,7 +385,8 @@ class ItemPoolGeneratorMajors(ItemPoolGenerator):
                 self.itemManager.addItem('ETank')
 
     def getItemPool(self):
-        self.itemManager.itemPool = []
+        self.itemManager.newItemPool()
+
         for itemType in ['ETank', 'Reserve', 'Bomb', 'Charge', 'Ice', 'HiJump', 'SpeedBooster', 'Wave', 'Spazer', 'SpringBall', 'Varia', 'Plasma', 'Grapple', 'Morph', 'Gravity', 'XRayScope', 'SpaceJump', 'ScrewAttack']:
             self.itemManager.addItem(itemType, 'Major')
         for itemType in ['Missile', 'Missile', 'Super', 'Super', 'PowerBomb']:
@@ -379,4 +395,4 @@ class ItemPoolGeneratorMajors(ItemPoolGenerator):
         self.addEnergy()
         self.addAmmo()
 
-        return self.itemManager.itemPool
+        return self.itemManager.getItemPool()

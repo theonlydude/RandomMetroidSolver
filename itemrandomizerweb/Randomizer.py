@@ -207,7 +207,7 @@ class SuperFunProvider(object):
         self.forbiddenItems = []
         self.restrictedLocs = []
         self.lastRestricted = []
-        self.bossesLocs = ['Space Jump', 'Varia Suit', 'Energy Tank, Ridley', 'Right Super, Wrecked Ship']
+        self.bossesLocs = ['Draygon', 'Kraid', 'Ridley', 'Phantoon']
         self.suits = ['Varia', 'Gravity']
         # organized by priority
         self.movementItems = ['SpaceJump', 'HiJump', 'SpeedBooster', 'Bomb', 'Grapple', 'SpringBall']
@@ -223,7 +223,7 @@ class SuperFunProvider(object):
         self.okay = lambda: SMBool(True, 0)
 
     def getItemPool(self, forbidden=[]):
-        self.itemManager.getItemPool()
+        self.itemManager.createItemPool()
         return self.itemManager.removeForbiddenItems(self.forbiddenItems + forbidden)
 
     def checkPool(self, forbidden=None):
@@ -460,7 +460,7 @@ class Randomizer(object):
             self.nonChozoItemPool = [item for item in self.itemPool if item['Class'] != 'Chozo'] # this will be swapped back
             self.itemPool = self.chozoItemPool
             self.chozoDiffTarget = self.difficultyTarget # backup diff target
-            self.difficultyTarget = infinity
+            self.difficultyTarget = infinity # FIXME this isn't right. diff target shall be ignored only for bosses/hard rooms/hell runs, not the knows
 #        print("itempool: {}".format([item['Type'] for item in self.itemPool]))
         self.restrictedLocations = fun.restrictedLocs
 
@@ -861,6 +861,12 @@ class Randomizer(object):
     # check if an item can be placed at a location, given restrictions
     # settings.
     def canPlaceAtLocation(self, item, location, checkSoftlock=False):
+        if item['Type'] == 'Boss':
+            return 'Boss' in location['Class']
+
+        if 'Boss' in location['Class']:
+            return item['Type'] == 'Boss'
+
         if not self.locClassCheck(item, location):
             return False
 
@@ -1061,8 +1067,8 @@ class Randomizer(object):
                 state.apply(self)
                 posItems = self.possibleItems(state.curLocs, self.itemPool)
                 if len(posItems) > 0: # new locs can be opened
-                    self.log.debug([item['Type'] for item in posItems])
-                    self.log.debug([loc['Name'] for loc in state.curLocs])
+#                    self.log.debug([item['Type'] for item in posItems])
+#                    self.log.debug([loc['Name'] for loc in state.curLocs])
                     itemLoc = self.generateItem(state.curLocs, self.itemPool)
                     if itemLoc is not None and not self.hasTried(itemLoc, i):
                         possibleStates.append((state, itemLoc))
@@ -1089,7 +1095,7 @@ class Randomizer(object):
             Bosses.beatBoss(boss)
         # get bosses locations and newly accessible locations (for bosses that open up locs)
         newLocs = self.currentLocations(post=True)
-        locs = newLocs + [loc for loc in self.unusedLocations if 'Pickup' in loc and not loc in newLocs]
+        locs = newLocs + [loc for loc in self.unusedLocations if 'Boss' in loc['Class'] and not loc in newLocs]
         ret = (len(locs) > len(prevLocs) and len(locs) == len(self.unusedLocations))
         # restore currently killed bosses
         Bosses.reset()
@@ -1112,8 +1118,9 @@ class Randomizer(object):
     # if not all items could be placed (the player cannot finish the seed 100%),
     # check if we can still finish the game (the player can finish the seed any%)
     def canEndGame(self):
-        itemTypes = [item['Type'] for item in self.currentItems]
-        return self.smbm.wand(Bosses.allBossesDead(self.smbm), self.smbm.enoughStuffTourian())
+        return not any(loc['Name'] == 'Mother Brain' for loc in self.unusedLocations)
+        # itemTypes = [item['Type'] for item in self.currentItems]
+        # return self.smbm.wand(Bosses.allBossesDead(self.smbm), self.smbm.enoughStuffTourian())
 
     def getNextItemInPool(self, t, pool=None):
         if pool is None:

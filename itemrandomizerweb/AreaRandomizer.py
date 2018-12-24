@@ -1,9 +1,7 @@
 import random
-from itemrandomizerweb.Randomizer import Randomizer
-from graph_access import vanillaTransitions, accessPoints
 
-def getAccessPoint(apName):
-    return next(ap for ap in accessPoints if ap.Name == apName)
+from itemrandomizerweb.Randomizer import Randomizer
+from graph_access import vanillaTransitions, accessPoints, getAccessPoint
 
 def createTransitions(bidir=True):
     tFrom = []
@@ -37,7 +35,7 @@ def createTransitions(bidir=True):
     return transitions
 
 class AreaRandomizer(Randomizer):
-    def __init__(self, locations, settings, seedName, bidir=True, dotDir=None):
+    def __init__(self, locations, settings, seedName, bossTransitions, bidir=True, dotDir=None):
         transitionsOk = False
         attempts = 0
         while not transitionsOk and attempts < 10:
@@ -46,7 +44,7 @@ class AreaRandomizer(Randomizer):
                 super(AreaRandomizer, self).__init__(locations,
                                                      settings,
                                                      seedName,
-                                                     self.transitions,
+                                                     self.transitions + bossTransitions,
                                                      bidir,
                                                      dotDir)
                 transitionsOk = True

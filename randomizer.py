@@ -5,7 +5,7 @@ import argparse, random, os.path, json, sys, shutil
 from itemrandomizerweb.Randomizer import Randomizer, RandoSettings, progSpeeds
 from itemrandomizerweb.AreaRandomizer import AreaRandomizer
 from graph_locations import locations as graphLocations
-from graph_access import vanillaTransitions, getDoorConnections
+from graph_access import vanillaTransitions, getDoorConnections, vanillaBossesTransitions, getRandomBossTransitions
 from parameters import Knows, easy, medium, hard, harder, hardcore, mania, text2diff, diff2text
 from utils import PresetLoader
 from rom import RomPatcher, RomPatches, FakeROM
@@ -42,6 +42,9 @@ if __name__ == "__main__":
     parser.add_argument('--area',
                         help="area mode", action='store_true',
                         dest='area', default=False)
+    parser.add_argument('--bosses',
+                        help="randomize bosses", action='store_true',
+                        dest='bosses', default=False)
     parser.add_argument('--areaLayoutBase',
                         help="use simple layout patch for area mode", action='store_true',
                         dest='areaLayoutBase', default=False)
@@ -244,6 +247,8 @@ if __name__ == "__main__":
         seedCode = 'FX'
     elif restrictions['MajorMinor'] == 'Chozo':
         seedCode = 'ZX'
+    if args.bosses == True:
+        seedCode = 'B'+seedCode
     if args.area == True:
         seedCode = 'A'+seedCode
 
@@ -312,19 +317,21 @@ if __name__ == "__main__":
                 i += 1
             else:
                 raise ValueError("Invalid button name : " + str(b))
-
     # print("qty = " + str(qty))
     # print("restrictions = " + str(restrictions))
     # print("superFun = " + str(args.superFun))
     log.init(args.debug)
     randoSettings = RandoSettings(maxDifficulty, progSpeed, progDiff, qty, restrictions, args.superFun, args.runtimeLimit_s)
+    bossTransitions = vanillaBossesTransitions
+    if args.bosses == True:
+        bossTransitions = getRandomBossTransitions()
     if args.area == True:
         if args.dot == True:
             dotDir = args.directory
         else:
             dotDir = None
         try:
-            randomizer = AreaRandomizer(graphLocations, randoSettings, seedName, dotDir=dotDir)
+            randomizer = AreaRandomizer(graphLocations, randoSettings, seedName, bossTransitions, dotDir=dotDir)
         except RuntimeError:
             msg = "Cannot generate area layout. Retry, and change the super fun settings if the problem happens again."
             dumpErrorMsg(args.output, msg)
@@ -333,15 +340,15 @@ if __name__ == "__main__":
         RomPatches.ActivePatches += RomPatches.AreaSet
         if args.areaLayoutBase == True:
             RomPatches.ActivePatches.remove(RomPatches.AreaRandoGatesOther)
-        doors = getDoorConnections(randomizer.areaGraph)
     else:
         try:
-            randomizer = Randomizer(graphLocations, randoSettings, seedName, vanillaTransitions)
+            randomizer = Randomizer(graphLocations, randoSettings, seedName, vanillaTransitions + bossTransitions)
         except RuntimeError:
-            msg = "Locations unreachable detected with preset/super fun/max diff. Retry, and change the Super Fun settings and or Maximum difficulty if the problem happens again."
+            msg = "Locations unreachable detected with preset/super fun/max diff. Retry, and change the Super Fun settings and/or Maximum difficulty if the problem happens again."
             dumpErrorMsg(args.output, msg)
             print("DIAG: {}".format(msg))
             sys.exit(-1)
+    doors = getDoorConnections(randomizer.areaGraph, args.area, args.bosses)
     itemLocs = randomizer.generateItems()
     if itemLocs is None:
         dumpErrorMsg(args.output, randomizer.errorMsg)
@@ -379,12 +386,13 @@ if __name__ == "__main__":
             romPatcher = RomPatcher(magic=args.raceMagic)
 
         romPatcher.writeItemsLocs(itemLocs)
-        romPatcher.applyIPSPatches(args.patches, args.noLayout, args.noGravHeat, args.area, args.areaLayoutBase, args.noVariaTweaks)
+        romPatcher.applyIPSPatches(args.patches, args.noLayout, args.noGravHeat, args.area, args.bosses, args.areaLayoutBase, args.noVariaTweaks)
         romPatcher.writeSeed(seed) # lol if race mode
         romPatcher.writeSpoiler(itemLocs)
         romPatcher.writeRandoSettings(randoSettings, itemLocs)
+        romPatcher.writeDoorConnections(doors)
         if args.area == True:
-            romPatcher.writeDoorConnections(doors)
+            romPatcher.writeTourianRefill()
 #        romPatcher.writeTransitionsCredits(randomizer.areaGraph.getCreditsTransitions())
         if ctrlDict is not None:
             romPatcher.writeControls(ctrlDict)

@@ -19,13 +19,14 @@ class AccessPoint(object):
     # internal : if true, shall not be used for connecting areas
     def __init__(self, name, graphArea, transitions,
                  traverse=lambda sm: SMBool(True),
-                 exitInfo=None, entryInfo=None, roomInfo=None, shortName=None, internal=False):
+                 exitInfo=None, entryInfo=None, roomInfo=None, shortName=None, internal=False, boss=False):
         self.Name = name
         self.GraphArea = graphArea
         self.ExitInfo = exitInfo
         self.EntryInfo = entryInfo
         self.RoomInfo = roomInfo
         self.Internal = internal
+        self.Boss = boss
         self.transitions = transitions
         self.traverse = traverse
         if shortName is not None:

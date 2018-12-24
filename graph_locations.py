@@ -245,6 +245,20 @@ locations = [
     'Area': "Brinstar",
     'GraphArea': "Kraid",
     'SolveArea': "Kraid",
+    'Name': "Kraid",
+    'Class': ["Boss"],
+    'Room': 'Kraid Room',
+    'AccessFrom' : {
+        'KraidRoomIn': lambda sm: SMBool(True)
+    },
+    'Available': lambda sm: sm.enoughStuffsKraid(),
+    'Pickup': lambda: Bosses.beatBoss('Kraid'),
+    'Unpickup': lambda: Bosses.unbeatBoss('Kraid')
+},
+{
+    'Area': "Brinstar",
+    'GraphArea': "Kraid",
+    'SolveArea': "Kraid",
     'Name': "Varia Suit",
     'Class': ["Major", "Chozo"],
     'CanHidden': True,
@@ -252,12 +266,9 @@ locations = [
     'Visibility': "Chozo",
     'Room': 'Varia Suit Room',
     'AccessFrom' : {
-        'Warehouse Zeela Room Left': lambda sm: SMBool(True)
+        'KraidRoomIn': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: sm.wand(sm.canPassBombPassages(),
-                                    sm.enoughStuffsKraid()),
-    'Pickup': lambda: Bosses.beatBoss('Kraid'),
-    'Unpickup': lambda: Bosses.unbeatBoss('Kraid')
+    'Available': lambda sm: Bosses.bossDead('Kraid')
 },
 {
     'Area': "Norfair",
@@ -394,6 +405,20 @@ locations = [
     'Area': "LowerNorfair",
     'GraphArea': "LowerNorfair",
     'SolveArea': "Lower Norfair After Amphitheater",
+    'Name': "Ridley",
+    'Class': ["Boss"],
+    'Room': 'Ridley Room',
+    'AccessFrom' : {
+        'RidleyRoomIn': lambda sm: SMBool(True)
+    },
+    'Available': lambda sm: sm.wand(sm.canHellRun('LowerNorfair'), sm.enoughStuffsRidley()),
+    'Pickup': lambda: Bosses.beatBoss('Ridley'),
+    'Unpickup': lambda: Bosses.unbeatBoss('Ridley')
+},
+{
+    'Area': "LowerNorfair",
+    'GraphArea': "LowerNorfair",
+    'SolveArea': "Lower Norfair After Amphitheater",
     'Name': "Energy Tank, Ridley",
     'Class': ["Major", "Chozo"],
     'CanHidden': True,
@@ -401,11 +426,9 @@ locations = [
     'Visibility': "Hidden",
     'Room': 'Ridley Tank Room',
     'AccessFrom' : {
-        'Ridley Zone': lambda sm: SMBool(True)
+        'RidleyRoomIn': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: sm.wand(sm.canHellRun('LowerNorfair'), sm.enoughStuffsRidley()),
-    'Pickup': lambda: Bosses.beatBoss('Ridley'),
-    'Unpickup': lambda: Bosses.unbeatBoss('Ridley')
+    'Available': lambda sm: Bosses.bossDead('Ridley')
 },
 {
     'Area': "LowerNorfair",
@@ -480,6 +503,20 @@ locations = [
     'Area': "WreckedShip",
     'GraphArea': "WreckedShip",
     'SolveArea': "WreckedShip Main",
+    'Name': "Phantoon",
+    'Class': ["Boss"],
+    'Room': 'Phantoon Room',
+    'AccessFrom' : {
+        'PhantoonRoomIn': lambda sm: SMBool(True)
+    },
+    'Available': lambda sm: sm.enoughStuffsPhantoon(),
+    'Pickup': lambda: Bosses.beatBoss('Phantoon'),
+    'Unpickup': lambda: Bosses.unbeatBoss('Phantoon')
+},
+{
+    'Area': "WreckedShip",
+    'GraphArea': "WreckedShip",
+    'SolveArea': "WreckedShip Main",
     'Name': "Right Super, Wrecked Ship",
     'Class': ["Major", "Chozo"],
     'CanHidden': True,
@@ -487,11 +524,9 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Wrecked Ship East Super Room',
     'AccessFrom' : {
-        'Wrecked Ship Main': lambda sm: SMBool(True)
+        'Wrecked Ship Main': lambda sm: Bosses.bossDead('Phantoon')
     },
-    'Available': lambda sm: sm.wand(sm.canOpenGreenDoors(), sm.enoughStuffsPhantoon(), sm.canPassBombPassages()),
-    'Pickup': lambda: Bosses.beatBoss('Phantoon'),
-    'Unpickup': lambda: Bosses.unbeatBoss('Phantoon')
+    'Available': lambda sm: sm.canPassBombPassages()
 },
 {
     'Area': "WreckedShip",
@@ -653,6 +688,20 @@ locations = [
     'Area': "Maridia",
     'GraphArea': "Maridia",
     'SolveArea': "Maridia Pink Top",
+    'Name': "Draygon",
+    'Class': ["Boss"],
+    'Room': 'Draygon Room',
+    'AccessFrom' : {
+        'DraygonRoomIn': lambda sm: SMBool(True)
+    },
+    'Available': lambda sm: sm.enoughStuffsDraygon(),
+    'Pickup': lambda: Bosses.beatBoss('Draygon'),
+    'Unpickup': lambda: Bosses.unbeatBoss('Draygon')
+},
+{
+    'Area': "Maridia",
+    'GraphArea': "Maridia",
+    'SolveArea': "Maridia Pink Top",
     'Name': "Space Jump",
     'Class': ["Major", "Chozo"],
     'CanHidden': True,
@@ -660,35 +709,24 @@ locations = [
     'Visibility': "Chozo",
     'Room': 'Space Jump Room',
     'AccessFrom' : {
-        'Main Street Bottom': lambda sm: sm.canAccessDraygonFromMainStreet()
+        'DraygonRoomIn': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: sm.enoughStuffsDraygon(),
-    'Pickup': lambda: Bosses.beatBoss('Draygon'),
-    'Unpickup': lambda: Bosses.unbeatBoss('Draygon'),
-    # to get out of draygon room:
-    #   with gravity but without highjump/bomb/space jump: gravity jump
-    #   dessyreqt randomizer in machosist can have suitless draygon:
-    #     to exit draygon room: grapple or crystal flash (for free shine spark)
-    #     to exit precious room: spring ball jump, xray scope glitch or stored spark
-    'PostAvailable': lambda sm: sm.wor(sm.wand(sm.haveItem('Gravity'),
-                                               sm.wor(sm.canFly(),
-                                                      sm.knowsGravityJump(),
-                                                      sm.wand(sm.haveItem('HiJump'),
-                                                              sm.haveItem('SpeedBooster')))),
-                                       sm.wand(sm.wand(sm.canCrystalFlash(),
-                                                       sm.knowsDraygonRoomCrystalFlash()),
-                                               # use the spark either to exit draygon room or precious room
-                                               sm.wor(sm.wand(sm.haveItem('Grapple'),
-                                                              sm.knowsDraygonRoomGrappleExit()),
-                                                      sm.wand(sm.haveItem('XRayScope'),
-                                                              sm.knowsPreciousRoomXRayExit()),
-                                                      sm.canSpringBallJump())),
-                                       # spark-less exit (no CF)
-                                       sm.wand(sm.wand(sm.haveItem('Grapple'),
-                                                       sm.knowsDraygonRoomGrappleExit()),
-                                               sm.wor(sm.wand(sm.haveItem('XRayScope'),
-                                                              sm.knowsPreciousRoomXRayExit()),
-                                                      sm.canSpringBallJump())))
+    'Available': lambda sm: Bosses.bossDead('Draygon')
+},
+{
+    'Area': "Tourian",
+    'GraphArea': "Tourian",
+    'SolveArea': "Tourian",
+    'Name': "Mother Brain",
+    'Class': ["Boss"],
+    'Room': 'Mother Brain Room',
+    'AccessFrom' : {
+        'Statues Hallway Left': lambda sm: sm.wand(Bosses.bossDead('Kraid'),
+                                                   Bosses.bossDead('Phantoon'),
+                                                   Bosses.bossDead('Draygon'),
+                                                   Bosses.bossDead('Ridley'))
+    },
+    'Available': lambda sm: sm.enoughStuffsMotherbrain(),
 },
 ###### MINORS
 {

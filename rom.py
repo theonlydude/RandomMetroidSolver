@@ -458,15 +458,14 @@ class RomReader:
     def getPlandoAddresses(self):
         self.romFile.seek(0x2F6000)
         addresses = []
-        i = 0
         # loop only 100 times (there's 100 locations)
-        while True and i < 100:
+        for i in range(100):
             address = self.readWord()
             if address == 0xFFFF:
-                return addresses
+                break
             else:
                 addresses.append(address)
-                i += 1
+        return addresses
 
 class RomPatcher:
     # standard:

@@ -211,7 +211,8 @@ class ItemManager:
             self.addItem('NoEnergy', self.majorClass)
         return self.itemPool
 
-    def getItem(self, itemType, itemClass):
+    @staticmethod
+    def getItem(itemType, itemClass=None):
         # TODO::use objects instead of dicts ?
         item = copy.copy(ItemManager.Items[itemType])
         if itemClass is not None:

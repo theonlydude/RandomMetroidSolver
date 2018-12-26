@@ -1248,50 +1248,177 @@ def tracker():
     if session.tracker is None:
         session.tracker = {}
 
-    if "area" not in session.tracker:
-        session.tracker["area"] = {}
-        session.tracker["area"]["lines"] = {}
-        session.tracker["area"]["linesSeq"] = []
-        session.tracker["area"]["firstTime"] = True
+        session.tracker["state"] = {} # {"lines": {}, "linesSeq": []}
+        session.tracker["preset"] = "regular"
+        session.tracker["seed"] = None
 
-    if "item" not in session.tracker:
-        session.tracker["item"] = {}
-        session.tracker["item"]["state"] = {}
-        session.tracker["item"]["preset"] = "regular"
+        # set to False in tracker.html
+        session.tracker["firstTime"] = True
 
     # load presets list
     (stdPresets, comPresets) = loadPresetsList()
 
     return dict(stdPresets=stdPresets, comPresets=comPresets)
 
-def validatePoint(point):
-    if request.vars[point] == None:
-        raiseHttp(400, "Missing parameter {}".format(point), True)
+class WS(object):
+    @staticmethod
+    def factory():
+        scope = request.vars.scope
+        if scope not in ["area", "item", "common"]:
+            raiseHttp(400, "Unknown scope: {}, must be area/item/common".format(scope), True)
 
-    pointValue = request.vars[point]
+        action = request.vars.action
+        if action not in ['add', 'remove', 'clear', 'init', 'get', 'save']:
+            raiseHttp(400, "Unknown action {}, must be add/remove/clear/init/get/save".format(action), True)
 
-    if pointValue not in ['lowerMushroomsLeft', 'moatRight', 'greenPiratesShaftBottomRight',
-                          'keyhunterRoomBottom', 'morphBallRoomLeft', 'greenBrinstarElevatorRight',
-                          'greenHillZoneTopRight', 'noobBridgeRight', 'westOceanLeft', 'crabMazeLeft',
-                          'lavaDiveRight', 'threeMuskateersRoomLeft', 'warehouseZeelaRoomLeft',
-                          'warehouseEntranceLeft', 'warehouseEntranceRight', 'singleChamberTopRight',
-                          'kronicBoostRoomBottomLeft', 'mainStreetBottom', 'crabHoleBottomLeft', 'leCoudeRight',
-                          'redFishRoomLeft', 'redTowerTopLeft', 'caterpillarRoomTopRight', 'redBrinstarElevator',
-                          'eastTunnelRight', 'eastTunnelTopRight', 'glassTunnelTop', 'statuesHallwayLeft']:
-        raiseHttp(400, "Wrong value for {}: {}".format(point, pointValue), True)
+        try:
+            WSClass = globals()["WS_{}_{}".format(scope, action)]
+            return WSClass()
+        except:
+            raiseHttp(400, "Unknown scope/action combo", True)
 
-def validateAreaTrackerParams():
-    if request.vars.action == None:
-        raiseHttp(400, "Missing parameter action", True)
-    action = request.vars.action
+    def validate(self):
+        # check that mode is in the state
+        if "mode" not in session.tracker:
+            raiseHttp(400, "Missing current mode in session", True)
 
-    if action not in ['add', 'remove', 'clear', 'get']:
-        raiseHttp(400, "Unknown action {}, must be add/remove/clear/get".format(action), True)
+    def action(self):
+        pass
 
-    if action == 'add':
+def WS_common_init(WS):
+    def validate(self):
+        self.mode = request.vars.mode
+        if mode not in ["standard", "seedless", "plando"]:
+            raiseHttp(400, "Unknown mode, must be standard/seedless/plando", True)
+
+        session.tracker["mode"] = self.mode
+
+    def action(self):
+        if self.mode == "seedless":
+            # init isolver in seedless mode
+            # TODO::add this to isolver:
+            session.tracker["state"] = {"lines": {}, "linesSeq": []}
+
+
+def WS_common_get(WS):
+    def validate(self):
+        super(WS_common_get, self).validate()
+
+    def action(self):
+        pass
+
+def WS_common_save(WS):
+    def validate(self):
+        super(WS_common_save, self).validate()
+
+    def action(self):
+        if session.tracker["mode"] != "plando":
+            raiseHttp(400, "Save can only be use in plando mode", True)
+
+def WS_area_add(WS):
+    def validatePoint(self, point):
+        if request.vars[point] == None:
+            raiseHttp(400, "Missing parameter {}".format(point), True)
+
+        pointValue = request.vars[point]
+
+        if pointValue not in ['lowerMushroomsLeft', 'moatRight', 'greenPiratesShaftBottomRight',
+                              'keyhunterRoomBottom', 'morphBallRoomLeft', 'greenBrinstarElevatorRight',
+                              'greenHillZoneTopRight', 'noobBridgeRight', 'westOceanLeft', 'crabMazeLeft',
+                              'lavaDiveRight', 'threeMuskateersRoomLeft', 'warehouseZeelaRoomLeft',
+                              'warehouseEntranceLeft', 'warehouseEntranceRight', 'singleChamberTopRight',
+                              'kronicBoostRoomBottomLeft', 'mainStreetBottom', 'crabHoleBottomLeft', 'leCoudeRight',
+                              'redFishRoomLeft', 'redTowerTopLeft', 'caterpillarRoomTopRight', 'redBrinstarElevator',
+                              'eastTunnelRight', 'eastTunnelTopRight', 'glassTunnelTop', 'statuesHallwayLeft']:
+            raiseHttp(400, "Wrong value for {}: {}".format(point, pointValue), True)
+
+    def validate(self):
+        super(WS_area_add, self).validate()
+
         # startPoint and endPoint
         validatePoint("startPoint")
         validatePoint("endPoint")
+
+    def action(self):
+        if session.tracker["mode"] == "seedless":
+            startPoint = request.vars.startPoint
+            endPoint = request.vars.endPoint
+            session.tracker["state"]["lines"][startPoint] = endPoint
+            session.tracker["state"]["lines"][endPoint] = startPoint
+            session.tracker["state"]["linesSeq"].append(startPoint)
+        else:
+            # TODO::send the new transition to the isolver
+            pass
+
+def WS_area_remove(WS_area):
+    def __init__(self, vars):
+        self.vars = vars
+
+    def validate(self):
+        super(WS_area_remove, self).validate()
+
+    def action(self):
+        if session.tracker["mode"] == "seedless":
+            if len(session.tracker["state"]["linesSeq"]) > 0:
+                startPoint = session.tracker["state"]["linesSeq"].pop()
+                endPoint = session.tracker["state"]["lines"][startPoint]
+
+                del session.tracker["state"]["lines"][startPoint]
+                del session.tracker["state"]["lines"][endPoint]
+
+def WS_area_clear(WS_area):
+    def validate(self):
+        super(WS_area_clear, self).validate()
+
+    def action(self):
+        if session.tracker["mode"] == "seedless":
+            session.tracker["state"]["lines"] = {}
+            session.tracker["state"]["linesSeq"] = []
+
+def WS_item_add(WS):
+    def validate(self):
+        super(WS_item_add, self).validate()
+
+        # new location
+        if request.vars.locName not in ['EnergyTankGauntlet', 'Bomb', 'EnergyTankTerminator', 'ReserveTankBrinstar', 'ChargeBeam', 'MorphingBall', 'EnergyTankBrinstarCeiling', 'EnergyTankEtecoons', 'EnergyTankWaterway', 'EnergyTankBrinstarGate', 'XRayScope', 'Spazer', 'EnergyTankKraid', 'VariaSuit', 'IceBeam', 'EnergyTankCrocomire', 'HiJumpBoots', 'GrappleBeam', 'ReserveTankNorfair', 'SpeedBooster', 'WaveBeam', 'EnergyTankRidley', 'ScrewAttack', 'EnergyTankFirefleas', 'ReserveTankWreckedShip', 'EnergyTankWreckedShip', 'RightSuperWreckedShip', 'GravitySuit', 'EnergyTankMamaturtle', 'PlasmaBeam', 'ReserveTankMaridia', 'SpringBall', 'EnergyTankBotwoon', 'SpaceJump', 'PowerBombCrateriasurface', 'MissileoutsideWreckedShipbottom', 'MissileoutsideWreckedShiptop', 'MissileoutsideWreckedShipmiddle', 'MissileCrateriamoat', 'MissileCrateriabottom', 'MissileCrateriagauntletright', 'MissileCrateriagauntletleft', 'SuperMissileCrateria', 'MissileCrateriamiddle', 'PowerBombgreenBrinstarbottom', 'SuperMissilepinkBrinstar', 'MissilegreenBrinstarbelowsupermissile', 'SuperMissilegreenBrinstartop', 'MissilegreenBrinstarbehindmissile', 'MissilegreenBrinstarbehindreservetank', 'MissilepinkBrinstartop', 'MissilepinkBrinstarbottom', 'PowerBombpinkBrinstar', 'MissilegreenBrinstarpipe', 'PowerBombblueBrinstar', 'MissileblueBrinstarmiddle', 'SuperMissilegreenBrinstarbottom', 'MissileblueBrinstarbottom', 'MissileblueBrinstartop', 'MissileblueBrinstarbehindmissile', 'PowerBombredBrinstarsidehopperroom', 'PowerBombredBrinstarspikeroom', 'MissileredBrinstarspikeroom', 'MissileKraid', 'Missilelavaroom', 'MissilebelowIceBeam', 'MissileaboveCrocomire', 'MissileHiJumpBoots', 'EnergyTankHiJumpBoots', 'PowerBombCrocomire', 'MissilebelowCrocomire', 'MissileGrappleBeam', 'MissileNorfairReserveTank', 'MissilebubbleNorfairgreendoor', 'MissilebubbleNorfair', 'MissileSpeedBooster', 'MissileWaveBeam', 'MissileGoldTorizo', 'SuperMissileGoldTorizo', 'MissileMickeyMouseroom', 'MissilelowerNorfairabovefireflearoom', 'PowerBomblowerNorfairabovefireflearoom', 'PowerBombPowerBombsofshame', 'MissilelowerNorfairnearWaveBeam', 'MissileWreckedShipmiddle', 'MissileGravitySuit', 'MissileWreckedShiptop', 'SuperMissileWreckedShipleft', 'MissilegreenMaridiashinespark', 'SuperMissilegreenMaridia', 'MissilegreenMaridiatatori', 'SuperMissileyellowMaridia', 'MissileyellowMaridiasupermissile', 'MissileyellowMaridiafalsewall', 'MissileleftMaridiasandpitroom', 'MissilerightMaridiasandpitroom', 'PowerBombrightMaridiasandpitroom', 'MissilepinkMaridia', 'SuperMissilepinkMaridia', 'MissileDraygon', 'MotherBrain']:
+            raiseHttp(400, "Unknown location name: {}".format(request.vars.locName), True)
+
+        if request.vars.itemName not in [None, 'ETank', 'Missile', 'Super', 'PowerBomb', 'Bomb', 'Charge', 'Ice', 'HiJump', 'SpeedBooster', 'Wave', 'Spazer', 'SpringBall', 'Varia', 'Plasma', 'Grapple', 'Morph', 'Reserve', 'Gravity', 'XRayScope', 'SpaceJump', 'ScrewAttack', 'Nothing']:
+                raiseHttp(400, "Unknown item name: {}".format(request.vars.itemName), True)
+
+    def action(self):
+        pass
+
+def WS_item_remove(WS):
+    def validate(self):
+        super(WS_item_remove, self).validate()
+
+    def action(self):
+        pass
+
+def WS_item_clear(WS):
+    def validate(self):
+        super(WS_item_clear, self).validate()
+
+    def action(self):
+        pass
+
+
+
+def trackerWebService():
+    # unified web service for item/area trackers
+    if session.tracker is None:
+        raiseHttp(400, "No session found for the Tracker Web service", True)
+
+    ws = WS()
+    ws.validate()
+    ret = ws.action()
+
+    if ret == None:
+        # return something
+        raiseHttp(200, "OK", True)
+    else:
+        return json.dumps(ret)
 
 def areaTrackerWebService():
     # web service to store tracker actions
@@ -1376,14 +1503,6 @@ def validateItemTrackerParams():
         isPlando = request.vars.isPlando
         if isPlando not in ["", "on"]:
             raiseHttp(400, "Wrong value for isPlando: {}".format(isPlando), True)
-
-    elif action == 'add':
-        # new location
-        if request.vars.locName not in ['EnergyTankGauntlet', 'Bomb', 'EnergyTankTerminator', 'ReserveTankBrinstar', 'ChargeBeam', 'MorphingBall', 'EnergyTankBrinstarCeiling', 'EnergyTankEtecoons', 'EnergyTankWaterway', 'EnergyTankBrinstarGate', 'XRayScope', 'Spazer', 'EnergyTankKraid', 'VariaSuit', 'IceBeam', 'EnergyTankCrocomire', 'HiJumpBoots', 'GrappleBeam', 'ReserveTankNorfair', 'SpeedBooster', 'WaveBeam', 'EnergyTankRidley', 'ScrewAttack', 'EnergyTankFirefleas', 'ReserveTankWreckedShip', 'EnergyTankWreckedShip', 'RightSuperWreckedShip', 'GravitySuit', 'EnergyTankMamaturtle', 'PlasmaBeam', 'ReserveTankMaridia', 'SpringBall', 'EnergyTankBotwoon', 'SpaceJump', 'PowerBombCrateriasurface', 'MissileoutsideWreckedShipbottom', 'MissileoutsideWreckedShiptop', 'MissileoutsideWreckedShipmiddle', 'MissileCrateriamoat', 'MissileCrateriabottom', 'MissileCrateriagauntletright', 'MissileCrateriagauntletleft', 'SuperMissileCrateria', 'MissileCrateriamiddle', 'PowerBombgreenBrinstarbottom', 'SuperMissilepinkBrinstar', 'MissilegreenBrinstarbelowsupermissile', 'SuperMissilegreenBrinstartop', 'MissilegreenBrinstarbehindmissile', 'MissilegreenBrinstarbehindreservetank', 'MissilepinkBrinstartop', 'MissilepinkBrinstarbottom', 'PowerBombpinkBrinstar', 'MissilegreenBrinstarpipe', 'PowerBombblueBrinstar', 'MissileblueBrinstarmiddle', 'SuperMissilegreenBrinstarbottom', 'MissileblueBrinstarbottom', 'MissileblueBrinstartop', 'MissileblueBrinstarbehindmissile', 'PowerBombredBrinstarsidehopperroom', 'PowerBombredBrinstarspikeroom', 'MissileredBrinstarspikeroom', 'MissileKraid', 'Missilelavaroom', 'MissilebelowIceBeam', 'MissileaboveCrocomire', 'MissileHiJumpBoots', 'EnergyTankHiJumpBoots', 'PowerBombCrocomire', 'MissilebelowCrocomire', 'MissileGrappleBeam', 'MissileNorfairReserveTank', 'MissilebubbleNorfairgreendoor', 'MissilebubbleNorfair', 'MissileSpeedBooster', 'MissileWaveBeam', 'MissileGoldTorizo', 'SuperMissileGoldTorizo', 'MissileMickeyMouseroom', 'MissilelowerNorfairabovefireflearoom', 'PowerBomblowerNorfairabovefireflearoom', 'PowerBombPowerBombsofshame', 'MissilelowerNorfairnearWaveBeam', 'MissileWreckedShipmiddle', 'MissileGravitySuit', 'MissileWreckedShiptop', 'SuperMissileWreckedShipleft', 'MissilegreenMaridiashinespark', 'SuperMissilegreenMaridia', 'MissilegreenMaridiatatori', 'SuperMissileyellowMaridia', 'MissileyellowMaridiasupermissile', 'MissileyellowMaridiafalsewall', 'MissileleftMaridiasandpitroom', 'MissilerightMaridiasandpitroom', 'PowerBombrightMaridiasandpitroom', 'MissilepinkMaridia', 'SuperMissilepinkMaridia', 'MissileDraygon', 'MotherBrain']:
-            raiseHttp(400, "Unknown location name: {}".format(request.vars.locName), True)
-
-        if request.vars.itemName not in [None, 'ETank', 'Missile', 'Super', 'PowerBomb', 'Bomb', 'Charge', 'Ice', 'HiJump', 'SpeedBooster', 'Wave', 'Spazer', 'SpringBall', 'Varia', 'Plasma', 'Grapple', 'Morph', 'Reserve', 'Gravity', 'XRayScope', 'SpaceJump', 'ScrewAttack', 'Nothing']:
-                raiseHttp(400, "Unknown item name: {}".format(request.vars.itemName), True)
 
 def locName4isolver(locName):
     # remove space and special characters

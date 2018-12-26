@@ -181,7 +181,7 @@ accessPoints = [
                                                SMBool(sm.haveItemCount('PowerBomb', 2)),
                                                sm.wand(sm.haveItem('SpeedBooster'),
                                                        sm.knowsShortCharge()))),
-        'RidleyRoomOut': lambda sm: SMBool(True)
+        'RidleyRoomOut': lambda sm: sm.canHellRun('LowerNorfair')
     }, internal=True),
     AccessPoint('Three Muskateers Room Left', 'LowerNorfair', {
         'Firefleas': lambda sm: sm.wand(sm.canHellRun('LowerNorfair'),
@@ -193,13 +193,13 @@ accessPoints = [
        entryInfo = {'SamusX':0x134, 'SamusY':0x88},
        shortName="LN\\THREE MUSK."),
     AccessPoint('RidleyRoomOut', 'LowerNorfair', {
-        'Ridley Zone': lambda sm: SMBool(True)
+        'Ridley Zone': lambda sm: sm.canHellRun('LowerNorfair')
     }, boss = True,
        roomInfo = {'RoomPtr':0xb37a, "area": 0x2},
        exitInfo = {'DoorPtr':0x98ca, 'direction': 0x5, "cap": (0xe, 0x6), "bitFlag": 0x0,
                    "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0},
        entryInfo = {'SamusX':0x2e, 'SamusY':0x98},
-       traverse=lambda sm: sm.canOpenRedDoors()),
+       traverse=lambda sm: sm.wand(sm.canHellRun('LowerNorfair'), sm.canOpenRedDoors())),
     AccessPoint('RidleyRoomIn', 'LowerNorfair', {},
        boss = True,
        roomInfo = {'RoomPtr':0xb32e, "area": 0x2},

@@ -407,7 +407,6 @@ class InteractiveSolver(CommonSolver):
         RomLoader.factory(self.patches).loadPatches()
 
         self.loadPreset(self.presetFileName)
-        self.areaGraph = AccessGraph(accessPoints, self.curGraphTransitions)
 
         if scope == 'item':
             locName = params['loc']
@@ -432,10 +431,14 @@ class InteractiveSolver(CommonSolver):
                 self.clearTransitions()
             else:
                 if action == 'add':
+                    startPoint = params['startPoint']
+                    endPoint = params['endPoint']
                     self.addTransition(self.transWeb2Internal(startPoint), self.transWeb2Internal(endPoint))
                 elif action == 'remove':
                     # remove last transition
                     self.cancelLastTransition()
+
+        self.areaGraph = AccessGraph(accessPoints, self.curGraphTransitions)
 
         # add already collected items to smbm
         self.smbm.addItems(self.collectedItems)

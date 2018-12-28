@@ -170,6 +170,17 @@ class RomReader:
         'areaLayout': {'address': 0x252FA7, 'value': 0xF8, 'desc': "Area layout additional modifications"}
     }
 
+    @staticmethod
+    def getDefaultPatches():
+        # called by the isolver in seedless mode
+        # activate only layout patch (the most common one)
+        ret = {}
+        for patch in RomReader.patches:
+            if patch == 'layout':
+                ret[RomReader.patches[patch]['address']] = RomReader.patches[patch]['value']
+            else:
+                ret[RomReader.patches[patch]['address']] = 0xFF
+
     def __init__(self, romFile, magic=None):
         self.romFile = romFile
         self.race = None

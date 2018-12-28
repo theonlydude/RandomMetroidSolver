@@ -1384,7 +1384,7 @@ def WS_item_add(WS):
             raiseHttp(400, "Unknown location name: {}".format(request.vars.locName), True)
 
         if request.vars.itemName not in [None, 'ETank', 'Missile', 'Super', 'PowerBomb', 'Bomb', 'Charge', 'Ice', 'HiJump', 'SpeedBooster', 'Wave', 'Spazer', 'SpringBall', 'Varia', 'Plasma', 'Grapple', 'Morph', 'Reserve', 'Gravity', 'XRayScope', 'SpaceJump', 'ScrewAttack', 'Nothing']:
-                raiseHttp(400, "Unknown item name: {}".format(request.vars.itemName), True)
+            raiseHttp(400, "Unknown item name: {}".format(request.vars.itemName), True)
 
     def action(self):
         pass

@@ -1123,6 +1123,9 @@ class Randomizer(object):
     # fill up unreachable locations with "junk" to maximize the chance of the ROM
     # to be finishable
     def fillRestrictedLocations(self):
+        if self.restrictions['MajorMinor'] == 'Chozo':
+            self.itemPool = self.nonChozoItemPool
+
         for loc in self.restrictedLocations:
             isMajor = self.isLocMajor(loc)
             isMinor = self.isLocMinor(loc)
@@ -1145,6 +1148,9 @@ class Randomizer(object):
                 break
             self.log.debug("Fill: {} at {}".format(itemLocation['Item']['Type'], itemLocation['Location']['Name']))
             self.getItem(itemLocation, False)
+
+        if self.restrictions['MajorMinor'] == 'Chozo':
+            self.itemPool = self.chozoItemPool
 
     def chozoCheck(self):
         if self.restrictions['MajorMinor'] == 'Chozo':

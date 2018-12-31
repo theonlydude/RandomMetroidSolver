@@ -66,12 +66,12 @@ class SolverState(object):
         self.state["visitedLocationsWeb"] = self.getAvailableLocationsWeb(solver.visitedLocations)
         # dict {locNameWeb: {infos}, ...}
         self.state["remainLocationsWeb"] = self.getRemainLocationsWeb(solver.majorLocations)
-        # bool
-        self.state["isPlando"] = solver.isPlando
         # string: standard/seedless/plando
         self.state["mode"] = solver.mode
         # string:
         self.state["seed"] = solver.seed
+        # dict {point: point, ...} / array of startPoints
+        (self.state["linesWeb"], self.state["linesSeqWeb"]) = self.getLinesWeb(solver.curGraphTransitions)
 
     def toSolver(self, solver):
         if 'majorsSplit' in self.state:
@@ -98,7 +98,8 @@ class SolverState(object):
         Bosses.reset()
         for boss in self.state["bosses"]:
             Bosses.beatBoss(boss)
-        solver.isPlando = self.state["isPlando"] if "isPlando" in self.state else False
+        solver.mode = self.state["mode"]
+        solver.seed = self.state["seed"]
 
     def getLocsData(self, locations):
         ret = {}
@@ -199,6 +200,17 @@ class SolverState(object):
                                 "knows": ["Sequence Break"],
                                 "items": []}
         return ret
+
+    def getLinesWeb(self, transitions):
+        lines = {}
+        linesSeq = []
+        for (start, end) in transitions:
+            startWeb =
+            endWeb = 
+            lines[startWeb] = endWeb
+            lines[endWeb] = startWeb
+            linesSeq.append((startWeb, endWeb))
+        return (lines, linesSeq)
 
     def getAvailableLocations(self, locations):
         ret = {}
@@ -376,6 +388,7 @@ class InteractiveSolver(CommonSolver):
     def initialize(self, mode, rom, presetFileName, magic):
         # load rom and preset, return first state
         self.mode = mode
+        self.seed = rom
 
         self.locations = graphLocations
         self.smbm = SMBoolManager()

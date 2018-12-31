@@ -1520,7 +1520,7 @@ def returnState(state):
                            "remainLocations": state["remainLocationsWeb"] if "remainLocationsWeb" in state else [],
                            "areaRando": state["areaRando"],
                            "lastLoc": locName4isolver(state["lastLoc"]),
-                           "isPlando": state["isPlando"]})
+                           "mode": state["mode"]})
     else:
         raiseHttp(200, "OK", True)
 

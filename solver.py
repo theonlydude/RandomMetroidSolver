@@ -158,7 +158,7 @@ class SolverState(object):
         else:
             return "mania"
 
-    def locName4isolver(self, locName):
+    def name4isolver(self, locName):
         # remove space and special characters
         # sed -e 's+ ++g' -e 's+,++g' -e 's+(++g' -e 's+)++g' -e 's+-++g'
         return locName.translate(None, " ,()-")
@@ -177,7 +177,7 @@ class SolverState(object):
         for loc in locations:
             if "difficulty" in loc and loc["difficulty"].bool == True:
                 diff = loc["difficulty"]
-                locName = self.locName4isolver(loc["Name"])
+                locName = self.name4isolver(loc["Name"])
                 ret[locName] = {"difficulty": self.diff4isolver(diff.difficulty),
                                 "knows": self.knows2isolver(diff.knows),
                                 "items": list(set(diff.items)),
@@ -194,7 +194,7 @@ class SolverState(object):
         ret = {}
         for loc in locations:
             if "difficulty" not in loc or ("difficulty" in loc and loc["difficulty"].bool == False):
-                locName = self.locName4isolver(loc["Name"])
+                locName = self.name4isolver(loc["Name"])
                 ret[locName] = {"item": loc["itemName"],
                                 "name": loc["Name"],
                                 "knows": ["Sequence Break"],
@@ -205,8 +205,8 @@ class SolverState(object):
         lines = {}
         linesSeq = []
         for (start, end) in transitions:
-            startWeb =
-            endWeb = 
+            startWeb = self.name4isolver(start)
+            endWeb = self.name4isolver(end)
             lines[startWeb] = endWeb
             lines[endWeb] = startWeb
             linesSeq.append((startWeb, endWeb))

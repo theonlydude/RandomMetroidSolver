@@ -15,7 +15,6 @@ from parameters import Knows, Settings, Controller, isKnows, isButton
 from solver import Conf
 from parameters import diff2text, text2diff
 from solver import StandardSolver, DifficultyDisplayer, InteractiveSolver
-from rom import RomLoader
 from utils import PresetLoader
 import db
 
@@ -1248,7 +1247,7 @@ def tracker():
     if session.tracker is None:
         session.tracker = {}
 
-        session.tracker["state"] = {} # {"lines": {}, "linesSeq": []}
+        session.tracker["state"] = {}
         session.tracker["preset"] = "regular"
         session.tracker["seed"] = None
 
@@ -1278,195 +1277,102 @@ class WS(object):
             raiseHttp(400, "Unknown scope/action combo", True)
 
     def validate(self):
-        # check that mode is in the state
-        if "mode" not in session.tracker:
-            raiseHttp(400, "Missing current mode in session", True)
+        if session.tracker is None:
+            raiseHttp(400, "No session found for the Tracker", True)
+
+        if request.vars.action == None:
+            raiseHttp(400, "Missing parameter action", True)
+        action = request.vars.action
+
+        if action not in ['init', 'add', 'remove', 'clear', 'get', 'save']:
+            raiseHttp(400, "Unknown action {}, must be init/add/remove/clear/get/save".format(action), True)
 
     def action(self):
         pass
+
+    def returnState(self):
+        if len(session.tracker["state"]) > 0:
+            #print("state returned to frontend: availWeb {}, visWeb {}".format(session.tracker["item"]["state"]["availableLocationsWeb"], session.tracker["item"]["state"]["visitedLocationsWeb"]))
+            state = session.tracker["item"]["state"]
+            return json.dumps({"availableLocations": state["availableLocationsWeb"],
+                               "visitedLocations": state["visitedLocationsWeb"],
+                               # compatibility with existing sessions
+                               "remainLocations": state["remainLocationsWeb"] if "remainLocationsWeb" in state else [],
+                               "areaRando": state["areaRando"],
+                               "lastLoc": locName4isolver(state["lastLoc"]),
+                               "mode": state["mode"],
+                               "lines": state["linesWeb"],
+                               "linesSeq": state["linesSeqWeb"]})
+        else:
+            raiseHttp(200, "OK", True)
+
+    def callSolverAction(self, scope, action, parameters):
+        # check that we have a state in the session
+        if "state" not in session.tracker:
+            raiseHttp(400, "Missing Solver state in the session", True)
+
+        mode = session.tracker["state"]["mode"]
+
+        (fd1, jsonInFileName) = tempfile.mkstemp()
+        (fd2, jsonOutFileName) = tempfile.mkstemp()
+        params = [
+            'python2',  os.path.expanduser("~/RandomMetroidSolver/solver.py"),
+            '--interactive',
+            '--state',  jsonInFileName,
+            '--output', jsonOutFileName,
+            '--action', action,
+            '--mode', mode,
+            '--scope', scope
+        ]
+        if action == 'add':
+            if scope == 'item':
+                params += ['--loc', parameters["loc"]]
+                if mode != 'standard':
+                    params += ['--item', parameters["item"]]
+            elif scope == 'area':
+                params += ['--startPoint', parameters["startPoint"],
+                           '--endPoint', parameters["endPoint"]]
+
+        # dump state as input
+        with open(jsonInFileName, 'w') as jsonFile:
+            json.dump(session.tracker["state"], jsonFile)
+
+        print("before calling isolver: {}".format(params))
+        start = datetime.now()
+        ret = subprocess.call(params)
+        end = datetime.now()
+        duration = (end - start).total_seconds()
+        print("ret: {}, duration: {}s".format(ret, duration))
+
+        if ret == 0:
+            with open(jsonOutFileName) as jsonFile:
+                state = json.load(jsonFile)
+            os.close(fd1)
+            os.remove(jsonInFileName)
+            os.close(fd2)
+            os.remove(jsonOutFileName)
+            if action == 'save':
+                return json.dumps(state)
+            else:
+                session.tracker["state"] = state
+                return self.returnState()
+        else:
+            os.close(fd1)
+            os.remove(jsonInFileName)
+            os.close(fd2)
+            os.remove(jsonOutFileName)
+            raiseHttp(400, "Something wrong happened while iteratively solving the ROM", True)
 
 def WS_common_init(WS):
     def validate(self):
-        self.mode = request.vars.mode
-        if mode not in ["standard", "seedless", "plando"]:
-            raiseHttp(400, "Unknown mode, must be standard/seedless/plando", True)
-
-        session.tracker["mode"] = self.mode
-
-    def action(self):
-        if self.mode == "seedless":
-            # init isolver in seedless mode
-            # TODO::add this to isolver:
-            session.tracker["state"] = {"lines": {}, "linesSeq": []}
-
-
-def WS_common_get(WS):
-    def validate(self):
         super(WS_common_get, self).validate()
 
-    def action(self):
-        pass
+        if request.vars.mode not in ["standard", "seedless", "plando"]:
+            raiseHttp(400, "Unknown mode, must be standard/seedless/plando", True)
 
-def WS_common_save(WS):
-    def validate(self):
-        super(WS_common_save, self).validate()
+        if request.vars.scope != 'common':
+            raiseHttp(400, "Unknown scope, must be common", True)
 
-    def action(self):
-        if session.tracker["mode"] != "plando":
-            raiseHttp(400, "Save can only be use in plando mode", True)
-
-def WS_area_add(WS):
-    def validatePoint(self, point):
-        if request.vars[point] == None:
-            raiseHttp(400, "Missing parameter {}".format(point), True)
-
-        pointValue = request.vars[point]
-
-        if pointValue not in ['lowerMushroomsLeft', 'moatRight', 'greenPiratesShaftBottomRight',
-                              'keyhunterRoomBottom', 'morphBallRoomLeft', 'greenBrinstarElevatorRight',
-                              'greenHillZoneTopRight', 'noobBridgeRight', 'westOceanLeft', 'crabMazeLeft',
-                              'lavaDiveRight', 'threeMuskateersRoomLeft', 'warehouseZeelaRoomLeft',
-                              'warehouseEntranceLeft', 'warehouseEntranceRight', 'singleChamberTopRight',
-                              'kronicBoostRoomBottomLeft', 'mainStreetBottom', 'crabHoleBottomLeft', 'leCoudeRight',
-                              'redFishRoomLeft', 'redTowerTopLeft', 'caterpillarRoomTopRight', 'redBrinstarElevator',
-                              'eastTunnelRight', 'eastTunnelTopRight', 'glassTunnelTop', 'statuesHallwayLeft']:
-            raiseHttp(400, "Wrong value for {}: {}".format(point, pointValue), True)
-
-    def validate(self):
-        super(WS_area_add, self).validate()
-
-        # startPoint and endPoint
-        validatePoint("startPoint")
-        validatePoint("endPoint")
-
-    def action(self):
-        if session.tracker["mode"] == "seedless":
-            startPoint = request.vars.startPoint
-            endPoint = request.vars.endPoint
-            session.tracker["state"]["lines"][startPoint] = endPoint
-            session.tracker["state"]["lines"][endPoint] = startPoint
-            session.tracker["state"]["linesSeq"].append(startPoint)
-        else:
-            # TODO::send the new transition to the isolver
-            pass
-
-def WS_area_remove(WS_area):
-    def __init__(self, vars):
-        self.vars = vars
-
-    def validate(self):
-        super(WS_area_remove, self).validate()
-
-    def action(self):
-        if session.tracker["mode"] == "seedless":
-            if len(session.tracker["state"]["linesSeq"]) > 0:
-                startPoint = session.tracker["state"]["linesSeq"].pop()
-                endPoint = session.tracker["state"]["lines"][startPoint]
-
-                del session.tracker["state"]["lines"][startPoint]
-                del session.tracker["state"]["lines"][endPoint]
-
-def WS_area_clear(WS_area):
-    def validate(self):
-        super(WS_area_clear, self).validate()
-
-    def action(self):
-        if session.tracker["mode"] == "seedless":
-            session.tracker["state"]["lines"] = {}
-            session.tracker["state"]["linesSeq"] = []
-
-def WS_item_add(WS):
-    def validate(self):
-        super(WS_item_add, self).validate()
-
-        # new location
-        if request.vars.locName not in ['EnergyTankGauntlet', 'Bomb', 'EnergyTankTerminator', 'ReserveTankBrinstar', 'ChargeBeam', 'MorphingBall', 'EnergyTankBrinstarCeiling', 'EnergyTankEtecoons', 'EnergyTankWaterway', 'EnergyTankBrinstarGate', 'XRayScope', 'Spazer', 'EnergyTankKraid', 'VariaSuit', 'IceBeam', 'EnergyTankCrocomire', 'HiJumpBoots', 'GrappleBeam', 'ReserveTankNorfair', 'SpeedBooster', 'WaveBeam', 'EnergyTankRidley', 'ScrewAttack', 'EnergyTankFirefleas', 'ReserveTankWreckedShip', 'EnergyTankWreckedShip', 'RightSuperWreckedShip', 'GravitySuit', 'EnergyTankMamaturtle', 'PlasmaBeam', 'ReserveTankMaridia', 'SpringBall', 'EnergyTankBotwoon', 'SpaceJump', 'PowerBombCrateriasurface', 'MissileoutsideWreckedShipbottom', 'MissileoutsideWreckedShiptop', 'MissileoutsideWreckedShipmiddle', 'MissileCrateriamoat', 'MissileCrateriabottom', 'MissileCrateriagauntletright', 'MissileCrateriagauntletleft', 'SuperMissileCrateria', 'MissileCrateriamiddle', 'PowerBombgreenBrinstarbottom', 'SuperMissilepinkBrinstar', 'MissilegreenBrinstarbelowsupermissile', 'SuperMissilegreenBrinstartop', 'MissilegreenBrinstarbehindmissile', 'MissilegreenBrinstarbehindreservetank', 'MissilepinkBrinstartop', 'MissilepinkBrinstarbottom', 'PowerBombpinkBrinstar', 'MissilegreenBrinstarpipe', 'PowerBombblueBrinstar', 'MissileblueBrinstarmiddle', 'SuperMissilegreenBrinstarbottom', 'MissileblueBrinstarbottom', 'MissileblueBrinstartop', 'MissileblueBrinstarbehindmissile', 'PowerBombredBrinstarsidehopperroom', 'PowerBombredBrinstarspikeroom', 'MissileredBrinstarspikeroom', 'MissileKraid', 'Missilelavaroom', 'MissilebelowIceBeam', 'MissileaboveCrocomire', 'MissileHiJumpBoots', 'EnergyTankHiJumpBoots', 'PowerBombCrocomire', 'MissilebelowCrocomire', 'MissileGrappleBeam', 'MissileNorfairReserveTank', 'MissilebubbleNorfairgreendoor', 'MissilebubbleNorfair', 'MissileSpeedBooster', 'MissileWaveBeam', 'MissileGoldTorizo', 'SuperMissileGoldTorizo', 'MissileMickeyMouseroom', 'MissilelowerNorfairabovefireflearoom', 'PowerBomblowerNorfairabovefireflearoom', 'PowerBombPowerBombsofshame', 'MissilelowerNorfairnearWaveBeam', 'MissileWreckedShipmiddle', 'MissileGravitySuit', 'MissileWreckedShiptop', 'SuperMissileWreckedShipleft', 'MissilegreenMaridiashinespark', 'SuperMissilegreenMaridia', 'MissilegreenMaridiatatori', 'SuperMissileyellowMaridia', 'MissileyellowMaridiasupermissile', 'MissileyellowMaridiafalsewall', 'MissileleftMaridiasandpitroom', 'MissilerightMaridiasandpitroom', 'PowerBombrightMaridiasandpitroom', 'MissilepinkMaridia', 'SuperMissilepinkMaridia', 'MissileDraygon', 'MotherBrain']:
-            raiseHttp(400, "Unknown location name: {}".format(request.vars.locName), True)
-
-        if request.vars.itemName not in [None, 'ETank', 'Missile', 'Super', 'PowerBomb', 'Bomb', 'Charge', 'Ice', 'HiJump', 'SpeedBooster', 'Wave', 'Spazer', 'SpringBall', 'Varia', 'Plasma', 'Grapple', 'Morph', 'Reserve', 'Gravity', 'XRayScope', 'SpaceJump', 'ScrewAttack', 'Nothing']:
-            raiseHttp(400, "Unknown item name: {}".format(request.vars.itemName), True)
-
-    def action(self):
-        pass
-
-def WS_item_remove(WS):
-    def validate(self):
-        super(WS_item_remove, self).validate()
-
-    def action(self):
-        pass
-
-def WS_item_clear(WS):
-    def validate(self):
-        super(WS_item_clear, self).validate()
-
-    def action(self):
-        pass
-
-
-
-def trackerWebService():
-    # unified web service for item/area trackers
-    if session.tracker is None:
-        raiseHttp(400, "No session found for the Tracker Web service", True)
-
-    ws = WS()
-    ws.validate()
-    ret = ws.action()
-
-    if ret == None:
-        # return something
-        raiseHttp(200, "OK", True)
-    else:
-        return json.dumps(ret)
-
-def areaTrackerWebService():
-    # web service to store tracker actions
-
-    # check params
-    validateAreaTrackerParams()
-
-    # init session
-    if session.tracker is None:
-        raiseHttp(400, "No session found for the Area Tracker", True)
-
-    # handle action
-    action = request.vars.action
-    print("areaTrackerWebService: action={}".format(action))
-
-    if action == 'add':
-        startPoint = request.vars.startPoint
-        endPoint = request.vars.endPoint
-        session.tracker["area"]["lines"][startPoint] = endPoint
-        session.tracker["area"]["lines"][endPoint] = startPoint
-        session.tracker["area"]["linesSeq"].append(startPoint)
-
-    elif action == 'remove':
-        if len(session.tracker["area"]["linesSeq"]) > 0:
-            startPoint = session.tracker["area"]["linesSeq"].pop()
-            endPoint = session.tracker["area"]["lines"][startPoint]
-
-            del session.tracker["area"]["lines"][startPoint]
-            del session.tracker["area"]["lines"][endPoint]
-    elif action == 'clear':
-        session.tracker["area"]["lines"] = {}
-        session.tracker["area"]["linesSeq"] = []
-    elif action == 'get':
-        return json.dumps({"lines": session.tracker["area"]["lines"],
-                           "linesSeq": session.tracker["area"]["linesSeq"]})
-
-    # return something
-    raiseHttp(200, "OK", True)
-
-def validateItemTrackerParams():
-    if request.vars.action == None:
-        raiseHttp(400, "Missing parameter action", True)
-    action = request.vars.action
-
-    if action not in ['init', 'add', 'remove', 'clear', 'get', 'save']:
-        raiseHttp(400, "Unknown action {}, must be init/add/remove/clear/get/save".format(action), True)
-
-    if action == 'init':
         # preset
         preset = request.vars.preset
         if request == None:
@@ -1500,9 +1406,180 @@ def validateItemTrackerParams():
         if IS_LENGTH(maxsize=255, minsize=1)(uploadFile)[1] is not None:
             raiseHttp(400, "Wrong length for ROM file name, name must be between 1 and 255 characters: {}".format(request.vars.romFile), True)
 
-        isPlando = request.vars.isPlando
-        if isPlando not in ["", "on"]:
-            raiseHttp(400, "Wrong value for isPlando: {}".format(isPlando), True)
+    def action(self):
+        mode = request.vars.mode
+        if mode != 'suitless':
+            try:
+                (base, jsonRomFileName) = generateJsonROM(request.vars.romJson)
+            except Exception as e:
+                raiseHttp(400, "Can't load JSON ROM: {}".format(e), True)
+            seed = base + '.sfc'
+        else:
+            seed = 'seedless'
+            jsonRomFileName = None
+
+        preset = request.vars.preset
+        presetFileName = '{}/{}.json'.format(getPresetDir(preset), preset)
+
+        session.tracker["seed"] = seed
+        session.tracker["preset"] = preset
+
+        return self.callSolverInit(jsonRomFileName, presetFileName,
+                                   preset, request.vars.fileName, mode)
+
+    def callSolverInit(self, jsonRomFileName, presetFileName, preset, romFileName, mode):
+        if mode != 'suitless':
+            (canSolve, magic) = canSolveROM(jsonRomFileName)
+            if canSolve == False:
+                raiseHttp(400, "Race seed is protected from solving")
+        else:
+            magic = None
+
+        (fd, jsonOutFileName) = tempfile.mkstemp()
+        params = [
+            'python2',  os.path.expanduser("~/RandomMetroidSolver/solver.py"),
+            '-r', str(jsonRomFileName),
+            '--preset', presetFileName,
+            '--output', jsonOutFileName,
+            '--action', "init",
+            '--interactive',
+            '--mode', mode,
+            '--scope', 'common'
+        ]
+
+        if magic != None:
+            params += ['--race', str(magic)]
+
+        print("before calling isolver: {}".format(params))
+        start = datetime.now()
+        ret = subprocess.call(params)
+        end = datetime.now()
+        duration = (end - start).total_seconds()
+        print("ret: {}, duration: {}s".format(ret, duration))
+
+        if ret == 0:
+            DB = db.DB()
+            DB.addISolver(preset, romFileName)
+            DB.close()
+
+            with open(jsonOutFileName) as jsonFile:
+                state = json.load(jsonFile)
+            os.close(fd)
+            os.remove(jsonOutFileName)
+            session.tracker["state"] = state
+            return self.returnState()
+        else:
+            os.close(fd)
+            os.remove(jsonOutFileName)
+            raiseHttp(400, "Something wrong happened while initializing the ISolver", True)
+
+def WS_common_get(WS):
+    def validate(self):
+        super(WS_common_get, self).validate()
+
+    def action(self):
+        return self.returnState()
+
+def WS_common_save(WS):
+    def validate(self):
+        super(WS_common_save, self).validate()
+
+    def action(self):
+        if session.tracker["mode"] != "plando":
+            raiseHttp(400, "Save can only be use in plando mode", True)
+
+def WS_area_add(WS):
+    def validatePoint(self, point):
+        if request.vars[point] == None:
+            raiseHttp(400, "Missing parameter {}".format(point), True)
+
+        pointValue = request.vars[point]
+
+        if pointValue not in ['lowerMushroomsLeft', 'moatRight', 'greenPiratesShaftBottomRight',
+                              'keyhunterRoomBottom', 'morphBallRoomLeft', 'greenBrinstarElevatorRight',
+                              'greenHillZoneTopRight', 'noobBridgeRight', 'westOceanLeft', 'crabMazeLeft',
+                              'lavaDiveRight', 'threeMuskateersRoomLeft', 'warehouseZeelaRoomLeft',
+                              'warehouseEntranceLeft', 'warehouseEntranceRight', 'singleChamberTopRight',
+                              'kronicBoostRoomBottomLeft', 'mainStreetBottom', 'crabHoleBottomLeft', 'leCoudeRight',
+                              'redFishRoomLeft', 'redTowerTopLeft', 'caterpillarRoomTopRight', 'redBrinstarElevator',
+                              'eastTunnelRight', 'eastTunnelTopRight', 'glassTunnelTop', 'statuesHallwayLeft']:
+            raiseHttp(400, "Wrong value for {}: {}".format(point, pointValue), True)
+
+    def validate(self):
+        super(WS_area_add, self).validate()
+
+        # startPoint and endPoint
+        self.validatePoint("startPoint")
+        self.validatePoint("endPoint")
+
+        if len(session.tracker["state"]) == 0:
+            raiseHttp(400, "ISolver state is empty", True)
+
+    def action(self):
+        return self.callSolverAction("area", "add", {"startPoint": request.vars.startPoint,
+                                                     "endPoint": request.vars.endPoint})
+
+def WS_area_remove(WS_area):
+    def __init__(self, vars):
+        self.vars = vars
+
+    def validate(self):
+        super(WS_area_remove, self).validate()
+
+    def action(self):
+        return self.callSolverAction("area", "remove", {})
+
+def WS_area_clear(WS_area):
+    def validate(self):
+        super(WS_area_clear, self).validate()
+
+    def action(self):
+        return self.callSolverAction("area", "clear", {})
+
+def WS_item_add(WS):
+    def validate(self):
+        super(WS_item_add, self).validate()
+
+        # new location
+        if request.vars.locName not in ['EnergyTankGauntlet', 'Bomb', 'EnergyTankTerminator', 'ReserveTankBrinstar', 'ChargeBeam', 'MorphingBall', 'EnergyTankBrinstarCeiling', 'EnergyTankEtecoons', 'EnergyTankWaterway', 'EnergyTankBrinstarGate', 'XRayScope', 'Spazer', 'EnergyTankKraid', 'VariaSuit', 'IceBeam', 'EnergyTankCrocomire', 'HiJumpBoots', 'GrappleBeam', 'ReserveTankNorfair', 'SpeedBooster', 'WaveBeam', 'EnergyTankRidley', 'ScrewAttack', 'EnergyTankFirefleas', 'ReserveTankWreckedShip', 'EnergyTankWreckedShip', 'RightSuperWreckedShip', 'GravitySuit', 'EnergyTankMamaturtle', 'PlasmaBeam', 'ReserveTankMaridia', 'SpringBall', 'EnergyTankBotwoon', 'SpaceJump', 'PowerBombCrateriasurface', 'MissileoutsideWreckedShipbottom', 'MissileoutsideWreckedShiptop', 'MissileoutsideWreckedShipmiddle', 'MissileCrateriamoat', 'MissileCrateriabottom', 'MissileCrateriagauntletright', 'MissileCrateriagauntletleft', 'SuperMissileCrateria', 'MissileCrateriamiddle', 'PowerBombgreenBrinstarbottom', 'SuperMissilepinkBrinstar', 'MissilegreenBrinstarbelowsupermissile', 'SuperMissilegreenBrinstartop', 'MissilegreenBrinstarbehindmissile', 'MissilegreenBrinstarbehindreservetank', 'MissilepinkBrinstartop', 'MissilepinkBrinstarbottom', 'PowerBombpinkBrinstar', 'MissilegreenBrinstarpipe', 'PowerBombblueBrinstar', 'MissileblueBrinstarmiddle', 'SuperMissilegreenBrinstarbottom', 'MissileblueBrinstarbottom', 'MissileblueBrinstartop', 'MissileblueBrinstarbehindmissile', 'PowerBombredBrinstarsidehopperroom', 'PowerBombredBrinstarspikeroom', 'MissileredBrinstarspikeroom', 'MissileKraid', 'Missilelavaroom', 'MissilebelowIceBeam', 'MissileaboveCrocomire', 'MissileHiJumpBoots', 'EnergyTankHiJumpBoots', 'PowerBombCrocomire', 'MissilebelowCrocomire', 'MissileGrappleBeam', 'MissileNorfairReserveTank', 'MissilebubbleNorfairgreendoor', 'MissilebubbleNorfair', 'MissileSpeedBooster', 'MissileWaveBeam', 'MissileGoldTorizo', 'SuperMissileGoldTorizo', 'MissileMickeyMouseroom', 'MissilelowerNorfairabovefireflearoom', 'PowerBomblowerNorfairabovefireflearoom', 'PowerBombPowerBombsofshame', 'MissilelowerNorfairnearWaveBeam', 'MissileWreckedShipmiddle', 'MissileGravitySuit', 'MissileWreckedShiptop', 'SuperMissileWreckedShipleft', 'MissilegreenMaridiashinespark', 'SuperMissilegreenMaridia', 'MissilegreenMaridiatatori', 'SuperMissileyellowMaridia', 'MissileyellowMaridiasupermissile', 'MissileyellowMaridiafalsewall', 'MissileleftMaridiasandpitroom', 'MissilerightMaridiasandpitroom', 'PowerBombrightMaridiasandpitroom', 'MissilepinkMaridia', 'SuperMissilepinkMaridia', 'MissileDraygon', 'MotherBrain']:
+            raiseHttp(400, "Unknown location name: {}".format(request.vars.locName), True)
+
+        if request.vars.itemName not in [None, 'ETank', 'Missile', 'Super', 'PowerBomb', 'Bomb', 'Charge', 'Ice', 'HiJump', 'SpeedBooster', 'Wave', 'Spazer', 'SpringBall', 'Varia', 'Plasma', 'Grapple', 'Morph', 'Reserve', 'Gravity', 'XRayScope', 'SpaceJump', 'ScrewAttack', 'Nothing']:
+            raiseHttp(400, "Unknown item name: {}".format(request.vars.itemName), True)
+
+    def action(self):
+        return self.callSolverAction("item", "add", {"loc": request.vars.locName, "item": request.vars.itemName})
+
+def WS_item_remove(WS):
+    def validate(self):
+        super(WS_item_remove, self).validate()
+
+    def action(self):
+        return self.callSolverAction("item", "remove", {})
+
+def WS_item_clear(WS):
+    def validate(self):
+        super(WS_item_clear, self).validate()
+
+    def action(self):
+        return self.callSolverAction("item", "clear", {})
+
+def trackerWebService():
+    # unified web service for item/area trackers
+    if session.tracker is None:
+        raiseHttp(400, "No session found for the Tracker Web service", True)
+
+    ws = WS()
+    ws.validate()
+    ret = ws.action()
+
+    if ret == None:
+        # return something
+        raiseHttp(200, "OK", True)
+    else:
+        return json.dumps(ret)
+
+
 
 def locName4isolver(locName):
     # remove space and special characters
@@ -1510,115 +1587,6 @@ def locName4isolver(locName):
     locName = str(locName)
     return locName[0].lower()+locName[1:].translate(None, " ,()-")
 
-def returnState(state):
-    if len(session.tracker["item"]["state"]) > 0:
-        #print("state returned to frontend: availWeb {}, visWeb {}".format(session.tracker["item"]["state"]["availableLocationsWeb"], session.tracker["item"]["state"]["visitedLocationsWeb"]))
-        state = session.tracker["item"]["state"]
-        return json.dumps({"availableLocations": state["availableLocationsWeb"],
-                           "visitedLocations": state["visitedLocationsWeb"],
-                           # compatibility with existing sessions
-                           "remainLocations": state["remainLocationsWeb"] if "remainLocationsWeb" in state else [],
-                           "areaRando": state["areaRando"],
-                           "lastLoc": locName4isolver(state["lastLoc"]),
-                           "mode": state["mode"]})
-    else:
-        raiseHttp(200, "OK", True)
-
-def callSolverInit(jsonRomFileName, presetFileName, preset, romFileName, isPlando):
-    (canSolve, magic) = canSolveROM(jsonRomFileName)
-    if canSolve == False:
-        raiseHttp(400, "Race seed is protected from solving")
-
-    (fd, jsonOutFileName) = tempfile.mkstemp()
-    params = [
-        'python2',  os.path.expanduser("~/RandomMetroidSolver/solver.py"),
-        '-r', str(jsonRomFileName),
-        '--preset', presetFileName,
-        '--output', jsonOutFileName,
-        '--action', "init",
-        '--interactive'
-    ]
-
-    if magic != None:
-        params += ['--race', str(magic)]
-    if isPlando == True:
-        params += ['--plando']
-
-    print("before calling isolver: {}".format(params))
-    start = datetime.now()
-    ret = subprocess.call(params)
-    end = datetime.now()
-    duration = (end - start).total_seconds()
-    print("ret: {}, duration: {}s".format(ret, duration))
-
-    if ret == 0:
-        DB = db.DB()
-        DB.addISolver(preset, romFileName)
-        DB.close()
-
-        with open(jsonOutFileName) as jsonFile:
-            state = json.load(jsonFile)
-        os.close(fd)
-        os.remove(jsonOutFileName)
-        session.tracker["item"]["state"] = state
-        return returnState(state)
-    else:
-        os.close(fd)
-        os.remove(jsonOutFileName)
-        raiseHttp(400, "Something wrong happened while initializing solving of the ROM", True)
-
-def callSolverAction(action, locName=None, itemName=None, isPlando=False):
-    # check that we have a state in the session
-    if "state" not in session.tracker["item"]:
-        raiseHttp(400, "Missing Solver state in the session", True)
-
-    (fd1, jsonInFileName) = tempfile.mkstemp()
-    (fd2, jsonOutFileName) = tempfile.mkstemp()
-    params = [
-        'python2',  os.path.expanduser("~/RandomMetroidSolver/solver.py"),
-        '--interactive',
-        '--state',  jsonInFileName,
-        '--output', jsonOutFileName,
-        '--action', action
-    ]
-    if action == 'add':
-        params += ['--loc', locName]
-        if isPlando == True:
-            params += ['--item', itemName]
-
-    if isPlando == True:
-        params += ['--plando']
-
-    # dump state as input
-    with open(jsonInFileName, 'w') as jsonFile:
-        json.dump(session.tracker["item"]["state"], jsonFile)
-
-    print("before calling isolver: {}".format(params))
-    start = datetime.now()
-    ret = subprocess.call(params)
-    end = datetime.now()
-    duration = (end - start).total_seconds()
-    print("ret: {}, duration: {}s".format(ret, duration))
-
-    if ret == 0:
-        with open(jsonOutFileName) as jsonFile:
-            state = json.load(jsonFile)
-        os.close(fd1)
-        os.remove(jsonInFileName)
-        os.close(fd2)
-        os.remove(jsonOutFileName)
-        if action == 'save':
-            return json.dumps(state)
-        else:
-            session.tracker["item"]["state"] = state
-            return returnState(state)
-    else:
-        os.close(fd1)
-        os.remove(jsonInFileName)
-        os.close(fd2)
-        os.remove(jsonOutFileName)
-        raiseHttp(400, "Something wrong happened while iteratively solving the ROM", True)
-    
 def itemTrackerWebService():
     # web service for the interactive solver
 

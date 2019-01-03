@@ -2765,21 +2765,6 @@ function deleteLine() {
   ajaxCall({action: "remove", scope: "area"}, "upload");
 }
 
-function ajaxCallArea(dataDict, msg, okFunc=ajaxOkJSON) {
-    var request = $.ajax({
-      url: "{{=URL(f='areaTrackerWebService')}}",
-      method: "POST",
-      data: dataDict,
-      dataType: "json",
-      crossDomain: true
-    });
-
-    setWSIcon(msg);
-
-    request.done(okFunc);
-    request.fail(ajaxFailJSON);
-}
-
 function ajaxOkGetArea(jsonData) {
   var arrayLength = jsonData["linesSeq"].length;
   for(var i=0; i<arrayLength; i++) {
@@ -3011,7 +2996,7 @@ window.onload = function(){
 
   // display the help on first connection to the tracker
 {{
-  if "firstTime" in session.tracker["area"] and session.tracker["area"]["firstTime"] == True:
+  if "firstTime" in session.tracker and session.tracker["firstTime"] == True:
     session.tracker["firstTime"] = False
 }}
     startTheTour(0);
@@ -3705,7 +3690,7 @@ function startTheTour(step=-1) {
       </tr>
       <tr>
 	<td>Preset:</td>
-	<td>{{=SELECT(OPTGROUP(*stdPresets, **dict(_label="Standard presets")), OPTGROUP(*comPresets, **dict(_label="Community presets")), **dict(_name="preset", _id="preset", value=session.tracker["item"]["preset"], _class="filldropdown chzn-select"))}}</td>
+	<td>{{=SELECT(OPTGROUP(*stdPresets, **dict(_label="Standard presets")), OPTGROUP(*comPresets, **dict(_label="Community presets")), **dict(_name="preset", _id="preset", value=session.tracker["preset"], _class="filldropdown chzn-select"))}}</td>
       </tr>
     </table>
     <table>

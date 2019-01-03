@@ -2680,7 +2680,7 @@ function addVanillaTransitions() {
 
   for(var i=0; i<vanillaTransitions.length; i++) {
     addLine(vanillaTransitions[i][0], vanillaTransitions[i][1]);
-    ajaxCallArea({action: "add", startPoint: vanillaTransitions[i][0], endPoint: vanillaTransitions[i][1]}, "upload");
+    ajaxCallArea({action: "add", scope: "area", startPoint: vanillaTransitions[i][0], endPoint: vanillaTransitions[i][1]}, "upload");
   }
 }
 
@@ -2762,7 +2762,7 @@ function deleteLine() {
   delete leaderLines[endPoint];
 
   nextColor -= 1;
-  ajaxCallArea({action: "remove"}, "upload");
+  ajaxCall({action: "remove", scope: "area"}, "upload");
 }
 
 function ajaxCallArea(dataDict, msg, okFunc=ajaxOkJSON) {
@@ -2820,6 +2820,21 @@ function ajaxOkJSON(data) {
   setWSIcon("checkmark");
 }
 
+function ajaxCall(dataDict, msg, okFunc=ajaxOkJSON) {
+    var request = $.ajax({
+      url: "{{=URL(f='trackerWebService')}}",
+      method: "POST",
+      data: dataDict,
+      dataType: "json",
+      crossDomain: true
+    });
+
+    setWSIcon(msg);
+
+    request.done(okFunc);
+    request.fail(ajaxFailJSON);
+}
+
 function setWSIcon(icon) {
   var names = ["checkmark", "warning", "download", "upload", "refresh"];
   for(var i=0; i<names.length; i++) {
@@ -2831,17 +2846,17 @@ function setWSIcon(icon) {
   }
 }
 
-function onloadWS(jsonData) {
-  // we have to call the two web services sequentially or the lines can be misplaced
-  ajaxOkGetItem(jsonData);
+//function onloadWS(jsonData) {
+//  // we have to call the two web services sequentially or the lines can be misplaced
+//  ajaxOkGetItem(jsonData);
+//
+//  ajaxCallArea({action: "get"}, "download", ajaxOkGetArea);
+//}
 
-  ajaxCallArea({action: "get"}, "download", ajaxOkGetArea);
-}
-
-function setActive() {
+function setActive(mode) {
   var itemElems = ["repeatItem", "binItem"];
   var plandoElems = ["repeatPlando", "binPlando", "savePlando"];
-  if(isPlando == false) {
+  if(mode != "plando") {
     for(var i=0; i<itemElems.length; i++) {
       $("#"+itemElems[i]).removeClass("greyed");
     }
@@ -2880,7 +2895,8 @@ function isActive(elemId) {
 
 var init = false;
 var lastLoc = "landingSite";
-var isPlando = false;
+var mode = "standard";
+// var isPlando = false;
 
 // can add more variables:
 //  -state: posible values: ["available", "visited", "breakable"]
@@ -2990,13 +3006,13 @@ var locsInfo = {
 };
 
 window.onload = function(){
-  ajaxCallItem({action: "get"}, "download", onloadWS);
+  ajaxCall({action: "get", scope: "common"}, "download", ajaxOkGet);
   $("#lastLoc").attr("class", "lastLoc "+lastLoc+"Gps");
 
   // display the help on first connection to the tracker
 {{
   if "firstTime" in session.tracker["area"] and session.tracker["area"]["firstTime"] == True:
-    session.tracker["area"]["firstTime"] = False
+    session.tracker["firstTime"] = False
 }}
     startTheTour(0);
 {{
@@ -3005,7 +3021,7 @@ window.onload = function(){
 
   var filesInput = document.getElementById("uploadFile");
   filesInput.addEventListener("change", function(event) {
-    var files = event.target.files; //It returns a FileList object
+    var files = event.target.files; // It returns a FileList object
     var file = files[0];
   
     var reader = new FileReader();
@@ -3194,11 +3210,11 @@ function save() {
       document.getElementById("savePopup").style.display = "block";
     } else {
       // call WS
-      ajaxCallItem({action: "save"}, "download", ajaxOkSave);
+      ajaxCall({action: "save", scope: "common"}, "download", ajaxOkSave);
     }
   } else {
     // call WS
-    ajaxCallItem({action: "save"}, "download", ajaxOkSave);
+    ajaxCall({action: "save", scope: "common"}, "download", ajaxOkSave);
   }
 }
 
@@ -3238,7 +3254,7 @@ function ajaxOkSave(data) {
   hideSavePopup();
 }
 
-function displayPopup(isPlando) {
+function displayPopup(mode) {
   if(loaded == false) {
     return;
   }
@@ -3248,14 +3264,11 @@ function displayPopup(isPlando) {
   // chosen must be activated when it's visible, else it doesn't work...
   $(".chzn-select").chosen();
 
-  if(isPlando == true) {
-    document.getElementById("isPlando").value = "on";
-  }
+  document.getElementById("mode").value = mode;
 }
 
 function hidePopup() {
   document.getElementById("solverPopup").style.display = "none";
-  document.getElementById("isPlando").value = "";
 }
 
 function initSolver() {
@@ -3275,10 +3288,10 @@ function initSolver() {
   init = true;
 
   // prepare parameters for WS
-  ajaxCallItem({action: "init", romJson: value,
-                preset: document.getElementById("preset").value,
-                fileName: document.getElementById("fileName").value,
-                isPlando: document.getElementById("isPlando").value}, "download", ajaxOkGetItem);
+  ajaxCall({action: "init", scope: "common", romJson: value,
+            preset: document.getElementById("preset").value,
+            fileName: document.getElementById("fileName").value,
+            mode: document.getElementById("mode").value}, "download", ajaxOkGetItem);
 
   hidePopup();
 }
@@ -3290,8 +3303,12 @@ function clickLoc(elem) {
 
   var locName = elem.id;
 
-  if(isPlando == true) {
-    document.getElementById("itemPopupText").innerHTML = "Item to place at "+locName+":";
+  if(mode != "standard") {
+    if(mode == "plando") {
+      document.getElementById("itemPopupText").innerHTML = "Item to place at "+locName+":";
+    } else {
+      document.getElementById("itemPopupText").innerHTML = "Item picked up at "+locName+":";
+    }
     document.getElementById("locName").value = locName;
 
     // display item selector
@@ -3300,7 +3317,7 @@ function clickLoc(elem) {
     // check that lock is in the available list
     if("state" in locsInfo[locName] && (locsInfo[locName]["state"] == "available" || locsInfo[locName]["state"] == "break")) {
       // call webservice
-      ajaxCallItem({action: "add", locName: locName}, "upload", ajaxOkGetItem);
+      ajaxCall({action: "add", scope: "item", locName: locName}, "upload", ajaxOkGet);
   
       // if mother brain loc, display end message
      if(locName == "MotherBrain") {
@@ -3320,7 +3337,7 @@ function placeItem() {
   } else if (item == "Reserve" && itemCount["Reserve"] == 4) {
     alert("Can't add more Reserve tank");
   } else {
-    ajaxCallItem({action: "add", locName: locName, itemName: item, isPlando: "on"}, "upload", ajaxOkGetItem);
+    ajaxCall({action: "add", scope: "item", locName: locName, itemName: item}, "upload", ajaxOkGet);
   }
 }
 
@@ -3346,7 +3363,7 @@ function deleteLoc(isPlando) {
   // reset everything
   resetLocsInfo();
 
-  ajaxCallItem({action: "remove"}, "upload", ajaxOkGetItem);
+  ajaxCall({action: "remove", scope: "item"}, "upload", ajaxOkGet);
 }
 
 function resetLocsInfo() {
@@ -3388,22 +3405,7 @@ function clearLocs(isPlando) {
   resetLocsInfo();
 
   // reset the state server side
-  ajaxCallItem({action: "clear"}, "upload", ajaxOkGetItem);
-}
-
-function ajaxCallItem(dataDict, msg, okFunc=ajaxOkJSON) {
-    var request = $.ajax({
-      url: "{{=URL(f='itemTrackerWebService')}}",
-      method: "POST",
-      data: dataDict,
-      dataType: "json",
-      crossDomain: true
-    });
-
-    setWSIcon(msg);
-
-    request.done(okFunc);
-    request.fail(ajaxFailJSON);
+  ajaxCall({action: "clear", scope: "item"}, "upload", ajaxOkGet);
 }
 
 function getTooltip(locName, locData, item, visited) {
@@ -3422,20 +3424,20 @@ function getTooltip(locName, locData, item, visited) {
   }
 }
 
-function ajaxOkGetItem(jsonData) {
+function ajaxOkGet(jsonData) {
   // get dicts availableLocations and visitedLocations
   console.log("json received: [ "+jsonData+" ]");
   if(jsonData == "OK") {
     return;
   }
 
-  isPlando = jsonData["isPlando"];
+  mode = jsonData["mode"];
 
-  if(isPlando == true) {
+  if(mode != "standard") {
     hideItemPopup();
   }
 
-  setActive();
+  setActive(mode);
 
   resetItems();
 
@@ -3540,6 +3542,7 @@ function ajaxOkGetItem(jsonData) {
 
   setWSIcon("checkmark");
 
+  // TODO::now that we only compute for the added transitions, update this condition:
   // if no available locations, display a popup telling you're stuck
   if(Object.keys(jsonData["availableLocations"]).length == 0) {
     if(( ! "state" in locsInfo["MotherBrain"] ) || locsInfo["MotherBrain"]["state"] != "visited") {
@@ -3713,7 +3716,7 @@ function startTheTour(step=-1) {
     </table>
     <input id="romJson" name="romJson" style="display:none" type="text"/>
     <input id="fileName" name="fileName" style="display:none" type="text"/>
-    <input id="isPlando" name="isPlando" style="display:none" type="text"/>
+    <input id="mode" name="mode" style="display:none" type="text"/>
   </div>
 
   <div id="itemPopup" class="itemPopup">

@@ -1290,6 +1290,12 @@ class WS(object):
     def action(self):
         pass
 
+    def locName4isolver(self, locName):
+        # remove space and special characters
+        # sed -e 's+ ++g' -e 's+,++g' -e 's+(++g' -e 's+)++g' -e 's+-++g'
+        locName = str(locName)
+        return locName[0].lower()+locName[1:].translate(None, " ,()-")
+
     def returnState(self):
         if len(session.tracker["state"]) > 0:
             #print("state returned to frontend: availWeb {}, visWeb {}".format(session.tracker["item"]["state"]["availableLocationsWeb"], session.tracker["item"]["state"]["visitedLocationsWeb"]))
@@ -1299,7 +1305,7 @@ class WS(object):
                                # compatibility with existing sessions
                                "remainLocations": state["remainLocationsWeb"] if "remainLocationsWeb" in state else [],
                                "areaRando": state["areaRando"],
-                               "lastLoc": locName4isolver(state["lastLoc"]),
+                               "lastLoc": self.locName4isolver(state["lastLoc"]),
                                "mode": state["mode"],
                                "lines": state["linesWeb"],
                                "linesSeq": state["linesSeqWeb"]})
@@ -1387,24 +1393,25 @@ def WS_common_init(WS):
         if not os.path.isfile(fullPath):
             raiseHttp(400, "Unknown preset: {}".format(preset), True)
 
-        # ROM (only through file API)
-        if request.vars.romJson is None or len(request.vars.romJson) == 0:
-            raiseHttp(400, "Missing ROM to solve", True)
-        try:
-            json.loads(request.vars.romJson)
-        except:
-            raiseHttp(400, "Wrong value for romJson, must be a JSON string: [{}]".format(request.vars.romJson))
+        if request.vars.mode != 'seedless':
+            # ROM (only through file API)
+            if request.vars.romJson is None or len(request.vars.romJson) == 0:
+                raiseHttp(400, "Missing ROM to solve", True)
+            try:
+                json.loads(request.vars.romJson)
+            except:
+                raiseHttp(400, "Wrong value for romJson, must be a JSON string: [{}]".format(request.vars.romJson))
 
-        # ROM file name
-        uploadFile = request.vars.fileName
-        if uploadFile is None:
-            raiseHttp(400, "Missing ROM file name", True)
-        if IS_NOT_EMPTY()(uploadFile)[1] is not None:
-            raiseHttp(400, "File name is empty", True)
-        if IS_MATCH('[a-zA-Z0-9_\.]*')(uploadFile)[1] is not None:
-            raiseHttp(400, "Wrong value for ROM file name, must be valid file name: {}".format(request.vars.romFile), True)
-        if IS_LENGTH(maxsize=255, minsize=1)(uploadFile)[1] is not None:
-            raiseHttp(400, "Wrong length for ROM file name, name must be between 1 and 255 characters: {}".format(request.vars.romFile), True)
+            # ROM file name
+            uploadFile = request.vars.fileName
+            if uploadFile is None:
+                raiseHttp(400, "Missing ROM file name", True)
+            if IS_NOT_EMPTY()(uploadFile)[1] is not None:
+                raiseHttp(400, "File name is empty", True)
+            if IS_MATCH('[a-zA-Z0-9_\.]*')(uploadFile)[1] is not None:
+                raiseHttp(400, "Wrong value for ROM file name, must be valid file name: {}".format(request.vars.romFile), True)
+            if IS_LENGTH(maxsize=255, minsize=1)(uploadFile)[1] is not None:
+                raiseHttp(400, "Wrong length for ROM file name, name must be between 1 and 255 characters: {}".format(request.vars.romFile), True)
 
     def action(self):
         mode = request.vars.mode
@@ -1424,8 +1431,7 @@ def WS_common_init(WS):
         session.tracker["seed"] = seed
         session.tracker["preset"] = preset
 
-        return self.callSolverInit(jsonRomFileName, presetFileName,
-                                   preset, request.vars.fileName, mode)
+        return self.callSolverInit(jsonRomFileName, presetFileName, preset, seed, mode)
 
     def callSolverInit(self, jsonRomFileName, presetFileName, preset, romFileName, mode):
         if mode != 'suitless':
@@ -1487,6 +1493,8 @@ def WS_common_save(WS):
     def action(self):
         if session.tracker["mode"] != "plando":
             raiseHttp(400, "Save can only be use in plando mode", True)
+
+        return self.callSolverAction("common", "save", {})
 
 def WS_area_add(WS):
     def validatePoint(self, point):
@@ -1579,49 +1587,7 @@ def trackerWebService():
     else:
         return json.dumps(ret)
 
-
-
-def locName4isolver(locName):
-    # remove space and special characters
-    # sed -e 's+ ++g' -e 's+,++g' -e 's+(++g' -e 's+)++g' -e 's+-++g'
-    locName = str(locName)
-    return locName[0].lower()+locName[1:].translate(None, " ,()-")
-
-def itemTrackerWebService():
-    # web service for the interactive solver
-
-    # check params
-    validateItemTrackerParams()
-
-    # init session
-    if session.tracker is None:
-        raiseHttp(400, "No session found for the Item Tracker", True)
-
-    # handle action
-    action = request.vars.action
-    print("itemTrackerWebService: action={}".format(action))
-
-    isPlando = (request.vars.isPlando == "on")
-
-    if action == 'init':
-        try:
-            (base, jsonRomFileName) = generateJsonROM(request.vars.romJson)
-        except Exception as e:
-            raiseHttp(400, "Can't load JSON ROM: {}".format(e), True)
-
-        presetFileName = '{}/{}.json'.format(getPresetDir(request.vars.preset), request.vars.preset)
-        session.tracker["item"]["preset"] = request.vars.preset
-
-        return callSolverInit(jsonRomFileName, presetFileName,
-                              request.vars.preset, request.vars.fileName, isPlando)
-    elif action == 'get':
-        return returnState(session.tracker["item"]["state"])
-    else:
-        return callSolverAction(action, request.vars.locName, request.vars.itemName, isPlando)
-
-    # return something if not already done
-    raiseHttp(200, "OK", True)
-
+# race mode
 def getMagic():
     return random.randint(1, 0xffff)
 

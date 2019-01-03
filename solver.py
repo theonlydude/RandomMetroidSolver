@@ -427,8 +427,6 @@ class InteractiveSolver(CommonSolver):
 
             if action == 'clear':
                 self.clearItems(True)
-            elif action == 'save':
-                return self.savePlando()
             else:
                 if action == 'add':
                     if self.mode == 'plando' or self.mode == 'seedless':
@@ -450,6 +448,9 @@ class InteractiveSolver(CommonSolver):
                 elif action == 'remove':
                     # remove last transition
                     self.cancelLastTransition()
+        elif scope == 'common':
+            if action == 'save':
+                return self.savePlando()
 
         self.areaGraph = AccessGraph(accessPoints, self.curGraphTransitions)
 

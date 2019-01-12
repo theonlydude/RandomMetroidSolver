@@ -609,7 +609,8 @@ locations = [
                                              sm.canOpenGreenDoors(),
                                              sm.canDestroyBombWallsUnderwater()) # toilet
     },
-    'Available': lambda sm: sm.wand(sm.wor(sm.haveItem('Gravity'), # access pants room
+    'Available': lambda sm: sm.wand(sm.canOpenYellowDoors(), # in Shaktool room to let Shaktool access the sand blocks
+                                    sm.wor(sm.haveItem('Gravity'), # access pants room
                                            sm.wand(sm.haveItem('HiJump'),
                                                    sm.haveItem('Ice'),
                                                    sm.knowsGravLessLevel3())),

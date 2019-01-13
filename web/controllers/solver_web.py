@@ -753,13 +753,13 @@ def raiseHttp(code, msg, isJson=False):
 
     raise HTTP(code, msg)
 
-def getInt(param):
+def getInt(param, isJson=False):
     try:
         return int(request.vars[param])
     except:
         raiseHttp(400, "Wrong value for {}: {}, must be an int".format(param, request.vars[param]), isJson)
 
-def getFloat(param):
+def getFloat(param, isJson=False):
     try:
         return float(request.vars[param])
     except:
@@ -795,12 +795,12 @@ def validateWebServiceParams(patchs, quantities, others, isJson=False):
     for qty in quantities:
         if request.vars[qty] == 'random':
             continue
-        qtyFloat = getFloat(qty)
+        qtyFloat = getFloat(qty, isJson)
         if qtyFloat < 1.0 or qtyFloat > 9.0:
             raiseHttp(400, json.dumps("Wrong value for {}: {}, must be between 1 and 9".format(qty, request.vars[qty])), isJson)
 
     if 'seed' in others:
-        seedInt = getInt('seed')
+        seedInt = getInt('seed', isJson)
         if seedInt < 0 or seedInt > 9999999:
             raiseHttp(400, "Wrong value for seed: {}, must be between 0 and 9999999".format(request.vars[seed]), isJson)
 
@@ -809,7 +809,7 @@ def validateWebServiceParams(patchs, quantities, others, isJson=False):
             raiseHttp(400, "Wrong value for difficulty_target, authorized values: no difficulty cap/easy/medium/hard/harder/hardcore/mania", isJson)
 
     if request.vars.minorQty != 'random':
-        minorQtyInt = getInt('minorQty')
+        minorQtyInt = getInt('minorQty', isJson)
         if minorQtyInt < 1 or minorQtyInt > 100:
             raiseHttp(400, "Wrong value for minorQty, must be between 1 and 100", isJson)
 
@@ -851,7 +851,7 @@ def validateWebServiceParams(patchs, quantities, others, isJson=False):
 
     # check race mode
     if 'raceMode' in request.vars:
-        raceHour = getInt('raceMode')
+        raceHour = getInt('raceMode', isJson)
         if raceHour < 1 or raceHour > 72:
             raiseHttp(400, "Wrong number of hours for race mode: {}, must be >=1 and <= 72".format(request.vars.raceMode), isJson)
 
@@ -1201,7 +1201,7 @@ def randoParamsWebService():
     if request.vars.seed == None:
         raiseHttp(400, "Missing parameter seed", False)
 
-    seed = getInt('seed')
+    seed = getInt('seed', False)
     if seed < 0 or seed > 9999999:
         raiseHttp(400, "Wrong value for seed: {}, must be between 0 and 9999999".format(request.vars[seed]), False)
 

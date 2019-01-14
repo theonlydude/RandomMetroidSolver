@@ -3291,6 +3291,11 @@ function clickLoc(elem) {
   var locName = elem.id;
 
   if(isPlando == true) {
+    // we don't put an item in mother brain location
+    if(locName == "MotherBrain") {
+      return;
+    }
+
     document.getElementById("itemPopupText").innerHTML = "Item to place at "+locName+":";
     document.getElementById("locName").value = locName;
 

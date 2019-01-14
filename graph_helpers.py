@@ -127,10 +127,11 @@ class HelpersGraph(Helpers):
         sm = self.smbm
         return sm.wand(sm.canOpenRedDoors(),
                        sm.wor(sm.wand(sm.canHellRun('MainUpperNorfair', mult),
-                                      sm.wor(RomPatches.has(RomPatches.CathedralEntranceWallJump),
-                                             sm.haveItem('HiJump'),
-                                             sm.canFly(),
-                                             sm.haveItem('SpeedBooster'))), # spark
+                                      sm.wor(sm.wor(RomPatches.has(RomPatches.CathedralEntranceWallJump),
+                                                    sm.haveItem('HiJump'),
+                                                    sm.canFly()),
+                                             sm.wor(sm.haveItem('SpeedBooster'), # spark
+                                                    sm.canSpringBallJump()))),
                               sm.wand(sm.canHellRun('MainUpperNorfair', 0.5*mult),
                                       sm.knowsNovaBoost())))
 

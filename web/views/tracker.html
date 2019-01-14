@@ -3289,6 +3289,11 @@ function clickLoc(elem) {
   var locName = elem.id;
 
   if(mode != "standard") {
+    // we don't put an item in mother brain location
+    if(mode == "plando" && locName == "MotherBrain") {
+      return;
+    }
+
     if(mode == "plando") {
       document.getElementById("itemPopupText").innerHTML = "Item to place at "+locName+":";
     } else {

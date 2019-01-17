@@ -470,7 +470,7 @@ class RomReader:
 
     def decompress(self, address):
         # return (size of compressed data, decompressed data)
-        return Compressor(self.romFile).decompress(address)
+        return Compressor().decompress(self.romFile, address)
 
 class RomPatcher:
     # standard:

@@ -1159,6 +1159,18 @@ class RomPatcher:
         # replace STZ with STA since A is non-zero at this point
         self.romFile.write(struct.pack('B', 0x8D))
 
+    def compress(self, address, data):
+        # data: [] of 256 int
+        # address: the address where the compressed bytes will be written
+        # return the size of the compressed data
+        compressedData = Compressor().compress(data)
+
+        self.romFile.seek(address)
+        for byte in compressedData:
+            self.romFile.write(struct.pack('B', byte))
+
+        return len(compressedData)
+
 class FakeROM:
     # to have the same code for real ROM and the webservice
     def __init__(self, data={}):

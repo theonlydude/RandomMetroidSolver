@@ -727,7 +727,7 @@ locations = [
                                                    Bosses.bossDead('Draygon'),
                                                    Bosses.bossDead('Ridley'))
     },
-    'Available': lambda sm: sm.enoughStuffsMotherbrain(),
+    'Available': lambda sm: sm.enoughStuffTourian(),
 },
 ###### MINORS
 {

@@ -83,7 +83,7 @@ def validatePresetsParams(action):
     if IS_LENGTH(32)(preset)[1] is not None:
         return (False, "Preset name must be max 32 chars: {}".format(preset))
 
-    if action == 'Create':
+    if action in ['Create', 'Update']:
         if IS_NOT_EMPTY()(request.vars.password)[1] is not None:
             return (False, "Password is empty")
         if IS_ALPHANUMERIC()(request.vars.password)[1] is not None:
@@ -91,7 +91,6 @@ def validatePresetsParams(action):
         if IS_LENGTH(32)(request.vars.password)[1] is not None:
             return (False, "Password must be max 32 chars")
 
-    if action in ['Create', 'Update']:
         # check that there's not two buttons for the same action
         map = {}
         for button in Controller.__dict__:

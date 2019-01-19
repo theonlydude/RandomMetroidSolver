@@ -4,6 +4,7 @@ from smbool import SMBool
 from itemrandomizerweb.Items import ItemManager
 from itemrandomizerweb.patches import patches
 from itemrandomizerweb.stdlib import List
+from compression import Compressor
 
 def readWord(romFile):
     r0 = struct.unpack("B", romFile.read(1))[0]
@@ -430,6 +431,10 @@ class RomReader:
             else:
                 addresses.append(address)
         return addresses
+
+    def decompress(self, address):
+        # return (size of compressed data, decompressed data)
+        return Compressor().decompress(self.romFile, address)
 
 class RomPatcher:
     # standard:
@@ -1123,6 +1128,18 @@ class RomPatcher:
         # replace STZ with STA since A is non-zero at this point
         self.romFile.write(struct.pack('B', 0x8D))
 
+    def compress(self, address, data):
+        # data: [] of 256 int
+        # address: the address where the compressed bytes will be written
+        # return the size of the compressed data
+        compressedData = Compressor().compress(data)
+
+        self.romFile.seek(address)
+        for byte in compressedData:
+            self.romFile.write(struct.pack('B', byte))
+
+        return len(compressedData)
+
 class FakeROM:
     # to have the same code for real ROM and the webservice
     def __init__(self, data={}):
@@ -1223,6 +1240,9 @@ class RomLoader(object):
 
     def getPlandoAddresses(self):
         return self.romReader.getPlandoAddresses()
+
+    def decompress(self, address):
+        return self.romReader.decompress(address)
 
 class RomLoaderSfc(RomLoader):
     # standard usage (when calling from the command line)

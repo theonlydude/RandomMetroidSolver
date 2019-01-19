@@ -2809,6 +2809,7 @@ function ajaxOkGet(jsonData) {
   // get dicts availableLocations and visitedLocations
   console.log("json received: [ "+jsonData+" ]");
   if(jsonData == "OK") {
+    setWSIcon("checkmark");
     return;
   }
 
@@ -3349,7 +3350,7 @@ function displayPopup(mode) {
   // chosen must be activated when it's visible, else it doesn't work...
   $(".chzn-select").chosen();
 
-  document.getElementById("mode").value = mode;
+  // document.getElementById("mode").value = mode;
 }
 
 function hidePopup() {
@@ -3664,19 +3665,19 @@ function startTheTour(step=-1) {
       <colgroup><col class="half" /><col class="half" /></colgroup>
       <tr>
 	<td>Current Mode: </td>
-	<td><input type="text" name="cur_mode" id="cur_mode" value="n/a" readonly></td>
+	<td><input type="text" name="cur_mode" id="cur_mode" value="n/a" readonly class="full"></td>
       </tr>
       <tr>
 	<td>Current Seed: </td>
-	<td><input type="text" name="cur_seed" id="cur_seed" value="n/a" readonly></td>
+	<td><input type="text" name="cur_seed" id="cur_seed" value="n/a" readonly class="full"></td>
       </tr>
       <tr>
 	<td>Current Preset: </td>
-	<td><input type="text" name="cur_preset" id="cur_preset" value="n/a" readonly></td>
+	<td><input type="text" name="cur_preset" id="cur_preset" value="n/a" readonly class="full"></td>
       </tr>
       <tr>
 	<td>Mode: </td>
-	<td>{{=SELECT(["standard", "seedless", "plando"], _id="mode", _name="mode", value="standard", _class="full")}}</td>
+	<td>{{=SELECT("standard", "seedless", "plando", _id="mode", _name="mode", value="standard", _class="full")}}</td>
       </tr>
       <tr>
 	<td>Randomized Super Metroid ROM: </td>

@@ -564,7 +564,7 @@ class RomPatcher:
             if itemLoc['Location']['Name'] == 'Mother Brain':
                 continue
             isMorph = itemLoc['Location']['Name'] == 'Morphing Ball'
-            if itemLoc['Item']['Type'] in ['Nothing', 'NoEnergy']:
+            if itemLoc['Item']['Category'] == 'Nothing':
                 self.writeNothing(itemLoc)
                 if isMorph:
                     # nothing at morph gives a missile pack
@@ -804,9 +804,7 @@ class RomPatcher:
 
     def writeSpoiler(self, itemLocs):
         # keep only majors, filter out Etanks and Reserve
-        fItemLocs = List.filter(lambda il: ('Major' in il['Item']['Class']
-                                            and il['Item']['Type'] not in ['ETank', 'Reserve',
-                                                                           'NoEnergy', 'Nothing']),
+        fItemLocs = List.filter(lambda il: il['Item']['Category'] not in ['Ammo', 'Nothing', 'Energy'],
                                 itemLocs)
         # add location of the first instance of each minor
         for t in ['Missile', 'Super', 'PowerBomb']:

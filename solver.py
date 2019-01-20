@@ -172,6 +172,10 @@ class SolverState(object):
                 result.append(know)
         return list(set(result))
 
+    def transition2isolver(self, transition):
+        transition = str(transition)
+        return transition[0].lower()+transition[1:].translate(None, " ,()-")
+
     def getAvailableLocationsWeb(self, locations):
         ret = {}
         for loc in locations:
@@ -205,8 +209,8 @@ class SolverState(object):
         lines = {}
         linesSeq = []
         for (start, end) in transitions:
-            startWeb = self.name4isolver(start)
-            endWeb = self.name4isolver(end)
+            startWeb = self.transition2isolver(start)
+            endWeb = self.transition2isolver(end)
             lines[startWeb] = endWeb
             lines[endWeb] = startWeb
             linesSeq.append((startWeb, endWeb))
@@ -267,10 +271,11 @@ class CommonSolver(object):
             print("ROM {} majors: {} area: {} patches: {}".format(rom, self.majorsSplit, self.areaRando, self.patches))
 
             self.graphTransitions = self.romLoader.getTransitions()
-            self.curGraphTransitions = []
-            if self.graphTransitions is None:
-                self.graphTransitions = vanillaTransitions
-                self.curGraphTransitions = vanillaTransitions
+            if self.areaRando == True and interactive == True:
+                # in interactive area mode we build the graph as we play along
+                self.curGraphTransitions = []
+            else:
+                self.curGraphTransitions = self.graphTransitions
 
         self.areaGraph = AccessGraph(accessPoints, self.curGraphTransitions)
 
@@ -444,7 +449,7 @@ class InteractiveSolver(CommonSolver):
                 if action == 'add':
                     startPoint = params['startPoint']
                     endPoint = params['endPoint']
-                    self.addTransition(self.transWeb2Internal(startPoint), self.transWeb2Internal(endPoint))
+                    self.addTransition(self.transWeb2Internal[startPoint], self.transWeb2Internal[endPoint])
                 elif action == 'remove':
                     # remove last transition
                     self.cancelLastTransition()
@@ -1309,8 +1314,8 @@ def interactiveSolver(args):
         if args.scope == 'common':
             pass
         elif args.scope == 'item':
-            if args.state != None and args.action != None and args.output != None:
-                print("Missing state/loc/output parameter")
+            if args.state == None or args.action == None or args.output == None:
+                print("Missing state/action/output parameter")
                 sys.exit(1)
             if args.action == "add":
                 if args.loc == None:
@@ -1322,8 +1327,8 @@ def interactiveSolver(args):
                         sys.exit(1)
                 params = {'loc': args.loc, 'item': args.item}
         elif args.scope == 'area':
-            if args.state != None and args.action != None and args.output != None:
-                print("Missing state/loc/output parameter")
+            if args.state == None or args.action == None or args.output == None:
+                print("Missing state/action/output parameter")
                 sys.exit(1)
             if args.action == "add":
                 if args.startPoint == None or args.endPoint == None:

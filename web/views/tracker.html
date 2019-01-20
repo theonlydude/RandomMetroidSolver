@@ -2665,37 +2665,11 @@ function clickPortal(elemId) {
     if(! ((firstClick in lines) || (elemId in lines))) {
       secondClick = elemId;
 
-      // addLine(firstClick, secondClick);
-
-      ajaxCall({action: "add", scope: "area", startPoint: firstClick, endPoint: secondClick}, "upload");
+      ajaxCall({action: "add", scope: "area", startPoint: firstClick, endPoint: secondClick}, "upload", ajaxOkGet);
 
       firstClick = "";
       secondClick = "";
     }
-  }
-}
-
-function addVanillaTransitions() {
-  var vanillaTransitions = [
-    ['lowerMushroomsLeft', 'greenBrinstarElevatorRight'],
-    ['morphBallRoomLeft', 'greenHillZoneTopRight'],
-    ['moatRight', 'westOceanLeft'],
-    ['keyhunterRoomBottom', 'redBrinstarElevator'],
-    ['noobBridgeRight', 'redTowerTopLeft'],
-    ['crabMazeLeft', 'leCoudeRight'],
-    ['kronicBoostRoomBottomLeft', 'lavaDiveRight'],
-    ['threeMuskateersRoomLeft', 'singleChamberTopRight'],
-    ['warehouseEntranceLeft', 'eastTunnelRight'],
-    ['eastTunnelTopRight', 'crabHoleBottomLeft'],
-    ['caterpillarRoomTopRight', 'redFishRoomLeft'],
-    ['glassTunnelTop', 'mainStreetBottom'],
-    ['greenPiratesShaftBottomRight', 'statuesHallwayLeft'],
-    ['warehouseEntranceRight', 'warehouseZeelaRoomLeft']
-  ]
-
-  for(var i=0; i<vanillaTransitions.length; i++) {
-    addLine(vanillaTransitions[i][0], vanillaTransitions[i][1]);
-    ajaxCall({action: "add", scope: "area", startPoint: vanillaTransitions[i][0], endPoint: vanillaTransitions[i][1]}, "upload");
   }
 }
 
@@ -2738,14 +2712,14 @@ function clearLines(ask) {
       return;
     }
   }
-  ajaxCall({action: "clear", scope: "area"}, "upload");
+  ajaxCall({action: "clear", scope: "area"}, "upload", ajaxOkGet);
 }
 
 function deleteLine() {
   if(loaded == false) {
     return;
   }
-  ajaxCall({action: "remove", scope: "area"}, "upload");
+  ajaxCall({action: "remove", scope: "area"}, "upload", ajaxOkGet);
 }
 
 function startAnimation(elem) {
@@ -2910,14 +2884,6 @@ function ajaxOkGet(jsonData) {
     }
   }
 
-  if(init == true) {
-    if("areaRando" in jsonData) {
-      if(jsonData["areaRando"] == false && linesSeq.length == 0) {
-        addVanillaTransitions();
-      }
-    }
-    init = false;
-  }
   if("lastLoc" in jsonData) {
     lastLoc = jsonData["lastLoc"];
   }
@@ -2928,7 +2894,7 @@ function ajaxOkGet(jsonData) {
   // add area transitions
   var arrayLength = jsonData["linesSeq"].length;
   for(var i=0; i<arrayLength; i++) {
-    addLine(jsonData["linesSeq"][i], jsonData["lines"][jsonData["linesSeq"][i]]);
+    addLine(jsonData["linesSeq"][i][0], jsonData["linesSeq"][i][1]);
   }
 
   // TODO::now that we only compute for the added transitions, update this condition:
@@ -2980,7 +2946,6 @@ function isActive(elemId) {
 //-----------------------------------------------------------
 // ITEMS TRACKER
 
-var init = false;
 var lastLoc = "landingSite";
 var mode = "standard";
 
@@ -3369,15 +3334,12 @@ function initSolver() {
 
   // reset everything
   resetLocsInfo();
-  clearLines(false);
-
-  init = true;
 
   // prepare parameters for WS
   ajaxCall({action: "init", scope: "common", romJson: value,
             preset: document.getElementById("preset").value,
             fileName: document.getElementById("fileName").value,
-            mode: document.getElementById("mode").value}, "download", ajaxOkGetItem);
+            mode: document.getElementById("mode").value}, "download", ajaxOkGet);
 
   hidePopup();
 }

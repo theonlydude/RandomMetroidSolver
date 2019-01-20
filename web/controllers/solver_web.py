@@ -1272,8 +1272,8 @@ class WS(object):
         try:
             WSClass = globals()["WS_{}_{}".format(scope, action)]
             return WSClass()
-        except:
-            raiseHttp(400, "Unknown scope/action combo", True)
+        except Exception as e:
+            raiseHttp(400, "Unknown scope/action combo: {}/{}: {}".format(scope, action, e), True)
 
     def validate(self):
         if session.tracker is None:
@@ -1298,7 +1298,7 @@ class WS(object):
     def returnState(self):
         if len(session.tracker["state"]) > 0:
             #print("state returned to frontend: availWeb {}, visWeb {}".format(session.tracker["item"]["state"]["availableLocationsWeb"], session.tracker["item"]["state"]["visitedLocationsWeb"]))
-            state = session.tracker["item"]["state"]
+            state = session.tracker["state"]
             return json.dumps({"availableLocations": state["availableLocationsWeb"],
                                "visitedLocations": state["visitedLocationsWeb"],
                                # compatibility with existing sessions
@@ -1316,7 +1316,7 @@ class WS(object):
         if "state" not in session.tracker:
             raiseHttp(400, "Missing Solver state in the session", True)
 
-        mode = session.tracker["state"]["mode"]
+        mode = session.tracker["mode"]
 
         (fd1, jsonInFileName) = tempfile.mkstemp()
         (fd2, jsonOutFileName) = tempfile.mkstemp()
@@ -1368,9 +1368,9 @@ class WS(object):
             os.remove(jsonOutFileName)
             raiseHttp(400, "Something wrong happened while iteratively solving the ROM", True)
 
-def WS_common_init(WS):
+class WS_common_init(WS):
     def validate(self):
-        super(WS_common_get, self).validate()
+        super(WS_common_init, self).validate()
 
         if request.vars.mode not in ["standard", "seedless", "plando"]:
             raiseHttp(400, "Unknown mode, must be standard/seedless/plando", True)
@@ -1414,7 +1414,7 @@ def WS_common_init(WS):
 
     def action(self):
         mode = request.vars.mode
-        if mode != 'suitless':
+        if mode != 'seedless':
             try:
                 (base, jsonRomFileName) = generateJsonROM(request.vars.romJson)
             except Exception as e:
@@ -1429,11 +1429,12 @@ def WS_common_init(WS):
 
         session.tracker["seed"] = seed
         session.tracker["preset"] = preset
+        session.tracker["mode"] = mode
 
         return self.callSolverInit(jsonRomFileName, presetFileName, preset, seed, mode)
 
     def callSolverInit(self, jsonRomFileName, presetFileName, preset, romFileName, mode):
-        if mode != 'suitless':
+        if mode != 'seedless':
             (canSolve, magic) = canSolveROM(jsonRomFileName)
             if canSolve == False:
                 raiseHttp(400, "Race seed is protected from solving")
@@ -1478,14 +1479,14 @@ def WS_common_init(WS):
             os.remove(jsonOutFileName)
             raiseHttp(400, "Something wrong happened while initializing the ISolver", True)
 
-def WS_common_get(WS):
+class WS_common_get(WS):
     def validate(self):
         super(WS_common_get, self).validate()
 
     def action(self):
         return self.returnState()
 
-def WS_common_save(WS):
+class WS_common_save(WS):
     def validate(self):
         super(WS_common_save, self).validate()
 
@@ -1495,7 +1496,7 @@ def WS_common_save(WS):
 
         return self.callSolverAction("common", "save", {})
 
-def WS_area_add(WS):
+class WS_area_add(WS):
     def validatePoint(self, point):
         if request.vars[point] == None:
             raiseHttp(400, "Missing parameter {}".format(point), True)
@@ -1526,24 +1527,21 @@ def WS_area_add(WS):
         return self.callSolverAction("area", "add", {"startPoint": request.vars.startPoint,
                                                      "endPoint": request.vars.endPoint})
 
-def WS_area_remove(WS_area):
-    def __init__(self, vars):
-        self.vars = vars
-
+class WS_area_remove(WS):
     def validate(self):
         super(WS_area_remove, self).validate()
 
     def action(self):
         return self.callSolverAction("area", "remove", {})
 
-def WS_area_clear(WS_area):
+class WS_area_clear(WS):
     def validate(self):
         super(WS_area_clear, self).validate()
 
     def action(self):
         return self.callSolverAction("area", "clear", {})
 
-def WS_item_add(WS):
+class WS_item_add(WS):
     def validate(self):
         super(WS_item_add, self).validate()
 
@@ -1557,14 +1555,14 @@ def WS_item_add(WS):
     def action(self):
         return self.callSolverAction("item", "add", {"loc": request.vars.locName, "item": request.vars.itemName})
 
-def WS_item_remove(WS):
+class WS_item_remove(WS):
     def validate(self):
         super(WS_item_remove, self).validate()
 
     def action(self):
         return self.callSolverAction("item", "remove", {})
 
-def WS_item_clear(WS):
+class WS_item_clear(WS):
     def validate(self):
         super(WS_item_clear, self).validate()
 
@@ -1576,7 +1574,9 @@ def trackerWebService():
     if session.tracker is None:
         raiseHttp(400, "No session found for the Tracker Web service", True)
 
-    ws = WS()
+    print("trackerWebService called")
+
+    ws = WS.factory()
     ws.validate()
     ret = ws.action()
 
@@ -1584,7 +1584,7 @@ def trackerWebService():
         # return something
         raiseHttp(200, "OK", True)
     else:
-        return json.dumps(ret)
+        return ret
 
 # race mode
 def getMagic():

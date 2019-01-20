@@ -366,13 +366,7 @@ class RomReader:
                         del transitions[dest]
 
         transitions = [(t, transitions[t]) for t in transitions]
-
-        # check if transitions are vanilla transitions
-        from graph_access import isVanillaTransitions
-        if isVanillaTransitions(transitions):
-            return None
-        else:
-            return transitions
+        return transitions
 
     def getTransition(self, doorPtr):
         self.romFile.seek(0x10000 | doorPtr)

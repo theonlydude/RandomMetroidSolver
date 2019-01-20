@@ -247,6 +247,7 @@ locations = [
     'SolveArea': "Kraid",
     'Name': "Kraid",
     'Class': ["Boss"],
+    'CanHidden': False,
     'Room': 'Kraid Room',
     'AccessFrom' : {
         'KraidRoomIn': lambda sm: SMBool(True)
@@ -407,6 +408,7 @@ locations = [
     'SolveArea': "Lower Norfair After Amphitheater",
     'Name': "Ridley",
     'Class': ["Boss"],
+    'CanHidden': False,
     'Room': 'Ridley Room',
     'AccessFrom' : {
         'RidleyRoomIn': lambda sm: SMBool(True)
@@ -505,6 +507,7 @@ locations = [
     'SolveArea': "WreckedShip Main",
     'Name': "Phantoon",
     'Class': ["Boss"],
+    'CanHidden': False,
     'Room': 'Phantoon Room',
     'AccessFrom' : {
         'PhantoonRoomIn': lambda sm: SMBool(True)
@@ -691,6 +694,7 @@ locations = [
     'SolveArea': "Maridia Pink Top",
     'Name': "Draygon",
     'Class': ["Boss"],
+    'CanHidden': False,
     'Room': 'Draygon Room',
     'AccessFrom' : {
         'DraygonRoomIn': lambda sm: SMBool(True)
@@ -720,6 +724,7 @@ locations = [
     'SolveArea': "Tourian",
     'Name': "Mother Brain",
     'Class': ["Boss"],
+    'CanHidden': False,
     'Room': 'Mother Brain Room',
     'AccessFrom' : {
         'Statues Hallway Left': lambda sm: sm.wand(Bosses.bossDead('Kraid'),

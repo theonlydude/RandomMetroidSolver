@@ -393,6 +393,8 @@ if __name__ == "__main__":
         romPatcher.writeDoorConnections(doors)
         if args.area == True:
             romPatcher.writeTourianRefill()
+        if args.bosses == True:
+            romPatcher.patchPhantoonEyeDoor()
 #        romPatcher.writeTransitionsCredits(randomizer.areaGraph.getCreditsTransitions())
         if ctrlDict is not None:
             romPatcher.writeControls(ctrlDict)

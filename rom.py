@@ -1059,6 +1059,12 @@ class RomPatcher:
         self.romFile.seek(offset)
         self.romFile.write(struct.pack('B', 0x2))
 
+    # adds eye door PLM to "phantoon dead" room state in boss rando
+    def patchPhantoonEyeDoor(self):
+        # repoints PLM list to "phantoon alive" (eye door is the only diff in the list)
+        self.romFile.seek(0x7CCAF)
+        self.writeWord(0xC291)
+
     # add ASM to Tourian "door" down elevator to trigger full refill (ammo + energy)
     def writeTourianRefill(self):
         tourianDoor = 0x19222

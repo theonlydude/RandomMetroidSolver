@@ -640,6 +640,8 @@ class RomPatcher:
                 stdPatches.remove('Removes_Gravity_Suit_heat_protection')
             if self.race is not None:
                 stdPatches.append('race_mode.ips')
+            if bosses == True:
+                stdPatches.append('ridley_platform.ips')
             for patchName in stdPatches:
                 self.applyIPSPatch(patchName)
             self.writeItemsNumber()

@@ -975,10 +975,13 @@ class RomPatcher:
 
         for conn in doorConnections:
 #            print('Writing door connection ' + conn['ID'])
+            doorPtr = conn['DoorPtr']
             roomPtr = conn['RoomPtr']
             if roomPtr == 0x93fe: # west ocean
-                self.patchWestOcean(conn['DoorPtr'])
-            self.romFile.seek(0x10000+conn['DoorPtr'])
+                self.patchWestOcean(doorPtr)
+            if doorPtr == 0x91ce: # kraid room exit door
+                self.patchKraidExit(roomPtr)
+            self.romFile.seek(0x10000 + doorPtr)
 
             # write room ptr
             self.romFile.write(struct.pack('B', roomPtr & 0x000FF))
@@ -1048,6 +1051,13 @@ class RomPatcher:
         # endian convert
         self.romFile.seek(0x7B7BB)
         self.writeWord(doorPtr)
+
+    # forces CRE graphics refresh when exiting kraid's room in boss rando
+    def patchKraidExit(self, roomPtr):
+        # Room ptr in bank 8F + CRE flag offset
+        offset = 0x70000 + roomPtr + 0x8
+        self.romFile.seek(offset)
+        self.romFile.write(struct.pack('B', 0x2))
 
     # add ASM to Tourian "door" down elevator to trigger full refill (ammo + energy)
     def writeTourianRefill(self):

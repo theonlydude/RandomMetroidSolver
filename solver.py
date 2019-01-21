@@ -236,7 +236,7 @@ class SolverState(object):
             self.state = json.load(jsonFile)
 #        print("Loaded Json State:")
 #        for key in self.state:
-#            if key in ["availableLocationsWeb", "visitedLocationsWeb", "collectedItems", "visitedLocations"]:
+#            if key in ["availableLocationsWeb", "visitedLocationsWeb", "collectedItems", "availableLocations", "visitedLocations"]:
 #                print("{}: {}".format(key, self.state[key]))
 #        print("")
 
@@ -427,18 +427,15 @@ class InteractiveSolver(CommonSolver):
         self.loadPreset(self.presetFileName)
 
         if scope == 'item':
-            locName = params['loc']
-            item = params['item']
-
             if action == 'clear':
                 self.clearItems(True)
             else:
                 if action == 'add':
                     if self.mode == 'plando' or self.mode == 'seedless':
-                        self.setItemAt(locName, item)
+                        self.setItemAt(params['loc'], params['item'])
                     else:
                         # pickup item at locName
-                        self.pickItemAt(locName)
+                        self.pickItemAt(params['loc'])
                 elif action == 'remove':
                     # remove last collected item
                     self.cancelLastItem()
@@ -463,6 +460,7 @@ class InteractiveSolver(CommonSolver):
         self.smbm.addItems(self.collectedItems)
 
         # compute new available locations
+        self.clearLocs(self.majorLocations)
         self.computeLocationsDifficulty(self.majorLocations)
 
         # return them
@@ -601,6 +599,11 @@ class InteractiveSolver(CommonSolver):
 
     def clearTransitions(self):
         self.curGraphTransitions = []
+
+    def clearLocs(self, locs):
+        for loc in locs:
+            if 'difficulty' in loc:
+                del loc['difficulty']
 
     def addMotherBrainLoc(self, locations):
         # in the interactive solver mother brain is a new loc

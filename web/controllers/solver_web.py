@@ -1307,7 +1307,8 @@ class WS(object):
                                "lastLoc": self.locName4isolver(state["lastLoc"]),
                                "mode": state["mode"],
                                "lines": state["linesWeb"],
-                               "linesSeq": state["linesSeqWeb"]})
+                               "linesSeq": state["linesSeqWeb"],
+                               "allTransitions": state["allTransitions"]})
         else:
             raiseHttp(200, "OK", True)
 

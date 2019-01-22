@@ -2900,7 +2900,7 @@ function ajaxOkGet(jsonData) {
   // TODO::now that we only compute for the added transitions, update this condition:
   // if no available locations, display a popup telling you're stuck
   if(Object.keys(jsonData["availableLocations"]).length == 0) {
-    if(( ! "state" in locsInfo["MotherBrain"] ) || locsInfo["MotherBrain"]["state"] != "visited") {
+    if(jsonData["allTransitions"] == true && (( ! "state" in locsInfo["MotherBrain"] ) || locsInfo["MotherBrain"]["state"] != "visited")) {
       alert("You're stucked, you can't finish this seed with the given preset.");
     }
   }

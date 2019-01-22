@@ -72,6 +72,8 @@ class SolverState(object):
         self.state["seed"] = solver.seed
         # dict {point: point, ...} / array of startPoints
         (self.state["linesWeb"], self.state["linesSeqWeb"]) = self.getLinesWeb(solver.curGraphTransitions)
+        # bool
+        self.state["allTransitions"] = len(solver.curGraphTransitions) == len(solver.graphTransitions)
 
     def toSolver(self, solver):
         if 'majorsSplit' in self.state:

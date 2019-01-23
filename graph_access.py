@@ -103,7 +103,7 @@ accessPoints = [
     AccessPoint('Wrecked Ship Main', 'WreckedShip', {
         'West Ocean Left': lambda sm: SMBool(True),
         'Wrecked Ship Back': lambda sm: sm.canPassSpongeBath(),
-        'PhantoonRoomOut': lambda sm: sm.canOpenGreenDoors()
+        'PhantoonRoomOut': lambda sm: sm.wand(sm.canOpenGreenDoors(), sm.canPassBombPassages())
     }, internal=True),
     AccessPoint('Wrecked Ship Back', 'WreckedShip', {
         'Wrecked Ship Main': lambda sm: SMBool(True),
@@ -608,9 +608,15 @@ def getDoorConnections(graph, areas=True, bosses=False):
         src.EntryInfo.update(dst.ExitInfo)
     connections = []
     for src, dst in graph.InterAreaTransitions:
+        # area only
         if not bosses and src.Boss:
             continue
+        # boss only
         if not areas and not src.Boss:
+            continue
+        # both
+        if bosses and areas and\
+           ((src.Boss and not dst.Boss) or (dst.Boss and not src.Boss)):
             continue
         conn = {}
         conn['ID'] = str(src) + ' -> ' + str(dst)

@@ -991,8 +991,9 @@ class Randomizer(object):
         if self.itemLimit <= 0:
             return False
         pool = self.getNonProgItemPool()
-        self.log.debug("fillNonProgressionItems poolset=" + str(list(set([item['Type'] for item in pool]))))
-        poolWasEmpty = len(pool) == 0
+        poolTypes = list(set([item['Type'] for item in pool]))
+        self.log.debug("fillNonProgressionItems poolset=" + str(poolTypes))
+        poolWasEmpty = len(pool) == 0 or poolTypes == ['Boss']
         itemLocation = None
         nItems = 0
         locPoolOk = True

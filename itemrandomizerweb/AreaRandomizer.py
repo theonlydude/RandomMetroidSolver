@@ -6,7 +6,7 @@ from graph_access import vanillaTransitions, accessPoints, getAccessPoint
 def createTransitions(bidir=True):
     tFrom = []
     tTo = []
-    apNames = [ap.Name for ap in accessPoints if ap.Internal == False]
+    apNames = [ap.Name for ap in accessPoints if ap.Internal == False and ap.Boss == False]
     transitions = []
 
     def findTo(trFrom):

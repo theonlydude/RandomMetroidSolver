@@ -2788,12 +2788,13 @@ function ajaxOkGet(jsonData) {
   }
 
   mode = jsonData["mode"];
+  area = jsonData["areaRando"];
 
   if(mode != "standard") {
     hideItemPopup();
   }
 
-  setActive(mode);
+  setActive(mode, area);
 
   resetItems();
   resetLines();
@@ -2897,7 +2898,6 @@ function ajaxOkGet(jsonData) {
     addLine(jsonData["linesSeq"][i][0], jsonData["linesSeq"][i][1]);
   }
 
-  // TODO::now that we only compute for the added transitions, update this condition:
   // if no available locations, display a popup telling you're stuck
   if(Object.keys(jsonData["availableLocations"]).length == 0) {
     if(jsonData["allTransitions"] == true && (( ! "state" in locsInfo["MotherBrain"] ) || locsInfo["MotherBrain"]["state"] != "visited")) {
@@ -2906,9 +2906,10 @@ function ajaxOkGet(jsonData) {
   }
 }
 
-function setActive(mode) {
+function setActive(mode, area) {
   var itemElems = ["repeatItem", "binItem"];
   var plandoElems = ["repeatPlando", "binPlando", "savePlando"];
+  var areaElems = ["repeatArea", "binArea"];
   if(mode != "plando") {
     for(var i=0; i<itemElems.length; i++) {
       $("#"+itemElems[i]).removeClass("greyed");
@@ -2922,6 +2923,15 @@ function setActive(mode) {
     }
     for(var i=0; i<plandoElems.length; i++) {
       $("#"+plandoElems[i]).removeClass("greyed");
+    }
+  }
+  if(area == true) {
+    for(var i=0; i<areaElems.length; i++) {
+      $("#"+itemElems[i]).removeClass("greyed");
+    }
+  } else {
+    for(var i=0; i<areaElems.length; i++) {
+      $("#"+itemElems[i]).addClass("greyed");
     }
   }
 }

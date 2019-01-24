@@ -2701,17 +2701,20 @@ function addLine(startPoint, endPoint) {
   linesSeq.push(startPoint);
 }
 
-function clearLines(ask) {
+function clearLines() {
   if(loaded == false) {
     return;
   }
 
-  if(ask == true) {
-    var result = confirm("Delete all the lines ?");
-    if(result == false){
-      return;
-    }
+  if(! isActive("binArea")) {
+    return;
   }
+
+  var result = confirm("Delete all the lines ?");
+  if(result == false){
+    return;
+  }
+
   ajaxCall({action: "clear", scope: "area"}, "upload", ajaxOkGet);
 }
 
@@ -2719,6 +2722,11 @@ function deleteLine() {
   if(loaded == false) {
     return;
   }
+
+  if(! isActive("repeatArea")) {
+    return;
+  }
+
   ajaxCall({action: "remove", scope: "area"}, "upload", ajaxOkGet);
 }
 
@@ -2789,6 +2797,12 @@ function ajaxOkGet(jsonData) {
 
   mode = jsonData["mode"];
   area = jsonData["areaRando"];
+  seed = jsonData["seed"];
+  preset = jsonData["preset"];
+
+  document.getElementById("cur_mode").value = mode;
+  document.getElementById("cur_seed").value = seed;
+  document.getElementById("cur_preset").value = preset;
 
   if(mode != "standard") {
     hideItemPopup();
@@ -2927,11 +2941,11 @@ function setActive(mode, area) {
   }
   if(area == true) {
     for(var i=0; i<areaElems.length; i++) {
-      $("#"+itemElems[i]).removeClass("greyed");
+      $("#"+areaElems[i]).removeClass("greyed");
     }
   } else {
     for(var i=0; i<areaElems.length; i++) {
-      $("#"+itemElems[i]).addClass("greyed");
+      $("#"+areaElems[i]).addClass("greyed");
     }
   }
 }
@@ -2951,6 +2965,9 @@ function isActive(elemId) {
       return elemId == "startItem";
     }
   }
+  if(elemId.includes("Area")) {
+    return area;
+  }
 }
 
 //-----------------------------------------------------------
@@ -2958,6 +2975,7 @@ function isActive(elemId) {
 
 var lastLoc = "landingSite";
 var mode = "standard";
+var area = true;
 
 // can add more variables:
 //  -state: posible values: ["available", "visited", "breakable"]
@@ -3846,7 +3864,7 @@ function startTheTour(step=-1) {
     <!-- area tracker buttons -->
     <div id="titleArea" class="titleArea">AREA</div>
     <div id="repeatArea" class="repeatArea"><img src="/solver/static/images/repeat.svg" alt="Cancel Last" onclick="deleteLine()" data-toggle="tooltip" title="Remove last added transition" data-placement="bottom" data-container="body" data-html="true"></div>
-    <div id="binArea" class="binArea"><img src="/solver/static/images/bin.svg" alt="Clear" onclick="clearLines(true)" data-toggle="tooltip" title="Remove all the transitions" data-placement="bottom" data-container="body" data-html="true"></div>
+    <div id="binArea" class="binArea"><img src="/solver/static/images/bin.svg" alt="Clear" onclick="clearLines()" data-toggle="tooltip" title="Remove all the transitions" data-placement="bottom" data-container="body" data-html="true"></div>
 
     <!-- item tracker buttons -->
     <div id="titleItem" class="titleItem">ITEM</div>

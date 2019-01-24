@@ -1262,7 +1262,10 @@ locations = [
     'AccessFrom' : {
         'Warehouse Entrance Left': lambda sm: sm.wand(sm.canOpenGreenDoors(),
                                                       sm.canUsePowerBombs(),
-                                                      sm.canHellRun('Ice')),
+                                                      sm.canHellRun('Ice'),
+                                                      sm.wor(sm.wand(sm.haveItem('Morph'),
+                                                                     sm.knowsMockball()),
+                                                             sm.haveItem('SpeedBooster'))),
         'Croc Zone': lambda sm: sm.wand(sm.canHellRun('MainUpperNorfair'),
                                         sm.haveItem('SpeedBooster'),
                                         sm.knowsIceMissileFromCroc())

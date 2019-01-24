@@ -1316,7 +1316,7 @@ class WS(object):
                 "mode": state["mode"],
                 "areaRando": state["areaRando"],
                 "seed": state["seed"],
-                "preset": state["presetFileName"]
+                "preset": os.path.basename(os.path.splitext(state["presetFileName"])[0])
             })
         else:
             raiseHttp(200, "OK", True)

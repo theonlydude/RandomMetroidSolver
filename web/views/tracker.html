@@ -2665,7 +2665,7 @@ function clickPortal(elemId) {
     if(! ((firstClick in lines) || (elemId in lines))) {
       secondClick = elemId;
 
-      ajaxCall({action: "add", scope: "area", startPoint: firstClick, endPoint: secondClick}, "upload", ajaxOkGet);
+      ajaxCall({action: "add", scope: "area", startPoint: firstClick, endPoint: secondClick}, "upload");
 
       firstClick = "";
       secondClick = "";
@@ -2715,7 +2715,7 @@ function clearLines() {
     return;
   }
 
-  ajaxCall({action: "clear", scope: "area"}, "upload", ajaxOkGet);
+  ajaxCall({action: "clear", scope: "area"}, "upload");
 }
 
 function deleteLine() {
@@ -2727,7 +2727,7 @@ function deleteLine() {
     return;
   }
 
-  ajaxCall({action: "remove", scope: "area"}, "upload", ajaxOkGet);
+  ajaxCall({action: "remove", scope: "area"}, "upload");
 }
 
 function startAnimation(elem) {
@@ -2757,11 +2757,7 @@ function ajaxFailJSON(jqXHR, textStatus) {
   $('#flash').show();
 }
 
-function ajaxOkJSON(data) {
-  setWSIcon("checkmark");
-}
-
-function ajaxCall(dataDict, msg, okFunc=ajaxOkJSON) {
+function ajaxCall(dataDict, msg, okFunc=ajaxOkGet) {
     var request = $.ajax({
       url: "{{=URL(f='trackerWebService')}}",
       method: "POST",
@@ -3085,7 +3081,7 @@ var locsInfo = {
 };
 
 window.onload = function(){
-  ajaxCall({action: "get", scope: "common"}, "download", ajaxOkGet);
+  ajaxCall({action: "get", scope: "common"}, "download");
   $("#lastLoc").attr("class", "lastLoc "+lastLoc+"Gps");
 
   // display the help on first connection to the tracker
@@ -3367,7 +3363,7 @@ function initSolver() {
   ajaxCall({action: "init", scope: "common", romJson: value,
             preset: document.getElementById("preset").value,
             fileName: document.getElementById("fileName").value,
-            mode: document.getElementById("mode").value}, "download", ajaxOkGet);
+            mode: document.getElementById("mode").value}, "download");
 
   hidePopup();
 }
@@ -3398,7 +3394,7 @@ function clickLoc(elem) {
     // check that lock is in the available list
     if("state" in locsInfo[locName] && (locsInfo[locName]["state"] == "available" || locsInfo[locName]["state"] == "break")) {
       // call webservice
-      ajaxCall({action: "add", scope: "item", locName: locName}, "upload", ajaxOkGet);
+      ajaxCall({action: "add", scope: "item", locName: locName}, "upload");
   
       // if mother brain loc, display end message
      if(locName == "MotherBrain") {
@@ -3418,7 +3414,7 @@ function placeItem() {
   } else if (item == "Reserve" && itemCount["Reserve"] == 4) {
     alert("Can't add more Reserve tank");
   } else {
-    ajaxCall({action: "add", scope: "item", locName: locName, itemName: item}, "upload", ajaxOkGet);
+    ajaxCall({action: "add", scope: "item", locName: locName, itemName: item}, "upload");
   }
 }
 
@@ -3444,7 +3440,7 @@ function deleteLoc(isPlando) {
   // reset everything
   resetLocsInfo();
 
-  ajaxCall({action: "remove", scope: "item"}, "upload", ajaxOkGet);
+  ajaxCall({action: "remove", scope: "item"}, "upload");
 }
 
 function resetLocsInfo() {
@@ -3486,7 +3482,7 @@ function clearLocs(isPlando) {
   resetLocsInfo();
 
   // reset the state server side
-  ajaxCall({action: "clear", scope: "item"}, "upload", ajaxOkGet);
+  ajaxCall({action: "clear", scope: "item"}, "upload");
 }
 
 function getTooltip(locName, locData, item, visited) {

@@ -395,7 +395,7 @@ class InteractiveSolver(CommonSolver):
     def initialize(self, mode, rom, presetFileName, magic):
         # load rom and preset, return first state
         self.mode = mode
-        self.seed = rom
+        self.seed = os.path.basename(os.path.splitext(rom)[0])+'.sfc'
 
         self.locations = graphLocations
         self.smbm = SMBoolManager()

@@ -614,10 +614,6 @@ def getDoorConnections(graph, areas=True, bosses=False):
         # boss only
         if not areas and not src.Boss:
             continue
-        # both
-        if bosses and areas and\
-           ((src.Boss and not dst.Boss) or (dst.Boss and not src.Boss)):
-            continue
         conn = {}
         conn['ID'] = str(src) + ' -> ' + str(dst)
         # where to write

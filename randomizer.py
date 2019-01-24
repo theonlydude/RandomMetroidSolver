@@ -330,6 +330,9 @@ if __name__ == "__main__":
             dotDir = args.directory
         else:
             dotDir = None
+        RomPatches.ActivePatches += RomPatches.AreaSet
+        if args.areaLayoutBase == True:
+            RomPatches.ActivePatches.remove(RomPatches.AreaRandoGatesOther)
         try:
             randomizer = AreaRandomizer(graphLocations, randoSettings, seedName, bossTransitions, dotDir=dotDir)
         except RuntimeError:
@@ -337,9 +340,6 @@ if __name__ == "__main__":
             dumpErrorMsg(args.output, msg)
             print("DIAG: {}".format(msg))
             sys.exit(-1)
-        RomPatches.ActivePatches += RomPatches.AreaSet
-        if args.areaLayoutBase == True:
-            RomPatches.ActivePatches.remove(RomPatches.AreaRandoGatesOther)
     else:
         try:
             randomizer = Randomizer(graphLocations, randoSettings, seedName, vanillaTransitions + bossTransitions)

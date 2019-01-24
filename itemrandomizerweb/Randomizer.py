@@ -252,7 +252,7 @@ class SuperFunProvider(object):
         for apName,ap in self.areaGraph.accessPoints.iteritems():
             if not ap in availAccessPoints:
                 ret = False
-                break
+                self.rando.log.debug("unavail AP:" + apName)
 
         # check if we can reach all bosses
         if ret:

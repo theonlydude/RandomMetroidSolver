@@ -3348,22 +3348,28 @@ function hidePopup() {
 
 function initSolver() {
   console.log("initSolver");
-  // check that romJson is set
-  var romJson = document.getElementById("romJson");
-  var value = romJson.value;
 
-  if(value.length == 0){
-    return;
+  var mode = document.getElementById("mode").value;
+  if( mode != "seedless" ) {
+    // check that romJson is set
+    var romJson = document.getElementById("romJson");
+    var romJsonValue = romJson.value;
+
+    if(romJsonValue.length == 0){
+      return;
+    }
+  } else {
+    var romJsonValue = '';
   }
 
   // reset everything
   resetLocsInfo();
 
   // prepare parameters for WS
-  ajaxCall({action: "init", scope: "common", romJson: value,
+  ajaxCall({action: "init", scope: "common", romJson: romJsonValue,
             preset: document.getElementById("preset").value,
             fileName: document.getElementById("fileName").value,
-            mode: document.getElementById("mode").value}, "download");
+            mode: mode}, "download");
 
   hidePopup();
 }

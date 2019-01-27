@@ -1454,7 +1454,6 @@ class WS_common_init(WS):
         (fd, jsonOutFileName) = tempfile.mkstemp()
         params = [
             'python2',  os.path.expanduser("~/RandomMetroidSolver/solver.py"),
-            '-r', str(jsonRomFileName),
             '--preset', presetFileName,
             '--output', jsonOutFileName,
             '--action', "init",
@@ -1462,6 +1461,9 @@ class WS_common_init(WS):
             '--mode', mode,
             '--scope', 'common'
         ]
+
+        if mode != "seedless":
+            params += ['-r', str(jsonRomFileName)]
 
         if magic != None:
             params += ['--race', str(magic)]

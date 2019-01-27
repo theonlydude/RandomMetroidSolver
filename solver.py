@@ -258,8 +258,11 @@ class CommonSolver(object):
             self.majorsSplit = 'Full'
             self.areaRando = True
             self.patches = RomReader.getDefaultPatches()
+            RomLoader.factory(self.patches).loadPatches()
             self.curGraphTransitions = []
-            self.GraphTransitions = []
+            self.graphTransitions = []
+            for loc in self.locations:
+                loc['itemName'] = 'Nothing'
         else:
             self.romFileName = rom
             self.romLoader = RomLoader.factory(rom, magic)
@@ -395,7 +398,10 @@ class InteractiveSolver(CommonSolver):
     def initialize(self, mode, rom, presetFileName, magic):
         # load rom and preset, return first state
         self.mode = mode
-        self.seed = os.path.basename(os.path.splitext(rom)[0])+'.sfc'
+        if self.mode != "seedless":
+            self.seed = os.path.basename(os.path.splitext(rom)[0])+'.sfc'
+        else:
+            self.seed = "seedless"
 
         self.locations = graphLocations
         self.smbm = SMBoolManager()

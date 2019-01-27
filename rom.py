@@ -173,13 +173,14 @@ class RomReader:
     @staticmethod
     def getDefaultPatches():
         # called by the isolver in seedless mode
-        # activate only layout patch (the most common one)
+        # activate only layout patch (the most common one) and blue bt/red tower blue doors
         ret = {}
         for patch in RomReader.patches:
-            if patch == 'layout':
+            if patch in ['layout', 'startLS']:
                 ret[RomReader.patches[patch]['address']] = RomReader.patches[patch]['value']
             else:
                 ret[RomReader.patches[patch]['address']] = 0xFF
+        return ret
 
     def __init__(self, romFile, magic=None):
         self.romFile = romFile

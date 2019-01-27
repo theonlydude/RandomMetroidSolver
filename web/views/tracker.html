@@ -2665,12 +2665,23 @@ function clickPortal(elemId) {
     if(! ((firstClick in lines) || (elemId in lines))) {
       secondClick = elemId;
 
-      ajaxCall({action: "add", scope: "area", startPoint: firstClick, endPoint: secondClick}, "upload");
-
-      firstClick = "";
-      secondClick = "";
+      if(init == true) {
+        ajaxCall({action: "add", scope: "area", startPoint: firstClick, endPoint: secondClick}, "upload");
+        firstClick = "";
+        secondClick = "";
+      } else {
+        // first init the isolver in seedless mode
+        ajaxCall({action: "init", scope: "common", romJson: "", preset: "regular", fileName: "", mode: "seedless"},
+                 "download", ajaxOkAddLine);
+      }
     }
   }
+}
+
+function ajaxOkAddLine(data) {
+  ajaxCall({action: "add", scope: "area", startPoint: firstClick, endPoint: secondClick}, "upload");
+  firstClick = "";
+  secondClick = "";
 }
 
 function addLine(startPoint, endPoint) {
@@ -2795,6 +2806,7 @@ function ajaxOkGet(jsonData) {
   area = jsonData["areaRando"];
   seed = jsonData["seed"];
   preset = jsonData["preset"];
+  init = true;
 
   document.getElementById("cur_mode").value = mode;
   document.getElementById("cur_seed").value = seed;
@@ -2972,6 +2984,7 @@ function isActive(elemId) {
 var lastLoc = "landingSite";
 var mode = "standard";
 var area = true;
+var init = false;
 
 // can add more variables:
 //  -state: posible values: ["available", "visited", "breakable"]
@@ -3329,17 +3342,21 @@ function ajaxOkSave(data) {
   hideSavePopup();
 }
 
-function displayPopup(mode) {
+function displayPopup(isPlando) {
   if(loaded == false) {
     return;
+  }
+
+  if(isPlando == true) {
+    document.getElementById("solverPopupText").innerHTML = "Select an already randomized ROM as base for your Plando, or a Plando ROM";
+  } else {
+    document.getElementById("solverPopupText").innerHTML = "Select your randomized ROM to solve, or none for seed less mode";
   }
 
   // display popup
   document.getElementById("solverPopup").style.display = "block";
   // chosen must be activated when it's visible, else it doesn't work...
   $(".chzn-select").chosen();
-
-  // document.getElementById("mode").value = mode;
 }
 
 function hidePopup() {
@@ -3383,8 +3400,13 @@ function clickLoc(elem) {
 
   if(mode != "standard") {
     // we don't put an item in mother brain location
-    if(mode == "plando" && locName == "MotherBrain") {
-      return;
+    if(locName == "MotherBrain") {
+      if(mode == "plando") {
+        return;
+      } else {
+        alert("SEE YOU NEXT MISSION");
+        return;
+      }
     }
 
     if(mode == "plando") {
@@ -3653,6 +3675,8 @@ function startTheTour(step=-1) {
 
 <div class="main">
   <div id="solverPopup" class="solverPopup">
+    <p id="solverPopupText">
+    </p>
     <table class="full">
       <colgroup><col class="half" /><col class="half" /></colgroup>
       <tr>

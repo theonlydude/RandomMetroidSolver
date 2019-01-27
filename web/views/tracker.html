@@ -2985,6 +2985,7 @@ var lastLoc = "landingSite";
 var mode = "standard";
 var area = true;
 var init = false;
+var globalPlando = false;
 
 // can add more variables:
 //  -state: posible values: ["available", "visited", "breakable"]
@@ -3183,7 +3184,12 @@ window.onload = function(){
         }
 
         // plando addresses
-        for(var i=0x2F6000; i<=0x2F60C8; i++) {
+        for(var i=0x2F6000; i<0x2F60C8; i++) {
+          romData[i] = bytes[i];
+        }
+        // plando transitions
+        // TODO::when adding bosses transitions increase upper limit
+        for(var i=0x2F60C8; i<0x2F6100; i++) {
           romData[i] = bytes[i];
         }
 
@@ -3339,6 +3345,7 @@ function ajaxOkSave(data) {
     $('#flash').show();
   }
 
+  setWSIcon("checkmark");
   hideSavePopup();
 }
 
@@ -3346,6 +3353,8 @@ function displayPopup(isPlando) {
   if(loaded == false) {
     return;
   }
+
+  globalPlando = isPlando;
 
   if(isPlando == true) {
     document.getElementById("solverPopupText").innerHTML = "Select an already randomized ROM as base for your Plando, or a Plando ROM";
@@ -3366,17 +3375,21 @@ function hidePopup() {
 function initSolver() {
   console.log("initSolver");
 
-  var mode = document.getElementById("mode").value;
-  if( mode != "seedless" ) {
-    // check that romJson is set
-    var romJson = document.getElementById("romJson");
-    var romJsonValue = romJson.value;
+  var mode = "seedless";
+  var romJson = document.getElementById("romJson");
+  var romJsonValue = romJson.value;
 
+  if(globalPlando == true) {
+    mode = "plando";
     if(romJsonValue.length == 0){
       return;
     }
   } else {
-    var romJsonValue = '';
+    if(romJsonValue.length == 0) {
+      mode = "seedless";
+    } else {
+      mode = "standard";
+    }
   }
 
   // reset everything
@@ -3641,7 +3654,7 @@ function startTheTour(step=-1) {
     {
       element: "#helpPlando",
       title: "VARIA Plando Generator",
-      content: "<h2 class=\"center\">Welcome to the VARIA Plando Generator</h2><p>The Plando (a Plando is a Super Metroid seed with manually placed items) Generator allows you to create your own Plando in interactive mode.<br/>To use it, click on the <img src=\"/solver/static/images/play.svg\" alt=\"Start\" style=\"width: 32px\"> button to upload your ROM and choose your preset (like on the Solver page).<br/>As a base for your Plando ROM you should generate a seed on the Randomizer page with all the optional patches that you need.<br/>The available locations will be displayed on the map, click on a location and a popup will be displayed allowing you to choose which item to place.<br/>You can put the same major item at several locations.</p><p>When you're done click on the <img src=\"/solver/static/images/save.svg\"alt=\"Save\" style=\"width: 32px\"> button to save the Plando on your Computer. You can resume working on it later by uploading the saved Plando ROM.</p><h4>Warning</h4><p>The Plando Generator is for items only, not areas.</p>",
+      content: "<h2 class=\"center\">Welcome to the VARIA Plando Generator</h2><p>The Plando (a Plando is a Super Metroid seed with manually placed items) Generator allows you to create your own Plando in interactive mode.<br/>To use it, click on the <img src=\"/solver/static/images/play.svg\" alt=\"Start\" style=\"width: 32px\"> button to upload your ROM and choose your preset (like on the Solver page).<br/>As a base for your Plando ROM you should generate a seed on the Randomizer page with all the optional patches that you need.<br/>The available locations will be displayed on the map, click on a location and a popup will be displayed allowing you to choose which item to place.<br/>You can put the same major item at several locations.</p><p>When you're done click on the <img src=\"/solver/static/images/save.svg\"alt=\"Save\" style=\"width: 32px\"> button to save the Plando on your Computer. You can resume working on it later by uploading the saved Plando ROM.</p><h4>Area</h4><p>Choose an Area seed as your base ROM to use the Plando Generator in items and areas mode.</p>",
       placement: "auto left"
     }]
   });
@@ -3675,8 +3688,7 @@ function startTheTour(step=-1) {
 
 <div class="main">
   <div id="solverPopup" class="solverPopup">
-    <p id="solverPopupText">
-    </p>
+    <p id="solverPopupText"></p>
     <table class="full">
       <colgroup><col class="half" /><col class="half" /></colgroup>
       <tr>
@@ -3690,10 +3702,6 @@ function startTheTour(step=-1) {
       <tr>
 	<td>Current Preset: </td>
 	<td><input type="text" name="cur_preset" id="cur_preset" value="n/a" readonly class="full"></td>
-      </tr>
-      <tr>
-	<td>Mode: </td>
-	<td>{{=SELECT("standard", "seedless", "plando", _id="mode", _name="mode", value="standard", _class="full")}}</td>
       </tr>
       <tr>
 	<td>Randomized Super Metroid ROM: </td>

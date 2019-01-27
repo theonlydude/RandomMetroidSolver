@@ -15,7 +15,7 @@ from rom import RomLoader, RomPatcher, RomReader
 from itemrandomizerweb.Items import ItemManager
 from graph_locations import locations as graphLocations
 from graph import AccessGraph
-from graph_access import vanillaTransitions, accessPoints
+from graph_access import vanillaTransitions, accessPoints, getDoorConnections, getTransitions
 from utils import PresetLoader
 import log
 
@@ -415,6 +415,9 @@ class InteractiveSolver(CommonSolver):
         self.clearItems()
 
         if self.mode == 'plando':
+            if self.areaRando == True:
+                self.curGraphTransitions = self.loadPlandoTransitions()
+
             self.loadPlandoLocs()
 
         # compute new available locations
@@ -458,11 +461,11 @@ class InteractiveSolver(CommonSolver):
                 elif action == 'remove':
                     # remove last transition
                     self.cancelLastTransition()
-        elif scope == 'common':
-            if action == 'save':
-                return self.savePlando()
 
         self.areaGraph = AccessGraph(accessPoints, self.curGraphTransitions)
+
+        if scope == 'common' and action == 'save':
+            return self.savePlando()
 
         # add already collected items to smbm
         self.smbm.addItems(self.collectedItems)
@@ -476,6 +479,10 @@ class InteractiveSolver(CommonSolver):
 
     def getLocNameFromAddress(self, address):
         return self.locsAddressName[address]
+
+    def loadPlandoTransitions(self):
+        transitionsAddr = self.romLoader.getPlandoTransitions(len(vanillaTransitions)*2)
+        return getTransitions(transitionsAddr)
 
     def loadPlandoLocs(self):
         # get the addresses of the already filled locs, with the correct order
@@ -509,11 +516,19 @@ class InteractiveSolver(CommonSolver):
         romPatcher.writeItemsNumber()
         romPatcher.writeSpoiler(itemLocs)
         romPatcher.writePlandoAddresses(self.visitedLocations)
+        if self.areaRando == True:
+            doors = getDoorConnections(self.areaGraph)
+            romPatcher.writeDoorConnections(doors)
+            romPatcher.writePlandoTransitions(doors, len(vanillaTransitions)*2)
         romPatcher.end()
 
         data = romPatcher.romFile.data
         preset = os.path.splitext(os.path.basename(self.presetFileName))[0]
-        fileName = 'VARIA_Plandomizer_X{}_{}.sfc'.format(strftime("%Y%m%d%H%M%S", gmtime()), preset)
+        if self.areaRando == True:
+            seedCode = 'AX'
+        else:
+            seedCode = 'X'
+        fileName = 'VARIA_Plandomizer_{}{}_{}.sfc'.format(seedCode, strftime("%Y%m%d%H%M%S", gmtime()), preset)
         data["fileName"] = fileName
         # error msg in json to be displayed by the web site
         data["errorMsg"] = ""

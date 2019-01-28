@@ -712,7 +712,6 @@ class Randomizer(object):
         if isProg == True and random.random() < self.spreadProb:
             locs = self.getLocsSpreadProgression(availableLocations)
         random.shuffle(locs)
-        self.log.debug("chooseLocation: {}".format([l['Name'] for l in locs]))
         self.log.debug("chooseLocation isProg: {}".format(isProg))
         if isProg == True:
             return self.getChooseFunc(self.chooseLocRanges, self.chooseLocFuncs)(locs, item)
@@ -752,7 +751,7 @@ class Randomizer(object):
             if not item in self.failItems:
                 self.failItems.append(item)
             return None
-        self.log.debug("placeItem: {}".format([l['Name'] for l in availableLocations]))
+        self.log.debug("placeItem: availLocs={}".format([l['Name'] for l in availableLocations]))
         location = self.chooseLocation(availableLocations, item)
 
         return {'Item': item, 'Location': location}
@@ -771,13 +770,12 @@ class Randomizer(object):
         canPlaceIt = self.canPlaceItem(item, oldLocations)
         if canPlaceIt == False:
             return False
-        newLocations = self.currentLocations(item)
-        if self.restrictions["MajorMinor"] != "Full":
+        newLocations = [loc for loc in self.currentLocations(item) if loc not in oldLocations]
+        newLocationsHasMajor = len(newLocations) > 0
+        if newLocationsHasMajor and self.restrictions["MajorMinor"] != "Full":
             newLocationsHasMajor = List.exists(lambda l: self.restrictions["MajorMinor"] in l["Class"], newLocations)
-        else:
-            newLocationsHasMajor = True
 
-        return newLocationsHasMajor and len(newLocations) > len(oldLocations)
+        return newLocationsHasMajor and len(newLocations) > 0
 
     @staticmethod
     def isInBlueBrinstar(location):

@@ -555,6 +555,7 @@ class RomPatcher:
         loc = itemLoc['Location']
         if 'Address' not in loc:
             return
+#        print('write ' + itemLoc['Item']['Type'] + ' at ' + loc['Name'])
         self.writeItemCode(itemLoc['Item'], loc['Visibility'], loc['Address'])
 
     def writeItemsLocs(self, itemLocs):

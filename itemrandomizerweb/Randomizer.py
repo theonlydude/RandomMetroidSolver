@@ -775,7 +775,7 @@ class Randomizer(object):
         if newLocationsHasMajor and self.restrictions["MajorMinor"] != "Full":
             newLocationsHasMajor = List.exists(lambda l: self.restrictions["MajorMinor"] in l["Class"], newLocations)
 
-        return newLocationsHasMajor and len(newLocations) > 0
+        return newLocationsHasMajor
 
     @staticmethod
     def isInBlueBrinstar(location):

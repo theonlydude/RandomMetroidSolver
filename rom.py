@@ -171,6 +171,18 @@ class RomReader:
         'areaLayout': {'address': 0x252FA7, 'value': 0xF8, 'desc': "Area layout additional modifications"}
     }
 
+    @staticmethod
+    def getDefaultPatches():
+        # called by the isolver in seedless mode
+        # activate only layout patch (the most common one) and blue bt/red tower blue doors
+        ret = {}
+        for patch in RomReader.patches:
+            if patch in ['layout', 'startLS']:
+                ret[RomReader.patches[patch]['address']] = RomReader.patches[patch]['value']
+            else:
+                ret[RomReader.patches[patch]['address']] = 0xFF
+        return ret
+
     def __init__(self, romFile, magic=None):
         self.romFile = romFile
         self.race = None
@@ -430,6 +442,18 @@ class RomReader:
                 break
             else:
                 addresses.append(address)
+        return addresses
+
+    def getPlandoTransitions(self, maxTransitions):
+        self.romFile.seek(0x2F60C8)
+        addresses = []
+        for i in range(maxTransitions):
+            doorPtr = self.readWord()
+            roomPtr = self.readWord()
+            if doorPtr == 0xFFFF and roomPtr == 0xFFFF:
+                break
+            else:
+                addresses.append((doorPtr, roomPtr))
         return addresses
 
     def decompress(self, address):
@@ -1139,6 +1163,20 @@ class RomPatcher:
         for i in range(0, locsNumber-len(locations)):
             self.writeWord(0xFFFF)
 
+    def writePlandoTransitions(self, doorConnections, maxTransitions):
+        self.romFile.seek(0x2F60C8)
+
+        for conn in doorConnections:
+            doorPtr = conn['DoorPtr']
+            roomPtr = conn['RoomPtr']
+            self.writeWord(doorPtr)
+            self.writeWord(roomPtr)
+
+        # fill remaining addresses with 0xFFFF
+        for i in range(0, maxTransitions-len(doorConnections)):
+            self.writeWord(0xFFFF)
+            self.writeWord(0xFFFF)
+
     def enableMoonWalk(self):
         self.romFile.seek(0xB35D)
         # replace STZ with STA since A is non-zero at this point
@@ -1256,6 +1294,9 @@ class RomLoader(object):
 
     def getPlandoAddresses(self):
         return self.romReader.getPlandoAddresses()
+
+    def getPlandoTransitions(self, maxTransitions):
+        return self.romReader.getPlandoTransitions(maxTransitions)
 
     def decompress(self, address):
         return self.romReader.decompress(address)

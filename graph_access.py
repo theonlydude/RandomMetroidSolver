@@ -1,6 +1,4 @@
-
-import random
-
+import random, copy
 from graph import AccessPoint
 from parameters import Knows
 from rom import RomPatches
@@ -636,3 +634,31 @@ def getDoorConnections(graph, areas=True, bosses=False):
             conn['song'] = dst.EntryInfo['song']
         connections.append(conn)
     return connections
+
+def getTransitions(addresses):
+    # build address -> name dict
+    address2Name = {}
+    for ap in accessPoints:
+        if ap.Internal == True:
+            continue
+        address2Name[ap.ExitInfo['DoorPtr']] = ap.Name
+        address2Name[ap.RoomInfo['RoomPtr']] = ap.Name
+
+    transitions = {}
+    # (src.ExitInfo['DoorPtr'], dst.RoomInfo['RoomPtr'])
+    for (doorPtr, roomPtr) in addresses:
+        transitions[address2Name[doorPtr]] = address2Name[roomPtr]
+
+    # remove bidirectionnal transitions
+    # can't del keys in a dict while iterating it
+    transitionsCopy = copy.copy(transitions)
+    for src in transitionsCopy:
+        if src in transitions:
+            dest = transitions[src]
+            if dest in transitions:
+                if transitions[dest] == src:
+                    del transitions[dest]
+
+    transitions = [(t, transitions[t]) for t in transitions]
+
+    return transitions

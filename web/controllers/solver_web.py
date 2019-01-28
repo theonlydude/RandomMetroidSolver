@@ -17,6 +17,7 @@ from parameters import diff2text, text2diff
 from solver import StandardSolver, DifficultyDisplayer, InteractiveSolver
 from utils import PresetLoader
 import db
+from graph_access import vanillaTransitions, vanillaBossesTransitions
 
 def maxPresetsReach():
     # to prevent a spammer to create presets in a loop and fill the fs
@@ -1239,6 +1240,10 @@ def stats():
                 isolver=isolver, isolverData=isolverData, errors=errors,
                 fsStatus=fsStatus, fsPercent=fsPercent)
 
+def transition2isolver(transition):
+    transition = str(transition)
+    return transition[0].lower()+transition[1:].translate(None, " ,()-")
+
 def tracker():
     response.title = 'Super Metroid VARIA Randomizer and Solver Area and Item Tracker'
 
@@ -1256,7 +1261,17 @@ def tracker():
     # load presets list
     (stdPresets, comPresets) = loadPresetsList()
 
-    return dict(stdPresets=stdPresets, comPresets=comPresets)
+    # access points
+    vanillaAPs = []
+    for (src, dest) in vanillaTransitions:
+        vanillaAPs += [transition2isolver(src), transition2isolver(dest)]
+
+    vanillaBossesAPs = []
+    for (src, dest) in vanillaBossesTransitions:
+        vanillaBossesAPs += [transition2isolver(src), transition2isolver(dest)]
+
+    return dict(stdPresets=stdPresets, comPresets=comPresets,
+                vanillaAPs=vanillaAPs, vanillaBossesAPs=vanillaBossesAPs)
 
 class WS(object):
     @staticmethod

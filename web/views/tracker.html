@@ -2646,6 +2646,15 @@ function resetLines() {
   nextColor = 0;
 }
 
+function checkCompatibleAPs(startAP, endAP) {
+{{
+  response.write("  var vanillaAPs = {};\n".format(vanillaAPs), escape=False)
+  response.write("  var vanillaBossesAPs = {};\n".format(vanillaBossesAPs), escape=False)
+}}
+
+  return (vanillaAPs.includes(startAP) && vanillaAPs.includes(endAP)) || (vanillaBossesAPs.includes(startAP) && vanillaBossesAPs.includes(endAP));
+}
+
 function clickPortal(elemId) {
   if(loaded == false) {
     return;
@@ -2663,6 +2672,11 @@ function clickPortal(elemId) {
   } else if(secondClick == "" && elemId != firstClick) {
 
     if(! ((firstClick in lines) || (elemId in lines))) {
+      if(checkCompatibleAPs(firstClick, elemId) == false) {
+        alert("You can't mix Areas access points and Bosses access points");
+        return;
+      }
+
       secondClick = elemId;
 
       if(init == true) {

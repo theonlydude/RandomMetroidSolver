@@ -15,7 +15,7 @@ from rom import RomLoader, RomPatcher, RomReader
 from itemrandomizerweb.Items import ItemManager
 from graph_locations import locations as graphLocations
 from graph import AccessGraph
-from graph_access import vanillaTransitions, accessPoints, getDoorConnections, getTransitions
+from graph_access import vanillaTransitions, accessPoints, getDoorConnections, getTransitions, vanillaBossesTransitions
 from utils import PresetLoader
 import log
 
@@ -481,7 +481,7 @@ class InteractiveSolver(CommonSolver):
         return self.locsAddressName[address]
 
     def loadPlandoTransitions(self):
-        transitionsAddr = self.romLoader.getPlandoTransitions(len(vanillaTransitions)*2)
+        transitionsAddr = self.romLoader.getPlandoTransitions((len(vanillaBossesTransitions) + len(vanillaTransitions))*2)
         return getTransitions(transitionsAddr)
 
     def loadPlandoLocs(self):
@@ -519,15 +519,16 @@ class InteractiveSolver(CommonSolver):
         if self.areaRando == True:
             doors = getDoorConnections(self.areaGraph)
             romPatcher.writeDoorConnections(doors)
-            romPatcher.writePlandoTransitions(doors, len(vanillaTransitions)*2)
+            romPatcher.writePlandoTransitions(doors, (len(vanillaBossesTransitions) + len(vanillaTransitions))*2)
         romPatcher.end()
 
         data = romPatcher.romFile.data
         preset = os.path.splitext(os.path.basename(self.presetFileName))[0]
+        seedCode = 'FX'
+        if self.bossRando == True:
+            seedCode = 'B'+seedCode
         if self.areaRando == True:
-            seedCode = 'AX'
-        else:
-            seedCode = 'X'
+            seedCode = 'A'+seedCode
         fileName = 'VARIA_Plandomizer_{}{}_{}.sfc'.format(seedCode, strftime("%Y%m%d%H%M%S", gmtime()), preset)
         data["fileName"] = fileName
         # error msg in json to be displayed by the web site

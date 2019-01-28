@@ -15,9 +15,9 @@ from parameters import Knows, Settings, Controller, isKnows, isButton
 from solver import Conf
 from parameters import diff2text, text2diff
 from solver import StandardSolver, DifficultyDisplayer, InteractiveSolver
-from rom import RomLoader
 from utils import PresetLoader
 import db
+from graph_access import vanillaTransitions, vanillaBossesTransitions
 
 def maxPresetsReach():
     # to prevent a spammer to create presets in a loop and fill the fs
@@ -1240,6 +1240,10 @@ def stats():
                 isolver=isolver, isolverData=isolverData, errors=errors,
                 fsStatus=fsStatus, fsPercent=fsPercent)
 
+def transition2isolver(transition):
+    transition = str(transition)
+    return transition[0].lower()+transition[1:].translate(None, " ,()-")
+
 def tracker():
     response.title = 'Super Metroid VARIA Randomizer and Solver Area and Item Tracker'
 
@@ -1247,98 +1251,158 @@ def tracker():
     if session.tracker is None:
         session.tracker = {}
 
-    if "area" not in session.tracker:
-        session.tracker["area"] = {}
-        session.tracker["area"]["lines"] = {}
-        session.tracker["area"]["linesSeq"] = []
-        session.tracker["area"]["firstTime"] = True
+        session.tracker["state"] = {}
+        session.tracker["preset"] = "regular"
+        session.tracker["seed"] = None
 
-    if "item" not in session.tracker:
-        session.tracker["item"] = {}
-        session.tracker["item"]["state"] = {}
-        session.tracker["item"]["preset"] = "regular"
+        # set to False in tracker.html
+        session.tracker["firstTime"] = True
 
     # load presets list
     (stdPresets, comPresets) = loadPresetsList()
 
-    return dict(stdPresets=stdPresets, comPresets=comPresets)
+    # access points
+    vanillaAPs = []
+    for (src, dest) in vanillaTransitions:
+        vanillaAPs += [transition2isolver(src), transition2isolver(dest)]
 
-def validatePoint(point):
-    if request.vars[point] == None:
-        raiseHttp(400, "Missing parameter {}".format(point), True)
+    vanillaBossesAPs = []
+    for (src, dest) in vanillaBossesTransitions:
+        vanillaBossesAPs += [transition2isolver(src), transition2isolver(dest)]
 
-    pointValue = request.vars[point]
+    return dict(stdPresets=stdPresets, comPresets=comPresets,
+                vanillaAPs=vanillaAPs, vanillaBossesAPs=vanillaBossesAPs)
 
-    if pointValue not in ['lowerMushroomsLeft', 'moatRight', 'greenPiratesShaftBottomRight',
-                          'keyhunterRoomBottom', 'morphBallRoomLeft', 'greenBrinstarElevatorRight',
-                          'greenHillZoneTopRight', 'noobBridgeRight', 'westOceanLeft', 'crabMazeLeft',
-                          'lavaDiveRight', 'threeMuskateersRoomLeft', 'warehouseZeelaRoomLeft',
-                          'warehouseEntranceLeft', 'warehouseEntranceRight', 'singleChamberTopRight',
-                          'kronicBoostRoomBottomLeft', 'mainStreetBottom', 'crabHoleBottomLeft', 'leCoudeRight',
-                          'redFishRoomLeft', 'redTowerTopLeft', 'caterpillarRoomTopRight', 'redBrinstarElevator',
-                          'eastTunnelRight', 'eastTunnelTopRight', 'glassTunnelTop', 'statuesHallwayLeft']:
-        raiseHttp(400, "Wrong value for {}: {}".format(point, pointValue), True)
+class WS(object):
+    @staticmethod
+    def factory():
+        scope = request.vars.scope
+        if scope not in ["area", "item", "common"]:
+            raiseHttp(400, "Unknown scope: {}, must be area/item/common".format(scope), True)
 
-def validateAreaTrackerParams():
-    if request.vars.action == None:
-        raiseHttp(400, "Missing parameter action", True)
-    action = request.vars.action
+        action = request.vars.action
+        if action not in ['add', 'remove', 'clear', 'init', 'get', 'save']:
+            raiseHttp(400, "Unknown action {}, must be add/remove/clear/init/get/save".format(action), True)
 
-    if action not in ['add', 'remove', 'clear', 'get']:
-        raiseHttp(400, "Unknown action {}, must be add/remove/clear/get".format(action), True)
+        try:
+            WSClass = globals()["WS_{}_{}".format(scope, action)]
+            return WSClass()
+        except Exception as e:
+            raiseHttp(400, "Unknown scope/action combo: {}/{}: {}".format(scope, action, e), True)
 
-    if action == 'add':
-        # startPoint and endPoint
-        validatePoint("startPoint")
-        validatePoint("endPoint")
+    def validate(self):
+        if session.tracker is None:
+            raiseHttp(400, "No session found for the Tracker", True)
 
-def areaTrackerWebService():
-    # web service to store tracker actions
+        if request.vars.action == None:
+            raiseHttp(400, "Missing parameter action", True)
+        action = request.vars.action
 
-    # check params
-    validateAreaTrackerParams()
+        if action not in ['init', 'add', 'remove', 'clear', 'get', 'save']:
+            raiseHttp(400, "Unknown action {}, must be init/add/remove/clear/get/save".format(action), True)
 
-    # init session
-    if session.tracker is None:
-        raiseHttp(400, "No session found for the Area Tracker", True)
+    def action(self):
+        pass
 
-    # handle action
-    action = request.vars.action
-    print("areaTrackerWebService: action={}".format(action))
+    def locName4isolver(self, locName):
+        # remove space and special characters
+        # sed -e 's+ ++g' -e 's+,++g' -e 's+(++g' -e 's+)++g' -e 's+-++g'
+        locName = str(locName)
+        return locName[0].lower()+locName[1:].translate(None, " ,()-")
 
-    if action == 'add':
-        startPoint = request.vars.startPoint
-        endPoint = request.vars.endPoint
-        session.tracker["area"]["lines"][startPoint] = endPoint
-        session.tracker["area"]["lines"][endPoint] = startPoint
-        session.tracker["area"]["linesSeq"].append(startPoint)
+    def returnState(self):
+        if len(session.tracker["state"]) > 0:
+            #print("state returned to frontend: availWeb {}, visWeb {}".format(session.tracker["item"]["state"]["availableLocationsWeb"], session.tracker["item"]["state"]["visitedLocationsWeb"]))
+            state = session.tracker["state"]
+            return json.dumps({
+                # item tracker
+                "availableLocations": state["availableLocationsWeb"],
+                "visitedLocations": state["visitedLocationsWeb"],
+                # compatibility with existing sessions
+                "remainLocations": state["remainLocationsWeb"] if "remainLocationsWeb" in state else [],
+                "lastLoc": self.locName4isolver(state["lastLoc"]),
 
-    elif action == 'remove':
-        if len(session.tracker["area"]["linesSeq"]) > 0:
-            startPoint = session.tracker["area"]["linesSeq"].pop()
-            endPoint = session.tracker["area"]["lines"][startPoint]
+                # area tracker
+                "lines": state["linesWeb"],
+                "linesSeq": state["linesSeqWeb"],
+                "allTransitions": state["allTransitions"],
 
-            del session.tracker["area"]["lines"][startPoint]
-            del session.tracker["area"]["lines"][endPoint]
-    elif action == 'clear':
-        session.tracker["area"]["lines"] = {}
-        session.tracker["area"]["linesSeq"] = []
-    elif action == 'get':
-        return json.dumps({"lines": session.tracker["area"]["lines"],
-                           "linesSeq": session.tracker["area"]["linesSeq"]})
+                # infos on seed
+                "mode": state["mode"],
+                "areaRando": state["areaRando"],
+                "seed": state["seed"],
+                "preset": os.path.basename(os.path.splitext(state["presetFileName"])[0])
+            })
+        else:
+            raiseHttp(200, "OK", True)
 
-    # return something
-    raiseHttp(200, "OK", True)
+    def callSolverAction(self, scope, action, parameters):
+        # check that we have a state in the session
+        if "state" not in session.tracker:
+            raiseHttp(400, "Missing Solver state in the session", True)
 
-def validateItemTrackerParams():
-    if request.vars.action == None:
-        raiseHttp(400, "Missing parameter action", True)
-    action = request.vars.action
+        mode = session.tracker["mode"]
 
-    if action not in ['init', 'add', 'remove', 'clear', 'get', 'save']:
-        raiseHttp(400, "Unknown action {}, must be init/add/remove/clear/get/save".format(action), True)
+        (fd1, jsonInFileName) = tempfile.mkstemp()
+        (fd2, jsonOutFileName) = tempfile.mkstemp()
+        params = [
+            'python2',  os.path.expanduser("~/RandomMetroidSolver/solver.py"),
+            '--interactive',
+            '--state',  jsonInFileName,
+            '--output', jsonOutFileName,
+            '--action', action,
+            '--mode', mode,
+            '--scope', scope
+        ]
+        if action == 'add':
+            if scope == 'item':
+                params += ['--loc', parameters["loc"]]
+                if mode != 'standard':
+                    params += ['--item', parameters["item"]]
+            elif scope == 'area':
+                params += ['--startPoint', parameters["startPoint"],
+                           '--endPoint', parameters["endPoint"]]
 
-    if action == 'init':
+        # dump state as input
+        with open(jsonInFileName, 'w') as jsonFile:
+            json.dump(session.tracker["state"], jsonFile)
+
+        print("before calling isolver: {}".format(params))
+        start = datetime.now()
+        ret = subprocess.call(params)
+        end = datetime.now()
+        duration = (end - start).total_seconds()
+        print("ret: {}, duration: {}s".format(ret, duration))
+
+        if ret == 0:
+            with open(jsonOutFileName) as jsonFile:
+                state = json.load(jsonFile)
+            os.close(fd1)
+            os.remove(jsonInFileName)
+            os.close(fd2)
+            os.remove(jsonOutFileName)
+            if action == 'save':
+                return json.dumps(state)
+            else:
+                session.tracker["state"] = state
+                return self.returnState()
+        else:
+            os.close(fd1)
+            os.remove(jsonInFileName)
+            os.close(fd2)
+            os.remove(jsonOutFileName)
+            raiseHttp(400, "Something wrong happened while iteratively solving the ROM", True)
+
+class WS_common_init(WS):
+    def validate(self):
+        super(WS_common_init, self).validate()
+
+        if request.vars.mode not in ["standard", "seedless", "plando"]:
+            raiseHttp(400, "Unknown mode, must be standard/seedless/plando", True)
+
+        if request.vars.scope != 'common':
+            raiseHttp(400, "Unknown scope, must be common", True)
+
         # preset
         preset = request.vars.preset
         if request == None:
@@ -1353,187 +1417,203 @@ def validateItemTrackerParams():
         if not os.path.isfile(fullPath):
             raiseHttp(400, "Unknown preset: {}".format(preset), True)
 
-        # ROM (only through file API)
-        if request.vars.romJson is None or len(request.vars.romJson) == 0:
-            raiseHttp(400, "Missing ROM to solve", True)
-        try:
-            json.loads(request.vars.romJson)
-        except:
-            raiseHttp(400, "Wrong value for romJson, must be a JSON string: [{}]".format(request.vars.romJson))
+        if request.vars.mode != 'seedless':
+            # ROM (only through file API)
+            if request.vars.romJson is None or len(request.vars.romJson) == 0:
+                raiseHttp(400, "Missing ROM to solve", True)
+            try:
+                json.loads(request.vars.romJson)
+            except:
+                raiseHttp(400, "Wrong value for romJson, must be a JSON string: [{}]".format(request.vars.romJson))
 
-        # ROM file name
-        uploadFile = request.vars.fileName
-        if uploadFile is None:
-            raiseHttp(400, "Missing ROM file name", True)
-        if IS_NOT_EMPTY()(uploadFile)[1] is not None:
-            raiseHttp(400, "File name is empty", True)
-        if IS_MATCH('[a-zA-Z0-9_\.]*')(uploadFile)[1] is not None:
-            raiseHttp(400, "Wrong value for ROM file name, must be valid file name: {}".format(request.vars.romFile), True)
-        if IS_LENGTH(maxsize=255, minsize=1)(uploadFile)[1] is not None:
-            raiseHttp(400, "Wrong length for ROM file name, name must be between 1 and 255 characters: {}".format(request.vars.romFile), True)
+            # ROM file name
+            uploadFile = request.vars.fileName
+            if uploadFile is None:
+                raiseHttp(400, "Missing ROM file name", True)
+            if IS_NOT_EMPTY()(uploadFile)[1] is not None:
+                raiseHttp(400, "File name is empty", True)
+            if IS_MATCH('[a-zA-Z0-9_\.]*')(uploadFile)[1] is not None:
+                raiseHttp(400, "Wrong value for ROM file name, must be valid file name: {}".format(request.vars.romFile), True)
+            if IS_LENGTH(maxsize=255, minsize=1)(uploadFile)[1] is not None:
+                raiseHttp(400, "Wrong length for ROM file name, name must be between 1 and 255 characters: {}".format(request.vars.romFile), True)
 
-        isPlando = request.vars.isPlando
-        if isPlando not in ["", "on"]:
-            raiseHttp(400, "Wrong value for isPlando: {}".format(isPlando), True)
+    def action(self):
+        mode = request.vars.mode
+        if mode != 'seedless':
+            try:
+                (base, jsonRomFileName) = generateJsonROM(request.vars.romJson)
+            except Exception as e:
+                raiseHttp(400, "Can't load JSON ROM: {}".format(e), True)
+            seed = base + '.sfc'
+        else:
+            seed = 'seedless'
+            jsonRomFileName = None
 
-    elif action == 'add':
+        preset = request.vars.preset
+        presetFileName = '{}/{}.json'.format(getPresetDir(preset), preset)
+
+        session.tracker["seed"] = seed
+        session.tracker["preset"] = preset
+        session.tracker["mode"] = mode
+
+        return self.callSolverInit(jsonRomFileName, presetFileName, preset, seed, mode)
+
+    def callSolverInit(self, jsonRomFileName, presetFileName, preset, romFileName, mode):
+        if mode != 'seedless':
+            (canSolve, magic) = canSolveROM(jsonRomFileName)
+            if canSolve == False:
+                raiseHttp(400, "Race seed is protected from solving")
+        else:
+            magic = None
+
+        (fd, jsonOutFileName) = tempfile.mkstemp()
+        params = [
+            'python2',  os.path.expanduser("~/RandomMetroidSolver/solver.py"),
+            '--preset', presetFileName,
+            '--output', jsonOutFileName,
+            '--action', "init",
+            '--interactive',
+            '--mode', mode,
+            '--scope', 'common'
+        ]
+
+        if mode != "seedless":
+            params += ['-r', str(jsonRomFileName)]
+
+        if magic != None:
+            params += ['--race', str(magic)]
+
+        print("before calling isolver: {}".format(params))
+        start = datetime.now()
+        ret = subprocess.call(params)
+        end = datetime.now()
+        duration = (end - start).total_seconds()
+        print("ret: {}, duration: {}s".format(ret, duration))
+
+        if ret == 0:
+            DB = db.DB()
+            DB.addISolver(preset, romFileName)
+            DB.close()
+
+            with open(jsonOutFileName) as jsonFile:
+                state = json.load(jsonFile)
+            os.close(fd)
+            os.remove(jsonOutFileName)
+            session.tracker["state"] = state
+            return self.returnState()
+        else:
+            os.close(fd)
+            os.remove(jsonOutFileName)
+            raiseHttp(400, "Something wrong happened while initializing the ISolver", True)
+
+class WS_common_get(WS):
+    def validate(self):
+        super(WS_common_get, self).validate()
+
+    def action(self):
+        return self.returnState()
+
+class WS_common_save(WS):
+    def validate(self):
+        super(WS_common_save, self).validate()
+
+    def action(self):
+        if session.tracker["mode"] != "plando":
+            raiseHttp(400, "Save can only be use in plando mode", True)
+
+        return self.callSolverAction("common", "save", {})
+
+class WS_area_add(WS):
+    def validatePoint(self, point):
+        if request.vars[point] == None:
+            raiseHttp(400, "Missing parameter {}".format(point), True)
+
+        pointValue = request.vars[point]
+
+        if pointValue not in ['lowerMushroomsLeft', 'moatRight', 'greenPiratesShaftBottomRight',
+                              'keyhunterRoomBottom', 'morphBallRoomLeft', 'greenBrinstarElevatorRight',
+                              'greenHillZoneTopRight', 'noobBridgeRight', 'westOceanLeft', 'crabMazeLeft',
+                              'lavaDiveRight', 'threeMuskateersRoomLeft', 'warehouseZeelaRoomLeft',
+                              'warehouseEntranceLeft', 'warehouseEntranceRight', 'singleChamberTopRight',
+                              'kronicBoostRoomBottomLeft', 'mainStreetBottom', 'crabHoleBottomLeft', 'leCoudeRight',
+                              'redFishRoomLeft', 'redTowerTopLeft', 'caterpillarRoomTopRight', 'redBrinstarElevator',
+                              'eastTunnelRight', 'eastTunnelTopRight', 'glassTunnelTop', 'statuesHallwayLeft']:
+            raiseHttp(400, "Wrong value for {}: {}".format(point, pointValue), True)
+
+    def validate(self):
+        super(WS_area_add, self).validate()
+
+        # startPoint and endPoint
+        self.validatePoint("startPoint")
+        self.validatePoint("endPoint")
+
+        if len(session.tracker["state"]) == 0:
+            raiseHttp(400, "ISolver state is empty", True)
+
+    def action(self):
+        return self.callSolverAction("area", "add", {"startPoint": request.vars.startPoint,
+                                                     "endPoint": request.vars.endPoint})
+
+class WS_area_remove(WS):
+    def validate(self):
+        super(WS_area_remove, self).validate()
+
+    def action(self):
+        return self.callSolverAction("area", "remove", {})
+
+class WS_area_clear(WS):
+    def validate(self):
+        super(WS_area_clear, self).validate()
+
+    def action(self):
+        return self.callSolverAction("area", "clear", {})
+
+class WS_item_add(WS):
+    def validate(self):
+        super(WS_item_add, self).validate()
+
         # new location
         if request.vars.locName not in ['EnergyTankGauntlet', 'Bomb', 'EnergyTankTerminator', 'ReserveTankBrinstar', 'ChargeBeam', 'MorphingBall', 'EnergyTankBrinstarCeiling', 'EnergyTankEtecoons', 'EnergyTankWaterway', 'EnergyTankBrinstarGate', 'XRayScope', 'Spazer', 'EnergyTankKraid', 'VariaSuit', 'IceBeam', 'EnergyTankCrocomire', 'HiJumpBoots', 'GrappleBeam', 'ReserveTankNorfair', 'SpeedBooster', 'WaveBeam', 'EnergyTankRidley', 'ScrewAttack', 'EnergyTankFirefleas', 'ReserveTankWreckedShip', 'EnergyTankWreckedShip', 'RightSuperWreckedShip', 'GravitySuit', 'EnergyTankMamaturtle', 'PlasmaBeam', 'ReserveTankMaridia', 'SpringBall', 'EnergyTankBotwoon', 'SpaceJump', 'PowerBombCrateriasurface', 'MissileoutsideWreckedShipbottom', 'MissileoutsideWreckedShiptop', 'MissileoutsideWreckedShipmiddle', 'MissileCrateriamoat', 'MissileCrateriabottom', 'MissileCrateriagauntletright', 'MissileCrateriagauntletleft', 'SuperMissileCrateria', 'MissileCrateriamiddle', 'PowerBombgreenBrinstarbottom', 'SuperMissilepinkBrinstar', 'MissilegreenBrinstarbelowsupermissile', 'SuperMissilegreenBrinstartop', 'MissilegreenBrinstarbehindmissile', 'MissilegreenBrinstarbehindreservetank', 'MissilepinkBrinstartop', 'MissilepinkBrinstarbottom', 'PowerBombpinkBrinstar', 'MissilegreenBrinstarpipe', 'PowerBombblueBrinstar', 'MissileblueBrinstarmiddle', 'SuperMissilegreenBrinstarbottom', 'MissileblueBrinstarbottom', 'MissileblueBrinstartop', 'MissileblueBrinstarbehindmissile', 'PowerBombredBrinstarsidehopperroom', 'PowerBombredBrinstarspikeroom', 'MissileredBrinstarspikeroom', 'MissileKraid', 'Missilelavaroom', 'MissilebelowIceBeam', 'MissileaboveCrocomire', 'MissileHiJumpBoots', 'EnergyTankHiJumpBoots', 'PowerBombCrocomire', 'MissilebelowCrocomire', 'MissileGrappleBeam', 'MissileNorfairReserveTank', 'MissilebubbleNorfairgreendoor', 'MissilebubbleNorfair', 'MissileSpeedBooster', 'MissileWaveBeam', 'MissileGoldTorizo', 'SuperMissileGoldTorizo', 'MissileMickeyMouseroom', 'MissilelowerNorfairabovefireflearoom', 'PowerBomblowerNorfairabovefireflearoom', 'PowerBombPowerBombsofshame', 'MissilelowerNorfairnearWaveBeam', 'MissileWreckedShipmiddle', 'MissileGravitySuit', 'MissileWreckedShiptop', 'SuperMissileWreckedShipleft', 'MissilegreenMaridiashinespark', 'SuperMissilegreenMaridia', 'MissilegreenMaridiatatori', 'SuperMissileyellowMaridia', 'MissileyellowMaridiasupermissile', 'MissileyellowMaridiafalsewall', 'MissileleftMaridiasandpitroom', 'MissilerightMaridiasandpitroom', 'PowerBombrightMaridiasandpitroom', 'MissilepinkMaridia', 'SuperMissilepinkMaridia', 'MissileDraygon', 'MotherBrain']:
             raiseHttp(400, "Unknown location name: {}".format(request.vars.locName), True)
 
         if request.vars.itemName not in [None, 'ETank', 'Missile', 'Super', 'PowerBomb', 'Bomb', 'Charge', 'Ice', 'HiJump', 'SpeedBooster', 'Wave', 'Spazer', 'SpringBall', 'Varia', 'Plasma', 'Grapple', 'Morph', 'Reserve', 'Gravity', 'XRayScope', 'SpaceJump', 'ScrewAttack', 'Nothing']:
-                raiseHttp(400, "Unknown item name: {}".format(request.vars.itemName), True)
+            raiseHttp(400, "Unknown item name: {}".format(request.vars.itemName), True)
 
-def locName4isolver(locName):
-    # remove space and special characters
-    # sed -e 's+ ++g' -e 's+,++g' -e 's+(++g' -e 's+)++g' -e 's+-++g'
-    locName = str(locName)
-    return locName[0].lower()+locName[1:].translate(None, " ,()-")
+    def action(self):
+        return self.callSolverAction("item", "add", {"loc": request.vars.locName, "item": request.vars.itemName})
 
-def returnState(state):
-    if len(session.tracker["item"]["state"]) > 0:
-        #print("state returned to frontend: availWeb {}, visWeb {}".format(session.tracker["item"]["state"]["availableLocationsWeb"], session.tracker["item"]["state"]["visitedLocationsWeb"]))
-        state = session.tracker["item"]["state"]
-        return json.dumps({"availableLocations": state["availableLocationsWeb"],
-                           "visitedLocations": state["visitedLocationsWeb"],
-                           # compatibility with existing sessions
-                           "remainLocations": state["remainLocationsWeb"] if "remainLocationsWeb" in state else [],
-                           "areaRando": state["areaRando"],
-                           "lastLoc": locName4isolver(state["lastLoc"]),
-                           "isPlando": state["isPlando"]})
-    else:
-        raiseHttp(200, "OK", True)
+class WS_item_remove(WS):
+    def validate(self):
+        super(WS_item_remove, self).validate()
 
-def callSolverInit(jsonRomFileName, presetFileName, preset, romFileName, isPlando):
-    (canSolve, magic) = canSolveROM(jsonRomFileName)
-    if canSolve == False:
-        raiseHttp(400, "Race seed is protected from solving")
+    def action(self):
+        return self.callSolverAction("item", "remove", {})
 
-    (fd, jsonOutFileName) = tempfile.mkstemp()
-    params = [
-        'python2',  os.path.expanduser("~/RandomMetroidSolver/solver.py"),
-        '-r', str(jsonRomFileName),
-        '--preset', presetFileName,
-        '--output', jsonOutFileName,
-        '--action', "init",
-        '--interactive'
-    ]
+class WS_item_clear(WS):
+    def validate(self):
+        super(WS_item_clear, self).validate()
 
-    if magic != None:
-        params += ['--race', str(magic)]
-    if isPlando == True:
-        params += ['--plando']
+    def action(self):
+        return self.callSolverAction("item", "clear", {})
 
-    print("before calling isolver: {}".format(params))
-    start = datetime.now()
-    ret = subprocess.call(params)
-    end = datetime.now()
-    duration = (end - start).total_seconds()
-    print("ret: {}, duration: {}s".format(ret, duration))
-
-    if ret == 0:
-        DB = db.DB()
-        DB.addISolver(preset, romFileName)
-        DB.close()
-
-        with open(jsonOutFileName) as jsonFile:
-            state = json.load(jsonFile)
-        os.close(fd)
-        os.remove(jsonOutFileName)
-        session.tracker["item"]["state"] = state
-        return returnState(state)
-    else:
-        os.close(fd)
-        os.remove(jsonOutFileName)
-        raiseHttp(400, "Something wrong happened while initializing solving of the ROM", True)
-
-def callSolverAction(action, locName=None, itemName=None, isPlando=False):
-    # check that we have a state in the session
-    if "state" not in session.tracker["item"]:
-        raiseHttp(400, "Missing Solver state in the session", True)
-
-    (fd1, jsonInFileName) = tempfile.mkstemp()
-    (fd2, jsonOutFileName) = tempfile.mkstemp()
-    params = [
-        'python2',  os.path.expanduser("~/RandomMetroidSolver/solver.py"),
-        '--interactive',
-        '--state',  jsonInFileName,
-        '--output', jsonOutFileName,
-        '--action', action
-    ]
-    if action == 'add':
-        params += ['--loc', locName]
-        if isPlando == True:
-            params += ['--item', itemName]
-
-    if isPlando == True:
-        params += ['--plando']
-
-    # dump state as input
-    with open(jsonInFileName, 'w') as jsonFile:
-        json.dump(session.tracker["item"]["state"], jsonFile)
-
-    print("before calling isolver: {}".format(params))
-    start = datetime.now()
-    ret = subprocess.call(params)
-    end = datetime.now()
-    duration = (end - start).total_seconds()
-    print("ret: {}, duration: {}s".format(ret, duration))
-
-    if ret == 0:
-        with open(jsonOutFileName) as jsonFile:
-            state = json.load(jsonFile)
-        os.close(fd1)
-        os.remove(jsonInFileName)
-        os.close(fd2)
-        os.remove(jsonOutFileName)
-        if action == 'save':
-            return json.dumps(state)
-        else:
-            session.tracker["item"]["state"] = state
-            return returnState(state)
-    else:
-        os.close(fd1)
-        os.remove(jsonInFileName)
-        os.close(fd2)
-        os.remove(jsonOutFileName)
-        raiseHttp(400, "Something wrong happened while iteratively solving the ROM", True)
-    
-def itemTrackerWebService():
-    # web service for the interactive solver
-
-    # check params
-    validateItemTrackerParams()
-
-    # init session
+def trackerWebService():
+    # unified web service for item/area trackers
     if session.tracker is None:
-        raiseHttp(400, "No session found for the Item Tracker", True)
+        raiseHttp(400, "No session found for the Tracker Web service", True)
 
-    # handle action
-    action = request.vars.action
-    print("itemTrackerWebService: action={}".format(action))
+    print("trackerWebService called")
 
-    isPlando = (request.vars.isPlando == "on")
+    ws = WS.factory()
+    ws.validate()
+    ret = ws.action()
 
-    if action == 'init':
-        try:
-            (base, jsonRomFileName) = generateJsonROM(request.vars.romJson)
-        except Exception as e:
-            raiseHttp(400, "Can't load JSON ROM: {}".format(e), True)
-
-        presetFileName = '{}/{}.json'.format(getPresetDir(request.vars.preset), request.vars.preset)
-        session.tracker["item"]["preset"] = request.vars.preset
-
-        return callSolverInit(jsonRomFileName, presetFileName,
-                              request.vars.preset, request.vars.fileName, isPlando)
-    elif action == 'get':
-        return returnState(session.tracker["item"]["state"])
+    if ret == None:
+        # return something
+        raiseHttp(200, "OK", True)
     else:
-        return callSolverAction(action, request.vars.locName, request.vars.itemName, isPlando)
+        return ret
 
-    # return something if not already done
-    raiseHttp(200, "OK", True)
-
+# race mode
 def getMagic():
     return random.randint(1, 0xffff)
 

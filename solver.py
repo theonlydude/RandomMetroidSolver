@@ -11,11 +11,11 @@ from parameters import easy, medium, hard, harder, hardcore, mania, god, samus, 
 from smbool import SMBool
 from smboolmanager import SMBoolManager
 from helpers import Pickup, Bosses
-from rom import RomLoader, RomPatcher
+from rom import RomLoader, RomPatcher, RomReader
 from itemrandomizerweb.Items import ItemManager
 from graph_locations import locations as graphLocations
 from graph import AccessGraph
-from graph_access import vanillaTransitions, accessPoints
+from graph_access import vanillaTransitions, accessPoints, getDoorConnections, getTransitions, vanillaBossesTransitions
 from utils import PresetLoader
 import log
 
@@ -45,6 +45,8 @@ class SolverState(object):
         self.state["locsData"] = self.getLocsData(solver.locations)
         # list [(ap1, ap2), (ap3, ap4), ...]
         self.state["graphTransitions"] = solver.graphTransitions
+        # list [(ap1, ap2), ...]
+        self.state["curGraphTransitions"] = solver.curGraphTransitions
         # preset file name
         self.state["presetFileName"] = solver.presetFileName
         ## items collected / locs visited / bosses killed
@@ -64,8 +66,14 @@ class SolverState(object):
         self.state["visitedLocationsWeb"] = self.getAvailableLocationsWeb(solver.visitedLocations)
         # dict {locNameWeb: {infos}, ...}
         self.state["remainLocationsWeb"] = self.getRemainLocationsWeb(solver.majorLocations)
+        # string: standard/seedless/plando
+        self.state["mode"] = solver.mode
+        # string:
+        self.state["seed"] = solver.seed
+        # dict {point: point, ...} / array of startPoints
+        (self.state["linesWeb"], self.state["linesSeqWeb"]) = self.getLinesWeb(solver.curGraphTransitions)
         # bool
-        self.state["isPlando"] = solver.isPlando
+        self.state["allTransitions"] = len(solver.curGraphTransitions) == len(solver.graphTransitions)
 
     def toSolver(self, solver):
         if 'majorsSplit' in self.state:
@@ -80,6 +88,7 @@ class SolverState(object):
         solver.patches = self.setPatches(self.state["patches"])
         self.setLocsData(solver.locations)
         solver.graphTransitions = self.state["graphTransitions"]
+        solver.curGraphTransitions = self.state["curGraphTransitions"]
         # preset
         solver.presetFileName = self.state["presetFileName"]
         # items collected / locs visited / bosses killed
@@ -91,7 +100,8 @@ class SolverState(object):
         Bosses.reset()
         for boss in self.state["bosses"]:
             Bosses.beatBoss(boss)
-        solver.isPlando = self.state["isPlando"] if "isPlando" in self.state else False
+        solver.mode = self.state["mode"]
+        solver.seed = self.state["seed"]
 
     def getLocsData(self, locations):
         ret = {}
@@ -150,7 +160,7 @@ class SolverState(object):
         else:
             return "mania"
 
-    def locName4isolver(self, locName):
+    def name4isolver(self, locName):
         # remove space and special characters
         # sed -e 's+ ++g' -e 's+,++g' -e 's+(++g' -e 's+)++g' -e 's+-++g'
         return locName.translate(None, " ,()-")
@@ -164,12 +174,16 @@ class SolverState(object):
                 result.append(know)
         return list(set(result))
 
+    def transition2isolver(self, transition):
+        transition = str(transition)
+        return transition[0].lower()+transition[1:].translate(None, " ,()-")
+
     def getAvailableLocationsWeb(self, locations):
         ret = {}
         for loc in locations:
             if "difficulty" in loc and loc["difficulty"].bool == True:
                 diff = loc["difficulty"]
-                locName = self.locName4isolver(loc["Name"])
+                locName = self.name4isolver(loc["Name"])
                 ret[locName] = {"difficulty": self.diff4isolver(diff.difficulty),
                                 "knows": self.knows2isolver(diff.knows),
                                 "items": list(set(diff.items)),
@@ -186,12 +200,23 @@ class SolverState(object):
         ret = {}
         for loc in locations:
             if "difficulty" not in loc or ("difficulty" in loc and loc["difficulty"].bool == False):
-                locName = self.locName4isolver(loc["Name"])
+                locName = self.name4isolver(loc["Name"])
                 ret[locName] = {"item": loc["itemName"],
                                 "name": loc["Name"],
                                 "knows": ["Sequence Break"],
                                 "items": []}
         return ret
+
+    def getLinesWeb(self, transitions):
+        lines = {}
+        linesSeq = []
+        for (start, end) in transitions:
+            startWeb = self.transition2isolver(start)
+            endWeb = self.transition2isolver(end)
+            lines[startWeb] = endWeb
+            lines[endWeb] = startWeb
+            linesSeq.append((startWeb, endWeb))
+        return (lines, linesSeq)
 
     def getAvailableLocations(self, locations):
         ret = {}
@@ -213,7 +238,7 @@ class SolverState(object):
             self.state = json.load(jsonFile)
 #        print("Loaded Json State:")
 #        for key in self.state:
-#            if key in ["availableLocationsWeb", "visitedLocationsWeb", "collectedItems", "visitedLocations"]:
+#            if key in ["availableLocationsWeb", "visitedLocationsWeb", "collectedItems", "availableLocations", "visitedLocations"]:
 #                print("{}: {}".format(key, self.state[key]))
 #        print("")
 
@@ -228,22 +253,36 @@ class SolverState(object):
 
 class CommonSolver(object):
     def loadRom(self, rom, interactive=False, magic=None):
-        self.romFileName = rom
-        self.romLoader = RomLoader.factory(rom, magic)
-        self.majorsSplit = self.romLoader.assignItems(self.locations)
-        self.areaRando = self.romLoader.loadPatches()
-
-        if interactive == False:
-            self.patches = self.romLoader.getPatches()
+        if rom == None:
+            self.romFileName = 'seedless'
+            self.majorsSplit = 'Full'
+            self.areaRando = True
+            self.patches = RomReader.getDefaultPatches()
+            RomLoader.factory(self.patches).loadPatches()
+            self.curGraphTransitions = []
+            self.graphTransitions = []
+            for loc in self.locations:
+                loc['itemName'] = 'Nothing'
         else:
-            self.patches = self.romLoader.getRawPatches()
-        print("ROM {} majors: {} area: {} patches: {}".format(rom, self.majorsSplit, self.areaRando, self.patches))
+            self.romFileName = rom
+            self.romLoader = RomLoader.factory(rom, magic)
+            self.majorsSplit = self.romLoader.assignItems(self.locations)
+            self.areaRando = self.romLoader.loadPatches()
 
-        self.graphTransitions = self.romLoader.getTransitions()
-        if self.graphTransitions is None:
-            self.graphTransitions = vanillaTransitions
+            if interactive == False:
+                self.patches = self.romLoader.getPatches()
+            else:
+                self.patches = self.romLoader.getRawPatches()
+            print("ROM {} majors: {} area: {} patches: {}".format(rom, self.majorsSplit, self.areaRando, self.patches))
 
-        self.areaGraph = AccessGraph(accessPoints, self.graphTransitions)
+            self.graphTransitions = self.romLoader.getTransitions()
+            if self.areaRando == True and interactive == True:
+                # in interactive area mode we build the graph as we play along
+                self.curGraphTransitions = []
+            else:
+                self.curGraphTransitions = self.graphTransitions
+
+        self.areaGraph = AccessGraph(accessPoints, self.curGraphTransitions)
 
         if self.log.getEffectiveLevel() == logging.DEBUG:
             self.log.debug("Display items at locations:")
@@ -333,6 +372,7 @@ class InteractiveSolver(CommonSolver):
         self.firstLogFile = None
 
         (self.locsAddressName, self.locsWeb2Internal) = self.initLocsAddressName()
+        self.transWeb2Internal = self.initTransitionsName()
 
     def initLocsAddressName(self):
         addressName = {}
@@ -343,14 +383,25 @@ class InteractiveSolver(CommonSolver):
             web2Internal[webName] = loc["Name"]
         return (addressName, web2Internal)
 
+    def initTransitionsName(self):
+        web2Internal = {}
+        for (startPoint, endPoint) in vanillaTransitions:
+            for point in [startPoint, endPoint]:
+                web2Internal[self.apNameInternal2Web(point)] = point
+        return web2Internal
+
     def dumpState(self):
         state = SolverState()
         state.fromSolver(self)
         state.toJson(self.outputFileName)
 
-    def initialize(self, rom, presetFileName, magic, isPlando):
+    def initialize(self, mode, rom, presetFileName, magic):
         # load rom and preset, return first state
-        self.isPlando = isPlando
+        self.mode = mode
+        if self.mode != "seedless":
+            self.seed = os.path.basename(os.path.splitext(rom)[0])+'.sfc'
+        else:
+            self.seed = "seedless"
 
         self.locations = graphLocations
         self.smbm = SMBoolManager()
@@ -361,9 +412,12 @@ class InteractiveSolver(CommonSolver):
         self.loadRom(rom, interactive=True, magic=magic)
         self.locations = self.addMotherBrainLoc(self.locations)
 
-        self.clear()
+        self.clearItems()
 
-        if self.isPlando == True:
+        if self.mode == 'plando':
+            if self.areaRando == True:
+                self.curGraphTransitions = self.loadPlandoTransitions()
+
             self.loadPlandoLocs()
 
         # compute new available locations
@@ -371,7 +425,7 @@ class InteractiveSolver(CommonSolver):
 
         self.dumpState()
 
-    def iterate(self, stateJson, locName, action, item):
+    def iterate(self, stateJson, scope, action, params):
         self.locations = self.addMotherBrainLoc(graphLocations)
         self.smbm = SMBoolManager()
 
@@ -382,27 +436,42 @@ class InteractiveSolver(CommonSolver):
         RomLoader.factory(self.patches).loadPatches()
 
         self.loadPreset(self.presetFileName)
-        self.areaGraph = AccessGraph(accessPoints, self.graphTransitions)
 
-        if action == 'clear':
-            self.clear(True)
-        elif action == 'save':
+        if scope == 'item':
+            if action == 'clear':
+                self.clearItems(True)
+            else:
+                if action == 'add':
+                    if self.mode == 'plando' or self.mode == 'seedless':
+                        self.setItemAt(params['loc'], params['item'])
+                    else:
+                        # pickup item at locName
+                        self.pickItemAt(params['loc'])
+                elif action == 'remove':
+                    # remove last collected item
+                    self.cancelLastItem()
+        elif scope == 'area':
+            if action == 'clear':
+                self.clearTransitions()
+            else:
+                if action == 'add':
+                    startPoint = params['startPoint']
+                    endPoint = params['endPoint']
+                    self.addTransition(self.transWeb2Internal[startPoint], self.transWeb2Internal[endPoint])
+                elif action == 'remove':
+                    # remove last transition
+                    self.cancelLastTransition()
+
+        self.areaGraph = AccessGraph(accessPoints, self.curGraphTransitions)
+
+        if scope == 'common' and action == 'save':
             return self.savePlando()
-        else:
-            # add already collected items to smbm
-            self.smbm.addItems(self.collectedItems)
 
-            if action == 'add':
-                if self.isPlando == True:
-                    self.setItemAt(locName, item)
-                else:
-                    # pickup item at locName
-                    self.pickItemAt(locName)
-            elif action == 'remove':
-                # remove last collected item
-                self.cancelLast()
+        # add already collected items to smbm
+        self.smbm.addItems(self.collectedItems)
 
         # compute new available locations
+        self.clearLocs(self.majorLocations)
         self.computeLocationsDifficulty(self.majorLocations)
 
         # return them
@@ -410,6 +479,10 @@ class InteractiveSolver(CommonSolver):
 
     def getLocNameFromAddress(self, address):
         return self.locsAddressName[address]
+
+    def loadPlandoTransitions(self):
+        transitionsAddr = self.romLoader.getPlandoTransitions((len(vanillaBossesTransitions) + len(vanillaTransitions))*2)
+        return getTransitions(transitionsAddr)
 
     def loadPlandoLocs(self):
         # get the addresses of the already filled locs, with the correct order
@@ -443,11 +516,20 @@ class InteractiveSolver(CommonSolver):
         romPatcher.writeItemsNumber()
         romPatcher.writeSpoiler(itemLocs)
         romPatcher.writePlandoAddresses(self.visitedLocations)
+        if self.areaRando == True:
+            doors = getDoorConnections(self.areaGraph)
+            romPatcher.writeDoorConnections(doors)
+            romPatcher.writePlandoTransitions(doors, (len(vanillaBossesTransitions) + len(vanillaTransitions))*2)
         romPatcher.end()
 
         data = romPatcher.romFile.data
         preset = os.path.splitext(os.path.basename(self.presetFileName))[0]
-        fileName = 'VARIA_Plandomizer_X{}_{}.sfc'.format(strftime("%Y%m%d%H%M%S", gmtime()), preset)
+        seedCode = 'FX'
+        if self.bossRando == True:
+            seedCode = 'B'+seedCode
+        if self.areaRando == True:
+            seedCode = 'A'+seedCode
+        fileName = 'VARIA_Plandomizer_{}{}_{}.sfc'.format(seedCode, strftime("%Y%m%d%H%M%S", gmtime()), preset)
         data["fileName"] = fileName
         # error msg in json to be displayed by the web site
         data["errorMsg"] = ""
@@ -459,6 +541,9 @@ class InteractiveSolver(CommonSolver):
 
     def locNameWeb2Internal(self, locNameWeb):
         return self.locsWeb2Internal[locNameWeb]
+
+    def apNameInternal2Web(self, apName):
+        return apName[0].lower()+apName[1:].translate(None, " ")
 
     def getLoc(self, locNameWeb):
         locName = self.locNameWeb2Internal(locNameWeb)
@@ -491,7 +576,7 @@ class InteractiveSolver(CommonSolver):
 
         self.collectMajor(loc, itemName)
 
-    def cancelLast(self):
+    def cancelLastItem(self):
         # loc
         if len(self.visitedLocations) == 0:
             return
@@ -516,7 +601,7 @@ class InteractiveSolver(CommonSolver):
         self.smbm.removeItem(item)
         self.collectedItems.pop()
 
-    def clear(self, reload=False):
+    def clearItems(self, reload=False):
         self.collectedItems = []
         self.visitedLocations = []
         self.lastLoc = 'Landing Site'
@@ -527,6 +612,22 @@ class InteractiveSolver(CommonSolver):
                     del loc["difficulty"]
         Bosses.reset()
         self.smbm.resetItems()
+
+    def addTransition(self, startPoint, endPoint):
+        # already check in controller if transition is valid for seed
+        self.curGraphTransitions.append((startPoint, endPoint))
+
+    def cancelLastTransition(self):
+        if len(self.curGraphTransitions) > 0:
+            self.curGraphTransitions.pop()
+
+    def clearTransitions(self):
+        self.curGraphTransitions = []
+
+    def clearLocs(self, locs):
+        for loc in locs:
+            if 'difficulty' in loc:
+                del loc['difficulty']
 
     def addMotherBrainLoc(self, locations):
         # in the interactive solver mother brain is a new loc
@@ -1218,28 +1319,52 @@ class DifficultyDisplayer:
         return percent
 
 def interactiveSolver(args):
-    # to init, requires interactive/romFileName/presetFileName/output parameters
-    # to iterate, requires interactive/state/loc/action/output parameters
-    if args.romFileName != None and args.presetFileName != None and args.output != None:
+    # to init, requires interactive/romFileName/presetFileName/output parameters in standard/plando mode
+    # to init, requires interactive/presetFileName/output parameters in seedless mode
+    # to iterate, requires interactive/state/[loc]/[item]/action/output parameters in item scope
+    # to iterate, requires interactive/state/[startPoint]/[endPoint]/action/output parameters in area scope
+    if args.action == 'init':
         # init
-        solver = InteractiveSolver(args.output)
-        solver.initialize(args.romFileName, args.presetFileName, magic=args.raceMagic, isPlando=args.plando)
-    elif args.state != None and args.action != None and args.output != None:
-        # iterate
-        if args.action == "add":
-            if args.loc == None:
-                print("Missing loc parameter when using action add")
-                sys.exit(1)
-            if args.plando == True:
-                if args.item == None:
-                    print("Missing item parameter when using action add in plando mode")
-                    sys.exit(1)
+        if args.mode != 'seedless' and args.romFileName == None:
+            print("Missing romFileName parameter for {} mode".format(args.mode))
+            sys.exit(1)
+
+        if args.presetFileName == None or args.output == None:
+            print("Missing preset or output parameter")
+            sys.exit(1)
 
         solver = InteractiveSolver(args.output)
-        solver.iterate(args.state, args.loc, args.action, args.item)
+        solver.initialize(args.mode, args.romFileName, args.presetFileName, magic=args.raceMagic)
     else:
-        print("Wrong parameters for interactive mode")
-        sys.exit(1)
+        # iterate
+        params = {}
+        if args.scope == 'common':
+            pass
+        elif args.scope == 'item':
+            if args.state == None or args.action == None or args.output == None:
+                print("Missing state/action/output parameter")
+                sys.exit(1)
+            if args.action == "add":
+                if args.loc == None:
+                    print("Missing loc parameter when using action add for item")
+                    sys.exit(1)
+                if args.mode != 'standard':
+                    if args.item == None:
+                        print("Missing item parameter when using action add in plando/suitless mode")
+                        sys.exit(1)
+                params = {'loc': args.loc, 'item': args.item}
+        elif args.scope == 'area':
+            if args.state == None or args.action == None or args.output == None:
+                print("Missing state/action/output parameter")
+                sys.exit(1)
+            if args.action == "add":
+                if args.startPoint == None or args.endPoint == None:
+                    print("Missing start or end point parameter when using action add for item")
+                    sys.exit(1)
+                params = {'startPoint': args.startPoint, 'endPoint': args.endPoint}
+
+        solver = InteractiveSolver(args.output)
+        solver.iterate(args.state, args.scope, args.action, params)
 
 def standardSolver(args):
     if args.romFileName is None:
@@ -1304,10 +1429,17 @@ if __name__ == "__main__":
                         dest="loc", nargs='?', default=None)
     parser.add_argument('--action', help="Pickup item at location, remove last pickedup location, clear all (used in interactive mode)",
                         dest="action", nargs="?", default=None, choices=['init', 'add', 'remove', 'clear', 'get', 'save'])
-    parser.add_argument('--plando', help="Plando mode (used in interactive mode)",
-                        dest="plando", action="store_true")
     parser.add_argument('--item', help="Name of the item to place in plando mode (used in interactive mode)",
                         dest="item", nargs='?', default=None)
+    parser.add_argument('--startPoint', help="The start AP to connect (used in interactive mode)",
+                        dest="startPoint", nargs='?', default=None)
+    parser.add_argument('--endPoint', help="The destination AP to connect (used in interactive mode)",
+                        dest="endPoint", nargs='?', default=None)
+
+    parser.add_argument('--mode', help="Solver mode: standard/seedless/plando (used in interactive mode)",
+                        dest="mode", nargs="?", default=None, choices=['standard', 'seedless', 'plando'])
+    parser.add_argument('--scope', help="Scope for the action: common/area/item (used in interactive mode)",
+                        dest="scope", nargs="?", default=None, choices=['common', 'area', 'item'])
 
     args = parser.parse_args()
 

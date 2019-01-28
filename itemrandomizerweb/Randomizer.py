@@ -1087,6 +1087,7 @@ class Randomizer(object):
 
     # check if bosses are blocking the last remaining locations
     def onlyBossesLeft(self, bossesKilled):
+        self.log.debug('diff=' + str(self.difficultyTarget))
         prevLocs = self.currentLocations(post=True)
         # fake kill all bosses and see if we can access the rest of the game
         Bosses.reset()
@@ -1101,6 +1102,7 @@ class Randomizer(object):
         for boss in bossesKilled:
             Bosses.beatBoss(boss)
         if ret == True and self.log.getEffectiveLevel() == logging.DEBUG:
+            self.log.debug("onlyBossesLeft prevLocs: {}".format([loc['Name'] for loc in prevLocs]))
             self.log.debug("onlyBossesLeft locs: {}".format([loc['Name'] for loc in locs]))
             self.log.debug("current AP: {}".format(self.curAccessPoint))
             nodes = self.areaGraph.getAvailableAccessPoints(self.areaGraph.accessPoints[self.curAccessPoint], self.smbm, self.difficultyTarget)
@@ -1188,6 +1190,7 @@ class Randomizer(object):
             self.determineParameters()
             # fill up with non-progression stuff
             isStuck = self.fillNonProgressionItems()
+            self.log.debug("non prog stuck = " + str(isStuck))
             self.chozoCheck()
             if len(self.itemPool) > 0:
                 # collect an item with standard pool
@@ -1211,7 +1214,8 @@ class Randomizer(object):
                         # stuck by boss fights. disable max difficulty (warn the user afterwards)
                         if prevDiffTarget is None:
                             prevDiffTarget = self.difficultyTarget
-                        self.difficultyTarget = infinity
+                            self.difficultyTarget = infinity
+                            self.curLocs = None # reset curLocs cache
                         isStuck = False
             self.chozoCheck()
             runtime_s = time.clock() - startDate
@@ -1233,7 +1237,7 @@ class Randomizer(object):
                 print("REM ITEMS = "  + str([item['Type'] for item in self.itemPool]))
                 self.errorMsg += "Stuck because of navigation. Retry, and disable either super fun settings/late morph ball/suits restriction if the problem happens again."
                 self.itemLocations = None
-        if prevDiffTarget is not None:
+        if prevDiffTarget is not None and self.itemLocations is not None:
             bossLocsDiffs = self.getAboveMaxDiffLocsStr(prevDiffTarget)
             self.errorMsg += "Boss fights forced us to up the maximum difficulty. Affected locations: {}".format(bossLocsDiffs)
         if len(self.errorMsg) > 0:

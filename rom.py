@@ -168,7 +168,8 @@ class RomReader:
         'gravityNoHeatProtection': {'address': 0x06e37d, 'value': 0x01, 'desc': "Gravity suit heat protection removed"},
         'variaTweaks': {'address': 0x7CC4D, 'value': 0x37, 'desc': "VARIA tweaks"},
         'area': {'address': 0x22D564, 'value': 0xF2, 'desc': "Area layout modifications"},
-        'areaLayout': {'address': 0x252FA7, 'value': 0xF8, 'desc': "Area layout additional modifications"}
+        'areaLayout': {'address': 0x252FA7, 'value': 0xF8, 'desc': "Area layout additional modifications"},
+        'ridley_platform': {'address': 0x246C09, 'value': 0x00, 'desc': "Ridley platform added in bosses rando"}
     }
 
     @staticmethod
@@ -316,29 +317,35 @@ class RomReader:
         return True
 
     def loadTransitions(self):
-        # return the transitions or None if vanilla transitions
+        # return the transitions
         from graph_access import accessPoints, getRooms
         rooms = getRooms()
-        transitions = {}
+        bossTransitions = {}
+        areaTransitions = {}
         for accessPoint in accessPoints:
             if accessPoint.Internal == True:
                 continue
             (destRoomPtr, destEntryScreen) = self.getTransition(accessPoint.ExitInfo['DoorPtr'])
             destAPName = rooms[(destRoomPtr, destEntryScreen)]
-            transitions[accessPoint.Name] = destAPName
+            if accessPoint.Boss == True:
+                bossTransitions[accessPoint.Name] = destAPName
+            else:
+                areaTransitions[accessPoint.Name] = destAPName
 
-        # remove bidirectionnal transitions
-        # can't del keys in a dict while iterating it
-        transitionsCopy = copy.copy(transitions)
-        for src in transitionsCopy:
-            if src in transitions:
-                dest = transitions[src]
-                if dest in transitions:
-                    if transitions[dest] == src:
-                        del transitions[dest]
+        def removeBiTrans(transitions):
+            # remove bidirectionnal transitions
+            # can't del keys in a dict while iterating it
+            transitionsCopy = copy.copy(transitions)
+            for src in transitionsCopy:
+                if src in transitions:
+                    dest = transitions[src]
+                    if dest in transitions:
+                        if transitions[dest] == src:
+                            del transitions[dest]
 
-        transitions = [(t, transitions[t]) for t in transitions]
-        return transitions
+            return [(t, transitions[t]) for t in transitions]
+
+        return (removeBiTrans(areaTransitions), removeBiTrans(bossTransitions))
 
     def getTransition(self, doorPtr):
         self.romFile.seek(0x10000 | doorPtr)
@@ -1250,6 +1257,7 @@ class RomLoader(object):
     def loadPatches(self):
         RomPatches.ActivePatches = []
         isArea = False
+        isBoss = False
 
         # check total base (blue bt and red tower blue door)
         if self.hasPatch("startCeres") or self.hasPatch("startLS"):
@@ -1283,7 +1291,12 @@ class RomLoader(object):
         if self.hasPatch("areaLayout"):
             RomPatches.ActivePatches.append(RomPatches.AreaRandoGatesOther)
 
-        return isArea
+
+        # check boss rando
+        if self.hasPatch("ridley_platform"):
+            isBoss = True
+
+        return (isArea, isBoss)
 
     def getPatches(self):
         return self.romReader.getPatches()

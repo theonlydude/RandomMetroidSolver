@@ -39,12 +39,16 @@ class SolverState(object):
         self.state["majorsSplit"] = solver.majorsSplit
         # bool
         self.state["areaRando"] = solver.areaRando
+        # bool
+        self.state["bossRando"] = solver.bossRando
         # dict of raw patches
         self.state["patches"] = solver.patches
         # dict {locName: {itemName: "xxx", "accessPoint": "xxx"}, ...}
         self.state["locsData"] = self.getLocsData(solver.locations)
         # list [(ap1, ap2), (ap3, ap4), ...]
-        self.state["graphTransitions"] = solver.graphTransitions
+        self.state["areaTransitions"] = solver.areaTransitions
+        # list [(ap1, ap2), (ap3, ap4), ...]
+        self.state["bossTransitions"] = solver.bossTransitions
         # list [(ap1, ap2), ...]
         self.state["curGraphTransitions"] = solver.curGraphTransitions
         # preset file name
@@ -73,7 +77,7 @@ class SolverState(object):
         # dict {point: point, ...} / array of startPoints
         (self.state["linesWeb"], self.state["linesSeqWeb"]) = self.getLinesWeb(solver.curGraphTransitions)
         # bool
-        self.state["allTransitions"] = len(solver.curGraphTransitions) == len(solver.graphTransitions)
+        self.state["allTransitions"] = len(solver.curGraphTransitions) == len(solver.areaTransitions) + len(solver.bossTransitions)
 
     def toSolver(self, solver):
         if 'majorsSplit' in self.state:
@@ -85,9 +89,11 @@ class SolverState(object):
             else:
                 solver.majorsSplit = 'Major'
         solver.areaRando = self.state["areaRando"]
+        solver.bossRando = self.state["bossRando"]
         solver.patches = self.setPatches(self.state["patches"])
         self.setLocsData(solver.locations)
-        solver.graphTransitions = self.state["graphTransitions"]
+        solver.areaTransitions = self.state["areaTransitions"]
+        solver.bossTransitions = self.state["bossTransitions"]
         solver.curGraphTransitions = self.state["curGraphTransitions"]
         # preset
         solver.presetFileName = self.state["presetFileName"]
@@ -257,17 +263,19 @@ class CommonSolver(object):
             self.romFileName = 'seedless'
             self.majorsSplit = 'Full'
             self.areaRando = True
+            self.bossRando = True
             self.patches = RomReader.getDefaultPatches()
             RomLoader.factory(self.patches).loadPatches()
             self.curGraphTransitions = []
-            self.graphTransitions = []
+            self.areaTransitions = []
+            self.bossTransitions = []
             for loc in self.locations:
                 loc['itemName'] = 'Nothing'
         else:
             self.romFileName = rom
             self.romLoader = RomLoader.factory(rom, magic)
             self.majorsSplit = self.romLoader.assignItems(self.locations)
-            self.areaRando = self.romLoader.loadPatches()
+            (self.areaRando, self.bossRando) = self.romLoader.loadPatches()
 
             if interactive == False:
                 self.patches = self.romLoader.getPatches()
@@ -275,12 +283,19 @@ class CommonSolver(object):
                 self.patches = self.romLoader.getRawPatches()
             print("ROM {} majors: {} area: {} patches: {}".format(rom, self.majorsSplit, self.areaRando, self.patches))
 
-            self.graphTransitions = self.romLoader.getTransitions()
-            if self.areaRando == True and interactive == True:
+            (self.areaTransitions, self.bossTransitions) = self.romLoader.getTransitions()
+            if interactive == True:
                 # in interactive area mode we build the graph as we play along
-                self.curGraphTransitions = []
+                if self.areaRando == True and self.bossRando == True:
+                    self.curGraphTransitions = []
+                elif self.areaRando == True:
+                    self.curGraphTransitions = self.bossTransitions[:]
+                elif self.bossRando == True:
+                    self.curGraphTransitions = self.areaTransitions[:]
+                else:
+                    self.curGraphTransitions = self.bossTransitions + self.areaTransitions
             else:
-                self.curGraphTransitions = self.graphTransitions
+                self.curGraphTransitions = self.bossTransitions + self.areaTransitions
 
         self.areaGraph = AccessGraph(accessPoints, self.curGraphTransitions)
 
@@ -618,11 +633,25 @@ class InteractiveSolver(CommonSolver):
         self.curGraphTransitions.append((startPoint, endPoint))
 
     def cancelLastTransition(self):
-        if len(self.curGraphTransitions) > 0:
-            self.curGraphTransitions.pop()
+        if self.areaRando == True and self.bossRando == True:
+            if len(self.curGraphTransitions) > 0:
+                self.curGraphTransitions.pop()
+        elif self.areaRando == True:
+            if len(self.curGraphTransitions) > len(self.bossTransitions):
+                self.curGraphTransitions.pop()
+        elif self.bossRando == True:
+            if len(self.curGraphTransitions) > len(self.areaTransitions):
+                self.curGraphTransitions.pop()
 
     def clearTransitions(self):
-        self.curGraphTransitions = []
+        if self.areaRando == True and self.bossRando == True:
+            self.curGraphTransitions = []
+        elif self.areaRando == True:
+            self.curGraphTransitions = self.bossTransitions[:]
+        elif self.bossRando == True:
+            self.curGraphTransitions = self.areaTransitions[:]
+        else:
+            self.curGraphTransitions = self.bossTransitions + self.areaTransitions
 
     def clearLocs(self, locs):
         for loc in locs:

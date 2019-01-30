@@ -2930,7 +2930,7 @@ function ajaxOkGet(jsonData) {
       if("boss" in locsInfo[locName]) {
         var boss = locsInfo[locName]["boss"];
         if(boss != "Mother Brain") {
-          document.getElementById(boss).style.display = "none";
+          document.getElementById(boss+"G4").style.display = "none";
         }
       }
     }
@@ -2958,7 +2958,7 @@ function ajaxOkGet(jsonData) {
       if("boss" in locsInfo[locName]) {
         var boss = locsInfo[locName]["boss"];
         if(boss != "Mother Brain") {
-          document.getElementById(boss).style.display = "block";
+          document.getElementById(boss+"G4").style.display = "block";
         }
       }
 
@@ -2995,7 +2995,7 @@ function ajaxOkGet(jsonData) {
       if("boss" in locsInfo[locName]) {
         var boss = locsInfo[locName]["boss"];
         if(boss != "Mother Brain") {
-          document.getElementById(boss).style.display = "none";
+          document.getElementById(boss+"G4").style.display = "none";
         }
       }
     }
@@ -4056,16 +4056,16 @@ function startTheTour(step=-1) {
     <div class="g4">
         <img src="/solver/static/images/golden_four.png" alt="g4" title="Golden 4" class="full">
     </div>
-    <div id="Kraid" class="boss kraid">
+    <div id="KraidG4" class="boss kraid">
         <img src="/solver/static/images/kraid.png" title="Kraid" class="full">
     </div>
-    <div id="Phantoon" class="boss phantoon">
+    <div id="PhantoonG4" class="boss phantoon">
         <img src="/solver/static/images/phantoon.png" title="Phantoon" class="full">
     </div>
-    <div id="Draygon" class="boss draygon">
+    <div id="DraygonG4" class="boss draygon">
         <img src="/solver/static/images/draygon.png" title="Draygon" class="full">
     </div>
-    <div id="Ridley" class="boss ridley">
+    <div id="RidleyG4" class="boss ridley">
         <img src="/solver/static/images/ridley.png" title="Ridley" class="full">
     </div>
 

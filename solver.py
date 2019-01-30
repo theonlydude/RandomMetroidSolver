@@ -425,7 +425,6 @@ class InteractiveSolver(CommonSolver):
         self.loadPreset(self.presetFileName)
 
         self.loadRom(rom, interactive=True, magic=magic)
-        self.locations = self.addMotherBrainLoc(self.locations)
 
         self.clearItems()
 
@@ -441,7 +440,6 @@ class InteractiveSolver(CommonSolver):
         self.dumpState()
 
     def iterate(self, stateJson, scope, action, params):
-        self.locations = self.addMotherBrainLoc(graphLocations)
         self.smbm = SMBoolManager()
 
         state = SolverState()
@@ -657,23 +655,6 @@ class InteractiveSolver(CommonSolver):
         for loc in locs:
             if 'difficulty' in loc:
                 del loc['difficulty']
-
-    def addMotherBrainLoc(self, locations):
-        # in the interactive solver mother brain is a new loc
-        locations.append({
-            'Area': "Tourian",
-            'GraphArea': "Tourian",
-            'SolveArea': "Tourian",
-            'Name': "Mother Brain",
-            'Visibility': "Visible",
-            'Room': 'Mother Brain Room',
-            'itemName': "Nothing",
-            'AccessFrom' : {
-                'Statues Hallway Left': lambda sm: SMBool(True)
-            },
-            'Available': lambda sm: sm.wand(Bosses.allBossesDead(sm), sm.enoughStuffTourian())
-        })
-        return locations
 
 class StandardSolver(CommonSolver):
     # given a rom and parameters returns the estimated difficulty

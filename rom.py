@@ -255,7 +255,7 @@ class RomReader:
             isFull = False
             chozoItems = {}
         for loc in locations:
-            if 'Address' not in loc:
+            if 'Boss' in loc['Class']:
                 loc["itemName"] = "Nothing"
                 continue
             item = self.getItem(loc["Address"], loc["Visibility"])
@@ -573,7 +573,7 @@ class RomPatcher:
 
     def writeNothing(self, itemLoc):
         loc = itemLoc['Location']
-        if 'Address' not in loc:
+        if 'Boss' in loc['Class']:
             return
         # missile
         self.writeItemCode({'Code': 0xeedb}, loc['Visibility'], loc['Address'])
@@ -584,7 +584,7 @@ class RomPatcher:
 
     def writeItem(self, itemLoc):
         loc = itemLoc['Location']
-        if 'Address' not in loc:
+        if 'Boss' in loc['Class']:
             return
 #        print('write ' + itemLoc['Item']['Type'] + ' at ' + loc['Name'])
         self.writeItemCode(itemLoc['Item'], loc['Visibility'], loc['Address'])
@@ -1162,8 +1162,6 @@ class RomPatcher:
     def writePlandoAddresses(self, locations):
         self.romFile.seek(0x2F6000)
         for loc in locations:
-            if 'Address' not in loc:
-                continue
             self.writeWord(loc['Address'] & 0xFFFF)
 
         # fill remaining addresses with 0xFFFF

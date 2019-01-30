@@ -395,7 +395,7 @@ class InteractiveSolver(CommonSolver):
         web2Internal = {}
         for loc in graphLocations:
             webName = self.locNameInternal2Web(loc["Name"])
-            addressName[loc["Address"] - 0x70000] = webName
+            addressName[loc["Address"] % 0x10000] = webName
             web2Internal[webName] = loc["Name"]
         return (addressName, web2Internal)
 

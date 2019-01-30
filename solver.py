@@ -401,7 +401,7 @@ class InteractiveSolver(CommonSolver):
 
     def initTransitionsName(self):
         web2Internal = {}
-        for (startPoint, endPoint) in vanillaTransitions:
+        for (startPoint, endPoint) in vanillaTransitions + vanillaBossesTransitions:
             for point in [startPoint, endPoint]:
                 web2Internal[self.apNameInternal2Web(point)] = point
         return web2Internal

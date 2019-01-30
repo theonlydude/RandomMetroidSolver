@@ -248,6 +248,7 @@ locations = [
     'Name': "Kraid",
     'Class': ["Boss"],
     'CanHidden': False,
+    'Address': 0xB055B055,
     'Room': 'Kraid Room',
     'AccessFrom' : {
         'KraidRoomIn': lambda sm: SMBool(True)
@@ -409,6 +410,7 @@ locations = [
     'Name': "Ridley",
     'Class': ["Boss"],
     'CanHidden': False,
+    'Address': 0xB055B056,
     'Room': 'Ridley Room',
     'AccessFrom' : {
         'RidleyRoomIn': lambda sm: SMBool(True)
@@ -508,6 +510,7 @@ locations = [
     'Name': "Phantoon",
     'Class': ["Boss"],
     'CanHidden': False,
+    'Address': 0xB055B057,
     'Room': 'Phantoon Room',
     'AccessFrom' : {
         'PhantoonRoomIn': lambda sm: SMBool(True)
@@ -694,6 +697,7 @@ locations = [
     'Name': "Draygon",
     'Class': ["Boss"],
     'CanHidden': False,
+    'Address': 0xB055B058,
     'Room': 'Draygon Room',
     'AccessFrom' : {
         'DraygonRoomIn': lambda sm: SMBool(True)
@@ -723,13 +727,11 @@ locations = [
     'SolveArea': "Tourian",
     'Name': "Mother Brain",
     'Class': ["Boss"],
+    'Address': 0xB055B059,
     'CanHidden': False,
     'Room': 'Mother Brain Room',
     'AccessFrom' : {
-        'Statues Hallway Left': lambda sm: sm.wand(Bosses.bossDead('Kraid'),
-                                                   Bosses.bossDead('Phantoon'),
-                                                   Bosses.bossDead('Draygon'),
-                                                   Bosses.bossDead('Ridley'))
+        'Statues Hallway Left': lambda sm: Bosses.allBossesDead(sm)
     },
     'Available': lambda sm: sm.enoughStuffTourian(),
 },

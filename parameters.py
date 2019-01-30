@@ -153,7 +153,7 @@ class Knows:
     DraygonSparkKill = SMBool(False, mania, ['DraygonSparkKill'])
     desc['DraygonSparkKill'] = {'display': 'Draygon Spark Kill',
                                 'title': 'Kill Draygon using Speed Booster and shinesparks',
-                                'href': '', # TODO
+                                'href': None, # TODO
                                 'rooms': ["Draygon's Room"]}
 
     MicrowaveDraygon = SMBool(True, easy, ['MicrowaveDraygon'])
@@ -438,7 +438,7 @@ class Knows:
     SuitlessPuyoClip = SMBool(False, 0, ['SuitlessPuyoClip'])
     desc['SuitlessPuyoClip'] = {'display': 'Suitless Puyo Clip',
                                 'title': 'Do the Puyo clip with Hi Jump and without Gravity',
-                                'href': '',
+                                'href': 'https://snipaclip.com/watch/HomelyImpartialVampireFloof',
                                 'rooms': ['Pants Room']}
 
     # plasma room

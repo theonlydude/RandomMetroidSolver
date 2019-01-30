@@ -346,6 +346,38 @@ img {
     left: 22.9%;
     top: 17.3%;
 }
+#phantoonRoomOut {
+    left: 77.7%;
+    top: 15.7%;
+}
+#phantoonRoomIn {
+    left: 75.3%;
+    top: 15.7%;
+}
+#ridleyRoomOut {
+    left: 77.35%;
+    top: 92.5%;
+}
+#ridleyRoomIn {
+    left: 79.4%;
+    top: 89.9%;
+}
+#kraidRoomOut {
+    left: 64.8%;
+    top: 66.1%;
+}
+#kraidRoomIn {
+    left: 62.25%;
+    top: 66.1%;
+}
+#draygonRoomOut {
+    left: 93.7%;
+    top: 48.8%;
+}
+#draygonRoomIn {
+    left: 95.85%;
+    top: 47.2%;
+}
 
 
 .lowerMushroomsLeftGps {
@@ -503,6 +535,38 @@ img {
 .bubbleMountainGps {
     left: 54.6%;
     top: 73%;
+}
+.phantoonRoomOutGps {
+    left: 24.9%;
+    top: 17.3%;
+}
+.phantoonRoomInGps {
+    left: 26.9%;
+    top: 17.3%;
+}
+.ridleyRoomOutGps {
+    left: 28.9%;
+    top: 17.3%;
+}
+.ridleyRoomInGps {
+    left: 30.9%;
+    top: 17.3%;
+}
+.kraidRoomOutGps {
+    left: 32.9%;
+    top: 17.3%;
+}
+.kraidRoomInGps {
+    left: 34.9%;
+    top: 17.3%;
+}
+.draygonRoomOutGps {
+    left: 36.9%;
+    top: 17.3%;
+}
+.draygonRoomInGps {
+    left: 38.9%;
+    top: 17.3%;
 }
 .lastLoc {
     position: absolute;
@@ -1106,7 +1170,7 @@ img {
     top: 66.8%;
 }
 #VariaSuit {
-    left: 64.4%;
+    left: 67.6%;
     top: 66.75%;
 }
 #IceBeam {
@@ -1138,8 +1202,8 @@ img {
     top: 76.9%;
 }
 #EnergyTankRidley {
-    left: 78.35%;
-    top: 92%;
+    left: 75.6%;
+    top: 94.6%;
 }
 #ScrewAttack {
     left: 76.45%;
@@ -1186,8 +1250,8 @@ img {
     top: 46.2%;
 }
 #SpaceJump {
-    left: 93.9%;
-    top: 49.3%;
+    left: 91.1%;
+    top: 50.9%;
 }
 #PowerBombCrateriasurface {
     left: 44.5%;
@@ -1452,6 +1516,22 @@ img {
 #MissileDraygon {
     left: 97.65%;
     top: 44.7%;
+}
+#Kraid {
+    left: 66.16%;
+    top: 66%;
+}
+#Ridley {
+    left: 76.6%;
+    top: 93.8%;
+}
+#Phantoon {
+    left: 78.8%;
+    top: 16.3%;
+}
+#Draygon {
+    left: 92.6%;
+    top: 50%;
 }
 #MotherBrain {
     left: 22%;
@@ -2627,7 +2707,7 @@ var leaderLines = {};
 var nextColor = 0;
 var linesSeq = new Array();
 
-var colors = ['grey', 'lime', 'pink',  'orange', 'yellow', 'purple', 'red', '#bfef45', 'white', 'cyan', 'magenta', 'olive', 'green', 'blue'];
+var colors = ['grey', 'lime', 'pink',  'fuchsia', 'orange', 'yellow', 'purple', 'aqua', 'red', '#bfef45', 'white', 'cyan', 'magenta', 'olive', 'green', 'blue', 'maroon', 'teal'];
 
 function resetLines() {
   for (var startPoint in lines) {
@@ -2850,7 +2930,7 @@ function ajaxOkGet(jsonData) {
       if("boss" in locsInfo[locName]) {
         var boss = locsInfo[locName]["boss"];
         if(boss != "Mother Brain") {
-          document.getElementById(boss).style.display = "none";
+          document.getElementById(boss+"G4").style.display = "none";
         }
       }
     }
@@ -2878,7 +2958,7 @@ function ajaxOkGet(jsonData) {
       if("boss" in locsInfo[locName]) {
         var boss = locsInfo[locName]["boss"];
         if(boss != "Mother Brain") {
-          document.getElementById(boss).style.display = "block";
+          document.getElementById(boss+"G4").style.display = "block";
         }
       }
 
@@ -2915,7 +2995,7 @@ function ajaxOkGet(jsonData) {
       if("boss" in locsInfo[locName]) {
         var boss = locsInfo[locName]["boss"];
         if(boss != "Mother Brain") {
-          document.getElementById(boss).style.display = "none";
+          document.getElementById(boss+"G4").style.display = "none";
         }
       }
     }
@@ -3018,7 +3098,7 @@ var locsInfo = {
   XRayScope: {left: 42.7, top: 55.27},
   Spazer: {left: 57, top: 58.3},
   EnergyTankKraid: {left: 50.97, top: 66.8},
-  VariaSuit: {left: 64.4, top: 66.75, boss: "Kraid"},
+  VariaSuit: {left: 67.6, top: 66.75},
   IceBeam: {left: 38.6, top: 73.99},
   EnergyTankCrocomire: {left: 52, top: 86.05},
   HiJumpBoots: {left: 40.4, top: 80},
@@ -3026,19 +3106,19 @@ var locsInfo = {
   ReserveTankNorfair: {left: 51.02, top: 73.99},
   SpeedBooster: {left: 69.05, top: 73.95},
   WaveBeam: {left: 61.4, top: 76.9},
-  EnergyTankRidley: {left: 78.35, top: 92, boss: "Ridley"},
+  EnergyTankRidley: {left: 75.6, top: 94.6},
   ScrewAttack: {left: 76.45, top: 90.4},
   EnergyTankFirefleas: {left: 92.5, top: 82.8},
   ReserveTankWreckedShip: {left: 71.71, top: 5.7},
   EnergyTankWreckedShip: {left: 74.7, top: 7.3},
-  RightSuperWreckedShip: {left: 77.4, top: 13.3, boss: "Phantoon"},
+  RightSuperWreckedShip: {left: 77.4, top: 13.3},
   GravitySuit: {left: 66.97, top: 7.2},
   EnergyTankMamaturtle: {left: 74.93, top: 52.3},
   PlasmaBeam: {left: 84.2, top: 36.87},
   ReserveTankMaridia: {left: 77.55, top: 56.85},
   SpringBall: {left: 89.1, top: 58.4},
   EnergyTankBotwoon: {left: 85.3, top: 46.2},
-  SpaceJump: {left: 93.9, top: 49.3, boss: "Draygon"},
+  SpaceJump: {left: 91.1, top: 50.9},
   PowerBombCrateriasurface: {left: 44.5, top: 3.9},
   MissileoutsideWreckedShipbottom: {left: 61.35, top: 10.1},
   MissileoutsideWreckedShiptop: {left: 62.1, top: 2.75},
@@ -3105,6 +3185,10 @@ var locsInfo = {
   MissilepinkMaridia: {left: 80.5, top: 47.85},
   SuperMissilepinkMaridia: {left: 81.5, top: 47.85},
   MissileDraygon: {left: 97.65, top: 44.7},
+  Kraid: {left: 66.16, top: 66, boss: "Kraid"},
+  Ridley: {left: 76.6, top: 93.8, boss: "Ridley"},
+  Phantoon: {left: 78.8, top: 16.3, boss: "Phantoon"},
+  Draygon: {left: 92.6, top: 50, boss: "Draygon"},
   MotherBrain: {left: 22, top: 33.2, boss: "Mother Brain"}
 };
 
@@ -3181,9 +3265,11 @@ window.onload = function(){
         romData[0x22D564] = bytes[0x22D564];
         // area layout
         romData[0x252FA7] = bytes[0x252FA7];
-  
+        // boss rando
+        romData[0x246C09] = bytes[0x246C09];
+
         // transitions
-        var addresses = new Array(0x18c22, 0x18aea, 0x18a42, 0x18e9e, 0x18bfe, 0x18e86, 0x18f0a, 0x189ca, 0x18aae, 0x196d2, 0x19a4a, 0x1922e, 0x195fa, 0x1967e, 0x1a39c, 0x1a510, 0x18aa2, 0x1a480, 0x1902a, 0x190c6, 0x18af6, 0x1a384, 0x1a390, 0x1a330, 0x18c52, 0x191e6, 0x1913e, 0x1923a);
+        var addresses = new Array(0x18c22, 0x18aea, 0x18a42, 0x18e9e, 0x18bfe, 0x18e86, 0x18f0a, 0x189ca, 0x18aae, 0x196d2, 0x19a4a, 0x1922e, 0x195fa, 0x1967e, 0x1a39c, 0x1a510, 0x18aa2, 0x1a480, 0x1902a, 0x190c6, 0x18af6, 0x1a384, 0x1a390, 0x1a330, 0x18c52, 0x191e6, 0x1913e, 0x1923a, 0x1a2ac, 0x1a2c4, 0x198ca, 0x198be, 0x191b6, 0x191ce, 0x1a840, 0x1a96c);
         var arrayLength = addresses.length;
         for(var i=0; i<arrayLength; i++) {
             romData[addresses[i]] = bytes[addresses[i]]
@@ -3426,14 +3512,17 @@ function clickLoc(elem) {
   var locName = elem.id;
 
   if(mode != "standard") {
-    // we don't put an item in mother brain location
-    if(locName == "MotherBrain") {
-      if(mode == "plando") {
-        return;
-      } else {
-        alert("SEE YOU NEXT MISSION");
-        return;
+    // we don't put an item in boss locations
+    if("boss" in locsInfo[locName]) {
+      // check that lock is in the available list
+      if("state" in locsInfo[locName] && (locsInfo[locName]["state"] == "available" || locsInfo[locName]["state"] == "break")) {
+        ajaxCall({action: "add", scope: "item", locName: locName, itemName: "Nothing"}, "upload");
+
+        if(locName == "MotherBrain") {
+          alert("SEE YOU NEXT MISSION");
+        }
       }
+      return;
     }
 
     if(mode == "plando") {
@@ -3469,7 +3558,10 @@ function placeItem() {
   } else if (item == "Reserve" && itemCount["Reserve"] == 4) {
     alert("Can't add more Reserve tank");
   } else {
-    ajaxCall({action: "add", scope: "item", locName: locName, itemName: item}, "upload");
+    // check that lock is in the available list
+    if("state" in locsInfo[locName] && (locsInfo[locName]["state"] == "available" || locsInfo[locName]["state"] == "break")) {
+      ajaxCall({action: "add", scope: "item", locName: locName, itemName: item}, "upload");
+    }
   }
 }
 
@@ -3808,6 +3900,14 @@ function startTheTour(step=-1) {
     <div id="eastTunnelTopRight" class="baseButton" onclick="clickPortal('eastTunnelTopRight')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="East Tunnel Top Right"></div>
     <div id="glassTunnelTop" class="baseButtonRot" onclick="clickPortal('glassTunnelTop')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Glass Tunnel Top"></div>
     <div id="statuesHallwayLeft" class="baseButton" onclick="clickPortal('statuesHallwayLeft')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Statues Hallway Left"></div>
+    <div id="phantoonRoomOut" class="baseButton" onclick="clickPortal('phantoonRoomOut')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Phantoon Room Out"></div>
+    <div id="phantoonRoomIn" class="baseButton" onclick="clickPortal('phantoonRoomIn')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Phantoon Room In"></div>
+    <div id="ridleyRoomOut" class="baseButton" onclick="clickPortal('ridleyRoomOut')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Ridley Room Out"></div>
+    <div id="ridleyRoomIn" class="baseButton" onclick="clickPortal('ridleyRoomIn')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Ridley Room In"></div>
+    <div id="kraidRoomOut" class="baseButton" onclick="clickPortal('kraidRoomOut')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Kraid Room Out"></div>
+    <div id="kraidRoomIn" class="baseButton" onclick="clickPortal('kraidRoomIn')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Kraid Room In"></div>
+    <div id="draygonRoomOut" class="baseButton" onclick="clickPortal('draygonRoomOut')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Draygon Room Out"></div>
+    <div id="draygonRoomIn" class="baseButton" onclick="clickPortal('draygonRoomIn')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Draygon Room In"></div>
 
     <!-- the locations -->
     <div id="EnergyTankGauntlet" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true" data-placement="bottom"></div>
@@ -3910,6 +4010,10 @@ function startTheTour(step=-1) {
     <div id="MissilepinkMaridia" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
     <div id="SuperMissilepinkMaridia" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
     <div id="MissileDraygon" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="Kraid" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="Ridley" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="Phantoon" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="Draygon" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
     <div id="MotherBrain" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
 
     <!-- area tracker buttons -->
@@ -3952,16 +4056,16 @@ function startTheTour(step=-1) {
     <div class="g4">
         <img src="/solver/static/images/golden_four.png" alt="g4" title="Golden 4" class="full">
     </div>
-    <div id="Kraid" class="boss kraid">
+    <div id="KraidG4" class="boss kraid">
         <img src="/solver/static/images/kraid.png" title="Kraid" class="full">
     </div>
-    <div id="Phantoon" class="boss phantoon">
+    <div id="PhantoonG4" class="boss phantoon">
         <img src="/solver/static/images/phantoon.png" title="Phantoon" class="full">
     </div>
-    <div id="Draygon" class="boss draygon">
+    <div id="DraygonG4" class="boss draygon">
         <img src="/solver/static/images/draygon.png" title="Draygon" class="full">
     </div>
-    <div id="Ridley" class="boss ridley">
+    <div id="RidleyG4" class="boss ridley">
         <img src="/solver/static/images/ridley.png" title="Ridley" class="full">
     </div>
 

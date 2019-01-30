@@ -442,6 +442,7 @@ class RomReader:
     def getPlandoAddresses(self):
         self.romFile.seek(0x2F6000)
         addresses = []
+        # TODO::now there's more than 100 with the bosses
         # loop only 100 times (there's 100 locations)
         for i in range(100):
             address = self.readWord()

@@ -1517,6 +1517,22 @@ img {
     left: 97.65%;
     top: 44.7%;
 }
+#Kraid {
+    left: 24%;
+    top: 33.2%;
+}
+#Ridley {
+    left: 26%;
+    top: 33.2%;
+}
+#Phantoon {
+    left: 28%;
+    top: 33.2%;
+}
+#Draygon {
+    left: 30%;
+    top: 33.2%;
+}
 #MotherBrain {
     left: 22%;
     top: 33.2%;
@@ -3496,14 +3512,17 @@ function clickLoc(elem) {
   var locName = elem.id;
 
   if(mode != "standard") {
-    // we don't put an item in mother brain location
-    if(locName == "MotherBrain") {
-      if(mode == "plando") {
-        return;
-      } else {
-        alert("SEE YOU NEXT MISSION");
-        return;
+    // we don't put an item in boss locations
+    if("boss" in locsInfo[locName]) {
+      // check that lock is in the available list
+      if("state" in locsInfo[locName] && (locsInfo[locName]["state"] == "available" || locsInfo[locName]["state"] == "break")) {
+        ajaxCall({action: "add", scope: "item", locName: locName, itemName: "Nothing"}, "upload");
+
+        if(locName == "MotherBrain") {
+          alert("SEE YOU NEXT MISSION");
+        }
       }
+      return;
     }
 
     if(mode == "plando") {
@@ -3539,7 +3558,10 @@ function placeItem() {
   } else if (item == "Reserve" && itemCount["Reserve"] == 4) {
     alert("Can't add more Reserve tank");
   } else {
-    ajaxCall({action: "add", scope: "item", locName: locName, itemName: item}, "upload");
+    // check that lock is in the available list
+    if("state" in locsInfo[locName] && (locsInfo[locName]["state"] == "available" || locsInfo[locName]["state"] == "break")) {
+      ajaxCall({action: "add", scope: "item", locName: locName, itemName: item}, "upload");
+    }
   }
 }
 
@@ -3988,6 +4010,10 @@ function startTheTour(step=-1) {
     <div id="MissilepinkMaridia" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
     <div id="SuperMissilepinkMaridia" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
     <div id="MissileDraygon" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="Kraid" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="Ridley" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="Phantoon" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="Draygon" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
     <div id="MotherBrain" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
 
     <!-- area tracker buttons -->

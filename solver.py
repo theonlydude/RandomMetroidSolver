@@ -385,6 +385,7 @@ class InteractiveSolver(CommonSolver):
 
         self.outputFileName = output
         self.firstLogFile = None
+        self.locations = graphLocations
 
         (self.locsAddressName, self.locsWeb2Internal) = self.initLocsAddressName()
         self.transWeb2Internal = self.initTransitionsName()
@@ -418,7 +419,6 @@ class InteractiveSolver(CommonSolver):
         else:
             self.seed = "seedless"
 
-        self.locations = graphLocations
         self.smbm = SMBoolManager()
 
         self.presetFileName = presetFileName

@@ -635,30 +635,30 @@ def getDoorConnections(graph, areas=True, bosses=False):
         connections.append(conn)
     return connections
 
-def getTransitions(addresses):
-    # build address -> name dict
-    address2Name = {}
+def getDoorsPtrs2Aps():
+    ret = {}
     for ap in accessPoints:
         if ap.Internal == True:
             continue
-        address2Name[ap.ExitInfo['DoorPtr']] = ap.Name
-        address2Name[ap.RoomInfo['RoomPtr']] = ap.Name
+        ret[ap.ExitInfo["DoorPtr"]] = ap.Name
+    return ret
 
-    transitions = {}
-    # (src.ExitInfo['DoorPtr'], dst.RoomInfo['RoomPtr'])
-    for (doorPtr, roomPtr) in addresses:
-        transitions[address2Name[doorPtr]] = address2Name[roomPtr]
+def getAps2DoorsPtrs():
+    ret = {}
+    for ap in accessPoints:
+        if ap.Internal == True:
+            continue
+        ret[ap.Name] = ap.ExitInfo["DoorPtr"]
+    return ret
 
-    # remove bidirectionnal transitions
-    # can't del keys in a dict while iterating it
-    transitionsCopy = copy.copy(transitions)
-    for src in transitionsCopy:
-        if src in transitions:
-            dest = transitions[src]
-            if dest in transitions:
-                if transitions[dest] == src:
-                    del transitions[dest]
 
-    transitions = [(t, transitions[t]) for t in transitions]
+def getTransitions(addresses):
+    # build address -> name dict
+    doorsPtrs = getDoorsPtrs2Aps()
+
+    transitions = []
+    # (src.ExitInfo['DoorPtr'], dst.ExitInfo['DoorPtr'])
+    for (srcDoorPtr, destDoorPtr) in addresses:
+        transitions.append((doorsPtrs[srcDoorPtr], doorsPtrs[destDoorPtr]))
 
     return transitions

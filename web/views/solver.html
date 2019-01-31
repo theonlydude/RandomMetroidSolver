@@ -53,10 +53,10 @@ if (hs.registerOverlay) {
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 <script type="text/javascript">
 function guessVARIAPreset(filename) {
-  var re = /VARIA_Randomizer_[A]?[F]?[Z]?X\d+_(\w+)/;
+  var re = /VARIA_Randomizer_[A]?[B]?[F]?[Z]?X\d+_(\w+)/;
   var match = filename.match(re);
   if(match == null) {
-    re = /VARIA_Plandomizer_[A]?[F]?X\d+_(\w+)/;
+    re = /VARIA_Plandomizer_[A]?[B]?FX\d+_(\w+)/;
     match = filename.match(re);
   }
   if(match != null) {

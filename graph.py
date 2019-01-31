@@ -261,7 +261,7 @@ class AccessGraph(object):
             if loc['GraphArea'] not in availAreas:
                 loc['distance'] = 10000
                 loc['difficulty'] = SMBool(False, 0)
-                # if loc['Name'] == "Screw Attack":
+                #if loc['Name'] == "Super Missile (Crateria)":
                 #    print("loc: {} locDiff is area nok".format(loc["Name"]))
                 continue
 
@@ -269,19 +269,19 @@ class AccessGraph(object):
                 if apName == None:
                     loc['distance'] = 10000
                     loc['difficulty'] = SMBool(False, 0)
-                    # if loc['Name'] == "Screw Attack":
+                    #if loc['Name'] == "Super Missile (Crateria)":
                     #    print("loc: {} ap is none".format(loc["Name"]))
                     break
 
                 tFunc = loc['AccessFrom'][apName]
                 ap = self.accessPoints[apName]
                 tdiff = smbm.eval(tFunc)
-                #if loc['Name'] == "Right Super, Wrecked Ship":
+                #if loc['Name'] == "Super Missile (Crateria)":
                 #    print("{} root: {} ap: {}".format(loc['Name'], rootNode, apName))
                 if tdiff.bool == True and tdiff.difficulty <= maxDiff:
                     diff = smbm.eval(loc['Available'])
                     path = availAPPaths[apName]["path"]
-                    # if loc['Name'] == "Screw Attack":
+                    #if loc['Name'] == "Super Missile (Crateria)":
                     #    print("{} path: {}".format(loc['Name'], [a.Name for a in path]))
                     pdiff = availAPPaths[apName]["pdiff"]
                     locDiff = SMBool(diff.bool,
@@ -294,18 +294,18 @@ class AccessGraph(object):
                         loc['difficulty'] = locDiff
                         loc['path'] = path
                         availLocs.append(loc)
-                        # if loc['Name'] == "Screw Attack":
+                        #if loc['Name'] == "Super Missile (Crateria)":
                         #    print("{} diff: {} tdiff: {} pdiff: {}".format(loc['Name'], diff, tdiff, pdiff))
                         break
                     else:
                         loc['distance'] = 1000 + tdiff.difficulty
                         loc['difficulty'] = SMBool(False, 0)
-                        # if loc['Name'] == "Screw Attack":
+                        #if loc['Name'] == "Super Missile (Crateria)":
                         #    print("loc: {} locDiff is false".format(loc["Name"]))
                 else:
                     loc['distance'] = 10000 + tdiff.difficulty
                     loc['difficulty'] = SMBool(False, 0)
-                    # if loc['Name'] == "Screw Attack":
+                    #if loc['Name'] == "Super Missile (Crateria)":
                     #    print("loc: {} tdiff is false".format(loc["Name"]))
 
             if 'difficulty' not in loc:
@@ -318,6 +318,8 @@ class AccessGraph(object):
     # test access from an access point to another, given an optional item
     def canAccess(self, smbm, srcAccessPointName, destAccessPointName, maxDiff, item=None):
         if item is not None:
+            already = smbm.haveItem(item)
+            isCount = smbm.isCountItem(item)
             smbm.addItem(item)
         #print("canAccess: item: {}, src: {}, dest: {}".format(item, srcAccessPointName, destAccessPointName))
         destAccessPoint = self.accessPoints[destAccessPointName]
@@ -326,7 +328,8 @@ class AccessGraph(object):
         can = destAccessPoint in availAccessPoints
         #self.log.debug("canAccess: avail = {}".format([ap.Name for ap in availAccessPoints.keys()]))
         if item is not None:
-            smbm.removeItem(item)
+            if not already or isCount == True:
+                smbm.removeItem(item)
         #print("canAccess: {}".format(can))
         return can
 

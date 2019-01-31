@@ -454,12 +454,12 @@ class RomReader:
         self.romFile.seek(0x2F6080)
         addresses = []
         for i in range(maxTransitions):
-            doorPtr = self.readWord()
-            roomPtr = self.readWord()
-            if doorPtr == 0xFFFF and roomPtr == 0xFFFF:
+            srcDoorPtr = self.readWord()
+            destDoorPtr = self.readWord()
+            if srcDoorPtr == 0xFFFF and destDoorPtr == 0xFFFF:
                 break
             else:
-                addresses.append((doorPtr, roomPtr))
+                addresses.append((srcDoorPtr, destDoorPtr))
         return addresses
 
     def decompress(self, address):
@@ -1164,21 +1164,19 @@ class RomPatcher:
             self.writeWord(loc['Address'] & 0xFFFF)
 
         # fill remaining addresses with 0xFFFF
-        locsNumber = 100
-        for i in range(0, locsNumber-len(locations)):
+        maxLocsNumber = 128
+        for i in range(0, maxLocsNumber-len(locations)):
             self.writeWord(0xFFFF)
 
-    def writePlandoTransitions(self, doorConnections, maxTransitions):
+    def writePlandoTransitions(self, transitions, doorsPtrs, maxTransitions):
         self.romFile.seek(0x2F6080)
 
-        for conn in doorConnections:
-            doorPtr = conn['DoorPtr']
-            roomPtr = conn['RoomPtr']
-            self.writeWord(doorPtr)
-            self.writeWord(roomPtr)
+        for (src, dest) in transitions:
+            self.writeWord(doorsPtrs[src])
+            self.writeWord(doorsPtrs[dest])
 
         # fill remaining addresses with 0xFFFF
-        for i in range(0, maxTransitions-len(doorConnections)):
+        for i in range(0, maxTransitions-len(transitions)):
             self.writeWord(0xFFFF)
             self.writeWord(0xFFFF)
 

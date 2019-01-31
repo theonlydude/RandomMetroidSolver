@@ -15,7 +15,7 @@ from rom import RomLoader, RomPatcher, RomReader
 from itemrandomizerweb.Items import ItemManager
 from graph_locations import locations as graphLocations
 from graph import AccessGraph
-from graph_access import vanillaTransitions, accessPoints, getDoorConnections, getTransitions, vanillaBossesTransitions
+from graph_access import vanillaTransitions, accessPoints, getDoorConnections, getTransitions, vanillaBossesTransitions, getAps2DoorsPtrs
 from utils import PresetLoader
 import log
 
@@ -316,20 +316,21 @@ class CommonSolver(object):
         self.areaGraph.getAvailableLocations(locations, self.smbm, infinity, self.lastLoc)
         # check post available functions too
         for loc in locations:
-            if 'PostAvailable' in loc:
-                already = self.smbm.haveItem(loc['itemName'])
-                isCount = self.smbm.isCountItem(loc['itemName'])
-
-                self.smbm.addItem(loc['itemName'])
-                postAvailable = loc['PostAvailable'](self.smbm)
-
-                if not already or isCount == True:
-                    self.smbm.removeItem(loc['itemName'])
-
-                loc['difficulty'] = self.smbm.wand(loc['difficulty'], postAvailable)
-
-            # also check if we can come back to landing site from the location
             if loc['difficulty'].bool == True:
+                if 'PostAvailable' in loc:
+                    # in plando mode we can have the same major multiple times
+                    already = self.smbm.haveItem(loc['itemName'])
+                    isCount = self.smbm.isCountItem(loc['itemName'])
+
+                    self.smbm.addItem(loc['itemName'])
+                    postAvailable = loc['PostAvailable'](self.smbm)
+
+                    if not already or isCount == True:
+                        self.smbm.removeItem(loc['itemName'])
+
+                    loc['difficulty'] = self.smbm.wand(loc['difficulty'], postAvailable)
+
+                # also check if we can come back to landing site from the location
                 loc['comeBack'] = self.areaGraph.canAccess(self.smbm, loc['accessPoint'], self.lastLoc, infinity, loc['itemName'])
 
         if self.log.getEffectiveLevel() == logging.DEBUG:
@@ -431,6 +432,7 @@ class InteractiveSolver(CommonSolver):
         if self.mode == 'plando':
             if self.areaRando == True:
                 self.curGraphTransitions = self.loadPlandoTransitions()
+                self.areaGraph = AccessGraph(accessPoints, self.curGraphTransitions)
 
             self.loadPlandoLocs()
 
@@ -532,7 +534,9 @@ class InteractiveSolver(CommonSolver):
         if self.areaRando == True:
             doors = getDoorConnections(self.areaGraph)
             romPatcher.writeDoorConnections(doors)
-            romPatcher.writePlandoTransitions(doors, (len(vanillaBossesTransitions) + len(vanillaTransitions))*2)
+            doorsPtrs = getAps2DoorsPtrs()
+            romPatcher.writePlandoTransitions(self.curGraphTransitions, doorsPtrs,
+                                              len(vanillaBossesTransitions) + len(vanillaTransitions))
         romPatcher.end()
 
         data = romPatcher.romFile.data

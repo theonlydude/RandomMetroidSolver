@@ -115,11 +115,19 @@ class AccessGraph(object):
             'Green Pirates Shaft Bottom Right': 'e',
             'Statues Hallway Left': 'w',
             'Warehouse Entrance Right': 'nw',
-            'Warehouse Zeela Room Left': 'w'
+            'Warehouse Zeela Room Left': 'w',
+            'KraidRoomOut': 'e',
+            'KraidRoomIn': 'e',
+            'PhantoonRoomOut': 's',
+            'PhantoonRoomIn': 's',
+            'DraygonRoomOut': 'e',
+            'DraygonRoomIn': 'e',
+            'RidleyRoomOut': 'e',
+            'RidleyRoomIn': 'e'
         }
         colors = ['red', 'blue', 'green', 'yellow', 'skyblue', 'violet', 'orange',
                   'lawngreen', 'crimson', 'chocolate', 'turquoise', 'tomato',
-                  'navyblue', 'darkturquoise']
+                  'navyblue', 'darkturquoise', 'green', 'blue', 'maroon', 'magenta']
         with open(dotFile, "w") as f:
             f.write("digraph {\n")
             f.write('size="30,30!";\n')

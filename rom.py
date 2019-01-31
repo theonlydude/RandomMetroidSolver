@@ -442,9 +442,7 @@ class RomReader:
     def getPlandoAddresses(self):
         self.romFile.seek(0x2F6000)
         addresses = []
-        # TODO::now there's more than 100 with the bosses
-        # loop only 100 times (there's 100 locations)
-        for i in range(100):
+        for i in range(128):
             address = self.readWord()
             if address == 0xFFFF:
                 break
@@ -453,7 +451,7 @@ class RomReader:
         return addresses
 
     def getPlandoTransitions(self, maxTransitions):
-        self.romFile.seek(0x2F60C8)
+        self.romFile.seek(0x2F6080)
         addresses = []
         for i in range(maxTransitions):
             doorPtr = self.readWord()
@@ -1171,7 +1169,7 @@ class RomPatcher:
             self.writeWord(0xFFFF)
 
     def writePlandoTransitions(self, doorConnections, maxTransitions):
-        self.romFile.seek(0x2F60C8)
+        self.romFile.seek(0x2F6080)
 
         for conn in doorConnections:
             doorPtr = conn['DoorPtr']

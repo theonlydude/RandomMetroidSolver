@@ -3284,12 +3284,11 @@ window.onload = function(){
         }
 
         // plando addresses
-        for(var i=0x2F6000; i<0x2F60C8; i++) {
+        for(var i=0x2F6000; i<0x2F6080; i++) {
           romData[i] = bytes[i];
         }
         // plando transitions
-        // TODO::when adding bosses transitions increase upper limit
-        for(var i=0x2F60C8; i<0x2F6100; i++) {
+        for(var i=0x2F6080; i<0x2F6080+(arrayLength * 4); i++) {
           romData[i] = bytes[i];
         }
 

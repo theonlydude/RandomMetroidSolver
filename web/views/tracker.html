@@ -2736,7 +2736,7 @@ function checkCompatibleAPs(startAP, endAP) {
 }
 
 function clickPortal(elemId) {
-  if(loaded == false) {
+  if(loaded == false || webServInProgress == true) {
     return;
   }
 
@@ -2807,7 +2807,7 @@ function addLine(startPoint, endPoint) {
 }
 
 function clearLines() {
-  if(loaded == false) {
+  if(loaded == false || webServInProgress == true) {
     return;
   }
 
@@ -2824,7 +2824,7 @@ function clearLines() {
 }
 
 function deleteLine() {
-  if(loaded == false) {
+  if(loaded == false || webServInProgress == true) {
     return;
   }
 
@@ -2855,6 +2855,8 @@ function stopAnimation(elem) {
 // COMMON
 
 function ajaxFailJSON(jqXHR, textStatus) {
+  webServInProgress = false;
+
   console.log("error ["+jqXHR.responseJSON+"] ["+jqXHR.responseText+"] ["+textStatus+"]");
 
   setWSIcon("warning");
@@ -2889,6 +2891,8 @@ function setWSIcon(icon) {
 }
 
 function ajaxOkGet(jsonData) {
+  webServInProgress = false;
+
   // get dicts availableLocations and visitedLocations
   console.log("json received: [ "+jsonData+" ]");
   if(jsonData == "OK") {
@@ -3080,6 +3084,7 @@ var mode = "standard";
 var area = true;
 var init = false;
 var globalPlando = false;
+var webServInProgress = false;
 
 // can add more variables:
 //  -state: posible values: ["available", "visited", "break"]
@@ -3412,6 +3417,8 @@ function save() {
 }
 
 function ajaxOkSave(data) {
+  webServInProgress = false;
+
   console.log("ajaxSaveOk");
 
   var uploadFile = document.getElementById("uploadFile");
@@ -3449,7 +3456,7 @@ function ajaxOkSave(data) {
 }
 
 function displayPopup(isPlando) {
-  if(loaded == false) {
+  if(loaded == false || webServInProgress == true) {
     return;
   }
 
@@ -3504,7 +3511,7 @@ function initSolver() {
 }
 
 function clickLoc(elem) {
-  if(loaded == false) {
+  if(loaded == false || webServInProgress == true) {
     return;
   }
 
@@ -3573,7 +3580,7 @@ function hideSavePopup() {
 }
 
 function deleteLoc(isPlando) {
-  if(loaded == false) {
+  if(loaded == false || webServInProgress == true) {
     return;
   }
   if(isPlando == true && ! isActive("repeatPlando")) {
@@ -3610,7 +3617,7 @@ function resetLocsInfo() {
 }
 
 function clearLocs(isPlando) {
-  if(loaded == false) {
+  if(loaded == false || webServInProgress == true) {
     return;
   }
   if(isPlando == true && ! isActive("binPlando")) {

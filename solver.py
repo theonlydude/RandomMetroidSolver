@@ -496,7 +496,7 @@ class InteractiveSolver(CommonSolver):
         return self.locsAddressName[address]
 
     def loadPlandoTransitions(self):
-        transitionsAddr = self.romLoader.getPlandoTransitions((len(vanillaBossesTransitions) + len(vanillaTransitions))*2)
+        transitionsAddr = self.romLoader.getPlandoTransitions(len(vanillaBossesTransitions) + len(vanillaTransitions))
         return getTransitions(transitionsAddr)
 
     def loadPlandoLocs(self):

@@ -536,38 +536,37 @@ img {
     left: 54.6%;
     top: 73%;
 }
-// update gps positions
 .phantoonRoomOutGps {
-    left: 24.9%;
-    top: 17.3%;
+    left: 77.2%;
+    top: 13.8%;
 }
 .phantoonRoomInGps {
-    left: 26.9%;
-    top: 17.3%;
+    left: 74.8%;
+    top: 13.8%;
 }
 .ridleyRoomOutGps {
-    left: 28.9%;
-    top: 17.3%;
+    left: 76.8%;
+    top: 90.7%;
 }
 .ridleyRoomInGps {
-    left: 30.9%;
-    top: 17.3%;
+    left: 78.9%;
+    top: 88%;
 }
 .kraidRoomOutGps {
-    left: 32.9%;
-    top: 17.3%;
+    left: 64.3%;
+    top: 64.3%;
 }
 .kraidRoomInGps {
-    left: 34.9%;
-    top: 17.3%;
+    left: 61.77%;
+    top: 64.3%;
 }
 .draygonRoomOutGps {
-    left: 36.9%;
-    top: 17.3%;
+    left: 93.2%;
+    top: 47%;
 }
 .draygonRoomInGps {
-    left: 38.9%;
-    top: 17.3%;
+    left: 95.35%;
+    top: 45.4%;
 }
 .lastLoc {
     position: absolute;
@@ -3288,8 +3287,8 @@ window.onload = function(){
         for(var i=0x2F6000; i<0x2F6080; i++) {
           romData[i] = bytes[i];
         }
-        // plando transitions
-        for(var i=0x2F6080; i<0x2F6080+(arrayLength * 4); i++) {
+        // plando transitions (4 bytes per transitions, ap#/2 transitions)
+        for(var i=0x2F6080; i<0x2F6080+((arrayLength/2) * 4); i++) {
           romData[i] = bytes[i];
         }
 
@@ -3457,7 +3456,7 @@ function displayPopup(isPlando) {
   globalPlando = isPlando;
 
   if(isPlando == true) {
-    document.getElementById("solverPopupText").innerHTML = "Select an already randomized ROM as base for your Plando, or a Plando ROM";
+    document.getElementById("solverPopupText").innerHTML = "Select an already randomized ROM as base to start your Plando, or a Plando ROM to continue working on it";
   } else {
     document.getElementById("solverPopupText").innerHTML = "Select your randomized ROM to solve, or none for seed less mode";
   }

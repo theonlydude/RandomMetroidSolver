@@ -2816,7 +2816,7 @@ function clearLines() {
     return;
   }
 
-  var result = confirm("Delete all the lines ?");
+  var result = confirm("Delete all the transitions ?");
   if(result == false){
     return;
   }
@@ -3628,7 +3628,14 @@ function clearLocs(isPlando) {
     return;
   }
 
-  var result = confirm("Reset the Interactive VARIA Solver ?");
+  var msg = "Reset the locations of the Interactive VARIA ";
+  if(isPlando == true) {
+    msg = msg + "Plandomizer ?";
+  } else {
+    msg = msg + "Solver ?"
+  }
+
+  var result = confirm(msg);
   if(result == false){
     return;
   }

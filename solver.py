@@ -281,7 +281,7 @@ class CommonSolver(object):
                 self.patches = self.romLoader.getPatches()
             else:
                 self.patches = self.romLoader.getRawPatches()
-            print("ROM {} majors: {} area: {} patches: {}".format(rom, self.majorsSplit, self.areaRando, self.patches))
+            print("ROM {} majors: {} area: {} boss: {} patches: {}".format(rom, self.majorsSplit, self.areaRando, self.bossRando, self.patches))
 
             (self.areaTransitions, self.bossTransitions) = self.romLoader.getTransitions()
             if interactive == True:
@@ -431,7 +431,9 @@ class InteractiveSolver(CommonSolver):
 
         if self.mode == 'plando':
             if self.areaRando == True:
-                self.curGraphTransitions = self.loadPlandoTransitions()
+                plandoTrans = self.loadPlandoTransitions()
+                if len(plandoTrans) > 0:
+                    self.curGraphTransitions = plandoTrans
                 self.areaGraph = AccessGraph(accessPoints, self.curGraphTransitions)
 
             self.loadPlandoLocs()

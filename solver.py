@@ -572,9 +572,10 @@ class InteractiveSolver(CommonSolver):
     def pickItemAt(self, locName):
         # collect new item at newLoc
         loc = self.getLoc(locName)
-        if "difficulty" not in loc:
+        if "difficulty" not in loc or loc["difficulty"] == False:
             # sequence break
             loc["difficulty"] = SMBool(True, -1)
+        if "accessPoint" not in loc:
             # take first ap of the loc
             loc["accessPoint"] = loc["AccessFrom"].keys()[0]
         self.collectMajor(loc)
@@ -588,6 +589,7 @@ class InteractiveSolver(CommonSolver):
         if "difficulty" not in loc:
             # sequence break
             loc["difficulty"] = SMBool(True, -1)
+        if "accessPoint" not in loc:
             # take first ap of the loc
             loc["accessPoint"] = loc["AccessFrom"].keys()[0]
 

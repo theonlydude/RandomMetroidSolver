@@ -3532,7 +3532,9 @@ function clickLoc(elem) {
       return;
     }
 
-    if(mode == "plando") {
+    if("state" in locsInfo[locName] && locsInfo[locName]["state"] == "visited") {
+      document.getElementById("itemPopupText").innerHTML = "Replace item at "+locName+":";
+    } else if(mode == "plando") {
       document.getElementById("itemPopupText").innerHTML = "Item to place at "+locName+":";
     } else {
       document.getElementById("itemPopupText").innerHTML = "Item picked up at "+locName+":";
@@ -3568,6 +3570,8 @@ function placeItem() {
     // check that lock is in the available list
     if("state" in locsInfo[locName] && (locsInfo[locName]["state"] == "available" || locsInfo[locName]["state"] == "break")) {
       ajaxCall({action: "add", scope: "item", locName: locName, itemName: item}, "upload");
+    } else {
+      ajaxCall({action: "replace", scope: "item", locName: locName, itemName: item}, "upload");
     }
   }
 }

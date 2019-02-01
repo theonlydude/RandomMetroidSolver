@@ -1315,7 +1315,7 @@ class WS(object):
             raiseHttp(400, "Unknown scope: {}, must be area/item/common".format(scope), True)
 
         action = request.vars.action
-        if action not in ['add', 'remove', 'clear', 'init', 'get', 'save']:
+        if action not in ['add', 'remove', 'clear', 'init', 'get', 'save', 'replace']:
             raiseHttp(400, "Unknown action {}, must be add/remove/clear/init/get/save".format(action), True)
 
         try:
@@ -1332,7 +1332,7 @@ class WS(object):
             raiseHttp(400, "Missing parameter action", True)
         action = request.vars.action
 
-        if action not in ['init', 'add', 'remove', 'clear', 'get', 'save']:
+        if action not in ['init', 'add', 'remove', 'clear', 'get', 'save', 'replace']:
             raiseHttp(400, "Unknown action {}, must be init/add/remove/clear/get/save".format(action), True)
 
     def action(self):
@@ -1388,7 +1388,7 @@ class WS(object):
             '--mode', mode,
             '--scope', scope
         ]
-        if action == 'add':
+        if action in ['add', 'replace']:
             if scope == 'item':
                 params += ['--loc', parameters["loc"]]
                 if mode != 'standard':
@@ -1617,6 +1617,13 @@ class WS_item_add(WS):
 
     def action(self):
         return self.callSolverAction("item", "add", {"loc": request.vars.locName, "item": request.vars.itemName})
+
+class WS_item_replace(WS_item_add):
+    def validate(self):
+        super(WS_item_replace, self).validate()
+
+    def action(self):
+        return self.callSolverAction("item", "replace", {"loc": request.vars.locName, "item": request.vars.itemName})
 
 class WS_item_remove(WS):
     def validate(self):

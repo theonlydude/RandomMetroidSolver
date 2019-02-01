@@ -720,6 +720,7 @@ def initRandomizerSession():
         session.randomizer['layoutPatches'] = "on"
         session.randomizer['progressionDifficulty'] = 'normal'
         session.randomizer['areaRandomization'] = "off"
+        session.randomizer['bossRandomization'] = "off"
         session.randomizer['complexity'] = "simple"
         session.randomizer['areaLayout'] = "off"
         session.randomizer['variaTweaks'] = "on"
@@ -822,7 +823,7 @@ def validateWebServiceParams(patchs, quantities, others, isJson=False):
         except:
             raiseHttp(400, "Wrong value for paramsFileTarget, must be a JSON string", isJson)
 
-    for check in ['suitsRestriction', 'layoutPatches', 'noGravHeat', 'areaRandomization', 'hideItems', 'strictMinors']:
+    for check in ['suitsRestriction', 'layoutPatches', 'noGravHeat', 'areaRandomization', 'bossRandomization', 'hideItems', 'strictMinors']:
         if check in others:
             if request.vars[check] not in ['on', 'off', 'random']:
                 raiseHttp(400, "Wrong value for {}: {}, authorized values: on/off".format(check, request.vars[check]), isJson)
@@ -864,7 +865,7 @@ def sessionWebService():
               'progressionSpeed', 'majorsSplit', 'suitsRestriction',
               'funCombat', 'funMovement', 'funSuits', 'layoutPatches', 'preset',
               'noGravHeat', 'progressionDifficulty', 'morphPlacement',
-              'areaRandomization', 'complexity', 'hideItems', 'strictMinors', 'randoPreset']
+              'areaRandomization', 'bossRandomization', 'complexity', 'hideItems', 'strictMinors', 'randoPreset']
     validateWebServiceParams(patchs, quantities, others)
 
     if session.randomizer is None:
@@ -890,6 +891,7 @@ def sessionWebService():
     session.randomizer['noGravHeat'] = request.vars.noGravHeat
     session.randomizer['progressionDifficulty'] = request.vars.progressionDifficulty
     session.randomizer['areaRandomization'] = request.vars.areaRandomization
+    session.randomizer['bossRandomization'] = request.vars.bossRandomization
     session.randomizer['complexity'] = request.vars.complexity
     session.randomizer['areaLayout'] = request.vars.areaLayout
     session.randomizer['variaTweaks'] = request.vars.variaTweaks
@@ -926,7 +928,7 @@ def randomizerWebService():
               'maxDifficulty', 'progressionSpeed', 'majorsSplit',
               'suitsRestriction', 'morphPlacement', 'funCombat', 'funMovement', 'funSuits',
               'layoutPatches', 'noGravHeat', 'progressionDifficulty', 'areaRandomization',
-              'hideItems', 'strictMinors', 'complexity']
+              'bossRandomization', 'hideItems', 'strictMinors', 'complexity']
     validateWebServiceParams(patchs, quantities, others, isJson=True)
 
     # randomize
@@ -1022,6 +1024,9 @@ def randomizerWebService():
 
     if request.vars.areaRandomization == 'on':
         params.append('--area')
+
+    if request.vars.bossRandomization == 'on':
+        params.append('--bosses')
 
     # load content of preset to get controller mapping
     try:
@@ -1245,7 +1250,7 @@ def transition2isolver(transition):
     return transition[0].lower()+transition[1:].translate(None, " ,()-")
 
 def tracker():
-    response.title = 'Super Metroid VARIA Randomizer and Solver Area and Item Tracker'
+    response.title = 'Super Metroid VARIA Areas and Items Tracker'
 
     # init session
     if session.tracker is None:
@@ -1257,6 +1262,35 @@ def tracker():
 
         # set to False in tracker.html
         session.tracker["firstTime"] = True
+
+    # load presets list
+    (stdPresets, comPresets) = loadPresetsList()
+
+    # access points
+    vanillaAPs = []
+    for (src, dest) in vanillaTransitions:
+        vanillaAPs += [transition2isolver(src), transition2isolver(dest)]
+
+    vanillaBossesAPs = []
+    for (src, dest) in vanillaBossesTransitions:
+        vanillaBossesAPs += [transition2isolver(src), transition2isolver(dest)]
+
+    return dict(stdPresets=stdPresets, comPresets=comPresets,
+                vanillaAPs=vanillaAPs, vanillaBossesAPs=vanillaBossesAPs)
+
+def plando():
+    response.title = 'Super Metroid VARIA Areas and Items Plando'
+
+    # init session
+    if session.plando is None:
+        session.plando = {}
+
+        session.plando["state"] = {}
+        session.plando["preset"] = "regular"
+        session.plando["seed"] = None
+
+        # set to False in tracker.html
+        session.plando["firstTime"] = True
 
     # load presets list
     (stdPresets, comPresets) = loadPresetsList()

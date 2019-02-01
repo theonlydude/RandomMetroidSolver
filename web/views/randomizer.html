@@ -240,7 +240,8 @@ function AjaxPresetCallCompleted(data) {
     console.log("AjaxPresetCallCompleted");
 
     var dataDict = {paramsFileTarget : data, "complexity": getComplexity()};
-    var elems = ["seed", "itemsounds", "spinjumprestart", "elevators_doors_speed", "skip_ceres", "skip_intro", "animals", "layoutPatches", "noGravHeat", "areaLayout", "variaTweaks", "areaRandomization", "No_Music", "preset"];
+    var elems = ["seed", "itemsounds", "spinjumprestart", "elevators_doors_speed", "skip_ceres", "skip_intro", "animals", "layoutPatches", "noGravHeat", "areaLayout", "variaTweaks", "areaRandomization", "No_Music", "preset",
+"bossRandomization"];
     var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "energyQty", "maxDifficulty", "majorsSplit", "suitsRestriction", "morphPlacement", "funCombat", "funMovement", "funSuits", "progressionDifficulty", "hideItems", "strictMinors"];
 
     for(var i=0; i<elems.length; i++) {
@@ -344,7 +345,7 @@ function AjaxRandomizerCallCompleted(data) {
     console.log("button text set back to randomize");
 
     var dataDict = {"complexity": getComplexity()};
-    var elems = ["itemsounds", "spinjumprestart", "elevators_doors_speed", "skip_ceres", "skip_intro", "animals", "layoutPatches", "noGravHeat", "areaLayout", "variaTweaks", "areaRandomization", "No_Music", "preset", "randoPreset"];
+    var elems = ["itemsounds", "spinjumprestart", "elevators_doors_speed", "skip_ceres", "skip_intro", "animals", "layoutPatches", "noGravHeat", "areaLayout", "variaTweaks", "areaRandomization", "bossRandomization", "No_Music", "preset", "randoPreset"];
     var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "energyQty", "maxDifficulty", "majorsSplit", "suitsRestriction", "morphPlacement", "funCombat", "funMovement", "funSuits", "progressionDifficulty", "hideItems", "strictMinors"];
 
     for(var i=0; i<elems.length; i++) {
@@ -741,18 +742,24 @@ function startTheTour(step=-1) {
     },
     {
       element: "#areaRandomizationStep",
-      title: "Area randomization",
+      title: "Areas randomization",
       content: "<p>Randomize areas together using bidirectional access portals: <a href=\"/solver/static/images/area_map.png\" class=\"highslide\" onclick=\"return hs.expand(this, {wrapperClassName: 'borderless', dimmingOpacity: 0.75, align: 'center'})\"><img id=\"areathumb\" src=\"/solver/static/images/area_map_thumbnail.png\" alt=\"Area Map\" title=\"Click to enlarge\"/></a><br/>All portals can be linked to one another, even if it means following an incompatible transition (Left-Left, Up-Right, ...).<br/>You can go through all portals and back, even those where you can't do that in vanilla, so:<ul><li>Some doors have been turned to blue</li><li>Both Maridia exit green gates have been removed</li><li>Crumble blocks preventing access to Lower Nofair through its exit have been removed</li></ul></p><p>Use the <a href=\"/solver/solver_web/tracker\">Area Tracker</a> to find your way more easily.</p><p><b>Note:</b> enabling it also auto-enables Majors Split to Full Randomization and set difficulty cap to hardcore (if it wasn't already easier) to avoid generating too hard seeds, but it can still be changed afterwards.</p>",
       placement: "auto left"
     },
     {
       element: "#areaLayoutStep",
-      title: "Area randomization additional layout modifications",
-      content: "Some layout tweaks to make your life easier in area randomizer :<br/><ul>\
+      title: "Areas randomization additional layout modifications",
+      content: "Some layout tweaks to make your life easier in areas randomizer :<br/><ul>\
 <li>Remove Crab green gate in Marida</li>\
 <li>Remove blue gate in Green Hill Zone</li>\
 <li>New platform in Green Hill Zone to access transition door</li>\
 <li>Made access paths to the three most 'hidden' portals more obvious so you don't forget to check them</li></ul>",
+      placement: "auto left"
+    },
+    {
+      element: "#bossRandomizationStep",
+      title: "Bosses randomization",
+      content: "Randomize Golden 4 access doors using bidirectional access portals (the sames as in Areas randomization).",
       placement: "auto left"
     },
     {
@@ -1023,18 +1030,28 @@ def displayNumber(id, min, max, default, step="1"):
 	    </div>
 	  </div>
 	  <div class="column">
-            <h4>Area Randomization</h4>
+            <h4>Areas Randomization</h4>
             <p>
 	      Add more randomness to your seed by randomizing the access between the areas.<br/>
 	      Check the help button for the map of the areas and the access points between them.
             </p>
 	    <table class="full">
 	      <tr>
-	        <td colspan="2" class="full" id="areaRandomizationStep">{{displayCheckbox("areaRandomization")}}Area randomization</td>
+	        <td colspan="2" class="full" id="areaRandomizationStep">{{displayCheckbox("areaRandomization")}}Areas randomization</td>
                 <td><button type="button" onclick="startTheTour(16)">?</button></td>
 	      </tr>
 	      <tr id="areaPatchVisibility">
 		<td colspan="2" class="full" id="areaLayoutStep">{{displayCheckbox("areaLayout", False)}} Additional layout patches for easier navigation</td><td><button type="button" onclick="startTheTour(17)">?</button></td>
+	      </tr>
+            </table>
+            <h4>Bosses Randomization</h4>
+            <p>
+	      Randomize the access doors to the Golden 4 bosses.
+            </p>
+	    <table class="full">
+	      <tr>
+	        <td colspan="2" class="full" id="bossRandomizationStep">{{displayCheckbox("bossRandomization")}}Bosses randomization</td>
+                <td><button type="button" onclick="startTheTour(18)">?</button></td>
 	      </tr>
             </table>
 	    <div id="superFunVisibility">
@@ -1047,35 +1064,35 @@ def displayNumber(id, min, max, default, step="1"):
                 <tr>
 		  <td class="small"><div class="random"><button id="funCombatRandom" type="button" onclick="randomize(event, 'funCombat')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
 		  <td colspan="2" class="full" id="funCombatStep">{{displayCheckbox("funCombat")}}<span id="funCombatText">Super Fun Combat</span></td>
-		  <td><button type="button" onclick="startTheTour(18)">?</button></td>
+		  <td><button type="button" onclick="startTheTour(19)">?</button></td>
                 </tr>
                 <tr>
 		  <td class="small"><div class="random"><button id="funMovementRandom" type="button" onclick="randomize(event, 'funMovement')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
 		  <td colspan="2" class="full" id="funMovementStep">{{displayCheckbox("funMovement")}}<span id="funMovementText">Super Fun Movement</span></td>
-		  <td><button type="button" onclick="startTheTour(19)">?</button></td>
+		  <td><button type="button" onclick="startTheTour(20)">?</button></td>
                 </tr>
                 <tr>
 		  <td class="small"><div class="random"><button id="funSuitsRandom" type="button" onclick="randomize(event, 'funSuits')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
 		  <td colspan="2" class="full" id="funSuitsStep">{{displayCheckbox("funSuits")}}<span id="funSuitsText">Suitless</span></td>
-		  <td><button type="button" onclick="startTheTour(20)">?</button></td>
+		  <td><button type="button" onclick="startTheTour(21)">?</button></td>
                 </tr>
               </table>
 	    </div>
 	    <div id="patchesVisibility">
-	      <h4 id="patchesStep">Patches<span class="right"><button type="button" onclick="startTheTour(21)">?</button></span></h4>
+	      <h4 id="patchesStep">Patches<span class="right"><button type="button" onclick="startTheTour(22)">?</button></span></h4>
 	      <p id="mainPatchesTextVisibitily">
 	        The bug fix <a href="https://itemrando.supermetroid.run/information">patches</a> from Total Item Randomizer are included by default.
 	      </p>
 	      <table class="full" id="mainPatchesVisibitily">
 	        <tr>
 		  <td class="full" id="layoutPatchesStep">{{displayCheckbox("layoutPatches", True)}} Include layout patches from Total Item Randomizer</td>
-		  <td><button type="button" onclick="startTheTour(22)">?</button></td>
+		  <td><button type="button" onclick="startTheTour(23)">?</button></td>
 	        </tr>
 	        <tr>
-		  <td class="full" id="noGravHeatStep">{{displayCheckbox("noGravHeat", True)}} Remove Gravity Suit heat protection (by Total)</td><td><button type="button" onclick="startTheTour(23)">?</button></td>
+		  <td class="full" id="noGravHeatStep">{{displayCheckbox("noGravHeat", True)}} Remove Gravity Suit heat protection (by Total)</td><td><button type="button" onclick="startTheTour(24)">?</button></td>
 	        </tr>
 	        <tr>
-		  <td class="full" id="variaTweaksStep">{{displayCheckbox("variaTweaks", True)}} VARIA tweaks (by Flo)</td><td><button type="button" onclick="startTheTour(24)">?</button></td>
+		  <td class="full" id="variaTweaksStep">{{displayCheckbox("variaTweaks", True)}} VARIA tweaks (by Flo)</td><td><button type="button" onclick="startTheTour(25)">?</button></td>
 	        </tr>
 	      </table>
 	      <table class="full" id="patchesStep">

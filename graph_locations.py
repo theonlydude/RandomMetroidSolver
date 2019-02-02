@@ -201,13 +201,17 @@ locations = [
         'Red Tower Top Left': lambda sm: SMBool(True)
     },
     'Available': lambda sm: sm.wand(sm.canUsePowerBombs(),
+                                    sm.canOpenRedDoors(),
                                     sm.wor(sm.haveItem('Grapple'),
                                            sm.haveItem('SpaceJump'),
                                            sm.wand(sm.energyReserveCountOkHardRoom('X-Ray'),
                                                    sm.wor(sm.knowsXrayDboost(),
                                                           sm.haveItem('Ice'),
                                                           sm.wand(sm.canUseBombs(),
-                                                                  sm.knowsInfiniteBombJump())))))
+                                                                  sm.knowsInfiniteBombJump()),
+                                                          sm.wand(sm.haveItem('HiJump'),
+                                                                  sm.wor(sm.haveItem('SpeedBooster'),
+                                                                         sm.haveItem('SpringBall')))))))
 },
 {
     'Area': "Brinstar",

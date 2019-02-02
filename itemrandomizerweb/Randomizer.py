@@ -514,7 +514,7 @@ class Randomizer(object):
                                                          self.smbm,
                                                          self.difficultyTarget,
                                                          ap)
-        if self.restrictions['MajorMinor'] != 'Chozo' or not self.isChozoLeft():
+        if self.restrictions['MajorMinor'] != 'Chozo' or self.difficultyTarget == infinity or not self.isChozoLeft():
             return availLocs
         # in chozo mode, we disable diff check for bosses/hardrooms/hellruns
         availLocsInf = self.areaGraph.getAvailableLocations(locs,

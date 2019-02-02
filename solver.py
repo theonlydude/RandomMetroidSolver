@@ -281,7 +281,7 @@ class CommonSolver(object):
                 self.patches = self.romLoader.getPatches()
             else:
                 self.patches = self.romLoader.getRawPatches()
-            print("ROM {} majors: {} area: {} patches: {}".format(rom, self.majorsSplit, self.areaRando, self.patches))
+            print("ROM {} majors: {} area: {} boss: {} patches: {}".format(rom, self.majorsSplit, self.areaRando, self.bossRando, self.patches))
 
             (self.areaTransitions, self.bossTransitions) = self.romLoader.getTransitions()
             if interactive == True:
@@ -431,7 +431,9 @@ class InteractiveSolver(CommonSolver):
 
         if self.mode == 'plando':
             if self.areaRando == True:
-                self.curGraphTransitions = self.loadPlandoTransitions()
+                plandoTrans = self.loadPlandoTransitions()
+                if len(plandoTrans) > 0:
+                    self.curGraphTransitions = plandoTrans
                 self.areaGraph = AccessGraph(accessPoints, self.curGraphTransitions)
 
             self.loadPlandoLocs()
@@ -465,6 +467,8 @@ class InteractiveSolver(CommonSolver):
                 elif action == 'remove':
                     # remove last collected item
                     self.cancelLastItem()
+                elif action == 'replace':
+                    self.replaceItemAt(params['loc'], params['item'])
         elif scope == 'area':
             if action == 'clear':
                 self.clearTransitions()
@@ -564,10 +568,10 @@ class InteractiveSolver(CommonSolver):
 
     def getLoc(self, locNameWeb):
         locName = self.locNameWeb2Internal(locNameWeb)
-        for loc in self.majorLocations:
+        for loc in self.locations:
             if loc["Name"] == locName:
                 return loc
-        raise Exception("Location '{}' not found in remaining locations".format(locName))
+        raise Exception("Location '{}' not found".format(locName))
 
     def pickItemAt(self, locName):
         # collect new item at newLoc
@@ -594,6 +598,24 @@ class InteractiveSolver(CommonSolver):
             loc["accessPoint"] = loc["AccessFrom"].keys()[0]
 
         self.collectMajor(loc, itemName)
+
+    def replaceItemAt(self, locName, itemName):
+        # replace itemName at locName
+        loc = self.getLoc(locName)
+        oldItemName = loc["itemName"]
+        loc["itemName"] = itemName
+
+        # major item can be set multiple times in plando mode
+        count = self.collectedItems.count(oldItemName)
+        isCount = self.smbm.isCountItem(oldItemName)
+
+        # replace item at the old item spot in collectedItems
+        index = next(i for i, vloc in enumerate(self.visitedLocations) if vloc['Name'] == loc['Name'])
+        self.collectedItems[index] = itemName
+
+        # update smbm if count item or major was only there once
+        if isCount == True or count == 1:
+            self.smbm.removeItem(oldItemName)
 
     def cancelLastItem(self):
         # loc
@@ -1360,7 +1382,7 @@ def interactiveSolver(args):
             if args.state == None or args.action == None or args.output == None:
                 print("Missing state/action/output parameter")
                 sys.exit(1)
-            if args.action == "add":
+            if args.action in ["add", "replace"]:
                 if args.loc == None:
                     print("Missing loc parameter when using action add for item")
                     sys.exit(1)
@@ -1444,7 +1466,7 @@ if __name__ == "__main__":
     parser.add_argument('--loc', help="Name of the location to action on (used in interactive mode)",
                         dest="loc", nargs='?', default=None)
     parser.add_argument('--action', help="Pickup item at location, remove last pickedup location, clear all (used in interactive mode)",
-                        dest="action", nargs="?", default=None, choices=['init', 'add', 'remove', 'clear', 'get', 'save'])
+                        dest="action", nargs="?", default=None, choices=['init', 'add', 'remove', 'clear', 'get', 'save', 'replace'])
     parser.add_argument('--item', help="Name of the item to place in plando mode (used in interactive mode)",
                         dest="item", nargs='?', default=None)
     parser.add_argument('--startPoint', help="The start AP to connect (used in interactive mode)",

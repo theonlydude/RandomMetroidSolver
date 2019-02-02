@@ -548,16 +548,23 @@ def getRooms():
     return rooms
 
 def getRandomBossTransitions():
-    transitions = []
-    srcs = []
-    dsts = []
-    for (src,dst) in vanillaBossesTransitions:
-        srcs.append(src)
-        dsts.append(dst)
-    while len(srcs) > 0:
-        src = srcs.pop(random.randint(0,len(srcs)-1))
-        dst = dsts.pop(random.randint(0,len(dsts)-1))
-        transitions.append((src,dst))
+    transitions = vanillaBossesTransitions
+    def isVanilla():
+        for t in vanillaBossesTransitions:
+            if t not in transitions:
+                return False
+        return True
+    while isVanilla():
+        transitions = []
+        srcs = []
+        dsts = []
+        for (src,dst) in vanillaBossesTransitions:
+            srcs.append(src)
+            dsts.append(dst)
+        while len(srcs) > 0:
+            src = srcs.pop(random.randint(0,len(srcs)-1))
+            dst = dsts.pop(random.randint(0,len(dsts)-1))
+            transitions.append((src,dst))
     return transitions
 
     # up: 0x3, 0x7

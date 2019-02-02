@@ -443,6 +443,7 @@ class Randomizer(object):
         # progression items tried for a given rollback point
         self.rollbackItemsTried = {}
         # handle super fun settings
+        self.itemPool = None
         itemManager = ItemManager(self.restrictions['MajorMinor'], settings.qty, self.smbm)
         fun = SuperFunProvider(settings.superFun, itemManager, self)
         fun.getForbidden()
@@ -456,11 +457,9 @@ class Randomizer(object):
         self.itemPool = fun.getItemPool()
         # temporarily swap item pool in chozo mode, until all chozo item are placed in chozo locs
         if self.restrictions['MajorMinor'] == 'Chozo':
-            self.chozoItemPool = [item for item in self.itemPool if item['Class'] == 'Chozo']
+            self.chozoItemPool = [item for item in self.itemPool if item['Class'] == 'Chozo' or item['Class'] == 'Boss']
             self.nonChozoItemPool = [item for item in self.itemPool if item['Class'] != 'Chozo'] # this will be swapped back
             self.itemPool = self.chozoItemPool
-            self.chozoDiffTarget = self.difficultyTarget # backup diff target
-            self.difficultyTarget = infinity # FIXME this isn't right. diff target shall be ignored only for bosses/hard rooms/hell runs, not the knows
 #        print("itempool: {}".format([item['Type'] for item in self.itemPool]))
         self.restrictedLocations = fun.restrictedLocs
 
@@ -510,6 +509,37 @@ class Randomizer(object):
         result = self.smbm.eval(loc['PostAvailable'], item)
         return result.bool == True and result.difficulty <= self.difficultyTarget
 
+    def getAvailLocs(self, locs, ap):
+        availLocs = self.areaGraph.getAvailableLocations(locs,
+                                                         self.smbm,
+                                                         self.difficultyTarget,
+                                                         ap)
+        if self.restrictions['MajorMinor'] != 'Chozo' or not self.isChozoLeft():
+            return availLocs
+        # in chozo mode, we disable diff check for bosses/hardrooms/hellruns
+        availLocsInf = self.areaGraph.getAvailableLocations(locs,
+                                                            self.smbm,
+                                                            infinity,
+                                                            ap)
+        def isAvail(loc):
+            if 'Boss' in loc['Class']:
+                return True
+            for k in loc['difficulty'].knows:
+                try:
+                    diff = getattr(Knows, k)
+                    if diff.difficulty > self.difficultyTarget:
+                        return False
+                except AttributeError:
+                    # hard room/hell run
+                    pass
+            return True
+
+        for loc in availLocsInf:
+            if loc not in availLocs and isAvail(loc):
+                availLocs.append(loc)
+                
+        return availLocs
+
     # get available locations, given current items, and an optional additional item.
     # uses graph method to get avail locs.
     # item : optional additional item
@@ -526,11 +556,7 @@ class Randomizer(object):
             self.smbm.addItem(itemType)
         if ap is None:
             ap = self.curAccessPoint
-
-        ret = sorted(self.areaGraph.getAvailableLocations(locs,
-                                                          self.smbm,
-                                                          self.difficultyTarget,
-                                                          ap),
+        ret = sorted(self.getAvailLocs(locs, ap),
                      key=lambda loc: loc['Name'])
         if post is True:
             ret = [loc for loc in ret if self.locPostAvailable(loc, itemType)]
@@ -839,7 +865,7 @@ class Randomizer(object):
         return False
 
     def isChozoLeft(self):
-        return any(item['Class'] == 'Chozo' for item in self.itemPool)
+        return self.itemPool is not None and any(item['Class'] == 'Chozo' for item in self.itemPool)
 
     def locClassCheck(self, item, location):
         # in chozo mode, place chozo items first with no diff cap
@@ -1166,7 +1192,6 @@ class Randomizer(object):
                 # filled all chozo locs, go back to normal placement
 #                print('SWAP')
                 self.itemPool = self.nonChozoItemPool
-                self.difficultyTarget = self.chozoDiffTarget
             self.hadChozoLeft = self.isChozoLeft()
             # FIXME : when all chozo have been placed, the rest is placed with no regard to access difficulty to already placed locations
 

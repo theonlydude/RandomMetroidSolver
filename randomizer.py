@@ -31,6 +31,9 @@ def restricted_float(x):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Random Metroid Randomizer")
+    parser.add_argument('--patchOnly',
+                        help="only apply patches, do not perform any randomization", action='store_true',
+                        dest='patchOnly', default=False)
     parser.add_argument('--param', '-p', help="the input parameters", nargs='+',
                         default=None, dest='paramsFileName')
     parser.add_argument('--dir',
@@ -195,7 +198,8 @@ if __name__ == "__main__":
     progDiff = args.progressionDifficulty
     if progDiff == "random":
         progDiff = progDiffs[random.randint(0, len(progDiffs)-1)]
-    print("SEED: " + str(seed))
+    if args.patchOnly == False:
+        print("SEED: " + str(seed))
 #    print("progression speed: " + progSpeed)
 
     # if no max diff, set it very high
@@ -253,14 +257,17 @@ if __name__ == "__main__":
         seedCode = 'A'+seedCode
 
     # output ROM name
-    fileName = 'VARIA_Randomizer_' + seedCode + str(seed) + '_' + preset
-    if args.progressionSpeed != "random":
-        fileName += "_" + args.progressionSpeed
+    if args.patchOnly == False:
+        fileName = 'VARIA_Randomizer_' + seedCode + str(seed) + '_' + preset
+        if args.progressionSpeed != "random":
+            fileName += "_" + args.progressionSpeed
+    else:
+        fileName = 'VARIA' # TODO : find better way to name the file (argument?)
     seedName = fileName
     if args.directory != '.':
         fileName = args.directory + '/' + fileName
     # check that one skip patch is set
-    if 'skip_intro.ips' not in args.patches and 'skip_ceres.ips' not in args.patches:
+    if 'skip_intro.ips' not in args.patches and 'skip_ceres.ips' not in args.patches and args.patchOnly == False:
         args.patches.append('skip_ceres.ips')
 
     if args.noLayout == True:
@@ -349,7 +356,10 @@ if __name__ == "__main__":
             print("DIAG: {}".format(msg))
             sys.exit(-1)
     doors = getDoorConnections(randomizer.areaGraph, args.area, args.bosses)
-    itemLocs = randomizer.generateItems()
+    if args.patchOnly == False:
+        itemLocs = randomizer.generateItems()
+    else:
+        itemLocs = []
     if itemLocs is None:
         dumpErrorMsg(args.output, randomizer.errorMsg)
         print("Can't generate " + fileName + " with the given parameters: {}".format(randomizer.errorMsg))
@@ -387,21 +397,23 @@ if __name__ == "__main__":
 
         romPatcher.writeItemsLocs(itemLocs)
         romPatcher.applyIPSPatches(args.patches, args.noLayout, args.noGravHeat, args.area, args.bosses, args.areaLayoutBase, args.noVariaTweaks)
-        romPatcher.writeSeed(seed) # lol if race mode
-        romPatcher.writeSpoiler(itemLocs)
-        romPatcher.writeRandoSettings(randoSettings, itemLocs)
-        romPatcher.writeDoorConnections(doors)
-        if args.area == True:
-            romPatcher.writeTourianRefill()
-        if args.bosses == True:
-            romPatcher.patchPhantoonEyeDoor()
+        if args.patchOnly == False:
+            romPatcher.writeSeed(seed) # lol if race mode
+            romPatcher.writeSpoiler(itemLocs)
+            romPatcher.writeRandoSettings(randoSettings, itemLocs)
+            romPatcher.writeDoorConnections(doors)
+            if args.area == True:
+                romPatcher.writeTourianRefill()
+            if args.bosses == True:
+                romPatcher.patchPhantoonEyeDoor()
 #        romPatcher.writeTransitionsCredits(randomizer.areaGraph.getCreditsTransitions())
         if ctrlDict is not None:
             romPatcher.writeControls(ctrlDict)
         if args.moonWalk == True:
             romPatcher.enableMoonWalk()
-        romPatcher.writeMagic()
-        romPatcher.writeMajorsSplit(args.majorsSplit)
+        if args.patchOnly == False:
+            romPatcher.writeMagic()
+            romPatcher.writeMajorsSplit(args.majorsSplit)
         romPatcher.end()
 
         if args.rom is None:

@@ -148,7 +148,7 @@ class ItemManager:
             'Category': 'Nothing',
             'Class': 'Minor',
             'Code': 0xeedb,
-            'Name': "Boss Location Filler"
+            'Name': "Boss"
         }
     }
 

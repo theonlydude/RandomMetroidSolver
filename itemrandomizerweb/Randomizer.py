@@ -191,7 +191,10 @@ class RandoSettings(object):
             locLimit = 3
         elif progSpeed == 'fastest':
             locLimit = 4
-        # locLimit is irrelevant for basic speed, as itemLimit is 0
+        elif progSpeed == 'basic':
+            # locLimit is irrelevant for basic speed, as itemLimit is 0,
+            # but we define it for chozo 2nd phase algorithm
+            locLimit = 100
         return locLimit
 
 # dat class name
@@ -363,6 +366,8 @@ class RandoState(object):
     def __init__(self, rando, curLocs):
         self.unusedLocations = rando.unusedLocations[:]
         self.itemPool = rando.itemPool[:]
+        self.chozoItemPool = rando.chozoItemPool[:]
+        self.nonChozoItemPool = rando.nonChozoItemPool[:]
         self.curAccessPoint = rando.curAccessPoint
         self.currentItems = rando.currentItems[:]
         self.itemLocations = rando.itemLocations[:]
@@ -383,6 +388,8 @@ class RandoState(object):
         rando.setCurAccessPoint(self.curAccessPoint)
         rando.states = self.states
         rando.itemPool = self.itemPool
+        rando.chozoItemPool = self.chozoItemPool
+        rando.nonChozoItemPool = self.nonChozoItemPool
         rando.progressionStatesIndices = self.progressionStatesIndices
         rando.progressionItemLocs = self.progressionItemLocs
         rando.hadChozoLeft = self.hadChozoLeft
@@ -455,12 +462,13 @@ class Randomizer(object):
         if len(fun.errorMsgs) > 0:
             self.errorMsg += "Super Fun: " + ', '.join(fun.errorMsgs) + ' '
         self.itemPool = fun.getItemPool()
+        self.chozoItemPool = []
+        self.nonChozoItemPool = []
         # temporarily swap item pool in chozo mode, until all chozo item are placed in chozo locs
         if self.restrictions['MajorMinor'] == 'Chozo':
-            self.chozoItemPool = [item for item in self.itemPool if item['Class'] == 'Chozo' or item['Class'] == 'Boss']
-            self.nonChozoItemPool = [item for item in self.itemPool if item['Class'] != 'Chozo'] # this will be swapped back
+            self.chozoItemPool = [item for item in self.itemPool if item['Class'] == 'Chozo' or item['Name'] == 'Boss']
+            self.nonChozoItemPool = [item for item in self.itemPool if item not in self.chozoItemPool] # this will be swapped back
             self.itemPool = self.chozoItemPool
-#        print("itempool: {}".format([item['Type'] for item in self.itemPool]))
         self.restrictedLocations = fun.restrictedLocs
 
     # with the new chozo split the tests change, a loc can have one or two classes, an item just one
@@ -537,12 +545,15 @@ class Randomizer(object):
         for loc in availLocsInf:
             if loc not in availLocs and isAvail(loc):
                 availLocs.append(loc)
-                
+
         return availLocs
 
     # get available locations, given current items, and an optional additional item.
     # uses graph method to get avail locs.
-    # item : optional additional item
+    # item : optional additional item, or None
+    # locs : base locations list. If None, self.unusedLocations will be used.
+    # ap : access point name. if None, self.curAccessPoint will be used
+    # post : if True, will also check post availability. Default is False. 
     # return available locations list.
     def currentLocations(self, item=None, locs=None, ap=None, post=False):
         isSimpleCall = item is None and locs is None and ap is None and post == False
@@ -604,9 +615,11 @@ class Randomizer(object):
         return result
 
     # removes an item of given type from the pool.
-    def removeItem(self, itemType):
-        item = self.getNextItemInPool(itemType)
-        self.itemPool.remove(item)
+    def removeItem(self, itemType, pool=None):
+        if pool is None:
+            pool = self.itemPool
+        item = self.getNextItemInPool(itemType, pool)
+        pool.remove(item)
 
     # get choose function from a weighted dict
     def getChooseFunc(self, rangeDict, funcDict):
@@ -868,9 +881,8 @@ class Randomizer(object):
         return self.itemPool is not None and any(item['Class'] == 'Chozo' for item in self.itemPool)
 
     def locClassCheck(self, item, location):
-        # in chozo mode, place chozo items first with no diff cap
-        # so the seed is theoretically finishable without checking
-        # any other location
+        # in chozo mode, place chozo items first so the seed is
+        # theoretically finishable without checking any other location
         if self.restrictions['MajorMinor'] == 'Chozo':
             if self.isChozoLeft():
                 return 'Chozo' == item['Class'] and 'Chozo' in location['Class']
@@ -928,10 +940,15 @@ class Randomizer(object):
 
     # actually get an item/loc.
     # itemLocation: item/loc to get
-    # collect: actually collect item. defaults to True. use False for unreachable items. 
-    def getItem(self, itemLocation, collect=True):
-        sys.stdout.write('.')
-        sys.stdout.flush()
+    # collect: actually collect item. defaults to True. use False for unreachable items.
+    # pool : base item pool. If None (default), uses self.itemPool.
+    # showDot : if True (default), outputs a dot on stdout
+    def getItem(self, itemLocation, collect=True, pool=None, showDot=True):
+        if pool is None:
+            pool = self.itemPool
+        if showDot == True:
+            sys.stdout.write('.')
+            sys.stdout.flush()
         item = itemLocation['Item']
         location = itemLocation['Location']
         curLocs = None
@@ -950,10 +967,12 @@ class Randomizer(object):
         self.log.debug("PLACEMENT {}: {} at {} diff: {}".format(len(self.currentItems), item['Type'], location['Name'], location['difficulty']))
         # if curLocs != None:
         #    self.log.debug("PLACEMENT, curLocs={}".format([loc['Name'] for loc in curLocs]))
-        self.removeItem(item['Type'])
+        self.removeItem(item['Type'], pool)
         if collect == True:
             if isProg == True:
-                self.progressionStatesIndices.append(len(self.states))
+                n = len(self.states)
+                if n not in self.progressionStatesIndices:
+                    self.progressionStatesIndices.append(n)
                 self.progressionItemLocs.append(itemLocation)
             if location in curLocs:
                 curLocs.remove(location)
@@ -999,15 +1018,20 @@ class Randomizer(object):
                 return False
         return True
 
-    def getNonProgItemPool(self):
-        pool = [item for item in self.itemPool if not self.isProgItem(item)]
+    def getNonProgItemPool(self, basePool=None):
+        if basePool is None:
+            basePool = self.itemPool
+        pool = [item for item in basePool if not self.isProgItem(item)]
 
-        # enabled only, in major/minor split, and depends on prog speed
+        # enabled only in major/minor split, and depends on prog speed
         if random.random() < self.minorHelpProb:
-            helpfulMinors = [item for item in self.itemPool if item['Class'] == 'Minor' and not self.hasItemTypeInPool(item['Type'], pool)]
+            helpfulMinors = [item for item in basePool if item['Class'] == 'Minor' and not self.hasItemTypeInPool(item['Type'], pool)]
             if len(helpfulMinors) > 0:
                 pool.append(helpfulMinors[random.randint(0, len(helpfulMinors)-1)])
-
+        # don't hold energy back for certain settings
+        if (self.restrictions['MajorMinor'] == 'Chozo' or (self.restrictions['MajorMinor'] == 'Major' and self.settings.qty['energy'] == 'vanilla'))\
+            and not any(item['Category'] == 'Energy' for item in pool):
+            pool += [item for item in basePool if item['Category'] == 'Energy']
         return pool
 
     # return True if stuck, False if not
@@ -1113,7 +1137,7 @@ class Randomizer(object):
 
     # check if bosses are blocking the last remaining locations
     def onlyBossesLeft(self, bossesKilled):
-        self.log.debug('diff=' + str(self.difficultyTarget))
+        self.log.debug('onlyBossesLeft, diff=' + str(self.difficultyTarget))
         prevLocs = self.currentLocations(post=True)
         # fake kill all bosses and see if we can access the rest of the game
         Bosses.reset()
@@ -1128,8 +1152,7 @@ class Randomizer(object):
         for boss in bossesKilled:
             Bosses.beatBoss(boss)
         if ret == True and self.log.getEffectiveLevel() == logging.DEBUG:
-            self.log.debug("onlyBossesLeft prevLocs: {}".format([loc['Name'] for loc in prevLocs]))
-            self.log.debug("onlyBossesLeft locs: {}".format([loc['Name'] for loc in locs]))
+            self.log.debug("onlyBossesLeft openedLocs: {}".format([loc['Name'] for loc in locs if loc not in prevLocs]))
             self.log.debug("current AP: {}".format(self.curAccessPoint))
             nodes = self.areaGraph.getAvailableAccessPoints(self.areaGraph.accessPoints[self.curAccessPoint], self.smbm, self.difficultyTarget)
             self.log.debug("avail APs: {}".format([ap.Name for ap in nodes]))
@@ -1186,14 +1209,96 @@ class Randomizer(object):
         if self.restrictions['MajorMinor'] == 'Chozo':
             self.itemPool = self.chozoItemPool
 
+    def getCurrentState(self):
+        return self.states[-1]
+
+    def chozoFill(self):
+        # 2nd phase fill-up :
+        # try to enforce max diff, with items compatible with prog speed
+        curState = RandoState(self, self.currentLocations())
+        allItemLocs = []
+        states = [self.states[i] for i in self.progressionStatesIndices]
+        self.log.debug("chozoFill, progs=" + str(self.progressionStatesIndices))
+        for state in states:
+            def chooseItem(pool):
+                # choose item in the pool that brings the most collected locs to < diffTarget
+                random.shuffle(pool)
+                ret = None
+                collectedLocs = [il['Location'] for il in self.itemLocations]
+                def getAboveDiffLocs(locs):
+                    return [loc for loc in locs if loc['difficulty'].difficulty > self.difficultyTarget]
+                minLeftAbove = len(getAboveDiffLocs(collectedLocs))
+                self.log.debug('minLeftAbove=' + str(minLeftAbove))
+                if minLeftAbove == 0:
+                    return pool[0]
+                checkPool = []
+                for item in pool:
+                    if not any(i for i in checkPool if i['Type'] == item['Type']):
+                        checkPool.append(item)
+                for item in checkPool:
+                    curLocs = self.currentLocations(item, collectedLocs)
+                    n = len(getAboveDiffLocs(curLocs))
+                    if n < minLeftAbove:
+                        minLeftAbove = n
+                        self.log.debug('item ' + item['Type'] + ' lowers minLeftAbove to ' + str(minLeftAbove))
+                        ret = item
+                if ret is None:
+                    ret = pool[0]
+                return ret
+            def getLocs(locs):
+                return [loc for loc in locs if 'Chozo' not in loc['Class'] and 'Boss' not in loc['Class']]
+            def fillup(n, pool):
+                self.log.debug('fillup-n=' + str(n) + ', pool_types=' + str(list(set([item['Type'] for item in pool]))))
+                itemLocs = []
+                for i in range(n):
+                    curLocs = getLocs(self.currentLocations(ap='Landing Site'))
+                    item = chooseItem(pool)
+                    loc = curLocs[random.randint(0, len(curLocs)-1)]
+                    il = {'Item':item, 'Location':loc}
+                    self.log.debug('fillup ' + item['Type'] + ' at ' + loc['Name'])
+                    self.getItem(il, pool=self.nonChozoItemPool)
+                    itemLocs.append(il)
+                    pool.remove(item)
+                return itemLocs
+            def updateCurrentState(itemLocs, curLocs, curState):
+                curState.apply(self)
+                for il in itemLocs:
+                    self.getItem(il, showDot=False)
+                    allItemLocs.append(il)
+                curState = RandoState(self, self.currentLocations())
+            # restore state to this point + all item locs we already put in the fillup
+            state.apply(self)
+            for il in allItemLocs:
+                self.getItem(il, pool=self.nonChozoItemPool, showDot=False)
+            # fill-up
+            self.determineParameters()
+            self.log.debug('collected=' + str(list(set([i['Item']['Type'] for i in self.itemLocations]))))
+            nonProg = self.getNonProgItemPool(self.nonChozoItemPool)
+            lim = self.locLimit
+            if lim < 0:
+                lim = 0
+            nLocsNonProg = len(getLocs(self.currentLocations())) - lim
+            itemLocs = []
+            if len(nonProg) > 0 and nLocsNonProg > 0:
+                self.log.debug('nonProg fillup cur=' + str(len(self.currentLocations())) + ', nLocs=' + str(nLocsNonProg))
+                itemLocs += fillup(min(nLocsNonProg, len(nonProg)), nonProg)
+            allItems = self.nonChozoItemPool[:]
+            nLocs = len(getLocs(self.currentLocations()))
+            if len(allItems) > 0 and nLocs > 0:
+                self.log.debug('allItems fillup cur=' + str(len(self.currentLocations())) + ', nLocs=' + str(nLocsNonProg))
+                itemLocs += fillup(min(nLocs, len(allItems)), allItems)
+            updateCurrentState(itemLocs, self.currentLocations(), curState)
+
     def chozoCheck(self):
         if self.restrictions['MajorMinor'] == 'Chozo':
             if not self.isChozoLeft() and self.hadChozoLeft:
                 # filled all chozo locs, go back to normal placement
-#                print('SWAP')
+                self.log.debug('CHOZO SWAP')
                 self.itemPool = self.nonChozoItemPool
+                if self.prevDiffTarget is not None:
+                    self.difficultyTarget = self.prevDiffTarget
+                self.chozoFill()
             self.hadChozoLeft = self.isChozoLeft()
-            # FIXME : when all chozo have been placed, the rest is placed with no regard to access difficulty to already placed locations
 
     # only function to use (once) from outside of the Randomizer class.
     # returns a list of item/location dicts with 'Item' and 'Location' as keys.
@@ -1209,7 +1314,7 @@ class Randomizer(object):
 #        self.log.debug("{} items in pool".format(len(self.itemPool)))
         runtime_s = 0
         startDate = time.clock()
-        prevDiffTarget = None
+        self.prevDiffTarget = None
         while len(self.itemPool) > 0 and not isStuck and runtime_s <= self.runtimeLimit_s:
             # dynamic params determination (useful for variable speed)
             self.determineParameters()
@@ -1223,10 +1328,10 @@ class Randomizer(object):
                     isStuck = self.getItemFromStandardPool()
                 if isStuck:
                     # if we're stuck, check if only bosses locations are left (bosses difficulty settings problems)
-                    onlyBosses = self.onlyBossesLeft(self.states[-1].bosses)
+                    onlyBosses = self.onlyBossesLeft(self.getCurrentState().bosses)
                     if not onlyBosses:
                         # check that we're actually stuck
-                        nCurLocs = len(self.states[-1].curLocs)
+                        nCurLocs = len(self.getCurrentState().curLocs)
                         nLocsLeft = len(self.unusedLocations)
                         # self.log.debug("nCurLocs={}, nLocsLeft={}".format(nCurLocs, nLocsLeft))
                         # self.log.debug("curLocs: {}".format([loc['Name'] for loc in self.states[-1].curLocs]))
@@ -1237,8 +1342,10 @@ class Randomizer(object):
                         isStuck = self.getItemFromStandardPool()
                     else:
                         # stuck by boss fights. disable max difficulty (warn the user afterwards)
-                        if prevDiffTarget is None:
-                            prevDiffTarget = self.difficultyTarget
+                        if self.prevDiffTarget is None:
+                            self.log.debug('RAISE MAX DIFF')
+                            self.log.debug("aboveDiff: {}".format([loc['Name'] for loc in self.getCurrentState().curLocs if loc['difficulty'].difficulty > self.difficultyTarget]))
+                            self.prevDiffTarget = self.difficultyTarget
                             self.difficultyTarget = infinity
                             self.curLocs = None # reset curLocs cache
                         isStuck = False
@@ -1262,9 +1369,13 @@ class Randomizer(object):
                 print("REM ITEMS = "  + str([item['Type'] for item in self.itemPool]))
                 self.errorMsg += "Stuck because of navigation. Retry, and disable either super fun settings/late morph ball/suits restriction if the problem happens again."
                 self.itemLocations = None
-        if prevDiffTarget is not None and self.itemLocations is not None:
-            bossLocsDiffs = self.getAboveMaxDiffLocsStr(prevDiffTarget)
-            self.errorMsg += "Boss fights forced us to up the maximum difficulty. Affected locations: {}".format(bossLocsDiffs)
+        if self.itemLocations is not None:
+            maxDiff = self.prevDiffTarget
+            if maxDiff is None:
+                maxDiff = self.difficultyTarget
+            locsDiffs = self.getAboveMaxDiffLocsStr(maxDiff)
+            if locsDiffs != '[  ]':
+                self.errorMsg += "Maximum difficulty could not be applied everywhere. Affected locations: {}".format(locsDiffs)
         if len(self.errorMsg) > 0:
             print("\nDIAG: {}".format(self.errorMsg))
         print("")

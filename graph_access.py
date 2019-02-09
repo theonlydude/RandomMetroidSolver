@@ -289,7 +289,7 @@ accessPoints = [
        entryInfo = {'SamusX':0x134, 'SamusY':0x288, 'song': 0x15},
        shortName="N\\KRONIC BOOST"),
     AccessPoint('Croc Zone', 'Norfair', {
-        'Warehouse Entrance Left': lambda sm: sm.wor(sm.wand(sm.haveItem('SpeedBooster'), # frog speedway
+        'Warehouse Entrance Left': lambda sm: sm.wor(sm.wand(sm.canPassFrogSpeedwayRightToLeft(),
                                                              sm.canHellRun('MainUpperNorfair', 2)),
                                                      sm.wand(sm.canHellRun('MainUpperNorfair', 1.25),
                                                              sm.canGrappleEscape(),
@@ -301,7 +301,8 @@ accessPoints = [
     }, internal=True),
     AccessPoint('Bubble Mountain', 'Norfair', {
         # bottom left door -> frog speed way OR exit cathedral
-        'Warehouse Entrance Left': lambda sm: sm.wor(sm.wand(sm.canPassBombPassages(), sm.haveItem('SpeedBooster')),
+        'Warehouse Entrance Left': lambda sm: sm.wor(sm.wand(sm.canPassBombPassages(),
+                                                             sm.canPassFrogSpeedwayRightToLeft()),
                                                      sm.canExitCathedral()),
         'Single Chamber Top Right': lambda sm: sm.wand(sm.canHellRun('MainUpperNorfair', 1.25),
                                                        sm.canDestroyBombWalls(),

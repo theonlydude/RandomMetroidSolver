@@ -321,6 +321,12 @@ class Knows:
                                   'href': 'https://clips.twitch.tv/CrackyConfidentMomEagleEye',
                                   'rooms': ['Crocomire Speedway']}
 
+    FrogSpeedwayWithoutSpeed = SMBool(False, 0, ['FrogSpeedwayWithoutSpeed'])
+    desc['FrogSpeedwayWithoutSpeed'] = {'display': 'Frog speedway without speed',
+                                        'title': 'Traverse frog speedway from right to left, without Speed Booster, but with Wave and either Spazer or Plasma',
+                                        'href': 'https://puu.sh/CvsCT/7757bb4f62.mp4',
+                                        'rooms': ['Frog Speedway']}
+
     LavaDive = SMBool(True, harder, ['LavaDive'])
     desc['LavaDive'] = {'display': 'Lava Dive',
                         'title': 'Enter Lower Norfair with Varia and Hi-Jump',

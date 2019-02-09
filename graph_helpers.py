@@ -168,6 +168,15 @@ class HelpersGraph(Helpers):
                       sm.wand(sm.haveItem('HiJump'), sm.canSpringBallJump())) # jump from the blocks below
 
     @Cache.decorator
+    def canPassFrogSpeedwayRightToLeft(self):
+        sm = self.smbm
+        return sm.wor(sm.haveItem('SpeedBooster'),
+                      sm.wand(sm.knowsFrogSpeedwayWithoutSpeed(),
+                              sm.haveItem('Wave'),
+                              sm.wor(sm.haveItem('Spazer'),
+                                     sm.haveItem('Plasma'))))
+
+    @Cache.decorator
     def canEnterNorfairReserveArea(self):
         sm = self.smbm
         return sm.wand(sm.canOpenGreenDoors(),

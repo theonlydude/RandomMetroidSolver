@@ -380,8 +380,6 @@ class RandoState(object):
 
     # apply this state to a randomizer object
     def apply(self, rando):
-        rando.progTypesCache = []
-        rando.nonProgTypesCache = []
         rando.unusedLocations = self.unusedLocations
         rando.currentItems = self.currentItems
         rando.itemLocations = self.itemLocations
@@ -398,8 +396,7 @@ class RandoState(object):
         Bosses.reset()
         for boss in self.bosses:
             Bosses.beatBoss(boss)
-        rando.curLocs = None
-
+        rando.resetCache()
 
 # randomizer algorithm main class. generateItems method will generate a complete seed, or fail (depending on settings) 
 class Randomizer(object):
@@ -435,9 +432,8 @@ class Randomizer(object):
         self.unusedLocations = locations
         # collected items
         self.currentItems = []
-        # progresion/non progression types cache
-        self.nonProgTypesCache = []
-        self.progTypesCache = []
+        # items, locs and area caches
+        self.resetCache()
         # start at landing site
         self.curAccessPoint = None
         self.curLocs = None
@@ -470,6 +466,12 @@ class Randomizer(object):
             self.nonChozoItemPool = [item for item in self.itemPool if item not in self.chozoItemPool] # this will be swapped back
             self.itemPool = self.chozoItemPool
         self.restrictedLocations = fun.restrictedLocs
+
+    def resetCache(self):
+        self.nonProgTypesCache = []
+        self.progTypesCache = []
+        self.curLocs = None
+        self.curAccessPoints = None
 
     # with the new chozo split the tests change, a loc can have one or two classes, an item just one
     def isLocMajor(self, loc):
@@ -578,6 +580,25 @@ class Randomizer(object):
 
         return ret
 
+    def currentAccessPoints(self, item=None, ap=None):
+        isSimpleCall = item is None and (ap is None or ap == self.curAccessPoint)
+        if self.curAccessPoints is not None and isSimpleCall:
+            return self.curAccessPoints
+        if item is not None:
+            itemType = item['Type']
+            self.smbm.addItem(itemType)
+        if ap is None:
+            ap = self.curAccessPoint
+        nodes = sorted(self.areaGraph.getAvailableAccessPoints(self.areaGraph.accessPoints[ap],
+                                                               self.smbm, self.difficultyTarget),
+                       key=lambda ap: ap.Name)
+        if item is not None:
+            self.smbm.removeItem(itemType)
+        if isSimpleCall:
+            self.curAccessPoints = nodes
+
+        return nodes
+
     # for an item check if a least one location can accept it, given the current
     # placement restrictions
     #
@@ -608,7 +629,7 @@ class Randomizer(object):
         result = []
         poolDict = self.getPoolDict(itemPool)
         for itemType,items in poolDict.iteritems():
-            if self.checkItem(curLocs, items[0], self.currentItems):
+            if self.checkItem(items[0]):
                 for item in items:
                     result.append(item)
         random.shuffle(result)
@@ -731,7 +752,7 @@ class Randomizer(object):
             return True
         if item['Type'] in self.nonProgTypesCache:
             return False
-        isProg = len(self.currentLocations()) < len(self.currentLocations(item))
+        isProg = self.checkItem(item)
         if isProg == False and item['Type'] not in self.nonProgTypesCache:
             self.nonProgTypesCache.append(item['Type'])
         elif isProg == True and item['Type'] not in self.progTypesCache:
@@ -798,23 +819,30 @@ class Randomizer(object):
     # checks if an item opens up new locations.
     # curLocs : currently available locations
     # item : item to check
-    # items : already placed items
     #
     # return bool
-    def checkItem(self, curLocs, item, items):
+    def checkItem(self, item):
         # no need to test nothing items
-        if item['Type'] in ['Nothing', 'NoEnergy']:
+        if item['Category'] == 'Nothing':
             return False
-        oldLocations = curLocs
+        oldLocations = self.currentLocations()
         canPlaceIt = self.canPlaceItem(item, oldLocations)
         if canPlaceIt == False:
             return False
         newLocations = [loc for loc in self.currentLocations(item) if loc not in oldLocations]
-        newLocationsHasMajor = len(newLocations) > 0
-        if newLocationsHasMajor and self.restrictions["MajorMinor"] != "Full":
-            newLocationsHasMajor = List.exists(lambda l: self.restrictions["MajorMinor"] in l["Class"], newLocations)
+        ret = len(newLocations) > 0
+        if ret == True and self.restrictions["MajorMinor"] != "Full":
+            ret = List.exists(lambda l: self.restrictions["MajorMinor"] in l["Class"], newLocations)
+            if ret == False and self.restrictions["MajorMinor"] == "Major":
+                # in major/minor split, still consider minor locs as progression if not all types are distributed
+                ret = not self.hasItemType('Missile') or not self.hasItemType('Super') or not self.hasItemType('PowerBomb')
+        # if ret == False:
+        #     # still consider items that open new access points
+        #     ret = any(ap not in self.currentAccessPoints() for ap in self.currentAccessPoints(item))
+        #     if ret == True:
+        #         self.log.debug('New APs with ' + item['Type'])
 
-        return newLocationsHasMajor
+        return ret
 
     @staticmethod
     def isInBlueBrinstar(location):
@@ -960,13 +988,10 @@ class Randomizer(object):
             self.setCurAccessPoint(location['accessPoint'])
             self.currentItems.append(item)
             self.smbm.addItem(item['Type'])
-            self.nonProgTypesCache = []
-            self.progTypesCache = []
         self.unusedLocations.remove(location)
         self.itemLocations.append(itemLocation)
-        self.log.debug("PLACEMENT {}: {} at {} diff: {}".format(len(self.currentItems), item['Type'], location['Name'], location['difficulty']))
-        # if curLocs != None:
-        #    self.log.debug("PLACEMENT, curLocs={}".format([loc['Name'] for loc in curLocs]))
+        if curLocs != None:
+            self.log.debug("PLACEMENT {}: {} at {} diff: {}".format(len(self.currentItems), item['Type'], location['Name'], location['difficulty']))
         self.removeItem(item['Type'], pool)
         if collect == True:
             if isProg == True:
@@ -976,7 +1001,7 @@ class Randomizer(object):
                 self.progressionItemLocs.append(itemLocation)
             if location in curLocs:
                 curLocs.remove(location)
-            self.curLocs = None
+            self.resetCache()
             self.states.append(RandoState(self, curLocs))
 
     # check if remaining locations pool is conform to rando settings when filling up
@@ -1154,7 +1179,7 @@ class Randomizer(object):
         if ret == True and self.log.getEffectiveLevel() == logging.DEBUG:
             self.log.debug("onlyBossesLeft openedLocs: {}".format([loc['Name'] for loc in locs if loc not in prevLocs]))
             self.log.debug("current AP: {}".format(self.curAccessPoint))
-            nodes = self.areaGraph.getAvailableAccessPoints(self.areaGraph.accessPoints[self.curAccessPoint], self.smbm, self.difficultyTarget)
+            nodes = self.currentAccessPoints()
             self.log.debug("avail APs: {}".format([ap.Name for ap in nodes]))
             self.log.debug("curLocs: {}".format([loc['Name'] for loc in self.curLocs]))
         return ret
@@ -1309,8 +1334,9 @@ class Randomizer(object):
         # items that are as useless as possible
         self.fillRestrictedLocations()
         self.curLocs = self.currentLocations()
+        self.curAccessPoints = self.currentAccessPoints()
         self.hadChozoLeft = self.isChozoLeft()
-        self.states.append(RandoState(self, self.curLocs))
+        self.states.append(RandoState(self, self.currentLocations()))
 #        self.log.debug("{} items in pool".format(len(self.itemPool)))
         runtime_s = 0
         startDate = time.clock()
@@ -1331,7 +1357,7 @@ class Randomizer(object):
                     onlyBosses = self.onlyBossesLeft(self.getCurrentState().bosses)
                     if not onlyBosses:
                         # check that we're actually stuck
-                        nCurLocs = len(self.getCurrentState().curLocs)
+                        nCurLocs = len(self.currentLocations())
                         nLocsLeft = len(self.unusedLocations)
                         # self.log.debug("nCurLocs={}, nLocsLeft={}".format(nCurLocs, nLocsLeft))
                         # self.log.debug("curLocs: {}".format([loc['Name'] for loc in self.states[-1].curLocs]))
@@ -1347,7 +1373,7 @@ class Randomizer(object):
                             self.log.debug("aboveDiff: {}".format([loc['Name'] for loc in self.getCurrentState().curLocs if loc['difficulty'].difficulty > self.difficultyTarget]))
                             self.prevDiffTarget = self.difficultyTarget
                             self.difficultyTarget = infinity
-                            self.curLocs = None # reset curLocs cache
+                            self.resetCache()
                         isStuck = False
             self.chozoCheck()
             runtime_s = time.clock() - startDate

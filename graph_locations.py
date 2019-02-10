@@ -704,7 +704,9 @@ locations = [
     'Address': 0xB055B058,
     'Room': 'Draygon Room',
     'AccessFrom' : {
-        'DraygonRoomIn': lambda sm: SMBool(True)
+        'DraygonRoomIn': lambda sm: sm.wor(sm.haveItem('Gravity'),
+                                           sm.knowsGravLessLevel2(),
+                                           sm.knowsGravLessLevel3())
     },
     'Available': lambda sm: sm.enoughStuffsDraygon(),
     'Pickup': lambda: Bosses.beatBoss('Draygon'),

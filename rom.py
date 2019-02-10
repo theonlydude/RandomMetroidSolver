@@ -584,7 +584,7 @@ class RomPatcher:
     def writeItem(self, itemLoc):
         loc = itemLoc['Location']
         if 'Boss' in loc['Class']:
-            return
+            raise ValueError('Cannot write Boss location')
 #        print('write ' + itemLoc['Item']['Type'] + ' at ' + loc['Name'])
         self.writeItemCode(itemLoc['Item'], loc['Visibility'], loc['Address'])
 
@@ -592,7 +592,7 @@ class RomPatcher:
         self.nItems = 0
         self.nothingAtMorph = False
         for itemLoc in itemLocs:
-            if itemLoc['Location']['Name'] == 'Mother Brain':
+            if 'Boss' in itemLoc['Location']['Class']:
                 continue
             isMorph = itemLoc['Location']['Name'] == 'Morphing Ball'
             if itemLoc['Item']['Category'] == 'Nothing':

@@ -745,6 +745,11 @@ class StandardSolver(CommonSolver):
         return [loc for loc in self.majorLocations if loc['difficulty'].bool == False and loc['itemName'] not in ['Nothing', 'NoEnergy']]
 
 
+    def getLoc(self, locName):
+        for loc in self.locations:
+            if loc['Name'] == locName:
+                return loc
+
     def getDiffThreshold(self):
         target = Conf.difficultyTarget
         threshold = target
@@ -800,6 +805,11 @@ class StandardSolver(CommonSolver):
             canEndGame = self.canEndGame()
             (isEndPossible, endDifficulty) = (canEndGame.bool, canEndGame.difficulty)
             if isEndPossible and hasEnoughItems and endDifficulty <= diffThreshold:
+                # check if last visited location is mother brain
+                if self.visitedLocations[-1]['Name'] != 'Mother Brain':
+                    self.computeLocationsDifficulty(self.majorLocations)
+                    mbLoc = self.getLoc('Mother Brain')
+                    self.collectMajor(mbLoc)
                 self.log.debug("END")
                 break
 
@@ -842,20 +852,6 @@ class StandardSolver(CommonSolver):
 
             # choose one to pick up
             area = self.nextDecision(majorsAvailable, minorsAvailable, hasEnoughMinors, diffThreshold, area)
-
-        # main loop end
-        if isEndPossible:
-            self.visitedLocations.append({
-                'item' : 'The End',
-                'itemName' : 'The End',
-                'Class': ['Major'],
-                'Name' : 'The End',
-                'Area' : 'The End',
-                'SolveArea' : 'The End',
-                'Room': 'Mother Brain Room',
-                'distance': 0,
-                'difficulty' : SMBool(True, endDifficulty)
-            })
 
         # compute difficulty value
         (difficulty, itemsOk) = self.computeDifficultyValue()

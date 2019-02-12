@@ -1276,10 +1276,11 @@ def tracker():
         vanillaBossesAPs += [transition2isolver(src), transition2isolver(dest)]
 
     return dict(stdPresets=stdPresets, comPresets=comPresets,
-                vanillaAPs=vanillaAPs, vanillaBossesAPs=vanillaBossesAPs)
+                vanillaAPs=vanillaAPs, vanillaBossesAPs=vanillaBossesAPs,
+                curSession=session.tracker)
 
 def plando():
-    response.title = 'Super Metroid VARIA Areas and Items Plando'
+    response.title = 'Super Metroid VARIA Areas and Items Plandomizer'
 
     # init session
     if session.plando is None:
@@ -1289,7 +1290,7 @@ def plando():
         session.plando["preset"] = "regular"
         session.plando["seed"] = None
 
-        # set to False in tracker.html
+        # set to False in plando.html
         session.plando["firstTime"] = True
 
     # load presets list
@@ -1305,7 +1306,8 @@ def plando():
         vanillaBossesAPs += [transition2isolver(src), transition2isolver(dest)]
 
     return dict(stdPresets=stdPresets, comPresets=comPresets,
-                vanillaAPs=vanillaAPs, vanillaBossesAPs=vanillaBossesAPs)
+                vanillaAPs=vanillaAPs, vanillaBossesAPs=vanillaBossesAPs,
+                curSession=session.plando)
 
 class WS(object):
     @staticmethod
@@ -1318,14 +1320,28 @@ class WS(object):
         if action not in ['add', 'remove', 'clear', 'init', 'get', 'save', 'replace']:
             raiseHttp(400, "Unknown action {}, must be add/remove/clear/init/get/save".format(action), True)
 
+        mode = request.vars.mode
+        if mode not in ["standard", "seedless", "plando"]:
+            raiseHttp(400, "Unknown mode, must be standard/seedless/plando", True)
+
         try:
             WSClass = globals()["WS_{}_{}".format(scope, action)]
-            return WSClass()
+            return WSClass(mode)
         except Exception as e:
             raiseHttp(400, "Unknown scope/action combo: {}/{}: {}".format(scope, action, e), True)
 
+    def __init__(self, mode):
+        if mode == "plando":
+            if session.plando is None:
+                raiseHttp(400, "No session found for the Plandomizer Web service", True)
+            self.session = session.plando
+        else:
+            if session.tracker is None:
+                raiseHttp(400, "No session found for the Tracker Web service", True)
+            self.session = session.tracker
+
     def validate(self):
-        if session.tracker is None:
+        if self.session is None:
             raiseHttp(400, "No session found for the Tracker", True)
 
         if request.vars.action == None:
@@ -1345,9 +1361,9 @@ class WS(object):
         return locName[0].lower()+locName[1:].translate(None, " ,()-")
 
     def returnState(self):
-        if len(session.tracker["state"]) > 0:
-            #print("state returned to frontend: availWeb {}, visWeb {}".format(session.tracker["item"]["state"]["availableLocationsWeb"], session.tracker["item"]["state"]["visitedLocationsWeb"]))
-            state = session.tracker["state"]
+        if len(self.session["state"]) > 0:
+            #print("state returned to frontend: availWeb {}, visWeb {}".format(self.session["item"]["state"]["availableLocationsWeb"], self.session["item"]["state"]["visitedLocationsWeb"]))
+            state = self.session["state"]
             return json.dumps({
                 # item tracker
                 "availableLocations": state["availableLocationsWeb"],
@@ -1372,10 +1388,10 @@ class WS(object):
 
     def callSolverAction(self, scope, action, parameters):
         # check that we have a state in the session
-        if "state" not in session.tracker:
+        if "state" not in self.session:
             raiseHttp(400, "Missing Solver state in the session", True)
 
-        mode = session.tracker["mode"]
+        mode = self.session["mode"]
 
         (fd1, jsonInFileName) = tempfile.mkstemp()
         (fd2, jsonOutFileName) = tempfile.mkstemp()
@@ -1399,7 +1415,7 @@ class WS(object):
 
         # dump state as input
         with open(jsonInFileName, 'w') as jsonFile:
-            json.dump(session.tracker["state"], jsonFile)
+            json.dump(self.session["state"], jsonFile)
 
         print("before calling isolver: {}".format(params))
         start = datetime.now()
@@ -1418,7 +1434,7 @@ class WS(object):
             if action == 'save':
                 return json.dumps(state)
             else:
-                session.tracker["state"] = state
+                self.session["state"] = state
                 return self.returnState()
         else:
             os.close(fd1)
@@ -1430,9 +1446,6 @@ class WS(object):
 class WS_common_init(WS):
     def validate(self):
         super(WS_common_init, self).validate()
-
-        if request.vars.mode not in ["standard", "seedless", "plando"]:
-            raiseHttp(400, "Unknown mode, must be standard/seedless/plando", True)
 
         if request.vars.scope != 'common':
             raiseHttp(400, "Unknown scope, must be common", True)
@@ -1486,9 +1499,9 @@ class WS_common_init(WS):
         preset = request.vars.preset
         presetFileName = '{}/{}.json'.format(getPresetDir(preset), preset)
 
-        session.tracker["seed"] = seed
-        session.tracker["preset"] = preset
-        session.tracker["mode"] = mode
+        self.session["seed"] = seed
+        self.session["preset"] = preset
+        self.session["mode"] = mode
 
         return self.callSolverInit(jsonRomFileName, presetFileName, preset, seed, mode)
 
@@ -1533,7 +1546,7 @@ class WS_common_init(WS):
                 state = json.load(jsonFile)
             os.close(fd)
             os.remove(jsonOutFileName)
-            session.tracker["state"] = state
+            self.session["state"] = state
             return self.returnState()
         else:
             os.close(fd)
@@ -1552,7 +1565,7 @@ class WS_common_save(WS):
         super(WS_common_save, self).validate()
 
     def action(self):
-        if session.tracker["mode"] != "plando":
+        if self.session["mode"] != "plando":
             raiseHttp(400, "Save can only be use in plando mode", True)
 
         return self.callSolverAction("common", "save", {})
@@ -1583,7 +1596,7 @@ class WS_area_add(WS):
         self.validatePoint("startPoint")
         self.validatePoint("endPoint")
 
-        if len(session.tracker["state"]) == 0:
+        if len(self.session["state"]) == 0:
             raiseHttp(400, "ISolver state is empty", True)
 
     def action(self):
@@ -1641,9 +1654,6 @@ class WS_item_clear(WS):
 
 def trackerWebService():
     # unified web service for item/area trackers
-    if session.tracker is None:
-        raiseHttp(400, "No session found for the Tracker Web service", True)
-
     print("trackerWebService called")
 
     ws = WS.factory()

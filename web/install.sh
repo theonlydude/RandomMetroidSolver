@@ -272,3 +272,10 @@ find ~/web2py/applications/solver/static -xtype l -exec rm -f {} \;
 
 [ -L ~/web2py/applications/solver/static/images/chozo_map_thumbnail.png ] || ln -s ~/RandomMetroidSolver/web/static/chozo_map_thumbnail.png ~/web2py/applications/solver/static/images/chozo_map_thumbnail.png
 [ -L ~/web2py/applications/solver/static/images/chozo_map.png ] || ln -s ~/RandomMetroidSolver/web/static/chozo_map.png ~/web2py/applications/solver/static/images/chozo_map.png
+
+[ -L ~/web2py/applications/solver/views/solver_web/t_includes.html ] || ln -s ~/RandomMetroidSolver/web/views/t_includes.html ~/web2py/applications/solver/views/solver_web/t_includes.html
+[ -L ~/web2py/applications/solver/views/solver_web/t_install.html ] || ln -s ~/RandomMetroidSolver/web/views/t_install.html ~/web2py/applications/solver/views/solver_web/t_install.html
+[ -L ~/web2py/applications/solver/views/solver_web/t_js.html ] || ln -s ~/RandomMetroidSolver/web/views/t_js.html ~/web2py/applications/solver/views/solver_web/t_js.html
+[ -L ~/web2py/applications/solver/views/solver_web/t_main.html ] || ln -s ~/RandomMetroidSolver/web/views/t_main.html ~/web2py/applications/solver/views/solver_web/t_main.html
+[ -L ~/web2py/applications/solver/views/solver_web/t_style.html ] || ln -s ~/RandomMetroidSolver/web/views/t_style.html ~/web2py/applications/solver/views/solver_web/t_style.html
+[ -L ~/web2py/applications/solver/views/solver_web/plando.html ] || ln -s ~/RandomMetroidSolver/web/views/plando.html ~/web2py/applications/solver/views/solver_web/plando.html

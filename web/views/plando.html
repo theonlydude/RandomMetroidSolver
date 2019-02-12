@@ -1,0 +1,211 @@
+{{extend 'layout.html'}}
+
+{{include 'solver_web/t_includes.html'}}
+
+<title>Super Metroid VARIA Plandomizer</title>
+
+<style>
+{{include 'solver_web/t_style.html'}}
+
+.titlePlando {
+    position: absolute;
+    z-index: 2;
+    width: 10%;
+    height: 3.75%;
+    top: 5.25%;
+    left: 4.3%;
+    color: #ffffff;
+    font-size: 1.25vw;
+    font-weight: bold;
+}
+.startPlando {
+    cursor: pointer;
+    position: absolute;
+    z-index: 2;
+    width: 2.5%;
+    height: 3.75%;
+    top: 4.75%;
+    left: 10.5%;
+}
+.repeatPlando {
+    cursor: pointer;
+    position: absolute;
+    z-index: 2;
+    width: 2.5%;
+    height: 3.75%;
+    top: 4.75%;
+    left: 13.25%;
+}
+.binPlando {
+    cursor: pointer;
+    position: absolute;
+    z-index: 2;
+    width: 2.5%;
+    height: 3.75%;
+    top: 4.75%;
+    left: 16%;
+}
+.savePlando {
+    cursor: pointer;
+    position: absolute;
+    z-index: 2;
+    width: 2.5%;
+    height: 3.75%;
+    top: 4.75%;
+    left: 18.75%;
+}
+.helpPlando {
+    cursor: pointer;
+    position: absolute;
+    z-index: 2;
+    width: 2.5%;
+    height: 3.75%;
+    top: 0.5%;
+    left: 2.75%;
+}
+</style>
+
+<script type="text/javascript">
+var globalPlando = true;
+
+function initCurMode() {
+  document.getElementById("cur_mode").value = "plando";
+}
+
+{{include 'solver_web/t_js.html'}}
+
+function save() {
+  if(! isActive("savePlando")) {
+    return;
+  }
+
+  var uploadFile = document.getElementById("uploadFile");
+  if(uploadFile.files.length == 0) {
+    var saveFile = document.getElementById("saveFile");
+    if(saveFile.files.length == 0) {
+      // display popup to choose the local ROM
+      document.getElementById("savePopup").style.display = "block";
+    } else {
+      // call WS
+      ajaxCall({action: "save", scope: "common"}, "download", ajaxOkSave);
+    }
+  } else {
+    // call WS
+    ajaxCall({action: "save", scope: "common"}, "download", ajaxOkSave);
+  }
+}
+
+function ajaxOkSave(data) {
+  webServInProgress = false;
+
+  console.log("ajaxSaveOk");
+
+  var uploadFile = document.getElementById("uploadFile");
+  if(uploadFile.files.length == 0) {
+    uploadFile = document.getElementById("saveFile");
+  }
+
+  var file = uploadFile.files[0];
+
+  var reader = new FileReader();
+  reader.readAsArrayBuffer(file)
+
+  reader.onload = function(e) {
+      var bytes = new Uint8Array(e.target.result);
+
+      for(var key in data) {
+          if(key === "fileName" || key === "errorMsg") { continue; }
+          bytes[key] = data[key];
+      }
+
+      var blob = new Blob([bytes], {type: "octet/stream"})
+
+      var outFileName = data['fileName']
+      saveAs(blob, outFileName)
+  }
+
+  // info message to display ?
+  if("errorMsg" in data && data["errorMsg"].length > 0) {
+    document.getElementById("flash").innerHTML = data["errorMsg"];
+    $('#flash').show();
+  }
+
+  setWSIcon("checkmark");
+  hideSavePopup();
+}
+
+
+
+//-----------------------------------------------------------
+// TUTORIAL
+
+function startTheTour(step=-1) {
+  // the tour tutorial
+  var tour = new Tour({
+    storage: false,
+    steps: [{
+      element: "#helpPlando",
+      title: "VARIA Plando Generator",
+      content: "<h2 class=\"center\">Welcome to the VARIA Plando Generator</h2><p>The Plando (a Plando is a Super Metroid seed with manually placed items) Generator allows you to create your own Plando in interactive mode.<br/>To use it, click on the <img src=\"/solver/static/images/play.svg\" alt=\"Start\" style=\"width: 32px\"> button to upload your ROM and choose your preset (like on the Solver page).<br/>As a base for your Plando ROM you should generate a seed on the Randomizer page with all the optional patches that you need.<br/>The available locations will be displayed on the map, click on a location and a popup will be displayed allowing you to choose which item to place.<br/>You can put the same major item at several locations.</p><p>When you're done click on the <img src=\"/solver/static/images/save.svg\"alt=\"Save\" style=\"width: 32px\"> button to save the Plando ROM on your Computer. You can resume working on it later by uploading the saved Plando ROM.</p><p>You can change the item of a location by clicking on it to choose another item (Warning: it could make some previously accessible locations inaccessible. When reloading the saved plando ROM these locations will be displayed as sequence break).</p><h4>Areas/Bosses</h4><p>Choose an Areas and/or Bosses seed as your base ROM to use the Plando Generator in items and areas/bosses mode, aka you choose the transitions between the areas/bosses.</p>"
+    }]
+  });
+
+  // Initialize the tour
+  tour.init();
+
+  // Start the tour
+  if(step != -1) {
+    tour.goTo(step);
+  }
+  tour.start();
+}
+</script>
+
+<div class="fixed">
+  <div class="menu">
+    <table class="full menuTable">
+      <tr>
+	<td>{{=A("Home", _href=URL(f="home"), _class="menu")}}</td>
+	<td>{{=A("Presets", _href=URL(f="presets"), _class="menu")}}</td>
+	<td>{{=A("Randomizer", _href=URL(f="randomizer"), _class="menu")}}</td>
+	<td>{{=A("Solver", _href=URL(f="solver"), _class="menu")}}</td>
+	<td>{{=A("Trackers", _href=URL(f="tracker"), _class="menu")}}</td>
+	<td class="menu_selected">{{=A("Plandomizer", _href=URL(f="plando"), _class="menu")}}</td>
+	<td>{{=A("Information & Contact", _href=URL(f="infos"), _class="menu")}}</td>
+      </tr>
+    </table>
+  </div>
+</div>
+
+<div class="main">
+
+  <div id="savePopup" class="itemPopup">
+    <p>
+      The page has been reloaded, please select again your ROM.
+    </p>
+    <table class="full">
+      <colgroup><col class="half" /><col class="half" /></colgroup>
+      <tr>
+	<td>Randomized Super Metroid ROM: </td>
+	<td><input id="saveFile" name="saveFile" type="file"/></td>
+      </tr>
+    </table>
+    <table>
+      <tr>
+	<td class="half"><button type="button" onclick="save()" class="full">Save</button></td>
+	<td class="half"><button type="button" onclick="hideSavePopup()" class="full">Cancel</button></td>
+      </tr>
+    </table>
+  </div>
+
+{{include 'solver_web/t_main.html'}}
+
+    <!-- plando buttons -->
+    <div id="titlePlando" class="titlePlando">PLANDO</div>
+    <div id="startPlando" class="startPlando"><img src="/solver/static/images/play.svg" alt="Start" onclick="displayPopup(true)" data-toggle="tooltip" title="Start the Plando creator" data-placement="bottom" data-container="body" data-html="true"></div>
+    <div id="repeatPlando" class="repeatPlando"><img src="/solver/static/images/repeat.svg" alt="Cancel Last" onclick="deleteLoc(true)" data-toggle="tooltip" title="Remove last placed item" data-placement="bottom" data-container="body" data-html="true"></div>
+    <div id="binPlando" class="binPlando"><img src="/solver/static/images/bin.svg" alt="Clear" onclick="clearLocs(true)" data-toggle="tooltip" title="Remove all placed items" data-placement="bottom" data-container="body" data-html="true"></div>
+    <div id="savePlando" class="savePlando"><img src="/solver/static/images/save.svg" alt="Save" onclick="save()" data-toggle="tooltip" title="Download plando ROM" data-placement="bottom" data-container="body" data-html="true"></div>
+    <div id="helpPlando" class="helpPlando"><img src="/solver/static/images/help.svg" alt="Help" onclick="startTheTour(0)" data-toggle="tooltip" title="Display the Plando help" data-placement="bottom" data-container="body" data-html="true"></div>
+  </div>
+</div>

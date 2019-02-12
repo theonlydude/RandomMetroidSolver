@@ -1,0 +1,1011 @@
+var loaded = false;
+
+//-----------------------------------------------------------
+// AREAS TRACKER
+
+var firstClick = "";
+var secondClick = "";
+
+var lines = {};
+var leaderLines = {};
+var nextColor = 0;
+var linesSeq = new Array();
+
+var colors = ['grey', 'lime', 'pink',  'fuchsia', 'orange', 'yellow', 'purple', 'aqua', 'red', '#bfef45', 'white', 'cyan', 'magenta', 'olive', 'green', 'blue', 'maroon', 'teal'];
+
+function resetLines() {
+  for (var startPoint in lines) {
+    if(lines[startPoint] != "") {
+      var endPoint = lines[startPoint];
+      lines[startPoint] = "";
+      lines[endPoint] = "";
+      leaderLines[startPoint].remove();
+      leaderLines[startPoint] = "";
+      leaderLines[endPoint] = "";
+    }
+  }
+  lines = {};
+  leaderLines = {};
+  linesSeq = [];
+  nextColor = 0;
+}
+
+function checkCompatibleAPs(startAP, endAP) {
+{{
+  response.write("  var vanillaAPs = {};\n".format(vanillaAPs), escape=False)
+  response.write("  var vanillaBossesAPs = {};\n".format(vanillaBossesAPs), escape=False)
+}}
+
+  return (vanillaAPs.includes(startAP) && vanillaAPs.includes(endAP)) || (vanillaBossesAPs.includes(startAP) && vanillaBossesAPs.includes(endAP));
+}
+
+function clickPortal(elemId) {
+  if(loaded == false || webServInProgress == true) {
+    return;
+  }
+
+  if(firstClick == ""){
+    // highlight first element
+    if(! (elemId in lines)){
+      firstClick = elemId;
+      $("#"+firstClick).addClass("addBorder");
+    }
+  } else if(firstClick == elemId){
+    $("#"+firstClick).removeClass("addBorder");
+    firstClick = "";
+  } else if(secondClick == "" && elemId != firstClick) {
+
+    if(! ((firstClick in lines) || (elemId in lines))) {
+      if(checkCompatibleAPs(firstClick, elemId) == false) {
+        alert("You can't mix Areas access points and Bosses access points");
+        return;
+      }
+
+      secondClick = elemId;
+
+      if(init == true) {
+        ajaxCall({action: "add", scope: "area", startPoint: firstClick, endPoint: secondClick}, "upload");
+        firstClick = "";
+        secondClick = "";
+      } else {
+        // first init the isolver in seedless mode
+        ajaxCall({action: "init", scope: "common", romJson: "", preset: "regular", fileName: "", mode: "seedless"},
+                 "download", ajaxOkAddLine);
+      }
+    }
+  }
+}
+
+function ajaxOkAddLine(data) {
+  ajaxCall({action: "add", scope: "area", startPoint: firstClick, endPoint: secondClick}, "upload");
+  firstClick = "";
+  secondClick = "";
+}
+
+function addLine(startPoint, endPoint) {
+  var startPointElem = document.getElementById(startPoint);
+  var endPointElem = document.getElementById(endPoint);
+
+  var line = new LeaderLine(startPointElem, endPointElem,
+                            {startPlug: 'disc',
+                             endPlug: 'disc',
+                             dropShadow: true,
+                             startPlugColor: colors[nextColor],
+                             endPlugColor: colors[nextColor],
+                             size: 4,
+                             gradient: true,
+                             outlineColor: 'rgb(255, 255, 255)',
+                             outline: true,
+                             outlineSize: 0.10});
+
+  nextColor += 1;
+  $("#"+startPoint).removeClass("addBorder");
+
+  lines[startPoint] = endPoint;
+  lines[endPoint] = startPoint;
+
+  leaderLines[startPoint] = line;
+  leaderLines[endPoint] = line;
+
+  linesSeq.push(startPoint);
+}
+
+function clearLines() {
+  if(loaded == false || webServInProgress == true) {
+    return;
+  }
+
+  if(! isActive("binArea")) {
+    return;
+  }
+
+  var result = confirm("Delete all the transitions ?");
+  if(result == false){
+    return;
+  }
+
+  ajaxCall({action: "clear", scope: "area"}, "upload");
+}
+
+function deleteLine() {
+  if(loaded == false || webServInProgress == true) {
+    return;
+  }
+
+  if(! isActive("repeatArea")) {
+    return;
+  }
+
+  ajaxCall({action: "remove", scope: "area"}, "upload");
+}
+
+function startAnimation(elem) {
+  if(elem.id in leaderLines) {
+    var line = leaderLines[elem.id];
+    line.dash = {animation: true};
+  }
+}
+
+function stopAnimation(elem) {
+  if(elem.id in leaderLines) {
+    var line = leaderLines[elem.id];
+    line.dash = false;
+  }
+}
+
+
+
+//-----------------------------------------------------------
+// COMMON
+
+function ajaxFailJSON(jqXHR, textStatus) {
+  webServInProgress = false;
+
+  console.log("error ["+jqXHR.responseJSON+"] ["+jqXHR.responseText+"] ["+textStatus+"]");
+
+  setWSIcon("warning");
+  document.getElementById("flash").innerHTML = jqXHR.responseText;
+  $('#flash').show();
+}
+
+function ajaxCall(dataDict, msg, okFunc=ajaxOkGet) {
+    if(!("mode" in dataDict)) {
+      dataDict["mode"] = document.getElementById("cur_mode").value;
+    }
+
+    var request = $.ajax({
+      url: "{{=URL(f='trackerWebService')}}",
+      method: "POST",
+      data: dataDict,
+      dataType: "json",
+      crossDomain: true
+    });
+
+    setWSIcon(msg);
+
+    request.done(okFunc);
+    request.fail(ajaxFailJSON);
+}
+
+function setWSIcon(icon) {
+  var names = ["checkmark", "warning", "download", "upload", "refresh"];
+  for(var i=0; i<names.length; i++) {
+    if(names[i] == icon){
+      document.getElementById(names[i]).style.display = "block";
+    } else {
+      document.getElementById(names[i]).style.display = "none";
+    }
+  }
+}
+
+function ajaxOkGet(jsonData) {
+  webServInProgress = false;
+
+  // get dicts availableLocations and visitedLocations
+  console.log("json received: [ "+jsonData+" ]");
+  if(jsonData == "OK") {
+    setWSIcon("checkmark");
+    return;
+  }
+
+  mode = jsonData["mode"];
+  area = jsonData["areaRando"];
+  seed = jsonData["seed"];
+  preset = jsonData["preset"];
+  init = true;
+
+  document.getElementById("cur_mode").value = mode;
+  document.getElementById("cur_seed").value = seed;
+  document.getElementById("cur_preset").value = preset;
+
+  if(mode != "standard") {
+    hideItemPopup();
+  }
+
+  setActive(mode, area);
+
+  resetItems();
+  resetLines();
+
+  if("availableLocations" in jsonData) {
+    for(var locName in jsonData["availableLocations"]) {
+      // console.log(locName+" is available");
+      var locData = jsonData["availableLocations"][locName];
+      locsInfo[locName]["state"] = "available";
+      locsInfo[locName]["difficulty"] = locData["difficulty"];
+
+      $("#"+locName).attr("class", "baseLoc marker_available_"+locData["difficulty"]);
+      var tooltip = getTooltip(locName, locData, "?", false);
+      $("#"+locName+'[data-toggle="tooltip"]').attr("title", tooltip).tooltip('fixTitle');
+
+      // check if a boss was at that location
+      if("boss" in locsInfo[locName]) {
+        var boss = locsInfo[locName]["boss"];
+        if(boss != "Mother Brain") {
+          document.getElementById(boss+"G4").style.display = "none";
+        }
+      }
+    }
+  }
+
+  if("visitedLocations" in jsonData) {
+    for(var locName in jsonData["visitedLocations"]) {
+      // console.log(locName+" is visited");
+      var locData = jsonData["visitedLocations"][locName];
+      locsInfo[locName]["state"] = "visited";
+      locsInfo[locName]["difficulty"] = locData["difficulty"];
+
+      // keep current loc zoomed
+      var base = "baseLoc";
+      if($("#"+locName).hasClass("baseLocOver")) {
+        base = "baseLocOver";
+      }
+
+      var className = "marker_visited_"+locData["difficulty"]+"_"+locData["item"];
+      $("#"+locName).attr("class", base+" "+className);
+      var tooltip = getTooltip(locName, locData, locData["item"], true);
+      $("#"+locName+'[data-toggle="tooltip"]').attr("title", tooltip).tooltip('fixTitle');
+
+      // check if a boss was at that location
+      if("boss" in locsInfo[locName]) {
+        var boss = locsInfo[locName]["boss"];
+        if(boss != "Mother Brain") {
+          document.getElementById(boss+"G4").style.display = "block";
+        }
+      }
+
+      // add item
+      addItem(locData["item"]);
+    }
+  }
+
+  setItemCount("Missile");
+  setItemCount("Super");
+  setItemCount("PowerBomb");
+  setReserveCount();
+
+  // set remaining locations as sequence breakable
+  if("remainLocations" in jsonData) {
+    for(var locName in jsonData["remainLocations"]) {
+      // console.log(locName+": sequence breakable");
+      var locData = jsonData["remainLocations"][locName];
+      locsInfo[locName]["state"] = "break";
+      locsInfo[locName]["difficulty"] = locData["difficulty"];
+
+      // keep current loc zoomed
+      var base = "baseLoc";
+      if($("#"+locName).hasClass("baseLocOver")) {
+        base = "baseLocOver";
+      }
+
+      var className = "marker_available_break";
+      $("#"+locName).attr("class", base+" "+className);
+      var tooltip = getTooltip(locName, locData, "?", false);
+      $("#"+locName+'[data-toggle="tooltip"]').attr("title", tooltip).tooltip('fixTitle');
+
+      // check if a boss was at that location
+      if("boss" in locsInfo[locName]) {
+        var boss = locsInfo[locName]["boss"];
+        if(boss != "Mother Brain") {
+          document.getElementById(boss+"G4").style.display = "none";
+        }
+      }
+    }
+  }
+
+  if("lastLoc" in jsonData) {
+    lastLoc = jsonData["lastLoc"];
+  }
+  $("#lastLoc").attr("class", "lastLoc "+lastLoc+"Gps");
+
+  setWSIcon("checkmark");
+
+  // add area transitions
+  var arrayLength = jsonData["linesSeq"].length;
+  for(var i=0; i<arrayLength; i++) {
+    addLine(jsonData["linesSeq"][i][0], jsonData["linesSeq"][i][1]);
+  }
+
+  // if no available locations, display a popup telling you're stuck
+  if(Object.keys(jsonData["availableLocations"]).length == 0) {
+    if(jsonData["allTransitions"] == true && (( ! "state" in locsInfo["MotherBrain"] ) || locsInfo["MotherBrain"]["state"] != "visited")) {
+      alert("You're stucked, you can't finish this seed with the given preset.");
+    }
+  }
+}
+
+function setActive(mode, area) {
+  var itemElems = ["repeatItem", "binItem"];
+  var plandoElems = ["repeatPlando", "binPlando", "savePlando"];
+  var areaElems = ["repeatArea", "binArea"];
+  if(mode != "plando") {
+    for(var i=0; i<itemElems.length; i++) {
+      $("#"+itemElems[i]).removeClass("greyed");
+    }
+    for(var i=0; i<plandoElems.length; i++) {
+      $("#"+plandoElems[i]).addClass("greyed");
+    }
+  } else {
+    for(var i=0; i<itemElems.length; i++) {
+      $("#"+itemElems[i]).addClass("greyed");
+    }
+    for(var i=0; i<plandoElems.length; i++) {
+      $("#"+plandoElems[i]).removeClass("greyed");
+    }
+  }
+  if(area == true) {
+    for(var i=0; i<areaElems.length; i++) {
+      $("#"+areaElems[i]).removeClass("greyed");
+    }
+  } else {
+    for(var i=0; i<areaElems.length; i++) {
+      $("#"+areaElems[i]).addClass("greyed");
+    }
+  }
+}
+
+function isActive(elemId) {
+  if(elemId.includes("Plando")) {
+    if(mode == "plando") {
+      return true;
+    } else {
+      return elemId == "startPlando";
+    }
+  }
+  if(elemId.includes("Item")) {
+    if(mode != "plando") {
+      return true;
+    } else {
+      return elemId == "startItem";
+    }
+  }
+  if(elemId.includes("Area")) {
+    return area;
+  }
+}
+
+//-----------------------------------------------------------
+// ITEMS TRACKER
+
+var lastLoc = "landingSite";
+var mode = "standard";
+var area = true;
+var init = false;
+var webServInProgress = false;
+
+// can add more variables:
+//  -state: posible values: ["available", "visited", "break"]
+//  -difficulty: possible values: ["easy", "medium", "hard", "harder", "hardcore", "mania"]
+var locsInfo = {
+  EnergyTankGauntlet: {left: 29.4, top: 5.4},
+  Bomb: {left: 37, top: 11.35},
+  EnergyTankTerminator: {left: 24.8, top: 11.35},
+  ReserveTankBrinstar: {left: 9.4, top: 56.3},
+  ChargeBeam: {left: 13.3, top: 67.05},
+  MorphingBall: {left: 34.3, top: 49.45},
+  EnergyTankBrinstarCeiling: {left: 39.9, top: 49.45},
+  EnergyTankEtecoons: {left: 2.9, top: 65.6},
+  EnergyTankWaterway: {left: 4.7, top: 70.09},
+  EnergyTankBrinstarGate: {left: 17.2, top: 62.5},
+  XRayScope: {left: 42.7, top: 55.27},
+  Spazer: {left: 57, top: 58.3},
+  EnergyTankKraid: {left: 50.97, top: 66.8},
+  VariaSuit: {left: 67.6, top: 66.75},
+  IceBeam: {left: 38.6, top: 73.99},
+  EnergyTankCrocomire: {left: 52, top: 86.05},
+  HiJumpBoots: {left: 40.4, top: 80},
+  GrappleBeam: {left: 36.65, top: 95.2},
+  ReserveTankNorfair: {left: 51.02, top: 73.99},
+  SpeedBooster: {left: 69.05, top: 73.95},
+  WaveBeam: {left: 61.4, top: 76.9},
+  EnergyTankRidley: {left: 75.6, top: 94.6},
+  ScrewAttack: {left: 76.45, top: 90.4},
+  EnergyTankFirefleas: {left: 92.5, top: 82.8},
+  ReserveTankWreckedShip: {left: 71.71, top: 5.7},
+  EnergyTankWreckedShip: {left: 74.7, top: 7.3},
+  RightSuperWreckedShip: {left: 77.4, top: 13.3},
+  GravitySuit: {left: 66.97, top: 7.2},
+  EnergyTankMamaturtle: {left: 74.93, top: 52.3},
+  PlasmaBeam: {left: 84.2, top: 36.87},
+  ReserveTankMaridia: {left: 77.55, top: 56.85},
+  SpringBall: {left: 89.1, top: 58.4},
+  EnergyTankBotwoon: {left: 85.3, top: 46.2},
+  SpaceJump: {left: 91.1, top: 50.9},
+  PowerBombCrateriasurface: {left: 44.5, top: 3.9},
+  MissileoutsideWreckedShipbottom: {left: 61.35, top: 10.1},
+  MissileoutsideWreckedShiptop: {left: 62.1, top: 2.75},
+  MissileoutsideWreckedShipmiddle: {left: 61.35, top: 5.55},
+  MissileCrateriamoat: {left: 47.5, top: 8.4},
+  MissileCrateriabottom: {left: 32.25, top: 29.6},
+  MissileCrateriagauntletright: {left: 24.2, top: 6.9},
+  MissileCrateriagauntletleft: {left: 23.2, top: 6.9},
+  SuperMissileCrateria: {left: 36.1, top: 15.98},
+  MissileCrateriamiddle: {left: 28.4, top: 12.85},
+  PowerBombgreenBrinstarbottom: {left: 8.5, top: 61},
+  SuperMissilepinkBrinstar: {left: 19.94, top: 64},
+  MissilegreenBrinstarbelowsupermissile: {left: 7.5, top: 56.3},
+  SuperMissilegreenBrinstartop: {left: 6.6, top: 54.9},
+  MissilegreenBrinstarbehindmissile: {left: 10.55, top: 55.6},
+  MissilegreenBrinstarbehindreservetank: {left: 10.37, top: 57},
+  MissilepinkBrinstartop: {left: 13.3, top: 61},
+  MissilepinkBrinstarbottom: {left: 13.3, top: 65.5},
+  PowerBombpinkBrinstar: {left: 11.4, top: 62.5},
+  MissilegreenBrinstarpipe: {left: 18, top: 67.2},
+  PowerBombblueBrinstar: {left: 32.25, top: 49.45},
+  MissileblueBrinstarmiddle: {left: 40.8, top: 49.45},
+  SuperMissilegreenBrinstarbottom: {left: 1.9, top: 65.6},
+  MissileblueBrinstarbottom: {left: 37, top: 50.99},
+  MissileblueBrinstartop: {left: 38, top: 45.6},
+  MissileblueBrinstarbehindmissile: {left: 38, top: 47},
+  PowerBombredBrinstarsidehopperroom: {left: 54.15, top: 44.6},
+  PowerBombredBrinstarspikeroom: {left: 54.15, top: 49.2},
+  MissileredBrinstarspikeroom: {left: 53.2, top: 49.2},
+  MissileKraid: {left: 54.9, top: 65.2},
+  Missilelavaroom: {left: 48, top: 76.95},
+  MissilebelowIceBeam: {left: 35.7, top: 76.95},
+  MissileaboveCrocomire: {left: 45.2, top: 80.1},
+  MissileHiJumpBoots: {left: 41.4, top: 78.6},
+  EnergyTankHiJumpBoots: {left: 42.4, top: 78.5},
+  PowerBombCrocomire: {left: 42.4, top: 86.05},
+  MissilebelowCrocomire: {left: 47, top: 93.7},
+  MissileGrappleBeam: {left: 41.3, top: 93.8},
+  MissileNorfairReserveTank: {left: 51.9, top: 73.95},
+  MissilebubbleNorfairgreendoor: {left: 53.8, top: 73.95},
+  MissilebubbleNorfair: {left: 55.7, top: 78.45},
+  MissileSpeedBooster: {left: 68.1, top: 73.95},
+  MissileWaveBeam: {left: 58.55, top: 77.1},
+  MissileGoldTorizo: {left: 74.5, top: 88.9},
+  SuperMissileGoldTorizo: {left: 75.5, top: 88.9},
+  MissileMickeyMouseroom: {left: 84.1, top: 81.4},
+  MissilelowerNorfairabovefireflearoom: {left: 90.75, top: 73.7},
+  PowerBomblowerNorfairabovefireflearoom: {left: 92.6, top: 75.2},
+  PowerBombPowerBombsofshame: {left: 87.9, top: 87.35},
+  MissilelowerNorfairnearWaveBeam: {left: 85, top: 73.7},
+  MissileWreckedShipmiddle: {left: 68.9, top: 11.75},
+  MissileGravitySuit: {left: 69.8, top: 7.2},
+  MissileWreckedShiptop: {left: 77.4, top: 2.65},
+  SuperMissileWreckedShipleft: {left: 71.8, top: 13.3},
+  MissilegreenMaridiashinespark: {left: 67.3, top: 52.2},
+  SuperMissilegreenMaridia: {left: 68.1, top: 50.75},
+  MissilegreenMaridiatatori: {left: 75.7, top: 53.7},
+  SuperMissileyellowMaridia: {left: 69.6, top: 43.1},
+  MissileyellowMaridiasupermissile: {left: 68.6, top: 43.1},
+  MissileyellowMaridiafalsewall: {left: 76.7, top: 43},
+  MissileleftMaridiasandpitroom: {left: 76.7, top: 55.4},
+  MissilerightMaridiasandpitroom: {left: 79.6, top: 55.4},
+  PowerBombrightMaridiasandpitroom: {left: 80.5, top: 56.8},
+  MissilepinkMaridia: {left: 80.5, top: 47.85},
+  SuperMissilepinkMaridia: {left: 81.5, top: 47.85},
+  MissileDraygon: {left: 97.65, top: 44.7},
+  Kraid: {left: 66.16, top: 66, boss: "Kraid"},
+  Ridley: {left: 76.6, top: 93.8, boss: "Ridley"},
+  Phantoon: {left: 78.8, top: 16.3, boss: "Phantoon"},
+  Draygon: {left: 92.6, top: 50, boss: "Draygon"},
+  MotherBrain: {left: 22, top: 33.2, boss: "Mother Brain"}
+};
+
+window.onload = function(){
+  initCurMode();
+
+  ajaxCall({action: "get", scope: "common"}, "download");
+  $("#lastLoc").attr("class", "lastLoc "+lastLoc+"Gps");
+
+  // display the help on first connection to the tracker
+{{
+  if "firstTime" in curSession and curSession["firstTime"] == True:
+    curSession["firstTime"] = False
+}}
+    startTheTour(0);
+{{
+    pass
+}}
+
+  var filesInput = document.getElementById("uploadFile");
+  filesInput.addEventListener("change", function(event) {
+    var files = event.target.files; // It returns a FileList object
+    var file = files[0];
+  
+    var reader = new FileReader();
+  
+    reader.onload = function(e) {
+  	// check sfc or smc extention
+        var re = /(?:\.([^.]+))?$/;
+  	var ext = re.exec(file.name)[1];
+        if( ! (ext === "sfc" || ext === "smc") ) {
+            document.getElementById("uploadFile").value = "";
+            alert("wrong extension: "+ext);
+            return false;
+        }
+
+        var re = /((.*)\.[^.]+)?$/;
+        var base = re.exec(file.name)[1];
+  
+        var outFileName = file.name.replace(/\.[^/.]+$/, ".json");
+        document.getElementById("fileName").value = file.name;
+
+        var fileSize = file.size;
+  	if( fileSize > 4*1024*1024 ) {
+            document.getElementById("uploadFile").value = "";
+            alert("Wrong ROM file size: "+fileSize.toString());
+            return false;
+        }
+  
+        var bytes = new Uint8Array(e.target.result);
+  
+        // locations items
+        var addresses = new Array(0x78264, 0x78404, 0x78432, 0x7852C, 0x78614, 0x786DE, 0x7879E, 0x787C2, 0x787FA, 0x78824, 0x78876, 0x7896E, 0x7899C, 0x78ACA, 0x78B24, 0x78BA4, 0x78BAC, 0x78C36, 0x78C3E, 0x78C82, 0x78CCA, 0x79108, 0x79110, 0x79184, 0x7C2E9, 0x7C337, 0x7C365, 0x7C36D, 0x7C47D, 0x7C559, 0x7C5E3, 0x7C6E5, 0x7C755, 0x7C7A7, 0x781CC, 0x781E8, 0x781EE, 0x781F4, 0x78248, 0x783EE, 0x78464, 0x7846A, 0x78478, 0x78486, 0x784AC, 0x784E4, 0x78518, 0x7851E, 0x78532, 0x78538, 0x78608, 0x7860E, 0x7865C, 0x78676, 0x7874C, 0x78798, 0x787D0, 0x78802, 0x78836, 0x7883C, 0x788CA, 0x7890E, 0x78914, 0x789EC, 0x78AE4, 0x78B46, 0x78BC0, 0x78BE6, 0x78BEC, 0x78C04, 0x78C14, 0x78C2A, 0x78C44, 0x78C52, 0x78C66, 0x78C74, 0x78CBC, 0x78E6E, 0x78E74, 0x78F30, 0x78FCA, 0x78FD2, 0x790C0, 0x79100, 0x7C265, 0x7C2EF, 0x7C319, 0x7C357, 0x7C437, 0x7C43D, 0x7C483, 0x7C4AF, 0x7C4B5, 0x7C533, 0x7C5DD, 0x7C5EB, 0x7C5F1, 0x7C603, 0x7C609, 0x7C74D);
+        var romData = {};
+  
+        var arrayLength = addresses.length;
+        for(var i=0; i<arrayLength; i++) {
+            romData[addresses[i]] = bytes[addresses[i]];
+            romData[addresses[i]+1] = bytes[addresses[i]+1];
+            romData[addresses[i]+4] = bytes[addresses[i]+4];
+        }
+  
+        // startCeres
+        romData[0x7F1F] = bytes[0x7F1F];
+        // startLS
+        romData[0x7F17] = bytes[0x7F17];
+        // layout
+        romData[0x21BD80] = bytes[0x21BD80];
+        // casual
+        romData[0x22E879] = bytes[0x22E879];
+        // gravity
+        romData[0x06e37d] = bytes[0x06e37d];
+        // varia tweaks
+        romData[0x7CC4D] = bytes[0x7CC4D];
+        // area
+        romData[0x22D564] = bytes[0x22D564];
+        // area layout
+        romData[0x252FA7] = bytes[0x252FA7];
+        // boss rando
+        romData[0x246C09] = bytes[0x246C09];
+
+        // transitions
+        var addresses = new Array(0x18c22, 0x18aea, 0x18a42, 0x18e9e, 0x18bfe, 0x18e86, 0x18f0a, 0x189ca, 0x18aae, 0x196d2, 0x19a4a, 0x1922e, 0x195fa, 0x1967e, 0x1a39c, 0x1a510, 0x18aa2, 0x1a480, 0x1902a, 0x190c6, 0x18af6, 0x1a384, 0x1a390, 0x1a330, 0x18c52, 0x191e6, 0x1913e, 0x1923a, 0x1a2ac, 0x1a2c4, 0x198ca, 0x198be, 0x191b6, 0x191ce, 0x1a840, 0x1a96c);
+        var arrayLength = addresses.length;
+        for(var i=0; i<arrayLength; i++) {
+            romData[addresses[i]] = bytes[addresses[i]]
+            romData[addresses[i]+1] = bytes[addresses[i]+1];
+            romData[addresses[i]+6] = bytes[addresses[i]+6];
+            romData[addresses[i]+7] = bytes[addresses[i]+7];
+        }
+  
+        // bank B8
+        for(var i=0x1C0000; i<=0x1C7FFF; i++){
+          romData[i] = bytes[i];
+        }
+
+        // plando addresses
+        for(var i=0x2F6000; i<0x2F6080; i++) {
+          romData[i] = bytes[i];
+        }
+        // plando transitions (4 bytes per transitions, ap#/2 transitions)
+        for(var i=0x2F6080; i<0x2F6080+((arrayLength/2) * 4); i++) {
+          romData[i] = bytes[i];
+        }
+
+        // majors split
+        romData[0x17B6C] = bytes[0x17B6C];
+
+        romData["romFileName"] = outFileName;
+  
+        var json = JSON.stringify(romData);
+  
+        var output = document.getElementById("romJson");
+        output.value = json;
+
+        setGuessedPreset(file.name);
+    }
+  
+    reader.readAsArrayBuffer(file);
+  }, false);
+
+  loaded = true;
+}
+
+function setGuessedPreset(romName){
+  var preset = guessVARIAPreset(romName);
+  if(preset != null) {
+    document.getElementById("preset").value = preset;
+    $("#preset").trigger("chosen:updated");
+  }
+}
+
+function guessVARIAPreset(filename) {
+  var re = /VARIA_Randomizer_[A]?[B]?[F]?[Z]?X\d+_(\w+)/;
+  var match = filename.match(re);
+  if(match == null) {
+    re = /VARIA_Plandomizer_[A]?[B]?FX\d+_(\w+)/;
+    match = filename.match(re);
+  }
+  if(match != null) {
+    var data = match[1];
+    console.log(data);
+
+    var re = /^(.*)_([a-zA-Z0-9]+)$/;
+    var match = data.match(re);
+
+    console.log(match);
+
+    if(match != null){
+      var pS = match[2];
+      if(pS == "slowest" || pS == "slow" || pS == "medium" || pS == "fast" || pS == "fastest" || pS == "basic" || pS == "VARIAble") {
+        return match[1];
+      } else {
+        return match[1] + '_' + match[2];
+      }
+    } else {
+      return data;
+    }
+  } else {
+    return null;
+  }
+}
+
+function mouseOver(elem) {
+  var locName = elem.id;
+
+  if("state" in locsInfo[locName]) {
+    $(elem).removeClass("baseLoc");
+    $(elem).addClass("baseLocOver");
+
+    if(locsInfo[locName]["state"] == "available"){
+      var className = "marker_"+locsInfo[locName]["state"]+"_"+locsInfo[locName]["difficulty"];
+      var classNameOver = "marker_over_"+locsInfo[locName]["difficulty"];
+      $(elem).removeClass(className);
+      $(elem).addClass(classNameOver);
+    }
+
+    var newTop = locsInfo[locName].top - 0.75;
+    var newLeft = locsInfo[locName].left - 0.5;
+    $(elem).css({"top": newTop+"%", "left": newLeft+"%"});
+  }
+}
+
+function mouseOut(elem) {
+  var locName = elem.id;
+
+  if("state" in locsInfo[locName]) {
+    $(elem).removeClass("baseLocOver");
+    $(elem).addClass("baseLoc");
+
+    if(locsInfo[locName]["state"] == "available"){
+      var className = "marker_"+locsInfo[locName]["state"]+"_"+locsInfo[locName]["difficulty"];
+      var classNameOver = "marker_over_"+locsInfo[locName]["difficulty"];
+      $(elem).removeClass(classNameOver);
+      $(elem).addClass(className);
+    }
+
+    var newTop = locsInfo[elem.id].top;
+    var newLeft = locsInfo[elem.id].left;
+    $(elem).css({"top": newTop+"%", "left": newLeft+"%"});
+  }
+}
+
+function displayPopup(isPlando) {
+  if(loaded == false || webServInProgress == true) {
+    return;
+  }
+
+  if(isPlando == true) {
+    document.getElementById("solverPopupText").innerHTML = "Select an already randomized ROM as base to start your Plando, or a Plando ROM to continue working on it";
+  } else {
+    document.getElementById("solverPopupText").innerHTML = "Select your randomized ROM to solve, or none for seed less mode";
+  }
+
+  // display popup
+  document.getElementById("solverPopup").style.display = "block";
+  // chosen must be activated when it's visible, else it doesn't work...
+  $(".chzn-select").chosen();
+}
+
+function hidePopup() {
+  document.getElementById("solverPopup").style.display = "none";
+}
+
+function initSolver() {
+  console.log("initSolver");
+
+  var mode = "seedless";
+  var romJson = document.getElementById("romJson");
+  var romJsonValue = romJson.value;
+
+  if(globalPlando == true) {
+    mode = "plando";
+    if(romJsonValue.length == 0){
+      return;
+    }
+  } else {
+    if(romJsonValue.length == 0) {
+      mode = "seedless";
+    } else {
+      mode = "standard";
+    }
+  }
+
+  // reset everything
+  resetLocsInfo();
+
+  // prepare parameters for WS
+  ajaxCall({action: "init", scope: "common", romJson: romJsonValue,
+            preset: document.getElementById("preset").value,
+            fileName: document.getElementById("fileName").value,
+            mode: mode}, "download");
+
+  hidePopup();
+}
+
+function clickLoc(elem) {
+  if(loaded == false || webServInProgress == true) {
+    return;
+  }
+
+  var locName = elem.id;
+
+  if(mode != "standard") {
+    // we don't put an item in boss locations
+    if("boss" in locsInfo[locName]) {
+      // check that lock is in the available list
+      if("state" in locsInfo[locName] && (locsInfo[locName]["state"] == "available" || locsInfo[locName]["state"] == "break")) {
+        ajaxCall({action: "add", scope: "item", locName: locName, itemName: "Nothing"}, "upload");
+
+        if(locName == "MotherBrain") {
+          alert("SEE YOU NEXT MISSION");
+        }
+      }
+      return;
+    }
+
+    if("state" in locsInfo[locName] && locsInfo[locName]["state"] == "visited") {
+      document.getElementById("itemPopupText").innerHTML = "Replace item at "+locName+":";
+    } else if(mode == "plando") {
+      document.getElementById("itemPopupText").innerHTML = "Item to place at "+locName+":";
+    } else {
+      document.getElementById("itemPopupText").innerHTML = "Item picked up at "+locName+":";
+    }
+    document.getElementById("locName").value = locName;
+
+    // display item selector
+    document.getElementById("itemPopup").style.display = "block";
+  } else {
+    // check that lock is in the available list
+    if("state" in locsInfo[locName] && (locsInfo[locName]["state"] == "available" || locsInfo[locName]["state"] == "break")) {
+      // call webservice
+      ajaxCall({action: "add", scope: "item", locName: locName}, "upload");
+  
+      // if mother brain loc, display end message
+     if(locName == "MotherBrain") {
+       alert("SEE YOU NEXT MISSION");
+     }
+    }
+  }
+}
+
+function placeItem() {
+  var item = document.getElementById("item").value;
+  var locName = document.getElementById("locName").value;
+
+  // check if not already 14 etanks or 4 reserves
+  if(item == "ETank" && itemCount["ETank"] == 14) {
+    alert("Can't add more Energy tank");
+  } else if (item == "Reserve" && itemCount["Reserve"] == 4) {
+    alert("Can't add more Reserve tank");
+  } else {
+    // check that lock is in the available list
+    if("state" in locsInfo[locName] && (locsInfo[locName]["state"] == "available" || locsInfo[locName]["state"] == "break")) {
+      ajaxCall({action: "add", scope: "item", locName: locName, itemName: item}, "upload");
+    } else {
+      ajaxCall({action: "replace", scope: "item", locName: locName, itemName: item}, "upload");
+    }
+  }
+}
+
+function hideItemPopup() {
+  document.getElementById("itemPopup").style.display = "none";
+}
+
+function hideSavePopup() {
+  document.getElementById("savePopup").style.display = "none";
+}
+
+function deleteLoc(isPlando) {
+  if(loaded == false || webServInProgress == true) {
+    return;
+  }
+  if(isPlando == true && ! isActive("repeatPlando")) {
+    return;
+  }
+  if(isPlando == false && ! isActive("repeatItem")) {
+    return;
+  }
+
+  // reset everything
+  resetLocsInfo();
+
+  ajaxCall({action: "remove", scope: "item"}, "upload");
+}
+
+function resetLocsInfo() {
+  // remove info and reset css
+  var keys = ["state", "difficulty"];
+  for(var locName in locsInfo) {
+    for(var i in keys) {
+      var key = keys[i];
+      // console.log("is "+keys[key]+" in locsInfo["+locName+"] ?");
+      if(key in locsInfo[locName]) {
+        // console.log("delete locsInfo["+locName+"]["+key+"]");
+        delete locsInfo[locName][key];
+      }
+    }
+    $("#"+locName).attr("class", "baseLoc");
+    $("#"+locName+'[data-toggle="tooltip"]').attr("title", "").tooltip('fixTitle');
+    $("#"+locName+'[data-toggle="tooltip"]').attr("data-original-title", "").tooltip('fixTitle');
+  }
+  lastLoc = "landingSite";
+  $("#lastLoc").attr("class", "lastLoc "+lastLoc+"Gps");
+}
+
+function clearLocs(isPlando) {
+  if(loaded == false || webServInProgress == true) {
+    return;
+  }
+  if(isPlando == true && ! isActive("binPlando")) {
+    return;
+  }
+  if(isPlando == false && ! isActive("binItem")) {
+    return;
+  }
+
+  var msg = "Reset the locations of the Interactive VARIA ";
+  if(isPlando == true) {
+    msg = msg + "Plandomizer ?";
+  } else {
+    msg = msg + "Solver ?"
+  }
+
+  var result = confirm(msg);
+  if(result == false){
+    return;
+  }
+
+  resetLocsInfo();
+
+  // reset the state server side
+  ajaxCall({action: "clear", scope: "item"}, "upload");
+}
+
+function getTooltip(locName, locData, item, visited) {
+  var tooltip = "<center>"+locData["name"]+"</center>";
+
+  if("boss" in locsInfo[locName]) {
+    tooltip += "Boss: "+locsInfo[locName]["boss"]+"<br>";
+  }
+
+  if(visited == true) {
+    return tooltip+"Item: "+item;
+
+  } else {
+    return tooltip+"Techniques: "+(locData["knows"].length > 0 ? locData["knows"] : "None")+"<br>Items: "+(locData["items"].length > 0 ? locData["items"] : "None")+("path" in locData ? "<br>Path: "+locData["path"] : "")+("comeBack" in locData && locData["comeBack"] == false ? "<br>WARNING: Can't come back" : "");
+
+  }
+}
+
+var itemCount = {
+  "ETank": 0,
+  "Reserve": 0,
+  "Missile": 0,
+  "Super": 0,
+  "PowerBomb": 0
+}
+
+function resetItems() {
+  itemCount["ETank"] = 0;
+  itemCount["Reserve"] = 0;
+  itemCount["Missile"] = 0;
+  itemCount["Super"] = 0;
+  itemCount["PowerBomb"] = 0;
+
+  for(var i=1; i<=14; i++) {
+    document.getElementById("ETank_"+i+"_pause").style.display = "none";
+  }
+  for(var i=1; i<=4; i++) {
+    document.getElementById("Reserve_"+i+"_pause").style.display = "none";
+  }
+
+  var items = ["Charge", "Ice", "Wave", "Spazer", "Plasma", "Varia", "Gravity", "Morph", "Bomb", "SpringBall", "ScrewAttack", "HiJump", "SpaceJump", "SpeedBooster", "Missile", "Super", "PowerBomb", "Grapple", "XRayScope"];
+  for(var item in items) {
+    document.getElementById(items[item]+"_pause").style.display = "none";
+  }
+}
+
+function addItem(itemName) {
+  if(itemName == "Nothing" || itemName == "NoEnergy") {
+    return;
+  }
+  if(itemName in itemCount) {
+    itemCount[itemName] += 1
+    if(itemName == "Missile" || itemName == "Super" || itemName == "PowerBomb") {
+      document.getElementById(itemName+"_pause").style.display = "block";
+    } else {
+      document.getElementById(itemName+"_"+itemCount[itemName]+"_pause").style.display = "block";
+    }
+  } else {
+    document.getElementById(itemName+"_pause").style.display = "block";
+  }
+}
+
+function pad(x, n) {
+  return ('' + (1000 + x)).substring(4-n, x.length);
+}
+
+function setReserveCount() {
+  for(var i=1; i<=4; i++) {
+    document.getElementById("reserve_"+i).style.display = "none";
+  }
+  document.getElementById("auto").style.display = "none";
+  document.getElementById("reserve_text").style.display = "none";
+  document.getElementById("reserve_0").style.display = "none";
+  document.getElementById("reserve_00").style.display = "none";
+
+  if(itemCount["Reserve"] == 0) {
+    return;
+  }
+
+  document.getElementById("auto").style.display = "block";
+  document.getElementById("reserve_text").style.display = "block";
+  document.getElementById("reserve_0").style.display = "block";
+  document.getElementById("reserve_00").style.display = "block";
+
+  document.getElementById("reserve_"+itemCount["Reserve"]).style.display = "block";
+}
+
+function setItemCount(itemName) {
+  var count = itemCount[itemName]*5;
+
+  // reset everything to display none
+  for(var i=0; i<=9; i++) {
+    for(var j=9; j<=900; j*=10) {
+      document.getElementById(itemName+"_"+j+"_"+i+"_pause").style.display = "none";
+    }
+  }
+
+  if(count == 0) {
+    return;
+  }
+
+  count = pad(count, 3);
+
+  // display current count
+  for(var j=9; j<=900; j*=10) {
+    var i = Math.ceil(Math.log10(j));
+    document.getElementById(itemName+"_"+j+"_"+count[count.length-i]+"_pause").style.display = "block";
+  }
+
+}
+
+$(window).scroll(function(){
+  $("#itemPopup").stop().animate({"marginTop": ($(window).scrollTop()) + "px"}, "fast" );
+});
+

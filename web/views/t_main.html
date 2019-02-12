@@ -1,0 +1,486 @@
+  <div id="solverPopup" class="solverPopup">
+    <table class="full">
+      <colgroup><col class="half" /><col class="half" /></colgroup>
+      <tr><td colspan=2></td></tr>
+      <tr>
+	<td colspan=2 class="center greyRow"><p id="solverPopupText"></p></td>
+      </tr>
+      <tr>
+	<td>Randomized Super Metroid ROM: </td>
+	<td><input id="uploadFile" name="uploadFile" type="file"/></td>
+      </tr>
+      <tr>
+	<td>Preset:</td>
+	<td>{{=SELECT(OPTGROUP(*stdPresets, **dict(_label="Standard presets")), OPTGROUP(*comPresets, **dict(_label="Community presets")), **dict(_name="preset", _id="preset", value=curSession["preset"], _class="filldropdown chzn-select"))}}</td>
+      </tr>
+      <tr class="blankRow">
+	<td colspan=2></td>
+      </tr>
+      <tr>
+	<td colspan=2 class="center greyRow">Information on the currently loaded seed</td>
+      </tr>
+      <tr>
+	<td>Current Mode: </td>
+	<td><input type="text" name="cur_mode" id="cur_mode" value="n/a" readonly class="full"></td>
+      </tr>
+      <tr>
+	<td>Current Seed: </td>
+	<td><input type="text" name="cur_seed" id="cur_seed" value="n/a" readonly class="full"></td>
+      </tr>
+      <tr>
+	<td>Current Preset: </td>
+	<td><input type="text" name="cur_preset" id="cur_preset" value="n/a" readonly class="full"></td>
+      </tr>
+    </table>
+    <table>
+      <tr>
+	<td class="half"><button type="button" onclick="initSolver()" class="full">Init</button></td>
+	<td class="half"><button type="button" onclick="hidePopup()" class="full">Cancel</button></td>
+      </tr>
+    </table>
+    <input id="romJson" name="romJson" style="display:none" type="text"/>
+    <input id="fileName" name="fileName" style="display:none" type="text"/>
+    <input id="mode" name="mode" style="display:none" type="text"/>
+  </div>
+
+  <div id="itemPopup" class="itemPopup">
+    <input id="locName" name="locName" style="display:none" type="text"/>
+    <table class="full">
+      <colgroup><col class="half" /><col class="half" /></colgroup>
+      <tr>
+	<td><p id="itemPopupText">Item to place at LOC:</p></td>
+	<td>
+	  <select class="filldropdown" id="item" name="item"><optgroup label="Nothing"><option value="Nothing">Nothing</option></optgroup><optgroup label="Minors"><option value="Missile">Missile</option><option value="Super">Super Missile</option><option value="PowerBomb">Power Bomb</option></optgroup><optgroup label="Energy"><option value="ETank">Energy Tank</option><option value="Reserve">Reserve Tank</option></optgroup><optgroup label="Beams"><option value="Charge">Charge Beam</option><option value="Ice">Ice Beam</option><option value="Wave">Wave Beam</option><option value="Spazer">Spazer</option><option value="Plasma">Plasma Beam</option></optgroup><optgroup label="Items"><option value="Varia">Varia Suit</option><option value="Gravity">Gravity Suit</option><option value="Morph">Morph Ball</option><option value="Bomb">Bomb</option><option value="SpringBall">Spring Ball</option><option value="ScrewAttack">Screw Attack</option><option value="HiJump">Hi-Jump Boots</option><option value="SpaceJump">Space Jump</option><option value="SpeedBooster">Speed Booster</option><option value="Grapple">Grapple Beam</option><option value="XRayScope">X-Ray Scope</option></optgroup></select>
+	</td>
+      </tr>
+    </table>
+    <table>
+      <tr>
+	<td class="half"><button type="button" onclick="placeItem()" class="full">Place</button></td>
+	<td class="half"><button type="button" onclick="hideItemPopup()" class="full">Cancel</button></td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="map_container">
+    <!-- the map -->
+    <img id="map" src="/solver/static/images/area_map.png" class="center">
+
+    <!-- the access points -->
+    <div id="lowerMushroomsLeft" class="baseButton" onclick="clickPortal('lowerMushroomsLeft')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Lower Mushrooms Left"></div>
+    <div id="moatRight" class="baseButton" onclick="clickPortal('moatRight')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Moat Right"></div>
+    <div id="greenPiratesShaftBottomRight" class="baseButton" onclick="clickPortal('greenPiratesShaftBottomRight')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Green Pirates Shaft Bottom Right"></div>
+    <div id="keyhunterRoomBottom" class="baseButtonRot" onclick="clickPortal('keyhunterRoomBottom')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Keyhunter Room Bottom"></div>
+    <div id="morphBallRoomLeft" class="baseButton" onclick="clickPortal('morphBallRoomLeft')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Morph Ball Room Left"></div>
+    <div id="greenBrinstarElevatorRight" class="baseButton" onclick="clickPortal('greenBrinstarElevatorRight')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Green Brinstar Elevator Right"></div>
+    <div id="greenHillZoneTopRight" class="baseButton" onclick="clickPortal('greenHillZoneTopRight')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Green Hill Zone Top Right"></div>
+    <div id="noobBridgeRight" class="baseButton" onclick="clickPortal('noobBridgeRight')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Noob Bridge Right"></div>
+    <div id="westOceanLeft" class="baseButton" onclick="clickPortal('westOceanLeft')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="West Ocean Left"></div>
+    <div id="crabMazeLeft" class="baseButton" onclick="clickPortal('crabMazeLeft')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Crab Maze Left"></div>
+    <div id="lavaDiveRight" class="baseButton" onclick="clickPortal('lavaDiveRight')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Lava Dive Right"></div>
+    <div id="threeMuskateersRoomLeft" class="baseButton" onclick="clickPortal('threeMuskateersRoomLeft')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Three Muskateers Room Left"></div>
+    <div id="warehouseZeelaRoomLeft" class="baseButton" onclick="clickPortal('warehouseZeelaRoomLeft')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Warehouse Zeela Room Left"></div>
+    <div id="warehouseEntranceLeft" class="baseButton" onclick="clickPortal('warehouseEntranceLeft')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Warehouse Entrance Left"></div>
+    <div id="warehouseEntranceRight" class="baseButton" onclick="clickPortal('warehouseEntranceRight')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Warehouse Entrance Right"></div>
+    <div id="singleChamberTopRight" class="baseButton" onclick="clickPortal('singleChamberTopRight')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Single Chamber Top Right"></div>
+    <div id="kronicBoostRoomBottomLeft" class="baseButton" onclick="clickPortal('kronicBoostRoomBottomLeft')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Kronic Boost Room Bottom Left"></div>
+    <div id="mainStreetBottom" class="baseButtonRot" onclick="clickPortal('mainStreetBottom')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Main Street Bottom Left"></div>
+    <div id="crabHoleBottomLeft" class="baseButton" onclick="clickPortal('crabHoleBottomLeft')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Crab Hole Bottom Left"></div>
+    <div id="leCoudeRight" class="baseButton" onclick="clickPortal('leCoudeRight')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Le Coude Right"></div>
+    <div id="redFishRoomLeft" class="baseButton" onclick="clickPortal('redFishRoomLeft')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Red Fish Room Left"></div>
+    <div id="redTowerTopLeft" class="baseButton" onclick="clickPortal('redTowerTopLeft')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Red Tower Top Left"></div>
+    <div id="caterpillarRoomTopRight" class="baseButton" onclick="clickPortal('caterpillarRoomTopRight')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Caterpillar Room Top Right"></div>
+    <div id="redBrinstarElevator" class="baseButtonRot" onclick="clickPortal('redBrinstarElevator')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Red Brinstar Elevator"></div>
+    <div id="eastTunnelRight" class="baseButton" onclick="clickPortal('eastTunnelRight')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="East Tunnel Right"></div>
+    <div id="eastTunnelTopRight" class="baseButton" onclick="clickPortal('eastTunnelTopRight')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="East Tunnel Top Right"></div>
+    <div id="glassTunnelTop" class="baseButtonRot" onclick="clickPortal('glassTunnelTop')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Glass Tunnel Top"></div>
+    <div id="statuesHallwayLeft" class="baseButton" onclick="clickPortal('statuesHallwayLeft')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Statues Hallway Left"></div>
+    <div id="phantoonRoomOut" class="baseButton" onclick="clickPortal('phantoonRoomOut')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Phantoon Room Out"></div>
+    <div id="phantoonRoomIn" class="baseButton" onclick="clickPortal('phantoonRoomIn')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Phantoon Room In"></div>
+    <div id="ridleyRoomOut" class="baseButton" onclick="clickPortal('ridleyRoomOut')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Ridley Room Out"></div>
+    <div id="ridleyRoomIn" class="baseButton" onclick="clickPortal('ridleyRoomIn')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Ridley Room In"></div>
+    <div id="kraidRoomOut" class="baseButton" onclick="clickPortal('kraidRoomOut')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Kraid Room Out"></div>
+    <div id="kraidRoomIn" class="baseButton" onclick="clickPortal('kraidRoomIn')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Kraid Room In"></div>
+    <div id="draygonRoomOut" class="baseButton" onclick="clickPortal('draygonRoomOut')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Draygon Room Out"></div>
+    <div id="draygonRoomIn" class="baseButton" onclick="clickPortal('draygonRoomIn')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Draygon Room In"></div>
+
+    <!-- the locations -->
+    <div id="EnergyTankGauntlet" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true" data-placement="bottom"></div>
+    <div id="Bomb" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true" data-placement="bottom"></div>
+    <div id="EnergyTankTerminator" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true" data-placement="bottom"></div>
+    <div id="ReserveTankBrinstar" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="ChargeBeam" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="MorphingBall" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="EnergyTankBrinstarCeiling" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="EnergyTankEtecoons" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="EnergyTankWaterway" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="EnergyTankBrinstarGate" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="XRayScope" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="Spazer" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="EnergyTankKraid" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="VariaSuit" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="IceBeam" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="EnergyTankCrocomire" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="HiJumpBoots" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="GrappleBeam" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="ReserveTankNorfair" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="SpeedBooster" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="WaveBeam" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="EnergyTankRidley" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="ScrewAttack" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="EnergyTankFirefleas" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="ReserveTankWreckedShip" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true" data-placement="bottom"></div>
+    <div id="EnergyTankWreckedShip" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true" data-placement="bottom"></div>
+    <div id="RightSuperWreckedShip" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true" data-placement="bottom"></div>
+    <div id="GravitySuit" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true" data-placement="bottom"></div>
+    <div id="EnergyTankMamaturtle" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="PlasmaBeam" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="ReserveTankMaridia" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="SpringBall" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="EnergyTankBotwoon" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="SpaceJump" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="PowerBombCrateriasurface" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true" data-placement="bottom"></div>
+    <div id="MissileoutsideWreckedShipbottom" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true" data-placement="bottom"></div>
+    <div id="MissileoutsideWreckedShiptop" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true" data-placement="bottom"></div>
+    <div id="MissileoutsideWreckedShipmiddle" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true" data-placement="bottom"></div>
+    <div id="MissileCrateriamoat" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true" data-placement="bottom"></div>
+    <div id="MissileCrateriabottom" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true" data-placement="bottom"></div>
+    <div id="MissileCrateriagauntletright" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true" data-placement="bottom"></div>
+    <div id="MissileCrateriagauntletleft" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true" data-placement="bottom"></div>
+    <div id="SuperMissileCrateria" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true" data-placement="bottom"></div>
+    <div id="MissileCrateriamiddle" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true" data-placement="bottom"></div>
+    <div id="PowerBombgreenBrinstarbottom" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="SuperMissilepinkBrinstar" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="MissilegreenBrinstarbelowsupermissile" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="SuperMissilegreenBrinstartop" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="MissilegreenBrinstarbehindmissile" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="MissilegreenBrinstarbehindreservetank" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="MissilepinkBrinstartop" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="MissilepinkBrinstarbottom" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="PowerBombpinkBrinstar" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="MissilegreenBrinstarpipe" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="PowerBombblueBrinstar" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="MissileblueBrinstarmiddle" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="SuperMissilegreenBrinstarbottom" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="MissileblueBrinstarbottom" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="MissileblueBrinstartop" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="MissileblueBrinstarbehindmissile" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="PowerBombredBrinstarsidehopperroom" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="PowerBombredBrinstarspikeroom" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="MissileredBrinstarspikeroom" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="MissileKraid" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="Missilelavaroom" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="MissilebelowIceBeam" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="MissileaboveCrocomire" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="MissileHiJumpBoots" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="EnergyTankHiJumpBoots" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="PowerBombCrocomire" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="MissilebelowCrocomire" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="MissileGrappleBeam" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="MissileNorfairReserveTank" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="MissilebubbleNorfairgreendoor" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="MissilebubbleNorfair" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="MissileSpeedBooster" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="MissileWaveBeam" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="MissileGoldTorizo" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="SuperMissileGoldTorizo" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="MissileMickeyMouseroom" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="MissilelowerNorfairabovefireflearoom" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="PowerBomblowerNorfairabovefireflearoom" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="PowerBombPowerBombsofshame" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="MissilelowerNorfairnearWaveBeam" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="MissileWreckedShipmiddle" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true" data-placement="bottom"></div>
+    <div id="MissileGravitySuit" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true" data-placement="bottom"></div>
+    <div id="MissileWreckedShiptop" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true" data-placement="bottom"></div>
+    <div id="SuperMissileWreckedShipleft" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true" data-placement="bottom"></div>
+    <div id="MissilegreenMaridiashinespark" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="SuperMissilegreenMaridia" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="MissilegreenMaridiatatori" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="SuperMissileyellowMaridia" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="MissileyellowMaridiasupermissile" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="MissileyellowMaridiafalsewall" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="MissileleftMaridiasandpitroom" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="MissilerightMaridiasandpitroom" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="PowerBombrightMaridiasandpitroom" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="MissilepinkMaridia" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="SuperMissilepinkMaridia" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="MissileDraygon" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="Kraid" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="Ridley" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="Phantoon" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="Draygon" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+    <div id="MotherBrain" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true"></div>
+
+    <!-- area tracker buttons -->
+    <div id="titleArea" class="titleArea">AREA</div>
+    <div id="repeatArea" class="repeatArea"><img src="/solver/static/images/repeat.svg" alt="Cancel Last" onclick="deleteLine()" data-toggle="tooltip" title="Remove last added transition" data-placement="bottom" data-container="body" data-html="true"></div>
+    <div id="binArea" class="binArea"><img src="/solver/static/images/bin.svg" alt="Clear" onclick="clearLines()" data-toggle="tooltip" title="Remove all the transitions" data-placement="bottom" data-container="body" data-html="true"></div>
+
+
+    <!-- web service status -->
+    <div id="cloud" class="cloud">
+      <img id="refresh" src="/solver/static/images/refresh.svg" alt="refresh" data-toggle="tooltip" title="Loading in progress" data-placement="bottom" data-container="body" data-html="true">
+      <img id="checkmark" src="/solver/static/images/checkmark.svg" alt="checkmark" style="display: none" data-toggle="tooltip" title="Web service OK" data-placement="bottom" data-container="body" data-html="true">
+      <img id="warning" src="/solver/static/images/warning.svg" alt="warning" style="display: none" data-toggle="tooltip" title="Web service ERROR" data-placement="bottom" data-container="body" data-html="true">
+      <img id="download" src="/solver/static/images/cloud_download.svg" alt="cloud_download" style="display: none" data-toggle="tooltip" title="Web service downloading" data-placement="bottom" data-container="body" data-html="true">
+      <img id="upload" src="/solver/static/images/cloud_upload.png" alt="cloud_upload" style="display: none" data-toggle="tooltip" title="Web service uploading" data-placement="bottom" data-container="body" data-html="true">
+    </div>
+
+    <!-- gps marker -->
+    <div id="lastLoc">
+      <img src="/solver/static/images/gps.png" alt="last access point" data-toggle="tooltip" title="Current access point" data-placement="bottom" data-container="body" data-html="true">
+    </div>
+
+    <!-- g4 -->
+    <div class="g4">
+        <img src="/solver/static/images/golden_four.png" alt="g4" title="Golden 4" class="full">
+    </div>
+    <div id="KraidG4" class="boss kraid">
+        <img src="/solver/static/images/kraid.png" title="Kraid" class="full">
+    </div>
+    <div id="PhantoonG4" class="boss phantoon">
+        <img src="/solver/static/images/phantoon.png" title="Phantoon" class="full">
+    </div>
+    <div id="DraygonG4" class="boss draygon">
+        <img src="/solver/static/images/draygon.png" title="Draygon" class="full">
+    </div>
+    <div id="RidleyG4" class="boss ridley">
+        <img src="/solver/static/images/ridley.png" title="Ridley" class="full">
+    </div>
+
+    <!-- inventory menu -->
+    <div class="pause">
+        <img src="/solver/static/images/background.png" class="full">
+    </div>
+    <div id="Charge_pause" class="Charge_pause">
+        <img src="/solver/static/images/charge.png" class="full">
+    </div>
+    <div id="Ice_pause" class="Ice_pause">
+        <img src="/solver/static/images/ice.png" class="full">
+    </div>
+    <div id="Wave_pause" class="Wave_pause">
+        <img src="/solver/static/images/wave.png" class="full">
+    </div>
+    <div id="Spazer_pause" class="Spazer_pause">
+        <img src="/solver/static/images/spazer.png" class="full">
+    </div>
+    <div id="Plasma_pause" class="Plasma_pause">
+        <img src="/solver/static/images/plasma.png" class="full">
+    </div>
+
+    <div id="Varia_pause" class="Varia_pause">
+        <img src="/solver/static/images/varia.png" class="full">
+    </div>
+    <div id="Gravity_pause" class="Gravity_pause">
+        <img src="/solver/static/images/gravity.png" class="full">
+    </div>
+    <div id="Morph_pause" class="Morph_pause">
+        <img src="/solver/static/images/morph.png" class="full">
+    </div>
+    <div id="Bomb_pause" class="Bomb_pause">
+        <img src="/solver/static/images/bomb.png" class="full">
+    </div>
+    <div id="SpringBall_pause" class="SpringBall_pause">
+        <img src="/solver/static/images/springball.png" class="full">
+    </div>
+    <div id="ScrewAttack_pause" class="ScrewAttack_pause">
+        <img src="/solver/static/images/screwattack.png" class="full">
+    </div>
+    <div id="HiJump_pause" class="HiJump_pause">
+        <img src="/solver/static/images/hijump.png" class="full">
+    </div>
+    <div id="SpaceJump_pause" class="SpaceJump_pause">
+        <img src="/solver/static/images/spacejump.png" class="full">
+    </div>
+    <div id="SpeedBooster_pause" class="SpeedBooster_pause">
+        <img src="/solver/static/images/speedbooster.png" class="full">
+    </div>
+
+    <div id="Missile_pause" class="Missile_pause">
+        <img src="/solver/static/images/missile.png" class="full">
+    </div>
+    <div id="Super_pause" class="Super_pause">
+        <img src="/solver/static/images/super.png" class="full">
+    </div>
+    <div id="PowerBomb_pause" class="PowerBomb_pause">
+        <img src="/solver/static/images/powerbomb.png" class="full">
+    </div>
+    <div id="Grapple_pause" class="Grapple_pause">
+        <img src="/solver/static/images/grapple.png" class="full">
+    </div>
+    <div id="XRayScope_pause" class="XRayScope_pause">
+        <img src="/solver/static/images/xray.png" class="full">
+    </div>
+
+    <div id="Energy_pause" class="Energy_pause">
+        <img src="/solver/static/images/energy.png" class="full">
+    </div>
+    <div id="Energy_90_pause" class="Energy_90_pause">
+        <img src="/solver/static/images/9.png" class="full">
+    </div>
+    <div id="Energy_9_pause" class="Energy_9_pause">
+        <img src="/solver/static/images/9.png" class="full">
+    </div>
+
+    <div id="ETank_1_pause" class="ETank_1_pause">
+        <img src="/solver/static/images/etank.png" class="full">
+    </div>
+    <div id="ETank_2_pause" class="ETank_2_pause">
+        <img src="/solver/static/images/etank.png" class="full">
+    </div>
+    <div id="ETank_3_pause" class="ETank_3_pause">
+        <img src="/solver/static/images/etank.png" class="full">
+    </div>
+    <div id="ETank_4_pause" class="ETank_4_pause">
+        <img src="/solver/static/images/etank.png" class="full">
+    </div>
+    <div id="ETank_5_pause" class="ETank_5_pause">
+        <img src="/solver/static/images/etank.png" class="full">
+    </div>
+    <div id="ETank_6_pause" class="ETank_6_pause">
+        <img src="/solver/static/images/etank.png" class="full">
+    </div>
+    <div id="ETank_7_pause" class="ETank_7_pause">
+        <img src="/solver/static/images/etank.png" class="full">
+    </div>
+    <div id="ETank_8_pause" class="ETank_8_pause">
+        <img src="/solver/static/images/etank.png" class="full">
+    </div>
+    <div id="ETank_9_pause" class="ETank_9_pause">
+        <img src="/solver/static/images/etank.png" class="full">
+    </div>
+    <div id="ETank_10_pause" class="ETank_10_pause">
+        <img src="/solver/static/images/etank.png" class="full">
+    </div>
+    <div id="ETank_11_pause" class="ETank_11_pause">
+        <img src="/solver/static/images/etank.png" class="full">
+    </div>
+    <div id="ETank_12_pause" class="ETank_12_pause">
+        <img src="/solver/static/images/etank.png" class="full">
+    </div>
+    <div id="ETank_13_pause" class="ETank_13_pause">
+        <img src="/solver/static/images/etank.png" class="full">
+    </div>
+    <div id="ETank_14_pause" class="ETank_14_pause">
+        <img src="/solver/static/images/etank.png" class="full">
+    </div>
+
+    <div id="Reserve_1_pause" class="Reserve_1_pause">
+        <img src="/solver/static/images/reserve.png" class="full">
+    </div>
+    <div id="Reserve_2_pause" class="Reserve_2_pause">
+        <img src="/solver/static/images/reserve.png" class="full">
+    </div>
+    <div id="Reserve_3_pause" class="Reserve_3_pause">
+        <img src="/solver/static/images/reserve.png" class="full">
+    </div>
+    <div id="Reserve_4_pause" class="Reserve_4_pause">
+        <img src="/solver/static/images/reserve.png" class="full">
+    </div>
+
+    <div id="Missile_900_0_pause" class="Missile_900_0_pause">
+        <img src="/solver/static/images/0.png" class="full">
+    </div>
+
+    <div id="Missile_900_0_pause" class="Missile_900_0_pause"><img src="/solver/static/images/0.png" class="full"></div>
+    <div id="Missile_900_1_pause" class="Missile_900_1_pause"><img src="/solver/static/images/1.png" class="full"></div>
+    <div id="Missile_900_2_pause" class="Missile_900_2_pause"><img src="/solver/static/images/2.png" class="full"></div>
+    <div id="Missile_900_3_pause" class="Missile_900_3_pause"><img src="/solver/static/images/3.png" class="full"></div>
+    <div id="Missile_900_4_pause" class="Missile_900_4_pause"><img src="/solver/static/images/4.png" class="full"></div>
+    <div id="Missile_900_5_pause" class="Missile_900_5_pause"><img src="/solver/static/images/5.png" class="full"></div>
+    <div id="Missile_900_6_pause" class="Missile_900_6_pause"><img src="/solver/static/images/6.png" class="full"></div>
+    <div id="Missile_900_7_pause" class="Missile_900_7_pause"><img src="/solver/static/images/7.png" class="full"></div>
+    <div id="Missile_900_8_pause" class="Missile_900_8_pause"><img src="/solver/static/images/8.png" class="full"></div>
+    <div id="Missile_900_9_pause" class="Missile_900_9_pause"><img src="/solver/static/images/9.png" class="full"></div>
+    <div id="Missile_90_0_pause" class="Missile_90_0_pause"><img src="/solver/static/images/0.png" class="full"></div>
+    <div id="Missile_90_1_pause" class="Missile_90_1_pause"><img src="/solver/static/images/1.png" class="full"></div>
+    <div id="Missile_90_2_pause" class="Missile_90_2_pause"><img src="/solver/static/images/2.png" class="full"></div>
+    <div id="Missile_90_3_pause" class="Missile_90_3_pause"><img src="/solver/static/images/3.png" class="full"></div>
+    <div id="Missile_90_4_pause" class="Missile_90_4_pause"><img src="/solver/static/images/4.png" class="full"></div>
+    <div id="Missile_90_5_pause" class="Missile_90_5_pause"><img src="/solver/static/images/5.png" class="full"></div>
+    <div id="Missile_90_6_pause" class="Missile_90_6_pause"><img src="/solver/static/images/6.png" class="full"></div>
+    <div id="Missile_90_7_pause" class="Missile_90_7_pause"><img src="/solver/static/images/7.png" class="full"></div>
+    <div id="Missile_90_8_pause" class="Missile_90_8_pause"><img src="/solver/static/images/8.png" class="full"></div>
+    <div id="Missile_90_9_pause" class="Missile_90_9_pause"><img src="/solver/static/images/9.png" class="full"></div>
+    <div id="Missile_9_0_pause" class="Missile_9_0_pause"><img src="/solver/static/images/0.png" class="full"></div>
+    <div id="Missile_9_1_pause" class="Missile_9_1_pause"><img src="/solver/static/images/1.png" class="full"></div>
+    <div id="Missile_9_2_pause" class="Missile_9_2_pause"><img src="/solver/static/images/2.png" class="full"></div>
+    <div id="Missile_9_3_pause" class="Missile_9_3_pause"><img src="/solver/static/images/3.png" class="full"></div>
+    <div id="Missile_9_4_pause" class="Missile_9_4_pause"><img src="/solver/static/images/4.png" class="full"></div>
+    <div id="Missile_9_5_pause" class="Missile_9_5_pause"><img src="/solver/static/images/5.png" class="full"></div>
+    <div id="Missile_9_6_pause" class="Missile_9_6_pause"><img src="/solver/static/images/6.png" class="full"></div>
+    <div id="Missile_9_7_pause" class="Missile_9_7_pause"><img src="/solver/static/images/7.png" class="full"></div>
+    <div id="Missile_9_8_pause" class="Missile_9_8_pause"><img src="/solver/static/images/8.png" class="full"></div>
+    <div id="Missile_9_9_pause" class="Missile_9_9_pause"><img src="/solver/static/images/9.png" class="full"></div>
+
+    <div id="Super_900_0_pause" class="Super_900_0_pause"><img src="/solver/static/images/0.png" class="full"></div>
+    <div id="Super_900_1_pause" class="Super_900_1_pause"><img src="/solver/static/images/1.png" class="full"></div>
+    <div id="Super_900_2_pause" class="Super_900_2_pause"><img src="/solver/static/images/2.png" class="full"></div>
+    <div id="Super_900_3_pause" class="Super_900_3_pause"><img src="/solver/static/images/3.png" class="full"></div>
+    <div id="Super_900_4_pause" class="Super_900_4_pause"><img src="/solver/static/images/4.png" class="full"></div>
+    <div id="Super_900_5_pause" class="Super_900_5_pause"><img src="/solver/static/images/5.png" class="full"></div>
+    <div id="Super_900_6_pause" class="Super_900_6_pause"><img src="/solver/static/images/6.png" class="full"></div>
+    <div id="Super_900_7_pause" class="Super_900_7_pause"><img src="/solver/static/images/7.png" class="full"></div>
+    <div id="Super_900_8_pause" class="Super_900_8_pause"><img src="/solver/static/images/8.png" class="full"></div>
+    <div id="Super_900_9_pause" class="Super_900_9_pause"><img src="/solver/static/images/9.png" class="full"></div>
+    <div id="Super_90_0_pause" class="Super_90_0_pause"><img src="/solver/static/images/0.png" class="full"></div>
+    <div id="Super_90_1_pause" class="Super_90_1_pause"><img src="/solver/static/images/1.png" class="full"></div>
+    <div id="Super_90_2_pause" class="Super_90_2_pause"><img src="/solver/static/images/2.png" class="full"></div>
+    <div id="Super_90_3_pause" class="Super_90_3_pause"><img src="/solver/static/images/3.png" class="full"></div>
+    <div id="Super_90_4_pause" class="Super_90_4_pause"><img src="/solver/static/images/4.png" class="full"></div>
+    <div id="Super_90_5_pause" class="Super_90_5_pause"><img src="/solver/static/images/5.png" class="full"></div>
+    <div id="Super_90_6_pause" class="Super_90_6_pause"><img src="/solver/static/images/6.png" class="full"></div>
+    <div id="Super_90_7_pause" class="Super_90_7_pause"><img src="/solver/static/images/7.png" class="full"></div>
+    <div id="Super_90_8_pause" class="Super_90_8_pause"><img src="/solver/static/images/8.png" class="full"></div>
+    <div id="Super_90_9_pause" class="Super_90_9_pause"><img src="/solver/static/images/9.png" class="full"></div>
+    <div id="Super_9_0_pause" class="Super_9_0_pause"><img src="/solver/static/images/0.png" class="full"></div>
+    <div id="Super_9_1_pause" class="Super_9_1_pause"><img src="/solver/static/images/1.png" class="full"></div>
+    <div id="Super_9_2_pause" class="Super_9_2_pause"><img src="/solver/static/images/2.png" class="full"></div>
+    <div id="Super_9_3_pause" class="Super_9_3_pause"><img src="/solver/static/images/3.png" class="full"></div>
+    <div id="Super_9_4_pause" class="Super_9_4_pause"><img src="/solver/static/images/4.png" class="full"></div>
+    <div id="Super_9_5_pause" class="Super_9_5_pause"><img src="/solver/static/images/5.png" class="full"></div>
+    <div id="Super_9_6_pause" class="Super_9_6_pause"><img src="/solver/static/images/6.png" class="full"></div>
+    <div id="Super_9_7_pause" class="Super_9_7_pause"><img src="/solver/static/images/7.png" class="full"></div>
+    <div id="Super_9_8_pause" class="Super_9_8_pause"><img src="/solver/static/images/8.png" class="full"></div>
+    <div id="Super_9_9_pause" class="Super_9_9_pause"><img src="/solver/static/images/9.png" class="full"></div>
+
+    <div id="PowerBomb_900_0_pause" class="PowerBomb_900_0_pause"><img src="/solver/static/images/0.png" class="full"></div>
+    <div id="PowerBomb_900_1_pause" class="PowerBomb_900_1_pause"><img src="/solver/static/images/1.png" class="full"></div>
+    <div id="PowerBomb_900_2_pause" class="PowerBomb_900_2_pause"><img src="/solver/static/images/2.png" class="full"></div>
+    <div id="PowerBomb_900_3_pause" class="PowerBomb_900_3_pause"><img src="/solver/static/images/3.png" class="full"></div>
+    <div id="PowerBomb_900_4_pause" class="PowerBomb_900_4_pause"><img src="/solver/static/images/4.png" class="full"></div>
+    <div id="PowerBomb_900_5_pause" class="PowerBomb_900_5_pause"><img src="/solver/static/images/5.png" class="full"></div>
+    <div id="PowerBomb_900_6_pause" class="PowerBomb_900_6_pause"><img src="/solver/static/images/6.png" class="full"></div>
+    <div id="PowerBomb_900_7_pause" class="PowerBomb_900_7_pause"><img src="/solver/static/images/7.png" class="full"></div>
+    <div id="PowerBomb_900_8_pause" class="PowerBomb_900_8_pause"><img src="/solver/static/images/8.png" class="full"></div>
+    <div id="PowerBomb_900_9_pause" class="PowerBomb_900_9_pause"><img src="/solver/static/images/9.png" class="full"></div>
+    <div id="PowerBomb_90_0_pause" class="PowerBomb_90_0_pause"><img src="/solver/static/images/0.png" class="full"></div>
+    <div id="PowerBomb_90_1_pause" class="PowerBomb_90_1_pause"><img src="/solver/static/images/1.png" class="full"></div>
+    <div id="PowerBomb_90_2_pause" class="PowerBomb_90_2_pause"><img src="/solver/static/images/2.png" class="full"></div>
+    <div id="PowerBomb_90_3_pause" class="PowerBomb_90_3_pause"><img src="/solver/static/images/3.png" class="full"></div>
+    <div id="PowerBomb_90_4_pause" class="PowerBomb_90_4_pause"><img src="/solver/static/images/4.png" class="full"></div>
+    <div id="PowerBomb_90_5_pause" class="PowerBomb_90_5_pause"><img src="/solver/static/images/5.png" class="full"></div>
+    <div id="PowerBomb_90_6_pause" class="PowerBomb_90_6_pause"><img src="/solver/static/images/6.png" class="full"></div>
+    <div id="PowerBomb_90_7_pause" class="PowerBomb_90_7_pause"><img src="/solver/static/images/7.png" class="full"></div>
+    <div id="PowerBomb_90_8_pause" class="PowerBomb_90_8_pause"><img src="/solver/static/images/8.png" class="full"></div>
+    <div id="PowerBomb_90_9_pause" class="PowerBomb_90_9_pause"><img src="/solver/static/images/9.png" class="full"></div>
+    <div id="PowerBomb_9_0_pause" class="PowerBomb_9_0_pause"><img src="/solver/static/images/0.png" class="full"></div>
+    <div id="PowerBomb_9_1_pause" class="PowerBomb_9_1_pause"><img src="/solver/static/images/1.png" class="full"></div>
+    <div id="PowerBomb_9_2_pause" class="PowerBomb_9_2_pause"><img src="/solver/static/images/2.png" class="full"></div>
+    <div id="PowerBomb_9_3_pause" class="PowerBomb_9_3_pause"><img src="/solver/static/images/3.png" class="full"></div>
+    <div id="PowerBomb_9_4_pause" class="PowerBomb_9_4_pause"><img src="/solver/static/images/4.png" class="full"></div>
+    <div id="PowerBomb_9_5_pause" class="PowerBomb_9_5_pause"><img src="/solver/static/images/5.png" class="full"></div>
+    <div id="PowerBomb_9_6_pause" class="PowerBomb_9_6_pause"><img src="/solver/static/images/6.png" class="full"></div>
+    <div id="PowerBomb_9_7_pause" class="PowerBomb_9_7_pause"><img src="/solver/static/images/7.png" class="full"></div>
+    <div id="PowerBomb_9_8_pause" class="PowerBomb_9_8_pause"><img src="/solver/static/images/8.png" class="full"></div>
+    <div id="PowerBomb_9_9_pause" class="PowerBomb_9_9_pause"><img src="/solver/static/images/9.png" class="full"></div>
+
+    <div id="auto" class="auto"><img src="/solver/static/images/auto.png" class="full"></div>
+    <div id="reserve_text" class="reserve_text"><img src="/solver/static/images/reserve_text.png" class="full"></div>
+
+    <div id="reserve_0" class="reserve_0"><img src="/solver/static/images/0_reserve.png" class="full"></div>
+    <div id="reserve_00" class="reserve_00"><img src="/solver/static/images/0_reserve.png" class="full"></div>
+    <div id="reserve_1" class="reserve_1"><img src="/solver/static/images/1_reserve.png" class="full"></div>
+    <div id="reserve_2" class="reserve_1"><img src="/solver/static/images/2_reserve.png" class="full"></div>
+    <div id="reserve_3" class="reserve_1"><img src="/solver/static/images/3_reserve.png" class="full"></div>
+    <div id="reserve_4" class="reserve_1"><img src="/solver/static/images/4_reserve.png" class="full"></div>

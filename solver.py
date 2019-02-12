@@ -454,6 +454,9 @@ class InteractiveSolver(CommonSolver):
 
         self.loadPreset(self.presetFileName)
 
+        # add already collected items to smbm
+        self.smbm.addItems(self.collectedItems)
+
         if scope == 'item':
             if action == 'clear':
                 self.clearItems(True)
@@ -485,9 +488,6 @@ class InteractiveSolver(CommonSolver):
 
         if scope == 'common' and action == 'save':
             return self.savePlando()
-
-        # add already collected items to smbm
-        self.smbm.addItems(self.collectedItems)
 
         # compute new available locations
         self.clearLocs(self.majorLocations)

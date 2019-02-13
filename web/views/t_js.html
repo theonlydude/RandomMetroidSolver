@@ -1001,3 +1001,8 @@ $(window).scroll(function(){
   $("#itemPopup").stop().animate({"marginTop": ($(window).scrollTop()) + "px"}, "fast" );
 });
 
+function clearInputSeed() {
+  document.getElementById("uploadFile").value = "";
+  document.getElementById("romJson").value = "";
+  document.getElementById("fileName").value = "";
+}

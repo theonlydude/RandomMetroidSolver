@@ -1,31 +1,32 @@
   <div id="solverPopup" class="solverPopup">
     <table class="full">
-      <colgroup><col class="half" /><col class="half" /></colgroup>
-      <tr><td colspan=2></td></tr>
+      <colgroup><col class="half" /><col class="half" /><col class="small"/></colgroup>
+      <tr><td colspan=3></td></tr>
       <tr>
-	<td colspan=2 class="center greyRow"><p id="solverPopupText"></p></td>
+	<td colspan=3 class="center greyRow"><p id="solverPopupText"></p></td>
       </tr>
       <tr>
 	<td>Randomized Super Metroid ROM: </td>
 	<td><input id="uploadFile" name="uploadFile" type="file"/></td>
+	<td><div class="clearInput"><img src="/solver/static/images/bin.svg" alt="Clear" onclick="clearInputSeed()" data-toggle="tooltip" title="Remove selected ROM file" data-placement="bottom" data-container="body" data-html="true"></div></td>
       </tr>
       <tr>
 	<td>Preset:</td>
-	<td>{{=SELECT(OPTGROUP(*stdPresets, **dict(_label="Standard presets")), OPTGROUP(*comPresets, **dict(_label="Community presets")), **dict(_name="preset", _id="preset", value=curSession["preset"], _class="filldropdown chzn-select"))}}</td>
+	<td colspan=2>{{=SELECT(OPTGROUP(*stdPresets, **dict(_label="Standard presets")), OPTGROUP(*comPresets, **dict(_label="Community presets")), **dict(_name="preset", _id="preset", value=curSession["preset"], _class="filldropdown chzn-select"))}}</td>
       </tr>
       <tr class="blankRow">
-	<td colspan=2></td>
+	<td colspan=3></td>
       </tr>
       <tr>
-	<td colspan=2 class="center greyRow">Information on the currently loaded seed</td>
+	<td colspan=3 class="center greyRow">Information on the currently loaded seed</td>
       </tr>
       <tr>
 	<td>Current Seed: </td>
-	<td><input type="text" name="cur_seed" id="cur_seed" value="n/a" readonly class="full"></td>
+	<td colspan=2><input type="text" name="cur_seed" id="cur_seed" value="n/a" readonly class="full"></td>
       </tr>
       <tr>
 	<td>Current Preset: </td>
-	<td><input type="text" name="cur_preset" id="cur_preset" value="n/a" readonly class="full"></td>
+	<td colspan=2><input type="text" name="cur_preset" id="cur_preset" value="n/a" readonly class="full"></td>
       </tr>
     </table>
     <table>

@@ -68,18 +68,11 @@ function clickPortal(elemId) {
         firstClick = "";
         secondClick = "";
       } else {
-        // first init the isolver in seedless mode
-        ajaxCall({action: "init", scope: "common", romJson: "", preset: "regular", fileName: "", mode: "seedless"},
-                 "download", ajaxOkAddLine);
+        // warn the user that he have to click on '>' first
+        alert("Please initialize the tracker/plando first by clicking on the Play button");
       }
     }
   }
-}
-
-function ajaxOkAddLine(data) {
-  ajaxCall({action: "add", scope: "area", startPoint: firstClick, endPoint: secondClick}, "upload");
-  firstClick = "";
-  secondClick = "";
 }
 
 function addLine(startPoint, endPoint) {
@@ -170,7 +163,7 @@ function ajaxFailJSON(jqXHR, textStatus) {
 
 function ajaxCall(dataDict, msg, okFunc=ajaxOkGet) {
     if(!("mode" in dataDict)) {
-      dataDict["mode"] = document.getElementById("cur_mode").value;
+      dataDict["mode"] = document.getElementById("mode").value;
     }
 
     var request = $.ajax({
@@ -214,7 +207,7 @@ function ajaxOkGet(jsonData) {
   preset = jsonData["preset"];
   init = true;
 
-  document.getElementById("cur_mode").value = mode;
+  document.getElementById("mode").value = mode;
   document.getElementById("cur_seed").value = seed;
   document.getElementById("cur_preset").value = preset;
 

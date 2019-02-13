@@ -201,6 +201,7 @@ function ajaxOkGet(jsonData) {
 
   mode = jsonData["mode"];
   area = jsonData["areaRando"];
+  boss = jsonData["bossRando"];
   seed = jsonData["seed"];
   preset = jsonData["preset"];
   init = true;
@@ -213,7 +214,7 @@ function ajaxOkGet(jsonData) {
     hideItemPopup();
   }
 
-  setActive(mode, area);
+  setActive(mode, area, boss);
 
   resetItems();
   resetLines();
@@ -325,7 +326,7 @@ function ajaxOkGet(jsonData) {
   }
 }
 
-function setActive(mode, area) {
+function setActive(mode, area, boss) {
   var itemElems = ["repeatItem", "binItem"];
   var plandoElems = ["repeatPlando", "binPlando", "savePlando"];
   var areaElems = ["repeatArea", "binArea"];
@@ -344,7 +345,7 @@ function setActive(mode, area) {
       $("#"+plandoElems[i]).removeClass("greyed");
     }
   }
-  if(area == true) {
+  if(area == true || boss == true) {
     for(var i=0; i<areaElems.length; i++) {
       $("#"+areaElems[i]).removeClass("greyed");
     }
@@ -371,7 +372,7 @@ function isActive(elemId) {
     }
   }
   if(elemId.includes("Area")) {
-    return area;
+    return area || boss;
   }
 }
 
@@ -381,6 +382,7 @@ function isActive(elemId) {
 var lastLoc = "landingSite";
 var mode = "standard";
 var area = true;
+var boss = true;
 var init = false;
 var webServInProgress = false;
 

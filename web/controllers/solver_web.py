@@ -1380,6 +1380,7 @@ class WS(object):
                 # infos on seed
                 "mode": state["mode"],
                 "areaRando": state["areaRando"],
+                "bossRando": state["bossRando"],
                 "seed": state["seed"],
                 "preset": os.path.basename(os.path.splitext(state["presetFileName"])[0])
             })

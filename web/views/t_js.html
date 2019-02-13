@@ -57,8 +57,7 @@ function clickPortal(elemId) {
 
     if(! ((firstClick in lines) || (elemId in lines))) {
       if(checkCompatibleAPs(firstClick, elemId) == false) {
-        alert("You can't mix Areas access points and Bosses access points");
-        return;
+        alert("Warning:\n\tYou are mixing an Areas access point and a Bosses access point.\n\tIt's an invalid transition except for Plando seeds.");
       }
 
       if(init == true) {
@@ -68,7 +67,7 @@ function clickPortal(elemId) {
         secondClick = "";
       } else {
         // warn the user that he have to click on '>' first
-        alert("Please initialize the tracker/plando first by clicking on the Play button");
+        alert("Please initialize the tracker/plando first by clicking on the Play button.");
       }
     }
   }

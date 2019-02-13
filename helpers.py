@@ -101,9 +101,7 @@ class Helpers(object):
         sm = self.smbm
         if sm.haveItem('SpaceJump') == True:
             return SMBool(True, easy, items=['SpaceJump'])
-        elif sm.wand(sm.haveItem('Morph'),
-                     sm.haveItem('Bomb'),
-                     sm.knowsInfiniteBombJump()) == True:
+        elif sm.canInfiniteBombJump() == True:
             return sm.knowsInfiniteBombJump()
         else:
             return SMBool(False)
@@ -124,6 +122,11 @@ class Helpers(object):
     def canUseBombs(self):
         sm = self.smbm
         return sm.wand(sm.haveItem('Morph'), sm.haveItem('Bomb'))
+
+    @Cache.decorator
+    def canInfiniteBombJump(self):
+        sm = self.smbm
+        return sm.wand(sm.haveItem('Morph'), sm.haveItem('Bomb'), sm.knowsInfiniteBombJump())
 
     @Cache.decorator
     def canOpenRedDoors(self):

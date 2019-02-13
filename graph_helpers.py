@@ -32,6 +32,7 @@ class HelpersGraph(Helpers):
         #             -do a short charge from the Keyhunter room (https://www.youtube.com/watch?v=kFAYji2gFok)
         #             -do a gravity jump from below the right platform
         #             -do a mock ball and a bounce ball (https://www.youtube.com/watch?v=WYxtRF--834)
+        #             -with gravity, either hijump or IBJ
         return sm.wor(sm.wor(sm.haveItem('Grapple'),
                              sm.haveItem('SpaceJump'),
                              sm.knowsContinuousWallJump()),
@@ -40,7 +41,8 @@ class HelpersGraph(Helpers):
                                             sm.wor(sm.knowsSimpleShortCharge(), sm.knowsShortCharge())),
                                     sm.wand(sm.haveItem('Gravity'),
                                             sm.wor(sm.knowsGravityJump(),
-                                                   sm.haveItem('HiJump'))),
+                                                   sm.haveItem('HiJump'),
+                                                   sm.canInfiniteBombJump())),
                                     sm.wand(sm.knowsMockballWs(), sm.canUseSpringBall())))
 
     @Cache.decorator
@@ -156,8 +158,7 @@ class HelpersGraph(Helpers):
     def canGrappleEscape(self):
         sm = self.smbm
         return sm.wor(sm.wor(sm.haveItem('SpaceJump'),
-                             sm.wand(sm.haveItem('Bomb'), # IBJ from lava...either have grav or freeze the enemy there if hellrunning (otherwise single DBJ at the end)
-                                     sm.knowsInfiniteBombJump(),
+                             sm.wand(sm.canInfiniteBombJump(), # IBJ from lava...either have grav or freeze the enemy there if hellrunning (otherwise single DBJ at the end)
                                      sm.wor(sm.heatProof(),
                                             sm.haveItem('Gravity'),
                                             sm.haveItem('Ice')))),

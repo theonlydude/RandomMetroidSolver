@@ -207,8 +207,7 @@ locations = [
                                            sm.wand(sm.energyReserveCountOkHardRoom('X-Ray'),
                                                    sm.wor(sm.knowsXrayDboost(),
                                                           sm.haveItem('Ice'),
-                                                          sm.wand(sm.canUseBombs(),
-                                                                  sm.knowsInfiniteBombJump()),
+                                                          sm.canInfiniteBombJump(),
                                                           sm.wand(sm.haveItem('HiJump'),
                                                                   sm.wor(sm.haveItem('SpeedBooster'),
                                                                          sm.haveItem('SpringBall')))))))

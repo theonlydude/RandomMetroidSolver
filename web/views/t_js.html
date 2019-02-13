@@ -61,9 +61,8 @@ function clickPortal(elemId) {
         return;
       }
 
-      secondClick = elemId;
-
       if(init == true) {
+        secondClick = elemId;
         ajaxCall({action: "add", scope: "area", startPoint: firstClick, endPoint: secondClick}, "upload");
         firstClick = "";
         secondClick = "";

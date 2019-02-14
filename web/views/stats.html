@@ -37,6 +37,9 @@ tr:nth-child(even) {
     background-color: red;
     color: white;
 }
+.error {
+    background-color: orange;
+}
 </style>
 
 <script language = "JavaScript">
@@ -315,7 +318,6 @@ google.charts.setOnLoadCallback(drawCharts);
     <div id = "isolver" style = "height: 400px; margin: 0 auto"></div>
   </div>
 </div>
-
 {{
   def displayData(id, data):
     if data == None:
@@ -333,8 +335,12 @@ google.charts.setOnLoadCallback(drawCharts);
 
       if data[1] != None:
         for row in data[1]:
-          response.write("  <tr>\n", escape=False)
-          for col in row:
+          if row[0] != 0:
+            response.write("  <tr class=\"error\">\n", escape=False)
+          else:
+            response.write("  <tr>\n", escape=False)
+            pass
+          for col in row[1:]:
             response.write("    <td style=\"white-space: nowrap\">{}</td>\n".format(col), escape=False)
             pass
           response.write("  </tr>\n", escape=False)
@@ -394,9 +400,13 @@ google.charts.setOnLoadCallback(drawCharts);
 
       if data[1] != None:
         for row in data[1]:
-          response.write("  <tr>\n", escape=False)
+          if row[0] != 0:
+            response.write("  <tr class=\"error\">\n", escape=False)
+          else:
+            response.write("  <tr>\n", escape=False)
+            pass
           # standard params except dynamic ones and error msg
-          for col in row[0:-2]:
+          for col in row[1:-2]:
             response.write("    <td style=\"white-space: nowrap\">{}</td>\n".format(col), escape=False)
             pass
           # dynamic parameters

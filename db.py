@@ -261,7 +261,7 @@ class DB:
 
     def getSolverData(self, weeks):
         # return all data csv style
-        sql = """select s.id, s.action_time,
+        sql = """select sr.return_code, s.id, s.action_time,
 sp.romFileName, sp.preset, sp.difficultyTarget, sp.pickupStrategy,
 sr.return_code, lpad(round(sr.duration, 2), 5, '0'), sr.difficulty, sr.knows_used, sr.knows_known, sr.items_ok, sr.len_remainTry, sr.len_remainMajors, sr.len_remainMinors, sr.len_skippedMajors, sr.len_unavailMajors,
 sci.collected_items,
@@ -278,7 +278,7 @@ order by s.id;"""
         return (header, self.execSelect(sql, (weeks,)))
 
     def getRandomizerData(self, weeks):
-        sql = """select r.id, r.action_time,
+        sql = """select rr.return_code, r.id, r.action_time,
 rr.return_code, lpad(round(rr.duration, 2), 5, '0'), rr.error_msg,
 rp.params
 from randomizer r
@@ -295,7 +295,7 @@ order by r.id;"""
         paramsSet = set()
         for row in data:
             # use a dict for the parameters
-            params = row[5]
+            params = row[6]
             dictParams = eval('{' + params + '}')
             outData.append(row[0:-1] + (dictParams,))
             paramsSet.update(dictParams.keys())
@@ -353,7 +353,7 @@ order by r.id;"""
 
     def getISolverData(self, weeks):
         # return all data csv style
-        sql = """select init_time, preset, romFileName
+        sql = """select 0, init_time, preset, romFileName
 from isolver
 where init_time > DATE_SUB(CURDATE(), INTERVAL %d WEEK)
 order by init_time;"""

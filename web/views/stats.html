@@ -423,7 +423,7 @@ google.charts.setOnLoadCallback(drawCharts);
           response.write("    <td style=\"white-space: nowrap\">{}</td>\n".format(col), escape=False)
 
           # display button to copy the params
-          response.write("    <td><button type=\"button\" onclick=\"getRandoParams({})\">D</button></td>\n".format(row[0]), escape=False)
+          response.write("    <td><button type=\"button\" onclick=\"getRandoParams({})\">D</button></td>\n".format(row[1]), escape=False)
 
           response.write("  </tr>\n", escape=False)
           pass

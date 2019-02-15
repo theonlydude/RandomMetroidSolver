@@ -208,4 +208,10 @@ function startTheTour(step=-1) {
     <div id="savePlando" class="savePlando"><img src="/solver/static/images/save.svg" alt="Save" onclick="save()" data-toggle="tooltip" title="Download plando ROM" data-placement="bottom" data-container="body" data-html="true"></div>
     <div id="helpPlando" class="helpPlando"><img src="/solver/static/images/help.svg" alt="Help" onclick="startTheTour(0)" data-toggle="tooltip" title="Display the Plando help" data-placement="bottom" data-container="body" data-html="true"></div>
   </div>
+
+  <!-- info on current loaded seed -->
+  <p class="white">Current Seed:</p>
+  <input type="text" name="cur_seed" id="cur_seed" value="n/a" readonly class="full">
+  <p class="white">Current Preset:</p>
+  <input type="text" name="cur_preset" id="cur_preset" value="n/a" readonly class="full">
 </div>

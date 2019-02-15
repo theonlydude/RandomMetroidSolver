@@ -14,20 +14,6 @@
 	<td>Preset:</td>
 	<td colspan=2>{{=SELECT(OPTGROUP(*stdPresets, **dict(_label="Standard presets")), OPTGROUP(*comPresets, **dict(_label="Community presets")), **dict(_name="preset", _id="preset", value=curSession["preset"], _class="filldropdown chzn-select"))}}</td>
       </tr>
-      <tr class="blankRow">
-	<td colspan=3></td>
-      </tr>
-      <tr>
-	<td colspan=3 class="center greyRow">Information on the currently loaded seed</td>
-      </tr>
-      <tr>
-	<td>Current Seed: </td>
-	<td colspan=2><input type="text" name="cur_seed" id="cur_seed" value="n/a" readonly class="full"></td>
-      </tr>
-      <tr>
-	<td>Current Preset: </td>
-	<td colspan=2><input type="text" name="cur_preset" id="cur_preset" value="n/a" readonly class="full"></td>
-      </tr>
     </table>
     <table>
       <tr>

@@ -361,6 +361,11 @@ class CommonSolver(object):
 
         if item not in Conf.itemsForbidden:
             self.collectedItems.append(item)
+            if self.checkDuplicateMajor == True:
+                if item not in ['Nothing', 'NoEnergy', 'Missile', 'Super', 'PowerBomb', 'ETank', 'Reserve']:
+                    if self.smbm.haveItem(item):
+                        print("WARNING: {} has already been picked up".format(item))
+
             self.smbm.addItem(item)
         else:
             # update the name of the item
@@ -687,7 +692,9 @@ class InteractiveSolver(CommonSolver):
 class StandardSolver(CommonSolver):
     # given a rom and parameters returns the estimated difficulty
 
-    def __init__(self, rom, presetFileName, difficultyTarget, pickupStrategy, itemsForbidden=[], type='console', firstItemsLog=None, displayGeneratedPath=False, outputFileName=None, magic=None):
+    def __init__(self, rom, presetFileName, difficultyTarget, pickupStrategy, itemsForbidden=[], type='console', firstItemsLog=None, displayGeneratedPath=False, outputFileName=None, magic=None, checkDuplicateMajor=False):
+        self.checkDuplicateMajor = checkDuplicateMajor
+
         self.log = log.get('Solver')
 
         self.setConf(difficultyTarget, pickupStrategy, itemsForbidden, displayGeneratedPath)
@@ -1422,7 +1429,8 @@ def standardSolver(args):
                             pickupStrategy, args.itemsForbidden, type=args.type,
                             firstItemsLog=args.firstItemsLog,
                             displayGeneratedPath=args.displayGeneratedPath,
-                            outputFileName=args.output, magic=args.raceMagic)
+                            outputFileName=args.output, magic=args.raceMagic,
+                            checkDuplicateMajor=args.checkDuplicateMajor)
 
     solver.solveRom()
 
@@ -1443,6 +1451,8 @@ if __name__ == "__main__":
 
     parser.add_argument('--type', '-y', help="web or console", dest='type', nargs='?',
                         default='console', choices=['web', 'console'])
+    parser.add_argument('--checkDuplicateMajor', dest="checkDuplicateMajor", action='store_true',
+                        help="print a warning if the same major is collected more than once")
     parser.add_argument('--debug', '-d', help="activate debug logging", dest='debug', action='store_true')
     parser.add_argument('--firstItemsLog', '-1',
                         help="path to file where for each item type the first time it was found and where will be written (spoilers!)",

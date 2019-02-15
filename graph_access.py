@@ -277,7 +277,8 @@ accessPoints = [
                                                      sm.canHellRun('MainUpperNorfair', 1.25)),
                                              sm.wand(sm.haveItem('Morph'),
                                                      sm.canHellRun('MainUpperNorfair', 0.5))), # go all the way around
-        'Croc Zone': lambda sm: sm.wand(sm.canHellRun('MainUpperNorfair'), 
+        'Croc Zone': lambda sm: sm.wand(sm.canOpenGreenDoors(),
+                                        sm.canHellRun('MainUpperNorfair'),
                                         sm.haveItem('Morph'),
                                         sm.wor(sm.haveItem('Wave'),
                                                sm.wand(sm.canOpenRedDoors(),

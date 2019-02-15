@@ -5,6 +5,7 @@ from smbool import SMBool
 from rom import RomPatches
 from helpers import Helpers, Bosses
 from cache import Cache
+from math import ceil
 
 class HelpersGraph(Helpers):
     def __init__(self, smbm):
@@ -196,6 +197,8 @@ class HelpersGraph(Helpers):
         nTanks4Dive = 3
         if sm.heatProof().bool == False:
             nTanks4Dive = 8
+        if sm.haveItem('HiJump').bool == False:
+            nTanks4Dive = ceil(nTanks4Dive * 1.25) # 4 or 10
         return sm.wand(sm.wor(sm.wand(sm.haveItem('Gravity'), sm.haveItem('SpaceJump')),
                               sm.wand(sm.knowsGravityJump(), sm.haveItem('Gravity'), sm.wor(sm.haveItem('HiJump'), sm.knowsLavaDive())),
                               sm.wand(sm.wor(sm.wand(sm.knowsLavaDive(), sm.haveItem('HiJump')),

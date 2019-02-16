@@ -387,6 +387,7 @@ class CommonSolver(object):
 
 class InteractiveSolver(CommonSolver):
     def __init__(self, output):
+        self.checkDuplicateMajor = False
         self.log = log.get('Solver')
 
         self.outputFileName = output
@@ -898,7 +899,7 @@ class StandardSolver(CommonSolver):
         for loc in locations:
             loc["areaWeight"] = graphLocs[loc["GraphArea"]]
 
-        print("WARNING: use no come back heuristic")
+        print("WARNING: use no come back heuristic for {} locs in {} graph locs".format(len(locations), len(graphLocs)))
 
         return True
 
@@ -906,44 +907,60 @@ class StandardSolver(CommonSolver):
         # locations without distance are not available
         locations = [loc for loc in locations if 'distance' in loc]
 
+        if len(locations) == 0:
+            return []
+
         cleanAreaWeight = self.handleNoComeBack(locations)
 
-        around = [loc for loc in locations if (loc['SolveArea'] == area or loc['distance'] < 3) and loc['difficulty'].difficulty <= threshold and not Bosses.areaBossDead(area) and 'comeBack' in loc and loc['comeBack'] == True]
-        # pickup action means beating a boss, so do that first if possible
-        around.sort(key=lambda loc: (loc["areaWeight"] if "areaWeight" in loc
-                                     else 0,
-                                     0 if 'Pickup' in loc
-                                     else 1,
-                                     0 if 'comeBack' in loc and loc['comeBack'] == True
-                                     else 1,
-                                     0 if loc['SolveArea'] == area and loc['difficulty'].difficulty <= threshold
-                                     else 1,
-                                     loc['distance'] if loc['difficulty'].difficulty <= threshold
-                                     else 100000,
-                                     loc['difficulty'].difficulty))
-
+        around = [loc for loc in locations if ((loc['SolveArea'] == area or loc['distance'] < 3)
+                                               and loc['difficulty'].difficulty <= threshold
+                                               and not Bosses.areaBossDead(area)
+                                               and 'comeBack' in loc and loc['comeBack'] == True)]
         outside = [loc for loc in locations if not loc in around]
-        self.log.debug("around1 = " + str([(loc['Name'], loc['difficulty'], loc['distance'], loc['comeBack'], loc['SolveArea']) for loc in around]))
-        self.log.debug("outside1 = " + str([(loc['Name'], loc['difficulty'], loc['distance'], loc['comeBack'], loc['SolveArea']) for loc in outside]))
-        # we want to sort the outside locations by putting the ones is the same
-        # area first if we don't have enough items,
+
+        self.log.debug("around1 = {}".format([(loc['Name'], loc['difficulty'], loc['distance'], loc['comeBack'], loc['SolveArea']) for loc in around]))
+        self.log.debug("outside1 = {}".format([(loc['Name'], loc['difficulty'], loc['distance'], loc['comeBack'], loc['SolveArea']) for loc in outside]))
+
+        around.sort(key=lambda loc: (
+            # locs in the same area
+            0 if loc['SolveArea'] == area
+            else 1,
+            # nearest locs
+            loc['distance'],
+            # beating a boss
+            0 if 'Pickup' in loc
+            else 1,
+            # easiest first
+            loc['difficulty'].difficulty
+            )
+        )
+
+        # we want to sort the outside locations by putting the ones is the same area first
         # then we sort the remaining areas starting whith boss dead status
-        outside.sort(key=lambda loc: (loc["areaWeight"] if "areaWeight" in loc
-                                      else 0,
-                                      0 if 'comeBack' in loc and loc['comeBack'] == True
-                                      else 1,
-                                      0 if loc['SolveArea'] == area and loc['difficulty'].difficulty <= threshold
-                                      else 1,
-                                      loc['distance'] if loc['difficulty'].difficulty <= threshold
-                                      else 100000,
-                                      loc['difficulty'].difficulty if not Bosses.areaBossDead(loc['Area'])
-                                                                      and loc['difficulty'].difficulty <= threshold
-                                                                      and 'Pickup' in loc
-                                      else 100000,
-                                      loc['difficulty'].difficulty if not Bosses.areaBossDead(loc['Area'])
-                                                                      and loc['difficulty'].difficulty <= threshold
-                                      else 100000,
-                                      loc['difficulty'].difficulty))
+        outside.sort(key=lambda loc: (
+            # no come back heuristic
+            loc["areaWeight"] if "areaWeight" in loc
+            else 0,
+            # first loc where we can come back
+            0 if 'comeBack' in loc and loc['comeBack'] == True
+            else 1,
+            # first locs in the same area
+            0 if loc['SolveArea'] == area and loc['difficulty'].difficulty <= threshold
+            else 1,
+            # first nearest locs
+            loc['distance'] if loc['difficulty'].difficulty <= threshold
+            else 100000,
+            # beating a boss
+            loc['difficulty'].difficulty if (not Bosses.areaBossDead(loc['Area'])
+                                             and loc['difficulty'].difficulty <= threshold
+                                             and 'Pickup' in loc)
+            else 100000,
+            # areas with boss still alive
+            loc['difficulty'].difficulty if (not Bosses.areaBossDead(loc['Area'])
+                                             and loc['difficulty'].difficulty <= threshold)
+            else 100000,
+            loc['difficulty'].difficulty))
+
         self.log.debug("around2 = " + str([(loc['Name'], loc['difficulty'], loc['distance'], loc['comeBack'], loc['SolveArea']) for loc in around]))
         self.log.debug("outside2 = " + str([(loc['Name'], loc['difficulty'], loc['distance'], loc['comeBack'], loc['SolveArea']) for loc in outside]))
 

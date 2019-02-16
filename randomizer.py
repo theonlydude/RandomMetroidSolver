@@ -142,6 +142,7 @@ if __name__ == "__main__":
                         nargs='?', default=30, type=int)
     parser.add_argument('--race', help="Race mode magic number, between 1 and 65535", dest='raceMagic',
                         type=int)
+    parser.add_argument('--vcr', help="Generate VCR output file", dest='vcr', action='store_true')
 
     # parse args
     args = parser.parse_args()
@@ -253,7 +254,7 @@ if __name__ == "__main__":
         args.hideItems = bool(random.getrandbits(1))
 
     if args.morphPlacement == 'random':
-        if args.suitsRestriction == True and args.area == True:
+        if (args.suitsRestriction == True and args.area == True) or (args.majorsSplit == 'Chozo' and args.area == False):
             morphPlacements.remove('late')
         args.morphPlacement = morphPlacements[random.randint(0, len(morphPlacements)-1)]
     logger.debug("morphPlacement: {}".format(args.morphPlacement))

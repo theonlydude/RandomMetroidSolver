@@ -3,7 +3,7 @@
 import json, os.path
 
 # record solver/rando to play in the VCR tracker
-class VCR:
+class VCR(object):
     def __init__(self, name, type):
         self.outFileName = "{}.{}.vcr".format(os.path.basename(os.path.splitext(name)[0]), type)
         self.tape = []

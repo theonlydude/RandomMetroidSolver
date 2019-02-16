@@ -8,6 +8,7 @@ from utils import randGaussBounds, getRangeDict, chooseFromRange
 from graph import AccessGraph
 from graph_access import accessPoints
 from smboolmanager import SMBoolManager
+from vcr import VCR
 import log, logging
 
 progSpeeds = ['slowest', 'slow', 'medium', 'fast', 'fastest', 'basic']
@@ -34,7 +35,7 @@ class RandoSettings(object):
     # of the relevant categorie(s). This can easily cause aborted seeds, so some basic checks will be performed
     # beforehand to know whether an item can indeed be removed.
     # runtimeLimit_s : maximum runtime limit in seconds for generateItems functions. If <= 0, will be unlimited.
-    def __init__(self, maxDiff, progSpeed, progDiff, qty, restrictions, superFun, runtimeLimit_s):
+    def __init__(self, maxDiff, progSpeed, progDiff, qty, restrictions, superFun, runtimeLimit_s, vcr):
         self.progSpeed = progSpeed
         self.progDiff = progDiff
         self.maxDiff = maxDiff
@@ -44,6 +45,7 @@ class RandoSettings(object):
         self.runtimeLimit_s = runtimeLimit_s
         if self.runtimeLimit_s <= 0:
             self.runtimeLimit_s = sys.maxint
+        self.vcr = vcr
 
     def getChooseLocs(self):
         return self.getChooseLocDict(self.progDiff)
@@ -470,6 +472,7 @@ class Randomizer(object):
             self.nonChozoItemPool = [item for item in self.itemPool if item not in self.chozoItemPool] # this will be swapped back
             self.itemPool = self.chozoItemPool
         self.restrictedLocations = fun.restrictedLocs
+        self.vcr = VCR(seedName, 'rando') if settings.vcr == True else None
 
     def resetCache(self):
         self.nonProgTypesCache = []
@@ -992,6 +995,10 @@ class Randomizer(object):
             self.setCurAccessPoint(location['accessPoint'])
             self.currentItems.append(item)
             self.smbm.addItem(item['Type'])
+
+            if self.vcr != None:
+                self.vcr.addLocation(location['Name'], item['Type'])
+
         self.unusedLocations.remove(location)
         self.itemLocations.append(itemLocation)
         if curLocs != None:
@@ -1161,8 +1168,14 @@ class Randomizer(object):
             (state, itemLoc) = possibleStates[random.randint(0, len(possibleStates)-1)]
             self.updateRollbackItemsTried(itemLoc, i)
             state.apply(self)
-            sys.stdout.write('<'*(nStatesAtStart - len(self.states) - 1))
+
+            rollbackCount = nStatesAtStart - len(self.states) - 1
+            sys.stdout.write('<'*(rollbackCount))
             sys.stdout.flush()
+
+            if self.vcr != None:
+                self.vcr.addRollback(rollbackCount)
+
         self.log.debug("rollback END: {}".format(len(self.currentItems)))
 
     # check if bosses are blocking the last remaining locations
@@ -1410,4 +1423,8 @@ class Randomizer(object):
         if len(self.errorMsg) > 0:
             print("\nDIAG: {}".format(self.errorMsg))
         print("")
+
+        if self.vcr != None:
+            self.vcr.dump()
+
         return self.itemLocations

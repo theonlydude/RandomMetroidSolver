@@ -17,6 +17,7 @@ from graph_locations import locations as graphLocations
 from graph import AccessGraph
 from graph_access import vanillaTransitions, accessPoints, getDoorConnections, getTransitions, vanillaBossesTransitions, getAps2DoorsPtrs
 from utils import PresetLoader
+from vcr import VCR
 import log
 
 class Conf:
@@ -354,6 +355,9 @@ class CommonSolver(object):
     def collectItem(self, loc, item=None):
         if item == None:
             item = loc["itemName"]
+
+        if self.vcr != None:
+            self.vcr.addLocation(loc['Name'], item)
 
         if self.firstLogFile is not None:
             if item not in self.collectedItems:
@@ -693,8 +697,9 @@ class InteractiveSolver(CommonSolver):
 class StandardSolver(CommonSolver):
     # given a rom and parameters returns the estimated difficulty
 
-    def __init__(self, rom, presetFileName, difficultyTarget, pickupStrategy, itemsForbidden=[], type='console', firstItemsLog=None, displayGeneratedPath=False, outputFileName=None, magic=None, checkDuplicateMajor=False):
+    def __init__(self, rom, presetFileName, difficultyTarget, pickupStrategy, itemsForbidden=[], type='console', firstItemsLog=None, displayGeneratedPath=False, outputFileName=None, magic=None, checkDuplicateMajor=False, vcr=False):
         self.checkDuplicateMajor = checkDuplicateMajor
+        self.vcr = VCR(rom, 'solver') if vcr == True else None
 
         self.log = log.get('Solver')
 
@@ -734,6 +739,9 @@ class StandardSolver(CommonSolver):
             self.firstLogFile.close()
 
         (self.knowsUsed, self.knowsKnown) = self.getKnowsUsed()
+
+        if self.vcr != None:
+            self.vcr.dump()
 
         self.output.out()
 
@@ -1447,7 +1455,7 @@ def standardSolver(args):
                             firstItemsLog=args.firstItemsLog,
                             displayGeneratedPath=args.displayGeneratedPath,
                             outputFileName=args.output, magic=args.raceMagic,
-                            checkDuplicateMajor=args.checkDuplicateMajor)
+                            checkDuplicateMajor=args.checkDuplicateMajor, vcr=args.vcr)
 
     solver.solveRom()
 
@@ -1477,6 +1485,7 @@ if __name__ == "__main__":
     parser.add_argument('--displayGeneratedPath', '-g', help="display the generated path (spoilers!)",
                         dest='displayGeneratedPath', action='store_true')
     parser.add_argument('--race', help="Race mode magic number", dest='raceMagic', type=int)
+    parser.add_argument('--vcr', help="Generate VCR output file", dest='vcr', action='store_true')
     # standard/interactive, web site
     parser.add_argument('--output', '-o', help="When called from the website, contains the result of the solver",
                         dest='output', nargs='?', default=None)

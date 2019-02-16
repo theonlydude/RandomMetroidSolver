@@ -738,7 +738,8 @@ class RomPatcher:
         q = len([il for il in itemLocs if il['Item']['Type'] == itemType])
         if itemType == 'Missile' and self.nothingAtMorph == True:
             q += 1
-        return q
+        # in vcr mode if the seed has stuck we may not have these items, return at least 1
+        return max(q, 1)
 
     def getMinorsDistribution(self, itemLocs):
         dist = {}
@@ -841,7 +842,11 @@ class RomPatcher:
                                 itemLocs)
         # add location of the first instance of each minor
         for t in ['Missile', 'Super', 'PowerBomb']:
-            fItemLocs.append(next(il for il in itemLocs if il['Item']['Type'] == t))
+            # in vcr mode if the seed has stucked we may not have these minors
+            try:
+                fItemLocs.append(next(il for il in itemLocs if il['Item']['Type'] == t))
+            except StopIteration:
+                pass
         regex = re.compile(r"[^A-Z0-9\.,'!: ]+")
 
         itemLocs = {}

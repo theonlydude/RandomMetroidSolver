@@ -376,13 +376,16 @@ if __name__ == "__main__":
             sys.exit(-1)
     doors = getDoorConnections(randomizer.areaGraph, args.area, args.bosses)
     if args.patchOnly == False:
-        itemLocs = randomizer.generateItems()
+        (stuck, itemLocs) = randomizer.generateItems()
     else:
+        stuck = False
         itemLocs = []
-    if itemLocs is None:
+    if stuck == True:
         dumpErrorMsg(args.output, randomizer.errorMsg)
         print("Can't generate " + fileName + " with the given parameters: {}".format(randomizer.errorMsg))
-        sys.exit(-1)
+        # in vcr mode we still want the seed to be generated to analyze it
+        if args.vcr == False:
+            sys.exit(-1)
 
     # hide some items like in dessy's
     if args.hideItems == True:
@@ -425,7 +428,7 @@ if __name__ == "__main__":
                 romPatcher.writeTourianRefill()
             if args.bosses == True:
                 romPatcher.patchPhantoonEyeDoor()
-#        romPatcher.writeTransitionsCredits(randomizer.areaGraph.getCreditsTransitions())
+        # romPatcher.writeTransitionsCredits(randomizer.areaGraph.getCreditsTransitions())
         if ctrlDict is not None:
             romPatcher.writeControls(ctrlDict)
         if args.moonWalk == True:
@@ -449,4 +452,7 @@ if __name__ == "__main__":
         print(msg)
         sys.exit(-1)
 
-    print("Rom generated: {}".format(fileName))
+    if stuck == True:
+        print("Rom generated for debug purpose: {}".format(fileName))
+    else:
+        print("Rom generated: {}".format(fileName))

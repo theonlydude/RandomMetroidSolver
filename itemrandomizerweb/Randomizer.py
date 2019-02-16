@@ -1346,6 +1346,7 @@ class Randomizer(object):
     # only function to use (once) from outside of the Randomizer class.
     # returns a list of item/location dicts with 'Item' and 'Location' as keys.
     def generateItems(self):
+        stuck = False
         self.itemLocations = []
         isStuck = False
         # if major items are removed from the pool (super fun setting), fill not accessible locations with
@@ -1412,8 +1413,8 @@ class Randomizer(object):
                 print("REM LOCS = "  + str([loc['Name'] for loc in self.unusedLocations]))
                 print("REM ITEMS = "  + str([item['Type'] for item in self.itemPool]))
                 self.errorMsg += "Stuck because of navigation. Retry, and disable either super fun settings/late morph ball/suits restriction if the problem happens again."
-                self.itemLocations = None
-        if self.itemLocations is not None:
+                stuck = True
+        if not stuck:
             maxDiff = self.prevDiffTarget
             if maxDiff is None:
                 maxDiff = self.difficultyTarget
@@ -1427,4 +1428,4 @@ class Randomizer(object):
         if self.vcr != None:
             self.vcr.dump()
 
-        return self.itemLocations
+        return (stuck, self.itemLocations)

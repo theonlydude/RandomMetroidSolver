@@ -224,19 +224,20 @@ class SuperFunProvider(object):
             'Ridley' : self.sm.enoughStuffsRidley
         }
         self.okay = lambda: SMBool(True, 0)
+        self.log = log.get('SuperFun')
 
     def getItemPool(self, forbidden=[]):
         self.itemManager.createItemPool()
         return self.itemManager.removeForbiddenItems(self.forbiddenItems + forbidden)
 
     def checkPool(self, forbidden=None):
-        self.rando.log.debug("forbidden=" + str(forbidden))
+        self.log.debug("forbidden=" + str(forbidden))
         ret = True
         if forbidden is not None:
             pool = self.getItemPool([forbidden])
         else:
             pool = self.getItemPool()
-        self.rando.log.debug('pool='+str(list(set([i['Type'] for i in pool]))))
+        self.log.debug('pool='+str(list(set([i['Type'] for i in pool]))))
         # give us everything and beat every boss to see what we can access
         self.disableBossChecks()
         self.sm.resetItems()
@@ -247,7 +248,7 @@ class SuperFunProvider(object):
         # get restricted locs
         totalAvailLocs = [loc for loc in self.rando.currentLocations(post=True)]
         self.lastRestricted = [loc for loc in self.locations if loc not in totalAvailLocs]
-        self.rando.log.debug("restricted=" + str([loc['Name'] for loc in self.lastRestricted]))
+        self.log.debug("restricted=" + str([loc['Name'] for loc in self.lastRestricted]))
 
         # check if we can reach all APs
         landingSite = self.areaGraph.accessPoints['Landing Site']
@@ -255,7 +256,7 @@ class SuperFunProvider(object):
         for apName,ap in self.areaGraph.accessPoints.iteritems():
             if not ap in availAccessPoints:
                 ret = False
-                self.rando.log.debug("unavail AP:" + apName)
+                self.log.debug("unavail AP:" + apName)
 
         # check if we can reach all bosses
         if ret:
@@ -307,7 +308,7 @@ class SuperFunProvider(object):
         return len(forb)
 
     def getForbiddenSuits(self):
-        self.rando.log.debug("getForbiddenSuits")
+        self.log.debug("getForbiddenSuits")
         removableSuits = [suit for suit in self.suits if self.checkPool(suit)]
         if len(removableSuits) > 0:
             # remove at least one
@@ -319,7 +320,7 @@ class SuperFunProvider(object):
             self.errorMsgs.append("Could not remove any suit")
 
     def getForbiddenMovement(self):
-        self.rando.log.debug("getForbiddenMovement")
+        self.log.debug("getForbiddenMovement")
         removableMovement = [mvt for mvt in self.movementItems if self.checkPool(mvt)]
         if len(removableMovement) > 0:
             # remove at least the most important
@@ -329,7 +330,7 @@ class SuperFunProvider(object):
             self.errorMsgs.append('Could not remove any movement item')
 
     def getForbiddenCombat(self):
-        self.rando.log.debug("getForbiddenCombat")
+        self.log.debug("getForbiddenCombat")
         removableCombat = [cbt for cbt in self.combatItems if self.checkPool(cbt)]
         if len(removableCombat) > 0:
             fake = [None, None] # placeholders to avoid tricking the gaussian into removing too much stuff
@@ -356,6 +357,9 @@ class SuperFunProvider(object):
             self.getForbiddenMovement()
         if 'Combat' in self.superFun:
             self.getForbiddenCombat()
+
+        self.log.debug("forbiddenItems: {}".format(self.forbiddenItems))
+        self.log.debug("restrictedLocs: {}".format([loc['Name'] for loc in self.restrictedLocs]))
 
 # current state of randomizer algorithm. can be saved and restored at any point.
 # useful to rollback state when algorithm is stuck
@@ -992,6 +996,7 @@ class Randomizer(object):
         self.itemLocations.append(itemLocation)
         if curLocs != None:
             self.log.debug("PLACEMENT {}: {} at {} diff: {}".format(len(self.currentItems), item['Type'], location['Name'], location['difficulty']))
+            self.log.debug("Path: {}".format([ap.Name for ap in location['path']]))
         self.removeItem(item['Type'], pool)
         if collect == True:
             if isProg == True:

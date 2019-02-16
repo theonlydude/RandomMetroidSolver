@@ -153,6 +153,9 @@ if __name__ == "__main__":
         print "Can't have both --output and --rom parameters"
         sys.exit(-1)
 
+    log.init(args.debug)
+    logger = log.get('Rando')
+
     # if diff preset given, load it
     if args.paramsFileName is not None:
         PresetLoader.factory(args.paramsFileName[0]).load()
@@ -163,11 +166,15 @@ if __name__ == "__main__":
     else:
         preset = 'default'
 
+    logger.debug("preset: {}".format(preset))
+
     # if no seed given, choose one
     if args.seed == 0:
         seed = random.randint(0, 9999999)
     else:
         seed = args.seed
+    logger.debug("seed: {}".format(seed))
+
     seed4rand = seed
     if args.raceMagic is not None:
         if args.raceMagic <= 0 or args.raceMagic >= 0x10000:
@@ -194,13 +201,16 @@ if __name__ == "__main__":
     if progSpeed not in speeds:
         print 'Invalid progression speed : ' + progSpeed
         sys.exit(-1)
+    logger.debug("progression speed: {}".format(progSpeed))
+
     # if random progression difficulty, choose one
     progDiff = args.progressionDifficulty
     if progDiff == "random":
         progDiff = progDiffs[random.randint(0, len(progDiffs)-1)]
+    logger.debug("progression diff: {}".format(progDiff))
+
     if args.patchOnly == False:
         print("SEED: " + str(seed))
-#    print("progression speed: " + progSpeed)
 
     # if no max diff, set it very high
     if args.maxDifficulty:
@@ -211,6 +221,7 @@ if __name__ == "__main__":
             maxDifficulty = text2diff[args.maxDifficulty]
     else:
         maxDifficulty = float('inf')
+    logger.debug("maxDifficulty: {}".format(maxDifficulty))
 
     # same as solver, increase max difficulty
     threshold = maxDifficulty
@@ -229,17 +240,24 @@ if __name__ == "__main__":
 
     if args.majorsSplit == 'random':
         args.majorsSplit = majorsSplits[random.randint(0, len(majorsSplits)-1)]
+    logger.debug("majorsSplit: {}".format(args.majorsSplit))
+
     if args.suitsRestriction == 'random':
         if args.morphPlacement == 'late' and args.area == True:
             args.suitsRestriction = False
         else:
             args.suitsRestriction = bool(random.getrandbits(1))
+    logger.debug("suitsRestriction: {}".format(args.suitsRestriction))
+
     if args.hideItems == 'random':
         args.hideItems = bool(random.getrandbits(1))
+
     if args.morphPlacement == 'random':
         if args.suitsRestriction == True and args.area == True:
             morphPlacements.remove('late')
         args.morphPlacement = morphPlacements[random.randint(0, len(morphPlacements)-1)]
+    logger.debug("morphPlacement: {}".format(args.morphPlacement))
+
     if args.strictMinors == 'random':
         args.strictMinors = bool(random.getrandbits(1))
 
@@ -299,6 +317,7 @@ if __name__ == "__main__":
                      'Super': superQty,
                      'PowerBomb': powerBombQty },
            'strictMinors' : args.strictMinors }
+    logger.debug("quantities: {}".format(qty))
 
     if len(args.superFun) > 0:
         superFun = []
@@ -309,6 +328,8 @@ if __name__ == "__main__":
             else:
                 superFun.append(fun)
         args.superFun = superFun
+    logger.debug("superFun: {}".format(args.superFun))
+
     ctrlDict = None
     if args.controls:
         ctrlList = args.controls.split(',')
@@ -324,10 +345,7 @@ if __name__ == "__main__":
                 i += 1
             else:
                 raise ValueError("Invalid button name : " + str(b))
-    # print("qty = " + str(qty))
-    # print("restrictions = " + str(restrictions))
-    # print("superFun = " + str(args.superFun))
-    log.init(args.debug)
+
     randoSettings = RandoSettings(maxDifficulty, progSpeed, progDiff, qty, restrictions, args.superFun, args.runtimeLimit_s)
     bossTransitions = vanillaBossesTransitions
     if args.bosses == True:

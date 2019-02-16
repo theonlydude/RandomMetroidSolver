@@ -237,7 +237,7 @@ class ItemManager:
 
     def createItemPool(self):
         itemPoolGenerator = ItemPoolGenerator.factory(self.majorsSplit, self, self.qty, self.sm)
-        return itemPoolGenerator.getItemPool()
+        self.itemPool = itemPoolGenerator.getItemPool()
 
     @staticmethod
     def getProgTypes():
@@ -255,6 +255,7 @@ class ItemPoolGenerator(object):
         self.itemManager = itemManager
         self.qty = qty
         self.sm = sm
+        self.maxItems = 105 # 100 item locs and 5 bosses
 
     # add ammo given quantity settings
     def addAmmo(self):
@@ -286,7 +287,7 @@ class ItemPoolGenerator(object):
             fillAmmoType('Super')
             fillAmmoType('PowerBomb', False)
 
-        for i in range(100 - maxItems):
+        for i in range(self.maxItems - maxItems):
             self.itemManager.addMinor('Nothing')
 
 class ItemPoolGeneratorChozo(ItemPoolGenerator):

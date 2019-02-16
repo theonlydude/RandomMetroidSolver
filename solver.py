@@ -1476,8 +1476,7 @@ if __name__ == "__main__":
                         nargs='?', default=None, type=str, dest='firstItemsLog')
     parser.add_argument('--displayGeneratedPath', '-g', help="display the generated path (spoilers!)",
                         dest='displayGeneratedPath', action='store_true')
-    parser.add_argument('--race', help="Race mode magic number", dest='raceMagic',
-                        type=int, choices=range(0, 0x10000))
+    parser.add_argument('--race', help="Race mode magic number", dest='raceMagic', type=int)
     # standard/interactive, web site
     parser.add_argument('--output', '-o', help="When called from the website, contains the result of the solver",
                         dest='output', nargs='?', default=None)
@@ -1506,6 +1505,11 @@ if __name__ == "__main__":
 
     if args.presetFileName is None:
         args.presetFileName = 'standard_presets/regular.json'
+
+    if args.raceMagic != None:
+        if args.raceMagic <= 0 or args.raceMagic >= 0x10000:
+            print "Invalid magic"
+            sys.exit(-1)
 
     log.init(args.debug)
 

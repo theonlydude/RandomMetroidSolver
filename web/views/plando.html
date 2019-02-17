@@ -382,6 +382,8 @@ function gotoStart(force=false) {
     }
   }
 
+  console.log("start button pushed");
+
   ajaxCall({action: "clear", scope: "item"}, "upload");
   vcrIndex = 0;
   loadNextAction();
@@ -396,6 +398,8 @@ function previousAction() {
     return;
   }
 
+  console.log("previous button pushed");
+
   if(vcrIndex == 0) {
     return;
   } else {
@@ -405,6 +409,7 @@ function previousAction() {
     if(nextActionType == "rollback") {
       if(ajaxChainedActions.length > 0) {
         alert("Can't rollback when there's already chained WS actions in progress");
+        return;
       }
 
       var count = nextAction["count"];
@@ -446,6 +451,8 @@ function nextAction() {
     return;
   }
 
+  console.log("next button pushed");
+
   if(vcrIndex >= vcrData.length) {
     return;
   } else {
@@ -482,7 +489,33 @@ function gotoEnd() {
     return;
   }
 
-  alert("TODO::implement me");
+  console.log("end button pushed");
+
+  if(ajaxChainedActions.length > 0) {
+    alert("Can't move to the end there's already chained WS actions in progress");
+    return;
+  }
+
+  while(vcrIndex < vcrData.length) {
+    var nextAction = vcrData[vcrIndex];
+
+    if(nextAction["type"] == "location") {
+      var locISolver = nextAction["loc"];
+      locISolver.replace(/[ ,()-]/g, '');
+      ajaxChainedActions.push({action: "add", scope: "item", locName: locISolver, itemName: nextAction["item"]})
+    } else {
+      var count = nextAction["count"];
+      ajaxChainedActions.push({action: "remove", scope: "item", count: nextAction["count"]});
+    }
+
+    vcrIndex += 1;
+  }
+
+  // the chained actions are executed from the end of the array
+  ajaxChainedActions.reverse();
+
+  loadNextAction();
+  ajaxCallChained();
 }
 
 function isDesactivated(elemId) {

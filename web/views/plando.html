@@ -200,42 +200,6 @@ function startTheTour(step=-1) {
   tour.start();
 }
 
-// https://www.w3schools.com/howto/howto_js_draggable.asp
-function dragElement(elmnt, headerId) {
-  var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-  document.getElementById(headerId).onmousedown = dragMouseDown;
-
-  function dragMouseDown(e) {
-    e = e || window.event;
-    e.preventDefault();
-    // get the mouse cursor position at startup:
-    pos3 = e.clientX;
-    pos4 = e.clientY;
-    document.onmouseup = closeDragElement;
-    // call a function whenever the cursor moves:
-    document.onmousemove = elementDrag;
-  }
-
-  function elementDrag(e) {
-    e = e || window.event;
-    e.preventDefault();
-    // calculate the new cursor position:
-    pos1 = pos3 - e.clientX;
-    pos2 = pos4 - e.clientY;
-    pos3 = e.clientX;
-    pos4 = e.clientY;
-    // set the element's new position:
-    elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
-    elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
-  }
-
-  function closeDragElement() {
-    // stop moving when mouse button is released:
-    document.onmouseup = null;
-    document.onmousemove = null;
-  }
-}
-
 var debug = false;
 var vcrData = [];
 var vcrIndex = 0;
@@ -288,6 +252,7 @@ function onloadHook() {
   }, false);
 
   dragElement(document.getElementById("debugPopup"), "VCRGrab");
+  dragElement(document.getElementById("savePopup"), "SaveGrab");
 }
 
 function hidePlandoButtons() {
@@ -588,7 +553,7 @@ function isDesactivated(elemId) {
     <table class="full">
       <colgroup><col class="half" /><col class="half" /></colgroup>
       <tr><td colspan=2></td></tr>
-      <tr><td colspan=2 class="center greyRow">The page has been reloaded, please select your ROM again</td></tr>
+      <tr><td id="SaveGrab" colspan=2 class="center greyRow">The page has been reloaded, please select your ROM again</td></tr>
       <tr><td colspan=2 class="blankRow"></td></tr>
       <tr>
 	<td>Randomized Super Metroid ROM: </td>

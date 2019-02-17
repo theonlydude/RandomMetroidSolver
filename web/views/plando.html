@@ -63,6 +63,36 @@
     top: 0.5%;
     left: 2.75%;
 }
+.startDebug {
+    cursor: pointer;
+    position: absolute;
+    z-index: 2;
+    width: 2.5%;
+    height: 3.75%;
+    top: 0.5%;
+    left: 97.4%;
+    display: none;
+}
+.popupButton {
+    cursor: pointer;
+    height: 3em;
+    width: 3em;
+}
+.flip {
+    -webkit-transform: scaleX(-1);
+    transform: scaleX(-1);
+}
+.debugPopup {
+    background-color: #ffffff;
+    position: absolute;
+    z-index: 4;
+    height: auto;
+    top: 17%;
+    left: 51%;
+    display: none;
+    padding: 0.5%;
+    border: 2px solid gray;
+}
 </style>
 
 <script type="text/javascript">
@@ -75,6 +105,9 @@ function initCurMode() {
 {{include 'solver_web/t_js.html'}}
 
 function save() {
+  if(loaded == false || webServInProgress == true || init == false) {
+    return;
+  }
   if(! isActive("savePlando")) {
     return;
   }
@@ -134,6 +167,10 @@ function ajaxOkSave(data) {
   hideSavePopup();
 }
 
+function hideSavePopup() {
+  document.getElementById("savePopup").style.display = "none";
+}
+
 
 
 //-----------------------------------------------------------
@@ -159,6 +196,278 @@ function startTheTour(step=-1) {
   }
   tour.start();
 }
+
+// https://www.w3schools.com/howto/howto_js_draggable.asp
+function dragElement(elmnt, headerId) {
+  var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+  document.getElementById(headerId).onmousedown = dragMouseDown;
+
+  function dragMouseDown(e) {
+    e = e || window.event;
+    e.preventDefault();
+    // get the mouse cursor position at startup:
+    pos3 = e.clientX;
+    pos4 = e.clientY;
+    document.onmouseup = closeDragElement;
+    // call a function whenever the cursor moves:
+    document.onmousemove = elementDrag;
+  }
+
+  function elementDrag(e) {
+    e = e || window.event;
+    e.preventDefault();
+    // calculate the new cursor position:
+    pos1 = pos3 - e.clientX;
+    pos2 = pos4 - e.clientY;
+    pos3 = e.clientX;
+    pos4 = e.clientY;
+    // set the element's new position:
+    elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
+    elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+  }
+
+  function closeDragElement() {
+    // stop moving when mouse button is released:
+    document.onmouseup = null;
+    document.onmousemove = null;
+  }
+}
+
+var debug = false;
+var vcrData = [];
+var vcrIndex = 0;
+function onloadHook() {
+  var url = window.location.pathname;
+  if(url.includes("debug")) {
+    debug = true;
+
+    // make the debug button visible
+    document.getElementById("startDebug").style.display = "block";
+  }
+
+  var vcrFileInput = document.getElementById("vcrFile");
+  vcrFileInput.addEventListener("change", function(event){
+      var file = event.target.files[0];
+      var reader = new FileReader();
+
+      reader.onload = function(e) {
+	  // check vcr extention
+          var re = /(?:\.([^.]+))?$/;
+          var ext = re.exec(file.name)[1];
+          if( ! (ext === "vcr") ) {
+            document.getElementById("vcrFile").value = "";
+            alert("Wrong extension: " + ext);
+            return false;
+          }
+
+          var fileSize = file.size;
+          if( fileSize > 1024*1024 ) {
+            document.getElementById("vcrFile").value = "";
+            alert("Wrong VCR file size: "+fileSize.toString());
+            return false;
+          }
+
+          // string with the json
+          var jsonStr = e.target.result;
+          document.getElementById("vcrJson").value = jsonStr;
+          console.log("loaded vcr: " + jsonStr);
+
+          vcrData = JSON.parse(jsonStr);
+          gotoStart(true);
+          hidePlandoButtons();
+      }
+
+      reader.readAsText(file);
+
+  }, false);
+
+  dragElement(document.getElementById("debugPopup"), "VCRGrab");
+}
+
+function hidePlandoButtons() {
+  // to avoid using them in debug mode
+  var plandoElems = ["repeatPlando", "binPlando", "savePlando", "repeatArea", "binArea"];
+  for(var i=0; i<plandoElems.length; i++) {
+    document.getElementById(plandoElems[i]).style.display = "none";
+  }
+}
+
+function displayDebugPopup() {
+  if(loaded == false || webServInProgress == true || init == false) {
+    return;
+  }
+  document.getElementById("debugPopup").style.display = "block";
+}
+
+function hideDebugPopup() {
+  document.getElementById("debugPopup").style.display = "none";
+}
+
+function loadNextAction() {
+  // next action
+  if(vcrIndex >= vcrData.length) {
+    var msg = "the end";
+  } else {
+    var nextAction = vcrData[vcrIndex];
+    var nextActionType = nextAction["type"];
+
+    var msg = (vcrIndex+1) + "/" + vcrData.length + ": ";
+    if(nextActionType == "rollback") {
+      msg = msg + "Rollback " + nextAction["count"] + " locations";
+    } else if(nextActionType == "location") {
+      msg = msg + "Pick " + nextAction["item"] + " at " + nextAction["loc"];
+    }
+  }
+
+  document.getElementById("nextAction").value = msg;
+
+  // previous action
+  if(vcrIndex == 0) {
+    var msg = "start";
+  } else {
+    var prevAction = vcrData[vcrIndex-1];
+    var prevActionType = prevAction["type"];
+
+    var msg = (vcrIndex) + "/" + vcrData.length + ": ";
+    if(prevActionType == "rollback") {
+      msg = msg + "Rollback " + prevAction["count"] + " locations";
+    } else if(prevActionType == "location") {
+      msg = msg + "Pick " + prevAction["item"] + " at " + prevAction["loc"];
+    }
+  }
+
+  document.getElementById("prevAction").value = msg;
+
+  activateVCRButtons(vcrIndex, vcrData.length);
+}
+
+function activateVCRButtons(index, len) {
+  // at start disable << and < buttons
+  // at end disable > and >> buttons
+  var backElems = ["start", "previous"];
+  var nextElems = ["next", "end"];
+  if(index == 0) {
+    for(var i=0; i<backElems.length; i++) {
+      $("#"+backElems[i]).addClass("greyed");
+    }
+    for(var i=0; i<nextElems.length; i++) {
+      $("#"+nextElems[i]).removeClass("greyed");
+    }
+  } else if (index == len) {
+    for(var i=0; i<backElems.length; i++) {
+      $("#"+backElems[i]).removeClass("greyed");
+    }
+    for(var i=0; i<nextElems.length; i++) {
+      $("#"+nextElems[i]).addClass("greyed");
+    }
+  } else {
+    for(var i=0; i<backElems.length; i++) {
+      $("#"+backElems[i]).removeClass("greyed");
+    }
+    for(var i=0; i<nextElems.length; i++) {
+      $("#"+nextElems[i]).removeClass("greyed");
+    }
+  }
+}
+
+function gotoStart(force=false) {
+  if(force == false) {
+    if(loaded == false || webServInProgress == true) {
+      return;
+    }
+
+    if(isDesactivated("start")) {
+      return;
+    }
+  }
+
+  ajaxCall({action: "clear", scope: "item"}, "upload");
+  vcrIndex = 0;
+  loadNextAction();
+}
+
+function previousAction() {
+  if(loaded == false || webServInProgress == true) {
+    return;
+  }
+
+  if(isDesactivated("prevous")) {
+    return;
+  }
+
+  if(vcrIndex == 0) {
+    return;
+  } else {
+    var nextAction = vcrData[vcrIndex-1];
+    var nextActionType = nextAction["type"];
+
+    if(nextActionType == "rollback") {
+      alert("TODO::implement me");
+    } else if(nextActionType == "location") {
+      ajaxCall({action: "remove", scope: "item"}, "upload");
+
+      vcrIndex -= 1;
+      loadNextAction();
+    }
+  }
+}
+
+function nextAction() {
+  if(loaded == false || webServInProgress == true) {
+    return;
+  }
+
+  if(isDesactivated("next")) {
+    return;
+  }
+
+  if(vcrIndex >= vcrData.length) {
+    return;
+  } else {
+    var nextAction = vcrData[vcrIndex];
+    var nextActionType = nextAction["type"];
+
+    if(nextActionType == "rollback") {
+      ajaxCall({action: "remove", scope: "item", count: nextAction["count"]}, "upload");
+
+      // console.log("rollback");
+
+      vcrIndex += 1;
+      loadNextAction();
+    } else if(nextActionType == "location") {
+      var locISolver = nextAction["loc"];
+      locISolver.replace(/[ ,()-]/g, '');
+
+      // console.log("locname: " + locISolver);
+
+      ajaxCall({action: "add", scope: "item", locName: locISolver, itemName: nextAction["item"]}, "upload");
+
+      vcrIndex += 1;
+      loadNextAction();
+    }
+  }
+}
+
+function gotoEnd() {
+  if(loaded == false || webServInProgress == true) {
+    return;
+  }
+
+  if(isDesactivated("end")) {
+    return;
+  }
+
+  alert("TODO::implement me");
+}
+
+function ajaxCallChained() {
+  // to call several ws, one after the other
+
+}
+
+function isDesactivated(elemId) {
+  return $("#"+elemId).hasClass("greyed");
+}
 </script>
 
 <div class="fixed">
@@ -180,15 +489,16 @@ function startTheTour(step=-1) {
 <div class="main">
 
   <div id="savePopup" class="itemPopup">
-    <p>
-      The page has been reloaded, please select again your ROM.
-    </p>
     <table class="full">
       <colgroup><col class="half" /><col class="half" /></colgroup>
+      <tr><td colspan=2></td></tr>
+      <tr><td colspan=2 class="center greyRow">The page has been reloaded, please select your ROM again</td></tr>
+      <tr><td colspan=2 class="blankRow"></td></tr>
       <tr>
 	<td>Randomized Super Metroid ROM: </td>
 	<td><input id="saveFile" name="saveFile" type="file"/></td>
       </tr>
+      <tr><td colspan=2 class="blankLastRow"></td></tr>
     </table>
     <table>
       <tr>
@@ -196,6 +506,55 @@ function startTheTour(step=-1) {
 	<td class="half"><button type="button" onclick="hideSavePopup()" class="full">Cancel</button></td>
       </tr>
     </table>
+  </div>
+
+    <div id="debugPopup" class="debugPopup">
+    <table class="full">
+      <colgroup><col class="half" /><col class="half" /></colgroup>
+      <tr><td colspan=2></td></tr>
+      <tr><td id="VCRGrab" colspan=2 class="center greyRow">Debug VCR window</td></tr>
+      <tr><td colspan=2 class="blankRow"></td></tr>
+      <tr>
+	<td>VCR file: </td>
+	<td><input id="vcrFile" name="vcrFile" type="file"/></td>
+      </tr>
+      <tr><td colspan=2 class="blankLastRow"></td></tr>
+    </table>
+    <table>
+      <tr>
+	<td>
+	  <div id="start" class="popupButton flip greyed"><img src="/solver/static/images/fast_forward.svg" alt="start" onclick="gotoStart()" data-toggle="tooltip" title="Cancel all actions" data-placement="bottom" data-container="body" data-html="true"></div>
+	</td>
+	<td>
+	  <div id="previous" class="popupButton flip greyed"><img src="/solver/static/images/play.svg" alt="end" onclick="previousAction()" data-toggle="tooltip" title="Cancel last action" data-placement="bottom" data-container="body" data-html="true"></div>
+	</td>
+	<td>
+	  <div id="next" class="popupButton greyed"><img src="/solver/static/images/play.svg" alt="end" onclick="nextAction()" data-toggle="tooltip" title="Apply next action" data-placement="bottom" data-container="body" data-html="true"></div>
+	</td>
+	<td>
+	  <div id="end" class="popupButton greyed"><img src="/solver/static/images/fast_forward.svg" alt="end" onclick="gotoEnd()" data-toggle="tooltip" title="Apply all actions" data-placement="bottom" data-container="body" data-html="true"></div>
+	</td>
+      </tr>
+      <tr><td colspan=3 class="blankLastRow"></td></tr>
+    </table>
+    <table class="full">
+      <colgroup><col class="quarter"/><col class="full"/></colgroup>
+      <tr>
+	<td>Next action:</td>
+	<td><input type="text" name="nextAction" id="nextAction" value="" readonly class="full"></td>
+      </tr>
+      <tr>
+	<td>Previous action:</td>
+	<td><input type="text" name="prevAction" id="prevAction" value="" readonly class="full"></td>
+      </tr>
+      <tr><td colspan=2 class="blankLastRow"></td></tr>
+    </table>
+    <table>
+      <tr>
+	<td class="half"><button type="button" onclick="hideDebugPopup()" class="full">Close</button></td>
+      </tr>
+    </table>
+    <input id="vcrJson" name="vcrJson" style="display:none" type="text"/>
   </div>
 
 {{include 'solver_web/t_main.html'}}
@@ -207,6 +566,9 @@ function startTheTour(step=-1) {
     <div id="binPlando" class="binPlando"><img src="/solver/static/images/bin.svg" alt="Clear" onclick="clearLocs(true)" data-toggle="tooltip" title="Remove all placed items" data-placement="bottom" data-container="body" data-html="true"></div>
     <div id="savePlando" class="savePlando"><img src="/solver/static/images/save.svg" alt="Save" onclick="save()" data-toggle="tooltip" title="Download plando ROM" data-placement="bottom" data-container="body" data-html="true"></div>
     <div id="helpPlando" class="helpPlando"><img src="/solver/static/images/help.svg" alt="Help" onclick="startTheTour(0)" data-toggle="tooltip" title="Display the Plando help" data-placement="bottom" data-container="body" data-html="true"></div>
+
+    <!-- to open the debug popup -->
+    <div id="startDebug" class="startDebug"><img src="/solver/static/images/play.svg" alt="Start" onclick="displayDebugPopup()" data-toggle="tooltip" title="Start the debug popup" data-placement="bottom" data-container="body" data-html="true"></div>
   </div>
 
   <!-- info on current loaded seed -->

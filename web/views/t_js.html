@@ -102,7 +102,7 @@ function addLine(startPoint, endPoint) {
 }
 
 function clearLines() {
-  if(loaded == false || webServInProgress == true) {
+  if(loaded == false || webServInProgress == true || init == false) {
     return;
   }
 
@@ -119,7 +119,7 @@ function clearLines() {
 }
 
 function deleteLine() {
-  if(loaded == false || webServInProgress == true) {
+  if(loaded == false || webServInProgress == true || init == false) {
     return;
   }
 
@@ -162,6 +162,10 @@ function ajaxFailJSON(jqXHR, textStatus) {
 function ajaxCall(dataDict, msg, okFunc=ajaxOkGet) {
     if(!("mode" in dataDict)) {
       dataDict["mode"] = document.getElementById("mode").value;
+    }
+
+    if(typeof debug !== 'undefined' && debug == true) {
+      dataDict["debug"] = true;
     }
 
     var request = $.ajax({
@@ -615,6 +619,9 @@ window.onload = function(){
     reader.readAsArrayBuffer(file);
   }, false);
 
+  // defined in plando.html/tracker.html
+  onloadHook();
+
   loaded = true;
 }
 
@@ -703,9 +710,9 @@ function displayPopup(isPlando) {
   }
 
   if(isPlando == true) {
-    document.getElementById("solverPopupText").innerHTML = "Select an already randomized ROM as base to start your Plando, or a Plando ROM to continue working on it";
+    document.getElementById("solverPopupText").innerHTML = "Select an already randomized ROM as base to start your Plando<br/>or a Plando ROM to continue working on it";
   } else {
-    document.getElementById("solverPopupText").innerHTML = "Select your randomized ROM to solve, or none for seed less mode";
+    document.getElementById("solverPopupText").innerHTML = "Select your randomized ROM to solve<br/>or none for seed less mode";
   }
 
   // display popup
@@ -751,7 +758,7 @@ function initSolver() {
 }
 
 function clickLoc(elem) {
-  if(loaded == false || webServInProgress == true) {
+  if(loaded == false || webServInProgress == true || init == false) {
     return;
   }
 
@@ -819,12 +826,8 @@ function hideItemPopup() {
   document.getElementById("itemPopup").style.display = "none";
 }
 
-function hideSavePopup() {
-  document.getElementById("savePopup").style.display = "none";
-}
-
 function deleteLoc(isPlando) {
-  if(loaded == false || webServInProgress == true) {
+  if(loaded == false || webServInProgress == true || init == false) {
     return;
   }
   if(isPlando == true && ! isActive("repeatPlando")) {
@@ -861,7 +864,7 @@ function resetLocsInfo() {
 }
 
 function clearLocs(isPlando) {
-  if(loaded == false || webServInProgress == true) {
+  if(loaded == false || webServInProgress == true || init == false) {
     return;
   }
   if(isPlando == true && ! isActive("binPlando")) {

@@ -279,3 +279,5 @@ find ~/web2py/applications/solver/static -xtype l -exec rm -f {} \;
 [ -L ~/web2py/applications/solver/views/solver_web/t_main.html ] || ln -s ~/RandomMetroidSolver/web/views/t_main.html ~/web2py/applications/solver/views/solver_web/t_main.html
 [ -L ~/web2py/applications/solver/views/solver_web/t_style.html ] || ln -s ~/RandomMetroidSolver/web/views/t_style.html ~/web2py/applications/solver/views/solver_web/t_style.html
 [ -L ~/web2py/applications/solver/views/solver_web/plando.html ] || ln -s ~/RandomMetroidSolver/web/views/plando.html ~/web2py/applications/solver/views/solver_web/plando.html
+
+[ -L ~/web2py/applications/solver/static/images/fast_forward.svg ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/fast_forward.svg ~/web2py/applications/solver/static/images/fast_forward.svg

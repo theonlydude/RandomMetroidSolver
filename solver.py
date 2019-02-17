@@ -34,6 +34,9 @@ class Conf:
     itemsForbidden = []
 
 class SolverState(object):
+    def __init__(self, debug=False):
+        self.debug = debug
+
     def fromSolver(self, solver):
         self.state = {}
         # string
@@ -199,8 +202,9 @@ class SolverState(object):
                 if "comeBack" in loc:
                     ret[locName]["comeBack"] = loc["comeBack"]
                 # for debug purpose
-                #if "path" in loc:
-                #    ret[locName]["path"] = [a.Name for a in loc["path"]]
+                if self.debug == True:
+                    if "path" in loc:
+                        ret[locName]["path"] = [a.Name for a in loc["path"]]
         return ret
 
     def getRemainLocationsWeb(self, locations):
@@ -285,7 +289,7 @@ class CommonSolver(object):
             print("ROM {} majors: {} area: {} boss: {} patches: {}".format(rom, self.majorsSplit, self.areaRando, self.bossRando, self.patches))
 
             (self.areaTransitions, self.bossTransitions) = self.romLoader.getTransitions()
-            if interactive == True:
+            if interactive == True and self.debug == False:
                 # in interactive area mode we build the graph as we play along
                 if self.areaRando == True and self.bossRando == True:
                     self.curGraphTransitions = []
@@ -392,6 +396,7 @@ class CommonSolver(object):
 class InteractiveSolver(CommonSolver):
     def __init__(self, output):
         self.checkDuplicateMajor = False
+        self.vcr = None
         self.log = log.get('Solver')
 
         self.outputFileName = output
@@ -418,12 +423,13 @@ class InteractiveSolver(CommonSolver):
         return web2Internal
 
     def dumpState(self):
-        state = SolverState()
+        state = SolverState(self.debug)
         state.fromSolver(self)
         state.toJson(self.outputFileName)
 
-    def initialize(self, mode, rom, presetFileName, magic):
+    def initialize(self, mode, rom, presetFileName, magic, debug):
         # load rom and preset, return first state
+        self.debug = debug
         self.mode = mode
         if self.mode != "seedless":
             self.seed = os.path.basename(os.path.splitext(rom)[0])+'.sfc'
@@ -439,7 +445,8 @@ class InteractiveSolver(CommonSolver):
 
         self.clearItems()
 
-        if self.mode == 'plando':
+        # in debug mode don't load plando locs/transitions
+        if self.mode == 'plando' and self.debug == False:
             if self.areaRando == True:
                 plandoTrans = self.loadPlandoTransitions()
                 if len(plandoTrans) > 0:
@@ -454,6 +461,7 @@ class InteractiveSolver(CommonSolver):
         self.dumpState()
 
     def iterate(self, stateJson, scope, action, params):
+        self.debug = params["debug"]
         self.smbm = SMBoolManager()
 
         state = SolverState()
@@ -479,7 +487,7 @@ class InteractiveSolver(CommonSolver):
                         self.pickItemAt(params['loc'])
                 elif action == 'remove':
                     # remove last collected item
-                    self.cancelLastItem()
+                    self.cancelLastItems(params['count'])
                 elif action == 'replace':
                     self.replaceItemAt(params['loc'], params['item'])
         elif scope == 'area':
@@ -627,30 +635,30 @@ class InteractiveSolver(CommonSolver):
         if isCount == True or count == 1:
             self.smbm.removeItem(oldItemName)
 
-    def cancelLastItem(self):
-        # loc
-        if len(self.visitedLocations) == 0:
-            return
+    def cancelLastItems(self, count):
+        for _ in range(count):
+            if len(self.visitedLocations) == 0:
+                return
 
-        loc = self.visitedLocations.pop()
-        self.majorLocations.append(loc)
+            loc = self.visitedLocations.pop()
+            self.majorLocations.append(loc)
 
-        # pickup func
-        if 'Unpickup' in loc:
-            loc['Unpickup']()
+            # pickup func
+            if 'Unpickup' in loc:
+                loc['Unpickup']()
 
-        # access point
-        if len(self.visitedLocations) == 0:
-            self.lastLoc = "Landing Site"
-        else:
-            self.lastLoc = self.visitedLocations[-1]["accessPoint"]
+            # access point
+            if len(self.visitedLocations) == 0:
+                self.lastLoc = "Landing Site"
+            else:
+                self.lastLoc = self.visitedLocations[-1]["accessPoint"]
 
-        # item
-        item = loc["itemName"]
-        if item != self.collectedItems[-1]:
-            raise Exception("Item of last collected loc {}: {} is different from last collected item: {}".format(loc["Name"], item, self.collectedItems[-1]))
-        self.smbm.removeItem(item)
-        self.collectedItems.pop()
+            # item
+            item = loc["itemName"]
+            if item != self.collectedItems[-1]:
+                raise Exception("Item of last collected loc {}: {} is different from last collected item: {}".format(loc["Name"], item, self.collectedItems[-1]))
+            self.smbm.removeItem(item)
+            self.collectedItems.pop()
 
     def clearItems(self, reload=False):
         self.collectedItems = []
@@ -1400,7 +1408,7 @@ def interactiveSolver(args):
             sys.exit(1)
 
         solver = InteractiveSolver(args.output)
-        solver.initialize(args.mode, args.romFileName, args.presetFileName, magic=args.raceMagic)
+        solver.initialize(args.mode, args.romFileName, args.presetFileName, magic=args.raceMagic, debug=args.vcr)
     else:
         # iterate
         params = {}
@@ -1419,6 +1427,8 @@ def interactiveSolver(args):
                         print("Missing item parameter when using action add in plando/suitless mode")
                         sys.exit(1)
                 params = {'loc': args.loc, 'item': args.item}
+            elif args.action == "remove":
+                params = {'count': args.count}
         elif args.scope == 'area':
             if args.state == None or args.action == None or args.output == None:
                 print("Missing state/action/output parameter")
@@ -1428,6 +1438,7 @@ def interactiveSolver(args):
                     print("Missing start or end point parameter when using action add for item")
                     sys.exit(1)
                 params = {'startPoint': args.startPoint, 'endPoint': args.endPoint}
+        params["debug"] = args.vcr
 
         solver = InteractiveSolver(args.output)
         solver.iterate(args.state, args.scope, args.action, params)
@@ -1485,7 +1496,7 @@ if __name__ == "__main__":
     parser.add_argument('--displayGeneratedPath', '-g', help="display the generated path (spoilers!)",
                         dest='displayGeneratedPath', action='store_true')
     parser.add_argument('--race', help="Race mode magic number", dest='raceMagic', type=int)
-    parser.add_argument('--vcr', help="Generate VCR output file", dest='vcr', action='store_true')
+    parser.add_argument('--vcr', help="Generate VCR output file (in isolver it means debug mode: load all the transitions/add path info for locs)", dest='vcr', action='store_true')
     # standard/interactive, web site
     parser.add_argument('--output', '-o', help="When called from the website, contains the result of the solver",
                         dest='output', nargs='?', default=None)
@@ -1509,6 +1520,8 @@ if __name__ == "__main__":
                         dest="mode", nargs="?", default=None, choices=['standard', 'seedless', 'plando'])
     parser.add_argument('--scope', help="Scope for the action: common/area/item (used in interactive mode)",
                         dest="scope", nargs="?", default=None, choices=['common', 'area', 'item'])
+    parser.add_argument('--count', help="Number of item rollback (used in interactive mode)",
+                        dest="count", type=int)
 
     args = parser.parse_args()
 
@@ -1518,6 +1531,11 @@ if __name__ == "__main__":
     if args.raceMagic != None:
         if args.raceMagic <= 0 or args.raceMagic >= 0x10000:
             print "Invalid magic"
+            sys.exit(-1)
+
+    if args.count != None:
+        if args.count < 1 or args.count > 0x80:
+            print "Invalid count"
             sys.exit(-1)
 
     log.init(args.debug)

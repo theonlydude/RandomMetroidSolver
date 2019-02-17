@@ -1140,6 +1140,7 @@ class Randomizer(object):
     # we can put a progression item
     def rollback(self):
         self.log.debug("rollback BEGIN: {}".format(len(self.currentItems)))
+        nItemsAtStart = len(self.currentItems)
         nStatesAtStart = len(self.states)
         self.initRollback()
         i = 0
@@ -1169,12 +1170,11 @@ class Randomizer(object):
             self.updateRollbackItemsTried(itemLoc, i)
             state.apply(self)
 
-            rollbackCount = nStatesAtStart - len(self.states) - 1
-            sys.stdout.write('<'*(rollbackCount))
+            sys.stdout.write('<'*(nStatesAtStart - len(self.states) - 1))
             sys.stdout.flush()
 
             if self.vcr != None:
-                self.vcr.addRollback(rollbackCount)
+                self.vcr.addRollback(nItemsAtStart - len(self.currentItems))
 
         self.log.debug("rollback END: {}".format(len(self.currentItems)))
 

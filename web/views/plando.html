@@ -93,6 +93,9 @@
     padding: 0.5%;
     border: 2px solid gray;
 }
+.gotoAction {
+    width: 4em;
+}
 </style>
 
 <script type="text/javascript">
@@ -276,6 +279,8 @@ function onloadHook() {
           vcrData = JSON.parse(jsonStr);
           gotoStart(true);
           hidePlandoButtons();
+
+          document.getElementById("gotoAction").setAttribute("max", vcrData.length);
       }
 
       reader.readAsText(file);
@@ -369,6 +374,8 @@ function activateVCRButtons(index, len) {
       $("#"+nextElems[i]).removeClass("greyed");
     }
   }
+  // goto X action button is never greyed
+  $("#goto").removeClass("greyed");
 }
 
 function gotoStart(force=false) {
@@ -496,7 +503,42 @@ function gotoEnd() {
     return;
   }
 
-  while(vcrIndex < vcrData.length) {
+  pushActions(vcrData.length - vcrIndex);
+}
+
+function gotoX() {
+  if(loaded == false || webServInProgress == true) {
+    return;
+  }
+
+  if(isDesactivated("goto")) {
+    return;
+  }
+
+  var gotoAction = document.getElementById("gotoAction").value;
+
+  if(gotoAction > vcrData.length) {
+    alert("Action "+gotoAction+" not found, only "+vcrData.length+" actions available");
+    return;
+  }
+
+  if(ajaxChainedActions.length > 0) {
+    alert("Can't move to action "+ gotoAction +" there's already chained WS actions in progress");
+    return;
+  }
+
+  // reset to begining
+  ajaxChainedActions.push({action: "clear", scope: "item"})
+  vcrIndex = 0;
+
+  // then iterate x actions
+  pushActions(gotoAction);
+}
+
+function pushActions(len) {
+  var endAction = vcrIndex + len;
+
+  while(vcrIndex < endAction) {
     var nextAction = vcrData[vcrIndex];
 
     if(nextAction["type"] == "location") {
@@ -516,6 +558,7 @@ function gotoEnd() {
 
   loadNextAction();
   ajaxCallChained();
+
 }
 
 function isDesactivated(elemId) {
@@ -586,6 +629,12 @@ function isDesactivated(elemId) {
 	</td>
 	<td>
 	  <div id="end" class="popupButton greyed"><img src="/solver/static/images/fast_forward.svg" alt="end" onclick="gotoEnd()" data-toggle="tooltip" title="Apply all actions" data-placement="bottom" data-container="body" data-html="true"></div>
+	</td>
+	<td>
+	  <input name="gotoAction" id="gotoAction" type="number" value="1" min="1" max="1024" step="1" class="gotoAction">
+	</td>
+	<td>
+	  <div id="goto" class="popupButton greyed"><img src="/solver/static/images/right_arrow.svg" alt="goto" onclick="gotoX()" data-toggle="tooltip" title="Goto X actions from start" data-placement="bottom" data-container="body" data-html="true"></div>
 	</td>
       </tr>
       <tr><td colspan=3 class="blankLastRow"></td></tr>

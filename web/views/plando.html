@@ -236,6 +236,7 @@ function dragElement(elmnt, headerId) {
 var debug = false;
 var vcrData = [];
 var vcrIndex = 0;
+
 function onloadHook() {
   var url = window.location.pathname;
   if(url.includes("debug")) {
@@ -402,13 +403,37 @@ function previousAction() {
     var nextActionType = nextAction["type"];
 
     if(nextActionType == "rollback") {
-      alert("TODO::implement me");
+      if(ajaxChainedActions.length > 0) {
+        alert("Can't rollback when there's already chained WS actions in progress");
+      }
+
+      var count = nextAction["count"];
+      var curActionIndex = vcrIndex-2;
+      console.log("rollback "+count+" from "+curActionIndex);
+      for(var i=1; i<=count; i++) {
+        console.log("rollback action: "+i);
+        var prevAction = vcrData[curActionIndex];
+        while(prevAction["type"] == "rollback") {
+           console.log("rollback in a rollback: "+prevAction["count"]);
+           curActionIndex -= prevAction["count"] + 1; // +1 because we don't count the rollback action
+           prevAction = vcrData[curActionIndex];
+        }
+
+        var locISolver = prevAction["loc"];
+        locISolver.replace(/[ ,()-]/g, '');
+
+        ajaxChainedActions.push({action: "add", scope: "item", locName: locISolver, itemName: prevAction["item"]})
+        console.log("pushed action: add/item/"+locISolver+"/"+prevAction["item"]);
+
+        curActionIndex -= 1;
+      }
+
+      ajaxCallChained();
     } else if(nextActionType == "location") {
       ajaxCall({action: "remove", scope: "item"}, "upload");
-
-      vcrIndex -= 1;
-      loadNextAction();
     }
+    vcrIndex -= 1;
+    loadNextAction();
   }
 }
 
@@ -458,11 +483,6 @@ function gotoEnd() {
   }
 
   alert("TODO::implement me");
-}
-
-function ajaxCallChained() {
-  // to call several ws, one after the other
-
 }
 
 function isDesactivated(elemId) {

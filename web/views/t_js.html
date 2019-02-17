@@ -149,8 +149,13 @@ function stopAnimation(elem) {
 //-----------------------------------------------------------
 // COMMON
 
+var ajaxChainedActions = [];
+
 function ajaxFailJSON(jqXHR, textStatus) {
   webServInProgress = false;
+
+  // if chained actions were planned, cancel them
+  ajaxChainedActions = [];
 
   console.log("error ["+jqXHR.responseJSON+"] ["+jqXHR.responseText+"] ["+textStatus+"]");
 
@@ -182,6 +187,27 @@ function ajaxCall(dataDict, msg, okFunc=ajaxOkGet) {
     request.fail(ajaxFailJSON);
 }
 
+function ajaxCallChained() {
+  // to call several ws, one after the other
+
+  console.log("ajaxCallChained with " + ajaxChainedActions.length + " actions");
+
+  ajaxCall(ajaxChainedActions.pop(), "upload", ajaxOkChained);
+}
+
+function ajaxOkChained(jsonData) {
+  // hard coded for now, as it's the only one we use in the tracker
+  ajaxOkGet(jsonData, true);
+
+  if(ajaxChainedActions.length > 0) {
+    console.log("ajaxOkChained: " + ajaxChainedActions.length + " actions remaining");
+    ajaxCall(ajaxChainedActions.pop(), "upload", ajaxOkChained);
+  } else {
+    console.log("ajaxOkChained: no actions remaining");
+    webServInProgress = false;
+  }
+}
+
 function setWSIcon(icon) {
   var names = ["checkmark", "warning", "download", "upload", "refresh"];
   for(var i=0; i<names.length; i++) {
@@ -193,8 +219,10 @@ function setWSIcon(icon) {
   }
 }
 
-function ajaxOkGet(jsonData) {
-  webServInProgress = false;
+function ajaxOkGet(jsonData, chained=false) {
+  if(chained == false) {
+    webServInProgress = false;
+  }
 
   // get dicts availableLocations and visitedLocations
   console.log("json received: [ "+jsonData+" ]");

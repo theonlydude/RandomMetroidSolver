@@ -254,9 +254,12 @@ if __name__ == "__main__":
         args.hideItems = bool(random.getrandbits(1))
 
     if args.morphPlacement == 'random':
-        if (args.suitsRestriction == True and args.area == True) or (args.majorsSplit == 'Chozo' and args.area == False):
+        if (args.suitsRestriction == True and args.area == True) or args.majorsSplit == 'Chozo':
             morphPlacements.remove('late')
         args.morphPlacement = morphPlacements[random.randint(0, len(morphPlacements)-1)]
+    # late + chozo will always stuck
+    if args.majorsSplit == 'Chozo' and args.morphPlacement == "late":
+        args.morphPlacement = "normal"
     logger.debug("morphPlacement: {}".format(args.morphPlacement))
 
     if args.strictMinors == 'random':

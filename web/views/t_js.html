@@ -194,7 +194,12 @@ function ajaxCallChained() {
 
   console.log("ajaxCallChained with " + ajaxChainedActions.length + " actions");
 
-  ajaxCall(ajaxChainedActions.pop(), "upload", ajaxOkChained);
+  var nextAction = ajaxChainedActions.pop();
+  if("idxFunc" in nextAction) {
+    var funcName = nextAction["idxFunc"];
+    window[funcName](true);
+  }
+  ajaxCall(nextAction, "upload", ajaxOkChained);
 }
 
 function ajaxOkChained(jsonData) {
@@ -203,7 +208,12 @@ function ajaxOkChained(jsonData) {
 
   if(ajaxChainedActions.length > 0) {
     console.log("ajaxOkChained: " + ajaxChainedActions.length + " actions remaining");
-    ajaxCall(ajaxChainedActions.pop(), "upload", ajaxOkChained);
+    var nextAction = ajaxChainedActions.pop();
+    if("idxFunc" in nextAction) {
+      var funcName = nextAction["idxFunc"];
+      window[funcName](true);
+    }
+    ajaxCall(nextAction, "upload", ajaxOkChained);
   } else {
     console.log("ajaxOkChained: no actions remaining");
     webServInProgress = false;

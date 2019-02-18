@@ -274,7 +274,11 @@ function hideDebugPopup() {
   document.getElementById("debugPopup").style.display = "none";
 }
 
-function loadNextAction() {
+function loadNextAction(chained=false) {
+  if(chained == true) {
+    vcrIndex += 1;
+  }
+
   // next action
   if(vcrIndex >= vcrData.length) {
     var msg = "the end";
@@ -502,20 +506,21 @@ function gotoX() {
 
 function pushActions(len) {
   var endAction = vcrIndex + len;
+  var tmpIndex = vcrIndex;
 
-  while(vcrIndex < endAction) {
-    var nextAction = vcrData[vcrIndex];
+  while(tmpIndex < endAction) {
+    var nextAction = vcrData[tmpIndex];
 
     if(nextAction["type"] == "location") {
       var locISolver = nextAction["loc"];
       locISolver.replace(/[ ,()-]/g, '');
-      ajaxChainedActions.push({action: "add", scope: "item", locName: locISolver, itemName: nextAction["item"]})
+      ajaxChainedActions.push({action: "add", scope: "item", locName: locISolver, itemName: nextAction["item"], idxFunc: "loadNextAction"})
     } else {
       var count = nextAction["count"];
-      ajaxChainedActions.push({action: "remove", scope: "item", count: nextAction["count"]});
+      ajaxChainedActions.push({action: "remove", scope: "item", count: nextAction["count"], idxFunc: "loadNextAction"});
     }
 
-    vcrIndex += 1;
+    tmpIndex += 1;
   }
 
   // the chained actions are executed from the end of the array
@@ -523,7 +528,6 @@ function pushActions(len) {
 
   loadNextAction();
   ajaxCallChained();
-
 }
 
 function isDesactivated(elemId) {

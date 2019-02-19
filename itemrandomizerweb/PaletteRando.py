@@ -31,78 +31,78 @@ import logging
 
 #Information about compressed palettes for main areas:
 #
-#$00 normal Crateria: 				C2AD7C	0x212D7C  
-#$01 red Cratera:					C2AE5D 	0x212E5D
-#$02 old Crateria: 					C2AF43	0x212F43
-#$03 old Crateria:					C2B015  0x213015
-#$04 Wrecked Ship: 					C2B0E7	0x2130E7
-#$05 Wrecked Ship:					C2B1A6  0x2131A6
-#$06 Green Brinstar: 				C2B264	0x213264
-#$07 Red Brinstar: 					C2B35F	0x21335F
-#$08 Red Brinstar:					C2B447	0x213447
-#$09 Norfair: 						C2B5E4	0x2135E4
-#$0A Norfair:						C2B6BB	0x2136BB
-#$0B Maridia: 						C2B83C	0x21383C
-#$0C Maridia:						C2B92E	0x21392E
-#$0D Tourian: 						C2BAED	0x213AED
-#$0E Tourian:						C2BBC1	0x213BC1
-#$0F Ceres: 						C2C104	0x214104
-#$10 Ceres:							C2C1E3	0x2141E3
-#$11 Mode 7 Ceres:					C2C104	0x214104
-#$12 Mode 7 Ceres:					C2C1E3	0x2141E3
-#$13 Mode 7 Ridley:					C2C104	0x214104
-#$14 Mode 7 Ridley:					C2C1E3	0x2141E3
-#$15 Save/G4 [0]: 					C2BC9C	0x213C9C
-#$16 Save/G4 [1]: 					C2BD7B	0x213D7B
-#$17 Save/G4 [2]: 					C2BE58	0x213E58
-#$18 Save/G4 [3]: 					C2BF3D	0x213F3D
-#$19 Save/G4 [4]: 					C2C021	0x214021
-#$1A Kraid room:					C2B510	0x213510
-#$1B Crocomire room:				C2B798	0x213798
-#$1C Draygon room:					C2BA2C	0x213A2C
+#$00 normal Crateria:                 C2AD7C    0x212D7C  
+#$01 red Cratera:                    C2AE5D     0x212E5D
+#$02 old Crateria:                     C2AF43    0x212F43
+#$03 old Crateria:                    C2B015  0x213015
+#$04 Wrecked Ship:                     C2B0E7    0x2130E7
+#$05 Wrecked Ship:                    C2B1A6  0x2131A6
+#$06 Green Brinstar:                 C2B264    0x213264
+#$07 Red Brinstar:                     C2B35F    0x21335F
+#$08 Red Brinstar:                    C2B447    0x213447
+#$09 Norfair:                         C2B5E4    0x2135E4
+#$0A Norfair:                        C2B6BB    0x2136BB
+#$0B Maridia:                         C2B83C    0x21383C
+#$0C Maridia:                        C2B92E    0x21392E
+#$0D Tourian:                         C2BAED    0x213AED
+#$0E Tourian:                        C2BBC1    0x213BC1
+#$0F Ceres:                         C2C104    0x214104
+#$10 Ceres:                            C2C1E3    0x2141E3
+#$11 Mode 7 Ceres:                    C2C104    0x214104
+#$12 Mode 7 Ceres:                    C2C1E3    0x2141E3
+#$13 Mode 7 Ridley:                    C2C104    0x214104
+#$14 Mode 7 Ridley:                    C2C1E3    0x2141E3
+#$15 Save/G4 [0]:                     C2BC9C    0x213C9C
+#$16 Save/G4 [1]:                     C2BD7B    0x213D7B
+#$17 Save/G4 [2]:                     C2BE58    0x213E58
+#$18 Save/G4 [3]:                     C2BF3D    0x213F3D
+#$19 Save/G4 [4]:                     C2C021    0x214021
+#$1A Kraid room:                    C2B510    0x213510
+#$1B Crocomire room:                C2B798    0x213798
+#$1C Draygon room:                    C2BA2C    0x213A2C
 
 
 #Pointer Locations:
 
-#$00	0x7E6A8 = 7C AD C2   
-#$01	0x7E6B1 = 5D AE C2
-#$02	0x7E6BA = 43 AF C2
-#$03	0x7E6C3 = 15 B0 C2
-#$04	0x7E6CC = E7 B0 C2
-#$05	0x7E6D5 = A6 B1 C2
-#$06	0x7E6DE = 64 B2 C2
-#$07	0x7E6E7 = 5F B3 C2
-#$08	0x7E6F0 = 47 B4 C2
-#$09	0x7E6F9 = E4 B5 C2
-#$0A	0x7E702 = BB B6 C2
-#$0B	0x7E70B = 3C B8 C2
-#$0C	0x7E714 = 2E B9 C2
-#$0D	0x7E71D = ED BA C2
-#$0E	0x7E726 = C1 BB C2
-#$0F	0x7E72F = 04 C1 C2
-#$10	0x7E738 = E3 C1 C2
+#$00    0x7E6A8 = 7C AD C2   
+#$01    0x7E6B1 = 5D AE C2
+#$02    0x7E6BA = 43 AF C2
+#$03    0x7E6C3 = 15 B0 C2
+#$04    0x7E6CC = E7 B0 C2
+#$05    0x7E6D5 = A6 B1 C2
+#$06    0x7E6DE = 64 B2 C2
+#$07    0x7E6E7 = 5F B3 C2
+#$08    0x7E6F0 = 47 B4 C2
+#$09    0x7E6F9 = E4 B5 C2
+#$0A    0x7E702 = BB B6 C2
+#$0B    0x7E70B = 3C B8 C2
+#$0C    0x7E714 = 2E B9 C2
+#$0D    0x7E71D = ED BA C2
+#$0E    0x7E726 = C1 BB C2
+#$0F    0x7E72F = 04 C1 C2
+#$10    0x7E738 = E3 C1 C2
 
 #Mode 7 stuff, probably best to leave this alone for now
-#$11	0x7E741 = 04 C1 C2
-#$12	0x7E74A = E3 C1 C2
-#$13	0x7E753 = 04 C1 C2
-#$14	0x7E75C = E3 C1 C2
+#$11    0x7E741 = 04 C1 C2
+#$12    0x7E74A = E3 C1 C2
+#$13    0x7E753 = 04 C1 C2
+#$14    0x7E75C = E3 C1 C2
 
 #Back to normal room palettes
-#$15	0x7E765 = 9C BC C2
-#$16	0x7E76E = 7B BD C2
-#$17	0x7E777 = 58 BE C2
-#$18	0x7E780 = 3D BF C2
-#$19	0x7E789 = 21 C0 C2
-#$1A	0x7E792 = 10 B5 C2
-#$1B	0x7E79B = 98 B7 C2
-#$1C	0x7E7A4 = 2C BA C2
+#$15    0x7E765 = 9C BC C2
+#$16    0x7E76E = 7B BD C2
+#$17    0x7E777 = 58 BE C2
+#$18    0x7E780 = 3D BF C2
+#$19    0x7E789 = 21 C0 C2
+#$1A    0x7E792 = 10 B5 C2
+#$1B    0x7E79B = 98 B7 C2
+#$1C    0x7E7A4 = 2C BA C2
 
 
 #Inserting palettes around 0x2FE050
 #
 #Decompressed palette info:
-#		2					+	26							+ 	2			+	2			=	32 bytes used per palette (hex-size = 0x20)   ||||| 32 * 8 = 256 bytes per palette set
+#        2                    +    26                            +     2            +    2            =    32 bytes used per palette (hex-size = 0x20)   ||||| 32 * 8 = 256 bytes per palette set
 # Transparency Color | 13 colors used in tileset palette | default white | default black
 
 #boss_tileset_palettes = [0x213510,0x213798,0x213A2C,0x213BC1]
@@ -251,10 +251,9 @@ boss_degree_list=[]
 #other_palette_offsets = [0x0D9400,0x0D9520,0x0D9540,0x0D9560,0x0D9580,0x0D95A0,0x0D95C0,0x0D95E0,0x0D9600,0x0D9620,0x0D9640,0x0D9660,0x0D9680,0x0D96A0,0x0D9780,0x0D97A0,0x0D97C0,0x0D97E0,0x0D9800,0x0D9820,0x0D9840,0x0D9860,0x0D9880,0x0D98A0,0x0D98C0,0x0D98E0,0x0D9900,0x0D9920,0x0D9940,0x0D9960,0x0D9980,0x0D99A0,0x0D99C0,0x0D99E0,0x0D9A00,0x0D9A20,0x0D9A40,0x0D9A60,0x0D9A80,0x0D9AA0,0x0D9AC0,0x0D9AE0,0x0D9B00,0x0D9B20,0x0D9B40,0x0D9B60,0x0D9B80,0x0D9BA0,0x0D9BC0,0x0D9BE0,0x0D9C00,0x0D9C20,0x0D9C40,0x0D9C60,0x0D9C80,0x0D9CA0,0x0D9CC0,0x0D9CE0,0x0D9D00,0x0D9D20,0x0D9D40,0x0D9D60,0x0D9D80,0x0D9DA0,0x0D9DC0,0x0D9DE0,0x0D9E00,0x0D9E20,0x0D9E40,0x0D9E60,0x0D9E80,0x0D9EA0,0x0D9EC0,0x0D9EE0,0x0D9F00,0x0D9F20,0x0D9F40,0x0D9F60,0x0D9F80,0x0D9FA0,0x0D9FC0,0x0D9FE0,0x0DA000,0x0DA020,0x0DA040,0x0DA060,0x0DA080,0x0DA0A0,0x0DA0C0,0x0DA0E0,0x0DA100]
 
 
-filename = sys.argv[1]
 
 #########################
-#		SETTINGS		#
+#        SETTINGS        #
 #########################
 
 #set to True if all suits should get a separate hue-shift degree
@@ -317,585 +316,587 @@ def wait_timeout(proc, seconds):
             proc.kill()
         time.sleep(interval)
     return
-		
+        
 def snes_to_pc(snesaddress):
-	pcaddress=((snesaddress&0x7F0000)>>1|(snesaddress&0x7FFF))
-	return pcaddress
-	
+    pcaddress=((snesaddress&0x7F0000)>>1|(snesaddress&0x7FFF))
+    return pcaddress
+    
 def pc_to_snes(pcaddress):
-	snesaddress=(((pcaddress<<1)&0x7F0000)|(pcaddress&0x7FFF)|0x8000)|0x800000
-	return snesaddress
+    snesaddress=(((pcaddress<<1)&0x7F0000)|(pcaddress&0x7FFF)|0x8000)|0x800000
+    return snesaddress
 
 def adjust_hue_degree(hsl_color, degree):
 
-	hue = hsl_color[0] *360
-	hue_adj = (hue +degree) % 360
-	if debug: print("Original hue: ",hue)
-	if debug: print("Adjusted hue:", hue_adj)
-	if debug: print("Degree:", degree)
-	
-	return hue_adj
-	
+    hue = hsl_color[0] *360
+    hue_adj = (hue +degree) % 360
+    if debug: print("Original hue: ",hue)
+    if debug: print("Adjusted hue:", hue_adj)
+    if debug: print("Degree:", degree)
+    
+    return hue_adj
+    
 def adjust_sat(hsl_color, adjustment):
-	
-	sat = hsl_color[1]*100
-	sat_adj = (sat+ adjustment) % 100
-	if debug: print("Original sat: ",sat)
-	if debug: print("Adjusted sat:", sat_adj)
-	if debug: print("Adjustment", adjustment)
-	
-	return sat_adj
+    
+    sat = hsl_color[1]*100
+    sat_adj = (sat+ adjustment) % 100
+    if debug: print("Original sat: ",sat)
+    if debug: print("Adjusted sat:", sat_adj)
+    if debug: print("Adjustment", adjustment)
+    
+    return sat_adj
 
 def adjust_light(hsl_color, adjustment):
-	
-	lit = hsl_color[2]*100
-	lit_adj = (lit + adjustment) % 100
-	if debug: print("Original lit: ",lit)
-	if debug: print("Adjusted lit:", lit_adj)
-	if debug: print("Adjustment", adjustment)
-	
-	return lit_adj
+    
+    lit = hsl_color[2]*100
+    lit_adj = (lit + adjustment) % 100
+    if debug: print("Original lit: ",lit)
+    if debug: print("Adjusted lit:", lit_adj)
+    if debug: print("Adjustment", adjustment)
+    
+    return lit_adj
 
 def RGB_24_to_15 (color_tuple):
 
-	R_adj = int(color_tuple[0])//8
-	G_adj = int(color_tuple[1])//8
-	B_adj = int(color_tuple[2])//8
-	
-	c = B_adj * 1024 + G_adj * 32 + R_adj
-	return (c)
-	
+    R_adj = int(color_tuple[0])//8
+    G_adj = int(color_tuple[1])//8
+    B_adj = int(color_tuple[2])//8
+    
+    c = B_adj * 1024 + G_adj * 32 + R_adj
+    return (c)
+    
 def RGB_15_to_24 (SNESColor):
 
-	R = ((SNESColor		) % 32) * 8
-	G = ((SNESColor//32	) % 32) * 8
-	B = ((SNESColor//1024) % 32) * 8
+    R = ((SNESColor        ) % 32) * 8
+    G = ((SNESColor//32    ) % 32) * 8
+    B = ((SNESColor//1024) % 32) * 8
 
-	return (R,G,B)
-	
+    return (R,G,B)
+    
 def read_pointer(file,address,length):
 
-	file.seek(address)
-	read_bytes = file.read(length)
-	int_value_LE = int.from_bytes(read_bytes,'little')
-	
-	return int_value_LE
+    file.seek(address)
+    read_bytes = file.read(length)
+    int_value_LE = int.from_bytes(read_bytes,'little')
+    
+    return int_value_LE
 
 def write_pointer(file,address,value,length):
-	if os.path.exists(filename):
-		src = os.path.realpath(filename)
-	file = open(src, "r+b")
-	file.seek(address)
-	file.write(value.to_bytes(length, byteorder='little'))
-	return
+    if os.path.exists(filename):
+        src = os.path.realpath(filename)
+    file = open(src, "r+b")
+    file.seek(address)
+    file.write(value.to_bytes(length, byteorder='little'))
+    return
 
 #Only used for individual tileset degrees (required to adjust fx1 effects accordingly)
 #Insert two entries for [0,1,2,4,5,6,7,8]
 #[0 0 1 1 2 2 3 4 4 5 5 6 6 7 7 8 8 9 10 11 12 13] 14 15 16
 def generate_tileset_degrees():
-	count=-1
-	while (count < 16):
-		count = count+1
-		if count in (3,9,10,11,12,13,14,15,16):
-			degree = random.randint(0,max_degree)
-			degree_list.append(degree)
-		else:
-			degree = random.randint(0,max_degree)
-			degree_list.append(degree)
-			degree_list.append(degree)
-	return
+    count=-1
+    while (count < 16):
+        count = count+1
+        if count in (3,9,10,11,12,13,14,15,16):
+            degree = random.randint(0,max_degree)
+            degree_list.append(degree)
+        else:
+            degree = random.randint(0,max_degree)
+            degree_list.append(degree)
+            degree_list.append(degree)
+    return
 
 def generate_boss_degrees():
-	#[sporespawn,kraid,phantoon,botwoon,draygon,crocomire,bomb-torizo,gold-torizo,ridley,mbrain]
-	count=-1
-	while (count<10):
-		count = count+1
-		degree = random.randint(0,max_degree)
-		boss_degree_list.append(degree)
-	return
-	
+    #[sporespawn,kraid,phantoon,botwoon,draygon,crocomire,bomb-torizo,gold-torizo,ridley,mbrain]
+    count=-1
+    while (count<10):
+        count = count+1
+        degree = random.randint(0,max_degree)
+        boss_degree_list.append(degree)
+    return
+    
 def hue_shift_palette_lists(file,degree,address_list, size_list):
-	count=-1
-	for address in address_list:
-		count = count+1
-		for i in range(0,(size_list[count])+1):
-			read_address=address+(i*2)
-			file.seek(read_address)
-			
-			print("Fx1 address:",hex(address)," at offset: ", hex(i*2))
-			#Read 2 bytes at index i*2
-			read_bytes = file.read(2)
+    count=-1
+    for address in address_list:
+        count = count+1
+        for i in range(0,(size_list[count])+1):
+            read_address=address+(i*2)
+            file.seek(read_address)
+            
+            print("Fx1 address:",hex(address)," at offset: ", hex(i*2))
+            #Read 2 bytes at index i*2
+            read_bytes = file.read(2)
 
-			#Convert from LE to BE
-			int_value_LE = struct.unpack_from("<h", read_bytes)[0]
-		
-			#Convert 15bit RGB to 24bit RGB
-			rgb_value_24 = RGB_15_to_24(int_value_LE)
-		
-			#24bit RGB to HLS
-			hls_col = colorsys.rgb_to_hls(rgb_value_24[0]/255,rgb_value_24[1]/255,rgb_value_24[2]/255)
-		
-			#Generate new hue based on degree
-			new_hue = adjust_hue_degree(hls_col, degree)/360
-			
-			rgb_final = colorsys.hls_to_rgb(new_hue,hls_col[1],hls_col[2])
-		
-			#Colorspace is in [0...1] format during conversion and needs to be multiplied by 255
-			rgb_final = (int(rgb_final[0]*255),int(rgb_final[1]*255),int(rgb_final[2]*255))
+            #Convert from LE to BE
+            int_value_LE = struct.unpack_from("<h", read_bytes)[0]
+        
+            #Convert 15bit RGB to 24bit RGB
+            rgb_value_24 = RGB_15_to_24(int_value_LE)
+        
+            #24bit RGB to HLS
+            hls_col = colorsys.rgb_to_hls(rgb_value_24[0]/255,rgb_value_24[1]/255,rgb_value_24[2]/255)
+        
+            #Generate new hue based on degree
+            new_hue = adjust_hue_degree(hls_col, degree)/360
+            
+            rgb_final = colorsys.hls_to_rgb(new_hue,hls_col[1],hls_col[2])
+        
+            #Colorspace is in [0...1] format during conversion and needs to be multiplied by 255
+            rgb_final = (int(rgb_final[0]*255),int(rgb_final[1]*255),int(rgb_final[2]*255))
 
-			BE_hex_color = RGB_24_to_15(rgb_final)
+            BE_hex_color = RGB_24_to_15(rgb_final)
 
-			file.seek(read_address)
-			file.write(BE_hex_color.to_bytes(2, byteorder='little'))
-	return
-		
+            file.seek(read_address)
+            file.write(BE_hex_color.to_bytes(2, byteorder='little'))
+    return
+        
 
 def hue_shift_palette_single_offsets(file, offset_list, degree, address):
-	
-	#if green brinstar or crateria palette, shuffle blue door caps to also shuffle lower crateria color
-	if (address == 0x213264) or (address == 0x21335F): 
-		copy_offset_list = (offset_list+bluedoor_bytes)
-	else:
-		copy_offset_list = offset_list
-		
-	for offset in copy_offset_list:
-		#print("Offset: ",hex(offset))
-		file.seek(offset)
-		#Read 2byte color at offset
-		read_bytes = file.read(2)
-		if debug: print("read decomp palette offset:", hex(offset), " value:" , read_bytes )
-				
-		#Convert from LE to BE
-		int_value_LE = struct.unpack_from("<h", read_bytes)[0]
-				
-		#Convert 15bit RGB to 24bit RGB
-		rgb_value_24 = RGB_15_to_24(int_value_LE)
-					
-		if debug: print("24RGB: ",rgb_value_24)
-				
-		#24bit RGB to HLS
-		hls_col = colorsys.rgb_to_hls(rgb_value_24[0]/255,rgb_value_24[1]/255,rgb_value_24[2]/255)
-		
-		#Generate new hue based on degree
-		new_hue = adjust_hue_degree(hls_col, degree)/360
-		
-		rgb_final = colorsys.hls_to_rgb(new_hue,hls_col[1],hls_col[2])
-					
-		#Colorspace is in [0...1] format during conversion and needs to be multiplied by 255
-		rgb_final = (int(rgb_final[0]*255),int(rgb_final[1]*255),int(rgb_final[2]*255))
-					
-		if debug: print("New 24RGB", rgb_final)
-						
-		BE_hex_color = RGB_24_to_15(rgb_final)
-					
-		if debug: print("15bit BE_hex_color", hex(BE_hex_color))
-					
-		file.seek(offset)
-		file.write(BE_hex_color.to_bytes(2, byteorder='little'))
-		if debug: print("write decomp palette offset:", hex(offset), " value:" , BE_hex_color.to_bytes(2, byteorder='little') )
-	return
-	
-	
+    
+    #if green brinstar or crateria palette, shuffle blue door caps to also shuffle lower crateria color
+    if (address == 0x213264) or (address == 0x21335F): 
+        copy_offset_list = (offset_list+bluedoor_bytes)
+    else:
+        copy_offset_list = offset_list
+        
+    for offset in copy_offset_list:
+        #print("Offset: ",hex(offset))
+        file.seek(offset)
+        #Read 2byte color at offset
+        read_bytes = file.read(2)
+        if debug: print("read decomp palette offset:", hex(offset), " value:" , read_bytes )
+                
+        #Convert from LE to BE
+        int_value_LE = struct.unpack_from("<h", read_bytes)[0]
+                
+        #Convert 15bit RGB to 24bit RGB
+        rgb_value_24 = RGB_15_to_24(int_value_LE)
+                    
+        if debug: print("24RGB: ",rgb_value_24)
+                
+        #24bit RGB to HLS
+        hls_col = colorsys.rgb_to_hls(rgb_value_24[0]/255,rgb_value_24[1]/255,rgb_value_24[2]/255)
+        
+        #Generate new hue based on degree
+        new_hue = adjust_hue_degree(hls_col, degree)/360
+        
+        rgb_final = colorsys.hls_to_rgb(new_hue,hls_col[1],hls_col[2])
+                    
+        #Colorspace is in [0...1] format during conversion and needs to be multiplied by 255
+        rgb_final = (int(rgb_final[0]*255),int(rgb_final[1]*255),int(rgb_final[2]*255))
+                    
+        if debug: print("New 24RGB", rgb_final)
+                        
+        BE_hex_color = RGB_24_to_15(rgb_final)
+                    
+        if debug: print("15bit BE_hex_color", hex(BE_hex_color))
+                    
+        file.seek(offset)
+        file.write(BE_hex_color.to_bytes(2, byteorder='little'))
+        if debug: print("write decomp palette offset:", hex(offset), " value:" , BE_hex_color.to_bytes(2, byteorder='little') )
+    return
+    
+    
 
 #Function to shift palette hues by set degree for a palette with fixed size 0x0F
 def hue_shift_fixed_size_palette(file, base_address, degree,size):
-	if debug: print("Shifting suit palette at ", hex(base_address)," by degree ", degree)
-	
-	for i in range(0,size+1):
-		read_address=base_address+(i*2)
-		file.seek(read_address)
-		
-		#Read 2 bytes at index i*2
-		read_bytes = file.read(2)
+    if debug: print("Shifting suit palette at ", hex(base_address)," by degree ", degree)
+    
+    for i in range(0,size+1):
+        read_address=base_address+(i*2)
+        file.seek(read_address)
+        
+        #Read 2 bytes at index i*2
+        read_bytes = file.read(2)
 
-		#Convert from LE to BE
-		int_value_LE = struct.unpack_from("<h", read_bytes)[0]
-		
-		#Convert 15bit RGB to 24bit RGB
-		rgb_value_24 = RGB_15_to_24(int_value_LE)
-		
-		#24bit RGB to HLS
-		hls_col = colorsys.rgb_to_hls(rgb_value_24[0]/255,rgb_value_24[1]/255,rgb_value_24[2]/255)
-		
-		#Generate new hue based on degree
-		new_hue = adjust_hue_degree(hls_col, degree)/360
-			
-		rgb_final = colorsys.hls_to_rgb(new_hue,hls_col[1],hls_col[2])
-		
-		#Colorspace is in [0...1] format during conversion and needs to be multiplied by 255
-		rgb_final = (int(rgb_final[0]*255),int(rgb_final[1]*255),int(rgb_final[2]*255))
+        #Convert from LE to BE
+        int_value_LE = struct.unpack_from("<h", read_bytes)[0]
+        
+        #Convert 15bit RGB to 24bit RGB
+        rgb_value_24 = RGB_15_to_24(int_value_LE)
+        
+        #24bit RGB to HLS
+        hls_col = colorsys.rgb_to_hls(rgb_value_24[0]/255,rgb_value_24[1]/255,rgb_value_24[2]/255)
+        
+        #Generate new hue based on degree
+        new_hue = adjust_hue_degree(hls_col, degree)/360
+            
+        rgb_final = colorsys.hls_to_rgb(new_hue,hls_col[1],hls_col[2])
+        
+        #Colorspace is in [0...1] format during conversion and needs to be multiplied by 255
+        rgb_final = (int(rgb_final[0]*255),int(rgb_final[1]*255),int(rgb_final[2]*255))
 
-		BE_hex_color = RGB_24_to_15(rgb_final)
+        BE_hex_color = RGB_24_to_15(rgb_final)
 
-		file.seek(read_address)
-		file.write(BE_hex_color.to_bytes(2, byteorder='little'))
-	return
+        file.seek(read_address)
+        file.write(BE_hex_color.to_bytes(2, byteorder='little'))
+    return
 
 def hue_shift_tileset_palette(degree):
-	count=-1
-	for address in tileset_palette_offsets:
-	
-		count = count+1
-		if individual_tileset_shift:
-			degree = degree_list[count]
+    count=-1
+    for address in tileset_palette_offsets:
+    
+        count = count+1
+        if individual_tileset_shift:
+            degree = degree_list[count]
 
-		if debug:print("Count: ", hex(count))
-		print("Decompressing palette at ", hex(address), " by degree: ", degree)
-		p = subprocess.Popen([decomppath+"/decomp.exe", decomppath+"/"+filename, "decomppalette.bin", hex(address), "4", "0"])	
-		wait_timeout(p,0.5)
-			
-		#Check if decompression happened
-		if os.path.exists("./decomppalette.bin"):
-			src = os.path.realpath("./decomppalette.bin")
-		else:
-			print("No decompressed binary file found. Exiting.")
-			sys.exit(1)
-			
-		if debug: print("opening ", src)
-		file = open(src, "r+b")
-			
-		hue_shift_palette_single_offsets(file, palette_single_bytes, degree, address)
-		
-		#special case for mother brain room
-		if address == 0x213BC1:
-			temp_TLS_palette_subsets = [0xA0,0xC0,0xE0]
-		#and kraids room
-		elif address == 0x213510: 
-			temp_TLS_palette_subsets = [0x80,0xA0,0xC0]
-		#and draygons room
-		elif address == 0x213A2C:
-			temp_TLS_palette_subsets = [0x80,0xC0,0xE0]
-		else:
-			temp_TLS_palette_subsets = [0x80,0xA0,0xC0,0xE0]
-		
-		#skip 2-byte-pair at index 0 (this is the transparency color)
-		for subset in temp_TLS_palette_subsets:
-			for j in range(1,15):
-				#print("Reading at ", hex(subset+(j*2)))
-				file.seek(subset+(j*2))
-				#Read 2 bytes at index j*2
-				read_bytes = file.read(2)
-				if debug: print("read decomp palette index:", hex(subset+(j*2)), " value:" , read_bytes )
-				
-				#Convert from LE to BE
-				int_value_LE = struct.unpack_from("<h", read_bytes)[0]
-			
-				#Convert 15bit RGB to 24bit RGB
-				rgb_value_24 = RGB_15_to_24(int_value_LE)
-					
-				if debug: print("24RGB: ",rgb_value_24)
-				
-				#24bit RGB to HLS
-				hls_col = colorsys.rgb_to_hls(rgb_value_24[0]/255,rgb_value_24[1]/255,rgb_value_24[2]/255)
-	
-				#Generate new hue based on degree
-				new_hue = adjust_hue_degree(hls_col, degree)/360
-					
-				rgb_final = colorsys.hls_to_rgb(new_hue,hls_col[1],hls_col[2])
-					
-				#Colorspace is in [0...1] format during conversion and needs to be multiplied by 255
-				rgb_final = (int(rgb_final[0]*255),int(rgb_final[1]*255),int(rgb_final[2]*255))
-					
-				if debug: print("New 24RGB", rgb_final)
-				
-				BE_hex_color = RGB_24_to_15(rgb_final)
-					
-				if debug: print("15bit BE_hex_color", hex(BE_hex_color))
-					
-				file.seek(subset+(j*2))
-				file.write(BE_hex_color.to_bytes(2, byteorder='little'))
-				if debug: print("write decomp palette index:", hex(subset+(j*2)), " value:" , BE_hex_color.to_bytes(2, byteorder='little') )
-				
-			
-		#Close file access to allow for new decompression-process
-		file.close()
-		#practice rom free space 0x2F51C0 -> 0x2F7FFF
-		if practice_rom:
-			insert_address= 0x2F51C0 + (count*0x100)
-		else:
-			insert_address= 0x2FE050 + (count*0x100)
-			
-		pointers_to_insert.append(insert_address)
-		if debug: print("pointers_to_insert: ",pointers_to_insert)
-			
-		#Recompress palette and re-insert at offset
-		p = subprocess.Popen([recomppath+"/recomp.exe", recomppath+"/decomppalette.bin", recomppath+"/"+filename, hex(insert_address), "4", "0"])
-		wait_timeout(p,0.5)
-	return
-	
+        if debug:print("Count: ", hex(count))
+        print("Decompressing palette at ", hex(address), " by degree: ", degree)
+        p = subprocess.Popen([decomppath+"/decomp.exe", decomppath+"/"+filename, "decomppalette.bin", hex(address), "4", "0"])    
+        wait_timeout(p,0.5)
+            
+        #Check if decompression happened
+        if os.path.exists("./decomppalette.bin"):
+            src = os.path.realpath("./decomppalette.bin")
+        else:
+            print("No decompressed binary file found. Exiting.")
+            sys.exit(1)
+            
+        if debug: print("opening ", src)
+        file = open(src, "r+b")
+            
+        hue_shift_palette_single_offsets(file, palette_single_bytes, degree, address)
+        
+        #special case for mother brain room
+        if address == 0x213BC1:
+            temp_TLS_palette_subsets = [0xA0,0xC0,0xE0]
+        #and kraids room
+        elif address == 0x213510: 
+            temp_TLS_palette_subsets = [0x80,0xA0,0xC0]
+        #and draygons room
+        elif address == 0x213A2C:
+            temp_TLS_palette_subsets = [0x80,0xC0,0xE0]
+        else:
+            temp_TLS_palette_subsets = [0x80,0xA0,0xC0,0xE0]
+        
+        #skip 2-byte-pair at index 0 (this is the transparency color)
+        for subset in temp_TLS_palette_subsets:
+            for j in range(1,15):
+                #print("Reading at ", hex(subset+(j*2)))
+                file.seek(subset+(j*2))
+                #Read 2 bytes at index j*2
+                read_bytes = file.read(2)
+                if debug: print("read decomp palette index:", hex(subset+(j*2)), " value:" , read_bytes )
+                
+                #Convert from LE to BE
+                int_value_LE = struct.unpack_from("<h", read_bytes)[0]
+            
+                #Convert 15bit RGB to 24bit RGB
+                rgb_value_24 = RGB_15_to_24(int_value_LE)
+                    
+                if debug: print("24RGB: ",rgb_value_24)
+                
+                #24bit RGB to HLS
+                hls_col = colorsys.rgb_to_hls(rgb_value_24[0]/255,rgb_value_24[1]/255,rgb_value_24[2]/255)
+    
+                #Generate new hue based on degree
+                new_hue = adjust_hue_degree(hls_col, degree)/360
+                    
+                rgb_final = colorsys.hls_to_rgb(new_hue,hls_col[1],hls_col[2])
+                    
+                #Colorspace is in [0...1] format during conversion and needs to be multiplied by 255
+                rgb_final = (int(rgb_final[0]*255),int(rgb_final[1]*255),int(rgb_final[2]*255))
+                    
+                if debug: print("New 24RGB", rgb_final)
+                
+                BE_hex_color = RGB_24_to_15(rgb_final)
+                    
+                if debug: print("15bit BE_hex_color", hex(BE_hex_color))
+                    
+                file.seek(subset+(j*2))
+                file.write(BE_hex_color.to_bytes(2, byteorder='little'))
+                if debug: print("write decomp palette index:", hex(subset+(j*2)), " value:" , BE_hex_color.to_bytes(2, byteorder='little') )
+                
+            
+        #Close file access to allow for new decompression-process
+        file.close()
+        #practice rom free space 0x2F51C0 -> 0x2F7FFF
+        if practice_rom:
+            insert_address= 0x2F51C0 + (count*0x100)
+        else:
+            insert_address= 0x2FE050 + (count*0x100)
+            
+        pointers_to_insert.append(insert_address)
+        if debug: print("pointers_to_insert: ",pointers_to_insert)
+            
+        #Recompress palette and re-insert at offset
+        p = subprocess.Popen([recomppath+"/recomp.exe", recomppath+"/decomppalette.bin", recomppath+"/"+filename, hex(insert_address), "4", "0"])
+        wait_timeout(p,0.5)
+    return
+    
 def boss_palette_shift(file):
-	if match_room_shift_with_boss:
-		hue_shift_palette_lists(file,degree_list[6],spore_spawn_palettes,spore_spawn_length)
-		hue_shift_palette_lists(file,degree_list[22],kraid_palettes,kraid_length)
-		hue_shift_palette_lists(file,degree_list[4],phantoon_palettes,phantoon_length)
-		hue_shift_palette_lists(file,degree_list[11],botwoon_palettes,botwoon_length)
-		hue_shift_palette_lists(file,degree_list[24],draygon_palettes,draygon_length)
-		hue_shift_palette_lists(file,degree_list[23],crocomire_palettes,crocomire_length)
-		hue_shift_palette_lists(file,degree_list[0],bomb_torizo_palettes,bomb_torizo_length)
-		hue_shift_palette_lists(file,degree_list[9],gold_torizo_palettes,gold_torizo_length)
-		hue_shift_palette_lists(file,degree_list[9],ridley_palettes,ridley_length)
-		hue_shift_palette_lists(file,degree_list[14],mbrain_palettes,mbrain_length)
-	else:
-		#[sporespawn,kraid,phantoon,botwoon,draygon,crocomire,bomb-torizo,gold-torizo,ridley,mbrain]
-		hue_shift_palette_lists(file,boss_degree_list[0],spore_spawn_palettes,spore_spawn_length)
-		hue_shift_palette_lists(file,boss_degree_list[1],kraid_palettes,kraid_length)
-		hue_shift_palette_lists(file,boss_degree_list[2],phantoon_palettes,phantoon_length)
-		hue_shift_palette_lists(file,boss_degree_list[3],botwoon_palettes,botwoon_length)
-		hue_shift_palette_lists(file,boss_degree_list[4],draygon_palettes,draygon_length)
-		hue_shift_palette_lists(file,boss_degree_list[5],crocomire_palettes,crocomire_length)
-		hue_shift_palette_lists(file,boss_degree_list[6],bomb_torizo_palettes,bomb_torizo_length)
-		hue_shift_palette_lists(file,boss_degree_list[7],gold_torizo_palettes,gold_torizo_length)
-		hue_shift_palette_lists(file,boss_degree_list[8],ridley_palettes,ridley_length)
-		hue_shift_palette_lists(file,boss_degree_list[9],mbrain_palettes,mbrain_length)	
-	
-	if shift_tileset_palette and len(pointers_to_insert)==0:
-		print("tileset shifting needs to be called before boss palette shifting if both are active!")
-		sys.exit(1)
-	
-	if shift_tileset_palette:
-		boss_address_list = [pointers_to_insert[14],pointers_to_insert[22],pointers_to_insert[24]]
-	else:
-		boss_address_list = [0x213BC1,0x213510,0x213A2C]
-		
-	for address in boss_address_list:
-		#kraid's room tileset sub-palettes containing boss colors
-		if address == 0x213510 or (shift_tileset_palette and address == pointers_to_insert[22]):
-			temp_TLS_palette_subsets = [0xE0]
-			if match_room_shift_with_boss:
-				degree = degree_list[22]
-			else:
-				degree = boss_degree_list[1]				
-		#mother brain's room tileset sub-palettes containing boss colors
-		if address == 0x213BC1 or (shift_tileset_palette and address == pointers_to_insert[14]):
-			temp_TLS_palette_subsets = [0x80]
-			if match_room_shift_with_boss:
-				degree = degree_list[14]
-			else:
-				degree = boss_degree_list[9]			
-		#draygon's room tileset sub-palettes containing boss colors
-		if address == 0x213A2C or (shift_tileset_palette and address == pointers_to_insert[24]):
-			temp_TLS_palette_subsets = [0xA0]
-			if match_room_shift_with_boss:
-				degree = degree_list[24]
-			else:
-				degree = boss_degree_list[4]
-				
-		p = subprocess.Popen([decomppath+"/decomp.exe", decomppath+"/"+filename, "decomppalette.bin", hex(address), "4", "0"])	
-		wait_timeout(p,0.5)
-			
-		#Check if decompression happened
-		if os.path.exists("./decomppalette.bin"):
-			src = os.path.realpath("./decomppalette.bin")
-		else:
-			print("No decompressed binary file found. Exiting.")
-			sys.exit(1)
-			
-		if debug: print("opening ", src)
-		file = open(src, "r+b")
+    if match_room_shift_with_boss:
+        hue_shift_palette_lists(file,degree_list[6],spore_spawn_palettes,spore_spawn_length)
+        hue_shift_palette_lists(file,degree_list[22],kraid_palettes,kraid_length)
+        hue_shift_palette_lists(file,degree_list[4],phantoon_palettes,phantoon_length)
+        hue_shift_palette_lists(file,degree_list[11],botwoon_palettes,botwoon_length)
+        hue_shift_palette_lists(file,degree_list[24],draygon_palettes,draygon_length)
+        hue_shift_palette_lists(file,degree_list[23],crocomire_palettes,crocomire_length)
+        hue_shift_palette_lists(file,degree_list[0],bomb_torizo_palettes,bomb_torizo_length)
+        hue_shift_palette_lists(file,degree_list[9],gold_torizo_palettes,gold_torizo_length)
+        hue_shift_palette_lists(file,degree_list[9],ridley_palettes,ridley_length)
+        hue_shift_palette_lists(file,degree_list[14],mbrain_palettes,mbrain_length)
+    else:
+        #[sporespawn,kraid,phantoon,botwoon,draygon,crocomire,bomb-torizo,gold-torizo,ridley,mbrain]
+        hue_shift_palette_lists(file,boss_degree_list[0],spore_spawn_palettes,spore_spawn_length)
+        hue_shift_palette_lists(file,boss_degree_list[1],kraid_palettes,kraid_length)
+        hue_shift_palette_lists(file,boss_degree_list[2],phantoon_palettes,phantoon_length)
+        hue_shift_palette_lists(file,boss_degree_list[3],botwoon_palettes,botwoon_length)
+        hue_shift_palette_lists(file,boss_degree_list[4],draygon_palettes,draygon_length)
+        hue_shift_palette_lists(file,boss_degree_list[5],crocomire_palettes,crocomire_length)
+        hue_shift_palette_lists(file,boss_degree_list[6],bomb_torizo_palettes,bomb_torizo_length)
+        hue_shift_palette_lists(file,boss_degree_list[7],gold_torizo_palettes,gold_torizo_length)
+        hue_shift_palette_lists(file,boss_degree_list[8],ridley_palettes,ridley_length)
+        hue_shift_palette_lists(file,boss_degree_list[9],mbrain_palettes,mbrain_length)    
+    
+    if shift_tileset_palette and len(pointers_to_insert)==0:
+        print("tileset shifting needs to be called before boss palette shifting if both are active!")
+        sys.exit(1)
+    
+    if shift_tileset_palette:
+        boss_address_list = [pointers_to_insert[14],pointers_to_insert[22],pointers_to_insert[24]]
+    else:
+        boss_address_list = [0x213BC1,0x213510,0x213A2C]
+        
+    for address in boss_address_list:
+        #kraid's room tileset sub-palettes containing boss colors
+        if address == 0x213510 or (shift_tileset_palette and address == pointers_to_insert[22]):
+            temp_TLS_palette_subsets = [0xE0]
+            if match_room_shift_with_boss:
+                degree = degree_list[22]
+            else:
+                degree = boss_degree_list[1]                
+        #mother brain's room tileset sub-palettes containing boss colors
+        if address == 0x213BC1 or (shift_tileset_palette and address == pointers_to_insert[14]):
+            temp_TLS_palette_subsets = [0x80]
+            if match_room_shift_with_boss:
+                degree = degree_list[14]
+            else:
+                degree = boss_degree_list[9]            
+        #draygon's room tileset sub-palettes containing boss colors
+        if address == 0x213A2C or (shift_tileset_palette and address == pointers_to_insert[24]):
+            temp_TLS_palette_subsets = [0xA0]
+            if match_room_shift_with_boss:
+                degree = degree_list[24]
+            else:
+                degree = boss_degree_list[4]
+                
+        p = subprocess.Popen([decomppath+"/decomp.exe", decomppath+"/"+filename, "decomppalette.bin", hex(address), "4", "0"])    
+        wait_timeout(p,0.5)
+            
+        #Check if decompression happened
+        if os.path.exists("./decomppalette.bin"):
+            src = os.path.realpath("./decomppalette.bin")
+        else:
+            print("No decompressed binary file found. Exiting.")
+            sys.exit(1)
+            
+        if debug: print("opening ", src)
+        file = open(src, "r+b")
 
-		for subset in temp_TLS_palette_subsets:
-			for j in range(1,15):
-				#print("Reading at ", hex(subset+(j*2)))
-				file.seek(subset+(j*2))
-				#Read 2 bytes at index j*2
-				read_bytes = file.read(2)
-				if debug: print("read decomp palette index:", hex(subset+(j*2)), " value:" , read_bytes )
-				
-				#Convert from LE to BE
-				int_value_LE = struct.unpack_from("<h", read_bytes)[0]
-			
-				#Convert 15bit RGB to 24bit RGB
-				rgb_value_24 = RGB_15_to_24(int_value_LE)
-					
-				if debug: print("24RGB: ",rgb_value_24)
-				
-				#24bit RGB to HLS
-				hls_col = colorsys.rgb_to_hls(rgb_value_24[0]/255,rgb_value_24[1]/255,rgb_value_24[2]/255)
+        for subset in temp_TLS_palette_subsets:
+            for j in range(1,15):
+                #print("Reading at ", hex(subset+(j*2)))
+                file.seek(subset+(j*2))
+                #Read 2 bytes at index j*2
+                read_bytes = file.read(2)
+                if debug: print("read decomp palette index:", hex(subset+(j*2)), " value:" , read_bytes )
+                
+                #Convert from LE to BE
+                int_value_LE = struct.unpack_from("<h", read_bytes)[0]
+            
+                #Convert 15bit RGB to 24bit RGB
+                rgb_value_24 = RGB_15_to_24(int_value_LE)
+                    
+                if debug: print("24RGB: ",rgb_value_24)
+                
+                #24bit RGB to HLS
+                hls_col = colorsys.rgb_to_hls(rgb_value_24[0]/255,rgb_value_24[1]/255,rgb_value_24[2]/255)
 
-				#Generate new hue based on degree
-				new_hue = adjust_hue_degree(hls_col, degree)/360
-					
-				rgb_final = colorsys.hls_to_rgb(new_hue,hls_col[1],hls_col[2])
-					
-				#Colorspace is in [0...1] format during conversion and needs to be multiplied by 255
-				rgb_final = (int(rgb_final[0]*255),int(rgb_final[1]*255),int(rgb_final[2]*255))
-					
-				if debug: print("New 24RGB", rgb_final)
-				
-				BE_hex_color = RGB_24_to_15(rgb_final)
-					
-				if debug: print("15bit BE_hex_color", hex(BE_hex_color))
-					
-				file.seek(subset+(j*2))
-				file.write(BE_hex_color.to_bytes(2, byteorder='little'))
-				if debug: print("write decomp palette index:", hex(subset+(j*2)), " value:" , BE_hex_color.to_bytes(2, byteorder='little') )
-				
-			
-		#Close file access to allow for new decompression-process
-		file.close()	
-			
-		#quick hack to re-insert, should work without issues
-		insert_address = address
-			
-		#Recompress palette and re-insert at offset
-		p = subprocess.Popen([recomppath+"/recomp.exe", recomppath+"/decomppalette.bin", recomppath+"/"+filename, hex(insert_address), "4", "0"])
-		wait_timeout(p,0.5)
-		
+                #Generate new hue based on degree
+                new_hue = adjust_hue_degree(hls_col, degree)/360
+                    
+                rgb_final = colorsys.hls_to_rgb(new_hue,hls_col[1],hls_col[2])
+                    
+                #Colorspace is in [0...1] format during conversion and needs to be multiplied by 255
+                rgb_final = (int(rgb_final[0]*255),int(rgb_final[1]*255),int(rgb_final[2]*255))
+                    
+                if debug: print("New 24RGB", rgb_final)
+                
+                BE_hex_color = RGB_24_to_15(rgb_final)
+                    
+                if debug: print("15bit BE_hex_color", hex(BE_hex_color))
+                    
+                file.seek(subset+(j*2))
+                file.write(BE_hex_color.to_bytes(2, byteorder='little'))
+                if debug: print("write decomp palette index:", hex(subset+(j*2)), " value:" , BE_hex_color.to_bytes(2, byteorder='little') )
+                
+            
+        #Close file access to allow for new decompression-process
+        file.close()    
+            
+        #quick hack to re-insert, should work without issues
+        insert_address = address
+            
+        #Recompress palette and re-insert at offset
+        p = subprocess.Popen([recomppath+"/recomp.exe", recomppath+"/decomppalette.bin", recomppath+"/"+filename, hex(insert_address), "4", "0"])
+        wait_timeout(p,0.5)
+        
 
-	return
+    return
 
 ######################### 
+if __name__ == "__main__":
+    filename = sys.argv[1]
 
-#Create Backup or restore for new hue shift
-if os.path.exists(filename+".bak"):
-    src = os.path.realpath(filename+".bak")
-    dst = src[:-4]
-    MainFile = dst
-    shutil.copy(src,dst)
-    print("Copied *.bak over *.sfc\n")
-elif os.path.exists(filename):
-    src = os.path.realpath(filename)
-    MainFile = src
-    dst = src + ".bak"
-    shutil.copy(src,dst)
-    print("Couldn't find *.bak, created new backup\n")
-else:
-    print("No sfc file found. Exiting.")
-    sys.exit(1)
-	
-#Check if tools are present
-if os.path.exists("./decomp.exe"):
-    decomppath = os.path.realpath("./")
-    print("Decomp Path: ", decomppath)
-else:
-    print("Decomp not found. Exiting.")
-    sys.exit(1)
-    
-if os.path.exists("./recomp.exe"):
-    recomppath = os.path.realpath("./")
-    print("Recomp Path: ", recomppath)
-else:
-    print("Recomp not found. Exiting.")
-    sys.exit(1)
+    #Create Backup or restore for new hue shift
+    if os.path.exists(filename+".bak"):
+        src = os.path.realpath(filename+".bak")
+        dst = src[:-4]
+        MainFile = dst
+        shutil.copy(src,dst)
+        print("Copied *.bak over *.sfc\n")
+    elif os.path.exists(filename):
+        src = os.path.realpath(filename)
+        MainFile = src
+        dst = src + ".bak"
+        shutil.copy(src,dst)
+        print("Couldn't find *.bak, created new backup\n")
+    else:
+        print("No sfc file found. Exiting.")
+        sys.exit(1)
+
+    #Check if tools are present
+    if os.path.exists("./decomp.exe"):
+        decomppath = os.path.realpath("./")
+        print("Decomp Path: ", decomppath)
+    else:
+        print("Decomp not found. Exiting.")
+        sys.exit(1)
+
+    if os.path.exists("./recomp.exe"):
+        recomppath = os.path.realpath("./")
+        print("Recomp Path: ", recomppath)
+    else:
+        print("Recomp not found. Exiting.")
+        sys.exit(1)
 
 
-#Open file for uncompressed binary op
-with open(filename, "r+b") as file:
+    #Open file for uncompressed binary op
+    with open(filename, "r+b") as file:
 
-	tileset_degree = random.randint(0,max_degree)
-	generate_tileset_degrees()
-	generate_boss_degrees()
-	
-	if shift_tileset_palette:
-		hue_shift_tileset_palette(tileset_degree)
-		
-		if individual_tileset_shift:
-			hue_shift_palette_lists(file,degree_list[0],fx1_palettes_cr, fx1_length_cr)
-			hue_shift_palette_lists(file,degree_list[6],fx1_palettes_gb, fx1_length_gb)
-			hue_shift_palette_lists(file,degree_list[7],fx1_palettes_rb,fx1_length_rb)
-			hue_shift_palette_lists(file,degree_list[4],fx1_palettes_ws, fx1_length_ws)
-			hue_shift_palette_lists(file,degree_list[13],fx1_palettes_tr, fx1_length_tr)
-			hue_shift_palette_lists(file,degree_list[11],fx1_palettes_ma,fx1_length_ma)
-			hue_shift_palette_lists(file,degree_list[7],fx1_palettes_lanterns, fx1_length_lanterns)
-			hue_shift_palette_lists(file,degree_list[6],crateria_special_enemies,[0x0F,0x0F]) 
-			print("Wrecked Ship sparks shifted by ",degree_list[4])
-			hue_shift_palette_lists(file,degree_list[4],wrecked_ship_special_enemies,[0x0F])
-			hue_shift_palette_lists(file,degree_list[13],tourian_special_enemies,[0x0F,0x0F])
-			hue_shift_fixed_size_palette(file,statue_palette_ridley,degree_list[17],0x0F)
-			hue_shift_fixed_size_palette(file,statue_palette_phantoon,degree_list[17],0x0F)
-			hue_shift_fixed_size_palette(file,statue_base,degree_list[17],0x0F)
-			hue_shift_palette_lists(file,degree_list[17],statue_fadeout_palettes,statue_fadeout_size)
-		else:
-			degree = tileset_degree
-			hue_shift_palette_lists(file,degree,fx1_palettes_cr, fx1_length_cr)
-			hue_shift_palette_lists(file,degree,fx1_palettes_gb, fx1_length_gb)
-			hue_shift_palette_lists(file,degree,fx1_palettes_rb, fx1_length_rb)
-			hue_shift_palette_lists(file,degree,fx1_palettes_ws, fx1_length_ws)
-			hue_shift_palette_lists(file,degree,fx1_palettes_tr, fx1_length_tr)
-			hue_shift_palette_lists(file,degree,fx1_palettes_ma,fx1_length_ma)
-			hue_shift_palette_lists(file,degree,fx1_palettes_lanterns, fx1_length_lanterns)
-			hue_shift_palette_lists(file,degree,crateria_special_enemies,[0x0F,0x0F])
-			hue_shift_palette_lists(file,degree,wrecked_ship_special_enemies,[0x0F])
-			hue_shift_palette_lists(file,degree,tourian_special_enemies,[0x0F])
-			hue_shift_fixed_size_palette(file,statue_palette_ridley,degree,0x0F)
-			hue_shift_fixed_size_palette(file,statue_palette_phantoon,degree,0x0F)
-			hue_shift_fixed_size_palette(file,statue_base,degree,0x0F)
-			hue_shift_palette_lists(file,degree,statue_fadeout_palettes,statue_fadeout_size)
+        tileset_degree = random.randint(0,max_degree)
+        generate_tileset_degrees()
+        generate_boss_degrees()
 
-		
-		i=-1
-		for p_update in pointers_to_insert:
-			i=i+1
-			if debug: print("New Pointer Address: ",p_update)
-			if debug: print("Write this to file: ", hex(pc_to_snes(p_update)))
-			write_pointer(file,pointer_addresses[i], pc_to_snes(p_update), 3)
-	
-	#this NEEDS to be called after the tileset palette shift function (if tileset shift actually gets called) because it references newly created pointers
-	if shift_boss_palettes:
-		boss_palette_shift(file)
+        if shift_tileset_palette:
+            hue_shift_tileset_palette(tileset_degree)
 
-	if shift_enemy_palettes:
-		if seperate_enemy_palette_groups:
-			enemy_degree=random.randint(0,max_degree)
-			hue_shift_palette_lists(file,enemy_degree,metroid_palettes,[0x0F,0x0F,0x0F,0x0F])
-			hue_shift_palette_lists(file,enemy_degree,various_metroid_palettes,various_metroid_length)
-			enemy_degree=random.randint(0,max_degree)
-			hue_shift_palette_lists(file,enemy_degree,desgeega_palettes,[0x0F,0x0F])
-			enemy_degree=random.randint(0,max_degree)
-			hue_shift_palette_lists(file,enemy_degree,sidehopper_palettes,[0x0F,0x0F])
-			enemy_degree=random.randint(0,max_degree)
-			hue_shift_palette_lists(file,enemy_degree,animal_palettes,[0x0F,0x0F,0x0F,0x0F])
-			for address in enemy_palettes:
-				enemy_degree=random.randint(0,max_degree)
-				hue_shift_fixed_size_palette(file,address,enemy_degree,0x0F)
-		else:
-			enemy_palettes.extend(metroid_palettes)
-			enemy_palettes.extend(desgeega_palettes)
-			enemy_palettes.extend(sidehopper_palettes)
-			enemy_palettes.extend(animal_palettes)
-			enemy_degree = random.randint(0,max_degree)
-			hue_shift_palette_lists(file,enemy_degree,various_metroid_palettes,various_metroid_length)
-			for address in enemy_palettes:
-				enemy_degree=random.randint(0,max_degree)
-				hue_shift_fixed_size_palette(file,address,enemy_degree,0x0F)
-		
-	if debug: print(degree_list)
-	
-	if shift_beam_palettes:
-		beam_degree=random.randint(0,max_degree)
-		hue_shift_palette_lists(file,beam_degree,beam_palettes,beam_palettes_length)
-		hue_shift_palette_lists(file,beam_degree,wave_beam_trail_palettes,wave_beam_trail_length)
-		hue_shift_palette_lists(file,beam_degree,grapple_beam_palettes,grapple_beam_length)
+            if individual_tileset_shift:
+                hue_shift_palette_lists(file,degree_list[0],fx1_palettes_cr, fx1_length_cr)
+                hue_shift_palette_lists(file,degree_list[6],fx1_palettes_gb, fx1_length_gb)
+                hue_shift_palette_lists(file,degree_list[7],fx1_palettes_rb,fx1_length_rb)
+                hue_shift_palette_lists(file,degree_list[4],fx1_palettes_ws, fx1_length_ws)
+                hue_shift_palette_lists(file,degree_list[13],fx1_palettes_tr, fx1_length_tr)
+                hue_shift_palette_lists(file,degree_list[11],fx1_palettes_ma,fx1_length_ma)
+                hue_shift_palette_lists(file,degree_list[7],fx1_palettes_lanterns, fx1_length_lanterns)
+                hue_shift_palette_lists(file,degree_list[6],crateria_special_enemies,[0x0F,0x0F]) 
+                print("Wrecked Ship sparks shifted by ",degree_list[4])
+                hue_shift_palette_lists(file,degree_list[4],wrecked_ship_special_enemies,[0x0F])
+                hue_shift_palette_lists(file,degree_list[13],tourian_special_enemies,[0x0F,0x0F])
+                hue_shift_fixed_size_palette(file,statue_palette_ridley,degree_list[17],0x0F)
+                hue_shift_fixed_size_palette(file,statue_palette_phantoon,degree_list[17],0x0F)
+                hue_shift_fixed_size_palette(file,statue_base,degree_list[17],0x0F)
+                hue_shift_palette_lists(file,degree_list[17],statue_fadeout_palettes,statue_fadeout_size)
+            else:
+                degree = tileset_degree
+                hue_shift_palette_lists(file,degree,fx1_palettes_cr, fx1_length_cr)
+                hue_shift_palette_lists(file,degree,fx1_palettes_gb, fx1_length_gb)
+                hue_shift_palette_lists(file,degree,fx1_palettes_rb, fx1_length_rb)
+                hue_shift_palette_lists(file,degree,fx1_palettes_ws, fx1_length_ws)
+                hue_shift_palette_lists(file,degree,fx1_palettes_tr, fx1_length_tr)
+                hue_shift_palette_lists(file,degree,fx1_palettes_ma,fx1_length_ma)
+                hue_shift_palette_lists(file,degree,fx1_palettes_lanterns, fx1_length_lanterns)
+                hue_shift_palette_lists(file,degree,crateria_special_enemies,[0x0F,0x0F])
+                hue_shift_palette_lists(file,degree,wrecked_ship_special_enemies,[0x0F])
+                hue_shift_palette_lists(file,degree,tourian_special_enemies,[0x0F])
+                hue_shift_fixed_size_palette(file,statue_palette_ridley,degree,0x0F)
+                hue_shift_fixed_size_palette(file,statue_palette_phantoon,degree,0x0F)
+                hue_shift_fixed_size_palette(file,statue_base,degree,0x0F)
+                hue_shift_palette_lists(file,degree,statue_fadeout_palettes,statue_fadeout_size)
 
-	if shift_ship_palette and not shift_suit_palettes:
-			if match_ship_and_power:
-				ship_degree = 0
-			else:
-				ship_degree=random.randint(0,max_degree)
-			hue_shift_fixed_size_palette(file,ship_palette,ship_degree,0x0F)
 
-	if shift_suit_palettes:	
-		base_degree = random.randint(0,max_degree)
-	
-		for address in power_palette_offsets:
-			hue_shift_fixed_size_palette(file, address, base_degree,0x0F)
-	
-		if match_ship_and_power:
-			ship_degree = base_degree
-		else:
-			ship_degree=random.randint(0,max_degree)
-			
-		if shift_ship_palette:
-			hue_shift_fixed_size_palette(file,ship_palette,ship_degree,0x0F)
-	
-		if individual_suit_shift:
-			degree = random.randint(0,max_degree)
-	
-		for address in varia_palette_offsets:
-			hue_shift_fixed_size_palette(file, address, degree,0x0F)
-	
-		if individual_suit_shift:
-			degree = random.randint(0,max_degree)
-		
-		for address in gravity_palette_offsets:
-			hue_shift_fixed_size_palette(file, address, degree,0x0F)	
+            i=-1
+            for p_update in pointers_to_insert:
+                i=i+1
+                if debug: print("New Pointer Address: ",p_update)
+                if debug: print("Write this to file: ", hex(pc_to_snes(p_update)))
+                write_pointer(file,pointer_addresses[i], pc_to_snes(p_update), 3)
+
+        #this NEEDS to be called after the tileset palette shift function (if tileset shift actually gets called) because it references newly created pointers
+        if shift_boss_palettes:
+            boss_palette_shift(file)
+
+        if shift_enemy_palettes:
+            if seperate_enemy_palette_groups:
+                enemy_degree=random.randint(0,max_degree)
+                hue_shift_palette_lists(file,enemy_degree,metroid_palettes,[0x0F,0x0F,0x0F,0x0F])
+                hue_shift_palette_lists(file,enemy_degree,various_metroid_palettes,various_metroid_length)
+                enemy_degree=random.randint(0,max_degree)
+                hue_shift_palette_lists(file,enemy_degree,desgeega_palettes,[0x0F,0x0F])
+                enemy_degree=random.randint(0,max_degree)
+                hue_shift_palette_lists(file,enemy_degree,sidehopper_palettes,[0x0F,0x0F])
+                enemy_degree=random.randint(0,max_degree)
+                hue_shift_palette_lists(file,enemy_degree,animal_palettes,[0x0F,0x0F,0x0F,0x0F])
+                for address in enemy_palettes:
+                    enemy_degree=random.randint(0,max_degree)
+                    hue_shift_fixed_size_palette(file,address,enemy_degree,0x0F)
+            else:
+                enemy_palettes.extend(metroid_palettes)
+                enemy_palettes.extend(desgeega_palettes)
+                enemy_palettes.extend(sidehopper_palettes)
+                enemy_palettes.extend(animal_palettes)
+                enemy_degree = random.randint(0,max_degree)
+                hue_shift_palette_lists(file,enemy_degree,various_metroid_palettes,various_metroid_length)
+                for address in enemy_palettes:
+                    enemy_degree=random.randint(0,max_degree)
+                    hue_shift_fixed_size_palette(file,address,enemy_degree,0x0F)
+
+        if debug: print(degree_list)
+
+        if shift_beam_palettes:
+            beam_degree=random.randint(0,max_degree)
+            hue_shift_palette_lists(file,beam_degree,beam_palettes,beam_palettes_length)
+            hue_shift_palette_lists(file,beam_degree,wave_beam_trail_palettes,wave_beam_trail_length)
+            hue_shift_palette_lists(file,beam_degree,grapple_beam_palettes,grapple_beam_length)
+
+        if shift_ship_palette and not shift_suit_palettes:
+                if match_ship_and_power:
+                    ship_degree = 0
+                else:
+                    ship_degree=random.randint(0,max_degree)
+                hue_shift_fixed_size_palette(file,ship_palette,ship_degree,0x0F)
+
+        if shift_suit_palettes:    
+            base_degree = random.randint(0,max_degree)
+
+            for address in power_palette_offsets:
+                hue_shift_fixed_size_palette(file, address, base_degree,0x0F)
+
+            if match_ship_and_power:
+                ship_degree = base_degree
+            else:
+                ship_degree=random.randint(0,max_degree)
+
+            if shift_ship_palette:
+                hue_shift_fixed_size_palette(file,ship_palette,ship_degree,0x0F)
+
+            if individual_suit_shift:
+                degree = random.randint(0,max_degree)
+
+            for address in varia_palette_offsets:
+                hue_shift_fixed_size_palette(file, address, degree,0x0F)
+
+            if individual_suit_shift:
+                degree = random.randint(0,max_degree)
+
+            for address in gravity_palette_offsets:
+                hue_shift_fixed_size_palette(file, address, degree,0x0F)    

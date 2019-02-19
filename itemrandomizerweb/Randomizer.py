@@ -386,16 +386,16 @@ class RandoState(object):
 
     # apply this state to a randomizer object
     def apply(self, rando):
-        rando.unusedLocations = self.unusedLocations
-        rando.currentItems = self.currentItems
-        rando.itemLocations = self.itemLocations
+        rando.unusedLocations = self.unusedLocations[:]
+        rando.currentItems = self.currentItems[:]
+        rando.itemLocations = self.itemLocations[:]
         rando.setCurAccessPoint(self.curAccessPoint)
-        rando.states = self.states
-        rando.itemPool = self.itemPool
-        rando.chozoItemPool = self.chozoItemPool
-        rando.nonChozoItemPool = self.nonChozoItemPool
-        rando.progressionStatesIndices = self.progressionStatesIndices
-        rando.progressionItemLocs = self.progressionItemLocs
+        rando.states = self.states[:]
+        rando.itemPool = self.itemPool[:]
+        rando.chozoItemPool = self.chozoItemPool[:]
+        rando.nonChozoItemPool = self.nonChozoItemPool[:]
+        rando.progressionStatesIndices = self.progressionStatesIndices[:]
+        rando.progressionItemLocs = self.progressionItemLocs[:]
         rando.hadChozoLeft = self.hadChozoLeft
         rando.smbm.resetItems()
         rando.smbm.addItems([item['Type'] for item in self.currentItems])
@@ -973,6 +973,12 @@ class Randomizer(object):
             itemLocation = self.placeItem(posItems, pool, curLocs)
         return itemLocation
 
+    def appendCurrentState(self, curLocs):
+        curState = RandoState(self, curLocs)
+        self.log.debug('appendCurrentState ' + str(curState) + ' at ' + str(len(self.states)))
+        self.states.append(curState)
+        curState.states.append(curState)
+
     # actually get an item/loc.
     # itemLocation: item/loc to get
     # collect: actually collect item. defaults to True. use False for unreachable items.
@@ -1002,19 +1008,21 @@ class Randomizer(object):
         self.unusedLocations.remove(location)
         self.itemLocations.append(itemLocation)
         if curLocs != None:
-            self.log.debug("PLACEMENT {}: {} at {} diff: {}".format(len(self.currentItems), item['Type'], location['Name'], location['difficulty']))
+            self.log.debug("PLACEMENT {}: {} at {} diff: {}, locs: {}".format(len(self.currentItems), item['Type'], location['Name'], location['difficulty'], len(curLocs)-1))
             self.log.debug("Path: {}".format([ap.Name for ap in location['path']]))
         self.removeItem(item['Type'], pool)
         if collect == True:
             if isProg == True:
                 n = len(self.states)
+                self.log.debug("prog indice="+str(n))
                 if n not in self.progressionStatesIndices:
+                    self.log.debug('prog indice added')
                     self.progressionStatesIndices.append(n)
                 self.progressionItemLocs.append(itemLocation)
             if location in curLocs:
                 curLocs.remove(location)
             self.resetCache()
-            self.states.append(RandoState(self, curLocs))
+            self.appendCurrentState(curLocs)
 
     # check if remaining locations pool is conform to rando settings when filling up
     # with non-progression items
@@ -1114,35 +1122,44 @@ class Randomizer(object):
         return isStuck
 
     def initRollbackPoints(self):
+        minRollbackPoint = 0
         maxRollbackPoint = len(self.states) - 1
         if len(self.progressionStatesIndices) > 0:
             minRollbackPoint = self.progressionStatesIndices[-1]
-        else:
-            minRollbackPoint = 0
+        self.log.debug('initRollbackPoints: min=' + str(minRollbackPoint) + ", max=" + str(maxRollbackPoint))
         return minRollbackPoint, maxRollbackPoint
 
     def initRollback(self):
         self.states.pop() # last state is current state, so it's useless
+        self.log.debug('initRollback: progressionStatesIndices 1=' + str(self.progressionStatesIndices))
         if len(self.progressionStatesIndices) > 0 and self.progressionStatesIndices[-1] == len(self.states):
             # the state we just removed was a progression state (highly unlikely, but let's be safe)
             self.progressionStatesIndices.pop()
+        self.log.debug('initRollback: progressionStatesIndices 2=' + str(self.progressionStatesIndices))
 
     def hasTried(self, itemLoc, idx):
-        return (idx in self.rollbackItemsTried) and (itemLoc['Item']['Type'] in self.rollbackItemsTried[idx])
+        itemType = itemLoc['Item']['Type']
+        ret = (idx in self.rollbackItemsTried) and (itemType in self.rollbackItemsTried[idx])
+        self.log.debug('hasTried: ' + str(idx) + '/' + itemType + ' - ' + str(ret))
 
     def updateRollbackItemsTried(self, itemLoc, idx):
         itemType = itemLoc['Item']['Type']
         if not idx in self.rollbackItemsTried:
             self.rollbackItemsTried[idx] = []
         self.rollbackItemsTried[idx].append(itemType)
+        self.log.debug('updateRollbackItemsTried: rollbackItemsTried=' + str(idx) + '/' + itemType)
 
     # goes back in the previous states to find one where
     # we can put a progression item
     def rollback(self):
-        self.log.debug("rollback BEGIN: {}".format(len(self.currentItems)))
         nItemsAtStart = len(self.currentItems)
         nStatesAtStart = len(self.states)
+        self.log.debug("rollback BEGIN: nItems={}, nStates={}".format(len(self.currentItems), nStatesAtStart))
         self.initRollback()
+        if len(self.states) == 0:
+            self.initState.apply(self)
+            self.log.debug("rollback initState apply, nCurLocs="+str(len(self.currentLocations())))
+            return
         i = 0
         possibleStates = []
         while i >= 0 and len(possibleStates) == 0:
@@ -1175,7 +1192,6 @@ class Randomizer(object):
 
             if self.vcr != None:
                 self.vcr.addRollback(nItemsAtStart - len(self.currentItems))
-
         self.log.debug("rollback END: {}".format(len(self.currentItems)))
 
     # check if bosses are blocking the last remaining locations
@@ -1311,11 +1327,13 @@ class Randomizer(object):
                 curState = RandoState(self, self.currentLocations())
             # restore state to this point + all item locs we already put in the fillup
             state.apply(self)
+            self.log.debug('state ' + str(state) + ' apply, nCurLocs='+str(len(self.currentLocations())))
+            self.log.debug('collected1=' + str(list(set([i['Item']['Type'] for i in self.itemLocations]))))
             for il in allItemLocs:
                 self.getItem(il, pool=self.nonChozoItemPool, showDot=False)
             # fill-up
             self.determineParameters()
-            self.log.debug('collected=' + str(list(set([i['Item']['Type'] for i in self.itemLocations]))))
+            self.log.debug('collected2=' + str(list(set([i['Item']['Type'] for i in self.itemLocations]))))
             nonProg = self.getNonProgItemPool(self.nonChozoItemPool)
             lim = self.locLimit
             if lim < 0:
@@ -1355,7 +1373,7 @@ class Randomizer(object):
         self.curLocs = self.currentLocations()
         self.curAccessPoints = self.currentAccessPoints()
         self.hadChozoLeft = self.isChozoLeft()
-        self.states.append(RandoState(self, self.currentLocations()))
+        self.initState = RandoState(self, self.currentLocations())
 #        self.log.debug("{} items in pool".format(len(self.itemPool)))
         runtime_s = 0
         startDate = time.clock()
@@ -1397,6 +1415,7 @@ class Randomizer(object):
             self.chozoCheck()
             runtime_s = time.clock() - startDate
         self.log.debug("{} remaining items in pool".format(len(self.itemPool)))
+        self.log.debug("nStates="+str(len(self.states)))
         if len(self.itemPool) > 0:
             # we could not place all items, check if we can finish the game
             if self.canEndGame():

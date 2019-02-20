@@ -1193,7 +1193,7 @@ class Randomizer(object):
 #                    self.log.debug([item['Type'] for item in posItems])
 #                    self.log.debug([loc['Name'] for loc in state.curLocs])
                     itemLoc = self.generateItem(state.curLocs, self.itemPool)
-                    if itemLoc is not None and not self.hasTried(itemLoc):
+                    if itemLoc is not None and (isFakeRollback == True or not self.hasTried(itemLoc)):
                         possibleStates.append((state, itemLoc))
                 i -= 1
             # nothing, let's rollback further a progression item
@@ -1216,7 +1216,7 @@ class Randomizer(object):
             # we end up here if rollback failed or fake rollback was asked
             self.log.debug('fallbackState apply')
             fallbackState.apply(self)
-        sys.stdout.write('<'*(nStatesAtStart - len(self.states) - 1))
+        sys.stdout.write('<'*(nStatesAtStart - len(self.states)))
         sys.stdout.flush()
         self.log.debug("rollback END: {}".format(len(self.currentItems)))
         return ret

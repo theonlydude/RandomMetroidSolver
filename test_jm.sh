@@ -63,7 +63,7 @@ function computeSeed {
 	echo "seed;diff_cap;rtime old;rtime new;stime old;stime new;;md5sum ok;params;" | tee -a ${CSV}
     fi
 
-    if [ ${COMPARE} -ne 0 ]; then
+    if [ ${COMPARE} -eq 0 ]; then
 	OLD_MD5="old n/a"
 	OUT=$(/usr/bin/time -f "\t%E real" python2 ${ORIG}/randomizer.py ${PARAMS} 2>&1)
 	if [ $? -ne 0 ]; then
@@ -90,7 +90,7 @@ function computeSeed {
 	fi
     fi
 
-    if [ "${OLD_MD5}" != "${NEW_MD5}" -a ${COMPARE} -ne 0 ]; then
+    if [ "${OLD_MD5}" != "${NEW_MD5}" -a ${COMPARE} -eq 0 ]; then
 	if [ "${OLD_MD5}" = "old n/a" ] && [ "${NEW_MD5}" = "new n/a" ]; then
 	    MD5="n/a"
 	else

@@ -1210,15 +1210,14 @@ class Randomizer(object):
             state.apply(self)
             ret = itemLoc
 
-            sys.stdout.write('<'*(nStatesAtStart - len(self.states) - 1))
-            sys.stdout.flush()
-
             if self.vcr != None:
                 self.vcr.addRollback(nItemsAtStart - len(self.currentItems))
         else:
             # we end up here if rollback failed or fake rollback was asked
             self.log.debug('fallbackState apply')
             fallbackState.apply(self)
+        sys.stdout.write('<'*(nStatesAtStart - len(self.states) - 1))
+        sys.stdout.flush()
         self.log.debug("rollback END: {}".format(len(self.currentItems)))
         return ret
 

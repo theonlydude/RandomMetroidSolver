@@ -212,7 +212,7 @@ class SuperFunProvider(object):
         self.forbiddenItems = []
         self.restrictedLocs = []
         self.lastRestricted = []
-        self.bossesLocs = ['Draygon', 'Kraid', 'Ridley', 'Phantoon']
+        self.bossesLocs = ['Draygon', 'Kraid', 'Ridley', 'Phantoon', 'Mother Brain']
         self.suits = ['Varia', 'Gravity']
         # organized by priority
         self.movementItems = ['SpaceJump', 'HiJump', 'SpeedBooster', 'Bomb', 'Grapple', 'SpringBall']
@@ -1137,6 +1137,10 @@ class Randomizer(object):
         return progItems+'/'+position
 
     def hasTried(self, itemLoc):
+        # disable tried check if we don't have morph+unlocking ammo
+        sm = self.smbm
+        if sm.canUsePowerBombs().bool == False or sm.canOpenGreenDoors().bool == False:
+            return False
         itemType = itemLoc['Item']['Type']
         situation = self.getSituationId()
         ret = False

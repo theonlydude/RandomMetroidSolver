@@ -210,7 +210,7 @@ locations = [
                                                           sm.canInfiniteBombJump(),
                                                           sm.wand(sm.haveItem('HiJump'),
                                                                   sm.wor(sm.haveItem('SpeedBooster'),
-                                                                         sm.haveItem('SpringBall')))))))
+                                                                         sm.canSpringBallJump()))))))
 },
 {
     'Area': "Brinstar",

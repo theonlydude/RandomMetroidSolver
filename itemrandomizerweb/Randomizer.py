@@ -1366,7 +1366,7 @@ class Randomizer(object):
                 self.log.debug('updateCurrentState END')
             # restore state to this point + all item locs we already put in the fillup
             state.apply(self)
-            self.log.debug('state ' + str(state) + ' apply, nCurLocs='+str(len(self.currentLocations())))
+            self.log.debug('state ' + str(state) + ' apply, nCurLocs='+str(len(self.currentLocations(ap='Landing Site'))))
             self.log.debug('collected1=' + str(list(set([i['Item']['Type'] for i in self.itemLocations]))))
             for il in allItemLocs:
                 self.getItem(il, pool=self.nonChozoItemPool, showDot=False)
@@ -1377,18 +1377,19 @@ class Randomizer(object):
             lim = self.locLimit
             if lim < 0:
                 lim = 0
-            nLocsNonProg = len(getLocs(self.currentLocations())) - lim
+            nLocsNonProg = len(getLocs(self.currentLocations(ap='Landing Site'))) - lim
             itemLocs = []
             if len(nonProg) > 0 and nLocsNonProg > 0:
-                self.log.debug('nonProg fillup cur=' + str(len(self.currentLocations())) + ', nLocs=' + str(nLocsNonProg))
+                self.log.debug('nonProg fillup cur=' + str(len(self.currentLocations(ap='Landing Site'))) + ', nLocs=' + str(nLocsNonProg))
                 itemLocs += fillup(min(nLocsNonProg, len(nonProg)), nonProg)
             allItems = self.nonChozoItemPool[:]
-            nLocs = len(getLocs(self.currentLocations()))
+            nLocs = len(getLocs(self.currentLocations(ap='Landing Site')))
             if len(allItems) > 0 and nLocs > 0:
-                self.log.debug('allItems fillup cur=' + str(len(self.currentLocations())) + ', nLocs=' + str(nLocsNonProg))
+                self.log.debug('allItems fillup cur=' + str(len(self.currentLocations(ap='Landing Site'))) + ', nLocs=' + str(nLocs))
                 itemLocs += fillup(min(nLocs, len(allItems)), allItems)
-            updateCurrentState(itemLocs, self.currentLocations(), curState)
-            curState = RandoState(self, self.currentLocations())
+            curLocs = self.currentLocations(ap='Landing Site')
+            updateCurrentState(itemLocs, curLocs, curState)
+            curState = RandoState(self, curLocs)
 
     def chozoCheck(self):
         if self.restrictions['MajorMinor'] == 'Chozo':

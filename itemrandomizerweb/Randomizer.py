@@ -204,6 +204,7 @@ class SuperFunProvider(object):
     # give the rando since we have to access services from it
     def __init__(self, superFun, itemManager, rando):
         self.superFun = superFun
+        self.isChozo = rando.restrictions['MajorMinor'] == 'Chozo'
         self.itemManager = itemManager
         self.rando = rando
         self.locations = rando.unusedLocations
@@ -242,6 +243,8 @@ class SuperFunProvider(object):
             pool = self.getItemPool(forbidden)
         else:
             pool = self.getItemPool()
+        if self.isChozo:
+            pool = [item for item in pool if item['Class'] == 'Chozo' or item['Name'] == 'Boss']
         poolDict = self.rando.getPoolDict(pool)
         self.log.debug('pool='+str([(t, len(poolDict[t])) for t in poolDict]))
         # give us everything and beat every boss to see what we can access
@@ -1142,12 +1145,14 @@ class Randomizer(object):
         self.log.debug('initRollbackPoints: min=' + str(minRollbackPoint) + ", max=" + str(maxRollbackPoint))
         return minRollbackPoint, maxRollbackPoint
 
-    def initRollback(self):
-        self.states.pop() # last state is current state, so it's useless
+    def initRollback(self, isFakeRollback):
         self.log.debug('initRollback: progressionStatesIndices 1=' + str(self.progressionStatesIndices))
-        if len(self.progressionStatesIndices) > 0 and self.progressionStatesIndices[-1] == len(self.states):
-            # the state we just removed was a progression state (highly unlikely, but let's be safe)
+        if len(self.progressionStatesIndices) > 0 and self.progressionStatesIndices[-1] == len(self.states) - 1:
+            if isFakeRollback == True: # in fake rollback case we refuse to remove any progression
+                return
+            # the state we are about to remove was a progression state
             self.progressionStatesIndices.pop()
+        self.states.pop() # remove current state, it's the one we're stuck in
         self.log.debug('initRollback: progressionStatesIndices 2=' + str(self.progressionStatesIndices))
 
     def getSituationId(self):
@@ -1183,21 +1188,25 @@ class Randomizer(object):
         nItemsAtStart = len(self.currentItems)
         nStatesAtStart = len(self.states)
         self.log.debug("rollback BEGIN: nItems={}, nStates={}".format(len(self.currentItems), nStatesAtStart))
-        self.initRollback()
-        if len(self.states) == 0:
-            self.initState.apply(self)
-            self.log.debug("rollback END initState apply, nCurLocs="+str(len(self.currentLocations())))
-            return None
-        # to stay consistent in case no solution is found as states list was popped in init
-        ret = None
-        fallbackState = self.states[-1]
+        currentState = self.states[-1]
         # we can be in a 'fake rollback' situation where we rollback
         # just after non prog phase without checking normal items first (we
         # do this for more randomness, to avoid placing items in postavail locs
         # like spospo etc. too often).
-        # if so, we won't go back further a prog item if first rollback fails
-        # (fallback state will be applied instead)
+        # in this case, we won't remove any prog items since we're not actually
+        # stuck
         isFakeRollback = self.generateItem(self.currentLocations(), self.itemPool) is not None
+        self.log.debug('isFakeRollback=' + str(isFakeRollback))
+        self.initRollback(isFakeRollback)
+        if len(self.states) == 0:
+            self.initState.apply(self)
+            self.log.debug("rollback END initState apply, nCurLocs="+str(len(self.currentLocations())))
+            if self.vcr != None:
+                self.vcr.addRollback(nStatesAtStart)
+            return None
+        # to stay consistent in case no solution is found as states list was popped in init
+        ret = None
+        fallbackState = self.states[-1]
         i = 0
         possibleStates = []
         while i >= 0 and len(possibleStates) == 0:
@@ -1232,9 +1241,14 @@ class Randomizer(object):
             if self.vcr != None:
                 self.vcr.addRollback(nItemsAtStart - len(self.currentItems))
         else:
-            # we end up here if rollback failed or fake rollback was asked
-            self.log.debug('fallbackState apply')
-            fallbackState.apply(self)
+            if isFakeRollback == False:
+                self.log.debug('fallbackState apply')
+                fallbackState.apply(self)
+                if self.vcr != None:
+                    self.vcr.addRollback(1)
+            else:
+                self.log.debug('currentState restore')
+                currentState.apply(self)
         sys.stdout.write('<'*(nStatesAtStart - len(self.states)))
         sys.stdout.flush()
         self.log.debug("rollback END: {}".format(len(self.currentItems)))

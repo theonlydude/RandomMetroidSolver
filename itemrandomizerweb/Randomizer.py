@@ -131,7 +131,7 @@ class RandoSettings(object):
             return 0
 
     def getMinorHelpProb(self, progSpeed):
-        if self.restrictions['MajorMinor'] == 'Full':
+        if self.restrictions['MajorMinor'] != 'Major':
             return 0
         if progSpeed == 'slowest':
             return 0.16

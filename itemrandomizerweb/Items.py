@@ -206,6 +206,9 @@ class ItemManager:
     def getItemPool(self):
         return self.itemPool
 
+    def setItemPool(self, pool):
+        self.itemPool = pool
+
     def addItem(self, itemType, itemClass=None):
         self.itemPool.append(ItemManager.getItem(itemType, itemClass))
 

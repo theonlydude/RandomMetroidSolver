@@ -531,7 +531,6 @@ class Helpers(object):
     @Cache.decorator
     def enoughStuffsMotherbrain(self):
         sm = self.smbm
-        #print('MB')
         # MB1 can't be hit by charge beam
         (ammoMargin, secs) = self.canInflictEnoughDamages(3000, charge=False, givesDrops=False)
         if ammoMargin == 0:
@@ -578,9 +577,11 @@ class Helpers(object):
 
     @Cache.decorator
     def enoughStuffTourian(self):
-        return self.smbm.wand(self.canPassMetroids(),
-                              self.canPassZebetites(),
-                              self.enoughStuffsMotherbrain())
+        sm = self.smbm
+        ret = self.smbm.wand(sm.canPassMetroids(),
+                             sm.canPassZebetites(),
+                             sm.enoughStuffsMotherbrain())
+        return ret
 
 class Pickup:
     def __init__(self, itemsPickup):
@@ -694,11 +695,13 @@ class Bosses:
 
     @staticmethod
     def beatBoss(boss):
-        Bosses.golden4Dead[boss] = True
+        if boss in Bosses.golden4Dead:
+            Bosses.golden4Dead[boss] = True
 
     @staticmethod
     def unbeatBoss(boss):
-        Bosses.golden4Dead[boss] = False
+        if boss in Bosses.golden4Dead:
+            Bosses.golden4Dead[boss] = False
 
     @staticmethod
     def areaBossDead(area):

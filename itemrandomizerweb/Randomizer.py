@@ -170,9 +170,9 @@ class RandoSettings(object):
     def getItemLimit(self, progSpeed):
         itemLimit = 105
         if progSpeed == 'slow':
-            itemLimit = 20
+            itemLimit = 21
         elif progSpeed == 'medium':
-            itemLimit = 11
+            itemLimit = 12
         elif progSpeed == 'fast':
             itemLimit = 5
         elif progSpeed == 'fastest':
@@ -223,13 +223,16 @@ class SuperFunProvider(object):
             'Kraid' : self.sm.enoughStuffsKraid,
             'Phantoon' : self.sm.enoughStuffsPhantoon,
             'Draygon' : self.sm.enoughStuffsDraygon,
-            'Ridley' : self.sm.enoughStuffsRidley
+            'Ridley' : self.sm.enoughStuffsRidley,
+            'Mother Brain': self.sm.enoughStuffsMotherbrain
         }
         self.okay = lambda: SMBool(True, 0)
+        self.itemManager.createItemPool() # we have to do this only once, otherwise pool will change
+        self.basePool = self.itemManager.getItemPool()[:]
         self.log = log.get('SuperFun')
 
     def getItemPool(self, forbidden=[]):
-        self.itemManager.createItemPool()
+        self.itemManager.setItemPool(self.basePool[:]) # reuse base pool to have constant base item set
         return self.itemManager.removeForbiddenItems(self.forbiddenItems + forbidden)
 
     def checkPool(self, forbidden=None):
@@ -239,14 +242,13 @@ class SuperFunProvider(object):
             pool = self.getItemPool([forbidden])
         else:
             pool = self.getItemPool()
-        self.log.debug('pool='+str(list(set([i['Type'] for i in pool]))))
+        self.log.debug('pool='+str(sorted([i['Type'] for i in pool])))
         # give us everything and beat every boss to see what we can access
         self.disableBossChecks()
         self.sm.resetItems()
         self.sm.addItems([item['Type'] for item in pool])
         for boss in self.bossChecks:
             Bosses.beatBoss(boss)
-
         # get restricted locs
         totalAvailLocs = [loc for loc in self.rando.currentLocations(post=True)]
         self.lastRestricted = [loc for loc in self.locations if loc not in totalAvailLocs]
@@ -255,17 +257,17 @@ class SuperFunProvider(object):
         # check if we can reach all APs
         landingSite = self.areaGraph.accessPoints['Landing Site']
         availAccessPoints = self.areaGraph.getAvailableAccessPoints(landingSite, self.sm, self.rando.difficultyTarget)
-        for apName,ap in self.areaGraph.accessPoints.iteritems():
+        for apName, ap in self.areaGraph.accessPoints.iteritems():
             if not ap in availAccessPoints:
                 ret = False
-                self.log.debug("unavail AP:" + apName)
+                self.log.debug("unavail AP: " + apName)
 
         # check if we can reach all bosses
         if ret:
             for loc in self.lastRestricted:
                 if loc['Name'] in self.bossesLocs:
                     ret = False
-                    break
+                    self.log.debug("unavail Boss: " + loc['Name'])
 
         # cleanup
         self.sm.resetItems()
@@ -279,12 +281,14 @@ class SuperFunProvider(object):
         self.sm.enoughStuffsPhantoon = self.okay
         self.sm.enoughStuffsDraygon = self.okay
         self.sm.enoughStuffsRidley = self.okay
+        self.sm.enoughStuffsMotherbrain = self.okay
 
     def restoreBossChecks(self):
         self.sm.enoughStuffsKraid = self.bossChecks['Kraid']
         self.sm.enoughStuffsPhantoon = self.bossChecks['Phantoon']
         self.sm.enoughStuffsDraygon = self.bossChecks['Draygon']
         self.sm.enoughStuffsRidley = self.bossChecks['Ridley']
+        self.sm.enoughStuffsMotherbrain = self.bossChecks['Mother Brain']
 
     def addRestricted(self):
         self.checkPool()
@@ -310,7 +314,7 @@ class SuperFunProvider(object):
         return len(forb)
 
     def getForbiddenSuits(self):
-        self.log.debug("getForbiddenSuits")
+        self.log.debug("getForbiddenSuits BEGIN. forbidden="+str(self.forbiddenItems))
         removableSuits = [suit for suit in self.suits if self.checkPool(suit)]
         if len(removableSuits) > 0:
             # remove at least one
@@ -320,9 +324,10 @@ class SuperFunProvider(object):
                 self.addRestricted()
         else:
             self.errorMsgs.append("Could not remove any suit")
+        self.log.debug("getForbiddenSuits END. forbidden="+str(self.forbiddenItems))
 
     def getForbiddenMovement(self):
-        self.log.debug("getForbiddenMovement")
+        self.log.debug("getForbiddenMovement BEGIN. forbidden="+str(self.forbiddenItems))
         removableMovement = [mvt for mvt in self.movementItems if self.checkPool(mvt)]
         if len(removableMovement) > 0:
             # remove at least the most important
@@ -330,9 +335,10 @@ class SuperFunProvider(object):
             self.addForbidden(removableMovement + [None])
         else:
             self.errorMsgs.append('Could not remove any movement item')
+        self.log.debug("getForbiddenMovement END. forbidden="+str(self.forbiddenItems))
 
     def getForbiddenCombat(self):
-        self.log.debug("getForbiddenCombat")
+        self.log.debug("getForbiddenCombat BEGIN. forbidden="+str(self.forbiddenItems))
         removableCombat = [cbt for cbt in self.combatItems if self.checkPool(cbt)]
         if len(removableCombat) > 0:
             fake = [None, None] # placeholders to avoid tricking the gaussian into removing too much stuff
@@ -340,14 +346,16 @@ class SuperFunProvider(object):
             if self.rando.restrictions['Morph'] == 'late':
                 removableCombat.pop(0)
                 fake.pop()
-            # remove at least one (will be screw or plasma)
-            self.forbiddenItems.append(removableCombat.pop(0))
-            # if plasme is still available, remove it as well
+            if len(removableCombat) > 0:
+                # remove at least one if possible (will be screw or plasma)
+                self.forbiddenItems.append(removableCombat.pop(0))
+            # if plasma is still available, remove it as well
             if len(removableCombat) > 0 and removableCombat[0] == 'Plasma':
                 self.forbiddenItems.append(removableCombat.pop(0))
             self.addForbidden(removableCombat + fake)
         else:
             self.errorMsgs.append('Could not remove any combat item')
+        self.log.debug("getForbiddenCombat END. forbidden="+str(self.forbiddenItems))
 
     def getForbidden(self):
         self.forbiddenItems = []

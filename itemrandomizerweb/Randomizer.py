@@ -236,13 +236,14 @@ class SuperFunProvider(object):
         return self.itemManager.removeForbiddenItems(self.forbiddenItems + forbidden)
 
     def checkPool(self, forbidden=None):
-        self.log.debug("forbidden=" + str(forbidden))
+        self.log.debug("checkPool. forbidden=" + str(forbidden) + ", self.forbiddenItems=" + str(self.forbiddenItems))
         ret = True
         if forbidden is not None:
-            pool = self.getItemPool([forbidden])
+            pool = self.getItemPool(forbidden)
         else:
             pool = self.getItemPool()
-        self.log.debug('pool='+str(sorted([i['Type'] for i in pool])))
+        poolDict = self.rando.getPoolDict(pool)
+        self.log.debug('pool='+str([(t, len(poolDict[t])) for t in poolDict]))
         # give us everything and beat every boss to see what we can access
         self.disableBossChecks()
         self.sm.resetItems()
@@ -297,6 +298,7 @@ class SuperFunProvider(object):
                 self.restrictedLocs.append(r)
 
     def getForbiddenItemsFromList(self, itemList):
+        self.log.debug('getForbiddenItemsFromList: ' + str(itemList))
         remove = []
         n = randGaussBounds(len(itemList))
         for i in range(n):
@@ -307,7 +309,13 @@ class SuperFunProvider(object):
         return remove
 
     def addForbidden(self, removable):
-        forb = self.getForbiddenItemsFromList(removable)
+        forb = None
+        # it can take several tries if some item combination removal
+        # forbids access to more stuff than each individually
+        while forb is None:
+            forb = self.getForbiddenItemsFromList(removable[:])
+            if self.checkPool(forb) == False:
+                forb = None
         self.forbiddenItems += forb
         self.checkPool()
         self.addRestricted()
@@ -315,7 +323,8 @@ class SuperFunProvider(object):
 
     def getForbiddenSuits(self):
         self.log.debug("getForbiddenSuits BEGIN. forbidden="+str(self.forbiddenItems))
-        removableSuits = [suit for suit in self.suits if self.checkPool(suit)]
+        removableSuits = [suit for suit in self.suits if self.checkPool([suit])]
+        self.log.debug("getForbiddenSuits removable="+str(removableSuits))
         if len(removableSuits) > 0:
             # remove at least one
             if self.addForbidden(removableSuits) == 0:
@@ -328,7 +337,8 @@ class SuperFunProvider(object):
 
     def getForbiddenMovement(self):
         self.log.debug("getForbiddenMovement BEGIN. forbidden="+str(self.forbiddenItems))
-        removableMovement = [mvt for mvt in self.movementItems if self.checkPool(mvt)]
+        removableMovement = [mvt for mvt in self.movementItems if self.checkPool([mvt])]
+        self.log.debug("getForbiddenMovement removable="+str(removableMovement))
         if len(removableMovement) > 0:
             # remove at least the most important
             self.forbiddenItems.append(removableMovement.pop(0))
@@ -339,7 +349,8 @@ class SuperFunProvider(object):
 
     def getForbiddenCombat(self):
         self.log.debug("getForbiddenCombat BEGIN. forbidden="+str(self.forbiddenItems))
-        removableCombat = [cbt for cbt in self.combatItems if self.checkPool(cbt)]
+        removableCombat = [cbt for cbt in self.combatItems if self.checkPool([cbt])]
+        self.log.debug("getForbiddenCombat removable="+str(removableCombat))
         if len(removableCombat) > 0:
             fake = [None, None] # placeholders to avoid tricking the gaussian into removing too much stuff
             # do not remove screw if morph placement is late FIXME : this is nasty, but is due to simplistice morph placement restriction implementation

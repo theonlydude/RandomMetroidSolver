@@ -258,13 +258,13 @@ class SuperFunProvider(object):
         self.lastRestricted = [loc for loc in self.locations if loc not in totalAvailLocs]
         self.log.debug("restricted=" + str([loc['Name'] for loc in self.lastRestricted]))
 
-        # check if we can reach all APs
-        landingSite = self.areaGraph.accessPoints['Landing Site']
-        availAccessPoints = self.areaGraph.getAvailableAccessPoints(landingSite, self.sm, self.rando.difficultyTarget)
-        for apName, ap in self.areaGraph.accessPoints.iteritems():
-            if not ap in availAccessPoints:
-                ret = False
-                self.log.debug("unavail AP: " + apName)
+        # check if we can reach all APs from all APs
+        for startApName, startAp in self.areaGraph.accessPoints.iteritems():
+            availAccessPoints = self.areaGraph.getAvailableAccessPoints(startAp, self.sm, self.rando.difficultyTarget)
+            for apName, ap in self.areaGraph.accessPoints.iteritems():
+                if not ap in availAccessPoints:
+                    ret = False
+                    self.log.debug("unavail AP: " + apName + ", from " + startApName)
 
         # check if we can reach all bosses
         if ret:

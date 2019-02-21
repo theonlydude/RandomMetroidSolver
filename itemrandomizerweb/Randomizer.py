@@ -1239,7 +1239,9 @@ class Randomizer(object):
             ret = itemLoc
 
             if self.vcr != None:
-                self.vcr.addRollback(nItemsAtStart - len(self.currentItems))
+                nRoll = nItemsAtStart - len(self.currentItems)
+                if nRoll > 0:
+                    self.vcr.addRollback(nRoll)
         else:
             if isFakeRollback == False:
                 self.log.debug('fallbackState apply')

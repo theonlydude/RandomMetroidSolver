@@ -212,7 +212,7 @@ class SuperFunProvider(object):
         self.forbiddenItems = []
         self.restrictedLocs = []
         self.lastRestricted = []
-        self.bossesLocs = ['Draygon', 'Kraid', 'Ridley', 'Phantoon']
+        self.bossesLocs = ['Draygon', 'Kraid', 'Ridley', 'Phantoon', 'Mother Brain']
         self.suits = ['Varia', 'Gravity']
         # organized by priority
         self.movementItems = ['SpaceJump', 'HiJump', 'SpeedBooster', 'Bomb', 'Grapple', 'SpringBall']
@@ -1105,7 +1105,7 @@ class Randomizer(object):
     # return True if stuck, False if not
     def getItemFromStandardPool(self):
         curLocs = self.currentLocations()
-        self.log.debug("getItemFromStandardPool: I:{} L:{}".format([i['Name'] for i in self.itemPool],[l['Name'] for l in curLocs]))
+        self.log.debug("getItemFromStandardPool: I:{} L:{}".format([i['Name'] for i in self.itemPool],[l['Name'] for l in curLocs if self.restrictions['MajorMinor'] != 'Chozo' or not self.isChozoLeft() or 'Chozo' in l['Class']]))
         itemLocation = self.generateItem(curLocs, self.itemPool)
         isStuck = itemLocation is None
         if not isStuck:
@@ -1137,6 +1137,10 @@ class Randomizer(object):
         return progItems+'/'+position
 
     def hasTried(self, itemLoc):
+        # disable tried check if we don't have morph+unlocking ammo
+        sm = self.smbm
+        if sm.canUsePowerBombs().bool == False or sm.canOpenGreenDoors().bool == False:
+            return False
         itemType = itemLoc['Item']['Type']
         situation = self.getSituationId()
         ret = False
@@ -1151,6 +1155,7 @@ class Randomizer(object):
         situation = self.getSituationId()
         if situation not in self.rollbackItemsTried:
             self.rollbackItemsTried[situation] = []
+        self.log.debug('adding ' + itemType + ' to situation ' + situation)
         self.rollbackItemsTried[situation].append(itemType)
 
     # goes back in the previous states to find one where
@@ -1162,10 +1167,18 @@ class Randomizer(object):
         self.initRollback()
         if len(self.states) == 0:
             self.initState.apply(self)
-            self.log.debug("rollback initState apply, nCurLocs="+str(len(self.currentLocations())))
-            return
+            self.log.debug("rollback END initState apply, nCurLocs="+str(len(self.currentLocations())))
+            return None
         # to stay consistent in case no solution is found as states list was popped in init
+        ret = None
         fallbackState = self.states[-1]
+        # we can be in a 'fake rollback' situation where we rollback
+        # just after non prog phase without checking normal items first (we
+        # do this for more randomness, to avoid placing items in postavail locs
+        # like spospo etc. too often).
+        # if so, we won't go back further a prog item if first rollback fails
+        # (fallback state will be applied instead)
+        isFakeRollback = self.generateItem(self.currentLocations(), self.itemPool) is not None
         i = 0
         possibleStates = []
         while i >= 0 and len(possibleStates) == 0:
@@ -1180,29 +1193,33 @@ class Randomizer(object):
 #                    self.log.debug([item['Type'] for item in posItems])
 #                    self.log.debug([loc['Name'] for loc in state.curLocs])
                     itemLoc = self.generateItem(state.curLocs, self.itemPool)
-                    if itemLoc is not None and not self.hasTried(itemLoc):
+                    if itemLoc is not None and (isFakeRollback == True or not self.hasTried(itemLoc)):
                         possibleStates.append((state, itemLoc))
                 i -= 1
             # nothing, let's rollback further a progression item
             if len(possibleStates) == 0 and i >= 0:
-                sys.stdout.write('!')
-                sys.stdout.flush()
-                self.progressionStatesIndices.pop()
+                if isFakeRollback == False:
+                    sys.stdout.write('!')
+                    sys.stdout.flush()
+                    self.progressionStatesIndices.pop()
+                else:
+                    break
         if len(possibleStates) > 0:
             (state, itemLoc) = possibleStates[random.randint(0, len(possibleStates)-1)]
             self.updateRollbackItemsTried(itemLoc)
             state.apply(self)
-
-            sys.stdout.write('<'*(nStatesAtStart - len(self.states) - 1))
-            sys.stdout.flush()
+            ret = itemLoc
 
             if self.vcr != None:
                 self.vcr.addRollback(nItemsAtStart - len(self.currentItems))
         else:
+            # we end up here if rollback failed or fake rollback was asked
             self.log.debug('fallbackState apply')
             fallbackState.apply(self)
-
+        sys.stdout.write('<'*(nStatesAtStart - len(self.states)))
+        sys.stdout.flush()
         self.log.debug("rollback END: {}".format(len(self.currentItems)))
+        return ret
 
     # check if bosses are blocking the last remaining locations
     def onlyBossesLeft(self, bossesKilled):
@@ -1249,12 +1266,15 @@ class Randomizer(object):
     # fill up unreachable locations with "junk" to maximize the chance of the ROM
     # to be finishable
     def fillRestrictedLocations(self):
-        if self.restrictions['MajorMinor'] == 'Chozo':
-            self.itemPool = self.nonChozoItemPool
-
+        isChozo = self.restrictions['MajorMinor'] == 'Chozo'
         for loc in self.restrictedLocations:
             isMajor = self.isLocMajor(loc)
             isMinor = self.isLocMinor(loc)
+            if isChozo:
+                if isMajor: # chozo loc
+                    self.itemPool = self.chozoItemPool
+                else:
+                    self.itemPool = self.nonChozoItemPool
             itemLocation = {'Location' : loc}
             if isMinor and self.hasItemTypeInPool('Nothing'):
                 itemLocation['Item'] = self.getNextItemInPool('Nothing')
@@ -1275,7 +1295,7 @@ class Randomizer(object):
             self.log.debug("Fill: {} at {}".format(itemLocation['Item']['Type'], itemLocation['Location']['Name']))
             self.getItem(itemLocation, False)
 
-        if self.restrictions['MajorMinor'] == 'Chozo':
+        if isChozo:
             self.itemPool = self.chozoItemPool
 
     def getCurrentState(self):
@@ -1386,7 +1406,7 @@ class Randomizer(object):
         self.curAccessPoints = self.currentAccessPoints()
         self.hadChozoLeft = self.isChozoLeft()
         self.initState = RandoState(self, self.currentLocations())
-#        self.log.debug("{} items in pool".format(len(self.itemPool)))
+        self.log.debug("{} items in pool".format(len(self.itemPool)))
         runtime_s = 0
         startDate = time.clock()
         self.prevDiffTarget = None
@@ -1408,13 +1428,18 @@ class Randomizer(object):
                         # check that we're actually stuck
                         nCurLocs = len(self.currentLocations())
                         nLocsLeft = len(self.unusedLocations)
+                        itemLoc = None
                         # self.log.debug("nCurLocs={}, nLocsLeft={}".format(nCurLocs, nLocsLeft))
                         # self.log.debug("curLocs: {}".format([loc['Name'] for loc in self.states[-1].curLocs]))
                         # self.log.debug("unused: {}".format([loc['Name'] for loc in self.unusedLocations]))
                         if nCurLocs < nLocsLeft:
                             # stuck, rollback to make progress if we can't access everything yet
-                            self.rollback()
-                        isStuck = self.getItemFromStandardPool()
+                            itemLoc = self.rollback()
+                        if itemLoc is not None:
+                            self.getItem(itemLoc)
+                            isStuck = False
+                        else:
+                            isStuck = self.getItemFromStandardPool()
                     else:
                         # stuck by boss fights. disable max difficulty (warn the user afterwards)
                         if self.prevDiffTarget is None:
@@ -1434,12 +1459,16 @@ class Randomizer(object):
             if self.canEndGame():
                 # seed is finishable, place randomly all remaining items
                 while len(self.itemPool) > 0:
+                    item = self.itemPool[0]
+                    possibleLocs = [loc for loc in self.unusedLocations if self.canPlaceAtLocation(item, loc)]
+                    self.log.debug("last fill item = " + item['Type'] + "/" + item['Class'] + ", locs = " + str([loc['Name'] for loc in possibleLocs]))
                     itemLocation = {
-                        'Item' : self.itemPool[0],
-                        'Location' : self.unusedLocations[random.randint(0, len(self.unusedLocations) - 1)]
+                        'Item' : item,
+                        'Location' : possibleLocs[random.randint(0, len(possibleLocs) - 1)]
                     }
-                    self.log.debug("Fill: {} at {}".format(itemLocation['Item']['Type'], itemLocation['Location']['Name']))
+                    self.log.debug("last Fill: {} at {}".format(itemLocation['Item']['Type'], itemLocation['Location']['Name']))
                     self.getItem(itemLocation, False)
+                self.chozoCheck()
             else:
                 print("\nSTUCK ! ")
                 print("REM LOCS = "  + str([loc['Name'] for loc in self.unusedLocations]))

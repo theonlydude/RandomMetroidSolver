@@ -505,10 +505,10 @@ class Randomizer(object):
 
     # with the new chozo split the tests change, a loc can have one or two classes, an item just one
     def isLocMajor(self, loc):
-        return self.restrictions['MajorMinor'] == "Full" or self.restrictions['MajorMinor'] in loc['Class']
+        return 'Boss' not in loc['Class'] and (self.restrictions['MajorMinor'] == "Full" or self.restrictions['MajorMinor'] in loc['Class'])
 
     def isLocMinor(self, loc):
-        return self.restrictions['MajorMinor'] == "Full" or self.restrictions['MajorMinor'] not in loc['Class']
+        return 'Boss' not in loc['Class'] and (self.restrictions['MajorMinor'] == "Full" or self.restrictions['MajorMinor'] not in loc['Class'])
 
     def isItemMajor(self, item):
         if self.restrictions['MajorMinor'] == "Full":
@@ -890,15 +890,9 @@ class Randomizer(object):
     @staticmethod
     def isMorph(item):
         return item['Type'] == 'Morph'
-    
-    def suitsRestrictionsImpl(self, item, location):
-        if item["Type"] == "Gravity":
-            return ((not (location["Area"] == "Crateria" or location["Area"] == "Brinstar"))
-                    or location["Name"] == "X-Ray Scope" or location["Name"] == "Energy Tank, Waterway")
-        elif item["Type"] == "Varia":
-            return not (location["Area"] == "Crateria" or Randomizer.isInBlueBrinstar(location))
 
-        return True
+    def suitsRestrictionsImpl(self, item, location):
+        return location['GraphArea'] != 'Crateria'
 
     def speedScrewRestrictionImpl(self, item, location):
         return not Randomizer.isInBlueBrinstar(location)

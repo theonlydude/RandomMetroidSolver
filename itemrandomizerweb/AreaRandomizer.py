@@ -58,6 +58,3 @@ class AreaRandomizer(Randomizer):
 
     def areaDistance(self, loc, otherLocs):
         return self.areaDistanceProp(loc, otherLocs, 'GraphArea')
-
-    def suitsRestrictionsImpl(self, item, location):
-        return location['GraphArea'] != 'Crateria'

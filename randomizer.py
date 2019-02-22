@@ -273,6 +273,8 @@ if __name__ == "__main__":
         seedCode = 'FX'
     elif restrictions['MajorMinor'] == 'Chozo':
         seedCode = 'ZX'
+    elif restrictions['MajorMinor'] == 'Major':
+        seedCode = 'MX'
     if args.bosses == True:
         seedCode = 'B'+seedCode
     if args.area == True:

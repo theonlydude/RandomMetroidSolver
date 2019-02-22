@@ -38,8 +38,7 @@ class HelpersGraph(Helpers):
                              sm.haveItem('SpaceJump'),
                              sm.knowsContinuousWallJump()),
                              sm.wor(sm.wand(sm.knowsDiagonalBombJump(), sm.canUseBombs()),
-                                    sm.wand(sm.haveItem('SpeedBooster'),
-                                            sm.wor(sm.knowsSimpleShortCharge(), sm.knowsShortCharge())),
+                                    sm.canSimpleShortCharge(),
                                     sm.wand(sm.haveItem('Gravity'),
                                             sm.wor(sm.knowsGravityJump(),
                                                    sm.haveItem('HiJump'),
@@ -88,18 +87,12 @@ class HelpersGraph(Helpers):
     # the water zone east of WS
     def canPassForgottenHighway(self, fromWs):
         sm = self.smbm
-        baseSuitLess = sm.wand(sm.haveItem('HiJump'),
-                               sm.wor(sm.haveItem('Ice'),
-                                      sm.canSpringBallJump()),
-                               sm.knowsGravLessLevel1())
+        suitless = sm.canDoSuitlessOuterMaridia()
         if fromWs is True:
-            suitlessCondition = sm.wand(baseSuitLess, # to climb on the ledges
-                                        sm.haveItem('SpaceJump')) # to go through the door on the right
-        else:
-            suitlessCondition = baseSuitLess
-
+            suitless = sm.wand(suitless, # to climb on the ledges
+                               sm.haveItem('SpaceJump')) # to go through the door on the right
         return sm.wand(sm.wor(sm.haveItem('Gravity'),
-                              suitlessCondition),
+                              suitless),
                        sm.haveItem('Morph')) # for crab maze
 
     @Cache.decorator
@@ -234,10 +227,8 @@ class HelpersGraph(Helpers):
                                       sm.knowsScrewAttackExit()),
                               sm.wand(sm.canUseSpringBall(),
                                       sm.knowsSpringBallJumpFromWall()),
-                              sm.wand(sm.haveItem('SpeedBooster'), # fight GT and spark out
-                                      sm.enoughStuffGT(),
-                                      sm.wor(sm.knowsSimpleShortCharge(),
-                                             sm.knowsShortCharge()))))
+                              sm.wand(sm.canSimpleShortCharge(), # fight GT and spark out
+                                      sm.enoughStuffGT())))
 
     @Cache.decorator
     def canPassWorstRoom(self):
@@ -251,11 +242,11 @@ class HelpersGraph(Helpers):
     @Cache.decorator
     def canPassThreeMuskateers(self):
         sm = self.smbm
-        destroy = sm.wor(sm.haveItem('ScrewAttack'),
+        destroy = sm.wor(sm.haveItem('Plasma'),
+                         sm.haveItem('ScrewAttack'),
                          sm.wand(sm.heatProof(), # this takes a loooong time ...
                                  sm.wor(sm.haveItem('Spazer'),
-                                        sm.haveItem('Ice'),
-                                        sm.haveItem('Plasma'))))
+                                        sm.haveItem('Ice'))))
         if destroy.bool == True:
             return destroy
         # if no adapted beams or screw attack, check if we can go both ways
@@ -299,7 +290,7 @@ class HelpersGraph(Helpers):
                              sm.haveItem('HiJump'),
                              sm.haveItem('Ice'),
                              sm.canFly()),
-                      sm.wand(sm.haveItem('SpeedBooster'), sm.knowsShortCharge()))
+                      sm.canShortCharge())
 
     @Cache.decorator
     def canGoUpMtEverest(self):

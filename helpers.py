@@ -119,6 +119,18 @@ class Helpers(object):
             return SMBool(False)
 
     @Cache.decorator
+    def canSimpleShortCharge(self):
+        sm = self.smbm
+        return sm.wand(sm.haveItem('SpeedBooster'),
+                       sm.wor(sm.knowsSimpleShortCharge(),
+                              sm.knowsShortCharge()))
+
+    @Cache.decorator
+    def canShortCharge(self):
+        sm = self.smbm
+        return sm.wand(sm.haveItem('SpeedBooster'), sm.knowsShortCharge())
+
+    @Cache.decorator
     def canUseBombs(self):
         sm = self.smbm
         return sm.wand(sm.haveItem('Morph'), sm.haveItem('Bomb'))

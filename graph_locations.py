@@ -20,8 +20,7 @@ locations = [
         'Landing Site': lambda sm: SMBool(True)
     },
     'Available': lambda sm: sm.wor(sm.canEnterAndLeaveGauntlet(),
-                                   sm.wand(sm.haveItem('SpeedBooster'),
-                                           sm.knowsShortCharge(),
+                                   sm.wand(sm.canShortCharge(),
                                            sm.canEnterAndLeaveGauntletQty(1, 0))) # thanks ponk! https://youtu.be/jil5zTBCF1s
 },
 {
@@ -127,8 +126,7 @@ locations = [
                                    sm.canFly(),
                                    sm.wor(sm.haveItem('HiJump'),
                                           sm.haveItem('Ice'),
-                                          sm.wand(sm.haveItem('SpeedBooster'),
-                                                  sm.wor(sm.knowsSimpleShortCharge(), sm.knowsShortCharge()))))
+                                          sm.canSimpleShortCharge()))
 },
 {
     'Area': "Brinstar",
@@ -163,8 +161,7 @@ locations = [
                                     sm.canOpenRedDoors(),
                                     sm.haveItem('SpeedBooster'),
                                     sm.wor(sm.haveItem('Gravity'),
-                                           sm.knowsSimpleShortCharge(), # from the blocks above the water
-                                           sm.knowsShortCharge()))
+                                           sm.canSimpleShortCharge())) # from the blocks above the water
 },
 {
     'Area': "Brinstar",
@@ -608,8 +605,7 @@ locations = [
     #  -can fly (space jump or infinite bomb jump)
     #  -use short charge with speedbooster
     'Available': lambda sm: Bosses.bossDead('Draygon'),
-    'PostAvailable': lambda sm: sm.wand(sm.wor(sm.wand(sm.haveItem('SpeedBooster'),
-                                                       sm.knowsShortCharge(),
+    'PostAvailable': lambda sm: sm.wand(sm.wor(sm.wand(sm.canShortCharge(),
                                                        sm.knowsKillPlasmaPiratesWithSpark()),
                                                sm.wand(sm.haveItem('Charge'),
                                                        sm.knowsKillPlasmaPiratesWithCharge()),
@@ -618,8 +614,7 @@ locations = [
                                         sm.wor(sm.canFly(),
                                                sm.wand(sm.haveItem('HiJump'),
                                                        sm.knowsGetAroundWallJump()),
-                                               sm.wand(sm.haveItem('SpeedBooster'),
-                                                       sm.knowsShortCharge()),
+                                               sm.canShortCharge(),
                                                sm.wand(sm.canSpringBallJump(),
                                                        sm.knowsSpringBallJumpFromWall())))
 },
@@ -850,8 +845,7 @@ locations = [
     },
     'Available': lambda sm: sm.wor(sm.wand(sm.canEnterAndLeaveGauntlet(),
                                            sm.canPassBombPassages()),
-                                   sm.wand(sm.wand(sm.knowsShortCharge(),
-                                                   sm.haveItem('SpeedBooster')),
+                                   sm.wand(sm.canShortCharge(),
                                            sm.canUsePowerBombs(),
                                            sm.itemCountOk('ETank', 1),
                                            sm.knowsLowGauntlet()))
@@ -871,8 +865,7 @@ locations = [
     },
     'Available': lambda sm: sm.wor(sm.wand(sm.canEnterAndLeaveGauntlet(),
                                            sm.canPassBombPassages()),
-                                   sm.wand(sm.wand(sm.knowsShortCharge(),
-                                                   sm.haveItem('SpeedBooster')),
+                                   sm.wand(sm.canShortCharge(),
                                            sm.canUsePowerBombs(),
                                            sm.itemCountOk('ETank', 1),
                                            sm.knowsLowGauntlet()))
@@ -899,8 +892,7 @@ locations = [
                                                           sm.haveItem('SpaceJump'),
                                                           sm.heatProof()))),
                                     sm.wor(sm.haveItem('Ice'),
-                                           sm.knowsShortCharge(),
-                                           sm.knowsSimpleShortCharge())) # there's also a dboost involved in simple short charge or you have to kill the yellow enemies with some power bombs
+                                           sm.canSimpleShortCharge())) # there's also a dboost involved in simple short charge or you have to kill the yellow enemies with some power bombs
 },
 {
     'Area': "Crateria",
@@ -1388,8 +1380,9 @@ locations = [
                                                    sm.wor(sm.canFly(),
                                                           sm.haveItem('Grapple'))))), # TODO::test if accessible with a spark, and how many etanks required
     'PostAvailable': lambda sm: sm.wor(sm.haveItem('Morph'), # normal exit
-                                       sm.wor(sm.haveItem('SpaceJump'), # go back to grapple room
-                                              sm.wand(sm.haveItem('SpeedBooster'), sm.haveItem('HiJump')))) # jump from the yellow plateform ennemy
+                                       sm.wand(sm.canOpenGreenDoors(), # go back to grapple room
+                                               sm.wor(sm.haveItem('SpaceJump'), 
+                                                      sm.wand(sm.haveItem('SpeedBooster'), sm.haveItem('HiJump')))) # jump from the yellow plateform ennemy
 },
 {
     'Area': "Norfair",
@@ -1652,8 +1645,7 @@ locations = [
                                     sm.haveItem('SpeedBooster'),
                                     sm.wor(sm.wand(sm.canOpenGreenDoors(), # run from room on the right
                                                    SMBool(sm.haveItemCount('ETank', 1))), # etank for the spark since sparking from low ground
-                                           sm.knowsSimpleShortCharge(), # run from above
-                                           sm.knowsShortCharge())) # run from below and jump
+                                           sm.canSimpleShortCharge())), # run from above
 },
 {
     'Area': "Maridia",

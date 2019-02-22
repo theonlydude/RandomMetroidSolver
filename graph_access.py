@@ -177,8 +177,7 @@ accessPoints = [
                                         sm.wor(sm.haveItem('SpringBall'),
                                                sm.haveItem('Bomb'),
                                                SMBool(sm.haveItemCount('PowerBomb', 2)),
-                                               sm.wand(sm.haveItem('SpeedBooster'),
-                                                       sm.knowsShortCharge()))),
+                                               sm.canShortCharge())), # speedball
         'RidleyRoomOut': lambda sm: sm.canHellRun('LowerNorfair')
     }, internal=True),
     AccessPoint('Three Muskateers Room Left', 'LowerNorfair', {

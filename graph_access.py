@@ -401,30 +401,7 @@ accessPoints = [
        exitInfo = {'DoorPtr':0xa96c, 'direction': 0x4, "cap": (0x1, 0x26), "bitFlag": 0x0,
                    "screen": (0x0, 0x2), "distanceToSpawn": 0x8000, "doorAsmPtr": 0xe3d9},
        entryInfo = {'SamusX':0x1c8, 'SamusY':0x88},
-       # to get out of draygon room:
-       #   with gravity but without highjump/bomb/space jump: gravity jump
-       #     to exit draygon room: grapple or crystal flash (for free shine spark)
-       #     to exit precious room: spring ball jump, xray scope glitch or stored spark
-       # FIXME this handles both draygon room and precious room, which isn't right if bosses are randomized
-       traverse = lambda sm: sm.wor(sm.wand(sm.haveItem('Gravity'),
-                                               sm.wor(sm.canFly(),
-                                                      sm.knowsGravityJump(),
-                                                      sm.wand(sm.haveItem('HiJump'),
-                                                              sm.haveItem('SpeedBooster')))),
-                                       sm.wand(sm.wand(sm.canCrystalFlash(),
-                                                       sm.knowsDraygonRoomCrystalFlash()),
-                                               # use the spark either to exit draygon room or precious room
-                                               sm.wor(sm.wand(sm.haveItem('Grapple'),
-                                                              sm.knowsDraygonRoomGrappleExit()),
-                                                      sm.wand(sm.haveItem('XRayScope'),
-                                                              sm.knowsPreciousRoomXRayExit()),
-                                                      sm.canSpringBallJump())),
-                                       # spark-less exit (no CF)
-                                       sm.wand(sm.wand(sm.haveItem('Grapple'),
-                                                       sm.knowsDraygonRoomGrappleExit()),
-                                               sm.wor(sm.wand(sm.haveItem('XRayScope'),
-                                                              sm.knowsPreciousRoomXRayExit()),
-                                                      sm.canSpringBallJump())))
+       traverse = lambda sm: sm.canExitDraygon()
     ),
     # Red Brinstar. Main nodes: Red Tower Top Left, East Tunnel Right
     AccessPoint('Red Tower Top Left', 'RedBrinstar', {

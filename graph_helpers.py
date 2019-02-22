@@ -355,3 +355,31 @@ class HelpersGraph(Helpers):
         return sm.wand(sm.canDefeatBotwoon(),
                        sm.wor(sm.haveItem('Gravity'),
                               sm.wand(sm.canDoSuitlessMaridia(), sm.knowsGravLessLevel2())))
+
+    @Cache.decorator
+    def canExitDraygon(self):
+        sm = self.smbm
+        # to get out of draygon room:
+        #   with gravity but without highjump/bomb/space jump: gravity jump
+        #     to exit draygon room: grapple or crystal flash (for free shine spark)
+        #     to exit precious room: spring ball jump, xray scope glitch or stored spark
+        # FIXME this handles both draygon room and precious room, which isn't right if bosses are randomized
+        return sm.wor(sm.wand(sm.haveItem('Gravity'),
+                              sm.wor(sm.canFly(),
+                                     sm.knowsGravityJump(),
+                                     sm.wand(sm.haveItem('HiJump'),
+                                             sm.haveItem('SpeedBooster')))),
+                      sm.wand(sm.wand(sm.canCrystalFlash(),
+                                      sm.knowsDraygonRoomCrystalFlash()),
+                              # use the spark either to exit draygon room or precious room
+                              sm.wor(sm.wand(sm.haveItem('Grapple'),
+                                             sm.knowsDraygonRoomGrappleExit()),
+                                     sm.wand(sm.haveItem('XRayScope'),
+                                             sm.knowsPreciousRoomXRayExit()),
+                                     sm.canSpringBallJump())),
+                      # spark-less exit (no CF)
+                      sm.wand(sm.wand(sm.haveItem('Grapple'),
+                                      sm.knowsDraygonRoomGrappleExit()),
+                              sm.wor(sm.wand(sm.haveItem('XRayScope'),
+                                             sm.knowsPreciousRoomXRayExit()),
+                                     sm.canSpringBallJump())))

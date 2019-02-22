@@ -705,6 +705,7 @@ locations = [
                                            sm.knowsGravLessLevel3())
     },
     'Available': lambda sm: sm.enoughStuffsDraygon(),
+    'PostAvailable': lambda sm: sm.canExitDraygon(),
     'Pickup': lambda: Bosses.beatBoss('Draygon'),
     'Unpickup': lambda: Bosses.unbeatBoss('Draygon')
 },
@@ -719,9 +720,17 @@ locations = [
     'Visibility': "Chozo",
     'Room': 'Space Jump Room',
     'AccessFrom' : {
-        'DraygonRoomIn': lambda sm: SMBool(True)
+        'DraygonRoomIn': lambda sm: sm.wor(sm.haveItem('Gravity'),
+                                           sm.knowsGravLessLevel2(),
+                                           sm.knowsGravLessLevel3())
     },
-    'Available': lambda sm: Bosses.bossDead('Draygon')
+    # we put the fight in avail condition instead of boss dead check
+    # to open the possibility of an item unlocking draygon exit to be
+    # placed here.    
+    # in other words we allow space jump loc to be filled before dray
+    # loc    
+    'Available': lambda sm: sm.enoughStuffsDraygon(),
+    'PostAvailable': lambda sm: sm.canExitDraygon()
 },
 {
     'Area': "Tourian",
@@ -1382,7 +1391,7 @@ locations = [
     'PostAvailable': lambda sm: sm.wor(sm.haveItem('Morph'), # normal exit
                                        sm.wand(sm.canOpenGreenDoors(), # go back to grapple room
                                                sm.wor(sm.haveItem('SpaceJump'), 
-                                                      sm.wand(sm.haveItem('SpeedBooster'), sm.haveItem('HiJump')))) # jump from the yellow plateform ennemy
+                                                      sm.wand(sm.haveItem('SpeedBooster'), sm.haveItem('HiJump'))))) # jump from the yellow plateform ennemy
 },
 {
     'Area': "Norfair",

@@ -512,12 +512,15 @@ class Randomizer(object):
 
     def isItemMajor(self, item):
         if self.restrictions['MajorMinor'] == "Full":
-            return False
+            return True
         else:
             return item['Class'] == self.restrictions['MajorMinor']
 
     def isItemMinor(self, item):
-        return item['Class'] == "Minor"
+        if self.restrictions['MajorMinor'] == "Full":
+            return True
+        else:
+            return item['Class'] == "Minor"
 
     def isItemLocMatching(self, loc, item):
         if self.restrictions['MajorMinor'] in loc['Class']:

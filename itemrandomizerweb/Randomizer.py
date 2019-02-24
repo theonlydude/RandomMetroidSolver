@@ -1,6 +1,6 @@
 import sys, random, time
 from itemrandomizerweb.Items import ItemManager
-from parameters import Knows, Settings, samus, infinity
+from parameters import Knows, Settings, samus, infinity, god
 from itemrandomizerweb.stdlib import List
 from smbool import SMBool
 from helpers import Bosses, diffValue2txt
@@ -559,10 +559,10 @@ class Randomizer(object):
                                                          ap)
         if self.restrictions['MajorMinor'] != 'Chozo' or self.difficultyTarget == infinity or not self.isChozoLeft():
             return availLocs
-        # in chozo mode, we disable diff check for bosses/hardrooms/hellruns
+        # in chozo mode, we use high difficulty check for bosses/hardrooms/hellruns
         availLocsInf = self.areaGraph.getAvailableLocations(locs,
                                                             self.smbm,
-                                                            infinity,
+                                                            god,
                                                             ap)
         def isAvail(loc):
             if 'Boss' in loc['Class']:
@@ -1116,7 +1116,7 @@ class Randomizer(object):
                 nItems += 1
                 self.log.debug("fillNonProgressionItems: {} at {}".format(itemLocation['Item']['Name'], itemLocation['Location']['Name']))
                 self.getItem(itemLocation)
-                pool = [item for item in self.itemPool if not self.isProgItem(item)]
+                pool = [item for item in self.itemPool if not self.isProgItem(item)] # FIXME use getNonProgItemPool here ???
             locPoolOk = self.checkLocPool()
         isStuck = not poolWasEmpty and itemLocation is None
         return isStuck

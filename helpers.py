@@ -485,6 +485,14 @@ class Helpers(object):
         return difficulty
 
     @Cache.decorator
+    def canFightDraygon(self):
+        sm = self.smbm
+        return sm.wor(sm.haveItem('Gravity'),
+                      sm.wand(sm.haveItem('HiJump'),
+                              sm.wor(sm.knowsGravLessLevel2(),
+                                     sm.knowsGravLessLevel3())))
+
+    @Cache.decorator
     def enoughStuffsDraygon(self):
         sm = self.smbm
         (ammoMargin, secs) = self.canInflictEnoughDamages(6000)

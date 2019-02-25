@@ -700,9 +700,7 @@ locations = [
     'Address': 0xB055B058,
     'Room': 'Draygon Room',
     'AccessFrom' : {
-        'DraygonRoomIn': lambda sm: sm.wor(sm.haveItem('Gravity'),
-                                           sm.knowsGravLessLevel2(),
-                                           sm.knowsGravLessLevel3())
+        'DraygonRoomIn': lambda sm: sm.canFightDraygon()
     },
     'Available': lambda sm: sm.enoughStuffsDraygon(),
     'PostAvailable': lambda sm: sm.canExitDraygon(),
@@ -720,9 +718,7 @@ locations = [
     'Visibility': "Chozo",
     'Room': 'Space Jump Room',
     'AccessFrom' : {
-        'DraygonRoomIn': lambda sm: sm.wor(sm.haveItem('Gravity'),
-                                           sm.knowsGravLessLevel2(),
-                                           sm.knowsGravLessLevel3())
+        'DraygonRoomIn': lambda sm: sm.canFightDraygon()
     },
     # we put the fight in avail condition instead of boss dead check
     # to open the possibility of an item unlocking draygon exit to be

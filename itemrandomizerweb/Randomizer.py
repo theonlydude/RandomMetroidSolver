@@ -1080,7 +1080,6 @@ class Randomizer(object):
         if (self.restrictions['MajorMinor'] == 'Chozo' or (self.restrictions['MajorMinor'] == 'Major' and self.settings.qty['energy'] == 'vanilla'))\
            and not any(item['Category'] == 'Energy' for item in pool)\
            and any(item['Category'] == 'Energy' for item in basePool):
-            print('caca')
             pool += [item for item in basePool if item['Category'] == 'Energy']
 
     def getNonProgItems(self, basePool):

@@ -1076,27 +1076,46 @@ class Randomizer(object):
                 return False
         return True
 
-    def getNonProgItemPool(self, basePool=None):
-        if basePool is None:
-            basePool = self.itemPool
+    def addEnergyAsNonProg(self, pool, basePool):
+        if (self.restrictions['MajorMinor'] == 'Chozo' or (self.restrictions['MajorMinor'] == 'Major' and self.settings.qty['energy'] == 'vanilla'))\
+           and not any(item['Category'] == 'Energy' for item in pool)\
+           and any(item['Category'] == 'Energy' for item in basePool):
+            print('caca')
+            pool += [item for item in basePool if item['Category'] == 'Energy']
+
+    def getNonProgItems(self, basePool):
         pool = [item for item in basePool if not self.isProgItem(item)]
 
+        return pool
+
+    def getNonProgItemPoolStart(self, basePool=None):
+        if basePool is None:
+            basePool = self.itemPool
+        pool = self.getNonProgItems(basePool)
         # enabled only in major/minor split, and depends on prog speed
         if random.random() < self.minorHelpProb:
             helpfulMinors = [item for item in basePool if item['Class'] == 'Minor' and not self.hasItemTypeInPool(item['Type'], pool)]
             if len(helpfulMinors) > 0:
                 pool.append(helpfulMinors[random.randint(0, len(helpfulMinors)-1)])
         # don't hold energy back for certain settings
-        if (self.restrictions['MajorMinor'] == 'Chozo' or (self.restrictions['MajorMinor'] == 'Major' and self.settings.qty['energy'] == 'vanilla'))\
-            and not any(item['Category'] == 'Energy' for item in pool):
-            pool += [item for item in basePool if item['Category'] == 'Energy']
+        self.addEnergyAsNonProg(pool, basePool)
+
+        return pool
+
+    def getNonProgItemPool(self, basePool=None):
+        if basePool is None:
+            basePool = self.itemPool
+        pool = self.getNonProgItems(basePool)
+        # don't hold energy back for certain settings
+        self.addEnergyAsNonProg(pool, basePool)
+
         return pool
 
     # return True if stuck, False if not
     def fillNonProgressionItems(self):
         if self.itemLimit <= 0:
             return False
-        pool = self.getNonProgItemPool()
+        pool = self.getNonProgItemPoolStart()
         poolTypes = list(set([item['Type'] for item in pool]))
         self.log.debug("fillNonProgressionItems poolset=" + str(poolTypes))
         poolWasEmpty = len(pool) == 0 or poolTypes == ['Boss']
@@ -1116,7 +1135,7 @@ class Randomizer(object):
                 nItems += 1
                 self.log.debug("fillNonProgressionItems: {} at {}".format(itemLocation['Item']['Name'], itemLocation['Location']['Name']))
                 self.getItem(itemLocation)
-                pool = [item for item in self.itemPool if not self.isProgItem(item)] # FIXME use getNonProgItemPool here ???
+                pool = self.getNonProgItemPool()
             locPoolOk = self.checkLocPool()
         isStuck = not poolWasEmpty and itemLocation is None
         return isStuck

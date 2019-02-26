@@ -262,65 +262,43 @@ class Compressor:
             self.address = address
             self.length = length
 
+        def __repr__(self):
+            return "({},{})".format(self.address, self.length)
+
     def _computeCopy(self, inputData):
-        self.copyLengths = [Compressor._Interval(0, 0) for i in range(len(inputData))]
-        # Lists of candidate start addresses for copy, sorted by byte value at that address.
-        addresses = [[-1 for i in range(256)] for j in range(256)]
+        self.copyLengths = []
+        limit = 5
 
-        # For each word fill, store address of prev. word fill ending in same two bytes:
-        backReferences = [0 for i in range(len(inputData))]
-        # For any word fill, store lengths of matching sequences after similar word fills:
-        matchLengths = []
-
-        # i iterates through start addresses of maximal word fills in the input.
+        # for each possible value store the positions of the value in the input data
+        start = [[] for i in range(len(inputData))]
         for i in range(len(inputData)-1):
-            #Register current fill, look for previous word fills ending in same two bytes.
-            fillLength = self.wordFillLengths[i] # length of current word fill.
-            if fillLength % 2 == 0:
-                byte1 = inputData[i]
-                byte2 = inputData[i + 1]
-            else:
-                # swap bytes if fill length is odd.
-                byte1 = inputData[i + 1]
-                byte2 = inputData[i]
-            backReferences[i] = addresses[byte1][byte2]
-            addresses[byte1][byte2] = i
+            start[inputData[i]].append(i)
 
-            # Calculate for each previous occurrence the max matching length after the fill.
-            matchLengths = []
-            previousAddress = backReferences[i]
-            while previousAddress >= 0:
-                previousFill = self.wordFillLengths[previousAddress]
-                l = self._matchSubSequences(previousAddress + previousFill, i + fillLength, inputData);
-                matchLengths.append(Compressor._Interval(previousAddress, l))
-                previousAddress = backReferences[previousAddress]
-
-            # For each index i+j in current maximal word fill, find which previous fill+match
-            # produces the longest total match.
-            for j in range(fillLength-1):
-                bestMatch = Compressor._Interval(0, 0)
-                for n in range(len(matchLengths)):
-                    matchFill = self.wordFillLengths[matchLengths[n].address]
-                    if matchFill < fillLength - j:
-                        match = Compressor._Interval(0, 0) # ignore cases where prev fill is too short.
-                    else:
-                        match = Compressor._Interval(matchLengths[n].address + matchFill - fillLength + j,
-                                                     matchLengths[n].length + fillLength - j)
-                    if (match.length > bestMatch.length):
-                        bestMatch = match
-                self.copyLengths[i + j] = bestMatch
-
-            addresses[byte1][byte2] = i # store address i as last occurrence of word fill.
-            i += fillLength - 1
+        for i, value in enumerate(inputData, start=0):
+            maxLength = 0
+            maxAddress = -1
+            for j, address in enumerate(start[inputData[i]], start=0):
+                # for performance reasons limit the number of addresses
+                if j >= limit:
+                    break
+                # only in previous addresses
+                if address >= i:
+                    break
+                length = self._matchSubSequences(address, i, inputData)
+                if length > maxLength:
+                    maxLength = length
+                    maxAddress = address
+            self.copyLengths.append(Compressor._Interval(maxAddress, maxLength))
 
     # Find the max length of two matching sequences starting at a and b in Input array.
     # Make sure that 0 <= a < b, otherwise bad stuff will happen.
     def _matchSubSequences(self, a, b, inputData):
-        if a == b:
+        if a >= b:
             return 0
 
         i = 0
-        while b+i < len(inputData) and inputData[a+i] == inputData[b+i]:
+        length = len(inputData)
+        while b+i < length and inputData[a+i] == inputData[b+i]:
             i += 1
-        self.log.debug("_matchSubSequences a: {} b: {} i: {}".format(a,b,i))
+        #self.log.debug("_matchSubSequences a: {} b: {} i: {}".format(a,b,i))
         return i

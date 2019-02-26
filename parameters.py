@@ -11,7 +11,7 @@ mania = 100
 god = mania*2
 samus = god*2
 impossibru = samus*2
-infinity = sys.maxint
+infinity = sys.maxsize
 
 diff2text = {
     0: 'baby',

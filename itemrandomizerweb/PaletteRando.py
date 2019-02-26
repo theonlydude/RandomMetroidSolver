@@ -99,7 +99,7 @@ from itemrandomizerweb.palettes import palettes
 
 
 class PaletteRando(object):
-    def __init__(self, romPatcher):
+    def __init__(self, romPatcher, settings):
         self.romPatcher = romPatcher
         self.romLoader = RomLoader.factory(palettes)
         self.palettesROM = self.romLoader.getROM()
@@ -253,32 +253,26 @@ class PaletteRando(object):
         #########################
         #        SETTINGS        #
         #########################
-        self.settings = {
-            #set to True if all suits should get a separate hue-shift degree
-            "individual_suit_shift": True,
+        self.settings = settings
 
-            #set to True if all tileset palettes should get a separate hue-shift degree
-            "individual_tileset_shift": True,
-
-            #Match ship palette with power suit palette
-            "match_ship_and_power": True,
-
-            #Group up similar looking enemy palettes to give them similar looks after hue-shifting
-            #(e.g. metroids, big+small sidehoppers)
-            "seperate_enemy_palette_groups": True,
-
-            #Match boss palettes with boss room degree
-            "match_room_shift_with_boss": False,
-
-            ### These variables define what gets shifted
-            "shift_tileset_palette": True,
-            "shift_boss_palettes": True,
-            "shift_suit_palettes": True,
-            "shift_enemy_palettes": True,
-            "shift_beam_palettes": True,
-            "shift_ship_palette": True
-        }
-
+        #set to True if all suits should get a separate hue-shift degree
+        #"individual_suit_shift": True,
+        #set to True if all tileset palettes should get a separate hue-shift degree
+        #"individual_tileset_shift": True,
+        #Match ship palette with power suit palette
+        #"match_ship_and_power": True,
+        #Group up similar looking enemy palettes to give them similar looks after hue-shifting
+        #(e.g. metroids, big+small sidehoppers)
+        #"seperate_enemy_palette_groups": True,
+        #Match boss palettes with boss room degree
+        #"match_room_shift_with_boss": False,
+        ### These variables define what gets shifted
+        #"shift_tileset_palette": True,
+        #"shift_boss_palettes": True,
+        #"shift_suit_palettes": True,
+        #"shift_enemy_palettes": True,
+        #"shift_beam_palettes": True,
+        #"shift_ship_palette": True
 
         #Change offsets to work with SM practice rom, this was just used for easier feature debugging, changes where new palettes are inserted.
         self.practice_rom = False

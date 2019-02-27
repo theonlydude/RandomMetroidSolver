@@ -1,4 +1,4 @@
-import sys, struct, colorsys, random
+import struct, colorsys, random
 from rom import RomLoader
 from itemrandomizerweb.palettes import palettes
 
@@ -361,6 +361,7 @@ class PaletteRando(object):
         self.outFile.write(struct.pack('B', w2))
 
     def get_word(self, data, index):
+        #print("pr@{}".format(index))
         return data[index] + (data[index+1] << 8)
 
     def set_word(self, data, index, value):
@@ -574,8 +575,7 @@ class PaletteRando(object):
             self.hue_shift_palette_lists(self.boss_degree_list[9], self.mbrain_palettes, self.mbrain_length)    
 
         if self.settings["shift_tileset_palette"] and len(self.pointers_to_insert) == 0:
-            print("tileset shifting needs to be called before boss palette shifting if both are active!")
-            sys.exit(1)
+            raise Exception("tileset shifting needs to be called before boss palette shifting if both are active!")
 
         if self.settings["shift_tileset_palette"]:
             boss_address_list = [self.pointers_to_insert[14], self.pointers_to_insert[22], self.pointers_to_insert[24]]
@@ -765,8 +765,13 @@ class PaletteRando(object):
                 self.hue_shift_fixed_size_palette(address, degree, 0x0F)    
 
     def compress(self, address, data):
-        self.romPatcher.compress(address, data)
+        length = self.romPatcher.compress(address, data)
+
+        # cp new compressed data into vanilla palettes data (used for boss palettes rando)
+        self.outFile.seek(address)
+        for i in range(length):
+            self.palettesROM.data[address+i] = struct.unpack("B", self.outFile.read(1))[0]
 
     def decompress(self, address):
-        (length, rawData) = self.romLoader.decompress(address)
+        (compressedLength, rawData) = self.romLoader.decompress(address)
         return rawData

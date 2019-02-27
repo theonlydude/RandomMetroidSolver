@@ -338,14 +338,16 @@ class PaletteRando(object):
         w0 = struct.unpack("B", self.palettesROM.read(1))[0]
         w1 = struct.unpack("B", self.palettesROM.read(1))[0]
         word = (w1 << 8) + w0
-        #print("{}: {},".format(address, w0))
-        #print("{}: {},".format(address+1, w1))
+        #print("r@{}: {},".format(hex(address), w0))
+        #print("r@{}: {},".format(hex(address+1), w1))
         return word
 
     def write_word(self, address, value):
         self.outFile.seek(address)
         w = value
         (w0, w1) = (w & 0xFF, (w & 0xFF00) >> 8)
+        #print("w@{}: {},".format(hex(address), w0))
+        #print("w@{}: {},".format(hex(address+1), w1))
         self.outFile.write(struct.pack('B', w0))
         self.outFile.write(struct.pack('B', w1))
 

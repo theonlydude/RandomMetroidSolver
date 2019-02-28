@@ -4,6 +4,7 @@ import argparse, random, os.path, json, sys, shutil
 
 from itemrandomizerweb.Randomizer import Randomizer, RandoSettings, progSpeeds
 from itemrandomizerweb.AreaRandomizer import AreaRandomizer
+from itemrandomizerweb.PaletteRando import PaletteRando
 from graph_locations import locations as graphLocations
 from graph_access import vanillaTransitions, getDoorConnections, vanillaBossesTransitions, getRandomBossTransitions
 from parameters import Knows, easy, medium, hard, harder, hardcore, mania, text2diff, diff2text
@@ -138,11 +139,35 @@ if __name__ == "__main__":
     parser.add_argument('--moonwalk',
                         help="Enables moonwalk by default",
                         dest='moonWalk', action='store_true', default=False)
-    parser.add_argument('--runtime', help="Maximum runtime limit in seconds. If 0 or negative, no runtime limit. Default is 30.", dest='runtimeLimit_s',
-                        nargs='?', default=30, type=int)
+    parser.add_argument('--runtime',
+                        help="Maximum runtime limit in seconds. If 0 or negative, no runtime limit. Default is 30.",
+                        dest='runtimeLimit_s', nargs='?', default=30, type=int)
     parser.add_argument('--race', help="Race mode magic number, between 1 and 65535", dest='raceMagic',
                         type=int)
     parser.add_argument('--vcr', help="Generate VCR output file", dest='vcr', action='store_true')
+    parser.add_argument('--palette', help="Randomize the palettes", dest='palette', action='store_true')
+    parser.add_argument('--individual_suit_shift', help="palette param", action='store_true',
+                        dest='individual_suit_shift', default=False)
+    parser.add_argument('--individual_tileset_shift', help="palette param", action='store_true',
+                        dest='individual_tileset_shift', default=False)
+    parser.add_argument('--no_match_ship_and_power', help="palette param", action='store_false',
+                        dest='match_ship_and_power', default=True)
+    parser.add_argument('--seperate_enemy_palette_groups', help="palette param", action='store_true',
+                        dest='seperate_enemy_palette_groups', default=False)
+    parser.add_argument('--no_match_room_shift_with_boss', help="palette param", action='store_false',
+                        dest='match_room_shift_with_boss', default=True)
+    parser.add_argument('--no_shift_tileset_palette', help="palette param", action='store_false',
+                        dest='shift_tileset_palette', default=True)
+    parser.add_argument('--no_shift_boss_palettes', help="palette param", action='store_false',
+                        dest='shift_boss_palettes', default=True)
+    parser.add_argument('--no_shift_suit_palettes', help="palette param", action='store_false',
+                        dest='shift_suit_palettes', default=True)
+    parser.add_argument('--no_shift_enemy_palettes', help="palette param", action='store_false',
+                        dest='shift_enemy_palettes', default=True)
+    parser.add_argument('--no_shift_beam_palettes', help="palette param", action='store_false',
+                        dest='shift_beam_palettes', default=True)
+    parser.add_argument('--no_shift_ship_palette', help="palette param", action='store_false',
+                        dest='shift_ship_palette', default=True)
 
     # parse args
     args = parser.parse_args()
@@ -439,6 +464,23 @@ if __name__ == "__main__":
         if args.patchOnly == False:
             romPatcher.writeMagic()
             romPatcher.writeMajorsSplit(args.majorsSplit)
+        if args.palette == True:
+            paletteSettings = {
+                "individual_suit_shift": None,
+                "individual_tileset_shift": None,
+                "match_ship_and_power": None,
+                "seperate_enemy_palette_groups": None,
+                "match_room_shift_with_boss": None,
+                "shift_tileset_palette": None,
+                "shift_boss_palettes": None,
+                "shift_suit_palettes": None,
+                "shift_enemy_palettes": None,
+                "shift_beam_palettes": None,
+                "shift_ship_palette": None
+            }
+            for param in paletteSettings:
+                paletteSettings[param] = getattr(args, param)
+            PaletteRando(romPatcher, paletteSettings).randomize()
         romPatcher.end()
 
         if args.rom is None:

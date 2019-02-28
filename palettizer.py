@@ -1,40 +1,75 @@
 #!/usr/bin/python
 
+import random, sys, argparse
 from itemrandomizerweb.PaletteRando import PaletteRando
-import random, sys
 from rom import RomPatcher
+import log
 
-random.seed(random.randint(0, 9999999))
+# for local "palette rando" patching of a seed
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Random Metroid Palettes Randomizer")
+    parser.add_argument('--rom', '-r', help="the ROM", dest='rom', nargs='?', default=None)
+    parser.add_argument('--individual_suit_shift', help="", action='store_true', dest='individual_suit_shift', default=False)
+    parser.add_argument('--individual_tileset_shift', help="", action='store_true', dest='individual_tileset_shift', default=False)
+    parser.add_argument('--no_match_ship_and_power', help="", action='store_false', dest='match_ship_and_power', default=True)
+    parser.add_argument('--seperate_enemy_palette_groups', help="", action='store_true', dest='seperate_enemy_palette_groups', default=False)
+    parser.add_argument('--no_match_room_shift_with_boss', help="", action='store_false', dest='match_room_shift_with_boss', default=True)
+    parser.add_argument('--no_shift_tileset_palette', help="", action='store_false', dest='shift_tileset_palette', default=True)
+    parser.add_argument('--no_shift_boss_palettes', help="", action='store_false', dest='shift_boss_palettes', default=True)
+    parser.add_argument('--no_shift_suit_palettes', help="", action='store_false', dest='shift_suit_palettes', default=True)
+    parser.add_argument('--no_shift_enemy_palettes', help="", action='store_false', dest='shift_enemy_palettes', default=True)
+    parser.add_argument('--no_shift_beam_palettes', help="", action='store_false', dest='shift_beam_palettes', default=True)
+    parser.add_argument('--no_shift_ship_palette', help="", action='store_false', dest='shift_ship_palette', default=True)
+    parser.add_argument('--seed', '-s', help="randomization seed to use", dest='seed', nargs='?', default=0, type=int)
+    parser.add_argument('--debug', '-d', help="activate debug logging", dest='debug', action='store_true')
 
-# we don't have access to the vanilla ROM in web mode
-filename = sys.argv[1]
-romPatcher = RomPatcher(filename)
+    args = parser.parse_args()
 
-settings = {
-    #set to True if all suits should get a separate hue-shift degree
-    "individual_suit_shift": False,
+    # local mode
+    if args.rom == None:
+        print("Need --rom parameter")
+        sys.exit(-1)
 
-    #set to True if all tileset palettes should get a separate hue-shift degree
-    "individual_tileset_shift": False,
+    log.init(args.debug)
+    logger = log.get('Palette')
 
-    #Match ship palette with power suit palette
-    "match_ship_and_power": False,
+    if args.seed == 0:
+        random.seed(random.randint(0, 9999999))
+    else:
+        random.seed(args.seed)
 
-    #Group up similar looking enemy palettes to give them similar looks after hue-shifting
-    #(e.g. metroids, big+small sidehoppers)
-    "seperate_enemy_palette_groups": True,
+    settings = {
+        #set to True if all suits should get a separate hue-shift degree
+        "individual_suit_shift": False,
 
-    #Match boss palettes with boss room degree
-    "match_room_shift_with_boss": False,
+        #set to True if all tileset palettes should get a separate hue-shift degree
+        "individual_tileset_shift": False,
 
-    ### These variables define what gets shifted
-    "shift_tileset_palette": True,
-    "shift_boss_palettes": True,
-    "shift_suit_palettes": True,
-    "shift_enemy_palettes": True,
-    "shift_beam_palettes": True,
-    "shift_ship_palette": True
-}
+        #Match ship palette with power suit palette
+        "match_ship_and_power": True,
 
-paletteRando = PaletteRando(romPatcher, settings)
-paletteRando.randomize()
+        #Group up similar looking enemy palettes to give them similar looks after hue-shifting
+        #(e.g. metroids, big+small sidehoppers)
+        "seperate_enemy_palette_groups": False,
+
+        #Match boss palettes with boss room degree
+        "match_room_shift_with_boss": True,
+
+        ### These variables define what gets shifted
+        "shift_tileset_palette": True,
+        "shift_boss_palettes": True,
+        "shift_suit_palettes": True,
+        "shift_enemy_palettes": True,
+        "shift_beam_palettes": True,
+        "shift_ship_palette": True
+    }
+
+    for param in settings:
+        settings[param] = getattr(args, param)
+
+    logger = log.get('Palette')
+    logger.debug("settings: {}".format(settings))
+
+    romPatcher = RomPatcher(args.rom)
+    paletteRando = PaletteRando(romPatcher, settings)
+    paletteRando.randomize()

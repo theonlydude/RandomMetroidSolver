@@ -1,6 +1,7 @@
 import struct, colorsys, random
 from rom import RomLoader
 from itemrandomizerweb.palettes import palettes
+import log
 
 #Palette Hue Shift
 
@@ -100,6 +101,8 @@ from itemrandomizerweb.palettes import palettes
 
 class PaletteRando(object):
     def __init__(self, romPatcher, settings):
+        self.logger = log.get('Palette')
+
         self.romPatcher = romPatcher
         self.romLoader = RomLoader.factory(palettes)
         self.palettesROM = self.romLoader.getROM()
@@ -276,7 +279,6 @@ class PaletteRando(object):
 
         #Change offsets to work with SM practice rom, this was just used for easier feature debugging, changes where new palettes are inserted.
         self.practice_rom = False
-        self.debug = False
 
         self.power_palette_offsets = [0x0D9400,0x0D9820,0x0D9840,0x0D9860,0x0D9880,0x0D98A0,0x0D98C0,0x0D98E0,0x0D9900,0x0D9B20,0x0D9B40,0x0D9B60,0x0D9B80,0x0D9BA0,0x0D9BC0,0x0D9BE0,0x0D9C00,0x0D9C20,0x0D9C40,0x0D9C60,0x0D9C80,0x0D9CA0,0x0D9CC0,0x0D9CE0,0x0D9D00,0x6DB6B, 0x6DBBA, 0x6DC09, 0x6DC58, 0x6DCA4,0x6E466, 0x6E488, 0x6E4AA, 0x6E4CC, 0x6E4EE, 0x6E510, 0x6E532, 0x6E554, 0x6E576, 0x6E598, 0x6E5BA, 0x6E5DC, 0x6E5FE, 0x6E620, 0x6E642, 0x6E664,0x6DB8F,0x6DC2D,0x6DC7C,0x6DBDE]
         self.varia_palette_offsets = [0x0D9520,0x0D9920,0x0D9940,0x0D9960,0x0D9980,0x0D99A0,0x0D99C0,0x0D99E0,0x0D9A00,0x0D9D20,0x0D9D40,0x0D9D60,0x0D9D80,0x0D9DA0,0x0D9DC0,0x0D9DE0,0x0D9E00,0x0D9E20,0x0D9E40,0x0D9E60,0x0D9E80,0x0D9EA0,0x0D9EC0,0x0D9EE0,0x0D9F00,0x6DCD1, 0x6DD20, 0x6DD6F, 0x6DDBE, 0x6DE0A,0x6E692, 0x6E6B4, 0x6E6D6, 0x6E6F8, 0x6E71A, 0x6E73C, 0x6E75E, 0x6E780, 0x6E7A2, 0x6E7C4, 0x6E7E6, 0x6E808, 0x6E82A, 0x6E84C, 0x6E86E, 0x6E890,0x6DCF5,0x6DD44,0x6DD93,0x6DDE2]
@@ -294,27 +296,27 @@ class PaletteRando(object):
     def adjust_hue_degree(self, hsl_color, degree):
         hue = hsl_color[0] *360
         hue_adj = (hue +degree) % 360
-        if self.debug: print("Original hue: ",hue)
-        if self.debug: print("Adjusted hue:", hue_adj)
-        if self.debug: print("Degree:", degree)
+        self.logger.debug("Original hue: {}".format(hue))
+        self.logger.debug("Adjusted hue: {}".format(hue_adj))
+        self.logger.debug("Degree: {}".format(degree))
 
         return hue_adj
 
     def adjust_sat(self, hsl_color, adjustment):
         sat = hsl_color[1]*100
         sat_adj = (sat+ adjustment) % 100
-        if self.debug: print("Original sat: ",sat)
-        if self.debug: print("Adjusted sat:", sat_adj)
-        if self.debug: print("Adjustment", adjustment)
+        self.logger.debug("Original sat: {}".format(sat))
+        self.logger.debug("Adjusted sat: {}".format(sat_adj))
+        self.logger.debug("Adjustment: {}".format(adjustment))
 
         return sat_adj
 
     def adjust_light(self, hsl_color, adjustment):
         lit = hsl_color[2]*100
         lit_adj = (lit + adjustment) % 100
-        if self.debug: print("Original lit: ",lit)
-        if self.debug: print("Adjusted lit:", lit_adj)
-        if self.debug: print("Adjustment", adjustment)
+        self.logger.debug("Original lit: {}".format(lit))
+        self.logger.debug("Adjusted lit: {}".format(lit_adj))
+        self.logger.debug("Adjustment: {}".format(adjustment))
 
         return lit_adj
 
@@ -391,9 +393,9 @@ class PaletteRando(object):
     def hue_shift_palette_lists(self, degree, address_list, size_list):
         for count, address in enumerate(address_list):
             for i in range(size_list[count]+1):
-                if self.debug: print("Fx1 address:",hex(address)," at offset: ", hex(i*2))
+                self.logger.debug("Fx1 address: {} at offset: {}".format(hex(address), hex(i*2)))
 
-                read_address=address+(i*2)
+                read_address = address + (i*2)
                 int_value_LE = self.read_word(read_address)
 
                 #Convert 15bit RGB to 24bit RGB
@@ -430,12 +432,12 @@ class PaletteRando(object):
             #Convert 15bit RGB to 24bit RGB
             rgb_value_24 = self.RGB_15_to_24(int_value_LE)
 
-            if self.debug: print("24RGB: ",rgb_value_24)
+            self.logger.debug("24RGB: {}".format(rgb_value_24))
 
             #24bit RGB to HLS
             hls_col = colorsys.rgb_to_hls(rgb_value_24[0]/255.0,rgb_value_24[1]/255.0,rgb_value_24[2]/255.0)
 
-            if self.debug: print("hls_col: {}".format(hls_col))
+            self.logger.debug("hls_col: {}".format(hls_col))
 
             #Generate new hue based on degree
             new_hue = self.adjust_hue_degree(hls_col, degree)/360.0
@@ -445,19 +447,19 @@ class PaletteRando(object):
             #Colorspace is in [0...1] format during conversion and needs to be multiplied by 255
             rgb_final = (int(rgb_final[0]*255),int(rgb_final[1]*255),int(rgb_final[2]*255))
 
-            if self.debug: print("New 24RGB 1", rgb_final)
+            self.logger.debug("New 24RGB 1 {}".format(rgb_final))
 
             BE_hex_color = self.RGB_24_to_15(rgb_final)
 
-            if self.debug: print("15bit BE_hex_color", hex(BE_hex_color))
+            self.logger.debug("15bit BE_hex_color: {}".format(hex(BE_hex_color)))
 
             self.set_word(data, offset, BE_hex_color)
 
-            if self.debug: print("write decomp palette offset:", hex(offset), " value:" , BE_hex_color )
+            self.logger.debug("write decomp palette offset: {} value: {}".format(hex(offset), BE_hex_color))
 
     #Function to shift palette hues by set degree for a palette with fixed size 0x0F
     def hue_shift_fixed_size_palette(self, base_address, degree,size):
-        if self.debug: print("Shifting suit palette at ", hex(base_address)," by degree ", degree)
+        self.logger.debug("Shifting suit palette at {} by degree {}".format(hex(base_address), degree))
 
         for i in range(0,size+1):
             read_address=base_address+(i*2)
@@ -513,7 +515,7 @@ class PaletteRando(object):
                     #Convert 15bit RGB to 24bit RGB
                     rgb_value_24 = self.RGB_15_to_24(int_value_LE)
 
-                    if self.debug: print("24RGB: ",rgb_value_24)
+                    self.logger.debug("24RGB: {}".format(rgb_value_24))
 
                     #24bit RGB to HLS
                     hls_col = colorsys.rgb_to_hls(rgb_value_24[0]/255.0,rgb_value_24[1]/255.0,rgb_value_24[2]/255.0)
@@ -526,15 +528,15 @@ class PaletteRando(object):
                     #Colorspace is in [0...1] format during conversion and needs to be multiplied by 255
                     rgb_final = (int(rgb_final[0]*255),int(rgb_final[1]*255),int(rgb_final[2]*255))
 
-                    if self.debug: print("New 24RGB 2", rgb_final)
+                    self.logger.debug("New 24RGB 2: {}".format(rgb_final))
 
                     BE_hex_color = self.RGB_24_to_15(rgb_final)
 
-                    if self.debug: print("15bit BE_hex_color", hex(BE_hex_color))
+                    self.logger.debug("15bit BE_hex_color: {}".format(hex(BE_hex_color)))
 
                     self.set_word(data, subset+(j*2), BE_hex_color)
 
-                    if self.debug: print("write decomp palette index:", hex(subset+(j*2)), " value:" , BE_hex_color )
+                    self.logger.debug("write decomp palette index: {} value: {}".format(hex(subset+(j*2)), BE_hex_color))
 
             #practice rom free space 0x2F51C0 -> 0x2F7FFF
             if self.practice_rom:
@@ -543,7 +545,7 @@ class PaletteRando(object):
                 insert_address= 0x2FE050 + (count*0x100)
 
             self.pointers_to_insert.append(insert_address)
-            if self.debug: print("pointers_to_insert: ",pointers_to_insert)
+            self.logger.debug("pointers_to_insert: {}".format(self.pointers_to_insert))
 
             #Recompress palette and re-insert at offset
             self.compress(insert_address, data)
@@ -615,7 +617,7 @@ class PaletteRando(object):
                     #Convert 15bit RGB to 24bit RGB
                     rgb_value_24 = self.RGB_15_to_24(int_value_LE)
 
-                    if self.debug: print("24RGB: ",rgb_value_24)
+                    self.logger.debug("24RGB: {}".format(rgb_value_24))
 
                     #24bit RGB to HLS
                     hls_col = colorsys.rgb_to_hls(rgb_value_24[0]/255.0,rgb_value_24[1]/255.0,rgb_value_24[2]/255.0)
@@ -628,15 +630,15 @@ class PaletteRando(object):
                     #Colorspace is in [0...1] format during conversion and needs to be multiplied by 255
                     rgb_final = (int(rgb_final[0]*255),int(rgb_final[1]*255),int(rgb_final[2]*255))
 
-                    if self.debug: print("New 24RGB 3", rgb_final)
+                    self.logger.debug("New 24RGB 3: {}".format(rgb_final))
 
                     BE_hex_color = self.RGB_24_to_15(rgb_final)
 
-                    if self.debug: print("15bit BE_hex_color", hex(BE_hex_color))
+                    self.logger.debug("15bit BE_hex_color: {}".format(hex(BE_hex_color)))
 
                     self.set_word(data, subset+(j*2), BE_hex_color)
 
-                    if self.debug: print("write decomp palette index:", hex(subset+(j*2)), " value:" , BE_hex_color )
+                    self.logger.debug("write decomp palette index: {} value: {}".format(hex(subset+(j*2)), BE_hex_color))
 
             #quick hack to re-insert, should work without issues
             insert_address = address
@@ -662,7 +664,7 @@ class PaletteRando(object):
                 self.hue_shift_palette_lists(self.degree_list[11], self.fx1_palettes_ma, self.fx1_length_ma)
                 self.hue_shift_palette_lists(self.degree_list[7], self.fx1_palettes_lanterns, self.fx1_length_lanterns)
                 self.hue_shift_palette_lists(self.degree_list[6], self.crateria_special_enemies, [0x0F,0x0F]) 
-                if self.debug: print("Wrecked Ship sparks shifted by ", self.degree_list[4])
+                self.logger.debug("Wrecked Ship sparks shifted by {}".format(self.degree_list[4]))
                 self.hue_shift_palette_lists(self.degree_list[4], self.wrecked_ship_special_enemies, [0x0F])
                 self.hue_shift_palette_lists(self.degree_list[13], self.tourian_special_enemies, [0x0F,0x0F])
                 self.hue_shift_fixed_size_palette(self.statue_palette_ridley, self.degree_list[17], 0x0F)
@@ -690,8 +692,8 @@ class PaletteRando(object):
             i=-1
             for p_update in self.pointers_to_insert:
                 i=i+1
-                if self.debug: print("New Pointer Address: ", p_update)
-                if self.debug: print("Write this to file: ", hex(self.pc_to_snes(p_update)))
+                self.logger.debug("New Pointer Address: {}".format(p_update))
+                self.logger.debug("Write this to file: {}".format(hex(self.pc_to_snes(p_update))))
                 self.write_pointer(self.pointer_addresses[i], self.pc_to_snes(p_update))
 
         #this NEEDS to be called after the tileset palette shift function (if tileset shift actually gets called) because it references newly created pointers
@@ -723,7 +725,7 @@ class PaletteRando(object):
                     enemy_degree = random.randint(0, self.max_degree)
                     self.hue_shift_fixed_size_palette(address, enemy_degree, 0x0F)
 
-        if self.debug: print(self.degree_list)
+        self.logger.debug("degree_list: {}".format(self.degree_list))
 
         if self.settings["shift_beam_palettes"]:
             beam_degree = random.randint(0, self.max_degree)

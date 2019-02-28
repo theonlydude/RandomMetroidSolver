@@ -210,7 +210,7 @@ locations = [
                                                           sm.canInfiniteBombJump(),
                                                           sm.wand(sm.haveItem('HiJump'),
                                                                   sm.wor(sm.haveItem('SpeedBooster'),
-                                                                         sm.haveItem('SpringBall')))))))
+                                                                         sm.canSpringBallJump()))))))
 },
 {
     'Area': "Brinstar",
@@ -451,7 +451,9 @@ locations = [
     'AccessFrom' : {
         'Screw Attack Bottom': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: SMBool(True)
+    'Available': lambda sm: SMBool(True),
+    # we still put post available for easier super fun checks
+    'PostAvailable': lambda sm: sm.canExitScrewAttackArea()
 },
 {
     'Area': "LowerNorfair",

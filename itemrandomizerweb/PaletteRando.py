@@ -647,13 +647,13 @@ class PaletteRando(object):
             self.compress(insert_address, data)
 
     def randomize(self):
-        tileset_degree = random.randint(0, self.max_degree)
+        degree = random.randint(0, self.max_degree)
 
         self.generate_tileset_degrees()
         self.generate_boss_degrees()
 
         if self.settings["shift_tileset_palette"]:
-            self.hue_shift_tileset_palette(tileset_degree)
+            self.hue_shift_tileset_palette(degree)
 
             if self.settings["individual_tileset_shift"]:
                 self.hue_shift_palette_lists(self.degree_list[0], self.fx1_palettes_cr, self.fx1_length_cr)
@@ -672,7 +672,6 @@ class PaletteRando(object):
                 self.hue_shift_fixed_size_palette(self.statue_base, self.degree_list[17], 0x0F)
                 self.hue_shift_palette_lists(self.degree_list[17], self.statue_fadeout_palettes, self.statue_fadeout_size)
             else:
-                degree = tileset_degree
                 self.hue_shift_palette_lists(degree, self.fx1_palettes_cr, self.fx1_length_cr)
                 self.hue_shift_palette_lists(degree, self.fx1_palettes_gb, self.fx1_length_gb)
                 self.hue_shift_palette_lists(degree, self.fx1_palettes_rb, self.fx1_length_rb)

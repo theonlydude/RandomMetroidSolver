@@ -727,6 +727,12 @@ def initRandomizerSession():
         session.randomizer['hideItems'] = "off"
         session.randomizer['strictMinors'] = "off"
         session.randomizer['randoPreset'] = ""
+        session.randomizer['colorsRandomization'] = "off"
+        session.randomizer['suitsPalettes'] = "on"
+        session.randomizer['beamsPalettes'] = "on"
+        session.randomizer['tilesPalettes'] = "on"
+        session.randomizer['enemiesPalettes'] = "on"
+        session.randomizer['bossesPalettes'] = "on"
 
     # fix session
     if 'fullRandomization' in session.randomizer:
@@ -823,7 +829,7 @@ def validateWebServiceParams(patchs, quantities, others, isJson=False):
         except:
             raiseHttp(400, "Wrong value for paramsFileTarget, must be a JSON string", isJson)
 
-    for check in ['suitsRestriction', 'layoutPatches', 'noGravHeat', 'areaRandomization', 'bossRandomization', 'hideItems', 'strictMinors']:
+    for check in ['suitsRestriction', 'layoutPatches', 'noGravHeat', 'areaRandomization', 'bossRandomization', 'hideItems', 'strictMinors', 'colorsRandomization', 'suitsPalettes', 'beamsPalettes', 'tilesPalettes', 'enemiesPalettes', 'bossesPalettes']:
         if check in others:
             if request.vars[check] not in ['on', 'off', 'random']:
                 raiseHttp(400, "Wrong value for {}: {}, authorized values: on/off".format(check, request.vars[check]), isJson)
@@ -865,7 +871,9 @@ def sessionWebService():
               'progressionSpeed', 'majorsSplit', 'suitsRestriction',
               'funCombat', 'funMovement', 'funSuits', 'layoutPatches', 'preset',
               'noGravHeat', 'progressionDifficulty', 'morphPlacement',
-              'areaRandomization', 'bossRandomization', 'complexity', 'hideItems', 'strictMinors', 'randoPreset']
+              'areaRandomization', 'bossRandomization', 'complexity', 'hideItems', 'strictMinors', 'randoPreset',
+              'colorsRandomization','suitsPalettes', 'beamsPalettes', 'tilesPalettes', 'enemiesPalettes',
+              'bossesPalettes']
     validateWebServiceParams(patchs, quantities, others)
 
     if session.randomizer is None:
@@ -898,6 +906,12 @@ def sessionWebService():
     session.randomizer['hideItems'] = request.vars.hideItems
     session.randomizer['strictMinors'] = request.vars.strictMinors
     session.randomizer['randoPreset'] = request.vars.randoPreset
+    session.randomizer['colorsRandomization'] = request.vars.colorsRandomization
+    session.randomizer['suitsPalettes'] = request.vars.suitsPalettes
+    session.randomizer['beamsPalettes'] = request.vars.beamsPalettes
+    session.randomizer['tilesPalettes'] = request.vars.tilesPalettes
+    session.randomizer['enemiesPalettes'] = request.vars.enemiesPalettes
+    session.randomizer['bossesPalettes'] = request.vars.bossesPalettes
 
     # to create a new rando preset, uncomment next lines
     #with open('rando_presets/new.json', 'w') as jsonFile:
@@ -928,7 +942,8 @@ def randomizerWebService():
               'maxDifficulty', 'progressionSpeed', 'majorsSplit',
               'suitsRestriction', 'morphPlacement', 'funCombat', 'funMovement', 'funSuits',
               'layoutPatches', 'noGravHeat', 'progressionDifficulty', 'areaRandomization',
-              'bossRandomization', 'hideItems', 'strictMinors', 'complexity']
+              'bossRandomization', 'hideItems', 'strictMinors', 'complexity', 'colorsRandomization',
+              'suitsPalettes', 'beamsPalettes', 'tilesPalettes', 'enemiesPalettes', 'bossesPalettes']
     validateWebServiceParams(patchs, quantities, others, isJson=True)
 
     # randomize
@@ -1027,6 +1042,19 @@ def randomizerWebService():
 
     if request.vars.bossRandomization == 'on':
         params.append('--bosses')
+
+    if request.vars.colorsRandomization == 'on':
+        params.append('--palette')
+        if request.vars.suitsPalettes == 'off':
+            params.append('--no_shift_suit_palettes')
+        if request.vars.beamsPalettes == 'off':
+            params.append('--no_shift_beam_palettes')
+        if request.vars.tilesPalettes == 'off':
+            params.append('--no_shift_tileset_palette')
+        if request.vars.enemiesPalettes == 'off':
+            params.append('--no_shift_enemy_palettes')
+        if request.vars.bossesPalettes == 'off':
+            params.append('--no_shift_boss_palettes')
 
     # load content of preset to get controller mapping
     try:

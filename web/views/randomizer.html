@@ -177,7 +177,7 @@ function setComplexity() {
 function changeComplexity(evt, name) {
   if(name == "simple") {
     var show = [];
-    var hide = ["seedVisibility", "ammoVisibility", "maxDiffVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "morphPlacementVisibility", "superFunVisibility", "patchesVisibility", "areaPatchVisibility", "hideItemsVisibility", "raceModeVisibility"];
+    var hide = ["seedVisibility", "ammoVisibility", "maxDiffVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "morphPlacementVisibility", "superFunVisibility", "patchesVisibility", "areaPatchVisibility", "hideItemsVisibility", "raceModeVisibility", "colorsRandomizationVisibility"];
     showHide(show, hide);
   }
 
@@ -190,7 +190,7 @@ for patch in patches:
     pass
   pass
 }}];
-    var hide = ["seedVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "strictMinorsVisibility", "missileQtyVisibility", "superQtyVisibility", "powerBombQtyVisibility", "superFunVisibility", "areaPatchVisibility", "mainPatchesVisibitily", "mainPatchesTextVisibitily", "hideItemsVisibility", "raceModeVisibility"
+    var hide = ["seedVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "strictMinorsVisibility", "missileQtyVisibility", "superQtyVisibility", "powerBombQtyVisibility", "superFunVisibility", "areaPatchVisibility", "mainPatchesVisibitily", "mainPatchesTextVisibitily", "hideItemsVisibility", "raceModeVisibility", "colorsRandomizationVisibility"
 {{
 for patch in patches:
   if patch[3] == False:
@@ -202,7 +202,7 @@ for patch in patches:
   }
 
   else {
-    var show = ["seedVisibility", "ammoVisibility", "maxDiffVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "morphPlacementVisibility", "strictMinorsVisibility", "missileQtyVisibility", "superQtyVisibility", "powerBombQtyVisibility", "superFunVisibility", "patchesVisibility", "areaPatchVisibility", "mainPatchesVisibitily", "mainPatchesTextVisibitily", "hideItemsVisibility", "raceModeVisibility"
+    var show = ["seedVisibility", "ammoVisibility", "maxDiffVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "morphPlacementVisibility", "strictMinorsVisibility", "missileQtyVisibility", "superQtyVisibility", "powerBombQtyVisibility", "superFunVisibility", "patchesVisibility", "areaPatchVisibility", "mainPatchesVisibitily", "mainPatchesTextVisibitily", "hideItemsVisibility", "raceModeVisibility", "colorsRandomizationVisibility"
 {{
 for patch in patches:
   response.write(", \"{}Visibitily\"".format(patch[0]), escape=False)
@@ -241,7 +241,7 @@ function AjaxPresetCallCompleted(data) {
 
     var dataDict = {paramsFileTarget : data, "complexity": getComplexity()};
     var elems = ["seed", "itemsounds", "spinjumprestart", "elevators_doors_speed", "skip_ceres", "skip_intro", "animals", "layoutPatches", "noGravHeat", "areaLayout", "variaTweaks", "areaRandomization", "No_Music", "preset",
-"bossRandomization"];
+"bossRandomization", "colorsRandomization", "suitsPalettes", "beamsPalettes", "tilesPalettes", "enemiesPalettes", "bossesPalettes"];
     var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "energyQty", "maxDifficulty", "majorsSplit", "suitsRestriction", "morphPlacement", "funCombat", "funMovement", "funSuits", "progressionDifficulty", "hideItems", "strictMinors"];
 
     for(var i=0; i<elems.length; i++) {
@@ -345,7 +345,7 @@ function AjaxRandomizerCallCompleted(data) {
     console.log("button text set back to randomize");
 
     var dataDict = {"complexity": getComplexity()};
-    var elems = ["itemsounds", "spinjumprestart", "elevators_doors_speed", "skip_ceres", "skip_intro", "animals", "layoutPatches", "noGravHeat", "areaLayout", "variaTweaks", "areaRandomization", "bossRandomization", "No_Music", "preset", "randoPreset"];
+    var elems = ["itemsounds", "spinjumprestart", "elevators_doors_speed", "skip_ceres", "skip_intro", "animals", "layoutPatches", "noGravHeat", "areaLayout", "variaTweaks", "areaRandomization", "bossRandomization", "No_Music", "preset", "randoPreset", "colorsRandomization", "suitsPalettes", "beamsPalettes", "tilesPalettes", "enemiesPalettes", "bossesPalettes"];
     var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "energyQty", "maxDifficulty", "majorsSplit", "suitsRestriction", "morphPlacement", "funCombat", "funMovement", "funSuits", "progressionDifficulty", "hideItems", "strictMinors"];
 
     for(var i=0; i<elems.length; i++) {
@@ -595,6 +595,7 @@ window.onload = function(){
         }
     }
 
+    //setColorsCheckboxes();
     setComplexity();
 
     setRandom();
@@ -760,6 +761,12 @@ function startTheTour(step=-1) {
       element: "#bossRandomizationStep",
       title: "Bosses randomization",
       content: "Randomize Golden 4 access doors using bidirectional access portals (the sames as in Areas randomization).",
+      placement: "auto left"
+    },
+    {
+      element: "#colorsRandomizationStep",
+      title: "Color randomization",
+      content: "Randomize the colors of various graphical elements:<br/><img src=\"/solver/static/images/palettesRando.png\" alt=\"colors rando\" title=\"colors rando\" class=\"full\"/>",
       placement: "auto left"
     },
     {
@@ -1055,6 +1062,33 @@ def displayNumber(id, min, max, default, step="1"):
                 <td><button type="button" onclick="startTheTour(18)">?</button></td>
 	      </tr>
             </table>
+            <h4>Colors Randomization</h4>
+            <p>
+	      Randomize the colors of Samus, beams, levels, enemies and bosses.
+            </p>
+	    <table class="full">
+	      <tr>
+	        <td colspan="2" class="full" id="colorsRandomizationStep">{{displayCheckbox("colorsRandomization")}}Colors randomization</td>
+                <td><button type="button" onclick="startTheTour(19)">?</button></td>
+	      </tr>
+            </table>
+	    <div id="colorsRandomizationVisibility">
+	      <p>
+		Select the elements to colors randomize.
+	      </p>
+	      <table class="full">
+		<tr>
+	          <td class="third">{{displayCheckbox("suitsPalettes")}}Randomize Samus colors</td>
+	          <td class="third">{{displayCheckbox("beamsPalettes")}}Randomize beams colors</td>
+	          <td class="third">{{displayCheckbox("tilesPalettes")}}Randomize levels colors</td>
+		</tr>
+		<tr>
+	          <td class="third">{{displayCheckbox("enemiesPalettes")}}Randomize enemies colors</td>
+	          <td class="third">{{displayCheckbox("bossesPalettes")}}Randomize bosses colors</td>
+		  <td class="third"></td>
+		</tr>
+	      </table>
+	    </div>
 	    <div id="superFunVisibility">
               <h4>Super Fun Times (TM)</h4>
               <p>
@@ -1065,35 +1099,35 @@ def displayNumber(id, min, max, default, step="1"):
                 <tr>
 		  <td class="small"><div class="random"><button id="funCombatRandom" type="button" onclick="randomize(event, 'funCombat')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
 		  <td colspan="2" class="full" id="funCombatStep">{{displayCheckbox("funCombat")}}<span id="funCombatText">Super Fun Combat</span></td>
-		  <td><button type="button" onclick="startTheTour(19)">?</button></td>
+		  <td><button type="button" onclick="startTheTour(20)">?</button></td>
                 </tr>
                 <tr>
 		  <td class="small"><div class="random"><button id="funMovementRandom" type="button" onclick="randomize(event, 'funMovement')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
 		  <td colspan="2" class="full" id="funMovementStep">{{displayCheckbox("funMovement")}}<span id="funMovementText">Super Fun Movement</span></td>
-		  <td><button type="button" onclick="startTheTour(20)">?</button></td>
+		  <td><button type="button" onclick="startTheTour(21)">?</button></td>
                 </tr>
                 <tr>
 		  <td class="small"><div class="random"><button id="funSuitsRandom" type="button" onclick="randomize(event, 'funSuits')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
 		  <td colspan="2" class="full" id="funSuitsStep">{{displayCheckbox("funSuits")}}<span id="funSuitsText">Suitless</span></td>
-		  <td><button type="button" onclick="startTheTour(21)">?</button></td>
+		  <td><button type="button" onclick="startTheTour(22)">?</button></td>
                 </tr>
               </table>
 	    </div>
 	    <div id="patchesVisibility">
-	      <h4 id="patchesStep">Patches<span class="right"><button type="button" onclick="startTheTour(22)">?</button></span></h4>
+	      <h4 id="patchesStep">Patches<span class="right"><button type="button" onclick="startTheTour(23)">?</button></span></h4>
 	      <p id="mainPatchesTextVisibitily">
 	        The bug fix <a href="https://itemrando.supermetroid.run/information">patches</a> from Total Item Randomizer are included by default.
 	      </p>
 	      <table class="full" id="mainPatchesVisibitily">
 	        <tr>
 		  <td class="full" id="layoutPatchesStep">{{displayCheckbox("layoutPatches", True)}} Include layout patches from Total Item Randomizer</td>
-		  <td><button type="button" onclick="startTheTour(23)">?</button></td>
+		  <td><button type="button" onclick="startTheTour(24)">?</button></td>
 	        </tr>
 	        <tr>
-		  <td class="full" id="noGravHeatStep">{{displayCheckbox("noGravHeat", True)}} Remove Gravity Suit heat protection (by Total)</td><td><button type="button" onclick="startTheTour(24)">?</button></td>
+		  <td class="full" id="noGravHeatStep">{{displayCheckbox("noGravHeat", True)}} Remove Gravity Suit heat protection (by Total)</td><td><button type="button" onclick="startTheTour(25)">?</button></td>
 	        </tr>
 	        <tr>
-		  <td class="full" id="variaTweaksStep">{{displayCheckbox("variaTweaks", True)}} VARIA tweaks (by Flo)</td><td><button type="button" onclick="startTheTour(25)">?</button></td>
+		  <td class="full" id="variaTweaksStep">{{displayCheckbox("variaTweaks", True)}} VARIA tweaks (by Flo)</td><td><button type="button" onclick="startTheTour(26)">?</button></td>
 	        </tr>
 	      </table>
 	      <table class="full" id="patchesStep">

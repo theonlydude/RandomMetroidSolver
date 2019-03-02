@@ -733,6 +733,8 @@ def initRandomizerSession():
         session.randomizer['tilesPalettes'] = "on"
         session.randomizer['enemiesPalettes'] = "on"
         session.randomizer['bossesPalettes'] = "on"
+        session.randomizer['minDegree'] = 0
+        session.randomizer['maxDegree'] = 360
 
     # fix session
     if 'fullRandomization' in session.randomizer:
@@ -861,6 +863,13 @@ def validateWebServiceParams(patchs, quantities, others, isJson=False):
         if raceHour < 1 or raceHour > 72:
             raiseHttp(400, "Wrong number of hours for race mode: {}, must be >=1 and <= 72".format(request.vars.raceMode), isJson)
 
+    # check slider values
+    for check in ['minDegree', 'maxDegree']:
+        if check in others:
+            degreeInt = getInt(check, isJson)
+            if degreeInt < 0 or degreeInt > 360:
+                raiseHttp(400, "Wrong value for {}: {}, must be between 0 and 360".format(check, request.vars[check]), isJson)
+
 def sessionWebService():
     # web service to update the session
     patchs = ['itemsounds', 'No_Music',
@@ -873,7 +882,7 @@ def sessionWebService():
               'noGravHeat', 'progressionDifficulty', 'morphPlacement',
               'areaRandomization', 'bossRandomization', 'complexity', 'hideItems', 'strictMinors', 'randoPreset',
               'colorsRandomization','suitsPalettes', 'beamsPalettes', 'tilesPalettes', 'enemiesPalettes',
-              'bossesPalettes']
+              'bossesPalettes', 'minDegree', 'maxDegree']
     validateWebServiceParams(patchs, quantities, others)
 
     if session.randomizer is None:
@@ -912,6 +921,8 @@ def sessionWebService():
     session.randomizer['tilesPalettes'] = request.vars.tilesPalettes
     session.randomizer['enemiesPalettes'] = request.vars.enemiesPalettes
     session.randomizer['bossesPalettes'] = request.vars.bossesPalettes
+    session.randomizer['minDegree'] = request.vars.minDegree
+    session.randomizer['maxDegree'] = request.vars.maxDegree
 
     # to create a new rando preset, uncomment next lines
     #with open('rando_presets/new.json', 'w') as jsonFile:
@@ -943,7 +954,8 @@ def randomizerWebService():
               'suitsRestriction', 'morphPlacement', 'funCombat', 'funMovement', 'funSuits',
               'layoutPatches', 'noGravHeat', 'progressionDifficulty', 'areaRandomization',
               'bossRandomization', 'hideItems', 'strictMinors', 'complexity', 'colorsRandomization',
-              'suitsPalettes', 'beamsPalettes', 'tilesPalettes', 'enemiesPalettes', 'bossesPalettes']
+              'suitsPalettes', 'beamsPalettes', 'tilesPalettes', 'enemiesPalettes', 'bossesPalettes',
+              'minDegree', 'maxDegree']
     validateWebServiceParams(patchs, quantities, others, isJson=True)
 
     # randomize
@@ -1055,6 +1067,8 @@ def randomizerWebService():
             params.append('--no_shift_enemy_palettes')
         if request.vars.bossesPalettes == 'off':
             params.append('--no_shift_boss_palettes')
+        params += ['--min_degree', request.vars.minDegree]
+        params += ['--max_degree', request.vars.maxDegree]
 
     # load content of preset to get controller mapping
     try:

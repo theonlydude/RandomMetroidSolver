@@ -21,6 +21,8 @@ if __name__ == "__main__":
     parser.add_argument('--no_shift_beam_palettes', help="", action='store_false', dest='shift_beam_palettes', default=True)
     parser.add_argument('--no_shift_ship_palette', help="", action='store_false', dest='shift_ship_palette', default=True)
     parser.add_argument('--seed', '-s', help="randomization seed to use", dest='seed', nargs='?', default=0, type=int)
+    parser.add_argument('--min_degree', help="min hue shift", dest='min_degree', nargs='?', default=0, type=int)
+    parser.add_argument('--max_degree', help="max hue shift", dest='max_degree', nargs='?', default=360, type=int)
     parser.add_argument('--debug', '-d', help="activate debug logging", dest='debug', action='store_true')
 
     args = parser.parse_args()
@@ -61,7 +63,11 @@ if __name__ == "__main__":
         "shift_suit_palettes": True,
         "shift_enemy_palettes": True,
         "shift_beam_palettes": True,
-        "shift_ship_palette": True
+        "shift_ship_palette": True,
+
+        # min/max hue shift
+        "min_degree": 0,
+        "max_degree": 360
     }
 
     for param in settings:

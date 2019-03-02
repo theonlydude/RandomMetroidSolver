@@ -35,9 +35,18 @@ if (hs.registerOverlay) {
 <script type="text/javascript" src="{{=URL('static', 'js/chosen.jquery.min.js')}}"></script>
 <link rel="stylesheet" type="text/css" href={{=URL("static", "css/chosen.css")}} />
 
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+
 <title>Super Metroid VARIA Randomizer</title>
 
 <style>
+.popover {
+    max-width: 20%;
+    /* max-height: 95vh;*/
+    /* overflow-y: scroll; */
+    position: fixed;
+}
 .highslide-dimming {
     background: black;
 }
@@ -73,22 +82,24 @@ if (hs.registerOverlay) {
 #psMultiselectDiv {
     display: none;
 }
+.sixty {
+    width: 65%
+}
+.thirty {
+    width: 30%
+}
+.floatright {
+    float: right;
+    vertical-align: top;
+    margin-top: -0.3em;
+}
+.floatleft {
+    float: left;
+    vertical-align: top;
+}
 </style>
 
 <script type="text/javascript">
-var expanded = false;
-
-function showPSCheckboxes() {
-  var checkboxes = document.getElementById("psCheckboxes");
-  if (!expanded) {
-    checkboxes.style.display = "block";
-    expanded = true;
-  } else {
-    checkboxes.style.display = "none";
-    expanded = false;
-  }
-}
-
 function randomize(evt, elemId) {
   var e = document.getElementById(elemId);
 
@@ -265,6 +276,10 @@ function AjaxPresetCallCompleted(data) {
       dataDict["raceMode"] = maxHourRace.value;
     }
 
+    // add colors slider
+    dataDict["minDegree"] = $("#degree_slider_range").slider("values", 0);
+    dataDict["maxDegree"] = $("#degree_slider_range").slider("values", 1);
+
     // call web service with parameters
     var request = $.ajax({
       url: "{{=URL(f='randomizerWebService')}}",
@@ -361,6 +376,9 @@ function AjaxRandomizerCallCompleted(data) {
     }
 
     dataDict["progressionSpeed"] = getProgSpeed();
+
+    dataDict["minDegree"] = $("#degree_slider_range").slider("values", 0);
+    dataDict["maxDegree"] = $("#degree_slider_range").slider("values", 1);
 
     // call webservice to update the session
     var request = $.ajax({
@@ -602,6 +620,26 @@ window.onload = function(){
 
     $("#preset").chosen();
     $("#randoPreset").chosen();
+
+    initSlider();
+}
+
+function initSlider() {
+  $("#degree_slider_range").slider({
+    range: true,
+    min: 0,
+    max: 360,
+    values: [0, 360],
+    slide: function(event, ui) {
+      $("#colorsText").text("Degree ["+(ui.values[0]-180)+" , "+(ui.values[1]-180)+"]");
+    }
+  });
+  // set current values
+  $("#degree_slider_range").slider("values", 0, {{=session.randomizer["minDegree"]}});
+  $("#degree_slider_range").slider("values", 1, {{=session.randomizer["maxDegree"]}});
+
+  // set text
+  $("#colorsText").text("Degree ["+($("#degree_slider_range").slider("values", 0)-180)+" , "+($("#degree_slider_range").slider("values", 1)-180)+"]");
 }
 
 function switchCheckbox(id, elems=[]) {
@@ -766,7 +804,7 @@ function startTheTour(step=-1) {
     {
       element: "#colorsRandomizationStep",
       title: "Color randomization",
-      content: "Randomize the colors of various graphical elements:<br/><img src=\"/solver/static/images/palettesRando.png\" alt=\"colors rando\" title=\"colors rando\" class=\"full\"/>",
+      content: "Randomize the colors of various graphical elements:<br/><img src=\"/solver/static/images/palettesRando.png\" alt=\"colors rando\" title=\"colors rando\" class=\"full\"/>Use the slider to restrict the possible range of the colors shifting, with zero meaning no shifting.",
       placement: "auto left"
     },
     {
@@ -1068,7 +1106,8 @@ def displayNumber(id, min, max, default, step="1"):
             </p>
 	    <table class="full">
 	      <tr>
-	        <td colspan="2" class="full" id="colorsRandomizationStep">{{displayCheckbox("colorsRandomization")}}Colors randomization</td>
+	        <td class="half" id="colorsRandomizationStep">{{displayCheckbox("colorsRandomization")}}Colors Randomization</td>
+		<td class="half"><div id="degree_slider_range" class="sixty floatleft"></div><span id="colorsText" class="thirty floatright"></span></td>
                 <td><button type="button" onclick="startTheTour(19)">?</button></td>
 	      </tr>
             </table>
@@ -1078,13 +1117,13 @@ def displayNumber(id, min, max, default, step="1"):
 	      </p>
 	      <table class="full">
 		<tr>
-	          <td class="third">{{displayCheckbox("suitsPalettes")}}Randomize Samus colors</td>
-	          <td class="third">{{displayCheckbox("beamsPalettes")}}Randomize beams colors</td>
-	          <td class="third">{{displayCheckbox("tilesPalettes")}}Randomize levels colors</td>
+	          <td class="third">{{displayCheckbox("suitsPalettes")}}Samus colors</td>
+	          <td class="third">{{displayCheckbox("beamsPalettes")}}Beams colors</td>
+	          <td class="third">{{displayCheckbox("tilesPalettes")}}Levels colors</td>
 		</tr>
 		<tr>
-	          <td class="third">{{displayCheckbox("enemiesPalettes")}}Randomize enemies colors</td>
-	          <td class="third">{{displayCheckbox("bossesPalettes")}}Randomize bosses colors</td>
+	          <td class="third">{{displayCheckbox("enemiesPalettes")}}Enemies colors</td>
+	          <td class="third">{{displayCheckbox("bossesPalettes")}}Bosses colors</td>
 		  <td class="third"></td>
 		</tr>
 	      </table>

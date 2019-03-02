@@ -108,6 +108,9 @@ class PaletteRando(object):
         self.palettesROM = self.romLoader.getROM()
         self.outFile = romPatcher.romFile
 
+        self.max_degree = settings["max_degree"]
+        self.min_degree = settings["min_degree"]
+
         #boss_tileset_palettes = [0x213510,0x213798,0x213A2C,0x213BC1]
         #boss_pointer_addresses = [0x7E792,0x7E79B,0x7E7A4,0x7E726]
         #gray doors + hud elements [0x28,0x2A,0x2C,0x2E]
@@ -284,8 +287,6 @@ class PaletteRando(object):
         self.varia_palette_offsets = [0x0D9520,0x0D9920,0x0D9940,0x0D9960,0x0D9980,0x0D99A0,0x0D99C0,0x0D99E0,0x0D9A00,0x0D9D20,0x0D9D40,0x0D9D60,0x0D9D80,0x0D9DA0,0x0D9DC0,0x0D9DE0,0x0D9E00,0x0D9E20,0x0D9E40,0x0D9E60,0x0D9E80,0x0D9EA0,0x0D9EC0,0x0D9EE0,0x0D9F00,0x6DCD1, 0x6DD20, 0x6DD6F, 0x6DDBE, 0x6DE0A,0x6E692, 0x6E6B4, 0x6E6D6, 0x6E6F8, 0x6E71A, 0x6E73C, 0x6E75E, 0x6E780, 0x6E7A2, 0x6E7C4, 0x6E7E6, 0x6E808, 0x6E82A, 0x6E84C, 0x6E86E, 0x6E890,0x6DCF5,0x6DD44,0x6DD93,0x6DDE2]
         self.gravity_palette_offsets = [0x0D9540,0x0D9560,0x0D9580,0x0D95A0,0x0D95C0,0x0D95E0,0x0D9600,0x0D9620,0x0D9640,0x0D9660,0x0D9680,0x0D96A0,0x0D9780,0x0D97A0,0x0D97C0,0x0D97E0,0x0D9800,0x0D9A20,0x0D9A40,0x0D9A60,0x0D9A80,0x0D9AA0,0x0D9AC0,0x0D9AE0,0x0D9B00,0x0D9F20,0x0D9F40,0x0D9F60,0x0D9F80,0x0D9FA0,0x0D9FC0,0x0D9FE0,0x0DA000,0x0DA020,0x0DA040,0x0DA060,0x0DA080,0x0DA0A0,0x0DA0C0,0x0DA0E0,0x0DA100,0x6DE37, 0x6DE86, 0x6DED5, 0x6DF24, 0x6DF70,0x6E8BE, 0x6E8E0, 0x6E902, 0x6E924, 0x6E946, 0x6E968, 0x6E98A, 0x6E9AC, 0x6E9CE, 0x6E9F0, 0x6EA12, 0x6EA34, 0x6EA56, 0x6EA78, 0x6EA9A, 0x6EABC,0x6DE5B,0x6DEAA,0x6DEF9,0x6DF48]
 
-        self.max_degree = 360
-
 
 
     
@@ -377,17 +378,17 @@ class PaletteRando(object):
     def generate_tileset_degrees(self):
         for count in range(17):
             if count in (3,9,10,11,12,13,14,15,16):
-                degree = random.randint(0, self.max_degree)
+                degree = random.randint(self.min_degree, self.max_degree)
                 self.degree_list.append(degree)
             else:
-                degree = random.randint(0, self.max_degree)
+                degree = random.randint(self.min_degree, self.max_degree)
                 self.degree_list.append(degree)
                 self.degree_list.append(degree)
 
     def generate_boss_degrees(self):
         #[sporespawn,kraid,phantoon,botwoon,draygon,crocomire,bomb-torizo,gold-torizo,ridley,mbrain]
         for count in range(11):
-            degree = random.randint(0, self.max_degree)
+            degree = random.randint(self.min_degree, self.max_degree)
             self.boss_degree_list.append(degree)
 
     def hue_shift_palette_lists(self, degree, address_list, size_list):
@@ -647,7 +648,7 @@ class PaletteRando(object):
             self.compress(insert_address, data)
 
     def randomize(self):
-        degree = random.randint(0, self.max_degree)
+        degree = random.randint(self.min_degree, self.max_degree)
 
         self.generate_tileset_degrees()
         self.generate_boss_degrees()
@@ -701,33 +702,33 @@ class PaletteRando(object):
 
         if self.settings["shift_enemy_palettes"]:
             if self.settings["seperate_enemy_palette_groups"]:
-                enemy_degree=random.randint(0, self.max_degree)
+                enemy_degree=random.randint(self.min_degree, self.max_degree)
                 self.hue_shift_palette_lists(enemy_degree, self.metroid_palettes, [0x0F,0x0F,0x0F,0x0F])
                 self.hue_shift_palette_lists(enemy_degree, self.various_metroid_palettes, self.various_metroid_length)
-                enemy_degree=random.randint(0, self.max_degree)
+                enemy_degree=random.randint(self.min_degree, self.max_degree)
                 self.hue_shift_palette_lists(enemy_degree, self.desgeega_palettes, [0x0F,0x0F])
-                enemy_degree=random.randint(0, self.max_degree)
+                enemy_degree=random.randint(self.min_degree, self.max_degree)
                 self.hue_shift_palette_lists(enemy_degree, self.sidehopper_palettes, [0x0F,0x0F])
-                enemy_degree=random.randint(0, self.max_degree)
+                enemy_degree=random.randint(self.min_degree, self.max_degree)
                 self.hue_shift_palette_lists(enemy_degree, self.animal_palettes, [0x0F,0x0F,0x0F,0x0F])
                 for address in self.enemy_palettes:
-                    enemy_degree = random.randint(0, self.max_degree)
+                    enemy_degree = random.randint(self.min_degree, self.max_degree)
                     self.hue_shift_fixed_size_palette(address, enemy_degree, 0x0F)
             else:
                 self.enemy_palettes.extend(self.metroid_palettes)
                 self.enemy_palettes.extend(self.desgeega_palettes)
                 self.enemy_palettes.extend(self.sidehopper_palettes)
                 self.enemy_palettes.extend(self.animal_palettes)
-                enemy_degree = random.randint(0, self.max_degree)
+                enemy_degree = random.randint(self.min_degree, self.max_degree)
                 self.hue_shift_palette_lists(enemy_degree, self.various_metroid_palettes, self.various_metroid_length)
                 for address in self.enemy_palettes:
-                    enemy_degree = random.randint(0, self.max_degree)
+                    enemy_degree = random.randint(self.min_degree, self.max_degree)
                     self.hue_shift_fixed_size_palette(address, enemy_degree, 0x0F)
 
         self.logger.debug("degree_list: {}".format(self.degree_list))
 
         if self.settings["shift_beam_palettes"]:
-            beam_degree = random.randint(0, self.max_degree)
+            beam_degree = random.randint(self.min_degree, self.max_degree)
             self.hue_shift_palette_lists(beam_degree, self.beam_palettes, self.beam_palettes_length)
             self.hue_shift_palette_lists(beam_degree, self.wave_beam_trail_palettes, self.wave_beam_trail_length)
             self.hue_shift_palette_lists(beam_degree, self.grapple_beam_palettes, self.grapple_beam_length)
@@ -736,11 +737,11 @@ class PaletteRando(object):
                 if self.settings["match_ship_and_power"]:
                     ship_degree = 0
                 else:
-                    ship_degree = random.randint(0, self.max_degree)
+                    ship_degree = random.randint(self.min_degree, self.max_degree)
                 self.hue_shift_fixed_size_palette(self.ship_palette, ship_degree, 0x0F)
 
         if self.settings["shift_suit_palettes"]:
-            base_degree = random.randint(0, self.max_degree)
+            base_degree = random.randint(self.min_degree, self.max_degree)
 
             for address in self.power_palette_offsets:
                 self.hue_shift_fixed_size_palette(address, base_degree, 0x0F)
@@ -748,19 +749,19 @@ class PaletteRando(object):
             if self.settings["match_ship_and_power"]:
                 ship_degree = base_degree
             else:
-                ship_degree = random.randint(0, self.max_degree)
+                ship_degree = random.randint(self.min_degree, self.max_degree)
 
             if self.settings["shift_ship_palette"]:
                 self.hue_shift_fixed_size_palette(self.ship_palette, ship_degree, 0x0F)
 
             if self.settings["individual_suit_shift"]:
-                degree = random.randint(0, self.max_degree)
+                degree = random.randint(self.min_degree, self.max_degree)
 
             for address in self.varia_palette_offsets:
                 self.hue_shift_fixed_size_palette(address, degree, 0x0F)
 
             if self.settings["individual_suit_shift"]:
-                degree = random.randint(0, self.max_degree)
+                degree = random.randint(self.min_degree, self.max_degree)
 
             for address in self.gravity_palette_offsets:
                 self.hue_shift_fixed_size_palette(address, degree, 0x0F)    

@@ -1414,7 +1414,7 @@ class Randomizer(object):
             collectedAmmo = list(set([il['Item']['Type'] for il in self.itemLocations if il['Item']['Category'] == 'Ammo']))
             self.log.debug('collectedAmmo='+str(collectedAmmo))
             nonProg = [item for item in self.getNonProgItemPool(self.nonChozoItemPool) if item['Category'] != 'Ammo' or item['Type'] in collectedAmmo]
-            lim = self.locLimit
+            lim = self.locLimit - 1
             if lim < 0:
                 lim = 0
             nLocsNonProg = len(getLocs(self.currentLocations(ap='Landing Site'))) - lim

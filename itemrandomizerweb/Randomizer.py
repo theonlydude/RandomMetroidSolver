@@ -1077,15 +1077,11 @@ class Randomizer(object):
         return True
 
     def addEnergyAsNonProg(self, pool, basePool):
-        if (self.restrictions['MajorMinor'] == 'Chozo' or (self.restrictions['MajorMinor'] == 'Major' and self.settings.qty['energy'] == 'vanilla'))\
-           and not any(item['Category'] == 'Energy' for item in pool)\
-           and any(item['Category'] == 'Energy' for item in basePool):
+        if self.restrictions['MajorMinor'] == 'Chozo' and not any(item['Category'] == 'Energy' for item in basePool):
             pool += [item for item in basePool if item['Category'] == 'Energy']
 
     def getNonProgItems(self, basePool):
-        pool = [item for item in basePool if not self.isProgItem(item)]
-
-        return pool
+        return [item for item in basePool if not self.isProgItem(item)]
 
     def getNonProgItemPoolStart(self, basePool=None):
         if basePool is None:
@@ -1415,20 +1411,24 @@ class Randomizer(object):
             # fill-up
             self.determineParameters()
             self.log.debug('collected2=' + str(list(set([i['Item']['Type'] for i in self.itemLocations]))))
-            nonProg = self.getNonProgItemPool(self.nonChozoItemPool)
+            collectedAmmo = list(set([il['Item']['Type'] for il in self.itemLocations if il['Item']['Category'] == 'Ammo']))
+            self.log.debug('collectedAmmo='+str(collectedAmmo))
+            nonProg = [item for item in self.getNonProgItemPool(self.nonChozoItemPool) if item['Category'] != 'Ammo' or item['Type'] in collectedAmmo]
             lim = self.locLimit
             if lim < 0:
                 lim = 0
             nLocsNonProg = len(getLocs(self.currentLocations(ap='Landing Site'))) - lim
             itemLocs = []
             if len(nonProg) > 0 and nLocsNonProg > 0:
-                self.log.debug('nonProg fillup cur=' + str(len(self.currentLocations(ap='Landing Site'))) + ', nLocs=' + str(nLocsNonProg))
-                itemLocs += fillup(min(nLocsNonProg, len(nonProg)), nonProg)
+                nNonProg = len(nonProg)
+                self.log.debug('nonProg fillup cur=' + str(len(self.currentLocations(ap='Landing Site'))) + ', nLocs=' + str(nLocsNonProg) + ', nNonProg=' + str(nNonProg))
+                itemLocs += fillup(min(nLocsNonProg, nNonProg), nonProg)
             allItems = self.nonChozoItemPool[:]
             nLocs = len(getLocs(self.currentLocations(ap='Landing Site')))
             if len(allItems) > 0 and nLocs > 0:
-                self.log.debug('allItems fillup cur=' + str(len(self.currentLocations(ap='Landing Site'))) + ', nLocs=' + str(nLocs))
-                itemLocs += fillup(min(nLocs, len(allItems)), allItems)
+                nItems = len(allItems)
+                self.log.debug('allItems fillup cur=' + str(len(self.currentLocations(ap='Landing Site'))) + ', nLocs=' + str(nLocs) + ', nItems=' + str(nItems))
+                itemLocs += fillup(min(nLocs, nItems), allItems)
             curLocs = self.currentLocations(ap='Landing Site')
             updateCurrentState(itemLocs, curLocs, curState)
             curState = RandoState(self, curLocs)

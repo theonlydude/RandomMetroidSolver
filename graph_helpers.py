@@ -327,7 +327,8 @@ class HelpersGraph(Helpers):
     def canDoSuitlessMaridia(self):
         sm = self.smbm
         return sm.wand(sm.canDoSuitlessOuterMaridia(),
-                       sm.haveItem('Grapple'))
+                       sm.wor(sm.haveItem('Grapple'),
+                              sm.canDoubleSpringBallJump()))
 
     @Cache.decorator
     def canAccessBotwoonFromMainStreet(self):
@@ -382,4 +383,5 @@ class HelpersGraph(Helpers):
                                       sm.knowsDraygonRoomGrappleExit()),
                               sm.wor(sm.wand(sm.haveItem('XRayScope'),
                                              sm.knowsPreciousRoomXRayExit()),
-                                     sm.canSpringBallJump())))
+                                     sm.canSpringBallJump())),
+                      sm.canDoubleSpringBallJump())

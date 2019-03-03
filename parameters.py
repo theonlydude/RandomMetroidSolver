@@ -75,6 +75,13 @@ class Knows:
                            'rooms': [],
                            'readonly' : True}
 
+    CrouchJump = SMBool(True, easy, ['CrouchJump'])
+    desc['CrouchJump'] = {'display': 'Crouch Jump',
+                          'title': 'Jump higher by crouching before jumping',
+                          'href': "https://www.youtube.com/watch?v=aTbubkfc7iE",
+                          'rooms': [],
+                          'readonly' : True}
+
     Mockball = SMBool(True, easy, ['Mockball'])
     desc['Mockball'] = {'display': 'Mockball',
                         'title': 'Morph from runing without loosing momentum to get Early Super and Ice Beam',
@@ -127,6 +134,12 @@ class Knows:
                                         'Sponge Bath',
                                         'Mama Turtle Room',
                                         'The Precious Room']}
+
+    DoubleSpringBallJump = SMBool(False, 0, ['DoubleSpringBallJump'])
+    desc['DoubleSpringBallJump'] = {'display': 'Double SpringBall-Jump',
+                                    'title': 'With Hi-Jump boots do two SpringBall-Jumps in a row',
+                                    'href': 'https://youtu.be/KohE3e8sGLQ',
+                                    'rooms': ['Mt. Everest', "Draygon's Room", 'The Precious Room']}
 
     SpringBallJumpFromWall = SMBool(True, harder, ['SpringBallJumpFromWall'])
     desc['SpringBallJumpFromWall'] = {'display': 'SpringBall-Jump from wall',
@@ -487,11 +500,11 @@ class Knows:
 
     categories = {
         'Common': [
-            {'knows': ['WallJump', 'ShineSpark', 'MidAirMorph'],
+            {'knows': ['WallJump', 'ShineSpark', 'MidAirMorph', 'CrouchJump'],
              'title': 'Basics'},
              {'knows': ['Mockball', 'SimpleShortCharge', 'InfiniteBombJump', 'GreenGateGlitch',
-                       'GravityJump', 'GetAroundWallJump',
-                       'SpringBallJump', 'SpringBallJumpFromWall', 'ShortCharge'],
+                        'GravityJump', 'GetAroundWallJump',
+                        'SpringBallJump', 'DoubleSpringBallJump', 'SpringBallJumpFromWall', 'ShortCharge'],
              'title': 'Used across the game'}
         ],
         'Crateria/Brinstar': [

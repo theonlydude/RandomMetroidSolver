@@ -635,6 +635,8 @@ class InteractiveSolver(CommonSolver):
         if isCount == True or count == 1:
             self.smbm.removeItem(oldItemName)
 
+        self.smbm.addItem(itemName)
+
     def cancelLastItems(self, count):
         for _ in range(count):
             if len(self.visitedLocations) == 0:

@@ -170,6 +170,13 @@ class Helpers(object):
         return sm.wand(sm.canUseSpringBall(),
                        sm.knowsSpringBallJump())
 
+    @Cache.decorator
+    def canDoubleSpringBallJump(self):
+        sm = self.smbm
+        return sm.wand(sm.canUseSpringBall(),
+                       sm.haveItem('HiJump'),
+                       sm.knowsDoubleSpringBallJump())
+
     def canPassTerminatorBombWall(self, fromLandingSite=True):
         sm = self.smbm
         return sm.wor(sm.wand(sm.haveItem('SpeedBooster'),

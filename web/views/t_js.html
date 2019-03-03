@@ -276,9 +276,9 @@ function ajaxOkGet(jsonData, status, dummy, chained=false) {
 
       // check if a boss was at that location
       if("boss" in locsInfo[locName]) {
-        var boss = locsInfo[locName]["boss"];
-        if(boss != "Mother Brain") {
-          document.getElementById(boss+"G4").style.display = "none";
+        var bossName = locsInfo[locName]["boss"];
+        if(bossName != "Mother Brain") {
+          document.getElementById(bossName+"G4").style.display = "none";
         }
       }
     }
@@ -304,9 +304,9 @@ function ajaxOkGet(jsonData, status, dummy, chained=false) {
 
       // check if a boss was at that location
       if("boss" in locsInfo[locName]) {
-        var boss = locsInfo[locName]["boss"];
-        if(boss != "Mother Brain") {
-          document.getElementById(boss+"G4").style.display = "block";
+        var bossName = locsInfo[locName]["boss"];
+        if(bossName != "Mother Brain") {
+          document.getElementById(bossName+"G4").style.display = "block";
         }
       }
 
@@ -341,9 +341,9 @@ function ajaxOkGet(jsonData, status, dummy, chained=false) {
 
       // check if a boss was at that location
       if("boss" in locsInfo[locName]) {
-        var boss = locsInfo[locName]["boss"];
-        if(boss != "Mother Brain") {
-          document.getElementById(boss+"G4").style.display = "none";
+        var bossName = locsInfo[locName]["boss"];
+        if(bossName != "Mother Brain") {
+          document.getElementById(bossName+"G4").style.display = "none";
         }
       }
     }

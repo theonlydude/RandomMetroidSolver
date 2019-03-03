@@ -119,7 +119,7 @@ class PaletteRando(object):
         self.palette_single_bytes = [0x08,0x0A,0x0C,0x0E,0x48,0x4A,0x4C,0x4E,0x50,0x52,0x54,0x56,0x58,0x5A,0x68,0x6A,0x6C,0x6E,0x70,0x72,0x74,0x76,0x78,0x7A]  
 
         #replaced crateria $00 with $01 pointer for nicer colors on surface crateria (was [0x7E6A8,0x7E6B1,[...] before the change)
-        self.pointer_addresses = [0x7E6A8,0x7E6A8,0x7E6BA,0x7E6C3,0x7E6CC,0x7E6D5,0x7E6DE,0x7E6E7,0x7E6F0,0x7E6F9,0x7E702,0x7E70B,0x7E714,0x7E71D,0x7E726,0x7E72F,0x7E738,0x7E765,0x7E76E,0x7E777,0x7E780,0x7E789,0x7E792,0x7E79B,0x7E7A4]
+        self.pointer_addresses = [0x7E6A8,0x7E6B1,0x7E6BA,0x7E6C3,0x7E6CC,0x7E6D5,0x7E6DE,0x7E6E7,0x7E6F0,0x7E6F9,0x7E702,0x7E70B,0x7E714,0x7E71D,0x7E726,0x7E72F,0x7E738,0x7E765,0x7E76E,0x7E777,0x7E780,0x7E789,0x7E792,0x7E79B,0x7E7A4]
         self.pointers_to_insert = []
 
 
@@ -295,8 +295,8 @@ class PaletteRando(object):
         return snesaddress
 
     def adjust_hue_degree(self, hsl_color, degree):
-        hue = hsl_color[0] *360
-        hue_adj = (hue +degree) % 360
+        hue = hsl_color[0] * 360
+        hue_adj = (hue + degree) % 360
         self.logger.debug("Original hue: {}".format(hue))
         self.logger.debug("Adjusted hue: {}".format(hue_adj))
         self.logger.debug("Degree: {}".format(degree))
@@ -304,7 +304,7 @@ class PaletteRando(object):
         return hue_adj
 
     def adjust_sat(self, hsl_color, adjustment):
-        sat = hsl_color[1]*100
+        sat = hsl_color[1] * 100
         sat_adj = (sat+ adjustment) % 100
         self.logger.debug("Original sat: {}".format(sat))
         self.logger.debug("Adjusted sat: {}".format(sat_adj))
@@ -313,7 +313,7 @@ class PaletteRando(object):
         return sat_adj
 
     def adjust_light(self, hsl_color, adjustment):
-        lit = hsl_color[2]*100
+        lit = hsl_color[2] * 100
         lit_adj = (lit + adjustment) % 100
         self.logger.debug("Original lit: {}".format(lit))
         self.logger.debug("Adjusted lit: {}".format(lit_adj))
@@ -330,8 +330,8 @@ class PaletteRando(object):
         return (c)
 
     def RGB_15_to_24(self, SNESColor):
-        R = ((SNESColor        ) % 32) * 8
-        G = ((SNESColor//32    ) % 32) * 8
+        R = ((SNESColor      ) % 32) * 8
+        G = ((SNESColor//32  ) % 32) * 8
         B = ((SNESColor//1024) % 32) * 8
 
         return (R,G,B)
@@ -473,7 +473,7 @@ class PaletteRando(object):
             hls_col = colorsys.rgb_to_hls(rgb_value_24[0]/255.0, rgb_value_24[1]/255.0, rgb_value_24[2]/255.0)
 
             #Generate new hue based on degree
-            new_hue = self.adjust_hue_degree(hls_col, degree)/360
+            new_hue = self.adjust_hue_degree(hls_col, degree)/360.0
 
             rgb_final = colorsys.hls_to_rgb(new_hue,hls_col[1],hls_col[2])
 
@@ -522,7 +522,7 @@ class PaletteRando(object):
                     hls_col = colorsys.rgb_to_hls(rgb_value_24[0]/255.0,rgb_value_24[1]/255.0,rgb_value_24[2]/255.0)
 
                     #Generate new hue based on degree
-                    new_hue = self.adjust_hue_degree(hls_col, degree)/360
+                    new_hue = self.adjust_hue_degree(hls_col, degree)/360.0
 
                     rgb_final = colorsys.hls_to_rgb(new_hue,hls_col[1],hls_col[2])
 
@@ -624,7 +624,7 @@ class PaletteRando(object):
                     hls_col = colorsys.rgb_to_hls(rgb_value_24[0]/255.0,rgb_value_24[1]/255.0,rgb_value_24[2]/255.0)
 
                     #Generate new hue based on degree
-                    new_hue = self.adjust_hue_degree(hls_col, degree)/360
+                    new_hue = self.adjust_hue_degree(hls_col, degree)/360.0
 
                     rgb_final = colorsys.hls_to_rgb(new_hue,hls_col[1],hls_col[2])
 
@@ -702,14 +702,14 @@ class PaletteRando(object):
 
         if self.settings["shift_enemy_palettes"]:
             if self.settings["seperate_enemy_palette_groups"]:
-                enemy_degree=random.randint(self.min_degree, self.max_degree)
+                enemy_degree = random.randint(self.min_degree, self.max_degree)
                 self.hue_shift_palette_lists(enemy_degree, self.metroid_palettes, [0x0F,0x0F,0x0F,0x0F])
                 self.hue_shift_palette_lists(enemy_degree, self.various_metroid_palettes, self.various_metroid_length)
-                enemy_degree=random.randint(self.min_degree, self.max_degree)
+                enemy_degree = random.randint(self.min_degree, self.max_degree)
                 self.hue_shift_palette_lists(enemy_degree, self.desgeega_palettes, [0x0F,0x0F])
-                enemy_degree=random.randint(self.min_degree, self.max_degree)
+                enemy_degree = random.randint(self.min_degree, self.max_degree)
                 self.hue_shift_palette_lists(enemy_degree, self.sidehopper_palettes, [0x0F,0x0F])
-                enemy_degree=random.randint(self.min_degree, self.max_degree)
+                enemy_degree = random.randint(self.min_degree, self.max_degree)
                 self.hue_shift_palette_lists(enemy_degree, self.animal_palettes, [0x0F,0x0F,0x0F,0x0F])
                 for address in self.enemy_palettes:
                     enemy_degree = random.randint(self.min_degree, self.max_degree)
@@ -719,16 +719,25 @@ class PaletteRando(object):
                 self.enemy_palettes.extend(self.desgeega_palettes)
                 self.enemy_palettes.extend(self.sidehopper_palettes)
                 self.enemy_palettes.extend(self.animal_palettes)
-                enemy_degree = random.randint(self.min_degree, self.max_degree)
+                if self.settings["global_shift"] == True:
+                    enemy_degree = degree
+                else:
+                    enemy_degree = random.randint(self.min_degree, self.max_degree)
                 self.hue_shift_palette_lists(enemy_degree, self.various_metroid_palettes, self.various_metroid_length)
                 for address in self.enemy_palettes:
-                    enemy_degree = random.randint(self.min_degree, self.max_degree)
+                    if self.settings["global_shift"] == True:
+                        enemy_degree = degree
+                    else:
+                        enemy_degree = random.randint(self.min_degree, self.max_degree)
                     self.hue_shift_fixed_size_palette(address, enemy_degree, 0x0F)
 
         self.logger.debug("degree_list: {}".format(self.degree_list))
 
         if self.settings["shift_beam_palettes"]:
-            beam_degree = random.randint(self.min_degree, self.max_degree)
+            if self.settings["global_shift"] == True:
+                beam_degree = degree
+            else:
+                beam_degree = random.randint(self.min_degree, self.max_degree)
             self.hue_shift_palette_lists(beam_degree, self.beam_palettes, self.beam_palettes_length)
             self.hue_shift_palette_lists(beam_degree, self.wave_beam_trail_palettes, self.wave_beam_trail_length)
             self.hue_shift_palette_lists(beam_degree, self.grapple_beam_palettes, self.grapple_beam_length)
@@ -737,11 +746,17 @@ class PaletteRando(object):
                 if self.settings["match_ship_and_power"]:
                     ship_degree = 0
                 else:
-                    ship_degree = random.randint(self.min_degree, self.max_degree)
+                    if self.settings["global_shift"] == True:
+                        ship_degree = degree
+                    else:
+                        ship_degree = random.randint(self.min_degree, self.max_degree)
                 self.hue_shift_fixed_size_palette(self.ship_palette, ship_degree, 0x0F)
 
         if self.settings["shift_suit_palettes"]:
-            base_degree = random.randint(self.min_degree, self.max_degree)
+            if self.settings["global_shift"] == True:
+                base_degree = degree
+            else:
+                base_degree = random.randint(self.min_degree, self.max_degree)
 
             for address in self.power_palette_offsets:
                 self.hue_shift_fixed_size_palette(address, base_degree, 0x0F)

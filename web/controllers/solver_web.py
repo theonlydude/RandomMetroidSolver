@@ -733,8 +733,8 @@ def initRandomizerSession():
         session.randomizer['tilesPalettes'] = "on"
         session.randomizer['enemiesPalettes'] = "on"
         session.randomizer['bossesPalettes'] = "on"
-        session.randomizer['minDegree'] = 0
-        session.randomizer['maxDegree'] = 360
+        session.randomizer['minDegree'] = -180
+        session.randomizer['maxDegree'] = 180
 
     # fix session
     if 'fullRandomization' in session.randomizer:
@@ -867,8 +867,8 @@ def validateWebServiceParams(patchs, quantities, others, isJson=False):
     for check in ['minDegree', 'maxDegree']:
         if check in others:
             degreeInt = getInt(check, isJson)
-            if degreeInt < 0 or degreeInt > 360:
-                raiseHttp(400, "Wrong value for {}: {}, must be between 0 and 360".format(check, request.vars[check]), isJson)
+            if degreeInt < -180 or degreeInt > 180:
+                raiseHttp(400, "Wrong value for {}: {}, must be between -180 and 180".format(check, request.vars[check]), isJson)
 
 def sessionWebService():
     # web service to update the session
@@ -1067,8 +1067,7 @@ def randomizerWebService():
             params.append('--no_shift_enemy_palettes')
         if request.vars.bossesPalettes == 'off':
             params.append('--no_shift_boss_palettes')
-        params += ['--min_degree', request.vars.minDegree]
-        params += ['--max_degree', request.vars.maxDegree]
+        params += ['--min_degree', request.vars.minDegree, '--max_degree', request.vars.maxDegree]
 
     # load content of preset to get controller mapping
     try:

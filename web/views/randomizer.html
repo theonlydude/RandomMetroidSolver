@@ -627,11 +627,11 @@ window.onload = function(){
 function initSlider() {
   $("#degree_slider_range").slider({
     range: true,
-    min: 0,
-    max: 360,
-    values: [0, 360],
+    min: -180,
+    max: 180,
+    values: [-180, 180],
     slide: function(event, ui) {
-      $("#colorsText").text("Degree ["+(ui.values[0]-180)+" , "+(ui.values[1]-180)+"]");
+      $("#colorsText").text("Degree ["+(ui.values[0])+" , "+(ui.values[1])+"]");
     }
   });
   // set current values
@@ -639,7 +639,7 @@ function initSlider() {
   $("#degree_slider_range").slider("values", 1, {{=session.randomizer["maxDegree"]}});
 
   // set text
-  $("#colorsText").text("Degree ["+($("#degree_slider_range").slider("values", 0)-180)+" , "+($("#degree_slider_range").slider("values", 1)-180)+"]");
+  $("#colorsText").text("Degree ["+($("#degree_slider_range").slider("values", 0))+" , "+($("#degree_slider_range").slider("values", 1))+"]");
 }
 
 function switchCheckbox(id, elems=[]) {

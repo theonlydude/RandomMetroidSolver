@@ -377,7 +377,13 @@ class HelpersGraph(Helpers):
     def canDraygonCrystalFlashSuit(self):
         sm = self.smbm
         return sm.wand(sm.canCrystalFlash(),
-                       sm.knowsDraygonRoomCrystalFlash())
+                       sm.knowsDraygonRoomCrystalFlash(),
+                       # ask for 4 PB pack as an ugly workaround for
+                       # a rando bug which can place a PB at space
+                       # jump to "get you out" (this check is in
+                       # PostAvailable condition of the Dray/Space
+                       # Jump locs)
+                       sm.itemCountOk('PowerBomb', 4))
 
     @Cache.decorator
     def canExitDraygonVanilla(self):

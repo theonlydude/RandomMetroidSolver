@@ -284,3 +284,5 @@ find ~/web2py/applications/solver/static -xtype l -exec rm -f {} \;
 [ -L ~/web2py/applications/solver/static/images/right_arrow.svg ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/right_arrow.svg ~/web2py/applications/solver/static/images/right_arrow.svg
 
 [ -L ~/web2py/routes.py ] || ln -s ~/RandomMetroidSolver/web/static/routes.py ~/web2py/routes.py
+
+[ -L ~/web2py/applications/solver/static/images/palettesRando.png ] || ln -s ~/RandomMetroidSolver/web/static/palettesRando.png ~/web2py/applications/solver/static/images/palettesRando.png

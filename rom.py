@@ -551,7 +551,7 @@ class RomPatcher:
         if romFileName == None:
             self.romFile = FakeROM()
         else:
-            self.romFile = open(romFileName, 'r+')
+            self.romFile = open(romFileName, 'rb+')
         if magic is not None:
             from race_mode import RaceModePatcher
             self.race = RaceModePatcher(self, magic)
@@ -1314,6 +1314,9 @@ class RomLoader(object):
 
     def decompress(self, address):
         return self.romReader.decompress(address)
+
+    def getROM(self):
+        return self.romReader.romFile
 
 class RomLoaderSfc(RomLoader):
     # standard usage (when calling from the command line)

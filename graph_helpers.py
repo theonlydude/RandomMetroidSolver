@@ -4,12 +4,14 @@ from functools import reduce
 from smbool import SMBool
 from rom import RomPatches
 from helpers import Helpers, Bosses
+from graph_access import getAccessPoint
 from cache import Cache
 from math import ceil
 
 class HelpersGraph(Helpers):
     def __init__(self, smbm):
         self.smbm = smbm
+        self.vanillaDraygon = None
 
     @Cache.decorator
     def canAccessKraidsLair(self):
@@ -357,21 +359,39 @@ class HelpersGraph(Helpers):
                        sm.wor(sm.haveItem('Gravity'),
                               sm.wand(sm.canDoSuitlessMaridia(), sm.knowsGravLessLevel2())))
 
+    def isVanillaDraygon(self):
+        if self.vanillaDraygon is None:
+            drayRoomOut = getAccessPoint('DraygonRoomOut')
+            self.vanillaDraygon = drayRoomOut.ConnectedTo == 'DraygonRoomIn'
+        return self.vanillaDraygon
+
     @Cache.decorator
-    def canExitDraygon(self):
+    def canFightDraygon(self):
+        sm = self.smbm
+        return sm.wor(sm.haveItem('Gravity'),
+                      sm.wand(sm.haveItem('HiJump'),
+                              sm.wor(sm.knowsGravLessLevel2(),
+                                     sm.knowsGravLessLevel3())))
+
+    @Cache.decorator
+    def canDraygonCrystalFlashSuit(self):
+        sm = self.smbm
+        return sm.wand(sm.canCrystalFlash(),
+                       sm.knowsDraygonRoomCrystalFlash())
+
+    @Cache.decorator
+    def canExitDraygonVanilla(self):
         sm = self.smbm
         # to get out of draygon room:
         #   with gravity but without highjump/bomb/space jump: gravity jump
         #     to exit draygon room: grapple or crystal flash (for free shine spark)
         #     to exit precious room: spring ball jump, xray scope glitch or stored spark
-        # FIXME this handles both draygon room and precious room, which isn't right if bosses are randomized
         return sm.wor(sm.wand(sm.haveItem('Gravity'),
                               sm.wor(sm.canFly(),
                                      sm.knowsGravityJump(),
                                      sm.wand(sm.haveItem('HiJump'),
                                              sm.haveItem('SpeedBooster')))),
-                      sm.wand(sm.wand(sm.canCrystalFlash(),
-                                      sm.knowsDraygonRoomCrystalFlash()),
+                      sm.wand(sm.canDraygonCrystalFlashSuit(),
                               # use the spark either to exit draygon room or precious room
                               sm.wor(sm.wand(sm.haveItem('Grapple'),
                                              sm.knowsDraygonRoomGrappleExit()),
@@ -385,3 +405,44 @@ class HelpersGraph(Helpers):
                                              sm.knowsPreciousRoomXRayExit()),
                                      sm.canSpringBallJump())),
                       sm.canDoubleSpringBallJump())
+
+    @Cache.decorator
+    def canExitDraygonRandomized(self):
+        sm = self.smbm
+        # disregard precious room
+        return sm.wor(sm.wand(sm.haveItem('Gravity'),
+                              sm.wor(sm.canFly(),
+                                     sm.knowsGravityJump(),
+                                     sm.wand(sm.haveItem('HiJump'),
+                                             sm.haveItem('SpeedBooster')))),
+                      sm.canDraygonCrystalFlashSuit(),
+                      sm.wand(sm.haveItem('Grapple'),
+                              sm.knowsDraygonRoomGrappleExit()),
+                      sm.canDoubleSpringBallJump())
+
+    def canExitDraygon(self):
+        if self.isVanillaDraygon():
+            return self.canExitDraygonVanilla()
+        else:
+            return self.canExitDraygonRandomized()
+
+    @Cache.decorator
+    def canExitPreciousRoomVanilla(self):
+        return SMBool(True) # handled by canExitDraygonVanilla
+
+    @Cache.decorator
+    def canExitPreciousRoomRandomized(self):
+        sm = self.smbm
+        return sm.wor(sm.wand(sm.haveItem('Gravity'),
+                              sm.wor(sm.canFly(),
+                                     sm.knowsGravityJump(),
+                                     sm.haveItem('HiJump'))),
+                      sm.wor(sm.wand(sm.haveItem('XRayScope'),
+                                     sm.knowsPreciousRoomXRayExit()),
+                             sm.canSpringBallJump()))
+
+    def canExitPreciousRoom(self):
+        if self.isVanillaDraygon():
+            return self.canExitPreciousRoomVanilla()
+        else:
+            return self.canExitPreciousRoomRandomized()

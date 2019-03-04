@@ -724,7 +724,7 @@ locations = [
     # to open the possibility of an item unlocking draygon exit to be
     # placed here.    
     # in other words we allow space jump loc to be filled before dray
-    # loc    
+    # loc
     'Available': lambda sm: sm.enoughStuffsDraygon(),
     'PostAvailable': lambda sm: sm.canExitDraygon()
 },
@@ -1825,7 +1825,7 @@ locations = [
     'Visibility': "Hidden",
     'Room': 'The Precious Room',
     'AccessFrom' : {
-        'Main Street Bottom': lambda sm: sm.canAccessDraygonFromMainStreet()
+        'Precious Room Top': lambda sm: SMBool(True)
     },
     'Available': lambda sm: SMBool(True)
 }

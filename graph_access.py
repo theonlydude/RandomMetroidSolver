@@ -331,7 +331,7 @@ accessPoints = [
                                                             sm.haveItem('HiJump'),
                                                             sm.haveItem('Ice'))), # for the sand pits
                                              sm.canDestroyBombWallsUnderwater()),
-        'DraygonRoomOut': lambda sm: sm.canAccessDraygonFromMainStreet()
+        'Precious Room Top': lambda sm: sm.canAccessDraygonFromMainStreet()
     }, roomInfo = {'RoomPtr':0xcfc9, "area": 0x4},
        exitInfo = {'DoorPtr':0xa39c, 'direction': 0x6, "cap": (0x6, 0x2), "bitFlag": 0x0,
                    "screen": (0x0, 0x0), "distanceToSpawn": 0x170, "doorAsmPtr": 0x0000},
@@ -387,8 +387,12 @@ accessPoints = [
                    "screen": (0x2, 0x3), "distanceToSpawn": 0x8000, "doorAsmPtr": 0xe367},
        entryInfo = {'SamusX':0x34, 'SamusY':0x88},
        shortName="M\\RED FISH"),
+    AccessPoint('Precious Room Top', 'Maridia', {
+        'Main Street Bottom': lambda sm: SMBool(True), # if you got there you can get back
+        'DraygonRoomOut': lambda sm: SMBool(True)
+    }, internal = True),
     AccessPoint('DraygonRoomOut', 'Maridia', {
-        'Main Street Bottom': lambda sm: SMBool(True) # if you got there you can get back
+        'Precious Room Top': lambda sm: sm.canExitPreciousRoom()
     }, boss = True,
        roomInfo = {'RoomPtr':0xd78f, "area": 0x4},
        exitInfo = {'DoorPtr':0xa840, 'direction': 0x5, "cap": (0x1e, 0x6), "bitFlag": 0x0,

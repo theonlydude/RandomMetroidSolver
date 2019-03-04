@@ -156,9 +156,13 @@ class PaletteRando(object):
         self.beam_palettes = [0x843E1]
         self.beam_palettes_length = [0x4F]
 
-        #This is in the general palette so as a side-effect it also changes things like energy drops, missile tip colors and other things excluding super missile tips
+        #This is in the general palette so as a side-effect it also changes things like energy drops, missile tip colors and other things
         self.wave_beam_trail_palettes = [0xD01AA]
         self.wave_beam_trail_length = [0x02]
+        
+        #Palette used for the tip of super missiles
+        self.super_missile_palettes = [0xD01B0]
+        self.super_missile_length = [0x02]
 
         #Single address for grapple extension color, shifted with same hue as beam palette
         self.grapple_beam_palettes = [0xDC687]
@@ -281,7 +285,7 @@ class PaletteRando(object):
         #"shift_ship_palette": True
 
         #Change offsets to work with SM practice rom, this was just used for easier feature debugging, changes where new palettes are inserted.
-        self.practice_rom = False
+        self.practice_rom = True
 
         self.power_palette_offsets = [0x0D9400,0x0D9820,0x0D9840,0x0D9860,0x0D9880,0x0D98A0,0x0D98C0,0x0D98E0,0x0D9900,0x0D9B20,0x0D9B40,0x0D9B60,0x0D9B80,0x0D9BA0,0x0D9BC0,0x0D9BE0,0x0D9C00,0x0D9C20,0x0D9C40,0x0D9C60,0x0D9C80,0x0D9CA0,0x0D9CC0,0x0D9CE0,0x0D9D00,0x6DB6B, 0x6DBBA, 0x6DC09, 0x6DC58, 0x6DCA4,0x6E466, 0x6E488, 0x6E4AA, 0x6E4CC, 0x6E4EE, 0x6E510, 0x6E532, 0x6E554, 0x6E576, 0x6E598, 0x6E5BA, 0x6E5DC, 0x6E5FE, 0x6E620, 0x6E642, 0x6E664,0x6DB8F,0x6DC2D,0x6DC7C,0x6DBDE]
         self.varia_palette_offsets = [0x0D9520,0x0D9920,0x0D9940,0x0D9960,0x0D9980,0x0D99A0,0x0D99C0,0x0D99E0,0x0D9A00,0x0D9D20,0x0D9D40,0x0D9D60,0x0D9D80,0x0D9DA0,0x0D9DC0,0x0D9DE0,0x0D9E00,0x0D9E20,0x0D9E40,0x0D9E60,0x0D9E80,0x0D9EA0,0x0D9EC0,0x0D9EE0,0x0D9F00,0x6DCD1, 0x6DD20, 0x6DD6F, 0x6DDBE, 0x6DE0A,0x6E692, 0x6E6B4, 0x6E6D6, 0x6E6F8, 0x6E71A, 0x6E73C, 0x6E75E, 0x6E780, 0x6E7A2, 0x6E7C4, 0x6E7E6, 0x6E808, 0x6E82A, 0x6E84C, 0x6E86E, 0x6E890,0x6DCF5,0x6DD44,0x6DD93,0x6DDE2]
@@ -745,6 +749,7 @@ class PaletteRando(object):
             self.hue_shift_palette_lists(beam_degree, self.beam_palettes, self.beam_palettes_length)
             self.hue_shift_palette_lists(beam_degree, self.wave_beam_trail_palettes, self.wave_beam_trail_length)
             self.hue_shift_palette_lists(beam_degree, self.grapple_beam_palettes, self.grapple_beam_length)
+            self.hue_shift_palette_lists(beam_degree, self.super_missile_palettes, self.super_missile_length)
 
         if self.settings["shift_ship_palette"] and not self.settings["shift_suit_palettes"]:
                 if self.settings["match_ship_and_power"]:

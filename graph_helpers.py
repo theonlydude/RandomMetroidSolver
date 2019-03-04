@@ -272,11 +272,14 @@ class HelpersGraph(Helpers):
     @Cache.decorator
     def canPassAmphitheaterReverse(self):
         sm = self.smbm
-        nTanks = 4
-        if not sm.heatProof():
-            nTanks = 16
-        return sm.wand(sm.haveItem('Gravity'),
-                       sm.energyReserveCountOk(nTanks))
+        nTanksGrav = 3
+        nTanksNoGrav = 6
+        if sm.heatProof().bool == False:
+            nTanksGrav *= 5
+            nTanksNoGrav *= 5 # 30 should not happen ...
+        return sm.wor(sm.wand(sm.haveItem('Gravity'),
+                              sm.energyReserveCountOk(nTanksGrav)),
+                      sm.energyReserveCountOk(nTanksNoGrav))
 
     @Cache.decorator
     def canClimbRedTower(self):

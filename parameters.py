@@ -185,7 +185,7 @@ class Knows:
     IceZebSkip = SMBool(False, 0, ['IceZebSkip'])
     desc['IceZebSkip'] = {'display': 'Ice Zeb Skip',
                           'title': 'Skip the Zebetites with Ice beam',
-                          'href': 'https://www.youtube.com/watch?v=GBXi3MSpGZg',
+                          'href': 'https://youtu.be/udowj-vMzMA',
                           'rooms': ['Mother Brain Room']}
 
     SpeedZebSkip = SMBool(False, 0, ['SpeedZebSkip'])

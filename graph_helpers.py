@@ -279,7 +279,8 @@ class HelpersGraph(Helpers):
             nTanksNoGrav *= 5 # 30 should not happen ...
         return sm.wor(sm.wand(sm.haveItem('Gravity'),
                               sm.energyReserveCountOk(nTanksGrav)),
-                      sm.energyReserveCountOk(nTanksNoGrav))
+                      sm.wand(sm.energyReserveCountOk(nTanksNoGrav),
+                              sm.knowsLavaDive())) # should be a good enough skill filter for acid wall jumps with no grav...
 
     @Cache.decorator
     def canClimbRedTower(self):

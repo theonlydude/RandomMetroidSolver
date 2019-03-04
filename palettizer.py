@@ -21,7 +21,10 @@ if __name__ == "__main__":
     parser.add_argument('--no_shift_beam_palettes', help="", action='store_false', dest='shift_beam_palettes', default=True)
     parser.add_argument('--no_shift_ship_palette', help="", action='store_false', dest='shift_ship_palette', default=True)
     parser.add_argument('--seed', '-s', help="randomization seed to use", dest='seed', nargs='?', default=0, type=int)
+    parser.add_argument('--min_degree', help="min hue shift", dest='min_degree', nargs='?', default=-180, type=int)
+    parser.add_argument('--max_degree', help="max hue shift", dest='max_degree', nargs='?', default=180, type=int)
     parser.add_argument('--debug', '-d', help="activate debug logging", dest='debug', action='store_true')
+    parser.add_argument('--no_global_shift', help="", action='store_false', dest='global_shift', default=True)
 
     args = parser.parse_args()
 
@@ -39,6 +42,9 @@ if __name__ == "__main__":
         random.seed(args.seed)
 
     settings = {
+        # global same shift for everything flag
+        "global_shift": True,
+
         #set to True if all suits should get a separate hue-shift degree
         "individual_suit_shift": False,
 
@@ -61,7 +67,11 @@ if __name__ == "__main__":
         "shift_suit_palettes": True,
         "shift_enemy_palettes": True,
         "shift_beam_palettes": True,
-        "shift_ship_palette": True
+        "shift_ship_palette": True,
+
+        # min/max hue shift
+        "min_degree": -180,
+        "max_degree": 180
     }
 
     for param in settings:

@@ -168,6 +168,9 @@ if __name__ == "__main__":
                         dest='shift_beam_palettes', default=True)
     parser.add_argument('--no_shift_ship_palette', help="palette param", action='store_false',
                         dest='shift_ship_palette', default=True)
+    parser.add_argument('--min_degree', help="min hue shift", dest='min_degree', nargs='?', default=-180, type=int)
+    parser.add_argument('--max_degree', help="max hue shift", dest='max_degree', nargs='?', default=180, type=int)
+    parser.add_argument('--no_global_shift', help="", action='store_false', dest='global_shift', default=True)
 
     # parse args
     args = parser.parse_args()
@@ -466,6 +469,7 @@ if __name__ == "__main__":
             romPatcher.writeMajorsSplit(args.majorsSplit)
         if args.palette == True:
             paletteSettings = {
+                "global_shift": None,
                 "individual_suit_shift": None,
                 "individual_tileset_shift": None,
                 "match_ship_and_power": None,
@@ -476,7 +480,9 @@ if __name__ == "__main__":
                 "shift_suit_palettes": None,
                 "shift_enemy_palettes": None,
                 "shift_beam_palettes": None,
-                "shift_ship_palette": None
+                "shift_ship_palette": None,
+                "min_degree": None,
+                "max_degree": None
             }
             for param in paletteSettings:
                 paletteSettings[param] = getattr(args, param)

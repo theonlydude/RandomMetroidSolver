@@ -167,13 +167,18 @@ class PaletteRando(object):
         #Single address for grapple extension color, shifted with same hue as beam palette
         self.grapple_beam_palettes = [0xDC687]
         self.grapple_beam_length = [0x00]
-
+        
+        #Space Pirate / Mbrain beam color | excluded for now as it also affects a lot of explosion effects
+        self.mbrain_beam_palettes = [0xD01A4]
+        self.mbrain_beam_length = [0x02]
+        
+        
         #Boss palettes
         #[sporespawn,kraid,phantoon,botwoon,draygon,crocomire,bomb-torizo,gold-torizo,ridley,mbrain]
 
         #Draygon, Kraid, Crocomire and Mother Brain have seperate colors hidden in tileset palettes which are addressed in the boss shift function
-        self.spore_spawn_palettes = [0x12E359]
-        self.spore_spawn_length = [0x3F]
+        self.spore_spawn_palettes = [0x12E359,0x12E3D9]
+        self.spore_spawn_length = [0x3F,0x8F]
         self.kraid_palettes = [0x138687,0x13B3F3,0x13B533,0x13AAB0,0x1386C7]
         self.kraid_length = [0x1F,0x8F,0x7F,0x03,0x0F]
         self.phantoon_palettes = [0x13CA01,0x13CB41]
@@ -607,7 +612,7 @@ class PaletteRando(object):
                 if self.settings["match_room_shift_with_boss"]:
                     degree = self.degree_list[14]
                 else:
-                    degree = self.boss_degree_list[9]            
+                    degree = self.boss_degree_list[9]    
             #draygon's room tileset sub-palettes containing boss colors
             if address == 0x213A2C or (self.settings["shift_tileset_palette"] and address == self.pointers_to_insert[24]):
                 temp_TLS_palette_subsets = [0xA0]
@@ -651,9 +656,31 @@ class PaletteRando(object):
 
             #quick hack to re-insert, should work without issues
             insert_address = address
-
-            #Recompress palette and re-insert at offset
-            self.compress(insert_address, data)
+                        
+            if address == 0x213BC1 and not self.settings["shift_tileset_palette"]:
+                    if self.practice_rom:
+                        insert_address= 0x2F51C0 + (0*0x100)
+                    else:
+                        insert_address= 0x2FE050 + (0*0x100)
+                    self.compress(insert_address, data)
+                    self.write_pointer(self.pointer_addresses[14], self.pc_to_snes(insert_address))
+            elif address == 0x213510 and not self.settings["shift_tileset_palette"]:
+                    if self.practice_rom:
+                        insert_address= 0x2F51C0 + (1*0x100)
+                    else:
+                        insert_address= 0x2FE050 + (1*0x100)
+                    self.compress(insert_address, data)
+                    self.write_pointer(self.pointer_addresses[22], self.pc_to_snes(insert_address))
+            elif address == 0x213A2C and not self.settings["shift_tileset_palette"]:
+                    if self.practice_rom:
+                        insert_address= 0x2F51C0 + (2*0x100)
+                    else:
+                        insert_address= 0x2FE050 + (2*0x100)
+                    self.compress(insert_address, data)
+                    self.write_pointer(self.pointer_addresses[4], self.pc_to_snes(insert_address))
+            else:        
+                #Recompress palette and re-insert at offset
+                self.compress(insert_address, data)
 
     def randomize(self):
         degree = random.randint(self.min_degree, self.max_degree)

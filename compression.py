@@ -169,6 +169,12 @@ class Compressor:
 
         # end of compressed data marker
         self.output.append(0xFF)
+
+        if len(self.output) > len(inputData):
+            print("WARNING !!! len compressed {} > original data {}".format(len(self.output), len(inputData)))
+            print("original: {}".format(inputData))
+            print("compressed: {}".format(self.output))
+
         return self.output[:]
 
     def _writeChunkHeader(self, type, length):

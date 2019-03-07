@@ -635,11 +635,11 @@ window.onload = function(){
         }
 
         // plando addresses
-        for(var i=0x2F6000; i<0x2F6080; i++) {
+        for(var i=0x2F6000; i<0x2F6100; i++) {
           romData[i] = bytes[i];
         }
         // plando transitions (4 bytes per transitions, ap#/2 transitions)
-        for(var i=0x2F6080; i<0x2F6080+((arrayLength/2) * 4); i++) {
+        for(var i=0x2F6100; i<0x2F6100+((arrayLength/2) * 4); i++) {
           romData[i] = bytes[i];
         }
 

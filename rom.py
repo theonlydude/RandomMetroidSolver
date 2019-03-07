@@ -451,7 +451,7 @@ class RomReader:
         return addresses
 
     def getPlandoTransitions(self, maxTransitions):
-        self.romFile.seek(0x2F6080)
+        self.romFile.seek(0x2F6100)
         addresses = []
         for i in range(maxTransitions):
             srcDoorPtr = self.readWord()
@@ -1174,7 +1174,7 @@ class RomPatcher:
             self.writeWord(0xFFFF)
 
     def writePlandoTransitions(self, transitions, doorsPtrs, maxTransitions):
-        self.romFile.seek(0x2F6080)
+        self.romFile.seek(0x2F6100)
 
         for (src, dest) in transitions:
             self.writeWord(doorsPtrs[src])

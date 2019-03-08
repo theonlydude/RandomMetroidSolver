@@ -664,7 +664,17 @@ window.onload = function(){
 
   dragElement(document.getElementById("solverPopup"), "solverGrab");
 
+  $("#placeItemButton").keypress(onEnterKey);
+
   loaded = true;
+}
+
+function onEnterKey(event) {
+  if(event.keyCode === 13) {
+    if(document.getElementById("itemPopup").style.display != "none") {
+      placeItem();
+    }
+  }
 }
 
 function setGuessedPreset(romName){
@@ -835,6 +845,7 @@ function clickLoc(elem) {
 
     // display item selector
     document.getElementById("itemPopup").style.display = "block";
+    document.getElementById("placeItemButton").focus();
   } else {
     // check that lock is in the available list
     if("state" in locsInfo[locName] && (locsInfo[locName]["state"] == "available" || locsInfo[locName]["state"] == "break")) {

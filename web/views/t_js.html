@@ -768,6 +768,10 @@ function hidePopup() {
 }
 
 function initSolver() {
+  if(loaded == false || webServInProgress == true) {
+    return;
+  }
+
   console.log("initSolver");
 
   var mode = "seedless";
@@ -846,6 +850,10 @@ function clickLoc(elem) {
 }
 
 function placeItem() {
+  if(loaded == false || webServInProgress == true || init == false) {
+    return;
+  }
+
   var item = document.getElementById("item").value;
   var locName = document.getElementById("locName").value;
 

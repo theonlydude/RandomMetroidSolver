@@ -868,18 +868,11 @@ function placeItem() {
   var item = document.getElementById("item").value;
   var locName = document.getElementById("locName").value;
 
-  // check if not already 14 etanks or 4 reserves
-  if(item == "ETank" && itemCount["ETank"] == 14) {
-    alert("Can't add more Energy tank");
-  } else if (item == "Reserve" && itemCount["Reserve"] == 4) {
-    alert("Can't add more Reserve tank");
+  // check that lock is in the available list
+  if("state" in locsInfo[locName] && (locsInfo[locName]["state"] == "available" || locsInfo[locName]["state"] == "break")) {
+    ajaxCall({action: "add", scope: "item", locName: locName, itemName: item}, "upload");
   } else {
-    // check that lock is in the available list
-    if("state" in locsInfo[locName] && (locsInfo[locName]["state"] == "available" || locsInfo[locName]["state"] == "break")) {
-      ajaxCall({action: "add", scope: "item", locName: locName, itemName: item}, "upload");
-    } else {
-      ajaxCall({action: "replace", scope: "item", locName: locName, itemName: item}, "upload");
-    }
+    ajaxCall({action: "replace", scope: "item", locName: locName, itemName: item}, "upload");
   }
 }
 
@@ -1006,7 +999,13 @@ function addItem(itemName) {
     if(itemName == "Missile" || itemName == "Super" || itemName == "PowerBomb") {
       document.getElementById(itemName+"_pause").style.display = "block";
     } else {
-      document.getElementById(itemName+"_"+itemCount[itemName]+"_pause").style.display = "block";
+      if(itemName == "ETank") {
+        var count = Math.min(14, itemCount[itemName]);
+        document.getElementById(itemName+"_"+count+"_pause").style.display = "block";
+      } else {
+        var count = Math.min(4, itemCount[itemName]);
+        document.getElementById(itemName+"_"+count+"_pause").style.display = "block";
+      }
     }
   } else {
     document.getElementById(itemName+"_pause").style.display = "block";
@@ -1035,7 +1034,8 @@ function setReserveCount() {
   document.getElementById("reserve_0").style.display = "block";
   document.getElementById("reserve_00").style.display = "block";
 
-  document.getElementById("reserve_"+itemCount["Reserve"]).style.display = "block";
+  var count = Math.min(4, itemCount["Reserve"]);
+  document.getElementById("reserve_"+count).style.display = "block";
 }
 
 function setItemCount(itemName) {

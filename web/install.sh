@@ -286,3 +286,7 @@ find ~/web2py/applications/solver/static -xtype l -exec rm -f {} \;
 [ -L ~/web2py/routes.py ] || ln -s ~/RandomMetroidSolver/web/static/routes.py ~/web2py/routes.py
 
 [ -L ~/web2py/applications/solver/static/images/palettesRando.png ] || ln -s ~/RandomMetroidSolver/web/static/palettesRando.png ~/web2py/applications/solver/static/images/palettesRando.png
+
+[ -L ~/web2py/applications/solver/views/solver_web/palettizer.html ] || ln -s ~/RandomMetroidSolver/web/views/palettizer.html ~/web2py/applications/solver/views/solver_web/palettizer.html
+
+[ -L ~/web2py/applications/solver/static/images/samus_degrees.png ] || ln -s ~/RandomMetroidSolver/web/static/samus_degrees.png ~/web2py/applications/solver/static/images/samus_degrees.png

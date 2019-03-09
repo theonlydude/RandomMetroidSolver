@@ -826,7 +826,7 @@ class StandardSolver(CommonSolver):
             self.minorLocations = [loc for loc in self.locations if "Minor" in loc["Class"]]
         elif self.majorsSplit == 'Chozo':
             self.majorLocations = [loc for loc in self.locations if "Chozo" in loc["Class"] or "Boss" in loc["Class"]]
-            self.minorLocations = [loc for loc in self.locations if "Chozo" not in loc["Class"]]
+            self.minorLocations = [loc for loc in self.locations if "Chozo" not in loc["Class"] and "Boss" not in loc["Class"]]
         else:
             # Full
             self.majorLocations = self.locations[:] # copy

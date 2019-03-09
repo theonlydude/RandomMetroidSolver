@@ -1,6 +1,6 @@
 import sys, random, time
 from itemrandomizerweb.Items import ItemManager
-from parameters import Knows, Settings, samus, infinity, god
+from parameters import Knows, isBossKnows, Settings, samus, infinity, god
 from itemrandomizerweb.stdlib import List
 from smbool import SMBool
 from helpers import Bosses, diffValue2txt
@@ -557,7 +557,7 @@ class Randomizer(object):
                                                          self.smbm,
                                                          self.difficultyTarget,
                                                          ap)
-        if self.restrictions['MajorMinor'] != 'Chozo' or self.difficultyTarget == infinity or not self.isChozoLeft():
+        if self.restrictions['MajorMinor'] != 'Chozo' or self.difficultyTarget >= god or not self.isChozoLeft():
             return availLocs
         # in chozo mode, we use high difficulty check for bosses/hardrooms/hellruns
         availLocsInf = self.areaGraph.getAvailableLocations(locs,
@@ -565,12 +565,19 @@ class Randomizer(object):
                                                             god,
                                                             ap)
         def isAvail(loc):
-            if 'Boss' in loc['Class']:
-                return True
             for k in loc['difficulty'].knows:
                 try:
                     diff = getattr(Knows, k)
-                    if diff.difficulty > self.difficultyTarget:
+                    # filter out tricks above diff target except boss
+                    # knows, because boss fights can be performed
+                    # without the trick anyway.
+                    # this barely works, because it is possible for
+                    # standard fight diff to be above god.  it is
+                    # never totally impossible because there is no
+                    # Knows for Ridley, and other bosses give
+                    # drops. so only boss fights with diff above god
+                    # can slip in
+                    if diff.difficulty > self.difficultyTarget and isBossKnows(k) is None:
                         return False
                 except AttributeError:
                     # hard room/hell run

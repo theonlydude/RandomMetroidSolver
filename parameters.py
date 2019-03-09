@@ -45,6 +45,12 @@ text2diff = {
 def isKnows(knows):
     return knows[0:len('__')] != '__' and knows[0] == knows[0].upper()
 
+def isBossKnows(knows):
+    ret = None
+    if isKnows(knows) and 'boss' in Knows.desc[knows]:
+        ret = Knows.desc[knows]['boss']
+    return ret
+
 class Knows:
     # the different technics to know (cf. http://deanyd.net/sm/index.php?title=Item_Randomizer)
     # and the personnal perceived difficulty.
@@ -161,25 +167,29 @@ class Knows:
     desc['DraygonGrappleKill'] = {'display': 'Draygon Grapple Kill',
                                   'title': 'Instant kill on Draygon with electric grapple',
                                   'href': 'https://www.youtube.com/watch?v=gcemRrXqCbE',
-                                  'rooms': ["Draygon's Room"]}
+                                  'rooms': ["Draygon's Room"],
+                                  'boss': "Draygon"}
 
     DraygonSparkKill = SMBool(False, mania, ['DraygonSparkKill'])
     desc['DraygonSparkKill'] = {'display': 'Draygon Spark Kill',
                                 'title': 'Kill Draygon using Speed Booster and shinesparks',
                                 'href': None, # TODO
-                                'rooms': ["Draygon's Room"]}
+                                'rooms': ["Draygon's Room"],
+                                'boss': "Draygon"}
 
     MicrowaveDraygon = SMBool(True, easy, ['MicrowaveDraygon'])
     desc['MicrowaveDraygon'] = {'display': 'Microwave Draygon',
                                 'title': 'Charge/Plasma/X-Ray glitch on Draygon',
                                 'href': 'https://www.youtube.com/watch?v=tj0VybUH6ZY',
-                                'rooms': ["Draygon's Room"]}
+                                'rooms': ["Draygon's Room"],
+                                'boss': "Draygon"}
 
     MicrowavePhantoon = SMBool(True, medium, ['MicrowavePhantoon'])
     desc['MicrowavePhantoon'] = {'display': 'Microwave Phantoon',
                                  'title': 'Same as Draygon, with a few missiles to start',
                                  'href': 'https://youtu.be/tox6blvT5Ao',
-                                 'rooms': ["Phantoon's Room"]}
+                                 'rooms': ["Phantoon's Room"],
+                                 'boss': "Phantoon"}
 
     # End Game
     IceZebSkip = SMBool(False, 0, ['IceZebSkip'])

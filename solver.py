@@ -535,6 +535,27 @@ class InteractiveSolver(CommonSolver):
             locName = self.getLocNameFromAddress(address)
             self.pickItemAt(locName)
 
+    def fillGraph(self):
+        # add self looping transitions on unused acces points
+        usedAPs = {}
+        for (src, dst) in self.curGraphTransitions:
+            usedAPs[src] = True
+            usedAPs[dst] = True
+
+        singleAPs = []
+        for ap in accessPoints:
+            if ap.Internal == True:
+                continue
+
+            if ap.Name not in usedAPs:
+                singleAPs.append(ap.Name)
+
+        transitions = self.curGraphTransitions[:]
+        for apName in singleAPs:
+            transitions.append((apName, apName))
+
+        return AccessGraph(accessPoints, transitions)
+
     def savePlando(self):
         # store filled locations addresses in the ROM for next creating session
         locsItems = {}
@@ -545,7 +566,8 @@ class InteractiveSolver(CommonSolver):
             if loc["Name"] in locsItems:
                 itemLocs.append({'Location': loc, 'Item': ItemManager.getItem(locsItems[loc["Name"]])})
             else:
-                itemLocs.append({'Location': loc, 'Item': ItemManager.getItem(loc["itemName"])})
+                # put nothing items in unused locations
+                itemLocs.append({'Location': loc, 'Item': ItemManager.getItem("Nothing")})
 
         # patch the ROM
         romPatcher = RomPatcher()
@@ -554,7 +576,7 @@ class InteractiveSolver(CommonSolver):
         romPatcher.writeSpoiler(itemLocs)
         romPatcher.writePlandoAddresses(self.visitedLocations)
         if self.areaRando == True:
-            doors = getDoorConnections(self.areaGraph)
+            doors = getDoorConnections(self.fillGraph(), self.areaRando, self.bossRando)
             romPatcher.writeDoorConnections(doors)
             doorsPtrs = getAps2DoorsPtrs()
             romPatcher.writePlandoTransitions(self.curGraphTransitions, doorsPtrs,

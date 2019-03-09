@@ -222,7 +222,6 @@ class RomReader:
             raise Exception("RomReader: unknown visibility: {}".format(visibility))
 
         # dessyreqt randomizer make some missiles non existant, detect it
-        # 0x1a is to say that the item is a morphball
         # 0xeedb is missile item
         # 0x786de is Morphing Ball location
         self.romFile.seek(address+4)
@@ -590,7 +589,7 @@ class RomPatcher:
 
         self.romFile.seek(loc['Address'] + 4)
         # if nothing was written at this loc before (in plando), then restore the vanilla value
-        self.romFile.write(struct.pack('B', loc['Byte']))
+        self.romFile.write(struct.pack('B', loc['Id']))
 
     def writeItemsLocs(self, itemLocs):
         self.nItems = 0

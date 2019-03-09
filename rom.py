@@ -585,8 +585,12 @@ class RomPatcher:
         loc = itemLoc['Location']
         if 'Boss' in loc['Class']:
             raise ValueError('Cannot write Boss location')
-#        print('write ' + itemLoc['Item']['Type'] + ' at ' + loc['Name'])
+        #print('write ' + itemLoc['Item']['Type'] + ' at ' + loc['Name'])
         self.writeItemCode(itemLoc['Item'], loc['Visibility'], loc['Address'])
+
+        self.romFile.seek(loc['Address'] + 4)
+        # if nothing was written at this loc before (in plando), then restore the vanilla value
+        self.romFile.write(struct.pack('B', loc['Byte']))
 
     def writeItemsLocs(self, itemLocs):
         self.nItems = 0

@@ -14,6 +14,7 @@ locations = [
     'Class': ["Major", "Chozo"],
     'CanHidden': False,
     'Address': 0x78264,
+    'Byte': 0x5,
     'Visibility': "Visible",
     'Room': 'Gauntlet Energy Tank Room',
     'AccessFrom' : {
@@ -29,6 +30,7 @@ locations = [
     'SolveArea': "Crateria Bombs",
     'Name': "Bomb",
     'Address': 0x78404,
+    'Byte': 0x7,
     'Class': ["Major", "Chozo"],
     'CanHidden': True,
     'Visibility': "Chozo",
@@ -49,6 +51,7 @@ locations = [
     'Class': ["Major"],
     'CanHidden': False,
     'Address': 0x78432,
+    'Byte': 0x8,
     'Visibility': "Visible",
     'Room': 'Terminator Room',
     'AccessFrom' : {
@@ -64,6 +67,7 @@ locations = [
     'Class': ["Major", "Chozo"],
     'CanHidden': True,
     'Address': 0x7852C,
+    'Byte': 0x11,
     'Visibility': "Chozo",
     'Room': 'Brinstar Reserve Tank Room',
     'AccessFrom' : {
@@ -82,6 +86,7 @@ locations = [
     'Class': ["Major", "Chozo"],
     'CanHidden': True,
     'Address': 0x78614,
+    'Byte': 0x17,
     'Visibility': "Chozo",
     'Room': 'Big Pink',
     'AccessFrom' : {
@@ -97,6 +102,7 @@ locations = [
     'Class': ["Major", "Chozo"],
     'CanHidden': False,
     'Address': 0x786DE,
+    'Byte': 0x1a,
     'Visibility': "Visible",
     'Room': 'Morph Ball Room',
     'AccessFrom' : {
@@ -112,6 +118,7 @@ locations = [
     'Class': ["Major"],
     'CanHidden': True,
     'Address': 0x7879E,
+    'Byte': 0x1d,
     'Visibility': "Hidden",
     'Room': 'Blue Brinstar Energy Tank Room',
     'AccessFrom' : {
@@ -136,6 +143,7 @@ locations = [
     'Class': ["Major"],
     'CanHidden': True,
     'Address': 0x787C2,
+    'Byte': 0x1e,
     'Visibility': "Visible",
     'Room': 'Etecoon Energy Tank Room',
     'AccessFrom' : {
@@ -152,6 +160,7 @@ locations = [
     'Class': ["Major"],
     'CanHidden': True,
     'Address': 0x787FA,
+    'Byte': 0x21,
     'Visibility': "Visible",
     'Room': 'Waterway Energy Tank Room',
     'AccessFrom' : {
@@ -171,6 +180,7 @@ locations = [
     'Class': ["Major"],
     'CanHidden': True,
     'Address': 0x78824,
+    'Byte': 0x23,
     'Visibility': "Visible",
     'Room': 'Hopper Energy Tank Room',
     'AccessFrom' : {
@@ -192,6 +202,7 @@ locations = [
     'Class': ["Major", "Chozo"],
     'CanHidden': True,
     'Address': 0x78876,
+    'Byte': 0x26,
     'Visibility': "Chozo",
     'Room': 'X-Ray Scope Room',
     'AccessFrom' : {
@@ -217,6 +228,7 @@ locations = [
     'Class': ["Major", "Chozo"],
     'CanHidden': True,
     'Address': 0x7896E,
+    'Byte': 0x2a,
     'Visibility': "Chozo",
     'Room': 'Spazer Room',
     'AccessFrom' : {
@@ -234,6 +246,7 @@ locations = [
     'Class': ["Major"],
     'CanHidden': True,
     'Address': 0x7899C,
+    'Byte': 0x2b,
     'Visibility': "Hidden",
     'Room': 'Warehouse Energy Tank Room',
     'AccessFrom' : {
@@ -265,6 +278,7 @@ locations = [
     'Class': ["Major", "Chozo"],
     'CanHidden': True,
     'Address': 0x78ACA,
+    'Byte': 0x30,
     'Visibility': "Chozo",
     'Room': 'Varia Suit Room',
     'AccessFrom' : {
@@ -280,6 +294,7 @@ locations = [
     'Class': ["Major", "Chozo"],
     'CanHidden': True,
     'Address': 0x78B24,
+    'Byte': 0x32,
     'Visibility': "Chozo",
     'Room': 'Ice Beam Room',
     'AccessFrom' : {
@@ -300,6 +315,7 @@ locations = [
     'Class': ["Major"],
     'CanHidden': True,
     'Address': 0x78BA4,
+    'Byte': 0x34,
     'Visibility': "Visible",
     'Room': "Crocomire's Room",
     'AccessFrom' : {
@@ -318,6 +334,7 @@ locations = [
     'Class': ["Major", "Chozo"],
     'CanHidden': True,
     'Address': 0x78BAC,
+    'Byte': 0x35,
     'Visibility': "Chozo",
     'Room': 'Hi Jump Boots Room',
     'AccessFrom' : {
@@ -335,6 +352,7 @@ locations = [
     'Class': ["Major", "Chozo"],
     'CanHidden': True,
     'Address': 0x78C36,
+    'Byte': 0x3c,
     'Visibility': "Chozo",
     'Room': 'Grapple Beam Room',
     'AccessFrom' : {
@@ -361,6 +379,7 @@ locations = [
     'Class': ["Major"],
     'CanHidden': True,
     'Address': 0x78C3E,
+    'Byte': 0x3d,
     'Visibility': "Chozo",
     'Room': 'Norfair Reserve Tank Room',
     'AccessFrom' : {
@@ -376,6 +395,7 @@ locations = [
     'Class': ["Major", "Chozo"],
     'CanHidden': True,
     'Address': 0x78C82,
+    'Byte': 0x42,
     'Visibility': "Chozo",
     'Room': 'Speed Booster Room',
     'AccessFrom' : {
@@ -391,6 +411,7 @@ locations = [
     'Class': ["Major", "Chozo"],
     'CanHidden': True,
     'Address': 0x78CCA,
+    'Byte': 0x44,
     'Visibility': "Chozo",
     'Room': 'Wave Beam Room',
     'AccessFrom' : {
@@ -427,6 +448,7 @@ locations = [
     'Class': ["Major", "Chozo"],
     'CanHidden': True,
     'Address': 0x79108,
+    'Byte': 0x4e,
     'Visibility': "Hidden",
     'Room': 'Ridley Tank Room',
     'AccessFrom' : {
@@ -442,6 +464,7 @@ locations = [
     'Class': ["Major", "Chozo"],
     'CanHidden': True,
     'Address': 0x79110,
+    'Byte': 0x4f,
     'Visibility': "Chozo",
     'Room': 'Screw Attack Room',
     # everything is handled by the graph
@@ -460,6 +483,7 @@ locations = [
     'Class': ["Major"],
     'CanHidden': True,
     'Address': 0x79184,
+    'Byte': 0x50,
     'Visibility': "Visible",
     'Room': 'Lower Norfair Fireflea Room',
     'AccessFrom' : {
@@ -480,6 +504,7 @@ locations = [
     'Class': ["Major"],
     'CanHidden': True,
     'Address': 0x7C2E9,
+    'Byte': 0x81,
     'Visibility': "Chozo",
     'Room': 'Bowling Alley',
     'AccessFrom' : {
@@ -497,6 +522,7 @@ locations = [
     'Class': ["Major", "Chozo"],
     'CanHidden': True,
     'Address': 0x7C337,
+    'Byte': 0x84,
     'Visibility': "Visible",
     'Room': 'Wrecked Ship Energy Tank Room',
     'AccessFrom' : {
@@ -529,6 +555,7 @@ locations = [
     'Class': ["Major", "Chozo"],
     'CanHidden': True,
     'Address': 0x7C365,
+    'Byte': 0x86,
     'Visibility': "Visible",
     'Room': 'Wrecked Ship East Super Room',
     'AccessFrom' : {
@@ -544,6 +571,7 @@ locations = [
     'Class': ["Major"],
     'CanHidden': True,
     'Address': 0x7C36D,
+    'Byte': 0x87,
     'Visibility': "Chozo",
     'Room': 'Gravity Suit Room',
     'AccessFrom' : {
@@ -560,6 +588,7 @@ locations = [
     'Class': ["Major"],
     'CanHidden': True,
     'Address': 0x7C47D,
+    'Byte': 0x8a,
     'Visibility': "Visible",
     'Room': 'Mama Turtle Room',
     'AccessFrom' : {
@@ -586,6 +615,7 @@ locations = [
     'Class': ["Major", "Chozo"],
     'CanHidden': True,
     'Address': 0x7C559,
+    'Byte': 0x8f,
     'Visibility': "Chozo",
     'Room': 'Plasma Room',
     'AccessFrom' : { # simple because if draygon is dead, you can get there
@@ -626,6 +656,7 @@ locations = [
     'Class': ["Major"],
     'CanHidden': True,
     'Address': 0x7C5E3,
+    'Byte': 0x91,
     'Visibility': "Chozo",
     'Room': 'West Sand Hole',
     'AccessFrom' : {
@@ -642,6 +673,7 @@ locations = [
     'Class': ["Major", "Chozo"],
     'CanHidden': True,
     'Address': 0x7C6E5,
+    'Byte': 0x96,
     'Visibility': "Chozo",
     'Room': 'Spring Ball Room',
     'AccessFrom' : {
@@ -683,6 +715,7 @@ locations = [
     'Class': ["Major"],
     'CanHidden': True,
     'Address': 0x7C755,
+    'Byte': 0x98,
     'Visibility': "Visible",
     'Room': 'Botwoon Energy Tank Room',
     'AccessFrom' : {
@@ -715,6 +748,7 @@ locations = [
     'Class': ["Major", "Chozo"],
     'CanHidden': True,
     'Address': 0x7C7A7,
+    'Byte': 0x9a,
     'Visibility': "Chozo",
     'Room': 'Space Jump Room',
     'AccessFrom' : {
@@ -751,6 +785,7 @@ locations = [
     'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x781CC,
+    'Byte': 0x0,
     'Visibility': "Visible",
     'Room': 'Crateria Power Bomb Room',
     'AccessFrom' : {
@@ -768,6 +803,7 @@ locations = [
     'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x781E8,
+    'Byte': 0x1,
     'Visibility': "Visible",
     'Room': 'West Ocean',
     'AccessFrom' : {
@@ -783,6 +819,7 @@ locations = [
     'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x781EE,
+    'Byte': 0x2,
     'Visibility': "Hidden",
     'Room': 'West Ocean',
     'AccessFrom' : {
@@ -798,6 +835,7 @@ locations = [
     'CanHidden': True,
     'Class': ["Minor"],
     'Address': 0x781F4,
+    'Byte': 0x3,
     'Visibility': "Visible",
     'Room': 'West Ocean',
     'AccessFrom' : {
@@ -813,6 +851,7 @@ locations = [
     'Class': ["Minor"],
     'CanHidden': False,
     'Address': 0x78248,
+    'Byte': 0x4,
     'Visibility': "Visible",
     'Room': 'The Moat',
     'AccessFrom' : {
@@ -828,6 +867,7 @@ locations = [
     'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x783EE,
+    'Byte': 0x6,
     'Visibility': "Visible",
     'Room': 'Pit Room',
     'AccessFrom' : {
@@ -843,6 +883,7 @@ locations = [
     'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x78464,
+    'Byte': 0x9,
     'Visibility': "Visible",
     'Room': 'Green Pirates Shaft',
     'AccessFrom' : {
@@ -863,6 +904,7 @@ locations = [
     'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x7846A,
+    'Byte': 0xa,
     'Visibility': "Visible",
     'Room': 'Green Pirates Shaft',
     'AccessFrom' : {
@@ -883,6 +925,7 @@ locations = [
     'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x78478,
+    'Byte': 0xb,
     'Visibility': "Visible",
     'Room': 'Crateria Super Room',
     'AccessFrom' : {
@@ -907,6 +950,7 @@ locations = [
     'Class': ["Minor", "Chozo"],
     'CanHidden': True,
     'Address': 0x78486,
+    'Byte': 0xc,
     'Visibility': "Visible",
     'Room': 'The Final Missile',
     'AccessFrom' : {
@@ -922,6 +966,7 @@ locations = [
     'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x784AC,
+    'Byte': 0xd,
     'Visibility': "Chozo",
     'Room': 'Green Brinstar Main Shaft',
     'AccessFrom' : {
@@ -938,6 +983,7 @@ locations = [
     'Class': ["Minor", "Chozo"],
     'CanHidden': True,
     'Address': 0x784E4,
+    'Byte': 0xe,
     'Visibility': "Chozo",
     'Room': 'Spore Spawn Super Room',
     'AccessFrom' : {
@@ -957,6 +1003,7 @@ locations = [
     'Class': ["Minor"],
     'CanHidden': False,
     'Address': 0x78518,
+    'Byte': 0xf,
     'Visibility': "Visible",
     'Room': 'Early Supers Room',
     'AccessFrom' : {
@@ -974,6 +1021,7 @@ locations = [
     'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x7851E,
+    'Byte': 0x10,
     'Visibility': "Visible",
     'Room': 'Early Supers Room',
     'AccessFrom' : {
@@ -991,6 +1039,7 @@ locations = [
     'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x78532,
+    'Byte': 0x12,
     'Visibility': "Hidden",
     'Room': 'Brinstar Reserve Tank Room',
     'AccessFrom' : {
@@ -1012,6 +1061,7 @@ locations = [
     'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x78538,
+    'Byte': 0x13,
     'Visibility': "Visible",
     'Room': 'Brinstar Reserve Tank Room',
     'AccessFrom' : {
@@ -1030,6 +1080,7 @@ locations = [
     'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x78608,
+    'Byte': 0x15,
     'Visibility': "Visible",
     'Room': 'Big Pink',
     'AccessFrom' : {
@@ -1045,6 +1096,7 @@ locations = [
     'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x7860E,
+    'Byte': 0x16,
     'Visibility': "Visible",
     'Room': 'Big Pink',
     'AccessFrom' : {
@@ -1060,6 +1112,7 @@ locations = [
     'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x7865C,
+    'Byte': 0x18,
     'Visibility': "Visible",
     'Room': 'Pink Brinstar Power Bomb Room',
     'AccessFrom' : {
@@ -1076,6 +1129,7 @@ locations = [
     'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x78676,
+    'Byte': 0x19,
     'Visibility': "Visible",
     'Room': 'Green Hill Zone',
     'AccessFrom' : {
@@ -1091,6 +1145,7 @@ locations = [
     'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x7874C,
+    'Byte': 0x1b,
     'Visibility': "Visible",
     'Room': 'Morph Ball Room',
     'AccessFrom' : {
@@ -1104,6 +1159,7 @@ locations = [
     'SolveArea': "Blue Brinstar",
     'Name': "Missile (blue Brinstar middle)",
     'Address': 0x78798,
+    'Byte': 0x1c,
     'Class': ["Minor"],
     'CanHidden': True,
     'Visibility': "Visible",
@@ -1123,6 +1179,7 @@ locations = [
     'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x787D0,
+    'Byte': 0x1f,
     'Visibility': "Visible",
     'Room': 'Etecoon Super Room',
     'AccessFrom' : {
@@ -1139,6 +1196,7 @@ locations = [
     'Class': ["Minor", "Chozo"],
     'CanHidden': True,
     'Address': 0x78802,
+    'Byte': 0x22,
     'Visibility': "Chozo",
     'Room': 'First Missile Room',
     'AccessFrom' : {
@@ -1154,6 +1212,7 @@ locations = [
     'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x78836,
+    'Byte': 0x24,
     'Visibility': "Visible",
     'Room': 'Billy Mays Room',
     'AccessFrom' : {
@@ -1169,6 +1228,7 @@ locations = [
     'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x7883C,
+    'Byte': 0x25,
     'Visibility': "Hidden",
     'Room': 'Billy Mays Room',
     'AccessFrom' : {
@@ -1184,6 +1244,7 @@ locations = [
     'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x788CA,
+    'Byte': 0x27,
     'Visibility': "Visible",
     'Room': 'Beta Power Bomb Room',
     'AccessFrom' : {
@@ -1200,6 +1261,7 @@ locations = [
     'Class': ["Minor", "Chozo"],
     'CanHidden': True,
     'Address': 0x7890E,
+    'Byte': 0x28,
     'Visibility': "Chozo",
     'Room': 'Alpha Power Bomb Room',
     'AccessFrom' : {
@@ -1215,6 +1277,7 @@ locations = [
     'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x78914,
+    'Byte': 0x29,
     'Visibility': "Visible",
     'Room': 'Alpha Power Bomb Room',
     'AccessFrom' : {
@@ -1231,6 +1294,7 @@ locations = [
     'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x789EC,
+    'Byte': 0x2c,
     'Visibility': "Hidden",
     'Room': 'Warehouse Keyhunter Room',
     'AccessFrom' : {
@@ -1246,6 +1310,7 @@ locations = [
     'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x78AE4,
+    'Byte': 0x31,
     'Visibility': "Hidden",
     'Room': 'Cathedral',
     'AccessFrom' : {
@@ -1262,6 +1327,7 @@ locations = [
     'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x78B46,
+    'Byte': 0x33,
     'Visibility': "Hidden",
     'Room': 'Crumble Shaft',
     'AccessFrom' : {
@@ -1285,6 +1351,7 @@ locations = [
     'Class': ["Minor"],
     'CanHidden': False,
     'Address': 0x78BC0,
+    'Byte': 0x36,
     'Visibility': "Visible",
     'Room': 'Crocomire Escape',
     'AccessFrom' : {
@@ -1300,6 +1367,7 @@ locations = [
     'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x78BE6,
+    'Byte': 0x37,
     'Visibility': "Visible",
     'Room': 'Hi Jump Energy Tank Room',
     'AccessFrom' : {
@@ -1317,6 +1385,7 @@ locations = [
     'CanHidden': True,
     'Class': ["Minor"],
     'Address': 0x78BEC,
+    'Byte': 0x38,
     'Visibility': "Visible",
     'Room': 'Hi Jump Energy Tank Room',
     'AccessFrom' : {
@@ -1332,6 +1401,7 @@ locations = [
     'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x78C04,
+    'Byte': 0x39,
     'Visibility': "Visible",
     'Room': 'Post Crocomire Power Bomb Room',
     'AccessFrom' : {
@@ -1354,6 +1424,7 @@ locations = [
     'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x78C14,
+    'Byte': 0x3a,
     'Visibility': "Visible",
     'Room': 'Post Crocomire Missile Room',
     'AccessFrom' : {
@@ -1369,6 +1440,7 @@ locations = [
     'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x78C2A,
+    'Byte': 0x3b,
     'Visibility': "Visible",
     'Room': 'Post Crocomire Jump Room',
     'AccessFrom' : {
@@ -1397,6 +1469,7 @@ locations = [
     'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x78C44,
+    'Byte': 0x3e,
     'Visibility': "Hidden",
     'Room': 'Norfair Reserve Tank Room',
     'AccessFrom' : {
@@ -1412,6 +1485,7 @@ locations = [
     'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x78C52,
+    'Byte': 0x3f,
     'Visibility': "Visible",
     'Room': 'Green Bubbles Missile Room',
     'AccessFrom' : {
@@ -1427,6 +1501,7 @@ locations = [
     'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x78C66,
+    'Byte': 0x40,
     'Visibility': "Visible",
     'Room': 'Bubble Mountain',
     'AccessFrom' : {
@@ -1442,6 +1517,7 @@ locations = [
     'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x78C74,
+    'Byte': 0x41,
     'Visibility': "Hidden",
     'Room': 'Speed Booster Hall',
     'AccessFrom' : {
@@ -1457,6 +1533,7 @@ locations = [
     'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x78CBC,
+    'Byte': 0x43,
     'Visibility': "Visible",
     'Room': 'Double Chamber',
     'AccessFrom' : {
@@ -1472,6 +1549,7 @@ locations = [
     'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x78E6E,
+    'Byte': 0x46,
     'Visibility': "Visible",
     'Room': "Golden Torizo's Room",
     'AccessFrom' : {
@@ -1488,6 +1566,7 @@ locations = [
     'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x78E74,
+    'Byte': 0x47,
     'Visibility': "Hidden",
     'Room': "Golden Torizo's Room",
     'AccessFrom' : {
@@ -1504,6 +1583,7 @@ locations = [
     'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x78F30,
+    'Byte': 0x49,
     'Visibility': "Visible",
     'Room': 'Mickey Mouse Room',
     'AccessFrom' : {
@@ -1519,6 +1599,7 @@ locations = [
     'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x78FCA,
+    'Byte': 0x4a,
     'Visibility': "Visible",
     'Room': 'Lower Norfair Spring Ball Maze Room',
     'AccessFrom' : {
@@ -1534,6 +1615,7 @@ locations = [
     'Class': ["Minor"],
     'CanHidden': False,
     'Address': 0x78FD2,
+    'Byte': 0x4b,
     'Visibility': "Visible",
     'Room': 'Lower Norfair Escape Power Bomb Room',
     'AccessFrom' : {
@@ -1549,6 +1631,7 @@ locations = [
     'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x790C0,
+    'Byte': 0x4c,
     'Visibility': "Visible",
     'Room': 'Wasteland',
     'AccessFrom' : {
@@ -1564,6 +1647,7 @@ locations = [
     'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x79100,
+    'Byte': 0x4d,
     'Visibility': "Visible",
     'Room': "Three Muskateers' Room",
     'AccessFrom' : {
@@ -1580,6 +1664,7 @@ locations = [
     'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x7C265,
+    'Byte': 0x80,
     'Visibility': "Visible",
     'Room': 'Wrecked Ship Main Shaft',
     'AccessFrom' : {
@@ -1595,6 +1680,7 @@ locations = [
     'Class': ["Minor", "Chozo"],
     'CanHidden': False,
     'Address': 0x7C2EF,
+    'Byte': 0x82,
     'Visibility': "Visible",
     'Room': 'Bowling Alley',
     'AccessFrom' : {
@@ -1611,6 +1697,7 @@ locations = [
     'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x7C319,
+    'Byte': 0x83,
     'Visibility': "Visible",
     'Room': 'Wrecked Ship East Missile Room',
     'AccessFrom' : {
@@ -1626,6 +1713,7 @@ locations = [
     'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x7C357,
+    'Byte': 0x85,
     'Visibility': "Visible",
     'Room': 'Wrecked Ship West Super Room',
     'AccessFrom' : {
@@ -1641,6 +1729,7 @@ locations = [
     'Class': ["Minor"],
     'CanHidden': False,
     'Address': 0x7C437,
+    'Byte': 0x88,
     'Visibility': "Visible",
     'Room': 'Main Street',
     'AccessFrom' : {
@@ -1660,6 +1749,7 @@ locations = [
     'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x7C43D,
+    'Byte': 0x89,
     'Visibility': "Visible",
     'Room': 'Main Street',
     'AccessFrom' : {
@@ -1677,6 +1767,7 @@ locations = [
     'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x7C483,
+    'Byte': 0x8b,
     'Visibility': "Hidden",
     'Room': 'Mama Turtle Room',
     'AccessFrom' : {
@@ -1693,6 +1784,7 @@ locations = [
     'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x7C4AF,
+    'Byte': 0x8c,
     'Visibility': "Visible",
     'Room': 'Watering Hole',
     'AccessFrom' : {
@@ -1709,6 +1801,7 @@ locations = [
     'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x7C4B5,
+    'Byte': 0x8d,
     'Visibility': "Visible",
     'Room': 'Watering Hole',
     'AccessFrom' : {
@@ -1724,6 +1817,7 @@ locations = [
     'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x7C533,
+    'Byte': 0x8e,
     'Visibility': "Visible",
     'Room': 'Pseudo Plasma Spark Room',
     'AccessFrom' : {
@@ -1739,6 +1833,7 @@ locations = [
     'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x7C5DD,
+    'Byte': 0x90,
     'Visibility': "Visible",
     'Room': 'West Sand Hole',
     'AccessFrom' : {
@@ -1755,6 +1850,7 @@ locations = [
     'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x7C5EB,
+    'Byte': 0x92,
     'Visibility': "Visible",
     'Room': 'East Sand Hole',
     'AccessFrom' : {
@@ -1771,6 +1867,7 @@ locations = [
     'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x7C5F1,
+    'Byte': 0x93,
     'Visibility': "Visible",
     'Room': 'East Sand Hole',
     'AccessFrom' : {
@@ -1786,6 +1883,7 @@ locations = [
     'SolveArea': "Maridia Pink Bottom",
     'Name': "Missile (pink Maridia)",
     'Address': 0x7C603,
+    'Byte': 0x94,
     'Class': ["Minor"],
     'CanHidden': True,
     'Visibility': "Visible",
@@ -1805,6 +1903,7 @@ locations = [
     'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x7C609,
+    'Byte': 0x95,
     'Visibility': "Visible",
     'Room': 'Aqueduct',
     'AccessFrom' : {
@@ -1822,6 +1921,7 @@ locations = [
     'Class': ["Minor"],
     'CanHidden': True,
     'Address': 0x7C74D,
+    'Byte': 0x97,
     'Visibility': "Hidden",
     'Room': 'The Precious Room',
     'AccessFrom' : {

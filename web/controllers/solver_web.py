@@ -1760,3 +1760,13 @@ def getMd5sum(romDict):
         values.append(romDict[address] if address in romDict else 0xFF)
         address += 1
     return hashlib.md5(json.dumps(values)).hexdigest()
+
+def initPalettizerSession():
+    pass
+
+def palettizer():
+    response.title = 'Super Metroid VARIA Palettizer'
+
+    initPalettizerSession()
+
+    return dict(patches=patches)

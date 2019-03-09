@@ -177,8 +177,10 @@ class PaletteRando(object):
         #[sporespawn,kraid,phantoon,botwoon,draygon,crocomire,bomb-torizo,gold-torizo,ridley,mbrain]
 
         #Draygon, Kraid, Crocomire and Mother Brain have seperate colors hidden in tileset palettes which are addressed in the boss shift function
-        self.spore_spawn_palettes = [0x12E359,0x12E3D9]
-        self.spore_spawn_length = [0x3F,0x8F]
+        #self.spore_spawn_palettes = [0x12E359,0x12E3D9]
+        #self.spore_spawn_length = [0x3F,0x8F]
+        self.spore_spawn_palettes = [0x12E359]
+        self.spore_spawn_length = [0x3F]
         self.kraid_palettes = [0x138687,0x13B3F3,0x13B533,0x13AAB0,0x1386C7]
         self.kraid_length = [0x1F,0x8F,0x7F,0x03,0x0F]
         self.phantoon_palettes = [0x13CA01,0x13CB41]

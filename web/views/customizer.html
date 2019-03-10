@@ -1,0 +1,438 @@
+{{
+extend 'layout.html'
+}}
+
+<meta name="description" content="Palettizer for the randomized Super Metroid roms"/>
+<link rel="shortcut icon" href={{=URL('static','favicon.ico')}} type="image/ico"/>
+<script src="{{=URL('static','js/FileSaver.js')}}"></script>
+<link rel="stylesheet" type="text/css" href={{=URL('static','css/mystyle_20181203.css')}} media="screen"/>
+
+<link rel="stylesheet" type="text/css" href={{=URL('static','dist/switchery.css')}} media="screen"/>
+<script src="{{=URL('static','dist/switchery.js')}}"></script>
+
+<link href={{=URL('static', 'css/bootstrap-tour.min.css')}} rel="stylesheet">
+<script src="{{=URL('static','js/bootstrap-tour.min.js')}}"></script>
+
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+
+<title>Super Metroid VARIA Palettizer</title>
+
+<style>
+.popover {
+    max-width: 20%;
+    /* max-height: 95vh;*/
+    /* overflow-y: scroll; */
+    position: fixed;
+}
+.highslide-dimming {
+    background: black;
+}
+#overlay {
+    position: fixed; /* Sit on top of the page content */
+    display: none; /* Hidden by default */
+    width: 100%; /* Full width (cover the whole page) */
+    height: 100%; /* Full height (cover the whole page) */
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0,0,0,0.5); /* Black background with opacity */
+    z-index: 2; /* Specify a stack order in case you're using a different order for other elements */
+    cursor: pointer; /* Add a pointer on hover */
+}
+#loadingGIF {
+    position: absolute;
+    left: 5%;
+    z-index: 3;
+    display:none;
+}
+@media (max-height: 800px) {
+    .loadingGIF {
+         top: 20%;
+    }
+}
+@media (min-height: 800px) {
+    .loadingGIF {
+         top: 40%;
+    }
+}
+#psMultiselectDiv {
+    display: none;
+}
+.sixty {
+    width: 65%
+}
+.thirty {
+    width: 30%
+}
+.floatright {
+    float: right;
+    vertical-align: top;
+    margin-top: -0.3em;
+}
+.floatleft {
+    float: left;
+    vertical-align: top;
+}
+</style>
+
+<script type="text/javascript">
+var globalSwitchs = {};
+
+function ajaxFail(jqXHR, textStatus) {
+  document.getElementById("flash").innerHTML = jqXHR.responseText;
+  $('#flash').show();
+  $('#overlay').hide();
+  $('#loadingGIF').hide();
+}
+
+function ajaxFailJSON(jqXHR, textStatus) {
+  if(jqXHR.responseJSON == null) {
+    document.getElementById("flash").innerHTML = "Something wrong happened with the customizer.";
+  } else {
+    document.getElementById("flash").innerHTML = jqXHR.responseJSON;
+  }
+  $('#flash').show();
+  $('#overlay').hide();
+  $('#loadingGIF').hide();
+}
+
+function AjaxCallCompleted(data) {
+    console.log("AjaxCallCompleted");
+
+    // with items/Locations patch the local rom in memory
+    var filesInput = document.getElementById("uploadFile");
+    var file = filesInput.files[0];
+
+    var reader = new FileReader();
+    reader.readAsArrayBuffer(file);
+
+    reader.onload = function(e) {
+        var bytes = new Uint8Array(e.target.result);
+
+        for(var key in data) {
+            if(key === "fileName" || key === "errorMsg") { continue; }
+            bytes[key] = data[key];
+        }
+
+        var blob = new Blob([bytes], {type: "octet/stream"});
+
+        var outFileName = data['fileName'];
+        saveAs(blob, outFileName);
+    }
+
+    // info message to display ?
+    if("errorMsg" in data && data["errorMsg"].length > 0) {
+        document.getElementById("flash").innerHTML = data["errorMsg"];
+        $('#flash').show();
+        displayFlash = true;
+    } else {
+        displayFlash = false;
+    }
+
+    // set backup button text to Randomize
+    document.getElementById("submitBtn").data = "Customize";
+
+    // remove "working" message
+    if(displayFlash == false){
+        $('#flash').hide();
+    }
+    $('#overlay').hide();
+    $('#loadingGIF').hide();
+}
+
+function doSubmit() {
+  if(window.File && window.FileList && window.FileReader) {
+
+    var filesInput = document.getElementById("uploadFile");
+    var file = filesInput.files[0]
+    if (file === undefined) {
+      alert("Please select a Super Metroid ROM first")
+      btn = document.getElementById("submitBtn");
+      btn.data = "Customize";
+      btn.disabled = false;
+
+      setTimeout(function(){ 
+          btn = document.getElementById("submitBtn");
+          btn.data = "Customize";
+          btn.disabled = false;
+      }, 20000);
+
+      return false;
+    }
+
+    var dataDict = {};
+    var elems = ["itemsounds", "spinjumprestart", "elevators_doors_speed", "animals", "variaTweaks", "No_Music", "colorsRandomization", "suitsPalettes", "beamsPalettes", "tilesPalettes", "enemiesPalettes", "bossesPalettes"];
+
+    for(var i=0; i<elems.length; i++) {
+       dataDict[elems[i]] = document.getElementById(elems[i]).value;
+    }
+
+    dataDict["minDegree"] = $("#degree_slider_range").slider("values", 0);
+    dataDict["maxDegree"] = $("#degree_slider_range").slider("values", 1);
+
+    console.log("before customizer web service call");
+
+    // call customizer web service with parameters
+    var request = $.ajax({
+      url: "{{=URL(f='customWebService')}}",
+      method: "POST",
+      data: dataDict,
+      dataType: "html"
+    });
+
+    request.done(AjaxCallCompleted);
+    request.fail(ajaxFail);
+
+    // while WS is working, display "working" message
+    $('#overlay').show();
+    $('#loadingGIF').show();
+  }
+
+  return false;
+}
+
+window.onload = function(){
+    //Check File API support
+    if(window.File && window.FileList && window.FileReader) {
+        var filesInput = document.getElementById("uploadFile");
+        filesInput.addEventListener("change", function(event){
+            var files = event.target.files; //It returns a FileList object
+            var file = files[0];
+
+            var reader = new FileReader();
+            reader.onload = function(e) {
+		// check sfc or smc extention
+                var re = /(?:\.([^.]+))?$/;
+		var ext = re.exec(file.name)[1];
+                console.log("ext: "+ext)
+                if( ! (ext === "sfc" || ext === "smc") ) {
+                    document.getElementById("uploadFile").value = "";
+                    alert("wrong extension: "+ext);
+                    return false;
+                }
+
+                var fileSize = file.size;
+		if( fileSize > 4*1024*1024 ) {
+                    document.getElementById("uploadFile").value = "";
+                    alert("wrong rom file size: "+fileSize.toString());
+                    return false;
+                }
+            }
+
+            reader.readAsArrayBuffer(file)
+
+        }, false);
+    } else {
+        alert("This website requires the HTML5 File API, please upgrade your browser to a newer version.");
+    }
+
+
+    var inputs = document.getElementsByTagName("input");
+    for(var i = 0; i < inputs.length; i++) {
+        if(inputs[i].type == "checkbox") {
+            // progression speed checkboxes don't need switchery, so they don't have a name property
+            if(inputs[i].name != "") {
+              var s = new Switchery(document.getElementById(inputs[i].name), { size: 'small', color: '#ddd' });
+              globalSwitchs[inputs[i].name] = s;
+            }
+        }
+    }
+
+    initSlider();
+}
+
+function initSlider() {
+  $("#degree_slider_range").slider({
+    range: true,
+    min: -180,
+    max: 180,
+    values: [-180, 180],
+    slide: function(event, ui) {
+      $("#colorsText").text("Degree ["+(ui.values[0])+" , "+(ui.values[1])+"]");
+    }
+  });
+  // set current values
+  $("#degree_slider_range").slider("values", 0, {{=session.randomizer["minDegree"]}});
+  $("#degree_slider_range").slider("values", 1, {{=session.randomizer["maxDegree"]}});
+
+  // set text
+  $("#colorsText").text("Degree ["+($("#degree_slider_range").slider("values", 0))+" , "+($("#degree_slider_range").slider("values", 1))+"]");
+}
+
+function switchCheckbox(id, elems=[]) {
+  var check = document.getElementById(id);
+  if(check.checked){
+    check.value = "on";
+  } else {
+    check.value = "off";
+  }
+
+  for(var i=0; i<elems.length; i++){
+    elemId = elems[i];
+    var e = document.getElementById(elemId);
+    e.disabled = check.checked;
+    // grey out the disabled text
+    var text = document.getElementById(elems[i]+"Text");
+    if(e.disabled) {
+        text.className = "disabledText";
+    } else {
+        text.className = "";
+    }
+    // tell switchery
+    if(elemId in globalSwitchs){
+      var s = globalSwitchs[elemId];
+      if(check.checked){
+        s.disable();
+      } else {
+        s.enable();
+      }
+    }
+  }
+}
+
+function startTheTour(step=-1) {
+  // the tour tutorial
+  var tour = new Tour({
+    storage: false,
+    steps: [
+    {
+      element: "#uploadFileStep",
+      title: "VARIA Seed",
+      content: "Select a seed generated on the VARIA website."
+    },
+    {
+      element: "#colorsRandomizationStep",
+      title: "Color randomization",
+      content: "<p>Randomize the colors of various graphical elements:<br/><img src=\"/solver/static/images/palettesRando.png\" alt=\"colors rando\" title=\"colors rando\" class=\"full\"/></p><br/><p>Use the slider to restrict the possible range of the colors shifting, with zero meaning no shifting:<br/><img src=\"/solver/static/images/samus_degrees.png\" alt=\"samus degrees\" title=\"samus degrees\" class=\"full\"/></p>"
+    },
+    {
+      element: "#patchesStep",
+      title: "Patches",
+      content: "Choose the patches that you want to include in your customized seed."
+    },
+    {
+      element: "#variaTweaksStep",
+      title: "Optional patches",
+      content: "Include minor tweaks for the game to behave 'as it should' in a randomizer context :\
+<ul><li>Bomb Torizo fight is triggered when picking up the item he's holding, not by having Bomb</li>\
+<li>Access item at Wrecked Ship Etank location without killing Phantoon (via Forgotten Highway)</li>\
+<li>Activate Lower Norfair Chozo (left of entrance) without Space Jump</li></ul>"
+    } ]});
+
+  // Initialize the tour
+  tour.init();
+
+  // Start the tour
+  if(step != -1) {
+    tour.goTo(step);
+  }
+  tour.start();
+}
+</script>
+{{
+def displayCheckbox(id, defaultTrue=False):
+  if (id in session.randomizer and session.randomizer[id] == 'on') or (id not in session.randomizer and defaultTrue == True):
+}}
+    {{=INPUT(_id=id, _name=id, _type="checkbox", _checked="checked", _value="on", _class="js-switch", _onchange="switchCheckbox('{}')".format(id))}}
+{{
+  else:
+}}
+    {{=INPUT(_id=id, _name=id, _type="checkbox", _value="off", _class="js-switch", _onchange="switchCheckbox('{}')".format(id))}}
+    {{pass}}
+  {{pass}}
+<body>
+  <div id="overlay"></div>
+  <div id="loadingGIF"><img src={{=URL('static/images','ajax-loader.gif')}}/></div>
+
+  <div class="fixed">
+    <div class="menu">
+    <table class="full menuTable">
+      <tr>
+	<td>{{=A("Home", _href=URL(f="home"), _class="menu")}}</td>
+	<td>{{=A("Presets", _href=URL(f="presets"), _class="menu")}}</td>
+	<td>{{=A("Randomizer", _href=URL(f="randomizer"), _class="menu")}}</td>
+	<td>{{=A("Solver", _href=URL(f="solver"), _class="menu")}}</td>
+	<td>{{=A("Trackers", _href=URL(f="tracker"), _class="menu")}}</td>
+	<td>{{=A("Plandomizer", _href=URL(f="plando"), _class="menu")}}</td>
+	<td class="menu_selected">{{=A("Customizer", _href=URL(f="customizer"), _class="menu")}}</td>
+	<td>{{=A("Information & Contact", _href=URL(f="infos"), _class="menu")}}</td>
+      </tr>
+    </table>
+    </div>
+  </div>
+
+  <div class="main">
+    <div id="complexityTabs" class="center">
+      <div class="tab">
+        <button class="tablinks">Seed Customizer</button>
+      </div>
+    </div>
+    <form id="mainform" name="mainform" onsubmit="doSubmit(); return false;">
+      <div id="tabRando" class="tabcontent">
+        <div class="row">
+	  <div class="column">
+	    <p>Add palette randomization, apply patches to an already randomized VARIA seed.</p>
+            <table class="full">
+              <colgroup><col class="half" /><col class="half" /></colgroup>
+              <tr>
+                <td>VARIA seed:</td>
+                <td>{{=INPUT(_type="file", _name="uploadFile", _id="uploadFile", _class="full")}}</td>
+                <td><button type="button" onclick="startTheTour(0)" id="uploadFileStep">?</button></td>
+              </tr>
+            </table>
+            <h4>Colors Randomization</h4>
+            <p>
+	      Randomize the colors of Samus, beams, levels, enemies and bosses.
+            </p>
+	    <table class="full">
+	      <tr>
+	        <td class="half">{{displayCheckbox("colorsRandomization")}}Colors Randomization</td>
+		<td class="half"><div id="degree_slider_range" class="sixty floatleft"></div><span id="colorsText" class="thirty floatright"></span></td>
+                <td><button type="button" onclick="startTheTour(1)" id="colorsRandomizationStep">?</button></td>
+	      </tr>
+            </table>
+	    <p>
+	      Select the elements to colors randomize.
+	    </p>
+	    <table class="full">
+	      <tr>
+	        <td class="third">{{displayCheckbox("suitsPalettes")}}Samus colors</td>
+	        <td class="third">{{displayCheckbox("beamsPalettes")}}Beams colors</td>
+	        <td class="third">{{displayCheckbox("tilesPalettes")}}Levels colors</td>
+	      </tr>
+	      <tr>
+	        <td class="third">{{displayCheckbox("enemiesPalettes")}}Enemies colors</td>
+	        <td class="third">{{displayCheckbox("bossesPalettes")}}Bosses colors</td>
+		<td class="third"></td>
+	      </tr>
+	    </table>
+	    <h4>Patches<span class="right"><button type="button" onclick="startTheTour(2)" id="patchesStep">?</button></span></h4>
+	    <p>
+	      Patches to customize your ROM.
+	    </p>
+	    <table class="full">
+	      <tr>
+		<td class="full">{{displayCheckbox("variaTweaks", True)}} VARIA tweaks (by Flo)</td><td><button type="button" onclick="startTheTour(3)" id="variaTweaksStep">?</button></td>
+	      </tr>
+	    </table>
+	    <table class="full">
+{{
+for patch in patches:
+  if patch[4] == True:
+    response.write("	    <tr>", escape=False)
+    response.write("	      <td class=\"full\">".format(patch[0]), escape=False)
+    displayCheckbox(patch[0], patches[2])
+    response.write("{}".format(patch[1]))
+    response.write("	    </tr>", escape=False)
+    pass
+  pass
+}}
+	    </table>
+	  </div>
+        </div>
+        {{=INPUT(_type="submit", _value="customize", _id="submitBtn", _class="btn btn-default buttonRandom")}}
+    </form>
+  </div>
+</body>

@@ -684,14 +684,14 @@ def infos():
     return dict()
 
 patches = [
-    # name, desc, default on, visible on medium
-    ('skip_intro', "Skip text intro (start at Ceres Station) (by Smiley)", False, False),
-    ('skip_ceres', "Skip text intro and Ceres station (start at Landing Site) (by Total)", True, False),
-    ('itemsounds', "Remove fanfare when picking up an item (by Scyzer)", True, True),
-    ('spinjumprestart', "Allows Samus to start spinning in mid air after jumping or falling (by Kejardon)", False, True),
-    ('elevators_doors_speed', 'Accelerate doors and elevators transitions (by Rakki & Lioran)', True, True),
-    ('animals', "Save the animals surprise (by Foosda)", False, False),
-    ('No_Music', "Disable background music (by Kejardon)", False, True)
+    # name, desc, default on, visible on medium, visible on palettizer
+    ('skip_intro', "Skip text intro (start at Ceres Station) (by Smiley)", False, False, False),
+    ('skip_ceres', "Skip text intro and Ceres station (start at Landing Site) (by Total)", True, False, False),
+    ('itemsounds', "Remove fanfare when picking up an item (by Scyzer)", True, True, True),
+    ('spinjumprestart', "Allows Samus to start spinning in mid air after jumping or falling (by Kejardon)", False, True, True),
+    ('elevators_doors_speed', 'Accelerate doors and elevators transitions (by Rakki & Lioran)', True, True, True),
+    ('animals', "Save the animals surprise (by Foosda)", False, False, True),
+    ('No_Music', "Disable background music (by Kejardon)", False, True, True)
 ]
 
 def initRandomizerSession():
@@ -1761,12 +1761,12 @@ def getMd5sum(romDict):
         address += 1
     return hashlib.md5(json.dumps(values)).hexdigest()
 
-def initPalettizerSession():
+def initCustomizerSession():
     pass
 
-def palettizer():
-    response.title = 'Super Metroid VARIA Palettizer'
+def customizer():
+    response.title = 'Super Metroid VARIA Seeds Customizer'
 
-    initPalettizerSession()
+    initCustomizerSession()
 
     return dict(patches=patches)

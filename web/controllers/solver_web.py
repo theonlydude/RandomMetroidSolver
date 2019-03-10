@@ -684,14 +684,14 @@ def infos():
     return dict()
 
 patches = [
-    # name, desc, default on, visible on medium
-    ('skip_intro', "Skip text intro (start at Ceres Station) (by Smiley)", False, False),
-    ('skip_ceres', "Skip text intro and Ceres station (start at Landing Site) (by Total)", True, False),
-    ('itemsounds', "Remove fanfare when picking up an item (by Scyzer)", True, True),
-    ('spinjumprestart', "Allows Samus to start spinning in mid air after jumping or falling (by Kejardon)", False, True),
-    ('elevators_doors_speed', 'Accelerate doors and elevators transitions (by Rakki & Lioran)', True, True),
-    ('animals', "Save the animals surprise (by Foosda)", False, False),
-    ('No_Music', "Disable background music (by Kejardon)", False, True)
+    # name, desc, default on, visible on medium, visible on palettizer
+    ('skip_intro', "Skip text intro (start at Ceres Station) (by Smiley)", False, False, False),
+    ('skip_ceres', "Skip text intro and Ceres station (start at Landing Site) (by Total)", True, False, False),
+    ('itemsounds', "Remove fanfare when picking up an item (by Scyzer)", True, True, True),
+    ('spinjumprestart', "Allows Samus to start spinning in mid air after jumping or falling (by Kejardon)", False, True, True),
+    ('elevators_doors_speed', 'Accelerate doors and elevators transitions (by Rakki & Lioran)', True, True, True),
+    ('animals', "Save the animals surprise (by Foosda)", False, False, True),
+    ('No_Music', "Disable background music (by Kejardon)", False, True, True)
 ]
 
 def initRandomizerSession():
@@ -784,21 +784,22 @@ def validateWebServiceParams(patchs, quantities, others, isJson=False):
         if request.vars[patch] not in ['on', 'off']:
             raiseHttp(400, "Wrong value for {}: {}, authorized values: on/off".format(patch, request.vars[patch]), isJson)
 
-    if request.vars['skip_intro'] == request.vars['skip_ceres']:
-        raiseHttp(400, "You must choose one and only one patch for skipping the intro/Ceres station", isJson)
+    if 'skip_intro' in patchs and 'skip_ceres' in patchs:
+        if request.vars['skip_intro'] == request.vars['skip_ceres']:
+            raiseHttp(400, "You must choose one and only one patch for skipping the intro/Ceres station", isJson)
 
     preset = request.vars.preset
+    if preset != None:
+        if IS_ALPHANUMERIC()(preset)[1] is not None:
+            raiseHttp(400, "Wrong value for preset, must be alphanumeric", isJson)
 
-    if IS_ALPHANUMERIC()(preset)[1] is not None:
-        raiseHttp(400, "Wrong value for preset, must be alphanumeric", isJson)
+        if IS_LENGTH(maxsize=32, minsize=1)(preset)[1] is not None:
+            raiseHttp(400, "Wrong length for preset, name must be between 1 and 32 characters", isJson)
 
-    if IS_LENGTH(maxsize=32, minsize=1)(preset)[1] is not None:
-        raiseHttp(400, "Wrong length for preset, name must be between 1 and 32 characters", isJson)
-
-    # check that preset exists
-    fullPath = '{}/{}.json'.format(getPresetDir(preset), preset)
-    if not os.path.isfile(fullPath):
-        raiseHttp(400, "Unknown preset: {}".format(preset), isJson)
+        # check that preset exists
+        fullPath = '{}/{}.json'.format(getPresetDir(preset), preset)
+        if not os.path.isfile(fullPath):
+            raiseHttp(400, "Unknown preset: {}".format(preset), isJson)
 
     for qty in quantities:
         if request.vars[qty] == 'random':
@@ -816,7 +817,7 @@ def validateWebServiceParams(patchs, quantities, others, isJson=False):
         if request.vars.maxDifficulty not in ['no difficulty cap', 'easy', 'medium', 'hard', 'harder', 'hardcore', 'mania', 'random']:
             raiseHttp(400, "Wrong value for difficulty_target, authorized values: no difficulty cap/easy/medium/hard/harder/hardcore/mania", isJson)
 
-    if request.vars.minorQty != 'random':
+    if request.vars.minorQty not in ['random', None]:
         minorQtyInt = getInt('minorQty', isJson)
         if minorQtyInt < 1 or minorQtyInt > 100:
             raiseHttp(400, "Wrong value for minorQty, must be between 1 and 100", isJson)
@@ -947,7 +948,7 @@ def randomizerWebService():
 
     # check validity of all parameters
     patchs = ['itemsounds', 'spinjumprestart', 'elevators_doors_speed', 'skip_intro',
-              'skip_ceres', 'areaLayout', 'variaTweaks', 'No_Music']
+              'skip_ceres', 'areaLayout', 'variaTweaks', 'No_Music', 'animals']
     quantities = ['missileQty', 'superQty', 'powerBombQty']
     others = ['seed', 'paramsFileTarget', 'minorQty', 'energyQty', 'preset',
               'maxDifficulty', 'progressionSpeed', 'majorsSplit',
@@ -1760,3 +1761,112 @@ def getMd5sum(romDict):
         values.append(romDict[address] if address in romDict else 0xFF)
         address += 1
     return hashlib.md5(json.dumps(values)).hexdigest()
+
+def initCustomizerSession():
+    if session.customizer == None:
+        session.customizer = {}
+
+        session.customizer['colorsRandomization'] = "on"
+        session.customizer['suitsPalettes'] = "on"
+        session.customizer['beamsPalettes'] = "on"
+        session.customizer['tilesPalettes'] = "on"
+        session.customizer['enemiesPalettes'] = "on"
+        session.customizer['bossesPalettes'] = "on"
+        session.customizer['minDegree'] = -180
+        session.customizer['maxDegree'] = 180
+
+        session.customizer['variaTweaks'] = "on"
+        for patch in patches:
+            if patch[0] in ['skip_intro', 'skip_ceres']:
+                continue
+            if patch[2] == True:
+                session.customizer[patch[0]] = "on"
+            else:
+                session.customizer[patch[0]] = "off"
+
+def customizer():
+    response.title = 'Super Metroid VARIA Seeds Customizer'
+
+    initCustomizerSession()
+
+    return dict(patches=patches)
+
+def customWebService():
+    # check validity of all parameters
+    patches = ['itemsounds', 'spinjumprestart', 'elevators_doors_speed', 'variaTweaks', 'No_Music', 'animals']
+    others = ['colorsRandomization', 'suitsPalettes', 'beamsPalettes', 'tilesPalettes', 'enemiesPalettes',
+              'bossesPalettes', 'minDegree', 'maxDegree']
+    validateWebServiceParams(patches, [], others, isJson=True)
+
+    # update session
+    session.customizer['colorsRandomization'] = request.vars.colorsRandomization
+    session.customizer['suitsPalettes'] = request.vars.suitsPalettes
+    session.customizer['beamsPalettes'] = request.vars.beamsPalettes
+    session.customizer['tilesPalettes'] = request.vars.tilesPalettes
+    session.customizer['enemiesPalettes'] = request.vars.enemiesPalettes
+    session.customizer['bossesPalettes'] = request.vars.bossesPalettes
+    session.customizer['minDegree'] = request.vars.minDegree
+    session.customizer['maxDegree'] = request.vars.maxDegree
+    for patch in patches:
+        session.customizer[patch] = request.vars[patch]
+
+    # call the randomizer
+    (fd, jsonFileName) = tempfile.mkstemp()
+    params = ['python2',  os.path.expanduser("~/RandomMetroidSolver/randomizer.py"),
+              '--output', jsonFileName, '--patchOnly']
+
+    for patch in patches:
+        if request.vars[patch] == 'on':
+            if patch in ['animals', 'variaTweaks']:
+                continue
+            params.append('-c')
+            if patch == 'No_Music':
+                params.append(patch)
+            else:
+                params.append(patch + '.ips')
+
+    if request.vars.animals == 'on':
+        params.append('--animals')
+    if request.vars.variaTweaks == 'off':
+        params.append('--novariatweaks')
+
+    if request.vars.colorsRandomization == 'on':
+        params.append('--palette')
+        if request.vars.suitsPalettes == 'off':
+            params.append('--no_shift_suit_palettes')
+        if request.vars.beamsPalettes == 'off':
+            params.append('--no_shift_beam_palettes')
+        if request.vars.tilesPalettes == 'off':
+            params.append('--no_shift_tileset_palette')
+        if request.vars.enemiesPalettes == 'off':
+            params.append('--no_shift_enemy_palettes')
+        if request.vars.bossesPalettes == 'off':
+            params.append('--no_shift_boss_palettes')
+        params += ['--min_degree', request.vars.minDegree, '--max_degree', request.vars.maxDegree]
+
+    print("before calling: {}".format(params))
+    start = datetime.now()
+    ret = subprocess.call(params)
+    end = datetime.now()
+    duration = (end - start).total_seconds()
+    print("ret: {}, duration: {}s".format(ret, duration))
+
+    if ret == 0:
+        with open(jsonFileName) as jsonFile:
+            data = json.load(jsonFile)
+
+        os.close(fd)
+        os.remove(jsonFileName)
+
+        return json.dumps(data)
+    else:
+        # extract error from json
+        try:
+            with open(jsonFileName) as jsonFile:
+                msg = json.load(jsonFile)['errorMsg']
+        except:
+            msg = "customizerWebService: something wrong happened"
+
+        os.close(fd)
+        os.remove(jsonFileName)
+        raise HTTP(400, json.dumps(msg))

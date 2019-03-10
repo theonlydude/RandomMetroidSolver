@@ -21,8 +21,6 @@ extend 'layout.html'
 <style>
 .popover {
     max-width: 20%;
-    /* max-height: 95vh;*/
-    /* overflow-y: scroll; */
     position: fixed;
 }
 .highslide-dimming {
@@ -56,9 +54,6 @@ extend 'layout.html'
     .loadingGIF {
          top: 40%;
     }
-}
-#psMultiselectDiv {
-    display: none;
 }
 .sixty {
     width: 65%
@@ -106,6 +101,7 @@ function AjaxCallCompleted(data) {
     var file = filesInput.files[0];
 
     var reader = new FileReader();
+    reader.fileName = file.name;
     reader.readAsArrayBuffer(file);
 
     reader.onload = function(e) {
@@ -118,8 +114,7 @@ function AjaxCallCompleted(data) {
 
         var blob = new Blob([bytes], {type: "octet/stream"});
 
-        var outFileName = data['fileName'];
-        saveAs(blob, outFileName);
+        saveAs(blob, "Custom_"+e.target.fileName);
     }
 
     // info message to display ?
@@ -131,7 +126,7 @@ function AjaxCallCompleted(data) {
         displayFlash = false;
     }
 
-    // set backup button text to Randomize
+    // set backup button text to customize
     document.getElementById("submitBtn").data = "Customize";
 
     // remove "working" message
@@ -148,7 +143,7 @@ function doSubmit() {
     var filesInput = document.getElementById("uploadFile");
     var file = filesInput.files[0]
     if (file === undefined) {
-      alert("Please select a Super Metroid ROM first")
+      alert("Please select a VARIA seed first")
       btn = document.getElementById("submitBtn");
       btn.data = "Customize";
       btn.disabled = false;
@@ -179,7 +174,7 @@ function doSubmit() {
       url: "{{=URL(f='customWebService')}}",
       method: "POST",
       data: dataDict,
-      dataType: "html"
+      dataType: "json"
     });
 
     request.done(AjaxCallCompleted);
@@ -254,8 +249,8 @@ function initSlider() {
     }
   });
   // set current values
-  $("#degree_slider_range").slider("values", 0, {{=session.randomizer["minDegree"]}});
-  $("#degree_slider_range").slider("values", 1, {{=session.randomizer["maxDegree"]}});
+  $("#degree_slider_range").slider("values", 0, {{=session.customizer["minDegree"]}});
+  $("#degree_slider_range").slider("values", 1, {{=session.customizer["maxDegree"]}});
 
   // set text
   $("#colorsText").text("Degree ["+($("#degree_slider_range").slider("values", 0))+" , "+($("#degree_slider_range").slider("values", 1))+"]");
@@ -333,7 +328,7 @@ function startTheTour(step=-1) {
 </script>
 {{
 def displayCheckbox(id, defaultTrue=False):
-  if (id in session.randomizer and session.randomizer[id] == 'on') or (id not in session.randomizer and defaultTrue == True):
+  if (id in session.customizer and session.customizer[id] == 'on') or (id not in session.customizer and defaultTrue == True):
 }}
     {{=INPUT(_id=id, _name=id, _type="checkbox", _checked="checked", _value="on", _class="js-switch", _onchange="switchCheckbox('{}')".format(id))}}
 {{

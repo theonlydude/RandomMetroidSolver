@@ -1,10 +1,10 @@
 {{extend 'layout.html'}}
 
-<meta name="description" content="Super Metroid VARIA Randomizer, Solver an Trackers"/>
+<meta name="description" content="Super Metroid VARIA Randomizer, Solver an Tracker"/>
 <link rel="shortcut icon" href={{=URL('static','favicon.ico')}} type="image/ico"/>
 <link rel="stylesheet" type="text/css" href={{=URL('static/css','mystyle_20181203.css')}} media="screen"/>
 
-<title>Super Metroid VARIA Randomizer, Solver and Trackers</title>
+<title>Super Metroid VARIA Randomizer, Solver and Tracker</title>
 
 <style>
 td {
@@ -77,7 +77,7 @@ a:active {
 	<td>{{=A("Presets", _href=URL(f="presets"), _class="menu")}}</td>
 	<td>{{=A("Randomizer", _href=URL(f="randomizer"), _class="menu")}}</td>
 	<td>{{=A("Solver", _href=URL(f="solver"), _class="menu")}}</td>
-	<td>{{=A("Trackers", _href=URL(f="tracker"), _class="menu")}}</td>
+	<td>{{=A("Tracker", _href=URL(f="tracker"), _class="menu")}}</td>
 	<td>{{=A("Plandomizer", _href=URL(f="plando"), _class="menu")}}</td>
 	<td>{{=A("Information & Contact", _href=URL(f="infos"), _class="menu")}}</td>
       </tr>
@@ -119,12 +119,13 @@ a:active {
 	<a href="/randomizer"><h4>Randomizer</h4></a>
 	<ul>
 	  <li>Use your preset to generate seeds that will only require techniques you know</li>
-	  <li>Full item randomization (like Dessy) or majors/minors randomization (like Total)</li>
-	  <li>Area randomization: randomize the access between the main areas of the game</li>
+	  <li>Full item randomization (like Dessy), majors/minors randomization (like Total), Chozo split (required items to finish the game are located in Chozo statues)</li>
+	  <li>Areas/Bosses randomization: randomize the access between the main areas of the game and/or the bosses doors</li>
 	  <li>Different progression speeds, from slowest, stuffing your way with as many non-progression items as possible, to fastest, where you will be able to visit Zebes pretty shortly</li>
 	  <li>Choose the quantity and distribution of minors and energy</li>
 	  <li>Various optional patches are available to enhance the gameplay</li>
 	  <li>Super Fun Times: Have fun randomly removing major items!</li>
+	  <li>Color randomization: randomize the in game colors</li>
 	</ul>
       </td>
     </tr>

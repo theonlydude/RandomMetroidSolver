@@ -22,9 +22,6 @@ table, th, td {
 th {
     cursor: pointer;
 }
-tr:nth-child(even) {
-    background-color: #f2f2f2
-}
 .OK {
     background-color: green;
     color: white;
@@ -36,6 +33,9 @@ tr:nth-child(even) {
 .CRITICAL {
     background-color: red;
     color: white;
+}
+.good:nth-child(even) {
+    background-color: #f2f2f2
 }
 .error {
     background-color: orange;
@@ -404,7 +404,7 @@ google.charts.setOnLoadCallback(drawCharts);
           if row[0] != 0:
             response.write("  <tr class=\"error\">\n", escape=False)
           else:
-            response.write("  <tr>\n", escape=False)
+            response.write("  <tr class=\"good\">\n", escape=False)
             pass
           # standard params except dynamic ones and error msg
           for col in row[1:-2]:

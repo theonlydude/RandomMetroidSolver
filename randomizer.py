@@ -451,8 +451,12 @@ if __name__ == "__main__":
             outFileName = args.output
             romPatcher = RomPatcher(magic=args.raceMagic)
 
-        romPatcher.writeItemsLocs(itemLocs)
-        romPatcher.applyIPSPatches(args.patches, args.noLayout, args.noGravHeat, args.area, args.bosses, args.areaLayoutBase, args.noVariaTweaks)
+        if args.patchOnly == False:
+            romPatcher.writeItemsLocs(itemLocs)
+            romPatcher.applyIPSPatches(args.patches, args.noLayout, args.noGravHeat, args.area, args.bosses, args.areaLayoutBase, args.noVariaTweaks)
+        else:
+            romPatcher.addIPSPatches(args.patches)
+
         if args.patchOnly == False:
             romPatcher.writeSeed(seed) # lol if race mode
             romPatcher.writeSpoiler(itemLocs)

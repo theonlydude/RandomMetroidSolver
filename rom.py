@@ -666,6 +666,11 @@ class RomPatcher:
         self.romFile.seek(0x5E651)
         self.romFile.write(struct.pack('B', self.nItems))
 
+    def addIPSPatches(self, patches):
+        for patchName in patches:
+            if patchName in RomPatcher.IPSPatches['Optional']:
+                self.applyIPSPatch(patchName)
+
     def applyIPSPatches(self, optionalPatches=[], noLayout=False, noGravHeat=False, area=False, bosses=False, areaLayoutBase=False, noVariaTweaks=False):
         try:
             # apply standard patches

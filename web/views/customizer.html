@@ -19,6 +19,96 @@ extend 'layout.html'
 <title>Super Metroid VARIA Palettizer</title>
 
 <style>
+body {
+  background: #F0F0F0;
+  font-family: Helvetica, Arial;
+}
+
+h1 {
+  text-align: center;
+  color: #444;
+  margin-top: 50px;
+}
+
+#slider-container {
+  width: 80%;
+  height: 80px;
+  box-sizing: border-box;
+  position: relative;
+  top: 50%;
+  margin: 0 auto;
+  text-align: center;
+  background: #FFF;
+  padding: 35px 40px 30px 40px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.ui-slider, .ui-slider .slider-range-inverse, .ui-slider .ui-slider-range {
+  height: 14px;
+  border-radius: 0px;
+  border-width: 0;
+}
+.ui-slider {
+  background-color: #1ABC9C;
+  background-image: linear-gradient(to right, #0000e8 0%, #e80074 25%, #e8e800 50%, #00e874 75%, #0000e8 100%);
+}
+.ui-slider * {
+  outline: none;
+}
+.ui-slider .slider-range-inverse0 {
+  background: #CCC;
+  position: absolute;
+  left: 0;
+  height: 12px;
+}
+.ui-slider .slider-range-inverse1 {
+  background: #CCC;
+  position: absolute;
+  right: 0;
+  height: 12px;
+}
+.ui-slider .ui-slider-range {
+  background: transparent;
+}
+.ui-slider .ui-slider-handle {
+  width: 6px;
+  height: 20px;
+  cursor: pointer;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4);
+  background: #FFF;
+  top: -4px;
+  border-width: 0;
+  margin-left: -3px;
+}
+.ui-slider .ui-slider-handle:active {
+  box-shadow: 0 3px 20px rgba(0, 0, 0, 0.5);
+}
+.ui-slider .ui-slider-handle .dot {
+  width: 4px;
+  height: 18px;
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  background: transparent;
+  overflow: hidden;
+}
+.ui-slider .ui-slider-handle .dot .handle-track0 {
+  display: block;
+  height: 18px;
+  background-color: #1ABC9C;
+  background-image: linear-gradient(to right, #0000e8 0%, #e80074 25%, #e8e800 50%, #00e874 75%, #0000e8 100%);
+  position: absolute;
+  margin-left: 0px;
+}
+.ui-slider .ui-slider-handle .dot .handle-track1 {
+  display: block;
+  height: 18px;
+  background-color: #1ABC9C;
+  background-image: linear-gradient(to right, #0000e8 0%, #e80074 25%, #e8e800 50%, #00e874 75%, #0000e8 100%);
+  position: absolute;
+  margin-left: 8px;
+}
+
 .popover {
     max-width: 20%;
     position: fixed;
@@ -63,12 +153,13 @@ extend 'layout.html'
 }
 .floatright {
     float: right;
-    vertical-align: top;
-    margin-top: -0.3em;
+    /* vertical-align: top; */
+    margin-top: -1em;
 }
 .floatleft {
     float: left;
-    vertical-align: top;
+    /* vertical-align: top; */
+    margin-right: 0.5em;
 }
 </style>
 
@@ -158,7 +249,7 @@ function doSubmit() {
     }
 
     var dataDict = {};
-    var elems = ["itemsounds", "spinjumprestart", "elevators_doors_speed", "animals", "variaTweaks", "No_Music", "colorsRandomization", "suitsPalettes", "beamsPalettes", "tilesPalettes", "enemiesPalettes", "bossesPalettes"];
+    var elems = ["itemsounds", "spinjumprestart", "elevators_doors_speed", "animals", "No_Music", "colorsRandomization", "suitsPalettes", "beamsPalettes", "tilesPalettes", "enemiesPalettes", "bossesPalettes"];
 
     for(var i=0; i<elems.length; i++) {
        dataDict[elems[i]] = document.getElementById(elems[i]).value;
@@ -166,6 +257,12 @@ function doSubmit() {
 
     dataDict["minDegree"] = $("#degree_slider_range").slider("values", 0);
     dataDict["maxDegree"] = $("#degree_slider_range").slider("values", 1);
+
+    if(invertSlider == true) {
+      dataDict["invert"] = "on";
+    } else {
+      dataDict["invert"] = "off";
+    }
 
     console.log("before customizer web service call");
 
@@ -236,24 +333,90 @@ window.onload = function(){
     }
 
     initSlider();
+
+{{
+if session.customizer["invert"] == True:
+}}
+    invertFunc();
+{{
+    pass
+}}
 }
 
+var invertSlider = false;
+
+// Helper function
+function update_handle_track_pos(slider, ui_handle_pos, index) {
+  var handle_track_xoffset = -(((ui_handle_pos*0.2777777778+50)/100) * slider.clientWidth);
+  $(slider).find(".handle-track"+index).css("left", handle_track_xoffset);
+
+  // reverse grey slider
+  if(invertSlider == true) {
+      var left_slider = $("#degree_slider_range").slider("values", 0);
+      var right_slider = $("#degree_slider_range").slider("values", 1);
+
+      var slider_range_inverse_left = (100 - (left_slider*-0.2777777778+50)) + "%";
+      var slider_range_inverse_width = ((right_slider-left_slider)*0.2777777778) + "%";
+
+      $(slider).find(".slider-range-inverse0").css("width", slider_range_inverse_width);
+      $(slider).find(".slider-range-inverse0").css("left", slider_range_inverse_left);
+
+      $(slider).find(".slider-range-inverse1").css("width", "0%");
+  } else {
+    $(slider).find(".slider-range-inverse0").css("left", "0%");
+
+    if(index == 1) {
+      var slider_range_inverse_width = (ui_handle_pos*-0.2777777778+50) + "%";
+      $(slider).find(".slider-range-inverse1").css("width", slider_range_inverse_width);
+    } else {
+      var slider_range_inverse_width = (100 - (ui_handle_pos*-0.2777777778+50)) + "%";
+      $(slider).find(".slider-range-inverse0").css("width", slider_range_inverse_width);
+    }
+  }
+}
+
+// Init slider
 function initSlider() {
   $("#degree_slider_range").slider({
     range: true,
     min: -180,
     max: 180,
     values: [-180, 180],
+    create: function(event, ui) {
+      var slider = $(event.target);
+      
+      // Append the slider handle with a center dot and it's own track
+      slider.find(".ui-slider-handle").append(function(n){ return "<span class=\"dot\"><span class=\"handle-track"+n+"\"></span></span>"; });
+
+      // Append the slider with an inverse range      
+      slider.prepend('<div class="slider-range-inverse0"></div>')
+      slider.prepend('<div class="slider-range-inverse1"></div>')
+
+      // Set initial dimensions
+      slider.find(".handle-track0").css("width", event.target.clientWidth);
+      slider.find(".handle-track1").css("width", event.target.clientWidth);
+      
+      // set current values
+      $("#degree_slider_range").slider("values", 0, {{=session.customizer["minDegree"]}});
+      $("#degree_slider_range").slider("values", 1, {{=session.customizer["maxDegree"]}});
+
+      // Set initial position for tracks
+      update_handle_track_pos(event.target, $(this).slider("values", 0), 0);
+      update_handle_track_pos(event.target, $(this).slider("values", 1), 1);
+
+    },
     slide: function(event, ui) {
-      $("#colorsText").text("Degree ["+(ui.values[0])+" , "+(ui.values[1])+"]");
+      // Update position of tracks
+      update_handle_track_pos(event.target, ui.value, ui.handleIndex);
     }
   });
-  // set current values
-  $("#degree_slider_range").slider("values", 0, {{=session.customizer["minDegree"]}});
-  $("#degree_slider_range").slider("values", 1, {{=session.customizer["maxDegree"]}});
+}
 
-  // set text
-  $("#colorsText").text("Degree ["+($("#degree_slider_range").slider("values", 0))+" , "+($("#degree_slider_range").slider("values", 1))+"]");
+function invertFunc() {
+  invertSlider = ! invertSlider;
+  var slider = $("#degree_slider_range");
+  update_handle_track_pos(slider, slider.slider("values", 0), 0);
+  update_handle_track_pos(slider, slider.slider("values", 1), 1);
 }
 
 function switchCheckbox(id, elems=[]) {
@@ -300,21 +463,14 @@ function startTheTour(step=-1) {
     {
       element: "#colorsRandomizationStep",
       title: "Color randomization",
-      content: "<p>Randomize the colors of various graphical elements:<br/><img src=\"/solver/static/images/palettesRando.png\" alt=\"colors rando\" title=\"colors rando\" class=\"full\"/></p><br/><p>Use the slider to restrict the possible range of the colors shifting, with zero meaning no shifting:<br/><img src=\"/solver/static/images/samus_degrees.png\" alt=\"samus degrees\" title=\"samus degrees\" class=\"full\"/></p>"
+      content: "<p>Randomize the colors of various graphical elements:<br/><img src=\"/solver/static/images/palettesRando.png\" alt=\"colors rando\" title=\"colors rando\" class=\"full\"/></p><br/><p>Use the slider to restrict the possible range of the colors shifting. The same degree is used to randomize all the elements. The colors on the slider are the result colors for Samus, the yellow in the middle being Samus vanilla color:<br/><img src=\"/solver/static/images/samus_degrees.png\" alt=\"samus degrees\" title=\"samus degrees\" class=\"full\"/>You can invert the range by clicking on the invert button.</p>"
     },
     {
       element: "#patchesStep",
       title: "Patches",
       content: "Choose the patches that you want to include in your customized seed."
-    },
-    {
-      element: "#variaTweaksStep",
-      title: "Optional patches",
-      content: "Include minor tweaks for the game to behave 'as it should' in a randomizer context :\
-<ul><li>Bomb Torizo fight is triggered when picking up the item he's holding, not by having Bomb</li>\
-<li>Access item at Wrecked Ship Etank location without killing Phantoon (via Forgotten Highway)</li>\
-<li>Activate Lower Norfair Chozo (left of entrance) without Space Jump</li></ul>"
-    } ]});
+    }
+  ]});
 
   // Initialize the tour
   tour.init();
@@ -383,8 +539,8 @@ def displayCheckbox(id, defaultTrue=False):
             </p>
 	    <table class="full">
 	      <tr>
-	        <td class="half">{{displayCheckbox("colorsRandomization")}}Colors Randomization</td>
-		<td class="half"><div id="degree_slider_range" class="sixty floatleft"></div><span id="colorsText" class="thirty floatright"></span></td>
+	        <td class="third">{{displayCheckbox("colorsRandomization")}}Colors Randomization</td>
+		<td class="sixty"><span id="textLeft" class="floatleft">-180</span><div id="degree_slider_range" class="sixty floatleft"></div><span id="textRight">180</span><span class="thirty floatright"><button id="invert" type="button" onclick="invertFunc()" class="floatright">Invert</button></span></td>
                 <td><button type="button" onclick="startTheTour(1)" id="colorsRandomizationStep">?</button></td>
 	      </tr>
             </table>
@@ -407,11 +563,6 @@ def displayCheckbox(id, defaultTrue=False):
 	    <p>
 	      Patches to customize your ROM.
 	    </p>
-	    <table class="full">
-	      <tr>
-		<td class="full">{{displayCheckbox("variaTweaks", True)}} VARIA tweaks (by Flo)</td><td><button type="button" onclick="startTheTour(3)" id="variaTweaksStep">?</button></td>
-	      </tr>
-	    </table>
 	    <table class="full">
 {{
 for patch in patches:

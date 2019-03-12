@@ -171,6 +171,7 @@ if __name__ == "__main__":
     parser.add_argument('--min_degree', help="min hue shift", dest='min_degree', nargs='?', default=-180, type=int)
     parser.add_argument('--max_degree', help="max hue shift", dest='max_degree', nargs='?', default=180, type=int)
     parser.add_argument('--no_global_shift', help="", action='store_false', dest='global_shift', default=True)
+    parser.add_argument('--invert', help="invert color range", dest='invert', action='store_true', default=False)
 
     # parse args
     args = parser.parse_args()
@@ -484,7 +485,8 @@ if __name__ == "__main__":
                 "shift_beam_palettes": None,
                 "shift_ship_palette": None,
                 "min_degree": None,
-                "max_degree": None
+                "max_degree": None,
+                "invert": None,
             }
             for param in paletteSettings:
                 paletteSettings[param] = getattr(args, param)

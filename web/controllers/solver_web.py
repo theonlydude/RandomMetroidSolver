@@ -832,7 +832,7 @@ def validateWebServiceParams(patchs, quantities, others, isJson=False):
         except:
             raiseHttp(400, "Wrong value for paramsFileTarget, must be a JSON string", isJson)
 
-    for check in ['suitsRestriction', 'layoutPatches', 'noGravHeat', 'areaRandomization', 'bossRandomization', 'hideItems', 'strictMinors', 'colorsRandomization', 'suitsPalettes', 'beamsPalettes', 'tilesPalettes', 'enemiesPalettes', 'bossesPalettes']:
+    for check in ['suitsRestriction', 'layoutPatches', 'noGravHeat', 'areaRandomization', 'bossRandomization', 'hideItems', 'strictMinors', 'colorsRandomization', 'suitsPalettes', 'beamsPalettes', 'tilesPalettes', 'enemiesPalettes', 'bossesPalettes', 'invert']:
         if check in others:
             if request.vars[check] not in ['on', 'off', 'random']:
                 raiseHttp(400, "Wrong value for {}: {}, authorized values: on/off".format(check, request.vars[check]), isJson)
@@ -1774,8 +1774,8 @@ def initCustomizerSession():
         session.customizer['bossesPalettes'] = "on"
         session.customizer['minDegree'] = -180
         session.customizer['maxDegree'] = 180
+        session.customizer['invert'] = "off"
 
-        session.customizer['variaTweaks'] = "on"
         for patch in patches:
             if patch[0] in ['skip_intro', 'skip_ceres']:
                 continue
@@ -1793,9 +1793,9 @@ def customizer():
 
 def customWebService():
     # check validity of all parameters
-    patches = ['itemsounds', 'spinjumprestart', 'elevators_doors_speed', 'variaTweaks', 'No_Music', 'animals']
+    patches = ['itemsounds', 'spinjumprestart', 'elevators_doors_speed', 'No_Music', 'animals']
     others = ['colorsRandomization', 'suitsPalettes', 'beamsPalettes', 'tilesPalettes', 'enemiesPalettes',
-              'bossesPalettes', 'minDegree', 'maxDegree']
+              'bossesPalettes', 'minDegree', 'maxDegree', 'invert']
     validateWebServiceParams(patches, [], others, isJson=True)
 
     # update session
@@ -1807,6 +1807,7 @@ def customWebService():
     session.customizer['bossesPalettes'] = request.vars.bossesPalettes
     session.customizer['minDegree'] = request.vars.minDegree
     session.customizer['maxDegree'] = request.vars.maxDegree
+    session.customizer['invert'] = request.vars.invert
     for patch in patches:
         session.customizer[patch] = request.vars[patch]
 
@@ -1817,7 +1818,7 @@ def customWebService():
 
     for patch in patches:
         if request.vars[patch] == 'on':
-            if patch in ['animals', 'variaTweaks']:
+            if patch in ['animals']:
                 continue
             params.append('-c')
             if patch == 'No_Music':
@@ -1827,8 +1828,6 @@ def customWebService():
 
     if request.vars.animals == 'on':
         params.append('--animals')
-    if request.vars.variaTweaks == 'off':
-        params.append('--novariatweaks')
 
     if request.vars.colorsRandomization == 'on':
         params.append('--palette')
@@ -1843,6 +1842,8 @@ def customWebService():
         if request.vars.bossesPalettes == 'off':
             params.append('--no_shift_boss_palettes')
         params += ['--min_degree', request.vars.minDegree, '--max_degree', request.vars.maxDegree]
+        if request.vars.invert == 'on':
+            params.append('--invert')
 
     print("before calling: {}".format(params))
     start = datetime.now()

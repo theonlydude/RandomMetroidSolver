@@ -1772,8 +1772,8 @@ def initCustomizerSession():
         session.customizer['tilesPalettes'] = "on"
         session.customizer['enemiesPalettes'] = "on"
         session.customizer['bossesPalettes'] = "on"
-        session.customizer['minDegree'] = -20
-        session.customizer['maxDegree'] = 20
+        session.customizer['minDegree'] = -15
+        session.customizer['maxDegree'] = 15
         session.customizer['invert'] = "on"
 
         for patch in patches:

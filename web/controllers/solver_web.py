@@ -1370,7 +1370,7 @@ class WS(object):
             WSClass = globals()["WS_{}_{}".format(scope, action)]
             return WSClass(mode)
         except Exception as e:
-            raiseHttp(400, "Unknown scope/action combo: {}/{}: {}".format(scope, action, e), True)
+            raiseHttp(400, "{}".format(e.body if "body" in e.__dict__ else e).replace('"', ''), True)
 
     def __init__(self, mode):
         if mode == "plando":

@@ -19,11 +19,6 @@ extend 'layout.html'
 <title>Super Metroid VARIA Palettizer</title>
 
 <style>
-body {
-  background: #F0F0F0;
-  font-family: Helvetica, Arial;
-}
-
 h1 {
   text-align: center;
   color: #444;
@@ -486,6 +481,10 @@ function startTheTour(step=-1) {
   }
   tour.start();
 }
+
+function nope(evt) {
+  evt.currentTarget.className += " active";
+}
 </script>
 {{
 def displayCheckbox(id, defaultTrue=False):
@@ -520,13 +519,13 @@ def displayCheckbox(id, defaultTrue=False):
   </div>
 
   <div class="main">
-    <div id="complexityTabs" class="center">
+    <div class="center">
       <div class="tab">
-        <button class="tablinks">Seed Customizer</button>
+        <button class="tablinks" onclick="nope(event);">Seed Customizer</button>
       </div>
     </div>
     <form id="mainform" name="mainform" onsubmit="doSubmit(); return false;">
-      <div id="tabRando" class="tabcontent">
+      <div class="tabcontent">
         <div class="row">
 	  <div class="column">
 	    <p>Add palette randomization, apply patches to an already randomized VARIA seed.</p>

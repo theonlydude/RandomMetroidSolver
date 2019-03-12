@@ -1772,9 +1772,9 @@ def initCustomizerSession():
         session.customizer['tilesPalettes'] = "on"
         session.customizer['enemiesPalettes'] = "on"
         session.customizer['bossesPalettes'] = "on"
-        session.customizer['minDegree'] = -180
-        session.customizer['maxDegree'] = 180
-        session.customizer['invert'] = "off"
+        session.customizer['minDegree'] = -20
+        session.customizer['maxDegree'] = 20
+        session.customizer['invert'] = "on"
 
         for patch in patches:
             if patch[0] in ['skip_intro', 'skip_ceres']:

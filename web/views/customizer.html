@@ -352,8 +352,13 @@ function update_handle_track_pos(slider, ui_handle_pos, index) {
 
   // reverse grey slider
   if(invertSlider == true) {
-      var left_slider = $("#degree_slider_range").slider("values", 0);
-      var right_slider = $("#degree_slider_range").slider("values", 1);
+      if(index == 0) {
+        var left_slider = ui_handle_pos;
+        var right_slider = $("#degree_slider_range").slider("values", 1);
+      } else {
+        var left_slider = $("#degree_slider_range").slider("values", 0);
+        var right_slider = ui_handle_pos;
+      }
 
       var slider_range_inverse_left = (100 - (left_slider*-0.2777777778+50)) + "%";
       var slider_range_inverse_width = ((right_slider-left_slider)*0.2777777778) + "%";

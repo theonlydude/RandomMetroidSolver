@@ -700,7 +700,7 @@ class PaletteRando(object):
 
             return rand
         else:
-            return self.getDegree()
+            return random.randint(self.min_degree, self.max_degree)
 
     def randomize(self):
         degree = self.getDegree()

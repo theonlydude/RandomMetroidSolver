@@ -1460,6 +1460,7 @@ class WS(object):
 
         if request.vars.debug != None:
             params.append('--vcr')
+            params.append('--debug')
 
         # dump state as input
         with open(jsonInFileName, 'w') as jsonFile:

@@ -957,7 +957,7 @@ function getTooltip(locName, locData, item, visited) {
     return tooltip+"Item: "+item;
 
   } else {
-    return tooltip+"Techniques: "+(locData["knows"].length > 0 ? locData["knows"] : "None")+"<br>Items: "+(locData["items"].length > 0 ? locData["items"] : "None")+("path" in locData ? "<br>Path: "+locData["path"] : "")+("comeBack" in locData && locData["comeBack"] == false ? "<br>WARNING: Can't come back" : "");
+    return tooltip+"Techniques: "+(locData["knows"].length > 0 ? locData["knows"] : "None")+"<br>Items: "+(locData["items"].length > 0 ? locData["items"] : "None")+("path" in locData ? "<br>Path: "+locData["path"] : "")+("comeBack" in locData && locData["comeBack"] == false ? "<br>WARNING: Can't come back" : "")+("difficulty" in locData ? "<br>Difficulty: "+locData["difficulty"] : "")+("distance" in locData ? "<br>Distance: "+locData["distance"] : "");
 
   }
 }

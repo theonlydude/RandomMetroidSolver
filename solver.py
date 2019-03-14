@@ -205,6 +205,8 @@ class SolverState(object):
                 if self.debug == True:
                     if "path" in loc:
                         ret[locName]["path"] = [a.Name for a in loc["path"]]
+                    if "distance" in loc:
+                        ret[locName]["distance"] = loc["distance"]
         return ret
 
     def getRemainLocationsWeb(self, locations):
@@ -216,6 +218,11 @@ class SolverState(object):
                                 "name": loc["Name"],
                                 "knows": ["Sequence Break"],
                                 "items": []}
+                if self.debug == True:
+                    if "difficulty" in loc:
+                        ret[locName]["difficulty"] = str(loc["difficulty"])
+                    if "distance" in loc:
+                        ret[locName]["distance"] = loc["distance"]
         return ret
 
     def getLinesWeb(self, transitions):

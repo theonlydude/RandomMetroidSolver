@@ -259,7 +259,7 @@ class AccessGraph(object):
 
         for loc in locations:
             if loc['GraphArea'] not in availAreas:
-                loc['distance'] = 10000
+                loc['distance'] = 30000
                 loc['difficulty'] = SMBool(False, 0)
                 #if loc['Name'] == "Super Missile (Crateria)":
                 #    print("loc: {} locDiff is area nok".format(loc["Name"]))
@@ -267,7 +267,7 @@ class AccessGraph(object):
 
             for apName in self.getSortedAPs(availAPPaths, loc['AccessFrom']):
                 if apName == None:
-                    loc['distance'] = 10000
+                    loc['distance'] = 20000
                     loc['difficulty'] = SMBool(False, 0)
                     #if loc['Name'] == "Super Missile (Crateria)":
                     #    print("loc: {} ap is none".format(loc["Name"]))

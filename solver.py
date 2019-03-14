@@ -393,6 +393,34 @@ class CommonSolver(object):
 
         return loc['SolveArea']
 
+    def cancelLastItems(self, count):
+        if self.vcr != None:
+            self.vcr.addRollback(count)
+
+        for _ in range(count):
+            if len(self.visitedLocations) == 0:
+                return
+
+            loc = self.visitedLocations.pop()
+            self.majorLocations.append(loc)
+
+            # pickup func
+            if 'Unpickup' in loc:
+                loc['Unpickup']()
+
+            # access point
+            if len(self.visitedLocations) == 0:
+                self.lastLoc = "Landing Site"
+            else:
+                self.lastLoc = self.visitedLocations[-1]["accessPoint"]
+
+            # item
+            item = loc["itemName"]
+            if item != self.collectedItems[-1]:
+                raise Exception("Item of last collected loc {}: {} is different from last collected item: {}".format(loc["Name"], item, self.collectedItems[-1]))
+            self.smbm.removeItem(item)
+            self.collectedItems.pop()
+
 class InteractiveSolver(CommonSolver):
     def __init__(self, output):
         self.checkDuplicateMajor = False
@@ -659,31 +687,6 @@ class InteractiveSolver(CommonSolver):
 
         self.smbm.addItem(itemName)
 
-    def cancelLastItems(self, count):
-        for _ in range(count):
-            if len(self.visitedLocations) == 0:
-                return
-
-            loc = self.visitedLocations.pop()
-            self.majorLocations.append(loc)
-
-            # pickup func
-            if 'Unpickup' in loc:
-                loc['Unpickup']()
-
-            # access point
-            if len(self.visitedLocations) == 0:
-                self.lastLoc = "Landing Site"
-            else:
-                self.lastLoc = self.visitedLocations[-1]["accessPoint"]
-
-            # item
-            item = loc["itemName"]
-            if item != self.collectedItems[-1]:
-                raise Exception("Item of last collected loc {}: {} is different from last collected item: {}".format(loc["Name"], item, self.collectedItems[-1]))
-            self.smbm.removeItem(item)
-            self.collectedItems.pop()
-
     def clearItems(self, reload=False):
         self.collectedItems = []
         self.visitedLocations = []
@@ -756,6 +759,8 @@ class StandardSolver(CommonSolver):
         self.loadRom(rom, magic=magic)
 
         self.pickup = Pickup(Conf.itemsPickup)
+
+        self.comeBack = ComeBack(self)
 
     def setConf(self, difficultyTarget, pickupStrategy, itemsForbidden, displayGeneratedPath):
         Conf.difficultyTarget = difficultyTarget
@@ -857,6 +862,7 @@ class StandardSolver(CommonSolver):
                 if self.visitedLocations[-1]['Name'] != 'Mother Brain':
                     self.computeLocationsDifficulty(self.majorLocations)
                     mbLoc = self.getLoc('Mother Brain')
+                    self.majorLocations.append(mbLoc)
                     self.collectMajor(mbLoc)
                 self.log.debug("END")
                 break
@@ -869,9 +875,17 @@ class StandardSolver(CommonSolver):
             if current == previous:
                 if not isEndPossible:
                     self.log.debug("STUCK ALL")
+                    if self.comeBack.rewind(len(self.collectedItems)) == True:
+                        # rewind ok
+                        previous = len(self.collectedItems) - 1
+                        continue
+                    else:
+                        # we're really stucked
+                        self.log.debug("STUCK CAN'T REWIND")
+                        break
                 else:
                     self.log.debug("HARD END")
-                break
+                    break
             previous = current
 
             # compute the difficulty of all the locations
@@ -887,9 +901,31 @@ class StandardSolver(CommonSolver):
             if len(majorsAvailable) == 0 and len(minorsAvailable) == 0:
                 if not isEndPossible:
                     self.log.debug("STUCK MAJORS and MINORS")
+                    if self.comeBack.rewind(len(self.collectedItems)) == True:
+                        previous = len(self.collectedItems) - 1
+                        continue
+                    else:
+                        # we're really stucked
+                        self.log.debug("STUCK CAN'T REWIND")
+                        break
                 else:
                     self.log.debug("HARD END")
-                break
+                    break
+
+            # handle no comeback heuristic
+            if self.majorsSplit == 'Full':
+                locs = majorsAvailable
+            else:
+                locs = majorsAvailable+minorsAvailable
+            rewindRequired = self.comeBack.handleNoComeBack(locs, len(self.collectedItems))
+            if rewindRequired == True:
+                if self.comeBack.rewind(len(self.collectedItems)) == True:
+                    previous = len(self.collectedItems) - 1
+                    continue
+                else:
+                    # we're really stucked
+                    self.log.debug("STUCK CAN'T REWIND")
+                    break
 
             # sort them on difficulty and proximity
             majorsAvailable = self.getAvailableItemsList(majorsAvailable, area, diffThreshold)
@@ -897,6 +933,8 @@ class StandardSolver(CommonSolver):
                 minorsAvailable = majorsAvailable
             else:
                 minorsAvailable = self.getAvailableItemsList(minorsAvailable, area, diffThreshold)
+
+            self.comeBack.cleanNoComeBack(locs)
 
             # choose one to pick up
             area = self.nextDecision(majorsAvailable, minorsAvailable, hasEnoughMinors, diffThreshold, area)
@@ -916,41 +954,12 @@ class StandardSolver(CommonSolver):
 
         return (difficulty, itemsOk)
 
-    def handleNoComeBack(self, locations):
-        # check if all the available locations have the no come back flag
-        # if so add a new parameter with the number of locations in each graph area
-        graphLocs = {}
-        for loc in locations:
-            if "comeBack" not in loc:
-                return False
-            if loc["comeBack"] == True:
-                return False
-            if loc["GraphArea"] in graphLocs:
-                graphLocs[loc["GraphArea"]] += 1
-            else:
-                graphLocs[loc["GraphArea"]] = 1
-
-        if len(graphLocs) == 1:
-            return False
-
-        for graphLoc in graphLocs:
-            graphLocs[graphLoc] = 1.0/graphLocs[graphLoc]
-
-        for loc in locations:
-            loc["areaWeight"] = graphLocs[loc["GraphArea"]]
-
-        print("WARNING: use no come back heuristic for {} locs in {} graph locs".format(len(locations), len(graphLocs)))
-
-        return True
-
     def getAvailableItemsList(self, locations, area, threshold):
         # locations without distance are not available
         locations = [loc for loc in locations if 'distance' in loc]
 
         if len(locations) == 0:
             return []
-
-        cleanAreaWeight = self.handleNoComeBack(locations)
 
         around = [loc for loc in locations if ((loc['SolveArea'] == area or loc['distance'] < 3)
                                                and loc['difficulty'].difficulty <= threshold
@@ -1003,10 +1012,6 @@ class StandardSolver(CommonSolver):
 
         self.log.debug("around2 = " + str([(loc['Name'], loc['difficulty'], loc['distance'], loc['comeBack'], loc['SolveArea']) for loc in around]))
         self.log.debug("outside2 = " + str([(loc['Name'], loc['difficulty'], loc['distance'], loc['comeBack'], loc['SolveArea']) for loc in outside]))
-
-        if cleanAreaWeight == True:
-            for loc in locations:
-                del loc["areaWeight"]
 
         return around + outside
 
@@ -1167,6 +1172,115 @@ class StandardSolver(CommonSolver):
         # - destroy/skip the zebetites
         # - beat Mother Brain
         return self.smbm.wand(Bosses.allBossesDead(self.smbm), self.smbm.enoughStuffTourian())
+
+class ComeBack(object):
+    # object to handle the decision to choose the next area when all locations have the "no comeback" flag.
+    # handle rewinding to try the next area in case of a stuck.
+    # one ComebackStep object is created each time we have to use the no comeback heuristic b, used for rewinding.
+    def __init__(self, solver):
+        self.comeBackSteps = []
+        # used to rewind
+        self.solver = solver
+        self.log = log.get('Rewind')
+
+    def handleNoComeBack(self, locations, cur):
+        # return true if a rewind is required
+        graphAreas = {}
+        for loc in locations:
+            if "comeBack" not in loc:
+                return False
+            if loc["comeBack"] == True:
+                return False
+            if loc["GraphArea"] in graphAreas:
+                graphAreas[loc["GraphArea"]] += 1
+            else:
+                graphAreas[loc["GraphArea"]] = 1
+
+        if len(graphAreas) == 1:
+            return False
+
+        self.log.debug("WARNING: use no come back heuristic for {} locs in {} graph areas".format(len(locations), len(graphAreas)))
+
+        # check if we can use existing step
+        if len(self.comeBackSteps) > 0:
+            lastStep = self.comeBackSteps[-1]
+            if lastStep.cur == cur:
+                self.log.debug("Use last step at {}".format(cur))
+                return lastStep.next(locations)
+
+        # create a step
+        self.log.debug("Create new step at {}".format(cur))
+        step = ComeBackStep(graphAreas, cur)
+        self.comeBackSteps.append(step)
+        return step.next(locations)
+
+    def cleanNoComeBack(self, locations):
+        for loc in locations:
+            if "areaWeight" in loc:
+                del loc["areaWeight"]
+
+    def rewind(self, cur):
+        # come back to the previous step
+        # if no more rewinds available: tell we're stuck by returning False
+        if len(self.comeBackSteps) == 0:
+            self.log.debug("No more steps to rewind")
+            return False
+
+        self.log.debug("Start rewind, current: {}".format(cur))
+
+        lastStep = self.comeBackSteps[-1]
+        if lastStep.cur == cur:
+            # need to go up one more time
+            self.comeBackSteps.pop()
+
+            if len(self.comeBackSteps) == 0:
+                self.log.debug("No more steps to rewind")
+                return False
+
+            lastStep = self.comeBackSteps[-1]
+            self.log.debug("Rewind previous step at {}".format(lastStep.cur))
+
+        count = cur - lastStep.cur
+        self.solver.cancelLastItems(count)
+        self.log.debug("Rewind {} items to {}".format(count, lastStep.cur))
+        return True
+
+class ComeBackStep(object):
+    # one case of no come back decision
+    def __init__(self, graphAreas, cur):
+        self.visitedGraphAreas = []
+        self.graphAreas = graphAreas
+        self.cur = cur
+
+    def next(self, locations):
+        # use next available area, if all areas has been visited return True (stuck), else False
+        if len(self.visitedGraphAreas) == len(self.graphAreas):
+            return True
+
+        # get area with max available locs
+        maxAreaWeigth = 0
+        maxAreaName = ""
+        for graphArea in self.graphAreas:
+            if graphArea in self.visitedGraphAreas:
+                continue
+            else:
+                if self.graphAreas[graphArea] > maxAreaWeigth:
+                    maxAreaWeigth = self.graphAreas[graphArea]
+                    maxAreaName = graphArea
+        self.visitedGraphAreas.append(maxAreaName)
+
+        retGraphAreas = {}
+        for graphArea in self.graphAreas:
+            if graphArea == maxAreaName:
+                retGraphAreas[graphArea] = 1
+            else:
+                retGraphAreas[graphArea] = 10000
+
+        # update locs
+        for loc in locations:
+            loc["areaWeight"] = retGraphAreas[loc["GraphArea"]]
+
+        return False
 
 class Out(object):
     @staticmethod

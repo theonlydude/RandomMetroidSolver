@@ -110,7 +110,7 @@ function computeSeed {
     fi
 
     if [ ${COMPARE} -eq 0 ]; then
-	OUT=$(/usr/bin/time -f "\t%E real" python2 ${ORIG}/solver.py -r ${ROM_GEN} --preset standard_presets/${PRESET}.json -g --checkDuplicateMajor 2>&1) > ${ROM_GEN}.old
+	OUT=$(/usr/bin/time -f "\t%E real" python2 ${ORIG}/solver.py -r ${ROM_GEN} --preset standard_presets/${PRESET}.json -g --checkDuplicateMajor 2>&1)
 	if [ $? -ne 0 ]; then
             echo "${SEED};${DIFF_CAP};${RTIME_OLD};${RTIME_NEW};${STIME_OLD};${STIME_NEW};${MD5};${PARAMS};" | tee -a ${CSV}
             echo "Can't solve ${ROM_GEN}" | tee -a ${CSV}
@@ -120,12 +120,13 @@ function computeSeed {
 	    STIME_OLD=$(echo "${OUT}" | grep real | awk '{print $1}')
 	    echo "${OUT}" | grep -q "has already been picked up"
 	    DUP_OLD=$?
+	    echo "${OUT}" > ${ROM_GEN}.old
 	fi
     else
 	DUP_OLD=1
     fi
 
-    OUT=$(/usr/bin/time -f "\t%E real" python2 ./solver.py -r ${ROM_GEN} --preset standard_presets/${PRESET}.json -g --checkDuplicateMajor 2>&1) > ${ROM_GEN}.new
+    OUT=$(/usr/bin/time -f "\t%E real" python2 ./solver.py -r ${ROM_GEN} --preset standard_presets/${PRESET}.json -g --checkDuplicateMajor 2>&1)
     if [ $? -ne 0 ]; then
         echo "${SEED};${DIFF_CAP};${RTIME_OLD};${RTIME_NEW};${STIME_OLD};${STIME_NEW};${MD5};${PARAMS};" | tee -a ${CSV}
         echo "Can't solve ${ROM_GEN}" | tee -a ${CSV}
@@ -135,6 +136,15 @@ function computeSeed {
 	STIME_NEW=$(echo "${OUT}" | grep real | awk '{print $1}')
 	echo "${OUT}" | grep -q "has already been picked up"
 	DUP_NEW=$?
+
+	echo "${OUT}" | grep -q "Start rewind"
+	if [ $? -eq 0 ]; then
+	    echo "REWIND ${SEED}" | tee -a ${CSV}
+	fi
+
+	if [ ${COMPARE} -eq 0 ]; then
+	    echo "${OUT}" > ${ROM_GEN}.new
+	fi
     fi
 
     if [ ${DUP_NEW} -eq 0 -o ${DUP_OLD} -eq 0 ]; then
@@ -152,6 +162,8 @@ function computeSeed {
 	    echo "${SEED};${ROM_GEN};SOLVER;${PRESET};NOK;" | tee -a test_jm.csv
 	    STOP="now"
 	fi
+    else
+	rm -f ${ROM_GEN}
     fi
 }
 

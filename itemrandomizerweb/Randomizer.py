@@ -495,7 +495,23 @@ class Randomizer(object):
             self.log.debug('pools. c=%d, n=%d, t=%d' % (len(self.chozoItemPool), len(self.nonChozoItemPool), len(self.itemPool)))
             self.itemPool = self.chozoItemPool
         self.restrictedLocations = fun.restrictedLocs
+
+        # if late moph compute number of locations available without morph
+        if self.restrictions['Morph'] == 'late':
+            self.computeLateMorphLimit()
+
         self.vcr = VCR(seedName, 'rando') if settings.vcr == True else None
+
+    def computeLateMorphLimit(self):
+        # add all the items (except those removed by super fun) except morph.
+        # compute the number of available locs.
+        self.smbm.resetItems()
+        self.smbm.addItems([item['Type'] for item in self.itemPool if item['Type'] != 'Morph'])
+        self.lateMorphLimit = len(self.currentLocations(post=True))
+        self.log.debug("lateMorphLimit: {}".format(self.lateMorphLimit))
+
+        # cleanup
+        self.smbm.resetItems()
 
     def resetCache(self):
         self.nonProgTypesCache = []
@@ -908,7 +924,19 @@ class Randomizer(object):
         return not Randomizer.isInBlueBrinstar(location)
 
     def morphPlacementImpl(self, item, location):
-        return location['GraphArea'] != 'Crateria'
+        # given the max number of locs available without morph, allow morph only after limit/2 locs have been filled
+        if len(self.currentItems) < self.lateMorphLimit/2:
+            return False
+
+        # the closer we get to the limit the higher the chances of allowing morph
+        limit = float(self.lateMorphLimit)
+        proba = random.gauss(limit, limit/2.0)
+        if proba > limit:
+            proba = 2 * limit - proba
+
+        self.log.debug("Morph ? step: {}, proba: {}".format(len(self.currentItems), proba))
+
+        return len(self.currentItems) >= proba
 
     # is softlock possible from the player POV when checking the loc?
     # usually these locs are checked last when playing, so placing

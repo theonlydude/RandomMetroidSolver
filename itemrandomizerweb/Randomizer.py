@@ -507,8 +507,12 @@ class Randomizer(object):
         # compute the number of available locs.
         self.smbm.resetItems()
         self.smbm.addItems([item['Type'] for item in self.itemPool if item['Type'] != 'Morph'])
-        self.lateMorphLimit = len(self.currentLocations(post=True))
-        self.log.debug("lateMorphLimit: {}".format(self.lateMorphLimit))
+        locs = self.currentLocations(post=True)
+        if self.restrictions['MajorMinor'] == 'Full':
+            self.lateMorphLimit = len(locs)
+        else:
+            self.lateMorphLimit = len([loc for loc in locs if self.restrictions['MajorMinor'] in loc['Class']])
+        self.log.debug("lateMorphLimit: {}: {}".format(self.restrictions['MajorMinor'], self.lateMorphLimit))
 
         # cleanup
         self.smbm.resetItems()
@@ -924,19 +928,20 @@ class Randomizer(object):
         return not Randomizer.isInBlueBrinstar(location)
 
     def morphPlacementImpl(self, item, location):
-        # given the max number of locs available without morph, allow morph only after limit/2 locs have been filled
-        if len(self.currentItems) < self.lateMorphLimit/2:
-            return False
-
         # the closer we get to the limit the higher the chances of allowing morph
         limit = float(self.lateMorphLimit)
-        proba = random.gauss(limit, limit/2.0)
+        proba = randGaussBounds(limit*2, 2.0)
         if proba > limit:
             proba = 2 * limit - proba
 
-        self.log.debug("Morph ? step: {}, proba: {}".format(len(self.currentItems), proba))
+        if self.restrictions['MajorMinor'] == 'Full':
+            nbItems = len(self.currentItems)
+        else:
+            nbItems = len([item for item in self.currentItems if self.restrictions['MajorMinor'] == item['Class']])
 
-        return len(self.currentItems) >= proba
+        self.log.debug("Morph ? step: {}, proba: {}: {}".format(nbItems, proba, nbItems >= proba))
+
+        return nbItems >= proba
 
     # is softlock possible from the player POV when checking the loc?
     # usually these locs are checked last when playing, so placing

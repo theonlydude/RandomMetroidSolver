@@ -839,13 +839,12 @@ class Randomizer(object):
     #
     # returns a dict with the item and the location
     def placeItem(self, items, itemPool, locations):
-        item = self.getItemToPlace(items, itemPool)
+        # kill bosses ASAP to open locs
+        if self.hasItemTypeInPool('Boss', itemPool) and any('Boss' in loc['Class'] for loc in locations):
+            item = self.getNextItemInPool('Boss', itemPool)
+        else:
+            item = self.getItemToPlace(items, itemPool)
         locations = [loc for loc in locations if self.locPostAvailable(loc, item['Type'])]
-        # if a loc is available we trigger pick up action, to make more locs available afterwards
-        for loc in locations:
-            if 'Pickup' in loc:
-                self.log.debug("PICKUP call for: {}".format(loc['Name']))
-                loc['Pickup']()
         availableLocations = List.filter(lambda loc: self.canPlaceAtLocation(item, loc, checkSoftlock=True), locations)
         if len(availableLocations) == 0:
             if not item in self.failItems:
@@ -1023,6 +1022,8 @@ class Randomizer(object):
             self.setCurAccessPoint(location['accessPoint'])
             # get actual cur locs from proper AP to store with the state
             curLocs = self.currentLocations(item)
+            if 'Pickup' in location:
+                location['Pickup']()
             self.currentItems.append(item)
             self.smbm.addItem(item['Type'])
 

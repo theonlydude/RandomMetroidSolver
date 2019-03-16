@@ -202,7 +202,7 @@ accessPoints = [
        roomInfo = {'RoomPtr':0xb32e, "area": 0x2},
        exitInfo = {'DoorPtr':0x98be, 'direction': 0x4, "cap": (0x1, 0x6), "bitFlag": 0x0,
                    "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0},
-       entryInfo = {'SamusX':0xcd, 'SamusY':0x88}),
+       entryInfo = {'SamusX':0xd1, 'SamusY':0x88}),
     # Kraid
     AccessPoint('Warehouse Zeela Room Left', 'Kraid', {
         'KraidRoomOut': lambda sm: sm.canPassBombPassages()

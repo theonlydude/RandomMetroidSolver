@@ -25,6 +25,7 @@ if __name__ == "__main__":
     parser.add_argument('--max_degree', help="max hue shift", dest='max_degree', nargs='?', default=180, type=int)
     parser.add_argument('--debug', '-d', help="activate debug logging", dest='debug', action='store_true')
     parser.add_argument('--no_global_shift', help="", action='store_false', dest='global_shift', default=True)
+    parser.add_argument('--invert', help="invert color range", dest='invert', action='store_true', default=False)
 
     args = parser.parse_args()
 
@@ -71,7 +72,8 @@ if __name__ == "__main__":
 
         # min/max hue shift
         "min_degree": -180,
-        "max_degree": 180
+        "max_degree": 180,
+        "invert": False
     }
 
     for param in settings:

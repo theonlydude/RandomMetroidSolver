@@ -1017,10 +1017,12 @@ class Randomizer(object):
         curLocs = None
         isProg = self.isProgItemNow(item)
         if collect == True:
-            # walk the graph one last time to get proper access point and store with the state
-            curLocs = self.currentLocations(item)
+            # walk the graph to get proper access point
+            self.currentLocations(item)
             self.log.debug("getItem: loc: {} ap: {}".format(location['Name'], location['accessPoint']))
             self.setCurAccessPoint(location['accessPoint'])
+            # get actual cur locs from proper AP to store with the state
+            curLocs = self.currentLocations(item)
             self.currentItems.append(item)
             self.smbm.addItem(item['Type'])
 
@@ -1237,7 +1239,7 @@ class Randomizer(object):
                 posItems = self.possibleItems(state.curLocs, self.itemPool)
                 if len(posItems) > 0: # new locs can be opened
 #                    self.log.debug([item['Type'] for item in posItems])
-#                    self.log.debug([loc['Name'] for loc in state.curLocs])
+                    self.log.debug("STATE curLocs = " + str([loc['Name'] for loc in state.curLocs]))
                     itemLoc = self.generateItem(state.curLocs, self.itemPool)
                     if itemLoc is not None and (isFakeRollback == True or not self.hasTried(itemLoc)):
                         possibleStates.append((state, itemLoc))

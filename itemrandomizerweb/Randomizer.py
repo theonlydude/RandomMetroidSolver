@@ -859,10 +859,17 @@ class Randomizer(object):
     #
     # returns a dict with the item and the location
     def placeItem(self, items, itemPool, locations):
+        def getNextBoss():
+            boss = None
+            if any('Boss' in loc['Class'] for loc in locations):
+                for item in itemPool:
+                    if item['Type'] == 'Boss' and item not in self.failItems:
+                        boss = item
+                        break
+            return boss
         # kill bosses ASAP to open locs
-        if self.hasItemTypeInPool('Boss', itemPool) and any('Boss' in loc['Class'] for loc in locations):
-            item = self.getNextItemInPool('Boss', itemPool)
-        else:
+        item = getNextBoss()
+        if item is None:
             item = self.getItemToPlace(items, itemPool)
         locations = [loc for loc in locations if self.locPostAvailable(loc, item['Type'])]
         availableLocations = List.filter(lambda loc: self.canPlaceAtLocation(item, loc, checkSoftlock=True), locations)

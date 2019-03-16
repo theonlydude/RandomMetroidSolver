@@ -495,7 +495,27 @@ class Randomizer(object):
             self.log.debug('pools. c=%d, n=%d, t=%d' % (len(self.chozoItemPool), len(self.nonChozoItemPool), len(self.itemPool)))
             self.itemPool = self.chozoItemPool
         self.restrictedLocations = fun.restrictedLocs
+
+        # if late moph compute number of locations available without morph
+        if self.restrictions['Morph'] == 'late':
+            self.computeLateMorphLimit()
+
         self.vcr = VCR(seedName, 'rando') if settings.vcr == True else None
+
+    def computeLateMorphLimit(self):
+        # add all the items (except those removed by super fun) except morph.
+        # compute the number of available locs.
+        self.smbm.resetItems()
+        self.smbm.addItems([item['Type'] for item in self.itemPool if item['Type'] != 'Morph'])
+        locs = self.currentLocations(post=True)
+        if self.restrictions['MajorMinor'] == 'Full':
+            self.lateMorphLimit = len(locs)
+        else:
+            self.lateMorphLimit = len([loc for loc in locs if self.restrictions['MajorMinor'] in loc['Class']])
+        self.log.debug("lateMorphLimit: {}: {}".format(self.restrictions['MajorMinor'], self.lateMorphLimit))
+
+        # cleanup
+        self.smbm.resetItems()
 
     def resetCache(self):
         self.nonProgTypesCache = []
@@ -907,7 +927,18 @@ class Randomizer(object):
         return not Randomizer.isInBlueBrinstar(location)
 
     def morphPlacementImpl(self, item, location):
-        return location['GraphArea'] != 'Crateria'
+        # the closer we get to the limit the higher the chances of allowing morph
+        limit = float(self.lateMorphLimit)
+        proba = random.randint(0, limit)
+
+        if self.restrictions['MajorMinor'] == 'Full':
+            nbItems = len(self.currentItems)
+        else:
+            nbItems = len([item for item in self.currentItems if self.restrictions['MajorMinor'] == item['Class']])
+
+        self.log.debug("Morph ? step: {}, proba: {}: {}".format(nbItems, proba, proba <= nbItems))
+
+        return proba <= nbItems
 
     # is softlock possible from the player POV when checking the loc?
     # usually these locs are checked last when playing, so placing

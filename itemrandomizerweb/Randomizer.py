@@ -930,18 +930,16 @@ class Randomizer(object):
     def morphPlacementImpl(self, item, location):
         # the closer we get to the limit the higher the chances of allowing morph
         limit = float(self.lateMorphLimit)
-        proba = randGaussBounds(limit*2, 2.0)
-        if proba > limit:
-            proba = 2 * limit - proba
+        proba = random.randint(0, limit)
 
         if self.restrictions['MajorMinor'] == 'Full':
             nbItems = len(self.currentItems)
         else:
             nbItems = len([item for item in self.currentItems if self.restrictions['MajorMinor'] == item['Class']])
 
-        self.log.debug("Morph ? step: {}, proba: {}: {}".format(nbItems, proba, nbItems >= proba))
+        self.log.debug("Morph ? step: {}, proba: {}: {}".format(nbItems, proba, proba <= nbItems))
 
-        return nbItems >= proba
+        return proba <= nbItems
 
     # is softlock possible from the player POV when checking the loc?
     # usually these locs are checked last when playing, so placing

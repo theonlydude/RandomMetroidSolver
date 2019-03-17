@@ -244,7 +244,7 @@ function doSubmit() {
     }
 
     var dataDict = {};
-    var elems = ["itemsounds", "spinjumprestart", "elevators_doors_speed", "animals", "No_Music", "colorsRandomization", "suitsPalettes", "beamsPalettes", "tilesPalettes", "enemiesPalettes", "bossesPalettes"];
+    var elems = ["itemsounds", "spinjumprestart", "elevators_doors_speed", "animals", "No_Music", "colorsRandomization", "suitsPalettes", "beamsPalettes", "tilesPalettes", "enemiesPalettes", "bossesPalettes", "globalShift"];
 
     for(var i=0; i<elems.length; i++) {
        dataDict[elems[i]] = document.getElementById(elems[i]).value;
@@ -463,7 +463,7 @@ function startTheTour(step=-1) {
     {
       element: "#colorsRandomizationStep",
       title: "Color randomization",
-      content: "<p>Randomize the colors of various graphical elements:<br/><img src=\"/solver/static/images/palettesRando.png\" alt=\"colors rando\" title=\"colors rando\" class=\"full\"/></p><br/><p>Use the slider to restrict the possible range of the colors shifting. The same degree is used to randomize all the elements. The colors on the slider are the result colors for Samus, the yellow in the middle being Samus vanilla color:<br/><img src=\"/solver/static/images/samus_degrees.png\" alt=\"samus degrees\" title=\"samus degrees\" class=\"full\"/>You can invert the range by clicking on the invert button.</p>"
+      content: "<p>Randomize the colors of various graphical elements:<br/><img src=\"/solver/static/images/palettesRando.png\" alt=\"colors rando\" title=\"colors rando\" class=\"full\"/></p><br/><p>Use the slider to restrict the possible range of the colors shifting. The colors on the slider are the result colors for Samus, the yellow in the middle being Samus vanilla color:<br/><img src=\"/solver/static/images/samus_degrees.png\" alt=\"samus degrees\" title=\"samus degrees\" class=\"full\"/>You can invert the range by clicking on the invert button.</p><p>You can choose if you want to use the same degree to randomize all the elements.</p>"
     },
     {
       element: "#patchesStep",
@@ -547,19 +547,22 @@ def displayCheckbox(id, defaultTrue=False):
 		<td class="sixty"><span id="textLeft" class="floatleft">-180</span><div id="degree_slider_range" class="sixty floatleft"></div><span id="textRight">180</span><span class="thirty floatright"><button id="invert" type="button" onclick="invertFunc()" class="floatright">Invert</button></span></td>
                 <td><button type="button" onclick="startTheTour(1)" id="colorsRandomizationStep">?</button></td>
 	      </tr>
+	      <tr>
+		<td colspan="3">{{displayCheckbox("globalShift")}}Use the same degree to randomize all the elements</td>
+	      </tr>
             </table>
 	    <p>
 	      Select the elements to colors randomize.
 	    </p>
 	    <table class="full">
 	      <tr>
-	        <td class="third">{{displayCheckbox("suitsPalettes")}}Samus colors</td>
-	        <td class="third">{{displayCheckbox("beamsPalettes")}}Beams colors</td>
-	        <td class="third">{{displayCheckbox("tilesPalettes")}}Levels colors</td>
+	        <td class="third">{{displayCheckbox("suitsPalettes")}}Samus</td>
+	        <td class="third">{{displayCheckbox("beamsPalettes")}}Beams</td>
+	        <td class="third">{{displayCheckbox("tilesPalettes")}}Levels</td>
 	      </tr>
 	      <tr>
-	        <td class="third">{{displayCheckbox("enemiesPalettes")}}Enemies colors</td>
-	        <td class="third">{{displayCheckbox("bossesPalettes")}}Bosses colors</td>
+	        <td class="third">{{displayCheckbox("enemiesPalettes")}}Enemies</td>
+	        <td class="third">{{displayCheckbox("bossesPalettes")}}Bosses</td>
 		<td class="third"></td>
 	      </tr>
 	    </table>

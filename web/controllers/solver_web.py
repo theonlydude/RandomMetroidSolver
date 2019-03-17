@@ -832,7 +832,7 @@ def validateWebServiceParams(patchs, quantities, others, isJson=False):
         except:
             raiseHttp(400, "Wrong value for paramsFileTarget, must be a JSON string", isJson)
 
-    for check in ['suitsRestriction', 'layoutPatches', 'noGravHeat', 'areaRandomization', 'bossRandomization', 'hideItems', 'strictMinors', 'colorsRandomization', 'suitsPalettes', 'beamsPalettes', 'tilesPalettes', 'enemiesPalettes', 'bossesPalettes', 'invert']:
+    for check in ['suitsRestriction', 'layoutPatches', 'noGravHeat', 'areaRandomization', 'bossRandomization', 'hideItems', 'strictMinors', 'colorsRandomization', 'suitsPalettes', 'beamsPalettes', 'tilesPalettes', 'enemiesPalettes', 'bossesPalettes', 'invert', 'globalShift']:
         if check in others:
             if request.vars[check] not in ['on', 'off', 'random']:
                 raiseHttp(400, "Wrong value for {}: {}, authorized values: on/off".format(check, request.vars[check]), isJson)
@@ -1777,6 +1777,7 @@ def initCustomizerSession():
         session.customizer['minDegree'] = -15
         session.customizer['maxDegree'] = 15
         session.customizer['invert'] = "on"
+        session.customizer['globalShift'] = "on"
 
         for patch in patches:
             if patch[0] in ['skip_intro', 'skip_ceres']:
@@ -1810,6 +1811,7 @@ def customWebService():
     session.customizer['minDegree'] = request.vars.minDegree
     session.customizer['maxDegree'] = request.vars.maxDegree
     session.customizer['invert'] = request.vars.invert
+    session.customizer['globalShift'] = request.vars.globalShift
     for patch in patches:
         session.customizer[patch] = request.vars[patch]
 
@@ -1843,6 +1845,12 @@ def customWebService():
             params.append('--no_shift_enemy_palettes')
         if request.vars.bossesPalettes == 'off':
             params.append('--no_shift_boss_palettes')
+        if request.vars.globalShift == 'off':
+            params.append('--no_global_shift')
+            params.append('--individual_suit_shift')
+            params.append('--individual_tileset_shift')
+            params.append('--no_match_ship_and_power')
+
         params += ['--min_degree', request.vars.minDegree, '--max_degree', request.vars.maxDegree]
         if request.vars.invert == 'on':
             params.append('--invert')

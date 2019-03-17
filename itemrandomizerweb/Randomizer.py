@@ -1460,6 +1460,8 @@ class Randomizer(object):
             self.determineParameters()
             self.log.debug('collected2=' + str(list(set([i['Item']['Type'] for i in self.itemLocations]))))
             collectedAmmo = list(set([il['Item']['Type'] for il in self.itemLocations if il['Item']['Category'] == 'Ammo']))
+            if 'Super' in collectedAmmo and 'Missile' not in collectedAmmo:
+                collectedAmmo.append('Missile') # no need to restrict missiles if supers are already in
             self.log.debug('collectedAmmo='+str(collectedAmmo))
             nonProg = [item for item in self.getNonProgItemPool(self.nonChozoItemPool) if item['Category'] != 'Ammo' or item['Type'] in collectedAmmo]
             lim = self.locLimit - 1

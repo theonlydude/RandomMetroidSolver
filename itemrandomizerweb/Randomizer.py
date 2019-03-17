@@ -315,10 +315,19 @@ class SuperFunProvider(object):
         forb = None
         # it can take several tries if some item combination removal
         # forbids access to more stuff than each individually
-        while forb is None:
+        tries = 0
+        while forb is None and tries < 100:
             forb = self.getForbiddenItemsFromList(removable[:])
             if self.checkPool(forb) == False:
                 forb = None
+            tries += 1
+        if forb is None:
+            # we couldn't find a combination, just pick an item
+            firstItem = next((itemType for itemType in removable if itemType is not None), None)
+            if firstItem is not None:
+                forb = [firstItem]
+            else:
+                forb = []
         self.forbiddenItems += forb
         self.checkPool()
         self.addRestricted()

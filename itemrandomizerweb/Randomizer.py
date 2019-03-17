@@ -1285,7 +1285,7 @@ class Randomizer(object):
 #                    self.log.debug([item['Type'] for item in posItems])
                     self.log.debug("STATE curLocs = " + str([loc['Name'] for loc in state.curLocs]))
                     itemLoc = self.generateItem(state.curLocs, self.itemPool)
-                    if itemLoc is not None and (isFakeRollback == True or not self.hasTried(itemLoc)):
+                    if itemLoc is not None and itemLoc['Item']['Category'] != 'Nothing' and (isFakeRollback == True or not self.hasTried(itemLoc)):
                         possibleStates.append((state, itemLoc))
                 i -= 1
             # nothing, let's rollback further a progression item

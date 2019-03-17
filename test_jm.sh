@@ -48,7 +48,7 @@ function generate_params {
     let S=$RANDOM%${#BOSSES[@]}
     BOSS=${BOSSES[$S]}
 
-    echo "-r ${ROM} --param standard_presets/${PRESET}.json --seed ${SEED} --progressionSpeed random --morphPlacement random --progressionDifficulty random --missileQty 0 --superQty 0 --powerBombQty 0 --minorQty 0 --energyQty random --majorsSplit random --suitsRestriction random --hideItems random --strictMinors random --superFun CombatRandom --superFun MovementRandom --superFun SuitsRandom --maxDifficulty random ${AREA} ${BOSS}"
+    echo "-r ${ROM} --param standard_presets/${PRESET}.json --seed ${SEED} --progressionSpeed random --morphPlacement random --progressionDifficulty random --missileQty 0 --superQty 0 --powerBombQty 0 --minorQty 0 --energyQty random --majorsSplit random --suitsRestriction random --hideItems random --strictMinors random --superFun CombatRandom --superFun MovementRandom --superFun SuitsRandom --maxDifficulty random --runtime 20 ${AREA} ${BOSS}"
 }
 
 function computeSeed {
@@ -80,14 +80,11 @@ function computeSeed {
 
     NEW_MD5="new n/a"
     OUT=$(/usr/bin/time -f "\t%E real" python2 ./randomizer.py ${PARAMS} 2>&1)
-    if [ $? -ne 0 ]; then
-	RTIME_NEW="n/a"
-    else
-	RTIME_NEW=$(echo "${OUT}" | grep real | awk '{print $1}')
-	ROM_GEN=$(ls -1 VARIA_Randomizer_*X${SEED}_${PRESET}.sfc 2>/dev/null)
-	if [ $? -eq 0 ]; then
-	    NEW_MD5=$(md5sum ${ROM_GEN} | awk '{print $1}')
-	fi
+
+    RTIME_NEW=$(echo "${OUT}" | grep real | awk '{print $1}')
+    ROM_GEN=$(ls -1 VARIA_Randomizer_*X${SEED}_${PRESET}.sfc 2>/dev/null)
+    if [ $? -eq 0 ]; then
+	NEW_MD5=$(md5sum ${ROM_GEN} | awk '{print $1}')
     fi
 
     if [ "${OLD_MD5}" != "${NEW_MD5}" -a ${COMPARE} -eq 0 ]; then

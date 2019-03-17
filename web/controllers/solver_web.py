@@ -987,6 +987,7 @@ def randomizerWebService():
     preset = request.vars.preset
 
     params = ['python2',  os.path.expanduser("~/RandomMetroidSolver/randomizer.py"),
+              '--runtime', '20',
               '--seed', seed,
               '--output', jsonFileName,
               '--param', presetFileName,

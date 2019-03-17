@@ -1148,7 +1148,7 @@ def displayNumber(id, min, max, default, step="1"):
 		<td id="presetStep"><button type="button" onclick="startTheTour(2)">?</button></td>
               </tr>
 		<td>Settings Preset:</td>
-		<td>{{=SELECT(*randoPresets, **dict(_name="randoPreset", _id="randoPreset", value=session.randomizer["randoPreset"] if "randoPreset" in session.randomizer else "default", _class="filldropdown chzn-select", _onchange="loadRandoPreset()"))}}</td>
+		<td>{{=SELECT(*randoPresets, **dict(_name="randoPreset", _id="randoPreset", value=session.randomizer["randoPreset"], _class="filldropdown chzn-select", _onchange="loadRandoPreset()"))}}</td>
 		<td id="randoPresetStep"><button type="button" onclick="startTheTour(3)">?</button></td>
               </tr>
 	      <tr id="raceModeVisibility">

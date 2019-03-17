@@ -501,7 +501,7 @@ class Randomizer(object):
             self.itemPool = self.chozoItemPool
         self.restrictedLocations = fun.restrictedLocs
 
-        # if late moph compute number of locations available without morph
+        # if late morph compute number of locations available without morph
         if self.restrictions['Morph'] == 'late':
             self.computeLateMorphLimit()
 
@@ -1579,7 +1579,7 @@ class Randomizer(object):
                 print("\nSTUCK ! ")
                 print("REM LOCS = "  + str([loc['Name'] for loc in self.unusedLocations]))
                 print("REM ITEMS = "  + str([item['Type'] for item in self.itemPool]))
-                self.errorMsg += "Stuck because of navigation. Retry, and disable either super fun settings/late morph ball/suits restriction if the problem happens again."
+                self.errorMsg += "Stuck because of navigation. Retry, and disable either super fun settings or suits restriction if the problem happens again."
                 stuck = True
         if not stuck:
             maxDiff = self.prevDiffTarget

@@ -365,10 +365,6 @@ class SuperFunProvider(object):
         self.log.debug("getForbiddenCombat removable="+str(removableCombat))
         if len(removableCombat) > 0:
             fake = [None, None] # placeholders to avoid tricking the gaussian into removing too much stuff
-            # do not remove screw if morph placement is late FIXME : this is nasty, but is due to simplistice morph placement restriction implementation
-            if self.rando.restrictions['Morph'] == 'late':
-                removableCombat.pop(0)
-                fake.pop()
             if len(removableCombat) > 0:
                 # remove at least one if possible (will be screw or plasma)
                 self.forbiddenItems.append(removableCombat.pop(0))
@@ -944,7 +940,7 @@ class Randomizer(object):
 
     def morphPlacementImpl(self, item, location):
         # the closer we get to the limit the higher the chances of allowing morph
-        limit = float(self.lateMorphLimit)
+        limit = self.lateMorphLimit
         proba = random.randint(0, limit)
 
         if self.restrictions['MajorMinor'] == 'Full':

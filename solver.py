@@ -833,6 +833,10 @@ class StandardSolver(CommonSolver):
         # the next collected item is the one with the smallest difficulty,
         # if equality between major and minor, take major first.
 
+        # remove mother brain location (there items pickup conditions on top of going to mother brain location)
+        mbLoc = self.getLoc('Mother Brain', self.locations)
+        self.locations.remove(mbLoc)
+
         if self.majorsSplit == 'Major':
             self.majorLocations = [loc for loc in self.locations if "Major" in loc["Class"] or "Boss" in loc["Class"]]
             self.minorLocations = [loc for loc in self.locations if "Minor" in loc["Class"]]
@@ -865,22 +869,17 @@ class StandardSolver(CommonSolver):
             canEndGame = self.canEndGame()
             (isEndPossible, endDifficulty) = (canEndGame.bool, canEndGame.difficulty)
             if isEndPossible and hasEnoughItems and endDifficulty <= diffThreshold:
-                # check if last visited location is mother brain
-                if self.visitedLocations[-1]['Name'] != 'Mother Brain':
-                    self.computeLocationsDifficulty(self.majorLocations)
-                    mbLoc = self.getLoc('Mother Brain', self.majorLocations)
-                    # check if mother brain location is accessible:
-                    if mbLoc["difficulty"] == True:
-                        self.collectMajor(mbLoc)
-                        self.log.debug("canEnd and MB loc is accessible")
-                        self.log.debug("END")
-                        break
-                    else:
-                        self.log.debug("canEnd but MB loc not accessible")
-                else:
-                    self.log.debug("End condition ok and last loc is Mother Brain")
+                # add mother brain loc and check if it's accessible
+                self.majorLocations.append(mbLoc)
+                self.computeLocationsDifficulty(self.majorLocations)
+                if mbLoc["difficulty"] == True:
+                    self.collectMajor(mbLoc)
+                    self.log.debug("canEnd and MB loc is accessible")
                     self.log.debug("END")
                     break
+                else:
+                    self.log.debug("canEnd but MB loc not accessible")
+                    self.majorLocations.remove(mbLoc)
 
             #self.log.debug(str(self.collectedItems))
             self.log.debug("Current Area : " + area)

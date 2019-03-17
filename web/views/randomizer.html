@@ -283,7 +283,7 @@ function setComplexity() {
 function changeComplexity(evt, name) {
   if(name == "simple") {
     var show = [];
-    var hide = ["seedVisibility", "ammoVisibility", "maxDiffVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "morphPlacementVisibility", "superFunVisibility", "patchesVisibility", "areaPatchVisibility", "hideItemsVisibility", "raceModeVisibility", "colorsRandomizationVisibility"];
+    var hide = ["seedVisibility", "ammoVisibility", "maxDiffVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "morphPlacementVisibility", "superFunVisibility", "patchesVisibility", "areaPatchVisibility", "hideItemsVisibility", "raceModeVisibility", "colorsRandomizationVisibility", "globalShiftVisibility"];
     showHide(show, hide);
   }
 
@@ -296,7 +296,7 @@ for patch in patches:
     pass
   pass
 }}];
-    var hide = ["seedVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "strictMinorsVisibility", "missileQtyVisibility", "superQtyVisibility", "powerBombQtyVisibility", "superFunVisibility", "areaPatchVisibility", "mainPatchesVisibitily", "mainPatchesTextVisibitily", "hideItemsVisibility", "raceModeVisibility", "colorsRandomizationVisibility"
+    var hide = ["seedVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "strictMinorsVisibility", "missileQtyVisibility", "superQtyVisibility", "powerBombQtyVisibility", "superFunVisibility", "areaPatchVisibility", "mainPatchesVisibitily", "mainPatchesTextVisibitily", "hideItemsVisibility", "raceModeVisibility", "colorsRandomizationVisibility", "globalShiftVisibility"
 {{
 for patch in patches:
   if patch[3] == False:
@@ -308,7 +308,7 @@ for patch in patches:
   }
 
   else {
-    var show = ["seedVisibility", "ammoVisibility", "maxDiffVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "morphPlacementVisibility", "strictMinorsVisibility", "missileQtyVisibility", "superQtyVisibility", "powerBombQtyVisibility", "superFunVisibility", "patchesVisibility", "areaPatchVisibility", "mainPatchesVisibitily", "mainPatchesTextVisibitily", "hideItemsVisibility", "raceModeVisibility", "colorsRandomizationVisibility"
+    var show = ["seedVisibility", "ammoVisibility", "maxDiffVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "morphPlacementVisibility", "strictMinorsVisibility", "missileQtyVisibility", "superQtyVisibility", "powerBombQtyVisibility", "superFunVisibility", "patchesVisibility", "areaPatchVisibility", "mainPatchesVisibitily", "mainPatchesTextVisibitily", "hideItemsVisibility", "raceModeVisibility", "colorsRandomizationVisibility", "globalShiftVisibility"
 {{
 for patch in patches:
   response.write(", \"{}Visibitily\"".format(patch[0]), escape=False)
@@ -347,7 +347,7 @@ function AjaxPresetCallCompleted(data) {
 
     var dataDict = {paramsFileTarget : data, "complexity": getComplexity()};
     var elems = ["seed", "itemsounds", "spinjumprestart", "elevators_doors_speed", "skip_ceres", "skip_intro", "animals", "layoutPatches", "noGravHeat", "areaLayout", "variaTweaks", "areaRandomization", "No_Music", "preset",
-"bossRandomization", "colorsRandomization", "suitsPalettes", "beamsPalettes", "tilesPalettes", "enemiesPalettes", "bossesPalettes"];
+"bossRandomization", "colorsRandomization", "suitsPalettes", "beamsPalettes", "tilesPalettes", "enemiesPalettes", "bossesPalettes", "globalShift"];
     var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "energyQty", "maxDifficulty", "majorsSplit", "suitsRestriction", "morphPlacement", "funCombat", "funMovement", "funSuits", "progressionDifficulty", "hideItems", "strictMinors"];
 
     for(var i=0; i<elems.length; i++) {
@@ -374,6 +374,12 @@ function AjaxPresetCallCompleted(data) {
     // add colors slider
     dataDict["minDegree"] = $("#degree_slider_range").slider("values", 0);
     dataDict["maxDegree"] = $("#degree_slider_range").slider("values", 1);
+
+    if(invertSlider == true) {
+      dataDict["invert"] = "on";
+    } else {
+      dataDict["invert"] = "off";
+    }
 
     // call web service with parameters
     var request = $.ajax({
@@ -455,7 +461,7 @@ function AjaxRandomizerCallCompleted(data) {
     console.log("button text set back to randomize");
 
     var dataDict = {"complexity": getComplexity()};
-    var elems = ["itemsounds", "spinjumprestart", "elevators_doors_speed", "skip_ceres", "skip_intro", "animals", "layoutPatches", "noGravHeat", "areaLayout", "variaTweaks", "areaRandomization", "bossRandomization", "No_Music", "preset", "randoPreset", "colorsRandomization", "suitsPalettes", "beamsPalettes", "tilesPalettes", "enemiesPalettes", "bossesPalettes"];
+    var elems = ["itemsounds", "spinjumprestart", "elevators_doors_speed", "skip_ceres", "skip_intro", "animals", "layoutPatches", "noGravHeat", "areaLayout", "variaTweaks", "areaRandomization", "bossRandomization", "No_Music", "preset", "randoPreset", "colorsRandomization", "suitsPalettes", "beamsPalettes", "tilesPalettes", "enemiesPalettes", "bossesPalettes", "globalShift"];
     var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "energyQty", "maxDifficulty", "majorsSplit", "suitsRestriction", "morphPlacement", "funCombat", "funMovement", "funSuits", "progressionDifficulty", "hideItems", "strictMinors"];
 
     for(var i=0; i<elems.length; i++) {
@@ -474,6 +480,12 @@ function AjaxRandomizerCallCompleted(data) {
 
     dataDict["minDegree"] = $("#degree_slider_range").slider("values", 0);
     dataDict["maxDegree"] = $("#degree_slider_range").slider("values", 1);
+
+    if(invertSlider == true) {
+      dataDict["invert"] = "on";
+    } else {
+      dataDict["invert"] = "off";
+    }
 
     // call webservice to update the session
     var request = $.ajax({
@@ -719,7 +731,7 @@ window.onload = function(){
     initSlider();
 
 {{
-if session.customizer["invert"] == "on":
+if session.randomizer["invert"] == "on":
 }}
     invertFunc();
 {{
@@ -786,8 +798,8 @@ function initSlider() {
       slider.find(".handle-track1").css("width", event.target.clientWidth);
       
       // set current values
-      $("#degree_slider_range").slider("values", 0, {{=session.customizer["minDegree"]}});
-      $("#degree_slider_range").slider("values", 1, {{=session.customizer["maxDegree"]}});
+      $("#degree_slider_range").slider("values", 0, {{=session.randomizer["minDegree"]}});
+      $("#degree_slider_range").slider("values", 1, {{=session.randomizer["maxDegree"]}});
 
       // Set initial position for tracks
       update_handle_track_pos(event.target, $(this).slider("values", 0), 0);
@@ -970,7 +982,7 @@ function startTheTour(step=-1) {
     {
       element: "#colorsRandomizationStep",
       title: "Color randomization",
-      content: "<p>Randomize the colors of various graphical elements:<br/><img src=\"/solver/static/images/palettesRando.png\" alt=\"colors rando\" title=\"colors rando\" class=\"full\"/></p><br/><p>Use the slider to restrict the possible range of the colors shifting. The same degree is used to randomize all the elements. The colors on the slider are the result colors for Samus, the yellow in the middle being Samus vanilla color:<br/><img src=\"/solver/static/images/samus_degrees.png\" alt=\"samus degrees\" title=\"samus degrees\" class=\"full\"/>You can invert the range by clicking on the invert button.</p>",
+      content: "<p>Randomize the colors of various graphical elements:<br/><img src=\"/solver/static/images/palettesRando.png\" alt=\"colors rando\" title=\"colors rando\" class=\"full\"/></p><br/><p>Use the slider to restrict the possible range of the colors shifting. The colors on the slider are the result colors for Samus, the yellow in the middle being Samus vanilla color:<br/><img src=\"/solver/static/images/samus_degrees.png\" alt=\"samus degrees\" title=\"samus degrees\" class=\"full\"/>You can invert the range by clicking on the invert button.</p><p>You can choose if you want to use the same degree to randomize all the elements.</p>",
       placement: "auto left"
     },
     {
@@ -1273,9 +1285,12 @@ def displayNumber(id, min, max, default, step="1"):
             </p>
 	    <table class="full">
 	      <tr>
-	        <td class="third">{{displayCheckbox("colorsRandomization")}}Colors Randomization</td>
+	        <td class="third" id="colorsRandomizationStep">{{displayCheckbox("colorsRandomization")}}Colors Randomization</td>
 		<td class="sixty"><span id="textLeft" class="floatleft">-180</span><div id="degree_slider_range" class="sixty floatleft"></div><span id="textRight">180</span><span class="thirty floatright"><button id="invert" type="button" onclick="invertFunc()" class="floatright">Invert</button></span></td>
-                <td><button type="button" onclick="startTheTour(19)" id="colorsRandomizationStep">?</button></td>
+                <td><button type="button" onclick="startTheTour(19)">?</button></td>
+	      </tr>
+	      <tr id="globalShiftVisibility">
+		<td colspan="3">{{displayCheckbox("globalShift")}}Use the same degree to randomize all the elements</td>
 	      </tr>
             </table>
 	    <div id="colorsRandomizationVisibility">
@@ -1284,13 +1299,13 @@ def displayNumber(id, min, max, default, step="1"):
 	      </p>
 	      <table class="full">
 		<tr>
-	          <td class="third">{{displayCheckbox("suitsPalettes")}}Samus colors</td>
-	          <td class="third">{{displayCheckbox("beamsPalettes")}}Beams colors</td>
-	          <td class="third">{{displayCheckbox("tilesPalettes")}}Levels colors</td>
+	          <td class="third">{{displayCheckbox("suitsPalettes")}}Samus</td>
+	          <td class="third">{{displayCheckbox("beamsPalettes")}}Beams</td>
+	          <td class="third">{{displayCheckbox("tilesPalettes")}}Levels</td>
 		</tr>
 		<tr>
-	          <td class="third">{{displayCheckbox("enemiesPalettes")}}Enemies colors</td>
-	          <td class="third">{{displayCheckbox("bossesPalettes")}}Bosses colors</td>
+	          <td class="third">{{displayCheckbox("enemiesPalettes")}}Enemies</td>
+	          <td class="third">{{displayCheckbox("bossesPalettes")}}Bosses</td>
 		  <td class="third"></td>
 		</tr>
 	      </table>

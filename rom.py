@@ -535,7 +535,7 @@ class RomPatcher:
                      'supermetroid_msu1.ips', 'max_ammo_display.ips'],
         'VariaTweaks' : ['ws_etank.ips', 'ln_chozo_sj_check_disable.ips', 'bomb_torizo.ips'],
         'Layout': ['dachora.ips', 'early_super_bridge.ips', 'high_jump.ips', 'moat.ips',
-                   'nova_boost_platform.ips', 'red_tower.ips', 'spazer.ips'],
+                   'nova_boost_platform.ips', 'red_tower.ips', 'spazer.ips', 'brinstar_map_room.ips'],
         'Optional': ['itemsounds.ips',
                      'spinjumprestart.ips', 'elevators_doors_speed.ips', 'No_Music',
                      'skip_intro.ips', 'skip_ceres.ips', 'animal_enemies.ips', 'animals.ips',

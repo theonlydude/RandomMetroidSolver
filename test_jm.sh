@@ -137,11 +137,6 @@ function computeSeed {
 	echo "${OUT}" | grep -q "has already been picked up"
 	DUP_NEW=$?
 
-	echo "${OUT}" | grep -q "Start rewind"
-	if [ $? -eq 0 ]; then
-	    echo "REWIND ${SEED}" | tee -a ${CSV}
-	fi
-
 	if [ ${COMPARE} -eq 0 ]; then
 	    echo "${OUT}" > ${ROM_GEN}.new
 	fi

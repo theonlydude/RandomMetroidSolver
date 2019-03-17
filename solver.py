@@ -805,8 +805,8 @@ class StandardSolver(CommonSolver):
         return [loc for loc in self.majorLocations if loc['difficulty'].bool == False and loc['itemName'] not in ['Nothing', 'NoEnergy']]
 
 
-    def getLoc(self, locName):
-        for loc in self.locations:
+    def getLoc(self, locName, locations):
+        for loc in locations:
             if loc['Name'] == locName:
                 return loc
 
@@ -868,11 +868,19 @@ class StandardSolver(CommonSolver):
                 # check if last visited location is mother brain
                 if self.visitedLocations[-1]['Name'] != 'Mother Brain':
                     self.computeLocationsDifficulty(self.majorLocations)
-                    mbLoc = self.getLoc('Mother Brain')
-                    self.majorLocations.append(mbLoc)
-                    self.collectMajor(mbLoc)
-                self.log.debug("END")
-                break
+                    mbLoc = self.getLoc('Mother Brain', self.majorLocations)
+                    # check if mother brain location is accessible:
+                    if mbLoc["difficulty"] == True:
+                        self.collectMajor(mbLoc)
+                        self.log.debug("canEnd and MB loc is accessible")
+                        self.log.debug("END")
+                        break
+                    else:
+                        self.log.debug("canEnd but MB loc not accessible")
+                else:
+                    self.log.debug("End condition ok and last loc is Mother Brain")
+                    self.log.debug("END")
+                    break
 
             #self.log.debug(str(self.collectedItems))
             self.log.debug("Current Area : " + area)

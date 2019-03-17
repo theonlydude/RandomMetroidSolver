@@ -401,7 +401,7 @@ locations = [
     'AccessFrom' : {
         'Bubble Mountain': lambda sm: sm.canOpenGreenDoors()
     },
-    'Available': lambda sm: sm.canHellRun('MainUpperNorfair')
+    'Available': lambda sm: sm.canHellRunToSpeedBooster()
 },
 {
     'Area': "Norfair",
@@ -1523,7 +1523,7 @@ locations = [
     'AccessFrom' : {
         'Bubble Mountain': lambda sm: sm.canOpenGreenDoors()
     },
-    'Available': lambda sm: sm.canHellRun('MainUpperNorfair')
+    'Available': lambda sm: sm.canHellRunToSpeedBooster()
 },
 {
     'Area': "Norfair",

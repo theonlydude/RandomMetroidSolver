@@ -134,6 +134,15 @@ class HelpersGraph(Helpers):
                                       sm.knowsNovaBoost())))
 
     @Cache.decorator
+    def canHellRunToSpeedBooster(self):
+        sm = self.smbm
+        mult = 1
+        hasSpeed = sm.haveItem('SpeedBooster').bool
+        if hasSpeed == True:
+            mult = 2
+        return sm.canHellRun('MainUpperNorfair', mult)
+
+    @Cache.decorator
     def canExitCathedral(self):
         # from top: can use bomb/powerbomb jumps
         # from bottom: can do a shinespark or use space jump

@@ -44,8 +44,11 @@ if (hs.registerOverlay) {
 .top {
     vertical-align: top;
 }
-.bottom {
-    float: bottom;
+.parent-center {
+    text-align: center;
+}
+.child-center {
+    margin: auto;
 }
 .popover {
     max-width: 40%;
@@ -911,7 +914,7 @@ function startTheTour(step=-1) {
     {
       element: "#majorsSplitStep",
       title: "Majors Split",
-      content: "<p>Chooze how you want to split the Majors and the Minors items:<ul><li>Full: All items are shuffled in all locations</li><li>Majors/Minors: Behave like Total randomizer, with major and minor item pools.</p><p><b>Note:</b> High-Jump boots Energy Tank location is considered minor, and right Super Missile in Wrecked ship is considered major for balancing purposes.</li><li>Chozo: Put all the required items to finish the seed in the Chozo statues locations.</li></ul></p><p>Check the map for the list of Majors and Chozo locations and items:<br/><a href=\"/solver/static/images/chozo_map.png\" class=\"highslide\" onclick=\"return hs.expand(this, {wrapperClassName: 'borderless', dimmingOpacity: 0.75, align: 'center'})\"><img id=\"chozoThumb\" src=\"/solver/static/images/chozo_map_thumbnail.png\" alt=\"Chozo Map\" title=\"Click to enlarge\" class=\"center half\"/></a></p><p>Click on the dice button to randomly set this parameter.</p>"
+      content: "<p>Chooze how you want to split the Majors and the Minors items:<ul><li>Full: All items are shuffled in all locations</li><li>Majors/Minors: Behave like Total randomizer, with major and minor item pools.</p><p><b>Note:</b> High-Jump boots Energy Tank location is considered minor, and right Super Missile in Wrecked ship is considered major for balancing purposes.</li><li>Chozo: Put all the required items to finish the seed in the Chozo statues locations.</li></ul></p><p>Check the map for the list of Majors and Chozo locations and items:<br/><a href=\"/solver/static/images/chozo_map.png\" class=\"highslide\" onclick=\"return hs.expand(this, {wrapperClassName: 'borderless', dimmingOpacity: 0.75, align: 'center'})\"><div class=\"parent-center\"><img id=\"chozoThumb\" src=\"/solver/static/images/chozo_map_thumbnail.png\" alt=\"Chozo Map\" title=\"Click to enlarge\" class=\"child-center half\"/></div></a></p><p>Click on the dice button to randomly set this parameter.</p>"
     },
     {
       element: "#maxDifficulty",
@@ -966,7 +969,7 @@ function startTheTour(step=-1) {
     {
       element: "#areaRandomizationStep",
       title: "Areas randomization",
-      content: "<p>Randomize areas together using bidirectional access portals: <a href=\"/solver/static/images/area_map.png\" class=\"highslide\" onclick=\"return hs.expand(this, {wrapperClassName: 'borderless', dimmingOpacity: 0.75, align: 'center'})\"><img id=\"areathumb\" src=\"/solver/static/images/area_map_thumbnail.png\" alt=\"Area Map\" title=\"Click to enlarge\" class=\"half center\"/></a><br/>All portals can be linked to one another, even if it means following an incompatible transition (Left-Left, Up-Right, ...).<br/>You can go through all portals and back, even those where you can't do that in vanilla, so:<ul><li>Some doors have been turned to blue</li><li>Both Maridia exit green gates have been removed</li><li>Crumble blocks preventing access to Lower Nofair through its exit have been removed</li></ul></p><p>Use the <a href=\"/solver/solver_web/tracker\">Area Tracker</a> to find your way more easily.</p><p><b>Note:</b> enabling it also auto-enables Majors Split to Full Randomization and set difficulty cap to hardcore (if it wasn't already easier) to avoid generating too hard seeds, but it can still be changed afterwards.</p>",
+      content: "<p>Randomize areas together using bidirectional access portals: <a href=\"/solver/static/images/area_map.png\" class=\"highslide\" onclick=\"return hs.expand(this, {wrapperClassName: 'borderless', dimmingOpacity: 0.75, align: 'center'})\"><div class=\"parent-center\"><img id=\"areathumb\" src=\"/solver/static/images/area_map_thumbnail.png\" alt=\"Area Map\" title=\"Click to enlarge\" class=\"half child-center\"/></div></a><br/>All portals can be linked to one another, even if it means following an incompatible transition (Left-Left, Up-Right, ...).<br/>You can go through all portals and back, even those where you can't do that in vanilla, so:<ul><li>Some doors have been turned to blue</li><li>Both Maridia exit green gates have been removed</li><li>Crumble blocks preventing access to Lower Nofair through its exit have been removed</li></ul></p><p>Use the <a href=\"/solver/solver_web/tracker\">Area Tracker</a> to find your way more easily.</p><p><b>Note:</b> enabling it also auto-enables Majors Split to Full Randomization and set difficulty cap to hardcore (if it wasn't already easier) to avoid generating too hard seeds, but it can still be changed afterwards.</p>",
       placement: "auto left"
     },
     {
@@ -988,7 +991,7 @@ function startTheTour(step=-1) {
     {
       element: "#colorsRandomizationStep",
       title: "Color randomization",
-      content: "<p>Randomize the colors of various graphical elements:<br/><img src=\"/solver/static/images/palettesRando.png\" alt=\"colors rando\" title=\"colors rando\" class=\"half\"/></p><br/><p>Use the slider to restrict the possible range of the colors shifting. The colors on the slider are the result colors for Samus, the yellow in the middle being Samus vanilla color:</p><img src=\"/solver/static/images/samus_degrees.png\" alt=\"samus degrees\" title=\"samus degrees\" class=\"half\"/><p>You can invert the range by clicking on the invert button.</p><p>You can choose if you want to use the same degree to randomize all the elements.</p>",
+      content: "<p>Randomize the colors of various graphical elements:</p><div class=\"parent-center\"><img src=\"/solver/static/images/palettesRando.png\" alt=\"colors rando\" title=\"colors rando\" class=\"child-center half\"/></div><p>Use the slider to restrict the possible range of the colors shifting. The colors on the slider are the result colors for Samus, the yellow in the middle being Samus vanilla color:</p><div class=\"parent-center\"><img src=\"/solver/static/images/samus_degrees.png\" alt=\"samus degrees\" title=\"samus degrees\" class=\"child-center half\"/></div><p>You can invert the range by clicking on the invert button.</p><p>You can choose if you want to use the same degree to randomize all the elements.</p>",
       placement: "auto left"
     },
     {
@@ -1027,10 +1030,10 @@ function startTheTour(step=-1) {
 <td class=\"quarter\"><p class=\"top\">Replace bomb blocks with shot blocks at Moat:</p></td>\
 </tr>\
 <tr>\
-<td class=\"quarter\"><img src=\"/solver/static/images/dachora.png\" alt=\"dachora\" title=\"dachora\" class=\"full bottom\"/></td>\
-<td class=\"quarter\"><img src=\"/solver/static/images/early_super.png\" alt=\"early_super\" title=\"early_super\" class=\"full bottom\"/></td>\
-<td class=\"quarter\"><img src=\"/solver/static/images/high_jump.png\" alt=\"high_jump\" title=\"high_jump\" class=\"full bottom\"/></td>\
-<td class=\"quarter\"><img src=\"/solver/static/images/moat.png\" alt=\"moat\" title=\"moat\" class=\"full bottom\"/></td>\
+<td class=\"quarter\"><img src=\"/solver/static/images/dachora.png\" alt=\"dachora\" title=\"dachora\" class=\"full\"/></td>\
+<td class=\"quarter\"><img src=\"/solver/static/images/early_super.png\" alt=\"early_super\" title=\"early_super\" class=\"full\"/></td>\
+<td class=\"quarter\"><img src=\"/solver/static/images/high_jump.png\" alt=\"high_jump\" title=\"high_jump\" class=\"full\"/></td>\
+<td class=\"quarter\"><img src=\"/solver/static/images/moat.png\" alt=\"moat\" title=\"moat\" class=\"full\"/></td>\
 </tr>\
 <tr>\
 <td class=\"quarter\"><p class=\"top\">First heated Norfair room without High-Jump:</p></td>\
@@ -1039,10 +1042,10 @@ function startTheTour(step=-1) {
 <td class=\"quarter\"><p class=\"top\">Remove grey door at Brinstar map stations:</p></td>\
 </tr>\
 <tr>\
-<td class=\"quarter\"><img src=\"/solver/static/images/cathedral.png\" alt=\"cathedral\" title=\"cathedral\" class=\"full bottom\"/></td>\
-<td class=\"quarter\"><img src=\"/solver/static/images/red_tower.png\" alt=\"red_tower\" title=\"red_tower\" class=\"full bottom\"/></td>\
-<td class=\"quarter\"><img src=\"/solver/static/images/spazer_block.png\" alt=\"spazer_block\" title=\"spazer_block\" class=\"full bottom\"/></td>\
-<td class=\"quarter\"><img src=\"/solver/static/images/bt_map.png\" alt=\"bt_map\" title=\"bt_map\" class=\"full bottom\"/></td>\
+<td class=\"quarter\"><img src=\"/solver/static/images/cathedral.png\" alt=\"cathedral\" title=\"cathedral\" class=\"full\"/></td>\
+<td class=\"quarter\"><img src=\"/solver/static/images/red_tower.png\" alt=\"red_tower\" title=\"red_tower\" class=\"full\"/></td>\
+<td class=\"quarter\"><img src=\"/solver/static/images/spazer_block.png\" alt=\"spazer_block\" title=\"spazer_block\" class=\"full\"/></td>\
+<td class=\"quarter\"><img src=\"/solver/static/images/bt_map.png\" alt=\"bt_map\" title=\"bt_map\" class=\"full\"/></td>\
 </tr>\
 </table>",
       placement: "auto left"
@@ -1366,7 +1369,7 @@ def displayNumber(id, min, max, default, step="1"):
 	      </p>
 	      <table class="full" id="mainPatchesVisibitily">
 	        <tr>
-		  <td class="full" id="layoutPatchesStep">{{displayCheckbox("layoutPatches", True)}} Include layout patches from Total Item Randomizer</td>
+		  <td class="full" id="layoutPatchesStep">{{displayCheckbox("layoutPatches", True)}} Anti-softlock layout patches (by Total & Flo)</td>
 		  <td><button type="button" onclick="startTheTour(24)">?</button></td>
 	        </tr>
 	        <tr>

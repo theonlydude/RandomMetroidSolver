@@ -41,8 +41,14 @@ if (hs.registerOverlay) {
 <title>Super Metroid VARIA Randomizer</title>
 
 <style>
+.top {
+    vertical-align: top;
+}
+.bottom {
+    float: bottom;
+}
 .popover {
-    max-width: 20%;
+    max-width: 40%;
     /* max-height: 95vh;*/
     /* overflow-y: scroll; */
     position: fixed;
@@ -905,7 +911,7 @@ function startTheTour(step=-1) {
     {
       element: "#majorsSplitStep",
       title: "Majors Split",
-      content: "<p>Chooze how you want to split the Majors and the Minors items:<ul><li>Full: All items are shuffled in all locations</li><li>Majors/Minors: Behave like Total randomizer, with major and minor item pools.</p><p><b>Note:</b> High-Jump boots Energy Tank location is considered minor, and right Super Missile in Wrecked ship is considered major for balancing purposes.</li><li>Chozo: Put all the required items to finish the seed in the Chozo statues locations.</li></ul></p><p>Check the map for the list of Majors and Chozo locations and items:<br/><a href=\"/solver/static/images/chozo_map.png\" class=\"highslide\" onclick=\"return hs.expand(this, {wrapperClassName: 'borderless', dimmingOpacity: 0.75, align: 'center'})\"><img id=\"chozoThumb\" src=\"/solver/static/images/chozo_map_thumbnail.png\" alt=\"Chozo Map\" title=\"Click to enlarge\" class=\"center\"/></a></p><p>Click on the dice button to randomly set this parameter.</p>"
+      content: "<p>Chooze how you want to split the Majors and the Minors items:<ul><li>Full: All items are shuffled in all locations</li><li>Majors/Minors: Behave like Total randomizer, with major and minor item pools.</p><p><b>Note:</b> High-Jump boots Energy Tank location is considered minor, and right Super Missile in Wrecked ship is considered major for balancing purposes.</li><li>Chozo: Put all the required items to finish the seed in the Chozo statues locations.</li></ul></p><p>Check the map for the list of Majors and Chozo locations and items:<br/><a href=\"/solver/static/images/chozo_map.png\" class=\"highslide\" onclick=\"return hs.expand(this, {wrapperClassName: 'borderless', dimmingOpacity: 0.75, align: 'center'})\"><img id=\"chozoThumb\" src=\"/solver/static/images/chozo_map_thumbnail.png\" alt=\"Chozo Map\" title=\"Click to enlarge\" class=\"center half\"/></a></p><p>Click on the dice button to randomly set this parameter.</p>"
     },
     {
       element: "#maxDifficulty",
@@ -925,7 +931,7 @@ function startTheTour(step=-1) {
     {
       element: "#morphPlacementStep",
       title: "Morph Placement",
-      content: "<p>Influences where VARIA will place Morphing Ball :<ul><li><b>early</b> (default): Morph will be either at its vanilla spot, or in the ceiling at the Blue Brinstar Energy Tank spot (like Total Randomizer)</li><li><b>normal</b>: Morph will be placed randomly (like Dessy Randomizer)</li><li><b>late</b>: Prevents Morph to be placed in the first area of the game (Crateria/Blue Brinstar). Best suited when used along area randomization, to find Morph in peculiar places.<br/><b>Warning: </b>In Chozo Majors Split <b>late</b> will be replace by <b>normal</b> to avoid being stuck</li></ul></p><p>Click on the dice button to randomly set this parameter.</p>"
+      content: "<p>Influences where VARIA will place Morphing Ball :<ul><li><b>early</b> (default): Morph will be either at its vanilla spot, or in the ceiling at the Blue Brinstar Energy Tank spot (like Total Randomizer)</li><li><b>normal</b>: Morph will be placed randomly (like Dessy Randomizer)</li><li><b>late</b>: Prevents Morph to be placed in the first available locations of the game. Best suited when used along area randomization, to find Morph in peculiar places.<br/><b>Warning: </b>In Chozo Majors Split <b>late</b> will be replace by <b>normal</b> to avoid being stuck</li></ul></p><p>Click on the dice button to randomly set this parameter.</p>"
     },
     {
       element: "#suitsRestrictionStep",
@@ -960,7 +966,7 @@ function startTheTour(step=-1) {
     {
       element: "#areaRandomizationStep",
       title: "Areas randomization",
-      content: "<p>Randomize areas together using bidirectional access portals: <a href=\"/solver/static/images/area_map.png\" class=\"highslide\" onclick=\"return hs.expand(this, {wrapperClassName: 'borderless', dimmingOpacity: 0.75, align: 'center'})\"><img id=\"areathumb\" src=\"/solver/static/images/area_map_thumbnail.png\" alt=\"Area Map\" title=\"Click to enlarge\"/></a><br/>All portals can be linked to one another, even if it means following an incompatible transition (Left-Left, Up-Right, ...).<br/>You can go through all portals and back, even those where you can't do that in vanilla, so:<ul><li>Some doors have been turned to blue</li><li>Both Maridia exit green gates have been removed</li><li>Crumble blocks preventing access to Lower Nofair through its exit have been removed</li></ul></p><p>Use the <a href=\"/solver/solver_web/tracker\">Area Tracker</a> to find your way more easily.</p><p><b>Note:</b> enabling it also auto-enables Majors Split to Full Randomization and set difficulty cap to hardcore (if it wasn't already easier) to avoid generating too hard seeds, but it can still be changed afterwards.</p>",
+      content: "<p>Randomize areas together using bidirectional access portals: <a href=\"/solver/static/images/area_map.png\" class=\"highslide\" onclick=\"return hs.expand(this, {wrapperClassName: 'borderless', dimmingOpacity: 0.75, align: 'center'})\"><img id=\"areathumb\" src=\"/solver/static/images/area_map_thumbnail.png\" alt=\"Area Map\" title=\"Click to enlarge\" class=\"half center\"/></a><br/>All portals can be linked to one another, even if it means following an incompatible transition (Left-Left, Up-Right, ...).<br/>You can go through all portals and back, even those where you can't do that in vanilla, so:<ul><li>Some doors have been turned to blue</li><li>Both Maridia exit green gates have been removed</li><li>Crumble blocks preventing access to Lower Nofair through its exit have been removed</li></ul></p><p>Use the <a href=\"/solver/solver_web/tracker\">Area Tracker</a> to find your way more easily.</p><p><b>Note:</b> enabling it also auto-enables Majors Split to Full Randomization and set difficulty cap to hardcore (if it wasn't already easier) to avoid generating too hard seeds, but it can still be changed afterwards.</p>",
       placement: "auto left"
     },
     {
@@ -982,7 +988,7 @@ function startTheTour(step=-1) {
     {
       element: "#colorsRandomizationStep",
       title: "Color randomization",
-      content: "<p>Randomize the colors of various graphical elements:<br/><img src=\"/solver/static/images/palettesRando.png\" alt=\"colors rando\" title=\"colors rando\" class=\"full\"/></p><br/><p>Use the slider to restrict the possible range of the colors shifting. The colors on the slider are the result colors for Samus, the yellow in the middle being Samus vanilla color:<br/><img src=\"/solver/static/images/samus_degrees.png\" alt=\"samus degrees\" title=\"samus degrees\" class=\"full\"/>You can invert the range by clicking on the invert button.</p><p>You can choose if you want to use the same degree to randomize all the elements.</p>",
+      content: "<p>Randomize the colors of various graphical elements:<br/><img src=\"/solver/static/images/palettesRando.png\" alt=\"colors rando\" title=\"colors rando\" class=\"half\"/></p><br/><p>Use the slider to restrict the possible range of the colors shifting. The colors on the slider are the result colors for Samus, the yellow in the middle being Samus vanilla color:</p><img src=\"/solver/static/images/samus_degrees.png\" alt=\"samus degrees\" title=\"samus degrees\" class=\"half\"/><p>You can invert the range by clicking on the invert button.</p><p>You can choose if you want to use the same degree to randomize all the elements.</p>",
       placement: "auto left"
     },
     {
@@ -1012,20 +1018,39 @@ function startTheTour(step=-1) {
     {
       element: "#layoutPatchesStep",
       title: "Layout patches",
-      content: "Include the anti-softlock layout patches from Total Item Randomizer. Disable at your own softlocking risk!\
-<ul><li>Disable respawning blocks at Dachora Pit</li>\
-<li>Make it possible to escape from below early Super bridge without Bombs</li>\
-<li>Replace bomb blocks with shot blocks before Hi-Jump</li>\
-<li>Replace bomb blocks with shot blocks at Moat</li>\
-<li>Raise platform in first heated Norfair room to not require Hi-Jump</li>\
-<li>Raise platforms in Red Tower bottom to always be able to get back up</li>\
-<li>Replace bomb blocks with shot blocks before Spazer</li></ul>",
+      content: "Include the anti-softlock layout patches. Disable at your own softlocking risk!\
+<table class=\"full\">\
+<tr>\
+<td class=\"quarter\"><p class=\"top\">Disable respawning blocks at Dachora Pit:</p></td>\
+<td class=\"quarter\"><p class=\"top\">Escape from below early Super bridge without Bombs:</p></td>\
+<td class=\"quarter\"><p class=\"top\">Replace bomb blocks with shot blocks before Hi-Jump:</p></td>\
+<td class=\"quarter\"><p class=\"top\">Replace bomb blocks with shot blocks at Moat:</p></td>\
+</tr>\
+<tr>\
+<td class=\"quarter\"><img src=\"/solver/static/images/dachora.png\" alt=\"dachora\" title=\"dachora\" class=\"full bottom\"/></td>\
+<td class=\"quarter\"><img src=\"/solver/static/images/early_super.png\" alt=\"early_super\" title=\"early_super\" class=\"full bottom\"/></td>\
+<td class=\"quarter\"><img src=\"/solver/static/images/high_jump.png\" alt=\"high_jump\" title=\"high_jump\" class=\"full bottom\"/></td>\
+<td class=\"quarter\"><img src=\"/solver/static/images/moat.png\" alt=\"moat\" title=\"moat\" class=\"full bottom\"/></td>\
+</tr>\
+<tr>\
+<td class=\"quarter\"><p class=\"top\">First heated Norfair room without High-Jump:</p></td>\
+<td class=\"quarter\"><p class=\"top\">Always be able to get back up from bottom Red Tower:</p></td>\
+<td class=\"quarter\"><p class=\"top\">Replace bomb blocks with shot blocks before Spazer:</p></td>\
+<td class=\"quarter\"><p class=\"top\">Remove grey door at Brinstar map stations:</p></td>\
+</tr>\
+<tr>\
+<td class=\"quarter\"><img src=\"/solver/static/images/cathedral.png\" alt=\"cathedral\" title=\"cathedral\" class=\"full bottom\"/></td>\
+<td class=\"quarter\"><img src=\"/solver/static/images/red_tower.png\" alt=\"red_tower\" title=\"red_tower\" class=\"full bottom\"/></td>\
+<td class=\"quarter\"><img src=\"/solver/static/images/spazer_block.png\" alt=\"spazer_block\" title=\"spazer_block\" class=\"full bottom\"/></td>\
+<td class=\"quarter\"><img src=\"/solver/static/images/bt_map.png\" alt=\"bt_map\" title=\"bt_map\" class=\"full bottom\"/></td>\
+</tr>\
+</table>",
       placement: "auto left"
     },
     {
       element: "#noGravHeatStep",
       title: "Optional patches",
-      content: "Patch from Total Item Randomizer to remove the Gravity Suit environmental protection (heat, spikes, electricity...), it balances more the two suits abilities. Disable it to have a more vanilla feeling.",
+      content: "Remove the Gravity Suit environmental protection (heat, spikes, electricity...), it balances more the two suits abilities. Disable it to have a more vanilla feeling.",
       placement: "auto left"
     },
     {

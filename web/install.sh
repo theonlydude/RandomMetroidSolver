@@ -290,3 +290,12 @@ find ~/web2py/applications/solver/static -xtype l -exec rm -f {} \;
 [ -L ~/web2py/applications/solver/views/solver_web/customizer.html ] || ln -s ~/RandomMetroidSolver/web/views/customizer.html ~/web2py/applications/solver/views/solver_web/customizer.html
 
 [ -L ~/web2py/applications/solver/static/images/samus_degrees.png ] || ln -s ~/RandomMetroidSolver/web/static/samus_degrees.png ~/web2py/applications/solver/static/images/samus_degrees.png
+
+[ -L ~/web2py/applications/solver/static/images/bt_map.png ] || ln -s ~/RandomMetroidSolver/web/static/layout/bt_map.png ~/web2py/applications/solver/static/images/bt_map.png
+[ -L ~/web2py/applications/solver/static/images/cathedral.png ] || ln -s ~/RandomMetroidSolver/web/static/layout/cathedral.png ~/web2py/applications/solver/static/images/cathedral.png
+[ -L ~/web2py/applications/solver/static/images/dachora.png ] || ln -s ~/RandomMetroidSolver/web/static/layout/dachora.png ~/web2py/applications/solver/static/images/dachora.png
+[ -L ~/web2py/applications/solver/static/images/early_super.png ] || ln -s ~/RandomMetroidSolver/web/static/layout/early_super.png ~/web2py/applications/solver/static/images/early_super.png
+[ -L ~/web2py/applications/solver/static/images/high_jump.png ] || ln -s ~/RandomMetroidSolver/web/static/layout/high_jump.png ~/web2py/applications/solver/static/images/high_jump.png
+[ -L ~/web2py/applications/solver/static/images/moat.png ] || ln -s ~/RandomMetroidSolver/web/static/layout/moat.png ~/web2py/applications/solver/static/images/moat.png
+[ -L ~/web2py/applications/solver/static/images/red_tower.png ] || ln -s ~/RandomMetroidSolver/web/static/layout/red_tower.png ~/web2py/applications/solver/static/images/red_tower.png
+[ -L ~/web2py/applications/solver/static/images/spazer_block.png ] || ln -s ~/RandomMetroidSolver/web/static/layout/spazer_block.png ~/web2py/applications/solver/static/images/spazer_block.png

@@ -686,7 +686,7 @@ function setGuessedPreset(romName){
 }
 
 function guessVARIAPreset(filename) {
-  var re = /VARIA_Randomizer_[A]?[B]?[F]?[Z]?X\d+_(\w+)/;
+  var re = /VARIA_Randomizer_[A]?[B]?[F]?[M]?[Z]?X\d+_(\w+)/;
   var match = filename.match(re);
   if(match == null) {
     re = /VARIA_Plandomizer_[A]?[B]?FX\d+_(\w+)/;

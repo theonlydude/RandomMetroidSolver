@@ -310,3 +310,23 @@ find ~/web2py/applications/solver/static -xtype l -exec rm -f {} \;
 [ -L ~/web2py/applications/solver/static/images/greenhill_platform.png ] || ln -s ~/RandomMetroidSolver/web/static/help/greenhill_platform.png ~/web2py/applications/solver/static/images/greenhill_platform.png
 [ -L ~/web2py/applications/solver/static/images/greenhill_gate.png ] || ln -s ~/RandomMetroidSolver/web/static/help/greenhill_gate.png ~/web2py/applications/solver/static/images/greenhill_gate.png
 
+[ -L ~/web2py/applications/solver/static/images/ws_etank.png ] || ln -s ~/RandomMetroidSolver/web/static/help/ws_etank.png ~/web2py/applications/solver/static/images/ws_etank.png
+[ -L ~/web2py/applications/solver/static/images/ln_chozo.png ] || ln -s ~/RandomMetroidSolver/web/static/help/ln_chozo.png ~/web2py/applications/solver/static/images/ln_chozo.png
+[ -L ~/web2py/applications/solver/static/images/bomb_torizo.png ] || ln -s ~/RandomMetroidSolver/web/static/help/bomb_torizo.png ~/web2py/applications/solver/static/images/bomb_torizo.png
+
+[ -L ~/web2py/applications/solver/static/images/Gravity.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/items/Gravity.png ~/web2py/applications/solver/static/images/Gravity.png
+
+[ -L ~/web2py/applications/solver/static/images/HiJump.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/items/HiJump.png ~/web2py/applications/solver/static/images/HiJump.png
+[ -L ~/web2py/applications/solver/static/images/Grapple.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/items/Grapple.png ~/web2py/applications/solver/static/images/Grapple.png
+[ -L ~/web2py/applications/solver/static/images/SpringBall.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/items/SpringBall.png ~/web2py/applications/solver/static/images/SpringBall.png
+[ -L ~/web2py/applications/solver/static/images/SpeedBooster.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/items/SpeedBooster.png ~/web2py/applications/solver/static/images/SpeedBooster.png
+[ -L ~/web2py/applications/solver/static/images/Bomb.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/items/Bomb.png ~/web2py/applications/solver/static/images/Bomb.png
+[ -L ~/web2py/applications/solver/static/images/SpaceJump.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/items/SpaceJump.png ~/web2py/applications/solver/static/images/SpaceJump.png
+
+[ -L ~/web2py/applications/solver/static/images/Plasma.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/items/Plasma.png ~/web2py/applications/solver/static/images/Plasma.png
+[ -L ~/web2py/applications/solver/static/images/ScrewAttack.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/items/ScrewAttack.png ~/web2py/applications/solver/static/images/ScrewAttack.png
+[ -L ~/web2py/applications/solver/static/images/Spazer.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/items/Spazer.png ~/web2py/applications/solver/static/images/Spazer.png
+[ -L ~/web2py/applications/solver/static/images/Wave.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/items/Wave.png ~/web2py/applications/solver/static/images/Wave.png
+
+#[ -L ~/web2py/applications/solver/static/images/.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/items/.png ~/web2py/applications/solver/static/images/.png
+

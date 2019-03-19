@@ -885,6 +885,7 @@ function startTheTour(step=-1) {
   // the tour tutorial
   var tour = new Tour({
     storage: false,
+    autoscroll: false,
     steps: [
     {
       element: "#uploadFile",
@@ -1030,13 +1031,27 @@ function startTheTour(step=-1) {
     {
       element: "#funCombatStep",
       title: "Super Fun Combat",
-      content: "Forces removal of Plasma Beam, and Screw Attack if the preset and settings allow it.<br/>In addition, can randomly remove some items from the Combat set:<br/><ul><li>Spazer</li><li>Wave Beam</li></ul>Click on the dice button to randomly set this parameter.",
+      content: "<p>Forces removal of Plasma Beam <img src=\"/solver/static/images/Plasma.png\" alt=\"Plasma.png\" title=\"Plasma.png\" class=\"width: 32px\"/>, and Screw Attack <img src=\"/solver/static/images/ScrewAttack.png\" alt=\"ScrewAttack.png\" title=\"ScrewAttack.png\" class=\"width: 32px\"/> if the preset and settings allow it.<br/>In addition, can randomly remove some items from the Combat set:</p>\
+<ul>\
+<li><img src=\"/solver/static/images/Spazer.png\" alt=\"Spazer.png\" title=\"Spazer.png\" class=\"width: 32px\"/> Spazer</li>\
+<li><img src=\"/solver/static/images/Wave.png\" alt=\"Wave.png\" title=\"Wave.png\" class=\"width: 32px\"/> Wave Beam</li>\
+</ul>\
+Click on the dice button to randomly set this parameter.",
       placement: "auto left"
     },
     {
       element: "#funMovementStep",
       title: "Super Fun Movement",
-      content: "Forces removal of Space Jump if the preset allows it.<br/>In addition, can randomly remove some items from the Movement set:<br/><ul><li>Hi Jump</li><li>Grappling Beam</li><li>Spring Ball</li><li>Speed Booster</li><li>Bombs</li></ul>Click on the dice button to randomly set this parameter.",
+      content: "<p>Forces removal of Space Jump <img src=\"/solver/static/images/SpaceJump.png\" alt=\"SpaceJump.png\" title=\"SpaceJump.png\" class=\"width: 32px\"/> if the preset allows it.<br/>\
+In addition, can randomly remove some items from the Movement set:</p>\
+<ul>\
+<li><img src=\"/solver/static/images/HiJump.png\" alt=\"HiJump.png\" title=\"HiJump.png\" class=\"width: 32px\"/> Hi Jump</li>\
+<li><img src=\"/solver/static/images/Grapple.png\" alt=\"Grapple.png\" title=\"Grapple.png\" class=\"width: 32px\"/> Grappling Beam</li>\
+<li><img src=\"/solver/static/images/SpringBall.png\" alt=\"SpringBall.png\" title=\"SpringBall.png\" class=\"width: 32px\"/> Spring Ball</li>\
+<li><img src=\"/solver/static/images/SpeedBooster.png\" alt=\"SpeedBooster.png\" title=\"SpeedBooster.png\" class=\"width: 32px\"/> Speed Booster</li>\
+<li><img src=\"/solver/static/images/Bomb.png\" alt=\"Bomb.png\" title=\"Bomb.png\" class=\"width: 32px\"/> Bombs</li>\
+</ul>\
+Click on the dice button to randomly set this parameter.",
       placement: "auto left"
     },
     {
@@ -1086,16 +1101,25 @@ function startTheTour(step=-1) {
     {
       element: "#noGravHeatStep",
       title: "Optional patches",
-      content: "Remove the Gravity Suit environmental protection (heat, spikes, electricity...), it balances more the two suits abilities. Disable it to have a more vanilla feeling.",
+      content: "Remove the Gravity Suit <img src=\"/solver/static/images/Gravity.png\" alt=\"Gravity.png\" title=\"Gravity.png\" class=\"width: 32px\"/> environmental protection (heat, spikes, electricity...), it balances more the two suits abilities. Disable it to have a more vanilla feeling.",
       placement: "auto left"
     },
     {
       element: "#variaTweaksStep",
       title: "Optional patches",
-      content: "Include minor tweaks for the game to behave 'as it should' in a randomizer context :\
-<ul><li>Bomb Torizo fight is triggered when picking up the item he's holding, not by having Bomb</li>\
-<li>Access item at Wrecked Ship Etank location without killing Phantoon (via Forgotten Highway)</li>\
-<li>Activate Lower Norfair Chozo (left of entrance) without Space Jump</li></ul>",
+      content: "<p>Include minor tweaks for the game to behave 'as it should' in a randomizer context:</p>\
+<table class=\"full\">\
+<tr>\
+<td class=\"quarter\"><p class=\"top\">Bomb Torizo fight is triggered when picking up the item he's holding, not by having Bomb:</p></td>\
+<td class=\"quarter\"><p class=\"top\">Access item at Wrecked Ship Etank location without killing Phantoon (via Forgotten Highway):</p></td>\
+<td class=\"quarter\"><p class=\"top\">Activate Lower Norfair Chozo (left of entrance) without Space Jump:</p></td>\
+</tr>\
+<tr>\
+<td class=\"quarter\"><img src=\"/solver/static/images/bomb_torizo.png\" alt=\"bomb_torizo\" title=\"bomb_torizo\" class=\"full\"/></td>\
+<td class=\"quarter\"><img src=\"/solver/static/images/ws_etank.png\" alt=\"ws_etank\" title=\"ws_etank\" class=\"full\"/></td>\
+<td class=\"quarter\"><img src=\"/solver/static/images/ln_chozo.png\" alt=\"ln_chozo\" title=\"ln_chozo\" class=\"full\"/></td>\
+</tr>\
+</table>",
       placement: "auto left"
     } ]});
 

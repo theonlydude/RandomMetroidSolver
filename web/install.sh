@@ -327,6 +327,7 @@ find ~/web2py/applications/solver/static -xtype l -exec rm -f {} \;
 [ -L ~/web2py/applications/solver/static/images/ScrewAttack.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/items/ScrewAttack.png ~/web2py/applications/solver/static/images/ScrewAttack.png
 [ -L ~/web2py/applications/solver/static/images/Spazer.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/items/Spazer.png ~/web2py/applications/solver/static/images/Spazer.png
 [ -L ~/web2py/applications/solver/static/images/Wave.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/items/Wave.png ~/web2py/applications/solver/static/images/Wave.png
+[ -L ~/web2py/applications/solver/static/images/Varia.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/items/Varia.png ~/web2py/applications/solver/static/images/Varia.png
 
 #[ -L ~/web2py/applications/solver/static/images/.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/items/.png ~/web2py/applications/solver/static/images/.png
 

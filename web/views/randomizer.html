@@ -631,19 +631,11 @@ window.onload = function(){
     var area = document.getElementById("areaRandomization");
     area.onchange = function(){
         var area = document.getElementById("areaRandomization");
-        var maxDiff = document.getElementById("maxDifficulty");
-        var majorsSplit = document.getElementById("majorsSplit");
         var patches = document.getElementById("areaLayout");
         var lateMorph = document.getElementById("morphPlacement");
         var suits = document.getElementById("suitsRestriction");
 
         if(area.checked){
-            if(majorsSplit.value != "Full") {
-                majorsSplit.value = "Full";
-            }
-            if(maxDiff.value == "no difficulty cap"){
-                maxDiff.value = "hardcore";
-            }
             if(! patches.checked){
                 patches.click();
             }
@@ -888,12 +880,12 @@ function startTheTour(step=-1) {
     autoscroll: false,
     steps: [
     {
-      element: "#uploadFile",
+      element: "#romStep",
       title: "Vanilla Super Metroid ROM",
       content: "Use an American/Japan unheadered ROM of Super Metroid.<br/>The randomized ROM is generated locally."
     },
     {
-      element: "#seed",
+      element: "#seedStep",
       title: "Randomizer seed",
       content: "Choose a seed number between 1 and 9999999, choose 0 to generate a random one."
     },
@@ -918,17 +910,17 @@ function startTheTour(step=-1) {
       content: "<p>Chooze how you want to split the Majors and the Minors items:<ul><li>Full: All items are shuffled in all locations</li><li>Majors/Minors: Use major and minor item pools.</p><p><b>Note:</b> High-Jump boots Energy Tank location is considered minor, and right Super Missile in Wrecked ship is considered major for balancing purposes.</li><li>Chozo: Put all the required items to finish the seed in the Chozo statues locations.</li></ul></p><p>Check the map for the list of Majors and Chozo locations and items:<br/><a href=\"/solver/static/images/chozo_map.png\" class=\"highslide\" onclick=\"return hs.expand(this, {wrapperClassName: 'borderless', dimmingOpacity: 0.75, align: 'center'})\"><div class=\"parent-center\"><img id=\"chozoThumb\" src=\"/solver/static/images/chozo_map_thumbnail.png\" alt=\"Chozo Map\" title=\"Click to enlarge\" class=\"child-center half\"/></div></a></p><p>Click on the dice button to randomly set this parameter.</p>"
     },
     {
-      element: "#maxDifficulty",
+      element: "#maxDifficultyStep",
       title: "Maximum difficulty for picking up an item",
       content: "<p>Depending on the perceived difficulties of the techniques, bosses, hell runs etc. from the preset, it will prevent the Randomizer from placing an item in a location too difficult to reach with the current items.</p><p><b>Warning:</b> if too low may cause the randomizer to up the difficulty for some boss fight.</p><p>Click on the dice button to randomly set this parameter.</p>"
     },
     {
-      element: "#progSpeedTuto",
+      element: "#progSpeedStep",
       title: "Progression speed",
       content: "<p>A progression item can be a suit, a movement item, or any item that opens up new locations. This parameter influences how fast progression items are likely to be found.<br/>Standard speeds go from <b>slowest</b>, stuffing your way with as many non-progression items as possible, to <b>fastest</b>, where you will be able to visit Zebes pretty shortly.</p><p><b>VARIAble</b> speed will randomly change internal progression speed while placing items, creating seeds that are more unpredictable.</p><p>You can also pick <b>basic</b>, in which case VARIA will place the items exactly like Dessyreqt Randomizer, or Total Randomizer in its Normal/Casual setting.</p><p>Click on the dice button to access <b>random progression speed</b> mode where you can choose on which progression speeds the randomization will take place.</p><p><b>Note:</b> usually, slower settings will result in more difficult seeds, and faster settings in easier seeds. Basic progression speed usually results in easy/fast seeds, but not always.</p>"
     },
     {
-      element: "#progressionDifficulty",
+      element: "#progDiffStep",
       title: "Progression difficulty",
       content: "<p>This parameter influences the choice of the next location. It uses the perceived difficulties from the preset to compute the difficulty to reach the locations. Then if <b>easier</b> or <b>harder</b> is selected, the easiest or hardest location will have a higher chance of being chosen.<br/>Set it to <b>normal</b> for the Randomizer to randomly choose the next location.</p><p><b>Note:</b> this setting has less of an influence on actual seed difficulty than Progression Speed.</p><p>Click on the dice button to randomly set this parameter.</p>"
     },
@@ -953,17 +945,17 @@ function startTheTour(step=-1) {
       content: "<p>Instead of using the Minors proportions as probabilities, enforce a strict distribution to match the proportions as exactly as possible.</p><p>Click on the dice button to randomly set this parameter.</p>"
     },
     {
-      element: "#missileQty",
+      element: "#missileQtyStep",
       title: "Proportion of Missiles/Super Missiles/Power Bombs",
       content: "<p>For each minor types, the higher the number the higher the probability of choosing it when placing a minor.</p><p>Click on the dice button to randomly set this parameter.</p>"
     },
     {
-      element: "#minorQty",
+      element: "#minorQtyStep",
       title: "Percentage of minors available",
       content: "<p>From 1%: minimum number of minors required to finish the game to 100%: all minors locations contain a minor (vanilla like).</p><p>Click on the dice button to randomly set this parameter.</p>"
     },
     {
-      element: "#energyQty",
+      element: "#energyQtyStep",
       title: "Quantity of Energy/Reserve Tanks available",
       content: "<p>Choose how many Energy/Reserve Tanks will be available, from 4-6 in sparse, 8-12 in medium and 18 in vanilla.</p><p>Click on the dice button to randomly set this parameter.</p>"
     },
@@ -985,7 +977,7 @@ function startTheTour(step=-1) {
 <td class=\"quarter\"><img src=\"/solver/static/images/ln_gate.png\" alt=\"ln_gate\" title=\"ln_gate\" class=\"full\"/></td>\
 </tr>\
 </table>\
-<p>Use the <a href=\"/solver/solver_web/tracker\">Area Tracker</a> to find your way more easily.</p><p><b>Note:</b> enabling it also auto-enables Majors Split to Full Randomization and set difficulty cap to hardcore (if it wasn't already easier) to avoid generating too hard seeds, but it can still be changed afterwards.</p>",
+<p>Use the <a href=\"/solver/solver_web/tracker\">Area Tracker</a> to find your way more easily.</p>",
       placement: "auto left"
     },
     {
@@ -1057,7 +1049,8 @@ Click on the dice button to randomly set this parameter.",
     {
       element: "#funSuitsStep",
       title: "Suitless",
-      content: "<p>If the preset and seed layout allow it, will force removal of at least one suit.</p><p>Click on the dice button to randomly set this parameter.</p>",
+      content: "<p>If the preset and seed layout allow it, will force removal of at least one suit (Varia Suit <img src=\"/solver/static/images/Varia.png\" alt=\"Varia.png\" title=\"Varia.png\" class=\"width: 32px\"/> and/or Gravity Suit <img src=\"/solver/static/images/Gravity.png\" alt=\"Gravity.png\" title=\"Gravity.png\" class=\"width: 32px\"/>).</p>\
+<p>Click on the dice button to randomly set this parameter.</p>",
       placement: "auto left"
     },
     {
@@ -1068,7 +1061,7 @@ Click on the dice button to randomly set this parameter.",
     },
     {
       element: "#layoutPatchesStep",
-      title: "Layout patches",
+      title: "Anti-softlock Layout patches",
       content: "Include the anti-softlock layout patches. Disable at your own softlocking risk!\
 <table class=\"full\">\
 <tr>\
@@ -1220,12 +1213,12 @@ def displayNumber(id, min, max, default, step="1"):
               <tr>
                 <td>Vanilla Super Metroid ROM:</td>
                 <td>{{=INPUT(_type="file", _name="uploadFile", _id="uploadFile", _class="full")}}</td>
-                <td><button type="button" onclick="startTheTour(0)">?</button></td>
+                <td id="romStep"><button type="button" onclick="startTheTour(0)">?</button></td>
               </tr>
               <tr id="seedVisibility">
 	        <td>Randomizer seed:</td>
 	        <td>{{displayNumber("seed", "0", "9999999", "0")}}</td>
-	        <td><button type="button" onclick="startTheTour(1)">?</button></td>
+	        <td id="seedStep"><button type="button" onclick="startTheTour(1)">?</button></td>
               </tr>
               <tr>
 		<td>Skills Preset:</td>
@@ -1248,14 +1241,14 @@ def displayNumber(id, min, max, default, step="1"):
 	      <tr>
 		<td class="small"><div class="random"><button id="majorsSplitRandom" type="button" onclick="randomize(event, 'majorsSplit')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
 		<td><span id="majorsSplitText">Majors Split</span></td>
-	        <td id="majorsSplitStep">{{displaySelect("majorsSplit", ["Full", "Major", "Chozo"], "Full")}}</td>
-                <td><button type="button" onclick="startTheTour(5)">?</button></td>
+	        <td>{{displaySelect("majorsSplit", ["Full", "Major", "Chozo"], "Full")}}</td>
+                <td id="majorsSplitStep"><button type="button" onclick="startTheTour(5)">?</button></td>
 	      </tr>
               <tr id="maxDiffVisibility">
 		<td class="small"><div class="random"><button id="maxDifficultyRandom" type="button" onclick="randomize(event, 'maxDifficulty')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
                 <td><span id="maxDifficultyText">Maximum difficulty for picking up an item:</span></td>
                 <td>{{displaySelect("maxDifficulty", ["no difficulty cap", "easy", "medium", "hard", "harder", "hardcore", "mania"], "no difficulty cap")}}</td>
-                <td><button type="button" onclick="startTheTour(6)">?</button></td>
+                <td id="maxDifficultyStep"><button type="button" onclick="startTheTour(6)">?</button></td>
               </tr>
 	      <tr>
 		<td class="small"><div class="random"><button id="progressionSpeedRandom" type="button" onclick="randomize(event, 'progressionSpeed')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
@@ -1274,29 +1267,29 @@ def displayNumber(id, min, max, default, step="1"):
 		    </select>
 		  </div>
 		</td>
-                <td><button id="progSpeedTuto" type="button" onclick="startTheTour(7)">?</button></td>
+                <td id="progSpeedStep"><button type="button" onclick="startTheTour(7)">?</button></td>
 	      </tr>
 	      <tr id="progDiffVisibility">
 		<td class="small"><div class="random"><button id="progressionDifficultyRandom" type="button" onclick="randomize(event, 'progressionDifficulty')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
 	        <td class="half"><span id="progressionDifficultyText">Progression difficulty:</span></td>
                 <td class="half">{{displaySelect("progressionDifficulty", ["easier", "normal", "harder"], "normal")}}</td>
-                <td><button type="button" onclick="startTheTour(8)">?</button></td>
+                <td id="progDiffStep"><button type="button" onclick="startTheTour(8)">?</button></td>
 	      </tr>
 	      <tr id="morphPlacementVisibility">
 		<td class="small"><div class="random"><button id="morphPlacementRandom" type="button" onclick="randomize(event, 'morphPlacement')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
 	        <td class="half"><span id="morphPlacementText">Morph Placement:</span></td>
-	        <td class="half" id="morphPlacementStep">{{displaySelect("morphPlacement", ["early", "normal", "late"], "normal")}}</td>
-                <td><button type="button" onclick="startTheTour(9)">?</button></td>
+	        <td class="half">{{displaySelect("morphPlacement", ["early", "normal", "late"], "normal")}}</td>
+                <td id="morphPlacementStep"><button type="button" onclick="startTheTour(9)">?</button></td>
 	      </tr>
 	      <tr id="suitsRestrictionVisibility">
 		<td class="small"><div class="random"><button id="suitsRestrictionRandom" type="button" onclick="randomize(event, 'suitsRestriction')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
-	        <td colspan="2" id="suitsRestrictionStep">{{displayCheckbox("suitsRestriction")}}<span id="suitsRestrictionText">Suits restriction</span></td>
-                <td><button type="button" onclick="startTheTour(10)">?</button></td>
+	        <td colspan="2">{{displayCheckbox("suitsRestriction")}}<span id="suitsRestrictionText">Suits restriction</span></td>
+                <td id="suitsRestrictionStep"><button type="button" onclick="startTheTour(10)">?</button></td>
 	      </tr>
 	      <tr id="hideItemsVisibility">
 		<td class="small"><div class="random"><button id="hideItemsRandom" type="button" onclick="randomize(event, 'hideItems')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
-		<td colspan="2" id="hideItemsStep">{{displayCheckbox("hideItems")}}<span id="hideItemsText">Hide some items</span></td>
-		<td><button type="button" onclick="startTheTour(11)">?</button></td>
+		<td colspan="2">{{displayCheckbox("hideItems")}}<span id="hideItemsText">Hide some items</span></td>
+		<td id="hideItemsStep"><button type="button" onclick="startTheTour(11)">?</button></td>
 	      </tr>
 	    </table>
 	    <div id="ammoVisibility">
@@ -1305,14 +1298,14 @@ def displayNumber(id, min, max, default, step="1"):
                 <colgroup><col class="small"/><col class="half" /><col class="half" /><col class="small"/></colgroup>
                 <tr id="strictMinorsVisibility">
 		  <td class="small"><div class="random"><button id="strictMinorsRandom" type="button" onclick="randomize(event, 'strictMinors')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
-		  <td colspan="2" id="strictMinorsStep">{{displayCheckbox("strictMinors")}}<span id="strictMinorsText">Strict Minors distribution</span></td>
-		  <td><button type="button" onclick="startTheTour(12)">?</button></td>
+		  <td colspan="2">{{displayCheckbox("strictMinors")}}<span id="strictMinorsText">Strict Minors distribution</span></td>
+		  <td id="strictMinorsStep"><button type="button" onclick="startTheTour(12)">?</button></td>
                 </tr>
                 <tr id="missileQtyVisibility">
 		  <td class="small"><div class="random"><button id="missileQtyRandom" type="button" onclick="randomize(event, 'missileQty')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
 		  <td><span id="missileQtyText">Proportion of Missiles:</span></td>
 		  <td>{{displayNumber("missileQty", "1", "9", "3", "0.1")}}</td>
-		  <td><button type="button" onclick="startTheTour(13)">?</button></td>
+		  <td id="missileQtyStep"><button type="button" onclick="startTheTour(13)">?</button></td>
                 </tr>
                 <tr id="superQtyVisibility">
 		  <td class="small"><div class="random"><button id="superQtyRandom" type="button" onclick="randomize(event, 'superQty')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
@@ -1328,13 +1321,13 @@ def displayNumber(id, min, max, default, step="1"):
 		  <td class="small"><div class="random"><button id="minorQtyRandom" type="button" onclick="randomize(event, 'minorQty')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
 		  <td><span id="minorQtyText">Percentage of minors available:</span></td>
 		  <td>{{displayNumber("minorQty", "1", "100", "100")}}</td>
-		  <td><button type="button" onclick="startTheTour(14)">?</button></td>
+		  <td id="minorQtyStep"><button type="button" onclick="startTheTour(14)">?</button></td>
                 </tr>
                 <tr>
 		  <td class="small"><div class="random"><button id="energyQtyRandom" type="button" onclick="randomize(event, 'energyQty')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
 		  <td><span id="energyQtyText">Quantity of Energy/Reserve Tanks available:</span></td>
 		  <td>{{displaySelect("energyQty", ["sparse", "medium", "vanilla"], "vanilla")}}</td>
-		  <td><button type="button" onclick="startTheTour(15)">?</button></td>
+		  <td id="energyQtyStep"><button type="button" onclick="startTheTour(15)">?</button></td>
                 </tr>
 	      </table>
 	    </div>
@@ -1403,18 +1396,18 @@ def displayNumber(id, min, max, default, step="1"):
               </p>
 	      <table class="full">
                 <tr>
-		  <td class="small"><div class="random"><button id="funCombatRandom" type="button" onclick="randomize(event, 'funCombat')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
-		  <td colspan="2" class="full" id="funCombatStep">{{displayCheckbox("funCombat")}}<span id="funCombatText">Super Fun Combat</span></td>
+		  <td class="small" id="funCombatStep"><div class="random"><button id="funCombatRandom" type="button" onclick="randomize(event, 'funCombat')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
+		  <td colspan="2" class="full">{{displayCheckbox("funCombat")}}<span id="funCombatText">Super Fun Combat</span></td>
 		  <td><button type="button" onclick="startTheTour(20)">?</button></td>
                 </tr>
                 <tr>
-		  <td class="small"><div class="random"><button id="funMovementRandom" type="button" onclick="randomize(event, 'funMovement')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
-		  <td colspan="2" class="full" id="funMovementStep">{{displayCheckbox("funMovement")}}<span id="funMovementText">Super Fun Movement</span></td>
+		  <td class="small" id="funMovementStep"><div class="random"><button id="funMovementRandom" type="button" onclick="randomize(event, 'funMovement')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
+		  <td colspan="2" class="full">{{displayCheckbox("funMovement")}}<span id="funMovementText">Super Fun Movement</span></td>
 		  <td><button type="button" onclick="startTheTour(21)">?</button></td>
                 </tr>
                 <tr>
-		  <td class="small"><div class="random"><button id="funSuitsRandom" type="button" onclick="randomize(event, 'funSuits')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
-		  <td colspan="2" class="full" id="funSuitsStep">{{displayCheckbox("funSuits")}}<span id="funSuitsText">Suitless</span></td>
+		  <td class="small" id="funSuitsStep"><div class="random"><button id="funSuitsRandom" type="button" onclick="randomize(event, 'funSuits')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
+		  <td colspan="2" class="full">{{displayCheckbox("funSuits")}}<span id="funSuitsText">Suitless</span></td>
 		  <td><button type="button" onclick="startTheTour(22)">?</button></td>
                 </tr>
               </table>
@@ -1425,8 +1418,8 @@ def displayNumber(id, min, max, default, step="1"):
 	        The bug fix <a href="https://itemrando.supermetroid.run/information">patches</a> from Total Item Randomizer are included by default.
 	      </p>
 	      <table class="full" id="mainPatchesVisibitily">
-	        <tr>
-		  <td class="full" id="layoutPatchesStep">{{displayCheckbox("layoutPatches", True)}} Anti-softlock layout patches (by Total & Flo)</td>
+	        <tr id="layoutPatchesStep">
+		  <td class="full">{{displayCheckbox("layoutPatches", True)}} Anti-softlock layout patches (by Total & Flo)</td>
 		  <td><button type="button" onclick="startTheTour(24)">?</button></td>
 	        </tr>
 	        <tr>

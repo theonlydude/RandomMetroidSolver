@@ -969,17 +969,50 @@ function startTheTour(step=-1) {
     {
       element: "#areaRandomizationStep",
       title: "Areas randomization",
-      content: "<p>Randomize areas together using bidirectional access portals: <a href=\"/solver/static/images/area_map.png\" class=\"highslide\" onclick=\"return hs.expand(this, {wrapperClassName: 'borderless', dimmingOpacity: 0.75, align: 'center'})\"><div class=\"parent-center\"><img id=\"areathumb\" src=\"/solver/static/images/area_map_thumbnail.png\" alt=\"Area Map\" title=\"Click to enlarge\" class=\"half child-center\"/></div></a><br/>All portals can be linked to one another, even if it means following an incompatible transition (Left-Left, Up-Right, ...).<br/>You can go through all portals and back, even those where you can't do that in vanilla, so:<ul><li>Some doors have been turned to blue</li><li>Both Maridia exit green gates have been removed</li><li>Crumble blocks preventing access to Lower Nofair through its exit have been removed</li></ul></p><p>Use the <a href=\"/solver/solver_web/tracker\">Area Tracker</a> to find your way more easily.</p><p><b>Note:</b> enabling it also auto-enables Majors Split to Full Randomization and set difficulty cap to hardcore (if it wasn't already easier) to avoid generating too hard seeds, but it can still be changed afterwards.</p>",
+      content: "<p>Randomize areas together using bidirectional access portals:</p><a href=\"/solver/static/images/area_map.png\" class=\"highslide\" onclick=\"return hs.expand(this, {wrapperClassName: 'borderless', dimmingOpacity: 0.75, align: 'center'})\"><div class=\"parent-center\"><img id=\"areathumb\" src=\"/solver/static/images/area_map_thumbnail.png\" alt=\"Area Map\" title=\"Click to enlarge\" class=\"half child-center\"/></div></a><p>All portals can be linked to one another, even if it means following an incompatible transition (Left-Left, Up-Right, ...).<br/>You can go through all portals and back, even those where you can't do that in vanilla, so:</p>\
+<ul><li>Some doors have been turned to blue</li>\
+<li>Some exit gates have been removed:</li></ul>\
+<table class=\"full\">\
+<tr>\
+<td class=\"quarter\"><p class=\"top\">Maridia red fish exit green gate has been removed:</p></td>\
+<td class=\"quarter\"><p class=\"top\">Maridia tube exit green gate has been removed:</p></td>\
+<td class=\"quarter\"><p class=\"top\">Lower Norfair exit crumble blocks have been removed:</p></td>\
+</tr>\
+<tr>\
+<td class=\"quarter\"><img src=\"/solver/static/images/fish_gate.png\" alt=\"fish_gate.png\" title=\"fish_gate.png\" class=\"full\"/></td>\
+<td class=\"quarter\"><img src=\"/solver/static/images/tube_gate.png\" alt=\"tube_gate.png\" title=\"tube_gate.png\" class=\"full\"/></td>\
+<td class=\"quarter\"><img src=\"/solver/static/images/ln_gate.png\" alt=\"ln_gate\" title=\"ln_gate\" class=\"full\"/></td>\
+</tr>\
+</table>\
+<p>Use the <a href=\"/solver/solver_web/tracker\">Area Tracker</a> to find your way more easily.</p><p><b>Note:</b> enabling it also auto-enables Majors Split to Full Randomization and set difficulty cap to hardcore (if it wasn't already easier) to avoid generating too hard seeds, but it can still be changed afterwards.</p>",
       placement: "auto left"
     },
     {
       element: "#areaLayoutStep",
       title: "Areas randomization additional layout modifications",
-      content: "Some layout tweaks to make your life easier in areas randomizer :<br/><ul>\
-<li>Remove Crab green gate in Marida</li>\
-<li>Remove blue gate in Green Hill Zone</li>\
-<li>New platform in Green Hill Zone to access transition door</li>\
-<li>Made access paths to the three most 'hidden' portals more obvious so you don't forget to check them</li></ul>",
+      content: "Some layout tweaks to make your life easier in areas randomizer:\
+<table class=\"full\">\
+<tr>\
+<td class=\"quarter\"><p class=\"top\">Remove Crab green gate in Marida:</p></td>\
+<td class=\"quarter\"><p class=\"top\">Remove blue gate in Green Hill Zone:</p></td>\
+<td class=\"quarter\"><p class=\"top\">New platform in Green Hill Zone to access transition door:</p></td>\
+</tr>\
+<tr>\
+<td class=\"quarter\"><img src=\"/solver/static/images/crab_gate.png\" alt=\"crab_gate\" title=\"crab_gate\" class=\"full\"/></td>\
+<td class=\"quarter\"><img src=\"/solver/static/images/greenhill_gate.png\" alt=\"greenhill_gate\" title=\"greenhill_gate\" class=\"full\"/></td>\
+<td class=\"quarter\"><img src=\"/solver/static/images/greenhill_platform.png\" alt=\"greenhill_platform\" title=\"greenhill_platform\" class=\"full\"/></td>\
+</tr>\
+<tr>\
+<td class=\"quarter\"><p class=\"top\">Access Maridia red fish exit:</p></td>\
+<td class=\"quarter\"><p class=\"top\">Access Maridia tube exit:</p></td>\
+<td class=\"quarter\"><p class=\"top\">Access Lower Norfair exit:</p></td>\
+</tr>\
+<tr>\
+<td class=\"quarter\"><img src=\"/solver/static/images/fish_access.png\" alt=\"fish_access\" title=\"fish_access\" class=\"full\"/></td>\
+<td class=\"quarter\"><img src=\"/solver/static/images/tube_access.png\" alt=\"tube_access\" title=\"tube_access\" class=\"full\"/></td>\
+<td class=\"quarter\"><img src=\"/solver/static/images/ln_access.png\" alt=\"ln_access\" title=\"ln_access\" class=\"full\"/></td>\
+</tr>\
+</table>",
       placement: "auto left"
     },
     {

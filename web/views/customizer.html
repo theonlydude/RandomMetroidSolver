@@ -159,6 +159,22 @@ h1 {
 </style>
 
 <script type="text/javascript">
+$(document).ready(function(){
+   jQuery(window).on('resize', resizeSlider);
+});
+
+function resizeSlider() {
+   var slider = $("#degree_slider_range");
+   var width = slider.width();
+
+   // set new handle tracks width
+   slider.find(".handle-track0").css("width", width);
+   slider.find(".handle-track1").css("width", width);
+
+   update_handle_track_pos(slider, slider.slider("values", 0), 0);
+   update_handle_track_pos(slider, slider.slider("values", 1), 1);
+}
+
 var globalSwitchs = {};
 
 function ajaxFail(jqXHR, textStatus) {
@@ -342,7 +358,8 @@ var invertSlider = false;
 
 // Helper function
 function update_handle_track_pos(slider, ui_handle_pos, index) {
-  var handle_track_xoffset = -(((ui_handle_pos*0.2777777778+50)/100) * slider.clientWidth);
+  var width = $("#degree_slider_range").width();
+  var handle_track_xoffset = -(((ui_handle_pos*0.2777777778+50)/100) * width);
   $(slider).find(".handle-track"+index).css("left", handle_track_xoffset);
 
   // reverse grey slider

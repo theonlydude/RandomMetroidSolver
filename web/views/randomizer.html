@@ -208,6 +208,18 @@ if (hs.registerOverlay) {
 </style>
 
 <script type="text/javascript">
+// https://stackoverflow.com/questions/16960690/chosen-harvesthq-resize-width-dynamically
+$(document).ready(function(){      
+   resizeChosen();
+   jQuery(window).on('resize', resizeChosen);
+});
+
+function resizeChosen() {
+   $(".chosen-container").each(function() {
+       $(this).attr('style', 'width: 100%');
+   });          
+}
+
 function randomize(evt, elemId) {
   var e = document.getElementById(elemId);
 
@@ -732,6 +744,7 @@ window.onload = function(){
 
     $("#preset").chosen();
     $("#randoPreset").chosen();
+    resizeChosen();
 
     initSlider();
 

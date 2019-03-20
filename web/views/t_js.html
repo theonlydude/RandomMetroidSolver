@@ -1,3 +1,15 @@
+// https://stackoverflow.com/questions/16960690/chosen-harvesthq-resize-width-dynamically
+$(document).ready(function(){      
+   resizeChosen();
+   jQuery(window).on('resize', resizeChosen);
+});
+
+function resizeChosen() {
+   $(".chosen-container").each(function() {
+       $(this).attr('style', 'width: 100%');
+   });          
+}
+
 var loaded = false;
 
 //-----------------------------------------------------------
@@ -771,6 +783,7 @@ function displayPopup(isPlando) {
   document.getElementById("solverPopup").style.display = "block";
   // chosen must be activated when it's visible, else it doesn't work...
   $(".chzn-select").chosen();
+  resizeChosen();
 }
 
 function hidePopup() {

@@ -52,6 +52,18 @@ if (hs.registerOverlay) {
 
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 <script type="text/javascript">
+// https://stackoverflow.com/questions/16960690/chosen-harvesthq-resize-width-dynamically
+$(document).ready(function(){      
+   resizeChosen();
+   jQuery(window).on('resize', resizeChosen);
+});
+
+function resizeChosen() {
+   $(".chosen-container").each(function() {
+       $(this).attr('style', 'width: 100%');
+   });          
+}
+
 function guessVARIAPreset(filename) {
   var re = /VARIA_Randomizer_[A]?[B]?[F]?[M]?[Z]?X\d+_(\w+)/;
   var match = filename.match(re);
@@ -255,6 +267,7 @@ pass
 
 window.onload = function(){
     $(".chzn-select").chosen();
+    resizeChosen();
 
     setComplexity();
 

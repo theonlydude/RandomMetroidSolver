@@ -992,19 +992,29 @@ function startTheTour(step=-1) {
     {
       element: "#areaRandomizationStep",
       title: "Areas randomization",
-      content: "<p>Randomize areas together using bidirectional access portals:</p><a href=\"/solver/static/images/area_map.png\" class=\"highslide\" onclick=\"return hs.expand(this, {wrapperClassName: 'borderless', dimmingOpacity: 0.75, align: 'center'})\"><div class=\"parent-center\"><img id=\"areathumb\" src=\"/solver/static/images/area_map_thumbnail.png\" alt=\"Area Map\" title=\"Click to enlarge\" class=\"half child-center\"/></div></a><p>All portals can be linked to one another, even if it means following an incompatible transition (Left-Left, Up-Right, ...).<br/>You can go through all portals and back, even those where you can't do that in vanilla, so:</p>\
-<ul><li>Some doors have been turned to blue</li>\
-<li>Some exit gates have been removed:</li></ul>\
+      content: "<p>Randomize areas together using bidirectional access portals:</p><a href=\"/solver/static/images/area_map.png\" class=\"highslide\" onclick=\"return hs.expand(this, {wrapperClassName: 'borderless', dimmingOpacity: 0.75, align: 'center'})\"><div class=\"parent-center\"><img id=\"areathumb\" src=\"/solver/static/images/area_map_thumbnail.png\" alt=\"Area Map\" title=\"Click to enlarge\" class=\"half child-center\"/></div></a><p>All portals can be linked to one another, even if it means following an incompatible transition (Left-Left, Up-Right, ...).<br/>You can go through all portals and back, even those where you can't do that in vanilla, so some layout tweaks have been made:</p>\
 <table class=\"full\">\
 <tr>\
-<td class=\"quarter\"><p class=\"top\">Maridia red fish exit green gate has been removed:</p></td>\
-<td class=\"quarter\"><p class=\"top\">Maridia tube exit green gate has been removed:</p></td>\
-<td class=\"quarter\"><p class=\"top\">Lower Norfair exit crumble blocks have been removed:</p></td>\
+<td class=\"quarter\"><p class=\"top\">Remove Maridia red fish exit green gate:</p></td>\
+<td class=\"quarter\"><p class=\"top\">Remove Maridia tube exit green gate:</p></td>\
+<td class=\"quarter\"><p class=\"top\">Remove Lower Norfair exit crumble blocks:</p></td>\
 </tr>\
 <tr>\
 <td class=\"quarter\"><img src=\"/solver/static/images/fish_gate.png\" alt=\"fish_gate.png\" title=\"fish_gate.png\" class=\"full\"/></td>\
 <td class=\"quarter\"><img src=\"/solver/static/images/tube_gate.png\" alt=\"tube_gate.png\" title=\"tube_gate.png\" class=\"full\"/></td>\
-<td class=\"quarter\"><img src=\"/solver/static/images/ln_gate.png\" alt=\"ln_gate\" title=\"ln_gate\" class=\"full\"/></td>\
+<td class=\"quarter\"><img src=\"/solver/static/images/ln_gate.png\" alt=\"ln_gate.png\" title=\"ln_gate.png\" class=\"full\"/></td>\
+</tr>\
+<tr>\
+<td class=\"quarter\"><p class=\"top\">Disable yellow door at Green Hill Zone:</p></td>\
+<td class=\"quarter\"><p class=\"top\">Disable yellow door at Noob Bridge:</p></td>\
+<td class=\"quarter\"><p class=\"top\">Disable yellow door at Le Coude:</p></td>\
+<td class=\"quarter\"><p class=\"top\">Disable yellow door at Kronic Boost room:</p></td>\
+</tr>\
+<tr>\
+<td class=\"quarter\"><img src=\"/solver/static/images/blue_door_greenhill.png\" alt=\"blue_door_greenhill.png\" title=\"blue_door_greenhill.png\" class=\"full\"/></td>\
+<td class=\"quarter\"><img src=\"/solver/static/images/blue_door_noob.png\" alt=\"blue_door_noob.png\" title=\"blue_door_noob.png\" class=\"full\"/></td>\
+<td class=\"quarter\"><img src=\"/solver/static/images/blue_door_lecoude.png\" alt=\"blue_door_lecoude.png\" title=\"blue_door_lecoude.png\" class=\"full\"/></td>\
+<td class=\"quarter\"><img src=\"/solver/static/images/blue_door_kronic.png\" alt=\"blue_door_kronic.png\" title=\"blue_door_kronic.png\" class=\"full\"/></td>\
 </tr>\
 </table>\
 <p>Use the <a href=\"/solver/solver_web/tracker\">Area Tracker</a> to find your way more easily.</p>",

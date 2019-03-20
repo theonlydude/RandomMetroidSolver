@@ -310,6 +310,11 @@ find ~/web2py/applications/solver/static -xtype l -exec rm -f {} \;
 [ -L ~/web2py/applications/solver/static/images/greenhill_platform.png ] || ln -s ~/RandomMetroidSolver/web/static/help/greenhill_platform.png ~/web2py/applications/solver/static/images/greenhill_platform.png
 [ -L ~/web2py/applications/solver/static/images/greenhill_gate.png ] || ln -s ~/RandomMetroidSolver/web/static/help/greenhill_gate.png ~/web2py/applications/solver/static/images/greenhill_gate.png
 
+[ -L ~/web2py/applications/solver/static/images/blue_door_noob.png ] || ln -s ~/RandomMetroidSolver/web/static/help/blue_door_noob.png ~/web2py/applications/solver/static/images/blue_door_noob.png
+[ -L ~/web2py/applications/solver/static/images/blue_door_lecoude.png ] || ln -s ~/RandomMetroidSolver/web/static/help/blue_door_lecoude.png ~/web2py/applications/solver/static/images/blue_door_lecoude.png
+[ -L ~/web2py/applications/solver/static/images/blue_door_kronic.png ] || ln -s ~/RandomMetroidSolver/web/static/help/blue_door_kronic.png ~/web2py/applications/solver/static/images/blue_door_kronic.png
+[ -L ~/web2py/applications/solver/static/images/blue_door_greenhill.png ] || ln -s ~/RandomMetroidSolver/web/static/help/blue_door_greenhill.png ~/web2py/applications/solver/static/images/blue_door_greenhill.png
+
 [ -L ~/web2py/applications/solver/static/images/ws_etank.png ] || ln -s ~/RandomMetroidSolver/web/static/help/ws_etank.png ~/web2py/applications/solver/static/images/ws_etank.png
 [ -L ~/web2py/applications/solver/static/images/ln_chozo.png ] || ln -s ~/RandomMetroidSolver/web/static/help/ln_chozo.png ~/web2py/applications/solver/static/images/ln_chozo.png
 [ -L ~/web2py/applications/solver/static/images/bomb_torizo.png ] || ln -s ~/RandomMetroidSolver/web/static/help/bomb_torizo.png ~/web2py/applications/solver/static/images/bomb_torizo.png

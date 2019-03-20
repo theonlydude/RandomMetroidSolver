@@ -343,6 +343,10 @@ window.onload = function(){
         }
     }
 
+    // color checkboxes
+    var colorRando = document.getElementById("colorsRandomization");
+    colorRando.onchange = setColorRando;
+
     initSlider();
 
 {{
@@ -352,6 +356,37 @@ if session.customizer["invert"] == "on":
 {{
     pass
 }}
+
+    setColorRando();
+}
+
+function setColorRando() {
+  var colorRando = document.getElementById("colorsRandomization");
+  var elements = ["globalShift", "suitsPalettes", "beamsPalettes", "tilesPalettes", "enemiesPalettes", "bossesPalettes"];
+  var slider = $("#degree_slider_range");
+
+  if(colorRando.checked){
+    for(var i=0; i<elements.length; i++) {
+      var elemId = elements[i];
+      var switchBox = document.getElementById(elemId);
+      var text = document.getElementById(elemId+"Text");
+      var s = globalSwitchs[elemId];
+      switchBox.disabled = false;
+      text.className = "";
+      s.enable();
+    }
+    slider.slider("enable");
+  } else {
+    for(var i=0; i<elements.length; i++) {
+      var switchBox = document.getElementById(elements[i]);
+      var text = document.getElementById(elements[i]+"Text");
+      var s = globalSwitchs[elements[i]];
+      switchBox.disabled = true;
+      text.className = "disabledText";
+      s.disable();
+    }
+    slider.slider("disable");
+  }
 }
 
 var invertSlider = false;
@@ -566,24 +601,24 @@ def displayCheckbox(id, defaultTrue=False):
                 <td><button type="button" onclick="startTheTour(1)" id="colorsRandomizationStep">?</button></td>
 	      </tr>
 	      <tr>
-		<td colspan="4">{{displayCheckbox("globalShift")}}Use the same degree to randomize all the elements</td>
+		<td colspan="4">{{displayCheckbox("globalShift")}}<span id="globalShiftText">Use the same degree to randomize all the elements</span></td>
 	      </tr>
             </table>
 	    <p>
 	      Select the elements to colors randomize.
 	    </p>
-	    <table class="full">
-	      <tr>
-	        <td class="third">{{displayCheckbox("suitsPalettes")}}Samus</td>
-	        <td class="third">{{displayCheckbox("beamsPalettes")}}Beams</td>
-	        <td class="third">{{displayCheckbox("tilesPalettes")}}Levels</td>
-	      </tr>
-	      <tr>
-	        <td class="third">{{displayCheckbox("enemiesPalettes")}}Enemies</td>
-	        <td class="third">{{displayCheckbox("bossesPalettes")}}Bosses</td>
-		<td class="third"></td>
-	      </tr>
-	    </table>
+	      <table class="full">
+		<tr>
+	          <td class="third">{{displayCheckbox("suitsPalettes")}}<span id="suitsPalettesText">Samus</span></td>
+	          <td class="third">{{displayCheckbox("beamsPalettes")}}<span id="beamsPalettesText">Beams</span></td>
+	          <td class="third">{{displayCheckbox("tilesPalettes")}}<span id="tilesPalettesText">Levels</span></td>
+		</tr>
+		<tr>
+	          <td class="third">{{displayCheckbox("enemiesPalettes")}}<span id="enemiesPalettesText">Enemies</span></td>
+	          <td class="third">{{displayCheckbox("bossesPalettes")}}<span id="bossesPalettesText">Bosses</span></td>
+		  <td class="third"></td>
+		</tr>
+	      </table>
 	    <h4>Patches<span class="right"><button type="button" onclick="startTheTour(2)" id="patchesStep">?</button></span></h4>
 	    <p>
 	      Patches to customize your ROM.

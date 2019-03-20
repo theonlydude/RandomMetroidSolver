@@ -182,7 +182,7 @@ p {
     display: table;
     clear: both;
 }
-@media (max-width: 800px) {
+@media (max-width: 975px) {
     .column {
         width: 100%;
     }

@@ -1455,6 +1455,9 @@ class WS(object):
                            '--endPoint', parameters["endPoint"]]
         elif action == 'remove' and scope == 'item':
             params += ['--count', str(parameters["count"])]
+        elif action == 'save' and scope == 'common':
+            if parameters['lock'] == True:
+                params.append('--lock')
 
         if request.vars.debug != None:
             params.append('--vcr')
@@ -1616,11 +1619,17 @@ class WS_common_save(WS):
     def validate(self):
         super(WS_common_save, self).validate()
 
+        if request.vars.lock == None:
+            raiseHttp(400, "Missing parameter lock", True)
+
+        if request.vars.lock not in ["save", "lock"]:
+            raiseHttp(400, "Wrong value for lock: {}, authorized values: save/lock".format(request.vars.lock), True)
+
     def action(self):
         if self.session["mode"] != "plando":
             raiseHttp(400, "Save can only be use in plando mode", True)
 
-        return self.callSolverAction("common", "save", {})
+        return self.callSolverAction("common", "save", {'lock': request.vars.lock == "lock"})
 
 class WS_area_add(WS):
     def validatePoint(self, point):

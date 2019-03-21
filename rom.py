@@ -668,8 +668,7 @@ class RomPatcher:
 
     def addIPSPatches(self, patches):
         for patchName in patches:
-            if patchName in RomPatcher.IPSPatches['Optional']:
-                self.applyIPSPatch(patchName)
+            self.applyIPSPatch(patchName)
 
     def applyIPSPatches(self, optionalPatches=[], noLayout=False, noGravHeat=False, area=False, bosses=False, areaLayoutBase=False, noVariaTweaks=False):
         try:

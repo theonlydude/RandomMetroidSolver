@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import sys, math, argparse, re, json, os, subprocess, logging
+import sys, math, argparse, re, json, os, subprocess, logging, random
 from time import gmtime, strftime
 
 # the difficulties for each technics
@@ -540,7 +540,7 @@ class InteractiveSolver(CommonSolver):
         self.areaGraph = AccessGraph(accessPoints, self.curGraphTransitions)
 
         if scope == 'common' and action == 'save':
-            return self.savePlando()
+            return self.savePlando(params['lock'])
 
         # compute new available locations
         self.clearLocs(self.majorLocations)
@@ -591,7 +591,7 @@ class InteractiveSolver(CommonSolver):
 
         return AccessGraph(accessPoints, transitions)
 
-    def savePlando(self):
+    def savePlando(self, lock):
         # store filled locations addresses in the ROM for next creating session
         locsItems = {}
         itemLocs = []
@@ -605,10 +605,27 @@ class InteractiveSolver(CommonSolver):
                 itemLocs.append({'Location': loc, 'Item': ItemManager.getItem("Nothing")})
 
         # patch the ROM
-        romPatcher = RomPatcher()
+        if lock == True:
+            magic = random.randint(1, 0xffff)
+        else:
+            magic = None
+        romPatcher = RomPatcher(magic=magic)
+        patches = ['credits_varia.ips', 'tracking.ips']
+        if magic != None:
+            patches.append('race_mode.ips')
+        romPatcher.addIPSPatches(patches)
         romPatcher.writeItemsLocs(itemLocs)
         romPatcher.writeItemsNumber()
         romPatcher.writeSpoiler(itemLocs)
+        class FakeRandoSettings:
+            def __init__(self):
+                self.qty = {'energy': 'plando'}
+                self.progSpeed = 'plando'
+                self.progDiff = 'plando'
+                self.restrictions = {'Suits': False, 'Morph': 'plando'}
+                self.superFun = {}
+        randoSettings = FakeRandoSettings()
+        romPatcher.writeRandoSettings(randoSettings, itemLocs)
         romPatcher.writePlandoAddresses(self.visitedLocations)
         if self.areaRando == True:
             doors = getDoorConnections(self.fillGraph(), self.areaRando, self.bossRando)
@@ -1565,7 +1582,8 @@ def interactiveSolver(args):
         # iterate
         params = {}
         if args.scope == 'common':
-            pass
+            if args.action == "save":
+                params["lock"] = args.lock
         elif args.scope == 'item':
             if args.state == None or args.action == None or args.output == None:
                 print("Missing state/action/output parameter")
@@ -1674,6 +1692,8 @@ if __name__ == "__main__":
                         dest="scope", nargs="?", default=None, choices=['common', 'area', 'item'])
     parser.add_argument('--count', help="Number of item rollback (used in interactive mode)",
                         dest="count", type=int)
+    parser.add_argument('--lock', help="lock the plando seed (used in interactive mode)",
+                        dest="lock", action='store_true')
 
     args = parser.parse_args()
 

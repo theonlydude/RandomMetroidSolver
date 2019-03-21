@@ -1187,12 +1187,6 @@ def randoPresetWebService():
     if IS_LENGTH(maxsize=32, minsize=1)(preset)[1] is not None:
         raise HTTP(400, "Preset name must be between 1 and 32 characters")
 
-    # we had a user which had kept its page opened since before last push in prod
-    if request.vars.complexity != None:
-        if request.vars.complexity not in ['simple', 'medium', 'advanced']:
-            raiseHttp(400, "Wrong value for complexity: {}, authorized values simple/medium/advanced".format(request.vars.complexity))
-        session.randomizer['complexity'] = request.vars.complexity
-
     print("randoPresetWebService: preset={}".format(preset))
 
     fullPath = 'rando_presets/{}.json'.format(preset)

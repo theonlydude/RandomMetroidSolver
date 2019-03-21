@@ -374,6 +374,9 @@ function setColorRando() {
       switchBox.disabled = false;
       text.className = "";
       s.enable();
+      document.getElementById("textRight").className = "";
+      document.getElementById("textLeft").className = "floatleft";
+      document.getElementById("invert").disabled = false;
     }
     slider.slider("enable");
   } else {
@@ -384,6 +387,9 @@ function setColorRando() {
       switchBox.disabled = true;
       text.className = "disabledText";
       s.disable();
+      document.getElementById("textRight").className = "disabledText";
+      document.getElementById("textLeft").className = "floatleft disabledText";
+      document.getElementById("invert").disabled = true;
     }
     slider.slider("disable");
   }

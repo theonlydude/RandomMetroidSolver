@@ -735,10 +735,8 @@ locations = [
     'AccessFrom' : {
         'DraygonRoomIn': lambda sm: sm.canFightDraygon()
     },
-    'Available': lambda sm: sm.enoughStuffsDraygon(),
+    'Available': lambda sm: Bosses.bossDead('Draygon'), # this is an evil trick, see SJ location below
     'PostAvailable': lambda sm: sm.canExitDraygon(),
-    'Pickup': lambda: Bosses.beatBoss('Draygon'),
-    'Unpickup': lambda: Bosses.unbeatBoss('Draygon')
 },
 {
     'Area': "Maridia",
@@ -754,13 +752,15 @@ locations = [
     'AccessFrom' : {
         'DraygonRoomIn': lambda sm: sm.canFightDraygon()
     },
-    # we put the fight in avail condition instead of boss dead check
-    # to open the possibility of an item unlocking draygon exit to be
-    # placed here.    
-    # in other words we allow space jump loc to be filled before dray
-    # loc
+    # evil trick: we put the actual boss fight here instead of draygon
+    # location to open the possibility of an item unlocking draygon
+    # exit to be placed here.
+    # in other words we force space jump loc to be filled before dray
+    # loc.
     'Available': lambda sm: sm.enoughStuffsDraygon(),
-    'PostAvailable': lambda sm: sm.canExitDraygon()
+    'PostAvailable': lambda sm: sm.canExitDraygon(),
+    'Pickup': lambda: Bosses.beatBoss('Draygon'),
+    'Unpickup': lambda: Bosses.unbeatBoss('Draygon')
 },
 {
     'Area': "Tourian",

@@ -995,7 +995,7 @@ class Randomizer(object):
 
     # check if an item can be placed at a location, given restrictions
     # settings.
-    def canPlaceAtLocation(self, item, location, checkSoftlock=False):
+    def canPlaceAtLocation(self, item, location, checkSoftlock=False, checkRestrictions=True):
         if item['Type'] == 'Boss':
             return 'Boss' in location['Class']
 
@@ -1005,19 +1005,21 @@ class Randomizer(object):
         if not self.locClassCheck(item, location):
             return False
 
-        if self.restrictions['Suits'] == True and Randomizer.isSuit(item):
-            return self.suitsRestrictionsImpl(item, location)
+        ret = True
+        if checkRestrictions == True:
+            if self.restrictions['Suits'] == True and Randomizer.isSuit(item):
+                ret = self.suitsRestrictionsImpl(item, location)
 
-        if self.restrictions['Morph'] == 'early' and Randomizer.isSpeedScrew(item):
-            return self.speedScrewRestrictionImpl(item, location)
+            if self.restrictions['Morph'] == 'early' and Randomizer.isSpeedScrew(item):
+                ret = self.speedScrewRestrictionImpl(item, location)
 
-        if self.restrictions['Morph'] == 'late' and Randomizer.isMorph(item):
-            return self.morphPlacementImpl(item, location)
+            if self.restrictions['Morph'] == 'late' and Randomizer.isMorph(item):
+                ret = self.morphPlacementImpl(item, location)
 
         if checkSoftlock == True:
-            return not self.isSoftlockPossible(item, location)
+            ret = ret and not self.isSoftlockPossible(item, location)
 
-        return True
+        return ret
 
     # from current accessible locations and an item pool, generate an item/loc dict.
     # return item/loc, or None if stuck
@@ -1557,7 +1559,7 @@ class Randomizer(object):
                         isStuck = False
             self.chozoCheck()
             runtime_s = time.clock() - startDate
-        self.log.debug("{} remaining items in pool".format(len(self.itemPool)))
+        self.log.debug("{} remaining items in pool : {}".format(len(self.itemPool), [i['Type'] for i in self.itemPool]))
         self.log.debug("nStates="+str(len(self.states)))
         self.log.debug('unusedLocs='+str([loc['Name'] for loc in self.unusedLocations]))
         if len(self.itemPool) > 0:
@@ -1566,7 +1568,7 @@ class Randomizer(object):
                 # seed is finishable, place randomly all remaining items
                 while len(self.itemPool) > 0:
                     item = self.itemPool[0]
-                    possibleLocs = [loc for loc in self.unusedLocations if self.canPlaceAtLocation(item, loc)]
+                    possibleLocs = [loc for loc in self.unusedLocations if self.canPlaceAtLocation(item, loc, checkRestrictions=False)]
                     self.log.debug("last fill item = " + item['Type'] + "/" + item['Class'] + ", locs = " + str([loc['Name'] for loc in possibleLocs]))
                     itemLocation = {
                         'Item' : item,

@@ -626,6 +626,8 @@ class InteractiveSolver(CommonSolver):
                 self.superFun = {}
         randoSettings = FakeRandoSettings()
         romPatcher.writeRandoSettings(randoSettings, itemLocs)
+        if magic != None:
+            romPatcher.writeMagic()
         romPatcher.writePlandoAddresses(self.visitedLocations)
         if self.areaRando == True:
             doors = getDoorConnections(self.fillGraph(), self.areaRando, self.bossRando)

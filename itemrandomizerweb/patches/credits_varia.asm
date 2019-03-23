@@ -934,27 +934,34 @@ script:
     dw {draw}, {blank}
 
     // Custom item randomizer credits text : max 248 dw {draw} statements
-
+    dw {draw}, {blank}
+    dw {draw}, {blank}
     dw {draw}, {row}*128 // VARIA RANDOMIZER STAFF
     dw {draw}, {blank}
     dw {draw}, {row}*129
     dw {draw}, {row}*130
     dw {draw}, {blank}
     dw {draw}, {blank}
-    dw {draw}, {row}*131 // SNES AND ITEM RANDOMIZER CODE
+    dw {draw}, {row}*131 // ORIGINAL ITEM RANDOMIZERS
     dw {draw}, {blank}
     dw {draw}, {row}*132
     dw {draw}, {blank}
-    dw {draw}, {row}*133
     dw {draw}, {blank}
+    dw {draw}, {row}*133 // SNES CODE
     dw {draw}, {blank}
-    dw {draw}, {row}*134 // ROM PATCHES
+    dw {draw}, {row}*134 
     dw {draw}, {blank}
     dw {draw}, {row}*135
     dw {draw}, {blank}
     dw {draw}, {row}*136
     dw {draw}, {blank}
     dw {draw}, {row}*137
+    dw {draw}, {blank}
+    dw {draw}, {blank}
+    dw {draw}, {row}*142 // PALETTE RANDOMIZER
+    dw {draw}, {blank}
+    dw {draw}, {row}*143
+    dw {draw}, {row}*144
     dw {draw}, {blank}
     dw {draw}, {blank}
     dw {draw}, {row}*138 // SPECIAL THANKS TO
@@ -964,15 +971,13 @@ script:
     dw {draw}, {row}*140
     dw {draw}, {row}*141
     dw {draw}, {blank}
-    dw {draw}, {row}*142 // SUPER METROID SRL COMMUNITY
+    dw {draw}, {row}*165 // SUPER METROID DISASSEMBLY
     dw {draw}, {blank}
-    dw {draw}, {row}*143
-    dw {draw}, {row}*144
+    dw {draw}, {row}*166
+    dw {draw}, {row}*167
     dw {draw}, {blank}
     dw {draw}, {blank}
     dw {draw}, {row}*145 // RANDOMIZER PARAMETERS
-    dw {draw}, {blank}
-    dw {draw}, {row}*154 // ENERGY QUANTITY
     dw {draw}, {blank}
     dw {draw}, {row}*155 // PROG SPEED
     dw {draw}, {blank}
@@ -994,6 +999,9 @@ script:
     dw {draw}, {blank}
     dw {draw}, {blank}
     dw {draw}, {row}*157 // ITEMS DISTRIBUTION
+    dw {draw}, {blank}
+    dw {draw}, {row}*168 // AVAILABLE
+    dw {draw}, {row}*169
     dw {draw}, {blank}
     dw {draw}, {row}*152 // ENERGY
     dw {draw}, {row}*153
@@ -1021,14 +1029,13 @@ script:
     dw {draw}, {row}*179
     dw {draw}, {row}*180
     dw {draw}, {blank}
+    dw {draw}, {blank}
     dw {draw}, {row}*181
+    dw {draw}, {blank}
     dw {draw}, {row}*182
     dw {draw}, {blank}
     dw {draw}, {blank}
-    dw {draw}, {blank}
-    dw {draw}, {blank}
-    dw {draw}, {blank}
-    
+
     dw {draw}, {row}*183 // GAMEPLAY STATS
     dw {draw}, {blank}
     dw {draw}, {blank}
@@ -1045,9 +1052,6 @@ script:
     dw {draw}, {blank}
     dw {draw}, {row}*189 // TIME ADJUSTING DOOR
     dw {draw}, {row}*190
-    dw {draw}, {blank}
-    dw {draw}, {row}*224 // ARM PUMP
-    dw {draw}, {row}*225
     dw {draw}, {blank}
     dw {draw}, {blank}
     dw {draw}, {row}*191 // TIME SPENT
@@ -1248,11 +1252,11 @@ credits:
     {big}
     dw "     METROIDCONSTRUCTION COM    " // 140
     dw "     metroidconstruction.com    " // 141
-    {yellow}
-    dw "  SUPER METROID SRL COMMUNITY   " // 142
+    {purple}
+    dw "       PALETTE RANDOMIZER       " // 142
     {big}
-    dw "    DISCORD INVITE . RT2FWZT    " // 143 (rT2fWZt)
-    dw "    discord invite . rt@fwzt    " // 144
+    dw "             RAND 0             " // 143
+    dw "             rand }             " // 144
     {purple}
     // params title
     dw "     RANDOMIZER PARAMETERS      " // 145
@@ -1268,7 +1272,7 @@ credits:
     dw " health tanks .............. xx " // 153
     // params data start
     {yellow}
-    dw " ENERGY QUANTITY ...... XXXXXXX " // 154
+    dw "                                " // 154  : reusable
     dw " PROGRESSION SPEED .... XXXXXXX " // 155
     dw " PROGRESSION DIFFICULTY XXXXXXX " // 156
     // item distrib title	
@@ -1285,12 +1289,16 @@ credits:
     {big}
     dw " AMMO DISTRIBUTION  X X X X X X " // 163
     dw " ammo distribution  x.x x.x x.x " // 164
+    // credits continued
+    {yellow}
+    dw "   SUPER METROID DISASSEMBLY    " // 165
+    {big}
+    dw "     PJBOY        KEJARDON      " // 166
+    dw "     pjboy        kejardon      " // 167
+// stats continued
+    dw "AVAILABLE  AMMO XXX% ENERGY XXX%" // 168
+    dw "available  ammo xxx> energy xxx>" // 169
 // --- this space is reusable
-    dw "                                " // 165
-    dw "                                " // 166
-    dw "                                " // 167
-    dw "                                " // 168
-    dw "                                " // 169
     dw "                                " // 170
     dw "                                " // 171
     dw "                                " // 172
@@ -1302,10 +1310,11 @@ credits:
     dw "                                " // 178
 // End of reusable space	
     {big}
-    dw "       RANDOMMETROIDSOLVER      " // 179
-    dw "       randommetroidsolver      " // 180
-    dw "        PYTHONANYWHERE COM      " // 181
-    dw "       .pythonanywhere.com      " // 182
+    dw "            VARIA RUN           " // 179
+    dw "            varia.run           " // 180
+    {orange}
+    dw "         BETA.VARIA.RUN         " // 181
+    dw "        DISCORD.VARIA.RUN       " // 182
     {purple}
     dw "      GAMEPLAY STATISTICS       " // 183
     {orange}
@@ -1358,8 +1367,6 @@ credits:
     {big}
     //dw " ARM PUMPING GAIN      00'00^00 " // 224
     //dw " arm pumping gain               " // 225
-    dw "                                " // 224
-    dw "                                " // 225
     dw $0000                              // End of credits tilemap
 
 warnpc $ceffff

@@ -767,8 +767,15 @@ class RomPatcher:
         
         return dist
 
+    def getAmmoPct(self, minorsDist):
+        q = 0
+        for m,v in minorsDist.iteritems():
+            q += v['Quantity']
+        return 100*q/66
+
     def writeRandoSettings(self, settings, itemLocs):
         dist = self.getMinorsDistribution(itemLocs)
+        tanks = self.getItemQty(itemLocs, 'ETank') + self.getItemQty(itemLocs, 'Reserve')
 
         address = 0x2736C0
         value = "%02d" % dist['Missile']['Quantity']
@@ -798,7 +805,6 @@ class RomPatcher:
         self.writeCreditsStringBig(address, line, top=False)
         address += 0x40
 
-        tanks = self.getItemQty(itemLocs, 'ETank') + self.getItemQty(itemLocs, 'Reserve')
         value = "%02d" % tanks
         line = " HEALTH TANKS                %s " % value
         self.writeCreditsStringBig(address, line, top=True)
@@ -847,6 +853,14 @@ class RomPatcher:
         line = " ammo distribution  %s " % value
         self.writeCreditsStringBig(address, line, top=False)
         address += 0x40
+
+        # write ammo/energy pct
+        address = 0x273C40
+        line = "AVAILABLE  AMMO %03d%% ENERGY %03d%%" % (self.getAmmoPct(dist), 100*tanks/18)
+        self.writeCreditsStringBig(address, line, top=True)
+        address += 0x40
+        line = "available  ammo %03d%% energy %03d%%" % (self.getAmmoPct(dist), 100*tanks/18)
+        self.writeCreditsStringBig(address, line, top=False)
 
     def writeSpoiler(self, itemLocs):
         # keep only majors, filter out Etanks and Reserve

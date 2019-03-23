@@ -258,7 +258,12 @@ class RomReader:
                 loc["itemName"] = "Nothing"
                 continue
             item = self.getItem(loc["Address"], loc["Visibility"])
-            loc["itemName"] = self.items[item]["name"]
+            try:
+                loc["itemName"] = self.items[item]["name"]
+            except:
+                # race seeds
+                loc["itemName"] = "Nothing"
+                item = '0x0'
             if majorsSplit == None:
                 if 'Major' in loc['Class'] and self.items[item]['name'] in ['Missile', 'Super', 'PowerBomb']:
                     isFull = True

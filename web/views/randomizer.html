@@ -1305,7 +1305,7 @@ def displayNumber(id, min, max, default, step="1"):
               </tr>
               <tr>
 		<td>Skills Preset:</td>
-		<td>{{=SELECT(OPTGROUP(*stdPresets, **dict(_label="Standard presets")), OPTGROUP(*comPresets, **dict(_label="Community presets")), **dict(_name="preset", _id="preset", value=session.randomizer["preset"], _class="filldropdown chzn-select"))}}</td>
+		<td>{{=SELECT(OPTGROUP(*stdPresets, **dict(_label="Standard presets")), OPTGROUP(*tourPresets, **dict(_label="Tournament presets")), OPTGROUP(*comPresets, **dict(_label="Community presets")), **dict(_name="preset", _id="preset", value=session.randomizer["preset"], _class="filldropdown chzn-select"))}}</td>
 		<td id="presetStep"><button type="button" onclick="startTheTour(2)">?</button></td>
               </tr>
 		<td>Settings Preset:</td>

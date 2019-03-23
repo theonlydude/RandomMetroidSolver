@@ -60,9 +60,10 @@ def loadPreset():
 
 def loadPresetsList():
     files = sorted(os.listdir('community_presets'), key=lambda v: v.upper())
-    stdPresets = ['noob', 'casual', 'regular', 'veteran', 'speedrunner', 'master', 'Season_Races', 'smrat']
+    stdPresets = ['noob', 'casual', 'regular', 'veteran', 'speedrunner', 'master']
+    tourPresets = ['Season_Races', 'smrat']
     comPresets = [os.path.splitext(file)[0] for file in files]
-    return (stdPresets, comPresets)
+    return (stdPresets, tourPresets, comPresets)
 
 def loadRandoPresetsList():
     files = sorted(os.listdir('rando_presets'), key=lambda v: v.upper())
@@ -256,7 +257,7 @@ def presets():
         redirect(URL(r=request, f='presets'))
 
     # load presets list
-    (stdPresets, comPresets) = loadPresetsList()
+    (stdPresets, tourPresets, comPresets) = loadPresetsList()
 
     # add missing knows
     for know in Knows.__dict__:
@@ -288,8 +289,8 @@ def presets():
     return dict(desc=Knows.desc, difficulties=diff2text,
                 categories=Knows.categories, settings=params['Settings'], knows=params['Knows'],
                 easy=easy, medium=medium, hard=hard, harder=harder, hardcore=hardcore, mania=mania,
-                controller=params['Controller'], stdPresets=stdPresets, comPresets=comPresets,
-                skillBarData=skillBarData)
+                controller=params['Controller'], stdPresets=stdPresets, tourPresets=tourPresets,
+                comPresets=comPresets, skillBarData=skillBarData)
 
 def initSolverSession():
     if session.solver is None:
@@ -569,10 +570,10 @@ def solver():
     lastRomFile = getLastSolvedROM()
 
     # load presets list
-    (stdPresets, comPresets) = loadPresetsList()
+    (stdPresets, tourPresets, comPresets) = loadPresetsList()
 
     # send values to view
-    return dict(desc=Knows.desc, stdPresets=stdPresets, comPresets=comPresets, roms=ROMs,
+    return dict(desc=Knows.desc, stdPresets=stdPresets, tourPresets=tourPresets, comPresets=comPresets, roms=ROMs,
                 lastRomFile=lastRomFile, difficulties=diff2text, categories=Knows.categories,
                 result=result,
                 easy=easy, medium=medium, hard=hard, harder=harder, hardcore=hardcore, mania=mania)
@@ -743,10 +744,11 @@ def randomizer():
 
     initRandomizerSession()
 
-    (stdPresets, comPresets) = loadPresetsList()
+    (stdPresets, tourPresets, comPresets) = loadPresetsList()
     randoPresets = loadRandoPresetsList()
 
-    return dict(stdPresets=stdPresets, comPresets=comPresets, patches=patches, randoPresets=randoPresets)
+    return dict(stdPresets=stdPresets, tourPresets=tourPresets, comPresets=comPresets,
+                patches=patches, randoPresets=randoPresets)
 
 def raiseHttp(code, msg, isJson=False):
     #print("raiseHttp: code {} msg {} isJson {}".format(code, msg, isJson))
@@ -1304,7 +1306,7 @@ def tracker():
         session.tracker["firstTime"] = True
 
     # load presets list
-    (stdPresets, comPresets) = loadPresetsList()
+    (stdPresets, tourPresets, comPresets) = loadPresetsList()
 
     # access points
     vanillaAPs = []
@@ -1315,7 +1317,7 @@ def tracker():
     for (src, dest) in vanillaBossesTransitions:
         vanillaBossesAPs += [transition2isolver(src), transition2isolver(dest)]
 
-    return dict(stdPresets=stdPresets, comPresets=comPresets,
+    return dict(stdPresets=stdPresets, tourPresets=tourPresets, comPresets=comPresets,
                 vanillaAPs=vanillaAPs, vanillaBossesAPs=vanillaBossesAPs,
                 curSession=session.tracker)
 
@@ -1334,7 +1336,7 @@ def plando():
         session.plando["firstTime"] = True
 
     # load presets list
-    (stdPresets, comPresets) = loadPresetsList()
+    (stdPresets, tourPresets, comPresets) = loadPresetsList()
 
     # access points
     vanillaAPs = []
@@ -1345,7 +1347,7 @@ def plando():
     for (src, dest) in vanillaBossesTransitions:
         vanillaBossesAPs += [transition2isolver(src), transition2isolver(dest)]
 
-    return dict(stdPresets=stdPresets, comPresets=comPresets,
+    return dict(stdPresets=stdPresets, tourPresets=tourPresets, comPresets=comPresets,
                 vanillaAPs=vanillaAPs, vanillaBossesAPs=vanillaBossesAPs,
                 curSession=session.plando)
 

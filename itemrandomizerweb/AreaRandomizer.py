@@ -38,7 +38,7 @@ class AreaRandomizer(Randomizer):
     def __init__(self, locations, settings, seedName, bossTransitions, bidir=True, dotDir=None):
         transitionsOk = False
         attempts = 0
-        while not transitionsOk and attempts < 10:
+        while not transitionsOk and attempts < 50:
             try:
                 self.transitions = createTransitions(bidir)
                 super(AreaRandomizer, self).__init__(locations,

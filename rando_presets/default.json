@@ -27,5 +27,7 @@
   "itemsounds": "on",
   "energyQty": "vanilla",
   "funSuits": "off",
-  "variaTweaks": "on"
+  "variaTweaks": "on",
+  "bossRandomization": "off",
+  "colorsRandomization": "off"
 }

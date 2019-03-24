@@ -370,8 +370,14 @@ class Knows:
 
     ScrewAttackExit = SMBool(True, medium, ['ScrewAttackExit'])
     desc['ScrewAttackExit'] = {'display': 'Screw Attack Exit',
-                               'title': 'Gain momentum from Golden Torizo Energy Recharge room, then Wall-Jump in Screw Attack room',
+                               'title': 'Gain momentum with Hi-Jump and Speed Booster from Golden Torizo Energy Recharge room, then Wall Jump in Screw Attack room, destroying the ceiling with Screw Attack.',
                                'href': 'https://youtu.be/l-L6zzpqim4',
+                               'rooms': ['Screw Attack Room']}
+
+    ScrewAttackExitWithoutScrew = SMBool(False, 0, ['ScrewAttackExitWithoutScrew'])
+    desc['ScrewAttackExitWithoutScrew'] = {'display': 'Screw Attack Exit without Screw',
+                               'title': 'Destroy the ceiling, then jump from inside the door with Hi-Jump and Speed Booster to climb up in Screw Attack room',
+                               'href': '', # TODO
                                'rooms': ['Screw Attack Room']}
 
     # wrecked ship

@@ -233,9 +233,9 @@ class HelpersGraph(Helpers):
         return sm.wand(sm.canDestroyBombWalls(),
                        sm.wor(sm.canFly(),
                               sm.wand(sm.haveItem('HiJump'),
-                                      sm.haveItem('ScrewAttack'),
                                       sm.haveItem('SpeedBooster'),
-                                      sm.knowsScrewAttackExit()),
+                                      sm.wor(sm.wand(sm.haveItem('ScrewAttack'), sm.knowsScrewAttackExit()),
+                                             sm.knowsScrewAttackExitWithoutScrew())),
                               sm.wand(sm.canUseSpringBall(),
                                       sm.knowsSpringBallJumpFromWall()),
                               sm.wand(sm.canSimpleShortCharge(), # fight GT and spark out

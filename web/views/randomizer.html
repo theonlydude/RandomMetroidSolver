@@ -793,6 +793,7 @@ function setColorRando() {
       document.getElementById("invert").disabled = false;
     }
     slider.slider("enable");
+    colorRando.value = "on";
   } else {
     for(var i=0; i<elements.length; i++) {
       var switchBox = document.getElementById(elements[i]);
@@ -806,6 +807,7 @@ function setColorRando() {
       document.getElementById("invert").disabled = true;
     }
     slider.slider("disable");
+    colorRando.value = "off";
   }
 }
 

@@ -564,9 +564,9 @@ class Knows:
              'title': 'Obscure suitless stuff'}
         ],
         'Norfair': [
-            {'knows': ['WallJumpCathedralExit', 'NorfairReserveDBoost', 'CrocPBsIce', 'CrocPBsDBoost', 'IceMissileFromCroc', 'FrogSpeedwayWithoutSpeed', 'NovaBoost'],
+            {'knows': ['WallJumpCathedralExit', 'NorfairReserveDBoost', 'CrocPBsIce', 'CrocPBsDBoost', 'IceEscape', 'IceMissileFromCroc', 'FrogSpeedwayWithoutSpeed', 'NovaBoost'],
               'title': 'Upper Norfair'},
-            {'knows': ['LavaDive', 'LavaDiveNoHiJump', 'ScrewAttackExit', 'WorstRoomIceCharge'],
+            {'knows': ['LavaDive', 'LavaDiveNoHiJump', 'ScrewAttackExit', 'ScrewAttackExitWithoutScrew', 'WorstRoomIceCharge'],
              'title': 'Lower Norfair'}
         ],
         'Bosses/End': [

@@ -16,7 +16,7 @@ extend 'layout.html'
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 
-<title>Super Metroid VARIA Palettizer</title>
+<title>Super Metroid VARIA Customizer</title>
 
 <style>
 h1 {
@@ -523,7 +523,7 @@ function startTheTour(step=-1) {
     {
       element: "#colorsRandomizationStep",
       title: "Color randomization",
-      content: "<p>Randomize the colors of various graphical elements:<br/><img src=\"/solver/static/images/palettesRando.png\" alt=\"colors rando\" title=\"colors rando\" class=\"full\"/></p><br/><p>Use the slider to restrict the possible range of the colors shifting. The colors on the slider are the result colors for Samus, the yellow in the middle being Samus vanilla color:<br/><img src=\"/solver/static/images/samus_degrees.png\" alt=\"samus degrees\" title=\"samus degrees\" class=\"full\"/>You can invert the range by clicking on the invert button.</p><p>You can choose if you want to use the same degree to randomize all the elements.</p>"
+      content: "<p>Randomize the colors of various graphical elements:<br/><img src=\"/solver/static/images/palettesRando.png\" alt=\"colors rando\" title=\"colors rando\" class=\"full\"/></p><br/><p>Use the slider to restrict the possible range of the colors shifting. The colors on the slider are the result colors for Samus, the yellow in the middle being Samus vanilla color:<br/><img src=\"/solver/static/images/samus_degrees.png\" alt=\"samus degrees\" title=\"samus degrees\" class=\"full\"/>You can invert the range by clicking on the invert button.</p><p>By default, the same shift is applied to all elements for color consistency. If you disable the setting, a different shift will be used for each category.</p>"
     },
     {
       element: "#patchesStep",
@@ -588,11 +588,11 @@ def displayCheckbox(id, defaultTrue=False):
       <div class="tabcontent">
         <div class="row">
 	  <div class="column">
-	    <p>Add palette randomization, apply patches to an already randomized VARIA seed.</p>
+	    <p>Add palette randomization, apply patches to an already randomized VARIA seed, or a vanilla Super Metroid ROM.</p>
             <table class="full">
               <colgroup><col class="half" /><col class="half" /></colgroup>
               <tr>
-                <td>VARIA seed:</td>
+                <td>ROM:</td>
                 <td>{{=INPUT(_type="file", _name="uploadFile", _id="uploadFile", _class="full")}}</td>
                 <td><button type="button" onclick="startTheTour(0)" id="uploadFileStep">?</button></td>
               </tr>

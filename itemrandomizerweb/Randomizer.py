@@ -1597,4 +1597,4 @@ class Randomizer(object):
         if self.vcr != None:
             self.vcr.dump()
 
-        return (stuck, self.itemLocations)
+        return (stuck, self.itemLocations, self.progressionItemLocs)

@@ -778,7 +778,7 @@ class RomPatcher:
         tanks = self.getItemQty(itemLocs, 'ETank') + self.getItemQty(itemLocs, 'Reserve')
 
         address = 0x2736C0
-        value = "%02d" % dist['Missile']['Quantity']
+        value = "{:>2}".format(int(dist['Missile']['Quantity']))
         line = " MISSILE PACKS               %s " % value
         self.writeCreditsStringBig(address, line, top=True)
         address += 0x40
@@ -787,7 +787,7 @@ class RomPatcher:
         self.writeCreditsStringBig(address, line, top=False)
         address += 0x40
 
-        value = "%02d" % dist['Super']['Quantity']
+        value = "{:>2}".format(int(dist['Super']['Quantity']))
         line = " SUPER PACKS                 %s " % value
         self.writeCreditsStringBig(address, line, top=True)
         address += 0x40
@@ -796,7 +796,7 @@ class RomPatcher:
         self.writeCreditsStringBig(address, line, top=False)
         address += 0x40
 
-        value = "%02d" % dist['PowerBomb']['Quantity']
+        value = "{:>2}".format(int(dist['PowerBomb']['Quantity']))
         line = " POWER BOMB PACKS            %s " % value
         self.writeCreditsStringBig(address, line, top=True)
         address += 0x40
@@ -805,7 +805,7 @@ class RomPatcher:
         self.writeCreditsStringBig(address, line, top=False)
         address += 0x40
 
-        value = "%02d" % tanks
+        value = "{:>2}".format(int(tanks))
         line = " HEALTH TANKS                %s " % value
         self.writeCreditsStringBig(address, line, top=True)
         address += 0x40
@@ -814,9 +814,9 @@ class RomPatcher:
         self.writeCreditsStringBig(address, line, top=False)
         address += 0x40
 
-        value = " "+settings.qty['energy'].upper()
-        line = " ENERGY QUANTITY ......%s " % value.rjust(8, '.')
-        self.writeCreditsString(address, 0x04, line)
+        # value = " "+settings.qty['energy'].upper()
+        # line = " ENERGY QUANTITY ......%s " % value.rjust(8, '.')
+        # self.writeCreditsString(address, 0x04, line)
         address += 0x40
 
         value = " "+settings.progSpeed.upper()
@@ -856,13 +856,14 @@ class RomPatcher:
 
         # write ammo/energy pct
         address = 0x273C40
-        line = "AVAILABLE  AMMO %03d%% ENERGY %03d%%" % (self.getAmmoPct(dist), 100*tanks/18)
+        (ammoPct, energyPct) = (int(self.getAmmoPct(dist)), int(100*tanks/18))
+        line = " AVAILABLE AMMO {:>3}% ENERGY {:>3}%".format(ammoPct, energyPct)
         self.writeCreditsStringBig(address, line, top=True)
         address += 0x40
-        line = "available  ammo %03d%% energy %03d%%" % (self.getAmmoPct(dist), 100*tanks/18)
+        line = " available ammo {:>3}% energy {:>3}%".format(ammoPct, energyPct)
         self.writeCreditsStringBig(address, line, top=False)
 
-    def writeSpoiler(self, itemLocs):
+    def writeSpoiler(self, itemLocs, progItemLocs=None):
         # keep only majors, filter out Etanks and Reserve
         fItemLocs = List.filter(lambda il: il['Item']['Category'] not in ['Ammo', 'Nothing', 'Energy'],
                                 itemLocs)
@@ -906,16 +907,34 @@ class RomPatcher:
                 self.romFile.seek(addr)
                 self.race.writeWordMagic(w)
                 addr += 0x2
-        for item in ["Charge Beam", "Ice Beam", "Wave Beam", "Spazer", "Plasma Beam",
-                     "Varia Suit", "Gravity Suit",
-                     "Morph Ball", "Bomb", "Spring Ball", "Screw Attack",
-                     "Hi-Jump Boots", "Space Jump", "Speed Booster",
-                     "Grappling Beam", "X-Ray Scope",
-                     "Missile", "Super Missile", "Power Bomb"]:
+        # standard item order
+        items = ["Missile", "Super Missile", "Power Bomb",
+                 "Charge Beam", "Ice Beam", "Wave Beam", "Spazer", "Plasma Beam",
+                 "Varia Suit", "Gravity Suit",
+                 "Morph Ball", "Bomb", "Spring Ball", "Screw Attack",
+                 "Hi-Jump Boots", "Space Jump", "Speed Booster",
+                 "Grappling Beam", "X-Ray Scope"]
+        displayNames = {}
+        if progItemLocs is not None:
+            # reorder it with progression indices
+            prog = ord('A')
+            idx = 0
+            progNames = [il['Item']['Name'] for il in progItemLocs]
+            for i in range(len(progNames)):
+                item = progNames[i]
+                if item in items:
+                    items.remove(item)
+                    items.insert(idx, item)
+                    displayNames[item] = chr(prog + i) + ": " + item
+                    idx += 1
+        for item in items:
             # super fun removes items
             if item not in itemLocs:
                 continue
-            itemName = prepareString(item)
+            display = item
+            if item in displayNames:
+                display = displayNames[item]
+            itemName = prepareString(display)
             locationName = prepareString(itemLocs[item], isItem=False)
 
             self.writeCreditsString(address, 0x04, itemName, isRace)

@@ -410,10 +410,11 @@ if __name__ == "__main__":
             sys.exit(-1)
     doors = getDoorConnections(randomizer.areaGraph, args.area, args.bosses)
     if args.patchOnly == False:
-        (stuck, itemLocs) = randomizer.generateItems()
+        (stuck, itemLocs, progItemLocs) = randomizer.generateItems()
     else:
         stuck = False
         itemLocs = []
+        progItemLocs = None
     if stuck == True:
         dumpErrorMsg(args.output, randomizer.errorMsg)
         print("Can't generate " + fileName + " with the given parameters: {}".format(randomizer.errorMsg))
@@ -438,7 +439,8 @@ if __name__ == "__main__":
         for loc in locsItems:
             print('{:>50}: {:>16} '.format(loc, locsItems[loc]))
 
-    try:
+#    try:
+    if True:
         # args.rom is not None: generate local rom named filename.sfc with args.rom as source
         # args.output is not None: generate local json named args.output
         if args.rom is not None:
@@ -459,7 +461,7 @@ if __name__ == "__main__":
 
         if args.patchOnly == False:
             romPatcher.writeSeed(seed) # lol if race mode
-            romPatcher.writeSpoiler(itemLocs)
+            romPatcher.writeSpoiler(itemLocs, progItemLocs)
             romPatcher.writeRandoSettings(randoSettings, itemLocs)
             romPatcher.writeDoorConnections(doors)
             if args.area == True:
@@ -505,11 +507,11 @@ if __name__ == "__main__":
             data["errorMsg"] = randomizer.errorMsg
             with open(outFileName, 'w') as jsonFile:
                 json.dump(data, jsonFile)
-    except Exception as e:
-        msg = "Error patching {}: ({}: {})".format(outFileName, type(e).__name__, e)
-        dumpErrorMsg(args.output, msg)
-        print(msg)
-        sys.exit(-1)
+    # except Exception as e:
+    #     msg = "Error patching {}: ({}: {})".format(outFileName, type(e).__name__, e)
+    #     dumpErrorMsg(args.output, msg)
+    #     print(msg)
+    #     sys.exit(-1)
 
     if stuck == True:
         print("Rom generated for debug purpose: {}".format(fileName))

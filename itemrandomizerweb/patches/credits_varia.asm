@@ -1106,63 +1106,64 @@ script:
     dw {draw}, {blank}
     dw {draw}, {blank}
 
-    dw {draw}, {row}*673 // Missile
-    dw {draw}, {row}*674
-    dw {draw}, {blank}
-    dw {draw}, {row}*675 // Super
-    dw {draw}, {row}*676
-    dw {draw}, {blank}
-    dw {draw}, {row}*677 // PB
-    dw {draw}, {row}*678
-    dw {draw}, {blank}	
-    dw {draw}, {row}*641 // Charge
+    dw {draw}, {row}*641
     dw {draw}, {row}*642
     dw {draw}, {blank}
-    dw {draw}, {row}*643 // Ice
+    dw {draw}, {row}*643
     dw {draw}, {row}*644
     dw {draw}, {blank}
-    dw {draw}, {row}*645 // WAve
+    dw {draw}, {row}*645
     dw {draw}, {row}*646
     dw {draw}, {blank}
-    dw {draw}, {row}*647 // Spazer
+    dw {draw}, {row}*647
     dw {draw}, {row}*648
     dw {draw}, {blank}
-    dw {draw}, {row}*649 // Plasma
+    dw {draw}, {row}*649
     dw {draw}, {row}*650
     dw {draw}, {blank}
-    dw {draw}, {row}*651 // Varia
+    dw {draw}, {row}*651
     dw {draw}, {row}*652
     dw {draw}, {blank}
-    dw {draw}, {row}*653 // Gravity
+    dw {draw}, {row}*653
     dw {draw}, {row}*654
     dw {draw}, {blank}
-    dw {draw}, {row}*655 // Morph
+    dw {draw}, {row}*655
     dw {draw}, {row}*656
     dw {draw}, {blank}
-    dw {draw}, {row}*657 // Bomb
+    dw {draw}, {row}*657
     dw {draw}, {row}*658
     dw {draw}, {blank}
-    dw {draw}, {row}*659 // Spring Ball
+    dw {draw}, {row}*659
     dw {draw}, {row}*660
     dw {draw}, {blank}
-    dw {draw}, {row}*661 // Screw
+    dw {draw}, {row}*661
     dw {draw}, {row}*662
     dw {draw}, {blank}
-    dw {draw}, {row}*663 // HiJump
+    dw {draw}, {row}*663
     dw {draw}, {row}*664
     dw {draw}, {blank}
-    dw {draw}, {row}*665 // Space Jump
+    dw {draw}, {row}*665
     dw {draw}, {row}*666
     dw {draw}, {blank}
-    dw {draw}, {row}*667 // Speed
+    dw {draw}, {row}*667
     dw {draw}, {row}*668
     dw {draw}, {blank}
-    dw {draw}, {row}*669 // Grapple
+    dw {draw}, {row}*669
     dw {draw}, {row}*670
     dw {draw}, {blank}
-    dw {draw}, {row}*671 // XRay
+    dw {draw}, {row}*671
     dw {draw}, {row}*672
     dw {draw}, {blank}
+    dw {draw}, {row}*673
+    dw {draw}, {row}*674
+    dw {draw}, {blank}
+    dw {draw}, {row}*675
+    dw {draw}, {row}*676
+    dw {draw}, {blank}
+    dw {draw}, {row}*677
+    dw {draw}, {row}*678
+    dw {draw}, {blank}
+
     // Last info
     dw {draw}, {blank}
     dw {draw}, {blank}
@@ -1296,8 +1297,8 @@ credits:
     dw "     PJBOY        KEJARDON      " // 166
     dw "     pjboy        kejardon      " // 167
 // stats continued
-    dw "AVAILABLE  AMMO XXX% ENERGY XXX%" // 168
-    dw "available  ammo xxx> energy xxx>" // 169
+    dw " AVAILABLE AMMO XXX% ENERGY XXX%" // 168
+    dw " available ammo xxx> energy xxx>" // 169
 // --- this space is reusable
     dw "                                " // 170
     dw "                                " // 171
@@ -1317,7 +1318,7 @@ credits:
     dw "        DISCORD.VARIA.RUN       " // 182
     {purple}
     dw "      GAMEPLAY STATISTICS       " // 183
-    {orange}
+    {blue}
     dw "      SPEEDRUNNING STATS        " // 184
     {big}
     dw " DOOR TRANSITIONS               " // 185

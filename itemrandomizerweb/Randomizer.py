@@ -517,6 +517,9 @@ class Randomizer(object):
             locs = [loc for loc in locs if self.restrictions['MajorMinor'] in loc['Class']]
         self.lateMorphLimit = len(locs)
         self.lateMorphOutCrateria = len(set([loc['GraphArea'] for loc in locs])) > 1
+        if self.lateMorphOutCrateria == False and self.restrictions['MajorMinor'] == 'Full' and self.restrictions['Suits'] == False:
+            # we can do better
+            raise RuntimeError('Invalid layout for late morph')
         self.log.debug("lateMorphLimit: {}: {} {}".format(self.restrictions['MajorMinor'], self.lateMorphLimit, self.lateMorphOutCrateria))
 
         # cleanup

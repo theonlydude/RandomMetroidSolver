@@ -2,7 +2,6 @@
   "elevators_doors_speed": "on",
   "progressionDifficulty": "random",
   "funMovement": "random",
-  "areaLayout": "off",
   "skip_ceres": "on",
   "hideItems": "random",
   "funCombat": "random",

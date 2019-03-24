@@ -10,10 +10,10 @@
   "layoutPatches": "on",
   "missileQty": "1.5",
   "morphPlacement": "early",
-  "progressionSpeed": "slow",
-  "maxDifficulty": "hardcore",
+  "progressionSpeed": "slowest",
+  "maxDifficulty": "mania",
   "powerBombQty": "1",
-  "minorQty": "100",
+  "minorQty": "50",
   "suitsRestriction": "on",
   "preset": "speedrunner",
   "spinjumprestart": "off",
@@ -21,7 +21,7 @@
   "superQty": "1",
   "skip_intro": "off",
   "itemsounds": "on",
-  "energyQty": "vanilla",
+  "energyQty": "medium",
   "funSuits": "on",
   "variaTweaks": "on"
 }

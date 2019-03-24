@@ -1,7 +1,6 @@
 {
   "progressionDifficulty": "random",
   "funMovement": "off",
-  "areaLayout": "off",
   "skip_ceres": "on",
   "hideItems": "off",
   "funCombat": "off",

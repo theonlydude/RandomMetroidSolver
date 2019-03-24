@@ -439,8 +439,7 @@ if __name__ == "__main__":
         for loc in locsItems:
             print('{:>50}: {:>16} '.format(loc, locsItems[loc]))
 
-#    try:
-    if True:
+    try:
         # args.rom is not None: generate local rom named filename.sfc with args.rom as source
         # args.output is not None: generate local json named args.output
         if args.rom is not None:
@@ -507,11 +506,11 @@ if __name__ == "__main__":
             data["errorMsg"] = randomizer.errorMsg
             with open(outFileName, 'w') as jsonFile:
                 json.dump(data, jsonFile)
-    # except Exception as e:
-    #     msg = "Error patching {}: ({}: {})".format(outFileName, type(e).__name__, e)
-    #     dumpErrorMsg(args.output, msg)
-    #     print(msg)
-    #     sys.exit(-1)
+    except Exception as e:
+        msg = "Error patching {}: ({}: {})".format(outFileName, type(e).__name__, e)
+        dumpErrorMsg(args.output, msg)
+        print(msg)
+        sys.exit(-1)
 
     if stuck == True:
         print("Rom generated for debug purpose: {}".format(fileName))

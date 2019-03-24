@@ -526,7 +526,7 @@ class Knows:
              'title': 'Basics'},
              {'knows': ['Mockball', 'SimpleShortCharge', 'InfiniteBombJump', 'GreenGateGlitch',
                         'GravityJump', 'GetAroundWallJump',
-                        'SpringBallJump', 'DoubleSpringBallJump', 'SpringBallJumpFromWall', 'ShortCharge'],
+                        'SpringBallJump', 'SpringBallJumpFromWall', 'ShortCharge'],
              'title': 'Used across the game'}
         ],
         'Crateria/Brinstar': [
@@ -560,7 +560,7 @@ class Knows:
              'title': 'Spring Ball Access'},
             {'knows': ['DraygonRoomGrappleExit', 'DraygonRoomCrystalFlash', 'PreciousRoomXRayExit'],
              'title': 'Suitless Draygon Exit'},
-            {'knows': ['TediousMountEverest', 'SuitlessPuyoClip'],
+            {'knows': ['DoubleSpringBallJump', 'TediousMountEverest', 'SuitlessPuyoClip'],
              'title': 'Obscure suitless stuff'}
         ],
         'Norfair': [

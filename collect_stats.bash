@@ -151,7 +151,7 @@ function gen_seeds() {
 }
 
 for A in "standard" "area"; do
-    for B in "Major" "Full" "Chozo"; do
+    for B in "Full"; do #"Major" "Full" "Chozo"; do
 	for C in "normal"; do #"easier" "harder" "normal"; do
 	    PARAMS="--maxDifficulty hardcore --morphPlacement late"
 	    if [ $A = "area" ]; then

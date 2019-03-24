@@ -5,8 +5,8 @@ SOLVER=./solver.py
 GET_STATS=./get_stats.py
 DUMP=./dump_rom.py
 
-presets="noob casual regular veteran speedrunner master"
-progs="slowest slow medium fast fastest random basic"
+presets="smrat Season_Races master"
+progs="slowest slow medium fast fastest variable"
 n=20
 vanilla_rom=$1
 if [ -z "$1" ]; then
@@ -53,7 +53,7 @@ function worker {
     seed=$(head -c 500 /dev/urandom | tr -dc '0-9' | fold -w 7 | head -n 1 | sed 's/^0*//')
     errfile=/tmp/VARIA_stats_worker_${seed}_${speed}_${p}
     echo "errfile = $errfile"
-    $RANDO --rom ${vanilla_rom} --seed ${seed} -i $speed $extra --param diff_presets/$p.json
+    $RANDO --rom ${vanilla_rom} --seed ${seed} -i $speed $extra --param standard_presets/$p.json
     [ $? -ne 0 ] && {
 	echo "RANDO failed"  > $errfile
 	echo "preset : $p" >> $errfile
@@ -68,7 +68,7 @@ function worker {
     solver_log=${dest}/${rom/sfc/log}
     romjson=${dest}/${rom/sfc/json}
     [ -f $rom ] && {
-	$SOLVER $rom --preset diff_presets/$p.json  --difficultyTarget 5 --displayGeneratedPath -1 $rom1st > $solver_log
+	$SOLVER -r $rom --preset standard_presets/$p.json  --difficultyTarget 5 --displayGeneratedPath -1 $rom1st > $solver_log
 	[ $? -ne 0 ] && {
 	    echo "SOLVER failed"  > $errfile
 	    echo "rom : $rom" >> $errfile
@@ -125,20 +125,12 @@ function gen_seeds() {
     base_extra=$4
     progDiff=$3
     for p in $presets; do
-	# if [ $p = 'noob' ]; then
-	#     noob='--maxDifficulty harder'
-	# fi
 	mkdir -p $base_dir/$p
 	for speed in $progs; do
-	    extra="$base_extra --progressionDifficulty $progDiff $noob"
-#	    extra="$base_extra --superQty 1 --powerBombQty 1 --missileQty 4.6"
-	    # if [[ $speed != "random" ]]; then
-	    # 	extra="$extra --morphPlacement early"
-	    # fi
-	    #	extra="--speedScrewRestriction --superFun Combat --superFun Movement"
-	    if [[ $speed != "fastest" ]]; then
-		extra="$extra --suitsRestriction"
-	    fi
+	    extra="$base_extra --progressionDifficulty $progDiff"
+#	    if [[ $speed != "fastest" ]]; then
+#		extra="$extra --suitsRestriction"
+#	    fi
 	    dest=$base_dir/$p/$speed
 	    mkdir $dest
 	    reset_workers
@@ -158,43 +150,15 @@ function gen_seeds() {
     done
 }
 
-# # do it again with random
-# DIFFS=("" "" "" "" "" "" "--maxDifficulty easy" "--maxDifficulty medium" "--maxDifficulty hard" "--maxDifficulty harder" "--maxDifficulty hardcore" "--maxDifficulty mania")
-
-# for A in "area" "standard"; do
-#     for B in "classic" "full"; do
-# 	PARAMS=""
-# 	if [ $A = "area" ]; then
-# 	    PARAMS="${PARAMS} --area --dot"
-# 	fi
-# 	if [ $B = "full" ]; then
-# 	    PARAMS="${PARAMS} --fullRandomization"
-# 	fi
-
-# 	# add randomized parameters
-# 	#	PARAMS="${PARAMS} --randomRestrictions --superFun random --energyQty random --missileQty 0 --superQty 0 --powerBombQty 0 --minorQty 0"
-# 	PARAMS="${PARAMS} --morphPlacement random --energyQty random --missileQty 0 --superQty 0 --powerBombQty 0 --minorQty 0"
-
-# 	let S=$RANDOM%${#DIFFS[@]}
-# 	DIFF=${DIFFS[$S]}
-# 	PARAMS="${PARAMS} ${DIFF}"
-
-# 	gen_seeds "$A" "$B" "random" "$PARAMS"
-#     done
-# done
-
 for A in "standard" "area"; do
-    for B in "classic" "full"; do
-	for C in "easier" "harder" "normal"; do
-	    PARAMS="--maxDifficulty hardcore"
+    for B in "Major" "Full" "Chozo"; do
+	for C in "normal"; do #"easier" "harder" "normal"; do
+	    PARAMS="--maxDifficulty hardcore --morphPlacement late"
 	    if [ $A = "area" ]; then
 		PARAMS="${PARAMS} --area --dot"
 	    fi
-	    if [ $B = "full" ]; then
-		PARAMS="${PARAMS} --fullRandomization"
-	    fi
+	    PARAMS="${PARAMS} --majorsSplit ${B}"
 	    gen_seeds "$A" "$B" "$C" "$PARAMS"
 	done
     done
 done
-

@@ -513,11 +513,11 @@ class Randomizer(object):
         self.smbm.resetItems()
         self.smbm.addItems([item['Type'] for item in self.itemPool if item['Type'] != 'Morph'])
         locs = self.currentLocations(post=True)
-        if self.restrictions['MajorMinor'] == 'Full':
-            self.lateMorphLimit = len(locs)
-        else:
-            self.lateMorphLimit = len([loc for loc in locs if self.restrictions['MajorMinor'] in loc['Class']])
-        self.log.debug("lateMorphLimit: {}: {}".format(self.restrictions['MajorMinor'], self.lateMorphLimit))
+        if self.restrictions['MajorMinor'] != 'Full':
+            locs = [loc for loc in locs if self.restrictions['MajorMinor'] in loc['Class']]
+        self.lateMorphLimit = len(locs)
+        self.lateMorphOutCrateria = len(set([loc['GraphArea'] for loc in locs])) > 1
+        self.log.debug("lateMorphLimit: {}: {} {}".format(self.restrictions['MajorMinor'], self.lateMorphLimit, self.lateMorphOutCrateria))
 
         # cleanup
         self.smbm.resetItems()
@@ -939,9 +939,13 @@ class Randomizer(object):
         return not Randomizer.isInBlueBrinstar(location)
 
     def morphPlacementImpl(self, item, location):
+        # if morph can be out of crateria, restrict it from being put in crateria
+        if self.lateMorphOutCrateria == True:
+            if location['GraphArea'] == 'Crateria':
+                return False
+
         # the closer we get to the limit the higher the chances of allowing morph
-        limit = self.lateMorphLimit
-        proba = random.randint(0, limit)
+        proba = random.randint(0, self.lateMorphLimit)
 
         if self.restrictions['MajorMinor'] == 'Full':
             nbItems = len(self.currentItems)

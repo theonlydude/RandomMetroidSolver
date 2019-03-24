@@ -308,6 +308,12 @@ class Knows:
                            'rooms': ['Landing Site', 'Gauntlet Entrance', 'Gauntlet Energy Tank Room']}
 
     # Norfair
+    IceEscape = SMBool(False, 0, ['IceEscape'])
+    desc['IceEscape'] = {'display': 'Ice Escape',
+                         'title': 'Freeze the platforms and exit Ice Beam area without bombs',
+                         'href': 'https://www.youtube.com/watch?v=lFJPqu8qk54',
+                         'rooms': ['Ice Beam Acid Room']}
+
     WallJumpCathedralExit = SMBool(True, medium, ['WallJumpCathedralExit'])
     desc['WallJumpCathedralExit'] = {'display': 'Wall Jump to exit Cathedral',
                                      'title': 'Use a delayed wall jump to exit Cathedral',
@@ -376,9 +382,9 @@ class Knows:
 
     ScrewAttackExitWithoutScrew = SMBool(False, 0, ['ScrewAttackExitWithoutScrew'])
     desc['ScrewAttackExitWithoutScrew'] = {'display': 'Screw Attack Exit without Screw',
-                               'title': 'Destroy the ceiling, then jump from inside the door with Hi-Jump and Speed Booster to climb up in Screw Attack room',
-                               'href': '', # TODO
-                               'rooms': ['Screw Attack Room']}
+                                           'title': 'Destroy the ceiling, then jump from inside the door with Hi-Jump and Speed Booster to climb up in Screw Attack room',
+                                           'href': 'https://youtu.be/2Ws0Zokg-SQ',
+                                           'rooms': ['Screw Attack Room']}
 
     # wrecked ship
     ContinuousWallJump = SMBool(False, 0, ['ContinuousWallJump'])

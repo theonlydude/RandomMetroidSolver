@@ -298,11 +298,13 @@ locations = [
     'Visibility': "Chozo",
     'Room': 'Ice Beam Room',
     'AccessFrom' : {
-        'Warehouse Entrance Left': lambda sm: SMBool(True)
+        'Warehouse Entrance Left': lambda sm: sm.canOpenGreenDoors()
     },
-    'Available': lambda sm: sm.wand(sm.canOpenGreenDoors(),
-                                    sm.canHellRun('Ice'),
-                                    sm.canPassBombPassages(), # if you fail
+    'Available': lambda sm: sm.wand(sm.canHellRun('Ice'),
+                                    sm.wor(sm.canPassBombPassages(), # to exit, or if you fail entrance
+                                           sm.wand(sm.haveItem('Ice'), # harder strat
+                                                   sm.haveItem('Morph'),
+                                                   sm.knowsIceEscape())),
                                     sm.wor(sm.wand(sm.haveItem('Morph'),
                                                    sm.knowsMockball()),
                                            sm.haveItem('SpeedBooster')))

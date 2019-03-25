@@ -12,7 +12,7 @@
   "noGravHeat": "on",
   "missileQty": "3",
   "morphPlacement": "early",
-  "progressionSpeed": ["slowest", "slow", "medium", "fast", "fastest", "basic"],
+  "progressionSpeed": "VARIAble",
   "No_Music": "off",
   "areaRandomization": "off",
   "maxDifficulty": "harder",
@@ -27,5 +27,8 @@
   "itemsounds": "off",
   "energyQty": "vanilla",
   "funSuits": "off",
-  "variaTweaks": "off"
+  "variaTweaks": "off",
+  "colorsRandomization": "off",
+  "bossRandomization": "off",
+  "areaLayout": "off"
 }

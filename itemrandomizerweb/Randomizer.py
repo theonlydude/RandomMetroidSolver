@@ -272,6 +272,15 @@ class SuperFunProvider(object):
                 if loc['Name'] in self.bossesLocs:
                     ret = False
                     self.log.debug("unavail Boss: " + loc['Name'])
+            if ret:
+                # revive bosses and see if phantoon doesn't block himself
+                Bosses.reset()
+                # reset cache
+                self.sm.resetItems()
+                self.sm.addItems([item['Type'] for item in pool])
+                maxDiff = self.rando.difficultyTarget
+                ret = self.rando.areaGraph.canAccess(self.sm, 'West Ocean Left', 'PhantoonRoomIn', maxDiff)\
+                    and self.rando.areaGraph.canAccess(self.sm, 'Crab Maze Left', 'PhantoonRoomIn', maxDiff)
 
         # cleanup
         self.sm.resetItems()

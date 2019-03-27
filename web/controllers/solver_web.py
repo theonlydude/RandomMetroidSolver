@@ -941,6 +941,8 @@ def randomizerWebService():
     # web service to compute a new random (returns json string)
     print("randomizerWebService")
 
+    session.forget(response)
+
     # set header to authorize cross domain AJAX
     response.headers['Access-Control-Allow-Origin'] = '*'
 

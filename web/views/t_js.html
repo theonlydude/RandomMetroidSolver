@@ -377,7 +377,7 @@ function ajaxOkGet(jsonData, status, dummy, chained=false) {
   // if no available locations, display a popup telling you're stuck
   if(Object.keys(jsonData["availableLocations"]).length == 0 && chained == false) {
     if(jsonData["allTransitions"] == true && (( ! "state" in locsInfo["MotherBrain"] ) || locsInfo["MotherBrain"]["state"] != "visited")) {
-      alert("You're stucked, you can't finish this seed with the given preset.");
+      alert("You're stuck, you can't finish this seed with the given preset.");
     }
   }
 }

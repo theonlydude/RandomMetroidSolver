@@ -24,7 +24,7 @@ def maxPresetsReach():
     return len(os.listdir('community_presets')) >= 2048
 
 def isStdPreset(preset):
-    return preset in ['noob', 'casual', 'regular', 'veteran', 'speedrunner', 'master', 'samus', 'solution', 'Season_Races', 'smrat']
+    return preset in ['noob', 'casual', 'regular', 'veteran', 'speedrunner', 'master', 'samus', 'solution', 'Season_Races', 'smrat', 'SCAVENGER_HUNT']
 
 def getPresetDir(preset):
     if isStdPreset(preset):
@@ -61,8 +61,8 @@ def loadPreset():
 def loadPresetsList():
     files = sorted(os.listdir('community_presets'), key=lambda v: v.upper())
     stdPresets = ['noob', 'casual', 'regular', 'veteran', 'speedrunner', 'master']
-    tourPresets = ['Season_Races', 'smrat']
-    comPresets = [os.path.splitext(file)[0] for file in files]
+    tourPresets = ['Season_Races', 'smrat', 'SCAVENGER_HUNT']
+    comPresets = [os.path.splitext(file)[0] for file in files if file != '.git']
     return (stdPresets, tourPresets, comPresets)
 
 def loadRandoPresetsList():

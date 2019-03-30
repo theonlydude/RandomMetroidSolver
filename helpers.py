@@ -547,6 +547,19 @@ class Helpers(object):
                               sm.haveItem('Charge'),
                               sm.haveItem('XRayScope')))
 
+    def mbEtankCheck(self):
+        sm = self.smbm
+        nTanks = sm.energyReserveCount()
+        energyDiff = 0
+        if sm.haveItem('Varia') == False:
+            # "remove" 3 etanks (accounting for rainbow beam damage without varia)
+            if nTanks < 6:
+                return (True, energyDiff)
+            energyDiff = -3
+        elif nTanks < 3:
+            return (False, 0)
+        return (True, energyDiff)
+
     @Cache.decorator
     def enoughStuffsMotherbrain(self):
         sm = self.smbm
@@ -560,18 +573,10 @@ class Helpers(object):
         (ammoMargin, secs) = self.canInflictEnoughDamages(18000 + 3000, givesDrops=False)
         if ammoMargin == 0:
             return SMBool(False)
-
-        # print('MB2', ammoMargin, secs)
-        nTanks = sm.energyReserveCount()
-        energyDiff = 0
-        if sm.haveItem('Varia') == False:
-            # "remove" 3 etanks (accounting for rainbow beam damage without varia)
-            if nTanks < 6:
-                return SMBool(False, 0)
-            energyDiff = -3
-        elif nTanks < 3:
+        (possible, energyDiff) = self.mbEtankCheck()
+        if possible == False:
             return SMBool(False, 0)
-
+        # print('MB2', ammoMargin, secs)
         #print("ammoMargin: {}, secs: {}, settings: {}, energyDiff: {}".format(ammoMargin, secs, Settings.bossesDifficulty['MotherBrain'], energyDiff))
         diff = self.computeBossDifficulty(ammoMargin, secs, Settings.bossesDifficulty['MotherBrain'], energyDiff)
         if diff < 0:

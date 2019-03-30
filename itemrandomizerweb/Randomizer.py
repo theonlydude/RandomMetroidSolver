@@ -293,7 +293,12 @@ class SuperFunProvider(object):
         self.sm.enoughStuffsPhantoon = self.okay
         self.sm.enoughStuffsDraygon = self.okay
         self.sm.enoughStuffsRidley = self.okay
-        self.sm.enoughStuffsMotherbrain = self.okay
+        def mbCheck():
+            (possible, energyDiff) = self.sm.mbEtankCheck()
+            if possible == True:
+                return self.okay()
+            return SMBool(False, 0)
+        self.sm.enoughStuffsMotherbrain = mbCheck
 
     def restoreBossChecks(self):
         self.sm.enoughStuffsKraid = self.bossChecks['Kraid']
@@ -528,8 +533,9 @@ class Randomizer(object):
         if self.lateMorphOutCrateria == False and self.restrictions['MajorMinor'] == 'Full' and self.restrictions['Suits'] == False:
             # we can do better
             raise RuntimeError('Invalid layout for late morph')
+        self.lateMorphResult = None
         self.log.debug("lateMorphLimit: {}: {} {}".format(self.restrictions['MajorMinor'], self.lateMorphLimit, self.lateMorphOutCrateria))
-
+        self.log.debug('lateMorphLimit: locs=' + str([loc['Name'] for loc in locs]))
         # cleanup
         self.smbm.resetItems()
 
@@ -538,6 +544,7 @@ class Randomizer(object):
         self.progTypesCache = []
         self.curLocs = None
         self.curAccessPoints = None
+        self.lateMorphResult = None
 
     # with the new chozo split the tests change, a loc can have one or two classes, an item just one
     def isLocMajor(self, loc):
@@ -954,6 +961,8 @@ class Randomizer(object):
         if self.lateMorphOutCrateria == True:
             if location['GraphArea'] == 'Crateria':
                 return False
+        if self.lateMorphResult is not None:
+            return self.lateMorphResult
 
         # the closer we get to the limit the higher the chances of allowing morph
         proba = random.randint(0, self.lateMorphLimit)
@@ -964,8 +973,8 @@ class Randomizer(object):
             nbItems = len([item for item in self.currentItems if self.restrictions['MajorMinor'] == item['Class']])
 
         self.log.debug("Morph ? step: {}, proba: {}: {}".format(nbItems, proba, proba <= nbItems))
-
-        return proba <= nbItems
+        self.lateMorphResult = proba <= nbItems
+        return self.lateMorphResult
 
     # is softlock possible from the player POV when checking the loc?
     # usually these locs are checked last when playing, so placing

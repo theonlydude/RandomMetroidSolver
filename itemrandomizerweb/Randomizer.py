@@ -914,8 +914,6 @@ class Randomizer(object):
         if canPlaceIt == False:
             return False
         newLocations = [loc for loc in self.currentLocations(item) if loc not in oldLocations]
-        if item['Type'] == 'Morph':
-            self.log.debug('Morph new locs = ' + str([loc['Name'] for loc in newLocations]))
         ret = len(newLocations) > 0
         if ret == True and self.restrictions["MajorMinor"] != "Full":
             ret = List.exists(lambda l: self.restrictions["MajorMinor"] in l["Class"], newLocations)

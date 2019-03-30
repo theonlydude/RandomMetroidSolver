@@ -293,7 +293,12 @@ class SuperFunProvider(object):
         self.sm.enoughStuffsPhantoon = self.okay
         self.sm.enoughStuffsDraygon = self.okay
         self.sm.enoughStuffsRidley = self.okay
-        self.sm.enoughStuffsMotherbrain = self.okay
+        def mbCheck():
+            (possible, energyDiff) = self.sm.mbEtankCheck()
+            if possible == True:
+                return self.okay()
+            return SMBool(False, 0)
+        self.sm.enoughStuffsMotherbrain = mbCheck
 
     def restoreBossChecks(self):
         self.sm.enoughStuffsKraid = self.bossChecks['Kraid']

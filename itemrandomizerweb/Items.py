@@ -1,5 +1,6 @@
 from itemrandomizerweb.stdlib import List
 from utils import randGaussBounds, getRangeDict, chooseFromRange
+import log, logging
 
 import struct, random, copy
 
@@ -259,17 +260,24 @@ class ItemPoolGenerator(object):
         self.qty = qty
         self.sm = sm
         self.maxItems = 105 # 100 item locs and 5 bosses
+        self.log = log.get('ItemPool')
 
     # add ammo given quantity settings
     def addAmmo(self):
         # always add enough minors to pass zebetites (1100 damages) and mother brain 1 (3000 damages)
         # accounting for missile refill. so 15-10, or 10-10 if ice zeb skip is known (Ice is always in item pool)
-        nbMinors = 66 - 5 # 66 minor locs, 5 already in the pool
+        nbMinorsAlready = 5
+        nbMinors = 66 - nbMinorsAlready # 66 minor locs, 5 already in the pool
         if not self.sm.knowsIceZebSkip():
+            self.log.debug("Add missile because ice zeb skip is not known")
             self.itemManager.addMinor('Missile')
             nbMinors -= 1
+            nbMinorsAlready += 1
         minorLocations = (nbMinors * self.qty['minors']) / 100
-        maxItems = len(self.itemManager.getItemPool()) + int(minorLocations)
+        self.log.debug("minorLocations: {}".format(minorLocations))
+        # we have to remove the minors already added
+        maxItems = len(self.itemManager.getItemPool()) + int(minorLocations) - nbMinorsAlready
+        self.log.debug("maxItems: {}".format(maxItems))
         ammoQty = self.qty['ammo']
         if not self.qty['strictMinors']:
             rangeDict = getRangeDict(ammoQty)
@@ -279,12 +287,18 @@ class ItemPoolGenerator(object):
         else:
             totalProps = ammoQty['Missile'] + ammoQty['Super'] + ammoQty['PowerBomb']
             totalMinorLocations = 66 * self.qty['minors'] / 100
+            self.log.debug("totalProps: {}".format(totalProps))
+            self.log.debug("totalMinorLocations: {}".format(totalMinorLocations))
             def getRatio(ammo):
                 thisAmmo = len([item for item in self.itemManager.getItemPool() if item['Type'] == ammo])
-                return float(thisAmmo)/totalMinorLocations
+                ratio = float(thisAmmo)/totalMinorLocations
+                self.log.debug("{} current ratio: {}".format(ammo, ratio))
+                return ratio
             def fillAmmoType(ammo, checkRatio=True):
                 ratio = float(ammoQty[ammo])/totalProps
+                self.log.debug("{}: target ratio: {}".format(ammo, ratio))
                 while len(self.itemManager.getItemPool()) < maxItems and (not checkRatio or getRatio(ammo) < ratio):
+                    self.log.debug("Add {}".format(ammo))
                     self.itemManager.addMinor(ammo)
             fillAmmoType('Missile')
             fillAmmoType('Super')

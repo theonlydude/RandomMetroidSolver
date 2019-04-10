@@ -6,14 +6,18 @@ from utils import randGaussBounds
 from itemrandomizerweb.Items import ItemManager
 from smboolmanager import SMBoolManager
 import random
+import log
 
 fun = ['HiJump', 'SpeedBooster', 'Plasma', 'ScrewAttack', 'Wave', 'Spazer', 'SpringBall']
 
 if __name__ == "__main__":
+    log.init(True) # debug mode
+    logger = log.get('ItemsTest')
     sm = SMBoolManager()
     with open("itemStats.csv", "w") as csvOut:
         csvOut.write("energyQty;minorQty;nFun;strictMinors;MissProb;SuperProb;PowerProb;nItems;nTanks;nTanksTotal;nMinors;nMissiles;nSupers;nPowers;MissAccuracy;SuperAccuracy;PowerAccuracy\n")
         for i in range(10000):
+            logger.debug('SEED ' + str(i))
             if (i+1) % 100 == 0:
                 print(i+1)
             isVanilla = random.random() < 0.5
@@ -72,10 +76,10 @@ if __name__ == "__main__":
             pbAcc = getAccuracy(pbProb, nPowers)
             csvOut.write("%f;%f;%f\n" % (missAcc, supersAcc, pbAcc))
             if len(itemPool) != 105:
-                raise ValueError("Not 105 items !!!")
-            if isVanilla and nItems != 105:
-                raise ValueError("Not 105 items in vanilla !!!")
+                raise ValueError("Not 105 items !!! " + str(len(itemPool)))
+            if isVanilla and nItems != 100:
+                raise ValueError("Not 100 actual items in vanilla !!! " + str(nItems))
             if energyQty == 'sparse' and (nTanks < 4 or nTanks > 6):
-                raise ValueError("Energy qty invalid !!")
+                raise ValueError("Energy qty invalid for sparse !! " + str(nTanks))
             if energyQty == 'medium' and (nTanks < 8 or nTanks > 12):
-                raise ValueError("Energy qty invalid !!")
+                raise ValueError("Energy qty invalid for medium !! " + str(nTanks))

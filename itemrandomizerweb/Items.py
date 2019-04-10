@@ -310,11 +310,13 @@ class ItemPoolGenerator(object):
             for m in minorsByProp:
                 fillAmmoType(m)
             # now that the ratios have been matched as exactly as possible, we distribute the error
+            def getError(m, countOffset=0):
+                return abs((ammoCount(m)+countOffset)/totalMinorLocations - targetRatio(m))
             while len(self.itemManager.getItemPool()) < maxItems:
                 minNextError = 1000
                 chosenAmmo = None
-                for m in minorsTypes:
-                    nextError = abs((ammoCount(m)+1)/totalMinorLocations - targetRatio(m))
+                for m in minorsByProp:
+                    nextError = getError(m, 1)
                     if nextError < minNextError:
                         minNextError = nextError
                         chosenAmmo = m

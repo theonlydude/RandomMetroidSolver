@@ -6,7 +6,6 @@ from utils import randGaussBounds
 from itemrandomizerweb.Items import ItemManager
 from smboolmanager import SMBoolManager
 import random
-from smboolmanager import SMBoolManager
 
 fun = ['HiJump', 'SpeedBooster', 'Plasma', 'ScrewAttack', 'Wave', 'Spazer', 'SpringBall']
 
@@ -49,9 +48,10 @@ if __name__ == "__main__":
             # write params
             csvOut.write("%s;%d;%d;%s;%d;%d;%d;" % (energyQty, minQty, len(forbidden), str(strictMinors), missProb, superProb, pbProb))
             # get items
-            smboolManager = SMBoolManager()
-            itemManager = ItemManager('Major', qty, smboolManager)
-            itemPool = itemManager.getItemPool()
+            splits = ['Full', 'Major', 'Chozo']
+            split = splits[random.randint(0, len(splits)-1)]
+            itemManager = ItemManager(split, qty, sm)
+            itemPool = itemManager.createItemPool()
             itemPool = itemManager.removeForbiddenItems(forbidden)
             # compute stats
             nItems = len([item for item in itemPool if item['Category'] != 'Nothing'])
@@ -71,10 +71,10 @@ if __name__ == "__main__":
             supersAcc = getAccuracy(superProb, nSupers)
             pbAcc = getAccuracy(pbProb, nPowers)
             csvOut.write("%f;%f;%f\n" % (missAcc, supersAcc, pbAcc))
-            if len(itemPool) != 100:
-                raise ValueError("Not 100 items !!!")
-            if isVanilla and nItems != 100:
-                raise ValueError("Not 100 actual items in vanilla !!!")
+            if len(itemPool) != 105:
+                raise ValueError("Not 105 items !!!")
+            if isVanilla and nItems != 105:
+                raise ValueError("Not 105 items in vanilla !!!")
             if energyQty == 'sparse' and (nTanks < 4 or nTanks > 6):
                 raise ValueError("Energy qty invalid !!")
             if energyQty == 'medium' and (nTanks < 8 or nTanks > 12):

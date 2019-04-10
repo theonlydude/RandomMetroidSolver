@@ -276,7 +276,7 @@ class ItemPoolGenerator(object):
         minorLocations = (nbMinors * self.qty['minors']) / 100
         self.log.debug("minorLocations: {}".format(minorLocations))
         # we have to remove the minors already added
-        maxItems = len(self.itemManager.getItemPool()) + int(minorLocations) - nbMinorsAlready
+        maxItems = len(self.itemManager.getItemPool()) + int(minorLocations)
         self.log.debug("maxItems: {}".format(maxItems))
         ammoQty = self.qty['ammo']
         if not self.qty['strictMinors']:
@@ -285,25 +285,41 @@ class ItemPoolGenerator(object):
                 item = chooseFromRange(rangeDict)
                 self.itemManager.addMinor(item)
         else:
-            totalProps = ammoQty['Missile'] + ammoQty['Super'] + ammoQty['PowerBomb']
+            minorsTypes = ['Missile', 'Super', 'PowerBomb']
+            totalProps = sum(ammoQty[m] for m in minorsTypes)
+            minorsByProp = sorted(minorsTypes, key=lambda m: ammoQty[m])
             totalMinorLocations = 66 * self.qty['minors'] / 100
             self.log.debug("totalProps: {}".format(totalProps))
             self.log.debug("totalMinorLocations: {}".format(totalMinorLocations))
-            def getRatio(ammo):
-                thisAmmo = len([item for item in self.itemManager.getItemPool() if item['Type'] == ammo])
-                ratio = float(thisAmmo)/totalMinorLocations
-                self.log.debug("{} current ratio: {}".format(ammo, ratio))
-                return ratio
+            def ammoCount(ammo):
+                return float(len([item for item in self.itemManager.getItemPool() if item['Type'] == ammo]))
+            def targetRatio(ammo):
+                return float(ammoQty[ammo])/totalProps
+            def cmpRatio(ammo, ratio):
+                thisAmmo = ammoCount(ammo)
+                thisRatio = thisAmmo/totalMinorLocations
+                nextRatio = (thisAmmo + 1)/totalMinorLocations
+                self.log.debug("{} current, next/target ratio: {}, {}/{}".format(ammo, thisRatio, nextRatio, ratio))
+                return abs(nextRatio - ratio) < abs(thisRatio - ratio)
             def fillAmmoType(ammo, checkRatio=True):
-                ratio = float(ammoQty[ammo])/totalProps
+                ratio = targetRatio(ammo)
                 self.log.debug("{}: target ratio: {}".format(ammo, ratio))
-                while len(self.itemManager.getItemPool()) < maxItems and (not checkRatio or getRatio(ammo) < ratio):
+                while len(self.itemManager.getItemPool()) < maxItems and (not checkRatio or cmpRatio(ammo, ratio)):
                     self.log.debug("Add {}".format(ammo))
                     self.itemManager.addMinor(ammo)
-            fillAmmoType('Missile')
-            fillAmmoType('Super')
-            fillAmmoType('PowerBomb', False)
-
+            for m in minorsByProp:
+                fillAmmoType(m)
+            # now that the ratios have been matched as exactly as possible, we distribute the error
+            while len(self.itemManager.getItemPool()) < maxItems:
+                minNextError = 1000
+                chosenAmmo = None
+                for m in minorsTypes:
+                    nextError = abs((ammoCount(m)+1)/totalMinorLocations - targetRatio(m))
+                    if nextError < minNextError:
+                        minNextError = nextError
+                        chosenAmmo = m
+                self.itemManager.addMinor(chosenAmmo)
+        # fill up the rest with blank items
         for i in range(self.maxItems - maxItems):
             self.itemManager.addMinor('Nothing')
 

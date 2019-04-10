@@ -11,7 +11,8 @@ import log
 fun = ['HiJump', 'SpeedBooster', 'Plasma', 'ScrewAttack', 'Wave', 'Spazer', 'SpringBall']
 
 if __name__ == "__main__":
-    log.init(True) # debug mode
+#    log.init(True) # debug mode
+    log.init(False)
     logger = log.get('ItemsTest')
     sm = SMBoolManager()
     with open("itemStats.csv", "w") as csvOut:

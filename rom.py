@@ -685,6 +685,8 @@ class RomPatcher:
                 stdPatches.append('race_mode.ips')
             if bosses == True:
                 stdPatches.append('ridley_platform.ips')
+            if area == True or bosses == True:
+                stdPatches.append('ws_save.ips')
             for patchName in stdPatches:
                 self.applyIPSPatch(patchName)
             self.writeItemsNumber()

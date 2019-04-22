@@ -16,7 +16,7 @@ if __name__ == "__main__":
     logger = log.get('ItemsTest')
     sm = SMBoolManager()
     with open("itemStats.csv", "w") as csvOut:
-        csvOut.write("energyQty;minorQty;nFun;strictMinors;MissProb;SuperProb;PowerProb;nItems;nTanks;nTanksTotal;nMinors;nMissiles;nSupers;nPowers;MissAccuracy;SuperAccuracy;PowerAccuracy\n")
+        csvOut.write("energyQty;minorQty;nFun;strictMinors;MissProb;SuperProb;PowerProb;nItems;nTanks;nTanksTotal;nMinors;nMissiles;nSupers;nPowers;MissAccuracy;SuperAccuracy;PowerAccuracy;AmmoAccuracy\n")
         for i in range(10000):
             logger.debug('SEED ' + str(i))
             if (i+1) % 100 == 0:
@@ -75,7 +75,8 @@ if __name__ == "__main__":
             missAcc = getAccuracy(missProb, nMissiles)
             supersAcc = getAccuracy(superProb, nSupers)
             pbAcc = getAccuracy(pbProb, nPowers)
-            csvOut.write("%f;%f;%f\n" % (missAcc, supersAcc, pbAcc))
+            ammoAcc = (float(nMinors)/66.0) / minQty * 100
+            csvOut.write("%f;%f;%f;%f\n" % (missAcc, supersAcc, pbAcc, ammoAcc))
             if len(itemPool) != 105:
                 raise ValueError("Not 105 items !!! " + str(len(itemPool)))
             if isVanilla and nItems != 100:

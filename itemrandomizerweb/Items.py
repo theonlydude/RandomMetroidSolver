@@ -267,13 +267,11 @@ class ItemPoolGenerator(object):
         # always add enough minors to pass zebetites (1100 damages) and mother brain 1 (3000 damages)
         # accounting for missile refill. so 15-10, or 10-10 if ice zeb skip is known (Ice is always in item pool)
         nbMinorsAlready = 5
-        nbMinors = 66 - nbMinorsAlready # 66 minor locs, 5 already in the pool
         if not self.sm.knowsIceZebSkip():
             self.log.debug("Add missile because ice zeb skip is not known")
             self.itemManager.addMinor('Missile')
-            nbMinors -= 1
             nbMinorsAlready += 1
-        minorLocations = (nbMinors * self.qty['minors']) / 100
+        minorLocations = max(0, 0.66*self.qty['minors'] - nbMinorsAlready) # 0.66 because of 66 minors and qty/100
         self.log.debug("minorLocations: {}".format(minorLocations))
         # we have to remove the minors already added
         maxItems = len(self.itemManager.getItemPool()) + int(minorLocations)

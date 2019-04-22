@@ -690,6 +690,7 @@ patches = [
     ('skip_ceres', "Skip text intro and Ceres station (start at Landing Site) (by Total)", True, False, False),
     ('itemsounds', "Remove fanfare when picking up an item (by Scyzer)", True, True, True),
     ('spinjumprestart', "Allows Samus to start spinning in mid air after jumping or falling (by Kejardon)", False, True, True),
+    ('rando_speed', "Let's Samus keep her momentum when landing from a fall or from jumping (by Oi27)", False, True, True),
     ('elevators_doors_speed', 'Accelerate doors and elevators transitions (by Rakki & Lioran)', True, True, True),
     ('animals', "Save the animals surprise (by Foosda)", False, False, True),
     ('No_Music', "Disable background music (by Kejardon)", False, True, True)

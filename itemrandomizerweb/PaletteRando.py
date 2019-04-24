@@ -694,7 +694,7 @@ class PaletteRando(object):
                     else:
                         insert_address= 0x2FE050 + (2*0x100)
                     self.compress(insert_address, data)
-                    self.write_pointer(self.pointer_addresses[4], self.pc_to_snes(insert_address))
+                    self.write_pointer(self.pointer_addresses[24], self.pc_to_snes(insert_address))
             else:        
                 #Recompress palette and re-insert at offset
                 self.compress(insert_address, data)

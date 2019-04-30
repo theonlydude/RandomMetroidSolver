@@ -10,7 +10,7 @@ from graph_access import vanillaTransitions, getDoorConnections, vanillaBossesTr
 from parameters import Knows, easy, medium, hard, harder, hardcore, mania, text2diff, diff2text
 from utils import PresetLoader
 from rom import RomPatcher, RomPatches, FakeROM
-import log
+import log, db
 
 speeds = progSpeeds + ['variable']
 energyQties = ['sparse', 'medium', 'vanilla' ]
@@ -173,6 +173,7 @@ if __name__ == "__main__":
     parser.add_argument('--max_degree', help="max hue shift", dest='max_degree', nargs='?', default=180, type=int)
     parser.add_argument('--no_global_shift', help="", action='store_false', dest='global_shift', default=True)
     parser.add_argument('--invert', help="invert color range", dest='invert', action='store_true', default=False)
+    parser.add_argument('--ext_stats', help="dump extended stats SQL", nargs='?', default=None, dest='extStatsFilename')
 
     # parse args
     args = parser.parse_args()
@@ -439,6 +440,20 @@ if __name__ == "__main__":
     if args.debug == True:
         for loc in locsItems:
             print('{:>50}: {:>16} '.format(loc, locsItems[loc]))
+
+    # insert extended stats into database
+    parameters = {'preset': preset, 'area': args.area, 'boss': args.bosses, 'majorsSplit': args.majorsSplit,
+                  'progSpeed': progSpeed, 'morphPlacement': args.morphPlacement,
+                  'suitsRestriction': args.suitsRestriction, 'progDiff': progDiff,
+                  'superFunMovement': 'Movement' in args.superFun, 'superFunCombat': 'Combat' in args.superFun,
+                  'superFunSuit': 'Suit' in args.superFun}
+    if args.extStatsFilename == None:
+        DB = db.DB()
+        DB.addExtStat(parameters, locsItems)
+        DB.close()
+    else:
+        with open(args.extStatsFilename, 'w') as extStatsFile:
+            db.DB.dumpExtStat(parameters, locsItems, extStatsFile)
 
     try:
         # args.rom is not None: generate local rom named filename.sfc with args.rom as source

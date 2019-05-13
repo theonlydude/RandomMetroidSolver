@@ -5,6 +5,9 @@ from parameters import Knows, Settings, Controller, isKnows, isSettings, isButto
 from parameters import easy, medium, hard, harder, hardcore, mania
 from smbool import SMBool
 
+def isStdPreset(preset):
+    return preset in ['noob', 'casual', 'regular', 'veteran', 'speedrunner', 'master', 'samus', 'solution', 'Season_Races', 'smrat', 'SCAVENGER_HUNT']
+
 # gauss random in [0, r] range
 # the higher the slope, the less probable extreme values are.
 def randGaussBounds(r, slope=5):

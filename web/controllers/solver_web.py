@@ -18,13 +18,11 @@ from solver import StandardSolver, DifficultyDisplayer, InteractiveSolver
 from utils import PresetLoader
 import db
 from graph_access import vanillaTransitions, vanillaBossesTransitions
+from utils import isStdPreset
 
 def maxPresetsReach():
     # to prevent a spammer to create presets in a loop and fill the fs
     return len(os.listdir('community_presets')) >= 2048
-
-def isStdPreset(preset):
-    return preset in ['noob', 'casual', 'regular', 'veteran', 'speedrunner', 'master', 'samus', 'solution', 'Season_Races', 'smrat', 'SCAVENGER_HUNT']
 
 def getPresetDir(preset):
     if isStdPreset(preset):
@@ -870,7 +868,7 @@ def validateWebServiceParams(patchs, quantities, others, isJson=False):
 
 def sessionWebService():
     # web service to update the session
-    patchs = ['itemsounds', 'No_Music',
+    patchs = ['itemsounds', 'No_Music', 'rando_speed',
               'spinjumprestart', 'elevators_doors_speed',
               'skip_intro', 'skip_ceres', 'animals', 'areaLayout', 'variaTweaks']
     quantities = ['missileQty', 'superQty', 'powerBombQty']
@@ -948,7 +946,7 @@ def randomizerWebService():
     response.headers['Access-Control-Allow-Origin'] = '*'
 
     # check validity of all parameters
-    patchs = ['itemsounds', 'spinjumprestart', 'elevators_doors_speed', 'skip_intro',
+    patchs = ['itemsounds', 'spinjumprestart', 'elevators_doors_speed', 'skip_intro', 'rando_speed',
               'skip_ceres', 'areaLayout', 'variaTweaks', 'No_Music', 'animals']
     quantities = ['missileQty', 'superQty', 'powerBombQty']
     others = ['seed', 'paramsFileTarget', 'minorQty', 'energyQty', 'preset',
@@ -1261,7 +1259,7 @@ def randoParamsWebService():
     return params
 
 def stats():
-    response.title = 'Super Metroid VARIA Randomizer and Solver statistics'
+    response.title = 'Super Metroid VARIA Randomizer and Solver usage statistics'
 
     DB = db.DB()
     weeks = 1
@@ -1807,7 +1805,7 @@ def customizer():
 
 def customWebService():
     # check validity of all parameters
-    patches = ['itemsounds', 'spinjumprestart', 'elevators_doors_speed', 'No_Music', 'animals']
+    patches = ['itemsounds', 'spinjumprestart', 'rando_speed', 'elevators_doors_speed', 'No_Music', 'animals']
     others = ['colorsRandomization', 'suitsPalettes', 'beamsPalettes', 'tilesPalettes', 'enemiesPalettes',
               'bossesPalettes', 'minDegree', 'maxDegree', 'invert']
     validateWebServiceParams(patches, [], others, isJson=True)

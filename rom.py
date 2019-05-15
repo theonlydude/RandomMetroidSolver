@@ -924,7 +924,7 @@ class RomPatcher:
             progNames = [il['Item']['Name'] for il in progItemLocs]
             for i in range(len(progNames)):
                 item = progNames[i]
-                if item in items:
+                if item in items and item not in displayNames:
                     items.remove(item)
                     items.insert(idx, item)
                     displayNames[item] = chr(prog + i) + ": " + item

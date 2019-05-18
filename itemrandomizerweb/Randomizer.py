@@ -1360,7 +1360,7 @@ class Randomizer(object):
             Bosses.beatBoss(boss)
         # get bosses locations and newly accessible locations (for bosses that open up locs)
         newLocs = self.currentLocations(post=True)
-        locs = newLocs + [loc for loc in self.unusedLocations if 'Boss' in loc['Class'] and not loc in newLocs]
+        locs = newLocs + [loc for loc in self.unusedLocations if ('Boss' in loc['Class'] or 'Pickup' in loc) and not loc in newLocs]
         ret = (len(locs) > len(prevLocs) and len(locs) == len(self.unusedLocations))
         # restore currently killed bosses
         Bosses.reset()

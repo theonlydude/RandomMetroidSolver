@@ -340,7 +340,8 @@ class CommonSolver(object):
                     if not already or isCount == True:
                         self.smbm.removeItem(loc['itemName'])
 
-                    loc['difficulty'] = self.smbm.wand(loc['difficulty'], postAvailable)
+                    loc['difficulty'] = self.smbm.wand(lambda: loc['difficulty'],
+                                                       lambda: postAvailable)
 
                 # also check if we can come back to landing site from the location
                 loc['comeBack'] = self.areaGraph.canAccess(self.smbm, loc['accessPoint'], self.lastLoc, infinity, loc['itemName'])
@@ -1204,7 +1205,8 @@ class StandardSolver(CommonSolver):
         # - defeat metroids
         # - destroy/skip the zebetites
         # - beat Mother Brain
-        return self.smbm.wand(Bosses.allBossesDead(self.smbm), self.smbm.enoughStuffTourian())
+        return self.smbm.wand(lambda: Bosses.allBossesDead(self.smbm),
+                              lambda: self.smbm.enoughStuffTourian())
 
 class ComeBack(object):
     # object to handle the decision to choose the next area when all locations have the "no comeback" flag.

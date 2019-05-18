@@ -23,7 +23,7 @@ class Helpers(object):
             return SMBool(False)
         def f(difficulty):
             return self.smbm.energyReserveCountOk(difficulty[0] / mult, difficulty=difficulty[1])
-        result = reduce(lambda result, difficulty: self.smbm.wor(result, f(difficulty)),
+        result = reduce(lambda result, difficulty: self.smbm.wor(lambda: result, lambda: f(difficulty)),
                         difficulties[1:], f(difficulties[0]))
         return result
 
@@ -69,9 +69,9 @@ class Helpers(object):
 
     @Cache.decorator
     def heatProof(self):
-        return self.smbm.wor(self.smbm.haveItem('Varia'),
-                             self.smbm.wand(self.smbm.wnot(RomPatches.has(RomPatches.NoGravityEnvProtection)),
-                                            self.smbm.haveItem('Gravity')))
+        return self.smbm.wor(lambda: self.smbm.haveItem('Varia'),
+                             lambda: self.smbm.wand(lambda: self.smbm.wnot(RomPatches.has(RomPatches.NoGravityEnvProtection)),
+                                                    lambda: self.smbm.haveItem('Gravity')))
 
     # higher values for mult means hell run is that much "easier" (HP mult)
     def canHellRun(self, hellRun, mult=1.0):
@@ -88,8 +88,8 @@ class Helpers(object):
                 if tanks >= 14:
                     mult *= 2.0
                 nCF = int(math.ceil(2/mult))
-                ret = sm.wand(self.energyReserveCountOkHellRun(hellRun, mult),
-                              self.canCrystalFlash(nCF))
+                ret = sm.wand(lambda: self.energyReserveCountOkHellRun(hellRun, mult),
+                              lambda: self.canCrystalFlash(nCF))
 #                nPB = self.smbm.itemCount('PowerBomb')
 #                print("canHellRun LN. tanks=" + str(tanks) + ", nCF=" + str(nCF) + ", nPB=" + str(nPB) + ", mult=" + str(mult) + ", heatProof=" + str(isHeatProof.bool) + ", ret=" + str(ret))
                 return ret
@@ -111,9 +111,9 @@ class Helpers(object):
         sm = self.smbm
         if sm.haveItem('SpaceJump') == True:
             return SMBool(True, easy, items=['SpaceJump'])
-        elif sm.wand(sm.haveItem('Morph'),
-                     sm.haveItem('Bomb'),
-                     sm.knowsDiagonalBombJump()) == True:
+        elif sm.wand(lambda: sm.haveItem('Morph'),
+                     lambda: sm.haveItem('Bomb'),
+                     lambda: sm.knowsDiagonalBombJump()) == True:
             return sm.knowsDiagonalBombJump()
         else:
             return SMBool(False)
@@ -121,29 +121,34 @@ class Helpers(object):
     @Cache.decorator
     def canSimpleShortCharge(self):
         sm = self.smbm
-        return sm.wand(sm.haveItem('SpeedBooster'),
-                       sm.wor(sm.knowsSimpleShortCharge(),
-                              sm.knowsShortCharge()))
+        return sm.wand(lambda: sm.haveItem('SpeedBooster'),
+                       lambda: sm.wor(lambda: sm.knowsSimpleShortCharge(),
+                                      lambda: sm.knowsShortCharge()))
 
     @Cache.decorator
     def canShortCharge(self):
         sm = self.smbm
-        return sm.wand(sm.haveItem('SpeedBooster'), sm.knowsShortCharge())
+        return sm.wand(lambda: sm.haveItem('SpeedBooster'),
+                       lambda: sm.knowsShortCharge())
 
     @Cache.decorator
     def canUseBombs(self):
         sm = self.smbm
-        return sm.wand(sm.haveItem('Morph'), sm.haveItem('Bomb'))
+        return sm.wand(lambda: sm.haveItem('Morph'),
+                       lambda: sm.haveItem('Bomb'))
 
     @Cache.decorator
     def canInfiniteBombJump(self):
         sm = self.smbm
-        return sm.wand(sm.haveItem('Morph'), sm.haveItem('Bomb'), sm.knowsInfiniteBombJump())
+        return sm.wand(lambda: sm.haveItem('Morph'),
+                       lambda: sm.haveItem('Bomb'),
+                       lambda: sm.knowsInfiniteBombJump())
 
     @Cache.decorator
     def canOpenRedDoors(self):
         sm = self.smbm
-        return sm.wor(sm.haveItem('Missile'), sm.haveItem('Super'))
+        return sm.wor(lambda: sm.haveItem('Missile'),
+                      lambda: sm.haveItem('Super'))
 
     @Cache.decorator
     def canOpenGreenDoors(self):
@@ -152,7 +157,8 @@ class Helpers(object):
     @Cache.decorator
     def canOpenYellowDoors(self):
         sm = self.smbm
-        return sm.wand(sm.haveItem('Morph'), sm.haveItem('PowerBomb'))
+        return sm.wand(lambda: sm.haveItem('Morph'),
+                       lambda: sm.haveItem('PowerBomb'))
 
     @Cache.decorator
     def canUsePowerBombs(self):
@@ -161,44 +167,46 @@ class Helpers(object):
     @Cache.decorator
     def canUseSpringBall(self):
         sm = self.smbm
-        return sm.wand(sm.haveItem('Morph'),
-                       sm.haveItem('SpringBall'))
+        return sm.wand(lambda: sm.haveItem('Morph'),
+                       lambda: sm.haveItem('SpringBall'))
 
     @Cache.decorator
     def canSpringBallJump(self):
         sm = self.smbm
-        return sm.wand(sm.canUseSpringBall(),
-                       sm.knowsSpringBallJump())
+        return sm.wand(lambda: sm.canUseSpringBall(),
+                       lambda: sm.knowsSpringBallJump())
 
     @Cache.decorator
     def canDoubleSpringBallJump(self):
         sm = self.smbm
-        return sm.wand(sm.canUseSpringBall(),
-                       sm.haveItem('HiJump'),
-                       sm.knowsDoubleSpringBallJump())
+        return sm.wand(lambda: sm.canUseSpringBall(),
+                       lambda: sm.haveItem('HiJump'),
+                       lambda: sm.knowsDoubleSpringBallJump())
 
     def canPassTerminatorBombWall(self, fromLandingSite=True):
         sm = self.smbm
-        return sm.wor(sm.wand(sm.haveItem('SpeedBooster'),
-                              sm.wor(SMBool(not fromLandingSite, 0), sm.knowsSimpleShortCharge(), sm.knowsShortCharge())),
-                      sm.canDestroyBombWalls())
+        return sm.wor(lambda: sm.wand(lambda: sm.haveItem('SpeedBooster'),
+                                      lambda: sm.wor(lambda: SMBool(not fromLandingSite, 0),
+                                                     lambda: sm.knowsSimpleShortCharge(),
+                                                     lambda: sm.knowsShortCharge())),
+                      lambda: sm.canDestroyBombWalls())
 
     @Cache.decorator
     def canDestroyBombWalls(self):
         sm = self.smbm
-        return sm.wor(sm.wand(sm.haveItem('Morph'),
-                              sm.wor(sm.haveItem('Bomb'),
-                                     sm.haveItem('PowerBomb'))),
-                      sm.haveItem('ScrewAttack'))
+        return sm.wor(lambda: sm.wand(lambda: sm.haveItem('Morph'),
+                                      lambda: sm.wor(lambda: sm.haveItem('Bomb'),
+                                                     lambda: sm.haveItem('PowerBomb'))),
+                      lambda: sm.haveItem('ScrewAttack'))
 
     @Cache.decorator
     def canDestroyBombWallsUnderwater(self):
         sm = self.smbm
-        return sm.wor(sm.wand(sm.haveItem('Gravity'),
-                              sm.canDestroyBombWalls()),
-                      sm.wand(sm.haveItem('Morph'),
-                              sm.wor(sm.haveItem('Bomb'),
-                                     sm.haveItem('PowerBomb'))))
+        return sm.wor(lambda: sm.wand(lambda: sm.haveItem('Gravity'),
+                                      lambda: sm.canDestroyBombWalls()),
+                      lambda: sm.wand(lambda: sm.haveItem('Morph'),
+                                      lambda: sm.wor(lambda: sm.haveItem('Bomb'),
+                                                     lambda: sm.haveItem('PowerBomb'))))
 
     def canEnterAndLeaveGauntletQty(self, nPB, nTanks):
         sm = self.smbm
@@ -213,19 +221,19 @@ class Helpers(object):
         #             -use bombs
         #             -perform a simple short charge on the way in
         #              and use power bombs on the way out
-        return sm.wand(sm.wor(sm.canFly(),
-                              sm.haveItem('SpeedBooster'),
-                              sm.wand(sm.knowsHiJumpGauntletAccess(),
-                                      sm.haveItem('HiJump')),
-                              sm.knowsHiJumpLessGauntletAccess()),
-                       sm.wor(sm.haveItem('ScrewAttack'),
-                              sm.wor(sm.wand(sm.energyReserveCountOkHardRoom('Gauntlet'),
-                                             sm.wand(sm.canUsePowerBombs(),
-                                                     sm.wor(sm.itemCountOk('PowerBomb', nPB),
-                                                            sm.wand(sm.haveItem('SpeedBooster'),
-                                                                    sm.energyReserveCountOk(nTanks))))),
-                                     sm.wand(sm.energyReserveCountOkHardRoom('Gauntlet', 0.5),
-                                             sm.canUseBombs()))))
+        return sm.wand(lambda: sm.wor(lambda: sm.canFly(),
+                                      lambda: sm.haveItem('SpeedBooster'),
+                                      lambda: sm.wand(lambda: sm.knowsHiJumpGauntletAccess(),
+                                                      lambda: sm.haveItem('HiJump')),
+                                      lambda: sm.knowsHiJumpLessGauntletAccess()),
+                       lambda: sm.wor(lambda: sm.haveItem('ScrewAttack'),
+                                      lambda: sm.wor(lambda: sm.wand(lambda: sm.energyReserveCountOkHardRoom('Gauntlet'),
+                                                                     lambda: sm.wand(lambda: sm.canUsePowerBombs(),
+                                                                                     lambda: sm.wor(lambda: sm.itemCountOk('PowerBomb', nPB),
+                                                                                                    lambda: sm.wand(lambda: sm.haveItem('SpeedBooster'),
+                                                                                                                    lambda: sm.energyReserveCountOk(nTanks))))),
+                                                     lambda: sm.wand(lambda: sm.energyReserveCountOkHardRoom('Gauntlet', 0.5),
+                                                                     lambda: sm.canUseBombs()))))
 
     @Cache.decorator
     def canEnterAndLeaveGauntlet(self):
@@ -234,45 +242,45 @@ class Helpers(object):
     @Cache.decorator
     def canPassBombPassages(self):
         sm = self.smbm
-        return sm.wor(sm.canUseBombs(),
-                      sm.canUsePowerBombs())
+        return sm.wor(lambda: sm.canUseBombs(),
+                      lambda: sm.canUsePowerBombs())
 
     def canCrystalFlash(self, n=1):
         sm = self.smbm
-        return sm.wand(sm.canUsePowerBombs(),
-                       sm.itemCountOk('Missile', 2*n),
-                       sm.itemCountOk('Super', 2*n),
-                       sm.itemCountOk('PowerBomb', 2*n+1))
+        return sm.wand(lambda: sm.canUsePowerBombs(),
+                       lambda: sm.itemCountOk('Missile', 2*n),
+                       lambda: sm.itemCountOk('Super', 2*n),
+                       lambda: sm.itemCountOk('PowerBomb', 2*n+1))
 
     @Cache.decorator
     def getBeamDamage(self):
         sm = self.smbm
         standardDamage = 20
 
-        if sm.wand(sm.haveItem('Ice'),
-                   sm.haveItem('Wave'),
-                   sm.haveItem('Plasma')) == True:
+        if sm.wand(lambda: sm.haveItem('Ice'),
+                   lambda: sm.haveItem('Wave'),
+                   lambda: sm.haveItem('Plasma')) == True:
             standardDamage = 300
-        elif sm.wand(sm.haveItem('Wave'),
-                     sm.haveItem('Plasma')) == True:
+        elif sm.wand(lambda: sm.haveItem('Wave'),
+                     lambda: sm.haveItem('Plasma')) == True:
             standardDamage = 250
-        elif sm.wand(sm.haveItem('Ice'),
-                     sm.haveItem('Plasma')) == True:
+        elif sm.wand(lambda: sm.haveItem('Ice'),
+                     lambda: sm.haveItem('Plasma')) == True:
             standardDamage = 200
         elif sm.haveItem('Plasma') == True:
             standardDamage = 150
-        elif sm.wand(sm.haveItem('Ice'),
-                     sm.haveItem('Wave'),
-                     sm.haveItem('Spazer')) == True:
+        elif sm.wand(lambda: sm.haveItem('Ice'),
+                     lambda: sm.haveItem('Wave'),
+                     lambda: sm.haveItem('Spazer')) == True:
             standardDamage = 100
-        elif sm.wand(sm.haveItem('Wave'),
-                     sm.haveItem('Spazer')) == True:
+        elif sm.wand(lambda: sm.haveItem('Wave'),
+                     lambda: sm.haveItem('Spazer')) == True:
             standardDamage = 70
-        elif sm.wand(sm.haveItem('Ice'),
-                     sm.haveItem('Spazer')) == True:
+        elif sm.wand(lambda: sm.haveItem('Ice'),
+                     lambda: sm.haveItem('Spazer')) == True:
             standardDamage = 60
-        elif sm.wand(sm.haveItem('Ice'),
-                     sm.haveItem('Wave')) == True:
+        elif sm.wand(lambda: sm.haveItem('Ice'),
+                     lambda: sm.haveItem('Wave')) == True:
             standardDamage = 60
         elif sm.haveItem('Wave') == True:
             standardDamage = 50
@@ -476,7 +484,7 @@ class Helpers(object):
             return SMBool(False)
 
         # need missile or super to open the eye door
-        if sm.wor(sm.haveItem('Missile'), sm.haveItem('Super')) == False:
+        if sm.wor(lambda: sm.haveItem('Missile'), lambda: sm.haveItem('Super')) == False:
             return SMBool(False)
         else:
             return SMBool(True, diff)
@@ -508,16 +516,16 @@ class Helpers(object):
             fight.difficulty = self.adjustHealthDropDiff(fight.difficulty)
         else:
             fight = SMBool(False)
-        return sm.wor(fight,
-                      sm.wand(sm.knowsDraygonGrappleKill(),
-                              sm.haveItem('Grapple')),
-                      sm.wand(sm.knowsMicrowaveDraygon(),
-                              sm.haveItem('Plasma'),
-                              sm.haveItem('Charge'),
-                              sm.haveItem('XRayScope')),
-                      sm.wand(sm.haveItem('Gravity'),
-                              sm.knowsDraygonSparkKill(),
-                              sm.haveItem('SpeedBooster')))
+        return sm.wor(lambda: fight,
+                      lambda: sm.wand(lambda: sm.knowsDraygonGrappleKill(),
+                                      lambda: sm.haveItem('Grapple')),
+                      lambda: sm.wand(lambda: sm.knowsMicrowaveDraygon(),
+                                      lambda: sm.haveItem('Plasma'),
+                                      lambda: sm.haveItem('Charge'),
+                                      lambda: sm.haveItem('XRayScope')),
+                      lambda: sm.wand(lambda: sm.haveItem('Gravity'),
+                                      lambda: sm.knowsDraygonSparkKill(),
+                                      lambda: sm.haveItem('SpeedBooster')))
 
     @Cache.decorator
     def enoughStuffsPhantoon(self):
@@ -541,11 +549,11 @@ class Helpers(object):
         difficulty = self.adjustHealthDropDiff(difficulty)
         fight = SMBool(True, difficulty)
 
-        return sm.wor(fight,
-                      sm.wand(sm.knowsMicrowavePhantoon(),
-                              sm.haveItem('Plasma'),
-                              sm.haveItem('Charge'),
-                              sm.haveItem('XRayScope')))
+        return sm.wor(lambda: fight,
+                      lambda: sm.wand(lambda: sm.knowsMicrowavePhantoon(),
+                                      lambda: sm.haveItem('Plasma'),
+                                      lambda: sm.haveItem('Charge'),
+                                      lambda: sm.haveItem('XRayScope')))
 
     def mbEtankCheck(self):
         sm = self.smbm
@@ -586,25 +594,27 @@ class Helpers(object):
     @Cache.decorator
     def canPassMetroids(self):
         sm = self.smbm
-        return sm.wand(sm.canOpenRedDoors(),
-                       sm.wor(sm.haveItem('Ice'),
-                              # to avoid leaving tourian to refill power bombs
-                              sm.itemCountOk('PowerBomb', 3)))
+        return sm.wand(lambda: sm.canOpenRedDoors(),
+                       lambda: sm.wor(lambda: sm.haveItem('Ice'),
+                                      # to avoid leaving tourian to refill power bombs
+                                      lambda: sm.itemCountOk('PowerBomb', 3)))
 
     @Cache.decorator
     def canPassZebetites(self):
         sm = self.smbm
         # account for one zebetite, refill may be necessary
-        return sm.wor(sm.wand(sm.haveItem('Ice'), sm.knowsIceZebSkip()),
-                      sm.wand(sm.haveItem('SpeedBooster'), sm.knowsSpeedZebSkip()),
-                      SMBool(self.canInflictEnoughDamages(1100, charge=False, givesDrops=False)[0] >= 1, 0))
+        return sm.wor(lambda: sm.wand(lambda: sm.haveItem('Ice'),
+                                      lambda: sm.knowsIceZebSkip()),
+                      lambda: sm.wand(lambda: sm.haveItem('SpeedBooster'),
+                                      lambda: sm.knowsSpeedZebSkip()),
+                      lambda: SMBool(self.canInflictEnoughDamages(1100, charge=False, givesDrops=False)[0] >= 1, 0))
 
     @Cache.decorator
     def enoughStuffTourian(self):
         sm = self.smbm
-        ret = self.smbm.wand(sm.canPassMetroids(),
-                             sm.canPassZebetites(),
-                             sm.enoughStuffsMotherbrain())
+        ret = self.smbm.wand(lambda: sm.canPassMetroids(),
+                             lambda: sm.canPassZebetites(),
+                             lambda: sm.enoughStuffsMotherbrain())
         return ret
 
 class Pickup:
@@ -735,10 +745,10 @@ class Bosses:
 
     @staticmethod
     def allBossesDead(smbm):
-        return smbm.wand(Bosses.bossDead('Kraid'),
-                         Bosses.bossDead('Phantoon'),
-                         Bosses.bossDead('Draygon'),
-                         Bosses.bossDead('Ridley'))
+        return smbm.wand(lambda: Bosses.bossDead('Kraid'),
+                         lambda: Bosses.bossDead('Phantoon'),
+                         lambda: Bosses.bossDead('Draygon'),
+                         lambda: Bosses.bossDead('Ridley'))
 
 
 def diffValue2txt(diff):

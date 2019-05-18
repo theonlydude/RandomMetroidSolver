@@ -106,49 +106,35 @@ class SMBoolManager(object):
     def knowsKnows(self, knows, smKnows):
         return SMBool(smKnows[0], smKnows[1], knows=[knows])
 
-    def wand2(self, a, b):
-        if a.bool is True and b.bool is True:
-            return SMBool(True, a.difficulty + b.difficulty,
-                          a.knows + b.knows, a.items + b.items)
-        else:
-            return SMBool(False)
-
-    def wand(self, a, b, c=None, d=None):
-        if c is None and d is None:
-            ret = self.wand2(a, b)
-        elif c is None:
-            ret = self.wand2(self.wand2(a, b), d)
-        elif d is None:
-            ret = self.wand2(self.wand2(a, b), c)
-        else:
-            ret = self.wand2(self.wand2(self.wand2(a, b), c), d)
-
-        return ret
-
-    def wor2(self, a, b):
-        if a.bool is True and b.bool is True:
-            if a.difficulty <= b.difficulty:
-                return SMBool(True, a.difficulty, a.knows, a.items)
+    def wand(self, *args):
+        smbools = []
+        for func in args:
+            smbool = func()
+            if smbool.bool == False:
+                return SMBool(False)
             else:
-                return SMBool(True, b.difficulty, b.knows, b.items)
-        elif a.bool is True:
-            return SMBool(True, a.difficulty, a.knows, a.items)
-        elif b.bool is True:
-            return SMBool(True, b.difficulty, b.knows, b.items)
-        else:
+                smbools.append(smbool)
+        return SMBool(True,
+                      sum([smbool.difficulty for smbool in smbools]),
+                      [knows for smbool in smbools for knows in smbool.knows],
+                      [item for smbool in smbools for item in smbool.items])
+
+    def wor(self, *args):
+        easiest = None
+        for func in args:
+            smbool = func()
+            if smbool.bool == True:
+                if smbool.difficulty == 0:
+                    # found the easiest, we can exit
+                    return SMBool(True, smbool.difficulty, smbool.knows, smbool.items)
+                else:
+                    # keep the easiest
+                    if easiest == None or smbool.difficulty < easiest.difficulty:
+                        easiest = smbool
+        if easiest == None:
             return SMBool(False)
-
-    def wor(self, a, b, c=None, d=None):
-        if c is None and d is None:
-            ret = self.wor2(a, b)
-        elif c is None:
-            ret = self.wor2(self.wor2(a, b), d)
-        elif d is None:
-            ret = self.wor2(self.wor2(a, b), c)
         else:
-            ret = self.wor2(self.wor2(self.wor2(a, b), c), d)
-
-        return ret
+            return SMBool(True, easiest.difficulty, easiest.knows, easiest.items)
 
     # negates boolean part of the SMBool
     def wnot(self, a):

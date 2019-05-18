@@ -20,10 +20,10 @@ class HelpersGraph(Helpers):
         #             -hijump boots (easy regular way)
         #             -fly (space jump or infinite bomb jump)
         #             -know how to wall jump on the platform without the hijump boots
-        return sm.wand(sm.canOpenGreenDoors(),
-                       sm.wor(sm.haveItem('HiJump'),
-                              sm.canFly(),
-                              sm.knowsEarlyKraid()))
+        return sm.wand(lambda: sm.canOpenGreenDoors(),
+                       lambda: sm.wor(lambda: sm.haveItem('HiJump'),
+                                      lambda: sm.canFly(),
+                                      lambda: sm.knowsEarlyKraid()))
 
     @Cache.decorator
     def canPassMoat(self):
@@ -36,102 +36,107 @@ class HelpersGraph(Helpers):
         #             -do a gravity jump from below the right platform
         #             -do a mock ball and a bounce ball (https://www.youtube.com/watch?v=WYxtRF--834)
         #             -with gravity, either hijump or IBJ
-        return sm.wor(sm.wor(sm.haveItem('Grapple'),
-                             sm.haveItem('SpaceJump'),
-                             sm.knowsContinuousWallJump()),
-                             sm.wor(sm.wand(sm.knowsDiagonalBombJump(), sm.canUseBombs()),
-                                    sm.canSimpleShortCharge(),
-                                    sm.wand(sm.haveItem('Gravity'),
-                                            sm.wor(sm.knowsGravityJump(),
-                                                   sm.haveItem('HiJump'),
-                                                   sm.canInfiniteBombJump())),
-                                    sm.wand(sm.knowsMockballWs(), sm.canUseSpringBall())))
+        return sm.wor(lambda: sm.haveItem('Grapple'),
+                      lambda: sm.haveItem('SpaceJump'),
+                      lambda: sm.knowsContinuousWallJump(),
+                      lambda: sm.wand(lambda: sm.knowsDiagonalBombJump(),
+                                      lambda: sm.canUseBombs()),
+                      lambda: sm.canSimpleShortCharge(),
+                      lambda: sm.wand(lambda: sm.haveItem('Gravity'),
+                                      lambda: sm.wor(lambda: sm.knowsGravityJump(),
+                                                     lambda: sm.haveItem('HiJump'),
+                                                     lambda: sm.canInfiniteBombJump())),
+                      lambda: sm.wand(lambda: sm.knowsMockballWs(),
+                                      lambda: sm.canUseSpringBall()))
 
     @Cache.decorator
     def canPassMoatReverse(self):
         sm = self.smbm
-        return sm.wor(sm.haveItem('Grapple'),
-                      sm.haveItem('SpaceJump'),
-                      sm.haveItem('Gravity'),
-                      sm.wand(sm.haveItem('Morph'),
-                              sm.wor(RomPatches.has(RomPatches.MoatShotBlock),
-                                     sm.canPassBombPassages())))
+        return sm.wor(lambda: sm.haveItem('Grapple'),
+                      lambda: sm.haveItem('SpaceJump'),
+                      lambda: sm.haveItem('Gravity'),
+                      lambda: sm.wand(lambda: sm.haveItem('Morph'),
+                                      lambda: sm.wor(lambda: RomPatches.has(RomPatches.MoatShotBlock),
+                                                     lambda: sm.canPassBombPassages())))
 
     @Cache.decorator
     def canPassSpongeBath(self):
         sm = self.smbm
-        return sm.wand(Bosses.bossDead('Phantoon'),
-                       sm.wor(sm.wand(sm.canPassBombPassages(),
-                                      sm.knowsSpongeBathBombJump()),
-                              sm.wand(sm.haveItem('HiJump'),
-                                      sm.knowsSpongeBathHiJump()),
-                              sm.wor(sm.haveItem('Gravity'),
-                                     sm.haveItem('SpaceJump'),
-                                     sm.wand(sm.haveItem('SpeedBooster'),
-                                             sm.knowsSpongeBathSpeed()),
-                                     sm.canSpringBallJump())))
+        return sm.wand(lambda: Bosses.bossDead('Phantoon'),
+                       lambda: sm.wor(lambda: sm.wand(lambda: sm.canPassBombPassages(),
+                                                      lambda: sm.knowsSpongeBathBombJump()),
+                                      lambda: sm.wand(lambda: sm.haveItem('HiJump'),
+                                                      lambda: sm.knowsSpongeBathHiJump()),
+                                      lambda: sm.wor(lambda: sm.haveItem('Gravity'),
+                                                     lambda: sm.haveItem('SpaceJump'),
+                                                     lambda: sm.wand(lambda: sm.haveItem('SpeedBooster'),
+                                                                     lambda: sm.knowsSpongeBathSpeed()),
+                                                     lambda: sm.canSpringBallJump())))
 
     @Cache.decorator
     def canPassBowling(self):
         sm = self.smbm
-        return sm.wand(Bosses.bossDead('Phantoon'),
-                       sm.wor(sm.heatProof(),
-                              sm.energyReserveCountOk(1),
-                              sm.haveItem("SpaceJump"),
-                              sm.haveItem("Grapple")))
+        return sm.wand(lambda: Bosses.bossDead('Phantoon'),
+                       lambda: sm.wor(lambda: sm.heatProof(),
+                                      lambda: sm.energyReserveCountOk(1),
+                                      lambda: sm.haveItem("SpaceJump"),
+                                      lambda: sm.haveItem("Grapple")))
 
     @Cache.decorator
     def canAccessEtecoons(self):
         sm = self.smbm
-        return sm.wor(sm.canUsePowerBombs(),
-                      sm.wand(sm.knowsMoondance(), sm.canUseBombs(), sm.canOpenRedDoors()))
+        return sm.wor(lambda: sm.canUsePowerBombs(),
+                      lambda: sm.wand(lambda: sm.knowsMoondance(),
+                                      lambda: sm.canUseBombs(),
+                                      lambda: sm.canOpenRedDoors()))
 
     # the water zone east of WS
     def canPassForgottenHighway(self, fromWs):
         sm = self.smbm
         suitless = sm.canDoSuitlessOuterMaridia()
         if fromWs is True:
-            suitless = sm.wand(suitless, # to climb on the ledges
-                               sm.haveItem('SpaceJump')) # to go through the door on the right
-        return sm.wand(sm.wor(sm.haveItem('Gravity'),
-                              suitless),
-                       sm.haveItem('Morph')) # for crab maze
+            suitless = sm.wand(lambda: suitless, # to climb on the ledges
+                               lambda: sm.haveItem('SpaceJump')) # to go through the door on the right
+        return sm.wand(lambda: sm.wor(lambda: sm.haveItem('Gravity'),
+                                      lambda: suitless),
+                       lambda: sm.haveItem('Morph')) # for crab maze
 
     @Cache.decorator
     def canExitCrabHole(self):
         sm = self.smbm
-        return sm.wand(sm.haveItem('Morph'), # morph to exit the hole
-                       sm.wor(sm.wand(sm.haveItem('Gravity'), # even with gravity you need some way to climb...
-                                      sm.wor(sm.haveItem('Ice'), # ...on crabs...
-                                             sm.haveItem('HiJump'), # ...or by jumping
-                                             sm.knowsGravityJump(),
-                                             sm.canFly())),
-                              sm.wand(sm.haveItem('Ice'), sm.canDoSuitlessOuterMaridia()))) # climbing crabs
+        return sm.wand(lambda: sm.haveItem('Morph'), # morph to exit the hole
+                       lambda: sm.wor(lambda: sm.wand(lambda: sm.haveItem('Gravity'), # even with gravity you need some way to climb...
+                                                      lambda: sm.wor(lambda: sm.haveItem('Ice'), # ...on crabs...
+                                                                     lambda: sm.haveItem('HiJump'), # ...or by jumping
+                                                                     lambda: sm.knowsGravityJump(),
+                                                                     lambda: sm.canFly())),
+                                      lambda: sm.wand(lambda: sm.haveItem('Ice'),
+                                                      lambda: sm.canDoSuitlessOuterMaridia()))) # climbing crabs
 
     @Cache.decorator
     def canPassMaridiaToRedTowerNode(self):
         sm = self.smbm
-        return sm.wand(sm.haveItem('Morph'),
-                       sm.wor(RomPatches.has(RomPatches.AreaRandoGatesBase),
-                              sm.canOpenGreenDoors()))
+        return sm.wand(lambda: sm.haveItem('Morph'),
+                       lambda: sm.wor(lambda: RomPatches.has(RomPatches.AreaRandoGatesBase),
+                                      lambda: sm.canOpenGreenDoors()))
 
     @Cache.decorator
     def canPassRedTowerToMaridiaNode(self):
         sm = self.smbm
-        return sm.wand(sm.haveItem('Morph'),
-                       RomPatches.has(RomPatches.AreaRandoGatesBase))
+        return sm.wand(lambda: sm.haveItem('Morph'),
+                       lambda: RomPatches.has(RomPatches.AreaRandoGatesBase))
 
     def canEnterCathedral(self, mult=1.0):
         sm = self.smbm
-        return sm.wand(sm.canOpenRedDoors(),
-                       sm.wor(sm.wand(sm.canHellRun('MainUpperNorfair', mult),
-                                      sm.wor(sm.wor(RomPatches.has(RomPatches.CathedralEntranceWallJump),
-                                                    sm.haveItem('HiJump'),
-                                                    sm.canFly()),
-                                             sm.wor(sm.haveItem('SpeedBooster'), # spark
-                                                    sm.canSpringBallJump()))),
-                              sm.wand(sm.canHellRun('MainUpperNorfair', 0.5*mult),
-                                      sm.knowsNovaBoost())))
+        return sm.wand(lambda: sm.canOpenRedDoors(),
+                       lambda: sm.wor(lambda: sm.wand(lambda: sm.canHellRun('MainUpperNorfair', mult),
+                                                      lambda: sm.wor(lambda: sm.wor(lambda: RomPatches.has(RomPatches.CathedralEntranceWallJump),
+                                                                                    lambda: sm.haveItem('HiJump'),
+                                                                                    lambda: sm.canFly()),
+                                                                     lambda: sm.wor(lambda: sm.haveItem('SpeedBooster'), # spark
+                                                                                    lambda: sm.canSpringBallJump()))),
+                                      lambda: sm.wand(lambda: sm.canHellRun('MainUpperNorfair', 0.5*mult),
+                                                      lambda: sm.knowsNovaBoost())))
 
     @Cache.decorator
     def canHellRunToSpeedBooster(self):
@@ -150,50 +155,52 @@ class HelpersGraph(Helpers):
         #              can do it with only two wall jumps (the first one is delayed like on alcatraz)
         #              can do it with a spring ball jump from wall
         sm = self.smbm
-        return sm.wand(sm.wor(sm.canHellRun('MainUpperNorfair', 0.75),
-                              sm.heatProof()),
-                       sm.wor(sm.wor(sm.canPassBombPassages(),
-                                     sm.haveItem("SpeedBooster")),
-                              sm.wor(sm.haveItem("SpaceJump"),
-                                     sm.haveItem("HiJump"),
-                                     sm.knowsWallJumpCathedralExit(),
-                                     sm.wand(sm.knowsSpringBallJumpFromWall(), sm.canUseSpringBall()))))
+        return sm.wand(lambda: sm.wor(lambda: sm.canHellRun('MainUpperNorfair', 0.75),
+                                      lambda: sm.heatProof()),
+                       lambda: sm.wor(lambda: sm.wor(lambda: sm.canPassBombPassages(),
+                                                     lambda: sm.haveItem("SpeedBooster")),
+                                      lambda: sm.wor(lambda: sm.haveItem("SpaceJump"),
+                                                     lambda: sm.haveItem("HiJump"),
+                                                     lambda: sm.knowsWallJumpCathedralExit(),
+                                                     lambda: sm.wand(lambda: sm.knowsSpringBallJumpFromWall(),
+                                                                     lambda: sm.canUseSpringBall()))))
 
     @Cache.decorator
     def canGrappleEscape(self):
         sm = self.smbm
-        return sm.wor(sm.wor(sm.haveItem('SpaceJump'),
-                             sm.wand(sm.canInfiniteBombJump(), # IBJ from lava...either have grav or freeze the enemy there if hellrunning (otherwise single DBJ at the end)
-                                     sm.wor(sm.heatProof(),
-                                            sm.haveItem('Gravity'),
-                                            sm.haveItem('Ice')))),
-                      sm.haveItem('Grapple'),
-                      sm.wand(sm.haveItem('SpeedBooster'),
-                              sm.wor(sm.haveItem('HiJump'), # jump from the blocks below
-                                     sm.knowsShortCharge())), # spark from across the grapple blocks
-                      sm.wand(sm.haveItem('HiJump'), sm.canSpringBallJump())) # jump from the blocks below
+        return sm.wor(lambda: sm.wor(lambda: sm.haveItem('SpaceJump'),
+                                     lambda: sm.wand(lambda: sm.canInfiniteBombJump(), # IBJ from lava...either have grav or freeze the enemy there if hellrunning (otherwise single DBJ at the end)
+                                                     lambda: sm.wor(lambda: sm.heatProof(),
+                                                                    lambda: sm.haveItem('Gravity'),
+                                                                    lambda: sm.haveItem('Ice')))),
+                      lambda: sm.haveItem('Grapple'),
+                      lambda: sm.wand(lambda: sm.haveItem('SpeedBooster'),
+                                      lambda: sm.wor(lambda: sm.haveItem('HiJump'), # jump from the blocks below
+                                                     lambda: sm.knowsShortCharge())), # spark from across the grapple blocks
+                      lambda: sm.wand(lambda: sm.haveItem('HiJump'),
+                                      lambda: sm.canSpringBallJump())) # jump from the blocks below
 
     @Cache.decorator
     def canPassFrogSpeedwayRightToLeft(self):
         sm = self.smbm
-        return sm.wor(sm.haveItem('SpeedBooster'),
-                      sm.wand(sm.knowsFrogSpeedwayWithoutSpeed(),
-                              sm.haveItem('Wave'),
-                              sm.wor(sm.haveItem('Spazer'),
-                                     sm.haveItem('Plasma'))))
+        return sm.wor(lambda: sm.haveItem('SpeedBooster'),
+                      lambda: sm.wand(lambda: sm.knowsFrogSpeedwayWithoutSpeed(),
+                                      lambda: sm.haveItem('Wave'),
+                                      lambda: sm.wor(lambda: sm.haveItem('Spazer'),
+                                                     lambda: sm.haveItem('Plasma'))))
 
     @Cache.decorator
     def canEnterNorfairReserveArea(self):
         sm = self.smbm
-        return sm.wand(sm.canOpenGreenDoors(),
-                       sm.wor(sm.wor(sm.canFly(),
-                                     sm.haveItem('Grapple'),
-                                     sm.wand(sm.haveItem('HiJump'),
-                                             sm.knowsGetAroundWallJump())),
-                              sm.wor(sm.haveItem('Ice'),
-                                     sm.wand(sm.canUseSpringBall(),
-                                             sm.knowsSpringBallJumpFromWall()),
-                                     sm.knowsNorfairReserveDBoost())))
+        return sm.wand(lambda: sm.canOpenGreenDoors(),
+                       lambda: sm.wor(lambda: sm.wor(lambda: sm.canFly(),
+                                                     lambda: sm.haveItem('Grapple'),
+                                                     lambda: sm.wand(lambda: sm.haveItem('HiJump'),
+                                                                     lambda: sm.knowsGetAroundWallJump())),
+                                      lambda: sm.wor(lambda: sm.haveItem('Ice'),
+                                                     lambda: sm.wand(lambda: sm.canUseSpringBall(),
+                                                                     lambda: sm.knowsSpringBallJumpFromWall()),
+                                                     lambda: sm.knowsNorfairReserveDBoost())))
 
     @Cache.decorator
     def canPassLavaPit(self):
@@ -203,12 +210,17 @@ class HelpersGraph(Helpers):
             nTanks4Dive = 8
         if sm.haveItem('HiJump').bool == False:
             nTanks4Dive = ceil(nTanks4Dive * 1.25) # 4 or 10
-        return sm.wand(sm.wor(sm.wand(sm.haveItem('Gravity'), sm.haveItem('SpaceJump')),
-                              sm.wand(sm.knowsGravityJump(), sm.haveItem('Gravity'), sm.wor(sm.haveItem('HiJump'), sm.knowsLavaDive())),
-                              sm.wand(sm.wor(sm.wand(sm.knowsLavaDive(), sm.haveItem('HiJump')),
-                                             sm.knowsLavaDiveNoHiJump()),
-                                      sm.energyReserveCountOk(nTanks4Dive))),
-                       sm.canUsePowerBombs()) # power bomb blocks left and right of LN entrance without any items before
+        return sm.wand(lambda: sm.wor(lambda: sm.wand(lambda: sm.haveItem('Gravity'),
+                                                      lambda: sm.haveItem('SpaceJump')),
+                                      lambda: sm.wand(lambda: sm.knowsGravityJump(),
+                                                      lambda: sm.haveItem('Gravity'),
+                                                      lambda: sm.wor(lambda: sm.haveItem('HiJump'),
+                                                                     lambda: sm.knowsLavaDive())),
+                                      lambda: sm.wand(lambda: sm.wor(lambda: sm.wand(lambda: sm.knowsLavaDive(),
+                                                                                     lambda: sm.haveItem('HiJump')),
+                                                                     lambda: sm.knowsLavaDiveNoHiJump()),
+                                                      lambda: sm.energyReserveCountOk(nTanks4Dive))),
+                       lambda: sm.canUsePowerBombs()) # power bomb blocks left and right of LN entrance without any items before
 
     @Cache.decorator
     def canPassLavaPitReverse(self):
@@ -221,43 +233,48 @@ class HelpersGraph(Helpers):
     @Cache.decorator
     def canPassLowerNorfairChozo(self):
         sm = self.smbm
-        return sm.wand(sm.canHellRun('LowerNorfair', 0.75), # 0.75 to require one more CF if no heat protection because of distance to cover, wait times, acid...
-                       sm.canUsePowerBombs(),
-                       sm.wor(sm.haveItem('SpaceJump'),
-                              RomPatches.has(RomPatches.LNChozoSJCheckDisabled)))
+        return sm.wand(lambda: sm.canHellRun('LowerNorfair', 0.75), # 0.75 to require one more CF if no heat protection because of distance to cover, wait times, acid...
+                       lambda: sm.canUsePowerBombs(),
+                       lambda: sm.wor(lambda: sm.haveItem('SpaceJump'),
+                                      lambda: RomPatches.has(RomPatches.LNChozoSJCheckDisabled)))
 
     @Cache.decorator
     def canExitScrewAttackArea(self):
         sm = self.smbm
 
-        return sm.wand(sm.canDestroyBombWalls(),
-                       sm.wor(sm.canFly(),
-                              sm.wand(sm.haveItem('HiJump'),
-                                      sm.haveItem('SpeedBooster'),
-                                      sm.wor(sm.wand(sm.haveItem('ScrewAttack'), sm.knowsScrewAttackExit()),
-                                             sm.knowsScrewAttackExitWithoutScrew())),
-                              sm.wand(sm.canUseSpringBall(),
-                                      sm.knowsSpringBallJumpFromWall()),
-                              sm.wand(sm.canSimpleShortCharge(), # fight GT and spark out
-                                      sm.enoughStuffGT())))
+        return sm.wand(lambda: sm.canDestroyBombWalls(),
+                       lambda: sm.wor(lambda: sm.canFly(),
+                                      lambda: sm.wand(lambda: sm.haveItem('HiJump'),
+                                                      lambda: sm.haveItem('SpeedBooster'),
+                                                      lambda: sm.wor(lambda: sm.wand(lambda: sm.haveItem('ScrewAttack'),
+                                                                                     lambda: sm.knowsScrewAttackExit()),
+                                                                     lambda: sm.knowsScrewAttackExitWithoutScrew())),
+                                      lambda: sm.wand(lambda: sm.canUseSpringBall(),
+                                                      lambda: sm.knowsSpringBallJumpFromWall()),
+                                      lambda: sm.wand(lambda: sm.canSimpleShortCharge(), # fight GT and spark out
+                                                      lambda: sm.enoughStuffGT())))
 
     @Cache.decorator
     def canPassWorstRoom(self):
         sm = self.smbm
-        return sm.wand(sm.canDestroyBombWalls(),
-                       sm.wor(sm.canFly(),
-                              sm.wand(sm.knowsWorstRoomIceCharge(), sm.haveItem('Ice'), sm.haveItem('Charge')),
-                              sm.wand(sm.knowsGetAroundWallJump(), sm.haveItem('HiJump')),
-                              sm.wand(sm.knowsSpringBallJumpFromWall(), sm.canUseSpringBall())))
+        return sm.wand(lambda: sm.canDestroyBombWalls(),
+                       lambda: sm.wor(lambda: sm.canFly(),
+                                      lambda: sm.wand(lambda: sm.knowsWorstRoomIceCharge(),
+                                                      lambda: sm.haveItem('Ice'),
+                                                      lambda: sm.haveItem('Charge')),
+                                      lambda: sm.wand(lambda: sm.knowsGetAroundWallJump(),
+                                                      lambda: sm.haveItem('HiJump')),
+                                      lambda: sm.wand(lambda: sm.knowsSpringBallJumpFromWall(),
+                                                      lambda: sm.canUseSpringBall())))
 
     @Cache.decorator
     def canPassThreeMuskateers(self):
         sm = self.smbm
-        destroy = sm.wor(sm.haveItem('Plasma'),
-                         sm.haveItem('ScrewAttack'),
-                         sm.wand(sm.heatProof(), # this takes a loooong time ...
-                                 sm.wor(sm.haveItem('Spazer'),
-                                        sm.haveItem('Ice'))))
+        destroy = sm.wor(lambda: sm.haveItem('Plasma'),
+                         lambda: sm.haveItem('ScrewAttack'),
+                         lambda: sm.wand(lambda: sm.heatProof(), # this takes a loooong time ...
+                                         lambda: sm.wor(lambda: sm.haveItem('Spazer'),
+                                                        lambda: sm.haveItem('Ice'))))
         if destroy.bool == True:
             return destroy
         # if no adapted beams or screw attack, check if we can go both ways
@@ -273,7 +290,8 @@ class HelpersGraph(Helpers):
         # - or with taking damage as well?
         dmgKi = 200.0 / sm.getDmgReduction(False)
         if (sm.itemCount('Super')*5*sup)/ki + (sm.energyReserveCount()*100 - 2)/dmgKi >= nbKi:
-            return sm.wand(sm.heatProof(), SMBool(True, 0, items=['Super', 'ETank'])) # require heat proof as long as taking damage is necessary
+            return sm.wand(lambda: sm.heatProof(),
+                           lambda: SMBool(True, 0, items=['Super', 'ETank'])) # require heat proof as long as taking damage is necessary
 
         return SMBool(False, 0)
 
@@ -286,71 +304,75 @@ class HelpersGraph(Helpers):
         if sm.heatProof().bool == False:
             nTanksGrav *= 5
             nTanksNoGrav *= 5 # 30 should not happen ...
-        return sm.wor(sm.wand(sm.haveItem('Gravity'),
-                              sm.energyReserveCountOk(nTanksGrav)),
-                      sm.wand(sm.energyReserveCountOk(nTanksNoGrav),
-                              sm.knowsLavaDive())) # should be a good enough skill filter for acid wall jumps with no grav...
+        return sm.wor(lambda: sm.wand(lambda: sm.haveItem('Gravity'),
+                                      lambda: sm.energyReserveCountOk(nTanksGrav)),
+                      lambda: sm.wand(lambda: sm.energyReserveCountOk(nTanksNoGrav),
+                                      lambda: sm.knowsLavaDive())) # should be a good enough skill filter for acid wall jumps with no grav...
 
     @Cache.decorator
     def canClimbRedTower(self):
         sm = self.smbm
-        return sm.wor(sm.knowsRedTowerClimb(),
-                      sm.haveItem('Ice'),
-                      sm.haveItem('SpaceJump'))
+        return sm.wor(lambda: sm.knowsRedTowerClimb(),
+                      lambda: sm.haveItem('Ice'),
+                      lambda: sm.haveItem('SpaceJump'))
 
     @Cache.decorator
     def canClimbBottomRedTower(self):
         sm = self.smbm
-        return sm.wor(sm.wor(RomPatches.has(RomPatches.RedTowerLeftPassage),
-                             sm.haveItem('HiJump'),
-                             sm.haveItem('Ice'),
-                             sm.canFly()),
-                      sm.canShortCharge())
+        return sm.wor(lambda: sm.wor(lambda: RomPatches.has(RomPatches.RedTowerLeftPassage),
+                                     lambda: sm.haveItem('HiJump'),
+                                     lambda: sm.haveItem('Ice'),
+                                     lambda: sm.canFly()),
+                      lambda: sm.canShortCharge())
 
     @Cache.decorator
     def canGoUpMtEverest(self):
         sm = self.smbm
-        return sm.wor(sm.wand(sm.haveItem('Gravity'),
-                              sm.wor(sm.haveItem('Grapple'),
-                                     sm.haveItem('SpeedBooster'),
-                                     sm.canFly(),
-                                     sm.wand(sm.haveItem('HiJump'), sm.knowsGravityJump()))),
-                      sm.wand(sm.canDoSuitlessOuterMaridia(),
-                              sm.haveItem('Grapple')))
+        return sm.wor(lambda: sm.wand(lambda: sm.haveItem('Gravity'),
+                                      lambda: sm.wor(lambda: sm.haveItem('Grapple'),
+                                                     lambda: sm.haveItem('SpeedBooster'),
+                                                     lambda: sm.canFly(),
+                                                     lambda: sm.wand(lambda: sm.haveItem('HiJump'),
+                                                                     lambda: sm.knowsGravityJump()))),
+                      lambda: sm.wand(lambda: sm.canDoSuitlessOuterMaridia(),
+                                      lambda: sm.haveItem('Grapple')))
 
     @Cache.decorator
     def canPassMtEverest(self):
         sm = self.smbm
-        return  sm.wor(sm.wand(sm.haveItem('Gravity'),
-                               sm.wor(sm.wor(sm.haveItem('Grapple'),
-                                             sm.haveItem('SpeedBooster')),
-                                      sm.wor(sm.canFly(),
-                                             sm.knowsGravityJump(),
-                                             sm.wand(sm.haveItem('Ice'), sm.knowsTediousMountEverest())))),
-                       sm.canDoSuitlessMaridia(),
-                       sm.wand(sm.haveItem('Ice'), sm.canDoSuitlessOuterMaridia(), sm.knowsTediousMountEverest()))
+        return  sm.wor(lambda: sm.wand(lambda: sm.haveItem('Gravity'),
+                                       lambda: sm.wor(lambda: sm.wor(lambda: sm.haveItem('Grapple'),
+                                                                     lambda: sm.haveItem('SpeedBooster')),
+                                                      lambda: sm.wor(lambda: sm.canFly(),
+                                                                     lambda: sm.knowsGravityJump(),
+                                                                     lambda: sm.wand(lambda: sm.haveItem('Ice'),
+                                                                                     lambda: sm.knowsTediousMountEverest())))),
+                       lambda: sm.canDoSuitlessMaridia(),
+                       lambda: sm.wand(lambda: sm.haveItem('Ice'),
+                                       lambda: sm.canDoSuitlessOuterMaridia(),
+                                       lambda: sm.knowsTediousMountEverest()))
 
     @Cache.decorator
     def canDoSuitlessOuterMaridia(self):
         sm = self.smbm
-        return sm.wand(sm.knowsGravLessLevel1(),
-                       sm.haveItem('HiJump'),
-                       sm.wor(sm.haveItem('Ice'),
-                              sm.canSpringBallJump()))
+        return sm.wand(lambda: sm.knowsGravLessLevel1(),
+                       lambda: sm.haveItem('HiJump'),
+                       lambda: sm.wor(lambda: sm.haveItem('Ice'),
+                                      lambda: sm.canSpringBallJump()))
 
     @Cache.decorator
     def canDoSuitlessMaridia(self):
         sm = self.smbm
-        return sm.wand(sm.canDoSuitlessOuterMaridia(),
-                       sm.wor(sm.haveItem('Grapple'),
-                              sm.canDoubleSpringBallJump()))
+        return sm.wand(lambda: sm.canDoSuitlessOuterMaridia(),
+                       lambda: sm.wor(lambda: sm.haveItem('Grapple'),
+                                      lambda: sm.canDoubleSpringBallJump()))
 
     @Cache.decorator
     def canAccessBotwoonFromMainStreet(self):
         sm = self.smbm
-        return sm.wand(sm.canPassMtEverest(),
-                       sm.canOpenGreenDoors(),
-                       sm.canUsePowerBombs())
+        return sm.wand(lambda: sm.canPassMtEverest(),
+                       lambda: sm.canOpenGreenDoors(),
+                       lambda: sm.canUsePowerBombs())
 
     # from main street only
     @Cache.decorator
@@ -359,18 +381,20 @@ class HelpersGraph(Helpers):
         # EXPLAINED: in Botwoon Hallway, either:
         #             -use regular speedbooster (with gravity)
         #             -do a mochtroidclip (https://www.youtube.com/watch?v=1z_TQu1Jf1I&t=20m28s)
-        return sm.wand(sm.canAccessBotwoonFromMainStreet(),
-                       sm.enoughStuffBotwoon(),
-                       sm.wor(sm.wand(sm.haveItem('SpeedBooster'),
-                                      sm.haveItem('Gravity')),
-                              sm.wand(sm.knowsMochtroidClip(), sm.haveItem('Ice'))))
+        return sm.wand(lambda: sm.canAccessBotwoonFromMainStreet(),
+                       lambda: sm.enoughStuffBotwoon(),
+                       lambda: sm.wor(lambda: sm.wand(lambda: sm.haveItem('SpeedBooster'),
+                                                      lambda: sm.haveItem('Gravity')),
+                                      lambda: sm.wand(lambda: sm.knowsMochtroidClip(),
+                                                      lambda: sm.haveItem('Ice'))))
 
     @Cache.decorator
     def canAccessDraygonFromMainStreet(self):
         sm = self.smbm
-        return sm.wand(sm.canDefeatBotwoon(),
-                       sm.wor(sm.haveItem('Gravity'),
-                              sm.wand(sm.canDoSuitlessMaridia(), sm.knowsGravLessLevel2())))
+        return sm.wand(lambda: sm.wor(lambda: sm.haveItem('Gravity'),
+                                      lambda: sm.wand(lambda: sm.canDoSuitlessMaridia(),
+                                                      lambda: sm.knowsGravLessLevel2())),
+                       lambda: sm.canDefeatBotwoon())
 
     def isVanillaDraygon(self):
         if self.vanillaDraygon is None:
@@ -381,22 +405,22 @@ class HelpersGraph(Helpers):
     @Cache.decorator
     def canFightDraygon(self):
         sm = self.smbm
-        return sm.wor(sm.haveItem('Gravity'),
-                      sm.wand(sm.haveItem('HiJump'),
-                              sm.wor(sm.knowsGravLessLevel2(),
-                                     sm.knowsGravLessLevel3())))
+        return sm.wor(lambda: sm.haveItem('Gravity'),
+                      lambda: sm.wand(lambda: sm.haveItem('HiJump'),
+                                      lambda: sm.wor(lambda: sm.knowsGravLessLevel2(),
+                                                     lambda: sm.knowsGravLessLevel3())))
 
     @Cache.decorator
     def canDraygonCrystalFlashSuit(self):
         sm = self.smbm
-        return sm.wand(sm.canCrystalFlash(),
-                       sm.knowsDraygonRoomCrystalFlash(),
+        return sm.wand(lambda: sm.canCrystalFlash(),
+                       lambda: sm.knowsDraygonRoomCrystalFlash(),
                        # ask for 4 PB pack as an ugly workaround for
                        # a rando bug which can place a PB at space
                        # jump to "get you out" (this check is in
                        # PostAvailable condition of the Dray/Space
                        # Jump locs)
-                       sm.itemCountOk('PowerBomb', 4))
+                       lambda: sm.itemCountOk('PowerBomb', 4))
 
     @Cache.decorator
     def canExitDraygonVanilla(self):
@@ -405,39 +429,39 @@ class HelpersGraph(Helpers):
         #   with gravity but without highjump/bomb/space jump: gravity jump
         #     to exit draygon room: grapple or crystal flash (for free shine spark)
         #     to exit precious room: spring ball jump, xray scope glitch or stored spark
-        return sm.wor(sm.wand(sm.haveItem('Gravity'),
-                              sm.wor(sm.canFly(),
-                                     sm.knowsGravityJump(),
-                                     sm.wand(sm.haveItem('HiJump'),
-                                             sm.haveItem('SpeedBooster')))),
-                      sm.wand(sm.canDraygonCrystalFlashSuit(),
-                              # use the spark either to exit draygon room or precious room
-                              sm.wor(sm.wand(sm.haveItem('Grapple'),
-                                             sm.knowsDraygonRoomGrappleExit()),
-                                     sm.wand(sm.haveItem('XRayScope'),
-                                             sm.knowsPreciousRoomXRayExit()),
-                                     sm.canSpringBallJump())),
+        return sm.wor(lambda: sm.wand(lambda: sm.haveItem('Gravity'),
+                                      lambda: sm.wor(lambda: sm.canFly(),
+                                                     lambda: sm.knowsGravityJump(),
+                                                     lambda: sm.wand(lambda: sm.haveItem('HiJump'),
+                                                                     lambda: sm.haveItem('SpeedBooster')))),
+                      lambda: sm.wand(lambda: sm.canDraygonCrystalFlashSuit(),
+                                      # use the spark either to exit draygon room or precious room
+                                      lambda: sm.wor(lambda: sm.wand(lambda: sm.haveItem('Grapple'),
+                                                                     lambda: sm.knowsDraygonRoomGrappleExit()),
+                                                     lambda: sm.wand(lambda: sm.haveItem('XRayScope'),
+                                                                     lambda: sm.knowsPreciousRoomXRayExit()),
+                                                     lambda: sm.canSpringBallJump())),
                       # spark-less exit (no CF)
-                      sm.wand(sm.wand(sm.haveItem('Grapple'),
-                                      sm.knowsDraygonRoomGrappleExit()),
-                              sm.wor(sm.wand(sm.haveItem('XRayScope'),
-                                             sm.knowsPreciousRoomXRayExit()),
-                                     sm.canSpringBallJump())),
-                      sm.canDoubleSpringBallJump())
+                      lambda: sm.wand(lambda: sm.wand(lambda: sm.haveItem('Grapple'),
+                                                      lambda: sm.knowsDraygonRoomGrappleExit()),
+                                      lambda: sm.wor(lambda: sm.wand(lambda: sm.haveItem('XRayScope'),
+                                                                     lambda: sm.knowsPreciousRoomXRayExit()),
+                                                     lambda: sm.canSpringBallJump())),
+                      lambda: sm.canDoubleSpringBallJump())
 
     @Cache.decorator
     def canExitDraygonRandomized(self):
         sm = self.smbm
         # disregard precious room
-        return sm.wor(sm.wand(sm.haveItem('Gravity'),
-                              sm.wor(sm.canFly(),
-                                     sm.knowsGravityJump(),
-                                     sm.wand(sm.haveItem('HiJump'),
-                                             sm.haveItem('SpeedBooster')))),
-                      sm.canDraygonCrystalFlashSuit(),
-                      sm.wand(sm.haveItem('Grapple'),
-                              sm.knowsDraygonRoomGrappleExit()),
-                      sm.canDoubleSpringBallJump())
+        return sm.wor(lambda: sm.wand(lambda: sm.haveItem('Gravity'),
+                                      lambda: sm.wor(lambda: sm.canFly(),
+                                                     lambda: sm.knowsGravityJump(),
+                                                     lambda: sm.wand(lambda: sm.haveItem('HiJump'),
+                                                                     lambda: sm.haveItem('SpeedBooster')))),
+                      lambda: sm.canDraygonCrystalFlashSuit(),
+                      lambda: sm.wand(lambda: sm.haveItem('Grapple'),
+                                      lambda: sm.knowsDraygonRoomGrappleExit()),
+                      lambda: sm.canDoubleSpringBallJump())
 
     def canExitDraygon(self):
         if self.isVanillaDraygon():
@@ -452,13 +476,13 @@ class HelpersGraph(Helpers):
     @Cache.decorator
     def canExitPreciousRoomRandomized(self):
         sm = self.smbm
-        return sm.wor(sm.wand(sm.haveItem('Gravity'),
-                              sm.wor(sm.canFly(),
-                                     sm.knowsGravityJump(),
-                                     sm.haveItem('HiJump'))),
-                      sm.wor(sm.wand(sm.haveItem('XRayScope'),
-                                     sm.knowsPreciousRoomXRayExit()),
-                             sm.canSpringBallJump()))
+        return sm.wor(lambda: sm.wand(lambda: sm.haveItem('Gravity'),
+                                      lambda: sm.wor(lambda: sm.canFly(),
+                                                     lambda: sm.knowsGravityJump(),
+                                                     lambda: sm.haveItem('HiJump'))),
+                      lambda: sm.wor(lambda: sm.wand(lambda: sm.haveItem('XRayScope'),
+                                                     lambda: sm.knowsPreciousRoomXRayExit()),
+                                     lambda: sm.canSpringBallJump()))
 
     def canExitPreciousRoom(self):
         if self.isVanillaDraygon():

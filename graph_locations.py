@@ -20,9 +20,9 @@ locations = [
     'AccessFrom' : {
         'Landing Site': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: sm.wor(sm.canEnterAndLeaveGauntlet(),
-                                   sm.wand(sm.canShortCharge(),
-                                           sm.canEnterAndLeaveGauntletQty(1, 0))) # thanks ponk! https://youtu.be/jil5zTBCF1s
+    'Available': lambda sm: sm.wor(lambda: sm.canEnterAndLeaveGauntlet(),
+                                   lambda: sm.wand(lambda: sm.canShortCharge(),
+                                                   lambda: sm.canEnterAndLeaveGauntletQty(1, 0))) # thanks ponk! https://youtu.be/jil5zTBCF1s
 },
 {
     'Area': "Crateria",
@@ -38,10 +38,10 @@ locations = [
     'AccessFrom' : {
         'Landing Site': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: sm.wand(sm.haveItem('Morph'),
-                                    sm.canOpenRedDoors()),
-    'PostAvailable': lambda sm: sm.wor(sm.knowsAlcatrazEscape(),
-                                       sm.canPassBombPassages())
+    'Available': lambda sm: sm.wand(lambda: sm.haveItem('Morph'),
+                                    lambda: sm.canOpenRedDoors()),
+    'PostAvailable': lambda sm: sm.wor(lambda: sm.knowsAlcatrazEscape(),
+                                       lambda: sm.canPassBombPassages())
 },
 {
     'Area': "Crateria",
@@ -73,10 +73,10 @@ locations = [
     'AccessFrom' : {
         'Green Brinstar Elevator Right': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: sm.wand(sm.canOpenRedDoors(),
-                                    sm.wor(sm.wand(sm.knowsMockball(),
-                                                   sm.haveItem('Morph')),
-                                           sm.haveItem('SpeedBooster')))
+    'Available': lambda sm: sm.wand(lambda: sm.canOpenRedDoors(),
+                                    lambda: sm.wor(lambda: sm.wand(lambda: sm.knowsMockball(),
+                                                                   lambda: sm.haveItem('Morph')),
+                                                   lambda: sm.haveItem('SpeedBooster')))
 },
 {
     'Area': "Brinstar",
@@ -122,18 +122,19 @@ locations = [
     'Visibility': "Hidden",
     'Room': 'Blue Brinstar Energy Tank Room',
     'AccessFrom' : {
-        'Landing Site': lambda sm: sm.wor(sm.canOpenRedDoors(), RomPatches.has(RomPatches.BlueBrinstarBlueDoor))
+        'Landing Site': lambda sm: sm.wor(lambda: sm.canOpenRedDoors(),
+                                          lambda: RomPatches.has(RomPatches.BlueBrinstarBlueDoor))
     },
     # EXPLAINED: to get this major item the different technics are:
     #  -can fly (continuous bomb jump or space jump)
     #  -have the high jump boots
     #  -freeze the Reo to jump on it
     #  -do a damage boost with one of the two Geemers
-    'Available': lambda sm: sm.wor(sm.knowsCeilingDBoost(),
-                                   sm.canFly(),
-                                   sm.wor(sm.haveItem('HiJump'),
-                                          sm.haveItem('Ice'),
-                                          sm.canSimpleShortCharge()))
+    'Available': lambda sm: sm.wor(lambda: sm.knowsCeilingDBoost(),
+                                   lambda: sm.canFly(),
+                                   lambda: sm.wor(lambda: sm.haveItem('HiJump'),
+                                                  lambda: sm.haveItem('Ice'),
+                                                  lambda: sm.canSimpleShortCharge()))
 },
 {
     'Area': "Brinstar",
@@ -166,11 +167,11 @@ locations = [
     'AccessFrom' : {
         'Big Pink': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: sm.wand(sm.canUsePowerBombs(),
-                                    sm.canOpenRedDoors(),
-                                    sm.haveItem('SpeedBooster'),
-                                    sm.wor(sm.haveItem('Gravity'),
-                                           sm.canSimpleShortCharge())) # from the blocks above the water
+    'Available': lambda sm: sm.wand(lambda: sm.canUsePowerBombs(),
+                                    lambda: sm.canOpenRedDoors(),
+                                    lambda: sm.haveItem('SpeedBooster'),
+                                    lambda: sm.wor(lambda: sm.haveItem('Gravity'),
+                                                   lambda: sm.canSimpleShortCharge())) # from the blocks above the water
 },
 {
     'Area': "Brinstar",
@@ -186,13 +187,13 @@ locations = [
     'AccessFrom' : {
         'Big Pink': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: sm.wand(sm.canUsePowerBombs(),
-                                    sm.wor(sm.haveItem('Wave'),
-                                           sm.wand(sm.haveItem('Super'),
-                                                   sm.haveItem('HiJump'),
-                                                   sm.knowsReverseGateGlitch()),
-                                           sm.wand(sm.haveItem('Super'),
-                                                   sm.knowsReverseGateGlitchHiJumpLess())))
+    'Available': lambda sm: sm.wand(lambda: sm.canUsePowerBombs(),
+                                    lambda: sm.wor(lambda: sm.haveItem('Wave'),
+                                                   lambda: sm.wand(lambda: sm.haveItem('Super'),
+                                                                   lambda: sm.haveItem('HiJump'),
+                                                                   lambda: sm.knowsReverseGateGlitch()),
+                                                   lambda: sm.wand(lambda: sm.haveItem('Super'),
+                                                                   lambda: sm.knowsReverseGateGlitchHiJumpLess())))
 },
 {
     'Area': "Brinstar",
@@ -208,17 +209,17 @@ locations = [
     'AccessFrom' : {
         'Red Tower Top Left': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: sm.wand(sm.canUsePowerBombs(),
-                                    sm.canOpenRedDoors(),
-                                    sm.wor(sm.haveItem('Grapple'),
-                                           sm.haveItem('SpaceJump'),
-                                           sm.wand(sm.energyReserveCountOkHardRoom('X-Ray'),
-                                                   sm.wor(sm.knowsXrayDboost(),
-                                                          sm.haveItem('Ice'),
-                                                          sm.canInfiniteBombJump(),
-                                                          sm.wand(sm.haveItem('HiJump'),
-                                                                  sm.wor(sm.haveItem('SpeedBooster'),
-                                                                         sm.canSpringBallJump()))))))
+    'Available': lambda sm: sm.wand(lambda: sm.canUsePowerBombs(),
+                                    lambda: sm.canOpenRedDoors(),
+                                    lambda: sm.wor(lambda: sm.haveItem('Grapple'),
+                                                   lambda: sm.haveItem('SpaceJump'),
+                                                   lambda: sm.wand(lambda: sm.energyReserveCountOkHardRoom('X-Ray'),
+                                                                   lambda: sm.wor(lambda: sm.knowsXrayDboost(),
+                                                                                  lambda: sm.haveItem('Ice'),
+                                                                                  lambda: sm.canInfiniteBombJump(),
+                                                                                  lambda: sm.wand(lambda: sm.haveItem('HiJump'),
+                                                                                                  lambda: sm.wor(lambda: sm.haveItem('SpeedBooster'),
+                                                                                                                 lambda: sm.canSpringBallJump()))))))
 },
 {
     'Area': "Brinstar",
@@ -234,9 +235,10 @@ locations = [
     'AccessFrom' : {
         'East Tunnel Right': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: sm.wand(sm.canOpenGreenDoors(),
-                                    sm.wor(sm.canPassBombPassages(),
-                                           sm.wand(sm.haveItem('Morph'), RomPatches.has(RomPatches.SpazerShotBlock))))
+    'Available': lambda sm: sm.wand(lambda: sm.canOpenGreenDoors(),
+                                    lambda: sm.wor(lambda: sm.canPassBombPassages(),
+                                                   lambda: sm.wand(lambda: sm.haveItem('Morph'), 
+                                                                   lambda: RomPatches.has(RomPatches.SpazerShotBlock))))
 },
 {
     'Area': "Brinstar",
@@ -300,14 +302,14 @@ locations = [
     'AccessFrom' : {
         'Warehouse Entrance Left': lambda sm: sm.canOpenGreenDoors()
     },
-    'Available': lambda sm: sm.wand(sm.canHellRun('Ice'),
-                                    sm.wor(sm.canPassBombPassages(), # to exit, or if you fail entrance
-                                           sm.wand(sm.haveItem('Ice'), # harder strat
-                                                   sm.haveItem('Morph'),
-                                                   sm.knowsIceEscape())),
-                                    sm.wor(sm.wand(sm.haveItem('Morph'),
-                                                   sm.knowsMockball()),
-                                           sm.haveItem('SpeedBooster')))
+    'Available': lambda sm: sm.wand(lambda: sm.canHellRun('Ice'),
+                                    lambda: sm.wor(lambda: sm.canPassBombPassages(), # to exit, or if you fail entrance
+                                                   lambda: sm.wand(lambda: sm.haveItem('Ice'), # harder strat
+                                                                   lambda: sm.haveItem('Morph'),
+                                                                   lambda: sm.knowsIceEscape())),
+                                    lambda: sm.wor(lambda: sm.wand(lambda: sm.haveItem('Morph'),
+                                                                   lambda: sm.knowsMockball()),
+                                                   lambda: sm.haveItem('SpeedBooster')))
 },
 {
     'Area': "Norfair",
@@ -323,10 +325,10 @@ locations = [
     'AccessFrom' : {
         'Croc Zone': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: sm.wand(sm.enoughStuffCroc(),
-                                    sm.wor(sm.haveItem('Grapple'),
-                                           sm.haveItem('SpaceJump'),
-                                           sm.energyReserveCountOk(3/sm.getDmgReduction())))
+    'Available': lambda sm: sm.wand(lambda: sm.enoughStuffCroc(),
+                                    lambda: sm.wor(lambda: sm.haveItem('Grapple'),
+                                                   lambda: sm.haveItem('SpaceJump'),
+                                                   lambda: sm.energyReserveCountOk(3/sm.getDmgReduction())))
 },
 {
     'Area': "Norfair",
@@ -342,9 +344,11 @@ locations = [
     'AccessFrom' : {
         'Warehouse Entrance Left': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: sm.wand(sm.canOpenRedDoors(), sm.haveItem('Morph')),
-    'PostAvailable': lambda sm: sm.wor(sm.canPassBombPassages(),
-                                       sm.wand(sm.haveItem('Morph'), RomPatches.has(RomPatches.HiJumpShotBlock)))
+    'Available': lambda sm: sm.wand(lambda: sm.canOpenRedDoors(),
+                                    lambda: sm.haveItem('Morph')),
+    'PostAvailable': lambda sm: sm.wor(lambda: sm.canPassBombPassages(),
+                                       lambda: sm.wand(lambda: sm.haveItem('Morph'),
+                                                       lambda: RomPatches.has(RomPatches.HiJumpShotBlock)))
 },
 {
     'Area': "Norfair",
@@ -360,18 +364,18 @@ locations = [
     'AccessFrom' : {
         'Croc Zone': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: sm.wand(sm.enoughStuffCroc(),
-                                    sm.wor(sm.wand(sm.haveItem('Morph'),
-                                                   sm.canFly()),
-                                           sm.wand(sm.haveItem('SpeedBooster'),
-                                                   sm.wor(sm.knowsShortCharge(),
-                                                          sm.canUsePowerBombs())),
-                                           sm.wand(sm.haveItem('Morph'),
-                                                   sm.wor(sm.haveItem('SpeedBooster'),
-                                                          sm.canSpringBallJump()),
-                                                   sm.haveItem('HiJump')), # jump from the yellow plateform ennemy
-                                           sm.wand(sm.haveItem('Super'),
-                                                   sm.knowsGreenGateGlitch())))
+    'Available': lambda sm: sm.wand(lambda: sm.enoughStuffCroc(),
+                                    lambda: sm.wor(lambda: sm.wand(lambda: sm.haveItem('Morph'),
+                                                                   lambda: sm.canFly()),
+                                                   lambda: sm.wand(lambda: sm.haveItem('SpeedBooster'),
+                                                                   lambda: sm.wor(lambda: sm.knowsShortCharge(),
+                                                                                  lambda: sm.canUsePowerBombs())),
+                                                   lambda: sm.wand(lambda: sm.haveItem('Morph'),
+                                                                   lambda: sm.wor(lambda: sm.haveItem('SpeedBooster'),
+                                                                                  lambda: sm.canSpringBallJump()),
+                                                                   lambda: sm.haveItem('HiJump')), # jump from the yellow plateform ennemy
+                                                   lambda: sm.wand(lambda: sm.haveItem('Super'),
+                                                                   lambda: sm.knowsGreenGateGlitch())))
 },
 {
     'Area': "Norfair",
@@ -387,7 +391,8 @@ locations = [
     'AccessFrom' : {
         'Bubble Mountain': lambda sm: sm.canHellRun('MainUpperNorfair'),
     },
-    'Available': lambda sm: sm.wand(sm.haveItem('Morph'), sm.canEnterNorfairReserveArea())
+    'Available': lambda sm: sm.wand(lambda: sm.haveItem('Morph'),
+                                    lambda: sm.canEnterNorfairReserveArea())
 },
 {
     'Area': "Norfair",
@@ -420,11 +425,12 @@ locations = [
         'Bubble Mountain': lambda sm: sm.canHellRun('MainUpperNorfair', 0.75)
     },
     'Available': lambda sm: sm.canOpenRedDoors(),
-    'PostAvailable': lambda sm: sm.wor(sm.haveItem('Morph'), # exit through lower passage under the spikes
-                                       sm.wand(sm.wor(sm.haveItem('SpaceJump'), # exit through blue gate
-                                                      sm.haveItem('Grapple')),
-                                               sm.wor(sm.wand(sm.knowsGreenGateGlitch(), sm.heatProof()), # hell run + green gate glitch is too much
-                                                      sm.haveItem('Wave'))))
+    'PostAvailable': lambda sm: sm.wor(lambda: sm.haveItem('Morph'), # exit through lower passage under the spikes
+                                       lambda: sm.wand(lambda: sm.wor(lambda: sm.haveItem('SpaceJump'), # exit through blue gate
+                                                                      lambda: sm.haveItem('Grapple')),
+                                                       lambda: sm.wor(lambda: sm.wand(lambda: sm.knowsGreenGateGlitch(),
+                                                                                      lambda: sm.heatProof()), # hell run + green gate glitch is too much
+                                                                      lambda: sm.haveItem('Wave'))))
 },
 {
     'Area': "LowerNorfair",
@@ -438,7 +444,8 @@ locations = [
     'AccessFrom' : {
         'RidleyRoomIn': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: sm.wand(sm.canHellRun('LowerNorfair'), sm.enoughStuffsRidley()),
+    'Available': lambda sm: sm.wand(lambda: sm.canHellRun('LowerNorfair'),
+                                    lambda: sm.enoughStuffsRidley()),
     'Pickup': lambda: Bosses.beatBoss('Ridley'),
     'Unpickup': lambda: Bosses.unbeatBoss('Ridley')
 },
@@ -493,10 +500,10 @@ locations = [
     },
     'Available': lambda sm: SMBool(True),
     # avoid doing the super annoying wall jump in the dark...
-    'PostAvailable': lambda sm: sm.wor(sm.haveItem('Ice'),
-                                       sm.haveItem('HiJump'),
-                                       sm.canFly(),
-                                       sm.canSpringBallJump())
+    'PostAvailable': lambda sm: sm.wor(lambda: sm.haveItem('Ice'),
+                                       lambda: sm.haveItem('HiJump'),
+                                       lambda: sm.canFly(),
+                                       lambda: sm.canSpringBallJump())
 },
 {
     'Area': "WreckedShip",
@@ -512,9 +519,9 @@ locations = [
     'AccessFrom' : {
         'Wrecked Ship Main': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: sm.wand(sm.canUsePowerBombs(),
-                                    sm.haveItem('SpeedBooster'),
-                                    sm.canPassBowling())
+    'Available': lambda sm: sm.wand(lambda: sm.canUsePowerBombs(),
+                                    lambda: sm.haveItem('SpeedBooster'),
+                                    lambda: sm.canPassBowling())
 },
 {
     'Area': "WreckedShip",
@@ -530,8 +537,8 @@ locations = [
     'AccessFrom' : {
         'Wrecked Ship Back': lambda sm: sm.canOpenRedDoors()
     },
-    'Available': lambda sm: sm.wor(Bosses.bossDead('Phantoon'),
-                                   RomPatches.has(RomPatches.WsEtankPhantoonAlive))
+    'Available': lambda sm: sm.wor(lambda: Bosses.bossDead('Phantoon'),
+                                   lambda: RomPatches.has(RomPatches.WsEtankPhantoonAlive))
 },
 {
     'Area': "WreckedShip",
@@ -579,8 +586,8 @@ locations = [
     'AccessFrom' : {
         'Wrecked Ship Main': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: sm.wand(sm.canPassBombPassages(),
-                                    sm.canPassBowling())
+    'Available': lambda sm: sm.wand(lambda: sm.canPassBombPassages(),
+                                    lambda: sm.canPassBowling())
 },
 {
     'Area': "Maridia",
@@ -594,20 +601,21 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Mama Turtle Room',
     'AccessFrom' : {
-        'Main Street Bottom': lambda sm: sm.wor(sm.haveItem('Gravity'), sm.canDoSuitlessOuterMaridia())
+        'Main Street Bottom': lambda sm: sm.wor(lambda: sm.haveItem('Gravity'),
+                                                lambda: sm.canDoSuitlessOuterMaridia())
     },
-    'Available': lambda sm: sm.wand(sm.canOpenRedDoors(),
-                                    sm.wor(sm.wor(sm.canFly(),
-                                                  sm.wand(sm.haveItem('Gravity'),
-                                                          sm.haveItem('SpeedBooster')),
-                                                  sm.wand(sm.haveItem('HiJump'),
-                                                          sm.haveItem('SpeedBooster'),
-                                                          sm.knowsHiJumpMamaTurtle())),
-                                           sm.wor(sm.wand(sm.canUseSpringBall(),
-                                                          sm.wor(sm.wand(sm.haveItem('HiJump'),
-                                                                         sm.knowsSpringBallJump()),
-                                                                 sm.knowsSpringBallJumpFromWall())),
-                                                  sm.haveItem('Grapple'))))
+    'Available': lambda sm: sm.wand(lambda: sm.canOpenRedDoors(),
+                                    lambda: sm.wor(lambda: sm.wor(lambda: sm.canFly(),
+                                                                  lambda: sm.wand(lambda: sm.haveItem('Gravity'),
+                                                                                  lambda: sm.haveItem('SpeedBooster')),
+                                                                  lambda: sm.wand(lambda: sm.haveItem('HiJump'),
+                                                                                  lambda: sm.haveItem('SpeedBooster'),
+                                                                                  lambda: sm.knowsHiJumpMamaTurtle())),
+                                                   lambda: sm.wor(lambda: sm.wand(lambda: sm.canUseSpringBall(),
+                                                                                  lambda: sm.wor(lambda: sm.wand(lambda: sm.haveItem('HiJump'),
+                                                                                                                 lambda: sm.knowsSpringBallJump()),
+                                                                                                 lambda: sm.knowsSpringBallJumpFromWall())),
+                                                                  lambda: sm.haveItem('Grapple'))))
 },
 {
     'Area': "Maridia",
@@ -637,18 +645,18 @@ locations = [
     #  -can fly (space jump or infinite bomb jump)
     #  -use short charge with speedbooster
     'Available': lambda sm: Bosses.bossDead('Draygon'),
-    'PostAvailable': lambda sm: sm.wand(sm.wor(sm.wand(sm.canShortCharge(),
-                                                       sm.knowsKillPlasmaPiratesWithSpark()),
-                                               sm.wand(sm.haveItem('Charge'),
-                                                       sm.knowsKillPlasmaPiratesWithCharge()),
-                                               sm.haveItem('ScrewAttack', difficulty=easy),
-                                               sm.haveItem('Plasma', difficulty=easy)),
-                                        sm.wor(sm.canFly(),
-                                               sm.wand(sm.haveItem('HiJump'),
-                                                       sm.knowsGetAroundWallJump()),
-                                               sm.canShortCharge(),
-                                               sm.wand(sm.canSpringBallJump(),
-                                                       sm.knowsSpringBallJumpFromWall())))
+    'PostAvailable': lambda sm: sm.wand(lambda: sm.wor(lambda: sm.wand(lambda: sm.canShortCharge(),
+                                                                       lambda: sm.knowsKillPlasmaPiratesWithSpark()),
+                                                       lambda: sm.wand(lambda: sm.haveItem('Charge'),
+                                                                       lambda: sm.knowsKillPlasmaPiratesWithCharge()),
+                                                       lambda: sm.haveItem('ScrewAttack', difficulty=easy),
+                                                       lambda: sm.haveItem('Plasma', difficulty=easy)),
+                                        lambda: sm.wor(lambda: sm.canFly(),
+                                                       lambda: sm.wand(lambda: sm.haveItem('HiJump'),
+                                                                       lambda: sm.knowsGetAroundWallJump()),
+                                                       lambda: sm.canShortCharge(),
+                                                       lambda: sm.wand(lambda: sm.canSpringBallJump(),
+                                                                       lambda: sm.knowsSpringBallJumpFromWall())))
 },
 {
     'Area': "Maridia",
@@ -664,8 +672,8 @@ locations = [
     'AccessFrom' : {
         'Main Street Bottom': lambda sm: sm.canAccessBotwoonFromMainStreet()
     },
-    'Available': lambda sm: sm.wor(sm.haveItem('Gravity'),
-                                   sm.knowsGravLessLevel3()) # suitless maridia conditions are in canAccessBotwoonFromMainStreet
+    'Available': lambda sm: sm.wor(lambda: sm.haveItem('Gravity'),
+                                   lambda: sm.knowsGravLessLevel3()) # suitless maridia conditions are in canAccessBotwoonFromMainStreet
 },
 {
     'Area': "Maridia",
@@ -679,35 +687,40 @@ locations = [
     'Visibility': "Chozo",
     'Room': 'Spring Ball Room',
     'AccessFrom' : {
-        'Main Street Bottom': lambda sm: sm.wor(sm.canOpenGreenDoors(), sm.wand(sm.canOpenRedDoors(), RomPatches.has(RomPatches.AreaRandoGatesOther))), # gate
-        'Le Coude Right': lambda sm: sm.wand(sm.wor(sm.canOpenYellowDoors(), RomPatches.has(RomPatches.AreaRandoBlueDoors)),
-                                             sm.canOpenGreenDoors(),
-                                             sm.canDestroyBombWallsUnderwater()) # toilet
+        'Main Street Bottom': lambda sm: sm.wor(lambda: sm.canOpenGreenDoors(), 
+                                                lambda: sm.wand(lambda: sm.canOpenRedDoors(),
+                                                                lambda: RomPatches.has(RomPatches.AreaRandoGatesOther))), # gate
+        'Le Coude Right': lambda sm: sm.wand(lambda: sm.wor(lambda: sm.canOpenYellowDoors(),
+                                                            lambda: RomPatches.has(RomPatches.AreaRandoBlueDoors)),
+                                             lambda: sm.canOpenGreenDoors(),
+                                             lambda: sm.canDestroyBombWallsUnderwater()) # toilet
     },
-    'Available': lambda sm: sm.wand(sm.canUsePowerBombs(), # in Shaktool room to let Shaktool access the sand blocks
-                                    sm.wor(sm.haveItem('Gravity'), # access pants room
-                                           sm.wand(sm.haveItem('HiJump'),
-                                                   sm.haveItem('Ice'),
-                                                   sm.knowsGravLessLevel3())),
-                                    sm.wor(sm.wand(sm.haveItem('Ice'), # puyo clip
-                                                   sm.wor(sm.wand(sm.haveItem('Gravity'),
-                                                                  sm.knowsPuyoClip()),
-                                                          sm.wand(sm.haveItem('Gravity'),
-                                                                  sm.haveItem('XRayScope'),
-                                                                  sm.knowsPuyoClipXRay()),
-                                                          sm.knowsSuitlessPuyoClip())),
-                                           sm.wand(sm.haveItem('Grapple'), # go through grapple block
-                                                   sm.haveItem('Gravity'),
-                                                   sm.wor(sm.canFlyDiagonally(),
-                                                          sm.haveItem('HiJump'),
-                                                          sm.wand(sm.haveItem('Bomb'),
-                                                                  sm.wor(sm.knowsAccessSpringBallWithBombJumps(),
-                                                                         sm.wand(sm.haveItem('SpringBall'),
-                                                                                 sm.knowsAccessSpringBallWithSpringBallBombJumps()))),
-                                                          sm.wand(sm.haveItem('SpringBall'), sm.knowsAccessSpringBallWithSpringBallJump()))),
-                                           sm.wand(sm.haveItem('XRayScope'), sm.knowsAccessSpringBallWithXRayClimb()))), # XRay climb
-    'PostAvailable': lambda sm: sm.wor(sm.haveItem('Gravity'),
-                                       sm.canSpringBallJump())
+    'Available': lambda sm: sm.wand(lambda: sm.canUsePowerBombs(), # in Shaktool room to let Shaktool access the sand blocks
+                                    lambda: sm.wor(lambda: sm.haveItem('Gravity'), # access pants room
+                                                   lambda: sm.wand(lambda: sm.haveItem('HiJump'),
+                                                                   lambda: sm.haveItem('Ice'),
+                                                                   lambda: sm.knowsGravLessLevel3())),
+                                    lambda: sm.wor(lambda: sm.wand(lambda: sm.haveItem('Ice'), # puyo clip
+                                                                   lambda: sm.wor(lambda: sm.wand(lambda: sm.haveItem('Gravity'),
+                                                                                                  lambda: sm.knowsPuyoClip()),
+                                                                                  lambda: sm.wand(lambda: sm.haveItem('Gravity'),
+                                                                                                  lambda: sm.haveItem('XRayScope'),
+                                                                                                  lambda: sm.knowsPuyoClipXRay()),
+                                                                                  lambda: sm.knowsSuitlessPuyoClip())),
+                                                   lambda: sm.wand(lambda: sm.haveItem('Grapple'), # go through grapple block
+                                                                   lambda: sm.haveItem('Gravity'),
+                                                                   lambda: sm.wor(lambda: sm.canFlyDiagonally(),
+                                                                                  lambda: sm.haveItem('HiJump'),
+                                                                                  lambda: sm.wand(lambda: sm.haveItem('Bomb'),
+                                                                                                  lambda: sm.wor(lambda: sm.knowsAccessSpringBallWithBombJumps(),
+                                                                                                                 lambda: sm.wand(lambda: sm.haveItem('SpringBall'),
+                                                                                                                                 lambda: sm.knowsAccessSpringBallWithSpringBallBombJumps()))),
+                                                                                  lambda: sm.wand(lambda: sm.haveItem('SpringBall'),
+                                                                                                  lambda: sm.knowsAccessSpringBallWithSpringBallJump()))),
+                                                   lambda: sm.wand(lambda: sm.haveItem('XRayScope'),
+                                                                   lambda: sm.knowsAccessSpringBallWithXRayClimb()))), # XRay climb
+    'PostAvailable': lambda sm: sm.wor(lambda: sm.haveItem('Gravity'),
+                                       lambda: sm.canSpringBallJump())
 },
 {
     'Area': "Maridia",
@@ -793,9 +806,9 @@ locations = [
     'AccessFrom' : {
         'Landing Site': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: sm.wand(sm.canUsePowerBombs(),
-                                    sm.wor(sm.haveItem('SpeedBooster'),
-                                           sm.canFly()))
+    'Available': lambda sm: sm.wand(lambda: sm.canUsePowerBombs(),
+                                    lambda: sm.wor(lambda: sm.haveItem('SpeedBooster'),
+                                                   lambda: sm.canFly()))
 },
 {
     'Area': "Crateria",
@@ -843,7 +856,9 @@ locations = [
     'AccessFrom' : {
         'Wrecked Ship Main': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: sm.wand(sm.haveItem('Super'), sm.haveItem('Morph'), Bosses.bossDead('Phantoon'))
+    'Available': lambda sm: sm.wand(lambda: sm.haveItem('Super'),
+                                    lambda: sm.haveItem('Morph'),
+                                    lambda: Bosses.bossDead('Phantoon'))
 },
 {
     'Area': "Crateria",
@@ -891,12 +906,12 @@ locations = [
     'AccessFrom' : {
         'Landing Site': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: sm.wor(sm.wand(sm.canEnterAndLeaveGauntlet(),
-                                           sm.canPassBombPassages()),
-                                   sm.wand(sm.canShortCharge(),
-                                           sm.canUsePowerBombs(),
-                                           sm.itemCountOk('ETank', 1),
-                                           sm.knowsLowGauntlet()))
+    'Available': lambda sm: sm.wor(lambda: sm.wand(lambda: sm.canEnterAndLeaveGauntlet(),
+                                                   lambda: sm.canPassBombPassages()),
+                                   lambda: sm.wand(lambda: sm.canShortCharge(),
+                                                   lambda: sm.canUsePowerBombs(),
+                                                   lambda: sm.itemCountOk('ETank', 1),
+                                                   lambda: sm.knowsLowGauntlet()))
 },
 {
     'Area': "Crateria",
@@ -912,12 +927,12 @@ locations = [
     'AccessFrom' : {
         'Landing Site': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: sm.wor(sm.wand(sm.canEnterAndLeaveGauntlet(),
-                                           sm.canPassBombPassages()),
-                                   sm.wand(sm.canShortCharge(),
-                                           sm.canUsePowerBombs(),
-                                           sm.itemCountOk('ETank', 1),
-                                           sm.knowsLowGauntlet()))
+    'Available': lambda sm: sm.wor(lambda: sm.wand(lambda: sm.canEnterAndLeaveGauntlet(),
+                                                   lambda: sm.canPassBombPassages()),
+                                   lambda: sm.wand(lambda: sm.canShortCharge(),
+                                                   lambda: sm.canUsePowerBombs(),
+                                                   lambda: sm.itemCountOk('ETank', 1),
+                                                   lambda: sm.knowsLowGauntlet()))
 },
 {
     'Area': "Crateria",
@@ -933,16 +948,17 @@ locations = [
     'AccessFrom' : {
         'Landing Site': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: sm.wand(sm.canUsePowerBombs(),
-                                    sm.haveItem('SpeedBooster'),
+    'Available': lambda sm: sm.wand(lambda: sm.canUsePowerBombs(),
+                                    lambda: sm.haveItem('SpeedBooster'),
                                     # reserves are hard to trigger midspark when not having ETanks
-                                    sm.wor(sm.wand(sm.energyReserveCountOk(2), SMBool(sm.haveItemCount('ETank', 1))), # need energy to get out
-                                           sm.wand(SMBool(sm.haveItemCount('ETank', 1)),
-                                                   sm.wor(sm.haveItem('Grapple'), # use grapple/space or dmg protection to get out
-                                                          sm.haveItem('SpaceJump'),
-                                                          sm.heatProof()))),
-                                    sm.wor(sm.haveItem('Ice'),
-                                           sm.canSimpleShortCharge())) # there's also a dboost involved in simple short charge or you have to kill the yellow enemies with some power bombs
+                                    lambda: sm.wor(lambda: sm.wand(lambda: sm.energyReserveCountOk(2),
+                                                                   lambda: SMBool(sm.haveItemCount('ETank', 1))), # need energy to get out
+                                                   lambda: sm.wand(lambda: SMBool(sm.haveItemCount('ETank', 1)),
+                                                                   lambda: sm.wor(lambda: sm.haveItem('Grapple'), # use grapple/space or dmg protection to get out
+                                                                                  lambda: sm.haveItem('SpaceJump'),
+                                                                                  lambda: sm.heatProof()))),
+                                    lambda: sm.wor(lambda: sm.haveItem('Ice'),
+                                                   lambda: sm.canSimpleShortCharge())) # there's also a dboost involved in simple short charge or you have to kill the yellow enemies with some power bombs
 },
 {
     'Area': "Crateria",
@@ -994,8 +1010,8 @@ locations = [
     # either you go the back way, using a super and the camera glitch,
     # or just beat spore spawn (so no sm.knows() setting needed for the glitch)
     'Available': lambda sm: sm.canOpenRedDoors(),
-    'PostAvailable': lambda sm: sm.wand(sm.canOpenGreenDoors(),
-                                        sm.canPassBombPassages())
+    'PostAvailable': lambda sm: sm.wand(lambda: sm.canOpenGreenDoors(),
+                                        lambda: sm.canPassBombPassages())
 },
 {
     'Area': "Brinstar",
@@ -1012,8 +1028,8 @@ locations = [
         'Green Brinstar Elevator Right': lambda sm: SMBool(True)
     },
     'Available': lambda sm: sm.canOpenRedDoors(),
-    'PostAvailable': lambda sm: sm.wor(sm.canPassBombPassages(),
-                                       RomPatches.has(RomPatches.EarlySupersShotBlock))
+    'PostAvailable': lambda sm: sm.wor(lambda: sm.canPassBombPassages(),
+                                       lambda: RomPatches.has(RomPatches.EarlySupersShotBlock))
 },
 {
     'Area': "Brinstar",
@@ -1029,9 +1045,10 @@ locations = [
     'AccessFrom' : {
         'Green Brinstar Elevator Right': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: sm.wand(sm.canOpenRedDoors(),
-                                    sm.wor(sm.wand(sm.haveItem('Morph'), sm.knowsMockball()),
-                                           sm.haveItem('SpeedBooster')))
+    'Available': lambda sm: sm.wand(lambda: sm.canOpenRedDoors(),
+                                    lambda: sm.wor(lambda: sm.wand(lambda: sm.haveItem('Morph'),
+                                                                   lambda: sm.knowsMockball()),
+                                                   lambda: sm.haveItem('SpeedBooster')))
 },
 {
     'Area': "Brinstar",
@@ -1047,13 +1064,13 @@ locations = [
     'AccessFrom' : {
         'Green Brinstar Elevator Right': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: sm.wand(sm.haveItem('Morph'),
-                                    sm.wor(sm.knowsMockball(),
-                                           sm.haveItem('SpeedBooster')),
-                                    sm.canOpenRedDoors(),
-                                    sm.wor(sm.canPassBombPassages(),
-                                           sm.wand(sm.knowsRonPopeilScrew(),
-                                                   sm.haveItem('ScrewAttack'))))
+    'Available': lambda sm: sm.wand(lambda: sm.haveItem('Morph'),
+                                    lambda: sm.wor(lambda: sm.knowsMockball(),
+                                                   lambda: sm.haveItem('SpeedBooster')),
+                                    lambda: sm.canOpenRedDoors(),
+                                    lambda: sm.wor(lambda: sm.canPassBombPassages(),
+                                                   lambda: sm.wand(lambda: sm.knowsRonPopeilScrew(),
+                                                                   lambda: sm.haveItem('ScrewAttack'))))
 },
 {
     'Area': "Brinstar",
@@ -1069,10 +1086,10 @@ locations = [
     'AccessFrom' : {
         'Green Brinstar Elevator Right': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: sm.wand(sm.canOpenRedDoors(),
-                                    sm.haveItem('Morph'),
-                                    sm.wor(sm.knowsMockball(),
-                                           sm.haveItem('SpeedBooster')))
+    'Available': lambda sm: sm.wand(lambda: sm.canOpenRedDoors(),
+                                    lambda: sm.haveItem('Morph'),
+                                    lambda: sm.wor(lambda: sm.knowsMockball(),
+                                                   lambda: sm.haveItem('SpeedBooster')))
 },
 {
     'Area': "Brinstar",
@@ -1120,8 +1137,8 @@ locations = [
     'AccessFrom' : {
         'Big Pink': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: sm.wand(sm.canUsePowerBombs(),
-                                    sm.haveItem('Super'))
+    'Available': lambda sm: sm.wand(lambda: sm.canUsePowerBombs(),
+                                    lambda: sm.haveItem('Super'))
 },
 {
     'Area': "Brinstar",
@@ -1169,9 +1186,10 @@ locations = [
     'AccessFrom' : {
         'Landing Site': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: sm.wand(sm.wor(sm.haveItem('Morph'), RomPatches.has(RomPatches.BlueBrinstarMissile)),
-                                    sm.wor(sm.canOpenRedDoors(),
-                                           RomPatches.has(RomPatches.BlueBrinstarBlueDoor)))
+    'Available': lambda sm: sm.wand(lambda: sm.wor(lambda: sm.haveItem('Morph'),
+                                                   lambda: RomPatches.has(RomPatches.BlueBrinstarMissile)),
+                                    lambda: sm.wor(lambda: sm.canOpenRedDoors(),
+                                                   lambda: RomPatches.has(RomPatches.BlueBrinstarBlueDoor)))
 },
 {
     'Area': "Brinstar",
@@ -1252,8 +1270,8 @@ locations = [
     'AccessFrom' : {
         'Red Brinstar Elevator': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: sm.wand(sm.canOpenGreenDoors(),
-                                    sm.canUsePowerBombs())
+    'Available': lambda sm: sm.wand(lambda: sm.canOpenGreenDoors(),
+                                    lambda: sm.canUsePowerBombs())
 },
 {
     'Area': "Brinstar",
@@ -1285,8 +1303,8 @@ locations = [
     'AccessFrom' : {
         'Red Brinstar Elevator': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: sm.wand(sm.canOpenGreenDoors(),
-                                    sm.canUsePowerBombs())
+    'Available': lambda sm: sm.wand(lambda: sm.canOpenGreenDoors(),
+                                    lambda: sm.canUsePowerBombs())
 },
 {
     'Area': "Brinstar",
@@ -1333,15 +1351,15 @@ locations = [
     'Visibility': "Hidden",
     'Room': 'Crumble Shaft',
     'AccessFrom' : {
-        'Warehouse Entrance Left': lambda sm: sm.wand(sm.canOpenGreenDoors(),
-                                                      sm.canUsePowerBombs(),
-                                                      sm.canHellRun('Ice'),
-                                                      sm.wor(sm.wand(sm.haveItem('Morph'),
-                                                                     sm.knowsMockball()),
-                                                             sm.haveItem('SpeedBooster'))),
-        'Croc Zone': lambda sm: sm.wand(sm.canHellRun('MainUpperNorfair'),
-                                        sm.haveItem('SpeedBooster'),
-                                        sm.knowsIceMissileFromCroc())
+        'Warehouse Entrance Left': lambda sm: sm.wand(lambda: sm.canOpenGreenDoors(),
+                                                      lambda: sm.canUsePowerBombs(),
+                                                      lambda: sm.canHellRun('Ice'),
+                                                      lambda: sm.wor(lambda: sm.wand(lambda: sm.haveItem('Morph'),
+                                                                                     lambda: sm.knowsMockball()),
+                                                                     lambda: sm.haveItem('SpeedBooster'))),
+        'Croc Zone': lambda sm: sm.wand(lambda: sm.canHellRun('MainUpperNorfair'),
+                                        lambda: sm.haveItem('SpeedBooster'),
+                                        lambda: sm.knowsIceMissileFromCroc())
     },
     'Available': lambda sm: SMBool(True)
 },
@@ -1375,9 +1393,11 @@ locations = [
     'AccessFrom' : {
         'Warehouse Entrance Left': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: sm.wand(sm.canOpenRedDoors(), sm.haveItem('Morph')),
-    'PostAvailable': lambda sm: sm.wor(sm.canPassBombPassages(),
-                                       sm.wand(RomPatches.has(RomPatches.HiJumpShotBlock), sm.haveItem('Morph')))
+    'Available': lambda sm: sm.wand(lambda: sm.canOpenRedDoors(),
+                                    lambda: sm.haveItem('Morph')),
+    'PostAvailable': lambda sm: sm.wor(lambda: sm.canPassBombPassages(),
+                                       lambda: sm.wand(lambda: RomPatches.has(RomPatches.HiJumpShotBlock),
+                                                       lambda: sm.haveItem('Morph')))
 },
 {
     'Area': "Norfair",
@@ -1409,14 +1429,14 @@ locations = [
     'AccessFrom' : {
         'Croc Zone': lambda sm: sm.energyReserveCountOk(1)
     },
-    'Available': lambda sm: sm.wand(sm.enoughStuffCroc(),
-                                    sm.wor(sm.wor(sm.canFly(),
-                                                  sm.haveItem('Grapple'),
-                                                  sm.haveItem('SpeedBooster')), # spark from the room before
-                                           sm.wor(sm.haveItem('HiJump'), # run and jump from yellow platform
-                                                  sm.wand(sm.haveItem('Ice'),
-                                                          sm.knowsCrocPBsIce()),
-                                                  sm.knowsCrocPBsDBoost())))
+    'Available': lambda sm: sm.wand(lambda: sm.enoughStuffCroc(),
+                                    lambda: sm.wor(lambda: sm.wor(lambda: sm.canFly(),
+                                                                  lambda: sm.haveItem('Grapple'),
+                                                                  lambda: sm.haveItem('SpeedBooster')), # spark from the room before
+                                                   lambda: sm.wor(lambda: sm.haveItem('HiJump'), # run and jump from yellow platform
+                                                                  lambda: sm.wand(lambda: sm.haveItem('Ice'),
+                                                                                  lambda: sm.knowsCrocPBsIce()),
+                                                                  lambda: sm.knowsCrocPBsDBoost())))
 },
 {
     'Area': "Norfair",
@@ -1432,7 +1452,9 @@ locations = [
     'AccessFrom' : {
         'Croc Zone': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: sm.wand(sm.canOpenRedDoors(), sm.enoughStuffCroc(), sm.haveItem('Morph'))
+    'Available': lambda sm: sm.wand(lambda: sm.canOpenRedDoors(), 
+                                    lambda: sm.enoughStuffCroc(),
+                                    lambda: sm.haveItem('Morph'))
 },
 {
     'Area': "Norfair",
@@ -1448,20 +1470,21 @@ locations = [
     'AccessFrom' : {
         'Croc Zone': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: sm.wand(sm.enoughStuffCroc(),
-                                    sm.wor(sm.wor(sm.wand(sm.haveItem('Morph'), # from below
-                                                          sm.canFly()),
-                                                  sm.wand(sm.haveItem('SpeedBooster'),
-                                                          sm.wor(sm.knowsShortCharge(),
-                                                                 sm.canUsePowerBombs()))),
-                                           sm.wand(sm.haveItem('Super'), # from grapple room
-                                                   sm.knowsGreenGateGlitch(),
-                                                   sm.wor(sm.canFly(),
-                                                          sm.haveItem('Grapple'))))), # TODO::test if accessible with a spark, and how many etanks required
-    'PostAvailable': lambda sm: sm.wor(sm.haveItem('Morph'), # normal exit
-                                       sm.wand(sm.canOpenGreenDoors(), # go back to grapple room
-                                               sm.wor(sm.haveItem('SpaceJump'), 
-                                                      sm.wand(sm.haveItem('SpeedBooster'), sm.haveItem('HiJump'))))) # jump from the yellow plateform ennemy
+    'Available': lambda sm: sm.wand(lambda: sm.enoughStuffCroc(),
+                                    lambda: sm.wor(lambda: sm.wor(lambda: sm.wand(lambda: sm.haveItem('Morph'), # from below
+                                                                                  lambda: sm.canFly()),
+                                                                  lambda: sm.wand(lambda: sm.haveItem('SpeedBooster'),
+                                                                                  lambda: sm.wor(lambda: sm.knowsShortCharge(),
+                                                                                                 lambda: sm.canUsePowerBombs()))),
+                                                   lambda: sm.wand(lambda: sm.haveItem('Super'), # from grapple room
+                                                                   lambda: sm.knowsGreenGateGlitch(),
+                                                                   lambda: sm.wor(lambda: sm.canFly(),
+                                                                                  lambda: sm.haveItem('Grapple'))))), # TODO::test if accessible with a spark, and how many etanks required
+    'PostAvailable': lambda sm: sm.wor(lambda: sm.haveItem('Morph'), # normal exit
+                                       lambda: sm.wand(lambda: sm.canOpenGreenDoors(), # go back to grapple room
+                                                       lambda: sm.wor(lambda: sm.haveItem('SpaceJump'), 
+                                                                      lambda: sm.wand(lambda: sm.haveItem('SpeedBooster'),
+                                                                                      lambda: sm.haveItem('HiJump'))))) # jump from the yellow plateform ennemy
 },
 {
     'Area': "Norfair",
@@ -1477,7 +1500,8 @@ locations = [
     'AccessFrom' : {
         'Bubble Mountain': lambda sm: sm.canHellRun('MainUpperNorfair')
     },
-    'Available': lambda sm: sm.wand(sm.haveItem('Morph'), sm.canEnterNorfairReserveArea())
+    'Available': lambda sm: sm.wand(lambda: sm.haveItem('Morph'),
+                                    lambda: sm.canEnterNorfairReserveArea())
 },
 {
     'Area': "Norfair",
@@ -1589,7 +1613,8 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Mickey Mouse Room',
     'AccessFrom' : {
-        'LN Entrance': lambda sm: sm.wand(sm.canUsePowerBombs(), sm.canPassWorstRoom()),
+        'LN Entrance': lambda sm: sm.wand(lambda: sm.canUsePowerBombs(),
+                                          lambda: sm.canPassWorstRoom()),
     },
     'Available': lambda sm: sm.canHellRun('LowerNorfair')
 },
@@ -1655,8 +1680,8 @@ locations = [
     'AccessFrom' : {
         'Three Muskateers Room Left': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: sm.wand(sm.canHellRun('LowerNorfair'),
-                                    sm.canPassBombPassages())
+    'Available': lambda sm: sm.wand(lambda: sm.canHellRun('LowerNorfair'),
+                                    lambda: sm.canPassBombPassages())
 },
 {
     'Area': "WreckedShip",
@@ -1688,8 +1713,8 @@ locations = [
     'AccessFrom' : {
         'Wrecked Ship Main': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: sm.wand(sm.canPassBowling(),
-                                    sm.canPassBombPassages())
+    'Available': lambda sm: sm.wand(lambda: sm.canPassBowling(),
+                                    lambda: sm.canPassBombPassages())
 },
 {
     'Area': "WreckedShip",
@@ -1737,11 +1762,11 @@ locations = [
     'AccessFrom' : {
         'Main Street Bottom': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: sm.wand(sm.haveItem('Gravity'),
-                                    sm.haveItem('SpeedBooster'),
-                                    sm.wor(sm.wand(sm.canOpenGreenDoors(), # run from room on the right
-                                                   SMBool(sm.haveItemCount('ETank', 1))), # etank for the spark since sparking from low ground
-                                           sm.canSimpleShortCharge())), # run from above
+    'Available': lambda sm: sm.wand(lambda: sm.haveItem('Gravity'),
+                                    lambda: sm.haveItem('SpeedBooster'),
+                                    lambda: sm.wor(lambda: sm.wand(lambda: sm.canOpenGreenDoors(), # run from room on the right
+                                                                   lambda: SMBool(sm.haveItemCount('ETank', 1))), # etank for the spark since sparking from low ground
+                                                   lambda: sm.canSimpleShortCharge())), # run from above
 },
 {
     'Area': "Maridia",
@@ -1755,8 +1780,8 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Main Street',
     'AccessFrom' : {
-        'Main Street Bottom': lambda sm: sm.wor(sm.haveItem('Gravity'),
-                                                sm.canDoSuitlessOuterMaridia())
+        'Main Street Bottom': lambda sm: sm.wor(lambda: sm.haveItem('Gravity'),
+                                                lambda: sm.canDoSuitlessOuterMaridia())
         # we could add eas access from red fish room here, but if you miss it you can't retry
     },
     'Available': lambda sm: sm.haveItem('Morph')
@@ -1773,8 +1798,8 @@ locations = [
     'Visibility': "Hidden",
     'Room': 'Mama Turtle Room',
     'AccessFrom' : {
-        'Main Street Bottom': lambda sm: sm.wor(sm.haveItem('Gravity'),
-                                                sm.canDoSuitlessOuterMaridia())
+        'Main Street Bottom': lambda sm: sm.wor(lambda: sm.haveItem('Gravity'),
+                                                lambda: sm.canDoSuitlessOuterMaridia())
     },
     'Available': lambda sm: sm.canOpenRedDoors()
 },
@@ -1792,8 +1817,8 @@ locations = [
     'AccessFrom' : {
         'Main Street Bottom': lambda sm: sm.canPassMtEverest()
     },
-    'Available': lambda sm: sm.wor(sm.canPassBombPassages(),
-                                   sm.canUseSpringBall())
+    'Available': lambda sm: sm.wor(lambda: sm.canPassBombPassages(),
+                                   lambda: sm.canUseSpringBall())
 },
 {
     'Area': "Maridia",
@@ -1809,7 +1834,8 @@ locations = [
     'AccessFrom' : {
         'Main Street Bottom': lambda sm: sm.canPassMtEverest()
     },
-    'Available': lambda sm: sm.wor(sm.canPassBombPassages(), sm.canUseSpringBall())
+    'Available': lambda sm: sm.wor(lambda: sm.canPassBombPassages(),
+                                   lambda: sm.canUseSpringBall())
 },
 {
     'Area': "Maridia",
@@ -1841,8 +1867,8 @@ locations = [
     'AccessFrom' : {
         'Main Street Bottom': lambda sm: sm.canAccessBotwoonFromMainStreet()
     },
-    'Available': lambda sm: sm.wor(sm.haveItem('Gravity'),
-                                   sm.knowsGravLessLevel3()) # suitless maridia conditions are in canPassMtEverest
+    'Available': lambda sm: sm.wor(lambda: sm.haveItem('Gravity'),
+                                   lambda: sm.knowsGravLessLevel3()) # suitless maridia conditions are in canPassMtEverest
 },
 {
     'Area': "Maridia",
@@ -1858,8 +1884,8 @@ locations = [
     'AccessFrom' : {
         'Main Street Bottom': lambda sm: sm.canAccessBotwoonFromMainStreet()
     },
-    'Available': lambda sm: sm.wor(sm.haveItem('Gravity'),
-                                   sm.knowsGravLessLevel3()) # suitless maridia conditions are in canPassMtEverest
+    'Available': lambda sm: sm.wor(lambda: sm.haveItem('Gravity'),
+                                   lambda: sm.knowsGravLessLevel3()) # suitless maridia conditions are in canPassMtEverest
 },
 {
     'Area': "Maridia",
@@ -1875,9 +1901,9 @@ locations = [
     'AccessFrom' : {
         'Main Street Bottom': lambda sm: sm.canAccessBotwoonFromMainStreet()
     },
-    'Available': lambda sm: sm.wor(sm.haveItem('Gravity'),
-                                   sm.wand(sm.knowsGravLessLevel3(),
-                                           sm.canSpringBallJump())) # https://www.youtube.com/watch?v=7LYYxphRRT0
+    'Available': lambda sm: sm.wor(lambda: sm.haveItem('Gravity'),
+                                   lambda: sm.wand(lambda: sm.knowsGravLessLevel3(),
+                                                   lambda: sm.canSpringBallJump())) # https://www.youtube.com/watch?v=7LYYxphRRT0
 },
 {
     'Area': "Maridia",
@@ -1893,9 +1919,10 @@ locations = [
     'AccessFrom' : {
         'Main Street Bottom': lambda sm: sm.canAccessBotwoonFromMainStreet()
     },
-    'Available': lambda sm: sm.wand(sm.wor(sm.haveItem('SpeedBooster'),
-                                           sm.wand(sm.knowsSnailClip(), sm.haveItem('Morph'))),
-                                    sm.haveItem('Gravity'))
+    'Available': lambda sm: sm.wand(lambda: sm.wor(lambda: sm.haveItem('SpeedBooster'),
+                                                   lambda: sm.wand(lambda: sm.knowsSnailClip(),
+                                                                   lambda: sm.haveItem('Morph'))),
+                                    lambda: sm.haveItem('Gravity'))
 },
 {
     'Area': "Maridia",
@@ -1911,9 +1938,10 @@ locations = [
     'AccessFrom' : {
         'Main Street Bottom': lambda sm: sm.canAccessBotwoonFromMainStreet()
     },
-    'Available': lambda sm: sm.wand(sm.wor(sm.haveItem('SpeedBooster'),
-                                           sm.wand(sm.knowsSnailClip(), sm.haveItem('Morph'))),
-                                    sm.haveItem('Gravity'))
+    'Available': lambda sm: sm.wand(lambda: sm.wor(lambda: sm.haveItem('SpeedBooster'),
+                                                   lambda: sm.wand(lambda: sm.knowsSnailClip(),
+                                                                   lambda: sm.haveItem('Morph'))),
+                                    lambda: sm.haveItem('Gravity'))
 },
 {
     'Area': "Maridia",

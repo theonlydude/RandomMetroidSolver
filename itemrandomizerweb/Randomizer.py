@@ -582,6 +582,11 @@ class Randomizer(object):
         self.itemLimit = self.settings.getItemLimit(speed)
         self.locLimit = self.settings.getLocLimit(speed)
         self.progressionItemTypes = self.settings.getProgressionItemTypes(speed)
+        collectedAmmoTypes = set([item['Type'] for item in self.currentItems if item['Category'] == 'Ammo'])
+        ammos = ['Missile', 'Super', 'PowerBomb']
+        if 'Super' in collectedAmmoTypes:
+            ammos.remove('Missile')
+        self.progressionItemTypes += [ammoType for ammoType in ammos if ammoType not in collectedAmmoTypes]
         self.possibleSoftlockProb = self.settings.getPossibleSoftlockProb(speed)
 
     def setCurAccessPoint(self, ap='Landing Site'):
@@ -1491,14 +1496,10 @@ class Randomizer(object):
             self.log.debug('collected1=' + str(list(set([i['Item']['Type'] for i in self.itemLocations]))))
             for il in allItemLocs:
                 self.getItem(il, pool=self.nonChozoItemPool, showDot=False)
+            self.log.debug('collected2=' + str(list(set([i['Item']['Type'] for i in self.itemLocations]))))
             # fill-up
             self.determineParameters()
-            self.log.debug('collected2=' + str(list(set([i['Item']['Type'] for i in self.itemLocations]))))
-            collectedAmmo = list(set([il['Item']['Type'] for il in self.itemLocations if il['Item']['Category'] == 'Ammo']))
-            if 'Super' in collectedAmmo and 'Missile' not in collectedAmmo:
-                collectedAmmo.append('Missile') # no need to restrict missiles if supers are already in
-            self.log.debug('collectedAmmo='+str(collectedAmmo))
-            nonProg = [item for item in self.getNonProgItemPool(self.nonChozoItemPool) if item['Category'] != 'Ammo' or item['Type'] in collectedAmmo]
+            nonProg = self.getNonProgItemPool(self.nonChozoItemPool)
             lim = self.locLimit - 1
             if lim < 0:
                 lim = 0

@@ -875,7 +875,9 @@ locations = [
     'AccessFrom' : {
         'Landing Site': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: sm.canDestroyBombWalls()
+    'Available': lambda sm: sm.wor(sm.canDestroyBombWalls(),
+                                   sm.wand(sm.haveItem('SpeedBooster'),
+                                           sm.knowsOldMBWithSpeed()))
 },
 {
     'Area': "Crateria",

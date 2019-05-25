@@ -282,12 +282,17 @@ class Knows:
                               'href': 'https://wiki.supermetroid.run/Brinstar_Reserve_Tank_Room',
                               'rooms': ['Brinstar Reserve Tank Room']}
 
+    OldMBWithSpeed = SMBool(False, mania, ['OldMBWithSpeed'])
+    desc['OldMBWithSpeed'] = {'display': 'Old Mother Brain with Speed',
+                              'title': 'Access Old Mother Brain Missile pack location with just the Speed Booster',
+                              'href': 'https://www.youtube.com/watch?v=-SO2QykqnZw',
+                              'rooms': ['Climb', 'Pit Room']}
+    
     Moondance = SMBool(False, mania, ['Moondance'])
     desc['Moondance'] = {'display': 'Moondance',
                          'title': 'Access Etecoons area using moonfall shenanigans',
                          'href': 'http://crocomi.re/92',
                          'rooms': ['Green Brinstar Main Shaft']}
-
     # Gauntlet
     HiJumpLessGauntletAccess = SMBool(False, 0, ['HiJumpLessGauntletAccess'])
     desc['HiJumpLessGauntletAccess'] = {'display': 'Gauntlet Access w/o Hi-Jump',
@@ -535,7 +540,7 @@ class Knows:
             {'knows': ['CeilingDBoost', 'EarlyKraid',
                        'ReverseGateGlitch', 'ReverseGateGlitchHiJumpLess', 
                        'RedTowerClimb', 'XrayDboost',
-                       'RonPopeilScrew', 'Moondance'],
+                       'RonPopeilScrew', 'OldMBWithSpeed', 'Moondance'],
              'title': 'Brinstar'}
         ],
         'Wrecked Ship': [

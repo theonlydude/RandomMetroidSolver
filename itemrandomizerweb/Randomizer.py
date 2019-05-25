@@ -832,7 +832,7 @@ class Randomizer(object):
     def isJunk(self, item):
         if item['Type'] in ['Nothing', 'NoEnergy']:
             return True
-    
+
     def isProgItemNow(self, item):
         if self.isJunk(item):
             return False
@@ -1165,7 +1165,7 @@ class Randomizer(object):
         return True
 
     def addEnergyAsNonProg(self, pool, basePool):
-        if self.restrictions['MajorMinor'] == 'Chozo' and not any(item['Category'] == 'Energy' for item in basePool):
+        if self.restrictions['MajorMinor'] == 'Chozo' and not any(item['Category'] == 'Energy' for item in pool):
             pool += [item for item in basePool if item['Category'] == 'Energy']
 
     def getNonProgItems(self, basePool):

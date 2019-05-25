@@ -74,13 +74,13 @@ class Helpers(object):
                                             self.smbm.haveItem('Gravity')))
 
     # higher values for mult means hell run is that much "easier" (HP mult)
-    def canHellRun(self, hellRun, mult=1.0):
+    def canHellRun(self, hellRun, mult=1.0, minE=2):
         sm = self.smbm
 
         isHeatProof = sm.heatProof()
         if isHeatProof == True:
             return SMBool(isHeatProof.bool, easy, isHeatProof.knows, isHeatProof.items)
-        elif self.energyReserveCount() >= 2:
+        elif self.energyReserveCount() >= minE:
             if hellRun != 'LowerNorfair':
                 return self.energyReserveCountOkHellRun(hellRun, mult)
             else:

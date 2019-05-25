@@ -233,7 +233,7 @@ accessPoints = [
                                              sm.wand(sm.canOpenGreenDoors(),
                                                      sm.canEnterCathedral())),
         'Croc Zone': lambda sm: sm.wor(sm.wand(sm.haveItem('SpeedBooster'), # frog speedway
-                                               sm.canHellRun('MainUpperNorfair', 2),
+                                               sm.canHellRun('MainUpperNorfair', mult=2, minE=1),
                                                sm.wor(sm.wand(sm.canOpenRedDoors(), sm.knowsGreenGateGlitch()),
                                                       sm.haveItem('Wave')),
                                                sm.canOpenGreenDoors()),
@@ -289,12 +289,12 @@ accessPoints = [
        shortName="N\\KRONIC BOOST"),
     AccessPoint('Croc Zone', 'Norfair', {
         'Warehouse Entrance Left': lambda sm: sm.wor(sm.wand(sm.canPassFrogSpeedwayRightToLeft(),
-                                                             sm.canHellRun('MainUpperNorfair', 2)),
+                                                             sm.canHellRun('Ice', 2, minE=1)),
                                                      sm.wand(sm.canHellRun('MainUpperNorfair', 1.25),
                                                              sm.canGrappleEscape(),
                                                              sm.haveItem('Super'))),
         'Bubble Mountain': lambda sm: sm.wand(sm.canPassBombPassages(),
-                                              sm.canHellRun('MainUpperNorfair', 2)),
+                                              sm.canHellRun('Ice', 2, minE=1)),
         'Kronic Boost Room Bottom Left': lambda sm: sm.wand(sm.canHellRun('MainUpperNorfair'),
                                                             sm.haveItem('Morph'))
     }, internal=True),

@@ -19,6 +19,7 @@ from utils import PresetLoader
 import db
 from graph_access import vanillaTransitions, vanillaBossesTransitions
 from utils import isStdPreset
+from graph_locations import locations
 
 def maxPresetsReach():
     # to prevent a spammer to create presets in a loop and fill the fs
@@ -1889,3 +1890,95 @@ def customWebService():
         os.close(fd)
         os.remove(jsonFileName)
         raise HTTP(400, json.dumps(msg))
+
+def initExtStatsSession():
+    if session.extStats == None:
+        session.extStats = {}
+        session.extStats['preset'] = 'regular'
+        session.extStats['randoPreset'] = 'default'
+
+def updateExtStatsSession():
+    if session.extStats is None:
+        session.extStats = {}
+
+    session.extStats['preset'] = request.vars.preset
+    session.extStats['randoPreset'] = request.vars.randoPreset
+
+def validateExtStatsParams():
+    for (preset, directory) in [("preset", "standard_presets"), ("randoPreset", "rando_presets")]:
+        if request.vars[preset] == None:
+            return (False, "Missing parameter preset")
+        preset = request.vars[preset]
+
+        if IS_ALPHANUMERIC()(preset)[1] is not None:
+            return (False, "Wrong value for preset, must be alphanumeric")
+
+        if IS_LENGTH(maxsize=32, minsize=1)(preset)[1] is not None:
+            return (False, "Wrong length for preset, name must be between 1 and 32 characters")
+
+        # check that preset exists
+        fullPath = '{}/{}.json'.format(directory, preset)
+        if not os.path.isfile(fullPath):
+            return (False, "Unknown preset: {}".format(preset))
+
+    return (True, None)
+
+def extStats():
+    response.title = 'Super Metroid VARIA Randomizer and ExtStats statistics'
+
+    initExtStatsSession()
+
+    if request.vars.action == 'Load':
+        (ok, msg) = validateExtStatsParams()
+        if not ok:
+            session.flash = msg
+            redirect(URL(r=request, f='extStats'))
+
+        updateExtStatsSession()
+
+        preset = request.vars.preset
+        randoPreset = request.vars.randoPreset
+        fullPath = 'rando_presets/{}.json'.format(randoPreset)
+
+        try:
+            with open(fullPath) as jsonFile:
+                randoPreset = json.load(jsonFile)
+        except Exception as e:
+            raise HTTP(400, "Can't load the rando preset: {}".format(randoPreset))
+
+        parameters = {
+            'preset': preset,
+            'area': 'areaRandomization' in randoPreset and randoPreset['areaRandomization'] == 'on',
+            'boss': 'bossRandomization' in randoPreset and randoPreset['bossRandomization'] == 'on',
+            # parameters which can be random:
+            'majorsSplit': randoPreset['majorsSplit'] if 'majorsSplit' in randoPreset else 'Full',
+            'progSpeed': randoPreset['progressionSpeed'] if 'progressionSpeed' in randoPreset else 'variable',
+            'morphPlacement': randoPreset['morphPlacement'] if 'morphPlacement' in randoPreset else 'early',
+            'suitsRestriction': 'suitsRestriction' in randoPreset and randoPreset['suitsRestriction'] == 'on',
+            'progDiff': randoPreset['progressionDifficulty'] if 'progressionDifficulty' in randoPreset else 'normal',
+            'superFunMovement': 'funMovement' in randoPreset and randoPreset['funMovement'] == 'on',
+            'superFunCombat': 'funCombat' in randoPreset and randoPreset['funCombat'] == 'on',
+            'superFunSuit': 'funSuits' in randoPreset and randoPreset['funSuits'] == 'on',
+        }
+
+        if randoPreset['suitsRestriction'] == "random":
+            parameters["suitsRestriction"] = "random"
+        if randoPreset['funMovement'] == "random":
+            parameters["superFunMovement"] = "random"
+        if randoPreset['funCombat'] == "random":
+            parameters["superFunCombat"] = "random"
+        if randoPreset['funSuits'] == "random":
+            parameters["superFunSuit"] = "random"
+
+
+        DB = db.DB()
+        stats = DB.getExtStat(parameters)
+        DB.close()
+    else:
+        stats = None
+
+    randoPresets = loadRandoPresetsList()
+    (stdPresets, tourPresets, comPresets) = loadPresetsList()
+
+    return dict(stdPresets=stdPresets, tourPresets=tourPresets, randoPresets=randoPresets,
+                stats=stats, locations=locations)

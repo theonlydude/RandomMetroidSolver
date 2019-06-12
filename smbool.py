@@ -2,10 +2,7 @@
 class SMBool:
     def __init__(self, bool, difficulty=0, knows=[], items=[]):
         # to avoid storing an SMBool as the bool attribute of the SMBool
-        if bool == True:
-            self.bool = True
-        else:
-            self.bool = False
+        self.bool = bool == True
         self.difficulty = difficulty
         self.knows = knows
         self.items = items
@@ -27,7 +24,7 @@ class SMBool:
 
     def __nonzero__(self):
         # when used in boolean expressions (with and/or/not) (python2)
-        return self.bool == True
+        return self.bool
 
     def __eq__(self, other):
         # for ==

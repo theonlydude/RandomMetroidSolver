@@ -10,6 +10,7 @@ from graph_access import vanillaTransitions, getDoorConnections, vanillaBossesTr
 from parameters import Knows, easy, medium, hard, harder, hardcore, mania, text2diff, diff2text
 from utils import PresetLoader
 from rom import RomPatcher, RomPatches, FakeROM
+from utils import isStdPreset, loadRandoPreset
 import log, db
 
 speeds = progSpeeds + ['variable']
@@ -174,6 +175,7 @@ if __name__ == "__main__":
     parser.add_argument('--no_global_shift', help="", action='store_false', dest='global_shift', default=True)
     parser.add_argument('--invert', help="invert color range", dest='invert', action='store_true', default=False)
     parser.add_argument('--ext_stats', help="dump extended stats SQL", nargs='?', default=None, dest='extStatsFilename')
+    parser.add_argument('--randoPreset', help="rando preset file", dest="randoPreset", nargs='?', default=None)
 
     # parse args
     args = parser.parse_args()
@@ -187,6 +189,10 @@ if __name__ == "__main__":
 
     log.init(args.debug)
     logger = log.get('Rando')
+
+    # if rando preset given, load it first
+    if args.randoPreset != None:
+        loadRandoPreset(args.randoPreset, args)
 
     # if diff preset given, load it
     if args.paramsFileName is not None:
@@ -433,27 +439,36 @@ if __name__ == "__main__":
                 if bool(random.getrandbits(1)) == True:
                     itemLoc['Location']['Visibility'] = 'Hidden'
 
-    # transform itemLocs in our usual dict(location, item)
+    # transform itemLocs in our usual dict(location, item), for minors keep only the first
     locsItems = {}
+    firstMinorsFound = {'Missile': False, 'Super': False, 'PowerBomb': False}
     for itemLoc in itemLocs:
-        locsItems[itemLoc["Location"]["Name"]] = itemLoc["Item"]["Type"]
+        locName = itemLoc["Location"]["Name"]
+        itemType = itemLoc["Item"]["Type"]
+        if itemType in firstMinorsFound and firstMinorsFound[itemType] == False:
+            locsItems[locName] = itemType
+            firstMinorsFound[itemType] = True
+        elif itemType not in firstMinorsFound:
+            locsItems[locName] = itemType
     if args.debug == True:
         for loc in locsItems:
             print('{:>50}: {:>16} '.format(loc, locsItems[loc]))
 
     # insert extended stats into database
-    parameters = {'preset': preset, 'area': args.area, 'boss': args.bosses, 'majorsSplit': args.majorsSplit,
-                  'progSpeed': progSpeed, 'morphPlacement': args.morphPlacement,
-                  'suitsRestriction': args.suitsRestriction, 'progDiff': progDiff,
-                  'superFunMovement': 'Movement' in args.superFun, 'superFunCombat': 'Combat' in args.superFun,
-                  'superFunSuit': 'Suit' in args.superFun}
-    if args.extStatsFilename == None:
-        DB = db.DB()
-        DB.addExtStat(parameters, locsItems)
-        DB.close()
-    else:
-        with open(args.extStatsFilename, 'w') as extStatsFile:
-            db.DB.dumpExtStat(parameters, locsItems, extStatsFile)
+    if isStdPreset(preset) and args.raceMagic == None:
+        parameters = {'preset': preset, 'area': args.area, 'boss': args.bosses, 'majorsSplit': args.majorsSplit,
+                      'progSpeed': progSpeed, 'morphPlacement': args.morphPlacement,
+                      'suitsRestriction': args.suitsRestriction, 'progDiff': progDiff,
+                      'superFunMovement': 'Movement' in args.superFun, 'superFunCombat': 'Combat' in args.superFun,
+                      'superFunSuit': 'Suit' in args.superFun}
+        if args.extStatsFilename == None:
+            DB = db.DB()
+            DB.addExtStat(parameters, locsItems)
+            DB.close()
+        else:
+            with open(args.extStatsFilename, 'a') as extStatsFile:
+                db.DB.dumpExtStat(parameters, locsItems, extStatsFile)
+            sys.exit(0)
 
     try:
         # args.rom is not None: generate local rom named filename.sfc with args.rom as source

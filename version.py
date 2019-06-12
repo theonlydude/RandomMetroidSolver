@@ -1,2 +1,2 @@
 # the current randomizer algorithm version
-randoAlgoVersion = 20190326
+randoAlgoVersion = 20190526

@@ -387,7 +387,7 @@ where md5sum = '%s'
 
     @staticmethod
     def dumpExtStat(parameters, locsItems, sqlFile):
-       sql = "insert into extended_stats (version, preset, area, boss, majorsSplit, progSpeed, morphPlacement, suitsRestriction, progDiff, superFunMovement, superFunCombat, superFunSuit, count) values (%d, '%s', %s, %s, '%s', '%s', '%s', %s, '%s', %s, %s, %s, 1) on duplicate key update id=LAST_INSERT_ID(id), count = count + 1;\nset @last_id = last_insert_id();"
+       sql = "insert into extended_stats (version, preset, area, boss, majorsSplit, progSpeed, morphPlacement, suitsRestriction, progDiff, superFunMovement, superFunCombat, superFunSuit, count) values (%d, '%s', %s, %s, '%s', '%s', '%s', %s, '%s', %s, %s, %s, 1) on duplicate key update id=LAST_INSERT_ID(id), count = count + 1;\nset @last_id = last_insert_id();\n"
 
        sqlFile.write(sql % (randoAlgoVersion, parameters['preset'], parameters['area'], parameters['boss'], parameters['majorsSplit'], parameters['progSpeed'], parameters['morphPlacement'], parameters['suitsRestriction'], parameters['progDiff'], parameters['superFunMovement'], parameters['superFunCombat'], parameters['superFunSuit']))
 

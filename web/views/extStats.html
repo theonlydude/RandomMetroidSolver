@@ -60,6 +60,9 @@ if (hs.registerOverlay) {
 .none {
     background-color: #ffffff;
 }
+.minor {
+    background-color: #dddddd;
+}
 .border {
     border: 1px solid #ddd;
 }
@@ -185,6 +188,19 @@ elif stats != None and len(stats) > 0:
     -->
 {{
 numberSeeds = float(stats[0][0])
+
+# to display the limits
+def getThreshold(ratio, nSeeds, split):
+    if split == 'Major':
+        nLocs = 34
+    elif split == 'Chozo':
+        nLocs = 25
+    else:
+        nLocs = 100
+        pass
+
+    percent = ratio * (100.0 / nLocs)
+    return round(percent, 1)
 }}
   <p>
     <div class="left">Statistics have been computed on {{=int(numberSeeds)}} seeds.</div>
@@ -192,11 +208,9 @@ numberSeeds = float(stats[0][0])
       <table class="right">
 	<tr>
 	  <td class="border">0.0</td>
-	  <td class="border blue">>0.0</td>
-	  <td class="border green">>{{=round(2.5*100.0/numberSeeds, 1)}}</td>
-	  <td class="border yellow">>{{=round(5*100.0/numberSeeds, 1)}}</td>
-	  <td class="border orange">>{{=round(7.5*100.0/numberSeeds, 1)}}</td>
-	  <td class="border red">>{{=round(10*100.0/numberSeeds, 1)}}</td>
+	  <td class="border green">>{{=getThreshold(1.0, numberSeeds, parameters["majorsSplit"])}}</td>
+	  <td class="border yellow">>{{=getThreshold(2.0, numberSeeds, parameters["majorsSplit"])}}</td>
+	  <td class="border red">>{{=getThreshold(3.0, numberSeeds, parameters["majorsSplit"])}}</td>
 	</tr>
       </table>
     </div>
@@ -238,33 +252,33 @@ def displayHeader():
 }}
 
 {{
-# occ : occurences of item in a given loc
-# nSeeds : total number of seeds
-# split : preset's split
-# isAmmo : True if item is an ammo item
-def getColor(occ, nSeeds, split, isAmmo):
+# percent: item percent for the location
+# nSeeds: total number of seeds
+# split: preset's split
+def getColor(percent, nSeeds, split):
+    percent = float(percent)
+    if percent == 0.0:
+      return "none"
+
     # possible locs for the item TODO : take into account restrictions (suits, morph)
-    nLocs = 100
-    if split == 'Major' and not isAmmo:
+    if split == 'Major':
         nLocs = 34
-        pass
-    if split == 'Major' and isAmmo:
-        nLocs = 66
-        pass
-    if split == 'Chozo' and not isAmmo:
+    elif split == 'Chozo':
         nLocs = 25
+    else:
+        nLocs = 100
         pass
-    if split == 'Chozo' and isAmmo:
-        nLocs = 80
-        pass
-    expected = float(nSeeds)/float(nLocs)
-    ratio = occ/expected
-    colors = [(1.5, "green"), (2.0, "yellow"), (3.0, "orange"), (5.0, "red")]
-    for r,c in colors:
-        if (ratio <= 1 and ratio > 1/r) or (ratio >= 1 and ratio < r):
-            return c
-        pass
-    return "red"
+
+    expectedPercent = 100.0 / nLocs
+    ratio = percent / expectedPercent
+
+    if ratio < 1.5:
+      return "green"
+    elif ratio < 3.0:
+      return "yellow"
+    else:
+      return "red"
+    pass
 
   # the items display order:
   #              Missile, Super, PowerBomb,  morph, bomb, springball, screwattack, varia, gravity, hijump, spacejump, speedbooster, charge, ice, wave, spazer, plasma, grapple, xrayscope
@@ -291,21 +305,18 @@ def getColor(occ, nSeeds, split, isAmmo):
 
       response.write("<tr><td><a href=\"https://wiki.supermetroid.run/{}\">{}</a></td>".format(loc["Room"].replace(' ', '_').replace("'", '%27'), loc["Name"]), escape=False)
   
-      for itemI, item in enumerate(["Bomb", "Charge", "Grapple", "Gravity", "HiJump", "Ice", "Missile", "Morph", "Plasma", "PowerBomb", "ScrewAttack", "SpaceJump", "Spazer", "SpeedBooster", "SpringBall", "Super", "Varia", "Wave", "XRayScope"]):
+      for itemI, item in enumerate(["Missile", "Super", "PowerBomb", "Morph", "Bomb", "Springball", "ScrewAttack", "Varia", "Gravity", "HiJump", "SpaceJump", "SpeedBooster", "Charge", "Ice", "Wave", "Spazer", "Plasma", "Grapple", "XRayScope"]):
         percent = stats[itemsMapping[itemI]][locI]
-        if percent > 10*100.0/numberSeeds:
-          color = "red"
-        elif percent > 7.5*100.0/numberSeeds:
-          color = "orange"
-        elif percent > 5*100.0/numberSeeds:
-          color = "yellow"
-        elif percent > 2.5*100.0/numberSeeds:
-          color = "green"
-        elif percent > 0:
-          color = "blue"
+        if item in ["Missile", "Super", "PowerBomb"]:
+          if float(percent) > 0.0:
+            color = "minor"
+          else:
+            color = "none"
+            pass
         else:
-          color = "none"
+          color = getColor(percent, numberSeeds, parameters["majorsSplit"])
           pass
+
         response.write("<td class=\"border {}\">{}</td>".format(color, percent), escape=False)
         percentSum[itemsMapping[itemI]] += percent
         pass
@@ -313,7 +324,7 @@ def getColor(occ, nSeeds, split, isAmmo):
       response.write("</tr>\n", escape=False)
       pass
     response.write("<tr><td class=\"bold\">Area Total</td>\n", escape=False)
-    for itemI, item in enumerate(["Bomb", "Charge", "Grapple", "Gravity", "HiJump", "Ice", "Missile", "Morph", "Plasma", "PowerBomb", "ScrewAttack", "SpaceJump", "Spazer", "SpeedBooster", "SpringBall", "Super", "Varia", "Wave", "XRayScope"]):
+    for itemI, item in enumerate(["Missile", "Super", "PowerBomb", "Morph", "Bomb", "Springball", "ScrewAttack", "Varia", "Gravity", "HiJump", "SpaceJump", "SpeedBooster", "Charge", "Ice", "Wave", "Spazer", "Plasma", "Grapple", "XRayScope"]):
       response.write("<td class=\"border\">{}</td>".format(percentSum[itemsMapping[itemI]]), escape=False)
       pass
     response.write("</tr>\n", escape=False)

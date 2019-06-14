@@ -1981,4 +1981,4 @@ def extStats():
     (stdPresets, tourPresets, comPresets) = loadPresetsList()
 
     return dict(stdPresets=stdPresets, tourPresets=tourPresets, randoPresets=randoPresets,
-                stats=stats, locations=locations)
+                stats=stats, locations=locations, parameters=parameters)

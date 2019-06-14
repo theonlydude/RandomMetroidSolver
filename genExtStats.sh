@@ -15,7 +15,7 @@ function computeSeed {
 
     LOG=log_$(basename ${RANDO_PRESET} | cut -d '.' -f 1)_$(basename ${SKILL_PRESET} | cut -d '.' -f 1)_${JOB_ID}.log
 
-    ./randomizer.py -r "${ROM}" --randoPreset "${RANDO_PRESET}" --param "${SKILL_PRESET}" --ext_stats "extStats_${JOB_ID}.sql" --runtime 5 > ${LOG} && (printf "."; rm -f ${LOG}) || printf "x"
+    ./randomizer.py -r "${ROM}" --randoPreset "${RANDO_PRESET}" --param "${SKILL_PRESET}" --ext_stats "extStats_${JOB_ID}.sql" --runtime 10 > ${LOG} && (printf "."; rm -f ${LOG}) || printf "x"
 }
 
 function wait_for_a_child {
@@ -70,6 +70,6 @@ for RANDO_PRESET in $(ls -1 rando_presets/*.json); do
     echo ""
 done
 
-cat extStats_*.sql > extStats.sql && rm -f extStats_*.sql
+cat extStats_*.sql >> extStats.sql && rm -f extStats_*.sql
 
 echo "DONE"

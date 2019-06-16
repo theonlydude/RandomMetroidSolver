@@ -170,7 +170,7 @@ function startTheTour(step=-1) {
 	  <td><button id="presetStep" type="button" onclick="startTheTour(0)">?</button></td>
 	  
 	  <td>Settings Preset:</td>
-	  <td>{{=SELECT(*randoPresets, **dict(_name="randoPreset", _id="randoPreset", value=session.extStats["randoPreset"], _class="filldropdown chzn-select"))}}</td>
+	  <td>{{=SELECT(OPTGROUP(*randoPresets, **dict(_label="Standard presets")), OPTGROUP(*tourRandoPresets, **dict(_label="Tournament presets")), **dict(_name="randoPreset", _id="randoPreset", value=session.extStats["randoPreset"], _class="filldropdown chzn-select"))}}</td>
 	  <td><button id="randoPresetStep" type="button" onclick="startTheTour(1)">?</button></td>
 	  <td>{{=INPUT(_type="submit", _value="Load", _name="action", _class="btn btn-default")}}</td>
         </tr>

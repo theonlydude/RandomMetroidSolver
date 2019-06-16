@@ -65,10 +65,12 @@ def loadPresetsList():
     return (stdPresets, tourPresets, comPresets)
 
 def loadRandoPresetsList():
+    tourPresets = ['Season_Races', 'smrat', 'Scavenger_Hunt']
     files = sorted(os.listdir('rando_presets'), key=lambda v: v.upper())
     randoPresets = [os.path.splitext(file)[0] for file in files]
-    randoPresets.append("")
-    return randoPresets
+    #randoPresets.append("") # ???
+    randoPresets = [preset for preset in randoPresets if preset not in tourPresets]
+    return (randoPresets, tourPresets)
 
 def validatePresetsParams(action):
     if action == 'Create':
@@ -745,10 +747,10 @@ def randomizer():
     initRandomizerSession()
 
     (stdPresets, tourPresets, comPresets) = loadPresetsList()
-    randoPresets = loadRandoPresetsList()
+    (randoPresets, tourRandoPresets) = loadRandoPresetsList()
 
     return dict(stdPresets=stdPresets, tourPresets=tourPresets, comPresets=comPresets,
-                patches=patches, randoPresets=randoPresets)
+                patches=patches, randoPresets=randoPresets, tourRandoPresets=tourRandoPresets)
 
 def raiseHttp(code, msg, isJson=False):
     #print("raiseHttp: code {} msg {} isJson {}".format(code, msg, isJson))
@@ -1978,8 +1980,9 @@ def extStats():
         stats = None
         parameters = None
 
-    randoPresets = loadRandoPresetsList()
+    (randoPresets, tourRandoPresets) = loadRandoPresetsList()
     (stdPresets, tourPresets, comPresets) = loadPresetsList()
 
-    return dict(stdPresets=stdPresets, tourPresets=tourPresets, randoPresets=randoPresets,
+    return dict(stdPresets=stdPresets, tourPresets=tourPresets,
+                randoPresets=randoPresets, tourRandoPresets=tourRandoPresets,
                 stats=stats, locations=locations, parameters=parameters)

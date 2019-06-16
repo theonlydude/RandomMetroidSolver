@@ -1976,6 +1976,7 @@ def extStats():
         DB.close()
     else:
         stats = None
+        parameters = None
 
     randoPresets = loadRandoPresetsList()
     (stdPresets, tourPresets, comPresets) = loadPresetsList()

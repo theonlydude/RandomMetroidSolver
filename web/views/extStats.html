@@ -208,7 +208,9 @@ def getThreshold(ratio, nSeeds, split):
       <table class="right">
 	<tr>
 	  <td class="border">0.0</td>
-	  <td class="border green">>{{=getThreshold(1.0, numberSeeds, parameters["majorsSplit"])}}</td>
+	  <td class="border red"><{{=getThreshold(0.33, numberSeeds, parameters["majorsSplit"])}}</td>
+	  <td class="border yellow"><{{=getThreshold(0.5, numberSeeds, parameters["majorsSplit"])}}</td>
+	  <td class="border green">>{{=getThreshold(0.5, numberSeeds, parameters["majorsSplit"])}} <{{=getThreshold(2.0, numberSeeds, parameters["majorsSplit"])}}</td>
 	  <td class="border yellow">>{{=getThreshold(2.0, numberSeeds, parameters["majorsSplit"])}}</td>
 	  <td class="border red">>{{=getThreshold(3.0, numberSeeds, parameters["majorsSplit"])}}</td>
 	</tr>
@@ -272,7 +274,11 @@ def getColor(percent, nSeeds, split):
     expectedPercent = 100.0 / nLocs
     ratio = percent / expectedPercent
 
-    if ratio < 1.5:
+    if ratio < 0.33:
+      return "red"
+    elif ratio < 0.5:
+      return "yellow"
+    elif ratio < 2.0:
       return "green"
     elif ratio < 3.0:
       return "yellow"

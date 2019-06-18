@@ -278,9 +278,10 @@ class CommonSolver(object):
             self.bossRando = True
             self.patches = RomReader.getDefaultPatches()
             RomLoader.factory(self.patches).loadPatches()
-            self.curGraphTransitions = []
-            self.areaTransitions = []
-            self.bossTransitions = []
+            # in seedless load all the vanilla transitions
+            self.areaTransitions = vanillaTransitions[:]
+            self.bossTransitions = vanillaBossesTransitions[:]
+            self.curGraphTransitions = self.bossTransitions + self.areaTransitions
             for loc in self.locations:
                 loc['itemName'] = 'Nothing'
         else:

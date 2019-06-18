@@ -68,7 +68,6 @@ def loadRandoPresetsList():
     tourPresets = ['Season_Races', 'smrat', 'Scavenger_Hunt']
     files = sorted(os.listdir('rando_presets'), key=lambda v: v.upper())
     randoPresets = [os.path.splitext(file)[0] for file in files]
-    #randoPresets.append("") # ???
     randoPresets = [preset for preset in randoPresets if preset not in tourPresets]
     return (randoPresets, tourPresets)
 
@@ -748,6 +747,8 @@ def randomizer():
 
     (stdPresets, tourPresets, comPresets) = loadPresetsList()
     (randoPresets, tourRandoPresets) = loadRandoPresetsList()
+    # add empty entry for default value
+    randoPresets.append("")
 
     return dict(stdPresets=stdPresets, tourPresets=tourPresets, comPresets=comPresets,
                 patches=patches, randoPresets=randoPresets, tourRandoPresets=tourRandoPresets)

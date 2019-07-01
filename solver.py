@@ -614,8 +614,8 @@ class InteractiveSolver(CommonSolver):
         patches = ['credits_varia.ips', 'tracking.ips']
         if magic != None:
             patches.append('race_mode.ips')
-        romPatcher.addIPSPatches(patches)
         romPatcher.writeItemsLocs(itemLocs)
+        romPatcher.addIPSPatches(patches)
         romPatcher.writeItemsNumber()
         romPatcher.writeSpoiler(itemLocs)
         class FakeRandoSettings:
@@ -629,13 +629,14 @@ class InteractiveSolver(CommonSolver):
         romPatcher.writeRandoSettings(randoSettings, itemLocs)
         if magic != None:
             romPatcher.writeMagic()
-        romPatcher.writePlandoAddresses(self.visitedLocations)
-        if self.areaRando == True:
-            doors = getDoorConnections(self.fillGraph(), self.areaRando, self.bossRando)
-            romPatcher.writeDoorConnections(doors)
-            doorsPtrs = getAps2DoorsPtrs()
-            romPatcher.writePlandoTransitions(self.curGraphTransitions, doorsPtrs,
-                                              len(vanillaBossesTransitions) + len(vanillaTransitions))
+        else:
+            romPatcher.writePlandoAddresses(self.visitedLocations)
+            if self.areaRando == True:
+                doors = getDoorConnections(self.fillGraph(), self.areaRando, self.bossRando)
+                romPatcher.writeDoorConnections(doors)
+                doorsPtrs = getAps2DoorsPtrs()
+                romPatcher.writePlandoTransitions(self.curGraphTransitions, doorsPtrs,
+                                                  len(vanillaBossesTransitions) + len(vanillaTransitions))
         romPatcher.end()
 
         data = romPatcher.romFile.data

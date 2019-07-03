@@ -549,7 +549,7 @@ class RomPatcher:
         'Area': ['area_rando_blue_doors.ips', 'area_rando_layout.ips', 'area_rando_door_transition.ips' ]
     }
 
-    def __init__(self, romFileName=None, magic=None):
+    def __init__(self, romFileName=None, magic=None, plando=False):
         self.romFileName = romFileName
         self.race = None
         if romFileName == None:
@@ -558,7 +558,7 @@ class RomPatcher:
             self.romFile = open(romFileName, 'rb+')
         if magic is not None:
             from race_mode import RaceModePatcher
-            self.race = RaceModePatcher(self, magic)
+            self.race = RaceModePatcher(self, magic, plando)
 
     def end(self):
         self.romFile.close()

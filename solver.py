@@ -610,7 +610,7 @@ class InteractiveSolver(CommonSolver):
             magic = random.randint(1, 0xffff)
         else:
             magic = None
-        romPatcher = RomPatcher(magic=magic)
+        romPatcher = RomPatcher(magic=magic, plando=True)
         patches = ['credits_varia.ips', 'tracking.ips']
         if magic != None:
             patches.append('race_mode.ips')

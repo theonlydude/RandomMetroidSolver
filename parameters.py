@@ -266,9 +266,15 @@ class Knows:
 
     XrayDboost = SMBool(False, 0, ['XrayDboost'])
     desc['XrayDboost'] = {'display': 'X-Ray Damage Boost',
-                          'title': 'Get to X-Ray location without Space-Jump, Grapple (no energy requirements), Ice or Bombs (see Hard Room settings)',
+                          'title': 'Get to X-Ray location without Space-Jump, Grapple (no energy requirements), Ice+Hi-Jump or Bombs (see Hard Room settings)',
                           'href': 'https://www.twitch.tv/videos/168724062',
                           'rooms': ['Red Brinstar Fireflea Room']}
+
+    XrayIce = SMBool(True, hard, ['XrayIce'])
+    desc['XrayIce'] = {'display': 'X-Ray Ice Climb',
+                       'title': 'Get to X-Ray location with Ice beam and no Hi-Jump (see Hard Room settings for energy requirements)',
+                       'href': '',
+                       'rooms': ['Red Brinstar Fireflea Room']}
 
     RedTowerClimb = SMBool(True, harder, ['RedTowerClimb'])
     desc['RedTowerClimb'] = {'display': 'Red Tower Climb',
@@ -539,7 +545,7 @@ class Knows:
              'title': 'Crateria'},
             {'knows': ['CeilingDBoost', 'EarlyKraid',
                        'ReverseGateGlitch', 'ReverseGateGlitchHiJumpLess', 
-                       'RedTowerClimb', 'XrayDboost',
+                       'RedTowerClimb', 'XrayDboost', 'XrayIce',
                        'RonPopeilScrew', 'OldMBWithSpeed', 'Moondance'],
              'title': 'Brinstar'}
         ],

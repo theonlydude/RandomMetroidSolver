@@ -1294,7 +1294,8 @@ class Randomizer(object):
         # like spospo etc. too often).
         # in this case, we won't remove any prog items since we're not actually
         # stuck
-        isFakeRollback = self.generateItem(self.currentLocations(), self.itemPool) is not None
+        ret = self.generateItem(self.currentLocations(), self.itemPool)
+        isFakeRollback = ret is not None
         self.log.debug('isFakeRollback=' + str(isFakeRollback))
         self.initRollback(isFakeRollback)
         if len(self.states) == 0:
@@ -1304,7 +1305,6 @@ class Randomizer(object):
                 self.vcr.addRollback(nStatesAtStart)
             return None
         # to stay consistent in case no solution is found as states list was popped in init
-        ret = None
         fallbackState = self.states[-1]
         i = 0
         possibleStates = []

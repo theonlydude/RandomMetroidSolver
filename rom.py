@@ -654,16 +654,17 @@ class RomPatcher:
             operand = ItemManager.BeamBits[item['Type']]
         else:
             operand = ItemManager.ItemBits[item['Type']]
-        # endianness
-        op0 = operand & 0x00FF
-        op1 = (operand & 0xFF00) >> 8
+        self.patchMorphBallCheck(0x1410E6, cat, comp, operand, branch) # eye main AI
+        self.patchMorphBallCheck(0x14683B, cat, comp, operand, branch) # head init AI
+        self.patchMorphBallCheck(0x1468B2, cat, comp, operand, branch) # head main AI
+
+    def patchMorphBallCheck(self, offset, cat, comp, operand, branch):
         # actually patch enemy AI
-        self.romFile.seek(0x1410E6)
+        self.romFile.seek(offset)
         self.romFile.write(struct.pack('B', cat))
-        self.romFile.seek(0x1410E8)
+        self.romFile.seek(offset+2)
         self.romFile.write(struct.pack('B', comp))
-        self.romFile.write(struct.pack('B', op0))
-        self.romFile.write(struct.pack('B', op1))
+        self.writeWord(operand)
         self.romFile.write(struct.pack('B', branch))
 
     def writeItemsNumber(self):

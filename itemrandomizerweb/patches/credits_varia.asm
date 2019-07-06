@@ -1080,6 +1080,9 @@ script:
     dw {draw}, {blank}
     dw {draw}, {row}*204 // SHOTS AND AMMO
     dw {draw}, {blank}
+    dw {draw}, {row}*170 // UNCHARGED
+    dw {draw}, {row}*171
+    dw {draw}, {blank}
     dw {draw}, {row}*205 // CHARGED
     dw {draw}, {row}*206
     dw {draw}, {blank}
@@ -1175,11 +1178,8 @@ script:
     dw {draw}, {blank}
     dw {draw}, {blank}
     dw {draw}, {blank}
-    dw {draw}, {blank}
     dw {draw}, {row}*219 // Thanks
     dw {draw}, {row}*220
-    dw {draw}, {blank}
-    dw {draw}, {blank}
     dw {draw}, {blank}
     dw {draw}, {blank}
     dw {draw}, {blank}
@@ -1209,11 +1209,12 @@ stats:
     dw 13,      {row}*198,  3, 0    // Wrecked Ship
     dw 15,      {row}*200,  3, 0    // Maridia
     dw 17,      {row}*202,  3, 0    // Tourian
+    dw 19,      {row}*170,  1, 0    // Uncharged Shots
     dw 20,      {row}*205,  1, 0    // Charged Shots
     dw 21,      {row}*207,  1, 0    // Special Beam Attacks
     dw 22,      {row}*209,  1, 0    // Missiles
     dw 23,      {row}*211,  1, 0    // Super Missiles
-    dw 24,      {row}*213,  1, 0    // Power Bombs
+    dw 24,      {row}*213,  1, 0    // Power Bombs	
     dw 26,      {row}*215,  1, 0    // Bombs
     dw 27,      {row}*221,  3, 0    // Time in pause
 //  dw 29,      {row}*224,  2, 0    // time saved arm pumping
@@ -1271,9 +1272,9 @@ credits:
     dw " power bomb packs .......... xx " // 151
     dw " HEALTH TANKS                XX " // 152
     dw " health tanks .............. xx " // 153
+    dw "                                " // 154  : reusable
     // params data start
     {yellow}
-    dw "                                " // 154  : reusable
     dw " PROGRESSION SPEED .... XXXXXXX " // 155
     dw " PROGRESSION DIFFICULTY XXXXXXX " // 156
     // item distrib title	
@@ -1299,9 +1300,9 @@ credits:
 // stats continued
     dw " AVAILABLE AMMO XXX% ENERGY XXX%" // 168
     dw " available ammo xxx> energy xxx>" // 169
+    dw " UNCHARGED SHOTS                " // 170
+    dw " uncharged shots                " // 171
 // --- this space is reusable
-    dw "                                " // 170
-    dw "                                " // 171
     dw "                                " // 172
     dw "                                " // 173
     dw "                                " // 174

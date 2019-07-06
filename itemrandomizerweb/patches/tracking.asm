@@ -61,6 +61,12 @@ org $82e309
 org $82e34c
     jml door_adjust_stop
 
+// Firing uncharged beam
+org $90b92a
+    jml uncharged_beam
+org $90bd5f
+    jml hyper_shot
+
 // Firing charged beam
 org $90b9a1
     jml charged_beam
@@ -96,12 +102,13 @@ pausing_local:
 resuming_local:
 	jml resuming
 
-org $91eb05
-	jmp pumps_local
+// FIXME reenable when arm pumping gain works
+//org $91eb05
+//	jmp pumps_local
 	
-org $91fff0
-pumps_local:
-	jml pumps
+//org $91fff0
+//pumps_local:
+//	jml pumps
 
 // -------------------------------
 // CODE (using bank A1 free space)
@@ -232,11 +239,29 @@ door_adjust_stop:
     sta $099c
     jml $82e352
 
+// uncharged Beam Fire
+uncharged_beam:
+	sta $0ccc // execute first part of hijacked code, to freely use A
+
+	lda #$0013
+	jsl {inc_stat}
+
+	pla // execute last instr of hijacked code
+	jml $90b92e // return
+
+hyper_shot:
+	sta $0cd0 // execute first part of hijacked code, to freely use A
+
+	lda #$0013
+	jsl {inc_stat}
+
+	plp // execute last instr of hijacked code
+	jml $90bd63 // return
+
 // Charged Beam Fire
 charged_beam:
     lda #$0014
     jsl {inc_stat}
-
     // Run hijacked code and return
     LDX #$0000
     LDA $0c2c, x
@@ -315,6 +340,7 @@ resuming:
 	inc $0998
 	jml $82939f
 
+// FIXME : does not work, increase wildly arm pump detection during collisions...
 // count arm pumps: hijack collision detection routine where the arm pump bug occurs 
 pumps:
 	// check if we're running :

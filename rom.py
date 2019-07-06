@@ -538,7 +538,7 @@ class RomPatcher:
                      'Removes_Gravity_Suit_heat_protection',
                      'AimAnyButton.ips', 'endingtotals.ips',
                      'supermetroid_msu1.ips', 'max_ammo_display.ips'],
-        'VariaTweaks' : ['ws_etank.ips', 'ln_chozo_sj_check_disable.ips', 'bomb_torizo.ips'],
+        'VariaTweaks' : ['ws_etank.ips', 'ln_chozo_sj_check_disable.ips', 'ln_chozo_platform.ips', 'bomb_torizo.ips'],
         'Layout': ['dachora.ips', 'early_super_bridge.ips', 'high_jump.ips', 'moat.ips',
                    'nova_boost_platform.ips', 'red_tower.ips', 'spazer.ips', 'brinstar_map_room.ips'],
         'Optional': ['itemsounds.ips', 'rando_speed.ips',

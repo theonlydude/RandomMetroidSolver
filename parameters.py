@@ -273,7 +273,7 @@ class Knows:
     XrayIce = SMBool(True, hard, ['XrayIce'])
     desc['XrayIce'] = {'display': 'X-Ray Ice Climb',
                        'title': 'Get to X-Ray location with Ice beam and no Hi-Jump (see Hard Room settings for energy requirements)',
-                       'href': '',
+                       'href': 'https://www.youtube.com/watch?v=j36noNULtI8',
                        'rooms': ['Red Brinstar Fireflea Room']}
 
     RedTowerClimb = SMBool(True, harder, ['RedTowerClimb'])

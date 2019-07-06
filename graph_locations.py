@@ -1458,8 +1458,7 @@ locations = [
                                                                  sm.canUsePowerBombs()))),
                                            sm.wand(sm.haveItem('Super'), # from grapple room
                                                    sm.knowsGreenGateGlitch(),
-                                                   sm.wor(sm.canFly(),
-                                                          sm.haveItem('Grapple'))))), # TODO::test if accessible with a spark, and how many etanks required
+                                                   sm.canFly()))), # TODO::test if accessible with a spark (short charge), and how many etanks required
     'PostAvailable': lambda sm: sm.wor(sm.haveItem('Morph'), # normal exit
                                        sm.wand(sm.canOpenGreenDoors(), # go back to grapple room
                                                sm.wor(sm.haveItem('SpaceJump'), 

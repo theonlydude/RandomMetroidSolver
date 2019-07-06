@@ -655,7 +655,6 @@ class RomPatcher:
         else:
             operand = ItemManager.ItemBits[item['Type']]
         self.patchMorphBallCheck(0x1410E6, cat, comp, operand, branch) # eye main AI
-        self.patchMorphBallCheck(0x14683B, cat, comp, operand, branch) # head init AI
         self.patchMorphBallCheck(0x1468B2, cat, comp, operand, branch) # head main AI
 
     def patchMorphBallCheck(self, offset, cat, comp, operand, branch):

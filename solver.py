@@ -1327,7 +1327,28 @@ class Out(object):
         else:
             raise Exception("Wrong output type for the Solver: {}".format(output))
 
-class OutWeb:
+    def fixEnergy(self, items):
+        # display number of energy used
+        energies = [i for i in items if i.find('ETank') != -1]
+        if len(energies) > 0:
+            (maxETank, maxReserve, maxEnergy) = (0, 0, 0)
+            for energy in energies:
+                nETank = energy[0:energy.find('-ETank')]
+                if energy.find('-Reserve') != -1:
+                    nReserve = energy[energy.find(' - ')+len(' - '):energy.find('-Reserve')]
+                else:
+                    nReserve = 0
+                nEnergy = int(nETank) + int(nReserve)
+                if nEnergy > maxEnergy:
+                    maxEnergy = nEnergy
+                    maxETank = nETank
+                    maxReserve = nReserve
+                items.remove(energy)
+            items.append('{}-ETank'.format(maxETank))
+            if nReserve > 0:
+                items.append('{}-Reserve'.format(maxReserve))
+
+class OutWeb(Out):
     def __init__(self, solver):
         self.solver = solver
 
@@ -1380,6 +1401,8 @@ class OutWeb:
 
         out = []
         for loc in locations:
+            self.fixEnergy(loc['difficulty'].items)
+
             out.append([(loc['Name'], loc['Room']), loc['Area'], loc['SolveArea'], loc['itemName'],
                         '{0:.2f}'.format(loc['difficulty'].difficulty),
                         ', '.join(sorted(loc['difficulty'].knows)),
@@ -1414,7 +1437,7 @@ class OutWeb:
 
         return (pngFileName, pngThumbFileName)
 
-class OutConsole:
+class OutConsole(Out):
     def __init__(self, solver):
         self.solver = solver
 
@@ -1444,6 +1467,9 @@ class OutConsole:
                     path = " -> ".join(path)
                     print('{:>50}: {}'.format('Path', path))
             line = '{} {:>48}: {:>12} {:>34} {:>8} {:>16} {:>14} {} {}'
+
+            self.fixEnergy(loc['difficulty'].items)
+
             print(line.format('Z' if 'Chozo' in loc['Class'] else ' ',
                               loc['Name'],
                               loc['Area'],

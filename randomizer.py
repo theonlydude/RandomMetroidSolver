@@ -460,7 +460,7 @@ if __name__ == "__main__":
                       'progSpeed': progSpeed, 'morphPlacement': args.morphPlacement,
                       'suitsRestriction': args.suitsRestriction, 'progDiff': progDiff,
                       'superFunMovement': 'Movement' in args.superFun, 'superFunCombat': 'Combat' in args.superFun,
-                      'superFunSuit': 'Suit' in args.superFun}
+                      'superFunSuit': 'Suits' in args.superFun}
         if args.extStatsFilename == None:
             DB = db.DB()
             DB.addExtStat(parameters, locsItems)

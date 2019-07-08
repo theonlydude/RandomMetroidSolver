@@ -335,5 +335,14 @@ find ~/web2py/applications/solver/static -xtype l -exec rm -f {} \;
 [ -L ~/web2py/applications/solver/static/images/Wave.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/items/Wave.png ~/web2py/applications/solver/static/images/Wave.png
 [ -L ~/web2py/applications/solver/static/images/Varia.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/items/Varia.png ~/web2py/applications/solver/static/images/Varia.png
 
-#[ -L ~/web2py/applications/solver/static/images/.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/items/.png ~/web2py/applications/solver/static/images/.png
+[ -L ~/web2py/applications/solver/static/images/Charge.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/items/Charge.png ~/web2py/applications/solver/static/images/Charge.png
+[ -L ~/web2py/applications/solver/static/images/ETank.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/items/ETank.png ~/web2py/applications/solver/static/images/ETank.png
+[ -L ~/web2py/applications/solver/static/images/Ice.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/items/Ice.png ~/web2py/applications/solver/static/images/Ice.png
+[ -L ~/web2py/applications/solver/static/images/Missile.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/items/Missile.png ~/web2py/applications/solver/static/images/Missile.png
+[ -L ~/web2py/applications/solver/static/images/Morph.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/items/Morph.png ~/web2py/applications/solver/static/images/Morph.png
+[ -L ~/web2py/applications/solver/static/images/PowerBomb.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/items/PowerBomb.png ~/web2py/applications/solver/static/images/PowerBomb.png
+[ -L ~/web2py/applications/solver/static/images/Reserve.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/items/Reserve.png ~/web2py/applications/solver/static/images/Reserve.png
+[ -L ~/web2py/applications/solver/static/images/Super.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/items/Super.png ~/web2py/applications/solver/static/images/Super.png
+[ -L ~/web2py/applications/solver/static/images/XRayScope.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/items/XRayScope.png ~/web2py/applications/solver/static/images/XRayScope.png
 
+[ -L ~/web2py/applications/solver/views/solver_web/extStats.html ] || ln -s ~/RandomMetroidSolver/web/views/extStats.html ~/web2py/applications/solver/views/solver_web/extStats.html

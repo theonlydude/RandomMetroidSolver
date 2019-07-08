@@ -582,6 +582,11 @@ class Randomizer(object):
         self.itemLimit = self.settings.getItemLimit(speed)
         self.locLimit = self.settings.getLocLimit(speed)
         self.progressionItemTypes = self.settings.getProgressionItemTypes(speed)
+        collectedAmmoTypes = set([item['Type'] for item in self.currentItems if item['Category'] == 'Ammo'])
+        ammos = ['Missile', 'Super', 'PowerBomb']
+        if 'Super' in collectedAmmoTypes:
+            ammos.remove('Missile')
+        self.progressionItemTypes += [ammoType for ammoType in ammos if ammoType not in collectedAmmoTypes]
         self.possibleSoftlockProb = self.settings.getPossibleSoftlockProb(speed)
 
     def setCurAccessPoint(self, ap='Landing Site'):
@@ -827,7 +832,7 @@ class Randomizer(object):
     def isJunk(self, item):
         if item['Type'] in ['Nothing', 'NoEnergy']:
             return True
-    
+
     def isProgItemNow(self, item):
         if self.isJunk(item):
             return False
@@ -984,9 +989,13 @@ class Randomizer(object):
             # disable check for bombs as it is the beginning
             return False
         # if the loc forces us to go to an area we can't come back from
-        comeBack = self.areaGraph.canAccess(self.smbm, loc['accessPoint'], self.curAccessPoint, self.difficultyTarget, item['Type'])
+        comeBack = loc['accessPoint'] == self.curAccessPoint or \
+            self.areaGraph.canAccess(self.smbm, loc['accessPoint'], self.curAccessPoint, self.difficultyTarget, item['Type'])
         if not comeBack:
+            self.log.debug("KO come back from " + loc['accessPoint'] + " to " + self.curAccessPoint + " when trying to place " + item['Type'] + " at " + loc['Name'])
             return True
+        else:
+            self.log.debug("OK come back from " + loc['accessPoint'] + " to " + self.curAccessPoint + " when trying to place " + item['Type'] + " at " + loc['Name'])
         if self.isProgItemNow(item) and random.random() >= self.possibleSoftlockProb: # depends on prog speed
             # we know that loc is avail and post avail with the item
             # if it is not post avail without it, then the item prevents the
@@ -1008,7 +1017,7 @@ class Randomizer(object):
         # theoretically finishable without checking any other location
         if self.restrictions['MajorMinor'] == 'Chozo':
             if self.isChozoLeft():
-                return 'Chozo' == item['Class'] and 'Chozo' in location['Class']
+                return ('Chozo' == item['Class'] and 'Chozo' in location['Class']) or ('Boss' == item['Type'] and 'Boss' in location['Class'])
             else:
                 return True
 
@@ -1020,11 +1029,11 @@ class Randomizer(object):
     # check if an item can be placed at a location, given restrictions
     # settings.
     def canPlaceAtLocation(self, item, location, checkSoftlock=False, checkRestrictions=True):
-        if item['Type'] == 'Boss':
-            return 'Boss' in location['Class']
+        if item['Type'] == 'Boss' and not 'Boss' in location['Class']:
+            return False
 
-        if 'Boss' in location['Class']:
-            return item['Type'] == 'Boss'
+        if 'Boss' in location['Class'] and not item['Type'] == 'Boss':
+            return False
 
         if not self.locClassCheck(item, location):
             return False
@@ -1156,7 +1165,7 @@ class Randomizer(object):
         return True
 
     def addEnergyAsNonProg(self, pool, basePool):
-        if self.restrictions['MajorMinor'] == 'Chozo' and not any(item['Category'] == 'Energy' for item in basePool):
+        if self.restrictions['MajorMinor'] == 'Chozo' and not any(item['Category'] == 'Energy' for item in pool):
             pool += [item for item in basePool if item['Category'] == 'Energy']
 
     def getNonProgItems(self, basePool):
@@ -1285,7 +1294,8 @@ class Randomizer(object):
         # like spospo etc. too often).
         # in this case, we won't remove any prog items since we're not actually
         # stuck
-        isFakeRollback = self.generateItem(self.currentLocations(), self.itemPool) is not None
+        ret = self.generateItem(self.currentLocations(), self.itemPool)
+        isFakeRollback = ret is not None
         self.log.debug('isFakeRollback=' + str(isFakeRollback))
         self.initRollback(isFakeRollback)
         if len(self.states) == 0:
@@ -1295,7 +1305,6 @@ class Randomizer(object):
                 self.vcr.addRollback(nStatesAtStart)
             return None
         # to stay consistent in case no solution is found as states list was popped in init
-        ret = None
         fallbackState = self.states[-1]
         i = 0
         possibleStates = []
@@ -1356,7 +1365,7 @@ class Randomizer(object):
             Bosses.beatBoss(boss)
         # get bosses locations and newly accessible locations (for bosses that open up locs)
         newLocs = self.currentLocations(post=True)
-        locs = newLocs + [loc for loc in self.unusedLocations if 'Boss' in loc['Class'] and not loc in newLocs]
+        locs = newLocs + [loc for loc in self.unusedLocations if ('Boss' in loc['Class'] or 'Pickup' in loc) and not loc in newLocs]
         ret = (len(locs) > len(prevLocs) and len(locs) == len(self.unusedLocations))
         # restore currently killed bosses
         Bosses.reset()
@@ -1487,14 +1496,10 @@ class Randomizer(object):
             self.log.debug('collected1=' + str(list(set([i['Item']['Type'] for i in self.itemLocations]))))
             for il in allItemLocs:
                 self.getItem(il, pool=self.nonChozoItemPool, showDot=False)
+            self.log.debug('collected2=' + str(list(set([i['Item']['Type'] for i in self.itemLocations]))))
             # fill-up
             self.determineParameters()
-            self.log.debug('collected2=' + str(list(set([i['Item']['Type'] for i in self.itemLocations]))))
-            collectedAmmo = list(set([il['Item']['Type'] for il in self.itemLocations if il['Item']['Category'] == 'Ammo']))
-            if 'Super' in collectedAmmo and 'Missile' not in collectedAmmo:
-                collectedAmmo.append('Missile') # no need to restrict missiles if supers are already in
-            self.log.debug('collectedAmmo='+str(collectedAmmo))
-            nonProg = [item for item in self.getNonProgItemPool(self.nonChozoItemPool) if item['Category'] != 'Ammo' or item['Type'] in collectedAmmo]
+            nonProg = self.getNonProgItemPool(self.nonChozoItemPool)
             lim = self.locLimit - 1
             if lim < 0:
                 lim = 0

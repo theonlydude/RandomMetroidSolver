@@ -538,10 +538,10 @@ class RomPatcher:
                      'Removes_Gravity_Suit_heat_protection',
                      'AimAnyButton.ips', 'endingtotals.ips',
                      'supermetroid_msu1.ips', 'max_ammo_display.ips'],
-        'VariaTweaks' : ['ws_etank.ips', 'ln_chozo_sj_check_disable.ips', 'bomb_torizo.ips'],
+        'VariaTweaks' : ['ws_etank.ips', 'ln_chozo_sj_check_disable.ips', 'ln_chozo_platform.ips', 'bomb_torizo.ips'],
         'Layout': ['dachora.ips', 'early_super_bridge.ips', 'high_jump.ips', 'moat.ips',
                    'nova_boost_platform.ips', 'red_tower.ips', 'spazer.ips', 'brinstar_map_room.ips'],
-        'Optional': ['itemsounds.ips',
+        'Optional': ['itemsounds.ips', 'rando_speed.ips',
                      'spinjumprestart.ips', 'elevators_doors_speed.ips', 'No_Music',
                      'skip_intro.ips', 'skip_ceres.ips', 'animal_enemies.ips', 'animals.ips',
                      'draygonimals.ips', 'escapimals.ips', 'gameend.ips', 'grey_door_animals.ips',
@@ -549,7 +549,7 @@ class RomPatcher:
         'Area': ['area_rando_blue_doors.ips', 'area_rando_layout.ips', 'area_rando_door_transition.ips' ]
     }
 
-    def __init__(self, romFileName=None, magic=None):
+    def __init__(self, romFileName=None, magic=None, plando=False):
         self.romFileName = romFileName
         self.race = None
         if romFileName == None:
@@ -558,7 +558,7 @@ class RomPatcher:
             self.romFile = open(romFileName, 'rb+')
         if magic is not None:
             from race_mode import RaceModePatcher
-            self.race = RaceModePatcher(self, magic)
+            self.race = RaceModePatcher(self, magic, plando)
 
     def end(self):
         self.romFile.close()
@@ -654,16 +654,16 @@ class RomPatcher:
             operand = ItemManager.BeamBits[item['Type']]
         else:
             operand = ItemManager.ItemBits[item['Type']]
-        # endianness
-        op0 = operand & 0x00FF
-        op1 = (operand & 0xFF00) >> 8
+        self.patchMorphBallCheck(0x1410E6, cat, comp, operand, branch) # eye main AI
+        self.patchMorphBallCheck(0x1468B2, cat, comp, operand, branch) # head main AI
+
+    def patchMorphBallCheck(self, offset, cat, comp, operand, branch):
         # actually patch enemy AI
-        self.romFile.seek(0x1410E6)
+        self.romFile.seek(offset)
         self.romFile.write(struct.pack('B', cat))
-        self.romFile.seek(0x1410E8)
+        self.romFile.seek(offset+2)
         self.romFile.write(struct.pack('B', comp))
-        self.romFile.write(struct.pack('B', op0))
-        self.romFile.write(struct.pack('B', op1))
+        self.writeWord(operand)
         self.romFile.write(struct.pack('B', branch))
 
     def writeItemsNumber(self):
@@ -685,6 +685,8 @@ class RomPatcher:
                 stdPatches.append('race_mode.ips')
             if bosses == True:
                 stdPatches.append('ridley_platform.ips')
+            if area == True or bosses == True:
+                stdPatches.append('ws_save.ips')
             for patchName in stdPatches:
                 self.applyIPSPatch(patchName)
             self.writeItemsNumber()
@@ -922,7 +924,7 @@ class RomPatcher:
             progNames = [il['Item']['Name'] for il in progItemLocs]
             for i in range(len(progNames)):
                 item = progNames[i]
-                if item in items:
+                if item in items and item not in displayNames:
                     items.remove(item)
                     items.insert(idx, item)
                     displayNames[item] = chr(prog + i) + ": " + item

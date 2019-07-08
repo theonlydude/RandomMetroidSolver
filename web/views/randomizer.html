@@ -383,7 +383,7 @@ function AjaxPresetCallCompleted(data) {
     console.log("AjaxPresetCallCompleted");
 
     var dataDict = {paramsFileTarget : data, "complexity": getComplexity()};
-    var elems = ["seed", "itemsounds", "spinjumprestart", "elevators_doors_speed", "skip_ceres", "skip_intro", "animals", "layoutPatches", "noGravHeat", "areaLayout", "variaTweaks", "areaRandomization", "No_Music", "preset",
+    var elems = ["seed", "itemsounds", "spinjumprestart", "rando_speed", "elevators_doors_speed", "skip_ceres", "skip_intro", "animals", "layoutPatches", "noGravHeat", "areaLayout", "variaTweaks", "areaRandomization", "No_Music", "preset",
 "bossRandomization", "colorsRandomization", "suitsPalettes", "beamsPalettes", "tilesPalettes", "enemiesPalettes", "bossesPalettes", "globalShift"];
     var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "energyQty", "maxDifficulty", "majorsSplit", "suitsRestriction", "morphPlacement", "funCombat", "funMovement", "funSuits", "progressionDifficulty", "hideItems", "strictMinors"];
 
@@ -498,7 +498,7 @@ function AjaxRandomizerCallCompleted(data) {
     console.log("button text set back to randomize");
 
     var dataDict = {"complexity": getComplexity()};
-    var elems = ["itemsounds", "spinjumprestart", "elevators_doors_speed", "skip_ceres", "skip_intro", "animals", "layoutPatches", "noGravHeat", "areaLayout", "variaTweaks", "areaRandomization", "bossRandomization", "No_Music", "preset", "randoPreset", "colorsRandomization", "suitsPalettes", "beamsPalettes", "tilesPalettes", "enemiesPalettes", "bossesPalettes", "globalShift"];
+    var elems = ["itemsounds", "spinjumprestart", "rando_speed", "elevators_doors_speed", "skip_ceres", "skip_intro", "animals", "layoutPatches", "noGravHeat", "areaLayout", "variaTweaks", "areaRandomization", "bossRandomization", "No_Music", "preset", "randoPreset", "colorsRandomization", "suitsPalettes", "beamsPalettes", "tilesPalettes", "enemiesPalettes", "bossesPalettes", "globalShift"];
     var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "energyQty", "maxDifficulty", "majorsSplit", "suitsRestriction", "morphPlacement", "funCombat", "funMovement", "funSuits", "progressionDifficulty", "hideItems", "strictMinors"];
 
     for(var i=0; i<elems.length; i++) {
@@ -608,7 +608,11 @@ window.onload = function(){
                 var fileSize = file.size;
 		if( fileSize > 4*1024*1024 ) {
                     document.getElementById("uploadFile").value = "";
-                    alert("wrong rom file size: "+fileSize.toString());
+                    alert("wrong ROM file size: "+fileSize.toString());
+                    return false;
+                } else if( fileSize == 3146240) {
+                    document.getElementById("uploadFile").value = "";
+                    alert("headered ROM detected, please use an unheadered ROM");
                     return false;
                 }
             }
@@ -964,12 +968,26 @@ function startTheTour(step=-1) {
     {
       element: "#presetStep",
       title: "Skills Preset",
-      content: "<p>The preset is used by the Randomizer to know which techniques are available to reach the items locations.</p><p>You can check which techniques are required as well as create and manage your own preset on the <a href=\"/solver/solver_web/presets\">Presets part of the website</a>.</p><p>Load one of the standard presets (sorted in increased difficulty), or your own from the community presets.</p><p>Creating your own preset will lead to a better experience overall, as the generated ROMs will be tailored for you.</p>"
+      content: "<p>The preset is used by the Randomizer to know which techniques are available to reach the items locations.</p><p>You can check which techniques are required as well as create and manage your own preset on the <a href=\"/solver/solver_web/presets\">Presets part of the website</a>.</p><p>Load one of the standard presets (sorted in increased difficulty), tournaent presets, or your own from the community presets.</p><p>Creating your own preset will lead to a better experience overall, as the generated ROMs will be tailored for you.</p>"
     },
     {
       element: "#randoPresetStep",
       title: "Settings Preset",
-      content: "Choose from a list of typical Randomizer usages. They're independent from skills preset, and settings can still be changed after loading the preset:<ul><li>all_random: all the parameters are set to random</li><li>default: VARIA randomizer default settings</li><li>free: easiest possible settings</li><li>hardway2well: harder highway2hell</li><li>highway2hell: favors suitless seeds</li><li>quite_random: randomizes a few significant settings to have various seeds</li><li>Scavenger_Hunt: SM Scavenger Hunt Tournament</li><li>Season_Races: settings used for rando league races</li><li>smrat: Super Metroid Randomizer Accessible Tournament 2019</li><li>stupid_hard: hardest possible settings</li><li>vanilla: closest possible to vanilla Super Metroid</li><li>way_of_chozo: chozo split with boss randomization</li><li>where_is_morph: Area mode with late Morph</li></ul>"
+      content: "Choose from a list of typical Randomizer usages. They're independent from skills preset, and settings can still be changed after loading the preset:<ul>\
+<li>all_random: all the parameters are set to random</li>\
+<li>default: VARIA randomizer default settings</li>\
+<li>free: easiest possible settings</li>\
+<li>hardway2well: harder highway2hell</li>\
+<li>highway2hell: favors suitless seeds</li>\
+<li>quite_random: randomizes a few significant settings to have various seeds</li>\
+<li>stupid_hard: hardest possible settings</li>\
+<li>vanilla: closest possible to vanilla Super Metroid</li>\
+<li>way_of_chozo: chozo split with boss randomization</li>\
+<li>where_is_morph: Area mode with late Morph</li></ul>\
+Tournament presets:<ul>\
+<li>Scavenger_Hunt: SM Scavenger Hunt Tournament</li>\
+<li>Season_Races: settings used for rando league races</li>\
+<li>smrat: Super Metroid Randomizer Accessible Tournament 2019</li></ul>"
     },
     {
       element: "#raceStep",
@@ -1024,7 +1042,7 @@ function startTheTour(step=-1) {
     {
       element: "#minorQtyStep",
       title: "Percentage of minors available",
-      content: "<p>From 1%: minimum number of minors required to finish the game to 100%: all minors locations contain a minor (vanilla like).</p><p>Click on the dice button to randomly set this parameter.</p>"
+      content: "<p>From 7%: minimum number of minors required to finish the game to 100%: all minors locations contain a minor (vanilla like).</p><p>Click on the dice button to randomly set this parameter.</p>"
     },
     {
       element: "#energyQtyStep",
@@ -1273,6 +1291,7 @@ def displayNumber(id, min, max, default, step="1"):
 	<td>{{=A("Tracker", _href=URL(f="tracker"), _class="menu")}}</td>
 	<td>{{=A("Plandomizer", _href=URL(f="plando"), _class="menu")}}</td>
 	<td>{{=A("Customizer", _href=URL(f="customizer"), _class="menu")}}</td>
+	<td>{{=A("Statistics", _href=URL(f="extStats"), _class="menu")}}</td>
 	<td>{{=A("Information & Contact", _href=URL(f="infos"), _class="menu")}}</td>
       </tr>
     </table>
@@ -1310,7 +1329,7 @@ def displayNumber(id, min, max, default, step="1"):
 		<td id="presetStep"><button type="button" onclick="startTheTour(2)">?</button></td>
               </tr>
 		<td>Settings Preset:</td>
-		<td>{{=SELECT(*randoPresets, **dict(_name="randoPreset", _id="randoPreset", value=session.randomizer["randoPreset"], _class="filldropdown chzn-select", _onchange="loadRandoPreset()"))}}</td>
+		<td>{{=SELECT(OPTGROUP(*randoPresets, **dict(_label="Standard presets")), OPTGROUP(*tourRandoPresets, **dict(_label="Tournament presets")), **dict(_name="randoPreset", _id="randoPreset", value=session.randomizer["randoPreset"], _class="filldropdown chzn-select", _onchange="loadRandoPreset()"))}}</td>
 		<td id="randoPresetStep"><button type="button" onclick="startTheTour(3)">?</button></td>
               </tr>
 	      <tr id="raceModeVisibility">
@@ -1404,7 +1423,7 @@ def displayNumber(id, min, max, default, step="1"):
                 <tr>
 		  <td class="small"><div class="random"><button id="minorQtyRandom" type="button" onclick="randomize(event, 'minorQty')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
 		  <td><span id="minorQtyText">Percentage of minors available:</span></td>
-		  <td>{{displayNumber("minorQty", "1", "100", "100")}}</td>
+		  <td>{{displayNumber("minorQty", "7", "100", "100")}}</td>
 		  <td id="minorQtyStep"><button type="button" onclick="startTheTour(14)">?</button></td>
                 </tr>
                 <tr>

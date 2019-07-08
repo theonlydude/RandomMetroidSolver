@@ -301,6 +301,10 @@ window.onload = function(){
                     document.getElementById("uploadFile").value = "";
                     alert("Wrong ROM file size: "+fileSize.toString());
                     return false;
+                } else if( fileSize == 3146240) {
+                    document.getElementById("uploadFile").value = "";
+                    alert("headered ROM detected, please use an unheadered ROM");
+                    return false;
                 }
 
                 var bytes = new Uint8Array(e.target.result);
@@ -409,7 +413,7 @@ function startTheTour(step=-1) {
     {
       element: "#presetStep",
       title: "Preset",
-      content: "The preset is used by the Solver to know which techniques are available to reach the items locations.<br/>You can create and manage your preset on the <a href=\"/solver/solver_web/presets\">Presets part of the website</a>.<br/>Load one of the standard presets (sorted in increased difficulty) or you own from the community presets.<br/>For the duration of the league the Season_Races preset is added to standard presets."
+      content: "The preset is used by the Solver to know which techniques are available to reach the items locations.<br/>You can create and manage your preset on the <a href=\"/solver/solver_web/presets\">Presets part of the website</a>.<br/>Load one of the standard presets (sorted in increased difficulty), tournament presets, or you own from the community presets."
     },
     {
       element: "#difficultyTarget",
@@ -472,6 +476,7 @@ If Charge Beam is not picked up along the way or not accessible, enough minors t
 	<td>{{=A("Tracker", _href=URL(f="tracker"), _class="menu")}}</td>
 	<td>{{=A("Plandomizer", _href=URL(f="plando"), _class="menu")}}</td>
 	<td>{{=A("Customizer", _href=URL(f="customizer"), _class="menu")}}</td>
+	<td>{{=A("Statistics", _href=URL(f="extStats"), _class="menu")}}</td>
 	<td>{{=A("Information & Contact", _href=URL(f="infos"), _class="menu")}}</td>
       </tr>
     </table>

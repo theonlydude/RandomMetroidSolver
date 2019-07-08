@@ -18,13 +18,12 @@ from solver import StandardSolver, DifficultyDisplayer, InteractiveSolver
 from utils import PresetLoader
 import db
 from graph_access import vanillaTransitions, vanillaBossesTransitions
+from utils import isStdPreset
+from graph_locations import locations
 
 def maxPresetsReach():
     # to prevent a spammer to create presets in a loop and fill the fs
     return len(os.listdir('community_presets')) >= 2048
-
-def isStdPreset(preset):
-    return preset in ['noob', 'casual', 'regular', 'veteran', 'speedrunner', 'master', 'samus', 'solution', 'Season_Races', 'smrat', 'SCAVENGER_HUNT']
 
 def getPresetDir(preset):
     if isStdPreset(preset):
@@ -66,10 +65,11 @@ def loadPresetsList():
     return (stdPresets, tourPresets, comPresets)
 
 def loadRandoPresetsList():
+    tourPresets = ['Season_Races', 'smrat', 'Scavenger_Hunt']
     files = sorted(os.listdir('rando_presets'), key=lambda v: v.upper())
     randoPresets = [os.path.splitext(file)[0] for file in files]
-    randoPresets.append("")
-    return randoPresets
+    randoPresets = [preset for preset in randoPresets if preset not in tourPresets]
+    return (randoPresets, tourPresets)
 
 def validatePresetsParams(action):
     if action == 'Create':
@@ -690,6 +690,7 @@ patches = [
     ('skip_ceres', "Skip text intro and Ceres station (start at Landing Site) (by Total)", True, False, False),
     ('itemsounds', "Remove fanfare when picking up an item (by Scyzer)", True, True, True),
     ('spinjumprestart', "Allows Samus to start spinning in mid air after jumping or falling (by Kejardon)", False, True, True),
+    ('rando_speed', "Let's Samus keep her momentum when landing from a fall or from jumping (by Oi27)", False, True, True),
     ('elevators_doors_speed', 'Accelerate doors and elevators transitions (by Rakki & Lioran)', True, True, True),
     ('animals', "Save the animals surprise (by Foosda)", False, False, True),
     ('No_Music', "Disable background music (by Kejardon)", False, True, True)
@@ -745,10 +746,12 @@ def randomizer():
     initRandomizerSession()
 
     (stdPresets, tourPresets, comPresets) = loadPresetsList()
-    randoPresets = loadRandoPresetsList()
+    (randoPresets, tourRandoPresets) = loadRandoPresetsList()
+    # add empty entry for default value
+    randoPresets.append("")
 
     return dict(stdPresets=stdPresets, tourPresets=tourPresets, comPresets=comPresets,
-                patches=patches, randoPresets=randoPresets)
+                patches=patches, randoPresets=randoPresets, tourRandoPresets=tourRandoPresets)
 
 def raiseHttp(code, msg, isJson=False):
     #print("raiseHttp: code {} msg {} isJson {}".format(code, msg, isJson))
@@ -869,7 +872,7 @@ def validateWebServiceParams(patchs, quantities, others, isJson=False):
 
 def sessionWebService():
     # web service to update the session
-    patchs = ['itemsounds', 'No_Music',
+    patchs = ['itemsounds', 'No_Music', 'rando_speed',
               'spinjumprestart', 'elevators_doors_speed',
               'skip_intro', 'skip_ceres', 'animals', 'areaLayout', 'variaTweaks']
     quantities = ['missileQty', 'superQty', 'powerBombQty']
@@ -947,7 +950,7 @@ def randomizerWebService():
     response.headers['Access-Control-Allow-Origin'] = '*'
 
     # check validity of all parameters
-    patchs = ['itemsounds', 'spinjumprestart', 'elevators_doors_speed', 'skip_intro',
+    patchs = ['itemsounds', 'spinjumprestart', 'elevators_doors_speed', 'skip_intro', 'rando_speed',
               'skip_ceres', 'areaLayout', 'variaTweaks', 'No_Music', 'animals']
     quantities = ['missileQty', 'superQty', 'powerBombQty']
     others = ['seed', 'paramsFileTarget', 'minorQty', 'energyQty', 'preset',
@@ -1260,7 +1263,7 @@ def randoParamsWebService():
     return params
 
 def stats():
-    response.title = 'Super Metroid VARIA Randomizer and Solver statistics'
+    response.title = 'Super Metroid VARIA Randomizer and Solver usage statistics'
 
     DB = db.DB()
     weeks = 1
@@ -1806,7 +1809,7 @@ def customizer():
 
 def customWebService():
     # check validity of all parameters
-    patches = ['itemsounds', 'spinjumprestart', 'elevators_doors_speed', 'No_Music', 'animals']
+    patches = ['itemsounds', 'spinjumprestart', 'rando_speed', 'elevators_doors_speed', 'No_Music', 'animals']
     others = ['colorsRandomization', 'suitsPalettes', 'beamsPalettes', 'tilesPalettes', 'enemiesPalettes',
               'bossesPalettes', 'minDegree', 'maxDegree', 'invert']
     validateWebServiceParams(patches, [], others, isJson=True)
@@ -1890,3 +1893,108 @@ def customWebService():
         os.close(fd)
         os.remove(jsonFileName)
         raise HTTP(400, json.dumps(msg))
+
+def initExtStatsSession():
+    if session.extStats == None:
+        session.extStats = {}
+        session.extStats['preset'] = 'regular'
+        session.extStats['randoPreset'] = 'default'
+
+def updateExtStatsSession():
+    if session.extStats is None:
+        session.extStats = {}
+
+    session.extStats['preset'] = request.vars.preset
+    session.extStats['randoPreset'] = request.vars.randoPreset
+
+def validateExtStatsParams():
+    for (preset, directory) in [("preset", "standard_presets"), ("randoPreset", "rando_presets")]:
+        if request.vars[preset] == None:
+            return (False, "Missing parameter preset")
+        preset = request.vars[preset]
+
+        if IS_ALPHANUMERIC()(preset)[1] is not None:
+            return (False, "Wrong value for preset, must be alphanumeric")
+
+        if IS_LENGTH(maxsize=32, minsize=1)(preset)[1] is not None:
+            return (False, "Wrong length for preset, name must be between 1 and 32 characters")
+
+        # check that preset exists
+        fullPath = '{}/{}.json'.format(directory, preset)
+        if not os.path.isfile(fullPath):
+            return (False, "Unknown preset: {}".format(preset))
+
+    return (True, None)
+
+def extStats():
+    response.title = 'Super Metroid VARIA Randomizer and ExtStats statistics'
+
+    initExtStatsSession()
+
+    if request.vars.action == 'Load':
+        (ok, msg) = validateExtStatsParams()
+        if not ok:
+            session.flash = msg
+            redirect(URL(r=request, f='extStats'))
+
+        updateExtStatsSession()
+
+        preset = request.vars.preset
+        randoPreset = request.vars.randoPreset
+        fullPath = 'rando_presets/{}.json'.format(randoPreset)
+
+        try:
+            with open(fullPath) as jsonFile:
+                randoPreset = json.load(jsonFile)
+        except Exception as e:
+            raise HTTP(400, "Can't load the rando preset: {}".format(randoPreset))
+
+        parameters = {
+            'preset': preset,
+            'area': 'areaRandomization' in randoPreset and randoPreset['areaRandomization'] == 'on',
+            'boss': 'bossRandomization' in randoPreset and randoPreset['bossRandomization'] == 'on',
+            # parameters which can be random:
+            'majorsSplit': randoPreset['majorsSplit'] if 'majorsSplit' in randoPreset else 'Full',
+            'progSpeed': randoPreset['progressionSpeed'] if 'progressionSpeed' in randoPreset else 'variable',
+            'morphPlacement': randoPreset['morphPlacement'] if 'morphPlacement' in randoPreset else 'early',
+            'suitsRestriction': 'suitsRestriction' in randoPreset and randoPreset['suitsRestriction'] == 'on',
+            'progDiff': randoPreset['progressionDifficulty'] if 'progressionDifficulty' in randoPreset else 'normal',
+            'superFunMovement': 'funMovement' in randoPreset and randoPreset['funMovement'] == 'on',
+            'superFunCombat': 'funCombat' in randoPreset and randoPreset['funCombat'] == 'on',
+            'superFunSuit': 'funSuits' in randoPreset and randoPreset['funSuits'] == 'on',
+        }
+
+        if randoPreset['suitsRestriction'] == "random":
+            parameters["suitsRestriction"] = "random"
+        if randoPreset['funMovement'] == "random":
+            parameters["superFunMovement"] = "random"
+        if randoPreset['funCombat'] == "random":
+            parameters["superFunCombat"] = "random"
+        if randoPreset['funSuits'] == "random":
+            parameters["superFunSuit"] = "random"
+
+
+        DB = db.DB()
+        stats = DB.getExtStat(parameters)
+        DB.close()
+
+        # check that all items are present in the stats:
+        if len(stats) != 19:
+            for i, item in enumerate(['Bomb', 'Charge', 'Grapple', 'Gravity', 'HiJump', 'Ice', 'Missile', 'Morph',
+                                      'Plasma', 'PowerBomb', 'ScrewAttack', 'SpaceJump', 'Spazer', 'SpeedBooster',
+                                      'SpringBall', 'Super', 'Varia', 'Wave', 'XRayScope']):
+                if stats[i][1] != item:
+                    stats.insert(i, [stats[0][0], item] + [0]*105)
+    else:
+        stats = None
+        parameters = None
+
+    (randoPresets, tourRandoPresets) = loadRandoPresetsList()
+    # remove random presets those statistics are useless
+    randoPresets.remove("all_random")
+    randoPresets.remove("quite_random")
+    (stdPresets, tourPresets, comPresets) = loadPresetsList()
+
+    return dict(stdPresets=stdPresets, tourPresets=tourPresets,
+                randoPresets=randoPresets, tourRandoPresets=tourRandoPresets,
+                stats=stats, locations=locations, parameters=parameters)

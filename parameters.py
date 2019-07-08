@@ -266,9 +266,15 @@ class Knows:
 
     XrayDboost = SMBool(False, 0, ['XrayDboost'])
     desc['XrayDboost'] = {'display': 'X-Ray Damage Boost',
-                          'title': 'Get to X-Ray location without Space-Jump, Grapple (no energy requirements), Ice or Bombs (see Hard Room settings)',
+                          'title': 'Get to X-Ray location without Space-Jump, Grapple (no energy requirements), Ice+Hi-Jump or Bombs (see Hard Room settings)',
                           'href': 'https://www.twitch.tv/videos/168724062',
                           'rooms': ['Red Brinstar Fireflea Room']}
+
+    XrayIce = SMBool(True, hard, ['XrayIce'])
+    desc['XrayIce'] = {'display': 'X-Ray Ice Climb',
+                       'title': 'Get to X-Ray location with Ice beam and no Hi-Jump (see Hard Room settings for energy requirements)',
+                       'href': 'https://www.youtube.com/watch?v=j36noNULtI8',
+                       'rooms': ['Red Brinstar Fireflea Room']}
 
     RedTowerClimb = SMBool(True, harder, ['RedTowerClimb'])
     desc['RedTowerClimb'] = {'display': 'Red Tower Climb',
@@ -282,12 +288,17 @@ class Knows:
                               'href': 'https://wiki.supermetroid.run/Brinstar_Reserve_Tank_Room',
                               'rooms': ['Brinstar Reserve Tank Room']}
 
+    OldMBWithSpeed = SMBool(False, mania, ['OldMBWithSpeed'])
+    desc['OldMBWithSpeed'] = {'display': 'Old Mother Brain with Speed',
+                              'title': 'Access Old Mother Brain Missile pack location with just the Speed Booster',
+                              'href': 'https://www.youtube.com/watch?v=-SO2QykqnZw',
+                              'rooms': ['Climb', 'Pit Room']}
+    
     Moondance = SMBool(False, mania, ['Moondance'])
     desc['Moondance'] = {'display': 'Moondance',
                          'title': 'Access Etecoons area using moonfall shenanigans',
                          'href': 'http://crocomi.re/92',
                          'rooms': ['Green Brinstar Main Shaft']}
-
     # Gauntlet
     HiJumpLessGauntletAccess = SMBool(False, 0, ['HiJumpLessGauntletAccess'])
     desc['HiJumpLessGauntletAccess'] = {'display': 'Gauntlet Access w/o Hi-Jump',
@@ -534,8 +545,8 @@ class Knows:
              'title': 'Crateria'},
             {'knows': ['CeilingDBoost', 'EarlyKraid',
                        'ReverseGateGlitch', 'ReverseGateGlitchHiJumpLess', 
-                       'RedTowerClimb', 'XrayDboost',
-                       'RonPopeilScrew', 'Moondance'],
+                       'RedTowerClimb', 'XrayDboost', 'XrayIce',
+                       'RonPopeilScrew', 'OldMBWithSpeed', 'Moondance'],
              'title': 'Brinstar'}
         ],
         'Wrecked Ship': [

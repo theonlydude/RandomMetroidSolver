@@ -159,17 +159,39 @@ function computeSeed {
     fi
 }
 
-STOP=""
-let LOOPS=${LOOPS}/4
-for i in $(seq 1 ${LOOPS}); do
-    computeSeed &
-    computeSeed &
-    computeSeed &
-    computeSeed &
-    wait
+function wait_for_a_child {
+    PIDS="$1"
 
-    if [ "${STOP}" = "now" ]; then
-	exit 1
+    while true; do
+	for PID in $PIDS; do
+	    kill -0 $PID 2>/dev/null
+	    if [ $? -ne 0 ]; then
+		PIDS=$(echo "$PIDS" | sed -e "s+ $PID ++")
+		return
+	    fi
+	done
+	sleep 1
+    done
+}
+
+STOP=""
+NB_CPU=$(cat /proc/cpuinfo  | grep 'processor' | wc -l)
+CUR_JOBS=0
+CUR_LOOP=0
+PIDS=""
+while true; do
+    while [ ${CUR_JOBS} -lt ${NB_CPU} -a ${CUR_LOOP} -lt ${LOOPS} ]; do
+	computeSeed &
+	PIDS="$PIDS $! "
+	let CUR_JOBS=$CUR_JOBS+1
+	let CUR_LOOP=$CUR_LOOP+1
+    done
+
+    wait_for_a_child "${PIDS}"
+    let CUR_JOBS=$CUR_JOBS-1
+
+    if [ $CUR_JOBS -eq 0 -a $CUR_LOOP -ge $LOOPS ]; then
+	break
     fi
 done
 

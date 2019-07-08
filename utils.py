@@ -5,6 +5,9 @@ from parameters import Knows, Settings, Controller, isKnows, isSettings, isButto
 from parameters import easy, medium, hard, harder, hardcore, mania
 from smbool import SMBool
 
+def isStdPreset(preset):
+    return preset in ['noob', 'casual', 'regular', 'veteran', 'speedrunner', 'master', 'samus', 'solution', 'Season_Races', 'smrat', 'SCAVENGER_HUNT']
+
 # gauss random in [0, r] range
 # the higher the slope, the less probable extreme values are.
 def randGaussBounds(r, slope=5):
@@ -220,3 +223,102 @@ class PresetLoaderDict(PresetLoader):
     def __init__(self, params):
         self.params = params
         super(PresetLoaderDict, self).__init__()
+
+def loadRandoPreset(randoPreset, args):
+    # load the rando preset json file and add the parameters inside it to the args parser
+    with open(randoPreset) as randoPresetFile:
+        randoParams = json.load(randoPresetFile)
+
+    if "animals" in randoParams and randoParams["animals"] == "on":
+        args.animals = True
+    if "areaLayout" in randoParams and randoParams["areaLayout"] == "off":
+        args.areaLayoutBase = True
+    if "variaTweaks" in randoParams and randoParams["variaTweaks"] == "off":
+        args.noVariaTweaks = True
+    if "maxDifficulty" in randoParams and randoParams["maxDifficulty"] != "no difficulty cap":
+        args.maxDifficulty = randoParams["maxDifficulty"]
+    if "suitsRestriction" in randoParams and randoParams["suitsRestriction"] != "off":
+        if randoParams["suitsRestriction"] == "on":
+            args.suitsRestriction = True
+        else:
+            args.suitsRestriction = "random"
+    if "hideItems" in randoParams and randoParams["hideItems"] != "off":
+        if randoParams["hideItems"] == "on":
+            args.hideItems = True
+        else:
+            args.hideItems = "random"
+    if "strictMinors" in randoParams and randoParams["strictMinors"] != "off":
+        if randoParams["strictMinors"] == "on":
+            args.strictMinors = True
+        else:
+            args.strictMinors = "random"
+
+    if "layoutPatches" in randoParams and randoParams["layoutPatches"] == "off":
+        args.noLayout = True
+    if "noGravHeat" in randoParams and randoParams["noGravHeat"] == "off":
+        args.noGravHeat = True
+
+    if "areaRandomization" in randoParams and randoParams["areaRandomization"] == "on":
+        args.area = True
+    if "bossRandomization" in randoParams and randoParams["bossRandomization"] == "on":
+        args.bosses = True
+
+    if "funCombat" in randoParams and randoParams["funCombat"] != "off":
+        if randoParams["funCombat"] == "on":
+            args.superFun.append("Combat")
+        else:
+            args.superFun.append("CombatRandom")
+    if "funMovement" in randoParams and randoParams["funMovement"] != "off":
+        if randoParams["funMovement"] == "on":
+            args.superFun.append("Movement")
+        else:
+            args.superFun.append("MovementRandom")
+    if "funSuits" in randoParams and randoParams["funSuits"] != "off":
+        if randoParams["funSuits"] == "on":
+            args.superFun.append("Suits")
+        else:
+            args.superFun.append("SuitsRandom")
+
+    patches = ["skip_intro", "skip_ceres", "itemsounds", "spinjumprestart", "rando_speed", "elevators_doors_speed"]
+
+    for patch in patches:
+        if patch in randoParams and randoParams[patch] == "on":
+            args.patches.append(patch + '.ips')
+    if "No_Music" in randoParams and randoParams["No_Music"] == "on":
+        args.patches.append("No_Music")
+
+    if "morphPlacement" in randoParams:
+        args.morphPlacement = randoParams["morphPlacement"]
+    if "majorsSplit" in randoParams:
+        args.majorsSplit = randoParams["majorsSplit"]
+    if "progressionDifficulty" in randoParams:
+        args.progressionDifficulty = randoParams["progressionDifficulty"]
+
+    if "progressionSpeed" in randoParams:
+        if type(randoParams["progressionSpeed"]) == list:
+            args.progressionSpeed = ",".join(randoParams["progressionSpeed"])
+        else:
+            args.progressionSpeed = randoParams["progressionSpeed"]
+
+    if "missileQty" in randoParams:
+        if randoParams["missileQty"] == "random":
+            args.missileQty = 0
+        else:
+            args.missileQty = randoParams["missileQty"]
+    if "superQty" in randoParams:
+        if randoParams["superQty"] == "random":
+            args.superQty = 0
+        else:
+            args.superQty = randoParams["superQty"]
+    if "powerBombQty" in randoParams:
+        if randoParams["powerBombQty"] == "random":
+            args.powerBombQty = 0
+        else:
+            args.powerBombQty = randoParams["powerBombQty"]
+    if "minorQty" in randoParams:
+        if randoParams["minorQty"] == "random":
+            args.minorQty = 0
+        else:
+            args.minorQty = randoParams["minorQty"]
+    if "energyQty" in randoParams:
+        args.energyQty = randoParams["energyQty"]

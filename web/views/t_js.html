@@ -597,6 +597,10 @@ window.onload = function(){
             document.getElementById("uploadFile").value = "";
             alert("Wrong ROM file size: "+fileSize.toString());
             return false;
+        } else if( fileSize == 3146240) {
+            document.getElementById("uploadFile").value = "";
+            alert("headered ROM detected, please use an unheadered ROM");
+            return false;
         }
   
         var bytes = new Uint8Array(e.target.result);

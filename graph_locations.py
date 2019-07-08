@@ -214,7 +214,8 @@ locations = [
                                            sm.haveItem('SpaceJump'),
                                            sm.wand(sm.energyReserveCountOkHardRoom('X-Ray'),
                                                    sm.wor(sm.knowsXrayDboost(),
-                                                          sm.haveItem('Ice'),
+                                                          sm.wand(sm.haveItem('Ice'),
+                                                                  sm.wor(sm.haveItem('HiJump'), sm.knowsXrayIce())),
                                                           sm.canInfiniteBombJump(),
                                                           sm.wand(sm.haveItem('HiJump'),
                                                                   sm.wor(sm.haveItem('SpeedBooster'),
@@ -875,7 +876,9 @@ locations = [
     'AccessFrom' : {
         'Landing Site': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: sm.canDestroyBombWalls()
+    'Available': lambda sm: sm.wor(sm.canDestroyBombWalls(),
+                                   sm.wand(sm.haveItem('SpeedBooster'),
+                                           sm.knowsOldMBWithSpeed()))
 },
 {
     'Area': "Crateria",
@@ -1456,8 +1459,7 @@ locations = [
                                                                  sm.canUsePowerBombs()))),
                                            sm.wand(sm.haveItem('Super'), # from grapple room
                                                    sm.knowsGreenGateGlitch(),
-                                                   sm.wor(sm.canFly(),
-                                                          sm.haveItem('Grapple'))))), # TODO::test if accessible with a spark, and how many etanks required
+                                                   sm.canFly()))), # TODO::test if accessible with a spark (short charge), and how many etanks required
     'PostAvailable': lambda sm: sm.wor(sm.haveItem('Morph'), # normal exit
                                        sm.wand(sm.canOpenGreenDoors(), # go back to grapple room
                                                sm.wor(sm.haveItem('SpaceJump'), 
@@ -1491,7 +1493,7 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Green Bubbles Missile Room',
     'AccessFrom' : {
-        'Bubble Mountain': lambda sm: sm.canHellRun('MainUpperNorfair', 2)
+        'Bubble Mountain': lambda sm: sm.canHellRun('MainUpperNorfair', 2.5, minE=1)
     },
     'Available': lambda sm: sm.canEnterNorfairReserveArea()
 },

@@ -1,0 +1,344 @@
+{{
+extend 'layout.html'
+}}
+
+
+<meta name="description" content="VARIA Randomizer statistics"/>
+<link rel="shortcut icon" href={{=URL('static','favicon.ico')}} type="image/ico"/>
+<link rel="stylesheet" type="text/css" href={{=URL('static/css','mystyle_20190320.css')}} media="screen"/>
+<script type="text/javascript" src="{{=URL('static', '/highslide/highslide.js')}}"></script>
+<link rel="stylesheet" type="text/css" href={{=URL("static", "/highslide/highslide.css")}} />
+<script type="text/javascript">
+hs.graphicsDir = "/solver/static/highslide/graphics/";
+hs.showCredits = 0;
+hs.zIndexCounter = 1000000;
+hs.dimmingOpacity = 0.75;
+
+if (hs.registerOverlay) {
+	// The simple semitransparent close button overlay
+	hs.registerOverlay({
+		thumbnailId: 'areathumb',
+		html: '<div class="closebutton"	onclick="return hs.close(this)" title="Close"></div>',
+		position: 'top right',
+		fade: 2 // fading the semi-transparent overlay looks bad in IE
+	});
+}
+</script>
+
+<link href={{=URL('static', 'css/bootstrap-tour.min.css')}} rel="stylesheet">
+<script src="{{=URL('static','js/bootstrap-tour.min.js')}}"></script>
+
+<script type="text/javascript" src="{{=URL('static', 'js/chosen.jquery.min.js')}}"></script>
+<link rel="stylesheet" type="text/css" href={{=URL("static", "css/chosen.css")}} />
+
+<title>Super Metroid VARIA Randomizer statistics</title>
+
+<style>
+.clickable {
+    cursor: pointer;
+}
+.centerTable {
+    margin-left: auto;
+    margin-right: auto;
+    width: 50%;
+}
+.blue {
+    background-color: #6d9eeb;
+}
+.green {
+    background-color: #93c47d;
+}
+.yellow {
+    background-color: #ffd966;
+}
+.orange {
+    background-color: #f6b26b;
+}
+.red {
+    background-color: #e06666;
+}
+.none {
+    background-color: #ffffff;
+}
+.minor {
+    background-color: #dddddd;
+}
+.border {
+    border: 1px solid #ddd;
+}
+.icon {
+    width: 3.6%;
+}
+.centerIcon {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: 32px;
+}
+.grey {
+    background-color: #f1f1f1;
+}
+.bold {
+    font-weight: bold;
+}
+.left {
+    float: left;
+}
+.right {
+    float: right;
+}
+</style>
+
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script type="text/javascript">
+// https://stackoverflow.com/questions/16960690/chosen-harvesthq-resize-width-dynamically
+$(document).ready(function(){      
+   resizeChosen();
+   jQuery(window).on('resize', resizeChosen);
+});
+
+function resizeChosen() {
+   $(".chosen-container").each(function() {
+       $(this).attr('style', 'width: 100%');
+   });          
+}
+
+window.onload = function(){
+    $(".chzn-select").chosen();
+    resizeChosen();
+}
+
+function startTheTour(step=-1) {
+  // the tour tutorial
+  var tour = new Tour({
+    storage: false,
+    steps: [
+    {
+      element: "#presetStep",
+      title: "Preset",
+      content: "Choose from the list of standard skill presets and tournament ones."
+    },
+    {
+      element: "#randoPresetStep",
+      title: "Settings Preset",
+      content: "Choose from the list of Randomizer presets and tournament ones."
+    } ]});
+
+  // Initialize the tour
+  tour.init();
+
+  // Start the tour
+  if(step != -1) {
+    tour.goTo(step);
+  }
+  tour.start();
+}
+
+</script>
+
+<div class="fixed">
+  <div class="menu">
+    <table class="full menuTable">
+      <tr>
+	<td>{{=A("Home", _href=URL(f="home"), _class="menu")}}</td>
+	<td>{{=A("Presets", _href=URL(f="presets"), _class="menu")}}</td>
+	<td>{{=A("Randomizer", _href=URL(f="randomizer"), _class="menu")}}</td>
+	<td>{{=A("Solver", _href=URL(f="solver"), _class="menu")}}</td>
+	<td>{{=A("Tracker", _href=URL(f="tracker"), _class="menu")}}</td>
+	<td>{{=A("Plandomizer", _href=URL(f="plando"), _class="menu")}}</td>
+	<td>{{=A("Customizer", _href=URL(f="customizer"), _class="menu")}}</td>
+	<td class="menu_selected">{{=A("Statistics", _href=URL(f="extStats"), _class="menu")}}</td>
+	<td>{{=A("Information & Contact", _href=URL(f="infos"), _class="menu")}}</td>
+      </tr>
+    </table>
+  </div>
+</div>
+
+<div class="main">
+  <div class="center">
+    <div class="tab">
+      <button class="tablinks" onclick="nope(event);">Statistics</button>
+    </div>
+  </div>
+  <div class="tabcontent">
+    <form id="mainform" name="mainform">
+      <table class="full">
+	<!-- <colgroup><col class="third" /><col class="third" /><col class="third" /></colgroup> -->
+	<tr>
+	  <td>Skills Preset:</td>
+	  <td>{{=SELECT(OPTGROUP(*stdPresets, **dict(_label="Standard presets")), OPTGROUP(*tourPresets, **dict(_label="Tournament presets")), **dict(_name="preset", _id="preset", value=session.extStats["preset"], _class="filldropdown chzn-select"))}}</td>
+	  <td><button id="presetStep" type="button" onclick="startTheTour(0)">?</button></td>
+	  
+	  <td>Settings Preset:</td>
+	  <td>{{=SELECT(OPTGROUP(*randoPresets, **dict(_label="Standard presets")), OPTGROUP(*tourRandoPresets, **dict(_label="Tournament presets")), **dict(_name="randoPreset", _id="randoPreset", value=session.extStats["randoPreset"], _class="filldropdown chzn-select"))}}</td>
+	  <td><button id="randoPresetStep" type="button" onclick="startTheTour(1)">?</button></td>
+	  <td>{{=INPUT(_type="submit", _value="Load", _name="action", _class="btn btn-default")}}</td>
+        </tr>
+      </table>
+    </form>
+{{
+if stats != None and len(stats) == 0:
+  response.write("No statistics found.", escape=False)
+elif stats != None and len(stats) > 0:
+}}
+  <!--
+      Stats is a matrix, on line per item, columns are (count, item, loc1%, loc2%, ..., loc100%)
+      Items are in this order: Bomb 0, Charge 1, Grapple 2, Gravity 3, HiJump 4, Ice 5, Missile 6, Morph 7, Plasma 8, PowerBomb 9, ScrewAttack 10, SpaceJump 11, Spazer 12, SpeedBooster 13, SpringBall 14, Super 15, Varia 16, Wave 17, XRayScope 18
+      Locations are in the same order as the graph_locations.locations list.
+    -->
+{{
+numberSeeds = float(stats[0][0])
+
+# to display the limits
+def getThreshold(ratio, nSeeds, split):
+    if split == 'Major':
+        nLocs = 34
+    elif split == 'Chozo':
+        nLocs = 25
+    else:
+        nLocs = 100
+        pass
+
+    percent = ratio * (100.0 / nLocs)
+    return round(percent, 1)
+}}
+  <p>
+    <div class="left">Statistics have been computed on {{=int(numberSeeds)}} seeds. Minors probabilities are only for the first ammo pack.</div>
+    <div class="right">Legend: &nbsp;
+      <table class="right">
+	<tr>
+	  <td class="border">0.0</td>
+	  <td class="border red"><{{=getThreshold(0.33, numberSeeds, parameters["majorsSplit"])}}</td>
+	  <td class="border yellow"><{{=getThreshold(0.5, numberSeeds, parameters["majorsSplit"])}}</td>
+	  <td class="border green">>{{=getThreshold(0.5, numberSeeds, parameters["majorsSplit"])}} <{{=getThreshold(2.0, numberSeeds, parameters["majorsSplit"])}}</td>
+	  <td class="border yellow">>{{=getThreshold(2.0, numberSeeds, parameters["majorsSplit"])}}</td>
+	  <td class="border red">>{{=getThreshold(3.0, numberSeeds, parameters["majorsSplit"])}}</td>
+	</tr>
+      </table>
+    </div>
+ </p>
+  <table class="full border">
+    <colgroup><col class="quarter"/><col class="icon"/><col class="icon"/><col class="icon"/><col class="icon"/><col class="icon"/><col class="icon"/><col class="icon"/><col class="icon"/><col class="icon"/><col class="icon"/><col class="icon"/><col class="icon"/><col class="icon"/><col class="icon"/><col class="icon"/><col class="icon"/><col class="icon"/><col class="icon"/><col class="icon"/><!--<col class="icon"/><col class="icon"/>--></colgroup>
+
+{{
+def displayHeader():
+}}
+    <tr class="border">
+      <th class="border">Location</th>
+      <th class="border"><img src="/solver/static/images/Missile.png" alt="Missile.png" title="Missile.png" class="centerIcon"/></th>
+      <th class="border"><img src="/solver/static/images/Super.png" alt="Super.png" title="Super.png" class="centerIcon"/></th>
+      <th class="border"><img src="/solver/static/images/PowerBomb.png" alt="PowerBomb.png" title="PowerBomb.png" class="centerIcon"/></th>
+      <!--
+      <th class="border"><img src="/solver/static/images/ETank.png" alt="ETank.png" title="ETank.png" class="centerIcon"/></th>
+      <th class="border"><img src="/solver/static/images/Reserve.png" alt="Reserve.png" title="Reserve.png" class="centerIcon"/></th>
+      -->
+      <th class="border"><img src="/solver/static/images/Morph.png" alt="Morph.png" title="Morph.png" class="centerIcon"/></th>
+      <th class="border"><img src="/solver/static/images/Bomb.png" alt="Bomb.png" title="Bomb.png" class="centerIcon"/></th>
+      <th class="border"><img src="/solver/static/images/SpringBall.png" alt="SpringBall.png" title="SpringBall.png" class="centerIcon"/></th>
+      <th class="border"><img src="/solver/static/images/ScrewAttack.png" alt="ScrewAttack.png" title="ScrewAttack.png" class="centerIcon"/></th>
+      <th class="border"><img src="/solver/static/images/Varia.png" alt="Varia.png" title="Varia.png" class="centerIcon"/></th>
+      <th class="border"><img src="/solver/static/images/Gravity.png" alt="Gravity.png" title="Gravity.png" class="centerIcon"/></th>
+      <th class="border"><img src="/solver/static/images/HiJump.png" alt="HiJump.png" title="HiJump.png" class="centerIcon"/></th>
+      <th class="border"><img src="/solver/static/images/SpaceJump.png" alt="SpaceJump.png" title="SpaceJump.png" class="centerIcon"/></th>
+      <th class="border"><img src="/solver/static/images/SpeedBooster.png" alt="SpeedBooster.png" title="SpeedBooster.png" class="centerIcon"/></th>
+      <th class="border"><img src="/solver/static/images/Charge.png" alt="Charge.png" title="Charge.png" class="centerIcon"/></th>
+      <th class="border"><img src="/solver/static/images/Ice.png" alt="Ice.png" title="Ice.png" class="centerIcon"/></th>
+      <th class="border"><img src="/solver/static/images/Wave.png" alt="Wave.png" title="Wave.png" class="centerIcon"/></th>
+      <th class="border"><img src="/solver/static/images/Spazer.png" alt="Spazer.png" title="Spazer.png" class="centerIcon"/></th>
+      <th class="border"><img src="/solver/static/images/Plasma.png" alt="Plasma.png" title="Plasma.png" class="centerIcon"/></th>
+      <th class="border"><img src="/solver/static/images/Grapple.png" alt="Grapple.png" title="Grapple.png" class="centerIcon"/></th>
+      <th class="border"><img src="/solver/static/images/XRayScope.png" alt="XRayScope.png" title="XRayScope.png" class="centerIcon"/></th>
+    <tr>
+{{
+  pass
+}}
+
+{{
+# percent: item percent for the location
+# nSeeds: total number of seeds
+# split: preset's split
+def getColor(percent, nSeeds, split):
+    percent = float(percent)
+    if percent == 0.0:
+      return "none"
+
+    # possible locs for the item TODO : take into account restrictions (suits, morph)
+    if split == 'Major':
+        nLocs = 34
+    elif split == 'Chozo':
+        nLocs = 25
+    else:
+        nLocs = 100
+        pass
+
+    expectedPercent = 100.0 / nLocs
+    ratio = percent / expectedPercent
+
+    if ratio < 0.33:
+      return "red"
+    elif ratio < 0.5:
+      return "yellow"
+    elif ratio < 2.0:
+      return "green"
+    elif ratio < 3.0:
+      return "yellow"
+    else:
+      return "red"
+    pass
+
+  # the items display order:
+  #              Missile, Super, PowerBomb,  morph, bomb, springball, screwattack, varia, gravity, hijump, spacejump, speedbooster, charge, ice, wave, spazer, plasma, grapple, xrayscope
+  itemsMapping = [     6,    15,         9,      7,    0,         14,          10,    16,       3,      4,        11,           13,      1,   5,   17,     12,      8,       2,        18]
+
+  # areas: crateria / brinstar / wrecked ship / maridia / norfair / lower norfair
+  for area in ["Crateria", "Brinstar", "WreckedShip", "Maridia", "Norfair", "LowerNorfair"]:
+    percentSum = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+    response.write("<tr><td class=\"center grey bold\" colspan=\"20\">{}</td></tr>\n".format(area), escape=False)
+    displayHeader()
+
+    for locI, loc in enumerate(locations, start=2):
+      if "Boss" in loc["Class"]:
+        continue
+
+      if area == "Brinstar":
+        if loc["GraphArea"] not in ["GreenPinkBrinstar", "Kraid", "RedBrinstar"]:
+          continue
+        else:
+          pass
+      elif loc["GraphArea"] != area:
+        continue
+
+      response.write("<tr><td><a href=\"https://wiki.supermetroid.run/{}\">{}</a></td>".format(loc["Room"].replace(' ', '_').replace("'", '%27'), loc["Name"]), escape=False)
+  
+      for itemI, item in enumerate(["Missile", "Super", "PowerBomb", "Morph", "Bomb", "Springball", "ScrewAttack", "Varia", "Gravity", "HiJump", "SpaceJump", "SpeedBooster", "Charge", "Ice", "Wave", "Spazer", "Plasma", "Grapple", "XRayScope"]):
+        percent = stats[itemsMapping[itemI]][locI]
+        if item in ["Missile", "Super", "PowerBomb"]:
+          if float(percent) > 0.0:
+            color = "minor"
+          else:
+            color = "none"
+            pass
+        else:
+          color = getColor(percent, numberSeeds, parameters["majorsSplit"])
+          pass
+
+        response.write("<td class=\"border {}\">{}</td>".format(color, percent), escape=False)
+        percentSum[itemsMapping[itemI]] += percent
+        pass
+  
+      response.write("</tr>\n", escape=False)
+      pass
+    response.write("<tr><td class=\"bold\">Area Total</td>\n", escape=False)
+    for itemI, item in enumerate(["Missile", "Super", "PowerBomb", "Morph", "Bomb", "Springball", "ScrewAttack", "Varia", "Gravity", "HiJump", "SpaceJump", "SpeedBooster", "Charge", "Ice", "Wave", "Spazer", "Plasma", "Grapple", "XRayScope"]):
+      response.write("<td class=\"border\">{}</td>".format(percentSum[itemsMapping[itemI]]), escape=False)
+      pass
+    response.write("</tr>\n", escape=False)
+    pass
+}}
+  </table>
+{{
+  pass
+}}
+  </div>
+</div>

@@ -137,10 +137,12 @@ class HelpersGraph(Helpers):
     def canHellRunToSpeedBooster(self):
         sm = self.smbm
         mult = 1
+        minE = 3
         hasSpeed = sm.haveItem('SpeedBooster').bool
         if hasSpeed == True:
             mult = 2
-        return sm.canHellRun('MainUpperNorfair', mult)
+            minE = 2
+        return sm.canHellRun('MainUpperNorfair', mult, minE)
 
     @Cache.decorator
     def canExitCathedral(self):

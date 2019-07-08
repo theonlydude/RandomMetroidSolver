@@ -6,15 +6,19 @@ from utils import randGaussBounds
 from itemrandomizerweb.Items import ItemManager
 from smboolmanager import SMBoolManager
 import random
-from smboolmanager import SMBoolManager
+import log
 
 fun = ['HiJump', 'SpeedBooster', 'Plasma', 'ScrewAttack', 'Wave', 'Spazer', 'SpringBall']
 
 if __name__ == "__main__":
+#    log.init(True) # debug mode
+    log.init(False)
+    logger = log.get('ItemsTest')
     sm = SMBoolManager()
     with open("itemStats.csv", "w") as csvOut:
-        csvOut.write("energyQty;minorQty;nFun;strictMinors;MissProb;SuperProb;PowerProb;nItems;nTanks;nTanksTotal;nMinors;nMissiles;nSupers;nPowers;MissAccuracy;SuperAccuracy;PowerAccuracy\n")
+        csvOut.write("energyQty;minorQty;nFun;strictMinors;MissProb;SuperProb;PowerProb;nItems;nTanks;nTanksTotal;nMinors;nMissiles;nSupers;nPowers;MissAccuracy;SuperAccuracy;PowerAccuracy;AmmoAccuracy\n")
         for i in range(10000):
+            logger.debug('SEED ' + str(i))
             if (i+1) % 100 == 0:
                 print(i+1)
             isVanilla = random.random() < 0.5
@@ -49,9 +53,10 @@ if __name__ == "__main__":
             # write params
             csvOut.write("%s;%d;%d;%s;%d;%d;%d;" % (energyQty, minQty, len(forbidden), str(strictMinors), missProb, superProb, pbProb))
             # get items
-            smboolManager = SMBoolManager()
-            itemManager = ItemManager('Major', qty, smboolManager)
-            itemPool = itemManager.getItemPool()
+            splits = ['Full', 'Major', 'Chozo']
+            split = splits[random.randint(0, len(splits)-1)]
+            itemManager = ItemManager(split, qty, sm)
+            itemPool = itemManager.createItemPool()
             itemPool = itemManager.removeForbiddenItems(forbidden)
             # compute stats
             nItems = len([item for item in itemPool if item['Category'] != 'Nothing'])
@@ -70,12 +75,13 @@ if __name__ == "__main__":
             missAcc = getAccuracy(missProb, nMissiles)
             supersAcc = getAccuracy(superProb, nSupers)
             pbAcc = getAccuracy(pbProb, nPowers)
-            csvOut.write("%f;%f;%f\n" % (missAcc, supersAcc, pbAcc))
-            if len(itemPool) != 100:
-                raise ValueError("Not 100 items !!!")
+            ammoAcc = (float(nMinors)/66.0) / minQty * 100
+            csvOut.write("%f;%f;%f;%f\n" % (missAcc, supersAcc, pbAcc, ammoAcc))
+            if len(itemPool) != 105:
+                raise ValueError("Not 105 items !!! " + str(len(itemPool)))
             if isVanilla and nItems != 100:
-                raise ValueError("Not 100 actual items in vanilla !!!")
+                raise ValueError("Not 100 actual items in vanilla !!! " + str(nItems))
             if energyQty == 'sparse' and (nTanks < 4 or nTanks > 6):
-                raise ValueError("Energy qty invalid !!")
+                raise ValueError("Energy qty invalid for sparse !! " + str(nTanks))
             if energyQty == 'medium' and (nTanks < 8 or nTanks > 12):
-                raise ValueError("Energy qty invalid !!")
+                raise ValueError("Energy qty invalid for medium !! " + str(nTanks))

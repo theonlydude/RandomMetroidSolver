@@ -1171,10 +1171,8 @@ script:
     dw {draw}, {blank}
     dw {draw}, {blank}
     dw {draw}, {blank}
-    dw {draw}, {blank}
     dw {draw}, {row}*217 // Final Time
     dw {draw}, {row}*218
-    dw {draw}, {blank}
     dw {draw}, {blank}
     dw {draw}, {blank}
     dw {draw}, {blank}
@@ -1187,6 +1185,8 @@ script:
     dw {draw}, {blank}
     dw {draw}, {blank}
     dw {draw}, {blank}
+    dw {draw}, {blank}
+    dw {draw}, {blank}	
 
     // Set scroll speed to 4 frames per pixel
     dw {speed}, $0004

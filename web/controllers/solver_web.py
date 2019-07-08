@@ -1990,6 +1990,9 @@ def extStats():
         parameters = None
 
     (randoPresets, tourRandoPresets) = loadRandoPresetsList()
+    # remove random presets those statistics are useless
+    randoPresets.remove("all_random")
+    randoPresets.remove("quite_random")
     (stdPresets, tourPresets, comPresets) = loadPresetsList()
 
     return dict(stdPresets=stdPresets, tourPresets=tourPresets,

@@ -62,6 +62,8 @@ org $82e34c
     jml door_adjust_stop
 
 // Firing uncharged beam
+org $90b911
+    jml uncharged_beam
 org $90b92a
     jml uncharged_beam
 org $90bd5f
@@ -245,9 +247,14 @@ uncharged_beam:
 
 	lda #$0013
 	jsl {inc_stat}
-
-	pla // execute last instr of hijacked code
-	jml $90b92e // return
+	// do the vanilla check, done in both auto and normal fire
+	pla
+	bit #$0001
+	bne +
+	// jump back to common branches for auto and normal fire
+	jml $90b933
++
+	jml $90b94c
 
 hyper_shot:
 	sta $0cd0 // execute first part of hijacked code, to freely use A

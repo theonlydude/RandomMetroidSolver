@@ -16,7 +16,7 @@
   "areaRandomization": "off",
   "maxDifficulty": "no difficulty cap",
   "powerBombQty": "1",
-  "minorQty": "1",
+  "minorQty": "7",
   "suitsRestriction": "on",
   "preset": "master",
   "animals": "on",

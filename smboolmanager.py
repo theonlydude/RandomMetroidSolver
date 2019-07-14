@@ -156,6 +156,8 @@ class SMBoolManager(object):
 
     def itemCountOk(self, item, count, difficulty=0):
         if self.itemCount(item) >= count:
+            if item in ['ETank', 'Reserve']:
+                item = '{}-{}'.format(count, item)
             return SMBool(True, difficulty, items = [item])
         else:
             return SMBool(False)

@@ -1561,10 +1561,11 @@ class WS_common_init(WS):
         self.session["mode"] = mode
 
         vcr = request.vars.debug != None
+        fill = request.vars.fill != None and request.vars.fill == "true"
 
-        return self.callSolverInit(jsonRomFileName, presetFileName, preset, seed, mode, vcr)
+        return self.callSolverInit(jsonRomFileName, presetFileName, preset, seed, mode, vcr, fill)
 
-    def callSolverInit(self, jsonRomFileName, presetFileName, preset, romFileName, mode, vcr):
+    def callSolverInit(self, jsonRomFileName, presetFileName, preset, romFileName, mode, vcr, fill):
         if mode != 'seedless':
             (canSolve, magic) = canSolveROM(jsonRomFileName)
             if canSolve == False:
@@ -1591,6 +1592,9 @@ class WS_common_init(WS):
 
         if vcr == True:
             params.append('--vcr')
+
+        if fill == True:
+            params.append('--fill')
 
         print("before calling isolver: {}".format(params))
         start = datetime.now()

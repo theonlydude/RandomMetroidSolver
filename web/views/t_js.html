@@ -781,6 +781,7 @@ function displayPopup(isPlando) {
     document.getElementById("solverPopupText").innerHTML = "Select an already randomized ROM as base to start your Plando<br/>or a Plando ROM to continue working on it";
   } else {
     document.getElementById("solverPopupText").innerHTML = "Select your randomized ROM to solve<br/>or none for seed less mode";
+    document.getElementById("fillPlandoVisibility").style.display = "none";
   }
 
   // display popup
@@ -822,9 +823,12 @@ function initSolver() {
   resetLocsInfo();
 
   // prepare parameters for WS
-  ajaxCall({action: "init", scope: "common", romJson: romJsonValue,
+  ajaxCall({action: "init",
+            scope: "common",
+            romJson: romJsonValue,
             preset: document.getElementById("preset").value,
             fileName: document.getElementById("fileName").value,
+            fill: document.getElementById("fillPlando").checked,
             mode: mode}, "download");
 
   hidePopup();

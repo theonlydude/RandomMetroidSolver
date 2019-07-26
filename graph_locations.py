@@ -1493,7 +1493,7 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Green Bubbles Missile Room',
     'AccessFrom' : {
-        'Bubble Mountain': lambda sm: sm.canHellRun('MainUpperNorfair', 2.5, minE=1)
+        'Bubble Mountain': lambda sm: sm.canHellRun('MainUpperNorfair', 2.5, 1)
     },
     'Available': lambda sm: sm.canEnterNorfairReserveArea()
 },

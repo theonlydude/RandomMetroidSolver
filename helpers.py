@@ -18,6 +18,7 @@ class Helpers(object):
     def energyReserveCount(self):
         return self.smbm.itemCount('ETank') + self.smbm.itemCount('Reserve')
 
+    @Cache.decoratorn(Cache.cache2)
     def energyReserveCountOkDiff(self, difficulties, mult=1.0):
         if difficulties is None or len(difficulties) == 0:
             return SMBool(False)
@@ -27,6 +28,7 @@ class Helpers(object):
                         difficulties[1:], f(difficulties[0]))
         return result
 
+    @Cache.decoratorn(Cache.cache2)
     def energyReserveCountOkHellRun(self, hellRunName, mult=1.0):
         difficulties = Settings.hellRuns[hellRunName]
         result = self.energyReserveCountOkDiff(difficulties, mult)
@@ -37,6 +39,7 @@ class Helpers(object):
 
     # gives damage reduction factor with the current suits
     # envDmg : if true (default) will return environmental damage reduction
+    @Cache.decoratorn(Cache.cache1)
     def getDmgReduction(self, envDmg=True):
         ret = 1.0
         sm = self.smbm
@@ -58,6 +61,7 @@ class Helpers(object):
         return ret
 
     # higher values for mult means room is that much "easier" (HP mult)
+    @Cache.decoratorn(Cache.cache2)
     def energyReserveCountOkHardRoom(self, roomName, mult=1.0):
         difficulties = Settings.hardRooms[roomName]
         mult *= self.getDmgReduction()
@@ -74,6 +78,7 @@ class Helpers(object):
                                             self.smbm.haveItem('Gravity')))
 
     # higher values for mult means hell run is that much "easier" (HP mult)
+    @Cache.decoratorn(Cache.cache3)
     def canHellRun(self, hellRun, mult=1.0, minE=2):
         sm = self.smbm
 
@@ -177,6 +182,7 @@ class Helpers(object):
                        sm.haveItem('HiJump'),
                        sm.knowsDoubleSpringBallJump())
 
+    @Cache.decoratorn(Cache.cache1)
     def canPassTerminatorBombWall(self, fromLandingSite=True):
         sm = self.smbm
         return sm.wor(sm.wand(sm.haveItem('SpeedBooster'),
@@ -200,6 +206,7 @@ class Helpers(object):
                               sm.wor(sm.haveItem('Bomb'),
                                      sm.haveItem('PowerBomb'))))
 
+    @Cache.decoratorn(Cache.cache2)
     def canEnterAndLeaveGauntletQty(self, nPB, nTanks):
         sm = self.smbm
         # EXPLAINED: to access Gauntlet Entrance from Landing site we can either:
@@ -237,6 +244,7 @@ class Helpers(object):
         return sm.wor(sm.canUseBombs(),
                       sm.canUsePowerBombs())
 
+    @Cache.decoratorn(Cache.cache1)
     def canCrystalFlash(self, n=1):
         sm = self.smbm
         return sm.wand(sm.canUsePowerBombs(),
@@ -294,6 +302,7 @@ class Helpers(object):
     # - estimation of the fight duration in seconds (well not really, it
     # is if you fire and land shots perfectly and constantly), giving info
     # to compute boss fight difficulty
+    #@Cache.decoratorn(Cache.cache6)
     def canInflictEnoughDamages(self, bossEnergy, doubleSuper=False, charge=True, power=False, givesDrops=True, ignoreMissiles=False):
         # TODO: handle special beam attacks ? (http://deanyd.net/sm/index.php?title=Charge_Beam_Combos)
         sm = self.smbm
@@ -366,6 +375,7 @@ class Helpers(object):
         return (ammoMargin, secs)
 
     # return diff score, or -1 if below minimum energy in diffTbl
+    @Cache.decoratorn(Cache.cache4)
     def computeBossDifficulty(self, ammoMargin, secs, diffTbl, energyDiff=0):
         sm = self.smbm
 
@@ -481,8 +491,9 @@ class Helpers(object):
         else:
             return SMBool(True, diff)
 
+    @Cache.decoratorn(Cache.cache1)
     def adjustHealthDropDiff(self, difficulty):
-        dmgRed = self.getDmgReduction(envDmg=False)
+        dmgRed = self.getDmgReduction(False)
         # 2 is Varia suit, considered standard eqt for boss fights
         # there's certainly a smarter way to do this but...
         if dmgRed < 2:
@@ -547,6 +558,7 @@ class Helpers(object):
                               sm.haveItem('Charge'),
                               sm.haveItem('XRayScope')))
 
+    @Cache.decoratorn(Cache.cache1)
     def mbEtankCheck(self):
         sm = self.smbm
         nTanks = sm.energyReserveCount()

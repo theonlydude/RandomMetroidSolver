@@ -6,6 +6,7 @@ class Cache:
     cache2 = {}
     cache3 = {}
     cache4 = {}
+    custom = {}
 
     @staticmethod
     def reset():
@@ -14,6 +15,7 @@ class Cache:
         Cache.cache2 = {}
         Cache.cache3 = {}
         Cache.cache4 = {}
+        Cache.custom = {}
 
     @staticmethod
     def decorator(func):

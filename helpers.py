@@ -302,8 +302,12 @@ class Helpers(object):
     # - estimation of the fight duration in seconds (well not really, it
     # is if you fire and land shots perfectly and constantly), giving info
     # to compute boss fight difficulty
-    #@Cache.decoratorn(Cache.cache6)
     def canInflictEnoughDamages(self, bossEnergy, doubleSuper=False, charge=True, power=False, givesDrops=True, ignoreMissiles=False):
+        # custom cache just for this method
+        key = bossEnergy + charge
+        if key in Cache.custom:
+            return Cache.custom[key]
+
         # TODO: handle special beam attacks ? (http://deanyd.net/sm/index.php?title=Charge_Beam_Combos)
         sm = self.smbm
 
@@ -333,7 +337,9 @@ class Helpers(object):
 
         canBeatBoss = chargeDamage > 0 or givesDrops or (missilesDamage + supersDamage + powerDamage) >= bossEnergy
         if not canBeatBoss:
-            return (0, 0)
+            ret = (0, 0)
+            Cache.custom[key] = ret
+            return ret
 
         ammoMargin = (missilesDamage + supersDamage + powerDamage) / bossEnergy
         if chargeDamage > 0:
@@ -372,7 +378,9 @@ class Helpers(object):
             secs += bossEnergy * Settings.algoSettings['missileDropsPerMinute'] * 100 / 60
             # print('ammoMargin = ' + str(ammoMargin) + ', secs = ' + str(secs))
 
-        return (ammoMargin, secs)
+        ret = (ammoMargin, secs)
+        Cache.custom[key] = ret
+        return ret
 
     # return diff score, or -1 if below minimum energy in diffTbl
     @Cache.decoratorn(Cache.cache4)

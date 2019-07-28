@@ -87,7 +87,6 @@ class HelpersGraph(Helpers):
                       sm.wand(sm.knowsMoondance(), sm.canUseBombs(), sm.canOpenRedDoors()))
 
     # the water zone east of WS
-    @Cache.decoratorn(Cache.cache1)
     def canPassForgottenHighway(self, fromWs):
         sm = self.smbm
         suitless = sm.canDoSuitlessOuterMaridia()
@@ -122,7 +121,6 @@ class HelpersGraph(Helpers):
         return sm.wand(sm.haveItem('Morph'),
                        RomPatches.has(RomPatches.AreaRandoGatesBase))
 
-    @Cache.decoratorn(Cache.cache1)
     def canEnterCathedral(self, mult=1.0):
         sm = self.smbm
         return sm.wand(sm.canOpenRedDoors(),
@@ -376,7 +374,6 @@ class HelpersGraph(Helpers):
                        sm.wor(sm.haveItem('Gravity'),
                               sm.wand(sm.canDoSuitlessMaridia(), sm.knowsGravLessLevel2())))
 
-    @Cache.decorator
     def isVanillaDraygon(self):
         if self.vanillaDraygon is None:
             drayRoomOut = getAccessPoint('DraygonRoomOut')
@@ -444,7 +441,6 @@ class HelpersGraph(Helpers):
                               sm.knowsDraygonRoomGrappleExit()),
                       sm.canDoubleSpringBallJump())
 
-    @Cache.decorator
     def canExitDraygon(self):
         if self.isVanillaDraygon():
             return self.canExitDraygonVanilla()
@@ -466,7 +462,6 @@ class HelpersGraph(Helpers):
                                      sm.knowsPreciousRoomXRayExit()),
                              sm.canSpringBallJump()))
 
-    @Cache.decorator
     def canExitPreciousRoom(self):
         if self.isVanillaDraygon():
             return self.canExitPreciousRoomVanilla()

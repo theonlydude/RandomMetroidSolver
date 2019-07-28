@@ -176,6 +176,8 @@ if __name__ == "__main__":
     parser.add_argument('--invert', help="invert color range", dest='invert', action='store_true', default=False)
     parser.add_argument('--ext_stats', help="dump extended stats SQL", nargs='?', default=None, dest='extStatsFilename')
     parser.add_argument('--randoPreset', help="rando preset file", dest="randoPreset", nargs='?', default=None)
+    parser.add_argument('--plandoRando', help="json string with already placed items/locs", dest="plandoRando",
+                        nargs='?', default=None)
 
     # parse args
     args = parser.parse_args()
@@ -185,6 +187,10 @@ if __name__ == "__main__":
         sys.exit(-1)
     elif args.output is not None and args.rom is not None:
         print "Can't have both --output and --rom parameters"
+        sys.exit(-1)
+
+    if args.plandoRando != None and args.output == None:
+        print "plandoRando param requires output param"
         sys.exit(-1)
 
     log.init(args.debug)
@@ -389,7 +395,10 @@ if __name__ == "__main__":
             else:
                 raise ValueError("Invalid button name : " + str(b))
 
-    randoSettings = RandoSettings(maxDifficulty, progSpeed, progDiff, qty, restrictions, args.superFun, args.runtimeLimit_s, args.vcr)
+    if args.plandoRando != None:
+        args.plandoRando = json.loads(args.plandoRando)
+
+    randoSettings = RandoSettings(maxDifficulty, progSpeed, progDiff, qty, restrictions, args.superFun, args.runtimeLimit_s, args.vcr, args.plandoRando)
     bossTransitions = vanillaBossesTransitions
     if args.bosses == True:
         bossTransitions = getRandomBossTransitions()
@@ -453,6 +462,12 @@ if __name__ == "__main__":
     if args.debug == True:
         for loc in locsItems:
             print('{:>50}: {:>16} '.format(loc, locsItems[loc]))
+
+    if args.plandoRando != None:
+        data = [(itemLoc["Location"]["Name"], itemLoc["Item"]["Type"]) for itemLoc in itemLocs]
+        with open(args.output, 'w') as jsonFile:
+            json.dump(data, jsonFile)
+        sys.exit(0)
 
     # insert extended stats into database
     if isStdPreset(preset) and args.raceMagic == None:

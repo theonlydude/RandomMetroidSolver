@@ -968,9 +968,16 @@ class InteractiveSolver(CommonSolver):
         return AccessGraph(accessPoints, transitions)
 
     def randoPlando(self):
+        # if all the locations are visited, do nothing
+        if len(self.majorLocations) == 0:
+            return
+
         plandoLocsItems = {}
         for loc in self.visitedLocations:
-            plandoLocsItems[loc["Name"]] = loc["itemName"]
+            if "Boss" in loc["Class"]:
+                plandoLocsItems[loc["Name"]] = "Boss"
+            else:
+                plandoLocsItems[loc["Name"]] = loc["itemName"]
 
         plandoLocsItemsJson = json.dumps(plandoLocsItems)
 
@@ -978,7 +985,7 @@ class InteractiveSolver(CommonSolver):
             'python2',  os.path.expanduser("~/RandomMetroidSolver/randomizer.py"),
             '--param', self.presetFileName,
             '--output', self.outputFileName,
-            '--plandoRando', plandoLocsItemsJson
+            '--plandoRando', plandoLocsItemsJson #, '-d'
         ]
         subprocess.call(params)
 

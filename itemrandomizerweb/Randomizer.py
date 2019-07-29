@@ -561,6 +561,7 @@ class Randomizer(object):
             'SpaceJump': 0,
             'ScrewAttack': 0,
             'Nothing': 0,
+            'Boss': 0,
             'total': 0
         }
 
@@ -1593,12 +1594,20 @@ class Randomizer(object):
         if self.settings.plandoRando == None:
             return
 
-        curLocs = self.currentLocations()
-        for loc in curLocs:
-            if 'itemName' in loc:
-                item = ItemManager.getItem(loc['itemName'])
-                itemLocation = {'Item': item, 'Location': loc}
-                self.getItem(itemLocation, pool=[item])
+        self.log.debug("addAvailablePlandoLocs:")
+
+        while True:
+            found = False
+            curLocs = self.currentLocations()
+            for loc in curLocs:
+                if 'itemName' in loc:
+                    item = ItemManager.getItem(loc['itemName'])
+                    itemLocation = {'Item': item, 'Location': loc}
+                    self.log.debug("add {} to {}".format(loc['itemName'], loc['Name']))
+                    self.getItem(itemLocation, pool=[item])
+                    found = True
+            if found == False:
+                break
 
     # only function to use (once) from outside of the Randomizer class.
     # returns a list of item/location dicts with 'Item' and 'Location' as keys.

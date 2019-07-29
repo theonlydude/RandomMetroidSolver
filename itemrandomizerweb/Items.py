@@ -198,11 +198,12 @@ class ItemManager:
         self.majorClass = 'Chozo' if majorsSplit == 'Chozo' else 'Major'
         self.itemPool = []
 
-    def newItemPool(self):
+    def newItemPool(self, addBosses=True):
         self.itemPool = []
-        # for the bosses
-        for i in range(5):
-            self.addMinor('Boss')
+        if addBosses == True:
+            # for the bosses
+            for i in range(5):
+                self.addMinor('Boss')
 
     def getItemPool(self):
         return self.itemPool
@@ -441,10 +442,20 @@ class ItemPoolGeneratorPlando(ItemPoolGenerator):
         self.exclude = exclude
 
     def getItemPool(self):
-        self.itemManager.newItemPool()
+        self.itemManager.newItemPool(addBosses=False)
 
-        remain = 100 - self.exclude['total']
+        remain = 105 - self.exclude['total']
         if remain > 0:
+            # add missing bosses
+            (itemType, minimum) = ('Boss', 5)
+            while self.exclude[itemType] < minimum:
+                self.itemManager.addItem(itemType, 'Minor')
+                self.exclude[itemType] += 1
+                remain -= 1
+
+            if remain < 0:
+                raise Exception("Too many items already placed by the plando: can't add the remaining bosses")
+
             # add missing majors
             for itemType in ['Bomb', 'Charge', 'Ice', 'HiJump', 'SpeedBooster', 'Wave', 'Spazer', 'SpringBall', 'Varia', 'Plasma', 'Grapple', 'Morph', 'Gravity', 'XRayScope', 'SpaceJump', 'ScrewAttack']:
                 if self.exclude[itemType] == 0:

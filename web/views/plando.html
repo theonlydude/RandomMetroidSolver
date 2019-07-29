@@ -54,6 +54,15 @@
     top: 4.75%;
     left: 18.75%;
 }
+.randoPlando {
+    cursor: pointer;
+    position: absolute;
+    z-index: 2;
+    width: 2.5%;
+    height: 3.75%;
+    top: 0.50%;
+    left: 18.75%;
+}
 .lockPlando {
     cursor: pointer;
     position: absolute;
@@ -148,6 +157,18 @@ function save(lock) {
     // call WS
     ajaxCall({action: "save", scope: "common", lock: g_lock}, "download", ajaxOkSave);
   }
+}
+
+function randomize() {
+  if(loaded == false || webServInProgress == true || init == false) {
+    return;
+  }
+  if(! isActive("randoPlando")) {
+    return;
+  }
+
+  // call WS
+  ajaxCall({action: "randomize", scope: "common"}, "download");
 }
 
 function ajaxOkSave(data) {
@@ -671,6 +692,7 @@ function isDesactivated(elemId) {
     <div id="savePlando" class="savePlando"><img src="/solver/static/images/save.svg" alt="Save" onclick="save('save')" data-toggle="tooltip" title="Download plando ROM" data-placement="bottom" data-container="body" data-html="true"></div>
     <div id="lockPlando" class="lockPlando"><img src="/solver/static/images/locked.svg" alt="Lock" onclick="save('lock')" data-toggle="tooltip" title="Download locked plando ROM" data-placement="bottom" data-container="body" data-html="true"></div>
     <div id="helpPlando" class="helpPlando"><img src="/solver/static/images/help.svg" alt="Help" onclick="startTheTour(0)" data-toggle="tooltip" title="Display the Plando help" data-placement="bottom" data-container="body" data-html="true"></div>
+    <div id="randoPlando" class="randoPlando"><img src="/solver/static/images/games.svg" alt="Randomize" onclick="randomize()" data-toggle="tooltip" title="Randomize the remaining items/locations" data-placement="bottom" data-container="body" data-html="true"></div>
 
     <!-- to open the debug popup -->
     <div id="startDebug" class="startDebug"><img src="/solver/static/images/play.svg" alt="Start" onclick="displayDebugPopup()" data-toggle="tooltip" title="Start the debug popup" data-placement="bottom" data-container="body" data-html="true"></div>

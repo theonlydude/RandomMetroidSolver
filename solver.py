@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import sys, math, argparse, re, json, os, subprocess, logging, random
+import sys, math, argparse, re, json, os, subprocess, logging, random, shutil
 from time import gmtime, strftime
 
 # the difficulties for each technics
@@ -884,8 +884,11 @@ class InteractiveSolver(CommonSolver):
 
         self.areaGraph = AccessGraph(accessPoints, self.curGraphTransitions)
 
-        if scope == 'common' and action == 'save':
-            return self.savePlando(params['lock'])
+        if scope == 'common':
+            if action == 'save':
+                return self.savePlando(params['lock'])
+            elif action == 'randomize':
+                self.randoPlando()
 
         # compute new available locations
         self.clearLocs(self.majorLocations)
@@ -963,6 +966,46 @@ class InteractiveSolver(CommonSolver):
             transitions.append((apName, apName))
 
         return AccessGraph(accessPoints, transitions)
+
+    def randoPlando(self):
+        plandoLocsItems = {}
+        for loc in self.visitedLocations:
+            plandoLocsItems[loc["Name"]] = loc["itemName"]
+
+        plandoLocsItemsJson = json.dumps(plandoLocsItems)
+
+        params = [
+            'python2',  os.path.expanduser("~/RandomMetroidSolver/randomizer.py"),
+            '--param', self.presetFileName,
+            '--output', self.outputFileName,
+            '--plandoRando', plandoLocsItemsJson
+        ]
+        subprocess.call(params)
+
+        with open(self.outputFileName, 'r') as jsonFile:
+            data = json.load(jsonFile)
+
+        if "errorMsg" in data:
+            return
+
+        # load the locations
+        self.clearItems(reload=True)
+        itemsLocs = data
+
+        self.majorLocations = self.locations
+
+        for itemLoc in itemsLocs:
+            locName = itemLoc["Location"]["Name"]
+            loc = self.getLoc(locName)
+            difficulty = itemLoc["Location"]["difficulty"]
+            smbool = SMBool(difficulty["bool"], difficulty["difficulty"], difficulty["knows"], difficulty["items"])
+            loc["difficulty"] = smbool
+            itemName = itemLoc["Item"]["Type"]
+            if itemName == "Boss":
+                itemName = "Nothing"
+            loc["itemName"] = itemName
+            loc["accessPoint"] = itemLoc["Location"]["accessPoint"]
+            self.collectMajor(loc)
 
     def savePlando(self, lock):
         # store filled locations addresses in the ROM for next creating session
@@ -1747,7 +1790,7 @@ if __name__ == "__main__":
     parser.add_argument('--loc', help="Name of the location to action on (used in interactive mode)",
                         dest="loc", nargs='?', default=None)
     parser.add_argument('--action', help="Pickup item at location, remove last pickedup location, clear all (used in interactive mode)",
-                        dest="action", nargs="?", default=None, choices=['init', 'add', 'remove', 'clear', 'get', 'save', 'replace'])
+                        dest="action", nargs="?", default=None, choices=['init', 'add', 'remove', 'clear', 'get', 'save', 'replace', 'randomize'])
     parser.add_argument('--item', help="Name of the item to place in plando mode (used in interactive mode)",
                         dest="item", nargs='?', default=None)
     parser.add_argument('--startPoint', help="The start AP to connect (used in interactive mode)",

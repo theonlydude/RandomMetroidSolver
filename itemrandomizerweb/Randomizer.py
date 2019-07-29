@@ -1590,6 +1590,9 @@ class Randomizer(object):
             self.hadChozoLeft = self.isChozoLeft()
 
     def addAvailablePlandoLocs(self):
+        if self.settings.plandoRando == None:
+            return
+
         curLocs = self.currentLocations()
         for loc in curLocs:
             if 'itemName' in loc:

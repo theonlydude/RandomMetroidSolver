@@ -464,9 +464,8 @@ if __name__ == "__main__":
             print('{:>50}: {:>16} '.format(loc, locsItems[loc]))
 
     if args.plandoRando != None:
-        data = [(itemLoc["Location"]["Name"], itemLoc["Item"]["Type"]) for itemLoc in itemLocs]
         with open(args.output, 'w') as jsonFile:
-            json.dump(data, jsonFile)
+            json.dump(itemLocs, jsonFile, default=lambda x: x.__dict__)
         sys.exit(0)
 
     # insert extended stats into database

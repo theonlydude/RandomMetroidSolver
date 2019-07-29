@@ -1364,8 +1364,8 @@ class WS(object):
             raiseHttp(400, "Unknown scope: {}, must be area/item/common".format(scope), True)
 
         action = request.vars.action
-        if action not in ['add', 'remove', 'clear', 'init', 'get', 'save', 'replace']:
-            raiseHttp(400, "Unknown action {}, must be add/remove/clear/init/get/save".format(action), True)
+        if action not in ['add', 'remove', 'clear', 'init', 'get', 'save', 'replace', 'randomize']:
+            raiseHttp(400, "Unknown action {}, must be add/remove/clear/init/get/save/randomize".format(action), True)
 
         mode = request.vars.mode
         if mode not in ["standard", "seedless", "plando"]:
@@ -1395,8 +1395,8 @@ class WS(object):
             raiseHttp(400, "Missing parameter action", True)
         action = request.vars.action
 
-        if action not in ['init', 'add', 'remove', 'clear', 'get', 'save', 'replace']:
-            raiseHttp(400, "Unknown action {}, must be init/add/remove/clear/get/save".format(action), True)
+        if action not in ['init', 'add', 'remove', 'clear', 'get', 'save', 'replace', 'randomize']:
+            raiseHttp(400, "Unknown action {}, must be init/add/remove/clear/get/save/randomize".format(action), True)
 
     def action(self):
         pass
@@ -1496,9 +1496,18 @@ class WS(object):
         else:
             os.close(fd1)
             os.remove(jsonInFileName)
+
+            msg = "Something wrong happened while iteratively solving the ROM"
+            try:
+                with open(jsonOutFileName, 'r') as jsonFile:
+                    data = json.load(jsonFile)
+                    if "errorMsg" in data:
+                        msg = data["errorMsg"]
+            except Exception as e:
+                pass
             os.close(fd2)
             os.remove(jsonOutFileName)
-            raiseHttp(400, "Something wrong happened while iteratively solving the ROM", True)
+            raiseHttp(400, msg, True)
 
 class WS_common_init(WS):
     def validate(self):
@@ -1641,6 +1650,16 @@ class WS_common_save(WS):
             raiseHttp(400, "Save can only be use in plando mode", True)
 
         return self.callSolverAction("common", "save", {'lock': request.vars.lock == "lock"})
+
+class WS_common_randomize(WS):
+    def validate(self):
+        super(WS_common_randomize, self).validate()
+
+    def action(self):
+        if self.session["mode"] != "plando":
+            raiseHttp(400, "Randomize can only be use in plando mode", True)
+
+        return self.callSolverAction("common", "randomize", {})
 
 class WS_area_add(WS):
     def validatePoint(self, point):

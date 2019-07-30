@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import sys, math, argparse, re, json, os, subprocess, logging, random, shutil
+import sys, math, argparse, re, json, os, subprocess, logging, random
 from time import gmtime, strftime
 
 # the difficulties for each technics
@@ -888,7 +888,8 @@ class InteractiveSolver(CommonSolver):
             if action == 'save':
                 return self.savePlando(params['lock'])
             elif action == 'randomize':
-                self.randoPlando()
+                if self.randoPlando() == False:
+                    sys.exit(1)
 
         # compute new available locations
         self.clearLocs(self.majorLocations)
@@ -993,7 +994,7 @@ class InteractiveSolver(CommonSolver):
             data = json.load(jsonFile)
 
         if "errorMsg" in data:
-            return
+            return False
 
         # load the locations
         self.clearItems(reload=True)
@@ -1013,6 +1014,8 @@ class InteractiveSolver(CommonSolver):
             loc["itemName"] = itemName
             loc["accessPoint"] = itemLoc["Location"]["accessPoint"]
             self.collectMajor(loc)
+
+        return True
 
     def savePlando(self, lock):
         # store filled locations addresses in the ROM for next creating session

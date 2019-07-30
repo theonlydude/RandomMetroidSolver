@@ -425,6 +425,11 @@ if __name__ == "__main__":
             dumpErrorMsg(args.output, msg)
             print("DIAG: {}".format(msg))
             sys.exit(-1)
+        except Exception as e:
+            msg = e.message
+            dumpErrorMsg(args.output, msg)
+            print("DIAG: {}".format(msg))
+            sys.exit(-1)
     doors = getDoorConnections(randomizer.areaGraph, args.area, args.bosses)
     if args.patchOnly == False:
         (stuck, itemLocs, progItemLocs) = randomizer.generateItems()

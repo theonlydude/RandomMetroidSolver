@@ -925,7 +925,6 @@ class InteractiveSolver(CommonSolver):
 
         # backup
         locationsBck = self.locations[:]
-        mbLoc = self.getLoc('Mother Brain')
 
         self.lastLoc = 'Landing Site'
         (self.difficulty, self.itemsOk) = self.computeDifficulty()
@@ -938,12 +937,6 @@ class InteractiveSolver(CommonSolver):
                     # take first ap of the loc
                     loc["accessPoint"] = loc["AccessFrom"].keys()[0]
                 self.collectMajor(loc)
-
-        # put back mother brain location
-        mbLoc["difficulty"] = SMBool(True, easy)
-        mbLoc["accessPoint"] = mbLoc["AccessFrom"].keys()[0]
-        self.majorLocations = [mbLoc]
-        self.collectMajor(mbLoc)
 
         self.locations = locationsBck
 

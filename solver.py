@@ -1000,7 +1000,8 @@ class InteractiveSolver(CommonSolver):
         self.clearItems(reload=True)
         itemsLocs = data
 
-        self.majorLocations = self.locations
+        # create a copy because we need self.locations to be full, else the state will be empty
+        self.majorLocations = self.locations[:]
 
         for itemLoc in itemsLocs:
             locName = itemLoc["Location"]["Name"]

@@ -186,6 +186,9 @@ function randomize() {
     return;
   }
 
+  $('#overlay').show();
+  $('#loadingGIF').show();
+
   // call WS
   ajaxCall({action: "randomize", scope: "common"}, "download");
 }

@@ -1333,19 +1333,19 @@ class Out(object):
         if len(energies) > 0:
             (maxETank, maxReserve, maxEnergy) = (0, 0, 0)
             for energy in energies:
-                nETank = energy[0:energy.find('-ETank')]
+                nETank = int(energy[0:energy.find('-ETank')])
                 if energy.find('-Reserve') != -1:
-                    nReserve = energy[energy.find(' - ')+len(' - '):energy.find('-Reserve')]
+                    nReserve = int(energy[energy.find(' - ')+len(' - '):energy.find('-Reserve')])
                 else:
                     nReserve = 0
-                nEnergy = int(nETank) + int(nReserve)
+                nEnergy = nETank + nReserve
                 if nEnergy > maxEnergy:
                     maxEnergy = nEnergy
                     maxETank = nETank
                     maxReserve = nReserve
                 items.remove(energy)
             items.append('{}-ETank'.format(maxETank))
-            if nReserve > 0:
+            if maxReserve > 0:
                 items.append('{}-Reserve'.format(maxReserve))
 
 class OutWeb(Out):

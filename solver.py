@@ -82,6 +82,7 @@ class SolverState(object):
         (self.state["linesWeb"], self.state["linesSeqWeb"]) = self.getLinesWeb(solver.curGraphTransitions)
         # bool
         self.state["allTransitions"] = len(solver.curGraphTransitions) == len(solver.areaTransitions) + len(solver.bossTransitions)
+        self.state["errorMsg"] = solver.errorMsg
 
     def toSolver(self, solver):
         if 'majorsSplit' in self.state:
@@ -769,6 +770,7 @@ class CommonSolver(object):
 
 class InteractiveSolver(CommonSolver):
     def __init__(self, output):
+        self.errorMsg = ""
         self.checkDuplicateMajor = False
         self.vcr = None
         self.log = log.get('Solver')
@@ -888,8 +890,7 @@ class InteractiveSolver(CommonSolver):
             if action == 'save':
                 return self.savePlando(params['lock'])
             elif action == 'randomize':
-                if self.randoPlando() == False:
-                    sys.exit(1)
+                self.randoPlando()
 
         # compute new available locations
         self.clearLocs(self.majorLocations)
@@ -987,7 +988,8 @@ class InteractiveSolver(CommonSolver):
             data = json.load(jsonFile)
 
         if "errorMsg" in data:
-            return False
+            self.errorMsg = data["errorMsg"]
+            return
 
         # load the locations
         self.clearItems(reload=True)
@@ -1008,8 +1010,6 @@ class InteractiveSolver(CommonSolver):
             loc["itemName"] = itemName
             loc["accessPoint"] = itemLoc["Location"]["accessPoint"]
             self.collectMajor(loc)
-
-        return True
 
     def savePlando(self, lock):
         # store filled locations addresses in the ROM for next creating session

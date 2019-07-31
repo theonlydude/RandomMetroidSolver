@@ -457,14 +457,16 @@ class ItemPoolGeneratorPlando(ItemPoolGenerator):
                 raise Exception("Too many items already placed by the plando: can't add the remaining bosses")
 
             # add missing majors
+            majors = []
             for itemType in ['Bomb', 'Charge', 'Ice', 'HiJump', 'SpeedBooster', 'Wave', 'Spazer', 'SpringBall', 'Varia', 'Plasma', 'Grapple', 'Morph', 'Gravity', 'XRayScope', 'SpaceJump', 'ScrewAttack']:
                 if self.exclude[itemType] == 0:
                     self.itemManager.addItem(itemType, 'Major')
                     self.exclude[itemType] = 1
+                    majors.append(itemType)
                     remain -= 1
 
             if remain < 0:
-                raise Exception("Too many items already placed by the plando: can't add the remaining majors")
+                raise Exception("Too many items already placed by the plando: can't add the remaining majors: {}".format(', '.join(majors)))
 
             # add minimum minors to finish the game
             for (itemType, minimum) in [('Missile', 2), ('Super', 2), ('PowerBomb', 1)]:

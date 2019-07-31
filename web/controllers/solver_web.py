@@ -1429,7 +1429,8 @@ class WS(object):
                 "areaRando": state["areaRando"],
                 "bossRando": state["bossRando"],
                 "seed": state["seed"],
-                "preset": os.path.basename(os.path.splitext(state["presetFileName"])[0])
+                "preset": os.path.basename(os.path.splitext(state["presetFileName"])[0]),
+                "errorMsg": state["errorMsg"]
             })
         else:
             raiseHttp(200, "OK", True)

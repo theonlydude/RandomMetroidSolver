@@ -260,6 +260,11 @@ function ajaxOkGet(jsonData, status, dummy, chained=false) {
     return;
   }
 
+  if(jsonData["errorMsg"] != "") {
+    document.getElementById("flash").innerHTML = jsonData["errorMsg"];
+    $('#flash').show();
+  }
+
   mode = jsonData["mode"];
   area = jsonData["areaRando"];
   boss = jsonData["bossRando"];

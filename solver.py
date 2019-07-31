@@ -432,8 +432,15 @@ class CommonSolver(object):
             item = loc["itemName"]
             if item != self.collectedItems[-1]:
                 raise Exception("Item of last collected loc {}: {} is different from last collected item: {}".format(loc["Name"], item, self.collectedItems[-1]))
-            self.smbm.removeItem(item)
+
             self.collectedItems.pop()
+
+            # if multiple majors in plando mode, remove it from smbm only when it's the last occurence of it
+            if self.smbm.isCountItem(item):
+                self.smbm.removeItem(item)
+            else:
+                if item not in self.collectedItems:
+                    self.smbm.removeItem(item)
 
     def getAvailableItemsList(self, locations, area, threshold):
         # locations without distance are not available

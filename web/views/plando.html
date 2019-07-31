@@ -196,8 +196,17 @@ function randomize() {
   $('#overlay').show();
   $('#loadingGIF').show();
 
+  var data = {action: "randomize", scope: "common"};
+
+  var elems = ["maxDifficulty", "progressionSpeed", "minorQty", "energyQty"];
+
+  for(var i=0; i<elems.length; i++) {
+    data[elems[i]] = document.getElementById(elems[i]).value;
+  }
+
   // call WS
-  ajaxCall({action: "randomize", scope: "common"}, "download");
+  ajaxCall(data, "download");
+  hideRandoPopup();
 }
 
 function ajaxOkSave(data) {
@@ -243,6 +252,9 @@ function hideSavePopup() {
   document.getElementById("savePopup").style.display = "none";
 }
 
+function hideRandoPopup() {
+  document.getElementById("randomizerPopup").style.display = "none";
+}
 
 
 //-----------------------------------------------------------
@@ -334,6 +346,7 @@ function onloadHook() {
 
   dragElement(document.getElementById("debugPopup"), "VCRGrab");
   dragElement(document.getElementById("savePopup"), "SaveGrab");
+  dragElement(document.getElementById("randomizerPopup"), "RandoGrab");
 }
 
 function hidePlandoButtons() {
@@ -614,6 +627,15 @@ function pushActions(len) {
 function isDesactivated(elemId) {
   return $("#"+elemId).hasClass("greyed");
 }
+
+function displayRandoPopup() {
+  if(loaded == false || webServInProgress == true || init == false) {
+    return;
+  }
+
+  // display popup
+  document.getElementById("randomizerPopup").style.display = "block";
+}
 </script>
 
 <div class="fixed">
@@ -634,7 +656,65 @@ function isDesactivated(elemId) {
   </div>
 </div>
 
+{{
+def displaySelect(id, values, default):
+  if id in session.plando["rando"]:
+    value = session.plando["rando"][id]
+  else:
+    value = default
+    pass
+}}
+  {{
+   =SELECT(*values,
+           **dict(_id=id, _name=id, value=value, _class="full"))
+  }}
+{{pass}}
+
+{{
+def displayNumber(id, min, max, default, step="1"):
+  if id in session.plando["rando"]:
+    value = session.plando["rando"][id]
+  else:
+    value = default
+    pass
+
+  response.write("<input name=\"{}\" id=\"{}\" type=\"number\" value=\"{}\" min=\"{}\" max=\"{}\" step=\"{}\" class=\"full\" required>".format(id, id, value, min, max, step), escape=False)
+  pass
+}}
+
 <div class="main">
+  <div id="randomizerPopup" class="itemPopup">
+    <table class="full">
+      <colgroup><col class="half" /><col class="half" /></colgroup>
+      <tr><td colspan=2></td></tr>
+      <tr><td id="RandoGrab" colspan=2 class="center greyRow"><p>Plando Randomizer parameters</p></td></tr>
+      <tr><td colspan=2 class="blankRow"></td></tr>
+      <tr>
+        <td>Maximum difficulty for picking up an item:</td>
+        <td>{{displaySelect("maxDifficulty", ["no difficulty cap", "easy", "medium", "hard", "harder", "hardcore", "mania"], "no difficulty cap")}}</td>
+      </tr>
+      <tr>
+	<td>Progression speed:</td>
+	<td>{{displaySelect("progressionSpeed", ["slowest", "slow", "medium", "fast", "fastest", "basic", "VARIAble"], "VARIAble")}}
+</td>
+      </tr>
+      <tr>
+	<td>Percentage of minors available:</td>
+	<td>{{displayNumber("minorQty", "7", "100", "100")}}</td>
+      </tr>
+      <tr>
+	<td>Quantity of Energy/Reserve Tanks available:</td>
+	<td>{{displaySelect("energyQty", ["sparse", "medium", "vanilla"], "vanilla")}}</td>
+      </tr>
+      <tr><td colspan=2 class="blankLastRow"></td></tr>
+    </table>
+    <table>
+      <tr>
+	<td class="half"><button type="button" onclick="randomize()" class="full">Randomize</button></td>
+	<td class="half"><button type="button" onclick="hideRandoPopup()" class="full">Cancel</button></td>
+      </tr>
+    </table>
+  </div>
 
   <div id="savePopup" class="itemPopup">
     <table class="full">
@@ -656,7 +736,7 @@ function isDesactivated(elemId) {
     </table>
   </div>
 
-    <div id="debugPopup" class="debugPopup">
+  <div id="debugPopup" class="debugPopup">
     <table class="full">
       <colgroup><col class="half" /><col class="half" /></colgroup>
       <tr><td colspan=2></td></tr>
@@ -721,7 +801,7 @@ function isDesactivated(elemId) {
     <div id="savePlando" class="savePlando"><img src="/solver/static/images/save.svg" alt="Save" onclick="save('save')" data-toggle="tooltip" title="Download plando ROM" data-placement="bottom" data-container="body" data-html="true"></div>
     <div id="lockPlando" class="lockPlando"><img src="/solver/static/images/locked.svg" alt="Lock" onclick="save('lock')" data-toggle="tooltip" title="Download locked plando ROM" data-placement="bottom" data-container="body" data-html="true"></div>
     <div id="helpPlando" class="helpPlando"><img src="/solver/static/images/help.svg" alt="Help" onclick="startTheTour(0)" data-toggle="tooltip" title="Display the Plando help" data-placement="bottom" data-container="body" data-html="true"></div>
-    <div id="randoPlando" class="randoPlando"><img src="/solver/static/images/games.svg" alt="Randomize" onclick="randomize()" data-toggle="tooltip" title="Randomize the remaining items/locations" data-placement="bottom" data-container="body" data-html="true"></div>
+    <div id="randoPlando" class="randoPlando"><img src="/solver/static/images/games.svg" alt="Randomize" onclick="displayRandoPopup()" data-toggle="tooltip" title="Randomize the remaining items/locations" data-placement="bottom" data-container="body" data-html="true"></div>
 
     <!-- to open the debug popup -->
     <div id="startDebug" class="startDebug"><img src="/solver/static/images/play.svg" alt="Start" onclick="displayDebugPopup()" data-toggle="tooltip" title="Start the debug popup" data-placement="bottom" data-container="body" data-html="true"></div>

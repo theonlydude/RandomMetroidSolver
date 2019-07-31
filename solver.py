@@ -897,7 +897,7 @@ class InteractiveSolver(CommonSolver):
             if action == 'save':
                 return self.savePlando(params['lock'])
             elif action == 'randomize':
-                self.randoPlando()
+                self.randoPlando(params)
 
         # compute new available locations
         self.clearLocs(self.majorLocations)
@@ -969,7 +969,7 @@ class InteractiveSolver(CommonSolver):
 
         return AccessGraph(accessPoints, transitions)
 
-    def randoPlando(self):
+    def randoPlando(self, parameters):
         # if all the locations are visited, do nothing
         if len(self.majorLocations) == 0:
             return
@@ -987,8 +987,15 @@ class InteractiveSolver(CommonSolver):
             'python2',  os.path.expanduser("~/RandomMetroidSolver/randomizer.py"),
             '--param', self.presetFileName,
             '--output', self.outputFileName,
-            '--plandoRando', plandoLocsItemsJson #, '-d'
+            '--plandoRando', plandoLocsItemsJson,
+            '--progressionSpeed', parameters["progressionSpeed"],
+            '--minorQty', parameters["minorQty"],
+            '--energyQty', parameters["energyQty"]
         ]
+
+        if parameters["maxDifficulty"] != "no difficulty cap":
+            params += ['--maxDifficulty', parameters["maxDifficulty"]]
+
         subprocess.call(params)
 
         with open(self.outputFileName, 'r') as jsonFile:
@@ -1707,6 +1714,11 @@ def interactiveSolver(args):
         if args.scope == 'common':
             if args.action == "save":
                 params["lock"] = args.lock
+            elif args.action == "randomize":
+                params["progressionSpeed"] = args.progressionSpeed
+                params["maxDifficulty"] = args.maxDifficulty
+                params["minorQty"] = args.minorQty
+                params["energyQty"] = args.energyQty
         elif args.scope == 'item':
             if args.state == None or args.action == None or args.output == None:
                 print("Missing state/action/output parameter")
@@ -1819,6 +1831,14 @@ if __name__ == "__main__":
                         dest="lock", action='store_true')
     parser.add_argument('--fill', help="in plando load all the source seed locations/transitions as a base (used in interactive mode)",
                         dest="fill", action='store_true')
+    parser.add_argument('--progressionSpeed', help="rando plando (used in interactive mode)",
+                        dest="progressionSpeed", nargs="?", default=None, choices=["slowest", "slow", "medium", "fast", "fastest", "basic", "VARIAble"])
+    parser.add_argument('--maxDifficulty', help="rando plando  (used in interactive mode)",
+                        dest="maxDifficulty", nargs="?", default=None, choices=["no difficulty cap", "easy", "medium", "hard", "harder", "hardcore", "mania"])
+    parser.add_argument('--minorQty', help="rando plando  (used in interactive mode)",
+                        dest="minorQty", nargs="?", default=None, choices=[str(i) for i in range(0,101)])
+    parser.add_argument('--energyQty', help="rando plando  (used in interactive mode)",
+                        dest="energyQty", nargs="?", default=None, choices=["sparse", "medium", "vanilla"])
 
     args = parser.parse_args()
 

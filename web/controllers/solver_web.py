@@ -818,8 +818,8 @@ def validateWebServiceParams(patchs, quantities, others, isJson=False):
 
     if request.vars.minorQty not in ['random', None]:
         minorQtyInt = getInt('minorQty', isJson)
-        if minorQtyInt < 1 or minorQtyInt > 100:
-            raiseHttp(400, "Wrong value for minorQty, must be between 1 and 100", isJson)
+        if minorQtyInt < 7 or minorQtyInt > 100:
+            raiseHttp(400, "Wrong value for minorQty, must be between 7 and 100", isJson)
 
     if 'energyQty' in others:
         if request.vars.energyQty not in ['sparse', 'medium', 'vanilla', 'random']:
@@ -1337,6 +1337,9 @@ def plando():
         session.plando["preset"] = "regular"
         session.plando["seed"] = None
 
+        # rando params
+        session.plando["rando"] = {}
+
         # set to False in plando.html
         session.plando["firstTime"] = True
 
@@ -1466,6 +1469,12 @@ class WS(object):
         elif action == 'save' and scope == 'common':
             if parameters['lock'] == True:
                 params.append('--lock')
+        elif action == 'randomize':
+            params += ['--progressionSpeed', parameters["progressionSpeed"],
+                       '--maxDifficulty', parameters["maxDifficulty"],
+                       '--minorQty', parameters["minorQty"],
+                       '--energyQty', parameters["energyQty"]
+            ]
 
         if request.vars.debug != None:
             params.append('--vcr')
@@ -1656,11 +1665,27 @@ class WS_common_randomize(WS):
     def validate(self):
         super(WS_common_randomize, self).validate()
 
+        if request.vars.maxDifficulty not in ["no difficulty cap", "easy", "medium", "hard", "harder", "hardcore", "mania"]:
+            raiseHttp(400, "Wrong value for maxDifficulty: {}".format(request.vars.maxDifficulty), True)
+        if request.vars.progressionSpeed not in ["slowest", "slow", "medium", "fast", "fastest", "basic", "VARIAble"]:
+            raiseHttp(400, "Wrong value for progressionSpeed: {}".format(request.vars.progressionSpeed), True)
+        minorQtyInt = getInt('minorQty', True)
+        if minorQtyInt < 7 or minorQtyInt > 100:
+            raiseHttp(400, "Wrong value for minorQty, must be between 7 and 100", True)
+        if request.vars.energyQty not in ["sparse", "medium", "vanilla"]:
+            raiseHttp(400, "Wrong value for energyQty: {}".format(request.vars.energyQty), True)
+
     def action(self):
         if self.session["mode"] != "plando":
             raiseHttp(400, "Randomize can only be use in plando mode", True)
 
-        return self.callSolverAction("common", "randomize", {})
+        params = {}
+        for elem in "maxDifficulty", "progressionSpeed", "minorQty", "energyQty":
+            params[elem] = request.vars[elem]
+
+        self.session["rando"] = params
+
+        return self.callSolverAction("common", "randomize", params)
 
 class WS_area_add(WS):
     def validatePoint(self, point):

@@ -990,6 +990,7 @@ class InteractiveSolver(CommonSolver):
 
         params = [
             'python2',  os.path.expanduser("~/RandomMetroidSolver/randomizer.py"),
+            '--runtime', '10',
             '--param', self.presetFileName,
             '--output', self.outputFileName,
             '--plandoRando', plandoLocsItemsJson,

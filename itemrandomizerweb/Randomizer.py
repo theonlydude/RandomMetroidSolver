@@ -35,7 +35,9 @@ class RandoSettings(object):
     # of the relevant categorie(s). This can easily cause aborted seeds, so some basic checks will be performed
     # beforehand to know whether an item can indeed be removed.
     # runtimeLimit_s : maximum runtime limit in seconds for generateItems functions. If <= 0, will be unlimited.
-    def __init__(self, maxDiff, progSpeed, progDiff, qty, restrictions, superFun, runtimeLimit_s, vcr):
+    # vcr: to generate debug .vcr output file
+    # plandoRando: list of already set (locationName, itemType) by the plando
+    def __init__(self, maxDiff, progSpeed, progDiff, qty, restrictions, superFun, runtimeLimit_s, vcr, plandoRando):
         self.progSpeed = progSpeed
         self.progDiff = progDiff
         self.maxDiff = maxDiff
@@ -46,6 +48,7 @@ class RandoSettings(object):
         if self.runtimeLimit_s <= 0:
             self.runtimeLimit_s = sys.maxint
         self.vcr = vcr
+        self.plandoRando = plandoRando
 
     def getChooseLocs(self):
         return self.getChooseLocDict(self.progDiff)
@@ -492,19 +495,33 @@ class Randomizer(object):
         self.progressionItemLocs = []
         # progression items tried for a given rollback point
         self.rollbackItemsTried = {}
-        # handle super fun settings
+
         self.itemPool = None
-        itemManager = ItemManager(self.restrictions['MajorMinor'], settings.qty, self.smbm)
-        fun = SuperFunProvider(settings.superFun, itemManager, self)
-        fun.getForbidden()
-        # check if we can reach everything
-        self.log.debug("LAST CHECKPOOL")
-        if not fun.checkPool():
-            raise RuntimeError('Invalid transitions')
-        # store unapplied super fun messages
-        if len(fun.errorMsgs) > 0:
-            self.errorMsg += "Super Fun: " + ', '.join(fun.errorMsgs) + ' '
-        self.itemPool = fun.getItemPool()
+        if self.settings.plandoRando != None:
+            itemManager = ItemManager('Plando', settings.qty, self.smbm)
+            # used to randomize only the locations not already placed in the plandomizer
+            itemManager.createItemPool(self.getExcludePlandoItems())
+            self.itemPool = itemManager.getItemPool()
+            # add itemName to locs from the plando
+            for loc in locations:
+                if loc['Name'] in self.settings.plandoRando:
+                    loc['itemName'] = self.settings.plandoRando[loc['Name']]
+            self.restrictedLocations = []
+        else:
+            itemManager = ItemManager(self.restrictions['MajorMinor'], settings.qty, self.smbm)
+            # handle super fun settings
+            fun = SuperFunProvider(settings.superFun, itemManager, self)
+            fun.getForbidden()
+            # check if we can reach everything
+            self.log.debug("LAST CHECKPOOL")
+            if not fun.checkPool():
+                raise RuntimeError('Invalid transitions')
+            # store unapplied super fun messages
+            if len(fun.errorMsgs) > 0:
+                self.errorMsg += "Super Fun: " + ', '.join(fun.errorMsgs) + ' '
+            self.itemPool = fun.getItemPool()
+            self.restrictedLocations = fun.restrictedLocs
+
         self.chozoItemPool = []
         self.nonChozoItemPool = []
         # temporarily swap item pool in chozo mode, until all chozo item are placed in chozo locs
@@ -513,13 +530,51 @@ class Randomizer(object):
             self.nonChozoItemPool = [item for item in self.itemPool if item not in self.chozoItemPool] # this will be swapped back
             self.log.debug('pools. c=%d, n=%d, t=%d' % (len(self.chozoItemPool), len(self.nonChozoItemPool), len(self.itemPool)))
             self.itemPool = self.chozoItemPool
-        self.restrictedLocations = fun.restrictedLocs
 
         # if late morph compute number of locations available without morph
         if self.restrictions['Morph'] == 'late':
             self.computeLateMorphLimit()
 
         self.vcr = VCR(seedName, 'rando') if settings.vcr == True else None
+
+    def getExcludePlandoItems(self):
+        exclude = {
+            'ETank': 0,
+            'Missile': 0,
+            'Super': 0,
+            'PowerBomb': 0,
+            'Bomb': 0,
+            'Charge': 0,
+            'Ice': 0,
+            'HiJump': 0,
+            'SpeedBooster': 0,
+            'Wave': 0,
+            'Spazer': 0,
+            'SpringBall': 0,
+            'Varia': 0,
+            'Plasma': 0,
+            'Grapple': 0,
+            'Morph': 0,
+            'Reserve': 0,
+            'Gravity': 0,
+            'XRayScope': 0,
+            'SpaceJump': 0,
+            'ScrewAttack': 0,
+            'Nothing': 0,
+            'Boss': 0,
+            'total': 0
+        }
+
+        # plandoRando is a dict {'loc name': 'item type'}
+        for loc in self.settings.plandoRando:
+            exclude[self.settings.plandoRando[loc]] += 1
+
+        for key in exclude:
+            if key == 'total':
+                continue
+            exclude['total'] += exclude[key]
+
+        return exclude
 
     def computeLateMorphLimit(self):
         # add all the items (except those removed by super fun) except morph.
@@ -1039,6 +1094,10 @@ class Randomizer(object):
         if not self.locClassCheck(item, location):
             return False
 
+        # plando locs are not available
+        if 'itemName' in location:
+            return False
+
         ret = True
         if checkRestrictions == True:
             if self.restrictions['Suits'] == True and Randomizer.isSuit(item):
@@ -1531,6 +1590,25 @@ class Randomizer(object):
                 self.chozoFill()
             self.hadChozoLeft = self.isChozoLeft()
 
+    def addAvailablePlandoLocs(self):
+        if self.settings.plandoRando == None:
+            return
+
+        self.log.debug("addAvailablePlandoLocs:")
+
+        while True:
+            found = False
+            curLocs = self.currentLocations()
+            for loc in curLocs:
+                if 'itemName' in loc:
+                    item = ItemManager.getItem(loc['itemName'])
+                    itemLocation = {'Item': item, 'Location': loc}
+                    self.log.debug("add {} to {}".format(loc['itemName'], loc['Name']))
+                    self.getItem(itemLocation, pool=[item])
+                    found = True
+            if found == False:
+                break
+
     # only function to use (once) from outside of the Randomizer class.
     # returns a list of item/location dicts with 'Item' and 'Location' as keys.
     def generateItems(self):
@@ -1551,6 +1629,8 @@ class Randomizer(object):
         while len(self.itemPool) > 0 and not isStuck and runtime_s <= self.runtimeLimit_s:
             # dynamic params determination (useful for variable speed)
             self.determineParameters()
+            # add available plando locs
+            self.addAvailablePlandoLocs()
             # fill up with non-progression stuff
             isStuck = self.fillNonProgressionItems()
             self.log.debug("non prog stuck = " + str(isStuck))

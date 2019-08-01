@@ -82,6 +82,12 @@ class SolverState(object):
         (self.state["linesWeb"], self.state["linesSeqWeb"]) = self.getLinesWeb(solver.curGraphTransitions)
         # bool
         self.state["allTransitions"] = len(solver.curGraphTransitions) == len(solver.areaTransitions) + len(solver.bossTransitions)
+        self.state["errorMsg"] = solver.errorMsg
+        if len(solver.visitedLocations) > 0:
+            self.state["last"] = {"loc": solver.visitedLocations[-1]["Name"],
+                                  "item": solver.visitedLocations[-1]["itemName"]}
+        else:
+            self.state["last"] = ""
 
     def toSolver(self, solver):
         if 'majorsSplit' in self.state:
@@ -431,8 +437,15 @@ class CommonSolver(object):
             item = loc["itemName"]
             if item != self.collectedItems[-1]:
                 raise Exception("Item of last collected loc {}: {} is different from last collected item: {}".format(loc["Name"], item, self.collectedItems[-1]))
-            self.smbm.removeItem(item)
+
             self.collectedItems.pop()
+
+            # if multiple majors in plando mode, remove it from smbm only when it's the last occurence of it
+            if self.smbm.isCountItem(item):
+                self.smbm.removeItem(item)
+            else:
+                if item not in self.collectedItems:
+                    self.smbm.removeItem(item)
 
     def getAvailableItemsList(self, locations, area, threshold):
         # locations without distance are not available
@@ -769,6 +782,7 @@ class CommonSolver(object):
 
 class InteractiveSolver(CommonSolver):
     def __init__(self, output):
+        self.errorMsg = ""
         self.checkDuplicateMajor = False
         self.vcr = None
         self.log = log.get('Solver')
@@ -884,8 +898,11 @@ class InteractiveSolver(CommonSolver):
 
         self.areaGraph = AccessGraph(accessPoints, self.curGraphTransitions)
 
-        if scope == 'common' and action == 'save':
-            return self.savePlando(params['lock'])
+        if scope == 'common':
+            if action == 'save':
+                return self.savePlando(params['lock'])
+            elif action == 'randomize':
+                self.randoPlando(params)
 
         # compute new available locations
         self.clearLocs(self.majorLocations)
@@ -921,7 +938,6 @@ class InteractiveSolver(CommonSolver):
 
         # backup
         locationsBck = self.locations[:]
-        mbLoc = self.getLoc('Mother Brain')
 
         self.lastLoc = 'Landing Site'
         (self.difficulty, self.itemsOk) = self.computeDifficulty()
@@ -934,12 +950,6 @@ class InteractiveSolver(CommonSolver):
                     # take first ap of the loc
                     loc["accessPoint"] = loc["AccessFrom"].keys()[0]
                 self.collectMajor(loc)
-
-        # put back mother brain location
-        mbLoc["difficulty"] = SMBool(True, easy)
-        mbLoc["accessPoint"] = mbLoc["AccessFrom"].keys()[0]
-        self.majorLocations = [mbLoc]
-        self.collectMajor(mbLoc)
 
         self.locations = locationsBck
 
@@ -963,6 +973,63 @@ class InteractiveSolver(CommonSolver):
             transitions.append((apName, apName))
 
         return AccessGraph(accessPoints, transitions)
+
+    def randoPlando(self, parameters):
+        # if all the locations are visited, do nothing
+        if len(self.majorLocations) == 0:
+            return
+
+        plandoLocsItems = {}
+        for loc in self.visitedLocations:
+            if "Boss" in loc["Class"]:
+                plandoLocsItems[loc["Name"]] = "Boss"
+            else:
+                plandoLocsItems[loc["Name"]] = loc["itemName"]
+
+        plandoLocsItemsJson = json.dumps(plandoLocsItems)
+
+        params = [
+            'python2',  os.path.expanduser("~/RandomMetroidSolver/randomizer.py"),
+            '--runtime', '10',
+            '--param', self.presetFileName,
+            '--output', self.outputFileName,
+            '--plandoRando', plandoLocsItemsJson,
+            '--progressionSpeed', parameters["progressionSpeed"],
+            '--minorQty', parameters["minorQty"],
+            '--energyQty', parameters["energyQty"]
+        ]
+
+        if parameters["maxDifficulty"] != "no difficulty cap":
+            params += ['--maxDifficulty', parameters["maxDifficulty"]]
+
+        subprocess.call(params)
+
+        with open(self.outputFileName, 'r') as jsonFile:
+            data = json.load(jsonFile)
+
+        if "errorMsg" in data:
+            self.errorMsg = data["errorMsg"]
+            return
+
+        # load the locations
+        self.clearItems(reload=True)
+        itemsLocs = data
+
+        # create a copy because we need self.locations to be full, else the state will be empty
+        self.majorLocations = self.locations[:]
+
+        for itemLoc in itemsLocs:
+            locName = itemLoc["Location"]["Name"]
+            loc = self.getLoc(locName)
+            difficulty = itemLoc["Location"]["difficulty"]
+            smbool = SMBool(difficulty["bool"], difficulty["difficulty"], difficulty["knows"], difficulty["items"])
+            loc["difficulty"] = smbool
+            itemName = itemLoc["Item"]["Type"]
+            if itemName == "Boss":
+                itemName = "Nothing"
+            loc["itemName"] = itemName
+            loc["accessPoint"] = itemLoc["Location"]["accessPoint"]
+            self.collectMajor(loc)
 
     def savePlando(self, lock):
         # store filled locations addresses in the ROM for next creating session
@@ -1653,6 +1720,11 @@ def interactiveSolver(args):
         if args.scope == 'common':
             if args.action == "save":
                 params["lock"] = args.lock
+            elif args.action == "randomize":
+                params["progressionSpeed"] = args.progressionSpeed
+                params["maxDifficulty"] = args.maxDifficulty
+                params["minorQty"] = args.minorQty
+                params["energyQty"] = args.energyQty
         elif args.scope == 'item':
             if args.state == None or args.action == None or args.output == None:
                 print("Missing state/action/output parameter")
@@ -1747,7 +1819,7 @@ if __name__ == "__main__":
     parser.add_argument('--loc', help="Name of the location to action on (used in interactive mode)",
                         dest="loc", nargs='?', default=None)
     parser.add_argument('--action', help="Pickup item at location, remove last pickedup location, clear all (used in interactive mode)",
-                        dest="action", nargs="?", default=None, choices=['init', 'add', 'remove', 'clear', 'get', 'save', 'replace'])
+                        dest="action", nargs="?", default=None, choices=['init', 'add', 'remove', 'clear', 'get', 'save', 'replace', 'randomize'])
     parser.add_argument('--item', help="Name of the item to place in plando mode (used in interactive mode)",
                         dest="item", nargs='?', default=None)
     parser.add_argument('--startPoint', help="The start AP to connect (used in interactive mode)",
@@ -1765,6 +1837,14 @@ if __name__ == "__main__":
                         dest="lock", action='store_true')
     parser.add_argument('--fill', help="in plando load all the source seed locations/transitions as a base (used in interactive mode)",
                         dest="fill", action='store_true')
+    parser.add_argument('--progressionSpeed', help="rando plando (used in interactive mode)",
+                        dest="progressionSpeed", nargs="?", default=None, choices=["slowest", "slow", "medium", "fast", "fastest", "basic", "VARIAble"])
+    parser.add_argument('--maxDifficulty', help="rando plando  (used in interactive mode)",
+                        dest="maxDifficulty", nargs="?", default=None, choices=["no difficulty cap", "easy", "medium", "hard", "harder", "hardcore", "mania"])
+    parser.add_argument('--minorQty', help="rando plando  (used in interactive mode)",
+                        dest="minorQty", nargs="?", default=None, choices=[str(i) for i in range(0,101)])
+    parser.add_argument('--energyQty', help="rando plando  (used in interactive mode)",
+                        dest="energyQty", nargs="?", default=None, choices=["sparse", "medium", "vanilla"])
 
     args = parser.parse_args()
 

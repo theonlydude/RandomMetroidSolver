@@ -346,3 +346,13 @@ find ~/web2py/applications/solver/static -xtype l -exec rm -f {} \;
 [ -L ~/web2py/applications/solver/static/images/XRayScope.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/items/XRayScope.png ~/web2py/applications/solver/static/images/XRayScope.png
 
 [ -L ~/web2py/applications/solver/views/solver_web/extStats.html ] || ln -s ~/RandomMetroidSolver/web/views/extStats.html ~/web2py/applications/solver/views/solver_web/extStats.html
+
+[ -L ~/web2py/applications/solver/static/images/games.svg ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/games.svg ~/web2py/applications/solver/static/images/games.svg
+
+[ -L ~/web2py/applications/solver/static/image-picker ] || ln -s ~/RandomMetroidSolver/web/static/image-picker ~/web2py/applications/solver/static/image-picker
+
+[ -L ~/web2py/applications/solver/static/images/Nothing.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/items/Nothing.png ~/web2py/applications/solver/static/images/Nothing.png
+
+[ -L ~/web2py/applications/solver/static/images/rando_popup.png ] || ln -s ~/RandomMetroidSolver/web/static/help/rando_popup.png ~/web2py/applications/solver/static/images/rando_popup.png
+[ -L ~/web2py/applications/solver/static/images/item_popup.png ] || ln -s ~/RandomMetroidSolver/web/static/help/item_popup.png ~/web2py/applications/solver/static/images/item_popup.png
+[ -L ~/web2py/applications/solver/static/images/load_popup.png ] || ln -s ~/RandomMetroidSolver/web/static/help/load_popup.png ~/web2py/applications/solver/static/images/load_popup.png

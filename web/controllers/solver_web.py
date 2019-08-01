@@ -818,8 +818,8 @@ def validateWebServiceParams(patchs, quantities, others, isJson=False):
 
     if request.vars.minorQty not in ['random', None]:
         minorQtyInt = getInt('minorQty', isJson)
-        if minorQtyInt < 1 or minorQtyInt > 100:
-            raiseHttp(400, "Wrong value for minorQty, must be between 1 and 100", isJson)
+        if minorQtyInt < 7 or minorQtyInt > 100:
+            raiseHttp(400, "Wrong value for minorQty, must be between 7 and 100", isJson)
 
     if 'energyQty' in others:
         if request.vars.energyQty not in ['sparse', 'medium', 'vanilla', 'random']:
@@ -1337,6 +1337,9 @@ def plando():
         session.plando["preset"] = "regular"
         session.plando["seed"] = None
 
+        # rando params
+        session.plando["rando"] = {}
+
         # set to False in plando.html
         session.plando["firstTime"] = True
 
@@ -1364,8 +1367,8 @@ class WS(object):
             raiseHttp(400, "Unknown scope: {}, must be area/item/common".format(scope), True)
 
         action = request.vars.action
-        if action not in ['add', 'remove', 'clear', 'init', 'get', 'save', 'replace']:
-            raiseHttp(400, "Unknown action {}, must be add/remove/clear/init/get/save".format(action), True)
+        if action not in ['add', 'remove', 'clear', 'init', 'get', 'save', 'replace', 'randomize']:
+            raiseHttp(400, "Unknown action {}, must be add/remove/clear/init/get/save/randomize".format(action), True)
 
         mode = request.vars.mode
         if mode not in ["standard", "seedless", "plando"]:
@@ -1395,8 +1398,8 @@ class WS(object):
             raiseHttp(400, "Missing parameter action", True)
         action = request.vars.action
 
-        if action not in ['init', 'add', 'remove', 'clear', 'get', 'save', 'replace']:
-            raiseHttp(400, "Unknown action {}, must be init/add/remove/clear/get/save".format(action), True)
+        if action not in ['init', 'add', 'remove', 'clear', 'get', 'save', 'replace', 'randomize']:
+            raiseHttp(400, "Unknown action {}, must be init/add/remove/clear/get/save/randomize".format(action), True)
 
     def action(self):
         pass
@@ -1429,7 +1432,9 @@ class WS(object):
                 "areaRando": state["areaRando"],
                 "bossRando": state["bossRando"],
                 "seed": state["seed"],
-                "preset": os.path.basename(os.path.splitext(state["presetFileName"])[0])
+                "preset": os.path.basename(os.path.splitext(state["presetFileName"])[0]),
+                "errorMsg": state["errorMsg"],
+                "last": state["last"]
             })
         else:
             raiseHttp(200, "OK", True)
@@ -1465,6 +1470,12 @@ class WS(object):
         elif action == 'save' and scope == 'common':
             if parameters['lock'] == True:
                 params.append('--lock')
+        elif action == 'randomize':
+            params += ['--progressionSpeed', parameters["progressionSpeed"],
+                       '--maxDifficulty', parameters["maxDifficulty"],
+                       '--minorQty', parameters["minorQty"],
+                       '--energyQty', parameters["energyQty"]
+            ]
 
         if request.vars.debug != None:
             params.append('--vcr')
@@ -1496,9 +1507,18 @@ class WS(object):
         else:
             os.close(fd1)
             os.remove(jsonInFileName)
+
+            msg = "Something wrong happened while iteratively solving the ROM"
+            try:
+                with open(jsonOutFileName, 'r') as jsonFile:
+                    data = json.load(jsonFile)
+                    if "errorMsg" in data:
+                        msg = data["errorMsg"]
+            except Exception as e:
+                pass
             os.close(fd2)
             os.remove(jsonOutFileName)
-            raiseHttp(400, "Something wrong happened while iteratively solving the ROM", True)
+            raiseHttp(400, msg, True)
 
 class WS_common_init(WS):
     def validate(self):
@@ -1641,6 +1661,32 @@ class WS_common_save(WS):
             raiseHttp(400, "Save can only be use in plando mode", True)
 
         return self.callSolverAction("common", "save", {'lock': request.vars.lock == "lock"})
+
+class WS_common_randomize(WS):
+    def validate(self):
+        super(WS_common_randomize, self).validate()
+
+        if request.vars.maxDifficulty not in ["no difficulty cap", "easy", "medium", "hard", "harder", "hardcore", "mania"]:
+            raiseHttp(400, "Wrong value for maxDifficulty: {}".format(request.vars.maxDifficulty), True)
+        if request.vars.progressionSpeed not in ["slowest", "slow", "medium", "fast", "fastest", "basic", "VARIAble"]:
+            raiseHttp(400, "Wrong value for progressionSpeed: {}".format(request.vars.progressionSpeed), True)
+        minorQtyInt = getInt('minorQty', True)
+        if minorQtyInt < 7 or minorQtyInt > 100:
+            raiseHttp(400, "Wrong value for minorQty, must be between 7 and 100", True)
+        if request.vars.energyQty not in ["sparse", "medium", "vanilla"]:
+            raiseHttp(400, "Wrong value for energyQty: {}".format(request.vars.energyQty), True)
+
+    def action(self):
+        if self.session["mode"] != "plando":
+            raiseHttp(400, "Randomize can only be use in plando mode", True)
+
+        params = {}
+        for elem in "maxDifficulty", "progressionSpeed", "minorQty", "energyQty":
+            params[elem] = request.vars[elem]
+
+        self.session["rando"] = params
+
+        return self.callSolverAction("common", "randomize", params)
 
 class WS_area_add(WS):
     def validatePoint(self, point):

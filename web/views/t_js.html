@@ -335,6 +335,17 @@ function ajaxOkGet(jsonData, status, dummy, chained=false) {
       // add item
       addItem(locData["item"]);
     }
+
+    if(mode == "plando") {
+      var elem = "repeatPlandoImg";
+    } else {
+      var elem = "repeatItemImg";
+    }
+    var tooltip = "Remove last placed item";
+    if(Object.keys(jsonData["visitedLocations"]).length > 0) {
+      var tooltip = tooltip + ": "+jsonData["last"]["item"]+" at "+jsonData["last"]["loc"];
+    }
+    $("#"+elem+'[data-toggle="tooltip"]').attr("title", tooltip).tooltip('fixTitle');
   }
 
   setItemCount("Missile");

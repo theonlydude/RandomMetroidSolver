@@ -83,6 +83,11 @@ class SolverState(object):
         # bool
         self.state["allTransitions"] = len(solver.curGraphTransitions) == len(solver.areaTransitions) + len(solver.bossTransitions)
         self.state["errorMsg"] = solver.errorMsg
+        if len(solver.visitedLocations) > 0:
+            self.state["last"] = {"loc": solver.visitedLocations[-1]["Name"],
+                                  "item": solver.visitedLocations[-1]["itemName"]}
+        else:
+            self.state["last"] = ""
 
     def toSolver(self, solver):
         if 'majorsSplit' in self.state:

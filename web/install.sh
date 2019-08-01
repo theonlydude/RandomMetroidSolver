@@ -352,3 +352,7 @@ find ~/web2py/applications/solver/static -xtype l -exec rm -f {} \;
 [ -L ~/web2py/applications/solver/static/image-picker ] || ln -s ~/RandomMetroidSolver/web/static/image-picker ~/web2py/applications/solver/static/image-picker
 
 [ -L ~/web2py/applications/solver/static/images/Nothing.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/items/Nothing.png ~/web2py/applications/solver/static/images/Nothing.png
+
+[ -L ~/web2py/applications/solver/static/images/rando_popup.png ] || ln -s ~/RandomMetroidSolver/web/static/help/rando_popup.png ~/web2py/applications/solver/static/images/rando_popup.png
+[ -L ~/web2py/applications/solver/static/images/item_popup.png ] || ln -s ~/RandomMetroidSolver/web/static/help/item_popup.png ~/web2py/applications/solver/static/images/item_popup.png
+[ -L ~/web2py/applications/solver/static/images/load_popup.png ] || ln -s ~/RandomMetroidSolver/web/static/help/load_popup.png ~/web2py/applications/solver/static/images/load_popup.png

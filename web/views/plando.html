@@ -268,13 +268,30 @@ function startTheTour(step=-1) {
       element: "#helpPlando",
       title: "VARIA Plando Generator",
       content: "<h2 class=\"center\">Welcome to the VARIA Plando Generator</h2>\
-<p>The Plando (a Plando is a Super Metroid seed with manually placed items) Generator allows you to create your own Plando in interactive mode.<br/>To use it, click on the <img src=\"/solver/static/images/play.svg\" alt=\"Start\" style=\"width: 32px\"> button to upload your ROM and choose your preset (like on the Solver page).<br/>As a base for your Plando ROM you should generate a seed on the Randomizer page with all the optional patches that you need.<br/>The available locations will be displayed on the map, click on a location and a popup will be displayed allowing you to choose which item to place.<br/>You can put the same major item at several locations.</p>\
+<p>The Plando (a Plando is a Super Metroid seed with manually placed items) Generator allows you to create your own Plando in interactive mode.</p>\
+<p>To use it, click on the <img src=\"/solver/static/images/play.svg\" alt=\"Start\" style=\"width: 32px\"> button, this popup will be displayed:\
+<img src=\"/solver/static/images/load_popup.png\" alt=\"Load popup\">\
+</p>\
+<p>Upload your ROM and choose your preset (like on the Solver page).<br/>As a base for your Plando ROM you should generate a seed on the Randomizer page with all the optional patches that you need.</p>\
+<p><b>Hint:</b>You can load the base ROM locations and transitions by checking the \"Populate your plando with the items and transitions from the base ROM\" checkbox.</p>\
+<p>The available locations will be displayed on the map, click on a location and this popup will be displayed allowing you to choose which item to place:\
+<img src=\"/solver/static/images/item_popup.png\" alt=\"Rando popup\">\
+</p>\
+<p><b>Hint:</b>You can put the same major item at several locations.</p>\
 <p>When you're done click on the <img src=\"/solver/static/images/save.svg\"alt=\"Save\" style=\"width: 32px\"> button to save the Plando ROM on your Computer. You can resume working on it later by uploading the saved Plando ROM.</p>\
-<p>You can change the item of a location by clicking on it to choose another item (Warning: it could make some previously accessible locations inaccessible. When reloading the saved plando ROM these locations will be displayed as sequence break).</p>\
-<h4>Areas/Bosses</h4>\
+\
+<p><b>Hint:</b>You can change the item of a location by clicking on it to choose another item (<b>Warning:</b> it could make some previously accessible locations inaccessible. When reloading the saved plando ROM these locations will be displayed as sequence break).</p>\
+<h4>Bosses</h4>\
+<p>You have to click on a boss location to tell the plandomizer that you killed it, it'll open the locations which are only available after the boss' death (like \"Energy Tank, Kraid\" after killing Kraid).</p>\
+<h4>Areas/Bosses Transitions</h4>\
 <p>Choose an Areas and/or Bosses seed as your base ROM to use the Plando Generator in items and areas/bosses mode, aka you choose the transitions between the areas/bosses.</p>\
 <h4>Unused locations/transitions</h4>\
 <p>If you don't set an item to a location it'll be empty. Portals with no transitions will be looping on themselves.</p>\
+<h4>Randomization</h4>\
+<p>You can use the <img src=\"/solver/static/images/games.svg\" alt=\"Random\" style=\"width: 32px\"> button to let the VARIA Randomizer fill all the empty remaining locations of your plando.</p>\
+<p>It'll display a popup where you can choose the Randomizer parameters:\
+<img src=\"/solver/static/images/rando_popup.png\" alt=\"Rando popup\">\
+</p>\
 <h4>Lock</h4>\
 <p>When your Plando seed is completed you can lock it (prevent it from being solved on the VARIA website, and not showing items in SMILE or other editors) if you want. To do so click on the <img src=\"/solver/static/images/locked.svg\" alt=\"Lock\" style=\"width: 32px\"> button.</p>\
 <p><b>WARNING:</b>You won't be able to modify a locked seed, so save it with <img src=\"/solver/static/images/save.svg\"alt=\"Save\" style=\"width: 32px\"> first.</p>\

@@ -94,12 +94,11 @@ if (hs.registerOverlay) {
          top: 40%;
     }
 }
-#loadingTips {
+.loadingTips {
     position: fixed;
     left: 50%;
     bottom: 10%;
     z-index: 99;
-    //margin-left: -3.5em;
     display:none;
     border-radius: 2em;
     background-color: #ffffff;
@@ -615,21 +614,34 @@ var tips = [
 ];
 
 var myTimer = null;
+var curLoadingTips = 0;
 
-function loadTip() {
+function loadTip(first = true) {
+    if(first == true) {
+      curLoadingTips = 0;
+    } else {
+      // first fadeout the current one
+      var elem = "loadingTips" + curLoadingTips;
+      $("#"+elem).fadeOut(1000);
+      curLoadingTips = 1 - curLoadingTips;
+    }
+
     var tip = tips[getRndInteger(tips.length)];
-    document.getElementById("loadingTips").innerHTML = tip;
-    document.getElementById("loadingTips").style.marginLeft = "-" + tip.length/4 + "em";
-    $('#loadingTips').fadeIn(1000);
-    myTimer = setTimeout(loadTip, 5000);
+    var elem = "loadingTips" + curLoadingTips;
+    document.getElementById(elem).innerHTML = tip;
+    document.getElementById(elem).style.marginLeft = "-" + tip.length/4 + "em";
+    $("#"+elem).fadeIn(1000);
+    myTimer = setTimeout(loadTip, 5000, false);
 }
 
 function cancelTip() {
-  $("#loadingTips").hide();
   if(myTimer != null) {
     clearTimeout(myTimer);
     myTimer = null;
   }
+  $("#loadingTips"+curLoadingTips).fadeOut(1000);
+  curLoadingTips = 1 - curLoadingTips;
+  $("#loadingTips"+curLoadingTips).hide();
 }
 
 window.onload = function(){
@@ -1330,7 +1342,8 @@ def displayNumber(id, min, max, default, step="1"):
 <body>
   <div id="overlay"></div>
   <div id="loadingGIF"><img src={{=URL('static/images','ajax-loader.gif')}}/></div>
-  <div id="loadingTips"></div>
+  <div id="loadingTips0" class="loadingTips"></div>
+  <div id="loadingTips1" class="loadingTips"></div>
 
   <div class="fixed">
     <div class="menu">

@@ -38,6 +38,8 @@ if (hs.registerOverlay) {
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 
+<script type="text/javascript" src="{{=URL('static', 'js/jquery.redirect.js')}}"></script>
+
 <title>Super Metroid VARIA Randomizer</title>
 
 <style>
@@ -1227,6 +1229,10 @@ Click on the dice button to randomly set this parameter.",
   }
   tour.start();
 }
+
+function DoPost(){
+    $.redirect("/presets", { action: "Load", currenttab: "Techniques1", preset: document.getElementById("preset").value }, "POST", "_blank");
+}
 </script>
 {{
 def displayCheckbox(id, defaultTrue=False):
@@ -1324,10 +1330,11 @@ def displayNumber(id, min, max, default, step="1"):
 	        <td id="seedStep"><button type="button" onclick="startTheTour(1)">?</button></td>
               </tr>
               <tr>
-		<td>Skills Preset:</td>
+		<td>Skills Preset: <span class="rightStep"><a href="javascript:DoPost()">What's in the logic for this skills preset ?</a><span></td>
 		<td>{{=SELECT(OPTGROUP(*stdPresets, **dict(_label="Standard presets")), OPTGROUP(*tourPresets, **dict(_label="Tournament presets")), OPTGROUP(*comPresets, **dict(_label="Community presets")), **dict(_name="preset", _id="preset", value=session.randomizer["preset"], _class="filldropdown chzn-select"))}}</td>
 		<td id="presetStep"><button type="button" onclick="startTheTour(2)">?</button></td>
               </tr>
+	      <tr>
 		<td>Settings Preset:</td>
 		<td>{{=SELECT(OPTGROUP(*randoPresets, **dict(_label="Standard presets")), OPTGROUP(*tourRandoPresets, **dict(_label="Tournament presets")), **dict(_name="randoPreset", _id="randoPreset", value=session.randomizer["randoPreset"], _class="filldropdown chzn-select", _onchange="loadRandoPreset()"))}}</td>
 		<td id="randoPresetStep"><button type="button" onclick="startTheTour(3)">?</button></td>

@@ -628,6 +628,7 @@ function cancelTip() {
   $("#loadingTips").hide();
   if(myTimer != null) {
     clearTimeout(myTimer);
+    myTimer = null;
   }
 }
 

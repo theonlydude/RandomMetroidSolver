@@ -378,21 +378,24 @@ def prepareResult():
     if session.solver['result'] is not None:
         result = session.solver['result']
 
-        if session.solver['result']['difficulty'] == -1:
-            result['resultText'] = "The ROM \"{}\" is not finishable with the known techniques".format(session.solver['result']['randomizedRom'])
+        # utf8 files
+        result['randomizedRom'] = result['randomizedRom'].encode('utf8', 'replace')
+
+        if result['difficulty'] == -1:
+            result['resultText'] = "The ROM \"{}\" is not finishable with the known techniques".format(result['randomizedRom'])
         else:
-            if session.solver['result']['itemsOk'] is False:
-                result['resultText'] = "The ROM \"{}\" is finishable but not all the requested items can be picked up with the known techniques. Estimated difficulty is: ".format(session.solver['result']['randomizedRom'])
+            if result['itemsOk'] is False:
+                result['resultText'] = "The ROM \"{}\" is finishable but not all the requested items can be picked up with the known techniques. Estimated difficulty is: ".format(result['randomizedRom'])
             else:
-                result['resultText'] = "The ROM \"{}\" estimated difficulty is: ".format(session.solver['result']['randomizedRom'])
+                result['resultText'] = "The ROM \"{}\" estimated difficulty is: ".format(result['randomizedRom'])
 
         # add generated path (spoiler !)
-        result['pathTable'] = genPathTable(session.solver['result']['generatedPath'])
-        result['pathremainTry'] = genPathTable(session.solver['result']['remainTry'])
-        result['pathremainMajors'] = genPathTable(session.solver['result']['remainMajors'], False)
-        result['pathremainMinors'] = genPathTable(session.solver['result']['remainMinors'], False)
-        result['pathskippedMajors'] = genPathTable(session.solver['result']['skippedMajors'], False)
-        result['pathunavailMajors'] = genPathTable(session.solver['result']['unavailMajors'], False)
+        result['pathTable'] = genPathTable(result['generatedPath'])
+        result['pathremainTry'] = genPathTable(result['remainTry'])
+        result['pathremainMajors'] = genPathTable(result['remainMajors'], False)
+        result['pathremainMinors'] = genPathTable(result['remainMinors'], False)
+        result['pathskippedMajors'] = genPathTable(result['skippedMajors'], False)
+        result['pathunavailMajors'] = genPathTable(result['unavailMajors'], False)
 
         # display the result only once
         session.solver['result'] = None
@@ -443,11 +446,7 @@ def validateSolverParams():
     if request.vars.romJson is None and request.vars.uploadFile is None and request.vars.romFile is None:
         return (False, "Missing ROM to solve")
 
-
     if request.vars.romFile is not None:
-        if IS_MATCH('[a-zA-Z0-9_\.]*')(request.vars.romFile)[1] is not None:
-            return (False, "Wrong value for romFile, must be valid file name: {}".format(request.vars.romFile))
-
         if IS_LENGTH(maxsize=255, minsize=1)(request.vars.romFile)[1] is not None:
             return (False, "Wrong length for romFile, name must be between 1 and 256 characters: {}".format(request.vars.romFile))
 
@@ -459,11 +458,11 @@ def validateSolverParams():
 
     if request.vars.uploadFile is not None:
         if type(request.vars.uploadFile) == str:
-            if IS_MATCH('[a-zA-Z0-9_\.]*')(request.vars.uploadFile)[1] is not None:
+            if IS_MATCH('[a-zA-Z0-9_\.() ,\-]*', strict=True)(request.vars.uploadFile)[1] is not None:
                 return (False, "Wrong value for uploadFile, must be a valid file name: {}".format(request.vars.uploadFile))
 
             if IS_LENGTH(maxsize=256, minsize=1)(request.vars.uploadFile)[1] is not None:
-                return (False, "Wrong length for uploadFile, name must be between 1 and 255 characters: {}".format(request.vars.uploadFile))
+                return (False, "Wrong length for uploadFile, name must be between 1 and 255 characters")
 
     return (True, None)
 
@@ -496,7 +495,8 @@ def canSolveROM(jsonRomFileName):
 
 def generateJsonROM(romJsonStr):
     tempRomJson = json.loads(romJsonStr)
-    romFileName = tempRomJson["romFileName"]
+    # handle filename with utf8 characters in it
+    romFileName = tempRomJson["romFileName"].encode('utf8', 'replace')
     (base, ext) = os.path.splitext(romFileName)
     jsonRomFileName = 'roms/' + base + '.json'
     del tempRomJson["romFileName"]
@@ -1536,10 +1536,8 @@ class WS_common_init(WS):
                 raiseHttp(400, "Missing ROM file name", True)
             if IS_NOT_EMPTY()(uploadFile)[1] is not None:
                 raiseHttp(400, "File name is empty", True)
-            if IS_MATCH('[a-zA-Z0-9_\.]*')(uploadFile)[1] is not None:
-                raiseHttp(400, "Wrong value for ROM file name, must be valid file name: {}".format(request.vars.romFile), True)
             if IS_LENGTH(maxsize=255, minsize=1)(uploadFile)[1] is not None:
-                raiseHttp(400, "Wrong length for ROM file name, name must be between 1 and 255 characters: {}".format(request.vars.romFile), True)
+                raiseHttp(400, "Wrong length for ROM file name, name must be between 1 and 255 characters", True)
 
     def action(self):
         mode = request.vars.mode

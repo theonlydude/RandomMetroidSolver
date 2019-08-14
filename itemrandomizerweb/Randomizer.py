@@ -1044,9 +1044,14 @@ class Randomizer(object):
         if loc['Name'] == 'Bomb':
             # disable check for bombs as it is the beginning
             return False
+        isPickup = 'Pickup' in loc
+        if isPickup:
+            loc['Pickup']()
         # if the loc forces us to go to an area we can't come back from
         comeBack = loc['accessPoint'] == self.curAccessPoint or \
             self.areaGraph.canAccess(self.smbm, loc['accessPoint'], self.curAccessPoint, self.difficultyTarget, item['Type'])
+        if isPickup:
+            loc['Unpickup']()
         if not comeBack:
             self.log.debug("KO come back from " + loc['accessPoint'] + " to " + self.curAccessPoint + " when trying to place " + item['Type'] + " at " + loc['Name'])
             return True

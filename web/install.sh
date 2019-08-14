@@ -356,3 +356,5 @@ find ~/web2py/applications/solver/static -xtype l -exec rm -f {} \;
 [ -L ~/web2py/applications/solver/static/images/rando_popup.png ] || ln -s ~/RandomMetroidSolver/web/static/help/rando_popup.png ~/web2py/applications/solver/static/images/rando_popup.png
 [ -L ~/web2py/applications/solver/static/images/item_popup.png ] || ln -s ~/RandomMetroidSolver/web/static/help/item_popup.png ~/web2py/applications/solver/static/images/item_popup.png
 [ -L ~/web2py/applications/solver/static/images/load_popup.png ] || ln -s ~/RandomMetroidSolver/web/static/help/load_popup.png ~/web2py/applications/solver/static/images/load_popup.png
+
+[ -L ~/web2py/applications/solver/static/js/jquery.redirect.js ] || ln -s ~/RandomMetroidSolver/web/static/jquery.redirect.js ~/web2py/applications/solver/static/js/jquery.redirect.js

@@ -38,6 +38,8 @@ if (hs.registerOverlay) {
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 
+<script type="text/javascript" src="{{=URL('static', 'js/jquery.redirect.js')}}"></script>
+
 <title>Super Metroid VARIA Randomizer</title>
 
 <style>
@@ -91,6 +93,18 @@ if (hs.registerOverlay) {
     .loadingGIF {
          top: 40%;
     }
+}
+.loadingTips {
+    position: fixed;
+    left: 50%;
+    bottom: 10%;
+    z-index: 99;
+    display:none;
+    border-radius: 2em;
+    background-color: #ffffff;
+    height: auto;
+    padding: 0.5%;
+    border: 2px solid #666666;
 }
 #psMultiselectDiv {
     display: none;
@@ -436,6 +450,7 @@ function ajaxFail(jqXHR, textStatus) {
   $('#flash').show();
   $('#overlay').hide();
   $('#loadingGIF').hide();
+  cancelTip();
 }
 
 function ajaxFailJSON(jqXHR, textStatus) {
@@ -448,6 +463,7 @@ function ajaxFailJSON(jqXHR, textStatus) {
   $('#flash').show();
   $('#overlay').hide();
   $('#loadingGIF').hide();
+  cancelTip();
 }
 
 function getProgSpeed() {
@@ -540,6 +556,7 @@ function AjaxRandomizerCallCompleted(data) {
     }
     $('#overlay').hide();
     $('#loadingGIF').hide();
+    cancelTip();
 }
 
 function doSubmit() {
@@ -580,9 +597,69 @@ function doSubmit() {
     // while WS is working, display "working" message
     $('#overlay').show();
     $('#loadingGIF').show();
+    loadTip();
   }
 
   return false;
+}
+
+function getRndInteger(max) {
+  return Math.floor(Math.random() * max );
+}
+
+var tips = [
+    "You can display the logic details for a preset by watching it on the Presets page",
+    "With VARIA tweaks you can activate Lower Norfair Chozo (left of entrance) without Space Jump",
+    "With VARIA tweaks you can access item at Wrecked Ship Etank location without killing Phantoon (via Forgotten Highway)",
+    "With VARIA tweaks Bomb Torizo fight is triggered when picking up the item he's holding, not by having Bomb",
+    "By default Gravity Suit environmental protection (heat, spikes, electricity...) is removed, it balances more the two suits abilities",
+    "Creating your own preset will lead to a better experience overall, as the generated ROMs will be tailored for you",
+    "The preset is used by the Randomizer to know which techniques are available to reach the items locations",
+    "There's three Majors splits: Full, Majors/Minors, Chozo",
+    "Majors split Chozo: Put all the upgrades as well as minimal ammo/energy to finish the seed in the Chozo locations.",
+    "Majors split Full: All items are shuffled in all locations",
+    "Majors split Majors/Minors: Use major (upgrades and energy) and minor (ammo) item pools",
+    "Majors split Majors/Minors: High-Jump boots Energy Tank location is considered minor, and right Super Missile in Wrecked ship is considered major for balancing purposes",
+    "VARIAble progression speed will randomly change internal progression speed while placing items, creating seeds that are more unpredictable",
+    "Late Morph is best suited when used along area randomization, to find Morph in peculiar places",
+    "The Tracker can be use in seedless mode, aka I use my tablet on my couch",
+    "If you're stuck while playing a seed, use the Solver or the Tracker to know where to go next",
+    "By default all seeds are MSU-1 compatible",
+    "Anti soft-lock layout modification are applied by default",
+    "You can use the tracker to only track the connections between the areas",
+    "By default the aim buttons can be assigned to any button",
+    "By default the maximum of each ammo is displayed in the HUD"
+];
+
+var myTimer = null;
+var curLoadingTips = 0;
+
+function loadTip(first = true) {
+    if(first == true) {
+      curLoadingTips = 0;
+    } else {
+      // first fadeout the current one
+      var elem = "loadingTips" + curLoadingTips;
+      $("#"+elem).fadeOut(1000);
+      curLoadingTips = 1 - curLoadingTips;
+    }
+
+    var tip = tips[getRndInteger(tips.length)];
+    var elem = "loadingTips" + curLoadingTips;
+    document.getElementById(elem).innerHTML = tip;
+    document.getElementById(elem).style.marginLeft = "-" + tip.length/4 + "em";
+    $("#"+elem).fadeIn(1000);
+    myTimer = setTimeout(loadTip, 5000, false);
+}
+
+function cancelTip() {
+  if(myTimer != null) {
+    clearTimeout(myTimer);
+    myTimer = null;
+  }
+  $("#loadingTips"+curLoadingTips).fadeOut(3000);
+  curLoadingTips = 1 - curLoadingTips;
+  $("#loadingTips"+curLoadingTips).hide();
 }
 
 window.onload = function(){
@@ -1227,6 +1304,10 @@ Click on the dice button to randomly set this parameter.",
   }
   tour.start();
 }
+
+function DoPost(){
+    $.redirect("/presets", { action: "Load", currenttab: "Techniques1", preset: document.getElementById("preset").value }, "POST", "_blank");
+}
 </script>
 {{
 def displayCheckbox(id, defaultTrue=False):
@@ -1279,6 +1360,8 @@ def displayNumber(id, min, max, default, step="1"):
 <body>
   <div id="overlay"></div>
   <div id="loadingGIF"><img src={{=URL('static/images','ajax-loader.gif')}}/></div>
+  <div id="loadingTips0" class="loadingTips"></div>
+  <div id="loadingTips1" class="loadingTips"></div>
 
   <div class="fixed">
     <div class="menu">
@@ -1324,10 +1407,11 @@ def displayNumber(id, min, max, default, step="1"):
 	        <td id="seedStep"><button type="button" onclick="startTheTour(1)">?</button></td>
               </tr>
               <tr>
-		<td>Skills Preset:</td>
+		<td>Skills Preset: <span class="rightStep"><a href="javascript:DoPost()">What's in the logic for this skills preset ?</a><span></td>
 		<td>{{=SELECT(OPTGROUP(*stdPresets, **dict(_label="Standard presets")), OPTGROUP(*tourPresets, **dict(_label="Tournament presets")), OPTGROUP(*comPresets, **dict(_label="Community presets")), **dict(_name="preset", _id="preset", value=session.randomizer["preset"], _class="filldropdown chzn-select"))}}</td>
 		<td id="presetStep"><button type="button" onclick="startTheTour(2)">?</button></td>
               </tr>
+	      <tr>
 		<td>Settings Preset:</td>
 		<td>{{=SELECT(OPTGROUP(*randoPresets, **dict(_label="Standard presets")), OPTGROUP(*tourRandoPresets, **dict(_label="Tournament presets")), **dict(_name="randoPreset", _id="randoPreset", value=session.randomizer["randoPreset"], _class="filldropdown chzn-select", _onchange="loadRandoPreset()"))}}</td>
 		<td id="randoPresetStep"><button type="button" onclick="startTheTour(3)">?</button></td>

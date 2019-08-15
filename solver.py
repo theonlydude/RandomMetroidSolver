@@ -986,14 +986,19 @@ class InteractiveSolver(CommonSolver):
             else:
                 plandoLocsItems[loc["Name"]] = loc["itemName"]
 
-        plandoLocsItemsJson = json.dumps(plandoLocsItems)
+        plandoCurrent = {
+            "locsItems": plandoLocsItems,
+            "transitions": self.curGraphTransitions
+        }
+
+        plandoCurrentJson = json.dumps(plandoCurrent)
 
         params = [
             'python2',  os.path.expanduser("~/RandomMetroidSolver/randomizer.py"),
             '--runtime', '10',
             '--param', self.presetFileName,
             '--output', self.outputFileName,
-            '--plandoRando', plandoLocsItemsJson,
+            '--plandoRando', plandoCurrentJson,
             '--progressionSpeed', parameters["progressionSpeed"],
             '--minorQty', parameters["minorQty"],
             '--energyQty', parameters["energyQty"]

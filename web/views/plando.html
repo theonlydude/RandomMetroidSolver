@@ -186,13 +186,6 @@ function randomize() {
     return;
   }
 
-  // check that all the transitions are set before randomizing
-  if(linesSeq.length < 18) {
-    document.getElementById("flash").innerHTML = "Set all the transitions before randomizing.";
-    $('#flash').show();
-    return;
-  }
-
   $('#overlay').show();
   $('#loadingGIF').show();
 

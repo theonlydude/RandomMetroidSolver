@@ -398,7 +398,7 @@ if __name__ == "__main__":
     if args.plandoRando != None:
         args.plandoRando = json.loads(args.plandoRando)
 
-    randoSettings = RandoSettings(maxDifficulty, progSpeed, progDiff, qty, restrictions, args.superFun, args.runtimeLimit_s, args.vcr, args.plandoRando)
+    randoSettings = RandoSettings(maxDifficulty, progSpeed, progDiff, qty, restrictions, args.superFun, args.runtimeLimit_s, args.vcr, args.plandoRando["locsItems"] if args.plandoRando != None else None)
     bossTransitions = vanillaBossesTransitions
     if args.bosses == True:
         bossTransitions = getRandomBossTransitions()
@@ -419,7 +419,11 @@ if __name__ == "__main__":
             sys.exit(-1)
     else:
         try:
-            randomizer = Randomizer(graphLocations, randoSettings, seedName, vanillaTransitions + bossTransitions)
+            if args.plandoRando != None:
+                transitions = args.plandoRando["transitions"]
+            else:
+                transitions = vanillaTransitions + bossTransitions
+            randomizer = Randomizer(graphLocations, randoSettings, seedName, transitions)
         except RuntimeError:
             msg = "Locations unreachable detected with preset/super fun/max diff. Retry, and change the Super Fun settings and/or Maximum difficulty if the problem happens again."
             dumpErrorMsg(args.output, msg)

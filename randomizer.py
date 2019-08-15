@@ -445,7 +445,7 @@ if __name__ == "__main__":
         dumpErrorMsg(args.output, randomizer.errorMsg)
         print("Can't generate " + fileName + " with the given parameters: {}".format(randomizer.errorMsg))
         # in vcr mode we still want the seed to be generated to analyze it
-        if args.vcr == False:
+        if args.vcr == False and args.plandoRando == None:
             sys.exit(-1)
 
     # hide some items like in dessy's
@@ -474,7 +474,7 @@ if __name__ == "__main__":
 
     if args.plandoRando != None:
         with open(args.output, 'w') as jsonFile:
-            json.dump(itemLocs, jsonFile, default=lambda x: x.__dict__)
+            json.dump({"itemLocs": itemLocs, "errorMsg": randomizer.errorMsg}, jsonFile, default=lambda x: x.__dict__)
         sys.exit(0)
 
     # insert extended stats into database

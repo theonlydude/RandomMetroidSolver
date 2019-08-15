@@ -1012,13 +1012,11 @@ class InteractiveSolver(CommonSolver):
         with open(self.outputFileName, 'r') as jsonFile:
             data = json.load(jsonFile)
 
-        if "errorMsg" in data:
-            self.errorMsg = data["errorMsg"]
-            return
+        self.errorMsg = data["errorMsg"]
 
         # load the locations
         self.clearItems(reload=True)
-        itemsLocs = data
+        itemsLocs = data["itemLocs"]
 
         # create a copy because we need self.locations to be full, else the state will be empty
         self.majorLocations = self.locations[:]

@@ -1696,7 +1696,11 @@ class Randomizer(object):
                 print("\nSTUCK ! ")
                 print("REM LOCS = "  + str([loc['Name'] for loc in self.unusedLocations]))
                 print("REM ITEMS = "  + str([item['Type'] for item in self.itemPool]))
-                self.errorMsg += "Stuck because of navigation. Retry, and disable either super fun settings or suits restriction if the problem happens again."
+
+                if runtime_s > self.runtimeLimit_s:
+                    self.errorMsg += "Can't randomize the seed under the time limit of {}s".format(self.runtimeLimit_s)
+                else:
+                    self.errorMsg += "Stuck because of navigation. Retry, and disable either super fun settings or suits restriction if the problem happens again."
                 stuck = True
         if not stuck:
             maxDiff = self.prevDiffTarget

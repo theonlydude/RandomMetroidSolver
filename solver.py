@@ -1015,24 +1015,25 @@ class InteractiveSolver(CommonSolver):
         self.errorMsg = data["errorMsg"]
 
         # load the locations
-        self.clearItems(reload=True)
-        itemsLocs = data["itemLocs"]
+        if "itemLocs" in data:
+            self.clearItems(reload=True)
+            itemsLocs = data["itemLocs"]
 
-        # create a copy because we need self.locations to be full, else the state will be empty
-        self.majorLocations = self.locations[:]
+            # create a copy because we need self.locations to be full, else the state will be empty
+            self.majorLocations = self.locations[:]
 
-        for itemLoc in itemsLocs:
-            locName = itemLoc["Location"]["Name"]
-            loc = self.getLoc(locName)
-            difficulty = itemLoc["Location"]["difficulty"]
-            smbool = SMBool(difficulty["bool"], difficulty["difficulty"], difficulty["knows"], difficulty["items"])
-            loc["difficulty"] = smbool
-            itemName = itemLoc["Item"]["Type"]
-            if itemName == "Boss":
-                itemName = "Nothing"
-            loc["itemName"] = itemName
-            loc["accessPoint"] = itemLoc["Location"]["accessPoint"]
-            self.collectMajor(loc)
+            for itemLoc in itemsLocs:
+                locName = itemLoc["Location"]["Name"]
+                loc = self.getLoc(locName)
+                difficulty = itemLoc["Location"]["difficulty"]
+                smbool = SMBool(difficulty["bool"], difficulty["difficulty"], difficulty["knows"], difficulty["items"])
+                loc["difficulty"] = smbool
+                itemName = itemLoc["Item"]["Type"]
+                if itemName == "Boss":
+                    itemName = "Nothing"
+                loc["itemName"] = itemName
+                loc["accessPoint"] = itemLoc["Location"]["accessPoint"]
+                self.collectMajor(loc)
 
     def savePlando(self, lock):
         # store filled locations addresses in the ROM for next creating session

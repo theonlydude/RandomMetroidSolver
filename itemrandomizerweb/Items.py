@@ -222,7 +222,7 @@ class ItemManager:
         for idx, item in enumerate(self.itemPool):
             if item["Type"] == itemType:
                 self.itemPool = self.itemPool[0:idx] + self.itemPool[idx+1:]
-                break
+                return item
 
     def removeForbiddenItems(self, forbiddenItems):
         # the pool is the one managed by the Randomizer
@@ -247,6 +247,9 @@ class ItemManager:
     @staticmethod
     def getProgTypes():
         return [item for item in ItemManager.Items if ItemManager.Items[item]['Category'] == 'Progression']
+
+    def hasItemInPoolCount(self, itemName, count):
+        return len([item for item in self.itemPool if item['Type'] == itemName]) >= count
 
 class ItemPoolGenerator(object):
     @staticmethod
@@ -443,6 +446,16 @@ class ItemPoolGeneratorPlando(ItemPoolGenerator):
 
     def getItemPool(self):
         self.itemManager.newItemPool(addBosses=False)
+
+        # add the already placed items by the plando
+        for item in self.exclude:
+            if item == 'total':
+                continue
+            itemClass = 'Major'
+            if item in ['Missile', 'Super', 'PowerBomb']:
+                itemClass = 'Minor'
+            for i in range(self.exclude[item]):
+                self.itemManager.addItem(item, itemClass)
 
         remain = 105 - self.exclude['total']
         self.log.debug("Plando: remain start: {}".format(remain))

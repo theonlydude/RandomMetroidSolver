@@ -202,6 +202,189 @@ class RandoSettings(object):
             locLimit = 105
         return locLimit
 
+class SuperPlandoProvider(object):
+    def __init__(self, settings, smbm, rando):
+        self.settings = settings
+        self.smbm = smbm
+        self.rando = rando
+        self.restrictedItemLocations = []
+
+    def getAvailableLocations(self):
+        # to allow the randomizer to finish when not all the transitions have been
+        # given we have to reduce the item pool to have just the number of item
+        # that the rando can place, for that we need to know the available locations
+        self.smbm.resetItems()
+        self.smbm.addItems([item['Type'] for item in self.itemPool])
+
+        print("items: {}".format(self.smbm.getItems()))
+
+        # kill available bosses (killing a boss can make new locations available)
+        oldDeadBosses = -1
+        curDeadBosses = 0
+        while oldDeadBosses != curDeadBosses:
+            oldDeadBosses = curDeadBosses
+            curDeadBosses = 0
+            locs = self.rando.currentLocations(post=True)
+            for loc in locs:
+                if "Boss" in loc["Class"]:
+                    Bosses.beatBoss(loc["Name"])
+                    curDeadBosses += 1
+
+        # cleanup
+        self.smbm.resetItems()
+        Bosses.reset()
+
+        # dict with the name of all the available locations
+        locsDict = {}
+        for loc in locs:
+            locsDict[loc["Name"]] = True
+
+        return locsDict
+
+    def getExcludePlandoItems(self):
+        exclude = {
+            'ETank': 0,
+            'Missile': 0,
+            'Super': 0,
+            'PowerBomb': 0,
+            'Bomb': 0,
+            'Charge': 0,
+            'Ice': 0,
+            'HiJump': 0,
+            'SpeedBooster': 0,
+            'Wave': 0,
+            'Spazer': 0,
+            'SpringBall': 0,
+            'Varia': 0,
+            'Plasma': 0,
+            'Grapple': 0,
+            'Morph': 0,
+            'Reserve': 0,
+            'Gravity': 0,
+            'XRayScope': 0,
+            'SpaceJump': 0,
+            'ScrewAttack': 0,
+            'Nothing': 0,
+            'Boss': 0,
+            'total': 0
+        }
+
+        # plandoRando is a dict {'loc name': 'item type'}
+        for loc in self.settings.plandoRando:
+            exclude[self.settings.plandoRando[loc]] += 1
+
+        for key in exclude:
+            if key == 'total':
+                continue
+            exclude['total'] += exclude[key]
+
+        return exclude
+
+    def getItemPool(self):
+        self.itemManager = ItemManager('Plando', self.settings.qty, self.smbm)
+
+        # randomize only the locations not already placed in the plandomizer
+        exclude = self.getExcludePlandoItems()
+
+        # generate item pool
+        self.itemManager.createItemPool(exclude)
+        self.itemPool = self.itemManager.getItemPool()
+
+        # add itemName to locs from the plando
+        for loc in self.rando.unusedLocations:
+            if loc['Name'] in self.settings.plandoRando:
+                loc['itemName'] = self.settings.plandoRando[loc['Name']]
+
+        # get locs availabe with all the items of the pool
+        availableLocs = self.getAvailableLocations()
+        print("availableLocs {}: {}".format(len(availableLocs), availableLocs))
+
+        # we need to partition the item pool in three:
+        # -items placed in the plando in available locs
+        # -items placed in the plando in not available locs
+        # -remaining items
+        available = []
+        for loc in self.rando.unusedLocations:
+            if loc["Name"] in availableLocs:
+                if "itemName" in loc:
+                    # available loc with plando placed item, get the item
+                    available.append(self.getItem(loc["itemName"]))
+            else:
+                if "itemName" in loc:
+                    # non available loc with plando placed item, get the item
+                    item = self.getItem(loc["itemName"])
+                    # place item
+                    self.placeItem(loc, item)
+
+        # then we loop on the not avaible locations with no items and
+        # we assign items to them and remove these items from the pool.
+        for loc in self.rando.unusedLocations:
+            if loc["Name"] in availableLocs:
+                continue
+            if "itemName" in loc:
+                continue
+            # check if boss loc
+            if 'Boss' in loc['Class']:
+                item = self.getItem('Boss')
+                self.placeItem(loc, item)
+            else:
+                # get next dispendable item from pool
+                item = self.getNextDispendableItem()
+                # place it
+                self.placeItem(loc, item)
+
+        # the item pool is then the remaining items and items placed
+        # in the plando in available locs
+        self.itemPool = self.itemManager.getItemPool() + available
+
+        print("item pool {}: {}".format(len(self.itemPool), self.itemPool))
+
+        return self.itemPool
+
+    def getItem(self, itemName):
+        # get the actual item from the item pool and remove it from pool
+        return self.itemManager.removeItem(itemName)
+
+    def getNextDispendableItem(self):
+        for (itemName, minNumber) in [
+                ("Nothing", 0),
+                ("NoEnergy", 0),
+                ("Missile", 1),
+                ("PowerBomb", 1),
+                ("Super", 1),
+                ('Reserve', 0),
+                ('ETank', 0),
+                ('XRayScope', 0),
+                ('Spazer', 0),
+                ('SpringBall', 0),
+                ('Plasma', 0),
+                ('Grapple', 0),
+                ('HiJump', 0),
+                ('Wave', 0),
+                ('Bomb', 0),
+                ('SpaceJump', 0),
+                ('ScrewAttack', 0),
+                ('Charge', 0),
+                ('Varia', 0),
+                ('Gravity', 0),
+                ('Ice', 0),
+                ('SpeedBooster', 0),
+                ('Morph', 0)
+        ]:
+            if self.itemManager.hasItemInPoolCount(itemName, minNumber+1):
+                return self.itemManager.removeItem(itemName)
+
+        for itemName in ["Missile", "PowerBomb", "Super"]:
+            if self.itemManager.hasItemInPool(itemName, 1):
+                return self.itemManager.removeItem(itemName)
+
+        raise Exception("Missing item in pool")
+
+    def placeItem(self, loc, item):
+        itemLocation = {'Location': loc, 'Item': item}
+        self.restrictedItemLocations.append(itemLocation)
+        #self.rando.getItem(itemLocation, False)
+
 # dat class name
 class SuperFunProvider(object):
     # give the rando since we have to access services from it
@@ -495,18 +678,16 @@ class Randomizer(object):
         self.progressionItemLocs = []
         # progression items tried for a given rollback point
         self.rollbackItemsTried = {}
+        self.itemLocations = []
 
         self.itemPool = None
         if self.settings.plandoRando != None:
-            itemManager = ItemManager('Plando', settings.qty, self.smbm)
-            # used to randomize only the locations not already placed in the plandomizer
-            itemManager.createItemPool(self.getExcludePlandoItems())
-            self.itemPool = itemManager.getItemPool()
-            # add itemName to locs from the plando
-            for loc in locations:
-                if loc['Name'] in self.settings.plandoRando:
-                    loc['itemName'] = self.settings.plandoRando[loc['Name']]
+            plando = SuperPlandoProvider(self.settings, self.smbm, self)
+            self.itemPool = plando.getItemPool()
             self.restrictedLocations = []
+            for itemLoc in plando.restrictedItemLocations:
+                self.unusedLocations.remove(itemLoc["Location"])
+                self.itemLocations.append(itemLoc)
         else:
             itemManager = ItemManager(self.restrictions['MajorMinor'], settings.qty, self.smbm)
             # handle super fun settings
@@ -536,45 +717,6 @@ class Randomizer(object):
             self.computeLateMorphLimit()
 
         self.vcr = VCR(seedName, 'rando') if settings.vcr == True else None
-
-    def getExcludePlandoItems(self):
-        exclude = {
-            'ETank': 0,
-            'Missile': 0,
-            'Super': 0,
-            'PowerBomb': 0,
-            'Bomb': 0,
-            'Charge': 0,
-            'Ice': 0,
-            'HiJump': 0,
-            'SpeedBooster': 0,
-            'Wave': 0,
-            'Spazer': 0,
-            'SpringBall': 0,
-            'Varia': 0,
-            'Plasma': 0,
-            'Grapple': 0,
-            'Morph': 0,
-            'Reserve': 0,
-            'Gravity': 0,
-            'XRayScope': 0,
-            'SpaceJump': 0,
-            'ScrewAttack': 0,
-            'Nothing': 0,
-            'Boss': 0,
-            'total': 0
-        }
-
-        # plandoRando is a dict {'loc name': 'item type'}
-        for loc in self.settings.plandoRando:
-            exclude[self.settings.plandoRando[loc]] += 1
-
-        for key in exclude:
-            if key == 'total':
-                continue
-            exclude['total'] += exclude[key]
-
-        return exclude
 
     def computeLateMorphLimit(self):
         # add all the items (except those removed by super fun) except morph.
@@ -1618,7 +1760,6 @@ class Randomizer(object):
     # returns a list of item/location dicts with 'Item' and 'Location' as keys.
     def generateItems(self):
         stuck = False
-        self.itemLocations = []
         isStuck = False
         # if major items are removed from the pool (super fun setting), fill not accessible locations with
         # items that are as useless as possible

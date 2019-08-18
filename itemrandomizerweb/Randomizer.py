@@ -207,7 +207,6 @@ class SuperPlandoProvider(object):
         self.settings = settings
         self.smbm = smbm
         self.rando = rando
-        self.restrictedItemLocations = []
         self.log = log.get('SuperPlando')
 
     def getAvailableLocations(self):
@@ -296,6 +295,7 @@ class SuperPlandoProvider(object):
 
         # get locs availabe with all the items of the pool
         availableLocs = self.getAvailableLocations()
+        self.log.debug("nb available locs: {}".format(len(availableLocs)))
 
         # we need to partition the item pool in three:
         # -items placed in the plando in available locs
@@ -309,13 +309,11 @@ class SuperPlandoProvider(object):
                     available.append(self.getItem(loc["itemName"]))
             else:
                 if "itemName" in loc:
-                    # non available loc with plando placed item, get the item
-                    item = self.getItem(loc["itemName"])
-                    # place item
-                    self.placeItem(loc, item)
+                    # non available loc with plando placed item, remove item from pool
+                    self.getItem(loc["itemName"])
 
-        # then we loop on the not avaible locations with no items and
-        # we assign items to them and remove these items from the pool.
+        # then we loop on the not avaible locations with no items.
+        # remove these items from the pool.
         for loc in self.rando.unusedLocations:
             if loc["Name"] in availableLocs:
                 continue
@@ -323,17 +321,16 @@ class SuperPlandoProvider(object):
                 continue
             # check if boss loc
             if 'Boss' in loc['Class']:
-                item = self.getItem('Boss')
-                self.placeItem(loc, item)
+                self.getItem('Boss')
             else:
                 # get next dispendable item from pool
-                item = self.getNextDispendableItem()
-                # place it
-                self.placeItem(loc, item)
+                self.getNextDispendableItem()
 
         # the item pool is then the remaining items and items placed
         # in the plando in available locs
         self.itemPool = self.itemManager.getItemPool() + available
+
+        self.log.debug("nb items in pool: {}".format(len(self.itemPool)))
 
         return self.itemPool
 
@@ -349,7 +346,7 @@ class SuperPlandoProvider(object):
                 ("PowerBomb", 1),
                 ("Super", 1),
                 ('Reserve', 0),
-                ('ETank', 0),
+                ('ETank', 1),
                 ('XRayScope', 0),
                 ('Spazer', 0),
                 ('SpringBall', 0),
@@ -370,17 +367,11 @@ class SuperPlandoProvider(object):
             if self.itemManager.hasItemInPoolCount(itemName, minNumber+1):
                 return self.itemManager.removeItem(itemName)
 
-        for itemName in ["Missile", "PowerBomb", "Super"]:
+        for itemName in ["Missile", "PowerBomb", "Super", "ETank"]:
             if self.itemManager.hasItemInPool(itemName, 1):
                 return self.itemManager.removeItem(itemName)
 
         raise Exception("Missing item in pool")
-
-    def placeItem(self, loc, item):
-        # set the ap:
-        loc["accessPoint"] = loc["AccessFrom"].keys()[0]
-        itemLocation = {'Location': loc, 'Item': item}
-        self.restrictedItemLocations.append(itemLocation)
 
 # dat class name
 class SuperFunProvider(object):
@@ -682,9 +673,6 @@ class Randomizer(object):
             plando = SuperPlandoProvider(self.settings, self.smbm, self)
             self.itemPool = plando.getItemPool()
             self.restrictedLocations = []
-            for itemLoc in plando.restrictedItemLocations:
-                self.unusedLocations.remove(itemLoc["Location"])
-                self.itemLocations.append(itemLoc)
         else:
             itemManager = ItemManager(self.restrictions['MajorMinor'], settings.qty, self.smbm)
             # handle super fun settings

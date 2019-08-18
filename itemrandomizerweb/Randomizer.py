@@ -208,6 +208,7 @@ class SuperPlandoProvider(object):
         self.smbm = smbm
         self.rando = rando
         self.restrictedItemLocations = []
+        self.log = log.get('SuperPlando')
 
     def getAvailableLocations(self):
         # to allow the randomizer to finish when not all the transitions have been
@@ -215,8 +216,6 @@ class SuperPlandoProvider(object):
         # that the rando can place, for that we need to know the available locations
         self.smbm.resetItems()
         self.smbm.addItems([item['Type'] for item in self.itemPool])
-
-        print("items: {}".format(self.smbm.getItems()))
 
         # kill available bosses (killing a boss can make new locations available)
         oldDeadBosses = -1
@@ -297,7 +296,6 @@ class SuperPlandoProvider(object):
 
         # get locs availabe with all the items of the pool
         availableLocs = self.getAvailableLocations()
-        print("availableLocs {}: {}".format(len(availableLocs), availableLocs))
 
         # we need to partition the item pool in three:
         # -items placed in the plando in available locs
@@ -336,8 +334,6 @@ class SuperPlandoProvider(object):
         # the item pool is then the remaining items and items placed
         # in the plando in available locs
         self.itemPool = self.itemManager.getItemPool() + available
-
-        print("item pool {}: {}".format(len(self.itemPool), self.itemPool))
 
         return self.itemPool
 
@@ -381,9 +377,10 @@ class SuperPlandoProvider(object):
         raise Exception("Missing item in pool")
 
     def placeItem(self, loc, item):
+        # set the ap:
+        loc["accessPoint"] = loc["AccessFrom"].keys()[0]
         itemLocation = {'Location': loc, 'Item': item}
         self.restrictedItemLocations.append(itemLocation)
-        #self.rando.getItem(itemLocation, False)
 
 # dat class name
 class SuperFunProvider(object):
@@ -1748,7 +1745,8 @@ class Randomizer(object):
             curLocs = self.currentLocations()
             for loc in curLocs:
                 if 'itemName' in loc:
-                    item = ItemManager.getItem(loc['itemName'])
+                    item = self.getNextItemInPool(loc['itemName'])
+                    self.itemPool.remove(item)
                     itemLocation = {'Item': item, 'Location': loc}
                     self.log.debug("add {} to {}".format(loc['itemName'], loc['Name']))
                     self.getItem(itemLocation, pool=[item])

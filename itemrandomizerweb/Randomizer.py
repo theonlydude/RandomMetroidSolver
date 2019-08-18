@@ -227,6 +227,10 @@ class SuperPlandoProvider(object):
                 if "Boss" in loc["Class"]:
                     Bosses.beatBoss(loc["Name"])
                     curDeadBosses += 1
+                # see evil trick in graph_locations.py on Space Jump/Draygon locs
+                if loc["Name"] == "Space Jump":
+                    Bosses.beatBoss("Draygon")
+                    curDeadBosses += 1
 
         # cleanup
         self.smbm.resetItems()
@@ -236,6 +240,8 @@ class SuperPlandoProvider(object):
         locsDict = {}
         for loc in locs:
             locsDict[loc["Name"]] = True
+
+        self.log.debug("available locs: {}".format(locsDict.keys()))
 
         return locsDict
 
@@ -331,6 +337,7 @@ class SuperPlandoProvider(object):
         self.itemPool = self.itemManager.getItemPool() + available
 
         self.log.debug("nb items in pool: {}".format(len(self.itemPool)))
+        self.log.debug("pool: {}".format([item['Type'] for item in self.itemPool]))
 
         return self.itemPool
 
@@ -368,7 +375,7 @@ class SuperPlandoProvider(object):
                 return self.itemManager.removeItem(itemName)
 
         for itemName in ["Missile", "PowerBomb", "Super", "ETank"]:
-            if self.itemManager.hasItemInPool(itemName, 1):
+            if self.itemManager.hasItemInPoolCount(itemName, 1):
                 return self.itemManager.removeItem(itemName)
 
         raise Exception("Missing item in pool")

@@ -986,9 +986,27 @@ class InteractiveSolver(CommonSolver):
             else:
                 plandoLocsItems[loc["Name"]] = loc["itemName"]
 
+        # add active patches
+        patches = {
+            0x7F1F:   {'value': 0xB6, 'name': "startCeres"},
+            0x7F17:   {'value': 0xB6, 'name': "startLS"},
+            0x21BD80: {'value': 0xD5, 'name': "layout"},
+            0x06e37d: {'value': 0x01, 'name': "gravityNoHeatProtection"},
+            0x7CC4D:  {'value': 0x37, 'name': "variaTweaks"},
+            0x22D564: {'value': 0xF2, 'name': "area"},
+            0x252FA7: {'value': 0xF8, 'name': "areaLayout"}
+        }
+
+        activePatches = []
+        for address in self.patches:
+            if address in patches:
+                if self.patches[address] == patches[address]["value"]:
+                    activePatches.append(patches[address]["name"])
+
         plandoCurrent = {
             "locsItems": plandoLocsItems,
-            "transitions": self.curGraphTransitions
+            "transitions": self.curGraphTransitions,
+            "patches": activePatches
         }
 
         plandoCurrentJson = json.dumps(plandoCurrent)
@@ -1526,6 +1544,7 @@ class OutWeb(Out):
         # use convert to generate the thumbnail
         # dotFileName: the /directory/image.dot
         # the png and thumbnails are generated in the same directory as the dot
+        # requires that graphviz is installed
 
         splited = os.path.splitext(dotFileName)
         pngFileName = splited[0] + '.png'

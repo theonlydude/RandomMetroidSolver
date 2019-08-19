@@ -31,6 +31,29 @@ def restricted_float(x):
         raise argparse.ArgumentTypeError("%r not in range [1.0, 9.0]"%(x,))
     return x
 
+def loadPlandoPatches(patches):
+    # check total base (blue bt and red tower blue door)
+    if "startCeres" in patches or "startLS" in patches:
+        RomPatches.ActivePatches += [RomPatches.BlueBrinstarBlueDoor,
+                                     RomPatches.RedTowerBlueDoors]
+    # check total soft lock protection
+    if "layout" in patches:
+        RomPatches.ActivePatches += RomPatches.TotalLayout
+    # check gravity heat protection
+    if "gravityNoHeatProtection" in patches:
+        RomPatches.ActivePatches.append(RomPatches.NoGravityEnvProtection)
+    # check varia tweaks
+    if "variaTweaks" in patches:
+        RomPatches.ActivePatches += RomPatches.VariaTweaks
+    # check area
+    if "area" in patches:
+        RomPatches.ActivePatches += [RomPatches.SingleChamberNoCrumble,
+                                     RomPatches.AreaRandoGatesBase,
+                                     RomPatches.AreaRandoBlueDoors]
+    # check area layout
+    if "areaLayout" in patches:
+        RomPatches.ActivePatches.append(RomPatches.AreaRandoGatesOther)
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Random Metroid Randomizer")
     parser.add_argument('--patchOnly',
@@ -397,6 +420,7 @@ if __name__ == "__main__":
 
     if args.plandoRando != None:
         args.plandoRando = json.loads(args.plandoRando)
+        loadPlandoPatches(args.plandoRando["patches"])
 
     randoSettings = RandoSettings(maxDifficulty, progSpeed, progDiff, qty, restrictions, args.superFun, args.runtimeLimit_s, args.vcr, args.plandoRando["locsItems"] if args.plandoRando != None else None)
     bossTransitions = vanillaBossesTransitions

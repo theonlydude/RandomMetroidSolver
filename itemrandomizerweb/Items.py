@@ -529,4 +529,6 @@ class ItemPoolGeneratorPlando(ItemPoolGenerator):
                 self.itemManager.addMinor('Nothing')
                 remain -= 1
 
+            self.log.debug("Plando: remain after nothing: {}".format(remain))
+
         return self.itemManager.getItemPool()

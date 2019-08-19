@@ -216,12 +216,15 @@ class SuperPlandoProvider(object):
         self.smbm.resetItems()
         self.smbm.addItems([item['Type'] for item in self.itemPool])
 
+        from cache import Cache
         # kill available bosses (killing a boss can make new locations available)
         oldDeadBosses = -1
         curDeadBosses = 0
         while oldDeadBosses != curDeadBosses:
             oldDeadBosses = curDeadBosses
             curDeadBosses = 0
+            # killling a boss doesn't reset the cache
+            Cache.reset()
             locs = self.rando.currentLocations(post=True)
             for loc in locs:
                 if "Boss" in loc["Class"]:

@@ -306,9 +306,8 @@ class SuperPlandoProvider(object):
         availableLocs = self.getAvailableLocations()
         self.log.debug("nb available locs: {}".format(len(availableLocs)))
 
-        # we need to partition the item pool in three:
+        # we need to partition the item pool in two:
         # -items placed in the plando in available locs
-        # -items placed in the plando in not available locs
         # -remaining items
         available = []
         for loc in self.rando.unusedLocations:
@@ -318,8 +317,8 @@ class SuperPlandoProvider(object):
                     available.append(self.getItem(loc["itemName"]))
             else:
                 if "itemName" in loc:
-                    # non available loc with plando placed item, remove item from pool
-                    self.getItem(loc["itemName"])
+                    # if an item has been set in the plando in a loc outside the transitions, remove it
+                    del loc["itemName"]
 
         # then we loop on the not avaible locations with no items.
         # remove these items from the pool.
@@ -335,14 +334,14 @@ class SuperPlandoProvider(object):
                 # get next dispendable item from pool
                 self.getNextDispendableItem()
 
-        # the item pool is then the remaining items and items placed
-        # in the plando in available locs
-        self.itemPool = self.itemManager.getItemPool() + available
+        # we have two item pools to avoid putting already placed items in the plandomizer in other locs
+        self.itemPool = self.itemManager.getItemPool()
+        self.plandoItemPool = available
 
         self.log.debug("nb items in pool: {}".format(len(self.itemPool)))
         self.log.debug("pool: {}".format([item['Type'] for item in self.itemPool]))
 
-        return self.itemPool
+        return (self.itemPool, self.plandoItemPool)
 
     def getItem(self, itemName):
         # get the actual item from the item pool and remove it from pool
@@ -597,6 +596,7 @@ class RandoState(object):
     def __init__(self, rando, curLocs):
         self.unusedLocations = rando.unusedLocations[:]
         self.itemPool = rando.itemPool[:]
+        self.plandoItemPool = rando.plandoItemPool[:]
         self.chozoItemPool = rando.chozoItemPool[:]
         self.nonChozoItemPool = rando.nonChozoItemPool[:]
         self.curAccessPoint = rando.curAccessPoint
@@ -617,6 +617,7 @@ class RandoState(object):
         rando.setCurAccessPoint(self.curAccessPoint)
         rando.states = self.states[:]
         rando.itemPool = self.itemPool[:]
+        rando.plandoItemPool = self.plandoItemPool[:]
         rando.chozoItemPool = self.chozoItemPool[:]
         rando.nonChozoItemPool = self.nonChozoItemPool[:]
         rando.progressionStatesIndices = self.progressionStatesIndices[:]
@@ -679,9 +680,10 @@ class Randomizer(object):
         self.itemLocations = []
 
         self.itemPool = None
+        self.plandoItemPool = None
         if self.settings.plandoRando != None:
             plando = SuperPlandoProvider(self.settings, self.smbm, self)
-            self.itemPool = plando.getItemPool()
+            (self.itemPool, self.plandoItemPool) = plando.getItemPool()
             self.restrictedLocations = []
         else:
             itemManager = ItemManager(self.restrictions['MajorMinor'], settings.qty, self.smbm)
@@ -1743,8 +1745,11 @@ class Randomizer(object):
             curLocs = self.currentLocations()
             for loc in curLocs:
                 if 'itemName' in loc:
-                    item = self.getNextItemInPool(loc['itemName'])
-                    self.itemPool.remove(item)
+                    self.log.debug("try to add {} to {}".format(loc['itemName'], loc['Name']))
+                    self.log.debug("plandoItemPool: {}".format([i['Type'] for i in self.plandoItemPool]))
+                    self.log.debug("itemPool: {}".format([i['Type'] for i in self.itemPool]))
+                    item = self.getNextItemInPool(loc['itemName'], self.plandoItemPool)
+                    self.plandoItemPool.remove(item)
                     itemLocation = {'Item': item, 'Location': loc}
                     self.log.debug("add {} to {}".format(loc['itemName'], loc['Name']))
                     self.getItem(itemLocation, pool=[item])

@@ -9,4 +9,4 @@ echo "sprite_patches = {"
 
 for i in *.ips; do ../ips.pl $i; done
 echo "}"
-) > $SOLVER_DIR/itemrandomizerweb/sprites_patches.py
+) > $SOLVER_DIR/itemrandomizerweb/sprite_patches.py

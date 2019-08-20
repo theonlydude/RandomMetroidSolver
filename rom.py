@@ -675,6 +675,13 @@ class RomPatcher:
         for patchName in patches:
             self.applyIPSPatch(patchName)
 
+    def customSprite(self, sprite):
+        from itemrandomizerweb.sprite_patches import sprite_patches
+        if sprite in sprite_patches:
+            self.applyIPSPatch(sprite, sprite_patches)
+        else:
+            raise ValueError("Unknown sprite " + str(sprite))
+
     def applyIPSPatches(self, optionalPatches=[], noLayout=False, noGravHeat=False, area=False, bosses=False, areaLayoutBase=False, noVariaTweaks=False):
         try:
             # apply standard patches
@@ -717,9 +724,11 @@ class RomPatcher:
         except Exception as e:
             raise Exception("Error patching {}. ({})".format(self.romFileName, e))
 
-    def applyIPSPatch(self, patchName):
+    def applyIPSPatch(self, patchName, patchDict=None):
+        if patchDict is None:
+            patchDict = patches
         print("Apply patch {}".format(patchName))
-        patchData = patches[patchName]
+        patchData = patchDict[patchName]
         for address in patchData:
             self.romFile.seek(address)
             for byte in patchData[address]:

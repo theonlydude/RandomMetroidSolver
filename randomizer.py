@@ -201,6 +201,7 @@ if __name__ == "__main__":
     parser.add_argument('--randoPreset', help="rando preset file", dest="randoPreset", nargs='?', default=None)
     parser.add_argument('--plandoRando', help="json string with already placed items/locs", dest="plandoRando",
                         nargs='?', default=None)
+    parser.add_argument('--sprite', help='use a custom sprite for Samus', dest='sprite', default=None)
 
     # parse args
     args = parser.parse_args()
@@ -553,6 +554,8 @@ if __name__ == "__main__":
         if args.patchOnly == False:
             romPatcher.writeMagic()
             romPatcher.writeMajorsSplit(args.majorsSplit)
+        if args.sprite is not None:
+            romPatcher.customSprite(args.sprite)
         if args.palette == True:
             paletteSettings = {
                 "global_shift": None,

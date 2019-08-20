@@ -1773,7 +1773,9 @@ class Randomizer(object):
         runtime_s = 0
         startDate = time.clock()
         self.prevDiffTarget = None
-        while len(self.itemPool) > 0 and not isStuck and runtime_s <= self.runtimeLimit_s:
+        while ((len(self.itemPool) > 0 or len(self.plandoItemPool) > 0)
+               and not isStuck
+               and runtime_s <= self.runtimeLimit_s):
             # dynamic params determination (useful for variable speed)
             self.determineParameters()
             # add available plando locs

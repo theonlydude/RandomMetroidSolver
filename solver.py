@@ -1019,11 +1019,9 @@ class InteractiveSolver(CommonSolver):
             '--plandoRando', plandoCurrentJson,
             '--progressionSpeed', parameters["progressionSpeed"],
             '--minorQty', parameters["minorQty"],
+            '--maxDifficulty', 'hardcore',
             '--energyQty', parameters["energyQty"]
         ]
-
-        if parameters["maxDifficulty"] != "no difficulty cap":
-            params += ['--maxDifficulty', parameters["maxDifficulty"]]
 
         subprocess.call(params)
 
@@ -1745,7 +1743,6 @@ def interactiveSolver(args):
                 params["lock"] = args.lock
             elif args.action == "randomize":
                 params["progressionSpeed"] = args.progressionSpeed
-                params["maxDifficulty"] = args.maxDifficulty
                 params["minorQty"] = args.minorQty
                 params["energyQty"] = args.energyQty
         elif args.scope == 'item':
@@ -1862,8 +1859,6 @@ if __name__ == "__main__":
                         dest="fill", action='store_true')
     parser.add_argument('--progressionSpeed', help="rando plando (used in interactive mode)",
                         dest="progressionSpeed", nargs="?", default=None, choices=["slowest", "slow", "medium", "fast", "fastest", "basic", "VARIAble"])
-    parser.add_argument('--maxDifficulty', help="rando plando  (used in interactive mode)",
-                        dest="maxDifficulty", nargs="?", default=None, choices=["no difficulty cap", "easy", "medium", "hard", "harder", "hardcore", "mania"])
     parser.add_argument('--minorQty', help="rando plando  (used in interactive mode)",
                         dest="minorQty", nargs="?", default=None, choices=[str(i) for i in range(0,101)])
     parser.add_argument('--energyQty', help="rando plando  (used in interactive mode)",

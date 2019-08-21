@@ -1472,7 +1472,6 @@ class WS(object):
                 params.append('--lock')
         elif action == 'randomize':
             params += ['--progressionSpeed', parameters["progressionSpeed"],
-                       '--maxDifficulty', parameters["maxDifficulty"],
                        '--minorQty', parameters["minorQty"],
                        '--energyQty', parameters["energyQty"]
             ]
@@ -1664,8 +1663,6 @@ class WS_common_randomize(WS):
     def validate(self):
         super(WS_common_randomize, self).validate()
 
-        if request.vars.maxDifficulty not in ["no difficulty cap", "easy", "medium", "hard", "harder", "hardcore", "mania"]:
-            raiseHttp(400, "Wrong value for maxDifficulty: {}".format(request.vars.maxDifficulty), True)
         if request.vars.progressionSpeed not in ["slowest", "slow", "medium", "fast", "fastest", "basic", "VARIAble"]:
             raiseHttp(400, "Wrong value for progressionSpeed: {}".format(request.vars.progressionSpeed), True)
         minorQtyInt = getInt('minorQty', True)
@@ -1679,7 +1676,7 @@ class WS_common_randomize(WS):
             raiseHttp(400, "Randomize can only be use in plando mode", True)
 
         params = {}
-        for elem in "maxDifficulty", "progressionSpeed", "minorQty", "energyQty":
+        for elem in "progressionSpeed", "minorQty", "energyQty":
             params[elem] = request.vars[elem]
 
         self.session["rando"] = params

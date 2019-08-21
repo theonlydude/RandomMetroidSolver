@@ -294,7 +294,7 @@ class Helpers(object):
     # - estimation of the fight duration in seconds (well not really, it
     # is if you fire and land shots perfectly and constantly), giving info
     # to compute boss fight difficulty
-    def canInflictEnoughDamages(self, bossEnergy, doubleSuper=False, charge=True, power=False, givesDrops=True, ignoreMissiles=False):
+    def canInflictEnoughDamages(self, bossEnergy, doubleSuper=False, charge=True, power=False, givesDrops=True, ignoreMissiles=False, ignoreSupers=False):
         # TODO: handle special beam attacks ? (http://deanyd.net/sm/index.php?title=Charge_Beam_Combos)
         sm = self.smbm
 
@@ -312,7 +312,10 @@ class Helpers(object):
         else:
             missilesDamage = missilesAmount * 100
         supersAmount = sm.itemCount('Super') * 5
-        oneSuper = 300.0
+        if ignoreSupers == True:
+            oneSuper = 0
+        else:
+            oneSuper = 300.0
         if doubleSuper == True:
             oneSuper *= 2
         supersDamage = supersAmount * oneSuper
@@ -567,7 +570,9 @@ class Helpers(object):
         (ammoMargin, secs) = self.canInflictEnoughDamages(3000, charge=False, givesDrops=False)
         if ammoMargin == 0:
             return SMBool(False)
-
+        # requires 10-10 to break the glass
+        if sm.itemCount('Missile') <= 1 or sm.itemCount('Super') <= 1:
+            return SMBool(False)
         # we actually don't give a shit about MB1 difficulty,
         # since we embark its health in the following calc
         (ammoMargin, secs) = self.canInflictEnoughDamages(18000 + 3000, givesDrops=False)
@@ -594,10 +599,10 @@ class Helpers(object):
     @Cache.decorator
     def canPassZebetites(self):
         sm = self.smbm
-        # account for one zebetite, refill may be necessary
         return sm.wor(sm.wand(sm.haveItem('Ice'), sm.knowsIceZebSkip()),
                       sm.wand(sm.haveItem('SpeedBooster'), sm.knowsSpeedZebSkip()),
-                      SMBool(self.canInflictEnoughDamages(1100, charge=False, givesDrops=False)[0] >= 1, 0))
+                      # account for one zebetite, refill may be necessary
+                      SMBool(self.canInflictEnoughDamages(1100, charge=False, givesDrops=False, ignoreSupers=True)[0] >= 1, 0))
 
     @Cache.decorator
     def enoughStuffTourian(self):

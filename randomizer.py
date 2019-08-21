@@ -470,7 +470,7 @@ if __name__ == "__main__":
         dumpErrorMsg(args.output, randomizer.errorMsg)
         print("Can't generate " + fileName + " with the given parameters: {}".format(randomizer.errorMsg))
         # in vcr mode we still want the seed to be generated to analyze it
-        if args.vcr == False and args.plandoRando == None:
+        if args.vcr == False:
             sys.exit(-1)
 
     # hide some items like in dessy's

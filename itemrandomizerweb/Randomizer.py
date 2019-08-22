@@ -680,7 +680,7 @@ class Randomizer(object):
         self.itemLocations = []
 
         self.itemPool = None
-        self.plandoItemPool = None
+        self.plandoItemPool = []
         if self.settings.plandoRando != None:
             plando = SuperPlandoProvider(self.settings, self.smbm, self)
             (self.itemPool, self.plandoItemPool) = plando.getItemPool()

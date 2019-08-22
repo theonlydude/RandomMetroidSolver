@@ -485,7 +485,7 @@ class ItemPoolGeneratorPlando(ItemPoolGenerator):
                 raise Exception("Too many items already placed by the plando: can't add the remaining majors: {}".format(', '.join(majors)))
 
             # add minimum minors to finish the game
-            for (itemType, minimum) in [('Missile', 2), ('Super', 2), ('PowerBomb', 1)]:
+            for (itemType, minimum) in [('Missile', 3), ('Super', 2), ('PowerBomb', 1)]:
                 while self.exclude[itemType] < minimum:
                     self.itemManager.addItem(itemType, 'Minor')
                     self.exclude[itemType] += 1

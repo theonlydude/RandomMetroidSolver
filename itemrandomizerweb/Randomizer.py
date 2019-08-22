@@ -351,9 +351,9 @@ class SuperPlandoProvider(object):
         for (itemName, minNumber) in [
                 ("Nothing", 0),
                 ("NoEnergy", 0),
-                ("Missile", 1),
+                ("Missile", 3),
                 ("PowerBomb", 1),
-                ("Super", 1),
+                ("Super", 2),
                 ('Reserve', 0),
                 ('ETank', 1),
                 ('XRayScope', 0),

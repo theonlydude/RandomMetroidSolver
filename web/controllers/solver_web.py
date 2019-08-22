@@ -1836,6 +1836,8 @@ def initCustomizerSession():
         session.customizer['maxDegree'] = 15
         session.customizer['invert'] = "on"
         session.customizer['globalShift'] = "on"
+        session.customizer['customSpriteEnable'] = "off"
+        session.customizer['customSprite'] = "samus"
 
         for patch in patches:
             if patch[0] in ['skip_intro', 'skip_ceres']:
@@ -1845,12 +1847,22 @@ def initCustomizerSession():
             else:
                 session.customizer[patch[0]] = "off"
 
+customSprites = {
+    'bailey': {"name": "Bailey", "desc": "", "author": "machin"},
+    'fed_trooper': {"name": "Fed Trooper", "desc": "", "author": "bidule"},
+    'hitbox_helper': {"name": "Hitbox Helper", "desc": "", "author": "lui"},
+    'marga': {"name": "Marga", "desc": "", "author": "un mec"},
+    'megaman': {"name": "Megaman", "desc": "", "author": "truc"},
+    'samus': {"name": "Samus", "desc": "", "author": "l'autre"},
+    'win95_cursor': {"name": "Win95 Cursor", "desc": "", "author": "chose"},
+}
+
 def customizer():
     response.title = 'Super Metroid VARIA Seeds Customizer'
 
     initCustomizerSession()
 
-    return dict(patches=patches)
+    return dict(patches=patches, customSprites=customSprites)
 
 def customWebService():
     # check validity of all parameters
@@ -1858,6 +1870,9 @@ def customWebService():
     others = ['colorsRandomization', 'suitsPalettes', 'beamsPalettes', 'tilesPalettes', 'enemiesPalettes',
               'bossesPalettes', 'minDegree', 'maxDegree', 'invert']
     validateWebServiceParams(patches, [], others, isJson=True)
+    if request.vars.customSpriteEnable == 'on':
+        if request.vars.customSprite not in customSprites:
+            raiseHttp(400, "Wrong value for customSprite", True)
 
     # update session
     session.customizer['colorsRandomization'] = request.vars.colorsRandomization
@@ -1870,6 +1885,8 @@ def customWebService():
     session.customizer['maxDegree'] = request.vars.maxDegree
     session.customizer['invert'] = request.vars.invert
     session.customizer['globalShift'] = request.vars.globalShift
+    session.customizer['customSpriteEnable'] = request.vars.customSpriteEnable
+    session.customizer['customSprite'] = request.vars.customSprite
     for patch in patches:
         session.customizer[patch] = request.vars[patch]
 
@@ -1911,6 +1928,10 @@ def customWebService():
         params += ['--min_degree', request.vars.minDegree, '--max_degree', request.vars.maxDegree]
         if request.vars.invert == 'on':
             params.append('--invert')
+
+    if request.vars.customSpriteEnable == 'on':
+        params += ['--sprite', "{}.ips".format(request.vars.customSprite)]
+        params.append('--no_shift_suit_palettes')
 
     print("before calling: {}".format(params))
     start = datetime.now()

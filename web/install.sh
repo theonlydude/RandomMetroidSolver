@@ -358,3 +358,11 @@ find ~/web2py/applications/solver/static -xtype l -exec rm -f {} \;
 [ -L ~/web2py/applications/solver/static/images/load_popup.png ] || ln -s ~/RandomMetroidSolver/web/static/help/load_popup.png ~/web2py/applications/solver/static/images/load_popup.png
 
 [ -L ~/web2py/applications/solver/static/js/jquery.redirect.js ] || ln -s ~/RandomMetroidSolver/web/static/jquery.redirect.js ~/web2py/applications/solver/static/js/jquery.redirect.js
+
+[ -L ~/web2py/applications/solver/static/images/bailey.png ] || ln -s ~/RandomMetroidSolver/web/static/samus_sprites/bailey.png ~/web2py/applications/solver/static/images/bailey.png
+[ -L ~/web2py/applications/solver/static/images/fed_trooper.png ] || ln -s ~/RandomMetroidSolver/web/static/samus_sprites/fed_trooper.png ~/web2py/applications/solver/static/images/fed_trooper.png
+[ -L ~/web2py/applications/solver/static/images/hitbox_helper.png ] || ln -s ~/RandomMetroidSolver/web/static/samus_sprites/hitbox_helper.png ~/web2py/applications/solver/static/images/hitbox_helper.png
+[ -L ~/web2py/applications/solver/static/images/marga.png ] || ln -s ~/RandomMetroidSolver/web/static/samus_sprites/marga.png ~/web2py/applications/solver/static/images/marga.png
+[ -L ~/web2py/applications/solver/static/images/megaman.png ] || ln -s ~/RandomMetroidSolver/web/static/samus_sprites/megaman.png ~/web2py/applications/solver/static/images/megaman.png
+[ -L ~/web2py/applications/solver/static/images/samus.png ] || ln -s ~/RandomMetroidSolver/web/static/samus_sprites/samus.png ~/web2py/applications/solver/static/images/samus.png
+[ -L ~/web2py/applications/solver/static/images/win95_cursor.png ] || ln -s ~/RandomMetroidSolver/web/static/samus_sprites/win95_cursor.png ~/web2py/applications/solver/static/images/win95_cursor.png

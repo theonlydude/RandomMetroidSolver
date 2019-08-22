@@ -16,6 +16,9 @@ extend 'layout.html'
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 
+<link rel="stylesheet" type="text/css" href="{{=URL('static','image-picker/image-picker.css')}}">
+<script src="{{=URL('static', 'image-picker/image-picker.js')}}" type="text/javascript"></script>
+
 <title>Super Metroid VARIA Customizer</title>
 
 <style>
@@ -156,6 +159,13 @@ h1 {
     /* vertical-align: top; */
     margin-right: 0.5em;
 }
+.border {
+    border: 1px solid #cccccc;
+    padding-left: 1em;
+    padding-right: 1em;
+    margin-bottom: 0.5em;
+    margin-top: 0.5em;
+}
 </style>
 
 <script type="text/javascript">
@@ -209,6 +219,13 @@ function AjaxCallCompleted(data) {
     reader.onload = function(e) {
         var bytes = new Uint8Array(e.target.result);
 
+        // with custom sprites we have to create a bigger array
+        if(document.getElementById("customSpriteEnable").checked) {
+          var tmp = new Uint8Array(0x400000);
+          tmp.set(bytes);
+          bytes = tmp;
+        }
+
         for(var key in data) {
             if(key === "fileName" || key === "errorMsg") { continue; }
             bytes[key] = data[key];
@@ -260,7 +277,7 @@ function doSubmit() {
     }
 
     var dataDict = {};
-    var elems = ["itemsounds", "spinjumprestart", "rando_speed", "elevators_doors_speed", "animals", "No_Music", "colorsRandomization", "suitsPalettes", "beamsPalettes", "tilesPalettes", "enemiesPalettes", "bossesPalettes", "globalShift"];
+    var elems = ["itemsounds", "spinjumprestart", "rando_speed", "elevators_doors_speed", "animals", "No_Music", "colorsRandomization", "suitsPalettes", "beamsPalettes", "tilesPalettes", "enemiesPalettes", "bossesPalettes", "globalShift", "customSpriteEnable", "customSprite"];
 
     for(var i=0; i<elems.length; i++) {
        dataDict[elems[i]] = document.getElementById(elems[i]).value;
@@ -347,6 +364,9 @@ window.onload = function(){
     var colorRando = document.getElementById("colorsRandomization");
     colorRando.onchange = setColorRando;
 
+    var customSpriteEnable = document.getElementById("customSpriteEnable");
+    customSpriteEnable.onchange = enableCustomSpriteDropdown;
+
     initSlider();
 
 {{
@@ -358,6 +378,26 @@ if session.customizer["invert"] == "on":
 }}
 
     setColorRando();
+    enableCustomSpriteDropdown()
+
+    $("#customSprite").imagepicker();
+}
+
+function enableCustomSpriteDropdown() {
+    var customSpriteEnable = document.getElementById("customSpriteEnable");
+    var customSprite = document.getElementById("customSprite");
+    var text = document.getElementById("customSpriteEnableText");
+    if(customSpriteEnable.checked) {
+      console.log("checked, set disabled to false");
+      customSprite.disabled = false;
+      customSpriteEnable.value = "on";
+      text.className = "";
+    } else {
+      console.log("non checked, set disabled to true");
+      customSprite.disabled = true;
+      customSpriteEnable.value = "off";
+      text.className = "disabledText";
+    }
 }
 
 function setColorRando() {
@@ -526,6 +566,17 @@ function startTheTour(step=-1) {
       content: "<p>Randomize the colors of various graphical elements:<br/><img src=\"/solver/static/images/palettesRando.png\" alt=\"colors rando\" title=\"colors rando\" class=\"full\"/></p><br/><p>Use the slider to restrict the possible range of the colors shifting. The colors on the slider are the result colors for Samus, the yellow in the middle being Samus vanilla color:<br/><img src=\"/solver/static/images/samus_degrees.png\" alt=\"samus degrees\" title=\"samus degrees\" class=\"full\"/>You can invert the range by clicking on the invert button.</p><p>By default, the same shift is applied to all elements for color consistency. If you disable the setting, a different shift will be used for each category.</p>"
     },
     {
+      element: "#customSpriteStep",
+      title: "Custom Sprites",
+      content: "<p>Replace Samus sprite with a custom one.</p>\
+<p>The sprites have been generated using <a href=\"https://github.com/Artheau/SpriteSomething\">Sprite Something</a>.</p>\
+{{
+for item in sorted(customSprites.keys()):
+  response.write('<p>{} by {}</p>\\\n'.format(customSprites[item]['name'], customSprites[item]['author']), escape=False)
+  pass
+}}"
+    },
+    {
       element: "#patchesStep",
       title: "Patches",
       content: "Choose the patches that you want to include in your customized seed."
@@ -628,7 +679,34 @@ def displayCheckbox(id, defaultTrue=False):
 		  <td class="third"></td>
 		</tr>
 	      </table>
-	    <h4>Patches<span class="right"><button type="button" onclick="startTheTour(2)" id="patchesStep">?</button></span></h4>
+	    <h4>Custom Sprites</h4>
+	    <p>
+	      <table class="full">
+		<colgroup><col class="check" /><col class="full" /></colgroup>
+		<tr>
+	          <td>{{displayCheckbox("customSpriteEnable")}}</td>
+		  <td><span id="customSpriteEnableText">Replace Samus sprite with a custom one.</span></td>
+                  <td><button type="button" onclick="startTheTour(2)" id="customSpriteStep">?</button></td>
+		</tr>
+		<tr>
+		  <td></td>
+		  <td>
+		    <div class="border">
+		      <select class="filldropdown" id="customSprite" name="customSprite">
+{{
+  for item in sorted(customSprites.keys()):
+    response.write("<optgroup label=\"{}\">\n".format(customSprites[item]["name"]), escape=False)
+    response.write("  <option data-img-src=\"/solver/static/images/{}.png\" value=\"{}\" {}>{}</option>\n".format(item, item, 'selected="selected"' if item == session.customizer['customSprite'] else "", item), escape=False)
+    response.write("</optgroup>\n", escape=False)
+    pass
+}}
+		      </select>
+		    </div>
+		  <td>
+		</tr>
+	      </table>
+	    </p>
+	    <h4>Patches<span class="right"><button type="button" onclick="startTheTour(3)" id="patchesStep">?</button></span></h4>
 	    <p>
 	      Patches to customize your ROM.
 	    </p>

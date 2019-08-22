@@ -295,6 +295,8 @@ def getColor(percent, nSeeds, split):
   #              Missile, Super, PowerBomb,  morph, bomb, springball, screwattack, varia, gravity, hijump, spacejump, speedbooster, charge, ice, wave, spazer, plasma, grapple, xrayscope
   itemsMapping = [     6,    15,         9,      7,    0,         14,          10,    16,       3,      4,        11,           13,      1,   5,   17,     12,      8,       2,        18]
 
+  percentTotalSum = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
   # areas: crateria / brinstar / wrecked ship / maridia / norfair / lower norfair
   for area in ["Crateria", "Brinstar", "WreckedShip", "Maridia", "Norfair", "LowerNorfair"]:
     percentSum = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
@@ -330,6 +332,7 @@ def getColor(percent, nSeeds, split):
 
         response.write("<td class=\"border {}\">{}</td>".format(color, percent), escape=False)
         percentSum[itemsMapping[itemI]] += percent
+        percentTotalSum[itemsMapping[itemI]] += percent
         pass
   
       response.write("</tr>\n", escape=False)
@@ -339,6 +342,14 @@ def getColor(percent, nSeeds, split):
       response.write("<td class=\"border\">{}</td>".format(percentSum[itemsMapping[itemI]]), escape=False)
       pass
     response.write("</tr>\n", escape=False)
+
+    response.write("<tr><td class=\"center grey bold\" colspan=\"20\">Total</td></tr>\n", escape=False)
+    response.write("<tr><td class=\"bold\"></td>\n", escape=False)
+    for itemI, item in enumerate(["Missile", "Super", "PowerBomb", "Morph", "Bomb", "Springball", "ScrewAttack", "Varia", "Gravity", "HiJump", "SpaceJump", "SpeedBooster", "Charge", "Ice", "Wave", "Spazer", "Plasma", "Grapple", "XRayScope"]):
+      response.write("<td class=\"border\">{}</td>".format(percentTotalSum[itemsMapping[itemI]]), escape=False)
+      pass
+    response.write("</tr>\n", escape=False)
+
     pass
 }}
   </table>

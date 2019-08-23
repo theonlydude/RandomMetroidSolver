@@ -1,6 +1,7 @@
 import struct, colorsys, random
 from rom import RomLoader
 from itemrandomizerweb.palettes import palettes
+from itemrandomizerweb.sprite_palettes import sprite_palettes
 import log
 
 #Palette Hue Shift
@@ -100,10 +101,12 @@ import log
 
 
 class PaletteRando(object):
-    def __init__(self, romPatcher, settings):
+    def __init__(self, romPatcher, settings, sprite):
         self.logger = log.get('Palette')
 
         self.romPatcher = romPatcher
+        if sprite is not None:
+            palettes.update(sprite_palettes[sprite])
         self.romLoader = RomLoader.factory(palettes)
         self.palettesROM = self.romLoader.getROM()
         self.outFile = romPatcher.romFile

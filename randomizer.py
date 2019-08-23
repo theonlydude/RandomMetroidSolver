@@ -576,7 +576,7 @@ if __name__ == "__main__":
             }
             for param in paletteSettings:
                 paletteSettings[param] = getattr(args, param)
-            PaletteRando(romPatcher, paletteSettings).randomize()
+            PaletteRando(romPatcher, paletteSettings, args.sprite).randomize()
         romPatcher.end()
 
         if args.rom is None:

@@ -1826,7 +1826,7 @@ def initCustomizerSession():
     if session.customizer == None:
         session.customizer = {}
 
-        session.customizer['colorsRandomization'] = "on"
+        session.customizer['colorsRandomization'] = "off"
         session.customizer['suitsPalettes'] = "on"
         session.customizer['beamsPalettes'] = "on"
         session.customizer['tilesPalettes'] = "on"
@@ -1842,10 +1842,7 @@ def initCustomizerSession():
         for patch in patches:
             if patch[0] in ['skip_intro', 'skip_ceres']:
                 continue
-            if patch[2] == True:
-                session.customizer[patch[0]] = "on"
-            else:
-                session.customizer[patch[0]] = "off"
+            session.customizer[patch[0]] = "off"
 
 customSprites = {
     'bailey': {"name": "Bailey", "desc": "", "author": "machin"},

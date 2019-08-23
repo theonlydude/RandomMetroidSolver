@@ -1990,7 +1990,7 @@ def validateExtStatsParams():
     return (True, None)
 
 def extStats():
-    response.title = 'Super Metroid VARIA Randomizer and ExtStats statistics'
+    response.title = 'Super Metroid VARIA Randomizer statistics'
 
     initExtStatsSession()
 

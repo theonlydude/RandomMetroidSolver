@@ -1845,13 +1845,13 @@ def initCustomizerSession():
             session.customizer[patch[0]] = "off"
 
 customSprites = {
-    'bailey': {"name": "Bailey", "desc": "", "author": "machin"},
-    'fed_trooper': {"name": "Fed Trooper", "desc": "", "author": "bidule"},
-    'hitbox_helper': {"name": "Hitbox Helper", "desc": "", "author": "lui"},
-    'marga': {"name": "Marga", "desc": "", "author": "un mec"},
-    'megaman': {"name": "Megaman", "desc": "", "author": "truc"},
-    'samus': {"name": "Samus", "desc": "", "author": "l'autre"},
-    'win95_cursor': {"name": "Win95 Cursor", "desc": "", "author": "chose"},
+    'samus': {"index":0, "name": "Samus", "desc": "Samus, with a distinct animation for Screw Attack without Space Jump and a new Crystal Flash animation", "author": "Artheau"},
+    'hitbox_helper': {"index":1, "name": "Hitbox Helper", "desc": "Samus, with her actual hitbox on top", "author": "Artheau"},
+    'bailey': {"index":2, "name": "Bailey", "desc": "Justin Bailey, aka Samus in an 80s swimsuit", "author": " and Artheau"},
+    'megaman': {"index":3, "name": "Megaman", "desc": "Megaman X!", "author": "Artheau"},
+    'fed_trooper': {"index":4, "name": "Fed Trooper", "desc": "A Galactic Federation trooper", "author": "bidule"},
+    'marga': {"index":5, "name": "Marga", "desc": "???", "author": "Plan"},
+    'win95_cursor': {"index":6, "name": "Win95 Cursor", "desc": "A classic Windows cursor...", "author": "PlaguedOne"},
 }
 
 def customizer():

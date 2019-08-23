@@ -43,6 +43,9 @@ if (hs.registerOverlay) {
 <title>Super Metroid VARIA Randomizer</title>
 
 <style>
+#colorRandomization {
+    display: none
+}
 .rightStep {
     float: right;
     margin-right: 0.3em;
@@ -1395,6 +1398,9 @@ def displayNumber(id, min, max, default, step="1"):
         <div class="row">
 	  <div class="column">
 	    <p>The Very Adaptive Randomizer of Items and Area (VARIA) randomizer will generate a Super Metroid ROM finishable using the known techniques of the chosen preset.</p>
+	    <p>
+	      You can randomize in-game colors and use a custom Samus sprite on the <a href="/customizer" target="_blank">Customizer page</a>.
+	    </p>
             <table class="full">
               <colgroup><col class="half" /><col class="half" /></colgroup>
               <tr>
@@ -1545,6 +1551,7 @@ def displayNumber(id, min, max, default, step="1"):
                 <td><button type="button" onclick="startTheTour(18)">?</button></td>
 	      </tr>
             </table>
+	    <div id="colorRandomization">
             <h4>Colors Randomization</h4>
             <p>
 	      Randomize the colors of Samus, beams, levels, enemies and bosses.
@@ -1576,6 +1583,7 @@ def displayNumber(id, min, max, default, step="1"):
 		  <td class="third"></td>
 		</tr>
 	      </table>
+	    </div>
 	    </div>
 	    <div id="superFunVisibility">
               <h4>Super Fun Times (TM)</h4>

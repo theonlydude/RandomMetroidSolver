@@ -582,8 +582,8 @@ function startTheTour(step=-1) {
       content: "<p>Replace Samus sprite with a custom one.</p>\
 <p>The sprites have been created using <a href=\"https://github.com/Artheau/SpriteSomething\">Sprite Something</a> by Artheau.</p>\
 {{
-for item in sorted(customSprites.keys()):
-  response.write('<p>{} by {}</p>\\\n'.format(customSprites[item]['name'], customSprites[item]['author']), escape=False)
+for (key, value) in sorted(customSprites.items(), key=lambda x: x[1]['index']):
+  response.write('<p>{} by {}</p>\\\n'.format(value['name'], value['author']), escape=False)
   pass
 }}"
     },
@@ -702,9 +702,9 @@ def displayCheckbox(id, defaultTrue=False):
 		    <div class="border">
 		      <select class="filldropdown" id="customSprite" name="customSprite">
 {{
-  for item in sorted(customSprites.keys()):
-    response.write("<optgroup label=\"{}\">\n".format(customSprites[item]["name"]), escape=False)
-    response.write("  <option data-img-src=\"/solver/static/images/{}.png\" value=\"{}\" {}>{}</option>\n".format(item, item, 'selected="selected"' if item == session.customizer['customSprite'] else "", item), escape=False)
+  for (key, value) in sorted(customSprites.items(), key=lambda x: x[1]['index']):
+    response.write("<optgroup label=\"{}\">\n".format(value["name"]), escape=False)
+    response.write("  <option data-img-src=\"/solver/static/images/{}.png\" value=\"{}\" {}>{}</option>\n".format(key, key, 'selected="selected"' if key == session.customizer['customSprite'] else "", key), escape=False)
     response.write("</optgroup>\n", escape=False)
     pass
 }}

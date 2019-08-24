@@ -1851,7 +1851,7 @@ customSprites = {
     'megaman': {"index":3, "name": "Megaman", "desc": "Megaman X!", "author": "Artheau"},
     'fed_trooper': {"index":4, "name": "Fed Trooper", "desc": "A Galactic Federation trooper", "author": "Physix"},
     'marga': {"index":5, "name": "Margatroid", "desc": "Alice Margatroid from the Touhou Project", "author": "Plan"},
-    'win95_cursor': {"index":6, "name": "Win95 Cursor", "desc": "A classic Windows cursor...", "author": "PlaguedOne"},
+    'win95_cursor': {"index":6, "name": "Win95 Cursor", "desc": "A classic Windows cursor...", "author": "PlaguedOne"}
 }
 
 def customizer():

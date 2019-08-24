@@ -114,35 +114,6 @@ h1 {
 .highslide-dimming {
     background: black;
 }
-#overlay {
-    position: fixed; /* Sit on top of the page content */
-    display: none; /* Hidden by default */
-    width: 100%; /* Full width (cover the whole page) */
-    height: 100%; /* Full height (cover the whole page) */
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0,0,0,0.5); /* Black background with opacity */
-    z-index: 2; /* Specify a stack order in case you're using a different order for other elements */
-    cursor: pointer; /* Add a pointer on hover */
-}
-#loadingGIF {
-    position: absolute;
-    left: 5%;
-    z-index: 3;
-    display:none;
-}
-@media (max-height: 800px) {
-    .loadingGIF {
-         top: 20%;
-    }
-}
-@media (min-height: 800px) {
-    .loadingGIF {
-         top: 40%;
-    }
-}
 .sixty {
     width: 65%
 }
@@ -190,8 +161,6 @@ var globalSwitchs = {};
 function ajaxFail(jqXHR, textStatus) {
   document.getElementById("flash").innerHTML = jqXHR.responseText;
   $('#flash').show();
-  $('#overlay').hide();
-  $('#loadingGIF').hide();
 }
 
 function ajaxFailJSON(jqXHR, textStatus) {
@@ -201,8 +170,6 @@ function ajaxFailJSON(jqXHR, textStatus) {
     document.getElementById("flash").innerHTML = jqXHR.responseJSON;
   }
   $('#flash').show();
-  $('#overlay').hide();
-  $('#loadingGIF').hide();
 }
 
 function unpack_3bytes(ips, i) {
@@ -302,8 +269,6 @@ function AjaxCallCompleted(data) {
     if(displayFlash == false){
         $('#flash').hide();
     }
-    $('#overlay').hide();
-    $('#loadingGIF').hide();
 }
 
 function doSubmit() {
@@ -354,10 +319,6 @@ function doSubmit() {
 
     request.done(AjaxCallCompleted);
     request.fail(ajaxFail);
-
-    // while WS is working, display "working" message
-    $('#overlay').show();
-    $('#loadingGIF').show();
   }
 
   return false;
@@ -659,9 +620,6 @@ def displayCheckbox(id, defaultTrue=False):
     {{pass}}
   {{pass}}
 <body>
-  <div id="overlay"></div>
-  <div id="loadingGIF"><img src={{=URL('static/images','ajax-loader.gif')}}/></div>
-
   <div class="fixed">
     <div class="menu">
     <table class="full menuTable">

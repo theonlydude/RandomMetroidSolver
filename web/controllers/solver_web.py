@@ -1928,7 +1928,6 @@ def customWebService():
 
     if request.vars.customSpriteEnable == 'on':
         params += ['--sprite', "{}.ips".format(request.vars.customSprite)]
-        params.append('--no_shift_suit_palettes')
 
     print("before calling: {}".format(params))
     start = datetime.now()

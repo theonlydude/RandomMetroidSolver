@@ -1846,11 +1846,11 @@ def initCustomizerSession():
 
 customSprites = {
     'samus': {"index":0, "name": "Samus", "desc": "Samus, with a distinct animation for Screw Attack without Space Jump and a new Crystal Flash animation", "author": "Artheau"},
-    'hitbox_helper': {"index":1, "name": "Hitbox Helper", "desc": "Samus, with her actual hitbox on top", "author": "Artheau"},
-    'bailey': {"index":2, "name": "Bailey", "desc": "Justin Bailey, aka Samus in an 80s swimsuit", "author": " and Artheau"},
+    'hitbox_helper': {"index":1, "name": "Hitbox Helper", "desc": "Samus, with her actual hitbox on top", "author": "Artheau and Komaru"},
+    'bailey': {"index":2, "name": "Bailey", "desc": "Justin Bailey, aka Samus in an 80s swimsuit", "author": "Auximines"},
     'megaman': {"index":3, "name": "Megaman", "desc": "Megaman X!", "author": "Artheau"},
-    'fed_trooper': {"index":4, "name": "Fed Trooper", "desc": "A Galactic Federation trooper", "author": "bidule"},
-    'marga': {"index":5, "name": "Marga", "desc": "???", "author": "Plan"},
+    'fed_trooper': {"index":4, "name": "Fed Trooper", "desc": "A Galactic Federation trooper", "author": "Physix"},
+    'marga': {"index":5, "name": "Marga", "desc": "Characters from Touhou", "author": "Plan"},
     'win95_cursor': {"index":6, "name": "Win95 Cursor", "desc": "A classic Windows cursor...", "author": "PlaguedOne"},
 }
 

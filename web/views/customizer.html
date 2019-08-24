@@ -22,6 +22,9 @@ extend 'layout.html'
 <title>Super Metroid VARIA Customizer</title>
 
 <style>
+th {
+    border-bottom: 1px solid #ddd;
+}
 h1 {
   text-align: center;
   color: #444;
@@ -108,7 +111,7 @@ h1 {
 }
 
 .popover {
-    max-width: 20%;
+    max-width: 60%;
     position: fixed;
 }
 .highslide-dimming {
@@ -579,12 +582,14 @@ function startTheTour(step=-1) {
     {
       element: "#customSpriteStep",
       title: "Custom Sprites",
-      content: "<p>Replace Samus sprite with a custom one.</p>\
-<p>The sprites have been created using <a href=\"https://github.com/Artheau/SpriteSomething\">Sprite Something</a> by Artheau.</p>\
+      content: "<p>The sprites have been created using <a href=\"https://github.com/Artheau/SpriteSomething\">Sprite Something</a> by Artheau.</p>\
+<table>\
+  <th>Sprite</th><th>Author</th><th>Description</th>\
 {{
 for (key, value) in sorted(customSprites.items(), key=lambda x: x[1]['index']):
-  response.write('<p>{} by {}</p>\\\n'.format(value['name'], value['author']), escape=False)
+  response.write('  <tr><td>{}</td><td>{}</td><td>{}</td>\\\n'.format(value['name'], value['author'], value['desc']), escape=False)
   pass
+response.write('</table>', escape=False)
 }}"
     },
     {

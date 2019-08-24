@@ -43,6 +43,14 @@ if (hs.registerOverlay) {
 <title>Super Metroid VARIA Randomizer</title>
 
 <style>
+.customizerText {
+    width: 40%;
+    margin-left: 30%;
+    margin-right: 30%;
+    margin-top: 1em;
+    margin-bottom: 0em;
+    text-align: center;
+}
 #colorRandomization {
     display: none
 }
@@ -1398,9 +1406,6 @@ def displayNumber(id, min, max, default, step="1"):
         <div class="row">
 	  <div class="column">
 	    <p>The Very Adaptive Randomizer of Items and Area (VARIA) randomizer will generate a Super Metroid ROM finishable using the known techniques of the chosen preset.</p>
-	    <p>
-	      You can randomize in-game colors and use a custom Samus sprite on the <a href="/customizer" target="_blank">Customizer page</a>.
-	    </p>
             <table class="full">
               <colgroup><col class="half" /><col class="half" /></colgroup>
               <tr>
@@ -1588,8 +1593,7 @@ def displayNumber(id, min, max, default, step="1"):
 	    <div id="superFunVisibility">
               <h4>Super Fun Times (TM)</h4>
               <p>
-                Have fun randomly removing major items!<br/>
-                <b>Warning:</b> For experienced players only.
+                Have fun randomly removing major items! <b>Warning:</b> For experienced players only.
               </p>
 	      <table class="full">
                 <tr>
@@ -1640,6 +1644,9 @@ for patch in patches:
 	    </div>
 	  </div>
         </div>
+	<p class="customizerText">
+	  You can randomize in-game colors and use a custom Samus sprite on the <a href="/customizer" target="_blank">Customizer page</a>.
+	</p>
         {{=INPUT(_type="submit", _value="Randomize", _id="submitBtn", _class="btn btn-default buttonRandom")}}
     </form>
   </div>

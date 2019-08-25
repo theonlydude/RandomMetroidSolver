@@ -428,6 +428,11 @@ class SuperFunProvider(object):
             pool = self.getItemPool()
         if self.isChozo:
             pool = [item for item in pool if item['Class'] == 'Chozo' or item['Name'] == 'Boss']
+            # forces ice zeb skip in the knows to pass end game condition. this is ugly but valid,
+            # as if zeb skip is not known, an extra missile pack is guaranteed to be added (it won't
+            # be in a chozo location, but the game is still finishable)
+            Knows.IceZebSkip = SMBool(True, 0, [])
+
         poolDict = self.rando.getPoolDict(pool)
         self.log.debug('pool='+str([(t, len(poolDict[t])) for t in poolDict]))
         # give us everything and beat every boss to see what we can access

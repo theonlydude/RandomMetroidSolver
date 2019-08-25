@@ -603,6 +603,19 @@ class CommonSolver(object):
 
         raise Exception("Can't take a decision")
 
+    def checkMB(self, mbLoc):
+        # add mother brain loc and check if it's accessible
+        self.majorLocations.append(mbLoc)
+        self.computeLocationsDifficulty(self.majorLocations)
+        if mbLoc["difficulty"] == True:
+            self.log.debug("MB loc accessible")
+            self.collectMajor(mbLoc)
+            return True
+        else:
+            self.log.debug("MB loc not accessible")
+            self.majorLocations.remove(mbLoc)
+            return False
+
     def computeDifficulty(self):
         # loop on the available locations depending on the collected items.
         # before getting a new item, loop on all of them and get their difficulty,
@@ -645,17 +658,11 @@ class CommonSolver(object):
             canEndGame = self.canEndGame()
             (isEndPossible, endDifficulty) = (canEndGame.bool, canEndGame.difficulty)
             if isEndPossible and hasEnoughItems and endDifficulty <= diffThreshold:
-                # add mother brain loc and check if it's accessible
-                self.majorLocations.append(mbLoc)
-                self.computeLocationsDifficulty(self.majorLocations)
-                if mbLoc["difficulty"] == True:
-                    self.collectMajor(mbLoc)
-                    self.log.debug("canEnd and MB loc is accessible")
+                if self.checkMB(mbLoc):
                     self.log.debug("END")
                     break
                 else:
                     self.log.debug("canEnd but MB loc not accessible")
-                    self.majorLocations.remove(mbLoc)
 
             #self.log.debug(str(self.collectedItems))
             self.log.debug("Current Area : " + area)
@@ -674,7 +681,8 @@ class CommonSolver(object):
                         self.log.debug("STUCK CAN'T REWIND")
                         break
                 else:
-                    self.log.debug("HARD END")
+                    self.log.debug("HARD END 1")
+                    self.checkMB(mbLoc)
                     break
             previous = current
 
@@ -699,7 +707,8 @@ class CommonSolver(object):
                         self.log.debug("STUCK CAN'T REWIND")
                         break
                 else:
-                    self.log.debug("HARD END")
+                    self.log.debug("HARD END 2")
+                    self.checkMB(mbLoc)
                     break
 
             # handle no comeback heuristic

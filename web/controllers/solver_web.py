@@ -818,8 +818,8 @@ def validateWebServiceParams(patchs, quantities, others, isJson=False):
 
     if request.vars.minorQty not in ['random', None]:
         minorQtyInt = getInt('minorQty', isJson)
-        if minorQtyInt < 1 or minorQtyInt > 100:
-            raiseHttp(400, "Wrong value for minorQty, must be between 1 and 100", isJson)
+        if minorQtyInt < 7 or minorQtyInt > 100:
+            raiseHttp(400, "Wrong value for minorQty, must be between 7 and 100", isJson)
 
     if 'energyQty' in others:
         if request.vars.energyQty not in ['sparse', 'medium', 'vanilla', 'random']:
@@ -1337,6 +1337,9 @@ def plando():
         session.plando["preset"] = "regular"
         session.plando["seed"] = None
 
+        # rando params
+        session.plando["rando"] = {}
+
         # set to False in plando.html
         session.plando["firstTime"] = True
 
@@ -1364,8 +1367,8 @@ class WS(object):
             raiseHttp(400, "Unknown scope: {}, must be area/item/common".format(scope), True)
 
         action = request.vars.action
-        if action not in ['add', 'remove', 'clear', 'init', 'get', 'save', 'replace']:
-            raiseHttp(400, "Unknown action {}, must be add/remove/clear/init/get/save".format(action), True)
+        if action not in ['add', 'remove', 'clear', 'init', 'get', 'save', 'replace', 'randomize']:
+            raiseHttp(400, "Unknown action {}, must be add/remove/clear/init/get/save/randomize".format(action), True)
 
         mode = request.vars.mode
         if mode not in ["standard", "seedless", "plando"]:
@@ -1395,8 +1398,8 @@ class WS(object):
             raiseHttp(400, "Missing parameter action", True)
         action = request.vars.action
 
-        if action not in ['init', 'add', 'remove', 'clear', 'get', 'save', 'replace']:
-            raiseHttp(400, "Unknown action {}, must be init/add/remove/clear/get/save".format(action), True)
+        if action not in ['init', 'add', 'remove', 'clear', 'get', 'save', 'replace', 'randomize']:
+            raiseHttp(400, "Unknown action {}, must be init/add/remove/clear/get/save/randomize".format(action), True)
 
     def action(self):
         pass
@@ -1429,7 +1432,9 @@ class WS(object):
                 "areaRando": state["areaRando"],
                 "bossRando": state["bossRando"],
                 "seed": state["seed"],
-                "preset": os.path.basename(os.path.splitext(state["presetFileName"])[0])
+                "preset": os.path.basename(os.path.splitext(state["presetFileName"])[0]),
+                "errorMsg": state["errorMsg"],
+                "last": state["last"]
             })
         else:
             raiseHttp(200, "OK", True)
@@ -1465,6 +1470,11 @@ class WS(object):
         elif action == 'save' and scope == 'common':
             if parameters['lock'] == True:
                 params.append('--lock')
+        elif action == 'randomize':
+            params += ['--progressionSpeed', parameters["progressionSpeed"],
+                       '--minorQty', parameters["minorQty"],
+                       '--energyQty', parameters["energyQty"]
+            ]
 
         if request.vars.debug != None:
             params.append('--vcr')
@@ -1496,9 +1506,18 @@ class WS(object):
         else:
             os.close(fd1)
             os.remove(jsonInFileName)
+
+            msg = "Something wrong happened while iteratively solving the ROM"
+            try:
+                with open(jsonOutFileName, 'r') as jsonFile:
+                    data = json.load(jsonFile)
+                    if "errorMsg" in data:
+                        msg = data["errorMsg"]
+            except Exception as e:
+                pass
             os.close(fd2)
             os.remove(jsonOutFileName)
-            raiseHttp(400, "Something wrong happened while iteratively solving the ROM", True)
+            raiseHttp(400, msg, True)
 
 class WS_common_init(WS):
     def validate(self):
@@ -1559,10 +1578,11 @@ class WS_common_init(WS):
         self.session["mode"] = mode
 
         vcr = request.vars.debug != None
+        fill = request.vars.fill != None and request.vars.fill == "true"
 
-        return self.callSolverInit(jsonRomFileName, presetFileName, preset, seed, mode, vcr)
+        return self.callSolverInit(jsonRomFileName, presetFileName, preset, seed, mode, vcr, fill)
 
-    def callSolverInit(self, jsonRomFileName, presetFileName, preset, romFileName, mode, vcr):
+    def callSolverInit(self, jsonRomFileName, presetFileName, preset, romFileName, mode, vcr, fill):
         if mode != 'seedless':
             (canSolve, magic) = canSolveROM(jsonRomFileName)
             if canSolve == False:
@@ -1578,7 +1598,7 @@ class WS_common_init(WS):
             '--action', "init",
             '--interactive',
             '--mode', mode,
-            '--scope', 'common'
+            '--scope', 'common',
         ]
 
         if mode != "seedless":
@@ -1589,6 +1609,9 @@ class WS_common_init(WS):
 
         if vcr == True:
             params.append('--vcr')
+
+        if fill == True:
+            params.append('--fill')
 
         print("before calling isolver: {}".format(params))
         start = datetime.now()
@@ -1635,6 +1658,30 @@ class WS_common_save(WS):
             raiseHttp(400, "Save can only be use in plando mode", True)
 
         return self.callSolverAction("common", "save", {'lock': request.vars.lock == "lock"})
+
+class WS_common_randomize(WS):
+    def validate(self):
+        super(WS_common_randomize, self).validate()
+
+        if request.vars.progressionSpeed not in ["slowest", "slow", "medium", "fast", "fastest", "basic", "VARIAble"]:
+            raiseHttp(400, "Wrong value for progressionSpeed: {}".format(request.vars.progressionSpeed), True)
+        minorQtyInt = getInt('minorQty', True)
+        if minorQtyInt < 7 or minorQtyInt > 100:
+            raiseHttp(400, "Wrong value for minorQty, must be between 7 and 100", True)
+        if request.vars.energyQty not in ["sparse", "medium", "vanilla"]:
+            raiseHttp(400, "Wrong value for energyQty: {}".format(request.vars.energyQty), True)
+
+    def action(self):
+        if self.session["mode"] != "plando":
+            raiseHttp(400, "Randomize can only be use in plando mode", True)
+
+        params = {}
+        for elem in "progressionSpeed", "minorQty", "energyQty":
+            params[elem] = request.vars[elem]
+
+        self.session["rando"] = params
+
+        return self.callSolverAction("common", "randomize", params)
 
 class WS_area_add(WS):
     def validatePoint(self, point):
@@ -1779,7 +1826,7 @@ def initCustomizerSession():
     if session.customizer == None:
         session.customizer = {}
 
-        session.customizer['colorsRandomization'] = "on"
+        session.customizer['colorsRandomization'] = "off"
         session.customizer['suitsPalettes'] = "on"
         session.customizer['beamsPalettes'] = "on"
         session.customizer['tilesPalettes'] = "on"
@@ -1789,21 +1836,30 @@ def initCustomizerSession():
         session.customizer['maxDegree'] = 15
         session.customizer['invert'] = "on"
         session.customizer['globalShift'] = "on"
+        session.customizer['customSpriteEnable'] = "off"
+        session.customizer['customSprite'] = "samus"
 
         for patch in patches:
             if patch[0] in ['skip_intro', 'skip_ceres']:
                 continue
-            if patch[2] == True:
-                session.customizer[patch[0]] = "on"
-            else:
-                session.customizer[patch[0]] = "off"
+            session.customizer[patch[0]] = "off"
+
+customSprites = {
+    'samus': {"index":0, "name": "Samus", "desc": "Samus, with a distinct animation for Screw Attack without Space Jump and a new Crystal Flash animation", "author": "Artheau"},
+    'hitbox_helper': {"index":1, "name": "Hitbox Helper", "desc": "Samus, with her actual hitbox on top", "author": "Artheau and Komaru"},
+    'bailey': {"index":2, "name": "Bailey", "desc": "Justin Bailey, aka Samus in an 80s swimsuit", "author": "Auximines"},
+    'megaman': {"index":3, "name": "Megaman", "desc": "Megaman X!", "author": "Artheau"},
+    'fed_trooper': {"index":4, "name": "Fed Trooper", "desc": "A Galactic Federation trooper", "author": "Physix"},
+    'marga': {"index":5, "name": "Margatroid", "desc": "Alice Margatroid from the Touhou Project", "author": "Plan"},
+    'win95_cursor': {"index":6, "name": "Win95 Cursor", "desc": "A classic Windows cursor...", "author": "PlaguedOne"}
+}
 
 def customizer():
     response.title = 'Super Metroid VARIA Seeds Customizer'
 
     initCustomizerSession()
 
-    return dict(patches=patches)
+    return dict(patches=patches, customSprites=customSprites)
 
 def customWebService():
     # check validity of all parameters
@@ -1811,6 +1867,9 @@ def customWebService():
     others = ['colorsRandomization', 'suitsPalettes', 'beamsPalettes', 'tilesPalettes', 'enemiesPalettes',
               'bossesPalettes', 'minDegree', 'maxDegree', 'invert']
     validateWebServiceParams(patches, [], others, isJson=True)
+    if request.vars.customSpriteEnable == 'on':
+        if request.vars.customSprite not in customSprites:
+            raiseHttp(400, "Wrong value for customSprite", True)
 
     # update session
     session.customizer['colorsRandomization'] = request.vars.colorsRandomization
@@ -1823,6 +1882,8 @@ def customWebService():
     session.customizer['maxDegree'] = request.vars.maxDegree
     session.customizer['invert'] = request.vars.invert
     session.customizer['globalShift'] = request.vars.globalShift
+    session.customizer['customSpriteEnable'] = request.vars.customSpriteEnable
+    session.customizer['customSprite'] = request.vars.customSprite
     for patch in patches:
         session.customizer[patch] = request.vars[patch]
 
@@ -1864,6 +1925,9 @@ def customWebService():
         params += ['--min_degree', request.vars.minDegree, '--max_degree', request.vars.maxDegree]
         if request.vars.invert == 'on':
             params.append('--invert')
+
+    if request.vars.customSpriteEnable == 'on':
+        params += ['--sprite', "{}.ips".format(request.vars.customSprite)]
 
     print("before calling: {}".format(params))
     start = datetime.now()
@@ -1925,7 +1989,7 @@ def validateExtStatsParams():
     return (True, None)
 
 def extStats():
-    response.title = 'Super Metroid VARIA Randomizer and ExtStats statistics'
+    response.title = 'Super Metroid VARIA Randomizer statistics'
 
     initExtStatsSession()
 

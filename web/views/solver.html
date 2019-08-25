@@ -31,9 +31,15 @@ if (hs.registerOverlay) {
 <script type="text/javascript" src="{{=URL('static', 'js/chosen.jquery.min.js')}}"></script>
 <link rel="stylesheet" type="text/css" href={{=URL("static", "css/chosen.css")}} />
 
+<script type="text/javascript" src="{{=URL('static', 'js/jquery.redirect.js')}}"></script>
+
 <title>Super Metroid VARIA Solver</title>
 
 <style>
+.rightStep {
+    float: right;
+    margin-right: 0.3em;
+}
 .clickable {
     cursor: pointer;
 }
@@ -451,6 +457,9 @@ If Charge Beam is not picked up along the way or not accessible, enough minors t
   tour.start();
 }
 
+function DoPost(){
+    $.redirect("/presets", { action: "Load", currenttab: "Techniques1", preset: document.getElementById("preset").value }, "POST", "_blank");
+}
 </script>
 
 {{
@@ -512,7 +521,7 @@ If Charge Beam is not picked up along the way or not accessible, enough minors t
 	      <td id="romFileStep"><button type="button" onclick="startTheTour(1)">?</button></td>
 	    </tr>
 	    <tr>
-	      <td>Preset:</td>
+	      <td>Preset: <span class="rightStep"><a href="javascript:DoPost()">What's in the logic for this skills preset ?</a></td>
 	      <td>{{=SELECT(OPTGROUP(*stdPresets, **dict(_label="Standard presets")), OPTGROUP(*tourPresets, **dict(_label="Tournament presets")), OPTGROUP(*comPresets, **dict(_label="Community presets")), **dict(_name="preset", _id="preset", value=session.solver["preset"], _class="filldropdown chzn-select"))}}</td>
 	      <td id="presetStep"><button type="button" onclick="startTheTour(2)">?</button></td>
 	    </tr>

@@ -1,3 +1,31 @@
+.image_picker_image {
+    width: 32px;
+    image-rendering: -moz-crisp-edges; /* Firefox */
+    image-rendering: -o-crisp-edges; /* Opera */
+    image-rendering: -webkit-optimize-contrast; /* Webkit (non-standard naming) */
+    image-rendering: crisp-edges;
+    -ms-interpolation-mode: nearest-neighbor; /* IE (non-standard property) */
+}
+#overlay {
+    position: fixed; /* Sit on top of the page content */
+    display: none; /* Hidden by default */
+    width: 100%; /* Full width (cover the whole page) */
+    height: 100%; /* Full height (cover the whole page) */
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0,0,0,0.5); /* Black background with opacity */
+    z-index: 6; /* Specify a stack order in case you're using a different order for other elements */
+    cursor: pointer; /* Add a pointer on hover */
+}
+#loadingGIF {
+    position: absolute;
+    left: 5%;
+    z-index: 5;
+    display:none;
+}
+
 .white {
     color: #fff;
 }
@@ -59,7 +87,7 @@ img {
 .solverPopup {
     background-color: #ffffff;
     position: absolute;
-    z-index: 4;
+    z-index: 7;
     width: 40%;
     height: auto;
     top: 2em;
@@ -71,18 +99,18 @@ img {
 .itemPopup {
     background-color: #ffffff;
     position: absolute;
-    z-index: 4;
-    width: 40%;
+    z-index: 7;
+    width: 35%;
     height: auto;
     top: 2em;
-    left: 30%;
+    left: 32.5%;
     display: none;
     padding: 0.5%;
     border: 2px solid gray;
 }
 .cloud {
     position: absolute;
-    z-index: 2;
+    z-index: 7;
     width: 2.5%;
     height: 3.75%;
     top: 0.5%;
@@ -90,7 +118,7 @@ img {
 }
 .titleArea {
     position: absolute;
-    z-index: 2;
+    z-index: 7;
     width: 10%;
     height: 3.75%;
     top: 1%;

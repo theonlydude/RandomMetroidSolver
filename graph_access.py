@@ -233,7 +233,7 @@ accessPoints = [
                                              sm.wand(sm.canOpenGreenDoors(),
                                                      sm.canEnterCathedral())),
         'Croc Zone': lambda sm: sm.wor(sm.wand(sm.haveItem('SpeedBooster'), # frog speedway
-                                               sm.canHellRun('MainUpperNorfair', mult=2, minE=1),
+                                               sm.canHellRun('MainUpperNorfair', mult=4 if sm.haveItem('Wave') else 2, minE=1),
                                                sm.wor(sm.wand(sm.canOpenRedDoors(), sm.knowsGreenGateGlitch()),
                                                       sm.haveItem('Wave')),
                                                sm.canOpenGreenDoors()),

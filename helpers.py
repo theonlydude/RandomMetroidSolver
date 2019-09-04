@@ -22,7 +22,7 @@ class Helpers(object):
         if difficulties is None or len(difficulties) == 0:
             return SMBool(False)
         def f(difficulty):
-            return self.smbm.energyReserveCountOk(difficulty[0] / mult, difficulty=difficulty[1])
+            return self.smbm.energyReserveCountOk(int(difficulty[0] / mult), difficulty=difficulty[1])
         result = reduce(lambda result, difficulty: self.smbm.wor(result, f(difficulty)),
                         difficulties[1:], f(difficulties[0]))
         return result

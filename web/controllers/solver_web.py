@@ -20,6 +20,8 @@ import db
 from graph_access import vanillaTransitions, vanillaBossesTransitions
 from utils import isStdPreset
 from graph_locations import locations
+from smboolmanager import SMBoolManager
+from rom import RomPatches
 
 def maxPresetsReach():
     # to prevent a spammer to create presets in a loop and fill the fs
@@ -154,8 +156,88 @@ def updatePresetsSession():
     else:
         session.presets['preset'] = request.vars.preset
 
+def computeGauntlet(sm, bomb, addVaria):
+    result = {}
+
+    for key in Settings.hardRoomsPresets['Gauntlet']:
+        Settings.hardRooms['Gauntlet'] = Settings.hardRoomsPresets['Gauntlet'][key]
+        sm.resetItems()
+        if addVaria == True:
+            sm.addItem('Varia')
+        sm.addItem(bomb)
+
+        result[key] = {easy: -1, medium: -1, hard: -1, harder: -1, hardcore: -1, mania: -1}
+
+        for i in range(18):
+            ret = sm.energyReserveCountOkHardRoom('Gauntlet', 0.5 if bomb == 'Bomb' else 1.0)
+
+            if ret.bool == True:
+                nEtank = 0
+                for item in ret.items:
+                    if item.find('ETank') != -1:
+                        nEtank = int(item[0:item.find('-ETank')])
+                        break
+                result[key][ret.difficulty] = nEtank
+
+            sm.addItem('ETank')
+
+    return result
+
+def computeXray(sm, addVaria):
+    result = {}
+
+    for key in Settings.hardRoomsPresets['X-Ray']:
+        Settings.hardRooms['X-Ray'] = Settings.hardRoomsPresets['X-Ray'][key]
+        sm.resetItems()
+        if addVaria == True:
+            sm.addItem('Varia')
+
+        result[key] = {easy: -1, medium: -1, hard: -1, harder: -1, hardcore: -1, mania: -1}
+
+        for i in range(18):
+            ret = sm.energyReserveCountOkHardRoom('X-Ray')
+
+            if ret.bool == True:
+                nEtank = 0
+                for item in ret.items:
+                    if item.find('ETank') != -1:
+                        nEtank = int(item[0:item.find('-ETank')])
+                        break
+                result[key][ret.difficulty] = nEtank
+
+            sm.addItem('ETank')
+
+    return result
+
+def computeHardRooms(hardRooms):
+    # add gravity patch (as we add it by default in the randomizer)
+    RomPatches.ActivePatches.append(RomPatches.NoGravityEnvProtection)
+
+    sm = SMBoolManager()
+
+    # xray
+    xray = {}
+    xray['Suitless'] = computeXray(sm, False)
+    xray['Varia'] = computeXray(sm, True)
+    hardRooms['X-Ray'] = xray
+
+    # gauntlet
+    gauntlet = {}
+    gauntlet['SuitlessBomb'] = computeGauntlet(sm, 'Bomb', False)
+    gauntlet['SuitlessPowerBomb'] = computeGauntlet(sm, 'PowerBomb', False)
+    gauntlet['VariaBomb'] = computeGauntlet(sm, 'Bomb', True)
+    gauntlet['VariaPowerBomb'] = computeGauntlet(sm, 'PowerBomb', True)
+    hardRooms['Gauntlet'] = gauntlet
+
+    return hardRooms
+
 def presets():
     initPresetsSession()
+
+    # use web2py builtin cache to avoid recomputing the hardrooms requirements
+    hardRooms = cache.ram('hardRooms', lambda:dict(), time_expire=None)
+    if len(hardRooms) == 0:
+        computeHardRooms(hardRooms)
 
     if request.vars.action is not None:
         (ok, msg) = validatePresetsParams(request.vars.action)
@@ -290,7 +372,7 @@ def presets():
                 categories=Knows.categories, settings=params['Settings'], knows=params['Knows'],
                 easy=easy, medium=medium, hard=hard, harder=harder, hardcore=hardcore, mania=mania,
                 controller=params['Controller'], stdPresets=stdPresets, tourPresets=tourPresets,
-                comPresets=comPresets, skillBarData=skillBarData)
+                comPresets=comPresets, skillBarData=skillBarData, hardRooms=hardRooms)
 
 def initSolverSession():
     if session.solver is None:

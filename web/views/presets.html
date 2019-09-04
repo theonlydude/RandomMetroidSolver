@@ -21,6 +21,9 @@ extend 'layout.html'
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 
 <style>
+.centerTd {
+    text-align: center;
+}
 .almostFull {
     width: 95%;
 }
@@ -141,52 +144,49 @@ pass
 function onChangeXRay() {
     var xrayItem = document.getElementById("X-Ray");
     var xraySetting = xrayItem.value;
-    setXrayEnergy(xraySetting, true);
-    setXrayEnergy(xraySetting, false);
+    setXrayEnergy(xraySetting);
 }
 
 function onChangeGauntlet() {
     var gauntletItem = document.getElementById("Gauntlet");
     var gauntletSetting = gauntletItem.value;
-    setGauntletEnergy(gauntletSetting, "Bomb", true);
-    setGauntletEnergy(gauntletSetting, "PowerBomb", true);
-    setGauntletEnergy(gauntletSetting, "Bomb", false);
-    setGauntletEnergy(gauntletSetting, "PowerBomb", false);
+    setGauntletEnergy(gauntletSetting, "Bomb");
+    setGauntletEnergy(gauntletSetting, "PowerBomb");
 }
 
-function setXrayEnergy(xraySetting, hasVaria) {
-  var suit = "Suitless";
-  if(hasVaria == true) {
-    suit = "Varia";
-  }
+function setXrayEnergy(xraySetting) {
 
   var difficulties = [{{response.write("[\"easy\", {}], [\"medium\", {}], [\"hard\", {}], [\"harder\", {}], [\"hardcore\", {}], [\"mania\", {}]".format(easy, medium, hard, harder, hardcore, mania), escape=False)}}];
 
   for(var i=0; i<difficulties.length; i++) {
-    var item = document.getElementById(difficulties[i][0]+"Xray"+suit);
-    var value = hardRooms["X-Ray"][suit][xraySetting][difficulties[i][1]]
-    if(value == -1) {
-      value = '-';
+    var item = document.getElementById(difficulties[i][0]+"Xray");
+    var valueS = hardRooms["X-Ray"]["Suitless"][xraySetting][difficulties[i][1]]
+    if(valueS == -1) {
+      valueS = '-';
     }
-    item.innerHTML = value;
+    var valueV = hardRooms["X-Ray"]["Varia"][xraySetting][difficulties[i][1]]
+    if(valueV == -1) {
+      valueV = '-';
+    }
+    item.innerHTML = valueS+" | "+valueV;
   }
 }
 
-function setGauntletEnergy(gauntletSetting, bombItem, hasVaria) {
-  var suit = "Suitless";
-  if(hasVaria == true) {
-    suit = "Varia";
-  }
+function setGauntletEnergy(gauntletSetting, bombItem) {
 
   var difficulties = [{{response.write("[\"easy\", {}], [\"medium\", {}], [\"hard\", {}], [\"harder\", {}], [\"hardcore\", {}], [\"mania\", {}]".format(easy, medium, hard, harder, hardcore, mania), escape=False)}}];
 
   for(var i=0; i<difficulties.length; i++) {
-    var item = document.getElementById(difficulties[i][0]+"Gauntlet"+suit+bombItem);
-    var value = hardRooms["Gauntlet"][suit+bombItem][gauntletSetting][difficulties[i][1]]
-    if(value == -1) {
-      value = '-';
+    var item = document.getElementById(difficulties[i][0]+"Gauntlet"+bombItem);
+    var valueS = hardRooms["Gauntlet"]["Suitless"+bombItem][gauntletSetting][difficulties[i][1]]
+    if(valueS == -1) {
+      valueS = '-';
     }
-    item.innerHTML = value;
+    var valueV = hardRooms["Gauntlet"]["Varia"+bombItem][gauntletSetting][difficulties[i][1]]
+    if(valueV == -1) {
+      valueV = '-';
+    }
+    item.innerHTML = valueS+" | "+valueV;
   }
 }
 
@@ -567,64 +567,44 @@ if skillBarData is not None:
       <h3>Energy requirements<span class="rightStep"><button id="requirementStep" type="button" onclick="startTheTour(5)">?</button></span></h3>
       <h4>X-Ray</h4>
       <table class="full">
-	<td></td><td>easy</td><td>medium</td><td>hard</td><td>very hard</td><td>hardcore</td><td>mania</td>
+	<colgroup><col class="sixteen"/><col class="sixteen" /><col/><col/><col/><col/><col/><col/></colgroup>
 	<tr>
-	  <td class="quarter">Suitless</td>
-	  <td><span id="easyXraySuitless"></span></td>
-	  <td><span id="mediumXraySuitless"></span></td>
-	  <td><span id="hardXraySuitless"></span></td>
-	  <td><span id="harderXraySuitless"></span></td>
-	  <td><span id="hardcoreXraySuitless"></span></td>
-	  <td><span id="maniaXraySuitless"></span></td>
+	  <td class="centerTd">Item</td><td class="centerTd">Suit</td><td class="centerTd">easy</td><td class="centerTd">medium</td><td class="centerTd">hard</td><td class="centerTd">very hard</td><td class="centerTd">hardcore</td><td class="centerTd">mania</td>
 	</tr>
 	<tr>
-	  <td class="quarter">Varia Suit <img src="/solver/static/images/Varia.png" alt="Varia.png" title="Varia.png" class="width: 32px"/></td>
-	  <td><span id="easyXrayVaria"></span></td>
-	  <td><span id="mediumXrayVaria"></span></td>
-	  <td><span id="hardXrayVaria"></span></td>
-	  <td><span id="harderXrayVaria"></span></td>
-	  <td><span id="hardcoreXrayVaria"></span></td>
-	  <td><span id="maniaXrayVaria"></span></td>
+	  <td class="centerTd">-</td>
+	  <td class="centerTd">Suitless | Varia Suit <img src="/solver/static/images/Varia.png" alt="Varia.png" title="Varia.png" class="width: 32px"/></td>
+	  <td class="centerTd"><span id="easyXray"></span></td>
+	  <td class="centerTd"><span id="mediumXray"></span></td>
+	  <td class="centerTd"><span id="hardXray"></span></td>
+	  <td class="centerTd"><span id="harderXray"></span></td>
+	  <td class="centerTd"><span id="hardcoreXray"></span></td>
+	  <td class="centerTd"><span id="maniaXray"></span></td>
 	</tr>
       </table>
       <h4>Gauntlet</h4>
       <table class="full">
-	<td></td><td>easy</td><td>medium</td><td>hard</td><td>very hard</td><td>hardcore</td><td>mania</td>
+	<colgroup><col class="sixteen"/><col class="sixteen" /><col/><col/><col/><col/><col/><col/></colgroup>
+	<td class="centerTd">Item</td><td class="centerTd">Suit</td><td class="centerTd">easy</td><td class="centerTd">medium</td><td class="centerTd">hard</td><td class="centerTd">very hard</td><td class="centerTd">hardcore</td><td class="centerTd">mania</td>
 	<tr>
-	  <td class="quarter">Suitless / Bomb <img src="/solver/static/images/Bomb.png" alt="Bomb.png" title="Bomb.png" class="width: 32px"/></td>
-	  <td><span id="easyGauntletSuitlessBomb"></span></td>
-	  <td><span id="mediumGauntletSuitlessBomb"></span></td>
-	  <td><span id="hardGauntletSuitlessBomb"></span></td>
-	  <td><span id="harderGauntletSuitlessBomb"></span></td>
-	  <td><span id="hardcoreGauntletSuitlessBomb"></span></td>
-	  <td><span id="maniaGauntletSuitlessBomb"></span></td>
+	  <td class="centerTd">Bomb <img src="/solver/static/images/Bomb.png" alt="Bomb.png" title="Bomb.png" class="width: 32px"/></td>
+	  <td class="centerTd">Suitless | Varia Suit <img src="/solver/static/images/Varia.png" alt="Varia.png" title="Varia.png" class="width: 32px"/></td>
+	  <td class="centerTd"><span id="easyGauntletBomb"></span></td>
+	  <td class="centerTd"><span id="mediumGauntletBomb"></span></td>
+	  <td class="centerTd"><span id="hardGauntletBomb"></span></td>
+	  <td class="centerTd"><span id="harderGauntletBomb"></span></td>
+	  <td class="centerTd"><span id="hardcoreGauntletBomb"></span></td>
+	  <td class="centerTd"><span id="maniaGauntletBomb"></span></td>
 	</tr>
 	<tr>
-	  <td class="quarter">Suitless / PowerBomb <img src="/solver/static/images/PowerBomb.png" alt="PowerBomb.png" title="PowerBomb.png" class="width: 32px"/></td>
-	  <td><span id="easyGauntletSuitlessPowerBomb"></span></td>
-	  <td><span id="mediumGauntletSuitlessPowerBomb"></span></td>
-	  <td><span id="hardGauntletSuitlessPowerBomb"></span></td>
-	  <td><span id="harderGauntletSuitlessPowerBomb"></span></td>
-	  <td><span id="hardcoreGauntletSuitlessPowerBomb"></span></td>
-	  <td><span id="maniaGauntletSuitlessPowerBomb"></span></td>
-	</tr>
-	<tr>
-	  <td class="quarter">Varia Suit <img src="/solver/static/images/Varia.png" alt="Varia.png" title="Varia.png" class="width: 32px"/> / Bomb <img src="/solver/static/images/Bomb.png" alt="Bomb.png" title="Bomb.png" class="width: 32px"/></td>
-	  <td><span id="easyGauntletVariaBomb"></span></td>
-	  <td><span id="mediumGauntletVariaBomb"></span></td>
-	  <td><span id="hardGauntletVariaBomb"></span></td>
-	  <td><span id="harderGauntletVariaBomb"></span></td>
-	  <td><span id="hardcoreGauntletVariaBomb"></span></td>
-	  <td><span id="maniaGauntletVariaBomb"></span></td>
-	</tr>
-	<tr>
-	  <td class="quarter">Varia Suit <img src="/solver/static/images/Varia.png" alt="Varia.png" title="Varia.png" class="width: 32px"/> / PowerBomb <img src="/solver/static/images/PowerBomb.png" alt="PowerBomb.png" title="PowerBomb.png" class="width: 32px"/></td>
-	  <td><span id="easyGauntletVariaPowerBomb"></span></td>
-	  <td><span id="mediumGauntletVariaPowerBomb"></span></td>
-	  <td><span id="hardGauntletVariaPowerBomb"></span></td>
-	  <td><span id="harderGauntletVariaPowerBomb"></span></td>
-	  <td><span id="hardcoreGauntletVariaPowerBomb"></span></td>
-	  <td><span id="maniaGauntletVariaPowerBomb"></span></td>
+	  <td class="centerTd">PowerBomb <img src="/solver/static/images/PowerBomb.png" alt="PowerBomb.png" title="PowerBomb.png" class="width: 32px"/></td>
+	  <td class="centerTd">Suitless | Varia Suit <img src="/solver/static/images/Varia.png" alt="Varia.png" title="Varia.png" class="width: 32px"/></td>
+	  <td class="centerTd"><span id="easyGauntletPowerBomb"></span></td>
+	  <td class="centerTd"><span id="mediumGauntletPowerBomb"></span></td>
+	  <td class="centerTd"><span id="hardGauntletPowerBomb"></span></td>
+	  <td class="centerTd"><span id="harderGauntletPowerBomb"></span></td>
+	  <td class="centerTd"><span id="hardcoreGauntletPowerBomb"></span></td>
+	  <td class="centerTd"><span id="maniaGauntletPowerBomb"></span></td>
 	</tr>
       </table>
     </div>
@@ -636,7 +616,7 @@ if skillBarData is not None:
 	  <td><a href="https://wiki.supermetroid.run/Kraid">Kraid:</a></td>
 	  <td>{{kraid = ["He's annoying", 'Default', 'Quick Kill']
                 displaySelect("Kraid", kraid, settings['Kraid'])}}</td>
-          <td><button type="button" onclick="startTheTour(5)">?</button></td>
+          <td><button type="button" onclick="startTheTour(6)">?</button></td>
 	</tr>
 	<tr>
 	  <td><a href="https://wiki.supermetroid.run/Draygon">Draygon:</a></td>

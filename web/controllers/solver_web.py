@@ -1871,6 +1871,9 @@ def customWebService():
         if request.vars.customSprite not in customSprites:
             raiseHttp(400, "Wrong value for customSprite", True)
 
+    if session.customizer == None:
+        session.customizer = {}
+
     # update session
     session.customizer['colorsRandomization'] = request.vars.colorsRandomization
     session.customizer['suitsPalettes'] = request.vars.suitsPalettes

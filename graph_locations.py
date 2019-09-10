@@ -706,7 +706,8 @@ locations = [
                                                                          sm.wand(sm.haveItem('SpringBall'),
                                                                                  sm.knowsAccessSpringBallWithSpringBallBombJumps()))),
                                                           sm.wand(sm.haveItem('SpringBall'), sm.knowsAccessSpringBallWithSpringBallJump()))),
-                                           sm.wand(sm.haveItem('XRayScope'), sm.knowsAccessSpringBallWithXRayClimb()))), # XRay climb
+                                           sm.wand(sm.haveItem('XRayScope'), sm.knowsAccessSpringBallWithXRayClimb())), # XRay climb
+                                    sm.wor(sm.haveItem('Gravity'), sm.canUseSpringBall())), # acess the item in spring ball room
     'PostAvailable': lambda sm: sm.wor(sm.haveItem('Gravity'),
                                        sm.canSpringBallJump())
 },

@@ -326,13 +326,14 @@ class HelpersGraph(Helpers):
     def canPassMtEverest(self):
         sm = self.smbm
         return  sm.wor(sm.wand(sm.haveItem('Gravity'),
-                               sm.wor(sm.wor(sm.haveItem('Grapple'),
-                                             sm.haveItem('SpeedBooster')),
-                                      sm.wor(sm.canFly(),
-                                             sm.knowsGravityJump(),
-                                             sm.wand(sm.haveItem('Ice'), sm.knowsTediousMountEverest())))),
-                       sm.canDoSuitlessMaridia(),
-                       sm.wand(sm.haveItem('Ice'), sm.canDoSuitlessOuterMaridia(), sm.knowsTediousMountEverest()))
+                               sm.wor(sm.haveItem('Grapple'),
+                                      sm.haveItem('SpeedBooster'),
+                                      sm.canFly(),
+                                      sm.knowsGravityJump())),
+                       sm.wand(sm.canDoSuitlessOuterMaridia(),
+                               sm.wor(sm.haveItem('Grapple'),
+                                      sm.wand(sm.haveItem('Ice'), sm.knowsTediousMountEverest()),
+                                      sm.canDoubleSpringBallJump())))
 
     @Cache.decorator
     def canDoSuitlessOuterMaridia(self):
@@ -341,13 +342,6 @@ class HelpersGraph(Helpers):
                        sm.haveItem('HiJump'),
                        sm.wor(sm.haveItem('Ice'),
                               sm.canSpringBallJump()))
-
-    @Cache.decorator
-    def canDoSuitlessMaridia(self):
-        sm = self.smbm
-        return sm.wand(sm.canDoSuitlessOuterMaridia(),
-                       sm.wor(sm.haveItem('Grapple'),
-                              sm.canDoubleSpringBallJump()))
 
     @Cache.decorator
     def canAccessBotwoonFromMainStreet(self):
@@ -374,7 +368,10 @@ class HelpersGraph(Helpers):
         sm = self.smbm
         return sm.wand(sm.canDefeatBotwoon(),
                        sm.wor(sm.haveItem('Gravity'),
-                              sm.wand(sm.canDoSuitlessMaridia(), sm.knowsGravLessLevel2())))
+                              sm.wand(sm.knowsGravLessLevel2(),
+                                      sm.wor(sm.haveItem('Grapple'),
+                                             sm.haveItem('SpaceJump'),
+                                             sm.wand(sm.haveItem('Ice'), sm.knowsBotwoonToDraygonWithIce())))))
 
     def isVanillaDraygon(self):
         if self.vanillaDraygon is None:

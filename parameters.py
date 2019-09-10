@@ -141,12 +141,6 @@ class Knows:
                                         'Mama Turtle Room',
                                         'The Precious Room']}
 
-    DoubleSpringBallJump = SMBool(False, 0, ['DoubleSpringBallJump'])
-    desc['DoubleSpringBallJump'] = {'display': 'Double SpringBall-Jump',
-                                    'title': 'With Hi-Jump boots do two SpringBall-Jumps in a row',
-                                    'href': 'https://youtu.be/KohE3e8sGLQ',
-                                    'rooms': ['Mt. Everest', "Draygon's Room", 'The Precious Room']}
-
     SpringBallJumpFromWall = SMBool(True, harder, ['SpringBallJumpFromWall'])
     desc['SpringBallJumpFromWall'] = {'display': 'SpringBall-Jump from wall',
                                       'title': 'Do a SpringBall jump after a Wall jump to exit Screw Attack area, climb Worst Room without Hi-Jump',
@@ -443,6 +437,18 @@ class Knows:
                                     'href': 'https://www.youtube.com/watch?v=chFbX9rRV_k&t=123s',
                                     'rooms': ['Mt. Everest']}
 
+    DoubleSpringBallJump = SMBool(False, 0, ['DoubleSpringBallJump'])
+    desc['DoubleSpringBallJump'] = {'display': 'Double SpringBall-Jump',
+                                    'title': 'With Hi-Jump boots do two SpringBall-Jumps in a row',
+                                    'href': 'https://youtu.be/KohE3e8sGLQ',
+                                    'rooms': ['Mt. Everest', "Draygon's Room"]}
+
+    BotwoonToDraygonWithIce = SMBool(False, 0, ['BotwoonToDraygonWithIce'])
+    desc['BotwoonToDraygonWithIce'] = {'display': 'Botwoon to Draygon with Ice',
+                                        'title': 'When past Botwoon, access Draygon using Hi-Jump and Ice only',
+                                        'href': '',
+                                        'rooms': ['Halfie Climb Room', 'Colosseum']}
+
     # Suitless Draygon
     DraygonRoomGrappleExit = SMBool(False, 0, ['DraygonRoomGrappleExit'])
     desc['DraygonRoomGrappleExit'] = {'display': 'Exit Draygon room with the Grapple',
@@ -541,12 +547,12 @@ class Knows:
              'title': 'Used across the game'}
         ],
         'Crateria/Brinstar': [
-            {'knows': ['AlcatrazEscape', 'HiJumpGauntletAccess', 'HiJumpLessGauntletAccess', 'LowGauntlet'],
+            {'knows': ['AlcatrazEscape', 'HiJumpGauntletAccess', 'HiJumpLessGauntletAccess', 'LowGauntlet', 'OldMBWithSpeed'],
              'title': 'Crateria'},
             {'knows': ['CeilingDBoost', 'EarlyKraid',
                        'ReverseGateGlitch', 'ReverseGateGlitchHiJumpLess', 
                        'RedTowerClimb', 'XrayDboost', 'XrayIce',
-                       'RonPopeilScrew', 'OldMBWithSpeed', 'Moondance'],
+                       'RonPopeilScrew', 'Moondance'],
              'title': 'Brinstar'}
         ],
         'Wrecked Ship': [
@@ -571,7 +577,7 @@ class Knows:
              'title': 'Spring Ball Access'},
             {'knows': ['DraygonRoomGrappleExit', 'DraygonRoomCrystalFlash', 'PreciousRoomXRayExit'],
              'title': 'Suitless Draygon Exit'},
-            {'knows': ['DoubleSpringBallJump', 'TediousMountEverest', 'SuitlessPuyoClip'],
+            {'knows': ['DoubleSpringBallJump', 'TediousMountEverest', 'BotwoonToDraygonWithIce', 'SuitlessPuyoClip'],
              'title': 'Obscure suitless stuff'}
         ],
         'Norfair': [

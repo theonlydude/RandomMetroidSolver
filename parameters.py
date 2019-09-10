@@ -433,7 +433,7 @@ class Knows:
     # Suitless
     TediousMountEverest = SMBool(False, 0, ['TediousMountEverest'])
     desc['TediousMountEverest'] = {'display': 'Mt. Everest without anything',
-                                    'title': 'Make your way through Mt. Everest with nothing but Ice (and Hi-Jump when suitless)',
+                                    'title': 'Make your way through Mt. Everest with nothing but Ice and Hi-Jump',
                                     'href': 'https://www.youtube.com/watch?v=chFbX9rRV_k&t=123s',
                                     'rooms': ['Mt. Everest']}
 

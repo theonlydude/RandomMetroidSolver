@@ -4,7 +4,7 @@
   "randoPreset": "",
   "skip_ceres": "on",
   "hideItems": "off",
-  "funCombat": "off",
+  "funCombat": "on",
   "majorsSplit": "Full",
   "strictMinors": "on",
   "layoutPatches": "on",
@@ -13,7 +13,7 @@
   "progressionSpeed": "slowest",
   "maxDifficulty": "mania",
   "powerBombQty": "1",
-  "minorQty": "50",
+  "minorQty": "65",
   "suitsRestriction": "on",
   "preset": "master",
   "spinjumprestart": "off",
@@ -21,7 +21,7 @@
   "superQty": "1",
   "skip_intro": "off",
   "itemsounds": "on",
-  "energyQty": "medium",
+  "energyQty": "vanilla",
   "funSuits": "on",
   "variaTweaks": "on"
 }

@@ -889,6 +889,29 @@ class Settings:
         'LowerNorfair' : hellRunPresets['LowerNorfair']['Default']
     }
 
+    # centralize all the hellruns coeffs
+    hellRunsTable = {
+        'Ice': {
+            'Norfair Entrance -> Ice Beam': {'mult': 1.0, 'minE': 2, 'hellRun': 'Ice'},
+            'Norfair Entrance -> Croc via Ice': {'mult': 1.5, 'minE': 2, 'hellRun': 'Ice'},
+            'Croc -> Bubble': {'mult': 2.0, 'minE': 1, 'hellRun': 'Ice'}
+        },
+        'MainUpperNorfair': {
+            'Norfair Entrance -> Bubble': {'mult': 1.0, 'minE': 2, 'hellRun': 'MainUpperNorfair'},
+            'Bubble -> Norfair Entrance': {'mult': 0.75, 'minE': 2, 'hellRun': 'MainUpperNorfair'},
+            'Norfair Entrance -> Cathedral Missiles': {'mult': 0.66, 'minE': 2, 'hellRun': 'MainUpperNorfair'},
+            'Bubble -> Cathedral Missiles': {'mult': 0.66, 'minE': 2, 'hellRun': 'MainUpperNorfair'},
+            'Norfair Entrance -> Croc via Frog': {'mult': 4.0, 'minE': 1, 'hellRun': 'MainUpperNorfair'},
+            'Norfair Entrance -> Croc via Frog w/Wave': {'mult': 2.0, 'minE': 1, 'hellRun': 'MainUpperNorfair'},
+            'Bubble -> Norfair Reserve Missiles': {'mult': 2.5, 'minE': 1, 'hellRun': 'MainUpperNorfair'},
+            'Bubble -> Norfair Reserve': {'mult': 1.0, 'minE': 2, 'hellRun': 'MainUpperNorfair'},
+            'Bubble -> Speed Booster': {'mult': 1.0, 'minE': 3, 'hellRun': 'MainUpperNorfair'},
+            'Bubble -> Speed Booster w/Speed': {'mult': 2.0, 'minE': 2, 'hellRun': 'MainUpperNorfair'},
+            'Bubble -> Wave': {'mult': 0.75, 'minE': 2, 'hellRun': 'MainUpperNorfair'},
+            'Croc -> Grapple Escape Missiles': {'mult': 1.0, 'minE': 2, 'hellRun': 'MainUpperNorfair'}
+        }
+    }
+
     hardRoomsPresets = {
         'X-Ray' : {
             'Aarghh' : [(10, hard), (14, medium)],

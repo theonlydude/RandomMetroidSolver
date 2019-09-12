@@ -699,8 +699,8 @@ locations = [
                                                           sm.knowsSuitlessPuyoClip())),
                                            sm.wand(sm.haveItem('Grapple'), # go through grapple block
                                                    sm.haveItem('Gravity'),
-                                                   sm.wor(sm.canFlyDiagonally(),
-                                                          sm.haveItem('HiJump'),
+                                                   sm.wor(sm.wor(sm.haveItem('HiJump'), sm.haveItem('SpaceJump')),
+                                                          sm.knowsAccessSpringBallWithGravJump(),
                                                           sm.wand(sm.haveItem('Bomb'),
                                                                   sm.wor(sm.knowsAccessSpringBallWithBombJumps(),
                                                                          sm.wand(sm.haveItem('SpringBall'),

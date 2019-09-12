@@ -537,6 +537,12 @@ class Knows:
                                              'href': 'https://youtu.be/I-f5X5cNypA',
                                              'rooms': ['Pants Room']}
 
+    AccessSpringBallWithGravJump = SMBool(False, 0, ['AccessSpringBallWithGravJump'])
+    desc['AccessSpringBallWithGravJump'] = {'display': 'Access Spring Ball location with a Gravity jump',
+                                             'title': 'Do a tricky gravity jump from the sand and get through the grapple hole',
+                                             'href': 'https://www.twitch.tv/videos/480378897',
+                                             'rooms': ['Pants Room']}
+
     categories = {
         'Common': [
             {'knows': ['WallJump', 'ShineSpark', 'MidAirMorph', 'CrouchJump'],
@@ -573,7 +579,8 @@ class Knows:
         ],
         'Maridia 2/2': [
             {'knows': ['AccessSpringBallWithSpringBallBombJumps', 'AccessSpringBallWithBombJumps',
-                       'AccessSpringBallWithSpringBallJump', 'AccessSpringBallWithXRayClimb'],
+                       'AccessSpringBallWithSpringBallJump', 'AccessSpringBallWithXRayClimb',
+                       'AccessSpringBallWithGravJump'],
              'title': 'Spring Ball Access'},
             {'knows': ['DraygonRoomGrappleExit', 'DraygonRoomCrystalFlash', 'PreciousRoomXRayExit'],
              'title': 'Suitless Draygon Exit'},

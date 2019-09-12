@@ -327,7 +327,7 @@ locations = [
     'Available': lambda sm: sm.wand(sm.enoughStuffCroc(),
                                     sm.wor(sm.haveItem('Grapple'),
                                            sm.haveItem('SpaceJump'),
-                                           sm.energyReserveCountOk(3/sm.getDmgReduction())))
+                                           sm.energyReserveCountOk(3/sm.getDmgReduction()[0])))
 },
 {
     'Area': "Norfair",

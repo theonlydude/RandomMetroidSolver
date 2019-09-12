@@ -21,6 +21,9 @@ extend 'layout.html'
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 
 <style>
+.column {
+    padding-right: 10px;
+}
 pre {
     display: block;
     padding: 0px;
@@ -150,8 +153,47 @@ pass
   gauntletItem.onchange = onChangeGauntlet;
   onChangeGauntlet();
 
+  var IceParamItem = document.getElementById("Ice");
+  IceParamItem.onchange = onChangeIceHellRun;
+  var IceHellRunItem = document.getElementById("IceHellRun");
+  IceHellRunItem.onchange = onChangeIceHellRun;
+  onChangeIceHellRun();
+
+  var NorfairParamItem = document.getElementById("MainUpperNorfair");
+  NorfairParamItem.onchange = onChangeNorfairHellRun;
+  var NorfairHellRunItem = document.getElementById("UpperHellRun");
+  NorfairHellRunItem.onchange = onChangeNorfairHellRun;
+  onChangeNorfairHellRun();
+
   $(".chzn-select").chosen();
   resizeChosen();
+}
+
+function onChangeIceHellRun() {
+  var valueParam = document.getElementById("Ice").value;
+  var valueHellRun = document.getElementById("IceHellRun").value;
+  var hellRun = "Ice";
+  setHellRunEnergy(hellRun, valueParam, valueHellRun);
+}
+
+function onChangeNorfairHellRun() {
+  var valueParam = document.getElementById("MainUpperNorfair").value;
+  var valueHellRun = document.getElementById("UpperHellRun").value;
+  var hellRun = "MainUpperNorfair";
+  setHellRunEnergy(hellRun, valueParam, valueHellRun);
+}
+
+function setHellRunEnergy(hellRun, valueParam, valueHellRun) {
+  var difficulties = [{{response.write("[\"easy\", {}], [\"medium\", {}], [\"hard\", {}], [\"harder\", {}], [\"hardcore\", {}], [\"mania\", {}]".format(easy, medium, hard, harder, hardcore, mania), escape=False)}}];
+
+  for(var i=0; i<difficulties.length; i++) {
+    var item = document.getElementById(difficulties[i][0]+hellRun);
+    var value = hellRuns[hellRun][valueHellRun][valueParam][difficulties[i][1]]
+    if(value == -1) {
+      value = '-';
+    }
+    item.innerHTML = value;
+  }
 }
 
 function onChangeXRay() {
@@ -205,6 +247,7 @@ function setGauntletEnergy(gauntletSetting, bombItem) {
 
 {{
 response.write("var hardRooms = {};\n".format(hardRooms), escape=False)
+response.write("var hellRuns = {};\n".format(hellRuns), escape=False)
 }}
 
 function startTheTour(step=-1) {
@@ -228,15 +271,9 @@ function startTheTour(step=-1) {
       content: "<ul><li><b>Load</b>: Load your preset or one of the predefined ones</li><li><b>Update</b>: Update your preset after you've mastered a new technique</li><li><b>Create</b>: create your own preset based on the currently loaded one.</li></ul>."
     },
     {
-      element: "#iceStep",
-      title: "Hellruns",
-      content: "A Hellrun is going through Norfair heated rooms without the VARIA Suit.<br/>\
-<b>No thanks</b>: Don't do hellruns.<br/>\
-<b>Gimme energy</b>: Get comfortable before going in.<br/>\
-<b>Default</b>: Balanced setting. For Lower Norfair's hell run \"Default\" means \"No thanks\".<br/>\
-<b>Bring the heat</b>: You don't mind doing hell runs at all.<br/>\
-<b>I run RBO</b>: Reverse Boss Order runner.<br/><br/>\
-(<a href=\"https://wiki.supermetroid.run/Upper_Norfair_Farming_Room\">Upper Norfair Farming Room</a> is not considered heated.)"
+      element: "#Kraid",
+      title: "Bosses",
+      content: "Logic behind the presets : the ones where you find the boss difficult are calibrated to give 'hard' in vanilla situations, the default are calibrated to give 'medium' in vanilla situations, just above gives 'easy' in vanilla situations, and top settings basically discards the boss except for extreme situations (very low energy or firepower).<br/>This is the estimated difficulty of the fight for a 'standard' kill. There are distinct parameters for special boss kill techniques (for example grappling Draygon, see Bosses in the Techniques section below)"
     },
     {
       element: "#xrayStep",
@@ -246,14 +283,26 @@ function startTheTour(step=-1) {
     {
       element: "#requirementStep",
       title: "Energy requirements",
-      content: "These tables give the number of Energy/Reserve Tanks required for the VARIA logic to consider the Hard rooms available (with the associated difficulty).<br/>\
+      content: "These tables give the number of Energy and Reserve Tanks required for the VARIA logic to consider the Hard rooms available (with the associated difficulty).<br/>\
 <b>Precision:</b>As the patch to disable Gravity Suit protection against environmental damage is on by the default in the VARIA Randomizer, having Gravity Suit is the same as being Suitless.<br/>\
 Also the Varia Suit environmental protection is increased to match vanilla Gravity Suit."
     },
     {
-      element: "#Kraid",
-      title: "Bosses",
-      content: "Logic behind the presets : the ones where you find the boss difficult are calibrated to give 'hard' in vanilla situations, the default are calibrated to give 'medium' in vanilla situations, just above gives 'easy' in vanilla situations, and top settings basically discards the boss except for extreme situations (very low energy or firepower).<br/>This is the estimated difficulty of the fight for a 'standard' kill. There are distinct parameters for special boss kill techniques (for example grappling Draygon, see Bosses in the Techniques section below)",
+      element: "#iceStep",
+      title: "Hellruns",
+      content: "A Hellrun is going through Norfair heated rooms without the VARIA Suit.<br/>\
+<b>No thanks</b>: Don't do hellruns.<br/>\
+<b>Gimme energy</b>: Get comfortable before going in.<br/>\
+<b>Default</b>: Balanced setting. For Lower Norfair's hell run \"Default\" means \"No thanks\".<br/>\
+<b>Bring the heat</b>: You don't mind doing hell runs at all.<br/>\
+<b>I run RBO</b>: Reverse Boss Order runner.<br/><br/>\
+(<a href=\"https://wiki.supermetroid.run/Upper_Norfair_Farming_Room\">Upper Norfair Farming Room</a> is not considered heated.)",
+      placement: "auto left"
+    },
+    {
+      element: "#hellRunsEnergyStep",
+      title: "Energy requirements",
+      content: "These tables give the number of Energy and Reserve Tanks required for the VARIA logic to consider the Hell runs available (with the associated difficulty).",
       placement: "auto left"
     }
  ]});
@@ -539,26 +588,38 @@ if skillBarData is not None:
   <button class="tablinks" onclick="changeTab(event, 'Mapping')" name="Mapping">Gamepad Mapping</button>
 </div>
 
-<div id="Global" class="tabcontent"><br/>
+<div id="Global" class="tabcontent">
   <div class="row">
     <div class="column">
-      <h3>Hellruns</h3>
+      <h3>Bosses</h3>
       <table class="full">
         <colgroup><col class="half" /><col class="half" /></colgroup>
 	<tr>
-	  <td><a href="https://www.youtube.com/watch?v=E0jcnyb2eec&t=15m11s">Ice:</a></td>
-	  <td>{{hellruns = ['No thanks', 'Gimme energy', 'Default', 'Bring the heat', 'I run RBO']
-	        displaySelect("Ice", hellruns, settings['Ice'])}}</td>
-          <td id="iceStep"><button type="button" onclick="startTheTour(3)">?</button></td>
+	  <td><a href="https://wiki.supermetroid.run/Kraid">Kraid:</a></td>
+	  <td>{{kraid = ["He's annoying", 'Default', 'Quick Kill']
+                displaySelect("Kraid", kraid, settings['Kraid'])}}</td>
+          <td><button type="button" onclick="startTheTour(3)">?</button></td>
 	</tr>
 	<tr>
-	  <td><a href="https://www.youtube.com/watch?v=E0jcnyb2eec&t=16m44s">Main Upper Norfair:</a></td>
-	  <td>{{displaySelect("MainUpperNorfair", hellruns, settings['MainUpperNorfair'])}}</td>
+	  <td><a href="https://wiki.supermetroid.run/Draygon">Draygon:</a></td>
+	  <td>{{draygon = ['A lot of trouble', 'Default', 'Used to it', 'No problemo']
+                displaySelect("Draygon", draygon, settings['Draygon'])}}</td>
 	</tr>
 	<tr>
-	  <td><a href="https://www.youtube.com/watch?v=E0jcnyb2eec&t=23m59s">Lower Norfair:</a></td>
-	  <td>{{hellruns = ['Default', 'Bring the heat', 'I run RBO']
-	        displaySelect("LowerNorfair", hellruns, settings['LowerNorfair'])}}</td>
+	  <td><a href="https://wiki.supermetroid.run/Ridley">Ridley:</a></td>
+	  <td>{{ridley = ["I'm scared!", 'Default', 'Used to it', 'Piece of cake']
+	        displaySelect("Ridley", ridley, settings['Ridley'])}}
+	  </td>
+	</tr>
+	<tr>
+	  <td><a href="https://wiki.supermetroid.run/Phantoon">Phantoon:</a></td>
+	  <td>{{phantoon = ['A lot of trouble', 'Default', 'Used to it', 'No problemo']
+	        displaySelect("Phantoon", phantoon, settings['Phantoon'])}}</td>
+	</tr>
+	<tr>
+	  <td><a href="https://wiki.supermetroid.run/Mother_Brain">Mother Brain:</a></td>
+	  <td>{{motherBrain = ['It can get ugly', 'Default', 'Is this really the last boss?', 'Nice cutscene bro']
+	        displaySelect("MotherBrain", motherBrain, settings['MotherBrain'])}}</td>
 	</tr>
       </table>
       <h3>Hard rooms</h3>
@@ -622,35 +683,76 @@ if skillBarData is not None:
       </table>
     </div>
     <div class="column">
-      <h3>Bosses</h3>
+      <h3 id="iceStep">Hellruns</h3>
       <table class="full">
         <colgroup><col class="half" /><col class="half" /></colgroup>
 	<tr>
-	  <td><a href="https://wiki.supermetroid.run/Kraid">Kraid:</a></td>
-	  <td>{{kraid = ["He's annoying", 'Default', 'Quick Kill']
-                displaySelect("Kraid", kraid, settings['Kraid'])}}</td>
+	  <td><a href="https://www.youtube.com/watch?v=E0jcnyb2eec&t=15m11s">Ice:</a></td>
+	  <td>{{hellruns = ['No thanks', 'Gimme energy', 'Default', 'Bring the heat', 'I run RBO']
+	        displaySelect("Ice", hellruns, settings['Ice'])}}</td>
           <td><button type="button" onclick="startTheTour(6)">?</button></td>
 	</tr>
 	<tr>
-	  <td><a href="https://wiki.supermetroid.run/Draygon">Draygon:</a></td>
-	  <td>{{draygon = ['A lot of trouble', 'Default', 'Used to it', 'No problemo']
-                displaySelect("Draygon", draygon, settings['Draygon'])}}</td>
+	  <td><a href="https://www.youtube.com/watch?v=E0jcnyb2eec&t=16m44s">Main Upper Norfair:</a></td>
+	  <td>{{displaySelect("MainUpperNorfair", hellruns, settings['MainUpperNorfair'])}}</td>
 	</tr>
 	<tr>
-	  <td><a href="https://wiki.supermetroid.run/Ridley">Ridley:</a></td>
-	  <td>{{ridley = ["I'm scared!", 'Default', 'Used to it', 'Piece of cake']
-	        displaySelect("Ridley", ridley, settings['Ridley'])}}
+	  <td><a href="https://www.youtube.com/watch?v=E0jcnyb2eec&t=23m59s">Lower Norfair:</a></td>
+	  <td>{{hellruns = ['Default', 'Bring the heat', 'I run RBO']
+	        displaySelect("LowerNorfair", hellruns, settings['LowerNorfair'])}}</td>
+	</tr>
+      </table>
+      <h3 id="hellRunsEnergyStep">Energy requirements<span class="rightStep"><button id="requirementStep" type="button" onclick="startTheTour(7)">?</button></span></h3>
+      <table class="full">
+        <colgroup><col class="half" /><col class="half" /></colgroup>
+	<tr>
+	  <td>
+	    <h4>Ice</h4>
 	  </td>
+	  <td>
+	    {{displaySelect("IceHellRun", sorted(hellRuns["Ice"]), hellRuns["Ice"]["Norfair Entrance -> Ice Beam"])}}
+	  </td>
+          <td><span class="btn"></span></td>
+	</tr>
+      </table>
+      <table class="full">
+	<colgroup><col class="name" /><col/><col/><col/><col/><col/><col/></colgroup>
+	<tr>
+	  <td class="centerTd">easy</td><td class="centerTd">medium</td><td class="centerTd">hard</td><td class="centerTd">very hard</td><td class="centerTd">hardcore</td><td class="centerTd">mania</td>
 	</tr>
 	<tr>
-	  <td><a href="https://wiki.supermetroid.run/Phantoon">Phantoon:</a></td>
-	  <td>{{phantoon = ['A lot of trouble', 'Default', 'Used to it', 'No problemo']
-	        displaySelect("Phantoon", phantoon, settings['Phantoon'])}}</td>
+	  <td class="centerTd"><pre><span id="easyIce"></span></pre></td>
+	  <td class="centerTd"><pre><span id="mediumIce"></span></pre></td>
+	  <td class="centerTd"><pre><span id="hardIce"></span></pre></td>
+	  <td class="centerTd"><pre><span id="harderIce"></span></pre></td>
+	  <td class="centerTd"><pre><span id="hardcoreIce"></span></pre></td>
+	  <td class="centerTd"><pre><span id="maniaIce"></span></pre></td>
+	</tr>
+      </table>
+      <table class="full">
+        <colgroup><col class="half" /><col class="half" /></colgroup>
+	<tr>
+	  <td>
+	    <h4>Upper Norfair</h4>
+	  </td>
+	  <td>
+	    {{displaySelect("UpperHellRun", sorted(hellRuns["MainUpperNorfair"]), hellRuns["MainUpperNorfair"]["Norfair Entrance -> Bubble"])}}
+	  </td>
+          <td><span class="btn"></span></td>
+	</tr>
+      </table>
+      <table class="full">
+	<colgroup><col class="name" /><col/><col/><col/><col/><col/><col/></colgroup>
+	<tr>
+	  <td class="centerTd">easy</td><td class="centerTd">medium</td><td class="centerTd">hard</td><td class="centerTd">very hard</td><td class="centerTd">hardcore</td><td class="centerTd">mania</td>
 	</tr>
 	<tr>
-	  <td><a href="https://wiki.supermetroid.run/Mother_Brain">Mother Brain:</a></td>
-	  <td>{{motherBrain = ['It can get ugly', 'Default', 'Is this really the last boss?', 'Nice cutscene bro']
-	        displaySelect("MotherBrain", motherBrain, settings['MotherBrain'])}}</td>
+	  <td class="centerTd"><pre><span id="easyMainUpperNorfair"></span></pre></td>
+	  <td class="centerTd"><pre><span id="mediumMainUpperNorfair"></span></pre></td>
+	  <td class="centerTd"><pre><span id="hardMainUpperNorfair"></span></pre></td>
+	  <td class="centerTd"><pre><span id="harderMainUpperNorfair"></span></pre></td>
+	  <td class="centerTd"><pre><span id="hardcoreMainUpperNorfair"></span></pre></td>
+	  <td class="centerTd"><pre><span id="maniaMainUpperNorfair"></span></pre></td>
 	</tr>
       </table>
     </div>

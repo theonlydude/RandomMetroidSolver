@@ -187,6 +187,8 @@ def computeXray(sm, addVaria):
     result = {}
 
     for key in Settings.hardRoomsPresets['X-Ray']:
+        if key == 'Solution':
+            continue
         Settings.hardRooms['X-Ray'] = Settings.hardRoomsPresets['X-Ray'][key]
         sm.resetItems()
         if addVaria == True:
@@ -231,6 +233,35 @@ def computeHardRooms(hardRooms):
 
     return hardRooms
 
+def computeHellruns(hellRuns):
+    sm = SMBoolManager()
+    for hellRun in ['Ice', 'MainUpperNorfair']:
+        hellRuns[hellRun] = {}
+
+        for (actualHellRun, params) in Settings.hellRunsTable[hellRun].items():
+            hellRuns[hellRun][actualHellRun] = {}
+            for (key, difficulties) in Settings.hellRunPresets[hellRun].items():
+                if key == 'Solution':
+                    continue
+                Settings.hellRuns[hellRun] = difficulties
+                hellRuns[hellRun][actualHellRun][key] = {easy: -1, medium: -1, hard: -1, harder: -1, hardcore: -1, mania: -1}
+                if difficulties == None:
+                    continue
+
+                sm.resetItems()
+                for i in range(18):
+                    ret = sm.canHellRun(**params)
+
+                    if ret.bool == True:
+                        nEtank = 0
+                        for item in ret.items:
+                            if item.find('ETank') != -1:
+                                nEtank = int(item[0:item.find('-ETank')])
+                                break
+                        hellRuns[hellRun][actualHellRun][key][ret.difficulty] = nEtank
+
+                    sm.addItem('ETank')
+
 def presets():
     initPresetsSession()
 
@@ -238,6 +269,10 @@ def presets():
     hardRooms = cache.ram('hardRooms', lambda:dict(), time_expire=None)
     if len(hardRooms) == 0:
         computeHardRooms(hardRooms)
+
+    hellRuns = cache.ram('hellRuns', lambda:dict(), time_expire=None)
+    if len(hellRuns) == 0:
+        computeHellruns(hellRuns)
 
     if request.vars.action is not None:
         (ok, msg) = validatePresetsParams(request.vars.action)
@@ -372,7 +407,7 @@ def presets():
                 categories=Knows.categories, settings=params['Settings'], knows=params['Knows'],
                 easy=easy, medium=medium, hard=hard, harder=harder, hardcore=hardcore, mania=mania,
                 controller=params['Controller'], stdPresets=stdPresets, tourPresets=tourPresets,
-                comPresets=comPresets, skillBarData=skillBarData, hardRooms=hardRooms)
+                comPresets=comPresets, skillBarData=skillBarData, hardRooms=hardRooms, hellRuns=hellRuns)
 
 def initSolverSession():
     if session.solver is None:

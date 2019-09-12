@@ -76,6 +76,10 @@
       true,
       100
     ],
+    "BotwoonToDraygonWithIce": [
+      true,
+      100
+    ],
     "GetAroundWallJump": [
       true,
       10
@@ -169,6 +173,10 @@
       5
     ],
     "AccessSpringBallWithXRayClimb": [
+      true,
+      100
+    ],
+    "AccessSpringBallWithGravJump": [
       true,
       100
     ],

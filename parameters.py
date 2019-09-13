@@ -446,7 +446,7 @@ class Knows:
     BotwoonToDraygonWithIce = SMBool(False, 0, ['BotwoonToDraygonWithIce'])
     desc['BotwoonToDraygonWithIce'] = {'display': 'Botwoon to Draygon with Ice',
                                         'title': 'When past Botwoon, access Draygon using Hi-Jump and Ice only',
-                                        'href': '',
+                                        'href': 'https://www.twitch.tv/videos/480882188',
                                         'rooms': ['Halfie Climb Room', 'Colosseum']}
 
     # Suitless Draygon

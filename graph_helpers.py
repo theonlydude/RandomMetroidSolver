@@ -333,7 +333,7 @@ class HelpersGraph(Helpers):
                                       sm.knowsGravityJump())),
                        sm.wand(sm.canDoSuitlessOuterMaridia(),
                                sm.wor(sm.haveItem('Grapple'),
-                                      sm.wand(sm.haveItem('Ice'), sm.knowsTediousMountEverest()),
+                                      sm.wand(sm.haveItem('Ice'), sm.knowsTediousMountEverest(), sm.haveItem('Super')),
                                       sm.canDoubleSpringBallJump())))
 
     @Cache.decorator

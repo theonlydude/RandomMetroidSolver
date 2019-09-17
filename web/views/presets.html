@@ -24,6 +24,9 @@ extend 'layout.html'
 .column {
     padding-right: 10px;
 }
+.row {
+    padding-bottom: 1em;
+}
 pre {
     display: block;
     padding: 0px;
@@ -271,11 +274,6 @@ function startTheTour(step=-1) {
       content: "<ul><li><b>Load</b>: Load your preset or one of the predefined ones</li><li><b>Update</b>: Update your preset after you've mastered a new technique</li><li><b>Create</b>: create your own preset based on the currently loaded one.</li></ul>."
     },
     {
-      element: "#Kraid",
-      title: "Bosses",
-      content: "Logic behind the presets : the ones where you find the boss difficult are calibrated to give 'hard' in vanilla situations, the default are calibrated to give 'medium' in vanilla situations, just above gives 'easy' in vanilla situations, and top settings basically discards the boss except for extreme situations (very low energy or firepower).<br/>This is the estimated difficulty of the fight for a 'standard' kill. There are distinct parameters for special boss kill techniques (for example grappling Draygon, see Bosses in the Techniques section below)"
-    },
-    {
       element: "#xrayStep",
       title: "Hard rooms",
       content: "Some rooms have an intended 'easy way' of traversing them : with Screw Attack for the Gauntlet Area, with Grapple or Space Jump for X-Ray. This is the difficulty when not placed in those conditions. Settings are displayed from easier to harder, they change the amount of energy required to go through the rooms.<br/><b>X-Ray</b>: difficulty of using the D-Boost (see in the techniques section below), Bomb Jump or Ice climb techniques.<br/><b>Gauntlet</b>: difficulty of traversing it with Bombs or Power Bombs."
@@ -285,7 +283,8 @@ function startTheTour(step=-1) {
       title: "Energy requirements",
       content: "These tables give the number of Energy and Reserve Tanks required for the VARIA logic to consider the Hard rooms available (with the associated difficulty).<br/>\
 <b>Precision:</b>As the patch to disable Gravity Suit protection against environmental damage is on by the default in the VARIA Randomizer, having Gravity Suit is the same as being Suitless.<br/>\
-Also the Varia Suit environmental protection is increased to match vanilla Gravity Suit."
+Also the Varia Suit environmental protection is increased to match vanilla Gravity Suit.",
+      placement: "auto left"
     },
     {
       element: "#iceStep",
@@ -296,14 +295,18 @@ Also the Varia Suit environmental protection is increased to match vanilla Gravi
 <b>Default</b>: Balanced setting. For Lower Norfair's hell run \"Default\" means \"No thanks\".<br/>\
 <b>Bring the heat</b>: You don't mind doing hell runs at all.<br/>\
 <b>I run RBO</b>: Reverse Boss Order runner.<br/><br/>\
-(<a href=\"https://wiki.supermetroid.run/Upper_Norfair_Farming_Room\">Upper Norfair Farming Room</a> is not considered heated.)",
-      placement: "auto left"
+(<a href=\"https://wiki.supermetroid.run/Upper_Norfair_Farming_Room\">Upper Norfair Farming Room</a> is not considered heated.)"
     },
     {
       element: "#hellRunsEnergyStep",
       title: "Energy requirements",
       content: "These tables give the number of Energy and Reserve Tanks required for the VARIA logic to consider the Hell runs available (with the associated difficulty).",
       placement: "auto left"
+    },
+    {
+      element: "#bossStep",
+      title: "Bosses",
+      content: "Logic behind the presets : the ones where you find the boss difficult are calibrated to give 'hard' in vanilla situations, the default are calibrated to give 'medium' in vanilla situations, just above gives 'easy' in vanilla situations, and top settings basically discards the boss except for extreme situations (very low energy or firepower).<br/>This is the estimated difficulty of the fight for a 'standard' kill. There are distinct parameters for special boss kill techniques (for example grappling Draygon, see Bosses in the Techniques section below)"
     }
  ]});
 
@@ -591,37 +594,6 @@ if skillBarData is not None:
 <div id="Global" class="tabcontent">
   <div class="row">
     <div class="column">
-      <h3>Bosses</h3>
-      <table class="full">
-        <colgroup><col class="half" /><col class="half" /></colgroup>
-	<tr>
-	  <td><a href="https://wiki.supermetroid.run/Kraid">Kraid:</a></td>
-	  <td>{{kraid = ["He's annoying", 'Default', 'Quick Kill']
-                displaySelect("Kraid", kraid, settings['Kraid'])}}</td>
-          <td><button type="button" onclick="startTheTour(3)">?</button></td>
-	</tr>
-	<tr>
-	  <td><a href="https://wiki.supermetroid.run/Draygon">Draygon:</a></td>
-	  <td>{{draygon = ['A lot of trouble', 'Default', 'Used to it', 'No problemo']
-                displaySelect("Draygon", draygon, settings['Draygon'])}}</td>
-	</tr>
-	<tr>
-	  <td><a href="https://wiki.supermetroid.run/Ridley">Ridley:</a></td>
-	  <td>{{ridley = ["I'm scared!", 'Default', 'Used to it', 'Piece of cake']
-	        displaySelect("Ridley", ridley, settings['Ridley'])}}
-	  </td>
-	</tr>
-	<tr>
-	  <td><a href="https://wiki.supermetroid.run/Phantoon">Phantoon:</a></td>
-	  <td>{{phantoon = ['A lot of trouble', 'Default', 'Used to it', 'No problemo']
-	        displaySelect("Phantoon", phantoon, settings['Phantoon'])}}</td>
-	</tr>
-	<tr>
-	  <td><a href="https://wiki.supermetroid.run/Mother_Brain">Mother Brain:</a></td>
-	  <td>{{motherBrain = ['It can get ugly', 'Default', 'Is this really the last boss?', 'Nice cutscene bro']
-	        displaySelect("MotherBrain", motherBrain, settings['MotherBrain'])}}</td>
-	</tr>
-      </table>
       <h3>Hard rooms</h3>
       <table class="full">
         <colgroup><col class="half" /><col class="half" /></colgroup>
@@ -629,7 +601,7 @@ if skillBarData is not None:
 	  <td><a href="https://wiki.supermetroid.run/Red_Brinstar_Fireflea_Room">X-Ray:</a></td>
 	  <td>{{xray = ["Aarghh", "I don't like spikes", "Default", "I don't mind spikes", "D-Boost master"]
 	        displaySelect("X-Ray", xray, settings["X-Ray"])}}</td>
-          <td id="xrayStep"><button type="button" onclick="startTheTour(4)">?</button></td>
+          <td id="xrayStep"><button type="button" onclick="startTheTour(3)">?</button></td>
 	</tr>
 	<tr>
 	  <td><a href="https://wiki.supermetroid.run/Gauntlet_Entrance">Gauntlet:</a></td>
@@ -637,8 +609,10 @@ if skillBarData is not None:
 	        displaySelect("Gauntlet", gauntlet, settings["Gauntlet"])}}</td>
 	</tr>
       </table>
+    </div>
+    <div class="column">
       <!-- display real etank requirements -->
-      <h3>Energy requirements<span class="rightStep"><button id="requirementStep" type="button" onclick="startTheTour(5)">?</button></span></h3>
+      <h3 id="requirementStep">Hard rooms energy requirements<span class="rightStep"><button type="button" onclick="startTheTour(4)">?</button></span></h3>
       <h4>X-Ray</h4>
       <table class="full">
 	<colgroup><col class="sixteen"/><col class="sixteen" /><col/><col/><col/><col/><col/><col/></colgroup>
@@ -682,6 +656,8 @@ if skillBarData is not None:
 	</tr>
       </table>
     </div>
+  </div>
+  <div class="row">
     <div class="column">
       <h3 id="iceStep">Hellruns</h3>
       <table class="full">
@@ -690,7 +666,7 @@ if skillBarData is not None:
 	  <td><a href="https://www.youtube.com/watch?v=E0jcnyb2eec&t=15m11s">Ice:</a></td>
 	  <td>{{hellruns = ['No thanks', 'Gimme energy', 'Default', 'Bring the heat', 'I run RBO']
 	        displaySelect("Ice", hellruns, settings['Ice'])}}</td>
-          <td><button type="button" onclick="startTheTour(6)">?</button></td>
+          <td><button type="button" onclick="startTheTour(5)">?</button></td>
 	</tr>
 	<tr>
 	  <td><a href="https://www.youtube.com/watch?v=E0jcnyb2eec&t=16m44s">Main Upper Norfair:</a></td>
@@ -702,7 +678,9 @@ if skillBarData is not None:
 	        displaySelect("LowerNorfair", hellruns, settings['LowerNorfair'])}}</td>
 	</tr>
       </table>
-      <h3 id="hellRunsEnergyStep">Energy requirements<span class="rightStep"><button id="requirementStep" type="button" onclick="startTheTour(7)">?</button></span></h3>
+    </div>
+    <div class="column">
+      <h3 id="hellRunsEnergyStep">Hellruns energy requirements<span class="rightStep"><button id="requirementStep" type="button" onclick="startTheTour(6)">?</button></span></h3>
       <table class="full">
         <colgroup><col class="half" /><col class="half" /></colgroup>
 	<tr>
@@ -753,6 +731,41 @@ if skillBarData is not None:
 	  <td class="centerTd"><pre><span id="harderMainUpperNorfair"></span></pre></td>
 	  <td class="centerTd"><pre><span id="hardcoreMainUpperNorfair"></span></pre></td>
 	  <td class="centerTd"><pre><span id="maniaMainUpperNorfair"></span></pre></td>
+	</tr>
+      </table>
+    </div>
+  </div>
+  <div class="row">
+    <div class="column">
+      <h3>Bosses</h3>
+      <table class="full">
+        <colgroup><col class="half" /><col class="half" /></colgroup>
+	<tr>
+	  <td><a href="https://wiki.supermetroid.run/Kraid">Kraid:</a></td>
+	  <td>{{kraid = ["He's annoying", 'Default', 'Quick Kill']
+            displaySelect("Kraid", kraid, settings['Kraid'])}}</td>
+          <td><button id="bossStep" type="button" onclick="startTheTour(7)">?</button></td>
+	</tr>
+	<tr>
+	  <td><a href="https://wiki.supermetroid.run/Draygon">Draygon:</a></td>
+	  <td>{{draygon = ['A lot of trouble', 'Default', 'Used to it', 'No problemo']
+            displaySelect("Draygon", draygon, settings['Draygon'])}}</td>
+	</tr>
+	<tr>
+	  <td><a href="https://wiki.supermetroid.run/Ridley">Ridley:</a></td>
+	  <td>{{ridley = ["I'm scared!", 'Default', 'Used to it', 'Piece of cake']
+	    displaySelect("Ridley", ridley, settings['Ridley'])}}
+	  </td>
+	</tr>
+	<tr>
+	  <td><a href="https://wiki.supermetroid.run/Phantoon">Phantoon:</a></td>
+	  <td>{{phantoon = ['A lot of trouble', 'Default', 'Used to it', 'No problemo']
+	    displaySelect("Phantoon", phantoon, settings['Phantoon'])}}</td>
+	</tr>
+	<tr>
+	  <td><a href="https://wiki.supermetroid.run/Mother_Brain">Mother Brain:</a></td>
+	  <td>{{motherBrain = ['It can get ugly', 'Default', 'Is this really the last boss?', 'Nice cutscene bro']
+	    displaySelect("MotherBrain", motherBrain, settings['MotherBrain'])}}</td>
 	</tr>
       </table>
     </div>

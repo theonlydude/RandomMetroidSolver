@@ -571,8 +571,8 @@ class SuperFunProvider(object):
                 # remove at least one if possible (will be screw or plasma)
                 self.forbiddenItems.append(removableCombat.pop(0))
                 fake.append(None)
-            # if plasma is still available, remove it as well
-            if len(removableCombat) > 0 and removableCombat[0] == 'Plasma':
+            # if plasma is still available, remove it as well if we can
+            if len(removableCombat) > 0 and removableCombat[0] == 'Plasma' and self.checkPool([removableCombat[0]]):
                 self.forbiddenItems.append(removableCombat.pop(0))
                 fake.append(None)
             self.addForbidden(removableCombat + fake)

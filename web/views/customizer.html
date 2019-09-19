@@ -214,11 +214,6 @@ function AjaxCallCompleted(data) {
           bytes = tmp;
         }
 
-        for(var key in data) {
-            if(key === "fileName" || key === "errorMsg" || key === "ips") { continue; }
-            bytes[key] = data[key];
-        }
-
         if("ips" in data) {
           var binary_string = atob(data["ips"]);
           var len = binary_string.length;
@@ -254,6 +249,12 @@ function AjaxCallCompleted(data) {
                i += j;
              }
           }
+        }
+
+        // do the ips first as the modified palettes are in the regular data
+        for(var key in data) {
+            if(key === "fileName" || key === "errorMsg" || key === "ips") { continue; }
+            bytes[key] = data[key];
         }
 
         var blob = new Blob([bytes], {type: "octet/stream"});

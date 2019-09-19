@@ -273,7 +273,8 @@ class HelpersGraph(Helpers):
             return SMBool(True, 0, items=['Super'])
 
         # - or with taking damage as well?
-        dmgKi = 200.0 / sm.getDmgReduction(False)
+        (dmgRed, item) = sm.getDmgReduction(envDmg=False)
+        dmgKi = 200.0 / dmgRed
         if (sm.itemCount('Super')*5*sup)/ki + (sm.energyReserveCount()*100 - 2)/dmgKi >= nbKi:
             # require heat proof as long as taking damage is necessary.
             # display all the available energy in the solver.
@@ -326,13 +327,14 @@ class HelpersGraph(Helpers):
     def canPassMtEverest(self):
         sm = self.smbm
         return  sm.wor(sm.wand(sm.haveItem('Gravity'),
-                               sm.wor(sm.wor(sm.haveItem('Grapple'),
-                                             sm.haveItem('SpeedBooster')),
-                                      sm.wor(sm.canFly(),
-                                             sm.knowsGravityJump(),
-                                             sm.wand(sm.haveItem('Ice'), sm.knowsTediousMountEverest())))),
-                       sm.canDoSuitlessMaridia(),
-                       sm.wand(sm.haveItem('Ice'), sm.canDoSuitlessOuterMaridia(), sm.knowsTediousMountEverest()))
+                               sm.wor(sm.haveItem('Grapple'),
+                                      sm.haveItem('SpeedBooster'),
+                                      sm.canFly(),
+                                      sm.knowsGravityJump())),
+                       sm.wand(sm.canDoSuitlessOuterMaridia(),
+                               sm.wor(sm.haveItem('Grapple'),
+                                      sm.wand(sm.haveItem('Ice'), sm.knowsTediousMountEverest(), sm.haveItem('Super')),
+                                      sm.canDoubleSpringBallJump())))
 
     @Cache.decorator
     def canDoSuitlessOuterMaridia(self):
@@ -341,13 +343,6 @@ class HelpersGraph(Helpers):
                        sm.haveItem('HiJump'),
                        sm.wor(sm.haveItem('Ice'),
                               sm.canSpringBallJump()))
-
-    @Cache.decorator
-    def canDoSuitlessMaridia(self):
-        sm = self.smbm
-        return sm.wand(sm.canDoSuitlessOuterMaridia(),
-                       sm.wor(sm.haveItem('Grapple'),
-                              sm.canDoubleSpringBallJump()))
 
     @Cache.decorator
     def canAccessBotwoonFromMainStreet(self):
@@ -374,7 +369,10 @@ class HelpersGraph(Helpers):
         sm = self.smbm
         return sm.wand(sm.canDefeatBotwoon(),
                        sm.wor(sm.haveItem('Gravity'),
-                              sm.wand(sm.canDoSuitlessMaridia(), sm.knowsGravLessLevel2())))
+                              sm.wand(sm.knowsGravLessLevel2(),
+                                      sm.wor(sm.haveItem('Grapple'),
+                                             sm.haveItem('SpaceJump'),
+                                             sm.wand(sm.haveItem('Ice'), sm.knowsBotwoonToDraygonWithIce())))))
 
     def isVanillaDraygon(self):
         if self.vanillaDraygon is None:

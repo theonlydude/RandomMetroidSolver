@@ -1057,7 +1057,7 @@ function startTheTour(step=-1) {
     {
       element: "#presetStep",
       title: "Skills Preset",
-      content: "<p>The preset is used by the Randomizer to know which techniques are available to reach the items locations.</p><p>You can check which techniques are required as well as create and manage your own preset on the <a href=\"/solver/solver_web/presets\">Presets part of the website</a>.</p><p>Load one of the standard presets (sorted in increased difficulty), tournaent presets, or your own from the community presets.</p><p>Creating your own preset will lead to a better experience overall, as the generated ROMs will be tailored for you.</p>"
+      content: "<p>The preset is used by the Randomizer to know which techniques are available to reach the items locations.</p><p>You can check which techniques are required as well as create and manage your own preset on the <a href=\"/solver/solver_web/presets\">Presets part of the website</a>.</p><p>Load one of the standard presets (sorted in increased difficulty), tournament presets, or your own from the community presets.</p><p>Creating your own preset will lead to a better experience overall, as the generated ROMs will be tailored for you.</p>"
     },
     {
       element: "#randoPresetStep",
@@ -1075,7 +1075,8 @@ function startTheTour(step=-1) {
 <li>where_is_morph: Area mode with late Morph</li></ul>\
 Tournament presets:<ul>\
 <li>Scavenger_Hunt: SM Scavenger Hunt Tournament</li>\
-<li>Season_Races: settings used for rando league races</li>\
+<li>Season_Races: settings used for rando league races (Majors/Minors split)</li>\
+<li>Season_Races_Chozo: settings used for rando league races (Chozo split)</li>\
 <li>smrat: Super Metroid Randomizer Accessible Tournament 2019</li></ul>"
     },
     {
@@ -1284,7 +1285,7 @@ Click on the dice button to randomly set this parameter.",
       element: "#patchesStep",
 //      element: "#noGravHeatStep",
       title: "No Gravity Suit Heat Protection",
-      content: "Remove the Gravity Suit <img src=\"/solver/static/images/Gravity.png\" alt=\"Gravity.png\" title=\"Gravity.png\" class=\"width: 32px\"/> environmental protection (heat, spikes, electricity...), it balances more the two suits abilities. Disable it to have a more vanilla feeling.",
+      content: "Remove the Gravity Suit <img src=\"/solver/static/images/Gravity.png\" alt=\"Gravity.png\" title=\"Gravity.png\" class=\"width: 32px\"/> environmental protection (heat, spikes, electricity...), it also double the Varia Suit <img src=\"/solver/static/images/Varia.png\" alt=\"Varia.png\" title=\"Varia.png\" class=\"width: 32px\"/> environmental protection, as such it balances more the two suits abilities. Disable it to have a more vanilla feeling.",
       placement: "auto left"
     },
     {

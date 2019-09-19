@@ -22,7 +22,7 @@ class Helpers(object):
         if difficulties is None or len(difficulties) == 0:
             return SMBool(False)
         def f(difficulty):
-            return self.smbm.energyReserveCountOk(difficulty[0] / mult, difficulty=difficulty[1])
+            return self.smbm.energyReserveCountOk(int(difficulty[0] / mult), difficulty=difficulty[1])
         result = reduce(lambda result, difficulty: self.smbm.wor(result, f(difficulty)),
                         difficulties[1:], f(difficulties[0]))
         return result
@@ -42,29 +42,37 @@ class Helpers(object):
         sm = self.smbm
         hasVaria = sm.haveItem('Varia')
         hasGrav = sm.haveItem('Gravity')
+        item = None
         if RomPatches.has(RomPatches.NoGravityEnvProtection):
             if hasVaria:
+                item = 'Varia'
                 if envDmg:
                     ret = 4.0
                 else:
                     ret = 2.0
             if hasGrav and not envDmg:
                 ret = 4.0
+                item = 'Gravity'
         else:
             if hasVaria:
                 ret = 2.0
+                item = 'Varia'
             if hasGrav:
                 ret = 4.0
-        return ret
+                item = 'Gravity'
+        return (ret, item)
 
     # higher values for mult means room is that much "easier" (HP mult)
     def energyReserveCountOkHardRoom(self, roomName, mult=1.0):
         difficulties = Settings.hardRooms[roomName]
-        mult *= self.getDmgReduction()
+        (dmgRed, item) = self.getDmgReduction()
+        mult *= dmgRed
         result = self.energyReserveCountOkDiff(difficulties, mult)
 
         if result == True:
             result.knows = ['HardRoom-'+roomName]
+            if dmgRed != 1.0:
+                result.items.append(item)
         return result
 
     @Cache.decorator
@@ -485,7 +493,7 @@ class Helpers(object):
             return SMBool(True, diff)
 
     def adjustHealthDropDiff(self, difficulty):
-        dmgRed = self.getDmgReduction(envDmg=False)
+        (dmgRed, item) = self.getDmgReduction(envDmg=False)
         # 2 is Varia suit, considered standard eqt for boss fights
         # there's certainly a smarter way to do this but...
         if dmgRed < 2:

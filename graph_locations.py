@@ -327,7 +327,7 @@ locations = [
     'Available': lambda sm: sm.wand(sm.enoughStuffCroc(),
                                     sm.wor(sm.haveItem('Grapple'),
                                            sm.haveItem('SpaceJump'),
-                                           sm.energyReserveCountOk(3/sm.getDmgReduction())))
+                                           sm.energyReserveCountOk(3/sm.getDmgReduction()[0])))
 },
 {
     'Area': "Norfair",
@@ -699,14 +699,15 @@ locations = [
                                                           sm.knowsSuitlessPuyoClip())),
                                            sm.wand(sm.haveItem('Grapple'), # go through grapple block
                                                    sm.haveItem('Gravity'),
-                                                   sm.wor(sm.canFlyDiagonally(),
-                                                          sm.haveItem('HiJump'),
+                                                   sm.wor(sm.wor(sm.haveItem('HiJump'), sm.haveItem('SpaceJump')),
+                                                          sm.knowsAccessSpringBallWithGravJump(),
                                                           sm.wand(sm.haveItem('Bomb'),
                                                                   sm.wor(sm.knowsAccessSpringBallWithBombJumps(),
                                                                          sm.wand(sm.haveItem('SpringBall'),
                                                                                  sm.knowsAccessSpringBallWithSpringBallBombJumps()))),
                                                           sm.wand(sm.haveItem('SpringBall'), sm.knowsAccessSpringBallWithSpringBallJump()))),
-                                           sm.wand(sm.haveItem('XRayScope'), sm.knowsAccessSpringBallWithXRayClimb()))), # XRay climb
+                                           sm.wand(sm.haveItem('XRayScope'), sm.knowsAccessSpringBallWithXRayClimb())), # XRay climb
+                                    sm.wor(sm.haveItem('Gravity'), sm.canUseSpringBall())), # acess the item in spring ball room
     'PostAvailable': lambda sm: sm.wor(sm.haveItem('Gravity'),
                                        sm.canSpringBallJump())
 },

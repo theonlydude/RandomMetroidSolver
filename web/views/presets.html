@@ -21,6 +21,28 @@ extend 'layout.html'
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 
 <style>
+.column {
+    padding-right: 10px;
+}
+.row {
+    padding-bottom: 1em;
+}
+pre {
+    display: block;
+    padding: 0px;
+    margin: 0 0 0 0;
+    font-size: 13px;
+    line-height: 1.42857143;
+    word-break: break-all;
+    word-wrap: break-word;
+    color: #000000;
+    background-color: #ffffff;
+    border: 0px solid #cccccc;
+    border-radius: 0px;
+}
+.centerTd {
+    text-align: center;
+}
 .almostFull {
     width: 95%;
 }
@@ -33,6 +55,10 @@ extend 'layout.html'
 }
 .sixteen {
     width: 16%;
+}
+.rightStep {
+    float: right;
+    margin-right: 0.1em;
 }
 </style>
 
@@ -122,9 +148,110 @@ else:
 pass
 }}
 
+  var xrayItem = document.getElementById("X-Ray");
+  xrayItem.onchange = onChangeXRay;
+  onChangeXRay();
+
+  var gauntletItem = document.getElementById("Gauntlet");
+  gauntletItem.onchange = onChangeGauntlet;
+  onChangeGauntlet();
+
+  var IceParamItem = document.getElementById("Ice");
+  IceParamItem.onchange = onChangeIceHellRun;
+  var IceHellRunItem = document.getElementById("IceHellRun");
+  IceHellRunItem.onchange = onChangeIceHellRun;
+  onChangeIceHellRun();
+
+  var NorfairParamItem = document.getElementById("MainUpperNorfair");
+  NorfairParamItem.onchange = onChangeNorfairHellRun;
+  var NorfairHellRunItem = document.getElementById("UpperHellRun");
+  NorfairHellRunItem.onchange = onChangeNorfairHellRun;
+  onChangeNorfairHellRun();
+
   $(".chzn-select").chosen();
   resizeChosen();
 }
+
+function onChangeIceHellRun() {
+  var valueParam = document.getElementById("Ice").value;
+  var valueHellRun = document.getElementById("IceHellRun").value;
+  var hellRun = "Ice";
+  setHellRunEnergy(hellRun, valueParam, valueHellRun);
+}
+
+function onChangeNorfairHellRun() {
+  var valueParam = document.getElementById("MainUpperNorfair").value;
+  var valueHellRun = document.getElementById("UpperHellRun").value;
+  var hellRun = "MainUpperNorfair";
+  setHellRunEnergy(hellRun, valueParam, valueHellRun);
+}
+
+function setHellRunEnergy(hellRun, valueParam, valueHellRun) {
+  var difficulties = [{{response.write("[\"easy\", {}], [\"medium\", {}], [\"hard\", {}], [\"harder\", {}], [\"hardcore\", {}], [\"mania\", {}]".format(easy, medium, hard, harder, hardcore, mania), escape=False)}}];
+
+  for(var i=0; i<difficulties.length; i++) {
+    var item = document.getElementById(difficulties[i][0]+hellRun);
+    var value = hellRuns[hellRun][valueHellRun][valueParam][difficulties[i][1]]
+    if(value == -1) {
+      value = '-';
+    }
+    item.innerHTML = value;
+  }
+}
+
+function onChangeXRay() {
+    var xrayItem = document.getElementById("X-Ray");
+    var xraySetting = xrayItem.value;
+    setXrayEnergy(xraySetting);
+}
+
+function onChangeGauntlet() {
+    var gauntletItem = document.getElementById("Gauntlet");
+    var gauntletSetting = gauntletItem.value;
+    setGauntletEnergy(gauntletSetting, "Bomb");
+    setGauntletEnergy(gauntletSetting, "PowerBomb");
+}
+
+function setXrayEnergy(xraySetting) {
+
+  var difficulties = [{{response.write("[\"easy\", {}], [\"medium\", {}], [\"hard\", {}], [\"harder\", {}], [\"hardcore\", {}], [\"mania\", {}]".format(easy, medium, hard, harder, hardcore, mania), escape=False)}}];
+
+  for(var i=0; i<difficulties.length; i++) {
+    var item = document.getElementById(difficulties[i][0]+"Xray");
+    var valueS = hardRooms["X-Ray"]["Suitless"][xraySetting][difficulties[i][1]]
+    if(valueS == -1) {
+      valueS = '-';
+    }
+    var valueV = hardRooms["X-Ray"]["Varia"][xraySetting][difficulties[i][1]]
+    if(valueV == -1) {
+      valueV = '-';
+    }
+    item.innerHTML = valueS+" | "+valueV;
+  }
+}
+
+function setGauntletEnergy(gauntletSetting, bombItem) {
+
+  var difficulties = [{{response.write("[\"easy\", {}], [\"medium\", {}], [\"hard\", {}], [\"harder\", {}], [\"hardcore\", {}], [\"mania\", {}]".format(easy, medium, hard, harder, hardcore, mania), escape=False)}}];
+
+  for(var i=0; i<difficulties.length; i++) {
+    var item = document.getElementById(difficulties[i][0]+"Gauntlet"+bombItem);
+    var valueS = hardRooms["Gauntlet"]["Suitless"+bombItem][gauntletSetting][difficulties[i][1]]
+    if(valueS == -1) {
+      valueS = '-';
+    }
+    var valueV = hardRooms["Gauntlet"]["Varia"+bombItem][gauntletSetting][difficulties[i][1]]
+    if(valueV == -1) {
+      valueV = '-';
+    }
+    item.innerHTML = valueS+" | "+valueV;
+  }
+}
+
+{{
+response.write("var hardRooms = {};\n".format(hardRooms), escape=False)
+response.write("var hellRuns = {};\n".format(hellRuns), escape=False)
+}}
 
 function startTheTour(step=-1) {
   // the tour tutorial
@@ -147,6 +274,19 @@ function startTheTour(step=-1) {
       content: "<ul><li><b>Load</b>: Load your preset or one of the predefined ones</li><li><b>Update</b>: Update your preset after you've mastered a new technique</li><li><b>Create</b>: create your own preset based on the currently loaded one.</li></ul>."
     },
     {
+      element: "#xrayStep",
+      title: "Hard rooms",
+      content: "Some rooms have an intended 'easy way' of traversing them : with Screw Attack for the Gauntlet Area, with Grapple or Space Jump for X-Ray. This is the difficulty when not placed in those conditions. Settings are displayed from easier to harder, they change the amount of energy required to go through the rooms.<br/><b>X-Ray</b>: difficulty of using the D-Boost (see in the techniques section below), Bomb Jump or Ice climb techniques.<br/><b>Gauntlet</b>: difficulty of traversing it with Bombs or Power Bombs."
+    },
+    {
+      element: "#requirementStep",
+      title: "Energy requirements",
+      content: "These tables give the number of Energy and Reserve Tanks required for the VARIA logic to consider the Hard rooms available (with the associated difficulty).<br/>\
+<b>Precision:</b>As the patch to disable Gravity Suit protection against environmental damage is on by the default in the VARIA Randomizer, having Gravity Suit is the same as being Suitless.<br/>\
+Also the Varia Suit environmental protection is increased to match vanilla Gravity Suit.",
+      placement: "auto left"
+    },
+    {
       element: "#iceStep",
       title: "Hellruns",
       content: "A Hellrun is going through Norfair heated rooms without the VARIA Suit.<br/>\
@@ -158,15 +298,15 @@ function startTheTour(step=-1) {
 (<a href=\"https://wiki.supermetroid.run/Upper_Norfair_Farming_Room\">Upper Norfair Farming Room</a> is not considered heated.)"
     },
     {
-      element: "#xrayStep",
-      title: "Hard rooms",
-      content: "Some rooms have an intended 'easy way' of traversing them : with Screw Attack for the Gauntlet Area, with Grapple or Space Jump for X-Ray. This is the difficulty when not placed in those conditions. Settings are displayed from easier to harder, they change the amount of energy required to go through the rooms.<br/><b>X-Ray</b>: difficulty of using the D-Boost (see in the techniques section below), Bomb Jump or Ice climb techniques.<br/><b>Gauntlet</b>: difficulty of traversing it with Bombs or Power Bombs."
+      element: "#hellRunsEnergyStep",
+      title: "Energy requirements",
+      content: "These tables give the number of Energy and Reserve Tanks required for the VARIA logic to consider the Hell runs available (with the associated difficulty).",
+      placement: "auto left"
     },
     {
-      element: "#Kraid",
+      element: "#bossStep",
       title: "Bosses",
-      content: "Logic behind the presets : the ones where you find the boss difficult are calibrated to give 'hard' in vanilla situations, the default are calibrated to give 'medium' in vanilla situations, just above gives 'easy' in vanilla situations, and top settings basically discards the boss except for extreme situations (very low energy or firepower).<br/>This is the estimated difficulty of the fight for a 'standard' kill. There are distinct parameters for special boss kill techniques (for example grappling Draygon, see Bosses in the Techniques section below)",
-      placement: "auto left"
+      content: "Logic behind the presets : the ones where you find the boss difficult are calibrated to give 'hard' in vanilla situations, the default are calibrated to give 'medium' in vanilla situations, just above gives 'easy' in vanilla situations, and top settings basically discards the boss except for extreme situations (very low energy or firepower).<br/>This is the estimated difficulty of the fight for a 'standard' kill. There are distinct parameters for special boss kill techniques (for example grappling Draygon, see Bosses in the Techniques section below)"
     }
  ]});
 
@@ -451,17 +591,82 @@ if skillBarData is not None:
   <button class="tablinks" onclick="changeTab(event, 'Mapping')" name="Mapping">Gamepad Mapping</button>
 </div>
 
-<div id="Global" class="tabcontent"><br/>
+<div id="Global" class="tabcontent">
   <div class="row">
     <div class="column">
-      <h3>Hellruns</h3>
+      <h3>Hard rooms</h3>
+      <table class="full">
+        <colgroup><col class="half" /><col class="half" /></colgroup>
+	<tr>
+	  <td><a href="https://wiki.supermetroid.run/Red_Brinstar_Fireflea_Room">X-Ray:</a></td>
+	  <td>{{xray = ["Aarghh", "I don't like spikes", "Default", "I don't mind spikes", "D-Boost master"]
+	        displaySelect("X-Ray", xray, settings["X-Ray"])}}</td>
+          <td id="xrayStep"><button type="button" onclick="startTheTour(3)">?</button></td>
+	</tr>
+	<tr>
+	  <td><a href="https://wiki.supermetroid.run/Gauntlet_Entrance">Gauntlet:</a></td>
+	  <td>{{gauntlet = ["Aarghh", "I don't like acid", "Default"]
+	        displaySelect("Gauntlet", gauntlet, settings["Gauntlet"])}}</td>
+	</tr>
+      </table>
+    </div>
+    <div class="column">
+      <!-- display real etank requirements -->
+      <h3 id="requirementStep">Hard rooms energy requirements<span class="rightStep"><button type="button" onclick="startTheTour(4)">?</button></span></h3>
+      <h4>X-Ray</h4>
+      <table class="full">
+	<colgroup><col class="sixteen"/><col class="sixteen" /><col/><col/><col/><col/><col/><col/></colgroup>
+	<tr>
+	  <td class="centerTd">Item</td><td class="centerTd">Suit</td><td class="centerTd">easy</td><td class="centerTd">medium</td><td class="centerTd">hard</td><td class="centerTd">very hard</td><td class="centerTd">hardcore</td><td class="centerTd">mania</td>
+	</tr>
+	<tr>
+	  <td class="centerTd">-</td>
+	  <td class="centerTd">Suitless | <img src="/solver/static/images/Varia.png" alt="Varia.png" title="Varia.png" class="width: 32px"/></td>
+	  <td class="centerTd"><pre><span id="easyXray"></span></pre></td>
+	  <td class="centerTd"><pre><span id="mediumXray"></span></pre></td>
+	  <td class="centerTd"><pre><span id="hardXray"></span></pre></td>
+	  <td class="centerTd"><pre><span id="harderXray"></span></pre></td>
+	  <td class="centerTd"><pre><span id="hardcoreXray"></span></pre></td>
+	  <td class="centerTd"><pre><span id="maniaXray"></span></pre></td>
+	</tr>
+      </table>
+      <h4>Gauntlet</h4>
+      <table class="full">
+	<colgroup><col class="sixteen"/><col class="sixteen" /><col/><col/><col/><col/><col/><col/></colgroup>
+	<td class="centerTd">Item</td><td class="centerTd">Suit</td><td class="centerTd">easy</td><td class="centerTd">medium</td><td class="centerTd">hard</td><td class="centerTd">very hard</td><td class="centerTd">hardcore</td><td class="centerTd">mania</td>
+	<tr>
+	  <td class="centerTd"><img src="/solver/static/images/Bomb.png" alt="Bomb.png" title="Bomb.png" class="width: 32px"/></td>
+	  <td class="centerTd">Suitless | <img src="/solver/static/images/Varia.png" alt="Varia.png" title="Varia.png" class="width: 32px"/></td>
+	  <td class="centerTd"><pre><span id="easyGauntletBomb"></span></pre></td>
+	  <td class="centerTd"><pre><span id="mediumGauntletBomb"></span></pre></td>
+	  <td class="centerTd"><pre><span id="hardGauntletBomb"></span></pre></td>
+	  <td class="centerTd"><pre><span id="harderGauntletBomb"></span></pre></td>
+	  <td class="centerTd"><pre><span id="hardcoreGauntletBomb"></span></pre></td>
+	  <td class="centerTd"><pre><span id="maniaGauntletBomb"></span></pre></td>
+	</tr>
+	<tr>
+	  <td class="centerTd"><img src="/solver/static/images/PowerBomb.png" alt="PowerBomb.png" title="PowerBomb.png" class="width: 32px"/></td>
+	  <td class="centerTd">Suitless | <img src="/solver/static/images/Varia.png" alt="Varia.png" title="Varia.png" class="width: 32px"/></td>
+	  <td class="centerTd"><pre><span id="easyGauntletPowerBomb"></span></pre></td>
+	  <td class="centerTd"><pre><span id="mediumGauntletPowerBomb"></span></pre></td>
+	  <td class="centerTd"><pre><span id="hardGauntletPowerBomb"></span></pre></td>
+	  <td class="centerTd"><pre><span id="harderGauntletPowerBomb"></span></pre></td>
+	  <td class="centerTd"><pre><span id="hardcoreGauntletPowerBomb"></span></pre></td>
+	  <td class="centerTd"><pre><span id="maniaGauntletPowerBomb"></span></pre></td>
+	</tr>
+      </table>
+    </div>
+  </div>
+  <div class="row">
+    <div class="column">
+      <h3 id="iceStep">Hellruns</h3>
       <table class="full">
         <colgroup><col class="half" /><col class="half" /></colgroup>
 	<tr>
 	  <td><a href="https://www.youtube.com/watch?v=E0jcnyb2eec&t=15m11s">Ice:</a></td>
 	  <td>{{hellruns = ['No thanks', 'Gimme energy', 'Default', 'Bring the heat', 'I run RBO']
 	        displaySelect("Ice", hellruns, settings['Ice'])}}</td>
-          <td id="iceStep"><button type="button" onclick="startTheTour(3)">?</button></td>
+          <td><button type="button" onclick="startTheTour(5)">?</button></td>
 	</tr>
 	<tr>
 	  <td><a href="https://www.youtube.com/watch?v=E0jcnyb2eec&t=16m44s">Main Upper Norfair:</a></td>
@@ -473,22 +678,64 @@ if skillBarData is not None:
 	        displaySelect("LowerNorfair", hellruns, settings['LowerNorfair'])}}</td>
 	</tr>
       </table>
-      <h3>Hard rooms</h3>
+    </div>
+    <div class="column">
+      <h3 id="hellRunsEnergyStep">Hellruns energy requirements<span class="rightStep"><button id="requirementStep" type="button" onclick="startTheTour(6)">?</button></span></h3>
       <table class="full">
         <colgroup><col class="half" /><col class="half" /></colgroup>
 	<tr>
-	  <td><a href="https://wiki.supermetroid.run/Red_Brinstar_Fireflea_Room">X-Ray:</a></td>
-	  <td>{{xray = ["Aarghh", "I don't like spikes", "Default", "I don't mind spikes", "D-Boost master"]
-	        displaySelect("X-Ray", xray, settings["X-Ray"])}}</td>
-          <td id="xrayStep"><button type="button" onclick="startTheTour(4)">?</button></td>
+	  <td>
+	    <h4>Ice</h4>
+	  </td>
+	  <td>
+	    {{displaySelect("IceHellRun", sorted(hellRuns["Ice"]), hellRuns["Ice"]["Norfair Entrance -> Ice Beam"])}}
+	  </td>
+          <td><span class="btn"></span></td>
+	</tr>
+      </table>
+      <table class="full">
+	<colgroup><col class="name" /><col/><col/><col/><col/><col/><col/></colgroup>
+	<tr>
+	  <td class="centerTd">easy</td><td class="centerTd">medium</td><td class="centerTd">hard</td><td class="centerTd">very hard</td><td class="centerTd">hardcore</td><td class="centerTd">mania</td>
 	</tr>
 	<tr>
-	  <td><a href="https://wiki.supermetroid.run/Gauntlet_Entrance">Gauntlet:</a></td>
-	  <td>{{gauntlet = ["Aarghh", "I don't like acid", "Default"]
-	        displaySelect("Gauntlet", gauntlet, settings["Gauntlet"])}}</td>
+	  <td class="centerTd"><pre><span id="easyIce"></span></pre></td>
+	  <td class="centerTd"><pre><span id="mediumIce"></span></pre></td>
+	  <td class="centerTd"><pre><span id="hardIce"></span></pre></td>
+	  <td class="centerTd"><pre><span id="harderIce"></span></pre></td>
+	  <td class="centerTd"><pre><span id="hardcoreIce"></span></pre></td>
+	  <td class="centerTd"><pre><span id="maniaIce"></span></pre></td>
+	</tr>
+      </table>
+      <table class="full">
+        <colgroup><col class="half" /><col class="half" /></colgroup>
+	<tr>
+	  <td>
+	    <h4>Upper Norfair</h4>
+	  </td>
+	  <td>
+	    {{displaySelect("UpperHellRun", sorted(hellRuns["MainUpperNorfair"]), hellRuns["MainUpperNorfair"]["Norfair Entrance -> Bubble"])}}
+	  </td>
+          <td><span class="btn"></span></td>
+	</tr>
+      </table>
+      <table class="full">
+	<colgroup><col class="name" /><col/><col/><col/><col/><col/><col/></colgroup>
+	<tr>
+	  <td class="centerTd">easy</td><td class="centerTd">medium</td><td class="centerTd">hard</td><td class="centerTd">very hard</td><td class="centerTd">hardcore</td><td class="centerTd">mania</td>
+	</tr>
+	<tr>
+	  <td class="centerTd"><pre><span id="easyMainUpperNorfair"></span></pre></td>
+	  <td class="centerTd"><pre><span id="mediumMainUpperNorfair"></span></pre></td>
+	  <td class="centerTd"><pre><span id="hardMainUpperNorfair"></span></pre></td>
+	  <td class="centerTd"><pre><span id="harderMainUpperNorfair"></span></pre></td>
+	  <td class="centerTd"><pre><span id="hardcoreMainUpperNorfair"></span></pre></td>
+	  <td class="centerTd"><pre><span id="maniaMainUpperNorfair"></span></pre></td>
 	</tr>
       </table>
     </div>
+  </div>
+  <div class="row">
     <div class="column">
       <h3>Bosses</h3>
       <table class="full">
@@ -496,29 +743,29 @@ if skillBarData is not None:
 	<tr>
 	  <td><a href="https://wiki.supermetroid.run/Kraid">Kraid:</a></td>
 	  <td>{{kraid = ["He's annoying", 'Default', 'Quick Kill']
-                displaySelect("Kraid", kraid, settings['Kraid'])}}</td>
-          <td><button type="button" onclick="startTheTour(5)">?</button></td>
+            displaySelect("Kraid", kraid, settings['Kraid'])}}</td>
+          <td><button id="bossStep" type="button" onclick="startTheTour(7)">?</button></td>
 	</tr>
 	<tr>
 	  <td><a href="https://wiki.supermetroid.run/Draygon">Draygon:</a></td>
 	  <td>{{draygon = ['A lot of trouble', 'Default', 'Used to it', 'No problemo']
-                displaySelect("Draygon", draygon, settings['Draygon'])}}</td>
+            displaySelect("Draygon", draygon, settings['Draygon'])}}</td>
 	</tr>
 	<tr>
 	  <td><a href="https://wiki.supermetroid.run/Ridley">Ridley:</a></td>
 	  <td>{{ridley = ["I'm scared!", 'Default', 'Used to it', 'Piece of cake']
-	        displaySelect("Ridley", ridley, settings['Ridley'])}}
+	    displaySelect("Ridley", ridley, settings['Ridley'])}}
 	  </td>
 	</tr>
 	<tr>
 	  <td><a href="https://wiki.supermetroid.run/Phantoon">Phantoon:</a></td>
 	  <td>{{phantoon = ['A lot of trouble', 'Default', 'Used to it', 'No problemo']
-	        displaySelect("Phantoon", phantoon, settings['Phantoon'])}}</td>
+	    displaySelect("Phantoon", phantoon, settings['Phantoon'])}}</td>
 	</tr>
 	<tr>
 	  <td><a href="https://wiki.supermetroid.run/Mother_Brain">Mother Brain:</a></td>
 	  <td>{{motherBrain = ['It can get ugly', 'Default', 'Is this really the last boss?', 'Nice cutscene bro']
-	        displaySelect("MotherBrain", motherBrain, settings['MotherBrain'])}}</td>
+	    displaySelect("MotherBrain", motherBrain, settings['MotherBrain'])}}</td>
 	</tr>
       </table>
     </div>

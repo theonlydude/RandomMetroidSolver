@@ -566,13 +566,15 @@ class SuperFunProvider(object):
         removableCombat = [cbt for cbt in self.combatItems if self.checkPool([cbt])]
         self.log.debug("getForbiddenCombat removable="+str(removableCombat))
         if len(removableCombat) > 0:
-            fake = [None, None] # placeholders to avoid tricking the gaussian into removing too much stuff
+            fake = [] # placeholders to avoid tricking the gaussian into removing too much stuff
             if len(removableCombat) > 0:
                 # remove at least one if possible (will be screw or plasma)
                 self.forbiddenItems.append(removableCombat.pop(0))
-            # if plasma is still available, remove it as well
-            if len(removableCombat) > 0 and removableCombat[0] == 'Plasma':
+                fake.append(None)
+            # if plasma is still available, remove it as well if we can
+            if len(removableCombat) > 0 and removableCombat[0] == 'Plasma' and self.checkPool([removableCombat[0]]):
                 self.forbiddenItems.append(removableCombat.pop(0))
+                fake.append(None)
             self.addForbidden(removableCombat + fake)
         else:
             self.errorMsgs.append('Could not remove any combat item')
@@ -1338,10 +1340,12 @@ class Randomizer(object):
     # with non-progression items
     def checkLocPool(self):
  #       self.log.debug("checkLocPool {}".format([it['Name'] for it in self.itemPool]))
+        if self.locLimit <= 0:
+            return True
         progItems = [item for item in self.itemPool if self.isProgItem(item)]
         self.log.debug("progItems {}".format([it['Name'] for it in progItems]))
  #       self.log.debug("curItems {}".format([it['Name'] for it in self.currentItems]))
-        if len(progItems) == 0 or self.locLimit <= 0:
+        if len(progItems) == 0:
             return True
         isMinorProg = any(self.isItemMinor(item) for item in progItems)
         isMajorProg = any(self.isItemMajor(item) for item in progItems)

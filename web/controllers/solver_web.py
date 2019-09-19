@@ -20,6 +20,8 @@ import db
 from graph_access import vanillaTransitions, vanillaBossesTransitions
 from utils import isStdPreset
 from graph_locations import locations
+from smboolmanager import SMBoolManager
+from rom import RomPatches
 
 def maxPresetsReach():
     # to prevent a spammer to create presets in a loop and fill the fs
@@ -65,7 +67,7 @@ def loadPresetsList():
     return (stdPresets, tourPresets, comPresets)
 
 def loadRandoPresetsList():
-    tourPresets = ['Season_Races', 'smrat', 'Scavenger_Hunt']
+    tourPresets = ['Season_Races', 'Season_Races_Chozo', 'smrat', 'Scavenger_Hunt']
     files = sorted(os.listdir('rando_presets'), key=lambda v: v.upper())
     randoPresets = [os.path.splitext(file)[0] for file in files]
     randoPresets = [preset for preset in randoPresets if preset not in tourPresets]
@@ -154,8 +156,123 @@ def updatePresetsSession():
     else:
         session.presets['preset'] = request.vars.preset
 
+def computeGauntlet(sm, bomb, addVaria):
+    result = {}
+
+    for key in Settings.hardRoomsPresets['Gauntlet']:
+        Settings.hardRooms['Gauntlet'] = Settings.hardRoomsPresets['Gauntlet'][key]
+        sm.resetItems()
+        if addVaria == True:
+            sm.addItem('Varia')
+        sm.addItem(bomb)
+
+        result[key] = {easy: -1, medium: -1, hard: -1, harder: -1, hardcore: -1, mania: -1}
+
+        for i in range(18):
+            ret = sm.energyReserveCountOkHardRoom('Gauntlet', 0.5 if bomb == 'Bomb' else 1.0)
+
+            if ret.bool == True:
+                nEtank = 0
+                for item in ret.items:
+                    if item.find('ETank') != -1:
+                        nEtank = int(item[0:item.find('-ETank')])
+                        break
+                result[key][ret.difficulty] = nEtank
+
+            sm.addItem('ETank')
+
+    return result
+
+def computeXray(sm, addVaria):
+    result = {}
+
+    for key in Settings.hardRoomsPresets['X-Ray']:
+        if key == 'Solution':
+            continue
+        Settings.hardRooms['X-Ray'] = Settings.hardRoomsPresets['X-Ray'][key]
+        sm.resetItems()
+        if addVaria == True:
+            sm.addItem('Varia')
+
+        result[key] = {easy: -1, medium: -1, hard: -1, harder: -1, hardcore: -1, mania: -1}
+
+        for i in range(18):
+            ret = sm.energyReserveCountOkHardRoom('X-Ray')
+
+            if ret.bool == True:
+                nEtank = 0
+                for item in ret.items:
+                    if item.find('ETank') != -1:
+                        nEtank = int(item[0:item.find('-ETank')])
+                        break
+                result[key][ret.difficulty] = nEtank
+
+            sm.addItem('ETank')
+
+    return result
+
+def computeHardRooms(hardRooms):
+    # add gravity patch (as we add it by default in the randomizer)
+    RomPatches.ActivePatches.append(RomPatches.NoGravityEnvProtection)
+
+    sm = SMBoolManager()
+
+    # xray
+    xray = {}
+    xray['Suitless'] = computeXray(sm, False)
+    xray['Varia'] = computeXray(sm, True)
+    hardRooms['X-Ray'] = xray
+
+    # gauntlet
+    gauntlet = {}
+    gauntlet['SuitlessBomb'] = computeGauntlet(sm, 'Bomb', False)
+    gauntlet['SuitlessPowerBomb'] = computeGauntlet(sm, 'PowerBomb', False)
+    gauntlet['VariaBomb'] = computeGauntlet(sm, 'Bomb', True)
+    gauntlet['VariaPowerBomb'] = computeGauntlet(sm, 'PowerBomb', True)
+    hardRooms['Gauntlet'] = gauntlet
+
+    return hardRooms
+
+def computeHellruns(hellRuns):
+    sm = SMBoolManager()
+    for hellRun in ['Ice', 'MainUpperNorfair']:
+        hellRuns[hellRun] = {}
+
+        for (actualHellRun, params) in Settings.hellRunsTable[hellRun].items():
+            hellRuns[hellRun][actualHellRun] = {}
+            for (key, difficulties) in Settings.hellRunPresets[hellRun].items():
+                if key == 'Solution':
+                    continue
+                Settings.hellRuns[hellRun] = difficulties
+                hellRuns[hellRun][actualHellRun][key] = {easy: -1, medium: -1, hard: -1, harder: -1, hardcore: -1, mania: -1}
+                if difficulties == None:
+                    continue
+
+                sm.resetItems()
+                for i in range(18):
+                    ret = sm.canHellRun(**params)
+
+                    if ret.bool == True:
+                        nEtank = 0
+                        for item in ret.items:
+                            if item.find('ETank') != -1:
+                                nEtank = int(item[0:item.find('-ETank')])
+                                break
+                        hellRuns[hellRun][actualHellRun][key][ret.difficulty] = nEtank
+
+                    sm.addItem('ETank')
+
 def presets():
     initPresetsSession()
+
+    # use web2py builtin cache to avoid recomputing the hardrooms requirements
+    hardRooms = cache.ram('hardRooms', lambda:dict(), time_expire=None)
+    if len(hardRooms) == 0:
+        computeHardRooms(hardRooms)
+
+    hellRuns = cache.ram('hellRuns', lambda:dict(), time_expire=None)
+    if len(hellRuns) == 0:
+        computeHellruns(hellRuns)
 
     if request.vars.action is not None:
         (ok, msg) = validatePresetsParams(request.vars.action)
@@ -290,7 +407,7 @@ def presets():
                 categories=Knows.categories, settings=params['Settings'], knows=params['Knows'],
                 easy=easy, medium=medium, hard=hard, harder=harder, hardcore=hardcore, mania=mania,
                 controller=params['Controller'], stdPresets=stdPresets, tourPresets=tourPresets,
-                comPresets=comPresets, skillBarData=skillBarData)
+                comPresets=comPresets, skillBarData=skillBarData, hardRooms=hardRooms, hellRuns=hellRuns)
 
 def initSolverSession():
     if session.solver is None:
@@ -1850,8 +1967,9 @@ customSprites = {
     'bailey': {"index":2, "name": "Bailey", "desc": "Justin Bailey, aka Samus in an 80s swimsuit", "author": "Auximines"},
     'megaman': {"index":3, "name": "Megaman", "desc": "Megaman X!", "author": "Artheau"},
     'fed_trooper': {"index":4, "name": "Fed Trooper", "desc": "A Galactic Federation trooper", "author": "Physix"},
-    'marga': {"index":5, "name": "Margatroid", "desc": "Alice Margatroid from the Touhou Project", "author": "Plan"},
-    'win95_cursor': {"index":6, "name": "Win95 Cursor", "desc": "A classic Windows cursor...", "author": "PlaguedOne"}
+    'super_controid': {"index":5, "name": "Contra", "desc": "Badass soldier from Contra III", "author": "Nintoaster"},
+    'marga': {"index":6, "name": "Margatroid", "desc": "Alice Margatroid from the Touhou Project", "author": "Plan"},
+    'win95_cursor': {"index":7, "name": "Win95 Cursor", "desc": "A classic Windows cursor...", "author": "PlaguedOne"}
 }
 
 def customizer():

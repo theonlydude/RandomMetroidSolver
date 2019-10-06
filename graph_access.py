@@ -349,8 +349,7 @@ accessPoints = [
                                                     sm.wand(sm.knowsGravLessLevel3(),
                                                             sm.haveItem('HiJump'),
                                                             sm.haveItem('Ice')))) # for the sand pits
-    },
-       roomInfo = {'RoomPtr':0xd21c, "area": 0x4},
+    }, roomInfo = {'RoomPtr':0xd21c, "area": 0x4},
        exitInfo = {'DoorPtr':0xa510, 'direction': 0x5,
                    "cap": (0x3e, 0x6), "screen": (0x3, 0x0), "bitFlag": 0x0,
                    "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
@@ -374,6 +373,8 @@ accessPoints = [
                                                          sm.canOpenGreenDoors(), # toilet door
                                                          sm.wor(RomPatches.has(RomPatches.AreaRandoGatesOther),
                                                                 sm.knowsGreenGateGlitch()))),
+        'Precious Room Top': lambda sm: sm.wand(sm.canPassCacatacAlley(),
+                                                sm.canGoFromBotwoonExitToDraygon())
     }, roomInfo = {'RoomPtr':0x95a8, "area": 0x0},
        exitInfo = {'DoorPtr':0x8aa2, 'direction': 0x4, "cap": (0x1, 0x16), "bitFlag": 0x0,
                    "screen": (0x0, 0x1), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
@@ -389,7 +390,9 @@ accessPoints = [
        shortName="M\\RED FISH"),
     AccessPoint('Precious Room Top', 'Maridia', {
         'Main Street Bottom': lambda sm: SMBool(True), # if you got there you can get back
-        'DraygonRoomOut': lambda sm: SMBool(True)
+        'DraygonRoomOut': lambda sm: SMBool(True),
+        'Le Coude Right': lambda sm: sm.wand(sm.canPassCacatacAlley(),
+                                             sm.canGoFromBotwoonExitToDraygon())
     }, internal = True),
     AccessPoint('DraygonRoomOut', 'Maridia', {
         'Precious Room Top': lambda sm: sm.canExitPreciousRoom()

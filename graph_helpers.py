@@ -365,14 +365,19 @@ class HelpersGraph(Helpers):
                               sm.wand(sm.knowsMochtroidClip(), sm.haveItem('Ice'))))
 
     @Cache.decorator
+    def canGoFromBotwoonExitToDraygon(self):
+        sm = self.smbm
+        return sm.wor(sm.haveItem('Gravity'),
+                      sm.wand(sm.knowsGravLessLevel2(),
+                              sm.wor(sm.haveItem('Grapple'),
+                                     sm.haveItem('SpaceJump'),
+                                     sm.wand(sm.haveItem('Ice'), sm.knowsBotwoonToDraygonWithIce()))))
+
+    @Cache.decorator
     def canAccessDraygonFromMainStreet(self):
         sm = self.smbm
         return sm.wand(sm.canDefeatBotwoon(),
-                       sm.wor(sm.haveItem('Gravity'),
-                              sm.wand(sm.knowsGravLessLevel2(),
-                                      sm.wor(sm.haveItem('Grapple'),
-                                             sm.haveItem('SpaceJump'),
-                                             sm.wand(sm.haveItem('Ice'), sm.knowsBotwoonToDraygonWithIce())))))
+                       sm.canGoFromBotwoonExitToDraygon())
 
     def isVanillaDraygon(self):
         if self.vanillaDraygon is None:
@@ -467,3 +472,12 @@ class HelpersGraph(Helpers):
             return self.canExitPreciousRoomVanilla()
         else:
             return self.canExitPreciousRoomRandomized()
+
+    @Cache.decorator
+    def canPassCacatacAlley(self):
+        sm = self.smbm
+        return sm.wand(Bosses.bossDead('Draygon'),
+                       sm.wor(sm.haveItem('Gravity'),
+                              sm.wand(sm.knowsGravLessLevel3(),
+                                      sm.haveItem('HiJump'),
+                                      sm.haveItem('SpaceJump'))))

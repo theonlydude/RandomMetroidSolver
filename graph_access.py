@@ -373,8 +373,8 @@ accessPoints = [
                                                          sm.canOpenGreenDoors(), # toilet door
                                                          sm.wor(RomPatches.has(RomPatches.AreaRandoGatesOther),
                                                                 sm.knowsGreenGateGlitch()))),
-        'Precious Room Top': lambda sm: sm.wand(sm.canPassCacatacAlley(),
-                                                sm.canGoFromBotwoonExitToDraygon())
+        'Precious Room Top': lambda sm: sm.wand(sm.haveItem('Gravity'), # suitless could be possible with this but unreasonable: https://youtu.be/rtLwytH-u8o 
+                                                sm.canOpenGreenDoors())
     }, roomInfo = {'RoomPtr':0x95a8, "area": 0x0},
        exitInfo = {'DoorPtr':0x8aa2, 'direction': 0x4, "cap": (0x1, 0x16), "bitFlag": 0x0,
                    "screen": (0x0, 0x1), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
@@ -392,7 +392,7 @@ accessPoints = [
         'Main Street Bottom': lambda sm: SMBool(True), # if you got there you can get back
         'DraygonRoomOut': lambda sm: SMBool(True),
         'Le Coude Right': lambda sm: sm.wand(sm.canPassCacatacAlley(),
-                                             sm.canGoFromBotwoonExitToDraygon())
+                                             sm.canBotwoonExitToAndFromDraygon())
     }, internal = True),
     AccessPoint('DraygonRoomOut', 'Maridia', {
         'Precious Room Top': lambda sm: sm.canExitPreciousRoom()

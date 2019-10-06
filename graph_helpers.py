@@ -365,7 +365,7 @@ class HelpersGraph(Helpers):
                               sm.wand(sm.knowsMochtroidClip(), sm.haveItem('Ice'))))
 
     @Cache.decorator
-    def canGoFromBotwoonExitToDraygon(self):
+    def canBotwoonExitToAndFromDraygon(self):
         sm = self.smbm
         return sm.wor(sm.haveItem('Gravity'),
                       sm.wand(sm.knowsGravLessLevel2(),
@@ -377,7 +377,7 @@ class HelpersGraph(Helpers):
     def canAccessDraygonFromMainStreet(self):
         sm = self.smbm
         return sm.wand(sm.canDefeatBotwoon(),
-                       sm.canGoFromBotwoonExitToDraygon())
+                       sm.canBotwoonExitToAndFromDraygon())
 
     def isVanillaDraygon(self):
         if self.vanillaDraygon is None:
@@ -478,6 +478,6 @@ class HelpersGraph(Helpers):
         sm = self.smbm
         return sm.wand(Bosses.bossDead('Draygon'),
                        sm.wor(sm.haveItem('Gravity'),
-                              sm.wand(sm.knowsGravLessLevel3(),
+                              sm.wand(sm.knowsGravLessLevel2(),
                                       sm.haveItem('HiJump'),
                                       sm.haveItem('SpaceJump'))))

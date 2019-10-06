@@ -1168,6 +1168,7 @@ class RomPatcher:
         self.writeWord(0xC291)
 
     # add ASM to Tourian "door" down elevator to trigger full refill (ammo + energy)
+    # TODO move this in area_rando_door_transition.asm
     def writeTourianRefill(self):
         tourianDoor = 0x19222
         self.romFile.seek(tourianDoor + 10) # go to door ASM ptr field

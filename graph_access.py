@@ -202,7 +202,7 @@ accessPoints = [
        roomInfo = {'RoomPtr':0xb32e, "area": 0x2},
        exitInfo = {'DoorPtr':0x98be, 'direction': 0x4, "cap": (0x1, 0x6), "bitFlag": 0x0,
                    "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0},
-       entryInfo = {'SamusX':0xd1, 'SamusY':0x88}),
+       entryInfo = {'SamusX':0xbf, 'SamusY':0x198}), # on Ridley's platform. entry screen has to be changed (see getDoorConnections)
     # Kraid
     AccessPoint('Warehouse Zeela Room Left', 'Kraid', {
         'KraidRoomOut': lambda sm: sm.canPassBombPassages()
@@ -619,6 +619,8 @@ def getDoorConnections(graph, areas=True, bosses=False):
             conn['distanceToSpawn'] = 0
             conn['SamusX'] = dst.EntryInfo['SamusX']
             conn['SamusY'] = dst.EntryInfo['SamusY']
+            if dst.Name == 'RidleyRoomIn': # special case: spawn samus on ridley platform
+                conn['screen'] = (0x0, 0x1)
         else:
             conn['distanceToSpawn'] = dst.EntryInfo['distanceToSpawn']
         if 'song' in dst.EntryInfo:

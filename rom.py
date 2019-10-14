@@ -169,7 +169,7 @@ class RomReader:
         'variaTweaks': {'address': 0x7CC4D, 'value': 0x37, 'desc': "VARIA tweaks"},
         'area': {'address': 0x22D564, 'value': 0xF2, 'desc': "Area layout modifications"},
         'areaLayout': {'address': 0x252FA7, 'value': 0xF8, 'desc': "Area layout additional modifications"},
-        'ridley_platform': {'address': 0x246C09, 'value': 0x00, 'desc': "Ridley platform added in bosses rando"}
+        'ws_save': {'address': 0x7CEB0, 'value': 0xC9, 'desc': "Phantoon save in boss/area rando"}
     }
 
     @staticmethod
@@ -700,8 +700,6 @@ class RomPatcher:
                 stdPatches.remove('Removes_Gravity_Suit_heat_protection')
             if self.race is not None:
                 stdPatches.append('race_mode.ips')
-            if bosses == True:
-                stdPatches.append('ridley_platform.ips')
             if area == True or bosses == True:
                 stdPatches.append('ws_save.ips')
             for patchName in stdPatches:
@@ -1361,7 +1359,7 @@ class RomLoader(object):
 
 
         # check boss rando
-        if self.hasPatch("ridley_platform"):
+        if self.hasPatch("ws_save") and not self.hasPatch('area'):
             isBoss = True
 
         return (isArea, isBoss)

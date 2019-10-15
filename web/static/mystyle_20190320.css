@@ -209,6 +209,9 @@ p {
 }
 .popover {
     max-width: 350px;
+    max-height: 95vh;
+    overflow-y: scroll;
+    position: fixed;
 }
 .buttonBack {
     background-color: lightblue;

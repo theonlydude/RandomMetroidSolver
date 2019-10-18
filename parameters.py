@@ -202,7 +202,7 @@ class Knows:
                             'rooms': ['Mother Brain Room']}
     # maridia mama turtle
     HiJumpMamaTurtle = SMBool(False, 0, ['HiJumpMamaTurtle'])
-    desc['HiJumpMamaTurtle'] = {'display': 'Mama Turtle E-Tank with High-Jump',
+    desc['HiJumpMamaTurtle'] = {'display': 'Mama Turtle E-Tank with High-Jump+Speed',
                                 'title': 'Access Mama Turtle E-Tank with High-Jump and Speed Booster (and Morph or X-Ray to turn around without moving)',
                                 'href': 'https://www.youtube.com/watch?v=1DINqLnINc8',
                                 'rooms': ['Mama Turtle Room']}

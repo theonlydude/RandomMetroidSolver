@@ -1,4 +1,6 @@
 
+import struct
+
 # adapted from ips-util for python 3.2 (https://pypi.org/project/ips-util/)
 
 def intFromBytesBig(bArray, n=0, idx=0):
@@ -193,6 +195,7 @@ class IPS_Patch(object):
 
         return encoded_bytes
 
+    # applies patch on an existing bytearray
     def apply(self, in_data):
         out_data = bytearray(in_data)
 
@@ -210,7 +213,18 @@ class IPS_Patch(object):
 
         return out_data
 
+    # applies patch on an opened file
+    def applyFile(self, handle):
+        for record in self.records:
+            handle.seek(record['address'])
+            if 'rle_count' in record:
+                handle.write(b''.join([record['data']] * record['rle_count']))
+            else:
+                handle.write(record['data'])
+
     # appends an IPS_Patch on top of this one
     def append(self, patch):
+        if patch.truncate_length is not None and patch.truncate_length > self.truncate_length:
+            self.set_truncate_length(patch.truncate_length)
         for record in patch.records:
             self.records.append(record)

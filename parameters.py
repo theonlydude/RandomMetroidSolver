@@ -1,4 +1,5 @@
 from smbool import SMBool
+import os
 import sys
 
 # the different difficulties available
@@ -41,6 +42,8 @@ text2diff = {
     'impossibru': impossibru,
     'infinity': infinity
 }
+
+appDir = os.path.expanduser(os.path.join("~/RandomMetroidSolver"))
 
 def isKnows(knows):
     return knows[0:len('__')] != '__' and knows[0] == knows[0].upper()

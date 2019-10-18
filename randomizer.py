@@ -536,7 +536,9 @@ if __name__ == "__main__":
             romPatcher.applyIPSPatches(args.patches, args.noLayout, args.noGravHeat, args.area, args.bosses, args.areaLayoutBase, args.noVariaTweaks)
         else:
             romPatcher.addIPSPatches(args.patches)
-
+        if args.sprite is not None:
+            romPatcher.customSprite(args.sprite) # adds another IPS
+        romPatcher.commitIPS() # actually write IPS data
         if args.patchOnly == False:
             romPatcher.writeSeed(seed) # lol if race mode
             romPatcher.writeSpoiler(itemLocs, progItemLocs)
@@ -554,8 +556,6 @@ if __name__ == "__main__":
         if args.patchOnly == False:
             romPatcher.writeMagic()
             romPatcher.writeMajorsSplit(args.majorsSplit)
-        if args.sprite is not None:
-            romPatcher.customSprite(args.sprite)
         if args.palette == True:
             paletteSettings = {
                 "global_shift": None,

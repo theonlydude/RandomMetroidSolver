@@ -5,6 +5,8 @@ from itemrandomizerweb.Items import ItemManager
 from itemrandomizerweb.patches import patches
 from itemrandomizerweb.stdlib import List
 from compression import Compressor
+from ips import IPS_Patch
+from parameters import appDir
 
 def readWord(romFile):
     r0 = struct.unpack("B", romFile.read(1))[0]
@@ -558,6 +560,7 @@ class RomPatcher:
         if magic is not None:
             from race_mode import RaceModePatcher
             self.race = RaceModePatcher(self, magic, plando)
+        self.ipsPatches = [] # IPS_Patch objects list
 
     def end(self):
         self.romFile.close()
@@ -675,21 +678,7 @@ class RomPatcher:
             self.applyIPSPatch(patchName)
 
     def customSprite(self, sprite):
-        if self.romFileName == None:
-            import base64
-            # in web mode the dict of the custom sprites can't be convert to .pyc on python anywhere.
-            # (killed when reaching 3GB RAM). so we send the .ips file instead
-            fileName = os.path.expanduser(os.path.join("~/RandomMetroidSolver/itemrandomizerweb/patches/sprites", sprite))
-            with open(fileName, 'rb') as openFile:
-                data = openFile.read()
-
-            self.romFile.data["ips"] = base64.b64encode(data)
-        else:
-            from itemrandomizerweb.sprite_patches import sprite_patches
-            if sprite in sprite_patches:
-                self.applyIPSPatch(sprite, sprite_patches)
-            else:
-                raise ValueError("Unknown sprite " + str(sprite))
+        self.applyIPSPatch(sprite, ipsDir='itemrandomizerweb/patches/sprites')
 
     def applyIPSPatches(self, optionalPatches=[], noLayout=False, noGravHeat=False, area=False, bosses=False, areaLayoutBase=False, noVariaTweaks=False):
         try:
@@ -731,15 +720,32 @@ class RomPatcher:
         except Exception as e:
             raise Exception("Error patching {}. ({})".format(self.romFileName, e))
 
-    def applyIPSPatch(self, patchName, patchDict=None):
+    def applyIPSPatch(self, patchName, patchDict=None, ipsDir="itemrandomizerweb/patches"):
         if patchDict is None:
             patchDict = patches
         print("Apply patch {}".format(patchName))
-        patchData = patchDict[patchName]
-        for address in patchData:
-            self.romFile.seek(address)
-            for byte in patchData[address]:
-                self.romFile.write(struct.pack('B', byte))
+        if patchName in patchDict:
+            patch = IPS_Patch(patchDict[patchName])
+        else:
+            # look for ips file
+            patch = IPS_Patch.load(appDir + '/' + ipsDir + '/' + patchName)
+        self.ipsPatches.append(patch)
+
+    def commitIPS(self):
+        if self.romFileName is not None:
+            # CLI
+            for ips in self.ipsPatches:
+                ips.applyFile(self.romFile)
+        else:
+            print('WEEEEB')
+            # Web
+            mergedIPS = IPS_Patch()
+            for ips in self.ipsPatches:
+                mergedIPS.append(ips)
+            patchData = mergedIPS.encode()
+            self.romFile.data["ips"] = base64.b64encode(patchData)
+            if mergedIPS.truncate_length is not None:
+                self.romFile.data["truncate_length"] = mergedIPS.truncate_length
 
     def writeSeed(self, seed):
         random.seed(seed)

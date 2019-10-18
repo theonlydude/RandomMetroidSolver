@@ -156,12 +156,24 @@ class SMBoolManager(object):
 
     def itemCountOk(self, item, count, difficulty=0):
         if self.itemCount(item) >= count:
+            if item in ['ETank', 'Reserve']:
+                item = '{}-{}'.format(count, item)
             return SMBool(True, difficulty, items = [item])
         else:
             return SMBool(False)
 
     def energyReserveCountOk(self, count, difficulty=0):
         if self.energyReserveCount() >= count:
-            return SMBool(True, difficulty, items = ['ETank', 'Reserve'])
+            nEtank = self.itemCount('ETank')
+            if nEtank > count:
+                nEtank = int(count)
+            items = '{}-ETank'.format(nEtank)
+            nReserve = self.itemCount('Reserve')
+            if nEtank < count:
+                nReserve = int(count) - nEtank
+                items += ' - {}-Reserve'.format(nReserve)
+            else:
+                nReserve = 0
+            return SMBool(True, difficulty, items = [items])
         else:
             return SMBool(False)

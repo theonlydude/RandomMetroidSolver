@@ -2,7 +2,7 @@
 
 <meta name="description" content="Solver for the randomized Super Metroid roms"/>
 <link rel="shortcut icon" href={{=URL('static','favicon.ico')}} type="image/ico"/>
-<link rel="stylesheet" type="text/css" href={{=URL('static/css','mystyle_20190320.css')}} media="screen"/>
+<link rel="stylesheet" type="text/css" href={{=URL('static/css','mystyle_20191017.css')}} media="screen"/>
 
 <title>Super Metroid Item VARIA Randomizer and Solver</title>
 
@@ -59,6 +59,89 @@
   <a name="latest"></a>
   <h2>Change Log</h2>
   <ul>
+    <li>
+      <h4>2019/09/19</h4>
+      <p>
+	Hello @randomizer,<br/><br/>
+
+	A small release for the season 2 of Randomizer league.<br/></br>
+
+	New stuff:
+	<ul>
+	  <li>preset: display the Hard rooms and Hellruns energy requirements</li>
+	  <li>preset: new technique, Spring Ball access with Gravity jump</li>
+	  <li>preset: new technique, Botwoon to Draygon with Ice</li>
+	  <li>customizer: new Contra custom sprite by Nintoaster</li>
+	  <li>settings preset: changed hardway2hell randomizer preset to generate more evil suitless seeds (can be even harder than stupid_hard for those interested in this kind of seed)</li>
+	</ul>
+	Bugfixes:
+	<ul>
+	  <li>logic: small fixes to suitless logic</li>
+	  <li>randomizer: fix bug with Super Fun provider and Lower Norfair Hellruns</li>
+	  <li>customizer: fix palette randomization with custom sprites</li>
+        </ul>
+      </p>
+    </li>
+    <li>
+      <h4>2019/08/25</h4>
+      <p>
+	Hello @randomizer,<br/><br/>
+
+	We've released a new version of the VARIA Randomizer, Solver, Tracker, Plandomizer and Customizer (<a href="http://varia.run/">http://varia.run/</a>), dubbed "MegaSamus X"!<br/><br/>
+
+	You can now change Samus sprites in the customizer. All the sprite sheets created so far with SpriteSomething (<a href="https://github.com/Artheau/SpriteSomething/releases">https://github.com/Artheau/SpriteSomething/releases</a>) have been integrated, for instance Megaman X!<br/><br/>
+
+	Another cool new feature is the ability to use the Randomizer to complete your plando. This allows for fun stuff like creating your own custom map (you don't like Wrecked Ship? don't include it) for your seeds, or generate a seed after placing Varia at Ridley for example.<br/><br/>
+
+	Note: to remove the bloat of the randomizer page, color randomization is now only available on the customizer page, don't worry it has not gone away!<br/><br/>
+
+	Full changelog below.<br/>
+
+	New stuff:
+	<ul>
+	  <li>plandomizer: you can now use the VARIA Randomizer to complete your plando</li>
+	  <li>plandomizer: you can load the items and transitions of your base seed</li>
+	  <li>plandomizer: the item selection popup now display the items with icons</li>
+	  <li>customizer: you can now replace Samus sprite with custom ones</li>
+	  <li>randomizer: usefull tips are now displayed during randomization</li>
+	  <li>randomizer: new link "what's in the logic" next to the preset to display the techniques available for the Randomizer</li>
+	  <li>stats: the total percentage for each item is now displayed at the end (for Randomizer presets with Super Fun enabled)</li>
+	</ul>
+	Bugfixes:
+	<ul>
+	  <li>solver: handle utf8 ROM filenames</li>
+	  <li>randomizer: fixed bug on super fun movement that did not remove space jump when VARIA tweaks were disabled</li>
+	  <li>randomizer: fix no comeback bug for bosses that created some failed area rando seeds</li>
+	  <li>logic: fixed ancient endgame condition bugs</li>
+        </ul>
+      </p>
+    </li>
+    <li>
+      <h4>2019/07/08</h4>
+      <p>
+	Hello @randomizer,<br/><br/>
+	We've released a new version of the VARIA Randomizer, Solver and Trackers (http://varia.run/).<br/>
+	New stuff:
+	<ul>
+	  <li>stats: new page with statistics for the standard skill presets and randomizer presets (up to 100000 seeds in the stats for tournament ones)</li>
+	  <li>preset: added separated technique for XRay Ice Climb w/o Hi-Jump, now disabled in noob and casual presets</li>
+	  <li>rando: Phantoon save station is now active before killing Phantoon when using area/boss randomization</li>
+	  <li>rando: new optional Speedkeep patch to keep momentum after landing</li>
+	  <li>rando: the number of uncharged shots are now displayed in the credits statistics</li>
+	  <li>rando: headered ROMs are now detected and an error message displayed</li>
+	  <li>rando: the heads at Morph Ball location are now activated with every items (like the yellow camera)</li>
+	  <li>layout: new platform in Acid Statue Room when VARIA tweaks patch is enabled</li>
+	  <li>solver: the number of ETanks/Reserves used are now displayed</li>
+	  <li>tracker: in seed-less mode the vanilla area transitions are now added by default</li>
+	</ul>
+	Bug fix:
+	<ul>
+	  <li>rando: fixed strict minors option (was not really accurate with low% minors)</li>
+	  <li>rando: fixed pregression spoiler in the credits where items were out of order sometimes</li>
+	  <li>plando: the lock button works now</li>
+	</ul>
+      </p>
+    </li>
     <li>
       <h4>2019/03/24</h4>
       <p>

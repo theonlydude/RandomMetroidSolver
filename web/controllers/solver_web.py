@@ -20,6 +20,8 @@ import db
 from graph_access import vanillaTransitions, vanillaBossesTransitions
 from utils import isStdPreset
 from graph_locations import locations
+from smboolmanager import SMBoolManager
+from rom import RomPatches
 
 def maxPresetsReach():
     # to prevent a spammer to create presets in a loop and fill the fs
@@ -65,7 +67,7 @@ def loadPresetsList():
     return (stdPresets, tourPresets, comPresets)
 
 def loadRandoPresetsList():
-    tourPresets = ['Season_Races', 'smrat', 'Scavenger_Hunt']
+    tourPresets = ['Season_Races', 'Season_Races_Chozo', 'smrat', 'Scavenger_Hunt']
     files = sorted(os.listdir('rando_presets'), key=lambda v: v.upper())
     randoPresets = [os.path.splitext(file)[0] for file in files]
     randoPresets = [preset for preset in randoPresets if preset not in tourPresets]
@@ -154,8 +156,123 @@ def updatePresetsSession():
     else:
         session.presets['preset'] = request.vars.preset
 
+def computeGauntlet(sm, bomb, addVaria):
+    result = {}
+
+    for key in Settings.hardRoomsPresets['Gauntlet']:
+        Settings.hardRooms['Gauntlet'] = Settings.hardRoomsPresets['Gauntlet'][key]
+        sm.resetItems()
+        if addVaria == True:
+            sm.addItem('Varia')
+        sm.addItem(bomb)
+
+        result[key] = {easy: -1, medium: -1, hard: -1, harder: -1, hardcore: -1, mania: -1}
+
+        for i in range(18):
+            ret = sm.energyReserveCountOkHardRoom('Gauntlet', 0.5 if bomb == 'Bomb' else 1.0)
+
+            if ret.bool == True:
+                nEtank = 0
+                for item in ret.items:
+                    if item.find('ETank') != -1:
+                        nEtank = int(item[0:item.find('-ETank')])
+                        break
+                result[key][ret.difficulty] = nEtank
+
+            sm.addItem('ETank')
+
+    return result
+
+def computeXray(sm, addVaria):
+    result = {}
+
+    for key in Settings.hardRoomsPresets['X-Ray']:
+        if key == 'Solution':
+            continue
+        Settings.hardRooms['X-Ray'] = Settings.hardRoomsPresets['X-Ray'][key]
+        sm.resetItems()
+        if addVaria == True:
+            sm.addItem('Varia')
+
+        result[key] = {easy: -1, medium: -1, hard: -1, harder: -1, hardcore: -1, mania: -1}
+
+        for i in range(18):
+            ret = sm.energyReserveCountOkHardRoom('X-Ray')
+
+            if ret.bool == True:
+                nEtank = 0
+                for item in ret.items:
+                    if item.find('ETank') != -1:
+                        nEtank = int(item[0:item.find('-ETank')])
+                        break
+                result[key][ret.difficulty] = nEtank
+
+            sm.addItem('ETank')
+
+    return result
+
+def computeHardRooms(hardRooms):
+    # add gravity patch (as we add it by default in the randomizer)
+    RomPatches.ActivePatches.append(RomPatches.NoGravityEnvProtection)
+
+    sm = SMBoolManager()
+
+    # xray
+    xray = {}
+    xray['Suitless'] = computeXray(sm, False)
+    xray['Varia'] = computeXray(sm, True)
+    hardRooms['X-Ray'] = xray
+
+    # gauntlet
+    gauntlet = {}
+    gauntlet['SuitlessBomb'] = computeGauntlet(sm, 'Bomb', False)
+    gauntlet['SuitlessPowerBomb'] = computeGauntlet(sm, 'PowerBomb', False)
+    gauntlet['VariaBomb'] = computeGauntlet(sm, 'Bomb', True)
+    gauntlet['VariaPowerBomb'] = computeGauntlet(sm, 'PowerBomb', True)
+    hardRooms['Gauntlet'] = gauntlet
+
+    return hardRooms
+
+def computeHellruns(hellRuns):
+    sm = SMBoolManager()
+    for hellRun in ['Ice', 'MainUpperNorfair']:
+        hellRuns[hellRun] = {}
+
+        for (actualHellRun, params) in Settings.hellRunsTable[hellRun].items():
+            hellRuns[hellRun][actualHellRun] = {}
+            for (key, difficulties) in Settings.hellRunPresets[hellRun].items():
+                if key == 'Solution':
+                    continue
+                Settings.hellRuns[hellRun] = difficulties
+                hellRuns[hellRun][actualHellRun][key] = {easy: -1, medium: -1, hard: -1, harder: -1, hardcore: -1, mania: -1}
+                if difficulties == None:
+                    continue
+
+                sm.resetItems()
+                for i in range(18):
+                    ret = sm.canHellRun(**params)
+
+                    if ret.bool == True:
+                        nEtank = 0
+                        for item in ret.items:
+                            if item.find('ETank') != -1:
+                                nEtank = int(item[0:item.find('-ETank')])
+                                break
+                        hellRuns[hellRun][actualHellRun][key][ret.difficulty] = nEtank
+
+                    sm.addItem('ETank')
+
 def presets():
     initPresetsSession()
+
+    # use web2py builtin cache to avoid recomputing the hardrooms requirements
+    hardRooms = cache.ram('hardRooms', lambda:dict(), time_expire=None)
+    if len(hardRooms) == 0:
+        computeHardRooms(hardRooms)
+
+    hellRuns = cache.ram('hellRuns', lambda:dict(), time_expire=None)
+    if len(hellRuns) == 0:
+        computeHellruns(hellRuns)
 
     if request.vars.action is not None:
         (ok, msg) = validatePresetsParams(request.vars.action)
@@ -290,7 +407,7 @@ def presets():
                 categories=Knows.categories, settings=params['Settings'], knows=params['Knows'],
                 easy=easy, medium=medium, hard=hard, harder=harder, hardcore=hardcore, mania=mania,
                 controller=params['Controller'], stdPresets=stdPresets, tourPresets=tourPresets,
-                comPresets=comPresets, skillBarData=skillBarData)
+                comPresets=comPresets, skillBarData=skillBarData, hardRooms=hardRooms, hellRuns=hellRuns)
 
 def initSolverSession():
     if session.solver is None:
@@ -378,21 +495,24 @@ def prepareResult():
     if session.solver['result'] is not None:
         result = session.solver['result']
 
-        if session.solver['result']['difficulty'] == -1:
-            result['resultText'] = "The ROM \"{}\" is not finishable with the known techniques".format(session.solver['result']['randomizedRom'])
+        # utf8 files
+        result['randomizedRom'] = result['randomizedRom'].encode('utf8', 'replace')
+
+        if result['difficulty'] == -1:
+            result['resultText'] = "The ROM \"{}\" is not finishable with the known techniques".format(result['randomizedRom'])
         else:
-            if session.solver['result']['itemsOk'] is False:
-                result['resultText'] = "The ROM \"{}\" is finishable but not all the requested items can be picked up with the known techniques. Estimated difficulty is: ".format(session.solver['result']['randomizedRom'])
+            if result['itemsOk'] is False:
+                result['resultText'] = "The ROM \"{}\" is finishable but not all the requested items can be picked up with the known techniques. Estimated difficulty is: ".format(result['randomizedRom'])
             else:
-                result['resultText'] = "The ROM \"{}\" estimated difficulty is: ".format(session.solver['result']['randomizedRom'])
+                result['resultText'] = "The ROM \"{}\" estimated difficulty is: ".format(result['randomizedRom'])
 
         # add generated path (spoiler !)
-        result['pathTable'] = genPathTable(session.solver['result']['generatedPath'])
-        result['pathremainTry'] = genPathTable(session.solver['result']['remainTry'])
-        result['pathremainMajors'] = genPathTable(session.solver['result']['remainMajors'], False)
-        result['pathremainMinors'] = genPathTable(session.solver['result']['remainMinors'], False)
-        result['pathskippedMajors'] = genPathTable(session.solver['result']['skippedMajors'], False)
-        result['pathunavailMajors'] = genPathTable(session.solver['result']['unavailMajors'], False)
+        result['pathTable'] = genPathTable(result['generatedPath'])
+        result['pathremainTry'] = genPathTable(result['remainTry'])
+        result['pathremainMajors'] = genPathTable(result['remainMajors'], False)
+        result['pathremainMinors'] = genPathTable(result['remainMinors'], False)
+        result['pathskippedMajors'] = genPathTable(result['skippedMajors'], False)
+        result['pathunavailMajors'] = genPathTable(result['unavailMajors'], False)
 
         # display the result only once
         session.solver['result'] = None
@@ -443,11 +563,7 @@ def validateSolverParams():
     if request.vars.romJson is None and request.vars.uploadFile is None and request.vars.romFile is None:
         return (False, "Missing ROM to solve")
 
-
     if request.vars.romFile is not None:
-        if IS_MATCH('[a-zA-Z0-9_\.]*')(request.vars.romFile)[1] is not None:
-            return (False, "Wrong value for romFile, must be valid file name: {}".format(request.vars.romFile))
-
         if IS_LENGTH(maxsize=255, minsize=1)(request.vars.romFile)[1] is not None:
             return (False, "Wrong length for romFile, name must be between 1 and 256 characters: {}".format(request.vars.romFile))
 
@@ -459,11 +575,11 @@ def validateSolverParams():
 
     if request.vars.uploadFile is not None:
         if type(request.vars.uploadFile) == str:
-            if IS_MATCH('[a-zA-Z0-9_\.]*')(request.vars.uploadFile)[1] is not None:
+            if IS_MATCH('[a-zA-Z0-9_\.() ,\-]*', strict=True)(request.vars.uploadFile)[1] is not None:
                 return (False, "Wrong value for uploadFile, must be a valid file name: {}".format(request.vars.uploadFile))
 
             if IS_LENGTH(maxsize=256, minsize=1)(request.vars.uploadFile)[1] is not None:
-                return (False, "Wrong length for uploadFile, name must be between 1 and 255 characters: {}".format(request.vars.uploadFile))
+                return (False, "Wrong length for uploadFile, name must be between 1 and 255 characters")
 
     return (True, None)
 
@@ -496,7 +612,8 @@ def canSolveROM(jsonRomFileName):
 
 def generateJsonROM(romJsonStr):
     tempRomJson = json.loads(romJsonStr)
-    romFileName = tempRomJson["romFileName"]
+    # handle filename with utf8 characters in it
+    romFileName = tempRomJson["romFileName"].encode('utf8', 'replace')
     (base, ext) = os.path.splitext(romFileName)
     jsonRomFileName = 'roms/' + base + '.json'
     del tempRomJson["romFileName"]
@@ -818,8 +935,8 @@ def validateWebServiceParams(patchs, quantities, others, isJson=False):
 
     if request.vars.minorQty not in ['random', None]:
         minorQtyInt = getInt('minorQty', isJson)
-        if minorQtyInt < 1 or minorQtyInt > 100:
-            raiseHttp(400, "Wrong value for minorQty, must be between 1 and 100", isJson)
+        if minorQtyInt < 7 or minorQtyInt > 100:
+            raiseHttp(400, "Wrong value for minorQty, must be between 7 and 100", isJson)
 
     if 'energyQty' in others:
         if request.vars.energyQty not in ['sparse', 'medium', 'vanilla', 'random']:
@@ -1337,6 +1454,9 @@ def plando():
         session.plando["preset"] = "regular"
         session.plando["seed"] = None
 
+        # rando params
+        session.plando["rando"] = {}
+
         # set to False in plando.html
         session.plando["firstTime"] = True
 
@@ -1364,8 +1484,8 @@ class WS(object):
             raiseHttp(400, "Unknown scope: {}, must be area/item/common".format(scope), True)
 
         action = request.vars.action
-        if action not in ['add', 'remove', 'clear', 'init', 'get', 'save', 'replace']:
-            raiseHttp(400, "Unknown action {}, must be add/remove/clear/init/get/save".format(action), True)
+        if action not in ['add', 'remove', 'clear', 'init', 'get', 'save', 'replace', 'randomize']:
+            raiseHttp(400, "Unknown action {}, must be add/remove/clear/init/get/save/randomize".format(action), True)
 
         mode = request.vars.mode
         if mode not in ["standard", "seedless", "plando"]:
@@ -1395,8 +1515,8 @@ class WS(object):
             raiseHttp(400, "Missing parameter action", True)
         action = request.vars.action
 
-        if action not in ['init', 'add', 'remove', 'clear', 'get', 'save', 'replace']:
-            raiseHttp(400, "Unknown action {}, must be init/add/remove/clear/get/save".format(action), True)
+        if action not in ['init', 'add', 'remove', 'clear', 'get', 'save', 'replace', 'randomize']:
+            raiseHttp(400, "Unknown action {}, must be init/add/remove/clear/get/save/randomize".format(action), True)
 
     def action(self):
         pass
@@ -1429,7 +1549,9 @@ class WS(object):
                 "areaRando": state["areaRando"],
                 "bossRando": state["bossRando"],
                 "seed": state["seed"],
-                "preset": os.path.basename(os.path.splitext(state["presetFileName"])[0])
+                "preset": os.path.basename(os.path.splitext(state["presetFileName"])[0]),
+                "errorMsg": state["errorMsg"],
+                "last": state["last"]
             })
         else:
             raiseHttp(200, "OK", True)
@@ -1465,6 +1587,11 @@ class WS(object):
         elif action == 'save' and scope == 'common':
             if parameters['lock'] == True:
                 params.append('--lock')
+        elif action == 'randomize':
+            params += ['--progressionSpeed', parameters["progressionSpeed"],
+                       '--minorQty', parameters["minorQty"],
+                       '--energyQty', parameters["energyQty"]
+            ]
 
         if request.vars.debug != None:
             params.append('--vcr')
@@ -1496,9 +1623,18 @@ class WS(object):
         else:
             os.close(fd1)
             os.remove(jsonInFileName)
+
+            msg = "Something wrong happened while iteratively solving the ROM"
+            try:
+                with open(jsonOutFileName, 'r') as jsonFile:
+                    data = json.load(jsonFile)
+                    if "errorMsg" in data:
+                        msg = data["errorMsg"]
+            except Exception as e:
+                pass
             os.close(fd2)
             os.remove(jsonOutFileName)
-            raiseHttp(400, "Something wrong happened while iteratively solving the ROM", True)
+            raiseHttp(400, msg, True)
 
 class WS_common_init(WS):
     def validate(self):
@@ -1536,10 +1672,8 @@ class WS_common_init(WS):
                 raiseHttp(400, "Missing ROM file name", True)
             if IS_NOT_EMPTY()(uploadFile)[1] is not None:
                 raiseHttp(400, "File name is empty", True)
-            if IS_MATCH('[a-zA-Z0-9_\.]*')(uploadFile)[1] is not None:
-                raiseHttp(400, "Wrong value for ROM file name, must be valid file name: {}".format(request.vars.romFile), True)
             if IS_LENGTH(maxsize=255, minsize=1)(uploadFile)[1] is not None:
-                raiseHttp(400, "Wrong length for ROM file name, name must be between 1 and 255 characters: {}".format(request.vars.romFile), True)
+                raiseHttp(400, "Wrong length for ROM file name, name must be between 1 and 255 characters", True)
 
     def action(self):
         mode = request.vars.mode
@@ -1561,10 +1695,11 @@ class WS_common_init(WS):
         self.session["mode"] = mode
 
         vcr = request.vars.debug != None
+        fill = request.vars.fill != None and request.vars.fill == "true"
 
-        return self.callSolverInit(jsonRomFileName, presetFileName, preset, seed, mode, vcr)
+        return self.callSolverInit(jsonRomFileName, presetFileName, preset, seed, mode, vcr, fill)
 
-    def callSolverInit(self, jsonRomFileName, presetFileName, preset, romFileName, mode, vcr):
+    def callSolverInit(self, jsonRomFileName, presetFileName, preset, romFileName, mode, vcr, fill):
         if mode != 'seedless':
             (canSolve, magic) = canSolveROM(jsonRomFileName)
             if canSolve == False:
@@ -1580,7 +1715,7 @@ class WS_common_init(WS):
             '--action', "init",
             '--interactive',
             '--mode', mode,
-            '--scope', 'common'
+            '--scope', 'common',
         ]
 
         if mode != "seedless":
@@ -1591,6 +1726,9 @@ class WS_common_init(WS):
 
         if vcr == True:
             params.append('--vcr')
+
+        if fill == True:
+            params.append('--fill')
 
         print("before calling isolver: {}".format(params))
         start = datetime.now()
@@ -1637,6 +1775,30 @@ class WS_common_save(WS):
             raiseHttp(400, "Save can only be use in plando mode", True)
 
         return self.callSolverAction("common", "save", {'lock': request.vars.lock == "lock"})
+
+class WS_common_randomize(WS):
+    def validate(self):
+        super(WS_common_randomize, self).validate()
+
+        if request.vars.progressionSpeed not in ["slowest", "slow", "medium", "fast", "fastest", "basic", "VARIAble"]:
+            raiseHttp(400, "Wrong value for progressionSpeed: {}".format(request.vars.progressionSpeed), True)
+        minorQtyInt = getInt('minorQty', True)
+        if minorQtyInt < 7 or minorQtyInt > 100:
+            raiseHttp(400, "Wrong value for minorQty, must be between 7 and 100", True)
+        if request.vars.energyQty not in ["sparse", "medium", "vanilla"]:
+            raiseHttp(400, "Wrong value for energyQty: {}".format(request.vars.energyQty), True)
+
+    def action(self):
+        if self.session["mode"] != "plando":
+            raiseHttp(400, "Randomize can only be use in plando mode", True)
+
+        params = {}
+        for elem in "progressionSpeed", "minorQty", "energyQty":
+            params[elem] = request.vars[elem]
+
+        self.session["rando"] = params
+
+        return self.callSolverAction("common", "randomize", params)
 
 class WS_area_add(WS):
     def validatePoint(self, point):
@@ -1781,7 +1943,7 @@ def initCustomizerSession():
     if session.customizer == None:
         session.customizer = {}
 
-        session.customizer['colorsRandomization'] = "on"
+        session.customizer['colorsRandomization'] = "off"
         session.customizer['suitsPalettes'] = "on"
         session.customizer['beamsPalettes'] = "on"
         session.customizer['tilesPalettes'] = "on"
@@ -1791,21 +1953,31 @@ def initCustomizerSession():
         session.customizer['maxDegree'] = 15
         session.customizer['invert'] = "on"
         session.customizer['globalShift'] = "on"
+        session.customizer['customSpriteEnable'] = "off"
+        session.customizer['customSprite'] = "samus"
 
         for patch in patches:
             if patch[0] in ['skip_intro', 'skip_ceres']:
                 continue
-            if patch[2] == True:
-                session.customizer[patch[0]] = "on"
-            else:
-                session.customizer[patch[0]] = "off"
+            session.customizer[patch[0]] = "off"
+
+customSprites = {
+    'samus': {"index":0, "name": "Samus", "desc": "Samus, with a distinct animation for Screw Attack without Space Jump and a new Crystal Flash animation", "author": "Artheau and Feesh"},
+    'hitbox_helper': {"index":1, "name": "Hitbox Helper", "desc": "Samus, with her actual hitbox on top", "author": "Artheau and Komaru"},
+    'bailey': {"index":2, "name": "Bailey", "desc": "Justin Bailey, aka Samus in an 80s swimsuit", "author": "Auximines"},
+    'megaman': {"index":3, "name": "Megaman", "desc": "Megaman X!", "author": "Artheau"},
+    'fed_trooper': {"index":4, "name": "Fed Trooper", "desc": "A Galactic Federation trooper", "author": "Physix"},
+    'super_controid': {"index":5, "name": "Contra", "desc": "Badass soldier from Contra III", "author": "Nintoaster"},
+    'marga': {"index":6, "name": "Margatroid", "desc": "Alice Margatroid from the Touhou Project", "author": "Plan"},
+    'win95_cursor': {"index":7, "name": "Win95 Cursor", "desc": "A classic Windows cursor...", "author": "PlaguedOne"}
+}
 
 def customizer():
     response.title = 'Super Metroid VARIA Seeds Customizer'
 
     initCustomizerSession()
 
-    return dict(patches=patches)
+    return dict(patches=patches, customSprites=customSprites)
 
 def customWebService():
     # check validity of all parameters
@@ -1813,6 +1985,12 @@ def customWebService():
     others = ['colorsRandomization', 'suitsPalettes', 'beamsPalettes', 'tilesPalettes', 'enemiesPalettes',
               'bossesPalettes', 'minDegree', 'maxDegree', 'invert']
     validateWebServiceParams(patches, [], others, isJson=True)
+    if request.vars.customSpriteEnable == 'on':
+        if request.vars.customSprite not in customSprites:
+            raiseHttp(400, "Wrong value for customSprite", True)
+
+    if session.customizer == None:
+        session.customizer = {}
 
     # update session
     session.customizer['colorsRandomization'] = request.vars.colorsRandomization
@@ -1825,6 +2003,8 @@ def customWebService():
     session.customizer['maxDegree'] = request.vars.maxDegree
     session.customizer['invert'] = request.vars.invert
     session.customizer['globalShift'] = request.vars.globalShift
+    session.customizer['customSpriteEnable'] = request.vars.customSpriteEnable
+    session.customizer['customSprite'] = request.vars.customSprite
     for patch in patches:
         session.customizer[patch] = request.vars[patch]
 
@@ -1866,6 +2046,9 @@ def customWebService():
         params += ['--min_degree', request.vars.minDegree, '--max_degree', request.vars.maxDegree]
         if request.vars.invert == 'on':
             params.append('--invert')
+
+    if request.vars.customSpriteEnable == 'on':
+        params += ['--sprite', "{}.ips".format(request.vars.customSprite)]
 
     print("before calling: {}".format(params))
     start = datetime.now()
@@ -1927,7 +2110,7 @@ def validateExtStatsParams():
     return (True, None)
 
 def extStats():
-    response.title = 'Super Metroid VARIA Randomizer and ExtStats statistics'
+    response.title = 'Super Metroid VARIA Randomizer statistics'
 
     initExtStatsSession()
 
@@ -1977,11 +2160,22 @@ def extStats():
         DB = db.DB()
         stats = DB.getExtStat(parameters)
         DB.close()
+
+        # check that all items are present in the stats:
+        if len(stats) != 19:
+            for i, item in enumerate(['Bomb', 'Charge', 'Grapple', 'Gravity', 'HiJump', 'Ice', 'Missile', 'Morph',
+                                      'Plasma', 'PowerBomb', 'ScrewAttack', 'SpaceJump', 'Spazer', 'SpeedBooster',
+                                      'SpringBall', 'Super', 'Varia', 'Wave', 'XRayScope']):
+                if stats[i][1] != item:
+                    stats.insert(i, [stats[0][0], item] + [0]*105)
     else:
         stats = None
         parameters = None
 
     (randoPresets, tourRandoPresets) = loadRandoPresetsList()
+    # remove random presets those statistics are useless
+    randoPresets.remove("all_random")
+    randoPresets.remove("quite_random")
     (stdPresets, tourPresets, comPresets) = loadPresetsList()
 
     return dict(stdPresets=stdPresets, tourPresets=tourPresets,

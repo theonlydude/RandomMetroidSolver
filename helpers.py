@@ -22,7 +22,7 @@ class Helpers(object):
         if difficulties is None or len(difficulties) == 0:
             return SMBool(False)
         def f(difficulty):
-            return self.smbm.energyReserveCountOk(difficulty[0] / mult, difficulty=difficulty[1])
+            return self.smbm.energyReserveCountOk(int(math.ceil(difficulty[0] / mult)), difficulty=difficulty[1])
         result = reduce(lambda result, difficulty: self.smbm.wor(result, f(difficulty)),
                         difficulties[1:], f(difficulties[0]))
         return result
@@ -42,29 +42,37 @@ class Helpers(object):
         sm = self.smbm
         hasVaria = sm.haveItem('Varia')
         hasGrav = sm.haveItem('Gravity')
+        item = None
         if RomPatches.has(RomPatches.NoGravityEnvProtection):
             if hasVaria:
+                item = 'Varia'
                 if envDmg:
                     ret = 4.0
                 else:
                     ret = 2.0
             if hasGrav and not envDmg:
                 ret = 4.0
+                item = 'Gravity'
         else:
             if hasVaria:
                 ret = 2.0
+                item = 'Varia'
             if hasGrav:
                 ret = 4.0
-        return ret
+                item = 'Gravity'
+        return (ret, item)
 
     # higher values for mult means room is that much "easier" (HP mult)
     def energyReserveCountOkHardRoom(self, roomName, mult=1.0):
         difficulties = Settings.hardRooms[roomName]
-        mult *= self.getDmgReduction()
+        (dmgRed, item) = self.getDmgReduction()
+        mult *= dmgRed
         result = self.energyReserveCountOkDiff(difficulties, mult)
 
         if result == True:
             result.knows = ['HardRoom-'+roomName]
+            if dmgRed != 1.0:
+                result.items.append(item)
         return result
 
     @Cache.decorator
@@ -294,7 +302,7 @@ class Helpers(object):
     # - estimation of the fight duration in seconds (well not really, it
     # is if you fire and land shots perfectly and constantly), giving info
     # to compute boss fight difficulty
-    def canInflictEnoughDamages(self, bossEnergy, doubleSuper=False, charge=True, power=False, givesDrops=True, ignoreMissiles=False):
+    def canInflictEnoughDamages(self, bossEnergy, doubleSuper=False, charge=True, power=False, givesDrops=True, ignoreMissiles=False, ignoreSupers=False):
         # TODO: handle special beam attacks ? (http://deanyd.net/sm/index.php?title=Charge_Beam_Combos)
         sm = self.smbm
 
@@ -312,7 +320,10 @@ class Helpers(object):
         else:
             missilesDamage = missilesAmount * 100
         supersAmount = sm.itemCount('Super') * 5
-        oneSuper = 300.0
+        if ignoreSupers == True:
+            oneSuper = 0
+        else:
+            oneSuper = 300.0
         if doubleSuper == True:
             oneSuper *= 2
         supersDamage = supersAmount * oneSuper
@@ -482,7 +493,7 @@ class Helpers(object):
             return SMBool(True, diff)
 
     def adjustHealthDropDiff(self, difficulty):
-        dmgRed = self.getDmgReduction(envDmg=False)
+        (dmgRed, item) = self.getDmgReduction(envDmg=False)
         # 2 is Varia suit, considered standard eqt for boss fights
         # there's certainly a smarter way to do this but...
         if dmgRed < 2:
@@ -567,7 +578,9 @@ class Helpers(object):
         (ammoMargin, secs) = self.canInflictEnoughDamages(3000, charge=False, givesDrops=False)
         if ammoMargin == 0:
             return SMBool(False)
-
+        # requires 10-10 to break the glass
+        if sm.itemCount('Missile') <= 1 or sm.itemCount('Super') <= 1:
+            return SMBool(False)
         # we actually don't give a shit about MB1 difficulty,
         # since we embark its health in the following calc
         (ammoMargin, secs) = self.canInflictEnoughDamages(18000 + 3000, givesDrops=False)
@@ -594,10 +607,10 @@ class Helpers(object):
     @Cache.decorator
     def canPassZebetites(self):
         sm = self.smbm
-        # account for one zebetite, refill may be necessary
         return sm.wor(sm.wand(sm.haveItem('Ice'), sm.knowsIceZebSkip()),
                       sm.wand(sm.haveItem('SpeedBooster'), sm.knowsSpeedZebSkip()),
-                      SMBool(self.canInflictEnoughDamages(1100, charge=False, givesDrops=False)[0] >= 1, 0))
+                      # account for one zebetite, refill may be necessary
+                      SMBool(self.canInflictEnoughDamages(1100, charge=False, givesDrops=False, ignoreSupers=True)[0] >= 1, 0))
 
     @Cache.decorator
     def enoughStuffTourian(self):

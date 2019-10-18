@@ -5,6 +5,8 @@ from itemrandomizerweb.Items import ItemManager
 from itemrandomizerweb.patches import patches
 from itemrandomizerweb.stdlib import List
 from compression import Compressor
+from ips import IPS_Patch
+from parameters import appDir
 
 def readWord(romFile):
     r0 = struct.unpack("B", romFile.read(1))[0]
@@ -168,8 +170,7 @@ class RomReader:
         'gravityNoHeatProtection': {'address': 0x06e37d, 'value': 0x01, 'desc': "Gravity suit heat protection removed"},
         'variaTweaks': {'address': 0x7CC4D, 'value': 0x37, 'desc': "VARIA tweaks"},
         'area': {'address': 0x22D564, 'value': 0xF2, 'desc': "Area layout modifications"},
-        'areaLayout': {'address': 0x252FA7, 'value': 0xF8, 'desc': "Area layout additional modifications"},
-        'ridley_platform': {'address': 0x246C09, 'value': 0x00, 'desc': "Ridley platform added in bosses rando"}
+        'areaLayout': {'address': 0x252FA7, 'value': 0xF8, 'desc': "Area layout additional modifications"}
     }
 
     @staticmethod
@@ -538,7 +539,7 @@ class RomPatcher:
                      'Removes_Gravity_Suit_heat_protection',
                      'AimAnyButton.ips', 'endingtotals.ips',
                      'supermetroid_msu1.ips', 'max_ammo_display.ips'],
-        'VariaTweaks' : ['ws_etank.ips', 'ln_chozo_sj_check_disable.ips', 'bomb_torizo.ips'],
+        'VariaTweaks' : ['ws_etank.ips', 'ln_chozo_sj_check_disable.ips', 'ln_chozo_platform.ips', 'bomb_torizo.ips'],
         'Layout': ['dachora.ips', 'early_super_bridge.ips', 'high_jump.ips', 'moat.ips',
                    'nova_boost_platform.ips', 'red_tower.ips', 'spazer.ips', 'brinstar_map_room.ips'],
         'Optional': ['itemsounds.ips', 'rando_speed.ips',
@@ -549,7 +550,7 @@ class RomPatcher:
         'Area': ['area_rando_blue_doors.ips', 'area_rando_layout.ips', 'area_rando_door_transition.ips' ]
     }
 
-    def __init__(self, romFileName=None, magic=None):
+    def __init__(self, romFileName=None, magic=None, plando=False):
         self.romFileName = romFileName
         self.race = None
         if romFileName == None:
@@ -558,7 +559,8 @@ class RomPatcher:
             self.romFile = open(romFileName, 'rb+')
         if magic is not None:
             from race_mode import RaceModePatcher
-            self.race = RaceModePatcher(self, magic)
+            self.race = RaceModePatcher(self, magic, plando)
+        self.ipsPatches = [] # IPS_Patch objects list
 
     def end(self):
         self.romFile.close()
@@ -654,16 +656,16 @@ class RomPatcher:
             operand = ItemManager.BeamBits[item['Type']]
         else:
             operand = ItemManager.ItemBits[item['Type']]
-        # endianness
-        op0 = operand & 0x00FF
-        op1 = (operand & 0xFF00) >> 8
+        self.patchMorphBallCheck(0x1410E6, cat, comp, operand, branch) # eye main AI
+        self.patchMorphBallCheck(0x1468B2, cat, comp, operand, branch) # head main AI
+
+    def patchMorphBallCheck(self, offset, cat, comp, operand, branch):
         # actually patch enemy AI
-        self.romFile.seek(0x1410E6)
+        self.romFile.seek(offset)
         self.romFile.write(struct.pack('B', cat))
-        self.romFile.seek(0x1410E8)
+        self.romFile.seek(offset+2)
         self.romFile.write(struct.pack('B', comp))
-        self.romFile.write(struct.pack('B', op0))
-        self.romFile.write(struct.pack('B', op1))
+        self.writeWord(operand)
         self.romFile.write(struct.pack('B', branch))
 
     def writeItemsNumber(self):
@@ -675,6 +677,9 @@ class RomPatcher:
         for patchName in patches:
             self.applyIPSPatch(patchName)
 
+    def customSprite(self, sprite):
+        self.applyIPSPatch(sprite, ipsDir='itemrandomizerweb/patches/sprites')
+
     def applyIPSPatches(self, optionalPatches=[], noLayout=False, noGravHeat=False, area=False, bosses=False, areaLayoutBase=False, noVariaTweaks=False):
         try:
             # apply standard patches
@@ -683,8 +688,6 @@ class RomPatcher:
                 stdPatches.remove('Removes_Gravity_Suit_heat_protection')
             if self.race is not None:
                 stdPatches.append('race_mode.ips')
-            if bosses == True:
-                stdPatches.append('ridley_platform.ips')
             if area == True or bosses == True:
                 stdPatches.append('ws_save.ips')
             for patchName in stdPatches:
@@ -717,13 +720,32 @@ class RomPatcher:
         except Exception as e:
             raise Exception("Error patching {}. ({})".format(self.romFileName, e))
 
-    def applyIPSPatch(self, patchName):
+    def applyIPSPatch(self, patchName, patchDict=None, ipsDir="itemrandomizerweb/patches"):
+        if patchDict is None:
+            patchDict = patches
         print("Apply patch {}".format(patchName))
-        patchData = patches[patchName]
-        for address in patchData:
-            self.romFile.seek(address)
-            for byte in patchData[address]:
-                self.romFile.write(struct.pack('B', byte))
+        if patchName in patchDict:
+            patch = IPS_Patch(patchDict[patchName])
+        else:
+            # look for ips file
+            patch = IPS_Patch.load(appDir + '/' + ipsDir + '/' + patchName)
+        self.ipsPatches.append(patch)
+
+    def commitIPS(self):
+        if self.romFileName is not None:
+            # CLI
+            for ips in self.ipsPatches:
+                ips.applyFile(self.romFile)
+        else:
+            print('WEEEEB')
+            # Web
+            mergedIPS = IPS_Patch()
+            for ips in self.ipsPatches:
+                mergedIPS.append(ips)
+            patchData = mergedIPS.encode()
+            self.romFile.data["ips"] = base64.b64encode(patchData)
+            if mergedIPS.truncate_length is not None:
+                self.romFile.data["truncate_length"] = mergedIPS.truncate_length
 
     def writeSeed(self, seed):
         random.seed(seed)
@@ -1149,6 +1171,7 @@ class RomPatcher:
         self.writeWord(0xC291)
 
     # add ASM to Tourian "door" down elevator to trigger full refill (ammo + energy)
+    # TODO move this in area_rando_door_transition.asm
     def writeTourianRefill(self):
         tourianDoor = 0x19222
         self.romFile.seek(tourianDoor + 10) # go to door ASM ptr field
@@ -1341,8 +1364,7 @@ class RomLoader(object):
 
 
         # check boss rando
-        if self.hasPatch("ridley_platform"):
-            isBoss = True
+        isBoss = self.isBoss()
 
         return (isArea, isBoss)
 
@@ -1364,6 +1386,15 @@ class RomLoader(object):
 
     def getROM(self):
         return self.romReader.romFile
+
+    def isBoss(self):
+        from graph_access import getAccessPoint
+        romFile = self.getROM()
+        phOut = getAccessPoint('PhantoonRoomOut')
+        doorPtr = phOut.ExitInfo['DoorPtr']
+        romFile.seek((0x10000 | doorPtr) + 10)
+        asmPtr = readWord(romFile)
+        return asmPtr != 0 # this is at 0 in vanilla
 
 class RomLoaderSfc(RomLoader):
     # standard usage (when calling from the command line)

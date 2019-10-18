@@ -7,9 +7,41 @@
 <style>
 {{include 'solver_web/t_style.html'}}
 
+#hideRandoOverlay {
+    position: fixed;
+    display: none;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0,0,0,0.9);
+    z-index: 6;
+    cursor: pointer;
+}
+.repeatArea {
+    cursor: pointer;
+    position: absolute;
+    z-index: 7;
+    width: 2.5%;
+    height: 3.75%;
+    top: 0.5%;
+    left: 11.875%;
+}
+.binArea {
+    cursor: pointer;
+    position: absolute;
+    z-index: 7;
+    width: 2.5%;
+    height: 3.75%;
+    top: 0.5%;
+    left: 14.625%;
+}
+
 .titlePlando {
     position: absolute;
-    z-index: 2;
+    z-index: 7;
     width: 10%;
     height: 3.75%;
     top: 5.25%;
@@ -21,7 +53,7 @@
 .startPlando {
     cursor: pointer;
     position: absolute;
-    z-index: 2;
+    z-index: 7;
     width: 2.5%;
     height: 3.75%;
     top: 4.75%;
@@ -30,7 +62,7 @@
 .repeatPlando {
     cursor: pointer;
     position: absolute;
-    z-index: 2;
+    z-index: 7;
     width: 2.5%;
     height: 3.75%;
     top: 4.75%;
@@ -39,7 +71,7 @@
 .binPlando {
     cursor: pointer;
     position: absolute;
-    z-index: 2;
+    z-index: 7;
     width: 2.5%;
     height: 3.75%;
     top: 4.75%;
@@ -48,16 +80,25 @@
 .savePlando {
     cursor: pointer;
     position: absolute;
-    z-index: 2;
+    z-index: 7;
     width: 2.5%;
     height: 3.75%;
     top: 4.75%;
     left: 18.75%;
 }
+.randoPlando {
+    cursor: pointer;
+    position: absolute;
+    z-index: 7;
+    width: 2.5%;
+    height: 3.75%;
+    top: 0.50%;
+    left: 18.75%;
+}
 .lockPlando {
     cursor: pointer;
     position: absolute;
-    z-index: 2;
+    z-index: 7;
     width: 2.5%;
     height: 3.75%;
     top: 9%;
@@ -66,7 +107,7 @@
 .helpPlando {
     cursor: pointer;
     position: absolute;
-    z-index: 2;
+    z-index: 7;
     width: 2.5%;
     height: 3.75%;
     top: 0.5%;
@@ -75,7 +116,7 @@
 .startDebug {
     cursor: pointer;
     position: absolute;
-    z-index: 2;
+    z-index: 7;
     width: 2.5%;
     height: 3.75%;
     top: 0.5%;
@@ -150,6 +191,39 @@ function save(lock) {
   }
 }
 
+function randomize() {
+  if(loaded == false || webServInProgress == true || init == false) {
+    return;
+  }
+  if(! isActive("randoPlando")) {
+    return;
+  }
+
+  $('#overlay').show();
+  $('#loadingGIF').show();
+
+  var data = {action: "randomize", scope: "common"};
+
+  var elems = ["progressionSpeed", "minorQty", "energyQty"];
+
+  for(var i=0; i<elems.length; i++) {
+    data[elems[i]] = document.getElementById(elems[i]).value;
+  }
+
+  // call WS
+  ajaxCall(data, "download", ajaxOkRandomizer);
+  hideRandoPopup();
+}
+
+function ajaxOkRandomizer(jsonData, status, dummy) {
+  // if checkbox checked and randomization ok
+  if(document.getElementById("hideRando").checked && jsonData["errorMsg"] == "") {
+    $('#hideRandoOverlay').show();
+  }
+
+  ajaxOkGet(jsonData, status, dummy);
+}
+
 function ajaxOkSave(data) {
   webServInProgress = false;
 
@@ -193,6 +267,9 @@ function hideSavePopup() {
   document.getElementById("savePopup").style.display = "none";
 }
 
+function hideRandoPopup() {
+  document.getElementById("randomizerPopup").style.display = "none";
+}
 
 
 //-----------------------------------------------------------
@@ -206,13 +283,34 @@ function startTheTour(step=-1) {
       element: "#helpPlando",
       title: "VARIA Plando Generator",
       content: "<h2 class=\"center\">Welcome to the VARIA Plando Generator</h2>\
-<p>The Plando (a Plando is a Super Metroid seed with manually placed items) Generator allows you to create your own Plando in interactive mode.<br/>To use it, click on the <img src=\"/solver/static/images/play.svg\" alt=\"Start\" style=\"width: 32px\"> button to upload your ROM and choose your preset (like on the Solver page).<br/>As a base for your Plando ROM you should generate a seed on the Randomizer page with all the optional patches that you need.<br/>The available locations will be displayed on the map, click on a location and a popup will be displayed allowing you to choose which item to place.<br/>You can put the same major item at several locations.</p>\
+<p>The Plando (a Plando is a Super Metroid seed with manually placed items) Generator allows you to create your own Plando in interactive mode.</p>\
+<h4>Start</h4>\
+<p>To use it, click on the <img src=\"/solver/static/images/play.svg\" alt=\"Start\" style=\"width: 32px\"> button, this popup will be displayed:\
+<img src=\"/solver/static/images/load_popup.png\" alt=\"Load popup\">\
+</p>\
+<p>As a base for your Plando ROM you should generate a seed on the <a href=\"/randomizer\" target=\"_blank\">Randomizer page</a> with all the optional patches that you need.</p>\
+<p><b>Hint:</b>You can load the base ROM locations and transitions by checking the \"Populate your plando with the items and transitions from the base ROM\" checkbox.</p>\
+<h4>Usage</h4>\
+<p>The available locations will be displayed on the map, click on a location and this popup will be displayed allowing you to choose which item to place:\
+<img src=\"/solver/static/images/item_popup.png\" alt=\"Rando popup\">\
+</p>\
+<p><b>Hint:</b>You can put the same major item at several locations.</p>\
 <p>When you're done click on the <img src=\"/solver/static/images/save.svg\"alt=\"Save\" style=\"width: 32px\"> button to save the Plando ROM on your Computer. You can resume working on it later by uploading the saved Plando ROM.</p>\
-<p>You can change the item of a location by clicking on it to choose another item (Warning: it could make some previously accessible locations inaccessible. When reloading the saved plando ROM these locations will be displayed as sequence break).</p>\
-<h4>Areas/Bosses</h4>\
+\
+<p><b>Hint:</b>You can change the item of a location by clicking on it to choose another item (<b>Warning:</b> it could make some previously accessible locations inaccessible. When reloading the saved plando ROM these locations will be displayed as sequence break).</p>\
+<h4>Bosses</h4>\
+<p>You have to click on a boss location to tell the plandomizer that you killed it, it'll open the locations which are only available after the boss' death (like \"Energy Tank, Kraid\" after killing Kraid).</p>\
+<h4>Areas/Bosses Transitions</h4>\
 <p>Choose an Areas and/or Bosses seed as your base ROM to use the Plando Generator in items and areas/bosses mode, aka you choose the transitions between the areas/bosses.</p>\
 <h4>Unused locations/transitions</h4>\
 <p>If you don't set an item to a location it'll be empty. Portals with no transitions will be looping on themselves.</p>\
+<h4>Randomization</h4>\
+<p>You can use the <img src=\"/solver/static/images/games.svg\" alt=\"Random\" style=\"width: 32px\"> button to let the VARIA Randomizer fill all the empty remaining locations of your plando.</p>\
+<p>It'll display a popup where you can choose the Randomizer parameters:\
+<img src=\"/solver/static/images/rando_popup.png\" alt=\"Rando popup\">\
+</p>\
+<p><b>Hint:</b>In areas/bosses mode you don't have to add all the transitions, the VARIA randomizer will limit itself to the connected locations (like a Minimizer).</p>\
+<p><b>Hint:</b>You can add items in sequence break locations, the VARIA randomizer will fill in the gaps.</p>\
 <h4>Lock</h4>\
 <p>When your Plando seed is completed you can lock it (prevent it from being solved on the VARIA website, and not showing items in SMILE or other editors) if you want. To do so click on the <img src=\"/solver/static/images/locked.svg\" alt=\"Lock\" style=\"width: 32px\"> button.</p>\
 <p><b>WARNING:</b>You won't be able to modify a locked seed, so save it with <img src=\"/solver/static/images/save.svg\"alt=\"Save\" style=\"width: 32px\"> first.</p>\
@@ -284,6 +382,7 @@ function onloadHook() {
 
   dragElement(document.getElementById("debugPopup"), "VCRGrab");
   dragElement(document.getElementById("savePopup"), "SaveGrab");
+  dragElement(document.getElementById("randomizerPopup"), "RandoGrab");
 }
 
 function hidePlandoButtons() {
@@ -564,6 +663,15 @@ function pushActions(len) {
 function isDesactivated(elemId) {
   return $("#"+elemId).hasClass("greyed");
 }
+
+function displayRandoPopup() {
+  if(loaded == false || webServInProgress == true || init == false) {
+    return;
+  }
+
+  // display popup
+  document.getElementById("randomizerPopup").style.display = "block";
+}
 </script>
 
 <div class="fixed">
@@ -584,7 +692,65 @@ function isDesactivated(elemId) {
   </div>
 </div>
 
+{{
+def displaySelect(id, values, default):
+  if id in session.plando["rando"]:
+    value = session.plando["rando"][id]
+  else:
+    value = default
+    pass
+}}
+  {{
+   =SELECT(*values,
+           **dict(_id=id, _name=id, value=value, _class="full"))
+  }}
+{{pass}}
+
+{{
+def displayNumber(id, min, max, default, step="1"):
+  if id in session.plando["rando"]:
+    value = session.plando["rando"][id]
+  else:
+    value = default
+    pass
+
+  response.write("<input name=\"{}\" id=\"{}\" type=\"number\" value=\"{}\" min=\"{}\" max=\"{}\" step=\"{}\" class=\"full\" required>".format(id, id, value, min, max, step), escape=False)
+  pass
+}}
+
 <div class="main">
+  <div id="randomizerPopup" class="itemPopup">
+    <table class="full">
+      <colgroup><col class="half" /><col class="half" /></colgroup>
+      <tr><td colspan=2></td></tr>
+      <tr><td id="RandoGrab" colspan=2 class="center greyRow"><p>Plando Randomizer parameters</p></td></tr>
+      <tr><td colspan=2 class="blankRow"></td></tr>
+      <tr>
+	<td>Progression speed:</td>
+	<td>{{displaySelect("progressionSpeed", ["slowest", "slow", "medium", "fast", "fastest", "basic", "VARIAble"], "VARIAble")}}
+</td>
+      </tr>
+      <tr>
+	<td>Percentage of minors available:</td>
+	<td>{{displayNumber("minorQty", "7", "100", "100")}}</td>
+      </tr>
+      <tr>
+	<td>Quantity of Energy/Reserve Tanks available:</td>
+	<td>{{displaySelect("energyQty", ["sparse", "medium", "vanilla"], "vanilla")}}</td>
+      </tr>
+      <tr>
+	<td>Hide the result of the VARIA Randomizer (to save it without spoiling):</td>
+	<td><input id="hideRando" name="hideRando" type="checkbox"></td>
+      </tr>
+      <tr><td colspan=2 class="blankLastRow"></td></tr>
+    </table>
+    <table>
+      <tr>
+	<td class="half"><button type="button" onclick="randomize()" class="full">Randomize</button></td>
+	<td class="half"><button type="button" onclick="hideRandoPopup()" class="full">Cancel</button></td>
+      </tr>
+    </table>
+  </div>
 
   <div id="savePopup" class="itemPopup">
     <table class="full">
@@ -606,7 +772,7 @@ function isDesactivated(elemId) {
     </table>
   </div>
 
-    <div id="debugPopup" class="debugPopup">
+  <div id="debugPopup" class="debugPopup">
     <table class="full">
       <colgroup><col class="half" /><col class="half" /></colgroup>
       <tr><td colspan=2></td></tr>
@@ -660,17 +826,19 @@ function isDesactivated(elemId) {
     </table>
     <input id="vcrJson" name="vcrJson" style="display:none" type="text"/>
   </div>
+  <div id="hideRandoOverlay"></div>
 
 {{include 'solver_web/t_main.html'}}
 
     <!-- plando buttons -->
     <div id="titlePlando" class="titlePlando">PLANDO</div>
     <div id="startPlando" class="startPlando"><img src="/solver/static/images/play.svg" alt="Start" onclick="displayPopup(true)" data-toggle="tooltip" title="Start the Plando creator" data-placement="bottom" data-container="body" data-html="true"></div>
-    <div id="repeatPlando" class="repeatPlando"><img src="/solver/static/images/repeat.svg" alt="Cancel Last" onclick="deleteLoc(true)" data-toggle="tooltip" title="Remove last placed item" data-placement="bottom" data-container="body" data-html="true"></div>
+    <div id="repeatPlando" class="repeatPlando"><img src="/solver/static/images/repeat.svg" alt="Cancel Last" onclick="deleteLoc(true)" data-toggle="tooltip" title="Remove last placed item" data-placement="bottom" data-container="body" data-html="true" id="repeatPlandoImg"></div>
     <div id="binPlando" class="binPlando"><img src="/solver/static/images/bin.svg" alt="Clear" onclick="clearLocs(true)" data-toggle="tooltip" title="Remove all placed items" data-placement="bottom" data-container="body" data-html="true"></div>
     <div id="savePlando" class="savePlando"><img src="/solver/static/images/save.svg" alt="Save" onclick="save('save')" data-toggle="tooltip" title="Download plando ROM" data-placement="bottom" data-container="body" data-html="true"></div>
-    <!-- <div id="lockPlando" class="lockPlando"><img src="/solver/static/images/locked.svg" alt="Lock" onclick="save('lock')" data-toggle="tooltip" title="Download locked plando ROM" data-placement="bottom" data-container="body" data-html="true"></div> -->
+    <div id="lockPlando" class="lockPlando"><img src="/solver/static/images/locked.svg" alt="Lock" onclick="save('lock')" data-toggle="tooltip" title="Download locked plando ROM" data-placement="bottom" data-container="body" data-html="true"></div>
     <div id="helpPlando" class="helpPlando"><img src="/solver/static/images/help.svg" alt="Help" onclick="startTheTour(0)" data-toggle="tooltip" title="Display the Plando help" data-placement="bottom" data-container="body" data-html="true"></div>
+    <div id="randoPlando" class="randoPlando"><img src="/solver/static/images/games.svg" alt="Randomize" onclick="displayRandoPopup()" data-toggle="tooltip" title="Randomize the remaining items/locations" data-placement="bottom" data-container="body" data-html="true"></div>
 
     <!-- to open the debug popup -->
     <div id="startDebug" class="startDebug"><img src="/solver/static/images/play.svg" alt="Start" onclick="displayDebugPopup()" data-toggle="tooltip" title="Start the debug popup" data-placement="bottom" data-container="body" data-html="true"></div>

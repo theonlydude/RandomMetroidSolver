@@ -35,7 +35,9 @@ class RandoSettings(object):
     # of the relevant categorie(s). This can easily cause aborted seeds, so some basic checks will be performed
     # beforehand to know whether an item can indeed be removed.
     # runtimeLimit_s : maximum runtime limit in seconds for generateItems functions. If <= 0, will be unlimited.
-    def __init__(self, maxDiff, progSpeed, progDiff, qty, restrictions, superFun, runtimeLimit_s, vcr):
+    # vcr: to generate debug .vcr output file
+    # plandoRando: list of already set (locationName, itemType) by the plando
+    def __init__(self, maxDiff, progSpeed, progDiff, qty, restrictions, superFun, runtimeLimit_s, vcr, plandoRando):
         self.progSpeed = progSpeed
         self.progDiff = progDiff
         self.maxDiff = maxDiff
@@ -46,6 +48,7 @@ class RandoSettings(object):
         if self.runtimeLimit_s <= 0:
             self.runtimeLimit_s = sys.maxint
         self.vcr = vcr
+        self.plandoRando = plandoRando
 
     def getChooseLocs(self):
         return self.getChooseLocDict(self.progDiff)
@@ -199,6 +202,186 @@ class RandoSettings(object):
             locLimit = 105
         return locLimit
 
+class SuperPlandoProvider(object):
+    def __init__(self, settings, smbm, rando):
+        self.settings = settings
+        self.smbm = smbm
+        self.rando = rando
+        self.log = log.get('SuperPlando')
+
+    def getAvailableLocations(self):
+        # to allow the randomizer to finish when not all the transitions have been
+        # given we have to reduce the item pool to have just the number of item
+        # that the rando can place, for that we need to know the available locations
+        self.smbm.resetItems()
+        self.smbm.addItems([item['Type'] for item in self.itemPool])
+
+        from cache import Cache
+        # kill available bosses (killing a boss can make new locations available)
+        oldDeadBosses = -1
+        curDeadBosses = 0
+        while oldDeadBosses != curDeadBosses:
+            oldDeadBosses = curDeadBosses
+            curDeadBosses = 0
+            # killling a boss doesn't reset the cache
+            Cache.reset()
+            locs = self.rando.currentLocations(post=True)
+            for loc in locs:
+                if "Boss" in loc["Class"]:
+                    Bosses.beatBoss(loc["Name"])
+                    curDeadBosses += 1
+                # see evil trick in graph_locations.py on Space Jump/Draygon locs
+                if loc["Name"] == "Space Jump":
+                    Bosses.beatBoss("Draygon")
+                    curDeadBosses += 1
+
+        # cleanup
+        self.smbm.resetItems()
+        Bosses.reset()
+
+        # dict with the name of all the available locations
+        locsDict = {}
+        for loc in locs:
+            locsDict[loc["Name"]] = True
+
+        self.log.debug("available locs: {}".format(locsDict.keys()))
+
+        return locsDict
+
+    def getExcludePlandoItems(self):
+        exclude = {
+            'ETank': 0,
+            'Missile': 0,
+            'Super': 0,
+            'PowerBomb': 0,
+            'Bomb': 0,
+            'Charge': 0,
+            'Ice': 0,
+            'HiJump': 0,
+            'SpeedBooster': 0,
+            'Wave': 0,
+            'Spazer': 0,
+            'SpringBall': 0,
+            'Varia': 0,
+            'Plasma': 0,
+            'Grapple': 0,
+            'Morph': 0,
+            'Reserve': 0,
+            'Gravity': 0,
+            'XRayScope': 0,
+            'SpaceJump': 0,
+            'ScrewAttack': 0,
+            'Nothing': 0,
+            'Boss': 0,
+            'total': 0
+        }
+
+        # plandoRando is a dict {'loc name': 'item type'}
+        for loc in self.settings.plandoRando:
+            exclude[self.settings.plandoRando[loc]] += 1
+
+        for key in exclude:
+            if key == 'total':
+                continue
+            exclude['total'] += exclude[key]
+
+        return exclude
+
+    def getItemPool(self):
+        self.itemManager = ItemManager('Plando', self.settings.qty, self.smbm)
+
+        # randomize only the locations not already placed in the plandomizer
+        exclude = self.getExcludePlandoItems()
+
+        # generate item pool
+        self.itemManager.createItemPool(exclude)
+        self.itemPool = self.itemManager.getItemPool()
+
+        # add itemName to locs from the plando
+        for loc in self.rando.unusedLocations:
+            if loc['Name'] in self.settings.plandoRando:
+                loc['itemName'] = self.settings.plandoRando[loc['Name']]
+
+        # get locs availabe with all the items of the pool
+        availableLocs = self.getAvailableLocations()
+        self.log.debug("nb available locs: {}".format(len(availableLocs)))
+
+        # we need to partition the item pool in two:
+        # -items placed in the plando in available locs
+        # -remaining items
+        available = []
+        for loc in self.rando.unusedLocations:
+            if loc["Name"] in availableLocs:
+                if "itemName" in loc:
+                    # available loc with plando placed item, get the item
+                    available.append(self.getItem(loc["itemName"]))
+            else:
+                if "itemName" in loc:
+                    # if an item has been set in the plando in a loc outside the transitions, remove it
+                    del loc["itemName"]
+
+        # then we loop on the not avaible locations with no items.
+        # remove these items from the pool.
+        for loc in self.rando.unusedLocations:
+            if loc["Name"] in availableLocs:
+                continue
+            if "itemName" in loc:
+                continue
+            # check if boss loc
+            if 'Boss' in loc['Class']:
+                self.getItem('Boss')
+            else:
+                # get next dispendable item from pool
+                self.getNextDispendableItem()
+
+        # we have two item pools to avoid putting already placed items in the plandomizer in other locs
+        self.itemPool = self.itemManager.getItemPool()
+        self.plandoItemPool = available
+
+        self.log.debug("nb items in pool: {}".format(len(self.itemPool)))
+        self.log.debug("pool: {}".format([item['Type'] for item in self.itemPool]))
+
+        return (self.itemPool, self.plandoItemPool)
+
+    def getItem(self, itemName):
+        # get the actual item from the item pool and remove it from pool
+        return self.itemManager.removeItem(itemName)
+
+    def getNextDispendableItem(self):
+        for (itemName, minNumber) in [
+                ("Nothing", 0),
+                ("NoEnergy", 0),
+                ("Missile", 3),
+                ("PowerBomb", 1),
+                ("Super", 2),
+                ('Reserve', 0),
+                ('ETank', 1),
+                ('XRayScope', 0),
+                ('Spazer', 0),
+                ('SpringBall', 0),
+                ('Plasma', 0),
+                ('Grapple', 0),
+                ('HiJump', 0),
+                ('Wave', 0),
+                ('Bomb', 0),
+                ('SpaceJump', 0),
+                ('ScrewAttack', 0),
+                ('Charge', 0),
+                ('Varia', 0),
+                ('Gravity', 0),
+                ('Ice', 0),
+                ('SpeedBooster', 0),
+                ('Morph', 0)
+        ]:
+            if self.itemManager.hasItemInPoolCount(itemName, minNumber+1):
+                return self.itemManager.removeItem(itemName)
+
+        for itemName in ["Missile", "PowerBomb", "Super", "ETank"]:
+            if self.itemManager.hasItemInPoolCount(itemName, 1):
+                return self.itemManager.removeItem(itemName)
+
+        raise Exception("Missing item in pool")
+
 # dat class name
 class SuperFunProvider(object):
     # give the rando since we have to access services from it
@@ -245,6 +428,11 @@ class SuperFunProvider(object):
             pool = self.getItemPool()
         if self.isChozo:
             pool = [item for item in pool if item['Class'] == 'Chozo' or item['Name'] == 'Boss']
+            # forces ice zeb skip in the knows to pass end game condition. this is ugly but valid,
+            # as if zeb skip is not known, an extra missile pack is guaranteed to be added (it won't
+            # be in a chozo location, but the game is still finishable)
+            Knows.IceZebSkip = SMBool(True, 0, [])
+
         poolDict = self.rando.getPoolDict(pool)
         self.log.debug('pool='+str([(t, len(poolDict[t])) for t in poolDict]))
         # give us everything and beat every boss to see what we can access
@@ -259,12 +447,13 @@ class SuperFunProvider(object):
         self.log.debug("restricted=" + str([loc['Name'] for loc in self.lastRestricted]))
 
         # check if we can reach all APs from all APs
+        nonInternalAPs = [ap for ap in self.areaGraph.accessPoints.values() if ap.Internal == False]
         for startApName, startAp in self.areaGraph.accessPoints.iteritems():
             availAccessPoints = self.areaGraph.getAvailableAccessPoints(startAp, self.sm, self.rando.difficultyTarget)
-            for apName, ap in self.areaGraph.accessPoints.iteritems():
+            for ap in nonInternalAPs:
                 if not ap in availAccessPoints:
                     ret = False
-                    self.log.debug("unavail AP: " + apName + ", from " + startApName)
+                    self.log.debug("unavail AP: " + ap.Name + ", from " + startApName)
 
         # check if we can reach all bosses
         if ret:
@@ -377,13 +566,15 @@ class SuperFunProvider(object):
         removableCombat = [cbt for cbt in self.combatItems if self.checkPool([cbt])]
         self.log.debug("getForbiddenCombat removable="+str(removableCombat))
         if len(removableCombat) > 0:
-            fake = [None, None] # placeholders to avoid tricking the gaussian into removing too much stuff
+            fake = [] # placeholders to avoid tricking the gaussian into removing too much stuff
             if len(removableCombat) > 0:
                 # remove at least one if possible (will be screw or plasma)
                 self.forbiddenItems.append(removableCombat.pop(0))
-            # if plasma is still available, remove it as well
-            if len(removableCombat) > 0 and removableCombat[0] == 'Plasma':
+                fake.append(None)
+            # if plasma is still available, remove it as well if we can
+            if len(removableCombat) > 0 and removableCombat[0] == 'Plasma' and self.checkPool([removableCombat[0]]):
                 self.forbiddenItems.append(removableCombat.pop(0))
+                fake.append(None)
             self.addForbidden(removableCombat + fake)
         else:
             self.errorMsgs.append('Could not remove any combat item')
@@ -412,6 +603,7 @@ class RandoState(object):
     def __init__(self, rando, curLocs):
         self.unusedLocations = rando.unusedLocations[:]
         self.itemPool = rando.itemPool[:]
+        self.plandoItemPool = rando.plandoItemPool[:]
         self.chozoItemPool = rando.chozoItemPool[:]
         self.nonChozoItemPool = rando.nonChozoItemPool[:]
         self.curAccessPoint = rando.curAccessPoint
@@ -432,6 +624,7 @@ class RandoState(object):
         rando.setCurAccessPoint(self.curAccessPoint)
         rando.states = self.states[:]
         rando.itemPool = self.itemPool[:]
+        rando.plandoItemPool = self.plandoItemPool[:]
         rando.chozoItemPool = self.chozoItemPool[:]
         rando.nonChozoItemPool = self.nonChozoItemPool[:]
         rando.progressionStatesIndices = self.progressionStatesIndices[:]
@@ -491,19 +684,29 @@ class Randomizer(object):
         self.progressionItemLocs = []
         # progression items tried for a given rollback point
         self.rollbackItemsTried = {}
-        # handle super fun settings
+        self.itemLocations = []
+
         self.itemPool = None
-        itemManager = ItemManager(self.restrictions['MajorMinor'], settings.qty, self.smbm)
-        fun = SuperFunProvider(settings.superFun, itemManager, self)
-        fun.getForbidden()
-        # check if we can reach everything
-        self.log.debug("LAST CHECKPOOL")
-        if not fun.checkPool():
-            raise RuntimeError('Invalid transitions')
-        # store unapplied super fun messages
-        if len(fun.errorMsgs) > 0:
-            self.errorMsg += "Super Fun: " + ', '.join(fun.errorMsgs) + ' '
-        self.itemPool = fun.getItemPool()
+        self.plandoItemPool = []
+        if self.settings.plandoRando != None:
+            plando = SuperPlandoProvider(self.settings, self.smbm, self)
+            (self.itemPool, self.plandoItemPool) = plando.getItemPool()
+            self.restrictedLocations = []
+        else:
+            itemManager = ItemManager(self.restrictions['MajorMinor'], settings.qty, self.smbm)
+            # handle super fun settings
+            fun = SuperFunProvider(settings.superFun, itemManager, self)
+            fun.getForbidden()
+            # check if we can reach everything
+            self.log.debug("LAST CHECKPOOL")
+            if not fun.checkPool():
+                raise RuntimeError('Invalid transitions')
+            # store unapplied super fun messages
+            if len(fun.errorMsgs) > 0:
+                self.errorMsg += "Super Fun: " + ', '.join(fun.errorMsgs) + ' '
+            self.itemPool = fun.getItemPool()
+            self.restrictedLocations = fun.restrictedLocs
+
         self.chozoItemPool = []
         self.nonChozoItemPool = []
         # temporarily swap item pool in chozo mode, until all chozo item are placed in chozo locs
@@ -512,7 +715,6 @@ class Randomizer(object):
             self.nonChozoItemPool = [item for item in self.itemPool if item not in self.chozoItemPool] # this will be swapped back
             self.log.debug('pools. c=%d, n=%d, t=%d' % (len(self.chozoItemPool), len(self.nonChozoItemPool), len(self.itemPool)))
             self.itemPool = self.chozoItemPool
-        self.restrictedLocations = fun.restrictedLocs
 
         # if late morph compute number of locations available without morph
         if self.restrictions['Morph'] == 'late':
@@ -988,9 +1190,14 @@ class Randomizer(object):
         if loc['Name'] == 'Bomb':
             # disable check for bombs as it is the beginning
             return False
+        isPickup = 'Pickup' in loc
+        if isPickup:
+            loc['Pickup']()
         # if the loc forces us to go to an area we can't come back from
         comeBack = loc['accessPoint'] == self.curAccessPoint or \
             self.areaGraph.canAccess(self.smbm, loc['accessPoint'], self.curAccessPoint, self.difficultyTarget, item['Type'])
+        if isPickup:
+            loc['Unpickup']()
         if not comeBack:
             self.log.debug("KO come back from " + loc['accessPoint'] + " to " + self.curAccessPoint + " when trying to place " + item['Type'] + " at " + loc['Name'])
             return True
@@ -1036,6 +1243,10 @@ class Randomizer(object):
             return False
 
         if not self.locClassCheck(item, location):
+            return False
+
+        # plando locs are not available
+        if 'itemName' in location:
             return False
 
         ret = True
@@ -1129,10 +1340,12 @@ class Randomizer(object):
     # with non-progression items
     def checkLocPool(self):
  #       self.log.debug("checkLocPool {}".format([it['Name'] for it in self.itemPool]))
+        if self.locLimit <= 0:
+            return True
         progItems = [item for item in self.itemPool if self.isProgItem(item)]
         self.log.debug("progItems {}".format([it['Name'] for it in progItems]))
  #       self.log.debug("curItems {}".format([it['Name'] for it in self.currentItems]))
-        if len(progItems) == 0 or self.locLimit <= 0:
+        if len(progItems) == 0:
             return True
         isMinorProg = any(self.isItemMinor(item) for item in progItems)
         isMajorProg = any(self.isItemMajor(item) for item in progItems)
@@ -1294,7 +1507,8 @@ class Randomizer(object):
         # like spospo etc. too often).
         # in this case, we won't remove any prog items since we're not actually
         # stuck
-        isFakeRollback = self.generateItem(self.currentLocations(), self.itemPool) is not None
+        ret = self.generateItem(self.currentLocations(), self.itemPool)
+        isFakeRollback = ret is not None
         self.log.debug('isFakeRollback=' + str(isFakeRollback))
         self.initRollback(isFakeRollback)
         if len(self.states) == 0:
@@ -1304,7 +1518,6 @@ class Randomizer(object):
                 self.vcr.addRollback(nStatesAtStart)
             return None
         # to stay consistent in case no solution is found as states list was popped in init
-        ret = None
         fallbackState = self.states[-1]
         i = 0
         possibleStates = []
@@ -1530,11 +1743,33 @@ class Randomizer(object):
                 self.chozoFill()
             self.hadChozoLeft = self.isChozoLeft()
 
+    def addAvailablePlandoLocs(self):
+        if self.settings.plandoRando == None:
+            return
+
+        self.log.debug("addAvailablePlandoLocs:")
+
+        while True:
+            found = False
+            curLocs = self.currentLocations()
+            for loc in curLocs:
+                if 'itemName' in loc:
+                    self.log.debug("try to add {} to {}".format(loc['itemName'], loc['Name']))
+                    self.log.debug("plandoItemPool: {}".format([i['Type'] for i in self.plandoItemPool]))
+                    self.log.debug("itemPool: {}".format([i['Type'] for i in self.itemPool]))
+                    item = self.getNextItemInPool(loc['itemName'], self.plandoItemPool)
+                    self.plandoItemPool.remove(item)
+                    itemLocation = {'Item': item, 'Location': loc}
+                    self.log.debug("add {} to {}".format(loc['itemName'], loc['Name']))
+                    self.getItem(itemLocation, pool=[item])
+                    found = True
+            if found == False:
+                break
+
     # only function to use (once) from outside of the Randomizer class.
     # returns a list of item/location dicts with 'Item' and 'Location' as keys.
     def generateItems(self):
         stuck = False
-        self.itemLocations = []
         isStuck = False
         # if major items are removed from the pool (super fun setting), fill not accessible locations with
         # items that are as useless as possible
@@ -1547,9 +1782,13 @@ class Randomizer(object):
         runtime_s = 0
         startDate = time.clock()
         self.prevDiffTarget = None
-        while len(self.itemPool) > 0 and not isStuck and runtime_s <= self.runtimeLimit_s:
+        while ((len(self.itemPool) > 0 or len(self.plandoItemPool) > 0)
+               and not isStuck
+               and runtime_s <= self.runtimeLimit_s):
             # dynamic params determination (useful for variable speed)
             self.determineParameters()
+            # add available plando locs
+            self.addAvailablePlandoLocs()
             # fill up with non-progression stuff
             isStuck = self.fillNonProgressionItems()
             self.log.debug("non prog stuck = " + str(isStuck))
@@ -1610,7 +1849,11 @@ class Randomizer(object):
                 print("\nSTUCK ! ")
                 print("REM LOCS = "  + str([loc['Name'] for loc in self.unusedLocations]))
                 print("REM ITEMS = "  + str([item['Type'] for item in self.itemPool]))
-                self.errorMsg += "Stuck because of navigation. Retry, and disable either super fun settings or suits restriction if the problem happens again."
+
+                if runtime_s > self.runtimeLimit_s:
+                    self.errorMsg += "Can't randomize the seed under the time limit of {}s".format(self.runtimeLimit_s)
+                else:
+                    self.errorMsg += "Stuck because of navigation. Retry, and disable either super fun settings or suits restriction if the problem happens again."
                 stuck = True
         if not stuck:
             maxDiff = self.prevDiffTarget

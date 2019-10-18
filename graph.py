@@ -212,7 +212,7 @@ class AccessGraph(object):
             pdiff = SMBool(True,
                            difficulty=max(pdiff.difficulty, diff.difficulty),
                            knows=list(set(pdiff.knows + diff.knows)),
-                           items=list(set(pdiff.items + diff.items)))
+                           items=pdiff.items + diff.items)
 
         return pdiff
 
@@ -287,7 +287,7 @@ class AccessGraph(object):
                     locDiff = SMBool(diff.bool,
                                      difficulty=max(tdiff.difficulty, diff.difficulty, pdiff.difficulty),
                                      knows=list(set(tdiff.knows + diff.knows + pdiff.knows)),
-                                     items=list(set(tdiff.items + diff.items + pdiff.items)))
+                                     items=tdiff.items + diff.items + pdiff.items)
                     if locDiff.bool == True and locDiff.difficulty <= maxDiff:
                         loc['distance'] = ap.distance + 1
                         loc['accessPoint'] = apName

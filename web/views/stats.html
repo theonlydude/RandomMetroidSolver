@@ -4,7 +4,7 @@ extend 'layout.html'
 
 <meta name="description" content="Statistics of the VARIA Randomizer and Solver"/>
 <link rel="shortcut icon" href={{=URL('static','favicon.ico')}} type="image/ico"/>
-<link rel="stylesheet" type="text/css" href={{=URL('static/css','mystyle_20190320.css')}} media="screen"/>
+<link rel="stylesheet" type="text/css" href={{=URL('static/css','mystyle_20191017.css')}} media="screen"/>
 <script type = "text/javascript" src = "https://www.gstatic.com/charts/loader.js"></script>
 <script type = "text/javascript">google.charts.load('current', {packages: ['corechart']});</script>
 <script type="text/javascript" src="{{=URL('static', '/js/excellentexport.js')}}"></script>
@@ -343,7 +343,7 @@ google.charts.setOnLoadCallback(drawCharts);
             response.write("  <tr>\n", escape=False)
             pass
           for col in row[1:]:
-            response.write("    <td style=\"white-space: nowrap\">{}</td>\n".format(col), escape=False)
+            response.write("    <td style=\"white-space: nowrap\">{}</td>\n".format(col.encode('utf8', 'replace') if type(col) == unicode else col), escape=False)
             pass
           response.write("  </tr>\n", escape=False)
           pass

@@ -5,7 +5,7 @@ extend 'layout.html'
 
 <meta name="description" content="Solver for the randomized Super Metroid roms"/>
 <link rel="shortcut icon" href={{=URL('static','favicon.ico')}} type="image/ico"/>
-<link rel="stylesheet" type="text/css" href={{=URL('static/css','mystyle_20190320.css')}} media="screen"/>
+<link rel="stylesheet" type="text/css" href={{=URL('static/css','mystyle_20191017.css')}} media="screen"/>
 <script type="text/javascript" src="{{=URL('static', '/highslide/highslide.js')}}"></script>
 <link rel="stylesheet" type="text/css" href={{=URL("static", "/highslide/highslide.css")}} />
 <script type="text/javascript">
@@ -31,9 +31,15 @@ if (hs.registerOverlay) {
 <script type="text/javascript" src="{{=URL('static', 'js/chosen.jquery.min.js')}}"></script>
 <link rel="stylesheet" type="text/css" href={{=URL("static", "css/chosen.css")}} />
 
+<script type="text/javascript" src="{{=URL('static', 'js/jquery.redirect.js')}}"></script>
+
 <title>Super Metroid VARIA Solver</title>
 
 <style>
+.rightStep {
+    float: right;
+    margin-right: 0.3em;
+}
 .clickable {
     cursor: pointer;
 }
@@ -346,7 +352,9 @@ window.onload = function(){
                     romData[addresses[i]] = bytes[addresses[i]];
                     romData[addresses[i]+1] = bytes[addresses[i]+1];
                     romData[addresses[i]+6] = bytes[addresses[i]+6];
-                    romData[addresses[i]+7] = bytes[addresses[i]+7];
+		    romData[addresses[i]+7] = bytes[addresses[i]+7];
+                    romData[addresses[i]+10] = bytes[addresses[i]+10];
+		    romData[addresses[i]+11] = bytes[addresses[i]+11];
                 }
 
                 // bank B8
@@ -413,7 +421,7 @@ function startTheTour(step=-1) {
     {
       element: "#presetStep",
       title: "Preset",
-      content: "The preset is used by the Solver to know which techniques are available to reach the items locations.<br/>You can create and manage your preset on the <a href=\"/solver/solver_web/presets\">Presets part of the website</a>.<br/>Load one of the standard presets (sorted in increased difficulty) or you own from the community presets.<br/>For the duration of the league the Season_Races preset is added to standard presets."
+      content: "The preset is used by the Solver to know which techniques are available to reach the items locations.<br/>You can create and manage your preset on the <a href=\"/solver/solver_web/presets\">Presets part of the website</a>.<br/>Load one of the standard presets (sorted in increased difficulty), tournament presets, or you own from the community presets."
     },
     {
       element: "#difficultyTarget",
@@ -451,6 +459,9 @@ If Charge Beam is not picked up along the way or not accessible, enough minors t
   tour.start();
 }
 
+function DoPost(){
+    $.redirect("/presets", { action: "Load", currenttab: "Techniques1", preset: document.getElementById("preset").value }, "POST", "_blank");
+}
 </script>
 
 {{
@@ -512,7 +523,7 @@ If Charge Beam is not picked up along the way or not accessible, enough minors t
 	      <td id="romFileStep"><button type="button" onclick="startTheTour(1)">?</button></td>
 	    </tr>
 	    <tr>
-	      <td>Preset:</td>
+	      <td>Preset: <span class="rightStep"><a href="javascript:DoPost()">What's in the logic for this skills preset ?</a></td>
 	      <td>{{=SELECT(OPTGROUP(*stdPresets, **dict(_label="Standard presets")), OPTGROUP(*tourPresets, **dict(_label="Tournament presets")), OPTGROUP(*comPresets, **dict(_label="Community presets")), **dict(_name="preset", _id="preset", value=session.solver["preset"], _class="filldropdown chzn-select"))}}</td>
 	      <td id="presetStep"><button type="button" onclick="startTheTour(2)">?</button></td>
 	    </tr>

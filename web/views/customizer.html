@@ -5,7 +5,7 @@ extend 'layout.html'
 <meta name="description" content="Palettizer for the randomized Super Metroid roms"/>
 <link rel="shortcut icon" href={{=URL('static','favicon.ico')}} type="image/ico"/>
 <script src="{{=URL('static','js/FileSaver.js')}}"></script>
-<link rel="stylesheet" type="text/css" href={{=URL('static','css/mystyle_20190320.css')}} media="screen"/>
+<link rel="stylesheet" type="text/css" href={{=URL('static','css/mystyle_20191017.css')}} media="screen"/>
 
 <link rel="stylesheet" type="text/css" href={{=URL('static','dist/switchery.css')}} media="screen"/>
 <script src="{{=URL('static','dist/switchery.js')}}"></script>
@@ -16,9 +16,20 @@ extend 'layout.html'
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 
+<link rel="stylesheet" type="text/css" href="{{=URL('static','image-picker/image-picker.css')}}">
+<script src="{{=URL('static', 'image-picker/image-picker.js')}}" type="text/javascript"></script>
+
 <title>Super Metroid VARIA Customizer</title>
 
 <style>
+.center_image {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+th {
+    border-bottom: 1px solid #ddd;
+}
 h1 {
   text-align: center;
   color: #444;
@@ -105,40 +116,10 @@ h1 {
 }
 
 .popover {
-    max-width: 20%;
-    position: fixed;
+    max-width: 30%;
 }
 .highslide-dimming {
     background: black;
-}
-#overlay {
-    position: fixed; /* Sit on top of the page content */
-    display: none; /* Hidden by default */
-    width: 100%; /* Full width (cover the whole page) */
-    height: 100%; /* Full height (cover the whole page) */
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0,0,0,0.5); /* Black background with opacity */
-    z-index: 2; /* Specify a stack order in case you're using a different order for other elements */
-    cursor: pointer; /* Add a pointer on hover */
-}
-#loadingGIF {
-    position: absolute;
-    left: 5%;
-    z-index: 3;
-    display:none;
-}
-@media (max-height: 800px) {
-    .loadingGIF {
-         top: 20%;
-    }
-}
-@media (min-height: 800px) {
-    .loadingGIF {
-         top: 40%;
-    }
 }
 .sixty {
     width: 65%
@@ -155,6 +136,13 @@ h1 {
     float: left;
     /* vertical-align: top; */
     margin-right: 0.5em;
+}
+.border {
+    border: 1px solid #cccccc;
+    padding-left: 1em;
+    padding-right: 1em;
+    margin-bottom: 0.5em;
+    margin-top: 0.5em;
 }
 </style>
 
@@ -180,8 +168,6 @@ var globalSwitchs = {};
 function ajaxFail(jqXHR, textStatus) {
   document.getElementById("flash").innerHTML = jqXHR.responseText;
   $('#flash').show();
-  $('#overlay').hide();
-  $('#loadingGIF').hide();
 }
 
 function ajaxFailJSON(jqXHR, textStatus) {
@@ -191,8 +177,19 @@ function ajaxFailJSON(jqXHR, textStatus) {
     document.getElementById("flash").innerHTML = jqXHR.responseJSON;
   }
   $('#flash').show();
-  $('#overlay').hide();
-  $('#loadingGIF').hide();
+}
+
+function unpack_3bytes(ips, i) {
+  var b1 = ips[i];
+  var b2 = ips[i+1];
+  var b3 = ips[i+2];
+  return (b1*65536) + (b2*256) + b3;
+}
+
+function unpack_2bytes(ips, i) {
+  var b1 = ips[i];
+  var b2 = ips[i+1];
+  return (b1*256) + b2;
 }
 
 function AjaxCallCompleted(data) {
@@ -209,8 +206,53 @@ function AjaxCallCompleted(data) {
     reader.onload = function(e) {
         var bytes = new Uint8Array(e.target.result);
 
+        // with custom sprites we have to create a bigger array
+        if("ips" in data) {
+          var tmp = new Uint8Array(0x400000);
+          tmp.set(bytes);
+          bytes = tmp;
+        }
+
+        if("ips" in data) {
+          var binary_string = atob(data["ips"]);
+          var len = binary_string.length;
+          var ips = new Uint8Array(len);
+          for(var i = 0; i < len; i++) {
+             ips[i] = binary_string.charCodeAt(i);
+          }
+
+          console.log("IPS size: "+ips.length);
+          var i = 5;
+          var offset = 0;
+          var size = 0;
+          var rle_size = 0;
+
+          while(i < ips.length - 3) {
+             offset = unpack_3bytes(ips, i);
+             i += 3;
+             size = unpack_2bytes(ips, i);
+             i += 2;
+
+             if(size == 0) {
+               // RLE
+               rle_size = unpack_2bytes(ips, i);
+               i += 2;
+               for(j=0; j<rle_size; j++) {
+                 bytes[offset+j] = ips[i];
+               }
+               i += 1;
+             } else {
+               for(j=0; j<size; j++) {
+                 bytes[offset+j] = ips[i+j];
+               }
+               i += j;
+             }
+          }
+        }
+
+        // do the ips first as the modified palettes are in the regular data
         for(var key in data) {
-            if(key === "fileName" || key === "errorMsg") { continue; }
+            if(key === "fileName" || key === "errorMsg" || key === "ips") { continue; }
             bytes[key] = data[key];
         }
 
@@ -235,8 +277,6 @@ function AjaxCallCompleted(data) {
     if(displayFlash == false){
         $('#flash').hide();
     }
-    $('#overlay').hide();
-    $('#loadingGIF').hide();
 }
 
 function doSubmit() {
@@ -260,7 +300,7 @@ function doSubmit() {
     }
 
     var dataDict = {};
-    var elems = ["itemsounds", "spinjumprestart", "rando_speed", "elevators_doors_speed", "animals", "No_Music", "colorsRandomization", "suitsPalettes", "beamsPalettes", "tilesPalettes", "enemiesPalettes", "bossesPalettes", "globalShift"];
+    var elems = ["itemsounds", "spinjumprestart", "rando_speed", "elevators_doors_speed", "animals", "No_Music", "colorsRandomization", "suitsPalettes", "beamsPalettes", "tilesPalettes", "enemiesPalettes", "bossesPalettes", "globalShift", "customSpriteEnable", "customSprite"];
 
     for(var i=0; i<elems.length; i++) {
        dataDict[elems[i]] = document.getElementById(elems[i]).value;
@@ -287,10 +327,6 @@ function doSubmit() {
 
     request.done(AjaxCallCompleted);
     request.fail(ajaxFail);
-
-    // while WS is working, display "working" message
-    $('#overlay').show();
-    $('#loadingGIF').show();
   }
 
   return false;
@@ -347,6 +383,9 @@ window.onload = function(){
     var colorRando = document.getElementById("colorsRandomization");
     colorRando.onchange = setColorRando;
 
+    var customSpriteEnable = document.getElementById("customSpriteEnable");
+    customSpriteEnable.onchange = enableCustomSpriteDropdown;
+
     initSlider();
 
 {{
@@ -358,6 +397,26 @@ if session.customizer["invert"] == "on":
 }}
 
     setColorRando();
+    enableCustomSpriteDropdown()
+
+    $("#customSprite").imagepicker();
+}
+
+function enableCustomSpriteDropdown() {
+    var customSpriteEnable = document.getElementById("customSpriteEnable");
+    var customSprite = document.getElementById("customSprite");
+    var text = document.getElementById("customSpriteEnableText");
+    if(customSpriteEnable.checked) {
+      console.log("checked, set disabled to false");
+      customSprite.disabled = false;
+      customSpriteEnable.value = "on";
+      text.className = "";
+    } else {
+      console.log("non checked, set disabled to true");
+      customSprite.disabled = true;
+      customSpriteEnable.value = "off";
+      text.className = "disabledText";
+    }
 }
 
 function setColorRando() {
@@ -523,7 +582,20 @@ function startTheTour(step=-1) {
     {
       element: "#colorsRandomizationStep",
       title: "Color randomization",
-      content: "<p>Randomize the colors of various graphical elements:<br/><img src=\"/solver/static/images/palettesRando.png\" alt=\"colors rando\" title=\"colors rando\" class=\"full\"/></p><br/><p>Use the slider to restrict the possible range of the colors shifting. The colors on the slider are the result colors for Samus, the yellow in the middle being Samus vanilla color:<br/><img src=\"/solver/static/images/samus_degrees.png\" alt=\"samus degrees\" title=\"samus degrees\" class=\"full\"/>You can invert the range by clicking on the invert button.</p><p>By default, the same shift is applied to all elements for color consistency. If you disable the setting, a different shift will be used for each category.</p>"
+      content: "<p>Randomize the colors of various graphical elements:<br/><img src=\"/solver/static/images/palettesRando.png\" alt=\"colors rando\" title=\"colors rando\" class=\"center_image half\"/></p><p>Use the slider to restrict the possible range of the colors shifting. The colors on the slider are the result colors for Samus, the yellow in the middle being Samus vanilla color:</p><img src=\"/solver/static/images/samus_degrees.png\" alt=\"samus degrees\" title=\"samus degrees\" class=\"center_image threequarter\"/><p>You can invert the range by clicking on the invert button.</p><p>By default, the same shift is applied to all elements for color consistency. If you disable the setting, a different shift will be used for each category.</p>"
+    },
+    {
+      element: "#customSpriteStep",
+      title: "Custom Sprites",
+      content: "<p>The sprites have been created using <a href=\"https://github.com/Artheau/SpriteSomething\">Sprite Something</a> by Artheau and MikeTrethewey.</p>\
+<table>\
+  <th>Sprite</th><th>Author</th><th>Description</th>\
+{{
+for (key, value) in sorted(customSprites.items(), key=lambda x: x[1]['index']):
+  response.write('  <tr><td>{}</td><td>{}</td><td>{}</td>\\\n'.format(value['name'], value['author'], value['desc']), escape=False)
+  pass
+response.write('</table>', escape=False)
+}}"
     },
     {
       element: "#patchesStep",
@@ -558,9 +630,6 @@ def displayCheckbox(id, defaultTrue=False):
     {{pass}}
   {{pass}}
 <body>
-  <div id="overlay"></div>
-  <div id="loadingGIF"><img src={{=URL('static/images','ajax-loader.gif')}}/></div>
-
   <div class="fixed">
     <div class="menu">
     <table class="full menuTable">
@@ -589,7 +658,7 @@ def displayCheckbox(id, defaultTrue=False):
       <div class="tabcontent">
         <div class="row">
 	  <div class="column">
-	    <p>Add palette randomization, apply patches to an already randomized VARIA seed, or a vanilla Super Metroid ROM.</p>
+	    <p>Add palette randomization, use custom Samus sprite, apply patches to an already randomized VARIA seed, or a vanilla Super Metroid ROM.</p>
             <table class="full">
               <colgroup><col class="half" /><col class="half" /></colgroup>
               <tr>
@@ -628,7 +697,34 @@ def displayCheckbox(id, defaultTrue=False):
 		  <td class="third"></td>
 		</tr>
 	      </table>
-	    <h4>Patches<span class="right"><button type="button" onclick="startTheTour(2)" id="patchesStep">?</button></span></h4>
+	    <h4>Custom Sprites</h4>
+	    <p>
+	      <table class="full">
+		<colgroup><col class="check" /><col class="full" /></colgroup>
+		<tr>
+	          <td>{{displayCheckbox("customSpriteEnable")}}</td>
+		  <td><span id="customSpriteEnableText">Replace Samus sprite with a custom one.</span></td>
+                  <td><button type="button" onclick="startTheTour(2)" id="customSpriteStep">?</button></td>
+		</tr>
+		<tr>
+		  <td></td>
+		  <td>
+		    <div class="border">
+		      <select class="filldropdown" id="customSprite" name="customSprite">
+{{
+  for (key, value) in sorted(customSprites.items(), key=lambda x: x[1]['index']):
+    response.write("<optgroup label=\"{}\">\n".format(value["name"]), escape=False)
+    response.write("  <option data-img-src=\"/solver/static/images/{}.png\" value=\"{}\" {}>{}</option>\n".format(key, key, 'selected="selected"' if key == session.customizer['customSprite'] else "", key), escape=False)
+    response.write("</optgroup>\n", escape=False)
+    pass
+}}
+		      </select>
+		    </div>
+		  <td>
+		</tr>
+	      </table>
+	    </p>
+	    <h4>Patches<span class="right"><button type="button" onclick="startTheTour(3)" id="patchesStep">?</button></span></h4>
 	    <p>
 	      Patches to customize your ROM.
 	    </p>

@@ -5,7 +5,7 @@ extend 'layout.html'
 <meta name="description" content="Solver for the randomized Super Metroid roms"/>
 <link rel="shortcut icon" href={{=URL('static','favicon.ico')}} type="image/ico"/>
 <script src="{{=URL('static','js/FileSaver.js')}}"></script>
-<link rel="stylesheet" type="text/css" href={{=URL('static','css/mystyle_20190320.css')}} media="screen"/>
+<link rel="stylesheet" type="text/css" href={{=URL('static','css/mystyle_20191017.css')}} media="screen"/>
 
 <link rel="stylesheet" type="text/css" href={{=URL('static','dist/switchery.css')}} media="screen"/>
 <script src="{{=URL('static','dist/switchery.js')}}"></script>
@@ -38,9 +38,22 @@ if (hs.registerOverlay) {
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 
+<script type="text/javascript" src="{{=URL('static', 'js/jquery.redirect.js')}}"></script>
+
 <title>Super Metroid VARIA Randomizer</title>
 
 <style>
+.customizerText {
+    width: 40%;
+    margin-left: 30%;
+    margin-right: 30%;
+    margin-top: 1em;
+    margin-bottom: 0em;
+    text-align: center;
+}
+#colorRandomization {
+    display: none
+}
 .rightStep {
     float: right;
     margin-right: 0.3em;
@@ -56,9 +69,6 @@ if (hs.registerOverlay) {
 }
 .popover {
     max-width: 40%;
-    /* max-height: 95vh;*/
-    /* overflow-y: scroll; */
-    position: fixed;
 }
 .highslide-dimming {
     background: black;
@@ -91,6 +101,18 @@ if (hs.registerOverlay) {
     .loadingGIF {
          top: 40%;
     }
+}
+.loadingTips {
+    position: fixed;
+    left: 50%;
+    bottom: 10%;
+    z-index: 99;
+    display:none;
+    border-radius: 2em;
+    background-color: #ffffff;
+    height: auto;
+    padding: 0.5%;
+    border: 2px solid #666666;
 }
 #psMultiselectDiv {
     display: none;
@@ -436,6 +458,7 @@ function ajaxFail(jqXHR, textStatus) {
   $('#flash').show();
   $('#overlay').hide();
   $('#loadingGIF').hide();
+  cancelTip();
 }
 
 function ajaxFailJSON(jqXHR, textStatus) {
@@ -448,6 +471,7 @@ function ajaxFailJSON(jqXHR, textStatus) {
   $('#flash').show();
   $('#overlay').hide();
   $('#loadingGIF').hide();
+  cancelTip();
 }
 
 function getProgSpeed() {
@@ -540,6 +564,7 @@ function AjaxRandomizerCallCompleted(data) {
     }
     $('#overlay').hide();
     $('#loadingGIF').hide();
+    cancelTip();
 }
 
 function doSubmit() {
@@ -580,9 +605,70 @@ function doSubmit() {
     // while WS is working, display "working" message
     $('#overlay').show();
     $('#loadingGIF').show();
+    loadTip();
   }
 
   return false;
+}
+
+function getRndInteger(max) {
+  return Math.floor(Math.random() * max );
+}
+
+var tips = [
+    "You can display the logic details for a skill preset by loading it on the Presets page",
+    "With VARIA tweaks on (default) you can activate Lower Norfair Chozo (left of entrance) without Space Jump",
+    "With VARIA tweaks on (default) you can access item at Wrecked Ship Etank location without killing Phantoon (via Forgotten Highway)",
+    "By default Gravity Suit environmental protection (heat, spikes, electricity...) is removed, it balances more the two suits abilities",
+    "Creating your own skills preset will lead to a better experience overall, as the generated ROMs will be tailored for you",
+    "The skills preset is used by the Randomizer, Solver, Tracker and Plandomizer to know which techniques are available to reach the item locations",
+    "Majors split Chozo: Put all the upgrades as well as minimal ammo/energy to finish the seed in the Chozo locations",
+    "Majors split Full: All items are shuffled in all locations",
+    "Majors split Majors/Minors: Use major (upgrades and energy) and minor (ammo) item pools",
+    "Majors split Majors/Minors: High-Jump boots Energy Tank location is considered minor, and right Super Missile in Wrecked ship is considered major for balancing purposes",
+    "Progression speed setting will have a big impact on seed difficulty. The slower the speed is, the harder the seed will be (usually)",
+    "VARIAble progression speed will randomly change internal progression speed while placing items, creating seeds that are more unpredictable",
+    "Progression difficulty setting will have a moderate impact on seed difficulty compared to progression speed",
+    "Late Morph is best suited when used along area randomization, to find Morph in peculiar places",
+    "The Tracker can be use in seedless mode, aka I use my tablet on my couch. Just click 'Init' without picking a seed file",
+    "If you're stuck while playing a seed, use the Solver or the Tracker to know where to go next",
+    "By default all seeds are MSU-1 compatible",
+    "Anti soft-lock layout modification are applied by default",
+    "You can use the tracker to track the connections between the areas and avoid getting too lost in area rando",
+    "With Boss randomization, the areas or rooms unlocked by the bosses stay unchanged. For example, you still have to kill Phantoon to activate Wrecked Ship.",
+    "The aim buttons can be assigned to any button",
+    "You can save your own button layout as well as moonwalk option in your skills preset to avoid doing the setup every seed"
+];
+
+var myTimer = null;
+var curLoadingTips = 0;
+
+function loadTip(first = true) {
+    if(first == true) {
+      curLoadingTips = 0;
+    } else {
+      // first fadeout the current one
+      var elem = "loadingTips" + curLoadingTips;
+      $("#"+elem).fadeOut(1000);
+      curLoadingTips = 1 - curLoadingTips;
+    }
+
+    var tip = tips[getRndInteger(tips.length)];
+    var elem = "loadingTips" + curLoadingTips;
+    document.getElementById(elem).innerHTML = tip;
+    document.getElementById(elem).style.marginLeft = "-" + tip.length/4 + "em";
+    $("#"+elem).fadeIn(1000);
+    myTimer = setTimeout(loadTip, 5000, false);
+}
+
+function cancelTip() {
+  if(myTimer != null) {
+    clearTimeout(myTimer);
+    myTimer = null;
+  }
+  $("#loadingTips"+curLoadingTips).fadeOut(3000);
+  curLoadingTips = 1 - curLoadingTips;
+  $("#loadingTips"+curLoadingTips).hide();
 }
 
 window.onload = function(){
@@ -968,7 +1054,7 @@ function startTheTour(step=-1) {
     {
       element: "#presetStep",
       title: "Skills Preset",
-      content: "<p>The preset is used by the Randomizer to know which techniques are available to reach the items locations.</p><p>You can check which techniques are required as well as create and manage your own preset on the <a href=\"/solver/solver_web/presets\">Presets part of the website</a>.</p><p>Load one of the standard presets (sorted in increased difficulty), or your own from the community presets.</p><p>Creating your own preset will lead to a better experience overall, as the generated ROMs will be tailored for you.</p>"
+      content: "<p>The preset is used by the Randomizer to know which techniques are available to reach the items locations.</p><p>You can check which techniques are required as well as create and manage your own preset on the <a href=\"/solver/solver_web/presets\">Presets part of the website</a>.</p><p>Load one of the standard presets (sorted in increased difficulty), tournament presets, or your own from the community presets.</p><p>Creating your own preset will lead to a better experience overall, as the generated ROMs will be tailored for you.</p>"
     },
     {
       element: "#randoPresetStep",
@@ -986,7 +1072,8 @@ function startTheTour(step=-1) {
 <li>where_is_morph: Area mode with late Morph</li></ul>\
 Tournament presets:<ul>\
 <li>Scavenger_Hunt: SM Scavenger Hunt Tournament</li>\
-<li>Season_Races: settings used for rando league races</li>\
+<li>Season_Races: settings used for rando league races (Majors/Minors split)</li>\
+<li>Season_Races_Chozo: settings used for rando league races (Chozo split)</li>\
 <li>smrat: Super Metroid Randomizer Accessible Tournament 2019</li></ul>"
     },
     {
@@ -1195,7 +1282,7 @@ Click on the dice button to randomly set this parameter.",
       element: "#patchesStep",
 //      element: "#noGravHeatStep",
       title: "No Gravity Suit Heat Protection",
-      content: "Remove the Gravity Suit <img src=\"/solver/static/images/Gravity.png\" alt=\"Gravity.png\" title=\"Gravity.png\" class=\"width: 32px\"/> environmental protection (heat, spikes, electricity...), it balances more the two suits abilities. Disable it to have a more vanilla feeling.",
+      content: "Remove the Gravity Suit <img src=\"/solver/static/images/Gravity.png\" alt=\"Gravity.png\" title=\"Gravity.png\" class=\"width: 32px\"/> environmental protection (heat, spikes, electricity...), it also double the Varia Suit <img src=\"/solver/static/images/Varia.png\" alt=\"Varia.png\" title=\"Varia.png\" class=\"width: 32px\"/> environmental protection, as such it balances more the two suits abilities. Disable it to have a more vanilla feeling.",
       placement: "auto left"
     },
     {
@@ -1226,6 +1313,10 @@ Click on the dice button to randomly set this parameter.",
     tour.goTo(step);
   }
   tour.start();
+}
+
+function DoPost(){
+    $.redirect("/presets", { action: "Load", currenttab: "Techniques1", preset: document.getElementById("preset").value }, "POST", "_blank");
 }
 </script>
 {{
@@ -1279,6 +1370,8 @@ def displayNumber(id, min, max, default, step="1"):
 <body>
   <div id="overlay"></div>
   <div id="loadingGIF"><img src={{=URL('static/images','ajax-loader.gif')}}/></div>
+  <div id="loadingTips0" class="loadingTips"></div>
+  <div id="loadingTips1" class="loadingTips"></div>
 
   <div class="fixed">
     <div class="menu">
@@ -1324,10 +1417,11 @@ def displayNumber(id, min, max, default, step="1"):
 	        <td id="seedStep"><button type="button" onclick="startTheTour(1)">?</button></td>
               </tr>
               <tr>
-		<td>Skills Preset:</td>
+		<td>Skills Preset: <span class="rightStep"><a href="javascript:DoPost()">What's in the logic for this skills preset ?</a><span></td>
 		<td>{{=SELECT(OPTGROUP(*stdPresets, **dict(_label="Standard presets")), OPTGROUP(*tourPresets, **dict(_label="Tournament presets")), OPTGROUP(*comPresets, **dict(_label="Community presets")), **dict(_name="preset", _id="preset", value=session.randomizer["preset"], _class="filldropdown chzn-select"))}}</td>
 		<td id="presetStep"><button type="button" onclick="startTheTour(2)">?</button></td>
               </tr>
+	      <tr>
 		<td>Settings Preset:</td>
 		<td>{{=SELECT(OPTGROUP(*randoPresets, **dict(_label="Standard presets")), OPTGROUP(*tourRandoPresets, **dict(_label="Tournament presets")), **dict(_name="randoPreset", _id="randoPreset", value=session.randomizer["randoPreset"], _class="filldropdown chzn-select", _onchange="loadRandoPreset()"))}}</td>
 		<td id="randoPresetStep"><button type="button" onclick="startTheTour(3)">?</button></td>
@@ -1460,6 +1554,7 @@ def displayNumber(id, min, max, default, step="1"):
                 <td><button type="button" onclick="startTheTour(18)">?</button></td>
 	      </tr>
             </table>
+	    <div id="colorRandomization">
             <h4>Colors Randomization</h4>
             <p>
 	      Randomize the colors of Samus, beams, levels, enemies and bosses.
@@ -1492,11 +1587,11 @@ def displayNumber(id, min, max, default, step="1"):
 		</tr>
 	      </table>
 	    </div>
+	    </div>
 	    <div id="superFunVisibility">
               <h4>Super Fun Times (TM)</h4>
               <p>
-                Have fun randomly removing major items!<br/>
-                <b>Warning:</b> For experienced players only.
+                Have fun randomly removing major items! <b>Warning:</b> For experienced players only.
               </p>
 	      <table class="full">
                 <tr>
@@ -1547,6 +1642,9 @@ for patch in patches:
 	    </div>
 	  </div>
         </div>
+	<p class="customizerText">
+	  <a href="/customizer" target="_blank">You can randomize in-game colors and use a custom Samus sprite on the Customizer page</a>.
+	</p>
         {{=INPUT(_type="submit", _value="Randomize", _id="submitBtn", _class="btn btn-default buttonRandom")}}
     </form>
   </div>

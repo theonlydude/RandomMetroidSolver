@@ -1,4 +1,5 @@
 from smbool import SMBool
+import os
 import sys
 
 # the different difficulties available
@@ -41,6 +42,8 @@ text2diff = {
     'impossibru': impossibru,
     'infinity': infinity
 }
+
+appDir = os.path.expanduser(os.path.join("~/RandomMetroidSolver"))
 
 def isKnows(knows):
     return knows[0:len('__')] != '__' and knows[0] == knows[0].upper()
@@ -140,12 +143,6 @@ class Knows:
                                         'Sponge Bath',
                                         'Mama Turtle Room',
                                         'The Precious Room']}
-
-    DoubleSpringBallJump = SMBool(False, 0, ['DoubleSpringBallJump'])
-    desc['DoubleSpringBallJump'] = {'display': 'Double SpringBall-Jump',
-                                    'title': 'With Hi-Jump boots do two SpringBall-Jumps in a row',
-                                    'href': 'https://youtu.be/KohE3e8sGLQ',
-                                    'rooms': ['Mt. Everest', "Draygon's Room", 'The Precious Room']}
 
     SpringBallJumpFromWall = SMBool(True, harder, ['SpringBallJumpFromWall'])
     desc['SpringBallJumpFromWall'] = {'display': 'SpringBall-Jump from wall',
@@ -266,9 +263,15 @@ class Knows:
 
     XrayDboost = SMBool(False, 0, ['XrayDboost'])
     desc['XrayDboost'] = {'display': 'X-Ray Damage Boost',
-                          'title': 'Get to X-Ray location without Space-Jump, Grapple (no energy requirements), Ice or Bombs (see Hard Room settings)',
+                          'title': 'Get to X-Ray location without Space-Jump, Grapple (no energy requirements), Ice+Hi-Jump or Bombs (see Hard Room settings)',
                           'href': 'https://www.twitch.tv/videos/168724062',
                           'rooms': ['Red Brinstar Fireflea Room']}
+
+    XrayIce = SMBool(True, hard, ['XrayIce'])
+    desc['XrayIce'] = {'display': 'X-Ray Ice Climb',
+                       'title': 'Get to X-Ray location with Ice beam and no Hi-Jump (see Hard Room settings for energy requirements)',
+                       'href': 'https://www.youtube.com/watch?v=j36noNULtI8',
+                       'rooms': ['Red Brinstar Fireflea Room']}
 
     RedTowerClimb = SMBool(True, harder, ['RedTowerClimb'])
     desc['RedTowerClimb'] = {'display': 'Red Tower Climb',
@@ -433,9 +436,21 @@ class Knows:
     # Suitless
     TediousMountEverest = SMBool(False, 0, ['TediousMountEverest'])
     desc['TediousMountEverest'] = {'display': 'Mt. Everest without anything',
-                                    'title': 'Make your way through Mt. Everest with nothing but Ice (and Hi-Jump when suitless)',
+                                    'title': 'Make your way through Mt. Everest with nothing but Ice and Hi-Jump',
                                     'href': 'https://www.youtube.com/watch?v=chFbX9rRV_k&t=123s',
                                     'rooms': ['Mt. Everest']}
+
+    DoubleSpringBallJump = SMBool(False, 0, ['DoubleSpringBallJump'])
+    desc['DoubleSpringBallJump'] = {'display': 'Double SpringBall-Jump',
+                                    'title': 'With Hi-Jump boots do two SpringBall-Jumps in a row',
+                                    'href': 'https://youtu.be/KohE3e8sGLQ',
+                                    'rooms': ['Mt. Everest', "Draygon's Room"]}
+
+    BotwoonToDraygonWithIce = SMBool(False, 0, ['BotwoonToDraygonWithIce'])
+    desc['BotwoonToDraygonWithIce'] = {'display': 'Botwoon to Draygon with Ice',
+                                        'title': 'When past Botwoon, access Draygon using Hi-Jump and Ice only',
+                                        'href': 'https://www.twitch.tv/videos/480882188',
+                                        'rooms': ['Halfie Climb Room', 'Colosseum']}
 
     # Suitless Draygon
     DraygonRoomGrappleExit = SMBool(False, 0, ['DraygonRoomGrappleExit'])
@@ -525,6 +540,12 @@ class Knows:
                                              'href': 'https://youtu.be/I-f5X5cNypA',
                                              'rooms': ['Pants Room']}
 
+    AccessSpringBallWithGravJump = SMBool(False, 0, ['AccessSpringBallWithGravJump'])
+    desc['AccessSpringBallWithGravJump'] = {'display': 'Access Spring Ball location with a Gravity jump',
+                                             'title': 'Do a tricky gravity jump from the sand and get through the grapple hole',
+                                             'href': 'https://www.twitch.tv/videos/480378897',
+                                             'rooms': ['Pants Room']}
+
     categories = {
         'Common': [
             {'knows': ['WallJump', 'ShineSpark', 'MidAirMorph', 'CrouchJump'],
@@ -535,12 +556,12 @@ class Knows:
              'title': 'Used across the game'}
         ],
         'Crateria/Brinstar': [
-            {'knows': ['AlcatrazEscape', 'HiJumpGauntletAccess', 'HiJumpLessGauntletAccess', 'LowGauntlet'],
+            {'knows': ['AlcatrazEscape', 'HiJumpGauntletAccess', 'HiJumpLessGauntletAccess', 'LowGauntlet', 'OldMBWithSpeed'],
              'title': 'Crateria'},
             {'knows': ['CeilingDBoost', 'EarlyKraid',
                        'ReverseGateGlitch', 'ReverseGateGlitchHiJumpLess', 
-                       'RedTowerClimb', 'XrayDboost',
-                       'RonPopeilScrew', 'OldMBWithSpeed', 'Moondance'],
+                       'RedTowerClimb', 'XrayDboost', 'XrayIce',
+                       'RonPopeilScrew', 'Moondance'],
              'title': 'Brinstar'}
         ],
         'Wrecked Ship': [
@@ -561,11 +582,12 @@ class Knows:
         ],
         'Maridia 2/2': [
             {'knows': ['AccessSpringBallWithSpringBallBombJumps', 'AccessSpringBallWithBombJumps',
-                       'AccessSpringBallWithSpringBallJump', 'AccessSpringBallWithXRayClimb'],
+                       'AccessSpringBallWithSpringBallJump', 'AccessSpringBallWithXRayClimb',
+                       'AccessSpringBallWithGravJump'],
              'title': 'Spring Ball Access'},
             {'knows': ['DraygonRoomGrappleExit', 'DraygonRoomCrystalFlash', 'PreciousRoomXRayExit'],
              'title': 'Suitless Draygon Exit'},
-            {'knows': ['DoubleSpringBallJump', 'TediousMountEverest', 'SuitlessPuyoClip'],
+            {'knows': ['DoubleSpringBallJump', 'TediousMountEverest', 'BotwoonToDraygonWithIce', 'SuitlessPuyoClip'],
              'title': 'Obscure suitless stuff'}
         ],
         'Norfair': [
@@ -875,6 +897,28 @@ class Settings:
         # rest of upper norfair
         'MainUpperNorfair' : hellRunPresets['MainUpperNorfair']['Default'],
         'LowerNorfair' : hellRunPresets['LowerNorfair']['Default']
+    }
+
+    # centralize all the hellruns coeffs
+    hellRunsTable = {
+        'Ice': {
+            'Norfair Entrance -> Ice Beam': {'mult': 1.0, 'minE': 2, 'hellRun': 'Ice'},
+            'Norfair Entrance -> Croc via Ice': {'mult': 1.5, 'minE': 2, 'hellRun': 'Ice'}
+        },
+        'MainUpperNorfair': {
+            'Norfair Entrance -> Bubble': {'mult': 1.0, 'minE': 2, 'hellRun': 'MainUpperNorfair'},
+            'Bubble -> Norfair Entrance': {'mult': 0.75, 'minE': 2, 'hellRun': 'MainUpperNorfair'},
+            'Norfair Entrance -> Cathedral Missiles': {'mult': 0.66, 'minE': 2, 'hellRun': 'MainUpperNorfair'},
+            'Bubble -> Cathedral Missiles': {'mult': 0.66, 'minE': 2, 'hellRun': 'MainUpperNorfair'},
+            'Norfair Entrance -> Croc via Frog': {'mult': 2.0, 'minE': 1, 'hellRun': 'MainUpperNorfair'},
+            'Norfair Entrance -> Croc via Frog w/Wave': {'mult': 4.0, 'minE': 1, 'hellRun': 'MainUpperNorfair'},
+            'Bubble -> Norfair Reserve Missiles': {'mult': 2.5, 'minE': 1, 'hellRun': 'MainUpperNorfair'},
+            'Bubble -> Norfair Reserve': {'mult': 1.0, 'minE': 2, 'hellRun': 'MainUpperNorfair'},
+            'Bubble -> Speed Booster': {'mult': 1.0, 'minE': 3, 'hellRun': 'MainUpperNorfair'},
+            'Bubble -> Speed Booster w/Speed': {'mult': 2.0, 'minE': 2, 'hellRun': 'MainUpperNorfair'},
+            'Bubble -> Wave': {'mult': 0.75, 'minE': 2, 'hellRun': 'MainUpperNorfair'},
+            'Croc -> Grapple Escape Missiles': {'mult': 1.0, 'minE': 2, 'hellRun': 'MainUpperNorfair'}
+        }
     }
 
     hardRoomsPresets = {

@@ -273,9 +273,12 @@ class HelpersGraph(Helpers):
             return SMBool(True, 0, items=['Super'])
 
         # - or with taking damage as well?
-        dmgKi = 200.0 / sm.getDmgReduction(False)
+        (dmgRed, item) = sm.getDmgReduction(envDmg=False)
+        dmgKi = 200.0 / dmgRed
         if (sm.itemCount('Super')*5*sup)/ki + (sm.energyReserveCount()*100 - 2)/dmgKi >= nbKi:
-            return sm.wand(sm.heatProof(), SMBool(True, 0, items=['Super', 'ETank'])) # require heat proof as long as taking damage is necessary
+            # require heat proof as long as taking damage is necessary.
+            # display all the available energy in the solver.
+            return sm.wand(sm.heatProof(), SMBool(True, 0, items=['Super', '{}-ETank - {}-Reserve'.format(self.smbm.itemCount('ETank'), self.smbm.itemCount('Reserve'))]))
 
         return SMBool(False, 0)
 
@@ -324,13 +327,14 @@ class HelpersGraph(Helpers):
     def canPassMtEverest(self):
         sm = self.smbm
         return  sm.wor(sm.wand(sm.haveItem('Gravity'),
-                               sm.wor(sm.wor(sm.haveItem('Grapple'),
-                                             sm.haveItem('SpeedBooster')),
-                                      sm.wor(sm.canFly(),
-                                             sm.knowsGravityJump(),
-                                             sm.wand(sm.haveItem('Ice'), sm.knowsTediousMountEverest())))),
-                       sm.canDoSuitlessMaridia(),
-                       sm.wand(sm.haveItem('Ice'), sm.canDoSuitlessOuterMaridia(), sm.knowsTediousMountEverest()))
+                               sm.wor(sm.haveItem('Grapple'),
+                                      sm.haveItem('SpeedBooster'),
+                                      sm.canFly(),
+                                      sm.knowsGravityJump())),
+                       sm.wand(sm.canDoSuitlessOuterMaridia(),
+                               sm.wor(sm.haveItem('Grapple'),
+                                      sm.wand(sm.haveItem('Ice'), sm.knowsTediousMountEverest(), sm.haveItem('Super')),
+                                      sm.canDoubleSpringBallJump())))
 
     @Cache.decorator
     def canDoSuitlessOuterMaridia(self):
@@ -339,13 +343,6 @@ class HelpersGraph(Helpers):
                        sm.haveItem('HiJump'),
                        sm.wor(sm.haveItem('Ice'),
                               sm.canSpringBallJump()))
-
-    @Cache.decorator
-    def canDoSuitlessMaridia(self):
-        sm = self.smbm
-        return sm.wand(sm.canDoSuitlessOuterMaridia(),
-                       sm.wor(sm.haveItem('Grapple'),
-                              sm.canDoubleSpringBallJump()))
 
     @Cache.decorator
     def canAccessBotwoonFromMainStreet(self):
@@ -368,11 +365,19 @@ class HelpersGraph(Helpers):
                               sm.wand(sm.knowsMochtroidClip(), sm.haveItem('Ice'))))
 
     @Cache.decorator
+    def canBotwoonExitToAndFromDraygon(self):
+        sm = self.smbm
+        return sm.wor(sm.haveItem('Gravity'),
+                      sm.wand(sm.knowsGravLessLevel2(),
+                              sm.wor(sm.haveItem('Grapple'),
+                                     sm.haveItem('SpaceJump'),
+                                     sm.wand(sm.haveItem('Ice'), sm.knowsBotwoonToDraygonWithIce()))))
+
+    @Cache.decorator
     def canAccessDraygonFromMainStreet(self):
         sm = self.smbm
         return sm.wand(sm.canDefeatBotwoon(),
-                       sm.wor(sm.haveItem('Gravity'),
-                              sm.wand(sm.canDoSuitlessMaridia(), sm.knowsGravLessLevel2())))
+                       sm.canBotwoonExitToAndFromDraygon())
 
     def isVanillaDraygon(self):
         if self.vanillaDraygon is None:
@@ -467,3 +472,12 @@ class HelpersGraph(Helpers):
             return self.canExitPreciousRoomVanilla()
         else:
             return self.canExitPreciousRoomRandomized()
+
+    @Cache.decorator
+    def canPassCacatacAlley(self):
+        sm = self.smbm
+        return sm.wand(Bosses.bossDead('Draygon'),
+                       sm.wor(sm.haveItem('Gravity'),
+                              sm.wand(sm.knowsGravLessLevel2(),
+                                      sm.haveItem('HiJump'),
+                                      sm.haveItem('SpaceJump'))))

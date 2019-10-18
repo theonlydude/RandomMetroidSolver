@@ -31,6 +31,29 @@ def restricted_float(x):
         raise argparse.ArgumentTypeError("%r not in range [1.0, 9.0]"%(x,))
     return x
 
+def loadPlandoPatches(patches):
+    # check total base (blue bt and red tower blue door)
+    if "startCeres" in patches or "startLS" in patches:
+        RomPatches.ActivePatches += [RomPatches.BlueBrinstarBlueDoor,
+                                     RomPatches.RedTowerBlueDoors]
+    # check total soft lock protection
+    if "layout" in patches:
+        RomPatches.ActivePatches += RomPatches.TotalLayout
+    # check gravity heat protection
+    if "gravityNoHeatProtection" in patches:
+        RomPatches.ActivePatches.append(RomPatches.NoGravityEnvProtection)
+    # check varia tweaks
+    if "variaTweaks" in patches:
+        RomPatches.ActivePatches += RomPatches.VariaTweaks
+    # check area
+    if "area" in patches:
+        RomPatches.ActivePatches += [RomPatches.SingleChamberNoCrumble,
+                                     RomPatches.AreaRandoGatesBase,
+                                     RomPatches.AreaRandoBlueDoors]
+    # check area layout
+    if "areaLayout" in patches:
+        RomPatches.ActivePatches.append(RomPatches.AreaRandoGatesOther)
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Random Metroid Randomizer")
     parser.add_argument('--patchOnly',
@@ -176,6 +199,9 @@ if __name__ == "__main__":
     parser.add_argument('--invert', help="invert color range", dest='invert', action='store_true', default=False)
     parser.add_argument('--ext_stats', help="dump extended stats SQL", nargs='?', default=None, dest='extStatsFilename')
     parser.add_argument('--randoPreset', help="rando preset file", dest="randoPreset", nargs='?', default=None)
+    parser.add_argument('--plandoRando', help="json string with already placed items/locs", dest="plandoRando",
+                        nargs='?', default=None)
+    parser.add_argument('--sprite', help='use a custom sprite for Samus', dest='sprite', default=None)
 
     # parse args
     args = parser.parse_args()
@@ -185,6 +211,10 @@ if __name__ == "__main__":
         sys.exit(-1)
     elif args.output is not None and args.rom is not None:
         print "Can't have both --output and --rom parameters"
+        sys.exit(-1)
+
+    if args.plandoRando != None and args.output == None:
+        print "plandoRando param requires output param"
         sys.exit(-1)
 
     log.init(args.debug)
@@ -389,7 +419,11 @@ if __name__ == "__main__":
             else:
                 raise ValueError("Invalid button name : " + str(b))
 
-    randoSettings = RandoSettings(maxDifficulty, progSpeed, progDiff, qty, restrictions, args.superFun, args.runtimeLimit_s, args.vcr)
+    if args.plandoRando != None:
+        args.plandoRando = json.loads(args.plandoRando)
+        loadPlandoPatches(args.plandoRando["patches"])
+
+    randoSettings = RandoSettings(maxDifficulty, progSpeed, progDiff, qty, restrictions, args.superFun, args.runtimeLimit_s, args.vcr, args.plandoRando["locsItems"] if args.plandoRando != None else None)
     bossTransitions = vanillaBossesTransitions
     if args.bosses == True:
         bossTransitions = getRandomBossTransitions()
@@ -410,9 +444,18 @@ if __name__ == "__main__":
             sys.exit(-1)
     else:
         try:
-            randomizer = Randomizer(graphLocations, randoSettings, seedName, vanillaTransitions + bossTransitions)
+            if args.plandoRando != None:
+                transitions = args.plandoRando["transitions"]
+            else:
+                transitions = vanillaTransitions + bossTransitions
+            randomizer = Randomizer(graphLocations, randoSettings, seedName, transitions)
         except RuntimeError:
             msg = "Locations unreachable detected with preset/super fun/max diff. Retry, and change the Super Fun settings and/or Maximum difficulty if the problem happens again."
+            dumpErrorMsg(args.output, msg)
+            print("DIAG: {}".format(msg))
+            sys.exit(-1)
+        except Exception as e:
+            msg = e.message
             dumpErrorMsg(args.output, msg)
             print("DIAG: {}".format(msg))
             sys.exit(-1)
@@ -454,13 +497,18 @@ if __name__ == "__main__":
         for loc in locsItems:
             print('{:>50}: {:>16} '.format(loc, locsItems[loc]))
 
+    if args.plandoRando != None:
+        with open(args.output, 'w') as jsonFile:
+            json.dump({"itemLocs": itemLocs, "errorMsg": randomizer.errorMsg}, jsonFile, default=lambda x: x.__dict__)
+        sys.exit(0)
+
     # insert extended stats into database
     if isStdPreset(preset) and args.raceMagic == None:
         parameters = {'preset': preset, 'area': args.area, 'boss': args.bosses, 'majorsSplit': args.majorsSplit,
                       'progSpeed': progSpeed, 'morphPlacement': args.morphPlacement,
                       'suitsRestriction': args.suitsRestriction, 'progDiff': progDiff,
                       'superFunMovement': 'Movement' in args.superFun, 'superFunCombat': 'Combat' in args.superFun,
-                      'superFunSuit': 'Suit' in args.superFun}
+                      'superFunSuit': 'Suits' in args.superFun}
         if args.extStatsFilename == None:
             DB = db.DB()
             DB.addExtStat(parameters, locsItems)
@@ -488,7 +536,9 @@ if __name__ == "__main__":
             romPatcher.applyIPSPatches(args.patches, args.noLayout, args.noGravHeat, args.area, args.bosses, args.areaLayoutBase, args.noVariaTweaks)
         else:
             romPatcher.addIPSPatches(args.patches)
-
+        if args.sprite is not None:
+            romPatcher.customSprite(args.sprite) # adds another IPS
+        romPatcher.commitIPS() # actually write IPS data
         if args.patchOnly == False:
             romPatcher.writeSeed(seed) # lol if race mode
             romPatcher.writeSpoiler(itemLocs, progItemLocs)
@@ -526,7 +576,7 @@ if __name__ == "__main__":
             }
             for param in paletteSettings:
                 paletteSettings[param] = getattr(args, param)
-            PaletteRando(romPatcher, paletteSettings).randomize()
+            PaletteRando(romPatcher, paletteSettings, args.sprite).randomize()
         romPatcher.end()
 
         if args.rom is None:

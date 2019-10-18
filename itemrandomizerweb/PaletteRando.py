@@ -1,6 +1,7 @@
 import struct, colorsys, random
 from rom import RomLoader
 from itemrandomizerweb.palettes import palettes
+from itemrandomizerweb.sprite_palettes import sprite_palettes
 import log
 
 #Palette Hue Shift
@@ -100,10 +101,12 @@ import log
 
 
 class PaletteRando(object):
-    def __init__(self, romPatcher, settings):
+    def __init__(self, romPatcher, settings, sprite):
         self.logger = log.get('Palette')
 
         self.romPatcher = romPatcher
+        if sprite is not None:
+            palettes.update(sprite_palettes[sprite])
         self.romLoader = RomLoader.factory(palettes)
         self.palettesROM = self.romLoader.getROM()
         self.outFile = romPatcher.romFile
@@ -294,6 +297,14 @@ class PaletteRando(object):
 
         #Change offsets to work with SM practice rom, this was just used for easier feature debugging, changes where new palettes are inserted.
         self.practice_rom = False
+
+        # base address to relocate the compressed palettes
+        if self.practice_rom == True:
+            # practice rom free space 0x2F51C0 -> 0x2F7FFF
+            self.base_address = 0x2F51C0
+        else:
+            # after the custom credits
+            self.base_address = 0x2fe0b0
 
         self.power_palette_offsets = [0x0D9400,0x0D9820,0x0D9840,0x0D9860,0x0D9880,0x0D98A0,0x0D98C0,0x0D98E0,0x0D9900,0x0D9B20,0x0D9B40,0x0D9B60,0x0D9B80,0x0D9BA0,0x0D9BC0,0x0D9BE0,0x0D9C00,0x0D9C20,0x0D9C40,0x0D9C60,0x0D9C80,0x0D9CA0,0x0D9CC0,0x0D9CE0,0x0D9D00,0x6DB6B, 0x6DBBA, 0x6DC09, 0x6DC58, 0x6DCA4,0x6E466, 0x6E488, 0x6E4AA, 0x6E4CC, 0x6E4EE, 0x6E510, 0x6E532, 0x6E554, 0x6E576, 0x6E598, 0x6E5BA, 0x6E5DC, 0x6E5FE, 0x6E620, 0x6E642, 0x6E664,0x6DB8F,0x6DC2D,0x6DC7C,0x6DBDE]
         self.varia_palette_offsets = [0x0D9520,0x0D9920,0x0D9940,0x0D9960,0x0D9980,0x0D99A0,0x0D99C0,0x0D99E0,0x0D9A00,0x0D9D20,0x0D9D40,0x0D9D60,0x0D9D80,0x0D9DA0,0x0D9DC0,0x0D9DE0,0x0D9E00,0x0D9E20,0x0D9E40,0x0D9E60,0x0D9E80,0x0D9EA0,0x0D9EC0,0x0D9EE0,0x0D9F00,0x6DCD1, 0x6DD20, 0x6DD6F, 0x6DDBE, 0x6DE0A,0x6E692, 0x6E6B4, 0x6E6D6, 0x6E6F8, 0x6E71A, 0x6E73C, 0x6E75E, 0x6E780, 0x6E7A2, 0x6E7C4, 0x6E7E6, 0x6E808, 0x6E82A, 0x6E84C, 0x6E86E, 0x6E890,0x6DCF5,0x6DD44,0x6DD93,0x6DDE2]
@@ -555,12 +566,7 @@ class PaletteRando(object):
 
                     self.logger.debug("write decomp palette index: {} value: {}".format(hex(subset+(j*2)), BE_hex_color))
 
-            #practice rom free space 0x2F51C0 -> 0x2F7FFF
-            if self.practice_rom:
-                insert_address= 0x2F51C0 + (count*0x100)
-            else:
-                insert_address= 0x2FE050 + (count*0x100)
-
+            insert_address = self.base_address + (count*0x100)
             self.pointers_to_insert.append(insert_address)
             self.logger.debug("pointers_to_insert: {}".format(self.pointers_to_insert))
 
@@ -675,26 +681,17 @@ class PaletteRando(object):
             insert_address = address
                         
             if address == 0x213BC1 and not self.settings["shift_tileset_palette"]:
-                    if self.practice_rom:
-                        insert_address= 0x2F51C0 + (0*0x100)
-                    else:
-                        insert_address= 0x2FE050 + (0*0x100)
-                    self.compress(insert_address, data)
-                    self.write_pointer(self.pointer_addresses[14], self.pc_to_snes(insert_address))
+                insert_address= self.base_address + (0*0x100)
+                self.compress(insert_address, data)
+                self.write_pointer(self.pointer_addresses[14], self.pc_to_snes(insert_address))
             elif address == 0x213510 and not self.settings["shift_tileset_palette"]:
-                    if self.practice_rom:
-                        insert_address= 0x2F51C0 + (1*0x100)
-                    else:
-                        insert_address= 0x2FE050 + (1*0x100)
-                    self.compress(insert_address, data)
-                    self.write_pointer(self.pointer_addresses[22], self.pc_to_snes(insert_address))
+                insert_address = self.base_address + (1*0x100)
+                self.compress(insert_address, data)
+                self.write_pointer(self.pointer_addresses[22], self.pc_to_snes(insert_address))
             elif address == 0x213A2C and not self.settings["shift_tileset_palette"]:
-                    if self.practice_rom:
-                        insert_address= 0x2F51C0 + (2*0x100)
-                    else:
-                        insert_address= 0x2FE050 + (2*0x100)
-                    self.compress(insert_address, data)
-                    self.write_pointer(self.pointer_addresses[24], self.pc_to_snes(insert_address))
+                insert_address = self.base_address + (2*0x100)
+                self.compress(insert_address, data)
+                self.write_pointer(self.pointer_addresses[24], self.pc_to_snes(insert_address))
             else:        
                 #Recompress palette and re-insert at offset
                 self.compress(insert_address, data)

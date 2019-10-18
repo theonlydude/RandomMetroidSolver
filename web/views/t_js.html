@@ -174,6 +174,8 @@ function ajaxFailJSON(jqXHR, textStatus) {
   setWSIcon("warning");
   document.getElementById("flash").innerHTML = jqXHR.responseText;
   $('#flash').show();
+  $('#overlay').hide();
+  $('#loadingGIF').hide();
 }
 
 function ajaxCall(dataDict, msg, okFunc=ajaxOkGet) {
@@ -248,11 +250,19 @@ function ajaxOkGet(jsonData, status, dummy, chained=false) {
     webServInProgress = false;
   }
 
+  $('#overlay').hide();
+  $('#loadingGIF').hide();
+
   // get dicts availableLocations and visitedLocations
   console.log("json received: [ "+jsonData+" ]");
   if(jsonData == "OK") {
     setWSIcon("checkmark");
     return;
+  }
+
+  if(jsonData["errorMsg"] != "") {
+    document.getElementById("flash").innerHTML = jsonData["errorMsg"];
+    $('#flash').show();
   }
 
   mode = jsonData["mode"];
@@ -325,6 +335,17 @@ function ajaxOkGet(jsonData, status, dummy, chained=false) {
       // add item
       addItem(locData["item"]);
     }
+
+    if(mode == "plando") {
+      var elem = "repeatPlandoImg";
+    } else {
+      var elem = "repeatItemImg";
+    }
+    var tooltip = "Remove last placed item";
+    if(Object.keys(jsonData["visitedLocations"]).length > 0) {
+      var tooltip = tooltip + ": "+jsonData["last"]["item"]+" at "+jsonData["last"]["loc"];
+    }
+    $("#"+elem+'[data-toggle="tooltip"]').attr("title", tooltip).tooltip('fixTitle');
   }
 
   setItemCount("Missile");
@@ -643,7 +664,9 @@ window.onload = function(){
             romData[addresses[i]+1] = bytes[addresses[i]+1];
             romData[addresses[i]+6] = bytes[addresses[i]+6];
             romData[addresses[i]+7] = bytes[addresses[i]+7];
-        }
+            romData[addresses[i]+10] = bytes[addresses[i]+10];
+	    romData[addresses[i]+11] = bytes[addresses[i]+11];
+	}
   
         // bank B8
         for(var i=0x1C0000; i<=0x1C7FFF; i++){
@@ -781,6 +804,7 @@ function displayPopup(isPlando) {
     document.getElementById("solverPopupText").innerHTML = "Select an already randomized ROM as base to start your Plando<br/>or a Plando ROM to continue working on it";
   } else {
     document.getElementById("solverPopupText").innerHTML = "Select your randomized ROM to solve<br/>or none for seed less mode";
+    document.getElementById("fillPlandoVisibility").style.display = "none";
   }
 
   // display popup
@@ -822,12 +846,16 @@ function initSolver() {
   resetLocsInfo();
 
   // prepare parameters for WS
-  ajaxCall({action: "init", scope: "common", romJson: romJsonValue,
+  ajaxCall({action: "init",
+            scope: "common",
+            romJson: romJsonValue,
             preset: document.getElementById("preset").value,
             fileName: document.getElementById("fileName").value,
+            fill: document.getElementById("fillPlando").checked,
             mode: mode}, "download");
 
   hidePopup();
+  $('#hideRandoOverlay').hide();
 }
 
 function clickLoc(elem) {
@@ -862,6 +890,7 @@ function clickLoc(elem) {
 
     // display item selector
     document.getElementById("itemPopup").style.display = "block";
+    $("#item").imagepicker();
     document.getElementById("placeItemButton").focus();
   } else {
     // check that lock is in the available list

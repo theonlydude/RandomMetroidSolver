@@ -214,7 +214,8 @@ locations = [
                                            sm.haveItem('SpaceJump'),
                                            sm.wand(sm.energyReserveCountOkHardRoom('X-Ray'),
                                                    sm.wor(sm.knowsXrayDboost(),
-                                                          sm.haveItem('Ice'),
+                                                          sm.wand(sm.haveItem('Ice'),
+                                                                  sm.wor(sm.haveItem('HiJump'), sm.knowsXrayIce())),
                                                           sm.canInfiniteBombJump(),
                                                           sm.wand(sm.haveItem('HiJump'),
                                                                   sm.wor(sm.haveItem('SpeedBooster'),
@@ -326,7 +327,7 @@ locations = [
     'Available': lambda sm: sm.wand(sm.enoughStuffCroc(),
                                     sm.wor(sm.haveItem('Grapple'),
                                            sm.haveItem('SpaceJump'),
-                                           sm.energyReserveCountOk(3/sm.getDmgReduction())))
+                                           sm.energyReserveCountOk(3/sm.getDmgReduction()[0])))
 },
 {
     'Area': "Norfair",
@@ -698,14 +699,15 @@ locations = [
                                                           sm.knowsSuitlessPuyoClip())),
                                            sm.wand(sm.haveItem('Grapple'), # go through grapple block
                                                    sm.haveItem('Gravity'),
-                                                   sm.wor(sm.canFlyDiagonally(),
-                                                          sm.haveItem('HiJump'),
+                                                   sm.wor(sm.wor(sm.haveItem('HiJump'), sm.haveItem('SpaceJump')),
+                                                          sm.knowsAccessSpringBallWithGravJump(),
                                                           sm.wand(sm.haveItem('Bomb'),
                                                                   sm.wor(sm.knowsAccessSpringBallWithBombJumps(),
                                                                          sm.wand(sm.haveItem('SpringBall'),
                                                                                  sm.knowsAccessSpringBallWithSpringBallBombJumps()))),
                                                           sm.wand(sm.haveItem('SpringBall'), sm.knowsAccessSpringBallWithSpringBallJump()))),
-                                           sm.wand(sm.haveItem('XRayScope'), sm.knowsAccessSpringBallWithXRayClimb()))), # XRay climb
+                                           sm.wand(sm.haveItem('XRayScope'), sm.knowsAccessSpringBallWithXRayClimb())), # XRay climb
+                                    sm.wor(sm.haveItem('Gravity'), sm.canUseSpringBall())), # acess the item in spring ball room
     'PostAvailable': lambda sm: sm.wor(sm.haveItem('Gravity'),
                                        sm.canSpringBallJump())
 },
@@ -1458,8 +1460,7 @@ locations = [
                                                                  sm.canUsePowerBombs()))),
                                            sm.wand(sm.haveItem('Super'), # from grapple room
                                                    sm.knowsGreenGateGlitch(),
-                                                   sm.wor(sm.canFly(),
-                                                          sm.haveItem('Grapple'))))), # TODO::test if accessible with a spark, and how many etanks required
+                                                   sm.canFly()))), # TODO::test if accessible with a spark (short charge), and how many etanks required
     'PostAvailable': lambda sm: sm.wor(sm.haveItem('Morph'), # normal exit
                                        sm.wand(sm.canOpenGreenDoors(), # go back to grapple room
                                                sm.wor(sm.haveItem('SpaceJump'), 

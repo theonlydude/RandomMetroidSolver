@@ -82,6 +82,12 @@ class SolverState(object):
         (self.state["linesWeb"], self.state["linesSeqWeb"]) = self.getLinesWeb(solver.curGraphTransitions)
         # bool
         self.state["allTransitions"] = len(solver.curGraphTransitions) == len(solver.areaTransitions) + len(solver.bossTransitions)
+        self.state["errorMsg"] = solver.errorMsg
+        if len(solver.visitedLocations) > 0:
+            self.state["last"] = {"loc": solver.visitedLocations[-1]["Name"],
+                                  "item": solver.visitedLocations[-1]["itemName"]}
+        else:
+            self.state["last"] = ""
 
     def toSolver(self, solver):
         if 'majorsSplit' in self.state:
@@ -325,6 +331,11 @@ class CommonSolver(object):
         if self.log.getEffectiveLevel() == logging.DEBUG:
             presetLoader.printToScreen()
 
+    def getLoc(self, locName):
+        for loc in self.locations:
+            if loc['Name'] == locName:
+                return loc
+
     def computeLocationsDifficulty(self, locations):
         self.areaGraph.getAvailableLocations(locations, self.smbm, infinity, self.lastLoc)
         # check post available functions too
@@ -426,567 +437,15 @@ class CommonSolver(object):
             item = loc["itemName"]
             if item != self.collectedItems[-1]:
                 raise Exception("Item of last collected loc {}: {} is different from last collected item: {}".format(loc["Name"], item, self.collectedItems[-1]))
-            self.smbm.removeItem(item)
+
             self.collectedItems.pop()
 
-class InteractiveSolver(CommonSolver):
-    def __init__(self, output):
-        self.checkDuplicateMajor = False
-        self.vcr = None
-        self.log = log.get('Solver')
-
-        self.outputFileName = output
-        self.firstLogFile = None
-        self.locations = graphLocations
-
-        (self.locsAddressName, self.locsWeb2Internal) = self.initLocsAddressName()
-        self.transWeb2Internal = self.initTransitionsName()
-
-    def initLocsAddressName(self):
-        addressName = {}
-        web2Internal = {}
-        for loc in graphLocations:
-            webName = self.locNameInternal2Web(loc["Name"])
-            addressName[loc["Address"] % 0x10000] = webName
-            web2Internal[webName] = loc["Name"]
-        return (addressName, web2Internal)
-
-    def initTransitionsName(self):
-        web2Internal = {}
-        for (startPoint, endPoint) in vanillaTransitions + vanillaBossesTransitions:
-            for point in [startPoint, endPoint]:
-                web2Internal[self.apNameInternal2Web(point)] = point
-        return web2Internal
-
-    def dumpState(self):
-        state = SolverState(self.debug)
-        state.fromSolver(self)
-        state.toJson(self.outputFileName)
-
-    def initialize(self, mode, rom, presetFileName, magic, debug):
-        # load rom and preset, return first state
-        self.debug = debug
-        self.mode = mode
-        if self.mode != "seedless":
-            self.seed = os.path.basename(os.path.splitext(rom)[0])+'.sfc'
-        else:
-            self.seed = "seedless"
-
-        self.smbm = SMBoolManager()
-
-        self.presetFileName = presetFileName
-        self.loadPreset(self.presetFileName)
-
-        self.loadRom(rom, interactive=True, magic=magic)
-
-        self.clearItems()
-
-        # in debug mode don't load plando locs/transitions
-        if self.mode == 'plando' and self.debug == False:
-            if self.areaRando == True:
-                plandoTrans = self.loadPlandoTransitions()
-                if len(plandoTrans) > 0:
-                    self.curGraphTransitions = plandoTrans
-                self.areaGraph = AccessGraph(accessPoints, self.curGraphTransitions)
-
-            self.loadPlandoLocs()
-
-        # compute new available locations
-        self.computeLocationsDifficulty(self.majorLocations)
-
-        self.dumpState()
-
-    def iterate(self, stateJson, scope, action, params):
-        self.debug = params["debug"]
-        self.smbm = SMBoolManager()
-
-        state = SolverState()
-        state.fromJson(stateJson)
-        state.toSolver(self)
-
-        RomLoader.factory(self.patches).loadPatches()
-
-        self.loadPreset(self.presetFileName)
-
-        # add already collected items to smbm
-        self.smbm.addItems(self.collectedItems)
-
-        if scope == 'item':
-            if action == 'clear':
-                self.clearItems(True)
+            # if multiple majors in plando mode, remove it from smbm only when it's the last occurence of it
+            if self.smbm.isCountItem(item):
+                self.smbm.removeItem(item)
             else:
-                if action == 'add':
-                    if self.mode == 'plando' or self.mode == 'seedless':
-                        self.setItemAt(params['loc'], params['item'])
-                    else:
-                        # pickup item at locName
-                        self.pickItemAt(params['loc'])
-                elif action == 'remove':
-                    # remove last collected item
-                    self.cancelLastItems(params['count'])
-                elif action == 'replace':
-                    self.replaceItemAt(params['loc'], params['item'])
-        elif scope == 'area':
-            if action == 'clear':
-                self.clearTransitions()
-            else:
-                if action == 'add':
-                    startPoint = params['startPoint']
-                    endPoint = params['endPoint']
-                    self.addTransition(self.transWeb2Internal[startPoint], self.transWeb2Internal[endPoint])
-                elif action == 'remove':
-                    # remove last transition
-                    self.cancelLastTransition()
-
-        self.areaGraph = AccessGraph(accessPoints, self.curGraphTransitions)
-
-        if scope == 'common' and action == 'save':
-            return self.savePlando(params['lock'])
-
-        # compute new available locations
-        self.clearLocs(self.majorLocations)
-        self.computeLocationsDifficulty(self.majorLocations)
-
-        # return them
-        self.dumpState()
-
-    def getLocNameFromAddress(self, address):
-        return self.locsAddressName[address]
-
-    def loadPlandoTransitions(self):
-        transitionsAddr = self.romLoader.getPlandoTransitions(len(vanillaBossesTransitions) + len(vanillaTransitions))
-        return getTransitions(transitionsAddr)
-
-    def loadPlandoLocs(self):
-        # get the addresses of the already filled locs, with the correct order
-        addresses = self.romLoader.getPlandoAddresses()
-
-        # create a copy of the locations to avoid removing locs from self.locations
-        self.majorLocations = self.locations[:]
-
-        for address in addresses:
-            # TODO::compute only the difficulty of the current loc
-            self.computeLocationsDifficulty(self.majorLocations)
-
-            locName = self.getLocNameFromAddress(address)
-            self.pickItemAt(locName)
-
-    def fillGraph(self):
-        # add self looping transitions on unused acces points
-        usedAPs = {}
-        for (src, dst) in self.curGraphTransitions:
-            usedAPs[src] = True
-            usedAPs[dst] = True
-
-        singleAPs = []
-        for ap in accessPoints:
-            if ap.Internal == True:
-                continue
-
-            if ap.Name not in usedAPs:
-                singleAPs.append(ap.Name)
-
-        transitions = self.curGraphTransitions[:]
-        for apName in singleAPs:
-            transitions.append((apName, apName))
-
-        return AccessGraph(accessPoints, transitions)
-
-    def savePlando(self, lock):
-        # store filled locations addresses in the ROM for next creating session
-        locsItems = {}
-        itemLocs = []
-        for loc in self.visitedLocations:
-            locsItems[loc["Name"]] = loc["itemName"]
-        for loc in self.locations:
-            if loc["Name"] in locsItems:
-                itemLocs.append({'Location': loc, 'Item': ItemManager.getItem(locsItems[loc["Name"]])})
-            else:
-                # put nothing items in unused locations
-                itemLocs.append({'Location': loc, 'Item': ItemManager.getItem("Nothing")})
-
-        # patch the ROM
-        if lock == True:
-            magic = random.randint(1, 0xffff)
-        else:
-            magic = None
-        romPatcher = RomPatcher(magic=magic)
-        patches = ['credits_varia.ips', 'tracking.ips']
-        if magic != None:
-            patches.append('race_mode.ips')
-        romPatcher.addIPSPatches(patches)
-        romPatcher.writeItemsLocs(itemLocs)
-        romPatcher.writeItemsNumber()
-        romPatcher.writeSpoiler(itemLocs)
-        class FakeRandoSettings:
-            def __init__(self):
-                self.qty = {'energy': 'plando'}
-                self.progSpeed = 'plando'
-                self.progDiff = 'plando'
-                self.restrictions = {'Suits': False, 'Morph': 'plando'}
-                self.superFun = {}
-        randoSettings = FakeRandoSettings()
-        romPatcher.writeRandoSettings(randoSettings, itemLocs)
-        if magic != None:
-            romPatcher.writeMagic()
-        romPatcher.writePlandoAddresses(self.visitedLocations)
-        if self.areaRando == True:
-            doors = getDoorConnections(self.fillGraph(), self.areaRando, self.bossRando)
-            romPatcher.writeDoorConnections(doors)
-            doorsPtrs = getAps2DoorsPtrs()
-            romPatcher.writePlandoTransitions(self.curGraphTransitions, doorsPtrs,
-                                              len(vanillaBossesTransitions) + len(vanillaTransitions))
-        romPatcher.end()
-
-        data = romPatcher.romFile.data
-        preset = os.path.splitext(os.path.basename(self.presetFileName))[0]
-        seedCode = 'FX'
-        if self.bossRando == True:
-            seedCode = 'B'+seedCode
-        if self.areaRando == True:
-            seedCode = 'A'+seedCode
-        fileName = 'VARIA_Plandomizer_{}{}_{}.sfc'.format(seedCode, strftime("%Y%m%d%H%M%S", gmtime()), preset)
-        data["fileName"] = fileName
-        # error msg in json to be displayed by the web site
-        data["errorMsg"] = ""
-        with open(self.outputFileName, 'w') as jsonFile:
-            json.dump(data, jsonFile)
-
-    def locNameInternal2Web(self, locName):
-        return locName.translate(None, " ,()-")
-
-    def locNameWeb2Internal(self, locNameWeb):
-        return self.locsWeb2Internal[locNameWeb]
-
-    def apNameInternal2Web(self, apName):
-        return apName[0].lower()+apName[1:].translate(None, " ")
-
-    def getLoc(self, locNameWeb):
-        locName = self.locNameWeb2Internal(locNameWeb)
-        for loc in self.locations:
-            if loc["Name"] == locName:
-                return loc
-        raise Exception("Location '{}' not found".format(locName))
-
-    def pickItemAt(self, locName):
-        # collect new item at newLoc
-        loc = self.getLoc(locName)
-        if "difficulty" not in loc or loc["difficulty"] == False:
-            # sequence break
-            loc["difficulty"] = SMBool(True, -1)
-        if "accessPoint" not in loc:
-            # take first ap of the loc
-            loc["accessPoint"] = loc["AccessFrom"].keys()[0]
-        self.collectMajor(loc)
-
-    def setItemAt(self, locName, itemName):
-        # set itemName at locName
-        loc = self.getLoc(locName)
-        # plando mode
-        loc["itemName"] = itemName
-
-        if "difficulty" not in loc:
-            # sequence break
-            loc["difficulty"] = SMBool(True, -1)
-        if "accessPoint" not in loc:
-            # take first ap of the loc
-            loc["accessPoint"] = loc["AccessFrom"].keys()[0]
-
-        self.collectMajor(loc, itemName)
-
-    def replaceItemAt(self, locName, itemName):
-        # replace itemName at locName
-        loc = self.getLoc(locName)
-        oldItemName = loc["itemName"]
-        loc["itemName"] = itemName
-
-        # major item can be set multiple times in plando mode
-        count = self.collectedItems.count(oldItemName)
-        isCount = self.smbm.isCountItem(oldItemName)
-
-        # replace item at the old item spot in collectedItems
-        index = next(i for i, vloc in enumerate(self.visitedLocations) if vloc['Name'] == loc['Name'])
-        self.collectedItems[index] = itemName
-
-        # update smbm if count item or major was only there once
-        if isCount == True or count == 1:
-            self.smbm.removeItem(oldItemName)
-
-        self.smbm.addItem(itemName)
-
-    def clearItems(self, reload=False):
-        self.collectedItems = []
-        self.visitedLocations = []
-        self.lastLoc = 'Landing Site'
-        self.majorLocations = self.locations
-        if reload == True:
-            for loc in self.majorLocations:
-                if "difficulty" in loc:
-                    del loc["difficulty"]
-        Bosses.reset()
-        self.smbm.resetItems()
-
-    def addTransition(self, startPoint, endPoint):
-        # already check in controller if transition is valid for seed
-        self.curGraphTransitions.append((startPoint, endPoint))
-
-    def cancelLastTransition(self):
-        if self.areaRando == True and self.bossRando == True:
-            if len(self.curGraphTransitions) > 0:
-                self.curGraphTransitions.pop()
-        elif self.areaRando == True:
-            if len(self.curGraphTransitions) > len(self.bossTransitions):
-                self.curGraphTransitions.pop()
-        elif self.bossRando == True:
-            if len(self.curGraphTransitions) > len(self.areaTransitions):
-                self.curGraphTransitions.pop()
-
-    def clearTransitions(self):
-        if self.areaRando == True and self.bossRando == True:
-            self.curGraphTransitions = []
-        elif self.areaRando == True:
-            self.curGraphTransitions = self.bossTransitions[:]
-        elif self.bossRando == True:
-            self.curGraphTransitions = self.areaTransitions[:]
-        else:
-            self.curGraphTransitions = self.bossTransitions + self.areaTransitions
-
-    def clearLocs(self, locs):
-        for loc in locs:
-            if 'difficulty' in loc:
-                del loc['difficulty']
-
-class StandardSolver(CommonSolver):
-    # given a rom and parameters returns the estimated difficulty
-
-    def __init__(self, rom, presetFileName, difficultyTarget, pickupStrategy, itemsForbidden=[], type='console', firstItemsLog=None, displayGeneratedPath=False, outputFileName=None, magic=None, checkDuplicateMajor=False, vcr=False):
-        self.checkDuplicateMajor = checkDuplicateMajor
-        self.vcr = VCR(rom, 'solver') if vcr == True else None
-
-        self.log = log.get('Solver')
-
-        self.setConf(difficultyTarget, pickupStrategy, itemsForbidden, displayGeneratedPath)
-
-        self.firstLogFile = None
-        if firstItemsLog is not None:
-            self.firstLogFile = open(firstItemsLog, 'w')
-            self.firstLogFile.write('Item;Location;Area\n')
-
-        # can be called from command line (console) or from web site (web)
-        self.type = type
-        self.output = Out.factory(self.type, self)
-        self.outputFileName = outputFileName
-
-        self.locations = graphLocations
-        self.smbm = SMBoolManager()
-
-        self.presetFileName = presetFileName
-        self.loadPreset(self.presetFileName)
-
-        self.loadRom(rom, magic=magic)
-
-        self.pickup = Pickup(Conf.itemsPickup)
-
-        self.comeBack = ComeBack(self)
-
-    def setConf(self, difficultyTarget, pickupStrategy, itemsForbidden, displayGeneratedPath):
-        Conf.difficultyTarget = difficultyTarget
-        Conf.itemsPickup = pickupStrategy
-        Conf.displayGeneratedPath = displayGeneratedPath
-        Conf.itemsForbidden = itemsForbidden
-
-    def solveRom(self):
-        self.lastLoc = 'Landing Site'
-
-        (self.difficulty, self.itemsOk) = self.computeDifficulty()
-        if self.firstLogFile is not None:
-            self.firstLogFile.close()
-
-        (self.knowsUsed, self.knowsKnown) = self.getKnowsUsed()
-
-        if self.vcr != None:
-            self.vcr.dump()
-
-        self.output.out()
-
-    def getRemainMajors(self):
-        return [loc for loc in self.majorLocations if loc['difficulty'].bool == False and loc['itemName'] not in ['Nothing', 'NoEnergy']]
-
-    def getRemainMinors(self):
-        if self.majorsSplit == 'Full':
-            return None
-        else:
-            return [loc for loc in self.minorLocations if loc['difficulty'].bool == False and loc['itemName'] not in ['Nothing', 'NoEnergy']]
-
-    def getSkippedMajors(self):
-        return [loc for loc in self.majorLocations if loc['difficulty'].bool == True and loc['itemName'] not in ['Nothing', 'NoEnergy']]
-
-    def getUnavailMajors(self):
-        return [loc for loc in self.majorLocations if loc['difficulty'].bool == False and loc['itemName'] not in ['Nothing', 'NoEnergy']]
-
-
-    def getLoc(self, locName, locations):
-        for loc in locations:
-            if loc['Name'] == locName:
-                return loc
-
-    def getDiffThreshold(self):
-        target = Conf.difficultyTarget
-        threshold = target
-        epsilon = 0.001
-        if target <= easy:
-            threshold = medium - epsilon
-        elif target <= medium:
-            threshold = hard - epsilon
-        elif target <= hard:
-            threshold = harder - epsilon
-        elif target <= harder:
-            threshold = hardcore - epsilon
-        elif target <= hardcore:
-            threshold = mania - epsilon
-
-        return threshold
-
-    def computeDifficulty(self):
-        # loop on the available locations depending on the collected items.
-        # before getting a new item, loop on all of them and get their difficulty,
-        # the next collected item is the one with the smallest difficulty,
-        # if equality between major and minor, take major first.
-
-        # remove mother brain location (there items pickup conditions on top of going to mother brain location)
-        mbLoc = self.getLoc('Mother Brain', self.locations)
-        self.locations.remove(mbLoc)
-
-        if self.majorsSplit == 'Major':
-            self.majorLocations = [loc for loc in self.locations if "Major" in loc["Class"] or "Boss" in loc["Class"]]
-            self.minorLocations = [loc for loc in self.locations if "Minor" in loc["Class"]]
-        elif self.majorsSplit == 'Chozo':
-            self.majorLocations = [loc for loc in self.locations if "Chozo" in loc["Class"] or "Boss" in loc["Class"]]
-            self.minorLocations = [loc for loc in self.locations if "Chozo" not in loc["Class"] and "Boss" not in loc["Class"]]
-        else:
-            # Full
-            self.majorLocations = self.locations[:] # copy
-            self.minorLocations = self.majorLocations
-
-        self.visitedLocations = []
-        self.collectedItems = []
-
-        # with the knowsXXX conditions some roms can be unbeatable, so we have to detect it
-        previous = -1
-        current = 0
-
-        self.log.debug("{}: available major: {}, available minor: {}, visited: {}".format(Conf.itemsPickup, len(self.majorLocations), len(self.minorLocations), len(self.visitedLocations)))
-
-        isEndPossible = False
-        endDifficulty = mania
-        area = 'Crateria Landing Site'
-        diffThreshold = self.getDiffThreshold()
-        while True:
-            # actual while condition
-            hasEnoughMinors = self.pickup.enoughMinors(self.smbm, self.minorLocations)
-            hasEnoughMajors = self.pickup.enoughMajors(self.smbm, self.majorLocations)
-            hasEnoughItems = hasEnoughMajors and hasEnoughMinors
-            canEndGame = self.canEndGame()
-            (isEndPossible, endDifficulty) = (canEndGame.bool, canEndGame.difficulty)
-            if isEndPossible and hasEnoughItems and endDifficulty <= diffThreshold:
-                # add mother brain loc and check if it's accessible
-                self.majorLocations.append(mbLoc)
-                self.computeLocationsDifficulty(self.majorLocations)
-                if mbLoc["difficulty"] == True:
-                    self.collectMajor(mbLoc)
-                    self.log.debug("canEnd and MB loc is accessible")
-                    self.log.debug("END")
-                    break
-                else:
-                    self.log.debug("canEnd but MB loc not accessible")
-                    self.majorLocations.remove(mbLoc)
-
-            #self.log.debug(str(self.collectedItems))
-            self.log.debug("Current Area : " + area)
-
-            # check if we have collected an item in the last loop
-            current = len(self.collectedItems)
-            if current == previous:
-                if not isEndPossible:
-                    self.log.debug("STUCK ALL")
-                    if self.comeBack.rewind(len(self.collectedItems)) == True:
-                        # rewind ok
-                        previous = len(self.collectedItems) - 1
-                        continue
-                    else:
-                        # we're really stucked
-                        self.log.debug("STUCK CAN'T REWIND")
-                        break
-                else:
-                    self.log.debug("HARD END")
-                    break
-            previous = current
-
-            # compute the difficulty of all the locations
-            self.computeLocationsDifficulty(self.majorLocations)
-            if self.majorsSplit != 'Full':
-                self.computeLocationsDifficulty(self.minorLocations)
-
-            # keep only the available locations
-            majorsAvailable = [loc for loc in self.majorLocations if 'difficulty' in loc and loc["difficulty"].bool == True]
-            minorsAvailable = [loc for loc in self.minorLocations if 'difficulty' in loc and loc["difficulty"].bool == True]
-
-            # check if we're stuck
-            if len(majorsAvailable) == 0 and len(minorsAvailable) == 0:
-                if not isEndPossible:
-                    self.log.debug("STUCK MAJORS and MINORS")
-                    if self.comeBack.rewind(len(self.collectedItems)) == True:
-                        previous = len(self.collectedItems) - 1
-                        continue
-                    else:
-                        # we're really stucked
-                        self.log.debug("STUCK CAN'T REWIND")
-                        break
-                else:
-                    self.log.debug("HARD END")
-                    break
-
-            # handle no comeback heuristic
-            if self.majorsSplit == 'Full':
-                locs = majorsAvailable
-            else:
-                locs = majorsAvailable+minorsAvailable
-            rewindRequired = self.comeBack.handleNoComeBack(locs, len(self.collectedItems))
-            if rewindRequired == True:
-                if self.comeBack.rewind(len(self.collectedItems)) == True:
-                    previous = len(self.collectedItems) - 1
-                    continue
-                else:
-                    # we're really stucked
-                    self.log.debug("STUCK CAN'T REWIND")
-                    break
-
-            # sort them on difficulty and proximity
-            majorsAvailable = self.getAvailableItemsList(majorsAvailable, area, diffThreshold)
-            if self.majorsSplit == 'Full':
-                minorsAvailable = majorsAvailable
-            else:
-                minorsAvailable = self.getAvailableItemsList(minorsAvailable, area, diffThreshold)
-
-            self.comeBack.cleanNoComeBack(locs)
-
-            # choose one to pick up
-            area = self.nextDecision(majorsAvailable, minorsAvailable, hasEnoughMinors, diffThreshold, area)
-
-        # compute difficulty value
-        (difficulty, itemsOk) = self.computeDifficultyValue()
-
-        self.log.debug("difficulty={}".format(difficulty))
-        self.log.debug("itemsOk={}".format(itemsOk))
-        self.log.debug("{}: remaining major: {}, remaining minor: {}, visited: {}".format(Conf.itemsPickup, len(self.majorLocations), len(self.minorLocations), len(self.visitedLocations)))
-
-        self.log.debug("remaining majors:")
-        for loc in self.majorLocations:
-            self.log.debug("{} ({})".format(loc['Name'], loc['itemName']))
-
-        self.log.debug("bosses: {}".format(Bosses.golden4Dead))
-
-        return (difficulty, itemsOk)
+                if item not in self.collectedItems:
+                    self.smbm.removeItem(item)
 
     def getAvailableItemsList(self, locations, area, threshold):
         # locations without distance are not available
@@ -1144,6 +603,173 @@ class StandardSolver(CommonSolver):
 
         raise Exception("Can't take a decision")
 
+    def checkMB(self, mbLoc):
+        # add mother brain loc and check if it's accessible
+        self.majorLocations.append(mbLoc)
+        self.computeLocationsDifficulty(self.majorLocations)
+        if mbLoc["difficulty"] == True:
+            self.log.debug("MB loc accessible")
+            self.collectMajor(mbLoc)
+            return True
+        else:
+            self.log.debug("MB loc not accessible")
+            self.majorLocations.remove(mbLoc)
+            return False
+
+    def computeDifficulty(self):
+        # loop on the available locations depending on the collected items.
+        # before getting a new item, loop on all of them and get their difficulty,
+        # the next collected item is the one with the smallest difficulty,
+        # if equality between major and minor, take major first.
+
+        # remove mother brain location (there items pickup conditions on top of going to mother brain location)
+        mbLoc = self.getLoc('Mother Brain')
+        self.locations.remove(mbLoc)
+
+        if self.majorsSplit == 'Major':
+            self.majorLocations = [loc for loc in self.locations if "Major" in loc["Class"] or "Boss" in loc["Class"]]
+            self.minorLocations = [loc for loc in self.locations if "Minor" in loc["Class"]]
+        elif self.majorsSplit == 'Chozo':
+            self.majorLocations = [loc for loc in self.locations if "Chozo" in loc["Class"] or "Boss" in loc["Class"]]
+            self.minorLocations = [loc for loc in self.locations if "Chozo" not in loc["Class"] and "Boss" not in loc["Class"]]
+        else:
+            # Full
+            self.majorLocations = self.locations[:] # copy
+            self.minorLocations = self.majorLocations
+
+        self.visitedLocations = []
+        self.collectedItems = []
+
+        # with the knowsXXX conditions some roms can be unbeatable, so we have to detect it
+        previous = -1
+        current = 0
+
+        self.log.debug("{}: available major: {}, available minor: {}, visited: {}".format(Conf.itemsPickup, len(self.majorLocations), len(self.minorLocations), len(self.visitedLocations)))
+
+        isEndPossible = False
+        endDifficulty = mania
+        area = 'Crateria Landing Site'
+        diffThreshold = self.getDiffThreshold()
+        while True:
+            # actual while condition
+            hasEnoughMinors = self.pickup.enoughMinors(self.smbm, self.minorLocations)
+            hasEnoughMajors = self.pickup.enoughMajors(self.smbm, self.majorLocations)
+            hasEnoughItems = hasEnoughMajors and hasEnoughMinors
+            canEndGame = self.canEndGame()
+            (isEndPossible, endDifficulty) = (canEndGame.bool, canEndGame.difficulty)
+            if isEndPossible and hasEnoughItems and endDifficulty <= diffThreshold:
+                if self.checkMB(mbLoc):
+                    self.log.debug("END")
+                    break
+                else:
+                    self.log.debug("canEnd but MB loc not accessible")
+
+            #self.log.debug(str(self.collectedItems))
+            self.log.debug("Current Area : " + area)
+
+            # check if we have collected an item in the last loop
+            current = len(self.collectedItems)
+            if current == previous:
+                if not isEndPossible:
+                    self.log.debug("STUCK ALL")
+                    if self.comeBack.rewind(len(self.collectedItems)) == True:
+                        # rewind ok
+                        previous = len(self.collectedItems) - 1
+                        continue
+                    else:
+                        # we're really stucked
+                        self.log.debug("STUCK CAN'T REWIND")
+                        break
+                else:
+                    self.log.debug("HARD END 1")
+                    self.checkMB(mbLoc)
+                    break
+            previous = current
+
+            # compute the difficulty of all the locations
+            self.computeLocationsDifficulty(self.majorLocations)
+            if self.majorsSplit != 'Full':
+                self.computeLocationsDifficulty(self.minorLocations)
+
+            # keep only the available locations
+            majorsAvailable = [loc for loc in self.majorLocations if 'difficulty' in loc and loc["difficulty"].bool == True]
+            minorsAvailable = [loc for loc in self.minorLocations if 'difficulty' in loc and loc["difficulty"].bool == True]
+
+            # check if we're stuck
+            if len(majorsAvailable) == 0 and len(minorsAvailable) == 0:
+                if not isEndPossible:
+                    self.log.debug("STUCK MAJORS and MINORS")
+                    if self.comeBack.rewind(len(self.collectedItems)) == True:
+                        previous = len(self.collectedItems) - 1
+                        continue
+                    else:
+                        # we're really stucked
+                        self.log.debug("STUCK CAN'T REWIND")
+                        break
+                else:
+                    self.log.debug("HARD END 2")
+                    self.checkMB(mbLoc)
+                    break
+
+            # handle no comeback heuristic
+            if self.majorsSplit == 'Full':
+                locs = majorsAvailable
+            else:
+                locs = majorsAvailable+minorsAvailable
+            rewindRequired = self.comeBack.handleNoComeBack(locs, len(self.collectedItems))
+            if rewindRequired == True:
+                if self.comeBack.rewind(len(self.collectedItems)) == True:
+                    previous = len(self.collectedItems) - 1
+                    continue
+                else:
+                    # we're really stucked
+                    self.log.debug("STUCK CAN'T REWIND")
+                    break
+
+            # sort them on difficulty and proximity
+            majorsAvailable = self.getAvailableItemsList(majorsAvailable, area, diffThreshold)
+            if self.majorsSplit == 'Full':
+                minorsAvailable = majorsAvailable
+            else:
+                minorsAvailable = self.getAvailableItemsList(minorsAvailable, area, diffThreshold)
+
+            self.comeBack.cleanNoComeBack(locs)
+
+            # choose one to pick up
+            area = self.nextDecision(majorsAvailable, minorsAvailable, hasEnoughMinors, diffThreshold, area)
+
+        # compute difficulty value
+        (difficulty, itemsOk) = self.computeDifficultyValue()
+
+        if self.log.getEffectiveLevel() == logging.DEBUG:
+            self.log.debug("difficulty={}".format(difficulty))
+            self.log.debug("itemsOk={}".format(itemsOk))
+            self.log.debug("{}: remaining major: {}, remaining minor: {}, visited: {}".format(Conf.itemsPickup, len(self.majorLocations), len(self.minorLocations), len(self.visitedLocations)))
+
+            self.log.debug("remaining majors:")
+            for loc in self.majorLocations:
+                self.log.debug("{} ({})".format(loc['Name'], loc['itemName']))
+
+            self.log.debug("bosses: {}".format(Bosses.golden4Dead))
+
+        return (difficulty, itemsOk)
+
+    def haveAllMinorTypes(self):
+        # the first minor of each type can be seen as a major, so check for them first before going to far in zebes
+        hasPB = 'PowerBomb' in self.collectedItems
+        hasSuper = 'Super' in self.collectedItems
+        hasMissile = 'Missile' in self.collectedItems
+        return (hasPB and hasSuper and hasMissile)
+
+    def canEndGame(self):
+        # to finish the game you must :
+        # - beat golden 4 : we force pickup of the 4 items
+        #   behind the bosses to ensure that
+        # - defeat metroids
+        # - destroy/skip the zebetites
+        # - beat Mother Brain
+        return self.smbm.wand(Bosses.allBossesDead(self.smbm), self.smbm.enoughStuffTourian())
+
     def computeDifficultyValue(self):
         if not self.canEndGame().bool:
             # we have aborted
@@ -1162,6 +788,532 @@ class StandardSolver(CommonSolver):
             else:
                 # can finish but can't take all the requested items
                 return (difficulty, False)
+
+class InteractiveSolver(CommonSolver):
+    def __init__(self, output):
+        self.errorMsg = ""
+        self.checkDuplicateMajor = False
+        self.vcr = None
+        self.log = log.get('Solver')
+
+        self.outputFileName = output
+        self.firstLogFile = None
+        self.locations = graphLocations
+
+        (self.locsAddressName, self.locsWeb2Internal) = self.initLocsAddressName()
+        self.transWeb2Internal = self.initTransitionsName()
+
+    def initLocsAddressName(self):
+        addressName = {}
+        web2Internal = {}
+        for loc in graphLocations:
+            webName = self.locNameInternal2Web(loc["Name"])
+            addressName[loc["Address"] % 0x10000] = webName
+            web2Internal[webName] = loc["Name"]
+        return (addressName, web2Internal)
+
+    def initTransitionsName(self):
+        web2Internal = {}
+        for (startPoint, endPoint) in vanillaTransitions + vanillaBossesTransitions:
+            for point in [startPoint, endPoint]:
+                web2Internal[self.apNameInternal2Web(point)] = point
+        return web2Internal
+
+    def dumpState(self):
+        state = SolverState(self.debug)
+        state.fromSolver(self)
+        state.toJson(self.outputFileName)
+
+    def initialize(self, mode, rom, presetFileName, magic, debug, fill):
+        # load rom and preset, return first state
+        self.debug = debug
+        self.mode = mode
+        if self.mode != "seedless":
+            self.seed = os.path.basename(os.path.splitext(rom)[0])+'.sfc'
+        else:
+            self.seed = "seedless"
+
+        self.smbm = SMBoolManager()
+
+        self.presetFileName = presetFileName
+        self.loadPreset(self.presetFileName)
+
+        self.loadRom(rom, interactive=True, magic=magic)
+
+        self.clearItems()
+
+        # in debug mode don't load plando locs/transitions
+        if self.mode == 'plando' and self.debug == False:
+            if fill == True:
+                # load the source seed transitions and items/locations
+                self.curGraphTransitions = self.bossTransitions + self.areaTransitions
+                self.areaGraph = AccessGraph(accessPoints, self.curGraphTransitions)
+                self.fillPlandoLocs()
+            else:
+                if self.areaRando == True:
+                    plandoTrans = self.loadPlandoTransitions()
+                    if len(plandoTrans) > 0:
+                        self.curGraphTransitions = plandoTrans
+                    self.areaGraph = AccessGraph(accessPoints, self.curGraphTransitions)
+
+                self.loadPlandoLocs()
+
+        # compute new available locations
+        self.computeLocationsDifficulty(self.majorLocations)
+
+        self.dumpState()
+
+    def iterate(self, stateJson, scope, action, params):
+        self.debug = params["debug"]
+        self.smbm = SMBoolManager()
+
+        state = SolverState()
+        state.fromJson(stateJson)
+        state.toSolver(self)
+
+        RomLoader.factory(self.patches).loadPatches()
+
+        self.loadPreset(self.presetFileName)
+
+        # add already collected items to smbm
+        self.smbm.addItems(self.collectedItems)
+
+        if scope == 'item':
+            if action == 'clear':
+                self.clearItems(True)
+            else:
+                if action == 'add':
+                    if self.mode == 'plando' or self.mode == 'seedless':
+                        self.setItemAt(params['loc'], params['item'])
+                    else:
+                        # pickup item at locName
+                        self.pickItemAt(params['loc'])
+                elif action == 'remove':
+                    # remove last collected item
+                    self.cancelLastItems(params['count'])
+                elif action == 'replace':
+                    self.replaceItemAt(params['loc'], params['item'])
+        elif scope == 'area':
+            if action == 'clear':
+                self.clearTransitions()
+            else:
+                if action == 'add':
+                    startPoint = params['startPoint']
+                    endPoint = params['endPoint']
+                    self.addTransition(self.transWeb2Internal[startPoint], self.transWeb2Internal[endPoint])
+                elif action == 'remove':
+                    # remove last transition
+                    self.cancelLastTransition()
+
+        self.areaGraph = AccessGraph(accessPoints, self.curGraphTransitions)
+
+        if scope == 'common':
+            if action == 'save':
+                return self.savePlando(params['lock'])
+            elif action == 'randomize':
+                self.randoPlando(params)
+
+        # compute new available locations
+        self.clearLocs(self.majorLocations)
+        self.computeLocationsDifficulty(self.majorLocations)
+
+        # return them
+        self.dumpState()
+
+    def getLocNameFromAddress(self, address):
+        return self.locsAddressName[address]
+
+    def loadPlandoTransitions(self):
+        transitionsAddr = self.romLoader.getPlandoTransitions(len(vanillaBossesTransitions) + len(vanillaTransitions))
+        return getTransitions(transitionsAddr)
+
+    def loadPlandoLocs(self):
+        # get the addresses of the already filled locs, with the correct order
+        addresses = self.romLoader.getPlandoAddresses()
+
+        # create a copy of the locations to avoid removing locs from self.locations
+        self.majorLocations = self.locations[:]
+
+        for address in addresses:
+            # TODO::compute only the difficulty of the current loc
+            self.computeLocationsDifficulty(self.majorLocations)
+
+            locName = self.getLocNameFromAddress(address)
+            self.pickItemAt(locName)
+
+    def fillPlandoLocs(self):
+        self.pickup = Pickup("all")
+        self.comeBack = ComeBack(self)
+
+        # backup
+        locationsBck = self.locations[:]
+
+        self.lastLoc = 'Landing Site'
+        (self.difficulty, self.itemsOk) = self.computeDifficulty()
+
+        if self.itemsOk == False:
+            # add remaining locs as sequence break
+            for loc in self.majorLocations[:]:
+                loc["difficulty"] = SMBool(True, -1)
+                if "accessPoint" not in loc:
+                    # take first ap of the loc
+                    loc["accessPoint"] = loc["AccessFrom"].keys()[0]
+                self.collectMajor(loc)
+
+        self.locations = locationsBck
+
+    def fillGraph(self):
+        # add self looping transitions on unused acces points
+        usedAPs = {}
+        for (src, dst) in self.curGraphTransitions:
+            usedAPs[src] = True
+            usedAPs[dst] = True
+
+        singleAPs = []
+        for ap in accessPoints:
+            if ap.Internal == True:
+                continue
+
+            if ap.Name not in usedAPs:
+                singleAPs.append(ap.Name)
+
+        transitions = self.curGraphTransitions[:]
+        for apName in singleAPs:
+            transitions.append((apName, apName))
+
+        return AccessGraph(accessPoints, transitions)
+
+    def randoPlando(self, parameters):
+        # if all the locations are visited, do nothing
+        if len(self.majorLocations) == 0:
+            return
+
+        plandoLocsItems = {}
+        for loc in self.visitedLocations:
+            if "Boss" in loc["Class"]:
+                plandoLocsItems[loc["Name"]] = "Boss"
+            else:
+                plandoLocsItems[loc["Name"]] = loc["itemName"]
+
+        # add active patches
+        patches = {
+            0x7F1F:   {'value': 0xB6, 'name': "startCeres"},
+            0x7F17:   {'value': 0xB6, 'name': "startLS"},
+            0x21BD80: {'value': 0xD5, 'name': "layout"},
+            0x06e37d: {'value': 0x01, 'name': "gravityNoHeatProtection"},
+            0x7CC4D:  {'value': 0x37, 'name': "variaTweaks"},
+            0x22D564: {'value': 0xF2, 'name': "area"},
+            0x252FA7: {'value': 0xF8, 'name': "areaLayout"}
+        }
+
+        activePatches = []
+        for address in self.patches:
+            if address in patches:
+                if self.patches[address] == patches[address]["value"]:
+                    activePatches.append(patches[address]["name"])
+
+        plandoCurrent = {
+            "locsItems": plandoLocsItems,
+            "transitions": self.curGraphTransitions,
+            "patches": activePatches
+        }
+
+        plandoCurrentJson = json.dumps(plandoCurrent)
+
+        params = [
+            'python2',  os.path.expanduser("~/RandomMetroidSolver/randomizer.py"),
+            '--runtime', '10',
+            '--param', self.presetFileName,
+            '--output', self.outputFileName,
+            '--plandoRando', plandoCurrentJson,
+            '--progressionSpeed', parameters["progressionSpeed"],
+            '--minorQty', parameters["minorQty"],
+            '--maxDifficulty', 'hardcore',
+            '--energyQty', parameters["energyQty"]
+        ]
+
+        subprocess.call(params)
+
+        with open(self.outputFileName, 'r') as jsonFile:
+            data = json.load(jsonFile)
+
+        self.errorMsg = data["errorMsg"]
+
+        # load the locations
+        if "itemLocs" in data:
+            self.clearItems(reload=True)
+            itemsLocs = data["itemLocs"]
+
+            # create a copy because we need self.locations to be full, else the state will be empty
+            self.majorLocations = self.locations[:]
+
+            for itemLoc in itemsLocs:
+                locName = itemLoc["Location"]["Name"]
+                loc = self.getLoc(locName)
+                difficulty = itemLoc["Location"]["difficulty"]
+                smbool = SMBool(difficulty["bool"], difficulty["difficulty"], difficulty["knows"], difficulty["items"])
+                loc["difficulty"] = smbool
+                itemName = itemLoc["Item"]["Type"]
+                if itemName == "Boss":
+                    itemName = "Nothing"
+                loc["itemName"] = itemName
+                loc["accessPoint"] = itemLoc["Location"]["accessPoint"]
+                self.collectMajor(loc)
+
+    def savePlando(self, lock):
+        # store filled locations addresses in the ROM for next creating session
+        locsItems = {}
+        itemLocs = []
+        for loc in self.visitedLocations:
+            locsItems[loc["Name"]] = loc["itemName"]
+        for loc in self.locations:
+            if loc["Name"] in locsItems:
+                itemLocs.append({'Location': loc, 'Item': ItemManager.getItem(locsItems[loc["Name"]])})
+            else:
+                # put nothing items in unused locations
+                itemLocs.append({'Location': loc, 'Item': ItemManager.getItem("Nothing")})
+
+        # patch the ROM
+        if lock == True:
+            magic = random.randint(1, 0xffff)
+        else:
+            magic = None
+        romPatcher = RomPatcher(magic=magic, plando=True)
+        patches = ['credits_varia.ips', 'tracking.ips']
+        if magic != None:
+            patches.append('race_mode.ips')
+        romPatcher.writeItemsLocs(itemLocs)
+        romPatcher.addIPSPatches(patches)
+        romPatcher.writeItemsNumber()
+        romPatcher.writeSpoiler(itemLocs)
+        class FakeRandoSettings:
+            def __init__(self):
+                self.qty = {'energy': 'plando'}
+                self.progSpeed = 'plando'
+                self.progDiff = 'plando'
+                self.restrictions = {'Suits': False, 'Morph': 'plando'}
+                self.superFun = {}
+        randoSettings = FakeRandoSettings()
+        romPatcher.writeRandoSettings(randoSettings, itemLocs)
+        if magic != None:
+            romPatcher.writeMagic()
+        else:
+            romPatcher.writePlandoAddresses(self.visitedLocations)
+            if self.areaRando == True:
+                doors = getDoorConnections(self.fillGraph(), self.areaRando, self.bossRando)
+                romPatcher.writeDoorConnections(doors)
+                doorsPtrs = getAps2DoorsPtrs()
+                romPatcher.writePlandoTransitions(self.curGraphTransitions, doorsPtrs,
+                                                  len(vanillaBossesTransitions) + len(vanillaTransitions))
+        romPatcher.end()
+
+        data = romPatcher.romFile.data
+        preset = os.path.splitext(os.path.basename(self.presetFileName))[0]
+        seedCode = 'FX'
+        if self.bossRando == True:
+            seedCode = 'B'+seedCode
+        if self.areaRando == True:
+            seedCode = 'A'+seedCode
+        fileName = 'VARIA_Plandomizer_{}{}_{}.sfc'.format(seedCode, strftime("%Y%m%d%H%M%S", gmtime()), preset)
+        data["fileName"] = fileName
+        # error msg in json to be displayed by the web site
+        data["errorMsg"] = ""
+        with open(self.outputFileName, 'w') as jsonFile:
+            json.dump(data, jsonFile)
+
+    def locNameInternal2Web(self, locName):
+        return locName.translate(None, " ,()-")
+
+    def locNameWeb2Internal(self, locNameWeb):
+        return self.locsWeb2Internal[locNameWeb]
+
+    def apNameInternal2Web(self, apName):
+        return apName[0].lower()+apName[1:].translate(None, " ")
+
+    def getWebLoc(self, locNameWeb):
+        locName = self.locNameWeb2Internal(locNameWeb)
+        for loc in self.locations:
+            if loc["Name"] == locName:
+                return loc
+        raise Exception("Location '{}' not found".format(locName))
+
+    def pickItemAt(self, locName):
+        # collect new item at newLoc
+        loc = self.getWebLoc(locName)
+        if "difficulty" not in loc or loc["difficulty"] == False:
+            # sequence break
+            loc["difficulty"] = SMBool(True, -1)
+        if "accessPoint" not in loc:
+            # take first ap of the loc
+            loc["accessPoint"] = loc["AccessFrom"].keys()[0]
+        self.collectMajor(loc)
+
+    def setItemAt(self, locName, itemName):
+        # set itemName at locName
+        loc = self.getWebLoc(locName)
+        # plando mode
+        loc["itemName"] = itemName
+
+        if "difficulty" not in loc:
+            # sequence break
+            loc["difficulty"] = SMBool(True, -1)
+        if "accessPoint" not in loc:
+            # take first ap of the loc
+            loc["accessPoint"] = loc["AccessFrom"].keys()[0]
+
+        self.collectMajor(loc, itemName)
+
+    def replaceItemAt(self, locName, itemName):
+        # replace itemName at locName
+        loc = self.getWebLoc(locName)
+        oldItemName = loc["itemName"]
+        loc["itemName"] = itemName
+
+        # major item can be set multiple times in plando mode
+        count = self.collectedItems.count(oldItemName)
+        isCount = self.smbm.isCountItem(oldItemName)
+
+        # replace item at the old item spot in collectedItems
+        index = next(i for i, vloc in enumerate(self.visitedLocations) if vloc['Name'] == loc['Name'])
+        self.collectedItems[index] = itemName
+
+        # update smbm if count item or major was only there once
+        if isCount == True or count == 1:
+            self.smbm.removeItem(oldItemName)
+
+        self.smbm.addItem(itemName)
+
+    def clearItems(self, reload=False):
+        self.collectedItems = []
+        self.visitedLocations = []
+        self.lastLoc = 'Landing Site'
+        self.majorLocations = self.locations
+        if reload == True:
+            for loc in self.majorLocations:
+                if "difficulty" in loc:
+                    del loc["difficulty"]
+        Bosses.reset()
+        self.smbm.resetItems()
+
+    def addTransition(self, startPoint, endPoint):
+        # already check in controller if transition is valid for seed
+        self.curGraphTransitions.append((startPoint, endPoint))
+
+    def cancelLastTransition(self):
+        if self.areaRando == True and self.bossRando == True:
+            if len(self.curGraphTransitions) > 0:
+                self.curGraphTransitions.pop()
+        elif self.areaRando == True:
+            if len(self.curGraphTransitions) > len(self.bossTransitions):
+                self.curGraphTransitions.pop()
+        elif self.bossRando == True:
+            if len(self.curGraphTransitions) > len(self.areaTransitions):
+                self.curGraphTransitions.pop()
+
+    def clearTransitions(self):
+        if self.areaRando == True and self.bossRando == True:
+            self.curGraphTransitions = []
+        elif self.areaRando == True:
+            self.curGraphTransitions = self.bossTransitions[:]
+        elif self.bossRando == True:
+            self.curGraphTransitions = self.areaTransitions[:]
+        else:
+            self.curGraphTransitions = self.bossTransitions + self.areaTransitions
+
+    def clearLocs(self, locs):
+        for loc in locs:
+            if 'difficulty' in loc:
+                del loc['difficulty']
+
+    def getDiffThreshold(self):
+        epsilon = 0.001
+        return hard - epsilon
+
+class StandardSolver(CommonSolver):
+    # given a rom and parameters returns the estimated difficulty
+
+    def __init__(self, rom, presetFileName, difficultyTarget, pickupStrategy, itemsForbidden=[], type='console', firstItemsLog=None, displayGeneratedPath=False, outputFileName=None, magic=None, checkDuplicateMajor=False, vcr=False):
+        self.checkDuplicateMajor = checkDuplicateMajor
+        self.vcr = VCR(rom, 'solver') if vcr == True else None
+
+        self.log = log.get('Solver')
+
+        self.setConf(difficultyTarget, pickupStrategy, itemsForbidden, displayGeneratedPath)
+
+        self.firstLogFile = None
+        if firstItemsLog is not None:
+            self.firstLogFile = open(firstItemsLog, 'w')
+            self.firstLogFile.write('Item;Location;Area\n')
+
+        # can be called from command line (console) or from web site (web)
+        self.type = type
+        self.output = Out.factory(self.type, self)
+        self.outputFileName = outputFileName
+
+        self.locations = graphLocations
+        self.smbm = SMBoolManager()
+
+        self.presetFileName = presetFileName
+        self.loadPreset(self.presetFileName)
+
+        self.loadRom(rom, magic=magic)
+
+        self.pickup = Pickup(Conf.itemsPickup)
+
+        self.comeBack = ComeBack(self)
+
+    def setConf(self, difficultyTarget, pickupStrategy, itemsForbidden, displayGeneratedPath):
+        Conf.difficultyTarget = difficultyTarget
+        Conf.itemsPickup = pickupStrategy
+        Conf.displayGeneratedPath = displayGeneratedPath
+        Conf.itemsForbidden = itemsForbidden
+
+    def solveRom(self):
+        self.lastLoc = 'Landing Site'
+
+        (self.difficulty, self.itemsOk) = self.computeDifficulty()
+        if self.firstLogFile is not None:
+            self.firstLogFile.close()
+
+        (self.knowsUsed, self.knowsKnown) = self.getKnowsUsed()
+
+        if self.vcr != None:
+            self.vcr.dump()
+
+        self.output.out()
+
+    def getRemainMajors(self):
+        return [loc for loc in self.majorLocations if loc['difficulty'].bool == False and loc['itemName'] not in ['Nothing', 'NoEnergy']]
+
+    def getRemainMinors(self):
+        if self.majorsSplit == 'Full':
+            return None
+        else:
+            return [loc for loc in self.minorLocations if loc['difficulty'].bool == False and loc['itemName'] not in ['Nothing', 'NoEnergy']]
+
+    def getSkippedMajors(self):
+        return [loc for loc in self.majorLocations if loc['difficulty'].bool == True and loc['itemName'] not in ['Nothing', 'NoEnergy']]
+
+    def getUnavailMajors(self):
+        return [loc for loc in self.majorLocations if loc['difficulty'].bool == False and loc['itemName'] not in ['Nothing', 'NoEnergy']]
+
+
+    def getDiffThreshold(self):
+        target = Conf.difficultyTarget
+        threshold = target
+        epsilon = 0.001
+        if target <= easy:
+            threshold = medium - epsilon
+        elif target <= medium:
+            threshold = hard - epsilon
+        elif target <= hard:
+            threshold = harder - epsilon
+        elif target <= harder:
+            threshold = hardcore - epsilon
+        elif target <= hardcore:
+            threshold = mania - epsilon
+
+        return threshold
 
     def getKnowsUsed(self):
         knowsUsed = []
@@ -1190,22 +1342,6 @@ class StandardSolver(CommonSolver):
         self.areaGraph.getAvailableLocations(locations, self.smbm, infinity, self.lastLoc)
 
         return [loc for loc in locations if loc['difficulty'].bool == True]
-
-    def haveAllMinorTypes(self):
-        # the first minor of each type can be seen as a major, so check for them first before going to far in zebes
-        hasPB = 'PowerBomb' in self.collectedItems
-        hasSuper = 'Super' in self.collectedItems
-        hasMissile = 'Missile' in self.collectedItems
-        return (hasPB and hasSuper and hasMissile)
-
-    def canEndGame(self):
-        # to finish the game you must :
-        # - beat golden 4 : we force pickup of the 4 items
-        #   behind the bosses to ensure that
-        # - defeat metroids
-        # - destroy/skip the zebetites
-        # - beat Mother Brain
-        return self.smbm.wand(Bosses.allBossesDead(self.smbm), self.smbm.enoughStuffTourian())
 
 class ComeBack(object):
     # object to handle the decision to choose the next area when all locations have the "no comeback" flag.
@@ -1326,7 +1462,28 @@ class Out(object):
         else:
             raise Exception("Wrong output type for the Solver: {}".format(output))
 
-class OutWeb:
+    def fixEnergy(self, items):
+        # display number of energy used
+        energies = [i for i in items if i.find('ETank') != -1]
+        if len(energies) > 0:
+            (maxETank, maxReserve, maxEnergy) = (0, 0, 0)
+            for energy in energies:
+                nETank = int(energy[0:energy.find('-ETank')])
+                if energy.find('-Reserve') != -1:
+                    nReserve = int(energy[energy.find(' - ')+len(' - '):energy.find('-Reserve')])
+                else:
+                    nReserve = 0
+                nEnergy = nETank + nReserve
+                if nEnergy > maxEnergy:
+                    maxEnergy = nEnergy
+                    maxETank = nETank
+                    maxReserve = nReserve
+                items.remove(energy)
+            items.append('{}-ETank'.format(maxETank))
+            if maxReserve > 0:
+                items.append('{}-Reserve'.format(maxReserve))
+
+class OutWeb(Out):
     def __init__(self, solver):
         self.solver = solver
 
@@ -1379,6 +1536,8 @@ class OutWeb:
 
         out = []
         for loc in locations:
+            self.fixEnergy(loc['difficulty'].items)
+
             out.append([(loc['Name'], loc['Room']), loc['Area'], loc['SolveArea'], loc['itemName'],
                         '{0:.2f}'.format(loc['difficulty'].difficulty),
                         ', '.join(sorted(loc['difficulty'].knows)),
@@ -1392,6 +1551,7 @@ class OutWeb:
         # use convert to generate the thumbnail
         # dotFileName: the /directory/image.dot
         # the png and thumbnails are generated in the same directory as the dot
+        # requires that graphviz is installed
 
         splited = os.path.splitext(dotFileName)
         pngFileName = splited[0] + '.png'
@@ -1413,7 +1573,7 @@ class OutWeb:
 
         return (pngFileName, pngThumbFileName)
 
-class OutConsole:
+class OutConsole(Out):
     def __init__(self, solver):
         self.solver = solver
 
@@ -1443,6 +1603,9 @@ class OutConsole:
                     path = " -> ".join(path)
                     print('{:>50}: {}'.format('Path', path))
             line = '{} {:>48}: {:>12} {:>34} {:>8} {:>16} {:>14} {} {}'
+
+            self.fixEnergy(loc['difficulty'].items)
+
             print(line.format('Z' if 'Chozo' in loc['Class'] else ' ',
                               loc['Name'],
                               loc['Area'],
@@ -1580,13 +1743,17 @@ def interactiveSolver(args):
             sys.exit(1)
 
         solver = InteractiveSolver(args.output)
-        solver.initialize(args.mode, args.romFileName, args.presetFileName, magic=args.raceMagic, debug=args.vcr)
+        solver.initialize(args.mode, args.romFileName, args.presetFileName, magic=args.raceMagic, debug=args.vcr, fill=args.fill)
     else:
         # iterate
         params = {}
         if args.scope == 'common':
             if args.action == "save":
                 params["lock"] = args.lock
+            elif args.action == "randomize":
+                params["progressionSpeed"] = args.progressionSpeed
+                params["minorQty"] = args.minorQty
+                params["energyQty"] = args.energyQty
         elif args.scope == 'item':
             if args.state == None or args.action == None or args.output == None:
                 print("Missing state/action/output parameter")
@@ -1681,7 +1848,7 @@ if __name__ == "__main__":
     parser.add_argument('--loc', help="Name of the location to action on (used in interactive mode)",
                         dest="loc", nargs='?', default=None)
     parser.add_argument('--action', help="Pickup item at location, remove last pickedup location, clear all (used in interactive mode)",
-                        dest="action", nargs="?", default=None, choices=['init', 'add', 'remove', 'clear', 'get', 'save', 'replace'])
+                        dest="action", nargs="?", default=None, choices=['init', 'add', 'remove', 'clear', 'get', 'save', 'replace', 'randomize'])
     parser.add_argument('--item', help="Name of the item to place in plando mode (used in interactive mode)",
                         dest="item", nargs='?', default=None)
     parser.add_argument('--startPoint', help="The start AP to connect (used in interactive mode)",
@@ -1697,6 +1864,14 @@ if __name__ == "__main__":
                         dest="count", type=int)
     parser.add_argument('--lock', help="lock the plando seed (used in interactive mode)",
                         dest="lock", action='store_true')
+    parser.add_argument('--fill', help="in plando load all the source seed locations/transitions as a base (used in interactive mode)",
+                        dest="fill", action='store_true')
+    parser.add_argument('--progressionSpeed', help="rando plando (used in interactive mode)",
+                        dest="progressionSpeed", nargs="?", default=None, choices=["slowest", "slow", "medium", "fast", "fastest", "basic", "VARIAble"])
+    parser.add_argument('--minorQty', help="rando plando  (used in interactive mode)",
+                        dest="minorQty", nargs="?", default=None, choices=[str(i) for i in range(0,101)])
+    parser.add_argument('--energyQty', help="rando plando  (used in interactive mode)",
+                        dest="energyQty", nargs="?", default=None, choices=["sparse", "medium", "vanilla"])
 
     args = parser.parse_args()
 

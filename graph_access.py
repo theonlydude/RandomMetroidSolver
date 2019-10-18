@@ -202,7 +202,7 @@ accessPoints = [
        roomInfo = {'RoomPtr':0xb32e, "area": 0x2},
        exitInfo = {'DoorPtr':0x98be, 'direction': 0x4, "cap": (0x1, 0x6), "bitFlag": 0x0,
                    "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0},
-       entryInfo = {'SamusX':0xd1, 'SamusY':0x88}),
+       entryInfo = {'SamusX':0xbf, 'SamusY':0x198}), # on Ridley's platform. entry screen has to be changed (see getDoorConnections)
     # Kraid
     AccessPoint('Warehouse Zeela Room Left', 'Kraid', {
         'KraidRoomOut': lambda sm: sm.canPassBombPassages()
@@ -233,7 +233,7 @@ accessPoints = [
                                              sm.wand(sm.canOpenGreenDoors(),
                                                      sm.canEnterCathedral())),
         'Croc Zone': lambda sm: sm.wor(sm.wand(sm.haveItem('SpeedBooster'), # frog speedway
-                                               sm.canHellRun('MainUpperNorfair', mult=2, minE=1),
+                                               sm.canHellRun('MainUpperNorfair', mult=4 if sm.haveItem('Wave') else 2, minE=1),
                                                sm.wor(sm.wand(sm.canOpenRedDoors(), sm.knowsGreenGateGlitch()),
                                                       sm.haveItem('Wave')),
                                                sm.canOpenGreenDoors()),
@@ -349,8 +349,7 @@ accessPoints = [
                                                     sm.wand(sm.knowsGravLessLevel3(),
                                                             sm.haveItem('HiJump'),
                                                             sm.haveItem('Ice')))) # for the sand pits
-    },
-       roomInfo = {'RoomPtr':0xd21c, "area": 0x4},
+    }, roomInfo = {'RoomPtr':0xd21c, "area": 0x4},
        exitInfo = {'DoorPtr':0xa510, 'direction': 0x5,
                    "cap": (0x3e, 0x6), "screen": (0x3, 0x0), "bitFlag": 0x0,
                    "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
@@ -374,6 +373,8 @@ accessPoints = [
                                                          sm.canOpenGreenDoors(), # toilet door
                                                          sm.wor(RomPatches.has(RomPatches.AreaRandoGatesOther),
                                                                 sm.knowsGreenGateGlitch()))),
+        'Precious Room Top': lambda sm: sm.wand(sm.haveItem('Gravity'), # suitless could be possible with this but unreasonable: https://youtu.be/rtLwytH-u8o 
+                                                sm.canOpenGreenDoors())
     }, roomInfo = {'RoomPtr':0x95a8, "area": 0x0},
        exitInfo = {'DoorPtr':0x8aa2, 'direction': 0x4, "cap": (0x1, 0x16), "bitFlag": 0x0,
                    "screen": (0x0, 0x1), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
@@ -389,7 +390,9 @@ accessPoints = [
        shortName="M\\RED FISH"),
     AccessPoint('Precious Room Top', 'Maridia', {
         'Main Street Bottom': lambda sm: SMBool(True), # if you got there you can get back
-        'DraygonRoomOut': lambda sm: SMBool(True)
+        'DraygonRoomOut': lambda sm: SMBool(True),
+        'Le Coude Right': lambda sm: sm.wand(sm.canPassCacatacAlley(),
+                                             sm.canBotwoonExitToAndFromDraygon())
     }, internal = True),
     AccessPoint('DraygonRoomOut', 'Maridia', {
         'Precious Room Top': lambda sm: sm.canExitPreciousRoom()
@@ -526,6 +529,9 @@ def getRooms():
         roomPtr = ap.RoomInfo['RoomPtr']
         entryInfo = getAccessPoint(getVanillaExit(ap.Name)).ExitInfo
         rooms[(roomPtr, entryInfo['screen'])] = ap.Name
+        # for boss rando with incompatible ridley transition, also register this one
+        if ap.Name == 'RidleyRoomIn':
+            rooms[(roomPtr, (0x0, 0x1))] = ap.Name
     return rooms
 
 def getRandomBossTransitions():
@@ -616,6 +622,8 @@ def getDoorConnections(graph, areas=True, bosses=False):
             conn['distanceToSpawn'] = 0
             conn['SamusX'] = dst.EntryInfo['SamusX']
             conn['SamusY'] = dst.EntryInfo['SamusY']
+            if dst.Name == 'RidleyRoomIn': # special case: spawn samus on ridley platform
+                conn['screen'] = (0x0, 0x1)
         else:
             conn['distanceToSpawn'] = dst.EntryInfo['distanceToSpawn']
         if 'song' in dst.EntryInfo:

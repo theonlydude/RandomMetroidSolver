@@ -1,3 +1,6 @@
+  <div id="overlay"></div>
+  <div id="loadingGIF"><img src={{=URL('static/images','ajax-loader.gif')}}/></div>
+
   <div id="solverPopup" class="solverPopup">
     <table class="full">
       <colgroup><col class="half" /><col class="half" /><col class="small"/></colgroup>
@@ -12,6 +15,10 @@
       <tr>
 	<td>Preset:</td>
 	<td colspan=2>{{=SELECT(OPTGROUP(*stdPresets, **dict(_label="Standard presets")), OPTGROUP(*tourPresets, **dict(_label="Tournament presets")), OPTGROUP(*comPresets, **dict(_label="Community presets")), **dict(_name="preset", _id="preset", value=curSession["preset"], _class="filldropdown chzn-select"))}}</td>
+      </tr>
+      <tr id="fillPlandoVisibility">
+	<td colspan=2>Populate your plando with the items and transitions from the base ROM:</td>
+	<td><input id="fillPlando" name="fillPlando" type="checkbox"></td>
       </tr>
       <tr><td colspan=3 class="blankLastRow"></td></tr>
     </table>
@@ -29,11 +36,48 @@
   <div id="itemPopup" class="itemPopup">
     <input id="locName" name="locName" style="display:none" type="text"/>
     <table class="full">
-      <colgroup><col class="half" /><col class="half" /></colgroup>
+      <colgroup><col class="full" /></colgroup>
       <tr>
-	<td><p id="itemPopupText">Item to place at LOC:</p></td>
+	<td><p id="itemPopupText" class="center">Item to place at LOC:</p></td>
+      </tr>
+      <tr>
 	<td>
-	  <select class="filldropdown" id="item" name="item"><optgroup label="Nothing"><option value="Nothing">Nothing</option></optgroup><optgroup label="Minors"><option value="Missile">Missile</option><option value="Super">Super Missile</option><option value="PowerBomb">Power Bomb</option></optgroup><optgroup label="Energy"><option value="ETank">Energy Tank</option><option value="Reserve">Reserve Tank</option></optgroup><optgroup label="Beams"><option value="Charge">Charge Beam</option><option value="Ice">Ice Beam</option><option value="Wave">Wave Beam</option><option value="Spazer">Spazer</option><option value="Plasma">Plasma Beam</option></optgroup><optgroup label="Items"><option value="Varia">Varia Suit</option><option value="Gravity">Gravity Suit</option><option value="Morph">Morph Ball</option><option value="Bomb">Bomb</option><option value="SpringBall">Spring Ball</option><option value="ScrewAttack">Screw Attack</option><option value="HiJump">Hi-Jump Boots</option><option value="SpaceJump">Space Jump</option><option value="SpeedBooster">Speed Booster</option><option value="Grapple">Grapple Beam</option><option value="XRayScope">X-Ray Scope</option></optgroup></select>
+	  <select class="filldropdown centerDiv" id="item" name="item">
+	    <optgroup label="Nothing">
+	      <option data-img-src="/solver/static/images/Nothing.png" value="Nothing">Nothing</option>
+	    </optgroup>
+	    <optgroup label="Ammo">
+	      <option data-img-src="/solver/static/images/Missile.png" value="Missile">Missile</option>
+	      <option data-img-src="/solver/static/images/Super.png" value="Super">Super Missile</option>
+	      <option data-img-src="/solver/static/images/PowerBomb.png" value="PowerBomb">Power Bomb</option>
+	    </optgroup>
+	    <optgroup label="Energy">
+	      <option data-img-src="/solver/static/images/ETank.png" value="ETank">Energy Tank</option>
+	      <option data-img-src="/solver/static/images/Reserve.png" value="Reserve">Reserve Tank</option>
+	    </optgroup>
+	    <optgroup label="Beams">
+	      <option data-img-src="/solver/static/images/Charge.png" value="Charge">Charge Beam</option>
+	      <option data-img-src="/solver/static/images/Ice.png" value="Ice">Ice Beam</option>
+	      <option data-img-src="/solver/static/images/Wave.png" value="Wave">Wave Beam</option>
+	      <option data-img-src="/solver/static/images/Spazer.png" value="Spazer">Spazer</option>
+	      <option data-img-src="/solver/static/images/Plasma.png" value="Plasma">Plasma Beam</option>
+	    </optgroup>
+	    <optgroup label="Suits">
+	      <option data-img-src="/solver/static/images/Varia.png" value="Varia">Varia Suit</option>
+	      <option data-img-src="/solver/static/images/Gravity.png" value="Gravity">Gravity Suit</option>
+	    </optgroup>
+	    <optgroup label="Items">
+	      <option data-img-src="/solver/static/images/Morph.png" value="Morph">Morph Ball</option>
+	      <option data-img-src="/solver/static/images/Bomb.png" value="Bomb">Bomb</option>
+	      <option data-img-src="/solver/static/images/SpringBall.png" value="SpringBall">Spring Ball</option>
+	      <option data-img-src="/solver/static/images/ScrewAttack.png" value="ScrewAttack">Screw Attack</option>
+	      <option data-img-src="/solver/static/images/HiJump.png" value="HiJump">Hi-Jump Boots</option>
+	      <option data-img-src="/solver/static/images/SpaceJump.png" value="SpaceJump">Space Jump</option>
+	      <option data-img-src="/solver/static/images/SpeedBooster.png" value="SpeedBooster">Speed Booster</option>
+	      <option data-img-src="/solver/static/images/Grapple.png" value="Grapple">Grapple Beam</option>
+	      <option data-img-src="/solver/static/images/XRayScope.png" value="XRayScope">X-Ray Scope</option>
+	    </optgroup>
+	  </select>
 	</td>
       </tr>
       <tr><td colspan=2 class="blankLastRow"></td></tr>

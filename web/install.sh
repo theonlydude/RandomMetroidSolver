@@ -359,6 +359,7 @@ find ~/web2py/applications/solver/static -xtype l -exec rm -f {} \;
 
 [ -L ~/web2py/applications/solver/static/js/jquery.redirect.js ] || ln -s ~/RandomMetroidSolver/web/static/jquery.redirect.js ~/web2py/applications/solver/static/js/jquery.redirect.js
 
+[ -L ~/web2py/applications/solver/static/images/alucard.png ] || ln -s ~/RandomMetroidSolver/web/static/samus_sprites/alucard.png ~/web2py/applications/solver/static/images/alucard.png
 [ -L ~/web2py/applications/solver/static/images/bailey.png ] || ln -s ~/RandomMetroidSolver/web/static/samus_sprites/bailey.png ~/web2py/applications/solver/static/images/bailey.png
 [ -L ~/web2py/applications/solver/static/images/fed_trooper.png ] || ln -s ~/RandomMetroidSolver/web/static/samus_sprites/fed_trooper.png ~/web2py/applications/solver/static/images/fed_trooper.png
 [ -L ~/web2py/applications/solver/static/images/hitbox_helper.png ] || ln -s ~/RandomMetroidSolver/web/static/samus_sprites/hitbox_helper.png ~/web2py/applications/solver/static/images/hitbox_helper.png

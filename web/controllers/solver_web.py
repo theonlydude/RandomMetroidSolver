@@ -1963,13 +1963,14 @@ def initCustomizerSession():
 
 customSprites = {
     'samus': {"index":0, "name": "Samus", "desc": "Samus, with a distinct animation for Screw Attack without Space Jump and a new Crystal Flash animation", "author": "Artheau and Feesh"},
-    'hitbox_helper': {"index":1, "name": "Hitbox Helper", "desc": "Samus, with her actual hitbox on top", "author": "Artheau and Komaru"},
+    'hitbox_helper': {"index":1, "name": "Hitbox Helper", "desc": "Samus, with her actual hitbox on top", "author": "Artheau and Komaru"},    
     'bailey': {"index":2, "name": "Bailey", "desc": "Justin Bailey, aka Samus in an 80s swimsuit", "author": "Auximines"},
-    'megaman': {"index":3, "name": "Megaman", "desc": "Megaman X!", "author": "Artheau"},
-    'fed_trooper': {"index":4, "name": "Fed Trooper", "desc": "A Galactic Federation trooper", "author": "Physix"},
-    'super_controid': {"index":5, "name": "Contra", "desc": "Badass soldier from Contra III", "author": "Nintoaster"},
-    'marga': {"index":6, "name": "Margatroid", "desc": "Alice Margatroid from the Touhou Project", "author": "Plan"},
-    'win95_cursor': {"index":7, "name": "Win95 Cursor", "desc": "A classic Windows cursor...", "author": "PlaguedOne"}
+    'alucard': {"index":3, "name": "Alucard", "desc": "Alucard from Castlevania Symphony Of The Night", "author": "Nintoaster"},
+    'megaman': {"index":4, "name": "Megaman", "desc": "Megaman X!", "author": "Artheau"},
+    'fed_trooper': {"index":5, "name": "Fed Trooper", "desc": "A Galactic Federation trooper", "author": "Physix"},
+    'super_controid': {"index":6, "name": "Contra", "desc": "Badass soldier from Contra III", "author": "Nintoaster"},
+    'marga': {"index":7, "name": "Margatroid", "desc": "Alice Margatroid from the Touhou Project", "author": "Plan"},
+    'win95_cursor': {"index":8, "name": "Win95 Cursor", "desc": "A classic Windows cursor...", "author": "PlaguedOne"}
 }
 
 def customizer():

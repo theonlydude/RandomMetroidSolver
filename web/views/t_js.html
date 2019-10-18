@@ -664,7 +664,9 @@ window.onload = function(){
             romData[addresses[i]+1] = bytes[addresses[i]+1];
             romData[addresses[i]+6] = bytes[addresses[i]+6];
             romData[addresses[i]+7] = bytes[addresses[i]+7];
-        }
+            romData[addresses[i]+10] = bytes[addresses[i]+10];
+	    romData[addresses[i]+11] = bytes[addresses[i]+11];
+	}
   
         // bank B8
         for(var i=0x1C0000; i<=0x1C7FFF; i++){

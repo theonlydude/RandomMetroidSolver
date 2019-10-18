@@ -529,6 +529,9 @@ def getRooms():
         roomPtr = ap.RoomInfo['RoomPtr']
         entryInfo = getAccessPoint(getVanillaExit(ap.Name)).ExitInfo
         rooms[(roomPtr, entryInfo['screen'])] = ap.Name
+        # for boss rando with incompatible ridley transition, also register this one
+        if ap.Name == 'RidleyRoomIn':
+            rooms[(roomPtr, (0x0, 0x1))] = ap.Name
     return rooms
 
 def getRandomBossTransitions():

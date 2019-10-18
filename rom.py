@@ -168,8 +168,7 @@ class RomReader:
         'gravityNoHeatProtection': {'address': 0x06e37d, 'value': 0x01, 'desc': "Gravity suit heat protection removed"},
         'variaTweaks': {'address': 0x7CC4D, 'value': 0x37, 'desc': "VARIA tweaks"},
         'area': {'address': 0x22D564, 'value': 0xF2, 'desc': "Area layout modifications"},
-        'areaLayout': {'address': 0x252FA7, 'value': 0xF8, 'desc': "Area layout additional modifications"},
-        'ws_save': {'address': 0x7CEB0, 'value': 0xC9, 'desc': "Phantoon save in boss/area rando"}
+        'areaLayout': {'address': 0x252FA7, 'value': 0xF8, 'desc': "Area layout additional modifications"}
     }
 
     @staticmethod
@@ -1359,8 +1358,7 @@ class RomLoader(object):
 
 
         # check boss rando
-        if self.hasPatch("ws_save") and not self.hasPatch('area'):
-            isBoss = True
+        isBoss = self.isBoss()
 
         return (isArea, isBoss)
 
@@ -1382,6 +1380,15 @@ class RomLoader(object):
 
     def getROM(self):
         return self.romReader.romFile
+
+    def isBoss(self):
+        from graph_access import getAccessPoint
+        romFile = self.getROM()
+        phOut = getAccessPoint('PhantoonRoomOut')
+        doorPtr = phOut.ExitInfo['DoorPtr']
+        romFile.seek((0x10000 | doorPtr) + 10)
+        asmPtr = readWord(romFile)
+        return asmPtr != 0 # this is at 0 in vanilla
 
 class RomLoaderSfc(RomLoader):
     # standard usage (when calling from the command line)

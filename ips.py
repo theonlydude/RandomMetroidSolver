@@ -209,3 +209,8 @@ class IPS_Patch(object):
             out_data = out_data[:self.truncate_length]
 
         return out_data
+
+    # appends an IPS_Patch on top of this one
+    def append(self, patch):
+        for record in patch.records:
+            self.records.append(record)

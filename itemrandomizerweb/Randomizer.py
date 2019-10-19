@@ -613,6 +613,7 @@ class RandoState(object):
         self.progressionItemLocs = rando.progressionItemLocs[:]
         self.progressionStatesIndices = rando.progressionStatesIndices[:]
         self.hadChozoLeft = rando.hadChozoLeft
+        self.onlyBosses = rando.onlyBosses
         self.bosses = [boss for boss in Bosses.golden4Dead if Bosses.golden4Dead[boss] == True]
         self.curLocs = curLocs
 
@@ -630,6 +631,7 @@ class RandoState(object):
         rando.progressionStatesIndices = self.progressionStatesIndices[:]
         rando.progressionItemLocs = self.progressionItemLocs[:]
         rando.hadChozoLeft = self.hadChozoLeft
+        rando.onlyBosses = self.onlyBosses
         rando.smbm.resetItems()
         rando.smbm.addItems([item['Type'] for item in self.currentItems])
         Bosses.reset()
@@ -1303,8 +1305,8 @@ class Randomizer(object):
         item = itemLocation['Item']
         location = itemLocation['Location']
         curLocs = None
-        isProg = self.isProgItemNow(item)
         if collect == True:
+            isProg = self.isProgItemNow(item)
             # walk the graph to get proper access point
             self.currentLocations(item)
             self.log.debug("getItem: loc: {} ap: {}".format(location['Name'], location['accessPoint']))
@@ -1414,7 +1416,7 @@ class Randomizer(object):
         pool = self.getNonProgItemPoolStart()
         poolTypes = list(set([item['Type'] for item in pool]))
         self.log.debug("fillNonProgressionItems poolset=" + str(poolTypes))
-        poolWasEmpty = len(pool) == 0 or poolTypes == ['Boss']
+        poolWasEmpty = len(pool) == 0
         itemLocation = None
         nItems = 0
         locPoolOk = True
@@ -1433,7 +1435,7 @@ class Randomizer(object):
                 self.getItem(itemLocation)
                 pool = self.getNonProgItemPool()
             locPoolOk = self.checkLocPool()
-        isStuck = not poolWasEmpty and itemLocation is None
+        isStuck = not poolWasEmpty and itemLocation is None and not self.onlyBosses # do this to avoid being stuck in an infinite non-prog loop in corner onlyBossesLeft cases
         return isStuck
 
     # return True if stuck, False if not
@@ -1777,6 +1779,7 @@ class Randomizer(object):
         self.curLocs = self.currentLocations()
         self.curAccessPoints = self.currentAccessPoints()
         self.hadChozoLeft = self.isChozoLeft()
+        self.onlyBosses = False
         self.initState = RandoState(self, self.currentLocations())
         self.log.debug("{} items in pool".format(len(self.itemPool)))
         runtime_s = 0
@@ -1799,8 +1802,8 @@ class Randomizer(object):
                     isStuck = self.getItemFromStandardPool()
                 if isStuck:
                     # if we're stuck, check if only bosses locations are left (bosses difficulty settings problems)
-                    onlyBosses = self.onlyBossesLeft(self.getCurrentState().bosses)
-                    if not onlyBosses:
+                    self.onlyBosses = self.onlyBossesLeft(self.getCurrentState().bosses)
+                    if not self.onlyBosses:
                         # check that we're actually stuck
                         nCurLocs = len(self.currentLocations())
                         nLocsLeft = len(self.unusedLocations)

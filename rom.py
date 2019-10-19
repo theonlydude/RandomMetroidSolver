@@ -893,11 +893,13 @@ class RomPatcher:
                                 itemLocs)
         # add location of the first instance of each minor
         for t in ['Missile', 'Super', 'PowerBomb']:
-            # in vcr mode if the seed has stucked we may not have these minors
-            try:
-                fItemLocs.append(next(il for il in itemLocs if il['Item']['Type'] == t))
-            except StopIteration:
-                pass
+            itLoc = None
+            if progItemLocs is not None:
+                itLoc = next((il for il in progItemLocs if il['Item']['Type'] == t), None)
+            if itLoc is None:
+                itLoc = next((il for il in itemLocs if il['Item']['Type'] == t), None)
+            if itLoc is not None: # in vcr mode if the seed has stucked we may not have these minors
+                fItemLocs.append(itLoc)
         regex = re.compile(r"[^A-Z0-9\.,'!: ]+")
 
         itemLocs = {}

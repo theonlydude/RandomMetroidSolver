@@ -3,6 +3,7 @@ from graph import AccessPoint
 from parameters import Knows
 from rom import RomPatches
 from smbool import SMBool
+from helpers import Bosses
 
 # all access points and traverse functions
 accessPoints = [

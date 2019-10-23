@@ -463,9 +463,7 @@ class HelpersGraph(Helpers):
                               sm.wor(sm.canFly(),
                                      sm.knowsGravityJump(),
                                      sm.haveItem('HiJump'))),
-                      sm.wor(sm.wand(sm.haveItem('XRayScope'),
-                                     sm.knowsPreciousRoomXRayExit()),
-                             sm.canSpringBallJump()))
+                      sm.canSpringBallJump())
 
     def canExitPreciousRoom(self):
         if self.isVanillaDraygon():

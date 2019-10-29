@@ -11,7 +11,7 @@ from math import ceil
 class HelpersGraph(Helpers):
     def __init__(self, smbm):
         self.smbm = smbm
-        self.vanillaDraygon = None
+        self.draygonConnection = None
 
     @Cache.decorator
     def canAccessKraidsLair(self):
@@ -379,11 +379,14 @@ class HelpersGraph(Helpers):
         return sm.wand(sm.canDefeatBotwoon(),
                        sm.canBotwoonExitToAndFromDraygon())
 
-    def isVanillaDraygon(self):
-        if self.vanillaDraygon is None:
+    def getDraygonConnection(self):
+        if self.draygonConnection is None:
             drayRoomOut = getAccessPoint('DraygonRoomOut')
-            self.vanillaDraygon = drayRoomOut.ConnectedTo == 'DraygonRoomIn'
-        return self.vanillaDraygon
+            self.draygonConnection = drayRoomOut.ConnectedTo
+        return self.draygonConnection
+
+    def isVanillaDraygon(self):
+        return self.getDraygonConnection() == 'DraygonRoomIn'
 
     @Cache.decorator
     def canFightDraygon(self):
@@ -406,17 +409,22 @@ class HelpersGraph(Helpers):
                        sm.itemCountOk('PowerBomb', 4))
 
     @Cache.decorator
+    def canExitDraygonRoomWithGravity(self):
+        sm = self.smbm
+        return sm.wand(sm.haveItem('Gravity'),
+                       sm.wor(sm.canFly(),
+                              sm.knowsGravityJump(),
+                              sm.wand(sm.haveItem('HiJump'),
+                                      sm.haveItem('SpeedBooster'))))
+
+    @Cache.decorator
     def canExitDraygonVanilla(self):
         sm = self.smbm
         # to get out of draygon room:
         #   with gravity but without highjump/bomb/space jump: gravity jump
         #     to exit draygon room: grapple or crystal flash (for free shine spark)
         #     to exit precious room: spring ball jump, xray scope glitch or stored spark
-        return sm.wor(sm.wand(sm.haveItem('Gravity'),
-                              sm.wor(sm.canFly(),
-                                     sm.knowsGravityJump(),
-                                     sm.wand(sm.haveItem('HiJump'),
-                                             sm.haveItem('SpeedBooster')))),
+        return sm.wor(sm.canExitDraygonRoomWithGravity(),
                       sm.wand(sm.canDraygonCrystalFlashSuit(),
                               # use the spark either to exit draygon room or precious room
                               sm.wor(sm.wand(sm.haveItem('Grapple'),
@@ -436,11 +444,7 @@ class HelpersGraph(Helpers):
     def canExitDraygonRandomized(self):
         sm = self.smbm
         # disregard precious room
-        return sm.wor(sm.wand(sm.haveItem('Gravity'),
-                              sm.wor(sm.canFly(),
-                                     sm.knowsGravityJump(),
-                                     sm.wand(sm.haveItem('HiJump'),
-                                             sm.haveItem('SpeedBooster')))),
+        return sm.wor(sm.canExitDraygonRoomWithGravity(),
                       sm.canDraygonCrystalFlashSuit(),
                       sm.wand(sm.haveItem('Grapple'),
                               sm.knowsDraygonRoomGrappleExit()),
@@ -459,11 +463,18 @@ class HelpersGraph(Helpers):
     @Cache.decorator
     def canExitPreciousRoomRandomized(self):
         sm = self.smbm
+        suitlessRoomExit = sm.canSpringBallJump()
+        if suitlessRoomExit.bool == False:
+            if self.getDraygonConnection() == 'KraidRoomIn':
+                suitlessRoomExit = sm.canShortCharge() # charge spark in kraid's room
+            elif self.getDraygonConnection() == 'RidleyRoomIn':
+                suitlessRoomExit = sm.wand(sm.haveItem('XRayScope'), # get doorstuck in compatible transition
+                                           sm.knowsPreciousRoomXRayExit())
         return sm.wor(sm.wand(sm.haveItem('Gravity'),
                               sm.wor(sm.canFly(),
                                      sm.knowsGravityJump(),
                                      sm.haveItem('HiJump'))),
-                      sm.canSpringBallJump())
+                      suitlessRoomExit)
 
     def canExitPreciousRoom(self):
         if self.isVanillaDraygon():

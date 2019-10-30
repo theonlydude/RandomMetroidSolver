@@ -1,5 +1,5 @@
 
-import re, struct, sys, random, os, json, copy
+import re, struct, sys, random, os, json, copy, base64
 from smbool import SMBool
 from itemrandomizerweb.Items import ItemManager
 from itemrandomizerweb.patches import patches

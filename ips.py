@@ -11,10 +11,10 @@ def intFromBytesBig(bArray, n=0, idx=0):
         ret |= ord(bArray[idx + n - i - 1]) << (8 * i)
     return ret
 
-def intToBytesBig(val, n, idx=0):
+def intToBytesBig(val, n):
     ret = bytearray()
     for i in reversed(range(n)):
-        ret.append(val & (0xff << (8 * i)))
+        ret.append((val & (0xff << (8 * i))) >> (8 * i))
     return ret
 
 class IPS_Patch(object):

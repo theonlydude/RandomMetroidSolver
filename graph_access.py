@@ -610,7 +610,7 @@ def getDoorConnections(graph, areas=True, bosses=False):
             continue
         conn = {}
         conn['ID'] = str(src) + ' -> ' + str(dst)
-        print(conn['ID'])
+#        print(conn['ID'])
         # where to write
         conn['DoorPtr'] = src.ExitInfo['DoorPtr']
         # door properties

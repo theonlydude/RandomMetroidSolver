@@ -21,6 +21,7 @@ class IPS_Patch(object):
     def __init__(self, patchDict=None):
         self.records = []
         self.truncate_length = None
+        self.max_size = 0
         if patchDict is not None:
             for addr, data in patchDict.iteritems():
                 byteData = "".join(map(chr, data))
@@ -156,6 +157,9 @@ class IPS_Patch(object):
             raise RuntimeError('Record with length {0} is too large for the IPS format. Records must be less than 65536 bytes.'.format(len(data)))
 
         record = {'address': address, 'data': data}
+        sz = address + len(data)
+        if sz > self.max_size:
+            self.max_size = sz
         self.records.append(record)
 
     def add_rle_record(self, address, data, count):
@@ -169,6 +173,9 @@ class IPS_Patch(object):
             raise RuntimeError('Data for RLE record must be exactly one byte! Received {0}.'.format(data))
 
         record = {'address': address, 'data': data, 'rle_count': count}
+        sz = address + count
+        if sz > self.max_size:
+            self.max_size = sz
         self.records.append(record)
 
     def set_truncate_length(self, truncate_length):
@@ -224,7 +231,9 @@ class IPS_Patch(object):
 
     # appends an IPS_Patch on top of this one
     def append(self, patch):
-        if patch.truncate_length is not None and patch.truncate_length > self.truncate_length:
+        if patch.truncate_length is not None and self.truncate_length is not None and patch.truncate_length > self.truncate_length:
             self.set_truncate_length(patch.truncate_length)
+        if patch.max_size > self.max_size:
+            self.max_size = patch.max_size
         for record in patch.records:
             self.records.append(record)

@@ -746,6 +746,7 @@ class RomPatcher:
             self.romFile.data["ips"] = base64.b64encode(patchData)
             if mergedIPS.truncate_length is not None:
                 self.romFile.data["truncate_length"] = mergedIPS.truncate_length
+            self.romFile.data["max_size"] = mergedIPS.max_size
 
     def writeSeed(self, seed):
         random.seed(seed)

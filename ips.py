@@ -231,7 +231,7 @@ class IPS_Patch(object):
 
     # appends an IPS_Patch on top of this one
     def append(self, patch):
-        if patch.truncate_length is not None and self.truncate_length is not None and patch.truncate_length > self.truncate_length:
+        if patch.truncate_length is not None and (self.truncate_length is None or patch.truncate_length > self.truncate_length):
             self.set_truncate_length(patch.truncate_length)
         if patch.max_size > self.max_size:
             self.max_size = patch.max_size

@@ -279,8 +279,8 @@ order by s.id;"""
         return (header, self.execSelect(sql, (weeks,)))
 
     def getRandomizerData(self, weeks):
-        sql = """select rr.return_code, r.id, r.action_time,
-rr.return_code, lpad(round(rr.duration, 2), 5, '0'), rr.error_msg,
+        sql = """select rr.return_code,
+r.id, r.action_time, rr.return_code, lpad(round(rr.duration, 2), 5, '0'), rr.error_msg,
 rp.params
 from randomizer r
   left join (select randomizer_id, group_concat(\"'\", name, \"': '\", value, \"'\" order by name) as params from randomizer_params group by randomizer_id) rp on r.id = rp.randomizer_id
@@ -295,8 +295,8 @@ order by r.id;"""
         outData = []
         paramsSet = set()
         for row in data:
-            # use a dict for the parameters
-            params = row[6]
+            # use a dict for the parameters which are in the last column
+            params = row[-1]
             dictParams = eval('{' + params + '}')
             outData.append(row[0:-1] + (dictParams,))
             paramsSet.update(dictParams.keys())

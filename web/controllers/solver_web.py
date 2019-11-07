@@ -2163,12 +2163,14 @@ def extStats():
         DB.close()
 
         # check that all items are present in the stats:
-        if len(stats) != 19:
+        nbItems = 19
+        nbLocs = 105
+        if len(stats) > 0 and len(stats) != nbItems:
             for i, item in enumerate(['Bomb', 'Charge', 'Grapple', 'Gravity', 'HiJump', 'Ice', 'Missile', 'Morph',
                                       'Plasma', 'PowerBomb', 'ScrewAttack', 'SpaceJump', 'Spazer', 'SpeedBooster',
                                       'SpringBall', 'Super', 'Varia', 'Wave', 'XRayScope']):
                 if stats[i][1] != item:
-                    stats.insert(i, [stats[0][0], item] + [0]*105)
+                    stats.insert(i, [stats[0][0], item] + [0]*nbLocs)
     else:
         stats = None
         parameters = None

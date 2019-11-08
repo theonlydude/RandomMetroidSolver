@@ -737,7 +737,6 @@ class RomPatcher:
             for ips in self.ipsPatches:
                 ips.applyFile(self.romFile)
         else:
-            print('WEEEEB')
             # Web
             mergedIPS = IPS_Patch()
             for ips in self.ipsPatches:

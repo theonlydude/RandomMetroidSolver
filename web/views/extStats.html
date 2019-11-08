@@ -151,7 +151,7 @@ function startTheTour(step=-1) {
 
 function drawDifficultiesHistogram() {
 {{
-  if len(difficulties) == 0:
+  if difficulties == None or len(difficulties) == 0:
     response.write("  return;", escape=False)
     pass
   else:

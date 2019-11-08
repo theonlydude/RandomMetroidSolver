@@ -449,9 +449,9 @@ from extended_stats e
 where 1 = 1
 {};"""
 
-        where = """and e.version = %d and e.preset = '%s' and e.area = %s and e.boss = %s """
+        where = """and e.version = %d and e.preset = '%s' and e.area = %s and e.boss = %s and e.noGravHeat = %s """
 
-        sqlParams = [randoAlgoVersion, parameters['preset'], parameters['area'], parameters['boss']]
+        sqlParams = [randoAlgoVersion, parameters['preset'], parameters['area'], parameters['boss'], parameters['noGravHeat']]
 
         if parameters['majorsSplit'] != "random":
             where += """and e.majorsSplit = '%s' """
@@ -488,8 +488,6 @@ where 1 = 1
         if parameters['superFunSuit'] != "random":
             where += """and e.superFunSuit = %s """
             sqlParams.append(parameters['superFunSuit'])
-
-        # TODO::add gravity parameter
 
         items = self.execSelect(sqlItems.format(where), tuple(sqlParams))
 

@@ -17,11 +17,11 @@ create table if not exists extended_stats (
   superFunMovement boolean,
   superFunCombat boolean,
   superFunSuit boolean,
-  -- TODO::add gravity parameter
+  noGravHeat boolean,
 
   -- how many seeds
   count int unsigned default 0,
-  primary key(version, preset, area, boss, majorsSplit, progSpeed, morphPlacement, suitsRestriction, progDiff, superFunMovement, superFunCombat, superFunSuit),
+  primary key(version, preset, area, boss, majorsSplit, progSpeed, morphPlacement, suitsRestriction, progDiff, superFunMovement, superFunCombat, superFunSuit, noGravHeat),
   index(id)
 );
 

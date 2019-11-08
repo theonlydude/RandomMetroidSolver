@@ -2137,6 +2137,7 @@ def extStats():
             'preset': preset,
             'area': 'areaRandomization' in randoPreset and randoPreset['areaRandomization'] == 'on',
             'boss': 'bossRandomization' in randoPreset and randoPreset['bossRandomization'] == 'on',
+            'noGravHeat': randoPreset['noGravHeat'] == 'on',
             # parameters which can be random:
             'majorsSplit': randoPreset['majorsSplit'] if 'majorsSplit' in randoPreset else 'Full',
             'progSpeed': randoPreset['progressionSpeed'] if 'progressionSpeed' in randoPreset else 'variable',
@@ -2146,7 +2147,6 @@ def extStats():
             'superFunMovement': 'funMovement' in randoPreset and randoPreset['funMovement'] == 'on',
             'superFunCombat': 'funCombat' in randoPreset and randoPreset['funCombat'] == 'on',
             'superFunSuit': 'funSuits' in randoPreset and randoPreset['funSuits'] == 'on'
-            # TODO::add gravity parameter
         }
 
         if randoPreset['suitsRestriction'] == "random":
@@ -2172,8 +2172,6 @@ def extStats():
                                       'SpringBall', 'Super', 'Varia', 'Wave', 'XRayScope']):
                 if itemsStats[i][1] != item:
                     itemsStats.insert(i, [itemsStats[0][0], item] + [0]*nbLocs)
-
-        print("difficulties: {}".format(difficulties))
     else:
         itemsStats = None
         techniquesStats = None

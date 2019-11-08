@@ -512,8 +512,7 @@ if __name__ == "__main__":
                       'superFunCombat': 'Combat' in args.superFun,
                       'superFunSuit': 'Suits' in args.superFun}
         with open(args.extStatsFilename, 'a') as extStatsFile:
-            db.DB.dumpExtStat(parameters, locsItems, extStatsFile)
-        sys.exit(0)
+            db.DB.dumpExtStatsItems(parameters, locsItems, extStatsFile)
 
     try:
         # args.rom is not None: generate local rom named filename.sfc with args.rom as source

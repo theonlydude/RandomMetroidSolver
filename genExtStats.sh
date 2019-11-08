@@ -14,8 +14,25 @@ function computeSeed {
     JOB_ID=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 32)
 
     LOG=log_$(basename ${RANDO_PRESET} | cut -d '.' -f 1)_$(basename ${SKILL_PRESET} | cut -d '.' -f 1)_${JOB_ID}.log
+    SQL=extStats_${JOB_ID}.sql
 
-    ./randomizer.py -r "${ROM}" --randoPreset "${RANDO_PRESET}" --param "${SKILL_PRESET}" --ext_stats "extStats_${JOB_ID}.sql" --runtime 10 > ${LOG} && (printf "."; rm -f ${LOG}) || printf "x"
+    ./randomizer.py -r "${ROM}" --randoPreset "${RANDO_PRESET}" --param "${SKILL_PRESET}" --ext_stats "${SQL}" --runtime 10 > ${LOG}
+     if [ $? -eq 0 ]; then
+	 SEED=$(grep 'Rom generated:' ${LOG} | awk '{print $NF}')".sfc"
+	 if [ -f "${SEED}" ]; then
+	     printf "."
+	     rm -f ${LOG}
+
+	     ./solver.py -r "${SEED}" --preset "${SKILL_PRESET}" --pickupStrategy any --difficultyTarget 1 --ext_stats "${SQL}" >/dev/null
+
+	     # delete generated ROM
+	     rm -f "${SEED}"
+	 else
+	     printf "x"
+	 fi
+     else
+	 printf "x"
+     fi
 }
 
 function wait_for_a_child {
@@ -42,6 +59,11 @@ STOP=""
 NB_CPU=$(cat /proc/cpuinfo  | grep 'processor' | wc -l)
 
 for RANDO_PRESET in $(ls -1 rando_presets/*.json); do 
+    # ignore random presets
+    if(echo "${RANDO_PRESET}" | grep -q "random"); then
+	continue
+    fi
+
     info "Begin rando preset ${RANDO_PRESET}"
 
     for SKILL_PRESET in $(ls -1 standard_presets/*.json | grep -v -E 'solution|samus'); do
@@ -70,6 +92,12 @@ for RANDO_PRESET in $(ls -1 rando_presets/*.json); do
     echo ""
 done
 
-cat extStats_*.sql >> extStats.sql && rm -f extStats_*.sql
+# will fail if more than 'getconf ARG_MAX' sql files (2097152 on linux)
+for F in extStats_*.sql; do
+    RESULT=${RANDOM}
+    let "RESULT %= ${NB_CPU}"
+
+    cat ${F} >> extStats_${RESULT}.sql && rm -f ${F}
+done
 
 echo "DONE"

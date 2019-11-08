@@ -18,7 +18,7 @@ from graph import AccessGraph
 from graph_access import vanillaTransitions, accessPoints, getDoorConnections, getTransitions, vanillaBossesTransitions, getAps2DoorsPtrs
 from utils import PresetLoader
 from vcr import VCR
-import log
+import log, db
 
 class Conf:
     # keep getting majors of at most this difficulty before going for minors or changing area
@@ -1232,7 +1232,9 @@ class InteractiveSolver(CommonSolver):
 class StandardSolver(CommonSolver):
     # given a rom and parameters returns the estimated difficulty
 
-    def __init__(self, rom, presetFileName, difficultyTarget, pickupStrategy, itemsForbidden=[], type='console', firstItemsLog=None, displayGeneratedPath=False, outputFileName=None, magic=None, checkDuplicateMajor=False, vcr=False):
+    def __init__(self, rom, presetFileName, difficultyTarget, pickupStrategy, itemsForbidden=[], type='console',
+                 firstItemsLog=None, extStatsFilename=None, displayGeneratedPath=False, outputFileName=None,
+                 magic=None, checkDuplicateMajor=False, vcr=False):
         self.checkDuplicateMajor = checkDuplicateMajor
         self.vcr = VCR(rom, 'solver') if vcr == True else None
 
@@ -1244,6 +1246,8 @@ class StandardSolver(CommonSolver):
         if firstItemsLog is not None:
             self.firstLogFile = open(firstItemsLog, 'w')
             self.firstLogFile.write('Item;Location;Area\n')
+
+        self.extStatsFilename = extStatsFilename
 
         # can be called from command line (console) or from web site (web)
         self.type = type
@@ -1275,10 +1279,14 @@ class StandardSolver(CommonSolver):
         if self.firstLogFile is not None:
             self.firstLogFile.close()
 
-        (self.knowsUsed, self.knowsKnown) = self.getKnowsUsed()
+        (self.knowsUsed, self.knowsKnown, knowsUsedList) = self.getKnowsUsed()
 
         if self.vcr != None:
             self.vcr.dump()
+
+        if self.extStatsFilename != None:
+            with open(self.extStatsFilename, 'a') as extStatsFile:
+                db.DB.dumpExtStatsSolver(self.difficulty, knowsUsedList, extStatsFile)
 
         self.output.out()
 
@@ -1321,13 +1329,14 @@ class StandardSolver(CommonSolver):
             knowsUsed += loc['difficulty'].knows
 
         # get unique knows
-        knowsUsed = len(list(set(knowsUsed)))
+        knowsUsed = list(set(knowsUsed))
+        knowsUsedCount = len(knowsUsed)
 
         # get total of known knows
-        knowsKnown = len([knows for  knows in Knows.__dict__ if isKnows(knows) and getattr(Knows, knows)[0] == True])
-        knowsKnown += len([hellRun for hellRun in Settings.hellRuns if Settings.hellRuns[hellRun] is not None])
+        knowsKnownCount = len([knows for  knows in Knows.__dict__ if isKnows(knows) and getattr(Knows, knows)[0] == True])
+        knowsKnownCount += len([hellRun for hellRun in Settings.hellRuns if Settings.hellRuns[hellRun] is not None])
 
-        return (knowsUsed, knowsKnown)
+        return (knowsUsedCount, knowsKnownCount, knowsUsed)
 
     def tryRemainingLocs(self):
         # use preset which knows every techniques to test the remaining locs to
@@ -1803,7 +1812,7 @@ def standardSolver(args):
 
     solver = StandardSolver(args.romFileName, args.presetFileName, difficultyTarget,
                             pickupStrategy, args.itemsForbidden, type=args.type,
-                            firstItemsLog=args.firstItemsLog,
+                            firstItemsLog=args.firstItemsLog, extStatsFilename=args.extStatsFilename,
                             displayGeneratedPath=args.displayGeneratedPath,
                             outputFileName=args.output, magic=args.raceMagic,
                             checkDuplicateMajor=args.checkDuplicateMajor, vcr=args.vcr)
@@ -1833,6 +1842,8 @@ if __name__ == "__main__":
     parser.add_argument('--firstItemsLog', '-1',
                         help="path to file where for each item type the first time it was found and where will be written (spoilers!)",
                         nargs='?', default=None, type=str, dest='firstItemsLog')
+    parser.add_argument('--ext_stats', help="Generate extended stats",
+                        nargs='?', default=None, dest='extStatsFilename')
     parser.add_argument('--displayGeneratedPath', '-g', help="display the generated path (spoilers!)",
                         dest='displayGeneratedPath', action='store_true')
     parser.add_argument('--race', help="Race mode magic number", dest='raceMagic', type=int)

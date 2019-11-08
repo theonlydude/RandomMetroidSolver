@@ -17,6 +17,8 @@ create table if not exists extended_stats (
   superFunMovement boolean,
   superFunCombat boolean,
   superFunSuit boolean,
+  -- TODO::add gravity parameter
+
   -- how many seeds
   count int unsigned default 0,
   primary key(version, preset, area, boss, majorsSplit, progSpeed, morphPlacement, suitsRestriction, progDiff, superFunMovement, superFunCombat, superFunSuit),
@@ -137,3 +139,24 @@ create table if not exists item_locs (
   primary key(ext_id, item)
 );
 
+create table if not exists techniques (
+  -- to join with extend_stats
+  ext_id int unsigned not null,
+  -- technique (count how many times the technique has been used)
+  technique varchar(64) not null,
+  count int unsigned default 0,
+  primary key(ext_id, technique)
+);
+
+create table if not exists difficulties (
+  -- to join with extend_stats
+  ext_id int unsigned not null,
+  -- count each difficulty to make an histogram
+  easy int unsigned default 0,
+  medium int unsigned default 0,
+  hard int unsigned default 0,
+  harder int unsigned default 0,
+  hardcore int unsigned default 0,
+  mania int unsigned default 0,
+  primary key(ext_id)
+);

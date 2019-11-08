@@ -31,6 +31,9 @@ if (hs.registerOverlay) {
 <script type="text/javascript" src="{{=URL('static', 'js/chosen.jquery.min.js')}}"></script>
 <link rel="stylesheet" type="text/css" href={{=URL("static", "css/chosen.css")}} />
 
+<script type = "text/javascript" src = "https://www.gstatic.com/charts/loader.js"></script>
+<script type = "text/javascript">google.charts.load('current', {packages: ['corechart']});</script>
+
 <title>Super Metroid VARIA Randomizer statistics</title>
 
 <style>
@@ -92,9 +95,16 @@ if (hs.registerOverlay) {
 .right {
     float: right;
 }
+.row {
+    margin-bottom: 0.5em;
+    padding-left: 0.5em;
+}
+.space {
+    margin-bottom: 1.0em;
+    margin-top: 1.0em;
+}
 </style>
 
-<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 <script type="text/javascript">
 // https://stackoverflow.com/questions/16960690/chosen-harvesthq-resize-width-dynamically
 $(document).ready(function(){      
@@ -139,6 +149,38 @@ function startTheTour(step=-1) {
   tour.start();
 }
 
+function drawDifficultiesHistogram() {
+{{
+  if len(difficulties) == 0:
+    response.write("  return;", escape=False)
+    pass
+  else:
+}}
+    // Define the chart to be drawn.
+    var data = google.visualization.arrayToDataTable([
+      ["Difficulty", "Count", { role: 'style' }],
+      ["easy", {{=difficulties[0]}}, "#6daa53"],
+      ["medium", {{=difficulties[1]}}, "#C1B725"],
+      ["hard", {{=difficulties[2]}}, "#e69235"],
+      ["very hard", {{=difficulties[3]}}, "#d13434"],
+      ["hardcore", {{=difficulties[4]}}, "#123456"],
+      ["mania", {{=difficulties[5]}}, "#000000"]
+    ]);
+
+    var options = {
+      title: "Difficulty histogram",
+      legend: { position: "none" }
+    };
+
+    // Instantiate and draw the chart.
+    var chart = new google.visualization.ColumnChart(document.getElementById("difficultiesHistogram"));
+    chart.draw(data, options);
+{{
+    pass
+}}
+}
+
+google.charts.setOnLoadCallback(drawDifficultiesHistogram);
 </script>
 
 <div class="fixed">
@@ -182,17 +224,17 @@ function startTheTour(step=-1) {
       </table>
     </form>
 {{
-if stats != None and len(stats) == 0:
+if itemsStats != None and len(itemsStats) == 0:
   response.write("No statistics found.", escape=False)
-elif stats != None and len(stats) > 0:
+elif itemsStats != None and len(itemsStats) > 0:
 }}
   <!--
-      Stats is a matrix, on line per item, columns are (count, item, loc1%, loc2%, ..., loc100%)
+      ItemsStats is a matrix, on line per item, columns are (count, item, loc1%, loc2%, ..., loc100%)
       Items are in this order: Bomb 0, Charge 1, Grapple 2, Gravity 3, HiJump 4, Ice 5, Missile 6, Morph 7, Plasma 8, PowerBomb 9, ScrewAttack 10, SpaceJump 11, Spazer 12, SpeedBooster 13, SpringBall 14, Super 15, Varia 16, Wave 17, XRayScope 18
       Locations are in the same order as the graph_locations.locations list.
     -->
 {{
-numberSeeds = float(stats[0][0])
+numberSeeds = float(itemsStats[0][0])
 
 # to display the limits
 def getThreshold(ratio, nSeeds, split):
@@ -207,6 +249,8 @@ def getThreshold(ratio, nSeeds, split):
     percent = ratio * (100.0 / nLocs)
     return round(percent, 1)
 }}
+  <h2 class="center">Items</h2>
+  <div class="space"></div>
   <p>
     <div class="left">Statistics have been computed on {{=int(numberSeeds)}} seeds. Minors probabilities are only for the first ammo pack.</div>
     <div class="right">Legend: &nbsp;
@@ -221,7 +265,7 @@ def getThreshold(ratio, nSeeds, split):
 	</tr>
       </table>
     </div>
- </p>
+  </p>
   <table class="full border">
     <colgroup><col class="quarter"/><col class="icon"/><col class="icon"/><col class="icon"/><col class="icon"/><col class="icon"/><col class="icon"/><col class="icon"/><col class="icon"/><col class="icon"/><col class="icon"/><col class="icon"/><col class="icon"/><col class="icon"/><col class="icon"/><col class="icon"/><col class="icon"/><col class="icon"/><col class="icon"/><col class="icon"/><!--<col class="icon"/><col class="icon"/>--></colgroup>
 
@@ -319,7 +363,7 @@ def getColor(percent, nSeeds, split):
       response.write("<tr><td><a href=\"https://wiki.supermetroid.run/{}\">{}</a></td>".format(loc["Room"].replace(' ', '_').replace("'", '%27'), loc["Name"]), escape=False)
   
       for itemI, item in enumerate(["Missile", "Super", "PowerBomb", "Morph", "Bomb", "Springball", "ScrewAttack", "Varia", "Gravity", "HiJump", "SpaceJump", "SpeedBooster", "Charge", "Ice", "Wave", "Spazer", "Plasma", "Grapple", "XRayScope"]):
-        percent = stats[itemsMapping[itemI]][locI]
+        percent = itemsStats[itemsMapping[itemI]][locI]
         if item in ["Missile", "Super", "PowerBomb"]:
           if float(percent) > 0.0:
             color = "minor"
@@ -355,5 +399,59 @@ def getColor(percent, nSeeds, split):
 {{
   pass
 }}
+
+{{
+  if techniquesStats != None:
+}}
+
+
+    <div class="space"></div>
+    <h2 class="center">Techniques</h2>
+    <div class="space"></div>
+    <div class="row">
+{{
+    for (i, category) in enumerate(categories["Common"] + categories["Crateria/Brinstar"] + categories["Wrecked Ship"] + categories["Maridia 1/2"] + categories["Maridia 2/2"] + categories["Norfair"] + categories["Bosses/End"], -1):
+      if category["title"] == "Basics":
+        continue
+
+      if i > 0 and i % 3 == 0:
+}}
+    </div>
+    <div class="row">
+{{
+        pass
+}}
+      <div class="columnThird">
+        <table class="full border">
+	  <colgroup><col class="threequarter"/><col class="quarter"/></colgroup>
+          <tr><td class="center grey bold" colspan="2">{{=category["title"]}}</td></tr>
+{{
+      for know in category["knows"]:
+        if know in techniquesStats:
+	  percent = techniquesStats[know]
+        else:
+	  percent = 0.0
+	  pass
+	if knowsDesc[know]['href'] is not None:
+          display = "<a href=\"{}\">{}</a>".format(knowsDesc[know]["href"], knowsDesc[know]["display"])
+	else:
+	  display = knowsDesc[know]["display"]
+	  pass
+}}
+          <tr class="border"><td class="border">{{response.write(display, escape=False)}}</td><td class="border">{{=percent}}</td></tr>
+{{
+        pass
+}}
+	</table>
+      </div>
+{{
+      pass
+    pass
+}}
+  <div id = "difficultiesHistogram" style = "height: 400px; margin: 0 auto"></div>
+{{
+  pass
+}}
+    </div>
   </div>
 </div>

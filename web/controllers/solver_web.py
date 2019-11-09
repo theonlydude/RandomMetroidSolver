@@ -62,7 +62,7 @@ def loadPreset():
 def loadPresetsList():
     files = sorted(os.listdir('community_presets'), key=lambda v: v.upper())
     stdPresets = ['noob', 'casual', 'regular', 'veteran', 'speedrunner', 'master']
-    tourPresets = ['Season_Races', 'smrat', 'SCAVENGER_HUNT']
+    tourPresets = ['Season_Races']
     comPresets = [os.path.splitext(file)[0] for file in files if file != '.git']
     return (stdPresets, tourPresets, comPresets)
 

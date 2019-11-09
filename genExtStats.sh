@@ -100,4 +100,4 @@ for F in extStats_*.sql; do
     cat ${F} >> extStats_${RESULT}.sql && rm -f ${F}
 done
 
-echo "DONE"
+info "DONE"

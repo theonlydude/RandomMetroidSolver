@@ -505,7 +505,7 @@ if __name__ == "__main__":
     # generate extended stats
     if args.extStatsFilename != None:
         parameters = {'preset': preset, 'area': args.area, 'boss': args.bosses,
-                      'noGravHeat': args.noGravHeat, 'majorsSplit': args.majorsSplit,
+                      'noGravHeat': not args.noGravHeat, 'majorsSplit': args.majorsSplit,
                       'progSpeed': progSpeed, 'morphPlacement': args.morphPlacement,
                       'suitsRestriction': args.suitsRestriction, 'progDiff': progDiff,
                       'superFunMovement': 'Movement' in args.superFun,

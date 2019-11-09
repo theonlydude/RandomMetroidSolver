@@ -59,6 +59,30 @@ def loadPreset():
 
     return params
 
+def completePreset(params):
+    # add missing knows
+    for know in Knows.__dict__:
+        if isKnows(know):
+            if know not in params['Knows'].keys():
+                params['Knows'][know] = Knows.__dict__[know]
+
+    # add missing settings
+    for boss in ['Kraid', 'Phantoon', 'Draygon', 'Ridley', 'MotherBrain']:
+        if boss not in params['Settings']:
+            params['Settings'][boss] = 'Default'
+    for hellrun in ['Ice', 'MainUpperNorfair', 'LowerNorfair']:
+        if hellrun not in params['Settings']:
+            params['Settings'][hellrun] = 'Default'
+    for hardroom in ['X-Ray', 'Gauntlet']:
+        if hardroom not in params['Settings']:
+            params['Settings'][hardroom] = 'Default'
+
+    # add missing controller buttons
+    for button in Controller.__dict__:
+        if isButton(button):
+            if button not in params['Controller'].keys():
+                params['Controller'][button] = Controller.__dict__[button]
+
 def loadPresetsList():
     files = sorted(os.listdir('community_presets'), key=lambda v: v.upper())
     stdPresets = ['noob', 'casual', 'regular', 'veteran', 'speedrunner', 'master']
@@ -376,28 +400,8 @@ def presets():
     # load presets list
     (stdPresets, tourPresets, comPresets) = loadPresetsList()
 
-    # add missing knows
-    for know in Knows.__dict__:
-        if isKnows(know):
-            if know not in params['Knows'].keys():
-                params['Knows'][know] = Knows.__dict__[know]
-
-    # add missing settings
-    for boss in ['Kraid', 'Phantoon', 'Draygon', 'Ridley', 'MotherBrain']:
-        if boss not in params['Settings']:
-            params['Settings'][boss] = 'Default'
-    for hellrun in ['Ice', 'MainUpperNorfair', 'LowerNorfair']:
-        if hellrun not in params['Settings']:
-            params['Settings'][hellrun] = 'Default'
-    for hardroom in ['X-Ray', 'Gauntlet']:
-        if hardroom not in params['Settings']:
-            params['Settings'][hardroom] = 'Default'
-
-    # add missing controller buttons
-    for button in Controller.__dict__:
-        if isButton(button):
-            if button not in params['Controller'].keys():
-                params['Controller'][button] = Controller.__dict__[button]
+    # add missing knows/settings
+    completePreset(params)
 
     # compute score for skill bar
     skillBarData = getSkillLevelBarData(session.presets['preset'])
@@ -2123,18 +2127,28 @@ def extStats():
 
         updateExtStatsSession()
 
-        preset = request.vars.preset
+        skillPreset = request.vars.preset
         randoPreset = request.vars.randoPreset
-        fullPath = 'rando_presets/{}.json'.format(randoPreset)
 
+        # load rando preset
+        fullPath = 'rando_presets/{}.json'.format(randoPreset)
         try:
             with open(fullPath) as jsonFile:
                 randoPreset = json.load(jsonFile)
         except Exception as e:
-            raise HTTP(400, "Can't load the rando preset: {}".format(randoPreset))
+            raise HTTP(400, "Can't load the rando preset: {}: {}".format(randoPreset, e))
+
+        # load skill preset
+        fullPath = '{}/{}.json'.format(getPresetDir(skillPreset), skillPreset)
+        try:
+            skillPresetContent = PresetLoader.factory(fullPath).params
+            completePreset(skillPresetContent)
+            skillPresetKnows = skillPresetContent["Knows"]
+        except Exception as e:
+            raise HTTP(400, "Error loading the preset {}: {}".format(skillPreset, e))
 
         parameters = {
-            'preset': preset,
+            'preset': skillPreset,
             'area': 'areaRandomization' in randoPreset and randoPreset['areaRandomization'] == 'on',
             'boss': 'bossRandomization' in randoPreset and randoPreset['bossRandomization'] == 'on',
             'noGravHeat': randoPreset['noGravHeat'] == 'on',
@@ -2157,7 +2171,6 @@ def extStats():
             parameters["superFunCombat"] = "random"
         if randoPreset['funSuits'] == "random":
             parameters["superFunSuit"] = "random"
-
 
         DB = db.DB()
         (itemsStats, techniquesStats, difficulties) = DB.getExtStat(parameters)
@@ -2186,5 +2199,6 @@ def extStats():
 
     return dict(stdPresets=stdPresets, tourPresets=tourPresets,
                 randoPresets=randoPresets, tourRandoPresets=tourRandoPresets,
-                itemsStats=itemsStats, techniquesStats=techniquesStats, categories=Knows.categories,
-                knowsDesc=Knows.desc, locations=locations, parameters=parameters, difficulties=difficulties)
+                itemsStats=itemsStats, techniquesStats=techniquesStats,
+                categories=Knows.categories, knowsDesc=Knows.desc, skillPresetKnows=skillPresetKnows,
+                locations=locations, parameters=parameters, difficulties=difficulties)

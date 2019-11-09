@@ -2,7 +2,6 @@
 extend 'layout.html'
 }}
 
-
 <meta name="description" content="VARIA Randomizer statistics"/>
 <link rel="shortcut icon" href={{=URL('static','favicon.ico')}} type="image/ico"/>
 <link rel="stylesheet" type="text/css" href={{=URL('static/css','mystyle_20191017.css')}} media="screen"/>
@@ -102,6 +101,9 @@ if (hs.registerOverlay) {
 .space {
     margin-bottom: 1.0em;
     margin-top: 1.0em;
+}
+.strike {
+    text-decoration: line-through;
 }
 </style>
 
@@ -439,8 +441,13 @@ elif itemsStats != None and len(itemsStats) > 0:
         else:
           style = 'style="background-color:#{}ff00;"'.format(getGradient(percent))
           pass
+        if skillPresetKnows[know][0] == False:
+          strike = "strike"
+        else:
+          strike = ""
+          pass
 }}
-          <tr class="border"><td class="border">{{response.write(display, escape=False)}}</td><td {{response.write(style, escape=False)}} class="border">{{=percent}}</td></tr>
+          <tr class="border"><td class="border {{=strike}}">{{response.write(display, escape=False)}}</td><td {{response.write(style, escape=False)}} class="border {{=strike}}">{{=percent}}</td></tr>
 {{
         pass
 }}

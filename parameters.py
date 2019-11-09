@@ -550,9 +550,9 @@ class Knows:
         'Common': [
             {'knows': ['WallJump', 'ShineSpark', 'MidAirMorph', 'CrouchJump'],
              'title': 'Basics'},
-             {'knows': ['Mockball', 'SimpleShortCharge', 'InfiniteBombJump', 'GreenGateGlitch',
-                        'GravityJump', 'GetAroundWallJump',
-                        'SpringBallJump', 'SpringBallJumpFromWall', 'ShortCharge'],
+            {'knows': ['Mockball', 'SimpleShortCharge', 'InfiniteBombJump', 'GreenGateGlitch',
+                       'GravityJump', 'GetAroundWallJump',
+                       'SpringBallJump', 'SpringBallJumpFromWall', 'ShortCharge'],
              'title': 'Used across the game'}
         ],
         'Crateria/Brinstar': [

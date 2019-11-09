@@ -409,9 +409,15 @@ elif itemsStats != None and len(itemsStats) > 0:
     <div class="space"></div>
     <div class="row">
 {{
-    for (i, category) in enumerate(categories["Common"] + categories["Crateria/Brinstar"] + categories["Wrecked Ship"] + categories["Maridia 1/2"] + categories["Maridia 2/2"] + categories["Norfair"] + categories["Bosses/End"], -1):
+    for (i, category) in enumerate(categories["Common"] + categories["Crateria/Brinstar"] +
+                                   categories["Wrecked Ship"] + categories["Maridia 1/2"] +
+                                   categories["Maridia 2/2"] + categories["Norfair"] + categories["Bosses/End"] +
+                                   [{"knows": ["HardRoom-Gauntlet", "HardRoom-X-Ray"], "title": "Hard rooms"},
+                                    {"knows": ["IceHellRun", "MainUpperNorfairHellRun", "LowerNorfairHellRun"], "title": "Hellruns"}], -1):
       if category["title"] == "Basics":
         continue
+
+      #response.write("c: {}".format(category), escape=False)
 
       if i > 0 and i % 3 == 0:
 }}
@@ -431,7 +437,10 @@ elif itemsStats != None and len(itemsStats) > 0:
         else:
 	  percent = 0.0
 	  pass
-	if knowsDesc[know]['href'] is not None:
+        if know not in knowsDesc:
+	  # hard rooms and hellruns
+	  display = know
+	elif knowsDesc[know]['href'] is not None:
           display = "<a href=\"{}\">{}</a>".format(knowsDesc[know]["href"], knowsDesc[know]["display"])
 	else:
 	  display = knowsDesc[know]["display"]
@@ -441,11 +450,20 @@ elif itemsStats != None and len(itemsStats) > 0:
         else:
           style = 'style="background-color:#{}ff00;"'.format(getGradient(percent))
           pass
-        if skillPresetKnows[know][0] == False:
-          strike = "strike"
-        else:
-          strike = ""
-          pass
+        strike = ""
+        if know in skillPresetContent["Knows"]:
+          if skillPresetContent["Knows"][know][0] == False:
+            strike = "strike"
+            pass
+	elif category["title"] == "Hellruns":
+          hellrunName = know[:-len("HellRun")]
+          hellrunValue = skillPresetContent["Settings"][hellrunName]
+          if hellrunValue == "No thanks" and hellrunName in ("Ice", "MainUpperNorfair"):
+	    strike = "strike"
+          elif hellrunValue == "Default" and hellrunName == "LowerNorfair":
+	    strike = "strike"
+            pass
+	  pass
 }}
           <tr class="border"><td class="border {{=strike}}">{{response.write(display, escape=False)}}</td><td {{response.write(style, escape=False)}} class="border {{=strike}}">{{=percent}}</td></tr>
 {{
@@ -456,10 +474,10 @@ elif itemsStats != None and len(itemsStats) > 0:
 {{
       pass
 }}
-  <div id = "difficultiesHistogram" style = "height: 400px; margin: 0 auto"></div>
+    </div>
+    <div id = "difficultiesHistogram" style = "height: 400px; margin: 0 auto"></div>
 {{
   pass
 }}
-    </div>
   </div>
 </div>

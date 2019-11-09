@@ -2143,7 +2143,6 @@ def extStats():
         try:
             skillPresetContent = PresetLoader.factory(fullPath).params
             completePreset(skillPresetContent)
-            skillPresetKnows = skillPresetContent["Knows"]
         except Exception as e:
             raise HTTP(400, "Error loading the preset {}: {}".format(skillPreset, e))
 
@@ -2189,6 +2188,7 @@ def extStats():
         itemsStats = None
         techniquesStats = None
         difficulties = None
+        skillPresetContent = None
         parameters = None
 
     (randoPresets, tourRandoPresets) = loadRandoPresetsList()
@@ -2200,5 +2200,5 @@ def extStats():
     return dict(stdPresets=stdPresets, tourPresets=tourPresets,
                 randoPresets=randoPresets, tourRandoPresets=tourRandoPresets,
                 itemsStats=itemsStats, techniquesStats=techniquesStats,
-                categories=Knows.categories, knowsDesc=Knows.desc, skillPresetKnows=skillPresetKnows,
+                categories=Knows.categories, knowsDesc=Knows.desc, skillPresetContent=skillPresetContent,
                 locations=locations, parameters=parameters, difficulties=difficulties)

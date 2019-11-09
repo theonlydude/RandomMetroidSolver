@@ -224,53 +224,21 @@ google.charts.setOnLoadCallback(drawDifficultiesHistogram);
       </table>
     </form>
 {{
-if itemsStats != None and len(itemsStats) == 0:
-  response.write("No statistics found.", escape=False)
-elif itemsStats != None and len(itemsStats) > 0:
-}}
-  <!--
-      ItemsStats is a matrix, on line per item, columns are (count, item, loc1%, loc2%, ..., loc100%)
-      Items are in this order: Bomb 0, Charge 1, Grapple 2, Gravity 3, HiJump 4, Ice 5, Missile 6, Morph 7, Plasma 8, PowerBomb 9, ScrewAttack 10, SpaceJump 11, Spazer 12, SpeedBooster 13, SpringBall 14, Super 15, Varia 16, Wave 17, XRayScope 18
-      Locations are in the same order as the graph_locations.locations list.
-    -->
-{{
-numberSeeds = float(itemsStats[0][0])
+  # python functions
+  # to display the limits
+  def getThreshold(ratio, nSeeds, split):
+      if split == 'Major':
+          nLocs = 34
+      elif split == 'Chozo':
+          nLocs = 25
+      else:
+          nLocs = 100
+          pass
 
-# to display the limits
-def getThreshold(ratio, nSeeds, split):
-    if split == 'Major':
-        nLocs = 34
-    elif split == 'Chozo':
-        nLocs = 25
-    else:
-        nLocs = 100
-        pass
+      percent = ratio * (100.0 / nLocs)
+      return round(percent, 1)
 
-    percent = ratio * (100.0 / nLocs)
-    return round(percent, 1)
-}}
-  <h2 class="center">Items</h2>
-  <div class="space"></div>
-  <p>
-    <div class="left">Statistics have been computed on {{=int(numberSeeds)}} seeds. Minors probabilities are only for the first ammo pack.</div>
-    <div class="right">Legend: &nbsp;
-      <table class="right">
-	<tr>
-	  <td class="border">0.0</td>
-	  <td class="border red"><{{=getThreshold(0.33, numberSeeds, parameters["majorsSplit"])}}</td>
-	  <td class="border yellow"><{{=getThreshold(0.5, numberSeeds, parameters["majorsSplit"])}}</td>
-	  <td class="border green">>{{=getThreshold(0.5, numberSeeds, parameters["majorsSplit"])}} <{{=getThreshold(2.0, numberSeeds, parameters["majorsSplit"])}}</td>
-	  <td class="border yellow">>{{=getThreshold(2.0, numberSeeds, parameters["majorsSplit"])}}</td>
-	  <td class="border red">>{{=getThreshold(3.0, numberSeeds, parameters["majorsSplit"])}}</td>
-	</tr>
-      </table>
-    </div>
-  </p>
-  <table class="full border">
-    <colgroup><col class="quarter"/><col class="icon"/><col class="icon"/><col class="icon"/><col class="icon"/><col class="icon"/><col class="icon"/><col class="icon"/><col class="icon"/><col class="icon"/><col class="icon"/><col class="icon"/><col class="icon"/><col class="icon"/><col class="icon"/><col class="icon"/><col class="icon"/><col class="icon"/><col class="icon"/><col class="icon"/><!--<col class="icon"/><col class="icon"/>--></colgroup>
-
-{{
-def displayHeader():
+  def displayHeader():
 }}
     <tr class="border">
       <th class="border">Location</th>
@@ -299,112 +267,134 @@ def displayHeader():
       <th class="border"><img src="/solver/static/images/XRayScope.png" alt="XRayScope.png" title="XRayScope.png" class="centerIcon"/></th>
     <tr>
 {{
-  pass
-}}
-
-{{
-# percent: item percent for the location
-# nSeeds: total number of seeds
-# split: preset's split
-def getColor(percent, nSeeds, split):
-    percent = float(percent)
-    if percent == 0.0:
-      return "none"
-
-    # possible locs for the item TODO : take into account restrictions (suits, morph)
-    if split == 'Major':
-        nLocs = 34
-    elif split == 'Chozo':
-        nLocs = 25
-    else:
-        nLocs = 100
-        pass
-
-    expectedPercent = 100.0 / nLocs
-    ratio = percent / expectedPercent
-
-    if ratio < 0.33:
-      return "red"
-    elif ratio < 0.5:
-      return "yellow"
-    elif ratio < 2.0:
-      return "green"
-    elif ratio < 3.0:
-      return "yellow"
-    else:
-      return "red"
     pass
 
-  # the items display order:
-  #              Missile, Super, PowerBomb,  morph, bomb, springball, screwattack, varia, gravity, hijump, spacejump, speedbooster, charge, ice, wave, spazer, plasma, grapple, xrayscope
-  itemsMapping = [     6,    15,         9,      7,    0,         14,          10,    16,       3,      4,        11,           13,      1,   5,   17,     12,      8,       2,        18]
+  # percent: item percent for the location
+  # nSeeds: total number of seeds
+  # split: preset's split
+  def getColor(percent, nSeeds, split):
+      percent = float(percent)
+      if percent == 0.0:
+        return "none"
 
-  percentTotalSum = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+      # possible locs for the item TODO : take into account restrictions (suits, morph)
+      if split == 'Major':
+          nLocs = 34
+      elif split == 'Chozo':
+          nLocs = 25
+      else:
+          nLocs = 100
+          pass
 
-  # areas: crateria / brinstar / wrecked ship / maridia / norfair / lower norfair
-  for area in ["Crateria", "Brinstar", "WreckedShip", "Maridia", "Norfair", "LowerNorfair"]:
-    percentSum = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+      expectedPercent = 100.0 / nLocs
+      ratio = percent / expectedPercent
 
-    response.write("<tr><td class=\"center grey bold\" colspan=\"20\">{}</td></tr>\n".format(area), escape=False)
-    displayHeader()
+      if ratio < 0.33:
+        return "red"
+      elif ratio < 0.5:
+        return "yellow"
+      elif ratio < 2.0:
+        return "green"
+      elif ratio < 3.0:
+        return "yellow"
+      else:
+        return "red"
+      pass
 
-    for locI, loc in enumerate(locations, start=2):
-      if "Boss" in loc["Class"]:
-        continue
+}}
+{{
+if itemsStats != None and len(itemsStats) == 0:
+  response.write("No statistics found.", escape=False)
+elif itemsStats != None and len(itemsStats) > 0:
+  numberSeeds = float(itemsStats[0][0])
+}}
+  <!--
+      ItemsStats is a matrix, on line per item, columns are (count, item, loc1%, loc2%, ..., loc100%)
+      Items are in this order: Bomb 0, Charge 1, Grapple 2, Gravity 3, HiJump 4, Ice 5, Missile 6, Morph 7, Plasma 8, PowerBomb 9, ScrewAttack 10, SpaceJump 11, Spazer 12, SpeedBooster 13, SpringBall 14, Super 15, Varia 16, Wave 17, XRayScope 18
+      Locations are in the same order as the graph_locations.locations list.
+    -->
+  <h2 class="center">Items</h2>
+  <div class="space"></div>
+  <p>
+    <div class="left">Statistics have been computed on {{=int(numberSeeds)}} seeds. Minors probabilities are only for the first ammo pack.</div>
+    <div class="right">Legend: &nbsp;
+      <table class="right">
+	<tr>
+	  <td class="border">0.0</td>
+	  <td class="border red"><{{=getThreshold(0.33, numberSeeds, parameters["majorsSplit"])}}</td>
+	  <td class="border yellow"><{{=getThreshold(0.5, numberSeeds, parameters["majorsSplit"])}}</td>
+	  <td class="border green">>{{=getThreshold(0.5, numberSeeds, parameters["majorsSplit"])}} <{{=getThreshold(2.0, numberSeeds, parameters["majorsSplit"])}}</td>
+	  <td class="border yellow">>{{=getThreshold(2.0, numberSeeds, parameters["majorsSplit"])}}</td>
+	  <td class="border red">>{{=getThreshold(3.0, numberSeeds, parameters["majorsSplit"])}}</td>
+	</tr>
+      </table>
+    </div>
+  </p>
+  <table class="full border">
+    <colgroup><col class="quarter"/><col class="icon"/><col class="icon"/><col class="icon"/><col class="icon"/><col class="icon"/><col class="icon"/><col class="icon"/><col class="icon"/><col class="icon"/><col class="icon"/><col class="icon"/><col class="icon"/><col class="icon"/><col class="icon"/><col class="icon"/><col class="icon"/><col class="icon"/><col class="icon"/><col class="icon"/><!--<col class="icon"/><col class="icon"/>--></colgroup>
 
-      if area == "Brinstar":
-        if loc["GraphArea"] not in ["GreenPinkBrinstar", "Kraid", "RedBrinstar"]:
+{{
+    # the items display order:
+    #              Missile, Super, PowerBomb,  morph, bomb, springball, screwattack, varia, gravity, hijump, spacejump, speedbooster, charge, ice, wave, spazer, plasma, grapple, xrayscope
+    itemsMapping = [     6,    15,         9,      7,    0,         14,          10,    16,       3,      4,        11,           13,      1,   5,   17,     12,      8,       2,        18]
+
+    percentTotalSum = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+    # areas: crateria / brinstar / wrecked ship / maridia / norfair / lower norfair
+    for area in ["Crateria", "Brinstar", "WreckedShip", "Maridia", "Norfair", "LowerNorfair"]:
+      percentSum = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+      response.write("<tr><td class=\"center grey bold\" colspan=\"20\">{}</td></tr>\n".format(area), escape=False)
+      displayHeader()
+
+      for locI, loc in enumerate(locations, start=2):
+        if "Boss" in loc["Class"]:
           continue
-        else:
-          pass
-      elif loc["GraphArea"] != area:
-        continue
 
-      response.write("<tr><td><a href=\"https://wiki.supermetroid.run/{}\">{}</a></td>".format(loc["Room"].replace(' ', '_').replace("'", '%27'), loc["Name"]), escape=False)
-  
-      for itemI, item in enumerate(["Missile", "Super", "PowerBomb", "Morph", "Bomb", "Springball", "ScrewAttack", "Varia", "Gravity", "HiJump", "SpaceJump", "SpeedBooster", "Charge", "Ice", "Wave", "Spazer", "Plasma", "Grapple", "XRayScope"]):
-        percent = itemsStats[itemsMapping[itemI]][locI]
-        if item in ["Missile", "Super", "PowerBomb"]:
-          if float(percent) > 0.0:
-            color = "minor"
+        if area == "Brinstar":
+          if loc["GraphArea"] not in ["GreenPinkBrinstar", "Kraid", "RedBrinstar"]:
+            continue
           else:
-            color = "none"
             pass
-        else:
-          color = getColor(percent, numberSeeds, parameters["majorsSplit"])
+        elif loc["GraphArea"] != area:
+          continue
+
+        response.write("<tr><td><a href=\"https://wiki.supermetroid.run/{}\">{}</a></td>".format(loc["Room"].replace(' ', '_').replace("'", '%27'), loc["Name"]), escape=False)
+
+        for itemI, item in enumerate(["Missile", "Super", "PowerBomb", "Morph", "Bomb", "Springball", "ScrewAttack", "Varia", "Gravity", "HiJump", "SpaceJump", "SpeedBooster", "Charge", "Ice", "Wave", "Spazer", "Plasma", "Grapple", "XRayScope"]):
+          percent = itemsStats[itemsMapping[itemI]][locI]
+          if item in ["Missile", "Super", "PowerBomb"]:
+            if float(percent) > 0.0:
+              color = "minor"
+            else:
+              color = "none"
+              pass
+          else:
+            color = getColor(percent, numberSeeds, parameters["majorsSplit"])
+            pass
+
+          response.write("<td class=\"border {}\">{}</td>".format(color, percent), escape=False)
+          percentSum[itemsMapping[itemI]] += percent
+          percentTotalSum[itemsMapping[itemI]] += percent
           pass
 
-        response.write("<td class=\"border {}\">{}</td>".format(color, percent), escape=False)
-        percentSum[itemsMapping[itemI]] += percent
-        percentTotalSum[itemsMapping[itemI]] += percent
+        response.write("</tr>\n", escape=False)
         pass
-  
+      response.write("<tr><td class=\"bold\">Area Total</td>\n", escape=False)
+      for itemI, item in enumerate(["Missile", "Super", "PowerBomb", "Morph", "Bomb", "Springball", "ScrewAttack", "Varia", "Gravity", "HiJump", "SpaceJump", "SpeedBooster", "Charge", "Ice", "Wave", "Spazer", "Plasma", "Grapple", "XRayScope"]):
+        response.write("<td class=\"border\">{}</td>".format(percentSum[itemsMapping[itemI]]), escape=False)
+        pass
       response.write("</tr>\n", escape=False)
       pass
-    response.write("<tr><td class=\"bold\">Area Total</td>\n", escape=False)
+
+    response.write("<tr><td class=\"center grey bold\" colspan=\"20\">Total</td></tr>\n", escape=False)
+    response.write("<tr><td class=\"bold\"></td>\n", escape=False)
     for itemI, item in enumerate(["Missile", "Super", "PowerBomb", "Morph", "Bomb", "Springball", "ScrewAttack", "Varia", "Gravity", "HiJump", "SpaceJump", "SpeedBooster", "Charge", "Ice", "Wave", "Spazer", "Plasma", "Grapple", "XRayScope"]):
-      response.write("<td class=\"border\">{}</td>".format(percentSum[itemsMapping[itemI]]), escape=False)
+      response.write("<td class=\"border\">{}</td>".format(percentTotalSum[itemsMapping[itemI]]), escape=False)
       pass
     response.write("</tr>\n", escape=False)
-    pass
-
-  response.write("<tr><td class=\"center grey bold\" colspan=\"20\">Total</td></tr>\n", escape=False)
-  response.write("<tr><td class=\"bold\"></td>\n", escape=False)
-  for itemI, item in enumerate(["Missile", "Super", "PowerBomb", "Morph", "Bomb", "Springball", "ScrewAttack", "Varia", "Gravity", "HiJump", "SpaceJump", "SpeedBooster", "Charge", "Ice", "Wave", "Spazer", "Plasma", "Grapple", "XRayScope"]):
-    response.write("<td class=\"border\">{}</td>".format(percentTotalSum[itemsMapping[itemI]]), escape=False)
-    pass
-  response.write("</tr>\n", escape=False)
 }}
   </table>
-{{
-  pass
-}}
-
-{{
-  if techniquesStats != None:
-}}
-
-
     <div class="space"></div>
     <h2 class="center">Techniques</h2>
     <div class="space"></div>
@@ -446,7 +436,6 @@ def getColor(percent, nSeeds, split):
       </div>
 {{
       pass
-    pass
 }}
   <div id = "difficultiesHistogram" style = "height: 400px; margin: 0 auto"></div>
 {{

@@ -301,6 +301,13 @@ google.charts.setOnLoadCallback(drawDifficultiesHistogram);
         return "red"
       pass
 
+  def getGradient(percent):
+    # 0 -> 100 to 255 -> 127
+    b = int((100 - percent) * 1.275) + 127
+    h = hex(b)
+    # remove '0x' in front
+    h = h[2:]
+    return h if len(h) == 2 else '0'+h
 }}
 {{
 if itemsStats != None and len(itemsStats) == 0:
@@ -418,7 +425,7 @@ elif itemsStats != None and len(itemsStats) > 0:
 {{
       for know in category["knows"]:
         if know in techniquesStats:
-	  percent = techniquesStats[know]
+	  percent = float(techniquesStats[know])
         else:
 	  percent = 0.0
 	  pass
@@ -427,8 +434,13 @@ elif itemsStats != None and len(itemsStats) > 0:
 	else:
 	  display = knowsDesc[know]["display"]
 	  pass
+	if percent == 0.0:
+          style = ""
+        else:
+          style = 'style="background-color:#{}ff00;"'.format(getGradient(percent))
+          pass
 }}
-          <tr class="border"><td class="border">{{response.write(display, escape=False)}}</td><td class="border">{{=percent}}</td></tr>
+          <tr class="border"><td class="border">{{response.write(display, escape=False)}}</td><td {{response.write(style, escape=False)}} class="border">{{=percent}}</td></tr>
 {{
         pass
 }}

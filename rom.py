@@ -79,7 +79,7 @@ class RomPatches:
 
     # VARIA specific patch set
     VariaTweaks = [ WsEtankPhantoonAlive, LNChozoSJCheckDisabled ]
-    
+
     # dessyreqt randomizer
     Dessy = []
 

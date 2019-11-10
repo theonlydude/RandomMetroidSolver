@@ -1,9 +1,13 @@
 #!/bin/bash
 
-CWD=$(dirname $0)
+CWD=$(dirname $0)/..
 cd ${CWD}
 
 [ -f "db_params.py" ] || exit 1
+
+SQL_DIR=${CWD}/sql
+LOG_DIR=${CWD}/logs
+mkdir -p ${LOG_DIR} ${SQL_DIR}
 
 function getDBParam {
     PARAM="$1"
@@ -25,8 +29,8 @@ password=$(getDBParam "password")
 
 info "Start loading extended stats"
 
-for SQL in $(ls -1 extStats_*.sql); do
-    echo "source ${SQL};" | mysql -h ${host} -u ${user} -p${password} ${database} > ${SQL}.log 2>&1 &
+for SQL in $(ls -1 ${SQL_DIR}/extStats_*.sql); do
+    echo "source ${SQL};" | mysql -h ${host} -u ${user} -p${password} ${database} > ${LOG_DIR}/$(basename ${SQL}).log 2>&1 &
 done
 
 wait

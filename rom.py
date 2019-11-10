@@ -183,6 +183,14 @@ class RomReader:
                 ret[RomReader.patches[patch]['address']] = RomReader.patches[patch]['value']
             else:
                 ret[RomReader.patches[patch]['address']] = 0xFF
+
+        # add phantoon door ptr used by boss rando detection
+        from graph_access import getAccessPoint
+        doorPtr = getAccessPoint('PhantoonRoomOut').ExitInfo['DoorPtr']
+        doorPtr = (0x10000 | doorPtr) + 10
+        ret[doorPtr] = 0
+        ret[doorPtr+1] = 0
+
         return ret
 
     def __init__(self, romFile, magic=None):

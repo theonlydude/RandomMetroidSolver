@@ -240,7 +240,7 @@ class Knows:
     BillyMays = SMBool(True, easy, ['BillyMays'])
     desc['BillyMays'] = {'display': 'Billy Mays access without Gravity or Space Jump',
                          'title': 'Jump through the door to get on the invisible platform',
-                         'href': '', # TODO
+                         'href': 'https://youtu.be/LOyj4CuOWik',
                          'rooms': ['Blue Brinstar Boulder Room']}
 
     AlcatrazEscape = SMBool(True, harder, ['AlcatrazEscape'])
@@ -337,7 +337,7 @@ class Knows:
     BubbleMountainWallJump = SMBool(True, medium, ['BubbleMountainWallJump'])
     desc['BubbleMountainWallJump'] = {'display': 'Bubble Mountain wall jump',
                                       'title': 'Run from the save room and get up Bubble Mountain without Hi-Jump',
-                                      'href': '', # TODO
+                                      'href': 'https://youtu.be/2RmbFRCMlUg',
                                       'rooms': ['Bubble Mountain']}
 
     NovaBoost = SMBool(False, 0, ['NovaBoost'])

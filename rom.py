@@ -393,6 +393,17 @@ class RomReader:
             self.romFile.seek(self.patches[patchName]['address'])
             value = struct.unpack("B", self.romFile.read(1))[0]
             result[self.patches[patchName]['address']] = value
+
+        # add boss detection bytes
+        from graph_access import getAccessPoint
+        doorPtr = getAccessPoint('PhantoonRoomOut').ExitInfo['DoorPtr']
+        doorPtr = (0x10000 | doorPtr) + 10
+
+        self.romFile.seek(doorPtr)
+        result[doorPtr] = struct.unpack("B", self.romFile.read(1))[0]
+        self.romFile.seek(doorPtr+1)
+        result[doorPtr+1] = struct.unpack("B", self.romFile.read(1))[0]
+
         return result
 
     def getDict(self):

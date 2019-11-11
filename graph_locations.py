@@ -642,7 +642,10 @@ locations = [
                                                        sm.knowsKillPlasmaPiratesWithSpark()),
                                                sm.wand(sm.haveItem('Charge'),
                                                        sm.knowsKillPlasmaPiratesWithCharge(),
-                                                       sm.energyReserveCountOk(4)),
+                                                       # 160/80/40 dmg * 4 ground plasma pirates
+                                                       # => 640/320/160 damage take required
+                                                       # check below is 1099/599/299 (give margin for taking dmg a bit)
+                                                       sm.energyReserveCountOk(int(10.0/sm.getDmgReduction(False)[0]))),
                                                sm.haveItem('ScrewAttack'),
                                                sm.haveItem('Plasma')),
                                         sm.wor(sm.canFly(),

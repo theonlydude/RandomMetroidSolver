@@ -1,4 +1,4 @@
-import sys, random, time
+import sys, random, time, copy
 from itemrandomizerweb.Items import ItemManager
 from parameters import Knows, isBossKnows, Settings, samus, infinity, god
 from itemrandomizerweb.stdlib import List
@@ -804,12 +804,12 @@ class Randomizer(object):
         result = self.smbm.eval(loc['PostAvailable'], item)
         return result.bool == True and result.difficulty <= self.difficultyTarget
 
-    def getAvailLocs(self, locs, ap):
+    def getAvailLocs(self, locs, ap, diff):
         availLocs = self.areaGraph.getAvailableLocations(locs,
                                                          self.smbm,
-                                                         self.difficultyTarget,
+                                                         diff,
                                                          ap)
-        if self.restrictions['MajorMinor'] != 'Chozo' or self.difficultyTarget >= god or not self.isChozoLeft():
+        if self.restrictions['MajorMinor'] != 'Chozo' or diff >= god or not self.isChozoLeft() or self.settings.qty['energy'] == 'sparse':
             return availLocs
         # in chozo mode, we use high difficulty check for bosses/hardrooms/hellruns
         availLocsInf = self.areaGraph.getAvailableLocations(locs,
@@ -829,7 +829,7 @@ class Randomizer(object):
                     # Knows for Ridley, and other bosses give
                     # drops. so only boss fights with diff above god
                     # can slip in
-                    if diff.difficulty > self.difficultyTarget and isBossKnows(k) is None:
+                    if diff.difficulty > diff and isBossKnows(k) is None:
                         return False
                 except AttributeError:
                     # hard room/hell run
@@ -849,10 +849,12 @@ class Randomizer(object):
     # ap : access point name. if None, self.curAccessPoint will be used
     # post : if True, will also check post availability. Default is False. 
     # return available locations list.
-    def currentLocations(self, item=None, locs=None, ap=None, post=False):
-        isSimpleCall = item is None and locs is None and ap is None and post == False
+    def currentLocations(self, item=None, locs=None, ap=None, post=False, diff=None):
+        isSimpleCall = item is None and locs is None and ap is None and post == False and diff is None
         if self.curLocs is not None and isSimpleCall:
             return self.curLocs
+        if diff is None:
+            diff = self.difficultyTarget
         itemType = None
         if locs is None:
             locs = self.unusedLocations
@@ -861,7 +863,7 @@ class Randomizer(object):
             self.smbm.addItem(itemType)
         if ap is None:
             ap = self.curAccessPoint
-        ret = sorted(self.getAvailLocs(locs, ap),
+        ret = sorted(self.getAvailLocs(locs, ap, diff),
                      key=lambda loc: loc['Name'])
         if post is True:
             ret = [loc for loc in ret if self.locPostAvailable(loc, itemType)]
@@ -1296,23 +1298,28 @@ class Randomizer(object):
     # collect: actually collect item. defaults to True. use False for unreachable items.
     # pool : base item pool. If None (default), uses self.itemPool.
     # showDot : if True (default), outputs a dot on stdout
-    def getItem(self, itemLocation, collect=True, pool=None, showDot=True):
+    # locs : useful only for chozo 2nd phase "restore step". if not
+    #    None, will not move in the graph in order to not overwrite
+    #    locations difficulties.
+    def getItem(self, itemLocation, collect=True, pool=None, showDot=True, locs=None):
         if pool is None:
             pool = self.itemPool
         if showDot == True:
             sys.stdout.write('.')
             sys.stdout.flush()
+        curLocs = locs
         item = itemLocation['Item']
         location = itemLocation['Location']
-        curLocs = None
         if collect == True:
             isProg = self.isProgItemNow(item)
             # walk the graph to get proper access point
-            self.currentLocations(item)
+            if locs is None:
+                self.currentLocations(item)
             self.log.debug("getItem: loc: {} ap: {}".format(location['Name'], location['accessPoint']))
             self.setCurAccessPoint(location['accessPoint'])
             # get actual cur locs from proper AP to store with the state
-            curLocs = self.currentLocations(item)
+            if locs is None:
+                curLocs = self.currentLocations(item)
             if 'Pickup' in location:
                 location['Pickup']()
             self.currentItems.append(item)
@@ -1658,14 +1665,17 @@ class Randomizer(object):
         states = [self.states[i] for i in self.progressionStatesIndices]
         self.log.debug("chozoFill, progs=" + str(self.progressionStatesIndices))
         for state in states:
-            def chooseItem(pool):
+            def getAboveDiffLocs(locs):
+                return [loc for loc in locs if loc['difficulty'].difficulty > self.difficultyTarget]
+            def getCollectedLocs():
+                return [il['Location'] for il in self.itemLocations]
+            def chooseItem(pool, curLocs):
                 # choose item in the pool that brings the most collected locs to < diffTarget
                 random.shuffle(pool)
                 ret = None
-                collectedLocs = [il['Location'] for il in self.itemLocations]
-                def getAboveDiffLocs(locs):
-                    return [loc for loc in locs if loc['difficulty'].difficulty > self.difficultyTarget]
-                initialAboveDiffLocs = getAboveDiffLocs(collectedLocs)
+                checkedLocs = getCollectedLocs() + curLocs
+                initialAboveDiffLocs = getAboveDiffLocs(checkedLocs)
+                self.log.debug('initialAboveDiffLocs = ' + str([loc['Name'] + ':' + str(loc['difficulty'].difficulty) for loc in initialAboveDiffLocs]))
                 minLeftAbove = len(initialAboveDiffLocs)
                 self.log.debug('minLeftAbove=' + str(minLeftAbove))
                 if minLeftAbove == 0 or self.difficultyTarget >= god:
@@ -1677,32 +1687,29 @@ class Randomizer(object):
                             checkPool.append(item)
                     for item in checkPool:
                         # take a copy everytime because difficulty stays
-                        # in loc dicts. shallow copy is enough since
-                        # difficulty is a scalar.
-                        locs = [loc.copy() for loc in collectedLocs]
+                        # in loc dicts.
+                        locs = [copy.deepcopy(loc) for loc in checkedLocs]
                         self.currentLocations(item, locs)
                         n = len(getAboveDiffLocs(locs)) # locs are modified in-place with difficulty
                         if n < minLeftAbove:
                             minLeftAbove = n
                             self.log.debug('item ' + item['Type'] + ' lowers minLeftAbove to ' + str(minLeftAbove))
                             ret = item
-                    if ret is None:
-                        ret = pool[0]
+                    if ret is None: # no direct item to lower difficulty, bank on energy
+                        ret = next((item for item in pool if item['Category'] == 'Energy'), pool[0])
                     else:
                         self.log.debug('chose ' + ret['Type'])
-                # updates collected locations difficulty with this new
-                # item, but only the ones that went below max diff
-                # (for accurate alert at the end on above diff locs)
-                self.currentLocations(ret, initialAboveDiffLocs)
                 return ret
             def getLocs(locs):
                 return [loc for loc in locs if 'Chozo' not in loc['Class'] and 'Boss' not in loc['Class']]
+            def getCurLocs(ap):
+                return self.currentLocations(ap=ap)
             def fillup(n, pool, ap):
                 self.log.debug('fillup-n=' + str(n) + ', pool_types=' + str(list(set([item['Type'] for item in pool]))))
                 itemLocs = []
                 for i in range(n):
-                    curLocs = getLocs(self.currentLocations(ap=ap))
-                    item = chooseItem(pool)
+                    curLocs = getLocs(getCurLocs(ap))
+                    item = chooseItem(pool, curLocs)
                     loc = curLocs[random.randint(0, len(curLocs)-1)]
                     il = {'Item':item, 'Location':loc}
                     self.log.debug('fillup ' + item['Type'] + ' at ' + loc['Name'])
@@ -1710,7 +1717,7 @@ class Randomizer(object):
                     itemLocs.append(il)
                     pool.remove(item)
                 return itemLocs
-            def updateCurrentState(itemLocs, curLocs, curState):
+            def updateCurrentState(itemLocs, curState):
                 self.log.debug('updateCurrentState BEGIN')
                 curState.apply(self)
                 for il in itemLocs:
@@ -1718,34 +1725,41 @@ class Randomizer(object):
                     allItemLocs.append(il)
                 self.log.debug('updateCurrentState END')
             # restore state to this point + all item locs we already put in the fillup
+            self.log.debug("****** CHOZO FILL STEP")
+            self.log.debug("*** CHOZO FILL RESTORE")
             state.apply(self)
             ap = self.curAccessPoint
-            self.log.debug('state ' + str(state) + ' apply, nCurLocs='+str(len(self.currentLocations(ap=ap))))
+            curLocs = getCurLocs(ap)
+            self.log.debug('state ' + str(state) + ' apply, nCurLocs='+str(len(curLocs)))
             self.log.debug('collected1=' + str(list(set([i['Item']['Type'] for i in self.itemLocations]))))
             for il in allItemLocs:
-                self.getItem(il, pool=self.nonChozoItemPool, showDot=False)
+                self.getItem(il, pool=self.nonChozoItemPool, showDot=False, locs=curLocs)
             self.log.debug('collected2=' + str(list(set([i['Item']['Type'] for i in self.itemLocations]))))
             # fill-up
+            curLocs = getCurLocs(ap)
             self.determineParameters()
             nonProg = self.getNonProgItemPool(self.nonChozoItemPool)
+            self.log.debug("*** CHOZO FILL NON-PROG")
             lim = self.locLimit - 1
             if lim < 0:
                 lim = 0
-            nLocsNonProg = len(getLocs(self.currentLocations(ap=ap))) - lim
+            nLocsNonProg = len(getLocs(curLocs)) - lim
             itemLocs = []
             if len(nonProg) > 0 and nLocsNonProg > 0:
                 nNonProg = len(nonProg)
-                self.log.debug('nonProg fillup cur=' + str(len(self.currentLocations(ap=ap))) + ', nLocs=' + str(nLocsNonProg) + ', nNonProg=' + str(nNonProg))
+                self.log.debug('nonProg fillup cur=' + str(len(curLocs)) + ', nLocs=' + str(nLocsNonProg) + ', nNonProg=' + str(nNonProg))
                 itemLocs += fillup(min(nLocsNonProg, nNonProg), nonProg, ap)
+                curLocs = getCurLocs(ap)
+                self.log.debug("*** CHOZO FILL ALL")
             allItems = self.nonChozoItemPool[:]
-            nLocs = len(getLocs(self.currentLocations(ap=ap)))
+            nLocs = len(getLocs(curLocs))
             if len(allItems) > 0 and nLocs > 0:
                 nItems = len(allItems)
-                self.log.debug('allItems fillup cur=' + str(len(self.currentLocations(ap=ap))) + ', nLocs=' + str(nLocs) + ', nItems=' + str(nItems))
+                self.log.debug('allItems fillup cur=' + str(len(curLocs)) + ', nLocs=' + str(nLocs) + ', nItems=' + str(nItems))
                 itemLocs += fillup(min(nLocs, nItems), allItems, ap)
-            curLocs = self.currentLocations(ap=ap)
-            # update collected locations difficulty
-            updateCurrentState(itemLocs, curLocs, curState)
+                curLocs = getCurLocs(ap)
+            self.log.debug("*** CHOZO FILL STATE UPDATE")
+            updateCurrentState(itemLocs, curState)
             curState = RandoState(self, curLocs)
 
     def chozoCheck(self):

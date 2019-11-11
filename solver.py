@@ -503,8 +503,10 @@ class CommonSolver(object):
             else 100000,
             loc['difficulty'].difficulty))
 
-        self.log.debug("around2 = " + str([(loc['Name'], loc['difficulty'], loc['distance'], loc['comeBack'], loc['SolveArea']) for loc in around]))
-        self.log.debug("outside2 = " + str([(loc['Name'], loc['difficulty'], loc['distance'], loc['comeBack'], loc['SolveArea']) for loc in outside]))
+        # display the criterias used for sorting
+        self.log.debug("around2: {}".format([(loc['Name'], 0 if loc['SolveArea'] == area else 1, loc['distance'], 0 if 'Pickup' in loc else 1, loc['difficulty'].difficulty) for loc in around]))
+        self.log.debug("outside2: (threshold: {}) name, areaWeight, comeBack, area, distance, boss, boss in area, difficulty".format(threshold))
+        self.log.debug("outside2: {}".format([(loc['Name'], loc["areaWeight"] if "areaWeight" in loc else 0, 0 if 'comeBack' in loc and loc['comeBack'] == True else 1, 0 if loc['SolveArea'] == area and loc['difficulty'].difficulty <= threshold else 1, loc['distance'] if loc['difficulty'].difficulty <= threshold else 100000, loc['difficulty'].difficulty if (not Bosses.areaBossDead(loc['Area']) and loc['difficulty'].difficulty <= threshold and 'Pickup' in loc) else 100000, loc['difficulty'].difficulty if (not Bosses.areaBossDead(loc['Area']) and loc['difficulty'].difficulty <= threshold) else 100000, loc['difficulty'].difficulty) for loc in outside]))
 
         return around + outside
 
@@ -1226,6 +1228,7 @@ class InteractiveSolver(CommonSolver):
                 del loc['difficulty']
 
     def getDiffThreshold(self):
+        # in interactive solver we don't have the max difficulty parameter
         epsilon = 0.001
         return hard - epsilon
 

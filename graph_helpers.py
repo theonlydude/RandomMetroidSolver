@@ -371,7 +371,9 @@ class HelpersGraph(Helpers):
                       sm.wand(sm.knowsGravLessLevel2(),
                               sm.wor(sm.haveItem('Grapple'),
                                      sm.haveItem('SpaceJump'),
-                                     sm.wand(sm.haveItem('Ice'), sm.knowsBotwoonToDraygonWithIce()))))
+                                     sm.wand(sm.haveItem('Ice'),
+                                             sm.energyReserveCountOk(4),
+                                             sm.knowsBotwoonToDraygonWithIce()))))
 
     @Cache.decorator
     def canAccessDraygonFromMainStreet(self):

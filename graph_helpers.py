@@ -385,7 +385,7 @@ class HelpersGraph(Helpers):
                               sm.wor(sm.haveItem('Grapple'),
                                      sm.haveItem('SpaceJump'),
                                      sm.wand(sm.haveItem('Ice'),
-                                             sm.energyReserveCountOk(4),
+                                             sm.energyReserveCountOk(int(7.0/sm.getDmgReduction()[0])), # mochtroid dmg
                                              sm.knowsBotwoonToDraygonWithIce()))))
 
     @Cache.decorator

@@ -79,7 +79,7 @@ class RomPatches:
 
     # VARIA specific patch set
     VariaTweaks = [ WsEtankPhantoonAlive, LNChozoSJCheckDisabled ]
-    
+
     # dessyreqt randomizer
     Dessy = []
 
@@ -183,6 +183,14 @@ class RomReader:
                 ret[RomReader.patches[patch]['address']] = RomReader.patches[patch]['value']
             else:
                 ret[RomReader.patches[patch]['address']] = 0xFF
+
+        # add phantoon door ptr used by boss rando detection
+        from graph_access import getAccessPoint
+        doorPtr = getAccessPoint('PhantoonRoomOut').ExitInfo['DoorPtr']
+        doorPtr = (0x10000 | doorPtr) + 10
+        ret[doorPtr] = 0
+        ret[doorPtr+1] = 0
+
         return ret
 
     def __init__(self, romFile, magic=None):
@@ -385,6 +393,17 @@ class RomReader:
             self.romFile.seek(self.patches[patchName]['address'])
             value = struct.unpack("B", self.romFile.read(1))[0]
             result[self.patches[patchName]['address']] = value
+
+        # add boss detection bytes
+        from graph_access import getAccessPoint
+        doorPtr = getAccessPoint('PhantoonRoomOut').ExitInfo['DoorPtr']
+        doorPtr = (0x10000 | doorPtr) + 10
+
+        self.romFile.seek(doorPtr)
+        result[doorPtr] = struct.unpack("B", self.romFile.read(1))[0]
+        self.romFile.seek(doorPtr+1)
+        result[doorPtr+1] = struct.unpack("B", self.romFile.read(1))[0]
+
         return result
 
     def getDict(self):
@@ -737,7 +756,6 @@ class RomPatcher:
             for ips in self.ipsPatches:
                 ips.applyFile(self.romFile)
         else:
-            print('WEEEEB')
             # Web
             mergedIPS = IPS_Patch()
             for ips in self.ipsPatches:

@@ -375,6 +375,7 @@ google.charts.setOnLoadCallback(drawCharts);
 <h4>Randomizer data</h4>
 {{
     # data[0]: list of column headers, data[1]: rows (last column is a dict of the params), data[2]: list of params
+    (headers, rows, params) = (0, 1, 2)
     data = randomizerData
     if data == None:
       response.write("No data\n", escape=False)
@@ -383,25 +384,25 @@ google.charts.setOnLoadCallback(drawCharts);
       response.write("  <tr>\n", escape=False)
 
       i = 0
-      # standard columns execpt last one (error msg)
-      for col in data[0][0:-1]:
+      # standard columns except last one (error msg)
+      for col in data[headers][0:-1]:
         response.write("    <th onclick=\"sortTable('randomizerData', {})\">{}</th>\n".format(i, col), escape=False)
         i += 1
         pass
       # dynamic parameters
-      paramList = data[2]
+      paramList = data[params]
       for col in paramList:
         response.write("    <th onclick=\"sortTable('randomizerData', {})\">{}</th>\n".format(i, col), escape=False)
         i += 1
         pass
       # put error message at the end
-      col = data[0][-1]
+      col = data[headers][-1]
       response.write("    <th onclick=\"sortTable('randomizerData', {})\">{}</th>\n".format(i, col), escape=False)
 
       response.write("  </tr>\n", escape=False)
 
-      if data[1] != None:
-        for row in data[1]:
+      if data[rows] != None:
+        for row in data[rows]:
           if row[0] != 0:
             response.write("  <tr class=\"error\">\n", escape=False)
           else:
@@ -434,19 +435,19 @@ google.charts.setOnLoadCallback(drawCharts);
       response.write("  <tr>\n", escape=False)
 
       i = 0
-      # standard columns execpt last one (error msg)
-      for col in data[0][0:-1]:
+      # standard columns except last one (error msg)
+      for col in data[headers][0:-1]:
         response.write("    <th onclick=\"sortTable('randomizerData', {})\">{}</th>\n".format(i, col), escape=False)
         i += 1
         pass
       # dynamic parameters
-      paramList = data[2]
+      paramList = data[params]
       for col in paramList:
         response.write("    <th onclick=\"sortTable('randomizerData', {})\">{}</th>\n".format(i, col), escape=False)
         i += 1
         pass
       # put error message at the end
-      col = data[0][-1]
+      col = data[headers][-1]
       response.write("    <th onclick=\"sortTable('randomizerData', {})\">{}</th>\n".format(i, col), escape=False)
 
       response.write("  </tr>\n", escape=False)

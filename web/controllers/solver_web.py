@@ -59,10 +59,34 @@ def loadPreset():
 
     return params
 
+def completePreset(params):
+    # add missing knows
+    for know in Knows.__dict__:
+        if isKnows(know):
+            if know not in params['Knows'].keys():
+                params['Knows'][know] = Knows.__dict__[know]
+
+    # add missing settings
+    for boss in ['Kraid', 'Phantoon', 'Draygon', 'Ridley', 'MotherBrain']:
+        if boss not in params['Settings']:
+            params['Settings'][boss] = 'Default'
+    for hellrun in ['Ice', 'MainUpperNorfair', 'LowerNorfair']:
+        if hellrun not in params['Settings']:
+            params['Settings'][hellrun] = 'Default'
+    for hardroom in ['X-Ray', 'Gauntlet']:
+        if hardroom not in params['Settings']:
+            params['Settings'][hardroom] = 'Default'
+
+    # add missing controller buttons
+    for button in Controller.__dict__:
+        if isButton(button):
+            if button not in params['Controller'].keys():
+                params['Controller'][button] = Controller.__dict__[button]
+
 def loadPresetsList():
     files = sorted(os.listdir('community_presets'), key=lambda v: v.upper())
     stdPresets = ['noob', 'casual', 'regular', 'veteran', 'speedrunner', 'master']
-    tourPresets = ['Season_Races', 'smrat', 'SCAVENGER_HUNT']
+    tourPresets = ['Season_Races']
     comPresets = [os.path.splitext(file)[0] for file in files if file != '.git']
     return (stdPresets, tourPresets, comPresets)
 
@@ -376,28 +400,8 @@ def presets():
     # load presets list
     (stdPresets, tourPresets, comPresets) = loadPresetsList()
 
-    # add missing knows
-    for know in Knows.__dict__:
-        if isKnows(know):
-            if know not in params['Knows'].keys():
-                params['Knows'][know] = Knows.__dict__[know]
-
-    # add missing settings
-    for boss in ['Kraid', 'Phantoon', 'Draygon', 'Ridley', 'MotherBrain']:
-        if boss not in params['Settings']:
-            params['Settings'][boss] = 'Default'
-    for hellrun in ['Ice', 'MainUpperNorfair', 'LowerNorfair']:
-        if hellrun not in params['Settings']:
-            params['Settings'][hellrun] = 'Default'
-    for hardroom in ['X-Ray', 'Gauntlet']:
-        if hardroom not in params['Settings']:
-            params['Settings'][hardroom] = 'Default'
-
-    # add missing controller buttons
-    for button in Controller.__dict__:
-        if isButton(button):
-            if button not in params['Controller'].keys():
-                params['Controller'][button] = Controller.__dict__[button]
+    # add missing knows/settings
+    completePreset(params)
 
     # compute score for skill bar
     skillBarData = getSkillLevelBarData(session.presets['preset'])
@@ -846,16 +850,6 @@ def initRandomizerSession():
         session.randomizer['hideItems'] = "off"
         session.randomizer['strictMinors'] = "off"
         session.randomizer['randoPreset'] = ""
-        session.randomizer['colorsRandomization'] = "off"
-        session.randomizer['suitsPalettes'] = "on"
-        session.randomizer['beamsPalettes'] = "on"
-        session.randomizer['tilesPalettes'] = "on"
-        session.randomizer['enemiesPalettes'] = "on"
-        session.randomizer['bossesPalettes'] = "on"
-        session.randomizer['minDegree'] = -15
-        session.randomizer['maxDegree'] = 15
-        session.randomizer['invert'] = "on"
-        session.randomizer['globalShift'] = "on"
 
 def randomizer():
     response.title = 'Super Metroid VARIA Randomizer'
@@ -997,9 +991,7 @@ def sessionWebService():
               'progressionSpeed', 'majorsSplit', 'suitsRestriction',
               'funCombat', 'funMovement', 'funSuits', 'layoutPatches', 'preset',
               'noGravHeat', 'progressionDifficulty', 'morphPlacement',
-              'areaRandomization', 'bossRandomization', 'complexity', 'hideItems', 'strictMinors', 'randoPreset',
-              'colorsRandomization','suitsPalettes', 'beamsPalettes', 'tilesPalettes', 'enemiesPalettes',
-              'bossesPalettes', 'minDegree', 'maxDegree', 'invert', 'globalShift']
+              'areaRandomization', 'bossRandomization', 'complexity', 'hideItems', 'strictMinors', 'randoPreset']
     validateWebServiceParams(patchs, quantities, others)
 
     if session.randomizer is None:
@@ -1032,16 +1024,6 @@ def sessionWebService():
     session.randomizer['hideItems'] = request.vars.hideItems
     session.randomizer['strictMinors'] = request.vars.strictMinors
     session.randomizer['randoPreset'] = request.vars.randoPreset
-    session.randomizer['colorsRandomization'] = request.vars.colorsRandomization
-    session.randomizer['suitsPalettes'] = request.vars.suitsPalettes
-    session.randomizer['beamsPalettes'] = request.vars.beamsPalettes
-    session.randomizer['tilesPalettes'] = request.vars.tilesPalettes
-    session.randomizer['enemiesPalettes'] = request.vars.enemiesPalettes
-    session.randomizer['bossesPalettes'] = request.vars.bossesPalettes
-    session.randomizer['minDegree'] = request.vars.minDegree
-    session.randomizer['maxDegree'] = request.vars.maxDegree
-    session.randomizer['invert'] = request.vars.invert
-    session.randomizer['globalShift'] = request.vars.globalShift
 
     # to create a new rando preset, uncomment next lines
     #with open('rando_presets/new.json', 'w') as jsonFile:
@@ -1074,9 +1056,7 @@ def randomizerWebService():
               'maxDifficulty', 'progressionSpeed', 'majorsSplit',
               'suitsRestriction', 'morphPlacement', 'funCombat', 'funMovement', 'funSuits',
               'layoutPatches', 'noGravHeat', 'progressionDifficulty', 'areaRandomization',
-              'bossRandomization', 'hideItems', 'strictMinors', 'complexity', 'colorsRandomization',
-              'suitsPalettes', 'beamsPalettes', 'tilesPalettes', 'enemiesPalettes', 'bossesPalettes',
-              'minDegree', 'maxDegree', 'invert', 'globalShift']
+              'bossRandomization', 'hideItems', 'strictMinors', 'complexity']
     validateWebServiceParams(patchs, quantities, others, isJson=True)
 
     # randomize
@@ -1176,27 +1156,6 @@ def randomizerWebService():
 
     if request.vars.bossRandomization == 'on':
         params.append('--bosses')
-
-    if request.vars.colorsRandomization == 'on':
-        params.append('--palette')
-        if request.vars.suitsPalettes == 'off':
-            params.append('--no_shift_suit_palettes')
-        if request.vars.beamsPalettes == 'off':
-            params.append('--no_shift_beam_palettes')
-        if request.vars.tilesPalettes == 'off':
-            params.append('--no_shift_tileset_palette')
-        if request.vars.enemiesPalettes == 'off':
-            params.append('--no_shift_enemy_palettes')
-        if request.vars.bossesPalettes == 'off':
-            params.append('--no_shift_boss_palettes')
-        if request.vars.globalShift == 'off':
-            params.append('--no_global_shift')
-            params.append('--individual_suit_shift')
-            params.append('--individual_tileset_shift')
-            params.append('--no_match_ship_and_power')
-        params += ['--min_degree', request.vars.minDegree, '--max_degree', request.vars.maxDegree]
-        if request.vars.invert == 'on':
-            params.append('--invert')
 
     # load content of preset to get controller mapping
     try:
@@ -1319,8 +1278,10 @@ def randoPresetWebService():
     if os.path.isfile(fullPath):
         # load it
         try:
-            loadRandoPreset(fullPath)
+            params = loadRandoPreset(fullPath)
             session.randomizer['randoPreset'] = preset
+            params = json.dumps(params)
+            return params
         except Exception as e:
             raise HTTP(400, "Can't load the rando preset: {}".format(preset))
     else:
@@ -1333,6 +1294,8 @@ def loadRandoPreset(presetFullPath):
     # update session
     for key in randoPreset:
         session.randomizer[key] = randoPreset[key]
+
+    return randoPreset
 
 def home():
     # set title
@@ -2123,20 +2086,30 @@ def extStats():
 
         updateExtStatsSession()
 
-        preset = request.vars.preset
+        skillPreset = request.vars.preset
         randoPreset = request.vars.randoPreset
-        fullPath = 'rando_presets/{}.json'.format(randoPreset)
 
+        # load rando preset
+        fullPath = 'rando_presets/{}.json'.format(randoPreset)
         try:
             with open(fullPath) as jsonFile:
                 randoPreset = json.load(jsonFile)
         except Exception as e:
-            raise HTTP(400, "Can't load the rando preset: {}".format(randoPreset))
+            raise HTTP(400, "Can't load the rando preset: {}: {}".format(randoPreset, e))
+
+        # load skill preset
+        fullPath = '{}/{}.json'.format(getPresetDir(skillPreset), skillPreset)
+        try:
+            skillPresetContent = PresetLoader.factory(fullPath).params
+            completePreset(skillPresetContent)
+        except Exception as e:
+            raise HTTP(400, "Error loading the preset {}: {}".format(skillPreset, e))
 
         parameters = {
-            'preset': preset,
+            'preset': skillPreset,
             'area': 'areaRandomization' in randoPreset and randoPreset['areaRandomization'] == 'on',
             'boss': 'bossRandomization' in randoPreset and randoPreset['bossRandomization'] == 'on',
+            'noGravHeat': randoPreset['noGravHeat'] == 'on',
             # parameters which can be random:
             'majorsSplit': randoPreset['majorsSplit'] if 'majorsSplit' in randoPreset else 'Full',
             'progSpeed': randoPreset['progressionSpeed'] if 'progressionSpeed' in randoPreset else 'variable',
@@ -2145,7 +2118,7 @@ def extStats():
             'progDiff': randoPreset['progressionDifficulty'] if 'progressionDifficulty' in randoPreset else 'normal',
             'superFunMovement': 'funMovement' in randoPreset and randoPreset['funMovement'] == 'on',
             'superFunCombat': 'funCombat' in randoPreset and randoPreset['funCombat'] == 'on',
-            'superFunSuit': 'funSuits' in randoPreset and randoPreset['funSuits'] == 'on',
+            'superFunSuit': 'funSuits' in randoPreset and randoPreset['funSuits'] == 'on'
         }
 
         if randoPreset['suitsRestriction'] == "random":
@@ -2157,22 +2130,24 @@ def extStats():
         if randoPreset['funSuits'] == "random":
             parameters["superFunSuit"] = "random"
 
-
         DB = db.DB()
-        stats = DB.getExtStat(parameters)
+        (itemsStats, techniquesStats, difficulties) = DB.getExtStat(parameters)
         DB.close()
 
         # check that all items are present in the stats:
         nbItems = 19
         nbLocs = 105
-        if len(stats) > 0 and len(stats) != nbItems:
+        if len(itemsStats) > 0 and len(itemsStats) != nbItems:
             for i, item in enumerate(['Bomb', 'Charge', 'Grapple', 'Gravity', 'HiJump', 'Ice', 'Missile', 'Morph',
                                       'Plasma', 'PowerBomb', 'ScrewAttack', 'SpaceJump', 'Spazer', 'SpeedBooster',
                                       'SpringBall', 'Super', 'Varia', 'Wave', 'XRayScope']):
-                if stats[i][1] != item:
-                    stats.insert(i, [stats[0][0], item] + [0]*nbLocs)
+                if itemsStats[i][1] != item:
+                    itemsStats.insert(i, [itemsStats[0][0], item] + [0]*nbLocs)
     else:
-        stats = None
+        itemsStats = None
+        techniquesStats = None
+        difficulties = None
+        skillPresetContent = None
         parameters = None
 
     (randoPresets, tourRandoPresets) = loadRandoPresetsList()
@@ -2183,4 +2158,6 @@ def extStats():
 
     return dict(stdPresets=stdPresets, tourPresets=tourPresets,
                 randoPresets=randoPresets, tourRandoPresets=tourRandoPresets,
-                stats=stats, locations=locations, parameters=parameters)
+                itemsStats=itemsStats, techniquesStats=techniquesStats,
+                categories=Knows.categories, knowsDesc=Knows.desc, skillPresetContent=skillPresetContent,
+                locations=locations, parameters=parameters, difficulties=difficulties)

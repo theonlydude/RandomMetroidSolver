@@ -502,21 +502,17 @@ if __name__ == "__main__":
             json.dump({"itemLocs": itemLocs, "errorMsg": randomizer.errorMsg}, jsonFile, default=lambda x: x.__dict__)
         sys.exit(0)
 
-    # insert extended stats into database
-    if isStdPreset(preset) and args.raceMagic == None:
-        parameters = {'preset': preset, 'area': args.area, 'boss': args.bosses, 'majorsSplit': args.majorsSplit,
+    # generate extended stats
+    if args.extStatsFilename != None:
+        parameters = {'preset': preset, 'area': args.area, 'boss': args.bosses,
+                      'noGravHeat': not args.noGravHeat, 'majorsSplit': args.majorsSplit,
                       'progSpeed': progSpeed, 'morphPlacement': args.morphPlacement,
                       'suitsRestriction': args.suitsRestriction, 'progDiff': progDiff,
-                      'superFunMovement': 'Movement' in args.superFun, 'superFunCombat': 'Combat' in args.superFun,
+                      'superFunMovement': 'Movement' in args.superFun,
+                      'superFunCombat': 'Combat' in args.superFun,
                       'superFunSuit': 'Suits' in args.superFun}
-        if args.extStatsFilename == None:
-            DB = db.DB()
-            DB.addExtStat(parameters, locsItems)
-            DB.close()
-        else:
-            with open(args.extStatsFilename, 'a') as extStatsFile:
-                db.DB.dumpExtStat(parameters, locsItems, extStatsFile)
-            sys.exit(0)
+        with open(args.extStatsFilename, 'a') as extStatsFile:
+            db.DB.dumpExtStatsItems(parameters, locsItems, extStatsFile)
 
     try:
         # args.rom is not None: generate local rom named filename.sfc with args.rom as source

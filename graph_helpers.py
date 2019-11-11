@@ -134,6 +134,14 @@ class HelpersGraph(Helpers):
                                       sm.knowsNovaBoost())))
 
     @Cache.decorator
+    def canClimbBubbleMountain(self):
+        sm = self.smbm
+        return sm.wor(sm.haveItem('HiJump'),
+                      sm.canFly(),
+                      sm.haveItem('Ice'),
+                      sm.knowsBubbleMountainWallJump())
+
+    @Cache.decorator
     def canHellRunToSpeedBooster(self):
         sm = self.smbm
         mult = 1
@@ -185,17 +193,22 @@ class HelpersGraph(Helpers):
                                      sm.haveItem('Plasma'))))
 
     @Cache.decorator
-    def canEnterNorfairReserveArea(self):
+    def canEnterNorfairReserveAreaFromBubbleMoutain(self):
         sm = self.smbm
         return sm.wand(sm.canOpenGreenDoors(),
-                       sm.wor(sm.wor(sm.canFly(),
-                                     sm.haveItem('Grapple'),
-                                     sm.wand(sm.haveItem('HiJump'),
-                                             sm.knowsGetAroundWallJump())),
-                              sm.wor(sm.haveItem('Ice'),
-                                     sm.wand(sm.canUseSpringBall(),
-                                             sm.knowsSpringBallJumpFromWall()),
-                                     sm.knowsNorfairReserveDBoost())))
+                       sm.wor(sm.canFly(), # from save door
+                              sm.wand(sm.haveItem('HiJump'),
+                                      sm.knowsGetAroundWallJump()),
+                              sm.wand(sm.canUseSpringBall(),
+                                      sm.knowsSpringBallJumpFromWall())))
+
+    @Cache.decorator
+    def canEnterNorfairReserveAreaFromBubbleMoutainTop(self):
+        sm = self.smbm
+        return sm.wand(sm.canOpenGreenDoors(),
+                       sm.wor(sm.haveItem('Grapple'),
+                              sm.haveItem('SpaceJump'),
+                              sm.knowsNorfairReserveDBoost()))
 
     @Cache.decorator
     def canPassLavaPit(self):

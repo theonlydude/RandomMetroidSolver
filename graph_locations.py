@@ -386,9 +386,10 @@ locations = [
     'Visibility': "Chozo",
     'Room': 'Norfair Reserve Tank Room',
     'AccessFrom' : {
-        'Bubble Mountain': lambda sm: sm.canHellRun('MainUpperNorfair'),
+        'Bubble Mountain': lambda sm: sm.canEnterNorfairReserveAreaFromBubbleMoutain(),
+        'Bubble Mountain Top': lambda sm: sm.canEnterNorfairReserveAreaFromBubbleMoutainTop(),
     },
-    'Available': lambda sm: sm.wand(sm.haveItem('Morph'), sm.canEnterNorfairReserveArea())
+    'Available': lambda sm: sm.wand(sm.haveItem('Morph'), sm.canHellRun('MainUpperNorfair'))
 },
 {
     'Area': "Norfair",
@@ -402,7 +403,7 @@ locations = [
     'Visibility': "Chozo",
     'Room': 'Speed Booster Room',
     'AccessFrom' : {
-        'Bubble Mountain': lambda sm: sm.canOpenGreenDoors()
+        'Bubble Mountain Top': lambda sm: sm.canOpenGreenDoors()
     },
     'Available': lambda sm: sm.canHellRunToSpeedBooster()
 },
@@ -418,7 +419,7 @@ locations = [
     'Visibility': "Chozo",
     'Room': 'Wave Beam Room',
     'AccessFrom' : {
-        'Bubble Mountain': lambda sm: sm.canHellRun('MainUpperNorfair', 0.75)
+        'Bubble Mountain Top': lambda sm: sm.canHellRun('MainUpperNorfair', 0.75)
     },
     'Available': lambda sm: sm.canOpenRedDoors(),
     'PostAvailable': lambda sm: sm.wor(sm.haveItem('Morph'), # exit through lower passage under the spikes
@@ -1482,9 +1483,10 @@ locations = [
     'Visibility': "Hidden",
     'Room': 'Norfair Reserve Tank Room',
     'AccessFrom' : {
-        'Bubble Mountain': lambda sm: sm.canHellRun('MainUpperNorfair')
+        'Bubble Mountain': lambda sm: sm.canEnterNorfairReserveAreaFromBubbleMoutain(),
+        'Bubble Mountain Top': lambda sm: sm.canEnterNorfairReserveAreaFromBubbleMoutainTop()
     },
-    'Available': lambda sm: sm.wand(sm.haveItem('Morph'), sm.canEnterNorfairReserveArea())
+    'Available': lambda sm: sm.wand(sm.haveItem('Morph'), sm.canHellRun('MainUpperNorfair'))
 },
 {
     'Area': "Norfair",
@@ -1498,9 +1500,10 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Green Bubbles Missile Room',
     'AccessFrom' : {
-        'Bubble Mountain': lambda sm: sm.canHellRun('MainUpperNorfair', 2.5, minE=1)
+        'Bubble Mountain': lambda sm: sm.canEnterNorfairReserveAreaFromBubbleMoutain(),
+        'Bubble Mountain Top': lambda sm: sm.canEnterNorfairReserveAreaFromBubbleMoutainTop()
     },
-    'Available': lambda sm: sm.canEnterNorfairReserveArea()
+    'Available': lambda sm: sm.canHellRun('MainUpperNorfair', 2.5, minE=1)
 },
 {
     'Area': "Norfair",
@@ -1530,7 +1533,7 @@ locations = [
     'Visibility': "Hidden",
     'Room': 'Speed Booster Hall',
     'AccessFrom' : {
-        'Bubble Mountain': lambda sm: sm.canOpenGreenDoors()
+        'Bubble Mountain Top': lambda sm: sm.canOpenGreenDoors()
     },
     'Available': lambda sm: sm.canHellRunToSpeedBooster()
 },
@@ -1546,7 +1549,7 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Double Chamber',
     'AccessFrom' : {
-        'Bubble Mountain': lambda sm: sm.canHellRun('MainUpperNorfair', 0.75)
+        'Bubble Mountain Top': lambda sm: sm.canHellRun('MainUpperNorfair', 0.75)
     },
     'Available': lambda sm: sm.canOpenRedDoors()
 },

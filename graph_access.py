@@ -257,9 +257,9 @@ accessPoints = [
        entryInfo = {'SamusX': 0x2c7, 'SamusY': 0x98},
        shortName="N\\WAREHOUSE R"),
     AccessPoint('Single Chamber Top Right', 'Norfair', {
-        'Bubble Mountain': lambda sm: sm.wand(sm.canDestroyBombWalls(),
-                                              sm.haveItem('Morph'),
-                                              sm.canHellRun('MainUpperNorfair', 1.25)),
+        'Bubble Mountain Top': lambda sm: sm.wand(sm.canDestroyBombWalls(),
+                                                  sm.haveItem('Morph'),
+                                                  sm.canHellRun('MainUpperNorfair', 1.25)),
         'Kronic Boost Room Bottom Left': lambda sm: sm.wand(sm.canDestroyBombWalls(),
                                                             sm.haveItem('Morph'),
                                                             sm.canHellRun('MainUpperNorfair'))
@@ -273,10 +273,10 @@ accessPoints = [
                                                        sm.canDestroyBombWalls(),
                                                        sm.haveItem('Morph'),
                                                        RomPatches.has(RomPatches.SingleChamberNoCrumble)),
-        'Bubble Mountain': lambda sm: sm.wor(sm.wand(sm.canPassBombPassages(),
-                                                     sm.canHellRun('MainUpperNorfair', 1.25)),
-                                             sm.wand(sm.haveItem('Morph'),
-                                                     sm.canHellRun('MainUpperNorfair', 0.5))), # go all the way around
+        'Bubble Mountain': lambda sm: sm.wand(sm.canPassBombPassages(),
+                                              sm.canHellRun('MainUpperNorfair', 1.25)),
+        'Bubble Mountain Top': lambda sm: sm.wand(sm.haveItem('Morph'),
+                                                  sm.canHellRun('MainUpperNorfair', 0.5)), # go all the way around
         'Croc Zone': lambda sm: sm.wand(sm.canOpenGreenDoors(),
                                         sm.canHellRun('MainUpperNorfair'),
                                         sm.wor(sm.haveItem('Wave'),
@@ -304,10 +304,7 @@ accessPoints = [
         'Warehouse Entrance Left': lambda sm: sm.wor(sm.wand(sm.canPassBombPassages(),
                                                              sm.canPassFrogSpeedwayRightToLeft()),
                                                      sm.canExitCathedral()),
-        'Single Chamber Top Right': lambda sm: sm.wand(sm.canHellRun('MainUpperNorfair', 1.25),
-                                                       sm.canDestroyBombWalls(),
-                                                       sm.haveItem('Morph'),
-                                                       RomPatches.has(RomPatches.SingleChamberNoCrumble)),
+        'Bubble Mountain Top': lambda sm: sm.canClimbBubbleMountain(),
         'Kronic Boost Room Bottom Left': lambda sm: sm.wor(sm.wand(sm.canPassBombPassages(),
                                                                    sm.canHellRun('MainUpperNorfair', 1.25)),
                                                            sm.wand(sm.haveItem('Morph'),
@@ -317,6 +314,13 @@ accessPoints = [
                                         sm.wor(sm.wand(sm.canOpenRedDoors(), sm.knowsGreenGateGlitch()),
                                                sm.haveItem('Wave')),
                                         sm.canOpenGreenDoors())
+    }, internal=True),
+    AccessPoint('Bubble Mountain Top', 'Norfair', {
+        'Single Chamber Top Right': lambda sm: sm.wand(sm.canHellRun('MainUpperNorfair', 1.25),
+                                                       sm.canDestroyBombWalls(),
+                                                       sm.haveItem('Morph'),
+                                                       RomPatches.has(RomPatches.SingleChamberNoCrumble)),
+        'Bubble Mountain': lambda sm: SMBool(True)
     }, internal=True),
     # Maridia
     AccessPoint('Main Street Bottom', 'Maridia', {

@@ -328,6 +328,12 @@ class Knows:
                                      'href': 'https://www.youtube.com/watch?v=CqQik2z6IkE',
                                      'rooms': ['Cathedral Entrance']}
 
+    BubbleMountainWallJump = SMBool(True, medium, ['BubbleMountainWallJump'])
+    desc['BubbleMountainWallJump'] = {'display': 'Bubble Mountain wall jump',
+                                      'title': 'Run from the save room and get up Bubble Mountain without Hi-Jump',
+                                      'href': '', # TODO
+                                      'rooms': ['Bubble Mountain']}
+
     NovaBoost = SMBool(False, 0, ['NovaBoost'])
     desc['NovaBoost'] = {'display': 'Nova Boost',
                          'title': 'Use a D-Boost on the Sova to enter Cathedral',
@@ -591,7 +597,7 @@ class Knows:
              'title': 'Obscure suitless stuff'}
         ],
         'Norfair': [
-            {'knows': ['WallJumpCathedralExit', 'NorfairReserveDBoost', 'CrocPBsIce', 'CrocPBsDBoost', 'IceEscape', 'IceMissileFromCroc', 'FrogSpeedwayWithoutSpeed', 'NovaBoost'],
+            {'knows': ['WallJumpCathedralExit', 'BubbleMountainWallJump', 'NorfairReserveDBoost', 'CrocPBsIce', 'CrocPBsDBoost', 'IceEscape', 'IceMissileFromCroc', 'FrogSpeedwayWithoutSpeed', 'NovaBoost'],
               'title': 'Upper Norfair'},
             {'knows': ['LavaDive', 'LavaDiveNoHiJump', 'ScrewAttackExit', 'ScrewAttackExitWithoutScrew', 'WorstRoomIceCharge'],
              'title': 'Lower Norfair'}

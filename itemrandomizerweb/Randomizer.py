@@ -1665,31 +1665,43 @@ class Randomizer(object):
                 collectedLocs = [il['Location'] for il in self.itemLocations]
                 def getAboveDiffLocs(locs):
                     return [loc for loc in locs if loc['difficulty'].difficulty > self.difficultyTarget]
-                minLeftAbove = len(getAboveDiffLocs(collectedLocs))
+                initialAboveDiffLocs = getAboveDiffLocs(collectedLocs)
+                minLeftAbove = len(initialAboveDiffLocs)
                 self.log.debug('minLeftAbove=' + str(minLeftAbove))
-                if minLeftAbove == 0:
-                    return pool[0]
-                checkPool = []
-                for item in pool:
-                    if not any(i for i in checkPool if i['Type'] == item['Type']):
-                        checkPool.append(item)
-                for item in checkPool:
-                    curLocs = self.currentLocations(item, collectedLocs)
-                    n = len(getAboveDiffLocs(curLocs))
-                    if n < minLeftAbove:
-                        minLeftAbove = n
-                        self.log.debug('item ' + item['Type'] + ' lowers minLeftAbove to ' + str(minLeftAbove))
-                        ret = item
-                if ret is None:
+                if minLeftAbove == 0 or self.difficultyTarget >= god:
                     ret = pool[0]
+                else:
+                    checkPool = []
+                    for item in pool:
+                        if not any(i for i in checkPool if i['Type'] == item['Type']):
+                            checkPool.append(item)
+                    for item in checkPool:
+                        # take a copy everytime because difficulty stays
+                        # in loc dicts. shallow copy is enough since
+                        # difficulty is a scalar.
+                        locs = [loc.copy() for loc in collectedLocs]
+                        self.currentLocations(item, locs)
+                        n = len(getAboveDiffLocs(locs)) # locs are modified in-place with difficulty
+                        if n < minLeftAbove:
+                            minLeftAbove = n
+                            self.log.debug('item ' + item['Type'] + ' lowers minLeftAbove to ' + str(minLeftAbove))
+                            ret = item
+                    if ret is None:
+                        ret = pool[0]
+                    else:
+                        self.log.debug('chose ' + ret['Type'])
+                # updates collected locations difficulty with this new
+                # item, but only the ones that went below max diff
+                # (for accurate alert at the end on above diff locs)
+                self.currentLocations(ret, initialAboveDiffLocs)
                 return ret
             def getLocs(locs):
                 return [loc for loc in locs if 'Chozo' not in loc['Class'] and 'Boss' not in loc['Class']]
-            def fillup(n, pool):
+            def fillup(n, pool, ap):
                 self.log.debug('fillup-n=' + str(n) + ', pool_types=' + str(list(set([item['Type'] for item in pool]))))
                 itemLocs = []
                 for i in range(n):
-                    curLocs = getLocs(self.currentLocations(ap='Landing Site'))
+                    curLocs = getLocs(self.currentLocations(ap=ap))
                     item = chooseItem(pool)
                     loc = curLocs[random.randint(0, len(curLocs)-1)]
                     il = {'Item':item, 'Location':loc}
@@ -1707,7 +1719,8 @@ class Randomizer(object):
                 self.log.debug('updateCurrentState END')
             # restore state to this point + all item locs we already put in the fillup
             state.apply(self)
-            self.log.debug('state ' + str(state) + ' apply, nCurLocs='+str(len(self.currentLocations(ap='Landing Site'))))
+            ap = self.curAccessPoint
+            self.log.debug('state ' + str(state) + ' apply, nCurLocs='+str(len(self.currentLocations(ap=ap))))
             self.log.debug('collected1=' + str(list(set([i['Item']['Type'] for i in self.itemLocations]))))
             for il in allItemLocs:
                 self.getItem(il, pool=self.nonChozoItemPool, showDot=False)
@@ -1718,19 +1731,20 @@ class Randomizer(object):
             lim = self.locLimit - 1
             if lim < 0:
                 lim = 0
-            nLocsNonProg = len(getLocs(self.currentLocations(ap='Landing Site'))) - lim
+            nLocsNonProg = len(getLocs(self.currentLocations(ap=ap))) - lim
             itemLocs = []
             if len(nonProg) > 0 and nLocsNonProg > 0:
                 nNonProg = len(nonProg)
-                self.log.debug('nonProg fillup cur=' + str(len(self.currentLocations(ap='Landing Site'))) + ', nLocs=' + str(nLocsNonProg) + ', nNonProg=' + str(nNonProg))
-                itemLocs += fillup(min(nLocsNonProg, nNonProg), nonProg)
+                self.log.debug('nonProg fillup cur=' + str(len(self.currentLocations(ap=ap))) + ', nLocs=' + str(nLocsNonProg) + ', nNonProg=' + str(nNonProg))
+                itemLocs += fillup(min(nLocsNonProg, nNonProg), nonProg, ap)
             allItems = self.nonChozoItemPool[:]
-            nLocs = len(getLocs(self.currentLocations(ap='Landing Site')))
+            nLocs = len(getLocs(self.currentLocations(ap=ap)))
             if len(allItems) > 0 and nLocs > 0:
                 nItems = len(allItems)
-                self.log.debug('allItems fillup cur=' + str(len(self.currentLocations(ap='Landing Site'))) + ', nLocs=' + str(nLocs) + ', nItems=' + str(nItems))
-                itemLocs += fillup(min(nLocs, nItems), allItems)
-            curLocs = self.currentLocations(ap='Landing Site')
+                self.log.debug('allItems fillup cur=' + str(len(self.currentLocations(ap=ap))) + ', nLocs=' + str(nLocs) + ', nItems=' + str(nItems))
+                itemLocs += fillup(min(nLocs, nItems), allItems, ap)
+            curLocs = self.currentLocations(ap=ap)
+            # update collected locations difficulty
             updateCurrentState(itemLocs, curLocs, curState)
             curState = RandoState(self, curLocs)
 

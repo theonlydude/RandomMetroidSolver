@@ -51,9 +51,6 @@ if (hs.registerOverlay) {
     margin-bottom: 0em;
     text-align: center;
 }
-#colorRandomization {
-    display: none
-}
 .rightStep {
     float: right;
     margin-right: 0.3em;
@@ -233,25 +230,12 @@ if (hs.registerOverlay) {
 // https://stackoverflow.com/questions/16960690/chosen-harvesthq-resize-width-dynamically
 $(document).ready(function(){      
    jQuery(window).on('resize', resizeChosen);
-   jQuery(window).on('resize', resizeSlider);
 });
 
 function resizeChosen() {
    $(".chosen-container").each(function() {
        $(this).attr('style', 'width: 100%');
    });          
-}
-
-function resizeSlider() {
-   var slider = $("#degree_slider_range");
-   var width = slider.width();
-
-   // set new handle tracks width
-   slider.find(".handle-track0").css("width", width);
-   slider.find(".handle-track1").css("width", width);
-
-   update_handle_track_pos(slider, slider.slider("values", 0), 0);
-   update_handle_track_pos(slider, slider.slider("values", 1), 1);
 }
 
 function randomize(evt, elemId) {
@@ -342,7 +326,7 @@ function setComplexity() {
 function changeComplexity(evt, name) {
   if(name == "simple") {
     var show = [];
-    var hide = ["seedVisibility", "ammoVisibility", "maxDiffVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "morphPlacementVisibility", "superFunVisibility", "patchesVisibility", "areaPatchVisibility", "hideItemsVisibility", "raceModeVisibility", "colorsRandomizationVisibility", "globalShiftVisibility"];
+    var hide = ["seedVisibility", "ammoVisibility", "maxDiffVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "morphPlacementVisibility", "superFunVisibility", "patchesVisibility", "areaPatchVisibility", "hideItemsVisibility", "raceModeVisibility"];
     showHide(show, hide);
   }
 
@@ -355,7 +339,7 @@ for patch in patches:
     pass
   pass
 }}];
-    var hide = ["seedVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "strictMinorsVisibility", "missileQtyVisibility", "superQtyVisibility", "powerBombQtyVisibility", "superFunVisibility", "areaPatchVisibility", "mainPatchesVisibitily", "mainPatchesTextVisibitily", "hideItemsVisibility", "raceModeVisibility", "colorsRandomizationVisibility", "globalShiftVisibility"
+    var hide = ["seedVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "strictMinorsVisibility", "missileQtyVisibility", "superQtyVisibility", "powerBombQtyVisibility", "superFunVisibility", "areaPatchVisibility", "mainPatchesVisibitily", "mainPatchesTextVisibitily", "hideItemsVisibility", "raceModeVisibility"
 {{
 for patch in patches:
   if patch[3] == False:
@@ -367,7 +351,7 @@ for patch in patches:
   }
 
   else {
-    var show = ["seedVisibility", "ammoVisibility", "maxDiffVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "morphPlacementVisibility", "strictMinorsVisibility", "missileQtyVisibility", "superQtyVisibility", "powerBombQtyVisibility", "superFunVisibility", "patchesVisibility", "areaPatchVisibility", "mainPatchesVisibitily", "mainPatchesTextVisibitily", "hideItemsVisibility", "raceModeVisibility", "colorsRandomizationVisibility", "globalShiftVisibility"
+    var show = ["seedVisibility", "ammoVisibility", "maxDiffVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "morphPlacementVisibility", "strictMinorsVisibility", "missileQtyVisibility", "superQtyVisibility", "powerBombQtyVisibility", "superFunVisibility", "patchesVisibility", "areaPatchVisibility", "mainPatchesVisibitily", "mainPatchesTextVisibitily", "hideItemsVisibility", "raceModeVisibility"
 {{
 for patch in patches:
   response.write(", \"{}Visibitily\"".format(patch[0]), escape=False)
@@ -405,8 +389,7 @@ function AjaxPresetCallCompleted(data) {
     console.log("AjaxPresetCallCompleted");
 
     var dataDict = {paramsFileTarget : data, "complexity": getComplexity()};
-    var elems = ["seed", "itemsounds", "spinjumprestart", "rando_speed", "elevators_doors_speed", "skip_ceres", "skip_intro", "animals", "layoutPatches", "noGravHeat", "areaLayout", "variaTweaks", "areaRandomization", "No_Music", "preset",
-"bossRandomization", "colorsRandomization", "suitsPalettes", "beamsPalettes", "tilesPalettes", "enemiesPalettes", "bossesPalettes", "globalShift"];
+    var elems = ["seed", "itemsounds", "spinjumprestart", "rando_speed", "elevators_doors_speed", "skip_ceres", "skip_intro", "animals", "layoutPatches", "noGravHeat", "areaLayout", "variaTweaks", "areaRandomization", "No_Music", "preset", "bossRandomization"];
     var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "energyQty", "maxDifficulty", "majorsSplit", "suitsRestriction", "morphPlacement", "funCombat", "funMovement", "funSuits", "progressionDifficulty", "hideItems", "strictMinors"];
 
     for(var i=0; i<elems.length; i++) {
@@ -428,16 +411,6 @@ function AjaxPresetCallCompleted(data) {
     if(raceMode.checked) {
       var maxHourRace = document.getElementById("maxHourRace");
       dataDict["raceMode"] = maxHourRace.value;
-    }
-
-    // add colors slider
-    dataDict["minDegree"] = $("#degree_slider_range").slider("values", 0);
-    dataDict["maxDegree"] = $("#degree_slider_range").slider("values", 1);
-
-    if(invertSlider == true) {
-      dataDict["invert"] = "on";
-    } else {
-      dataDict["invert"] = "off";
     }
 
     // call web service with parameters
@@ -572,7 +545,7 @@ function AjaxRandomizerCallCompleted(data) {
     console.log("button text set back to randomize");
 
     var dataDict = {"complexity": getComplexity()};
-    var elems = ["itemsounds", "spinjumprestart", "rando_speed", "elevators_doors_speed", "skip_ceres", "skip_intro", "animals", "layoutPatches", "noGravHeat", "areaLayout", "variaTweaks", "areaRandomization", "bossRandomization", "No_Music", "preset", "randoPreset", "colorsRandomization", "suitsPalettes", "beamsPalettes", "tilesPalettes", "enemiesPalettes", "bossesPalettes", "globalShift"];
+    var elems = ["itemsounds", "spinjumprestart", "rando_speed", "elevators_doors_speed", "skip_ceres", "skip_intro", "animals", "layoutPatches", "noGravHeat", "areaLayout", "variaTweaks", "areaRandomization", "bossRandomization", "No_Music", "preset", "randoPreset"];
     var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "energyQty", "maxDifficulty", "majorsSplit", "suitsRestriction", "morphPlacement", "funCombat", "funMovement", "funSuits", "progressionDifficulty", "hideItems", "strictMinors"];
 
     for(var i=0; i<elems.length; i++) {
@@ -588,15 +561,6 @@ function AjaxRandomizerCallCompleted(data) {
     }
 
     dataDict["progressionSpeed"] = getProgSpeed();
-
-    dataDict["minDegree"] = $("#degree_slider_range").slider("values", 0);
-    dataDict["maxDegree"] = $("#degree_slider_range").slider("values", 1);
-
-    if(invertSlider == true) {
-      dataDict["invert"] = "on";
-    } else {
-      dataDict["invert"] = "off";
-    }
 
     // call webservice to update the session
     var request = $.ajax({
@@ -889,10 +853,6 @@ window.onload = function(){
         }
     }
 
-    // color checkboxes
-    var colorRando = document.getElementById("colorsRandomization");
-    colorRando.onchange = setColorRando;
-
     setComplexity();
 
     setRandom();
@@ -900,137 +860,6 @@ window.onload = function(){
     $("#preset").chosen();
     $("#randoPreset").chosen();
     resizeChosen();
-
-    initSlider();
-
-{{
-if session.randomizer["invert"] == "on":
-}}
-    invertFunc();
-{{
-    pass
-}}
-
-    setColorRando();
-}
-
-function setColorRando() {
-  var colorRando = document.getElementById("colorsRandomization");
-  var elements = ["globalShift", "suitsPalettes", "beamsPalettes", "tilesPalettes", "enemiesPalettes", "bossesPalettes"];
-  var slider = $("#degree_slider_range");
-
-  if(colorRando.checked){
-    for(var i=0; i<elements.length; i++) {
-      var elemId = elements[i];
-      var switchBox = document.getElementById(elemId);
-      var text = document.getElementById(elemId+"Text");
-      var s = globalSwitchs[elemId];
-      switchBox.disabled = false;
-      text.className = "";
-      s.enable();
-      document.getElementById("textRight").className = "";
-      document.getElementById("textLeft").className = "floatleft";
-      document.getElementById("invert").disabled = false;
-    }
-    slider.slider("enable");
-    colorRando.value = "on";
-  } else {
-    for(var i=0; i<elements.length; i++) {
-      var switchBox = document.getElementById(elements[i]);
-      var text = document.getElementById(elements[i]+"Text");
-      var s = globalSwitchs[elements[i]];
-      switchBox.disabled = true;
-      text.className = "disabledText";
-      s.disable();
-      document.getElementById("textRight").className = "disabledText";
-      document.getElementById("textLeft").className = "floatleft disabledText";
-      document.getElementById("invert").disabled = true;
-    }
-    slider.slider("disable");
-    colorRando.value = "off";
-  }
-}
-
-var invertSlider = false;
-
-// Helper function
-function update_handle_track_pos(slider, ui_handle_pos, index) {
-  var width = $("#degree_slider_range").width();
-  var handle_track_xoffset = -(((ui_handle_pos*0.2777777778+50)/100) * width);
-  $(slider).find(".handle-track"+index).css("left", handle_track_xoffset);
-
-  // reverse grey slider
-  if(invertSlider == true) {
-      if(index == 0) {
-        var left_slider = ui_handle_pos;
-        var right_slider = $("#degree_slider_range").slider("values", 1);
-      } else {
-        var left_slider = $("#degree_slider_range").slider("values", 0);
-        var right_slider = ui_handle_pos;
-      }
-
-      var slider_range_inverse_left = (100 - (left_slider*-0.2777777778+50)) + "%";
-      var slider_range_inverse_width = ((right_slider-left_slider)*0.2777777778) + "%";
-
-      $(slider).find(".slider-range-inverse0").css("width", slider_range_inverse_width);
-      $(slider).find(".slider-range-inverse0").css("left", slider_range_inverse_left);
-
-      $(slider).find(".slider-range-inverse1").css("width", "0%");
-  } else {
-    $(slider).find(".slider-range-inverse0").css("left", "0%");
-
-    if(index == 1) {
-      var slider_range_inverse_width = (ui_handle_pos*-0.2777777778+50) + "%";
-      $(slider).find(".slider-range-inverse1").css("width", slider_range_inverse_width);
-    } else {
-      var slider_range_inverse_width = (100 - (ui_handle_pos*-0.2777777778+50)) + "%";
-      $(slider).find(".slider-range-inverse0").css("width", slider_range_inverse_width);
-    }
-  }
-}
-
-// Init slider
-function initSlider() {
-  $("#degree_slider_range").slider({
-    range: true,
-    min: -180,
-    max: 180,
-    values: [-180, 180],
-    create: function(event, ui) {
-      var slider = $(event.target);
-      
-      // Append the slider handle with a center dot and it's own track
-      slider.find(".ui-slider-handle").append(function(n){ return "<span class=\"dot\"><span class=\"handle-track"+n+"\"></span></span>"; });
-
-      // Append the slider with an inverse range      
-      slider.prepend('<div class="slider-range-inverse0"></div>')
-      slider.prepend('<div class="slider-range-inverse1"></div>')
-
-      // Set initial dimensions
-      slider.find(".handle-track0").css("width", event.target.clientWidth);
-      slider.find(".handle-track1").css("width", event.target.clientWidth);
-      
-      // set current values
-      $("#degree_slider_range").slider("values", 0, {{=session.randomizer["minDegree"]}});
-      $("#degree_slider_range").slider("values", 1, {{=session.randomizer["maxDegree"]}});
-
-      // Set initial position for tracks
-      update_handle_track_pos(event.target, $(this).slider("values", 0), 0);
-      update_handle_track_pos(event.target, $(this).slider("values", 1), 1);
-
-    },
-    slide: function(event, ui) {
-      // Update position of tracks
-      update_handle_track_pos(event.target, ui.value, ui.handleIndex);
-    }
-  });
-}
-
-function invertFunc() {
-  invertSlider = ! invertSlider;
-  var slider = $("#degree_slider_range");
-  update_handle_track_pos(slider, slider.slider("values", 0), 0);
-  update_handle_track_pos(slider, slider.slider("values", 1), 1);
 }
 
 function switchCheckbox(id, elems=[]) {
@@ -1074,15 +903,58 @@ function loadRandoPreset() {
       url: "{{=URL(f='randoPresetWebService')}}",
       method: "POST",
       data: dataDict,
-      dataType: "html"
+      dataType: "json"
   });
 
   request.done(loadRandoPresetOK);
   request.fail(ajaxFail);
 }
 
-function loadRandoPresetOK() {
-  location.reload();
+function loadRandoPresetOK(data) {
+  // instead of reloading the page which remove the sm ROM, update all fields manually
+  for(var key in data) {
+    value = data[key];
+    var elem = document.getElementById(key);
+
+    var elemRandom = document.getElementById(key+"Random");
+    if(value == "random") {
+      if(key == "progressionSpeed") {
+        $("#psMultiselect").val(["slowest", "slow", "medium", "fast", "fastest", "basic", "VARIAble"]).trigger("chosen:updated");
+        document.getElementById("progressionSpeedRandom").click();
+      }
+
+      // if not already set as random, set it
+      if(elemRandom.className.search("active") == -1) {
+        randomize({currentTarget: elemRandom}, key);
+      }
+    } else {
+      // check if it was random before
+      if(elemRandom != null && elemRandom.className.search("active") != -1) {
+        randomize({currentTarget: elemRandom}, key);
+      }
+
+      // tell switchery for checkboxes
+      if(key in globalSwitchs) {
+        if(value != elem.value){
+          elem.click();
+        }
+      }
+
+      // update element value
+      if(key == "progressionSpeed") {
+        if(typeof value == "string") {
+          // one value
+          elem.value = value;
+        } else {
+          // multiple values
+          $("#psMultiselect").val(value).trigger("chosen:updated");
+          document.getElementById("progressionSpeedRandom").click();
+        }
+      } else {
+        elem.value = value;
+      }
+    }
+  }
 }
 
 function startTheTour(step=-1) {
@@ -1255,12 +1127,6 @@ The areas or rooms unlocked by the bosses stay unchanged. For example, you still
       placement: "auto left"
     },
     {
-      element: "#colorsRandomizationStep",
-      title: "Color randomization",
-      content: "<p>Randomize the colors of various graphical elements:</p><div class=\"parent-center\"><img src=\"/solver/static/images/palettesRando.png\" alt=\"colors rando\" title=\"colors rando\" class=\"child-center half\"/></div><p>Use the slider to restrict the possible range of the colors shifting. The colors on the slider are the result colors for Samus, the yellow in the middle being Samus vanilla color:</p><div class=\"parent-center\"><img src=\"/solver/static/images/samus_degrees.png\" alt=\"samus degrees\" title=\"samus degrees\" class=\"child-center half\"/></div><p>You can invert the range by clicking on the invert button.</p><p>By default, the same shift is applied to all elements for color consistency. If you disable the setting, a different shift will be used for each category.</p>",
-      placement: "auto left"
-    },
-    {
       element: "#funCombatStep",
       title: "Super Fun Combat",
       content: "<p>Forces removal of Plasma Beam <img src=\"/solver/static/images/Plasma.png\" alt=\"Plasma.png\" title=\"Plasma.png\" class=\"width: 32px\"/>, and Screw Attack <img src=\"/solver/static/images/ScrewAttack.png\" alt=\"ScrewAttack.png\" title=\"ScrewAttack.png\" class=\"width: 32px\"/> if the preset and settings allow it.<br/>In addition, can randomly remove some items from the Combat set:</p>\
@@ -1300,8 +1166,7 @@ Click on the dice button to randomly set this parameter.",
       placement: "auto left"
     },
     {
-//      element: "#layoutPatchesStep",
-      element: "#patchesStep",
+      element: "#layoutPatchesStep",
       title: "Anti-softlock Layout patches",
       content: "Include the anti-softlock layout patches. Disable at your own softlocking risk!\
 <table class=\"full\">\
@@ -1328,7 +1193,7 @@ Click on the dice button to randomly set this parameter.",
 <tr>\
 <td class=\"third\"><p class=\"top\">Replace bomb blocks with shot blocks before Spazer:</p></td>\
 <td class=\"third\"><p class=\"top\">Remove grey door at Brinstar map stations:</p></td>\
-<td class=\"third\"><p class=\"top\">Spore Spawn save station always available:</p></td>\
+<td class=\"third\"><p class=\"top\">Spore Spawn save station is always available:</p></td>\
 </tr>\
 <tr>\
 <td class=\"third\"><img src=\"/solver/static/images/spazer_block.png\" alt=\"spazer_block\" title=\"spazer_block\" class=\"full\"/></td>\
@@ -1339,15 +1204,13 @@ Click on the dice button to randomly set this parameter.",
       placement: "auto left"
     },
     {
-      element: "#patchesStep",
-//      element: "#noGravHeatStep",
+      element: "#noGravHeatStep",
       title: "No Gravity Suit Heat Protection",
       content: "Remove the Gravity Suit <img src=\"/solver/static/images/Gravity.png\" alt=\"Gravity.png\" title=\"Gravity.png\" class=\"width: 32px\"/> environmental protection (heat, spikes, electricity...), it also double the Varia Suit <img src=\"/solver/static/images/Varia.png\" alt=\"Varia.png\" title=\"Varia.png\" class=\"width: 32px\"/> environmental protection, as such it balances more the two suits abilities. Disable it to have a more vanilla feeling.",
       placement: "auto left"
     },
     {
-      element: "#patchesStep",
-//      element: "#variaTweaksStep",
+      element: "#variaTweaksStep",
       title: "VARIA Tweaks",
       content: "<p>Include minor tweaks for the game to behave 'as it should' in a randomizer context:</p>\
 <table class=\"full\">\
@@ -1614,40 +1477,6 @@ def displayNumber(id, min, max, default, step="1"):
                 <td><button type="button" onclick="startTheTour(18)">?</button></td>
 	      </tr>
             </table>
-	    <div id="colorRandomization">
-            <h4>Colors Randomization</h4>
-            <p>
-	      Randomize the colors of Samus, beams, levels, enemies and bosses.
-            </p>
-	    <table class="full">
-	      <tr>
-	        <td class="third" id="colorsRandomizationStep">{{displayCheckbox("colorsRandomization")}}Colors Randomization</td>
-		<td class="full"><span id="textLeft" class="floatleft">-180</span><div id="degree_slider_range" class="sixty floatleft"></div><span id="textRight">180</span></td>
-		<td><button id="invert" type="button" onclick="invertFunc()">Invert</button></td>
-                <td><button type="button" onclick="startTheTour(19)">?</button></td>
-	      </tr>
-	      <tr id="globalShiftVisibility">
-		<td colspan="3">{{displayCheckbox("globalShift")}}<span id="globalShiftText">Use the same degree to randomize all the elements</span></td>
-	      </tr>
-            </table>
-	    <div id="colorsRandomizationVisibility">
-	      <p>
-		Select the elements to colors randomize.
-	      </p>
-	      <table class="full">
-		<tr>
-	          <td class="third">{{displayCheckbox("suitsPalettes")}}<span id="suitsPalettesText">Samus</span></td>
-	          <td class="third">{{displayCheckbox("beamsPalettes")}}<span id="beamsPalettesText">Beams</span></td>
-	          <td class="third">{{displayCheckbox("tilesPalettes")}}<span id="tilesPalettesText">Levels</span></td>
-		</tr>
-		<tr>
-	          <td class="third">{{displayCheckbox("enemiesPalettes")}}<span id="enemiesPalettesText">Enemies</span></td>
-	          <td class="third">{{displayCheckbox("bossesPalettes")}}<span id="bossesPalettesText">Bosses</span></td>
-		  <td class="third"></td>
-		</tr>
-	      </table>
-	    </div>
-	    </div>
 	    <div id="superFunVisibility">
               <h4>Super Fun Times (TM)</h4>
               <p>
@@ -1657,35 +1486,35 @@ def displayNumber(id, min, max, default, step="1"):
                 <tr>
 		  <td class="small" id="funCombatStep"><div class="random"><button id="funCombatRandom" type="button" onclick="randomize(event, 'funCombat')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
 		  <td colspan="2" class="full">{{displayCheckbox("funCombat")}}<span id="funCombatText">Super Fun Combat</span></td>
-		  <td><button type="button" onclick="startTheTour(20)">?</button></td>
+		  <td><button type="button" onclick="startTheTour(19)">?</button></td>
                 </tr>
                 <tr>
 		  <td class="small" id="funMovementStep"><div class="random"><button id="funMovementRandom" type="button" onclick="randomize(event, 'funMovement')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
 		  <td colspan="2" class="full">{{displayCheckbox("funMovement")}}<span id="funMovementText">Super Fun Movement</span></td>
-		  <td><button type="button" onclick="startTheTour(21)">?</button></td>
+		  <td><button type="button" onclick="startTheTour(20)">?</button></td>
                 </tr>
                 <tr>
 		  <td class="small" id="funSuitsStep"><div class="random"><button id="funSuitsRandom" type="button" onclick="randomize(event, 'funSuits')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
 		  <td colspan="2" class="full">{{displayCheckbox("funSuits")}}<span id="funSuitsText">Suitless</span></td>
-		  <td><button type="button" onclick="startTheTour(22)">?</button></td>
+		  <td><button type="button" onclick="startTheTour(21)">?</button></td>
                 </tr>
               </table>
 	    </div>
 	    <div id="patchesVisibility">
-	      <h4 id="patchesStep">Patches<span class="rightStep"><button type="button" onclick="startTheTour(23)">?</button></span></h4>
+	      <h4 id="patchesStep">Patches<span class="rightStep"><button type="button" onclick="startTheTour(22)">?</button></span></h4>
 	      <p id="mainPatchesTextVisibitily">
 	        The bug fix <a href="https://itemrando.supermetroid.run/information">patches</a> from Total Item Randomizer are included by default.
 	      </p>
 	      <table class="full" id="mainPatchesVisibitily">
 	        <tr id="layoutPatchesStep">
 		  <td class="full">{{displayCheckbox("layoutPatches", True)}} Anti-softlock layout patches (by Total & Flo)</td>
-		  <td><button type="button" onclick="startTheTour(24)">?</button></td>
+		  <td><button type="button" onclick="startTheTour(23)">?</button></td>
 	        </tr>
 	        <tr>
-		  <td class="full" id="noGravHeatStep">{{displayCheckbox("noGravHeat", True)}} Remove Gravity Suit heat protection (by Total)</td><td><button type="button" onclick="startTheTour(25)">?</button></td>
+		  <td class="full" id="noGravHeatStep">{{displayCheckbox("noGravHeat", True)}} Remove Gravity Suit heat protection (by Total)</td><td><button type="button" onclick="startTheTour(24)">?</button></td>
 	        </tr>
 	        <tr>
-		  <td class="full" id="variaTweaksStep">{{displayCheckbox("variaTweaks", True)}} VARIA tweaks (by Flo)</td><td><button type="button" onclick="startTheTour(26)">?</button></td>
+		  <td class="full" id="variaTweaksStep">{{displayCheckbox("variaTweaks", True)}} VARIA tweaks (by Flo)</td><td><button type="button" onclick="startTheTour(25)">?</button></td>
 	        </tr>
 	      </table>
 	      <table class="full" id="patchesStep">

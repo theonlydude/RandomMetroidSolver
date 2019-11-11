@@ -850,16 +850,6 @@ def initRandomizerSession():
         session.randomizer['hideItems'] = "off"
         session.randomizer['strictMinors'] = "off"
         session.randomizer['randoPreset'] = ""
-        session.randomizer['colorsRandomization'] = "off"
-        session.randomizer['suitsPalettes'] = "on"
-        session.randomizer['beamsPalettes'] = "on"
-        session.randomizer['tilesPalettes'] = "on"
-        session.randomizer['enemiesPalettes'] = "on"
-        session.randomizer['bossesPalettes'] = "on"
-        session.randomizer['minDegree'] = -15
-        session.randomizer['maxDegree'] = 15
-        session.randomizer['invert'] = "on"
-        session.randomizer['globalShift'] = "on"
 
 def randomizer():
     response.title = 'Super Metroid VARIA Randomizer'
@@ -1001,9 +991,7 @@ def sessionWebService():
               'progressionSpeed', 'majorsSplit', 'suitsRestriction',
               'funCombat', 'funMovement', 'funSuits', 'layoutPatches', 'preset',
               'noGravHeat', 'progressionDifficulty', 'morphPlacement',
-              'areaRandomization', 'bossRandomization', 'complexity', 'hideItems', 'strictMinors', 'randoPreset',
-              'colorsRandomization','suitsPalettes', 'beamsPalettes', 'tilesPalettes', 'enemiesPalettes',
-              'bossesPalettes', 'minDegree', 'maxDegree', 'invert', 'globalShift']
+              'areaRandomization', 'bossRandomization', 'complexity', 'hideItems', 'strictMinors', 'randoPreset']
     validateWebServiceParams(patchs, quantities, others)
 
     if session.randomizer is None:
@@ -1036,16 +1024,6 @@ def sessionWebService():
     session.randomizer['hideItems'] = request.vars.hideItems
     session.randomizer['strictMinors'] = request.vars.strictMinors
     session.randomizer['randoPreset'] = request.vars.randoPreset
-    session.randomizer['colorsRandomization'] = request.vars.colorsRandomization
-    session.randomizer['suitsPalettes'] = request.vars.suitsPalettes
-    session.randomizer['beamsPalettes'] = request.vars.beamsPalettes
-    session.randomizer['tilesPalettes'] = request.vars.tilesPalettes
-    session.randomizer['enemiesPalettes'] = request.vars.enemiesPalettes
-    session.randomizer['bossesPalettes'] = request.vars.bossesPalettes
-    session.randomizer['minDegree'] = request.vars.minDegree
-    session.randomizer['maxDegree'] = request.vars.maxDegree
-    session.randomizer['invert'] = request.vars.invert
-    session.randomizer['globalShift'] = request.vars.globalShift
 
     # to create a new rando preset, uncomment next lines
     #with open('rando_presets/new.json', 'w') as jsonFile:
@@ -1078,9 +1056,7 @@ def randomizerWebService():
               'maxDifficulty', 'progressionSpeed', 'majorsSplit',
               'suitsRestriction', 'morphPlacement', 'funCombat', 'funMovement', 'funSuits',
               'layoutPatches', 'noGravHeat', 'progressionDifficulty', 'areaRandomization',
-              'bossRandomization', 'hideItems', 'strictMinors', 'complexity', 'colorsRandomization',
-              'suitsPalettes', 'beamsPalettes', 'tilesPalettes', 'enemiesPalettes', 'bossesPalettes',
-              'minDegree', 'maxDegree', 'invert', 'globalShift']
+              'bossRandomization', 'hideItems', 'strictMinors', 'complexity']
     validateWebServiceParams(patchs, quantities, others, isJson=True)
 
     # randomize
@@ -1180,27 +1156,6 @@ def randomizerWebService():
 
     if request.vars.bossRandomization == 'on':
         params.append('--bosses')
-
-    if request.vars.colorsRandomization == 'on':
-        params.append('--palette')
-        if request.vars.suitsPalettes == 'off':
-            params.append('--no_shift_suit_palettes')
-        if request.vars.beamsPalettes == 'off':
-            params.append('--no_shift_beam_palettes')
-        if request.vars.tilesPalettes == 'off':
-            params.append('--no_shift_tileset_palette')
-        if request.vars.enemiesPalettes == 'off':
-            params.append('--no_shift_enemy_palettes')
-        if request.vars.bossesPalettes == 'off':
-            params.append('--no_shift_boss_palettes')
-        if request.vars.globalShift == 'off':
-            params.append('--no_global_shift')
-            params.append('--individual_suit_shift')
-            params.append('--individual_tileset_shift')
-            params.append('--no_match_ship_and_power')
-        params += ['--min_degree', request.vars.minDegree, '--max_degree', request.vars.maxDegree]
-        if request.vars.invert == 'on':
-            params.append('--invert')
 
     # load content of preset to get controller mapping
     try:
@@ -1323,8 +1278,10 @@ def randoPresetWebService():
     if os.path.isfile(fullPath):
         # load it
         try:
-            loadRandoPreset(fullPath)
+            params = loadRandoPreset(fullPath)
             session.randomizer['randoPreset'] = preset
+            params = json.dumps(params)
+            return params
         except Exception as e:
             raise HTTP(400, "Can't load the rando preset: {}".format(preset))
     else:
@@ -1337,6 +1294,8 @@ def loadRandoPreset(presetFullPath):
     # update session
     for key in randoPreset:
         session.randomizer[key] = randoPreset[key]
+
+    return randoPreset
 
 def home():
     # set title

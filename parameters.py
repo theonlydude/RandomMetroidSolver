@@ -233,9 +233,15 @@ class Knows:
     # Brinstar
     CeilingDBoost = SMBool(True, easy, ['CeilingDBoost'])
     desc['CeilingDBoost'] = {'display': 'Ceiling Damage Boost',
-                          'title': 'Hit an enemy at the right time to get the item in Blue Brinstar Ceiling',
-                          'href': 'https://www.metroid2002.com/3/early_items_blue_brinstar_energy_tank.php',
-                          'rooms': ['Blue Brinstar Energy Tank Room']}
+                             'title': 'Hit an enemy at the right time to get the item in Blue Brinstar Ceiling',
+                             'href': 'https://www.metroid2002.com/3/early_items_blue_brinstar_energy_tank.php',
+                             'rooms': ['Blue Brinstar Energy Tank Room']}
+
+    BillyMays = SMBool(True, easy, ['BillyMays'])
+    desc['BillyMays'] = {'display': 'Billy Mays access without Gravity or Space Jump',
+                         'title': 'Jump through the door to get on the invisible platform',
+                         'href': '', # TODO
+                         'rooms': ['Blue Brinstar Boulder Room']}
 
     AlcatrazEscape = SMBool(True, harder, ['AlcatrazEscape'])
     desc['AlcatrazEscape'] = {'display': 'Alcatraz Escape',
@@ -564,7 +570,7 @@ class Knows:
         'Crateria/Brinstar': [
             {'knows': ['AlcatrazEscape', 'HiJumpGauntletAccess', 'HiJumpLessGauntletAccess', 'LowGauntlet', 'OldMBWithSpeed'],
              'title': 'Crateria'},
-            {'knows': ['CeilingDBoost', 'EarlyKraid',
+            {'knows': ['CeilingDBoost', 'BillyMays', 'EarlyKraid',
                        'ReverseGateGlitch', 'ReverseGateGlitchHiJumpLess', 
                        'RedTowerClimb', 'XrayDboost', 'XrayIce',
                        'RonPopeilScrew', 'Moondance'],

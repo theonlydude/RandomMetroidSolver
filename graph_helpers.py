@@ -14,6 +14,14 @@ class HelpersGraph(Helpers):
         self.draygonConnection = None
 
     @Cache.decorator
+    def canAccessBillyMays(self):
+        sm = self.smbm
+        return sm.wand(sm.canUsePowerBombs(),
+                       sm.wor(sm.knowsBillyMays(),
+                              sm.haveItem('Gravity'),
+                              sm.haveItem('SpaceJump')))
+
+    @Cache.decorator
     def canAccessKraidsLair(self):
         sm = self.smbm
         # EXPLAINED: access the upper right platform with either:

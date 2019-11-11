@@ -1229,7 +1229,7 @@ locations = [
     'AccessFrom' : {
         'Landing Site': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: sm.canUsePowerBombs()
+    'Available': lambda sm: sm.canAccessBillyMays()
 },
 {
     'Area': "Brinstar",
@@ -1245,7 +1245,7 @@ locations = [
     'AccessFrom' : {
         'Landing Site': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: sm.canUsePowerBombs()
+    'Available': lambda sm: sm.canAccessBillyMays()
 },
 {
     'Area': "Brinstar",

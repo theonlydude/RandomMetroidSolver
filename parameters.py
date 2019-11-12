@@ -915,7 +915,9 @@ class Settings:
     hellRunsTable = {
         'Ice': {
             'Norfair Entrance -> Ice Beam': {'mult': 1.0, 'minE': 2, 'hellRun': 'Ice'},
-            'Norfair Entrance -> Croc via Ice': {'mult': 1.5, 'minE': 2, 'hellRun': 'Ice'}
+            'Norfair Entrance -> Croc via Ice': {'mult': 1.5, 'minE': 2, 'hellRun': 'Ice'},
+            'Croc -> Norfair Entrance': {'mult': 2.0, 'minE': 1, 'hellRun': 'Ice'},
+            'Croc -> Bubble Mountain': {'mult': 2.0, 'minE': 1, 'hellRun': 'Ice'}
         },
         'MainUpperNorfair': {
             'Norfair Entrance -> Bubble': {'mult': 1.0, 'minE': 2, 'hellRun': 'MainUpperNorfair'},
@@ -929,7 +931,16 @@ class Settings:
             'Bubble -> Speed Booster': {'mult': 1.0, 'minE': 3, 'hellRun': 'MainUpperNorfair'},
             'Bubble -> Speed Booster w/Speed': {'mult': 2.0, 'minE': 2, 'hellRun': 'MainUpperNorfair'},
             'Bubble -> Wave': {'mult': 0.75, 'minE': 2, 'hellRun': 'MainUpperNorfair'},
-            'Croc -> Grapple Escape Missiles': {'mult': 1.0, 'minE': 2, 'hellRun': 'MainUpperNorfair'}
+            'Bubble -> Kronic Boost Room': {'mult': 1.25, 'minE': 2, 'hellRun': 'MainUpperNorfair'},
+            'Bubble -> Kronic Boost Room wo/Bomb': {'mult': 0.5, 'minE': 2, 'hellRun': 'MainUpperNorfair'},
+            'Bubble -> Croc': {'mult': 2.0, 'minE': 2, 'hellRun': 'MainUpperNorfair'},
+            'Croc -> Grapple Escape Missiles': {'mult': 1.0, 'minE': 2, 'hellRun': 'MainUpperNorfair'},
+            'Croc -> Ice Missiles': {'mult': 1.0, 'minE': 2, 'hellRun': 'MainUpperNorfair'},
+            'Single Chamber <-> Bubble Mountain': {'mult': 1.25, 'minE': 2, 'hellRun': 'MainUpperNorfair'},
+            'Single Chamber <-> Kronic Boost Room': {'mult': 1.0, 'minE': 2, 'hellRun': 'MainUpperNorfair'},
+            'Kronic Boost Room -> Bubble Mountain Top': {'mult': 0.5, 'minE': 2, 'hellRun': 'MainUpperNorfair'},
+            'Kronic Boost Room <-> Croc': {'mult': 1.0, 'minE': 2, 'hellRun': 'MainUpperNorfair'},
+            'Croc -> Norfair Entrance': {'mult': 1.25, 'minE': 2, 'hellRun': 'MainUpperNorfair'}
         }
     }
 

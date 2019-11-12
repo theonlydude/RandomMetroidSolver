@@ -7,6 +7,7 @@ from helpers import Helpers, Bosses
 from graph_access import getAccessPoint
 from cache import Cache
 from math import ceil
+from parameters import Settings
 
 class HelpersGraph(Helpers):
     def __init__(self, smbm):
@@ -152,13 +153,7 @@ class HelpersGraph(Helpers):
     @Cache.decorator
     def canHellRunToSpeedBooster(self):
         sm = self.smbm
-        mult = 1
-        minE = 3
-        hasSpeed = sm.haveItem('SpeedBooster').bool
-        if hasSpeed == True:
-            mult = 2
-            minE = 2
-        return sm.canHellRun('MainUpperNorfair', mult, minE)
+        return sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Speed Booster w/Speed' if sm.haveItem('SpeedBooster') else 'Bubble -> Speed Booster'])
 
     @Cache.decorator
     def canExitCathedral(self):
@@ -168,7 +163,7 @@ class HelpersGraph(Helpers):
         #              can do it with only two wall jumps (the first one is delayed like on alcatraz)
         #              can do it with a spring ball jump from wall
         sm = self.smbm
-        return sm.wand(sm.wor(sm.canHellRun('MainUpperNorfair', 0.75),
+        return sm.wand(sm.wor(sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Norfair Entrance']),
                               sm.heatProof()),
                        sm.wor(sm.wor(sm.canPassBombPassages(),
                                      sm.haveItem("SpeedBooster")),

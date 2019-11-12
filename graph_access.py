@@ -1,6 +1,6 @@
 import random, copy
 from graph import AccessPoint
-from parameters import Knows
+from parameters import Knows, Settings
 from rom import RomPatches
 from smbool import SMBool
 from helpers import Bosses
@@ -232,9 +232,9 @@ accessPoints = [
                                                      sm.canPassBombPassages()),
                                              # go through cathedral
                                              sm.wand(sm.canOpenGreenDoors(),
-                                                     sm.canEnterCathedral())),
+                                                     sm.canEnterCathedral(Settings.hellRunsTable['MainUpperNorfair']['Norfair Entrance -> Bubble']['mult']))),
         'Croc Zone': lambda sm: sm.wor(sm.wand(sm.haveItem('SpeedBooster'), # frog speedway
-                                               sm.canHellRun('MainUpperNorfair', mult=4 if sm.haveItem('Wave') else 2, minE=1),
+                                               sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Norfair Entrance -> Croc via Frog w/Wave' if sm.haveItem('Wave') else 'Norfair Entrance -> Croc via Frog']),
                                                sm.wor(sm.wand(sm.canOpenRedDoors(), sm.knowsGreenGateGlitch()),
                                                       sm.haveItem('Wave')),
                                                sm.canOpenGreenDoors()),
@@ -242,7 +242,7 @@ accessPoints = [
                                        sm.wand(sm.canOpenGreenDoors(),
                                                sm.haveItem('SpeedBooster'),
                                                sm.canUsePowerBombs(),
-                                               sm.canHellRun('Ice', 1.5))),
+                                               sm.canHellRun(**Settings.hellRunsTable['Ice']['Norfair Entrance -> Croc via Ice']))),
         'Warehouse Entrance Right': lambda sm: sm.canAccessKraidsLair()
     }, roomInfo = {'RoomPtr':0xa6a1, "area": 0x1},
        exitInfo = {'DoorPtr':0x922e, 'direction': 0x5, "cap": (0xe, 0x16), "bitFlag": 0x40,
@@ -259,26 +259,26 @@ accessPoints = [
     AccessPoint('Single Chamber Top Right', 'Norfair', {
         'Bubble Mountain Top': lambda sm: sm.wand(sm.canDestroyBombWalls(),
                                                   sm.haveItem('Morph'),
-                                                  sm.canHellRun('MainUpperNorfair', 1.25)),
+                                                  sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Single Chamber <-> Bubble Mountain'])),
         'Kronic Boost Room Bottom Left': lambda sm: sm.wand(sm.canDestroyBombWalls(),
                                                             sm.haveItem('Morph'),
-                                                            sm.canHellRun('MainUpperNorfair'))
+                                                            sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Single Chamber <-> Kronic Boost Room']))
     },  roomInfo = {'RoomPtr':0xad5e, "area": 0x2},
         exitInfo = {'DoorPtr':0x95fa, 'direction': 0x4, "cap": (0x11, 0x6), "bitFlag": 0x0,
                     "screen": (0x1, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
         entryInfo = {'SamusX':0x5cf, 'SamusY':0x88},
         shortName="N\\SINGLE CHAMBER"),
     AccessPoint('Kronic Boost Room Bottom Left', 'Norfair', {
-        'Single Chamber Top Right': lambda sm: sm.wand(sm.canHellRun('MainUpperNorfair'),
+        'Single Chamber Top Right': lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Single Chamber <-> Kronic Boost Room']),
                                                        sm.canDestroyBombWalls(),
                                                        sm.haveItem('Morph'),
                                                        RomPatches.has(RomPatches.SingleChamberNoCrumble)),
         'Bubble Mountain': lambda sm: sm.wand(sm.canPassBombPassages(),
-                                              sm.canHellRun('MainUpperNorfair', 1.25)),
+                                              sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Single Chamber <-> Bubble Mountain'])),
         'Bubble Mountain Top': lambda sm: sm.wand(sm.haveItem('Morph'),
-                                                  sm.canHellRun('MainUpperNorfair', 0.5)), # go all the way around
+                                                  sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Kronic Boost Room -> Bubble Mountain Top'])), # go all the way around
         'Croc Zone': lambda sm: sm.wand(sm.canOpenGreenDoors(),
-                                        sm.canHellRun('MainUpperNorfair'),
+                                        sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Kronic Boost Room <-> Croc']),
                                         sm.wor(sm.haveItem('Wave'),
                                                sm.wand(sm.canOpenRedDoors(),
                                                        sm.knowsGreenGateGlitch()))),
@@ -290,13 +290,13 @@ accessPoints = [
        shortName="N\\KRONIC BOOST"),
     AccessPoint('Croc Zone', 'Norfair', {
         'Warehouse Entrance Left': lambda sm: sm.wor(sm.wand(sm.canPassFrogSpeedwayRightToLeft(),
-                                                             sm.canHellRun('Ice', 2, minE=1)),
-                                                     sm.wand(sm.canHellRun('MainUpperNorfair', 1.25),
+                                                             sm.canHellRun(**Settings.hellRunsTable['Ice']['Croc -> Norfair Entrance'])),
+                                                     sm.wand(sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Croc -> Norfair Entrance']),
                                                              sm.canGrappleEscape(),
                                                              sm.haveItem('Super'))),
         'Bubble Mountain': lambda sm: sm.wand(sm.canPassBombPassages(),
-                                              sm.canHellRun('Ice', 2, minE=1)),
-        'Kronic Boost Room Bottom Left': lambda sm: sm.wand(sm.canHellRun('MainUpperNorfair'),
+                                              sm.canHellRun(**Settings.hellRunsTable['Ice']['Croc -> Bubble Mountain'])),
+        'Kronic Boost Room Bottom Left': lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Kronic Boost Room <-> Croc']),
                                                             sm.haveItem('Morph'))
     }, internal=True),
     AccessPoint('Bubble Mountain', 'Norfair', {
@@ -306,17 +306,17 @@ accessPoints = [
                                                      sm.canExitCathedral()),
         'Bubble Mountain Top': lambda sm: sm.canClimbBubbleMountain(),
         'Kronic Boost Room Bottom Left': lambda sm: sm.wor(sm.wand(sm.canPassBombPassages(),
-                                                                   sm.canHellRun('MainUpperNorfair', 1.25)),
+                                                                   sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Kronic Boost Room'])),
                                                            sm.wand(sm.haveItem('Morph'),
-                                                                   sm.canHellRun('MainUpperNorfair', 0.5))), # go all the way around
+                                                                   sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Kronic Boost Room wo/Bomb']))), # go all the way around
         'Croc Zone': lambda sm: sm.wand(sm.canPassBombPassages(),
-                                        sm.canHellRun('MainUpperNorfair', 2),
+                                        sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Croc']),
                                         sm.wor(sm.wand(sm.canOpenRedDoors(), sm.knowsGreenGateGlitch()),
                                                sm.haveItem('Wave')),
                                         sm.canOpenGreenDoors())
     }, internal=True),
     AccessPoint('Bubble Mountain Top', 'Norfair', {
-        'Single Chamber Top Right': lambda sm: sm.wand(sm.canHellRun('MainUpperNorfair', 1.25),
+        'Single Chamber Top Right': lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Single Chamber <-> Bubble Mountain']),
                                                        sm.canDestroyBombWalls(),
                                                        sm.haveItem('Morph'),
                                                        RomPatches.has(RomPatches.SingleChamberNoCrumble)),

@@ -1775,7 +1775,7 @@ class Randomizer(object):
             self.log.debug("*** CHOZO FILL STATE UPDATE")
             collected = [loc for loc in getCollectedLocs() if loc not in previousCollected]
             self.currentLocations(ap=ap, locs=collected) # update difficulty
-            previousCollected = collected
+            previousCollected += collected
             updateCurrentState(itemLocs, curState)
             curState = RandoState(self, curLocs)
 

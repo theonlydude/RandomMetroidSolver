@@ -1662,6 +1662,7 @@ class Randomizer(object):
         # try to enforce max diff, with items compatible with prog speed
         curState = RandoState(self, self.currentLocations())
         allItemLocs = []
+        previousCollected = []
         states = [self.states[i] for i in self.progressionStatesIndices]
         self.log.debug("chozoFill, progs=" + str(self.progressionStatesIndices))
         for state in states:
@@ -1772,6 +1773,9 @@ class Randomizer(object):
                 itemLocs += fillup(min(nLocs, nItems), allItems, ap)
                 curLocs = getCurLocs(ap)
             self.log.debug("*** CHOZO FILL STATE UPDATE")
+            collected = [loc for loc in getCollectedLocs() if loc not in previousCollected]
+            self.currentLocations(ap=ap, locs=collected) # update difficulty
+            previousCollected = collected
             updateCurrentState(itemLocs, curState)
             curState = RandoState(self, curLocs)
 

@@ -926,7 +926,7 @@ class Settings:
             'Bubble -> Cathedral Missiles': {'mult': 0.66, 'minE': 2, 'hellRun': 'MainUpperNorfair'},
             'Norfair Entrance -> Croc via Frog': {'mult': 2.0, 'minE': 1, 'hellRun': 'MainUpperNorfair'},
             'Norfair Entrance -> Croc via Frog w/Wave': {'mult': 4.0, 'minE': 1, 'hellRun': 'MainUpperNorfair'},
-            'Bubble -> Norfair Reserve Missiles': {'mult': 2.5, 'minE': 1, 'hellRun': 'MainUpperNorfair'},
+            'Bubble -> Norfair Reserve Missiles': {'mult': 3.0, 'minE': 1, 'hellRun': 'MainUpperNorfair'},
             'Bubble -> Norfair Reserve': {'mult': 1.0, 'minE': 2, 'hellRun': 'MainUpperNorfair'},
             'Bubble -> Speed Booster': {'mult': 1.0, 'minE': 3, 'hellRun': 'MainUpperNorfair'},
             'Bubble -> Speed Booster w/Speed': {'mult': 2.0, 'minE': 2, 'hellRun': 'MainUpperNorfair'},

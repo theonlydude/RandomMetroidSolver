@@ -1700,6 +1700,19 @@ class Randomizer(object):
                     else:
                         self.log.debug('chose ' + ret['Type'])
                 return ret
+            def chooseLoc(locs):
+                ret = None
+                chooseFrom = [loc for loc in locs if loc['difficulty'].difficulty <= self.difficultyTarget]
+                if len(chooseFrom) > 0:
+                    ret = chooseFrom[random.randint(0, len(chooseFrom)-1)]
+                else:
+                    minDiff = god
+                    for loc in locs:
+                        d = loc['difficulty'].difficulty
+                        if d < minDiff:
+                            minDiff = d
+                            ret = loc
+                return loc
             def getLocs(locs):
                 return [loc for loc in locs if 'Chozo' not in loc['Class'] and 'Boss' not in loc['Class']]
             def getCurLocs(ap):
@@ -1710,7 +1723,7 @@ class Randomizer(object):
                 for i in range(n):
                     curLocs = getLocs(getCurLocs(ap))
                     item = chooseItem(pool, curLocs)
-                    loc = curLocs[random.randint(0, len(curLocs)-1)]
+                    loc = chooseLoc(curLocs)
                     il = {'Item':item, 'Location':loc}
                     self.log.debug('fillup ' + item['Type'] + ' at ' + loc['Name'])
                     self.getItem(il, pool=self.nonChozoItemPool)

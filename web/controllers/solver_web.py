@@ -193,7 +193,7 @@ def computeGauntlet(sm, bomb, addVaria):
         result[key] = {easy: -1, medium: -1, hard: -1, harder: -1, hardcore: -1, mania: -1}
 
         for i in range(18):
-            ret = sm.energyReserveCountOkHardRoom('Gauntlet', 0.5 if bomb == 'Bomb' else 1.0)
+            ret = sm.energyReserveCountOkHardRoom('Gauntlet', 0.51 if bomb == 'Bomb' else 1.0)
 
             if ret.bool == True:
                 nEtank = 0

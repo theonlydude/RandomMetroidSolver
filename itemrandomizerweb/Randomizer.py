@@ -809,7 +809,7 @@ class Randomizer(object):
                                                          self.smbm,
                                                          diff,
                                                          ap)
-        if self.restrictions['MajorMinor'] != 'Chozo' or diff >= god or not self.isChozoLeft() or self.settings.qty['energy'] == 'sparse':
+        if self.restrictions['MajorMinor'] != 'Chozo' or diff >= god or not self.isChozoLeft():
             return availLocs
         # in chozo mode, we use high difficulty check for bosses/hardrooms/hellruns
         availLocsInf = self.areaGraph.getAvailableLocations(locs,
@@ -1674,7 +1674,7 @@ class Randomizer(object):
                 # choose item in the pool that brings the most collected locs to < diffTarget
                 random.shuffle(pool)
                 ret = None
-                checkedLocs = getCollectedLocs() + curLocs
+                checkedLocs = [loc for loc in getCollectedLocs() if loc not in previousCollected] + curLocs
                 initialAboveDiffLocs = getAboveDiffLocs(checkedLocs)
                 self.log.debug('initialAboveDiffLocs = ' + str([loc['Name'] + ':' + str(loc['difficulty'].difficulty) for loc in initialAboveDiffLocs]))
                 minLeftAbove = len(initialAboveDiffLocs)

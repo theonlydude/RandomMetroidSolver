@@ -1,7 +1,7 @@
 #!/bin/bash
 
-if [ $# -ne 2 -a $# -ne 3 ]; then
-    echo "params: ROM LOOPS"
+if [ $# -ne 2 -a $# -ne 3 -a $# -ne 4 ]; then
+    echo "params: ROM LOOPS [tourney]"
     exit -1
 fi
 
@@ -17,6 +17,7 @@ mkdir -p ${LOG_DIR} ${SQL_DIR}
 
 ROM=$1
 LOOPS=$2
+TOURNEY=$3
 
 function computeSeed {
     RANDO_PRESET="$1"
@@ -69,7 +70,17 @@ function info {
 STOP=""
 NB_CPU=$(cat /proc/cpuinfo  | grep 'processor' | wc -l)
 
-for RANDO_PRESET in $(ls -1 ${CWD}/rando_presets/*.json); do
+RANDO_PRESETS=$(ls -1 ${CWD}/rando_presets/*.json)
+if [ -n "${TOURNEY}" ]; then
+    RANDO_PRESETS=$(echo "${RANDO_PRESETS}" | grep 'Season_Races')
+fi
+
+SKILL_PRESETS=$(ls -1 ${CWD}/standard_presets/*.json | grep -v -E 'solution|samus')
+if [ -n "${TOURNEY}" ]; then
+    SKILL_PRESETS=$(echo "${SKILL_PRESETS}" | grep 'Season_Races')
+fi
+
+for RANDO_PRESET in ${RANDO_PRESETS}; do
     # ignore random presets
     if(echo "${RANDO_PRESET}" | grep -q "random"); then
 	continue
@@ -77,7 +88,7 @@ for RANDO_PRESET in $(ls -1 ${CWD}/rando_presets/*.json); do
 
     info "Begin rando preset ${RANDO_PRESET}"
 
-    for SKILL_PRESET in $(ls -1 ${CWD}/standard_presets/*.json | grep -v -E 'solution|samus'); do
+    for SKILL_PRESET in ${SKILL_PRESETS}; do
 	info "  Begin skill preset ${SKILL_PRESET}"
 
 	CUR_JOBS=0

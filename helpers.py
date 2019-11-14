@@ -93,9 +93,10 @@ class Helpers(object):
                 return self.energyReserveCountOkHellRun(hellRun, mult)
             else:
                 tanks = self.energyReserveCount()
+                multCF = mult
                 if tanks >= 14:
-                    mult *= 2.0
-                nCF = int(math.ceil(2/mult))
+                    multCF *= 2.0
+                nCF = int(math.ceil(2/multCF))
                 ret = sm.wand(self.energyReserveCountOkHellRun(hellRun, mult),
                               self.canCrystalFlash(nCF))
 #                nPB = self.smbm.itemCount('PowerBomb')

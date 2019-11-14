@@ -23,6 +23,9 @@ from graph_locations import locations
 from smboolmanager import SMBoolManager
 from rom import RomPatches
 
+# put an expiration date to the default cookie to have it kept between browser restart
+response.cookies['session_id_solver']['expires'] = 31 * 24 * 3600
+
 def maxPresetsReach():
     # to prevent a spammer to create presets in a loop and fill the fs
     return len(os.listdir('community_presets')) >= 2048

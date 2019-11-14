@@ -260,6 +260,18 @@ def computeHardRooms(hardRooms):
 
     return hardRooms
 
+def addCF(sm, count):
+    sm.addItem('Morph')
+    sm.addItem('PowerBomb')
+
+    for i in range(count):
+        sm.addItem('Missile')
+        sm.addItem('Missile')
+        sm.addItem('Super')
+        sm.addItem('Super')
+        sm.addItem('PowerBomb')
+        sm.addItem('PowerBomb')
+
 def computeHellruns(hellRuns):
     sm = SMBoolManager()
     for hellRun in ['Ice', 'MainUpperNorfair']:
@@ -276,7 +288,7 @@ def computeHellruns(hellRuns):
                     continue
 
                 sm.resetItems()
-                for i in range(18):
+                for etank in range(19):
                     ret = sm.canHellRun(**params)
 
                     if ret.bool == True:
@@ -289,6 +301,39 @@ def computeHellruns(hellRuns):
 
                     sm.addItem('ETank')
 
+    # lower norfair
+    hellRun = 'LowerNorfair'
+    hellRuns[hellRun] = {}
+    for (actualHellRun, params) in Settings.hellRunsTable[hellRun].items():
+        hellRuns[hellRun][actualHellRun] = {}
+        for (key, difficulties) in Settings.hellRunPresets[hellRun].items():
+            if key == 'Solution':
+                continue
+            Settings.hellRuns[hellRun] = difficulties
+            hellRuns[hellRun][actualHellRun][key] = {'ETank': {easy: -1, medium: -1, hard: -1, harder: -1, hardcore: -1, mania: -1}, 'CF': {easy: -1, medium: -1, hard: -1, harder: -1, hardcore: -1, mania: -1}}
+            if difficulties == None:
+                continue
+
+            for cf in range(3, 0, -1):
+                for additional in [[], ['ScrewAttack']]:
+                    sm.resetItems()
+                    sm.addItems(additional)
+                    addCF(sm, cf)
+                    for etank in range(19):
+                        ret = sm.canHellRun(**params)
+
+                        if ret.bool == True:
+                            nEtank = 0
+                            for item in ret.items:
+                                if item.find('ETank') != -1:
+                                    nEtank = int(item[0:item.find('-ETank')])
+                                    break
+                            hellRuns[hellRun][actualHellRun][key]['ETank'][ret.difficulty] = nEtank
+                            hellRuns[hellRun][actualHellRun][key]['CF'][ret.difficulty] = cf
+                            print("Add({})/{}/{}: {} - ({}, {}) ({})".format(additional, actualHellRun, key, ret.difficulty, nEtank, cf, sm.getItems()['ETank']))
+
+                        sm.addItem('ETank')
+
 def presets():
     initPresetsSession()
 
@@ -300,6 +345,8 @@ def presets():
     hellRuns = cache.ram('hellRuns', lambda:dict(), time_expire=None)
     if len(hellRuns) == 0:
         computeHellruns(hellRuns)
+
+    print("LN: {}".format(hellRuns['LowerNorfair']))
 
     if request.vars.action is not None:
         (ok, msg) = validatePresetsParams(request.vars.action)

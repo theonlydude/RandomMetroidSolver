@@ -941,6 +941,10 @@ class Settings:
             'Kronic Boost Room -> Bubble Mountain Top': {'mult': 0.5, 'minE': 2, 'hellRun': 'MainUpperNorfair'},
             'Kronic Boost Room <-> Croc': {'mult': 1.0, 'minE': 2, 'hellRun': 'MainUpperNorfair'},
             'Croc -> Norfair Entrance': {'mult': 1.25, 'minE': 2, 'hellRun': 'MainUpperNorfair'}
+        },
+        'LowerNorfair': {
+            'Main': {'mult':1.0, 'minE':8, 'hellRun':'LowerNorfair'},
+            'Entrance -> GT via Chozo': {'mult':0.8, 'minE':8, 'hellRun':'LowerNorfair'}
         }
     }
 

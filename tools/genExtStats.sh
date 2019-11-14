@@ -108,7 +108,7 @@ for F in ${SQL_DIR}/extStats_*.sql; do
     RESULT=${RANDOM}
     let "RESULT %= ${NB_CPU}"
 
-    cat ${F} >> ${SQL_DIR}/extStats_${RESULT}.sql && rm -f ${F}
+    cat ${F} >> ${SQL_DIR}/extStatsOut_${RESULT}.sql && rm -f ${F}
 done
 
 info "DONE"

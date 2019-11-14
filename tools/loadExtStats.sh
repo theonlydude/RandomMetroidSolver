@@ -30,7 +30,7 @@ password=$(getDBParam "password")
 
 info "Start loading extended stats"
 
-for SQL in $(ls -1 ${SQL_DIR}/extStats_*.sql); do
+for SQL in $(ls -1 ${SQL_DIR}/extStatsOut_*.sql); do
     echo "source ${SQL};" | mysql -h ${host} -u ${user} -p${password} ${database} > ${LOG_DIR}/$(basename ${SQL}).log 2>&1 &
 done
 

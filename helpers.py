@@ -99,10 +99,15 @@ class Helpers(object):
                 nCF = int(math.ceil(2/multCF))
                 ret = sm.wand(self.energyReserveCountOkHellRun(hellRun, mult),
                               self.canCrystalFlash(nCF))
-                if sm.haveItem('Gravity').bool == True or sm.haveItem('ScrewAttack').bool == True:
-                    ret.difficulty *= 0.7
-#                nPB = self.smbm.itemCount('PowerBomb')
-#                print("canHellRun LN. tanks=" + str(tanks) + ", nCF=" + str(nCF) + ", nPB=" + str(nPB) + ", mult=" + str(mult) + ", heatProof=" + str(isHeatProof.bool) + ", ret=" + str(ret))
+                if ret.bool == True:
+                    if sm.haveItem('Gravity') == True:
+                        ret.difficulty *= 0.7
+                        ret.items.append('Gravity')
+                    elif sm.haveItem('ScrewAttack') == True:
+                        ret.difficulty *= 0.7
+                        ret.items.append('ScrewAttack')
+                #nPB = self.smbm.itemCount('PowerBomb')
+                #print("canHellRun LN. tanks=" + str(tanks) + ", nCF=" + str(nCF) + ", nPB=" + str(nPB) + ", mult=" + str(mult) + ", heatProof=" + str(isHeatProof.bool) + ", ret=" + str(ret))
                 return ret
         else:
             return SMBool(False)

@@ -315,24 +315,22 @@ def computeHellruns(hellRuns):
                 continue
 
             for cf in range(3, 0, -1):
-                for additional in [[], ['ScrewAttack']]:
-                    sm.resetItems()
-                    sm.addItems(additional)
-                    addCF(sm, cf)
-                    for etank in range(19):
-                        ret = sm.canHellRun(**params)
+                sm.resetItems()
+                addCF(sm, cf)
+                for etank in range(19):
+                    ret = sm.canHellRun(**params)
 
-                        if ret.bool == True:
-                            nEtank = 0
-                            for item in ret.items:
-                                if item.find('ETank') != -1:
-                                    nEtank = int(item[0:item.find('-ETank')])
-                                    break
-                            hellRuns[hellRun][actualHellRun][key]['ETank'][ret.difficulty] = nEtank
-                            hellRuns[hellRun][actualHellRun][key]['CF'][ret.difficulty] = cf
-                            print("Add({})/{}/{}: {} - ({}, {}) ({})".format(additional, actualHellRun, key, ret.difficulty, nEtank, cf, sm.getItems()['ETank']))
+                    if ret.bool == True:
+                        nEtank = 0
+                        for item in ret.items:
+                            if item.find('ETank') != -1:
+                                nEtank = int(item[0:item.find('-ETank')])
+                                break
+                        hellRuns[hellRun][actualHellRun][key]['ETank'][ret.difficulty] = nEtank
+                        hellRuns[hellRun][actualHellRun][key]['CF'][ret.difficulty] = cf
+                        #print("Add({})/{}/{}: {} - ({}, {}) ({})".format(additional, actualHellRun, key, ret.difficulty, nEtank, cf, sm.getItems()['ETank']))
 
-                        sm.addItem('ETank')
+                    sm.addItem('ETank')
 
 def presets():
     initPresetsSession()
@@ -345,8 +343,6 @@ def presets():
     hellRuns = cache.ram('hellRuns', lambda:dict(), time_expire=None)
     if len(hellRuns) == 0:
         computeHellruns(hellRuns)
-
-    print("LN: {}".format(hellRuns['LowerNorfair']))
 
     if request.vars.action is not None:
         (ok, msg) = validatePresetsParams(request.vars.action)

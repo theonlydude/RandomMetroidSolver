@@ -440,7 +440,7 @@ locations = [
     'AccessFrom' : {
         'RidleyRoomIn': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: sm.wand(sm.canHellRun('LowerNorfair'), sm.enoughStuffsRidley()),
+    'Available': lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']), sm.enoughStuffsRidley()),
     'Pickup': lambda: Bosses.beatBoss('Ridley'),
     'Unpickup': lambda: Bosses.unbeatBoss('Ridley')
 },
@@ -1567,7 +1567,7 @@ locations = [
     'AccessFrom' : {
         'LN Above GT': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: sm.canHellRun('LowerNorfair'),
+    'Available': lambda sm: sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']),
     'PostAvailable': lambda sm: sm.enoughStuffGT()
 },
 {
@@ -1601,7 +1601,7 @@ locations = [
     'AccessFrom' : {
         'LN Entrance': lambda sm: sm.wand(sm.canUsePowerBombs(), sm.canPassWorstRoom()),
     },
-    'Available': lambda sm: sm.canHellRun('LowerNorfair')
+    'Available': lambda sm: sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main'])
 },
 {
     'Area': "LowerNorfair",
@@ -1617,7 +1617,7 @@ locations = [
     'AccessFrom' : {
         'Firefleas': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: sm.canHellRun('LowerNorfair')
+    'Available': lambda sm: sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main'])
 },
 {
     'Area': "LowerNorfair",
@@ -1633,7 +1633,7 @@ locations = [
     'AccessFrom' : {
         'Firefleas': lambda sm: sm.canPassBombPassages()
     },
-    'Available': lambda sm: sm.canHellRun('LowerNorfair')
+    'Available': lambda sm: sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main'])
 },
 {
     'Area': "LowerNorfair",
@@ -1649,7 +1649,7 @@ locations = [
     'AccessFrom' : {
         'Ridley Zone': lambda sm: sm.canUsePowerBombs()
     },
-    'Available': lambda sm: sm.canHellRun('LowerNorfair')
+    'Available': lambda sm: sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main'])
 },
 {
     'Area': "LowerNorfair",
@@ -1665,7 +1665,7 @@ locations = [
     'AccessFrom' : {
         'Three Muskateers Room Left': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: sm.wand(sm.canHellRun('LowerNorfair'),
+    'Available': lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']),
                                     sm.canPassBombPassages())
 },
 {

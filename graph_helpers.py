@@ -239,7 +239,8 @@ class HelpersGraph(Helpers):
     @Cache.decorator
     def canPassLowerNorfairChozo(self):
         sm = self.smbm
-        return sm.wand(sm.canHellRun('LowerNorfair', 0.75), # 0.75 to require one more CF if no heat protection because of distance to cover, wait times, acid...
+        # to require one more CF if no heat protection because of distance to cover, wait times, acid...
+        return sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Entrance -> GT via Chozo']),
                        sm.canUsePowerBombs(),
                        sm.wor(sm.haveItem('SpaceJump'),
                               RomPatches.has(RomPatches.LNChozoSJCheckDisabled)))

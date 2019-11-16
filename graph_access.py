@@ -141,48 +141,48 @@ accessPoints = [
         'Lava Dive Right': lambda sm: sm.canPassLavaPitReverse(),
         'LN Above GT': lambda sm: sm.canPassLowerNorfairChozo(),
         'Screw Attack Bottom': lambda sm: sm.wand(sm.canUsePowerBombs(),
-                                                  sm.canHellRun('LowerNorfair'),
+                                                  sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']),
                                                   sm.wand(sm.haveItem('Super'), sm.knowsGreenGateGlitch()),
                                                   sm.canDestroyBombWalls()),
-        'Firefleas': lambda sm: sm.wand(sm.canHellRun('LowerNorfair'),
+        'Firefleas': lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']),
                                         sm.canPassWorstRoom(),
                                         sm.canUsePowerBombs())
     }, internal=True),
     AccessPoint('LN Above GT', 'LowerNorfair', {
-        'Screw Attack Bottom': lambda sm: sm.wand(sm.canHellRun('LowerNorfair'),
+        'Screw Attack Bottom': lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']),
                                                   sm.enoughStuffGT())
     }, internal=True),
     AccessPoint('Screw Attack Bottom', 'LowerNorfair', {
-        'LN Entrance': lambda sm: sm.wand(sm.canHellRun('LowerNorfair'),
+        'LN Entrance': lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']),
                                           sm.canExitScrewAttackArea(),
                                           sm.haveItem('Super'))
     }, internal=True),
     AccessPoint('Firefleas', 'LowerNorfair', {
-        'LN Entrance': lambda sm: sm.wand(sm.canHellRun('LowerNorfair'),
+        'LN Entrance': lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']),
                                           sm.canPassAmphitheaterReverse(),
                                           sm.canUsePowerBombs()),
-        'Three Muskateers Room Left': lambda sm: sm.wand(sm.canHellRun('LowerNorfair'),
+        'Three Muskateers Room Left': lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']),
                                                          sm.haveItem('Morph'),
                                                          sm.canPassThreeMuskateers()),
-        'Ridley Zone': lambda sm: sm.wand(sm.canHellRun('LowerNorfair'),
+        'Ridley Zone': lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']),
                                           sm.canOpenGreenDoors(),
                                           sm.canOpenYellowDoors()),
-        'Screw Attack Bottom': lambda sm: sm.wand(sm.canHellRun('LowerNorfair'),
+        'Screw Attack Bottom': lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']),
                                                   sm.canPassAmphitheaterReverse(),
                                                   sm.canDestroyBombWalls(),
                                                   sm.wand(sm.haveItem('Super'), sm.knowsGreenGateGlitch()))
     }, internal=True),
     AccessPoint('Ridley Zone', 'LowerNorfair', {
-        'Firefleas': lambda sm: sm.wand(sm.canHellRun('LowerNorfair'),
+        'Firefleas': lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']),
                                         sm.canUsePowerBombs(),
                                         sm.wor(sm.haveItem('SpringBall'),
                                                sm.haveItem('Bomb'),
                                                SMBool(sm.haveItemCount('PowerBomb', 2)),
                                                sm.canShortCharge())), # speedball
-        'RidleyRoomOut': lambda sm: sm.canHellRun('LowerNorfair')
+        'RidleyRoomOut': lambda sm: sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main'])
     }, internal=True),
     AccessPoint('Three Muskateers Room Left', 'LowerNorfair', {
-        'Firefleas': lambda sm: sm.wand(sm.canHellRun('LowerNorfair'),
+        'Firefleas': lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']),
                                         sm.haveItem('Morph'),
                                         sm.canPassThreeMuskateers())
     }, roomInfo = {'RoomPtr':0xb656, "area": 0x2},
@@ -191,13 +191,13 @@ accessPoints = [
        entryInfo = {'SamusX':0x134, 'SamusY':0x88},
        shortName="LN\\THREE MUSK."),
     AccessPoint('RidleyRoomOut', 'LowerNorfair', {
-        'Ridley Zone': lambda sm: sm.canHellRun('LowerNorfair')
+        'Ridley Zone': lambda sm: sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main'])
     }, boss = True,
        roomInfo = {'RoomPtr':0xb37a, "area": 0x2},
        exitInfo = {'DoorPtr':0x98ca, 'direction': 0x5, "cap": (0xe, 0x6), "bitFlag": 0x0,
                    "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0},
        entryInfo = {'SamusX':0x2e, 'SamusY':0x98},
-       traverse=lambda sm: sm.wand(sm.canHellRun('LowerNorfair'), sm.canOpenRedDoors())),
+       traverse=lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']), sm.canOpenRedDoors())),
     AccessPoint('RidleyRoomIn', 'LowerNorfair', {},
        boss = True,
        roomInfo = {'RoomPtr':0xb32e, "area": 0x2},

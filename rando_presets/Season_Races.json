@@ -2,7 +2,6 @@
   "elevators_doors_speed": "off",
   "progressionDifficulty": "normal",
   "funMovement": "off",
-  "randoPreset": "default",
   "skip_ceres": "on",
   "hideItems": "off",
   "funCombat": "off",
@@ -28,7 +27,6 @@
   "energyQty": "vanilla",
   "funSuits": "off",
   "variaTweaks": "off",
-  "colorsRandomization": "off",
   "bossRandomization": "off",
   "areaLayout": "off"
 }

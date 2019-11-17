@@ -1,3 +1,3 @@
-# VARIA Randomizer and Solver for Super Metroid
+# VARIA Randomizer, Solver, Tracker, Plandomizer for Super Metroid
 
-There's a website to use the VARIA Randomizer and Solver: [Super Metroid VARIA Randomizer and Solver](http://randommetroidsolver.pythonanywhere.com/)
+There's a website to use the VARIA Randomizer, Solver, Tracker, Plandomizer: [Super Metroid VARIA Randomizer, Solver, Tracker, Plandomizer](http://varia.run/)

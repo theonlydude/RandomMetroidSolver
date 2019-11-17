@@ -1220,6 +1220,8 @@ stats:
 //  dw 29,      {row}*224,  2, 0    // time saved arm pumping
     dw 0,               0,  0, 0    // end of table
 
+print "credits end : ", org
+
 warnpc $dfffff
 
 // Relocated credits tilemap to free space in bank CE

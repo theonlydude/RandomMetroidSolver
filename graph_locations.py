@@ -301,7 +301,7 @@ locations = [
     'AccessFrom' : {
         'Warehouse Entrance Left': lambda sm: sm.canOpenGreenDoors()
     },
-    'Available': lambda sm: sm.wand(sm.canHellRun('Ice'),
+    'Available': lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['Ice']['Norfair Entrance -> Ice Beam']),
                                     sm.wor(sm.canPassBombPassages(), # to exit, or if you fail entrance
                                            sm.wand(sm.haveItem('Ice'), # harder strat
                                                    sm.haveItem('Morph'),
@@ -386,9 +386,10 @@ locations = [
     'Visibility': "Chozo",
     'Room': 'Norfair Reserve Tank Room',
     'AccessFrom' : {
-        'Bubble Mountain': lambda sm: sm.canHellRun('MainUpperNorfair'),
+        'Bubble Mountain': lambda sm: sm.canEnterNorfairReserveAreaFromBubbleMoutain(),
+        'Bubble Mountain Top': lambda sm: sm.canEnterNorfairReserveAreaFromBubbleMoutainTop(),
     },
-    'Available': lambda sm: sm.wand(sm.haveItem('Morph'), sm.canEnterNorfairReserveArea())
+    'Available': lambda sm: sm.wand(sm.haveItem('Morph'), sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Norfair Reserve']))
 },
 {
     'Area': "Norfair",
@@ -402,7 +403,7 @@ locations = [
     'Visibility': "Chozo",
     'Room': 'Speed Booster Room',
     'AccessFrom' : {
-        'Bubble Mountain': lambda sm: sm.canOpenGreenDoors()
+        'Bubble Mountain Top': lambda sm: sm.canOpenGreenDoors()
     },
     'Available': lambda sm: sm.canHellRunToSpeedBooster()
 },
@@ -418,7 +419,7 @@ locations = [
     'Visibility': "Chozo",
     'Room': 'Wave Beam Room',
     'AccessFrom' : {
-        'Bubble Mountain': lambda sm: sm.canHellRun('MainUpperNorfair', 0.75)
+        'Bubble Mountain Top': lambda sm: sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Wave'])
     },
     'Available': lambda sm: sm.canOpenRedDoors(),
     'PostAvailable': lambda sm: sm.wor(sm.haveItem('Morph'), # exit through lower passage under the spikes
@@ -439,7 +440,7 @@ locations = [
     'AccessFrom' : {
         'RidleyRoomIn': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: sm.wand(sm.canHellRun('LowerNorfair'), sm.enoughStuffsRidley()),
+    'Available': lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']), sm.enoughStuffsRidley()),
     'Pickup': lambda: Bosses.beatBoss('Ridley'),
     'Unpickup': lambda: Bosses.unbeatBoss('Ridley')
 },
@@ -641,9 +642,13 @@ locations = [
     'PostAvailable': lambda sm: sm.wand(sm.wor(sm.wand(sm.canShortCharge(),
                                                        sm.knowsKillPlasmaPiratesWithSpark()),
                                                sm.wand(sm.haveItem('Charge'),
-                                                       sm.knowsKillPlasmaPiratesWithCharge()),
-                                               sm.haveItem('ScrewAttack', difficulty=easy),
-                                               sm.haveItem('Plasma', difficulty=easy)),
+                                                       sm.knowsKillPlasmaPiratesWithCharge(),
+                                                       # 160/80/40 dmg * 4 ground plasma pirates
+                                                       # => 640/320/160 damage take required
+                                                       # check below is 1099/599/299 (give margin for taking dmg a bit)
+                                                       sm.energyReserveCountOk(int(10.0/sm.getDmgReduction(False)[0]))),
+                                               sm.haveItem('ScrewAttack'),
+                                               sm.haveItem('Plasma')),
                                         sm.wor(sm.canFly(),
                                                sm.wand(sm.haveItem('HiJump'),
                                                        sm.knowsGetAroundWallJump()),
@@ -1224,7 +1229,7 @@ locations = [
     'AccessFrom' : {
         'Landing Site': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: sm.canUsePowerBombs()
+    'Available': lambda sm: sm.canAccessBillyMays()
 },
 {
     'Area': "Brinstar",
@@ -1240,7 +1245,7 @@ locations = [
     'AccessFrom' : {
         'Landing Site': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: sm.canUsePowerBombs()
+    'Available': lambda sm: sm.canAccessBillyMays()
 },
 {
     'Area': "Brinstar",
@@ -1320,8 +1325,8 @@ locations = [
     'Visibility': "Hidden",
     'Room': 'Cathedral',
     'AccessFrom' : {
-        'Warehouse Entrance Left': lambda sm: sm.canEnterCathedral(0.66),
-        'Bubble Mountain': lambda sm: sm.canHellRun('MainUpperNorfair', 0.66)
+        'Warehouse Entrance Left': lambda sm: sm.canEnterCathedral(Settings.hellRunsTable['MainUpperNorfair']['Norfair Entrance -> Cathedral Missiles']['mult']),
+        'Bubble Mountain': lambda sm: sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Cathedral Missiles'])
     },
     'Available': lambda sm: sm.haveItem('Morph')
 },
@@ -1339,11 +1344,11 @@ locations = [
     'AccessFrom' : {
         'Warehouse Entrance Left': lambda sm: sm.wand(sm.canOpenGreenDoors(),
                                                       sm.canUsePowerBombs(),
-                                                      sm.canHellRun('Ice'),
+                                                      sm.canHellRun(**Settings.hellRunsTable['Ice']['Norfair Entrance -> Ice Beam']),
                                                       sm.wor(sm.wand(sm.haveItem('Morph'),
                                                                      sm.knowsMockball()),
                                                              sm.haveItem('SpeedBooster'))),
-        'Croc Zone': lambda sm: sm.wand(sm.canHellRun('MainUpperNorfair'),
+        'Croc Zone': lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Croc -> Ice Missiles']),
                                         sm.haveItem('SpeedBooster'),
                                         sm.knowsIceMissileFromCroc())
     },
@@ -1361,7 +1366,7 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Crocomire Escape',
     'AccessFrom' : {
-        'Croc Zone': lambda sm: sm.canHellRun('MainUpperNorfair')
+        'Croc Zone': lambda sm: sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Croc -> Grapple Escape Missiles'])
     },
     'Available': lambda sm: sm.canGrappleEscape()
 },
@@ -1478,9 +1483,10 @@ locations = [
     'Visibility': "Hidden",
     'Room': 'Norfair Reserve Tank Room',
     'AccessFrom' : {
-        'Bubble Mountain': lambda sm: sm.canHellRun('MainUpperNorfair')
+        'Bubble Mountain': lambda sm: sm.canEnterNorfairReserveAreaFromBubbleMoutain(),
+        'Bubble Mountain Top': lambda sm: sm.canEnterNorfairReserveAreaFromBubbleMoutainTop()
     },
-    'Available': lambda sm: sm.wand(sm.haveItem('Morph'), sm.canEnterNorfairReserveArea())
+    'Available': lambda sm: sm.wand(sm.haveItem('Morph'), sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Norfair Reserve']))
 },
 {
     'Area': "Norfair",
@@ -1494,9 +1500,10 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Green Bubbles Missile Room',
     'AccessFrom' : {
-        'Bubble Mountain': lambda sm: sm.canHellRun('MainUpperNorfair', 2.5, minE=1)
+        'Bubble Mountain': lambda sm: sm.canEnterNorfairReserveAreaFromBubbleMoutain(),
+        'Bubble Mountain Top': lambda sm: sm.canEnterNorfairReserveAreaFromBubbleMoutainTop()
     },
-    'Available': lambda sm: sm.canEnterNorfairReserveArea()
+    'Available': lambda sm: sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Norfair Reserve Missiles'])
 },
 {
     'Area': "Norfair",
@@ -1526,7 +1533,7 @@ locations = [
     'Visibility': "Hidden",
     'Room': 'Speed Booster Hall',
     'AccessFrom' : {
-        'Bubble Mountain': lambda sm: sm.canOpenGreenDoors()
+        'Bubble Mountain Top': lambda sm: sm.canOpenGreenDoors()
     },
     'Available': lambda sm: sm.canHellRunToSpeedBooster()
 },
@@ -1542,7 +1549,7 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Double Chamber',
     'AccessFrom' : {
-        'Bubble Mountain': lambda sm: sm.canHellRun('MainUpperNorfair', 0.75)
+        'Bubble Mountain Top': lambda sm: sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Wave'])
     },
     'Available': lambda sm: sm.canOpenRedDoors()
 },
@@ -1560,7 +1567,7 @@ locations = [
     'AccessFrom' : {
         'LN Above GT': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: sm.canHellRun('LowerNorfair'),
+    'Available': lambda sm: sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']),
     'PostAvailable': lambda sm: sm.enoughStuffGT()
 },
 {
@@ -1594,7 +1601,7 @@ locations = [
     'AccessFrom' : {
         'LN Entrance': lambda sm: sm.wand(sm.canUsePowerBombs(), sm.canPassWorstRoom()),
     },
-    'Available': lambda sm: sm.canHellRun('LowerNorfair')
+    'Available': lambda sm: sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main'])
 },
 {
     'Area': "LowerNorfair",
@@ -1610,7 +1617,7 @@ locations = [
     'AccessFrom' : {
         'Firefleas': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: sm.canHellRun('LowerNorfair')
+    'Available': lambda sm: sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main'])
 },
 {
     'Area': "LowerNorfair",
@@ -1626,7 +1633,7 @@ locations = [
     'AccessFrom' : {
         'Firefleas': lambda sm: sm.canPassBombPassages()
     },
-    'Available': lambda sm: sm.canHellRun('LowerNorfair')
+    'Available': lambda sm: sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main'])
 },
 {
     'Area': "LowerNorfair",
@@ -1642,7 +1649,7 @@ locations = [
     'AccessFrom' : {
         'Ridley Zone': lambda sm: sm.canUsePowerBombs()
     },
-    'Available': lambda sm: sm.canHellRun('LowerNorfair')
+    'Available': lambda sm: sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main'])
 },
 {
     'Area': "LowerNorfair",
@@ -1658,7 +1665,7 @@ locations = [
     'AccessFrom' : {
         'Three Muskateers Room Left': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: sm.wand(sm.canHellRun('LowerNorfair'),
+    'Available': lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']),
                                     sm.canPassBombPassages())
 },
 {

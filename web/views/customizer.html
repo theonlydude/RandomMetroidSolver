@@ -207,7 +207,7 @@ function AjaxCallCompleted(data) {
         var bytes = new Uint8Array(e.target.result);
 
         // with custom sprites we have to create a bigger array
-        if("ips" in data) {
+        if("ips" in data && "max_size" in data && data["max_size"] > 0x300000) {
           var tmp = new Uint8Array(0x400000);
           tmp.set(bytes);
           bytes = tmp;
@@ -252,7 +252,7 @@ function AjaxCallCompleted(data) {
 
         // do the ips first as the modified palettes are in the regular data
         for(var key in data) {
-            if(key === "fileName" || key === "errorMsg" || key === "ips") { continue; }
+            if(key === "fileName" || key === "errorMsg" || key === "ips" || key === "max_size" || key == "truncate_length") { continue; }
             bytes[key] = data[key];
         }
 

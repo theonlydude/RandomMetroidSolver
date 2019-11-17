@@ -359,6 +359,7 @@ find ~/web2py/applications/solver/static -xtype l -exec rm -f {} \;
 
 [ -L ~/web2py/applications/solver/static/js/jquery.redirect.js ] || ln -s ~/RandomMetroidSolver/web/static/jquery.redirect.js ~/web2py/applications/solver/static/js/jquery.redirect.js
 
+[ -L ~/web2py/applications/solver/static/images/alucard.png ] || ln -s ~/RandomMetroidSolver/web/static/samus_sprites/alucard.png ~/web2py/applications/solver/static/images/alucard.png
 [ -L ~/web2py/applications/solver/static/images/bailey.png ] || ln -s ~/RandomMetroidSolver/web/static/samus_sprites/bailey.png ~/web2py/applications/solver/static/images/bailey.png
 [ -L ~/web2py/applications/solver/static/images/fed_trooper.png ] || ln -s ~/RandomMetroidSolver/web/static/samus_sprites/fed_trooper.png ~/web2py/applications/solver/static/images/fed_trooper.png
 [ -L ~/web2py/applications/solver/static/images/hitbox_helper.png ] || ln -s ~/RandomMetroidSolver/web/static/samus_sprites/hitbox_helper.png ~/web2py/applications/solver/static/images/hitbox_helper.png
@@ -368,4 +369,8 @@ find ~/web2py/applications/solver/static -xtype l -exec rm -f {} \;
 [ -L ~/web2py/applications/solver/static/images/super_controid.png ] || ln -s ~/RandomMetroidSolver/web/static/samus_sprites/super_controid.png ~/web2py/applications/solver/static/images/super_controid.png
 [ -L ~/web2py/applications/solver/static/images/win95_cursor.png ] || ln -s ~/RandomMetroidSolver/web/static/samus_sprites/win95_cursor.png ~/web2py/applications/solver/static/images/win95_cursor.png
 
+[ -L ~/web2py/applications/solver/static/images/spore_save.png ] || ln -s ~/RandomMetroidSolver/web/static/help/spore_save.png ~/web2py/applications/solver/static/images/spore_save.png
+[ -L ~/web2py/applications/solver/static/images/ws_save.png ] || ln -s ~/RandomMetroidSolver/web/static/help/ws_save.png ~/web2py/applications/solver/static/images/ws_save.png
+[ -L ~/web2py/applications/solver/static/images/early_super_bis.png ] || ln -s ~/RandomMetroidSolver/web/static/help/early_super_bis.png ~/web2py/applications/solver/static/images/early_super_bis.png
 
+[ -L ~/web2py/applications/solver/static/images/crystal_flash.png ] || ln -s ~/RandomMetroidSolver/web/static/crystal_flash.png ~/web2py/applications/solver/static/images/crystal_flash.png

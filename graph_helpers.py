@@ -7,11 +7,20 @@ from helpers import Helpers, Bosses
 from graph_access import getAccessPoint
 from cache import Cache
 from math import ceil
+from parameters import Settings
 
 class HelpersGraph(Helpers):
     def __init__(self, smbm):
         self.smbm = smbm
-        self.vanillaDraygon = None
+        self.draygonConnection = None
+
+    @Cache.decorator
+    def canAccessBillyMays(self):
+        sm = self.smbm
+        return sm.wand(sm.canUsePowerBombs(),
+                       sm.wor(sm.knowsBillyMays(),
+                              sm.haveItem('Gravity'),
+                              sm.haveItem('SpaceJump')))
 
     @Cache.decorator
     def canAccessKraidsLair(self):
@@ -134,15 +143,17 @@ class HelpersGraph(Helpers):
                                       sm.knowsNovaBoost())))
 
     @Cache.decorator
+    def canClimbBubbleMountain(self):
+        sm = self.smbm
+        return sm.wor(sm.haveItem('HiJump'),
+                      sm.canFly(),
+                      sm.haveItem('Ice'),
+                      sm.knowsBubbleMountainWallJump())
+
+    @Cache.decorator
     def canHellRunToSpeedBooster(self):
         sm = self.smbm
-        mult = 1
-        minE = 3
-        hasSpeed = sm.haveItem('SpeedBooster').bool
-        if hasSpeed == True:
-            mult = 2
-            minE = 2
-        return sm.canHellRun('MainUpperNorfair', mult, minE)
+        return sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Speed Booster w/Speed' if sm.haveItem('SpeedBooster') else 'Bubble -> Speed Booster'])
 
     @Cache.decorator
     def canExitCathedral(self):
@@ -152,7 +163,7 @@ class HelpersGraph(Helpers):
         #              can do it with only two wall jumps (the first one is delayed like on alcatraz)
         #              can do it with a spring ball jump from wall
         sm = self.smbm
-        return sm.wand(sm.wor(sm.canHellRun('MainUpperNorfair', 0.75),
+        return sm.wand(sm.wor(sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Norfair Entrance']),
                               sm.heatProof()),
                        sm.wor(sm.wor(sm.canPassBombPassages(),
                                      sm.haveItem("SpeedBooster")),
@@ -185,17 +196,22 @@ class HelpersGraph(Helpers):
                                      sm.haveItem('Plasma'))))
 
     @Cache.decorator
-    def canEnterNorfairReserveArea(self):
+    def canEnterNorfairReserveAreaFromBubbleMoutain(self):
         sm = self.smbm
         return sm.wand(sm.canOpenGreenDoors(),
-                       sm.wor(sm.wor(sm.canFly(),
-                                     sm.haveItem('Grapple'),
-                                     sm.wand(sm.haveItem('HiJump'),
-                                             sm.knowsGetAroundWallJump())),
-                              sm.wor(sm.haveItem('Ice'),
-                                     sm.wand(sm.canUseSpringBall(),
-                                             sm.knowsSpringBallJumpFromWall()),
-                                     sm.knowsNorfairReserveDBoost())))
+                       sm.wor(sm.canFly(), # from save door
+                              sm.wand(sm.haveItem('HiJump'),
+                                      sm.knowsGetAroundWallJump()),
+                              sm.wand(sm.canUseSpringBall(),
+                                      sm.knowsSpringBallJumpFromWall())))
+
+    @Cache.decorator
+    def canEnterNorfairReserveAreaFromBubbleMoutainTop(self):
+        sm = self.smbm
+        return sm.wand(sm.canOpenGreenDoors(),
+                       sm.wor(sm.haveItem('Grapple'),
+                              sm.haveItem('SpaceJump'),
+                              sm.knowsNorfairReserveDBoost()))
 
     @Cache.decorator
     def canPassLavaPit(self):
@@ -223,7 +239,8 @@ class HelpersGraph(Helpers):
     @Cache.decorator
     def canPassLowerNorfairChozo(self):
         sm = self.smbm
-        return sm.wand(sm.canHellRun('LowerNorfair', 0.75), # 0.75 to require one more CF if no heat protection because of distance to cover, wait times, acid...
+        # to require one more CF if no heat protection because of distance to cover, wait times, acid...
+        return sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Entrance -> GT via Chozo']),
                        sm.canUsePowerBombs(),
                        sm.wor(sm.haveItem('SpaceJump'),
                               RomPatches.has(RomPatches.LNChozoSJCheckDisabled)))
@@ -365,20 +382,30 @@ class HelpersGraph(Helpers):
                               sm.wand(sm.knowsMochtroidClip(), sm.haveItem('Ice'))))
 
     @Cache.decorator
+    def canBotwoonExitToAndFromDraygon(self):
+        sm = self.smbm
+        return sm.wor(sm.haveItem('Gravity'),
+                      sm.wand(sm.knowsGravLessLevel2(),
+                              sm.wor(sm.haveItem('Grapple'),
+                                     sm.haveItem('SpaceJump'),
+                                     sm.wand(sm.haveItem('Ice'),
+                                             sm.energyReserveCountOk(int(7.0/sm.getDmgReduction(False)[0])), # mochtroid dmg
+                                             sm.knowsBotwoonToDraygonWithIce()))))
+
+    @Cache.decorator
     def canAccessDraygonFromMainStreet(self):
         sm = self.smbm
         return sm.wand(sm.canDefeatBotwoon(),
-                       sm.wor(sm.haveItem('Gravity'),
-                              sm.wand(sm.knowsGravLessLevel2(),
-                                      sm.wor(sm.haveItem('Grapple'),
-                                             sm.haveItem('SpaceJump'),
-                                             sm.wand(sm.haveItem('Ice'), sm.knowsBotwoonToDraygonWithIce())))))
+                       sm.canBotwoonExitToAndFromDraygon())
+
+    def getDraygonConnection(self):
+        if self.draygonConnection is None:
+            drayRoomOut = getAccessPoint('DraygonRoomOut')
+            self.draygonConnection = drayRoomOut.ConnectedTo
+        return self.draygonConnection
 
     def isVanillaDraygon(self):
-        if self.vanillaDraygon is None:
-            drayRoomOut = getAccessPoint('DraygonRoomOut')
-            self.vanillaDraygon = drayRoomOut.ConnectedTo == 'DraygonRoomIn'
-        return self.vanillaDraygon
+        return self.getDraygonConnection() == 'DraygonRoomIn'
 
     @Cache.decorator
     def canFightDraygon(self):
@@ -401,17 +428,22 @@ class HelpersGraph(Helpers):
                        sm.itemCountOk('PowerBomb', 4))
 
     @Cache.decorator
+    def canExitDraygonRoomWithGravity(self):
+        sm = self.smbm
+        return sm.wand(sm.haveItem('Gravity'),
+                       sm.wor(sm.canFly(),
+                              sm.knowsGravityJump(),
+                              sm.wand(sm.haveItem('HiJump'),
+                                      sm.haveItem('SpeedBooster'))))
+
+    @Cache.decorator
     def canExitDraygonVanilla(self):
         sm = self.smbm
         # to get out of draygon room:
         #   with gravity but without highjump/bomb/space jump: gravity jump
         #     to exit draygon room: grapple or crystal flash (for free shine spark)
         #     to exit precious room: spring ball jump, xray scope glitch or stored spark
-        return sm.wor(sm.wand(sm.haveItem('Gravity'),
-                              sm.wor(sm.canFly(),
-                                     sm.knowsGravityJump(),
-                                     sm.wand(sm.haveItem('HiJump'),
-                                             sm.haveItem('SpeedBooster')))),
+        return sm.wor(sm.canExitDraygonRoomWithGravity(),
                       sm.wand(sm.canDraygonCrystalFlashSuit(),
                               # use the spark either to exit draygon room or precious room
                               sm.wor(sm.wand(sm.haveItem('Grapple'),
@@ -431,11 +463,7 @@ class HelpersGraph(Helpers):
     def canExitDraygonRandomized(self):
         sm = self.smbm
         # disregard precious room
-        return sm.wor(sm.wand(sm.haveItem('Gravity'),
-                              sm.wor(sm.canFly(),
-                                     sm.knowsGravityJump(),
-                                     sm.wand(sm.haveItem('HiJump'),
-                                             sm.haveItem('SpeedBooster')))),
+        return sm.wor(sm.canExitDraygonRoomWithGravity(),
                       sm.canDraygonCrystalFlashSuit(),
                       sm.wand(sm.haveItem('Grapple'),
                               sm.knowsDraygonRoomGrappleExit()),
@@ -454,16 +482,30 @@ class HelpersGraph(Helpers):
     @Cache.decorator
     def canExitPreciousRoomRandomized(self):
         sm = self.smbm
+        suitlessRoomExit = sm.canSpringBallJump()
+        if suitlessRoomExit.bool == False:
+            if self.getDraygonConnection() == 'KraidRoomIn':
+                suitlessRoomExit = sm.canShortCharge() # charge spark in kraid's room
+            elif self.getDraygonConnection() == 'RidleyRoomIn':
+                suitlessRoomExit = sm.wand(sm.haveItem('XRayScope'), # get doorstuck in compatible transition
+                                           sm.knowsPreciousRoomXRayExit())
         return sm.wor(sm.wand(sm.haveItem('Gravity'),
                               sm.wor(sm.canFly(),
                                      sm.knowsGravityJump(),
                                      sm.haveItem('HiJump'))),
-                      sm.wor(sm.wand(sm.haveItem('XRayScope'),
-                                     sm.knowsPreciousRoomXRayExit()),
-                             sm.canSpringBallJump()))
+                      suitlessRoomExit)
 
     def canExitPreciousRoom(self):
         if self.isVanillaDraygon():
             return self.canExitPreciousRoomVanilla()
         else:
             return self.canExitPreciousRoomRandomized()
+
+    @Cache.decorator
+    def canPassCacatacAlley(self):
+        sm = self.smbm
+        return sm.wand(Bosses.bossDead('Draygon'),
+                       sm.wor(sm.haveItem('Gravity'),
+                              sm.wand(sm.knowsGravLessLevel2(),
+                                      sm.haveItem('HiJump'),
+                                      sm.haveItem('SpaceJump'))))

@@ -10,7 +10,7 @@ from graph_access import vanillaTransitions, getDoorConnections, vanillaBossesTr
 from parameters import Knows, easy, medium, hard, harder, hardcore, mania, text2diff, diff2text
 from utils import PresetLoader
 from rom import RomPatcher, RomPatches, FakeROM
-from utils import isStdPreset, loadRandoPreset
+from utils import loadRandoPreset
 import log, db
 
 speeds = progSpeeds + ['variable']
@@ -502,21 +502,17 @@ if __name__ == "__main__":
             json.dump({"itemLocs": itemLocs, "errorMsg": randomizer.errorMsg}, jsonFile, default=lambda x: x.__dict__)
         sys.exit(0)
 
-    # insert extended stats into database
-    if isStdPreset(preset) and args.raceMagic == None:
-        parameters = {'preset': preset, 'area': args.area, 'boss': args.bosses, 'majorsSplit': args.majorsSplit,
+    # generate extended stats
+    if args.extStatsFilename != None:
+        parameters = {'preset': preset, 'area': args.area, 'boss': args.bosses,
+                      'noGravHeat': not args.noGravHeat, 'majorsSplit': args.majorsSplit,
                       'progSpeed': progSpeed, 'morphPlacement': args.morphPlacement,
                       'suitsRestriction': args.suitsRestriction, 'progDiff': progDiff,
-                      'superFunMovement': 'Movement' in args.superFun, 'superFunCombat': 'Combat' in args.superFun,
+                      'superFunMovement': 'Movement' in args.superFun,
+                      'superFunCombat': 'Combat' in args.superFun,
                       'superFunSuit': 'Suits' in args.superFun}
-        if args.extStatsFilename == None:
-            DB = db.DB()
-            DB.addExtStat(parameters, locsItems)
-            DB.close()
-        else:
-            with open(args.extStatsFilename, 'a') as extStatsFile:
-                db.DB.dumpExtStat(parameters, locsItems, extStatsFile)
-            sys.exit(0)
+        with open(args.extStatsFilename, 'a') as extStatsFile:
+            db.DB.dumpExtStatsItems(parameters, locsItems, extStatsFile)
 
     try:
         # args.rom is not None: generate local rom named filename.sfc with args.rom as source
@@ -536,7 +532,9 @@ if __name__ == "__main__":
             romPatcher.applyIPSPatches(args.patches, args.noLayout, args.noGravHeat, args.area, args.bosses, args.areaLayoutBase, args.noVariaTweaks)
         else:
             romPatcher.addIPSPatches(args.patches)
-
+        if args.sprite is not None:
+            romPatcher.customSprite(args.sprite) # adds another IPS
+        romPatcher.commitIPS() # actually write IPS data
         if args.patchOnly == False:
             romPatcher.writeSeed(seed) # lol if race mode
             romPatcher.writeSpoiler(itemLocs, progItemLocs)
@@ -554,8 +552,6 @@ if __name__ == "__main__":
         if args.patchOnly == False:
             romPatcher.writeMagic()
             romPatcher.writeMajorsSplit(args.majorsSplit)
-        if args.sprite is not None:
-            romPatcher.customSprite(args.sprite)
         if args.palette == True:
             paletteSettings = {
                 "global_shift": None,

@@ -22,7 +22,7 @@ class Helpers(object):
         if difficulties is None or len(difficulties) == 0:
             return SMBool(False)
         def f(difficulty):
-            return self.smbm.energyReserveCountOk(int(difficulty[0] / mult), difficulty=difficulty[1])
+            return self.smbm.energyReserveCountOk(int(round(difficulty[0] / mult)), difficulty=difficulty[1])
         result = reduce(lambda result, difficulty: self.smbm.wor(result, f(difficulty)),
                         difficulties[1:], f(difficulties[0]))
         return result
@@ -93,13 +93,21 @@ class Helpers(object):
                 return self.energyReserveCountOkHellRun(hellRun, mult)
             else:
                 tanks = self.energyReserveCount()
+                multCF = mult
                 if tanks >= 14:
-                    mult *= 2.0
-                nCF = int(math.ceil(2/mult))
+                    multCF *= 2.0
+                nCF = int(math.ceil(2/multCF))
                 ret = sm.wand(self.energyReserveCountOkHellRun(hellRun, mult),
                               self.canCrystalFlash(nCF))
-#                nPB = self.smbm.itemCount('PowerBomb')
-#                print("canHellRun LN. tanks=" + str(tanks) + ", nCF=" + str(nCF) + ", nPB=" + str(nPB) + ", mult=" + str(mult) + ", heatProof=" + str(isHeatProof.bool) + ", ret=" + str(ret))
+                if ret.bool == True:
+                    if sm.haveItem('Gravity') == True:
+                        ret.difficulty *= 0.7
+                        ret.items.append('Gravity')
+                    elif sm.haveItem('ScrewAttack') == True:
+                        ret.difficulty *= 0.7
+                        ret.items.append('ScrewAttack')
+                #nPB = self.smbm.itemCount('PowerBomb')
+                #print("canHellRun LN. tanks=" + str(tanks) + ", nCF=" + str(nCF) + ", nPB=" + str(nPB) + ", mult=" + str(mult) + ", heatProof=" + str(isHeatProof.bool) + ", ret=" + str(ret))
                 return ret
         else:
             return SMBool(False)
@@ -232,7 +240,7 @@ class Helpers(object):
                                                      sm.wor(sm.itemCountOk('PowerBomb', nPB),
                                                             sm.wand(sm.haveItem('SpeedBooster'),
                                                                     sm.energyReserveCountOk(nTanks))))),
-                                     sm.wand(sm.energyReserveCountOkHardRoom('Gauntlet', 0.5),
+                                     sm.wand(sm.energyReserveCountOkHardRoom('Gauntlet', 0.51),
                                              sm.canUseBombs()))))
 
     @Cache.decorator

@@ -1,4 +1,5 @@
 from smbool import SMBool
+import os
 import sys
 
 # the different difficulties available
@@ -41,6 +42,8 @@ text2diff = {
     'impossibru': impossibru,
     'infinity': infinity
 }
+
+appDir = os.path.expanduser(os.path.join("~/RandomMetroidSolver"))
 
 def isKnows(knows):
     return knows[0:len('__')] != '__' and knows[0] == knows[0].upper()
@@ -199,7 +202,7 @@ class Knows:
                             'rooms': ['Mother Brain Room']}
     # maridia mama turtle
     HiJumpMamaTurtle = SMBool(False, 0, ['HiJumpMamaTurtle'])
-    desc['HiJumpMamaTurtle'] = {'display': 'Mama Turtle E-Tank with High-Jump',
+    desc['HiJumpMamaTurtle'] = {'display': 'Mama Turtle E-Tank with High-Jump+Speed',
                                 'title': 'Access Mama Turtle E-Tank with High-Jump and Speed Booster (and Morph or X-Ray to turn around without moving)',
                                 'href': 'https://www.youtube.com/watch?v=1DINqLnINc8',
                                 'rooms': ['Mama Turtle Room']}
@@ -230,9 +233,15 @@ class Knows:
     # Brinstar
     CeilingDBoost = SMBool(True, easy, ['CeilingDBoost'])
     desc['CeilingDBoost'] = {'display': 'Ceiling Damage Boost',
-                          'title': 'Hit an enemy at the right time to get the item in Blue Brinstar Ceiling',
-                          'href': 'https://www.metroid2002.com/3/early_items_blue_brinstar_energy_tank.php',
-                          'rooms': ['Blue Brinstar Energy Tank Room']}
+                             'title': 'Hit an enemy at the right time to get the item in Blue Brinstar Ceiling',
+                             'href': 'https://www.metroid2002.com/3/early_items_blue_brinstar_energy_tank.php',
+                             'rooms': ['Blue Brinstar Energy Tank Room']}
+
+    BillyMays = SMBool(True, easy, ['BillyMays'])
+    desc['BillyMays'] = {'display': 'Billy Mays access without Gravity or Space Jump',
+                         'title': 'Jump through the door to get on the invisible platform',
+                         'href': 'https://youtu.be/LOyj4CuOWik',
+                         'rooms': ['Blue Brinstar Boulder Room']}
 
     AlcatrazEscape = SMBool(True, harder, ['AlcatrazEscape'])
     desc['AlcatrazEscape'] = {'display': 'Alcatraz Escape',
@@ -324,6 +333,12 @@ class Knows:
                                      'title': 'Use a delayed wall jump to exit Cathedral',
                                      'href': 'https://www.youtube.com/watch?v=CqQik2z6IkE',
                                      'rooms': ['Cathedral Entrance']}
+
+    BubbleMountainWallJump = SMBool(True, medium, ['BubbleMountainWallJump'])
+    desc['BubbleMountainWallJump'] = {'display': 'Bubble Mountain wall jump',
+                                      'title': 'Run from the save room and get up Bubble Mountain without Hi-Jump',
+                                      'href': 'https://youtu.be/2RmbFRCMlUg',
+                                      'rooms': ['Bubble Mountain']}
 
     NovaBoost = SMBool(False, 0, ['NovaBoost'])
     desc['NovaBoost'] = {'display': 'Nova Boost',
@@ -547,15 +562,15 @@ class Knows:
         'Common': [
             {'knows': ['WallJump', 'ShineSpark', 'MidAirMorph', 'CrouchJump'],
              'title': 'Basics'},
-             {'knows': ['Mockball', 'SimpleShortCharge', 'InfiniteBombJump', 'GreenGateGlitch',
-                        'GravityJump', 'GetAroundWallJump',
-                        'SpringBallJump', 'SpringBallJumpFromWall', 'ShortCharge'],
+            {'knows': ['Mockball', 'SimpleShortCharge', 'InfiniteBombJump', 'GreenGateGlitch',
+                       'GravityJump', 'GetAroundWallJump',
+                       'SpringBallJump', 'SpringBallJumpFromWall', 'ShortCharge'],
              'title': 'Used across the game'}
         ],
         'Crateria/Brinstar': [
             {'knows': ['AlcatrazEscape', 'HiJumpGauntletAccess', 'HiJumpLessGauntletAccess', 'LowGauntlet', 'OldMBWithSpeed'],
              'title': 'Crateria'},
-            {'knows': ['CeilingDBoost', 'EarlyKraid',
+            {'knows': ['CeilingDBoost', 'BillyMays', 'EarlyKraid',
                        'ReverseGateGlitch', 'ReverseGateGlitchHiJumpLess', 
                        'RedTowerClimb', 'XrayDboost', 'XrayIce',
                        'RonPopeilScrew', 'Moondance'],
@@ -588,7 +603,7 @@ class Knows:
              'title': 'Obscure suitless stuff'}
         ],
         'Norfair': [
-            {'knows': ['WallJumpCathedralExit', 'NorfairReserveDBoost', 'CrocPBsIce', 'CrocPBsDBoost', 'IceEscape', 'IceMissileFromCroc', 'FrogSpeedwayWithoutSpeed', 'NovaBoost'],
+            {'knows': ['WallJumpCathedralExit', 'BubbleMountainWallJump', 'NorfairReserveDBoost', 'CrocPBsIce', 'CrocPBsDBoost', 'IceEscape', 'IceMissileFromCroc', 'FrogSpeedwayWithoutSpeed', 'NovaBoost'],
               'title': 'Upper Norfair'},
             {'knows': ['LavaDive', 'LavaDiveNoHiJump', 'ScrewAttackExit', 'ScrewAttackExitWithoutScrew', 'WorstRoomIceCharge'],
              'title': 'Lower Norfair'}
@@ -900,7 +915,9 @@ class Settings:
     hellRunsTable = {
         'Ice': {
             'Norfair Entrance -> Ice Beam': {'mult': 1.0, 'minE': 2, 'hellRun': 'Ice'},
-            'Norfair Entrance -> Croc via Ice': {'mult': 1.5, 'minE': 2, 'hellRun': 'Ice'}
+            'Norfair Entrance -> Croc via Ice': {'mult': 1.5, 'minE': 2, 'hellRun': 'Ice'},
+            'Croc -> Norfair Entrance': {'mult': 2.0, 'minE': 1, 'hellRun': 'Ice'},
+            'Croc -> Bubble Mountain': {'mult': 2.0, 'minE': 1, 'hellRun': 'Ice'}
         },
         'MainUpperNorfair': {
             'Norfair Entrance -> Bubble': {'mult': 1.0, 'minE': 2, 'hellRun': 'MainUpperNorfair'},
@@ -909,12 +926,25 @@ class Settings:
             'Bubble -> Cathedral Missiles': {'mult': 0.66, 'minE': 2, 'hellRun': 'MainUpperNorfair'},
             'Norfair Entrance -> Croc via Frog': {'mult': 2.0, 'minE': 1, 'hellRun': 'MainUpperNorfair'},
             'Norfair Entrance -> Croc via Frog w/Wave': {'mult': 4.0, 'minE': 1, 'hellRun': 'MainUpperNorfair'},
-            'Bubble -> Norfair Reserve Missiles': {'mult': 2.5, 'minE': 1, 'hellRun': 'MainUpperNorfair'},
+            'Bubble -> Norfair Reserve Missiles': {'mult': 3.0, 'minE': 1, 'hellRun': 'MainUpperNorfair'},
             'Bubble -> Norfair Reserve': {'mult': 1.0, 'minE': 2, 'hellRun': 'MainUpperNorfair'},
             'Bubble -> Speed Booster': {'mult': 1.0, 'minE': 3, 'hellRun': 'MainUpperNorfair'},
             'Bubble -> Speed Booster w/Speed': {'mult': 2.0, 'minE': 2, 'hellRun': 'MainUpperNorfair'},
             'Bubble -> Wave': {'mult': 0.75, 'minE': 2, 'hellRun': 'MainUpperNorfair'},
-            'Croc -> Grapple Escape Missiles': {'mult': 1.0, 'minE': 2, 'hellRun': 'MainUpperNorfair'}
+            'Bubble -> Kronic Boost Room': {'mult': 1.25, 'minE': 2, 'hellRun': 'MainUpperNorfair'},
+            'Bubble -> Kronic Boost Room wo/Bomb': {'mult': 0.5, 'minE': 2, 'hellRun': 'MainUpperNorfair'},
+            'Bubble -> Croc': {'mult': 2.0, 'minE': 2, 'hellRun': 'MainUpperNorfair'},
+            'Croc -> Grapple Escape Missiles': {'mult': 1.0, 'minE': 2, 'hellRun': 'MainUpperNorfair'},
+            'Croc -> Ice Missiles': {'mult': 1.0, 'minE': 2, 'hellRun': 'MainUpperNorfair'},
+            'Single Chamber <-> Bubble Mountain': {'mult': 1.25, 'minE': 2, 'hellRun': 'MainUpperNorfair'},
+            'Single Chamber <-> Kronic Boost Room': {'mult': 1.0, 'minE': 2, 'hellRun': 'MainUpperNorfair'},
+            'Kronic Boost Room -> Bubble Mountain Top': {'mult': 0.5, 'minE': 2, 'hellRun': 'MainUpperNorfair'},
+            'Kronic Boost Room <-> Croc': {'mult': 1.0, 'minE': 2, 'hellRun': 'MainUpperNorfair'},
+            'Croc -> Norfair Entrance': {'mult': 1.25, 'minE': 2, 'hellRun': 'MainUpperNorfair'}
+        },
+        'LowerNorfair': {
+            'Main': {'mult':1.0, 'minE':8, 'hellRun':'LowerNorfair'},
+            'Entrance -> GT via Chozo': {'mult':0.8, 'minE':8, 'hellRun':'LowerNorfair'}
         }
     }
 

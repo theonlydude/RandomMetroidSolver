@@ -1265,7 +1265,7 @@ def randomizerWebService():
             dictROM = {}
             # in json keys are strings
             for address in locsItems:
-                if address in ["fileName", "errorMsg"]:
+                if address in ["fileName", "errorMsg", "ips", "max_size", "truncate_length"]:
                     continue
                 dictROM[int(address)] = locsItems[address]
             md5sum = getMd5sum(dictROM)

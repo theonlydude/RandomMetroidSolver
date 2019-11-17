@@ -213,17 +213,21 @@ function onChangeLowerNorfairHellRun() {
 
   var difficulties = [{{response.write("[\"easy\", {}], [\"medium\", {}], [\"hard\", {}], [\"harder\", {}], [\"hardcore\", {}], [\"mania\", {}]".format(easy, medium, hard, harder, hardcore, mania), escape=False)}}];
 
-  for(var i=0; i<difficulties.length; i++) {
-    var item = document.getElementById(difficulties[i][0]+hellRun);
-    var valueETank = hellRuns[hellRun][valueHellRun][valueParam]["ETank"][difficulties[i][1]]
-    if(valueETank == -1) {
-      valueETank = '-';
+  var screw = ["NoScrew", "Screw"];
+
+  for(var s=0; s<screw.length; s++) {
+    for(var i=0; i<difficulties.length; i++) {
+      var item = document.getElementById(difficulties[i][0]+hellRun+screw[s]);
+      var valueETank = hellRuns[hellRun][screw[s]][valueHellRun][valueParam]["ETank"][difficulties[i][1]]
+      if(valueETank == -1) {
+        valueETank = '-';
+      }
+      var valueCF = hellRuns[hellRun][screw[s]][valueHellRun][valueParam]["CF"][difficulties[i][1]]
+      if(valueCF == -1) {
+        valueCF = '-';
+      }
+      item.innerHTML = valueETank+" | "+valueCF;
     }
-    var valueCF = hellRuns[hellRun][valueHellRun][valueParam]["CF"][difficulties[i][1]]
-    if(valueCF == -1) {
-      valueCF = '-';
-    }
-    item.innerHTML = valueETank+" | "+valueCF;
   }
 }
 
@@ -329,7 +333,8 @@ Also the Varia Suit environmental protection is increased to match vanilla Gravi
       element: "#hellRunsEnergyStep",
       title: "Energy requirements",
       content: "<p>These tables give the number of Energy and Reserve Tanks required for the VARIA logic to consider the Hell runs available (with the associated difficulty).</p>\
-<p>For Lower Norfair Hell runs it displays the number of Energy/Reserve Tanks and also the number of <a href=\"https://metroid.fandom.com/wiki/Crystal_Flash\">Crystal Flashes</a> required.</p>",
+<p>For Lower Norfair Hell runs it displays the number of Energy <img src=\"/solver/static/images/ETank.png\" alt=\"ETank.png\" title=\"ETank.png\" class=\"width: 32px\"/>/Reserve <img src=\"/solver/static/images/Reserve.png\" alt=\"Reserve.png\" title=\"Reserve.png\" class=\"width: 32px\"/> Tanks and also the number of <a href=\"https://metroid.fandom.com/wiki/Crystal_Flash\">Crystal Flashes</a> <img src=\"/solver/static/images/crystal_flash.png\" alt=\"CF.png\" title=\"CF.png\" class=\"width: 32px\"/> required.</p>\
+<p>When equipped with Gravity Suit <img src=\"/solver/static/images/Gravity.png\" alt=\"Gravity.png\" title=\"Gravity.png\" class=\"width: 32px\"/> or Screw Attack <img src=\"/solver/static/images/ScrewAttack.png\" alt=\"Screw.png\" title=\"Screw.png\" class=\"width: 32px\"/> the Lower Norfair Hell runs' difficulty is lowered.</p>",
       placement: "auto left"
     },
     {
@@ -767,23 +772,34 @@ if skillBarData is not None:
 	    <h4>Lower Norfair</h4>
 	  </td>
 	  <td>
-	    {{displaySelect("LowerHellRun", hellRuns["LowerNorfair"], hellRuns["LowerNorfair"]["Main"])}}
+	    {{displaySelect("LowerHellRun", hellRuns["LowerNorfair"]["NoScrew"], hellRuns["LowerNorfair"]["NoScrew"]["Main"])}}
 	  </td>
           <td><span class="btn"></span></td>
 	</tr>
       </table>
       <table class="full">
 	<tr>
-	  <td class="centerTd"></td><td class="centerTd">easy</td><td class="centerTd">medium</td><td class="centerTd">hard</td><td class="centerTd">very hard</td><td class="centerTd">hardcore</td><td class="centerTd">mania</td>
+	  <td class="centerTd">Item</td><td class="centerTd"></td><td class="centerTd">easy</td><td class="centerTd">medium</td><td class="centerTd">hard</td><td class="centerTd">very hard</td><td class="centerTd">hardcore</td><td class="centerTd">mania</td>
 	</tr>
 	<tr>
+	  <td class="centerTd"></td>
 	  <td class="centerTd"><img src="/solver/static/images/ETank.png" alt="ETank.png" title="ETank.png" class="width: 32px"/> | <img src="/solver/static/images/crystal_flash.png" alt="CF.png" title="CF.png" class="width: 32px"/></td>
-	  <td class="centerTd"><pre><span id="easyLowerNorfair"></span></pre></td>
-	  <td class="centerTd"><pre><span id="mediumLowerNorfair"></span></pre></td>
-	  <td class="centerTd"><pre><span id="hardLowerNorfair"></span></pre></td>
-	  <td class="centerTd"><pre><span id="harderLowerNorfair"></span></pre></td>
-	  <td class="centerTd"><pre><span id="hardcoreLowerNorfair"></span></pre></td>
-	  <td class="centerTd"><pre><span id="maniaLowerNorfair"></span></pre></td>
+	  <td class="centerTd"><pre><span id="easyLowerNorfairNoScrew"></span></pre></td>
+	  <td class="centerTd"><pre><span id="mediumLowerNorfairNoScrew"></span></pre></td>
+	  <td class="centerTd"><pre><span id="hardLowerNorfairNoScrew"></span></pre></td>
+	  <td class="centerTd"><pre><span id="harderLowerNorfairNoScrew"></span></pre></td>
+	  <td class="centerTd"><pre><span id="hardcoreLowerNorfairNoScrew"></span></pre></td>
+	  <td class="centerTd"><pre><span id="maniaLowerNorfairNoScrew"></span></pre></td>
+	</tr>
+	<tr>
+	  <td class="centerTd"><img src="/solver/static/images/Gravity.png" alt="Gravity.png" title="Gravity.png" class="width: 32px"/> or <img src="/solver/static/images/ScrewAttack.png" alt="Screw.png" title="Screw.png" class="width: 32px"/></td>
+	  <td class="centerTd"><img src="/solver/static/images/ETank.png" alt="ETank.png" title="ETank.png" class="width: 32px"/> | <img src="/solver/static/images/crystal_flash.png" alt="CF.png" title="CF.png" class="width: 32px"/></td>
+	  <td class="centerTd"><pre><span id="easyLowerNorfairScrew"></span></pre></td>
+	  <td class="centerTd"><pre><span id="mediumLowerNorfairScrew"></span></pre></td>
+	  <td class="centerTd"><pre><span id="hardLowerNorfairScrew"></span></pre></td>
+	  <td class="centerTd"><pre><span id="harderLowerNorfairScrew"></span></pre></td>
+	  <td class="centerTd"><pre><span id="hardcoreLowerNorfairScrew"></span></pre></td>
+	  <td class="centerTd"><pre><span id="maniaLowerNorfairScrew"></span></pre></td>
 	</tr>
       </table>
     </div>

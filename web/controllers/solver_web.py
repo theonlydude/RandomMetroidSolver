@@ -301,21 +301,43 @@ def computeHellruns(hellRuns):
 
                     sm.addItem('ETank')
 
-    # lower norfair
     hellRun = 'LowerNorfair'
     hellRuns[hellRun] = {}
+    hellRuns[hellRun]["NoScrew"] = computeLNHellRun(sm, False)
+    hellRuns[hellRun]["Screw"] = computeLNHellRun(sm, True)
+
+def getNearestDifficulty(difficulty):
+    epsilon = 0.001
+    if difficulty < medium - epsilon:
+        return easy
+    elif difficulty < hard - epsilon:
+        return medium
+    elif difficulty < harder - epsilon:
+        return hard
+    elif difficulty < hardcore - epsilon:
+        return harder
+    elif difficulty < mania - epsilon:
+        return hardcore
+    else:
+        return mania
+
+def computeLNHellRun(sm, addScrew):
+    result = {}
+    hellRun = 'LowerNorfair'
     for (actualHellRun, params) in Settings.hellRunsTable[hellRun].items():
-        hellRuns[hellRun][actualHellRun] = {}
+        result[actualHellRun] = {}
         for (key, difficulties) in Settings.hellRunPresets[hellRun].items():
             if key == 'Solution':
                 continue
             Settings.hellRuns[hellRun] = difficulties
-            hellRuns[hellRun][actualHellRun][key] = {'ETank': {easy: -1, medium: -1, hard: -1, harder: -1, hardcore: -1, mania: -1}, 'CF': {easy: -1, medium: -1, hard: -1, harder: -1, hardcore: -1, mania: -1}}
+            result[actualHellRun][key] = {'ETank': {easy: -1, medium: -1, hard: -1, harder: -1, hardcore: -1, mania: -1}, 'CF': {easy: -1, medium: -1, hard: -1, harder: -1, hardcore: -1, mania: -1}}
             if difficulties == None:
                 continue
 
             for cf in range(3, 0, -1):
                 sm.resetItems()
+                if addScrew == True:
+                    sm.addItem('ScrewAttack')
                 addCF(sm, cf)
                 for etank in range(19):
                     ret = sm.canHellRun(**params)
@@ -326,11 +348,11 @@ def computeHellruns(hellRuns):
                             if item.find('ETank') != -1:
                                 nEtank = int(item[0:item.find('-ETank')])
                                 break
-                        hellRuns[hellRun][actualHellRun][key]['ETank'][ret.difficulty] = nEtank
-                        hellRuns[hellRun][actualHellRun][key]['CF'][ret.difficulty] = cf
-                        #print("Add({})/{}/{}: {} - ({}, {}) ({})".format(additional, actualHellRun, key, ret.difficulty, nEtank, cf, sm.getItems()['ETank']))
+                        result[actualHellRun][key]['ETank'][getNearestDifficulty(ret.difficulty)] = nEtank
+                        result[actualHellRun][key]['CF'][getNearestDifficulty(ret.difficulty)] = cf
 
                     sm.addItem('ETank')
+    return result
 
 def presets():
     initPresetsSession()

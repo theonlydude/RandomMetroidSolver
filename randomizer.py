@@ -10,7 +10,7 @@ from graph_access import vanillaTransitions, getDoorConnections, vanillaBossesTr
 from parameters import Knows, easy, medium, hard, harder, hardcore, mania, text2diff, diff2text
 from utils import PresetLoader
 from rom import RomPatcher, RomPatches, FakeROM
-from utils import isStdPreset, loadRandoPreset
+from utils import loadRandoPreset
 import log, db
 
 speeds = progSpeeds + ['variable']

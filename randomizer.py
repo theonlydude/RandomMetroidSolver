@@ -528,7 +528,6 @@ if __name__ == "__main__":
             romPatcher = RomPatcher(magic=args.raceMagic)
 
         if args.patchOnly == False:
-            romPatcher.writeItemsLocs(itemLocs)
             romPatcher.applyIPSPatches(args.patches, args.noLayout, args.noGravHeat, args.area, args.bosses, args.areaLayoutBase, args.noVariaTweaks)
         else:
             romPatcher.addIPSPatches(args.patches)
@@ -536,6 +535,8 @@ if __name__ == "__main__":
             romPatcher.customSprite(args.sprite) # adds another IPS
         romPatcher.commitIPS() # actually write IPS data
         if args.patchOnly == False:
+            romPatcher.writeItemsLocs(itemLocs)
+            romPatcher.writeItemsNumber()
             romPatcher.writeSeed(seed) # lol if race mode
             romPatcher.writeSpoiler(itemLocs, progItemLocs)
             romPatcher.writeRandoSettings(randoSettings, itemLocs)

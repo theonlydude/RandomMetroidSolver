@@ -702,16 +702,17 @@ class RomPatcher:
     def applyIPSPatches(self, optionalPatches=[], noLayout=False, noGravHeat=False, area=False, bosses=False, areaLayoutBase=False, noVariaTweaks=False):
         try:
             # apply standard patches
-            stdPatches = RomPatcher.IPSPatches['Standard'][:]
-            if noGravHeat == True:
-                stdPatches.remove('Removes_Gravity_Suit_heat_protection')
+            stdPatches = []
+            # apply race mode first because it fills the rom with a bunch of crap
             if self.race is not None:
                 stdPatches.append('race_mode.ips')
+            stdPatches += RomPatcher.IPSPatches['Standard'][:]
+            if noGravHeat == True:
+                stdPatches.remove('Removes_Gravity_Suit_heat_protection')
             if area == True or bosses == True:
                 stdPatches.append('ws_save.ips')
             for patchName in stdPatches:
                 self.applyIPSPatch(patchName)
-            self.writeItemsNumber()
 
             if noLayout == False:
                 # apply layout patches

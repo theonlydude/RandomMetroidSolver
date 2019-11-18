@@ -950,6 +950,9 @@ function loadRandoPresetOK(data) {
           $("#psMultiselect").val(value).trigger("chosen:updated");
           document.getElementById("progressionSpeedRandom").click();
         }
+      } else if(key == "preset") {
+        elem.value = value;
+        $("#preset").val(value).trigger("chosen:updated");
       } else {
         elem.value = value;
       }

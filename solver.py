@@ -1083,9 +1083,10 @@ class InteractiveSolver(CommonSolver):
         romPatcher = RomPatcher(magic=magic, plando=True)
         patches = ['credits_varia.ips', 'tracking.ips']
         if magic != None:
-            patches.append('race_mode.ips')
-        romPatcher.writeItemsLocs(itemLocs)
+            patches.insert(0, 'race_mode.ips')
         romPatcher.addIPSPatches(patches)
+        romPatcher.commitIPS()
+        romPatcher.writeItemsLocs(itemLocs)
         romPatcher.writeItemsNumber()
         romPatcher.writeSpoiler(itemLocs)
         class FakeRandoSettings:

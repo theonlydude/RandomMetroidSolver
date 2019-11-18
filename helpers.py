@@ -246,14 +246,9 @@ class Helpers(object):
     @Cache.decorator
     def canEnterAndLeaveGauntlet(self):
         sm = self.smbm
-        nTanksSpark = 3
-        shortCharge = sm.knowsShortCharge().bool == True
-        if shortCharge:
-            nTanksSpark = 2
-        ret = self.canEnterAndLeaveGauntletQty(2, nTanksSpark)
-        if shortCharge and 'SpeedBooster' in ret.items and ret.items.count('PowerBomb') < 2 and not 'Bomb' in ret.items and not 'ShortCharge' in ret.knows:
-            ret.knows.append('ShortCharge')
-        return ret
+        return sm.wor(sm.wand(sm.canShortCharge(),
+                              sm.canEnterAndLeaveGauntletQty(2, 2)),
+                      sm.canEnterAndLeaveGauntletQty(2, 3))
 
     @Cache.decorator
     def canPassBombPassages(self):

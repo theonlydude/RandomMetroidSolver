@@ -251,7 +251,7 @@ class Helpers(object):
         if shortCharge:
             nTanksSpark = 2
         ret = self.canEnterAndLeaveGauntletQty(2, nTanksSpark)
-        if shortCharge and 'SpeedBooster' in ret.items and not 'ShortCharge' in ret.knows:
+        if shortCharge and 'SpeedBooster' in ret.items and ret.items.count('PowerBomb') < 2 and not 'Bomb' in ret.items and not 'ShortCharge' in ret.knows:
             ret.knows.append('ShortCharge')
         return ret
 

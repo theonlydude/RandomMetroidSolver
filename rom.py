@@ -711,7 +711,6 @@ class RomPatcher:
                 stdPatches.append('ws_save.ips')
             for patchName in stdPatches:
                 self.applyIPSPatch(patchName)
-            self.writeItemsNumber()
 
             if noLayout == False:
                 # apply layout patches

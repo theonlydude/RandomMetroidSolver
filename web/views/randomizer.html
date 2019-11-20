@@ -40,6 +40,8 @@ if (hs.registerOverlay) {
 
 <script type="text/javascript" src="{{=URL('static', 'js/jquery.redirect.js')}}"></script>
 
+<script type="text/javascript" src="{{=URL('static', 'js/crc32.js')}}"></script>
+
 <title>Super Metroid VARIA Randomizer</title>
 
 <style>
@@ -693,7 +695,10 @@ window.onload = function(){
             var files = event.target.files; //It returns a FileList object
             var file = files[0];
 
+            var crc32 = new Crc32();
+
             var reader = new FileReader();
+            reader.readAsArrayBuffer(file)
             reader.onload = function(e) {
 		// check sfc or smc extention
                 var re = /(?:\.([^.]+))?$/;
@@ -715,10 +720,14 @@ window.onload = function(){
                     alert("headered ROM detected, please use an unheadered ROM");
                     return false;
                 }
+
+                crc32.update(e.target.result);
+                var digest = crc32.digest();
+                console.log("crc32: "+digest);
+                if(digest != "d63ed5f8") {
+                    alert("Non vanilla ROM detected, use at your own risk!");
+                }
             }
-
-            reader.readAsArrayBuffer(file)
-
         }, false);
     } else {
         alert("This website requires the HTML5 File API, please upgrade your browser to a newer version.");

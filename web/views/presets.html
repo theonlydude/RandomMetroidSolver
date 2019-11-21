@@ -372,16 +372,17 @@ if skillBarData is not None:
         dataTable.addColumn({ type: 'date', id: 'End' });
         dataTable.addRows([
 {{
-  score = 100 + skillBarData["custom"][1]*4
-  lower = 100 + skillBarData["standards"]["noob"]*4
-  upper = 100 + skillBarData["standards"]["samus"]*4
+  mult = 2
+  score = 100 + skillBarData["custom"][1]*mult
+  lower = 100 + skillBarData["standards"]["noob"]*mult
+  upper = 100 + skillBarData["standards"]["samus"]*mult
 
   previousStdScore = lower
   previousPreset = 'noob'
   stop = False
   for preset in ['casual', 'regular', 'veteran', 'speedrunner', 'master', 'samus']:
     if stop == False:
-      stdScore = 100 + skillBarData["standards"][preset]*4
+      stdScore = 100 + skillBarData["standards"][preset]*mult
       if stdScore <= score:
         response.write("[ 'Skill', '{}', new Date({}), new Date({}) ],\n".format(previousPreset, previousStdScore, stdScore), escape=False)
       else:

@@ -1,16 +1,22 @@
 #!/bin/bash
 
-LOG=test_jm.log
+# cd to root dir
+CWD=$(dirname $0)/..
+cd ${CWD}
+CWD=$(pwd)
+
+LOG_DIR=${CWD}/logs
+mkdir -p ${LOG_DIR}
+LOG=${LOG_DIR}/test_jm.log
+CSV=${LOG_DIR}/test_jm.csv
 > ${LOG}
-#> test_jm.err
-#> test_jm.csv
+#> ${CSV}
 
 if [ $# -ne 2 -a $# -ne 3 ]; then
     echo "params: ROM LOOPS [COMPARE]"
     exit -1
 fi
 
-#ROM=~/supermetroid_random/Super_Metroid_JU.smc
 ROM=$1
 LOOPS=$2
 if [ -n "$3" ]; then
@@ -58,7 +64,6 @@ function computeSeed {
     SEED="$RANDOM"
 
     PARAMS=$(generate_params "${SEED}" "${PRESET}")
-    CSV=test_jm.csv
     if [ ! -s "${CSV}" ]; then
 	echo "seed;diff_cap;rtime old;rtime new;stime old;stime new;;md5sum ok;params;" | tee -a ${CSV}
     fi
@@ -93,7 +98,6 @@ function computeSeed {
 	else
 	    MD5="mismatch"
 	    echo "OLD: ${OLD_MD5} NEW: ${NEW_MD5}"
-	    STOP="now"
 	fi
     else
 	MD5=${NEW_MD5}
@@ -152,7 +156,6 @@ function computeSeed {
 	    echo "${SEED};${ROM_GEN};SOLVER;${PRESET};OK;" | tee -a test_jm.csv
 	else
 	    echo "${SEED};${ROM_GEN};SOLVER;${PRESET};NOK;" | tee -a test_jm.csv
-	    STOP="now"
 	fi
     else
 	rm -f ${ROM_GEN}
@@ -174,7 +177,6 @@ function wait_for_a_child {
     done
 }
 
-STOP=""
 NB_CPU=$(cat /proc/cpuinfo  | grep 'processor' | wc -l)
 CUR_JOBS=0
 CUR_LOOP=0

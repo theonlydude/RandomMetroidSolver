@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 
-import sys
+import sys, os
+
+# now that we're in directory 'tools/' we have to update sys.path
+sys.path.append(os.path.dirname(sys.path[0]))
 
 from utils import randGaussBounds
 from itemrandomizerweb.Items import ItemManager

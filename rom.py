@@ -707,6 +707,8 @@ class RomPatcher:
             if self.race is not None:
                 stdPatches.append('race_mode.ips')
             stdPatches += RomPatcher.IPSPatches['Standard'][:]
+            if self.race is not None:
+                stdPatches.append('race_mode_credits.ips')
             if noGravHeat == True:
                 stdPatches.remove('Removes_Gravity_Suit_heat_protection')
             if area == True or bosses == True:

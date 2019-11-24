@@ -1560,8 +1560,8 @@ class WS(object):
 
     def returnState(self):
         if len(self.session["state"]) > 0:
-            #print("state returned to frontend: availWeb {}, visWeb {}".format(self.session["item"]["state"]["availableLocationsWeb"], self.session["item"]["state"]["visitedLocationsWeb"]))
             state = self.session["state"]
+            #print("state returned to frontend: availWeb {}, visWeb {}".format(state["availableLocationsWeb"], state["visitedLocationsWeb"]))
             return json.dumps({
                 # item tracker
                 "availableLocations": state["availableLocationsWeb"],

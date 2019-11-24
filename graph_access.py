@@ -526,7 +526,7 @@ def getVanillaExit(apName):
     return None
 
 # gets dict like
-# (RoomPtr, (vanilla entry screen X, vanilla entry screen Y)): AP name
+# (RoomPtr, (vanilla entry screen X, vanilla entry screen Y)): AP
 def getRooms():
     rooms = {}
     for ap in accessPoints:
@@ -534,10 +534,10 @@ def getRooms():
             continue
         roomPtr = ap.RoomInfo['RoomPtr']
         entryInfo = getAccessPoint(getVanillaExit(ap.Name)).ExitInfo
-        rooms[(roomPtr, entryInfo['screen'])] = ap.Name
+        rooms[(roomPtr, entryInfo['screen'])] = ap
         # for boss rando with incompatible ridley transition, also register this one
         if ap.Name == 'RidleyRoomIn':
-            rooms[(roomPtr, (0x0, 0x1))] = ap.Name
+            rooms[(roomPtr, (0x0, 0x1))] = ap
     return rooms
 
 def getRandomBossTransitions():

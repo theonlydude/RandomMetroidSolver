@@ -855,7 +855,7 @@ class InteractiveSolver(CommonSolver):
                 self.areaGraph = AccessGraph(accessPoints, self.curGraphTransitions)
                 self.fillPlandoLocs()
             else:
-                if self.areaRando == True:
+                if self.areaRando == True or self.bossRando == True:
                     plandoTrans = self.loadPlandoTransitions()
                     if len(plandoTrans) > 0:
                         self.curGraphTransitions = plandoTrans

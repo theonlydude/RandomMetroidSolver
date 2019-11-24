@@ -339,11 +339,11 @@ class RomReader:
             if accessPoint.Internal == True:
                 continue
             (destRoomPtr, destEntryScreen) = self.getTransition(accessPoint.ExitInfo['DoorPtr'])
-            destAPName = rooms[(destRoomPtr, destEntryScreen)]
-            if accessPoint.Boss == True:
-                bossTransitions[accessPoint.Name] = destAPName
+            destAP = rooms[(destRoomPtr, destEntryScreen)]
+            if accessPoint.Boss == True or destAP.Boss == True:
+                bossTransitions[accessPoint.Name] = destAP.Name
             else:
-                areaTransitions[accessPoint.Name] = destAPName
+                areaTransitions[accessPoint.Name] = destAP.Name
 
         def removeBiTrans(transitions):
             # remove bidirectionnal transitions

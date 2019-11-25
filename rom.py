@@ -1173,7 +1173,7 @@ class RomPatcher:
             for byte in asmPatch:
                 self.romFile.write(struct.pack('B', byte))
 
-            self.asmAddress += 0x20
+            self.asmAddress += len(asmPatch)
 
     # change BG table to avoid scrolling sky bug when transitioning to west ocean
     def patchWestOcean(self, doorPtr):

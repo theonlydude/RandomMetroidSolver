@@ -614,6 +614,9 @@ def getDoorConnections(graph, areas=True, bosses=False):
             continue
         conn = {}
         conn['ID'] = str(src) + ' -> ' + str(dst)
+        # remove duplicates (loop transitions)
+        if any(c['ID'] == conn['ID'] for c in connections):
+            continue
 #        print(conn['ID'])
         # where to write
         conn['DoorPtr'] = src.ExitInfo['DoorPtr']

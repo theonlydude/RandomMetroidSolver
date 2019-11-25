@@ -1635,6 +1635,8 @@ class OutConsole(Out):
     def displayOutput(self):
         s = self.solver
 
+        print("all patches: {}".format(s.romLoader.getAllPatches()))
+
         # print generated path
         if Conf.displayGeneratedPath == True:
             self.printPath("Generated path ({}/101):".format(len(s.visitedLocations)), s.visitedLocations)

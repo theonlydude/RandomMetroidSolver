@@ -173,6 +173,64 @@ class RomReader:
         'areaLayout': {'address': 0x252FA7, 'value': 0xF8, 'desc': "Area layout additional modifications"}
     }
 
+    allPatches = {
+        'AimAnyButton': {'address': 0x175ca, 'value': 0x60, 'vanillaValue': 0xad},
+        'animal_enemies': {'address': 0x78418, 'value': 0x3B, 'vanillaValue': 0x48},
+        # all the modifications from animals are included in animal_enemies...
+        #'animals': {'address': 0x7841D, 'value': 0x8C, 'vanillaValue': 0x18},
+        'area_rando_blue_doors': {'address': 0x7823E, 'value': 0x3B, 'vanillaValue': 0x66},
+        'area_rando_door_transition': {'address': 0x7FDC, 'value': 0x9A, 'vanillaValue': 0x20},
+        'area_rando_layout_base': {'address': 0x788A0, 'value': 0x2B, 'vanillaValue': 0x26},
+        'area_rando_layout': {'address': 0x78666, 'value': 0x62, 'vanillaValue': 0x64},
+        'bomb_torizo': {'address': 0x7FDC, 'value': 0xF2, 'vanillaValue': 0x20},
+        'brinstar_map_room': {'address': 0x784EC, 'value': 0x3B, 'vanillaValue': 0x42},
+        'credits_varia': {'address': 0x44B, 'value': 0x5C, 'vanillaValue': 0xa2},
+        'dachora': {'address': 0x22A173, 'value': 0xC9, 'vanillaValue': 0xc8},
+        'draygonimals': {'address': 0x1ADAC, 'value': 0x60, 'vanillaValue': 0xff},
+        'early_super_bridge': {'address': 0x22976B, 'value': 0xC7, 'vanillaValue': 0x43},
+        'elevators_doors_speed': {'address': 0x2E9D, 'value': 0x08, 'vanillaValue': 0x04},
+        'endingtotals': {'address': 0x7FDC, 'value': 0x7B, 'vanillaValue': 0x20},
+        'escapimals': {'address': 0x1ADAC, 'value': 0x4D, 'vanillaValue': 0xff},
+        'g4_skip': {'address': 0x18C5D, 'value': 0xFE, 'vanillaValue': 0x00},
+        'gameend': {'address': 0x18BCC, 'value': 0x20, 'vanillaValue': 0x00},
+        'grey_door_animals': {'address': 0x21E186, 'value': 0x06, 'vanillaValue': 0x07},
+        'high_jump': {'address': 0x23AA77, 'value': 0x04, 'vanillaValue': 0x05},
+        'itemsounds': {'address': 0x16126, 'value': 0x22, 'vanillaValue': 0xa9},
+        'ln_chozo_platform': {'address': 0x7CEB0, 'value': 0xC9, 'vanillaValue': 0xc7},
+        'ln_chozo_sj_check_disable': {'address': 0x2518F, 'value': 0xEA, 'vanillaValue': 0xad},
+        'low_timer': {'address': 0x18BCC, 'value': 0x20, 'vanillaValue': 0x00},
+        'max_ammo_display': {'address': 0x19E1, 'value': 0xEA, 'vanillaValue': 0xad},
+        'metalimals': {'address': 0x1ADAC, 'value': 0x2B, 'vanillaValue': 0xff},
+        'moat': {'address': 0x21BD80, 'value': 0xD5, 'vanillaValue': 0x54},
+        'nova_boost_platform': {'address': 0x236CC3, 'value': 0xDF, 'vanillaValue': 0x5f},
+        'phantoonimals': {'address': 0x1ADAC, 'value': 0x13, 'vanillaValue': 0xff},
+        'rando_speed': {'address': 0x7FDC, 'value': 0xB4, 'vanillaValue': 0x20},
+        'red_tower': {'address': 0x2304F7, 'value': 0xC4, 'vanillaValue': 0x44},
+        'ridleyimals': {'address': 0x1ADAC, 'value': 0x2E, 'vanillaValue': 0xff},
+        'ridley_platform': {'address': 0x246C09, 'value': 0x00, 'vanillaValue': 0x02},
+        'seed_display': {'address': 0x16CBB, 'value': 0x20, 'vanillaValue': 0xa2},
+        'skip_ceres': {'address': 0x7F17, 'value': 0xB6, 'vanillaValue': 0xff},
+        'skip_intro': {'address': 0x7F1F, 'value': 0xB6, 'vanillaValue': 0xff},
+        'spazer': {'address': 0x23392B, 'value': 0xC5, 'vanillaValue': 0x45},
+        'spinjumprestart': {'address': 0x8763A, 'value': 0xAD, 'vanillaValue': 0xff},
+        'spospo_save': {'address': 0x785FC, 'value': 0x3B, 'vanillaValue': 0x03},
+        'supermetroid_msu1': {'address': 0xF27, 'value': 0x20, 'vanillaValue': 0x8d},
+        'tracking': {'address': 0x10CEA, 'value': 0x4C, 'vanillaValue': 0xee},
+        'wake_zebes': {'address': 0x18EB5, 'value': 0xFF, 'vanillaValue': 0x00},
+        'ws_etank': {'address': 0x7CC4D, 'value': 0x37, 'vanillaValue': 0x8f},
+        'ws_save': {'address': 0x7CEB0, 'value': 0xC9, 'vanillaValue': 0xc7},
+        'Removes_Gravity_Suit_heat_protection': {'address': 0x06e37d, 'value': 0x01, 'vanillaValue': 0x21},
+        'Mother_Brain_Cutscene_Edits': {'address': 0x148824, 'value': 0x01, 'vanillaValue': 0x40},
+        'Suit_acquisition_animation_skip': {'address': 0x020717, 'value': 0xea, 'vanillaValue': 0x22},
+        'Fix_Morph_and_Missiles_Room_State': {'address': 0x07e655, 'value': 0xea, 'vanillaValue': 0x89},
+        'Fix_heat_damage_speed_echoes_bug': {'address': 0x08b629, 'value': 0x01, 'vanillaValue': 0x00},
+        'Disable_GT_Code': {'address': 0x15491c, 'value': 0x80, 'vanillaValue': 0xd0},
+        'Disable_Space_Time_select_in_menu': {'address': 0x013175, 'value': 0x01, 'vanillaValue': 0x08},
+        'Fix_Morph_Ball_Hidden_Chozo_PLMs': {'address': 0x0268ce, 'value': 0x04, 'vanillaValue': 0x02},
+        'Fix_Screw_Attack_selection_in_menu': {'address': 0x0134c5, 'value': 0x0c, 'vanillaValue': 0x0a},
+        'No_Music': {'address': 0x278413, 'value': 0x6f, 'vanillaValue': 0xcd},
+    }
+
     @staticmethod
     def getDefaultPatches():
         # called by the isolver in seedless mode
@@ -405,6 +463,16 @@ class RomReader:
         result[doorPtr+1] = struct.unpack("B", self.romFile.read(1))[0]
 
         return result
+
+    def getAllPatches(self):
+        # to display in cli solver (for debug use)
+        ret = []
+        for patch in self.allPatches:
+            self.romFile.seek(self.allPatches[patch]['address'])
+            value = struct.unpack("B", self.romFile.read(1))[0]
+            if value == self.allPatches[patch]["value"]:
+                ret.append(patch)
+        return sorted(ret)
 
     def getDict(self):
         # get the address/value dict for dump
@@ -1398,6 +1466,10 @@ class RomLoader(object):
     def getRawPatches(self):
         # used in interactive solver
         return self.romReader.getRawPatches()
+
+    def getAllPatches(self):
+        # used in cli
+        return self.romReader.getAllPatches()
 
     def getPlandoAddresses(self):
         return self.romReader.getPlandoAddresses()

@@ -216,6 +216,7 @@ class RomReader:
         'spospo_save': {'address': 0x785FC, 'value': 0x3B, 'vanillaValue': 0x03},
         'supermetroid_msu1': {'address': 0xF27, 'value': 0x20, 'vanillaValue': 0x8d},
         'tracking': {'address': 0x10CEA, 'value': 0x4C, 'vanillaValue': 0xee},
+        'tracking_buggy_arm_pump': {'address': 0x8EB05, 'value': 0x4C, 'vanillaValue': 0x4D},
         'wake_zebes': {'address': 0x18EB5, 'value': 0xFF, 'vanillaValue': 0x00},
         'ws_etank': {'address': 0x7CC4D, 'value': 0x37, 'vanillaValue': 0x8f},
         'ws_save': {'address': 0x7CEB0, 'value': 0xC9, 'vanillaValue': 0xc7},

@@ -1092,6 +1092,7 @@ class InteractiveSolver(CommonSolver):
         patches = ['credits_varia.ips', 'tracking.ips']
         if magic != None:
             patches.insert(0, 'race_mode.ips')
+            patches.append('race_mode_credits.ips')
         romPatcher.addIPSPatches(patches)
         romPatcher.commitIPS()
         romPatcher.writeItemsLocs(itemLocs)

@@ -951,10 +951,15 @@ class InteractiveSolver(CommonSolver):
         self.comeBack = ComeBack(self)
 
         # backup
+        mbLoc = self.getLoc("Mother Brain")
         locationsBck = self.locations[:]
 
         self.lastLoc = 'Landing Site'
         (self.difficulty, self.itemsOk) = self.computeDifficulty()
+
+        # put back mother brain location
+        if mbLoc not in self.majorLocations and mbLoc not in self.visitedLocations:
+            self.majorLocations.append(mbLoc)
 
         if self.itemsOk == False:
             # add remaining locs as sequence break

@@ -1,5 +1,6 @@
 # super metroid boolean
 class SMBool:
+    __slots__ = ('bool', 'difficulty', 'knows', 'items')
     def __init__(self, bool, difficulty=0, knows=[], items=[]):
         # to avoid storing an SMBool as the bool attribute of the SMBool
         self.bool = bool == True

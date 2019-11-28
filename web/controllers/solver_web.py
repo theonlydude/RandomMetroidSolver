@@ -89,12 +89,12 @@ def completePreset(params):
 def loadPresetsList():
     files = sorted(os.listdir('community_presets'), key=lambda v: v.upper())
     stdPresets = ['noob', 'casual', 'regular', 'veteran', 'speedrunner', 'master']
-    tourPresets = ['Season_Races', 'SMRAT2020']
+    tourPresets = ['Season_Races', 'Playoff_Races', 'SMRAT2020']
     comPresets = [os.path.splitext(file)[0] for file in files if file != '.git']
     return (stdPresets, tourPresets, comPresets)
 
 def loadRandoPresetsList():
-    tourPresets = ['Season_Races', 'Season_Races_Chozo', 'smrat', 'Scavenger_Hunt']
+    tourPresets = ['Season_Races', 'Season_Races_Chozo', 'Playoff_Races', 'Playoff_Races_Chozo', 'smrat', 'Scavenger_Hunt']
     files = sorted(os.listdir('rando_presets'), key=lambda v: v.upper())
     randoPresets = [os.path.splitext(file)[0] for file in files]
     randoPresets = [preset for preset in randoPresets if preset not in tourPresets]

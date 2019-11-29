@@ -1432,7 +1432,10 @@ class Randomizer(object):
         self.log.debug("NON-PROG")
         minLimit = self.itemLimit - int(self.itemLimit/5)
         maxLimit = self.itemLimit + int(self.itemLimit/5)
-        itemLimit = random.randint(minLimit, maxLimit)
+        if minLimit == maxLimit:
+            itemLimit = minLimit
+        else:
+            itemLimit = random.randint(minLimit, maxLimit)
         while len(pool) > 0 and nItems < itemLimit and locPoolOk:
             curLocs = self.currentLocations()
             itemLocation = self.generateItem(curLocs, pool)
@@ -1707,7 +1710,7 @@ class Randomizer(object):
                 ret = None
                 chooseFrom = [loc for loc in locs if loc['difficulty'].difficulty <= self.difficultyTarget]
                 if len(chooseFrom) > 0:
-                    ret = chooseFrom[random.randint(0, len(chooseFrom)-1)]
+                    ret = chooseFrom[random.randint(0, len(chooseFrom)-1) if len(chooseFrom) > 1 else 0]
                 else:
                     minDiff = god
                     for loc in locs:

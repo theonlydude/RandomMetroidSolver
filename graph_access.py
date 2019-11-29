@@ -1,4 +1,5 @@
-import random, copy
+import copy
+from numpy import random
 from graph import AccessPoint
 from parameters import Knows, Settings
 from rom import RomPatches
@@ -555,8 +556,8 @@ def getRandomBossTransitions():
             srcs.append(src)
             dsts.append(dst)
         while len(srcs) > 0:
-            src = srcs.pop(random.randint(0,len(srcs)-1))
-            dst = dsts.pop(random.randint(0,len(dsts)-1))
+            src = srcs.pop(random.randint(0,len(srcs)-1) if len(srcs) > 1 else 0)
+            dst = dsts.pop(random.randint(0,len(dsts)-1) if len(dsts) > 1 else 0)
             transitions.append((src,dst))
     return transitions
 

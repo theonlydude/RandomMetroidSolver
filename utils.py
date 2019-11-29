@@ -1,6 +1,8 @@
 #!/usr/bin/python
 
-import os, json, random
+import os, json, sys
+from numpy import random
+
 from parameters import Knows, Settings, Controller, isKnows, isSettings, isButton
 from parameters import easy, medium, hard, harder, hardcore, mania
 from smbool import SMBool
@@ -12,7 +14,9 @@ def isStdPreset(preset):
 # the higher the slope, the less probable extreme values are.
 def randGaussBounds(r, slope=5):
     r = float(r)
-    n = int(round(random.gauss(r/2, r/slope), 0))
+    n = int(round(random.normal(r/2, r/slope), 0))
+    # TODO::after validating python2/3 compatibility, reverse to python random.gauss instead of numpy
+    #n = int(round(random.gauss(r/2, r/slope), 0))
     if n < 0:
         n = 0
     if n > r:
@@ -42,11 +46,18 @@ def chooseFromRange(rangeDict):
             return v
     return val
 
+if sys.version_info.major == 2:
+    def isString(string):
+        return type(string) in [str, unicode]
+else:
+    def isString(string):
+        return type(string) == str
+
 class PresetLoader(object):
     @staticmethod
     def factory(params):
         # can be a json, a python file or a dict with the parameters
-        if type(params) in [str, unicode]:
+        if isString(params):
             ext = os.path.splitext(params)
             if ext[1].lower() == '.json':
                 return PresetLoaderJson(params)

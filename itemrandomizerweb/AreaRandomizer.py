@@ -1,4 +1,4 @@
-import random
+from numpy import random
 
 from itemrandomizerweb.Randomizer import Randomizer
 from graph_access import vanillaTransitions, accessPoints, getAccessPoint
@@ -15,7 +15,7 @@ def createTransitions(bidir=True):
         targets = [apName for apName in apNames if apName not in tTo and getAccessPoint(apName).GraphArea != fromArea]
         if len(targets) == 0: # fallback if no area transition is found
             targets = [apName for apName in apNames if apName != ap.Name]
-        return targets[random.randint(0, len(targets)-1)]
+        return targets[random.randint(0, len(targets)-1) if len(targets) > 1 else 0]
 
     def addTransition(src, dst):
         tFrom.append(src)
@@ -23,7 +23,7 @@ def createTransitions(bidir=True):
 
     while len(apNames) > 0:
         sources = [apName for apName in apNames if apName not in tFrom]
-        src = sources[random.randint(0, len(sources)-1)]
+        src = sources[random.randint(0, len(sources)-1) if len(sources) > 1 else 0]
         dst = findTo(src)
         transitions.append((src, dst))
         addTransition(src, dst)

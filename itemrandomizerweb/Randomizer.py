@@ -1,4 +1,6 @@
-import sys, random, time, copy
+import sys, time, copy
+from numpy import random
+
 from itemrandomizerweb.Items import ItemManager
 from parameters import Knows, isBossKnows, Settings, samus, infinity, god
 from itemrandomizerweb.stdlib import List
@@ -434,7 +436,7 @@ class SuperFunProvider(object):
             Knows.IceZebSkip = SMBool(True, 0, [])
 
         poolDict = self.rando.getPoolDict(pool)
-        self.log.debug('pool='+str([(t, len(poolDict[t])) for t in poolDict]))
+        self.log.debug('pool={}'.format(sorted([(t, len(poolDict[t])) for t in poolDict])))
         # give us everything and beat every boss to see what we can access
         self.disableBossChecks()
         self.sm.resetItems()
@@ -448,7 +450,7 @@ class SuperFunProvider(object):
 
         # check if we can reach all APs from all APs
         nonInternalAPs = [ap for ap in self.areaGraph.accessPoints.values() if ap.Internal == False]
-        for startApName, startAp in self.areaGraph.accessPoints.iteritems():
+        for startApName, startAp in self.areaGraph.accessPoints.items():
             availAccessPoints = self.areaGraph.getAvailableAccessPoints(startAp, self.sm, self.rando.difficultyTarget)
             for ap in nonInternalAPs:
                 if not ap in availAccessPoints:
@@ -922,7 +924,7 @@ class Randomizer(object):
     def possibleItems(self, curLocs, itemPool):
         result = []
         poolDict = self.getPoolDict(itemPool)
-        for itemType,items in poolDict.iteritems():
+        for itemType,items in sorted(poolDict.items()):
             if self.checkItem(items[0]):
                 for item in items:
                     result.append(item)
@@ -943,7 +945,7 @@ class Randomizer(object):
         return funcDict[v]
 
     def chooseItemRandom(self, items):
-        return items[random.randint(0, len(items)-1)]
+        return items[random.randint(0, len(items)-1) if len(items) > 1 else 0]
 
     def chooseItemMinProgression(self, items):
         minNewLocs = 1000
@@ -981,7 +983,7 @@ class Randomizer(object):
     def chooseLocationRandom(self, availableLocations, item):
         self.log.debug("RANDOM")
         self.log.debug("chooseLocationRandom: {}".format([l['Name'] for l in availableLocations]))
-        return availableLocations[random.randint(0, len(availableLocations)-1)]
+        return availableLocations[random.randint(0, len(availableLocations)-1) if len(availableLocations) > 1 else 0]
 
     def getLocDiff(self, loc):
         # avail difficulty already stored by graph algorithm        
@@ -1082,7 +1084,7 @@ class Randomizer(object):
         itemsLen = len(items)
         if itemsLen == 0:
             fixedPool = [item for item in itemPool if item not in self.failItems]
-            item = List.item(random.randint(0, len(fixedPool)-1), fixedPool)
+            item = List.item(random.randint(0, len(fixedPool)-1) if len(fixedPool) > 1 else 0, fixedPool)
         else:
             item = self.chooseItem(items)
         return item
@@ -1422,7 +1424,7 @@ class Randomizer(object):
             return False
         pool = self.getNonProgItemPoolStart()
         poolTypes = list(set([item['Type'] for item in pool]))
-        self.log.debug("fillNonProgressionItems poolset=" + str(poolTypes))
+        self.log.debug("fillNonProgressionItems poolset=" + str(sorted(poolTypes)))
         poolWasEmpty = len(pool) == 0
         itemLocation = None
         nItems = 0
@@ -1554,7 +1556,7 @@ class Randomizer(object):
                 else:
                     break
         if len(possibleStates) > 0:
-            (state, itemLoc) = possibleStates[random.randint(0, len(possibleStates)-1)]
+            (state, itemLoc) = possibleStates[random.randint(0, len(possibleStates)-1) if len(possibleStates) > 1 else 0]
             self.updateRollbackItemsTried(itemLoc)
             state.apply(self)
             ret = itemLoc

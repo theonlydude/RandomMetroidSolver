@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
-import sys, math, argparse, re, json, os, subprocess, logging, random
+import sys, math, argparse, re, json, os, subprocess, logging
+from numpy import random
 from time import gmtime, strftime
 
 # the difficulties for each technics

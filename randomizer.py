@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
-import argparse, random, os.path, json, sys, shutil
+import argparse, os.path, json, sys, shutil
+from numpy import random
 
 from itemrandomizerweb.Randomizer import Randomizer, RandoSettings, progSpeeds
 from itemrandomizerweb.AreaRandomizer import AreaRandomizer
@@ -207,14 +208,14 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.output is None and args.rom is None:
-        print "Need --output or --rom parameter"
+        print("Need --output or --rom parameter")
         sys.exit(-1)
     elif args.output is not None and args.rom is not None:
-        print "Can't have both --output and --rom parameters"
+        print("Can't have both --output and --rom parameters")
         sys.exit(-1)
 
     if args.plandoRando != None and args.output == None:
-        print "plandoRando param requires output param"
+        print("plandoRando param requires output param")
         sys.exit(-1)
 
     log.init(args.debug)
@@ -246,7 +247,7 @@ if __name__ == "__main__":
     seed4rand = seed
     if args.raceMagic is not None:
         if args.raceMagic <= 0 or args.raceMagic >= 0x10000:
-            print "Invalid magic"
+            print("Invalid magic")
             sys.exit(-1)
         seed4rand = seed ^ args.raceMagic
     random.seed(seed4rand)
@@ -263,11 +264,11 @@ if __name__ == "__main__":
     if progSpeed == "random":
         progSpeed = speeds[random.randint(0, len(speeds)-1)]
     mulSpeeds = progSpeed.split(',')
-    progSpeed = mulSpeeds[random.randint(0, len(mulSpeeds)-1)]
+    progSpeed = mulSpeeds[random.randint(0, len(mulSpeeds)-1) if len(mulSpeeds) > 1 else 0]
     if len(mulSpeeds) > 1:
         args.progressionSpeed = 'random'
     if progSpeed not in speeds:
-        print 'Invalid progression speed : ' + progSpeed
+        print('Invalid progression speed : ' + progSpeed)
         sys.exit(-1)
     logger.debug("progression speed: {}".format(progSpeed))
 

@@ -1,5 +1,6 @@
 
 import math
+from functools import reduce
 from smbool import SMBool
 from rom import RomPatches
 from parameters import Settings, easy, medium, hard, harder, hardcore, mania, diff2text

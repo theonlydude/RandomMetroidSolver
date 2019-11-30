@@ -1994,14 +1994,22 @@ def initCustomizerSession():
 
 customSprites = {
     'samus': {"index":0, "name": "Samus", "desc": "Samus, with a distinct animation for Screw Attack without Space Jump and a new Crystal Flash animation", "author": "Artheau and Feesh"},
-    'hitbox_helper': {"index":1, "name": "Hitbox Helper", "desc": "Samus, with her actual hitbox on top", "author": "Artheau and Komaru"},    
-    'bailey': {"index":2, "name": "Bailey", "desc": "Justin Bailey, aka Samus in an 80s swimsuit", "author": "Auximines"},
-    'alucard': {"index":3, "name": "Alucard", "desc": "Alucard from Castlevania Symphony Of The Night", "author": "Nintoaster"},
-    'megaman': {"index":4, "name": "Megaman", "desc": "Megaman X!", "author": "Artheau"},
-    'fed_trooper': {"index":5, "name": "Fed Trooper", "desc": "A Galactic Federation trooper", "author": "Physix"},
-    'super_controid': {"index":6, "name": "Contra", "desc": "Badass soldier from Contra III", "author": "Nintoaster"},
-    'marga': {"index":7, "name": "Margatroid", "desc": "Alice Margatroid from the Touhou Project", "author": "Plan"},
-    'win95_cursor': {"index":8, "name": "Win95 Cursor", "desc": "A classic Windows cursor...", "author": "PlaguedOne"}
+    'hitbox_helper': {"index":1, "name": "Hitbox Helper", "desc": "Samus, with her actual hitbox on top", "author": "Artheau and Komaru"},
+    'hack_ancient_chozo': {"index":2, "name": "Chozo", "desc": "Samus, from Ancient Chozo hack", "author": "Albert V."},
+    'hack_ascent': {"index":3, "name": "Ascent", "desc": "Samus, from Ascent hack", "author": "Benox50"},
+    'hack_decision': {"index":4, "name": "Decision", "desc": "Samus, from Decision hack", "author": "JoshShoeWah"},
+    'hack_escape2': {"index":5, "name": "Escape II", "desc": "Samus, from Escape II hack", "author": "Hiroishi"},
+    'hack_hyper': {"index":6, "name": "Hyper", "desc": "Samus, from Hyper Metroid hack", "author": "RealRed"},
+    'hack_nature': {"index":7, "name": "Nature", "desc": "Samus, from Nature hack", "author": "Jefe962"},
+    'hack_redesign': {"index":8, "name": "Redesign", "desc": "Samus, from Redesign hack", "author": "Drewseph"},
+    'hack_szm': {"index":9, "name": "SZM", "desc": "Samus, from Super Zero Mission hack", "author": "SBniconico"},
+    'bailey': {"index":10, "name": "Bailey", "desc": "Justin Bailey, aka Samus in an 80s swimsuit", "author": "Auximines"},
+    'alucard': {"index":11, "name": "Alucard", "desc": "Alucard from Castlevania Symphony Of The Night", "author": "Nintoaster"},
+    'megaman': {"index":12, "name": "Megaman", "desc": "Megaman X!", "author": "Artheau"},
+    'fed_trooper': {"index":13, "name": "Fed Trooper", "desc": "A Galactic Federation trooper", "author": "Physix"},
+    'super_controid': {"index":14, "name": "Contra", "desc": "Badass soldier from Contra III", "author": "Nintoaster"},
+    'marga': {"index":15, "name": "Margatroid", "desc": "Alice Margatroid from the Touhou Project", "author": "Plan"},
+    'win95_cursor': {"index":16, "name": "Win95 Cursor", "desc": "A classic Windows cursor...", "author": "PlaguedOne"}
 }
 
 def customizer():

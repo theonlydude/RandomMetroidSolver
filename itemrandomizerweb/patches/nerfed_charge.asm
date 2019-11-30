@@ -27,7 +27,7 @@ org $90b9e6
 	jsr charge
 
 ;;; nerfed charge : damage modification
-org $90f700
+org $90f6a0
 charge:
 	lda $09A6		; equipped beams
 	bit #$1000		; check for charge

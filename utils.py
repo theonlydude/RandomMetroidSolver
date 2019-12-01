@@ -10,11 +10,20 @@ from smbool import SMBool
 def isStdPreset(preset):
     return preset in ['noob', 'casual', 'regular', 'veteran', 'speedrunner', 'master', 'samus', 'solution', 'Season_Races', 'SMRAT2020']
 
+# https://github.com/robotools/fontParts/commit/7cb561033929cfb4a723d274672e7257f5e68237
+def normalizeRounding(n):
+    # Normalizes rounding as Python 2 and Python 3 handing the rounding of halves (0.5, 1.5, etc) differently.
+    # This normalizes rounding to be the same in both environments.
+    if round(0.5) != 1 and n % 1 == .5 and not int(n) % 2:
+        return int((round(n) + (abs(n) / n) * 1))
+    else:
+        return int(round(n))
+
 # gauss random in [0, r] range
 # the higher the slope, the less probable extreme values are.
 def randGaussBounds(r, slope=5):
     r = float(r)
-    n = int(round(random.normal(r/2, r/slope), 0))
+    n = normalizeRounding(random.normal(r/2, r/slope))
     # TODO::after validating python2/3 compatibility, reverse to python random.gauss instead of numpy
     #n = int(round(random.gauss(r/2, r/slope), 0))
     if n < 0:

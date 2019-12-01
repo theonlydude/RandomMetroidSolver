@@ -301,7 +301,7 @@ class CommonSolver(object):
                 self.patches = self.romLoader.getPatches()
             else:
                 self.patches = self.romLoader.getRawPatches()
-            print("ROM {} majors: {} area: {} boss: {} patches: {}".format(rom, self.majorsSplit, self.areaRando, self.bossRando, self.patches))
+            print("ROM {} majors: {} area: {} boss: {} patches: {}".format(rom, self.majorsSplit, self.areaRando, self.bossRando, sorted(self.patches)))
 
             (self.areaTransitions, self.bossTransitions) = self.romLoader.getTransitions()
             if interactive == True and self.debug == False:
@@ -1604,7 +1604,7 @@ class OutConsole(Out):
         s = self.solver
         self.displayOutput()
 
-        print("({}, {}): diff : {}".format(round(s.difficulty, 3), s.itemsOk, s.romFileName))
+        print("({}, {}): diff : {}".format(round(float(s.difficulty), 3), s.itemsOk, s.romFileName))
         print("{}/{}: knows Used : {}".format(s.knowsUsed, s.knowsKnown, s.romFileName))
 
         if s.difficulty >= 0:
@@ -1635,9 +1635,9 @@ class OutConsole(Out):
                               loc['SolveArea'],
                               loc['distance'] if 'distance' in loc else 'nc',
                               loc['itemName'],
-                              round(loc['difficulty'].difficulty, 2) if 'difficulty' in loc else 'nc',
+                              round(float(loc['difficulty'].difficulty), 2) if 'difficulty' in loc else 'nc',
                               sorted(loc['difficulty'].knows) if 'difficulty' in loc else 'nc',
-                              list(set(loc['difficulty'].items)) if 'difficulty' in loc else 'nc'))
+                              sorted(list(set(loc['difficulty'].items))) if 'difficulty' in loc else 'nc'))
 
     def displayOutput(self):
         s = self.solver

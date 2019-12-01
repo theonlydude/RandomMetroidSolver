@@ -5,6 +5,7 @@ from smbool import SMBool
 from rom import RomPatches
 from parameters import Settings, easy, medium, hard, harder, hardcore, mania, diff2text
 from cache import Cache
+from utils import normalizeRounding
 
 class Helpers(object):
     def __init__(self, smbm):
@@ -23,7 +24,7 @@ class Helpers(object):
         if difficulties is None or len(difficulties) == 0:
             return SMBool(False)
         def f(difficulty):
-            return self.smbm.energyReserveCountOk(int(round(difficulty[0] / mult)), difficulty=difficulty[1])
+            return self.smbm.energyReserveCountOk(normalizeRounding(difficulty[0] / mult), difficulty=difficulty[1])
         result = reduce(lambda result, difficulty: self.smbm.wor(result, f(difficulty)),
                         difficulties[1:], f(difficulties[0]))
         return result

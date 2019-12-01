@@ -139,7 +139,7 @@ else:
   for category in categories["Common"] + categories["Crateria/Brinstar"] + categories["Wrecked Ship"] + categories["Maridia 1/2"] + categories["Maridia 2/2"] + categories["Norfair"] + categories["Bosses/End"]:
     for know in category['knows']:
       response.write("  $(function() { " + "$('#{}_diff')".format(know) + ".barrating('show', {theme: 'bars-1to10'}); });\n", escape=False)
-      if knows[know][0] is False or ('readonly' in desc[know] and desc[know]['readonly'] == True):
+      if knows[know][0] == False or ('readonly' in desc[know] and desc[know]['readonly'] == True):
         response.write("  $(function() { " + "$('#{}_diff').barrating('readonly', true);".format(know) + "});\n", escape=False)
         pass
       pass

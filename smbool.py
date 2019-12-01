@@ -12,13 +12,6 @@ class SMBool:
         # to display the smbool as a string
         return 'SMBool({}, {}, {}, {})'.format(self.bool, self.difficulty, self.knows, self.items)
 
-    def __getitem__(self, index):
-        # to acces the smbool as [0] for the bool and [1] for the difficulty
-        if index == 0:
-            return self.bool
-        elif index == 1:
-            return self.difficulty
-
     def __bool__(self):
         # when used in boolean expressions (with and/or/not) (python3)
         return self.bool

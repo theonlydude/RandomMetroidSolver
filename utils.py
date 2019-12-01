@@ -194,8 +194,8 @@ class PresetLoader(object):
                         score += diff2score[self.params['Knows'][know][1]]
                 else:
                     # if old preset with not all the knows, use default values for the know
-                    if Knows.__dict__[know][0] == True:
-                        score += diff2score[Knows.__dict__[know][1]]
+                    if Knows.__dict__[know].bool == True:
+                        score += diff2score[Knows.__dict__[know].difficulty]
 
         # hard rooms
         hardRoom = 'X-Ray'

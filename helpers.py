@@ -577,10 +577,10 @@ class Helpers(object):
         if sm.haveItem('Varia') == False:
             # "remove" 3 etanks (accounting for rainbow beam damage without varia)
             if nTanks < 6:
-                return (False, 0)
+                return (False)
             energyDiff = -3
         elif nTanks < 3:
-            return (False, 0)
+            return (False)
         return (True, energyDiff)
 
     @Cache.decorator
@@ -600,7 +600,7 @@ class Helpers(object):
             return SMBool(False)
         (possible, energyDiff) = self.mbEtankCheck()
         if possible == False:
-            return SMBool(False, 0)
+            return SMBool(False)
         # print('MB2', ammoMargin, secs)
         #print("ammoMargin: {}, secs: {}, settings: {}, energyDiff: {}".format(ammoMargin, secs, Settings.bossesDifficulty['MotherBrain'], energyDiff))
         diff = self.computeBossDifficulty(ammoMargin, secs, Settings.bossesDifficulty['MotherBrain'], energyDiff)

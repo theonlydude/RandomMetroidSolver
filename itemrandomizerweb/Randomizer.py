@@ -488,7 +488,7 @@ class SuperFunProvider(object):
             (possible, energyDiff) = self.sm.mbEtankCheck()
             if possible == True:
                 return self.okay()
-            return SMBool(False, 0)
+            return SMBool(False)
         self.sm.enoughStuffsMotherbrain = mbCheck
 
     def restoreBossChecks(self):

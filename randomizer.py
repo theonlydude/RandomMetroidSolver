@@ -42,6 +42,10 @@ def loadPlandoPatches(patches):
     # check gravity heat protection
     if "gravityNoHeatProtection" in patches:
         RomPatches.ActivePatches.append(RomPatches.NoGravityEnvProtection)
+    if "progressiveSuits" in patches:
+        RomPatches.ActivePatches.append(RomPatches.ProgressiveSuits)
+    if "nerfedCharge" in patches:
+        RomPatches.ActivePatches.append(RomPatches.NerfedCharge)
     # check varia tweaks
     if "variaTweaks" in patches:
         RomPatches.ActivePatches += RomPatches.VariaTweaks
@@ -155,6 +159,12 @@ if __name__ == "__main__":
     parser.add_argument('--nogravheat',
                         help="do not include total randomizer suits patches",
                         dest='noGravHeat', action='store_true', default=False)
+    parser.add_argument('--progressiveSuits',
+                        help="apply progressive suits patch",
+                        dest='progressiveSuits', action='store_true', default=False)
+    parser.add_argument('--nerfedCharge',
+                        help="apply nerfed charge patch",
+                        dest='nerfedCharge', action='store_true', default=False)
     parser.add_argument('--novariatweaks',
                         help="do not include VARIA randomizer tweaks",
                         dest='noVariaTweaks', action='store_true', default=False)
@@ -365,8 +375,12 @@ if __name__ == "__main__":
         RomPatches.ActivePatches = RomPatches.TotalBase
     else:
         RomPatches.ActivePatches = RomPatches.Total
-    if args.noGravHeat == True:
+    if args.noGravHeat == True or args.progressiveSuits == True:
         RomPatches.ActivePatches.remove(RomPatches.NoGravityEnvProtection)
+    if args.progressiveSuits == True:
+        RomPatches.ActivePatches.append(RomPatches.ProgressiveSuits)
+    if args.nerfedCharge == True:
+        RomPatches.ActivePatches.append(RomPatches.NerfedCharge)
     if args.noVariaTweaks == False:
         RomPatches.ActivePatches += RomPatches.VariaTweaks
     missileQty = float(args.missileQty)
@@ -506,6 +520,8 @@ if __name__ == "__main__":
     if args.extStatsFilename != None:
         parameters = {'preset': preset, 'area': args.area, 'boss': args.bosses,
                       'noGravHeat': not args.noGravHeat, 'majorsSplit': args.majorsSplit,
+                      'progressiveSuits': args.progressiveSuits,
+                      'nerfedCharge': args.nerfedCharge,
                       'progSpeed': progSpeed, 'morphPlacement': args.morphPlacement,
                       'suitsRestriction': args.suitsRestriction, 'progDiff': progDiff,
                       'superFunMovement': 'Movement' in args.superFun,
@@ -528,7 +544,12 @@ if __name__ == "__main__":
             romPatcher = RomPatcher(magic=args.raceMagic)
 
         if args.patchOnly == False:
-            romPatcher.applyIPSPatches(args.patches, args.noLayout, args.noGravHeat, args.area, args.bosses, args.areaLayoutBase, args.noVariaTweaks)
+            suitsMode = "Classic"
+            if args.progressiveSuits:
+                suitsMode = "Progressive"
+            elif args.noGravHeat:
+                suitsMode = "Vanilla"
+            romPatcher.applyIPSPatches(args.patches, args.noLayout, suitsMode, args.area, args.bosses, args.areaLayoutBase, args.noVariaTweaks, args.nerfedCharge)
         else:
             romPatcher.addIPSPatches(args.patches)
         if args.sprite is not None:

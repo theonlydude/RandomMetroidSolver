@@ -60,6 +60,10 @@ class RomPatches:
     WsEtankPhantoonAlive    = 1001
     # Lower Norfair chozo (vanilla access to GT/Screw Area) : disable space jump check
     LNChozoSJCheckDisabled  = 1002
+    # Progressive suits patch, mutually exclusive with NoGravityEnvProtection
+    ProgressiveSuits        = 1003
+    # Nerfed charge beam available from the start
+    NerfedCharge            = 1004
 
     #### Patch sets
     # total randomizer
@@ -167,7 +171,9 @@ class RomReader:
         'startLS': {'address': 0x7F17, 'value': 0xB6, 'desc': "Blue Brinstar and Red Tower blue doors"},
         'layout': {'address': 0x21BD80, 'value': 0xD5, 'desc': "Anti soft lock layout modifications"},
         'casual': {'address': 0x22E879, 'value': 0xF8, 'desc': "Switch Blue Brinstar Etank and missile"},
-        'gravityNoHeatProtection': {'address': 0x06e37d, 'value': 0x01, 'desc': "Gravity suit heat protection removed"},
+        'gravityNoHeatProtection': {'address': 0x0869dd, 'value': 0x01, 'desc': "Gravity suit heat protection removed"},
+        'progressiveSuits': {'address':0x869df, 'value': 0xF0, 'desc': "Progressive suits"},
+        'nerfedCharge': {'address':0x83821, 'value': 0x80, 'desc': "Nerfed charge beam from the start of the game"}, # this value works for both DASH and VARIA variants
         'variaTweaks': {'address': 0x7CC4D, 'value': 0x37, 'desc': "VARIA tweaks"},
         'area': {'address': 0x22D564, 'value': 0xF2, 'desc': "Area layout modifications"},
         'areaLayout': {'address': 0x252FA7, 'value': 0xF8, 'desc': "Area layout additional modifications"}
@@ -768,7 +774,7 @@ class RomPatcher:
     def customSprite(self, sprite):
         self.applyIPSPatch(sprite, ipsDir='itemrandomizerweb/patches/sprites')
 
-    def applyIPSPatches(self, optionalPatches=[], noLayout=False, noGravHeat=False, area=False, bosses=False, areaLayoutBase=False, noVariaTweaks=False):
+    def applyIPSPatches(self, optionalPatches=[], noLayout=False, suitsMode="Classic", area=False, bosses=False, areaLayoutBase=False, noVariaTweaks=False, nerfedCharge=False):
         try:
             # apply standard patches
             stdPatches = []
@@ -778,8 +784,12 @@ class RomPatcher:
             stdPatches += RomPatcher.IPSPatches['Standard'][:]
             if self.race is not None:
                 stdPatches.append('race_mode_credits.ips')
-            if noGravHeat == True:
+            if suitsMode != "Classic":
                 stdPatches.remove('Removes_Gravity_Suit_heat_protection')
+            if suitsMode == "Progressive":
+                stdPatches.append('progressive_suits.ips')
+            if nerfedCharge == True:
+                stdPatches.append('nerfed_charge.ips')
             if area == True or bosses == True:
                 stdPatches.append('ws_save.ips')
             for patchName in stdPatches:
@@ -1439,6 +1449,11 @@ class RomLoader(object):
         # check gravity heat protection
         if self.hasPatch("gravityNoHeatProtection"):
             RomPatches.ActivePatches.append(RomPatches.NoGravityEnvProtection)
+
+        if self.hasPatch("progressiveSuits"):
+            RomPatches.ActivePatches.append(RomPatches.ProgressiveSuits)
+        if self.hasPatch("nerfedCharge"):
+            RomPatches.ActivePatches.append(RomPatches.NerfedCharge)
 
         # check varia tweaks
         if self.hasPatch("variaTweaks"):

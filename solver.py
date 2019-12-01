@@ -1031,8 +1031,9 @@ class InteractiveSolver(CommonSolver):
 
         plandoCurrentJson = json.dumps(plandoCurrent)
 
+        pythonExec = "python{}".format(sys.version[0])
         params = [
-            'python2',  os.path.expanduser("~/RandomMetroidSolver/randomizer.py"),
+            pythonExec,  os.path.expanduser("~/RandomMetroidSolver/randomizer.py"),
             '--runtime', '10',
             '--param', self.presetFileName,
             '--output', self.outputFileName,

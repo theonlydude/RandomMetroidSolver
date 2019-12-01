@@ -835,7 +835,7 @@ class RomPatcher:
             for ips in self.ipsPatches:
                 mergedIPS.append(ips)
             patchData = mergedIPS.encode()
-            self.romFile.data["ips"] = base64.b64encode(patchData)
+            self.romFile.data["ips"] = base64.b64encode(patchData).decode()
             if mergedIPS.truncate_length is not None:
                 self.romFile.data["truncate_length"] = mergedIPS.truncate_length
             self.romFile.data["max_size"] = mergedIPS.max_size

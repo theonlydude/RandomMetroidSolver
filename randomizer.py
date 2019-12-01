@@ -579,7 +579,7 @@ if __name__ == "__main__":
 
         if args.rom is None:
             data = romPatcher.romFile.data
-            fileName += '.sfc'
+            fileName = '{}.sfc'.format(fileName)
             data["fileName"] = fileName
             # error msg in json to be displayed by the web site
             data["errorMsg"] = randomizer.errorMsg

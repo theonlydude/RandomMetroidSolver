@@ -42,55 +42,84 @@ class Helpers(object):
         sm = self.smbm
         hasVaria = sm.haveItem('Varia')
         hasGrav = sm.haveItem('Gravity')
-        item = None
+        items = []
         if RomPatches.has(RomPatches.NoGravityEnvProtection):
             if hasVaria:
-                item = 'Varia'
+                items.append('Varia')
                 if envDmg:
                     ret = 4.0
                 else:
                     ret = 2.0
             if hasGrav and not envDmg:
                 ret = 4.0
-                item = 'Gravity'
+                items.append('Gravity')
+        elif RomPatches.has(RomPatches.ProgressiveSuits):
+            if hasVaria:
+                items.append('Varia')
+                ret *= 2
+            if hasGrav:
+                items.append('Gravity')
+                ret *= 2
         else:
             if hasVaria:
                 ret = 2.0
-                item = 'Varia'
+                items.append('Varia')
             if hasGrav:
                 ret = 4.0
-                item = 'Gravity'
-        return (ret, item)
+                items.append('Gravity')
+        return (ret, items)
 
     # higher values for mult means room is that much "easier" (HP mult)
     def energyReserveCountOkHardRoom(self, roomName, mult=1.0):
         difficulties = Settings.hardRooms[roomName]
-        (dmgRed, item) = self.getDmgReduction()
+        (dmgRed, items) = self.getDmgReduction()
         mult *= dmgRed
         result = self.energyReserveCountOkDiff(difficulties, mult)
 
         if result == True:
             result.knows = ['HardRoom-'+roomName]
             if dmgRed != 1.0:
-                result.items.append(item)
+                result.items += items
         return result
 
     @Cache.decorator
     def heatProof(self):
-        return self.smbm.wor(self.smbm.haveItem('Varia'),
-                             self.smbm.wand(self.smbm.wnot(RomPatches.has(RomPatches.NoGravityEnvProtection)),
-                                            self.smbm.haveItem('Gravity')))
+        sm = self.smbm
+        return sm.wor(sm.haveItem('Varia'),
+                      sm.wand(sm.wnot(RomPatches.has(RomPatches.NoGravityEnvProtection)),
+                              sm.wnot(RomPatches.has(RomPatches.ProgressiveSuits)),
+                              sm.haveItem('Gravity')))
+
+    # helper here because we can't define "sublambdas" in locations
+    def getPiratesPseudoScrewCoeff(self):
+        ret = 1.0
+        if RomPatches.has(RomPatches.NerfedCharge).bool == True:
+            ret = 4.0
+        return ret
+
+    @Cache.decorator
+    def canFireChargedShots(self):
+        sm = self.smbm
+        return sm.wor(sm.haveItem('Charge'), RomPatches.has(RomPatches.NerfedCharge))
 
     # higher values for mult means hell run is that much "easier" (HP mult)
     def canHellRun(self, hellRun, mult=1.0, minE=2):
         sm = self.smbm
 
+        items = []
         isHeatProof = sm.heatProof()
         if isHeatProof == True:
             return SMBool(isHeatProof.bool, easy, isHeatProof.knows, isHeatProof.items)
-        elif self.energyReserveCount() >= minE:
+        if sm.wand(RomPatches.has(RomPatches.ProgressiveSuits), sm.haveItem('Gravity')).bool == True:
+            # half heat protection
+            mult *= 2.0
+            minE /= 2.0
+            items.append('Gravity')
+        if self.energyReserveCount() >= minE:
             if hellRun != 'LowerNorfair':
-                return self.energyReserveCountOkHellRun(hellRun, mult)
+                ret = self.energyReserveCountOkHellRun(hellRun, mult)
+                ret.items += items
+                return ret
             else:
                 tanks = self.energyReserveCount()
                 multCF = mult
@@ -319,10 +348,12 @@ class Helpers(object):
 
         # http://deanyd.net/sm/index.php?title=Damage
         standardDamage = 0
-        if sm.haveItem('Charge') == True and charge == True:
+        if sm.canFireChargedShots().bool == True and charge == True:
             standardDamage = self.getBeamDamage()
         # charge triples the damage
-        chargeDamage = standardDamage * 3.0
+        chargeDamage = standardDamage
+        if sm.haveItem('Charge').bool == True:
+            chargeDamage *= 3.0
 
         # missile 100 damages, super missile 300 damages, PBs 200 dmg, 5 in each extension
         missilesAmount = sm.itemCount('Missile') * 5
@@ -504,7 +535,7 @@ class Helpers(object):
             return SMBool(True, diff)
 
     def adjustHealthDropDiff(self, difficulty):
-        (dmgRed, item) = self.getDmgReduction(envDmg=False)
+        (dmgRed, items) = self.getDmgReduction(envDmg=False)
         # 2 is Varia suit, considered standard eqt for boss fights
         # there's certainly a smarter way to do this but...
         if dmgRed < 2:
@@ -535,7 +566,7 @@ class Helpers(object):
                               sm.haveItem('Grapple')),
                       sm.wand(sm.knowsMicrowaveDraygon(),
                               sm.haveItem('Plasma'),
-                              sm.haveItem('Charge'),
+                              sm.canFireChargedShots(),
                               sm.haveItem('XRayScope')),
                       sm.wand(sm.haveItem('Gravity'),
                               sm.knowsDraygonSparkKill(),
@@ -552,7 +583,7 @@ class Helpers(object):
                                                 Settings.bossesDifficulty['Phantoon'])
         if difficulty < 0:
             return SMBool(False)
-        hasCharge = sm.haveItem('Charge')
+        hasCharge = sm.canFireChargedShots()
         hasScrew = sm.haveItem('ScrewAttack')
         if hasScrew:
             difficulty /= Settings.algoSettings['phantoonFlamesAvoidBonusScrew']
@@ -566,7 +597,7 @@ class Helpers(object):
         return sm.wor(fight,
                       sm.wand(sm.knowsMicrowavePhantoon(),
                               sm.haveItem('Plasma'),
-                              sm.haveItem('Charge'),
+                              sm.canFireChargedShots(),
                               sm.haveItem('XRayScope')))
 
     def mbEtankCheck(self):
@@ -673,7 +704,7 @@ class Pickup:
                     # mother brain rainbow attack
                     and canResistRainbow
                     # lower norfair access
-                    and (smbm.haveItem('Varia') or smbm.wnot(RomPatches.has(RomPatches.NoGravityEnvProtection))) # gravity is checked below
+                    and (smbm.haveItem('Varia') or smbm.wand(smbm.wnot(RomPatches.has(RomPatches.NoGravityEnvProtection), smbm.wnot(RomPatches.has(RomPatches.ProgressiveSuits))))) # gravity is checked below
                     # speed or ice to access botwoon
                     and (smbm.haveItem('SpeedBooster')
                          or smbm.haveItem('Ice'))

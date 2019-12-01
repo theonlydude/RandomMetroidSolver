@@ -641,12 +641,13 @@ locations = [
     'Available': lambda sm: Bosses.bossDead('Draygon'),
     'PostAvailable': lambda sm: sm.wand(sm.wor(sm.wand(sm.canShortCharge(),
                                                        sm.knowsKillPlasmaPiratesWithSpark()),
-                                               sm.wand(sm.haveItem('Charge'),
+                                               sm.wand(sm.canFireChargedShots(),
                                                        sm.knowsKillPlasmaPiratesWithCharge(),
                                                        # 160/80/40 dmg * 4 ground plasma pirates
                                                        # => 640/320/160 damage take required
                                                        # check below is 1099/599/299 (give margin for taking dmg a bit)
-                                                       sm.energyReserveCountOk(int(10.0/sm.getDmgReduction(False)[0]))),
+                                                       # (* 4 for nerfed charge, since you need to take hits 4 times instead of one)
+                                                       sm.energyReserveCountOk(int(10.0 * sm.getPiratesPseudoScrewCoeff()/sm.getDmgReduction(False)[0]))),
                                                sm.haveItem('ScrewAttack'),
                                                sm.haveItem('Plasma')),
                                         sm.wor(sm.canFly(),

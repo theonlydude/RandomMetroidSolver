@@ -265,7 +265,7 @@ class HelpersGraph(Helpers):
         sm = self.smbm
         return sm.wand(sm.canDestroyBombWalls(),
                        sm.wor(sm.canFly(),
-                              sm.wand(sm.knowsWorstRoomIceCharge(), sm.haveItem('Ice'), sm.haveItem('Charge')),
+                              sm.wand(sm.knowsWorstRoomIceCharge(), sm.haveItem('Ice'), sm.canFireChargedShots()),
                               sm.wand(sm.knowsGetAroundWallJump(), sm.haveItem('HiJump')),
                               sm.wand(sm.knowsSpringBallJumpFromWall(), sm.canUseSpringBall())))
 
@@ -290,12 +290,12 @@ class HelpersGraph(Helpers):
             return SMBool(True, 0, items=['Super'])
 
         # - or with taking damage as well?
-        (dmgRed, item) = sm.getDmgReduction(envDmg=False)
+        (dmgRed, redItems) = sm.getDmgReduction(envDmg=False)
         dmgKi = 200.0 / dmgRed
         if (sm.itemCount('Super')*5*sup)/ki + (sm.energyReserveCount()*100 - 2)/dmgKi >= nbKi:
             # require heat proof as long as taking damage is necessary.
             # display all the available energy in the solver.
-            return sm.wand(sm.heatProof(), SMBool(True, 0, items=['Super', '{}-ETank - {}-Reserve'.format(self.smbm.itemCount('ETank'), self.smbm.itemCount('Reserve'))]))
+            return sm.wand(sm.heatProof(), SMBool(True, 0, items=redItems+['Super', '{}-ETank - {}-Reserve'.format(self.smbm.itemCount('ETank'), self.smbm.itemCount('Reserve'))]))
 
         return SMBool(False, 0)
 

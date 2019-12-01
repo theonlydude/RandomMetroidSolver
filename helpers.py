@@ -442,7 +442,7 @@ class Helpers(object):
         if diffAdjust > 1:
             difficulty *= diffAdjust
 
-        return difficulty
+        return round(difficulty, 2)
 
     @Cache.decorator
     def enoughStuffCroc(self):

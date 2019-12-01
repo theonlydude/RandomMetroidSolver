@@ -495,7 +495,7 @@ if __name__ == "__main__":
         elif itemType not in firstMinorsFound:
             locsItems[locName] = itemType
     if args.debug == True:
-        for loc in locsItems:
+        for loc in sorted(locsItems.keys()):
             print('{:>50}: {:>16} '.format(loc, locsItems[loc]))
 
     if args.plandoRando != None:

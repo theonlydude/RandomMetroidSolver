@@ -286,6 +286,7 @@ class ItemPoolGenerator(object):
         ammoQty = self.qty['ammo']
         if not self.qty['strictMinors']:
             rangeDict = getRangeDict(ammoQty)
+            self.log.debug("rangeDict: {}".format(rangeDict))
             while len(self.itemManager.getItemPool()) < maxItems:
                 item = chooseFromRange(rangeDict)
                 self.itemManager.addMinor(item)

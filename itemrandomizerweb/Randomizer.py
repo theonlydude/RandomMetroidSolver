@@ -455,7 +455,7 @@ class SuperFunProvider(object):
             for ap in nonInternalAPs:
                 if not ap in availAccessPoints:
                     ret = False
-                    self.log.debug("unavail AP: " + ap.Name + ", from " + startApName)
+                    #self.log.debug("unavail AP: " + ap.Name + ", from " + startApName)
 
         # check if we can reach all bosses
         if ret:

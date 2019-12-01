@@ -509,7 +509,7 @@ class SuperFunProvider(object):
         remove = []
         n = randGaussBounds(len(itemList))
         for i in range(n):
-            idx = random.randint(0, len(itemList) - 1)
+            idx = random.randint(0, len(itemList) - 1) if len(itemList) > 1 else 0
             item = itemList.pop(idx)
             if item is not None:
                 remove.append(item)
@@ -781,7 +781,7 @@ class Randomizer(object):
     def determineParameters(self):
         speed = self.settings.progSpeed
         if speed == 'variable':
-            speed = progSpeeds[random.randint(0, len(progSpeeds)-1)]
+            speed = progSpeeds[random.randint(0, len(progSpeeds)-1) if len(progSpeeds) > 1 else 0]
         self.spreadProb = self.settings.getSpreadFactor(speed)
         self.minorHelpProb = self.settings.getMinorHelpProb(speed)
         self.chooseItemRanges = getRangeDict(self.settings.getChooseItems(speed))
@@ -1403,7 +1403,7 @@ class Randomizer(object):
         if random.random() < self.minorHelpProb:
             helpfulMinors = [item for item in basePool if item['Class'] == 'Minor' and not self.hasItemTypeInPool(item['Type'], pool)]
             if len(helpfulMinors) > 0:
-                pool.append(helpfulMinors[random.randint(0, len(helpfulMinors)-1)])
+                pool.append(helpfulMinors[random.randint(0, len(helpfulMinors)-1) if len(helpfulMinors) > 1 else 0])
         # don't hold energy back for certain settings
         self.addEnergyAsNonProg(pool, basePool)
 
@@ -1893,7 +1893,7 @@ class Randomizer(object):
                     self.log.debug("last fill item = " + item['Type'] + "/" + item['Class'] + ", locs = " + str([loc['Name'] for loc in possibleLocs]))
                     itemLocation = {
                         'Item' : item,
-                        'Location' : possibleLocs[random.randint(0, len(possibleLocs) - 1)]
+                        'Location' : possibleLocs[random.randint(0, len(possibleLocs) - 1) if len(possibleLocs) > 1 else 0]
                     }
                     self.log.debug("last Fill: {} at {}".format(itemLocation['Item']['Type'], itemLocation['Location']['Name']))
                     self.getItem(itemLocation, False)

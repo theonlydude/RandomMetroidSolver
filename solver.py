@@ -1347,7 +1347,7 @@ class StandardSolver(CommonSolver):
         knowsUsedCount = len(knowsUsed)
 
         # get total of known knows
-        knowsKnownCount = len([knows for  knows in Knows.__dict__ if isKnows(knows) and getattr(Knows, knows)[0] == True])
+        knowsKnownCount = len([knows for  knows in Knows.__dict__ if isKnows(knows) and getattr(Knows, knows).bool == True])
         knowsKnownCount += len([hellRun for hellRun in Settings.hellRuns if Settings.hellRuns[hellRun] is not None])
 
         return (knowsUsedCount, knowsKnownCount, knowsUsed)
@@ -1604,7 +1604,7 @@ class OutConsole(Out):
         s = self.solver
         self.displayOutput()
 
-        print("({}, {}): diff : {}".format(s.difficulty, s.itemsOk, s.romFileName))
+        print("({}, {}): diff : {}".format(round(s.difficulty, 3), s.itemsOk, s.romFileName))
         print("{}/{}: knows Used : {}".format(s.knowsUsed, s.knowsKnown, s.romFileName))
 
         if s.difficulty >= 0:
@@ -1907,12 +1907,12 @@ if __name__ == "__main__":
 
     if args.raceMagic != None:
         if args.raceMagic <= 0 or args.raceMagic >= 0x10000:
-            print "Invalid magic"
+            print("Invalid magic")
             sys.exit(-1)
 
     if args.count != None:
         if args.count < 1 or args.count > 0x80:
-            print "Invalid count"
+            print("Invalid count")
             sys.exit(-1)
 
     log.init(args.debug)

@@ -577,10 +577,10 @@ class Helpers(object):
         if sm.haveItem('Varia') == False:
             # "remove" 3 etanks (accounting for rainbow beam damage without varia)
             if nTanks < 6:
-                return (False)
+                return (False, 0)
             energyDiff = -3
         elif nTanks < 3:
-            return (False)
+            return (False, 0)
         return (True, energyDiff)
 
     @Cache.decorator

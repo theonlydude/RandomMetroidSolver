@@ -315,11 +315,11 @@ if __name__ == "__main__":
         if args.morphPlacement == 'late' and args.area == True:
             args.suitsRestriction = False
         else:
-            args.suitsRestriction = bool(random.getrandbits(1))
+            args.suitsRestriction = bool(random.randint(0, 2))
     logger.debug("suitsRestriction: {}".format(args.suitsRestriction))
 
     if args.hideItems == 'random':
-        args.hideItems = bool(random.getrandbits(1))
+        args.hideItems = bool(random.randint(0, 2))
 
     if args.morphPlacement == 'random':
         if (args.suitsRestriction == True and args.area == True) or args.majorsSplit == 'Chozo':
@@ -331,7 +331,7 @@ if __name__ == "__main__":
     logger.debug("morphPlacement: {}".format(args.morphPlacement))
 
     if args.strictMinors == 'random':
-        args.strictMinors = bool(random.getrandbits(1))
+        args.strictMinors = bool(random.randint(0, 2))
 
     # fill restrictions dict
     restrictions = { 'Suits' : args.suitsRestriction, 'Morph' : args.morphPlacement }
@@ -397,7 +397,7 @@ if __name__ == "__main__":
         superFun = []
         for fun in args.superFun:
             if fun.find('Random') != -1:
-                if bool(random.getrandbits(1)) == True:
+                if bool(random.randint(0, 2)) == True:
                     superFun.append(fun[0:fun.find('Random')])
             else:
                 superFun.append(fun)
@@ -480,7 +480,7 @@ if __name__ == "__main__":
             if (itemLoc['Item']['Type'] not in ['Nothing', 'NoEnergy']
                 and itemLoc['Location']['CanHidden'] == True
                 and itemLoc['Location']['Visibility'] == 'Visible'):
-                if bool(random.getrandbits(1)) == True:
+                if bool(random.randint(0, 2)) == True:
                     itemLoc['Location']['Visibility'] = 'Hidden'
 
     # transform itemLocs in our usual dict(location, item), for minors keep only the first

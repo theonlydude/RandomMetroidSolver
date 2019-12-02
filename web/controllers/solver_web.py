@@ -1338,6 +1338,9 @@ def randoPresetWebService():
     if IS_LENGTH(maxsize=32, minsize=1)(preset)[1] is not None:
         raise HTTP(400, "Preset name must be between 1 and 32 characters")
 
+    if request.vars.origin not in ["extStats", "randomizer"]:
+        raise HTTP(400, "Unknown origin")
+
     print("randoPresetWebService: preset={}".format(preset))
 
     fullPath = 'rando_presets/{}.json'.format(preset)
@@ -1346,8 +1349,11 @@ def randoPresetWebService():
     if os.path.isfile(fullPath):
         # load it
         try:
-            params = loadRandoPreset(fullPath)
-            session.randomizer['randoPreset'] = preset
+            updateSession = request.vars.origin == "randomizer"
+
+            params = loadRandoPreset(fullPath, updateSession)
+            if updateSession == True:
+                session.randomizer['randoPreset'] = preset
             params = json.dumps(params)
             return params
         except Exception as e:
@@ -1355,13 +1361,14 @@ def randoPresetWebService():
     else:
         raise HTTP(400, "Rando preset '{}' not found".format(fullPath))
 
-def loadRandoPreset(presetFullPath):
+def loadRandoPreset(presetFullPath, updateSession):
     with open(presetFullPath) as jsonFile:
         randoPreset = json.load(jsonFile)
 
-    # update session
-    for key in randoPreset:
-        session.randomizer[key] = randoPreset[key]
+    if updateSession == True:
+        # update session
+        for key in randoPreset:
+            session.randomizer[key] = randoPreset[key]
 
     return randoPreset
 

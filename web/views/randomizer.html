@@ -905,7 +905,7 @@ function switchCheckbox(id, elems=[]) {
 function loadRandoPreset() {
   console.log("loadRandoPreset: "+document.getElementById("randoPreset").value);
 
-  var dataDict = {"randoPreset": document.getElementById("randoPreset").value, "complexity": getComplexity()};
+  var dataDict = {"randoPreset": document.getElementById("randoPreset").value, "origin": "randomizer"};
 
   // call web service to update the session with the params from the rando preset and reload the page
   var request = $.ajax({

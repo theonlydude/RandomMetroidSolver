@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import os, json, sys
+import os, json, sys, re
 from numpy import random
 
 from parameters import Knows, Settings, Controller, isKnows, isSettings, isButton
@@ -9,6 +9,9 @@ from smbool import SMBool
 
 def isStdPreset(preset):
     return preset in ['noob', 'casual', 'regular', 'veteran', 'speedrunner', 'master', 'samus', 'solution', 'Season_Races', 'SMRAT2020']
+
+def removeChars(string, toRemove):
+    return re.sub('[{}]+'.format(toRemove), '', string)
 
 # https://github.com/robotools/fontParts/commit/7cb561033929cfb4a723d274672e7257f5e68237
 def normalizeRounding(n):

@@ -17,7 +17,7 @@ from itemrandomizerweb.Items import ItemManager
 from graph_locations import locations as graphLocations
 from graph import AccessGraph
 from graph_access import vanillaTransitions, accessPoints, getDoorConnections, getTransitions, vanillaBossesTransitions, getAps2DoorsPtrs
-from utils import PresetLoader
+from utils import PresetLoader, removeChars
 from vcr import VCR
 import log, db
 
@@ -180,7 +180,7 @@ class SolverState(object):
     def name4isolver(self, locName):
         # remove space and special characters
         # sed -e 's+ ++g' -e 's+,++g' -e 's+(++g' -e 's+)++g' -e 's+-++g'
-        return locName.translate(None, " ,()-")
+        return removeChars(locName, " ,()-")
 
     def knows2isolver(self, knows):
         result = []
@@ -193,7 +193,7 @@ class SolverState(object):
 
     def transition2isolver(self, transition):
         transition = str(transition)
-        return transition[0].lower()+transition[1:].translate(None, " ,()-")
+        return transition[0].lower() + removeChars(transition[1:], " ,()-")
 
     def getAvailableLocationsWeb(self, locations):
         ret = {}
@@ -1136,13 +1136,13 @@ class InteractiveSolver(CommonSolver):
             json.dump(data, jsonFile)
 
     def locNameInternal2Web(self, locName):
-        return locName.translate(None, " ,()-")
+        return removeChars(locName, " ,()-")
 
     def locNameWeb2Internal(self, locNameWeb):
         return self.locsWeb2Internal[locNameWeb]
 
     def apNameInternal2Web(self, apName):
-        return apName[0].lower()+apName[1:].translate(None, " ")
+        return apName[0].lower() + removeChars(apName[1:], " ")
 
     def getWebLoc(self, locNameWeb):
         locName = self.locNameWeb2Internal(locNameWeb)

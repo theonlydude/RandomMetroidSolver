@@ -15,7 +15,7 @@ from parameters import Knows, Settings, Controller, isKnows, isButton
 from solver import Conf
 from parameters import diff2text, text2diff
 from solver import StandardSolver, DifficultyDisplayer, InteractiveSolver
-from utils import PresetLoader
+from utils import PresetLoader, removeChars
 import db
 from graph_access import vanillaTransitions, vanillaBossesTransitions
 from utils import isStdPreset
@@ -1445,7 +1445,7 @@ def stats():
 
 def transition2isolver(transition):
     transition = str(transition)
-    return transition[0].lower()+transition[1:].translate(None, " ,()-")
+    return transition[0].lower() + removeChars(transition[1:], " ,()-")
 
 def tracker():
     response.title = 'Super Metroid VARIA Areas and Items Tracker'
@@ -1559,7 +1559,7 @@ class WS(object):
         # remove space and special characters
         # sed -e 's+ ++g' -e 's+,++g' -e 's+(++g' -e 's+)++g' -e 's+-++g'
         locName = str(locName)
-        return locName[0].lower()+locName[1:].translate(None, " ,()-")
+        return locName[0].lower() + removeChars(locName[1:], " ,()-")
 
     def returnState(self):
         if len(self.session["state"]) > 0:
@@ -1889,7 +1889,7 @@ class WS_item_add(WS):
         def name4isolver(locName):
             # remove space and special characters
             # sed -e 's+ ++g' -e 's+,++g' -e 's+(++g' -e 's+)++g' -e 's+-++g'
-            return locName.translate(None, " ,()-")
+            return removeChars(locName, " ,()-")
 
         locName = name4isolver(request.vars.locName)
 

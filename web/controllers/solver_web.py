@@ -89,12 +89,12 @@ def completePreset(params):
 def loadPresetsList():
     files = sorted(os.listdir('community_presets'), key=lambda v: v.upper())
     stdPresets = ['noob', 'casual', 'regular', 'veteran', 'speedrunner', 'master']
-    tourPresets = ['Season_Races', 'SMRAT2020']
+    tourPresets = ['Season_Races', 'Playoff_Races', 'Playoff_Races_Chozo', 'SMRAT2020']
     comPresets = [os.path.splitext(file)[0] for file in files if file != '.git']
     return (stdPresets, tourPresets, comPresets)
 
 def loadRandoPresetsList():
-    tourPresets = ['Season_Races', 'Season_Races_Chozo', 'smrat', 'Scavenger_Hunt']
+    tourPresets = ['Season_Races', 'Season_Races_Chozo', 'Playoff_Races', 'Playoff_Races_Chozo', 'smrat', 'Scavenger_Hunt']
     files = sorted(os.listdir('rando_presets'), key=lambda v: v.upper())
     randoPresets = [os.path.splitext(file)[0] for file in files]
     randoPresets = [preset for preset in randoPresets if preset not in tourPresets]
@@ -1338,6 +1338,9 @@ def randoPresetWebService():
     if IS_LENGTH(maxsize=32, minsize=1)(preset)[1] is not None:
         raise HTTP(400, "Preset name must be between 1 and 32 characters")
 
+    if request.vars.origin not in ["extStats", "randomizer"]:
+        raise HTTP(400, "Unknown origin")
+
     print("randoPresetWebService: preset={}".format(preset))
 
     fullPath = 'rando_presets/{}.json'.format(preset)
@@ -1346,8 +1349,11 @@ def randoPresetWebService():
     if os.path.isfile(fullPath):
         # load it
         try:
-            params = loadRandoPreset(fullPath)
-            session.randomizer['randoPreset'] = preset
+            updateSession = request.vars.origin == "randomizer"
+
+            params = loadRandoPreset(fullPath, updateSession)
+            if updateSession == True:
+                session.randomizer['randoPreset'] = preset
             params = json.dumps(params)
             return params
         except Exception as e:
@@ -1355,13 +1361,14 @@ def randoPresetWebService():
     else:
         raise HTTP(400, "Rando preset '{}' not found".format(fullPath))
 
-def loadRandoPreset(presetFullPath):
+def loadRandoPreset(presetFullPath, updateSession):
     with open(presetFullPath) as jsonFile:
         randoPreset = json.load(jsonFile)
 
-    # update session
-    for key in randoPreset:
-        session.randomizer[key] = randoPreset[key]
+    if updateSession == True:
+        # update session
+        for key in randoPreset:
+            session.randomizer[key] = randoPreset[key]
 
     return randoPreset
 
@@ -1993,15 +2000,23 @@ def initCustomizerSession():
             session.customizer[patch[0]] = "off"
 
 customSprites = {
-    'samus': {"index":0, "name": "Samus", "desc": "Samus, with a distinct animation for Screw Attack without Space Jump and a new Crystal Flash animation", "author": "Artheau and Feesh"},
-    'hitbox_helper': {"index":1, "name": "Hitbox Helper", "desc": "Samus, with her actual hitbox on top", "author": "Artheau and Komaru"},    
-    'bailey': {"index":2, "name": "Bailey", "desc": "Justin Bailey, aka Samus in an 80s swimsuit", "author": "Auximines"},
-    'alucard': {"index":3, "name": "Alucard", "desc": "Alucard from Castlevania Symphony Of The Night", "author": "Nintoaster"},
-    'megaman': {"index":4, "name": "Megaman", "desc": "Megaman X!", "author": "Artheau"},
-    'fed_trooper': {"index":5, "name": "Fed Trooper", "desc": "A Galactic Federation trooper", "author": "Physix"},
-    'super_controid': {"index":6, "name": "Contra", "desc": "Badass soldier from Contra III", "author": "Nintoaster"},
-    'marga': {"index":7, "name": "Margatroid", "desc": "Alice Margatroid from the Touhou Project", "author": "Plan"},
-    'win95_cursor': {"index":8, "name": "Win95 Cursor", "desc": "A classic Windows cursor...", "author": "PlaguedOne"}
+    'samus': {"index":0, "name": "Samus", "desc": "Samus, with a distinct animation for Screw Attack without Space Jump and a new Crystal Flash animation", "author": "Artheau and Feesh", "group": "Samus"},
+    'hitbox_helper': {"index":1, "name": "Hitbox", "desc": "Samus, with her actual hitbox on top", "author": "Artheau and Komaru", "group": "Samus"},
+    'hack_ancient_chozo': {"index":2, "name": "Chozo", "desc": "Samus, from Ancient Chozo hack", "author": "Albert V.", "group": "Samus"},
+    'hack_ascent': {"index":3, "name": "Ascent", "desc": "Samus, from Ascent hack", "author": "Benox50", "group": "Samus"},
+    'hack_decision': {"index":4, "name": "Decision", "desc": "Samus, from Decision hack", "author": "JoshShoeWah", "group": "Samus"},
+    'hack_escape2': {"index":5, "name": "Escape II", "desc": "Samus, from Escape II hack", "author": "Hiroishi", "group": "Samus"},
+    'hack_hyper': {"index":6, "name": "Hyper", "desc": "Samus, from Hyper Metroid hack", "author": "RealRed", "group": "Samus"},
+    'hack_nature': {"index":7, "name": "Nature", "desc": "Samus, from Nature hack", "author": "Jefe962", "group": "Samus"},
+    'hack_redesign': {"index":8, "name": "Redesign", "desc": "Samus, from Redesign hack", "author": "Drewseph", "group": "Samus"},
+    'hack_szm': {"index":9, "name": "SZM", "desc": "Samus, from Super Zero Mission hack", "author": "SBniconico", "group": "Samus"},
+    'bailey': {"index":10, "name": "Bailey", "desc": "Justin Bailey, aka Samus in an 80s swimsuit", "author": "Auximines", "group": "Custom"},
+    'alucard': {"index":11, "name": "Alucard", "desc": "Alucard from Castlevania Symphony Of The Night", "author": "Nintoaster", "group": "Custom"},
+    'megaman': {"index":12, "name": "Megaman", "desc": "Megaman X!", "author": "Artheau", "group": "Custom"},
+    'fed_trooper': {"index":13, "name": "GF Trooper", "desc": "A Galactic Federation trooper", "author": "Physix", "group": "Custom"},
+    'super_controid': {"index":14, "name": "Contra", "desc": "Badass soldier from Contra III", "author": "Nintoaster", "group": "Custom"},
+    'marga': {"index":15, "name": "Margatroid", "desc": "Alice Margatroid from the Touhou Project", "author": "Plan", "group": "Custom"},
+    'win95_cursor': {"index":16, "name": "Win95 Cursor", "desc": "A classic Windows cursor...", "author": "PlaguedOne", "group": "Custom"}
 }
 
 def customizer():

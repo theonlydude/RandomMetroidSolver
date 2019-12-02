@@ -1421,7 +1421,9 @@ locations = [
     'Available': lambda sm: sm.wand(sm.enoughStuffCroc(),
                                     sm.wor(sm.wor(sm.canFly(),
                                                   sm.haveItem('Grapple'),
-                                                  sm.haveItem('SpeedBooster')), # spark from the room before
+                                                  sm.wand(sm.haveItem('SpeedBooster'),
+                                                          sm.wor(sm.heatProof(),
+                                                                 sm.energyReserveCountOk(1)))), # spark from the room before
                                            sm.wor(sm.haveItem('HiJump'), # run and jump from yellow platform
                                                   sm.wand(sm.haveItem('Ice'),
                                                           sm.knowsCrocPBsIce()),

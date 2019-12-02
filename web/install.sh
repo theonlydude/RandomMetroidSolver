@@ -368,7 +368,6 @@ find ~/web2py/applications/solver/static -xtype l -exec rm -f {} \;
 [ -L ~/web2py/applications/solver/static/images/samus.png ] || ln -s ~/RandomMetroidSolver/web/static/samus_sprites/samus.png ~/web2py/applications/solver/static/images/samus.png
 [ -L ~/web2py/applications/solver/static/images/super_controid.png ] || ln -s ~/RandomMetroidSolver/web/static/samus_sprites/super_controid.png ~/web2py/applications/solver/static/images/super_controid.png
 [ -L ~/web2py/applications/solver/static/images/win95_cursor.png ] || ln -s ~/RandomMetroidSolver/web/static/samus_sprites/win95_cursor.png ~/web2py/applications/solver/static/images/win95_cursor.png
-
 [ -L ~/web2py/applications/solver/static/images/spore_save.png ] || ln -s ~/RandomMetroidSolver/web/static/help/spore_save.png ~/web2py/applications/solver/static/images/spore_save.png
 [ -L ~/web2py/applications/solver/static/images/ws_save.png ] || ln -s ~/RandomMetroidSolver/web/static/help/ws_save.png ~/web2py/applications/solver/static/images/ws_save.png
 [ -L ~/web2py/applications/solver/static/images/early_super_bis.png ] || ln -s ~/RandomMetroidSolver/web/static/help/early_super_bis.png ~/web2py/applications/solver/static/images/early_super_bis.png
@@ -376,3 +375,11 @@ find ~/web2py/applications/solver/static -xtype l -exec rm -f {} \;
 [ -L ~/web2py/applications/solver/static/images/crystal_flash.png ] || ln -s ~/RandomMetroidSolver/web/static/crystal_flash.png ~/web2py/applications/solver/static/images/crystal_flash.png
 
 [ -L ~/web2py/applications/solver/static/js/crc32.js ] || ln -s ~/RandomMetroidSolver/web/static/crc32.js ~/web2py/applications/solver/static/js/crc32.js
+[ -L ~/web2py/applications/solver/static/images/hack_ancient_chozo.png ] || ln -s ~/RandomMetroidSolver/web/static/samus_sprites/hack_ancient_chozo.png ~/web2py/applications/solver/static/images/hack_ancient_chozo.png
+[ -L ~/web2py/applications/solver/static/images/hack_ascent.png ] || ln -s ~/RandomMetroidSolver/web/static/samus_sprites/hack_ascent.png ~/web2py/applications/solver/static/images/hack_ascent.png
+[ -L ~/web2py/applications/solver/static/images/hack_decision.png ] || ln -s ~/RandomMetroidSolver/web/static/samus_sprites/hack_decision.png ~/web2py/applications/solver/static/images/hack_decision.png
+[ -L ~/web2py/applications/solver/static/images/hack_escape2.png ] || ln -s ~/RandomMetroidSolver/web/static/samus_sprites/hack_escape2.png ~/web2py/applications/solver/static/images/hack_escape2.png
+[ -L ~/web2py/applications/solver/static/images/hack_hyper.png ] || ln -s ~/RandomMetroidSolver/web/static/samus_sprites/hack_hyper.png ~/web2py/applications/solver/static/images/hack_hyper.png
+[ -L ~/web2py/applications/solver/static/images/hack_nature.png ] || ln -s ~/RandomMetroidSolver/web/static/samus_sprites/hack_nature.png ~/web2py/applications/solver/static/images/hack_nature.png
+[ -L ~/web2py/applications/solver/static/images/hack_redesign.png ] || ln -s ~/RandomMetroidSolver/web/static/samus_sprites/hack_redesign.png ~/web2py/applications/solver/static/images/hack_redesign.png
+[ -L ~/web2py/applications/solver/static/images/hack_szm.png ] || ln -s ~/RandomMetroidSolver/web/static/samus_sprites/hack_szm.png ~/web2py/applications/solver/static/images/hack_szm.png

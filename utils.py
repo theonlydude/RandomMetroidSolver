@@ -6,7 +6,7 @@ from parameters import easy, medium, hard, harder, hardcore, mania
 from smbool import SMBool
 
 def isStdPreset(preset):
-    return preset in ['noob', 'casual', 'regular', 'veteran', 'speedrunner', 'master', 'samus', 'solution', 'Season_Races', 'SMRAT2020']
+    return preset in ['noob', 'casual', 'regular', 'veteran', 'speedrunner', 'master', 'samus', 'solution', 'Season_Races', 'Playoff_Races', 'Playoff_Races_Chozo', 'SMRAT2020']
 
 # gauss random in [0, r] range
 # the higher the slope, the less probable extreme values are.

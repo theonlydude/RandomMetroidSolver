@@ -905,7 +905,7 @@ function switchCheckbox(id, elems=[]) {
 function loadRandoPreset() {
   console.log("loadRandoPreset: "+document.getElementById("randoPreset").value);
 
-  var dataDict = {"randoPreset": document.getElementById("randoPreset").value, "complexity": getComplexity()};
+  var dataDict = {"randoPreset": document.getElementById("randoPreset").value, "origin": "randomizer"};
 
   // call web service to update the session with the params from the rando preset and reload the page
   var request = $.ajax({
@@ -1008,6 +1008,8 @@ Tournament presets:<ul>\
 <li>Scavenger_Hunt: SM Scavenger Hunt Tournament</li>\
 <li>Season_Races: settings used for rando league races (Majors/Minors split)</li>\
 <li>Season_Races_Chozo: settings used for rando league races (Chozo split)</li>\
+<li>Playoff_Races: settings used for rando league races during playoff (Majors/Minors split)</li>\
+<li>Playoff_Races_Chozo: settings used for rando league races during playoff (Chozo split)</li>\
 <li>smrat: Super Metroid Randomizer Accessible Tournament 2019</li></ul>"
     },
     {

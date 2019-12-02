@@ -115,7 +115,8 @@ class HelpersGraph(Helpers):
                                              sm.haveItem('HiJump'), # ...or by jumping
                                              sm.knowsGravityJump(),
                                              sm.canFly())),
-                              sm.wand(sm.haveItem('Ice'), sm.canDoSuitlessOuterMaridia()))) # climbing crabs
+                              sm.wand(sm.haveItem('Ice'), sm.canDoSuitlessOuterMaridia()), # climbing crabs
+                              sm.canDoubleSpringBallJump()))
 
     @Cache.decorator
     def canPassMaridiaToRedTowerNode(self):

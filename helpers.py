@@ -87,7 +87,7 @@ class Helpers(object):
 
         isHeatProof = sm.heatProof()
         if isHeatProof == True:
-            return SMBool(isHeatProof.bool, easy, isHeatProof.knows, isHeatProof.items)
+            return SMBool(isHeatProof.bool, 0, isHeatProof.knows, isHeatProof.items)
         elif self.energyReserveCount() >= minE:
             if hellRun != 'LowerNorfair':
                 return self.energyReserveCountOkHellRun(hellRun, mult)

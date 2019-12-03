@@ -1,5 +1,4 @@
-import sys, time, copy
-from numpy import random
+import sys, time, copy, random
 
 from itemrandomizerweb.Items import ItemManager
 from parameters import Knows, isBossKnows, Settings, samus, infinity, god

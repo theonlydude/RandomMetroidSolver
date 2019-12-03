@@ -1,7 +1,4 @@
-#!/usr/bin/python
-
-import os, json, sys, re
-from numpy import random
+import os, json, sys, re, random
 
 from parameters import Knows, Settings, Controller, isKnows, isSettings, isButton
 from parameters import easy, medium, hard, harder, hardcore, mania
@@ -26,9 +23,7 @@ def normalizeRounding(n):
 # the higher the slope, the less probable extreme values are.
 def randGaussBounds(r, slope=5):
     r = float(r)
-    n = normalizeRounding(random.normal(r/2, r/slope))
-    # TODO::after validating python2/3 compatibility, reverse to python random.gauss instead of numpy
-    #n = int(round(random.gauss(r/2, r/slope), 0))
+    n = normalizeRounding(random.gauss(r/2, r/slope))
     if n < 0:
         n = 0
     if n > r:

@@ -1,7 +1,6 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
-import argparse, os.path, json, sys, shutil
-from numpy import random
+import argparse, os.path, json, sys, shutil, random
 
 from itemrandomizerweb.Randomizer import Randomizer, RandoSettings, progSpeeds
 from itemrandomizerweb.AreaRandomizer import AreaRandomizer

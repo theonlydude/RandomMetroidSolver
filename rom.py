@@ -1,6 +1,5 @@
 
-import re, struct, sys, os, json, copy, base64
-from numpy import random
+import re, struct, sys, os, json, copy, base64, random
 
 from smbool import SMBool
 from itemrandomizerweb.Items import ItemManager

@@ -1,5 +1,3 @@
-#!/usr/bin/python
-
 # check if a stats db is available
 try:
     import mysql.connector

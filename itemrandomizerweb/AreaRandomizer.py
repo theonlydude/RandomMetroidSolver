@@ -1,4 +1,4 @@
-from numpy import random
+import random
 
 from itemrandomizerweb.Randomizer import Randomizer
 from graph_access import vanillaTransitions, accessPoints, getAccessPoint

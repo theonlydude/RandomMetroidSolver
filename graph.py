@@ -1,5 +1,3 @@
-#!/usr/bin/python
-
 import copy
 from smbool import SMBool
 from rom import RomPatches

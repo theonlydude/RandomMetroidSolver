@@ -1,5 +1,5 @@
 import copy
-from numpy import random
+import random
 from graph import AccessPoint
 from parameters import Knows, Settings
 from rom import RomPatches

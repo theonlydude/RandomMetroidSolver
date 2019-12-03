@@ -179,17 +179,6 @@ class DB:
             print("DB.addISolver::error execute: {} error: {}".format(sql, e))
             self.dbAvailable = False
 
-    def addRace(self, md5sum, interval, magic):
-        if self.dbAvailable == False:
-            return None
-
-        try:
-            sql = "insert into race (md5sum, create_time, interval_hours, magic) values ('%s', now(), %d, %d);"
-            self.cursor.execute(sql % (md5sum, interval, magic))
-        except Exception as e:
-            print("DB.addISolver::error execute: {} error: {}".format(sql, e))
-            self.dbAvailable = False
-
     # read data
     def execSelect(self, sql, params=None):
         if self.dbAvailable == False:
@@ -362,29 +351,6 @@ order by init_time;"""
 
         header = ["initTime", "preset", "romFileName"]
         return (header, self.execSelect(sql, (weeks,)))
-
-    def checkIsRace(self, md5sum):
-        # return true if seed is race protected
-        sql = """select 1
-from race
-where md5sum = '%s';"""
-        result = self.execSelect(sql, (md5sum,))
-        if result == None:
-            return False
-        return len(result) > 0
-
-    def checkCanSolveRace(self, md5sum):
-        # return magic number if race protected seed can be solved, else None
-        sql = """select magic
-from race
-where md5sum = '%s'
-  and now() > date_add(create_time, interval interval_hours hour);"""
-        result = self.execSelect(sql, (md5sum,))
-        if result == None or len(result) == 0:
-            return None
-        else:
-            # db returns a list of tuples
-            return result[0][0]
 
     @staticmethod
     def dumpExtStatsItems(parameters, locsItems, sqlFile):

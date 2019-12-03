@@ -667,11 +667,6 @@ window.onload = function(){
 	    romData[addresses[i]+11] = bytes[addresses[i]+11];
 	}
   
-        // bank B8
-        for(var i=0x1C0000; i<=0x1C7FFF; i++){
-          romData[i] = bytes[i];
-        }
-
         // plando addresses
         for(var i=0x2F6000; i<0x2F6100; i++) {
           romData[i] = bytes[i];

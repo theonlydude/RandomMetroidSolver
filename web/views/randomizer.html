@@ -391,7 +391,7 @@ function AjaxPresetCallCompleted(data) {
     console.log("AjaxPresetCallCompleted");
 
     var dataDict = {paramsFileTarget : data, "complexity": getComplexity()};
-    var elems = ["seed", "itemsounds", "spinjumprestart", "rando_speed", "elevators_doors_speed", "skip_ceres", "skip_intro", "animals", "layoutPatches", "noGravHeat", "areaLayout", "variaTweaks", "areaRandomization", "No_Music", "preset", "bossRandomization"];
+    var elems = ["seed", "itemsounds", "spinjumprestart", "rando_speed", "elevators_doors_speed", "skip_ceres", "skip_intro", "animals", "layoutPatches", "noGravHeat", "areaLayout", "variaTweaks", "areaRandomization", "No_Music", "preset", "bossRandomization", "raceMode"];
     var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "energyQty", "maxDifficulty", "majorsSplit", "suitsRestriction", "morphPlacement", "funCombat", "funMovement", "funSuits", "progressionDifficulty", "hideItems", "strictMinors"];
 
     for(var i=0; i<elems.length; i++) {
@@ -407,13 +407,6 @@ function AjaxPresetCallCompleted(data) {
     }
 
     dataDict["progressionSpeed"] = getProgSpeed();
-
-    // add race mode
-    var raceMode = document.getElementById("raceMode");
-    if(raceMode.checked) {
-      var maxHourRace = document.getElementById("maxHourRace");
-      dataDict["raceMode"] = maxHourRace.value;
-    }
 
     // call web service with parameters
     var request = $.ajax({
@@ -833,22 +826,18 @@ window.onload = function(){
 
     // race mode is disabled by default
     var text = document.getElementById("raceModeText");
-    var maxHourRace = document.getElementById("maxHourRace");
     text.className = "disabledText";
-    maxHourRace.disabled = true;
 
     var raceMode = document.getElementById("raceMode");
     raceMode.onchange = function() {
       var raceMode = document.getElementById("raceMode");
       var text = document.getElementById("raceModeText");
-      var maxHourRace = document.getElementById("maxHourRace");
       if(raceMode.checked){
         text.className = "";
-        maxHourRace.disabled = false;
       } else {
         text.className = "disabledText";
-        maxHourRace.disabled = true;
       }
+      switchCheckbox("raceMode");
     }
 
     var inputs = document.getElementsByTagName("input");
@@ -1015,7 +1004,8 @@ Tournament presets:<ul>\
     {
       element: "#raceStep",
       title: "Race",
-      content: "When enabled, makes it difficult to cheat by using a Super Metroid editor like SMILE.<br/>You can choose how many hours must pass before a Race Mode seed can be solved on the VARIA website (default is 24)."
+      content: "<p>When enabled, makes it difficult to cheat by using a Super Metroid editor like SMILE.</p>\
+<p>You won't be able to solve/track a race protected seed on the VARIA website.</p>"
     },
     {
       element: "#majorsSplitStep",
@@ -1367,7 +1357,7 @@ def displayNumber(id, min, max, default, step="1"):
               </tr>
 	      <tr id="raceModeVisibility">
 		<td>{{displayCheckbox("raceMode")}}<span id="raceModeText">Race Mode</span></td>
-		<td>{{displaySelect("maxHourRace", [2,4,8,12,24,48,72], 24)}}</td>
+		<td></td>
 		<td id="raceStep"><button type="button" onclick="startTheTour(4)">?</button></td>
 	      </tr>
             </table>

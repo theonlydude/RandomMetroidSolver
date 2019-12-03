@@ -571,7 +571,8 @@ def prepareResult():
         result = session.solver['result']
 
         # utf8 files
-        result['randomizedRom'] = result['randomizedRom'].encode('utf8', 'replace')
+        if sys.version_info.major == 2:
+            result['randomizedRom'] = result['randomizedRom'].encode('utf8', 'replace')
 
         if result['difficulty'] == -1:
             result['resultText'] = "The ROM \"{}\" is not finishable with the known techniques".format(result['randomizedRom'])
@@ -658,37 +659,13 @@ def validateSolverParams():
 
     return (True, None)
 
-def canSolveROM(jsonRomFileName):
-    with open(jsonRomFileName) as jsonFile:
-        tempDictROM = json.load(jsonFile)
-
-    romDict = {}
-    for address in tempDictROM:
-        romDict[int(address)] = tempDictROM[address]
-
-    # check if the ROM is not a race one protected against solving
-    try:
-        md5sum = getMd5sum(romDict)
-    except:
-        return (False, None)
-
-    DB = db.DB()
-
-    isRace = DB.checkIsRace(md5sum)
-    print("canSolveROM::{} md5: {} isRace: {}".format(jsonRomFileName, md5sum, isRace))
-    if isRace == False:
-        DB.close()
-        return (True, None)
-
-    magic = DB.checkCanSolveRace(md5sum)
-    DB.close()
-    print("canSolveROM {} magic: {}".format(jsonRomFileName, magic))
-    return (magic != None, magic)
-
 def generateJsonROM(romJsonStr):
     tempRomJson = json.loads(romJsonStr)
     # handle filename with utf8 characters in it
-    romFileName = tempRomJson["romFileName"].encode('utf8', 'replace')
+    if sys.version_info.major > 2:
+        romFileName = tempRomJson["romFileName"]
+    else:
+        romFileName = tempRomJson["romFileName"].encode('utf8', 'replace')
     (base, ext) = os.path.splitext(romFileName)
     jsonRomFileName = 'roms/{}.json'.format(base)
     del tempRomJson["romFileName"]
@@ -717,7 +694,6 @@ def solver():
         if request.vars['romJson'] != '':
             try:
                 (base, jsonRomFileName) = generateJsonROM(request.vars['romJson'])
-
                 session.solver['romFile'] = base
                 if base not in session.solver['romFiles']:
                     session.solver['romFiles'].append(base)
@@ -820,10 +796,6 @@ def genJsonFromParams(vars):
 def computeDifficulty(jsonRomFileName, preset):
     randomizedRom = os.path.basename(jsonRomFileName.replace('json', 'sfc'))
 
-    (canSolve, magic) = canSolveROM(jsonRomFileName)
-    if canSolve == False:
-        return (False, "Race seed is protected from solving")
-
     presetFileName = "{}/{}.json".format(getPresetDir(preset), preset)
     (fd, jsonFileName) = tempfile.mkstemp()
 
@@ -839,9 +811,6 @@ def computeDifficulty(jsonRomFileName, preset):
         '--type', 'web',
         '--output', jsonFileName
     ]
-
-    if magic != None:
-        params += ['--race', str(magic)]
 
     for item in session.solver['itemsForbidden']:
         params += ['--itemsForbidden', item]
@@ -1041,9 +1010,8 @@ def validateWebServiceParams(patchs, quantities, others, isJson=False):
 
     # check race mode
     if 'raceMode' in request.vars:
-        raceHour = getInt('raceMode', isJson)
-        if raceHour < 1 or raceHour > 72:
-            raiseHttp(400, "Wrong number of hours for race mode: {}, must be >=1 and <= 72".format(request.vars.raceMode), isJson)
+        if request.vars.raceMode not in ['on', 'off']:
+            raiseHttp(400, "Wrong value for race mode: {}, must on/off".format(request.vars.raceMode), isJson)
 
     # check slider values
     for check in ['minDegree', 'maxDegree']:
@@ -1136,7 +1104,7 @@ def randomizerWebService():
 
     # race mode
     useRace = False
-    if request.vars.raceMode is not None:
+    if request.vars.raceMode == 'on':
         magic = getMagic()
         useRace = True
 
@@ -1263,19 +1231,6 @@ def randomizerWebService():
             msg = locsItems['errorMsg']
 
         DB.addRandoResult(id, ret, duration, msg)
-
-        if useRace == True:
-            dictROM = {}
-            # in json keys are strings
-            for address in locsItems:
-                if address in ["fileName", "errorMsg", "ips", "max_size", "truncate_length"]:
-                    continue
-                dictROM[int(address)] = locsItems[address]
-            md5sum = getMd5sum(dictROM)
-
-            interval = int(request.vars.raceMode)
-            DB.addRace(md5sum, interval, magic)
-
         DB.close()
 
         os.close(fd1)
@@ -1741,13 +1696,6 @@ class WS_common_init(WS):
         return self.callSolverInit(jsonRomFileName, presetFileName, preset, seed, mode, vcr, fill)
 
     def callSolverInit(self, jsonRomFileName, presetFileName, preset, romFileName, mode, vcr, fill):
-        if mode != 'seedless':
-            (canSolve, magic) = canSolveROM(jsonRomFileName)
-            if canSolve == False:
-                raiseHttp(400, "Race seed is protected from solving")
-        else:
-            magic = None
-
         (fd, jsonOutFileName) = tempfile.mkstemp()
         params = [
             pythonExec,  os.path.expanduser("~/RandomMetroidSolver/solver.py"),
@@ -1761,9 +1709,6 @@ class WS_common_init(WS):
 
         if mode != "seedless":
             params += ['-r', str(jsonRomFileName)]
-
-        if magic != None:
-            params += ['--race', str(magic)]
 
         if vcr == True:
             params.append('--vcr')
@@ -1965,20 +1910,6 @@ def trackerWebService():
 # race mode
 def getMagic():
     return random.randint(1, 0xffff)
-
-def getMd5sum(romDict):
-    # keep only the items bytes
-    addresses = [0x78264, 0x78404, 0x78432, 0x7852C, 0x78614, 0x786DE, 0x7879E, 0x787C2, 0x787FA, 0x78824, 0x78876, 0x7896E, 0x7899C, 0x78ACA, 0x78B24, 0x78BA4, 0x78BAC, 0x78C36, 0x78C3E, 0x78C82, 0x78CCA, 0x79108, 0x79110, 0x79184, 0x7C2E9, 0x7C337, 0x7C365, 0x7C36D, 0x7C47D, 0x7C559, 0x7C5E3, 0x7C6E5, 0x7C755, 0x7C7A7, 0x781CC, 0x781E8, 0x781EE, 0x781F4, 0x78248, 0x783EE, 0x78464, 0x7846A, 0x78478, 0x78486, 0x784AC, 0x784E4, 0x78518, 0x7851E, 0x78532, 0x78538, 0x78608, 0x7860E, 0x7865C, 0x78676, 0x7874C, 0x78798, 0x787D0, 0x78802, 0x78836, 0x7883C, 0x788CA, 0x7890E, 0x78914, 0x789EC, 0x78AE4, 0x78B46, 0x78BC0, 0x78BE6, 0x78BEC, 0x78C04, 0x78C14, 0x78C2A, 0x78C44, 0x78C52, 0x78C66, 0x78C74, 0x78CBC, 0x78E6E, 0x78E74, 0x78F30, 0x78FCA, 0x78FD2, 0x790C0, 0x79100, 0x7C265, 0x7C2EF, 0x7C319, 0x7C357, 0x7C437, 0x7C43D, 0x7C483, 0x7C4AF, 0x7C4B5, 0x7C533, 0x7C5DD, 0x7C5EB, 0x7C5F1, 0x7C603, 0x7C609, 0x7C74D]
-    values = []
-    for address in addresses:
-        values.append(romDict[address])
-        values.append(romDict[address+1])
-    # add bank B8
-    address = 0x1C0000
-    while address <= 0x1C7FFF:
-        values.append(romDict[address] if address in romDict else 0xFF)
-        address += 1
-    return hashlib.md5(json.dumps(values)).hexdigest()
 
 def initCustomizerSession():
     if session.customizer == None:

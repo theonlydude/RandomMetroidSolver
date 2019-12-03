@@ -72,7 +72,6 @@ function computeSeed {
 	OLD_MD5="old n/a"
 	OUT=$(/usr/bin/time -f "\t%E real" python3 ${ORIG}/randomizer.py ${PARAMS} 2>&1)
 	if [ $? -ne 0 ]; then
-	    OLD="error"
 	    echo "${OUT}" >> ${LOG}
 	else
 	    RTIME_OLD=$(echo "${OUT}" | grep real | awk '{print $1}')
@@ -85,11 +84,14 @@ function computeSeed {
 
     NEW_MD5="new n/a"
     OUT=$(/usr/bin/time -f "\t%E real" python3 ./randomizer.py ${PARAMS} 2>&1)
-
-    RTIME_NEW=$(echo "${OUT}" | grep real | awk '{print $1}')
-    ROM_GEN=$(ls -1 VARIA_Randomizer_*X${SEED}_${PRESET}.sfc 2>/dev/null)
-    if [ $? -eq 0 ]; then
-	NEW_MD5=$(md5sum ${ROM_GEN} | awk '{print $1}')
+    if [ $? -ne 0 ]; then
+	echo "${OUT}" >> ${LOG}
+    else
+	RTIME_NEW=$(echo "${OUT}" | grep real | awk '{print $1}')
+	ROM_GEN=$(ls -1 VARIA_Randomizer_*X${SEED}_${PRESET}.sfc 2>/dev/null)
+	if [ $? -eq 0 ]; then
+	    NEW_MD5=$(md5sum ${ROM_GEN} | awk '{print $1}')
+	fi
     fi
 
     if [ "${OLD_MD5}" != "${NEW_MD5}" -a ${COMPARE} -eq 0 ]; then

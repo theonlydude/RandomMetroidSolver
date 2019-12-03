@@ -263,7 +263,7 @@ if __name__ == "__main__":
     if progSpeed == "random":
         progSpeed = speeds[random.randint(0, len(speeds)-1)]
     mulSpeeds = progSpeed.split(',')
-    progSpeed = mulSpeeds[random.randint(0, len(mulSpeeds)-1) if len(mulSpeeds) > 1 else 0]
+    progSpeed = mulSpeeds[random.randint(0, len(mulSpeeds)-1)]
     if len(mulSpeeds) > 1:
         args.progressionSpeed = 'random'
     if progSpeed not in speeds:

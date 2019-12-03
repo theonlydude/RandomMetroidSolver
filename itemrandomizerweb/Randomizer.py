@@ -508,7 +508,7 @@ class SuperFunProvider(object):
         remove = []
         n = randGaussBounds(len(itemList))
         for i in range(n):
-            idx = random.randint(0, len(itemList) - 1) if len(itemList) > 1 else 0
+            idx = random.randint(0, len(itemList) - 1)
             item = itemList.pop(idx)
             if item is not None:
                 remove.append(item)
@@ -780,7 +780,7 @@ class Randomizer(object):
     def determineParameters(self):
         speed = self.settings.progSpeed
         if speed == 'variable':
-            speed = progSpeeds[random.randint(0, len(progSpeeds)-1) if len(progSpeeds) > 1 else 0]
+            speed = progSpeeds[random.randint(0, len(progSpeeds)-1)]
         self.spreadProb = self.settings.getSpreadFactor(speed)
         self.minorHelpProb = self.settings.getMinorHelpProb(speed)
         self.chooseItemRanges = getRangeDict(self.settings.getChooseItems(speed))
@@ -944,7 +944,7 @@ class Randomizer(object):
         return funcDict[v]
 
     def chooseItemRandom(self, items):
-        return items[random.randint(0, len(items)-1) if len(items) > 1 else 0]
+        return items[random.randint(0, len(items)-1)]
 
     def chooseItemMinProgression(self, items):
         minNewLocs = 1000
@@ -982,7 +982,7 @@ class Randomizer(object):
     def chooseLocationRandom(self, availableLocations, item):
         self.log.debug("RANDOM")
         self.log.debug("chooseLocationRandom: {}".format([l['Name'] for l in availableLocations]))
-        return availableLocations[random.randint(0, len(availableLocations)-1) if len(availableLocations) > 1 else 0]
+        return availableLocations[random.randint(0, len(availableLocations)-1)]
 
     def getLocDiff(self, loc):
         # avail difficulty already stored by graph algorithm        
@@ -1083,7 +1083,7 @@ class Randomizer(object):
         itemsLen = len(items)
         if itemsLen == 0:
             fixedPool = [item for item in itemPool if item not in self.failItems]
-            item = List.item(random.randint(0, len(fixedPool)-1) if len(fixedPool) > 1 else 0, fixedPool)
+            item = List.item(random.randint(0, len(fixedPool)-1), fixedPool)
         else:
             item = self.chooseItem(items)
         return item
@@ -1402,7 +1402,7 @@ class Randomizer(object):
         if random.random() < self.minorHelpProb:
             helpfulMinors = [item for item in basePool if item['Class'] == 'Minor' and not self.hasItemTypeInPool(item['Type'], pool)]
             if len(helpfulMinors) > 0:
-                pool.append(helpfulMinors[random.randint(0, len(helpfulMinors)-1) if len(helpfulMinors) > 1 else 0])
+                pool.append(helpfulMinors[random.randint(0, len(helpfulMinors)-1)])
         # don't hold energy back for certain settings
         self.addEnergyAsNonProg(pool, basePool)
 
@@ -1558,7 +1558,7 @@ class Randomizer(object):
                 else:
                     break
         if len(possibleStates) > 0:
-            (state, itemLoc) = possibleStates[random.randint(0, len(possibleStates)-1) if len(possibleStates) > 1 else 0]
+            (state, itemLoc) = possibleStates[random.randint(0, len(possibleStates)-1)]
             self.updateRollbackItemsTried(itemLoc)
             state.apply(self)
             ret = itemLoc
@@ -1709,7 +1709,7 @@ class Randomizer(object):
                 ret = None
                 chooseFrom = [loc for loc in locs if loc['difficulty'].difficulty <= self.difficultyTarget]
                 if len(chooseFrom) > 0:
-                    ret = chooseFrom[random.randint(0, len(chooseFrom)-1) if len(chooseFrom) > 1 else 0]
+                    ret = chooseFrom[random.randint(0, len(chooseFrom)-1)]
                 else:
                     minDiff = god
                     for loc in locs:
@@ -1892,7 +1892,7 @@ class Randomizer(object):
                     self.log.debug("last fill item = " + item['Type'] + "/" + item['Class'] + ", locs = " + str([loc['Name'] for loc in possibleLocs]))
                     itemLocation = {
                         'Item' : item,
-                        'Location' : possibleLocs[random.randint(0, len(possibleLocs) - 1) if len(possibleLocs) > 1 else 0]
+                        'Location' : possibleLocs[random.randint(0, len(possibleLocs) - 1)]
                     }
                     self.log.debug("last Fill: {} at {}".format(itemLocation['Item']['Type'], itemLocation['Location']['Name']))
                     self.getItem(itemLocation, False)

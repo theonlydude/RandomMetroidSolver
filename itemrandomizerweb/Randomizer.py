@@ -184,7 +184,7 @@ class RandoSettings(object):
         elif progSpeed == 'basic':
             itemLimit = 0
         if self.restrictions['MajorMinor'] == 'Chozo':
-            itemLimit /= 4
+            itemLimit = int(itemLimit / 4)
         return itemLimit
 
     def getLocLimit(self, progSpeed):
@@ -820,7 +820,7 @@ class Randomizer(object):
         def isAvail(loc):
             for k in loc['difficulty'].knows:
                 try:
-                    diff = getattr(Knows, k)
+                    smKnows = getattr(Knows, k)
                     # filter out tricks above diff target except boss
                     # knows, because boss fights can be performed
                     # without the trick anyway.
@@ -830,7 +830,7 @@ class Randomizer(object):
                     # Knows for Ridley, and other bosses give
                     # drops. so only boss fights with diff above god
                     # can slip in
-                    if diff.difficulty > diff and isBossKnows(k) is None:
+                    if smKnows.difficulty > diff and isBossKnows(k) is None:
                         return False
                 except AttributeError:
                     # hard room/hell run
@@ -1717,7 +1717,7 @@ class Randomizer(object):
                         if d < minDiff:
                             minDiff = d
                             ret = loc
-                return loc
+                return ret
             def getLocs(locs):
                 return [loc for loc in locs if 'Chozo' not in loc['Class'] and 'Boss' not in loc['Class']]
             def getCurLocs(ap):

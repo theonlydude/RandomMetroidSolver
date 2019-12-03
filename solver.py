@@ -1454,7 +1454,7 @@ class ComeBackStep(object):
         # get area with max available locs
         maxAreaWeigth = 0
         maxAreaName = ""
-        for graphArea in self.graphAreas:
+        for graphArea in sorted(self.graphAreas):
             if graphArea in self.visitedGraphAreas:
                 continue
             else:

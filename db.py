@@ -1,12 +1,13 @@
 # check if a stats db is available
 try:
+    # pip3 install mysql-connector-python --user
     import mysql.connector
     from db_params import dbParams
-    from version import randoAlgoVersion
     dbAvailable = True
 except:
     dbAvailable = False
 
+from version import randoAlgoVersion
 from parameters import easy, medium, hard, harder, hardcore, mania
 from utils import removeChars
 

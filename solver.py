@@ -967,7 +967,7 @@ class InteractiveSolver(CommonSolver):
                 loc["difficulty"] = SMBool(True, -1)
                 if "accessPoint" not in loc:
                     # take first ap of the loc
-                    loc["accessPoint"] = loc["AccessFrom"].keys()[0]
+                    loc["accessPoint"] = list(loc["AccessFrom"])[0]
                 self.collectMajor(loc)
 
         self.locations = locationsBck
@@ -1158,7 +1158,7 @@ class InteractiveSolver(CommonSolver):
             loc["difficulty"] = SMBool(True, -1)
         if "accessPoint" not in loc:
             # take first ap of the loc
-            loc["accessPoint"] = loc["AccessFrom"].keys()[0]
+            loc["accessPoint"] = list(loc["AccessFrom"])[0]
         self.collectMajor(loc)
 
     def setItemAt(self, locName, itemName):
@@ -1172,7 +1172,7 @@ class InteractiveSolver(CommonSolver):
             loc["difficulty"] = SMBool(True, -1)
         if "accessPoint" not in loc:
             # take first ap of the loc
-            loc["accessPoint"] = loc["AccessFrom"].keys()[0]
+            loc["accessPoint"] = list(loc["AccessFrom"])[0]
 
         self.collectMajor(loc, itemName)
 

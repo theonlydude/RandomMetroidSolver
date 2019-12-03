@@ -1,5 +1,3 @@
-#!/usr/bin/python
-
 import copy
 from smbool import SMBool
 from rom import RomPatches
@@ -233,8 +231,8 @@ class AccessGraph(object):
                 continue
             difficulty = paths[apName]["pdiff"].difficulty
             ret.append((difficulty if difficulty != -1 else infinity,  paths[apName]["distance"], apName))
-        # sort by difficulty first, then distance
-        ret.sort(key=lambda x: (x[0], x[1]))
+        # sort by difficulty first, then distance (also by name to have same behavious in python2 and 3)
+        ret.sort(key=lambda x: (x[0], x[1], x[2]))
         return [apName for (diff, dist, apName) in ret]
 
     # locations: locations to check
@@ -260,7 +258,7 @@ class AccessGraph(object):
         for loc in locations:
             if loc['GraphArea'] not in availAreas:
                 loc['distance'] = 30000
-                loc['difficulty'] = SMBool(False, 0)
+                loc['difficulty'] = SMBool(False)
                 #if loc['Name'] == "Super Missile (Crateria)":
                 #    print("loc: {} locDiff is area nok".format(loc["Name"]))
                 continue
@@ -268,7 +266,7 @@ class AccessGraph(object):
             for apName in self.getSortedAPs(availAPPaths, loc['AccessFrom']):
                 if apName == None:
                     loc['distance'] = 20000
-                    loc['difficulty'] = SMBool(False, 0)
+                    loc['difficulty'] = SMBool(False)
                     #if loc['Name'] == "Super Missile (Crateria)":
                     #    print("loc: {} ap is none".format(loc["Name"]))
                     break
@@ -299,18 +297,18 @@ class AccessGraph(object):
                         break
                     else:
                         loc['distance'] = 1000 + tdiff.difficulty
-                        loc['difficulty'] = SMBool(False, 0)
+                        loc['difficulty'] = SMBool(False)
                         #if loc['Name'] == "Super Missile (Crateria)":
                         #    print("loc: {} locDiff is false".format(loc["Name"]))
                 else:
                     loc['distance'] = 10000 + tdiff.difficulty
-                    loc['difficulty'] = SMBool(False, 0)
+                    loc['difficulty'] = SMBool(False)
                     #if loc['Name'] == "Super Missile (Crateria)":
                     #    print("loc: {} tdiff is false".format(loc["Name"]))
 
             if 'difficulty' not in loc:
                 loc['distance'] = 100000
-                loc['difficulty'] = SMBool(False, 0)
+                loc['difficulty'] = SMBool(False)
 
         #print("availableLocs: {}".format([loc["Name"] for loc in availLocs]))
         return availLocs

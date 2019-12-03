@@ -1,5 +1,3 @@
-#!/usr/bin/python
-
 # check if a stats db is available
 try:
     import mysql.connector
@@ -10,6 +8,7 @@ except:
     dbAvailable = False
 
 from parameters import easy, medium, hard, harder, hardcore, mania
+from utils import removeChars
 
 class DB:
     def __init__(self):
@@ -402,7 +401,7 @@ set @last_id = last_insert_id();
             if item == 'Boss':
                 continue
             # we can't have special chars in columns names
-            location = location.translate(None, " ,()-")
+            location = removeChars(location, " ,()-")
             sql = "insert into item_locs (ext_id, item, {}) values (@last_id, '%s', 1) on duplicate key update {} = {} + 1;\n".format(location, location, location)
 
             sqlFile.write(sql % (item,))

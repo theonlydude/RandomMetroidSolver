@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 import sys, math, argparse, re, json, os, subprocess, logging, random
 from time import gmtime, strftime
@@ -16,7 +16,7 @@ from itemrandomizerweb.Items import ItemManager
 from graph_locations import locations as graphLocations
 from graph import AccessGraph
 from graph_access import vanillaTransitions, accessPoints, getDoorConnections, getTransitions, vanillaBossesTransitions, getAps2DoorsPtrs
-from utils import PresetLoader
+from utils import PresetLoader, removeChars
 from vcr import VCR
 import log, db
 
@@ -179,7 +179,7 @@ class SolverState(object):
     def name4isolver(self, locName):
         # remove space and special characters
         # sed -e 's+ ++g' -e 's+,++g' -e 's+(++g' -e 's+)++g' -e 's+-++g'
-        return locName.translate(None, " ,()-")
+        return removeChars(locName, " ,()-")
 
     def knows2isolver(self, knows):
         result = []
@@ -192,7 +192,7 @@ class SolverState(object):
 
     def transition2isolver(self, transition):
         transition = str(transition)
-        return transition[0].lower()+transition[1:].translate(None, " ,()-")
+        return transition[0].lower() + removeChars(transition[1:], " ,()-")
 
     def getAvailableLocationsWeb(self, locations):
         ret = {}
@@ -300,7 +300,7 @@ class CommonSolver(object):
                 self.patches = self.romLoader.getPatches()
             else:
                 self.patches = self.romLoader.getRawPatches()
-            print("ROM {} majors: {} area: {} boss: {} patches: {}".format(rom, self.majorsSplit, self.areaRando, self.bossRando, self.patches))
+            print("ROM {} majors: {} area: {} boss: {} patches: {}".format(rom, self.majorsSplit, self.areaRando, self.bossRando, sorted(self.patches)))
 
             (self.areaTransitions, self.bossTransitions) = self.romLoader.getTransitions()
             if interactive == True and self.debug == False:
@@ -1030,8 +1030,9 @@ class InteractiveSolver(CommonSolver):
 
         plandoCurrentJson = json.dumps(plandoCurrent)
 
+        pythonExec = "python{}".format(sys.version[0])
         params = [
-            'python2',  os.path.expanduser("~/RandomMetroidSolver/randomizer.py"),
+            pythonExec,  os.path.expanduser("~/RandomMetroidSolver/randomizer.py"),
             '--runtime', '10',
             '--param', self.presetFileName,
             '--output', self.outputFileName,
@@ -1134,13 +1135,13 @@ class InteractiveSolver(CommonSolver):
             json.dump(data, jsonFile)
 
     def locNameInternal2Web(self, locName):
-        return locName.translate(None, " ,()-")
+        return removeChars(locName, " ,()-")
 
     def locNameWeb2Internal(self, locNameWeb):
         return self.locsWeb2Internal[locNameWeb]
 
     def apNameInternal2Web(self, apName):
-        return apName[0].lower()+apName[1:].translate(None, " ")
+        return apName[0].lower() + removeChars(apName[1:], " ")
 
     def getWebLoc(self, locNameWeb):
         locName = self.locNameWeb2Internal(locNameWeb)
@@ -1346,7 +1347,7 @@ class StandardSolver(CommonSolver):
         knowsUsedCount = len(knowsUsed)
 
         # get total of known knows
-        knowsKnownCount = len([knows for  knows in Knows.__dict__ if isKnows(knows) and getattr(Knows, knows)[0] == True])
+        knowsKnownCount = len([knows for  knows in Knows.__dict__ if isKnows(knows) and getattr(Knows, knows).bool == True])
         knowsKnownCount += len([hellRun for hellRun in Settings.hellRuns if Settings.hellRuns[hellRun] is not None])
 
         return (knowsUsedCount, knowsKnownCount, knowsUsed)
@@ -1452,7 +1453,7 @@ class ComeBackStep(object):
         # get area with max available locs
         maxAreaWeigth = 0
         maxAreaName = ""
-        for graphArea in self.graphAreas:
+        for graphArea in sorted(self.graphAreas):
             if graphArea in self.visitedGraphAreas:
                 continue
             else:
@@ -1603,7 +1604,7 @@ class OutConsole(Out):
         s = self.solver
         self.displayOutput()
 
-        print("({}, {}): diff : {}".format(s.difficulty, s.itemsOk, s.romFileName))
+        print("({}, {}): diff : {}".format(round(float(s.difficulty), 3), s.itemsOk, s.romFileName))
         print("{}/{}: knows Used : {}".format(s.knowsUsed, s.knowsKnown, s.romFileName))
 
         if s.difficulty >= 0:
@@ -1634,9 +1635,9 @@ class OutConsole(Out):
                               loc['SolveArea'],
                               loc['distance'] if 'distance' in loc else 'nc',
                               loc['itemName'],
-                              round(loc['difficulty'].difficulty, 2) if 'difficulty' in loc else 'nc',
+                              round(float(loc['difficulty'].difficulty), 2) if 'difficulty' in loc else 'nc',
                               sorted(loc['difficulty'].knows) if 'difficulty' in loc else 'nc',
-                              list(set(loc['difficulty'].items)) if 'difficulty' in loc else 'nc'))
+                              sorted(list(set(loc['difficulty'].items))) if 'difficulty' in loc else 'nc'))
 
     def displayOutput(self):
         s = self.solver
@@ -1906,12 +1907,12 @@ if __name__ == "__main__":
 
     if args.raceMagic != None:
         if args.raceMagic <= 0 or args.raceMagic >= 0x10000:
-            print "Invalid magic"
+            print("Invalid magic")
             sys.exit(-1)
 
     if args.count != None:
         if args.count < 1 or args.count > 0x80:
-            print "Invalid count"
+            print("Invalid count")
             sys.exit(-1)
 
     log.init(args.debug)

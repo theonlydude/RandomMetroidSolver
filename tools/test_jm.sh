@@ -70,7 +70,7 @@ function computeSeed {
 
     if [ ${COMPARE} -eq 0 ]; then
 	OLD_MD5="old n/a"
-	OUT=$(/usr/bin/time -f "\t%E real" python2 ${ORIG}/randomizer.py ${PARAMS} 2>&1)
+	OUT=$(/usr/bin/time -f "\t%E real" python3 ${ORIG}/randomizer.py ${PARAMS} 2>&1)
 	if [ $? -ne 0 ]; then
 	    OLD="error"
 	    echo "${OUT}" >> ${LOG}
@@ -84,7 +84,7 @@ function computeSeed {
     fi
 
     NEW_MD5="new n/a"
-    OUT=$(/usr/bin/time -f "\t%E real" python2 ./randomizer.py ${PARAMS} 2>&1)
+    OUT=$(/usr/bin/time -f "\t%E real" python3 ./randomizer.py ${PARAMS} 2>&1)
 
     RTIME_NEW=$(echo "${OUT}" | grep real | awk '{print $1}')
     ROM_GEN=$(ls -1 VARIA_Randomizer_*X${SEED}_${PRESET}.sfc 2>/dev/null)
@@ -111,7 +111,7 @@ function computeSeed {
     fi
 
     if [ ${COMPARE} -eq 0 ]; then
-	OUT=$(/usr/bin/time -f "\t%E real" python2 ${ORIG}/solver.py -r ${ROM_GEN} --preset standard_presets/${PRESET}.json -g --checkDuplicateMajor 2>&1)
+	OUT=$(/usr/bin/time -f "\t%E real" python3 ${ORIG}/solver.py -r ${ROM_GEN} --preset standard_presets/${PRESET}.json -g --checkDuplicateMajor 2>&1)
 	if [ $? -ne 0 ]; then
             echo "${SEED};${DIFF_CAP};${RTIME_OLD};${RTIME_NEW};${STIME_OLD};${STIME_NEW};${MD5};${PARAMS};" | tee -a ${CSV}
             echo "Can't solve ${ROM_GEN}" | tee -a ${CSV}
@@ -121,13 +121,13 @@ function computeSeed {
 	    STIME_OLD=$(echo "${OUT}" | grep real | awk '{print $1}')
 	    echo "${OUT}" | grep -q "has already been picked up"
 	    DUP_OLD=$?
-	    echo "${OUT}" > ${ROM_GEN}.old
+	    echo "${OUT}" | grep -v 'real' > ${ROM_GEN}.old
 	fi
     else
 	DUP_OLD=1
     fi
 
-    OUT=$(/usr/bin/time -f "\t%E real" python2 ./solver.py -r ${ROM_GEN} --preset standard_presets/${PRESET}.json -g --checkDuplicateMajor 2>&1)
+    OUT=$(/usr/bin/time -f "\t%E real" python3 ./solver.py -r ${ROM_GEN} --preset standard_presets/${PRESET}.json -g --checkDuplicateMajor 2>&1)
     if [ $? -ne 0 ]; then
         echo "${SEED};${DIFF_CAP};${RTIME_OLD};${RTIME_NEW};${STIME_OLD};${STIME_NEW};${MD5};${PARAMS};" | tee -a ${CSV}
         echo "Can't solve ${ROM_GEN}" | tee -a ${CSV}
@@ -139,7 +139,7 @@ function computeSeed {
 	DUP_NEW=$?
 
 	if [ ${COMPARE} -eq 0 ]; then
-	    echo "${OUT}" > ${ROM_GEN}.new
+	    echo "${OUT}" | grep -v 'real' > ${ROM_GEN}.new
 	fi
     fi
 

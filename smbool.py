@@ -13,7 +13,9 @@ class SMBool:
         return 'SMBool({}, {}, {}, {})'.format(self.bool, self.difficulty, self.knows, self.items)
 
     def __getitem__(self, index):
-        # to acces the smbool as [0] for the bool and [1] for the difficulty
+        # to acces the smbool as [0] for the bool and [1] for the difficulty.
+        # required when we load a json preset where the smbool is stored as a list,
+        # and we add missing smbools to it, so we have a mix of lists and smbools.
         if index == 0:
             return self.bool
         elif index == 1:

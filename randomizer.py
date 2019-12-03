@@ -1,6 +1,6 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
-import argparse, random, os.path, json, sys, shutil
+import argparse, os.path, json, sys, shutil, random
 
 from itemrandomizerweb.Randomizer import Randomizer, RandoSettings, progSpeeds
 from itemrandomizerweb.AreaRandomizer import AreaRandomizer
@@ -207,14 +207,14 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.output is None and args.rom is None:
-        print "Need --output or --rom parameter"
+        print("Need --output or --rom parameter")
         sys.exit(-1)
     elif args.output is not None and args.rom is not None:
-        print "Can't have both --output and --rom parameters"
+        print("Can't have both --output and --rom parameters")
         sys.exit(-1)
 
     if args.plandoRando != None and args.output == None:
-        print "plandoRando param requires output param"
+        print("plandoRando param requires output param")
         sys.exit(-1)
 
     log.init(args.debug)
@@ -246,7 +246,7 @@ if __name__ == "__main__":
     seed4rand = seed
     if args.raceMagic is not None:
         if args.raceMagic <= 0 or args.raceMagic >= 0x10000:
-            print "Invalid magic"
+            print("Invalid magic")
             sys.exit(-1)
         seed4rand = seed ^ args.raceMagic
     random.seed(seed4rand)
@@ -263,11 +263,11 @@ if __name__ == "__main__":
     if progSpeed == "random":
         progSpeed = speeds[random.randint(0, len(speeds)-1)]
     mulSpeeds = progSpeed.split(',')
-    progSpeed = mulSpeeds[random.randint(0, len(mulSpeeds)-1)]
+    progSpeed = mulSpeeds[random.randint(0, len(mulSpeeds)-1) if len(mulSpeeds) > 1 else 0]
     if len(mulSpeeds) > 1:
         args.progressionSpeed = 'random'
     if progSpeed not in speeds:
-        print 'Invalid progression speed : ' + progSpeed
+        print('Invalid progression speed : ' + progSpeed)
         sys.exit(-1)
     logger.debug("progression speed: {}".format(progSpeed))
 
@@ -314,11 +314,11 @@ if __name__ == "__main__":
         if args.morphPlacement == 'late' and args.area == True:
             args.suitsRestriction = False
         else:
-            args.suitsRestriction = bool(random.getrandbits(1))
+            args.suitsRestriction = bool(random.randint(0, 2))
     logger.debug("suitsRestriction: {}".format(args.suitsRestriction))
 
     if args.hideItems == 'random':
-        args.hideItems = bool(random.getrandbits(1))
+        args.hideItems = bool(random.randint(0, 2))
 
     if args.morphPlacement == 'random':
         if (args.suitsRestriction == True and args.area == True) or args.majorsSplit == 'Chozo':
@@ -330,7 +330,7 @@ if __name__ == "__main__":
     logger.debug("morphPlacement: {}".format(args.morphPlacement))
 
     if args.strictMinors == 'random':
-        args.strictMinors = bool(random.getrandbits(1))
+        args.strictMinors = bool(random.randint(0, 2))
 
     # fill restrictions dict
     restrictions = { 'Suits' : args.suitsRestriction, 'Morph' : args.morphPlacement }
@@ -396,7 +396,7 @@ if __name__ == "__main__":
         superFun = []
         for fun in args.superFun:
             if fun.find('Random') != -1:
-                if bool(random.getrandbits(1)) == True:
+                if bool(random.randint(0, 2)) == True:
                     superFun.append(fun[0:fun.find('Random')])
             else:
                 superFun.append(fun)
@@ -479,7 +479,7 @@ if __name__ == "__main__":
             if (itemLoc['Item']['Type'] not in ['Nothing', 'NoEnergy']
                 and itemLoc['Location']['CanHidden'] == True
                 and itemLoc['Location']['Visibility'] == 'Visible'):
-                if bool(random.getrandbits(1)) == True:
+                if bool(random.randint(0, 2)) == True:
                     itemLoc['Location']['Visibility'] = 'Hidden'
 
     # transform itemLocs in our usual dict(location, item), for minors keep only the first
@@ -494,7 +494,7 @@ if __name__ == "__main__":
         elif itemType not in firstMinorsFound:
             locsItems[locName] = itemType
     if args.debug == True:
-        for loc in locsItems:
+        for loc in sorted(locsItems.keys()):
             print('{:>50}: {:>16} '.format(loc, locsItems[loc]))
 
     if args.plandoRando != None:
@@ -578,7 +578,7 @@ if __name__ == "__main__":
 
         if args.rom is None:
             data = romPatcher.romFile.data
-            fileName += '.sfc'
+            fileName = '{}.sfc'.format(fileName)
             data["fileName"] = fileName
             # error msg in json to be displayed by the web site
             data["errorMsg"] = randomizer.errorMsg

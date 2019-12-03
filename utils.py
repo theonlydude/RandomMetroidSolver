@@ -1,6 +1,5 @@
-#!/usr/bin/python
+import os, json, sys, re, random
 
-import os, json, random
 from parameters import Knows, Settings, Controller, isKnows, isSettings, isButton
 from parameters import easy, medium, hard, harder, hardcore, mania
 from smbool import SMBool
@@ -8,11 +7,23 @@ from smbool import SMBool
 def isStdPreset(preset):
     return preset in ['noob', 'casual', 'regular', 'veteran', 'speedrunner', 'master', 'samus', 'solution', 'Season_Races', 'Playoff_Races', 'Playoff_Races_Chozo', 'SMRAT2020']
 
+def removeChars(string, toRemove):
+    return re.sub('[{}]+'.format(toRemove), '', string)
+
+# https://github.com/robotools/fontParts/commit/7cb561033929cfb4a723d274672e7257f5e68237
+def normalizeRounding(n):
+    # Normalizes rounding as Python 2 and Python 3 handing the rounding of halves (0.5, 1.5, etc) differently.
+    # This normalizes rounding to be the same in both environments.
+    if round(0.5) != 1 and n % 1 == .5 and not int(n) % 2:
+        return int((round(n) + (abs(n) / n) * 1))
+    else:
+        return int(round(n))
+
 # gauss random in [0, r] range
 # the higher the slope, the less probable extreme values are.
 def randGaussBounds(r, slope=5):
     r = float(r)
-    n = int(round(random.gauss(r/2, r/slope), 0))
+    n = normalizeRounding(random.gauss(r/2, r/slope))
     if n < 0:
         n = 0
     if n > r:
@@ -26,7 +37,7 @@ def getRangeDict(weightDict):
     total = float(sum(weightDict.values()))
     rangeDict = {}
     current = 0.0
-    for k in sorted(weightDict, key=weightDict.get):
+    for k in sorted(weightDict, key=lambda kv: (kv[1], kv[0])):
         w = float(weightDict[k]) / total
         current += w
         rangeDict[k] = current
@@ -42,11 +53,18 @@ def chooseFromRange(rangeDict):
             return v
     return val
 
+if sys.version_info.major == 2:
+    def isString(string):
+        return type(string) in [str, unicode]
+else:
+    def isString(string):
+        return type(string) == str
+
 class PresetLoader(object):
     @staticmethod
     def factory(params):
         # can be a json, a python file or a dict with the parameters
-        if type(params) in [str, unicode]:
+        if isString(params):
             ext = os.path.splitext(params)
             if ext[1].lower() == '.json':
                 return PresetLoaderJson(params)
@@ -183,8 +201,8 @@ class PresetLoader(object):
                         score += diff2score[self.params['Knows'][know][1]]
                 else:
                     # if old preset with not all the knows, use default values for the know
-                    if Knows.__dict__[know][0] == True:
-                        score += diff2score[Knows.__dict__[know][1]]
+                    if Knows.__dict__[know].bool == True:
+                        score += diff2score[Knows.__dict__[know].difficulty]
 
         # hard rooms
         hardRoom = 'X-Ray'

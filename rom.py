@@ -1,5 +1,6 @@
 
-import re, struct, sys, random, os, json, copy, base64
+import re, struct, sys, os, json, copy, base64, random
+
 from smbool import SMBool
 from itemrandomizerweb.Items import ItemManager
 from itemrandomizerweb.patches import patches
@@ -833,7 +834,7 @@ class RomPatcher:
             for ips in self.ipsPatches:
                 mergedIPS.append(ips)
             patchData = mergedIPS.encode()
-            self.romFile.data["ips"] = base64.b64encode(patchData)
+            self.romFile.data["ips"] = base64.b64encode(patchData).decode()
             if mergedIPS.truncate_length is not None:
                 self.romFile.data["truncate_length"] = mergedIPS.truncate_length
             self.romFile.data["max_size"] = mergedIPS.max_size
@@ -884,7 +885,7 @@ class RomPatcher:
 
     def getAmmoPct(self, minorsDist):
         q = 0
-        for m,v in minorsDist.iteritems():
+        for m,v in minorsDist.items():
             q += v['Quantity']
         return 100*q/66
 
@@ -1316,7 +1317,7 @@ class RomPatcher:
     # controlsDict : possible keys are "Shot", "Jump", "Dash", "ItemSelect", "ItemCancel", "AngleUp", "AngleDown"
     #                possible values are "A", "B", "X", "Y", "L", "R", "Select", "None"
     def writeControls(self, controlsDict):
-        for ctrl, button in controlsDict.iteritems():
+        for ctrl, button in controlsDict.items():
             if ctrl not in RomPatcher.controls:
                 raise ValueError("Invalid control name : " + str(ctrl))
             if button not in RomPatcher.buttons:

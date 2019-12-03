@@ -15,7 +15,7 @@ from parameters import Knows, Settings, Controller, isKnows, isButton
 from solver import Conf
 from parameters import diff2text, text2diff
 from solver import StandardSolver, DifficultyDisplayer, InteractiveSolver
-from utils import PresetLoader
+from utils import PresetLoader, removeChars
 import db
 from graph_access import vanillaTransitions, vanillaBossesTransitions
 from utils import isStdPreset
@@ -25,6 +25,9 @@ from rom import RomPatches
 
 # put an expiration date to the default cookie to have it kept between browser restart
 response.cookies['session_id_solver']['expires'] = 31 * 24 * 3600
+
+# use the correct one
+pythonExec = "python{}".format(sys.version[0])
 
 def maxPresetsReach():
     # to prevent a spammer to create presets in a loop and fill the fs
@@ -522,13 +525,13 @@ def getROMsList():
         files = sorted(os.listdir('roms'))
         bases = [os.path.splitext(file)[0] for file in files]
         filtered = [base for base in bases if base in session.solver['romFiles']]
-        roms = [file+'.sfc' for file in filtered]
+        roms = ['{}.sfc'.format(file) for file in filtered]
 
     return roms
 
 def getLastSolvedROM():
     if session.solver['romFile'] is not None:
-        return session.solver['romFile'] + '.sfc'
+        return '{}.sfc'.format(session.solver['romFile'])
     else:
         return None
 
@@ -687,7 +690,7 @@ def generateJsonROM(romJsonStr):
     # handle filename with utf8 characters in it
     romFileName = tempRomJson["romFileName"].encode('utf8', 'replace')
     (base, ext) = os.path.splitext(romFileName)
-    jsonRomFileName = 'roms/' + base + '.json'
+    jsonRomFileName = 'roms/{}.json'.format(base)
     del tempRomJson["romFileName"]
 
     with open(jsonRomFileName, 'w') as jsonFile:
@@ -828,7 +831,7 @@ def computeDifficulty(jsonRomFileName, preset):
     id = DB.initSolver()
 
     params = [
-        'python2',  os.path.expanduser("~/RandomMetroidSolver/solver.py"),
+        pythonExec,  os.path.expanduser("~/RandomMetroidSolver/solver.py"),
         '-r', str(jsonRomFileName),
         '--preset', presetFileName,
         '--difficultyTarget', str(session.solver['difficultyTarget']),
@@ -1154,7 +1157,7 @@ def randomizerWebService():
 
     preset = request.vars.preset
 
-    params = ['python2',  os.path.expanduser("~/RandomMetroidSolver/randomizer.py"),
+    params = [pythonExec,  os.path.expanduser("~/RandomMetroidSolver/randomizer.py"),
               '--runtime', '20',
               '--seed', seed,
               '--output', jsonFileName,
@@ -1449,7 +1452,7 @@ def stats():
 
 def transition2isolver(transition):
     transition = str(transition)
-    return transition[0].lower()+transition[1:].translate(None, " ,()-")
+    return transition[0].lower() + removeChars(transition[1:], " ,()-")
 
 def tracker():
     response.title = 'Super Metroid VARIA Areas and Items Tracker'
@@ -1563,7 +1566,7 @@ class WS(object):
         # remove space and special characters
         # sed -e 's+ ++g' -e 's+,++g' -e 's+(++g' -e 's+)++g' -e 's+-++g'
         locName = str(locName)
-        return locName[0].lower()+locName[1:].translate(None, " ,()-")
+        return locName[0].lower() + removeChars(locName[1:], " ,()-")
 
     def returnState(self):
         if len(self.session["state"]) > 0:
@@ -1604,7 +1607,7 @@ class WS(object):
         (fd1, jsonInFileName) = tempfile.mkstemp()
         (fd2, jsonOutFileName) = tempfile.mkstemp()
         params = [
-            'python2',  os.path.expanduser("~/RandomMetroidSolver/solver.py"),
+            pythonExec,  os.path.expanduser("~/RandomMetroidSolver/solver.py"),
             '--interactive',
             '--state',  jsonInFileName,
             '--output', jsonOutFileName,
@@ -1747,7 +1750,7 @@ class WS_common_init(WS):
 
         (fd, jsonOutFileName) = tempfile.mkstemp()
         params = [
-            'python2',  os.path.expanduser("~/RandomMetroidSolver/solver.py"),
+            pythonExec,  os.path.expanduser("~/RandomMetroidSolver/solver.py"),
             '--preset', presetFileName,
             '--output', jsonOutFileName,
             '--action', "init",
@@ -1893,7 +1896,7 @@ class WS_item_add(WS):
         def name4isolver(locName):
             # remove space and special characters
             # sed -e 's+ ++g' -e 's+,++g' -e 's+(++g' -e 's+)++g' -e 's+-++g'
-            return locName.translate(None, " ,()-")
+            return removeChars(locName, " ,()-")
 
         locName = name4isolver(request.vars.locName)
 
@@ -2057,7 +2060,7 @@ def customWebService():
 
     # call the randomizer
     (fd, jsonFileName) = tempfile.mkstemp()
-    params = ['python2',  os.path.expanduser("~/RandomMetroidSolver/randomizer.py"),
+    params = [pythonExec,  os.path.expanduser("~/RandomMetroidSolver/randomizer.py"),
               '--output', jsonFileName, '--patchOnly']
 
     for patch in patches:

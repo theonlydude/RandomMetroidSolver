@@ -27,7 +27,7 @@ from rom import RomPatches
 response.cookies['session_id_solver']['expires'] = 31 * 24 * 3600
 
 # use the correct one
-pythonExec = "python{}".format(sys.version[0])
+pythonExec = "python{}.{}".format(sys.version_info.major, sys.version_info.minor)
 
 def maxPresetsReach():
     # to prevent a spammer to create presets in a loop and fill the fs

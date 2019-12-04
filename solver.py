@@ -1030,7 +1030,7 @@ class InteractiveSolver(CommonSolver):
 
         plandoCurrentJson = json.dumps(plandoCurrent)
 
-        pythonExec = "python{}".format(sys.version[0])
+        pythonExec = "python{}.{}".format(sys.version_info.major, sys.version_info.minor)
         params = [
             pythonExec,  os.path.expanduser("~/RandomMetroidSolver/randomizer.py"),
             '--runtime', '10',

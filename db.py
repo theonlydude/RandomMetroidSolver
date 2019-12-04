@@ -1,15 +1,15 @@
-#!/usr/bin/python
-
 # check if a stats db is available
 try:
+    # pip3 install mysql-connector-python --user
     import mysql.connector
     from db_params import dbParams
-    from version import randoAlgoVersion
     dbAvailable = True
 except:
     dbAvailable = False
 
+from version import randoAlgoVersion
 from parameters import easy, medium, hard, harder, hardcore, mania
+from utils import removeChars
 
 class DB:
     def __init__(self):
@@ -176,17 +176,6 @@ class DB:
         try:
             sql = "insert into isolver (init_time, preset, romFileName) values (now(), '%s', '%s');"
             self.cursor.execute(sql % (preset, romFileName))
-        except Exception as e:
-            print("DB.addISolver::error execute: {} error: {}".format(sql, e))
-            self.dbAvailable = False
-
-    def addRace(self, md5sum, interval, magic):
-        if self.dbAvailable == False:
-            return None
-
-        try:
-            sql = "insert into race (md5sum, create_time, interval_hours, magic) values ('%s', now(), %d, %d);"
-            self.cursor.execute(sql % (md5sum, interval, magic))
         except Exception as e:
             print("DB.addISolver::error execute: {} error: {}".format(sql, e))
             self.dbAvailable = False
@@ -364,29 +353,6 @@ order by init_time;"""
         header = ["initTime", "preset", "romFileName"]
         return (header, self.execSelect(sql, (weeks,)))
 
-    def checkIsRace(self, md5sum):
-        # return true if seed is race protected
-        sql = """select 1
-from race
-where md5sum = '%s';"""
-        result = self.execSelect(sql, (md5sum,))
-        if result == None:
-            return False
-        return len(result) > 0
-
-    def checkCanSolveRace(self, md5sum):
-        # return magic number if race protected seed can be solved, else None
-        sql = """select magic
-from race
-where md5sum = '%s'
-  and now() > date_add(create_time, interval interval_hours hour);"""
-        result = self.execSelect(sql, (md5sum,))
-        if result == None or len(result) == 0:
-            return None
-        else:
-            # db returns a list of tuples
-            return result[0][0]
-
     @staticmethod
     def dumpExtStatsItems(parameters, locsItems, sqlFile):
         sql = """insert into extended_stats (version, preset, area, boss, majorsSplit, progSpeed, morphPlacement, suitsRestriction, progDiff, superFunMovement, superFunCombat, superFunSuit, noGravHeat, count)
@@ -402,7 +368,7 @@ set @last_id = last_insert_id();
             if item == 'Boss':
                 continue
             # we can't have special chars in columns names
-            location = location.translate(None, " ,()-")
+            location = removeChars(location, " ,()-")
             sql = "insert into item_locs (ext_id, item, {}) values (@last_id, '%s', 1) on duplicate key update {} = {} + 1;\n".format(location, location, location)
 
             sqlFile.write(sql % (item,))

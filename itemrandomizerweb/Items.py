@@ -2,7 +2,7 @@ from itemrandomizerweb.stdlib import List
 from utils import randGaussBounds, getRangeDict, chooseFromRange
 import log, logging
 
-import struct, random, copy
+import struct, copy, random
 
 class ItemManager:
     Items = {
@@ -285,6 +285,7 @@ class ItemPoolGenerator(object):
         ammoQty = self.qty['ammo']
         if not self.qty['strictMinors']:
             rangeDict = getRangeDict(ammoQty)
+            self.log.debug("rangeDict: {}".format(rangeDict))
             while len(self.itemManager.getItemPool()) < maxItems:
                 item = chooseFromRange(rangeDict)
                 self.itemManager.addMinor(item)
@@ -292,17 +293,18 @@ class ItemPoolGenerator(object):
             minorsTypes = ['Missile', 'Super', 'PowerBomb']
             totalProps = sum(ammoQty[m] for m in minorsTypes)
             minorsByProp = sorted(minorsTypes, key=lambda m: ammoQty[m])
-            totalMinorLocations = 66 * self.qty['minors'] / 100
+            # in python3 the result is a float
+            totalMinorLocations = int(66 * self.qty['minors'] / 100)
             self.log.debug("totalProps: {}".format(totalProps))
             self.log.debug("totalMinorLocations: {}".format(totalMinorLocations))
             def ammoCount(ammo):
                 return float(len([item for item in self.itemManager.getItemPool() if item['Type'] == ammo]))
             def targetRatio(ammo):
-                return float(ammoQty[ammo])/totalProps
+                return round(float(ammoQty[ammo])/totalProps, 3)
             def cmpRatio(ammo, ratio):
                 thisAmmo = ammoCount(ammo)
-                thisRatio = thisAmmo/totalMinorLocations
-                nextRatio = (thisAmmo + 1)/totalMinorLocations
+                thisRatio = round(thisAmmo/totalMinorLocations, 3)
+                nextRatio = round((thisAmmo + 1)/totalMinorLocations, 3)
                 self.log.debug("{} current, next/target ratio: {}, {}/{}".format(ammo, thisRatio, nextRatio, ratio))
                 return abs(nextRatio - ratio) < abs(thisRatio - ratio)
             def fillAmmoType(ammo, checkRatio=True):

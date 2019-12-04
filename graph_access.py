@@ -1,4 +1,5 @@
-import random, copy
+import copy
+import random
 from graph import AccessPoint
 from parameters import Knows, Settings
 from rom import RomPatches

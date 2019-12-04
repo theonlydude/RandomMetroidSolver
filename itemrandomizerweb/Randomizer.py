@@ -1,4 +1,5 @@
-import sys, random, time, copy
+import sys, time, copy, random
+
 from itemrandomizerweb.Items import ItemManager
 from parameters import Knows, isBossKnows, Settings, samus, infinity, god
 from itemrandomizerweb.stdlib import List
@@ -183,7 +184,7 @@ class RandoSettings(object):
         elif progSpeed == 'basic':
             itemLimit = 0
         if self.restrictions['MajorMinor'] == 'Chozo':
-            itemLimit /= 4
+            itemLimit = int(itemLimit / 4)
         return itemLimit
 
     def getLocLimit(self, progSpeed):
@@ -434,7 +435,7 @@ class SuperFunProvider(object):
             Knows.IceZebSkip = SMBool(True, 0, [])
 
         poolDict = self.rando.getPoolDict(pool)
-        self.log.debug('pool='+str([(t, len(poolDict[t])) for t in poolDict]))
+        self.log.debug('pool={}'.format(sorted([(t, len(poolDict[t])) for t in poolDict])))
         # give us everything and beat every boss to see what we can access
         self.disableBossChecks()
         self.sm.resetItems()
@@ -448,12 +449,12 @@ class SuperFunProvider(object):
 
         # check if we can reach all APs from all APs
         nonInternalAPs = [ap for ap in self.areaGraph.accessPoints.values() if ap.Internal == False]
-        for startApName, startAp in self.areaGraph.accessPoints.iteritems():
+        for startApName, startAp in self.areaGraph.accessPoints.items():
             availAccessPoints = self.areaGraph.getAvailableAccessPoints(startAp, self.sm, self.rando.difficultyTarget)
             for ap in nonInternalAPs:
                 if not ap in availAccessPoints:
                     ret = False
-                    self.log.debug("unavail AP: " + ap.Name + ", from " + startApName)
+                    #self.log.debug("unavail AP: " + ap.Name + ", from " + startApName)
 
         # check if we can reach all bosses
         if ret:
@@ -486,7 +487,7 @@ class SuperFunProvider(object):
             (possible, energyDiff) = self.sm.mbEtankCheck()
             if possible == True:
                 return self.okay()
-            return SMBool(False, 0)
+            return SMBool(False)
         self.sm.enoughStuffsMotherbrain = mbCheck
 
     def restoreBossChecks(self):
@@ -819,7 +820,7 @@ class Randomizer(object):
         def isAvail(loc):
             for k in loc['difficulty'].knows:
                 try:
-                    diff = getattr(Knows, k)
+                    smKnows = getattr(Knows, k)
                     # filter out tricks above diff target except boss
                     # knows, because boss fights can be performed
                     # without the trick anyway.
@@ -829,7 +830,7 @@ class Randomizer(object):
                     # Knows for Ridley, and other bosses give
                     # drops. so only boss fights with diff above god
                     # can slip in
-                    if diff.difficulty > diff and isBossKnows(k) is None:
+                    if smKnows.difficulty > diff and isBossKnows(k) is None:
                         return False
                 except AttributeError:
                     # hard room/hell run
@@ -922,7 +923,7 @@ class Randomizer(object):
     def possibleItems(self, curLocs, itemPool):
         result = []
         poolDict = self.getPoolDict(itemPool)
-        for itemType,items in poolDict.iteritems():
+        for itemType,items in sorted(poolDict.items()):
             if self.checkItem(items[0]):
                 for item in items:
                     result.append(item)
@@ -1422,7 +1423,7 @@ class Randomizer(object):
             return False
         pool = self.getNonProgItemPoolStart()
         poolTypes = list(set([item['Type'] for item in pool]))
-        self.log.debug("fillNonProgressionItems poolset=" + str(poolTypes))
+        self.log.debug("fillNonProgressionItems poolset=" + str(sorted(poolTypes)))
         poolWasEmpty = len(pool) == 0
         itemLocation = None
         nItems = 0
@@ -1430,7 +1431,10 @@ class Randomizer(object):
         self.log.debug("NON-PROG")
         minLimit = self.itemLimit - int(self.itemLimit/5)
         maxLimit = self.itemLimit + int(self.itemLimit/5)
-        itemLimit = random.randint(minLimit, maxLimit)
+        if minLimit == maxLimit:
+            itemLimit = minLimit
+        else:
+            itemLimit = random.randint(minLimit, maxLimit)
         while len(pool) > 0 and nItems < itemLimit and locPoolOk:
             curLocs = self.currentLocations()
             itemLocation = self.generateItem(curLocs, pool)
@@ -1713,7 +1717,7 @@ class Randomizer(object):
                         if d < minDiff:
                             minDiff = d
                             ret = loc
-                return loc
+                return ret
             def getLocs(locs):
                 return [loc for loc in locs if 'Chozo' not in loc['Class'] and 'Boss' not in loc['Class']]
             def getCurLocs(ap):

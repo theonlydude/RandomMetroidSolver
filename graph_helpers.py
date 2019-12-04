@@ -115,7 +115,8 @@ class HelpersGraph(Helpers):
                                              sm.haveItem('HiJump'), # ...or by jumping
                                              sm.knowsGravityJump(),
                                              sm.canFly())),
-                              sm.wand(sm.haveItem('Ice'), sm.canDoSuitlessOuterMaridia()))) # climbing crabs
+                              sm.wand(sm.haveItem('Ice'), sm.canDoSuitlessOuterMaridia()), # climbing crabs
+                              sm.canDoubleSpringBallJump()))
 
     @Cache.decorator
     def canPassMaridiaToRedTowerNode(self):
@@ -297,7 +298,7 @@ class HelpersGraph(Helpers):
             # display all the available energy in the solver.
             return sm.wand(sm.heatProof(), SMBool(True, 0, items=redItems+['Super', '{}-ETank - {}-Reserve'.format(self.smbm.itemCount('ETank'), self.smbm.itemCount('Reserve'))]))
 
-        return SMBool(False, 0)
+        return SMBool(False)
 
     # go though the pirates room filled with acid
     @Cache.decorator

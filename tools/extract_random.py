@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 from rom import RomLoader
 from graph_locations import locations

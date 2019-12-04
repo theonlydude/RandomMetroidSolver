@@ -356,11 +356,6 @@ window.onload = function(){
 		    romData[addresses[i]+11] = bytes[addresses[i]+11];
                 }
 
-                // bank B8
-                for(var i=0x1C0000; i<=0x1C7FFF; i++){
-                  romData[i] = bytes[i];
-                }
-
                 // majors split
                 romData[0x17B6C] = bytes[0x17B6C];
 

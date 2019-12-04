@@ -89,12 +89,3 @@ create table if not exists isolver (
   romFileName tinytext,
   primary key (init_time, preset)
 );
-
--- race mode
-create table if not exists race (
-  md5sum char(32) not null,
-  create_time datetime not null,
-  interval_hours tinyint unsigned not null,
-  magic smallint unsigned not null,
-  primary key (md5sum)
-);

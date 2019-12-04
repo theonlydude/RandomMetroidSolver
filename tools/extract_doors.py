@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 # get info from https://github.com/DJuttmann/SM3E
 

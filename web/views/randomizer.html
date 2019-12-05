@@ -333,32 +333,13 @@ function changeComplexity(evt, name) {
   }
 
   else if(name == "medium") {
-    var show = ["maxDiffVisibility", "patchesVisibility", "morphPlacementVisibility", "ammoVisibility"
-{{
-for patch in patches:
-  if patch[3] == True:
-    response.write(", \"{}Visibitily\"".format(patch[0]), escape=False)
-    pass
-  pass
-}}];
-    var hide = ["seedVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "strictMinorsVisibility", "missileQtyVisibility", "superQtyVisibility", "powerBombQtyVisibility", "superFunVisibility", "areaPatchVisibility", "mainPatchesVisibitily", "mainPatchesTextVisibitily", "hideItemsVisibility", "raceModeVisibility"
-{{
-for patch in patches:
-  if patch[3] == False:
-    response.write(", \"{}Visibitily\"".format(patch[0]), escape=False)
-    pass
-  pass
-}}];
+    var show = ["maxDiffVisibility", "patchesVisibility", "morphPlacementVisibility", "ammoVisibility", "nerfedChargeVisibility", "noMusicVisibility"];
+    var hide = ["seedVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "strictMinorsVisibility", "missileQtyVisibility", "superQtyVisibility", "powerBombQtyVisibility", "superFunVisibility", "areaPatchVisibility", "mainPatchesVisibility", "mainPatchesTextVisibility", "hideItemsVisibility", "raceModeVisibility", "miscVisibility"];
     showHide(show, hide);
   }
 
   else {
-    var show = ["seedVisibility", "ammoVisibility", "maxDiffVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "morphPlacementVisibility", "strictMinorsVisibility", "missileQtyVisibility", "superQtyVisibility", "powerBombQtyVisibility", "superFunVisibility", "patchesVisibility", "areaPatchVisibility", "mainPatchesVisibitily", "mainPatchesTextVisibitily", "hideItemsVisibility", "raceModeVisibility"
-{{
-for patch in patches:
-  response.write(", \"{}Visibitily\"".format(patch[0]), escape=False)
-  pass
-}}];
+    var show = ["seedVisibility", "ammoVisibility", "maxDiffVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "morphPlacementVisibility", "strictMinorsVisibility", "missileQtyVisibility", "superQtyVisibility", "powerBombQtyVisibility", "superFunVisibility", "patchesVisibility", "areaPatchVisibility", "mainPatchesVisibility", "mainPatchesTextVisibility", "hideItemsVisibility", "raceModeVisibility", "nerfedChargeVisibility", "miscVisibility", "noMusicVisibility"];
     var hide = [];
     showHide(show, hide);
   }
@@ -391,7 +372,7 @@ function AjaxPresetCallCompleted(data) {
     console.log("AjaxPresetCallCompleted");
 
     var dataDict = {paramsFileTarget : data, "complexity": getComplexity()};
-    var elems = ["seed", "itemsounds", "spinjumprestart", "rando_speed", "elevators_doors_speed", "skip_ceres", "skip_intro", "animals", "layoutPatches", "noGravHeat", "areaLayout", "variaTweaks", "areaRandomization", "No_Music", "preset", "bossRandomization", "raceMode"];
+    var elems = ["seed", "preset", "raceMode", "areaRandomization", "areaLayout", "bossRandomization", "layoutPatches", "variaTweaks", "gravityBehaviour", "nerfedCharge", "itemsounds", "elevators_doors_speed", "spinjumprestart", "rando_speed", "startLocation", "animals", "No_Music"];
     var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "energyQty", "maxDifficulty", "majorsSplit", "suitsRestriction", "morphPlacement", "funCombat", "funMovement", "funSuits", "progressionDifficulty", "hideItems", "strictMinors"];
 
     for(var i=0; i<elems.length; i++) {
@@ -540,7 +521,7 @@ function AjaxRandomizerCallCompleted(data) {
     console.log("button text set back to randomize");
 
     var dataDict = {"complexity": getComplexity()};
-    var elems = ["itemsounds", "spinjumprestart", "rando_speed", "elevators_doors_speed", "skip_ceres", "skip_intro", "animals", "layoutPatches", "noGravHeat", "areaLayout", "variaTweaks", "areaRandomization", "bossRandomization", "No_Music", "preset", "randoPreset"];
+    var elems = ["seed", "preset", "raceMode", "areaRandomization", "areaLayout", "bossRandomization", "layoutPatches", "variaTweaks", "gravityBehaviour", "nerfedCharge", "itemsounds", "elevators_doors_speed", "spinjumprestart", "rando_speed", "startLocation", "animals", "No_Music", "randoPreset"];
     var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "energyQty", "maxDifficulty", "majorsSplit", "suitsRestriction", "morphPlacement", "funCombat", "funMovement", "funSuits", "progressionDifficulty", "hideItems", "strictMinors"];
 
     for(var i=0; i<elems.length; i++) {
@@ -724,42 +705,6 @@ window.onload = function(){
         }, false);
     } else {
         alert("This website requires the HTML5 File API, please upgrade your browser to a newer version.");
-    }
-
-    var skipCeres = document.getElementById("skip_ceres");
-    skipCeres.onchange = function(){
-        var skipCeres = document.getElementById("skip_ceres");
-        var skipIntro = document.getElementById("skip_intro");
-
-        // if both are set, unselect the other one
-        if(skipCeres.checked && skipIntro.checked){
-            skipIntro.click();
-        }
-        // if none are set, select the other one
-        if(! skipCeres.checked && ! skipIntro.checked){
-            skipIntro.click();
-        }
-
-        switchCheckbox("skip_ceres");
-    };
-
-    var skipIntro = document.getElementById("skip_intro");
-    skipIntro.onchange = function(){
-        var skipCeres = document.getElementById("skip_ceres");
-        var skipIntro = document.getElementById("skip_intro");
-
-        if(skipIntro.checked && skipCeres.checked){
-            skipCeres.click();
-        }
-        if(! skipCeres.checked && ! skipIntro.checked){
-            skipCeres.click();
-        }
-        switchCheckbox("skip_intro");
-    };
-
-    // if none are set, activate skip ceres
-    if(! skipCeres.checked && ! skipIntro.checked){
-        skipCeres.click();
     }
 
     var area = document.getElementById("areaRandomization");
@@ -1206,13 +1151,8 @@ Click on the dice button to randomly set this parameter.",
 <td class=\"knowsUsed\"><img src=\"/solver/static/images/bt_map.png\" alt=\"bt_map\" title=\"bt_map\" class=\"full\"/></td>\
 <td class=\"knowsUsed\"><img src=\"/solver/static/images/spore_save.png\" alt=\"spore_save\" title=\"spore_save\" class=\"full\"/></td>\
 </tr>\
-</table>",
-      placement: "auto left"
-    },
-    {
-      element: "#noGravHeatStep",
-      title: "No Gravity Suit Heat Protection",
-      content: "Remove the Gravity Suit <img src=\"/solver/static/images/Gravity.png\" alt=\"Gravity.png\" title=\"Gravity.png\" class=\"width: 32px\"/> environmental protection (heat, spikes, electricity...), it also double the Varia Suit <img src=\"/solver/static/images/Varia.png\" alt=\"Varia.png\" title=\"Varia.png\" class=\"width: 32px\"/> environmental protection, as such it balances more the two suits abilities. Disable it to have a more vanilla feeling.",
+</table>\
+<p>Patches developed by Total & Flo.</p>",
       placement: "auto left"
     },
     {
@@ -1230,9 +1170,93 @@ Click on the dice button to randomly set this parameter.",
 <td class=\"quarter\"><img src=\"/solver/static/images/ws_etank.png\" alt=\"ws_etank\" title=\"ws_etank\" class=\"full\"/></td>\
 <td class=\"quarter\"><img src=\"/solver/static/images/ln_chozo.png\" alt=\"ln_chozo\" title=\"ln_chozo\" class=\"full\"/></td>\
 </tr>\
-</table>",
+</table>\
+<p>Patch developed by Flo.</p>",
       placement: "auto left"
-    } ]});
+    },
+    {
+      element: "#gravityBehaviourStep",
+      title: "Gravity Suit Environmental Protection Behaviour",
+      content: "<p><ul>\
+<li>Vanilla environmental protection:<p>Gravity Suit <img src=\"/solver/static/images/Gravity.png\" alt=\"Gravity.png\" title=\"Gravity.png\" class=\"width: 32px\"/> provides full protection against environmental damages (heat, spikes, electricity...).</p></li>\
+<li>Progressive environmental protection:\
+<p><ul>\
+<li>Gravity Suit  <img src=\"/solver/static/images/Gravity.png\" alt=\"Gravity.png\" title=\"Gravity.png\" class=\"width: 32px\"/> provides 50% heat damage reduction</li>\
+<li>Varia <img src=\"/solver/static/images/Varia.png\" alt=\"Varia.png\" title=\"Varia.png\" class=\"width: 32px\"/> and Gravity  <img src=\"/solver/static/images/Gravity.png\" alt=\"Gravity.png\" title=\"Gravity.png\" class=\"width: 32px\"/> each add 50% damage reduction to enemy attacks and environmental damage</li>\
+<li>Varia <img src=\"/solver/static/images/Varia.png\" alt=\"Varia.png\" title=\"Varia.png\" class=\"width: 32px\"/> and Gravity  <img src=\"/solver/static/images/Gravity.png\" alt=\"Gravity.png\" title=\"Gravity.png\" class=\"width: 32px\"/> stack to reach 75% reduction to enemy attacks and environmental damage</li>\
+</ul></p>\
+</li>\
+<li>No environmental protection:<p>Remove Gravity Suit <img src=\"/solver/static/images/Gravity.png\" alt=\"Gravity.png\" title=\"Gravity.png\" class=\"width: 32px\"/> environmental protection (heat, spikes, electricity...), it also double the Varia Suit <img src=\"/solver/static/images/Varia.png\" alt=\"Varia.png\" title=\"Varia.png\" class=\"width: 32px\"/> environmental protection, as such it balances more the two suits abilities.</p></li>\
+</ul></p>\
+<p>Patches developed by Total and Smiley.</p>",
+      placement: "auto left"
+    },
+    {
+      element: "#nerfedChargeStep",
+      title: "Nerfed Charge beam",
+      content: "<ul>\
+<li>Samus begins with starter Charge Beam <img src=\"/solver/static/images/Charge.png\" alt=\"Charge.png\" title=\"Charge.png\" class=\"width: 32px\"/> that does one third charged shot damage.</li>\
+<li><a href=\"https://wiki.supermetroid.run/Pseudo_Screw_Attack\">Pseudo Screws</a> and <a href=\"https://wiki.supermetroid.run/Charge_Beam_Combos\">Special Beam Attacks</a> also do one third damage.</li>\
+<li>Once Charge Beam <img src=\"/solver/static/images/Charge.png\" alt=\"Charge.png\" title=\"Charge.png\" class=\"width: 32px\"/> has been collected, do full damage.</li>\
+</ul>\
+<p>Patch developed by Smiley and Flo.</p>",
+      placement: "auto left"
+    },
+    {
+      element: "#itemsoundsStep",
+      title: "Fanfare",
+      content: "<p>Replace the quite long fanfare played when picking an item by a shorter one related with the item picked.</p>\
+<p>Patch developed by Scyzer.</p>",
+      placement: "auto left"
+    },
+    {
+      element: "#ElevatorDoorsStep",
+      title: "Transitions",
+      content: "<p>Accelerate doors and elevators transitions</p>\
+<p>This patch was developed by Rakki and Lioran.</p>",
+      placement: "auto left"
+    },
+    {
+      element: "#spinjumprestartStep",
+      title: "Spin jump restart",
+      content: "<p>Allows Samus to start spinning in mid air after jumping or falling</p>\
+<p>This patch was developed by Kejardon.</p>",
+      placement: "auto left"
+    },
+    {
+      element: "#rando_speedStep",
+      title: "Momentum",
+      content: "<p>Let Samus keeps her momentum when landing from a fall or from jumping</p>\
+<p>This patch was developed by Oi27.</p>",
+      placement: "auto left"
+    },
+    {
+      element: "#StartLocationStep",
+      title: "Start location",
+      content: "<p>Choose where you want to start the game:\
+<ul>\
+<li>Start at Ceres Station: Skip text intro</li>\
+<li>Start at Landing Site: Skip text intro and Ceres station</li>\
+</ul>\
+</p>\
+<p>Patches developed by Smiley and Total.</p>",
+      placement: "auto left"
+    },
+    {
+      element: "#animalsStep",
+      title: "Animals surprise",
+      content: "<p>Replace saving the animals in the escape sequence by a random surprise.</p>\
+<p>This patch was developed by Foosda.</p>",
+      placement: "auto left"
+    },
+    {
+      element: "#No_MusicStep",
+      title: "No music",
+      content: "<p>Disable the background music to let you hear you favorite tunes instead.</p>\
+<p>This patch was developed by Kejardon.</p>",
+      placement: "auto left"
+    }
+ ]});
 
   // Initialize the tour
   tour.init();
@@ -1508,31 +1532,107 @@ def displayNumber(id, min, max, default, step="1"):
 	    </div>
 	    <div id="patchesVisibility">
 	      <h4 id="patchesStep">Patches<span class="rightStep"><button type="button" onclick="startTheTour(22)">?</button></span></h4>
-	      <p id="mainPatchesTextVisibitily">
+	      <p id="mainPatchesTextVisibility">
 	        The bug fix <a href="https://itemrando.supermetroid.run/information">patches</a> from Total Item Randomizer are included by default.
 	      </p>
-	      <table class="full" id="mainPatchesVisibitily">
+	      <table class="full">
+		<colgroup><col class="quarter" /><col class="threequarter" /><col class="check" /></colgroup>
+		<tr><td colspan="2"><h5 class="center">Randomizer adaptations (logic impact)</h5></td><td></td></tr>
+	      </table>
+	      <table class="full" id="mainPatchesVisibility">
+		<colgroup><col class="half" /><col class="half" /></colgroup>
 	        <tr id="layoutPatchesStep">
-		  <td class="full">{{displayCheckbox("layoutPatches", True)}} Anti-softlock layout patches (by Total & Flo)</td>
+		  <td colspan="2">{{displayCheckbox("layoutPatches", True)}} Anti-softlock layout patches</td>
 		  <td><button type="button" onclick="startTheTour(23)">?</button></td>
 	        </tr>
 	        <tr>
-		  <td class="full" id="noGravHeatStep">{{displayCheckbox("noGravHeat", True)}} Remove Gravity Suit heat protection (by Total)</td><td><button type="button" onclick="startTheTour(24)">?</button></td>
+		  <td colspan="2" id="variaTweaksStep">{{displayCheckbox("variaTweaks", True)}} VARIA tweaks</td>
+		  <td><button type="button" onclick="startTheTour(24)">?</button></td>
 	        </tr>
-	        <tr>
-		  <td class="full" id="variaTweaksStep">{{displayCheckbox("variaTweaks", True)}} VARIA tweaks (by Flo)</td><td><button type="button" onclick="startTheTour(25)">?</button></td>
+	        <tr id="gravityBehaviourStep">
+		  <td>Gravity Suit behaviour</td>
+		  <td>
+		    {{displaySelect("gravityBehaviour", ["Vanilla environmental protection", "Progressive environmental protection", "No environmental protection"], "No environmental protection")}}
+		  </td>
+		  <td><button type="button" onclick="startTheTour(25)">?</button></td>
 	        </tr>
 	      </table>
-	      <table class="full" id="patchesStep">
-{{
-for patch in patches:
-  response.write("	    <tr>", escape=False)
-  response.write("	      <td class=\"full\" id=\"{}Visibitily\">".format(patch[0]), escape=False)
-  displayCheckbox(patch[0], patches[2])
-  response.write("{}".format(patch[1]))
-  response.write("	    </tr>", escape=False)
-  pass
-}}
+	      <table class="full" id="nerfedChargeVisibility">
+		<colgroup><col class="half" /><col class="half" /></colgroup>
+		<tr id="nerfedChargeStep">
+		  <td colspan="2">
+		    {{displayCheckbox("nerfedCharge")}}
+		    Nerfed Charge beam available from start
+		  </td>
+                  <td><button type="button" onclick="startTheTour(26)">?</button></td>
+		</tr>
+	      </table>
+	      <table class="full">
+		<colgroup><col class="quarter" /><col class="threequarter" /><col class="check" /></colgroup>
+		<tr><td colspan="2"><h5 class="center">Game confort</h5></td><td></td></tr>
+	      </table>
+	      <table class="full">
+		<colgroup><col class="half" /><col class="half" /></colgroup>
+		<tr id="itemsoundsStep">
+		  <td colspan="2">
+		    {{displayCheckbox("itemsounds")}}
+		    Remove fanfare when picking up an item
+		  </td>
+                  <td><button type="button" onclick="startTheTour(28)">?</button></td>
+		</tr>
+		<tr id="ElevatorDoorsStep">
+		  <td colspan="2">
+		    {{displayCheckbox("elevators_doors_speed")}}
+		    Accelerate doors and elevators transitions
+		  </td>
+                  <td><button type="button" onclick="startTheTour(29)">?</button></td>
+		</tr>
+	      </table>
+	      <table class="full">
+		<colgroup><col class="half" /><col class="half" /></colgroup>
+		<tr id="spinjumprestartStep">
+		  <td colspan="2">
+		    {{displayCheckbox("spinjumprestart")}}
+		    Allows Samus to start spinning in mid air after jumping or falling
+		  </td>
+                  <td><button type="button" onclick="startTheTour(30)">?</button></td>
+		</tr>
+		<tr id="rando_speedStep">
+		  <td colspan="2">
+		    {{displayCheckbox("rando_speed")}}
+		    Let Samus keeps her momentum when landing from a fall or from jumping
+		  </td>
+                  <td><button type="button" onclick="startTheTour(31)">?</button></td>
+		</tr>
+	      </table>
+	      <table class="full">
+		<colgroup><col class="quarter" /><col class="threequarter" /><col class="check" /></colgroup>
+		<tr><td colspan="2"><h5 class="center">Miscellaneous</h5></td><td></td></tr>
+	      </table>
+	      <table class="full" id="miscVisibility">
+		<colgroup><col class="half" /><col class="half" /></colgroup>
+		<tr id="StartLocationStep">
+		  <td>Start location</td>
+		  <td>{{displaySelect("startLocation", ["Ceres", "Landing Site"], "Landing Site")}}</td>
+                  <td><button type="button" onclick="startTheTour(27)">?</button></td>
+		</tr>
+		<tr id="animalsStep">
+		  <td colspan="2">
+		    {{displayCheckbox("animals")}}
+		    Save the animals surprise
+		  </td>
+                  <td><button type="button" onclick="startTheTour(32)">?</button></td>
+		</tr>
+	      </table>
+	      <table class="full" id="noMusicVisibility">
+		<colgroup><col class="half" /><col class="half" /></colgroup>
+		<tr id="No_MusicStep">
+		  <td colspan="2">
+		    {{displayCheckbox("No_Music")}}
+		    Disable background music
+		  </td>
+                  <td><button type="button" onclick="startTheTour(33)">?</button></td>
+		</tr>
 	      </table>
 	    </div>
 	  </div>

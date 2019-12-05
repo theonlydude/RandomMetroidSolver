@@ -47,14 +47,14 @@ class Helpers(object):
         items = []
         if RomPatches.has(RomPatches.NoGravityEnvProtection):
             if hasVaria:
-                items.append('Varia')
+                items = ['Varia']
                 if envDmg:
                     ret = 4.0
                 else:
                     ret = 2.0
             if hasGrav and not envDmg:
                 ret = 4.0
-                items.append('Gravity')
+                items = ['Gravity']
         elif RomPatches.has(RomPatches.ProgressiveSuits):
             if hasVaria:
                 items.append('Varia')
@@ -65,10 +65,10 @@ class Helpers(object):
         else:
             if hasVaria:
                 ret = 2.0
-                items.append('Varia')
+                items = ['Varia']
             if hasGrav:
                 ret = 4.0
-                items.append('Gravity')
+                items = ['Gravity']
         return (ret, items)
 
     # higher values for mult means room is that much "easier" (HP mult)
@@ -433,11 +433,7 @@ class Helpers(object):
         else:
             duration = secs / rate
         # print('rate=' + str(rate) + ', duration=' + str(duration))
-        suitsCoeff = 0.5
-        if sm.haveItem('Gravity') == True:
-            suitsCoeff = 2
-        elif sm.haveItem('Varia') == True:
-            suitsCoeff = 1
+        suitsCoeff = sm.getDmgReduction(envDmg=False)[0] / 2.0
         energy = suitsCoeff * (1 + self.energyReserveCount() + energyDiff)
         energyDict = None
         if 'Energy' in diffTbl:

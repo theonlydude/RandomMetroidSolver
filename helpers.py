@@ -706,7 +706,7 @@ class Pickup:
                     # mother brain rainbow attack
                     and canResistRainbow
                     # lower norfair access
-                    and (smbm.haveItem('Varia') or smbm.wand(smbm.wnot(RomPatches.has(RomPatches.NoGravityEnvProtection), smbm.wnot(RomPatches.has(RomPatches.ProgressiveSuits))))) # gravity is checked below
+                    and (smbm.haveItem('Varia') or smbm.wand(smbm.wnot(RomPatches.has(RomPatches.NoGravityEnvProtection)), smbm.wnot(RomPatches.has(RomPatches.ProgressiveSuits)))) # gravity is checked below
                     # speed or ice to access botwoon
                     and (smbm.haveItem('SpeedBooster')
                          or smbm.haveItem('Ice'))

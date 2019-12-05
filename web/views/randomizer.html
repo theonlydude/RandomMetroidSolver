@@ -1176,28 +1176,28 @@ Click on the dice button to randomly set this parameter.",
     },
     {
       element: "#gravityBehaviourStep",
-      title: "Gravity Suit Environmental Protection Behaviour",
+      title: "Suits Properties",
       content: "<p><ul>\
-<li>Vanilla environmental protection:<p>Gravity Suit <img src=\"/solver/static/images/Gravity.png\" alt=\"Gravity.png\" title=\"Gravity.png\" class=\"width: 32px\"/> provides full protection against environmental damages (heat, spikes, electricity...).</p></li>\
-<li>Progressive environmental protection:\
+<li>Balanced:<p>Removes Gravity <img src=\"/solver/static/images/Gravity.png\" alt=\"Gravity.png\" title=\"Gravity.png\" class=\"width: 32px\"/> environmental protection (heat, spikes, electricity...). It also doubles the Varia <img src=\"/solver/static/images/Varia.png\" alt=\"Varia.png\" title=\"Varia.png\" class=\"width: 32px\"/> environmental protection, to balance the two suits abilities. Enemy damage protection is still vanilla (50% for Varia, 75% for Gravity).</p></li>\
+<li>Progressive:\
 <p><ul>\
-<li>Gravity Suit  <img src=\"/solver/static/images/Gravity.png\" alt=\"Gravity.png\" title=\"Gravity.png\" class=\"width: 32px\"/> provides 50% heat damage reduction</li>\
-<li>Varia <img src=\"/solver/static/images/Varia.png\" alt=\"Varia.png\" title=\"Varia.png\" class=\"width: 32px\"/> and Gravity  <img src=\"/solver/static/images/Gravity.png\" alt=\"Gravity.png\" title=\"Gravity.png\" class=\"width: 32px\"/> each add 50% damage reduction to enemy attacks and environmental damage</li>\
-<li>Varia <img src=\"/solver/static/images/Varia.png\" alt=\"Varia.png\" title=\"Varia.png\" class=\"width: 32px\"/> and Gravity  <img src=\"/solver/static/images/Gravity.png\" alt=\"Gravity.png\" title=\"Gravity.png\" class=\"width: 32px\"/> stack to reach 75% reduction to enemy attacks and environmental damage</li>\
+<li>Gravity <img src=\"/solver/static/images/Gravity.png\" alt=\"Gravity.png\" title=\"Gravity.png\" class=\"width: 32px\"/> provides 50% heat damage reduction. Varia <img src=\"/solver/static/images/Varia.png\" alt=\"Varia.png\" title=\"Varia.png\" class=\"width: 32px\"/> still provides full heat protection.</li>\
+<li>Varia <img src=\"/solver/static/images/Varia.png\" alt=\"Varia.png\" title=\"Varia.png\" class=\"width: 32px\"/> and Gravity  <img src=\"/solver/static/images/Gravity.png\" alt=\"Gravity.png\" title=\"Gravity.png\" class=\"width: 32px\"/> each add 50% damage reduction to enemy attacks and environmental damage.</li>\
+<li>Varia <img src=\"/solver/static/images/Varia.png\" alt=\"Varia.png\" title=\"Varia.png\" class=\"width: 32px\"/> and Gravity  <img src=\"/solver/static/images/Gravity.png\" alt=\"Gravity.png\" title=\"Gravity.png\" class=\"width: 32px\"/> stack to reach 75% reduction to enemy attacks and environmental damage.</li>\
 </ul></p>\
 </li>\
-<li>No environmental protection:<p>Remove Gravity Suit <img src=\"/solver/static/images/Gravity.png\" alt=\"Gravity.png\" title=\"Gravity.png\" class=\"width: 32px\"/> environmental protection (heat, spikes, electricity...), it also double the Varia Suit <img src=\"/solver/static/images/Varia.png\" alt=\"Varia.png\" title=\"Varia.png\" class=\"width: 32px\"/> environmental protection, as such it balances more the two suits abilities.</p></li>\
+<li>Vanilla:<p>No change to vanilla suits properties. Most notably, Gravity <img src=\"/solver/static/images/Gravity.png\" alt=\"Gravity.png\" title=\"Gravity.png\" class=\"width: 32px\"/> provides full protection against environmental damages (heat, spikes, electricity...).</p></li>\
 </ul></p>\
 <p>Patches developed by Total and Smiley.</p>",
       placement: "auto left"
     },
     {
       element: "#nerfedChargeStep",
-      title: "Nerfed Charge beam",
+      title: "Nerfed Charge Beam",
       content: "<ul>\
-<li>Samus begins with starter Charge Beam <img src=\"/solver/static/images/Charge.png\" alt=\"Charge.png\" title=\"Charge.png\" class=\"width: 32px\"/> that does one third charged shot damage.</li>\
+<li>Samus begins with a starter Charge Beam <img src=\"/solver/static/images/Charge.png\" alt=\"Charge.png\" title=\"Charge.png\" class=\"width: 32px\"/> that does one third of charged shot damage, effectively bringing a nerfed charge shot damage to a standard shot damage, but that can damage bosses.</li>\
 <li><a href=\"https://wiki.supermetroid.run/Pseudo_Screw_Attack\">Pseudo Screws</a> and <a href=\"https://wiki.supermetroid.run/Charge_Beam_Combos\">Special Beam Attacks</a> also do one third damage.</li>\
-<li>Once Charge Beam <img src=\"/solver/static/images/Charge.png\" alt=\"Charge.png\" title=\"Charge.png\" class=\"width: 32px\"/> has been collected, do full damage.</li>\
+<li>Once the Charge Beam <img src=\"/solver/static/images/Charge.png\" alt=\"Charge.png\" title=\"Charge.png\" class=\"width: 32px\"/> item has been collected, it does full damage.</li>\
 </ul>\
 <p>Patch developed by Smiley and Flo.</p>",
       placement: "auto left"
@@ -1205,7 +1205,7 @@ Click on the dice button to randomly set this parameter.",
     {
       element: "#itemsoundsStep",
       title: "Fanfare",
-      content: "<p>Replace the quite long fanfare played when picking an item by a shorter one related with the item picked.</p>\
+      content: "<p>Replaces the quite long fanfare played when picking up an item by a short sound effect related with the item picked, and does not restart game music on item pickup.</p>\
 <p>Patch developed by Scyzer.</p>",
       placement: "auto left"
     },
@@ -1213,7 +1213,7 @@ Click on the dice button to randomly set this parameter.",
       element: "#ElevatorDoorsStep",
       title: "Transitions",
       content: "<p>Accelerate doors and elevators transitions</p>\
-<p>This patch was developed by Rakki and Lioran.</p>",
+<p>Doors patch was developed by Rakki and elevators patch by Lioran.</p>",
       placement: "auto left"
     },
     {
@@ -1537,7 +1537,7 @@ def displayNumber(id, min, max, default, step="1"):
 	      </p>
 	      <table class="full">
 		<colgroup><col class="quarter" /><col class="threequarter" /><col class="check" /></colgroup>
-		<tr><td colspan="2"><h5 class="center">Randomizer adaptations (logic impact)</h5></td><td></td></tr>
+		<tr><td colspan="2"><h5 class="center"><b>Randomizer adaptations (logic impact)</b></h5></td><td></td></tr>
 	      </table>
 	      <table class="full" id="mainPatchesVisibility">
 		<colgroup><col class="half" /><col class="half" /></colgroup>
@@ -1550,9 +1550,9 @@ def displayNumber(id, min, max, default, step="1"):
 		  <td><button type="button" onclick="startTheTour(24)">?</button></td>
 	        </tr>
 	        <tr id="gravityBehaviourStep">
-		  <td>Gravity Suit behaviour</td>
+		  <td>Suits properties</td>
 		  <td>
-		    {{displaySelect("gravityBehaviour", ["Vanilla environmental protection", "Progressive environmental protection", "No environmental protection"], "No environmental protection")}}
+		    {{displaySelect("gravityBehaviour", ["Balanced", "Progressive", "Vanilla"], "Balanced")}}
 		  </td>
 		  <td><button type="button" onclick="startTheTour(25)">?</button></td>
 	        </tr>
@@ -1562,14 +1562,14 @@ def displayNumber(id, min, max, default, step="1"):
 		<tr id="nerfedChargeStep">
 		  <td colspan="2">
 		    {{displayCheckbox("nerfedCharge")}}
-		    Nerfed Charge beam available from start
+		    Nerfed Charge Beam available from the start
 		  </td>
                   <td><button type="button" onclick="startTheTour(26)">?</button></td>
 		</tr>
 	      </table>
 	      <table class="full">
 		<colgroup><col class="quarter" /><col class="threequarter" /><col class="check" /></colgroup>
-		<tr><td colspan="2"><h5 class="center">Game confort</h5></td><td></td></tr>
+		<tr><td colspan="2"><h5 class="center"><b>Game comfort</b></h5></td><td></td></tr>
 	      </table>
 	      <table class="full">
 		<colgroup><col class="half" /><col class="half" /></colgroup>
@@ -1593,21 +1593,21 @@ def displayNumber(id, min, max, default, step="1"):
 		<tr id="spinjumprestartStep">
 		  <td colspan="2">
 		    {{displayCheckbox("spinjumprestart")}}
-		    Allows Samus to start spinning in mid air after jumping or falling
+		    Respin
 		  </td>
                   <td><button type="button" onclick="startTheTour(30)">?</button></td>
 		</tr>
 		<tr id="rando_speedStep">
 		  <td colspan="2">
 		    {{displayCheckbox("rando_speed")}}
-		    Let Samus keeps her momentum when landing from a fall or from jumping
+		    Speedkeep
 		  </td>
                   <td><button type="button" onclick="startTheTour(31)">?</button></td>
 		</tr>
 	      </table>
 	      <table class="full">
 		<colgroup><col class="quarter" /><col class="threequarter" /><col class="check" /></colgroup>
-		<tr><td colspan="2"><h5 class="center">Miscellaneous</h5></td><td></td></tr>
+		<tr><td colspan="2"><h5 class="center"><b>Miscellaneous</b></h5></td><td></td></tr>
 	      </table>
 	      <table class="full" id="miscVisibility">
 		<colgroup><col class="half" /><col class="half" /></colgroup>

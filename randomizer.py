@@ -155,7 +155,7 @@ if __name__ == "__main__":
     parser.add_argument('--nolayout',
                         help="do not include total randomizer layout patches",
                         dest='noLayout', action='store_true', default=False)
-    parser.add_argument('--nogravheat',
+    parser.add_argument('--nogravheatPatch',
                         help="do not include total randomizer suits patches",
                         dest='noGravHeat', action='store_true', default=False)
     parser.add_argument('--progressiveSuits',

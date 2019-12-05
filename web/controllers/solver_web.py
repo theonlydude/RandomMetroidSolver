@@ -886,7 +886,7 @@ def initRandomizerSession():
         session.randomizer['funSuits'] = "off"
         session.randomizer['layoutPatches'] = "on"
         session.randomizer['variaTweaks'] = "on"
-        session.randomizer['gravityBehaviour'] = "No environmental protection"
+        session.randomizer['gravityBehaviour'] = "Balanced"
         session.randomizer['nerfedCharge'] = "off"
         session.randomizer['itemsounds'] = "on"
         session.randomizer['elevators_doors_speed'] = "on"
@@ -1023,7 +1023,7 @@ def validateWebServiceParams(switchs, quantities, others, isJson=False):
             raiseHttp(400, "Wrong value for energyQty: authorized values: sparse/medium/vanilla", isJson)
 
     if 'gravityBehaviour' in others:
-        if request.vars.gravityBehaviour not in ['Vanilla environmental protection', 'Progressive environmental protection', 'No environmental protection']:
+        if request.vars.gravityBehaviour not in ['Balanced', 'Progressive', 'Vanilla']:
             raiseHttp(400, "Wrong value for gravityBehaviour: {}".format(request.vars.gravityBehaviour), isJson)
 
     if 'startLocation' in others:
@@ -1220,9 +1220,9 @@ def randomizerWebService():
         params.append('--nolayout')
 
 
-    if request.vars.gravityBehaviour == 'No environmental protection':
+    if request.vars.gravityBehaviour == 'Vanilla':
         params.append('--nogravheat')
-    elif request.vars.gravityBehaviour == 'Progressive environmental protection':
+    elif request.vars.gravityBehaviour == 'Progressive':
         params.append('--progressiveSuits')
 
     if request.vars.areaRandomization == 'on':

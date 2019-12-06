@@ -2183,7 +2183,7 @@ def extStats():
         # check that all items are present in the stats:
         nbItems = 19
         nbLocs = 105
-        if len(itemsStats) > 0 and len(itemsStats) != nbItems:
+        if itemsStats != None and len(itemsStats) > 0 and len(itemsStats) != nbItems:
             for i, item in enumerate(['Bomb', 'Charge', 'Grapple', 'Gravity', 'HiJump', 'Ice', 'Missile', 'Morph',
                                       'Plasma', 'PowerBomb', 'ScrewAttack', 'SpaceJump', 'Spazer', 'SpeedBooster',
                                       'SpringBall', 'Super', 'Varia', 'Wave', 'XRayScope']):

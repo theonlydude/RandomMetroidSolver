@@ -427,7 +427,7 @@ where 1 = 1
 
         sqlParams = [randoAlgoVersion, parameters['preset'], parameters['area'], parameters['boss'], parameters['gravityBehaviour'], parameters['nerfedCharge']]
 
-        if [parameters["maxDifficulty"] != "random":
+        if parameters["maxDifficulty"] != "random":
             where += """and e.maxDifficulty = '%s' """
             sqlParams.append(parameters['maxDifficulty'])
 
@@ -472,14 +472,16 @@ where 1 = 1
         techniques = self.execSelect(sqlTechniques.format(where), tuple(sqlParams))
         # transform techniques into a dict
         techOut = {}
-        for technique in techniques:
-            techOut[technique[0]] = technique[1]
+        if techniques != None:
+            for technique in techniques:
+                techOut[technique[0]] = technique[1]
 
         difficulties = self.execSelect(sqlDifficulties.format(where), tuple(sqlParams))
-        difficulties = difficulties[0]
+        if difficulties != None:
+            difficulties = difficulties[0]
 
-        # check if all values are null
-        if difficulties.count(None) == len(difficulties):
-            difficulties = []
+            # check if all values are null
+            if difficulties.count(None) == len(difficulties):
+                difficulties = []
 
         return (items, techOut, difficulties)

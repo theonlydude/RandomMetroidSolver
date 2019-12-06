@@ -845,19 +845,6 @@ def infos():
 
     return dict()
 
-# TODO: update customizer page to remove usage of the patches list
-patches = [
-    # name, desc, default on, visible on medium, visible on palettizer
-    ('skip_intro', "Skip text intro (start at Ceres Station) (by Smiley)", False, False, False),
-    ('skip_ceres', "Skip text intro and Ceres station (start at Landing Site) (by Total)", True, False, False),
-    ('itemsounds', "Remove fanfare when picking up an item (by Scyzer)", True, True, True),
-    ('spinjumprestart', "Allows Samus to start spinning in mid air after jumping or falling (by Kejardon)", False, True, True),
-    ('rando_speed', "Let's Samus keep her momentum when landing from a fall or from jumping (by Oi27)", False, True, True),
-    ('elevators_doors_speed', 'Accelerate doors and elevators transitions (by Rakki & Lioran)', True, True, True),
-    ('animals', "Save the animals surprise (by Foosda)", False, False, True),
-    ('No_Music', "Disable background music (by Kejardon)", False, True, True)
-]
-
 def initRandomizerSession():
     if session.randomizer is None:
         session.randomizer = {}
@@ -907,7 +894,7 @@ def randomizer():
     randoPresets.append("")
 
     return dict(stdPresets=stdPresets, tourPresets=tourPresets, comPresets=comPresets,
-                patches=patches, randoPresets=randoPresets, tourRandoPresets=tourRandoPresets)
+                randoPresets=randoPresets, tourRandoPresets=tourRandoPresets)
 
 def raiseHttp(code, msg, isJson=False):
     #print("raiseHttp: code {} msg {} isJson {}".format(code, msg, isJson))
@@ -1962,11 +1949,12 @@ def initCustomizerSession():
         session.customizer['globalShift'] = "on"
         session.customizer['customSpriteEnable'] = "off"
         session.customizer['customSprite'] = "samus"
-
-        for patch in patches:
-            if patch[0] in ['skip_intro', 'skip_ceres']:
-                continue
-            session.customizer[patch[0]] = "off"
+        session.customizer['itemsounds'] = "off"
+        session.customizer['spinjumprestart'] = "off"
+        session.customizer['rando_speed'] = "off"
+        session.customizer['elevators_doors_speed'] = "off"
+        session.customizer['animals'] = "off"
+        session.customizer['No_Music'] = "off"
 
 customSprites = {
     'samus': {"index":0, "name": "Samus", "desc": "Samus, with a distinct animation for Screw Attack without Space Jump and a new Crystal Flash animation", "author": "Artheau and Feesh", "group": "Samus"},
@@ -1993,7 +1981,7 @@ def customizer():
 
     initCustomizerSession()
 
-    return dict(patches=patches, customSprites=customSprites)
+    return dict(customSprites=customSprites)
 
 def customWebService():
     # check validity of all parameters
@@ -2021,24 +2009,28 @@ def customWebService():
     session.customizer['globalShift'] = request.vars.globalShift
     session.customizer['customSpriteEnable'] = request.vars.customSpriteEnable
     session.customizer['customSprite'] = request.vars.customSprite
-    for patch in patches:
-        session.customizer[patch] = request.vars[patch]
+    session.customizer['itemsounds'] = request.vars.itemsounds
+    session.customizer['spinjumprestart'] = request.vars.spinjumprestart
+    session.customizer['rando_speed'] = request.vars.rando_speed
+    session.customizer['elevators_doors_speed'] = request.vars.elevators_doors_speed
+    session.customizer['animals'] = request.vars.animals
+    session.customizer['No_Music'] = request.vars.No_Music
 
     # call the randomizer
     (fd, jsonFileName) = tempfile.mkstemp()
     params = [pythonExec,  os.path.expanduser("~/RandomMetroidSolver/randomizer.py"),
               '--output', jsonFileName, '--patchOnly']
 
-    for patch in patches:
-        if request.vars[patch] == 'on':
-            if patch in ['animals']:
-                continue
-            params.append('-c')
-            if patch == 'No_Music':
-                params.append(patch)
-            else:
-                params.append(patch + '.ips')
-
+    if request.vars.itemsounds == 'on':
+        params += ['-c', 'itemsounds.ips']
+    if request.vars.elevators_doors_speed == 'on':
+        params += ['-c', 'elevators_doors_speed.ips']
+    if request.vars.spinjumprestart == 'on':
+        params += ['-c', 'spinjumprestart.ips']
+    if request.vars.rando_speed == 'on':
+        params += ['-c', 'rando_speed.ips']
+    if request.vars.No_Music == 'on':
+        params += ['-c', 'No_Music']
     if request.vars.animals == 'on':
         params.append('--animals')
 

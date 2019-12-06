@@ -735,17 +735,42 @@ def displayCheckbox(id, defaultTrue=False):
 	      Patches to customize your ROM.
 	    </p>
 	    <table class="full">
-{{
-for patch in patches:
-  if patch[4] == True:
-    response.write("	    <tr>", escape=False)
-    response.write("	      <td class=\"full\">".format(patch[0]), escape=False)
-    displayCheckbox(patch[0], patches[2])
-    response.write("{}".format(patch[1]))
-    response.write("	    </tr>", escape=False)
-    pass
-  pass
-}}
+	      <tr>
+		<td class="full">
+		  {{displayCheckbox("itemsounds")}}
+		  Remove fanfare when picking up an item (by Scyzer)
+		</td>
+	      </tr>
+	      <tr>
+		<td class="full">
+		  {{displayCheckbox("spinjumprestart")}}
+		  Allows Samus to start spinning in mid air after jumping or falling (by Kejardon)
+		</td>
+	      </tr>
+	      <tr>
+		<td class="full">
+		  {{displayCheckbox("rando_speed")}}
+		  Let Samus keeps her momentum when landing from a fall or from jumping (by Oi27)
+		</td>
+	      </tr>
+	      <tr>
+		<td class="full">
+		  {{displayCheckbox("elevators_doors_speed")}}
+		  Accelerate doors and elevators transitions (by Rakki & Lioran)
+		</td>
+	      </tr>
+	      <tr>
+		<td class="full">
+		  {{displayCheckbox("animals")}}
+		  Save the animals surprise (by Foosda)
+		</td>
+	      </tr>
+	      <tr>
+		<td class="full">
+		  {{displayCheckbox("No_Music")}}
+		  Disable background music (by Kejardon)
+		</td>
+	      </tr>
 	    </table>
 	  </div>
         </div>

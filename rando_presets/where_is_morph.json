@@ -8,7 +8,7 @@
   "majorsSplit": "Full",
   "strictMinors": "off",
   "layoutPatches": "on",
-  "noGravHeat": "on",
+  "gravityBehaviour": "Balanced",
   "missileQty": "3",
   "morphPlacement": "late",
   "progressionSpeed": "random",
@@ -26,5 +26,6 @@
   "itemsounds": "on",
   "energyQty": "random",
   "funSuits": "off",
+  "nerfedCharge": "off",
   "variaTweaks": "on"
 }

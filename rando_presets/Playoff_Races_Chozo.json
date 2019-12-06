@@ -8,7 +8,7 @@
   "majorsSplit": "Chozo",
   "strictMinors": "off",
   "layoutPatches": "on",
-  "noGravHeat": "on",
+  "gravityBehaviour": "Balanced",
   "missileQty": "3",
   "morphPlacement": "early",
   "progressionSpeed": "VARIAble",
@@ -28,5 +28,6 @@
   "funSuits": "off",
   "variaTweaks": "off",
   "bossRandomization": "off",
+  "nerfedCharge": "off",
   "areaLayout": "off"
 }

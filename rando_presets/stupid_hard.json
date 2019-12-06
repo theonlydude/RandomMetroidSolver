@@ -21,11 +21,12 @@
   "preset": "master",
   "animals": "on",
   "spinjumprestart": "off",
-  "noGravHeat": "on",
+  "gravityBehaviour": "Balanced",
   "superQty": "1",
   "skip_intro": "off",
   "itemsounds": "on",
   "energyQty": "sparse",
   "funSuits": "on",
+  "nerfedCharge": "off",
   "variaTweaks": "on"
 }

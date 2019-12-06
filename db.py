@@ -423,9 +423,13 @@ from extended_stats e
 where 1 = 1
 {};"""
 
-        where = """and e.version = %d and e.preset = '%s' and e.area = %s and e.boss = %s and e.gravityBehaviour = '%s' and e.nerfedCharge = %s and e.maxDifficulty = '%s' """
+        where = """and e.version = %d and e.preset = '%s' and e.area = %s and e.boss = %s and e.gravityBehaviour = '%s' and e.nerfedCharge = %s """
 
-        sqlParams = [randoAlgoVersion, parameters['preset'], parameters['area'], parameters['boss'], parameters['gravityBehaviour'], parameters['nerfedCharge'], parameters['maxDifficulty']]
+        sqlParams = [randoAlgoVersion, parameters['preset'], parameters['area'], parameters['boss'], parameters['gravityBehaviour'], parameters['nerfedCharge']]
+
+        if [parameters["maxDifficulty"] != "random":
+            where += """and e.maxDifficulty = '%s' """
+            sqlParams.append(parameters['maxDifficulty'])
 
         if parameters['majorsSplit'] != "random":
             where += """and e.majorsSplit = '%s' """

@@ -15,11 +15,12 @@
   "powerBombQty": "1",
   "minorQty": "random",
   "suitsRestriction": "random",
-  "noGravHeat": "on",
+  "gravityBehaviour": "Balanced",
   "superQty": "2",
   "skip_intro": "off",
   "itemsounds": "on",
   "energyQty": "random",
   "funSuits": "off",
+  "nerfedCharge": "off",
   "variaTweaks": "on"
 }

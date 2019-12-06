@@ -18,7 +18,7 @@
   "areaRandomization": "off",
   "maxDifficulty": "hard",
   "powerBombQty": "1",
-  "noGravHeat": "on",
+  "gravityBehaviour": "Balanced",
   "suitsRestriction": "on",
   "preset": "SCAVENGER_HUNT",
   "skip_intro": "off",
@@ -31,5 +31,6 @@
   "minorQty": "100",
   "funSuits": "off",
   "variaTweaks": "on",
+  "nerfedCharge": "off",
   "majorsSplit": "Major"
 }

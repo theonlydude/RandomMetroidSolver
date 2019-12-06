@@ -16,11 +16,12 @@
   "suitsRestriction": "on",
   "preset": "speedrunner",
   "spinjumprestart": "off",
-  "noGravHeat": "on",
+  "gravityBehaviour": "Balanced",
   "superQty": "1",
   "skip_intro": "off",
   "itemsounds": "on",
   "energyQty": "vanilla",
   "funSuits": "on",
+  "nerfedCharge": "off",
   "variaTweaks": "on"
 }

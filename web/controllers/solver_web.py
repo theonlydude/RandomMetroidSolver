@@ -2153,7 +2153,9 @@ def extStats():
             'preset': skillPreset,
             'area': 'areaRandomization' in randoPreset and randoPreset['areaRandomization'] == 'on',
             'boss': 'bossRandomization' in randoPreset and randoPreset['bossRandomization'] == 'on',
-            'noGravHeat': randoPreset['noGravHeat'] == 'on',
+            'gravityBehaviour': randoPreset['gravityBehaviour'],
+            'nerfedCharge': randoPreset['nerfedCharge'] == 'on',
+            'maxDifficulty': randoPreset['maxDifficulty'],
             # parameters which can be random:
             'majorsSplit': randoPreset['majorsSplit'] if 'majorsSplit' in randoPreset else 'Full',
             'progSpeed': randoPreset['progressionSpeed'] if 'progressionSpeed' in randoPreset else 'variable',

@@ -517,10 +517,19 @@ if __name__ == "__main__":
 
     # generate extended stats
     if args.extStatsFilename != None:
+        if args.noGravHeat == True:
+            gravityBehaviour = 'Vanilla'
+        elif args.progressivesuits == True:
+            gravityBehaviour = 'Progressive'
+        else:
+            gravityBehaviour = 'Balanced'
+        if args.maxDifficulty == None:
+            args.maxDifficulty = 'no difficulty cap'
         parameters = {'preset': preset, 'area': args.area, 'boss': args.bosses,
-                      'noGravHeat': not args.noGravHeat, 'majorsSplit': args.majorsSplit,
-                      'progressiveSuits': args.progressiveSuits,
+                      'majorsSplit': args.majorsSplit,
+                      'gravityBehaviour': gravityBehaviour,
                       'nerfedCharge': args.nerfedCharge,
+                      'maxDifficulty': args.maxDifficulty,
                       'progSpeed': progSpeed, 'morphPlacement': args.morphPlacement,
                       'suitsRestriction': args.suitsRestriction, 'progDiff': progDiff,
                       'superFunMovement': 'Movement' in args.superFun,

@@ -1225,7 +1225,7 @@ Click on the dice button to randomly set this parameter.",
     },
     {
       element: "#rando_speedStep",
-      title: "Momentum",
+      title: "Momentum conservation",
       content: "<p>Let Samus keeps her momentum when landing from a fall or from jumping</p>\
 <p>This patch was developed by Oi27.</p>",
       placement: "auto left"
@@ -1593,14 +1593,14 @@ def displayNumber(id, min, max, default, step="1"):
 		<tr id="spinjumprestartStep">
 		  <td colspan="2">
 		    {{displayCheckbox("spinjumprestart")}}
-		    Respin
+		    Spin jump restart (a.k.a. Respin)
 		  </td>
                   <td><button type="button" onclick="startTheTour(29)">?</button></td>
 		</tr>
 		<tr id="rando_speedStep">
 		  <td colspan="2">
 		    {{displayCheckbox("rando_speed")}}
-		    Speedkeep
+		     Momentum conservation (a.k.a. Speedkeep)
 		  </td>
                   <td><button type="button" onclick="startTheTour(30)">?</button></td>
 		</tr>

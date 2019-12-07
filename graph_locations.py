@@ -122,7 +122,7 @@ locations = [
     'Visibility': "Hidden",
     'Room': 'Blue Brinstar Energy Tank Room',
     'AccessFrom' : {
-        'Landing Site': lambda sm: sm.wor(sm.canOpenRedDoors(), RomPatches.has(RomPatches.BlueBrinstarBlueDoor))
+        'Landing Site': lambda sm: sm.wor(RomPatches.has(RomPatches.BlueBrinstarBlueDoor), sm.canOpenRedDoors())
     },
     # EXPLAINED: to get this major item the different technics are:
     #  -can fly (continuous bomb jump or space jump)
@@ -687,7 +687,7 @@ locations = [
     'Room': 'Spring Ball Room',
     'AccessFrom' : {
         'Main Street Bottom': lambda sm: sm.wor(sm.canOpenGreenDoors(), sm.wand(sm.canOpenRedDoors(), RomPatches.has(RomPatches.AreaRandoGatesOther))), # gate
-        'Le Coude Right': lambda sm: sm.wand(sm.wor(sm.canOpenYellowDoors(), RomPatches.has(RomPatches.AreaRandoBlueDoors)),
+        'Le Coude Right': lambda sm: sm.wand(sm.wor(RomPatches.has(RomPatches.AreaRandoBlueDoors), sm.canOpenYellowDoors()),
                                              sm.canOpenGreenDoors(),
                                              sm.canDestroyBombWallsUnderwater()) # toilet
     },
@@ -1022,8 +1022,7 @@ locations = [
         'Green Brinstar Elevator Right': lambda sm: SMBool(True)
     },
     'Available': lambda sm: sm.canOpenRedDoors(),
-    'PostAvailable': lambda sm: sm.wor(sm.canPassBombPassages(),
-                                       RomPatches.has(RomPatches.EarlySupersShotBlock))
+    'PostAvailable': lambda sm: sm.wor(RomPatches.has(RomPatches.EarlySupersShotBlock), sm.canPassBombPassages())
 },
 {
     'Area': "Brinstar",
@@ -1179,9 +1178,8 @@ locations = [
     'AccessFrom' : {
         'Landing Site': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: sm.wand(sm.wor(sm.haveItem('Morph'), RomPatches.has(RomPatches.BlueBrinstarMissile)),
-                                    sm.wor(sm.canOpenRedDoors(),
-                                           RomPatches.has(RomPatches.BlueBrinstarBlueDoor)))
+    'Available': lambda sm: sm.wand(sm.wor(RomPatches.has(RomPatches.BlueBrinstarMissile), sm.haveItem('Morph')),
+                                    sm.wor(RomPatches.has(RomPatches.BlueBrinstarBlueDoor), sm.canOpenRedDoors()))
 },
 {
     'Area': "Brinstar",

@@ -33,6 +33,9 @@ if (hs.registerOverlay) {
 
 <script type="text/javascript" src="{{=URL('static', 'js/jquery.redirect.js')}}"></script>
 
+<link rel="stylesheet" type="text/css" href="{{=URL('static','image-picker/image-picker.css')}}">
+<script src="{{=URL('static', 'image-picker/image-picker.js')}}" type="text/javascript"></script>
+
 <title>Super Metroid VARIA Solver</title>
 
 <style>
@@ -46,13 +49,38 @@ if (hs.registerOverlay) {
 .centerTable {
     margin-left: auto;
     margin-right: auto;
-    width: 50%;
+    width: 30%;
 }
 .tdGrey {
     border: 1px solid #ddd;
 }
 .HL {
     background-color: #F8B000
+}
+.image_picker_image {
+    width: 32px;
+    image-rendering: -moz-crisp-edges; /* Firefox */
+    image-rendering: -o-crisp-edges; /* Opera */
+    image-rendering: -webkit-optimize-contrast; /* Webkit (non-standard naming) */
+    image-rendering: crisp-edges;
+    -ms-interpolation-mode: nearest-neighbor; /* IE (non-standard property) */
+}
+.imageItems {
+    width: 16px;
+    image-rendering: -moz-crisp-edges; /* Firefox */
+    image-rendering: -o-crisp-edges; /* Opera */
+    image-rendering: -webkit-optimize-contrast; /* Webkit (non-standard naming) */
+    image-rendering: crisp-edges;
+    -ms-interpolation-mode: nearest-neighbor; /* IE (non-standard property) */
+    margin-right: 0.5em;
+}
+.imageItem {
+    width: 32px;
+    image-rendering: -moz-crisp-edges; /* Firefox */
+    image-rendering: -o-crisp-edges; /* Opera */
+    image-rendering: -webkit-optimize-contrast; /* Webkit (non-standard naming) */
+    image-rendering: crisp-edges;
+    -ms-interpolation-mode: nearest-neighbor; /* IE (non-standard property) */
 }
 </style>
 
@@ -148,6 +176,25 @@ function showHide(show, hide) {
   }
 }
 
+var previousSelected = [];
+function imagePickerClick(obj) {
+  var selected = obj.val();
+  var lenBefore = previousSelected.length;
+  var lenAfter = selected.length;
+
+  if(lenAfter > lenBefore) {
+    // a new item as been selected
+    var difference = selected.filter(x => !previousSelected.includes(x));
+  } else {
+    // an item as been unselected
+    var difference = previousSelected.filter(x => !selected.includes(x));
+  }
+
+  selectItem(difference)
+
+  previousSelected = selected;
+}
+
 function selectItem(itemName) {
     items = document.getElementsByClassName(itemName);
 
@@ -171,6 +218,10 @@ function showPath()
 {
   if(document.getElementById('displayPath').checked) {
     document.getElementById('path_div').style.display = "block";
+    $("#item").imagepicker({
+      clicked: function(option) {imagePickerClick(this);}
+    });
+
   } else {
     document.getElementById('path_div').style.display = "none";
   }
@@ -559,13 +610,9 @@ function DoPost(){
       pass
     response.write("      <td><input id=\"{}_bool\" name=\"{}_bool\" type=\"checkbox\" {}>".format(item, item, checked), escape=False)
 
-    response.write("{}".format(item), escape=False)
+    response.write("<img src=\"/solver/static/images/{}.png\" alt=\"{}.png\" title=\"{}.png\" class=\"width: 32px\"/>".format(item, item, item), escape=False)
     response.write("</td>\n", escape=False)
 
-    i += 1
-    if i % 7 == 0:
-      response.write("    </tr>\n    <tr>\n", escape=False)
-      pass
     pass
 }}
 	  </tr>
@@ -622,7 +669,6 @@ if result is not None and result["difficulty"] != -1:
   pass
 }}
 
-
 {{
 if result is not None:
 }}
@@ -631,56 +677,46 @@ if result is not None:
 
     <div id="path_div" style="display:none;">
       <br/>
-      <p class="half centerTable">Click on items to highlight them in the spoiler:</p>
-      <table class="half centerTable">
-	<tr>
-	  <td onclick="selectItem('ETank')" class="tdGrey clickable ETank">Energy Tank</td>
-	  <td onclick="selectItem('Reserve')" class="tdGrey clickable Reserve">Reserve Tank</td>
-	</tr>
-      </table>
-      <table class="half centerTable">
-	<tr>
-	  <td onclick="selectItem('Missile')" class="tdGrey clickable Missile">Missile</td>
-	  <td onclick="selectItem('Super')" class="tdGrey clickable Super">Super Missile</td>
-	  <td onclick="selectItem('PowerBomb')" class="tdGrey clickable PowerBomb">Power Bomb</td>
-	</tr>
-      </table>
-      <table class="half centerTable">
-	<tr>
-	  <td onclick="selectItem('Grapple')" class="tdGrey clickable Grapple">Grapple</td>
-	  <td onclick="selectItem('XRayScope')" class="tdGrey clickable XRayScope">X-ray</td>
-	</tr>
-      </table>
-      <table class="half centerTable">
-	<tr>
-	  <td onclick="selectItem('Charge')" class="tdGrey clickable Charge">Charge</td>
-	  <td onclick="selectItem('Ice')" class="tdGrey clickable Ice">Ice</td>
-	  <td onclick="selectItem('Wave')" class="tdGrey clickable Wave">Wave</td>
-	  <td onclick="selectItem('Spazer')" class="tdGrey clickable Spazer">Spazer</td>
-	  <td onclick="selectItem('Plasma')" class="tdGrey clickable Plasma">Plasma</td>
-	</tr>
-      </table>
-      <table class="half centerTable">
-	<tr>
-	  <td onclick="selectItem('Varia')" class="tdGrey clickable Varia">Varia Suit</td>
-	  <td onclick="selectItem('Gravity')" class="tdGrey clickable Gravity">Gravity Suit</td>
-	</tr>
-      </table>
-      <table class="half centerTable">
-	<tr>
-	  <td onclick="selectItem('Morph')" class="tdGrey clickable Morph">Morphing Ball</td>
-	  <td onclick="selectItem('Bomb')" class="tdGrey clickable Bomb">Bomb</td>
-	  <td onclick="selectItem('SpringBall')" class="tdGrey clickable SpringBall">Spring Ball</td>
-	  <td onclick="selectItem('ScrewAttack')" class="tdGrey clickable ScrewAttack">Screw Attack</td>
-	</tr>
-      </table>
-      <table class="half centerTable">
-	<tr>
-	  <td onclick="selectItem('HiJump')" class="tdGrey clickable HiJump">Hi-Jump Boots</td>
-	  <td onclick="selectItem('SpaceJump')" class="tdGrey clickable SpaceJump">Space Jump</td>
-	  <td onclick="selectItem('SpeedBooster')" class="tdGrey clickable SpeedBooster">Speed Booster</td>
-	</tr>
-      </table>
+      <p class="centerTable">Click on items to highlight them in the spoiler:</p>
+
+      <div class="centerTable">
+      <select multiple="multiple" id="item" name="item">
+	<optgroup label="Nothing">
+	  <option data-img-src="/solver/static/images/Nothing.png" value="Nothing">Nothing</option>
+	</optgroup>
+	<optgroup label="Ammo">
+	  <option data-img-src="/solver/static/images/Missile.png" value="Missile">Missile</option>
+	  <option data-img-src="/solver/static/images/Super.png" value="Super">Super Missile</option>
+	  <option data-img-src="/solver/static/images/PowerBomb.png" value="PowerBomb">Power Bomb</option>
+	</optgroup>
+	<optgroup label="Energy">
+	  <option data-img-src="/solver/static/images/ETank.png" value="ETank">Energy Tank</option>
+	    <option data-img-src="/solver/static/images/Reserve.png" value="Reserve">Reserve Tank</option>
+	</optgroup>
+	<optgroup label="Beams">
+	  <option data-img-src="/solver/static/images/Charge.png" value="Charge">Charge Beam</option>
+	  <option data-img-src="/solver/static/images/Ice.png" value="Ice">Ice Beam</option>
+	  <option data-img-src="/solver/static/images/Wave.png" value="Wave">Wave Beam</option>
+	  <option data-img-src="/solver/static/images/Spazer.png" value="Spazer">Spazer</option>
+	  <option data-img-src="/solver/static/images/Plasma.png" value="Plasma">Plasma Beam</option>
+	</optgroup>
+	<optgroup label="Suits">
+	  <option data-img-src="/solver/static/images/Varia.png" value="Varia">Varia Suit</option>
+	  <option data-img-src="/solver/static/images/Gravity.png" value="Gravity">Gravity Suit</option>
+	</optgroup>
+	<optgroup label="Items">
+	  <option data-img-src="/solver/static/images/Morph.png" value="Morph">Morph Ball</option>
+	  <option data-img-src="/solver/static/images/Bomb.png" value="Bomb">Bomb</option>
+	  <option data-img-src="/solver/static/images/SpringBall.png" value="SpringBall">Spring Ball</option>
+	  <option data-img-src="/solver/static/images/ScrewAttack.png" value="ScrewAttack">Screw Attack</option>
+	  <option data-img-src="/solver/static/images/HiJump.png" value="HiJump">Hi-Jump Boots</option>
+	  <option data-img-src="/solver/static/images/SpaceJump.png" value="SpaceJump">Space Jump</option>
+	  <option data-img-src="/solver/static/images/SpeedBooster.png" value="SpeedBooster">Speed Booster</option>
+	  <option data-img-src="/solver/static/images/Grapple.png" value="Grapple">Grapple Beam</option>
+	  <option data-img-src="/solver/static/images/XRayScope.png" value="XRayScope">X-Ray Scope</option>
+	</optgroup>
+      </select>
+      </div>
       <br/>
   {{=result["pathTable"]}}
 

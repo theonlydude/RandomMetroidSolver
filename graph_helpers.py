@@ -243,8 +243,7 @@ class HelpersGraph(Helpers):
         # to require one more CF if no heat protection because of distance to cover, wait times, acid...
         return sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Entrance -> GT via Chozo']),
                        sm.canUsePowerBombs(),
-                       sm.wor(sm.haveItem('SpaceJump'),
-                              RomPatches.has(RomPatches.LNChozoSJCheckDisabled)))
+                       sm.wor(RomPatches.has(RomPatches.LNChozoSJCheckDisabled), sm.haveItem('SpaceJump')))
 
     @Cache.decorator
     def canExitScrewAttackArea(self):

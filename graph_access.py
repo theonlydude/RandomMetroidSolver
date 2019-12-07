@@ -362,7 +362,7 @@ accessPoints = [
        entryInfo = {'SamusX':0x28, 'SamusY':0x188},
        shortName="M\\CRAB HOLE"),
     AccessPoint('Le Coude Right', 'Maridia', {
-        'Crab Hole Bottom Left': lambda sm: sm.wand(sm.wand(sm.wor(sm.canOpenYellowDoors(), RomPatches.has(RomPatches.AreaRandoBlueDoors)),
+        'Crab Hole Bottom Left': lambda sm: sm.wand(sm.wand(sm.wor(RomPatches.has(RomPatches.AreaRandoBlueDoors), sm.canOpenYellowDoors()),
                                                             sm.wor(sm.haveItem('Gravity'),
                                                                    sm.wand(sm.knowsGravLessLevel3(),
                                                                            sm.haveItem('HiJump'),
@@ -370,7 +370,7 @@ accessPoints = [
                                                     sm.wand(sm.canOpenGreenDoors(),
                                                             sm.canDestroyBombWallsUnderwater(),
                                                             sm.haveItem('Morph'))), # toilet door
-        'Main Street Bottom': lambda sm: sm.wand(sm.wor(sm.canOpenYellowDoors(), RomPatches.has(RomPatches.AreaRandoBlueDoors)),
+        'Main Street Bottom': lambda sm: sm.wand(sm.wor(RomPatches.has(RomPatches.AreaRandoBlueDoors), sm.canOpenYellowDoors()),
                                                  sm.canDestroyBombWallsUnderwater(),
                                                  sm.wand(sm.wor(sm.haveItem('Gravity'),
                                                                 sm.wand(sm.knowsGravLessLevel3(),
@@ -443,8 +443,7 @@ accessPoints = [
     AccessPoint('Red Brinstar Elevator', 'RedBrinstar', {
         'Caterpillar Room Top Right': lambda sm: sm.canPassRedTowerToMaridiaNode(),
         'Red Tower Top Left': lambda sm: sm.canOpenYellowDoors()
-    }, traverse=lambda sm:sm.wor(sm.canOpenYellowDoors(),
-                                 RomPatches.has(RomPatches.RedTowerBlueDoors)),
+    }, traverse=lambda sm:sm.wor(RomPatches.has(RomPatches.RedTowerBlueDoors), sm.canOpenYellowDoors()),
        roomInfo = {'RoomPtr':0x962a, "area": 0x0},
        exitInfo = {'DoorPtr':0x8af6, 'direction': 0x7, "cap": (0x16, 0x2d), "bitFlag": 0x0,
                    "screen": (0x1, 0x2), "distanceToSpawn": 0x1c0, "doorAsmPtr": 0xb9f1},

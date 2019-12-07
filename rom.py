@@ -1229,24 +1229,6 @@ class RomPatcher:
         self.romFile.write(struct.pack('B', 0x5C))
         self.romFile.write(struct.pack('B', 0xEA))
 
-    def writeTransitionsCredits(self, transitions):
-        address = 0x273B40
-        lineLength = 32
-
-        for (src, dest) in transitions:
-            # line is 32 chars long, need a space between the two access points
-            length = len(src) + len(dest) + len(" ")
-            if length > lineLength:
-                self.writeCreditsString(address, 0x04, src)
-                address += 0x40
-
-                dest = " "+dest
-                self.writeCreditsString(address, 0x04, dest.rjust(lineLength))
-                address += 0x40
-            else:
-                self.writeCreditsString(address, 0x04, src+" "*(lineLength-(len(src)+len(dest)))+dest)
-                address += 0x40
-
     buttons = {
         "Select" : [0x00, 0x20],
         "A"      : [0x80, 0x00],

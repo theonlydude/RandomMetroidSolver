@@ -27,5 +27,6 @@
   "energyQty": "vanilla",
   "funSuits": "off",
   "nerfedCharge": "off",
-  "variaTweaks": "off"
+  "variaTweaks": "off",
+  "bossRandomization": "off"
 }

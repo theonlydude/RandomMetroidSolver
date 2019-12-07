@@ -316,8 +316,6 @@ class AccessGraph(object):
     # test access from an access point to another, given an optional item
     def canAccess(self, smbm, srcAccessPointName, destAccessPointName, maxDiff, item=None):
         if item is not None:
-            already = smbm.haveItem(item)
-            isCount = smbm.isCountItem(item)
             smbm.addItem(item)
         #print("canAccess: item: {}, src: {}, dest: {}".format(item, srcAccessPointName, destAccessPointName))
         destAccessPoint = self.accessPoints[destAccessPointName]
@@ -326,8 +324,7 @@ class AccessGraph(object):
         can = destAccessPoint in availAccessPoints
         #self.log.debug("canAccess: avail = {}".format([ap.Name for ap in availAccessPoints.keys()]))
         if item is not None:
-            if not already or isCount == True:
-                smbm.removeItem(item)
+            smbm.removeItem(item)
         #print("canAccess: {}".format(can))
         return can
 

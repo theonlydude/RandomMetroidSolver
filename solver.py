@@ -342,15 +342,9 @@ class CommonSolver(object):
         for loc in locations:
             if loc['difficulty'].bool == True:
                 if 'PostAvailable' in loc:
-                    # in plando mode we can have the same major multiple times
-                    already = self.smbm.haveItem(loc['itemName'])
-                    isCount = self.smbm.isCountItem(loc['itemName'])
-
                     self.smbm.addItem(loc['itemName'])
                     postAvailable = loc['PostAvailable'](self.smbm)
-
-                    if not already or isCount == True:
-                        self.smbm.removeItem(loc['itemName'])
+                    self.smbm.removeItem(loc['itemName'])
 
                     loc['difficulty'] = self.smbm.wand(loc['difficulty'], postAvailable)
 

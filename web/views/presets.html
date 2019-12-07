@@ -327,13 +327,13 @@ Also the Varia Suit environmental protection is increased to match vanilla Gravi
 <b>Default</b>: Balanced setting. For Lower Norfair's hell run \"Default\" means \"No thanks\".<br/>\
 <b>Bring the heat</b>: You don't mind doing hell runs at all.<br/>\
 <b>I run RBO</b>: Reverse Boss Order runner.<br/><br/>\
-(<a href=\"https://wiki.supermetroid.run/Upper_Norfair_Farming_Room\">Upper Norfair Farming Room</a> is not considered heated.)"
+(<a href=\"https://wiki.supermetroid.run/Upper_Norfair_Farming_Room\" target=\"_blank\">Upper Norfair Farming Room</a> is not considered heated.)"
     },
     {
       element: "#hellRunsEnergyStep",
       title: "Energy requirements",
       content: "<p>These tables give the number of Energy and Reserve Tanks required for the VARIA logic to consider the Hell runs available (with the associated difficulty).</p>\
-<p>For Lower Norfair Hell runs it displays the number of Energy <img src=\"/solver/static/images/ETank.png\" alt=\"ETank.png\" title=\"ETank.png\" class=\"width: 32px\"/>/Reserve <img src=\"/solver/static/images/Reserve.png\" alt=\"Reserve.png\" title=\"Reserve.png\" class=\"width: 32px\"/> Tanks and also the number of <a href=\"https://metroid.fandom.com/wiki/Crystal_Flash\">Crystal Flashes</a> <img src=\"/solver/static/images/crystal_flash.png\" alt=\"CF.png\" title=\"CF.png\" class=\"width: 32px\"/> required.</p>\
+<p>For Lower Norfair Hell runs it displays the number of Energy <img src=\"/solver/static/images/ETank.png\" alt=\"ETank.png\" title=\"ETank.png\" class=\"width: 32px\"/>/Reserve <img src=\"/solver/static/images/Reserve.png\" alt=\"Reserve.png\" title=\"Reserve.png\" class=\"width: 32px\"/> Tanks and also the number of <a href=\"https://metroid.fandom.com/wiki/Crystal_Flash\" target=\"_blank\">Crystal Flashes</a> <img src=\"/solver/static/images/crystal_flash.png\" alt=\"CF.png\" title=\"CF.png\" class=\"width: 32px\"/> required.</p>\
 <p>When equipped with Gravity Suit <img src=\"/solver/static/images/Gravity.png\" alt=\"Gravity.png\" title=\"Gravity.png\" class=\"width: 32px\"/> or Screw Attack <img src=\"/solver/static/images/ScrewAttack.png\" alt=\"Screw.png\" title=\"Screw.png\" class=\"width: 32px\"/> the Lower Norfair Hell runs' difficulty is lowered.</p>",
       placement: "auto left"
     },
@@ -467,7 +467,7 @@ def displayKnow(know):
   response.write("  <td><input id=\"{}_bool\" name=\"{}_bool\" type=\"checkbox\" {} onClick=\"toggleSelect('{}')\" form=\"presetForm\" {}></td>\n".format(know, know, checked, know, disabled), escape=False)
 
   if desc[know]['href'] is not None:
-    response.write("  <td><a href=\"{}\">{}</a></td>\n".format(desc[know]['href'], desc[know]['display']), escape=False)
+    response.write("  <td><a href=\"{}\" target=\"_blank\">{}</a></td>\n".format(desc[know]['href'], desc[know]['display']), escape=False)
   else:
     response.write("  <td>{}</td>\n".format(desc[know]['display']), escape=False)
     pass
@@ -505,7 +505,7 @@ def displayKnow(know):
       response.write(", ", escape=False)
       pass
 
-    response.write("<a href=\"https://wiki.supermetroid.run/{}\">{}</a>".format(room.replace(' ', '_').replace("'", '%27'), room), escape=False)
+    response.write("<a href=\"https://wiki.supermetroid.run/{}\" target=\"_blank\">{}</a>".format(room.replace(' ', '_').replace("'", '%27'), room), escape=False)
     pass
   response.write("</td>", escape=False)
 
@@ -633,13 +633,13 @@ if skillBarData is not None:
       <table class="full">
         <colgroup><col class="half" /><col class="half" /></colgroup>
 	<tr>
-	  <td><a href="https://wiki.supermetroid.run/Red_Brinstar_Fireflea_Room">X-Ray:</a></td>
+	  <td><a href="https://wiki.supermetroid.run/Red_Brinstar_Fireflea_Room" target="_blank">X-Ray:</a></td>
 	  <td>{{xray = ["Aarghh", "I don't like spikes", "Default", "I don't mind spikes", "D-Boost master"]
 	        displaySelect("X-Ray", xray, settings["X-Ray"])}}</td>
           <td id="xrayStep"><button type="button" onclick="startTheTour(3)">?</button></td>
 	</tr>
 	<tr>
-	  <td><a href="https://wiki.supermetroid.run/Gauntlet_Entrance">Gauntlet:</a></td>
+	  <td><a href="https://wiki.supermetroid.run/Gauntlet_Entrance" target="_blank">Gauntlet:</a></td>
 	  <td>{{gauntlet = ["Aarghh", "I don't like acid", "Default"]
 	        displaySelect("Gauntlet", gauntlet, settings["Gauntlet"])}}</td>
 	</tr>
@@ -698,17 +698,17 @@ if skillBarData is not None:
       <table class="full">
         <colgroup><col class="half" /><col class="half" /></colgroup>
 	<tr>
-	  <td><a href="https://www.youtube.com/watch?v=E0jcnyb2eec&t=15m11s">Ice:</a></td>
+	  <td><a href="https://www.youtube.com/watch?v=E0jcnyb2eec&t=15m11s" target="_blank">Ice:</a></td>
 	  <td>{{hellruns = ['No thanks', 'Gimme energy', 'Default', 'Bring the heat', 'I run RBO']
 	        displaySelect("Ice", hellruns, settings['Ice'])}}</td>
           <td><button type="button" onclick="startTheTour(5)">?</button></td>
 	</tr>
 	<tr>
-	  <td><a href="https://www.youtube.com/watch?v=E0jcnyb2eec&t=16m44s">Main Upper Norfair:</a></td>
+	  <td><a href="https://www.youtube.com/watch?v=E0jcnyb2eec&t=16m44s" target="_blank">Main Upper Norfair:</a></td>
 	  <td>{{displaySelect("MainUpperNorfair", hellruns, settings['MainUpperNorfair'])}}</td>
 	</tr>
 	<tr>
-	  <td><a href="https://www.youtube.com/watch?v=E0jcnyb2eec&t=23m59s">Lower Norfair:</a></td>
+	  <td><a href="https://www.youtube.com/watch?v=E0jcnyb2eec&t=23m59s" target="_blank">Lower Norfair:</a></td>
 	  <td>{{hellruns = ['Default', 'Bring the heat', 'I run RBO']
 	        displaySelect("LowerNorfair", hellruns, settings['LowerNorfair'])}}</td>
 	</tr>
@@ -811,29 +811,29 @@ if skillBarData is not None:
       <table class="full">
         <colgroup><col class="half" /><col class="half" /></colgroup>
 	<tr>
-	  <td><a href="https://wiki.supermetroid.run/Kraid">Kraid:</a></td>
+	  <td><a href="https://wiki.supermetroid.run/Kraid" target="_blank">Kraid:</a></td>
 	  <td>{{kraid = ["He's annoying", 'Default', 'Quick Kill']
             displaySelect("Kraid", kraid, settings['Kraid'])}}</td>
           <td><button id="bossStep" type="button" onclick="startTheTour(7)">?</button></td>
 	</tr>
 	<tr>
-	  <td><a href="https://wiki.supermetroid.run/Draygon">Draygon:</a></td>
+	  <td><a href="https://wiki.supermetroid.run/Draygon" target="_blank">Draygon:</a></td>
 	  <td>{{draygon = ['A lot of trouble', 'Default', 'Used to it', 'No problemo']
             displaySelect("Draygon", draygon, settings['Draygon'])}}</td>
 	</tr>
 	<tr>
-	  <td><a href="https://wiki.supermetroid.run/Ridley">Ridley:</a></td>
+	  <td><a href="https://wiki.supermetroid.run/Ridley" target="_blank">Ridley:</a></td>
 	  <td>{{ridley = ["I'm scared!", 'Default', 'Used to it', 'Piece of cake']
 	    displaySelect("Ridley", ridley, settings['Ridley'])}}
 	  </td>
 	</tr>
 	<tr>
-	  <td><a href="https://wiki.supermetroid.run/Phantoon">Phantoon:</a></td>
+	  <td><a href="https://wiki.supermetroid.run/Phantoon" target="_blank">Phantoon:</a></td>
 	  <td>{{phantoon = ['A lot of trouble', 'Default', 'Used to it', 'No problemo']
 	    displaySelect("Phantoon", phantoon, settings['Phantoon'])}}</td>
 	</tr>
 	<tr>
-	  <td><a href="https://wiki.supermetroid.run/Mother_Brain">Mother Brain:</a></td>
+	  <td><a href="https://wiki.supermetroid.run/Mother_Brain" target="_blank">Mother Brain:</a></td>
 	  <td>{{motherBrain = ['It can get ugly', 'Default', 'Is this really the last boss?', 'Nice cutscene bro']
 	    displaySelect("MotherBrain", motherBrain, settings['MotherBrain'])}}</td>
 	</tr>

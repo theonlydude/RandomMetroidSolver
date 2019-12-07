@@ -402,7 +402,7 @@ elif itemsStats != None and len(itemsStats) > 0:
         elif loc["GraphArea"] != area:
           continue
 
-        response.write("<tr><td><a href=\"https://wiki.supermetroid.run/{}\">{}</a></td>".format(loc["Room"].replace(' ', '_').replace("'", '%27'), loc["Name"]), escape=False)
+        response.write("<tr><td><a href=\"https://wiki.supermetroid.run/{}\" target=\"_blank\">{}</a></td>".format(loc["Room"].replace(' ', '_').replace("'", '%27'), loc["Name"]), escape=False)
 
         for itemI, item in enumerate(["Missile", "Super", "PowerBomb", "Morph", "Bomb", "Springball", "ScrewAttack", "Varia", "Gravity", "HiJump", "SpaceJump", "SpeedBooster", "Charge", "Ice", "Wave", "Spazer", "Plasma", "Grapple", "XRayScope"]):
           percent = itemsStats[itemsMapping[itemI]][locI]
@@ -475,7 +475,7 @@ elif itemsStats != None and len(itemsStats) > 0:
 	  # hard rooms and hellruns
 	  display = know
 	elif knowsDesc[know]['href'] is not None:
-          display = "<a href=\"{}\">{}</a>".format(knowsDesc[know]["href"], knowsDesc[know]["display"])
+          display = "<a href=\"{}\" target=\"_blank\">{}</a>".format(knowsDesc[know]["href"], knowsDesc[know]["display"])
 	else:
 	  display = knowsDesc[know]["display"]
 	  pass

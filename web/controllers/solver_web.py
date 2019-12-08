@@ -545,7 +545,7 @@ def genPathTable(locations, displayAPs=True):
                       TR(TH("Location Name"), TH("Area"), TH("SubArea"), TH("Item"),
                          TH("Difficulty"), TH("Techniques used"), TH("Items used")),
                       _class="full")
-    for location, area, subarea, item, diff, techniques, items, path in locations:
+    for location, area, subarea, item, diff, techniques, items, path, _class in locations:
         if path is not None:
             lastAP = path[-1]
             if displayAPs == True and not (len(path) == 1 and path[0] == lastAP):
@@ -553,20 +553,22 @@ def genPathTable(locations, displayAPs=True):
                                     TD(" -> ".join(path), _colspan="6"),
                                     _class="grey"))
 
+        (name, room) = location
+
         # not picked up items start with an '-'
         if item[0] != '-':
-            pathTable.append(TR(A(location[0], _target="_blank",
-                                  _href="https://wiki.supermetroid.run/{}".format(location[1].replace(' ', '_').replace("'", '%27'))),
+            pathTable.append(TR(A(name, _target="_blank",
+                                  _href="https://wiki.supermetroid.run/{}".format(room.replace(' ', '_').replace("'", '%27'))),
                                 area,
                                 subarea,
-                                IMG(_src="/solver/static/images/{}.png".format(item), _alt=item, _title=item, _class="imageItem"),
+                                IMG(_src="/solver/static/images/{}.png".format(name.replace(' ', '')), _alt=name, _title=name, _class="imageBoss") if "Boss" in _class else IMG(_src="/solver/static/images/{}.png".format(item), _alt=item, _title=item, _class="imageItem"),
                                 diff,
                                 TD(*[A(tech, _href=Knows.desc[tech]['href'], _target="_blank", _class="marginKnows") if tech in Knows.desc and Knows.desc[tech]['href'] != None else SPAN(tech, _class="marginKnows") for tech in techniques]),
                                 TD(*[SPAN(i[:i.find('-')]+"-", IMG(_src="/solver/static/images/{}.png".format(i[i.find('-')+1:]), _alt=i[i.find('-')+1:], _title=i[i.find('-')+1:], _class="imageItems")) if i[0] in ['1', '2', '3', '4', '5', '6', '7', '8', '9'] else IMG(_src="/solver/static/images/{}.png".format(i), _alt=i, _title=i, _class="imageItems") for i in items]),
                                 _class=item))
         else:
-            pathTable.append(TR(A(location[0],
-                                  _href="https://wiki.supermetroid.run/{}".format(location[1].replace(' ', '_').replace("'", '%27'))),
+            pathTable.append(TR(A(name,
+                                  _href="https://wiki.supermetroid.run/{}".format(room.replace(' ', '_').replace("'", '%27'))),
                                 area, subarea, DIV(item, _class='linethrough'),
                                 diff, techniques, items, _class=item))
 

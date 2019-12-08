@@ -1559,7 +1559,8 @@ class OutWeb(Out):
                         '{0:.2f}'.format(loc['difficulty'].difficulty),
                         sorted(loc['difficulty'].knows),
                         sorted(list(set(loc['difficulty'].items))),
-                        [ap.Name for ap in loc['path']] if 'path' in loc else None])
+                        [ap.Name for ap in loc['path']] if 'path' in loc else None,
+                        loc['Class']])
 
         return out
 

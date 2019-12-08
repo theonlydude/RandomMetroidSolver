@@ -383,3 +383,9 @@ find ~/web2py/applications/solver/static -xtype l -exec rm -f {} \;
 [ -L ~/web2py/applications/solver/static/images/hack_nature.png ] || ln -s ~/RandomMetroidSolver/web/static/samus_sprites/hack_nature.png ~/web2py/applications/solver/static/images/hack_nature.png
 [ -L ~/web2py/applications/solver/static/images/hack_redesign.png ] || ln -s ~/RandomMetroidSolver/web/static/samus_sprites/hack_redesign.png ~/web2py/applications/solver/static/images/hack_redesign.png
 [ -L ~/web2py/applications/solver/static/images/hack_szm.png ] || ln -s ~/RandomMetroidSolver/web/static/samus_sprites/hack_szm.png ~/web2py/applications/solver/static/images/hack_szm.png
+
+[ -L ~/web2py/applications/solver/static/images/Draygon.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/bosses/Draygon.png ~/web2py/applications/solver/static/images/Draygon.png
+[ -L ~/web2py/applications/solver/static/images/Kraid.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/bosses/Kraid.png ~/web2py/applications/solver/static/images/Kraid.png
+[ -L ~/web2py/applications/solver/static/images/Phantoon.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/bosses/Phantoon.png ~/web2py/applications/solver/static/images/Phantoon.png
+[ -L ~/web2py/applications/solver/static/images/Ridley.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/bosses/Ridley.png ~/web2py/applications/solver/static/images/Ridley.png
+[ -L ~/web2py/applications/solver/static/images/MotherBrain.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/bosses/MotherBrain.png ~/web2py/applications/solver/static/images/MotherBrain.png

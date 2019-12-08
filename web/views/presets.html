@@ -60,6 +60,14 @@ pre {
     float: right;
     margin-right: 0.1em;
 }
+.imageBoss {
+    width: 64px;
+    image-rendering: -moz-crisp-edges; /* Firefox */
+    image-rendering: -o-crisp-edges; /* Opera */
+    image-rendering: -webkit-optimize-contrast; /* Webkit (non-standard naming) */
+    image-rendering: crisp-edges;
+    -ms-interpolation-mode: nearest-neighbor; /* IE (non-standard property) */
+}
 </style>
 
 <script type="text/javascript">
@@ -809,31 +817,36 @@ if skillBarData is not None:
     <div class="column">
       <h3>Bosses</h3>
       <table class="full">
-        <colgroup><col class="half" /><col class="half" /></colgroup>
+        <colgroup><col class="quarter"><col class="quarter" /><col class="half" /></colgroup>
 	<tr>
 	  <td><a href="https://wiki.supermetroid.run/Kraid" target="_blank">Kraid:</a></td>
+	  <td><img src="/solver/static/images/Kraid.png" alt="Kraid" title="Kraid" class="imageBoss"/></td>
 	  <td>{{kraid = ["He's annoying", 'Default', 'Quick Kill']
             displaySelect("Kraid", kraid, settings['Kraid'])}}</td>
           <td><button id="bossStep" type="button" onclick="startTheTour(7)">?</button></td>
 	</tr>
 	<tr>
 	  <td><a href="https://wiki.supermetroid.run/Draygon" target="_blank">Draygon:</a></td>
+	  <td><img src="/solver/static/images/Draygon.png" alt="Draygon" title="Draygon" class="imageBoss"/></td>
 	  <td>{{draygon = ['A lot of trouble', 'Default', 'Used to it', 'No problemo']
             displaySelect("Draygon", draygon, settings['Draygon'])}}</td>
 	</tr>
 	<tr>
 	  <td><a href="https://wiki.supermetroid.run/Ridley" target="_blank">Ridley:</a></td>
+	  <td><img src="/solver/static/images/Ridley.png" alt="Ridley" title="Ridley" class="imageBoss"/></td>
 	  <td>{{ridley = ["I'm scared!", 'Default', 'Used to it', 'Piece of cake']
 	    displaySelect("Ridley", ridley, settings['Ridley'])}}
 	  </td>
 	</tr>
 	<tr>
 	  <td><a href="https://wiki.supermetroid.run/Phantoon" target="_blank">Phantoon:</a></td>
+	  <td><img src="/solver/static/images/Phantoon.png" alt="Phantoon" title="Phantoon" class="imageBoss"/></td>
 	  <td>{{phantoon = ['A lot of trouble', 'Default', 'Used to it', 'No problemo']
 	    displaySelect("Phantoon", phantoon, settings['Phantoon'])}}</td>
 	</tr>
 	<tr>
 	  <td><a href="https://wiki.supermetroid.run/Mother_Brain" target="_blank">Mother Brain:</a></td>
+	  <td><img src="/solver/static/images/MotherBrain.png" alt="Mother Brain" title="Mother Brain" class="imageBoss"/></td>
 	  <td>{{motherBrain = ['It can get ugly', 'Default', 'Is this really the last boss?', 'Nice cutscene bro']
 	    displaySelect("MotherBrain", motherBrain, settings['MotherBrain'])}}</td>
 	</tr>

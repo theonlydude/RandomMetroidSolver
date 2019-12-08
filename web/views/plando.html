@@ -437,7 +437,7 @@ function onloadHook() {
 
 function hidePlandoButtons() {
   // to avoid using them in debug mode
-  var plandoElems = ["repeatPlando", "binPlando", "savePlando", "repeatArea", "binArea"];
+  var plandoElems = ["repeatPlando", "binPlando", "savePlando", "lockPlando", "randoPlando", "repeatArea", "binArea"];
   for(var i=0; i<plandoElems.length; i++) {
     document.getElementById(plandoElems[i]).style.display = "none";
   }

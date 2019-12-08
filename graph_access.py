@@ -12,7 +12,11 @@ accessPoints = [
     AccessPoint('Landing Site', 'Crateria', {
         'Lower Mushrooms Left': lambda sm: sm.canPassTerminatorBombWall(),
         'Keyhunter Room Bottom': lambda sm: sm.canOpenGreenDoors(),
-        'Morph Ball Room Left': lambda sm: sm.canUsePowerBombs()
+        'Blue Brinstar Elevator Bottom': lambda sm: SMBool(True)
+    }, internal=True),
+    AccessPoint('Blue Brinstar Elevator Bottom', 'Crateria', {
+        'Morph Ball Room Left': lambda sm: sm.canUsePowerBombs(),
+        'Landing Site': lambda sm: SMBool(True)
     }, internal=True),
     AccessPoint('Lower Mushrooms Left', 'Crateria', {
         'Landing Site': lambda sm: sm.canPassTerminatorBombWall(False),
@@ -49,7 +53,7 @@ accessPoints = [
        entryInfo = {'SamusX':0x14c, 'SamusY':0x2b8, 'song': 0xc},
        dotOrientation = 'se'),
     AccessPoint('Morph Ball Room Left', 'Crateria', {
-        'Landing Site': lambda sm: sm.canUsePowerBombs()
+        'Blue Brinstar Elevator Bottom': lambda sm: sm.canUsePowerBombs()
     }, roomInfo = { 'RoomPtr':0x9e9f, "area": 0x1},
        exitInfo = {'DoorPtr':0x8e9e, 'direction': 0x5, "cap": (0x1e, 0x6), "bitFlag": 0x0,
                    "screen": (0x1, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},

@@ -106,7 +106,7 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Morph Ball Room',
     'AccessFrom' : {
-        'Landing Site': lambda sm: SMBool(True)
+        'Blue Brinstar Elevator Bottom': lambda sm: SMBool(True)
     },
     'Available': lambda sm: SMBool(True)
 },
@@ -122,7 +122,7 @@ locations = [
     'Visibility': "Hidden",
     'Room': 'Blue Brinstar Energy Tank Room',
     'AccessFrom' : {
-        'Landing Site': lambda sm: sm.wor(RomPatches.has(RomPatches.BlueBrinstarBlueDoor), sm.canOpenRedDoors())
+        'Blue Brinstar Elevator Bottom': lambda sm: sm.wor(RomPatches.has(RomPatches.BlueBrinstarBlueDoor), sm.canOpenRedDoors())
     },
     # EXPLAINED: to get this major item the different technics are:
     #  -can fly (continuous bomb jump or space jump)
@@ -1165,7 +1165,7 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Morph Ball Room',
     'AccessFrom' : {
-        'Landing Site': lambda sm: SMBool(True)
+        'Blue Brinstar Elevator Bottom': lambda sm: SMBool(True)
     },
     'Available': lambda sm: sm.canUsePowerBombs()
 },
@@ -1181,7 +1181,7 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Blue Brinstar Energy Tank Room',
     'AccessFrom' : {
-        'Landing Site': lambda sm: SMBool(True)
+        'Blue Brinstar Elevator Bottom': lambda sm: SMBool(True)
     },
     'Available': lambda sm: sm.wand(sm.wor(RomPatches.has(RomPatches.BlueBrinstarMissile), sm.haveItem('Morph')),
                                     sm.wor(RomPatches.has(RomPatches.BlueBrinstarBlueDoor), sm.canOpenRedDoors()))
@@ -1215,7 +1215,7 @@ locations = [
     'Visibility': "Chozo",
     'Room': 'First Missile Room',
     'AccessFrom' : {
-        'Landing Site': lambda sm: SMBool(True)
+        'Blue Brinstar Elevator Bottom': lambda sm: SMBool(True)
     },
     'Available': lambda sm: sm.haveItem('Morph')
 },
@@ -1231,7 +1231,7 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Billy Mays Room',
     'AccessFrom' : {
-        'Landing Site': lambda sm: SMBool(True)
+        'Blue Brinstar Elevator Bottom': lambda sm: SMBool(True)
     },
     'Available': lambda sm: sm.canAccessBillyMays()
 },
@@ -1247,7 +1247,7 @@ locations = [
     'Visibility': "Hidden",
     'Room': 'Billy Mays Room',
     'AccessFrom' : {
-        'Landing Site': lambda sm: SMBool(True)
+        'Blue Brinstar Elevator Bottom': lambda sm: SMBool(True)
     },
     'Available': lambda sm: sm.canAccessBillyMays()
 },

@@ -1,7 +1,7 @@
 {
   "progressionDifficulty": "harder",
   "funMovement": "off",
-  "skip_ceres": "on",
+  "startLocation": "Landing Site",
   "hideItems": "off",
   "funCombat": "on",
   "majorsSplit": "Full",
@@ -18,7 +18,6 @@
   "spinjumprestart": "off",
   "gravityBehaviour": "Balanced",
   "superQty": "1",
-  "skip_intro": "off",
   "itemsounds": "on",
   "energyQty": "vanilla",
   "funSuits": "on",

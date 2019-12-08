@@ -1,7 +1,7 @@
 {
   "progressionDifficulty": "random",
   "funMovement": "off",
-  "skip_ceres": "on",
+  "startLocation": "Landing Site",
   "hideItems": "off",
   "funCombat": "off",
   "majorsSplit": "Full",
@@ -17,7 +17,6 @@
   "suitsRestriction": "random",
   "gravityBehaviour": "Balanced",
   "superQty": "2",
-  "skip_intro": "off",
   "itemsounds": "on",
   "energyQty": "random",
   "funSuits": "off",

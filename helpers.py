@@ -224,12 +224,6 @@ class Helpers(object):
                        sm.haveItem('HiJump'),
                        sm.knowsDoubleSpringBallJump())
 
-    def canPassTerminatorBombWall(self, fromLandingSite=True):
-        sm = self.smbm
-        return sm.wor(sm.wand(sm.haveItem('SpeedBooster'),
-                              sm.wor(SMBool(not fromLandingSite, 0), sm.knowsSimpleShortCharge(), sm.knowsShortCharge())),
-                      sm.canDestroyBombWalls())
-
     @Cache.decorator
     def canDestroyBombWalls(self):
         sm = self.smbm
@@ -246,40 +240,6 @@ class Helpers(object):
                       sm.wand(sm.haveItem('Morph'),
                               sm.wor(sm.haveItem('Bomb'),
                                      sm.haveItem('PowerBomb'))))
-
-    def canEnterAndLeaveGauntletQty(self, nPB, nTanksSpark):
-        sm = self.smbm
-        # EXPLAINED: to access Gauntlet Entrance from Landing site we can either:
-        #             -fly to it (infinite bomb jumps or space jump)
-        #             -shinespark to it
-        #             -wall jump with high jump boots
-        #             -wall jump without high jump boots
-        #            then inside it to break the bomb wals:
-        #             -use screw attack (easy way)
-        #             -use power bombs
-        #             -use bombs
-        #             -perform a simple short charge on the way in
-        #              and use power bombs on the way out
-        return sm.wand(sm.wor(sm.canFly(),
-                              sm.haveItem('SpeedBooster'),
-                              sm.wand(sm.knowsHiJumpGauntletAccess(),
-                                      sm.haveItem('HiJump')),
-                              sm.knowsHiJumpLessGauntletAccess()),
-                       sm.wor(sm.haveItem('ScrewAttack'),
-                              sm.wor(sm.wand(sm.energyReserveCountOkHardRoom('Gauntlet'),
-                                             sm.wand(sm.canUsePowerBombs(),
-                                                     sm.wor(sm.itemCountOk('PowerBomb', nPB),
-                                                            sm.wand(sm.haveItem('SpeedBooster'),
-                                                                    sm.energyReserveCountOk(nTanksSpark))))),
-                                     sm.wand(sm.energyReserveCountOkHardRoom('Gauntlet', 0.51),
-                                             sm.canUseBombs()))))
-
-    @Cache.decorator
-    def canEnterAndLeaveGauntlet(self):
-        sm = self.smbm
-        return sm.wor(sm.wand(sm.canShortCharge(),
-                              sm.canEnterAndLeaveGauntletQty(2, 2)),
-                      sm.canEnterAndLeaveGauntletQty(2, 3))
 
     @Cache.decorator
     def canPassBombPassages(self):

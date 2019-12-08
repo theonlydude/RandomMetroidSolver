@@ -400,7 +400,13 @@ accessPoints = [
        entryInfo = {'SamusX':0x34, 'SamusY':0x88},
        dotOrientation = 'w'),
     AccessPoint('Precious Room Top', 'Maridia', {
-        'Main Street Bottom': lambda sm: SMBool(True), # if you got there you can get back
+        'Main Street Bottom': lambda sm: sm.wand(sm.canBotwoonExitToAndFromDraygon(),
+                                                 sm.wor(sm.haveItem('Gravity'), # go down sand pits
+                                                        sm.wand(sm.canDoSuitlessOuterMaridia(),
+                                                                sm.wor(sm.wand(sm.haveItem('Ice'),# reverse pre-botwoon
+                                                                               sm.knowsMochtroidClip(),
+                                                                               sm.canDestroyBombWallsUnderwater()),
+                                                                       sm.knowsGravLessLevel3())))), # sandpits
         'DraygonRoomOut': lambda sm: SMBool(True),
         'Le Coude Right': lambda sm: sm.wand(sm.canPassCacatacAlley(),
                                              sm.canBotwoonExitToAndFromDraygon())

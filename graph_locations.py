@@ -622,8 +622,13 @@ locations = [
     'Id': 0x8f,
     'Visibility': "Chozo",
     'Room': 'Plasma Room',
-    'AccessFrom' : { # simple because if draygon is dead, you can get there
-        'Main Street Bottom': lambda sm: SMBool(True), # green gate+toilet
+    'AccessFrom' : {
+        'Main Street Bottom': lambda sm: sm.wand(sm.canOpenGreenDoors(),
+                                                 sm.wor(sm.wand(sm.haveItem('Gravity'),
+                                                                sm.canDestroyBombWalls()),
+                                                        sm.wand(sm.canDoSuitlessOuterMaridia(),
+                                                                sm.knowsGravLessLevel3(),
+                                                                sm.canDestroyBombWallsUnderwater()))),
         'Le Coude Right': lambda sm: SMBool(True)
     },
     # DONE: to leave the Plasma Beam room you have to kill the space pirates and return to the door

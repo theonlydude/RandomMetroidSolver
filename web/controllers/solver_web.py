@@ -564,7 +564,7 @@ def genPathTable(locations, displayAPs=True):
                                 IMG(_src="/solver/static/images/{}.png".format(name.replace(' ', '')), _alt=name, _title=name, _class="imageBoss") if "Boss" in _class else IMG(_src="/solver/static/images/{}.png".format(item), _alt=item, _title=item, _class="imageItem"),
                                 diff,
                                 TD(*[A(tech, _href=Knows.desc[tech]['href'], _target="_blank", _class="marginKnows") if tech in Knows.desc and Knows.desc[tech]['href'] != None else SPAN(tech, _class="marginKnows") for tech in techniques]),
-                                TD(*[SPAN(i[:i.find('-')]+"-", IMG(_src="/solver/static/images/{}.png".format(i[i.find('-')+1:]), _alt=i[i.find('-')+1:], _title=i[i.find('-')+1:], _class="imageItems")) if i[0] in ['1', '2', '3', '4', '5', '6', '7', '8', '9'] else IMG(_src="/solver/static/images/{}.png".format(i), _alt=i, _title=i, _class="imageItems") for i in items]),
+                                TD(*[SPAN(i[:i.find('-')]+"-", IMG(_src="/solver/static/images/{}.png".format(i[i.find('-')+1:]), _alt=i[i.find('-')+1:], _title=i[i.find('-')+1:], _class="imageItems")) if i[0] in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'] else IMG(_src="/solver/static/images/{}.png".format(i), _alt=i, _title=i, _class="imageItems") for i in items]),
                                 _class=item))
         else:
             pathTable.append(TR(A(name,

@@ -109,11 +109,10 @@ class AccessGraph(object):
                 dst = self.accessPoints[dstName]
                 if dst in newAvailNodes or dst in availNodes:
                     continue
-                # diff = tFunc(smbm)
                 diff = smbm.eval(tFunc)
                 if diff.bool == True and diff.difficulty <= maxDiff:
                     if src.GraphArea == dst.GraphArea:
-                        dst.distance = src.distance
+                        dst.distance = src.distance + 0.01
                     else:
                         dst.distance = src.distance + 1
                     newAvailNodes[dst] = { 'difficulty' : diff, 'from' : src }

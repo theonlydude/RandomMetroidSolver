@@ -858,6 +858,7 @@ function loadRandoPresetOK(data) {
   for(var key in data) {
     value = data[key];
     var elem = document.getElementById(key);
+    // console.log("key: "+key+" value: "+value);
 
     var elemRandom = document.getElementById(key+"Random");
     if(value == "random") {

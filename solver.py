@@ -470,37 +470,61 @@ class CommonSolver(object):
             loc['difficulty'].difficulty
             )
         )
-
-        # we want to sort the outside locations by putting the ones is the same area first
-        # then we sort the remaining areas starting whith boss dead status
-        outside.sort(key=lambda loc: (
-            # no come back heuristic
-            loc["areaWeight"] if "areaWeight" in loc
-            else 0,
-            # first loc where we can come back
-            0 if 'comeBack' in loc and loc['comeBack'] == True
-            else 1,
-            # first locs in the same area
-            0 if loc['SolveArea'] == area and loc['difficulty'].difficulty <= threshold
-            else 1,
-            # first nearest locs
-            loc['distance'] if loc['difficulty'].difficulty <= threshold
-            else 100000,
-            # beating a boss
-            loc['difficulty'].difficulty if (not Bosses.areaBossDead(loc['Area'])
-                                             and loc['difficulty'].difficulty <= threshold
-                                             and 'Pickup' in loc)
-            else 100000,
-            # areas with boss still alive
-            loc['difficulty'].difficulty if (not Bosses.areaBossDead(loc['Area'])
-                                             and loc['difficulty'].difficulty <= threshold)
-            else 100000,
-            loc['difficulty'].difficulty))
-
-        # display the criterias used for sorting
         self.log.debug("around2: {}".format([(loc['Name'], 0 if loc['SolveArea'] == area else 1, loc['distance'], 0 if 'Pickup' in loc else 1, loc['difficulty'].difficulty) for loc in around]))
-        self.log.debug("outside2: (threshold: {}) name, areaWeight, comeBack, area, distance, boss, boss in area, difficulty".format(threshold))
-        self.log.debug("outside2: {}".format([(loc['Name'], loc["areaWeight"] if "areaWeight" in loc else 0, 0 if 'comeBack' in loc and loc['comeBack'] == True else 1, 0 if loc['SolveArea'] == area and loc['difficulty'].difficulty <= threshold else 1, loc['distance'] if loc['difficulty'].difficulty <= threshold else 100000, loc['difficulty'].difficulty if (not Bosses.areaBossDead(loc['Area']) and loc['difficulty'].difficulty <= threshold and 'Pickup' in loc) else 100000, loc['difficulty'].difficulty if (not Bosses.areaBossDead(loc['Area']) and loc['difficulty'].difficulty <= threshold) else 100000, loc['difficulty'].difficulty) for loc in outside]))
+
+        # we want to sort the outside locations by putting the ones is the same area first,
+        # then we sort the remaining areas starting whith boss dead status.
+        # we also want to sort by range of difficulty and not only with the difficulty threshold.
+        ranged = {
+            "areaWeight": [],
+            "easy": [],
+            "medium": [],
+            "hard": [],
+            "harder": [],
+            "hardcore": [],
+            "mania": [],
+            "noComeBack": []
+        }
+        for loc in outside:
+            if "areaWeight" in loc:
+                ranged["areaWeight"].append(loc)
+            elif "comeBack" not in loc or loc['comeBack'] == False:
+                ranged["noComeBack"].append(loc)
+            else:
+                difficulty = loc['difficulty'].difficulty
+                if difficulty < medium:
+                    ranged["easy"].append(loc)
+                elif difficulty < hard:
+                    ranged["medium"].append(loc)
+                elif difficulty < harder:
+                    ranged["hard"].append(loc)
+                elif difficulty < hardcore:
+                    ranged["harder"].append(loc)
+                elif difficulty < mania:
+                    ranged["hardcore"].append(loc)
+                else:
+                    ranged["mania"].append(loc)
+
+        for key in ranged:
+            ranged[key].sort(key=lambda loc: (
+                # first locs in the same area
+                0 if loc['SolveArea'] == area else 1,
+                # first nearest locs
+                loc['distance'],
+                # beating a boss
+                loc['difficulty'].difficulty if (not Bosses.areaBossDead(loc['Area'])
+                                                 and 'Pickup' in loc)
+                else 100000,
+                # areas with boss still alive
+                loc['difficulty'].difficulty if (not Bosses.areaBossDead(loc['Area']))
+                else 100000,
+                loc['difficulty'].difficulty))
+
+        self.log.debug("outside2: (threshold: {}) name, areaWeight, area, distance, boss, boss in area, difficulty".format(threshold))
+        outside = []
+        for key in ["areaWeight", "easy", "medium", "hard", "harder", "hardcore", "mania", "noComeBack"]:
+            outside += ranged[key]
+            self.log.debug("outside2: {}: {}".format(key, [(loc['Name'], loc["areaWeight"] if "areaWeight" in loc else 0, 0 if loc['SolveArea'] == area else 1, loc['distance'], loc['difficulty'].difficulty if (not Bosses.areaBossDead(loc['Area']) and 'Pickup' in loc) else 100000, loc['difficulty'].difficulty if not Bosses.areaBossDead(loc['Area']) else 100000,loc['difficulty'].difficulty) for loc in ranged[key]]))
 
         return around + outside
 
@@ -545,15 +569,8 @@ class CommonSolver(object):
                         return self.collectMajor(majorsAvailable.pop(0))
                     else:
                         return self.collectMinor(minorsAvailable.pop(0))
-                # if not all the minors type are collected, start with minors
-                elif nextMinDifficulty <= diffThreshold and not self.haveAllMinorTypes():
-                    self.log.debug("not all minors types")
-                    return self.collectMinor(minorsAvailable.pop(0))
-                elif nextMinArea == area and nextMinDifficulty <= diffThreshold:
-                    self.log.debug("not enough minors")
-                    return self.collectMinor(minorsAvailable.pop(0))
                 # difficulty over area (this is a difficulty estimator, not a speedrunning simulator)
-                elif nextMinDifficulty <= diffThreshold and nextMajDistance <= diffThreshold:
+                elif nextMinDifficulty <= diffThreshold and nextMajDifficulty <= diffThreshold:
                     # take the closer one
                     if nextMajDistance != nextMinDistance:
                         self.log.debug("!= distance")
@@ -571,7 +588,14 @@ class CommonSolver(object):
                     # same difficulty and distance for minor and major, take major first
                     else:
                         return self.collectMajor(majorsAvailable.pop(0))
-                elif nextMinDifficulty > diffThreshold and nextMajDistance > diffThreshold:
+                # if not all the minors type are collected, start with minors
+                elif nextMinDifficulty <= diffThreshold and not self.haveAllMinorTypes():
+                    self.log.debug("not all minors types")
+                    return self.collectMinor(minorsAvailable.pop(0))
+                elif nextMinArea == area and nextMinDifficulty <= diffThreshold:
+                    self.log.debug("not enough minors")
+                    return self.collectMinor(minorsAvailable.pop(0))
+                elif nextMinDifficulty > diffThreshold and nextMajDifficulty > diffThreshold:
                     # take the easier
                     if nextMinDifficulty < nextMajDifficulty:
                         self.log.debug("min easier and not enough minors")

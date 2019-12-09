@@ -389,3 +389,7 @@ find ~/web2py/applications/solver/static -xtype l -exec rm -f {} \;
 [ -L ~/web2py/applications/solver/static/images/Phantoon.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/bosses/Phantoon.png ~/web2py/applications/solver/static/images/Phantoon.png
 [ -L ~/web2py/applications/solver/static/images/Ridley.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/bosses/Ridley.png ~/web2py/applications/solver/static/images/Ridley.png
 [ -L ~/web2py/applications/solver/static/images/MotherBrain.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/bosses/MotherBrain.png ~/web2py/applications/solver/static/images/MotherBrain.png
+
+[ -L ~/web2py/applications/solver/views/solver_web/maps.html ] || ln -s ~/RandomMetroidSolver/web/views/maps.html ~/web2py/applications/solver/views/solver_web/maps.html
+
+[ -L ~/web2py/applications/solver/static/images/maps ] || ln -s ~/RandomMetroidSolver/web/static/maps ~/web2py/applications/solver/static/images/maps

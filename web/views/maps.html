@@ -1,0 +1,80 @@
+{{extend 'layout.html'}}
+
+<link rel="stylesheet" type="text/css" href={{=URL('static','css/mystyle_20191017.css')}} media="screen"/>
+
+<title>Super Metroid VARIA Randomizer Maps</title>
+
+<style>
+    html, body {
+      margin: 0;
+      padding: 0;
+    }
+    #map {
+      width: 100vw;
+      height: 100vh;
+    }
+</style>
+
+<script src="https://maps.googleapis.com/maps/api/js?key=xxxxxxxxx"></script>
+
+<script type="text/javascript">
+window.onload = function() {
+  var mapEl = document.querySelector('#map');
+  var map = new google.maps.Map(mapEl, {
+    center: new google.maps.LatLng(39.8282, -98.5795),
+    zoom: 5
+  });
+
+  map.enableScrollWheelZoom();  
+
+  // Replace this with your URL.
+  var TILE_URL = 'http://127.0.0.1:8000/solver/static/images/maps/zoom{z}/{y}-{x}.png';
+  
+  // Name the layer anything you like.
+  var layerID = 'my_custom_layer';
+  
+  // Create a new ImageMapType layer.
+  var layer = new google.maps.ImageMapType({
+    name: layerID,
+    getTileUrl: function(coord, zoom) {
+      console.log("getTileUrl: coord: "+coord);
+      console.log("getTileUrl: zoom: "+zoom);
+
+      var y = coord.y;
+      var x = coord.x;
+
+      var url = TILE_URL.replace('{x}', x).replace('{y}', y).replace('{z}', zoom);
+      console.log("getTileUrl: url: "+url);
+      return url;
+    },
+    tileSize: new google.maps.Size(256, 256),
+    minZoom: 1,
+    maxZoom: 7
+  });
+  
+  map.mapTypes.set(layerID, layer);
+  map.setMapTypeId(layerID);
+}
+</script>
+
+<div class="fixed">
+  <div class="menu">
+    <table class="full menuTable">
+      <tr>
+	<td>{{=A("Home", _href=URL(f="home"), _class="menu")}}</td>
+	<td>{{=A("Presets", _href=URL(f="presets"), _class="menu")}}</td>
+	<td>{{=A("Randomizer", _href=URL(f="randomizer"), _class="menu")}}</td>
+	<td>{{=A("Solver", _href=URL(f="solver"), _class="menu")}}</td>
+	<td class="menu_selected">{{=A("Tracker", _href=URL(f="tracker"), _class="menu")}}</td>
+	<td>{{=A("Plandomizer", _href=URL(f="plando"), _class="menu")}}</td>
+	<td>{{=A("Customizer", _href=URL(f="customizer"), _class="menu")}}</td>
+	<td>{{=A("Statistics", _href=URL(f="extStats"), _class="menu")}}</td>
+	<td>{{=A("Information & Contact", _href=URL(f="infos"), _class="menu")}}</td>
+      </tr>
+    </table>
+  </div>
+</div>
+
+<div class="main">
+  <div id="map"></div>
+</div>

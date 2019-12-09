@@ -2215,3 +2215,8 @@ def extStats():
                 itemsStats=itemsStats, techniquesStats=techniquesStats,
                 categories=Knows.categories, knowsDesc=Knows.desc, skillPresetContent=skillPresetContent,
                 locations=locations, parameters=parameters, difficulties=difficulties)
+
+def maps():
+    response.title = 'Super Metroid VARIA Randomizer maps'
+
+    return dict()

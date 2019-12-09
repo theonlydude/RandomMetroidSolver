@@ -386,6 +386,7 @@ function ajaxOkGet(jsonData, status, dummy, chained=false) {
     lastLoc = jsonData["lastLoc"];
   }
   $("#lastLoc").attr("class", "lastLoc "+lastLoc+"Gps");
+  $("#gps"+'[data-toggle="tooltip"]').attr("title", lastLoc).tooltip('fixTitle');
 
   setWSIcon("checkmark");
 

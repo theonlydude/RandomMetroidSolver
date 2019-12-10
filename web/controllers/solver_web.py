@@ -931,7 +931,7 @@ def validateWebServiceParams(switchs, quantities, others, isJson=False):
             raiseHttp(400, "Missing parameter: {}".format(param), isJson)
 
     for switch in switchs:
-        if request.vars[switch] not in ['on', 'off']:
+        if request.vars[switch] not in ['on', 'off', 'random']:
             raiseHttp(400, "Wrong value for {}: {}, authorized values: on/off".format(switch, request.vars[switch]), isJson)
 
     for qty in quantities:

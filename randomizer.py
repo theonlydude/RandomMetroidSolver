@@ -511,6 +511,10 @@ if __name__ == "__main__":
             print('{:>50}: {:>16} '.format(loc, locsItems[loc]))
 
     if args.plandoRando != None:
+        # replace smbool with a dict
+        for itemLoc in itemLocs:
+            itemLoc["Location"]["difficulty"] = itemLoc["Location"]["difficulty"].json()
+
         with open(args.output, 'w') as jsonFile:
             json.dump({"itemLocs": itemLocs, "errorMsg": randomizer.errorMsg}, jsonFile, default=lambda x: x.__dict__)
         sys.exit(0)

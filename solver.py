@@ -936,9 +936,23 @@ class InteractiveSolver(CommonSolver):
             elif action == 'randomize':
                 self.randoPlando(params)
 
+        # if last loc added was a sequence break, recompute its difficulty,
+        # as it may be available with the newly placed item.
+        lastVisited = self.visitedLocations[-1]
+        if lastVisited['difficulty'].difficulty == -1:
+            self.visitedLocations.remove(lastVisited)
+            self.majorLocations.append(lastVisited)
+        else:
+            lastVisited = None
+
         # compute new available locations
         self.clearLocs(self.majorLocations)
         self.computeLocationsDifficulty(self.majorLocations)
+
+        # put back last visited location
+        if lastVisited != None:
+            self.majorLocations.remove(lastVisited)
+            self.visitedLocations.append(lastVisited)
 
         # return them
         self.dumpState()

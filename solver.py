@@ -434,7 +434,7 @@ class CommonSolver(object):
 
             # in plando we have to remove the last added item,
             # else it could be used in computing the postAvailable of a location
-            if self.mode == 'plando':
+            if self.mode in ['plando', 'seedless']:
                 loc["itemName"] = 'Nothing'
 
             self.collectedItems.pop()

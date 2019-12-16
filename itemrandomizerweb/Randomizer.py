@@ -428,6 +428,7 @@ class SuperFunProvider(object):
         else:
             pool = self.getItemPool()
         if self.isChozo:
+            zeb = self.sm.knowsIceZebSkip()
             pool = [item for item in pool if item['Class'] == 'Chozo' or item['Name'] == 'Boss']
             # forces ice zeb skip in the knows to pass end game condition. this is ugly but valid,
             # as if zeb skip is not known, an extra missile pack is guaranteed to be added (it won't
@@ -475,6 +476,8 @@ class SuperFunProvider(object):
         self.sm.resetItems()
         Bosses.reset()
         self.restoreBossChecks()
+        if self.isChozo:
+            Knows.IceZebSkip = zeb
 
         return ret
 

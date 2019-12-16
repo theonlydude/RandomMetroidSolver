@@ -35,3 +35,7 @@ class SMBool:
     def __ne__(self, other):
         # for !=
         return self.bool != other
+
+    def json(self):
+        # as we have slots instead of dict
+        return {key : getattr(self, key, None) for key in self.__slots__}

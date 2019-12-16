@@ -432,6 +432,11 @@ class CommonSolver(object):
             if item != self.collectedItems[-1]:
                 raise Exception("Item of last collected loc {}: {} is different from last collected item: {}".format(loc["Name"], item, self.collectedItems[-1]))
 
+            # in plando we have to remove the last added item,
+            # else it could be used in computing the postAvailable of a location
+            if self.mode in ['plando', 'seedless']:
+                loc["itemName"] = 'Nothing'
+
             self.collectedItems.pop()
 
             # if multiple majors in plando mode, remove it from smbm only when it's the last occurence of it
@@ -936,9 +941,29 @@ class InteractiveSolver(CommonSolver):
             elif action == 'randomize':
                 self.randoPlando(params)
 
+        # if last loc added was a sequence break, recompute its difficulty,
+        # as it may be available with the newly placed item.
+        if len(self.visitedLocations) > 0:
+            lastVisited = self.visitedLocations[-1]
+            if lastVisited['difficulty'].difficulty == -1:
+                self.visitedLocations.remove(lastVisited)
+                self.majorLocations.append(lastVisited)
+            else:
+                lastVisited = None
+        else:
+            lastVisited = None
+
         # compute new available locations
         self.clearLocs(self.majorLocations)
         self.computeLocationsDifficulty(self.majorLocations)
+
+        # put back last visited location
+        if lastVisited != None:
+            self.majorLocations.remove(lastVisited)
+            self.visitedLocations.append(lastVisited)
+            if lastVisited["difficulty"] == False:
+                # if the loc is still sequence break, put it back as sequence break
+                lastVisited["difficulty"] = SMBool(True, -1)
 
         # return them
         self.dumpState()
@@ -1024,15 +1049,10 @@ class InteractiveSolver(CommonSolver):
                 plandoLocsItems[loc["Name"]] = loc["itemName"]
 
         # add active patches
-        patches = {
-            0x7F1F:   {'value': 0xB6, 'name': "startCeres"},
-            0x7F17:   {'value': 0xB6, 'name': "startLS"},
-            0x21BD80: {'value': 0xD5, 'name': "layout"},
-            0x06e37d: {'value': 0x01, 'name': "gravityNoHeatProtection"},
-            0x7CC4D:  {'value': 0x37, 'name': "variaTweaks"},
-            0x22D564: {'value': 0xF2, 'name': "area"},
-            0x252FA7: {'value': 0xF8, 'name': "areaLayout"}
-        }
+        patches = {}
+        for (patchName, patchData) in RomReader.patches.items():
+            # hash on patch adress
+            patches[patchData['address']] = {'value': patchData['value'], 'name': patchName}
 
         activePatches = []
         for address in self.patches:
@@ -1130,9 +1150,10 @@ class InteractiveSolver(CommonSolver):
             romPatcher.writeMagic()
         else:
             romPatcher.writePlandoAddresses(self.visitedLocations)
-            if self.areaRando == True:
-                doors = getDoorConnections(self.fillGraph(), self.areaRando, self.bossRando)
-                romPatcher.writeDoorConnections(doors)
+        if self.areaRando == True or self.bossRando == True:
+            doors = getDoorConnections(self.fillGraph(), self.areaRando, self.bossRando)
+            romPatcher.writeDoorConnections(doors)
+            if magic == None:
                 doorsPtrs = getAps2DoorsPtrs()
                 romPatcher.writePlandoTransitions(self.curGraphTransitions, doorsPtrs,
                                                   len(vanillaBossesTransitions) + len(vanillaTransitions))

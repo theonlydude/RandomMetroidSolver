@@ -70,7 +70,7 @@ function computeSeed {
 
     if [ ${COMPARE} -eq 0 ]; then
 	OLD_MD5="old n/a"
-	OUT=$(/usr/bin/time -f "\t%E real" python3 ${ORIG}/randomizer.py ${PARAMS} 2>&1)
+	OUT=$(/usr/bin/time -f "\t%E real" python3.7 ${ORIG}/randomizer.py ${PARAMS} 2>&1)
 	if [ $? -ne 0 ]; then
 	    echo "${OUT}" >> ${LOG}
 	else
@@ -83,7 +83,7 @@ function computeSeed {
     fi
 
     NEW_MD5="new n/a"
-    OUT=$(/usr/bin/time -f "\t%E real" python3 ./randomizer.py ${PARAMS} 2>&1)
+    OUT=$(/usr/bin/time -f "\t%E real" python3.7 ./randomizer.py ${PARAMS} 2>&1)
     if [ $? -ne 0 ]; then
 	echo "${OUT}" >> ${LOG}
     else
@@ -113,7 +113,7 @@ function computeSeed {
     fi
 
     if [ ${COMPARE} -eq 0 ]; then
-	OUT=$(/usr/bin/time -f "\t%E real" python3 ${ORIG}/solver.py -r ${ROM_GEN} --preset standard_presets/${PRESET}.json -g --checkDuplicateMajor 2>&1)
+	OUT=$(/usr/bin/time -f "\t%E real" python3.7 ${ORIG}/solver.py -r ${ROM_GEN} --preset standard_presets/${PRESET}.json -g --checkDuplicateMajor 2>&1)
 	if [ $? -ne 0 ]; then
             echo "${SEED};${DIFF_CAP};${RTIME_OLD};${RTIME_NEW};${STIME_OLD};${STIME_NEW};${MD5};${PARAMS};" | tee -a ${CSV}
             echo "Can't solve ${ROM_GEN}" | tee -a ${CSV}
@@ -129,7 +129,7 @@ function computeSeed {
 	DUP_OLD=1
     fi
 
-    OUT=$(/usr/bin/time -f "\t%E real" python3 ./solver.py -r ${ROM_GEN} --preset standard_presets/${PRESET}.json -g --checkDuplicateMajor 2>&1)
+    OUT=$(/usr/bin/time -f "\t%E real" python3.7 ./solver.py -r ${ROM_GEN} --preset standard_presets/${PRESET}.json -g --checkDuplicateMajor 2>&1)
     if [ $? -ne 0 ]; then
         echo "${SEED};${DIFF_CAP};${RTIME_OLD};${RTIME_NEW};${STIME_OLD};${STIME_NEW};${MD5};${PARAMS};" | tee -a ${CSV}
         echo "Can't solve ${ROM_GEN}" | tee -a ${CSV}

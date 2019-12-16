@@ -1326,7 +1326,7 @@ class Randomizer(object):
             self.currentItems.append(item)
             self.smbm.addItem(item['Type'])
 
-            if self.vcr != None:
+            if self.vcr != None and showDot == True:
                 self.vcr.addLocation(location['Name'], item['Type'])
 
         self.unusedLocations.remove(location)

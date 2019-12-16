@@ -961,6 +961,9 @@ class InteractiveSolver(CommonSolver):
         if lastVisited != None:
             self.majorLocations.remove(lastVisited)
             self.visitedLocations.append(lastVisited)
+            if lastVisited["difficulty"] == False:
+                # if the loc is still sequence break, put it back as sequence break
+                lastVisited["difficulty"] = SMBool(True, -1)
 
         # return them
         self.dumpState()

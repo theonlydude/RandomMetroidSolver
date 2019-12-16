@@ -468,7 +468,7 @@ if __name__ == "__main__":
             print("DIAG: {}".format(msg))
             sys.exit(-1)
         except Exception as e:
-            msg = e.message
+            msg = str(e)
             dumpErrorMsg(args.output, msg)
             print("DIAG: {}".format(msg))
             sys.exit(-1)

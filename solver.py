@@ -943,10 +943,13 @@ class InteractiveSolver(CommonSolver):
 
         # if last loc added was a sequence break, recompute its difficulty,
         # as it may be available with the newly placed item.
-        lastVisited = self.visitedLocations[-1]
-        if lastVisited['difficulty'].difficulty == -1:
-            self.visitedLocations.remove(lastVisited)
-            self.majorLocations.append(lastVisited)
+        if len(self.visitedLocations) > 0:
+            lastVisited = self.visitedLocations[-1]
+            if lastVisited['difficulty'].difficulty == -1:
+                self.visitedLocations.remove(lastVisited)
+                self.majorLocations.append(lastVisited)
+            else:
+                lastVisited = None
         else:
             lastVisited = None
 

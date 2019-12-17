@@ -712,19 +712,21 @@ class Randomizer(object):
                 self.errorMsg += "Super Fun: " + ', '.join(fun.errorMsgs) + ' '
             self.itemPool = fun.getItemPool()
             self.restrictedLocations = fun.restrictedLocs
-
+        # if late morph compute number of locations available without morph
+        if self.restrictions['Morph'] == 'late':
+            self.computeLateMorphLimit()
+        # temporarily swap item pool in chozo mode, until all chozo item are placed in chozo locs
         self.chozoItemPool = []
         self.nonChozoItemPool = []
-        # temporarily swap item pool in chozo mode, until all chozo item are placed in chozo locs
         if self.restrictions['MajorMinor'] == 'Chozo':
             self.chozoItemPool = [item for item in self.itemPool if item['Class'] == 'Chozo' or item['Name'] == 'Boss']
             self.nonChozoItemPool = [item for item in self.itemPool if item not in self.chozoItemPool] # this will be swapped back
             self.log.debug('pools. c=%d, n=%d, t=%d' % (len(self.chozoItemPool), len(self.nonChozoItemPool), len(self.itemPool)))
             self.itemPool = self.chozoItemPool
-
-        # if late morph compute number of locations available without morph
-        if self.restrictions['Morph'] == 'late':
-            self.computeLateMorphLimit()
+            # forces ice zeb skip in the knows to pass end game condition. this is ugly but valid,
+            # as if zeb skip is not known, an extra missile pack is guaranteed to be added (it won't
+            # be in a chozo location, but the game is still finishable)
+            Knows.IceZebSkip = SMBool(True, 0, [])
 
         self.vcr = VCR(seedName, 'rando') if settings.vcr == True else None
 

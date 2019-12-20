@@ -1544,6 +1544,24 @@ class WS(object):
         if action not in ['init', 'add', 'remove', 'clear', 'get', 'save', 'replace', 'randomize']:
             raiseHttp(400, "Unknown action {}, must be init/add/remove/clear/get/save/randomize".format(action), True)
 
+    def validatePoint(self, point):
+        if request.vars[point] == None:
+            raiseHttp(400, "Missing parameter {}".format(point), True)
+
+        pointValue = request.vars[point]
+
+        if pointValue not in ['lowerMushroomsLeft', 'moatRight', 'greenPiratesShaftBottomRight',
+                              'keyhunterRoomBottom', 'morphBallRoomLeft', 'greenBrinstarElevatorRight',
+                              'greenHillZoneTopRight', 'noobBridgeRight', 'westOceanLeft', 'crabMazeLeft',
+                              'lavaDiveRight', 'threeMuskateersRoomLeft', 'warehouseZeelaRoomLeft',
+                              'warehouseEntranceLeft', 'warehouseEntranceRight', 'singleChamberTopRight',
+                              'kronicBoostRoomBottomLeft', 'mainStreetBottom', 'crabHoleBottomLeft', 'leCoudeRight',
+                              'redFishRoomLeft', 'redTowerTopLeft', 'caterpillarRoomTopRight', 'redBrinstarElevator',
+                              'eastTunnelRight', 'eastTunnelTopRight', 'glassTunnelTop', 'statuesHallwayLeft',
+                              'ridleyRoomOut', 'ridleyRoomIn', 'kraidRoomOut', 'kraidRoomIn',
+                              'draygonRoomOut', 'draygonRoomIn', 'phantoonRoomOut', 'phantoonRoomIn']:
+            raiseHttp(400, "Wrong value for {}: {}".format(point, pointValue), True)
+
     def action(self):
         pass
 
@@ -1610,6 +1628,8 @@ class WS(object):
                            '--endPoint', parameters["endPoint"]]
         elif action == 'remove' and scope == 'item':
             params += ['--count', str(parameters["count"])]
+        elif action == 'remove' and scope == 'area' and "startPoint" in parameters:
+            params += ['--startPoint', parameters["startPoint"]]
         elif action == 'save' and scope == 'common':
             if parameters['lock'] == True:
                 params.append('--lock')
@@ -1817,24 +1837,6 @@ class WS_common_randomize(WS):
         return self.callSolverAction("common", "randomize", params)
 
 class WS_area_add(WS):
-    def validatePoint(self, point):
-        if request.vars[point] == None:
-            raiseHttp(400, "Missing parameter {}".format(point), True)
-
-        pointValue = request.vars[point]
-
-        if pointValue not in ['lowerMushroomsLeft', 'moatRight', 'greenPiratesShaftBottomRight',
-                              'keyhunterRoomBottom', 'morphBallRoomLeft', 'greenBrinstarElevatorRight',
-                              'greenHillZoneTopRight', 'noobBridgeRight', 'westOceanLeft', 'crabMazeLeft',
-                              'lavaDiveRight', 'threeMuskateersRoomLeft', 'warehouseZeelaRoomLeft',
-                              'warehouseEntranceLeft', 'warehouseEntranceRight', 'singleChamberTopRight',
-                              'kronicBoostRoomBottomLeft', 'mainStreetBottom', 'crabHoleBottomLeft', 'leCoudeRight',
-                              'redFishRoomLeft', 'redTowerTopLeft', 'caterpillarRoomTopRight', 'redBrinstarElevator',
-                              'eastTunnelRight', 'eastTunnelTopRight', 'glassTunnelTop', 'statuesHallwayLeft',
-                              'ridleyRoomOut', 'ridleyRoomIn', 'kraidRoomOut', 'kraidRoomIn',
-                              'draygonRoomOut', 'draygonRoomIn', 'phantoonRoomOut', 'phantoonRoomIn']:
-            raiseHttp(400, "Wrong value for {}: {}".format(point, pointValue), True)
-
     def validate(self):
         super(WS_area_add, self).validate()
 
@@ -1851,10 +1853,17 @@ class WS_area_add(WS):
 
 class WS_area_remove(WS):
     def validate(self):
+        if request.vars["startPoint"] != None:
+            self.validatePoint("startPoint")
+
         super(WS_area_remove, self).validate()
 
     def action(self):
-        return self.callSolverAction("area", "remove", {})
+        parameters = {}
+        if request.vars["startPoint"] != None:
+            parameters["startPoint"] = request.vars.startPoint
+
+        return self.callSolverAction("area", "remove", parameters)
 
 class WS_area_clear(WS):
     def validate(self):

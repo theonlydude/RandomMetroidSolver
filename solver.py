@@ -930,8 +930,11 @@ class InteractiveSolver(CommonSolver):
                     endPoint = params['endPoint']
                     self.addTransition(self.transWeb2Internal[startPoint], self.transWeb2Internal[endPoint])
                 elif action == 'remove':
-                    # remove last transition
-                    self.cancelLastTransition()
+                    if 'startPoint' in params:
+                        self.cancelTransition(self.transWeb2Internal[params['startPoint']])
+                    else:
+                        # remove last transition
+                        self.cancelLastTransition()
 
         self.areaGraph = AccessGraph(accessPoints, self.curGraphTransitions)
 
@@ -1261,6 +1264,39 @@ class InteractiveSolver(CommonSolver):
         elif self.bossRando == True:
             if len(self.curGraphTransitions) > len(self.areaTransitions):
                 self.curGraphTransitions.pop()
+
+    def cancelTransition(self, startPoint):
+        # get end point
+        endPoint = None
+        for (i, (start, end)) in enumerate(self.curGraphTransitions):
+            if start == startPoint:
+                endPoint = end
+                break
+            elif end == startPoint:
+                endPoint = start
+                break
+
+        if endPoint == None:
+            # shouldn't happen
+            return
+
+        # check that transition is cancelable
+        if self.areaRando == True and self.bossRando == True:
+            if len(self.curGraphTransitions) == 0:
+                return
+        elif self.areaRando == True:
+            if len(self.curGraphTransitions) == len(self.bossTransitions):
+                return
+            elif [startPoint, endPoint] in self.bossTransitions or [endPoint, startPoint] in self.bossTransitions:
+                return
+        elif self.bossRando == True:
+            if len(self.curGraphTransitions) == len(self.areaTransitions):
+                return
+            elif [startPoint, endPoint] in self.areaTransitions or [endPoint, startPoint] in self.areaTransitions:
+                return
+
+        # remove transition
+        self.curGraphTransitions.pop(i)
 
     def clearTransitions(self):
         if self.areaRando == True and self.bossRando == True:
@@ -1843,6 +1879,8 @@ def interactiveSolver(args):
                     print("Missing start or end point parameter when using action add for item")
                     sys.exit(1)
                 params = {'startPoint': args.startPoint, 'endPoint': args.endPoint}
+            if args.action == "remove" and args.startPoint != None:
+                params = {'startPoint': args.startPoint}
         params["debug"] = args.vcr
 
         solver = InteractiveSolver(args.output)

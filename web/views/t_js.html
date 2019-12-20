@@ -57,29 +57,34 @@ function clickPortal(elemId) {
   }
 
   if(firstClick == ""){
-    // highlight first element
-    if(! (elemId in lines)){
-      firstClick = elemId;
-      $("#"+firstClick).addClass("addBorder");
-    }
+    // highlight first element, allow highlight of already linked portals for link removal
+    firstClick = elemId;
+    $("#"+firstClick).addClass("addBorder");
   } else if(firstClick == elemId){
+    // click back on same portal
     $("#"+firstClick).removeClass("addBorder");
     firstClick = "";
   } else if(secondClick == "" && elemId != firstClick) {
+    if(firstClick in lines) {
+      // first portal was an already connected one, replace the selection
+      $("#"+firstClick).removeClass("addBorder");
+      firstClick = elemId;
+      $("#"+firstClick).addClass("addBorder");
+    } else {
+      if(! ((firstClick in lines) || (elemId in lines))) {
+        if(checkCompatibleAPs(firstClick, elemId) == false) {
+          alert("Warning:\n\tYou are mixing an Areas access point and a Bosses access point.\n\tIt's an invalid transition except for Plando seeds.");
+        }
 
-    if(! ((firstClick in lines) || (elemId in lines))) {
-      if(checkCompatibleAPs(firstClick, elemId) == false) {
-        alert("Warning:\n\tYou are mixing an Areas access point and a Bosses access point.\n\tIt's an invalid transition except for Plando seeds.");
-      }
-
-      if(init == true) {
-        secondClick = elemId;
-        ajaxCall({action: "add", scope: "area", startPoint: firstClick, endPoint: secondClick}, "upload");
-        firstClick = "";
-        secondClick = "";
-      } else {
-        // warn the user that he have to click on '>' first
-        alert("Please initialize the tracker/plando first by clicking on the Play button.");
+        if(init == true) {
+          secondClick = elemId;
+          ajaxCall({action: "add", scope: "area", startPoint: firstClick, endPoint: secondClick}, "upload");
+          firstClick = "";
+          secondClick = "";
+        } else {
+          // warn the user that he have to click on '>' first
+          alert("Please initialize the tracker/plando first by clicking on the Play button.");
+        }
       }
     }
   }
@@ -139,7 +144,14 @@ function deleteLine() {
     return;
   }
 
-  ajaxCall({action: "remove", scope: "area"}, "upload");
+  // check if a portal linked to an existing line is selected
+  if(firstClick != "" && firstClick in lines) {
+    $("#"+firstClick).removeClass("addBorder");
+    ajaxCall({action: "remove", scope: "area", startPoint: firstClick}, "upload");
+    firstClick = "";
+  } else {
+    ajaxCall({action: "remove", scope: "area"}, "upload");
+  }
 }
 
 function startAnimation(elem) {

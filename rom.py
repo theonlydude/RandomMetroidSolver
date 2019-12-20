@@ -8,6 +8,7 @@ from itemrandomizerweb.stdlib import List
 from compression import Compressor
 from ips import IPS_Patch
 from parameters import appDir
+from utils import normalizeRounding
 
 def readWord(romFile):
     r0 = struct.unpack("B", romFile.read(1))[0]
@@ -712,6 +713,9 @@ class RomPatcher:
         # write total number of actual items for item percentage patch (patch the patch)
         self.romFile.seek(0x5E651)
         self.romFile.write(struct.pack('B', self.nItems))
+        # write total number of items /10 for decimal point accuracy
+        self.romFile.seek(0x5E6A4)
+        self.romFile.write(struct.pack('B', normalizeRounding(float(self.nItems)/10.0)))
 
     def addIPSPatches(self, patches):
         for patchName in patches:

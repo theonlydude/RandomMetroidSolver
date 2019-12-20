@@ -4,8 +4,9 @@
 ;Allows an uneven or random number of items (up to 255 separate item pickups)
 ;Adds a single decimal point value, to give more accurate results to random item ammounts
 
-!CollectedItems = $7ED86E
-!TotalItems     = #$64	;TOTAL number if items in the game. This includes ALL items: missiles, upgrades, etc
+!CollectedItems  = $7ED86E
+!TotalItems      = #$64	;TOTAL number if items in the game. This includes ALL items: missiles, upgrades, etc
+!TotalItemsDiv10 = #$0A	; !TotalItems, divided by 10, to get accurate decimal point value
 
 LOROM
 arch snes.cpu
@@ -69,7 +70,7 @@ org $8BE627
 	PLA
 	SEP #$20
 	STA $4204
-	LDA #$0A
+	LDA !TotalItemsDiv10	                        ; FLO : patch this value to have accurate decimal point
 	STA $4206					
 	NOP : NOP : NOP : NOP : NOP : NOP : NOP		;Divide remainder by 10
 	REP #$20

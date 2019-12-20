@@ -74,8 +74,12 @@ org $8BE627
 	STA $4206					
 	NOP : NOP : NOP : NOP : NOP : NOP : NOP		;Divide remainder by 10
 	REP #$20
-	LDA $4214					;load value
-	STA $18					
+	LDA $4214					;load value and cap it at 9
+	CMP #$000A
+	BMI +
+	LDA #$0009
++
+	STA $18
 HUNDREDTHS:
 	LDA $12						;Load hundredths value
 	BEQ TENTHS					;If 0, don't draw hundredths digit
@@ -124,3 +128,5 @@ ONETHS:
 	PLB
 	PLP
 	RTS
+
+warnpc $8be740

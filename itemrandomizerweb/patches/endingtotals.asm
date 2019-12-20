@@ -6,7 +6,6 @@
 
 !CollectedItems  = $7ED86E
 !TotalItems      = #$64	;TOTAL number if items in the game. This includes ALL items: missiles, upgrades, etc
-!TotalItemsDiv10 = #$0A	; !TotalItems, divided by 10, to get accurate decimal point value
 
 LOROM
 arch snes.cpu
@@ -36,14 +35,15 @@ org $8BE627
 	STA $4202
 	LDA #$64					;Load #100 decimal
 	STA $4203
-	NOP : NOP : NOP : NOP : NOP : NOP : NOP
+	PHA : PLA : XBA : XBA
 	REP #$20
 	LDA $4216					;Load number of (collected items * 100)
 	STA $4204					;Store to devisor A
 	SEP #$20
+print "1st TotaItems (add 1) : ", pc
 	LDA !TotalItems					;Load total number of game items ; FLO: this has to be changed at ROM patch phase
 	STA $4206					;Store to devisor B
-	NOP : NOP : NOP : NOP : NOP : NOP : NOP
+	PHA : PLA : XBA : XBA
 	REP #$20
 	LDA $4214					;Load ((collected items * 100)/Total items) ie Item percent
 	STA $4204
@@ -52,7 +52,7 @@ org $8BE627
 	SEP #$20
 	LDA #$0A
 	STA $4206
-	NOP : NOP : NOP : NOP : NOP : NOP : NOP		;Calculate percentage / 10
+	PHA : PLA : XBA : XBA				;Calculate percentage / 10
 	REP #$20
 	LDA $4214					;Load tenths of percentage / 10 (eg, if 78, load 7, if 53, load 5)
 	STA $4204					;Store value to devisor A
@@ -61,24 +61,28 @@ org $8BE627
 	SEP #$20
 	LDA #$0A
 	STA $4206					
-	NOP : NOP : NOP : NOP : NOP : NOP : NOP		;Divide percentage by 10 again
+	PHA : PLA : XBA : XBA				;Divide percentage by 10 again
 	REP #$20
 	LDA $4214					;If 100%, this will be 1
 	STA $12						;Store to $12. Contains 100th of percentage. WIll only be 1 if 100% achieved
 	LDA $4216					;Load remainder, which will be 0 if 100% achieved
 	STA $14						;Store to $14
-	PLA
+	PLA						; gets initial division remainder to have decimal point
 	SEP #$20
-	STA $4204
-	LDA !TotalItemsDiv10	                        ; FLO : patch this value to have accurate decimal point
-	STA $4206					
-	NOP : NOP : NOP : NOP : NOP : NOP : NOP		;Divide remainder by 10
+	STA $4202
+	LDA #$0A					;Load #10 decimal
+	STA $4203
+	PHA : PLA : XBA : XBA
 	REP #$20
-	LDA $4214					;load value and cap it at 9
-	CMP #$000A
-	BMI +
-	LDA #$0009
-+
+	LDA $4216					;Load (remainder * 10) and use it to divide by number of items
+	STA $4204
+	SEP #$20
+print "2nd TotaItems (add 1) : ", pc
+	LDA !TotalItems	                                ; FLO : patch this value to have accurate decimal point
+	STA $4206					
+	PHA : PLA : XBA : XBA				;Divide remainder*10 by number of items
+	REP #$20
+	LDA $4214					;load value
 	STA $18
 HUNDREDTHS:
 	LDA $12						;Load hundredths value

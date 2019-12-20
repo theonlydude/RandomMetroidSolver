@@ -711,11 +711,9 @@ class RomPatcher:
 
     def writeItemsNumber(self):
         # write total number of actual items for item percentage patch (patch the patch)
-        self.romFile.seek(0x5E651)
-        self.romFile.write(struct.pack('B', self.nItems))
-        # write total number of items /10 for decimal point accuracy
-        self.romFile.seek(0x5E6A4)
-        self.romFile.write(struct.pack('B', normalizeRounding(float(self.nItems)/10.0)))
+        for addr in [0x5E64E, 0x5E6AB]:
+            self.romFile.seek(addr)
+            self.romFile.write(struct.pack('B', self.nItems))
 
     def addIPSPatches(self, patches):
         for patchName in patches:

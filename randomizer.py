@@ -315,9 +315,26 @@ if __name__ == "__main__":
         threshold = mania - epsilon
     maxDifficulty = threshold
 
+    majorsSplitRandom = False
     if args.majorsSplit == 'random':
+        majorsSplitRandom = True
         args.majorsSplit = majorsSplits[random.randint(0, len(majorsSplits)-1)]
     logger.debug("majorsSplit: {}".format(args.majorsSplit))
+
+    areaRandom = False
+    if args.area == 'random':
+        areaRandom = True
+        args.area = bool(random.randint(0, 2))
+        if args.area == True:
+            # also add area layout
+            args.areaLayoutBase = True
+    logger.debug("area: {}".format(args.area))
+
+    bossesRandom = False
+    if args.bosses == 'random':
+        bossesRandom = True
+        args.bosses = bool(random.randint(0, 2))
+    logger.debug("bosses: {}".format(args.bosses))
 
     if args.suitsRestriction == 'random':
         if args.morphPlacement == 'late' and args.area == True:
@@ -345,15 +362,16 @@ if __name__ == "__main__":
     restrictions = { 'Suits' : args.suitsRestriction, 'Morph' : args.morphPlacement }
     restrictions['MajorMinor'] = args.majorsSplit
     seedCode = 'X'
-    if restrictions['MajorMinor'] == 'Full':
-        seedCode = 'FX'
-    elif restrictions['MajorMinor'] == 'Chozo':
-        seedCode = 'ZX'
-    elif restrictions['MajorMinor'] == 'Major':
-        seedCode = 'MX'
-    if args.bosses == True:
+    if majorsSplitRandom == False:
+        if restrictions['MajorMinor'] == 'Full':
+            seedCode = 'FX'
+        elif restrictions['MajorMinor'] == 'Chozo':
+            seedCode = 'ZX'
+        elif restrictions['MajorMinor'] == 'Major':
+            seedCode = 'MX'
+    if args.bosses == True and bossesRandom == False:
         seedCode = 'B'+seedCode
-    if args.area == True:
+    if args.area == True and areaRandom == False:
         seedCode = 'A'+seedCode
 
     # output ROM name

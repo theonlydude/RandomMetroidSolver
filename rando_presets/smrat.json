@@ -18,7 +18,7 @@
   "powerBombQty": "1",
   "minorQty": "100",
   "suitsRestriction": "off",
-  "preset": "smrat",
+  "preset": "SMRAT2020",
   "spinjumprestart": "off",
   "superQty": "3",
   "animals": "off",
@@ -27,5 +27,6 @@
   "funSuits": "off",
   "nerfedCharge": "off",
   "variaTweaks": "off",
-  "bossRandomization": "off"
+  "bossRandomization": "off",
+  "rando_speed": "off"
 }

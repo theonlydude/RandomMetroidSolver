@@ -14,10 +14,11 @@
   "progressionSpeed": "random",
   "No_Music": "off",
   "areaRandomization": "off",
+  "bossRandomization": "off",  
   "maxDifficulty": "hardcore",
   "powerBombQty": "1",
   "minorQty": "100",
-  "suitsRestriction": "random",
+  "suitsRestriction": "off",
   "spinjumprestart": "off",
   "areaLayout": "off",
   "superQty": "1",
@@ -26,5 +27,6 @@
   "energyQty": "vanilla",
   "funSuits": "off",
   "nerfedCharge": "off",
-  "variaTweaks": "off"
+  "variaTweaks": "off",
+  "rando_speed": "off"
 }

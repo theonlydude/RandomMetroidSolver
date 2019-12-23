@@ -12,8 +12,6 @@
   "missileQty": "9",
   "morphPlacement": "early",
   "progressionSpeed": "slowest",
-  "No_Music": "off",
-  "areaRandomization": "off",
   "maxDifficulty": "no difficulty cap",
   "powerBombQty": "1",
   "minorQty": "7",
@@ -23,9 +21,9 @@
   "spinjumprestart": "off",
   "gravityBehaviour": "Balanced",
   "superQty": "1",
-  "itemsounds": "on",
   "energyQty": "sparse",
   "funSuits": "on",
   "nerfedCharge": "off",
-  "variaTweaks": "on"
+  "variaTweaks": "on",
+  "rando_speed": "off"
 }

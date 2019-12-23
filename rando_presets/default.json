@@ -27,5 +27,6 @@
   "funSuits": "off",
   "variaTweaks": "on",
   "nerfedCharge": "off",
-  "bossRandomization": "off"
+  "bossRandomization": "off",
+  "rando_speed": "off"
 }

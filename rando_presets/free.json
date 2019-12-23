@@ -5,14 +5,13 @@
   "startLocation": "Landing Site",
   "hideItems": "off",
   "funCombat": "off",
-  "majorsSplit": "Full",
+  "majorsSplit": "Chozo",
   "strictMinors": "off",
   "layoutPatches": "on",
-  "gravityBehaviour": "Balanced",
+  "gravityBehaviour": "Vanilla",
   "missileQty": "3",
   "morphPlacement": "early",
   "progressionSpeed": "fastest",
-  "No_Music": "off",
   "areaRandomization": "off",
   "maxDifficulty": "easy",
   "powerBombQty": "1",
@@ -25,6 +24,7 @@
   "itemsounds": "on",
   "energyQty": "vanilla",
   "funSuits": "off",
-  "nerfedCharge": "off",
-  "variaTweaks": "on"
+  "nerfedCharge": "on",
+  "variaTweaks": "on",
+  "rando_speed": "on"
 }

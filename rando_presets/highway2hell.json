@@ -18,9 +18,9 @@
   "spinjumprestart": "off",
   "gravityBehaviour": "Balanced",
   "superQty": "1",
-  "itemsounds": "on",
   "energyQty": "vanilla",
   "funSuits": "on",
   "nerfedCharge": "off",
-  "variaTweaks": "on"
+  "variaTweaks": "on",
+  "rando_speed": "off"
 }

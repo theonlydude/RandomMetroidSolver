@@ -1,5 +1,4 @@
 {
-  "elevators_doors_speed": "on",
   "progressionDifficulty": "random",
   "funMovement": "random",
   "startLocation": "Landing Site",
@@ -7,23 +6,16 @@
   "funCombat": "random",
   "majorsSplit": "random",
   "strictMinors": "random",
-  "layoutPatches": "on",
   "missileQty": "random",
   "morphPlacement": "random",
   "progressionSpeed": "random",
-  "No_Music": "off",
-  "areaRandomization": "off",
+  "areaRandomization": "random",
+  "bossRandomization": "random",  
   "maxDifficulty": "random",
   "powerBombQty": "random",
   "minorQty": "random",
   "suitsRestriction": "random",
-  "animals": "off",
-  "spinjumprestart": "off",
-  "gravityBehaviour": "Balanced",
   "superQty": "random",
-  "itemsounds": "on",
   "energyQty": "random",
-  "funSuits": "random",
-  "nerfedCharge": "off",
-  "variaTweaks": "on"
+  "funSuits": "random"
 }

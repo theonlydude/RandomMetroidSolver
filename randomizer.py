@@ -538,7 +538,7 @@ if __name__ == "__main__":
     if args.extStatsFilename != None:
         if args.noGravHeat == True:
             gravityBehaviour = 'Vanilla'
-        elif args.progressivesuits == True:
+        elif args.progressiveSuits == True:
             gravityBehaviour = 'Progressive'
         else:
             gravityBehaviour = 'Balanced'

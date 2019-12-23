@@ -139,7 +139,9 @@ class SolverState(object):
         i = 0
         for loc in visitedLocations:
             diff = loc["difficulty"]
-            ret[loc["Name"]] = {"index": i, "difficulty": (diff.bool, diff.difficulty, diff.knows, diff.items)}
+            ret[loc["Name"]] = {"index": i,
+                                "difficulty": (diff.bool, diff.difficulty, diff.knows, diff.items),
+                                "Visibility": loc["Visibility"]}
             i += 1
         return ret
 
@@ -151,6 +153,7 @@ class SolverState(object):
                 # visitedLocations contains an index
                 diff = visitedLocations[loc["Name"]]["difficulty"]
                 loc["difficulty"] = SMBool(diff[0], diff[1], diff[2], diff[3])
+                loc["Visibility"] = visitedLocations[loc["Name"]]["Visibility"]
                 retVis.append((visitedLocations[loc["Name"]]["index"], loc))
             else:
                 if loc["Name"] in availableLocations:
@@ -204,7 +207,9 @@ class SolverState(object):
                                 "knows": self.knows2isolver(diff.knows),
                                 "items": list(set(diff.items)),
                                 "item": loc["itemName"],
-                                "name": loc["Name"]}
+                                "name": loc["Name"],
+                                "canHidden": loc["CanHidden"],
+                                "visibility": loc["Visibility"]}
                 if "comeBack" in loc:
                     ret[locName]["comeBack"] = loc["comeBack"]
                 # for debug purpose
@@ -223,7 +228,9 @@ class SolverState(object):
                 ret[locName] = {"item": loc["itemName"],
                                 "name": loc["Name"],
                                 "knows": ["Sequence Break"],
-                                "items": []}
+                                "items": [],
+                                "canHidden": loc["CanHidden"],
+                                "visibility": loc["Visibility"]}
                 if self.debug == True:
                     if "difficulty" in loc:
                         ret[locName]["difficulty"] = str(loc["difficulty"])
@@ -912,7 +919,7 @@ class InteractiveSolver(CommonSolver):
             else:
                 if action == 'add':
                     if self.mode == 'plando' or self.mode == 'seedless':
-                        self.setItemAt(params['loc'], params['item'])
+                        self.setItemAt(params['loc'], params['item'], params['hide'])
                     else:
                         # pickup item at locName
                         self.pickItemAt(params['loc'])
@@ -920,7 +927,7 @@ class InteractiveSolver(CommonSolver):
                     # remove last collected item
                     self.cancelLastItems(params['count'])
                 elif action == 'replace':
-                    self.replaceItemAt(params['loc'], params['item'])
+                    self.replaceItemAt(params['loc'], params['item'], params['hide'])
         elif scope == 'area':
             if action == 'clear':
                 self.clearTransitions()
@@ -1203,8 +1210,9 @@ class InteractiveSolver(CommonSolver):
             loc["accessPoint"] = list(loc["AccessFrom"])[0]
         self.collectMajor(loc)
 
-    def setItemAt(self, locName, itemName):
+    def setItemAt(self, locName, itemName, hide):
         # set itemName at locName
+
         loc = self.getWebLoc(locName)
         # plando mode
         loc["itemName"] = itemName
@@ -1216,9 +1224,12 @@ class InteractiveSolver(CommonSolver):
             # take first ap of the loc
             loc["accessPoint"] = list(loc["AccessFrom"])[0]
 
+        if hide == True:
+            loc["Visibility"] = 'Hidden'
+
         self.collectMajor(loc, itemName)
 
-    def replaceItemAt(self, locName, itemName):
+    def replaceItemAt(self, locName, itemName, hide):
         # replace itemName at locName
         loc = self.getWebLoc(locName)
         oldItemName = loc["itemName"]
@@ -1235,6 +1246,12 @@ class InteractiveSolver(CommonSolver):
         # update smbm if count item or major was only there once
         if isCount == True or count == 1:
             self.smbm.removeItem(oldItemName)
+
+        if hide == True:
+            loc["Visibility"] = 'Hidden'
+        elif loc['CanHidden'] == True and loc['Visibility'] == 'Hidden':
+            # the loc was previously hidden, set it back to visible
+            loc["Visibility"] = 'Visible'
 
         self.smbm.addItem(itemName)
 
@@ -1867,7 +1884,7 @@ def interactiveSolver(args):
                     if args.item == None:
                         print("Missing item parameter when using action add in plando/suitless mode")
                         sys.exit(1)
-                params = {'loc': args.loc, 'item': args.item}
+                params = {'loc': args.loc, 'item': args.item, 'hide': args.hide}
             elif args.action == "remove":
                 params = {'count': args.count}
         elif args.scope == 'area':
@@ -1956,6 +1973,8 @@ if __name__ == "__main__":
                         dest="action", nargs="?", default=None, choices=['init', 'add', 'remove', 'clear', 'get', 'save', 'replace', 'randomize'])
     parser.add_argument('--item', help="Name of the item to place in plando mode (used in interactive mode)",
                         dest="item", nargs='?', default=None)
+    parser.add_argument('--hide', help="Hide the item to place in plando mode (used in interactive mode)",
+                        dest="hide", action='store_true')
     parser.add_argument('--startPoint', help="The start AP to connect (used in interactive mode)",
                         dest="startPoint", nargs='?', default=None)
     parser.add_argument('--endPoint', help="The destination AP to connect (used in interactive mode)",

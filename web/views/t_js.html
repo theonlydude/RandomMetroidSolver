@@ -303,6 +303,8 @@ function ajaxOkGet(jsonData, status, dummy, chained=false) {
       var locData = jsonData["availableLocations"][locName];
       locsInfo[locName]["state"] = "available";
       locsInfo[locName]["difficulty"] = locData["difficulty"];
+      locsInfo[locName]["canHidden"] = locData["canHidden"];
+      locsInfo[locName]["visibility"] = locData["visibility"];
 
       $("#"+locName).attr("class", "baseLoc marker_available_"+locData["difficulty"]);
       var tooltip = getTooltip(locName, locData, "?", false);
@@ -324,6 +326,8 @@ function ajaxOkGet(jsonData, status, dummy, chained=false) {
       var locData = jsonData["visitedLocations"][locName];
       locsInfo[locName]["state"] = "visited";
       locsInfo[locName]["difficulty"] = locData["difficulty"];
+      locsInfo[locName]["canHidden"] = locData["canHidden"];
+      locsInfo[locName]["visibility"] = locData["visibility"];
 
       // keep current loc zoomed
       var base = "baseLoc";
@@ -372,6 +376,8 @@ function ajaxOkGet(jsonData, status, dummy, chained=false) {
       var locData = jsonData["remainLocations"][locName];
       locsInfo[locName]["state"] = "break";
       locsInfo[locName]["difficulty"] = locData["difficulty"];
+      locsInfo[locName]["canHidden"] = locData["canHidden"];
+      locsInfo[locName]["visibility"] = locData["visibility"];
 
       // keep current loc zoomed
       var base = "baseLoc";
@@ -869,6 +875,18 @@ function initSolver() {
   $('#hideRandoOverlay').hide();
 }
 
+function handleHide(locName) {
+  // console.log("handleHide locName: "+locName+" canHidden: "+locsInfo[locName]["canHidden"]);
+
+  if("canHidden" in locsInfo[locName] && locsInfo[locName]["canHidden"] == true) {
+    document.getElementById("hideItemVisibility").style.display = "block";
+    document.getElementById("hideItem").checked = locsInfo[locName]["visibility"] == "Hidden";
+  } else {
+    document.getElementById("hideItemVisibility").style.display = "none";
+    document.getElementById("hideItem").checked = false;
+  }
+}
+
 function clickLoc(elem) {
   if(loaded == false || webServInProgress == true || init == false) {
     return;
@@ -899,6 +917,10 @@ function clickLoc(elem) {
     }
     document.getElementById("locName").value = locName;
 
+    if(mode == "plando") {
+      handleHide(locName);
+    }
+
     // display item selector
     document.getElementById("itemPopup").style.display = "block";
     $("#item").imagepicker();
@@ -924,12 +946,13 @@ function placeItem() {
 
   var item = document.getElementById("item").value;
   var locName = document.getElementById("locName").value;
+  var hide = document.getElementById("hideItem").checked;
 
   // check that lock is in the available list
   if("state" in locsInfo[locName] && (locsInfo[locName]["state"] == "available" || locsInfo[locName]["state"] == "break")) {
-    ajaxCall({action: "add", scope: "item", locName: locName, itemName: item}, "upload");
+    ajaxCall({action: "add", scope: "item", locName: locName, itemName: item, hide: hide}, "upload");
   } else {
-    ajaxCall({action: "replace", scope: "item", locName: locName, itemName: item}, "upload");
+    ajaxCall({action: "replace", scope: "item", locName: locName, itemName: item, hide: hide}, "upload");
   }
 }
 

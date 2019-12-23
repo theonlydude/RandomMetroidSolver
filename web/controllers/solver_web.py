@@ -1623,6 +1623,8 @@ class WS(object):
                 params += ['--loc', parameters["loc"]]
                 if mode != 'standard':
                     params += ['--item', parameters["item"]]
+                    if parameters['hide'] == True:
+                        params.append('--hide')
             elif scope == 'area':
                 params += ['--startPoint', parameters["startPoint"],
                            '--endPoint', parameters["endPoint"]]
@@ -1741,7 +1743,7 @@ class WS_common_init(WS):
         self.session["mode"] = mode
 
         vcr = request.vars.debug != None
-        fill = request.vars.fill != None and request.vars.fill == "true"
+        fill = request.vars.fill == "true"
 
         return self.callSolverInit(jsonRomFileName, presetFileName, preset, seed, mode, vcr, fill)
 
@@ -1901,14 +1903,15 @@ class WS_item_add(WS):
         # items used only in the randomizer that we get in vcr mode
         if item in ["Boss", "NoEnergy"]:
             item = 'Nothing'
-        return self.callSolverAction("item", "add", {"loc": request.vars.locName, "item": item})
+
+        return self.callSolverAction("item", "add", {"loc": request.vars.locName, "item": item, "hide": request.vars.hide == "true"})
 
 class WS_item_replace(WS_item_add):
     def validate(self):
         super(WS_item_replace, self).validate()
 
     def action(self):
-        return self.callSolverAction("item", "replace", {"loc": request.vars.locName, "item": request.vars.itemName})
+        return self.callSolverAction("item", "replace", {"loc": request.vars.locName, "item": request.vars.itemName, "hide": request.vars.hide == "true"})
 
 class WS_item_remove(WS):
     def validate(self):

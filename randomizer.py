@@ -325,9 +325,6 @@ if __name__ == "__main__":
     if args.area == 'random':
         areaRandom = True
         args.area = bool(random.randint(0, 2))
-        if args.area == True:
-            # also add area layout
-            args.areaLayoutBase = True
     logger.debug("area: {}".format(args.area))
 
     bossesRandom = False

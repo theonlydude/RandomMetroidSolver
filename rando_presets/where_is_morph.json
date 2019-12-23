@@ -10,7 +10,7 @@
   "gravityBehaviour": "Balanced",
   "missileQty": "3",
   "morphPlacement": "late",
-  "progressionSpeed": "random",
+  "progressionSpeed": "VARIAble",
   "areaRandomization": "on",
   "maxDifficulty": "hardcore",
   "powerBombQty": "1",

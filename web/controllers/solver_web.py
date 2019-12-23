@@ -97,7 +97,7 @@ def loadPresetsList():
     return (stdPresets, tourPresets, comPresets)
 
 def loadRandoPresetsList():
-    tourPresets = ['Season_Races', 'Season_Races_Chozo', 'Playoff_Races', 'Playoff_Races_Chozo', 'smrat', 'Scavenger_Hunt']
+    tourPresets = ['Season_Races', 'Season_Races_Chozo', 'Playoff_Races', 'Playoff_Races_Chozo', 'SMRAT2020']
     files = sorted(os.listdir('rando_presets'), key=lambda v: v.upper())
     randoPresets = [os.path.splitext(file)[0] for file in files]
     randoPresets = [preset for preset in randoPresets if preset not in tourPresets]

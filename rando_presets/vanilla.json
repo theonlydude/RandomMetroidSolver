@@ -11,7 +11,7 @@
   "gravityBehaviour": "Vanilla",
   "missileQty": "4.6",
   "morphPlacement": "early",
-  "progressionSpeed": "random",
+  "progressionSpeed": "VARIAble",
   "No_Music": "off",
   "areaRandomization": "off",
   "bossRandomization": "off",  

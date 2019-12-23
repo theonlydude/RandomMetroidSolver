@@ -328,6 +328,7 @@ function ajaxOkGet(jsonData, status, dummy, chained=false) {
       locsInfo[locName]["difficulty"] = locData["difficulty"];
       locsInfo[locName]["canHidden"] = locData["canHidden"];
       locsInfo[locName]["visibility"] = locData["visibility"];
+      locsInfo[locName]["item"] = locData["item"];
 
       // keep current loc zoomed
       var base = "baseLoc";
@@ -910,6 +911,7 @@ function clickLoc(elem) {
 
     if("state" in locsInfo[locName] && locsInfo[locName]["state"] == "visited") {
       document.getElementById("itemPopupText").innerHTML = "Replace item at "+locName+":";
+      $("#item").val(locsInfo[locName]["item"]);
     } else if(mode == "plando") {
       document.getElementById("itemPopupText").innerHTML = "Item to place at "+locName+":";
     } else {

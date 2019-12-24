@@ -77,7 +77,7 @@ class DB:
         try:
             if returnCode == 0:
                 sql = "insert into solver_collected_items values (%d, '%s', %d);"
-                for item, count in result['collectedItems'].iteritems():
+                for item, count in result['collectedItems'].items():
                     if count > 0:
                         self.cursor.execute(sql % (id, item, count))
 

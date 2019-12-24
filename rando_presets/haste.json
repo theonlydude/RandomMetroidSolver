@@ -17,7 +17,7 @@
   "powerBombQty": "4.5",
   "minorQty": "100",
   "suitsRestriction": "on",
-  "preset": "regular",
+  "preset": "Season_Races",
   "animals": "off",
   "spinjumprestart": "off",
   "gravityBehaviour": "Progressive",

@@ -1343,6 +1343,8 @@ class StandardSolver(CommonSolver):
                  magic=None, checkDuplicateMajor=False, vcr=False):
         self.checkDuplicateMajor = checkDuplicateMajor
         self.vcr = VCR(rom, 'solver') if vcr == True else None
+        # for compatibility with some common methods of the interactive solver
+        self.mode = 'standard'
 
         self.log = log.get('Solver')
 

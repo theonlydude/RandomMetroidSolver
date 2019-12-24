@@ -667,7 +667,9 @@ class Pickup:
                     and (smbm.haveItem('SpeedBooster')
                          or smbm.haveItem('Ice'))
                     # draygon access
-                    and smbm.haveItem('Gravity'))
+                    and smbm.haveItem('Gravity')
+                    # all boss locs collected (draygon pickup is not on draygon location)
+                    and not any('Boss' in loc['Class'] for loc in majorLocations))
         else:
             return False
 

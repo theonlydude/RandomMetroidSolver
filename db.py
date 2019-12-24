@@ -114,7 +114,7 @@ class DB:
         while i < len(params):
             if params[i][0:len('--')] == '--':
                 paramName = params[i][len('--'):]
-                if i != len(params) - 1 and params[i+1][0:len('--')] != '--':
+                if i != len(params) - 1 and params[i+1][0:len('--')] not in ['--', '-c']:
                     paramValue = params[i+1]
                     i += 2
                 else:

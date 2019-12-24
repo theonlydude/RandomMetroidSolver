@@ -71,12 +71,10 @@ if __name__ == "__main__":
     parser.add_argument('--dot',
                         help="generate dot file with area graph",
                         action='store_true',dest='dot', default=False)
-    parser.add_argument('--area',
-                        help="area mode", action='store_true',
-                        dest='area', default=False)
-    parser.add_argument('--bosses',
-                        help="randomize bosses", action='store_true',
-                        dest='bosses', default=False)
+    parser.add_argument('--area', help="area mode",
+                        dest='area', nargs='?', const=True, default=False)
+    parser.add_argument('--bosses', help="randomize bosses",
+                        dest='bosses', nargs='?', const=True, default=False)
     parser.add_argument('--areaLayoutBase',
                         help="use simple layout patch for area mode", action='store_true',
                         dest='areaLayoutBase', default=False)

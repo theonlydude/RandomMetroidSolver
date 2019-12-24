@@ -153,7 +153,8 @@ class SolverState(object):
                 # visitedLocations contains an index
                 diff = visitedLocations[loc["Name"]]["difficulty"]
                 loc["difficulty"] = SMBool(diff[0], diff[1], diff[2], diff[3])
-                loc["Visibility"] = visitedLocations[loc["Name"]]["Visibility"]
+                if "Visibility" in visitedLocations[loc["Name"]]:
+                    loc["Visibility"] = visitedLocations[loc["Name"]]["Visibility"]
                 retVis.append((visitedLocations[loc["Name"]]["index"], loc))
             else:
                 if loc["Name"] in availableLocations:

@@ -1,6 +1,7 @@
 # check if a stats db is available
 try:
-    # pip3 install mysql-connector-python --user
+    # python3.7 -m pip install pip
+    # pip3.7 install mysql-connector-python --user
     import mysql.connector
     from db_params import dbParams
     dbAvailable = True

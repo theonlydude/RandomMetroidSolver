@@ -10,7 +10,7 @@
   "layoutPatches": "on",
   "missileQty": "8.5",
   "morphPlacement": "early",
-  "progressionSpeed": "fast",
+  "progressionSpeed": ["medium", "fast"],
   "No_Music": "off",
   "areaRandomization": "off",
   "maxDifficulty": "hardcore",

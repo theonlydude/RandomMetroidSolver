@@ -540,39 +540,91 @@ def genPathTable(locations, displayAPs=True):
         return None
 
     lastAP = None
-    pathTable = TABLE(COLGROUP(COL(_class="locName"), COL(_class="area"), COL(_class="subarea"), COL(_class="item"),
-                               COL(_class="difficulty"), COL(_class="knowsUsed"), COL(_class="itemsUsed")),
-                      TR(TH("Location Name"), TH("Area"), TH("SubArea"), TH("Item"),
-                         TH("Difficulty"), TH("Techniques used"), TH("Items used")),
-                      _class="full")
+    pathTable = """
+<table class="full">
+  <colgroup>
+    <col class="locName" /><col class="area" /><col class="subarea" /><col class="item" /><col class="difficulty" /><col class="knowsUsed" /><col class="itemsUsed" />
+  </colgroup>
+  <tr>
+    <th>Location Name</th><th>Area</th><th>SubArea</th><th>Item</th><th>Difficulty</th><th>Techniques used</th><th>Items used</th>
+  </tr>
+"""
+
     for location, area, subarea, item, diff, techniques, items, path, _class in locations:
         if path is not None:
             lastAP = path[-1]
             if displayAPs == True and not (len(path) == 1 and path[0] == lastAP):
-                pathTable.append(TR(TD("Path"),
-                                    TD(" -> ".join(path), _colspan="6"),
-                                    _class="grey"))
+                pathTable += """<tr class="grey"><td>Path</td><td colspan="6">{}</td></tr>\n""".format(" -&gt; ".join(path))
 
         (name, room) = location
 
         # not picked up items start with an '-'
         if item[0] != '-':
-            pathTable.append(TR(A(name, _target="_blank",
-                                  _href="https://wiki.supermetroid.run/{}".format(room.replace(' ', '_').replace("'", '%27'))),
-                                area,
-                                subarea,
-                                IMG(_src="/solver/static/images/{}.png".format(name.replace(' ', '')), _alt=name, _title=name, _class="imageBoss") if "Boss" in _class else IMG(_src="/solver/static/images/{}.png".format(item), _alt=item, _title=item, _class="imageItem"),
-                                diff,
-                                TD(*[SPAN(" ", A(tech, _href=Knows.desc[tech]['href'], _target="_blank", _class="marginKnows")) if tech in Knows.desc and Knows.desc[tech]['href'] != None else SPAN(tech, _class="marginKnows") for tech in techniques]),
-                                TD(*[SPAN(i[:i.find('-')]+"-", IMG(_src="/solver/static/images/{}.png".format(i[i.find('-')+1:]), _alt=i[i.find('-')+1:], _title=i[i.find('-')+1:], _class="imageItems")) if i[0] in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'] else IMG(_src="/solver/static/images/{}.png".format(i), _alt=i, _title=i, _class="imageItems") for i in items]),
-                                _class=item))
+            pathTable += """
+<tr class="{}">
+  <td>{}</td>
+  <td>{}</td>
+  <td>{}</td>
+  <td>{}</td>
+  <td>{}</td>
+  <td>{}</td>
+  <td>{}</td>
+</tr>
+""".format(item, getRoomLink(name, room), area, subarea,
+           getBossImg(name) if "Boss" in _class else getItemImg(item), diff,
+           getTechniques(techniques), getItems(items))
         else:
-            pathTable.append(TR(A(name,
-                                  _href="https://wiki.supermetroid.run/{}".format(room.replace(' ', '_').replace("'", '%27'))),
-                                area, subarea, DIV(item, _class='linethrough'),
-                                diff, techniques, items, _class=item))
+            pathTable += """
+<tr class="{}">
+  <td>{}</td>
+  <td>{}</td>
+  <td>{}</td>
+  <td><div class="linethrough">{}</div></td>
+  <td>{}</td>
+  <td></td>
+  <td></td>
+</tr>
+""".format(item, getRoomLink(name, room), area, subarea, item, diff)
+
+    pathTable += "</table>"
 
     return pathTable
+
+def getItems(items):
+    ret = ""
+    for item in items:
+        if item[0] >= '0' and item[0] <= '9':
+            # for etanks and reserves
+            count = item[:item.find('-')]
+            item = item[item.find('-')+1:]
+            ret += "<span>{}-{}</span>".format(count, getItemImg(item, True))
+        else:
+            ret += getItemImg(item, True)
+    return ret
+
+def getTechniques(techniques):
+    ret = ""
+    for tech in techniques:
+        if tech in Knows.desc and Knows.desc[tech]['href'] != None:
+            ret += """ <a class="marginKnows" href="{}" target="_blank">{}</a>""".format(Knows.desc[tech]['href'], tech)
+        else:
+            ret += """ {}""".format(tech)
+    return ret
+
+def getRoomLink(name, room):
+    roomUrl = room.replace(' ', '_').replace("'", '%27')
+    roomImg = room.replace(' ', '').replace('-', '').replace("'", '')
+    return """<a target="_blank" href="https://wiki.supermetroid.run/{}" data-thumbnail-src="/solver/static/images/{}.png">{}</a>""".format(roomUrl, roomImg, name)
+
+def getBossImg(boss):
+    return """<img alt="{}" class="imageBoss" src="/solver/static/images/{}.png" title="{}" />""".format(boss, boss, boss)
+
+def getItemImg(item, small=False):
+    if small == True:
+        _class = "imageItems"
+    else:
+        _class = "imageItem"
+    return """<img alt="{}" class="{}" src="/solver/static/images/{}.png" title="{}" />""".format(item, _class, item, item)
 
 def prepareResult():
     if session.solver['result'] is not None:

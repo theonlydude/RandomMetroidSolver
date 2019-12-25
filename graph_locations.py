@@ -438,7 +438,7 @@ locations = [
     'CanHidden': False,
     'Address': 0xB055B056,
     'Visibility': "Hidden",
-    'Room': 'Ridley Room',
+    'Room': "Ridley's Room",
     'AccessFrom' : {
         'RidleyRoomIn': lambda sm: SMBool(True)
     },
@@ -546,7 +546,7 @@ locations = [
     'CanHidden': False,
     'Address': 0xB055B057,
     'Visibility': "Hidden",
-    'Room': 'Phantoon Room',
+    'Room': "Phantoon's Room",
     'AccessFrom' : {
         'PhantoonRoomIn': lambda sm: SMBool(True)
     },
@@ -750,7 +750,7 @@ locations = [
     'CanHidden': False,
     'Address': 0xB055B058,
     'Visibility': "Hidden",
-    'Room': 'Draygon Room',
+    'Room': "Draygon's Room",
     'AccessFrom' : {
         'DraygonRoomIn': lambda sm: sm.canFightDraygon()
     },

@@ -77,7 +77,7 @@ class DB:
         try:
             if returnCode == 0:
                 sql = "insert into solver_collected_items values (%d, '%s', %d);"
-                for item, count in result['collectedItems'].iteritems():
+                for item, count in result['collectedItems'].items():
                     if count > 0:
                         self.cursor.execute(sql % (id, item, count))
 
@@ -114,7 +114,7 @@ class DB:
         while i < len(params):
             if params[i][0:len('--')] == '--':
                 paramName = params[i][len('--'):]
-                if i != len(params) - 1 and params[i+1][0:len('--')] != '--':
+                if i != len(params) - 1 and params[i+1][0:len('--')] not in ['--', '-c']:
                     paramValue = params[i+1]
                     i += 2
                 else:

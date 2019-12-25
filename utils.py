@@ -273,8 +273,14 @@ def loadRandoPreset(randoPreset, args):
 
     if "layoutPatches" in randoParams and randoParams["layoutPatches"] == "off":
         args.noLayout = True
-    if "noGravHeat" in randoParams and randoParams["noGravHeat"] == "off":
-        args.noGravHeat = True
+    if "gravityBehaviour" in randoParams:
+        # Balanced is the default
+        if randoParams["gravityBehaviour"] == "Vanilla":
+            args.noGravHeat = True
+        elif randoParams["gravityBehaviour"] == "Progressive":
+            args.progressiveSuits = True
+    if "nerfedCharge" in randoParams and randoParams["nerfedCharge"] == "on":
+        args.nerfedCharge = True
 
     if "areaRandomization" in randoParams and randoParams["areaRandomization"] == "on":
         args.area = True

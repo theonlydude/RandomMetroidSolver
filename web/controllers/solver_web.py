@@ -1222,9 +1222,13 @@ def randomizerWebService():
 
     if request.vars.areaRandomization == 'on':
         params.append('--area')
+    elif request.vars.areaRandomization == 'random':
+        params += ['--area', 'random']
 
     if request.vars.bossRandomization == 'on':
         params.append('--bosses')
+    elif request.vars.bossRandomization == 'random':
+        params += ['--bosses', 'random']
 
     # load content of preset to get controller mapping
     try:

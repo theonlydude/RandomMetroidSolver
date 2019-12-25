@@ -627,7 +627,7 @@ def getAreaLink(name):
     return """<a target="_blank" href="https://metroid.fandom.com/wiki/{}" data-thumbnail-src="/solver/static/images/{}.png" class="area">{}</a>""".format(url, name, name)
 
 def getBossImg(boss):
-    return """<img alt="{}" class="imageBoss" src="/solver/static/images/{}.png" title="{}" />""".format(boss, boss, boss)
+    return """<img alt="{}" class="imageBoss" src="/solver/static/images/{}.png" title="{}" />""".format(boss, boss.replace(' ', ''), boss)
 
 def getItemImg(item, small=False):
     if small == True:

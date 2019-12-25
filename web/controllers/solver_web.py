@@ -570,7 +570,7 @@ def genPathTable(locations, displayAPs=True):
   <td>{}</td>
   <td>{}</td>
 </tr>
-""".format(item, getRoomLink(name, room), area, subarea,
+""".format(item, getRoomLink(name, room), getAreaLink(area), subarea,
            getBossImg(name) if "Boss" in _class else getItemImg(item), diff,
            getTechniques(techniques), getItems(items))
         else:
@@ -584,7 +584,7 @@ def genPathTable(locations, displayAPs=True):
   <td></td>
   <td></td>
 </tr>
-""".format(item, getRoomLink(name, room), area, subarea, item, diff)
+""".format(item, getRoomLink(name, room), getAreaLink(area), subarea, item, diff)
 
     pathTable += "</table>"
 
@@ -614,7 +614,17 @@ def getTechniques(techniques):
 def getRoomLink(name, room):
     roomUrl = room.replace(' ', '_').replace("'", '%27')
     roomImg = room.replace(' ', '').replace('-', '').replace("'", '')
-    return """<a target="_blank" href="https://wiki.supermetroid.run/{}" data-thumbnail-src="/solver/static/images/{}.png">{}</a>""".format(roomUrl, roomImg, name)
+    return """<a target="_blank" href="https://wiki.supermetroid.run/{}" data-thumbnail-src="/solver/static/images/{}.png" class="room">{}</a>""".format(roomUrl, roomImg, name)
+
+def getAreaLink(name):
+    if name == "WreckedShip":
+        url = "Wrecked_Ship"
+    elif name == "LowerNorfair":
+        url = "Norfair"
+    else:
+        url = name
+
+    return """<a target="_blank" href="https://metroid.fandom.com/wiki/{}" data-thumbnail-src="/solver/static/images/{}.png" class="area">{}</a>""".format(url, name, name)
 
 def getBossImg(boss):
     return """<img alt="{}" class="imageBoss" src="/solver/static/images/{}.png" title="{}" />""".format(boss, boss, boss)

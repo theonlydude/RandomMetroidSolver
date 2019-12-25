@@ -98,15 +98,23 @@ if (hs.registerOverlay) {
     image-rendering: crisp-edges;
     -ms-interpolation-mode: nearest-neighbor; /* IE (non-standard property) */
 }
-.popup{
+.popupRoom {
     position:absolute;
     z-index: 100;
 }
-.popup img{
+.popupRoom img {
     max-width: 30%;
 }
-.rooms {
-    width: 100%;
+.room {
+}
+.popupArea {
+    position:absolute;
+    z-index: 100;
+}
+.popupArea img {
+    opacity: 0.75;
+}
+.area {
 }
 </style>
 
@@ -463,11 +471,19 @@ window.onload = function(){
         alert("This website requires the HTML5 File API, please upgrade your browser to a newer version.");
     }
 
-    $('#path_div a').on('mouseenter', function(evt){
-        $('.popup').html('<img src="'+window.location.origin+$(this).data('thumbnail-src')+'">');
-        $('.popup').css({left: evt.pageX+30, top: evt.pageY-15}).show();
+    $('.room').on('mouseenter', function(evt){
+        $('.popupRoom').html('<img src="'+window.location.origin+$(this).data('thumbnail-src')+'">');
+        $('.popupRoom').css({left: evt.pageX+30, top: evt.pageY-15}).show();
         $(this).on('mouseleave', function(){
-            $('.popup').hide();
+            $('.popupRoom').hide();
+        });
+    });
+
+    $('.area').on('mouseenter', function(evt){
+        $('.popupArea').html('<img src="'+window.location.origin+$(this).data('thumbnail-src')+'">');
+        $('.popupArea').css({left: evt.pageX+30, top: evt.pageY-15}).show();
+        $(this).on('mouseleave', function(){
+            $('.popupArea').hide();
         });
     });
 }
@@ -709,7 +725,8 @@ if result is not None:
     Display the generated path (spoilers)
 
     <div id="path_div" style="display:none;">
-      <div class="popup" style="display:none;">Popup</div>
+      <div class="popupRoom" style="display:none;">PopupRoom</div>
+      <div class="popupArea" style="display:none;">PopupArea</div>
       <br/>
       <p class="centerTable">Click on items to highlight them in the spoiler:</p>
 

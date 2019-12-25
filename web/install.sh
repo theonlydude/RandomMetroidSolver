@@ -474,3 +474,11 @@ find ~/web2py/applications/solver/static -xtype l -exec rm -f {} \;
 [ -L ~/web2py/applications/solver/static/images/WreckedShipMainShaft.png ] || ln -s ~/RandomMetroidSolver/web/static/rooms/WreckedShipMainShaft.png ~/web2py/applications/solver/static/images/WreckedShipMainShaft.png
 [ -L ~/web2py/applications/solver/static/images/WreckedShipWestSuperRoom.png ] || ln -s ~/RandomMetroidSolver/web/static/rooms/WreckedShipWestSuperRoom.png ~/web2py/applications/solver/static/images/WreckedShipWestSuperRoom.png
 [ -L ~/web2py/applications/solver/static/images/XRayScopeRoom.png ] || ln -s ~/RandomMetroidSolver/web/static/rooms/XRayScopeRoom.png ~/web2py/applications/solver/static/images/XRayScopeRoom.png
+
+[ -L ~/web2py/applications/solver/static/images/Brinstar.png ] || ln -s ~/RandomMetroidSolver/web/static/rooms/Brinstar.png ~/web2py/applications/solver/static/images/Brinstar.png
+[ -L ~/web2py/applications/solver/static/images/Crateria.png ] || ln -s ~/RandomMetroidSolver/web/static/rooms/Crateria.png ~/web2py/applications/solver/static/images/Crateria.png
+[ -L ~/web2py/applications/solver/static/images/Maridia.png ] || ln -s ~/RandomMetroidSolver/web/static/rooms/Maridia.png ~/web2py/applications/solver/static/images/Maridia.png
+[ -L ~/web2py/applications/solver/static/images/Tourian.png ] || ln -s ~/RandomMetroidSolver/web/static/rooms/Tourian.png ~/web2py/applications/solver/static/images/Tourian.png
+[ -L ~/web2py/applications/solver/static/images/WreckedShip.png ] || ln -s ~/RandomMetroidSolver/web/static/rooms/WreckedShip.png ~/web2py/applications/solver/static/images/WreckedShip.png
+[ -L ~/web2py/applications/solver/static/images/Norfair.png ] || ln -s ~/RandomMetroidSolver/web/static/rooms/Norfair.png ~/web2py/applications/solver/static/images/Norfair.png
+[ -L ~/web2py/applications/solver/static/images/LowerNorfair.png ] || ln -s ~/RandomMetroidSolver/web/static/rooms/Norfair.png ~/web2py/applications/solver/static/images/LowerNorfair.png

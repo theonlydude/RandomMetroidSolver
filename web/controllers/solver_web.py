@@ -570,7 +570,7 @@ def genPathTable(locations, displayAPs=True):
   <td>{}</td>
   <td>{}</td>
 </tr>
-""".format(item, getRoomLink(name, room), getAreaLink(area), subarea,
+""".format(item, getRoomLink(name, room), getAreaLink(area), getSubArea(subarea),
            getBossImg(name) if "Boss" in _class else getItemImg(item), diff,
            getTechniques(techniques), getItems(items))
         else:
@@ -584,7 +584,7 @@ def genPathTable(locations, displayAPs=True):
   <td></td>
   <td></td>
 </tr>
-""".format(item, getRoomLink(name, room), getAreaLink(area), subarea, item, diff)
+""".format(item, getRoomLink(name, room), getAreaLink(area), getSubArea(subarea), item, diff)
 
     pathTable += "</table>"
 
@@ -625,6 +625,13 @@ def getAreaLink(name):
         url = name
 
     return """<a target="_blank" href="https://metroid.fandom.com/wiki/{}" data-thumbnail-src="/solver/static/images/{}.png" class="area">{}</a>""".format(url, name, name)
+
+def getSubArea(subarea):
+    img = subarea.replace(' ', '')
+    if img in ["Kraid", "Tourian"]:
+        # kraid is already the image for kraid boss
+        img += "SubArea"
+    return """<span data-thumbnail-src="/solver/static/images/{}.png" class="subarea">{}</span>""".format(img, subarea)
 
 def getBossImg(boss):
     return """<img alt="{}" class="imageBoss" src="/solver/static/images/{}.png" title="{}" />""".format(boss, boss.replace(' ', ''), boss)

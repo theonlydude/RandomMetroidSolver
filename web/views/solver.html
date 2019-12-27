@@ -116,6 +116,15 @@ if (hs.registerOverlay) {
 }
 .area {
 }
+.popupSubArea {
+    position:absolute;
+    z-index: 100;
+}
+.popupSubArea img {
+    max-width: 75%;
+}
+.subarea {
+}
 </style>
 
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
@@ -486,6 +495,38 @@ window.onload = function(){
             $('.popupArea').hide();
         });
     });
+
+    $('.subarea').on('mouseenter', function(evt){
+        var image = $(this).data("thumbnail-src");
+        var url = window.location.origin+image;
+        $(".popupSubArea").html('<img src="'+url+'">');
+        $(".popupSubArea").css({left: evt.pageX+30, top: evt.pageY});
+        getMeta(image, url, setPopupXY);
+        $(this).on('mouseleave', function(){
+            $('.popupSubArea').hide();
+        });
+    });
+}
+
+function getMeta(image, url, callback) {
+    var img = new Image();
+    img.src = url;
+    img.onload = function() { callback(image, this.width, this.height); }
+}
+
+function setPopupXY(image, width, height) {
+  var top = $(".popupSubArea").css("top");
+  // top is like: 812px, remove last two chars: px
+  top = top.slice(0, -2);
+  // image is reduced to 75% in css
+  height *= 0.75;
+  top = parseInt(top, 10) - Math.floor(height/2);
+  if(image.includes("TourianSubArea")) {
+    // mother brain loc in at the bottom and the image is clipped
+    top -= 100;
+  }
+  $(".popupSubArea").css({top: top});
+  $(".popupSubArea").show();
 }
 
 function lastRomFileChanged(elem) {
@@ -727,6 +768,7 @@ if result is not None:
     <div id="path_div" style="display:none;">
       <div class="popupRoom" style="display:none;">PopupRoom</div>
       <div class="popupArea" style="display:none;">PopupArea</div>
+      <div class="popupSubArea" style="display:none;">PopupSubArea</div>
       <br/>
       <p class="centerTable">Click on items to highlight them in the spoiler:</p>
 

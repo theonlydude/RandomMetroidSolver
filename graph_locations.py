@@ -834,7 +834,7 @@ locations = [
 {
     'Area': "Crateria",
     'GraphArea': "WreckedShip",
-    'SolveArea': "WreckedShip",
+    'SolveArea': "WreckedShip Top",
     'Name': "Missile (outside Wrecked Ship top)",
     'Class': ["Minor"],
     'CanHidden': False,

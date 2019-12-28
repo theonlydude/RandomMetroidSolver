@@ -481,52 +481,60 @@ window.onload = function(){
     }
 
     $('.room').on('mouseenter', function(evt){
-        $('.popupRoom').html('<img src="'+window.location.origin+$(this).data('thumbnail-src')+'">');
-        $('.popupRoom').css({left: evt.pageX+30, top: evt.pageY-15}).show();
+        var url = window.location.origin+$(this).data("thumbnail-src");
+        $(".popupRoom").html('<img src="'+window.location.origin+$(this).data('thumbnail-src')+'">');
+        $(".popupRoom").css({left: evt.pageX+30, top: evt.pageY});
+        getMeta(url, ".popupRoom", setPopupXY);
         $(this).on('mouseleave', function(){
-            $('.popupRoom').hide();
+            $(".popupRoom").hide();
         });
     });
 
     $('.area').on('mouseenter', function(evt){
-        $('.popupArea').html('<img src="'+window.location.origin+$(this).data('thumbnail-src')+'">');
-        $('.popupArea').css({left: evt.pageX+30, top: evt.pageY-15}).show();
+        var url = window.location.origin+$(this).data("thumbnail-src");
+        $(".popupArea").html('<img src="'+window.location.origin+$(this).data('thumbnail-src')+'">');
+        $(".popupArea").css({left: evt.pageX+30, top: evt.pageY});
+        getMeta(url, ".popupArea", setPopupXY);
         $(this).on('mouseleave', function(){
-            $('.popupArea').hide();
+            $(".popupArea").hide();
         });
     });
 
     $('.subarea').on('mouseenter', function(evt){
-        var image = $(this).data("thumbnail-src");
-        var url = window.location.origin+image;
+        var url = window.location.origin+$(this).data("thumbnail-src");
         $(".popupSubArea").html('<img src="'+url+'">');
         $(".popupSubArea").css({left: evt.pageX+30, top: evt.pageY});
-        getMeta(image, url, setPopupXY);
+        getMeta(url, ".popupSubArea", setPopupXY);
         $(this).on('mouseleave', function(){
-            $('.popupSubArea').hide();
+            $(".popupSubArea").hide();
         });
     });
 }
 
-function getMeta(image, url, callback) {
+function getMeta(url, popup, callback) {
     var img = new Image();
     img.src = url;
-    img.onload = function() { callback(image, this.width, this.height); }
+    img.onload = function() { callback(url, popup, this.width, this.height); }
 }
 
-function setPopupXY(image, width, height) {
-  var top = $(".popupSubArea").css("top");
+function setPopupXY(url, popup, width, height) {
+  var top = $(popup).css("top");
   // top is like: 812px, remove last two chars: px
   top = top.slice(0, -2);
-  // image is reduced to 75% in css
-  height *= 0.75;
-  top = parseInt(top, 10) - Math.floor(height/2);
-  if(image.includes("TourianSubArea")) {
-    // mother brain loc in at the bottom and the image is clipped
+  // image is reduced in css
+  if(popup == ".popupSubArea") {
+    height *= 0.75;
+  } else if(popup == ".popupRoom") {
+    height *= 0.30;
+  }
+  // magic number 30 or else the image is too low
+  top = parseInt(top, 10) - Math.floor(height/2) - 30;
+  if(url.includes("TourianSubArea")) {
+    // mother brain loc is at the bottom and the image is clipped
     top -= 100;
   }
-  $(".popupSubArea").css({top: top});
-  $(".popupSubArea").show();
+  $(popup).css({top: top});
+  $(popup).show();
 }
 
 function lastRomFileChanged(elem) {

@@ -52,7 +52,7 @@ shinespark_end:
 	stz !spark_flag
 	rts
 
-org $0fea00
+org $8fea30
 print "incompatible_doors:"
 print pc
 ;;; routine called from door ASM when connecting two incompatible doors

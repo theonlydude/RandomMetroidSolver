@@ -7,6 +7,16 @@
 lorom
 arch snes.cpu
 
+;;; carry set if escape flag on, carry clear if off
+macro checkEscape()
+    lda #$000e : jsl $808233
+endmacro
+
+org $809E21
+print "timer_value: ", pc
+timer_value:
+    dw #$1030
+
 ;;; HIJACKS
 org $82df38
     jml music_and_enemies
@@ -46,7 +56,7 @@ org $84f070
     
 ;;; returns zero flag set if in the escape and projectile is hyper beam
 escape_hyper_check:    
-    jsl check_ext_escape : bcc .nohit
+    %checkEscape() : bcc .nohit
     lda $0c18,x
     bit #$0008                  ; check for plasma (hyper = wave+plasma)
     beq .nohit
@@ -96,13 +106,36 @@ save_station:
     lda #$0017
     jmp $8cf6
 
+;;; DATA, bank 8F. makes map stations doors in norfair/brin/maridia/ws
+;;; permanently grey
+org $8f8b06                     ; norfair map
+    dw $C848
+    db $01,$46
+    dw $904C
 
+org $8fc547                     ; maridia map
+    dw $C842
+    db $0E,$16
+    dw $9090
 
-;;; CODE (in a tiny bit of bank 8F free space)
+org $8f84b8                     ; brinstar map
+    dw $C848
+    db $01,$46
+    dw $9020
+
+;; ws map : PLM set repoints for both states since door is blue in vanilla
+org $8fcc95
+    dw ws_basement_PLMs
+org $8fccaf
+    dw ws_basement_PLMs
+
 org $8fe9a0
+print "test door ASM: ", pc
+    ;;; CODE (in a tiny bit of bank 8F free space)
     ;; test door ASM
     lda #$0000 : jsl $8081fa    ; wake zebes
     lda #$000e : jsl $8081fa    ; set escape flag
+print "escape_setup: ", pc
     ;; door ASM for MB escape door
 escape_setup:
     ;; open all doors
@@ -129,6 +162,7 @@ room_setup:
     plb
     jsr $919c                   ; sets up room shaking
     plb
+    jsl fix_timer_gfx
 .end:
     ;; goes back to vanilla setup asm call
     lda $0018,x
@@ -148,9 +182,44 @@ room_main:
 
 warnpc $8fe9ff
 
-   
+org $8ff000                     ; FIXME tmp address
+ws_basement_PLMs:
+    ;; original PLM list
+    dw $B703
+    db $40,$0C
+    dw $CCC0
+
+    dw $B703
+    db $46,$0C
+    dw $CCC5
+
+    dw $DB5A
+    db $4E,$06
+    dw $0085
+
+    dw $DB60
+    db $4E,$09
+    dw $0085
+
+    dw $DB56
+    db $4E,$07
+    dw $0085
+    ;; additional grey door
+    dw $C848
+    db $01,$06
+    dw $9061
+    ;; terminator
+    dw $0000
+
+
 ;;; DATA (bank A1 free space)
-org $a1f000  
+org $a1f000
+
+;;; OPTIONS
+print "opt_remove_enemies: ", pc
+opt_remove_enemies:
+    dw $0001
+
 ;;; custom enemy populations for some rooms
 
 ;;; room ID, enemy population in bank a1, enemy GFX in bank b4 
@@ -193,8 +262,7 @@ one_elev_list_4:
 ;;; checks the need for "extended escape" setup
 ;;; return carry set if setup is needed, carry clear if not
 check_ext_escape:
-    lda #$000e : jsl $808233
-    bcc .end
+    %checkEscape() : bcc .end
     ;; filter out Tourian area and Crateria escape rooms
     ;; (already handled by the game)
     lda $079f                  ; current area
@@ -226,6 +294,7 @@ music_and_enemies:
     lda $0005,x ;\
     and #$00FF  ;} Music track index = [[X] + 5]
     sta $07C9   ;/
+.vanilla_enemies:
     lda $0008,x ;\
     sta $07CF   ;} Enemy population pointer = [[X] + 8]
     lda $000A,x ;\
@@ -234,9 +303,14 @@ music_and_enemies:
 .escape:
     stz $07CB   ;} Music data index = 0
     stz $07C9   ;} Music track index = 0
-    
     ;; check room ID against list of custom enemy populations (elevators etc.)
     phb : phk : plb             ; data bank=program bank
+    lda opt_remove_enemies
+    bne .remove_enemies
+    ;; vanilla enemies load
+    plb
+    bra .vanilla_enemies
+.remove_enemies:
     ldy #$0000
 .loop:
     lda enemy_table,y
@@ -264,6 +338,24 @@ music_and_enemies:
     sta $07D1   ;} Enemy set pointer = empty list
 .end:
     jml $82df5c
+
+
+;;; courtesy of Smiley
+fix_timer_gfx:
+    PHX
+    LDX $0330						;get index for the table
+    LDA #$0400 : STA $D0,x  				;Size
+    INX : INX						;inc X for next entry (twice because 2 bytes)
+    LDA #$C000 : STA $D0,x					;source address
+    INX : INX						;inc again
+    SEP #$20 : LDA #$B0 : STA $D0,x : REP #$20  		;Source bank $B0
+    INX							;inc once, because the bank is stored in one byte only
+    ;; VRAM destination (in word addresses, basically take the byte
+    ;; address from the RAM map and and devide them by 2)
+    LDA #$7E00	: STA $D0,x
+    INX : INX : STX $0330 					;storing index
+    PLX
+    RTL							;done. return
 
 warnpc $a1ffff
 

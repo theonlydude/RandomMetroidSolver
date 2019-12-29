@@ -73,11 +73,17 @@ if __name__ == "__main__":
                         action='store_true',dest='dot', default=False)
     parser.add_argument('--area', help="area mode",
                         dest='area', nargs='?', const=True, default=False)
-    parser.add_argument('--bosses', help="randomize bosses",
-                        dest='bosses', nargs='?', const=True, default=False)
     parser.add_argument('--areaLayoutBase',
                         help="use simple layout patch for area mode", action='store_true',
                         dest='areaLayoutBase', default=False)
+    parser.add_argument('--noEscapeRando',
+                        help="Do not randomize the escape sequence in area mode", action='store_true',
+                        dest='noEscapeRando', default=False)
+    parser.add_argument('--noRemoveEscapeEnemies',
+                        help="Do not remove enemies during escape sequence in area mode", action='store_true',
+                        dest='noRemoveEscapeEnemies', default=False)
+    parser.add_argument('--bosses', help="randomize bosses",
+                        dest='bosses', nargs='?', const=True, default=False)
     parser.add_argument('--debug', '-d', help="activate debug logging", dest='debug',
                         action='store_true')
     parser.add_argument('--maxDifficulty', '-t',

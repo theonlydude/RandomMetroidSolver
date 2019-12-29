@@ -937,6 +937,8 @@ def initRandomizerSession():
         session.randomizer['energyQty'] = "vanilla"
         session.randomizer['areaRandomization'] = "off"
         session.randomizer['areaLayout'] = "off"
+        session.randomizer['escapeRando'] = "off"
+        session.randomizer['removeEscapeEnemies'] = "off"
         session.randomizer['bossRandomization'] = "off"
         session.randomizer['funCombat'] = "off"
         session.randomizer['funMovement'] = "off"
@@ -1090,7 +1092,8 @@ def validateWebServiceParams(switchs, quantities, others, isJson=False):
 def sessionWebService():
     # web service to update the session
     switchs = ['suitsRestriction', 'hideItems', 'strictMinors',
-               'areaRandomization', 'areaLayout', 'bossRandomization',
+               'areaRandomization', 'areaLayout', 'escapeRando', 'removeEscapeEnemies',
+               'bossRandomization',
                'funCombat', 'funMovement', 'funSuits',
                'layoutPatches', 'variaTweaks', 'nerfedCharge',
                'itemsounds', 'elevators_doors_speed', 'spinjumprestart',
@@ -1123,6 +1126,8 @@ def sessionWebService():
     session.randomizer['energyQty'] = request.vars.energyQty
     session.randomizer['areaRandomization'] = request.vars.areaRandomization
     session.randomizer['areaLayout'] = request.vars.areaLayout
+    session.randomizer['escapeRando'] = request.vars.escapeRando
+    session.randomizer['removeEscapeEnemies'] = request.vars.removeEscapeEnemies
     session.randomizer['bossRandomization'] = request.vars.bossRandomization
     session.randomizer['funCombat'] = request.vars.funCombat
     session.randomizer['funMovement'] = request.vars.funMovement
@@ -1164,7 +1169,8 @@ def randomizerWebService():
 
     # check validity of all parameters
     switchs = ['suitsRestriction', 'hideItems', 'strictMinors',
-               'areaRandomization', 'areaLayout', 'bossRandomization',
+               'areaRandomization', 'areaLayout', 'escapeRando', 'removeEscapeEnemies',
+               'bossRandomization',
                'funCombat', 'funMovement', 'funSuits',
                'layoutPatches', 'variaTweaks', 'nerfedCharge',
                'itemsounds', 'elevators_doors_speed', 'spinjumprestart',
@@ -1243,8 +1249,6 @@ def randomizerWebService():
 
     if request.vars.animals == 'on':
         params.append('--animals')
-    if request.vars.areaLayout == 'off':
-        params.append('--areaLayoutBase')
     if request.vars.variaTweaks == 'off':
         params.append('--novariatweaks')
 
@@ -1284,6 +1288,12 @@ def randomizerWebService():
 
     if request.vars.areaRandomization == 'on':
         params.append('--area')
+        if request.vars.areaLayout == 'off':
+            params.append('--areaLayoutBase')
+        if request.vars.escapeRando == 'off':
+            params.append('--noEscapeRando')
+        if request.vars.removeEscapeEnemies == 'off':
+            params.append('--noRemoveEscapeEnemies')
     elif request.vars.areaRandomization == 'random':
         params += ['--area', 'random']
 

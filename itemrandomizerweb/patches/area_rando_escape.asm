@@ -155,15 +155,38 @@ org $a1f000
 
 ;;; room ID, enemy population in bank a1, enemy GFX in bank b4 
 enemy_table:
-    dw $a7de,business_center,$8aed
+    dw $a7de,one_elev_list_1,$8aed  ; business center
     dw $a6a1,$98e4,$8529            ; warehouse (vanilla data)
     dw $a98d,$bb0e,$8b11            ; croc room (vanilla "croc dead" data)
+    dw $962a,$89DF,$81F3            ; red brin elevator (vanilla data)
+    dw $a322,one_elev_list_1,$863F  ; red tower top
+    dw $94cc,$8B74,$8255            ; forgotten hiway elevator (vanilla data)
+    dw $d30b,one_elev_list_2,$8d85  ; forgotten hiway
+    dw $9e9f,one_elev_list_3,$83b5  ; morph room
+    dw $97b5,$8b61,$824b            ; blue brin elevator (vanilla data)
+    dw $9ad9,one_elev_list_1,$8541  ; green brin shaft
+    dw $9938,$8573,$80d3            ; green brin elevator (vanilla data)
+    dw $af3f,$a544,$873d            ; LN elevator (vanilla data)
+    dw $b236,one_elev_list_4,$893d  ; LN main hall
     ;; table terminator
     dw $ffff
 
-business_center:
+one_elev_list_1:
     dw $D73F,$0080,$02C2,$0000,$2C00,$0000,$0001,$0018,$ffff
     db $00
+
+one_elev_list_2:
+    dw $D73F,$0080,$02C0,$0000,$2C00,$0000,$0001,$0018,$ffff
+    db $00
+
+one_elev_list_3:
+    dw $D73F,$0580,$02C2,$0000,$2C00,$0000,$0001,$0018,$ffff
+    db $00
+
+one_elev_list_4:
+    dw $D73F,$0480,$02A2,$0000,$2C00,$0000,$0001,$0018,$ffff
+    db $00
+
 
 ;;; CODE (in bank A1 free space)
 

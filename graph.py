@@ -274,7 +274,8 @@ class AccessGraph(object):
         #print("canAccess: {}".format(can))
         return can
 
-    # returns a list of AccessPoint instances from srcAccessPointName to destAccessPointName,
+    # returns a list of AccessPoint instances from srcAccessPointName to destAccessPointName
+    # (not including source ap)
     # or None if no possible path
     def accessPath(self, smbm, srcAccessPointName, destAccessPointName, maxDiff):
         destAccessPoint = self.accessPoints[destAccessPointName]

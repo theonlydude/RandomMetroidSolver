@@ -104,7 +104,7 @@ accessPoints = [
        entryInfo = {'SamusX':0x5ce, 'SamusY':0x88},
        dotOrientation = 'se'),
     AccessPoint('Green Brinstar Main Shaft Top Left', 'GreenPinkBrinstar', {
-        'Green Hill Zone Top Right': lambda sm: SMBool(True)
+        'Green Brinstar Elevator Right': lambda sm: SMBool(True)
     }, roomInfo = {'RoomPtr':0x9ad9, "area": 0x1},
        exitInfo = {'DoorPtr':0x8cb2, 'direction': 0x5, "cap": (0x2e, 0x6), "bitFlag": 0x0,
                    "screen": (0x2, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},

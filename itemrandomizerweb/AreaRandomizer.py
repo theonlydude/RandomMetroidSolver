@@ -19,23 +19,7 @@ class AreaRandomizer(Randomizer):
                                                      bidir,
                                                      dotDir)
                 if escape == True:
-                    sm = self.smbm
-                    # setup smbm with item pool
-                    sm.resetItems()
-                    for boss in Bosses.bosses():
-                        Bosses.beatBoss(boss)
-                    sm.addItems([item['Type'] for item in self.itemPool if item['Type'] != 'Ice'])                    
-                    path = None
-                    while path is None:
-                        (src, dst) = createEscapeTransition()
-                        path = self.areaGraph.accessPath(sm, dst, 'Landing Site',
-                                                         self.difficultyTarget)
-                    # cleanup smbm
-                    sm.resetItems()
-                    Bosses.reset()
-                    # actually update graph
-                    self.areaGraph.addTransition(src, dst)
-                    # TODO compute timer value
+                    self.escapeGraph()
                 transitionsOk = True
             except RuntimeError:
                 transitionsOk = False
@@ -47,3 +31,52 @@ class AreaRandomizer(Randomizer):
 
     def areaDistance(self, loc, otherLocs):
         return self.areaDistanceProp(loc, otherLocs, 'GraphArea')
+
+    # area graph update for randomized escape
+    def escapeGraph(self):
+        sm = self.smbm
+        # setup smbm with item pool
+        sm.resetItems()
+        for boss in Bosses.bosses():
+            Bosses.beatBoss(boss)
+        sm.addItems([item['Type'] for item in self.itemPool if item['Type'] != 'Ice'])
+        path = None
+        while path is None:
+            (src, dst) = createEscapeTransition()
+            path = self.areaGraph.accessPath(sm, dst, 'Landing Site',
+                                             self.difficultyTarget)
+        # cleanup smbm
+        sm.resetItems()
+        Bosses.reset()
+        # actually update graph
+        self.areaGraph.addTransition(src, dst)
+        # get timer value
+        t = self.escapeTimer(path)
+        self.areaGraph.EscapeTimer = t
+
+    def escapeTimer(self, path):
+        if path[0].Name == 'Climb Bottom Left':
+            self.log.debug('escapeTimer: vanilla')
+            return 180 # vanilla escape
+        # really rough, to be accurate it would require traversal times for all APs
+        # combinations within areas
+        traversedAreas = list(set([ap.GraphArea for ap in path]))
+        self.log.debug("escapeTimer path: " + str([ap.Name for ap in path]))
+        self.log.debug("escapeTimer traversedAreas: " + str(traversedAreas))
+        # rough estimates of navigation within areas to reach "borders"
+        # (can obviously be completely off wrt to actual path, but on the generous side)
+        traversals = {
+            'Crateria':45,
+            'GreenPinkBrinstar':75,
+            'WreckedShip':90,
+            'LowerNorfair':120,
+            'Maridia':135,
+            'RedBrinstar':75,
+            'Norfair': 120,
+            # Kraid and Tourian can't be on the path
+        }
+        t = 60
+        for area in traversedAreas:
+            t += traversals[area]
+        self.log.debug("escapeTimer. t="+str(t))
+        return max(t, 180)

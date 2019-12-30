@@ -24,13 +24,10 @@ class AreaRandomizer(Randomizer):
                     sm.resetItems()
                     for boss in Bosses.bosses():
                         Bosses.beatBoss(boss)
-                    sm.addItems([item['Type'] for item in self.itemPool])
-                    if removeEscapeEnemies == True:
-                        sm.removeItem('Ice')
+                    sm.addItems([item['Type'] for item in self.itemPool if item['Type'] != 'Ice'])                    
                     path = None
                     while path is None:
                         (src, dst) = createEscapeTransition()
-                        print(dst)
                         path = self.areaGraph.accessPath(sm, dst, 'Landing Site',
                                                          self.difficultyTarget)
                     # cleanup smbm

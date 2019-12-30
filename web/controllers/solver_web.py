@@ -2066,8 +2066,9 @@ customSprites = {
     'megaman': {"index":13, "name": "Megaman", "desc": "Megaman X!", "author": "Artheau", "group": "Custom"},
     'fed_trooper': {"index":14, "name": "GF Trooper", "desc": "A Galactic Federation trooper", "author": "Physix", "group": "Custom"},
     'super_controid': {"index":15, "name": "Contra", "desc": "Badass soldier from Contra III", "author": "Nintoaster", "group": "Custom"},
-    'marga': {"index":16, "name": "Margatroid", "desc": "Alice Margatroid from the Touhou Project", "author": "Plan", "group": "Custom"},
-    'win95_cursor': {"index":17, "name": "Win95 Cursor", "desc": "A classic Windows cursor...", "author": "PlaguedOne", "group": "Custom"}
+    'luigi': {"index":16, "name": "Luigi", "desc": "Let's-a go!", "author": "RonnSama", "group": "Custom"},
+    'marga': {"index":17, "name": "Margatroid", "desc": "Alice Margatroid from the Touhou Project", "author": "Plan", "group": "Custom"},
+    'win95_cursor': {"index":18, "name": "Win95 Cursor", "desc": "A classic Windows cursor...", "author": "PlaguedOne", "group": "Custom"}
 }
 
 def customizer():

@@ -6,7 +6,7 @@ from itemrandomizerweb.Randomizer import Randomizer, RandoSettings, progSpeeds
 from itemrandomizerweb.AreaRandomizer import AreaRandomizer
 from itemrandomizerweb.PaletteRando import PaletteRando
 from graph_locations import locations as graphLocations
-from graph_access import vanillaTransitions, getDoorConnections, vanillaBossesTransitions, getRandomBossTransitions
+from graph_access import vanillaTransitions, getDoorConnections, vanillaBossesTransitions, createBossesTransitions
 from parameters import Knows, easy, medium, hard, harder, hardcore, mania, text2diff, diff2text
 from utils import PresetLoader
 from rom import RomPatcher, RomPatches, FakeROM
@@ -458,7 +458,7 @@ if __name__ == "__main__":
     randoSettings = RandoSettings(maxDifficulty, progSpeed, progDiff, qty, restrictions, args.superFun, args.runtimeLimit_s, args.vcr, args.plandoRando["locsItems"] if args.plandoRando != None else None)
     bossTransitions = vanillaBossesTransitions
     if args.bosses == True:
-        bossTransitions = getRandomBossTransitions()
+        bossTransitions = createBossesTransitions()
     if args.area == True:
         if args.dot == True:
             dotDir = args.directory

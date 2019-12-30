@@ -159,7 +159,7 @@ accessPoints = [
        entryInfo = {'SamusX':0x2e, 'SamusY':0xb8},
        dotOrientation = 's'),
     AccessPoint('Basement Left', 'WreckedShip', {
-        'Wrecked Ship Main': lambda sm: sm.canPassBombPassages()
+        'Wrecked Ship Main': lambda sm: SMBool(True)
     }, roomInfo = {'RoomPtr':0xcc6f, "area": 0x3},
        exitInfo = {'DoorPtr':0xa2a0, 'direction': 0x5, "cap": (0xe, 0x6), "bitFlag": 0x0,
                    "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},

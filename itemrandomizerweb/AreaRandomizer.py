@@ -1,7 +1,8 @@
 import random
 
 from itemrandomizerweb.Randomizer import Randomizer
-from graph_access import vanillaTransitions, accessPoints, getAccessPoint, createAreaTransitions, chooseEscape
+from graph_access import vanillaTransitions, accessPoints, getAccessPoint, createAreaTransitions, createEscapeTransition
+from helpers import Bosses
 
 class AreaRandomizer(Randomizer):
     def __init__(self, locations, settings, seedName, bossTransitions,
@@ -18,10 +19,26 @@ class AreaRandomizer(Randomizer):
                                                      bidir,
                                                      dotDir)
                 if escape == True:
-                    # TODO setup smbm with item pool
-                    (src, dst) = chooseEscape(self.smbm)
-                    # TODO cleanup smbm
+                    sm = self.smbm
+                    # setup smbm with item pool
+                    sm.resetItems()
+                    for boss in Bosses.bosses():
+                        Bosses.beatBoss(boss)
+                    sm.addItems([item['Type'] for item in self.itemPool])
+                    if removeEscapeEnemies == True:
+                        sm.removeItem('Ice')
+                    path = None
+                    while path is None:
+                        (src, dst) = createEscapeTransition()
+                        print(dst)
+                        path = self.areaGraph.accessPath(sm, dst, 'Landing Site',
+                                                         self.difficultyTarget)
+                    # cleanup smbm
+                    sm.resetItems()
+                    Bosses.reset()
+                    # actually update graph
                     self.areaGraph.addTransition(src, dst)
+                    # TODO compute timer value
                 transitionsOk = True
             except RuntimeError:
                 transitionsOk = False

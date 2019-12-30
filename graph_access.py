@@ -64,7 +64,7 @@ accessPoints = [
     }, roomInfo = {'RoomPtr':0x96ba, "area": 0x0},
        exitInfo = {'DoorPtr':0x8b6e, 'direction': 0x5, "cap": (0x2e, 0x16), "bitFlag": 0x0,
                    "screen": (0x2, 0x1), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
-       entryInfo = {'SamusX':0xffff, 'SamusY':0xffff}, # unused
+       entryInfo = {'SamusX':0x34, 'SamusY':0x888},
        escape = True,
        dotOrientation = 'ne'),
     ### Green and Pink Brinstar
@@ -109,6 +109,13 @@ accessPoints = [
        exitInfo = {'DoorPtr':0x8cb2, 'direction': 0x5, "cap": (0x2e, 0x6), "bitFlag": 0x0,
                    "screen": (0x2, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
        entryInfo = {'SamusX':0x34, 'SamusY':0x488},
+       escape = True,
+       dotOrientation = 'ne'),
+    AccessPoint('Brinstar Pre-Map Room Right', 'GreenPinkBrinstar', {
+    }, roomInfo = {'RoomPtr':0x9b9d, "area": 0x1},
+       exitInfo = {'DoorPtr':0x8d42, 'direction': 0x4, "cap": (0x1, 0x46), "bitFlag": 0x0,
+                   "screen": (0x0, 0x4), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
+       entryInfo = {'SamusX':0xffff, 'SamusY':0xffff}, # unused
        escape = True,
        dotOrientation = 'ne'),
     ### Wrecked Ship
@@ -157,6 +164,13 @@ accessPoints = [
        exitInfo = {'DoorPtr':0xa2a0, 'direction': 0x5, "cap": (0xe, 0x6), "bitFlag": 0x0,
                    "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
        entryInfo = {'SamusX':0x2e, 'SamusY':0x88},
+       escape = True,
+       dotOrientation = 'ne'),
+    AccessPoint('Wrecked Ship Map Room', 'WreckedShip', {
+    }, roomInfo = {'RoomPtr':0xcccb, "area": 0x3},
+       exitInfo = {'DoorPtr':0xa2b8, 'direction': 0x4, "cap": (0x1, 0x6), "bitFlag": 0x0,
+                   "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
+       entryInfo = {'SamusX':0xffff, 'SamusY':0xffff}, # unused
        escape = True,
        dotOrientation = 'ne'),
     ### Lower Norfair
@@ -364,6 +378,13 @@ accessPoints = [
        entryInfo = {'SamusX':0x34, 'SamusY':0x488},
        escape = True,
        dotOrientation = 'ne'),
+    AccessPoint('Norfair Map Room', 'Norfair', {
+    }, roomInfo = {'RoomPtr':0xb0b4, "area": 0x2},
+       exitInfo = {'DoorPtr':0x97c2, 'direction': 0x4, "cap": (0x1, 0x46), "bitFlag": 0x0,
+                   "screen": (0x0, 0x4), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
+       entryInfo = {'SamusX':0xffff, 'SamusY':0xffff}, # unused
+       escape = True,
+       dotOrientation = 'ne'),
     ### Maridia
     AccessPoint('Main Street Bottom', 'Maridia', {
         'Red Fish Room Left': lambda sm: sm.wand(sm.canGoUpMtEverest(),
@@ -472,6 +493,13 @@ accessPoints = [
        entryInfo = {'SamusX':0xd7, 'SamusY':0x188},
        escape = True,
        dotOrientation = 'ne'),
+    AccessPoint('Maridia Map Room', 'Maridia', {
+    }, roomInfo = {'RoomPtr':0xd3b6, "area": 0x4},
+       exitInfo = {'DoorPtr':0xa5e8, 'direction': 0x5, "cap": (0xe, 0x16), "bitFlag": 0x0,
+                   "screen": (0x0, 0x1), "distanceToSpawn": 0x8000, "doorAsmPtr": 0xe356},
+       entryInfo = {'SamusX':0xffff, 'SamusY':0xffff}, # unused
+       escape = True,
+       dotOrientation = 'ne'),
     ### Red Brinstar. Main nodes: Red Tower Top Left, East Tunnel Right
     AccessPoint('Red Tower Top Left', 'RedBrinstar', {
         # go up
@@ -574,8 +602,11 @@ vanillaBossesTransitions = [
 ]
 
 vanillaEscapeTransitions = [
-    ('Tourian Escape Room 4 Top Right', 'Climb Bottom Left')
-    # TODO other useless APs ...
+    ('Tourian Escape Room 4 Top Right', 'Climb Bottom Left'),
+    ('Brinstar Pre-Map Room Right', 'Green Brinstar Main Shaft Top Left'),
+    ('Wrecked Ship Map Room', 'Basement Left'),
+    ('Norfair Map Room', 'Business Center Mid Left'),
+    ('Maridia Map Room', 'Crab Hole Bottom Right')
 ]
 
 escapeSource = 'Tourian Escape Room 4 Top Right'
@@ -635,9 +666,8 @@ def createAreaTransitions(bidir=True):
             apNames.remove(apName)
     return transitions
 
-def chooseEscape(sm):
-    # TODO
-    return (escapeSource, escapeTargets[0])
+def createEscapeTransition():
+    return (escapeSource, random.choice(escapeTargets))
 
 def getVanillaExit(apName):
     allVanillaTransitions = vanillaTransitions + vanillaBossesTransitions

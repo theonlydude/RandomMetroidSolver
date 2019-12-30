@@ -39,7 +39,9 @@ class AreaRandomizer(Randomizer):
         sm.resetItems()
         for boss in Bosses.bosses():
             Bosses.beatBoss(boss)
-        sm.addItems([item['Type'] for item in self.itemPool if item['Type'] != 'Ice'])
+        # Ice not usable because of hyper beam
+        # remove energy to avoid hell runs
+        sm.addItems([item['Type'] for item in self.itemPool if item['Type'] != 'Ice' and item['Category'] != 'Energy'])
         path = None
         while path is None:
             (src, dst) = createEscapeTransition()
@@ -51,15 +53,14 @@ class AreaRandomizer(Randomizer):
         # actually update graph
         self.areaGraph.addTransition(src, dst)
         # get timer value
-        t = self.escapeTimer(path)
-        self.areaGraph.EscapeTimer = t
+        self.areaGraph.EscapeTimer = self.escapeTimer(path)
 
+    # really rough, to be accurate it would require traversal times for all APs
+    # combinations within areas
     def escapeTimer(self, path):
         if path[0].Name == 'Climb Bottom Left':
             self.log.debug('escapeTimer: vanilla')
-            return 180 # vanilla escape
-        # really rough, to be accurate it would require traversal times for all APs
-        # combinations within areas
+            return None
         traversedAreas = list(set([ap.GraphArea for ap in path]))
         self.log.debug("escapeTimer path: " + str([ap.Name for ap in path]))
         self.log.debug("escapeTimer traversedAreas: " + str(traversedAreas))

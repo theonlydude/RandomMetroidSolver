@@ -785,7 +785,7 @@ class Randomizer(object):
     def determineParameters(self):
         speed = self.settings.progSpeed
         if speed == 'variable':
-            speed = progSpeeds[random.randint(0, len(progSpeeds)-1)]
+            speed = random.choice(progSpeeds)
         self.spreadProb = self.settings.getSpreadFactor(speed)
         self.minorHelpProb = self.settings.getMinorHelpProb(speed)
         self.chooseItemRanges = getRangeDict(self.settings.getChooseItems(speed))
@@ -949,7 +949,7 @@ class Randomizer(object):
         return funcDict[v]
 
     def chooseItemRandom(self, items):
-        return items[random.randint(0, len(items)-1)]
+        return random.choice(items)
 
     def chooseItemMinProgression(self, items):
         minNewLocs = 1000
@@ -987,7 +987,7 @@ class Randomizer(object):
     def chooseLocationRandom(self, availableLocations, item):
         self.log.debug("RANDOM")
         self.log.debug("chooseLocationRandom: {}".format([l['Name'] for l in availableLocations]))
-        return availableLocations[random.randint(0, len(availableLocations)-1)]
+        return random.choice(availableLocations)
 
     def getLocDiff(self, loc):
         # avail difficulty already stored by graph algorithm        
@@ -1407,7 +1407,7 @@ class Randomizer(object):
         if random.random() < self.minorHelpProb:
             helpfulMinors = [item for item in basePool if item['Class'] == 'Minor' and not self.hasItemTypeInPool(item['Type'], pool)]
             if len(helpfulMinors) > 0:
-                pool.append(helpfulMinors[random.randint(0, len(helpfulMinors)-1)])
+                pool.append(random.choice(helpfulMinors))
         # don't hold energy back for certain settings
         self.addEnergyAsNonProg(pool, basePool)
 
@@ -1563,7 +1563,7 @@ class Randomizer(object):
                 else:
                     break
         if len(possibleStates) > 0:
-            (state, itemLoc) = possibleStates[random.randint(0, len(possibleStates)-1)]
+            (state, itemLoc) = random.choice(possibleStates)
             self.updateRollbackItemsTried(itemLoc)
             state.apply(self)
             ret = itemLoc
@@ -1714,7 +1714,7 @@ class Randomizer(object):
                 ret = None
                 chooseFrom = [loc for loc in locs if loc['difficulty'].difficulty <= self.difficultyTarget]
                 if len(chooseFrom) > 0:
-                    ret = chooseFrom[random.randint(0, len(chooseFrom)-1)]
+                    ret = random.choice(chooseFrom)
                 else:
                     minDiff = god
                     for loc in locs:

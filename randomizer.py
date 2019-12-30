@@ -263,14 +263,14 @@ if __name__ == "__main__":
         animalsPatches = ['animal_enemies.ips', 'animals.ips', 'draygonimals.ips', 'escapimals.ips',
                           'gameend.ips', 'grey_door_animals.ips', 'low_timer.ips', 'metalimals.ips',
                           'phantoonimals.ips', 'ridleyimals.ips']
-        args.patches.append(animalsPatches[random.randint(0, len(animalsPatches)-1)])
+        args.patches.append(random.choice(animalsPatches))
 
     # if random progression speed, choose one
     progSpeed = str(args.progressionSpeed).lower()
     if progSpeed == "random":
-        progSpeed = speeds[random.randint(0, len(speeds)-1)]
+        progSpeed = random.choice(speeds)
     mulSpeeds = progSpeed.split(',')
-    progSpeed = mulSpeeds[random.randint(0, len(mulSpeeds)-1)]
+    progSpeed = random.choice(mulSpeeds)
     if len(mulSpeeds) > 1:
         args.progressionSpeed = 'random'
     if progSpeed not in speeds:
@@ -281,7 +281,7 @@ if __name__ == "__main__":
     # if random progression difficulty, choose one
     progDiff = args.progressionDifficulty
     if progDiff == "random":
-        progDiff = progDiffs[random.randint(0, len(progDiffs)-1)]
+        progDiff = random.choice(progDiffs)
     logger.debug("progression diff: {}".format(progDiff))
 
     if args.patchOnly == False:
@@ -291,7 +291,7 @@ if __name__ == "__main__":
     if args.maxDifficulty:
         if args.maxDifficulty == 'random':
             diffs = ['hard', 'harder', 'very hard', 'hardcore', 'mania']
-            maxDifficulty = text2diff[diffs[random.randint(0, len(diffs)-1)]]
+            maxDifficulty = text2diff[random.choice(diffs)]
         else:
             maxDifficulty = text2diff[args.maxDifficulty]
     else:
@@ -316,7 +316,7 @@ if __name__ == "__main__":
     majorsSplitRandom = False
     if args.majorsSplit == 'random':
         majorsSplitRandom = True
-        args.majorsSplit = majorsSplits[random.randint(0, len(majorsSplits)-1)]
+        args.majorsSplit = random.choice(majorsSplits)
     logger.debug("majorsSplit: {}".format(args.majorsSplit))
 
     areaRandom = False
@@ -344,7 +344,7 @@ if __name__ == "__main__":
     if args.morphPlacement == 'random':
         if (args.suitsRestriction == True and args.area == True) or args.majorsSplit == 'Chozo':
             morphPlacements.remove('late')
-        args.morphPlacement = morphPlacements[random.randint(0, len(morphPlacements)-1)]
+        args.morphPlacement = random.choice(morphPlacements)
     # late + chozo will always stuck
     if args.majorsSplit == 'Chozo' and args.morphPlacement == "late":
         args.morphPlacement = "normal"
@@ -409,7 +409,7 @@ if __name__ == "__main__":
     if minorQty < 1:
         minorQty = random.randint(25, 100)
     if energyQty == 'random':
-        energyQty = energyQties[random.randint(0, len(energyQties)-1)]
+        energyQty = random.choice(energyQties)
     qty = {'energy': energyQty,
            'minors': minorQty,
            'ammo': { 'Missile': missileQty,

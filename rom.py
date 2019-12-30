@@ -1228,8 +1228,13 @@ class RomPatcher:
         self.romFile.write(struct.pack('B', 0x2))
 
     def writeEscapeTimer(self, escapeTimer):
-        # TODO
-        pass
+        minute = int(escapeTimer / 60)
+        seconde = escapeTimer % 60
+        minute = int(minute / 10) * 16 + minute % 10
+        seconde = int(seconde / 10) * 16 + seconde % 10
+        self.romFile.seed(0x1E21)
+        self.romFile.write(struct.pack('B', minute))
+        self.romFile.write(struct.pack('B', seconde))
 
     buttons = {
         "Select" : [0x00, 0x20],

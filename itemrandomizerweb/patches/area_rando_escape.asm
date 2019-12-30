@@ -98,7 +98,7 @@ map_station:
 
 ;;; Disables save stations during the escape
 save_station:
-    jsl check_ext_escape : bcc .resume
+    %checkEscape() : bcc .resume
     ;; disable save
     jmp $8d32
 .resume:
@@ -135,7 +135,6 @@ print "test door ASM: ", pc
     ;; test door ASM
     lda #$0000 : jsl $8081fa    ; wake zebes
     lda #$000e : jsl $8081fa    ; set escape flag
-print "escape_setup: ", pc
 ;;; door ASM for MB escape door
 escape_setup:
     ;; open all doors
@@ -239,6 +238,7 @@ enemy_table:
     dw $af3f,$a544,$873d            ; LN elevator (vanilla data)
     dw $b236,one_elev_list_4,$893d  ; LN main hall
     dw $d95e,$de5a,$9028            ; botwoon room (vanilla "botwoon dead" data)
+    dw $a66a,$9081,$8333            ; G4 (G4?) (vanilla data)
     ;; table terminator
     dw $ffff
 

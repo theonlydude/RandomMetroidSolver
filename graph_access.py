@@ -573,6 +573,11 @@ vanillaBossesTransitions = [
     ('RidleyRoomOut', 'RidleyRoomIn')
 ]
 
+vanillaEscapeTransitions = [
+    ('Tourian Escape Room 4 Top Right', 'Climb Bottom Left')
+    # TODO other useless APs ...
+]
+
 escapeSource = 'Tourian Escape Room 4 Top Right'
 escapeTargets = ['Climb Bottom Left', 'Green Brinstar Main Shaft Top Left', 'Basement Left', 'Business Center Mid Left', 'Crab Hole Bottom Right']
 
@@ -630,6 +635,9 @@ def createAreaTransitions(bidir=True):
             apNames.remove(apName)
     return transitions
 
+def chooseEscape(sm):
+    # TODO
+    return (escapeSource, escapeTargets[0])
 
 def getVanillaExit(apName):
     allVanillaTransitions = vanillaTransitions + vanillaBossesTransitions
@@ -688,12 +696,14 @@ def getBitFlag(srcArea, dstArea, origFlag):
         flags |= 0x40
     return flags
 
-def getDoorConnections(graph, areas=True, bosses=False):
+def getDoorConnections(graph, areas=True, bosses=False, escape=True):
     transitions = []
     if areas:
         transitions += vanillaTransitions
     if bosses:
         transitions += vanillaBossesTransitions
+    if escape:
+        transitions += vanillaEscapeTransitions
     for srcName, dstName in transitions:
         src = graph.accessPoints[srcName]
         dst = graph.accessPoints[dstName]

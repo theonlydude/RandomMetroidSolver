@@ -53,9 +53,9 @@ org $84f070
 
 ;;; Disables "ammo locked" elements b/c of no ammo in escape :
 ;;; makes them react to hyper beam shots
-    
+
 ;;; returns zero flag set if in the escape and projectile is hyper beam
-escape_hyper_check:    
+escape_hyper_check:
     %checkEscape() : bcc .nohit
     lda $0c18,x
     bit #$0008                  ; check for plasma (hyper = wave+plasma)

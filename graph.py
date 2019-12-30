@@ -59,6 +59,7 @@ class AccessGraph(object):
 
         self.accessPoints = {}
         self.InterAreaTransitions = []
+        self.EscapeTimer = None
         self.bidir = bidir
         for ap in accessPointList:
             ap.distance = 0

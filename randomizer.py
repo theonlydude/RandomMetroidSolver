@@ -468,7 +468,10 @@ if __name__ == "__main__":
         if args.areaLayoutBase == True:
             RomPatches.ActivePatches.remove(RomPatches.AreaRandoGatesOther)
         try:
-            randomizer = AreaRandomizer(graphLocations, randoSettings, seedName, bossTransitions, dotDir=dotDir)
+            randomizer = AreaRandomizer(graphLocations, randoSettings, seedName, bossTransitions,
+                                        dotDir=dotDir,
+                                        escape=not args.noEscapeRando,
+                                        removeEscapeEnemies=not args.noRemoveEscapeEnemies)
         except RuntimeError:
             msg = "Cannot generate area layout. Retry, and change the super fun settings if the problem happens again."
             dumpErrorMsg(args.output, msg)
@@ -491,9 +494,12 @@ if __name__ == "__main__":
             dumpErrorMsg(args.output, msg)
             print("DIAG: {}".format(msg))
             sys.exit(-1)
-    doors = getDoorConnections(randomizer.areaGraph, args.area, args.bosses)
     if args.patchOnly == False:
         (stuck, itemLocs, progItemLocs) = randomizer.generateItems()
+        doors = getDoorConnections(randomizer.areaGraph,
+                                   args.area, args.bosses,
+                                   args.area and not args.noEscapeRando)
+        escapeTimer = randomizer.areaGraph.EscapeTimer
     else:
         stuck = False
         itemLocs = []
@@ -596,6 +602,8 @@ if __name__ == "__main__":
             romPatcher.writeSpoiler(itemLocs, progItemLocs)
             romPatcher.writeRandoSettings(randoSettings, itemLocs)
             romPatcher.writeDoorConnections(doors)
+            if escapeTimer is not None:
+                romPatcher.writeEscapeTimer(escapeTimer)
         if ctrlDict is not None:
             romPatcher.writeControls(ctrlDict)
         if args.moonWalk == True:

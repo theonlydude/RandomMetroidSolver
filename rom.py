@@ -1227,6 +1227,10 @@ class RomPatcher:
         self.romFile.seek(offset)
         self.romFile.write(struct.pack('B', 0x2))
 
+    def writeEscapeTimer(self, escapeTimer):
+        # TODO
+        pass
+
     buttons = {
         "Select" : [0x00, 0x20],
         "A"      : [0x80, 0x00],

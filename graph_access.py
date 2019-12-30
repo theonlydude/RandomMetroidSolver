@@ -21,7 +21,7 @@ accessPoints = [
     AccessPoint('Lower Mushrooms Left', 'Crateria', {
         'Landing Site': lambda sm: sm.canPassTerminatorBombWall(False),
         'Green Pirates Shaft Bottom Right': lambda sm: SMBool(True)
-    }, roomInfo = {'RoomPtr':0x9969, "area": 0x0},
+    }, roomInfo = {'RoomPtr':0x9969, "area": 0x0, 'songs':[0x997a]},
        exitInfo = {'DoorPtr':0x8c22, 'direction': 0x5, "cap": (0xe, 0x6), "bitFlag": 0x0,
                    "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
        entryInfo = {'SamusX':0x36, 'SamusY':0x88, 'song': 0x9},
@@ -29,7 +29,7 @@ accessPoints = [
     AccessPoint('Green Pirates Shaft Bottom Right', 'Crateria', {
         'Lower Mushrooms Left': lambda sm: SMBool(True)
     }, traverse = lambda sm: sm.canOpenRedDoors(),
-       roomInfo = {'RoomPtr':0x99bd, "area": 0x0},
+       roomInfo = {'RoomPtr':0x99bd, "area": 0x0, 'songs':[0x99ce]},
        # the doorAsmPtr 7FE00 is set by the g4_skip.ips patch, we have to call it
        exitInfo = {'DoorPtr':0x8c52, 'direction': 0x4, "cap": (0x1, 0x6), "bitFlag": 0x0,
                    "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0xfe00},
@@ -37,7 +37,7 @@ accessPoints = [
        dotOrientation = 'e'),
     AccessPoint('Moat Right', 'Crateria', {
         'Keyhunter Room Bottom': lambda sm: sm.canPassMoatReverse()
-    }, roomInfo = {'RoomPtr':0x95ff, "area": 0x0},
+    }, roomInfo = {'RoomPtr':0x95ff, "area": 0x0, 'songs':[0x9610]},
        exitInfo = {'DoorPtr':0x8aea, 'direction': 0x4, "cap": (0x1, 0x46), "bitFlag": 0x0,
                    "screen": (0x0, 0x4), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
        entryInfo = {'SamusX':0x1cf, 'SamusY':0x88, 'song': 0xc},
@@ -47,7 +47,7 @@ accessPoints = [
                                          sm.canPassMoat()),
         'Landing Site': lambda sm: SMBool(True)
     }, traverse = lambda sm: sm.canOpenYellowDoors(),
-       roomInfo = { 'RoomPtr':0x948c, "area": 0x0 },
+       roomInfo = { 'RoomPtr':0x948c, "area": 0x0, 'songs':[0x949d] },
        exitInfo = {'DoorPtr':0x8a42, 'direction': 0x6, "cap": (0x6, 0x2), "bitFlag": 0x0,
                    "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
        entryInfo = {'SamusX':0x14c, 'SamusY':0x2b8, 'song': 0xc},
@@ -114,7 +114,7 @@ accessPoints = [
     }, internal=True),
     AccessPoint('Crab Maze Left', 'WreckedShip', {
         'Wrecked Ship Back': lambda sm: sm.canPassForgottenHighway(False)
-    }, roomInfo = {'RoomPtr':0x957d, "area": 0x0},
+    }, roomInfo = {'RoomPtr':0x957d, "area": 0x0, 'songs':[0x958e]},
        exitInfo = {'DoorPtr':0x8aae, 'direction': 0x5, "cap": (0xe, 0x6), "bitFlag": 0x0,
                    "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
        entryInfo = {'SamusX':0x34, 'SamusY':0x188, 'song': 0xc},
@@ -138,7 +138,7 @@ accessPoints = [
     # Lower Norfair
     AccessPoint('Lava Dive Right', 'LowerNorfair', {
         'LN Entrance': lambda sm: sm.canPassLavaPit()
-    }, roomInfo = {'RoomPtr':0xaf14, "area": 0x2},
+    }, roomInfo = {'RoomPtr':0xaf14, "area": 0x2, 'songs':[0xaf25]},
        exitInfo = {'DoorPtr':0x96d2, 'direction': 0x4, "cap": (0x11, 0x26), "bitFlag": 0x0,
                    "screen": (0x1, 0x2), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
        entryInfo = {'SamusX':0x3d0, 'SamusY':0x88, 'song': 0x15},
@@ -215,7 +215,7 @@ accessPoints = [
     # Kraid
     AccessPoint('Warehouse Zeela Room Left', 'Kraid', {
         'KraidRoomOut': lambda sm: sm.canPassBombPassages()
-    }, roomInfo = {'RoomPtr': 0xa471, "area": 0x1},
+    }, roomInfo = {'RoomPtr': 0xa471, "area": 0x1, 'songs':[0xa482]},
        exitInfo = {'DoorPtr': 0x913e, 'direction': 0x5, "cap": (0x2e, 0x6), "bitFlag": 0x0,
                    "screen": (0x2, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0xbd3f},
        entryInfo = {'SamusX':0x34, 'SamusY':0x88, 'song':0x12},
@@ -293,7 +293,7 @@ accessPoints = [
                                                sm.wand(sm.canOpenRedDoors(),
                                                        sm.knowsGreenGateGlitch()))),
     }, traverse=lambda sm: sm.wor(RomPatches.has(RomPatches.AreaRandoBlueDoors), sm.canOpenYellowDoors()),
-       roomInfo = {'RoomPtr':0xae74, "area": 0x2},
+       roomInfo = {'RoomPtr':0xae74, "area": 0x2, 'songs':[0xae85]},
        exitInfo = {'DoorPtr':0x967e, 'direction': 0x5, "cap": (0x3e, 0x6), "bitFlag": 0x0,
                    "screen": (0x3, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
        entryInfo = {'SamusX':0x134, 'SamusY':0x288, 'song': 0x15},
@@ -651,6 +651,7 @@ def getDoorConnections(graph, areas=True, bosses=False):
             conn['distanceToSpawn'] = dst.EntryInfo['distanceToSpawn']
         if 'song' in dst.EntryInfo:
             conn['song'] = dst.EntryInfo['song']
+            conn['songs'] = dst.RoomInfo['songs']
         connections.append(conn)
     return connections
 

@@ -580,7 +580,10 @@ if __name__ == "__main__":
                 suitsMode = "Progressive"
             elif args.noGravHeat:
                 suitsMode = "Vanilla"
-            romPatcher.applyIPSPatches(args.patches, args.noLayout, suitsMode, args.area, args.bosses, args.areaLayoutBase, args.noVariaTweaks, args.nerfedCharge)
+            romPatcher.applyIPSPatches(args.patches, args.noLayout, suitsMode,
+                                       args.area, args.bosses, args.areaLayoutBase,
+                                       args.noVariaTweaks, args.nerfedCharge,
+                                       args.noEscapeRando, args.noRemoveEscapeEnemies)
         else:
             romPatcher.addIPSPatches(args.patches)
         if args.sprite is not None:
@@ -593,7 +596,6 @@ if __name__ == "__main__":
             romPatcher.writeSpoiler(itemLocs, progItemLocs)
             romPatcher.writeRandoSettings(randoSettings, itemLocs)
             romPatcher.writeDoorConnections(doors)
-        # romPatcher.writeTransitionsCredits(randomizer.areaGraph.getCreditsTransitions())
         if ctrlDict is not None:
             romPatcher.writeControls(ctrlDict)
         if args.moonWalk == True:

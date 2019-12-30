@@ -17,8 +17,6 @@ arch snes.cpu
 !poses_transitions     = $0a2a	
 !contact_dmg_idx       = $0a6e
 !iframes               = $18a8
-;;; For song change
-!song_routine          = $808fc1
 ;;; For refill
 !samus_max_health      = $09c4
 !samus_reserve         = $09d6
@@ -100,21 +98,6 @@ giveiframes:
 	sta !iframes
 	rts
 
-print "change_song:"
-print pc
-;;; changes current song for transitions that require it: shall be #$ff<song> in A
-change_song:
-	pha			; save song to load
-	lda #$0000		; stops current song
-	jsl !song_routine
-	pla			; retrieve song to load
-	jsl !song_routine   	; change song
-	lda #$0005         	; load song track 5 (First track from song data)
-	jsl !song_routine
-	rts
-
-print "full_refill:"
-print pc	
 ;;; "ship refill" for tourian elevator
 full_refill:
 	lda !samus_max_health
@@ -128,3 +111,9 @@ full_refill:
 	lda !samus_max_pbs
 	sta !samus_pbs
 	rts
+
+;;; stop before generated door asm routines start
+warnpc $8feaff
+
+org $83922c                     ; Tourian Elevator door ASM ptr
+    dw full_refill

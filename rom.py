@@ -588,7 +588,7 @@ class RomPatcher:
                      'skip_intro.ips', 'skip_ceres.ips', 'animal_enemies.ips', 'animals.ips',
                      'draygonimals.ips', 'escapimals.ips', 'gameend.ips', 'grey_door_animals.ips',
                      'low_timer.ips', 'metalimals.ips', 'phantoonimals.ips', 'ridleyimals.ips'],
-        'Area': ['area_rando_blue_doors.ips', 'area_rando_layout.ips', 'area_rando_door_transition.ips' ]
+        'Area': ['area_rando_blue_doors.ips', 'area_rando_layout.ips', 'area_rando_door_transition.ips','area_rando_escape.ips' ]
     }
 
     def __init__(self, romFileName=None, magic=None, plando=False):
@@ -722,7 +722,10 @@ class RomPatcher:
     def customSprite(self, sprite):
         self.applyIPSPatch(sprite, ipsDir='itemrandomizerweb/patches/sprites')
 
-    def applyIPSPatches(self, optionalPatches=[], noLayout=False, suitsMode="Classic", area=False, bosses=False, areaLayoutBase=False, noVariaTweaks=False, nerfedCharge=False):
+    def applyIPSPatches(self, optionalPatches=[], noLayout=False, suitsMode="Classic",
+                        area=False, bosses=False, areaLayoutBase=False,
+                        noVariaTweaks=False, nerfedCharge=False,
+                        noEscapeRando=False, noRemoveEscapeEnemies=False):
         try:
             # apply standard patches
             stdPatches = []
@@ -738,8 +741,11 @@ class RomPatcher:
                 stdPatches.append('progressive_suits.ips')
             if nerfedCharge == True:
                 stdPatches.append('nerfed_charge.ips')
-            if area == True or bosses == True:
+            if bosses == True or area == True:
                 stdPatches.append('ws_save.ips')
+            if bosses == True and (area == False or noEscapeRando == True):
+                stdPatches.append("Phantoon_Eye_Door")
+
             for patchName in stdPatches:
                 self.applyIPSPatch(patchName)
 
@@ -762,6 +768,10 @@ class RomPatcher:
                 if areaLayoutBase == True:
                     RomPatcher.IPSPatches['Area'].remove('area_rando_layout.ips')
                     RomPatcher.IPSPatches['Area'].append('area_rando_layout_base.ips')
+                if noEscapeRando == True:
+                    RomPatcher.IPSPatches['Area'].remove('area_rando_escape.ips')
+                elif noRemoveEscapeEnemies == True:
+                    RomPatcher.IPSPatches['Area'].append('Escape_Rando_Enable_Enemies')
                 for patchName in RomPatcher.IPSPatches['Area']:
                     self.applyIPSPatch(patchName)
             elif bosses == True:
@@ -1127,9 +1137,9 @@ class RomPatcher:
     #   property shall point to this custom ASM.
     # * if not, just write doorAsmPtr as the door property directly.
     def writeDoorConnections(self, doorConnections):
-        self.asmAddress = 0x7EB00
-
+        asmAddress = 0x7EB00
         for conn in doorConnections:
+            # write door ASM for transition doors (code and pointers)
 #            print('Writing door connection ' + conn['ID'])
             doorPtr = conn['DoorPtr']
             roomPtr = conn['RoomPtr']
@@ -1179,28 +1189,30 @@ class RomPatcher:
                 (Y0, Y1) = (conn['SamusY'] & 0x00FF, (conn['SamusY'] & 0xFF00) >> 8)
                 # force samus position
                 # see area_rando_door_transition.asm. assemble it to print routines SNES addresses.
-                asmPatch += [ 0x20, 0x00, 0xEA ]    # JSR incompatible_doors
+                asmPatch += [ 0x20, 0x30, 0xEA ]    # JSR incompatible_doors
                 asmPatch += [ 0xA9, X0,   X1   ]    # LDA #$SamusX        ; fixed Samus X position
                 asmPatch += [ 0x8D, 0xF6, 0x0A ]    # STA $0AF6           ; update Samus X position in memory
                 asmPatch += [ 0xA9, Y0,   Y1   ]    # LDA #$SamusY        ; fixed Samus Y position
                 asmPatch += [ 0x8D, 0xFA, 0x0A ]    # STA $0AFA           ; update Samus Y position in memory
             else:
                 # still give I-frames
-                asmPatch += [ 0x20, 0x40, 0xEA ]    # JSR giveiframes
-            # change song if needed
-            if 'song' in conn:
-                asmPatch += [ 0xA9, conn['song'], 0xFF ]       # LDA #$song       ; A is argument for change_song
-                asmPatch += [ 0x20, 0x47,         0XEA ]       # JSR change_song
+                asmPatch += [ 0x20, 0x70, 0xEA ]    # JSR giveiframes
             # return
             asmPatch += [ 0x60 ]   # RTS
-            self.romFile.write(struct.pack('B', self.asmAddress & 0x00FF))
-            self.romFile.write(struct.pack('B', (self.asmAddress & 0xFF00) >> 8))
+            self.romFile.write(struct.pack('B', asmAddress & 0x00FF))
+            self.romFile.write(struct.pack('B', (asmAddress & 0xFF00) >> 8))
 
-            self.romFile.seek(self.asmAddress)
+            self.romFile.seek(asmAddress)
             for byte in asmPatch:
                 self.romFile.write(struct.pack('B', byte))
 
-            self.asmAddress += len(asmPatch)
+            asmAddress += len(asmPatch)
+            # update room state header with song changes
+            if 'song' in conn:
+                for addr in conn["songs"]:
+                    self.romFile.seek(0x70000 + addr)
+                    self.romFile.write(struct.pack('B', conn['song']))
+                    self.romFile.write(struct.pack('B', 0x5))
 
     # change BG table to avoid scrolling sky bug when transitioning to west ocean
     def patchWestOcean(self, doorPtr):
@@ -1214,22 +1226,6 @@ class RomPatcher:
         offset = 0x70000 + roomPtr + 0x8
         self.romFile.seek(offset)
         self.romFile.write(struct.pack('B', 0x2))
-
-    # adds eye door PLM to "phantoon dead" room state in boss rando
-    def patchPhantoonEyeDoor(self):
-        # repoints PLM list to "phantoon alive" (eye door is the only diff in the list)
-        self.romFile.seek(0x7CCAF)
-        self.writeWord(0xC291)
-
-    # add ASM to Tourian "door" down elevator to trigger full refill (ammo + energy)
-    # TODO move this in area_rando_door_transition.asm
-    def writeTourianRefill(self):
-        tourianDoor = 0x19222
-        self.romFile.seek(tourianDoor + 10) # go to door ASM ptr field
-        # write full_refill routine address
-        # aseemble area_rando_door_transition.asm to print it if modified
-        self.romFile.write(struct.pack('B', 0x5C))
-        self.romFile.write(struct.pack('B', 0xEA))
 
     buttons = {
         "Select" : [0x00, 0x20],

@@ -136,7 +136,7 @@ print "test door ASM: ", pc
     lda #$0000 : jsl $8081fa    ; wake zebes
     lda #$000e : jsl $8081fa    ; set escape flag
 print "escape_setup: ", pc
-    ;; door ASM for MB escape door
+;;; door ASM for MB escape door
 escape_setup:
     ;; open all doors
     lda #$ffff
@@ -153,6 +153,7 @@ escape_setup:
     inx : inx
     cpx #$0008
     bcc -
+.end:
     rts
 
 room_setup:
@@ -180,9 +181,6 @@ room_main:
     ldx $07df
     rts
 
-warnpc $8fe9ff
-
-org $8ff000                     ; FIXME tmp address
 ws_basement_PLMs:
     ;; original PLM list
     dw $B703
@@ -210,7 +208,10 @@ ws_basement_PLMs:
     dw $9061
     ;; terminator
     dw $0000
+print "PLM population end: ", pc    
 
+;;; stop before area rando door transition patch
+warnpc $8fea2f
 
 ;;; DATA (bank A1 free space)
 org $a1f000
@@ -237,6 +238,7 @@ enemy_table:
     dw $9938,$8573,$80d3            ; green brin elevator (vanilla data)
     dw $af3f,$a544,$873d            ; LN elevator (vanilla data)
     dw $b236,one_elev_list_4,$893d  ; LN main hall
+    dw $d95e,$de5a,$9028            ; botwoon room (vanilla "botwoon dead" data)
     ;; table terminator
     dw $ffff
 
@@ -359,11 +361,15 @@ fix_timer_gfx:
 
 warnpc $a1ffff
 
-;;; TEST
-org $83AB34
-    ;; escape door header => norfair map station
-    dw $A7DE
-    db $00,$04,$01,$46,$00,$04
-    dw $8000
-    dw $E9A0                    ; sets escape flag and triggers escape setup asm
-;;; END TEST
+;;; ASM ptr for down door at the beggining of escape 
+org $83aaf6
+    dw escape_setup
+
+;; ;;; TEST
+;; org $83AB34
+;;     ;; escape door header => norfair map station
+;;     dw $A7DE
+;;     db $00,$04,$01,$46,$00,$04
+;;     dw $8000
+;;     ;; dw $E9A0                    ; sets escape flag and triggers escape setup asm
+;; ;;; END TEST

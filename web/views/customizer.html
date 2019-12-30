@@ -592,10 +592,11 @@ function startTheTour(step=-1) {
   <th>Sprite</th><th>Author</th><th>Description</th>\
 {{
 for (key, value) in sorted(customSprites.items(), key=lambda x: x[1]['index']):
-  response.write('  <tr><td>{}</td><td>{}</td><td>{}</td>\\\n'.format(value['name'], value['author'], value['desc']), escape=False)
+  response.write('  <tr><td><a href=\\\"/solver/static/images/sprite_sheets/{}.png\\\" target=\\\"_blank\\\">{}</a></td><td>{}</td><td>{}</td>\\\n'.format(key, value['name'], value['author'], value['desc']), escape=False)
   pass
 response.write('</table>', escape=False)
-}}"
+}}\
+<p><b>Hint:</b>Click on a sprite name in the above table to display its sprite sheet.</p>"
     },
     {
       element: "#patchesStep",

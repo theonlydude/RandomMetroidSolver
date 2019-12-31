@@ -1,52 +1,25 @@
 import random
 
 from itemrandomizerweb.Randomizer import Randomizer
-from graph_access import vanillaTransitions, accessPoints, getAccessPoint
-
-def createTransitions(bidir=True):
-    tFrom = []
-    tTo = []
-    apNames = [ap.Name for ap in accessPoints if ap.Internal == False and ap.Boss == False]
-    transitions = []
-
-    def findTo(trFrom):
-        ap = getAccessPoint(trFrom)
-        fromArea = ap.GraphArea
-        targets = [apName for apName in apNames if apName not in tTo and getAccessPoint(apName).GraphArea != fromArea]
-        if len(targets) == 0: # fallback if no area transition is found
-            targets = [apName for apName in apNames if apName != ap.Name]
-        return random.choice(targets)
-
-    def addTransition(src, dst):
-        tFrom.append(src)
-        tTo.append(dst)
-
-    while len(apNames) > 0:
-        sources = [apName for apName in apNames if apName not in tFrom]
-        src = random.choice(sources)
-        dst = findTo(src)
-        transitions.append((src, dst))
-        addTransition(src, dst)
-        if bidir is True:
-            addTransition(dst, src)
-        toRemove = [apName for apName in apNames if apName in tFrom and apName in tTo]
-        for apName in toRemove:
-            apNames.remove(apName)
-    return transitions
+from graph_access import vanillaTransitions, accessPoints, getAccessPoint, createAreaTransitions, createEscapeTransition
+from helpers import Bosses
 
 class AreaRandomizer(Randomizer):
-    def __init__(self, locations, settings, seedName, bossTransitions, bidir=True, dotDir=None):
+    def __init__(self, locations, settings, seedName, bossTransitions,
+                 bidir=True, dotDir=None, escape=True, removeEscapeEnemies=True):
         transitionsOk = False
         attempts = 0
         while not transitionsOk and attempts < 50:
             try:
-                self.transitions = createTransitions(bidir)
+                self.transitions = createAreaTransitions(bidir)
                 super(AreaRandomizer, self).__init__(locations,
                                                      settings,
                                                      seedName,
                                                      self.transitions + bossTransitions,
                                                      bidir,
                                                      dotDir)
+                if escape == True:
+                    self.escapeGraph()
                 transitionsOk = True
             except RuntimeError:
                 transitionsOk = False
@@ -58,3 +31,53 @@ class AreaRandomizer(Randomizer):
 
     def areaDistance(self, loc, otherLocs):
         return self.areaDistanceProp(loc, otherLocs, 'GraphArea')
+
+    # area graph update for randomized escape
+    def escapeGraph(self):
+        sm = self.smbm
+        # setup smbm with item pool
+        sm.resetItems()
+        for boss in Bosses.bosses():
+            Bosses.beatBoss(boss)
+        # Ice not usable because of hyper beam
+        # remove energy to avoid hell runs
+        sm.addItems([item['Type'] for item in self.itemPool if item['Type'] != 'Ice' and item['Category'] != 'Energy'])
+        path = None
+        while path is None:
+            (src, dst) = createEscapeTransition()
+            path = self.areaGraph.accessPath(sm, dst, 'Landing Site',
+                                             self.difficultyTarget)
+        # cleanup smbm
+        sm.resetItems()
+        Bosses.reset()
+        # actually update graph
+        self.areaGraph.addTransition(src, dst)
+        # get timer value
+        self.areaGraph.EscapeTimer = self.escapeTimer(path)
+
+    # really rough, to be accurate it would require traversal times for all APs
+    # combinations within areas
+    def escapeTimer(self, path):
+        if path[0].Name == 'Climb Bottom Left':
+            self.log.debug('escapeTimer: vanilla')
+            return None
+        traversedAreas = list(set([ap.GraphArea for ap in path]))
+        self.log.debug("escapeTimer path: " + str([ap.Name for ap in path]))
+        self.log.debug("escapeTimer traversedAreas: " + str(traversedAreas))
+        # rough estimates of navigation within areas to reach "borders"
+        # (can obviously be completely off wrt to actual path, but on the generous side)
+        traversals = {
+            'Crateria':90,
+            'GreenPinkBrinstar':90,
+            'WreckedShip':120,
+            'LowerNorfair':135,
+            'Maridia':150,
+            'RedBrinstar':75,
+            'Norfair': 120,
+            # Kraid and Tourian can't be on the path
+        }
+        t = 90
+        for area in traversedAreas:
+            t += traversals[area]
+        self.log.debug("escapeTimer. t="+str(t))
+        return max(t, 180)

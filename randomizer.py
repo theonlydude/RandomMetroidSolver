@@ -6,7 +6,7 @@ from itemrandomizerweb.Randomizer import Randomizer, RandoSettings, progSpeeds
 from itemrandomizerweb.AreaRandomizer import AreaRandomizer
 from itemrandomizerweb.PaletteRando import PaletteRando
 from graph_locations import locations as graphLocations
-from graph_access import vanillaTransitions, getDoorConnections, vanillaBossesTransitions, getRandomBossTransitions
+from graph_access import vanillaTransitions, getDoorConnections, vanillaBossesTransitions, createBossesTransitions
 from parameters import Knows, easy, medium, hard, harder, hardcore, mania, text2diff, diff2text
 from utils import PresetLoader
 from rom import RomPatcher, RomPatches, FakeROM
@@ -20,10 +20,10 @@ morphPlacements = ['early', 'late', 'normal']
 majorsSplits = ['Full', 'Major', 'Chozo']
 
 def dumpErrorMsg(outFileName, msg):
-    if outFileName is None:
-        return
-    with open(outFileName, 'w') as jsonFile:
-        json.dump({"errorMsg": msg}, jsonFile)
+    print("DIAG: " + msg)
+    if outFileName is not None:
+        with open(outFileName, 'w') as jsonFile:
+            json.dump({"errorMsg": msg}, jsonFile)
 
 def restricted_float(x):
     x = float(x)
@@ -73,11 +73,17 @@ if __name__ == "__main__":
                         action='store_true',dest='dot', default=False)
     parser.add_argument('--area', help="area mode",
                         dest='area', nargs='?', const=True, default=False)
-    parser.add_argument('--bosses', help="randomize bosses",
-                        dest='bosses', nargs='?', const=True, default=False)
     parser.add_argument('--areaLayoutBase',
                         help="use simple layout patch for area mode", action='store_true',
                         dest='areaLayoutBase', default=False)
+    parser.add_argument('--noEscapeRando',
+                        help="Do not randomize the escape sequence in area mode", action='store_true',
+                        dest='noEscapeRando', default=False)
+    parser.add_argument('--noRemoveEscapeEnemies',
+                        help="Do not remove enemies during escape sequence in area mode", action='store_true',
+                        dest='noRemoveEscapeEnemies', default=False)
+    parser.add_argument('--bosses', help="randomize bosses",
+                        dest='bosses', nargs='?', const=True, default=False)
     parser.add_argument('--debug', '-d', help="activate debug logging", dest='debug',
                         action='store_true')
     parser.add_argument('--maxDifficulty', '-t',
@@ -257,13 +263,17 @@ if __name__ == "__main__":
             sys.exit(-1)
         seed4rand = seed ^ args.raceMagic
     random.seed(seed4rand)
-
+    optErrMsg = ""
     # choose on animal patch
     if args.animals == True:
-        animalsPatches = ['animal_enemies.ips', 'animals.ips', 'draygonimals.ips', 'escapimals.ips',
-                          'gameend.ips', 'grey_door_animals.ips', 'low_timer.ips', 'metalimals.ips',
-                          'phantoonimals.ips', 'ridleyimals.ips']
-        args.patches.append(random.choice(animalsPatches))
+        if args.area == False or args.noEscapeRando == True or args.noRemoveEscapeEnemies == True:
+            animalsPatches = ['animal_enemies.ips', 'animals.ips', 'draygonimals.ips', 'escapimals.ips',
+                              'gameend.ips', 'grey_door_animals.ips', 'low_timer.ips', 'metalimals.ips',
+                              'phantoonimals.ips', 'ridleyimals.ips']
+            args.patches.append(random.choice(animalsPatches))
+        else:
+            optErrMsg = "Disabled animals surprise patch (incompatible with randomized escape without enemies)"
+            print(optErrMsg)
 
     # if random progression speed, choose one
     progSpeed = str(args.progressionSpeed).lower()
@@ -452,7 +462,7 @@ if __name__ == "__main__":
     randoSettings = RandoSettings(maxDifficulty, progSpeed, progDiff, qty, restrictions, args.superFun, args.runtimeLimit_s, args.vcr, args.plandoRando["locsItems"] if args.plandoRando != None else None)
     bossTransitions = vanillaBossesTransitions
     if args.bosses == True:
-        bossTransitions = getRandomBossTransitions()
+        bossTransitions = createBossesTransitions()
     if args.area == True:
         if args.dot == True:
             dotDir = args.directory
@@ -462,11 +472,13 @@ if __name__ == "__main__":
         if args.areaLayoutBase == True:
             RomPatches.ActivePatches.remove(RomPatches.AreaRandoGatesOther)
         try:
-            randomizer = AreaRandomizer(graphLocations, randoSettings, seedName, bossTransitions, dotDir=dotDir)
+            randomizer = AreaRandomizer(graphLocations, randoSettings, seedName, bossTransitions,
+                                        dotDir=dotDir,
+                                        escape=not args.noEscapeRando,
+                                        removeEscapeEnemies=not args.noRemoveEscapeEnemies)
         except RuntimeError:
             msg = "Cannot generate area layout. Retry, and change the super fun settings if the problem happens again."
             dumpErrorMsg(args.output, msg)
-            print("DIAG: {}".format(msg))
             sys.exit(-1)
     else:
         try:
@@ -478,16 +490,17 @@ if __name__ == "__main__":
         except RuntimeError:
             msg = "Locations unreachable detected with preset/super fun/max diff. Retry, and change the Super Fun settings and/or Maximum difficulty if the problem happens again."
             dumpErrorMsg(args.output, msg)
-            print("DIAG: {}".format(msg))
             sys.exit(-1)
         except Exception as e:
             msg = str(e)
             dumpErrorMsg(args.output, msg)
-            print("DIAG: {}".format(msg))
             sys.exit(-1)
-    doors = getDoorConnections(randomizer.areaGraph, args.area, args.bosses)
     if args.patchOnly == False:
         (stuck, itemLocs, progItemLocs) = randomizer.generateItems()
+        doors = getDoorConnections(randomizer.areaGraph,
+                                   args.area, args.bosses,
+                                   args.area and not args.noEscapeRando)
+        escapeTimer = randomizer.areaGraph.EscapeTimer
     else:
         stuck = False
         itemLocs = []
@@ -574,7 +587,10 @@ if __name__ == "__main__":
                 suitsMode = "Progressive"
             elif args.noGravHeat:
                 suitsMode = "Vanilla"
-            romPatcher.applyIPSPatches(args.patches, args.noLayout, suitsMode, args.area, args.bosses, args.areaLayoutBase, args.noVariaTweaks, args.nerfedCharge)
+            romPatcher.applyIPSPatches(args.patches, args.noLayout, suitsMode,
+                                       args.area, args.bosses, args.areaLayoutBase,
+                                       args.noVariaTweaks, args.nerfedCharge,
+                                       args.noEscapeRando, args.noRemoveEscapeEnemies)
         else:
             romPatcher.addIPSPatches(args.patches)
         if args.sprite is not None:
@@ -587,11 +603,8 @@ if __name__ == "__main__":
             romPatcher.writeSpoiler(itemLocs, progItemLocs)
             romPatcher.writeRandoSettings(randoSettings, itemLocs)
             romPatcher.writeDoorConnections(doors)
-            if args.area == True:
-                romPatcher.writeTourianRefill()
-            if args.bosses == True:
-                romPatcher.patchPhantoonEyeDoor()
-        # romPatcher.writeTransitionsCredits(randomizer.areaGraph.getCreditsTransitions())
+            if escapeTimer is not None:
+                romPatcher.writeEscapeTimer(escapeTimer)
         if ctrlDict is not None:
             romPatcher.writeControls(ctrlDict)
         if args.moonWalk == True:
@@ -627,13 +640,16 @@ if __name__ == "__main__":
             fileName = '{}.sfc'.format(fileName)
             data["fileName"] = fileName
             # error msg in json to be displayed by the web site
-            data["errorMsg"] = randomizer.errorMsg
+            if optErrMsg != "":
+                msg = optErrMsg + '\n' + randomizer.errorMsg
+            else:
+                msg = randomizer.errorMsg
+            data["errorMsg"] = msg
             with open(outFileName, 'w') as jsonFile:
                 json.dump(data, jsonFile)
     except Exception as e:
         msg = "Error patching {}: ({}: {})".format(outFileName, type(e).__name__, e)
         dumpErrorMsg(args.output, msg)
-        print(msg)
         sys.exit(-1)
 
     if stuck == True:

@@ -249,8 +249,6 @@ def loadRandoPreset(randoPreset, args):
 
     if "animals" in randoParams and randoParams["animals"] == "on":
         args.animals = True
-    if "areaLayout" in randoParams and randoParams["areaLayout"] == "off":
-        args.areaLayoutBase = True
     if "variaTweaks" in randoParams and randoParams["variaTweaks"] == "off":
         args.noVariaTweaks = True
     if "maxDifficulty" in randoParams and randoParams["maxDifficulty"] != "no difficulty cap":
@@ -284,6 +282,13 @@ def loadRandoPreset(randoPreset, args):
 
     if "areaRandomization" in randoParams and randoParams["areaRandomization"] == "on":
         args.area = True
+        if "areaLayout" in randoParams and randoParams["areaLayout"] == "off":
+            args.areaLayoutBase = True
+        if "escapeRando" in randoParams and randoParams["escapeRando"] == "off":
+            args.noEscapeRando = True
+        if "removeEscapeEnemies" in randoParams and randoParams["removeEscapeEnemies"] == "off":
+            args.noRemoveEscapeEnemies = True
+
     if "bossRandomization" in randoParams and randoParams["bossRandomization"] == "on":
         args.bosses = True
 

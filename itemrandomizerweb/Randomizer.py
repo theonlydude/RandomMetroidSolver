@@ -448,11 +448,11 @@ class SuperFunProvider(object):
         self.lastRestricted = [loc for loc in self.locations if loc not in totalAvailLocs]
         self.log.debug("restricted=" + str([loc['Name'] for loc in self.lastRestricted]))
 
-        # check if we can reach all APs from all APs
-        nonInternalAPs = [ap for ap in self.areaGraph.accessPoints.values() if ap.Internal == False]
-        for startApName, startAp in self.areaGraph.accessPoints.items():
+        # check if we all inter-area APs reach each other
+        interAPs = [ap for ap in self.areaGraph.accessPoints.values() if ap.isArea()]
+        for startAp in interAPs:
             availAccessPoints = self.areaGraph.getAvailableAccessPoints(startAp, self.sm, self.rando.difficultyTarget)
-            for ap in nonInternalAPs:
+            for ap in interAPs:
                 if not ap in availAccessPoints:
                     ret = False
                     #self.log.debug("unavail AP: " + ap.Name + ", from " + startApName)

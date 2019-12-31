@@ -17,7 +17,9 @@ class AccessPoint(object):
     # internal : if true, shall not be used for connecting areas
     def __init__(self, name, graphArea, transitions,
                  traverse=lambda sm: SMBool(True),
-                 exitInfo=None, entryInfo=None, roomInfo=None, shortName=None, internal=False, boss=False, dotOrientation='w'):
+                 exitInfo=None, entryInfo=None, roomInfo=None,
+                 internal=False, boss=False, escape=False,
+                 dotOrientation='w'):
         self.Name = name
         self.GraphArea = graphArea
         self.ExitInfo = exitInfo
@@ -25,13 +27,10 @@ class AccessPoint(object):
         self.RoomInfo = roomInfo
         self.Internal = internal
         self.Boss = boss
+        self.Escape = escape
         self.DotOrientation = dotOrientation
         self.transitions = transitions
         self.traverse = traverse
-        if shortName is not None:
-            self.ShortName = shortName
-        else:
-            self.ShortName = str(self)
         self.distance = 0
         # inter-area connection
         self.ConnectedTo = None
@@ -49,12 +48,18 @@ class AccessPoint(object):
         else:
             raise RuntimeError("Cannot add an internal access point as inter-are transition")
 
+    # tells if this node is to connect areas together
+    def isArea(self):
+        return not self.Internal and not self.Boss and not self.Escape
+
+
 class AccessGraph(object):
     def __init__(self, accessPointList, transitions, bidir=True, dotFile=None):
         self.log = log.get('Graph')
 
         self.accessPoints = {}
         self.InterAreaTransitions = []
+        self.EscapeTimer = None
         self.bidir = bidir
         for ap in accessPointList:
             ap.distance = 0
@@ -269,3 +274,13 @@ class AccessGraph(object):
         #print("canAccess: {}".format(can))
         return can
 
+    # returns a list of AccessPoint instances from srcAccessPointName to destAccessPointName
+    # (not including source ap)
+    # or None if no possible path
+    def accessPath(self, smbm, srcAccessPointName, destAccessPointName, maxDiff):
+        destAccessPoint = self.accessPoints[destAccessPointName]
+        srcAccessPoint = self.accessPoints[srcAccessPointName]
+        availAccessPoints = self.getAvailableAccessPoints(srcAccessPoint, smbm, maxDiff)
+        if destAccessPoint not in availAccessPoints:
+            return None
+        return self.getPath(destAccessPoint, availAccessPoints)

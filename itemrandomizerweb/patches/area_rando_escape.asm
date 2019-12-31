@@ -106,6 +106,9 @@ save_station:
     lda #$0017
     jmp $8cf6
 
+print "B84 end: ", pc
+warnpc $84f0c3                  ; explicitly right there, to remember needed race mode update
+
 ;;; DATA, bank 8F. makes map stations doors in norfair/brin/maridia/ws
 ;;; permanently grey
 org $8f8b06                     ; norfair map

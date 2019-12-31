@@ -1029,6 +1029,7 @@ Tournament presets:<ul>\
       element: "#areaRandomizationStep",
       title: "Areas randomization",
       content: "<p>Randomize areas together using bidirectional access portals:</p><a href=\"/solver/static/images/area_map.png\" class=\"highslide\" onclick=\"return hs.expand(this, {wrapperClassName: 'borderless', dimmingOpacity: 0.75, align: 'center'})\"><div class=\"parent-center\"><img id=\"areathumb\" src=\"/solver/static/images/area_map_thumbnail.png\" alt=\"Area Map\" title=\"Click to enlarge\" class=\"half child-center\"/></div></a><p>It is recommended to use the <a href=\"/solver/solver_web/tracker\" target=\"_blank\">Area Tracker</a> to find your way more easily.</p><p>All portals can be linked to one another, even if it means following an incompatible transition (Left-Left, Up-Right, ...).<br/>\
+By default, the escape sequence can spawn you outside a random map station, and you have to find your way to the ship. See next option (in medium/advanced tab) for more information.<br/>\
 You can go through all portals and back, even those where you can't do that in vanilla, so some layout tweaks have been made:</p>\
 <table class=\"full\">\
 <tr>\
@@ -1090,20 +1091,21 @@ Click on the dice button to randomly set this parameter.",
     {
       element: "#escapeRandoStep",
       title: "Escape sequence randomization",
-      content: "<p>When leaving Tourian get teleported to a random Map station and finish the escape sequence from there.</p>\
+      content: "<p>When leaving Tourian, get teleported to one of five spawn points: either the vanilla escape (Climb room) of the exit of a random Map station (between Brinstar/Maridia/Norfair/Wrecked Ship). You then have to find your way to the ship in the remaining time (allotted time depends on area layout, but not on skill settings and is pretty generous).</p>\
 During the escape sequence:\
 <ul>\
-<li>The Hyper Beam can destroy Bomb, Power Bomb and Super Missile blocks and open blue/green gates from both sides</li>\
 <li>All doors are opened</li>\
+<li>The Hyper Beam can destroy Bomb, Power Bomb and Super Missile blocks and open blue/green gates from both sides</li>\
 <li>All mini bosses are defeated</li>\
+<li>By default, all minor enemies are removed to allow you to move faster. See next option (in advanced tab) to change this behavior</li>\
 </ul>\
-During game only Crateria Map station door can be open and the station will reveal all map contents.",
+During regular game only Crateria Map station door can be opened and activating the station will act as if all map stations were activated at once.",
       placement: "auto left"
     },
     {
       element: "#removeEscapeEnemiesStep",
       title: "Remove enemies during escape",
-      content: "<p>Remove enemies during escape sequence, disable it to blast through enemies with your Hyper Beam</p>",
+      content: "<p>Remove enemies during escape sequence, disable it to blast through enemies with your Hyper Beam and cause lag.</p>",
       placement: "auto left"
     },
     {

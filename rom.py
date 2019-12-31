@@ -406,7 +406,7 @@ class RomReader:
         bossTransitions = {}
         areaTransitions = {}
         for accessPoint in accessPoints:
-            if accessPoint.Internal == True:
+            if accessPoint.isInternal() == True:
                 continue
             (destRoomPtr, destEntryScreen) = self.getTransition(accessPoint.ExitInfo['DoorPtr'])
             destAP = rooms[(destRoomPtr, destEntryScreen)]

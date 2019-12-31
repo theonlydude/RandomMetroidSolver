@@ -1035,7 +1035,7 @@ class InteractiveSolver(CommonSolver):
 
         singleAPs = []
         for ap in accessPoints:
-            if ap.Internal == True:
+            if ap.isInternal() == True:
                 continue
 
             if ap.Name not in usedAPs:

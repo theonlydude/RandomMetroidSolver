@@ -52,6 +52,9 @@ class AccessPoint(object):
     def isArea(self):
         return not self.Internal and not self.Boss and not self.Escape
 
+    # used by the solver to get area and boss APs
+    def isInternal(self):
+        return self.Internal or self.Escape
 
 class AccessGraph(object):
     def __init__(self, accessPointList, transitions, bidir=True, dotFile=None):

@@ -683,7 +683,7 @@ def getVanillaExit(apName):
 def getRooms():
     rooms = {}
     for ap in accessPoints:
-        if ap.Internal == True:
+        if ap.isInternal() == True:
             continue
         roomPtr = ap.RoomInfo['RoomPtr']
         entryInfo = getAccessPoint(getVanillaExit(ap.Name)).ExitInfo
@@ -780,7 +780,7 @@ def getDoorConnections(graph, areas=True, bosses=False, escape=True):
 def getDoorsPtrs2Aps():
     ret = {}
     for ap in accessPoints:
-        if ap.Internal == True:
+        if ap.isInternal() == True:
             continue
         ret[ap.ExitInfo["DoorPtr"]] = ap.Name
     return ret
@@ -788,7 +788,7 @@ def getDoorsPtrs2Aps():
 def getAps2DoorsPtrs():
     ret = {}
     for ap in accessPoints:
-        if ap.Internal == True:
+        if ap.isInternal() == True:
             continue
         ret[ap.Name] = ap.ExitInfo["DoorPtr"]
     return ret

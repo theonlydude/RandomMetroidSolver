@@ -737,8 +737,8 @@ window.onload = function(){
             }
 
             if(! patches.checked){ patches.click(); }
-            if(! escapeRando.checked){ escapeRando.click(); }
             if(! removeEscapeEnemies.checked){ removeEscapeEnemies.click(); }
+            if(! escapeRando.checked){ escapeRando.click(); }
 
             // uncheck suits restrictions when late morph + area
             if(lateMorph.options[lateMorph.selectedIndex].text == "late"){
@@ -748,8 +748,8 @@ window.onload = function(){
             }
         } else {
             if(patches.checked){ patches.click(); }
-            if(escapeRando.checked){ escapeRando.click(); }
             if(removeEscapeEnemies.checked){ removeEscapeEnemies.click(); }
+            if(escapeRando.checked){ escapeRando.click(); }
 
             var secondIds = ["areaLayout", "escapeRando", "removeEscapeEnemies"];
             for(var i=0; i<secondIds.length; i++) {
@@ -757,6 +757,14 @@ window.onload = function(){
             }
         }
         switchCheckbox("areaRandomization");
+    };
+
+    var escapeRando = document.getElementById("escapeRando");
+    escapeRando.onchange = function() {
+      var escapeRando = document.getElementById("escapeRando");
+
+      disableElement("removeEscapeEnemies", ! escapeRando.checked);
+      switchCheckbox("escapeRando");
     };
 
     // uncheck suits restrictions when late morph + area

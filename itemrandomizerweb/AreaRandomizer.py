@@ -67,16 +67,16 @@ class AreaRandomizer(Randomizer):
         # rough estimates of navigation within areas to reach "borders"
         # (can obviously be completely off wrt to actual path, but on the generous side)
         traversals = {
-            'Crateria':45,
-            'GreenPinkBrinstar':75,
-            'WreckedShip':90,
-            'LowerNorfair':120,
-            'Maridia':135,
+            'Crateria':60,
+            'GreenPinkBrinstar':90,
+            'WreckedShip':105,
+            'LowerNorfair':135,
+            'Maridia':150,
             'RedBrinstar':75,
             'Norfair': 120,
             # Kraid and Tourian can't be on the path
         }
-        t = 60
+        t = 90
         for area in traversedAreas:
             t += traversals[area]
         self.log.debug("escapeTimer. t="+str(t))

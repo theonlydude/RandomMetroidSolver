@@ -187,7 +187,8 @@ class RomReader:
         # all the modifications from animals are included in animal_enemies...
         #'animals': {'address': 0x7841D, 'value': 0x8C, 'vanillaValue': 0x18},
         'area_rando_blue_doors': {'address': 0x7823E, 'value': 0x3B, 'vanillaValue': 0x66},
-        'area_rando_door_transition': {'address': 0x7FDC, 'value': 0x9A, 'vanillaValue': 0x20},
+        'area_rando_door_transition': {'address': 0x852BA, 'value': 0x20, 'vanillaValue': 0xad},
+        'area_rando_escape': {'address': 0x15f38, 'value': 0x5c, 'vanillaValue': 0xbd},
         'area_rando_layout_base': {'address': 0x788A0, 'value': 0x2B, 'vanillaValue': 0x26},
         'area_rando_layout': {'address': 0x78666, 'value': 0x62, 'vanillaValue': 0x64},
         'bomb_torizo': {'address': 0x7FDC, 'value': 0xF2, 'vanillaValue': 0x20},

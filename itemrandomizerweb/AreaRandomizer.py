@@ -67,9 +67,9 @@ class AreaRandomizer(Randomizer):
         # rough estimates of navigation within areas to reach "borders"
         # (can obviously be completely off wrt to actual path, but on the generous side)
         traversals = {
-            'Crateria':60,
+            'Crateria':90,
             'GreenPinkBrinstar':90,
-            'WreckedShip':105,
+            'WreckedShip':120,
             'LowerNorfair':135,
             'Maridia':150,
             'RedBrinstar':75,

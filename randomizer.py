@@ -20,10 +20,10 @@ morphPlacements = ['early', 'late', 'normal']
 majorsSplits = ['Full', 'Major', 'Chozo']
 
 def dumpErrorMsg(outFileName, msg):
-    if outFileName is None:
-        return
-    with open(outFileName, 'w') as jsonFile:
-        json.dump({"errorMsg": msg}, jsonFile)
+    print("DIAG: " + msg)
+    if outFileName is not None:
+        with open(outFileName, 'w') as jsonFile:
+            json.dump({"errorMsg": msg}, jsonFile)
 
 def restricted_float(x):
     x = float(x)
@@ -263,13 +263,17 @@ if __name__ == "__main__":
             sys.exit(-1)
         seed4rand = seed ^ args.raceMagic
     random.seed(seed4rand)
-
+    optErrMsg = ""
     # choose on animal patch
     if args.animals == True:
-        animalsPatches = ['animal_enemies.ips', 'animals.ips', 'draygonimals.ips', 'escapimals.ips',
-                          'gameend.ips', 'grey_door_animals.ips', 'low_timer.ips', 'metalimals.ips',
-                          'phantoonimals.ips', 'ridleyimals.ips']
-        args.patches.append(animalsPatches[random.randint(0, len(animalsPatches)-1)])
+        if args.area == False or args.noEscapeRando == True or args.noRemoveEscapeEnemies == True:
+            animalsPatches = ['animal_enemies.ips', 'animals.ips', 'draygonimals.ips', 'escapimals.ips',
+                              'gameend.ips', 'grey_door_animals.ips', 'low_timer.ips', 'metalimals.ips',
+                              'phantoonimals.ips', 'ridleyimals.ips']
+            args.patches.append(animalsPatches[random.randint(0, len(animalsPatches)-1)])
+        else:
+            optErrMsg = "Disabled animals surprise patch (incompatible with randomized escape without enemies)"
+            print(optErrMsg)
 
     # if random progression speed, choose one
     progSpeed = str(args.progressionSpeed).lower()
@@ -475,7 +479,6 @@ if __name__ == "__main__":
         except RuntimeError:
             msg = "Cannot generate area layout. Retry, and change the super fun settings if the problem happens again."
             dumpErrorMsg(args.output, msg)
-            print("DIAG: {}".format(msg))
             sys.exit(-1)
     else:
         try:
@@ -487,12 +490,10 @@ if __name__ == "__main__":
         except RuntimeError:
             msg = "Locations unreachable detected with preset/super fun/max diff. Retry, and change the Super Fun settings and/or Maximum difficulty if the problem happens again."
             dumpErrorMsg(args.output, msg)
-            print("DIAG: {}".format(msg))
             sys.exit(-1)
         except Exception as e:
             msg = str(e)
             dumpErrorMsg(args.output, msg)
-            print("DIAG: {}".format(msg))
             sys.exit(-1)
     if args.patchOnly == False:
         (stuck, itemLocs, progItemLocs) = randomizer.generateItems()
@@ -639,13 +640,16 @@ if __name__ == "__main__":
             fileName = '{}.sfc'.format(fileName)
             data["fileName"] = fileName
             # error msg in json to be displayed by the web site
-            data["errorMsg"] = randomizer.errorMsg
+            if optErrMsg != "":
+                msg = optErrMsg + '\n' + randomizer.errorMsg
+            else:
+                msg = randomizer.errorMsg
+            data["errorMsg"] = msg
             with open(outFileName, 'w') as jsonFile:
                 json.dump(data, jsonFile)
     except Exception as e:
         msg = "Error patching {}: ({}: {})".format(outFileName, type(e).__name__, e)
         dumpErrorMsg(args.output, msg)
-        print(msg)
         sys.exit(-1)
 
     if stuck == True:

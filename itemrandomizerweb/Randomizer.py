@@ -682,7 +682,7 @@ class Randomizer(object):
         # start at landing site
         self.curAccessPoint = None
         self.curLocs = None
-        self.setCurAccessPoint()
+        self.setCurAccessPoint('Bubble Mountain')
         # states saved at each item collection
         self.states = []
         # indices in states list that mark a progression item collection
@@ -1197,8 +1197,8 @@ class Randomizer(object):
     # usually these locs are checked last when playing, so placing
     # an important item there has an impact on progression speed
     def isSoftlockPossible(self, item, loc):
-        if loc['Name'] == 'Bomb':
-            # disable check for bombs as it is the beginning
+        if len(self.progressionStatesIndices) <= 2:
+            # disable check for early game
             return False
         isPickup = 'Pickup' in loc
         if isPickup:
@@ -1491,10 +1491,10 @@ class Randomizer(object):
         return progItems+'/'+position
 
     def hasTried(self, itemLoc):
-        # disable tried check if we don't have morph+unlocking ammo
-        sm = self.smbm
-        if sm.canUsePowerBombs().bool == False or sm.canOpenGreenDoors().bool == False:
-            return False
+        # # disable tried check if we don't have morph+unlocking ammo
+        # sm = self.smbm
+        # if sm.canUsePowerBombs().bool == False or sm.canOpenGreenDoors().bool == False:
+        #     return False
         itemType = itemLoc['Item']['Type']
         situation = self.getSituationId()
         ret = False

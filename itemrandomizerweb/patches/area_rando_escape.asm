@@ -128,41 +128,6 @@ org $8f84b8                     ; brinstar map
 
 ;; ws map door handled with PLM spawn table, as it is blue in vanilla (see plm_spawn.asm)
 
-;; org $8fcc95
-;;     dw ws_basement_PLMs
-;; org $8fccaf
-;;     dw ws_basement_PLMs
-
-;; org $8fe9a0
-;; ws_basement_PLMs:
-;;     ;; original PLM list
-;;     dw $B703
-;;     db $40,$0C
-;;     dw $CCC0
-
-;;     dw $B703
-;;     db $46,$0C
-;;     dw $CCC5
-
-;;     dw $DB5A
-;;     db $4E,$06
-;;     dw $0085
-
-;;     dw $DB60
-;;     db $4E,$09
-;;     dw $0085
-
-;;     dw $DB56
-;;     db $4E,$07
-;;     dw $0085
-;;     ;; additional grey door
-;;     dw $C848
-;;     db $01,$06
-;;     dw $9061
-;;     ;; terminator
-;;     dw $0000
-;; print "PLM population end: ", pc
-
 org $8ff500
 
 ;;; CODE (in a tiny bit of bank 8F free space)

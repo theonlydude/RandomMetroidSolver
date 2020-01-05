@@ -37,7 +37,8 @@ plm_lists:
 
 ;;; *** Non-overlap in this space has to be handled at ROM generation ***
 
-org $8ff300
+org $8febf8
+
 ;;; Additional PLM definitions for rooms *going upwards* (written at ROM generation)
 ;;; 
 ;;; PLM lists are indexed by (Room ptr, Room State ptr, Entry Door ptr) and terminated by $0000
@@ -54,6 +55,8 @@ room_plms:
 ;;; 
 print "upwards room_plms table start: ", pc
 ;;; CODE in bank 8F
+org $8ff300
+
 add_plms:
     phx
     ;; iterate through room table
@@ -62,15 +65,15 @@ add_plms:
 .room_loop:
     lda $8f0000,x   : beq .end
     cmp $079b       : beq .room_ok
-    bra .next_room
+    bra .next_entry
 .room_ok:
     lda $8f0002,x   : beq .state_ok
     cmp $07bb       : beq .state_ok
-    bra .next_room
+    bra .next_entry
 .state_ok:
     lda $8f0004,x   : beq .load
     cmp $078d       : beq .load
-    bra .next_room
+    bra .next_entry
 .load:
     phx                         ; save our room table iterator
     lda $8f0006,x : tax         ; put PLM list address in X
@@ -81,7 +84,7 @@ add_plms:
     bra .plm_loop
 .load_end:
     plx                         ; restore room table iterator
-.next_room:
+.next_entry:
     txa : sec : sbc #$0008 : tax ; X -= 8
     bra .room_loop
 .end:

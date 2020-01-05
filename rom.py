@@ -822,7 +822,7 @@ class RomPatcher:
         # use instances vars because of terrible python scoping
         self.plmTblAddr = 0x7E9A0 # moves downwards
         self.plmPatchData = []
-        self.roomTblAddr = 0x7F308 # moves upwards
+        self.roomTblAddr = 0x7EC00 # moves upwards
         self.roomPatchData = []
         self.plmTblOffset = self.plmTblAddr
         def appendPlmBytes(bytez):

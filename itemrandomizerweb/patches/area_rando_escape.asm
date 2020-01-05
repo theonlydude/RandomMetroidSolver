@@ -362,7 +362,7 @@ fix_timer_gfx:
     PLX
     RTL							;done. return
 
-warnpc $a1ffff
+warnpc $a1f1ff
 
 ;;; ASM ptr for down door at the beggining of escape 
 org $83aaf6

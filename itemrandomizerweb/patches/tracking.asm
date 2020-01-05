@@ -419,3 +419,5 @@ pumps:
 	// run hijacked code and return
 	lda $0a1e
 	jml $91eb08
+
+warnpc $a1efff

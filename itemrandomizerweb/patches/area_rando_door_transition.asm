@@ -50,7 +50,7 @@ shinespark_end:
 	stz !spark_flag
 	rts
 
-org $8fea30
+org $8ff600
 print "incompatible_doors:"
 print pc
 ;;; routine called from door ASM when connecting two incompatible doors
@@ -113,7 +113,7 @@ full_refill:
 	rts
 
 ;;; stop before generated door asm routines start
-warnpc $8feaff
+warnpc $8ff7ff
 
 org $83922c                     ; Tourian Elevator door ASM ptr
     dw full_refill

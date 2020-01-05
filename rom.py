@@ -1139,7 +1139,7 @@ class RomPatcher:
     #   property shall point to this custom ASM.
     # * if not, just write doorAsmPtr as the door property directly.
     def writeDoorConnections(self, doorConnections):
-        asmAddress = 0x7EB00
+        asmAddress = 0x7F800
         for conn in doorConnections:
             # write door ASM for transition doors (code and pointers)
 #            print('Writing door connection ' + conn['ID'])
@@ -1191,14 +1191,14 @@ class RomPatcher:
                 (Y0, Y1) = (conn['SamusY'] & 0x00FF, (conn['SamusY'] & 0xFF00) >> 8)
                 # force samus position
                 # see area_rando_door_transition.asm. assemble it to print routines SNES addresses.
-                asmPatch += [ 0x20, 0x30, 0xEA ]    # JSR incompatible_doors
+                asmPatch += [ 0x20, 0x00, 0xF6 ]    # JSR incompatible_doors
                 asmPatch += [ 0xA9, X0,   X1   ]    # LDA #$SamusX        ; fixed Samus X position
                 asmPatch += [ 0x8D, 0xF6, 0x0A ]    # STA $0AF6           ; update Samus X position in memory
                 asmPatch += [ 0xA9, Y0,   Y1   ]    # LDA #$SamusY        ; fixed Samus Y position
                 asmPatch += [ 0x8D, 0xFA, 0x0A ]    # STA $0AFA           ; update Samus Y position in memory
             else:
                 # still give I-frames
-                asmPatch += [ 0x20, 0x70, 0xEA ]    # JSR giveiframes
+                asmPatch += [ 0x20, 0x40, 0xF6 ]    # JSR giveiframes
             # return
             asmPatch += [ 0x60 ]   # RTS
             self.romFile.write(struct.pack('B', asmAddress & 0x00FF))

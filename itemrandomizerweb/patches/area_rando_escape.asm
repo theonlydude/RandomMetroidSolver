@@ -107,7 +107,7 @@ save_station:
     jmp $8cf6
 
 print "B84 end: ", pc
-warnpc $84f0c3                  ; explicitly right there, to remember needed race mode update
+warnpc $84f0c2                  ; explicitly right there, to remember needed race mode update
 
 ;;; DATA, bank 8F. makes map stations doors in norfair/brin/maridia/ws
 ;;; permanently grey
@@ -133,9 +133,39 @@ org $8fccaf
     dw ws_basement_PLMs
 
 org $8fe9a0
-print "test door ASM: ", pc
-    ;;; CODE (in a tiny bit of bank 8F free space)
-    ;; test door ASM
+ws_basement_PLMs:
+    ;; original PLM list
+    dw $B703
+    db $40,$0C
+    dw $CCC0
+
+    dw $B703
+    db $46,$0C
+    dw $CCC5
+
+    dw $DB5A
+    db $4E,$06
+    dw $0085
+
+    dw $DB60
+    db $4E,$09
+    dw $0085
+
+    dw $DB56
+    db $4E,$07
+    dw $0085
+    ;; additional grey door
+    dw $C848
+    db $01,$06
+    dw $9061
+    ;; terminator
+    dw $0000
+print "PLM population end: ", pc
+
+org $8ff500
+
+;;; CODE (in a tiny bit of bank 8F free space)
+test_door_asm:
     lda #$0000 : jsl $8081fa    ; wake zebes
     lda #$000e : jsl $8081fa    ; set escape flag
 ;;; door ASM for MB escape door
@@ -183,37 +213,8 @@ room_main:
     ldx $07df
     rts
 
-ws_basement_PLMs:
-    ;; original PLM list
-    dw $B703
-    db $40,$0C
-    dw $CCC0
-
-    dw $B703
-    db $46,$0C
-    dw $CCC5
-
-    dw $DB5A
-    db $4E,$06
-    dw $0085
-
-    dw $DB60
-    db $4E,$09
-    dw $0085
-
-    dw $DB56
-    db $4E,$07
-    dw $0085
-    ;; additional grey door
-    dw $C848
-    db $01,$06
-    dw $9061
-    ;; terminator
-    dw $0000
-print "PLM population end: ", pc    
-
 ;;; stop before area rando door transition patch
-warnpc $8fea2f
+warnpc $8ff5ff
 
 ;;; DATA (bank A1 free space)
 org $a1f000
@@ -374,5 +375,5 @@ org $83aaf6
 ;;     dw $A7DE
 ;;     db $00,$04,$01,$46,$00,$04
 ;;     dw $8000
-;;     ;; dw $E9A0                    ; sets escape flag and triggers escape setup asm
+;;     ;; dw test_door_asm                    ; sets escape flag and triggers escape setup asm
 ;; ;;; END TEST

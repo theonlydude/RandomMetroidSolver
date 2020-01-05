@@ -28,7 +28,7 @@ additional_plms:
     ldx #save_plm
     jsl $84846a
 .end:
-    ;; proceed with vanilla code
+    ;; vanilla code (call door asm)
     jsl $8fe8a3
     rtl
 

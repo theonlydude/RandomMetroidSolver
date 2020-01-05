@@ -817,7 +817,7 @@ class RomPatcher:
             k = (room, state, door)
             if k not in plmDict:
                 plmDict[k] = []
-            plmDict[k].append(plm['plm_bytes_list'])
+            plmDict[k] += plm['plm_bytes_list']
         # make two patches out of this dict
         # use instances vars because of terrible python scoping
         self.plmTblAddr = 0x7E9A0 # moves downwards
@@ -831,22 +831,23 @@ class RomPatcher:
         def addRoomPatchData(bytez):
             self.roomPatchData = bytez + self.roomPatchData
             self.roomTblAddr -= len(bytez)
-        for roomKey, plmList in plmDict:
+        for roomKey, plmList in plmDict.items():
             entryAddr = self.plmTblOffset
             roomData = []
             for plmBytes in plmList:
-                assert len(plmBytes) == 6, "Invalid PLM entry for roomKey " + str(roomKey)
+                assert len(plmBytes) == 6, "Invalid PLM entry for roomKey " + str(roomKey) + ": PLM list len is " + str(len(plmBytes))
                 appendPlmBytes(plmBytes)
             appendPlmBytes([0x0, 0x0]) # list terminator
-            def appendRoomWord(w):
+            def appendRoomWord(w, data):
                 (w0, w1) = getWord(w)
-                roomData += [w0, w1]
+                data += [w0, w1]
             for i in range(3):
-                appendRoomWord(roomKey[i])
-            appendRoomWord(entryAddr)
+                appendRoomWord(roomKey[i], roomData)
+            appendRoomWord(entryAddr, roomData)
             addRoomPatchData(roomData)
         # write room table terminator
         addRoomPatchData([0x0] * 8)
+        assert self.plmTblOffset < self.roomTblAddr, "Spawn PLM table overlap"
         patchDict = {
             "PLM_Spawn_Tables" : {
                 self.plmTblAddr: self.plmPatchData,

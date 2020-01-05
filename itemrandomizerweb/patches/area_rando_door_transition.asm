@@ -1,6 +1,8 @@
 ;;; This patch handles area rando door transitions:
 ;;; - for incompatible transitions, cancel samus movement
-;;; - changes song if needed
+;;; - for all transitions, give I-frames
+;;; - refill at Tourian elevator
+;;; 
 ;;; compile with asar (https://www.smwcentral.net/?a=details&id=14560&p=section),
 ;;; or a variant of xkas that supports arch directive
 

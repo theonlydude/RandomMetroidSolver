@@ -682,7 +682,8 @@ class Randomizer(object):
         # start at landing site
         self.curAccessPoint = None
         self.curLocs = None
-        self.setCurAccessPoint('Bubble Mountain')
+#        self.setCurAccessPoint('Bubble Mountain')
+        self.setCurAccessPoint()
         # states saved at each item collection
         self.states = []
         # indices in states list that mark a progression item collection

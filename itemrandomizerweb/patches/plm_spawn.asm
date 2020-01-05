@@ -38,7 +38,6 @@ plm_lists:
 ;;; *** Non-overlap in this space has to be handled at ROM generation ***
 
 org $8ff300
-print "upwards room_plms table start: ", pc
 ;;; Additional PLM definitions for rooms *going upwards* (written at ROM generation)
 ;;; 
 ;;; PLM lists are indexed by (Room ptr, Room State ptr, Entry Door ptr) and terminated by $0000
@@ -49,12 +48,11 @@ print "upwards room_plms table start: ", pc
 room_plms:
     ;;  Room   State  Door   PLM list address
     dw  $0000, $0000, $0000, $0000
-
 ;;; TEST
 ;; room_plms:
 ;;     dw  $99bd, $99ca, $8b1a, plm_lists
 ;;; 
-
+print "upwards room_plms table start: ", pc
 ;;; CODE in bank 8F
 add_plms:
     phx

@@ -3,7 +3,7 @@ import re, struct, sys, os, json, copy, base64, random
 
 from smbool import SMBool
 from itemrandomizerweb.Items import ItemManager
-from itemrandomizerweb.patches import patches
+from itemrandomizerweb.patches import patches, additional_PLMs
 from itemrandomizerweb.stdlib import List
 from compression import Compressor
 from ips import IPS_Patch
@@ -16,8 +16,11 @@ def readWord(romFile):
     word = (r1 << 8) + r0
     return word
 
+def getWord(w):
+    return (w & 0x00FF, (w & 0xFF00) >> 8)
+
 def writeWord(romFile, w):
-    (w0, w1) = (w & 0x00FF, (w & 0xFF00) >> 8)
+    (w0, w1) = getWord(w)
     romFile.write(struct.pack('B', w0))
     romFile.write(struct.pack('B', w1))
 
@@ -571,8 +574,9 @@ class RomPatcher:
     # Replace bomb blocks with shot blocks before Spazer
     #   spazer.ips
     IPSPatches = {
-        'Standard': ['credits_varia.ips', 'g4_skip.ips',
-                     'seed_display.ips', 'tracking.ips', 'wake_zebes.ips',
+        'Standard': ['credits_varia.ips', 'plm_spawn.ips',
+                     'seed_display.ips', 'tracking.ips',
+                     'wake_zebes.ips', 'g4_skip.ips', # XXX those are door ASMs
                      'Mother_Brain_Cutscene_Edits',
                      'Suit_acquisition_animation_skip', 'Fix_Morph_and_Missiles_Room_State',
                      'Fix_heat_damage_speed_echoes_bug', 'Disable_GT_Code',
@@ -730,6 +734,7 @@ class RomPatcher:
         try:
             # apply standard patches
             stdPatches = []
+            plms = []
             # apply race mode first because it fills the rom with a bunch of crap
             if self.race is not None:
                 stdPatches.append('race_mode.ips')
@@ -744,7 +749,7 @@ class RomPatcher:
                 stdPatches.append('nerfed_charge.ips')
             if bosses == True or area == True:
                 stdPatches.append('ws_save.ips')
-            if bosses == True and (area == False or noEscapeRando == True):
+            if bosses == True:
                 stdPatches.append("Phantoon_Eye_Door")
 
             for patchName in stdPatches:
@@ -772,12 +777,15 @@ class RomPatcher:
                 if noEscapeRando == True:
                     RomPatcher.IPSPatches['Area'].remove('area_rando_escape.ips')
                     RomPatcher.IPSPatches['Area'].remove('area_rando_escape_ws_fix.ips')
-                elif noRemoveEscapeEnemies == True:
-                    RomPatcher.IPSPatches['Area'].append('Escape_Rando_Enable_Enemies')
+                else:
+                    if noRemoveEscapeEnemies == True:
+                        RomPatcher.IPSPatches['Area'].append('Escape_Rando_Enable_Enemies')
+                    plms.append("WS_Map_Grey_Door")
                 for patchName in RomPatcher.IPSPatches['Area']:
                     self.applyIPSPatch(patchName)
             elif bosses == True:
                 self.applyIPSPatch('area_rando_door_transition.ips')
+            self.applyPLMs(plms)
         except Exception as e:
             raise Exception("Error patching {}. ({})".format(self.romFileName, e))
 
@@ -791,6 +799,61 @@ class RomPatcher:
             # look for ips file
             patch = IPS_Patch.load(appDir + '/' + ipsDir + '/' + patchName)
         self.ipsPatches.append(patch)
+
+    # adds ad-hoc "IPS patches" for additional PLM tables
+    def applyPLMs(self, plms):
+        # compose a dict (room, state, door) => PLM array
+        # 'PLMs' being a 6 byte arrays
+        plmDict = {}
+        for p in plms:
+            plm = additional_PLMs[p]
+            room = plm['room']
+            state = 0
+            if 'state' in plm:
+                state = plm['state']
+            door = 0
+            if 'door' in plm:
+                door = plm['door']
+            k = (room, state, door)
+            if k not in plmDict:
+                plmDict[k] = []
+            plmDict[k].append(plm['plm_bytes_list'])
+        # make two patches out of this dict
+        # use instances vars because of terrible python scoping
+        self.plmTblAddr = 0x7E9A0 # moves downwards
+        self.plmPatchData = []
+        self.roomTblAddr = 0x7F308 # moves upwards
+        self.roomPatchData = []
+        self.plmTblOffset = self.plmTblAddr
+        def appendPlmBytes(bytez):
+            self.plmPatchData += bytez
+            self.plmTblOffset += len(bytez)
+        def addRoomPatchData(bytez):
+            self.roomPatchData = bytez + self.roomPatchData
+            self.roomTblAddr -= len(bytez)
+        for roomKey, plmList in plmDict:
+            entryAddr = self.plmTblOffset
+            roomData = []
+            for plmBytes in plmList:
+                assert len(plmBytes) == 6, "Invalid PLM entry for roomKey " + str(roomKey)
+                appendPlmBytes(plmBytes)
+            appendPlmBytes([0x0, 0x0]) # list terminator
+            def appendRoomWord(w):
+                (w0, w1) = getWord(w)
+                roomData += [w0, w1]
+            for i in range(3):
+                appendRoomWord(roomKey[i])
+            appendRoomWord(entryAddr)
+            addRoomPatchData(roomData)
+        # write room table terminator
+        addRoomPatchData([0x0] * 8)
+        patchDict = {
+            "PLM_Spawn_Tables" : {
+                self.plmTblAddr: self.plmPatchData,
+                self.roomTblAddr: self.roomPatchData
+            }
+        }
+        self.applyIPSPatch("PLM_Spawn_Tables", patchDict)
 
     def commitIPS(self):
         if self.romFileName is not None:

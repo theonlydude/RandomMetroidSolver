@@ -55,3 +55,12 @@ patches = {
     "Escape_Rando_Enable_Enemies":{
         0x10F000: [0x0]}
 }
+
+additional_PLMs = {
+    "WS_Map_Grey_Door": {
+        'room': 0Xcc6f,
+        'plm_bytes_list': [
+            [0x48, 0xc8, 0x1, 0x6, 0x61, 0x90]
+        ]
+    }
+}

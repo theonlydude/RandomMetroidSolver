@@ -518,8 +518,6 @@ class RomReader:
 
 class RomPatcher:
     # standard:
-    # Intro/Ceres Skip and initial door flag setup
-    #   introskip_doorflags.ips
     # Instantly open G4 passage when all bosses are killed
     #   g4_skip.ips
     # Wake up zebes when going right from morph
@@ -574,8 +572,8 @@ class RomPatcher:
     # Replace bomb blocks with shot blocks before Spazer
     #   spazer.ips
     IPSPatches = {
-        'Standard': ['credits_varia.ips', 'plm_spawn.ips',
-                     'seed_display.ips', 'tracking.ips',
+        'Standard': ['new_game.ips', 'plm_spawn.ips',
+                     'credits_varia.ips', 'seed_display.ips', 'tracking.ips',
                      'wake_zebes.ips', 'g4_skip.ips', # XXX those are door ASMs
                      'Mother_Brain_Cutscene_Edits',
                      'Suit_acquisition_animation_skip', 'Fix_Morph_and_Missiles_Room_State',
@@ -727,7 +725,8 @@ class RomPatcher:
     def customSprite(self, sprite):
         self.applyIPSPatch(sprite, ipsDir='itemrandomizerweb/patches/sprites')
 
-    def applyIPSPatches(self, optionalPatches=[], noLayout=False, suitsMode="Classic",
+    def applyIPSPatches(self, startAP="Landing Site",
+                        optionalPatches=[], noLayout=False, suitsMode="Classic",
                         area=False, bosses=False, areaLayoutBase=False,
                         noVariaTweaks=False, nerfedCharge=False,
                         noEscapeRando=False, noRemoveEscapeEnemies=False):
@@ -786,6 +785,7 @@ class RomPatcher:
             elif bosses == True:
                 self.applyIPSPatch('area_rando_door_transition.ips')
             self.applyPLMs(plms)
+            self.applyStartAP(startAP)
         except Exception as e:
             raise Exception("Error patching {}. ({})".format(self.romFileName, e))
 
@@ -799,6 +799,18 @@ class RomPatcher:
             # look for ips file
             patch = IPS_Patch.load(appDir + '/' + ipsDir + '/' + patchName)
         self.ipsPatches.append(patch)
+
+    def applyStartAP(self, apName):
+        from graph_access import getAccessPoint
+        ap = getAccessPoint(apName)
+        (w0, w1) = getWord(ap.Start)
+        patchDict = {
+            'StartAP': {
+                0x10F200: [w0, w1]
+            }
+        }
+        self.applyIPSPatch('StartAP', patchDict)
+        # TODO handle custom saves
 
     # adds ad-hoc "IPS patches" for additional PLM tables
     def applyPLMs(self, plms):

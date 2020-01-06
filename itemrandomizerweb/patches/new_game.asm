@@ -34,7 +34,8 @@ start_location:
 ;;; CODE in bank A1
 
 ;;; zero flag set if we're starting a new game
-    ;; TODO call this from credits_varia.asm, or move start hooks from credits to here
+;;; called from credits_varia as well
+print "check_new_game: ", pc
 check_new_game:
     ;; Make sure game mode is 1f
     lda $7e0998

@@ -53,7 +53,7 @@ patches = {
     "Phantoon_Eye_Door":{
         0x7CCAF: [0x91,0xC2]},
     "Escape_Rando_Enable_Enemies":{
-        0x10F000: [0x0]}
+        0x10F000: [0x0, 0x0]}
 }
 
 additional_PLMs = {

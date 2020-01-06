@@ -62,5 +62,12 @@ additional_PLMs = {
         'plm_bytes_list': [
             [0x48, 0xc8, 0x1, 0x6, 0x61, 0x90]
         ]
-    }
+    },
+    "WS_Save_Blinking_Door": { # works together with ws_save.ips
+        'room': 0xcaf6,
+        'state': 0xcb08,
+        'plm_bytes_list': [
+            [0x42, 0xC8, 0x4E, 0x36, 0x83, 0x0C]
+        ]
+    },
 }

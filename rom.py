@@ -748,6 +748,7 @@ class RomPatcher:
                 stdPatches.append('nerfed_charge.ips')
             if bosses == True or area == True:
                 stdPatches.append('ws_save.ips')
+                plms.append('WS_Save_Blinking_Door')
             if bosses == True:
                 stdPatches.append("Phantoon_Eye_Door")
 

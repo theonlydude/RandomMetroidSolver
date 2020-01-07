@@ -51,9 +51,22 @@ class HelpersGraph(Helpers):
 
     def canPassTerminatorBombWall(self, fromLandingSite=True):
         sm = self.smbm
-        return sm.wor(sm.wand(sm.haveItem('SpeedBooster'),
-                              sm.wor(SMBool(not fromLandingSite, 0), sm.knowsSimpleShortCharge(), sm.knowsShortCharge())),
-                      sm.canDestroyBombWalls())
+        return sm.wand(sm.wor(sm.wand(sm.haveItem('SpeedBooster'),
+                                      sm.wor(SMBool(not fromLandingSite, 0), sm.knowsSimpleShortCharge(), sm.knowsShortCharge())),
+                              sm.canDestroyBombWalls()),
+                       sm.canPassCrateriaGreenPirates())
+
+    # mostly for going up but let's be noob friendly and add the condition for both ways
+    @Cache.decorator
+    def canPassCrateriaGreenPirates(self):
+        sm = self.smbm
+        return sm.wor(sm.canPassBombPassages(),
+                      sm.canOpenRedDoors(),
+                      sm.energyReserveCountOk(1),
+                      sm.wor(sm.haveItem('Charge'),
+                             sm.haveItem('Ice'),
+                             sm.haveItem('Wave'),
+                             sm.haveItem('Spazer')))
 
     @Cache.decorator
     def canAccessBillyMays(self):

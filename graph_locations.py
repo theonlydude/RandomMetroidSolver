@@ -55,7 +55,7 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Terminator Room',
     'AccessFrom' : {
-        'Lower Mushrooms Left': lambda sm: SMBool(True)
+        'Lower Mushrooms Left': lambda sm: sm.canPassCrateriaGreenPirates()
     },
     'Available': lambda sm: SMBool(True)
 },

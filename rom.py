@@ -631,7 +631,8 @@ class RomPatcher:
                      'skip_intro.ips', 'skip_ceres.ips', 'animal_enemies.ips', 'animals.ips',
                      'draygonimals.ips', 'escapimals.ips', 'gameend.ips', 'grey_door_animals.ips',
                      'low_timer.ips', 'metalimals.ips', 'phantoonimals.ips', 'ridleyimals.ips'],
-        'Area': ['area_rando_blue_doors.ips', 'area_rando_layout.ips', 'area_rando_door_transition.ips','area_rando_escape.ips','area_rando_escape_ws_fix.ips' ]
+        'Area': ['area_rando_blue_doors.ips', 'area_rando_layout.ips', 'area_rando_door_transition.ips' ],
+        'AreaEscape' : ['area_rando_escape.ips', 'area_rando_escape_ws_fix.ips', 'Escape_Rando_Tourian_Doors']
     }
 
     def __init__(self, romFileName=None, magic=None, plando=False):
@@ -811,11 +812,10 @@ class RomPatcher:
                 if areaLayoutBase == True:
                     RomPatcher.IPSPatches['Area'].remove('area_rando_layout.ips')
                     RomPatcher.IPSPatches['Area'].append('area_rando_layout_base.ips')
-                if noEscapeRando == True:
-                    RomPatcher.IPSPatches['Area'].remove('area_rando_escape.ips')
-                    RomPatcher.IPSPatches['Area'].remove('area_rando_escape_ws_fix.ips')
-                elif noRemoveEscapeEnemies == True:
-                    RomPatcher.IPSPatches['Area'].append('Escape_Rando_Enable_Enemies')
+                if noEscapeRando == False:
+                    RomPatcher.IPSPatches['Area'] += RomPatcher.IPSPatches['AreaEscape']
+                    if noRemoveEscapeEnemies == True:
+                        RomPatcher.IPSPatches['Area'].append('Escape_Rando_Enable_Enemies')
                 for patchName in RomPatcher.IPSPatches['Area']:
                     self.applyIPSPatch(patchName)
             elif bosses == True:

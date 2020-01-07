@@ -53,5 +53,10 @@ patches = {
     "Phantoon_Eye_Door":{
         0x7CCAF: [0x91,0xC2]},
     "Escape_Rando_Enable_Enemies":{
-        0x10F000: [0x0]}
+        0x10F000: [0x0]},
+    "Escape_Rando_Disable_Enemies":{
+        0x10F000: [0x1]},
+    "Escape_Rando_Tourian_Doors":{
+        0x7C836: [0x0C],
+        0x7C828: [0x0C]},
 }

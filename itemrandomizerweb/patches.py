@@ -70,4 +70,12 @@ additional_PLMs = {
             [0x42, 0xC8, 0x4E, 0x36, 0x83, 0x0C]
         ]
     },
+    "Morph_Zebes_Awake": {
+        'room': 0x9e9f,
+        'state': 0x9ecb,
+        'plm_bytes_list': [
+            [0xff, 0xff, 0x45, 0x29, 0x1A, 0x00]
+        ],
+        'locations': [("Morphing Ball", 0)]
+    }
 }

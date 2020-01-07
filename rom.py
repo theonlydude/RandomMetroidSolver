@@ -604,7 +604,11 @@ class RomPatcher:
         if magic is not None:
             from race_mode import RaceModePatcher
             self.race = RaceModePatcher(self, magic, plando)
-        self.ipsPatches = [] # IPS_Patch objects list
+        # IPS_Patch objects list
+        self.ipsPatches = []
+        # loc name to alternate address. we still write to original
+        # address to help the RomReader.
+        self.altLocsAddresses = {}
 
     def end(self):
         self.romFile.close()
@@ -620,27 +624,36 @@ class RomPatcher:
         else:
             self.race.writeItemCode(address, itemCode)
 
+    def getLocAddresses(self, loc):
+        ret = [loc['Address']]
+        if loc['Name'] in self.altLocsAddresses:
+            ret.append(self.altLocsAddresses[loc['Name']])
+        return ret
+
     def writeNothing(self, itemLoc):
         loc = itemLoc['Location']
         if 'Boss' in loc['Class']:
             return
-        # missile
-        self.writeItemCode({'Code': 0xeedb}, loc['Visibility'], loc['Address'])
-        self.romFile.seek(loc['Address'] + 4)
-        # morph ball slot. all Nothing at non-Morph loc will disappear
-        # when morph loc item is collected
-        self.romFile.write(struct.pack('B', 0x1a))
+        for addr in self.getLocAddresses(loc):
+            # missile
+            self.writeItemCode({'Code': 0xeedb}, loc['Visibility'], addr)
+            self.romFile.seek(addr + 4)
+            # morph ball slot. all Nothing at non-Morph loc will disappear
+            # when morph loc item is collected
+            # FIXME choose another slot when morph is not first item
+            self.romFile.write(struct.pack('B', 0x1a))
 
     def writeItem(self, itemLoc):
         loc = itemLoc['Location']
         if 'Boss' in loc['Class']:
             raise ValueError('Cannot write Boss location')
         #print('write ' + itemLoc['Item']['Type'] + ' at ' + loc['Name'])
-        self.writeItemCode(itemLoc['Item'], loc['Visibility'], loc['Address'])
-
-        self.romFile.seek(loc['Address'] + 4)
-        # if nothing was written at this loc before (in plando), then restore the vanilla value
-        self.romFile.write(struct.pack('B', loc['Id']))
+        for addr in self.getLocAddresses(loc):
+            self.writeItemCode(itemLoc['Item'], loc['Visibility'], addr)
+            # if nothing was written at this loc before (in plando),
+            # then restore the vanilla value
+            self.romFile.seek(addr + 4)
+            self.romFile.write(struct.pack('B', loc['Id']))
 
     def writeItemsLocs(self, itemLocs):
         self.nItems = 0
@@ -785,8 +798,8 @@ class RomPatcher:
                     self.applyIPSPatch(patchName)
             elif bosses == True:
                 self.applyIPSPatch('area_rando_door_transition.ips')
+            self.applyStartAP(startAP, plms)
             self.applyPLMs(plms)
-            self.applyStartAP(startAP)
         except Exception as e:
             raise Exception("Error patching {}. ({})".format(self.romFileName, e))
 
@@ -801,9 +814,12 @@ class RomPatcher:
             patch = IPS_Patch.load(appDir + '/' + ipsDir + '/' + patchName)
         self.ipsPatches.append(patch)
 
-    def applyStartAP(self, apName):
+    def applyStartAP(self, apName, plms=None):
         from graph_access import getAccessPoint
         ap = getAccessPoint(apName)
+        if plms is not None and ap.Start > 1:
+            # not Ceres or Landing Site, so Zebes will be awake
+            plms.append('Morph_Zebes_Awake')
         (w0, w1) = getWord(ap.Start)
         patchDict = {
             'StartAP': {
@@ -818,6 +834,9 @@ class RomPatcher:
         # compose a dict (room, state, door) => PLM array
         # 'PLMs' being a 6 byte arrays
         plmDict = {}
+        # we might need to update locations addresses on the fly
+        import graph_locations
+        plmLocs = {} # room key above => loc name
         for p in plms:
             plm = additional_PLMs[p]
             room = plm['room']
@@ -831,6 +850,10 @@ class RomPatcher:
             if k not in plmDict:
                 plmDict[k] = []
             plmDict[k] += plm['plm_bytes_list']
+            if 'locations' in plm:
+                locList = plm['locations']
+                for locName, locIndex in locList:
+                    plmLocs[(k, locIndex)] = locName
         # make two patches out of this dict
         # use instances vars because of terrible python scoping
         self.plmTblAddr = 0x7E9A0 # moves downwards
@@ -847,8 +870,11 @@ class RomPatcher:
         for roomKey, plmList in plmDict.items():
             entryAddr = self.plmTblOffset
             roomData = []
-            for plmBytes in plmList:
+            for i in range(len(plmList)):
+                plmBytes = plmList[i]
                 assert len(plmBytes) == 6, "Invalid PLM entry for roomKey " + str(roomKey) + ": PLM list len is " + str(len(plmBytes))
+                if (roomKey, i) in plmLocs:
+                    self.altLocsAddresses[plmLocs[(roomKey, i)]] = self.plmTblOffset
                 appendPlmBytes(plmBytes)
             appendPlmBytes([0x0, 0x0]) # list terminator
             def appendRoomWord(w, data):

@@ -495,7 +495,7 @@ locations = [
     'AccessFrom' : {
         'Firefleas': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: SMBool(True),
+    'Available': lambda sm: sm.wor(sm.canOpenGreenDoors(), sm.canPassBombPassages(), sm.canUseSpringBall()), # get past the fune
     # avoid doing the super annoying wall jump in the dark...
     'PostAvailable': lambda sm: sm.wor(sm.haveItem('Ice'),
                                        sm.haveItem('HiJump'),

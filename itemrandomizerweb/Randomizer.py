@@ -15,6 +15,7 @@ import log, logging
 progSpeeds = ['slowest', 'slow', 'medium', 'fast', 'fastest', 'basic']
 
 class RandoSettings(object):
+    # startAP : start Access Point name
     # maxDiff : max diff
     # progSpeed : slowest, slow, medium, fast, fastest, basic
     # progDiff : easier, normal, harder
@@ -38,7 +39,9 @@ class RandoSettings(object):
     # runtimeLimit_s : maximum runtime limit in seconds for generateItems functions. If <= 0, will be unlimited.
     # vcr: to generate debug .vcr output file
     # plandoRando: list of already set (locationName, itemType) by the plando
-    def __init__(self, maxDiff, progSpeed, progDiff, qty, restrictions, superFun, runtimeLimit_s, vcr, plandoRando):
+    def __init__(self, startAP, maxDiff, progSpeed, progDiff, qty, restrictions,
+                 superFun, runtimeLimit_s, vcr, plandoRando):
+        self.startAP = startAP
         self.progSpeed = progSpeed
         self.progDiff = progDiff
         self.maxDiff = maxDiff
@@ -682,7 +685,7 @@ class Randomizer(object):
         # start at landing site
         self.curAccessPoint = None
         self.curLocs = None
-        self.setCurAccessPoint('Bubble Mountain')
+        self.setCurAccessPoint(settings.startAP)
         # states saved at each item collection
         self.states = []
         # indices in states list that mark a progression item collection

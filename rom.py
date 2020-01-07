@@ -3,7 +3,7 @@ import re, struct, sys, os, json, copy, base64, random
 
 from smbool import SMBool
 from itemrandomizerweb.Items import ItemManager
-from itemrandomizerweb.patches import patches
+from itemrandomizerweb.patches import patches, additional_PLMs
 from itemrandomizerweb.stdlib import List
 from compression import Compressor
 from ips import IPS_Patch
@@ -16,8 +16,11 @@ def readWord(romFile):
     word = (r1 << 8) + r0
     return word
 
+def getWord(w):
+    return (w & 0x00FF, (w & 0xFF00) >> 8)
+
 def writeWord(romFile, w):
-    (w0, w1) = (w & 0x00FF, (w & 0xFF00) >> 8)
+    (w0, w1) = getWord(w)
     romFile.write(struct.pack('B', w0))
     romFile.write(struct.pack('B', w1))
 
@@ -515,8 +518,6 @@ class RomReader:
 
 class RomPatcher:
     # standard:
-    # Intro/Ceres Skip and initial door flag setup
-    #   introskip_doorflags.ips
     # Instantly open G4 passage when all bosses are killed
     #   g4_skip.ips
     # Wake up zebes when going right from morph
@@ -571,8 +572,9 @@ class RomPatcher:
     # Replace bomb blocks with shot blocks before Spazer
     #   spazer.ips
     IPSPatches = {
-        'Standard': ['credits_varia.ips', 'g4_skip.ips',
-                     'seed_display.ips', 'tracking.ips', 'wake_zebes.ips',
+        'Standard': ['new_game.ips', 'plm_spawn.ips',
+                     'credits_varia.ips', 'seed_display.ips', 'tracking.ips',
+                     'wake_zebes.ips', 'g4_skip.ips', # XXX those are door ASMs
                      'Mother_Brain_Cutscene_Edits',
                      'Suit_acquisition_animation_skip', 'Fix_Morph_and_Missiles_Room_State',
                      'Fix_heat_damage_speed_echoes_bug', 'Disable_GT_Code',
@@ -602,7 +604,11 @@ class RomPatcher:
         if magic is not None:
             from race_mode import RaceModePatcher
             self.race = RaceModePatcher(self, magic, plando)
-        self.ipsPatches = [] # IPS_Patch objects list
+        # IPS_Patch objects list
+        self.ipsPatches = []
+        # loc name to alternate address. we still write to original
+        # address to help the RomReader.
+        self.altLocsAddresses = {}
 
     def end(self):
         self.romFile.close()
@@ -618,27 +624,36 @@ class RomPatcher:
         else:
             self.race.writeItemCode(address, itemCode)
 
+    def getLocAddresses(self, loc):
+        ret = [loc['Address']]
+        if loc['Name'] in self.altLocsAddresses:
+            ret.append(self.altLocsAddresses[loc['Name']])
+        return ret
+
     def writeNothing(self, itemLoc):
         loc = itemLoc['Location']
         if 'Boss' in loc['Class']:
             return
-        # missile
-        self.writeItemCode({'Code': 0xeedb}, loc['Visibility'], loc['Address'])
-        self.romFile.seek(loc['Address'] + 4)
-        # morph ball slot. all Nothing at non-Morph loc will disappear
-        # when morph loc item is collected
-        self.romFile.write(struct.pack('B', 0x1a))
+        for addr in self.getLocAddresses(loc):
+            # missile
+            self.writeItemCode({'Code': 0xeedb}, loc['Visibility'], addr)
+            self.romFile.seek(addr + 4)
+            # morph ball slot. all Nothing at non-Morph loc will disappear
+            # when morph loc item is collected
+            # FIXME choose another slot when morph is not first item
+            self.romFile.write(struct.pack('B', 0x1a))
 
     def writeItem(self, itemLoc):
         loc = itemLoc['Location']
         if 'Boss' in loc['Class']:
             raise ValueError('Cannot write Boss location')
         #print('write ' + itemLoc['Item']['Type'] + ' at ' + loc['Name'])
-        self.writeItemCode(itemLoc['Item'], loc['Visibility'], loc['Address'])
-
-        self.romFile.seek(loc['Address'] + 4)
-        # if nothing was written at this loc before (in plando), then restore the vanilla value
-        self.romFile.write(struct.pack('B', loc['Id']))
+        for addr in self.getLocAddresses(loc):
+            self.writeItemCode(itemLoc['Item'], loc['Visibility'], addr)
+            # if nothing was written at this loc before (in plando),
+            # then restore the vanilla value
+            self.romFile.seek(addr + 4)
+            self.romFile.write(struct.pack('B', loc['Id']))
 
     def writeItemsLocs(self, itemLocs):
         self.nItems = 0
@@ -723,13 +738,15 @@ class RomPatcher:
     def customSprite(self, sprite):
         self.applyIPSPatch(sprite, ipsDir='itemrandomizerweb/patches/sprites')
 
-    def applyIPSPatches(self, optionalPatches=[], noLayout=False, suitsMode="Classic",
+    def applyIPSPatches(self, startAP="Landing Site",
+                        optionalPatches=[], noLayout=False, suitsMode="Classic",
                         area=False, bosses=False, areaLayoutBase=False,
                         noVariaTweaks=False, nerfedCharge=False,
                         noEscapeRando=False, noRemoveEscapeEnemies=False):
         try:
             # apply standard patches
             stdPatches = []
+            plms = []
             # apply race mode first because it fills the rom with a bunch of crap
             if self.race is not None:
                 stdPatches.append('race_mode.ips')
@@ -744,7 +761,8 @@ class RomPatcher:
                 stdPatches.append('nerfed_charge.ips')
             if bosses == True or area == True:
                 stdPatches.append('ws_save.ips')
-            if bosses == True and (area == False or noEscapeRando == True):
+                plms.append('WS_Save_Blinking_Door')
+            if bosses == True:
                 stdPatches.append("Phantoon_Eye_Door")
 
             for patchName in stdPatches:
@@ -772,12 +790,16 @@ class RomPatcher:
                 if noEscapeRando == True:
                     RomPatcher.IPSPatches['Area'].remove('area_rando_escape.ips')
                     RomPatcher.IPSPatches['Area'].remove('area_rando_escape_ws_fix.ips')
-                elif noRemoveEscapeEnemies == True:
-                    RomPatcher.IPSPatches['Area'].append('Escape_Rando_Enable_Enemies')
+                else:
+                    if noRemoveEscapeEnemies == True:
+                        RomPatcher.IPSPatches['Area'].append('Escape_Rando_Enable_Enemies')
+                    plms.append("WS_Map_Grey_Door")
                 for patchName in RomPatcher.IPSPatches['Area']:
                     self.applyIPSPatch(patchName)
             elif bosses == True:
                 self.applyIPSPatch('area_rando_door_transition.ips')
+            self.applyStartAP(startAP, plms)
+            self.applyPLMs(plms)
         except Exception as e:
             raise Exception("Error patching {}. ({})".format(self.romFileName, e))
 
@@ -791,6 +813,87 @@ class RomPatcher:
             # look for ips file
             patch = IPS_Patch.load(appDir + '/' + ipsDir + '/' + patchName)
         self.ipsPatches.append(patch)
+
+    def applyStartAP(self, apName, plms=None):
+        from graph_access import getAccessPoint
+        ap = getAccessPoint(apName)
+        if plms is not None and ap.Start > 1:
+            # not Ceres or Landing Site, so Zebes will be awake
+            plms.append('Morph_Zebes_Awake')
+        (w0, w1) = getWord(ap.Start)
+        patchDict = {
+            'StartAP': {
+                0x10F200: [w0, w1]
+            }
+        }
+        self.applyIPSPatch('StartAP', patchDict)
+        # TODO handle custom saves
+
+    # adds ad-hoc "IPS patches" for additional PLM tables
+    def applyPLMs(self, plms):
+        # compose a dict (room, state, door) => PLM array
+        # 'PLMs' being a 6 byte arrays
+        plmDict = {}
+        # we might need to update locations addresses on the fly
+        import graph_locations
+        plmLocs = {} # room key above => loc name
+        for p in plms:
+            plm = additional_PLMs[p]
+            room = plm['room']
+            state = 0
+            if 'state' in plm:
+                state = plm['state']
+            door = 0
+            if 'door' in plm:
+                door = plm['door']
+            k = (room, state, door)
+            if k not in plmDict:
+                plmDict[k] = []
+            plmDict[k] += plm['plm_bytes_list']
+            if 'locations' in plm:
+                locList = plm['locations']
+                for locName, locIndex in locList:
+                    plmLocs[(k, locIndex)] = locName
+        # make two patches out of this dict
+        # use instances vars because of terrible python scoping
+        self.plmTblAddr = 0x7E9A0 # moves downwards
+        self.plmPatchData = []
+        self.roomTblAddr = 0x7EC00 # moves upwards
+        self.roomPatchData = []
+        self.plmTblOffset = self.plmTblAddr
+        def appendPlmBytes(bytez):
+            self.plmPatchData += bytez
+            self.plmTblOffset += len(bytez)
+        def addRoomPatchData(bytez):
+            self.roomPatchData = bytez + self.roomPatchData
+            self.roomTblAddr -= len(bytez)
+        for roomKey, plmList in plmDict.items():
+            entryAddr = self.plmTblOffset
+            roomData = []
+            for i in range(len(plmList)):
+                plmBytes = plmList[i]
+                assert len(plmBytes) == 6, "Invalid PLM entry for roomKey " + str(roomKey) + ": PLM list len is " + str(len(plmBytes))
+                if (roomKey, i) in plmLocs:
+                    self.altLocsAddresses[plmLocs[(roomKey, i)]] = self.plmTblOffset
+                appendPlmBytes(plmBytes)
+            appendPlmBytes([0x0, 0x0]) # list terminator
+            def appendRoomWord(w, data):
+                (w0, w1) = getWord(w)
+                data += [w0, w1]
+            for i in range(3):
+                appendRoomWord(roomKey[i], roomData)
+            appendRoomWord(entryAddr, roomData)
+            addRoomPatchData(roomData)
+        # write room table terminator
+        addRoomPatchData([0x0] * 8)
+        assert self.plmTblOffset < self.roomTblAddr, "Spawn PLM table overlap"
+        patchDict = {
+            "PLM_Spawn_Tables" : {
+                self.plmTblAddr: self.plmPatchData,
+                self.roomTblAddr: self.roomPatchData
+            }
+        }
+        self.applyIPSPatch("PLM_Spawn_Tables", patchDict)
 
     def commitIPS(self):
         if self.romFileName is not None:
@@ -1139,7 +1242,7 @@ class RomPatcher:
     #   property shall point to this custom ASM.
     # * if not, just write doorAsmPtr as the door property directly.
     def writeDoorConnections(self, doorConnections):
-        asmAddress = 0x7EB00
+        asmAddress = 0x7F800
         for conn in doorConnections:
             # write door ASM for transition doors (code and pointers)
 #            print('Writing door connection ' + conn['ID'])
@@ -1191,14 +1294,14 @@ class RomPatcher:
                 (Y0, Y1) = (conn['SamusY'] & 0x00FF, (conn['SamusY'] & 0xFF00) >> 8)
                 # force samus position
                 # see area_rando_door_transition.asm. assemble it to print routines SNES addresses.
-                asmPatch += [ 0x20, 0x30, 0xEA ]    # JSR incompatible_doors
+                asmPatch += [ 0x20, 0x00, 0xF6 ]    # JSR incompatible_doors
                 asmPatch += [ 0xA9, X0,   X1   ]    # LDA #$SamusX        ; fixed Samus X position
                 asmPatch += [ 0x8D, 0xF6, 0x0A ]    # STA $0AF6           ; update Samus X position in memory
                 asmPatch += [ 0xA9, Y0,   Y1   ]    # LDA #$SamusY        ; fixed Samus Y position
                 asmPatch += [ 0x8D, 0xFA, 0x0A ]    # STA $0AFA           ; update Samus Y position in memory
             else:
                 # still give I-frames
-                asmPatch += [ 0x20, 0x70, 0xEA ]    # JSR giveiframes
+                asmPatch += [ 0x20, 0x40, 0xF6 ]    # JSR giveiframes
             # return
             asmPatch += [ 0x60 ]   # RTS
             self.romFile.write(struct.pack('B', asmAddress & 0x00FF))

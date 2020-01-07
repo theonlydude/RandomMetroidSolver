@@ -53,5 +53,29 @@ patches = {
     "Phantoon_Eye_Door":{
         0x7CCAF: [0x91,0xC2]},
     "Escape_Rando_Enable_Enemies":{
-        0x10F000: [0x0]}
+        0x10F000: [0x0, 0x0]}
+}
+
+additional_PLMs = {
+    "WS_Map_Grey_Door": {
+        'room': 0Xcc6f,
+        'plm_bytes_list': [
+            [0x48, 0xc8, 0x1, 0x6, 0x61, 0x90]
+        ]
+    },
+    "WS_Save_Blinking_Door": { # works together with ws_save.ips
+        'room': 0xcaf6,
+        'state': 0xcb08,
+        'plm_bytes_list': [
+            [0x42, 0xC8, 0x4E, 0x36, 0x83, 0x0C]
+        ]
+    },
+    "Morph_Zebes_Awake": {
+        'room': 0x9e9f,
+        'state': 0x9ecb,
+        'plm_bytes_list': [
+            [0xff, 0xff, 0x45, 0x29, 0x1A, 0x00]
+        ],
+        'locations': [("Morphing Ball", 0)]
+    }
 }

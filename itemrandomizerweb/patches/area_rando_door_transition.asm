@@ -1,6 +1,8 @@
 ;;; This patch handles area rando door transitions:
 ;;; - for incompatible transitions, cancel samus movement
-;;; - changes song if needed
+;;; - for all transitions, give I-frames
+;;; - refill at Tourian elevator
+;;; 
 ;;; compile with asar (https://www.smwcentral.net/?a=details&id=14560&p=section),
 ;;; or a variant of xkas that supports arch directive
 
@@ -50,7 +52,7 @@ shinespark_end:
 	stz !spark_flag
 	rts
 
-org $8fea30
+org $8ff600
 print "incompatible_doors:"
 print pc
 ;;; routine called from door ASM when connecting two incompatible doors
@@ -113,7 +115,7 @@ full_refill:
 	rts
 
 ;;; stop before generated door asm routines start
-warnpc $8feaff
+warnpc $8ff7ff
 
 org $83922c                     ; Tourian Elevator door ASM ptr
     dw full_refill

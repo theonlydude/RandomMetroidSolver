@@ -8,12 +8,16 @@ from helpers import Bosses
 
 # all access points and traverse functions
 accessPoints = [
+    ### Ceres Station
+    AccessPoint('Ceres', 'Ceres', {
+        'Landing Site': lambda sm: SMBool(True)
+    }, internal=True, start=0x0001),
     ### Crateria and Blue Brinstar
     AccessPoint('Landing Site', 'Crateria', {
         'Lower Mushrooms Left': lambda sm: sm.canPassTerminatorBombWall(),
         'Keyhunter Room Bottom': lambda sm: sm.canOpenGreenDoors(),
         'Blue Brinstar Elevator Bottom': lambda sm: SMBool(True)
-    }, internal=True),
+    }, internal=True, start=0x0000),
     AccessPoint('Blue Brinstar Elevator Bottom', 'Crateria', {
         'Morph Ball Room Left': lambda sm: sm.canUsePowerBombs(),
         'Landing Site': lambda sm: SMBool(True)
@@ -82,7 +86,7 @@ accessPoints = [
                                                         sm.canOpenGreenDoors()),
         'Green Brinstar Elevator Right': lambda sm: sm.wor(sm.haveItem('SpeedBooster'),
                                                            sm.canDestroyBombWalls())
-    }, internal=True),
+    }, internal=True, start=0x0100),
     AccessPoint('Green Hill Zone Top Right', 'GreenPinkBrinstar', {
         'Noob Bridge Right': lambda sm: SMBool(True),
         'Big Pink': lambda sm: sm.haveItem('Morph')
@@ -614,6 +618,9 @@ escapeTargets = ['Climb Bottom Left', 'Green Brinstar Main Shaft Top Left', 'Bas
 
 def getAccessPoint(apName):
     return next(ap for ap in accessPoints if ap.Name == apName)
+
+def getStartAccessPointNames():
+    return [ap.Name for ap in accessPoints if ap.Start is not None]
 
 def createBossesTransitions():
     transitions = vanillaBossesTransitions

@@ -6,7 +6,7 @@ from itemrandomizerweb.Randomizer import Randomizer, RandoSettings, progSpeeds
 from itemrandomizerweb.AreaRandomizer import AreaRandomizer
 from itemrandomizerweb.PaletteRando import PaletteRando
 from graph_locations import locations as graphLocations
-from graph_access import vanillaTransitions, getDoorConnections, vanillaBossesTransitions, createBossesTransitions
+from graph_access import vanillaTransitions, getDoorConnections, vanillaBossesTransitions, createBossesTransitions, getStartAccessPointNames
 from parameters import Knows, easy, medium, hard, harder, hardcore, mania, text2diff, diff2text
 from utils import PresetLoader
 from rom import RomPatcher, RomPatches, FakeROM
@@ -84,6 +84,9 @@ if __name__ == "__main__":
                         dest='noRemoveEscapeEnemies', default=False)
     parser.add_argument('--bosses', help="randomize bosses",
                         dest='bosses', nargs='?', const=True, default=False)
+    parser.add_argument('--startAP', help="Name of the Access Point to start from",
+                        dest='startAP', nargs='?', default="Landing Site",
+                        choices=getStartAccessPointNames())
     parser.add_argument('--debug', '-d', help="activate debug logging", dest='debug',
                         action='store_true')
     parser.add_argument('--maxDifficulty', '-t',
@@ -105,8 +108,7 @@ if __name__ == "__main__":
                         help="optional patches to add",
                         dest='patches', nargs='?', default=[], action='append',
                         choices=['itemsounds.ips', 'elevators_doors_speed.ips',
-                                 'spinjumprestart.ips', 'rando_speed.ips',
-                                 'skip_intro.ips', 'skip_ceres.ips', 'No_Music'])
+                                 'spinjumprestart.ips', 'rando_speed.ips', 'No_Music'])
     parser.add_argument('--missileQty', '-m',
                         help="quantity of missiles",
                         dest='missileQty', nargs='?', default=3,
@@ -389,10 +391,6 @@ if __name__ == "__main__":
     seedName = fileName
     if args.directory != '.':
         fileName = args.directory + '/' + fileName
-    # check that one skip patch is set
-    if 'skip_intro.ips' not in args.patches and 'skip_ceres.ips' not in args.patches and args.patchOnly == False:
-        args.patches.append('skip_ceres.ips')
-
     if args.noLayout == True:
         RomPatches.ActivePatches = RomPatches.TotalBase
     else:
@@ -459,7 +457,11 @@ if __name__ == "__main__":
         args.plandoRando = json.loads(args.plandoRando)
         loadPlandoPatches(args.plandoRando["patches"])
 
-    randoSettings = RandoSettings(maxDifficulty, progSpeed, progDiff, qty, restrictions, args.superFun, args.runtimeLimit_s, args.vcr, args.plandoRando["locsItems"] if args.plandoRando != None else None)
+    randoSettings = RandoSettings(args.startAP,
+                                  maxDifficulty, progSpeed, progDiff, qty,
+                                  restrictions, args.superFun, args.runtimeLimit_s,
+                                  args.vcr,
+                                  args.plandoRando["locsItems"] if args.plandoRando != None else None)
     bossTransitions = vanillaBossesTransitions
     if args.bosses == True:
         bossTransitions = createBossesTransitions()
@@ -587,7 +589,8 @@ if __name__ == "__main__":
                 suitsMode = "Progressive"
             elif args.noGravHeat:
                 suitsMode = "Vanilla"
-            romPatcher.applyIPSPatches(args.patches, args.noLayout, suitsMode,
+            romPatcher.applyIPSPatches(args.startAP, args.patches,
+                                       args.noLayout, suitsMode,
                                        args.area, args.bosses, args.areaLayoutBase,
                                        args.noVariaTweaks, args.nerfedCharge,
                                        args.noEscapeRando, args.noRemoveEscapeEnemies)

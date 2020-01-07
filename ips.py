@@ -212,6 +212,11 @@ class IPS_Patch(object):
 
         return encoded_bytes
 
+    # save patch into IPS file
+    def save(self, path):
+        with open(path, 'wb') as ipsFile:
+            ipsFile.write(self.encode())
+
     # applies patch on an existing bytearray
     def apply(self, in_data):
         out_data = bytearray(in_data)

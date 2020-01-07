@@ -75,7 +75,8 @@ class AccessGraph(object):
     def toDot(self, dotFile):
         colors = ['red', 'blue', 'green', 'yellow', 'skyblue', 'violet', 'orange',
                   'lawngreen', 'crimson', 'chocolate', 'turquoise', 'tomato',
-                  'navyblue', 'darkturquoise', 'green', 'blue', 'maroon', 'magenta']
+                  'navyblue', 'darkturquoise', 'green', 'blue', 'maroon', 'magenta',
+                  'bisque', 'coral', 'chartreuse', 'chocolate', 'cyan']
         with open(dotFile, "w") as f:
             f.write("digraph {\n")
             f.write('size="30,30!";\n')

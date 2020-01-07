@@ -15,7 +15,7 @@ from rom import RomLoader, RomPatcher, RomReader
 from itemrandomizerweb.Items import ItemManager
 from graph_locations import locations as graphLocations
 from graph import AccessGraph
-from graph_access import vanillaTransitions, accessPoints, getDoorConnections, getTransitions, vanillaBossesTransitions, getAps2DoorsPtrs
+from graph_access import vanillaTransitions, accessPoints, getDoorConnections, getTransitions, vanillaBossesTransitions, getAps2DoorsPtrs, vanillaEscapeTransitions
 from utils import PresetLoader, removeChars
 from vcr import VCR
 import log, db
@@ -45,6 +45,8 @@ class SolverState(object):
         self.state["areaRando"] = solver.areaRando
         # bool
         self.state["bossRando"] = solver.bossRando
+        # bool
+        self.state["escapeRando"] = solver.escapeRando
         # dict of raw patches
         self.state["patches"] = solver.patches
         # dict {locName: {itemName: "xxx", "accessPoint": "xxx"}, ...}
@@ -100,6 +102,7 @@ class SolverState(object):
                 solver.majorsSplit = 'Major'
         solver.areaRando = self.state["areaRando"]
         solver.bossRando = self.state["bossRando"]
+        solver.escapeRando = self.state["escapeRando"]
         solver.patches = self.setPatches(self.state["patches"])
         self.setLocsData(solver.locations)
         solver.areaTransitions = self.state["areaTransitions"]
@@ -290,27 +293,32 @@ class CommonSolver(object):
             self.majorsSplit = 'Full'
             self.areaRando = True
             self.bossRando = True
+            self.escapeRando = False
             self.patches = RomReader.getDefaultPatches()
             RomLoader.factory(self.patches).loadPatches()
             # in seedless load all the vanilla transitions
             self.areaTransitions = vanillaTransitions[:]
             self.bossTransitions = vanillaBossesTransitions[:]
-            self.curGraphTransitions = self.bossTransitions + self.areaTransitions
+            self.escapeTransition = [vanillaEscapeTransitions[0]]
+            self.curGraphTransitions = self.bossTransitions + self.areaTransitions + self.escapeTransition
             for loc in self.locations:
                 loc['itemName'] = 'Nothing'
         else:
             self.romFileName = rom
             self.romLoader = RomLoader.factory(rom, magic)
             self.majorsSplit = self.romLoader.assignItems(self.locations)
-            (self.areaRando, self.bossRando) = self.romLoader.loadPatches()
+            (self.areaRando, self.bossRando, self.escapeRando) = self.romLoader.loadPatches()
 
             if interactive == False:
                 self.patches = self.romLoader.getPatches()
             else:
                 self.patches = self.romLoader.getRawPatches()
-            print("ROM {} majors: {} area: {} boss: {} patches: {}".format(rom, self.majorsSplit, self.areaRando, self.bossRando, sorted(self.patches)))
+            print("ROM {} majors: {} area: {} boss: {} escape: {} patches: {}".format(rom, self.majorsSplit, self.areaRando, self.bossRando, self.escapeRando, sorted(self.patches)))
 
-            (self.areaTransitions, self.bossTransitions) = self.romLoader.getTransitions()
+            (self.areaTransitions, self.bossTransitions, self.escapeTransition) = self.romLoader.getTransitions()
+            print("areaTrans: {}".format(self.areaTransitions))
+            print("bossTrans: {}".format(self.bossTransitions))
+            print("escapeTrans: {}".format(self.escapeTransition))
             if interactive == True and self.debug == False:
                 # in interactive area mode we build the graph as we play along
                 if self.areaRando == True and self.bossRando == True:
@@ -321,8 +329,10 @@ class CommonSolver(object):
                     self.curGraphTransitions = self.areaTransitions[:]
                 else:
                     self.curGraphTransitions = self.bossTransitions + self.areaTransitions
+                if self.escapeRando == False:
+                    self.curGraphTransitions += self.escapeTransition
             else:
-                self.curGraphTransitions = self.bossTransitions + self.areaTransitions
+                self.curGraphTransitions = self.bossTransitions + self.areaTransitions + self.escapeTransition
 
         self.areaGraph = AccessGraph(accessPoints, self.curGraphTransitions)
 
@@ -847,7 +857,7 @@ class InteractiveSolver(CommonSolver):
 
     def initTransitionsName(self):
         web2Internal = {}
-        for (startPoint, endPoint) in vanillaTransitions + vanillaBossesTransitions:
+        for (startPoint, endPoint) in vanillaTransitions + vanillaBossesTransitions + vanillaEscapeTransitions:
             for point in [startPoint, endPoint]:
                 web2Internal[self.apNameInternal2Web(point)] = point
         return web2Internal
@@ -882,7 +892,7 @@ class InteractiveSolver(CommonSolver):
         if self.mode == 'plando' and self.debug == False:
             if fill == True:
                 # load the source seed transitions and items/locations
-                self.curGraphTransitions = self.bossTransitions + self.areaTransitions
+                self.curGraphTransitions = self.bossTransitions + self.areaTransitions + self.escapeTransition
                 self.areaGraph = AccessGraph(accessPoints, self.curGraphTransitions)
                 self.fillPlandoLocs()
             else:

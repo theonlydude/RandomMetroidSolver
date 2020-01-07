@@ -178,7 +178,8 @@ class RomReader:
         'nerfedCharge': {'address':0x83821, 'value': 0x80, 'desc': "Nerfed charge beam from the start of the game"}, # this value works for both DASH and VARIA variants
         'variaTweaks': {'address': 0x7CC4D, 'value': 0x37, 'desc': "VARIA tweaks"},
         'area': {'address': 0x22D564, 'value': 0xF2, 'desc': "Area layout modifications"},
-        'areaLayout': {'address': 0x252FA7, 'value': 0xF8, 'desc': "Area layout additional modifications"}
+        'areaLayout': {'address': 0x252FA7, 'value': 0xF8, 'desc': "Area layout additional modifications"},
+        'areaEscape': {'address': 0x20c91, 'value': 0x4C, 'desc': "Area escape randomization"}
     }
 
     allPatches = {
@@ -401,15 +402,17 @@ class RomReader:
 
     def loadTransitions(self):
         # return the transitions
-        from graph_access import accessPoints, getRooms
+        from graph_access import accessPoints, getRooms, getAccessPoint
+
         rooms = getRooms()
         bossTransitions = {}
         areaTransitions = {}
         for accessPoint in accessPoints:
             if accessPoint.isInternal() == True:
                 continue
-            (destRoomPtr, destEntryScreen) = self.getTransition(accessPoint.ExitInfo['DoorPtr'])
-            destAP = rooms[(destRoomPtr, destEntryScreen)]
+            key = self.getTransition(accessPoint.ExitInfo['DoorPtr'])
+
+            destAP = rooms[key]
             if accessPoint.Boss == True or destAP.Boss == True:
                 bossTransitions[accessPoint.Name] = destAP.Name
             else:
@@ -428,7 +431,13 @@ class RomReader:
 
             return [(t, transitions[t]) for t in transitions]
 
-        return (removeBiTrans(areaTransitions), removeBiTrans(bossTransitions))
+        # get escape transition
+        escapeSrcAP = getAccessPoint('Tourian Escape Room 4 Top Right')
+        key = self.getTransition(escapeSrcAP.ExitInfo['DoorPtr'])
+        escapeDstAP = rooms[key]
+        escapeTransition = [(escapeSrcAP.Name, escapeDstAP.Name)]
+
+        return (removeBiTrans(areaTransitions), removeBiTrans(bossTransitions), escapeTransition)
 
     def getTransition(self, doorPtr):
         self.romFile.seek(0x10000 | doorPtr)
@@ -436,12 +445,45 @@ class RomReader:
         # room ptr is in two bytes
         v1 = struct.unpack("B", self.romFile.read(1))[0]
         v2 = struct.unpack("B", self.romFile.read(1))[0]
+        roomPtr = v1 | (v2 << 8)
+
+        self.romFile.seek((0x10000 | doorPtr) + 3)
+        direction = struct.unpack("B", self.romFile.read(1))[0]
 
         self.romFile.seek((0x10000 | doorPtr) + 6)
         sx = struct.unpack("B", self.romFile.read(1))[0]
         sy = struct.unpack("B", self.romFile.read(1))[0]
 
-        return (v1 | (v2 << 8), (sx, sy))
+        d1 = struct.unpack("B", self.romFile.read(1))[0]
+        d2 = struct.unpack("B", self.romFile.read(1))[0]
+        distanceToSpawn = d1 | (d2 << 8)
+
+        if distanceToSpawn == 0:
+            # incompatible transition use samus X/Y instead of direction
+            # as incompatible transition change the value of direction
+            asm1 = struct.unpack("B", self.romFile.read(1))[0]
+            asm2 = struct.unpack("B", self.romFile.read(1))[0]
+            asmAddress = 0x70000 | asm1 | (asm2 << 8)
+
+            self.romFile.seek(asmAddress+3)
+            b = struct.unpack("B", self.romFile.read(1))[0]
+            offset = 0
+            if b == 0x20:
+                # ignore original door asm ptr call
+                offset = 3
+
+            self.romFile.seek(asmAddress+4+offset)
+            x1 = struct.unpack("B", self.romFile.read(1))[0]
+            x2 = struct.unpack("B", self.romFile.read(1))[0]
+            x = x1 | (x2 << 8)
+            self.romFile.seek(asmAddress+10+offset)
+            y1 = struct.unpack("B", self.romFile.read(1))[0]
+            y2 = struct.unpack("B", self.romFile.read(1))[0]
+            y = y1 | (y2 << 8)
+
+            return (roomPtr, (sx, sy), (x, y))
+        else:
+            return (roomPtr, (sx, sy), direction)
 
     def patchPresent(self, patchName):
         self.romFile.seek(self.patches[patchName]['address'])
@@ -1369,6 +1411,7 @@ class RomLoader(object):
         RomPatches.ActivePatches = []
         isArea = False
         isBoss = False
+        isEscape = False
 
         # check total base (blue bt and red tower blue door)
         if self.hasPatch("startCeres") or self.hasPatch("startLS"):
@@ -1407,11 +1450,13 @@ class RomLoader(object):
         if self.hasPatch("areaLayout"):
             RomPatches.ActivePatches.append(RomPatches.AreaRandoGatesOther)
 
-
         # check boss rando
         isBoss = self.isBoss()
 
-        return (isArea, isBoss)
+        # check escape rando
+        isEscape = self.hasPatch("areaEscape")
+
+        return (isArea, isBoss, isEscape)
 
     def getPatches(self):
         return self.romReader.getPatches()

@@ -1221,6 +1221,11 @@ class RomPatcher:
 
             # write door asm
             asmPatch = []
+            # call original door asm ptr if needed
+            if conn['doorAsmPtr'] != 0x0000:
+                # endian convert
+                (D0, D1) = (conn['doorAsmPtr'] & 0x00FF, (conn['doorAsmPtr'] & 0xFF00) >> 8)
+                asmPatch += [ 0x20, D0, D1 ]        # JSR $doorAsmPtr
             # incompatible transition
             if 'SamusX' in conn:
                 # endian convert
@@ -1236,11 +1241,6 @@ class RomPatcher:
             else:
                 # still give I-frames
                 asmPatch += [ 0x20, 0x70, 0xEA ]    # JSR giveiframes
-            # call original door asm ptr if needed
-            if conn['doorAsmPtr'] != 0x0000:
-                # endian convert
-                (D0, D1) = (conn['doorAsmPtr'] & 0x00FF, (conn['doorAsmPtr'] & 0xFF00) >> 8)
-                asmPatch += [ 0x20, D0, D1 ]        # JSR $doorAsmPtr
             # return
             asmPatch += [ 0x60 ]   # RTS
             self.romFile.write(struct.pack('B', asmAddress & 0x00FF))

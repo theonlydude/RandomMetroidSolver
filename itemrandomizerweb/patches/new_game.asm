@@ -33,8 +33,9 @@ start_location:
 opt_door:
     ;; optional door to open.
     ;; door ID is low byte PLM argument when editing doors in SMILE
-    ;; ($00=no door)
+    ;; terminate with $00
     db $32			; defaults to construction zone
+    db $00
 
 warnpc $a1f20f
 
@@ -84,14 +85,16 @@ gameplay_start:
     ;; Set red tower elevator door to blue
     lda $7ed8b2 : ora.w #$0001 : sta $7ed8b2
     ;; Set optional door to blue if necessary
-    lda.l opt_door : and #$00ff
-    beq .end			; $00 = no door to open 
+    ldx #$0000
+-
+    lda.l opt_door,x : and #$00ff
+    beq .end			; end list
+    phx
     jsl $80818e		    ; call bit index function, returns X=byte index, $05e7=bitmask
     ;; Set door in bitfield
-    lda $7ED8B0,x
-    ora $05E7
-    sta $7ED8B0,x
-
+    lda $7ED8B0,x : ora $05E7 : sta $7ED8B0,x
+    plx
+    inx : bra -		    ; next
     ;; Call the save code to create a new file
     lda $7e0952 : jsl $818000
 .end:

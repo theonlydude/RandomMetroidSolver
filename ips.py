@@ -1,5 +1,5 @@
 
-import struct, sys
+import struct, sys, itertools
 
 # in Python 3 reading a binary file returns a bytes object and indexing a bytes object returns an integer,
 # so we no longer need ord(). to remove ord get a bytearray in python2 when reading a file

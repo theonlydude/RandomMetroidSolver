@@ -817,7 +817,7 @@ class RomPatcher:
     def applyStartAP(self, apName, plms=None):
         from graph_access import getAccessPoint
         ap = getAccessPoint(apName)
-        if plms is not None and ap.Start > 1:
+        if plms is not None and ap.Start != 0 and ap.Start != 0xffff:
             # not Ceres or Landing Site, so Zebes will be awake
             plms.append('Morph_Zebes_Awake')
         (w0, w1) = getWord(ap.Start)

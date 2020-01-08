@@ -11,7 +11,7 @@ accessPoints = [
     ### Ceres Station
     AccessPoint('Ceres', 'Ceres', {
         'Landing Site': lambda sm: SMBool(True)
-    }, internal=True, start=0x0001),
+    }, internal=True, start=0xffff),
     ### Crateria and Blue Brinstar
     AccessPoint('Landing Site', 'Crateria', {
         'Lower Mushrooms Left': lambda sm: sm.canPassTerminatorBombWall(),

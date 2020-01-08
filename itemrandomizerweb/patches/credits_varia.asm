@@ -25,7 +25,7 @@ define softreset $7fffe6
 define scroll_speed $7fffe8
 define timer1 $05b8
 define timer2 $05ba
-define check_new_game   $A1F202
+define check_new_game   $A1F210
 
 // Patch soft reset to retain value of RTA counter
 org $80844B

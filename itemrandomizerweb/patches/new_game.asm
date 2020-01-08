@@ -22,7 +22,7 @@ org $828067
 org $82eeda
     db $1f
 
-;;; DATA in bank A1
+;;; DATA in bank A1 (start options)
 
 org $a1f200
 print "start_location: ", pc
@@ -30,9 +30,14 @@ start_location:
     ;; start location: $0000=Zebes, $0001=Ceres,
     ;; otherwise hi byte is area and low is save index
     dw $0000
+opt_door:
+    ;; optional door to open (defaults to construction zone)
+    dw $0032
+
+warnpc $a1f20f
 
 ;;; CODE in bank A1
-
+org $a1f210
 ;;; zero flag set if we're starting a new game
 ;;; called from credits_varia as well
 print "check_new_game: ", pc
@@ -71,14 +76,23 @@ startup:
     rtl
 
 gameplay_start:
+    phx
     jsl check_new_game  : bne .end
-    ;; Set construction zone and red tower elevator doors to blue
-    lda $7ed8b6 : ora.w #$0004 : sta $7ed8b6
+	;; lda $7ed8b6 : ora.w #$0004 : sta $7ed8b6
+    ;; Set red tower elevator door to blue
     lda $7ed8b2 : ora.w #$0001 : sta $7ed8b2
+    ;; Set optional door to blue if necessary
+    lda.l opt_door : beq .end
+    jsl $80818e		    ; call bit index function, returns X=byte index, $05e7=bitmask
+    ;; Set door in bitfield
+    lda $7ED8B0,x
+    ora $05E7
+    sta $7ED8B0,x
 
     ;; Call the save code to create a new file
     lda $7e0952 : jsl $818000
 .end:
+    plx
     rtl
 
 warnpc $a1ffff

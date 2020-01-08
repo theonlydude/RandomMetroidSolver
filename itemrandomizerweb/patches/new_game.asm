@@ -27,12 +27,14 @@ org $82eeda
 org $a1f200
 print "start_location: ", pc
 start_location:
-    ;; start location: $0000=Zebes, $0001=Ceres,
+    ;; start location: $0000=Zebes Landing site, $ffff=Ceres,
     ;; otherwise hi byte is area and low is save index
-    dw $0000
+    dw $0000			; defaults to landing site
 opt_door:
-    ;; optional door to open (defaults to construction zone)
-    dw $0032
+    ;; optional door to open.
+    ;; door ID is low byte PLM argument when editing doors in SMILE
+    ;; ($00=no door)
+    db $32			; defaults to construction zone
 
 warnpc $a1f20f
 
@@ -57,7 +59,7 @@ check_new_game:
 startup:
     jsl check_new_game      : bne .end
     lda.l start_location    : beq .zebes
-    cmp #$0001              : beq .ceres
+    cmp #$ffff              : beq .ceres
     ;; custom start point on Zebes
     pha
     and #$ff00 : xba : sta $079f ; hi byte is area
@@ -82,7 +84,8 @@ gameplay_start:
     ;; Set red tower elevator door to blue
     lda $7ed8b2 : ora.w #$0001 : sta $7ed8b2
     ;; Set optional door to blue if necessary
-    lda.l opt_door : beq .end
+    lda.l opt_door : and #$00ff
+    beq .end			; $00 = no door to open 
     jsl $80818e		    ; call bit index function, returns X=byte index, $05e7=bitmask
     ;; Set door in bitfield
     lda $7ED8B0,x

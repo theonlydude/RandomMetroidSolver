@@ -430,11 +430,12 @@ class SuperFunProvider(object):
         pool = self.basePool[:]
         locs = self.locations[:]
         itemLoc = None
-        startOk = True
+        startOk = True        
         self.sm.resetItems()
+        curLocs = self.rando.currentLocations(locs=locs)
+        state = RandoState(self.rando, curLocs)
         self.rando.determineParameters()
         for i in range(5): # 5 just..sounds good
-            curLocs = self.rando.currentLocations(locs=locs)
             itemLoc = self.rando.generateItem(curLocs, pool, locs=locs)
             if itemLoc is None:
                 startOk = False
@@ -442,7 +443,9 @@ class SuperFunProvider(object):
             pool.remove(itemLoc['Item'])
             locs.remove(itemLoc['Location'])
             self.sm.addItem(itemLoc['Item']['Type'])
+            curLocs = self.rando.currentLocations(locs=locs)
         self.sm.resetItems()
+        state.apply(self.rando)
 
         return startOk
 
@@ -719,6 +722,10 @@ class Randomizer(object):
         self.itemLocations = []
 
         self.itemPool = None
+        self.chozoItemPool = []
+        self.nonChozoItemPool = []
+        self.hadChozoLeft = None
+        self.onlyBosses = False
         self.plandoItemPool = []
         if self.settings.plandoRando != None:
             plando = SuperPlandoProvider(self.settings, self.smbm, self)
@@ -726,9 +733,11 @@ class Randomizer(object):
             self.restrictedLocations = []
         else:
             itemManager = ItemManager(self.restrictions['MajorMinor'], settings.qty, self.smbm)
-            # handle super fun settings
+            # handle super fun settings and determine item pool
             fun = SuperFunProvider(settings.superFun, itemManager, self)
             fun.getForbidden()
+            self.itemPool = fun.getItemPool()
+            self.restrictedLocations = fun.restrictedLocs
             # check if we can reach everything
             self.log.debug("LAST CHECKPOOL")
             if not fun.checkPool() or not fun.checkStart():
@@ -736,14 +745,10 @@ class Randomizer(object):
             # store unapplied super fun messages
             if len(fun.errorMsgs) > 0:
                 self.errorMsg += "Super Fun: " + ', '.join(fun.errorMsgs) + ' '
-            self.itemPool = fun.getItemPool()
-            self.restrictedLocations = fun.restrictedLocs
         # if late morph compute number of locations available without morph
         if self.restrictions['Morph'] == 'late':
             self.computeLateMorphLimit()
         # temporarily swap item pool in chozo mode, until all chozo item are placed in chozo locs
-        self.chozoItemPool = []
-        self.nonChozoItemPool = []
         if self.restrictions['MajorMinor'] == 'Chozo':
             self.chozoItemPool = [item for item in self.itemPool if item['Class'] == 'Chozo' or item['Name'] == 'Boss']
             self.nonChozoItemPool = [item for item in self.itemPool if item not in self.chozoItemPool] # this will be swapped back
@@ -1563,7 +1568,7 @@ class Randomizer(object):
                 self.vcr.addRollback(nStatesAtStart)
             return None
         # to stay consistent in case no solution is found as states list was popped in init
-        fallbackState = self.states[-1]
+        fallbackState = self.getCurrentState()
         i = 0
         possibleStates = []
         while i >= 0 and len(possibleStates) == 0:

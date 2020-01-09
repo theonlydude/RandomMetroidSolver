@@ -742,10 +742,10 @@ class GraphUtils:
         if exitDir == entryDir:
             return exitDir
         # if incompatible but horizontal we keep entry dir (looks more natural)
-        if isHorizontal(exitDir) and isHorizontal(entryDir):
+        if GraphUtils.isHorizontal(exitDir) and GraphUtils.isHorizontal(entryDir):
             return entryDir
         # otherwise keep exit direction and remove cap
-        return removeCap(exitDir)
+        return GraphUtils.removeCap(exitDir)
 
     def getBitFlag(srcArea, dstArea, origFlag):
         flags = origFlag
@@ -787,9 +787,9 @@ class GraphUtils:
             # door properties
             conn['RoomPtr'] = dst.RoomInfo['RoomPtr']
             conn['doorAsmPtr'] = dst.EntryInfo['doorAsmPtr']
-            conn['direction'] = getDirection(src, dst)
-            conn['bitFlag'] = getBitFlag(src.RoomInfo['area'], dst.RoomInfo['area'],
-                                         dst.EntryInfo['bitFlag'])
+            conn['direction'] = GraphUtils.getDirection(src, dst)
+            conn['bitFlag'] = GraphUtils.getBitFlag(src.RoomInfo['area'], dst.RoomInfo['area'],
+                                                    dst.EntryInfo['bitFlag'])
             conn['cap'] = dst.EntryInfo['cap']
             conn['screen'] = dst.EntryInfo['screen']
             if conn['direction'] != src.ExitInfo['direction']: # incompatible transition

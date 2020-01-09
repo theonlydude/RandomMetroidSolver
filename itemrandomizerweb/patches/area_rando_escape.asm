@@ -15,7 +15,7 @@ endmacro
 org $809E21
 print "timer_value: ", pc
 timer_value:
-    dw #$1030
+;   dw #$1030
 
 ;;; HIJACKS
 org $82df38

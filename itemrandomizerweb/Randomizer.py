@@ -1485,7 +1485,8 @@ class Randomizer(object):
                 return
             # the state we are about to remove was a progression state
             self.progressionStatesIndices.pop()
-        self.states.pop() # remove current state, it's the one we're stuck in
+        if len(self.states) > 0:
+            self.states.pop() # remove current state, it's the one we're stuck in
         self.log.debug('initRollback: progressionStatesIndices 2=' + str(self.progressionStatesIndices))
 
     def getSituationId(self):
@@ -1521,7 +1522,7 @@ class Randomizer(object):
         nItemsAtStart = len(self.currentItems)
         nStatesAtStart = len(self.states)
         self.log.debug("rollback BEGIN: nItems={}, nStates={}".format(len(self.currentItems), nStatesAtStart))
-        currentState = self.states[-1]
+        currentState = self.getCurrentState()
         # we can be in a 'fake rollback' situation where we rollback
         # just after non prog phase without checking normal items first (we
         # do this for more randomness, to avoid placing items in postavail locs
@@ -1667,7 +1668,7 @@ class Randomizer(object):
             self.itemPool = self.chozoItemPool
 
     def getCurrentState(self):
-        return self.states[-1]
+        return self.states[-1] if len(self.states) > 0 else self.initState
 
     def chozoFill(self):
         # 2nd phase fill-up :

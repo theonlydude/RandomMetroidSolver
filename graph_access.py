@@ -74,7 +74,7 @@ accessPoints = [
        escape = True,
        dotOrientation = 'ne'),
     ### Green and Pink Brinstar
-    AccessPoint('Green Brinstar Elevator Right', 'GreenPinkBrinstar', {
+    AccessPoint('Green Brinstar Elevator', 'GreenPinkBrinstar', {
         'Big Pink': lambda sm: sm.wand(sm.wor(sm.haveItem('SpeedBooster'),
                                               sm.canDestroyBombWalls()),
                                        sm.canOpenRedDoors())
@@ -87,7 +87,7 @@ accessPoints = [
     AccessPoint('Big Pink', 'GreenPinkBrinstar', {
         'Green Hill Zone Top Right': lambda sm: sm.wand(sm.haveItem('Morph'),
                                                         sm.canOpenGreenDoors()),
-        'Green Brinstar Elevator Right': lambda sm: sm.wor(sm.haveItem('SpeedBooster'),
+        'Green Brinstar Elevator': lambda sm: sm.wor(sm.haveItem('SpeedBooster'),
                                                            sm.canDestroyBombWalls())
     }, internal=True, start={'spawn': 0x0100}),
     AccessPoint('Green Hill Zone Top Right', 'GreenPinkBrinstar', {
@@ -111,7 +111,7 @@ accessPoints = [
        entryInfo = {'SamusX':0x5ce, 'SamusY':0x88},
        dotOrientation = 'se'),
     AccessPoint('Green Brinstar Main Shaft Top Left', 'GreenPinkBrinstar', {
-        'Green Brinstar Elevator Right': lambda sm: SMBool(True)
+        'Green Brinstar Elevator': lambda sm: SMBool(True)
     }, roomInfo = {'RoomPtr':0x9ad9, "area": 0x1},
        exitInfo = {'DoorPtr':0x8cb2, 'direction': 0x5, "cap": (0x2e, 0x6), "bitFlag": 0x0,
                    "screen": (0x2, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
@@ -135,14 +135,17 @@ accessPoints = [
        dotOrientation = 'w'),
     AccessPoint('Wrecked Ship Main', 'WreckedShip', {
         'West Ocean Left': lambda sm: SMBool(True),
-        'Wrecked Ship Back': lambda sm: sm.canPassSpongeBath(),
+        'Wrecked Ship Back': lambda sm: sm.wor(sm.wand(Bosses.bossDead('Phantoon'),
+                                                       sm.canPassSpongeBath()),
+                                               sm.wand(sm.wnot(Bosses.bossDead('Phantoon')),
+                                                       RomPatches.has(RomPatches.SpongeBathBlueDoor))),
         'PhantoonRoomOut': lambda sm: sm.wand(sm.canOpenGreenDoors(), sm.canPassBombPassages())
-    }, internal=True),
+    }, internal=True,
+       start={'spawn':0x0300, 'doors':[0x83], 'patches':[RomPatches.SpongeBathBlueDoor]}),
     AccessPoint('Wrecked Ship Back', 'WreckedShip', {
         'Wrecked Ship Main': lambda sm: SMBool(True),
         'Crab Maze Left': lambda sm: sm.canPassForgottenHighway(True)
-    }, internal=True,
-       start={'spawn':0x0300, 'doors':[0x83], 'patches':[RomPatches.SpongeBathBlueDoor]}),
+    }, internal=True),
     AccessPoint('Crab Maze Left', 'WreckedShip', {
         'Wrecked Ship Back': lambda sm: sm.canPassForgottenHighway(False)
     }, roomInfo = {'RoomPtr':0x957d, "area": 0x0, 'songs':[0x958e]},
@@ -284,6 +287,21 @@ accessPoints = [
        dotOrientation = 'e'),
     ### Norfair
     AccessPoint('Warehouse Entrance Left', 'Norfair', {
+        'Warehouse Entrance Right': lambda sm: sm.canAccessKraidsLair(),
+        'Business Center': lambda sm: SMBool(True)
+    }, roomInfo = {'RoomPtr':0xa6a1, "area": 0x1},
+       exitInfo = {'DoorPtr':0x922e, 'direction': 0x5, "cap": (0xe, 0x16), "bitFlag": 0x40,
+                   "screen": (0x0, 0x1), "distanceToSpawn": 0x8000, "doorAsmPtr": 0xbdd1},
+       entryInfo = {'SamusX':0x34, 'SamusY':0x88},
+       dotOrientation = 'sw'),
+    AccessPoint('Warehouse Entrance Right', 'Norfair', {
+        'Warehouse Entrance Left': lambda sm: sm.haveItem('Super')
+    }, roomInfo = {'RoomPtr': 0xa6a1, "area": 0x1},
+       exitInfo = {'DoorPtr': 0x923a, 'direction': 0x4, "cap": (0x1, 0x6), "bitFlag": 0x0,
+                   "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
+       entryInfo = {'SamusX': 0x2c7, 'SamusY': 0x98},
+       dotOrientation = 'nw'),
+    AccessPoint('Business Center', 'Norfair', {
         'Bubble Mountain': lambda sm: sm.wor(sm.wand(sm.haveItem('SpeedBooster'), # frog speedway
                                                      sm.canPassBombPassages()),
                                              # go through cathedral
@@ -299,20 +317,9 @@ accessPoints = [
                                                sm.haveItem('SpeedBooster'),
                                                sm.canUsePowerBombs(),
                                                sm.canHellRun(**Settings.hellRunsTable['Ice']['Norfair Entrance -> Croc via Ice']))),
-        'Warehouse Entrance Right': lambda sm: sm.canAccessKraidsLair()
-    }, roomInfo = {'RoomPtr':0xa6a1, "area": 0x1},
-       exitInfo = {'DoorPtr':0x922e, 'direction': 0x5, "cap": (0xe, 0x16), "bitFlag": 0x40,
-                   "screen": (0x0, 0x1), "distanceToSpawn": 0x8000, "doorAsmPtr": 0xbdd1},
-       entryInfo = {'SamusX':0x34, 'SamusY':0x88},
-       start={'spawn':0x0202, 'doors':[0x4d], 'patches':[RomPatches.HiJumpAreaBlueDoor]},
-       dotOrientation = 'sw'),
-    AccessPoint('Warehouse Entrance Right', 'Norfair', {
-        'Warehouse Entrance Left': lambda sm: sm.haveItem('Super')
-    }, roomInfo = {'RoomPtr': 0xa6a1, "area": 0x1},
-       exitInfo = {'DoorPtr': 0x923a, 'direction': 0x4, "cap": (0x1, 0x6), "bitFlag": 0x0,
-                   "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
-       entryInfo = {'SamusX': 0x2c7, 'SamusY': 0x98},
-       dotOrientation = 'nw'),
+        'Warehouse Entrance Left': lambda sm: SMBool(True)
+    }, internal=True,
+       start={'spawn':0x0202, 'doors':[0x4d], 'patches':[RomPatches.HiJumpAreaBlueDoor]}),
     AccessPoint('Single Chamber Top Right', 'Norfair', {
         'Bubble Mountain Top': lambda sm: sm.wand(sm.canDestroyBombWalls(),
                                                   sm.haveItem('Morph'),
@@ -346,11 +353,11 @@ accessPoints = [
        entryInfo = {'SamusX':0x134, 'SamusY':0x288, 'song': 0x15},
        dotOrientation = 'se'),
     AccessPoint('Croc Zone', 'Norfair', {
-        'Warehouse Entrance Left': lambda sm: sm.wor(sm.wand(sm.canPassFrogSpeedwayRightToLeft(),
-                                                             sm.canHellRun(**Settings.hellRunsTable['Ice']['Croc -> Norfair Entrance'])),
-                                                     sm.wand(sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Croc -> Norfair Entrance']),
-                                                             sm.canGrappleEscape(),
-                                                             sm.haveItem('Super'))),
+        'Business Center': lambda sm: sm.wor(sm.wand(sm.canPassFrogSpeedwayRightToLeft(),
+                                                     sm.canHellRun(**Settings.hellRunsTable['Ice']['Croc -> Norfair Entrance'])),
+                                             sm.wand(sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Croc -> Norfair Entrance']),
+                                                     sm.canGrappleEscape(),
+                                                     sm.haveItem('Super'))),
         'Bubble Mountain': lambda sm: sm.wand(sm.canPassBombPassages(),
                                               sm.canHellRun(**Settings.hellRunsTable['Ice']['Croc -> Bubble Mountain'])),
         'Kronic Boost Room Bottom Left': lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Kronic Boost Room <-> Croc']),
@@ -358,9 +365,9 @@ accessPoints = [
     }, internal=True),
     AccessPoint('Bubble Mountain', 'Norfair', {
         # bottom left door -> frog speed way OR exit cathedral
-        'Warehouse Entrance Left': lambda sm: sm.wor(sm.wand(sm.canPassBombPassages(),
-                                                             sm.canPassFrogSpeedwayRightToLeft()),
-                                                     sm.canExitCathedral()),
+        'Business Center': lambda sm: sm.wor(sm.wand(sm.canPassBombPassages(),
+                                                     sm.canPassFrogSpeedwayRightToLeft()),
+                                             sm.canExitCathedral()),
         'Bubble Mountain Top': lambda sm: sm.canClimbBubbleMountain(),
         'Kronic Boost Room Bottom Left': lambda sm: sm.wor(sm.wand(sm.canPassBombPassages(),
                                                                    sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Kronic Boost Room'])),
@@ -534,7 +541,7 @@ accessPoints = [
        dotOrientation = 'ne'),
     AccessPoint('Red Brinstar Elevator', 'RedBrinstar', {
         'Caterpillar Room Top Right': lambda sm: sm.canPassRedTowerToMaridiaNode(),
-        'Red Tower Top Left': lambda sm: sm.canOpenYellowDoors()
+        'Red Tower Top Left': lambda sm: sm.wor(RomPatches.has(RomPatches.HellwayBlueDoor), sm.canOpenYellowDoors())
     }, traverse=lambda sm:sm.wor(RomPatches.has(RomPatches.RedTowerBlueDoors), sm.canOpenYellowDoors()),
        roomInfo = {'RoomPtr':0x962a, "area": 0x0},
        exitInfo = {'DoorPtr':0x8af6, 'direction': 0x7, "cap": (0x16, 0x2d), "bitFlag": 0x0,
@@ -589,7 +596,7 @@ accessPoints = [
 ]
 
 vanillaTransitions = [
-    ('Lower Mushrooms Left', 'Green Brinstar Elevator Right'),
+    ('Lower Mushrooms Left', 'Green Brinstar Elevator'),
     ('Morph Ball Room Left', 'Green Hill Zone Top Right'),
     ('Moat Right', 'West Ocean Left'),
     ('Keyhunter Room Bottom', 'Red Brinstar Elevator'),

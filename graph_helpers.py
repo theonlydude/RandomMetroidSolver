@@ -124,16 +124,15 @@ class HelpersGraph(Helpers):
     @Cache.decorator
     def canPassSpongeBath(self):
         sm = self.smbm
-        return sm.wand(Bosses.bossDead('Phantoon'),
-                       sm.wor(sm.wand(sm.canPassBombPassages(),
-                                      sm.knowsSpongeBathBombJump()),
-                              sm.wand(sm.haveItem('HiJump'),
-                                      sm.knowsSpongeBathHiJump()),
-                              sm.wor(sm.haveItem('Gravity'),
-                                     sm.haveItem('SpaceJump'),
-                                     sm.wand(sm.haveItem('SpeedBooster'),
-                                             sm.knowsSpongeBathSpeed()),
-                                     sm.canSpringBallJump())))
+        return sm.wor(sm.wand(sm.canPassBombPassages(),
+                              sm.knowsSpongeBathBombJump()),
+                      sm.wand(sm.haveItem('HiJump'),
+                              sm.knowsSpongeBathHiJump()),
+                      sm.wor(sm.haveItem('Gravity'),
+                             sm.haveItem('SpaceJump'),
+                             sm.wand(sm.haveItem('SpeedBooster'),
+                                     sm.knowsSpongeBathSpeed()),
+                             sm.canSpringBallJump()))
 
     @Cache.decorator
     def canPassBowling(self):

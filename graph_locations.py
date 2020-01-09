@@ -71,12 +71,11 @@ locations = [
     'Visibility': "Chozo",
     'Room': 'Brinstar Reserve Tank Room',
     'AccessFrom' : {
-        'Green Brinstar Elevator Right': lambda sm: SMBool(True)
+        'Green Brinstar Elevator': lambda sm: sm.wor(RomPatches.has(RomPatches.BrinReserveBlueDoor), sm.canOpenRedDoors())
     },
-    'Available': lambda sm: sm.wand(sm.canOpenRedDoors(),
-                                    sm.wor(sm.wand(sm.knowsMockball(),
-                                                   sm.haveItem('Morph')),
-                                           sm.haveItem('SpeedBooster')))
+    'Available': lambda sm: sm.wor(sm.wand(sm.knowsMockball(),
+                                           sm.haveItem('Morph')),
+                                   sm.haveItem('SpeedBooster'))
 },
 {
     'Area': "Brinstar",
@@ -147,7 +146,7 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Etecoon Energy Tank Room',
     'AccessFrom' : {
-        'Green Brinstar Elevator Right': lambda sm: SMBool(True)
+        'Green Brinstar Elevator': lambda sm: SMBool(True)
     },
     'Available': lambda sm: sm.canAccessEtecoons(),
     'PostAvailable': lambda sm: sm.canUsePowerBombs()
@@ -300,7 +299,7 @@ locations = [
     'Visibility': "Chozo",
     'Room': 'Ice Beam Room',
     'AccessFrom' : {
-        'Warehouse Entrance Left': lambda sm: sm.canOpenGreenDoors()
+        'Business Center': lambda sm: sm.canOpenGreenDoors()
     },
     'Available': lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['Ice']['Norfair Entrance -> Ice Beam']),
                                     sm.wor(sm.canPassBombPassages(), # to exit, or if you fail entrance
@@ -342,9 +341,9 @@ locations = [
     'Visibility': "Chozo",
     'Room': 'Hi Jump Boots Room',
     'AccessFrom' : {
-        'Warehouse Entrance Left': lambda sm: SMBool(True)
+        'Business Center': lambda sm: sm.wor(RomPatches.has(RomPatches.HiJumpAreaBlueDoor), sm.canOpenRedDoors())
     },
-    'Available': lambda sm: sm.wand(sm.canOpenRedDoors(), sm.haveItem('Morph')),
+    'Available': lambda sm: sm.haveItem('Morph'),
     'PostAvailable': lambda sm: sm.wor(sm.canPassBombPassages(),
                                        sm.wand(sm.haveItem('Morph'), RomPatches.has(RomPatches.HiJumpShotBlock)))
 },
@@ -404,7 +403,7 @@ locations = [
     'Visibility': "Chozo",
     'Room': 'Speed Booster Room',
     'AccessFrom' : {
-        'Bubble Mountain Top': lambda sm: sm.canOpenGreenDoors()
+        'Bubble Mountain Top': lambda sm: sm.wor(RomPatches.has(RomPatches.SpeedAreaBlueDoor), sm.canOpenGreenDoors())
     },
     'Available': lambda sm: sm.canHellRunToSpeedBooster()
 },
@@ -992,7 +991,7 @@ locations = [
     'Visibility': "Chozo",
     'Room': 'Green Brinstar Main Shaft',
     'AccessFrom' : {
-        'Green Brinstar Elevator Right': lambda sm: SMBool(True)
+        'Green Brinstar Elevator': lambda sm: SMBool(True)
     },
     'Available': lambda sm: sm.canAccessEtecoons(),
     'PostAvailable': lambda sm: sm.canUsePowerBombs()
@@ -1029,7 +1028,7 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Early Supers Room',
     'AccessFrom' : {
-        'Green Brinstar Elevator Right': lambda sm: SMBool(True)
+        'Green Brinstar Elevator': lambda sm: SMBool(True)
     },
     'Available': lambda sm: sm.canOpenRedDoors(),
     'PostAvailable': lambda sm: sm.wor(RomPatches.has(RomPatches.EarlySupersShotBlock), sm.canPassBombPassages())
@@ -1046,11 +1045,10 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Early Supers Room',
     'AccessFrom' : {
-        'Green Brinstar Elevator Right': lambda sm: SMBool(True)
+        'Green Brinstar Elevator': lambda sm: sm.wor(RomPatches.has(RomPatches.BrinReserveBlueDoor), sm.canOpenRedDoors())
     },
-    'Available': lambda sm: sm.wand(sm.canOpenRedDoors(),
-                                    sm.wor(sm.wand(sm.haveItem('Morph'), sm.knowsMockball()),
-                                           sm.haveItem('SpeedBooster')))
+    'Available': lambda sm: sm.wor(sm.wand(sm.haveItem('Morph'), sm.knowsMockball()),
+                                           sm.haveItem('SpeedBooster'))
 },
 {
     'Area': "Brinstar",
@@ -1064,7 +1062,7 @@ locations = [
     'Visibility': "Hidden",
     'Room': 'Brinstar Reserve Tank Room',
     'AccessFrom' : {
-        'Green Brinstar Elevator Right': lambda sm: SMBool(True)
+        'Green Brinstar Elevator': lambda sm: SMBool(True)
     },
     'Available': lambda sm: sm.wand(sm.haveItem('Morph'),
                                     sm.wor(sm.knowsMockball(),
@@ -1086,7 +1084,7 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Brinstar Reserve Tank Room',
     'AccessFrom' : {
-        'Green Brinstar Elevator Right': lambda sm: SMBool(True)
+        'Green Brinstar Elevator': lambda sm: SMBool(True)
     },
     'Available': lambda sm: sm.wand(sm.canOpenRedDoors(),
                                     sm.haveItem('Morph'),
@@ -1203,7 +1201,7 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Etecoon Super Room',
     'AccessFrom' : {
-        'Green Brinstar Elevator Right': lambda sm: sm.canAccessEtecoons()
+        'Green Brinstar Elevator': lambda sm: sm.canAccessEtecoons()
     },
     'Available': lambda sm: sm.canOpenGreenDoors(),
     'PostAvailable': lambda sm: sm.canUsePowerBombs()
@@ -1334,7 +1332,7 @@ locations = [
     'Visibility': "Hidden",
     'Room': 'Cathedral',
     'AccessFrom' : {
-        'Warehouse Entrance Left': lambda sm: sm.canEnterCathedral(Settings.hellRunsTable['MainUpperNorfair']['Norfair Entrance -> Cathedral Missiles']['mult']),
+        'Business Center': lambda sm: sm.canEnterCathedral(Settings.hellRunsTable['MainUpperNorfair']['Norfair Entrance -> Cathedral Missiles']['mult']),
         'Bubble Mountain': lambda sm: sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Cathedral Missiles'])
     },
     'Available': lambda sm: sm.haveItem('Morph')
@@ -1351,7 +1349,7 @@ locations = [
     'Visibility': "Hidden",
     'Room': 'Crumble Shaft',
     'AccessFrom' : {
-        'Warehouse Entrance Left': lambda sm: sm.wand(sm.canOpenGreenDoors(),
+        'Business Center': lambda sm: sm.wand(sm.canOpenGreenDoors(),
                                                       sm.canUsePowerBombs(),
                                                       sm.canHellRun(**Settings.hellRunsTable['Ice']['Norfair Entrance -> Ice Beam']),
                                                       sm.wor(sm.wand(sm.haveItem('Morph'),
@@ -1391,9 +1389,9 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Hi Jump Energy Tank Room',
     'AccessFrom' : {
-        'Warehouse Entrance Left': lambda sm: SMBool(True)
+        'Business Center': lambda sm: sm.wor(RomPatches.has(RomPatches.HiJumpAreaBlueDoor), sm.canOpenRedDoors())
     },
-    'Available': lambda sm: sm.wand(sm.canOpenRedDoors(), sm.haveItem('Morph')),
+    'Available': lambda sm: sm.haveItem('Morph'),
     'PostAvailable': lambda sm: sm.wor(sm.canPassBombPassages(),
                                        sm.wand(RomPatches.has(RomPatches.HiJumpShotBlock), sm.haveItem('Morph')))
 },
@@ -1409,9 +1407,9 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Hi Jump Energy Tank Room',
     'AccessFrom' : {
-        'Warehouse Entrance Left': lambda sm: SMBool(True)
+        'Business Center': lambda sm: sm.wor(RomPatches.has(RomPatches.HiJumpAreaBlueDoor), sm.canOpenRedDoors())
     },
-    'Available': lambda sm: sm.canOpenRedDoors()
+    'Available': lambda sm: SMBool(True)
 },
 {
     'Area': "Norfair",
@@ -1544,7 +1542,7 @@ locations = [
     'Visibility': "Hidden",
     'Room': 'Speed Booster Hall',
     'AccessFrom' : {
-        'Bubble Mountain Top': lambda sm: sm.canOpenGreenDoors()
+        'Bubble Mountain Top': lambda sm: sm.wor(RomPatches.has(RomPatches.SpeedAreaBlueDoor), sm.canOpenGreenDoors())
     },
     'Available': lambda sm: sm.canHellRunToSpeedBooster()
 },

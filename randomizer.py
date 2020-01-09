@@ -398,6 +398,7 @@ if __name__ == "__main__":
         RomPatches.ActivePatches = RomPatches.Total
     RomPatches.ActivePatches.remove(RomPatches.BlueBrinstarBlueDoor)
     RomPatches.ActivePatches += GraphUtils.getGraphPatches(args.startAP)
+    # TODO handle start AP knows
     if args.noGravHeat == True or args.progressiveSuits == True:
         RomPatches.ActivePatches.remove(RomPatches.NoGravityEnvProtection)
     if args.progressiveSuits == True:

@@ -832,10 +832,15 @@ class RomPatcher:
             # not Ceres or Landing Site, so Zebes will be awake
             plms.append('Morph_Zebes_Awake')
         (w0, w1) = getWord(ap.Start['spawn'])
+        doors = ap.Start['doors'] if 'doors' in ap.Start else []
+        doors.append(0x0)
+        addr = 0x10F200
+        patch = [w0, w1] + doors
+        assert (addr + len(patch)) < 0x10F210, "Stopped before new_game overwrite"
         patchDict = {
             'StartAP': {
-                0x10F200: [w0, w1]
-            }
+                addr: patch
+            },
         }
         self.applyIPSPatch('StartAP', patchDict)
         # TODO handle custom saves

@@ -531,7 +531,8 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Wrecked Ship Energy Tank Room',
     'AccessFrom' : {
-        'Wrecked Ship Back': lambda sm: sm.wor(RomPatches.has(RomPatches.WSEtankBlueDoor),
+        'Wrecked Ship Back': lambda sm: sm.wor(sm.wand(sm.wnot(Bosses.bossDead('Phantoon')),
+                                                       RomPatches.has(RomPatches.WsEtankPhantoonAlive)),
                                                sm.canOpenRedDoors())
     },
     'Available': lambda sm: sm.wor(Bosses.bossDead('Phantoon'),
@@ -829,7 +830,8 @@ locations = [
     'AccessFrom' : {
         'West Ocean Left': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: sm.canPassBombPassages()
+    'Available': lambda sm: sm.haveItem('Morph'),
+    'PostAvailable': lambda sm: sm.canPassBombPassages()
 },
 {
     'Area': "Crateria",

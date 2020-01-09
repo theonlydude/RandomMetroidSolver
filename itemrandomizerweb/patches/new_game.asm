@@ -34,7 +34,7 @@ opt_door:
     ;; optional door to open.
     ;; door ID is low byte PLM argument when editing doors in SMILE
     ;; terminate with $00
-    db $32			; defaults to construction zone
+    db $10,$32			; defaults to red tower top+construction zone
     db $00
 
 warnpc $a1f20f
@@ -81,10 +81,7 @@ startup:
 gameplay_start:
     phx
     jsl check_new_game  : bne .end
-	;; lda $7ed8b6 : ora.w #$0004 : sta $7ed8b6
-    ;; Set red tower elevator door to blue
-    lda $7ed8b2 : ora.w #$0001 : sta $7ed8b2
-    ;; Set optional door to blue if necessary
+    ;; Set doors to blue if necessary
     ldx #$0000
 -
     lda.l opt_door,x : and #$00ff

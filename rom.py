@@ -832,7 +832,9 @@ class RomPatcher:
             # not Ceres or Landing Site, so Zebes will be awake
             plms.append('Morph_Zebes_Awake')
         (w0, w1) = getWord(ap.Start['spawn'])
-        doors = ap.Start['doors'] if 'doors' in ap.Start else []
+        doors = [0x10] # red brin elevator
+        if 'doors' in ap.Start:
+            doors += ap.Start['doors']
         doors.append(0x0)
         addr = 0x10F200
         patch = [w0, w1] + doors

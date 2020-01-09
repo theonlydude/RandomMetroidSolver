@@ -386,7 +386,8 @@ class SuperPlandoProvider(object):
 
         raise Exception("Missing item in pool")
 
-# dat class name
+# handles super fun settings and checks that the start AP/area/item
+# pool/settings combination makes sense
 class SuperFunProvider(object):
     # give the rando since we have to access services from it
     def __init__(self, superFun, itemManager, rando):
@@ -422,6 +423,28 @@ class SuperFunProvider(object):
     def getItemPool(self, forbidden=[]):
         self.itemManager.setItemPool(self.basePool[:]) # reuse base pool to have constant base item set
         return self.itemManager.removeForbiddenItems(self.forbiddenItems + forbidden)
+
+    # do a simplified "pre-randomization" of a few items to check start AP/area layout validity
+    # very basic because we know we're in full randomization in cases the check can fail
+    def checkStart(self):
+        pool = self.basePool[:]
+        locs = self.locations[:]
+        itemLoc = None
+        startOk = True
+        self.sm.resetItems()
+        self.rando.determineParameters()
+        for i in range(5): # 5 just..sounds good
+            curLocs = self.rando.currentLocations(locs=locs)
+            itemLoc = self.rando.generateItem(curLocs, pool, locs=locs)
+            if itemLoc is None:
+                startOk = False
+                break
+            pool.remove(itemLoc['Item'])
+            locs.remove(itemLoc['Location'])
+            self.sm.addItem(itemLoc['Item']['Type'])
+        self.sm.resetItems()
+
+        return startOk
 
     def checkPool(self, forbidden=None):
         self.log.debug("checkPool. forbidden=" + str(forbidden) + ", self.forbiddenItems=" + str(self.forbiddenItems))
@@ -708,7 +731,7 @@ class Randomizer(object):
             fun.getForbidden()
             # check if we can reach everything
             self.log.debug("LAST CHECKPOOL")
-            if not fun.checkPool():
+            if not fun.checkPool() or not fun.checkStart():
                 raise RuntimeError('Invalid transitions')
             # store unapplied super fun messages
             if len(fun.errorMsgs) > 0:
@@ -928,11 +951,11 @@ class Randomizer(object):
     # itemPool: list of the items not already placed
     #
     # return list of items eligible for next placement
-    def possibleItems(self, curLocs, itemPool):
+    def possibleItems(self, itemPool, locs=None):
         result = []
         poolDict = self.getPoolDict(itemPool)
         for itemType,items in sorted(poolDict.items()):
-            if self.checkItem(items[0]):
+            if self.checkItem(items[0], locs=locs):
                 for item in items:
                     result.append(item)
         random.shuffle(result)
@@ -1130,15 +1153,15 @@ class Randomizer(object):
     # item : item to check
     #
     # return bool
-    def checkItem(self, item):
+    def checkItem(self, item, locs=None):
         # no need to test nothing items
         if item['Category'] == 'Nothing':
             return False
-        oldLocations = self.currentLocations()
+        oldLocations = self.currentLocations(locs=locs)
         canPlaceIt = self.canPlaceItem(item, oldLocations)
         if canPlaceIt == False:
             return False
-        newLocations = [loc for loc in self.currentLocations(item) if loc not in oldLocations]
+        newLocations = [loc for loc in self.currentLocations(item, locs=locs) if loc not in oldLocations]
         ret = len(newLocations) > 0
         if ret == True and self.restrictions["MajorMinor"] != "Full":
             ret = List.exists(lambda l: self.restrictions["MajorMinor"] in l["Class"], newLocations)
@@ -1280,10 +1303,10 @@ class Randomizer(object):
 
     # from current accessible locations and an item pool, generate an item/loc dict.
     # return item/loc, or None if stuck
-    def generateItem(self, curLocs, pool):
+    def generateItem(self, curLocs, pool, locs=None):
         itemLocation = None
         self.failItems = []
-        posItems = self.possibleItems(curLocs, pool)
+        posItems = self.possibleItems(pool, locs=locs)
         self.log.debug("posItems: {}".format([i['Name'] for i in posItems]))
         if len(posItems) > 0:
             # if posItems is not empty, only those in posItems will be tried (see placeItem)
@@ -1550,7 +1573,7 @@ class Randomizer(object):
             while i >= minRollbackPoint and len(possibleStates) < 3:
                 state = states[i]
                 state.apply(self)
-                posItems = self.possibleItems(state.curLocs, self.itemPool)
+                posItems = self.possibleItems(self.itemPool)
                 if len(posItems) > 0: # new locs can be opened
 #                    self.log.debug([item['Type'] for item in posItems])
                     self.log.debug("STATE curLocs = " + str([loc['Name'] for loc in state.curLocs]))

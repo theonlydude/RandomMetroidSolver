@@ -1028,9 +1028,9 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Early Supers Room',
     'AccessFrom' : {
-        'Green Brinstar Elevator': lambda sm: SMBool(True)
+        'Green Brinstar Elevator': lambda sm: sm.wor(RomPatches.has(RomPatches.BrinReserveBlueDoor), sm.canOpenRedDoors())
     },
-    'Available': lambda sm: sm.canOpenRedDoors(),
+    'Available': lambda sm: SMBool(True),
     'PostAvailable': lambda sm: sm.wor(RomPatches.has(RomPatches.EarlySupersShotBlock), sm.canPassBombPassages())
 },
 {

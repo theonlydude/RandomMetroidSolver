@@ -30,8 +30,8 @@ start_location:
     ;; start location: $0000=Zebes Landing site, $ffff=Ceres,
     ;; otherwise hi byte is area and low is save index
     dw $0000			; defaults to landing site
-opt_door:
-    ;; optional door to open.
+opt_doors:
+    ;; optional doors to open.
     ;; door ID is low byte PLM argument when editing doors in SMILE
     ;; terminate with $00
     db $10,$32			; defaults to red tower top+construction zone
@@ -84,7 +84,7 @@ gameplay_start:
     ;; Set doors to blue if necessary
     ldx #$0000
 -
-    lda.l opt_door,x : and #$00ff
+    lda.l opt_doors,x : and #$00ff
     beq .end			; end list
     phx
     jsl $80818e		    ; call bit index function, returns X=byte index, $05e7=bitmask

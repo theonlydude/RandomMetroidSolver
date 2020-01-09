@@ -141,7 +141,7 @@ accessPoints = [
                                                        RomPatches.has(RomPatches.SpongeBathBlueDoor))),
         'PhantoonRoomOut': lambda sm: sm.wand(sm.canOpenGreenDoors(), sm.canPassBombPassages())
     }, internal=True,
-       start={'spawn':0x0300, 'doors':[0x83], 'patches':[RomPatches.SpongeBathBlueDoor]}),
+       start={'spawn':0x0300, 'doors':[0x83, 0xff], 'patches':[RomPatches.SpongeBathBlueDoor, RomPatches.WSEtankBlueDoor]}), # FIXME door ID
     AccessPoint('Wrecked Ship Back', 'WreckedShip', {
         'Wrecked Ship Main': lambda sm: SMBool(True),
         'Crab Maze Left': lambda sm: sm.canPassForgottenHighway(True)

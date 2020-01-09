@@ -531,7 +531,8 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Wrecked Ship Energy Tank Room',
     'AccessFrom' : {
-        'Wrecked Ship Back': lambda sm: sm.canOpenRedDoors()
+        'Wrecked Ship Back': lambda sm: sm.wor(RomPatches.has(RomPatches.WSEtankBlueDoor),
+                                               sm.canOpenRedDoors())
     },
     'Available': lambda sm: sm.wor(Bosses.bossDead('Phantoon'),
                                    RomPatches.has(RomPatches.WsEtankPhantoonAlive))

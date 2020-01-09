@@ -56,6 +56,7 @@ class RomPatches:
     MoatShotBlock             = 41
     #graph
     SpongeBathBlueDoor        = 42
+    WSEtankBlueDoor           = 43
     ## Area rando patches
     # remove crumble block for reverse lower norfair door access
     SingleChamberNoCrumble    = 101

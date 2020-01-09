@@ -1,7 +1,7 @@
 import random
 
 from itemrandomizerweb.Randomizer import Randomizer
-from graph_access import vanillaTransitions, accessPoints, getAccessPoint, createAreaTransitions, createEscapeTransition
+from graph_access import GraphUtils
 from helpers import Bosses
 
 class AreaRandomizer(Randomizer):
@@ -11,7 +11,7 @@ class AreaRandomizer(Randomizer):
         attempts = 0
         while not transitionsOk and attempts < 50:
             try:
-                self.transitions = createAreaTransitions(bidir)
+                self.transitions = GraphUtils.createAreaTransitions(bidir)
                 super(AreaRandomizer, self).__init__(locations,
                                                      settings,
                                                      seedName,
@@ -44,7 +44,7 @@ class AreaRandomizer(Randomizer):
         sm.addItems([item['Type'] for item in self.itemPool if item['Type'] != 'Ice' and item['Category'] != 'Energy'])
         path = None
         while path is None:
-            (src, dst) = createEscapeTransition()
+            (src, dst) = GraphUtils.createEscapeTransition()
             path = self.areaGraph.accessPath(sm, dst, 'Landing Site',
                                              self.difficultyTarget)
         # cleanup smbm

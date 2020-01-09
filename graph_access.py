@@ -11,13 +11,15 @@ accessPoints = [
     ### Ceres Station
     AccessPoint('Ceres', 'Ceres', {
         'Landing Site': lambda sm: SMBool(True)
-    }, internal=True, start=0xffff),
+    }, internal=True,
+       start={'spawn': 0xffff, 'doors':[0x32], 'patches':[RomPatches.BlueBrinstarBlueDoor]}),
     ### Crateria and Blue Brinstar
     AccessPoint('Landing Site', 'Crateria', {
         'Lower Mushrooms Left': lambda sm: sm.canPassTerminatorBombWall(),
         'Keyhunter Room Bottom': lambda sm: sm.canOpenGreenDoors(),
         'Blue Brinstar Elevator Bottom': lambda sm: SMBool(True)
-    }, internal=True, start=0x0000),
+    }, internal=True,
+       start={'spawn': 0x0000, 'doors':[0x32], 'patches':[RomPatches.BlueBrinstarBlueDoor]}),
     AccessPoint('Blue Brinstar Elevator Bottom', 'Crateria', {
         'Morph Ball Room Left': lambda sm: sm.canUsePowerBombs(),
         'Landing Site': lambda sm: SMBool(True)
@@ -80,13 +82,14 @@ accessPoints = [
        exitInfo = {'DoorPtr':0x8bfe, 'direction': 0x4, "cap": (0x1, 0x6), "bitFlag": 0x0,
                    "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
        entryInfo = {'SamusX':0xcc, 'SamusY':0x88},
+       start = {'spawn': 0x0101, 'doors':[0x1f, 0x21], 'patches':[RomPatches.BrinReserveBlueDoor]}, # XXX test if it would be better in brin reserve room with custom save
        dotOrientation = 'ne'),
     AccessPoint('Big Pink', 'GreenPinkBrinstar', {
         'Green Hill Zone Top Right': lambda sm: sm.wand(sm.haveItem('Morph'),
                                                         sm.canOpenGreenDoors()),
         'Green Brinstar Elevator Right': lambda sm: sm.wor(sm.haveItem('SpeedBooster'),
                                                            sm.canDestroyBombWalls())
-    }, internal=True, start=0x0100),
+    }, internal=True, start={'spawn': 0x0100}),
     AccessPoint('Green Hill Zone Top Right', 'GreenPinkBrinstar', {
         'Noob Bridge Right': lambda sm: SMBool(True),
         'Big Pink': lambda sm: sm.haveItem('Morph')
@@ -138,7 +141,8 @@ accessPoints = [
     AccessPoint('Wrecked Ship Back', 'WreckedShip', {
         'Wrecked Ship Main': lambda sm: SMBool(True),
         'Crab Maze Left': lambda sm: sm.canPassForgottenHighway(True)
-    }, internal=True),
+    }, internal=True,
+       start={'spawn':0x0300, 'doors':[0x83], 'patches':[RomPatches.SpongeBathBlueDoor]}),
     AccessPoint('Crab Maze Left', 'WreckedShip', {
         'Wrecked Ship Back': lambda sm: sm.canPassForgottenHighway(False)
     }, roomInfo = {'RoomPtr':0x957d, "area": 0x0, 'songs':[0x958e]},
@@ -300,6 +304,7 @@ accessPoints = [
        exitInfo = {'DoorPtr':0x922e, 'direction': 0x5, "cap": (0xe, 0x16), "bitFlag": 0x40,
                    "screen": (0x0, 0x1), "distanceToSpawn": 0x8000, "doorAsmPtr": 0xbdd1},
        entryInfo = {'SamusX':0x34, 'SamusY':0x88},
+       start={'spawn':0x0202, 'doors':[0x4d], 'patches':[RomPatches.HiJumpAreaBlueDoor]},
        dotOrientation = 'sw'),
     AccessPoint('Warehouse Entrance Right', 'Norfair', {
         'Warehouse Entrance Left': lambda sm: sm.haveItem('Super')
@@ -366,7 +371,8 @@ accessPoints = [
                                         sm.wor(sm.wand(sm.canOpenRedDoors(), sm.knowsGreenGateGlitch()),
                                                sm.haveItem('Wave')),
                                         sm.canOpenGreenDoors())
-    }, internal=True),
+    }, internal=True,
+       start={'spawn':0x0201, 'doors':[0x54], 'patches':[RomPatches.SpeedAreaBlueDoor], 'knows':['BubbleMountainWallJump']}),
     AccessPoint('Bubble Mountain Top', 'Norfair', {
         'Single Chamber Top Right': lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Single Chamber <-> Bubble Mountain']),
                                                        sm.canDestroyBombWalls(),
@@ -534,6 +540,7 @@ accessPoints = [
        exitInfo = {'DoorPtr':0x8af6, 'direction': 0x7, "cap": (0x16, 0x2d), "bitFlag": 0x0,
                    "screen": (0x1, 0x2), "distanceToSpawn": 0x1c0, "doorAsmPtr": 0xb9f1},
        entryInfo = {'SamusX':0x80, 'SamusY':0x58},
+       start={'spawn':0x0104, 'doors':[0x3c], 'patches':[RomPatches.HellwayBlueDoor]},
        dotOrientation = 'n'),
     AccessPoint('East Tunnel Right', 'RedBrinstar', {
         'East Tunnel Top Right': lambda sm: SMBool(True), # handled by room traverse function
@@ -619,195 +626,203 @@ escapeTargets = ['Climb Bottom Left', 'Green Brinstar Main Shaft Top Left', 'Bas
 def getAccessPoint(apName):
     return next(ap for ap in accessPoints if ap.Name == apName)
 
-def getStartAccessPointNames():
-    return [ap.Name for ap in accessPoints if ap.Start is not None]
+class GraphUtils:
+    def getStartAccessPointNames():
+        return [ap.Name for ap in accessPoints if ap.Start is not None]
 
-def createBossesTransitions():
-    transitions = vanillaBossesTransitions
-    def isVanilla():
-        for t in vanillaBossesTransitions:
-            if t not in transitions:
-                return False
-        return True
-    while isVanilla():
+    def isStandardStart(startApName):
+        return startApName == 'Ceres' or startApName == 'Landing Site'
+
+    def getGraphPatches(startApName):
+        ap = getAccessPoint(startApName)
+        return ap.Start['patches'] if 'patches' in ap.Start else []
+
+    def createBossesTransitions():
+        transitions = vanillaBossesTransitions
+        def isVanilla():
+            for t in vanillaBossesTransitions:
+                if t not in transitions:
+                    return False
+            return True
+        while isVanilla():
+            transitions = []
+            srcs = []
+            dsts = []
+            for (src,dst) in vanillaBossesTransitions:
+                srcs.append(src)
+                dsts.append(dst)
+            while len(srcs) > 0:
+                src = srcs.pop(random.randint(0,len(srcs)-1))
+                dst = dsts.pop(random.randint(0,len(dsts)-1))
+                transitions.append((src,dst))
+        return transitions
+
+    def createAreaTransitions(bidir=True):
+        tFrom = []
+        tTo = []
+        apNames = [ap.Name for ap in accessPoints if ap.isArea()]
         transitions = []
-        srcs = []
-        dsts = []
-        for (src,dst) in vanillaBossesTransitions:
-            srcs.append(src)
-            dsts.append(dst)
-        while len(srcs) > 0:
-            src = srcs.pop(random.randint(0,len(srcs)-1))
-            dst = dsts.pop(random.randint(0,len(dsts)-1))
-            transitions.append((src,dst))
-    return transitions
 
-def createAreaTransitions(bidir=True):
-    tFrom = []
-    tTo = []
-    apNames = [ap.Name for ap in accessPoints if ap.isArea()]
-    transitions = []
+        def findTo(trFrom):
+            ap = getAccessPoint(trFrom)
+            fromArea = ap.GraphArea
+            targets = [apName for apName in apNames if apName not in tTo and getAccessPoint(apName).GraphArea != fromArea]
+            if len(targets) == 0: # fallback if no area transition is found
+                targets = [apName for apName in apNames if apName != ap.Name]
+            return targets[random.randint(0, len(targets)-1)]
 
-    def findTo(trFrom):
-        ap = getAccessPoint(trFrom)
-        fromArea = ap.GraphArea
-        targets = [apName for apName in apNames if apName not in tTo and getAccessPoint(apName).GraphArea != fromArea]
-        if len(targets) == 0: # fallback if no area transition is found
-            targets = [apName for apName in apNames if apName != ap.Name]
-        return targets[random.randint(0, len(targets)-1)]
+        def addTransition(src, dst):
+            tFrom.append(src)
+            tTo.append(dst)
 
-    def addTransition(src, dst):
-        tFrom.append(src)
-        tTo.append(dst)
+        while len(apNames) > 0:
+            sources = [apName for apName in apNames if apName not in tFrom]
+            src = sources[random.randint(0, len(sources)-1)]
+            dst = findTo(src)
+            transitions.append((src, dst))
+            addTransition(src, dst)
+            if bidir is True:
+                addTransition(dst, src)
+            toRemove = [apName for apName in apNames if apName in tFrom and apName in tTo]
+            for apName in toRemove:
+                apNames.remove(apName)
+        return transitions
 
-    while len(apNames) > 0:
-        sources = [apName for apName in apNames if apName not in tFrom]
-        src = sources[random.randint(0, len(sources)-1)]
-        dst = findTo(src)
-        transitions.append((src, dst))
-        addTransition(src, dst)
-        if bidir is True:
-            addTransition(dst, src)
-        toRemove = [apName for apName in apNames if apName in tFrom and apName in tTo]
-        for apName in toRemove:
-            apNames.remove(apName)
-    return transitions
+    def createEscapeTransition():
+        return (escapeSource, random.choice(escapeTargets))
 
-def createEscapeTransition():
-    return (escapeSource, random.choice(escapeTargets))
+    def getVanillaExit(apName):
+        allVanillaTransitions = vanillaTransitions + vanillaBossesTransitions
+        for (src,dst) in allVanillaTransitions:
+            if apName == src:
+                return dst
+            if apName == dst:
+                return src
+        return None
 
-def getVanillaExit(apName):
-    allVanillaTransitions = vanillaTransitions + vanillaBossesTransitions
-    for (src,dst) in allVanillaTransitions:
-        if apName == src:
-            return dst
-        if apName == dst:
-            return src
-    return None
+    # gets dict like
+    # (RoomPtr, (vanilla entry screen X, vanilla entry screen Y)): AP
+    def getRooms():
+        rooms = {}
+        for ap in accessPoints:
+            if ap.isInternal() == True:
+                continue
+            roomPtr = ap.RoomInfo['RoomPtr']
+            entryInfo = getAccessPoint(getVanillaExit(ap.Name)).ExitInfo
+            rooms[(roomPtr, entryInfo['screen'])] = ap
+            # for boss rando with incompatible ridley transition, also register this one
+            if ap.Name == 'RidleyRoomIn':
+                rooms[(roomPtr, (0x0, 0x1))] = ap
+        return rooms
 
-# gets dict like
-# (RoomPtr, (vanilla entry screen X, vanilla entry screen Y)): AP
-def getRooms():
-    rooms = {}
-    for ap in accessPoints:
-        if ap.isInternal() == True:
-            continue
-        roomPtr = ap.RoomInfo['RoomPtr']
-        entryInfo = getAccessPoint(getVanillaExit(ap.Name)).ExitInfo
-        rooms[(roomPtr, entryInfo['screen'])] = ap
-        # for boss rando with incompatible ridley transition, also register this one
-        if ap.Name == 'RidleyRoomIn':
-            rooms[(roomPtr, (0x0, 0x1))] = ap
-    return rooms
+        # up: 0x3, 0x7
+        # down: 0x2, 0x6
+        # left: 0x1, 0x5
+        # right: 0x0, 0x4
 
-    # up: 0x3, 0x7
-    # down: 0x2, 0x6
-    # left: 0x1, 0x5
-    # right: 0x0, 0x4
+    def isHorizontal(dir):
+        return dir in [0x1, 0x5, 0x0, 0x4]
 
-def isHorizontal(dir):
-    return dir in [0x1, 0x5, 0x0, 0x4]
+    def removeCap(dir):
+        if dir < 4:
+            return dir
+        return dir - 4
 
-def removeCap(dir):
-    if dir < 4:
-        return dir
-    return dir - 4
+    def getDirection(src, dst):
+        exitDir = src.ExitInfo['direction']
+        entryDir = dst.EntryInfo['direction']
+        # compatible transition
+        if exitDir == entryDir:
+            return exitDir
+        # if incompatible but horizontal we keep entry dir (looks more natural)
+        if isHorizontal(exitDir) and isHorizontal(entryDir):
+            return entryDir
+        # otherwise keep exit direction and remove cap
+        return removeCap(exitDir)
 
-def getDirection(src, dst):
-    exitDir = src.ExitInfo['direction']
-    entryDir = dst.EntryInfo['direction']
-    # compatible transition
-    if exitDir == entryDir:
-        return exitDir
-    # if incompatible but horizontal we keep entry dir (looks more natural)
-    if isHorizontal(exitDir) and isHorizontal(entryDir):
-        return entryDir
-    # otherwise keep exit direction and remove cap
-    return removeCap(exitDir)
-
-def getBitFlag(srcArea, dstArea, origFlag):
-    flags = origFlag
-    if srcArea == dstArea:
-        flags &= 0xBF
-    else:
-        flags |= 0x40
-    return flags
-
-def getDoorConnections(graph, areas=True, bosses=False, escape=True):
-    transitions = []
-    if areas:
-        transitions += vanillaTransitions
-    if bosses:
-        transitions += vanillaBossesTransitions
-    if escape:
-        transitions += vanillaEscapeTransitions
-    for srcName, dstName in transitions:
-        src = graph.accessPoints[srcName]
-        dst = graph.accessPoints[dstName]
-        dst.EntryInfo.update(src.ExitInfo)
-        src.EntryInfo.update(dst.ExitInfo)
-    connections = []
-    for src, dst in graph.InterAreaTransitions:
-        # area only
-        if not bosses and src.Boss:
-            continue
-        # boss only
-        if not areas and not src.Boss:
-            continue
-        conn = {}
-        conn['ID'] = str(src) + ' -> ' + str(dst)
-        # remove duplicates (loop transitions)
-        if any(c['ID'] == conn['ID'] for c in connections):
-            continue
-#        print(conn['ID'])
-        # where to write
-        conn['DoorPtr'] = src.ExitInfo['DoorPtr']
-        # door properties
-        conn['RoomPtr'] = dst.RoomInfo['RoomPtr']
-        conn['doorAsmPtr'] = dst.EntryInfo['doorAsmPtr']
-        conn['direction'] = getDirection(src, dst)
-        conn['bitFlag'] = getBitFlag(src.RoomInfo['area'], dst.RoomInfo['area'],
-                                     dst.EntryInfo['bitFlag'])
-        conn['cap'] = dst.EntryInfo['cap']
-        conn['screen'] = dst.EntryInfo['screen']
-        if conn['direction'] != src.ExitInfo['direction']: # incompatible transition
-            conn['distanceToSpawn'] = 0
-            conn['SamusX'] = dst.EntryInfo['SamusX']
-            conn['SamusY'] = dst.EntryInfo['SamusY']
-            if dst.Name == 'RidleyRoomIn': # special case: spawn samus on ridley platform
-                conn['screen'] = (0x0, 0x1)
+    def getBitFlag(srcArea, dstArea, origFlag):
+        flags = origFlag
+        if srcArea == dstArea:
+            flags &= 0xBF
         else:
-            conn['distanceToSpawn'] = dst.EntryInfo['distanceToSpawn']
-        if 'song' in dst.EntryInfo:
-            conn['song'] = dst.EntryInfo['song']
-            conn['songs'] = dst.RoomInfo['songs']
-        connections.append(conn)
-    return connections
+            flags |= 0x40
+        return flags
 
-def getDoorsPtrs2Aps():
-    ret = {}
-    for ap in accessPoints:
-        if ap.isInternal() == True:
-            continue
-        ret[ap.ExitInfo["DoorPtr"]] = ap.Name
-    return ret
+    def getDoorConnections(graph, areas=True, bosses=False, escape=True):
+        transitions = []
+        if areas:
+            transitions += vanillaTransitions
+        if bosses:
+            transitions += vanillaBossesTransitions
+        if escape:
+            transitions += vanillaEscapeTransitions
+        for srcName, dstName in transitions:
+            src = graph.accessPoints[srcName]
+            dst = graph.accessPoints[dstName]
+            dst.EntryInfo.update(src.ExitInfo)
+            src.EntryInfo.update(dst.ExitInfo)
+        connections = []
+        for src, dst in graph.InterAreaTransitions:
+            # area only
+            if not bosses and src.Boss:
+                continue
+            # boss only
+            if not areas and not src.Boss:
+                continue
+            conn = {}
+            conn['ID'] = str(src) + ' -> ' + str(dst)
+            # remove duplicates (loop transitions)
+            if any(c['ID'] == conn['ID'] for c in connections):
+                continue
+    #        print(conn['ID'])
+            # where to write
+            conn['DoorPtr'] = src.ExitInfo['DoorPtr']
+            # door properties
+            conn['RoomPtr'] = dst.RoomInfo['RoomPtr']
+            conn['doorAsmPtr'] = dst.EntryInfo['doorAsmPtr']
+            conn['direction'] = getDirection(src, dst)
+            conn['bitFlag'] = getBitFlag(src.RoomInfo['area'], dst.RoomInfo['area'],
+                                         dst.EntryInfo['bitFlag'])
+            conn['cap'] = dst.EntryInfo['cap']
+            conn['screen'] = dst.EntryInfo['screen']
+            if conn['direction'] != src.ExitInfo['direction']: # incompatible transition
+                conn['distanceToSpawn'] = 0
+                conn['SamusX'] = dst.EntryInfo['SamusX']
+                conn['SamusY'] = dst.EntryInfo['SamusY']
+                if dst.Name == 'RidleyRoomIn': # special case: spawn samus on ridley platform
+                    conn['screen'] = (0x0, 0x1)
+            else:
+                conn['distanceToSpawn'] = dst.EntryInfo['distanceToSpawn']
+            if 'song' in dst.EntryInfo:
+                conn['song'] = dst.EntryInfo['song']
+                conn['songs'] = dst.RoomInfo['songs']
+            connections.append(conn)
+        return connections
 
-def getAps2DoorsPtrs():
-    ret = {}
-    for ap in accessPoints:
-        if ap.isInternal() == True:
-            continue
-        ret[ap.Name] = ap.ExitInfo["DoorPtr"]
-    return ret
+    def getDoorsPtrs2Aps():
+        ret = {}
+        for ap in accessPoints:
+            if ap.isInternal() == True:
+                continue
+            ret[ap.ExitInfo["DoorPtr"]] = ap.Name
+        return ret
+
+    def getAps2DoorsPtrs():
+        ret = {}
+        for ap in accessPoints:
+            if ap.isInternal() == True:
+                continue
+            ret[ap.Name] = ap.ExitInfo["DoorPtr"]
+        return ret
 
 
-def getTransitions(addresses):
-    # build address -> name dict
-    doorsPtrs = getDoorsPtrs2Aps()
+    def getTransitions(addresses):
+        # build address -> name dict
+        doorsPtrs = getDoorsPtrs2Aps()
 
-    transitions = []
-    # (src.ExitInfo['DoorPtr'], dst.ExitInfo['DoorPtr'])
-    for (srcDoorPtr, destDoorPtr) in addresses:
-        transitions.append((doorsPtrs[srcDoorPtr], doorsPtrs[destDoorPtr]))
+        transitions = []
+        # (src.ExitInfo['DoorPtr'], dst.ExitInfo['DoorPtr'])
+        for (srcDoorPtr, destDoorPtr) in addresses:
+            transitions.append((doorsPtrs[srcDoorPtr], doorsPtrs[destDoorPtr]))
 
-    return transitions
+        return transitions

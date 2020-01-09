@@ -37,16 +37,25 @@ class RomPatches:
     SpazerShotBlock           = 20
     # climb back up red tower from bottom no matter what
     RedTowerLeftPassage       = 21
-    # exit red tower top to crateria or back to red tower without power bombs
+    # exit red tower top to crateria
     RedTowerBlueDoors         = 22
     # shot block in crumble blocks at early supers
     EarlySupersShotBlock      = 23
+    # brinstar reserve area door blue
+    BrinReserveBlueDoor       = 24
+    # red tower top PB door to hellway
+    HellwayBlueDoor           = 25
     # shot block to exit hi jump area
     HiJumpShotBlock           = 30
     # access main upper norfair without anything
     CathedralEntranceWallJump = 31
+    # graph blue doors
+    HiJumpAreaBlueDoor        = 32
+    SpeedAreaBlueDoor         = 33
     # moat bottom block
     MoatShotBlock             = 41
+    #graph
+    SpongeBathBlueDoor        = 42
     ## Area rando patches
     # remove crumble block for reverse lower norfair door access
     SingleChamberNoCrumble    = 101
@@ -171,6 +180,7 @@ class RomReader:
         '0x0': {'name': 'Nothing'}
     }
 
+    # FIXME not up to date
     patches = {
         'startCeres': {'address': 0x7F1F, 'value': 0xB6, 'desc': "Blue Brinstar and Red Tower blue doors"},
         'startLS': {'address': 0x7F17, 'value': 0xB6, 'desc': "Blue Brinstar and Red Tower blue doors"},
@@ -184,6 +194,7 @@ class RomReader:
         'areaLayout': {'address': 0x252FA7, 'value': 0xF8, 'desc': "Area layout additional modifications"}
     }
 
+    # FIXME shouldn't be here
     allPatches = {
         'AimAnyButton': {'address': 0x175ca, 'value': 0x60, 'vanillaValue': 0xad},
         'animal_enemies': {'address': 0x78418, 'value': 0x3B, 'vanillaValue': 0x48},
@@ -404,8 +415,8 @@ class RomReader:
 
     def loadTransitions(self):
         # return the transitions
-        from graph_access import accessPoints, getRooms
-        rooms = getRooms()
+        from graph_access import accessPoints, GraphUtils
+        rooms = GraphUtils.getRooms()
         bossTransitions = {}
         areaTransitions = {}
         for accessPoint in accessPoints:
@@ -815,12 +826,12 @@ class RomPatcher:
         self.ipsPatches.append(patch)
 
     def applyStartAP(self, apName, plms=None):
-        from graph_access import getAccessPoint
-        ap = getAccessPoint(apName)
-        if plms is not None and ap.Start != 0 and ap.Start != 0xffff:
+        from graph_access import getAccessPoint, GraphUtils
+        ap = getAccessPoint(apName)        
+        if plms is not None and not GraphUtils.isStandardStart(apName):
             # not Ceres or Landing Site, so Zebes will be awake
             plms.append('Morph_Zebes_Awake')
-        (w0, w1) = getWord(ap.Start)
+        (w0, w1) = getWord(ap.Start['spawn'])
         patchDict = {
             'StartAP': {
                 0x10F200: [w0, w1]

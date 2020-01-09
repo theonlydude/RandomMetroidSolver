@@ -15,7 +15,7 @@ from rom import RomLoader, RomPatcher, RomReader
 from itemrandomizerweb.Items import ItemManager
 from graph_locations import locations as graphLocations
 from graph import AccessGraph
-from graph_access import vanillaTransitions, accessPoints, getDoorConnections, getTransitions, vanillaBossesTransitions, getAps2DoorsPtrs
+from graph_access import vanillaTransitions, vanillaBossesTransitions, accessPoints, GraphUtils
 from utils import PresetLoader, removeChars
 from vcr import VCR
 import log, db
@@ -984,7 +984,7 @@ class InteractiveSolver(CommonSolver):
 
     def loadPlandoTransitions(self):
         transitionsAddr = self.romLoader.getPlandoTransitions(len(vanillaBossesTransitions) + len(vanillaTransitions))
-        return getTransitions(transitionsAddr)
+        return GraphUtils.getTransitions(transitionsAddr)
 
     def loadPlandoLocs(self):
         # get the addresses of the already filled locs, with the correct order
@@ -1162,10 +1162,10 @@ class InteractiveSolver(CommonSolver):
         else:
             romPatcher.writePlandoAddresses(self.visitedLocations)
         if self.areaRando == True or self.bossRando == True:
-            doors = getDoorConnections(self.fillGraph(), self.areaRando, self.bossRando)
+            doors = GraphUtils.getDoorConnections(self.fillGraph(), self.areaRando, self.bossRando)
             romPatcher.writeDoorConnections(doors)
             if magic == None:
-                doorsPtrs = getAps2DoorsPtrs()
+                doorsPtrs = GraphUtils.getAps2DoorsPtrs()
                 romPatcher.writePlandoTransitions(self.curGraphTransitions, doorsPtrs,
                                                   len(vanillaBossesTransitions) + len(vanillaTransitions))
         romPatcher.end()

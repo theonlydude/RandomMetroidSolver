@@ -615,6 +615,10 @@ class Knows:
         ]
     }
 
+    def knows(name, diff):
+        k = getattr(name)
+        return k.bool and k.difficulty <= diff
+
 def isSettings(settings):
     return settings[0:len('__')] != '__'
 

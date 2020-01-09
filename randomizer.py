@@ -6,7 +6,7 @@ from itemrandomizerweb.Randomizer import Randomizer, RandoSettings, progSpeeds
 from itemrandomizerweb.AreaRandomizer import AreaRandomizer
 from itemrandomizerweb.PaletteRando import PaletteRando
 from graph_locations import locations as graphLocations
-from graph_access import vanillaTransitions, getDoorConnections, vanillaBossesTransitions, createBossesTransitions, getStartAccessPointNames
+from graph_access import vanillaTransitions, vanillaBossesTransitions, GraphUtils
 from parameters import Knows, easy, medium, hard, harder, hardcore, mania, text2diff, diff2text
 from utils import PresetLoader
 from rom import RomPatcher, RomPatches, FakeROM
@@ -32,6 +32,7 @@ def restricted_float(x):
     return x
 
 def loadPlandoPatches(patches):
+    # FIXME doors
     # check total base (blue bt and red tower blue door)
     if "startCeres" in patches or "startLS" in patches:
         RomPatches.ActivePatches += [RomPatches.BlueBrinstarBlueDoor,
@@ -86,7 +87,7 @@ if __name__ == "__main__":
                         dest='bosses', nargs='?', const=True, default=False)
     parser.add_argument('--startAP', help="Name of the Access Point to start from",
                         dest='startAP', nargs='?', default="Landing Site",
-                        choices=getStartAccessPointNames())
+                        choices=GraphUtils.getStartAccessPointNames())
     parser.add_argument('--debug', '-d', help="activate debug logging", dest='debug',
                         action='store_true')
     parser.add_argument('--maxDifficulty', '-t',
@@ -395,6 +396,8 @@ if __name__ == "__main__":
         RomPatches.ActivePatches = RomPatches.TotalBase
     else:
         RomPatches.ActivePatches = RomPatches.Total
+    RomPatches.ActivePatches.remove(RomPatches.BlueBrinstarBlueDoor)
+    RomPatches.ActivePatches += GraphUtils.getGraphPatches(args.startAP)
     if args.noGravHeat == True or args.progressiveSuits == True:
         RomPatches.ActivePatches.remove(RomPatches.NoGravityEnvProtection)
     if args.progressiveSuits == True:
@@ -464,7 +467,7 @@ if __name__ == "__main__":
                                   args.plandoRando["locsItems"] if args.plandoRando != None else None)
     bossTransitions = vanillaBossesTransitions
     if args.bosses == True:
-        bossTransitions = createBossesTransitions()
+        bossTransitions = GraphUtils.createBossesTransitions()
     if args.area == True:
         if args.dot == True:
             dotDir = args.directory
@@ -499,9 +502,9 @@ if __name__ == "__main__":
             sys.exit(-1)
     if args.patchOnly == False:
         (stuck, itemLocs, progItemLocs) = randomizer.generateItems()
-        doors = getDoorConnections(randomizer.areaGraph,
-                                   args.area, args.bosses,
-                                   args.area and not args.noEscapeRando)
+        doors = GraphUtils.getDoorConnections(randomizer.areaGraph,
+                                              args.area, args.bosses,
+                                              args.area and not args.noEscapeRando)
         escapeTimer = randomizer.areaGraph.EscapeTimer
     else:
         stuck = False

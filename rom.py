@@ -555,6 +555,16 @@ class RomReader:
         # return (size of compressed data, decompressed data)
         return Compressor().decompress(self.romFile, address)
 
+    def getEscapeTimer(self):
+        self.romFile.seek(0x1E21)
+        second = struct.unpack("B", self.romFile.read(1))[0]
+        minute = struct.unpack("B", self.romFile.read(1))[0]
+
+        second = int(second / 16)*10 + second%16
+        minute = int(minute / 16)*10 + minute%16
+
+        return "{:02d}:{:02d}".format(minute, second)
+
 class RomPatcher:
     # standard:
     # Intro/Ceres Skip and initial door flag setup
@@ -1489,6 +1499,9 @@ class RomLoader(object):
         romFile.seek((0x10000 | doorPtr) + 10)
         asmPtr = readWord(romFile)
         return asmPtr != 0 # this is at 0 in vanilla
+
+    def getEscapeTimer(self):
+        return self.romReader.getEscapeTimer()
 
 class RomLoaderSfc(RomLoader):
     # standard usage (when calling from the command line)

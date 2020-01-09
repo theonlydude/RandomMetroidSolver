@@ -5,7 +5,7 @@ path = os.path.expanduser('~/RandomMetroidSolver')
 if os.path.exists(path) and path not in sys.path:
     sys.path.append(path)
 
-import datetime, os, hashlib, json, subprocess, tempfile, glob, random
+import datetime, os, hashlib, json, subprocess, tempfile, glob, random, re
 from datetime import datetime, date
 from collections import OrderedDict
 
@@ -843,9 +843,12 @@ def getAddressesToRead(plando=False):
             continue
         addresses["transitions"].append(0x10000 | ap.ExitInfo['DoorPtr'])
 
-    # misc: majors split
-    addresses["misc"].append(0x0)
+    # misc
+    # majors split
     addresses["misc"].append(0x17B6C)
+    # escape timer
+    addresses["misc"].append(0x1E21)
+    addresses["misc"].append(0x1E22)
 
     # ranges [low, high[
     ## doorasm
@@ -1679,6 +1682,10 @@ class WS(object):
         if action not in ['init', 'add', 'remove', 'clear', 'get', 'save', 'replace', 'randomize']:
             raiseHttp(400, "Unknown action {}, must be init/add/remove/clear/get/save/randomize".format(action), True)
 
+        if request.vars.escapeTimer != None:
+            if re.match("[0-9][0-9]:[0-9][0-9]", request.vars.escapeTimer) == None:
+                raiseHttp(400, "Wrong escape timer value")
+
     def validatePoint(self, point):
         if request.vars[point] == None:
             raiseHttp(400, "Missing parameter {}".format(point), True)
@@ -1730,6 +1737,7 @@ class WS(object):
                 "areaRando": state["areaRando"],
                 "bossRando": state["bossRando"],
                 "escapeRando": state["escapeRando"],
+                "escapeTimer": state["escapeTimer"],
                 "seed": state["seed"],
                 "preset": os.path.basename(os.path.splitext(state["presetFileName"])[0]),
                 "errorMsg": state["errorMsg"],
@@ -1773,6 +1781,8 @@ class WS(object):
         elif action == 'save' and scope == 'common':
             if parameters['lock'] == True:
                 params.append('--lock')
+            if 'escapeTimer' in parameters:
+                params += ['--escapeTimer', parameters['escapeTimer']]
         elif action == 'randomize':
             params += ['--progressionSpeed', parameters["progressionSpeed"],
                        '--minorQty', parameters["minorQty"],
@@ -1804,6 +1814,10 @@ class WS(object):
             if action == 'save':
                 return json.dumps(state)
             else:
+                # save the escape timer at every step to avoid loosing its value
+                if request.vars.escapeTimer != None:
+                    state["escapeTimer"] = request.vars.escapeTimer
+
                 self.session["state"] = state
                 return self.returnState()
         else:
@@ -1950,7 +1964,11 @@ class WS_common_save(WS):
         if self.session["mode"] != "plando":
             raiseHttp(400, "Save can only be use in plando mode", True)
 
-        return self.callSolverAction("common", "save", {'lock': request.vars.lock == "lock"})
+        params = {'lock': request.vars.lock == "lock"}
+        if request.vars.escapeTimer != None:
+            params['escapeTimer'] = request.vars.escapeTimer
+
+        return self.callSolverAction("common", "save", params)
 
 class WS_common_randomize(WS):
     def validate(self):

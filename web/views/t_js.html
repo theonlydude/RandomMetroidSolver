@@ -242,6 +242,12 @@ function ajaxCall(dataDict, msg, okFunc=ajaxOkGet) {
       dataDict["debug"] = true;
     }
 
+    // always store the timer
+    if(escapeRando == true && mode == "plando") {
+      var value = document.getElementById("timer").value;
+      dataDict["escapeTimer"] = value;
+    }
+
     webServInProgress = true;
 
     var request = $.ajax({
@@ -457,6 +463,15 @@ function ajaxOkGet(jsonData, status, dummy, chained=false) {
   var arrayLength = jsonData["linesSeq"].length;
   for(var i=0; i<arrayLength; i++) {
     addLine(jsonData["linesSeq"][i][0], jsonData["linesSeq"][i][1]);
+  }
+
+  // add timer input
+  if(escapeRando == true && mode == "plando") {
+    var timer = document.getElementById("timer");
+    timer.value = jsonData["escapeTimer"];
+    timer.style.display = "block";
+  } else {
+    document.getElementById("timer").style.display = "none";
   }
 
   // if no available locations, display a popup telling you're stuck

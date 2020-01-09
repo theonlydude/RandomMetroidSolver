@@ -147,6 +147,14 @@
 .gotoAction {
     width: 4em;
 }
+.timer {
+    position: absolute;
+    z-index: 7;
+    /* width: 2.5%; */
+    /* height: 3.75%; */
+    top: 31%;
+    left: 27.9%;
+}
 </style>
 
 <script type="text/javascript">
@@ -175,6 +183,7 @@ function save(lock) {
     lock = g_lock;
   }
 
+  var dataDict = {action: "save", scope: "common", lock: g_lock};
   var uploadFile = document.getElementById("uploadFile");
   if(uploadFile.files.length == 0) {
     var saveFile = document.getElementById("saveFile");
@@ -183,11 +192,11 @@ function save(lock) {
       document.getElementById("savePopup").style.display = "block";
     } else {
       // call WS
-      ajaxCall({action: "save", scope: "common", lock: g_lock}, "download", ajaxOkSave);
+      ajaxCall(dataDict, "download", ajaxOkSave);
     }
   } else {
     // call WS
-    ajaxCall({action: "save", scope: "common", lock: g_lock}, "download", ajaxOkSave);
+    ajaxCall(dataDict, "download", ajaxOkSave);
   }
 }
 
@@ -894,6 +903,8 @@ def displayNumber(id, min, max, default, step="1"):
     <!-- to open the debug popup -->
     <div id="startDebug" class="startDebug"><img src="/solver/static/images/play.svg" alt="Start" onclick="displayDebugPopup()" data-toggle="tooltip" title="Start the debug popup" data-placement="bottom" data-container="body" data-html="true"></div>
   </div>
+
+  <input id="timer" type="time" value="03:00" class="timer" style="display:none">
 
   <!-- info on current loaded seed -->
   <p class="white">Current Seed:</p>

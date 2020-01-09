@@ -784,7 +784,7 @@ def getDoorConnections(graph, areas=True, bosses=False, escape=True):
 def getDoorsPtrs2Aps():
     ret = {}
     for ap in accessPoints:
-        if ap.isInternal() == True:
+        if ap.Internal == True:
             continue
         ret[ap.ExitInfo["DoorPtr"]] = ap.Name
     return ret
@@ -792,7 +792,7 @@ def getDoorsPtrs2Aps():
 def getAps2DoorsPtrs():
     ret = {}
     for ap in accessPoints:
-        if ap.isInternal() == True:
+        if ap.Internal == True:
             continue
         ret[ap.Name] = ap.ExitInfo["DoorPtr"]
     return ret

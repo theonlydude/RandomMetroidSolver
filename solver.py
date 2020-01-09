@@ -47,6 +47,8 @@ class SolverState(object):
         self.state["bossRando"] = solver.bossRando
         # bool
         self.state["escapeRando"] = solver.escapeRando
+        # string "03:00"
+        self.state["escapeTimer"] = solver.escapeTimer
         # dict of raw patches
         self.state["patches"] = solver.patches
         # dict {locName: {itemName: "xxx", "accessPoint": "xxx"}, ...}
@@ -103,6 +105,7 @@ class SolverState(object):
         solver.areaRando = self.state["areaRando"]
         solver.bossRando = self.state["bossRando"]
         solver.escapeRando = self.state["escapeRando"]
+        solver.escapeTimer = self.state["escapeTimer"]
         solver.patches = self.setPatches(self.state["patches"])
         self.setLocsData(solver.locations)
         solver.areaTransitions = self.state["areaTransitions"]
@@ -294,6 +297,7 @@ class CommonSolver(object):
             self.areaRando = True
             self.bossRando = True
             self.escapeRando = False
+            self.escapeTimer = "03:00"
             self.patches = RomReader.getDefaultPatches()
             RomLoader.factory(self.patches).loadPatches()
             # in seedless load all the vanilla transitions
@@ -308,6 +312,7 @@ class CommonSolver(object):
             self.romLoader = RomLoader.factory(rom, magic)
             self.majorsSplit = self.romLoader.assignItems(self.locations)
             (self.areaRando, self.bossRando, self.escapeRando) = self.romLoader.loadPatches()
+            self.escapeTimer = self.romLoader.getEscapeTimer()
 
             if interactive == False:
                 self.patches = self.romLoader.getPatches()
@@ -316,9 +321,6 @@ class CommonSolver(object):
             print("ROM {} majors: {} area: {} boss: {} escape: {} patches: {}".format(rom, self.majorsSplit, self.areaRando, self.bossRando, self.escapeRando, sorted(self.patches)))
 
             (self.areaTransitions, self.bossTransitions, self.escapeTransition) = self.romLoader.getTransitions()
-            print("areaTrans: {}".format(self.areaTransitions))
-            print("bossTrans: {}".format(self.bossTransitions))
-            print("escapeTrans: {}".format(self.escapeTransition))
             if interactive == True and self.debug == False:
                 # in interactive area mode we build the graph as we play along
                 if self.areaRando == True and self.bossRando == True:
@@ -958,7 +960,7 @@ class InteractiveSolver(CommonSolver):
 
         if scope == 'common':
             if action == 'save':
-                return self.savePlando(params['lock'])
+                return self.savePlando(params['lock'], params['escapeTimer'])
             elif action == 'randomize':
                 self.randoPlando(params)
 
@@ -993,7 +995,8 @@ class InteractiveSolver(CommonSolver):
         return self.locsAddressName[address]
 
     def loadPlandoTransitions(self):
-        transitionsAddr = self.romLoader.getPlandoTransitions(len(vanillaBossesTransitions) + len(vanillaTransitions))
+        # add escape transition
+        transitionsAddr = self.romLoader.getPlandoTransitions(len(vanillaBossesTransitions) + len(vanillaTransitions) + 1)
         return getTransitions(transitionsAddr)
 
     def loadPlandoLocs(self):
@@ -1130,7 +1133,7 @@ class InteractiveSolver(CommonSolver):
                 loc["accessPoint"] = itemLoc["Location"]["accessPoint"]
                 self.collectMajor(loc)
 
-    def savePlando(self, lock):
+    def savePlando(self, lock, escapeTimer):
         # store filled locations addresses in the ROM for next creating session
         locsItems = {}
         itemLocs = []
@@ -1178,6 +1181,11 @@ class InteractiveSolver(CommonSolver):
                 doorsPtrs = getAps2DoorsPtrs()
                 romPatcher.writePlandoTransitions(self.curGraphTransitions, doorsPtrs,
                                                   len(vanillaBossesTransitions) + len(vanillaTransitions))
+            if self.escapeRando == True and escapeTimer != None:
+                # convert from '03:00' to number of seconds
+                escapeTimer = int(escapeTimer[0:2]) * 60 + int(escapeTimer[3:])
+                romPatcher.writeEscapeTimer(escapeTimer)
+
         romPatcher.end()
 
         data = romPatcher.romFile.data
@@ -1881,6 +1889,7 @@ def interactiveSolver(args):
         if args.scope == 'common':
             if args.action == "save":
                 params["lock"] = args.lock
+                params["escapeTimer"] = args.escapeTimer
             elif args.action == "randomize":
                 params["progressionSpeed"] = args.progressionSpeed
                 params["minorQty"] = args.minorQty
@@ -2001,6 +2010,7 @@ if __name__ == "__main__":
                         dest="count", type=int)
     parser.add_argument('--lock', help="lock the plando seed (used in interactive mode)",
                         dest="lock", action='store_true')
+    parser.add_argument('--escapeTimer', help="escape timer like 03:00", dest="escapeTimer", default=None)
     parser.add_argument('--fill', help="in plando load all the source seed locations/transitions as a base (used in interactive mode)",
                         dest="fill", action='store_true')
     parser.add_argument('--progressionSpeed', help="rando plando (used in interactive mode)",

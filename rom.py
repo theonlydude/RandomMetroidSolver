@@ -1037,7 +1037,8 @@ class RomPatcher:
             return s
 
         isRace = self.race is not None
-        address = 0x2f5240
+        startCreditAddress = 0x2f5240
+        address = startCreditAddress
         if isRace:
             addr = address - 0x40
             data = [0x007f, 0x007f, 0x007f, 0x007f, 0x007f, 0x007f, 0x007f, 0x007f, 0x007f, 0x1008, 0x1013, 0x1004, 0x100c, 0x007f, 0x100b, 0x100e, 0x1002, 0x1000, 0x1013, 0x1008, 0x100e, 0x100d, 0x1012, 0x007f, 0x007f, 0x007f, 0x007f, 0x007f, 0x007f, 0x007f, 0x007f, 0x007f]
@@ -1082,7 +1083,7 @@ class RomPatcher:
             address += 0x80
 
         # we need 19 items displayed, if we've removed majors, add some blank text
-        for i in range(19 - len(fItemLocs)):
+        while address < startCreditAddress + len(items)*0x80:
             self.writeCreditsString(address, 0x04, prepareString(""), isRace)
             self.writeCreditsString((address + 0x40), 0x18, prepareString(""), isRace)
 

@@ -1,12 +1,12 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
-import argparse, random, os.path, json, sys, shutil
+import argparse, os.path, json, sys, shutil, random
 
 from itemrandomizerweb.Randomizer import Randomizer, RandoSettings, progSpeeds
 from itemrandomizerweb.AreaRandomizer import AreaRandomizer
 from itemrandomizerweb.PaletteRando import PaletteRando
 from graph_locations import locations as graphLocations
-from graph_access import vanillaTransitions, getDoorConnections, vanillaBossesTransitions, getRandomBossTransitions
+from graph_access import vanillaTransitions, getDoorConnections, vanillaBossesTransitions, createBossesTransitions
 from parameters import Knows, easy, medium, hard, harder, hardcore, mania, text2diff, diff2text
 from utils import PresetLoader
 from rom import RomPatcher, RomPatches, FakeROM
@@ -20,10 +20,10 @@ morphPlacements = ['early', 'late', 'normal']
 majorsSplits = ['Full', 'Major', 'Chozo']
 
 def dumpErrorMsg(outFileName, msg):
-    if outFileName is None:
-        return
-    with open(outFileName, 'w') as jsonFile:
-        json.dump({"errorMsg": msg}, jsonFile)
+    print("DIAG: " + msg)
+    if outFileName is not None:
+        with open(outFileName, 'w') as jsonFile:
+            json.dump({"errorMsg": msg}, jsonFile)
 
 def restricted_float(x):
     x = float(x)
@@ -42,6 +42,10 @@ def loadPlandoPatches(patches):
     # check gravity heat protection
     if "gravityNoHeatProtection" in patches:
         RomPatches.ActivePatches.append(RomPatches.NoGravityEnvProtection)
+    if "progressiveSuits" in patches:
+        RomPatches.ActivePatches.append(RomPatches.ProgressiveSuits)
+    if "nerfedCharge" in patches:
+        RomPatches.ActivePatches.append(RomPatches.NerfedCharge)
     # check varia tweaks
     if "variaTweaks" in patches:
         RomPatches.ActivePatches += RomPatches.VariaTweaks
@@ -67,15 +71,19 @@ if __name__ == "__main__":
     parser.add_argument('--dot',
                         help="generate dot file with area graph",
                         action='store_true',dest='dot', default=False)
-    parser.add_argument('--area',
-                        help="area mode", action='store_true',
-                        dest='area', default=False)
-    parser.add_argument('--bosses',
-                        help="randomize bosses", action='store_true',
-                        dest='bosses', default=False)
+    parser.add_argument('--area', help="area mode",
+                        dest='area', nargs='?', const=True, default=False)
     parser.add_argument('--areaLayoutBase',
                         help="use simple layout patch for area mode", action='store_true',
                         dest='areaLayoutBase', default=False)
+    parser.add_argument('--noEscapeRando',
+                        help="Do not randomize the escape sequence in area mode", action='store_true',
+                        dest='noEscapeRando', default=False)
+    parser.add_argument('--noRemoveEscapeEnemies',
+                        help="Do not remove enemies during escape sequence in area mode", action='store_true',
+                        dest='noRemoveEscapeEnemies', default=False)
+    parser.add_argument('--bosses', help="randomize bosses",
+                        dest='bosses', nargs='?', const=True, default=False)
     parser.add_argument('--debug', '-d', help="activate debug logging", dest='debug',
                         action='store_true')
     parser.add_argument('--maxDifficulty', '-t',
@@ -96,10 +104,9 @@ if __name__ == "__main__":
     parser.add_argument('--patch', '-c',
                         help="optional patches to add",
                         dest='patches', nargs='?', default=[], action='append',
-                        choices=['itemsounds.ips',
-                                 'spinjumprestart.ips', 'No_Music', 'rando_speed.ips',
-                                 'elevators_doors_speed.ips', 'skip_intro.ips', 'skip_ceres.ips',
-                                 'AimAnyButton.ips', 'supermetroid_msu1.ips', 'max_ammo_display.ips'])
+                        choices=['itemsounds.ips', 'elevators_doors_speed.ips',
+                                 'spinjumprestart.ips', 'rando_speed.ips',
+                                 'skip_intro.ips', 'skip_ceres.ips', 'No_Music'])
     parser.add_argument('--missileQty', '-m',
                         help="quantity of missiles",
                         dest='missileQty', nargs='?', default=3,
@@ -152,9 +159,15 @@ if __name__ == "__main__":
     parser.add_argument('--nolayout',
                         help="do not include total randomizer layout patches",
                         dest='noLayout', action='store_true', default=False)
-    parser.add_argument('--nogravheat',
+    parser.add_argument('--nogravheatPatch',
                         help="do not include total randomizer suits patches",
                         dest='noGravHeat', action='store_true', default=False)
+    parser.add_argument('--progressiveSuits',
+                        help="apply progressive suits patch",
+                        dest='progressiveSuits', action='store_true', default=False)
+    parser.add_argument('--nerfedCharge',
+                        help="apply nerfed charge patch",
+                        dest='nerfedCharge', action='store_true', default=False)
     parser.add_argument('--novariatweaks',
                         help="do not include VARIA randomizer tweaks",
                         dest='noVariaTweaks', action='store_true', default=False)
@@ -207,14 +220,14 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.output is None and args.rom is None:
-        print "Need --output or --rom parameter"
+        print("Need --output or --rom parameter")
         sys.exit(-1)
     elif args.output is not None and args.rom is not None:
-        print "Can't have both --output and --rom parameters"
+        print("Can't have both --output and --rom parameters")
         sys.exit(-1)
 
     if args.plandoRando != None and args.output == None:
-        print "plandoRando param requires output param"
+        print("plandoRando param requires output param")
         sys.exit(-1)
 
     log.init(args.debug)
@@ -246,35 +259,42 @@ if __name__ == "__main__":
     seed4rand = seed
     if args.raceMagic is not None:
         if args.raceMagic <= 0 or args.raceMagic >= 0x10000:
-            print "Invalid magic"
+            print("Invalid magic")
             sys.exit(-1)
         seed4rand = seed ^ args.raceMagic
     random.seed(seed4rand)
-
+    optErrMsg = ""
     # choose on animal patch
     if args.animals == True:
         animalsPatches = ['animal_enemies.ips', 'animals.ips', 'draygonimals.ips', 'escapimals.ips',
                           'gameend.ips', 'grey_door_animals.ips', 'low_timer.ips', 'metalimals.ips',
                           'phantoonimals.ips', 'ridleyimals.ips']
-        args.patches.append(animalsPatches[random.randint(0, len(animalsPatches)-1)])
+        if args.area == True and args.noEscapeRando == False:
+            # these glitch with enemies on
+            animalsPatches.remove('phantoonimals.ips') # excessive lag and ridley sound effects
+            animalsPatches.remove('ridleyimals.ips') # escape timer tiles tail
+            if args.noRemoveEscapeEnemies == False:
+                animalsPatches.remove('draygonimals.ips') # glitched room
+                animalsPatches.remove('metalimals.ips') # no pirates
+        args.patches.append(random.choice(animalsPatches))
 
     # if random progression speed, choose one
     progSpeed = str(args.progressionSpeed).lower()
     if progSpeed == "random":
-        progSpeed = speeds[random.randint(0, len(speeds)-1)]
+        progSpeed = random.choice(speeds)
     mulSpeeds = progSpeed.split(',')
-    progSpeed = mulSpeeds[random.randint(0, len(mulSpeeds)-1)]
+    progSpeed = random.choice(mulSpeeds)
     if len(mulSpeeds) > 1:
         args.progressionSpeed = 'random'
     if progSpeed not in speeds:
-        print 'Invalid progression speed : ' + progSpeed
+        print('Invalid progression speed : ' + progSpeed)
         sys.exit(-1)
     logger.debug("progression speed: {}".format(progSpeed))
 
     # if random progression difficulty, choose one
     progDiff = args.progressionDifficulty
     if progDiff == "random":
-        progDiff = progDiffs[random.randint(0, len(progDiffs)-1)]
+        progDiff = random.choice(progDiffs)
     logger.debug("progression diff: {}".format(progDiff))
 
     if args.patchOnly == False:
@@ -284,7 +304,7 @@ if __name__ == "__main__":
     if args.maxDifficulty:
         if args.maxDifficulty == 'random':
             diffs = ['hard', 'harder', 'very hard', 'hardcore', 'mania']
-            maxDifficulty = text2diff[diffs[random.randint(0, len(diffs)-1)]]
+            maxDifficulty = text2diff[random.choice(diffs)]
         else:
             maxDifficulty = text2diff[args.maxDifficulty]
     else:
@@ -306,45 +326,60 @@ if __name__ == "__main__":
         threshold = mania - epsilon
     maxDifficulty = threshold
 
+    majorsSplitRandom = False
     if args.majorsSplit == 'random':
-        args.majorsSplit = majorsSplits[random.randint(0, len(majorsSplits)-1)]
+        majorsSplitRandom = True
+        args.majorsSplit = random.choice(majorsSplits)
     logger.debug("majorsSplit: {}".format(args.majorsSplit))
+
+    areaRandom = False
+    if args.area == 'random':
+        areaRandom = True
+        args.area = bool(random.randint(0, 2))
+    logger.debug("area: {}".format(args.area))
+
+    bossesRandom = False
+    if args.bosses == 'random':
+        bossesRandom = True
+        args.bosses = bool(random.randint(0, 2))
+    logger.debug("bosses: {}".format(args.bosses))
 
     if args.suitsRestriction == 'random':
         if args.morphPlacement == 'late' and args.area == True:
             args.suitsRestriction = False
         else:
-            args.suitsRestriction = bool(random.getrandbits(1))
+            args.suitsRestriction = bool(random.randint(0, 2))
     logger.debug("suitsRestriction: {}".format(args.suitsRestriction))
 
     if args.hideItems == 'random':
-        args.hideItems = bool(random.getrandbits(1))
+        args.hideItems = bool(random.randint(0, 2))
 
     if args.morphPlacement == 'random':
         if (args.suitsRestriction == True and args.area == True) or args.majorsSplit == 'Chozo':
             morphPlacements.remove('late')
-        args.morphPlacement = morphPlacements[random.randint(0, len(morphPlacements)-1)]
+        args.morphPlacement = random.choice(morphPlacements)
     # late + chozo will always stuck
     if args.majorsSplit == 'Chozo' and args.morphPlacement == "late":
         args.morphPlacement = "normal"
     logger.debug("morphPlacement: {}".format(args.morphPlacement))
 
     if args.strictMinors == 'random':
-        args.strictMinors = bool(random.getrandbits(1))
+        args.strictMinors = bool(random.randint(0, 2))
 
     # fill restrictions dict
     restrictions = { 'Suits' : args.suitsRestriction, 'Morph' : args.morphPlacement }
     restrictions['MajorMinor'] = args.majorsSplit
     seedCode = 'X'
-    if restrictions['MajorMinor'] == 'Full':
-        seedCode = 'FX'
-    elif restrictions['MajorMinor'] == 'Chozo':
-        seedCode = 'ZX'
-    elif restrictions['MajorMinor'] == 'Major':
-        seedCode = 'MX'
-    if args.bosses == True:
+    if majorsSplitRandom == False:
+        if restrictions['MajorMinor'] == 'Full':
+            seedCode = 'FX'
+        elif restrictions['MajorMinor'] == 'Chozo':
+            seedCode = 'ZX'
+        elif restrictions['MajorMinor'] == 'Major':
+            seedCode = 'MX'
+    if args.bosses == True and bossesRandom == False:
         seedCode = 'B'+seedCode
-    if args.area == True:
+    if args.area == True and areaRandom == False:
         seedCode = 'A'+seedCode
 
     # output ROM name
@@ -365,8 +400,12 @@ if __name__ == "__main__":
         RomPatches.ActivePatches = RomPatches.TotalBase
     else:
         RomPatches.ActivePatches = RomPatches.Total
-    if args.noGravHeat == True:
+    if args.noGravHeat == True or args.progressiveSuits == True:
         RomPatches.ActivePatches.remove(RomPatches.NoGravityEnvProtection)
+    if args.progressiveSuits == True:
+        RomPatches.ActivePatches.append(RomPatches.ProgressiveSuits)
+    if args.nerfedCharge == True:
+        RomPatches.ActivePatches.append(RomPatches.NerfedCharge)
     if args.noVariaTweaks == False:
         RomPatches.ActivePatches += RomPatches.VariaTweaks
     missileQty = float(args.missileQty)
@@ -383,7 +422,7 @@ if __name__ == "__main__":
     if minorQty < 1:
         minorQty = random.randint(25, 100)
     if energyQty == 'random':
-        energyQty = energyQties[random.randint(0, len(energyQties)-1)]
+        energyQty = random.choice(energyQties)
     qty = {'energy': energyQty,
            'minors': minorQty,
            'ammo': { 'Missile': missileQty,
@@ -396,7 +435,7 @@ if __name__ == "__main__":
         superFun = []
         for fun in args.superFun:
             if fun.find('Random') != -1:
-                if bool(random.getrandbits(1)) == True:
+                if bool(random.randint(0, 2)) == True:
                     superFun.append(fun[0:fun.find('Random')])
             else:
                 superFun.append(fun)
@@ -426,7 +465,7 @@ if __name__ == "__main__":
     randoSettings = RandoSettings(maxDifficulty, progSpeed, progDiff, qty, restrictions, args.superFun, args.runtimeLimit_s, args.vcr, args.plandoRando["locsItems"] if args.plandoRando != None else None)
     bossTransitions = vanillaBossesTransitions
     if args.bosses == True:
-        bossTransitions = getRandomBossTransitions()
+        bossTransitions = createBossesTransitions()
     if args.area == True:
         if args.dot == True:
             dotDir = args.directory
@@ -436,11 +475,13 @@ if __name__ == "__main__":
         if args.areaLayoutBase == True:
             RomPatches.ActivePatches.remove(RomPatches.AreaRandoGatesOther)
         try:
-            randomizer = AreaRandomizer(graphLocations, randoSettings, seedName, bossTransitions, dotDir=dotDir)
+            randomizer = AreaRandomizer(graphLocations, randoSettings, seedName, bossTransitions,
+                                        dotDir=dotDir,
+                                        escape=not args.noEscapeRando,
+                                        removeEscapeEnemies=not args.noRemoveEscapeEnemies)
         except RuntimeError:
             msg = "Cannot generate area layout. Retry, and change the super fun settings if the problem happens again."
             dumpErrorMsg(args.output, msg)
-            print("DIAG: {}".format(msg))
             sys.exit(-1)
     else:
         try:
@@ -452,16 +493,17 @@ if __name__ == "__main__":
         except RuntimeError:
             msg = "Locations unreachable detected with preset/super fun/max diff. Retry, and change the Super Fun settings and/or Maximum difficulty if the problem happens again."
             dumpErrorMsg(args.output, msg)
-            print("DIAG: {}".format(msg))
             sys.exit(-1)
         except Exception as e:
-            msg = e.message
+            msg = str(e)
             dumpErrorMsg(args.output, msg)
-            print("DIAG: {}".format(msg))
             sys.exit(-1)
-    doors = getDoorConnections(randomizer.areaGraph, args.area, args.bosses)
     if args.patchOnly == False:
         (stuck, itemLocs, progItemLocs) = randomizer.generateItems()
+        doors = getDoorConnections(randomizer.areaGraph,
+                                   args.area, args.bosses,
+                                   args.area and not args.noEscapeRando)
+        escapeTimer = randomizer.areaGraph.EscapeTimer
     else:
         stuck = False
         itemLocs = []
@@ -479,7 +521,7 @@ if __name__ == "__main__":
             if (itemLoc['Item']['Type'] not in ['Nothing', 'NoEnergy']
                 and itemLoc['Location']['CanHidden'] == True
                 and itemLoc['Location']['Visibility'] == 'Visible'):
-                if bool(random.getrandbits(1)) == True:
+                if bool(random.randint(0, 2)) == True:
                     itemLoc['Location']['Visibility'] = 'Hidden'
 
     # transform itemLocs in our usual dict(location, item), for minors keep only the first
@@ -494,18 +536,33 @@ if __name__ == "__main__":
         elif itemType not in firstMinorsFound:
             locsItems[locName] = itemType
     if args.debug == True:
-        for loc in locsItems:
+        for loc in sorted(locsItems.keys()):
             print('{:>50}: {:>16} '.format(loc, locsItems[loc]))
 
     if args.plandoRando != None:
+        # replace smbool with a dict
+        for itemLoc in itemLocs:
+            itemLoc["Location"]["difficulty"] = itemLoc["Location"]["difficulty"].json()
+
         with open(args.output, 'w') as jsonFile:
             json.dump({"itemLocs": itemLocs, "errorMsg": randomizer.errorMsg}, jsonFile, default=lambda x: x.__dict__)
         sys.exit(0)
 
     # generate extended stats
     if args.extStatsFilename != None:
+        if args.noGravHeat == True:
+            gravityBehaviour = 'Vanilla'
+        elif args.progressiveSuits == True:
+            gravityBehaviour = 'Progressive'
+        else:
+            gravityBehaviour = 'Balanced'
+        if args.maxDifficulty == None:
+            args.maxDifficulty = 'no difficulty cap'
         parameters = {'preset': preset, 'area': args.area, 'boss': args.bosses,
-                      'noGravHeat': not args.noGravHeat, 'majorsSplit': args.majorsSplit,
+                      'majorsSplit': args.majorsSplit,
+                      'gravityBehaviour': gravityBehaviour,
+                      'nerfedCharge': args.nerfedCharge,
+                      'maxDifficulty': args.maxDifficulty,
                       'progSpeed': progSpeed, 'morphPlacement': args.morphPlacement,
                       'suitsRestriction': args.suitsRestriction, 'progDiff': progDiff,
                       'superFunMovement': 'Movement' in args.superFun,
@@ -528,7 +585,15 @@ if __name__ == "__main__":
             romPatcher = RomPatcher(magic=args.raceMagic)
 
         if args.patchOnly == False:
-            romPatcher.applyIPSPatches(args.patches, args.noLayout, args.noGravHeat, args.area, args.bosses, args.areaLayoutBase, args.noVariaTweaks)
+            suitsMode = "Classic"
+            if args.progressiveSuits:
+                suitsMode = "Progressive"
+            elif args.noGravHeat:
+                suitsMode = "Vanilla"
+            romPatcher.applyIPSPatches(args.patches, args.noLayout, suitsMode,
+                                       args.area, args.bosses, args.areaLayoutBase,
+                                       args.noVariaTweaks, args.nerfedCharge,
+                                       args.noEscapeRando, args.noRemoveEscapeEnemies)
         else:
             romPatcher.addIPSPatches(args.patches)
         if args.sprite is not None:
@@ -541,11 +606,8 @@ if __name__ == "__main__":
             romPatcher.writeSpoiler(itemLocs, progItemLocs)
             romPatcher.writeRandoSettings(randoSettings, itemLocs)
             romPatcher.writeDoorConnections(doors)
-            if args.area == True:
-                romPatcher.writeTourianRefill()
-            if args.bosses == True:
-                romPatcher.patchPhantoonEyeDoor()
-        # romPatcher.writeTransitionsCredits(randomizer.areaGraph.getCreditsTransitions())
+            if escapeTimer is not None:
+                romPatcher.writeEscapeTimer(escapeTimer)
         if ctrlDict is not None:
             romPatcher.writeControls(ctrlDict)
         if args.moonWalk == True:
@@ -578,16 +640,19 @@ if __name__ == "__main__":
 
         if args.rom is None:
             data = romPatcher.romFile.data
-            fileName += '.sfc'
+            fileName = '{}.sfc'.format(fileName)
             data["fileName"] = fileName
             # error msg in json to be displayed by the web site
-            data["errorMsg"] = randomizer.errorMsg
+            if optErrMsg != "":
+                msg = optErrMsg + '\n' + randomizer.errorMsg
+            else:
+                msg = randomizer.errorMsg
+            data["errorMsg"] = msg
             with open(outFileName, 'w') as jsonFile:
                 json.dump(data, jsonFile)
     except Exception as e:
         msg = "Error patching {}: ({}: {})".format(outFileName, type(e).__name__, e)
         dumpErrorMsg(args.output, msg)
-        print(msg)
         sys.exit(-1)
 
     if stuck == True:

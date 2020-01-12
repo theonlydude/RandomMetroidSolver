@@ -80,6 +80,10 @@
 	  </select>
 	</td>
       </tr>
+      <tr id="hideItemVisibility" style="display: none">
+	<td>Hide this item:</td>
+	<td><input id="hideItem" name="hideItem" type="checkbox"></td>
+      </tr>
       <tr><td colspan=2 class="blankLastRow"></td></tr>
     </table>
     <table>
@@ -94,7 +98,7 @@
     <!-- the map -->
     <img id="map" src="/solver/static/images/area_map.png" class="center">
 
-    <!-- the access points -->
+    <!-- area access points -->
     <div id="lowerMushroomsLeft" class="baseButton" onclick="clickPortal('lowerMushroomsLeft')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Lower Mushrooms Left"></div>
     <div id="moatRight" class="baseButton" onclick="clickPortal('moatRight')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Moat Right"></div>
     <div id="greenPiratesShaftBottomRight" class="baseButton" onclick="clickPortal('greenPiratesShaftBottomRight')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Green Pirates Shaft Bottom Right"></div>
@@ -123,6 +127,8 @@
     <div id="eastTunnelTopRight" class="baseButton" onclick="clickPortal('eastTunnelTopRight')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="East Tunnel Top Right"></div>
     <div id="glassTunnelTop" class="baseButtonRot" onclick="clickPortal('glassTunnelTop')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Glass Tunnel Top"></div>
     <div id="statuesHallwayLeft" class="baseButton" onclick="clickPortal('statuesHallwayLeft')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Statues Hallway Left"></div>
+
+    <!-- bosses -->
     <div id="phantoonRoomOut" class="baseButton" onclick="clickPortal('phantoonRoomOut')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Phantoon Room Out"></div>
     <div id="phantoonRoomIn" class="baseButton" onclick="clickPortal('phantoonRoomIn')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Phantoon Room In"></div>
     <div id="ridleyRoomOut" class="baseButton" onclick="clickPortal('ridleyRoomOut')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Ridley Room Out"></div>
@@ -131,6 +137,14 @@
     <div id="kraidRoomIn" class="baseButton" onclick="clickPortal('kraidRoomIn')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Kraid Room In"></div>
     <div id="draygonRoomOut" class="baseButton" onclick="clickPortal('draygonRoomOut')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Draygon Room Out"></div>
     <div id="draygonRoomIn" class="baseButton" onclick="clickPortal('draygonRoomIn')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Draygon Room In"></div>
+
+    <!-- escape -->
+    <div id="tourianEscapeRoom4TopRight" class="baseButton" onclick="clickPortal('tourianEscapeRoom4TopRight')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Tourian Escape"></div>
+    <div id="climbBottomLeft" class="baseButton" onclick="clickPortal('climbBottomLeft')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Climb Bottom Left"></div>
+    <div id="greenBrinstarMainShaftTopLeft" class="baseButton" onclick="clickPortal('greenBrinstarMainShaftTopLeft')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Brinstar Map Room"></div>
+    <div id="basementLeft" class="baseButton" onclick="clickPortal('basementLeft')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Wrecked Ship Map Room"></div>
+    <div id="businessCenterMidLeft" class="baseButton" onclick="clickPortal('businessCenterMidLeft')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Norfair Map Room"></div>
+    <div id="crabHoleBottomRight" class="baseButton" onclick="clickPortal('crabHoleBottomRight')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Maridia Map Room"></div>
 
     <!-- the locations -->
     <div id="EnergyTankGauntlet" class="baseLoc" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-toggle="tooltip" title="" onclick="clickLoc(this)" data-html="true" data-placement="bottom"></div>
@@ -241,7 +255,7 @@
 
     <!-- area tracker buttons -->
     <div id="titleArea" class="titleArea">AREA</div>
-    <div id="repeatArea" class="repeatArea"><img src="/solver/static/images/repeat.svg" alt="Cancel Last" onclick="deleteLine()" data-toggle="tooltip" title="Remove last added transition" data-placement="bottom" data-container="body" data-html="true"></div>
+    <div id="repeatArea" class="repeatArea"><img src="/solver/static/images/repeat.svg" alt="Cancel Last" onclick="deleteLine()" data-toggle="tooltip" title="Remove last added or selected transition" data-placement="bottom" data-container="body" data-html="true"></div>
     <div id="binArea" class="binArea"><img src="/solver/static/images/bin.svg" alt="Clear" onclick="clearLines()" data-toggle="tooltip" title="Reset seed transitions" data-placement="bottom" data-container="body" data-html="true"></div>
 
 
@@ -256,7 +270,7 @@
 
     <!-- gps marker -->
     <div id="lastLoc">
-      <img src="/solver/static/images/gps.png" alt="last access point" data-toggle="tooltip" title="Current access point" data-placement="bottom" data-container="body" data-html="true">
+      <img src="/solver/static/images/gps.png" alt="last access point" data-toggle="tooltip" title="Current access point" data-placement="bottom" data-container="body" data-html="true" id="gps">
     </div>
 
     <!-- g4 -->

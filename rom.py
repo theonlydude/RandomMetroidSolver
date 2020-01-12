@@ -1,5 +1,6 @@
 
-import re, struct, sys, random, os, json, copy, base64
+import re, struct, sys, os, json, copy, base64, random
+
 from smbool import SMBool
 from itemrandomizerweb.Items import ItemManager
 from itemrandomizerweb.patches import patches
@@ -7,6 +8,7 @@ from itemrandomizerweb.stdlib import List
 from compression import Compressor
 from ips import IPS_Patch
 from parameters import appDir
+from utils import normalizeRounding
 
 def readWord(romFile):
     r0 = struct.unpack("B", romFile.read(1))[0]
@@ -60,6 +62,10 @@ class RomPatches:
     WsEtankPhantoonAlive    = 1001
     # Lower Norfair chozo (vanilla access to GT/Screw Area) : disable space jump check
     LNChozoSJCheckDisabled  = 1002
+    # Progressive suits patch, mutually exclusive with NoGravityEnvProtection
+    ProgressiveSuits        = 1003
+    # Nerfed charge beam available from the start
+    NerfedCharge            = 1004
 
     #### Patch sets
     # total randomizer
@@ -167,10 +173,13 @@ class RomReader:
         'startLS': {'address': 0x7F17, 'value': 0xB6, 'desc': "Blue Brinstar and Red Tower blue doors"},
         'layout': {'address': 0x21BD80, 'value': 0xD5, 'desc': "Anti soft lock layout modifications"},
         'casual': {'address': 0x22E879, 'value': 0xF8, 'desc': "Switch Blue Brinstar Etank and missile"},
-        'gravityNoHeatProtection': {'address': 0x06e37d, 'value': 0x01, 'desc': "Gravity suit heat protection removed"},
+        'gravityNoHeatProtection': {'address': 0x0869dd, 'value': 0x01, 'desc': "Gravity suit heat protection removed"},
+        'progressiveSuits': {'address':0x869df, 'value': 0xF0, 'desc': "Progressive suits"},
+        'nerfedCharge': {'address':0x83821, 'value': 0x80, 'desc': "Nerfed charge beam from the start of the game"}, # this value works for both DASH and VARIA variants
         'variaTweaks': {'address': 0x7CC4D, 'value': 0x37, 'desc': "VARIA tweaks"},
         'area': {'address': 0x22D564, 'value': 0xF2, 'desc': "Area layout modifications"},
-        'areaLayout': {'address': 0x252FA7, 'value': 0xF8, 'desc': "Area layout additional modifications"}
+        'areaLayout': {'address': 0x252FA7, 'value': 0xF8, 'desc': "Area layout additional modifications"},
+        'areaEscape': {'address': 0x20c91, 'value': 0x4C, 'desc': "Area escape randomization"}
     }
 
     allPatches = {
@@ -179,7 +188,8 @@ class RomReader:
         # all the modifications from animals are included in animal_enemies...
         #'animals': {'address': 0x7841D, 'value': 0x8C, 'vanillaValue': 0x18},
         'area_rando_blue_doors': {'address': 0x7823E, 'value': 0x3B, 'vanillaValue': 0x66},
-        'area_rando_door_transition': {'address': 0x7FDC, 'value': 0x9A, 'vanillaValue': 0x20},
+        'area_rando_door_transition': {'address': 0x852BA, 'value': 0x20, 'vanillaValue': 0xad},
+        'area_rando_escape': {'address': 0x15f38, 'value': 0x5c, 'vanillaValue': 0xbd},
         'area_rando_layout_base': {'address': 0x788A0, 'value': 0x2B, 'vanillaValue': 0x26},
         'area_rando_layout': {'address': 0x78666, 'value': 0x62, 'vanillaValue': 0x64},
         'bomb_torizo': {'address': 0x7FDC, 'value': 0xF2, 'vanillaValue': 0x20},
@@ -220,7 +230,9 @@ class RomReader:
         'wake_zebes': {'address': 0x18EB5, 'value': 0xFF, 'vanillaValue': 0x00},
         'ws_etank': {'address': 0x7CC4D, 'value': 0x37, 'vanillaValue': 0x8f},
         'ws_save': {'address': 0x7CEB0, 'value': 0xC9, 'vanillaValue': 0xc7},
-        'Removes_Gravity_Suit_heat_protection': {'address': 0x06e37d, 'value': 0x01, 'vanillaValue': 0x21},
+        'Removes_Gravity_Suit_heat_protection': {'address': 0x0869dd, 'value': 0x01, 'vanillaValue': 0x20},
+        'progressive_suits': {'address': 0x869df, 'value': 0xF0, 'vanillaValue': 0xd0},
+        'nerfed_charge': {'address': 0x83821, 'value': 0x80, 'vanillaValue': 0xd0},
         'Mother_Brain_Cutscene_Edits': {'address': 0x148824, 'value': 0x01, 'vanillaValue': 0x40},
         'Suit_acquisition_animation_skip': {'address': 0x020717, 'value': 0xea, 'vanillaValue': 0x22},
         'Fix_Morph_and_Missiles_Room_State': {'address': 0x07e655, 'value': 0xea, 'vanillaValue': 0x89},
@@ -229,7 +241,7 @@ class RomReader:
         'Disable_Space_Time_select_in_menu': {'address': 0x013175, 'value': 0x01, 'vanillaValue': 0x08},
         'Fix_Morph_Ball_Hidden_Chozo_PLMs': {'address': 0x0268ce, 'value': 0x04, 'vanillaValue': 0x02},
         'Fix_Screw_Attack_selection_in_menu': {'address': 0x0134c5, 'value': 0x0c, 'vanillaValue': 0x0a},
-        'No_Music': {'address': 0x278413, 'value': 0x6f, 'vanillaValue': 0xcd},
+        'No_Music': {'address': 0x278413, 'value': 0x6f, 'vanillaValue': 0xcd}
     }
 
     @staticmethod
@@ -390,15 +402,17 @@ class RomReader:
 
     def loadTransitions(self):
         # return the transitions
-        from graph_access import accessPoints, getRooms
+        from graph_access import accessPoints, getRooms, getAccessPoint
+
         rooms = getRooms()
         bossTransitions = {}
         areaTransitions = {}
         for accessPoint in accessPoints:
-            if accessPoint.Internal == True:
+            if accessPoint.isInternal() == True:
                 continue
-            (destRoomPtr, destEntryScreen) = self.getTransition(accessPoint.ExitInfo['DoorPtr'])
-            destAP = rooms[(destRoomPtr, destEntryScreen)]
+            key = self.getTransition(accessPoint.ExitInfo['DoorPtr'])
+
+            destAP = rooms[key]
             if accessPoint.Boss == True or destAP.Boss == True:
                 bossTransitions[accessPoint.Name] = destAP.Name
             else:
@@ -417,7 +431,13 @@ class RomReader:
 
             return [(t, transitions[t]) for t in transitions]
 
-        return (removeBiTrans(areaTransitions), removeBiTrans(bossTransitions))
+        # get escape transition
+        escapeSrcAP = getAccessPoint('Tourian Escape Room 4 Top Right')
+        key = self.getTransition(escapeSrcAP.ExitInfo['DoorPtr'])
+        escapeDstAP = rooms[key]
+        escapeTransition = [(escapeSrcAP.Name, escapeDstAP.Name)]
+
+        return (removeBiTrans(areaTransitions), removeBiTrans(bossTransitions), escapeTransition)
 
     def getTransition(self, doorPtr):
         self.romFile.seek(0x10000 | doorPtr)
@@ -425,12 +445,45 @@ class RomReader:
         # room ptr is in two bytes
         v1 = struct.unpack("B", self.romFile.read(1))[0]
         v2 = struct.unpack("B", self.romFile.read(1))[0]
+        roomPtr = v1 | (v2 << 8)
+
+        self.romFile.seek((0x10000 | doorPtr) + 3)
+        direction = struct.unpack("B", self.romFile.read(1))[0]
 
         self.romFile.seek((0x10000 | doorPtr) + 6)
         sx = struct.unpack("B", self.romFile.read(1))[0]
         sy = struct.unpack("B", self.romFile.read(1))[0]
 
-        return (v1 | (v2 << 8), (sx, sy))
+        d1 = struct.unpack("B", self.romFile.read(1))[0]
+        d2 = struct.unpack("B", self.romFile.read(1))[0]
+        distanceToSpawn = d1 | (d2 << 8)
+
+        if distanceToSpawn == 0:
+            # incompatible transition use samus X/Y instead of direction
+            # as incompatible transition change the value of direction
+            asm1 = struct.unpack("B", self.romFile.read(1))[0]
+            asm2 = struct.unpack("B", self.romFile.read(1))[0]
+            asmAddress = 0x70000 | asm1 | (asm2 << 8)
+
+            self.romFile.seek(asmAddress+3)
+            b = struct.unpack("B", self.romFile.read(1))[0]
+            offset = 0
+            if b == 0x20:
+                # ignore original door asm ptr call
+                offset = 3
+
+            self.romFile.seek(asmAddress+4+offset)
+            x1 = struct.unpack("B", self.romFile.read(1))[0]
+            x2 = struct.unpack("B", self.romFile.read(1))[0]
+            x = x1 | (x2 << 8)
+            self.romFile.seek(asmAddress+10+offset)
+            y1 = struct.unpack("B", self.romFile.read(1))[0]
+            y2 = struct.unpack("B", self.romFile.read(1))[0]
+            y = y1 | (y2 << 8)
+
+            return (roomPtr, (sx, sy), (x, y))
+        else:
+            return (roomPtr, (sx, sy), direction)
 
     def patchPresent(self, patchName):
         self.romFile.seek(self.patches[patchName]['address'])
@@ -475,63 +528,6 @@ class RomReader:
                 ret.append(patch)
         return sorted(ret)
 
-    def getDict(self):
-        # get the address/value dict for dump
-        romData = {}
-
-        # locations items
-        addresses = [0x78264, 0x78404, 0x78432, 0x7852C, 0x78614, 0x786DE, 0x7879E, 0x787C2, 0x787FA, 0x78824, 0x78876, 0x7896E, 0x7899C, 0x78ACA, 0x78B24, 0x78BA4, 0x78BAC, 0x78C36, 0x78C3E, 0x78C82, 0x78CCA, 0x79108, 0x79110, 0x79184, 0x7C2E9, 0x7C337, 0x7C365, 0x7C36D, 0x7C47D, 0x7C559, 0x7C5E3, 0x7C6E5, 0x7C755, 0x7C7A7, 0x781CC, 0x781E8, 0x781EE, 0x781F4, 0x78248, 0x783EE, 0x78464, 0x7846A, 0x78478, 0x78486, 0x784AC, 0x784E4, 0x78518, 0x7851E, 0x78532, 0x78538, 0x78608, 0x7860E, 0x7865C, 0x78676, 0x7874C, 0x78798, 0x787D0, 0x78802, 0x78836, 0x7883C, 0x788CA, 0x7890E, 0x78914, 0x789EC, 0x78AE4, 0x78B46, 0x78BC0, 0x78BE6, 0x78BEC, 0x78C04, 0x78C14, 0x78C2A, 0x78C44, 0x78C52, 0x78C66, 0x78C74, 0x78CBC, 0x78E6E, 0x78E74, 0x78F30, 0x78FCA, 0x78FD2, 0x790C0, 0x79100, 0x7C265, 0x7C2EF, 0x7C319, 0x7C357, 0x7C437, 0x7C43D, 0x7C483, 0x7C4AF, 0x7C4B5, 0x7C533, 0x7C5DD, 0x7C5EB, 0x7C5F1, 0x7C603, 0x7C609, 0x7C74D]
-        for address in addresses:
-            self.romFile.seek(address)
-            romData[address] = struct.unpack("B", self.romFile.read(1))[0]
-            romData[address+1] = struct.unpack("B", self.romFile.read(1))[0]
-            self.romFile.seek(address+4)
-            romData[address+4] = struct.unpack("B", self.romFile.read(1))[0]
-
-        # start ceres
-        self.romFile.seek(0x7F1F)
-        romData[0x7F1F] = struct.unpack("B", self.romFile.read(1))[0]
-
-        # start landing site
-        self.romFile.seek(0x7F17)
-        romData[0x7F17] = struct.unpack("B", self.romFile.read(1))[0]
-
-        # layout
-        self.romFile.seek(0x21BD80)
-        romData[0x21BD80] = struct.unpack("B", self.romFile.read(1))[0]
-
-        # casual
-        self.romFile.seek(0x22E879)
-        romData[0x22E879] = struct.unpack("B", self.romFile.read(1))[0]
-
-        # no grav heat
-        self.romFile.seek(0x06e37d)
-        romData[0x06e37d] = struct.unpack("B", self.romFile.read(1))[0]
-
-        # varia tweaks
-        self.romFile.seek(0x7CC4D)
-        romData[0x7CC4D] = struct.unpack("B", self.romFile.read(1))[0]
-
-        # area
-        self.romFile.seek(0x22D564)
-        romData[0x22D564] = struct.unpack("B", self.romFile.read(1))[0]
-
-        # area more layout
-        self.romFile.seek(0x252FA7)
-        romData[0x252FA7] = struct.unpack("B", self.romFile.read(1))[0]
-
-        # transitions
-        addresses = [0x18c22, 0x18aea, 0x18a42, 0x18e9e, 0x18bfe, 0x18e86, 0x18f0a, 0x189ca, 0x18aae, 0x196d2, 0x19a4a, 0x1922e, 0x195fa, 0x1967e, 0x1a39c, 0x1a510, 0x18aa2, 0x1a480, 0x1902a, 0x190c6, 0x18af6, 0x1a384, 0x1a390, 0x1a330, 0x18c52, 0x191e6]
-        for address in addresses:
-            self.romFile.seek(address)
-            romData[address] = struct.unpack("B", self.romFile.read(1))[0]
-            romData[address+1] = struct.unpack("B", self.romFile.read(1))[0]
-            self.romFile.seek(address+6)
-            romData[address+6] = struct.unpack("B", self.romFile.read(1))[0]
-            romData[address+7] = struct.unpack("B", self.romFile.read(1))[0]
-
-        return romData
-
     def getPlandoAddresses(self):
         self.romFile.seek(0x2F6000)
         addresses = []
@@ -558,6 +554,16 @@ class RomReader:
     def decompress(self, address):
         # return (size of compressed data, decompressed data)
         return Compressor().decompress(self.romFile, address)
+
+    def getEscapeTimer(self):
+        self.romFile.seek(0x1E21)
+        second = struct.unpack("B", self.romFile.read(1))[0]
+        minute = struct.unpack("B", self.romFile.read(1))[0]
+
+        second = int(second / 16)*10 + second%16
+        minute = int(minute / 16)*10 + minute%16
+
+        return "{:02d}:{:02d}".format(minute, second)
 
 class RomPatcher:
     # standard:
@@ -635,7 +641,8 @@ class RomPatcher:
                      'skip_intro.ips', 'skip_ceres.ips', 'animal_enemies.ips', 'animals.ips',
                      'draygonimals.ips', 'escapimals.ips', 'gameend.ips', 'grey_door_animals.ips',
                      'low_timer.ips', 'metalimals.ips', 'phantoonimals.ips', 'ridleyimals.ips'],
-        'Area': ['area_rando_blue_doors.ips', 'area_rando_layout.ips', 'area_rando_door_transition.ips' ]
+        'Area': ['area_rando_blue_doors.ips', 'area_rando_layout.ips', 'area_rando_door_transition.ips' ],
+        'AreaEscape' : ['area_rando_escape.ips', 'area_rando_escape_ws_fix.ips', 'Escape_Rando_Tourian_Doors']
     }
 
     def __init__(self, romFileName=None, magic=None, plando=False):
@@ -758,8 +765,9 @@ class RomPatcher:
 
     def writeItemsNumber(self):
         # write total number of actual items for item percentage patch (patch the patch)
-        self.romFile.seek(0x5E651)
-        self.romFile.write(struct.pack('B', self.nItems))
+        for addr in [0x5E64E, 0x5E6AB]:
+            self.romFile.seek(addr)
+            self.romFile.write(struct.pack('B', self.nItems))
 
     def addIPSPatches(self, patches):
         for patchName in patches:
@@ -768,7 +776,10 @@ class RomPatcher:
     def customSprite(self, sprite):
         self.applyIPSPatch(sprite, ipsDir='itemrandomizerweb/patches/sprites')
 
-    def applyIPSPatches(self, optionalPatches=[], noLayout=False, noGravHeat=False, area=False, bosses=False, areaLayoutBase=False, noVariaTweaks=False):
+    def applyIPSPatches(self, optionalPatches=[], noLayout=False, suitsMode="Classic",
+                        area=False, bosses=False, areaLayoutBase=False,
+                        noVariaTweaks=False, nerfedCharge=False,
+                        noEscapeRando=False, noRemoveEscapeEnemies=False):
         try:
             # apply standard patches
             stdPatches = []
@@ -778,10 +789,17 @@ class RomPatcher:
             stdPatches += RomPatcher.IPSPatches['Standard'][:]
             if self.race is not None:
                 stdPatches.append('race_mode_credits.ips')
-            if noGravHeat == True:
+            if suitsMode != "Classic":
                 stdPatches.remove('Removes_Gravity_Suit_heat_protection')
-            if area == True or bosses == True:
+            if suitsMode == "Progressive":
+                stdPatches.append('progressive_suits.ips')
+            if nerfedCharge == True:
+                stdPatches.append('nerfed_charge.ips')
+            if bosses == True or area == True:
                 stdPatches.append('ws_save.ips')
+            if bosses == True and (area == False or noEscapeRando == True):
+                stdPatches.append("Phantoon_Eye_Door")
+
             for patchName in stdPatches:
                 self.applyIPSPatch(patchName)
 
@@ -804,6 +822,10 @@ class RomPatcher:
                 if areaLayoutBase == True:
                     RomPatcher.IPSPatches['Area'].remove('area_rando_layout.ips')
                     RomPatcher.IPSPatches['Area'].append('area_rando_layout_base.ips')
+                if noEscapeRando == False:
+                    RomPatcher.IPSPatches['Area'] += RomPatcher.IPSPatches['AreaEscape']
+                    if noRemoveEscapeEnemies == True:
+                        RomPatcher.IPSPatches['Area'].append('Escape_Rando_Enable_Enemies')
                 for patchName in RomPatcher.IPSPatches['Area']:
                     self.applyIPSPatch(patchName)
             elif bosses == True:
@@ -833,7 +855,7 @@ class RomPatcher:
             for ips in self.ipsPatches:
                 mergedIPS.append(ips)
             patchData = mergedIPS.encode()
-            self.romFile.data["ips"] = base64.b64encode(patchData)
+            self.romFile.data["ips"] = base64.b64encode(patchData).decode()
             if mergedIPS.truncate_length is not None:
                 self.romFile.data["truncate_length"] = mergedIPS.truncate_length
             self.romFile.data["max_size"] = mergedIPS.max_size
@@ -884,7 +906,7 @@ class RomPatcher:
 
     def getAmmoPct(self, minorsDist):
         q = 0
-        for m,v in minorsDist.iteritems():
+        for m,v in minorsDist.items():
             q += v['Quantity']
         return 100*q/66
 
@@ -1015,7 +1037,8 @@ class RomPatcher:
             return s
 
         isRace = self.race is not None
-        address = 0x2f5240
+        startCreditAddress = 0x2f5240
+        address = startCreditAddress
         if isRace:
             addr = address - 0x40
             data = [0x007f, 0x007f, 0x007f, 0x007f, 0x007f, 0x007f, 0x007f, 0x007f, 0x007f, 0x1008, 0x1013, 0x1004, 0x100c, 0x007f, 0x100b, 0x100e, 0x1002, 0x1000, 0x1013, 0x1008, 0x100e, 0x100d, 0x1012, 0x007f, 0x007f, 0x007f, 0x007f, 0x007f, 0x007f, 0x007f, 0x007f, 0x007f]
@@ -1060,7 +1083,7 @@ class RomPatcher:
             address += 0x80
 
         # we need 19 items displayed, if we've removed majors, add some blank text
-        for i in range(19 - len(fItemLocs)):
+        while address < startCreditAddress + len(items)*0x80:
             self.writeCreditsString(address, 0x04, prepareString(""), isRace)
             self.writeCreditsString((address + 0x40), 0x18, prepareString(""), isRace)
 
@@ -1169,9 +1192,9 @@ class RomPatcher:
     #   property shall point to this custom ASM.
     # * if not, just write doorAsmPtr as the door property directly.
     def writeDoorConnections(self, doorConnections):
-        self.asmAddress = 0x7EB00
-
+        asmAddress = 0x7EB00
         for conn in doorConnections:
+            # write door ASM for transition doors (code and pointers)
 #            print('Writing door connection ' + conn['ID'])
             doorPtr = conn['DoorPtr']
             roomPtr = conn['RoomPtr']
@@ -1221,28 +1244,30 @@ class RomPatcher:
                 (Y0, Y1) = (conn['SamusY'] & 0x00FF, (conn['SamusY'] & 0xFF00) >> 8)
                 # force samus position
                 # see area_rando_door_transition.asm. assemble it to print routines SNES addresses.
-                asmPatch += [ 0x20, 0x00, 0xEA ]    # JSR incompatible_doors
+                asmPatch += [ 0x20, 0x30, 0xEA ]    # JSR incompatible_doors
                 asmPatch += [ 0xA9, X0,   X1   ]    # LDA #$SamusX        ; fixed Samus X position
                 asmPatch += [ 0x8D, 0xF6, 0x0A ]    # STA $0AF6           ; update Samus X position in memory
                 asmPatch += [ 0xA9, Y0,   Y1   ]    # LDA #$SamusY        ; fixed Samus Y position
                 asmPatch += [ 0x8D, 0xFA, 0x0A ]    # STA $0AFA           ; update Samus Y position in memory
             else:
                 # still give I-frames
-                asmPatch += [ 0x20, 0x40, 0xEA ]    # JSR giveiframes
-            # change song if needed
-            if 'song' in conn:
-                asmPatch += [ 0xA9, conn['song'], 0xFF ]       # LDA #$song       ; A is argument for change_song
-                asmPatch += [ 0x20, 0x47,         0XEA ]       # JSR change_song
+                asmPatch += [ 0x20, 0x70, 0xEA ]    # JSR giveiframes
             # return
             asmPatch += [ 0x60 ]   # RTS
-            self.romFile.write(struct.pack('B', self.asmAddress & 0x00FF))
-            self.romFile.write(struct.pack('B', (self.asmAddress & 0xFF00) >> 8))
+            self.romFile.write(struct.pack('B', asmAddress & 0x00FF))
+            self.romFile.write(struct.pack('B', (asmAddress & 0xFF00) >> 8))
 
-            self.romFile.seek(self.asmAddress)
+            self.romFile.seek(asmAddress)
             for byte in asmPatch:
                 self.romFile.write(struct.pack('B', byte))
 
-            self.asmAddress += len(asmPatch)
+            asmAddress += len(asmPatch)
+            # update room state header with song changes
+            if 'song' in conn:
+                for addr in conn["songs"]:
+                    self.romFile.seek(0x70000 + addr)
+                    self.romFile.write(struct.pack('B', conn['song']))
+                    self.romFile.write(struct.pack('B', 0x5))
 
     # change BG table to avoid scrolling sky bug when transitioning to west ocean
     def patchWestOcean(self, doorPtr):
@@ -1257,39 +1282,14 @@ class RomPatcher:
         self.romFile.seek(offset)
         self.romFile.write(struct.pack('B', 0x2))
 
-    # adds eye door PLM to "phantoon dead" room state in boss rando
-    def patchPhantoonEyeDoor(self):
-        # repoints PLM list to "phantoon alive" (eye door is the only diff in the list)
-        self.romFile.seek(0x7CCAF)
-        self.writeWord(0xC291)
-
-    # add ASM to Tourian "door" down elevator to trigger full refill (ammo + energy)
-    # TODO move this in area_rando_door_transition.asm
-    def writeTourianRefill(self):
-        tourianDoor = 0x19222
-        self.romFile.seek(tourianDoor + 10) # go to door ASM ptr field
-        # write full_refill routine address
-        # aseemble area_rando_door_transition.asm to print it if modified
-        self.romFile.write(struct.pack('B', 0x5C))
-        self.romFile.write(struct.pack('B', 0xEA))
-
-    def writeTransitionsCredits(self, transitions):
-        address = 0x273B40
-        lineLength = 32
-
-        for (src, dest) in transitions:
-            # line is 32 chars long, need a space between the two access points
-            length = len(src) + len(dest) + len(" ")
-            if length > lineLength:
-                self.writeCreditsString(address, 0x04, src)
-                address += 0x40
-
-                dest = " "+dest
-                self.writeCreditsString(address, 0x04, dest.rjust(lineLength))
-                address += 0x40
-            else:
-                self.writeCreditsString(address, 0x04, src+" "*(lineLength-(len(src)+len(dest)))+dest)
-                address += 0x40
+    def writeEscapeTimer(self, escapeTimer):
+        minute = int(escapeTimer / 60)
+        second = escapeTimer % 60
+        minute = int(minute / 10) * 16 + minute % 10
+        second = int(second / 10) * 16 + second % 10
+        self.romFile.seek(0x1E21)
+        self.romFile.write(struct.pack('B', second))
+        self.romFile.write(struct.pack('B', minute))
 
     buttons = {
         "Select" : [0x00, 0x20],
@@ -1316,7 +1316,7 @@ class RomPatcher:
     # controlsDict : possible keys are "Shot", "Jump", "Dash", "ItemSelect", "ItemCancel", "AngleUp", "AngleDown"
     #                possible values are "A", "B", "X", "Y", "L", "R", "Select", "None"
     def writeControls(self, controlsDict):
-        for ctrl, button in controlsDict.iteritems():
+        for ctrl, button in controlsDict.items():
             if ctrl not in RomPatcher.controls:
                 raise ValueError("Invalid control name : " + str(ctrl))
             if button not in RomPatcher.buttons:
@@ -1422,6 +1422,7 @@ class RomLoader(object):
         RomPatches.ActivePatches = []
         isArea = False
         isBoss = False
+        isEscape = False
 
         # check total base (blue bt and red tower blue door)
         if self.hasPatch("startCeres") or self.hasPatch("startLS"):
@@ -1440,6 +1441,11 @@ class RomLoader(object):
         if self.hasPatch("gravityNoHeatProtection"):
             RomPatches.ActivePatches.append(RomPatches.NoGravityEnvProtection)
 
+        if self.hasPatch("progressiveSuits"):
+            RomPatches.ActivePatches.append(RomPatches.ProgressiveSuits)
+        if self.hasPatch("nerfedCharge"):
+            RomPatches.ActivePatches.append(RomPatches.NerfedCharge)
+
         # check varia tweaks
         if self.hasPatch("variaTweaks"):
             RomPatches.ActivePatches += RomPatches.VariaTweaks
@@ -1455,11 +1461,13 @@ class RomLoader(object):
         if self.hasPatch("areaLayout"):
             RomPatches.ActivePatches.append(RomPatches.AreaRandoGatesOther)
 
-
         # check boss rando
         isBoss = self.isBoss()
 
-        return (isArea, isBoss)
+        # check escape rando
+        isEscape = self.hasPatch("areaEscape")
+
+        return (isArea, isBoss, isEscape)
 
     def getPatches(self):
         return self.romReader.getPatches()
@@ -1493,18 +1501,15 @@ class RomLoader(object):
         asmPtr = readWord(romFile)
         return asmPtr != 0 # this is at 0 in vanilla
 
+    def getEscapeTimer(self):
+        return self.romReader.getEscapeTimer()
+
 class RomLoaderSfc(RomLoader):
     # standard usage (when calling from the command line)
     def __init__(self, romFileName, magic=None):
         super(RomLoaderSfc, self).__init__()
         romFile = open(romFileName, "rb")
         self.romReader = RomReader(romFile, magic)
-
-    def dump(self, fileName):
-        dictROM = self.romReader.getDict()
-
-        with open(fileName, 'w') as jsonFile:
-            json.dump(dictROM, jsonFile)
 
 class RomLoaderDict(RomLoader):
     # when called from the website (the js in the browser uploads a dict of address: value)
@@ -1513,10 +1518,6 @@ class RomLoaderDict(RomLoader):
         self.dictROM = dictROM
         fakeROM = FakeROM(self.dictROM)
         self.romReader = RomReader(fakeROM, magic)
-
-    def dump(self, fileName):
-        with open(fileName, 'w') as jsonFile:
-            json.dump(self.dictROM, jsonFile)
 
 class RomLoaderJson(RomLoaderDict):
     # when called from the test suite and the website (when loading already uploaded roms converted to json)

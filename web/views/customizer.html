@@ -587,15 +587,16 @@ function startTheTour(step=-1) {
     {
       element: "#customSpriteStep",
       title: "Custom Sprites",
-      content: "<p>The sprites have been created using <a href=\"https://github.com/Artheau/SpriteSomething\">Sprite Something</a> by Artheau and MikeTrethewey.</p>\
+      content: "<p>The sprites have been created using <a href=\"https://github.com/Artheau/SpriteSomething\" target=\"_blank\">Sprite Something</a> by Artheau and MikeTrethewey.</p>\
 <table>\
   <th>Sprite</th><th>Author</th><th>Description</th>\
 {{
 for (key, value) in sorted(customSprites.items(), key=lambda x: x[1]['index']):
-  response.write('  <tr><td>{}</td><td>{}</td><td>{}</td>\\\n'.format(value['name'], value['author'], value['desc']), escape=False)
+  response.write('  <tr><td><a href=\\\"/solver/static/images/sprite_sheets/{}.png\\\" target=\\\"_blank\\\">{}</a></td><td>{}</td><td>{}</td>\\\n'.format(key, value['name'], value['author'], value['desc']), escape=False)
   pass
 response.write('</table>', escape=False)
-}}"
+}}\
+<p><b>Hint:</b>Click on a sprite name in the above table to display its sprite sheet.</p>"
     },
     {
       element: "#patchesStep",
@@ -735,17 +736,42 @@ def displayCheckbox(id, defaultTrue=False):
 	      Patches to customize your ROM.
 	    </p>
 	    <table class="full">
-{{
-for patch in patches:
-  if patch[4] == True:
-    response.write("	    <tr>", escape=False)
-    response.write("	      <td class=\"full\">".format(patch[0]), escape=False)
-    displayCheckbox(patch[0], patches[2])
-    response.write("{}".format(patch[1]))
-    response.write("	    </tr>", escape=False)
-    pass
-  pass
-}}
+	      <tr>
+		<td class="full">
+		  {{displayCheckbox("itemsounds")}}
+		  Remove fanfare when picking up an item (by Scyzer)
+		</td>
+	      </tr>
+	      <tr>
+		<td class="full">
+		  {{displayCheckbox("spinjumprestart")}}
+		  Allows Samus to start spinning in mid air after jumping or falling (by Kejardon)
+		</td>
+	      </tr>
+	      <tr>
+		<td class="full">
+		  {{displayCheckbox("rando_speed")}}
+		  Let Samus keeps her momentum when landing from a fall or from jumping (by Oi27)
+		</td>
+	      </tr>
+	      <tr>
+		<td class="full">
+		  {{displayCheckbox("elevators_doors_speed")}}
+		  Accelerate doors and elevators transitions (by Rakki & Lioran)
+		</td>
+	      </tr>
+	      <tr>
+		<td class="full">
+		  {{displayCheckbox("animals")}}
+		  Save the animals surprise (by Foosda)
+		</td>
+	      </tr>
+	      <tr>
+		<td class="full">
+		  {{displayCheckbox("No_Music")}}
+		  Disable background music (by Kejardon)
+		</td>
+	      </tr>
 	    </table>
 	  </div>
         </div>

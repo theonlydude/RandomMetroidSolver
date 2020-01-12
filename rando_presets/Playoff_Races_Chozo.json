@@ -2,13 +2,13 @@
   "elevators_doors_speed": "off",
   "progressionDifficulty": "normal",
   "funMovement": "off",
-  "skip_ceres": "on",
+  "startLocation": "Landing Site",
   "hideItems": "off",
   "funCombat": "off",
   "majorsSplit": "Chozo",
   "strictMinors": "off",
   "layoutPatches": "on",
-  "noGravHeat": "on",
+  "gravityBehaviour": "Balanced",
   "missileQty": "3",
   "morphPlacement": "early",
   "progressionSpeed": "VARIAble",
@@ -19,7 +19,6 @@
   "minorQty": "100",
   "suitsRestriction": "on",
   "preset": "Playoff_Races_Chozo",
-  "skip_intro": "off",
   "spinjumprestart": "off",
   "superQty": "2",
   "animals": "off",
@@ -28,5 +27,6 @@
   "funSuits": "off",
   "variaTweaks": "off",
   "bossRandomization": "off",
-  "areaLayout": "off"
+  "nerfedCharge": "off",
+  "rando_speed": "off"
 }

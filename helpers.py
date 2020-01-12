@@ -1,9 +1,11 @@
 
 import math
+from functools import reduce
 from smbool import SMBool
 from rom import RomPatches
 from parameters import Settings, easy, medium, hard, harder, hardcore, mania, diff2text
 from cache import Cache
+from utils import normalizeRounding
 
 class Helpers(object):
     def __init__(self, smbm):
@@ -22,7 +24,7 @@ class Helpers(object):
         if difficulties is None or len(difficulties) == 0:
             return SMBool(False)
         def f(difficulty):
-            return self.smbm.energyReserveCountOk(int(round(difficulty[0] / mult)), difficulty=difficulty[1])
+            return self.smbm.energyReserveCountOk(normalizeRounding(difficulty[0] / mult), difficulty=difficulty[1])
         result = reduce(lambda result, difficulty: self.smbm.wor(result, f(difficulty)),
                         difficulties[1:], f(difficulties[0]))
         return result
@@ -42,55 +44,84 @@ class Helpers(object):
         sm = self.smbm
         hasVaria = sm.haveItem('Varia')
         hasGrav = sm.haveItem('Gravity')
-        item = None
+        items = []
         if RomPatches.has(RomPatches.NoGravityEnvProtection):
             if hasVaria:
-                item = 'Varia'
+                items = ['Varia']
                 if envDmg:
                     ret = 4.0
                 else:
                     ret = 2.0
             if hasGrav and not envDmg:
                 ret = 4.0
-                item = 'Gravity'
+                items = ['Gravity']
+        elif RomPatches.has(RomPatches.ProgressiveSuits):
+            if hasVaria:
+                items.append('Varia')
+                ret *= 2
+            if hasGrav:
+                items.append('Gravity')
+                ret *= 2
         else:
             if hasVaria:
                 ret = 2.0
-                item = 'Varia'
+                items = ['Varia']
             if hasGrav:
                 ret = 4.0
-                item = 'Gravity'
-        return (ret, item)
+                items = ['Gravity']
+        return (ret, items)
 
     # higher values for mult means room is that much "easier" (HP mult)
     def energyReserveCountOkHardRoom(self, roomName, mult=1.0):
         difficulties = Settings.hardRooms[roomName]
-        (dmgRed, item) = self.getDmgReduction()
+        (dmgRed, items) = self.getDmgReduction()
         mult *= dmgRed
         result = self.energyReserveCountOkDiff(difficulties, mult)
 
         if result == True:
             result.knows = ['HardRoom-'+roomName]
             if dmgRed != 1.0:
-                result.items.append(item)
+                result.items += items
         return result
 
     @Cache.decorator
     def heatProof(self):
-        return self.smbm.wor(self.smbm.haveItem('Varia'),
-                             self.smbm.wand(self.smbm.wnot(RomPatches.has(RomPatches.NoGravityEnvProtection)),
-                                            self.smbm.haveItem('Gravity')))
+        sm = self.smbm
+        return sm.wor(sm.haveItem('Varia'),
+                      sm.wand(sm.wnot(RomPatches.has(RomPatches.NoGravityEnvProtection)),
+                              sm.wnot(RomPatches.has(RomPatches.ProgressiveSuits)),
+                              sm.haveItem('Gravity')))
+
+    # helper here because we can't define "sublambdas" in locations
+    def getPiratesPseudoScrewCoeff(self):
+        ret = 1.0
+        if RomPatches.has(RomPatches.NerfedCharge).bool == True:
+            ret = 4.0
+        return ret
+
+    @Cache.decorator
+    def canFireChargedShots(self):
+        sm = self.smbm
+        return sm.wor(sm.haveItem('Charge'), RomPatches.has(RomPatches.NerfedCharge))
 
     # higher values for mult means hell run is that much "easier" (HP mult)
     def canHellRun(self, hellRun, mult=1.0, minE=2):
         sm = self.smbm
 
+        items = []
         isHeatProof = sm.heatProof()
         if isHeatProof == True:
             return isHeatProof
-        elif self.energyReserveCount() >= minE:
+        if sm.wand(RomPatches.has(RomPatches.ProgressiveSuits), sm.haveItem('Gravity')).bool == True:
+            # half heat protection
+            mult *= 2.0
+            minE /= 2.0
+            items.append('Gravity')
+        if self.energyReserveCount() >= minE:
             if hellRun != 'LowerNorfair':
-                return self.energyReserveCountOkHellRun(hellRun, mult)
+                ret = self.energyReserveCountOkHellRun(hellRun, mult)
+                ret.items += items
+                return ret
             else:
                 tanks = self.energyReserveCount()
                 multCF = mult
@@ -193,12 +224,6 @@ class Helpers(object):
                        sm.haveItem('HiJump'),
                        sm.knowsDoubleSpringBallJump())
 
-    def canPassTerminatorBombWall(self, fromLandingSite=True):
-        sm = self.smbm
-        return sm.wor(sm.wand(sm.haveItem('SpeedBooster'),
-                              sm.wor(SMBool(not fromLandingSite, 0), sm.knowsSimpleShortCharge(), sm.knowsShortCharge())),
-                      sm.canDestroyBombWalls())
-
     @Cache.decorator
     def canDestroyBombWalls(self):
         sm = self.smbm
@@ -215,40 +240,6 @@ class Helpers(object):
                       sm.wand(sm.haveItem('Morph'),
                               sm.wor(sm.haveItem('Bomb'),
                                      sm.haveItem('PowerBomb'))))
-
-    def canEnterAndLeaveGauntletQty(self, nPB, nTanksSpark):
-        sm = self.smbm
-        # EXPLAINED: to access Gauntlet Entrance from Landing site we can either:
-        #             -fly to it (infinite bomb jumps or space jump)
-        #             -shinespark to it
-        #             -wall jump with high jump boots
-        #             -wall jump without high jump boots
-        #            then inside it to break the bomb wals:
-        #             -use screw attack (easy way)
-        #             -use power bombs
-        #             -use bombs
-        #             -perform a simple short charge on the way in
-        #              and use power bombs on the way out
-        return sm.wand(sm.wor(sm.canFly(),
-                              sm.haveItem('SpeedBooster'),
-                              sm.wand(sm.knowsHiJumpGauntletAccess(),
-                                      sm.haveItem('HiJump')),
-                              sm.knowsHiJumpLessGauntletAccess()),
-                       sm.wor(sm.haveItem('ScrewAttack'),
-                              sm.wor(sm.wand(sm.energyReserveCountOkHardRoom('Gauntlet'),
-                                             sm.wand(sm.canUsePowerBombs(),
-                                                     sm.wor(sm.itemCountOk('PowerBomb', nPB),
-                                                            sm.wand(sm.haveItem('SpeedBooster'),
-                                                                    sm.energyReserveCountOk(nTanksSpark))))),
-                                     sm.wand(sm.energyReserveCountOkHardRoom('Gauntlet', 0.51),
-                                             sm.canUseBombs()))))
-
-    @Cache.decorator
-    def canEnterAndLeaveGauntlet(self):
-        sm = self.smbm
-        return sm.wor(sm.wand(sm.canShortCharge(),
-                              sm.canEnterAndLeaveGauntletQty(2, 2)),
-                      sm.canEnterAndLeaveGauntletQty(2, 3))
 
     @Cache.decorator
     def canPassBombPassages(self):
@@ -319,10 +310,12 @@ class Helpers(object):
 
         # http://deanyd.net/sm/index.php?title=Damage
         standardDamage = 0
-        if sm.haveItem('Charge') == True and charge == True:
+        if sm.canFireChargedShots().bool == True and charge == True:
             standardDamage = self.getBeamDamage()
         # charge triples the damage
-        chargeDamage = standardDamage * 3.0
+        chargeDamage = standardDamage
+        if sm.haveItem('Charge').bool == True:
+            chargeDamage *= 3.0
 
         # missile 100 damages, super missile 300 damages, PBs 200 dmg, 5 in each extension
         missilesAmount = sm.itemCount('Missile') * 5
@@ -400,11 +393,7 @@ class Helpers(object):
         else:
             duration = secs / rate
         # print('rate=' + str(rate) + ', duration=' + str(duration))
-        suitsCoeff = 0.5
-        if sm.haveItem('Gravity') == True:
-            suitsCoeff = 2
-        elif sm.haveItem('Varia') == True:
-            suitsCoeff = 1
+        suitsCoeff = sm.getDmgReduction(envDmg=False)[0] / 2.0
         energy = suitsCoeff * (1 + self.energyReserveCount() + energyDiff)
         energyDict = None
         if 'Energy' in diffTbl:
@@ -440,7 +429,7 @@ class Helpers(object):
         if diffAdjust > 1:
             difficulty *= diffAdjust
 
-        return difficulty
+        return round(difficulty, 2)
 
     @Cache.decorator
     def enoughStuffCroc(self):
@@ -504,7 +493,7 @@ class Helpers(object):
             return SMBool(True, diff)
 
     def adjustHealthDropDiff(self, difficulty):
-        (dmgRed, item) = self.getDmgReduction(envDmg=False)
+        (dmgRed, items) = self.getDmgReduction(envDmg=False)
         # 2 is Varia suit, considered standard eqt for boss fights
         # there's certainly a smarter way to do this but...
         if dmgRed < 2:
@@ -535,7 +524,7 @@ class Helpers(object):
                               sm.haveItem('Grapple')),
                       sm.wand(sm.knowsMicrowaveDraygon(),
                               sm.haveItem('Plasma'),
-                              sm.haveItem('Charge'),
+                              sm.canFireChargedShots(),
                               sm.haveItem('XRayScope')),
                       sm.wand(sm.haveItem('Gravity'),
                               sm.knowsDraygonSparkKill(),
@@ -552,7 +541,7 @@ class Helpers(object):
                                                 Settings.bossesDifficulty['Phantoon'])
         if difficulty < 0:
             return SMBool(False)
-        hasCharge = sm.haveItem('Charge')
+        hasCharge = sm.canFireChargedShots()
         hasScrew = sm.haveItem('ScrewAttack')
         if hasScrew:
             difficulty /= Settings.algoSettings['phantoonFlamesAvoidBonusScrew']
@@ -566,7 +555,7 @@ class Helpers(object):
         return sm.wor(fight,
                       sm.wand(sm.knowsMicrowavePhantoon(),
                               sm.haveItem('Plasma'),
-                              sm.haveItem('Charge'),
+                              sm.canFireChargedShots(),
                               sm.haveItem('XRayScope')))
 
     def mbEtankCheck(self):
@@ -599,7 +588,7 @@ class Helpers(object):
             return SMBool(False)
         (possible, energyDiff) = self.mbEtankCheck()
         if possible == False:
-            return SMBool(False, 0)
+            return SMBool(False)
         # print('MB2', ammoMargin, secs)
         #print("ammoMargin: {}, secs: {}, settings: {}, energyDiff: {}".format(ammoMargin, secs, Settings.bossesDifficulty['MotherBrain'], energyDiff))
         diff = self.computeBossDifficulty(ammoMargin, secs, Settings.bossesDifficulty['MotherBrain'], energyDiff)
@@ -673,12 +662,14 @@ class Pickup:
                     # mother brain rainbow attack
                     and canResistRainbow
                     # lower norfair access
-                    and (smbm.haveItem('Varia') or smbm.wnot(RomPatches.has(RomPatches.NoGravityEnvProtection))) # gravity is checked below
+                    and (smbm.haveItem('Varia') or smbm.wand(smbm.wnot(RomPatches.has(RomPatches.NoGravityEnvProtection)), smbm.wnot(RomPatches.has(RomPatches.ProgressiveSuits)))) # gravity is checked below
                     # speed or ice to access botwoon
                     and (smbm.haveItem('SpeedBooster')
                          or smbm.haveItem('Ice'))
                     # draygon access
-                    and smbm.haveItem('Gravity'))
+                    and smbm.haveItem('Gravity')
+                    # all boss locs collected (draygon pickup is not on draygon location)
+                    and not any('Boss' in loc['Class'] for loc in majorLocations))
         else:
             return False
 
@@ -731,6 +722,10 @@ class Bosses:
         'Draygon' : False,
         'Ridley' : False
     }
+
+    @staticmethod
+    def bosses():
+        return Bosses.golden4Dead.keys()
 
     @staticmethod
     def reset():

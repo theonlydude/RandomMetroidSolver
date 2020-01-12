@@ -1,5 +1,3 @@
-#!/usr/bin/python
-
 import copy
 from smbool import SMBool
 from rom import RomPatches
@@ -19,7 +17,9 @@ class AccessPoint(object):
     # internal : if true, shall not be used for connecting areas
     def __init__(self, name, graphArea, transitions,
                  traverse=lambda sm: SMBool(True),
-                 exitInfo=None, entryInfo=None, roomInfo=None, shortName=None, internal=False, boss=False):
+                 exitInfo=None, entryInfo=None, roomInfo=None,
+                 internal=False, boss=False, escape=False,
+                 dotOrientation='w'):
         self.Name = name
         self.GraphArea = graphArea
         self.ExitInfo = exitInfo
@@ -27,12 +27,10 @@ class AccessPoint(object):
         self.RoomInfo = roomInfo
         self.Internal = internal
         self.Boss = boss
+        self.Escape = escape
+        self.DotOrientation = dotOrientation
         self.transitions = transitions
         self.traverse = traverse
-        if shortName is not None:
-            self.ShortName = shortName
-        else:
-            self.ShortName = str(self)
         self.distance = 0
         # inter-area connection
         self.ConnectedTo = None
@@ -50,12 +48,21 @@ class AccessPoint(object):
         else:
             raise RuntimeError("Cannot add an internal access point as inter-are transition")
 
+    # tells if this node is to connect areas together
+    def isArea(self):
+        return not self.Internal and not self.Boss and not self.Escape
+
+    # used by the solver to get area and boss APs
+    def isInternal(self):
+        return self.Internal or self.Escape
+
 class AccessGraph(object):
     def __init__(self, accessPointList, transitions, bidir=True, dotFile=None):
         self.log = log.get('Graph')
 
         self.accessPoints = {}
         self.InterAreaTransitions = []
+        self.EscapeTimer = None
         self.bidir = bidir
         for ap in accessPointList:
             ap.distance = 0
@@ -65,69 +72,11 @@ class AccessGraph(object):
         if dotFile is not None:
             self.toDot(dotFile)
 
-    def getCreditsTransitions(self):
-        transitionsDict = {}
-        for (src, dest) in self.InterAreaTransitions:
-            transitionsDict[src.ShortName] = dest.ShortName
-
-        transitions = []
-        for accessPoint in ['C\\MUSHROOMS', 'C\\PIRATES', 'C\\MOAT', 'C\\KEYHUNTERS', 'C\\MORPH', 'B\\GREEN ELEV.',
-                            'B\\GREEN HILL', 'B\\NOOB BRIDGE', 'W\\WEST OCEAN', 'W\\CRAB MAZE', 'N\\WAREHOUSE',
-                            'N\\SINGLE CHAMBER', 'N\\KRONIC BOOST', 'LN\\LAVA DIVE', 'LN\\THREE MUSK.',
-                            'M\\MAIN STREET', 'M\\CRAB HOLE', 'M\\COUDE', 'M\\RED FISH', 'B\\RED TOWER',
-                            'B\\TOP RED TOWER', 'B\\RED ELEV.', 'B\\EAST TUNNEL', 'B\\TOP EAST TUNNEL',
-                            'B\\GLASS TUNNEL', 'T\\STATUES']:
-            if accessPoint in transitionsDict:
-                src = accessPoint
-                dst = transitionsDict[accessPoint]
-                transitions.append((src, dst))
-                del transitionsDict[src]
-                del transitionsDict[dst]
-
-        return transitions
-
     def toDot(self, dotFile):
-        orientations = {
-            'Lava Dive Right': 'w',
-            'Noob Bridge Right': 'se',
-            'Main Street Bottom': 's',
-            'Red Tower Top Left': 'w',
-            'Red Brinstar Elevator': 'n',
-            'Moat Right': 'ne',
-            'Le Coude Right': 'ne',
-            'Warehouse Entrance Left': 'sw',
-            'Green Brinstar Elevator Right': 'ne',
-            'Crab Hole Bottom Left': 'se',
-            'Lower Mushrooms Left': 'nw',
-            'East Tunnel Right': 'se',
-            'Glass Tunnel Top': 's',
-            'Green Hill Zone Top Right': 'e',
-            'East Tunnel Top Right': 'e',
-            'Crab Maze Left': 'e',
-            'Caterpillar Room Top Right': 'ne',
-            'Three Muskateers Room Left': 'n',
-            'Morph Ball Room Left': 'sw',
-            'Kronic Boost Room Bottom Left': 'se',
-            'West Ocean Left': 'w',
-            'Red Fish Room Left': 'w',
-            'Single Chamber Top Right': 'ne',
-            'Keyhunter Room Bottom': 'se',
-            'Green Pirates Shaft Bottom Right': 'e',
-            'Statues Hallway Left': 'w',
-            'Warehouse Entrance Right': 'nw',
-            'Warehouse Zeela Room Left': 'w',
-            'KraidRoomOut': 'e',
-            'KraidRoomIn': 'e',
-            'PhantoonRoomOut': 's',
-            'PhantoonRoomIn': 's',
-            'DraygonRoomOut': 'e',
-            'DraygonRoomIn': 'e',
-            'RidleyRoomOut': 'e',
-            'RidleyRoomIn': 'e'
-        }
         colors = ['red', 'blue', 'green', 'yellow', 'skyblue', 'violet', 'orange',
                   'lawngreen', 'crimson', 'chocolate', 'turquoise', 'tomato',
-                  'navyblue', 'darkturquoise', 'green', 'blue', 'maroon', 'magenta']
+                  'navyblue', 'darkturquoise', 'green', 'blue', 'maroon', 'magenta',
+                  'bisque', 'coral', 'chartreuse', 'chocolate', 'cyan']
         with open(dotFile, "w") as f:
             f.write("digraph {\n")
             f.write('size="30,30!";\n')
@@ -143,7 +92,7 @@ class AccessGraph(object):
             for src, dst in self.InterAreaTransitions:
                 if self.bidir is True and src.Name in drawn:
                     continue
-                f.write('%s:%s -> %s:%s [taillabel="%s",headlabel="%s",color=%s];\n' % (src.GraphArea, orientations[src.Name], dst.GraphArea, orientations[dst.Name], src.Name, dst.Name, colors[i]))
+                f.write('%s:%s -> %s:%s [taillabel="%s",headlabel="%s",color=%s];\n' % (src.GraphArea, src.DotOrientation, dst.GraphArea, dst.DotOrientation, src.Name, dst.Name, colors[i]))
                 drawn += [src.Name,dst.Name]
                 i += 1
             f.write("}\n")
@@ -169,11 +118,10 @@ class AccessGraph(object):
                 dst = self.accessPoints[dstName]
                 if dst in newAvailNodes or dst in availNodes:
                     continue
-                # diff = tFunc(smbm)
                 diff = smbm.eval(tFunc)
                 if diff.bool == True and diff.difficulty <= maxDiff:
                     if src.GraphArea == dst.GraphArea:
-                        dst.distance = src.distance
+                        dst.distance = src.distance + 0.01
                     else:
                         dst.distance = src.distance + 1
                     newAvailNodes[dst] = { 'difficulty' : diff, 'from' : src }
@@ -233,8 +181,8 @@ class AccessGraph(object):
                 continue
             difficulty = paths[apName]["pdiff"].difficulty
             ret.append((difficulty if difficulty != -1 else infinity,  paths[apName]["distance"], apName))
-        # sort by difficulty first, then distance
-        ret.sort(key=lambda x: (x[0], x[1]))
+        # sort by difficulty first, then distance (also by name to have same behavious in python2 and 3)
+        ret.sort(key=lambda x: (x[0], x[1], x[2]))
         return [apName for (diff, dist, apName) in ret]
 
     # locations: locations to check
@@ -260,7 +208,7 @@ class AccessGraph(object):
         for loc in locations:
             if loc['GraphArea'] not in availAreas:
                 loc['distance'] = 30000
-                loc['difficulty'] = SMBool(False, 0)
+                loc['difficulty'] = SMBool(False)
                 #if loc['Name'] == "Super Missile (Crateria)":
                 #    print("loc: {} locDiff is area nok".format(loc["Name"]))
                 continue
@@ -268,7 +216,7 @@ class AccessGraph(object):
             for apName in self.getSortedAPs(availAPPaths, loc['AccessFrom']):
                 if apName == None:
                     loc['distance'] = 20000
-                    loc['difficulty'] = SMBool(False, 0)
+                    loc['difficulty'] = SMBool(False)
                     #if loc['Name'] == "Super Missile (Crateria)":
                     #    print("loc: {} ap is none".format(loc["Name"]))
                     break
@@ -299,18 +247,18 @@ class AccessGraph(object):
                         break
                     else:
                         loc['distance'] = 1000 + tdiff.difficulty
-                        loc['difficulty'] = SMBool(False, 0)
+                        loc['difficulty'] = SMBool(False)
                         #if loc['Name'] == "Super Missile (Crateria)":
                         #    print("loc: {} locDiff is false".format(loc["Name"]))
                 else:
                     loc['distance'] = 10000 + tdiff.difficulty
-                    loc['difficulty'] = SMBool(False, 0)
+                    loc['difficulty'] = SMBool(False)
                     #if loc['Name'] == "Super Missile (Crateria)":
                     #    print("loc: {} tdiff is false".format(loc["Name"]))
 
             if 'difficulty' not in loc:
                 loc['distance'] = 100000
-                loc['difficulty'] = SMBool(False, 0)
+                loc['difficulty'] = SMBool(False)
 
         #print("availableLocs: {}".format([loc["Name"] for loc in availLocs]))
         return availLocs
@@ -318,8 +266,6 @@ class AccessGraph(object):
     # test access from an access point to another, given an optional item
     def canAccess(self, smbm, srcAccessPointName, destAccessPointName, maxDiff, item=None):
         if item is not None:
-            already = smbm.haveItem(item)
-            isCount = smbm.isCountItem(item)
             smbm.addItem(item)
         #print("canAccess: item: {}, src: {}, dest: {}".format(item, srcAccessPointName, destAccessPointName))
         destAccessPoint = self.accessPoints[destAccessPointName]
@@ -328,8 +274,17 @@ class AccessGraph(object):
         can = destAccessPoint in availAccessPoints
         #self.log.debug("canAccess: avail = {}".format([ap.Name for ap in availAccessPoints.keys()]))
         if item is not None:
-            if not already or isCount == True:
-                smbm.removeItem(item)
+            smbm.removeItem(item)
         #print("canAccess: {}".format(can))
         return can
 
+    # returns a list of AccessPoint instances from srcAccessPointName to destAccessPointName
+    # (not including source ap)
+    # or None if no possible path
+    def accessPath(self, smbm, srcAccessPointName, destAccessPointName, maxDiff):
+        destAccessPoint = self.accessPoints[destAccessPointName]
+        srcAccessPoint = self.accessPoints[srcAccessPointName]
+        availAccessPoints = self.getAvailableAccessPoints(srcAccessPoint, smbm, maxDiff)
+        if destAccessPoint not in availAccessPoints:
+            return None
+        return self.getPath(destAccessPoint, availAccessPoints)

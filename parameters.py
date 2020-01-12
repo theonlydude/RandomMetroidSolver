@@ -102,55 +102,51 @@ class Knows:
                                  'title': 'Activate SpeedBooster faster than normal by delaying run button input',
                                  'href': 'https://wiki.supermetroid.run/index.php?title=Quick_charge',
                                  'rooms': ['Parlor and Alcatraz', 'Waterway Energy Tank Room',
-                                           'Landing Site', 'Crateria Keyhunter Room',
+                                           'Landing Site', 'Crateria Keyhunter Room', 'Blue Brinstar Energy Tank Room',
                                            'Crateria Super Room', 'Main Street', "Golden Torizo's Room"]}
 
     InfiniteBombJump = SMBool(True, medium, ['InfiniteBombJump'])
     desc['InfiniteBombJump'] = {'display': 'Infinite Bomb-Jump',
                                 'title': 'To access certain locations without Hi-Jump or Space-Jump',
                                 'href': 'https://www.youtube.com/watch?v=Qfmcm7hkXP4',
-                                'rooms': ['Blue Brinstar Energy Tank Room', 'Post Crocomire Jump Room', 'Bubble Mountain', 'Screw Attack Room', 'Mama Turtle Room', 'Plasma Room', "Draygon's Room", 'Landing Site', 'Crocomire Escape', 'Post Crocomire Farming Room', 'Post Crocomire Jump Room', 'Warehouse Entrance', 'The Worst Room In The Game', 'Mt. Everest']}
+                                'rooms': ['Blue Brinstar Energy Tank Room', 'Bubble Mountain', 'Screw Attack Room', 'Mama Turtle Room', 'Plasma Room', "Draygon's Room", 'Landing Site', 'Crocomire Escape', 'Post Crocomire Farming Room', 'Post Crocomire Jump Room', 'Warehouse Entrance', 'The Worst Room In The Game', 'Mt. Everest', 'The Moat', 'Red Brinstar Fireflea Room', 'Crab Hole', 'Cathedral Entrance', 'Red Tower', 'The Precious Room']}
 
     GreenGateGlitch = SMBool(True, medium, ['GreenGateGlitch'])
     desc['GreenGateGlitch'] = {'display': 'Green Gate Glitch',
                                'title': 'Open gates from other side to access Screw Attack and Crocomire',
                                'href': 'https://wiki.supermetroid.run/index.php?title=Gate_Glitch',
-                               'rooms': ['Grapple Tutorial Room 3',
-                                         'Fast Ripper Room',
-                                         'Upper Norfair Farming Room']}
+                               'rooms': ['Green Hill Zone', 'Grapple Tutorial Room 3', 'Fast Ripper Room', 'Upper Norfair Farming Room', 'Crab Tunnel', 'Double Chamber']}
 
     ShortCharge = SMBool(False, 0, ['ShortCharge'])
     desc['ShortCharge'] = {'display': 'Tight Short Charge',
                            'title': 'Activate SpeedBooster really fast (3 taps or stutter 3)',
                            'href': 'https://wiki.supermetroid.run/index.php?title=Short_Charge',
-                           'rooms': ['Red Tower', 'Gauntlet Energy Tank Room', 'Plasma Room',
-                                     'Post Crocomire Jump Room', 'Crocomire Escape']}
+                           'rooms': ['Red Tower', 'Landing Site', 'Gauntlet Energy Tank Room', 'Plasma Room',
+                                     'Post Crocomire Jump Room', 'Crocomire Escape', 'Wasteland', 'Kraid Room']}
 
     GravityJump = SMBool(True, hard, ['GravityJump'])
     desc['GravityJump'] = {'display': 'Gravity-Jump',
                            'title': "Super Hi-Jumps in water/lava using game's bug",
                            'href': 'https://wiki.supermetroid.run/index.php?title=14%25#Gravity_Jump',
-                           'rooms': ["Draygon's Room",
-                                     'The Moat',
-                                     'Lava Dive Room',
-                                     'Mt. Everest']}
+                           'rooms': ["Draygon's Room", 'The Moat', 'Lava Dive Room',
+                                     'Crab Hole', 'Mt. Everest', 'The Precious Room']}
 
     SpringBallJump = SMBool(True, hard, ['SpringBallJump'])
     desc['SpringBallJump'] = {'display': 'SpringBall-Jump',
                               'title': 'Do a SpringBall Jump from a jump to Access to Wrecked Ship Etank without anything else, Suitless Maridia navigation',
                               'href': 'https://www.youtube.com/watch?v=8ldQUIgBavw&t=49s',
-                              'rooms': ['Main Street',
-                                        'Sponge Bath',
-                                        'Mama Turtle Room',
-                                        'The Precious Room']}
+                              'rooms': ['Sponge Bath',
+                                        'Main Street', 'Crab Shaft', 'Pseudo Plasma Spark Room',
+                                        'Mama Turtle Room', 'The Precious Room', 'Spring Ball Room', 'East Sand Hole',
+                                        'Cathedral Entrance', 'Crocomire Escape', 'Post Crocomire Jump Room',
+                                        'Red Brinstar Fireflea Room', 'Lower Norfair Fireflea Room']}
 
     SpringBallJumpFromWall = SMBool(True, harder, ['SpringBallJumpFromWall'])
     desc['SpringBallJumpFromWall'] = {'display': 'SpringBall-Jump from wall',
                                       'title': 'Do a SpringBall jump after a Wall jump to exit Screw Attack area, climb Worst Room without Hi-Jump',
                                       'href': 'https://youtu.be/3bTe2MN7mS4',
-                                      'rooms': ['Screw Attack Room',
-                                                'The Worst Room In The Game',
-                                                'Bubble Mountain']}
+                                      'rooms': ['Screw Attack Room', 'The Worst Room In The Game', 'Bubble Mountain',
+                                                'Mama Turtle Room', 'Plasma Room', 'Cathedral Entrance']}
 
     GetAroundWallJump = SMBool(True, hard, ['GetAroundWallJump'])
     desc['GetAroundWallJump'] = {'display': 'Get around Wall-Jump',
@@ -212,20 +208,23 @@ class Knows:
     desc['GravLessLevel1'] = {'display': 'Level 1',
                               'title': 'Make your way underwater with Hi-Jump and Ice, freezing crabs and fishes. Access Botwoon with grapple.',
                               'href': 'https://www.youtube.com/watch?v=c2xoPigezvM',
-                              'rooms': ['Main Street', 'Mt. Everest', 'Crab Shaft',
-                                        'Aqueduct', 'Botwoon Hallway']} # TODO add forgotten highway rooms, crab hole
+                              'rooms': ['Main Street', 'Mt. Everest', 'Crab Shaft', 'Pseudo Plasma Spark Room',
+                                        'Aqueduct', 'Botwoon Hallway', "Botwoon's Room", 'Botwoon Energy Tank Room',
+                                        'Crab Hole', 'Crab Tunnel', 'East Ocean']}
 
     GravLessLevel2 = SMBool(False, 0, ['GravLessLevel2'])
     desc['GravLessLevel2'] = {'display': 'Level 2',
                               'title': "Level 1 + access Draygon's lair and do the Draygon fight (exiting Draygon are separate techniques)",
                               'href': None,
-                              'rooms': []} # TODO
+                              'rooms': ['Halfie Climb Room', 'Colosseum', 'The Precious Room', "Draygon's Room",
+                                        'East Cactus Alley Room', 'West Cactus Alley Room']}
 
     GravLessLevel3 = SMBool(False, 0, ['GravLessLevel3'])
     desc['GravLessLevel3'] = {'display': 'Level 3',
                                'title': 'Level 2 and : no problem getting out of sand suitless, traverse mini-draygons area, wall jumps to access items in the left sand pit, access missile location in the right sand pit.',
                                'href': 'https://www.youtube.com/watch?v=1M2TiEVwH2I',
-                               'rooms': ['West Sand Hole', 'East Sand Hole']} # TODO add mini-draygons rooms
+                               'rooms': ['West Sand Hole', 'East Sand Hole',
+                                         'West Sand Hall', 'East Sand Hall']}
 
 
     # Area difficulties

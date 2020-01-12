@@ -25,7 +25,7 @@ if __name__ == "__main__":
             if (i+1) % 100 == 0:
                 print(i+1)
             isVanilla = random.random() < 0.5
-            strictMinors = bool(random.getrandbits(1))
+            strictMinors = bool(random.randint(0, 2))
             minQty = 100
             energyQty = 'vanilla'
             forbidden = []
@@ -37,7 +37,7 @@ if __name__ == "__main__":
                     energyQty = 'sparse'
                 funPick = fun[:]
                 for i in range(randGaussBounds(len(fun))):
-                    item = funPick[random.randint(0, len(funPick)-1)]
+                    item = random.choice(funPick)
                     forbidden.append(item)
                     funPick.remove(item)
             missProb = random.randint(1, 9)
@@ -57,7 +57,7 @@ if __name__ == "__main__":
             csvOut.write("%s;%d;%d;%s;%d;%d;%d;" % (energyQty, minQty, len(forbidden), str(strictMinors), missProb, superProb, pbProb))
             # get items
             splits = ['Full', 'Major', 'Chozo']
-            split = splits[random.randint(0, len(splits)-1)]
+            split = random.choice(splits)
             itemManager = ItemManager(split, qty, sm)
             itemPool = itemManager.createItemPool()
             itemPool = itemManager.removeForbiddenItems(forbidden)

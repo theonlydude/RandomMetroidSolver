@@ -50,7 +50,13 @@ class SMBoolManager(object):
 
     def addItem(self, item):
         # a new item is available
-        setattr(self, item, True)
+        already = self.haveItem(item)
+        isCount = self.isCountItem(item)
+        if isCount or not already:
+            setattr(self, item, True)
+        else:
+            # handle duplicate major items (plandos)
+            setattr(self, 'dup_'+item, False)
         if item in self.countItems:
             setattr(self, item+'Count', getattr(self, item+'Count') + 1)
 
@@ -74,7 +80,11 @@ class SMBoolManager(object):
             if count == 0:
                 setattr(self, item, False)
         else:
-            setattr(self, item, False)
+            dup = 'dup_'+item
+            if getattr(self, dup, None) is None:
+                setattr(self, item, False)
+            else:
+                setattr(self, dup, False)
 
         Cache.reset()
 

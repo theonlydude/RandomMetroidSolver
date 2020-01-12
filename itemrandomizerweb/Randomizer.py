@@ -1,4 +1,5 @@
-import sys, random, time, copy
+import sys, time, copy, random
+
 from itemrandomizerweb.Items import ItemManager
 from parameters import Knows, isBossKnows, Settings, samus, infinity, god
 from itemrandomizerweb.stdlib import List
@@ -427,6 +428,7 @@ class SuperFunProvider(object):
         else:
             pool = self.getItemPool()
         if self.isChozo:
+            zeb = self.sm.knowsIceZebSkip()
             pool = [item for item in pool if item['Class'] == 'Chozo' or item['Name'] == 'Boss']
             # forces ice zeb skip in the knows to pass end game condition. this is ugly but valid,
             # as if zeb skip is not known, an extra missile pack is guaranteed to be added (it won't
@@ -434,7 +436,7 @@ class SuperFunProvider(object):
             Knows.IceZebSkip = SMBool(True, 0, [])
 
         poolDict = self.rando.getPoolDict(pool)
-        self.log.debug('pool='+str([(t, len(poolDict[t])) for t in poolDict]))
+        self.log.debug('pool={}'.format(sorted([(t, len(poolDict[t])) for t in poolDict])))
         # give us everything and beat every boss to see what we can access
         self.disableBossChecks()
         self.sm.resetItems()
@@ -446,14 +448,14 @@ class SuperFunProvider(object):
         self.lastRestricted = [loc for loc in self.locations if loc not in totalAvailLocs]
         self.log.debug("restricted=" + str([loc['Name'] for loc in self.lastRestricted]))
 
-        # check if we can reach all APs from all APs
-        nonInternalAPs = [ap for ap in self.areaGraph.accessPoints.values() if ap.Internal == False]
-        for startApName, startAp in self.areaGraph.accessPoints.iteritems():
+        # check if we all inter-area APs reach each other
+        interAPs = [ap for ap in self.areaGraph.accessPoints.values() if ap.isArea()]
+        for startAp in interAPs:
             availAccessPoints = self.areaGraph.getAvailableAccessPoints(startAp, self.sm, self.rando.difficultyTarget)
-            for ap in nonInternalAPs:
+            for ap in interAPs:
                 if not ap in availAccessPoints:
                     ret = False
-                    self.log.debug("unavail AP: " + ap.Name + ", from " + startApName)
+                    #self.log.debug("unavail AP: " + ap.Name + ", from " + startApName)
 
         # check if we can reach all bosses
         if ret:
@@ -474,6 +476,8 @@ class SuperFunProvider(object):
         self.sm.resetItems()
         Bosses.reset()
         self.restoreBossChecks()
+        if self.isChozo:
+            Knows.IceZebSkip = zeb
 
         return ret
 
@@ -486,7 +490,7 @@ class SuperFunProvider(object):
             (possible, energyDiff) = self.sm.mbEtankCheck()
             if possible == True:
                 return self.okay()
-            return SMBool(False, 0)
+            return SMBool(False)
         self.sm.enoughStuffsMotherbrain = mbCheck
 
     def restoreBossChecks(self):
@@ -708,19 +712,21 @@ class Randomizer(object):
                 self.errorMsg += "Super Fun: " + ', '.join(fun.errorMsgs) + ' '
             self.itemPool = fun.getItemPool()
             self.restrictedLocations = fun.restrictedLocs
-
+        # if late morph compute number of locations available without morph
+        if self.restrictions['Morph'] == 'late':
+            self.computeLateMorphLimit()
+        # temporarily swap item pool in chozo mode, until all chozo item are placed in chozo locs
         self.chozoItemPool = []
         self.nonChozoItemPool = []
-        # temporarily swap item pool in chozo mode, until all chozo item are placed in chozo locs
         if self.restrictions['MajorMinor'] == 'Chozo':
             self.chozoItemPool = [item for item in self.itemPool if item['Class'] == 'Chozo' or item['Name'] == 'Boss']
             self.nonChozoItemPool = [item for item in self.itemPool if item not in self.chozoItemPool] # this will be swapped back
             self.log.debug('pools. c=%d, n=%d, t=%d' % (len(self.chozoItemPool), len(self.nonChozoItemPool), len(self.itemPool)))
             self.itemPool = self.chozoItemPool
-
-        # if late morph compute number of locations available without morph
-        if self.restrictions['Morph'] == 'late':
-            self.computeLateMorphLimit()
+            # forces ice zeb skip in the knows to pass end game condition. this is ugly but valid,
+            # as if zeb skip is not known, an extra missile pack is guaranteed to be added (it won't
+            # be in a chozo location, but the game is still finishable)
+            Knows.IceZebSkip = SMBool(True, 0, [])
 
         self.vcr = VCR(seedName, 'rando') if settings.vcr == True else None
 
@@ -779,7 +785,7 @@ class Randomizer(object):
     def determineParameters(self):
         speed = self.settings.progSpeed
         if speed == 'variable':
-            speed = progSpeeds[random.randint(0, len(progSpeeds)-1)]
+            speed = random.choice(progSpeeds)
         self.spreadProb = self.settings.getSpreadFactor(speed)
         self.minorHelpProb = self.settings.getMinorHelpProb(speed)
         self.chooseItemRanges = getRangeDict(self.settings.getChooseItems(speed))
@@ -922,7 +928,7 @@ class Randomizer(object):
     def possibleItems(self, curLocs, itemPool):
         result = []
         poolDict = self.getPoolDict(itemPool)
-        for itemType,items in poolDict.iteritems():
+        for itemType,items in sorted(poolDict.items()):
             if self.checkItem(items[0]):
                 for item in items:
                     result.append(item)
@@ -943,7 +949,7 @@ class Randomizer(object):
         return funcDict[v]
 
     def chooseItemRandom(self, items):
-        return items[random.randint(0, len(items)-1)]
+        return random.choice(items)
 
     def chooseItemMinProgression(self, items):
         minNewLocs = 1000
@@ -981,7 +987,7 @@ class Randomizer(object):
     def chooseLocationRandom(self, availableLocations, item):
         self.log.debug("RANDOM")
         self.log.debug("chooseLocationRandom: {}".format([l['Name'] for l in availableLocations]))
-        return availableLocations[random.randint(0, len(availableLocations)-1)]
+        return random.choice(availableLocations)
 
     def getLocDiff(self, loc):
         # avail difficulty already stored by graph algorithm        
@@ -1325,7 +1331,7 @@ class Randomizer(object):
             self.currentItems.append(item)
             self.smbm.addItem(item['Type'])
 
-            if self.vcr != None:
+            if self.vcr != None and showDot == True:
                 self.vcr.addLocation(location['Name'], item['Type'])
 
         self.unusedLocations.remove(location)
@@ -1401,7 +1407,7 @@ class Randomizer(object):
         if random.random() < self.minorHelpProb:
             helpfulMinors = [item for item in basePool if item['Class'] == 'Minor' and not self.hasItemTypeInPool(item['Type'], pool)]
             if len(helpfulMinors) > 0:
-                pool.append(helpfulMinors[random.randint(0, len(helpfulMinors)-1)])
+                pool.append(random.choice(helpfulMinors))
         # don't hold energy back for certain settings
         self.addEnergyAsNonProg(pool, basePool)
 
@@ -1422,7 +1428,7 @@ class Randomizer(object):
             return False
         pool = self.getNonProgItemPoolStart()
         poolTypes = list(set([item['Type'] for item in pool]))
-        self.log.debug("fillNonProgressionItems poolset=" + str(poolTypes))
+        self.log.debug("fillNonProgressionItems poolset=" + str(sorted(poolTypes)))
         poolWasEmpty = len(pool) == 0
         itemLocation = None
         nItems = 0
@@ -1430,7 +1436,10 @@ class Randomizer(object):
         self.log.debug("NON-PROG")
         minLimit = self.itemLimit - int(self.itemLimit/5)
         maxLimit = self.itemLimit + int(self.itemLimit/5)
-        itemLimit = random.randint(minLimit, maxLimit)
+        if minLimit == maxLimit:
+            itemLimit = minLimit
+        else:
+            itemLimit = random.randint(minLimit, maxLimit)
         while len(pool) > 0 and nItems < itemLimit and locPoolOk:
             curLocs = self.currentLocations()
             itemLocation = self.generateItem(curLocs, pool)
@@ -1554,7 +1563,7 @@ class Randomizer(object):
                 else:
                     break
         if len(possibleStates) > 0:
-            (state, itemLoc) = possibleStates[random.randint(0, len(possibleStates)-1)]
+            (state, itemLoc) = random.choice(possibleStates)
             self.updateRollbackItemsTried(itemLoc)
             state.apply(self)
             ret = itemLoc
@@ -1705,7 +1714,7 @@ class Randomizer(object):
                 ret = None
                 chooseFrom = [loc for loc in locs if loc['difficulty'].difficulty <= self.difficultyTarget]
                 if len(chooseFrom) > 0:
-                    ret = chooseFrom[random.randint(0, len(chooseFrom)-1)]
+                    ret = random.choice(chooseFrom)
                 else:
                     minDiff = god
                     for loc in locs:

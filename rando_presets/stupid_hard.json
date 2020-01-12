@@ -3,7 +3,7 @@
   "progressionDifficulty": "harder",
   "funMovement": "on",
   "areaLayout": "off",
-  "skip_ceres": "on",
+  "startLocation": "Landing Site",
   "hideItems": "off",
   "funCombat": "on",
   "majorsSplit": "Full",
@@ -12,8 +12,6 @@
   "missileQty": "9",
   "morphPlacement": "early",
   "progressionSpeed": "slowest",
-  "No_Music": "off",
-  "areaRandomization": "off",
   "maxDifficulty": "no difficulty cap",
   "powerBombQty": "1",
   "minorQty": "7",
@@ -21,11 +19,11 @@
   "preset": "master",
   "animals": "on",
   "spinjumprestart": "off",
-  "noGravHeat": "on",
+  "gravityBehaviour": "Balanced",
   "superQty": "1",
-  "skip_intro": "off",
-  "itemsounds": "on",
   "energyQty": "sparse",
   "funSuits": "on",
-  "variaTweaks": "on"
+  "nerfedCharge": "off",
+  "variaTweaks": "on",
+  "rando_speed": "off"
 }

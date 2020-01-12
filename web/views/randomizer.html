@@ -259,21 +259,14 @@ function randomize(evt, elemId) {
     isActive = true;
   }
 
-  e.disabled = isActive;
-  // grey out the disabled text
-  var text = document.getElementById(elemId+"Text");
-  if(e.disabled) {
-      text.className = "disabledText";
-  } else {
-      text.className = "";
-  }
-  // tell switchery
-  if(elemId in globalSwitchs){
-    var s = globalSwitchs[elemId];
-    if(isActive){
-      s.disable();
-    } else {
-      s.enable();
+  disableElement(elemId, isActive);
+
+  if(elemId == "areaRandomization") {
+    if(isActive == true || (isActive == false && e.checked == true)) {
+      var secondIds = ["areaLayout", "escapeRando", "removeEscapeEnemies"];
+      for(var i=0; i<secondIds.length; i++) {
+        disableElement(secondIds[i], isActive);
+      }
     }
   }
 
@@ -291,6 +284,27 @@ function randomize(evt, elemId) {
   }
 }
 
+function disableElement(id, disable) {
+  var elem = document.getElementById(id);
+  elem.disabled = disable;
+  // grey out the disabled text
+  var text = document.getElementById(id+"Text");
+  if(elem.disabled) {
+      text.className = "disabledText";
+  } else {
+      text.className = "";
+  }
+  // tell switchery
+  if(id in globalSwitchs) {
+    var sw = globalSwitchs[id];
+    if(disable) {
+      sw.disable();
+    } else {
+      sw.enable();
+    }
+  }
+}
+
 function getComplexity() {
   tablinks = document.getElementsByClassName("tablinks");
   for (i = 0; i < tablinks.length; i++) {
@@ -302,15 +316,15 @@ function getComplexity() {
 
 function setRandom() {
 {{
-  for id in ["missileQty", "superQty", "powerBombQty", "minorQty", "energyQty", "maxDifficulty", "majorsSplit", "suitsRestriction", "morphPlacement", "funCombat", "funMovement", "funSuits", "progressionDifficulty", "hideItems", "strictMinors", "progressionSpeed"]:
+  for id in ["missileQty", "superQty", "powerBombQty", "minorQty", "energyQty", "maxDifficulty", "majorsSplit", "suitsRestriction", "morphPlacement", "funCombat", "funMovement", "funSuits", "progressionDifficulty", "hideItems", "strictMinors", "progressionSpeed", "areaRandomization", "bossRandomization"]:
     if id in session.randomizer and session.randomizer[id] == "random":
-      response.write('  document.getElementById("{}Random").click();'.format(id), escape=False)
+      response.write("  document.getElementById(\"{}Random\").click();\n".format(id), escape=False)
       pass
     pass
   if "progressionSpeed" in session.randomizer and type(session.randomizer["progressionSpeed"]) == list and len(session.randomizer["progressionSpeed"]) > 1:
-    # prog speed are in utf-8 after loading from json and displayed in js like [u'slowest', u'slow']
-    response.write('  $("#psMultiselect").val({});'.format([ps.encode('ascii') for ps in session.randomizer["progressionSpeed"]]), escape=False)
-    response.write('  document.getElementById("progressionSpeedRandom").click();', escape=False)
+    # python2: prog speed are in utf-8 after loading from json and displayed in js like [u'slowest', u'slow']
+    response.write("  $(\"#psMultiselect\").val({});\n".format([str(ps) for ps in session.randomizer["progressionSpeed"]]), escape=False)
+    response.write("  document.getElementById(\"progressionSpeedRandom\").click();\n", escape=False)
     pass
 }}
 }
@@ -328,37 +342,18 @@ function setComplexity() {
 function changeComplexity(evt, name) {
   if(name == "simple") {
     var show = [];
-    var hide = ["seedVisibility", "ammoVisibility", "maxDiffVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "morphPlacementVisibility", "superFunVisibility", "patchesVisibility", "areaPatchVisibility", "hideItemsVisibility", "raceModeVisibility"];
+    var hide = ["seedVisibility", "ammoVisibility", "maxDiffVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "morphPlacementVisibility", "superFunVisibility", "patchesVisibility", "areaPatchVisibility", "hideItemsVisibility", "raceModeVisibility", "escapeRandoVisibility", "removeEscapeEnemiesVisibility"];
     showHide(show, hide);
   }
 
   else if(name == "medium") {
-    var show = ["maxDiffVisibility", "patchesVisibility", "morphPlacementVisibility", "ammoVisibility"
-{{
-for patch in patches:
-  if patch[3] == True:
-    response.write(", \"{}Visibitily\"".format(patch[0]), escape=False)
-    pass
-  pass
-}}];
-    var hide = ["seedVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "strictMinorsVisibility", "missileQtyVisibility", "superQtyVisibility", "powerBombQtyVisibility", "superFunVisibility", "areaPatchVisibility", "mainPatchesVisibitily", "mainPatchesTextVisibitily", "hideItemsVisibility", "raceModeVisibility"
-{{
-for patch in patches:
-  if patch[3] == False:
-    response.write(", \"{}Visibitily\"".format(patch[0]), escape=False)
-    pass
-  pass
-}}];
+    var show = ["maxDiffVisibility", "patchesVisibility", "morphPlacementVisibility", "ammoVisibility", "nerfedChargeVisibility", "noMusicVisibility", "escapeRandoVisibility"];
+    var hide = ["seedVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "strictMinorsVisibility", "missileQtyVisibility", "superQtyVisibility", "powerBombQtyVisibility", "superFunVisibility", "areaPatchVisibility", "mainPatchesVisibility", "mainPatchesTextVisibility", "hideItemsVisibility", "raceModeVisibility", "miscVisibility", "removeEscapeEnemiesVisibility"];
     showHide(show, hide);
   }
 
   else {
-    var show = ["seedVisibility", "ammoVisibility", "maxDiffVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "morphPlacementVisibility", "strictMinorsVisibility", "missileQtyVisibility", "superQtyVisibility", "powerBombQtyVisibility", "superFunVisibility", "patchesVisibility", "areaPatchVisibility", "mainPatchesVisibitily", "mainPatchesTextVisibitily", "hideItemsVisibility", "raceModeVisibility"
-{{
-for patch in patches:
-  response.write(", \"{}Visibitily\"".format(patch[0]), escape=False)
-  pass
-}}];
+    var show = ["seedVisibility", "ammoVisibility", "maxDiffVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "morphPlacementVisibility", "strictMinorsVisibility", "missileQtyVisibility", "superQtyVisibility", "powerBombQtyVisibility", "superFunVisibility", "patchesVisibility", "areaPatchVisibility", "mainPatchesVisibility", "mainPatchesTextVisibility", "hideItemsVisibility", "raceModeVisibility", "nerfedChargeVisibility", "miscVisibility", "noMusicVisibility", "escapeRandoVisibility", "removeEscapeEnemiesVisibility"];
     var hide = [];
     showHide(show, hide);
   }
@@ -391,8 +386,8 @@ function AjaxPresetCallCompleted(data) {
     console.log("AjaxPresetCallCompleted");
 
     var dataDict = {paramsFileTarget : data, "complexity": getComplexity()};
-    var elems = ["seed", "itemsounds", "spinjumprestart", "rando_speed", "elevators_doors_speed", "skip_ceres", "skip_intro", "animals", "layoutPatches", "noGravHeat", "areaLayout", "variaTweaks", "areaRandomization", "No_Music", "preset", "bossRandomization"];
-    var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "energyQty", "maxDifficulty", "majorsSplit", "suitsRestriction", "morphPlacement", "funCombat", "funMovement", "funSuits", "progressionDifficulty", "hideItems", "strictMinors"];
+    var elems = ["seed", "preset", "raceMode", "areaLayout", "layoutPatches", "variaTweaks", "gravityBehaviour", "nerfedCharge", "itemsounds", "elevators_doors_speed", "spinjumprestart", "rando_speed", "startLocation", "animals", "No_Music", "escapeRando", "removeEscapeEnemies"];
+    var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "energyQty", "maxDifficulty", "majorsSplit", "suitsRestriction", "morphPlacement", "funCombat", "funMovement", "funSuits", "progressionDifficulty", "hideItems", "strictMinors", "areaRandomization", "bossRandomization"];
 
     for(var i=0; i<elems.length; i++) {
        dataDict[elems[i]] = document.getElementById(elems[i]).value;
@@ -407,13 +402,6 @@ function AjaxPresetCallCompleted(data) {
     }
 
     dataDict["progressionSpeed"] = getProgSpeed();
-
-    // add race mode
-    var raceMode = document.getElementById("raceMode");
-    if(raceMode.checked) {
-      var maxHourRace = document.getElementById("maxHourRace");
-      dataDict["raceMode"] = maxHourRace.value;
-    }
 
     // call web service with parameters
     var request = $.ajax({
@@ -547,8 +535,8 @@ function AjaxRandomizerCallCompleted(data) {
     console.log("button text set back to randomize");
 
     var dataDict = {"complexity": getComplexity()};
-    var elems = ["itemsounds", "spinjumprestart", "rando_speed", "elevators_doors_speed", "skip_ceres", "skip_intro", "animals", "layoutPatches", "noGravHeat", "areaLayout", "variaTweaks", "areaRandomization", "bossRandomization", "No_Music", "preset", "randoPreset"];
-    var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "energyQty", "maxDifficulty", "majorsSplit", "suitsRestriction", "morphPlacement", "funCombat", "funMovement", "funSuits", "progressionDifficulty", "hideItems", "strictMinors"];
+    var elems = ["seed", "preset", "raceMode", "areaLayout", "layoutPatches", "variaTweaks", "gravityBehaviour", "nerfedCharge", "itemsounds", "elevators_doors_speed", "spinjumprestart", "rando_speed", "startLocation", "animals", "No_Music", "randoPreset", "escapeRando", "removeEscapeEnemies"];
+    var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "energyQty", "maxDifficulty", "majorsSplit", "suitsRestriction", "morphPlacement", "funCombat", "funMovement", "funSuits", "progressionDifficulty", "hideItems", "strictMinors", "areaRandomization", "bossRandomization"];
 
     for(var i=0; i<elems.length; i++) {
        dataDict[elems[i]] = document.getElementById(elems[i]).value;
@@ -733,53 +721,25 @@ window.onload = function(){
         alert("This website requires the HTML5 File API, please upgrade your browser to a newer version.");
     }
 
-    var skipCeres = document.getElementById("skip_ceres");
-    skipCeres.onchange = function(){
-        var skipCeres = document.getElementById("skip_ceres");
-        var skipIntro = document.getElementById("skip_intro");
-
-        // if both are set, unselect the other one
-        if(skipCeres.checked && skipIntro.checked){
-            skipIntro.click();
-        }
-        // if none are set, select the other one
-        if(! skipCeres.checked && ! skipIntro.checked){
-            skipIntro.click();
-        }
-
-        switchCheckbox("skip_ceres");
-    };
-
-    var skipIntro = document.getElementById("skip_intro");
-    skipIntro.onchange = function(){
-        var skipCeres = document.getElementById("skip_ceres");
-        var skipIntro = document.getElementById("skip_intro");
-
-        if(skipIntro.checked && skipCeres.checked){
-            skipCeres.click();
-        }
-        if(! skipCeres.checked && ! skipIntro.checked){
-            skipCeres.click();
-        }
-        switchCheckbox("skip_intro");
-    };
-
-    // if none are set, activate skip ceres
-    if(! skipCeres.checked && ! skipIntro.checked){
-        skipCeres.click();
-    }
-
     var area = document.getElementById("areaRandomization");
     area.onchange = function(){
         var area = document.getElementById("areaRandomization");
         var patches = document.getElementById("areaLayout");
         var lateMorph = document.getElementById("morphPlacement");
         var suits = document.getElementById("suitsRestriction");
+        var escapeRando = document.getElementById("escapeRando");
+        var removeEscapeEnemies = document.getElementById("removeEscapeEnemies");
 
         if(area.checked){
-            if(! patches.checked){
-                patches.click();
+            var secondIds = ["areaLayout", "escapeRando", "removeEscapeEnemies"];
+            for(var i=0; i<secondIds.length; i++) {
+              disableElement(secondIds[i], false);
             }
+
+            if(! patches.checked){ patches.click(); }
+            if(! removeEscapeEnemies.checked){ removeEscapeEnemies.click(); }
+            if(! escapeRando.checked){ escapeRando.click(); }
+
             // uncheck suits restrictions when late morph + area
             if(lateMorph.options[lateMorph.selectedIndex].text == "late"){
                 if(suits.checked){
@@ -787,11 +747,24 @@ window.onload = function(){
                 }
             }
         } else {
-            if(patches.checked){
-                patches.click();
+            if(patches.checked){ patches.click(); }
+            if(removeEscapeEnemies.checked){ removeEscapeEnemies.click(); }
+            if(escapeRando.checked){ escapeRando.click(); }
+
+            var secondIds = ["areaLayout", "escapeRando", "removeEscapeEnemies"];
+            for(var i=0; i<secondIds.length; i++) {
+              disableElement(secondIds[i], true);
             }
         }
         switchCheckbox("areaRandomization");
+    };
+
+    var escapeRando = document.getElementById("escapeRando");
+    escapeRando.onchange = function() {
+      var escapeRando = document.getElementById("escapeRando");
+
+      disableElement("removeEscapeEnemies", ! escapeRando.checked);
+      switchCheckbox("escapeRando");
     };
 
     // uncheck suits restrictions when late morph + area
@@ -833,22 +806,18 @@ window.onload = function(){
 
     // race mode is disabled by default
     var text = document.getElementById("raceModeText");
-    var maxHourRace = document.getElementById("maxHourRace");
     text.className = "disabledText";
-    maxHourRace.disabled = true;
 
     var raceMode = document.getElementById("raceMode");
     raceMode.onchange = function() {
       var raceMode = document.getElementById("raceMode");
       var text = document.getElementById("raceModeText");
-      var maxHourRace = document.getElementById("maxHourRace");
       if(raceMode.checked){
         text.className = "";
-        maxHourRace.disabled = false;
       } else {
         text.className = "disabledText";
-        maxHourRace.disabled = true;
       }
+      switchCheckbox("raceMode");
     }
 
     var inputs = document.getElementsByTagName("input");
@@ -880,25 +849,7 @@ function switchCheckbox(id, elems=[]) {
   }
 
   for(var i=0; i<elems.length; i++){
-    elemId = elems[i];
-    var e = document.getElementById(elemId);
-    e.disabled = check.checked;
-    // grey out the disabled text
-    var text = document.getElementById(elems[i]+"Text");
-    if(e.disabled) {
-        text.className = "disabledText";
-    } else {
-        text.className = "";
-    }
-    // tell switchery
-    if(elemId in globalSwitchs){
-      var s = globalSwitchs[elemId];
-      if(check.checked){
-        s.disable();
-      } else {
-        s.enable();
-      }
-    }
+    disableElement(elems[i], check.checked);
   }
 }
 
@@ -924,6 +875,7 @@ function loadRandoPresetOK(data) {
   for(var key in data) {
     value = data[key];
     var elem = document.getElementById(key);
+    // console.log("key: "+key+" value: "+value);
 
     var elemRandom = document.getElementById(key+"Random");
     if(value == "random") {
@@ -988,7 +940,7 @@ function startTheTour(step=-1) {
     {
       element: "#presetStep",
       title: "Skills Preset",
-      content: "<p>The preset is used by the Randomizer to know which techniques are available to reach the items locations.</p><p>You can check which techniques are required as well as create and manage your own preset on the <a href=\"/solver/solver_web/presets\">Presets part of the website</a>.</p><p>Load one of the standard presets (sorted in increased difficulty), tournament presets, or your own from the community presets.</p><p>Creating your own preset will lead to a better experience overall, as the generated ROMs will be tailored for you.</p>"
+      content: "<p>The preset is used by the Randomizer to know which techniques are available to reach the items locations.</p><p>You can check which techniques are required as well as create and manage your own preset on the <a href=\"/solver/solver_web/presets\" target=\"_blank\">Presets part of the website</a>.</p><p>Load one of the standard presets (sorted in increased difficulty), tournament presets, or your own from the community presets.</p><p>Creating your own preset will lead to a better experience overall, as the generated ROMs will be tailored for you.</p>"
     },
     {
       element: "#randoPresetStep",
@@ -998,6 +950,7 @@ function startTheTour(step=-1) {
 <li>default: VARIA randomizer default settings</li>\
 <li>free: easiest possible settings</li>\
 <li>hardway2well: harder highway2hell</li>\
+<li>haste: speedrunning preset inspired by the <a href=\"https://dashrando.github.io/\" target=\"_blank\">DASH randomizer</a> with Nerfed Charge and Progressive Suits</li>\
 <li>highway2hell: favors suitless seeds</li>\
 <li>quite_random: randomizes a few significant settings to have various seeds</li>\
 <li>stupid_hard: hardest possible settings</li>\
@@ -1005,17 +958,17 @@ function startTheTour(step=-1) {
 <li>way_of_chozo: chozo split with boss randomization</li>\
 <li>where_is_morph: Area mode with late Morph</li></ul>\
 Tournament presets:<ul>\
-<li>Scavenger_Hunt: SM Scavenger Hunt Tournament</li>\
 <li>Season_Races: settings used for rando league races (Majors/Minors split)</li>\
 <li>Season_Races_Chozo: settings used for rando league races (Chozo split)</li>\
 <li>Playoff_Races: settings used for rando league races during playoff (Majors/Minors split)</li>\
 <li>Playoff_Races_Chozo: settings used for rando league races during playoff (Chozo split)</li>\
-<li>smrat: Super Metroid Randomizer Accessible Tournament 2019</li></ul>"
+<li>SMRAT2020: Super Metroid Randomizer Accessible Tournament 2020</li></ul>"
     },
     {
       element: "#raceStep",
       title: "Race",
-      content: "When enabled, makes it difficult to cheat by using a Super Metroid editor like SMILE.<br/>You can choose how many hours must pass before a Race Mode seed can be solved on the VARIA website (default is 24)."
+      content: "<p>When enabled, makes it difficult to cheat by using a Super Metroid editor like SMILE.</p>\
+<p>You won't be able to solve/track a race protected seed on the VARIA website.</p>"
     },
     {
       element: "#majorsSplitStep",
@@ -1075,7 +1028,8 @@ Tournament presets:<ul>\
     {
       element: "#areaRandomizationStep",
       title: "Areas randomization",
-      content: "<p>Randomize areas together using bidirectional access portals:</p><a href=\"/solver/static/images/area_map.png\" class=\"highslide\" onclick=\"return hs.expand(this, {wrapperClassName: 'borderless', dimmingOpacity: 0.75, align: 'center'})\"><div class=\"parent-center\"><img id=\"areathumb\" src=\"/solver/static/images/area_map_thumbnail.png\" alt=\"Area Map\" title=\"Click to enlarge\" class=\"half child-center\"/></div></a><p>It is recommended to use the <a href=\"/solver/solver_web/tracker\">Area Tracker</a> to find your way more easily.</p><p>All portals can be linked to one another, even if it means following an incompatible transition (Left-Left, Up-Right, ...).<br/>\
+      content: "<p>Randomize areas together using bidirectional access portals:</p><a href=\"/solver/static/images/area_map.png\" class=\"highslide\" onclick=\"return hs.expand(this, {wrapperClassName: 'borderless', dimmingOpacity: 0.75, align: 'center'})\"><div class=\"parent-center\"><img id=\"areathumb\" src=\"/solver/static/images/area_map_thumbnail.png\" alt=\"Area Map\" title=\"Click to enlarge\" class=\"half child-center\"/></div></a><p>It is recommended to use the <a href=\"/solver/solver_web/tracker\" target=\"_blank\">Area Tracker</a> to find your way more easily.</p><p>All portals can be linked to one another, even if it means following an incompatible transition (Left-Left, Up-Right, ...).<br/>\
+By default, the escape sequence can spawn you outside a random map station, and you have to find your way to the ship. See next option (in medium/advanced tab) for more information.<br/>\
 You can go through all portals and back, even those where you can't do that in vanilla, so some layout tweaks have been made:</p>\
 <table class=\"full\">\
 <tr>\
@@ -1102,7 +1056,8 @@ You can go through all portals and back, even those where you can't do that in v
 <td class=\"quarter\"><img src=\"/solver/static/images/blue_door_lecoude.png\" alt=\"blue_door_lecoude.png\" title=\"blue_door_lecoude.png\" class=\"full\"/></td>\
 <td class=\"quarter\"><img src=\"/solver/static/images/blue_door_kronic.png\" alt=\"blue_door_kronic.png\" title=\"blue_door_kronic.png\" class=\"full\"/></td>\
 </tr>\
-</table>",
+</table>\
+Click on the dice button to randomly set this parameter.",
       placement: "auto left"
     },
     {
@@ -1134,14 +1089,35 @@ You can go through all portals and back, even those where you can't do that in v
       placement: "auto left"
     },
     {
+      element: "#escapeRandoStep",
+      title: "Escape sequence randomization",
+      content: "<p>When leaving Tourian, get teleported to one of five spawn points: either the vanilla escape (Climb room), or the exit of a random Map station (between Brinstar/Maridia/Norfair/Wrecked Ship).<br/>You then have to find your way to the ship in the remaining time. Allotted time depends on area layout, but not on skill settings and is pretty generous.</p>\
+During the escape sequence:\
+<ul>\
+<li>All doors are opened</li>\
+<li>The Hyper Beam can destroy Bomb, Power Bomb and Super Missile blocks and open blue/green gates from both sides</li>\
+<li>All mini bosses are defeated</li>\
+<li>By default, all minor enemies are removed to allow you to move faster. See next option (in advanced tab) to change this behavior</li>\
+</ul>\
+During regular game only Crateria Map station door can be opened and activating the station will act as if all map stations were activated at once.",
+      placement: "auto left"
+    },
+    {
+      element: "#removeEscapeEnemiesStep",
+      title: "Remove enemies during escape",
+      content: "<p>Remove enemies during escape sequence, disable it to blast through enemies with your Hyper Beam and cause lag.</p>",
+      placement: "auto left"
+    },
+    {
       element: "#bossRandomizationStep",
       title: "Bosses randomization",
-	content: "<p>Randomize Golden 4 bosses access doors (<a href=\"https://wiki.supermetroid.run/Kraid\">Kraid</a>, <a href=\"https://wiki.supermetroid.run/Phantoon\">Phantoon</a>, <a href=\"https://wiki.supermetroid.run/Draygon\">Draygon</a>, <a href=\"https://wiki.supermetroid.run/Ridley\">Ridley</a>) using bidirectional access portals (the same access portals as in Areas randomization).</p>\
+      content: "<p>Randomize Golden 4 bosses access doors (<a href=\"https://wiki.supermetroid.run/Kraid\" target=\"_blank\">Kraid</a>, <a href=\"https://wiki.supermetroid.run/Phantoon\" target=\"_blank\">Phantoon</a>, <a href=\"https://wiki.supermetroid.run/Draygon\" target=\"_blank\">Draygon</a>, <a href=\"https://wiki.supermetroid.run/Ridley\" target=\"_blank\">Ridley</a>) using bidirectional access portals (the same access portals as in Areas randomization).</p>\
 <p>The areas or rooms unlocked by the bosses stay unchanged. For example, you still have to kill Phantoon to activate Wrecked Ship.</p>\
 <p>Wrecked Ship save station is always active:</p>\
 <table class=\"quarter\">\
 <tr><td><img src=\"/solver/static/images/ws_save.png\" alt=\"ws_save.png\" title=\"ws_save.png\" class=\"full\"/></td></tr>\
-</table>",
+</table>\
+Click on the dice button to randomly set this parameter.",
       placement: "auto left"
     },
     {
@@ -1216,13 +1192,8 @@ Click on the dice button to randomly set this parameter.",
 <td class=\"knowsUsed\"><img src=\"/solver/static/images/bt_map.png\" alt=\"bt_map\" title=\"bt_map\" class=\"full\"/></td>\
 <td class=\"knowsUsed\"><img src=\"/solver/static/images/spore_save.png\" alt=\"spore_save\" title=\"spore_save\" class=\"full\"/></td>\
 </tr>\
-</table>",
-      placement: "auto left"
-    },
-    {
-      element: "#noGravHeatStep",
-      title: "No Gravity Suit Heat Protection",
-      content: "Remove the Gravity Suit <img src=\"/solver/static/images/Gravity.png\" alt=\"Gravity.png\" title=\"Gravity.png\" class=\"width: 32px\"/> environmental protection (heat, spikes, electricity...), it also double the Varia Suit <img src=\"/solver/static/images/Varia.png\" alt=\"Varia.png\" title=\"Varia.png\" class=\"width: 32px\"/> environmental protection, as such it balances more the two suits abilities. Disable it to have a more vanilla feeling.",
+</table>\
+<p>Patches developed by Total & Flo.</p>",
       placement: "auto left"
     },
     {
@@ -1240,9 +1211,94 @@ Click on the dice button to randomly set this parameter.",
 <td class=\"quarter\"><img src=\"/solver/static/images/ws_etank.png\" alt=\"ws_etank\" title=\"ws_etank\" class=\"full\"/></td>\
 <td class=\"quarter\"><img src=\"/solver/static/images/ln_chozo.png\" alt=\"ln_chozo\" title=\"ln_chozo\" class=\"full\"/></td>\
 </tr>\
-</table>",
+</table>\
+<p>Patch developed by Flo.</p>",
       placement: "auto left"
-    } ]});
+    },
+    {
+      element: "#gravityBehaviourStep",
+      title: "Suits Properties",
+      content: "<p><ul>\
+<li>Balanced:<p>Removes Gravity <img src=\"/solver/static/images/Gravity.png\" alt=\"Gravity.png\" title=\"Gravity.png\" class=\"width: 32px\"/> environmental protection (heat, spikes, electricity...). It also doubles the Varia <img src=\"/solver/static/images/Varia.png\" alt=\"Varia.png\" title=\"Varia.png\" class=\"width: 32px\"/> environmental protection, to balance the two suits abilities. Enemy damage protection is still vanilla (50% for Varia, 75% for Gravity).</p></li>\
+<li>Progressive:\
+<p><ul>\
+<li>Gravity <img src=\"/solver/static/images/Gravity.png\" alt=\"Gravity.png\" title=\"Gravity.png\" class=\"width: 32px\"/> provides 50% heat damage reduction. Varia <img src=\"/solver/static/images/Varia.png\" alt=\"Varia.png\" title=\"Varia.png\" class=\"width: 32px\"/> still provides full heat protection.</li>\
+<li>Varia <img src=\"/solver/static/images/Varia.png\" alt=\"Varia.png\" title=\"Varia.png\" class=\"width: 32px\"/> and Gravity  <img src=\"/solver/static/images/Gravity.png\" alt=\"Gravity.png\" title=\"Gravity.png\" class=\"width: 32px\"/> each add 50% damage reduction to enemy attacks and environmental damage.</li>\
+<li>Varia <img src=\"/solver/static/images/Varia.png\" alt=\"Varia.png\" title=\"Varia.png\" class=\"width: 32px\"/> and Gravity  <img src=\"/solver/static/images/Gravity.png\" alt=\"Gravity.png\" title=\"Gravity.png\" class=\"width: 32px\"/> stack to reach 75% reduction to enemy attacks and environmental damage.</li>\
+</ul></p>\
+</li>\
+<li>Vanilla:<p>No change to vanilla suits properties. Most notably, Gravity <img src=\"/solver/static/images/Gravity.png\" alt=\"Gravity.png\" title=\"Gravity.png\" class=\"width: 32px\"/> provides full protection against environmental damages (heat, spikes, electricity...).</p></li>\
+</ul></p>\
+<p>Patches developed by Total and Smiley.</p>",
+      placement: "auto left"
+    },
+    {
+      element: "#nerfedChargeStep",
+      title: "Nerfed Charge Beam",
+      content: "<ul>\
+<li>Samus begins with a starter Charge Beam <img src=\"/solver/static/images/Charge.png\" alt=\"Charge.png\" title=\"Charge.png\" class=\"width: 32px\"/> that does one third of charged shot damage, effectively bringing a nerfed charge shot damage to a standard shot damage, but that can damage bosses.</li>\
+<li><a href=\"https://wiki.supermetroid.run/Pseudo_Screw_Attack\" target=\"_blank\">Pseudo Screws</a> also do one third damage.</li>\
+<li><a href=\"https://wiki.supermetroid.run/Charge_Beam_Combos\" target=\"_blank\">Special Beam Attacks</a> do normal damage but cost 3 Power Bombs instead of 1.</li>\
+<li>Once the Charge Beam <img src=\"/solver/static/images/Charge.png\" alt=\"Charge.png\" title=\"Charge.png\" class=\"width: 32px\"/> item has been collected, it does full damage and special attacks are back to normal.</li>\
+</ul>\
+<p>Patch developed by Smiley and Flo.</p>",
+      placement: "auto left"
+    },
+    {
+      element: "#itemsoundsStep",
+      title: "Fanfare",
+      content: "<p>Replaces the quite long fanfare played when picking up an item by a short sound effect related with the item picked, and does not restart game music on item pickup.</p>\
+<p>Patch developed by Scyzer.</p>",
+      placement: "auto left"
+    },
+    {
+      element: "#ElevatorDoorsStep",
+      title: "Transitions",
+      content: "<p>Accelerate doors and elevators transitions</p>\
+<p>Doors patch developed by Rakki and elevators patch by Lioran.</p>",
+      placement: "auto left"
+    },
+    {
+      element: "#spinjumprestartStep",
+      title: "Spin jump restart",
+      content: "<p>Allows Samus to start spinning in mid air after jumping or falling</p>\
+<p>Patch developed by Kejardon.</p>",
+      placement: "auto left"
+    },
+    {
+      element: "#rando_speedStep",
+      title: "Momentum conservation",
+      content: "<p>Let Samus keeps her momentum when landing from a fall or from jumping</p>\
+<p>This patch was developed by Oi27.</p>",
+      placement: "auto left"
+    },
+    {
+      element: "#StartLocationStep",
+      title: "Start location",
+      content: "<p>Choose where you want to start the game:\
+<ul>\
+<li>Start at Ceres Station: Skip text intro</li>\
+<li>Start at Landing Site: Skip text intro and Ceres station</li>\
+</ul>\
+</p>\
+<p>Patches developed by Smiley and Total.</p>",
+      placement: "auto left"
+    },
+    {
+      element: "#animalsStep",
+      title: "Animals surprise",
+      content: "<p>Replace saving the animals in the escape sequence by a random surprise.</p>\
+<p>Patch developed by Foosda.</p>",
+      placement: "auto left"
+    },
+    {
+      element: "#No_MusicStep",
+      title: "No music",
+      content: "<p>Disable the background music to let you hear you favorite tunes instead.</p>\
+<p>Patch developed by Kejardon.</p>",
+      placement: "auto left"
+    }
+ ]});
 
   // Initialize the tour
   tour.init();
@@ -1367,7 +1423,7 @@ def displayNumber(id, min, max, default, step="1"):
               </tr>
 	      <tr id="raceModeVisibility">
 		<td>{{displayCheckbox("raceMode")}}<span id="raceModeText">Race Mode</span></td>
-		<td>{{displaySelect("maxHourRace", [2,4,8,12,24,48,72], 24)}}</td>
+		<td></td>
 		<td id="raceStep"><button type="button" onclick="startTheTour(4)">?</button></td>
 	      </tr>
             </table>
@@ -1476,11 +1532,21 @@ def displayNumber(id, min, max, default, step="1"):
             </p>
 	    <table class="full">
 	      <tr>
-	        <td colspan="2" class="full" id="areaRandomizationStep">{{displayCheckbox("areaRandomization")}}Areas randomization</td>
+		<td class="small"><div class="random"><button id="areaRandomizationRandom" type="button" onclick="randomize(event, 'areaRandomization')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
+	        <td colspan="2" class="full" id="areaRandomizationStep">{{displayCheckbox("areaRandomization")}}<span id="areaRandomizationText">Areas randomization</span></td>
                 <td><button type="button" onclick="startTheTour(16)">?</button></td>
 	      </tr>
 	      <tr id="areaPatchVisibility">
-		<td colspan="2" class="full" id="areaLayoutStep">{{displayCheckbox("areaLayout", False)}} Additional layout patches for easier navigation</td><td><button type="button" onclick="startTheTour(17)">?</button></td>
+		<td class="small"></td>
+		<td colspan="2" class="full" id="areaLayoutStep">{{displayCheckbox("areaLayout", False)}}<span id="areaLayoutText">Additional layout patches for easier navigation</span></td><td><button type="button" onclick="startTheTour(17)">?</button></td>
+	      </tr>
+	      <tr id="escapeRandoVisibility">
+		<td class="small"></td>
+		<td colspan="2" class="full" id="escapeRandoStep">{{displayCheckbox("escapeRando", False)}}<span id="escapeRandoText">Randomize the escape sequence</span></td><td><button type="button" onclick="startTheTour(18)">?</button></td>
+	      </tr>
+	      <tr id="removeEscapeEnemiesVisibility">
+		<td class="small"></td>
+		<td colspan="2" class="full" id="removeEscapeEnemiesStep">{{displayCheckbox("removeEscapeEnemies", False)}}<span id="removeEscapeEnemiesText">Remove enemies during randomized escape sequence</span></td><td><button type="button" onclick="startTheTour(19)">?</button></td>
 	      </tr>
             </table>
             <h4>Bosses Randomization</h4>
@@ -1489,8 +1555,9 @@ def displayNumber(id, min, max, default, step="1"):
             </p>
 	    <table class="full">
 	      <tr>
-	        <td colspan="2" class="full" id="bossRandomizationStep">{{displayCheckbox("bossRandomization")}}Bosses randomization</td>
-                <td><button type="button" onclick="startTheTour(18)">?</button></td>
+		<td class="small"><div class="random"><button id="bossRandomizationRandom" type="button" onclick="randomize(event, 'bossRandomization')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
+	        <td colspan="2" class="full" id="bossRandomizationStep">{{displayCheckbox("bossRandomization")}}<span id="bossRandomizationText">Bosses randomization</span></td>
+                <td><button type="button" onclick="startTheTour(20)">?</button></td>
 	      </tr>
             </table>
 	    <div id="superFunVisibility">
@@ -1502,47 +1569,123 @@ def displayNumber(id, min, max, default, step="1"):
                 <tr>
 		  <td class="small" id="funCombatStep"><div class="random"><button id="funCombatRandom" type="button" onclick="randomize(event, 'funCombat')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
 		  <td colspan="2" class="full">{{displayCheckbox("funCombat")}}<span id="funCombatText">Super Fun Combat</span></td>
-		  <td><button type="button" onclick="startTheTour(19)">?</button></td>
+		  <td><button type="button" onclick="startTheTour(21)">?</button></td>
                 </tr>
                 <tr>
 		  <td class="small" id="funMovementStep"><div class="random"><button id="funMovementRandom" type="button" onclick="randomize(event, 'funMovement')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
 		  <td colspan="2" class="full">{{displayCheckbox("funMovement")}}<span id="funMovementText">Super Fun Movement</span></td>
-		  <td><button type="button" onclick="startTheTour(20)">?</button></td>
+		  <td><button type="button" onclick="startTheTour(22)">?</button></td>
                 </tr>
                 <tr>
 		  <td class="small" id="funSuitsStep"><div class="random"><button id="funSuitsRandom" type="button" onclick="randomize(event, 'funSuits')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
 		  <td colspan="2" class="full">{{displayCheckbox("funSuits")}}<span id="funSuitsText">Suitless</span></td>
-		  <td><button type="button" onclick="startTheTour(21)">?</button></td>
+		  <td><button type="button" onclick="startTheTour(23)">?</button></td>
                 </tr>
               </table>
 	    </div>
 	    <div id="patchesVisibility">
-	      <h4 id="patchesStep">Patches<span class="rightStep"><button type="button" onclick="startTheTour(22)">?</button></span></h4>
-	      <p id="mainPatchesTextVisibitily">
-	        The bug fix <a href="https://itemrando.supermetroid.run/information">patches</a> from Total Item Randomizer are included by default.
+	      <h4 id="patchesStep">Patches<span class="rightStep"><button type="button" onclick="startTheTour(24)">?</button></span></h4>
+	      <p id="mainPatchesTextVisibility">
+	        The bug fix <a href="https://itemrando.supermetroid.run/information" target="_blank">patches</a> from Total Item Randomizer are included by default.
 	      </p>
-	      <table class="full" id="mainPatchesVisibitily">
+	      <table class="full">
+		<colgroup><col class="quarter" /><col class="threequarter" /><col class="check" /></colgroup>
+		<tr><td colspan="2"><h5 class="center"><b>Randomizer adaptations (logic impact)</b></h5></td><td></td></tr>
+	      </table>
+	      <table class="full" id="mainPatchesVisibility">
+		<colgroup><col class="half" /><col class="half" /></colgroup>
 	        <tr id="layoutPatchesStep">
-		  <td class="full">{{displayCheckbox("layoutPatches", True)}} Anti-softlock layout patches (by Total & Flo)</td>
-		  <td><button type="button" onclick="startTheTour(23)">?</button></td>
+		  <td colspan="2">{{displayCheckbox("layoutPatches", True)}} Anti-softlock layout patches</td>
+		  <td><button type="button" onclick="startTheTour(25)">?</button></td>
 	        </tr>
 	        <tr>
-		  <td class="full" id="noGravHeatStep">{{displayCheckbox("noGravHeat", True)}} Remove Gravity Suit heat protection (by Total)</td><td><button type="button" onclick="startTheTour(24)">?</button></td>
+		  <td colspan="2" id="variaTweaksStep">{{displayCheckbox("variaTweaks", True)}} VARIA tweaks</td>
+		  <td><button type="button" onclick="startTheTour(26)">?</button></td>
 	        </tr>
-	        <tr>
-		  <td class="full" id="variaTweaksStep">{{displayCheckbox("variaTweaks", True)}} VARIA tweaks (by Flo)</td><td><button type="button" onclick="startTheTour(25)">?</button></td>
+	        <tr id="gravityBehaviourStep">
+		  <td>Suits properties</td>
+		  <td>
+		    {{displaySelect("gravityBehaviour", ["Balanced", "Progressive", "Vanilla"], "Balanced")}}
+		  </td>
+		  <td><button type="button" onclick="startTheTour(27)">?</button></td>
 	        </tr>
 	      </table>
-	      <table class="full" id="patchesStep">
-{{
-for patch in patches:
-  response.write("	    <tr>", escape=False)
-  response.write("	      <td class=\"full\" id=\"{}Visibitily\">".format(patch[0]), escape=False)
-  displayCheckbox(patch[0], patches[2])
-  response.write("{}".format(patch[1]))
-  response.write("	    </tr>", escape=False)
-  pass
-}}
+	      <table class="full" id="nerfedChargeVisibility">
+		<colgroup><col class="half" /><col class="half" /></colgroup>
+		<tr id="nerfedChargeStep">
+		  <td colspan="2">
+		    {{displayCheckbox("nerfedCharge")}}
+		    Nerfed Charge Beam available from the start
+		  </td>
+                  <td><button type="button" onclick="startTheTour(28)">?</button></td>
+		</tr>
+	      </table>
+	      <table class="full">
+		<colgroup><col class="quarter" /><col class="threequarter" /><col class="check" /></colgroup>
+		<tr><td colspan="2"><h5 class="center"><b>Game comfort</b></h5></td><td></td></tr>
+	      </table>
+	      <table class="full">
+		<colgroup><col class="half" /><col class="half" /></colgroup>
+		<tr id="itemsoundsStep">
+		  <td colspan="2">
+		    {{displayCheckbox("itemsounds")}}
+		    Remove fanfare when picking up an item
+		  </td>
+                  <td><button type="button" onclick="startTheTour(29)">?</button></td>
+		</tr>
+		<tr id="ElevatorDoorsStep">
+		  <td colspan="2">
+		    {{displayCheckbox("elevators_doors_speed")}}
+		    Accelerate doors and elevators transitions
+		  </td>
+                  <td><button type="button" onclick="startTheTour(30)">?</button></td>
+		</tr>
+	      </table>
+	      <table class="full">
+		<colgroup><col class="half" /><col class="half" /></colgroup>
+		<tr id="spinjumprestartStep">
+		  <td colspan="2">
+		    {{displayCheckbox("spinjumprestart")}}
+		    Spin jump restart (a.k.a. Respin)
+		  </td>
+                  <td><button type="button" onclick="startTheTour(31)">?</button></td>
+		</tr>
+		<tr id="rando_speedStep">
+		  <td colspan="2">
+		    {{displayCheckbox("rando_speed")}}
+		     Momentum conservation (a.k.a. Speedkeep)
+		  </td>
+                  <td><button type="button" onclick="startTheTour(32)">?</button></td>
+		</tr>
+	      </table>
+	      <table class="full">
+		<colgroup><col class="quarter" /><col class="threequarter" /><col class="check" /></colgroup>
+		<tr><td colspan="2"><h5 class="center"><b>Miscellaneous</b></h5></td><td></td></tr>
+	      </table>
+	      <table class="full" id="miscVisibility">
+		<colgroup><col class="half" /><col class="half" /></colgroup>
+		<tr id="StartLocationStep">
+		  <td>Start location</td>
+		  <td>{{displaySelect("startLocation", ["Ceres", "Landing Site"], "Landing Site")}}</td>
+                  <td><button type="button" onclick="startTheTour(33)">?</button></td>
+		</tr>
+		<tr id="animalsStep">
+		  <td colspan="2">
+		    {{displayCheckbox("animals")}}
+		    Save the animals surprise
+		  </td>
+                  <td><button type="button" onclick="startTheTour(34)">?</button></td>
+		</tr>
+	      </table>
+	      <table class="full" id="noMusicVisibility">
+		<colgroup><col class="half" /><col class="half" /></colgroup>
+		<tr id="No_MusicStep">
+		  <td colspan="2">
+		    {{displayCheckbox("No_Music")}}
+		    Disable background music
+		  </td>
+                  <td><button type="button" onclick="startTheTour(35)">?</button></td>
+		</tr>
 	      </table>
 	    </div>
 	  </div>

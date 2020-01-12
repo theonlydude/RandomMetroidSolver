@@ -14,6 +14,47 @@ class HelpersGraph(Helpers):
         self.smbm = smbm
         self.draygonConnection = None
 
+
+    def canEnterAndLeaveGauntletQty(self, nPB, nTanksSpark):
+        sm = self.smbm
+        # EXPLAINED: to access Gauntlet Entrance from Landing site we can either:
+        #             -fly to it (infinite bomb jumps or space jump)
+        #             -shinespark to it
+        #             -wall jump with high jump boots
+        #             -wall jump without high jump boots
+        #            then inside it to break the bomb wals:
+        #             -use screw attack (easy way)
+        #             -use power bombs
+        #             -use bombs
+        #             -perform a simple short charge on the way in
+        #              and use power bombs on the way out
+        return sm.wand(sm.wor(sm.canFly(),
+                              sm.haveItem('SpeedBooster'),
+                              sm.wand(sm.knowsHiJumpGauntletAccess(),
+                                      sm.haveItem('HiJump')),
+                              sm.knowsHiJumpLessGauntletAccess()),
+                       sm.wor(sm.haveItem('ScrewAttack'),
+                              sm.wor(sm.wand(sm.energyReserveCountOkHardRoom('Gauntlet'),
+                                             sm.wand(sm.canUsePowerBombs(),
+                                                     sm.wor(sm.itemCountOk('PowerBomb', nPB),
+                                                            sm.wand(sm.haveItem('SpeedBooster'),
+                                                                    sm.energyReserveCountOk(nTanksSpark))))),
+                                     sm.wand(sm.energyReserveCountOkHardRoom('Gauntlet', 0.51),
+                                             sm.canUseBombs()))))
+
+    @Cache.decorator
+    def canEnterAndLeaveGauntlet(self):
+        sm = self.smbm
+        return sm.wor(sm.wand(sm.canShortCharge(),
+                              sm.canEnterAndLeaveGauntletQty(2, 2)),
+                      sm.canEnterAndLeaveGauntletQty(2, 3))
+
+    def canPassTerminatorBombWall(self, fromLandingSite=True):
+        sm = self.smbm
+        return sm.wor(sm.wand(sm.haveItem('SpeedBooster'),
+                              sm.wor(SMBool(not fromLandingSite, 0), sm.knowsSimpleShortCharge(), sm.knowsShortCharge())),
+                      sm.canDestroyBombWalls())
+
     @Cache.decorator
     def canAccessBillyMays(self):
         sm = self.smbm
@@ -243,8 +284,7 @@ class HelpersGraph(Helpers):
         # to require one more CF if no heat protection because of distance to cover, wait times, acid...
         return sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Entrance -> GT via Chozo']),
                        sm.canUsePowerBombs(),
-                       sm.wor(sm.haveItem('SpaceJump'),
-                              RomPatches.has(RomPatches.LNChozoSJCheckDisabled)))
+                       sm.wor(RomPatches.has(RomPatches.LNChozoSJCheckDisabled), sm.haveItem('SpaceJump')))
 
     @Cache.decorator
     def canExitScrewAttackArea(self):
@@ -266,7 +306,7 @@ class HelpersGraph(Helpers):
         sm = self.smbm
         return sm.wand(sm.canDestroyBombWalls(),
                        sm.wor(sm.canFly(),
-                              sm.wand(sm.knowsWorstRoomIceCharge(), sm.haveItem('Ice'), sm.haveItem('Charge')),
+                              sm.wand(sm.knowsWorstRoomIceCharge(), sm.haveItem('Ice'), sm.canFireChargedShots()),
                               sm.wand(sm.knowsGetAroundWallJump(), sm.haveItem('HiJump')),
                               sm.wand(sm.knowsSpringBallJumpFromWall(), sm.canUseSpringBall())))
 
@@ -291,14 +331,14 @@ class HelpersGraph(Helpers):
             return SMBool(True, 0, items=['Super'])
 
         # - or with taking damage as well?
-        (dmgRed, item) = sm.getDmgReduction(envDmg=False)
+        (dmgRed, redItems) = sm.getDmgReduction(envDmg=False)
         dmgKi = 200.0 / dmgRed
         if (sm.itemCount('Super')*5*sup)/ki + (sm.energyReserveCount()*100 - 2)/dmgKi >= nbKi:
             # require heat proof as long as taking damage is necessary.
             # display all the available energy in the solver.
-            return sm.wand(sm.heatProof(), SMBool(True, 0, items=['Super', '{}-ETank - {}-Reserve'.format(self.smbm.itemCount('ETank'), self.smbm.itemCount('Reserve'))]))
+            return sm.wand(sm.heatProof(), SMBool(True, 0, items=redItems+['Super', '{}-ETank - {}-Reserve'.format(self.smbm.itemCount('ETank'), self.smbm.itemCount('Reserve'))]))
 
-        return SMBool(False, 0)
+        return SMBool(False)
 
     # go though the pirates room filled with acid
     @Cache.decorator
@@ -387,6 +427,7 @@ class HelpersGraph(Helpers):
         sm = self.smbm
         return sm.wor(sm.haveItem('Gravity'),
                       sm.wand(sm.knowsGravLessLevel2(),
+                              sm.haveItem("HiJump"),
                               sm.wor(sm.haveItem('Grapple'),
                                      sm.haveItem('SpaceJump'),
                                      sm.wand(sm.haveItem('Ice'),

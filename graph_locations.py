@@ -32,7 +32,7 @@ locations = [
     'Address': 0x78404,
     'Id': 0x7,
     'Class': ["Major", "Chozo"],
-    'CanHidden': True,
+    'CanHidden': False,
     'Visibility': "Chozo",
     'Room': 'Bomb Torizo Room',
     'AccessFrom' : {
@@ -65,7 +65,7 @@ locations = [
     'SolveArea': "Green Brinstar Reserve",
     'Name': "Reserve Tank, Brinstar",
     'Class': ["Major", "Chozo"],
-    'CanHidden': True,
+    'CanHidden': False,
     'Address': 0x7852C,
     'Id': 0x11,
     'Visibility': "Chozo",
@@ -84,7 +84,7 @@ locations = [
     'SolveArea': "Pink Brinstar",
     'Name': "Charge Beam",
     'Class': ["Major", "Chozo"],
-    'CanHidden': True,
+    'CanHidden': False,
     'Address': 0x78614,
     'Id': 0x17,
     'Visibility': "Chozo",
@@ -106,7 +106,7 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Morph Ball Room',
     'AccessFrom' : {
-        'Landing Site': lambda sm: SMBool(True)
+        'Blue Brinstar Elevator Bottom': lambda sm: SMBool(True)
     },
     'Available': lambda sm: SMBool(True)
 },
@@ -116,13 +116,13 @@ locations = [
     'SolveArea': "Blue Brinstar",
     'Name': "Energy Tank, Brinstar Ceiling",
     'Class': ["Major"],
-    'CanHidden': True,
+    'CanHidden': False,
     'Address': 0x7879E,
     'Id': 0x1d,
     'Visibility': "Hidden",
     'Room': 'Blue Brinstar Energy Tank Room',
     'AccessFrom' : {
-        'Landing Site': lambda sm: sm.wor(sm.canOpenRedDoors(), RomPatches.has(RomPatches.BlueBrinstarBlueDoor))
+        'Blue Brinstar Elevator Bottom': lambda sm: sm.wor(RomPatches.has(RomPatches.BlueBrinstarBlueDoor), sm.canOpenRedDoors())
     },
     # EXPLAINED: to get this major item the different technics are:
     #  -can fly (continuous bomb jump or space jump)
@@ -200,7 +200,7 @@ locations = [
     'SolveArea': "Red Brinstar",
     'Name': "X-Ray Scope",
     'Class': ["Major", "Chozo"],
-    'CanHidden': True,
+    'CanHidden': False,
     'Address': 0x78876,
     'Id': 0x26,
     'Visibility': "Chozo",
@@ -227,7 +227,7 @@ locations = [
     'SolveArea': "Red Brinstar",
     'Name': "Spazer",
     'Class': ["Major", "Chozo"],
-    'CanHidden': True,
+    'CanHidden': False,
     'Address': 0x7896E,
     'Id': 0x2a,
     'Visibility': "Chozo",
@@ -245,7 +245,7 @@ locations = [
     'SolveArea': "Kraid",
     'Name': "Energy Tank, Kraid",
     'Class': ["Major"],
-    'CanHidden': True,
+    'CanHidden': False,
     'Address': 0x7899C,
     'Id': 0x2b,
     'Visibility': "Hidden",
@@ -263,6 +263,7 @@ locations = [
     'Class': ["Boss"],
     'CanHidden': False,
     'Address': 0xB055B055,
+    'Visibility': "Hidden",
     'Room': 'Kraid Room',
     'AccessFrom' : {
         'KraidRoomIn': lambda sm: SMBool(True)
@@ -277,7 +278,7 @@ locations = [
     'SolveArea': "Kraid",
     'Name': "Varia Suit",
     'Class': ["Major", "Chozo"],
-    'CanHidden': True,
+    'CanHidden': False,
     'Address': 0x78ACA,
     'Id': 0x30,
     'Visibility': "Chozo",
@@ -293,7 +294,7 @@ locations = [
     'SolveArea': "Norfair Ice",
     'Name': "Ice Beam",
     'Class': ["Major", "Chozo"],
-    'CanHidden': True,
+    'CanHidden': False,
     'Address': 0x78B24,
     'Id': 0x32,
     'Visibility': "Chozo",
@@ -335,7 +336,7 @@ locations = [
     'SolveArea': "Norfair Entrance",
     'Name': "Hi-Jump Boots",
     'Class': ["Major", "Chozo"],
-    'CanHidden': True,
+    'CanHidden': False,
     'Address': 0x78BAC,
     'Id': 0x35,
     'Visibility': "Chozo",
@@ -353,7 +354,7 @@ locations = [
     'SolveArea': "Crocomire",
     'Name': "Grapple Beam",
     'Class': ["Major", "Chozo"],
-    'CanHidden': True,
+    'CanHidden': False,
     'Address': 0x78C36,
     'Id': 0x3c,
     'Visibility': "Chozo",
@@ -380,7 +381,7 @@ locations = [
     'SolveArea': "Bubble Norfair Reserve",
     'Name': "Reserve Tank, Norfair",
     'Class': ["Major"],
-    'CanHidden': True,
+    'CanHidden': False,
     'Address': 0x78C3E,
     'Id': 0x3d,
     'Visibility': "Chozo",
@@ -397,7 +398,7 @@ locations = [
     'SolveArea': "Bubble Norfair Speed",
     'Name': "Speed Booster",
     'Class': ["Major", "Chozo"],
-    'CanHidden': True,
+    'CanHidden': False,
     'Address': 0x78C82,
     'Id': 0x42,
     'Visibility': "Chozo",
@@ -413,7 +414,7 @@ locations = [
     'SolveArea': "Bubble Norfair Wave",
     'Name': "Wave Beam",
     'Class': ["Major", "Chozo"],
-    'CanHidden': True,
+    'CanHidden': False,
     'Address': 0x78CCA,
     'Id': 0x44,
     'Visibility': "Chozo",
@@ -436,7 +437,8 @@ locations = [
     'Class': ["Boss"],
     'CanHidden': False,
     'Address': 0xB055B056,
-    'Room': 'Ridley Room',
+    'Visibility': "Hidden",
+    'Room': "Ridley's Room",
     'AccessFrom' : {
         'RidleyRoomIn': lambda sm: SMBool(True)
     },
@@ -450,7 +452,7 @@ locations = [
     'SolveArea': "Lower Norfair After Amphitheater",
     'Name': "Energy Tank, Ridley",
     'Class': ["Major", "Chozo"],
-    'CanHidden': True,
+    'CanHidden': False,
     'Address': 0x79108,
     'Id': 0x4e,
     'Visibility': "Hidden",
@@ -466,7 +468,7 @@ locations = [
     'SolveArea': "Lower Norfair Screw Attack",
     'Name': "Screw Attack",
     'Class': ["Major", "Chozo"],
-    'CanHidden': True,
+    'CanHidden': False,
     'Address': 0x79110,
     'Id': 0x4f,
     'Visibility': "Chozo",
@@ -506,7 +508,7 @@ locations = [
     'SolveArea': "WreckedShip Gravity",
     'Name': "Reserve Tank, Wrecked Ship",
     'Class': ["Major"],
-    'CanHidden': True,
+    'CanHidden': False,
     'Address': 0x7C2E9,
     'Id': 0x81,
     'Visibility': "Chozo",
@@ -543,7 +545,8 @@ locations = [
     'Class': ["Boss"],
     'CanHidden': False,
     'Address': 0xB055B057,
-    'Room': 'Phantoon Room',
+    'Visibility': "Hidden",
+    'Room': "Phantoon's Room",
     'AccessFrom' : {
         'PhantoonRoomIn': lambda sm: SMBool(True)
     },
@@ -573,7 +576,7 @@ locations = [
     'SolveArea': "WreckedShip Gravity",
     'Name': "Gravity Suit",
     'Class': ["Major"],
-    'CanHidden': True,
+    'CanHidden': False,
     'Address': 0x7C36D,
     'Id': 0x87,
     'Visibility': "Chozo",
@@ -617,13 +620,18 @@ locations = [
     'SolveArea': "Maridia Forgotten Highway",
     'Name': "Plasma Beam",
     'Class': ["Major", "Chozo"],
-    'CanHidden': True,
+    'CanHidden': False,
     'Address': 0x7C559,
     'Id': 0x8f,
     'Visibility': "Chozo",
     'Room': 'Plasma Room',
-    'AccessFrom' : { # simple because if draygon is dead, you can get there
-        'Main Street Bottom': lambda sm: SMBool(True), # green gate+toilet
+    'AccessFrom' : {
+        'Main Street Bottom': lambda sm: sm.wand(sm.canOpenGreenDoors(),
+                                                 sm.wor(sm.wand(sm.haveItem('Gravity'),
+                                                                sm.canDestroyBombWalls()),
+                                                        sm.wand(sm.canDoSuitlessOuterMaridia(),
+                                                                sm.knowsGravLessLevel3(),
+                                                                sm.canDestroyBombWallsUnderwater()))),
         'Le Coude Right': lambda sm: SMBool(True)
     },
     # DONE: to leave the Plasma Beam room you have to kill the space pirates and return to the door
@@ -641,12 +649,13 @@ locations = [
     'Available': lambda sm: Bosses.bossDead('Draygon'),
     'PostAvailable': lambda sm: sm.wand(sm.wor(sm.wand(sm.canShortCharge(),
                                                        sm.knowsKillPlasmaPiratesWithSpark()),
-                                               sm.wand(sm.haveItem('Charge'),
+                                               sm.wand(sm.canFireChargedShots(),
                                                        sm.knowsKillPlasmaPiratesWithCharge(),
                                                        # 160/80/40 dmg * 4 ground plasma pirates
                                                        # => 640/320/160 damage take required
                                                        # check below is 1099/599/299 (give margin for taking dmg a bit)
-                                                       sm.energyReserveCountOk(int(10.0/sm.getDmgReduction(False)[0]))),
+                                                       # (* 4 for nerfed charge, since you need to take hits 4 times instead of one)
+                                                       sm.energyReserveCountOk(int(10.0 * sm.getPiratesPseudoScrewCoeff()/sm.getDmgReduction(False)[0]))),
                                                sm.haveItem('ScrewAttack'),
                                                sm.haveItem('Plasma')),
                                         sm.wor(sm.canFly(),
@@ -662,7 +671,7 @@ locations = [
     'SolveArea': "Maridia Pink Bottom",
     'Name': "Reserve Tank, Maridia",
     'Class': ["Major"],
-    'CanHidden': True,
+    'CanHidden': False,
     'Address': 0x7C5E3,
     'Id': 0x91,
     'Visibility': "Chozo",
@@ -679,14 +688,14 @@ locations = [
     'SolveArea': "Maridia Sandpits",
     'Name': "Spring Ball",
     'Class': ["Major", "Chozo"],
-    'CanHidden': True,
+    'CanHidden': False,
     'Address': 0x7C6E5,
     'Id': 0x96,
     'Visibility': "Chozo",
     'Room': 'Spring Ball Room',
     'AccessFrom' : {
         'Main Street Bottom': lambda sm: sm.wor(sm.canOpenGreenDoors(), sm.wand(sm.canOpenRedDoors(), RomPatches.has(RomPatches.AreaRandoGatesOther))), # gate
-        'Le Coude Right': lambda sm: sm.wand(sm.wor(sm.canOpenYellowDoors(), RomPatches.has(RomPatches.AreaRandoBlueDoors)),
+        'Le Coude Right': lambda sm: sm.wand(sm.wor(RomPatches.has(RomPatches.AreaRandoBlueDoors), sm.canOpenYellowDoors()),
                                              sm.canOpenGreenDoors(),
                                              sm.canDestroyBombWallsUnderwater()) # toilet
     },
@@ -740,7 +749,8 @@ locations = [
     'Class': ["Boss"],
     'CanHidden': False,
     'Address': 0xB055B058,
-    'Room': 'Draygon Room',
+    'Visibility': "Hidden",
+    'Room': "Draygon's Room",
     'AccessFrom' : {
         'DraygonRoomIn': lambda sm: sm.canFightDraygon()
     },
@@ -753,7 +763,7 @@ locations = [
     'SolveArea': "Maridia Pink Top",
     'Name': "Space Jump",
     'Class': ["Major", "Chozo"],
-    'CanHidden': True,
+    'CanHidden': False,
     'Address': 0x7C7A7,
     'Id': 0x9a,
     'Visibility': "Chozo",
@@ -778,6 +788,7 @@ locations = [
     'Name': "Mother Brain",
     'Class': ["Boss"],
     'Address': 0xB055B059,
+    'Visibility': "Hidden",
     'CanHidden': False,
     'Room': 'Mother Brain Room',
     'AccessFrom' : {
@@ -823,10 +834,10 @@ locations = [
 {
     'Area': "Crateria",
     'GraphArea': "WreckedShip",
-    'SolveArea': "WreckedShip",
+    'SolveArea': "WreckedShip Top",
     'Name': "Missile (outside Wrecked Ship top)",
     'Class': ["Minor"],
-    'CanHidden': True,
+    'CanHidden': False,
     'Address': 0x781EE,
     'Id': 0x2,
     'Visibility': "Hidden",
@@ -975,7 +986,7 @@ locations = [
     'SolveArea': "Green Brinstar",
     'Name': "Power Bomb (green Brinstar bottom)",
     'Class': ["Minor"],
-    'CanHidden': True,
+    'CanHidden': False,
     'Address': 0x784AC,
     'Id': 0xd,
     'Visibility': "Chozo",
@@ -992,7 +1003,7 @@ locations = [
     'SolveArea': "Pink Brinstar",
     'Name': "Super Missile (pink Brinstar)",
     'Class': ["Minor", "Chozo"],
-    'CanHidden': True,
+    'CanHidden': False,
     'Address': 0x784E4,
     'Id': 0xe,
     'Visibility': "Chozo",
@@ -1021,8 +1032,7 @@ locations = [
         'Green Brinstar Elevator Right': lambda sm: SMBool(True)
     },
     'Available': lambda sm: sm.canOpenRedDoors(),
-    'PostAvailable': lambda sm: sm.wor(sm.canPassBombPassages(),
-                                       RomPatches.has(RomPatches.EarlySupersShotBlock))
+    'PostAvailable': lambda sm: sm.wor(RomPatches.has(RomPatches.EarlySupersShotBlock), sm.canPassBombPassages())
 },
 {
     'Area': "Brinstar",
@@ -1048,7 +1058,7 @@ locations = [
     'SolveArea': "Green Brinstar Reserve",
     'Name': "Missile (green Brinstar behind missile)",
     'Class': ["Minor"],
-    'CanHidden': True,
+    'CanHidden': False,
     'Address': 0x78532,
     'Id': 0x12,
     'Visibility': "Hidden",
@@ -1160,7 +1170,7 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Morph Ball Room',
     'AccessFrom' : {
-        'Landing Site': lambda sm: SMBool(True)
+        'Blue Brinstar Elevator Bottom': lambda sm: SMBool(True)
     },
     'Available': lambda sm: sm.canUsePowerBombs()
 },
@@ -1176,11 +1186,10 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Blue Brinstar Energy Tank Room',
     'AccessFrom' : {
-        'Landing Site': lambda sm: SMBool(True)
+        'Blue Brinstar Elevator Bottom': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: sm.wand(sm.wor(sm.haveItem('Morph'), RomPatches.has(RomPatches.BlueBrinstarMissile)),
-                                    sm.wor(sm.canOpenRedDoors(),
-                                           RomPatches.has(RomPatches.BlueBrinstarBlueDoor)))
+    'Available': lambda sm: sm.wand(sm.wor(RomPatches.has(RomPatches.BlueBrinstarMissile), sm.haveItem('Morph')),
+                                    sm.wor(RomPatches.has(RomPatches.BlueBrinstarBlueDoor), sm.canOpenRedDoors()))
 },
 {
     'Area': "Brinstar",
@@ -1205,13 +1214,13 @@ locations = [
     'SolveArea': "Blue Brinstar",
     'Name': "Missile (blue Brinstar bottom)",
     'Class': ["Minor", "Chozo"],
-    'CanHidden': True,
+    'CanHidden': False,
     'Address': 0x78802,
     'Id': 0x22,
     'Visibility': "Chozo",
     'Room': 'First Missile Room',
     'AccessFrom' : {
-        'Landing Site': lambda sm: SMBool(True)
+        'Blue Brinstar Elevator Bottom': lambda sm: SMBool(True)
     },
     'Available': lambda sm: sm.haveItem('Morph')
 },
@@ -1227,7 +1236,7 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Billy Mays Room',
     'AccessFrom' : {
-        'Landing Site': lambda sm: SMBool(True)
+        'Blue Brinstar Elevator Bottom': lambda sm: SMBool(True)
     },
     'Available': lambda sm: sm.canAccessBillyMays()
 },
@@ -1237,13 +1246,13 @@ locations = [
     'SolveArea': "Blue Brinstar",
     'Name': "Missile (blue Brinstar behind missile)",
     'Class': ["Minor"],
-    'CanHidden': True,
+    'CanHidden': False,
     'Address': 0x7883C,
     'Id': 0x25,
     'Visibility': "Hidden",
     'Room': 'Billy Mays Room',
     'AccessFrom' : {
-        'Landing Site': lambda sm: SMBool(True)
+        'Blue Brinstar Elevator Bottom': lambda sm: SMBool(True)
     },
     'Available': lambda sm: sm.canAccessBillyMays()
 },
@@ -1270,7 +1279,7 @@ locations = [
     'SolveArea': "Red Brinstar Top",
     'Name': "Power Bomb (red Brinstar spike room)",
     'Class': ["Minor", "Chozo"],
-    'CanHidden': True,
+    'CanHidden': False,
     'Address': 0x7890E,
     'Id': 0x28,
     'Visibility': "Chozo",
@@ -1303,7 +1312,7 @@ locations = [
     'SolveArea': "Kraid",
     'Name': "Missile (Kraid)",
     'Class': ["Minor"],
-    'CanHidden': True,
+    'CanHidden': False,
     'Address': 0x789EC,
     'Id': 0x2c,
     'Visibility': "Hidden",
@@ -1319,7 +1328,7 @@ locations = [
     'SolveArea': "Norfair Entrance",
     'Name': "Missile (lava room)",
     'Class': ["Minor"],
-    'CanHidden': True,
+    'CanHidden': False,
     'Address': 0x78AE4,
     'Id': 0x31,
     'Visibility': "Hidden",
@@ -1336,7 +1345,7 @@ locations = [
     'SolveArea': "Norfair Ice",
     'Name': "Missile (below Ice Beam)",
     'Class': ["Minor"],
-    'CanHidden': True,
+    'CanHidden': False,
     'Address': 0x78B46,
     'Id': 0x33,
     'Visibility': "Hidden",
@@ -1479,7 +1488,7 @@ locations = [
     'SolveArea': "Bubble Norfair Reserve",
     'Name': "Missile (Norfair Reserve Tank)",
     'Class': ["Minor"],
-    'CanHidden': True,
+    'CanHidden': False,
     'Address': 0x78C44,
     'Id': 0x3e,
     'Visibility': "Hidden",
@@ -1529,7 +1538,7 @@ locations = [
     'SolveArea': "Bubble Norfair Speed",
     'Name': "Missile (Speed Booster)",
     'Class': ["Minor"],
-    'CanHidden': True,
+    'CanHidden': False,
     'Address': 0x78C74,
     'Id': 0x41,
     'Visibility': "Hidden",
@@ -1578,7 +1587,7 @@ locations = [
     'SolveArea': "Lower Norfair Screw Attack",
     'Name': "Super Missile (Gold Torizo)",
     'Class': ["Minor"],
-    'CanHidden': True,
+    'CanHidden': False,
     'Address': 0x78E74,
     'Id': 0x47,
     'Visibility': "Hidden",
@@ -1779,7 +1788,7 @@ locations = [
     'SolveArea': "Maridia Green",
     'Name': "Missile (green Maridia tatori)",
     'Class': ["Minor"],
-    'CanHidden': True,
+    'CanHidden': False,
     'Address': 0x7C483,
     'Id': 0x8b,
     'Visibility': "Hidden",
@@ -1933,7 +1942,7 @@ locations = [
     'SolveArea': "Maridia Pink Top",
     'Name': "Missile (Draygon)",
     'Class': ["Minor"],
-    'CanHidden': True,
+    'CanHidden': False,
     'Address': 0x7C74D,
     'Id': 0x97,
     'Visibility': "Hidden",

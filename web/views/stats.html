@@ -343,7 +343,7 @@ google.charts.setOnLoadCallback(drawCharts);
             response.write("  <tr>\n", escape=False)
             pass
           for col in row[1:]:
-            response.write("    <td style=\"white-space: nowrap\">{}</td>\n".format(col.encode('utf8', 'replace') if type(col) == unicode else col), escape=False)
+            response.write("    <td style=\"white-space: nowrap\">{}</td>\n".format(col), escape=False)
             pass
           response.write("  </tr>\n", escape=False)
           pass

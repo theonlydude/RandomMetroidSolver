@@ -1,15 +1,16 @@
-#!/usr/bin/python
-
 # check if a stats db is available
 try:
+    # python3.7 -m pip install pip
+    # pip3.7 install mysql-connector-python --user
     import mysql.connector
     from db_params import dbParams
-    from version import randoAlgoVersion
     dbAvailable = True
 except:
     dbAvailable = False
 
+from version import randoAlgoVersion
 from parameters import easy, medium, hard, harder, hardcore, mania
+from utils import removeChars
 
 class DB:
     def __init__(self):
@@ -76,7 +77,7 @@ class DB:
         try:
             if returnCode == 0:
                 sql = "insert into solver_collected_items values (%d, '%s', %d);"
-                for item, count in result['collectedItems'].iteritems():
+                for item, count in result['collectedItems'].items():
                     if count > 0:
                         self.cursor.execute(sql % (id, item, count))
 
@@ -113,7 +114,7 @@ class DB:
         while i < len(params):
             if params[i][0:len('--')] == '--':
                 paramName = params[i][len('--'):]
-                if i != len(params) - 1 and params[i+1][0:len('--')] != '--':
+                if i != len(params) - 1 and params[i+1][0:len('--')] not in ['--', '-c']:
                     paramValue = params[i+1]
                     i += 2
                 else:
@@ -176,17 +177,6 @@ class DB:
         try:
             sql = "insert into isolver (init_time, preset, romFileName) values (now(), '%s', '%s');"
             self.cursor.execute(sql % (preset, romFileName))
-        except Exception as e:
-            print("DB.addISolver::error execute: {} error: {}".format(sql, e))
-            self.dbAvailable = False
-
-    def addRace(self, md5sum, interval, magic):
-        if self.dbAvailable == False:
-            return None
-
-        try:
-            sql = "insert into race (md5sum, create_time, interval_hours, magic) values ('%s', now(), %d, %d);"
-            self.cursor.execute(sql % (md5sum, interval, magic))
         except Exception as e:
             print("DB.addISolver::error execute: {} error: {}".format(sql, e))
             self.dbAvailable = False
@@ -364,45 +354,22 @@ order by init_time;"""
         header = ["initTime", "preset", "romFileName"]
         return (header, self.execSelect(sql, (weeks,)))
 
-    def checkIsRace(self, md5sum):
-        # return true if seed is race protected
-        sql = """select 1
-from race
-where md5sum = '%s';"""
-        result = self.execSelect(sql, (md5sum,))
-        if result == None:
-            return False
-        return len(result) > 0
-
-    def checkCanSolveRace(self, md5sum):
-        # return magic number if race protected seed can be solved, else None
-        sql = """select magic
-from race
-where md5sum = '%s'
-  and now() > date_add(create_time, interval interval_hours hour);"""
-        result = self.execSelect(sql, (md5sum,))
-        if result == None or len(result) == 0:
-            return None
-        else:
-            # db returns a list of tuples
-            return result[0][0]
-
     @staticmethod
     def dumpExtStatsItems(parameters, locsItems, sqlFile):
-        sql = """insert into extended_stats (version, preset, area, boss, majorsSplit, progSpeed, morphPlacement, suitsRestriction, progDiff, superFunMovement, superFunCombat, superFunSuit, noGravHeat, count)
+        sql = """insert into extended_stats (version, preset, area, boss, majorsSplit, progSpeed, morphPlacement, suitsRestriction, progDiff, superFunMovement, superFunCombat, superFunSuit, gravityBehaviour, nerfedCharge, maxDifficulty, count)
 values
-(%d, '%s', %s, %s, '%s', '%s', '%s', %s, '%s', %s, %s, %s, %s, 1)
+(%d, '%s', %s, %s, '%s', '%s', '%s', %s, '%s', %s, %s, %s, '%s', %s, '%s', 1)
 on duplicate key update id=LAST_INSERT_ID(id), count = count + 1;
 set @last_id = last_insert_id();
 """
 
-        sqlFile.write(sql % (randoAlgoVersion, parameters['preset'], parameters['area'], parameters['boss'], parameters['majorsSplit'], parameters['progSpeed'], parameters['morphPlacement'], parameters['suitsRestriction'], parameters['progDiff'], parameters['superFunMovement'], parameters['superFunCombat'], parameters['superFunSuit'], parameters['noGravHeat']))
+        sqlFile.write(sql % (randoAlgoVersion, parameters['preset'], parameters['area'], parameters['boss'], parameters['majorsSplit'], parameters['progSpeed'], parameters['morphPlacement'], parameters['suitsRestriction'], parameters['progDiff'], parameters['superFunMovement'], parameters['superFunCombat'], parameters['superFunSuit'], parameters['gravityBehaviour'], parameters['nerfedCharge'], parameters['maxDifficulty']))
 
         for (location, item) in locsItems.items():
             if item == 'Boss':
                 continue
             # we can't have special chars in columns names
-            location = location.translate(None, " ,()-")
+            location = removeChars(location, " ,()-")
             sql = "insert into item_locs (ext_id, item, {}) values (@last_id, '%s', 1) on duplicate key update {} = {} + 1;\n".format(location, location, location)
 
             sqlFile.write(sql % (item,))
@@ -457,9 +424,13 @@ from extended_stats e
 where 1 = 1
 {};"""
 
-        where = """and e.version = %d and e.preset = '%s' and e.area = %s and e.boss = %s and e.noGravHeat = %s """
+        where = """and e.version = %d and e.preset = '%s' and e.area = %s and e.boss = %s and e.gravityBehaviour = '%s' and e.nerfedCharge = %s """
 
-        sqlParams = [randoAlgoVersion, parameters['preset'], parameters['area'], parameters['boss'], parameters['noGravHeat']]
+        sqlParams = [randoAlgoVersion, parameters['preset'], parameters['area'], parameters['boss'], parameters['gravityBehaviour'], parameters['nerfedCharge']]
+
+        if parameters["maxDifficulty"] != "random":
+            where += """and e.maxDifficulty = '%s' """
+            sqlParams.append(parameters['maxDifficulty'])
 
         if parameters['majorsSplit'] != "random":
             where += """and e.majorsSplit = '%s' """
@@ -502,14 +473,16 @@ where 1 = 1
         techniques = self.execSelect(sqlTechniques.format(where), tuple(sqlParams))
         # transform techniques into a dict
         techOut = {}
-        for technique in techniques:
-            techOut[technique[0]] = technique[1]
+        if techniques != None:
+            for technique in techniques:
+                techOut[technique[0]] = technique[1]
 
         difficulties = self.execSelect(sqlDifficulties.format(where), tuple(sqlParams))
-        difficulties = difficulties[0]
+        if difficulties != None:
+            difficulties = difficulties[0]
 
-        # check if all values are null
-        if difficulties.count(None) == len(difficulties):
-            difficulties = []
+            # check if all values are null
+            if difficulties.count(None) == len(difficulties):
+                difficulties = []
 
         return (items, techOut, difficulties)

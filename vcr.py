@@ -1,5 +1,3 @@
-#!/usr/bin/python
-
 import json, os.path
 
 # record solver/rando to play in the VCR tracker

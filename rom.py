@@ -261,8 +261,8 @@ class RomReader:
             self.race = RaceModeReader(self, magic)
 
     def getItemBytes(self):
-        value1 = int.from_bytes(self.romFile.read(1))
-        value2 = int.from_bytes(self.romFile.read(1))
+        value1 = int.from_bytes(self.romFile.read(1), byteorder='little')
+        value2 = int.from_bytes(self.romFile.read(1), byteorder='little')
         return (value1, value2)
 
     def getItem(self, address, visibility):
@@ -291,7 +291,7 @@ class RomReader:
         # 0xeedb is missile item
         # 0x786de is Morphing Ball location
         self.romFile.seek(address+4)
-        value3 = int.from_bytes(self.romFile.read(1))
+        value3 = int.from_bytes(self.romFile.read(1), byteorder='little')
         if (value3 == int('0x1a', 16)
             and int(itemCode, 16) == int('0xeedb', 16)
             and address != int('0x786DE', 16)):
@@ -1328,7 +1328,7 @@ class ROM(object):
 
     def writeBytes(self, value, size, address=None):
         if address != None:
-            self.romFile.seek(address)
+            self.seek(address)
         self.write(value.to_bytes(size, byteorder='little'))
 
 class FakeROM(ROM):
@@ -1351,7 +1351,7 @@ class FakeROM(ROM):
             bytes.append(self.data[self.curAddress])
             self.curAddress += 1
 
-        return int.from_bytes(bytes, byteorder='little')
+        return bytes
 
     def close(self):
         pass
@@ -1366,10 +1366,6 @@ class RealROM(ROM):
         self.romFile.seek(address)
 
     def write(self, bytes):
-#        if self.address > 0x2736FA-len(bytes) and self.address < 0x2736FA+len(bytes):
-#            print("address: {}".format(hex(self.address)))
-#            raise MaBITE
-
         self.romFile.write(bytes)
 
     def read(self, byteCount):

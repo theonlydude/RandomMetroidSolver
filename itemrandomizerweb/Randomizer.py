@@ -430,7 +430,8 @@ class SuperFunProvider(object):
         pool = self.basePool[:]
         locs = self.locations[:]
         itemLoc = None
-        startOk = True        
+        startOk = True
+        self.rando.computeLateMorphLimit()
         self.sm.resetItems()
         curLocs = self.rando.currentLocations(locs=locs)
         state = RandoState(self.rando, curLocs)
@@ -746,8 +747,7 @@ class Randomizer(object):
             if len(fun.errorMsgs) > 0:
                 self.errorMsg += "Super Fun: " + ', '.join(fun.errorMsgs) + ' '
         # if late morph compute number of locations available without morph
-        if self.restrictions['Morph'] == 'late':
-            self.computeLateMorphLimit()
+        self.computeLateMorphLimit()
         # temporarily swap item pool in chozo mode, until all chozo item are placed in chozo locs
         if self.restrictions['MajorMinor'] == 'Chozo':
             self.chozoItemPool = [item for item in self.itemPool if item['Class'] == 'Chozo' or item['Name'] == 'Boss']
@@ -762,6 +762,8 @@ class Randomizer(object):
         self.vcr = VCR(seedName, 'rando') if settings.vcr == True else None
 
     def computeLateMorphLimit(self):
+        if self.restrictions['Morph'] != 'late':
+            return
         # add all the items (except those removed by super fun) except morph.
         # compute the number of available locs.
         self.smbm.resetItems()

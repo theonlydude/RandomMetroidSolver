@@ -120,7 +120,8 @@ class Helpers(object):
         if self.energyReserveCount() >= minE:
             if hellRun != 'LowerNorfair':
                 ret = self.energyReserveCountOkHellRun(hellRun, mult)
-                ret.items += items
+                if ret.bool == True:
+                    ret.items += items
                 return ret
             else:
                 tanks = self.energyReserveCount()

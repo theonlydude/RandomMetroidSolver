@@ -1,4 +1,4 @@
-import struct, colorsys, random
+import colorsys, random
 from rom import RomLoader
 from itemrandomizerweb.palettes import palettes
 from itemrandomizerweb.sprite_palettes import sprite_palettes
@@ -360,31 +360,13 @@ class PaletteRando(object):
         return (R,G,B)
 
     def read_word(self, address):
-        self.palettesROM.seek(address)
-        w0 = struct.unpack("B", self.palettesROM.read(1))[0]
-        w1 = struct.unpack("B", self.palettesROM.read(1))[0]
-        word = (w1 << 8) + w0
-        #print("r@{}: {},".format(hex(address), w0))
-        #print("r@{}: {},".format(hex(address+1), w1))
-        return word
+        return self.palettesROM.readWord(address)
 
     def write_word(self, address, value):
-        self.outFile.seek(address)
-        w = value
-        (w0, w1) = (w & 0xFF, (w & 0xFF00) >> 8)
-        #print("w@{}: {},".format(hex(address), w0))
-        #print("w@{}: {},".format(hex(address+1), w1))
-        self.outFile.write(struct.pack('B', w0))
-        self.outFile.write(struct.pack('B', w1))
+        self.outFile.writeWord(value, address)
 
     def write_pointer(self, address, value):
-        self.outFile.seek(address)
-
-        w = value
-        (w0, w1, w2) = (w & 0xFF, (w & 0xFF00) >> 8, (w & 0xFF0000) >> 16)
-        self.outFile.write(struct.pack('B', w0))
-        self.outFile.write(struct.pack('B', w1))
-        self.outFile.write(struct.pack('B', w2))
+        self.outFile.writeBytes(value, 3, address)
 
     def get_word(self, data, index):
         #print("pr@{}".format(index))
@@ -855,7 +837,7 @@ class PaletteRando(object):
         # cp new compressed data into vanilla palettes data (used for boss palettes rando)
         self.outFile.seek(address)
         for i in range(length):
-            self.palettesROM.data[address+i] = struct.unpack("B", self.outFile.read(1))[0]
+            self.palettesROM.data[address+i] = self.outFile.readByte()
 
     def decompress(self, address):
         (compressedLength, rawData) = self.romLoader.decompress(address)

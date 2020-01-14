@@ -627,7 +627,7 @@ class RomPatcher:
         if self.race is None:
             self.romFile.writeWord(itemCode, address)
         else:
-            self.race.writeItemCode(address, itemCode)
+            self.race.writeItemCode(itemCode, address)
 
     def writeNothing(self, itemLoc):
         loc = itemLoc['Location']

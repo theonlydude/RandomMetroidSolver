@@ -24,10 +24,6 @@ class SMBool:
         # when used in boolean expressions (with and/or/not) (python3)
         return self.bool
 
-    def __nonzero__(self):
-        # when used in boolean expressions (with and/or/not) (python2)
-        return self.bool
-
     def __eq__(self, other):
         # for ==
         return self.bool == other

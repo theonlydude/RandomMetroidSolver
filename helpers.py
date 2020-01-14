@@ -20,6 +20,7 @@ class Helpers(object):
     def energyReserveCount(self):
         return self.smbm.itemCount('ETank') + self.smbm.itemCount('Reserve')
 
+    # TODO::remove reduce
     def energyReserveCountOkDiff(self, difficulties, mult=1.0):
         if difficulties is None or len(difficulties) == 0:
             return SMBool(False)

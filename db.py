@@ -110,7 +110,7 @@ class DB:
         dbParams = []
         skipParams = ['output', 'param', 'controls', 'race']
         superFuns = []
-        i = 2 # skip first parameters (python2 and randomizer.py)
+        i = 2 # skip first parameters (pythonX and randomizer.py)
         while i < len(params):
             if params[i][0:len('--')] == '--':
                 paramName = params[i][len('--'):]

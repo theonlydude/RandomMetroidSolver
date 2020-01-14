@@ -1,5 +1,5 @@
 # from https://github.com/DJuttmann/SM3E/blob/master/SM3E/Tools/Compression.cs
-import struct, log
+import log
 
 class Compressor:
     def __init__(self):
@@ -9,7 +9,7 @@ class Compressor:
         return b0 + (b1 << 8)
 
     def _nextByte(self):
-        return struct.unpack("B", self.romFile.read(1))[0]
+        return self.romFile.readByte()
 
     def decompress(self, romFile, address):
         self.romFile = romFile

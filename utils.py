@@ -53,18 +53,11 @@ def chooseFromRange(rangeDict):
             return v
     return val
 
-if sys.version_info.major == 2:
-    def isString(string):
-        return type(string) in [str, unicode]
-else:
-    def isString(string):
-        return type(string) == str
-
 class PresetLoader(object):
     @staticmethod
     def factory(params):
         # can be a json, a python file or a dict with the parameters
-        if isString(params):
+        if type(params) == str:
             ext = os.path.splitext(params)
             if ext[1].lower() == '.json':
                 return PresetLoaderJson(params)

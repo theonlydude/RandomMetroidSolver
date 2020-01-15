@@ -647,10 +647,6 @@ def prepareResult():
     if session.solver['result'] is not None:
         result = session.solver['result']
 
-        # utf8 files
-        if sys.version_info.major == 2:
-            result['randomizedRom'] = result['randomizedRom'].encode('utf8', 'replace')
-
         if result['difficulty'] == -1:
             result['resultText'] = "The ROM \"{}\" is not finishable with the known techniques".format(result['randomizedRom'])
         else:
@@ -738,11 +734,7 @@ def validateSolverParams():
 
 def generateJsonROM(romJsonStr):
     tempRomJson = json.loads(romJsonStr)
-    # handle filename with utf8 characters in it
-    if sys.version_info.major > 2:
-        romFileName = tempRomJson["romFileName"]
-    else:
-        romFileName = tempRomJson["romFileName"].encode('utf8', 'replace')
+    romFileName = tempRomJson["romFileName"]
     (base, ext) = os.path.splitext(romFileName)
     jsonRomFileName = 'roms/{}.json'.format(base)
     del tempRomJson["romFileName"]

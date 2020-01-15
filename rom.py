@@ -1,5 +1,5 @@
 
-import re, struct, sys, os, json, copy, base64, random
+import re, sys, os, json, copy, base64, random
 
 from smbool import SMBool
 from itemrandomizerweb.Items import ItemManager
@@ -9,17 +9,6 @@ from compression import Compressor
 from ips import IPS_Patch
 from parameters import appDir
 from utils import normalizeRounding
-
-def readWord(romFile):
-    r0 = struct.unpack("B", romFile.read(1))[0]
-    r1 = struct.unpack("B", romFile.read(1))[0]
-    word = (r1 << 8) + r0
-    return word
-
-def writeWord(romFile, w):
-    (w0, w1) = (w & 0x00FF, (w & 0xFF00) >> 8)
-    romFile.write(struct.pack('B', w0))
-    romFile.write(struct.pack('B', w1))
 
 # layout patches added by randomizers
 class RomPatches:
@@ -271,12 +260,9 @@ class RomReader:
             from race_mode import RaceModeReader
             self.race = RaceModeReader(self, magic)
 
-    def readWord(self):
-        return readWord(self.romFile)
-
     def getItemBytes(self):
-        value1 = struct.unpack("B", self.romFile.read(1))[0]
-        value2 = struct.unpack("B", self.romFile.read(1))[0]
+        value1 = int.from_bytes(self.romFile.read(1), byteorder='little')
+        value2 = int.from_bytes(self.romFile.read(1), byteorder='little')
         return (value1, value2)
 
     def getItem(self, address, visibility):
@@ -305,7 +291,7 @@ class RomReader:
         # 0xeedb is missile item
         # 0x786de is Morphing Ball location
         self.romFile.seek(address+4)
-        value3 = struct.unpack("B", self.romFile.read(1))[0]
+        value3 = int.from_bytes(self.romFile.read(1), byteorder='little')
         if (value3 == int('0x1a', 16)
             and int(itemCode, 16) == int('0xeedb', 16)
             and address != int('0x786DE', 16)):
@@ -315,8 +301,7 @@ class RomReader:
 
     def getMajorsSplit(self):
         address = 0x17B6C
-        self.romFile.seek(address)
-        split = chr(struct.unpack("B", self.romFile.read(1))[0])
+        split = chr(self.romFile.readByte(address))
         if split in ['F', 'M', 'Z']:
             splits = {
                 'F': 'Full',
@@ -440,54 +425,36 @@ class RomReader:
         return (removeBiTrans(areaTransitions), removeBiTrans(bossTransitions), escapeTransition)
 
     def getTransition(self, doorPtr):
-        self.romFile.seek(0x10000 | doorPtr)
-
         # room ptr is in two bytes
-        v1 = struct.unpack("B", self.romFile.read(1))[0]
-        v2 = struct.unpack("B", self.romFile.read(1))[0]
-        roomPtr = v1 | (v2 << 8)
+        roomPtr = self.romFile.readWord(0x10000 | doorPtr)
 
-        self.romFile.seek((0x10000 | doorPtr) + 3)
-        direction = struct.unpack("B", self.romFile.read(1))[0]
+        direction = self.romFile.readByte((0x10000 | doorPtr) + 3)
 
-        self.romFile.seek((0x10000 | doorPtr) + 6)
-        sx = struct.unpack("B", self.romFile.read(1))[0]
-        sy = struct.unpack("B", self.romFile.read(1))[0]
+        sx = self.romFile.readByte((0x10000 | doorPtr) + 6)
+        sy = self.romFile.readByte()
 
-        d1 = struct.unpack("B", self.romFile.read(1))[0]
-        d2 = struct.unpack("B", self.romFile.read(1))[0]
-        distanceToSpawn = d1 | (d2 << 8)
+        distanceToSpawn = self.romFile.readWord()
 
         if distanceToSpawn == 0:
             # incompatible transition use samus X/Y instead of direction
             # as incompatible transition change the value of direction
-            asm1 = struct.unpack("B", self.romFile.read(1))[0]
-            asm2 = struct.unpack("B", self.romFile.read(1))[0]
-            asmAddress = 0x70000 | asm1 | (asm2 << 8)
+            asmAddress = 0x70000 | self.romFile.readWord()
 
-            self.romFile.seek(asmAddress+3)
-            b = struct.unpack("B", self.romFile.read(1))[0]
+            b = self.romFile.readByte(asmAddress+3)
             offset = 0
             if b == 0x20:
                 # ignore original door asm ptr call
                 offset = 3
 
-            self.romFile.seek(asmAddress+4+offset)
-            x1 = struct.unpack("B", self.romFile.read(1))[0]
-            x2 = struct.unpack("B", self.romFile.read(1))[0]
-            x = x1 | (x2 << 8)
-            self.romFile.seek(asmAddress+10+offset)
-            y1 = struct.unpack("B", self.romFile.read(1))[0]
-            y2 = struct.unpack("B", self.romFile.read(1))[0]
-            y = y1 | (y2 << 8)
+            x = self.romFile.readWord(asmAddress+4+offset)
+            y = self.romFile.readWord(asmAddress+10+offset)
 
             return (roomPtr, (sx, sy), (x, y))
         else:
             return (roomPtr, (sx, sy), direction)
 
     def patchPresent(self, patchName):
-        self.romFile.seek(self.patches[patchName]['address'])
-        value = struct.unpack("B", self.romFile.read(1))[0]
+        value = self.romFile.readByte(self.patches[patchName]['address'])
         return value == self.patches[patchName]['value']
 
     def getPatches(self):
@@ -502,8 +469,7 @@ class RomReader:
         # for interactive solver
         result = {}
         for patchName in self.patches:
-            self.romFile.seek(self.patches[patchName]['address'])
-            value = struct.unpack("B", self.romFile.read(1))[0]
+            value = self.romFile.readByte(self.patches[patchName]['address'])
             result[self.patches[patchName]['address']] = value
 
         # add boss detection bytes
@@ -511,10 +477,8 @@ class RomReader:
         doorPtr = getAccessPoint('PhantoonRoomOut').ExitInfo['DoorPtr']
         doorPtr = (0x10000 | doorPtr) + 10
 
-        self.romFile.seek(doorPtr)
-        result[doorPtr] = struct.unpack("B", self.romFile.read(1))[0]
-        self.romFile.seek(doorPtr+1)
-        result[doorPtr+1] = struct.unpack("B", self.romFile.read(1))[0]
+        result[doorPtr] = self.romFile.readByte(doorPtr)
+        result[doorPtr+1] = self.romFile.readByte()
 
         return result
 
@@ -522,8 +486,7 @@ class RomReader:
         # to display in cli solver (for debug use)
         ret = []
         for patch in self.allPatches:
-            self.romFile.seek(self.allPatches[patch]['address'])
-            value = struct.unpack("B", self.romFile.read(1))[0]
+            value = self.romFile.readByte(self.allPatches[patch]['address'])
             if value == self.allPatches[patch]["value"]:
                 ret.append(patch)
         return sorted(ret)
@@ -532,7 +495,7 @@ class RomReader:
         self.romFile.seek(0x2F6000)
         addresses = []
         for i in range(128):
-            address = self.readWord()
+            address = self.romFile.readWord()
             if address == 0xFFFF:
                 break
             else:
@@ -543,8 +506,8 @@ class RomReader:
         self.romFile.seek(0x2F6100)
         addresses = []
         for i in range(maxTransitions):
-            srcDoorPtr = self.readWord()
-            destDoorPtr = self.readWord()
+            srcDoorPtr = self.romFile.readWord()
+            destDoorPtr = self.romFile.readWord()
             if srcDoorPtr == 0xFFFF and destDoorPtr == 0xFFFF:
                 break
             else:
@@ -556,9 +519,8 @@ class RomReader:
         return Compressor().decompress(self.romFile, address)
 
     def getEscapeTimer(self):
-        self.romFile.seek(0x1E21)
-        second = struct.unpack("B", self.romFile.read(1))[0]
-        minute = struct.unpack("B", self.romFile.read(1))[0]
+        second = self.romFile.readByte(0x1E21)
+        minute = self.romFile.readByte()
 
         second = int(second / 16)*10 + second%16
         minute = int(minute / 16)*10 + minute%16
@@ -651,7 +613,7 @@ class RomPatcher:
         if romFileName == None:
             self.romFile = FakeROM()
         else:
-            self.romFile = open(romFileName, 'rb+')
+            self.romFile = RealROM(romFileName)
         if magic is not None:
             from race_mode import RaceModePatcher
             self.race = RaceModePatcher(self, magic, plando)
@@ -660,16 +622,12 @@ class RomPatcher:
     def end(self):
         self.romFile.close()
 
-    def writeWord(self, w):
-        writeWord(self.romFile, w)
-
     def writeItemCode(self, item, visibility, address):
         itemCode = ItemManager.getItemTypeCode(item, visibility)
         if self.race is None:
-            self.romFile.seek(address)
-            self.writeWord(itemCode)
+            self.romFile.writeWord(itemCode, address)
         else:
-            self.race.writeItemCode(address, itemCode)
+            self.race.writeItemCode(itemCode, address)
 
     def writeNothing(self, itemLoc):
         loc = itemLoc['Location']
@@ -677,10 +635,9 @@ class RomPatcher:
             return
         # missile
         self.writeItemCode({'Code': 0xeedb}, loc['Visibility'], loc['Address'])
-        self.romFile.seek(loc['Address'] + 4)
         # morph ball slot. all Nothing at non-Morph loc will disappear
         # when morph loc item is collected
-        self.romFile.write(struct.pack('B', 0x1a))
+        self.romFile.writeByte(0x1a, loc['Address'] + 4)
 
     def writeItem(self, itemLoc):
         loc = itemLoc['Location']
@@ -689,9 +646,8 @@ class RomPatcher:
         #print('write ' + itemLoc['Item']['Type'] + ' at ' + loc['Name'])
         self.writeItemCode(itemLoc['Item'], loc['Visibility'], loc['Address'])
 
-        self.romFile.seek(loc['Address'] + 4)
         # if nothing was written at this loc before (in plando), then restore the vanilla value
-        self.romFile.write(struct.pack('B', loc['Id']))
+        self.romFile.writeByte(loc['Id'], loc['Address'] + 4)
 
     def writeItemsLocs(self, itemLocs):
         self.nItems = 0
@@ -756,18 +712,15 @@ class RomPatcher:
 
     def patchMorphBallCheck(self, offset, cat, comp, operand, branch):
         # actually patch enemy AI
-        self.romFile.seek(offset)
-        self.romFile.write(struct.pack('B', cat))
-        self.romFile.seek(offset+2)
-        self.romFile.write(struct.pack('B', comp))
-        self.writeWord(operand)
-        self.romFile.write(struct.pack('B', branch))
+        self.romFile.writeByte(cat, offset)
+        self.romFile.writeByte(comp, offset+2)
+        self.romFile.writeWord(operand)
+        self.romFile.writeByte(branch)
 
     def writeItemsNumber(self):
         # write total number of actual items for item percentage patch (patch the patch)
         for addr in [0x5E64E, 0x5E6AB]:
-            self.romFile.seek(addr)
-            self.romFile.write(struct.pack('B', self.nItems))
+            self.romFile.writeByte(self.nItems, addr)
 
     def addIPSPatches(self, patches):
         for patchName in patches:
@@ -864,9 +817,8 @@ class RomPatcher:
         random.seed(seed)
         seedInfo = random.randint(0, 0xFFFF)
         seedInfo2 = random.randint(0, 0xFFFF)
-        self.romFile.seek(0x2FFF00)
-        self.writeWord(seedInfo)
-        self.writeWord(seedInfo2)
+        self.romFile.writeWord(seedInfo, 0x2FFF00)
+        self.romFile.writeWord(seedInfo2)
 
     def writeMagic(self):
         if self.race is not None:
@@ -880,8 +832,7 @@ class RomPatcher:
             char = 'F'
         else:
             char = 'M'
-        self.romFile.seek(address)
-        self.romFile.write(struct.pack('B', ord(char)))
+        self.romFile.writeByte(ord(char), address)
 
     def getItemQty(self, itemLocs, itemType):
         q = len([il for il in itemLocs if il['Item']['Type'] == itemType])
@@ -1177,8 +1128,9 @@ class RomPatcher:
         self.romFile.seek(address)
         for w in array:
             if not isRace:
-                self.writeWord(w)
+                self.romFile.writeWord(w)
             else:
+                self.romFile.seek(address)
                 self.race.writeWordMagic(w)
 
     # write area randomizer transitions to ROM
@@ -1205,30 +1157,28 @@ class RomPatcher:
             self.romFile.seek(0x10000 + doorPtr)
 
             # write room ptr
-            self.romFile.write(struct.pack('B', roomPtr & 0x000FF))
-            self.romFile.write(struct.pack('B', (roomPtr & 0x0FF00) >> 8))
+            self.romFile.writeWord(roomPtr & 0xFFFF)
 
             # write bitflag (if area switch we have to set bit 0x40, and remove it if same area)
-            self.romFile.write(struct.pack('B', conn['bitFlag']))
+            self.romFile.writeByte(conn['bitFlag'])
 
             # write direction
-            self.romFile.write(struct.pack('B', conn['direction']))
+            self.romFile.writeByte(conn['direction'])
 
             # write door cap x
-            self.romFile.write(struct.pack('B', conn['cap'][0]))
+            self.romFile.writeByte(conn['cap'][0])
 
             # write door cap y
-            self.romFile.write(struct.pack('B', conn['cap'][1]))
+            self.romFile.writeByte(conn['cap'][1])
 
             # write screen x
-            self.romFile.write(struct.pack('B', conn['screen'][0]))
+            self.romFile.writeByte(conn['screen'][0])
 
             # write screen y
-            self.romFile.write(struct.pack('B', conn['screen'][1]))
+            self.romFile.writeByte(conn['screen'][1])
 
             # write distance to spawn
-            self.romFile.write(struct.pack('B', conn['distanceToSpawn'] & 0x00FF))
-            self.romFile.write(struct.pack('B', (conn['distanceToSpawn'] & 0xFF00) >> 8))
+            self.romFile.writeWord(conn['distanceToSpawn'] & 0xFFFF)
 
             # write door asm
             asmPatch = []
@@ -1254,42 +1204,37 @@ class RomPatcher:
                 asmPatch += [ 0x20, 0x70, 0xEA ]    # JSR giveiframes
             # return
             asmPatch += [ 0x60 ]   # RTS
-            self.romFile.write(struct.pack('B', asmAddress & 0x00FF))
-            self.romFile.write(struct.pack('B', (asmAddress & 0xFF00) >> 8))
+            self.romFile.writeWord(asmAddress & 0xFFFF)
 
             self.romFile.seek(asmAddress)
             for byte in asmPatch:
-                self.romFile.write(struct.pack('B', byte))
+                self.romFile.writeByte(byte)
 
             asmAddress += len(asmPatch)
             # update room state header with song changes
             if 'song' in conn:
                 for addr in conn["songs"]:
                     self.romFile.seek(0x70000 + addr)
-                    self.romFile.write(struct.pack('B', conn['song']))
-                    self.romFile.write(struct.pack('B', 0x5))
+                    self.romFile.writeByte(conn['song'])
+                    self.romFile.writeByte(0x5)
 
     # change BG table to avoid scrolling sky bug when transitioning to west ocean
     def patchWestOcean(self, doorPtr):
-        # endian convert
-        self.romFile.seek(0x7B7BB)
-        self.writeWord(doorPtr)
+        self.romFile.writeWord(doorPtr, 0x7B7BB)
 
     # forces CRE graphics refresh when exiting kraid's room in boss rando
     def patchKraidExit(self, roomPtr):
         # Room ptr in bank 8F + CRE flag offset
         offset = 0x70000 + roomPtr + 0x8
-        self.romFile.seek(offset)
-        self.romFile.write(struct.pack('B', 0x2))
+        self.romFile.writeByte(0x2, offset)
 
     def writeEscapeTimer(self, escapeTimer):
         minute = int(escapeTimer / 60)
         second = escapeTimer % 60
         minute = int(minute / 10) * 16 + minute % 10
         second = int(second / 10) * 16 + second % 10
-        self.romFile.seek(0x1E21)
-        self.romFile.write(struct.pack('B', second))
-        self.romFile.write(struct.pack('B', minute))
+        self.romFile.writeByte(second, 0x1E21)
+        self.romFile.writeByte(minute)
 
     buttons = {
         "Select" : [0x00, 0x20],
@@ -1322,36 +1267,34 @@ class RomPatcher:
             if button not in RomPatcher.buttons:
                 raise ValueError("Invalid button name : " + str(button))
             for addr in RomPatcher.controls[ctrl]:
-                self.romFile.seek(addr)
-                self.romFile.write(struct.pack('B', RomPatcher.buttons[button][0]))
-                self.romFile.write(struct.pack('B', RomPatcher.buttons[button][1]))
+                self.romFile.writeByte(RomPatcher.buttons[button][0], addr)
+                self.romFile.writeByte(RomPatcher.buttons[button][1])
 
     def writePlandoAddresses(self, locations):
         self.romFile.seek(0x2F6000)
         for loc in locations:
-            self.writeWord(loc['Address'] & 0xFFFF)
+            self.romFile.writeWord(loc['Address'] & 0xFFFF)
 
         # fill remaining addresses with 0xFFFF
         maxLocsNumber = 128
         for i in range(0, maxLocsNumber-len(locations)):
-            self.writeWord(0xFFFF)
+            self.romFile.writeWord(0xFFFF)
 
     def writePlandoTransitions(self, transitions, doorsPtrs, maxTransitions):
         self.romFile.seek(0x2F6100)
 
         for (src, dest) in transitions:
-            self.writeWord(doorsPtrs[src])
-            self.writeWord(doorsPtrs[dest])
+            self.romFile.writeWord(doorsPtrs[src])
+            self.romFile.writeWord(doorsPtrs[dest])
 
         # fill remaining addresses with 0xFFFF
         for i in range(0, maxTransitions-len(transitions)):
-            self.writeWord(0xFFFF)
-            self.writeWord(0xFFFF)
+            self.romFile.writeWord(0xFFFF)
+            self.romFile.writeWord(0xFFFF)
 
     def enableMoonWalk(self):
-        self.romFile.seek(0xB35D)
         # replace STZ with STA since A is non-zero at this point
-        self.romFile.write(struct.pack('B', 0x8D))
+        self.romFile.writeByte(0x8D, 0xB35D)
 
     def compress(self, address, data):
         # data: [] of 256 int
@@ -1361,11 +1304,34 @@ class RomPatcher:
 
         self.romFile.seek(address)
         for byte in compressedData:
-            self.romFile.write(struct.pack('B', byte))
+            self.romFile.writeByte(byte)
 
         return len(compressedData)
 
-class FakeROM:
+class ROM(object):
+    def readWord(self, address=None):
+        return self.readBytes(2, address)
+
+    def readByte(self, address=None):
+        return self.readBytes(1, address)
+
+    def readBytes(self, size, address=None):
+        if address != None:
+            self.seek(address)
+        return int.from_bytes(self.read(size), byteorder='little')
+
+    def writeWord(self, word, address=None):
+        self.writeBytes(word, 2, address)
+
+    def writeByte(self, byte, address=None):
+        self.writeBytes(byte, 1, address)
+
+    def writeBytes(self, value, size, address=None):
+        if address != None:
+            self.seek(address)
+        self.write(value.to_bytes(size, byteorder='little'))
+
+class FakeROM(ROM):
     # to have the same code for real ROM and the webservice
     def __init__(self, data={}):
         self.curAddress = 0
@@ -1374,31 +1340,45 @@ class FakeROM:
     def seek(self, address):
         self.curAddress = address
 
-    def write(self, byte):
-        self.data[self.curAddress] = struct.unpack("B", byte)[0]
-        self.curAddress += 1
+    def write(self, bytes):
+        for byte in bytes:
+            self.data[self.curAddress] = byte
+            self.curAddress += 1
 
     def read(self, byteCount):
-        # in our case byteCount is always equals to 1
-        ret = struct.pack("B", self.data[self.curAddress])
-        self.curAddress += 1
-        return ret
+        bytes = []
+        for i in range(byteCount):
+            bytes.append(self.data[self.curAddress])
+            self.curAddress += 1
+
+        return bytes
 
     def close(self):
         pass
 
-def isString(string):
-    # unicode only exists in python2
-    if sys.version[0] == '2':
-        return type(string) == str or type(string) == unicode
-    else:
-        return type(string) == str
+class RealROM(ROM):
+    def __init__(self, name):
+        self.romFile = open(name, "rb+")
+        self.address = 0
+
+    def seek(self, address):
+        self.address = address
+        self.romFile.seek(address)
+
+    def write(self, bytes):
+        self.romFile.write(bytes)
+
+    def read(self, byteCount):
+        return self.romFile.read(byteCount)
+
+    def close(self):
+        self.romFile.close()
 
 class RomLoader(object):
     @staticmethod
     def factory(rom, magic=None):
         # can be a real rom. can be a json or a dict with the ROM address/values
-        if isString(rom):
+        if type(rom) == str:
             ext = os.path.splitext(rom)
             if ext[1].lower() == '.sfc' or ext[1].lower() == '.smc':
                 return RomLoaderSfc(rom, magic)
@@ -1498,7 +1478,7 @@ class RomLoader(object):
         phOut = getAccessPoint('PhantoonRoomOut')
         doorPtr = phOut.ExitInfo['DoorPtr']
         romFile.seek((0x10000 | doorPtr) + 10)
-        asmPtr = readWord(romFile)
+        asmPtr = romFile.readWord()
         return asmPtr != 0 # this is at 0 in vanilla
 
     def getEscapeTimer(self):
@@ -1508,15 +1488,14 @@ class RomLoaderSfc(RomLoader):
     # standard usage (when calling from the command line)
     def __init__(self, romFileName, magic=None):
         super(RomLoaderSfc, self).__init__()
-        romFile = open(romFileName, "rb")
-        self.romReader = RomReader(romFile, magic)
+        realROM = RealROM(romFileName)
+        self.romReader = RomReader(realROM, magic)
 
 class RomLoaderDict(RomLoader):
     # when called from the website (the js in the browser uploads a dict of address: value)
     def __init__(self, dictROM, magic=None):
         super(RomLoaderDict, self).__init__()
-        self.dictROM = dictROM
-        fakeROM = FakeROM(self.dictROM)
+        fakeROM = FakeROM(dictROM)
         self.romReader = RomReader(fakeROM, magic)
 
 class RomLoaderJson(RomLoaderDict):

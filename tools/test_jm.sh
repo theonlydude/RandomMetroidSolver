@@ -44,6 +44,10 @@ fi
 PRESETS=("regular" "noob" "master")
 AREAS=("" "--area")
 BOSSES=("" "--bosses")
+SUITS=("" "--nogravheatPatch" "--progressiveSuits")
+CHARGES=("" "--nerfedCharge")
+TWEAKS=("" "--novariatweaks")
+LAYOUTS=("" "--nolayout")
 
 function generate_params {
     SEED="$1"
@@ -54,7 +58,17 @@ function generate_params {
     let S=$RANDOM%${#BOSSES[@]}
     BOSS=${BOSSES[$S]}
 
-    echo "-r ${ROM} --param standard_presets/${PRESET}.json --seed ${SEED} --progressionSpeed random --morphPlacement random --progressionDifficulty random --missileQty 0 --superQty 0 --powerBombQty 0 --minorQty 0 --energyQty random --majorsSplit random --suitsRestriction random --hideItems random --strictMinors random --superFun CombatRandom --superFun MovementRandom --superFun SuitsRandom --maxDifficulty random --runtime 20 ${AREA} ${BOSS}"
+    # optional patches
+    let S=$RANDOM%${#SUITS[@]}
+    SUIT=${SUITS[$S]}
+    let S=$RANDOM%${#CHARGES[@]}
+    CHARGE=${CHARGES[$S]}
+    let S=$RANDOM%${#TWEAKS[@]}
+    TWEAK=${TWEAKS[$S]}
+    let S=$RANDOM%${#LAYOUTS[@]}
+    LAYOUT=${LAYOUTS[$S]}
+
+    echo "-r ${ROM} --param standard_presets/${PRESET}.json --seed ${SEED} --progressionSpeed random --morphPlacement random --progressionDifficulty random --missileQty 0 --superQty 0 --powerBombQty 0 --minorQty 0 --energyQty random --majorsSplit random --suitsRestriction random --hideItems random --strictMinors random --superFun CombatRandom --superFun MovementRandom --superFun SuitsRandom --maxDifficulty random --runtime 20 ${AREA} ${BOSS} ${SUIT} ${CHARGE} ${TWEAK} ${LAYOUT}"
 }
 
 function computeSeed {
@@ -155,9 +169,9 @@ function computeSeed {
 
 	if [ -z "${DIFF}" ]; then
 	    rm -f ${ROM_GEN} ${ROM_GEN}.new ${ROM_GEN}.old
-	    echo "${SEED};${ROM_GEN};SOLVER;${PRESET};OK;" | tee -a test_jm.csv
+	    echo "${SEED};${ROM_GEN};SOLVER;${PRESET};OK;" | tee -a ${CSV}
 	else
-	    echo "${SEED};${ROM_GEN};SOLVER;${PRESET};NOK;" | tee -a test_jm.csv
+	    echo "${SEED};${ROM_GEN};SOLVER;${PRESET};NOK;" | tee -a ${CSV}
 	fi
     else
 	rm -f ${ROM_GEN}
@@ -200,4 +214,8 @@ while true; do
 done
 
 echo "DONE"
+
+echo "errors:"
+grep -E "NOK|mismatch|Can't solve" ${CSV}
+
 rm -rf ${TEMP_DIR}

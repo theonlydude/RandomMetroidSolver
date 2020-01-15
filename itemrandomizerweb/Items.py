@@ -1,8 +1,5 @@
-from itemrandomizerweb.stdlib import List
 from utils import randGaussBounds, getRangeDict, chooseFromRange
-import log, logging
-
-import struct, copy, random
+import log, logging, copy, random
 
 class ItemManager:
     Items = {

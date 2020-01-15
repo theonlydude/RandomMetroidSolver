@@ -23,10 +23,13 @@ class Helpers(object):
     def energyReserveCountOkDiff(self, difficulties, mult=1.0):
         if difficulties is None or len(difficulties) == 0:
             return SMBool(False)
+
         def f(difficulty):
             return self.smbm.energyReserveCountOk(normalizeRounding(difficulty[0] / mult), difficulty=difficulty[1])
-        result = reduce(lambda result, difficulty: self.smbm.wor(result, f(difficulty)),
-                        difficulties[1:], f(difficulties[0]))
+
+        result = f(difficulties[0])
+        for difficulty in difficulties[1:]:
+            result = self.smbm.wor(result, f(difficulty))
         return result
 
     def energyReserveCountOkHellRun(self, hellRunName, mult=1.0):

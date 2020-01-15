@@ -473,10 +473,12 @@ class CommonSolver(object):
         if len(locations) == 0:
             return []
 
-        around = [loc for loc in locations if ((loc['SolveArea'] == area or loc['distance'] < 3)
-                                               and loc['difficulty'].difficulty <= threshold
-                                               and not Bosses.areaBossDead(area)
-                                               and 'comeBack' in loc and loc['comeBack'] == True)]
+        # add nocomeback locations which has been selected by the comeback step (areaWeight == 1)
+        around = [loc for loc in locations if( ('areaWeight' in loc and loc['areaWeight'] == 1)
+                                               or ((loc['SolveArea'] == area or loc['distance'] < 3)
+                                                   and loc['difficulty'].difficulty <= threshold
+                                                   and not Bosses.areaBossDead(area)
+                                                   and 'comeBack' in loc and loc['comeBack'] == True) )]
         outside = [loc for loc in locations if not loc in around]
 
         self.log.debug("around1 = {}".format([(loc['Name'], loc['difficulty'], loc['distance'], loc['comeBack'], loc['SolveArea']) for loc in around]))
@@ -1557,11 +1559,15 @@ class ComeBackStep(object):
         self.visitedGraphAreas = []
         self.graphAreas = graphAreas
         self.cur = cur
+        self.log = log.get('RewindStep')
 
     def next(self, locations):
-        # use next available area, if all areas has been visited return True (stuck), else False
+        # use next available area, if all areas have been visited return True (stuck), else False
         if len(self.visitedGraphAreas) == len(self.graphAreas):
+            self.log.debug("all areas have been visited, stuck")
             return True
+
+        self.log.debug("graphAreas: {} visitedGraphAreas: {}".format(self.graphAreas, self.visitedGraphAreas))
 
         # get area with max available locs
         maxAreaWeigth = 0
@@ -1574,6 +1580,7 @@ class ComeBackStep(object):
                     maxAreaWeigth = self.graphAreas[graphArea]
                     maxAreaName = graphArea
         self.visitedGraphAreas.append(maxAreaName)
+        self.log.debug("next area: {}".format(maxAreaName))
 
         retGraphAreas = {}
         for graphArea in self.graphAreas:
@@ -1585,6 +1592,7 @@ class ComeBackStep(object):
         # update locs
         for loc in locations:
             loc["areaWeight"] = retGraphAreas[loc["GraphArea"]]
+            self.log.debug("{} areaWeight: {}".format(loc["Name"], loc["areaWeight"]))
 
         return False
 

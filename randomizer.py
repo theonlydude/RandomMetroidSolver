@@ -571,89 +571,89 @@ if __name__ == "__main__":
         with open(args.extStatsFilename, 'a') as extStatsFile:
             db.DB.dumpExtStatsItems(parameters, locsItems, extStatsFile)
 
-    #try:
-    # args.rom is not None: generate local rom named filename.sfc with args.rom as source
-    # args.output is not None: generate local json named args.output
-    if args.rom is not None:
-        # patch local rom
-        romFileName = args.rom
-        outFileName = fileName + '.sfc'
-        shutil.copyfile(romFileName, outFileName)
-        romPatcher = RomPatcher(outFileName, magic=args.raceMagic)
-    else:
-        outFileName = args.output
-        romPatcher = RomPatcher(magic=args.raceMagic)
-
-    if args.patchOnly == False:
-        suitsMode = "Classic"
-        if args.progressiveSuits:
-            suitsMode = "Progressive"
-        elif args.noGravHeat:
-            suitsMode = "Vanilla"
-        romPatcher.applyIPSPatches(args.patches, args.noLayout, suitsMode,
-                                   args.area, args.bosses, args.areaLayoutBase,
-                                   args.noVariaTweaks, args.nerfedCharge,
-                                   args.noEscapeRando, args.noRemoveEscapeEnemies)
-    else:
-        romPatcher.addIPSPatches(args.patches)
-    if args.sprite is not None:
-        romPatcher.customSprite(args.sprite) # adds another IPS
-    romPatcher.commitIPS() # actually write IPS data
-    if args.patchOnly == False:
-        romPatcher.writeItemsLocs(itemLocs)
-        romPatcher.writeItemsNumber()
-        romPatcher.writeSeed(seed) # lol if race mode
-        romPatcher.writeSpoiler(itemLocs, progItemLocs)
-        romPatcher.writeRandoSettings(randoSettings, itemLocs)
-        romPatcher.writeDoorConnections(doors)
-        if escapeTimer is not None:
-            romPatcher.writeEscapeTimer(escapeTimer)
-    if ctrlDict is not None:
-        romPatcher.writeControls(ctrlDict)
-    if args.moonWalk == True:
-        romPatcher.enableMoonWalk()
-    if args.patchOnly == False:
-        romPatcher.writeMagic()
-        romPatcher.writeMajorsSplit(args.majorsSplit)
-    if args.palette == True:
-        paletteSettings = {
-            "global_shift": None,
-            "individual_suit_shift": None,
-            "individual_tileset_shift": None,
-            "match_ship_and_power": None,
-            "seperate_enemy_palette_groups": None,
-            "match_room_shift_with_boss": None,
-            "shift_tileset_palette": None,
-            "shift_boss_palettes": None,
-            "shift_suit_palettes": None,
-            "shift_enemy_palettes": None,
-            "shift_beam_palettes": None,
-            "shift_ship_palette": None,
-            "min_degree": None,
-            "max_degree": None,
-            "invert": None,
-        }
-        for param in paletteSettings:
-            paletteSettings[param] = getattr(args, param)
-        PaletteRando(romPatcher, paletteSettings, args.sprite).randomize()
-    romPatcher.end()
-
-    if args.rom is None:
-        data = romPatcher.romFile.data
-        fileName = '{}.sfc'.format(fileName)
-        data["fileName"] = fileName
-        # error msg in json to be displayed by the web site
-        if optErrMsg != "":
-            msg = optErrMsg + '\n' + randomizer.errorMsg
+    try:
+        # args.rom is not None: generate local rom named filename.sfc with args.rom as source
+        # args.output is not None: generate local json named args.output
+        if args.rom is not None:
+            # patch local rom
+            romFileName = args.rom
+            outFileName = fileName + '.sfc'
+            shutil.copyfile(romFileName, outFileName)
+            romPatcher = RomPatcher(outFileName, magic=args.raceMagic)
         else:
-            msg = randomizer.errorMsg
-        data["errorMsg"] = msg
-        with open(outFileName, 'w') as jsonFile:
-            json.dump(data, jsonFile)
-    #except Exception as e:
-    #    msg = "Error patching {}: ({}: {})".format(outFileName, type(e).__name__, e)
-    #    dumpErrorMsg(args.output, msg)
-    #    sys.exit(-1)
+            outFileName = args.output
+            romPatcher = RomPatcher(magic=args.raceMagic)
+
+        if args.patchOnly == False:
+            suitsMode = "Classic"
+            if args.progressiveSuits:
+                suitsMode = "Progressive"
+            elif args.noGravHeat:
+                suitsMode = "Vanilla"
+            romPatcher.applyIPSPatches(args.patches, args.noLayout, suitsMode,
+                                       args.area, args.bosses, args.areaLayoutBase,
+                                       args.noVariaTweaks, args.nerfedCharge,
+                                       args.noEscapeRando, args.noRemoveEscapeEnemies)
+        else:
+            romPatcher.addIPSPatches(args.patches)
+        if args.sprite is not None:
+            romPatcher.customSprite(args.sprite) # adds another IPS
+        romPatcher.commitIPS() # actually write IPS data
+        if args.patchOnly == False:
+            romPatcher.writeItemsLocs(itemLocs)
+            romPatcher.writeItemsNumber()
+            romPatcher.writeSeed(seed) # lol if race mode
+            romPatcher.writeSpoiler(itemLocs, progItemLocs)
+            romPatcher.writeRandoSettings(randoSettings, itemLocs)
+            romPatcher.writeDoorConnections(doors)
+            if escapeTimer is not None:
+                romPatcher.writeEscapeTimer(escapeTimer)
+        if ctrlDict is not None:
+            romPatcher.writeControls(ctrlDict)
+        if args.moonWalk == True:
+            romPatcher.enableMoonWalk()
+        if args.patchOnly == False:
+            romPatcher.writeMagic()
+            romPatcher.writeMajorsSplit(args.majorsSplit)
+        if args.palette == True:
+            paletteSettings = {
+                "global_shift": None,
+                "individual_suit_shift": None,
+                "individual_tileset_shift": None,
+                "match_ship_and_power": None,
+                "seperate_enemy_palette_groups": None,
+                "match_room_shift_with_boss": None,
+                "shift_tileset_palette": None,
+                "shift_boss_palettes": None,
+                "shift_suit_palettes": None,
+                "shift_enemy_palettes": None,
+                "shift_beam_palettes": None,
+                "shift_ship_palette": None,
+                "min_degree": None,
+                "max_degree": None,
+                "invert": None,
+            }
+            for param in paletteSettings:
+                paletteSettings[param] = getattr(args, param)
+            PaletteRando(romPatcher, paletteSettings, args.sprite).randomize()
+        romPatcher.end()
+
+        if args.rom is None:
+            data = romPatcher.romFile.data
+            fileName = '{}.sfc'.format(fileName)
+            data["fileName"] = fileName
+            # error msg in json to be displayed by the web site
+            if optErrMsg != "":
+                msg = optErrMsg + '\n' + randomizer.errorMsg
+            else:
+                msg = randomizer.errorMsg
+            data["errorMsg"] = msg
+            with open(outFileName, 'w') as jsonFile:
+                json.dump(data, jsonFile)
+    except Exception as e:
+        msg = "Error patching {}: ({}: {})".format(outFileName, type(e).__name__, e)
+        dumpErrorMsg(args.output, msg)
+        sys.exit(-1)
 
     if stuck == True:
         print("Rom generated for debug purpose: {}".format(fileName))

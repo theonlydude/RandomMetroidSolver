@@ -319,7 +319,7 @@ class RomReader:
         # 0x786de is Morphing Ball location
         self.romFile.seek(address+4)
         value3 = struct.unpack("B", self.romFile.read(1))[0]
-        if (value3 == int('0x1a', 16)
+        if (value3 == int('0x1a', 16) # FIXME go read nothing ID if available (if 0xff is read, assume 0x1a)
             and int(itemCode, 16) == int('0xeedb', 16)
             and address != int('0x786DE', 16)):
             return hex(0)
@@ -650,10 +650,9 @@ class RomPatcher:
             # missile
             self.writeItemCode({'Code': 0xeedb}, loc['Visibility'], addr)
             self.romFile.seek(addr + 4)
-            # morph ball slot. all Nothing at non-Morph loc will disappear
-            # when morph loc item is collected
-            # FIXME choose another slot when morph is not first item
-            self.romFile.write(struct.pack('B', 0x1a))
+            # all Nothing not at this loc Id will disappear when loc
+            # item is collected
+            self.romFile.write(struct.pack('B', self.nothingId))
 
     def writeItem(self, itemLoc):
         loc = itemLoc['Location']
@@ -950,6 +949,21 @@ class RomPatcher:
             char = 'M'
         self.romFile.seek(address)
         self.romFile.write(struct.pack('B', ord(char)))
+
+    def setNothingId(self, startAP, itemLocs):
+        # morph ball loc by default
+        self.nothingId = 0x1a
+        # if not default start, use first loc with a nothing
+        from graph_access import GraphUtils
+        if not GraphUtils.isStandardStart(startAP):
+            firstNothing = next((il['Location'] for il in itemLocs if il['Item']['Category'] == 'Nothing'), None)
+            if firstNothing is not None:
+                self.nothingId = firstNothing['Id']
+
+    def writeNothingId(self):
+        address = 0x17B6D
+        self.romFile.seek(address)
+        self.romFile.write(struct.pack('B', self.nothingId))
 
     def getItemQty(self, itemLocs, itemType):
         q = len([il for il in itemLocs if il['Item']['Type'] == itemType])

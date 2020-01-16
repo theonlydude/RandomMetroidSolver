@@ -959,7 +959,7 @@ class RomPatcher:
         # if not default start, use first loc with a nothing
         from graph_access import GraphUtils
         if not GraphUtils.isStandardStart(startAP):
-            firstNothing = next((il['Location'] for il in itemLocs if il['Item']['Category'] == 'Nothing'), None)
+            firstNothing = next((il['Location'] for il in itemLocs if il['Item']['Category'] == 'Nothing' and il['Item']['Type'] != 'Boss'), None)
             if firstNothing is not None:
                 self.nothingId = firstNothing['Id']
 

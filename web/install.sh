@@ -57,6 +57,8 @@ find ~/web2py/applications/solver/static -xtype l -exec rm -f {} \;
 [ -L ~/web2py/applications/solver/static/images/save.svg ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/save.svg ~/web2py/applications/solver/static/images/save.svg
 [ -L ~/web2py/applications/solver/static/images/locked.svg ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/locked.svg ~/web2py/applications/solver/static/images/locked.svg
 [ -L ~/web2py/applications/solver/static/images/portal.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/portal.png ~/web2py/applications/solver/static/images/portal.png
+[ -L ~/web2py/applications/solver/static/images/portal_boss.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/portal_boss.png ~/web2py/applications/solver/static/images/portal_boss.png
+[ -L ~/web2py/applications/solver/static/images/portal_escape.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/portal_escape.png ~/web2py/applications/solver/static/images/portal_escape.png
 [ -L ~/web2py/applications/solver/static/images/marker_visited_easy.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/marker_visited_easy.png ~/web2py/applications/solver/static/images/marker_visited_easy.png
 [ -L ~/web2py/applications/solver/static/images/marker_visited_medium.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/marker_visited_medium.png ~/web2py/applications/solver/static/images/marker_visited_medium.png
 [ -L ~/web2py/applications/solver/static/images/marker_visited_hard.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/marker_visited_hard.png ~/web2py/applications/solver/static/images/marker_visited_hard.png
@@ -541,3 +543,5 @@ mkdir -p ~/web2py/applications/solver/static/images/sprite_sheets/
 [ -L ~/web2py/applications/solver/static/images/sprite_sheets/samus.png ] || ln -s ~/RandomMetroidSolver/web/static/sprite_sheets/samus.png ~/web2py/applications/solver/static/images/sprite_sheets/samus.png
 [ -L ~/web2py/applications/solver/static/images/sprite_sheets/super_controid.png ] || ln -s ~/RandomMetroidSolver/web/static/sprite_sheets/super_controid.png ~/web2py/applications/solver/static/images/sprite_sheets/super_controid.png
 [ -L ~/web2py/applications/solver/static/images/sprite_sheets/win95_cursor.png ] || ln -s ~/RandomMetroidSolver/web/static/sprite_sheets/win95_cursor.png ~/web2py/applications/solver/static/images/sprite_sheets/win95_cursor.png
+
+[ -L ~/web2py/applications/solver/static/images/area_map_20200112.png ] || ln -s ~/RandomMetroidSolver/web/static/area_map.png ~/web2py/applications/solver/static/images/area_map_20200112.png

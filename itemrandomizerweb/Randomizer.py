@@ -1074,6 +1074,11 @@ class Randomizer(object):
             pool = self.itemPool
         return any(item['Type'] == t for item in pool)
 
+    def countItemTypeInPool(self, t, pool=None):
+        if pool is None:
+            pool = self.itemPool
+        return len([item for item in pool if item['Type'] == t])
+
     def isJunk(self, item):
         if item['Type'] in ['Nothing', 'NoEnergy']:
             return True
@@ -1679,18 +1684,18 @@ class Randomizer(object):
                 itemLocation['Item'] = self.getNextItemInPool('Nothing')
             elif isMajor and self.hasItemTypeInPool('NoEnergy'):
                 itemLocation['Item'] = self.getNextItemInPool('NoEnergy')
-            elif isMinor and self.hasItemTypeInPool('Missile'):
+            elif isMinor and self.hasItemTypeInPool('Missile') and self.countItemTypeInPool('Missile') > 3:
                 itemLocation['Item'] = self.getNextItemInPool('Missile')
-            elif isMinor and self.hasItemTypeInPool('Super'):
+            elif isMinor and self.hasItemTypeInPool('Super') and self.countItemTypeInPool('Super') > 2:
                 itemLocation['Item'] = self.getNextItemInPool('Super')
-            elif isMinor and self.hasItemTypeInPool('PowerBomb'):
+            elif isMinor and self.hasItemTypeInPool('PowerBomb') and self.countItemTypeInPool('PowerBomb') > 1:
                 itemLocation['Item'] = self.getNextItemInPool('PowerBomb')
-            elif isMajor and self.hasItemTypeInPool('Reserve'):
+            elif isMajor and self.hasItemTypeInPool('Reserve') and self.countItemTypeInPool('Reserve') > 1:
                 itemLocation['Item'] = self.getNextItemInPool('Reserve')
-            elif isMajor and self.hasItemTypeInPool('ETank'):
+            elif isMajor and self.hasItemTypeInPool('ETank') and self.countItemTypeInPool('ETank') > 3:
                 itemLocation['Item'] = self.getNextItemInPool('ETank')
             else:
-                break
+                raise RuntimeError("Cannot fill restricted locations")
             self.log.debug("Fill: {} at {}".format(itemLocation['Item']['Type'], itemLocation['Location']['Name']))
             self.getItem(itemLocation, False)
 

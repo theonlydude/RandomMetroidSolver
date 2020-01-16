@@ -1,8 +1,5 @@
-from itemrandomizerweb.stdlib import List
 from utils import randGaussBounds, getRangeDict, chooseFromRange
-import log, logging
-
-import struct, copy, random
+import log, logging, copy, random
 
 class ItemManager:
     Items = {
@@ -349,7 +346,7 @@ class ItemPoolGeneratorChozo(ItemPoolGenerator):
                 self.itemManager.addItem('ETank', 'Minor')
             # complete up to 18 energies with nothing item
             for i in range(total - alreadyInPool - rest):
-                self.itemManager.addItem('NoEnergy', 'Minor')
+                self.itemManager.addItem('Nothing', 'Minor')
         elif energyQty == 'medium':
             # 8-12
             # add up to 3 Reserves or ETanks (cannot add more than 3 reserves)
@@ -365,7 +362,7 @@ class ItemPoolGeneratorChozo(ItemPoolGenerator):
                 self.itemManager.addItem('ETank', 'Minor')
             # fill the rest with NoEnergy
             for i in range(total - alreadyInPool - rest):
-                self.itemManager.addItem('NoEnergy', 'Minor')
+                self.itemManager.addItem('Nothing', 'Minor')
         else:
             # add the vanilla 3 reserves and 13 Etanks
             for i in range(3):

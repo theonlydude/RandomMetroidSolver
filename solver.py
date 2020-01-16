@@ -15,7 +15,7 @@ from rom import RomLoader, RomPatcher, RomReader
 from itemrandomizerweb.Items import ItemManager
 from graph_locations import locations as graphLocations
 from graph import AccessGraph
-from graph_access import vanillaTransitions, vanillaBossesTransitions, accessPoints, GraphUtils
+from graph_access import vanillaTransitions, vanillaBossesTransitions, vanillaEscapeTransitions, accessPoints, GraphUtils
 from utils import PresetLoader, removeChars
 from vcr import VCR
 import log, db
@@ -45,6 +45,10 @@ class SolverState(object):
         self.state["areaRando"] = solver.areaRando
         # bool
         self.state["bossRando"] = solver.bossRando
+        # bool
+        self.state["escapeRando"] = solver.escapeRando
+        # string "03:00"
+        self.state["escapeTimer"] = solver.escapeTimer
         # dict of raw patches
         self.state["patches"] = solver.patches
         # dict {locName: {itemName: "xxx", "accessPoint": "xxx"}, ...}
@@ -100,6 +104,8 @@ class SolverState(object):
                 solver.majorsSplit = 'Major'
         solver.areaRando = self.state["areaRando"]
         solver.bossRando = self.state["bossRando"]
+        solver.escapeRando = self.state["escapeRando"]
+        solver.escapeTimer = self.state["escapeTimer"]
         solver.patches = self.setPatches(self.state["patches"])
         self.setLocsData(solver.locations)
         solver.areaTransitions = self.state["areaTransitions"]
@@ -290,27 +296,31 @@ class CommonSolver(object):
             self.majorsSplit = 'Full'
             self.areaRando = True
             self.bossRando = True
+            self.escapeRando = False
+            self.escapeTimer = "03:00"
             self.patches = RomReader.getDefaultPatches()
             RomLoader.factory(self.patches).loadPatches()
             # in seedless load all the vanilla transitions
             self.areaTransitions = vanillaTransitions[:]
             self.bossTransitions = vanillaBossesTransitions[:]
-            self.curGraphTransitions = self.bossTransitions + self.areaTransitions
+            self.escapeTransition = [vanillaEscapeTransitions[0]]
+            self.curGraphTransitions = self.bossTransitions + self.areaTransitions + self.escapeTransition
             for loc in self.locations:
                 loc['itemName'] = 'Nothing'
         else:
             self.romFileName = rom
             self.romLoader = RomLoader.factory(rom, magic)
             self.majorsSplit = self.romLoader.assignItems(self.locations)
-            (self.areaRando, self.bossRando) = self.romLoader.loadPatches()
+            (self.areaRando, self.bossRando, self.escapeRando) = self.romLoader.loadPatches()
+            self.escapeTimer = self.romLoader.getEscapeTimer()
 
             if interactive == False:
                 self.patches = self.romLoader.getPatches()
             else:
                 self.patches = self.romLoader.getRawPatches()
-            print("ROM {} majors: {} area: {} boss: {} patches: {}".format(rom, self.majorsSplit, self.areaRando, self.bossRando, sorted(self.patches)))
+            print("ROM {} majors: {} area: {} boss: {} escape: {} patches: {}".format(rom, self.majorsSplit, self.areaRando, self.bossRando, self.escapeRando, sorted(self.patches)))
 
-            (self.areaTransitions, self.bossTransitions) = self.romLoader.getTransitions()
+            (self.areaTransitions, self.bossTransitions, self.escapeTransition) = self.romLoader.getTransitions()
             if interactive == True and self.debug == False:
                 # in interactive area mode we build the graph as we play along
                 if self.areaRando == True and self.bossRando == True:
@@ -321,8 +331,10 @@ class CommonSolver(object):
                     self.curGraphTransitions = self.areaTransitions[:]
                 else:
                     self.curGraphTransitions = self.bossTransitions + self.areaTransitions
+                if self.escapeRando == False:
+                    self.curGraphTransitions += self.escapeTransition
             else:
-                self.curGraphTransitions = self.bossTransitions + self.areaTransitions
+                self.curGraphTransitions = self.bossTransitions + self.areaTransitions + self.escapeTransition
 
         self.areaGraph = AccessGraph(accessPoints, self.curGraphTransitions)
 
@@ -461,10 +473,12 @@ class CommonSolver(object):
         if len(locations) == 0:
             return []
 
-        around = [loc for loc in locations if ((loc['SolveArea'] == area or loc['distance'] < 3)
-                                               and loc['difficulty'].difficulty <= threshold
-                                               and not Bosses.areaBossDead(area)
-                                               and 'comeBack' in loc and loc['comeBack'] == True)]
+        # add nocomeback locations which has been selected by the comeback step (areaWeight == 1)
+        around = [loc for loc in locations if( ('areaWeight' in loc and loc['areaWeight'] == 1)
+                                               or ((loc['SolveArea'] == area or loc['distance'] < 3)
+                                                   and loc['difficulty'].difficulty <= threshold
+                                                   and not Bosses.areaBossDead(area)
+                                                   and 'comeBack' in loc and loc['comeBack'] == True) )]
         outside = [loc for loc in locations if not loc in around]
 
         self.log.debug("around1 = {}".format([(loc['Name'], loc['difficulty'], loc['distance'], loc['comeBack'], loc['SolveArea']) for loc in around]))
@@ -847,7 +861,7 @@ class InteractiveSolver(CommonSolver):
 
     def initTransitionsName(self):
         web2Internal = {}
-        for (startPoint, endPoint) in vanillaTransitions + vanillaBossesTransitions:
+        for (startPoint, endPoint) in vanillaTransitions + vanillaBossesTransitions + vanillaEscapeTransitions:
             for point in [startPoint, endPoint]:
                 web2Internal[self.apNameInternal2Web(point)] = point
         return web2Internal
@@ -882,7 +896,7 @@ class InteractiveSolver(CommonSolver):
         if self.mode == 'plando' and self.debug == False:
             if fill == True:
                 # load the source seed transitions and items/locations
-                self.curGraphTransitions = self.bossTransitions + self.areaTransitions
+                self.curGraphTransitions = self.bossTransitions + self.areaTransitions + self.escapeTransition
                 self.areaGraph = AccessGraph(accessPoints, self.curGraphTransitions)
                 self.fillPlandoLocs()
             else:
@@ -948,7 +962,7 @@ class InteractiveSolver(CommonSolver):
 
         if scope == 'common':
             if action == 'save':
-                return self.savePlando(params['lock'])
+                return self.savePlando(params['lock'], params['escapeTimer'])
             elif action == 'randomize':
                 self.randoPlando(params)
 
@@ -983,7 +997,8 @@ class InteractiveSolver(CommonSolver):
         return self.locsAddressName[address]
 
     def loadPlandoTransitions(self):
-        transitionsAddr = self.romLoader.getPlandoTransitions(len(vanillaBossesTransitions) + len(vanillaTransitions))
+        # add escape transition
+        transitionsAddr = self.romLoader.getPlandoTransitions(len(vanillaBossesTransitions) + len(vanillaTransitions) + 1)
         return GraphUtils.getTransitions(transitionsAddr)
 
     def loadPlandoLocs(self):
@@ -1120,7 +1135,7 @@ class InteractiveSolver(CommonSolver):
                 loc["accessPoint"] = itemLoc["Location"]["accessPoint"]
                 self.collectMajor(loc)
 
-    def savePlando(self, lock):
+    def savePlando(self, lock, escapeTimer):
         # store filled locations addresses in the ROM for next creating session
         locsItems = {}
         itemLocs = []
@@ -1168,6 +1183,11 @@ class InteractiveSolver(CommonSolver):
                 doorsPtrs = GraphUtils.getAps2DoorsPtrs()
                 romPatcher.writePlandoTransitions(self.curGraphTransitions, doorsPtrs,
                                                   len(vanillaBossesTransitions) + len(vanillaTransitions))
+            if self.escapeRando == True and escapeTimer != None:
+                # convert from '03:00' to number of seconds
+                escapeTimer = int(escapeTimer[0:2]) * 60 + int(escapeTimer[3:])
+                romPatcher.writeEscapeTimer(escapeTimer)
+
         romPatcher.end()
 
         data = romPatcher.romFile.data
@@ -1539,11 +1559,15 @@ class ComeBackStep(object):
         self.visitedGraphAreas = []
         self.graphAreas = graphAreas
         self.cur = cur
+        self.log = log.get('RewindStep')
 
     def next(self, locations):
-        # use next available area, if all areas has been visited return True (stuck), else False
+        # use next available area, if all areas have been visited return True (stuck), else False
         if len(self.visitedGraphAreas) == len(self.graphAreas):
+            self.log.debug("all areas have been visited, stuck")
             return True
+
+        self.log.debug("graphAreas: {} visitedGraphAreas: {}".format(self.graphAreas, self.visitedGraphAreas))
 
         # get area with max available locs
         maxAreaWeigth = 0
@@ -1556,6 +1580,7 @@ class ComeBackStep(object):
                     maxAreaWeigth = self.graphAreas[graphArea]
                     maxAreaName = graphArea
         self.visitedGraphAreas.append(maxAreaName)
+        self.log.debug("next area: {}".format(maxAreaName))
 
         retGraphAreas = {}
         for graphArea in self.graphAreas:
@@ -1567,6 +1592,7 @@ class ComeBackStep(object):
         # update locs
         for loc in locations:
             loc["areaWeight"] = retGraphAreas[loc["GraphArea"]]
+            self.log.debug("{} areaWeight: {}".format(loc["Name"], loc["areaWeight"]))
 
         return False
 
@@ -1871,6 +1897,7 @@ def interactiveSolver(args):
         if args.scope == 'common':
             if args.action == "save":
                 params["lock"] = args.lock
+                params["escapeTimer"] = args.escapeTimer
             elif args.action == "randomize":
                 params["progressionSpeed"] = args.progressionSpeed
                 params["minorQty"] = args.minorQty
@@ -1991,6 +2018,7 @@ if __name__ == "__main__":
                         dest="count", type=int)
     parser.add_argument('--lock', help="lock the plando seed (used in interactive mode)",
                         dest="lock", action='store_true')
+    parser.add_argument('--escapeTimer', help="escape timer like 03:00", dest="escapeTimer", default=None)
     parser.add_argument('--fill', help="in plando load all the source seed locations/transitions as a base (used in interactive mode)",
                         dest="fill", action='store_true')
     parser.add_argument('--progressionSpeed', help="rando plando (used in interactive mode)",

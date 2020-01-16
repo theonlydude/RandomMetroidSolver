@@ -5,7 +5,7 @@ path = os.path.expanduser('~/RandomMetroidSolver')
 if os.path.exists(path) and path not in sys.path:
     sys.path.append(path)
 
-import datetime, os, hashlib, json, subprocess, tempfile, glob, random
+import datetime, os, hashlib, json, subprocess, tempfile, glob, random, re
 from datetime import datetime, date
 from collections import OrderedDict
 
@@ -17,11 +17,11 @@ from parameters import diff2text, text2diff
 from solver import StandardSolver, DifficultyDisplayer, InteractiveSolver
 from utils import PresetLoader, removeChars
 import db
-from graph_access import vanillaTransitions, vanillaBossesTransitions
+from graph_access import vanillaTransitions, vanillaBossesTransitions, vanillaEscapeTransitions, accessPoints
 from utils import isStdPreset
 from graph_locations import locations
 from smboolmanager import SMBoolManager
-from rom import RomPatches
+from rom import RomPatches, RomReader
 
 # put an expiration date to the default cookie to have it kept between browser restart
 response.cookies['session_id_solver']['expires'] = 31 * 24 * 3600
@@ -647,10 +647,6 @@ def prepareResult():
     if session.solver['result'] is not None:
         result = session.solver['result']
 
-        # utf8 files
-        if sys.version_info.major == 2:
-            result['randomizedRom'] = result['randomizedRom'].encode('utf8', 'replace')
-
         if result['difficulty'] == -1:
             result['resultText'] = "The ROM \"{}\" is not finishable with the known techniques".format(result['randomizedRom'])
         else:
@@ -738,11 +734,7 @@ def validateSolverParams():
 
 def generateJsonROM(romJsonStr):
     tempRomJson = json.loads(romJsonStr)
-    # handle filename with utf8 characters in it
-    if sys.version_info.major > 2:
-        romFileName = tempRomJson["romFileName"]
-    else:
-        romFileName = tempRomJson["romFileName"].encode('utf8', 'replace')
+    romFileName = tempRomJson["romFileName"]
     (base, ext) = os.path.splitext(romFileName)
     jsonRomFileName = 'roms/{}.json'.format(base)
     del tempRomJson["romFileName"]
@@ -817,11 +809,52 @@ def solver():
     # load presets list
     (stdPresets, tourPresets, comPresets) = loadPresetsList()
 
+    # generate list of addresses to read in the ROM
+    addresses = getAddressesToRead()
+
     # send values to view
     return dict(desc=Knows.desc, stdPresets=stdPresets, tourPresets=tourPresets, comPresets=comPresets, roms=ROMs,
                 lastRomFile=lastRomFile, difficulties=diff2text, categories=Knows.categories,
-                result=result,
+                result=result, addresses=addresses,
                 easy=easy, medium=medium, hard=hard, harder=harder, hardcore=hardcore, mania=mania)
+
+def getAddressesToRead(plando=False):
+    addresses = {"locations": [], "patches": [], "transitions": [], "misc": [], "ranges": []}
+
+    # locations
+    for loc in locations:
+        addresses["locations"].append(loc["Address"])
+
+    # patches
+    for (patch, values) in RomReader.patches.items():
+        addresses["patches"].append(values["address"])
+
+    # transitions
+    for ap in accessPoints:
+        if ap.Internal == True:
+            continue
+        addresses["transitions"].append(0x10000 | ap.ExitInfo['DoorPtr'])
+
+    # misc
+    # majors split
+    addresses["misc"].append(0x17B6C)
+    # escape timer
+    addresses["misc"].append(0x1E21)
+    addresses["misc"].append(0x1E22)
+
+    # ranges [low, high[
+    ## doorasm
+    addresses["ranges"] += [0x7EB00, 0x7EE00]
+    # for next release doorasm addresses will be relocated
+    addresses["ranges"] += [0x7F800, 0x7F9FF]
+
+    if plando == True:
+        # plando addresses
+        addresses["ranges"] += [0x2F6000, 0x2F6100]
+        # plando transitions (4 bytes per transitions, ap#/2 transitions)
+        addresses["ranges"] += [0x2F6100, 0x2F6100+((len(addresses["transitions"])/2) * 4)]
+
+    return addresses
 
 def genJsonFromParams(vars):
     paramsDict = {'Knows': {}, 'Settings': {}, 'Controller': {}}
@@ -1548,9 +1581,16 @@ def tracker():
     for (src, dest) in vanillaBossesTransitions:
         vanillaBossesAPs += [transition2isolver(src), transition2isolver(dest)]
 
+    escapeAPs = []
+    for (src, dest) in vanillaEscapeTransitions:
+        escapeAPs += [transition2isolver(src), transition2isolver(dest)]
+
+    # generate list of addresses to read in the ROM
+    addresses = getAddressesToRead()
+
     return dict(stdPresets=stdPresets, tourPresets=tourPresets, comPresets=comPresets,
-                vanillaAPs=vanillaAPs, vanillaBossesAPs=vanillaBossesAPs,
-                curSession=session.tracker)
+                vanillaAPs=vanillaAPs, vanillaBossesAPs=vanillaBossesAPs, escapeAPs=escapeAPs,
+                curSession=session.tracker, addresses=addresses)
 
 def plando():
     response.title = 'Super Metroid VARIA Areas and Items Plandomizer'
@@ -1581,9 +1621,16 @@ def plando():
     for (src, dest) in vanillaBossesTransitions:
         vanillaBossesAPs += [transition2isolver(src), transition2isolver(dest)]
 
+    escapeAPs = []
+    for (src, dest) in vanillaEscapeTransitions:
+        escapeAPs += [transition2isolver(src), transition2isolver(dest)]
+
+    # generate list of addresses to read in the ROM
+    addresses = getAddressesToRead(plando=True)
+
     return dict(stdPresets=stdPresets, tourPresets=tourPresets, comPresets=comPresets,
-                vanillaAPs=vanillaAPs, vanillaBossesAPs=vanillaBossesAPs,
-                curSession=session.plando)
+                vanillaAPs=vanillaAPs, vanillaBossesAPs=vanillaBossesAPs, escapeAPs=escapeAPs,
+                curSession=session.plando, addresses=addresses)
 
 class WS(object):
     @staticmethod
@@ -1627,6 +1674,10 @@ class WS(object):
         if action not in ['init', 'add', 'remove', 'clear', 'get', 'save', 'replace', 'randomize']:
             raiseHttp(400, "Unknown action {}, must be init/add/remove/clear/get/save/randomize".format(action), True)
 
+        if request.vars.escapeTimer != None:
+            if re.match("[0-9][0-9]:[0-9][0-9]", request.vars.escapeTimer) == None:
+                raiseHttp(400, "Wrong escape timer value")
+
     def validatePoint(self, point):
         if request.vars[point] == None:
             raiseHttp(400, "Missing parameter {}".format(point), True)
@@ -1642,7 +1693,9 @@ class WS(object):
                               'redFishRoomLeft', 'redTowerTopLeft', 'caterpillarRoomTopRight', 'redBrinstarElevator',
                               'eastTunnelRight', 'eastTunnelTopRight', 'glassTunnelTop', 'statuesHallwayLeft',
                               'ridleyRoomOut', 'ridleyRoomIn', 'kraidRoomOut', 'kraidRoomIn',
-                              'draygonRoomOut', 'draygonRoomIn', 'phantoonRoomOut', 'phantoonRoomIn']:
+                              'draygonRoomOut', 'draygonRoomIn', 'phantoonRoomOut', 'phantoonRoomIn',
+                              'tourianEscapeRoom4TopRight', 'climbBottomLeft', 'greenBrinstarMainShaftTopLeft',
+                              'basementLeft', 'businessCenterMidLeft', 'crabHoleBottomRight']:
             raiseHttp(400, "Wrong value for {}: {}".format(point, pointValue), True)
 
     def action(self):
@@ -1675,6 +1728,8 @@ class WS(object):
                 "mode": state["mode"],
                 "areaRando": state["areaRando"],
                 "bossRando": state["bossRando"],
+                "escapeRando": state["escapeRando"],
+                "escapeTimer": state["escapeTimer"],
                 "seed": state["seed"],
                 "preset": os.path.basename(os.path.splitext(state["presetFileName"])[0]),
                 "errorMsg": state["errorMsg"],
@@ -1718,6 +1773,8 @@ class WS(object):
         elif action == 'save' and scope == 'common':
             if parameters['lock'] == True:
                 params.append('--lock')
+            if 'escapeTimer' in parameters:
+                params += ['--escapeTimer', parameters['escapeTimer']]
         elif action == 'randomize':
             params += ['--progressionSpeed', parameters["progressionSpeed"],
                        '--minorQty', parameters["minorQty"],
@@ -1749,6 +1806,10 @@ class WS(object):
             if action == 'save':
                 return json.dumps(state)
             else:
+                # save the escape timer at every step to avoid loosing its value
+                if request.vars.escapeTimer != None:
+                    state["escapeTimer"] = request.vars.escapeTimer
+
                 self.session["state"] = state
                 return self.returnState()
         else:
@@ -1895,7 +1956,11 @@ class WS_common_save(WS):
         if self.session["mode"] != "plando":
             raiseHttp(400, "Save can only be use in plando mode", True)
 
-        return self.callSolverAction("common", "save", {'lock': request.vars.lock == "lock"})
+        params = {'lock': request.vars.lock == "lock"}
+        if request.vars.escapeTimer != None:
+            params['escapeTimer'] = request.vars.escapeTimer
+
+        return self.callSolverAction("common", "save", params)
 
 class WS_common_randomize(WS):
     def validate(self):

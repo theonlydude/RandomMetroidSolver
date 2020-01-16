@@ -77,7 +77,8 @@ class AccessGraph(object):
     def toDot(self, dotFile):
         colors = ['red', 'blue', 'green', 'yellow', 'skyblue', 'violet', 'orange',
                   'lawngreen', 'crimson', 'chocolate', 'turquoise', 'tomato',
-                  'navyblue', 'darkturquoise', 'green', 'blue', 'maroon', 'magenta']
+                  'navyblue', 'darkturquoise', 'green', 'blue', 'maroon', 'magenta',
+                  'bisque', 'coral', 'chartreuse', 'chocolate', 'cyan']
         with open(dotFile, "w") as f:
             f.write("digraph {\n")
             f.write('size="30,30!";\n')
@@ -181,8 +182,8 @@ class AccessGraph(object):
             if apName not in paths:
                 continue
             difficulty = paths[apName]["pdiff"].difficulty
-            ret.append((difficulty if difficulty != -1 else infinity,  paths[apName]["distance"], apName))
-        # sort by difficulty first, then distance (also by name to have same behavious in python2 and 3)
+            ret.append((difficulty if difficulty != -1 else infinity, paths[apName]["distance"], apName))
+        # sort by difficulty first, then distance
         ret.sort(key=lambda x: (x[0], x[1], x[2]))
         return [apName for (diff, dist, apName) in ret]
 

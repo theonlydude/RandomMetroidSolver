@@ -619,6 +619,7 @@ vanillaBossesTransitions = [
     ('RidleyRoomOut', 'RidleyRoomIn')
 ]
 
+# vanilla escape transition in first position
 vanillaEscapeTransitions = [
     ('Tourian Escape Room 4 Top Right', 'Climb Bottom Left'),
     ('Brinstar Pre-Map Room Right', 'Green Brinstar Main Shaft Top Left'),
@@ -699,7 +700,7 @@ class GraphUtils:
         return (escapeSource, random.choice(escapeTargets))
 
     def getVanillaExit(apName):
-        allVanillaTransitions = vanillaTransitions + vanillaBossesTransitions
+        allVanillaTransitions = vanillaTransitions + vanillaBossesTransitions + vanillaEscapeTransitions
         for (src,dst) in allVanillaTransitions:
             if apName == src:
                 return dst
@@ -712,22 +713,26 @@ class GraphUtils:
     def getRooms():
         rooms = {}
         for ap in accessPoints:
-            if ap.isInternal() == True:
+            if ap.Internal == True:
                 continue
             roomPtr = ap.RoomInfo['RoomPtr']
-            entryInfo = getAccessPoint(getVanillaExit(ap.Name)).ExitInfo
-            rooms[(roomPtr, entryInfo['screen'])] = ap
+
+            connAP = getAccessPoint(GraphUtils.getVanillaExit(ap.Name))
+            entryInfo = connAP.ExitInfo
+            rooms[(roomPtr, entryInfo['screen'], entryInfo['direction'])] = ap
+            rooms[(roomPtr, entryInfo['screen'], (ap.EntryInfo['SamusX'], ap.EntryInfo['SamusY']))] = ap
             # for boss rando with incompatible ridley transition, also register this one
             if ap.Name == 'RidleyRoomIn':
-                rooms[(roomPtr, (0x0, 0x1))] = ap
+                rooms[(roomPtr, (0x0, 0x1), 0x5)] = ap
+                rooms[(roomPtr, (0x0, 0x1), (0xbf, 0x198))] = ap
+
         return rooms
 
+    def isHorizontal(dir):
         # up: 0x3, 0x7
         # down: 0x2, 0x6
         # left: 0x1, 0x5
         # right: 0x0, 0x4
-
-    def isHorizontal(dir):
         return dir in [0x1, 0x5, 0x0, 0x4]
 
     def removeCap(dir):
@@ -809,7 +814,7 @@ class GraphUtils:
     def getDoorsPtrs2Aps():
         ret = {}
         for ap in accessPoints:
-            if ap.isInternal() == True:
+            if ap.Internal == True:
                 continue
             ret[ap.ExitInfo["DoorPtr"]] = ap.Name
         return ret
@@ -817,11 +822,10 @@ class GraphUtils:
     def getAps2DoorsPtrs():
         ret = {}
         for ap in accessPoints:
-            if ap.isInternal() == True:
+            if ap.Internal == True:
                 continue
             ret[ap.Name] = ap.ExitInfo["DoorPtr"]
         return ret
-
 
     def getTransitions(addresses):
         # build address -> name dict

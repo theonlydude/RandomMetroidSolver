@@ -269,14 +269,17 @@ if __name__ == "__main__":
     optErrMsg = ""
     # choose on animal patch
     if args.animals == True:
-        if args.area == False or args.noEscapeRando == True or args.noRemoveEscapeEnemies == True:
-            animalsPatches = ['animal_enemies.ips', 'animals.ips', 'draygonimals.ips', 'escapimals.ips',
-                              'gameend.ips', 'grey_door_animals.ips', 'low_timer.ips', 'metalimals.ips',
-                              'phantoonimals.ips', 'ridleyimals.ips']
-            args.patches.append(random.choice(animalsPatches))
-        else:
-            optErrMsg = "Disabled animals surprise patch (incompatible with randomized escape without enemies)"
-            print(optErrMsg)
+        animalsPatches = ['animal_enemies.ips', 'animals.ips', 'draygonimals.ips', 'escapimals.ips',
+                          'gameend.ips', 'grey_door_animals.ips', 'low_timer.ips', 'metalimals.ips',
+                          'phantoonimals.ips', 'ridleyimals.ips']
+        if args.area == True and args.noEscapeRando == False:
+            # these glitch with enemies on
+            animalsPatches.remove('phantoonimals.ips') # excessive lag and ridley sound effects
+            animalsPatches.remove('ridleyimals.ips') # escape timer tiles tail
+            if args.noRemoveEscapeEnemies == False:
+                animalsPatches.remove('draygonimals.ips') # glitched room
+                animalsPatches.remove('metalimals.ips') # no pirates
+        args.patches.append(random.choice(animalsPatches))
 
     # if random progression speed, choose one
     progSpeed = str(args.progressionSpeed).lower()

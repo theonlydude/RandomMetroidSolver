@@ -1231,12 +1231,15 @@ class Randomizer(object):
         self.lateMorphResult = proba <= nbItems
         return self.lateMorphResult
 
+    def isEarlyGame(self):
+        return len(self.progressionStatesIndices) <= 2
+
     # is softlock possible from the player POV when checking the loc?
     # usually these locs are checked last when playing, so placing
     # an important item there has an impact on progression speed
     def isSoftlockPossible(self, item, loc):
-        if len(self.progressionStatesIndices) <= 2:
-            # disable check for early game
+        # disable check for early game
+        if self.isEarlyGame():
             return False
         isPickup = 'Pickup' in loc
         if isPickup:
@@ -1530,10 +1533,9 @@ class Randomizer(object):
         return progItems+'/'+position
 
     def hasTried(self, itemLoc):
-        # # disable tried check if we don't have morph+unlocking ammo
-        # sm = self.smbm
-        # if sm.canUsePowerBombs().bool == False or sm.canOpenGreenDoors().bool == False:
-        #     return False
+        # disable check for early game
+        if self.isEarlyGame():
+            return False
         itemType = itemLoc['Item']['Type']
         situation = self.getSituationId()
         ret = False

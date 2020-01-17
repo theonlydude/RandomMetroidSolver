@@ -10,6 +10,7 @@ from parameters import appDir
 from utils import normalizeRounding
 from rom_patches import RomPatches
 from graph_access import accessPoints, GraphUtils, getAccessPoint
+from graph_locations import locations
 
 def getWord(w):
     return (w & 0x00FF, (w & 0xFF00) >> 8)
@@ -186,7 +187,9 @@ class RomReader:
     def __init__(self, romFile, magic=None):
         self.romFile = romFile
         self.race = None
+        # default to morph ball location
         self.nothingId = 0x1a
+        self.nothingAddr = 0x786DE
         if magic is not None:
             from race_mode import RaceModeReader
             self.race = RaceModeReader(self, magic)
@@ -225,7 +228,7 @@ class RomReader:
         value3 = int.from_bytes(self.romFile.read(1), byteorder='little')
         if (value3 == self.nothingId
             and int(itemCode, 16) == 0xeedb
-            and address != 0x786DE):
+            and address != self.nothingAddr):
             return hex(0)
         else:
             return itemCode
@@ -460,6 +463,12 @@ class RomReader:
         value = self.romFile.readByte(address)
         if value != 0xff:
             self.nothingId = value
+
+        # find the associated location to get its address
+        for loc in locations:
+            if loc['Id'] == self.nothingId:
+                self.nothingAddr = 0x70000 | loc['Address']
+                break
 
 class RomPatcher:
     # standard:

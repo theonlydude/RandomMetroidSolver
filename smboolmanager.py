@@ -6,6 +6,7 @@ from smbool import SMBool
 from rom_patches import RomPatches
 from graph_helpers import HelpersGraph
 from cache import Cache
+from parameters import Knows, isKnows
 
 class SMBoolManager(object):
     items = ['ETank', 'Missile', 'Super', 'PowerBomb', 'Bomb', 'Charge', 'Ice', 'HiJump', 'SpeedBooster', 'Wave', 'Spazer', 'SpringBall', 'Varia', 'Plasma', 'Grapple', 'Morph', 'Reserve', 'Gravity', 'XRayScope', 'SpaceJump', 'ScrewAttack', 'Nothing', 'NoEnergy']
@@ -96,7 +97,6 @@ class SMBoolManager(object):
     def createKnowsFunctions(self):
         # for each knows we have a function knowsKnows (ex: knowsAlcatrazEscape()) which
         # take no parameter
-        from parameters import Knows, isKnows
         for knows in Knows.__dict__:
             if isKnows(knows):
                 setattr(self, 'knows'+knows, lambda knows=knows: self.knowsKnows(knows,

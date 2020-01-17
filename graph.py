@@ -1,6 +1,6 @@
 import copy
 from smbool import SMBool
-from rom import RomPatches
+from rom_patches import RomPatches
 from parameters import infinity
 import log
 

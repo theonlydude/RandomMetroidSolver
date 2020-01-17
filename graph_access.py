@@ -2,7 +2,7 @@ import copy
 import random
 from graph import AccessPoint
 from parameters import Knows, Settings
-from rom import RomPatches
+from rom_patches import RomPatches
 from smbool import SMBool
 from helpers import Bosses
 

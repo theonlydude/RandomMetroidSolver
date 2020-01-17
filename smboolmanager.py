@@ -3,7 +3,7 @@
 from functools import reduce
 
 from smbool import SMBool
-from rom import RomPatches
+from rom_patches import RomPatches
 from graph_helpers import HelpersGraph
 from cache import Cache
 

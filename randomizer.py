@@ -9,7 +9,8 @@ from graph_locations import locations as graphLocations
 from graph_access import vanillaTransitions, vanillaBossesTransitions, GraphUtils
 from parameters import Knows, easy, medium, hard, harder, hardcore, mania, text2diff, diff2text
 from utils import PresetLoader
-from rom import RomPatcher, RomPatches, FakeROM
+from rom_patches import RomPatches
+from rom import RomPatcher, FakeROM
 from utils import loadRandoPreset
 import log, db
 

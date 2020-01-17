@@ -21,7 +21,8 @@ from graph_access import vanillaTransitions, vanillaBossesTransitions, vanillaEs
 from utils import isStdPreset
 from graph_locations import locations
 from smboolmanager import SMBoolManager
-from rom import RomPatches, RomReader
+from rom import RomReader
+from rom_patches import RomPatches
 
 # put an expiration date to the default cookie to have it kept between browser restart
 response.cookies['session_id_solver']['expires'] = 31 * 24 * 3600

@@ -1,6 +1,6 @@
 from parameters import Knows, Settings, easy, medium, hard, harder, hardcore, mania
 from helpers import Bosses
-from rom import RomPatches
+from rom_patches import RomPatches
 from smbool import SMBool
 
 # all the items locations with the prerequisites to access them

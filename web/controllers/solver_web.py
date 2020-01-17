@@ -842,6 +842,8 @@ def getAddressesToRead(plando=False):
     # escape timer
     addresses["misc"].append(0x1E21)
     addresses["misc"].append(0x1E22)
+    # nothing id
+    addresses["misc"].append(0x17B6D)
 
     # ranges [low, high[
     ## doorasm

@@ -313,6 +313,7 @@ class CommonSolver(object):
             self.majorsSplit = self.romLoader.assignItems(self.locations)
             (self.areaRando, self.bossRando, self.escapeRando) = self.romLoader.loadPatches()
             self.escapeTimer = self.romLoader.getEscapeTimer()
+            self.romLoader.readNothingId()
 
             if interactive == False:
                 self.patches = self.romLoader.getPatches()

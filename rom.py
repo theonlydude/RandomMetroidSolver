@@ -186,6 +186,7 @@ class RomReader:
     def __init__(self, romFile, magic=None):
         self.romFile = romFile
         self.race = None
+        self.nothingId = 0x1a
         if magic is not None:
             from race_mode import RaceModeReader
             self.race = RaceModeReader(self, magic)
@@ -222,9 +223,9 @@ class RomReader:
         # 0x786de is Morphing Ball location
         self.romFile.seek(address+4)
         value3 = int.from_bytes(self.romFile.read(1), byteorder='little')
-        if (value3 == int('0x1a', 16) # FIXME go read nothing ID if available (if 0xff is read, assume 0x1a)
-            and int(itemCode, 16) == int('0xeedb', 16)
-            and address != int('0x786DE', 16)):
+        if (value3 == self.nothingId
+            and int(itemCode, 16) == 0xeedb
+            and address != 0x786DE):
             return hex(0)
         else:
             return itemCode
@@ -453,6 +454,12 @@ class RomReader:
         minute = int(minute / 16)*10 + minute%16
 
         return "{:02d}:{:02d}".format(minute, second)
+
+    def readNothingId(self):
+        address = 0x17B6D
+        value = self.romFile.readByte(address)
+        if value != 0xff:
+            self.nothingId = value
 
 class RomPatcher:
     # standard:
@@ -1527,6 +1534,9 @@ class RomLoader(object):
 
     def getEscapeTimer(self):
         return self.romReader.getEscapeTimer()
+
+    def readNothingId(self):
+        self.romReader.readNothingId()
 
 class RomLoaderSfc(RomLoader):
     # standard usage (when calling from the command line)

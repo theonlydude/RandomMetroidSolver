@@ -88,7 +88,7 @@ if __name__ == "__main__":
                         dest='bosses', nargs='?', const=True, default=False)
     parser.add_argument('--startAP', help="Name of the Access Point to start from",
                         dest='startAP', nargs='?', default="Landing Site",
-                        choices=GraphUtils.getStartAccessPointNames())
+                        choices=['random'] + GraphUtils.getStartAccessPointNames())
     parser.add_argument('--debug', '-d', help="activate debug logging", dest='debug',
                         action='store_true')
     parser.add_argument('--maxDifficulty', '-t',

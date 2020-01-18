@@ -69,7 +69,7 @@ class SolverState(object):
         # dict {locName: (bool, diff, [know1, ...], [item1, ...]), ...}
         self.state["availableLocations"] = self.getAvailableLocations(solver.majorLocations)
         # string of last access point
-        self.state["lastLoc"] = solver.lastLoc
+        self.state["lastAP"] = solver.lastAP
         # list of killed bosses: ["boss1", "boss2"]
         self.state["bosses"] = [boss for boss in Bosses.golden4Dead if Bosses.golden4Dead[boss] == True]
         # dict {locNameWeb: {infos}, ...}
@@ -118,7 +118,7 @@ class SolverState(object):
         (solver.visitedLocations, solver.majorLocations) = self.setLocations(self.state["visitedLocations"],
                                                                              self.state["availableLocations"],
                                                                              solver.locations)
-        solver.lastLoc = self.state["lastLoc"]
+        solver.lastAP = self.state["lastAP"]
         Bosses.reset()
         for boss in self.state["bosses"]:
             Bosses.beatBoss(boss)
@@ -298,6 +298,8 @@ class CommonSolver(object):
             self.bossRando = True
             self.escapeRando = False
             self.escapeTimer = "03:00"
+            self.startAP = 'Landing Site'
+            self.startArea = 'Crateria Landing Site'
             self.patches = RomReader.getDefaultPatches()
             RomLoader.factory(self.patches).loadPatches()
             # in seedless load all the vanilla transitions
@@ -314,6 +316,7 @@ class CommonSolver(object):
             (self.areaRando, self.bossRando, self.escapeRando) = self.romLoader.loadPatches()
             self.escapeTimer = self.romLoader.getEscapeTimer()
             self.romLoader.readNothingId()
+            (self.startAP, self.startArea) = self.romLoader.getStartAP()
 
             if interactive == False:
                 self.patches = self.romLoader.getPatches()
@@ -358,7 +361,7 @@ class CommonSolver(object):
                 return loc
 
     def computeLocationsDifficulty(self, locations):
-        self.areaGraph.getAvailableLocations(locations, self.smbm, infinity, self.lastLoc)
+        self.areaGraph.getAvailableLocations(locations, self.smbm, infinity, self.lastAP)
         # check post available functions too
         for loc in locations:
             if loc['difficulty'].bool == True:
@@ -370,7 +373,7 @@ class CommonSolver(object):
                     loc['difficulty'] = self.smbm.wand(loc['difficulty'], postAvailable)
 
                 # also check if we can come back to landing site from the location
-                loc['comeBack'] = self.areaGraph.canAccess(self.smbm, loc['accessPoint'], self.lastLoc, infinity, loc['itemName'])
+                loc['comeBack'] = self.areaGraph.canAccess(self.smbm, loc['accessPoint'], self.lastAP, infinity, loc['itemName'])
 
         if self.log.getEffectiveLevel() == logging.DEBUG:
             self.log.debug("available locs:")
@@ -381,14 +384,12 @@ class CommonSolver(object):
     def collectMajor(self, loc, itemName=None):
         self.majorLocations.remove(loc)
         self.visitedLocations.append(loc)
-        area = self.collectItem(loc, itemName)
-        return area
+        self.collectItem(loc, itemName)
 
     def collectMinor(self, loc):
         self.minorLocations.remove(loc)
         self.visitedLocations.append(loc)
-        area = self.collectItem(loc)
-        return area
+        self.collectItem(loc)
 
     def collectItem(self, loc, item=None):
         if item == None:
@@ -423,9 +424,8 @@ class CommonSolver(object):
         self.log.debug("collectItem: {} at {}".format(item, loc['Name']))
 
         # last loc is used as root node for the graph
-        self.lastLoc = loc['accessPoint']
-
-        return loc['SolveArea']
+        self.lastAP = loc['accessPoint']
+        self.lastArea = loc['SolveArea']
 
     def cancelLastItems(self, count):
         if self.vcr != None:
@@ -444,9 +444,11 @@ class CommonSolver(object):
 
             # access point
             if len(self.visitedLocations) == 0:
-                self.lastLoc = "Landing Site"
+                self.lastAP = self.startAP
+                self.lastArea = self.startArea
             else:
-                self.lastLoc = self.visitedLocations[-1]["accessPoint"]
+                self.lastAP = self.visitedLocations[-1]["accessPoint"]
+                self.lastArea = self.visitedLocations[-1]["SolveArea"]
 
             # item
             item = loc["itemName"]
@@ -467,7 +469,7 @@ class CommonSolver(object):
                 if item not in self.collectedItems:
                     self.smbm.removeItem(item)
 
-    def getAvailableItemsList(self, locations, area, threshold):
+    def getAvailableItemsList(self, locations, threshold):
         # locations without distance are not available
         locations = [loc for loc in locations if 'distance' in loc]
 
@@ -476,9 +478,9 @@ class CommonSolver(object):
 
         # add nocomeback locations which has been selected by the comeback step (areaWeight == 1)
         around = [loc for loc in locations if( ('areaWeight' in loc and loc['areaWeight'] == 1)
-                                               or ((loc['SolveArea'] == area or loc['distance'] < 3)
+                                               or ((loc['SolveArea'] == self.lastArea or loc['distance'] < 3)
                                                    and loc['difficulty'].difficulty <= threshold
-                                                   and not Bosses.areaBossDead(area)
+                                                   and not Bosses.areaBossDead(self.lastArea)
                                                    and 'comeBack' in loc and loc['comeBack'] == True) )]
         outside = [loc for loc in locations if not loc in around]
 
@@ -487,7 +489,7 @@ class CommonSolver(object):
 
         around.sort(key=lambda loc: (
             # locs in the same area
-            0 if loc['SolveArea'] == area
+            0 if loc['SolveArea'] == self.lastArea
             else 1,
             # nearest locs
             loc['distance'],
@@ -498,9 +500,9 @@ class CommonSolver(object):
             loc['difficulty'].difficulty
             )
         )
-        self.log.debug("around2: {}".format([(loc['Name'], 0 if loc['SolveArea'] == area else 1, loc['distance'], 0 if 'Pickup' in loc else 1, loc['difficulty'].difficulty) for loc in around]))
+        self.log.debug("around2: {}".format([(loc['Name'], 0 if loc['SolveArea'] == self.lastArea else 1, loc['distance'], 0 if 'Pickup' in loc else 1, loc['difficulty'].difficulty) for loc in around]))
 
-        # we want to sort the outside locations by putting the ones is the same area first,
+        # we want to sort the outside locations by putting the ones in the same area first,
         # then we sort the remaining areas starting whith boss dead status.
         # we also want to sort by range of difficulty and not only with the difficulty threshold.
         ranged = {
@@ -536,7 +538,7 @@ class CommonSolver(object):
         for key in ranged:
             ranged[key].sort(key=lambda loc: (
                 # first locs in the same area
-                0 if loc['SolveArea'] == area else 1,
+                0 if loc['SolveArea'] == self.lastArea else 1,
                 # first nearest locs
                 loc['distance'],
                 # beating a boss
@@ -552,19 +554,19 @@ class CommonSolver(object):
         outside = []
         for key in ["areaWeight", "easy", "medium", "hard", "harder", "hardcore", "mania", "noComeBack"]:
             outside += ranged[key]
-            self.log.debug("outside2: {}: {}".format(key, [(loc['Name'], loc["areaWeight"] if "areaWeight" in loc else 0, 0 if loc['SolveArea'] == area else 1, loc['distance'], loc['difficulty'].difficulty if (not Bosses.areaBossDead(loc['Area']) and 'Pickup' in loc) else 100000, loc['difficulty'].difficulty if not Bosses.areaBossDead(loc['Area']) else 100000,loc['difficulty'].difficulty) for loc in ranged[key]]))
+            self.log.debug("outside2: {}: {}".format(key, [(loc['Name'], loc["areaWeight"] if "areaWeight" in loc else 0, 0 if loc['SolveArea'] == self.lastArea else 1, loc['distance'], loc['difficulty'].difficulty if (not Bosses.areaBossDead(loc['Area']) and 'Pickup' in loc) else 100000, loc['difficulty'].difficulty if not Bosses.areaBossDead(loc['Area']) else 100000,loc['difficulty'].difficulty) for loc in ranged[key]]))
 
         return around + outside
 
-    def nextDecision(self, majorsAvailable, minorsAvailable, hasEnoughMinors, diffThreshold, area):
+    def nextDecision(self, majorsAvailable, minorsAvailable, hasEnoughMinors, diffThreshold):
         # first take major items of acceptable difficulty in the current area
         if (len(majorsAvailable) > 0
-            and majorsAvailable[0]['SolveArea'] == area
+            and majorsAvailable[0]['SolveArea'] == self.lastArea
             and majorsAvailable[0]['difficulty'].difficulty <= diffThreshold
             and majorsAvailable[0]['comeBack'] == True):
             return self.collectMajor(majorsAvailable.pop(0))
         # next item decision
-        if len(minorsAvailable) == 0 and len(majorsAvailable) > 0:
+        elif len(minorsAvailable) == 0 and len(majorsAvailable) > 0:
             self.log.debug('MAJOR')
             return self.collectMajor(majorsAvailable.pop(0))
         elif len(majorsAvailable) == 0 and len(minorsAvailable) > 0:
@@ -620,7 +622,7 @@ class CommonSolver(object):
                 elif nextMinDifficulty <= diffThreshold and not self.haveAllMinorTypes():
                     self.log.debug("not all minors types")
                     return self.collectMinor(minorsAvailable.pop(0))
-                elif nextMinArea == area and nextMinDifficulty <= diffThreshold:
+                elif nextMinArea == self.lastArea and nextMinDifficulty <= diffThreshold:
                     self.log.debug("not enough minors")
                     return self.collectMinor(minorsAvailable.pop(0))
                 elif nextMinDifficulty > diffThreshold and nextMajDifficulty > diffThreshold:
@@ -696,7 +698,6 @@ class CommonSolver(object):
 
         isEndPossible = False
         endDifficulty = mania
-        area = 'Crateria Landing Site'
         diffThreshold = self.getDiffThreshold()
         while True:
             # actual while condition
@@ -713,7 +714,7 @@ class CommonSolver(object):
                     self.log.debug("canEnd but MB loc not accessible")
 
             #self.log.debug(str(self.collectedItems))
-            self.log.debug("Current Area : " + area)
+            self.log.debug("Current AP/Area: {}/{}".format(self.lastAP, self.lastArea))
 
             # check if we have collected an item in the last loop
             current = len(self.collectedItems)
@@ -775,16 +776,16 @@ class CommonSolver(object):
                     break
 
             # sort them on difficulty and proximity
-            majorsAvailable = self.getAvailableItemsList(majorsAvailable, area, diffThreshold)
+            majorsAvailable = self.getAvailableItemsList(majorsAvailable, diffThreshold)
             if self.majorsSplit == 'Full':
                 minorsAvailable = majorsAvailable
             else:
-                minorsAvailable = self.getAvailableItemsList(minorsAvailable, area, diffThreshold)
+                minorsAvailable = self.getAvailableItemsList(minorsAvailable, diffThreshold)
 
             self.comeBack.cleanNoComeBack(locs)
 
             # choose one to pick up
-            area = self.nextDecision(majorsAvailable, minorsAvailable, hasEnoughMinors, diffThreshold, area)
+            self.nextDecision(majorsAvailable, minorsAvailable, hasEnoughMinors, diffThreshold)
 
         # compute difficulty value
         (difficulty, itemsOk) = self.computeDifficultyValue()
@@ -1024,7 +1025,8 @@ class InteractiveSolver(CommonSolver):
         mbLoc = self.getLoc("Mother Brain")
         locationsBck = self.locations[:]
 
-        self.lastLoc = 'Landing Site'
+        self.lastAP = self.startAP
+        self.lastArea = self.startArea
         (self.difficulty, self.itemsOk) = self.computeDifficulty()
 
         # put back mother brain location
@@ -1280,7 +1282,8 @@ class InteractiveSolver(CommonSolver):
     def clearItems(self, reload=False):
         self.collectedItems = []
         self.visitedLocations = []
-        self.lastLoc = 'Landing Site'
+        self.lastAP = self.startAP
+        self.lastArea = self.startArea
         self.majorLocations = self.locations
         if reload == True:
             for loc in self.majorLocations:
@@ -1403,7 +1406,8 @@ class StandardSolver(CommonSolver):
         Conf.itemsForbidden = itemsForbidden
 
     def solveRom(self):
-        self.lastLoc = 'Landing Site'
+        self.lastAP = self.startAP
+        self.lastArea = self.startArea
 
         (self.difficulty, self.itemsOk) = self.computeDifficulty()
         if self.firstLogFile is not None:
@@ -1478,7 +1482,7 @@ class StandardSolver(CommonSolver):
         presetLoader.load()
         self.smbm.createKnowsFunctions()
 
-        self.areaGraph.getAvailableLocations(locations, self.smbm, infinity, self.lastLoc)
+        self.areaGraph.getAvailableLocations(locations, self.smbm, infinity, self.lastAP)
 
         return [loc for loc in locations if loc['difficulty'].bool == True]
 

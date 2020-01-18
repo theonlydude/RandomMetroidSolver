@@ -451,11 +451,11 @@ function ajaxOkGet(jsonData, status, dummy, chained=false) {
     }
   }
 
-  if("lastLoc" in jsonData) {
-    lastLoc = jsonData["lastLoc"];
+  if("lastAP" in jsonData) {
+    lastAP = jsonData["lastAP"];
   }
-  $("#lastLoc").attr("class", "lastLoc "+lastLoc+"Gps");
-  $("#gps"+'[data-toggle="tooltip"]').attr("title", lastLoc).tooltip('fixTitle');
+  $("#lastAP").attr("class", "lastAP "+lastAP+"Gps");
+  $("#gps"+'[data-toggle="tooltip"]').attr("title", lastAP).tooltip('fixTitle');
 
   setWSIcon("checkmark");
 
@@ -535,7 +535,7 @@ function isActive(elemId) {
 //-----------------------------------------------------------
 // ITEMS TRACKER
 
-var lastLoc = "landingSite";
+var lastAP = "landingSite";
 var mode = "standard";
 var area = true;
 var boss = true;
@@ -658,7 +658,7 @@ window.onload = function(){
   initCurMode();
 
   ajaxCall({action: "get", scope: "common"}, "download");
-  $("#lastLoc").attr("class", "lastLoc "+lastLoc+"Gps");
+  $("#lastAP").attr("class", "lastAP "+lastAP+"Gps");
 
   // display the help on first connection to the tracker
 {{
@@ -1054,8 +1054,8 @@ function resetLocsInfo() {
     $("#"+locName+'[data-toggle="tooltip"]').attr("title", "").tooltip('fixTitle');
     $("#"+locName+'[data-toggle="tooltip"]').attr("data-original-title", "").tooltip('fixTitle');
   }
-  lastLoc = "landingSite";
-  $("#lastLoc").attr("class", "lastLoc "+lastLoc+"Gps");
+  lastAP = "landingSite";
+  $("#lastAP").attr("class", "lastAP "+lastAP+"Gps");
 }
 
 function clearLocs(isPlando) {

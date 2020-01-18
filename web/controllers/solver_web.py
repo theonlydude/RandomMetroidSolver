@@ -844,6 +844,9 @@ def getAddressesToRead(plando=False):
     addresses["misc"].append(0x1E22)
     # nothing id
     addresses["misc"].append(0x17B6D)
+    # start ap
+    addresses["misc"].append(0x10F200)
+    addresses["misc"].append(0x10F201)
 
     # ranges [low, high[
     ## doorasm
@@ -1720,7 +1723,7 @@ class WS(object):
                 "visitedLocations": state["visitedLocationsWeb"],
                 # compatibility with existing sessions
                 "remainLocations": state["remainLocationsWeb"] if "remainLocationsWeb" in state else [],
-                "lastLoc": self.locName4isolver(state["lastLoc"]),
+                "lastAP": self.locName4isolver(state["lastAP"]),
 
                 # area tracker
                 "lines": state["linesWeb"],

@@ -466,9 +466,26 @@ class RomReader:
 
         # find the associated location to get its address
         for loc in locations:
-            if loc['Id'] == self.nothingId:
+            if 'Id' in loc and loc['Id'] == self.nothingId:
                 self.nothingAddr = 0x70000 | loc['Address']
                 break
+
+    def getStartAP(self):
+        address = 0x10F200
+        value = self.romFile.readWord(address)
+
+        startAP = 'Landing Site'
+        startArea = 'Crateria Landing Site'
+        for ap in accessPoints:
+            if ap.Start != None and 'spawn' in ap.Start and ap.Start['spawn'] == value:
+                startAP = ap.Name
+                startArea = ap.Start['solveArea']
+                break
+
+        if startAP == 'Ceres':
+            startAP = 'Landing Site'
+
+        return (startAP, startArea)
 
 class RomPatcher:
     # standard:
@@ -1546,6 +1563,9 @@ class RomLoader(object):
 
     def readNothingId(self):
         self.romReader.readNothingId()
+
+    def getStartAP(self):
+        return self.romReader.getStartAP()
 
 class RomLoaderSfc(RomLoader):
     # standard usage (when calling from the command line)

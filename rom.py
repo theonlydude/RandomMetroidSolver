@@ -775,9 +775,9 @@ class RomPatcher:
             patch = IPS_Patch.load(appDir + '/' + ipsDir + '/' + patchName)
         self.ipsPatches.append(patch)
 
-    def applyStartAP(self, apName, plms=None):
+    def applyStartAP(self, apName, plms):
         ap = getAccessPoint(apName)        
-        if plms is not None and not GraphUtils.isStandardStart(apName):
+        if not GraphUtils.isStandardStart(apName):
             # not Ceres or Landing Site, so Zebes will be awake
             plms.append('Morph_Zebes_Awake')
         (w0, w1) = getWord(ap.Start['spawn'])
@@ -794,7 +794,10 @@ class RomPatcher:
             },
         }
         self.applyIPSPatch('StartAP', patchDict)
-        # TODO handle custom saves
+        # handle custom saves
+        if 'save' in ap.Start:
+            self.applyIPSPatch(ap.Start['save'])
+            plms.append(ap.Start['save'])
 
     # adds ad-hoc "IPS patches" for additional PLM tables
     def applyPLMs(self, plms):

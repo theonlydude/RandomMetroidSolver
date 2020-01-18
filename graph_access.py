@@ -24,6 +24,10 @@ accessPoints = [
         'Morph Ball Room Left': lambda sm: sm.canUsePowerBombs(),
         'Landing Site': lambda sm: SMBool(True)
     }, internal=True),
+    AccessPoint('Gauntlet Top', 'Crateria', {
+        'Green Pirates Shaft Bottom Right': lambda sm: sm.haveItem('Morph')
+    }, internal=True,
+       start={'spawn': 0x0006, 'solveArea': "Crateria Gauntlet", 'save':"Save_Gauntlet"}),
     AccessPoint('Lower Mushrooms Left', 'Crateria', {
         'Landing Site': lambda sm: sm.canPassTerminatorBombWall(False),
         'Green Pirates Shaft Bottom Right': lambda sm: SMBool(True)
@@ -547,7 +551,7 @@ accessPoints = [
        exitInfo = {'DoorPtr':0x8af6, 'direction': 0x7, "cap": (0x16, 0x2d), "bitFlag": 0x0,
                    "screen": (0x1, 0x2), "distanceToSpawn": 0x1c0, "doorAsmPtr": 0xb9f1},
        entryInfo = {'SamusX':0x80, 'SamusY':0x58},
-       start={'spawn':0x0104, 'doors':[0x3c], 'patches':[RomPatches.HellwayBlueDoor], 'solveArea': "Red Brinstar Top"},
+       start={'spawn':0x0104, 'doors':[0x3c], 'patches':[RomPatches.HellwayBlueDoor], 'solveArea': "Red Brinstar Top", 'areaMode':True},
        dotOrientation = 'n'),
     AccessPoint('East Tunnel Right', 'RedBrinstar', {
         'East Tunnel Top Right': lambda sm: SMBool(True), # handled by room traverse function
@@ -585,6 +589,7 @@ accessPoints = [
        exitInfo = {'DoorPtr':0x91e6, 'direction': 0x5, "cap": (0xe, 0x66), "bitFlag": 0x0,
                    "screen": (0x0, 0x6), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
        entryInfo = {'SamusX':0x34, 'SamusY':0x88},
+       start={'spawn':0x0007, 'solveArea': "Tourian", "save": "Save_G4", 'areaMode':True},
        dotOrientation = 'w'),
     AccessPoint('Tourian Escape Room 4 Top Right', 'Tourian', {},
        roomInfo = {'RoomPtr':0xdede, "area": 0x5},

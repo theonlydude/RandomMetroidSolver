@@ -55,7 +55,9 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Terminator Room',
     'AccessFrom' : {
-        'Lower Mushrooms Left': lambda sm: sm.canPassCrateriaGreenPirates()
+        'Landing Site': lambda sm: sm.canPassTerminatorBombWall(),
+        'Lower Mushrooms Left': lambda sm: sm.canPassCrateriaGreenPirates(),
+        'Gauntlet Top': lambda sm: sm.haveItem('Morph')
     },
     'Available': lambda sm: SMBool(True)
 },
@@ -911,14 +913,15 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Green Pirates Shaft',
     'AccessFrom' : {
-        'Landing Site': lambda sm: SMBool(True)
+        'Landing Site': lambda sm: sm.wor(sm.wand(sm.canEnterAndLeaveGauntlet(),
+                                                  sm.canPassBombPassages()),
+                                          sm.wand(sm.canShortCharge(),
+                                                  sm.canUsePowerBombs(),
+                                                  sm.itemCountOk('ETank', 1),
+                                                  sm.knowsLowGauntlet())),
+        'Gauntlet Top': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: sm.wor(sm.wand(sm.canEnterAndLeaveGauntlet(),
-                                           sm.canPassBombPassages()),
-                                   sm.wand(sm.canShortCharge(),
-                                           sm.canUsePowerBombs(),
-                                           sm.itemCountOk('ETank', 1),
-                                           sm.knowsLowGauntlet()))
+    'Available': lambda sm: SMBool(True)
 },
 {
     'Area': "Crateria",
@@ -932,14 +935,15 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Green Pirates Shaft',
     'AccessFrom' : {
-        'Landing Site': lambda sm: SMBool(True)
+        'Landing Site': lambda sm: sm.wor(sm.wand(sm.canEnterAndLeaveGauntlet(),
+                                                  sm.canPassBombPassages()),
+                                          sm.wand(sm.canShortCharge(),
+                                                  sm.canUsePowerBombs(),
+                                                  sm.itemCountOk('ETank', 1),
+                                                  sm.knowsLowGauntlet())),
+        'Gauntlet Top': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: sm.wor(sm.wand(sm.canEnterAndLeaveGauntlet(),
-                                           sm.canPassBombPassages()),
-                                   sm.wand(sm.canShortCharge(),
-                                           sm.canUsePowerBombs(),
-                                           sm.itemCountOk('ETank', 1),
-                                           sm.knowsLowGauntlet()))
+    'Available': lambda sm: SMBool(True)
 },
 {
     'Area': "Crateria",

@@ -729,6 +729,7 @@ class Randomizer(object):
         self.hadChozoLeft = None
         self.onlyBosses = False
         self.plandoItemPool = []
+        self.stdStart = GraphUtils.isStandardStart(self.settings.startAP)
         if self.settings.plandoRando != None:
             plando = SuperPlandoProvider(self.settings, self.smbm, self)
             (self.itemPool, self.plandoItemPool) = plando.getItemPool()
@@ -742,7 +743,7 @@ class Randomizer(object):
             self.restrictedLocations = fun.restrictedLocs
             # check if we can reach everything
             self.log.debug("LAST CHECKPOOL")
-            if not fun.checkPool() or (not GraphUtils.isStandardStart(self.settings.startAP) and not fun.checkStart()):
+            if not fun.checkPool() or (not self.stdStart and not fun.checkStart()):
                 raise RuntimeError('Invalid transitions')
             # store unapplied super fun messages
             if len(fun.errorMsgs) > 0:
@@ -1231,7 +1232,7 @@ class Randomizer(object):
         return self.lateMorphResult
 
     def isEarlyGame(self):
-        return len(self.progressionStatesIndices) <= 2
+        return len(self.progressionStatesIndices) <= 2 if self.stdStart else len(self.progressionStatesIndices) <= 3
 
     # is softlock possible from the player POV when checking the loc?
     # usually these locs are checked last when playing, so placing

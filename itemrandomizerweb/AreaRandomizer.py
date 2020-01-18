@@ -1,4 +1,4 @@
-import random
+import random, sys
 
 from itemrandomizerweb.Randomizer import Randomizer
 from graph_access import GraphUtils
@@ -9,7 +9,7 @@ class AreaRandomizer(Randomizer):
                  bidir=True, dotDir=None, escape=True, removeEscapeEnemies=True):
         transitionsOk = False
         attempts = 0
-        while not transitionsOk and attempts < 50:
+        while not transitionsOk and attempts < 500:
             try:
                 self.transitions = GraphUtils.createAreaTransitions(bidir)
                 super(AreaRandomizer, self).__init__(locations,
@@ -23,6 +23,8 @@ class AreaRandomizer(Randomizer):
                 transitionsOk = True
             except RuntimeError:
                 transitionsOk = False
+                sys.stdout.write('*')
+                sys.stdout.flush()
                 attempts += 1
         if not transitionsOk:
             raise RuntimeError("Impossible seed! (too much fun in the settings, probably)")

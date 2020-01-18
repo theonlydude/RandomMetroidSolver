@@ -798,6 +798,10 @@ class RomPatcher:
         if 'save' in ap.Start:
             self.applyIPSPatch(ap.Start['save'])
             plms.append(ap.Start['save'])
+        # handle optional rom patches
+        if 'rom_patches' in ap.Start:
+            for patch in ap.Start['rom_patches']:
+                self.applyIPSPatch(patch)
 
     # adds ad-hoc "IPS patches" for additional PLM tables
     def applyPLMs(self, plms):

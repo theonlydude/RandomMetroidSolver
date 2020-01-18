@@ -32,6 +32,8 @@ class RomPatches:
     MoatShotBlock             = 41
     #graph
     SpongeBathBlueDoor        = 42
+    # maridia
+    MaridiaTubeOpened         = 50
     ## Area rando patches
     # remove crumble block for reverse lower norfair door access
     SingleChamberNoCrumble    = 101

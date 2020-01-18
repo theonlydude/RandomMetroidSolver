@@ -77,6 +77,8 @@ class AreaRandomizer(Randomizer):
             'RedBrinstar':75,
             'Norfair': 120,
             # Kraid and Tourian can't be on the path
+            'Kraid': 0,
+            'Tourian': 0
         }
         t = 90
         for area in traversedAreas:

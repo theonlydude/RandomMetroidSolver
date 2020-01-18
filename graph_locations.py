@@ -1816,10 +1816,12 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Watering Hole',
     'AccessFrom' : {
-        'Main Street Bottom': lambda sm: sm.canPassMtEverest()
+        'Main Street Bottom': lambda sm: sm.wand(sm.canPassMtEverest(),
+                                                 sm.wor(sm.canPassBombPassages(),
+                                                        sm.canUseSpringBall())),
+        'Watering Hole Bottom': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: sm.wor(sm.canPassBombPassages(),
-                                   sm.canUseSpringBall())
+    'Available': lambda sm: SMBool(True)
 },
 {
     'Area': "Maridia",
@@ -1833,9 +1835,12 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Watering Hole',
     'AccessFrom' : {
-        'Main Street Bottom': lambda sm: sm.canPassMtEverest()
+        'Main Street Bottom': lambda sm: sm.wand(sm.canPassMtEverest(),
+                                                 sm.wor(sm.canPassBombPassages(),
+                                                        sm.canUseSpringBall())),
+        'Watering Hole Bottom': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: sm.wor(sm.canPassBombPassages(), sm.canUseSpringBall())
+    'Available': lambda sm: SMBool(True)
 },
 {
     'Area': "Maridia",
@@ -1849,7 +1854,8 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Pseudo Plasma Spark Room',
     'AccessFrom' : {
-        'Main Street Bottom': lambda sm: sm.canPassMtEverest()
+        'Main Street Bottom': lambda sm: sm.canPassMtEverest(),
+        'Beach': lambda sm: SMBool(True)
     },
     'Available': lambda sm: SMBool(True)
 },

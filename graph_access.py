@@ -477,6 +477,20 @@ accessPoints = [
                    "screen": (0x2, 0x3), "distanceToSpawn": 0x8000, "doorAsmPtr": 0xe367},
        entryInfo = {'SamusX':0x34, 'SamusY':0x88},
        dotOrientation = 'w'),
+    AccessPoint('Watering Hole', 'Maridia', {
+        'Beach': lambda sm: sm.haveItem('Morph'),
+        'Watering Hole Bottom': lambda sm: SMBool(True)
+    }, internal=True,
+       start = {'spawn': 0x0407, 'solveArea': "Maridia Pink Bottom", 'save':"Save_Watering_Hole",
+                'patches':[RomPatches.MaridiaTubeOpened], 'rom_patches':['wh_open_tube.ips']}),
+    AccessPoint('Watering Hole Bottom', 'Maridia', {
+        'Watering Hole': lambda sm: sm.wor(sm.haveItem('Gravity'),
+                                           sm.wand(sm.knowsGravLessLevel1(),
+                                                   sm.haveItem('HiJump')))
+    }, internal=True),
+    AccessPoint('Beach', 'Maridia', {
+        'Main Street Bottom': lambda sm: SMBool(True) # fall down
+    }, internal=True),
     AccessPoint('Precious Room Top', 'Maridia', {
         'Main Street Bottom': lambda sm: sm.wand(sm.canBotwoonExitToAndFromDraygon(),
                                                  sm.wor(sm.haveItem('Gravity'), # go down sand pits
@@ -574,10 +588,12 @@ accessPoints = [
        entryInfo = {'SamusX':0x3c6, 'SamusY':0x88},
        dotOrientation = 'e'),
     AccessPoint('Glass Tunnel Top', 'RedBrinstar', {
-        'East Tunnel Right': lambda sm: sm.canUsePowerBombs()
+        'East Tunnel Right': lambda sm: sm.wor(RomPatches.has(RomPatches.MaridiaTubeOpened),
+                                               sm.canUsePowerBombs())
     }, traverse=lambda sm: sm.wand(sm.wor(sm.haveItem('Gravity'),
                                           sm.haveItem('HiJump')),
-                                   sm.canUsePowerBombs()),
+                                   sm.wor(RomPatches.has(RomPatches.MaridiaTubeOpened),
+                                          sm.canUsePowerBombs())),
        roomInfo = {'RoomPtr':0xcefb, "area": 0x4},
        exitInfo = {'DoorPtr':0xa330, 'direction': 0x7, "cap": (0x16, 0x7d), "bitFlag": 0x0,
                    "screen": (0x1, 0x7), "distanceToSpawn": 0x200, "doorAsmPtr": 0x0000},

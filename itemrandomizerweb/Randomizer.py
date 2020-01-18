@@ -1585,7 +1585,7 @@ class Randomizer(object):
         i = 0
         possibleStates = []
         while i >= 0 and len(possibleStates) == 0:
-            states = self.states[:]
+            states = [self.initState] + self.states[:]
             self.log.debug('rollback. nStates='+str(len(self.states)))
             minRollbackPoint, maxRollbackPoint = self.initRollbackPoints()
             i = maxRollbackPoint

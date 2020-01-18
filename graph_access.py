@@ -641,6 +641,23 @@ class GraphUtils:
     def isStandardStart(startApName):
         return startApName == 'Ceres' or startApName == 'Landing Site'
 
+    def getPossibleStartAPs(areaMode, maxDiff):
+        ret = []
+        allStartAPs = GraphUtils.getStartAccessPointNames()
+        for apName in allStartAPs:
+            start = getAccessPoint(apName).Start
+            ok = True
+            if 'knows' in start:
+                for k in start['knows']:
+                    if not Knows.knows(k, maxDiff):
+                        ok = False
+                        break
+            if 'areaMode' in start:
+                ok = start['areaMode'] == areaMode
+            if ok:
+                ret.append(apName)
+        return ret
+
     def getGraphPatches(startApName):
         ap = getAccessPoint(startApName)
         return ap.Start['patches'] if 'patches' in ap.Start else []

@@ -281,6 +281,30 @@ if __name__ == "__main__":
                 animalsPatches.remove('draygonimals.ips') # glitched room
                 animalsPatches.remove('metalimals.ips') # no pirates
         args.patches.append(random.choice(animalsPatches))
+    # if no max diff, set it very high
+    if args.maxDifficulty:
+        if args.maxDifficulty == 'random':
+            diffs = ['hard', 'harder', 'very hard', 'hardcore', 'mania']
+            maxDifficulty = text2diff[random.choice(diffs)]
+        else:
+            maxDifficulty = text2diff[args.maxDifficulty]
+    else:
+        maxDifficulty = float('inf')
+    # same as solver, increase max difficulty
+    threshold = maxDifficulty
+    epsilon = 0.001
+    if maxDifficulty <= easy:
+        threshold = medium - epsilon
+    elif maxDifficulty <= medium:
+        threshold = hard - epsilon
+    elif maxDifficulty <= hard:
+        threshold = harder - epsilon
+    elif maxDifficulty <= harder:
+        threshold = hardcore - epsilon
+    elif maxDifficulty <= hardcore:
+        threshold = mania - epsilon
+    maxDifficulty = threshold
+    logger.debug("maxDifficulty: {}".format(maxDifficulty))
 
     # if random progression speed, choose one
     progSpeed = str(args.progressionSpeed).lower()
@@ -300,35 +324,6 @@ if __name__ == "__main__":
     if progDiff == "random":
         progDiff = random.choice(progDiffs)
     logger.debug("progression diff: {}".format(progDiff))
-
-    if args.patchOnly == False:
-        print("SEED: " + str(seed))
-
-    # if no max diff, set it very high
-    if args.maxDifficulty:
-        if args.maxDifficulty == 'random':
-            diffs = ['hard', 'harder', 'very hard', 'hardcore', 'mania']
-            maxDifficulty = text2diff[random.choice(diffs)]
-        else:
-            maxDifficulty = text2diff[args.maxDifficulty]
-    else:
-        maxDifficulty = float('inf')
-    logger.debug("maxDifficulty: {}".format(maxDifficulty))
-
-    # same as solver, increase max difficulty
-    threshold = maxDifficulty
-    epsilon = 0.001
-    if maxDifficulty <= easy:
-        threshold = medium - epsilon
-    elif maxDifficulty <= medium:
-        threshold = hard - epsilon
-    elif maxDifficulty <= hard:
-        threshold = harder - epsilon
-    elif maxDifficulty <= harder:
-        threshold = hardcore - epsilon
-    elif maxDifficulty <= hardcore:
-        threshold = mania - epsilon
-    maxDifficulty = threshold
 
     majorsSplitRandom = False
     if args.majorsSplit == 'random':
@@ -370,6 +365,32 @@ if __name__ == "__main__":
     if args.strictMinors == 'random':
         args.strictMinors = bool(random.randint(0, 2))
 
+    # filter incompatible options for start AP
+    argDict = vars(args)
+    def forceArg(arg, value):
+        msg = ''
+        if argDict[arg] != value:
+            argDict[arg] = value
+            msg = '\n' + arg + " forced to " + str(argDict[arg])
+        return msg
+    if not GraphUtils.isStandardStart(args.startAP):
+        optErrMsg += forceArg('morphPlacement', 'normal')
+        optErrMsg += forceArg('majorsSplit', 'Full')
+        optErrMsg += forceArg('noVariaTweaks', False)
+        optErrMsg += forceArg('noLayout', False)
+        optErrMsg += forceArg('suitsRestriction', False)
+        optErrMsg += forceArg('areaLayoutBase', False)
+        possibleStartAPs = GraphUtils.getPossibleStartAPs(args.area, maxDifficulty)
+        if args.startAP == 'random':
+            args.startAP = random.choice(possibleStartAPs)
+        elif args.startAP not in possibleStartAPs:
+            print('Invalid start AP ' + args.startAP)
+            print('Possible start APs with these settings : ' + str(possibleStartAPs))
+            sys.exit(-1)
+
+    if args.patchOnly == False:
+        print("SEED: " + str(seed))
+
     # fill restrictions dict
     restrictions = { 'Suits' : args.suitsRestriction, 'Morph' : args.morphPlacement }
     restrictions['MajorMinor'] = args.majorsSplit
@@ -402,7 +423,6 @@ if __name__ == "__main__":
         RomPatches.ActivePatches = RomPatches.Total
     RomPatches.ActivePatches.remove(RomPatches.BlueBrinstarBlueDoor)
     RomPatches.ActivePatches += GraphUtils.getGraphPatches(args.startAP)
-    # TODO handle start AP knows
     if args.noGravHeat == True or args.progressiveSuits == True:
         RomPatches.ActivePatches.remove(RomPatches.NoGravityEnvProtection)
     if args.progressiveSuits == True:
@@ -647,7 +667,8 @@ if __name__ == "__main__":
                 paletteSettings[param] = getattr(args, param)
             PaletteRando(romPatcher, paletteSettings, args.sprite).randomize()
         romPatcher.end()
-
+        if optErrMsg != '':
+            print(optErrMsg + '\n')
         if args.rom is None:
             data = romPatcher.romFile.data
             fileName = '{}.sfc'.format(fileName)

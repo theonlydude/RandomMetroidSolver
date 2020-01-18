@@ -616,7 +616,7 @@ class Knows:
     }
 
     def knows(name, diff):
-        k = getattr(name)
+        k = getattr(Knows, name)
         return k.bool and k.difficulty <= diff
 
 def isSettings(settings):

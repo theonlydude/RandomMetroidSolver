@@ -79,23 +79,24 @@ startup:
     rtl
 
 gameplay_start:
-    phx
     jsl check_new_game  : bne .end
     ;; Set doors to blue if necessary
+    phx
     ldx #$0000
 -
     lda.l opt_doors,x : and #$00ff
-    beq .end			; end list
+    beq .save			; end list
     phx
     jsl $80818e		    ; call bit index function, returns X=byte index, $05e7=bitmask
     ;; Set door in bitfield
     lda $7ED8B0,x : ora $05E7 : sta $7ED8B0,x
     plx
     inx : bra -		    ; next
+.save:
     ;; Call the save code to create a new file
+    plx
     lda $7e0952 : jsl $818000
 .end:
-    plx
     rtl
 
 warnpc $a1ffff

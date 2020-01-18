@@ -21,6 +21,8 @@ class RomPatches:
     BrinReserveBlueDoor       = 24
     # red tower top PB door to hellway
     HellwayBlueDoor           = 25
+    # etecoon supers blue door
+    EtecoonSupersBlueDoor     = 26
     # shot block to exit hi jump area
     HiJumpShotBlock           = 30
     # access main upper norfair without anything

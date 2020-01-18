@@ -148,10 +148,9 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Etecoon Energy Tank Room',
     'AccessFrom' : {
-        'Green Brinstar Elevator': lambda sm: SMBool(True)
+        'Etecoons Bottom': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: sm.canAccessEtecoons(),
-    'PostAvailable': lambda sm: sm.canUsePowerBombs()
+    'Available': lambda sm: SMBool(True)
 },
 {
     'Area': "Brinstar",
@@ -998,10 +997,10 @@ locations = [
     'Visibility': "Chozo",
     'Room': 'Green Brinstar Main Shaft',
     'AccessFrom' : {
-        'Green Brinstar Elevator': lambda sm: SMBool(True)
+        'Etecoons Bottom': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: sm.canAccessEtecoons(),
-    'PostAvailable': lambda sm: sm.canUsePowerBombs()
+    'Available': lambda sm: sm.wand(sm.haveItem('Morph'),
+                                    sm.wor(sm.canOpenRedDoors(), sm.canUsePowerBombs())) # beetoms
 },
 {
     'Area': "Brinstar",
@@ -1208,10 +1207,9 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Etecoon Super Room',
     'AccessFrom' : {
-        'Green Brinstar Elevator': lambda sm: sm.canAccessEtecoons()
+        'Etecoons Supers': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: sm.canOpenGreenDoors(),
-    'PostAvailable': lambda sm: sm.canUsePowerBombs()
+    'Available': lambda sm: SMBool(True)
 },
 {
     'Area': "Brinstar",

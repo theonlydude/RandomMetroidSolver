@@ -81,7 +81,8 @@ accessPoints = [
     AccessPoint('Green Brinstar Elevator', 'GreenPinkBrinstar', {
         'Big Pink': lambda sm: sm.wand(sm.wor(sm.haveItem('SpeedBooster'),
                                               sm.canDestroyBombWalls()),
-                                       sm.canOpenRedDoors())
+                                       sm.canOpenRedDoors()),
+        'Etecoons Bottom': lambda sm: sm.canAccessEtecoons()
     }, roomInfo = {'RoomPtr':0x9938, "area": 0x0},
        exitInfo = {'DoorPtr':0x8bfe, 'direction': 0x4, "cap": (0x1, 0x6), "bitFlag": 0x0,
                    "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
@@ -129,6 +130,16 @@ accessPoints = [
        entryInfo = {'SamusX':0xffff, 'SamusY':0xffff}, # unused
        escape = True,
        dotOrientation = 'ne'),
+    AccessPoint('Etecoons Supers', 'GreenPinkBrinstar', {
+        'Etecoons Bottom': lambda sm: sm.haveItem('Morph')
+    }, internal=True,
+       start={'spawn': 0x0107, 'doors':[0x34], 'patches':[RomPatches.EtecoonSupersBlueDoor],
+              'save':"Save_Etecoons" ,'solveArea': "Green Brinstar"}),
+    AccessPoint('Etecoons Bottom', 'GreenPinkBrinstar', {
+        'Etecoons Supers': lambda sm: sm.wor(RomPatches.has(RomPatches.EtecoonSupersBlueDoor),
+                                             sm.canOpenGreenDoors()),
+        'Green Brinstar Elevator': lambda sm: sm.canUsePowerBombs()
+    }, internal=True),
     ### Wrecked Ship
     AccessPoint('West Ocean Left', 'WreckedShip', {
         'Wrecked Ship Main': lambda sm: sm.canOpenGreenDoors()

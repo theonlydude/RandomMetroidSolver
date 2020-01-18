@@ -1581,7 +1581,6 @@ class Randomizer(object):
             return None
         # to stay consistent in case no solution is found as states list was popped in init
         fallbackState = self.getCurrentState()
-        lastItemLoc = currentState.itemLocations[-1]
         i = 0
         possibleStates = []
         while i >= 0 and len(possibleStates) == 0:

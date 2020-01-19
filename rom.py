@@ -817,7 +817,6 @@ class RomPatcher:
         # 'PLMs' being a 6 byte arrays
         plmDict = {}
         # we might need to update locations addresses on the fly
-        import graph_locations
         plmLocs = {} # room key above => loc name
         for p in plms:
             plm = additional_PLMs[p]
@@ -878,20 +877,7 @@ class RomPatcher:
         self.applyIPSPatch("PLM_Spawn_Tables", patchDict)
 
     def commitIPS(self):
-        if self.romFileName is not None:
-            # CLI
-            for ips in self.ipsPatches:
-                ips.applyFile(self.romFile)
-        else:
-            # Web
-            mergedIPS = IPS_Patch()
-            for ips in self.ipsPatches:
-                mergedIPS.append(ips)
-            patchData = mergedIPS.encode()
-            self.romFile.data["ips"] = base64.b64encode(patchData).decode()
-            if mergedIPS.truncate_length is not None:
-                self.romFile.data["truncate_length"] = mergedIPS.truncate_length
-            self.romFile.data["max_size"] = mergedIPS.max_size
+        self.romFile.ipsPatch(self.ipsPatches)
 
     def writeSeed(self, seed):
         random.seed(seed)
@@ -1449,6 +1435,16 @@ class FakeROM(ROM):
     def close(self):
         pass
 
+    def ipsPatch(self, ipsPatches):
+        mergedIPS = IPS_Patch()
+        for ips in ipsPatches:
+            mergedIPS.append(ips)
+        patchData = mergedIPS.encode()
+        self.data["ips"] = base64.b64encode(patchData).decode()
+        if mergedIPS.truncate_length is not None:
+            self.data["truncate_length"] = mergedIPS.truncate_length
+        self.data["max_size"] = mergedIPS.max_size
+
 class RealROM(ROM):
     def __init__(self, name):
         self.romFile = open(name, "rb+")
@@ -1466,6 +1462,10 @@ class RealROM(ROM):
 
     def close(self):
         self.romFile.close()
+
+    def ipsPatch(self, ipsPatches):
+        for ips in ipsPatches:
+            ips.applyFile(self)
 
 class RomLoader(object):
     @staticmethod

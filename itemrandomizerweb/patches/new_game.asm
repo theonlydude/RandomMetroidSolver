@@ -103,6 +103,15 @@ gameplay_start:
 
 warnpc $a1ffff
 
-;; org $80c527
-;; crateria_load:
-;;     dw $99BD, $8B1A, $0000, $0000, $0000, $0078, $0040
+;;; patch morph+missile room state check
+org $8fe652
+    ;; check that zebes is awake instead: works with both standard
+    ;; start with wake_zebes.ips, and non standard start with wake
+    ;; zebes forced from the start.
+    lda #$0000 : jsl $808233
+    bcc .not_awake
+    bra .awake
+org $8fe65f
+.awake:
+org $8fe666
+.not_awake:

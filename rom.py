@@ -547,7 +547,7 @@ class RomPatcher:
                      'credits_varia.ips', 'seed_display.ips', 'tracking.ips',
                      'wake_zebes.ips', 'g4_skip.ips', # XXX those are door ASMs
                      'Mother_Brain_Cutscene_Edits',
-                     'Suit_acquisition_animation_skip', 'Fix_Morph_and_Missiles_Room_State',
+                     'Suit_acquisition_animation_skip',
                      'Fix_heat_damage_speed_echoes_bug', 'Disable_GT_Code',
                      'Disable_Space_Time_select_in_menu', 'Fix_Morph_Ball_Hidden_Chozo_PLMs',
                      'Fix_Screw_Attack_selection_in_menu',

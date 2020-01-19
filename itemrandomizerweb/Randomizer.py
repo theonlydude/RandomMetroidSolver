@@ -1232,14 +1232,16 @@ class Randomizer(object):
         return self.lateMorphResult
 
     def isEarlyGame(self):
-        return len(self.progressionStatesIndices) <= 2 if self.stdStart else len(self.progressionStatesIndices) <= 3
+        if self.restrictions['MajorMinor'] == 'Full':
+            return len(self.progressionStatesIndices) <= 2 if self.stdStart else len(self.progressionStatesIndices) <= 3
+        return False
 
     # is softlock possible from the player POV when checking the loc?
     # usually these locs are checked last when playing, so placing
     # an important item there has an impact on progression speed
     def isSoftlockPossible(self, item, loc):
         # disable check for early game
-        if self.isEarlyGame():
+        if self.isEarlyGame() or loc['Name'] == 'Bomb':
             return False
         isPickup = 'Pickup' in loc
         if isPickup:
@@ -1600,7 +1602,7 @@ class Randomizer(object):
                 i -= 1
             # nothing, let's rollback further a progression item
             if len(possibleStates) == 0 and i >= 0:
-                if isFakeRollback == False:
+                if len(self.progressionStatesIndices) > 0 and isFakeRollback == False:
                     sys.stdout.write('!')
                     sys.stdout.flush()
                     self.progressionStatesIndices.pop()

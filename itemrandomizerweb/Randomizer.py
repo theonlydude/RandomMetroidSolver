@@ -1592,15 +1592,11 @@ class Randomizer(object):
             while i >= minRollbackPoint and len(possibleStates) < 3:
                 state = states[i]
                 state.apply(self)
-                posItems = self.possibleItems(self.itemPool)
-                if len(posItems) > 0: # new locs can be opened
+                itemLoc = self.generateItem(state.curLocs, self.itemPool)
+                if itemLoc is not None and itemLoc['Item']['Category'] != 'Nothing' and not self.hasTried(itemLoc):
                     self.log.debug("STATE = " + str(state))
-                    self.log.debug("STATE nCurLocs = " + str(len(state.curLocs)))
                     self.log.debug("STATE curLocs = " + str([loc['Name'] for loc in state.curLocs]))
-                    itemLoc = self.generateItem(state.curLocs, self.itemPool)
-                    if itemLoc is not None and itemLoc['Item']['Category'] != 'Nothing' \
-                       and not self.hasTried(itemLoc):
-                        possibleStates.append((state, itemLoc))
+                    possibleStates.append((state, itemLoc))
                 i -= 1
             # nothing, let's rollback further a progression item
             if len(possibleStates) == 0 and i >= 0:

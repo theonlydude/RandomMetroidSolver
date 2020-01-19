@@ -12,7 +12,7 @@ accessPoints = [
     AccessPoint('Ceres', 'Ceres', {
         'Landing Site': lambda sm: SMBool(True)
     }, internal=True,
-       start={'spawn': 0xffff, 'doors':[0x32], 'patches':[RomPatches.BlueBrinstarBlueDoor], 'solveArea': "Crateria Landing Site"}),
+       start={'spawn': 0xfffe, 'doors':[0x32], 'patches':[RomPatches.BlueBrinstarBlueDoor], 'solveArea': "Crateria Landing Site"}),
     ### Crateria and Blue Brinstar
     AccessPoint('Landing Site', 'Crateria', {
         'Lower Mushrooms Left': lambda sm: sm.canPassTerminatorBombWall(),

@@ -27,8 +27,10 @@ org $82eeda
 org $a1f200
 print "start_location: ", pc
 start_location:
-    ;; start location: $0000=Zebes Landing site, $ffff=Ceres,
-    ;; otherwise hi byte is area and low is save index
+    ;; start location: $0000=Zebes Landing site, $fffe=Ceres,
+    ;; otherwise hi byte is area and low is save index.
+    ;; (use FFFE as Ceres special value because FFFF can be mistaken
+    ;; for free space by solver/tracker)
     dw $0000			; defaults to landing site
 opt_doors:
     ;; optional doors to open.
@@ -60,7 +62,7 @@ check_new_game:
 startup:
     jsl check_new_game      : bne .end
     lda.l start_location    : beq .zebes
-    cmp #$ffff              : beq .ceres
+    cmp #$fffe              : beq .ceres
     ;; custom start point on Zebes
     pha
     and #$ff00 : xba : sta $079f ; hi byte is area

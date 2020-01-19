@@ -45,7 +45,8 @@ class RomPatches:
     AreaRandoGatesOther       = 103
     # disable Green Hill Yellow, Noob Bridge Green, Coude Yellow, and Kronic Boost yellow doors
     AreaRandoBlueDoors        = 104
-    
+    # crateria key hunter yellow, green pirates shaft red
+    AreaRandoMoreBlueDoors    = 105
 
     ### Other
     # Gravity no longer protects from environmental damage (heat, spikes...)
@@ -73,7 +74,7 @@ class RomPatches:
     TotalCasual = [ BlueBrinstarMissile ] + Total
 
     # area rando patch set
-    AreaSet = [ SingleChamberNoCrumble, AreaRandoGatesBase, AreaRandoGatesOther, AreaRandoBlueDoors ]
+    AreaSet = [ SingleChamberNoCrumble, AreaRandoGatesBase, AreaRandoGatesOther, AreaRandoBlueDoors, AreaRandoMoreBlueDoors ]
 
     # VARIA specific patch set
     VariaTweaks = [ WsEtankPhantoonAlive, LNChozoSJCheckDisabled ]

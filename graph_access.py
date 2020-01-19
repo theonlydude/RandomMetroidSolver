@@ -38,7 +38,8 @@ accessPoints = [
        dotOrientation = 'nw'),
     AccessPoint('Green Pirates Shaft Bottom Right', 'Crateria', {
         'Lower Mushrooms Left': lambda sm: SMBool(True)
-    }, traverse = lambda sm: sm.canOpenRedDoors(),
+    }, traverse = lambda sm: sm.wor(RomPatches.has(RomPatches.AreaRandoMoreBlueDoors),
+                                    sm.canOpenRedDoors()),
        roomInfo = {'RoomPtr':0x99bd, "area": 0x0, 'songs':[0x99ce]},
        # the doorAsmPtr 7FE00 is set by the g4_skip.ips patch, we have to call it
        exitInfo = {'DoorPtr':0x8c52, 'direction': 0x4, "cap": (0x1, 0x6), "bitFlag": 0x0,
@@ -56,7 +57,8 @@ accessPoints = [
         'Moat Right': lambda sm: sm.wand(sm.canOpenYellowDoors(),
                                          sm.canPassMoat()),
         'Landing Site': lambda sm: SMBool(True)
-    }, traverse = lambda sm: sm.canOpenYellowDoors(),
+    }, traverse = lambda sm: sm.wor(RomPatches.has(RomPatches.AreaRandoMoreBlueDoors),
+                                    sm.canOpenYellowDoors()),
        roomInfo = { 'RoomPtr':0x948c, "area": 0x0, 'songs':[0x949d] },
        exitInfo = {'DoorPtr':0x8a42, 'direction': 0x6, "cap": (0x6, 0x2), "bitFlag": 0x0,
                    "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},

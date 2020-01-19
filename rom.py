@@ -562,7 +562,7 @@ class RomPatcher:
                      'skip_intro.ips', 'skip_ceres.ips', 'animal_enemies.ips', 'animals.ips',
                      'draygonimals.ips', 'escapimals.ips', 'gameend.ips', 'grey_door_animals.ips',
                      'low_timer.ips', 'metalimals.ips', 'phantoonimals.ips', 'ridleyimals.ips'],
-        'Area': ['area_rando_blue_doors.ips', 'area_rando_layout.ips', 'area_rando_door_transition.ips' ],
+        'Area': ['area_rando_layout.ips', 'area_rando_door_transition.ips' ],
         'AreaEscape' : ['area_rando_escape.ips', 'area_rando_escape_ws_fix.ips', 'Escape_Rando_Tourian_Doors']
     }
 
@@ -759,7 +759,7 @@ class RomPatcher:
                     self.applyIPSPatch(patchName)
             elif bosses == True:
                 self.applyIPSPatch('area_rando_door_transition.ips')
-            self.applyStartAP(startAP, plms)
+            self.applyStartAP(startAP, plms, area)
             self.applyPLMs(plms)
         except Exception as e:
             raise Exception("Error patching {}. ({})".format(self.romFileName, e))
@@ -775,13 +775,21 @@ class RomPatcher:
             patch = IPS_Patch.load(appDir + '/' + ipsDir + '/' + patchName)
         self.ipsPatches.append(patch)
 
-    def applyStartAP(self, apName, plms):
+    def applyStartAP(self, apName, plms, area):
         ap = getAccessPoint(apName)        
         if not GraphUtils.isStandardStart(apName):
             # not Ceres or Landing Site, so Zebes will be awake
             plms.append('Morph_Zebes_Awake')
         (w0, w1) = getWord(ap.Start['spawn'])
         doors = [0x10] # red brin elevator
+        if area == True:
+            # add area blue doors
+            doors += [0x30, # green hills
+                      0x33, # noob bridge
+                      0x0e, # crateria key hunters
+                      0x1e, # green pirates shaft
+                      0x0f, # coude
+                      0x58] # kronic boost
         if 'doors' in ap.Start:
             doors += ap.Start['doors']
         doors.append(0x0)

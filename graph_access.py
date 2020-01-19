@@ -87,7 +87,7 @@ accessPoints = [
        exitInfo = {'DoorPtr':0x8bfe, 'direction': 0x4, "cap": (0x1, 0x6), "bitFlag": 0x0,
                    "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
        entryInfo = {'SamusX':0xcc, 'SamusY':0x88},
-       start = {'spawn': 0x0101, 'doors':[0x1f, 0x21], 'patches':[RomPatches.BrinReserveBlueDoor], 'solveArea': "Green Brinstar"}, # XXX test if it would be better in brin reserve room with custom save
+       start = {'spawn': 0x0101, 'doors':[0x1f, 0x21, 0x26], 'patches':[RomPatches.BrinReserveBlueDoors], 'solveArea': "Green Brinstar"}, # XXX test if it would be better in brin reserve room with custom save
        dotOrientation = 'ne'),
     AccessPoint('Big Pink', 'GreenPinkBrinstar', {
         'Green Hill Zone Top Right': lambda sm: sm.wand(sm.haveItem('Morph'),
@@ -685,7 +685,7 @@ class GraphUtils:
                         ok = False
                         break
             if 'areaMode' in start:
-                ok = start['areaMode'] == areaMode
+                ok &= start['areaMode'] == areaMode
             if ok:
                 ret.append(apName)
         return ret

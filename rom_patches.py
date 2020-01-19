@@ -18,7 +18,7 @@ class RomPatches:
     # shot block in crumble blocks at early supers
     EarlySupersShotBlock      = 23
     # brinstar reserve area door blue
-    BrinReserveBlueDoor       = 24
+    BrinReserveBlueDoors      = 24
     # red tower top PB door to hellway
     HellwayBlueDoor           = 25
     # etecoon supers blue door

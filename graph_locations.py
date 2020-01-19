@@ -73,7 +73,7 @@ locations = [
     'Visibility': "Chozo",
     'Room': 'Brinstar Reserve Tank Room',
     'AccessFrom' : {
-        'Green Brinstar Elevator': lambda sm: sm.wor(RomPatches.has(RomPatches.BrinReserveBlueDoor), sm.canOpenRedDoors())
+        'Green Brinstar Elevator': lambda sm: sm.wor(RomPatches.has(RomPatches.BrinReserveBlueDoors), sm.canOpenRedDoors())
     },
     'Available': lambda sm: sm.wor(sm.wand(sm.knowsMockball(),
                                            sm.haveItem('Morph')),
@@ -1000,7 +1000,7 @@ locations = [
         'Etecoons Bottom': lambda sm: SMBool(True)
     },
     'Available': lambda sm: sm.wand(sm.haveItem('Morph'),
-                                    sm.wor(sm.canOpenRedDoors(), sm.canUsePowerBombs())) # beetoms
+                                    sm.wor(sm.canOpenRedDoors(), sm.canUsePowerBombs(), sm.haveItem('ScrewAttack'))) # beetoms
 },
 {
     'Area': "Brinstar",
@@ -1034,7 +1034,7 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Early Supers Room',
     'AccessFrom' : {
-        'Green Brinstar Elevator': lambda sm: sm.wor(RomPatches.has(RomPatches.BrinReserveBlueDoor), sm.canOpenRedDoors())
+        'Green Brinstar Elevator': lambda sm: sm.wor(RomPatches.has(RomPatches.BrinReserveBlueDoors), sm.canOpenRedDoors())
     },
     'Available': lambda sm: SMBool(True),
     'PostAvailable': lambda sm: sm.wor(RomPatches.has(RomPatches.EarlySupersShotBlock), sm.canPassBombPassages())
@@ -1051,7 +1051,7 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Early Supers Room',
     'AccessFrom' : {
-        'Green Brinstar Elevator': lambda sm: sm.wor(RomPatches.has(RomPatches.BrinReserveBlueDoor), sm.canOpenRedDoors())
+        'Green Brinstar Elevator': lambda sm: sm.wor(RomPatches.has(RomPatches.BrinReserveBlueDoors), sm.canOpenRedDoors())
     },
     'Available': lambda sm: sm.wor(sm.wand(sm.haveItem('Morph'), sm.knowsMockball()),
                                            sm.haveItem('SpeedBooster'))

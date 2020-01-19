@@ -67,7 +67,8 @@ class HelpersGraph(Helpers):
                              sm.haveItem('Ice'),
                              sm.haveItem('Wave'),
                              sm.wor(sm.haveItem('Spazer'),
-                                    sm.haveItem('Plasma'))))
+                                    sm.haveItem('Plasma'),
+                                    sm.haveItem('ScrewAttack'))))
 
     @Cache.decorator
     def canAccessBillyMays(self):

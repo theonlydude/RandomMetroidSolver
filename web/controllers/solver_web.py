@@ -1691,7 +1691,7 @@ class WS(object):
         pointValue = request.vars[point]
 
         if pointValue not in ['lowerMushroomsLeft', 'moatRight', 'greenPiratesShaftBottomRight',
-                              'keyhunterRoomBottom', 'morphBallRoomLeft', 'greenBrinstarElevatorRight',
+                              'keyhunterRoomBottom', 'morphBallRoomLeft', 'greenBrinstarElevator',
                               'greenHillZoneTopRight', 'noobBridgeRight', 'westOceanLeft', 'crabMazeLeft',
                               'lavaDiveRight', 'threeMuskateersRoomLeft', 'warehouseZeelaRoomLeft',
                               'warehouseEntranceLeft', 'warehouseEntranceRight', 'singleChamberTopRight',

@@ -12,6 +12,7 @@ from smbool import SMBool
 from smboolmanager import SMBoolManager
 from helpers import Pickup, Bosses
 from rom import RomLoader, RomPatcher, RomReader
+from rom_patches import RomPatches
 from itemrandomizerweb.Items import ItemManager
 from graph_locations import locations as graphLocations
 from graph import AccessGraph
@@ -49,8 +50,12 @@ class SolverState(object):
         self.state["escapeRando"] = solver.escapeRando
         # string "03:00"
         self.state["escapeTimer"] = solver.escapeTimer
-        # dict of raw patches
-        self.state["patches"] = solver.patches
+        # list of active patches
+        self.state["patches"] = RomPatches.ActivePatches
+        # start ap
+        self.state["startAP"] = solver.startAP
+        # start area
+        self.state["startArea"] = solver.startArea
         # dict {locName: {itemName: "xxx", "accessPoint": "xxx"}, ...}
         self.state["locsData"] = self.getLocsData(solver.locations)
         # list [(ap1, ap2), (ap3, ap4), ...]
@@ -106,7 +111,9 @@ class SolverState(object):
         solver.bossRando = self.state["bossRando"]
         solver.escapeRando = self.state["escapeRando"]
         solver.escapeTimer = self.state["escapeTimer"]
-        solver.patches = self.setPatches(self.state["patches"])
+        RomPatches.ActivePatches = self.state["patches"]
+        solver.startAP = self.state["startAP"]
+        solver.startArea = self.state["startArea"]
         self.setLocsData(solver.locations)
         solver.areaTransitions = self.state["areaTransitions"]
         solver.bossTransitions = self.state["bossTransitions"]
@@ -264,13 +271,6 @@ class SolverState(object):
                 ret[loc["Name"]] = (diff.bool, diff.difficulty, diff.knows, diff.items)
         return ret
 
-    def setPatches(self, patchesData):
-        # json's dicts keys are strings
-        ret = {}
-        for address in patchesData:
-            ret[int(address)] = patchesData[address]
-        return ret
-
     def fromJson(self, stateJsonFileName):
         with open(stateJsonFileName, 'r') as jsonFile:
             self.state = json.load(jsonFile)
@@ -300,8 +300,7 @@ class CommonSolver(object):
             self.escapeTimer = "03:00"
             self.startAP = 'Landing Site'
             self.startArea = 'Crateria Landing Site'
-            self.patches = RomReader.getDefaultPatches()
-            RomLoader.factory(self.patches).loadPatches()
+            RomPatches.setDefaultPatches()
             # in seedless load all the vanilla transitions
             self.areaTransitions = vanillaTransitions[:]
             self.bossTransitions = vanillaBossesTransitions[:]
@@ -313,16 +312,16 @@ class CommonSolver(object):
             self.romFileName = rom
             self.romLoader = RomLoader.factory(rom, magic)
             self.majorsSplit = self.romLoader.assignItems(self.locations)
-            (self.areaRando, self.bossRando, self.escapeRando) = self.romLoader.loadPatches()
+            (self.startAP, self.startArea, startPatches, rawStartAP) = self.romLoader.getStartAP()
+            (self.areaRando, self.bossRando, self.escapeRando) = self.romLoader.loadPatches(rawStartAP)
+            RomPatches.ActivePatches += startPatches
             self.escapeTimer = self.romLoader.getEscapeTimer()
             self.romLoader.readNothingId()
-            (self.startAP, self.startArea) = self.romLoader.getStartAP()
 
             if interactive == False:
-                self.patches = self.romLoader.getPatches()
+                print("ROM {} majors: {} area: {} boss: {} escape: {} patches: {} activePatches: {}".format(rom, self.majorsSplit, self.areaRando, self.bossRando, self.escapeRando, sorted(self.romLoader.getPatches()), sorted(RomPatches.ActivePatches)))
             else:
-                self.patches = self.romLoader.getRawPatches()
-            print("ROM {} majors: {} area: {} boss: {} escape: {} patches: {}".format(rom, self.majorsSplit, self.areaRando, self.bossRando, self.escapeRando, sorted(self.patches)))
+                print("majors: {} area: {} boss: {} escape: {} activepatches: {}".format(self.majorsSplit, self.areaRando, self.bossRando, self.escapeRando, sorted(RomPatches.ActivePatches)))
 
             (self.areaTransitions, self.bossTransitions, self.escapeTransition) = self.romLoader.getTransitions()
             if interactive == True and self.debug == False:
@@ -923,8 +922,6 @@ class InteractiveSolver(CommonSolver):
         state.fromJson(stateJson)
         state.toSolver(self)
 
-        RomLoader.factory(self.patches).loadPatches()
-
         self.loadPreset(self.presetFileName)
 
         # add already collected items to smbm
@@ -1077,22 +1074,10 @@ class InteractiveSolver(CommonSolver):
             else:
                 plandoLocsItems[loc["Name"]] = loc["itemName"]
 
-        # add active patches
-        patches = {}
-        for (patchName, patchData) in RomReader.patches.items():
-            # hash on patch adress
-            patches[patchData['address']] = {'value': patchData['value'], 'name': patchName}
-
-        activePatches = []
-        for address in self.patches:
-            if address in patches:
-                if self.patches[address] == patches[address]["value"]:
-                    activePatches.append(patches[address]["name"])
-
         plandoCurrent = {
             "locsItems": plandoLocsItems,
             "transitions": self.curGraphTransitions,
-            "patches": activePatches
+            "patches": RomPatches.ActivePatches
         }
 
         plandoCurrentJson = json.dumps(plandoCurrent)

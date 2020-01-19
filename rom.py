@@ -476,16 +476,19 @@ class RomReader:
 
         startAP = 'Landing Site'
         startArea = 'Crateria Landing Site'
+        startPatches = []
         for ap in accessPoints:
             if ap.Start != None and 'spawn' in ap.Start and ap.Start['spawn'] == value:
                 startAP = ap.Name
                 startArea = ap.Start['solveArea']
+                if 'patches' in ap.Start:
+                    startPatches = ap.Start['patches']
                 break
 
         if startAP == 'Ceres':
             startAP = 'Landing Site'
 
-        return (startAP, startArea)
+        return (startAP, startArea, startPatches, value)
 
 class RomPatcher:
     # standard:
@@ -1491,14 +1494,14 @@ class RomLoader(object):
     def hasPatch(self, patchName):
         return self.romReader.patchPresent(patchName)
 
-    def loadPatches(self):
+    def loadPatches(self, rawStartAP):
         RomPatches.ActivePatches = []
         isArea = False
         isBoss = False
         isEscape = False
 
         # check total base (blue bt and red tower blue door)
-        if self.hasPatch("startCeres") or self.hasPatch("startLS"):
+        if self.hasPatch("startCeres") or self.hasPatch("startLS") or rawStartAP != 0xffff:
             RomPatches.ActivePatches += [RomPatches.BlueBrinstarBlueDoor,
                                          RomPatches.RedTowerBlueDoors]
 

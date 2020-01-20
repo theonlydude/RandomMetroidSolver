@@ -794,7 +794,7 @@ locations = [
     'CanHidden': False,
     'Room': 'Mother Brain Room',
     'AccessFrom' : {
-        'Statues Hallway Left': lambda sm: Bosses.allBossesDead(sm)
+        'Golden Four': lambda sm: Bosses.allBossesDead(sm)
     },
     'Available': lambda sm: sm.enoughStuffTourian(),
 },

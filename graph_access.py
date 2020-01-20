@@ -613,7 +613,7 @@ accessPoints = [
        entryInfo = {'SamusX':0x81, 'SamusY':0x78},
        dotOrientation = 's'),
     ### Tourian
-    AccessPoint('Statues Hallway Left', 'Tourian', {},
+    AccessPoint('Golden Four', 'Tourian', {},
        roomInfo = {'RoomPtr':0xa5ed, "area": 0x0},
        exitInfo = {'DoorPtr':0x91e6, 'direction': 0x5, "cap": (0xe, 0x66), "bitFlag": 0x0,
                    "screen": (0x0, 0x6), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
@@ -642,7 +642,7 @@ vanillaTransitions = [
     ('East Tunnel Top Right', 'Crab Hole Bottom Left'),
     ('Caterpillar Room Top Right', 'Red Fish Room Left'),
     ('Glass Tunnel Top', 'Main Street Bottom'),
-    ('Green Pirates Shaft Bottom Right', 'Statues Hallway Left'),
+    ('Green Pirates Shaft Bottom Right', 'Golden Four'),
     ('Warehouse Entrance Right', 'Warehouse Zeela Room Left')
 ]
 

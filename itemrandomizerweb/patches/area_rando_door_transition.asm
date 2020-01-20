@@ -100,11 +100,9 @@ giveiframes:
 	sta !iframes
 	rts
 
+print "full_refill: ", pc
 ;;; "ship refill" for tourian elevator
 full_refill:
-	;; check that we're in area rando (this patch is also applied in boss rando)
-	lda $c5d564 : and #$00ff : cmp #$00f2 : bne .end
-	;; actual refill
 	lda !samus_max_health
 	sta !samus_health
 	lda !samus_max_reserve
@@ -119,7 +117,5 @@ full_refill:
 	rts
 
 ;;; stop before generated door asm routines start
-warnpc $8ff7ff
 
-org $83922c                     ; Tourian Elevator door ASM ptr
-    dw full_refill
+warnpc $8ff7ff

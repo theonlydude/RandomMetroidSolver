@@ -52,6 +52,8 @@ patches = {
         0x278413: [0x6f]},
     "Phantoon_Eye_Door":{
         0x7CCAF: [0x91,0xC2]},
+    "Tourian_Refill": {
+        0x1922C: [0x77, 0xEA]},
     "Escape_Rando_Enable_Enemies":{
         0x10F000: [0x0]},
     "Escape_Rando_Disable_Enemies":{

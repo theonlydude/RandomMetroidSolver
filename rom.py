@@ -566,7 +566,7 @@ class RomPatcher:
                      'skip_intro.ips', 'skip_ceres.ips', 'animal_enemies.ips', 'animals.ips',
                      'draygonimals.ips', 'escapimals.ips', 'gameend.ips', 'grey_door_animals.ips',
                      'low_timer.ips', 'metalimals.ips', 'phantoonimals.ips', 'ridleyimals.ips'],
-        'Area': ['area_rando_layout.ips', 'area_rando_door_transition.ips' ],
+        'Area': ['area_rando_layout.ips', 'area_rando_door_transition.ips', 'Tourian_Refill' ],
         'AreaEscape' : ['area_rando_escape.ips', 'area_rando_escape_ws_fix.ips', 'Escape_Rando_Tourian_Doors']
     }
 

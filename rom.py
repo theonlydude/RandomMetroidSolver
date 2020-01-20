@@ -99,7 +99,8 @@ class RomReader:
         'variaTweaks': {'address': 0x7CC4D, 'value': 0x37, 'desc': "VARIA tweaks"},
         'area': {'address': 0x22D564, 'value': 0xF2, 'desc': "Area layout modifications"},
         'areaLayout': {'address': 0x252FA7, 'value': 0xF8, 'desc': "Area layout additional modifications"},
-        'areaEscape': {'address': 0x20c91, 'value': 0x4C, 'desc': "Area escape randomization"}
+        'areaEscape': {'address': 0x20c91, 'value': 0x4C, 'desc': "Area escape randomization"},
+        'newGame': {'address': 0x1001d, 'value': 0x22, 'desc': "Custom new game"}
     }
 
     # FIXME shouldn't be here
@@ -1531,6 +1532,8 @@ class RomLoader(object):
             RomPatches.ActivePatches += [RomPatches.SingleChamberNoCrumble,
                                          RomPatches.AreaRandoGatesBase,
                                          RomPatches.AreaRandoBlueDoors]
+            if self.hasPatch("newGame"):
+                RomPatches.ActivePatches.append(RomPatches.AreaRandoMoreBlueDoors)
             isArea = True
 
         # check area layout

@@ -98,8 +98,10 @@ giveiframes:
 	sta !iframes
 	rts
 
+print "full_refill: ", pc
 ;;; "ship refill" for tourian elevator
 full_refill:
+	;; actual refill
 	lda !samus_max_health
 	sta !samus_health
 	lda !samus_max_reserve
@@ -110,10 +112,8 @@ full_refill:
 	sta !samus_supers
 	lda !samus_max_pbs
 	sta !samus_pbs
+.end:
 	rts
 
 ;;; stop before generated door asm routines start
 warnpc $8feaff
-
-org $83922c                     ; Tourian Elevator door ASM ptr
-    dw full_refill

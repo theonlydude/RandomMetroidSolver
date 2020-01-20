@@ -626,7 +626,7 @@ class RomPatcher:
 
     def writeItemsLocs(self, itemLocs):
         self.nItems = 0
-        self.nothingAtMorph = False
+        self.nothingAtMorph = False # FIXME not only morph
         for itemLoc in itemLocs:
             if 'Boss' in itemLoc['Location']['Class']:
                 continue
@@ -779,7 +779,7 @@ class RomPatcher:
         self.ipsPatches.append(patch)
 
     def applyStartAP(self, apName, plms, area):
-        ap = getAccessPoint(apName)        
+        ap = getAccessPoint(apName)
         if not GraphUtils.isStandardStart(apName):
             # not Ceres or Landing Site, so Zebes will be awake
             plms.append('Morph_Zebes_Awake')

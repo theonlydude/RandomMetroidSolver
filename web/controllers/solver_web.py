@@ -17,7 +17,7 @@ from parameters import diff2text, text2diff
 from solver import StandardSolver, DifficultyDisplayer, InteractiveSolver
 from utils import PresetLoader, removeChars
 import db
-from graph_access import vanillaTransitions, vanillaBossesTransitions, vanillaEscapeTransitions, accessPoints
+from graph_access import vanillaTransitions, vanillaBossesTransitions, vanillaEscapeTransitions, accessPoints, GraphUtils
 from utils import isStdPreset
 from graph_locations import locations
 from smboolmanager import SMBoolManager
@@ -969,6 +969,7 @@ def initRandomizerSession():
         session.randomizer['preset'] = 'regular'
         session.randomizer['randoPreset'] = ""
         session.randomizer['majorsSplit'] = "Full"
+        session.randomizer['startLocation'] = "Landing Site"
         session.randomizer['maxDifficulty'] = 'hardcore'
         session.randomizer['progressionSpeed'] = "medium"
         session.randomizer['progressionDifficulty'] = 'normal'
@@ -997,7 +998,6 @@ def initRandomizerSession():
         session.randomizer['elevators_doors_speed'] = "on"
         session.randomizer['spinjumprestart'] = "off"
         session.randomizer['rando_speed'] = "off"
-        session.randomizer['startLocation'] = "Landing Site"
         session.randomizer['animals'] = "off"
         session.randomizer['No_Music'] = "off"
 
@@ -1011,8 +1011,14 @@ def randomizer():
     # add empty entry for default value
     randoPresets.append("")
 
+    startAPs = GraphUtils.getStartAccessPointNamesCategory()
+    startAPs = [OPTGROUP(_label="Standard", *startAPs["regular"]),
+                OPTGROUP(_label="Custom", *startAPs["custom"]),
+                OPTGROUP(_label="Custom (Area rando only)", *startAPs["area"])]
+
     return dict(stdPresets=stdPresets, tourPresets=tourPresets, comPresets=comPresets,
-                randoPresets=randoPresets, tourRandoPresets=tourRandoPresets)
+                randoPresets=randoPresets, tourRandoPresets=tourRandoPresets,
+                startAPs=startAPs)
 
 def raiseHttp(code, msg, isJson=False):
     #print("raiseHttp: code {} msg {} isJson {}".format(code, msg, isJson))
@@ -1132,7 +1138,7 @@ def validateWebServiceParams(switchs, quantities, others, isJson=False):
             raiseHttp(400, "Wrong value for gravityBehaviour: {}".format(request.vars.gravityBehaviour), isJson)
 
     if 'startLocation' in others:
-        if request.vars.startLocation not in ['Ceres', 'Landing Site']:
+        if request.vars.startLocation not in GraphUtils.getStartAccessPointNames() + ['random']:
             raiseHttp(400, "Wrong value for startLocation: {}".format(request.vars.startLocation), isJson)
 
 def sessionWebService():
@@ -1158,6 +1164,7 @@ def sessionWebService():
     session.randomizer['preset'] = request.vars.preset
     session.randomizer['randoPreset'] = request.vars.randoPreset
     session.randomizer['majorsSplit'] = request.vars.majorsSplit
+    session.randomizer['startLocation'] = request.vars.startLocation
     session.randomizer['maxDifficulty'] = request.vars.maxDifficulty
     session.randomizer['progressionSpeed'] = request.vars.progressionSpeed.split(',')
     session.randomizer['progressionDifficulty'] = request.vars.progressionDifficulty
@@ -1186,7 +1193,6 @@ def sessionWebService():
     session.randomizer['elevators_doors_speed'] = request.vars.elevators_doors_speed
     session.randomizer['spinjumprestart'] = request.vars.spinjumprestart
     session.randomizer['rando_speed'] = request.vars.rando_speed
-    session.randomizer['startLocation'] = request.vars.startLocation
     session.randomizer['animals'] = request.vars.animals
     session.randomizer['No_Music'] = request.vars.No_Music
 
@@ -1264,7 +1270,8 @@ def randomizerWebService():
               '--progressionSpeed', request.vars.progressionSpeed,
               '--progressionDifficulty', request.vars.progressionDifficulty,
               '--morphPlacement', request.vars.morphPlacement,
-              '--majorsSplit', request.vars.majorsSplit]
+              '--majorsSplit', request.vars.majorsSplit,
+              '--startAP', request.vars.startLocation]
     params += ['--missileQty', request.vars.missileQty if request.vars.missileQty != 'random' else '0',
                '--superQty', request.vars.superQty if request.vars.superQty != 'random' else '0',
                '--powerBombQty', request.vars.powerBombQty if request.vars.powerBombQty != 'random' else '0',
@@ -1287,11 +1294,6 @@ def randomizerWebService():
         params += ['-c', 'rando_speed.ips']
     if request.vars.No_Music == 'on':
         params += ['-c', 'No_Music']
-
-    if request.vars.startLocation == "Ceres":
-        params += ['-c', 'skip_intro.ips']
-    else:
-        params += ['-c', 'skip_ceres.ips']
 
     if request.vars.animals == 'on':
         params.append('--animals')
@@ -1381,6 +1383,9 @@ def randomizerWebService():
         msg = ''
         if len(locsItems['errorMsg']) > 0:
             msg = locsItems['errorMsg']
+            if msg[0] == '\n':
+                msg = msg[1:]
+            locsItems['errorMsg'] = msg.replace('\n', '<br/>')
 
         DB.addRandoResult(id, ret, duration, msg)
         DB.close()
@@ -1396,6 +1401,9 @@ def randomizerWebService():
         try:
             with open(jsonFileName) as jsonFile:
                 msg = json.load(jsonFile)['errorMsg']
+                if msg[0] == '\n':
+                    msg = msg[1:]
+                    msg = msg.replace('\n', '<br/>')
         except:
             msg = "randomizerWebService: something wrong happened"
 
@@ -1697,7 +1705,7 @@ class WS(object):
                               'warehouseEntranceLeft', 'warehouseEntranceRight', 'singleChamberTopRight',
                               'kronicBoostRoomBottomLeft', 'mainStreetBottom', 'crabHoleBottomLeft', 'leCoudeRight',
                               'redFishRoomLeft', 'redTowerTopLeft', 'caterpillarRoomTopRight', 'redBrinstarElevator',
-                              'eastTunnelRight', 'eastTunnelTopRight', 'glassTunnelTop', 'statuesHallwayLeft',
+                              'eastTunnelRight', 'eastTunnelTopRight', 'glassTunnelTop', 'goldenFour',
                               'ridleyRoomOut', 'ridleyRoomIn', 'kraidRoomOut', 'kraidRoomIn',
                               'draygonRoomOut', 'draygonRoomIn', 'phantoonRoomOut', 'phantoonRoomIn',
                               'tourianEscapeRoom4TopRight', 'climbBottomLeft', 'greenBrinstarMainShaftTopLeft',

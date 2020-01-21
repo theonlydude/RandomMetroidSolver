@@ -672,6 +672,19 @@ class GraphUtils:
     def getStartAccessPointNames():
         return [ap.Name for ap in accessPoints if ap.Start is not None]
 
+    def getStartAccessPointNamesCategory():
+        ret = {'regular': [], 'custom': [], 'area': []}
+        for ap in accessPoints:
+            if ap.Start == None:
+                continue
+            elif 'areaMode' in ap.Start and ap.Start['areaMode'] == True:
+                ret['area'].append(ap.Name)
+            elif ap.Name in ["Ceres", "Landing Site"]:
+                ret['regular'].append(ap.Name)
+            else:
+                ret['custom'].append(ap.Name)
+        return ret
+
     def isStandardStart(startApName):
         return startApName == 'Ceres' or startApName == 'Landing Site'
 
@@ -880,7 +893,7 @@ class GraphUtils:
 
     def getTransitions(addresses):
         # build address -> name dict
-        doorsPtrs = getDoorsPtrs2Aps()
+        doorsPtrs = GraphUtils.getDoorsPtrs2Aps()
 
         transitions = []
         # (src.ExitInfo['DoorPtr'], dst.ExitInfo['DoorPtr'])

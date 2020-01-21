@@ -339,25 +339,26 @@ if __name__ == "__main__":
 
     # filter incompatible options for start AP
     argDict = vars(args)
-    def forceArg(arg, value):
-        msg = ''
+    def forceArg(arg, value, msg):
         if argDict[arg] != value:
             argDict[arg] = value
-            msg = '\n' + arg + " forced to " + str(argDict[arg])
-        return msg
+            return '\n'+msg
+        else:
+            return ''
     if not GraphUtils.isStandardStart(args.startAP):
-        optErrMsg += forceArg('morphPlacement', 'normal')
-        optErrMsg += forceArg('majorsSplit', 'Full')
-        optErrMsg += forceArg('noVariaTweaks', False)
-        optErrMsg += forceArg('noLayout', False)
-        optErrMsg += forceArg('suitsRestriction', False)
-        optErrMsg += forceArg('areaLayoutBase', False)
+        optErrMsg += forceArg('morphPlacement', 'normal', "'Morph Placement' forced to normal")
+        optErrMsg += forceArg('majorsSplit', 'Full', "'Majors Split' forced to Full")
+        optErrMsg += forceArg('noVariaTweaks', False, "'VARIA tweaks' forced to on")
+        optErrMsg += forceArg('noLayout', False, "'Anti-softlock layout patches' forced to on")
+        optErrMsg += forceArg('suitsRestriction', False, "'Suits restriction' forced to off")
+        optErrMsg += forceArg('areaLayoutBase', False, "'Additional layout patches for easier navigation' forced to on")
         possibleStartAPs = GraphUtils.getPossibleStartAPs(args.area, maxDifficulty)
         if args.startAP == 'random':
             args.startAP = random.choice(possibleStartAPs)
         elif args.startAP not in possibleStartAPs:
-            print('Invalid start AP ' + args.startAP)
-            print('Possible start APs with these settings : ' + str(possibleStartAPs))
+            optErrMsg += '\nInvalid start location: {}'.format(args.startAP)
+            optErrMsg += '\nPossible start locations with these settings: {}'.format(possibleStartAPs)
+            dumpErrorMsg(args.output, optErrMsg)
             sys.exit(-1)
 
     if args.patchOnly == False:

@@ -1232,9 +1232,7 @@ class Randomizer(object):
         return self.lateMorphResult
 
     def isEarlyGame(self):
-        if self.restrictions['MajorMinor'] == 'Full':
-            return len(self.progressionStatesIndices) <= 2 if self.stdStart else len(self.progressionStatesIndices) <= 3
-        return False
+        return len(self.progressionStatesIndices) <= 2 if self.stdStart else len(self.progressionStatesIndices) <= 3
 
     # is softlock possible from the player POV when checking the loc?
     # usually these locs are checked last when playing, so placing
@@ -1519,7 +1517,7 @@ class Randomizer(object):
         if len(self.progressionStatesIndices) > 0:
             minRollbackPoint = self.progressionStatesIndices[-1]
         self.log.debug('initRollbackPoints: min=' + str(minRollbackPoint) + ", max=" + str(maxRollbackPoint))
-        return minRollbackPoint, maxRollbackPoint
+        return minRollbackPoint+1, maxRollbackPoint+1 # add one because init state is added after
 
     def initRollback(self, isFakeRollback):
         self.log.debug('initRollback: progressionStatesIndices 1=' + str(self.progressionStatesIndices))
@@ -1586,9 +1584,9 @@ class Randomizer(object):
         fallbackState = self.getCurrentState()
         i = 0
         possibleStates = []
+        self.log.debug('rollback. nStates='+str(len(self.states)))
         while i >= 0 and len(possibleStates) == 0:
             states = [self.initState] + self.states[:]
-            self.log.debug('rollback. nStates='+str(len(self.states)))
             minRollbackPoint, maxRollbackPoint = self.initRollbackPoints()
             i = maxRollbackPoint
             while i >= minRollbackPoint and len(possibleStates) < 3:

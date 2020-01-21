@@ -721,6 +721,7 @@ class Randomizer(object):
         self.progressionItemLocs = []
         # progression items tried for a given rollback point
         self.rollbackItemsTried = {}
+        self.lastFallbackState = None
         self.itemLocations = []
 
         self.itemPool = None
@@ -1517,7 +1518,7 @@ class Randomizer(object):
         if len(self.progressionStatesIndices) > 0:
             minRollbackPoint = self.progressionStatesIndices[-1]
         self.log.debug('initRollbackPoints: min=' + str(minRollbackPoint) + ", max=" + str(maxRollbackPoint))
-        return minRollbackPoint+1, maxRollbackPoint+1 # add one because init state is added after
+        return minRollbackPoint, maxRollbackPoint
 
     def initRollback(self, isFakeRollback):
         self.log.debug('initRollback: progressionStatesIndices 1=' + str(self.progressionStatesIndices))
@@ -1582,18 +1583,22 @@ class Randomizer(object):
             return None
         # to stay consistent in case no solution is found as states list was popped in init
         fallbackState = self.getCurrentState()
+        if fallbackState == self.lastFallbackState:
+            # we're stuck there, rewind more in fallback
+            fallbackState = self.states[-2] if len(self.states) > 1 else self.initState
+        self.lastFallbackState = fallbackState
         i = 0
         possibleStates = []
         self.log.debug('rollback. nStates='+str(len(self.states)))
         while i >= 0 and len(possibleStates) == 0:
-            states = [self.initState] + self.states[:]
+            states = self.states[:]
             minRollbackPoint, maxRollbackPoint = self.initRollbackPoints()
             i = maxRollbackPoint
             while i >= minRollbackPoint and len(possibleStates) < 3:
                 state = states[i]
                 state.apply(self)
                 itemLoc = self.generateItem(state.curLocs, self.itemPool)
-                if itemLoc is not None and itemLoc['Item']['Category'] != 'Nothing' and not self.hasTried(itemLoc):
+                if itemLoc is not None and not self.hasTried(itemLoc) and self.isProgItemNow(itemLoc['Item']):
                     self.log.debug("STATE = " + str(state))
                     self.log.debug("STATE curLocs = " + str([loc['Name'] for loc in state.curLocs]))
                     possibleStates.append((state, itemLoc))

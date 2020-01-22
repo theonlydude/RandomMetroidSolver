@@ -560,6 +560,7 @@ if __name__ == "__main__":
             args.maxDifficulty = 'no difficulty cap'
         parameters = {'preset': preset, 'area': args.area, 'boss': args.bosses,
                       'majorsSplit': args.majorsSplit,
+                      'startAP': args.startAP,
                       'gravityBehaviour': gravityBehaviour,
                       'nerfedCharge': args.nerfedCharge,
                       'maxDifficulty': args.maxDifficulty,

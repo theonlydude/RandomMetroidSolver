@@ -356,14 +356,14 @@ order by init_time;"""
 
     @staticmethod
     def dumpExtStatsItems(parameters, locsItems, sqlFile):
-        sql = """insert into extended_stats (version, preset, area, boss, majorsSplit, progSpeed, morphPlacement, suitsRestriction, progDiff, superFunMovement, superFunCombat, superFunSuit, gravityBehaviour, nerfedCharge, maxDifficulty, count)
+        sql = """insert into extended_stats (version, preset, area, boss, majorsSplit, progSpeed, morphPlacement, suitsRestriction, progDiff, superFunMovement, superFunCombat, superFunSuit, gravityBehaviour, nerfedCharge, maxDifficulty, startAP, count)
 values
-(%d, '%s', %s, %s, '%s', '%s', '%s', %s, '%s', %s, %s, %s, '%s', %s, '%s', 1)
+(%d, '%s', %s, %s, '%s', '%s', '%s', %s, '%s', %s, %s, %s, '%s', %s, '%s', '%s', 1)
 on duplicate key update id=LAST_INSERT_ID(id), count = count + 1;
 set @last_id = last_insert_id();
 """
 
-        sqlFile.write(sql % (randoAlgoVersion, parameters['preset'], parameters['area'], parameters['boss'], parameters['majorsSplit'], parameters['progSpeed'], parameters['morphPlacement'], parameters['suitsRestriction'], parameters['progDiff'], parameters['superFunMovement'], parameters['superFunCombat'], parameters['superFunSuit'], parameters['gravityBehaviour'], parameters['nerfedCharge'], parameters['maxDifficulty']))
+        sqlFile.write(sql % (randoAlgoVersion, parameters['preset'], parameters['area'], parameters['boss'], parameters['majorsSplit'], parameters['progSpeed'], parameters['morphPlacement'], parameters['suitsRestriction'], parameters['progDiff'], parameters['superFunMovement'], parameters['superFunCombat'], parameters['superFunSuit'], parameters['gravityBehaviour'], parameters['nerfedCharge'], parameters['maxDifficulty'], parameters['startAP']))
 
         for (location, item) in locsItems.items():
             if item == 'Boss':
@@ -431,6 +431,10 @@ where 1 = 1
         if parameters["maxDifficulty"] != "random":
             where += """and e.maxDifficulty = '%s' """
             sqlParams.append(parameters['maxDifficulty'])
+
+        if parameters["startAP"] != "random":
+            where += """and e.startAP = '%s' """
+            sqlParams.append(parameters['startAP'])
 
         if parameters['majorsSplit'] != "random":
             where += """and e.majorsSplit = '%s' """

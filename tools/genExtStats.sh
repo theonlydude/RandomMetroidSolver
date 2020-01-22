@@ -70,12 +70,12 @@ function info {
 STOP=""
 NB_CPU=$(cat /proc/cpuinfo  | grep 'processor' | wc -l)
 
-RANDO_PRESETS=$(ls -1 ${CWD}/rando_presets/*.json)
+RANDO_PRESETS=$(ls -1 ${CWD}/rando_presets/Season_Races_*.json)
 if [ -n "${TOURNEY}" ]; then
     RANDO_PRESETS=$(echo "${RANDO_PRESETS}" | grep 'Season_Races')
 fi
 
-SKILL_PRESETS=$(ls -1 ${CWD}/standard_presets/*.json | grep -v -E 'solution|samus')
+SKILL_PRESETS="/home/dude/RandomMetroidSolver/standard_presets/Season_Races.json" #$(ls -1 ${CWD}/standard_presets/*.json | grep -v -E 'solution|samus')
 if [ -n "${TOURNEY}" ]; then
     SKILL_PRESETS=$(echo "${SKILL_PRESETS}" | grep 'Season_Races')
 fi

@@ -2342,6 +2342,7 @@ def extStats():
             'maxDifficulty': randoPreset['maxDifficulty'],
             # parameters which can be random:
             'majorsSplit': randoPreset['majorsSplit'] if 'majorsSplit' in randoPreset else 'Full',
+            'startAP': randoPreset['startLocation'] if 'startLocation' in randoPreset else 'Landing Site',
             'progSpeed': randoPreset['progressionSpeed'] if 'progressionSpeed' in randoPreset else 'variable',
             'morphPlacement': randoPreset['morphPlacement'] if 'morphPlacement' in randoPreset else 'early',
             'suitsRestriction': 'suitsRestriction' in randoPreset and randoPreset['suitsRestriction'] == 'on',

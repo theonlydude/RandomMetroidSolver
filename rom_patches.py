@@ -90,7 +90,8 @@ class RomPatches:
         return SMBool(patch in RomPatches.ActivePatches)
 
     @staticmethod
-    def setDefaultPatches():
+    def setDefaultPatches(startAP):
         # called by the isolver in seedless mode.
-        # activate only layout patch (the most common one) and blue bt/red tower blue doors.
-        RomPatches.ActivePatches = [RomPatches.BlueBrinstarBlueDoor, RomPatches.RedTowerBlueDoors] + RomPatches.TotalLayout
+        # activate only layout patch (the most common one), red tower blue doors and the startAP's patches.
+        from graph_access import GraphUtils
+        RomPatches.ActivePatches = [RomPatches.RedTowerBlueDoors] + RomPatches.TotalLayout + GraphUtils.getGraphPatches(startAP)

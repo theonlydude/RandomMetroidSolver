@@ -1579,6 +1579,7 @@ def tracker():
         session.tracker["state"] = {}
         session.tracker["preset"] = "regular"
         session.tracker["seed"] = None
+        session.tracker["startLocation"] = "Landing Site"
 
         # set to False in tracker.html
         session.tracker["firstTime"] = True
@@ -1602,9 +1603,14 @@ def tracker():
     # generate list of addresses to read in the ROM
     addresses = getAddressesToRead()
 
+    startAPs = GraphUtils.getStartAccessPointNamesCategory()
+    startAPs = [OPTGROUP(_label="Standard", *startAPs["regular"]),
+                OPTGROUP(_label="Custom", *startAPs["custom"]),
+                OPTGROUP(_label="Custom (Area rando only)", *startAPs["area"])]
+
     return dict(stdPresets=stdPresets, tourPresets=tourPresets, comPresets=comPresets,
                 vanillaAPs=vanillaAPs, vanillaBossesAPs=vanillaBossesAPs, escapeAPs=escapeAPs,
-                curSession=session.tracker, addresses=addresses)
+                curSession=session.tracker, addresses=addresses, startAPs=startAPs)
 
 def plando():
     response.title = 'Super Metroid VARIA Areas and Items Plandomizer'
@@ -1616,6 +1622,7 @@ def plando():
         session.plando["state"] = {}
         session.plando["preset"] = "regular"
         session.plando["seed"] = None
+        session.plando["startLocation"] = "Landing Site"
 
         # rando params
         session.plando["rando"] = {}
@@ -1642,9 +1649,14 @@ def plando():
     # generate list of addresses to read in the ROM
     addresses = getAddressesToRead(plando=True)
 
+    startAPs = GraphUtils.getStartAccessPointNamesCategory()
+    startAPs = [OPTGROUP(_label="Standard", *startAPs["regular"]),
+                OPTGROUP(_label="Custom", *startAPs["custom"]),
+                OPTGROUP(_label="Custom (Area rando only)", *startAPs["area"])]
+
     return dict(stdPresets=stdPresets, tourPresets=tourPresets, comPresets=comPresets,
                 vanillaAPs=vanillaAPs, vanillaBossesAPs=vanillaBossesAPs, escapeAPs=escapeAPs,
-                curSession=session.plando, addresses=addresses)
+                curSession=session.plando, addresses=addresses, startAPs=startAPs)
 
 class WS(object):
     @staticmethod
@@ -1881,6 +1893,10 @@ class WS_common_init(WS):
             if IS_LENGTH(maxsize=255, minsize=1)(uploadFile)[1] is not None:
                 raiseHttp(400, "Wrong length for ROM file name, name must be between 1 and 255 characters", True)
 
+        if request.vars.startLocation != None:
+            if request.vars.startLocation not in GraphUtils.getStartAccessPointNames():
+                raiseHttp(400, "Wrong value for startLocation: {}".format(request.vars.startLocation), True)
+
     def action(self):
         mode = request.vars.mode
         if mode != 'seedless':
@@ -1889,9 +1905,11 @@ class WS_common_init(WS):
             except Exception as e:
                 raiseHttp(400, "Can't load JSON ROM: {}".format(e), True)
             seed = base + '.sfc'
+            startLocation = None
         else:
             seed = 'seedless'
             jsonRomFileName = None
+            startLocation = request.vars.startLocation
 
         preset = request.vars.preset
         presetFileName = '{}/{}.json'.format(getPresetDir(preset), preset)
@@ -1899,13 +1917,14 @@ class WS_common_init(WS):
         self.session["seed"] = seed
         self.session["preset"] = preset
         self.session["mode"] = mode
+        self.session["startLocation"] = startLocation if startLocation != None else "Landing Site"
 
         vcr = request.vars.debug != None
         fill = request.vars.fill == "true"
 
-        return self.callSolverInit(jsonRomFileName, presetFileName, preset, seed, mode, vcr, fill)
+        return self.callSolverInit(jsonRomFileName, presetFileName, preset, seed, mode, vcr, fill, startLocation)
 
-    def callSolverInit(self, jsonRomFileName, presetFileName, preset, romFileName, mode, vcr, fill):
+    def callSolverInit(self, jsonRomFileName, presetFileName, preset, romFileName, mode, vcr, fill, startLocation):
         (fd, jsonOutFileName) = tempfile.mkstemp()
         params = [
             pythonExec,  os.path.expanduser("~/RandomMetroidSolver/solver.py"),
@@ -1925,6 +1944,9 @@ class WS_common_init(WS):
 
         if fill == True:
             params.append('--fill')
+
+        if startLocation != None:
+            params += ['--startAP', startLocation]
 
         print("before calling isolver: {}".format(params))
         start = datetime.now()

@@ -489,7 +489,7 @@ class RomReader:
         if startAP == 'Ceres':
             startAP = 'Landing Site'
 
-        return (startAP, startArea, startPatches, value)
+        return (startAP, startArea, startPatches)
 
 class RomPatcher:
     # standard:
@@ -1495,16 +1495,19 @@ class RomLoader(object):
     def hasPatch(self, patchName):
         return self.romReader.patchPresent(patchName)
 
-    def loadPatches(self, rawStartAP):
+    def loadPatches(self):
         RomPatches.ActivePatches = []
         isArea = False
         isBoss = False
         isEscape = False
 
         # check total base (blue bt and red tower blue door)
-        if self.hasPatch("startCeres") or self.hasPatch("startLS") or rawStartAP != 0xffff:
+        if self.hasPatch("startCeres") or self.hasPatch("startLS"):
             RomPatches.ActivePatches += [RomPatches.BlueBrinstarBlueDoor,
                                          RomPatches.RedTowerBlueDoors]
+
+        if self.hasPatch("newGame"):
+            RomPatches.ActivePatches.append(RomPatches.RedTowerBlueDoors)
 
         # check total soft lock protection
         if self.hasPatch("layout"):

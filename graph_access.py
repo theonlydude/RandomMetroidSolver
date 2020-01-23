@@ -679,7 +679,7 @@ class GraphUtils:
                 continue
             elif 'areaMode' in ap.Start and ap.Start['areaMode'] == True:
                 ret['area'].append(ap.Name)
-            elif ap.Name in ["Ceres", "Landing Site"]:
+            elif GraphUtils.isStandardStart(ap.Name):
                 ret['regular'].append(ap.Name)
             else:
                 ret['custom'].append(ap.Name)

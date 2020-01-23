@@ -16,7 +16,7 @@ from rom_patches import RomPatches
 from itemrandomizerweb.Items import ItemManager
 from graph_locations import locations as graphLocations
 from graph import AccessGraph
-from graph_access import vanillaTransitions, vanillaBossesTransitions, vanillaEscapeTransitions, accessPoints, GraphUtils
+from graph_access import vanillaTransitions, vanillaBossesTransitions, vanillaEscapeTransitions, accessPoints, GraphUtils, getAccessPoint
 from utils import PresetLoader, removeChars
 from vcr import VCR
 import log, db
@@ -290,7 +290,8 @@ class SolverState(object):
 #        print("")
 
 class CommonSolver(object):
-    def loadRom(self, rom, interactive=False, magic=None):
+    def loadRom(self, rom, interactive=False, magic=None, startAP=None):
+        # startAP param is only use for seedless
         if rom == None:
             self.romFileName = 'seedless'
             self.majorsSplit = 'Full'
@@ -298,9 +299,9 @@ class CommonSolver(object):
             self.bossRando = True
             self.escapeRando = False
             self.escapeTimer = "03:00"
-            self.startAP = 'Landing Site'
-            self.startArea = 'Crateria Landing Site'
-            RomPatches.setDefaultPatches()
+            self.startAP = startAP
+            RomPatches.setDefaultPatches(startAP)
+            self.startArea = getAccessPoint(startAP).Start['solveArea']
             # in seedless load all the vanilla transitions
             self.areaTransitions = vanillaTransitions[:]
             self.bossTransitions = vanillaBossesTransitions[:]
@@ -312,8 +313,8 @@ class CommonSolver(object):
             self.romFileName = rom
             self.romLoader = RomLoader.factory(rom, magic)
             self.majorsSplit = self.romLoader.assignItems(self.locations)
-            (self.startAP, self.startArea, startPatches, rawStartAP) = self.romLoader.getStartAP()
-            (self.areaRando, self.bossRando, self.escapeRando) = self.romLoader.loadPatches(rawStartAP)
+            (self.startAP, self.startArea, startPatches) = self.romLoader.getStartAP()
+            (self.areaRando, self.bossRando, self.escapeRando) = self.romLoader.loadPatches()
             RomPatches.ActivePatches += startPatches
             self.escapeTimer = self.romLoader.getEscapeTimer()
             self.romLoader.readNothingId()
@@ -872,7 +873,7 @@ class InteractiveSolver(CommonSolver):
         state.fromSolver(self)
         state.toJson(self.outputFileName)
 
-    def initialize(self, mode, rom, presetFileName, magic, debug, fill):
+    def initialize(self, mode, rom, presetFileName, magic, debug, fill, startAP):
         # load rom and preset, return first state
         self.debug = debug
         self.mode = mode
@@ -886,7 +887,7 @@ class InteractiveSolver(CommonSolver):
         self.presetFileName = presetFileName
         self.loadPreset(self.presetFileName)
 
-        self.loadRom(rom, interactive=True, magic=magic)
+        self.loadRom(rom, interactive=True, magic=magic, startAP=startAP)
         if self.mode == 'plando':
             # in plando always consider that we're doing full
             self.majorsSplit = 'Full'
@@ -1880,7 +1881,7 @@ def interactiveSolver(args):
             sys.exit(1)
 
         solver = InteractiveSolver(args.output)
-        solver.initialize(args.mode, args.romFileName, args.presetFileName, magic=args.raceMagic, debug=args.vcr, fill=args.fill)
+        solver.initialize(args.mode, args.romFileName, args.presetFileName, magic=args.raceMagic, debug=args.vcr, fill=args.fill, startAP=args.startAP)
     else:
         # iterate
         params = {}
@@ -2011,6 +2012,7 @@ if __name__ == "__main__":
     parser.add_argument('--escapeTimer', help="escape timer like 03:00", dest="escapeTimer", default=None)
     parser.add_argument('--fill', help="in plando load all the source seed locations/transitions as a base (used in interactive mode)",
                         dest="fill", action='store_true')
+    parser.add_argument('--startAP', help="in plando/seedless: the start location", dest="startAP", default="Landing Site")
     parser.add_argument('--progressionSpeed', help="rando plando (used in interactive mode)",
                         dest="progressionSpeed", nargs="?", default=None, choices=["slowest", "slow", "medium", "fast", "fastest", "basic", "VARIAble"])
     parser.add_argument('--minorQty', help="rando plando  (used in interactive mode)",

@@ -770,6 +770,8 @@ window.onload = function(){
         output.value = json;
 
         setGuessedPreset(file.name);
+
+	document.getElementById("startLocationVisibility").style.display = "none";
     }
   
     reader.readAsArrayBuffer(file);
@@ -929,6 +931,7 @@ function initSolver() {
             preset: document.getElementById("preset").value,
             fileName: document.getElementById("fileName").value,
             fill: document.getElementById("fillPlando").checked,
+	    startLocation: document.getElementById("startLocation").value,
             mode: mode}, "download");
 
   hidePopup();
@@ -1211,6 +1214,7 @@ function clearInputSeed() {
   document.getElementById("uploadFile").value = "";
   document.getElementById("romJson").value = "";
   document.getElementById("fileName").value = "";
+  document.getElementById("startLocationVisibility").style.display = "table-row";
 }
 
 // https://www.w3schools.com/howto/howto_js_draggable.asp

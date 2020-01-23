@@ -20,6 +20,10 @@
 	<td colspan=2>Populate your plando with the items and transitions from the base ROM:</td>
 	<td><input id="fillPlando" name="fillPlando" type="checkbox"></td>
       </tr>
+      <tr id="startLocationVisibility">
+	<td>Start location:</td>
+	<td colspan=2>{{=SELECT(*startAPs, **dict(_name="startLocation", _id="startLocation", value=curSession["startLocation"], _class="filldropdown"))}}</td>
+      </tr>
       <tr><td colspan=3 class="blankLastRow"></td></tr>
     </table>
     <table>

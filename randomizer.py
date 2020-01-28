@@ -208,7 +208,14 @@ if __name__ == "__main__":
 
     log.init(args.debug)
     logger = log.get('Rando')
-
+    # service to force an argument value and notify it
+    argDict = vars(args)
+    def forceArg(arg, value, msg):
+        if argDict[arg] != value:
+            argDict[arg] = value
+            return '\n'+msg
+        else:
+            return ''
     # if rando preset given, load it first
     if args.randoPreset != None:
         loadRandoPreset(args.randoPreset, args)
@@ -331,22 +338,15 @@ if __name__ == "__main__":
         args.morphPlacement = random.choice(morphPlacements)
     # late + chozo will always stuck
     if args.majorsSplit == 'Chozo' and args.morphPlacement == "late":
-        args.morphPlacement = "normal"
+        optErrMsg += forceArg('morphPlacement', 'normal', "'Morph Placement' forced to normal")
     logger.debug("morphPlacement: {}".format(args.morphPlacement))
 
     if args.strictMinors == 'random':
         args.strictMinors = bool(random.randint(0, 2))
 
-    # filter incompatible options for start AP
-    argDict = vars(args)
-    def forceArg(arg, value, msg):
-        if argDict[arg] != value:
-            argDict[arg] = value
-            return '\n'+msg
-        else:
-            return ''
     if not GraphUtils.isStandardStart(args.startAP):
-        optErrMsg += forceArg('morphPlacement', 'normal', "'Morph Placement' forced to normal")
+        if args.morphPlacement == 'late':
+            optErrMsg += forceArg('morphPlacement', 'normal', "'Morph Placement' forced to normal")
         optErrMsg += forceArg('majorsSplit', 'Full', "'Majors Split' forced to Full")
         optErrMsg += forceArg('noVariaTweaks', False, "'VARIA tweaks' forced to on")
         optErrMsg += forceArg('noLayout', False, "'Anti-softlock layout patches' forced to on")

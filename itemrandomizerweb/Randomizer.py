@@ -440,10 +440,9 @@ class SuperFunProvider(object):
         self.rando.computeLateMorphLimit()
         self.sm.resetItems()
         curLocs = self.rando.currentLocations(locs=locs)
-        self.log.debug("nCurLocs="+str(len(curLocs)))
         state = RandoState(self.rando, curLocs)
         self.rando.determineParameters()
-        for i in range(5): # 5 just..sounds good
+        for i in range(4):
             itemLoc = self.rando.generateItem(curLocs, pool, locs=locs)
             if itemLoc is None:
                 startOk = False
@@ -1122,6 +1121,7 @@ class Randomizer(object):
             return False
         newLocations = [loc for loc in self.currentLocations(item, locs=locs) if loc not in oldLocations]
         ret = len(newLocations) > 0
+        self.log.debug('checkItem. item=' + item['Type'] + ', newLocs=' + str([loc['Name'] for loc in newLocations]))
         if ret == True and self.restrictions["MajorMinor"] != "Full":
             ret = List.exists(lambda l: self.restrictions["MajorMinor"] in l["Class"], newLocations)
             if ret == False and self.restrictions["MajorMinor"] == "Major":
@@ -1245,9 +1245,12 @@ class Randomizer(object):
 
     # returns (dict : item wrapper => possible locations list, possible prog or bosses boolean)
     def getPossiblePlacements(self, pool, curLocs, locs=None):
+        self.log.debug('getPossiblePlacements. nCurLocs='+str(len(curLocs)))
         poolDict = self.getPoolDict(pool)
         itemLocDict = {}
         possibleProg = False
+        def getLocList(itemObj, baseList):
+            return [loc for loc in baseList if self.locPostAvailable(loc, itemObj['Type']) and self.canPlaceAtLocation(itemObj, loc, checkSoftlock=True)]
         for itemType,items in sorted(poolDict.items()):
             itemObj = items[0]
             cont = True
@@ -1260,15 +1263,41 @@ class Randomizer(object):
             if cont: # ignore non boss + non prog items if a prog item has already been found
                 continue
             # check possible locations for this item type
-            locations = [loc for loc in curLocs if self.locPostAvailable(loc, itemType) and self.canPlaceAtLocation(itemObj, loc, checkSoftlock=True)]
+            self.log.debug('getPossiblePlacements. itemType=' + itemType + ', curLocs='+str([loc['Name'] for loc in curLocs]))
+            locations = getLocList(itemObj, curLocs)
             if len(locations) == 0:
                 continue
-            if not possibleProg:
+            if prog and not possibleProg:
                 possibleProg = True
                 itemLocDict = {} # forget all the crap ones we stored just in case
+            self.log.debug('getPossiblePlacements. itemType=' + itemType + ', locs='+str([loc['Name'] for loc in locations]))
             for item in items:
                 itemLocDict[ItemWrapper(item)] = locations
-
+        # special check for early morph
+        if self.restrictions['Morph'] == 'early' and len(curLocs) >= 2:
+            morph = next((item for item in pool if Randomizer.isMorph(item)), None)
+            if morph is not None and not any(w.item['Type'] == morph['Type'] for w in itemLocDict):
+                # we have to place morph early, it's still not placed, and not detected as placeable
+                # let's see if we can place it anyway in the context of a combo
+                morphLocs = getLocList(morph, curLocs)
+                if len(morphLocs) > 0:
+                    pool = pool[:]
+                    if locs is not None:
+                        locs = locs[:]
+                    state = RandoState(self, curLocs)
+                    # acquire morph and see if we can still open new locs
+                    self.getItem({'Item':morph, 'Location':random.choice(morphLocs)}, pool=pool, locs=locs, showDot=False)
+                    (ild, poss) = self.getPossiblePlacements(pool, self.currentLocations(locs=locs), locs=locs)
+                    if poss:
+                        itemLocDict[ItemWrapper(morph)] = morphLocs
+                    state.apply(self) # restore consistent state
+        if self.log.getEffectiveLevel() == logging.DEBUG:
+            debugDict = {}
+            for w, locList in itemLocDict.items():
+                if w.item['Type'] not in debugDict:
+                    debugDict[w.item['Type']] = [loc['Name'] for loc in locList]
+            self.log.debug('itemLocDict='+str(debugDict))
+            self.log.debug('possibleProg='+str(possibleProg))
         return (itemLocDict, possibleProg)
 
     # from current accessible locations and an item pool, generate an item/loc dict.

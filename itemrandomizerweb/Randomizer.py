@@ -14,6 +14,11 @@ import log, logging
 
 progSpeeds = ['slowest', 'slow', 'medium', 'fast', 'fastest', 'basic']
 
+class ItemWrapper(object): # to put items in dictionaries
+    def __init__(self, item):
+        self.item = item
+        item['Wrapper'] = self
+
 class RandoSettings(object):
     # startAP : start Access Point name
     # maxDiff : max diff
@@ -1317,19 +1322,63 @@ class Randomizer(object):
 
         return ret
 
+    # returns (dict : item wrapper => possible locations list, possible prog or bosses boolean)
+    def getPossiblePlacements(self, pool, locs=None):
+        poolDict = self.getPoolDict(pool)
+        itemLocDict = {}
+        possibleProg = False
+        locList = locs
+        if locList is None: # keep locs at None to speed up checkItem
+            locList = self.unusedLocations
+        for itemType,items in sorted(poolDict.items()):
+            itemObj = items[0]
+            cont = True
+            prog = False
+            if itemType == 'Boss' or self.checkItem(itemObj, locs=locs):
+                cont = False
+                prog = True
+            elif not possibleProg:
+                cont = False
+            if cont: # ignore non boss + non prog items if a prog item has already been found
+                continue
+            # check possible locations for this item type
+            locations = [loc for loc in locList if self.locPostAvailable(loc, itemType) and self.canPlaceAtLocation(itemObj, loc, checkSoftlock=True)]
+            if len(locations) == 0:
+                continue
+            if not possibleProg:
+                possibleProg = True
+                itemLocDict = {} # forget all the crap ones we stored just in case
+            for item in items:
+                itemLocDict[ItemWrapper(item)] = locations
+
+        return (itemLocDict, possibleProg)
+
     # from current accessible locations and an item pool, generate an item/loc dict.
     # return item/loc, or None if stuck
     def generateItem(self, curLocs, pool, locs=None):
-        poolDict = self.getPoolDict(pool)
-        # item object => possible locations list
-        prog = {}
-        other = {}
-#        def updatePossibleLocDict(toUpdate, 
-        for itemType,items in sorted(poolDict.items()):
-            if self.checkItem(items[0], locs=locs):
-                for item in items:
-                    result.append(item)
-        raise RuntimeError("Work In Progress")
+        item, loc = None, None
+        itemLocDict, possibleProg = self.getPossiblePlacements(pool, locs=locs)
+        if possibleProg:
+            # first, check if we can place a boss
+            nextBoss = next(((itemWrapper.item, locs) for itemWrapper, locs in itemLocDict.items() if itemWrapper.item['Type'] == 'Boss'), None)
+            if nextBoss is not None:
+                item = nextBoss[0]
+                loc = self.chooseLocation(nextBoss[1], nextBoss[0])
+            else:
+                # choose item/loc with prog rules
+                item = self.chooseItem([wrapper.item for wrapper in itemLocDict.keys()])
+                loc = self.chooseLocation(itemLocDict[item['Wrapper']], item)
+        elif len(itemLocDict) > 0:
+            # randomly choose item/location
+            item = random.choice([wrapper.item for wrapper in itemLocDict.keys()])
+            loc = random.choice(itemLocDict[item['Wrapper']])
+        itemLoc = None
+        if item is not None and loc is not None:
+            itemLoc = {
+                'Item': item,
+                'Location': loc
+            }
+        return itemLoc
         # itemLocation = None
         # self.failItems = []
         # posItems = self.possibleItems(pool, locs=locs)
@@ -1344,7 +1393,6 @@ class Randomizer(object):
         #     self.log.debug("P " + str(len(posItems)) + ", F " + str(len(self.failItems)) + " / " + str(nPool))
         #     itemLocation = self.placeItem(posItems, pool, curLocs)
         # return itemLocation
-        
 
     def appendCurrentState(self, curLocs):
         curState = RandoState(self, curLocs)

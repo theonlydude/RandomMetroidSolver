@@ -957,23 +957,6 @@ class Randomizer(object):
             poolDict[item['Type']].append(item)
         return poolDict
 
-    # loop on all the items in the item pool of not already placed
-    # items and return those that open up new locations.
-    #
-    # curLocs: accessible locations
-    # itemPool: list of the items not already placed
-    #
-    # return list of items eligible for next placement
-    def possibleItems(self, itemPool, locs=None):
-        result = []
-        poolDict = self.getPoolDict(itemPool)
-        for itemType,items in sorted(poolDict.items()):
-            if self.checkItem(items[0], locs=locs):
-                for item in items:
-                    result.append(item)
-        random.shuffle(result)
-        return result
-
     # removes an item of given type from the pool.
     def removeItem(self, itemType, pool=None):
         if pool is None:
@@ -995,8 +978,6 @@ class Randomizer(object):
         ret = None
 
         for item in items:
-            if item in self.failItems:
-                continue
             newLocs = len(self.currentLocations(item))
             if newLocs < minNewLocs:
                 minNewLocs = newLocs
@@ -1008,8 +989,6 @@ class Randomizer(object):
         ret = None
 
         for item in items:
-            if item in self.failItems:
-                continue
             newLocs = len(self.currentLocations(item))
             if newLocs > maxNewLocs:
                 maxNewLocs = newLocs
@@ -1122,49 +1101,6 @@ class Randomizer(object):
         else:
             # choose randomly if non-progression
             return self.chooseLocationRandom(locs, item)
-
-    # items: possible items to place that will open up new paths, or an empty list
-    # itemPool: non-placed items
-    #
-    # return if items is non-empty, item to place based on choose
-    # function. if items is empty, a random non-placed item.
-    def getItemToPlace(self, items, itemPool):
-        itemsLen = len(items)
-        if itemsLen == 0:
-            fixedPool = [item for item in itemPool if item not in self.failItems]
-            item = List.item(random.randint(0, len(fixedPool)-1), fixedPool)
-        else:
-            item = self.chooseItem(items)
-        return item
-
-    # items: possible items to place that will open up new paths, or an empty list
-    # itemPool: non-placed items
-    # locations: locations available
-    #
-    # returns a dict with the item and the location
-    def placeItem(self, items, itemPool, locations):
-        def getNextBoss():
-            boss = None
-            if any('Boss' in loc['Class'] for loc in locations):
-                for item in itemPool:
-                    if item['Type'] == 'Boss' and item not in self.failItems:
-                        boss = item
-                        break
-            return boss
-        # kill bosses ASAP to open locs
-        item = getNextBoss()
-        if item is None:
-            item = self.getItemToPlace(items, itemPool)
-        locations = [loc for loc in locations if self.locPostAvailable(loc, item['Type'])]
-        availableLocations = List.filter(lambda loc: self.canPlaceAtLocation(item, loc, checkSoftlock=True), locations)
-        if len(availableLocations) == 0:
-            if not item in self.failItems:
-                self.failItems.append(item)
-            return None
-        self.log.debug("placeItem: availLocs={}".format([l['Name'] for l in availableLocations]))
-        location = self.chooseLocation(availableLocations, item)
-
-        return {'Item': item, 'Location': location}
 
     # checks if an item opens up new locations.
     # curLocs : currently available locations
@@ -1379,20 +1315,6 @@ class Randomizer(object):
                 'Location': loc
             }
         return itemLoc
-        # itemLocation = None
-        # self.failItems = []
-        # posItems = self.possibleItems(pool, locs=locs)
-        # self.log.debug("posItems: {}".format([i['Name'] for i in posItems]))
-        # if len(posItems) > 0:
-        #     # if posItems is not empty, only those in posItems will be tried (see placeItem)
-        #     nPool = len(set([item['Type'] for item in posItems]))
-        # else:
-        #     # if posItems is empty, all items in the pool will be tried (see placeItem)
-        #     nPool = len(set([item['Type'] for item in pool]))
-        # while itemLocation is None and len(self.failItems) < nPool:
-        #     self.log.debug("P " + str(len(posItems)) + ", F " + str(len(self.failItems)) + " / " + str(nPool))
-        #     itemLocation = self.placeItem(posItems, pool, curLocs)
-        # return itemLocation
 
     def appendCurrentState(self, curLocs):
         curState = RandoState(self, curLocs)

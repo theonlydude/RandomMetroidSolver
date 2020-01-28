@@ -627,16 +627,16 @@ class RomPatcher:
 
     def writeItemsLocs(self, itemLocs):
         self.nItems = 0
-        self.nothingAtMorph = False # FIXME not only morph
+        self.nothingMissile = False
         for itemLoc in itemLocs:
             if 'Boss' in itemLoc['Location']['Class']:
                 continue
             isMorph = itemLoc['Location']['Name'] == 'Morphing Ball'
             if itemLoc['Item']['Category'] == 'Nothing':
                 self.writeNothing(itemLoc)
-                if isMorph:
+                if itemLoc['Location']['Id'] == self.nothingId:
                     # nothing at morph gives a missile pack
-                    self.nothingAtMorph = True
+                    self.nothingMissile = True
                     self.nItems += 1
             else:
                 self.nItems += 1
@@ -649,8 +649,9 @@ class RomPatcher:
     def patchMorphBallEye(self, item):
 #        print('Eye item = ' + item['Type'])
         # consider Nothing as missile, because if it is at morph ball it will actually be a missile
-        isAmmo = item['Category'] == 'Ammo' or item['Category'] == 'Nothing'
-        isMissile = item['Type'] == 'Missile' or item['Category'] == 'Nothing'
+        isNothingMissile = item['Category'] == 'Nothing' and self.nothingId == 0x1a
+        isAmmo = item['Category'] == 'Ammo' or isNothingMissile
+        isMissile = item['Type'] == 'Missile' or isNothingMissile
         # category to check
         if ItemManager.isBeam(item):
             cat = 0xA8 # collected beams
@@ -919,7 +920,7 @@ class RomPatcher:
 
     def getItemQty(self, itemLocs, itemType):
         q = len([il for il in itemLocs if il['Item']['Type'] == itemType])
-        if itemType == 'Missile' and self.nothingAtMorph == True:
+        if itemType == 'Missile' and self.nothingMissile == True:
             q += 1
         # in vcr mode if the seed has stuck we may not have these items, return at least 1
         return max(q, 1)

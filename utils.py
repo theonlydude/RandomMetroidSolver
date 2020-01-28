@@ -301,7 +301,7 @@ def loadRandoPreset(randoPreset, args):
         else:
             args.superFun.append("SuitsRandom")
 
-    patches = ["skip_intro", "skip_ceres", "itemsounds", "spinjumprestart", "rando_speed", "elevators_doors_speed"]
+    patches = ["itemsounds", "spinjumprestart", "rando_speed", "elevators_doors_speed"]
 
     for patch in patches:
         if patch in randoParams and randoParams[patch] == "on":
@@ -313,6 +313,8 @@ def loadRandoPreset(randoPreset, args):
         args.morphPlacement = randoParams["morphPlacement"]
     if "majorsSplit" in randoParams:
         args.majorsSplit = randoParams["majorsSplit"]
+    if "startLocation" in randoParams:
+        args.startAP = randoParams["startLocation"]
     if "progressionDifficulty" in randoParams:
         args.progressionDifficulty = randoParams["progressionDifficulty"]
 

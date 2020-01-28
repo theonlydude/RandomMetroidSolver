@@ -2,7 +2,7 @@
 import math
 from functools import reduce
 from smbool import SMBool
-from rom import RomPatches
+from rom_patches import RomPatches
 from parameters import Settings, easy, medium, hard, harder, hardcore, mania, diff2text
 from cache import Cache
 from utils import normalizeRounding

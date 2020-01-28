@@ -157,3 +157,6 @@ WordTable:
 // place holder for VARIA seed type
 InfoStr:
     db 0
+// VARIA: placeholder for 'nothing' loc identifier (defaults to morph ball loc)
+NothingId:
+   db $1a

@@ -34,6 +34,8 @@ btcheck:
 	cmp !PickedUp
 	rts
 
+warnpc $84f06f
+
 ;;; overwrite BT grey door PLM instruction (bomb check)
 org $84ba6f
 	jsr btcheck

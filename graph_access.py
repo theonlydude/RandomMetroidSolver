@@ -2,22 +2,32 @@ import copy
 import random
 from graph import AccessPoint
 from parameters import Knows, Settings
-from rom import RomPatches
+from rom_patches import RomPatches
 from smbool import SMBool
 from helpers import Bosses
 
 # all access points and traverse functions
 accessPoints = [
+    ### Ceres Station
+    AccessPoint('Ceres', 'Ceres', {
+        'Landing Site': lambda sm: SMBool(True)
+    }, internal=True,
+       start={'spawn': 0xfffe, 'doors':[0x32], 'patches':[RomPatches.BlueBrinstarBlueDoor], 'solveArea': "Crateria Landing Site"}),
     ### Crateria and Blue Brinstar
     AccessPoint('Landing Site', 'Crateria', {
         'Lower Mushrooms Left': lambda sm: sm.canPassTerminatorBombWall(),
         'Keyhunter Room Bottom': lambda sm: sm.canOpenGreenDoors(),
         'Blue Brinstar Elevator Bottom': lambda sm: SMBool(True)
-    }, internal=True),
+    }, internal=True,
+       start={'spawn': 0x0000, 'doors':[0x32], 'patches':[RomPatches.BlueBrinstarBlueDoor], 'solveArea': "Crateria Landing Site"}),
     AccessPoint('Blue Brinstar Elevator Bottom', 'Crateria', {
         'Morph Ball Room Left': lambda sm: sm.canUsePowerBombs(),
         'Landing Site': lambda sm: SMBool(True)
     }, internal=True),
+    AccessPoint('Gauntlet Top', 'Crateria', {
+        'Green Pirates Shaft Bottom Right': lambda sm: sm.haveItem('Morph')
+    }, internal=True,
+       start={'spawn': 0x0006, 'solveArea': "Crateria Gauntlet", 'save':"Save_Gauntlet"}),
     AccessPoint('Lower Mushrooms Left', 'Crateria', {
         'Landing Site': lambda sm: sm.canPassTerminatorBombWall(False),
         'Green Pirates Shaft Bottom Right': lambda sm: SMBool(True)
@@ -28,7 +38,8 @@ accessPoints = [
        dotOrientation = 'nw'),
     AccessPoint('Green Pirates Shaft Bottom Right', 'Crateria', {
         'Lower Mushrooms Left': lambda sm: SMBool(True)
-    }, traverse = lambda sm: sm.canOpenRedDoors(),
+    }, traverse = lambda sm: sm.wor(RomPatches.has(RomPatches.AreaRandoMoreBlueDoors),
+                                    sm.canOpenRedDoors()),
        roomInfo = {'RoomPtr':0x99bd, "area": 0x0, 'songs':[0x99ce]},
        # the doorAsmPtr 7FE00 is set by the g4_skip.ips patch, we have to call it
        exitInfo = {'DoorPtr':0x8c52, 'direction': 0x4, "cap": (0x1, 0x6), "bitFlag": 0x0,
@@ -46,7 +57,8 @@ accessPoints = [
         'Moat Right': lambda sm: sm.wand(sm.canOpenYellowDoors(),
                                          sm.canPassMoat()),
         'Landing Site': lambda sm: SMBool(True)
-    }, traverse = lambda sm: sm.canOpenYellowDoors(),
+    }, traverse = lambda sm: sm.wor(RomPatches.has(RomPatches.AreaRandoMoreBlueDoors),
+                                    sm.canOpenYellowDoors()),
        roomInfo = { 'RoomPtr':0x948c, "area": 0x0, 'songs':[0x949d] },
        exitInfo = {'DoorPtr':0x8a42, 'direction': 0x6, "cap": (0x6, 0x2), "bitFlag": 0x0,
                    "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
@@ -68,21 +80,23 @@ accessPoints = [
        escape = True,
        dotOrientation = 'ne'),
     ### Green and Pink Brinstar
-    AccessPoint('Green Brinstar Elevator Right', 'GreenPinkBrinstar', {
+    AccessPoint('Green Brinstar Elevator', 'GreenPinkBrinstar', {
         'Big Pink': lambda sm: sm.wand(sm.wor(sm.haveItem('SpeedBooster'),
                                               sm.canDestroyBombWalls()),
-                                       sm.canOpenRedDoors())
+                                       sm.canOpenRedDoors()),
+        'Etecoons Bottom': lambda sm: sm.canAccessEtecoons()
     }, roomInfo = {'RoomPtr':0x9938, "area": 0x0},
        exitInfo = {'DoorPtr':0x8bfe, 'direction': 0x4, "cap": (0x1, 0x6), "bitFlag": 0x0,
                    "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
        entryInfo = {'SamusX':0xcc, 'SamusY':0x88},
+       start = {'spawn': 0x0101, 'doors':[0x1f, 0x21, 0x26], 'patches':[RomPatches.BrinReserveBlueDoors], 'solveArea': "Green Brinstar"}, # XXX test if it would be better in brin reserve room with custom save
        dotOrientation = 'ne'),
     AccessPoint('Big Pink', 'GreenPinkBrinstar', {
         'Green Hill Zone Top Right': lambda sm: sm.wand(sm.haveItem('Morph'),
                                                         sm.canOpenGreenDoors()),
-        'Green Brinstar Elevator Right': lambda sm: sm.wor(sm.haveItem('SpeedBooster'),
+        'Green Brinstar Elevator': lambda sm: sm.wor(sm.haveItem('SpeedBooster'),
                                                            sm.canDestroyBombWalls())
-    }, internal=True),
+    }, internal=True, start={'spawn': 0x0100, 'solveArea': "Pink Brinstar"}),
     AccessPoint('Green Hill Zone Top Right', 'GreenPinkBrinstar', {
         'Noob Bridge Right': lambda sm: SMBool(True),
         'Big Pink': lambda sm: sm.haveItem('Morph')
@@ -104,7 +118,7 @@ accessPoints = [
        entryInfo = {'SamusX':0x5ce, 'SamusY':0x88},
        dotOrientation = 'se'),
     AccessPoint('Green Brinstar Main Shaft Top Left', 'GreenPinkBrinstar', {
-        'Green Brinstar Elevator Right': lambda sm: SMBool(True)
+        'Green Brinstar Elevator': lambda sm: SMBool(True)
     }, roomInfo = {'RoomPtr':0x9ad9, "area": 0x1},
        exitInfo = {'DoorPtr':0x8cb2, 'direction': 0x5, "cap": (0x2e, 0x6), "bitFlag": 0x0,
                    "screen": (0x2, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
@@ -118,6 +132,16 @@ accessPoints = [
        entryInfo = {'SamusX':0xffff, 'SamusY':0xffff}, # unused
        escape = True,
        dotOrientation = 'ne'),
+    AccessPoint('Etecoons Supers', 'GreenPinkBrinstar', {
+        'Etecoons Bottom': lambda sm: sm.haveItem('Morph')
+    }, internal=True,
+       start={'spawn': 0x0107, 'doors':[0x34], 'patches':[RomPatches.EtecoonSupersBlueDoor],
+              'save':"Save_Etecoons" ,'solveArea': "Green Brinstar"}),
+    AccessPoint('Etecoons Bottom', 'GreenPinkBrinstar', {
+        'Etecoons Supers': lambda sm: sm.wor(RomPatches.has(RomPatches.EtecoonSupersBlueDoor),
+                                             sm.canOpenGreenDoors()),
+        'Green Brinstar Elevator': lambda sm: sm.canUsePowerBombs()
+    }, internal=True),
     ### Wrecked Ship
     AccessPoint('West Ocean Left', 'WreckedShip', {
         'Wrecked Ship Main': lambda sm: sm.canOpenGreenDoors()
@@ -128,9 +152,13 @@ accessPoints = [
        dotOrientation = 'w'),
     AccessPoint('Wrecked Ship Main', 'WreckedShip', {
         'West Ocean Left': lambda sm: SMBool(True),
-        'Wrecked Ship Back': lambda sm: sm.canPassSpongeBath(),
+        'Wrecked Ship Back': lambda sm: sm.wor(sm.wand(Bosses.bossDead('Phantoon'),
+                                                       sm.canPassSpongeBath()),
+                                               sm.wand(sm.wnot(Bosses.bossDead('Phantoon')),
+                                                       RomPatches.has(RomPatches.SpongeBathBlueDoor))),
         'PhantoonRoomOut': lambda sm: sm.wand(sm.canOpenGreenDoors(), sm.canPassBombPassages())
-    }, internal=True),
+    }, internal=True,
+       start={'spawn':0x0300, 'doors':[0x83], 'patches':[RomPatches.SpongeBathBlueDoor], 'solveArea': "WreckedShip Main"}),
     AccessPoint('Wrecked Ship Back', 'WreckedShip', {
         'Wrecked Ship Main': lambda sm: SMBool(True),
         'Crab Maze Left': lambda sm: sm.canPassForgottenHighway(True)
@@ -276,6 +304,21 @@ accessPoints = [
        dotOrientation = 'e'),
     ### Norfair
     AccessPoint('Warehouse Entrance Left', 'Norfair', {
+        'Warehouse Entrance Right': lambda sm: sm.canAccessKraidsLair(),
+        'Business Center': lambda sm: SMBool(True)
+    }, roomInfo = {'RoomPtr':0xa6a1, "area": 0x1},
+       exitInfo = {'DoorPtr':0x922e, 'direction': 0x5, "cap": (0xe, 0x16), "bitFlag": 0x40,
+                   "screen": (0x0, 0x1), "distanceToSpawn": 0x8000, "doorAsmPtr": 0xbdd1},
+       entryInfo = {'SamusX':0x34, 'SamusY':0x88},
+       dotOrientation = 'sw'),
+    AccessPoint('Warehouse Entrance Right', 'Norfair', {
+        'Warehouse Entrance Left': lambda sm: sm.haveItem('Super')
+    }, roomInfo = {'RoomPtr': 0xa6a1, "area": 0x1},
+       exitInfo = {'DoorPtr': 0x923a, 'direction': 0x4, "cap": (0x1, 0x6), "bitFlag": 0x0,
+                   "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
+       entryInfo = {'SamusX': 0x2c7, 'SamusY': 0x98},
+       dotOrientation = 'nw'),
+    AccessPoint('Business Center', 'Norfair', {
         'Bubble Mountain': lambda sm: sm.wor(sm.wand(sm.haveItem('SpeedBooster'), # frog speedway
                                                      sm.canPassBombPassages()),
                                              # go through cathedral
@@ -291,19 +334,9 @@ accessPoints = [
                                                sm.haveItem('SpeedBooster'),
                                                sm.canUsePowerBombs(),
                                                sm.canHellRun(**Settings.hellRunsTable['Ice']['Norfair Entrance -> Croc via Ice']))),
-        'Warehouse Entrance Right': lambda sm: sm.canAccessKraidsLair()
-    }, roomInfo = {'RoomPtr':0xa6a1, "area": 0x1},
-       exitInfo = {'DoorPtr':0x922e, 'direction': 0x5, "cap": (0xe, 0x16), "bitFlag": 0x40,
-                   "screen": (0x0, 0x1), "distanceToSpawn": 0x8000, "doorAsmPtr": 0xbdd1},
-       entryInfo = {'SamusX':0x34, 'SamusY':0x88},
-       dotOrientation = 'sw'),
-    AccessPoint('Warehouse Entrance Right', 'Norfair', {
-        'Warehouse Entrance Left': lambda sm: sm.haveItem('Super')
-    }, roomInfo = {'RoomPtr': 0xa6a1, "area": 0x1},
-       exitInfo = {'DoorPtr': 0x923a, 'direction': 0x4, "cap": (0x1, 0x6), "bitFlag": 0x0,
-                   "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
-       entryInfo = {'SamusX': 0x2c7, 'SamusY': 0x98},
-       dotOrientation = 'nw'),
+        'Warehouse Entrance Left': lambda sm: SMBool(True)
+    }, internal=True,
+       start={'spawn':0x0202, 'doors':[0x4d], 'patches':[RomPatches.HiJumpAreaBlueDoor], 'solveArea': "Norfair Entrance"}),
     AccessPoint('Single Chamber Top Right', 'Norfair', {
         'Bubble Mountain Top': lambda sm: sm.wand(sm.canDestroyBombWalls(),
                                                   sm.haveItem('Morph'),
@@ -337,11 +370,11 @@ accessPoints = [
        entryInfo = {'SamusX':0x134, 'SamusY':0x288, 'song': 0x15},
        dotOrientation = 'se'),
     AccessPoint('Croc Zone', 'Norfair', {
-        'Warehouse Entrance Left': lambda sm: sm.wor(sm.wand(sm.canPassFrogSpeedwayRightToLeft(),
-                                                             sm.canHellRun(**Settings.hellRunsTable['Ice']['Croc -> Norfair Entrance'])),
-                                                     sm.wand(sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Croc -> Norfair Entrance']),
-                                                             sm.canGrappleEscape(),
-                                                             sm.haveItem('Super'))),
+        'Business Center': lambda sm: sm.wor(sm.wand(sm.canPassFrogSpeedwayRightToLeft(),
+                                                     sm.canHellRun(**Settings.hellRunsTable['Ice']['Croc -> Norfair Entrance'])),
+                                             sm.wand(sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Croc -> Norfair Entrance']),
+                                                     sm.canGrappleEscape(),
+                                                     sm.haveItem('Super'))),
         'Bubble Mountain': lambda sm: sm.wand(sm.canPassBombPassages(),
                                               sm.canHellRun(**Settings.hellRunsTable['Ice']['Croc -> Bubble Mountain'])),
         'Kronic Boost Room Bottom Left': lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Kronic Boost Room <-> Croc']),
@@ -349,9 +382,9 @@ accessPoints = [
     }, internal=True),
     AccessPoint('Bubble Mountain', 'Norfair', {
         # bottom left door -> frog speed way OR exit cathedral
-        'Warehouse Entrance Left': lambda sm: sm.wor(sm.wand(sm.canPassBombPassages(),
-                                                             sm.canPassFrogSpeedwayRightToLeft()),
-                                                     sm.canExitCathedral()),
+        'Business Center': lambda sm: sm.wor(sm.wand(sm.canPassBombPassages(),
+                                                     sm.canPassFrogSpeedwayRightToLeft()),
+                                             sm.canExitCathedral()),
         'Bubble Mountain Top': lambda sm: sm.canClimbBubbleMountain(),
         'Kronic Boost Room Bottom Left': lambda sm: sm.wor(sm.wand(sm.canPassBombPassages(),
                                                                    sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Kronic Boost Room'])),
@@ -362,7 +395,8 @@ accessPoints = [
                                         sm.wor(sm.wand(sm.canOpenRedDoors(), sm.knowsGreenGateGlitch()),
                                                sm.haveItem('Wave')),
                                         sm.canOpenGreenDoors())
-    }, internal=True),
+    }, internal=True,
+       start={'spawn':0x0201, 'doors':[0x54], 'patches':[RomPatches.SpeedAreaBlueDoor], 'knows':['BubbleMountainWallJump'], 'solveArea': "Bubble Norfair Bottom"}),
     AccessPoint('Bubble Mountain Top', 'Norfair', {
         'Single Chamber Top Right': lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Single Chamber <-> Bubble Mountain']),
                                                        sm.canDestroyBombWalls(),
@@ -456,6 +490,20 @@ accessPoints = [
                    "screen": (0x2, 0x3), "distanceToSpawn": 0x8000, "doorAsmPtr": 0xe367},
        entryInfo = {'SamusX':0x34, 'SamusY':0x88},
        dotOrientation = 'w'),
+    AccessPoint('Watering Hole', 'Maridia', {
+        'Beach': lambda sm: sm.haveItem('Morph'),
+        'Watering Hole Bottom': lambda sm: SMBool(True)
+    }, internal=True,
+       start = {'spawn': 0x0407, 'solveArea': "Maridia Pink Bottom", 'save':"Save_Watering_Hole",
+                'patches':[RomPatches.MaridiaTubeOpened], 'rom_patches':['wh_open_tube.ips']}),
+    AccessPoint('Watering Hole Bottom', 'Maridia', {
+        'Watering Hole': lambda sm: sm.wor(sm.haveItem('Gravity'),
+                                           sm.wand(sm.knowsGravLessLevel1(),
+                                                   sm.haveItem('HiJump')))
+    }, internal=True),
+    AccessPoint('Beach', 'Maridia', {
+        'Main Street Bottom': lambda sm: SMBool(True) # fall down
+    }, internal=True),
     AccessPoint('Precious Room Top', 'Maridia', {
         'Main Street Bottom': lambda sm: sm.wand(sm.canBotwoonExitToAndFromDraygon(),
                                                  sm.wor(sm.haveItem('Gravity'), # go down sand pits
@@ -524,12 +572,13 @@ accessPoints = [
        dotOrientation = 'ne'),
     AccessPoint('Red Brinstar Elevator', 'RedBrinstar', {
         'Caterpillar Room Top Right': lambda sm: sm.canPassRedTowerToMaridiaNode(),
-        'Red Tower Top Left': lambda sm: sm.canOpenYellowDoors()
+        'Red Tower Top Left': lambda sm: sm.wor(RomPatches.has(RomPatches.HellwayBlueDoor), sm.canOpenYellowDoors())
     }, traverse=lambda sm:sm.wor(RomPatches.has(RomPatches.RedTowerBlueDoors), sm.canOpenYellowDoors()),
        roomInfo = {'RoomPtr':0x962a, "area": 0x0},
        exitInfo = {'DoorPtr':0x8af6, 'direction': 0x7, "cap": (0x16, 0x2d), "bitFlag": 0x0,
                    "screen": (0x1, 0x2), "distanceToSpawn": 0x1c0, "doorAsmPtr": 0xb9f1},
        entryInfo = {'SamusX':0x80, 'SamusY':0x58},
+       start={'spawn':0x0104, 'doors':[0x3c], 'patches':[RomPatches.HellwayBlueDoor], 'solveArea': "Red Brinstar Top", 'areaMode':True},
        dotOrientation = 'n'),
     AccessPoint('East Tunnel Right', 'RedBrinstar', {
         'East Tunnel Top Right': lambda sm: SMBool(True), # handled by room traverse function
@@ -552,21 +601,24 @@ accessPoints = [
        entryInfo = {'SamusX':0x3c6, 'SamusY':0x88},
        dotOrientation = 'e'),
     AccessPoint('Glass Tunnel Top', 'RedBrinstar', {
-        'East Tunnel Right': lambda sm: sm.canUsePowerBombs()
+        'East Tunnel Right': lambda sm: sm.wor(RomPatches.has(RomPatches.MaridiaTubeOpened),
+                                               sm.canUsePowerBombs())
     }, traverse=lambda sm: sm.wand(sm.wor(sm.haveItem('Gravity'),
                                           sm.haveItem('HiJump')),
-                                   sm.canUsePowerBombs()),
+                                   sm.wor(RomPatches.has(RomPatches.MaridiaTubeOpened),
+                                          sm.canUsePowerBombs())),
        roomInfo = {'RoomPtr':0xcefb, "area": 0x4},
        exitInfo = {'DoorPtr':0xa330, 'direction': 0x7, "cap": (0x16, 0x7d), "bitFlag": 0x0,
                    "screen": (0x1, 0x7), "distanceToSpawn": 0x200, "doorAsmPtr": 0x0000},
        entryInfo = {'SamusX':0x81, 'SamusY':0x78},
        dotOrientation = 's'),
     ### Tourian
-    AccessPoint('Statues Hallway Left', 'Tourian', {},
+    AccessPoint('Golden Four', 'Tourian', {},
        roomInfo = {'RoomPtr':0xa5ed, "area": 0x0},
        exitInfo = {'DoorPtr':0x91e6, 'direction': 0x5, "cap": (0xe, 0x66), "bitFlag": 0x0,
                    "screen": (0x0, 0x6), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
        entryInfo = {'SamusX':0x34, 'SamusY':0x88},
+       start={'spawn':0x0007, 'solveArea': "Tourian", "save": "Save_G4", 'areaMode':True},
        dotOrientation = 'w'),
     AccessPoint('Tourian Escape Room 4 Top Right', 'Tourian', {},
        roomInfo = {'RoomPtr':0xdede, "area": 0x5},
@@ -578,7 +630,7 @@ accessPoints = [
 ]
 
 vanillaTransitions = [
-    ('Lower Mushrooms Left', 'Green Brinstar Elevator Right'),
+    ('Lower Mushrooms Left', 'Green Brinstar Elevator'),
     ('Morph Ball Room Left', 'Green Hill Zone Top Right'),
     ('Moat Right', 'West Ocean Left'),
     ('Keyhunter Room Bottom', 'Red Brinstar Elevator'),
@@ -590,7 +642,7 @@ vanillaTransitions = [
     ('East Tunnel Top Right', 'Crab Hole Bottom Left'),
     ('Caterpillar Room Top Right', 'Red Fish Room Left'),
     ('Glass Tunnel Top', 'Main Street Bottom'),
-    ('Green Pirates Shaft Bottom Right', 'Statues Hallway Left'),
+    ('Green Pirates Shaft Bottom Right', 'Golden Four'),
     ('Warehouse Entrance Right', 'Warehouse Zeela Room Left')
 ]
 
@@ -616,195 +668,236 @@ escapeTargets = ['Climb Bottom Left', 'Green Brinstar Main Shaft Top Left', 'Bas
 def getAccessPoint(apName):
     return next(ap for ap in accessPoints if ap.Name == apName)
 
-def createBossesTransitions():
-    transitions = vanillaBossesTransitions
-    def isVanilla():
-        for t in vanillaBossesTransitions:
-            if t not in transitions:
-                return False
-        return True
-    while isVanilla():
+class GraphUtils:
+    def getStartAccessPointNames():
+        return [ap.Name for ap in accessPoints if ap.Start is not None]
+
+    def getStartAccessPointNamesCategory():
+        ret = {'regular': [], 'custom': [], 'area': []}
+        for ap in accessPoints:
+            if ap.Start == None:
+                continue
+            elif 'areaMode' in ap.Start and ap.Start['areaMode'] == True:
+                ret['area'].append(ap.Name)
+            elif GraphUtils.isStandardStart(ap.Name):
+                ret['regular'].append(ap.Name)
+            else:
+                ret['custom'].append(ap.Name)
+        return ret
+
+    def isStandardStart(startApName):
+        return startApName == 'Ceres' or startApName == 'Landing Site'
+
+    def getPossibleStartAPs(areaMode, maxDiff):
+        ret = []
+        allStartAPs = GraphUtils.getStartAccessPointNames()
+        for apName in allStartAPs:
+            start = getAccessPoint(apName).Start
+            ok = True
+            if 'knows' in start:
+                for k in start['knows']:
+                    if not Knows.knows(k, maxDiff):
+                        ok = False
+                        break
+            if 'areaMode' in start:
+                ok &= start['areaMode'] == areaMode
+            if ok:
+                ret.append(apName)
+        return ret
+
+    def getGraphPatches(startApName):
+        ap = getAccessPoint(startApName)
+        return ap.Start['patches'] if 'patches' in ap.Start else []
+
+    def createBossesTransitions():
+        transitions = vanillaBossesTransitions
+        def isVanilla():
+            for t in vanillaBossesTransitions:
+                if t not in transitions:
+                    return False
+            return True
+        while isVanilla():
+            transitions = []
+            srcs = []
+            dsts = []
+            for (src,dst) in vanillaBossesTransitions:
+                srcs.append(src)
+                dsts.append(dst)
+            while len(srcs) > 0:
+                src = srcs.pop(random.randint(0,len(srcs)-1))
+                dst = dsts.pop(random.randint(0,len(dsts)-1))
+                transitions.append((src,dst))
+        return transitions
+
+    def createAreaTransitions(bidir=True):
+        tFrom = []
+        tTo = []
+        apNames = [ap.Name for ap in accessPoints if ap.isArea()]
         transitions = []
-        srcs = []
-        dsts = []
-        for (src,dst) in vanillaBossesTransitions:
-            srcs.append(src)
-            dsts.append(dst)
-        while len(srcs) > 0:
-            src = srcs.pop(random.randint(0,len(srcs)-1))
-            dst = dsts.pop(random.randint(0,len(dsts)-1))
-            transitions.append((src,dst))
-    return transitions
 
-def createAreaTransitions(bidir=True):
-    tFrom = []
-    tTo = []
-    apNames = [ap.Name for ap in accessPoints if ap.isArea()]
-    transitions = []
+        def findTo(trFrom):
+            ap = getAccessPoint(trFrom)
+            fromArea = ap.GraphArea
+            targets = [apName for apName in apNames if apName not in tTo and getAccessPoint(apName).GraphArea != fromArea]
+            if len(targets) == 0: # fallback if no area transition is found
+                targets = [apName for apName in apNames if apName != ap.Name]
+            return targets[random.randint(0, len(targets)-1)]
 
-    def findTo(trFrom):
-        ap = getAccessPoint(trFrom)
-        fromArea = ap.GraphArea
-        targets = [apName for apName in apNames if apName not in tTo and getAccessPoint(apName).GraphArea != fromArea]
-        if len(targets) == 0: # fallback if no area transition is found
-            targets = [apName for apName in apNames if apName != ap.Name]
-        return targets[random.randint(0, len(targets)-1)]
+        def addTransition(src, dst):
+            tFrom.append(src)
+            tTo.append(dst)
 
-    def addTransition(src, dst):
-        tFrom.append(src)
-        tTo.append(dst)
+        while len(apNames) > 0:
+            sources = [apName for apName in apNames if apName not in tFrom]
+            src = sources[random.randint(0, len(sources)-1)]
+            dst = findTo(src)
+            transitions.append((src, dst))
+            addTransition(src, dst)
+            if bidir is True:
+                addTransition(dst, src)
+            toRemove = [apName for apName in apNames if apName in tFrom and apName in tTo]
+            for apName in toRemove:
+                apNames.remove(apName)
+        return transitions
 
-    while len(apNames) > 0:
-        sources = [apName for apName in apNames if apName not in tFrom]
-        src = sources[random.randint(0, len(sources)-1)]
-        dst = findTo(src)
-        transitions.append((src, dst))
-        addTransition(src, dst)
-        if bidir is True:
-            addTransition(dst, src)
-        toRemove = [apName for apName in apNames if apName in tFrom and apName in tTo]
-        for apName in toRemove:
-            apNames.remove(apName)
-    return transitions
+    def createEscapeTransition():
+        return (escapeSource, random.choice(escapeTargets))
 
-def createEscapeTransition():
-    return (escapeSource, random.choice(escapeTargets))
+    def getVanillaExit(apName):
+        allVanillaTransitions = vanillaTransitions + vanillaBossesTransitions + vanillaEscapeTransitions
+        for (src,dst) in allVanillaTransitions:
+            if apName == src:
+                return dst
+            if apName == dst:
+                return src
+        return None
 
-def getVanillaExit(apName):
-    allVanillaTransitions = vanillaTransitions + vanillaBossesTransitions + vanillaEscapeTransitions
-    for (src,dst) in allVanillaTransitions:
-        if apName == src:
-            return dst
-        if apName == dst:
-            return src
-    return None
+    # gets dict like
+    # (RoomPtr, (vanilla entry screen X, vanilla entry screen Y)): AP
+    def getRooms():
+        rooms = {}
+        for ap in accessPoints:
+            if ap.Internal == True:
+                continue
+            roomPtr = ap.RoomInfo['RoomPtr']
 
-# gets dict like
-# (RoomPtr, (vanilla entry screen X, vanilla entry screen Y)): AP
-def getRooms():
-    rooms = {}
-    for ap in accessPoints:
-        if ap.Internal == True:
-            continue
-        roomPtr = ap.RoomInfo['RoomPtr']
-        connAP = getAccessPoint(getVanillaExit(ap.Name))
-        entryInfo = connAP.ExitInfo
-        rooms[(roomPtr, entryInfo['screen'], entryInfo['direction'])] = ap
-        rooms[(roomPtr, entryInfo['screen'], (ap.EntryInfo['SamusX'], ap.EntryInfo['SamusY']))] = ap
-        # for boss rando with incompatible ridley transition, also register this one
-        if ap.Name == 'RidleyRoomIn':
-            rooms[(roomPtr, (0x0, 0x1), 0x5)] = ap
-            rooms[(roomPtr, (0x0, 0x1), (0xbf, 0x198))] = ap
+            connAP = getAccessPoint(GraphUtils.getVanillaExit(ap.Name))
+            entryInfo = connAP.ExitInfo
+            rooms[(roomPtr, entryInfo['screen'], entryInfo['direction'])] = ap
+            rooms[(roomPtr, entryInfo['screen'], (ap.EntryInfo['SamusX'], ap.EntryInfo['SamusY']))] = ap
+            # for boss rando with incompatible ridley transition, also register this one
+            if ap.Name == 'RidleyRoomIn':
+                rooms[(roomPtr, (0x0, 0x1), 0x5)] = ap
+                rooms[(roomPtr, (0x0, 0x1), (0xbf, 0x198))] = ap
 
-    return rooms
+        return rooms
 
-def isHorizontal(dir):
-    # up: 0x3, 0x7
-    # down: 0x2, 0x6
-    # left: 0x1, 0x5
-    # right: 0x0, 0x4
-    return dir in [0x1, 0x5, 0x0, 0x4]
+    def isHorizontal(dir):
+        # up: 0x3, 0x7
+        # down: 0x2, 0x6
+        # left: 0x1, 0x5
+        # right: 0x0, 0x4
+        return dir in [0x1, 0x5, 0x0, 0x4]
 
-def removeCap(dir):
-    if dir < 4:
-        return dir
-    return dir - 4
+    def removeCap(dir):
+        if dir < 4:
+            return dir
+        return dir - 4
 
-def getDirection(src, dst):
-    exitDir = src.ExitInfo['direction']
-    entryDir = dst.EntryInfo['direction']
-    # compatible transition
-    if exitDir == entryDir:
-        return exitDir
-    # if incompatible but horizontal we keep entry dir (looks more natural)
-    if isHorizontal(exitDir) and isHorizontal(entryDir):
-        return entryDir
-    # otherwise keep exit direction and remove cap
-    return removeCap(exitDir)
+    def getDirection(src, dst):
+        exitDir = src.ExitInfo['direction']
+        entryDir = dst.EntryInfo['direction']
+        # compatible transition
+        if exitDir == entryDir:
+            return exitDir
+        # if incompatible but horizontal we keep entry dir (looks more natural)
+        if GraphUtils.isHorizontal(exitDir) and GraphUtils.isHorizontal(entryDir):
+            return entryDir
+        # otherwise keep exit direction and remove cap
+        return GraphUtils.removeCap(exitDir)
 
-def getBitFlag(srcArea, dstArea, origFlag):
-    flags = origFlag
-    if srcArea == dstArea:
-        flags &= 0xBF
-    else:
-        flags |= 0x40
-    return flags
-
-def getDoorConnections(graph, areas=True, bosses=False, escape=True):
-    transitions = []
-    if areas:
-        transitions += vanillaTransitions
-    if bosses:
-        transitions += vanillaBossesTransitions
-    if escape:
-        transitions += vanillaEscapeTransitions
-    for srcName, dstName in transitions:
-        src = graph.accessPoints[srcName]
-        dst = graph.accessPoints[dstName]
-        dst.EntryInfo.update(src.ExitInfo)
-        src.EntryInfo.update(dst.ExitInfo)
-    connections = []
-    for src, dst in graph.InterAreaTransitions:
-        # area only
-        if not bosses and src.Boss:
-            continue
-        # boss only
-        if not areas and not src.Boss:
-            continue
-        conn = {}
-        conn['ID'] = str(src) + ' -> ' + str(dst)
-        # remove duplicates (loop transitions)
-        if any(c['ID'] == conn['ID'] for c in connections):
-            continue
-#        print(conn['ID'])
-        # where to write
-        conn['DoorPtr'] = src.ExitInfo['DoorPtr']
-        # door properties
-        conn['RoomPtr'] = dst.RoomInfo['RoomPtr']
-        conn['doorAsmPtr'] = dst.EntryInfo['doorAsmPtr']
-        conn['direction'] = getDirection(src, dst)
-        conn['bitFlag'] = getBitFlag(src.RoomInfo['area'], dst.RoomInfo['area'],
-                                     dst.EntryInfo['bitFlag'])
-        conn['cap'] = dst.EntryInfo['cap']
-        conn['screen'] = dst.EntryInfo['screen']
-        if conn['direction'] != src.ExitInfo['direction']: # incompatible transition
-            conn['distanceToSpawn'] = 0
-            conn['SamusX'] = dst.EntryInfo['SamusX']
-            conn['SamusY'] = dst.EntryInfo['SamusY']
-            if dst.Name == 'RidleyRoomIn': # special case: spawn samus on ridley platform
-                conn['screen'] = (0x0, 0x1)
+    def getBitFlag(srcArea, dstArea, origFlag):
+        flags = origFlag
+        if srcArea == dstArea:
+            flags &= 0xBF
         else:
-            conn['distanceToSpawn'] = dst.EntryInfo['distanceToSpawn']
-        if 'song' in dst.EntryInfo:
-            conn['song'] = dst.EntryInfo['song']
-            conn['songs'] = dst.RoomInfo['songs']
-        connections.append(conn)
-    return connections
+            flags |= 0x40
+        return flags
 
-def getDoorsPtrs2Aps():
-    ret = {}
-    for ap in accessPoints:
-        if ap.Internal == True:
-            continue
-        ret[ap.ExitInfo["DoorPtr"]] = ap.Name
-    return ret
+    def getDoorConnections(graph, areas=True, bosses=False, escape=True):
+        transitions = []
+        if areas:
+            transitions += vanillaTransitions
+        if bosses:
+            transitions += vanillaBossesTransitions
+        if escape:
+            transitions += vanillaEscapeTransitions
+        for srcName, dstName in transitions:
+            src = graph.accessPoints[srcName]
+            dst = graph.accessPoints[dstName]
+            dst.EntryInfo.update(src.ExitInfo)
+            src.EntryInfo.update(dst.ExitInfo)
+        connections = []
+        for src, dst in graph.InterAreaTransitions:
+            # area only
+            if not bosses and src.Boss:
+                continue
+            # boss only
+            if not areas and not src.Boss:
+                continue
+            conn = {}
+            conn['ID'] = str(src) + ' -> ' + str(dst)
+            # remove duplicates (loop transitions)
+            if any(c['ID'] == conn['ID'] for c in connections):
+                continue
+    #        print(conn['ID'])
+            # where to write
+            conn['DoorPtr'] = src.ExitInfo['DoorPtr']
+            # door properties
+            conn['RoomPtr'] = dst.RoomInfo['RoomPtr']
+            conn['doorAsmPtr'] = dst.EntryInfo['doorAsmPtr']
+            conn['direction'] = GraphUtils.getDirection(src, dst)
+            conn['bitFlag'] = GraphUtils.getBitFlag(src.RoomInfo['area'], dst.RoomInfo['area'],
+                                                    dst.EntryInfo['bitFlag'])
+            conn['cap'] = dst.EntryInfo['cap']
+            conn['screen'] = dst.EntryInfo['screen']
+            if conn['direction'] != src.ExitInfo['direction']: # incompatible transition
+                conn['distanceToSpawn'] = 0
+                conn['SamusX'] = dst.EntryInfo['SamusX']
+                conn['SamusY'] = dst.EntryInfo['SamusY']
+                if dst.Name == 'RidleyRoomIn': # special case: spawn samus on ridley platform
+                    conn['screen'] = (0x0, 0x1)
+            else:
+                conn['distanceToSpawn'] = dst.EntryInfo['distanceToSpawn']
+            if 'song' in dst.EntryInfo:
+                conn['song'] = dst.EntryInfo['song']
+                conn['songs'] = dst.RoomInfo['songs']
+            connections.append(conn)
+        return connections
 
-def getAps2DoorsPtrs():
-    ret = {}
-    for ap in accessPoints:
-        if ap.Internal == True:
-            continue
-        ret[ap.Name] = ap.ExitInfo["DoorPtr"]
-    return ret
+    def getDoorsPtrs2Aps():
+        ret = {}
+        for ap in accessPoints:
+            if ap.Internal == True:
+                continue
+            ret[ap.ExitInfo["DoorPtr"]] = ap.Name
+        return ret
 
+    def getAps2DoorsPtrs():
+        ret = {}
+        for ap in accessPoints:
+            if ap.Internal == True:
+                continue
+            ret[ap.Name] = ap.ExitInfo["DoorPtr"]
+        return ret
 
-def getTransitions(addresses):
-    # build address -> name dict
-    doorsPtrs = getDoorsPtrs2Aps()
+    def getTransitions(addresses):
+        # build address -> name dict
+        doorsPtrs = GraphUtils.getDoorsPtrs2Aps()
 
-    transitions = []
-    # (src.ExitInfo['DoorPtr'], dst.ExitInfo['DoorPtr'])
-    for (srcDoorPtr, destDoorPtr) in addresses:
-        transitions.append((doorsPtrs[srcDoorPtr], doorsPtrs[destDoorPtr]))
+        transitions = []
+        # (src.ExitInfo['DoorPtr'], dst.ExitInfo['DoorPtr'])
+        for (srcDoorPtr, destDoorPtr) in addresses:
+            transitions.append((doorsPtrs[srcDoorPtr], doorsPtrs[destDoorPtr]))
 
-    return transitions
+        return transitions

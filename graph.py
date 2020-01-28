@@ -1,6 +1,6 @@
 import copy
 from smbool import SMBool
-from rom import RomPatches
+from rom_patches import RomPatches
 from parameters import infinity
 import log
 
@@ -19,6 +19,7 @@ class AccessPoint(object):
                  traverse=lambda sm: SMBool(True),
                  exitInfo=None, entryInfo=None, roomInfo=None,
                  internal=False, boss=False, escape=False,
+                 start=None,
                  dotOrientation='w'):
         self.Name = name
         self.GraphArea = graphArea
@@ -28,6 +29,7 @@ class AccessPoint(object):
         self.Internal = internal
         self.Boss = boss
         self.Escape = escape
+        self.Start = start
         self.DotOrientation = dotOrientation
         self.transitions = transitions
         self.traverse = traverse

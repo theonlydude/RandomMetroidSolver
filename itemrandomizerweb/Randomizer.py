@@ -1320,20 +1320,31 @@ class Randomizer(object):
     # from current accessible locations and an item pool, generate an item/loc dict.
     # return item/loc, or None if stuck
     def generateItem(self, curLocs, pool, locs=None):
-        itemLocation = None
-        self.failItems = []
-        posItems = self.possibleItems(pool, locs=locs)
-        self.log.debug("posItems: {}".format([i['Name'] for i in posItems]))
-        if len(posItems) > 0:
-            # if posItems is not empty, only those in posItems will be tried (see placeItem)
-            nPool = len(set([item['Type'] for item in posItems]))
-        else:
-            # if posItems is empty, all items in the pool will be tried (see placeItem)
-            nPool = len(set([item['Type'] for item in pool]))
-        while itemLocation is None and len(self.failItems) < nPool:
-            self.log.debug("P " + str(len(posItems)) + ", F " + str(len(self.failItems)) + " / " + str(nPool))
-            itemLocation = self.placeItem(posItems, pool, curLocs)
-        return itemLocation
+        poolDict = self.getPoolDict(pool)
+        # item object => possible locations list
+        prog = {}
+        other = {}
+#        def updatePossibleLocDict(toUpdate, 
+        for itemType,items in sorted(poolDict.items()):
+            if self.checkItem(items[0], locs=locs):
+                for item in items:
+                    result.append(item)
+        raise RuntimeError("Work In Progress")
+        # itemLocation = None
+        # self.failItems = []
+        # posItems = self.possibleItems(pool, locs=locs)
+        # self.log.debug("posItems: {}".format([i['Name'] for i in posItems]))
+        # if len(posItems) > 0:
+        #     # if posItems is not empty, only those in posItems will be tried (see placeItem)
+        #     nPool = len(set([item['Type'] for item in posItems]))
+        # else:
+        #     # if posItems is empty, all items in the pool will be tried (see placeItem)
+        #     nPool = len(set([item['Type'] for item in pool]))
+        # while itemLocation is None and len(self.failItems) < nPool:
+        #     self.log.debug("P " + str(len(posItems)) + ", F " + str(len(self.failItems)) + " / " + str(nPool))
+        #     itemLocation = self.placeItem(posItems, pool, curLocs)
+        # return itemLocation
+        
 
     def appendCurrentState(self, curLocs):
         curState = RandoState(self, curLocs)

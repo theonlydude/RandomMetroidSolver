@@ -1656,7 +1656,7 @@ class OutWeb(Out):
 
         result = dict(randomizedRom=randomizedRom, difficulty=s.difficulty,
                       generatedPath=generatedPath, diffPercent=diffPercent,
-                      knowsUsed=(s.knowsUsed, s.knowsKnown), itemsOk=s.itemsOk, patches=s.patches,
+                      knowsUsed=(s.knowsUsed, s.knowsKnown), itemsOk=s.itemsOk, patches=s.romLoader.getPatches(),
                       pngFileName=pngFileName, pngThumbFileName=pngThumbFileName,
                       remainTry=remainTry, remainMajors=remainMajors, remainMinors=remainMinors,
                       skippedMajors=skippedMajors, unavailMajors=unavailMajors,

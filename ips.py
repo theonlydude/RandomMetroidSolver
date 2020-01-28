@@ -139,7 +139,8 @@ class IPS_Patch(object):
             raise RuntimeError('Start address {0:x} is too large for the IPS format. Addresses must fit into 3 bytes.'.format(address))
         if len(data) > 0xffff:
             raise RuntimeError('Record with length {0} is too large for the IPS format. Records must be less than 65536 bytes.'.format(len(data)))
-
+        if len(data) == 0: # ignore empty records
+            return
         record = {'address': address, 'data': data}
         sz = address + len(data)
         if sz > self.max_size:
@@ -155,7 +156,6 @@ class IPS_Patch(object):
             raise RuntimeError('RLE record with length {0} is too large for the IPS format. RLE records must be less than 65536 bytes.'.format(count))
         if len(data) != 1:
             raise RuntimeError('Data for RLE record must be exactly one byte! Received {0}.'.format(data))
-
         record = {'address': address, 'data': data, 'rle_count': count}
         sz = address + count
         if sz > self.max_size:
@@ -225,4 +225,5 @@ class IPS_Patch(object):
         if patch.max_size > self.max_size:
             self.max_size = patch.max_size
         for record in patch.records:
-            self.records.append(record)
+            if len(record['data']) > 0: # ignore empty records
+                self.records.append(record)

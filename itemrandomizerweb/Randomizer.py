@@ -996,6 +996,11 @@ class Randomizer(object):
         return ret
 
     def chooseItem(self, items):
+        # if early morph is asked, and morph is still not placed, place it in priority
+        if self.restrictions['Morph'] == 'early':
+            morph = next((item for item in items if Randomizer.isMorph(item)), None)
+            if morph is not None:
+                return morph
         random.shuffle(items)
         item = self.getChooseFunc(self.chooseItemRanges, self.chooseItemFuncs)(items)
         if item is None:
@@ -1126,22 +1131,8 @@ class Randomizer(object):
         return ret
 
     @staticmethod
-    def isInBlueBrinstar(location):
-        return location["Name"] in ["Morphing Ball",
-                                    "Missile (blue Brinstar middle)",
-                                    "Energy Tank, Brinstar Ceiling",
-                                    "Power Bomb (blue Brinstar)",
-                                    "Missile (blue Brinstar bottom)",
-                                    "Missile (blue Brinstar top)",
-                                    "Missile (blue Brinstar behind missile)"]
-
-    @staticmethod
     def isSuit(item):
         return item['Type'] in ['Gravity', 'Varia']
-
-    @staticmethod
-    def isSpeedScrew(item):
-        return item['Type'] in ['SpeedBooster', 'ScrewAttack']
 
     @staticmethod
     def isMorph(item):
@@ -1149,9 +1140,6 @@ class Randomizer(object):
 
     def suitsRestrictionsImpl(self, item, location):
         return location['GraphArea'] != 'Crateria'
-
-    def speedScrewRestrictionImpl(self, item, location):
-        return not Randomizer.isInBlueBrinstar(location)
 
     def morphPlacementImpl(self, item, location):
         # if morph can be out of crateria, restrict it from being put in crateria
@@ -1247,9 +1235,6 @@ class Randomizer(object):
             if self.restrictions['Suits'] == True and Randomizer.isSuit(item):
                 ret = self.suitsRestrictionsImpl(item, location)
 
-            if self.restrictions['Morph'] == 'early' and Randomizer.isSpeedScrew(item):
-                ret = self.speedScrewRestrictionImpl(item, location)
-
             if self.restrictions['Morph'] == 'late' and Randomizer.isMorph(item):
                 ret = self.morphPlacementImpl(item, location)
 
@@ -1259,13 +1244,10 @@ class Randomizer(object):
         return ret
 
     # returns (dict : item wrapper => possible locations list, possible prog or bosses boolean)
-    def getPossiblePlacements(self, pool, locs=None):
+    def getPossiblePlacements(self, pool, curLocs, locs=None):
         poolDict = self.getPoolDict(pool)
         itemLocDict = {}
         possibleProg = False
-        locList = locs
-        if locList is None: # keep locs at None to speed up checkItem
-            locList = self.unusedLocations
         for itemType,items in sorted(poolDict.items()):
             itemObj = items[0]
             cont = True
@@ -1278,7 +1260,7 @@ class Randomizer(object):
             if cont: # ignore non boss + non prog items if a prog item has already been found
                 continue
             # check possible locations for this item type
-            locations = [loc for loc in locList if self.locPostAvailable(loc, itemType) and self.canPlaceAtLocation(itemObj, loc, checkSoftlock=True)]
+            locations = [loc for loc in curLocs if self.locPostAvailable(loc, itemType) and self.canPlaceAtLocation(itemObj, loc, checkSoftlock=True)]
             if len(locations) == 0:
                 continue
             if not possibleProg:
@@ -1293,7 +1275,7 @@ class Randomizer(object):
     # return item/loc, or None if stuck
     def generateItem(self, curLocs, pool, locs=None):
         item, loc = None, None
-        itemLocDict, possibleProg = self.getPossiblePlacements(pool, locs=locs)
+        itemLocDict, possibleProg = self.getPossiblePlacements(pool, curLocs, locs=locs)
         if possibleProg:
             # first, check if we can place a boss
             nextBoss = next(((itemWrapper.item, locs) for itemWrapper, locs in itemLocDict.items() if itemWrapper.item['Type'] == 'Boss'), None)

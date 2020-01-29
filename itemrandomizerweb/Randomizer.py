@@ -740,6 +740,7 @@ class Randomizer(object):
         self.onlyBosses = False
         self.plandoItemPool = []
         self.stdStart = GraphUtils.isStandardStart(self.settings.startAP)
+
         if self.settings.plandoRando != None:
             plando = SuperPlandoProvider(self.settings, self.smbm, self)
             (self.itemPool, self.plandoItemPool) = plando.getItemPool()
@@ -835,6 +836,8 @@ class Randomizer(object):
         self.itemLimit = self.settings.getItemLimit(speed)
         self.locLimit = self.settings.getLocLimit(speed)
         self.progressionItemTypes = self.settings.getProgressionItemTypes(speed)
+        if self.restrictions['Morph'] == 'early' and 'Morph' in self.progressionItemTypes:
+            self.progressionItemTypes.remove('Morph')
         collectedAmmoTypes = set([item['Type'] for item in self.currentItems if item['Category'] == 'Ammo'])
         ammos = ['Missile', 'Super', 'PowerBomb']
         if 'Super' in collectedAmmoTypes:
@@ -1298,6 +1301,7 @@ class Randomizer(object):
         if self.restrictions['Morph'] == 'early' and len(curLocs) >= 2:
             morph = next((item for item in pool if Randomizer.isMorph(item)), None)
             if morph is not None and not any(w.item['Type'] == morph['Type'] for w in itemLocDict):
+                self.log.debug("getPossiblePlacements: early morph check")
                 # we have to place morph early, it's still not placed, and not detected as placeable
                 # let's see if we can place it anyway in the context of a combo
                 morphLocs = getLocList(morph, curLocs)
@@ -1449,17 +1453,26 @@ class Randomizer(object):
             pool += [item for item in basePool if item['Category'] == 'Energy']
 
     def getNonProgItems(self, basePool):
-        return [item for item in basePool if not self.isProgItem(item)]
+        nonProg = [item for item in basePool if not self.isProgItem(item)]
+        if not self.stdStart:
+            # throw in all ammo for non standard start to avoid early returns to blue brin
+            nonProg += [item for item in basePool if item['Category'] == 'Ammo' and item not in nonProg]
+        return nonProg
 
     def getNonProgItemPoolStart(self, basePool=None):
         if basePool is None:
             basePool = self.itemPool
         pool = self.getNonProgItems(basePool)
+        if self.restrictions['Morph'] == 'early':
+            morph = next((item for item in basePool if Randomizer.isMorph(item)), None)
+            if morph is not None and morph not in pool:
+                pool.append(morph)
         # enabled only in major/minor split, and depends on prog speed
         if random.random() < self.minorHelpProb:
-            helpfulMinors = [item for item in basePool if item['Class'] == 'Minor' and not self.hasItemTypeInPool(item['Type'], pool)]
+            helpfulMinors = [item for item in basePool if item['Category'] == 'Ammo' and not self.hasItemTypeInPool(item['Type'], pool)]
             if len(helpfulMinors) > 0:
-                pool.append(random.choice(helpfulMinors))
+                m = random.choice(helpfulMinors)
+                pool.append(m)
         # don't hold energy back for certain settings
         self.addEnergyAsNonProg(pool, basePool)
 

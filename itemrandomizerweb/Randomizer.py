@@ -7,7 +7,7 @@ from smbool import SMBool
 from helpers import Bosses, diffValue2txt
 from utils import randGaussBounds, getRangeDict, chooseFromRange
 from graph import AccessGraph
-from graph_access import accessPoints, GraphUtils
+from graph_access import accessPoints, GraphUtils, getAccessPoint
 from smboolmanager import SMBoolManager
 from vcr import VCR
 import log, logging
@@ -429,9 +429,14 @@ class SuperFunProvider(object):
         self.itemManager.setItemPool(self.basePool[:]) # reuse base pool to have constant base item set
         return self.itemManager.removeForbiddenItems(self.forbiddenItems + forbidden)
 
-    # do a simplified "pre-randomization" of a few items to check start AP/area layout validity
+    # if needed, do a simplified "pre-randomization" of a few items to check start AP/area layout validity
     # very basic because we know we're in full randomization in cases the check can fail
     def checkStart(self):
+        ap = getAccessPoint(self.rando.curAccessPoint)
+        if ap.Start is None or \
+           (('needsPreRando' not in ap.Start or not ap.Start['needsPreRando']) and \
+            ('areaMode' not in ap.Start or not ap.Start['areaMode'])):
+            return True
         self.log.debug("********* PRE RANDO START")
         pool = self.basePool[:]
         locs = [copy.deepcopy(loc) for loc in self.locations]

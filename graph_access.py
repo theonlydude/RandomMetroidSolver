@@ -158,7 +158,7 @@ accessPoints = [
                                                        RomPatches.has(RomPatches.SpongeBathBlueDoor))),
         'PhantoonRoomOut': lambda sm: sm.wand(sm.canOpenGreenDoors(), sm.canPassBombPassages())
     }, internal=True,
-       start={'spawn':0x0300, 'doors':[0x83], 'patches':[RomPatches.SpongeBathBlueDoor], 'solveArea': "WreckedShip Main"}),
+       start={'spawn':0x0300, 'doors':[0x83], 'patches':[RomPatches.SpongeBathBlueDoor], 'solveArea': "WreckedShip Main", 'needsPreRando':True}),
     AccessPoint('Wrecked Ship Back', 'WreckedShip', {
         'Wrecked Ship Main': lambda sm: SMBool(True),
         'Crab Maze Left': lambda sm: sm.canPassForgottenHighway(True)
@@ -336,7 +336,7 @@ accessPoints = [
                                                sm.canHellRun(**Settings.hellRunsTable['Ice']['Norfair Entrance -> Croc via Ice']))),
         'Warehouse Entrance Left': lambda sm: SMBool(True)
     }, internal=True,
-       start={'spawn':0x0202, 'doors':[0x4d], 'patches':[RomPatches.HiJumpAreaBlueDoor], 'solveArea': "Norfair Entrance"}),
+       start={'spawn':0x0202, 'doors':[0x4d], 'patches':[RomPatches.HiJumpAreaBlueDoor], 'solveArea': "Norfair Entrance", 'needsPreRando':True}),
     AccessPoint('Single Chamber Top Right', 'Norfair', {
         'Bubble Mountain Top': lambda sm: sm.wand(sm.canDestroyBombWalls(),
                                                   sm.haveItem('Morph'),

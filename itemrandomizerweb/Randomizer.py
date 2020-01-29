@@ -1017,16 +1017,7 @@ class Randomizer(object):
     def chooseLocationRandom(self, availableLocations, item):
         self.log.debug("RANDOM")
         self.log.debug("chooseLocationRandom: {}".format([l['Name'] for l in availableLocations]))
-        locs = availableLocations
-        if self.isEarlyGame():
-            # cheat a little bit if non-standard start: place early
-            # progression away from crateria/blue brin if possible
-            startAp = getAccessPoint(self.settings.startAP)
-            if startAp.GraphArea != "Crateria":
-                locs = [loc for loc in availableLocations if loc['GraphArea'] != 'Crateria']
-                if len(locs) == 0:
-                    locs = availableLocations
-        return random.choice(locs)
+        return random.choice(availableLocations)
 
     def getLocDiff(self, loc):
         # avail difficulty already stored by graph algorithm        
@@ -1112,9 +1103,17 @@ class Randomizer(object):
 
     def chooseLocation(self, availableLocations, item):
         locs = availableLocations
+        if self.isEarlyGame():
+            # cheat a little bit if non-standard start: place early
+            # progression away from crateria/blue brin if possible
+            startAp = getAccessPoint(self.settings.startAP)
+            if startAp.GraphArea != "Crateria":
+                locs = [loc for loc in availableLocations if loc['GraphArea'] != 'Crateria']
+                if len(locs) == 0:
+                    locs = availableLocations
         isProg = self.isProgItem(item)
         if isProg == True and random.random() < self.spreadProb:
-            locs = self.getLocsSpreadProgression(availableLocations)
+            locs = self.getLocsSpreadProgression(locs)
         random.shuffle(locs)
         self.log.debug("chooseLocation isProg: {}".format(isProg))
         if isProg == True:

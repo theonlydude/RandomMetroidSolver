@@ -70,10 +70,13 @@ class HelpersGraph(Helpers):
                                     sm.haveItem('Plasma'),
                                     sm.haveItem('ScrewAttack'))))
 
+    # from blue brin elevator
     @Cache.decorator
     def canAccessBillyMays(self):
         sm = self.smbm
-        return sm.wand(sm.canUsePowerBombs(),
+        return sm.wand(sm.wor(RomPatches.has(RomPatches.BlueBrinstarBlueDoor),
+                              sm.canOpenRedDoors()),
+                       sm.canUsePowerBombs(),
                        sm.wor(sm.knowsBillyMays(),
                               sm.haveItem('Gravity'),
                               sm.haveItem('SpaceJump')))

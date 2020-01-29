@@ -1265,16 +1265,23 @@ class Randomizer(object):
         possibleProg = False
         def getLocList(itemObj, baseList):
             return [loc for loc in baseList if self.locPostAvailable(loc, itemObj['Type']) and self.canPlaceAtLocation(itemObj, loc, checkSoftlock=True)]
+        # boss handling : check bosses we can kill and come back from. return immediately if found
+        boss = next((item for item in pool if item['Type'] == 'Boss'), None)
+        if boss is not None:
+            bossLocs = getLocList(boss, [loc for loc in curLocs if 'Boss' in loc['Class']])
+            if len(bossLocs) > 0:
+                itemLocDict[ItemWrapper(boss)] = bossLocs
+                return (itemLocDict, False)
         for itemType,items in sorted(poolDict.items()):
             itemObj = items[0]
             cont = True
             prog = False
-            if itemType == 'Boss' or self.checkItem(itemObj, locs=locs):
+            if self.checkItem(itemObj, locs=locs):
                 cont = False
                 prog = True
             elif not possibleProg:
                 cont = False
-            if cont: # ignore non boss + non prog items if a prog item has already been found
+            if cont: # ignore non prog items if a prog item has already been found
                 continue
             # check possible locations for this item type
             self.log.debug('getPossiblePlacements. itemType=' + itemType + ', curLocs='+str([loc['Name'] for loc in curLocs]))
@@ -1320,19 +1327,13 @@ class Randomizer(object):
         item, loc = None, None
         itemLocDict, possibleProg = self.getPossiblePlacements(pool, curLocs, locs=locs)
         if possibleProg:
-            # first, check if we can place a boss
-            nextBoss = next(((itemWrapper.item, locs) for itemWrapper, locs in itemLocDict.items() if itemWrapper.item['Type'] == 'Boss'), None)
-            if nextBoss is not None:
-                item = nextBoss[0]
-                loc = self.chooseLocation(nextBoss[1], nextBoss[0])
-            else:
-                # choose item/loc with prog rules
-                item = self.chooseItem([wrapper.item for wrapper in itemLocDict.keys()])
-                loc = self.chooseLocation(itemLocDict[item['Wrapper']], item)
+            # choose item/loc with prog rules
+            item = self.chooseItem([wrapper.item for wrapper in itemLocDict.keys()])
+            loc = self.chooseLocation(itemLocDict[item['Wrapper']], item)
         elif len(itemLocDict) > 0:
             # randomly choose item/location
-            item = random.choice([wrapper.item for wrapper in itemLocDict.keys()])
-            loc = random.choice(itemLocDict[item['Wrapper']])
+            item = self.chooseItemRandom([wrapper.item for wrapper in itemLocDict.keys()])
+            loc = self.chooseLocationRandom(itemLocDict[item['Wrapper']], item)
         itemLoc = None
         if item is not None and loc is not None:
             itemLoc = {

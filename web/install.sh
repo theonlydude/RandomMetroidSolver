@@ -545,3 +545,17 @@ mkdir -p ~/web2py/applications/solver/static/images/sprite_sheets/
 [ -L ~/web2py/applications/solver/static/images/sprite_sheets/win95_cursor.png ] || ln -s ~/RandomMetroidSolver/web/static/sprite_sheets/win95_cursor.png ~/web2py/applications/solver/static/images/sprite_sheets/win95_cursor.png
 
 [ -L ~/web2py/applications/solver/static/images/area_map_20200112.png ] || ln -s ~/RandomMetroidSolver/web/static/area_map.png ~/web2py/applications/solver/static/images/area_map_20200112.png
+
+[ -L ~/web2py/applications/solver/static/images/gauntlet_start.png ] || ln -s ~/RandomMetroidSolver/web/static/start_locations/gauntlet_start.png ~/web2py/applications/solver/static/images/gauntlet_start.png
+[ -L ~/web2py/applications/solver/static/images/green_bt_elevator_start.png ] || ln -s ~/RandomMetroidSolver/web/static/start_locations/green_bt_elevator_start.png ~/web2py/applications/solver/static/images/green_bt_elevator_start.png
+[ -L ~/web2py/applications/solver/static/images/bt_reserve_blue_door.png ] || ln -s ~/RandomMetroidSolver/web/static/start_locations/bt_reserve_blue_door.png ~/web2py/applications/solver/static/images/bt_reserve_blue_door.png
+[ -L ~/web2py/applications/solver/static/images/ceres_start.png ] || ln -s ~/RandomMetroidSolver/web/static/start_locations/ceres_start.png ~/web2py/applications/solver/static/images/ceres_start.png
+[ -L ~/web2py/applications/solver/static/images/landing_site_start.png ] || ln -s ~/RandomMetroidSolver/web/static/start_locations/landing_site_start.png ~/web2py/applications/solver/static/images/landing_site_start.png
+[ -L ~/web2py/applications/solver/static/images/blue_bt_blue_door.png ] || ln -s ~/RandomMetroidSolver/web/static/start_locations/blue_bt_blue_door.png ~/web2py/applications/solver/static/images/blue_bt_blue_door.png
+[ -L ~/web2py/applications/solver/static/images/golden_four_start.png ] || ln -s ~/RandomMetroidSolver/web/static/start_locations/golden_four_start.png ~/web2py/applications/solver/static/images/golden_four_start.png
+[ -L ~/web2py/applications/solver/static/images/watering_hole_start.png ] || ln -s ~/RandomMetroidSolver/web/static/start_locations/watering_hole_start.png ~/web2py/applications/solver/static/images/watering_hole_start.png
+[ -L ~/web2py/applications/solver/static/images/.png ] || ln -s ~/RandomMetroidSolver/web/static/start_locations/.png ~/web2py/applications/solver/static/images/.png
+[ -L ~/web2py/applications/solver/static/images/.png ] || ln -s ~/RandomMetroidSolver/web/static/start_locations/.png ~/web2py/applications/solver/static/images/.png
+[ -L ~/web2py/applications/solver/static/images/.png ] || ln -s ~/RandomMetroidSolver/web/static/start_locations/.png ~/web2py/applications/solver/static/images/.png
+[ -L ~/web2py/applications/solver/static/images/.png ] || ln -s ~/RandomMetroidSolver/web/static/start_locations/.png ~/web2py/applications/solver/static/images/.png
+[ -L ~/web2py/applications/solver/static/images/.png ] || ln -s ~/RandomMetroidSolver/web/static/start_locations/.png ~/web2py/applications/solver/static/images/.png

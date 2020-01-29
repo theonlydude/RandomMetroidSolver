@@ -29,7 +29,7 @@ class RomPatches:
     CathedralEntranceWallJump = 31
     # graph blue doors
     HiJumpAreaBlueDoor        = 32
-    SpeedAreaBlueDoor         = 33
+    SpeedAreaBlueDoors        = 33
     # moat bottom block
     MoatShotBlock             = 41
     #graph

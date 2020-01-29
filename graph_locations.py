@@ -404,7 +404,7 @@ locations = [
     'Visibility': "Chozo",
     'Room': 'Speed Booster Room',
     'AccessFrom' : {
-        'Bubble Mountain Top': lambda sm: sm.wor(RomPatches.has(RomPatches.SpeedAreaBlueDoor), sm.canOpenGreenDoors())
+        'Bubble Mountain Top': lambda sm: sm.wor(RomPatches.has(RomPatches.SpeedAreaBlueDoors), sm.canOpenGreenDoors())
     },
     'Available': lambda sm: sm.canHellRunToSpeedBooster()
 },
@@ -1547,7 +1547,7 @@ locations = [
     'Visibility': "Hidden",
     'Room': 'Speed Booster Hall',
     'AccessFrom' : {
-        'Bubble Mountain Top': lambda sm: sm.wor(RomPatches.has(RomPatches.SpeedAreaBlueDoor), sm.canOpenGreenDoors())
+        'Bubble Mountain Top': lambda sm: sm.wor(RomPatches.has(RomPatches.SpeedAreaBlueDoors), sm.canOpenGreenDoors())
     },
     'Available': lambda sm: sm.canHellRunToSpeedBooster()
 },

@@ -396,7 +396,7 @@ accessPoints = [
                                                sm.haveItem('Wave')),
                                         sm.canOpenGreenDoors())
     }, internal=True,
-       start={'spawn':0x0201, 'doors':[0x54], 'patches':[RomPatches.SpeedAreaBlueDoors], 'knows':['BubbleMountainWallJump'], 'solveArea': "Bubble Norfair Bottom"}),
+       start={'spawn':0x0201, 'doors':[0x54,0x55], 'patches':[RomPatches.SpeedAreaBlueDoors], 'knows':['BubbleMountainWallJump'], 'solveArea': "Bubble Norfair Bottom"}),
     AccessPoint('Bubble Mountain Top', 'Norfair', {
         'Single Chamber Top Right': lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Single Chamber <-> Bubble Mountain']),
                                                        sm.canDestroyBombWalls(),

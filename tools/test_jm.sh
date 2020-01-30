@@ -68,7 +68,7 @@ function generate_params {
     let S=$RANDOM%${#LAYOUTS[@]}
     LAYOUT=${LAYOUTS[$S]}
 
-    echo "-r ${ROM} --param standard_presets/${PRESET}.json --seed ${SEED} --progressionSpeed random --morphPlacement random --progressionDifficulty random --missileQty 0 --superQty 0 --powerBombQty 0 --minorQty 0 --energyQty random --majorsSplit random --suitsRestriction random --hideItems random --strictMinors random --superFun CombatRandom --superFun MovementRandom --superFun SuitsRandom --maxDifficulty random --runtime 20 ${AREA} ${BOSS} ${SUIT} ${CHARGE} ${TWEAK} ${LAYOUT}"
+    echo "-r ${ROM} --param standard_presets/${PRESET}.json --seed ${SEED} --progressionSpeed random --morphPlacement random --progressionDifficulty random --missileQty 0 --superQty 0 --powerBombQty 0 --minorQty 0 --energyQty random --majorsSplit random --suitsRestriction random --hideItems random --strictMinors random --superFun CombatRandom --superFun MovementRandom --superFun SuitsRandom --maxDifficulty random --startAP random --runtime 20 ${AREA} ${BOSS} ${SUIT} ${CHARGE} ${TWEAK} ${LAYOUT}"
 }
 
 function computeSeed {

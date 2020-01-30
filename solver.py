@@ -1498,7 +1498,7 @@ class ComeBack(object):
         if len(graphAreas) == 1:
             return False
 
-        self.log.debug("WARNING: use no come back heuristic for {} locs in {} graph areas".format(len(locations), len(graphAreas)))
+        self.log.debug("WARNING: use no come back heuristic for {} locs in {} graph areas ({})".format(len(locations), len(graphAreas), graphAreas))
 
         # check if we can use existing step
         if len(self.comeBackSteps) > 0:
@@ -1573,17 +1573,24 @@ class ComeBackStep(object):
         self.visitedGraphAreas.append(maxAreaName)
         self.log.debug("next area: {}".format(maxAreaName))
 
+        outWeight = 10000
         retGraphAreas = {}
         for graphArea in self.graphAreas:
             if graphArea == maxAreaName:
                 retGraphAreas[graphArea] = 1
             else:
-                retGraphAreas[graphArea] = 10000
+                retGraphAreas[graphArea] = outWeight
 
         # update locs
         for loc in locations:
-            loc["areaWeight"] = retGraphAreas[loc["GraphArea"]]
-            self.log.debug("{} areaWeight: {}".format(loc["Name"], loc["areaWeight"]))
+            graphArea = loc["GraphArea"]
+            if graphArea in retGraphAreas:
+                loc["areaWeight"] = retGraphAreas[loc["GraphArea"]]
+                self.log.debug("{} areaWeight: {}".format(loc["Name"], loc["areaWeight"]))
+            else:
+                # can happen if going to the first area unlocks new areas
+                loc["areaWeight"] = outWeight
+                self.log.debug("loc {} from area {} not in original areas".format(loc["Name"], graphArea))
 
         return False
 

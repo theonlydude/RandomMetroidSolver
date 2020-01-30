@@ -649,7 +649,13 @@ class RomPatcher:
     def patchMorphBallEye(self, item):
 #        print('Eye item = ' + item['Type'])
         # consider Nothing as missile, because if it is at morph ball it will actually be a missile
-        isNothingMissile = item['Category'] == 'Nothing' and self.nothingId == 0x1a
+        if item['Category'] == 'Nothing':
+            if self.nothingId == 0x1a:
+                isNothingMissile = True
+            else:
+                return
+        else:
+            isNothingMissile = False
         isAmmo = item['Category'] == 'Ammo' or isNothingMissile
         isMissile = item['Type'] == 'Missile' or isNothingMissile
         # category to check

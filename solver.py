@@ -1528,7 +1528,7 @@ class ComeBack(object):
         self.log.debug("Start rewind, current: {}".format(cur))
 
         lastStep = self.comeBackSteps[-1]
-        if lastStep.cur == cur:
+        if not lastStep.moreAvailable():
             # need to go up one more time
             self.comeBackSteps.pop()
 
@@ -1551,14 +1551,18 @@ class ComeBackStep(object):
         self.graphAreas = graphAreas
         self.cur = cur
         self.log = log.get('RewindStep')
+        self.log.debug("create rewind step: {} {}".format(cur, graphAreas))
+
+    def moreAvailable(self):
+        return len(self.visitedGraphAreas) < len(self.graphAreas)
 
     def next(self, locations):
         # use next available area, if all areas have been visited return True (stuck), else False
-        if len(self.visitedGraphAreas) == len(self.graphAreas):
-            self.log.debug("all areas have been visited, stuck")
+        if not self.moreAvailable():
+            self.log.debug("rewind: all areas have been visited, stuck")
             return True
 
-        self.log.debug("graphAreas: {} visitedGraphAreas: {}".format(self.graphAreas, self.visitedGraphAreas))
+        self.log.debug("rewind next, graphAreas: {} visitedGraphAreas: {}".format(self.graphAreas, self.visitedGraphAreas))
 
         # get area with max available locs
         maxAreaWeigth = 0
@@ -1571,7 +1575,7 @@ class ComeBackStep(object):
                     maxAreaWeigth = self.graphAreas[graphArea]
                     maxAreaName = graphArea
         self.visitedGraphAreas.append(maxAreaName)
-        self.log.debug("next area: {}".format(maxAreaName))
+        self.log.debug("rewind next area: {}".format(maxAreaName))
 
         outWeight = 10000
         retGraphAreas = {}
@@ -1586,11 +1590,11 @@ class ComeBackStep(object):
             graphArea = loc["GraphArea"]
             if graphArea in retGraphAreas:
                 loc["areaWeight"] = retGraphAreas[loc["GraphArea"]]
-                self.log.debug("{} areaWeight: {}".format(loc["Name"], loc["areaWeight"]))
+                self.log.debug("rewind loc {} new areaWeight: {}".format(loc["Name"], loc["areaWeight"]))
             else:
                 # can happen if going to the first area unlocks new areas
                 loc["areaWeight"] = outWeight
-                self.log.debug("loc {} from area {} not in original areas".format(loc["Name"], graphArea))
+                self.log.debug("rewind loc {} from area {} not in original areas".format(loc["Name"], graphArea))
 
         return False
 

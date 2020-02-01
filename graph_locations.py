@@ -878,7 +878,8 @@ locations = [
     'Visibility': "Visible",
     'Room': 'The Moat',
     'AccessFrom' : {
-        'Keyhunter Room Bottom': lambda sm: sm.canOpenYellowDoors()
+        'Keyhunter Room Bottom': lambda sm: sm.canOpenYellowDoors(),
+        'Moat Right': lambda sm: sm.canPassMoatReverse()
     },
     'Available': lambda sm: SMBool(True)
 },

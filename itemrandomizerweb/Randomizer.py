@@ -1814,7 +1814,8 @@ class Randomizer(object):
                     itemLocs.append(il)
                     pool.remove(item)
                 return itemLocs
-            def updateCurrentState(itemLocs, curState):
+            def updateCurrentState(itemLocs):
+                nonlocal curState
                 self.log.debug('updateCurrentState BEGIN')
                 curState.apply(self)
                 for il in itemLocs:
@@ -1859,7 +1860,7 @@ class Randomizer(object):
             collected = [loc for loc in getCollectedLocs() if loc not in previousCollected]
             self.currentLocations(ap=ap, locs=collected) # update difficulty
             previousCollected += collected
-            updateCurrentState(itemLocs, curState)
+            updateCurrentState(itemLocs)
             curState = RandoState(self, curLocs)
 
     def chozoCheck(self):

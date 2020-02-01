@@ -847,26 +847,27 @@ class RomPatcher:
                 for locName, locIndex in locList:
                     plmLocs[(k, locIndex)] = locName
         # make two patches out of this dict
-        # use instances vars because of terrible python scoping
-        self.plmTblAddr = 0x7E9A0 # moves downwards
-        self.plmPatchData = []
-        self.roomTblAddr = 0x7EC00 # moves upwards
-        self.roomPatchData = []
-        self.plmTblOffset = self.plmTblAddr
+        plmTblAddr = 0x7E9A0 # moves downwards
+        plmPatchData = []
+        roomTblAddr = 0x7EC00 # moves upwards
+        roomPatchData = []
+        plmTblOffset = plmTblAddr
         def appendPlmBytes(bytez):
-            self.plmPatchData += bytez
-            self.plmTblOffset += len(bytez)
+            nonlocal plmPatchData, plmTblOffset
+            plmPatchData += bytez
+            plmTblOffset += len(bytez)
         def addRoomPatchData(bytez):
-            self.roomPatchData = bytez + self.roomPatchData
-            self.roomTblAddr -= len(bytez)
+            nonlocal roomPatchData, roomTblAddr
+            roomPatchData = bytez + roomPatchData
+            roomTblAddr -= len(bytez)
         for roomKey, plmList in plmDict.items():
-            entryAddr = self.plmTblOffset
+            entryAddr = plmTblOffset
             roomData = []
             for i in range(len(plmList)):
                 plmBytes = plmList[i]
                 assert len(plmBytes) == 6, "Invalid PLM entry for roomKey " + str(roomKey) + ": PLM list len is " + str(len(plmBytes))
                 if (roomKey, i) in plmLocs:
-                    self.altLocsAddresses[plmLocs[(roomKey, i)]] = self.plmTblOffset
+                    self.altLocsAddresses[plmLocs[(roomKey, i)]] = plmTblOffset
                 appendPlmBytes(plmBytes)
             appendPlmBytes([0x0, 0x0]) # list terminator
             def appendRoomWord(w, data):
@@ -878,11 +879,11 @@ class RomPatcher:
             addRoomPatchData(roomData)
         # write room table terminator
         addRoomPatchData([0x0] * 8)
-        assert self.plmTblOffset < self.roomTblAddr, "Spawn PLM table overlap"
+        assert plmTblOffset < roomTblAddr, "Spawn PLM table overlap"
         patchDict = {
             "PLM_Spawn_Tables" : {
-                self.plmTblAddr: self.plmPatchData,
-                self.roomTblAddr: self.roomPatchData
+                plmTblAddr: plmPatchData,
+                roomTblAddr: roomPatchData
             }
         }
         self.applyIPSPatch("PLM_Spawn_Tables", patchDict)

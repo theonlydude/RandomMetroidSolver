@@ -1265,8 +1265,14 @@ class Randomizer(object):
         poolDict = self.getPoolDict(pool)
         itemLocDict = {}
         possibleProg = False
+        nonProgList = None
         def getLocList(itemObj, baseList):
             return [loc for loc in baseList if self.locPostAvailable(loc, itemObj['Type']) and self.canPlaceAtLocation(itemObj, loc, checkSoftlock=True)]
+        def getNonProgLocList(itemObj):
+            nonlocal nonProgList
+            if nonProgList is None:
+                nonProgList = self.currentLocations(post=True)
+            return [loc for loc in nonProgList if self.canPlaceAtLocation(itemObj, loc)]
         # boss handling : check bosses we can kill and come back from. return immediately if found
         boss = next((item for item in pool if item['Type'] == 'Boss'), None)
         if boss is not None:
@@ -1287,7 +1293,7 @@ class Randomizer(object):
                 continue
             # check possible locations for this item type
             self.log.debug('getPossiblePlacements. itemType=' + itemType + ', curLocs='+str([loc['Name'] for loc in curLocs]))
-            locations = getLocList(itemObj, curLocs)
+            locations = getLocList(itemObj, curLocs) if prog else getNonProgLocList(itemObj)
             if len(locations) == 0:
                 continue
             if prog and not possibleProg:

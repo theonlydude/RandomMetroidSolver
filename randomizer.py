@@ -361,6 +361,8 @@ if __name__ == "__main__":
             dumpErrorMsg(args.output, optErrMsg)
             sys.exit(-1)
 
+    print("startAP:{}".format(args.startAP))
+
     if args.patchOnly == False:
         print("SEED: " + str(seed))
 

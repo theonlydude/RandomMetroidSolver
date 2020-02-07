@@ -450,6 +450,16 @@ class CommonSolver(object):
                 self.lastAP = self.visitedLocations[-1]["accessPoint"]
                 self.lastArea = self.visitedLocations[-1]["SolveArea"]
 
+            # delete location params which are set when the location is available
+            if 'difficulty' in loc:
+                del loc['difficulty']
+            if 'distance' in loc:
+                del loc['distance']
+            if 'accessPoint' in loc:
+                del loc['accessPoint']
+            if 'path' in loc:
+                del loc['path']
+
             # item
             item = loc["itemName"]
             if item != self.collectedItems[-1]:
@@ -690,10 +700,6 @@ class CommonSolver(object):
         self.visitedLocations = []
         self.collectedItems = []
 
-        # with the knowsXXX conditions some roms can be unbeatable, so we have to detect it
-        previous = -1
-        current = 0
-
         self.log.debug("{}: available major: {}, available minor: {}, visited: {}".format(Conf.itemsPickup, len(self.majorLocations), len(self.minorLocations), len(self.visitedLocations)))
 
         isEndPossible = False
@@ -713,27 +719,7 @@ class CommonSolver(object):
                 else:
                     self.log.debug("canEnd but MB loc not accessible")
 
-            #self.log.debug(str(self.collectedItems))
             self.log.debug("Current AP/Area: {}/{}".format(self.lastAP, self.lastArea))
-
-            # check if we have collected an item in the last loop
-            current = len(self.collectedItems)
-            if current == previous:
-                if not isEndPossible:
-                    self.log.debug("STUCK ALL")
-                    if self.comeBack.rewind(len(self.collectedItems)) == True:
-                        # rewind ok
-                        previous = len(self.collectedItems) - 1
-                        continue
-                    else:
-                        # we're really stucked
-                        self.log.debug("STUCK CAN'T REWIND")
-                        break
-                else:
-                    self.log.debug("HARD END 1")
-                    self.checkMB(mbLoc)
-                    break
-            previous = current
 
             # compute the difficulty of all the locations
             self.computeLocationsDifficulty(self.majorLocations)
@@ -744,12 +730,16 @@ class CommonSolver(object):
             majorsAvailable = [loc for loc in self.majorLocations if 'difficulty' in loc and loc["difficulty"].bool == True]
             minorsAvailable = [loc for loc in self.minorLocations if 'difficulty' in loc and loc["difficulty"].bool == True]
 
+            if self.majorsSplit == 'Full':
+                locs = majorsAvailable
+            else:
+                locs = majorsAvailable+minorsAvailable
+
             # check if we're stuck
             if len(majorsAvailable) == 0 and len(minorsAvailable) == 0:
                 if not isEndPossible:
                     self.log.debug("STUCK MAJORS and MINORS")
                     if self.comeBack.rewind(len(self.collectedItems)) == True:
-                        previous = len(self.collectedItems) - 1
                         continue
                     else:
                         # we're really stucked
@@ -760,15 +750,10 @@ class CommonSolver(object):
                     self.checkMB(mbLoc)
                     break
 
-            # handle no comeback heuristic
-            if self.majorsSplit == 'Full':
-                locs = majorsAvailable
-            else:
-                locs = majorsAvailable+minorsAvailable
+            # handle no comeback locations
             rewindRequired = self.comeBack.handleNoComeBack(locs, len(self.collectedItems))
             if rewindRequired == True:
                 if self.comeBack.rewind(len(self.collectedItems)) == True:
-                    previous = len(self.collectedItems) - 1
                     continue
                 else:
                     # we're really stucked
@@ -1374,6 +1359,7 @@ class StandardSolver(CommonSolver):
         self.outputFileName = outputFileName
 
         self.locations = graphLocations
+
         self.smbm = SMBoolManager()
 
         self.presetFileName = presetFileName
@@ -1483,7 +1469,7 @@ class ComeBack(object):
         self.log = log.get('Rewind')
 
     def handleNoComeBack(self, locations, cur):
-        # return true if a rewind is required
+        # return True if a rewind is needed. choose the next area to use
         graphAreas = {}
         for loc in locations:
             if "comeBack" not in loc:
@@ -1495,23 +1481,26 @@ class ComeBack(object):
             else:
                 graphAreas[loc["GraphArea"]] = 1
 
-        if len(graphAreas) == 1:
-            return False
-
         self.log.debug("WARNING: use no come back heuristic for {} locs in {} graph areas ({})".format(len(locations), len(graphAreas), graphAreas))
 
-        # check if we can use existing step
+        # check if we can use an existing step
         if len(self.comeBackSteps) > 0:
             lastStep = self.comeBackSteps[-1]
             if lastStep.cur == cur:
                 self.log.debug("Use last step at {}".format(cur))
                 return lastStep.next(locations)
+            else:
+                self.log.debug("cur: {}, lastStep.cur: {}, don't use lastStep.next()".format(cur, lastStep.cur))
+
+        if len(graphAreas) == 1:
+            self.log.debug("handleNoComeBack: only one graph area")
+            return False
 
         # create a step
         self.log.debug("Create new step at {}".format(cur))
-        step = ComeBackStep(graphAreas, cur)
-        self.comeBackSteps.append(step)
-        return step.next(locations)
+        lastStep = ComeBackStep(graphAreas, cur)
+        self.comeBackSteps.append(lastStep)
+        return lastStep.next(locations)
 
     def cleanNoComeBack(self, locations):
         for loc in locations:
@@ -1527,19 +1516,24 @@ class ComeBack(object):
 
         self.log.debug("Start rewind, current: {}".format(cur))
 
-        lastStep = self.comeBackSteps[-1]
-        if not lastStep.moreAvailable():
-            # need to go up one more time
-            self.comeBackSteps.pop()
-
-            if len(self.comeBackSteps) == 0:
-                self.log.debug("No more steps to rewind")
-                return False
-
+        while len(self.comeBackSteps) > 0:
             lastStep = self.comeBackSteps[-1]
-            self.log.debug("Rewind previous step at {}".format(lastStep.cur))
+            if not lastStep.moreAvailable():
+                self.log.debug("last step has been fully visited, go up one more time")
+                self.comeBackSteps.pop()
+
+                if len(self.comeBackSteps) == 0:
+                    self.log.debug("No more steps to rewind")
+                    return False
+
+                self.log.debug("Rewind to previous step at {}".format(self.comeBackSteps[-1].cur))
+            else:
+                break
 
         count = cur - lastStep.cur
+        if count == 0:
+            self.log.debug("Can't rewind, it's buggy here !")
+            return False
         self.solver.cancelLastItems(count)
         self.log.debug("Rewind {} items to {}".format(count, lastStep.cur))
         return True
@@ -1554,6 +1548,7 @@ class ComeBackStep(object):
         self.log.debug("create rewind step: {} {}".format(cur, graphAreas))
 
     def moreAvailable(self):
+        self.log.debug("moreAvailable: cur: {} len(visited): {} len(areas): {}".format(self.cur, len(self.visitedGraphAreas), len(self.graphAreas)))
         return len(self.visitedGraphAreas) < len(self.graphAreas)
 
     def next(self, locations):

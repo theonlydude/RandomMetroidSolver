@@ -257,7 +257,7 @@ locations = [
 },
 {
     'Area': "Brinstar",
-    'GraphArea': "Kraid",
+    'GraphArea': "KraidBoss",
     'SolveArea': "Kraid",
     'Name': "Kraid",
     'Class': ["Boss"],
@@ -274,7 +274,7 @@ locations = [
 },
 {
     'Area': "Brinstar",
-    'GraphArea': "Kraid",
+    'GraphArea': "KraidBoss",
     'SolveArea': "Kraid",
     'Name': "Varia Suit",
     'Class': ["Major", "Chozo"],
@@ -431,7 +431,7 @@ locations = [
 },
 {
     'Area': "LowerNorfair",
-    'GraphArea': "LowerNorfair",
+    'GraphArea': "LowerNorfairBoss",
     'SolveArea': "Lower Norfair After Amphitheater",
     'Name': "Ridley",
     'Class': ["Boss"],
@@ -448,7 +448,7 @@ locations = [
 },
 {
     'Area': "LowerNorfair",
-    'GraphArea': "LowerNorfair",
+    'GraphArea': "LowerNorfairBoss",
     'SolveArea': "Lower Norfair After Amphitheater",
     'Name': "Energy Tank, Ridley",
     'Class': ["Major", "Chozo"],
@@ -541,7 +541,7 @@ locations = [
 },
 {
     'Area': "WreckedShip",
-    'GraphArea': "WreckedShip",
+    'GraphArea': "WreckedShipBoss",
     'SolveArea': "WreckedShip Main",
     'Name': "Phantoon",
     'Class': ["Boss"],
@@ -745,7 +745,7 @@ locations = [
 },
 {
     'Area': "Maridia",
-    'GraphArea': "Maridia",
+    'GraphArea': "MaridiaBoss",
     'SolveArea': "Maridia Pink Top",
     'Name': "Draygon",
     'Class': ["Boss"],
@@ -761,7 +761,7 @@ locations = [
 },
 {
     'Area': "Maridia",
-    'GraphArea': "Maridia",
+    'GraphArea': "MaridiaBoss",
     'SolveArea': "Maridia Pink Top",
     'Name': "Space Jump",
     'Class': ["Major", "Chozo"],

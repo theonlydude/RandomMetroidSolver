@@ -683,6 +683,16 @@ class RandoState(object):
             Bosses.beatBoss(boss)
         rando.resetCache()
 
+    def __eq__(self, rhs):
+        if rhs is None:
+            return False
+        eq = self.unusedLocations == rhs.unusedLocations
+        eq &= self.currentItems == rhs.currentItems
+        eq &= self.curAccessPoint == rhs.curAccessPoint
+        eq &= self.progressionStatesIndices == rhs.progressionStatesIndices
+        return eq
+
+
 # randomizer algorithm main class. generateItems method will generate a complete seed, or fail (depending on settings) 
 class Randomizer(object):
     # locations : items locations
@@ -1351,6 +1361,18 @@ class Randomizer(object):
                 'Item': item,
                 'Location': loc
             }
+            while self.hasTried(itemLoc):
+                itemList.remove(item)
+                if len(itemList) > 0:
+                    item = self.chooseItemRandom(itemList)
+                    loc = self.chooseLocationRandom(itemLocDict[item['Wrapper']], item)
+                    itemLoc = {
+                        'Item': item,
+                        'Location': loc
+                    }
+                else:
+                    itemLoc = None
+                    break
         return itemLoc
 
     def appendCurrentState(self, curLocs):
@@ -1564,9 +1586,6 @@ class Randomizer(object):
         return progItems+'/'+position
 
     def hasTried(self, itemLoc):
-        # disable check for early game
-        if self.isEarlyGame():
-            return False
         itemType = itemLoc['Item']['Type']
         situation = self.getSituationId()
         ret = False
@@ -1611,6 +1630,7 @@ class Randomizer(object):
             sys.stdout.flush()
             return None
         # to stay consistent in case no solution is found as states list was popped in init
+        byPassTriedCheck = self.isEarlyGame()
         fallbackState = self.getCurrentState()
         if fallbackState == self.lastFallbackState:
             # we're stuck there, rewind more in fallback

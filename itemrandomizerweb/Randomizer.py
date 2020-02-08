@@ -438,7 +438,7 @@ class SuperFunProvider(object):
             ('areaMode' not in ap.Start or not ap.Start['areaMode'])):
             return True
         self.log.debug("********* PRE RANDO START")
-        pool = self.basePool[:]
+        pool = self.rando.itemPool[:]
         locs = [copy.deepcopy(loc) for loc in self.locations]
         itemLoc = None
         startOk = True
@@ -1361,18 +1361,18 @@ class Randomizer(object):
                 'Item': item,
                 'Location': loc
             }
-            while self.hasTried(itemLoc):
-                itemList.remove(item)
-                if len(itemList) > 0:
-                    item = self.chooseItemRandom(itemList)
-                    loc = self.chooseLocationRandom(itemLocDict[item['Wrapper']], item)
-                    itemLoc = {
-                        'Item': item,
-                        'Location': loc
-                    }
-                else:
-                    itemLoc = None
-                    break
+            # while self.hasTried(itemLoc):
+            #     itemList.remove(item)
+            #     if len(itemList) > 0:
+            #         item = self.chooseItemRandom(itemList)
+            #         loc = self.chooseLocationRandom(itemLocDict[item['Wrapper']], item)
+            #         itemLoc = {
+            #             'Item': item,
+            #             'Location': loc
+            #         }
+            #     else:
+            #         itemLoc = None
+            #         break
         return itemLoc
 
     def appendCurrentState(self, curLocs):
@@ -1586,6 +1586,8 @@ class Randomizer(object):
         return progItems+'/'+position
 
     def hasTried(self, itemLoc):
+        if self.isEarlyGame():
+            return False
         itemType = itemLoc['Item']['Type']
         situation = self.getSituationId()
         ret = False

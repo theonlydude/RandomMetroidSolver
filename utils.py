@@ -37,7 +37,7 @@ def getRangeDict(weightDict):
     total = float(sum(weightDict.values()))
     rangeDict = {}
     current = 0.0
-    for k in sorted(weightDict, key=lambda kv: (kv[1], kv[0])):
+    for k in sorted(weightDict, key=weightDict.get):
         w = float(weightDict[k]) / total
         current += w
         rangeDict[k] = current

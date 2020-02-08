@@ -510,7 +510,7 @@ class SuperFunProvider(object):
                 self.sm.addItems([item['Type'] for item in pool])
                 maxDiff = self.rando.difficultyTarget
                 ret = self.rando.areaGraph.canAccess(self.sm, 'PhantoonRoomOut', 'PhantoonRoomIn', maxDiff)\
-                      and self.rando.areaGraph.canAccess(self.sm, 'Main Street Bottom', 'DraygonRoomOut', maxDiff)
+                      and self.rando.areaGraph.canAccess(self.sm, 'Main Street Bottom', 'DraygonRoomIn', maxDiff)
 
         # cleanup
         self.sm.resetItems()

@@ -42,8 +42,6 @@ else
 fi
 
 PRESETS=("regular" "noob" "master")
-AREAS=("" "--area")
-BOSSES=("" "--bosses")
 SUITS=("" "--nogravheatPatch" "--progressiveSuits")
 CHARGES=("" "--nerfedCharge")
 TWEAKS=("" "--novariatweaks")
@@ -52,11 +50,6 @@ LAYOUTS=("" "--nolayout")
 function generate_params {
     SEED="$1"
     PRESET="$2"
-
-    let S=$RANDOM%${#AREAS[@]}
-    AREA=${AREAS[$S]}
-    let S=$RANDOM%${#BOSSES[@]}
-    BOSS=${BOSSES[$S]}
 
     # optional patches
     let S=$RANDOM%${#SUITS[@]}
@@ -68,7 +61,7 @@ function generate_params {
     let S=$RANDOM%${#LAYOUTS[@]}
     LAYOUT=${LAYOUTS[$S]}
 
-    echo "-r ${ROM} --param standard_presets/${PRESET}.json --seed ${SEED} --progressionSpeed random --morphPlacement random --progressionDifficulty random --missileQty 0 --superQty 0 --powerBombQty 0 --minorQty 0 --energyQty random --majorsSplit random --suitsRestriction random --hideItems random --strictMinors random --superFun CombatRandom --superFun MovementRandom --superFun SuitsRandom --maxDifficulty random --startAP random --runtime 20 ${AREA} ${BOSS} ${SUIT} ${CHARGE} ${TWEAK} ${LAYOUT}"
+    echo "-r ${ROM} --param standard_presets/${PRESET}.json --seed ${SEED} --progressionSpeed random --morphPlacement random --progressionDifficulty random --missileQty 0 --superQty 0 --powerBombQty 0 --minorQty 0 --energyQty random --majorsSplit random --suitsRestriction random --hideItems random --strictMinors random --superFun CombatRandom --superFun MovementRandom --superFun SuitsRandom --maxDifficulty random --startAP random --runtime 20 --area random --bosses random ${SUIT} ${CHARGE} ${TWEAK} ${LAYOUT}"
 }
 
 function computeSeed {
@@ -215,5 +208,6 @@ echo "DONE"
 
 echo "errors:"
 grep -E "NOK|mismatch|Can't solve" ${CSV}
+grep Traceback ${LOG}
 
 rm -rf ${TEMP_DIR}

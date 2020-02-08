@@ -527,10 +527,10 @@ class Knows:
                                            'rooms': ['Plasma Room']}
 
     # spring ball access
-    AccessSpringBallWithHiJump = SMBool(True, medium, ['AccessSpringBallWithHiJump'])
+    AccessSpringBallWithHiJump = SMBool(True, easy, ['AccessSpringBallWithHiJump'])
     desc['AccessSpringBallWithHiJump'] = {'display': 'Access Spring Ball location with Hi-Jump',
                                           'title': 'With Gravity and Hi-Jump, jump to get through the grapple hole',
-                                          'href': None,
+                                          'href': 'https://youtu.be/mHiSd3kebHo',
                                           'rooms': ['Pants Room']}
 
     AccessSpringBallWithSpringBallBombJumps = SMBool(False, 0, ['AccessSpringBallWithSpringBallBombJumps'])

@@ -213,6 +213,7 @@ if __name__ == "__main__":
     def forceArg(arg, value, msg):
         if argDict[arg] != value:
             argDict[arg] = value
+            print(msg)
             return '\n'+msg
         else:
             return ''
@@ -643,8 +644,6 @@ if __name__ == "__main__":
                 paletteSettings[param] = getattr(args, param)
             PaletteRando(romPatcher, paletteSettings, args.sprite).randomize()
         romPatcher.end()
-        if optErrMsg != '':
-            print(optErrMsg + '\n')
         if args.rom is None:
             data = romPatcher.romFile.data
             fileName = '{}.sfc'.format(fileName)

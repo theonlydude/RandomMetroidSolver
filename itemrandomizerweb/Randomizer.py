@@ -1913,7 +1913,7 @@ class Randomizer(object):
         self.log.debug("initState="+str(self.initState))
         self.log.debug("{} items in pool".format(len(self.itemPool)))
         runtime_s = 0
-        startDate = time.clock()
+        startDate = time.process_time()
         self.prevDiffTarget = None
         while ((len(self.itemPool) > 0 or len(self.plandoItemPool) > 0)
                and not isStuck
@@ -1959,7 +1959,7 @@ class Randomizer(object):
                             self.resetCache()
                         isStuck = False
             self.chozoCheck()
-            runtime_s = time.clock() - startDate
+            runtime_s = time.process_time() - startDate
         self.log.debug("{} remaining items in pool : {}".format(len(self.itemPool), [i['Type'] for i in self.itemPool]))
         self.log.debug("nStates="+str(len(self.states)))
         self.log.debug('unusedLocs='+str([loc['Name'] for loc in self.unusedLocations]))

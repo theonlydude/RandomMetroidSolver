@@ -483,7 +483,17 @@ class SuperFunProvider(object):
         for boss in self.bossChecks:
             Bosses.beatBoss(boss)
         # get restricted locs
-        totalAvailLocs = [loc for loc in self.rando.currentLocations(post=True) if self.areaGraph.canAccess(self.sm, loc['accessPoint'], self.rando.curAccessPoint, self.rando.difficultyTarget)]
+        totalAvailLocs = []
+        comeBack = {}
+        locs = [loc for loc in self.rando.currentLocations(post=True)]
+        for loc in locs:
+            ap = loc['accessPoint']
+            if ap not in comeBack:
+                # we chose Landing Site because other start APs might not have comeback transitions
+                # possible start AP issues are handled in checkStart
+                comeBack[ap] = self.areaGraph.canAccess(self.sm, ap, 'Landing Site', self.rando.difficultyTarget)
+            if comeBack[ap]:
+                totalAvailLocs.append(loc)
         self.lastRestricted = [loc for loc in self.locations if loc not in totalAvailLocs]
         self.log.debug("restricted=" + str([loc['Name'] for loc in self.lastRestricted]))
 

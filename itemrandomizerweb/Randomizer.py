@@ -1271,7 +1271,7 @@ class Randomizer(object):
         def getNonProgLocList(itemObj):
             nonlocal nonProgList
             if nonProgList is None:
-                nonProgList = self.currentLocations(post=True)
+                nonProgList = self.currentLocations(locs=locs, post=True)
             return [loc for loc in nonProgList if self.canPlaceAtLocation(itemObj, loc)]
         # boss handling : check bosses we can kill and come back from. return immediately if found
         boss = next((item for item in pool if item['Type'] == 'Boss'), None)

@@ -1336,13 +1336,14 @@ class Randomizer(object):
     def generateItem(self, curLocs, pool, locs=None):
         item, loc = None, None
         itemLocDict, possibleProg = self.getPossiblePlacements(pool, curLocs, locs=locs)
+        itemList = sorted([wrapper.item for wrapper in itemLocDict.keys()], key=lambda item: item['Type'])
         if possibleProg:
             # choose item/loc with prog rules
-            item = self.chooseItem([wrapper.item for wrapper in itemLocDict.keys()])
+            item = self.chooseItem(itemList)
             loc = self.chooseLocation(itemLocDict[item['Wrapper']], item)
         elif len(itemLocDict) > 0:
             # randomly choose item/location
-            item = self.chooseItemRandom([wrapper.item for wrapper in itemLocDict.keys()])
+            item = self.chooseItemRandom(itemList)
             loc = self.chooseLocationRandom(itemLocDict[item['Wrapper']], item)
         itemLoc = None
         if item is not None and loc is not None:
@@ -1606,6 +1607,8 @@ class Randomizer(object):
             self.log.debug("rollback END initState apply, nCurLocs="+str(len(self.currentLocations())))
             if self.vcr != None:
                 self.vcr.addRollback(nStatesAtStart)
+            sys.stdout.write('<'*nStatesAtStart)
+            sys.stdout.flush()
             return None
         # to stay consistent in case no solution is found as states list was popped in init
         fallbackState = self.getCurrentState()

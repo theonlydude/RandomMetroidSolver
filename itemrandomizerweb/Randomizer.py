@@ -483,7 +483,7 @@ class SuperFunProvider(object):
         for boss in self.bossChecks:
             Bosses.beatBoss(boss)
         # get restricted locs
-        totalAvailLocs = [loc for loc in self.rando.currentLocations(post=True)]
+        totalAvailLocs = [loc for loc in self.rando.currentLocations(post=True) if self.areaGraph.canAccess(self.sm, loc['accessPoint'], self.rando.curAccessPoint, self.rando.difficultyTarget)]
         self.lastRestricted = [loc for loc in self.locations if loc not in totalAvailLocs]
         self.log.debug("restricted=" + str([loc['Name'] for loc in self.lastRestricted]))
 
@@ -580,8 +580,11 @@ class SuperFunProvider(object):
         return len(forb)
 
     def getForbiddenSuits(self):
-        self.log.debug("getForbiddenSuits BEGIN. forbidden="+str(self.forbiddenItems))
+        self.log.debug("getForbiddenSuits BEGIN. forbidden="+str(self.forbiddenItems)+",ap="+self.rando.curAccessPoint)
         removableSuits = [suit for suit in self.suits if self.checkPool([suit])]
+        if 'Varia' in removableSuits and self.rando.curAccessPoint == 'Bubble Mountain':
+            # Varia has to be fist item there, and checkPool can't detect it
+            removableSuits.remove('Varia')
         self.log.debug("getForbiddenSuits removable="+str(removableSuits))
         if len(removableSuits) > 0:
             # remove at least one
@@ -1282,7 +1285,7 @@ class Randomizer(object):
         def getNonProgLocList(itemObj):
             nonlocal nonProgList
             if nonProgList is None:
-                nonProgList = self.currentLocations(locs=locs, post=True)
+                nonProgList = [loc for loc in self.currentLocations(locs=locs, post=True) if not self.isSoftlockPossible(itemObj, loc)] # we don't care what the item is
             return [loc for loc in nonProgList if self.canPlaceAtLocation(itemObj, loc)]
         # boss handling : check bosses we can kill and come back from. return immediately if found
         boss = next((item for item in pool if item['Type'] == 'Boss'), None)
@@ -1361,18 +1364,6 @@ class Randomizer(object):
                 'Item': item,
                 'Location': loc
             }
-            # while self.hasTried(itemLoc):
-            #     itemList.remove(item)
-            #     if len(itemList) > 0:
-            #         item = self.chooseItemRandom(itemList)
-            #         loc = self.chooseLocationRandom(itemLocDict[item['Wrapper']], item)
-            #         itemLoc = {
-            #             'Item': item,
-            #             'Location': loc
-            #         }
-            #     else:
-            #         itemLoc = None
-            #         break
         return itemLoc
 
     def appendCurrentState(self, curLocs):

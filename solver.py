@@ -312,12 +312,12 @@ class CommonSolver(object):
         else:
             self.romFileName = rom
             self.romLoader = RomLoader.factory(rom, magic)
+            self.romLoader.readNothingId()
             self.majorsSplit = self.romLoader.assignItems(self.locations)
             (self.startAP, self.startArea, startPatches) = self.romLoader.getStartAP()
             (self.areaRando, self.bossRando, self.escapeRando) = self.romLoader.loadPatches()
             RomPatches.ActivePatches += startPatches
             self.escapeTimer = self.romLoader.getEscapeTimer()
-            self.romLoader.readNothingId()
 
             if interactive == False:
                 print("ROM {} majors: {} area: {} boss: {} escape: {} patches: {} activePatches: {}".format(rom, self.majorsSplit, self.areaRando, self.bossRando, self.escapeRando, sorted(self.romLoader.getPatches()), sorted(RomPatches.ActivePatches)))

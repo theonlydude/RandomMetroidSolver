@@ -527,6 +527,12 @@ class Knows:
                                            'rooms': ['Plasma Room']}
 
     # spring ball access
+    AccessSpringBallWithHiJump = SMBool(True, medium, ['AccessSpringBallWithHiJump'])
+    desc['AccessSpringBallWithHiJump'] = {'display': 'Access Spring Ball location with Hi-Jump',
+                                          'title': 'With Gravity and Hi-Jump, jump to get through the grapple hole',
+                                          'href': None,
+                                          'rooms': ['Pants Room']}
+
     AccessSpringBallWithSpringBallBombJumps = SMBool(False, 0, ['AccessSpringBallWithSpringBallBombJumps'])
     desc['AccessSpringBallWithSpringBallBombJumps'] = {'display': 'Access Spring Ball location with bomb jumps and spring ball',
                                                        'title': 'With Gravity and no Hi-Jump, bounce on the sand and bomb jump up to get through the grapple hole',
@@ -592,9 +598,9 @@ class Knows:
              'title': 'Mama Turtle'}
         ],
         'Maridia 2/2': [
-            {'knows': ['AccessSpringBallWithSpringBallBombJumps', 'AccessSpringBallWithBombJumps',
-                       'AccessSpringBallWithSpringBallJump', 'AccessSpringBallWithXRayClimb',
-                       'AccessSpringBallWithGravJump'],
+            {'knows': ['AccessSpringBallWithHiJump', 'AccessSpringBallWithSpringBallBombJumps',
+                       'AccessSpringBallWithBombJumps', 'AccessSpringBallWithSpringBallJump',
+                       'AccessSpringBallWithXRayClimb', 'AccessSpringBallWithGravJump'],
              'title': 'Spring Ball Access'},
             {'knows': ['DraygonRoomGrappleExit', 'DraygonRoomCrystalFlash', 'PreciousRoomXRayExit'],
              'title': 'Suitless Draygon Exit'},

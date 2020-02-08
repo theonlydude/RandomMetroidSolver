@@ -211,27 +211,35 @@ class AccessGraph(object):
             if loc['GraphArea'] not in availAreas:
                 loc['distance'] = 30000
                 loc['difficulty'] = SMBool(False)
-                #if loc['Name'] == "Super Missile (Crateria)":
+                #if loc['Name'] == "Kraid":
                 #    print("loc: {} locDiff is area nok".format(loc["Name"]))
                 continue
 
-            for apName in self.getSortedAPs(availAPPaths, loc['AccessFrom']):
+            locAPs = self.getSortedAPs(availAPPaths, loc['AccessFrom'])
+            if len(locAPs) == 0:
+                loc['distance'] = 40000
+                loc['difficulty'] = SMBool(False)
+                #if loc['Name'] == "Kraid":
+                #    print("loc: {} no aps".format(loc["Name"]))
+                continue
+
+            for apName in locAPs:
                 if apName == None:
                     loc['distance'] = 20000
                     loc['difficulty'] = SMBool(False)
-                    #if loc['Name'] == "Super Missile (Crateria)":
+                    #if loc['Name'] == "Kraid":
                     #    print("loc: {} ap is none".format(loc["Name"]))
                     break
 
                 tFunc = loc['AccessFrom'][apName]
                 ap = self.accessPoints[apName]
                 tdiff = smbm.eval(tFunc)
-                #if loc['Name'] == "Super Missile (Crateria)":
+                #if loc['Name'] == "Kraid":
                 #    print("{} root: {} ap: {}".format(loc['Name'], rootNode, apName))
                 if tdiff.bool == True and tdiff.difficulty <= maxDiff:
                     diff = smbm.eval(loc['Available'])
                     path = availAPPaths[apName]["path"]
-                    #if loc['Name'] == "Super Missile (Crateria)":
+                    #if loc['Name'] == "Kraid":
                     #    print("{} path: {}".format(loc['Name'], [a.Name for a in path]))
                     pdiff = availAPPaths[apName]["pdiff"]
                     locDiff = SMBool(diff.bool,
@@ -244,23 +252,28 @@ class AccessGraph(object):
                         loc['difficulty'] = locDiff
                         loc['path'] = path
                         availLocs.append(loc)
-                        #if loc['Name'] == "Super Missile (Crateria)":
+                        #if loc['Name'] == "Kraid":
                         #    print("{} diff: {} tdiff: {} pdiff: {}".format(loc['Name'], diff, tdiff, pdiff))
                         break
                     else:
                         loc['distance'] = 1000 + tdiff.difficulty
                         loc['difficulty'] = SMBool(False)
-                        #if loc['Name'] == "Super Missile (Crateria)":
+                        #if loc['Name'] == "Kraid":
                         #    print("loc: {} locDiff is false".format(loc["Name"]))
                 else:
                     loc['distance'] = 10000 + tdiff.difficulty
                     loc['difficulty'] = SMBool(False)
-                    #if loc['Name'] == "Super Missile (Crateria)":
+                    #if loc['Name'] == "Kraid":
                     #    print("loc: {} tdiff is false".format(loc["Name"]))
 
             if 'difficulty' not in loc:
+                #if loc['Name'] == "Kraid":
+                #    print("loc: {} no difficulty in loc".format(loc["Name"]))
                 loc['distance'] = 100000
                 loc['difficulty'] = SMBool(False)
+
+            #if loc['Name'] == "Kraid":
+            #    print("loc: {}: {}".format(loc['Name'], loc))
 
         #print("availableLocs: {}".format([loc["Name"] for loc in availLocs]))
         return availLocs

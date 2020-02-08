@@ -1,6 +1,3 @@
-from functools import reduce
-
-# the difficulties for each technics
 from smbool import SMBool
 from rom_patches import RomPatches
 from helpers import Helpers, Bosses

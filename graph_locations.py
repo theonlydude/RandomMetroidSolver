@@ -257,7 +257,7 @@ locations = [
 },
 {
     'Area': "Brinstar",
-    'GraphArea': "Kraid",
+    'GraphArea': "KraidBoss",
     'SolveArea': "Kraid",
     'Name': "Kraid",
     'Class': ["Boss"],
@@ -274,7 +274,7 @@ locations = [
 },
 {
     'Area': "Brinstar",
-    'GraphArea': "Kraid",
+    'GraphArea': "KraidBoss",
     'SolveArea': "Kraid",
     'Name': "Varia Suit",
     'Class': ["Major", "Chozo"],
@@ -431,7 +431,7 @@ locations = [
 },
 {
     'Area': "LowerNorfair",
-    'GraphArea': "LowerNorfair",
+    'GraphArea': "LowerNorfairBoss",
     'SolveArea': "Lower Norfair After Amphitheater",
     'Name': "Ridley",
     'Class': ["Boss"],
@@ -448,7 +448,7 @@ locations = [
 },
 {
     'Area': "LowerNorfair",
-    'GraphArea': "LowerNorfair",
+    'GraphArea': "LowerNorfairBoss",
     'SolveArea': "Lower Norfair After Amphitheater",
     'Name': "Energy Tank, Ridley",
     'Class': ["Major", "Chozo"],
@@ -541,7 +541,7 @@ locations = [
 },
 {
     'Area': "WreckedShip",
-    'GraphArea': "WreckedShip",
+    'GraphArea': "WreckedShipBoss",
     'SolveArea': "WreckedShip Main",
     'Name': "Phantoon",
     'Class': ["Boss"],
@@ -715,7 +715,8 @@ locations = [
                                                           sm.knowsSuitlessPuyoClip())),
                                            sm.wand(sm.haveItem('Grapple'), # go through grapple block
                                                    sm.haveItem('Gravity'),
-                                                   sm.wor(sm.wor(sm.haveItem('HiJump'), sm.haveItem('SpaceJump')),
+                                                   sm.wor(sm.wor(sm.wand(sm.haveItem('HiJump'), sm.knowsAccessSpringBallWithHiJump()),
+                                                                 sm.haveItem('SpaceJump')),
                                                           sm.knowsAccessSpringBallWithGravJump(),
                                                           sm.wand(sm.haveItem('Bomb'),
                                                                   sm.wor(sm.knowsAccessSpringBallWithBombJumps(),
@@ -745,7 +746,7 @@ locations = [
 },
 {
     'Area': "Maridia",
-    'GraphArea': "Maridia",
+    'GraphArea': "MaridiaBoss",
     'SolveArea': "Maridia Pink Top",
     'Name': "Draygon",
     'Class': ["Boss"],
@@ -761,7 +762,7 @@ locations = [
 },
 {
     'Area': "Maridia",
-    'GraphArea': "Maridia",
+    'GraphArea': "MaridiaBoss",
     'SolveArea': "Maridia Pink Top",
     'Name': "Space Jump",
     'Class': ["Major", "Chozo"],
@@ -878,7 +879,8 @@ locations = [
     'Visibility': "Visible",
     'Room': 'The Moat',
     'AccessFrom' : {
-        'Keyhunter Room Bottom': lambda sm: sm.canOpenYellowDoors()
+        'Keyhunter Room Bottom': lambda sm: sm.canOpenYellowDoors(),
+        'Moat Right': lambda sm: sm.canPassMoatReverse()
     },
     'Available': lambda sm: SMBool(True)
 },

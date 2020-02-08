@@ -215,5 +215,6 @@ echo "DONE"
 
 echo "errors:"
 grep -E "NOK|mismatch|Can't solve" ${CSV}
+grep Traceback ${LOG}
 
 rm -rf ${TEMP_DIR}

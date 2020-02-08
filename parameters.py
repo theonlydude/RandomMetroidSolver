@@ -535,19 +535,19 @@ class Knows:
 
     AccessSpringBallWithSpringBallBombJumps = SMBool(False, 0, ['AccessSpringBallWithSpringBallBombJumps'])
     desc['AccessSpringBallWithSpringBallBombJumps'] = {'display': 'Access Spring Ball location with bomb jumps and spring ball',
-                                                       'title': 'With Gravity and no Hi-Jump, bounce on the sand and bomb jump up to get through the grapple hole',
+                                                       'title': 'With Gravity, bounce on the sand and bomb jump up to get through the grapple hole',
                                                        'href': 'https://youtu.be/VbR6z3aZuWg',
                                                        'rooms': ['Pants Room']}
 
     AccessSpringBallWithBombJumps = SMBool(False, 0, ['AccessSpringBallWithBombJumps'])
     desc['AccessSpringBallWithBombJumps'] = {'display': 'Access Spring Ball location with bomb jumps only',
-                                             'title': 'With Gravity and no Hi-Jump, bomb jump up from the sand to get through the grapple hole',
+                                             'title': 'With Gravity, bomb jump up from the sand to get through the grapple hole',
                                              'href': 'https://youtu.be/8s_Tng-3oZM',
                                              'rooms': ['Pants Room']}
 
     AccessSpringBallWithSpringBallJump = SMBool(False, 0, ['AccessSpringBallWithSpringBallJump'])
     desc['AccessSpringBallWithSpringBallJump'] = {'display': 'Access Spring Ball location with a spring ball jump',
-                                                  'title': 'With Gravity and no Hi-Jump, use a spring ball jump, either from the sand or a ledge to get through the grapple hole',
+                                                  'title': 'With Gravity, use a spring ball jump, either from the sand or a ledge to get through the grapple hole',
                                                   'href': 'https://youtu.be/YrmAqwJxbYs',
                                                   'rooms': ['Pants Room']}
 

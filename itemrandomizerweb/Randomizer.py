@@ -503,13 +503,14 @@ class SuperFunProvider(object):
                     ret = False
                     self.log.debug("unavail Boss: " + loc['Name'])
             if ret:
-                # revive bosses and see if phantoon doesn't block himself
+                # revive bosses and see if phantoon doesn't block himself, and if we can reach draygon if she's alive
                 Bosses.reset()
                 # reset cache
                 self.sm.resetItems()
                 self.sm.addItems([item['Type'] for item in pool])
                 maxDiff = self.rando.difficultyTarget
-                ret = self.rando.areaGraph.canAccess(self.sm, 'PhantoonRoomOut', 'PhantoonRoomIn', maxDiff)
+                ret = self.rando.areaGraph.canAccess(self.sm, 'PhantoonRoomOut', 'PhantoonRoomIn', maxDiff)\
+                      and self.rando.areaGraph.canAccess(self.sm, 'Main Street Bottom', 'DraygonRoomOut', maxDiff)
 
         # cleanup
         self.sm.resetItems()

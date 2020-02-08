@@ -55,7 +55,7 @@ class RandoSettings(object):
         self.superFun = superFun
         self.runtimeLimit_s = runtimeLimit_s
         if self.runtimeLimit_s <= 0:
-            self.runtimeLimit_s = sys.maxint
+            self.runtimeLimit_s = sys.maxsize
         self.vcr = vcr
         self.plandoRando = plandoRando
 

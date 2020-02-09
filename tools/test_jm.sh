@@ -209,6 +209,14 @@ done
 
 echo "DONE"
 
+for AP in "Ceres" "Landing Site" "Gauntlet Top" "Green Brinstar Elevator" "Big Pink" "Etecoons Supers" "Wrecked Ship Main" "Business Center" "Bubble Mountain" "Watering Hole" "Red Brinstar Elevator" "Golden Four"; do
+    TOTAL=$(grep "${AP}" ${CSV}  | wc -l)
+    ERROR=$(grep "${AP}" ${CSV} | grep -E '^error' | wc -l)
+    PERCENT=$(echo "${ERROR}*100/${TOTAL}" | bc)
+    printf "%-24s" "${AP}"; echo "error ${ERROR}/${TOTAL} = ${PERCENT}%"
+done
+echo "total: $(wc -l logs/test_jm.csv)"
+
 echo "errors:"
 grep -E "NOK|mismatch|Can't solve" ${CSV}
 grep Traceback ${LOG}

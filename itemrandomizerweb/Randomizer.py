@@ -1690,13 +1690,18 @@ class Randomizer(object):
     # check if bosses are blocking the last remaining locations
     def onlyBossesLeft(self, bossesKilled):
         self.log.debug('onlyBossesLeft, diff=' + str(self.difficultyTarget))
-        prevLocs = self.currentLocations(post=True)
+        nextBoss = next((item for item in self.itemPool if item['Type'] == 'Boss'), None)
+        if nextBoss is None:
+            return False
+        def getLocList():
+            return [loc for loc in self.currentLocations(post=True) if not self.isSoftlockPossible(nextBoss, loc)]
+        prevLocs = getLocList()
         # fake kill all bosses and see if we can access the rest of the game
         Bosses.reset()
         for boss in ['Kraid', 'Phantoon', 'Ridley', 'Draygon']:
             Bosses.beatBoss(boss)
         # get bosses locations and newly accessible locations (for bosses that open up locs)
-        newLocs = self.currentLocations(post=True)
+        newLocs = getLocList()
         locs = newLocs + [loc for loc in self.unusedLocations if ('Boss' in loc['Class'] or 'Pickup' in loc) and not loc in newLocs]
         ret = (len(locs) > len(prevLocs) and len(locs) == len(self.unusedLocations))
         # restore currently killed bosses

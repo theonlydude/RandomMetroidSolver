@@ -1964,7 +1964,11 @@ class Randomizer(object):
                     isStuck = self.getItemFromStandardPool()
                 if isStuck:
                     # if we're stuck, check if only bosses locations are left (bosses difficulty settings problems)
-                    self.onlyBosses = self.onlyBossesLeft(self.getCurrentState().bosses)
+                    if not self.onlyBosses:
+                        self.onlyBosses = self.onlyBossesLeft(self.getCurrentState().bosses)
+                    else:
+                        # shouldn't be stuck if onlyBosses was already detected, so it was a false positive
+                        self.onlyBosses = False
                     if not self.onlyBosses:
                         # check that we're actually stuck
                         nCurLocs = len(self.currentLocations())

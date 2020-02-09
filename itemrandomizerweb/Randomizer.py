@@ -1215,8 +1215,8 @@ class Randomizer(object):
     # usually these locs are checked last when playing, so placing
     # an important item there has an impact on progression speed
     def isSoftlockPossible(self, item, loc):
-        # disable check for early game
-        if self.isEarlyGame() or loc['Name'] == 'Bomb':
+        # disable check for early game and MB
+        if self.isEarlyGame() or loc['Name'] == 'Bomb' or loc['Name'] == 'Mother Brain':
             return False
         isPickup = 'Pickup' in loc
         if isPickup:
@@ -1640,7 +1640,6 @@ class Randomizer(object):
             sys.stdout.flush()
             return None
         # to stay consistent in case no solution is found as states list was popped in init
-        byPassTriedCheck = self.isEarlyGame()
         fallbackState = self.getCurrentState()
         if fallbackState == self.lastFallbackState:
             # we're stuck there, rewind more in fallback

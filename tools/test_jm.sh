@@ -46,6 +46,7 @@ SUITS=("" "--nogravheatPatch" "--progressiveSuits")
 CHARGES=("" "--nerfedCharge")
 TWEAKS=("" "--novariatweaks")
 LAYOUTS=("" "--nolayout")
+STARTAPS=("" "--startAP random")
 
 function generate_params {
     SEED="$1"
@@ -60,8 +61,10 @@ function generate_params {
     TWEAK=${TWEAKS[$S]}
     let S=$RANDOM%${#LAYOUTS[@]}
     LAYOUT=${LAYOUTS[$S]}
+    let S=$RANDOM%${#STARTAPS[@]}
+    STARTAP=${STARTAPS[$S]}
 
-    echo "-r ${ROM} --param standard_presets/${PRESET}.json --seed ${SEED} --progressionSpeed random --morphPlacement random --progressionDifficulty random --missileQty 0 --superQty 0 --powerBombQty 0 --minorQty 0 --energyQty random --majorsSplit random --suitsRestriction random --hideItems random --strictMinors random --superFun CombatRandom --superFun MovementRandom --superFun SuitsRandom --maxDifficulty random --startAP random --runtime 20 --area random --bosses random ${SUIT} ${CHARGE} ${TWEAK} ${LAYOUT}"
+    echo "-r ${ROM} --param standard_presets/${PRESET}.json --seed ${SEED} --progressionSpeed random --morphPlacement random --progressionDifficulty random --missileQty 0 --superQty 0 --powerBombQty 0 --minorQty 0 --energyQty random --majorsSplit random --suitsRestriction random --hideItems random --strictMinors random --superFun CombatRandom --superFun MovementRandom --superFun SuitsRandom --maxDifficulty random --runtime 20 --area random --bosses random ${SUIT} ${CHARGE} ${TWEAK} ${LAYOUT} ${STARTAP}"
 }
 
 function computeSeed {

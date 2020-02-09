@@ -1474,7 +1474,9 @@ class Randomizer(object):
             sys.stdout.flush()
             return False
         # check that there is room left in all main areas
-        room = {'Brinstar' : 0, 'Norfair' : 0, 'WreckedShip' : 0, 'LowerNorfair' : 0, 'Maridia' : 0, 'Crateria' : 0 }
+        room = {'Brinstar' : 0, 'Norfair' : 0, 'WreckedShip' : 0, 'LowerNorfair' : 0, 'Maridia' : 0 }
+        if not self.stdStart:
+            room['Crateria'] = 0
         for loc in self.unusedLocations:
             majAvail = self.isLocMajor(loc)
             minAvail = self.isLocMinor(loc)

@@ -639,14 +639,22 @@ var tips = [
     "VARIAble progression speed will randomly change internal progression speed while placing items, creating seeds that are more unpredictable",
     "Progression difficulty setting will have a moderate impact on seed difficulty compared to progression speed",
     "Late Morph is best suited when used along area randomization, to find Morph in peculiar places",
+    "For the Late morph setting to work at full power, you must enable Area+Full randomization, and leave Suits Restriction off. If the seed generation fails, just retry.",
     "The Tracker can be use in seedless mode, aka I use my tablet on my couch. Just click 'Init' without picking a seed file",
     "If you're stuck while playing a seed, use the Solver or the Tracker to know where to go next",
-    "By default all seeds are MSU-1 compatible",
+    "All generated seeds are MSU-1 compatible",
     "Anti soft-lock layout modification are applied by default",
     "You can use the tracker to track the connections between the areas and avoid getting too lost in area rando",
     "With Boss randomization, the areas or rooms unlocked by the bosses stay unchanged. For example, you still have to kill Phantoon to activate Wrecked Ship.",
     "The aim buttons can be assigned to any button",
-    "You can save your own button layout as well as moonwalk option in your skills preset to avoid doing the setup every seed"
+    "You can save your own button layout as well as moonwalk option in your skills preset to avoid doing the setup every seed",
+    "Using a non-standard or randomized start location will enable Full randomization, all anti-softlock patches and VARIA tweaks",
+    "During randomized escape sequence in area rando, your hyper beam can destroy super/bomb/PB blocks, and open all gates",
+    "During randomized escape sequence in area rando, if you 'forgot' to pick up a suit during your run and cannot escape, you can reload and exit Tourian at any time",
+    "Click on the '?' buttons to get help and tutorials in all pages of the VARIA site",
+    "You can alter the Suits behaviour in the Advanced tab (Patches section). Choose between Balanced (default), Progressive (like DASH randomizer), and Vanilla.",
+    "Tired of looking for Charge beam? Check out the 'Nerfed Charge' patch accessible in Medium and Advanced tabs",
+    "Super Fun settings (Advanced tab) do not require any specific skill in your preset. The seeds generated will always be completable."
 ];
 
 var myTimer = null;
@@ -1699,7 +1707,7 @@ def displayNumber(id, min, max, default, step="1"):
 	    <div id="superFunVisibility">
               <h4>Super Fun Times (TM)</h4>
               <p>
-                Have fun randomly removing major items! <b>Warning:</b> For experienced players only.
+                Have fun randomly removing major items!
               </p>
 	      <table class="full">
                 <tr>

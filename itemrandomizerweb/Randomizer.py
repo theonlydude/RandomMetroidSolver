@@ -1976,6 +1976,8 @@ class Randomizer(object):
                     else:
                         # shouldn't be stuck if onlyBosses was already detected, so it was a false positive
                         self.onlyBosses = False
+                        self.difficultyTarget = self.prevDiffTarget
+                        self.prevDiffTarget = None
                     if not self.onlyBosses:
                         # check that we're actually stuck
                         nCurLocs = len(self.currentLocations())

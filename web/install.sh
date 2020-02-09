@@ -571,4 +571,4 @@ mkdir -p ~/web2py/applications/solver/static/images/sprite_sheets/
 [ -L ~/web2py/applications/solver/static/images/red_bt_blue_door.png ] || ln -s ~/RandomMetroidSolver/web/static/start_locations/red_bt_blue_door.png ~/web2py/applications/solver/static/images/red_bt_blue_door.png
 
 [ -L ~/web2py/applications/solver/static/images/pirates_shaft_blue_door.png ] || ln -s ~/RandomMetroidSolver/web/static/help/pirates_shaft_blue_door.png ~/web2py/applications/solver/static/images/pirates_shaft_blue_door.png
-[ -L ~/web2py/applications/solver/static/images/.png ] || ln -s ~/RandomMetroidSolver/web/static/help/.png ~/web2py/applications/solver/static/images/.png
+[ -L ~/web2py/applications/solver/static/images/kihunter_blue_door.png ] || ln -s ~/RandomMetroidSolver/web/static/help/kihunter_blue_door.png ~/web2py/applications/solver/static/images/kihunter_blue_door.png

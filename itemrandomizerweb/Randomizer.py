@@ -522,12 +522,19 @@ class SuperFunProvider(object):
                 ret = self.rando.areaGraph.canAccess(self.sm, 'PhantoonRoomOut', 'PhantoonRoomIn', maxDiff)\
                       and self.rando.areaGraph.canAccess(self.sm, 'Main Street Bottom', 'DraygonRoomIn', maxDiff)
 
+        if self.isChozo:
+            Knows.IceZebSkip = zeb
+            # last check for chozo locations: don't put more restricted locations than removed chozo items (we cannot rely
+            # on removing ammo/energy in fillRestrictedLocations since it is already the bare minimum in chozo pool)
+            restrictedLocs = self.restrictedLocs + [loc for loc in self.lastRestricted if loc not in self.restrictedLocs]
+            nRestrictedChozo = sum(1 for loc in restrictedLocs if 'Chozo' in loc['Class'])
+            nNothingChozo = sum(1 for item in pool if 'Chozo' in item['Class'] and item['Category'] == 'Nothing')
+            ret &= nRestrictedChozo <= nNothingChozo
+            self.log.debug('checkPool. nRestrictedChozo='+str(nRestrictedChozo)+', nNothingChozo='+str(nNothingChozo))
         # cleanup
         self.sm.resetItems()
         Bosses.reset()
         self.restoreBossChecks()
-        if self.isChozo:
-            Knows.IceZebSkip = zeb
 
         return ret
 

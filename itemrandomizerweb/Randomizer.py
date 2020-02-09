@@ -504,7 +504,7 @@ class SuperFunProvider(object):
             for ap in interAPs:
                 if not ap in availAccessPoints:
                     ret = False
-                    #self.log.debug("unavail AP: " + ap.Name + ", from " + startApName)
+                    self.log.debug("unavail AP: " + ap.Name + ", from " + startAp.Name)
 
         # check if we can reach all bosses
         if ret:
@@ -521,6 +521,7 @@ class SuperFunProvider(object):
                 maxDiff = self.rando.difficultyTarget
                 ret = self.rando.areaGraph.canAccess(self.sm, 'PhantoonRoomOut', 'PhantoonRoomIn', maxDiff)\
                       and self.rando.areaGraph.canAccess(self.sm, 'Main Street Bottom', 'DraygonRoomIn', maxDiff)
+                self.log.debug('checkPool. boss access sanity check: '+str(ret))
 
         if self.isChozo:
             Knows.IceZebSkip = zeb
@@ -535,7 +536,7 @@ class SuperFunProvider(object):
         self.sm.resetItems()
         Bosses.reset()
         self.restoreBossChecks()
-
+        self.log.debug('checkPool. result: '+str(ret))
         return ret
 
     def disableBossChecks(self):
@@ -815,14 +816,15 @@ class Randomizer(object):
             locs = [loc for loc in locs if self.restrictions['MajorMinor'] in loc['Class']]
         self.lateMorphLimit = len(locs)
         self.lateMorphOutCrateria = len(set([loc['GraphArea'] for loc in locs])) > 1
-        if self.lateMorphOutCrateria == False and self.restrictions['MajorMinor'] == 'Full' and self.restrictions['Suits'] == False:
-            # we can do better
-            raise RuntimeError('Invalid layout for late morph')
+        self.computeLateMorphLimitCheck()
         self.lateMorphResult = None
         self.log.debug("lateMorphLimit: {}: {} {}".format(self.restrictions['MajorMinor'], self.lateMorphLimit, self.lateMorphOutCrateria))
         self.log.debug('lateMorphLimit: locs=' + str([loc['Name'] for loc in locs]))
         # cleanup
         self.smbm.resetItems()
+
+    def computeLateMorphLimitCheck(self):
+        pass
 
     def resetCache(self):
         self.nonProgTypesCache = []

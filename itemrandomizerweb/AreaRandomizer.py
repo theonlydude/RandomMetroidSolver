@@ -30,6 +30,10 @@ class AreaRandomizer(Randomizer):
             raise RuntimeError("Impossible seed! (too much fun in the settings, probably)")
 
     # adapt restrictions implementation to different area layout
+    def computeLateMorphLimitCheck(self):
+        if self.lateMorphOutCrateria == False and self.restrictions['MajorMinor'] == 'Full' and self.restrictions['Suits'] == False:
+            # we can do better
+            raise RuntimeError('Invalid layout for late morph')
 
     def areaDistance(self, loc, otherLocs):
         return self.areaDistanceProp(loc, otherLocs, 'GraphArea')

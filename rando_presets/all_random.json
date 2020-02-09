@@ -1,7 +1,7 @@
 {
   "progressionDifficulty": "random",
   "funMovement": "random",
-  "startLocation": "Landing Site",
+  "startLocation": "random",
   "hideItems": "random",
   "funCombat": "random",
   "majorsSplit": "random",
@@ -10,7 +10,7 @@
   "morphPlacement": "random",
   "progressionSpeed": "random",
   "areaRandomization": "random",
-  "bossRandomization": "random",  
+  "bossRandomization": "random",
   "maxDifficulty": "random",
   "powerBombQty": "random",
   "minorQty": "random",

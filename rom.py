@@ -228,8 +228,7 @@ class RomReader:
         self.romFile.seek(address+4)
         value3 = int.from_bytes(self.romFile.read(1), byteorder='little')
         if (value3 == self.nothingId
-            and int(itemCode, 16) == 0xeedb
-            and address != self.nothingAddr):
+            and int(itemCode, 16) == 0xeedb):
             return hex(0)
         else:
             return itemCode

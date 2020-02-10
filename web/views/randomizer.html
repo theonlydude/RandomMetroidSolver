@@ -1027,11 +1027,6 @@ Tournament presets:<ul>\
 <p>You won't be able to solve/track a race protected seed on the VARIA website.</p>"
     },
     {
-      element: "#majorsSplitStep",
-      title: "Majors Split",
-      content: "<p>Chooze how you want to split the Majors and the Minors items:<ul><li>Full: All items are shuffled in all locations</li><li>Majors/Minors: Use major (upgrades and energy) and minor (ammo) item pools.</p><p><b>Note:</b> High-Jump boots Energy Tank location is considered minor, and right Super Missile in Wrecked ship is considered major for balancing purposes.</li><li>Chozo: Put all the upgrades as well as minimal ammo/energy to finish the seed in the Chozo locations. Theses are the Chozo statues, Morph Ball and boss item locations (Right Super in Wrecked Ship, Varia Suit, Ridley ETank). Depending on progresson speed and item distribution settings, you will be able to 'sequence break' by going to other locations as well.</li></ul></p><p>Check the map for the list of Majors and Chozo locations and items:<br/><a href=\"/solver/static/images/chozo_map.png\" class=\"highslide\" onclick=\"return hs.expand(this, {wrapperClassName: 'borderless', dimmingOpacity: 0.75, align: 'center'})\"><div class=\"parent-center\"><img id=\"chozoThumb\" src=\"/solver/static/images/chozo_map_thumbnail.png\" alt=\"Chozo Map\" title=\"Click to enlarge\" class=\"child-center half\"/></div></a></p><p>Click on the dice button to randomly set this parameter.</p>"
-    },
-    {
       element: "#StartLocationStep",
       title: "Start location",
       content: "<p>Choose where you want to start the game:\
@@ -1118,6 +1113,11 @@ Tournament presets:<ul>\
 </table>\
 </p>\
 <p>Patches developed by Flo.</p>"
+    },
+    {
+      element: "#majorsSplitStep",
+      title: "Majors Split",
+      content: "<p>Chooze how you want to split the Majors and the Minors items:<ul><li>Full: All items are shuffled in all locations</li><li>Majors/Minors: Use major (upgrades and energy) and minor (ammo) item pools.</p><p><b>Note:</b> High-Jump boots Energy Tank location is considered minor, and right Super Missile in Wrecked ship is considered major for balancing purposes.</li><li>Chozo: Put all the upgrades as well as minimal ammo/energy to finish the seed in the Chozo locations. Theses are the Chozo statues, Morph Ball and boss item locations (Right Super in Wrecked Ship, Varia Suit, Ridley ETank). Depending on progresson speed and item distribution settings, you will be able to 'sequence break' by going to other locations as well.</li></ul></p><p>Check the map for the list of Majors and Chozo locations and items:<br/><a href=\"/solver/static/images/chozo_map.png\" class=\"highslide\" onclick=\"return hs.expand(this, {wrapperClassName: 'borderless', dimmingOpacity: 0.75, align: 'center'})\"><div class=\"parent-center\"><img id=\"chozoThumb\" src=\"/solver/static/images/chozo_map_thumbnail.png\" alt=\"Chozo Map\" title=\"Click to enlarge\" class=\"child-center half\"/></div></a></p><p>Click on the dice button to randomly set this parameter.</p>"
     },
     {
       element: "#maxDifficultyStep",
@@ -1573,16 +1573,16 @@ def displayNumber(id, min, max, default, step="1"):
 	    <h4>Randomizer parameters</h4>
 	    <table class="full">
 	      <tr>
-		<td class="small"><div class="random"><button id="majorsSplitRandom" type="button" onclick="randomize(event, 'majorsSplit')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
-		<td><span id="majorsSplitText">Majors Split</span></td>
-	        <td>{{displaySelect("majorsSplit", ["Full", "Major", "Chozo"], "Full")}}</td>
-                <td id="majorsSplitStep"><button type="button" onclick="startTheTour(5)">?</button></td>
-	      </tr>
-	      <tr>
 		<td class="small"><div class="random"><button id="startLocationRandom" type="button" onclick="randomize(event, 'startLocation')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
 		<td><span id="startLocationText">Start location</span></td>
 		<td>{{displaySelect("startLocation", startAPs, "Landing Site")}}</td>
-                <td id="StartLocationStep"><button type="button" onclick="startTheTour(6)">?</button></td>
+                <td id="StartLocationStep"><button type="button" onclick="startTheTour(5)">?</button></td>
+	      </tr>
+	      <tr>
+		<td class="small"><div class="random"><button id="majorsSplitRandom" type="button" onclick="randomize(event, 'majorsSplit')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
+		<td><span id="majorsSplitText">Majors Split</span></td>
+	        <td>{{displaySelect("majorsSplit", ["Full", "Major", "Chozo"], "Full")}}</td>
+                <td id="majorsSplitStep"><button type="button" onclick="startTheTour(6)">?</button></td>
 	      </tr>
               <tr id="maxDiffVisibility">
 		<td class="small"><div class="random"><button id="maxDifficultyRandom" type="button" onclick="randomize(event, 'maxDifficulty')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>

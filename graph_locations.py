@@ -22,7 +22,8 @@ locations = [
     },
     'Available': lambda sm: sm.wor(sm.canEnterAndLeaveGauntlet(),
                                    sm.wand(sm.canShortCharge(),
-                                           sm.canEnterAndLeaveGauntletQty(1, 0))) # thanks ponk! https://youtu.be/jil5zTBCF1s
+                                           sm.canEnterAndLeaveGauntletQty(1, 0)), # thanks ponk! https://youtu.be/jil5zTBCF1s
+                                   sm.canDoLowGauntlet())
 },
 {
     'Area': "Crateria",
@@ -916,10 +917,7 @@ locations = [
     'AccessFrom' : {
         'Landing Site': lambda sm: sm.wor(sm.wand(sm.canEnterAndLeaveGauntlet(),
                                                   sm.canPassBombPassages()),
-                                          sm.wand(sm.canShortCharge(),
-                                                  sm.canUsePowerBombs(),
-                                                  sm.itemCountOk('ETank', 1),
-                                                  sm.knowsLowGauntlet())),
+                                          sm.canDoLowGauntlet()),
         'Gauntlet Top': lambda sm: SMBool(True)
     },
     'Available': lambda sm: SMBool(True)
@@ -938,10 +936,7 @@ locations = [
     'AccessFrom' : {
         'Landing Site': lambda sm: sm.wor(sm.wand(sm.canEnterAndLeaveGauntlet(),
                                                   sm.canPassBombPassages()),
-                                          sm.wand(sm.canShortCharge(),
-                                                  sm.canUsePowerBombs(),
-                                                  sm.itemCountOk('ETank', 1),
-                                                  sm.knowsLowGauntlet())),
+                                          sm.canDoLowGauntlet()),
         'Gauntlet Top': lambda sm: SMBool(True)
     },
     'Available': lambda sm: SMBool(True)

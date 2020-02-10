@@ -259,6 +259,14 @@ class Helpers(object):
                        sm.itemCountOk('PowerBomb', 2*n+1))
 
     @Cache.decorator
+    def canDoLowGauntlet(self):
+        sm = self.smbm
+        return sm.wand(sm.canShortCharge(),
+                       sm.canUsePowerBombs(),
+                       sm.itemCountOk('ETank', 1),
+                       sm.knowsLowGauntlet())
+
+    @Cache.decorator
     def getBeamDamage(self):
         sm = self.smbm
         standardDamage = 20

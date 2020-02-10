@@ -7,14 +7,20 @@ from smbool import SMBool
 from helpers import Bosses, diffValue2txt
 from utils import randGaussBounds, getRangeDict, chooseFromRange
 from graph import AccessGraph
-from graph_access import accessPoints
+from graph_access import accessPoints, GraphUtils, getAccessPoint
 from smboolmanager import SMBoolManager
 from vcr import VCR
 import log, logging
 
 progSpeeds = ['slowest', 'slow', 'medium', 'fast', 'fastest', 'basic']
 
+class ItemWrapper(object): # to put items in dictionaries
+    def __init__(self, item):
+        self.item = item
+        item['Wrapper'] = self
+
 class RandoSettings(object):
+    # startAP : start Access Point name
     # maxDiff : max diff
     # progSpeed : slowest, slow, medium, fast, fastest, basic
     # progDiff : easier, normal, harder
@@ -38,7 +44,9 @@ class RandoSettings(object):
     # runtimeLimit_s : maximum runtime limit in seconds for generateItems functions. If <= 0, will be unlimited.
     # vcr: to generate debug .vcr output file
     # plandoRando: list of already set (locationName, itemType) by the plando
-    def __init__(self, maxDiff, progSpeed, progDiff, qty, restrictions, superFun, runtimeLimit_s, vcr, plandoRando):
+    def __init__(self, startAP, maxDiff, progSpeed, progDiff, qty, restrictions,
+                 superFun, runtimeLimit_s, vcr, plandoRando):
+        self.startAP = startAP
         self.progSpeed = progSpeed
         self.progDiff = progDiff
         self.maxDiff = maxDiff
@@ -47,7 +55,7 @@ class RandoSettings(object):
         self.superFun = superFun
         self.runtimeLimit_s = runtimeLimit_s
         if self.runtimeLimit_s <= 0:
-            self.runtimeLimit_s = sys.maxint
+            self.runtimeLimit_s = sys.maxsize
         self.vcr = vcr
         self.plandoRando = plandoRando
 
@@ -383,7 +391,8 @@ class SuperPlandoProvider(object):
 
         raise Exception("Missing item in pool")
 
-# dat class name
+# handles super fun settings and checks that the start AP/area/item
+# pool/settings combination makes sense
 class SuperFunProvider(object):
     # give the rando since we have to access services from it
     def __init__(self, superFun, itemManager, rando):
@@ -420,6 +429,36 @@ class SuperFunProvider(object):
         self.itemManager.setItemPool(self.basePool[:]) # reuse base pool to have constant base item set
         return self.itemManager.removeForbiddenItems(self.forbiddenItems + forbidden)
 
+    # if needed, do a simplified "pre-randomization" of a few items to check start AP/area layout validity
+    # very basic because we know we're in full randomization in cases the check can fail
+    def checkStart(self):
+        ap = getAccessPoint(self.rando.curAccessPoint)
+        if ap.Start is None or \
+           (('needsPreRando' not in ap.Start or not ap.Start['needsPreRando']) and \
+            ('areaMode' not in ap.Start or not ap.Start['areaMode'])):
+            return True
+        self.log.debug("********* PRE RANDO START")
+        pool = self.rando.itemPool[:]
+        locs = [copy.deepcopy(loc) for loc in self.locations]
+        itemLoc = None
+        startOk = True
+        self.rando.computeLateMorphLimit()
+        self.sm.resetItems()
+        curLocs = self.rando.currentLocations(locs=locs)
+        state = RandoState(self.rando, curLocs)
+        self.rando.determineParameters()
+        for i in range(4):
+            itemLoc = self.rando.generateItem(curLocs, pool, locs=locs)
+            if itemLoc is None:
+                startOk = False
+                break
+            self.rando.getItem(itemLoc, pool=pool, locs=locs, showDot=False)
+            curLocs = self.rando.currentLocations(locs=locs)
+        state.apply(self.rando)
+        self.log.debug("********* PRE RANDO END")
+
+        return startOk
+
     def checkPool(self, forbidden=None):
         self.log.debug("checkPool. forbidden=" + str(forbidden) + ", self.forbiddenItems=" + str(self.forbiddenItems))
         ret = True
@@ -444,7 +483,17 @@ class SuperFunProvider(object):
         for boss in self.bossChecks:
             Bosses.beatBoss(boss)
         # get restricted locs
-        totalAvailLocs = [loc for loc in self.rando.currentLocations(post=True)]
+        totalAvailLocs = []
+        comeBack = {}
+        locs = [loc for loc in self.rando.currentLocations(post=True)]
+        for loc in locs:
+            ap = loc['accessPoint']
+            if ap not in comeBack:
+                # we chose Landing Site because other start APs might not have comeback transitions
+                # possible start AP issues are handled in checkStart
+                comeBack[ap] = self.areaGraph.canAccess(self.sm, ap, 'Landing Site', self.rando.difficultyTarget)
+            if comeBack[ap]:
+                totalAvailLocs.append(loc)
         self.lastRestricted = [loc for loc in self.locations if loc not in totalAvailLocs]
         self.log.debug("restricted=" + str([loc['Name'] for loc in self.lastRestricted]))
 
@@ -455,7 +504,7 @@ class SuperFunProvider(object):
             for ap in interAPs:
                 if not ap in availAccessPoints:
                     ret = False
-                    #self.log.debug("unavail AP: " + ap.Name + ", from " + startApName)
+                    self.log.debug("unavail AP: " + ap.Name + ", from " + startAp.Name)
 
         # check if we can reach all bosses
         if ret:
@@ -464,21 +513,30 @@ class SuperFunProvider(object):
                     ret = False
                     self.log.debug("unavail Boss: " + loc['Name'])
             if ret:
-                # revive bosses and see if phantoon doesn't block himself
+                # revive bosses and see if phantoon doesn't block himself, and if we can reach draygon if she's alive
                 Bosses.reset()
                 # reset cache
                 self.sm.resetItems()
                 self.sm.addItems([item['Type'] for item in pool])
                 maxDiff = self.rando.difficultyTarget
-                ret = self.rando.areaGraph.canAccess(self.sm, 'PhantoonRoomOut', 'PhantoonRoomIn', maxDiff)
+                ret = self.rando.areaGraph.canAccess(self.sm, 'PhantoonRoomOut', 'PhantoonRoomIn', maxDiff)\
+                      and self.rando.areaGraph.canAccess(self.sm, 'Main Street Bottom', 'DraygonRoomIn', maxDiff)
+                self.log.debug('checkPool. boss access sanity check: '+str(ret))
 
+        if self.isChozo:
+            Knows.IceZebSkip = zeb
+            # last check for chozo locations: don't put more restricted locations than removed chozo items (we cannot rely
+            # on removing ammo/energy in fillRestrictedLocations since it is already the bare minimum in chozo pool)
+            restrictedLocs = self.restrictedLocs + [loc for loc in self.lastRestricted if loc not in self.restrictedLocs]
+            nRestrictedChozo = sum(1 for loc in restrictedLocs if 'Chozo' in loc['Class'])
+            nNothingChozo = sum(1 for item in pool if 'Chozo' in item['Class'] and item['Category'] == 'Nothing')
+            ret &= nRestrictedChozo <= nNothingChozo
+            self.log.debug('checkPool. nRestrictedChozo='+str(nRestrictedChozo)+', nNothingChozo='+str(nNothingChozo))
         # cleanup
         self.sm.resetItems()
         Bosses.reset()
         self.restoreBossChecks()
-        if self.isChozo:
-            Knows.IceZebSkip = zeb
-
+        self.log.debug('checkPool. result: '+str(ret))
         return ret
 
     def disableBossChecks(self):
@@ -540,8 +598,11 @@ class SuperFunProvider(object):
         return len(forb)
 
     def getForbiddenSuits(self):
-        self.log.debug("getForbiddenSuits BEGIN. forbidden="+str(self.forbiddenItems))
+        self.log.debug("getForbiddenSuits BEGIN. forbidden="+str(self.forbiddenItems)+",ap="+self.rando.curAccessPoint)
         removableSuits = [suit for suit in self.suits if self.checkPool([suit])]
+        if 'Varia' in removableSuits and self.rando.curAccessPoint == 'Bubble Mountain':
+            # Varia has to be fist item there, and checkPool can't detect it
+            removableSuits.remove('Varia')
         self.log.debug("getForbiddenSuits removable="+str(removableSuits))
         if len(removableSuits) > 0:
             # remove at least one
@@ -619,7 +680,7 @@ class RandoState(object):
         self.hadChozoLeft = rando.hadChozoLeft
         self.onlyBosses = rando.onlyBosses
         self.bosses = [boss for boss in Bosses.golden4Dead if Bosses.golden4Dead[boss] == True]
-        self.curLocs = curLocs
+        self.curLocs = curLocs[:]
 
     # apply this state to a randomizer object
     def apply(self, rando):
@@ -643,11 +704,22 @@ class RandoState(object):
             Bosses.beatBoss(boss)
         rando.resetCache()
 
+    def __eq__(self, rhs):
+        if rhs is None:
+            return False
+        eq = self.unusedLocations == rhs.unusedLocations
+        eq &= self.currentItems == rhs.currentItems
+        eq &= self.curAccessPoint == rhs.curAccessPoint
+        eq &= self.progressionStatesIndices == rhs.progressionStatesIndices
+        return eq
+
+
 # randomizer algorithm main class. generateItems method will generate a complete seed, or fail (depending on settings) 
 class Randomizer(object):
     # locations : items locations
     # settings : RandoSettings instance
     def __init__(self, locations, settings, seedName, graphTransitions, bidir=True, dotDir=None):
+        self.vcr = VCR(seedName, 'rando') if settings.vcr == True else None
         self.errorMsg = ''
         # create graph
         dotFile = None
@@ -682,7 +754,7 @@ class Randomizer(object):
         # start at landing site
         self.curAccessPoint = None
         self.curLocs = None
-        self.setCurAccessPoint()
+        self.setCurAccessPoint(settings.startAP)
         # states saved at each item collection
         self.states = []
         # indices in states list that mark a progression item collection
@@ -690,34 +762,38 @@ class Randomizer(object):
         self.progressionItemLocs = []
         # progression items tried for a given rollback point
         self.rollbackItemsTried = {}
+        self.lastFallbackState = None
         self.itemLocations = []
 
         self.itemPool = None
+        self.chozoItemPool = []
+        self.nonChozoItemPool = []
+        self.hadChozoLeft = None
+        self.onlyBosses = False
         self.plandoItemPool = []
+        self.stdStart = GraphUtils.isStandardStart(self.settings.startAP)
+
         if self.settings.plandoRando != None:
             plando = SuperPlandoProvider(self.settings, self.smbm, self)
             (self.itemPool, self.plandoItemPool) = plando.getItemPool()
             self.restrictedLocations = []
         else:
             itemManager = ItemManager(self.restrictions['MajorMinor'], settings.qty, self.smbm)
-            # handle super fun settings
+            # handle super fun settings and determine item pool
             fun = SuperFunProvider(settings.superFun, itemManager, self)
             fun.getForbidden()
+            self.itemPool = fun.getItemPool()
+            self.restrictedLocations = fun.restrictedLocs
             # check if we can reach everything
             self.log.debug("LAST CHECKPOOL")
-            if not fun.checkPool():
+            if not fun.checkPool() or (not self.stdStart and not fun.checkStart()):
                 raise RuntimeError('Invalid transitions')
             # store unapplied super fun messages
             if len(fun.errorMsgs) > 0:
                 self.errorMsg += "Super Fun: " + ', '.join(fun.errorMsgs) + ' '
-            self.itemPool = fun.getItemPool()
-            self.restrictedLocations = fun.restrictedLocs
         # if late morph compute number of locations available without morph
-        if self.restrictions['Morph'] == 'late':
-            self.computeLateMorphLimit()
+        self.computeLateMorphLimit()
         # temporarily swap item pool in chozo mode, until all chozo item are placed in chozo locs
-        self.chozoItemPool = []
-        self.nonChozoItemPool = []
         if self.restrictions['MajorMinor'] == 'Chozo':
             self.chozoItemPool = [item for item in self.itemPool if item['Class'] == 'Chozo' or item['Name'] == 'Boss']
             self.nonChozoItemPool = [item for item in self.itemPool if item not in self.chozoItemPool] # this will be swapped back
@@ -728,9 +804,9 @@ class Randomizer(object):
             # be in a chozo location, but the game is still finishable)
             Knows.IceZebSkip = SMBool(True, 0, [])
 
-        self.vcr = VCR(seedName, 'rando') if settings.vcr == True else None
-
     def computeLateMorphLimit(self):
+        if self.restrictions['Morph'] != 'late':
+            return
         # add all the items (except those removed by super fun) except morph.
         # compute the number of available locs.
         self.smbm.resetItems()
@@ -740,14 +816,15 @@ class Randomizer(object):
             locs = [loc for loc in locs if self.restrictions['MajorMinor'] in loc['Class']]
         self.lateMorphLimit = len(locs)
         self.lateMorphOutCrateria = len(set([loc['GraphArea'] for loc in locs])) > 1
-        if self.lateMorphOutCrateria == False and self.restrictions['MajorMinor'] == 'Full' and self.restrictions['Suits'] == False:
-            # we can do better
-            raise RuntimeError('Invalid layout for late morph')
+        self.computeLateMorphLimitCheck()
         self.lateMorphResult = None
         self.log.debug("lateMorphLimit: {}: {} {}".format(self.restrictions['MajorMinor'], self.lateMorphLimit, self.lateMorphOutCrateria))
         self.log.debug('lateMorphLimit: locs=' + str([loc['Name'] for loc in locs]))
         # cleanup
         self.smbm.resetItems()
+
+    def computeLateMorphLimitCheck(self):
+        pass
 
     def resetCache(self):
         self.nonProgTypesCache = []
@@ -792,6 +869,8 @@ class Randomizer(object):
         self.itemLimit = self.settings.getItemLimit(speed)
         self.locLimit = self.settings.getLocLimit(speed)
         self.progressionItemTypes = self.settings.getProgressionItemTypes(speed)
+        if self.restrictions['Morph'] == 'early' and 'Morph' in self.progressionItemTypes:
+            self.progressionItemTypes.remove('Morph')
         collectedAmmoTypes = set([item['Type'] for item in self.currentItems if item['Category'] == 'Ammo'])
         ammos = ['Missile', 'Super', 'PowerBomb']
         if 'Super' in collectedAmmoTypes:
@@ -918,23 +997,6 @@ class Randomizer(object):
             poolDict[item['Type']].append(item)
         return poolDict
 
-    # loop on all the items in the item pool of not already placed
-    # items and return those that open up new locations.
-    #
-    # curLocs: accessible locations
-    # itemPool: list of the items not already placed
-    #
-    # return list of items eligible for next placement
-    def possibleItems(self, curLocs, itemPool):
-        result = []
-        poolDict = self.getPoolDict(itemPool)
-        for itemType,items in sorted(poolDict.items()):
-            if self.checkItem(items[0]):
-                for item in items:
-                    result.append(item)
-        random.shuffle(result)
-        return result
-
     # removes an item of given type from the pool.
     def removeItem(self, itemType, pool=None):
         if pool is None:
@@ -956,8 +1018,6 @@ class Randomizer(object):
         ret = None
 
         for item in items:
-            if item in self.failItems:
-                continue
             newLocs = len(self.currentLocations(item))
             if newLocs < minNewLocs:
                 minNewLocs = newLocs
@@ -969,8 +1029,6 @@ class Randomizer(object):
         ret = None
 
         for item in items:
-            if item in self.failItems:
-                continue
             newLocs = len(self.currentLocations(item))
             if newLocs > maxNewLocs:
                 maxNewLocs = newLocs
@@ -978,6 +1036,11 @@ class Randomizer(object):
         return ret
 
     def chooseItem(self, items):
+        # if early morph is asked, and morph is still not placed, place it in priority
+        if self.restrictions['Morph'] == 'early':
+            morph = next((item for item in items if Randomizer.isMorph(item)), None)
+            if morph is not None:
+                return morph
         random.shuffle(items)
         item = self.getChooseFunc(self.chooseItemRanges, self.chooseItemFuncs)(items)
         if item is None:
@@ -1041,6 +1104,11 @@ class Randomizer(object):
             pool = self.itemPool
         return any(item['Type'] == t for item in pool)
 
+    def countItemTypeInPool(self, t, pool=None):
+        if pool is None:
+            pool = self.itemPool
+        return len([item for item in pool if item['Type'] == t])
+
     def isJunk(self, item):
         if item['Type'] in ['Nothing', 'NoEnergy']:
             return True
@@ -1068,9 +1136,17 @@ class Randomizer(object):
 
     def chooseLocation(self, availableLocations, item):
         locs = availableLocations
+        if self.isEarlyGame():
+            # cheat a little bit if non-standard start: place early
+            # progression away from crateria/blue brin if possible
+            startAp = getAccessPoint(self.settings.startAP)
+            if startAp.GraphArea != "Crateria":
+                locs = [loc for loc in availableLocations if loc['GraphArea'] != 'Crateria']
+                if len(locs) == 0:
+                    locs = availableLocations
         isProg = self.isProgItem(item)
         if isProg == True and random.random() < self.spreadProb:
-            locs = self.getLocsSpreadProgression(availableLocations)
+            locs = self.getLocsSpreadProgression(locs)
         random.shuffle(locs)
         self.log.debug("chooseLocation isProg: {}".format(isProg))
         if isProg == True:
@@ -1079,64 +1155,22 @@ class Randomizer(object):
             # choose randomly if non-progression
             return self.chooseLocationRandom(locs, item)
 
-    # items: possible items to place that will open up new paths, or an empty list
-    # itemPool: non-placed items
-    #
-    # return if items is non-empty, item to place based on choose
-    # function. if items is empty, a random non-placed item.
-    def getItemToPlace(self, items, itemPool):
-        itemsLen = len(items)
-        if itemsLen == 0:
-            fixedPool = [item for item in itemPool if item not in self.failItems]
-            item = List.item(random.randint(0, len(fixedPool)-1), fixedPool)
-        else:
-            item = self.chooseItem(items)
-        return item
-
-    # items: possible items to place that will open up new paths, or an empty list
-    # itemPool: non-placed items
-    # locations: locations available
-    #
-    # returns a dict with the item and the location
-    def placeItem(self, items, itemPool, locations):
-        def getNextBoss():
-            boss = None
-            if any('Boss' in loc['Class'] for loc in locations):
-                for item in itemPool:
-                    if item['Type'] == 'Boss' and item not in self.failItems:
-                        boss = item
-                        break
-            return boss
-        # kill bosses ASAP to open locs
-        item = getNextBoss()
-        if item is None:
-            item = self.getItemToPlace(items, itemPool)
-        locations = [loc for loc in locations if self.locPostAvailable(loc, item['Type'])]
-        availableLocations = List.filter(lambda loc: self.canPlaceAtLocation(item, loc, checkSoftlock=True), locations)
-        if len(availableLocations) == 0:
-            if not item in self.failItems:
-                self.failItems.append(item)
-            return None
-        self.log.debug("placeItem: availLocs={}".format([l['Name'] for l in availableLocations]))
-        location = self.chooseLocation(availableLocations, item)
-
-        return {'Item': item, 'Location': location}
-
     # checks if an item opens up new locations.
     # curLocs : currently available locations
     # item : item to check
     #
     # return bool
-    def checkItem(self, item):
+    def checkItem(self, item, locs=None):
         # no need to test nothing items
         if item['Category'] == 'Nothing':
             return False
-        oldLocations = self.currentLocations()
+        oldLocations = self.currentLocations(locs=locs)
         canPlaceIt = self.canPlaceItem(item, oldLocations)
         if canPlaceIt == False:
             return False
-        newLocations = [loc for loc in self.currentLocations(item) if loc not in oldLocations]
+        newLocations = [loc for loc in self.currentLocations(item, locs=locs) if loc not in oldLocations]
         ret = len(newLocations) > 0
+        self.log.debug('checkItem. item=' + item['Type'] + ', newLocs=' + str([loc['Name'] for loc in newLocations]))
         if ret == True and self.restrictions["MajorMinor"] != "Full":
             ret = List.exists(lambda l: self.restrictions["MajorMinor"] in l["Class"], newLocations)
             if ret == False and self.restrictions["MajorMinor"] == "Major":
@@ -1146,22 +1180,8 @@ class Randomizer(object):
         return ret
 
     @staticmethod
-    def isInBlueBrinstar(location):
-        return location["Name"] in ["Morphing Ball",
-                                    "Missile (blue Brinstar middle)",
-                                    "Energy Tank, Brinstar Ceiling",
-                                    "Power Bomb (blue Brinstar)",
-                                    "Missile (blue Brinstar bottom)",
-                                    "Missile (blue Brinstar top)",
-                                    "Missile (blue Brinstar behind missile)"]
-
-    @staticmethod
     def isSuit(item):
         return item['Type'] in ['Gravity', 'Varia']
-
-    @staticmethod
-    def isSpeedScrew(item):
-        return item['Type'] in ['SpeedBooster', 'ScrewAttack']
 
     @staticmethod
     def isMorph(item):
@@ -1169,9 +1189,6 @@ class Randomizer(object):
 
     def suitsRestrictionsImpl(self, item, location):
         return location['GraphArea'] != 'Crateria'
-
-    def speedScrewRestrictionImpl(self, item, location):
-        return not Randomizer.isInBlueBrinstar(location)
 
     def morphPlacementImpl(self, item, location):
         # if morph can be out of crateria, restrict it from being put in crateria
@@ -1193,12 +1210,15 @@ class Randomizer(object):
         self.lateMorphResult = proba <= nbItems
         return self.lateMorphResult
 
+    def isEarlyGame(self):
+        return len(self.progressionStatesIndices) <= 2 if self.stdStart else len(self.progressionStatesIndices) <= 3
+
     # is softlock possible from the player POV when checking the loc?
     # usually these locs are checked last when playing, so placing
     # an important item there has an impact on progression speed
     def isSoftlockPossible(self, item, loc):
-        if loc['Name'] == 'Bomb':
-            # disable check for bombs as it is the beginning
+        # disable check for early game and MB
+        if self.isEarlyGame() or loc['Name'] == 'Bomb' or loc['Name'] == 'Mother Brain':
             return False
         isPickup = 'Pickup' in loc
         if isPickup:
@@ -1264,9 +1284,6 @@ class Randomizer(object):
             if self.restrictions['Suits'] == True and Randomizer.isSuit(item):
                 ret = self.suitsRestrictionsImpl(item, location)
 
-            if self.restrictions['Morph'] == 'early' and Randomizer.isSpeedScrew(item):
-                ret = self.speedScrewRestrictionImpl(item, location)
-
             if self.restrictions['Morph'] == 'late' and Randomizer.isMorph(item):
                 ret = self.morphPlacementImpl(item, location)
 
@@ -1275,23 +1292,98 @@ class Randomizer(object):
 
         return ret
 
+    # returns (dict : item wrapper => possible locations list, possible prog or bosses boolean)
+    def getPossiblePlacements(self, pool, curLocs, locs=None):
+        self.log.debug('getPossiblePlacements. nCurLocs='+str(len(curLocs)))
+        poolDict = self.getPoolDict(pool)
+        itemLocDict = {}
+        possibleProg = False
+        nonProgList = None
+        def getLocList(itemObj, baseList):
+            return [loc for loc in baseList if self.locPostAvailable(loc, itemObj['Type']) and self.canPlaceAtLocation(itemObj, loc, checkSoftlock=True)]
+        def getNonProgLocList(itemObj):
+            nonlocal nonProgList
+            if nonProgList is None:
+                nonProgList = [loc for loc in self.currentLocations(locs=locs, post=True) if not self.isSoftlockPossible(itemObj, loc)] # we don't care what the item is
+            return [loc for loc in nonProgList if self.canPlaceAtLocation(itemObj, loc)]
+        # boss handling : check bosses we can kill and come back from. return immediately if found
+        boss = next((item for item in pool if item['Type'] == 'Boss'), None)
+        if boss is not None:
+            bossLocs = getLocList(boss, [loc for loc in curLocs if 'Boss' in loc['Class']])
+            if len(bossLocs) > 0:
+                itemLocDict[ItemWrapper(boss)] = bossLocs
+                return (itemLocDict, False)
+        for itemType,items in sorted(poolDict.items()):
+            itemObj = items[0]
+            cont = True
+            prog = False
+            if self.checkItem(itemObj, locs=locs):
+                cont = False
+                prog = True
+            elif not possibleProg:
+                cont = False
+            if cont: # ignore non prog items if a prog item has already been found
+                continue
+            # check possible locations for this item type
+            self.log.debug('getPossiblePlacements. itemType=' + itemType + ', curLocs='+str([loc['Name'] for loc in curLocs]))
+            locations = getLocList(itemObj, curLocs) if prog else getNonProgLocList(itemObj)
+            if len(locations) == 0:
+                continue
+            if prog and not possibleProg:
+                possibleProg = True
+                itemLocDict = {} # forget all the crap ones we stored just in case
+            self.log.debug('getPossiblePlacements. itemType=' + itemType + ', locs='+str([loc['Name'] for loc in locations]))
+            for item in items:
+                itemLocDict[ItemWrapper(item)] = locations
+        # special check for early morph
+        if self.restrictions['Morph'] == 'early' and len(curLocs) >= 2:
+            morph = next((item for item in pool if Randomizer.isMorph(item)), None)
+            if morph is not None and not any(w.item['Type'] == morph['Type'] for w in itemLocDict):
+                self.log.debug("getPossiblePlacements: early morph check")
+                # we have to place morph early, it's still not placed, and not detected as placeable
+                # let's see if we can place it anyway in the context of a combo
+                morphLocs = getLocList(morph, curLocs)
+                if len(morphLocs) > 0:
+                    pool = pool[:]
+                    if locs is not None:
+                        locs = locs[:]
+                    state = RandoState(self, curLocs)
+                    # acquire morph and see if we can still open new locs
+                    self.getItem({'Item':morph, 'Location':random.choice(morphLocs)}, pool=pool, locs=locs, showDot=False)
+                    (ild, poss) = self.getPossiblePlacements(pool, self.currentLocations(locs=locs), locs=locs)
+                    if poss:
+                        itemLocDict[ItemWrapper(morph)] = morphLocs
+                    state.apply(self) # restore consistent state
+        if self.log.getEffectiveLevel() == logging.DEBUG:
+            debugDict = {}
+            for w, locList in itemLocDict.items():
+                if w.item['Type'] not in debugDict:
+                    debugDict[w.item['Type']] = [loc['Name'] for loc in locList]
+            self.log.debug('itemLocDict='+str(debugDict))
+            self.log.debug('possibleProg='+str(possibleProg))
+        return (itemLocDict, possibleProg)
+
     # from current accessible locations and an item pool, generate an item/loc dict.
     # return item/loc, or None if stuck
-    def generateItem(self, curLocs, pool):
-        itemLocation = None
-        self.failItems = []
-        posItems = self.possibleItems(curLocs, pool)
-        self.log.debug("posItems: {}".format([i['Name'] for i in posItems]))
-        if len(posItems) > 0:
-            # if posItems is not empty, only those in posItems will be tried (see placeItem)
-            nPool = len(set([item['Type'] for item in posItems]))
-        else:
-            # if posItems is empty, all items in the pool will be tried (see placeItem)
-            nPool = len(set([item['Type'] for item in pool]))
-        while itemLocation is None and len(self.failItems) < nPool:
-            self.log.debug("P " + str(len(posItems)) + ", F " + str(len(self.failItems)) + " / " + str(nPool))
-            itemLocation = self.placeItem(posItems, pool, curLocs)
-        return itemLocation
+    def generateItem(self, curLocs, pool, locs=None):
+        item, loc = None, None
+        itemLocDict, possibleProg = self.getPossiblePlacements(pool, curLocs, locs=locs)
+        itemList = sorted([wrapper.item for wrapper in itemLocDict.keys()], key=lambda item: item['Type'])
+        if possibleProg:
+            # choose item/loc with prog rules
+            item = self.chooseItem(itemList)
+            loc = self.chooseLocation(itemLocDict[item['Wrapper']], item)
+        elif len(itemLocDict) > 0:
+            # randomly choose item/location
+            item = self.chooseItemRandom(itemList)
+            loc = self.chooseLocationRandom(itemLocDict[item['Wrapper']], item)
+        itemLoc = None
+        if item is not None and loc is not None:
+            itemLoc = {
+                'Item': item,
+                'Location': loc
+            }
+        return itemLoc
 
     def appendCurrentState(self, curLocs):
         curState = RandoState(self, curLocs)
@@ -1303,28 +1395,31 @@ class Randomizer(object):
     # itemLocation: item/loc to get
     # collect: actually collect item. defaults to True. use False for unreachable items.
     # pool : base item pool. If None (default), uses self.itemPool.
+    # locs : locations list
     # showDot : if True (default), outputs a dot on stdout
-    # locs : useful only for chozo 2nd phase "restore step". if not
+    # curLocs : useful only for chozo 2nd phase "restore step". if not
     #    None, will not move in the graph in order to not overwrite
     #    locations difficulties.
-    def getItem(self, itemLocation, collect=True, pool=None, showDot=True, locs=None):
+    def getItem(self, itemLocation, collect=True, pool=None, locs=None, showDot=True, curLocs=None):
         if pool is None:
             pool = self.itemPool
+        if locs is None:
+            locs = self.unusedLocations
         if showDot == True:
             sys.stdout.write('.')
             sys.stdout.flush()
-        curLocs = locs
+        curLocs = curLocs
         item = itemLocation['Item']
         location = itemLocation['Location']
         if collect == True:
             isProg = self.isProgItemNow(item)
             # walk the graph to get proper access point
-            if locs is None:
+            if curLocs is None:
                 self.currentLocations(item)
             self.log.debug("getItem: loc: {} ap: {}".format(location['Name'], location['accessPoint']))
             self.setCurAccessPoint(location['accessPoint'])
             # get actual cur locs from proper AP to store with the state
-            if locs is None:
+            if curLocs is None:
                 curLocs = self.currentLocations(item)
             if 'Pickup' in location:
                 location['Pickup']()
@@ -1334,7 +1429,7 @@ class Randomizer(object):
             if self.vcr != None and showDot == True:
                 self.vcr.addLocation(location['Name'], item['Type'])
 
-        self.unusedLocations.remove(location)
+        locs.remove(location)
         self.itemLocations.append(itemLocation)
         if curLocs != None:
             self.log.debug("PLACEMENT {}: {} at {} diff: {}, locs: {}".format(len(self.currentItems), item['Type'], location['Name'], location['difficulty'], len(curLocs)-1))
@@ -1380,6 +1475,8 @@ class Randomizer(object):
             return False
         # check that there is room left in all main areas
         room = {'Brinstar' : 0, 'Norfair' : 0, 'WreckedShip' : 0, 'LowerNorfair' : 0, 'Maridia' : 0 }
+        if not self.stdStart:
+            room['Crateria'] = 0
         for loc in self.unusedLocations:
             majAvail = self.isLocMajor(loc)
             minAvail = self.isLocMinor(loc)
@@ -1397,17 +1494,26 @@ class Randomizer(object):
             pool += [item for item in basePool if item['Category'] == 'Energy']
 
     def getNonProgItems(self, basePool):
-        return [item for item in basePool if not self.isProgItem(item)]
+        nonProg = [item for item in basePool if not self.isProgItem(item)]
+        if not self.stdStart:
+            # throw in all ammo for non standard start to avoid early returns to blue brin
+            nonProg += [item for item in basePool if item['Category'] == 'Ammo' and item not in nonProg]
+        return nonProg
 
     def getNonProgItemPoolStart(self, basePool=None):
         if basePool is None:
             basePool = self.itemPool
         pool = self.getNonProgItems(basePool)
+        if self.restrictions['Morph'] == 'early':
+            morph = next((item for item in basePool if Randomizer.isMorph(item)), None)
+            if morph is not None and morph not in pool:
+                pool.append(morph)
         # enabled only in major/minor split, and depends on prog speed
         if random.random() < self.minorHelpProb:
-            helpfulMinors = [item for item in basePool if item['Class'] == 'Minor' and not self.hasItemTypeInPool(item['Type'], pool)]
+            helpfulMinors = [item for item in basePool if item['Category'] == 'Ammo' and not self.hasItemTypeInPool(item['Type'], pool)]
             if len(helpfulMinors) > 0:
-                pool.append(random.choice(helpfulMinors))
+                m = random.choice(helpfulMinors)
+                pool.append(m)
         # don't hold energy back for certain settings
         self.addEnergyAsNonProg(pool, basePool)
 
@@ -1482,7 +1588,8 @@ class Randomizer(object):
                 return
             # the state we are about to remove was a progression state
             self.progressionStatesIndices.pop()
-        self.states.pop() # remove current state, it's the one we're stuck in
+        if len(self.states) > 0:
+            self.states.pop() # remove current state, it's the one we're stuck in
         self.log.debug('initRollback: progressionStatesIndices 2=' + str(self.progressionStatesIndices))
 
     def getSituationId(self):
@@ -1491,9 +1598,7 @@ class Randomizer(object):
         return progItems+'/'+position
 
     def hasTried(self, itemLoc):
-        # disable tried check if we don't have morph+unlocking ammo
-        sm = self.smbm
-        if sm.canUsePowerBombs().bool == False or sm.canOpenGreenDoors().bool == False:
+        if self.isEarlyGame():
             return False
         itemType = itemLoc['Item']['Type']
         situation = self.getSituationId()
@@ -1518,7 +1623,8 @@ class Randomizer(object):
         nItemsAtStart = len(self.currentItems)
         nStatesAtStart = len(self.states)
         self.log.debug("rollback BEGIN: nItems={}, nStates={}".format(len(self.currentItems), nStatesAtStart))
-        currentState = self.states[-1]
+        currentState = self.getCurrentState()
+        ret = None
         # we can be in a 'fake rollback' situation where we rollback
         # just after non prog phase without checking normal items first (we
         # do this for more randomness, to avoid placing items in postavail locs
@@ -1526,7 +1632,7 @@ class Randomizer(object):
         # in this case, we won't remove any prog items since we're not actually
         # stuck
         ret = self.generateItem(self.currentLocations(), self.itemPool)
-        isFakeRollback = ret is not None
+        isFakeRollback = ret is not None and not self.isEarlyGame()
         self.log.debug('isFakeRollback=' + str(isFakeRollback))
         self.initRollback(isFakeRollback)
         if len(self.states) == 0:
@@ -1534,11 +1640,18 @@ class Randomizer(object):
             self.log.debug("rollback END initState apply, nCurLocs="+str(len(self.currentLocations())))
             if self.vcr != None:
                 self.vcr.addRollback(nStatesAtStart)
+            sys.stdout.write('<'*nStatesAtStart)
+            sys.stdout.flush()
             return None
         # to stay consistent in case no solution is found as states list was popped in init
-        fallbackState = self.states[-1]
+        fallbackState = self.getCurrentState()
+        if fallbackState == self.lastFallbackState:
+            # we're stuck there, rewind more in fallback
+            fallbackState = self.states[-2] if len(self.states) > 1 else self.initState
+        self.lastFallbackState = fallbackState
         i = 0
         possibleStates = []
+        self.log.debug('rollback. nStates='+str(len(self.states)))
         while i >= 0 and len(possibleStates) == 0:
             states = self.states[:]
             minRollbackPoint, maxRollbackPoint = self.initRollbackPoints()
@@ -1546,17 +1659,15 @@ class Randomizer(object):
             while i >= minRollbackPoint and len(possibleStates) < 3:
                 state = states[i]
                 state.apply(self)
-                posItems = self.possibleItems(state.curLocs, self.itemPool)
-                if len(posItems) > 0: # new locs can be opened
-#                    self.log.debug([item['Type'] for item in posItems])
+                itemLoc = self.generateItem(state.curLocs, self.itemPool)
+                if itemLoc is not None and not self.hasTried(itemLoc) and self.isProgItemNow(itemLoc['Item']):
+                    self.log.debug("STATE = " + str(state))
                     self.log.debug("STATE curLocs = " + str([loc['Name'] for loc in state.curLocs]))
-                    itemLoc = self.generateItem(state.curLocs, self.itemPool)
-                    if itemLoc is not None and itemLoc['Item']['Category'] != 'Nothing' and (isFakeRollback == True or not self.hasTried(itemLoc)):
-                        possibleStates.append((state, itemLoc))
+                    possibleStates.append((state, itemLoc))
                 i -= 1
             # nothing, let's rollback further a progression item
             if len(possibleStates) == 0 and i >= 0:
-                if isFakeRollback == False:
+                if len(self.progressionStatesIndices) > 0 and isFakeRollback == False:
                     sys.stdout.write('!')
                     sys.stdout.flush()
                     self.progressionStatesIndices.pop()
@@ -1589,13 +1700,18 @@ class Randomizer(object):
     # check if bosses are blocking the last remaining locations
     def onlyBossesLeft(self, bossesKilled):
         self.log.debug('onlyBossesLeft, diff=' + str(self.difficultyTarget))
-        prevLocs = self.currentLocations(post=True)
+        nextBoss = next((item for item in self.itemPool if item['Type'] == 'Boss'), None)
+        if nextBoss is None:
+            return False
+        def getLocList():
+            return [loc for loc in self.currentLocations(post=True) if not self.isSoftlockPossible(nextBoss, loc)]
+        prevLocs = getLocList()
         # fake kill all bosses and see if we can access the rest of the game
         Bosses.reset()
         for boss in ['Kraid', 'Phantoon', 'Ridley', 'Draygon']:
             Bosses.beatBoss(boss)
         # get bosses locations and newly accessible locations (for bosses that open up locs)
-        newLocs = self.currentLocations(post=True)
+        newLocs = getLocList()
         locs = newLocs + [loc for loc in self.unusedLocations if ('Boss' in loc['Class'] or 'Pickup' in loc) and not loc in newLocs]
         ret = (len(locs) > len(prevLocs) and len(locs) == len(self.unusedLocations))
         # restore currently killed bosses
@@ -1645,18 +1761,18 @@ class Randomizer(object):
                 itemLocation['Item'] = self.getNextItemInPool('Nothing')
             elif isMajor and self.hasItemTypeInPool('NoEnergy'):
                 itemLocation['Item'] = self.getNextItemInPool('NoEnergy')
-            elif isMinor and self.hasItemTypeInPool('Missile'):
+            elif isMinor and self.hasItemTypeInPool('Missile') and self.countItemTypeInPool('Missile') > 3:
                 itemLocation['Item'] = self.getNextItemInPool('Missile')
-            elif isMinor and self.hasItemTypeInPool('Super'):
+            elif isMinor and self.hasItemTypeInPool('Super') and self.countItemTypeInPool('Super') > 2:
                 itemLocation['Item'] = self.getNextItemInPool('Super')
-            elif isMinor and self.hasItemTypeInPool('PowerBomb'):
+            elif isMinor and self.hasItemTypeInPool('PowerBomb') and self.countItemTypeInPool('PowerBomb') > 1:
                 itemLocation['Item'] = self.getNextItemInPool('PowerBomb')
-            elif isMajor and self.hasItemTypeInPool('Reserve'):
+            elif isMajor and self.hasItemTypeInPool('Reserve') and self.countItemTypeInPool('Reserve') > 1:
                 itemLocation['Item'] = self.getNextItemInPool('Reserve')
-            elif isMajor and self.hasItemTypeInPool('ETank'):
+            elif isMajor and self.hasItemTypeInPool('ETank') and self.countItemTypeInPool('ETank') > 3:
                 itemLocation['Item'] = self.getNextItemInPool('ETank')
             else:
-                break
+                raise RuntimeError("Cannot fill restricted locations")
             self.log.debug("Fill: {} at {}".format(itemLocation['Item']['Type'], itemLocation['Location']['Name']))
             self.getItem(itemLocation, False)
 
@@ -1664,7 +1780,7 @@ class Randomizer(object):
             self.itemPool = self.chozoItemPool
 
     def getCurrentState(self):
-        return self.states[-1]
+        return self.states[-1] if len(self.states) > 0 else self.initState
 
     def chozoFill(self):
         # 2nd phase fill-up :
@@ -1740,7 +1856,8 @@ class Randomizer(object):
                     itemLocs.append(il)
                     pool.remove(item)
                 return itemLocs
-            def updateCurrentState(itemLocs, curState):
+            def updateCurrentState(itemLocs):
+                nonlocal curState
                 self.log.debug('updateCurrentState BEGIN')
                 curState.apply(self)
                 for il in itemLocs:
@@ -1756,7 +1873,7 @@ class Randomizer(object):
             self.log.debug('state ' + str(state) + ' apply, nCurLocs='+str(len(curLocs)))
             self.log.debug('collected1=' + str(list(set([i['Item']['Type'] for i in self.itemLocations]))))
             for il in allItemLocs:
-                self.getItem(il, pool=self.nonChozoItemPool, showDot=False, locs=curLocs)
+                self.getItem(il, pool=self.nonChozoItemPool, showDot=False, curLocs=curLocs)
             self.log.debug('collected2=' + str(list(set([i['Item']['Type'] for i in self.itemLocations]))))
             # fill-up
             curLocs = getCurLocs(ap)
@@ -1785,7 +1902,7 @@ class Randomizer(object):
             collected = [loc for loc in getCollectedLocs() if loc not in previousCollected]
             self.currentLocations(ap=ap, locs=collected) # update difficulty
             previousCollected += collected
-            updateCurrentState(itemLocs, curState)
+            updateCurrentState(itemLocs)
             curState = RandoState(self, curLocs)
 
     def chozoCheck(self):
@@ -1835,9 +1952,10 @@ class Randomizer(object):
         self.hadChozoLeft = self.isChozoLeft()
         self.onlyBosses = False
         self.initState = RandoState(self, self.currentLocations())
+        self.log.debug("initState="+str(self.initState))
         self.log.debug("{} items in pool".format(len(self.itemPool)))
         runtime_s = 0
-        startDate = time.clock()
+        startDate = time.process_time()
         self.prevDiffTarget = None
         while ((len(self.itemPool) > 0 or len(self.plandoItemPool) > 0)
                and not isStuck
@@ -1856,7 +1974,13 @@ class Randomizer(object):
                     isStuck = self.getItemFromStandardPool()
                 if isStuck:
                     # if we're stuck, check if only bosses locations are left (bosses difficulty settings problems)
-                    self.onlyBosses = self.onlyBossesLeft(self.getCurrentState().bosses)
+                    if not self.onlyBosses:
+                        self.onlyBosses = self.onlyBossesLeft(self.getCurrentState().bosses)
+                    else:
+                        # shouldn't be stuck if onlyBosses was already detected, so it was a false positive
+                        self.onlyBosses = False
+                        self.difficultyTarget = self.prevDiffTarget
+                        self.prevDiffTarget = None
                     if not self.onlyBosses:
                         # check that we're actually stuck
                         nCurLocs = len(self.currentLocations())
@@ -1883,7 +2007,7 @@ class Randomizer(object):
                             self.resetCache()
                         isStuck = False
             self.chozoCheck()
-            runtime_s = time.clock() - startDate
+            runtime_s = time.process_time() - startDate
         self.log.debug("{} remaining items in pool : {}".format(len(self.itemPool), [i['Type'] for i in self.itemPool]))
         self.log.debug("nStates="+str(len(self.states)))
         self.log.debug('unusedLocs='+str([loc['Name'] for loc in self.unusedLocations]))

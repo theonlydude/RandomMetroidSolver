@@ -20,6 +20,10 @@
 	<td colspan=2>Populate your plando with the items and transitions from the base ROM:</td>
 	<td><input id="fillPlando" name="fillPlando" type="checkbox"></td>
       </tr>
+      <tr id="startLocationVisibility">
+	<td>Start location:</td>
+	<td colspan=2>{{=SELECT(*startAPs, **dict(_name="startLocation", _id="startLocation", value=curSession["startLocation"], _class="filldropdown"))}}</td>
+      </tr>
       <tr><td colspan=3 class="blankLastRow"></td></tr>
     </table>
     <table>
@@ -104,7 +108,7 @@
     <div id="greenPiratesShaftBottomRight" class="baseButton" onclick="clickPortal('greenPiratesShaftBottomRight')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Green Pirates Shaft Bottom Right"></div>
     <div id="keyhunterRoomBottom" class="baseButtonRot" onclick="clickPortal('keyhunterRoomBottom')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Keyhunter Room Bottom"></div>
     <div id="morphBallRoomLeft" class="baseButton" onclick="clickPortal('morphBallRoomLeft')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Morph Ball Room Left"></div>
-    <div id="greenBrinstarElevatorRight" class="baseButton" onclick="clickPortal('greenBrinstarElevatorRight')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Green Brinstar Elevator Right"></div>
+    <div id="greenBrinstarElevator" class="baseButton" onclick="clickPortal('greenBrinstarElevator')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Green Brinstar Elevator"></div>
     <div id="greenHillZoneTopRight" class="baseButton" onclick="clickPortal('greenHillZoneTopRight')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Green Hill Zone Top Right"></div>
     <div id="noobBridgeRight" class="baseButton" onclick="clickPortal('noobBridgeRight')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Noob Bridge Right"></div>
     <div id="westOceanLeft" class="baseButton" onclick="clickPortal('westOceanLeft')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="West Ocean Left"></div>
@@ -126,7 +130,7 @@
     <div id="eastTunnelRight" class="baseButton" onclick="clickPortal('eastTunnelRight')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="East Tunnel Right"></div>
     <div id="eastTunnelTopRight" class="baseButton" onclick="clickPortal('eastTunnelTopRight')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="East Tunnel Top Right"></div>
     <div id="glassTunnelTop" class="baseButtonRot" onclick="clickPortal('glassTunnelTop')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Glass Tunnel Top"></div>
-    <div id="statuesHallwayLeft" class="baseButton" onclick="clickPortal('statuesHallwayLeft')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Statues Hallway Left"></div>
+    <div id="goldenFour" class="baseButton" onclick="clickPortal('goldenFour')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Golden Four"></div>
 
     <!-- bosses -->
     <div id="phantoonRoomOut" class="baseButton" onclick="clickPortal('phantoonRoomOut')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Phantoon Room Out"></div>
@@ -269,7 +273,7 @@
     </div>
 
     <!-- gps marker -->
-    <div id="lastLoc">
+    <div id="lastAP">
       <img src="/solver/static/images/gps.png" alt="last access point" data-toggle="tooltip" title="Current access point" data-placement="bottom" data-container="body" data-html="true" id="gps">
     </div>
 
@@ -526,3 +530,5 @@
     <div id="reserve_2" class="reserve_1"><img src="/solver/static/images/2_reserve.png" class="full"></div>
     <div id="reserve_3" class="reserve_1"><img src="/solver/static/images/3_reserve.png" class="full"></div>
     <div id="reserve_4" class="reserve_1"><img src="/solver/static/images/4_reserve.png" class="full"></div>
+
+    <input id="timer" type="time" value="03:00" class="timer" style="display:none">

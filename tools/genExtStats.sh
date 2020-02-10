@@ -35,7 +35,7 @@ function computeSeed {
 	     printf "."
 	     rm -f ${LOG}
 
-	     python3.7 ${CWD}/solver.py -r "${SEED}" --preset "${SKILL_PRESET}" --pickupStrategy any --difficultyTarget 1 --ext_stats "${SQL}" >/dev/null
+	     python3.7 ${CWD}/solver.py -r "${SEED}" --preset "${SKILL_PRESET}" --pickupStrategy any --difficultyTarget 0 --ext_stats "${SQL}" >/dev/null
 
 	     # delete generated ROM
 	     rm -f "${SEED}"
@@ -72,12 +72,12 @@ NB_CPU=$(cat /proc/cpuinfo  | grep 'processor' | wc -l)
 
 RANDO_PRESETS=$(ls -1 ${CWD}/rando_presets/*.json)
 if [ -n "${TOURNEY}" ]; then
-    RANDO_PRESETS=$(echo "${RANDO_PRESETS}" | grep 'Season_Races')
+    RANDO_PRESETS=$(echo "${RANDO_PRESETS}" | grep "${TOURNEY}")
 fi
 
 SKILL_PRESETS=$(ls -1 ${CWD}/standard_presets/*.json | grep -v -E 'solution|samus')
 if [ -n "${TOURNEY}" ]; then
-    SKILL_PRESETS=$(echo "${SKILL_PRESETS}" | grep 'Season_Races')
+    SKILL_PRESETS=$(echo "${SKILL_PRESETS}" | grep "${TOURNEY}")
 fi
 
 for RANDO_PRESET in ${RANDO_PRESETS}; do

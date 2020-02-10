@@ -17,11 +17,12 @@ from parameters import diff2text, text2diff
 from solver import StandardSolver, DifficultyDisplayer, InteractiveSolver
 from utils import PresetLoader, removeChars
 import db
-from graph_access import vanillaTransitions, vanillaBossesTransitions, vanillaEscapeTransitions, accessPoints
+from graph_access import vanillaTransitions, vanillaBossesTransitions, vanillaEscapeTransitions, accessPoints, GraphUtils
 from utils import isStdPreset
 from graph_locations import locations
 from smboolmanager import SMBoolManager
-from rom import RomPatches, RomReader
+from rom import RomReader
+from rom_patches import RomPatches
 
 # put an expiration date to the default cookie to have it kept between browser restart
 response.cookies['session_id_solver']['expires'] = 31 * 24 * 3600
@@ -647,10 +648,6 @@ def prepareResult():
     if session.solver['result'] is not None:
         result = session.solver['result']
 
-        # utf8 files
-        if sys.version_info.major == 2:
-            result['randomizedRom'] = result['randomizedRom'].encode('utf8', 'replace')
-
         if result['difficulty'] == -1:
             result['resultText'] = "The ROM \"{}\" is not finishable with the known techniques".format(result['randomizedRom'])
         else:
@@ -738,11 +735,7 @@ def validateSolverParams():
 
 def generateJsonROM(romJsonStr):
     tempRomJson = json.loads(romJsonStr)
-    # handle filename with utf8 characters in it
-    if sys.version_info.major > 2:
-        romFileName = tempRomJson["romFileName"]
-    else:
-        romFileName = tempRomJson["romFileName"].encode('utf8', 'replace')
+    romFileName = tempRomJson["romFileName"]
     (base, ext) = os.path.splitext(romFileName)
     jsonRomFileName = 'roms/{}.json'.format(base)
     del tempRomJson["romFileName"]
@@ -849,12 +842,17 @@ def getAddressesToRead(plando=False):
     # escape timer
     addresses["misc"].append(0x1E21)
     addresses["misc"].append(0x1E22)
+    # nothing id
+    addresses["misc"].append(0x17B6D)
+    # start ap
+    addresses["misc"].append(0x10F200)
+    addresses["misc"].append(0x10F201)
 
-    # ranges [low, high[
+    # ranges [low, high]
     ## doorasm
-    addresses["ranges"] += [0x7EB00, 0x7EE00]
+    addresses["ranges"] += [0x7EB00, 0x7ee60]
     # for next release doorasm addresses will be relocated
-    addresses["ranges"] += [0x7F800, 0x7F9FF]
+    addresses["ranges"] += [0x7F800, 0x7FA5F]
 
     if plando == True:
         # plando addresses
@@ -971,6 +969,7 @@ def initRandomizerSession():
         session.randomizer['preset'] = 'regular'
         session.randomizer['randoPreset'] = ""
         session.randomizer['majorsSplit'] = "Full"
+        session.randomizer['startLocation'] = "Landing Site"
         session.randomizer['maxDifficulty'] = 'hardcore'
         session.randomizer['progressionSpeed'] = "medium"
         session.randomizer['progressionDifficulty'] = 'normal'
@@ -999,7 +998,6 @@ def initRandomizerSession():
         session.randomizer['elevators_doors_speed'] = "on"
         session.randomizer['spinjumprestart'] = "off"
         session.randomizer['rando_speed'] = "off"
-        session.randomizer['startLocation'] = "Landing Site"
         session.randomizer['animals'] = "off"
         session.randomizer['No_Music'] = "off"
 
@@ -1013,8 +1011,14 @@ def randomizer():
     # add empty entry for default value
     randoPresets.append("")
 
+    startAPs = GraphUtils.getStartAccessPointNamesCategory()
+    startAPs = [OPTGROUP(_label="Standard", *startAPs["regular"]),
+                OPTGROUP(_label="Custom", *startAPs["custom"]),
+                OPTGROUP(_label="Custom (Area rando only)", *startAPs["area"])]
+
     return dict(stdPresets=stdPresets, tourPresets=tourPresets, comPresets=comPresets,
-                randoPresets=randoPresets, tourRandoPresets=tourRandoPresets)
+                randoPresets=randoPresets, tourRandoPresets=tourRandoPresets,
+                startAPs=startAPs)
 
 def raiseHttp(code, msg, isJson=False):
     #print("raiseHttp: code {} msg {} isJson {}".format(code, msg, isJson))
@@ -1134,7 +1138,7 @@ def validateWebServiceParams(switchs, quantities, others, isJson=False):
             raiseHttp(400, "Wrong value for gravityBehaviour: {}".format(request.vars.gravityBehaviour), isJson)
 
     if 'startLocation' in others:
-        if request.vars.startLocation not in ['Ceres', 'Landing Site']:
+        if request.vars.startLocation not in GraphUtils.getStartAccessPointNames() + ['random']:
             raiseHttp(400, "Wrong value for startLocation: {}".format(request.vars.startLocation), isJson)
 
 def sessionWebService():
@@ -1160,6 +1164,7 @@ def sessionWebService():
     session.randomizer['preset'] = request.vars.preset
     session.randomizer['randoPreset'] = request.vars.randoPreset
     session.randomizer['majorsSplit'] = request.vars.majorsSplit
+    session.randomizer['startLocation'] = request.vars.startLocation
     session.randomizer['maxDifficulty'] = request.vars.maxDifficulty
     session.randomizer['progressionSpeed'] = request.vars.progressionSpeed.split(',')
     session.randomizer['progressionDifficulty'] = request.vars.progressionDifficulty
@@ -1188,7 +1193,6 @@ def sessionWebService():
     session.randomizer['elevators_doors_speed'] = request.vars.elevators_doors_speed
     session.randomizer['spinjumprestart'] = request.vars.spinjumprestart
     session.randomizer['rando_speed'] = request.vars.rando_speed
-    session.randomizer['startLocation'] = request.vars.startLocation
     session.randomizer['animals'] = request.vars.animals
     session.randomizer['No_Music'] = request.vars.No_Music
 
@@ -1266,7 +1270,8 @@ def randomizerWebService():
               '--progressionSpeed', request.vars.progressionSpeed,
               '--progressionDifficulty', request.vars.progressionDifficulty,
               '--morphPlacement', request.vars.morphPlacement,
-              '--majorsSplit', request.vars.majorsSplit]
+              '--majorsSplit', request.vars.majorsSplit,
+              '--startAP', request.vars.startLocation]
     params += ['--missileQty', request.vars.missileQty if request.vars.missileQty != 'random' else '0',
                '--superQty', request.vars.superQty if request.vars.superQty != 'random' else '0',
                '--powerBombQty', request.vars.powerBombQty if request.vars.powerBombQty != 'random' else '0',
@@ -1289,11 +1294,6 @@ def randomizerWebService():
         params += ['-c', 'rando_speed.ips']
     if request.vars.No_Music == 'on':
         params += ['-c', 'No_Music']
-
-    if request.vars.startLocation == "Ceres":
-        params += ['-c', 'skip_intro.ips']
-    else:
-        params += ['-c', 'skip_ceres.ips']
 
     if request.vars.animals == 'on':
         params.append('--animals')
@@ -1383,6 +1383,9 @@ def randomizerWebService():
         msg = ''
         if len(locsItems['errorMsg']) > 0:
             msg = locsItems['errorMsg']
+            if msg[0] == '\n':
+                msg = msg[1:]
+            locsItems['errorMsg'] = msg.replace('\n', '<br/>')
 
         DB.addRandoResult(id, ret, duration, msg)
         DB.close()
@@ -1398,6 +1401,9 @@ def randomizerWebService():
         try:
             with open(jsonFileName) as jsonFile:
                 msg = json.load(jsonFile)['errorMsg']
+                if msg[0] == '\n':
+                    msg = msg[1:]
+                    msg = msg.replace('\n', '<br/>')
         except:
             msg = "randomizerWebService: something wrong happened"
 
@@ -1573,6 +1579,7 @@ def tracker():
         session.tracker["state"] = {}
         session.tracker["preset"] = "regular"
         session.tracker["seed"] = None
+        session.tracker["startLocation"] = "Landing Site"
 
         # set to False in tracker.html
         session.tracker["firstTime"] = True
@@ -1596,9 +1603,14 @@ def tracker():
     # generate list of addresses to read in the ROM
     addresses = getAddressesToRead()
 
+    startAPs = GraphUtils.getStartAccessPointNamesCategory()
+    startAPs = [OPTGROUP(_label="Standard", *startAPs["regular"]),
+                OPTGROUP(_label="Custom", *startAPs["custom"]),
+                OPTGROUP(_label="Custom (Area rando only)", *startAPs["area"])]
+
     return dict(stdPresets=stdPresets, tourPresets=tourPresets, comPresets=comPresets,
                 vanillaAPs=vanillaAPs, vanillaBossesAPs=vanillaBossesAPs, escapeAPs=escapeAPs,
-                curSession=session.tracker, addresses=addresses)
+                curSession=session.tracker, addresses=addresses, startAPs=startAPs)
 
 def plando():
     response.title = 'Super Metroid VARIA Areas and Items Plandomizer'
@@ -1610,6 +1622,7 @@ def plando():
         session.plando["state"] = {}
         session.plando["preset"] = "regular"
         session.plando["seed"] = None
+        session.plando["startLocation"] = "Landing Site"
 
         # rando params
         session.plando["rando"] = {}
@@ -1636,9 +1649,14 @@ def plando():
     # generate list of addresses to read in the ROM
     addresses = getAddressesToRead(plando=True)
 
+    startAPs = GraphUtils.getStartAccessPointNamesCategory()
+    startAPs = [OPTGROUP(_label="Standard", *startAPs["regular"]),
+                OPTGROUP(_label="Custom", *startAPs["custom"]),
+                OPTGROUP(_label="Custom (Area rando only)", *startAPs["area"])]
+
     return dict(stdPresets=stdPresets, tourPresets=tourPresets, comPresets=comPresets,
                 vanillaAPs=vanillaAPs, vanillaBossesAPs=vanillaBossesAPs, escapeAPs=escapeAPs,
-                curSession=session.plando, addresses=addresses)
+                curSession=session.plando, addresses=addresses, startAPs=startAPs)
 
 class WS(object):
     @staticmethod
@@ -1693,13 +1711,13 @@ class WS(object):
         pointValue = request.vars[point]
 
         if pointValue not in ['lowerMushroomsLeft', 'moatRight', 'greenPiratesShaftBottomRight',
-                              'keyhunterRoomBottom', 'morphBallRoomLeft', 'greenBrinstarElevatorRight',
+                              'keyhunterRoomBottom', 'morphBallRoomLeft', 'greenBrinstarElevator',
                               'greenHillZoneTopRight', 'noobBridgeRight', 'westOceanLeft', 'crabMazeLeft',
                               'lavaDiveRight', 'threeMuskateersRoomLeft', 'warehouseZeelaRoomLeft',
                               'warehouseEntranceLeft', 'warehouseEntranceRight', 'singleChamberTopRight',
                               'kronicBoostRoomBottomLeft', 'mainStreetBottom', 'crabHoleBottomLeft', 'leCoudeRight',
                               'redFishRoomLeft', 'redTowerTopLeft', 'caterpillarRoomTopRight', 'redBrinstarElevator',
-                              'eastTunnelRight', 'eastTunnelTopRight', 'glassTunnelTop', 'statuesHallwayLeft',
+                              'eastTunnelRight', 'eastTunnelTopRight', 'glassTunnelTop', 'goldenFour',
                               'ridleyRoomOut', 'ridleyRoomIn', 'kraidRoomOut', 'kraidRoomIn',
                               'draygonRoomOut', 'draygonRoomIn', 'phantoonRoomOut', 'phantoonRoomIn',
                               'tourianEscapeRoom4TopRight', 'climbBottomLeft', 'greenBrinstarMainShaftTopLeft',
@@ -1725,7 +1743,7 @@ class WS(object):
                 "visitedLocations": state["visitedLocationsWeb"],
                 # compatibility with existing sessions
                 "remainLocations": state["remainLocationsWeb"] if "remainLocationsWeb" in state else [],
-                "lastLoc": self.locName4isolver(state["lastLoc"]),
+                "lastAP": self.locName4isolver(state["lastAP"]),
 
                 # area tracker
                 "lines": state["linesWeb"],
@@ -1875,6 +1893,10 @@ class WS_common_init(WS):
             if IS_LENGTH(maxsize=255, minsize=1)(uploadFile)[1] is not None:
                 raiseHttp(400, "Wrong length for ROM file name, name must be between 1 and 255 characters", True)
 
+        if request.vars.startLocation != None:
+            if request.vars.startLocation not in GraphUtils.getStartAccessPointNames():
+                raiseHttp(400, "Wrong value for startLocation: {}".format(request.vars.startLocation), True)
+
     def action(self):
         mode = request.vars.mode
         if mode != 'seedless':
@@ -1883,9 +1905,11 @@ class WS_common_init(WS):
             except Exception as e:
                 raiseHttp(400, "Can't load JSON ROM: {}".format(e), True)
             seed = base + '.sfc'
+            startLocation = None
         else:
             seed = 'seedless'
             jsonRomFileName = None
+            startLocation = request.vars.startLocation
 
         preset = request.vars.preset
         presetFileName = '{}/{}.json'.format(getPresetDir(preset), preset)
@@ -1893,13 +1917,14 @@ class WS_common_init(WS):
         self.session["seed"] = seed
         self.session["preset"] = preset
         self.session["mode"] = mode
+        self.session["startLocation"] = startLocation if startLocation != None else "Landing Site"
 
         vcr = request.vars.debug != None
         fill = request.vars.fill == "true"
 
-        return self.callSolverInit(jsonRomFileName, presetFileName, preset, seed, mode, vcr, fill)
+        return self.callSolverInit(jsonRomFileName, presetFileName, preset, seed, mode, vcr, fill, startLocation)
 
-    def callSolverInit(self, jsonRomFileName, presetFileName, preset, romFileName, mode, vcr, fill):
+    def callSolverInit(self, jsonRomFileName, presetFileName, preset, romFileName, mode, vcr, fill, startLocation):
         (fd, jsonOutFileName) = tempfile.mkstemp()
         params = [
             pythonExec,  os.path.expanduser("~/RandomMetroidSolver/solver.py"),
@@ -1919,6 +1944,9 @@ class WS_common_init(WS):
 
         if fill == True:
             params.append('--fill')
+
+        if startLocation != None:
+            params += ['--startAP', startLocation]
 
         print("before calling isolver: {}".format(params))
         start = datetime.now()
@@ -2336,6 +2364,7 @@ def extStats():
             'maxDifficulty': randoPreset['maxDifficulty'],
             # parameters which can be random:
             'majorsSplit': randoPreset['majorsSplit'] if 'majorsSplit' in randoPreset else 'Full',
+            'startAP': randoPreset['startLocation'] if 'startLocation' in randoPreset else 'Landing Site',
             'progSpeed': randoPreset['progressionSpeed'] if 'progressionSpeed' in randoPreset else 'variable',
             'morphPlacement': randoPreset['morphPlacement'] if 'morphPlacement' in randoPreset else 'early',
             'suitsRestriction': 'suitsRestriction' in randoPreset and randoPreset['suitsRestriction'] == 'on',

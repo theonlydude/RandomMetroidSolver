@@ -347,8 +347,9 @@ function startTheTour(step=-1) {
 <p>To use it, click on the <img src=\"/solver/static/images/play.svg\" alt=\"Start\" style=\"width: 32px\"> button, this popup will be displayed:\
 <img src=\"/solver/static/images/load_popup.png\" alt=\"Load popup\">\
 </p>\
-<p>As a base for your Plando ROM you should generate a seed on the <a href=\"/randomizer\" target=\"_blank\">Randomizer page</a> with all the optional patches that you need.</p>\
+<p>As a base for your Plando ROM you should generate a seed on the <a href=\"/randomizer\" target=\"_blank\">Randomizer page</a> with all the optional patches that you need and the start location of your choice.</p>\
 <p><b>Hint:</b>You can load the base ROM locations and transitions by checking the \"Populate your plando with the items and transitions from the base ROM\" checkbox.</p>\
+<p><b>Warning:</b>Using a race protected seed as your base ROM is not supported and will likely result with in-game crash.</p>\
 <h4>Usage</h4>\
 <p>The available locations will be displayed on the map, click on a location and this popup will be displayed allowing you to choose which item to place:\
 <img src=\"/solver/static/images/item_popup.png\" alt=\"Rando popup\">\
@@ -363,7 +364,7 @@ function startTheTour(step=-1) {
 <h4>Areas/Bosses Transitions</h4>\
 <p>Choose an Areas and/or Bosses seed as your base ROM to use the Plando Generator in items and areas/bosses mode, aka you choose the transitions between the areas/bosses.<br/>\
 <b>Hint:</b>You can mix Area portals <img src=\"/solver/static/images/portal.png\" alt=\"Portal\" style=\"width: 20px\"> and Boss portals <img src=\"/solver/static/images/portal_boss.png\" alt=\"Boss Portal\" style=\"width: 20px\">.<br/>\
-Using a base seed with Escape randomization allows you to edit the escape transition (<img src=\"/solver/static/images/portal_escape.png\" alt=\"Escape Portal\" style=\"width: 20px\">), it must start from Tourian escape portal. You can also set the escape timer by entering the time in the input just under Tourian escape portal (displayed only when the base seed is an escape randomization one).</p>\
+Using a base seed with Escape randomization allows you to edit the escape transition (<img src=\"/solver/static/images/portal_escape.png\" alt=\"Escape Portal\" style=\"width: 20px\">), it must start from Tourian escape portal. You can also set the escape timer by entering the time in the input just under Tourian escape portal (displayed only when the base seed is an escape randomization one) (the am/pm is ignored).</p>\
 <h4>Unused locations/transitions</h4>\
 <p>If you don't set an item to a location it'll be empty. Portals with no transitions will be looping on themselves.</p>\
 <h4>Randomization</h4>\
@@ -403,6 +404,8 @@ function onloadHook() {
     // make the debug button visible
     document.getElementById("startDebug").style.display = "block";
   }
+
+  document.getElementById("startLocationVisibility").style.display = "none";
 
   var vcrFileInput = document.getElementById("vcrFile");
   vcrFileInput.addEventListener("change", function(event){
@@ -905,8 +908,6 @@ def displayNumber(id, min, max, default, step="1"):
     <!-- to open the debug popup -->
     <div id="startDebug" class="startDebug"><img src="/solver/static/images/play.svg" alt="Start" onclick="displayDebugPopup()" data-toggle="tooltip" title="Start the debug popup" data-placement="bottom" data-container="body" data-html="true"></div>
   </div>
-
-  <input id="timer" type="time" value="03:00" class="timer" style="display:none">
 
   <!-- info on current loaded seed -->
   <p class="white">Current Seed:</p>

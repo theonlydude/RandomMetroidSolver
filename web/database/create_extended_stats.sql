@@ -20,10 +20,11 @@ create table if not exists extended_stats (
   gravityBehaviour varchar(16),
   nerfedCharge boolean,
   maxDifficulty varchar(32),
+  startAP varchar(32),
 
   -- how many seeds
   count int unsigned default 0,
-  primary key(version, preset, area, boss, majorsSplit, progSpeed, morphPlacement, suitsRestriction, progDiff, superFunMovement, superFunCombat, superFunSuit, gravityBehaviour, nerfedCharge, maxDifficulty),
+  primary key(version, preset, area, boss, majorsSplit, progSpeed, morphPlacement, suitsRestriction, progDiff, superFunMovement, superFunCombat, superFunSuit, gravityBehaviour, nerfedCharge, maxDifficulty, startAP),
   index(id)
 );
 

@@ -12,10 +12,11 @@ from smbool import SMBool
 from smboolmanager import SMBoolManager
 from helpers import Pickup, Bosses
 from rom import RomLoader, RomPatcher, RomReader
+from rom_patches import RomPatches
 from itemrandomizerweb.Items import ItemManager
 from graph_locations import locations as graphLocations
 from graph import AccessGraph
-from graph_access import vanillaTransitions, accessPoints, getDoorConnections, getTransitions, vanillaBossesTransitions, getAps2DoorsPtrs, vanillaEscapeTransitions
+from graph_access import vanillaTransitions, vanillaBossesTransitions, vanillaEscapeTransitions, accessPoints, GraphUtils, getAccessPoint
 from utils import PresetLoader, removeChars
 from vcr import VCR
 import log, db
@@ -49,8 +50,12 @@ class SolverState(object):
         self.state["escapeRando"] = solver.escapeRando
         # string "03:00"
         self.state["escapeTimer"] = solver.escapeTimer
-        # dict of raw patches
-        self.state["patches"] = solver.patches
+        # list of active patches
+        self.state["patches"] = RomPatches.ActivePatches
+        # start ap
+        self.state["startAP"] = solver.startAP
+        # start area
+        self.state["startArea"] = solver.startArea
         # dict {locName: {itemName: "xxx", "accessPoint": "xxx"}, ...}
         self.state["locsData"] = self.getLocsData(solver.locations)
         # list [(ap1, ap2), (ap3, ap4), ...]
@@ -69,7 +74,7 @@ class SolverState(object):
         # dict {locName: (bool, diff, [know1, ...], [item1, ...]), ...}
         self.state["availableLocations"] = self.getAvailableLocations(solver.majorLocations)
         # string of last access point
-        self.state["lastLoc"] = solver.lastLoc
+        self.state["lastAP"] = solver.lastAP
         # list of killed bosses: ["boss1", "boss2"]
         self.state["bosses"] = [boss for boss in Bosses.golden4Dead if Bosses.golden4Dead[boss] == True]
         # dict {locNameWeb: {infos}, ...}
@@ -106,7 +111,9 @@ class SolverState(object):
         solver.bossRando = self.state["bossRando"]
         solver.escapeRando = self.state["escapeRando"]
         solver.escapeTimer = self.state["escapeTimer"]
-        solver.patches = self.setPatches(self.state["patches"])
+        RomPatches.ActivePatches = self.state["patches"]
+        solver.startAP = self.state["startAP"]
+        solver.startArea = self.state["startArea"]
         self.setLocsData(solver.locations)
         solver.areaTransitions = self.state["areaTransitions"]
         solver.bossTransitions = self.state["bossTransitions"]
@@ -118,7 +125,7 @@ class SolverState(object):
         (solver.visitedLocations, solver.majorLocations) = self.setLocations(self.state["visitedLocations"],
                                                                              self.state["availableLocations"],
                                                                              solver.locations)
-        solver.lastLoc = self.state["lastLoc"]
+        solver.lastAP = self.state["lastAP"]
         Bosses.reset()
         for boss in self.state["bosses"]:
             Bosses.beatBoss(boss)
@@ -264,13 +271,6 @@ class SolverState(object):
                 ret[loc["Name"]] = (diff.bool, diff.difficulty, diff.knows, diff.items)
         return ret
 
-    def setPatches(self, patchesData):
-        # json's dicts keys are strings
-        ret = {}
-        for address in patchesData:
-            ret[int(address)] = patchesData[address]
-        return ret
-
     def fromJson(self, stateJsonFileName):
         with open(stateJsonFileName, 'r') as jsonFile:
             self.state = json.load(jsonFile)
@@ -290,7 +290,8 @@ class SolverState(object):
 #        print("")
 
 class CommonSolver(object):
-    def loadRom(self, rom, interactive=False, magic=None):
+    def loadRom(self, rom, interactive=False, magic=None, startAP=None):
+        # startAP param is only use for seedless
         if rom == None:
             self.romFileName = 'seedless'
             self.majorsSplit = 'Full'
@@ -298,8 +299,9 @@ class CommonSolver(object):
             self.bossRando = True
             self.escapeRando = False
             self.escapeTimer = "03:00"
-            self.patches = RomReader.getDefaultPatches()
-            RomLoader.factory(self.patches).loadPatches()
+            self.startAP = startAP
+            RomPatches.setDefaultPatches(startAP)
+            self.startArea = getAccessPoint(startAP).Start['solveArea']
             # in seedless load all the vanilla transitions
             self.areaTransitions = vanillaTransitions[:]
             self.bossTransitions = vanillaBossesTransitions[:]
@@ -310,15 +312,17 @@ class CommonSolver(object):
         else:
             self.romFileName = rom
             self.romLoader = RomLoader.factory(rom, magic)
+            self.romLoader.readNothingId()
             self.majorsSplit = self.romLoader.assignItems(self.locations)
+            (self.startAP, self.startArea, startPatches) = self.romLoader.getStartAP()
             (self.areaRando, self.bossRando, self.escapeRando) = self.romLoader.loadPatches()
+            RomPatches.ActivePatches += startPatches
             self.escapeTimer = self.romLoader.getEscapeTimer()
 
             if interactive == False:
-                self.patches = self.romLoader.getPatches()
+                print("ROM {} majors: {} area: {} boss: {} escape: {} patches: {} activePatches: {}".format(rom, self.majorsSplit, self.areaRando, self.bossRando, self.escapeRando, sorted(self.romLoader.getPatches()), sorted(RomPatches.ActivePatches)))
             else:
-                self.patches = self.romLoader.getRawPatches()
-            print("ROM {} majors: {} area: {} boss: {} escape: {} patches: {}".format(rom, self.majorsSplit, self.areaRando, self.bossRando, self.escapeRando, sorted(self.patches)))
+                print("majors: {} area: {} boss: {} escape: {} activepatches: {}".format(self.majorsSplit, self.areaRando, self.bossRando, self.escapeRando, sorted(RomPatches.ActivePatches)))
 
             (self.areaTransitions, self.bossTransitions, self.escapeTransition) = self.romLoader.getTransitions()
             if interactive == True and self.debug == False:
@@ -357,7 +361,7 @@ class CommonSolver(object):
                 return loc
 
     def computeLocationsDifficulty(self, locations):
-        self.areaGraph.getAvailableLocations(locations, self.smbm, infinity, self.lastLoc)
+        self.areaGraph.getAvailableLocations(locations, self.smbm, infinity, self.lastAP)
         # check post available functions too
         for loc in locations:
             if loc['difficulty'].bool == True:
@@ -369,7 +373,7 @@ class CommonSolver(object):
                     loc['difficulty'] = self.smbm.wand(loc['difficulty'], postAvailable)
 
                 # also check if we can come back to landing site from the location
-                loc['comeBack'] = self.areaGraph.canAccess(self.smbm, loc['accessPoint'], self.lastLoc, infinity, loc['itemName'])
+                loc['comeBack'] = self.areaGraph.canAccess(self.smbm, loc['accessPoint'], self.lastAP, infinity, loc['itemName'])
 
         if self.log.getEffectiveLevel() == logging.DEBUG:
             self.log.debug("available locs:")
@@ -380,14 +384,12 @@ class CommonSolver(object):
     def collectMajor(self, loc, itemName=None):
         self.majorLocations.remove(loc)
         self.visitedLocations.append(loc)
-        area = self.collectItem(loc, itemName)
-        return area
+        self.collectItem(loc, itemName)
 
     def collectMinor(self, loc):
         self.minorLocations.remove(loc)
         self.visitedLocations.append(loc)
-        area = self.collectItem(loc)
-        return area
+        self.collectItem(loc)
 
     def collectItem(self, loc, item=None):
         if item == None:
@@ -422,9 +424,8 @@ class CommonSolver(object):
         self.log.debug("collectItem: {} at {}".format(item, loc['Name']))
 
         # last loc is used as root node for the graph
-        self.lastLoc = loc['accessPoint']
-
-        return loc['SolveArea']
+        self.lastAP = loc['accessPoint']
+        self.lastArea = loc['SolveArea']
 
     def cancelLastItems(self, count):
         if self.vcr != None:
@@ -443,9 +444,21 @@ class CommonSolver(object):
 
             # access point
             if len(self.visitedLocations) == 0:
-                self.lastLoc = "Landing Site"
+                self.lastAP = self.startAP
+                self.lastArea = self.startArea
             else:
-                self.lastLoc = self.visitedLocations[-1]["accessPoint"]
+                self.lastAP = self.visitedLocations[-1]["accessPoint"]
+                self.lastArea = self.visitedLocations[-1]["SolveArea"]
+
+            # delete location params which are set when the location is available
+            if 'difficulty' in loc:
+                del loc['difficulty']
+            if 'distance' in loc:
+                del loc['distance']
+            if 'accessPoint' in loc:
+                del loc['accessPoint']
+            if 'path' in loc:
+                del loc['path']
 
             # item
             item = loc["itemName"]
@@ -466,17 +479,19 @@ class CommonSolver(object):
                 if item not in self.collectedItems:
                     self.smbm.removeItem(item)
 
-    def getAvailableItemsList(self, locations, area, threshold):
+    def getAvailableItemsList(self, locations, threshold):
         # locations without distance are not available
         locations = [loc for loc in locations if 'distance' in loc]
 
         if len(locations) == 0:
             return []
 
-        around = [loc for loc in locations if ((loc['SolveArea'] == area or loc['distance'] < 3)
-                                               and loc['difficulty'].difficulty <= threshold
-                                               and not Bosses.areaBossDead(area)
-                                               and 'comeBack' in loc and loc['comeBack'] == True)]
+        # add nocomeback locations which has been selected by the comeback step (areaWeight == 1)
+        around = [loc for loc in locations if( ('areaWeight' in loc and loc['areaWeight'] == 1)
+                                               or ((loc['SolveArea'] == self.lastArea or loc['distance'] < 3)
+                                                   and loc['difficulty'].difficulty <= threshold
+                                                   and not Bosses.areaBossDead(self.lastArea)
+                                                   and 'comeBack' in loc and loc['comeBack'] == True) )]
         outside = [loc for loc in locations if not loc in around]
 
         self.log.debug("around1 = {}".format([(loc['Name'], loc['difficulty'], loc['distance'], loc['comeBack'], loc['SolveArea']) for loc in around]))
@@ -484,7 +499,7 @@ class CommonSolver(object):
 
         around.sort(key=lambda loc: (
             # locs in the same area
-            0 if loc['SolveArea'] == area
+            0 if loc['SolveArea'] == self.lastArea
             else 1,
             # nearest locs
             loc['distance'],
@@ -495,9 +510,9 @@ class CommonSolver(object):
             loc['difficulty'].difficulty
             )
         )
-        self.log.debug("around2: {}".format([(loc['Name'], 0 if loc['SolveArea'] == area else 1, loc['distance'], 0 if 'Pickup' in loc else 1, loc['difficulty'].difficulty) for loc in around]))
+        self.log.debug("around2: {}".format([(loc['Name'], 0 if loc['SolveArea'] == self.lastArea else 1, loc['distance'], 0 if 'Pickup' in loc else 1, loc['difficulty'].difficulty) for loc in around]))
 
-        # we want to sort the outside locations by putting the ones is the same area first,
+        # we want to sort the outside locations by putting the ones in the same area first,
         # then we sort the remaining areas starting whith boss dead status.
         # we also want to sort by range of difficulty and not only with the difficulty threshold.
         ranged = {
@@ -533,7 +548,7 @@ class CommonSolver(object):
         for key in ranged:
             ranged[key].sort(key=lambda loc: (
                 # first locs in the same area
-                0 if loc['SolveArea'] == area else 1,
+                0 if loc['SolveArea'] == self.lastArea else 1,
                 # first nearest locs
                 loc['distance'],
                 # beating a boss
@@ -549,19 +564,19 @@ class CommonSolver(object):
         outside = []
         for key in ["areaWeight", "easy", "medium", "hard", "harder", "hardcore", "mania", "noComeBack"]:
             outside += ranged[key]
-            self.log.debug("outside2: {}: {}".format(key, [(loc['Name'], loc["areaWeight"] if "areaWeight" in loc else 0, 0 if loc['SolveArea'] == area else 1, loc['distance'], loc['difficulty'].difficulty if (not Bosses.areaBossDead(loc['Area']) and 'Pickup' in loc) else 100000, loc['difficulty'].difficulty if not Bosses.areaBossDead(loc['Area']) else 100000,loc['difficulty'].difficulty) for loc in ranged[key]]))
+            self.log.debug("outside2: {}: {}".format(key, [(loc['Name'], loc["areaWeight"] if "areaWeight" in loc else 0, 0 if loc['SolveArea'] == self.lastArea else 1, loc['distance'], loc['difficulty'].difficulty if (not Bosses.areaBossDead(loc['Area']) and 'Pickup' in loc) else 100000, loc['difficulty'].difficulty if not Bosses.areaBossDead(loc['Area']) else 100000,loc['difficulty'].difficulty) for loc in ranged[key]]))
 
         return around + outside
 
-    def nextDecision(self, majorsAvailable, minorsAvailable, hasEnoughMinors, diffThreshold, area):
+    def nextDecision(self, majorsAvailable, minorsAvailable, hasEnoughMinors, diffThreshold):
         # first take major items of acceptable difficulty in the current area
         if (len(majorsAvailable) > 0
-            and majorsAvailable[0]['SolveArea'] == area
+            and majorsAvailable[0]['SolveArea'] == self.lastArea
             and majorsAvailable[0]['difficulty'].difficulty <= diffThreshold
             and majorsAvailable[0]['comeBack'] == True):
             return self.collectMajor(majorsAvailable.pop(0))
         # next item decision
-        if len(minorsAvailable) == 0 and len(majorsAvailable) > 0:
+        elif len(minorsAvailable) == 0 and len(majorsAvailable) > 0:
             self.log.debug('MAJOR')
             return self.collectMajor(majorsAvailable.pop(0))
         elif len(majorsAvailable) == 0 and len(minorsAvailable) > 0:
@@ -617,7 +632,7 @@ class CommonSolver(object):
                 elif nextMinDifficulty <= diffThreshold and not self.haveAllMinorTypes():
                     self.log.debug("not all minors types")
                     return self.collectMinor(minorsAvailable.pop(0))
-                elif nextMinArea == area and nextMinDifficulty <= diffThreshold:
+                elif nextMinArea == self.lastArea and nextMinDifficulty <= diffThreshold:
                     self.log.debug("not enough minors")
                     return self.collectMinor(minorsAvailable.pop(0))
                 elif nextMinDifficulty > diffThreshold and nextMajDifficulty > diffThreshold:
@@ -685,15 +700,10 @@ class CommonSolver(object):
         self.visitedLocations = []
         self.collectedItems = []
 
-        # with the knowsXXX conditions some roms can be unbeatable, so we have to detect it
-        previous = -1
-        current = 0
-
         self.log.debug("{}: available major: {}, available minor: {}, visited: {}".format(Conf.itemsPickup, len(self.majorLocations), len(self.minorLocations), len(self.visitedLocations)))
 
         isEndPossible = False
         endDifficulty = mania
-        area = 'Crateria Landing Site'
         diffThreshold = self.getDiffThreshold()
         while True:
             # actual while condition
@@ -709,27 +719,7 @@ class CommonSolver(object):
                 else:
                     self.log.debug("canEnd but MB loc not accessible")
 
-            #self.log.debug(str(self.collectedItems))
-            self.log.debug("Current Area : " + area)
-
-            # check if we have collected an item in the last loop
-            current = len(self.collectedItems)
-            if current == previous:
-                if not isEndPossible:
-                    self.log.debug("STUCK ALL")
-                    if self.comeBack.rewind(len(self.collectedItems)) == True:
-                        # rewind ok
-                        previous = len(self.collectedItems) - 1
-                        continue
-                    else:
-                        # we're really stucked
-                        self.log.debug("STUCK CAN'T REWIND")
-                        break
-                else:
-                    self.log.debug("HARD END 1")
-                    self.checkMB(mbLoc)
-                    break
-            previous = current
+            self.log.debug("Current AP/Area: {}/{}".format(self.lastAP, self.lastArea))
 
             # compute the difficulty of all the locations
             self.computeLocationsDifficulty(self.majorLocations)
@@ -740,12 +730,16 @@ class CommonSolver(object):
             majorsAvailable = [loc for loc in self.majorLocations if 'difficulty' in loc and loc["difficulty"].bool == True]
             minorsAvailable = [loc for loc in self.minorLocations if 'difficulty' in loc and loc["difficulty"].bool == True]
 
+            if self.majorsSplit == 'Full':
+                locs = majorsAvailable
+            else:
+                locs = majorsAvailable+minorsAvailable
+
             # check if we're stuck
             if len(majorsAvailable) == 0 and len(minorsAvailable) == 0:
                 if not isEndPossible:
                     self.log.debug("STUCK MAJORS and MINORS")
                     if self.comeBack.rewind(len(self.collectedItems)) == True:
-                        previous = len(self.collectedItems) - 1
                         continue
                     else:
                         # we're really stucked
@@ -756,15 +750,10 @@ class CommonSolver(object):
                     self.checkMB(mbLoc)
                     break
 
-            # handle no comeback heuristic
-            if self.majorsSplit == 'Full':
-                locs = majorsAvailable
-            else:
-                locs = majorsAvailable+minorsAvailable
+            # handle no comeback locations
             rewindRequired = self.comeBack.handleNoComeBack(locs, len(self.collectedItems))
             if rewindRequired == True:
                 if self.comeBack.rewind(len(self.collectedItems)) == True:
-                    previous = len(self.collectedItems) - 1
                     continue
                 else:
                     # we're really stucked
@@ -772,16 +761,16 @@ class CommonSolver(object):
                     break
 
             # sort them on difficulty and proximity
-            majorsAvailable = self.getAvailableItemsList(majorsAvailable, area, diffThreshold)
+            majorsAvailable = self.getAvailableItemsList(majorsAvailable, diffThreshold)
             if self.majorsSplit == 'Full':
                 minorsAvailable = majorsAvailable
             else:
-                minorsAvailable = self.getAvailableItemsList(minorsAvailable, area, diffThreshold)
+                minorsAvailable = self.getAvailableItemsList(minorsAvailable, diffThreshold)
 
             self.comeBack.cleanNoComeBack(locs)
 
             # choose one to pick up
-            area = self.nextDecision(majorsAvailable, minorsAvailable, hasEnoughMinors, diffThreshold, area)
+            self.nextDecision(majorsAvailable, minorsAvailable, hasEnoughMinors, diffThreshold)
 
         # compute difficulty value
         (difficulty, itemsOk) = self.computeDifficultyValue()
@@ -869,7 +858,7 @@ class InteractiveSolver(CommonSolver):
         state.fromSolver(self)
         state.toJson(self.outputFileName)
 
-    def initialize(self, mode, rom, presetFileName, magic, debug, fill):
+    def initialize(self, mode, rom, presetFileName, magic, debug, fill, startAP):
         # load rom and preset, return first state
         self.debug = debug
         self.mode = mode
@@ -883,7 +872,7 @@ class InteractiveSolver(CommonSolver):
         self.presetFileName = presetFileName
         self.loadPreset(self.presetFileName)
 
-        self.loadRom(rom, interactive=True, magic=magic)
+        self.loadRom(rom, interactive=True, magic=magic, startAP=startAP)
         if self.mode == 'plando':
             # in plando always consider that we're doing full
             self.majorsSplit = 'Full'
@@ -918,8 +907,6 @@ class InteractiveSolver(CommonSolver):
         state = SolverState()
         state.fromJson(stateJson)
         state.toSolver(self)
-
-        RomLoader.factory(self.patches).loadPatches()
 
         self.loadPreset(self.presetFileName)
 
@@ -997,7 +984,7 @@ class InteractiveSolver(CommonSolver):
     def loadPlandoTransitions(self):
         # add escape transition
         transitionsAddr = self.romLoader.getPlandoTransitions(len(vanillaBossesTransitions) + len(vanillaTransitions) + 1)
-        return getTransitions(transitionsAddr)
+        return GraphUtils.getTransitions(transitionsAddr)
 
     def loadPlandoLocs(self):
         # get the addresses of the already filled locs, with the correct order
@@ -1021,7 +1008,8 @@ class InteractiveSolver(CommonSolver):
         mbLoc = self.getLoc("Mother Brain")
         locationsBck = self.locations[:]
 
-        self.lastLoc = 'Landing Site'
+        self.lastAP = self.startAP
+        self.lastArea = self.startArea
         (self.difficulty, self.itemsOk) = self.computeDifficulty()
 
         # put back mother brain location
@@ -1072,22 +1060,10 @@ class InteractiveSolver(CommonSolver):
             else:
                 plandoLocsItems[loc["Name"]] = loc["itemName"]
 
-        # add active patches
-        patches = {}
-        for (patchName, patchData) in RomReader.patches.items():
-            # hash on patch adress
-            patches[patchData['address']] = {'value': patchData['value'], 'name': patchName}
-
-        activePatches = []
-        for address in self.patches:
-            if address in patches:
-                if self.patches[address] == patches[address]["value"]:
-                    activePatches.append(patches[address]["name"])
-
         plandoCurrent = {
             "locsItems": plandoLocsItems,
             "transitions": self.curGraphTransitions,
-            "patches": activePatches
+            "patches": RomPatches.ActivePatches
         }
 
         plandoCurrentJson = json.dumps(plandoCurrent)
@@ -1158,9 +1134,11 @@ class InteractiveSolver(CommonSolver):
             patches.append('race_mode_credits.ips')
         romPatcher.addIPSPatches(patches)
         romPatcher.commitIPS()
+        romPatcher.setNothingId(self.startAP, itemLocs)
         romPatcher.writeItemsLocs(itemLocs)
         romPatcher.writeItemsNumber()
         romPatcher.writeSpoiler(itemLocs)
+        romPatcher.writeNothingId()
         class FakeRandoSettings:
             def __init__(self):
                 self.qty = {'energy': 'plando'}
@@ -1175,10 +1153,10 @@ class InteractiveSolver(CommonSolver):
         else:
             romPatcher.writePlandoAddresses(self.visitedLocations)
         if self.areaRando == True or self.bossRando == True:
-            doors = getDoorConnections(self.fillGraph(), self.areaRando, self.bossRando)
+            doors = GraphUtils.getDoorConnections(self.fillGraph(), self.areaRando, self.bossRando)
             romPatcher.writeDoorConnections(doors)
             if magic == None:
-                doorsPtrs = getAps2DoorsPtrs()
+                doorsPtrs = GraphUtils.getAps2DoorsPtrs()
                 romPatcher.writePlandoTransitions(self.curGraphTransitions, doorsPtrs,
                                                   len(vanillaBossesTransitions) + len(vanillaTransitions))
             if self.escapeRando == True and escapeTimer != None:
@@ -1277,7 +1255,8 @@ class InteractiveSolver(CommonSolver):
     def clearItems(self, reload=False):
         self.collectedItems = []
         self.visitedLocations = []
-        self.lastLoc = 'Landing Site'
+        self.lastAP = self.startAP
+        self.lastArea = self.startArea
         self.majorLocations = self.locations
         if reload == True:
             for loc in self.majorLocations:
@@ -1382,6 +1361,7 @@ class StandardSolver(CommonSolver):
         self.outputFileName = outputFileName
 
         self.locations = graphLocations
+
         self.smbm = SMBoolManager()
 
         self.presetFileName = presetFileName
@@ -1400,7 +1380,8 @@ class StandardSolver(CommonSolver):
         Conf.itemsForbidden = itemsForbidden
 
     def solveRom(self):
-        self.lastLoc = 'Landing Site'
+        self.lastAP = self.startAP
+        self.lastArea = self.startArea
 
         (self.difficulty, self.itemsOk) = self.computeDifficulty()
         if self.firstLogFile is not None:
@@ -1475,14 +1456,14 @@ class StandardSolver(CommonSolver):
         presetLoader.load()
         self.smbm.createKnowsFunctions()
 
-        self.areaGraph.getAvailableLocations(locations, self.smbm, infinity, self.lastLoc)
+        self.areaGraph.getAvailableLocations(locations, self.smbm, infinity, self.lastAP)
 
         return [loc for loc in locations if loc['difficulty'].bool == True]
 
 class ComeBack(object):
     # object to handle the decision to choose the next area when all locations have the "no comeback" flag.
     # handle rewinding to try the next area in case of a stuck.
-    # one ComebackStep object is created each time we have to use the no comeback heuristic b, used for rewinding.
+    # one ComebackStep object is created each time we have to use the no comeback heuristic, used for rewinding.
     def __init__(self, solver):
         self.comeBackSteps = []
         # used to rewind
@@ -1490,35 +1471,38 @@ class ComeBack(object):
         self.log = log.get('Rewind')
 
     def handleNoComeBack(self, locations, cur):
-        # return true if a rewind is required
-        graphAreas = {}
+        # return True if a rewind is needed. choose the next area to use
+        solveAreas = {}
         for loc in locations:
             if "comeBack" not in loc:
                 return False
             if loc["comeBack"] == True:
                 return False
-            if loc["GraphArea"] in graphAreas:
-                graphAreas[loc["GraphArea"]] += 1
+            if loc["SolveArea"] in solveAreas:
+                solveAreas[loc["SolveArea"]] += 1
             else:
-                graphAreas[loc["GraphArea"]] = 1
+                solveAreas[loc["SolveArea"]] = 1
 
-        if len(graphAreas) == 1:
-            return False
+        self.log.debug("WARNING: use no come back heuristic for {} locs in {} solve areas ({})".format(len(locations), len(solveAreas), solveAreas))
 
-        self.log.debug("WARNING: use no come back heuristic for {} locs in {} graph areas".format(len(locations), len(graphAreas)))
-
-        # check if we can use existing step
+        # check if we can use an existing step
         if len(self.comeBackSteps) > 0:
             lastStep = self.comeBackSteps[-1]
             if lastStep.cur == cur:
                 self.log.debug("Use last step at {}".format(cur))
                 return lastStep.next(locations)
+            else:
+                self.log.debug("cur: {}, lastStep.cur: {}, don't use lastStep.next()".format(cur, lastStep.cur))
+
+        if len(solveAreas) == 1:
+            self.log.debug("handleNoComeBack: only one solve area")
+            return False
 
         # create a step
         self.log.debug("Create new step at {}".format(cur))
-        step = ComeBackStep(graphAreas, cur)
-        self.comeBackSteps.append(step)
-        return step.next(locations)
+        lastStep = ComeBackStep(solveAreas, cur)
+        self.comeBackSteps.append(lastStep)
+        return lastStep.next(locations)
 
     def cleanNoComeBack(self, locations):
         for loc in locations:
@@ -1534,57 +1518,80 @@ class ComeBack(object):
 
         self.log.debug("Start rewind, current: {}".format(cur))
 
-        lastStep = self.comeBackSteps[-1]
-        if lastStep.cur == cur:
-            # need to go up one more time
-            self.comeBackSteps.pop()
-
-            if len(self.comeBackSteps) == 0:
-                self.log.debug("No more steps to rewind")
-                return False
-
+        while len(self.comeBackSteps) > 0:
             lastStep = self.comeBackSteps[-1]
-            self.log.debug("Rewind previous step at {}".format(lastStep.cur))
+            if not lastStep.moreAvailable():
+                self.log.debug("last step has been fully visited, go up one more time")
+                self.comeBackSteps.pop()
+
+                if len(self.comeBackSteps) == 0:
+                    self.log.debug("No more steps to rewind")
+                    return False
+
+                self.log.debug("Rewind to previous step at {}".format(self.comeBackSteps[-1].cur))
+            else:
+                break
 
         count = cur - lastStep.cur
+        if count == 0:
+            self.log.debug("Can't rewind, it's buggy here !")
+            return False
         self.solver.cancelLastItems(count)
         self.log.debug("Rewind {} items to {}".format(count, lastStep.cur))
         return True
 
 class ComeBackStep(object):
     # one case of no come back decision
-    def __init__(self, graphAreas, cur):
-        self.visitedGraphAreas = []
-        self.graphAreas = graphAreas
+    def __init__(self, solveAreas, cur):
+        self.visitedSolveAreas = []
+        self.solveAreas = solveAreas
         self.cur = cur
+        self.log = log.get('RewindStep')
+        self.log.debug("create rewind step: {} {}".format(cur, solveAreas))
+
+    def moreAvailable(self):
+        self.log.debug("moreAvailable: cur: {} len(visited): {} len(areas): {}".format(self.cur, len(self.visitedSolveAreas), len(self.solveAreas)))
+        return len(self.visitedSolveAreas) < len(self.solveAreas)
 
     def next(self, locations):
-        # use next available area, if all areas has been visited return True (stuck), else False
-        if len(self.visitedGraphAreas) == len(self.graphAreas):
+        # use next available area, if all areas have been visited return True (stuck), else False
+        if not self.moreAvailable():
+            self.log.debug("rewind: all areas have been visited, stuck")
             return True
+
+        self.log.debug("rewind next, solveAreas: {} visitedSolveAreas: {}".format(self.solveAreas, self.visitedSolveAreas))
 
         # get area with max available locs
         maxAreaWeigth = 0
         maxAreaName = ""
-        for graphArea in sorted(self.graphAreas):
-            if graphArea in self.visitedGraphAreas:
+        for solveArea in sorted(self.solveAreas):
+            if solveArea in self.visitedSolveAreas:
                 continue
             else:
-                if self.graphAreas[graphArea] > maxAreaWeigth:
-                    maxAreaWeigth = self.graphAreas[graphArea]
-                    maxAreaName = graphArea
-        self.visitedGraphAreas.append(maxAreaName)
+                if self.solveAreas[solveArea] > maxAreaWeigth:
+                    maxAreaWeigth = self.solveAreas[solveArea]
+                    maxAreaName = solveArea
+        self.visitedSolveAreas.append(maxAreaName)
+        self.log.debug("rewind next area: {}".format(maxAreaName))
 
-        retGraphAreas = {}
-        for graphArea in self.graphAreas:
-            if graphArea == maxAreaName:
-                retGraphAreas[graphArea] = 1
+        outWeight = 10000
+        retSolveAreas = {}
+        for solveArea in self.solveAreas:
+            if solveArea == maxAreaName:
+                retSolveAreas[solveArea] = 1
             else:
-                retGraphAreas[graphArea] = 10000
+                retSolveAreas[solveArea] = outWeight
 
         # update locs
         for loc in locations:
-            loc["areaWeight"] = retGraphAreas[loc["GraphArea"]]
+            solveArea = loc["SolveArea"]
+            if solveArea in retSolveAreas:
+                loc["areaWeight"] = retSolveAreas[loc["SolveArea"]]
+                self.log.debug("rewind loc {} new areaWeight: {}".format(loc["Name"], loc["areaWeight"]))
+            else:
+                # can happen if going to the first area unlocks new areas
+                loc["areaWeight"] = outWeight
+                self.log.debug("rewind loc {} from area {} not in original areas".format(loc["Name"], solveArea))
 
         return False
 
@@ -1657,7 +1664,7 @@ class OutWeb(Out):
 
         result = dict(randomizedRom=randomizedRom, difficulty=s.difficulty,
                       generatedPath=generatedPath, diffPercent=diffPercent,
-                      knowsUsed=(s.knowsUsed, s.knowsKnown), itemsOk=s.itemsOk, patches=s.patches,
+                      knowsUsed=(s.knowsUsed, s.knowsKnown), itemsOk=s.itemsOk, patches=s.romLoader.getPatches(),
                       pngFileName=pngFileName, pngThumbFileName=pngThumbFileName,
                       remainTry=remainTry, remainMajors=remainMajors, remainMinors=remainMinors,
                       skippedMajors=skippedMajors, unavailMajors=unavailMajors,
@@ -1882,7 +1889,7 @@ def interactiveSolver(args):
             sys.exit(1)
 
         solver = InteractiveSolver(args.output)
-        solver.initialize(args.mode, args.romFileName, args.presetFileName, magic=args.raceMagic, debug=args.vcr, fill=args.fill)
+        solver.initialize(args.mode, args.romFileName, args.presetFileName, magic=args.raceMagic, debug=args.vcr, fill=args.fill, startAP=args.startAP)
     else:
         # iterate
         params = {}
@@ -2013,6 +2020,7 @@ if __name__ == "__main__":
     parser.add_argument('--escapeTimer', help="escape timer like 03:00", dest="escapeTimer", default=None)
     parser.add_argument('--fill', help="in plando load all the source seed locations/transitions as a base (used in interactive mode)",
                         dest="fill", action='store_true')
+    parser.add_argument('--startAP', help="in plando/seedless: the start location", dest="startAP", default="Landing Site")
     parser.add_argument('--progressionSpeed', help="rando plando (used in interactive mode)",
                         dest="progressionSpeed", nargs="?", default=None, choices=["slowest", "slow", "medium", "fast", "fastest", "basic", "VARIAble"])
     parser.add_argument('--minorQty', help="rando plando  (used in interactive mode)",

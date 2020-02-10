@@ -25,6 +25,7 @@ define softreset $7fffe6
 define scroll_speed $7fffe8
 define timer1 $05b8
 define timer2 $05ba
+define check_new_game   $A1F210
 
 // Patch soft reset to retain value of RTA counter
 org $80844B
@@ -297,18 +298,7 @@ copy:
 clear_values:
     php
     rep #$30
-    // Do some checks to see that we're actually starting a new game    
-    // Make sure game mode is 1f
-    lda $7e0998
-    cmp.w #$001f
-    bne .ret
-    
-    // check that Game time and frames is equal zero for new game
-    // (Thanks Smiley and P.JBoy from metconst)
-    LDA $09DA
-    ORA $09DC
-    ORA $09DE
-    ORA $09E0
+    jsl {check_new_game}
     bne .ret
 
     ldx #$0000

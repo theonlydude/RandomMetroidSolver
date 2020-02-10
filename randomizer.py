@@ -6,10 +6,11 @@ from itemrandomizerweb.Randomizer import Randomizer, RandoSettings, progSpeeds
 from itemrandomizerweb.AreaRandomizer import AreaRandomizer
 from itemrandomizerweb.PaletteRando import PaletteRando
 from graph_locations import locations as graphLocations
-from graph_access import vanillaTransitions, getDoorConnections, vanillaBossesTransitions, createBossesTransitions
+from graph_access import vanillaTransitions, vanillaBossesTransitions, GraphUtils
 from parameters import Knows, easy, medium, hard, harder, hardcore, mania, text2diff, diff2text
 from utils import PresetLoader
-from rom import RomPatcher, RomPatches, FakeROM
+from rom_patches import RomPatches
+from rom import RomPatcher, FakeROM
 from utils import loadRandoPreset
 import log, db
 
@@ -30,33 +31,6 @@ def restricted_float(x):
     if x < 0.0 or x > 9.0:
         raise argparse.ArgumentTypeError("%r not in range [1.0, 9.0]"%(x,))
     return x
-
-def loadPlandoPatches(patches):
-    # check total base (blue bt and red tower blue door)
-    if "startCeres" in patches or "startLS" in patches:
-        RomPatches.ActivePatches += [RomPatches.BlueBrinstarBlueDoor,
-                                     RomPatches.RedTowerBlueDoors]
-    # check total soft lock protection
-    if "layout" in patches:
-        RomPatches.ActivePatches += RomPatches.TotalLayout
-    # check gravity heat protection
-    if "gravityNoHeatProtection" in patches:
-        RomPatches.ActivePatches.append(RomPatches.NoGravityEnvProtection)
-    if "progressiveSuits" in patches:
-        RomPatches.ActivePatches.append(RomPatches.ProgressiveSuits)
-    if "nerfedCharge" in patches:
-        RomPatches.ActivePatches.append(RomPatches.NerfedCharge)
-    # check varia tweaks
-    if "variaTweaks" in patches:
-        RomPatches.ActivePatches += RomPatches.VariaTweaks
-    # check area
-    if "area" in patches:
-        RomPatches.ActivePatches += [RomPatches.SingleChamberNoCrumble,
-                                     RomPatches.AreaRandoGatesBase,
-                                     RomPatches.AreaRandoBlueDoors]
-    # check area layout
-    if "areaLayout" in patches:
-        RomPatches.ActivePatches.append(RomPatches.AreaRandoGatesOther)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Random Metroid Randomizer")
@@ -84,6 +58,9 @@ if __name__ == "__main__":
                         dest='noRemoveEscapeEnemies', default=False)
     parser.add_argument('--bosses', help="randomize bosses",
                         dest='bosses', nargs='?', const=True, default=False)
+    parser.add_argument('--startAP', help="Name of the Access Point to start from",
+                        dest='startAP', nargs='?', default="Landing Site",
+                        choices=['random'] + GraphUtils.getStartAccessPointNames())
     parser.add_argument('--debug', '-d', help="activate debug logging", dest='debug',
                         action='store_true')
     parser.add_argument('--maxDifficulty', '-t',
@@ -105,8 +82,7 @@ if __name__ == "__main__":
                         help="optional patches to add",
                         dest='patches', nargs='?', default=[], action='append',
                         choices=['itemsounds.ips', 'elevators_doors_speed.ips',
-                                 'spinjumprestart.ips', 'rando_speed.ips',
-                                 'skip_intro.ips', 'skip_ceres.ips', 'No_Music'])
+                                 'spinjumprestart.ips', 'rando_speed.ips', 'No_Music'])
     parser.add_argument('--missileQty', '-m',
                         help="quantity of missiles",
                         dest='missileQty', nargs='?', default=3,
@@ -232,7 +208,15 @@ if __name__ == "__main__":
 
     log.init(args.debug)
     logger = log.get('Rando')
-
+    # service to force an argument value and notify it
+    argDict = vars(args)
+    def forceArg(arg, value, msg):
+        if argDict[arg] != value:
+            argDict[arg] = value
+            print(msg)
+            return '\n'+msg
+        else:
+            return ''
     # if rando preset given, load it first
     if args.randoPreset != None:
         loadRandoPreset(args.randoPreset, args)
@@ -277,6 +261,30 @@ if __name__ == "__main__":
                 animalsPatches.remove('draygonimals.ips') # glitched room
                 animalsPatches.remove('metalimals.ips') # no pirates
         args.patches.append(random.choice(animalsPatches))
+    # if no max diff, set it very high
+    if args.maxDifficulty:
+        if args.maxDifficulty == 'random':
+            diffs = ['hard', 'harder', 'very hard', 'hardcore', 'mania']
+            maxDifficulty = text2diff[random.choice(diffs)]
+        else:
+            maxDifficulty = text2diff[args.maxDifficulty]
+    else:
+        maxDifficulty = float('inf')
+    # same as solver, increase max difficulty
+    threshold = maxDifficulty
+    epsilon = 0.001
+    if maxDifficulty <= easy:
+        threshold = medium - epsilon
+    elif maxDifficulty <= medium:
+        threshold = hard - epsilon
+    elif maxDifficulty <= hard:
+        threshold = harder - epsilon
+    elif maxDifficulty <= harder:
+        threshold = hardcore - epsilon
+    elif maxDifficulty <= hardcore:
+        threshold = mania - epsilon
+    maxDifficulty = threshold
+    logger.debug("maxDifficulty: {}".format(maxDifficulty))
 
     # if random progression speed, choose one
     progSpeed = str(args.progressionSpeed).lower()
@@ -296,35 +304,6 @@ if __name__ == "__main__":
     if progDiff == "random":
         progDiff = random.choice(progDiffs)
     logger.debug("progression diff: {}".format(progDiff))
-
-    if args.patchOnly == False:
-        print("SEED: " + str(seed))
-
-    # if no max diff, set it very high
-    if args.maxDifficulty:
-        if args.maxDifficulty == 'random':
-            diffs = ['hard', 'harder', 'very hard', 'hardcore', 'mania']
-            maxDifficulty = text2diff[random.choice(diffs)]
-        else:
-            maxDifficulty = text2diff[args.maxDifficulty]
-    else:
-        maxDifficulty = float('inf')
-    logger.debug("maxDifficulty: {}".format(maxDifficulty))
-
-    # same as solver, increase max difficulty
-    threshold = maxDifficulty
-    epsilon = 0.001
-    if maxDifficulty <= easy:
-        threshold = medium - epsilon
-    elif maxDifficulty <= medium:
-        threshold = hard - epsilon
-    elif maxDifficulty <= hard:
-        threshold = harder - epsilon
-    elif maxDifficulty <= harder:
-        threshold = hardcore - epsilon
-    elif maxDifficulty <= hardcore:
-        threshold = mania - epsilon
-    maxDifficulty = threshold
 
     majorsSplitRandom = False
     if args.majorsSplit == 'random':
@@ -360,11 +339,33 @@ if __name__ == "__main__":
         args.morphPlacement = random.choice(morphPlacements)
     # late + chozo will always stuck
     if args.majorsSplit == 'Chozo' and args.morphPlacement == "late":
-        args.morphPlacement = "normal"
+        optErrMsg += forceArg('morphPlacement', 'normal', "'Morph Placement' forced to normal")
     logger.debug("morphPlacement: {}".format(args.morphPlacement))
 
     if args.strictMinors == 'random':
         args.strictMinors = bool(random.randint(0, 2))
+
+    if not GraphUtils.isStandardStart(args.startAP):
+        if args.morphPlacement == 'late':
+            optErrMsg += forceArg('morphPlacement', 'normal', "'Morph Placement' forced to normal")
+        optErrMsg += forceArg('majorsSplit', 'Full', "'Majors Split' forced to Full")
+        optErrMsg += forceArg('noVariaTweaks', False, "'VARIA tweaks' forced to on")
+        optErrMsg += forceArg('noLayout', False, "'Anti-softlock layout patches' forced to on")
+        optErrMsg += forceArg('suitsRestriction', False, "'Suits restriction' forced to off")
+        optErrMsg += forceArg('areaLayoutBase', False, "'Additional layout patches for easier navigation' forced to on")
+        possibleStartAPs = GraphUtils.getPossibleStartAPs(args.area, maxDifficulty)
+        if args.startAP == 'random':
+            args.startAP = random.choice(possibleStartAPs)
+        elif args.startAP not in possibleStartAPs:
+            optErrMsg += '\nInvalid start location: {}'.format(args.startAP)
+            optErrMsg += '\nPossible start locations with these settings: {}'.format(possibleStartAPs)
+            dumpErrorMsg(args.output, optErrMsg)
+            sys.exit(-1)
+
+    print("startAP:{}".format(args.startAP))
+
+    if args.patchOnly == False:
+        print("SEED: " + str(seed))
 
     # fill restrictions dict
     restrictions = { 'Suits' : args.suitsRestriction, 'Morph' : args.morphPlacement }
@@ -392,14 +393,12 @@ if __name__ == "__main__":
     seedName = fileName
     if args.directory != '.':
         fileName = args.directory + '/' + fileName
-    # check that one skip patch is set
-    if 'skip_intro.ips' not in args.patches and 'skip_ceres.ips' not in args.patches and args.patchOnly == False:
-        args.patches.append('skip_ceres.ips')
-
     if args.noLayout == True:
         RomPatches.ActivePatches = RomPatches.TotalBase
     else:
         RomPatches.ActivePatches = RomPatches.Total
+    RomPatches.ActivePatches.remove(RomPatches.BlueBrinstarBlueDoor)
+    RomPatches.ActivePatches += GraphUtils.getGraphPatches(args.startAP)
     if args.noGravHeat == True or args.progressiveSuits == True:
         RomPatches.ActivePatches.remove(RomPatches.NoGravityEnvProtection)
     if args.progressiveSuits == True:
@@ -460,12 +459,16 @@ if __name__ == "__main__":
 
     if args.plandoRando != None:
         args.plandoRando = json.loads(args.plandoRando)
-        loadPlandoPatches(args.plandoRando["patches"])
+        RomPatches.ActivePatches = args.plandoRando["patches"]
 
-    randoSettings = RandoSettings(maxDifficulty, progSpeed, progDiff, qty, restrictions, args.superFun, args.runtimeLimit_s, args.vcr, args.plandoRando["locsItems"] if args.plandoRando != None else None)
+    randoSettings = RandoSettings(args.startAP,
+                                  maxDifficulty, progSpeed, progDiff, qty,
+                                  restrictions, args.superFun, args.runtimeLimit_s,
+                                  args.vcr,
+                                  args.plandoRando["locsItems"] if args.plandoRando != None else None)
     bossTransitions = vanillaBossesTransitions
     if args.bosses == True:
-        bossTransitions = createBossesTransitions()
+        bossTransitions = GraphUtils.createBossesTransitions()
     if args.area == True:
         if args.dot == True:
             dotDir = args.directory
@@ -500,9 +503,9 @@ if __name__ == "__main__":
             sys.exit(-1)
     if args.patchOnly == False:
         (stuck, itemLocs, progItemLocs) = randomizer.generateItems()
-        doors = getDoorConnections(randomizer.areaGraph,
-                                   args.area, args.bosses,
-                                   args.area and not args.noEscapeRando)
+        doors = GraphUtils.getDoorConnections(randomizer.areaGraph,
+                                              args.area, args.bosses,
+                                              args.area and not args.noEscapeRando)
         escapeTimer = randomizer.areaGraph.EscapeTimer
     else:
         stuck = False
@@ -543,6 +546,8 @@ if __name__ == "__main__":
         # replace smbool with a dict
         for itemLoc in itemLocs:
             itemLoc["Location"]["difficulty"] = itemLoc["Location"]["difficulty"].json()
+            if "Wrapper" in itemLoc["Item"]:
+                del itemLoc["Item"]["Wrapper"]
 
         with open(args.output, 'w') as jsonFile:
             json.dump({"itemLocs": itemLocs, "errorMsg": randomizer.errorMsg}, jsonFile, default=lambda x: x.__dict__)
@@ -560,6 +565,7 @@ if __name__ == "__main__":
             args.maxDifficulty = 'no difficulty cap'
         parameters = {'preset': preset, 'area': args.area, 'boss': args.bosses,
                       'majorsSplit': args.majorsSplit,
+                      'startAP': args.startAP,
                       'gravityBehaviour': gravityBehaviour,
                       'nerfedCharge': args.nerfedCharge,
                       'maxDifficulty': args.maxDifficulty,
@@ -590,7 +596,8 @@ if __name__ == "__main__":
                 suitsMode = "Progressive"
             elif args.noGravHeat:
                 suitsMode = "Vanilla"
-            romPatcher.applyIPSPatches(args.patches, args.noLayout, suitsMode,
+            romPatcher.applyIPSPatches(args.startAP, args.patches,
+                                       args.noLayout, suitsMode,
                                        args.area, args.bosses, args.areaLayoutBase,
                                        args.noVariaTweaks, args.nerfedCharge,
                                        args.noEscapeRando, args.noRemoveEscapeEnemies)
@@ -600,6 +607,7 @@ if __name__ == "__main__":
             romPatcher.customSprite(args.sprite) # adds another IPS
         romPatcher.commitIPS() # actually write IPS data
         if args.patchOnly == False:
+            romPatcher.setNothingId(args.startAP, itemLocs)
             romPatcher.writeItemsLocs(itemLocs)
             romPatcher.writeItemsNumber()
             romPatcher.writeSeed(seed) # lol if race mode
@@ -615,6 +623,7 @@ if __name__ == "__main__":
         if args.patchOnly == False:
             romPatcher.writeMagic()
             romPatcher.writeMajorsSplit(args.majorsSplit)
+            romPatcher.writeNothingId()
         if args.palette == True:
             paletteSettings = {
                 "global_shift": None,
@@ -637,7 +646,6 @@ if __name__ == "__main__":
                 paletteSettings[param] = getattr(args, param)
             PaletteRando(romPatcher, paletteSettings, args.sprite).randomize()
         romPatcher.end()
-
         if args.rom is None:
             data = romPatcher.romFile.data
             fileName = '{}.sfc'.format(fileName)

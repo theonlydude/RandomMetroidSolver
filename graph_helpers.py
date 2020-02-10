@@ -1,8 +1,5 @@
-from functools import reduce
-
-# the difficulties for each technics
 from smbool import SMBool
-from rom import RomPatches
+from rom_patches import RomPatches
 from helpers import Helpers, Bosses
 from graph_access import getAccessPoint
 from cache import Cache
@@ -51,14 +48,32 @@ class HelpersGraph(Helpers):
 
     def canPassTerminatorBombWall(self, fromLandingSite=True):
         sm = self.smbm
-        return sm.wor(sm.wand(sm.haveItem('SpeedBooster'),
-                              sm.wor(SMBool(not fromLandingSite, 0), sm.knowsSimpleShortCharge(), sm.knowsShortCharge())),
-                      sm.canDestroyBombWalls())
+        return sm.wand(sm.wor(sm.wand(sm.haveItem('SpeedBooster'),
+                                      sm.wor(SMBool(not fromLandingSite, 0), sm.knowsSimpleShortCharge(), sm.knowsShortCharge())),
+                              sm.canDestroyBombWalls()),
+                       sm.canPassCrateriaGreenPirates())
 
+    # mostly for going up but let's be noob friendly and add the condition for both ways
+    @Cache.decorator
+    def canPassCrateriaGreenPirates(self):
+        sm = self.smbm
+        return sm.wor(sm.canPassBombPassages(),
+                      sm.canOpenRedDoors(),
+                      sm.energyReserveCountOk(1),
+                      sm.wor(sm.haveItem('Charge'),
+                             sm.haveItem('Ice'),
+                             sm.haveItem('Wave'),
+                             sm.wor(sm.haveItem('Spazer'),
+                                    sm.haveItem('Plasma'),
+                                    sm.haveItem('ScrewAttack'))))
+
+    # from blue brin elevator
     @Cache.decorator
     def canAccessBillyMays(self):
         sm = self.smbm
-        return sm.wand(sm.canUsePowerBombs(),
+        return sm.wand(sm.wor(RomPatches.has(RomPatches.BlueBrinstarBlueDoor),
+                              sm.canOpenRedDoors()),
+                       sm.canUsePowerBombs(),
                        sm.wor(sm.knowsBillyMays(),
                               sm.haveItem('Gravity'),
                               sm.haveItem('SpaceJump')))
@@ -110,16 +125,15 @@ class HelpersGraph(Helpers):
     @Cache.decorator
     def canPassSpongeBath(self):
         sm = self.smbm
-        return sm.wand(Bosses.bossDead('Phantoon'),
-                       sm.wor(sm.wand(sm.canPassBombPassages(),
-                                      sm.knowsSpongeBathBombJump()),
-                              sm.wand(sm.haveItem('HiJump'),
-                                      sm.knowsSpongeBathHiJump()),
-                              sm.wor(sm.haveItem('Gravity'),
-                                     sm.haveItem('SpaceJump'),
-                                     sm.wand(sm.haveItem('SpeedBooster'),
-                                             sm.knowsSpongeBathSpeed()),
-                                     sm.canSpringBallJump())))
+        return sm.wor(sm.wand(sm.canPassBombPassages(),
+                              sm.knowsSpongeBathBombJump()),
+                      sm.wand(sm.haveItem('HiJump'),
+                              sm.knowsSpongeBathHiJump()),
+                      sm.wor(sm.haveItem('Gravity'),
+                             sm.haveItem('SpaceJump'),
+                             sm.wand(sm.haveItem('SpeedBooster'),
+                                     sm.knowsSpongeBathSpeed()),
+                             sm.canSpringBallJump()))
 
     @Cache.decorator
     def canPassBowling(self):

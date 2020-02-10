@@ -53,18 +53,11 @@ def chooseFromRange(rangeDict):
             return v
     return val
 
-if sys.version_info.major == 2:
-    def isString(string):
-        return type(string) in [str, unicode]
-else:
-    def isString(string):
-        return type(string) == str
-
 class PresetLoader(object):
     @staticmethod
     def factory(params):
         # can be a json, a python file or a dict with the parameters
-        if isString(params):
+        if type(params) == str:
             ext = os.path.splitext(params)
             if ext[1].lower() == '.json':
                 return PresetLoaderJson(params)
@@ -308,7 +301,7 @@ def loadRandoPreset(randoPreset, args):
         else:
             args.superFun.append("SuitsRandom")
 
-    patches = ["skip_intro", "skip_ceres", "itemsounds", "spinjumprestart", "rando_speed", "elevators_doors_speed"]
+    patches = ["itemsounds", "spinjumprestart", "rando_speed", "elevators_doors_speed"]
 
     for patch in patches:
         if patch in randoParams and randoParams[patch] == "on":
@@ -320,6 +313,8 @@ def loadRandoPreset(randoPreset, args):
         args.morphPlacement = randoParams["morphPlacement"]
     if "majorsSplit" in randoParams:
         args.majorsSplit = randoParams["majorsSplit"]
+    if "startLocation" in randoParams:
+        args.startAP = randoParams["startLocation"]
     if "progressionDifficulty" in randoParams:
         args.progressionDifficulty = randoParams["progressionDifficulty"]
 

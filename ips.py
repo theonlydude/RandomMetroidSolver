@@ -1,30 +1,6 @@
-
-import struct, sys, itertools
-
-# in Python 3 reading a binary file returns a bytes object and indexing a bytes object returns an integer,
-# so we no longer need ord(). to remove ord get a bytearray in python2 when reading a file
-if sys.version_info.major > 2:
-    def readBytes(file, n):
-        return file.read(n)
-else:
-    def readBytes(file, n):
-        return bytearray(file.read(n))
+import itertools
 
 # adapted from ips-util for python 3.2 (https://pypi.org/project/ips-util/)
-def intFromBytesBig(bArray, n=0, idx=0):
-    ret = 0
-    if n == 0:
-        n = len(bArray)
-    for i in reversed(range(n)):
-        ret |= bArray[idx + n - i - 1] << (8 * i)
-    return ret
-
-def intToBytesBig(val, n):
-    ret = bytearray()
-    for i in reversed(range(n)):
-        ret.append((val & (0xff << (8 * i))) >> (8 * i))
-    return ret
-
 class IPS_Patch(object):
     def __init__(self, patchDict=None):
         self.records = []
@@ -32,37 +8,35 @@ class IPS_Patch(object):
         self.max_size = 0
         if patchDict is not None:
             for addr, data in patchDict.items():
-                byteData = b''
-                for byte in data:
-                    byteData += struct.pack("B", byte)
+                byteData = bytearray(data)
                 self.add_record(addr, byteData)
 
     @staticmethod
     def load(filename):
         loaded_patch = IPS_Patch()
         with open(filename, 'rb') as file:
-            header = readBytes(file, 5)
+            header = file.read(5)
             if header != b'PATCH':
                 raise Exception('Not a valid IPS patch file!')
             while True:
-                address_bytes = readBytes(file, 3)
+                address_bytes = file.read(3)
                 if address_bytes == b'EOF':
                     break
-                address = intFromBytesBig(address_bytes)
-                length = intFromBytesBig(readBytes(file, 2))
+                address = int.from_bytes(address_bytes, byteorder='big')
+                length = int.from_bytes(file.read(2), byteorder='big')
                 rle_count = 0
                 if length == 0:
-                    rle_count = intFromBytesBig(readBytes(file, 2))
+                    rle_count = int.from_bytes(file.read(2), byteorder='big')
                     length = 1
-                data = readBytes(file, length)
+                data = file.read(length)
                 if rle_count > 0:
                     loaded_patch.add_rle_record(address, data, rle_count)
                 else:
                     loaded_patch.add_record(address, data)
 
-            truncate_bytes = readBytes(file, 3)
+            truncate_bytes = file.read(3)
             if len(truncate_bytes) == 3:
-                loaded_patch.set_truncate_length(intFromBytesBig(truncate_bytes))
+                loaded_patch.set_truncate_length(int.from_bytes(truncate_bytes, byteorder='big'))
         return loaded_patch
 
     @staticmethod
@@ -103,7 +77,7 @@ class IPS_Patch(object):
             runs.append((current_run_start, current_run_data))
 
         for start, data in runs:
-            if start == intFromBytesBig(b'EOF'):
+            if start == int.from_bytes(b'EOF', byteorder='big'):
                 start -= 1
                 data = bytes([patched_data[start - 1]]) + data
 
@@ -159,13 +133,14 @@ class IPS_Patch(object):
         return patch
 
     def add_record(self, address, data):
-        if address == intFromBytesBig(bytearray(b'EOF')):
+        if address == int.from_bytes(b'EOF', byteorder='big'):
             raise RuntimeError('Start address {0:x} is invalid in the IPS format. Please shift your starting address back by one byte to avoid it.'.format(address))
         if address > 0xffffff:
             raise RuntimeError('Start address {0:x} is too large for the IPS format. Addresses must fit into 3 bytes.'.format(address))
         if len(data) > 0xffff:
             raise RuntimeError('Record with length {0} is too large for the IPS format. Records must be less than 65536 bytes.'.format(len(data)))
-
+        if len(data) == 0: # ignore empty records
+            return
         record = {'address': address, 'data': data}
         sz = address + len(data)
         if sz > self.max_size:
@@ -173,7 +148,7 @@ class IPS_Patch(object):
         self.records.append(record)
 
     def add_rle_record(self, address, data, count):
-        if address == intFromBytesBig(bytearray(b'EOF')):
+        if address == int.from_bytes(b'EOF', byteorder='big'):
             raise RuntimeError('Start address {0:x} is invalid in the IPS format. Please shift your starting address back by one byte to avoid it.'.format(address))
         if address > 0xffffff:
             raise RuntimeError('Start address {0:x} is too large for the IPS format. Addresses must fit into 3 bytes.'.format(address))
@@ -181,7 +156,6 @@ class IPS_Patch(object):
             raise RuntimeError('RLE record with length {0} is too large for the IPS format. RLE records must be less than 65536 bytes.'.format(count))
         if len(data) != 1:
             raise RuntimeError('Data for RLE record must be exactly one byte! Received {0}.'.format(data))
-
         record = {'address': address, 'data': data, 'rle_count': count}
         sz = address + count
         if sz > self.max_size:
@@ -197,18 +171,18 @@ class IPS_Patch(object):
         encoded_bytes += 'PATCH'.encode('ascii')
 
         for record in self.records:
-            encoded_bytes += intToBytesBig(record['address'], 3)
+            encoded_bytes += record['address'].to_bytes(3, byteorder='big')
             if 'rle_count' in record:
-                encoded_bytes += intToBytesBig(0, 2)
-                encoded_bytes += intToBytesBig(record['rle_count'], 2)
+                encoded_bytes += (0).to_bytes(2, byteorder='big')
+                encoded_bytes += record['rle_count'].to_bytes(2, byteorder='big')
             else:
-                encoded_bytes += intToBytesBig(len(record['data']), 2)
+                encoded_bytes += len(record['data']).to_bytes(2, byteorder='big')
             encoded_bytes += record['data']
 
         encoded_bytes += 'EOF'.encode('ascii')
 
         if self.truncate_length is not None:
-            encoded_bytes += intToBytesBig(self.truncate_length, 3)
+            encoded_bytes += self.truncate_length.to_bytes(3, byteorder='big')
 
         return encoded_bytes
 
@@ -251,4 +225,5 @@ class IPS_Patch(object):
         if patch.max_size > self.max_size:
             self.max_size = patch.max_size
         for record in patch.records:
-            self.records.append(record)
+            if len(record['data']) > 0: # ignore empty records
+                self.records.append(record)

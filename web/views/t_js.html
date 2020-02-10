@@ -1214,7 +1214,9 @@ function clearInputSeed() {
   document.getElementById("uploadFile").value = "";
   document.getElementById("romJson").value = "";
   document.getElementById("fileName").value = "";
-  document.getElementById("startLocationVisibility").style.display = "table-row";
+  if(mode != "plando") {
+    document.getElementById("startLocationVisibility").style.display = "table-row";
+  }
 }
 
 // https://www.w3schools.com/howto/howto_js_draggable.asp

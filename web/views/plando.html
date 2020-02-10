@@ -405,6 +405,8 @@ function onloadHook() {
     document.getElementById("startDebug").style.display = "block";
   }
 
+  document.getElementById("startLocationVisibility").style.display = "none";
+
   var vcrFileInput = document.getElementById("vcrFile");
   vcrFileInput.addEventListener("change", function(event){
       var file = event.target.files[0];

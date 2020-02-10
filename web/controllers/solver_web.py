@@ -848,7 +848,7 @@ def getAddressesToRead(plando=False):
     addresses["misc"].append(0x10F200)
     addresses["misc"].append(0x10F201)
 
-    # ranges [low, high[
+    # ranges [low, high]
     ## doorasm
     addresses["ranges"] += [0x7EB00, 0x7ee60]
     # for next release doorasm addresses will be relocated

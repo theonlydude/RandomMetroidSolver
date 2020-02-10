@@ -1134,9 +1134,11 @@ class InteractiveSolver(CommonSolver):
             patches.append('race_mode_credits.ips')
         romPatcher.addIPSPatches(patches)
         romPatcher.commitIPS()
+        romPatcher.setNothingId(self.startAP, itemLocs)
         romPatcher.writeItemsLocs(itemLocs)
         romPatcher.writeItemsNumber()
         romPatcher.writeSpoiler(itemLocs)
+        romPatcher.writeNothingId()
         class FakeRandoSettings:
             def __init__(self):
                 self.qty = {'energy': 'plando'}

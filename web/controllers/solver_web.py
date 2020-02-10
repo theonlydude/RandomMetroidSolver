@@ -850,9 +850,9 @@ def getAddressesToRead(plando=False):
 
     # ranges [low, high[
     ## doorasm
-    addresses["ranges"] += [0x7EB00, 0x7EE00]
+    addresses["ranges"] += [0x7EB00, 0x7ee60]
     # for next release doorasm addresses will be relocated
-    addresses["ranges"] += [0x7F800, 0x7F9FF]
+    addresses["ranges"] += [0x7F800, 0x7FA5F]
 
     if plando == True:
         # plando addresses

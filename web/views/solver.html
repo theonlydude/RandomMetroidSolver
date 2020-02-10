@@ -459,7 +459,7 @@ window.onload = function(){
                 for(var i=0; i<arrayLength; i+=2) {
                   low = ranges[i];
                   high = ranges[i+1];
-                  for(var j=low; j<high; j++) {
+                  for(var j=low; j<=high; j++) {
                     romData[j] = bytes[j];
                   }
                 }

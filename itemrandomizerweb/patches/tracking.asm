@@ -104,13 +104,11 @@ pausing_local:
 resuming_local:
 	jml resuming
 
-// FIXME reenable when arm pumping gain works
-//org $91eb05
-//	jmp pumps_local
-	
-//org $91fff0
-//pumps_local:
-//	jml pumps
+; arm pump detection (from Drewseph in Redesign/Axeil)
+org $91EB3E
+    JSL pump_left : NOP
+org $91EB21
+    JSL pump_right : NOP
 
 // -------------------------------
 // CODE (using bank A1 free space)
@@ -347,23 +345,38 @@ resuming:
 	inc $0998
 	jml $82939f
 
-// FIXME : does not work, increase wildly arm pump detection during collisions...
-// count arm pumps: hijack collision detection routine where the arm pump bug occurs 
+;;; ARM PUMP detection/time gained computation. detection borrowed from Redesigne/Axeil by Drewseph
+pump_left:
+	lda #$FFFF
+	sta $12
+	bra pumps
+pump_right:
+	lda #$0001
+	sta $12
 pumps:
-	// check if we're running :
-	// last_movement_type is 1
-	lda {last_movement_type}
-	and #$00ff
-	dec
-	bne +
-	// X momentum is at least 2: walking/underwater running "full speed"
-	// since we don't have accel value, do this to avoid being too wrong
-	// in frame gain computations because of too low speed values
-	lda {mx_pix}
-	cmp #$0002
-	bcs .pump
-+
-	jmp .end
+    LDA $0A1F : AND #$00FF : CMP #$0015 : BNE + ; checks that we're not bonking a wall
+        jmp .end
+
+    +    LDA $0AD2 : BEQ +    ; Checks if in water no gravity suit
+            LDA $09A2 : BIT #$0020 : BNE +     ; Checks Gravity suit
+                BRA .pump		       ; if no grav and in water: arm pump??? FIXME test this
+	;; checks Samus poses
+    +    LDA $0A20 : CMP #$0009 : BEQ .pump
+                    CMP #$000A : BEQ .pump
+                    CMP #$000F : BEQ .pump
+                    CMP #$0010 : BEQ .pump
+                    CMP #$0011 : BEQ .pump
+                    CMP #$0012 : BEQ .pump
+                    jmp .end
+;; pumps:
+;; 	// X momentum is at least 2: walking/underwater running "full speed"
+;; 	// since we don't have accel value, do this to avoid being too wrong
+;; 	// in frame gain computations because of too low speed values
+;; 	lda {mx_pix}
+;; 	cmp #$0002
+;; 	bcs .pump
+;; +
+;; 	jmp .end
 .pump:
 	// compute arm pump time saved
 	// first, compute speed in 16th of a pixel per frame :
@@ -416,8 +429,6 @@ pumps:
 	lda $4216
 	sta {pump_rem}
 .end:
-	// run hijacked code and return
-	lda $0a1e
-	jml $91eb08
+	rtl
 
 warnpc $a1efff

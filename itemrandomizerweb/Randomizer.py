@@ -485,7 +485,7 @@ class SuperFunProvider(object):
         # get restricted locs
         totalAvailLocs = []
         comeBack = {}
-        locs = [loc for loc in self.rando.currentLocations(post=True)]
+        locs = self.rando.currentLocations(post=True)
         for loc in locs:
             ap = loc['accessPoint']
             if ap not in comeBack:

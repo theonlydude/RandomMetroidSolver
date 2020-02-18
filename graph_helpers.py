@@ -255,7 +255,8 @@ class HelpersGraph(Helpers):
     def canEnterNorfairReserveAreaFromBubbleMoutain(self):
         sm = self.smbm
         return sm.wand(sm.canOpenGreenDoors(),
-                       sm.wor(sm.canFly(), # from save door
+                       sm.wor(sm.canFly(),
+                              sm.haveItem('Ice'),
                               sm.wand(sm.haveItem('HiJump'),
                                       sm.knowsGetAroundWallJump()),
                               sm.wand(sm.canUseSpringBall(),
@@ -358,11 +359,9 @@ class HelpersGraph(Helpers):
     @Cache.decorator
     def canPassAmphitheaterReverse(self):
         sm = self.smbm
-        nTanksGrav = 3
-        nTanksNoGrav = 6
-        if sm.heatProof().bool == False:
-            nTanksGrav *= 5
-            nTanksNoGrav *= 5 # 30 should not happen ...
+        dmgRed = sm.getDmgReduction()[0]
+        nTanksGrav = 4 * 4/dmgRed
+        nTanksNoGrav = 6 * 4/dmgRed
         return sm.wor(sm.wand(sm.haveItem('Gravity'),
                               sm.energyReserveCountOk(nTanksGrav)),
                       sm.wand(sm.energyReserveCountOk(nTanksNoGrav),

@@ -10,6 +10,7 @@ import json, argparse, sys, random, os, os.path, base64, shutil, tempfile
 from requests import Session
 from rom import RealROM
 from ips import IPS_Patch
+from utils import getRandomizerDefaultParameters
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Random Metroid Randomizer webservice client")
@@ -44,46 +45,16 @@ if __name__ == "__main__":
         randoParams["seed"] = args.seed
 
     # not all parameters are present in rando preset, add default value for missing ones
-    defaultParams = {}
-    defaultParams['complexity'] = "simple"
-    defaultParams['preset'] = 'regular'
-    defaultParams['randoPreset'] = ""
-    defaultParams['majorsSplit'] = "Full"
-    defaultParams['startLocation'] = "Landing Site"
-    defaultParams['maxDifficulty'] = 'hardcore'
-    defaultParams['progressionSpeed'] = "medium"
-    defaultParams['progressionDifficulty'] = 'normal'
-    defaultParams['morphPlacement'] = "early"
-    defaultParams['suitsRestriction'] = "on"
-    defaultParams['hideItems'] = "off"
-    defaultParams['strictMinors'] = "off"
-    defaultParams['missileQty'] = "3"
-    defaultParams['superQty'] = "2"
-    defaultParams['powerBombQty'] = "1"
-    defaultParams['minorQty'] = "100"
-    defaultParams['energyQty'] = "vanilla"
-    defaultParams['areaRandomization'] = "off"
-    defaultParams['areaLayout'] = "off"
-    defaultParams['escapeRando'] = "off"
-    defaultParams['removeEscapeEnemies'] = "off"
-    defaultParams['bossRandomization'] = "off"
-    defaultParams['funCombat'] = "off"
-    defaultParams['funMovement'] = "off"
-    defaultParams['funSuits'] = "off"
-    defaultParams['layoutPatches'] = "on"
-    defaultParams['variaTweaks'] = "on"
-    defaultParams['gravityBehaviour'] = "Balanced"
-    defaultParams['nerfedCharge'] = "off"
-    defaultParams['itemsounds'] = "on"
-    defaultParams['elevators_doors_speed'] = "on"
-    defaultParams['spinjumprestart'] = "off"
-    defaultParams['rando_speed'] = "off"
-    defaultParams['animals'] = "off"
-    defaultParams['No_Music'] = "off"
+    defaultParams = getRandomizerDefaultParameters()
 
     for (key, value) in defaultParams.items():
         if key not in randoParams:
             randoParams[key] = value
+
+    # fix multiparameter prog speed for rando webservice
+    # (it expects a string '"prog1","prog2"' when multiple prog speed are available to randomize)
+    if type(randoParams["progressionSpeed"]) == list:
+        randoParams["progressionSpeed"] = ','.join(randoParams["progressionSpeed"])
 
     # call web service
     if args.remoteUrl == 'local':

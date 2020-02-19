@@ -18,7 +18,7 @@ from solver import StandardSolver, DifficultyDisplayer, InteractiveSolver
 from utils import PresetLoader, removeChars
 import db
 from graph_access import vanillaTransitions, vanillaBossesTransitions, vanillaEscapeTransitions, accessPoints, GraphUtils
-from utils import isStdPreset
+from utils import isStdPreset, getRandomizerDefaultParameters
 from graph_locations import locations
 from smboolmanager import SMBoolManager
 from rom import RomReader
@@ -963,43 +963,7 @@ def infos():
 
 def initRandomizerSession():
     if session.randomizer is None:
-        session.randomizer = {}
-
-        session.randomizer['complexity'] = "simple"
-        session.randomizer['preset'] = 'regular'
-        session.randomizer['randoPreset'] = ""
-        session.randomizer['majorsSplit'] = "Full"
-        session.randomizer['startLocation'] = "Landing Site"
-        session.randomizer['maxDifficulty'] = 'hardcore'
-        session.randomizer['progressionSpeed'] = "medium"
-        session.randomizer['progressionDifficulty'] = 'normal'
-        session.randomizer['morphPlacement'] = "early"
-        session.randomizer['suitsRestriction'] = "on"
-        session.randomizer['hideItems'] = "off"
-        session.randomizer['strictMinors'] = "off"
-        session.randomizer['missileQty'] = "3"
-        session.randomizer['superQty'] = "2"
-        session.randomizer['powerBombQty'] = "1"
-        session.randomizer['minorQty'] = "100"
-        session.randomizer['energyQty'] = "vanilla"
-        session.randomizer['areaRandomization'] = "off"
-        session.randomizer['areaLayout'] = "off"
-        session.randomizer['escapeRando'] = "off"
-        session.randomizer['removeEscapeEnemies'] = "off"
-        session.randomizer['bossRandomization'] = "off"
-        session.randomizer['funCombat'] = "off"
-        session.randomizer['funMovement'] = "off"
-        session.randomizer['funSuits'] = "off"
-        session.randomizer['layoutPatches'] = "on"
-        session.randomizer['variaTweaks'] = "on"
-        session.randomizer['gravityBehaviour'] = "Balanced"
-        session.randomizer['nerfedCharge'] = "off"
-        session.randomizer['itemsounds'] = "on"
-        session.randomizer['elevators_doors_speed'] = "on"
-        session.randomizer['spinjumprestart'] = "off"
-        session.randomizer['rando_speed'] = "off"
-        session.randomizer['animals'] = "off"
-        session.randomizer['No_Music'] = "off"
+        session.randomizer = getRandomizerDefaultParameters()
 
 def randomizer():
     response.title = 'Super Metroid VARIA Randomizer'

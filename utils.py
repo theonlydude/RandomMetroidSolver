@@ -346,3 +346,44 @@ def loadRandoPreset(randoPreset, args):
             args.minorQty = randoParams["minorQty"]
     if "energyQty" in randoParams:
         args.energyQty = randoParams["energyQty"]
+
+def getRandomizerDefaultParameters():
+    defaultParams = {}
+
+    defaultParams['complexity'] = "simple"
+    defaultParams['preset'] = 'regular'
+    defaultParams['randoPreset'] = ""
+    defaultParams['majorsSplit'] = "Full"
+    defaultParams['startLocation'] = "Landing Site"
+    defaultParams['maxDifficulty'] = 'hardcore'
+    defaultParams['progressionSpeed'] = "medium"
+    defaultParams['progressionDifficulty'] = 'normal'
+    defaultParams['morphPlacement'] = "early"
+    defaultParams['suitsRestriction'] = "on"
+    defaultParams['hideItems'] = "off"
+    defaultParams['strictMinors'] = "off"
+    defaultParams['missileQty'] = "3"
+    defaultParams['superQty'] = "2"
+    defaultParams['powerBombQty'] = "1"
+    defaultParams['minorQty'] = "100"
+    defaultParams['energyQty'] = "vanilla"
+    defaultParams['areaRandomization'] = "off"
+    defaultParams['areaLayout'] = "off"
+    defaultParams['escapeRando'] = "off"
+    defaultParams['removeEscapeEnemies'] = "off"
+    defaultParams['bossRandomization'] = "off"
+    defaultParams['funCombat'] = "off"
+    defaultParams['funMovement'] = "off"
+    defaultParams['funSuits'] = "off"
+    defaultParams['layoutPatches'] = "on"
+    defaultParams['variaTweaks'] = "on"
+    defaultParams['gravityBehaviour'] = "Balanced"
+    defaultParams['nerfedCharge'] = "off"
+    defaultParams['itemsounds'] = "on"
+    defaultParams['elevators_doors_speed'] = "on"
+    defaultParams['spinjumprestart'] = "off"
+    defaultParams['rando_speed'] = "off"
+    defaultParams['animals'] = "off"
+    defaultParams['No_Music'] = "off"
+
+    return defaultParams

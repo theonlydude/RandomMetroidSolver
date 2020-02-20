@@ -1126,7 +1126,10 @@ def sessionWebService():
 
     session.randomizer['complexity'] = request.vars.complexity
     session.randomizer['preset'] = request.vars.preset
-    session.randomizer['randoPreset'] = request.vars.randoPreset
+    # after selecting a rando preset and changing an option users can end up
+    # generating a seed with the rando preset selected but not with all
+    # the options set with the rando preset, so always empty the rando preset
+    session.randomizer['randoPreset'] = ""
     session.randomizer['majorsSplit'] = request.vars.majorsSplit
     session.randomizer['startLocation'] = request.vars.startLocation
     session.randomizer['maxDifficulty'] = request.vars.maxDifficulty
@@ -1431,11 +1434,10 @@ def randoPresetWebService():
     if os.path.isfile(fullPath):
         # load it
         try:
+            # can be called from randomizer and extended stats pages
             updateSession = request.vars.origin == "randomizer"
 
             params = loadRandoPreset(fullPath, updateSession)
-            if updateSession == True:
-                session.randomizer['randoPreset'] = preset
             params = json.dumps(params)
             return params
         except Exception as e:
@@ -1447,8 +1449,8 @@ def loadRandoPreset(presetFullPath, updateSession):
     with open(presetFullPath) as jsonFile:
         randoPreset = json.load(jsonFile)
 
+    # update session
     if updateSession == True:
-        # update session
         for key in randoPreset:
             session.randomizer[key] = randoPreset[key]
 

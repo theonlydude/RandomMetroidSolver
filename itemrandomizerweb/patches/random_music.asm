@@ -23,7 +23,8 @@ arch snes.cpu
 
 ;;; HIJACKS
 org $808FD8
-	jsl music_queue
+	;; use a jml to avoid touching the stack
+	jml music_queue
 
 org $809006
 	jsl music_queue_timer
@@ -47,7 +48,7 @@ musics_list:
 	dw $ff18	; Lower Norfair
 	dw $ff12	; Red Brinstar
 	dw $ff0f	; Green Brinstar
-	dw $ff36	; Intro
+	dw $ff21	; Tourian
 
 number_tracks:
 	;; number of possible music tracks
@@ -66,7 +67,7 @@ number_tracks:
 	db $01	; Lower Norfair
 	db $01	; Red Brinstar
 	db $01	; Green Brinstar
-	db $01	; Intro
+	db $01	; Tourian
 
 ;;; check that musique in A is in musics_list table.
 ;;; set carry flag if true.
@@ -95,7 +96,7 @@ music_queue:
 	pla			; original code
 	jsr randomize_music_and_track
 	cpx $063b		; original code
-	rtl
+	jml $808fdc		; called with jml
 	
 music_queue_timer:
 ;;; $80:9006 9D 19 06    STA $0619,x[$7E:0619]
@@ -108,6 +109,7 @@ music_queue_timer:
 	tya			; original code
 	rtl
 
+print pc
 randomize_music_and_track:
 	;; pla has set the n flag in calling functions.
 	;; music data has its first byte as 0xFF (negative)
@@ -115,7 +117,7 @@ randomize_music_and_track:
 	bmi .check_music
 	bra .check_track
 .check_music:
-	jsl is_music_to_randomize
+	jsr is_music_to_randomize
 	bcc .end
 .randomize_music:
 	;; call RNG, result in A
@@ -123,14 +125,14 @@ randomize_music_and_track:
 	;; A = A % 16
 	and #$000F
 	;; X = A*2
-	asl
+	asl : tax
 	;; load in A value of musics_list[x]
 	lda.l musics_list,x
 	bra .end
 .check_track:
 	pha
 	lda $063d     ; load current music
-	jsl is_music_to_randomize
+	jsr is_music_to_randomize
 	pla			; pla doesn't change the carry flag
 	bcc .end
 	;; check if track is 0x05 or 0x06 (track1 or track2)
@@ -142,7 +144,7 @@ randomize_music_and_track:
 	txa : lsr : tax
 	lda.l number_tracks,x
 	and #$00ff
-	cmp $#0001 : bne .randomize_track
+	cmp #$0001 : bne .randomize_track
 	;;  if only one track, use it (track1 = 0x05)
 	lda #$0005
 	bra .end
@@ -153,7 +155,7 @@ randomize_music_and_track:
 	;; A = A % 2
 	and #$0001
 	;; A = A + 0x05
-	clc : adc #$05
+	clc : adc #$0005
 .end:
 	plx
 	rts

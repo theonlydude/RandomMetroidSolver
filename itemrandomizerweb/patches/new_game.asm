@@ -101,10 +101,11 @@ gameplay_start:
 .end:
     rtl
 
-warnpc $a1ffff
+warnpc $a1f2ff
 
 ;;; patch morph+missile room state check
 org $8fe652
+morph_missile_check:
     ;; check that zebes is awake instead: works with both standard
     ;; start with wake_zebes.ips, and non standard start with wake
     ;; zebes forced from the start.

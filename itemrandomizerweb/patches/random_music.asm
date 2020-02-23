@@ -37,7 +37,7 @@ musics_list:
 	dw $ff18	; Lower Norfair
 	dw $ff12	; Red Brinstar
 	dw $ff0f	; Green Brinstar
-	dw $ff21	; Tourian
+	dw $ff1e	; Tourian
 
 number_tracks:
 	;; number of possible music tracks
@@ -116,7 +116,6 @@ load_new_music:
 .notrandom:
 	jml $82E110		; go to the end of the hijacked function
 
-print pc
 randomize_music_and_track:
 	;; pla has set the n flag in calling functions.
 	;; music data has its first byte as 0xFF (negative)

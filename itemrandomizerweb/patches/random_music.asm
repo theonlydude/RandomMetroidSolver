@@ -7,20 +7,6 @@
 lorom
 arch snes.cpu
 
-;;; hijack les deux routines de chargement de la musique
-;;; table avec les 16 id de musique qu'on veut randomizer
-;;; on appele la fonction RNG puis on la modulo 16
-;;; le format de la musique c'est 0xFFxx (musique data) ou 0x00xx (musique track)
-;;; on randomize que le music data (que tu crois)
-;;; 
-;;; on hijack ici:
-;;; $80:8FD8 68          PLA                
-;;; $80:8FD9 EC 3B 06    CPX $063B  [$7E:063B]
-	
-;;; et la:
-;;; $80:9006 9D 19 06    STA $0619,x[$7E:0619]
-;;; $80:9009 98          TYA
-
 ;;; HIJACKS
 org $808FD8
 	;; use a jml to avoid touching the stack
@@ -28,6 +14,9 @@ org $808FD8
 
 org $809006
 	jsl music_queue_timer
+
+org $82E102
+	jml load_new_music
 
 org $A1F300
 musics_list:
@@ -69,7 +58,7 @@ number_tracks:
 	db $01	; Green Brinstar
 	db $01	; Tourian
 
-;;; check that musique in A is in musics_list table.
+;;; check that music in A is in musics_list table.
 ;;; set carry flag if true.
 is_music_to_randomize:
 	;; set X to 0
@@ -108,6 +97,24 @@ music_queue_timer:
 	sta $0619,x		; original code
 	tya			; original code
 	rtl
+
+load_new_music:
+;;; $82:E102 C5 14       CMP $14    [$7E:0014]
+;;; $82:E104 F0 0A       BEQ $0A    [$E110]
+	;; if new music, load it
+	;; if same music, check if the new one is a random one, if it is, load it anyway
+	cmp $14 		; original code
+	beq .same_music
+	jml $82E106		; go back to music changing code
+.same_music:
+	pha			; save A
+	lda $07F3 : ora #$FF00	; set music xx in A: 0xFFxx
+	jsr is_music_to_randomize
+	pla			; restore A
+	bcc .notrandom
+	jml $82E106		; go to the part of the hijacked function which load the new music
+.notrandom:
+	jml $82E110		; go to the end of the hijacked function
 
 print pc
 randomize_music_and_track:

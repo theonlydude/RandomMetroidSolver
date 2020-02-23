@@ -1221,7 +1221,6 @@ class RomPatcher:
             if not isRace:
                 self.romFile.writeWord(w)
             else:
-                self.romFile.seek(address)
                 self.race.writeWordMagic(w)
 
     # write area randomizer transitions to ROM

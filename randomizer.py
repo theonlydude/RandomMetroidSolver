@@ -81,7 +81,7 @@ if __name__ == "__main__":
     parser.add_argument('--patch', '-c',
                         help="optional patches to add",
                         dest='patches', nargs='?', default=[], action='append',
-                        choices=['itemsounds.ips', 'elevators_doors_speed.ips',
+                        choices=['itemsounds.ips', 'elevators_doors_speed.ips', 'random_music.ips',
                                  'spinjumprestart.ips', 'rando_speed.ips', 'No_Music'])
     parser.add_argument('--missileQty', '-m',
                         help="quantity of missiles",

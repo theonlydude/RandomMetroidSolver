@@ -163,7 +163,8 @@ class RomReader:
         'Disable_Space_Time_select_in_menu': {'address': 0x013175, 'value': 0x01, 'vanillaValue': 0x08},
         'Fix_Morph_Ball_Hidden_Chozo_PLMs': {'address': 0x0268ce, 'value': 0x04, 'vanillaValue': 0x02},
         'Fix_Screw_Attack_selection_in_menu': {'address': 0x0134c5, 'value': 0x0c, 'vanillaValue': 0x0a},
-        'No_Music': {'address': 0x278413, 'value': 0x6f, 'vanillaValue': 0xcd}
+        'No_Music': {'address': 0x278413, 'value': 0x6f, 'vanillaValue': 0xcd},
+        'random_music': {'address': 0x10F320, 'value': 0x01, 'vanillaValue': 0xff}
     }
 
     @staticmethod
@@ -562,7 +563,7 @@ class RomPatcher:
         'Layout': ['dachora.ips', 'early_super_bridge.ips', 'high_jump.ips', 'moat.ips', 'spospo_save.ips',
                    'nova_boost_platform.ips', 'red_tower.ips', 'spazer.ips', 'brinstar_map_room.ips'],
         'Optional': ['itemsounds.ips', 'rando_speed.ips',
-                     'spinjumprestart.ips', 'elevators_doors_speed.ips', 'No_Music',
+                     'spinjumprestart.ips', 'elevators_doors_speed.ips', 'No_Music', 'random_music.ips',
                      'skip_intro.ips', 'skip_ceres.ips', 'animal_enemies.ips', 'animals.ips',
                      'draygonimals.ips', 'escapimals.ips', 'gameend.ips', 'grey_door_animals.ips',
                      'low_timer.ips', 'metalimals.ips', 'phantoonimals.ips', 'ridleyimals.ips'],

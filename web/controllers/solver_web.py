@@ -1113,7 +1113,7 @@ def sessionWebService():
                'funCombat', 'funMovement', 'funSuits',
                'layoutPatches', 'variaTweaks', 'nerfedCharge',
                'itemsounds', 'elevators_doors_speed', 'spinjumprestart',
-               'rando_speed', 'animals', 'No_Music']
+               'rando_speed', 'animals', 'No_Music', 'random_music']
     quantities = ['missileQty', 'superQty', 'powerBombQty']
     others = ['complexity', 'preset', 'randoPreset', 'majorsSplit',
               'maxDifficulty', 'progressionSpeed', 'progressionDifficulty',
@@ -1162,6 +1162,7 @@ def sessionWebService():
     session.randomizer['rando_speed'] = request.vars.rando_speed
     session.randomizer['animals'] = request.vars.animals
     session.randomizer['No_Music'] = request.vars.No_Music
+    session.randomizer['random_music'] = request.vars.random_music
 
     # to create a new rando preset, uncomment next lines
     #with open('rando_presets/new.json', 'w') as jsonFile:
@@ -1193,7 +1194,7 @@ def randomizerWebService():
                'funCombat', 'funMovement', 'funSuits',
                'layoutPatches', 'variaTweaks', 'nerfedCharge',
                'itemsounds', 'elevators_doors_speed', 'spinjumprestart',
-               'rando_speed', 'animals', 'No_Music']
+               'rando_speed', 'animals', 'No_Music', 'random_music']
     quantities = ['missileQty', 'superQty', 'powerBombQty']
     others = ['complexity', 'paramsFileTarget', 'seed', 'preset', 'majorsSplit',
               'maxDifficulty', 'progressionSpeed', 'progressionDifficulty',
@@ -1261,6 +1262,8 @@ def randomizerWebService():
         params += ['-c', 'rando_speed.ips']
     if request.vars.No_Music == 'on':
         params += ['-c', 'No_Music']
+    if request.vars.random_music == 'on':
+        params += ['-c', 'random_music.ips']
 
     if request.vars.animals == 'on':
         params.append('--animals')
@@ -2125,6 +2128,7 @@ def initCustomizerSession():
         session.customizer['elevators_doors_speed'] = "off"
         session.customizer['animals'] = "off"
         session.customizer['No_Music'] = "off"
+        session.customizer['random_music'] = "off"
 
 customSprites = {
     'samus': {"index":0, "name": "Samus", "desc": "Samus, with a distinct animation for Screw Attack without Space Jump and a new Crystal Flash animation", "author": "Artheau and Feesh", "group": "Samus"},
@@ -2157,7 +2161,7 @@ def customizer():
 
 def customWebService():
     # check validity of all parameters
-    patches = ['itemsounds', 'spinjumprestart', 'rando_speed', 'elevators_doors_speed', 'No_Music', 'animals']
+    patches = ['itemsounds', 'spinjumprestart', 'rando_speed', 'elevators_doors_speed', 'No_Music', 'animals', 'random_music']
     others = ['colorsRandomization', 'suitsPalettes', 'beamsPalettes', 'tilesPalettes', 'enemiesPalettes',
               'bossesPalettes', 'minDegree', 'maxDegree', 'invert']
     validateWebServiceParams(patches, [], others, isJson=True)
@@ -2187,6 +2191,7 @@ def customWebService():
     session.customizer['elevators_doors_speed'] = request.vars.elevators_doors_speed
     session.customizer['animals'] = request.vars.animals
     session.customizer['No_Music'] = request.vars.No_Music
+    session.customizer['random_music'] = request.vars.random_music
 
     # call the randomizer
     (fd, jsonFileName) = tempfile.mkstemp()
@@ -2203,6 +2208,8 @@ def customWebService():
         params += ['-c', 'rando_speed.ips']
     if request.vars.No_Music == 'on':
         params += ['-c', 'No_Music']
+    if request.vars.random_music == 'on':
+        params += ['-c', 'random_music.ips']
     if request.vars.animals == 'on':
         params.append('--animals')
 

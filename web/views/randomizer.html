@@ -352,13 +352,13 @@ function changeComplexity(evt, name) {
   }
 
   else if(name == "medium") {
-    var show = ["maxDiffVisibility", "patchesVisibility", "morphPlacementVisibility", "ammoVisibility", "nerfedChargeVisibility", "noMusicVisibility", "escapeRandoVisibility"];
+    var show = ["maxDiffVisibility", "patchesVisibility", "morphPlacementVisibility", "ammoVisibility", "nerfedChargeVisibility", "noMusicVisibility", "random_musicVisibility", "escapeRandoVisibility"];
     var hide = ["seedVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "strictMinorsVisibility", "missileQtyVisibility", "superQtyVisibility", "powerBombQtyVisibility", "superFunVisibility", "areaPatchVisibility", "mainPatchesVisibility", "mainPatchesTextVisibility", "hideItemsVisibility", "raceModeVisibility", "miscVisibility", "removeEscapeEnemiesVisibility"];
     showHide(show, hide);
   }
 
   else {
-    var show = ["seedVisibility", "ammoVisibility", "maxDiffVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "morphPlacementVisibility", "strictMinorsVisibility", "missileQtyVisibility", "superQtyVisibility", "powerBombQtyVisibility", "superFunVisibility", "patchesVisibility", "areaPatchVisibility", "mainPatchesVisibility", "mainPatchesTextVisibility", "hideItemsVisibility", "raceModeVisibility", "nerfedChargeVisibility", "miscVisibility", "noMusicVisibility", "escapeRandoVisibility", "removeEscapeEnemiesVisibility"];
+    var show = ["seedVisibility", "ammoVisibility", "maxDiffVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "morphPlacementVisibility", "strictMinorsVisibility", "missileQtyVisibility", "superQtyVisibility", "powerBombQtyVisibility", "superFunVisibility", "patchesVisibility", "areaPatchVisibility", "mainPatchesVisibility", "mainPatchesTextVisibility", "hideItemsVisibility", "raceModeVisibility", "nerfedChargeVisibility", "miscVisibility", "noMusicVisibility", "random_musicVisibility", "escapeRandoVisibility", "removeEscapeEnemiesVisibility"];
     var hide = [];
     showHide(show, hide);
   }
@@ -391,7 +391,7 @@ function AjaxPresetCallCompleted(data) {
     console.log("AjaxPresetCallCompleted");
 
     var dataDict = {paramsFileTarget : data, "complexity": getComplexity()};
-    var elems = ["seed", "preset", "raceMode", "areaLayout", "layoutPatches", "variaTweaks", "gravityBehaviour", "nerfedCharge", "itemsounds", "elevators_doors_speed", "spinjumprestart", "rando_speed", "animals", "No_Music", "escapeRando", "removeEscapeEnemies"];
+    var elems = ["seed", "preset", "raceMode", "areaLayout", "layoutPatches", "variaTweaks", "gravityBehaviour", "nerfedCharge", "itemsounds", "elevators_doors_speed", "spinjumprestart", "rando_speed", "animals", "No_Music", "escapeRando", "removeEscapeEnemies", "random_music"];
     var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "energyQty", "maxDifficulty", "majorsSplit", "startLocation", "suitsRestriction", "morphPlacement", "funCombat", "funMovement", "funSuits", "progressionDifficulty", "hideItems", "strictMinors", "areaRandomization", "bossRandomization"];
 
     for(var i=0; i<elems.length; i++) {
@@ -540,7 +540,7 @@ function AjaxRandomizerCallCompleted(data) {
     console.log("button text set back to randomize");
 
     var dataDict = {"complexity": getComplexity()};
-    var elems = ["seed", "preset", "raceMode", "areaLayout", "layoutPatches", "variaTweaks", "gravityBehaviour", "nerfedCharge", "itemsounds", "elevators_doors_speed", "spinjumprestart", "rando_speed", "animals", "No_Music", "randoPreset", "escapeRando", "removeEscapeEnemies"];
+    var elems = ["seed", "preset", "raceMode", "areaLayout", "layoutPatches", "variaTweaks", "gravityBehaviour", "nerfedCharge", "itemsounds", "elevators_doors_speed", "spinjumprestart", "rando_speed", "animals", "No_Music", "randoPreset", "escapeRando", "removeEscapeEnemies", "random_music"];
     var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "energyQty", "maxDifficulty", "majorsSplit", "startLocation", "suitsRestriction", "morphPlacement", "funCombat", "funMovement", "funSuits", "progressionDifficulty", "hideItems", "strictMinors", "areaRandomization", "bossRandomization"];
 
     for(var i=0; i<elems.length; i++) {
@@ -1442,6 +1442,13 @@ Click on the dice button to randomly set this parameter.",
       content: "<p>Disable the background music to let you hear you favorite tunes instead.</p>\
 <p>Patch developed by Kejardon.</p>",
       placement: "auto left"
+    },
+    {
+      element: "#random_musicStep",
+      title: "Random Music",
+      content: "<p>Randomize the background music.</p>\
+<p>Patch developed by dude & flo.</p>",
+      placement: "auto left"
     }
  ]});
 
@@ -1831,6 +1838,16 @@ def displayNumber(id, min, max, default, step="1"):
 		    Disable background music
 		  </td>
                   <td><button type="button" onclick="startTheTour(35)">?</button></td>
+		</tr>
+	      </table>
+	      <table class="full" id="random_musicVisibility">
+		<colgroup><col class="half" /><col class="half" /></colgroup>
+		<tr id="random_musicStep">
+		  <td colspan="2">
+		    {{displayCheckbox("random_music")}}
+		    Randomize background music
+		  </td>
+                  <td><button type="button" onclick="startTheTour(36)">?</button></td>
 		</tr>
 	      </table>
 	    </div>

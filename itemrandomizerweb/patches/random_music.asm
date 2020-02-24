@@ -18,6 +18,9 @@ org $809006
 org $82E102
 	jml load_new_music
 
+org $a98810
+	rep 4 : nop		; disables MB2 "no music" before fight, as cutscene is sped up
+
 org $A1F300
 musics_list:
 	;; do not change order below, the second table is dependent on it

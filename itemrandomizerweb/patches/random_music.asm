@@ -13,7 +13,7 @@ lorom
 arch snes.cpu
 
 ;;; CONSTANTS
-!nb_tracks	= #$000c
+!tracks_tbl_sz	= #$0018
 !nb_tracks_8b	= #$0c
 !last_music_rq	= $7fff30	; RAM address to store music requests by the game
 !last_music_rnd = $7fff32	; RAM address to store our random music
@@ -27,7 +27,10 @@ arch snes.cpu
 
 ;;; HIJACKS
 org $82DF3E
-	jml load_room_music	; hijack room state header load to replace music/track
+	;; hijack room state header load to replace music/track
+	;; area escape rando hijacks before and returns control after,
+	;; so it has to call a function here
+	jml load_room_music_no_escape_rando
 
 org $a98810
 	rep 4 : nop		; disables MB2 "no music" before fight, as cutscene is sped up
@@ -62,7 +65,7 @@ is_music_to_randomize:
 	cmp.l musics_list,x
 	beq .music_is_random
 	inx : inx
-	cpx !nb_tracks : beq .music_is_not_random : bra .loop
+	cpx !tracks_tbl_sz : beq .music_is_not_random : bra .loop
 .music_is_not_random:
 	;; clear carry flag
 	clc
@@ -174,8 +177,19 @@ load_room_music:
 	sta !room_music
 	rep #$20
 .end:
-	;; resume original routine after music/track load
 	plx
+	rts
+
+load_room_music_no_escape_rando:
+	jsr load_room_music
 	jml $82DF4A
+
+warnpc $a1f3ef
+
+org $a1f3f0		 ; fixed position used in area_rando_escape
+load_room_music_escape_rando:
+	lda $0004,x : and #$00ff ; reload music data index (needed by load_room_music)
+	jsr load_room_music
+	rtl
 
 warnpc $a1f3ff

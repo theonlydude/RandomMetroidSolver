@@ -626,6 +626,48 @@ response.write('</table>', escape=False)
       element: "#patchesStep",
       title: "Patches",
       content: "Choose the patches that you want to include in your customized seed."
+    },
+    {
+      element: "#itemsoundsStep",
+      title: "Fanfare",
+      content: "<p>Replaces the quite long fanfare played when picking up an item by a short sound effect related with the item picked, and does not restart game music on item pickup.</p>\
+<p>Patch developed by Scyzer.</p>"
+    },
+    {
+      element: "#ElevatorDoorsStep",
+      title: "Transitions",
+      content: "<p>Accelerate doors and elevators transitions</p>\
+<p>Doors patch developed by Rakki and elevators patch by Lioran.</p>"
+    },
+    {
+      element: "#spinjumprestartStep",
+      title: "Spin jump restart",
+      content: "<p>Allows Samus to start spinning in mid air after jumping or falling</p>\
+<p>Patch developed by Kejardon.</p>"
+    },
+    {
+      element: "#rando_speedStep",
+      title: "Momentum conservation",
+      content: "<p>Let Samus keeps her momentum when landing from a fall or from jumping</p>\
+<p>This patch was developed by Oi27.</p>"
+    },
+    {
+      element: "#animalsStep",
+      title: "Animals surprise",
+      content: "<p>Replace saving the animals in the escape sequence by a random surprise.</p>\
+<p>Patch developed by Foosda.</p>"
+    },
+    {
+      element: "#No_MusicStep",
+      title: "No music",
+      content: "<p>Disable the background music to let you hear you favorite tunes instead.</p>\
+<p>Patch developed by Kejardon.</p>"
+    },
+    {
+      element: "#random_musicStep",
+      title: "Random Music",
+      content: "<p>Randomize the background music.</p>\
+<p>Patch developed by dude & flo.</p>"
     }
   ]});
 
@@ -759,50 +801,80 @@ def displayCheckbox(id, defaultTrue=False):
 	    <p>
 	      Patches to customize your ROM.
 	    </p>
-	    <table class="full">
-	      <tr>
-		<td class="full">
-		  {{displayCheckbox("itemsounds")}}
-		  Remove fanfare when picking up an item (by Scyzer)
-		</td>
-	      </tr>
-	      <tr>
-		<td class="full">
-		  {{displayCheckbox("spinjumprestart")}}
-		  Allows Samus to start spinning in mid air after jumping or falling (by Kejardon)
-		</td>
-	      </tr>
-	      <tr>
-		<td class="full">
-		  {{displayCheckbox("rando_speed")}}
-		  Let Samus keeps her momentum when landing from a fall or from jumping (by Oi27)
-		</td>
-	      </tr>
-	      <tr>
-		<td class="full">
-		  {{displayCheckbox("elevators_doors_speed")}}
-		  Accelerate doors and elevators transitions (by Rakki & Lioran)
-		</td>
-	      </tr>
-	      <tr>
-		<td class="full">
-		  {{displayCheckbox("animals")}}
-		  Save the animals surprise (by Foosda)
-		</td>
-	      </tr>
-	      <tr>
-		<td class="full">
-		  {{displayCheckbox("No_Music")}}
-		  Disable background music (by Kejardon)
-		</td>
-	      </tr>
-	      <tr>
-		<td class="full">
-		  {{displayCheckbox("random_music")}}
-		  Randomize background music (by dude & flo)
-		</td>
-	      </tr>
-	    </table>
+
+	      <table class="full">
+		<colgroup><col class="quarter" /><col class="threequarter" /><col class="check" /></colgroup>
+		<tr><td colspan="2"><h5 class="center"><b>Game comfort</b></h5></td><td></td></tr>
+	      </table>
+	      <table class="full">
+		<colgroup><col class="half" /><col class="half" /></colgroup>
+		<tr id="itemsoundsStep">
+		  <td colspan="2">
+		    {{displayCheckbox("itemsounds")}}
+		    Remove fanfare when picking up an item
+		  </td>
+                  <td><button type="button" onclick="startTheTour(4)">?</button></td>
+		</tr>
+		<tr id="ElevatorDoorsStep">
+		  <td colspan="2">
+		    {{displayCheckbox("elevators_doors_speed")}}
+		    Accelerate doors and elevators transitions
+		  </td>
+                  <td><button type="button" onclick="startTheTour(5)">?</button></td>
+		</tr>
+	      </table>
+	      <table class="full">
+		<colgroup><col class="half" /><col class="half" /></colgroup>
+		<tr id="spinjumprestartStep">
+		  <td colspan="2">
+		    {{displayCheckbox("spinjumprestart")}}
+		    Spin jump restart (a.k.a. Respin)
+		  </td>
+                  <td><button type="button" onclick="startTheTour(6)">?</button></td>
+		</tr>
+		<tr id="rando_speedStep">
+		  <td colspan="2">
+		    {{displayCheckbox("rando_speed")}}
+		     Momentum conservation (a.k.a. Speedkeep)
+		  </td>
+                  <td><button type="button" onclick="startTheTour(7)">?</button></td>
+		</tr>
+	      </table>
+	      <table class="full">
+		<colgroup><col class="quarter" /><col class="threequarter" /><col class="check" /></colgroup>
+		<tr><td colspan="2"><h5 class="center"><b>Miscellaneous</b></h5></td><td></td></tr>
+	      </table>
+	      <table class="full">
+		<colgroup><col class="half" /><col class="half" /></colgroup>
+		<tr id="animalsStep">
+		  <td colspan="2">
+		    {{displayCheckbox("animals")}}
+		    Save the animals surprise
+		  </td>
+                  <td><button type="button" onclick="startTheTour(8)">?</button></td>
+		</tr>
+	      </table>
+	      <table class="full">
+		<colgroup><col class="half" /><col class="half" /></colgroup>
+		<tr id="No_MusicStep">
+		  <td colspan="2">
+		    {{displayCheckbox("No_Music")}}
+		    Disable background music
+		  </td>
+                  <td><button type="button" onclick="startTheTour(9)">?</button></td>
+		</tr>
+	      </table>
+	      <table class="full">
+		<colgroup><col class="half" /><col class="half" /></colgroup>
+		<tr id="random_musicStep">
+		  <td colspan="2">
+		    {{displayCheckbox("random_music")}}
+		    Randomize background music
+		  </td>
+                  <td><button type="button" onclick="startTheTour(10)">?</button></td>
+		</tr>
+	      </table>
+
 	  </div>
         </div>
         {{=INPUT(_type="submit", _value="customize", _id="submitBtn", _class="btn btn-default buttonRandom")}}

@@ -327,7 +327,12 @@ function doSubmit() {
     var elems = ["itemsounds", "spinjumprestart", "rando_speed", "elevators_doors_speed", "animals", "No_Music", "random_music", "colorsRandomization", "suitsPalettes", "beamsPalettes", "tilesPalettes", "enemiesPalettes", "bossesPalettes", "globalShift", "customSpriteEnable", "customSprite"];
 
     for(var i=0; i<elems.length; i++) {
-       dataDict[elems[i]] = document.getElementById(elems[i]).value;
+        var elem = document.getElementById(elems[i]);
+        if(elem.disabled == true) {
+            dataDict[elems[i]] = "off";
+        } else {
+            dataDict[elems[i]] = elem.value;
+        }
     }
 
     dataDict["minDegree"] = $("#degree_slider_range").slider("values", 0);
@@ -356,6 +361,27 @@ function doSubmit() {
   return false;
 }
 
+function disableElement(id, disable) {
+  var elem = document.getElementById(id);
+  elem.disabled = disable;
+  // grey out the disabled text
+  var text = document.getElementById(id+"Text");
+  if(elem.disabled) {
+      text.className = "disabledText";
+  } else {
+      text.className = "";
+  }
+  // tell switchery
+  if(id in globalSwitchs) {
+    var sw = globalSwitchs[id];
+    if(disable) {
+      sw.disable();
+    } else {
+      sw.enable();
+    }
+  }
+}
+
 window.onload = function(){
     //Check File API support
     if(window.File && window.FileList && window.FileReader) {
@@ -381,6 +407,22 @@ window.onload = function(){
                     document.getElementById("uploadFile").value = "";
                     alert("wrong rom file size: "+fileSize.toString());
                     return false;
+                }
+
+                // detect race mode patch
+                var bytes = new Uint8Array(e.target.result);
+                var isRace = false;
+                for(var addr=0x1C0200; addr<0x1C0210; addr++) {
+                    if(bytes[addr] != 0xff) {
+                        isRace = true;
+                        break;
+                    }
+                }
+
+                // grey out patches
+                var buttons = ["itemsounds", "elevators_doors_speed", "spinjumprestart", "rando_speed", "animals"];
+                for(var i=0; i<buttons.length; i++) {
+                    disableElement(buttons[i], isRace);
                 }
             }
 
@@ -811,31 +853,28 @@ def displayCheckbox(id, defaultTrue=False):
 		<tr id="itemsoundsStep">
 		  <td colspan="2">
 		    {{displayCheckbox("itemsounds")}}
-		    Remove fanfare when picking up an item
+		    <span id="itemsoundsText">Remove fanfare when picking up an item</span>
 		  </td>
                   <td><button type="button" onclick="startTheTour(4)">?</button></td>
 		</tr>
 		<tr id="ElevatorDoorsStep">
 		  <td colspan="2">
 		    {{displayCheckbox("elevators_doors_speed")}}
-		    Accelerate doors and elevators transitions
+		    <span id="elevators_doors_speedText">Accelerate doors and elevators transitions</span>
 		  </td>
                   <td><button type="button" onclick="startTheTour(5)">?</button></td>
 		</tr>
-	      </table>
-	      <table class="full">
-		<colgroup><col class="half" /><col class="half" /></colgroup>
 		<tr id="spinjumprestartStep">
 		  <td colspan="2">
 		    {{displayCheckbox("spinjumprestart")}}
-		    Spin jump restart (a.k.a. Respin)
+		    <span id="spinjumprestartText">Spin jump restart (a.k.a. Respin)</span>
 		  </td>
                   <td><button type="button" onclick="startTheTour(6)">?</button></td>
 		</tr>
 		<tr id="rando_speedStep">
 		  <td colspan="2">
 		    {{displayCheckbox("rando_speed")}}
-		     Momentum conservation (a.k.a. Speedkeep)
+		     <span id="rando_speedText">Momentum conservation (a.k.a. Speedkeep)</span>
 		  </td>
                   <td><button type="button" onclick="startTheTour(7)">?</button></td>
 		</tr>
@@ -849,27 +888,21 @@ def displayCheckbox(id, defaultTrue=False):
 		<tr id="animalsStep">
 		  <td colspan="2">
 		    {{displayCheckbox("animals")}}
-		    Save the animals surprise
+		    <span id="animalsText">Save the animals surprise</span>
 		  </td>
                   <td><button type="button" onclick="startTheTour(8)">?</button></td>
 		</tr>
-	      </table>
-	      <table class="full">
-		<colgroup><col class="half" /><col class="half" /></colgroup>
 		<tr id="No_MusicStep">
 		  <td colspan="2">
 		    {{displayCheckbox("No_Music")}}
-		    Disable background music
+		    <span id="No_MusicText">Disable background music</span>
 		  </td>
                   <td><button type="button" onclick="startTheTour(9)">?</button></td>
 		</tr>
-	      </table>
-	      <table class="full">
-		<colgroup><col class="half" /><col class="half" /></colgroup>
 		<tr id="random_musicStep">
 		  <td colspan="2">
 		    {{displayCheckbox("random_music")}}
-		    Randomize background music
+		    <span id="random_musicText">Randomize background music</span>
 		  </td>
                   <td><button type="button" onclick="startTheTour(10)">?</button></td>
 		</tr>

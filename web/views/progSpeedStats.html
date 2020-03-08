@@ -185,7 +185,10 @@ function drawOpennessHistogram(progSpeed, dataIn) {
 
     var options = {
       title: "Progression items distribution - "+progSpeed,
-      vAxis: {title: 'Percentage'},
+      vAxis: {
+          title: 'Percentage',
+          viewWindow: { min: 0, max: 50 }
+      },
       hAxis: {title: 'Collected items count'}
     };
 
@@ -226,6 +229,16 @@ function drawOpennessHistogram_basic() {
     drawOpennessHistogram("basic", {{response.write(progSpeedStats["basic"]["open"], escape=False)}});
 }
 google.charts.setOnLoadCallback(drawOpennessHistogram_basic);
+
+function drawOpennessHistogram_variable() {
+    drawOpennessHistogram("variable", {{response.write(progSpeedStats["variable"]["open"], escape=False)}});
+}
+google.charts.setOnLoadCallback(drawOpennessHistogram_variable);
+
+function drawOpennessHistogram_total() {
+    drawOpennessHistogram("total", {{response.write(progSpeedStats["total"]["open"], escape=False)}});
+}
+google.charts.setOnLoadCallback(drawOpennessHistogram_total);
 </script>
 
 <div class="fixed">
@@ -280,6 +293,8 @@ else:
     <div id="opennessHistogram_fast" style="height: 400px; margin: 0 auto"></div>
     <div id="opennessHistogram_fastest" style="height: 400px; margin: 0 auto"></div>
     <div id="opennessHistogram_basic" style="height: 400px; margin: 0 auto"></div>
+    <div id="opennessHistogram_variable" style="height: 400px; margin: 0 auto"></div>
+    <div id="opennessHistogram_total" style="height: 400px; margin: 0 auto"></div>
 {{
   pass
 }}

@@ -2512,7 +2512,7 @@ def progSpeedStats():
         DB = db.DB()
         progSpeedStatsRaw = {}
         progSpeedStats = {}
-        for progSpeed in ['slowest', 'slow', 'medium', 'fast', 'fastest', 'basic']:
+        for progSpeed in ['slowest', 'slow', 'medium', 'fast', 'fastest', 'basic', 'variable', 'total']:
             parameters['progSpeed'] = progSpeed
             progSpeedStatsRaw[progSpeed] = DB.getProgSpeedStat(parameters)
 
@@ -2525,8 +2525,8 @@ def progSpeedStats():
             progSpeedStats[progSpeed]["open"] = zipStats([open14, open24, open34, open44])
             progSpeedStats[progSpeed]["open"].insert(0, ['Collected items', '1/4 locations available', '2/4 locations available', '3/4 locations available', '4/4 locations available'])
         DB.close()
-        progSpeedStats['avgLocs'] = zipStats([progSpeedStats[progSpeed]["avgLocs"] for progSpeed in ['slowest', 'slow', 'medium', 'fast', 'fastest', 'basic']])
-        progSpeedStats["avgLocs"].insert(0, ['Available locations', 'slowest', 'slow', 'medium', 'fast', 'fastest', 'basic'])
+        progSpeedStats['avgLocs'] = zipStats([progSpeedStats[progSpeed]["avgLocs"] for progSpeed in ['slowest', 'slow', 'medium', 'fast', 'fastest', 'basic', 'variable', 'total']])
+        progSpeedStats["avgLocs"].insert(0, ['Available locations', 'slowest', 'slow', 'medium', 'fast', 'fastest', 'basic', 'variable', 'total'])
     else:
         progSpeedStats = None
 

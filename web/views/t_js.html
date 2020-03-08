@@ -705,6 +705,18 @@ window.onload = function(){
         }
   
         var bytes = new Uint8Array(e.target.result);
+
+        if(document.getElementById("mode").value == "plando") {
+            // detect race mode patch
+            for(var addr=0x1C0200; addr<0x1C0210; addr++) {
+                if(bytes[addr] != 0xff) {
+                    clearInputSeed();
+                    alert("race protected seed detected");
+                    return false;
+                }
+            }
+        }
+
         var romData = {};
   
         // locations items

@@ -1,0 +1,287 @@
+{{
+extend 'layout.html'
+}}
+
+<meta name="description" content="VARIA Randomizer progression speed statistics"/>
+<link rel="shortcut icon" href={{=URL('static','favicon.ico')}} type="image/ico"/>
+<link rel="stylesheet" type="text/css" href={{=URL('static/css','mystyle_20191017.css')}} media="screen"/>
+<script type="text/javascript" src="{{=URL('static', '/highslide/highslide.js')}}"></script>
+<link rel="stylesheet" type="text/css" href={{=URL("static", "/highslide/highslide.css")}} />
+<script type="text/javascript">
+hs.graphicsDir = "/solver/static/highslide/graphics/";
+hs.showCredits = 0;
+hs.zIndexCounter = 1000000;
+hs.dimmingOpacity = 0.75;
+
+if (hs.registerOverlay) {
+	// The simple semitransparent close button overlay
+	hs.registerOverlay({
+		thumbnailId: 'areathumb',
+		html: '<div class="closebutton"	onclick="return hs.close(this)" title="Close"></div>',
+		position: 'top right',
+		fade: 2 // fading the semi-transparent overlay looks bad in IE
+	});
+}
+</script>
+
+<link href={{=URL('static', 'css/bootstrap-tour.min.css')}} rel="stylesheet">
+<script src="{{=URL('static','js/bootstrap-tour.min.js')}}"></script>
+
+<script type="text/javascript" src="{{=URL('static', 'js/chosen.jquery.min.js')}}"></script>
+<link rel="stylesheet" type="text/css" href={{=URL("static", "css/chosen.css")}} />
+
+<script type = "text/javascript" src = "https://www.gstatic.com/charts/loader.js"></script>
+<script type = "text/javascript">google.charts.load('current', {packages: ['corechart']});</script>
+
+<title>Super Metroid VARIA Randomizer progresssion speed statistics</title>
+
+<style>
+.clickable {
+    cursor: pointer;
+}
+.centerTable {
+    margin-left: auto;
+    margin-right: auto;
+    width: 50%;
+}
+.blue {
+    background-color: #6d9eeb;
+}
+.green {
+    background-color: #93c47d;
+}
+.yellow {
+    background-color: #ffd966;
+}
+.orange {
+    background-color: #f6b26b;
+}
+.red {
+    background-color: #e06666;
+}
+.none {
+    background-color: #ffffff;
+}
+.minor {
+    background-color: #dddddd;
+}
+.border {
+    border: 1px solid #ddd;
+}
+.icon {
+    width: 3.6%;
+}
+.centerIcon {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: 32px;
+    image-rendering: -moz-crisp-edges; /* Firefox */
+    image-rendering: -o-crisp-edges; /* Opera */
+    image-rendering: -webkit-optimize-contrast; /* Webkit (non-standard naming) */
+    image-rendering: crisp-edges;
+    -ms-interpolation-mode: nearest-neighbor; /* IE (non-standard property) */
+}
+.grey {
+    background-color: #f1f1f1;
+}
+.bold {
+    font-weight: bold;
+}
+.left {
+    float: left;
+}
+.right {
+    float: right;
+}
+.row {
+    margin-bottom: 0.5em;
+    padding-left: 0.5em;
+}
+.space {
+    margin-bottom: 1.0em;
+    margin-top: 1.0em;
+}
+.strike {
+    text-decoration: line-through;
+}
+</style>
+
+<script type="text/javascript">
+// https://stackoverflow.com/questions/16960690/chosen-harvesthq-resize-width-dynamically
+$(document).ready(function(){      
+   resizeChosen();
+   jQuery(window).on('resize', resizeChosen);
+});
+
+function resizeChosen() {
+   $(".chosen-container").each(function() {
+       $(this).attr('style', 'width: 100%');
+   });          
+}
+
+window.onload = function(){
+    $(".chzn-select").chosen();
+    resizeChosen();
+}
+
+function startTheTour(step=-1) {
+  // the tour tutorial
+  var tour = new Tour({
+    storage: false,
+    steps: [
+    {
+      element: "#randoPresetStep",
+      title: "Settings Preset",
+      content: "Choose from the list of Randomizer presets and tournament ones."
+    } ]});
+
+  // Initialize the tour
+  tour.init();
+
+  // Start the tour
+  if(step != -1) {
+    tour.goTo(step);
+  }
+  tour.start();
+}
+
+
+function drawAvgLocsHistogram() {
+{{
+  if progSpeedStats == None or len(progSpeedStats) == 0:
+      response.write("  return;", escape=False)
+      pass
+  else:
+}}
+    // Define the chart to be drawn.
+    var data = google.visualization.arrayToDataTable({{response.write(progSpeedStats["avgLocs"], escape=False)}});
+
+    var options = {
+      title: "Average number of available locations distribution",
+      vAxis: {title: 'Percentage'},
+      hAxis: {title: 'Average number of available locations'}
+    };
+
+    // Instantiate and draw the chart.
+    var chart = new google.visualization.AreaChart(document.getElementById("avgLocsHistogram"));
+    chart.draw(data, options);
+{{
+      pass
+}}
+}
+
+google.charts.setOnLoadCallback(drawAvgLocsHistogram);
+
+function drawOpennessHistogram(progSpeed, dataIn) {
+{{
+  if progSpeedStats == None or len(progSpeedStats) == 0:
+      response.write("  return;", escape=False)
+      pass
+  else:
+}}
+    // Define the chart to be drawn.
+    var data = google.visualization.arrayToDataTable(dataIn);
+
+    var options = {
+      title: "Progression items distribution - "+progSpeed,
+      vAxis: {title: 'Percentage'},
+      hAxis: {title: 'Collected items count'}
+    };
+
+    // Instantiate and draw the chart.
+    var chart = new google.visualization.AreaChart(document.getElementById("opennessHistogram_"+progSpeed));
+    chart.draw(data, options);
+{{
+      pass
+}}
+}
+
+function drawOpennessHistogram_slowest() {
+    drawOpennessHistogram("slowest", {{response.write(progSpeedStats["slowest"]["open"], escape=False)}});
+}
+google.charts.setOnLoadCallback(drawOpennessHistogram_slowest);
+
+function drawOpennessHistogram_slow() {
+    drawOpennessHistogram("slow", {{response.write(progSpeedStats["slow"]["open"], escape=False)}});
+}
+google.charts.setOnLoadCallback(drawOpennessHistogram_slow);
+
+function drawOpennessHistogram_medium() {
+    drawOpennessHistogram("medium", {{response.write(progSpeedStats["medium"]["open"], escape=False)}});
+}
+google.charts.setOnLoadCallback(drawOpennessHistogram_medium);
+
+function drawOpennessHistogram_fast() {
+    drawOpennessHistogram("fast", {{response.write(progSpeedStats["fast"]["open"], escape=False)}});
+}
+google.charts.setOnLoadCallback(drawOpennessHistogram_fast);
+
+function drawOpennessHistogram_fastest() {
+    drawOpennessHistogram("fastest", {{response.write(progSpeedStats["fastest"]["open"], escape=False)}});
+}
+google.charts.setOnLoadCallback(drawOpennessHistogram_fastest);
+
+function drawOpennessHistogram_basic() {
+    drawOpennessHistogram("basic", {{response.write(progSpeedStats["basic"]["open"], escape=False)}});
+}
+google.charts.setOnLoadCallback(drawOpennessHistogram_basic);
+</script>
+
+<div class="fixed">
+  <div class="menu">
+    <table class="full menuTable">
+      <tr>
+	<td>{{=A("Home", _href=URL(f="home"), _class="menu")}}</td>
+	<td>{{=A("Presets", _href=URL(f="presets"), _class="menu")}}</td>
+	<td>{{=A("Randomizer", _href=URL(f="randomizer"), _class="menu")}}</td>
+	<td>{{=A("Solver", _href=URL(f="solver"), _class="menu")}}</td>
+	<td>{{=A("Tracker", _href=URL(f="tracker"), _class="menu")}}</td>
+	<td>{{=A("Plandomizer", _href=URL(f="plando"), _class="menu")}}</td>
+	<td>{{=A("Customizer", _href=URL(f="customizer"), _class="menu")}}</td>
+	<td>{{=A("Statistics", _href=URL(f="extStats"), _class="menu")}}</td>
+	<td>{{=A("Information & Contact", _href=URL(f="infos"), _class="menu")}}</td>
+      </tr>
+    </table>
+  </div>
+</div>
+
+<div class="main">
+  <div class="center">
+    <div class="tab">
+      <button class="tablinks" onclick="nope(event);">Statistics</button>
+    </div>
+  </div>
+  <div class="tabcontent">
+    <form id="mainform" name="mainform">
+      <table class="full">
+	<tr>
+	  <td>Settings Preset:</td>
+	  <td>{{=SELECT(*randoPresets, **dict(_name="randoPreset", _id="randoPreset", value=session.progSpeedStats["randoPreset"], _class="filldropdown chzn-select"))}}</td>
+	  <td><button id="randoPresetStep" type="button" onclick="startTheTour(0)">?</button></td>
+	  <td>{{=INPUT(_type="submit", _value="Load", _name="action", _class="btn btn-default")}}</td>
+        </tr>
+      </table>
+    </form>
+
+{{
+if progSpeedStats == None:
+  response.write("No statistics found.", escape=False)
+else:
+}}
+
+    <p>When solving the seed we count at each step how many locations are available for next choice, then we keep the average value. The higher average of available locations the more open the seed is.<br/>Click on a progression speed in the legend to highlight it.</p>
+    <div id="avgLocsHistogram" style="height: 400px; margin: 0 auto"></div>
+
+    <p>When solving the seed we count when we can reach 1/4, 1/2, 3/4 and all the locations, this gives the distribution of progression items. The sooner we reach this milestones the freer the seed is.</p>
+    <div id="opennessHistogram_slowest" style="height: 400px; margin: 0 auto"></div>
+    <div id="opennessHistogram_slow" style="height: 400px; margin: 0 auto"></div>
+    <div id="opennessHistogram_medium" style="height: 400px; margin: 0 auto"></div>
+    <div id="opennessHistogram_fast" style="height: 400px; margin: 0 auto"></div>
+    <div id="opennessHistogram_fastest" style="height: 400px; margin: 0 auto"></div>
+    <div id="opennessHistogram_basic" style="height: 400px; margin: 0 auto"></div>
+{{
+  pass
+}}
+  </div>
+</div>

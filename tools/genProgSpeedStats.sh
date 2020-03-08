@@ -1,7 +1,7 @@
 #!/bin/bash
 
-if [ $# -ne 2 -a $# -ne 3 -a $# -ne 4 ]; then
-    echo "params: ROM LOOPS [tourney]"
+if [ $# -ne 2 -a $# -ne 3 ]; then
+    echo "params: ROM LOOPS"
     exit -1
 fi
 
@@ -17,11 +17,11 @@ mkdir -p ${LOG_DIR} ${SQL_DIR}
 
 ROM=$1
 LOOPS=$2
-TOURNEY=$3
 
 function computeSeed {
     RANDO_PRESET="$1"
     SKILL_PRESET="$2"
+    PROG_SPEED="$3"
     JOB_ID=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 32)
     RUNTIME_LIMIT=15
 
@@ -34,8 +34,6 @@ function computeSeed {
 	 if [ -f "${SEED}" ]; then
 	     printf "."
 	     rm -f ${LOG}
-
-	     python3.7 ${CWD}/solver.py -r "${SEED}" --preset "${SKILL_PRESET}" --pickupStrategy any --difficultyTarget 0 --ext_stats "${SQL}" --ext_stats_step 1 >/dev/null
 
 	     python3.7 ${CWD}/solver.py -r "${SEED}" --preset "${SKILL_PRESET}" --pickupStrategy all --difficultyTarget 10 --ext_stats "${SQL}" --ext_stats_step 2 >/dev/null
 
@@ -72,48 +70,36 @@ function info {
 STOP=""
 NB_CPU=$(cat /proc/cpuinfo  | grep 'processor' | wc -l)
 
-RANDO_PRESETS=$(ls -1 ${CWD}/rando_presets/*.json)
-if [ -n "${TOURNEY}" ]; then
-    RANDO_PRESETS=$(echo "${RANDO_PRESETS}" | grep "${TOURNEY}")
-fi
+SKILL_PRESET=${CWD}/standard_presets/Season_Races.json
+BASE_RANDO_PRESET=${CWD}/rando_presets/Season_Races.json
+for PROG_SPEED in slowest slow medium fast fastest basic variable; do
+    # generate rando preset
+    RANDO_PRESET=${CWD}/rando_presets/Season_Races_${PROG_SPEED}.json
+    sed -e "s+VARIAble+${PROG_SPEED}+" ${BASE_RANDO_PRESET} > ${RANDO_PRESET}
 
-SKILL_PRESETS=$(ls -1 ${CWD}/standard_presets/*.json | grep -v -E 'solution|samus')
-if [ -n "${TOURNEY}" ]; then
-    SKILL_PRESETS=$(echo "${SKILL_PRESETS}" | grep "${TOURNEY}")
-fi
+    info "Begin rando preset ${RANDO_PRESET} - skill preset ${SKILL_PRESET}"
 
-for RANDO_PRESET in ${RANDO_PRESETS}; do
-    # ignore random presets
-    if(echo "${RANDO_PRESET}" | grep -q "random"); then
-	continue
-    fi
-
-    info "Begin rando preset ${RANDO_PRESET}"
-
-    for SKILL_PRESET in ${SKILL_PRESETS}; do
-	info "  Begin skill preset ${SKILL_PRESET}"
-
-	CUR_JOBS=0
-	CUR_LOOP=0
-	PIDS=""
-	while true; do
-	    while [ ${CUR_JOBS} -lt ${NB_CPU} -a ${CUR_LOOP} -lt ${LOOPS} ]; do
-		computeSeed "${RANDO_PRESET}" "${SKILL_PRESET}" &
-		PIDS="$PIDS $! "
-		let CUR_JOBS=$CUR_JOBS+1
-		let CUR_LOOP=$CUR_LOOP+1
-	    done
-
-	    wait_for_a_child "${PIDS}"
-	    let CUR_JOBS=$CUR_JOBS-1
-
-	    if [ $CUR_JOBS -eq 0 -a $CUR_LOOP -ge $LOOPS ]; then
-		break
-	    fi
+    CUR_JOBS=0
+    CUR_LOOP=0
+    PIDS=""
+    while true; do
+	while [ ${CUR_JOBS} -lt ${NB_CPU} -a ${CUR_LOOP} -lt ${LOOPS} ]; do
+	    computeSeed "${RANDO_PRESET}" "${SKILL_PRESET}" "${PROG_SPEED}" &
+	    PIDS="$PIDS $! "
+	    let CUR_JOBS=$CUR_JOBS+1
+	    let CUR_LOOP=$CUR_LOOP+1
 	done
-	echo ""
+
+	wait_for_a_child "${PIDS}"
+	let CUR_JOBS=$CUR_JOBS-1
+
+	if [ $CUR_JOBS -eq 0 -a $CUR_LOOP -ge $LOOPS ]; then
+	    break
+	fi
     done
     echo ""
+
+    rm -f ${RANDO_PRESET}
 done
 
 for F in ${SQL_DIR}/extStats_*.sql; do

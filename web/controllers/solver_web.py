@@ -2357,8 +2357,20 @@ def extStats():
             parameters["superFunSuit"] = "random"
 
         DB = db.DB()
-        (itemsStats, techniquesStats, difficulties) = DB.getExtStat(parameters)
+        (itemsStats, techniquesStats, difficulties, solverStatsRaw) = DB.getExtStat(parameters)
         DB.close()
+
+        solverStats = {}
+        if "avgLocs" in solverStatsRaw:
+            solverStats["avgLocs"] = transformStats(solverStatsRaw["avgLocs"])
+            solverStats["avgLocs"].insert(0, ['Available locations', 'Percentage'])
+        if "open14" in solverStatsRaw:
+            open14 = transformStats(solverStatsRaw["open14"])
+            open24 = transformStats(solverStatsRaw["open24"])
+            open34 = transformStats(solverStatsRaw["open34"])
+            open44 = transformStats(solverStatsRaw["open44"])
+            solverStats["open"] = zipStats([open14, open24, open34, open44])
+            solverStats["open"].insert(0, ['Collected items', '1/4 locations available', '2/4 locations available', '3/4 locations available', '4/4 locations available'])
 
         # check that all items are present in the stats:
         nbItems = 19
@@ -2373,6 +2385,7 @@ def extStats():
         itemsStats = None
         techniquesStats = None
         difficulties = None
+        solverStats = None
         skillPresetContent = None
         parameters = None
 
@@ -2386,4 +2399,137 @@ def extStats():
                 randoPresets=randoPresets, tourRandoPresets=tourRandoPresets,
                 itemsStats=itemsStats, techniquesStats=techniquesStats,
                 categories=Knows.categories, knowsDesc=Knows.desc, skillPresetContent=skillPresetContent,
-                locations=locations, parameters=parameters, difficulties=difficulties)
+                locations=locations, parameters=parameters, difficulties=difficulties, solverStats=solverStats)
+
+def transformStats(stats, maxRange=106):
+    # input a list [(x, value), (x, value), ..., (x, value)]
+    # ouput a list with (x, 0) for missing x values
+    if len(stats) > 0:
+        (curX, curValue) = stats.pop(0)
+    else:
+        (curX, curValue) = (maxRange-1, 0)
+    out = []
+    for i in range(1, maxRange):
+        if i < curX:
+            out.append([i, 0])
+        else:
+            out.append([curX, float(curValue)])
+            if len(stats) > 0:
+                (curX, curValue) = stats.pop(0)
+            else:
+                (curX, curValue) = (maxRange-1, 0)
+    return out
+
+def zipStats(stats):
+    out = []
+    for i in range(len(stats[0])):
+        line = [i+1]
+        for s in stats:
+            line.append(s[i][1])
+        out.append(line)
+    return out
+
+def initProgSpeedStatsSession():
+    if session.progSpeedStats == None:
+        session.progSpeedStats = {}
+        session.progSpeedStats['randoPreset'] = 'Season_Races'
+
+def updateProgSpeedStatsSession():
+    if session.progSpeedStats is None:
+        session.progSpeedStats = {}
+
+    session.progSpeedStats['randoPreset'] = request.vars.randoPreset
+
+def validateProgSpeedStatsParams():
+    for (preset, directory) in [("randoPreset", "rando_presets")]:
+        if request.vars[preset] == None:
+            return (False, "Missing parameter preset")
+        preset = request.vars[preset]
+
+        if IS_ALPHANUMERIC()(preset)[1] is not None:
+            return (False, "Wrong value for preset, must be alphanumeric")
+
+        if IS_LENGTH(maxsize=32, minsize=1)(preset)[1] is not None:
+            return (False, "Wrong length for preset, name must be between 1 and 32 characters")
+
+        # check that preset exists
+        fullPath = '{}/{}.json'.format(directory, preset)
+        if not os.path.isfile(fullPath):
+            return (False, "Unknown preset: {}".format(preset))
+
+    return (True, None)
+
+def progSpeedStats():
+    response.title = 'Super Metroid VARIA Randomizer progression speed statistics'
+
+    initProgSpeedStatsSession()
+
+    if request.vars.action == 'Load':
+        (ok, msg) = validateProgSpeedStatsParams()
+        if not ok:
+            session.flash = msg
+            redirect(URL(r=request, f='progSpeedStats'))
+
+        updateProgSpeedStatsSession()
+
+        randoPreset = request.vars.randoPreset
+
+        # load rando preset
+        fullPath = 'rando_presets/{}.json'.format(randoPreset)
+        try:
+            with open(fullPath) as jsonFile:
+                randoPreset = json.load(jsonFile)
+        except Exception as e:
+            raise HTTP(400, "Can't load the rando preset: {}: {}".format(randoPreset, e))
+
+        parameters = {
+            'preset': randoPreset['preset'] if 'preset' in randoPreset else 'regular',
+            'area': 'areaRandomization' in randoPreset and randoPreset['areaRandomization'] == 'on',
+            'boss': 'bossRandomization' in randoPreset and randoPreset['bossRandomization'] == 'on',
+            'gravityBehaviour': randoPreset['gravityBehaviour'],
+            'nerfedCharge': randoPreset['nerfedCharge'] == 'on',
+            'maxDifficulty': randoPreset['maxDifficulty'],
+            # parameters which can be random:
+            'majorsSplit': randoPreset['majorsSplit'] if 'majorsSplit' in randoPreset else 'Full',
+            'startAP': randoPreset['startLocation'] if 'startLocation' in randoPreset else 'Landing Site',
+            'morphPlacement': randoPreset['morphPlacement'] if 'morphPlacement' in randoPreset else 'early',
+            'suitsRestriction': 'suitsRestriction' in randoPreset and randoPreset['suitsRestriction'] == 'on',
+            'progDiff': randoPreset['progressionDifficulty'] if 'progressionDifficulty' in randoPreset else 'normal',
+            'superFunMovement': 'funMovement' in randoPreset and randoPreset['funMovement'] == 'on',
+            'superFunCombat': 'funCombat' in randoPreset and randoPreset['funCombat'] == 'on',
+            'superFunSuit': 'funSuits' in randoPreset and randoPreset['funSuits'] == 'on'
+        }
+
+        if randoPreset['suitsRestriction'] == "random":
+            parameters["suitsRestriction"] = "random"
+        if randoPreset['funMovement'] == "random":
+            parameters["superFunMovement"] = "random"
+        if randoPreset['funCombat'] == "random":
+            parameters["superFunCombat"] = "random"
+        if randoPreset['funSuits'] == "random":
+            parameters["superFunSuit"] = "random"
+
+        DB = db.DB()
+        progSpeedStatsRaw = {}
+        progSpeedStats = {}
+        for progSpeed in ['slowest', 'slow', 'medium', 'fast', 'fastest', 'basic']:
+            parameters['progSpeed'] = progSpeed
+            progSpeedStatsRaw[progSpeed] = DB.getProgSpeedStat(parameters)
+
+            progSpeedStats[progSpeed] = {}
+            progSpeedStats[progSpeed]["avgLocs"] = transformStats(progSpeedStatsRaw[progSpeed]["avgLocs"], 50)
+            open14 = transformStats(progSpeedStatsRaw[progSpeed]["open14"])
+            open24 = transformStats(progSpeedStatsRaw[progSpeed]["open24"])
+            open34 = transformStats(progSpeedStatsRaw[progSpeed]["open34"])
+            open44 = transformStats(progSpeedStatsRaw[progSpeed]["open44"])
+            progSpeedStats[progSpeed]["open"] = zipStats([open14, open24, open34, open44])
+            progSpeedStats[progSpeed]["open"].insert(0, ['Collected items', '1/4 locations available', '2/4 locations available', '3/4 locations available', '4/4 locations available'])
+        DB.close()
+        progSpeedStats['avgLocs'] = zipStats([progSpeedStats[progSpeed]["avgLocs"] for progSpeed in ['slowest', 'slow', 'medium', 'fast', 'fastest', 'basic']])
+        progSpeedStats["avgLocs"].insert(0, ['Available locations', 'slowest', 'slow', 'medium', 'fast', 'fastest', 'basic'])
+    else:
+        progSpeedStats = None
+
+    randoPresets = ['Season_Races']
+
+    return dict(randoPresets=randoPresets, progSpeedStats=progSpeedStats)

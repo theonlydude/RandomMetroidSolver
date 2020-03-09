@@ -1,7 +1,7 @@
 #!/bin/bash
 
-if [ $# -ne 1 ]; then
-    echo "params: dir"
+if [ $# -ne 1 -a $# -ne 2 ]; then
+    echo "params: dir [FULL]"
     exit -1
 fi
 
@@ -16,10 +16,17 @@ SQL_DIR=${CWD}/sql
 mkdir -p ${LOG_DIR} ${SQL_DIR}
 
 ROMS_DIR=$1
+FULL=$2
+
+if [ -n "${FULL}" ]; then
+    SPLIT="Full"
+else
+    SPLIT="Major"
+fi
 
 SQL_BASE="insert into extended_stats (version, preset, area, boss, majorsSplit, progSpeed, morphPlacement, suitsRestriction, progDiff, superFunMovement, superFunCombat, superFunSuit, gravityBehaviour, nerfedCharge, maxDifficulty, startAP, count)
 values
-(20191114, 'Season_Races', False, False, 'Major', 'total', 'early', True, 'normal', False, False, False, 'Balanced', False, 'harder', 'Landing Site', 1)
+(20191114, 'Season_Races', False, False, '${SPLIT}', 'total', 'early', True, 'normal', False, False, False, 'Balanced', False, 'harder', 'Landing Site', 1)
 on duplicate key update id=LAST_INSERT_ID(id), count = count + 1;
 set @last_id = last_insert_id();"
 

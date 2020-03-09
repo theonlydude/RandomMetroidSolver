@@ -2126,7 +2126,6 @@ def initCustomizerSession():
         session.customizer['spinjumprestart'] = "off"
         session.customizer['rando_speed'] = "off"
         session.customizer['elevators_doors_speed'] = "off"
-        session.customizer['animals'] = "off"
         session.customizer['No_Music'] = "off"
         session.customizer['random_music'] = "off"
 
@@ -2161,7 +2160,7 @@ def customizer():
 
 def customWebService():
     # check validity of all parameters
-    patches = ['itemsounds', 'spinjumprestart', 'rando_speed', 'elevators_doors_speed', 'No_Music', 'animals', 'random_music']
+    patches = ['itemsounds', 'spinjumprestart', 'rando_speed', 'elevators_doors_speed', 'No_Music', 'random_music']
     others = ['colorsRandomization', 'suitsPalettes', 'beamsPalettes', 'tilesPalettes', 'enemiesPalettes',
               'bossesPalettes', 'minDegree', 'maxDegree', 'invert']
     validateWebServiceParams(patches, [], others, isJson=True)
@@ -2189,7 +2188,6 @@ def customWebService():
     session.customizer['spinjumprestart'] = request.vars.spinjumprestart
     session.customizer['rando_speed'] = request.vars.rando_speed
     session.customizer['elevators_doors_speed'] = request.vars.elevators_doors_speed
-    session.customizer['animals'] = request.vars.animals
     session.customizer['No_Music'] = request.vars.No_Music
     session.customizer['random_music'] = request.vars.random_music
 
@@ -2210,8 +2208,6 @@ def customWebService():
         params += ['-c', 'No_Music']
     if request.vars.random_music == 'on':
         params += ['-c', 'random_music.ips']
-    if request.vars.animals == 'on':
-        params.append('--animals')
 
     if request.vars.colorsRandomization == 'on':
         params.append('--palette')

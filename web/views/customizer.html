@@ -324,7 +324,7 @@ function doSubmit() {
     }
 
     var dataDict = {};
-    var elems = ["itemsounds", "spinjumprestart", "rando_speed", "elevators_doors_speed", "animals", "No_Music", "random_music", "colorsRandomization", "suitsPalettes", "beamsPalettes", "tilesPalettes", "enemiesPalettes", "bossesPalettes", "globalShift", "customSpriteEnable", "customSprite"];
+    var elems = ["itemsounds", "spinjumprestart", "rando_speed", "elevators_doors_speed", "No_Music", "random_music", "colorsRandomization", "suitsPalettes", "beamsPalettes", "tilesPalettes", "enemiesPalettes", "bossesPalettes", "globalShift", "customSpriteEnable", "customSprite"];
 
     for(var i=0; i<elems.length; i++) {
         var elem = document.getElementById(elems[i]);
@@ -420,7 +420,7 @@ window.onload = function(){
                 }
 
                 // grey out patches
-                var buttons = ["itemsounds", "elevators_doors_speed", "spinjumprestart", "rando_speed", "animals"];
+                var buttons = ["itemsounds", "elevators_doors_speed", "spinjumprestart", "rando_speed"];
                 for(var i=0; i<buttons.length; i++) {
                     disableElement(buttons[i], isRace);
                 }
@@ -694,12 +694,6 @@ response.write('</table>', escape=False)
 <p>This patch was developed by Oi27.</p>"
     },
     {
-      element: "#animalsStep",
-      title: "Animals surprise",
-      content: "<p>Replace saving the animals in the escape sequence by a random surprise.</p>\
-<p>Patch developed by Foosda.</p>"
-    },
-    {
       element: "#No_MusicStep",
       title: "No music",
       content: "<p>Disable the background music to let you hear you favorite tunes instead.</p>\
@@ -885,26 +879,19 @@ def displayCheckbox(id, defaultTrue=False):
 	      </table>
 	      <table class="full">
 		<colgroup><col class="half" /><col class="half" /></colgroup>
-		<tr id="animalsStep">
-		  <td colspan="2">
-		    {{displayCheckbox("animals")}}
-		    <span id="animalsText">Save the animals surprise</span>
-		  </td>
-                  <td><button type="button" onclick="startTheTour(8)">?</button></td>
-		</tr>
 		<tr id="No_MusicStep">
 		  <td colspan="2">
 		    {{displayCheckbox("No_Music")}}
 		    <span id="No_MusicText">Disable background music</span>
 		  </td>
-                  <td><button type="button" onclick="startTheTour(9)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(8)">?</button></td>
 		</tr>
 		<tr id="random_musicStep">
 		  <td colspan="2">
 		    {{displayCheckbox("random_music")}}
 		    <span id="random_musicText">Randomize background music</span>
 		  </td>
-                  <td><button type="button" onclick="startTheTour(10)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(9)">?</button></td>
 		</tr>
 	      </table>
 

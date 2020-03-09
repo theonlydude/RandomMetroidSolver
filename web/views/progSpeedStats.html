@@ -200,6 +200,32 @@ function drawOpennessHistogram(progSpeed, dataIn) {
 }}
 }
 
+function drawOpennessHistogram2(progSpeed, dataIn) {
+{{
+  if progSpeedStats == None or len(progSpeedStats) == 0:
+      response.write("  return;", escape=False)
+      pass
+  else:
+}}
+    // Define the chart to be drawn.
+    var data = google.visualization.arrayToDataTable(dataIn);
+
+    var options = {
+      title: "Progression items distribution - "+progSpeed,
+      vAxis: {
+          title: 'Percentage'
+      },
+      hAxis: {title: 'Collected items count'}
+    };
+
+    // Instantiate and draw the chart.
+    var chart = new google.visualization.LineChart(document.getElementById("opennessHistogram_"+progSpeed));
+    chart.draw(data, options);
+{{
+      pass
+}}
+}
+
 {{
   if progSpeedStats != None:
 }}
@@ -242,6 +268,26 @@ function drawOpennessHistogram_total() {
     drawOpennessHistogram("total", {{response.write(progSpeedStats["total"]["open"], escape=False)}});
 }
 google.charts.setOnLoadCallback(drawOpennessHistogram_total);
+
+function drawOpennessHistogram_14() {
+    drawOpennessHistogram2("14", {{response.write(progSpeedStats["open14"], escape=False)}});
+}
+google.charts.setOnLoadCallback(drawOpennessHistogram_14);
+
+function drawOpennessHistogram_24() {
+    drawOpennessHistogram2("24", {{response.write(progSpeedStats["open24"], escape=False)}});
+}
+google.charts.setOnLoadCallback(drawOpennessHistogram_24);
+
+function drawOpennessHistogram_34() {
+    drawOpennessHistogram2("34", {{response.write(progSpeedStats["open34"], escape=False)}});
+}
+google.charts.setOnLoadCallback(drawOpennessHistogram_34);
+
+function drawOpennessHistogram_44() {
+    drawOpennessHistogram2("44", {{response.write(progSpeedStats["open44"], escape=False)}});
+}
+google.charts.setOnLoadCallback(drawOpennessHistogram_44);
 {{
     pass
 }}
@@ -301,6 +347,12 @@ else:
     <div id="opennessHistogram_basic" style="height: 400px; margin: 0 auto"></div>
     <div id="opennessHistogram_variable" style="height: 400px; margin: 0 auto"></div>
     <div id="opennessHistogram_total" style="height: 400px; margin: 0 auto"></div>
+
+    <p>The same values but with all the progression speeds on the same graph.</p>
+    <div id="opennessHistogram_14" style="height: 400px; margin: 0 auto"></div>
+    <div id="opennessHistogram_24" style="height: 400px; margin: 0 auto"></div>
+    <div id="opennessHistogram_34" style="height: 400px; margin: 0 auto"></div>
+    <div id="opennessHistogram_44" style="height: 400px; margin: 0 auto"></div>
 {{
   pass
 }}

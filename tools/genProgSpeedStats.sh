@@ -78,7 +78,7 @@ for PROG_SPEED in slowest slow medium fast fastest basic variable; do
     RANDO_PRESET=${CWD}/rando_presets/Season_Races_${PROG_SPEED}.json
     sed -e "s+VARIAble+${PROG_SPEED}+" ${BASE_RANDO_PRESET} > ${RANDO_PRESET}
     if [ -n "${FULL}" ]; then
-        sed -e 's+Major+Full+' ${BASE_RANDO_PRESET} > ${RANDO_PRESET}
+        sed -i -e 's+Major+Full+' ${RANDO_PRESET}
     fi
 
     info "Begin rando preset ${RANDO_PRESET} - skill preset ${SKILL_PRESET}"

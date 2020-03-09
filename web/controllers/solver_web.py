@@ -2524,40 +2524,53 @@ def progSpeedStats():
         progSpeedStats["open34"] = {}
         progSpeedStats["open44"] = {}
         progSpeeds = ['slowest', 'slow', 'medium', 'fast', 'fastest', 'basic', 'variable', 'total']
+        realProgSpeeds = []
+        realProgSpeedsName = []
         for progSpeed in progSpeeds:
             parameters['progSpeed'] = progSpeed
             progSpeedStatsRaw[progSpeed] = DB.getProgSpeedStat(parameters)
 
-            progSpeedStats[progSpeed] = {}
-            progSpeedStats[progSpeed]["avgLocs"] = transformStats(progSpeedStatsRaw[progSpeed]["avgLocs"], 50)
-            open14 = transformStats(progSpeedStatsRaw[progSpeed]["open14"])
-            open24 = transformStats(progSpeedStatsRaw[progSpeed]["open24"])
-            open34 = transformStats(progSpeedStatsRaw[progSpeed]["open34"])
-            open44 = transformStats(progSpeedStatsRaw[progSpeed]["open44"])
-            progSpeedStats[progSpeed]["open"] = zipStats([open14, open24, open34, open44])
-            progSpeedStats[progSpeed]["open"].insert(0, ['Collected items', '1/4 locations available', '2/4 locations available', '3/4 locations available', '4/4 locations available'])
+            if len(progSpeedStatsRaw[progSpeed]) != 0:
+                progSpeedStats[progSpeed] = {}
+                progSpeedStats[progSpeed]["avgLocs"] = transformStats(progSpeedStatsRaw[progSpeed]["avgLocs"], 50)
+                open14 = transformStats(progSpeedStatsRaw[progSpeed]["open14"])
+                open24 = transformStats(progSpeedStatsRaw[progSpeed]["open24"])
+                open34 = transformStats(progSpeedStatsRaw[progSpeed]["open34"])
+                open44 = transformStats(progSpeedStatsRaw[progSpeed]["open44"])
+                progSpeedStats[progSpeed]["open"] = zipStats([open14, open24, open34, open44])
+                progSpeedStats[progSpeed]["open"].insert(0, ['Collected items', '1/4 locations available', '2/4 locations available', '3/4 locations available', '4/4 locations available'])
 
-            progSpeedStats["open14"][progSpeed] = open14
-            progSpeedStats["open24"][progSpeed] = open24
-            progSpeedStats["open34"][progSpeed] = open34
-            progSpeedStats["open44"][progSpeed] = open44
+                progSpeedStats["open14"][progSpeed] = open14
+                progSpeedStats["open24"][progSpeed] = open24
+                progSpeedStats["open34"][progSpeed] = open34
+                progSpeedStats["open44"][progSpeed] = open44
+
+                realProgSpeeds.append(progSpeed)
+                if progSpeed == 'total':
+                    realProgSpeedsName.append('total_rando')
+                else:
+                    realProgSpeedsName.append(progSpeed)
         DB.close()
 
         # avg locs
-        progSpeedStats['avgLocs'] = zipStats([progSpeedStats[progSpeed]["avgLocs"] for progSpeed in progSpeeds])
-        progSpeedStats["avgLocs"].insert(0, ['Available locations', 'slowest', 'slow', 'medium', 'fast', 'fastest', 'basic', 'variable', 'total_rando'])
+        if len(realProgSpeeds) > 0:
+            progSpeedStats['avgLocs'] = zipStats([progSpeedStats[progSpeed]["avgLocs"] for progSpeed in realProgSpeeds])
+            progSpeedStats["avgLocs"].insert(0, ['Available locations']+realProgSpeedsName)
 
         # prog items
-        progSpeedStats["open14"] = zipStats([progSpeedStats["open14"][progSpeed] for progSpeed in progSpeeds])
-        progSpeedStats["open14"].insert(0, ['Collected items']+progSpeeds[:-1]+['total_rando'])
-        progSpeedStats["open24"] = zipStats([progSpeedStats["open24"][progSpeed] for progSpeed in progSpeeds])
-        progSpeedStats["open24"].insert(0, ['Collected items']+progSpeeds[:-1]+['total_rando'])
-        progSpeedStats["open34"] = zipStats([progSpeedStats["open34"][progSpeed] for progSpeed in progSpeeds])
-        progSpeedStats["open34"].insert(0, ['Collected items']+progSpeeds[:-1]+['total_rando'])
-        progSpeedStats["open44"] = zipStats([progSpeedStats["open44"][progSpeed] for progSpeed in progSpeeds])
-        progSpeedStats["open44"].insert(0, ['Collected items']+progSpeeds[:-1]+['total_rando'])
+        if len(progSpeedStats["open14"]) > 0:
+            progSpeedStats["open14"] = zipStats([progSpeedStats["open14"][progSpeed] for progSpeed in realProgSpeeds])
+            progSpeedStats["open14"].insert(0, ['Collected items']+realProgSpeedsName)
+            progSpeedStats["open24"] = zipStats([progSpeedStats["open24"][progSpeed] for progSpeed in realProgSpeeds])
+            progSpeedStats["open24"].insert(0, ['Collected items']+realProgSpeedsName)
+            progSpeedStats["open34"] = zipStats([progSpeedStats["open34"][progSpeed] for progSpeed in realProgSpeeds])
+            progSpeedStats["open34"].insert(0, ['Collected items']+realProgSpeedsName)
+            progSpeedStats["open44"] = zipStats([progSpeedStats["open44"][progSpeed] for progSpeed in realProgSpeeds])
+            progSpeedStats["open44"].insert(0, ['Collected items']+realProgSpeedsName)
     else:
         progSpeedStats = None
+
+    print(progSpeedStats)
 
     randoPresets = ['Season_Races']
     majorsSplit = ['Major', 'Full']

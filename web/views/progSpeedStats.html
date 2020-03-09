@@ -154,9 +154,8 @@ function startTheTour(step=-1) {
 
 function drawAvgLocsHistogram() {
 {{
-  if progSpeedStats == None or len(progSpeedStats) == 0:
+  if progSpeedStats == None or "avgLocs" not in progSpeedStats:
       response.write("  return;", escape=False)
-      pass
   else:
 }}
     // Define the chart to be drawn.
@@ -179,12 +178,6 @@ function drawAvgLocsHistogram() {
 google.charts.setOnLoadCallback(drawAvgLocsHistogram);
 
 function drawOpennessHistogram(progSpeed, dataIn) {
-{{
-  if progSpeedStats == None or len(progSpeedStats) == 0:
-      response.write("  return;", escape=False)
-      pass
-  else:
-}}
     // Define the chart to be drawn.
     var data = google.visualization.arrayToDataTable(dataIn);
 
@@ -205,18 +198,9 @@ function drawOpennessHistogram(progSpeed, dataIn) {
     // Instantiate and draw the chart.
     var chart = new google.visualization.AreaChart(document.getElementById("opennessHistogram_"+progSpeed));
     chart.draw(data, options);
-{{
-      pass
-}}
 }
 
 function drawOpennessHistogram2(progSpeed, dataIn) {
-{{
-  if progSpeedStats == None or len(progSpeedStats) == 0:
-      response.write("  return;", escape=False)
-      pass
-  else:
-}}
     // Define the chart to be drawn.
     var data = google.visualization.arrayToDataTable(dataIn);
 
@@ -231,74 +215,118 @@ function drawOpennessHistogram2(progSpeed, dataIn) {
     // Instantiate and draw the chart.
     var chart = new google.visualization.LineChart(document.getElementById("opennessHistogram_"+progSpeed));
     chart.draw(data, options);
-{{
-      pass
-}}
 }
 
 {{
   if progSpeedStats != None:
+    if "slowest" in progSpeedStats:
 }}
+
 function drawOpennessHistogram_slowest() {
     drawOpennessHistogram("slowest", {{response.write(progSpeedStats["slowest"]["open"], escape=False)}});
 }
 google.charts.setOnLoadCallback(drawOpennessHistogram_slowest);
+{{
+      pass
+    if "slow" in progSpeedStats:
+}}
 
 function drawOpennessHistogram_slow() {
     drawOpennessHistogram("slow", {{response.write(progSpeedStats["slow"]["open"], escape=False)}});
 }
 google.charts.setOnLoadCallback(drawOpennessHistogram_slow);
+{{
+      pass
+    if "medium" in progSpeedStats:
+}}
 
 function drawOpennessHistogram_medium() {
     drawOpennessHistogram("medium", {{response.write(progSpeedStats["medium"]["open"], escape=False)}});
 }
 google.charts.setOnLoadCallback(drawOpennessHistogram_medium);
+{{
+      pass
+    if "fast" in progSpeedStats:
+}}
 
 function drawOpennessHistogram_fast() {
     drawOpennessHistogram("fast", {{response.write(progSpeedStats["fast"]["open"], escape=False)}});
 }
 google.charts.setOnLoadCallback(drawOpennessHistogram_fast);
+{{
+      pass
+    if "fastest" in progSpeedStats:
+}}
 
 function drawOpennessHistogram_fastest() {
     drawOpennessHistogram("fastest", {{response.write(progSpeedStats["fastest"]["open"], escape=False)}});
 }
 google.charts.setOnLoadCallback(drawOpennessHistogram_fastest);
+{{
+      pass
+    if "basic" in progSpeedStats:
+}}
 
 function drawOpennessHistogram_basic() {
     drawOpennessHistogram("basic", {{response.write(progSpeedStats["basic"]["open"], escape=False)}});
 }
 google.charts.setOnLoadCallback(drawOpennessHistogram_basic);
+{{
+      pass
+    if "variable" in progSpeedStats:
+}}
 
 function drawOpennessHistogram_variable() {
     drawOpennessHistogram("variable", {{response.write(progSpeedStats["variable"]["open"], escape=False)}});
 }
 google.charts.setOnLoadCallback(drawOpennessHistogram_variable);
+{{
+      pass
+    if "total" in progSpeedStats:
+}}
 
 function drawOpennessHistogram_total() {
     drawOpennessHistogram("total", {{response.write(progSpeedStats["total"]["open"], escape=False)}});
 }
 google.charts.setOnLoadCallback(drawOpennessHistogram_total);
+{{
+      pass
+    if "open14" in progSpeedStats and len(progSpeedStats["open14"]) > 0:
+}}
 
 function drawOpennessHistogram_14() {
     drawOpennessHistogram2("14", {{response.write(progSpeedStats["open14"], escape=False)}});
 }
 google.charts.setOnLoadCallback(drawOpennessHistogram_14);
+{{
+      pass
+    if "open24" in progSpeedStats and len(progSpeedStats["open24"]) > 0:
+}}
 
 function drawOpennessHistogram_24() {
     drawOpennessHistogram2("24", {{response.write(progSpeedStats["open24"], escape=False)}});
 }
 google.charts.setOnLoadCallback(drawOpennessHistogram_24);
+{{
+      pass
+    if "open34" in progSpeedStats and len(progSpeedStats["open34"]) > 0:
+}}
 
 function drawOpennessHistogram_34() {
     drawOpennessHistogram2("34", {{response.write(progSpeedStats["open34"], escape=False)}});
 }
 google.charts.setOnLoadCallback(drawOpennessHistogram_34);
+{{
+      pass
+    if "open44" in progSpeedStats and len(progSpeedStats["open44"]) > 0:
+}}
 
 function drawOpennessHistogram_44() {
     drawOpennessHistogram2("44", {{response.write(progSpeedStats["open44"], escape=False)}});
 }
 google.charts.setOnLoadCallback(drawOpennessHistogram_44);
 {{
+      pass
     pass
 }}
 </script>
@@ -352,21 +380,71 @@ if progSpeedStats != None:
     <div id="avgLocsHistogram" style="height: 400px; margin: 0 auto"></div>
 
     <p>When solving the seed we count when we can reach 1/4, 1/2, 3/4 and all the locations, this gives the distribution of progression items. The sooner we reach this milestones the freer the seed is.</p>
+{{
+  if "slowest" in progSpeedStats:
+}}
     <div id="opennessHistogram_slowest" style="height: 400px; margin: 0 auto"></div>
+{{
+    pass
+  if "slow" in progSpeedStats:
+}}
     <div id="opennessHistogram_slow" style="height: 400px; margin: 0 auto"></div>
+{{
+    pass
+  if "medium" in progSpeedStats:
+}}
     <div id="opennessHistogram_medium" style="height: 400px; margin: 0 auto"></div>
+{{
+    pass
+  if "fast" in progSpeedStats:
+}}
     <div id="opennessHistogram_fast" style="height: 400px; margin: 0 auto"></div>
+{{
+    pass
+  if "fastest" in progSpeedStats:
+}}
     <div id="opennessHistogram_fastest" style="height: 400px; margin: 0 auto"></div>
+{{
+    pass
+  if "basic" in progSpeedStats:
+}}
     <div id="opennessHistogram_basic" style="height: 400px; margin: 0 auto"></div>
+{{
+    pass
+  if "variable" in progSpeedStats:
+}}
     <div id="opennessHistogram_variable" style="height: 400px; margin: 0 auto"></div>
+{{
+    pass
+  if "total" in progSpeedStats:
+}}
     <div id="opennessHistogram_total" style="height: 400px; margin: 0 auto"></div>
+{{
+    pass
+}}
 
     <p>The same values but with all the progression speeds on the same graph.</p>
+{{
+  if "open14" in progSpeedStats and len(progSpeedStats["open14"]) > 0:
+}}
     <div id="opennessHistogram_14" style="height: 400px; margin: 0 auto"></div>
+{{
+    pass
+  if "open24" in progSpeedStats and len(progSpeedStats["open24"]) > 0:
+}}
     <div id="opennessHistogram_24" style="height: 400px; margin: 0 auto"></div>
+{{
+    pass
+  if "open34" in progSpeedStats and len(progSpeedStats["open34"]) > 0:
+}}
     <div id="opennessHistogram_34" style="height: 400px; margin: 0 auto"></div>
+{{
+    pass
+  if "open44" in progSpeedStats and len(progSpeedStats["open44"]) > 0:
+}}
     <div id="opennessHistogram_44" style="height: 400px; margin: 0 auto"></div>
 {{
+    pass
   pass
 }}
   </div>

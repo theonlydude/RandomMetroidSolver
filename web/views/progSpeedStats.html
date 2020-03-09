@@ -133,7 +133,12 @@ function startTheTour(step=-1) {
     {
       element: "#randoPresetStep",
       title: "Settings Preset",
-      content: "Choose from the list of Randomizer presets and tournament ones."
+      content: "Only Season Races preset is available."
+    },
+    {
+      element: "#majorsSplitStep",
+      title: "Majors Split",
+      content: "Choose between Majors and Full."
     } ]});
 
   // Initialize the tour
@@ -183,8 +188,13 @@ function drawOpennessHistogram(progSpeed, dataIn) {
     // Define the chart to be drawn.
     var data = google.visualization.arrayToDataTable(dataIn);
 
+    var displayName = progSpeed;
+    if(displayName == "total") {
+        displayName = "total_rando"
+    }
+
     var options = {
-      title: "Progression items distribution - "+progSpeed,
+      title: "Progression items distribution - "+displayName,
       vAxis: {
           title: 'Percentage',
           viewWindow: { min: 0, max: 50 }
@@ -324,15 +334,18 @@ google.charts.setOnLoadCallback(drawOpennessHistogram_44);
 	  <td>Settings Preset:</td>
 	  <td>{{=SELECT(*randoPresets, **dict(_name="randoPreset", _id="randoPreset", value=session.progSpeedStats["randoPreset"], _class="filldropdown chzn-select"))}}</td>
 	  <td><button id="randoPresetStep" type="button" onclick="startTheTour(0)">?</button></td>
+
+	  <td>Majors Split:</td>
+	  <td>{{=SELECT(*majorsSplit, **dict(_name="majorsSplit", _id="majorsSplit", value=session.progSpeedStats["majorsSplit"], _class="filldropdown chzn-select"))}}</td>
+	  <td><button id="majorsSplitStep" type="button" onclick="startTheTour(1)">?</button></td>
+
 	  <td>{{=INPUT(_type="submit", _value="Load", _name="action", _class="btn btn-default")}}</td>
         </tr>
       </table>
     </form>
 
 {{
-if progSpeedStats == None:
-  response.write("No statistics found.", escape=False)
-else:
+if progSpeedStats != None:
 }}
 
     <p>When solving the seed we count at each step how many locations are available for next choice, then we keep the average value. The higher average of available locations the more open the seed is.<br/>Click on a progression speed in the legend to highlight it.</p>

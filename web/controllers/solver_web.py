@@ -2433,12 +2433,14 @@ def initProgSpeedStatsSession():
     if session.progSpeedStats == None:
         session.progSpeedStats = {}
         session.progSpeedStats['randoPreset'] = 'Season_Races'
+        session.progSpeedStats['majorsSplit'] = 'Major'
 
 def updateProgSpeedStatsSession():
     if session.progSpeedStats is None:
         session.progSpeedStats = {}
 
     session.progSpeedStats['randoPreset'] = request.vars.randoPreset
+    session.progSpeedStats['majorsSplit'] = request.vars.majorsSplit
 
 def validateProgSpeedStatsParams():
     for (preset, directory) in [("randoPreset", "rando_presets")]:
@@ -2456,6 +2458,9 @@ def validateProgSpeedStatsParams():
         fullPath = '{}/{}.json'.format(directory, preset)
         if not os.path.isfile(fullPath):
             return (False, "Unknown preset: {}".format(preset))
+
+    if request.vars['majorsSplit'] not in ['Full', 'Major']:
+            return (False, "Wrong value for majorsSplit, authorized values Full/Major")
 
     return (True, None)
 
@@ -2509,6 +2514,8 @@ def progSpeedStats():
         if randoPreset['funSuits'] == "random":
             parameters["superFunSuit"] = "random"
 
+        parameters['majorsSplit'] = request.vars.majorsSplit
+
         DB = db.DB()
         progSpeedStatsRaw = {}
         progSpeedStats = {}
@@ -2538,20 +2545,21 @@ def progSpeedStats():
 
         # avg locs
         progSpeedStats['avgLocs'] = zipStats([progSpeedStats[progSpeed]["avgLocs"] for progSpeed in progSpeeds])
-        progSpeedStats["avgLocs"].insert(0, ['Available locations', 'slowest', 'slow', 'medium', 'fast', 'fastest', 'basic', 'variable', 'total'])
+        progSpeedStats["avgLocs"].insert(0, ['Available locations', 'slowest', 'slow', 'medium', 'fast', 'fastest', 'basic', 'variable', 'total_rando'])
 
         # prog items
         progSpeedStats["open14"] = zipStats([progSpeedStats["open14"][progSpeed] for progSpeed in progSpeeds])
-        progSpeedStats["open14"].insert(0, ['Collected items']+progSpeeds)
+        progSpeedStats["open14"].insert(0, ['Collected items']+progSpeeds[:-1]+['total_rando'])
         progSpeedStats["open24"] = zipStats([progSpeedStats["open24"][progSpeed] for progSpeed in progSpeeds])
-        progSpeedStats["open24"].insert(0, ['Collected items']+progSpeeds)
+        progSpeedStats["open24"].insert(0, ['Collected items']+progSpeeds[:-1]+['total_rando'])
         progSpeedStats["open34"] = zipStats([progSpeedStats["open34"][progSpeed] for progSpeed in progSpeeds])
-        progSpeedStats["open34"].insert(0, ['Collected items']+progSpeeds)
+        progSpeedStats["open34"].insert(0, ['Collected items']+progSpeeds[:-1]+['total_rando'])
         progSpeedStats["open44"] = zipStats([progSpeedStats["open44"][progSpeed] for progSpeed in progSpeeds])
-        progSpeedStats["open44"].insert(0, ['Collected items']+progSpeeds)
+        progSpeedStats["open44"].insert(0, ['Collected items']+progSpeeds[:-1]+['total_rando'])
     else:
         progSpeedStats = None
 
     randoPresets = ['Season_Races']
+    majorsSplit = ['Major', 'Full']
 
-    return dict(randoPresets=randoPresets, progSpeedStats=progSpeedStats)
+    return dict(randoPresets=randoPresets, majorsSplit=majorsSplit, progSpeedStats=progSpeedStats)

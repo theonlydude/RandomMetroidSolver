@@ -1,7 +1,7 @@
 #!/bin/bash
 
-if [ $# -ne 2 -a $# -ne 3 ]; then
-    echo "params: ROM LOOPS"
+if [ $# -ne 2 -a $# -ne 3 -a $# -ne 4 ]; then
+    echo "params: ROM LOOPS [FULL]"
     exit -1
 fi
 
@@ -17,6 +17,7 @@ mkdir -p ${LOG_DIR} ${SQL_DIR}
 
 ROM=$1
 LOOPS=$2
+FULL=$3
 
 function computeSeed {
     RANDO_PRESET="$1"
@@ -76,6 +77,9 @@ for PROG_SPEED in slowest slow medium fast fastest basic variable; do
     # generate rando preset
     RANDO_PRESET=${CWD}/rando_presets/Season_Races_${PROG_SPEED}.json
     sed -e "s+VARIAble+${PROG_SPEED}+" ${BASE_RANDO_PRESET} > ${RANDO_PRESET}
+    if [ -n "${FULL}" ]; then
+        sed -e 's+Major+Full+' ${BASE_RANDO_PRESET} > ${RANDO_PRESET}
+    fi
 
     info "Begin rando preset ${RANDO_PRESET} - skill preset ${SKILL_PRESET}"
 

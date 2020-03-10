@@ -815,10 +815,11 @@ class Randomizer(object):
         if self.restrictions['MajorMinor'] != 'Full':
             locs = [loc for loc in locs if self.restrictions['MajorMinor'] in loc['Class']]
         self.lateMorphLimit = len(locs)
-        self.lateMorphOutCrateria = len(set([loc['GraphArea'] for loc in locs])) > 1
+        self.lateMorphOutStartArea = len(set([loc['GraphArea'] for loc in locs])) > 1
+        self.startArea = getAccessPoint(self.settings.startAP).GraphArea
         self.computeLateMorphLimitCheck()
         self.lateMorphResult = None
-        self.log.debug("lateMorphLimit: {}: {} {}".format(self.restrictions['MajorMinor'], self.lateMorphLimit, self.lateMorphOutCrateria))
+        self.log.debug("lateMorphLimit: {}: {} {}".format(self.restrictions['MajorMinor'], self.lateMorphLimit, self.lateMorphOutStartArea))
         self.log.debug('lateMorphLimit: locs=' + str([loc['Name'] for loc in locs]))
         # cleanup
         self.smbm.resetItems()
@@ -1191,10 +1192,11 @@ class Randomizer(object):
         return location['GraphArea'] != 'Crateria'
 
     def morphPlacementImpl(self, item, location):
-        # if morph can be out of crateria, restrict it from being put in crateria
-        if self.lateMorphOutCrateria == True:
-            if location['GraphArea'] == 'Crateria':
+        # if morph can be out of start area, restrict it from being put in start area
+        if self.lateMorphOutStartArea == True:
+            if location['GraphArea'] == self.startArea:
                 return False
+
         if self.lateMorphResult is not None:
             return self.lateMorphResult
 

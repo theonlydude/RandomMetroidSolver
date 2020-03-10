@@ -333,8 +333,6 @@ if __name__ == "__main__":
         args.strictMinors = bool(random.randint(0, 2))
 
     if not GraphUtils.isStandardStart(args.startAP):
-        if args.morphPlacement == 'late':
-            optErrMsg += forceArg('morphPlacement', 'normal', "'Morph Placement' forced to normal")
         optErrMsg += forceArg('majorsSplit', 'Full', "'Majors Split' forced to Full")
         optErrMsg += forceArg('noVariaTweaks', False, "'VARIA tweaks' forced to on")
         optErrMsg += forceArg('noLayout', False, "'Anti-softlock layout patches' forced to on")

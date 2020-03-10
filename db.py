@@ -375,32 +375,37 @@ set @last_id = last_insert_id();
             sqlFile.write(sql % (item,))
 
     @staticmethod
-    def dumpExtStatsSolver(difficulty, techniques, sqlFile):
+    def dumpExtStatsSolver(difficulty, techniques, solverStats, step, sqlFile):
         # use @last_id defined by the randomizer
 
-        # get difficulty column
-        if difficulty < medium:
-            column = "easy"
-        elif difficulty < hard:
-            column = "medium"
-        elif difficulty < harder:
-            column = "hard"
-        elif difficulty < hardcore:
-            column = "harder"
-        elif difficulty < mania:
-            column = "hardcore"
+        if step == 1:
+            # get difficulty column
+            if difficulty < medium:
+                column = "easy"
+            elif difficulty < hard:
+                column = "medium"
+            elif difficulty < harder:
+                column = "hard"
+            elif difficulty < hardcore:
+                column = "harder"
+            elif difficulty < mania:
+                column = "hardcore"
+            else:
+                column = "mania"
+
+            sql = "insert into difficulties (ext_id, {}) values (@last_id, 1) on duplicate key update {} = {} + 1;\n".format(column, column, column)
+            sqlFile.write(sql)
+
+            for technique in techniques:
+                sql = "insert into techniques (ext_id, technique, count) values (@last_id, '%s', 1) on duplicate key update count = count + 1;\n"
+                sqlFile.write(sql % (technique,))
         else:
-            column = "mania"
+            for (stat, value) in solverStats.items():
+                sql = "insert into solver_stats (ext_id, name, value) values (@last_id, '%s', %d);\n"
+                sqlFile.write(sql % (stat, value))
 
-        sql = "insert into difficulties (ext_id, {}) values (@last_id, 1) on duplicate key update {} = {} + 1;\n".format(column, column, column)
-        sqlFile.write(sql)
-
-        for technique in techniques:
-            sql = "insert into techniques (ext_id, technique, count) values (@last_id, '%s', 1) on duplicate key update count = count + 1;\n"
-            sqlFile.write(sql % (technique,))
-
-        # to avoid // issues
-        sqlFile.write("commit;\n")
+            # to avoid // issues
+            sqlFile.write("commit;\n")
 
     def getExtStat(self, parameters):
         sqlItems = """select sum(e.count), i.item, round(100*sum(i.EnergyTankGauntlet)/sum(e.count), 1), round(100*sum(i.Bomb)/sum(e.count), 1), round(100*sum(i.EnergyTankTerminator)/sum(e.count), 1), round(100*sum(i.ReserveTankBrinstar)/sum(e.count), 1), round(100*sum(i.ChargeBeam)/sum(e.count), 1), round(100*sum(i.MorphingBall)/sum(e.count), 1), round(100*sum(i.EnergyTankBrinstarCeiling)/sum(e.count), 1), round(100*sum(i.EnergyTankEtecoons)/sum(e.count), 1), round(100*sum(i.EnergyTankWaterway)/sum(e.count), 1), round(100*sum(i.EnergyTankBrinstarGate)/sum(e.count), 1), round(100*sum(i.XRayScope)/sum(e.count), 1), round(100*sum(i.Spazer)/sum(e.count), 1), round(100*sum(i.EnergyTankKraid)/sum(e.count), 1), round(100*sum(i.Kraid)/sum(e.count), 1), round(100*sum(i.VariaSuit)/sum(e.count), 1), round(100*sum(i.IceBeam)/sum(e.count), 1), round(100*sum(i.EnergyTankCrocomire)/sum(e.count), 1), round(100*sum(i.HiJumpBoots)/sum(e.count), 1), round(100*sum(i.GrappleBeam)/sum(e.count), 1), round(100*sum(i.ReserveTankNorfair)/sum(e.count), 1), round(100*sum(i.SpeedBooster)/sum(e.count), 1), round(100*sum(i.WaveBeam)/sum(e.count), 1), round(100*sum(i.Ridley)/sum(e.count), 1), round(100*sum(i.EnergyTankRidley)/sum(e.count), 1), round(100*sum(i.ScrewAttack)/sum(e.count), 1), round(100*sum(i.EnergyTankFirefleas)/sum(e.count), 1), round(100*sum(i.ReserveTankWreckedShip)/sum(e.count), 1), round(100*sum(i.EnergyTankWreckedShip)/sum(e.count), 1), round(100*sum(i.Phantoon)/sum(e.count), 1), round(100*sum(i.RightSuperWreckedShip)/sum(e.count), 1), round(100*sum(i.GravitySuit)/sum(e.count), 1), round(100*sum(i.EnergyTankMamaturtle)/sum(e.count), 1), round(100*sum(i.PlasmaBeam)/sum(e.count), 1), round(100*sum(i.ReserveTankMaridia)/sum(e.count), 1), round(100*sum(i.SpringBall)/sum(e.count), 1), round(100*sum(i.EnergyTankBotwoon)/sum(e.count), 1), round(100*sum(i.Draygon)/sum(e.count), 1), round(100*sum(i.SpaceJump)/sum(e.count), 1), round(100*sum(i.MotherBrain)/sum(e.count), 1), round(100*sum(i.PowerBombCrateriasurface)/sum(e.count), 1), round(100*sum(i.MissileoutsideWreckedShipbottom)/sum(e.count), 1), round(100*sum(i.MissileoutsideWreckedShiptop)/sum(e.count), 1), round(100*sum(i.MissileoutsideWreckedShipmiddle)/sum(e.count), 1), round(100*sum(i.MissileCrateriamoat)/sum(e.count), 1), round(100*sum(i.MissileCrateriabottom)/sum(e.count), 1), round(100*sum(i.MissileCrateriagauntletright)/sum(e.count), 1), round(100*sum(i.MissileCrateriagauntletleft)/sum(e.count), 1), round(100*sum(i.SuperMissileCrateria)/sum(e.count), 1), round(100*sum(i.MissileCrateriamiddle)/sum(e.count), 1), round(100*sum(i.PowerBombgreenBrinstarbottom)/sum(e.count), 1), round(100*sum(i.SuperMissilepinkBrinstar)/sum(e.count), 1), round(100*sum(i.MissilegreenBrinstarbelowsupermissile)/sum(e.count), 1), round(100*sum(i.SuperMissilegreenBrinstartop)/sum(e.count), 1), round(100*sum(i.MissilegreenBrinstarbehindmissile)/sum(e.count), 1), round(100*sum(i.MissilegreenBrinstarbehindreservetank)/sum(e.count), 1), round(100*sum(i.MissilepinkBrinstartop)/sum(e.count), 1), round(100*sum(i.MissilepinkBrinstarbottom)/sum(e.count), 1), round(100*sum(i.PowerBombpinkBrinstar)/sum(e.count), 1), round(100*sum(i.MissilegreenBrinstarpipe)/sum(e.count), 1), round(100*sum(i.PowerBombblueBrinstar)/sum(e.count), 1), round(100*sum(i.MissileblueBrinstarmiddle)/sum(e.count), 1), round(100*sum(i.SuperMissilegreenBrinstarbottom)/sum(e.count), 1), round(100*sum(i.MissileblueBrinstarbottom)/sum(e.count), 1), round(100*sum(i.MissileblueBrinstartop)/sum(e.count), 1), round(100*sum(i.MissileblueBrinstarbehindmissile)/sum(e.count), 1), round(100*sum(i.PowerBombredBrinstarsidehopperroom)/sum(e.count), 1), round(100*sum(i.PowerBombredBrinstarspikeroom)/sum(e.count), 1), round(100*sum(i.MissileredBrinstarspikeroom)/sum(e.count), 1), round(100*sum(i.MissileKraid)/sum(e.count), 1), round(100*sum(i.Missilelavaroom)/sum(e.count), 1), round(100*sum(i.MissilebelowIceBeam)/sum(e.count), 1), round(100*sum(i.MissileaboveCrocomire)/sum(e.count), 1), round(100*sum(i.MissileHiJumpBoots)/sum(e.count), 1), round(100*sum(i.EnergyTankHiJumpBoots)/sum(e.count), 1), round(100*sum(i.PowerBombCrocomire)/sum(e.count), 1), round(100*sum(i.MissilebelowCrocomire)/sum(e.count), 1), round(100*sum(i.MissileGrappleBeam)/sum(e.count), 1), round(100*sum(i.MissileNorfairReserveTank)/sum(e.count), 1), round(100*sum(i.MissilebubbleNorfairgreendoor)/sum(e.count), 1), round(100*sum(i.MissilebubbleNorfair)/sum(e.count), 1), round(100*sum(i.MissileSpeedBooster)/sum(e.count), 1), round(100*sum(i.MissileWaveBeam)/sum(e.count), 1), round(100*sum(i.MissileGoldTorizo)/sum(e.count), 1), round(100*sum(i.SuperMissileGoldTorizo)/sum(e.count), 1), round(100*sum(i.MissileMickeyMouseroom)/sum(e.count), 1), round(100*sum(i.MissilelowerNorfairabovefireflearoom)/sum(e.count), 1), round(100*sum(i.PowerBomblowerNorfairabovefireflearoom)/sum(e.count), 1), round(100*sum(i.PowerBombPowerBombsofshame)/sum(e.count), 1), round(100*sum(i.MissilelowerNorfairnearWaveBeam)/sum(e.count), 1), round(100*sum(i.MissileWreckedShipmiddle)/sum(e.count), 1), round(100*sum(i.MissileGravitySuit)/sum(e.count), 1), round(100*sum(i.MissileWreckedShiptop)/sum(e.count), 1), round(100*sum(i.SuperMissileWreckedShipleft)/sum(e.count), 1), round(100*sum(i.MissilegreenMaridiashinespark)/sum(e.count), 1), round(100*sum(i.SuperMissilegreenMaridia)/sum(e.count), 1), round(100*sum(i.MissilegreenMaridiatatori)/sum(e.count), 1), round(100*sum(i.SuperMissileyellowMaridia)/sum(e.count), 1), round(100*sum(i.MissileyellowMaridiasupermissile)/sum(e.count), 1), round(100*sum(i.MissileyellowMaridiafalsewall)/sum(e.count), 1), round(100*sum(i.MissileleftMaridiasandpitroom)/sum(e.count), 1), round(100*sum(i.MissilerightMaridiasandpitroom)/sum(e.count), 1), round(100*sum(i.PowerBombrightMaridiasandpitroom)/sum(e.count), 1), round(100*sum(i.MissilepinkMaridia)/sum(e.count), 1), round(100*sum(i.SuperMissilepinkMaridia)/sum(e.count), 1), round(100*sum(i.MissileDraygon)/sum(e.count), 1)
@@ -424,6 +429,69 @@ from extended_stats e
 where 1 = 1
 {};"""
 
+        sqlSolverStats = """
+select s.name, s.value, round(count(*) * 100 / e.count, 1)
+from extended_stats e
+  join solver_stats s on e.id = s.ext_id
+where 1 = 1
+{}
+group by s.name, s.value
+order by 1,2;"""
+
+        (where, sqlParams) = self.getWhereClause(parameters)
+
+        items = self.execSelect(sqlItems.format(where), tuple(sqlParams))
+
+        techniques = self.execSelect(sqlTechniques.format(where), tuple(sqlParams))
+        # transform techniques into a dict
+        techOut = {}
+        if techniques != None:
+            for technique in techniques:
+                techOut[technique[0]] = technique[1]
+
+        difficulties = self.execSelect(sqlDifficulties.format(where), tuple(sqlParams))
+        if difficulties != None:
+            difficulties = difficulties[0]
+
+            # check if all values are null
+            if difficulties.count(None) == len(difficulties):
+                difficulties = []
+
+        solverStats = self.execSelect(sqlSolverStats.format(where), tuple(sqlParams))
+        solverStatsOut = {}
+        if solverStats != None:
+            for stat in solverStats:
+                (name, value, count) = stat
+                if name not in solverStatsOut:
+                    solverStatsOut[name] = []
+                solverStatsOut[name].append((value, count))
+
+        return (items, techOut, difficulties, solverStatsOut)
+
+    def getProgSpeedStat(self, parameters):
+        sqlSolverStats = """
+select s.name, s.value, round(count(*) * 100 / e.count, 1)
+from extended_stats e
+  join solver_stats s on e.id = s.ext_id
+where 1 = 1
+{}
+group by s.name, s.value
+order by 1,2;"""
+
+        (where, sqlParams) = self.getWhereClause(parameters)
+
+        solverStats = self.execSelect(sqlSolverStats.format(where), tuple(sqlParams))
+        solverStatsOut = {}
+        if solverStats != None:
+            for stat in solverStats:
+                (name, value, count) = stat
+                if name not in solverStatsOut:
+                    solverStatsOut[name] = []
+                solverStatsOut[name].append((value, count))
+
+        return solverStatsOut
+
+    def getWhereClause(self, parameters):
         where = """and e.version = %d and e.preset = '%s' and e.area = %s and e.boss = %s and e.gravityBehaviour = '%s' and e.nerfedCharge = %s """
 
         sqlParams = [randoAlgoVersion, parameters['preset'], parameters['area'], parameters['boss'], parameters['gravityBehaviour'], parameters['nerfedCharge']]
@@ -472,21 +540,4 @@ where 1 = 1
             where += """and e.superFunSuit = %s """
             sqlParams.append(parameters['superFunSuit'])
 
-        items = self.execSelect(sqlItems.format(where), tuple(sqlParams))
-
-        techniques = self.execSelect(sqlTechniques.format(where), tuple(sqlParams))
-        # transform techniques into a dict
-        techOut = {}
-        if techniques != None:
-            for technique in techniques:
-                techOut[technique[0]] = technique[1]
-
-        difficulties = self.execSelect(sqlDifficulties.format(where), tuple(sqlParams))
-        if difficulties != None:
-            difficulties = difficulties[0]
-
-            # check if all values are null
-            if difficulties.count(None) == len(difficulties):
-                difficulties = []
-
-        return (items, techOut, difficulties)
+        return (where, sqlParams)

@@ -182,7 +182,59 @@ function drawDifficultiesHistogram() {
 }}
 }
 
+function drawAvgLocsHistogram() {
+{{
+  if solverStats == None or "avgLocs" not in solverStats:
+    response.write("  return;", escape=False)
+    pass
+  else:
+}}
+    // Define the chart to be drawn.
+    var data = google.visualization.arrayToDataTable({{response.write(solverStats["avgLocs"], escape=False)}});
+
+    var options = {
+      title: "Average number of available locations distribution",
+      vAxis: {title: 'Percentage'},
+      hAxis: {title: 'Average number of available locations'},
+      seriesType: 'bars',
+      legend: { position: "none" }
+    };
+
+    // Instantiate and draw the chart.
+    var chart = new google.visualization.ColumnChart(document.getElementById("avgLocsHistogram"));
+    chart.draw(data, options);
+{{
+    pass
+}}
+}
+
+function drawOpennessHistogram() {
+{{
+  if solverStats == None or "open" not in solverStats:
+    response.write("  return;", escape=False)
+    pass
+  else:
+}}
+    // Define the chart to be drawn.
+    var data = google.visualization.arrayToDataTable({{response.write(solverStats["open"], escape=False)}});
+
+    var options = {
+      title: "Progression items distribution",
+      vAxis: {title: 'Percentage'},
+      hAxis: {title: 'Collected items count'}
+    };
+
+    // Instantiate and draw the chart.
+    var chart = new google.visualization.AreaChart(document.getElementById("opennessHistogram"));
+    chart.draw(data, options);
+{{
+    pass
+}}
+}
+
 google.charts.setOnLoadCallback(drawDifficultiesHistogram);
+google.charts.setOnLoadCallback(drawAvgLocsHistogram);
+google.charts.setOnLoadCallback(drawOpennessHistogram);
 
 function loadRandoPreset() {
   console.log("loadRandoPreset: "+document.getElementById("randoPreset").value);
@@ -509,8 +561,20 @@ elif itemsStats != None and len(itemsStats) > 0:
       pass
 }}
     </div>
-    <div id = "difficultiesHistogram" style = "height: 400px; margin: 0 auto"></div>
+    <div id="difficultiesHistogram" style="height: 400px; margin: 0 auto"></div>
 {{
+  if "avgLocs" in solverStats:
+}}
+    <p>When solving the seed we count at each step how many locations are available for next choice, then we keep the average value. The higher average of available locations the more open the seed is.</p>
+    <div id="avgLocsHistogram" style="height: 400px; margin: 0 auto"></div>
+{{
+    pass
+  if "open" in solverStats:
+}}
+    <p>When solving the seed we count when we can reach 1/4, 1/2, 3/4 and all the locations, this gives the distribution of progression items. The sooner we reach this milestones the freer the seed is.</p>
+    <div id="opennessHistogram" style="height: 400px; margin: 0 auto"></div>
+{{
+    pass
   pass
 }}
   </div>

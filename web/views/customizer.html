@@ -207,10 +207,12 @@ function AjaxCallCompleted(data) {
         var bytes = new Uint8Array(e.target.result);
 
         // with custom sprites we have to create a bigger array
+        var is4MB = false;
         if("ips" in data && "max_size" in data && data["max_size"] > 0x300000) {
           var tmp = new Uint8Array(0x400000);
           tmp.set(bytes);
           bytes = tmp;
+          is4MB = true;
         }
 
         if("ips" in data) {
@@ -256,6 +258,28 @@ function AjaxCallCompleted(data) {
             bytes[key] = data[key];
         }
 
+        // fix checksum
+        var sum1 = 0;
+        for(var i=0; i<0x200000; i++) { sum1 += bytes[i]; }
+        var sum2 = 0;
+        var max = 0x300000;
+        if(is4MB == true){ max = 0x400000; }
+        for(var i=0x200000; i<max; i++) { sum2 += bytes[i]; }
+        if(is4MB == true){
+            var sum = (sum1 + sum2) & 0xFFFF;
+        } else {
+            var sum = (sum1 + (sum2 * 2)) & 0xFFFF;
+        }
+        var sumlo = sum & 0x00FF;
+        var sumhi = (sum & 0xFF00) >> 8;
+        var invSum = sum ^ 0xFFFF;
+        var invSumlo = invSum & 0x00FF;
+        var invSumhi = (invSum & 0xFF00) >> 8;
+        bytes[0x7FDC] = invSumlo;
+        bytes[0x7FDD] = invSumhi;
+        bytes[0x7FDE] = sumlo;
+        bytes[0x7FDF] = sumhi;
+
         var blob = new Blob([bytes], {type: "octet/stream"});
 
         saveAs(blob, "Custom_"+e.target.fileName);
@@ -300,10 +324,15 @@ function doSubmit() {
     }
 
     var dataDict = {};
-    var elems = ["itemsounds", "spinjumprestart", "rando_speed", "elevators_doors_speed", "animals", "No_Music", "random_music", "colorsRandomization", "suitsPalettes", "beamsPalettes", "tilesPalettes", "enemiesPalettes", "bossesPalettes", "globalShift", "customSpriteEnable", "customSprite"];
+    var elems = ["itemsounds", "spinjumprestart", "rando_speed", "elevators_doors_speed", "No_Music", "random_music", "colorsRandomization", "suitsPalettes", "beamsPalettes", "tilesPalettes", "enemiesPalettes", "bossesPalettes", "globalShift", "customSpriteEnable", "customSprite"];
 
     for(var i=0; i<elems.length; i++) {
-       dataDict[elems[i]] = document.getElementById(elems[i]).value;
+        var elem = document.getElementById(elems[i]);
+        if(elem.disabled == true) {
+            dataDict[elems[i]] = "off";
+        } else {
+            dataDict[elems[i]] = elem.value;
+        }
     }
 
     dataDict["minDegree"] = $("#degree_slider_range").slider("values", 0);
@@ -332,6 +361,27 @@ function doSubmit() {
   return false;
 }
 
+function disableElement(id, disable) {
+  var elem = document.getElementById(id);
+  elem.disabled = disable;
+  // grey out the disabled text
+  var text = document.getElementById(id+"Text");
+  if(elem.disabled) {
+      text.className = "disabledText";
+  } else {
+      text.className = "";
+  }
+  // tell switchery
+  if(id in globalSwitchs) {
+    var sw = globalSwitchs[id];
+    if(disable) {
+      sw.disable();
+    } else {
+      sw.enable();
+    }
+  }
+}
+
 window.onload = function(){
     //Check File API support
     if(window.File && window.FileList && window.FileReader) {
@@ -357,6 +407,22 @@ window.onload = function(){
                     document.getElementById("uploadFile").value = "";
                     alert("wrong rom file size: "+fileSize.toString());
                     return false;
+                }
+
+                // detect race mode patch
+                var bytes = new Uint8Array(e.target.result);
+                var isRace = false;
+                for(var addr=0x1C0200; addr<0x1C0210; addr++) {
+                    if(bytes[addr] != 0xff) {
+                        isRace = true;
+                        break;
+                    }
+                }
+
+                // grey out patches
+                var buttons = ["itemsounds", "elevators_doors_speed", "spinjumprestart", "rando_speed"];
+                for(var i=0; i<buttons.length; i++) {
+                    disableElement(buttons[i], isRace);
                 }
             }
 
@@ -602,6 +668,42 @@ response.write('</table>', escape=False)
       element: "#patchesStep",
       title: "Patches",
       content: "Choose the patches that you want to include in your customized seed."
+    },
+    {
+      element: "#itemsoundsStep",
+      title: "Fanfare",
+      content: "<p>Replaces the quite long fanfare played when picking up an item by a short sound effect related with the item picked, and does not restart game music on item pickup.</p>\
+<p>Patch developed by Scyzer.</p>"
+    },
+    {
+      element: "#ElevatorDoorsStep",
+      title: "Transitions",
+      content: "<p>Accelerate doors and elevators transitions</p>\
+<p>Doors patch developed by Rakki and elevators patch by Lioran.</p>"
+    },
+    {
+      element: "#spinjumprestartStep",
+      title: "Spin jump restart",
+      content: "<p>Allows Samus to start spinning in mid air after jumping or falling</p>\
+<p>Patch developed by Kejardon.</p>"
+    },
+    {
+      element: "#rando_speedStep",
+      title: "Momentum conservation",
+      content: "<p>Let Samus keeps her momentum when landing from a fall or from jumping</p>\
+<p>This patch was developed by Oi27.</p>"
+    },
+    {
+      element: "#No_MusicStep",
+      title: "No music",
+      content: "<p>Disable the background music to let you hear you favorite tunes instead.</p>\
+<p>Patch developed by Kejardon.</p>"
+    },
+    {
+      element: "#random_musicStep",
+      title: "Random Music",
+      content: "<p>Randomize the background music.</p>\
+<p>Patch developed by dude & flo.</p>"
     }
   ]});
 
@@ -735,50 +837,64 @@ def displayCheckbox(id, defaultTrue=False):
 	    <p>
 	      Patches to customize your ROM.
 	    </p>
-	    <table class="full">
-	      <tr>
-		<td class="full">
-		  {{displayCheckbox("itemsounds")}}
-		  Remove fanfare when picking up an item (by Scyzer)
-		</td>
-	      </tr>
-	      <tr>
-		<td class="full">
-		  {{displayCheckbox("spinjumprestart")}}
-		  Allows Samus to start spinning in mid air after jumping or falling (by Kejardon)
-		</td>
-	      </tr>
-	      <tr>
-		<td class="full">
-		  {{displayCheckbox("rando_speed")}}
-		  Let Samus keeps her momentum when landing from a fall or from jumping (by Oi27)
-		</td>
-	      </tr>
-	      <tr>
-		<td class="full">
-		  {{displayCheckbox("elevators_doors_speed")}}
-		  Accelerate doors and elevators transitions (by Rakki & Lioran)
-		</td>
-	      </tr>
-	      <tr>
-		<td class="full">
-		  {{displayCheckbox("animals")}}
-		  Save the animals surprise (by Foosda)
-		</td>
-	      </tr>
-	      <tr>
-		<td class="full">
-		  {{displayCheckbox("No_Music")}}
-		  Disable background music (by Kejardon)
-		</td>
-	      </tr>
-	      <tr>
-		<td class="full">
-		  {{displayCheckbox("random_music")}}
-		  Randomize background music (by dude & flo)
-		</td>
-	      </tr>
-	    </table>
+
+	      <table class="full">
+		<colgroup><col class="quarter" /><col class="threequarter" /><col class="check" /></colgroup>
+		<tr><td colspan="2"><h5 class="center"><b>Game comfort</b></h5></td><td></td></tr>
+	      </table>
+	      <table class="full">
+		<colgroup><col class="half" /><col class="half" /></colgroup>
+		<tr id="itemsoundsStep">
+		  <td colspan="2">
+		    {{displayCheckbox("itemsounds")}}
+		    <span id="itemsoundsText">Remove fanfare when picking up an item</span>
+		  </td>
+                  <td><button type="button" onclick="startTheTour(4)">?</button></td>
+		</tr>
+		<tr id="ElevatorDoorsStep">
+		  <td colspan="2">
+		    {{displayCheckbox("elevators_doors_speed")}}
+		    <span id="elevators_doors_speedText">Accelerate doors and elevators transitions</span>
+		  </td>
+                  <td><button type="button" onclick="startTheTour(5)">?</button></td>
+		</tr>
+		<tr id="spinjumprestartStep">
+		  <td colspan="2">
+		    {{displayCheckbox("spinjumprestart")}}
+		    <span id="spinjumprestartText">Spin jump restart (a.k.a. Respin)</span>
+		  </td>
+                  <td><button type="button" onclick="startTheTour(6)">?</button></td>
+		</tr>
+		<tr id="rando_speedStep">
+		  <td colspan="2">
+		    {{displayCheckbox("rando_speed")}}
+		     <span id="rando_speedText">Momentum conservation (a.k.a. Speedkeep)</span>
+		  </td>
+                  <td><button type="button" onclick="startTheTour(7)">?</button></td>
+		</tr>
+	      </table>
+	      <table class="full">
+		<colgroup><col class="quarter" /><col class="threequarter" /><col class="check" /></colgroup>
+		<tr><td colspan="2"><h5 class="center"><b>Miscellaneous</b></h5></td><td></td></tr>
+	      </table>
+	      <table class="full">
+		<colgroup><col class="half" /><col class="half" /></colgroup>
+		<tr id="No_MusicStep">
+		  <td colspan="2">
+		    {{displayCheckbox("No_Music")}}
+		    <span id="No_MusicText">Disable background music</span>
+		  </td>
+                  <td><button type="button" onclick="startTheTour(8)">?</button></td>
+		</tr>
+		<tr id="random_musicStep">
+		  <td colspan="2">
+		    {{displayCheckbox("random_music")}}
+		    <span id="random_musicText">Randomize background music</span>
+		  </td>
+                  <td><button type="button" onclick="startTheTour(9)">?</button></td>
+		</tr>
+	      </table>
+
 	  </div>
         </div>
         {{=INPUT(_type="submit", _value="customize", _id="submitBtn", _class="btn btn-default buttonRandom")}}

@@ -520,6 +520,22 @@ function AjaxRandomizerCallCompleted(data) {
             bytes[key] = data[key];
         }
 
+        // fix checksum
+        var sum1 = 0;
+        for(var i=0; i<0x200000; i++) { sum1 += bytes[i]; }
+        var sum2 = 0;
+        for(var i=0x200000; i<0x300000; i++) { sum2 += bytes[i]; }
+        var sum = (sum1 + (sum2 * 2)) & 0xFFFF;
+        var sumlo = sum & 0x00FF;
+        var sumhi = (sum & 0xFF00) >> 8;
+        var invSum = sum ^ 0xFFFF;
+        var invSumlo = invSum & 0x00FF;
+        var invSumhi = (invSum & 0xFF00) >> 8;
+        bytes[0x7FDC] = invSumlo;
+        bytes[0x7FDD] = invSumhi;
+        bytes[0x7FDE] = sumlo;
+        bytes[0x7FDF] = sumhi;
+
         var blob = new Blob([bytes], {type: "octet/stream"});
 
         var outFileName = data['fileName'];

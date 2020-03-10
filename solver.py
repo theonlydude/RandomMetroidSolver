@@ -342,6 +342,9 @@ class CommonSolver(object):
 
         self.areaGraph = AccessGraph(accessPoints, self.curGraphTransitions)
 
+        # store at each step how many locations are available
+        self.nbAvailLocs = []
+
         if self.log.getEffectiveLevel() == logging.DEBUG:
             self.log.debug("Display items at locations:")
             for location in self.locations:
@@ -430,6 +433,8 @@ class CommonSolver(object):
     def cancelLastItems(self, count):
         if self.vcr != None:
             self.vcr.addRollback(count)
+
+        self.nbAvailLocs = self.nbAvailLocs[:-count]
 
         for _ in range(count):
             if len(self.visitedLocations) == 0:
@@ -734,6 +739,8 @@ class CommonSolver(object):
                 locs = majorsAvailable
             else:
                 locs = majorsAvailable+minorsAvailable
+
+            self.nbAvailLocs.append(len(locs))
 
             # check if we're stuck
             if len(majorsAvailable) == 0 and len(minorsAvailable) == 0:
@@ -1337,8 +1344,8 @@ class StandardSolver(CommonSolver):
     # given a rom and parameters returns the estimated difficulty
 
     def __init__(self, rom, presetFileName, difficultyTarget, pickupStrategy, itemsForbidden=[], type='console',
-                 firstItemsLog=None, extStatsFilename=None, displayGeneratedPath=False, outputFileName=None,
-                 magic=None, checkDuplicateMajor=False, vcr=False):
+                 firstItemsLog=None, extStatsFilename=None, extStatsStep=None, displayGeneratedPath=False,
+                 outputFileName=None, magic=None, checkDuplicateMajor=False, vcr=False, plot=None):
         self.checkDuplicateMajor = checkDuplicateMajor
         self.vcr = VCR(rom, 'solver') if vcr == True else None
         # for compatibility with some common methods of the interactive solver
@@ -1354,6 +1361,8 @@ class StandardSolver(CommonSolver):
             self.firstLogFile.write('Item;Location;Area\n')
 
         self.extStatsFilename = extStatsFilename
+        self.extStatsStep = extStatsStep
+        self.plot = plot
 
         # can be called from command line (console) or from web site (web)
         self.type = type
@@ -1392,11 +1401,57 @@ class StandardSolver(CommonSolver):
         if self.vcr != None:
             self.vcr.dump()
 
+        self.computeExtStats()
+
         if self.extStatsFilename != None:
             with open(self.extStatsFilename, 'a') as extStatsFile:
-                db.DB.dumpExtStatsSolver(self.difficulty, knowsUsedList, extStatsFile)
+                db.DB.dumpExtStatsSolver(self.difficulty, knowsUsedList, self.solverStats, self.extStatsStep, extStatsFile)
+
+        if self.plot != None:
+            with open(self.plot, 'w') as outDataFile:
+                for (i, number) in enumerate(self.nbAvailLocs):
+                    outDataFile.write("{} {}\n".format(i, number))
 
         self.output.out()
+
+    def computeExtStats(self):
+        # avgLocs: avg number of available locs, the higher the value the more open is a seed
+        # open[1-4]4: how many location you have to visit to open 1/4, 1/2, 3/4, all locations.
+        #             gives intel about prog item repartition.
+        self.solverStats = {}
+        self.solverStats['avgLocs'] = int(sum(self.nbAvailLocs)/len(self.nbAvailLocs))
+
+        derivative = []
+        for i in range(len(self.nbAvailLocs)-1):
+            d = self.nbAvailLocs[i+1] - self.nbAvailLocs[i]
+            derivative.append(d)
+
+        sumD = sum([d for d in derivative if d != -1])
+        (sum14, sum24, sum34, sum44) = (sumD/4, sumD/2, sumD*3/4, sumD)
+        (open14, open24, open34, open44) = (-1, -1, -1, -1)
+
+        sumD = 0
+        for (i, d) in enumerate(derivative, 1):
+            if d == -1:
+                continue
+            sumD += d
+            if sumD >= sum14 and open14 == -1:
+                open14 = i
+                continue
+            if sumD >= sum24 and open24 == -1:
+                open24 = i
+                continue
+            if sumD >= sum34 and open34 == -1:
+                open34 = i
+                continue
+            if sumD >= sum44 and open44 == -1:
+                open44 = i
+                break
+
+        self.solverStats['open14'] = open14
+        self.solverStats['open24'] = open24
+        self.solverStats['open34'] = open34
+        self.solverStats['open44'] = open44
 
     def getRemainMajors(self):
         return [loc for loc in self.majorLocations if loc['difficulty'].bool == False and loc['itemName'] not in ['Nothing', 'NoEnergy']]
@@ -1953,9 +2008,10 @@ def standardSolver(args):
     solver = StandardSolver(args.romFileName, args.presetFileName, difficultyTarget,
                             pickupStrategy, args.itemsForbidden, type=args.type,
                             firstItemsLog=args.firstItemsLog, extStatsFilename=args.extStatsFilename,
+                            extStatsStep=args.extStatsStep,
                             displayGeneratedPath=args.displayGeneratedPath,
                             outputFileName=args.output, magic=args.raceMagic,
-                            checkDuplicateMajor=args.checkDuplicateMajor, vcr=args.vcr)
+                            checkDuplicateMajor=args.checkDuplicateMajor, vcr=args.vcr, plot=args.plot)
 
     solver.solveRom()
 
@@ -1984,6 +2040,8 @@ if __name__ == "__main__":
                         nargs='?', default=None, type=str, dest='firstItemsLog')
     parser.add_argument('--ext_stats', help="Generate extended stats",
                         nargs='?', default=None, dest='extStatsFilename')
+    parser.add_argument('--ext_stats_step', help="what extended stats to generate",
+                        nargs='?', default=None, dest='extStatsStep', type=int)
     parser.add_argument('--displayGeneratedPath', '-g', help="display the generated path (spoilers!)",
                         dest='displayGeneratedPath', action='store_true')
     parser.add_argument('--race', help="Race mode magic number", dest='raceMagic', type=int)
@@ -2027,6 +2085,7 @@ if __name__ == "__main__":
                         dest="minorQty", nargs="?", default=None, choices=[str(i) for i in range(0,101)])
     parser.add_argument('--energyQty', help="rando plando  (used in interactive mode)",
                         dest="energyQty", nargs="?", default=None, choices=["sparse", "medium", "vanilla"])
+    parser.add_argument('--plot', help="dump plot data in file specified", dest="plot", nargs="?", default=None)
 
     args = parser.parse_args()
 

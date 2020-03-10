@@ -31,7 +31,9 @@ class AreaRandomizer(Randomizer):
 
     # adapt restrictions implementation to different area layout
     def computeLateMorphLimitCheck(self):
-        if self.lateMorphOutCrateria == False and self.restrictions['MajorMinor'] == 'Full' and self.restrictions['Suits'] == False:
+        # TODO::allow lateMorphOutStartArea check for custom starts which doesn't require morph early
+        if (self.lateMorphOutStartArea == False and self.stdStart == True
+            and self.restrictions['MajorMinor'] == 'Full' and self.restrictions['Suits'] == False):
             # we can do better
             raise RuntimeError('Invalid layout for late morph')
 

@@ -824,6 +824,7 @@ class GraphUtils:
         while len(targetAPs) > 0:
             transitions.append((sourceAPs.pop().Name, targetAPs.pop().Name))
         transitions += GraphUtils.createAreaTransitions(sourceAPs, lambda ap: not ap.isInternal())
+        locs += [loc for loc in locations if 'Boss' in loc['Class']] # add bosses back
 
         return (transitions, locs)
 

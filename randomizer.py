@@ -248,19 +248,6 @@ if __name__ == "__main__":
         seed4rand = seed ^ args.raceMagic
     random.seed(seed4rand)
     optErrMsg = ""
-    # choose on animal patch
-    if args.animals == True:
-        animalsPatches = ['animal_enemies.ips', 'animals.ips', 'draygonimals.ips', 'escapimals.ips',
-                          'gameend.ips', 'grey_door_animals.ips', 'low_timer.ips', 'metalimals.ips',
-                          'phantoonimals.ips', 'ridleyimals.ips']
-        if args.area == True and args.noEscapeRando == False:
-            # these glitch with enemies on
-            animalsPatches.remove('phantoonimals.ips') # excessive lag and ridley sound effects
-            animalsPatches.remove('ridleyimals.ips') # escape timer tiles tail
-            if args.noRemoveEscapeEnemies == False:
-                animalsPatches.remove('draygonimals.ips') # glitched room
-                animalsPatches.remove('metalimals.ips') # no pirates
-        args.patches.append(random.choice(animalsPatches))
     # if no max diff, set it very high
     if args.maxDifficulty:
         if args.maxDifficulty == 'random':
@@ -526,7 +513,19 @@ if __name__ == "__main__":
                 and itemLoc['Location']['Visibility'] == 'Visible'):
                 if bool(random.randint(0, 2)) == True:
                     itemLoc['Location']['Visibility'] = 'Hidden'
-
+    # choose on animal patch
+    if args.animals == True:
+        animalsPatches = ['animal_enemies.ips', 'animals.ips', 'draygonimals.ips', 'escapimals.ips',
+                          'gameend.ips', 'grey_door_animals.ips', 'low_timer.ips', 'metalimals.ips',
+                          'phantoonimals.ips', 'ridleyimals.ips']
+        if args.area == True and args.noEscapeRando == False:
+            # these glitch with enemies on
+            animalsPatches.remove('phantoonimals.ips') # excessive lag and ridley sound effects
+            animalsPatches.remove('ridleyimals.ips') # escape timer tiles tail
+            if args.noRemoveEscapeEnemies == False:
+                animalsPatches.remove('draygonimals.ips') # glitched room
+                animalsPatches.remove('metalimals.ips') # no pirates
+        args.patches.append(random.choice(animalsPatches))
     # transform itemLocs in our usual dict(location, item), for minors keep only the first
     locsItems = {}
     firstMinorsFound = {'Missile': False, 'Super': False, 'PowerBomb': False}

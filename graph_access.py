@@ -6,7 +6,6 @@ from parameters import Knows, Settings
 from rom_patches import RomPatches
 from smbool import SMBool
 from helpers import Bosses
-from smboolmanager import SMBoolManager
 
 # all access points and traverse functions
 accessPoints = [
@@ -733,12 +732,14 @@ class GraphUtils:
                 transitions.append((src,dst))
         return transitions
 
-    def createAreaTransitions(apList=None):
+    def createAreaTransitions(apList=None, apPred=None):
         if apList is None:
             apList = accessPoints
+        if apPred is None:
+            apPred = lambda ap: ap.isArea()
         tFrom = []
         tTo = []
-        apNames = [ap.Name for ap in apList if ap.isArea()]
+        apNames = [ap.Name for ap in apList if apPred(ap) == True]
         transitions = []
 
         def findTo(trFrom):
@@ -767,48 +768,69 @@ class GraphUtils:
                 apNames.remove(apName)
         return transitions
 
-    def getAPs(apPredicate=None, apList=None):
+    def getAPs(apPredicate, apList=None):
         if apList is None:
             apList = accessPoints
-        return [ap for ap in apList if apPredicate is None or apPredicate(ap) == True]
+        return [ap for ap in apList if apPredicate(ap) == True]
 
-    def getLocs(graphArea):
-        return [loc for loc in locations if loc['Grapharea'] == graphArea and 'Boss' not in loc['Class']]
+    def getLocs(locsPredicate, locList=None):
+        if locList is None:
+            locList = locations
+        return [loc for loc in locList if locsPredicate(loc) == True and 'Boss' not in loc['Class']]
 
-    def createMinimizerTransitionsAndLocs(startApName, escapeRando, graph):
-        # general algorithm:
-        # 1) ensure at least 4 locations can be obtained from start AP with nothing: handle this later with pre rando, not here
-        # 2) randomly add areas until :
-        #    - there are 35 locations in the game (chozo+10 seems fair)
-        #    - there are 5 available transitions for bosses+tourian
-        #    - ship is reachable for escape: if escape is not randomized, that's not an issue.
-        #                                    if it is, ensure we have at least 2 of the escape map station doors available
-        #                                    one for the actual escape, and the other for reaching the vanilla escape door
-        #                                    in case crateria is not reachable. requires adding transitions to escape doors.
-        #                                    (does this requires removing hardcoded grey doors in escape patch?
-        #                                     or maybe just remove the "always closed" bit, since we open all doors)
-        #    (when locs constraint is fulfilled and not transitions/escape, favor areas that fulfill the criteria)
-        # 3) connect bosses/tourian to 5 available transitions
-        # 4) connect remaining transitions between themselves, loop if necessary. use area rando algo (to generalize a bit)
-        # 5) add escape transition(s) if escape rando
-        transitions = []
-        locs = []
+    def createMinimizerTransitionsAndLocs(startApName, escapeRando):
         if startApName == 'Ceres':
             startApName = 'Landing Site'
         startAp = getAccessPoint(startApName)
+        availAreas = list(set([ap.GraphArea for ap in accessPoints if ap.GraphArea != startAp.GraphArea and len(GraphUtils.getLocs(lambda loc: loc['GraphArea'] == ap.GraphArea)) > 0]))
         areas = [startAp.GraphArea]
         def isShipReachable():
             if escapeRando == False:
                 return True
-            return len(getAPs(lambda ap: ap.GraphArea in areas and ap.Name in escapeTargets)) >= 2
+            return len(GraphUtils.getAPs(lambda ap: ap.GraphArea in areas and ap.Name in escapeTargets)) >= 2
         def openTransitions():
-            pass # TODO
-        while len(locs) < 35 and len(openTransitions()) < 5 and isShipReachable():
-            pass # TODO
+            nTransitions = len(GraphUtils.getAPs(lambda ap: ap.GraphArea in areas and not ap.isInternal()))
+            nClosedTransitions = len(areas) - 1
+            return nTransitions - nClosedTransitions
+        locs = []
+        locLimit = 35
+        trLimit = 5
+        while len(locs) < locLimit or openTransitions() < trLimit or not isShipReachable():
+            fromAreas = availAreas
+            if len(locs) >= locLimit and not isShipReachable():
+                # add an area with a map station
+                escapeAPs = GraphUtils.getAPs(lambda ap: ap.GraphArea in areas and ap.Name in escapeTargets)
+                fromAreas = [area for area in availAreas if len(GraphUtils.getAPs(lambda ap: ap.Name in escapeTargets and ap not in escapeAPs)) > 0]
+            if len(locs) >= locLimit and isShipReachable():
+                # we just need transitions, avoid adding a huge area
+                fromAreas = []
+                n = trLimit - openTransitions()
+                while len(fromAreas) == 0:
+                    fromAreas = [area for area in availAreas if len(GraphUtils.getAPs(lambda ap: not ap.isInternal())) - 1 >= n]
+                    n -= 1
+                minLocs = min([len(GraphUtils.getLocs(lambda loc: loc['GraphArea'] == area)) for area in fromAreas])
+                fromAreas = [area for area in fromAreas if len(GraphUtils.getLocs(lambda loc: loc['GraphArea'] == area)) == minLocs]
+            nextArea = random.choice(fromAreas)
+            availAreas.remove(nextArea)
+            areas.append(nextArea)
+            locs = [loc for loc in locations if loc['GraphArea'] in areas]
+        # we picked the areas, add transitions (bosses and tourian first)
+        transitions = []
+        inBossCheck = lambda ap: ap.Boss and ap.Name.endswith("In")
+        sourceAPs = GraphUtils.getAPs(lambda ap: ap.GraphArea in areas and not ap.isInternal() and not inBossCheck(ap))
+        random.shuffle(sourceAPs)
+        targetAPs = GraphUtils.getAPs(lambda ap: inBossCheck(ap) or ap.Name == "Golden Four")
+        random.shuffle(targetAPs)
+        while len(targetAPs) > 0:
+            transitions.append((sourceAPs.pop().Name, targetAPs.pop().Name))
+        transitions += GraphUtils.createAreaTransitions(sourceAPs, lambda ap: not ap.isInternal())
+
         return (transitions, locs)
-        
-    def createEscapeTransition():
-        return (escapeSource, random.choice(escapeTargets))
+
+    def createEscapeTransition(targets=None):
+        if targets is None:
+            targets = escapeTargets
+        return (escapeSource, random.choice(targets))
 
     def getVanillaExit(apName):
         allVanillaTransitions = vanillaTransitions + vanillaBossesTransitions + vanillaEscapeTransitions

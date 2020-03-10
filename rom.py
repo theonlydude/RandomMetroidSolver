@@ -1303,6 +1303,9 @@ class RomPatcher:
 
             asmAddress += len(asmPatch)
             # update room state header with song changes
+            # TODO just do an IPS patch for this as it is completely static
+            #      this would get rid of both 'song' and 'songs' fields
+            #      as well as this code
             if 'song' in conn:
                 for addr in conn["songs"]:
                     self.romFile.seek(0x70000 + addr)

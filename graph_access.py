@@ -1,10 +1,12 @@
 import copy
 import random
-from graph import AccessPoint
+from graph import AccessPoint, AccessGraph
+from graph_locations import locations
 from parameters import Knows, Settings
 from rom_patches import RomPatches
 from smbool import SMBool
 from helpers import Bosses
+from smboolmanager import SMBoolManager
 
 # all access points and traverse functions
 accessPoints = [
@@ -665,8 +667,10 @@ vanillaEscapeTransitions = [
 escapeSource = 'Tourian Escape Room 4 Top Right'
 escapeTargets = ['Climb Bottom Left', 'Green Brinstar Main Shaft Top Left', 'Basement Left', 'Business Center Mid Left', 'Crab Hole Bottom Right']
 
-def getAccessPoint(apName):
-    return next(ap for ap in accessPoints if ap.Name == apName)
+def getAccessPoint(apName, apList=None):
+    if apList is None:
+        apList = accessPoints
+    return next(ap for ap in apList if ap.Name == apName)
 
 class GraphUtils:
     def getStartAccessPointNames():
@@ -729,19 +733,23 @@ class GraphUtils:
                 transitions.append((src,dst))
         return transitions
 
-    def createAreaTransitions(bidir=True):
+    def createAreaTransitions(apList=None):
+        if apList is None:
+            apList = accessPoints
         tFrom = []
         tTo = []
-        apNames = [ap.Name for ap in accessPoints if ap.isArea()]
+        apNames = [ap.Name for ap in apList if ap.isArea()]
         transitions = []
 
         def findTo(trFrom):
-            ap = getAccessPoint(trFrom)
+            ap = getAccessPoint(trFrom, apList)
             fromArea = ap.GraphArea
-            targets = [apName for apName in apNames if apName not in tTo and getAccessPoint(apName).GraphArea != fromArea]
+            targets = [apName for apName in apNames if apName not in tTo and getAccessPoint(apName, apList).GraphArea != fromArea]
             if len(targets) == 0: # fallback if no area transition is found
                 targets = [apName for apName in apNames if apName != ap.Name]
-            return targets[random.randint(0, len(targets)-1)]
+                if len(targets) == 0: # extreme fallback: loop on itself
+                    targets = [ap.Name]
+            return random.choice(targets)
 
         def addTransition(src, dst):
             tFrom.append(src)
@@ -749,17 +757,56 @@ class GraphUtils:
 
         while len(apNames) > 0:
             sources = [apName for apName in apNames if apName not in tFrom]
-            src = sources[random.randint(0, len(sources)-1)]
+            src = random.choice(sources)
             dst = findTo(src)
             transitions.append((src, dst))
             addTransition(src, dst)
-            if bidir is True:
-                addTransition(dst, src)
+            addTransition(dst, src)
             toRemove = [apName for apName in apNames if apName in tFrom and apName in tTo]
             for apName in toRemove:
                 apNames.remove(apName)
         return transitions
 
+    def getAPs(apPredicate=None, apList=None):
+        if apList is None:
+            apList = accessPoints
+        return [ap for ap in apList if apPredicate is None or apPredicate(ap) == True]
+
+    def getLocs(graphArea):
+        return [loc for loc in locations if loc['Grapharea'] == graphArea and 'Boss' not in loc['Class']]
+
+    def createMinimizerTransitionsAndLocs(startApName, escapeRando, graph):
+        # general algorithm:
+        # 1) ensure at least 4 locations can be obtained from start AP with nothing: handle this later with pre rando, not here
+        # 2) randomly add areas until :
+        #    - there are 35 locations in the game (chozo+10 seems fair)
+        #    - there are 5 available transitions for bosses+tourian
+        #    - ship is reachable for escape: if escape is not randomized, that's not an issue.
+        #                                    if it is, ensure we have at least 2 of the escape map station doors available
+        #                                    one for the actual escape, and the other for reaching the vanilla escape door
+        #                                    in case crateria is not reachable. requires adding transitions to escape doors.
+        #                                    (does this requires removing hardcoded grey doors in escape patch?
+        #                                     or maybe just remove the "always closed" bit, since we open all doors)
+        #    (when locs constraint is fulfilled and not transitions/escape, favor areas that fulfill the criteria)
+        # 3) connect bosses/tourian to 5 available transitions
+        # 4) connect remaining transitions between themselves, loop if necessary. use area rando algo (to generalize a bit)
+        # 5) add escape transition(s) if escape rando
+        transitions = []
+        locs = []
+        if startApName == 'Ceres':
+            startApName = 'Landing Site'
+        startAp = getAccessPoint(startApName)
+        areas = [startAp.GraphArea]
+        def isShipReachable():
+            if escapeRando == False:
+                return True
+            return len(getAPs(lambda ap: ap.GraphArea in areas and ap.Name in escapeTargets)) >= 2
+        def openTransitions():
+            pass # TODO
+        while len(locs) < 35 and len(openTransitions()) < 5 and isShipReachable():
+            pass # TODO
+        return (transitions, locs)
+        
     def createEscapeTransition():
         return (escapeSource, random.choice(escapeTargets))
 

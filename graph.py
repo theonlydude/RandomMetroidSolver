@@ -42,13 +42,16 @@ class AccessPoint(object):
 
     # connect to inter-area access point
     def connect(self, destName):
-        if self.ConnectedTo is not None:
-            del self.transitions[self.ConnectedTo]
+        self.disconnect()
         if self.Internal is False:
             self.transitions[destName] = lambda sm: self.traverse(sm)
             self.ConnectedTo = destName
         else:
             raise RuntimeError("Cannot add an internal access point as inter-are transition")
+
+    def disconnect(self):
+        if self.ConnectedTo is not None:
+            del self.transitions[self.ConnectedTo]
 
     # tells if this node is to connect areas together
     def isArea(self):
@@ -59,18 +62,17 @@ class AccessPoint(object):
         return self.Internal or self.Escape
 
 class AccessGraph(object):
-    def __init__(self, accessPointList, transitions, bidir=True, dotFile=None):
+    def __init__(self, accessPointList, transitions, dotFile=None):
         self.log = log.get('Graph')
 
         self.accessPoints = {}
         self.InterAreaTransitions = []
         self.EscapeTimer = None
-        self.bidir = bidir
         for ap in accessPointList:
             ap.distance = 0
             self.accessPoints[ap.Name] = ap
         for srcName, dstName in transitions:
-            self.addTransition(srcName, dstName, bidir)
+            self.addTransition(srcName, dstName)
         if dotFile is not None:
             self.toDot(dotFile)
 
@@ -92,7 +94,7 @@ class AccessGraph(object):
             drawn = []
             i = 0
             for src, dst in self.InterAreaTransitions:
-                if self.bidir is True and src.Name in drawn:
+                if src.Name in drawn:
                     continue
                 f.write('%s:%s -> %s:%s [taillabel="%s",headlabel="%s",color=%s];\n' % (src.GraphArea, src.DotOrientation, dst.GraphArea, dst.DotOrientation, src.Name, dst.Name, colors[i]))
                 drawn += [src.Name,dst.Name]

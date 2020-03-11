@@ -792,6 +792,7 @@ class GraphUtils:
             nTransitions = len(GraphUtils.getAPs(lambda ap: ap.GraphArea in areas and not ap.isInternal()))
             nClosedTransitions = (len(areas) - 1) * 2
             return nTransitions - nClosedTransitions
+        inBossCheck = lambda ap: ap.Boss and ap.Name.endswith("In")
         locs = []
         transitions = []
         usedAPs = []
@@ -813,17 +814,17 @@ class GraphUtils:
                 minLocs = min([len(GraphUtils.getLocs(lambda loc: loc['GraphArea'] == area)) for area in fromAreas])
                 fromAreas = [area for area in fromAreas if len(GraphUtils.getLocs(lambda loc: loc['GraphArea'] == area)) == minLocs]
             nextArea = random.choice(fromAreas)
-            possibleSources = GraphUtils.getAPs(lambda ap: ap.GraphArea == areas[-1] and not ap.isInternal())
-            possibleTargets = GraphUtils.getAPs(lambda ap: ap.GraphArea == nextArea and not ap.isInternal())
+            apCheck = lambda ap: not ap.isInternal() and not inBossCheck(ap) and ap not in usedAPs
+            possibleSources = GraphUtils.getAPs(lambda ap: ap.GraphArea == areas[-1] and apCheck(ap))
+            possibleTargets = GraphUtils.getAPs(lambda ap: ap.GraphArea == nextArea and apCheck(ap))
             src = random.choice(possibleSources)
             dst = random.choice(possibleTargets)
             usedAPs += [src,dst]
             transitions.append((src.Name,dst.Name))
             availAreas.remove(nextArea)
             areas.append(nextArea)
-            locs = [loc for loc in locations if loc['GraphArea'] in areas]
+            locs = GraphUtils.getLocs(lambda loc:loc['GraphArea'] in areas)
         # we picked the areas, add transitions (bosses and tourian first)
-        inBossCheck = lambda ap: ap.Boss and ap.Name.endswith("In")
         sourceAPs = GraphUtils.getAPs(lambda ap: ap.GraphArea in areas and not ap.isInternal() and not inBossCheck(ap) and not ap in usedAPs)
         random.shuffle(sourceAPs)
         targetAPs = GraphUtils.getAPs(lambda ap: inBossCheck(ap) or ap.Name == "Golden Four")
@@ -832,7 +833,7 @@ class GraphUtils:
             transitions.append((sourceAPs.pop().Name, targetAPs.pop().Name))
         transitions += GraphUtils.createAreaTransitions(sourceAPs, lambda ap: not ap.isInternal())
         locs += [loc for loc in locations if 'Boss' in loc['Class']] # add bosses back
-        print(areas)
+
         return (transitions, locs)
 
     def createEscapeTransition(targets=None):

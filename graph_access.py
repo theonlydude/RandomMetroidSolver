@@ -806,7 +806,7 @@ class GraphUtils:
                 fromAreas = []
                 n = trLimit - openTransitions()
                 while len(fromAreas) == 0:
-                    fromAreas = [area for area in availAreas if len(GraphUtils.getAPs(lambda ap: not ap.isInternal())) - 1 >= n]
+                    fromAreas = [area for area in availAreas if len(GraphUtils.getAPs(lambda ap: not ap.isInternal())) > n]
                     n -= 1
                 minLocs = min([len(GraphUtils.getLocs(lambda loc: loc['GraphArea'] == area)) for area in fromAreas])
                 fromAreas = [area for area in fromAreas if len(GraphUtils.getLocs(lambda loc: loc['GraphArea'] == area)) == minLocs]

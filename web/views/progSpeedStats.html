@@ -194,31 +194,11 @@ function drawAvgLocsHistogram() {
             if (sel[0].row === null) {
                 var col = sel[0].column;
                 if (columns['avgLocs'][col-1] == true) {
-                    // grey out all other lines or make them all colored
-                    for(var i=0; i<columns['avgLocs'].length; i++) {
-                        if(i == col-1) {
-                            continue;
-                        }
-
-                        if(columns['avgLocs'][i] == true) {
-                            columns['avgLocs'][i] = false;
-                            series['avgLocs'][i].color = '#CCCCCC';
-                        } else {
-                            columns['avgLocs'][i] = true;
-                            series['avgLocs'][i].color = null;
-                        }
-                    }
+                    columns['avgLocs'][col-1] = false;
+                    series['avgLocs'][col-1].color = '#CCCCCC';
                 } else {
-                    // grey out all other lines
-                    for(var i=0; i<columns['avgLocs'].length; i++) {
-                        if(i == col-1) {
-                            columns['avgLocs'][i] = true;
-                            series['avgLocs'][i].color = null;
-                        } else {
-                            columns['avgLocs'][i] = false;
-                            series['avgLocs'][i].color = '#CCCCCC';
-                        }
-                    }
+                    columns['avgLocs'][col-1] = true;
+                    series['avgLocs'][col-1].color = null;
                 }
                 var view = new google.visualization.DataView(data);
                 chart.draw(view, options);
@@ -295,31 +275,11 @@ function drawOpennessHistogram2(progSpeed, dataIn) {
             if (sel[0].row === null) {
                 var col = sel[0].column;
                 if (columns[progSpeed][col-1] == true) {
-                    // grey out all other lines or make them all colored
-                    for(var i=0; i<columns[progSpeed].length; i++) {
-                        if(i == col-1) {
-                            continue;
-                        }
-
-                        if(columns[progSpeed][i] == true) {
-                            columns[progSpeed][i] = false;
-                            series[progSpeed][i].color = '#CCCCCC';
-                        } else {
-                            columns[progSpeed][i] = true;
-                            series[progSpeed][i].color = null;
-                        }
-                    }
+                    columns[progSpeed][col-1] = false;
+                    series[progSpeed][col-1].color = '#CCCCCC';
                 } else {
-                    // grey out all other lines
-                    for(var i=0; i<columns[progSpeed].length; i++) {
-                        if(i == col-1) {
-                            columns[progSpeed][i] = true;
-                            series[progSpeed][i].color = null;
-                        } else {
-                            columns[progSpeed][i] = false;
-                            series[progSpeed][i].color = '#CCCCCC';
-                        }
-                    }
+                    columns[progSpeed][col-1] = true;
+                    series[progSpeed][col-1].color = null;
                 }
                 var view = new google.visualization.DataView(data);
                 chart.draw(view, options);
@@ -487,7 +447,7 @@ google.charts.setOnLoadCallback(drawOpennessHistogram_44);
 if progSpeedStats != None:
 }}
 
-    <p>When solving the seed we count at each step how many locations are available for next choice, then we keep the average value. The higher average of available locations the more open the seed is.<br/>Click on a progression speed in the legend to highlight it.</p>
+    <p>When solving the seed we count at each step how many locations are available for next choice, then we keep the average value. The higher average of available locations the more open the seed is.<br/>Click on a progression speed in the legend to grey it.</p>
     <div id="avgLocsHistogram" style="height: 400px; margin: 0 auto"></div>
 
     <p>When solving the seed we count when we can reach 1/4, 1/2, 3/4 and all the locations, this gives the distribution of progression items. The sooner we reach this milestones the freer the seed is.</p>

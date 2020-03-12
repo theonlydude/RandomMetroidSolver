@@ -2566,8 +2566,6 @@ def progSpeedStats():
     else:
         progSpeedStats = None
 
-    print(progSpeedStats)
-
     randoPresets = ['Season_Races']
     majorsSplit = ['Major', 'Full']
 

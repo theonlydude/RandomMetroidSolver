@@ -87,7 +87,7 @@ dude@computer:~/RandomMetroidSolver (master)$ python3.7 ./solver.py -h
 You can call a VARIA website to generate your seed (a local one, beta or production) using the webservice client, it can be used for example on a Raspberry Pi with limited CPU power.
 
 ```
-dude@computer:~/RandomMetroidSolver (master)$ python3.7 ./randomizer_webservice.py --rom ~/metroid/SuperMetroid.sfc --skillPreset standard_presets/Season_Races.json --randoPreset rando_presets/where_am_i.json --seed 1356988 --remoteUrl local
+dude@computer:~/RandomMetroidSolver (master)$ python3.7 ./randomizer_webservice.py --rom ~/metroid/SuperMetroid.sfc --skillPreset standard_presets/Season_Races.json --randoPreset rando_presets/where_am_i.json --seed 1356988 --remoteUrl beta
 
 VARIA_Randomizer_AFX1356988_Season_Races_VARIAble.sfc generated succesfully
 ```

@@ -92,7 +92,7 @@ dude@computer:~/RandomMetroidSolver (master)$ python3.7 ./randomizer_webservice.
 VARIA_Randomizer_AFX1356988_Season_Races_VARIAble.sfc generated succesfully
 ```
 
-To list all theRandomizer webservice client parameters and their description:
+To list all the Randomizer webservice client parameters and their description:
 ```
 dude@computer:~/RandomMetroidSolver (master)$ python3.7 randomizer_webservice.py 
   --skillPreset [SKILLPRESET]
@@ -103,4 +103,97 @@ dude@computer:~/RandomMetroidSolver (master)$ python3.7 randomizer_webservice.py
   --seed [SEED]         seed number (optional)
   --remoteUrl [{local,beta,production}]
                         remote url to connect to
+```
+
+# CLI Palettizer
+
+To apply colors randomization to an existing seed you can use the palettizer.
+
+```
+dude@computer:~/RandomMetroidSolver (master)$ python3.7 ./palettizer.py -r VARIA_Randomizer_FX1097821_Season_Races_medium.sfc
+```
+
+The parameters:
+```
+  --individual_suit_shift
+  --individual_tileset_shift
+  --no_match_ship_and_power
+  --seperate_enemy_palette_groups
+  --no_match_room_shift_with_boss
+  --no_shift_tileset_palette
+  --no_shift_boss_palettes
+  --no_shift_suit_palettes
+  --no_shift_enemy_palettes
+  --no_shift_beam_palettes
+  --no_shift_ship_palette
+  --seed [SEED], -s [SEED]
+                        randomization seed to use
+  --min_degree [MIN_DEGREE]
+                        min hue shift
+  --max_degree [MAX_DEGREE]
+                        max hue shift
+  --no_global_shift
+  --invert              invert color range
+```
+
+# CLI Customizer
+
+To change Samus sprite or apply patches on an existing seed you have to call the Randomizer with the --patchOnly parameter. It'll generate a new ROM: VARIA.sfc
+
+To add a sprite use --sprite, the available sprites are in itemrandomizerweb/patches/sprites/:
+```
+dude@computer:~/RandomMetroidSolver (master)$ ls itemrandomizerweb/patches/sprites/
+alucard.ips  fed_trooper.ips         hack_ascent.ips    hack_escape2.ips  hack_nature.ips  hack_redesign.ips  hitbox_helper.ips  marga.ips    samus.ips           win95_cursor.ips
+bailey.ips   hack_ancient_chozo.ips  hack_decision.ips  hack_hyper.ips    hack_phazon.ips  hack_szm.ips       luigi.ips          megaman.ips  super_controid.ips
+```
+
+To add one or more patches use --patch, the available patches listed in the same order as on the Customizer page:
+```
+itemsounds.ips
+elevators_doors_speed.ips
+spinjumprestart.ips
+rando_speed.ips
+No_Music
+random_music.ips
+```
+
+Example:
+```
+dude@computer:~/RandomMetroidSolver (master)$ python3.7 ./randomizer.py -r VARIA_Randomizer_FX1097821_Season_Races_medium.sfc --patchOnly --sprite megaman.ips --patch itemsounds.ips --patch No_Music
+startAP:Landing Site
+Apply patch itemsounds.ips
+Apply patch No_Music
+Apply patch megaman.ips
+Rom generated: VARIA
+```
+
+**Note**: if you want both colors randomization and custom sprite you can't use the palettizer, you have to add the colors randomization parameters to the randomizer on top of --patchOnly.
+
+The parameters:
+```
+  --palette             Randomize the palettes
+  --individual_suit_shift
+  --individual_tileset_shift
+  --no_match_ship_and_power
+  --seperate_enemy_palette_groups
+  --no_match_room_shift_with_boss
+  --no_shift_tileset_palette
+  --no_shift_boss_palettes
+  --no_shift_suit_palettes
+  --no_shift_enemy_palettes
+  --no_shift_beam_palettes
+  --no_shift_ship_palette
+  --min_degree [MIN_DEGREE]
+  --max_degree [MAX_DEGREE]
+  --no_global_shift
+  --invert              invert color range
+```
+
+Example:
+```
+dude@computer:~/RandomMetroidSolver (master)$ python3.7 ./randomizer.py -r VARIA_Randomizer_AFX8258621_Season_Races_VARIAble.sfc  --patchOnly --sprite megaman.ips --patch itemsounds.ips --palette --min_degree -75 --max_degree 25 --invert
+startAP:Landing Site
+Apply patch itemsounds.ips
+Apply patch megaman.ips
+Rom generated: VARIA
 ```

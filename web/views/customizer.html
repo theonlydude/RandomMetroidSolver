@@ -424,6 +424,18 @@ window.onload = function(){
                 for(var i=0; i<buttons.length; i++) {
                     disableElement(buttons[i], isRace);
                 }
+
+                // detect varia default patches
+                var isVARIA = false;
+                if(bytes[0x175ca] == 0x60 && bytes[0x19E1] == 0xEA && bytes[0xF27] == 0x20) {
+                    isVARIA = true;
+                }
+
+                // grey out patches
+                var buttons = ["AimAnyButton", "max_ammo_display", "supermetroid_msu1"];
+                for(var i=0; i<buttons.length; i++) {
+                    disableElement(buttons[i], isVARIA);
+                }
             }
 
             reader.readAsArrayBuffer(file)
@@ -708,19 +720,19 @@ response.write('</table>', escape=False)
     {
       element: "#AimAnyButtonStep",
       title: "Aim any button",
-      content: "<p>Allows the aim buttons to be assigned to any button.</p>\
+      content: "<p>Allows the aim buttons to be assigned to any button (already applied by default on VARIA seeds).</p>\
 <p>Patch developed by Kejardon.</p>"
     },
     {
       element: "#max_ammo_displayStep",
       title: "Max ammo display",
-      content: "<p>Max Ammo Display.</p>\
+      content: "<p>Max Ammo Display (already applied by default on VARIA seeds).</p>\
 <p>Patch developed by Personitis.</p>"
     },
     {
       element: "#supermetroid_msu1Step",
       title: "MSU1",
-      content: "<p>Play music with MSU1 chip on SD2SNES.</p>\
+      content: "<p>Play music with MSU1 chip on SD2SNES (already applied by default on VARIA seeds).</p>\
 <p>Patch developed by DarkShock.</p>"
     }
   ]});

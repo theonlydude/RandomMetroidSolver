@@ -663,7 +663,7 @@ vanillaEscapeTransitions = [
 ]
 
 escapeSource = 'Tourian Escape Room 4 Top Right'
-escapeTargets = ['Climb Bottom Left', 'Green Brinstar Main Shaft Top Left', 'Basement Left', 'Business Center Mid Left', 'Crab Hole Bottom Right']
+escapeTargets = ['Green Brinstar Main Shaft Top Left', 'Basement Left', 'Business Center Mid Left', 'Crab Hole Bottom Right']
 
 def getAccessPoint(apName):
     return next(ap for ap in accessPoints if ap.Name == apName)

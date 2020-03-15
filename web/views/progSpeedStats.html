@@ -151,6 +151,8 @@ function startTheTour(step=-1) {
   tour.start();
 }
 
+var columns = {};
+var series = {};
 
 function drawAvgLocsHistogram() {
 {{
@@ -170,6 +172,40 @@ function drawAvgLocsHistogram() {
     // Instantiate and draw the chart.
     var chart = new google.visualization.AreaChart(document.getElementById("avgLocsHistogram"));
     chart.draw(data, options);
+
+    // allow to highlight a line by clicking on its legend
+    columns['avgLocs'] = [];
+    series['avgLocs'] = {};
+
+    for (var i = 0; i < data.getNumberOfColumns(); i++) {
+        columns['avgLocs'].push(true);
+        series['avgLocs'][i] = {};
+    }
+
+    var options = {
+        series: series['avgLocs']
+    }
+
+    google.visualization.events.addListener(chart, 'select', function () {
+        var sel = chart.getSelection();
+        // if selection length is 0, we deselected an element
+        if (sel.length > 0) {
+            // if row is undefined, we clicked on the legend
+            if (sel[0].row === null) {
+                var col = sel[0].column;
+                if (columns['avgLocs'][col-1] == true) {
+                    columns['avgLocs'][col-1] = false;
+                    series['avgLocs'][col-1].color = '#CCCCCC';
+                } else {
+                    columns['avgLocs'][col-1] = true;
+                    series['avgLocs'][col-1].color = null;
+                }
+                var view = new google.visualization.DataView(data);
+                chart.draw(view, options);
+            }
+        }
+    });
+
 {{
       pass
 }}
@@ -197,6 +233,7 @@ function drawOpennessHistogram(progSpeed, dataIn) {
 
     // Instantiate and draw the chart.
     var chart = new google.visualization.AreaChart(document.getElementById("opennessHistogram_"+progSpeed));
+    chart.data = data;
     chart.draw(data, options);
 }
 
@@ -214,7 +251,41 @@ function drawOpennessHistogram2(progSpeed, dataIn) {
 
     // Instantiate and draw the chart.
     var chart = new google.visualization.LineChart(document.getElementById("opennessHistogram_"+progSpeed));
+    chart.data = data;
     chart.draw(data, options);
+
+    // allow to highlight a line by clicking on its legend
+    columns[progSpeed] = [];
+    series[progSpeed] = {};
+
+    for (var i = 0; i < data.getNumberOfColumns(); i++) {
+        columns[progSpeed].push(true);
+        series[progSpeed][i] = {};
+    }
+
+    var options = {
+        series: series[progSpeed]
+    }
+
+    google.visualization.events.addListener(chart, 'select', function () {
+        var sel = chart.getSelection();
+        // if selection length is 0, we deselected an element
+        if (sel.length > 0) {
+            // if row is undefined, we clicked on the legend
+            if (sel[0].row === null) {
+                var col = sel[0].column;
+                if (columns[progSpeed][col-1] == true) {
+                    columns[progSpeed][col-1] = false;
+                    series[progSpeed][col-1].color = '#CCCCCC';
+                } else {
+                    columns[progSpeed][col-1] = true;
+                    series[progSpeed][col-1].color = null;
+                }
+                var view = new google.visualization.DataView(data);
+                chart.draw(view, options);
+            }
+        }
+    });
 }
 
 {{
@@ -376,7 +447,7 @@ google.charts.setOnLoadCallback(drawOpennessHistogram_44);
 if progSpeedStats != None:
 }}
 
-    <p>When solving the seed we count at each step how many locations are available for next choice, then we keep the average value. The higher average of available locations the more open the seed is.<br/>Click on a progression speed in the legend to highlight it.</p>
+    <p>When solving the seed we count at each step how many locations are available for next choice, then we keep the average value. The higher average of available locations the more open the seed is.<br/>Click on a progression speed in the legend to grey it.</p>
     <div id="avgLocsHistogram" style="height: 400px; margin: 0 auto"></div>
 
     <p>When solving the seed we count when we can reach 1/4, 1/2, 3/4 and all the locations, this gives the distribution of progression items. The sooner we reach this milestones the freer the seed is.</p>

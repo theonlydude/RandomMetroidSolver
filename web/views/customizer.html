@@ -324,7 +324,7 @@ function doSubmit() {
     }
 
     var dataDict = {};
-    var elems = ["itemsounds", "spinjumprestart", "rando_speed", "elevators_doors_speed", "No_Music", "random_music", "colorsRandomization", "suitsPalettes", "beamsPalettes", "tilesPalettes", "enemiesPalettes", "bossesPalettes", "globalShift", "customSpriteEnable", "customSprite"];
+    var elems = ["itemsounds", "spinjumprestart", "rando_speed", "elevators_doors_speed", "No_Music", "random_music", "AimAnyButton", "max_ammo_display", "supermetroid_msu1", "colorsRandomization", "suitsPalettes", "beamsPalettes", "tilesPalettes", "enemiesPalettes", "bossesPalettes", "globalShift", "customSpriteEnable", "customSprite"];
 
     for(var i=0; i<elems.length; i++) {
         var elem = document.getElementById(elems[i]);
@@ -423,6 +423,18 @@ window.onload = function(){
                 var buttons = ["itemsounds", "elevators_doors_speed", "spinjumprestart", "rando_speed"];
                 for(var i=0; i<buttons.length; i++) {
                     disableElement(buttons[i], isRace);
+                }
+
+                // detect varia default patches
+                var isVARIA = false;
+                if(bytes[0x175ca] == 0x60 && bytes[0x19E1] == 0xEA && bytes[0xF27] == 0x20) {
+                    isVARIA = true;
+                }
+
+                // grey out patches
+                var buttons = ["AimAnyButton", "max_ammo_display", "supermetroid_msu1"];
+                for(var i=0; i<buttons.length; i++) {
+                    disableElement(buttons[i], isVARIA);
                 }
             }
 
@@ -704,6 +716,24 @@ response.write('</table>', escape=False)
       title: "Random Music",
       content: "<p>Randomize the background music.</p>\
 <p>Patch developed by dude & flo.</p>"
+    },
+    {
+      element: "#AimAnyButtonStep",
+      title: "Aim any button",
+      content: "<p>Allows the aim buttons to be assigned to any button (already applied by default on VARIA seeds).</p>\
+<p>Patch developed by Kejardon.</p>"
+    },
+    {
+      element: "#max_ammo_displayStep",
+      title: "Max ammo display",
+      content: "<p>Max Ammo Display (already applied by default on VARIA seeds).</p>\
+<p>Patch developed by Personitis.</p>"
+    },
+    {
+      element: "#supermetroid_msu1Step",
+      title: "MSU1",
+      content: "<p>Play music with MSU1 chip on SD2SNES (already applied by default on VARIA seeds).</p>\
+<p>Patch developed by DarkShock.</p>"
     }
   ]});
 
@@ -893,8 +923,28 @@ def displayCheckbox(id, defaultTrue=False):
 		  </td>
                   <td><button type="button" onclick="startTheTour(9)">?</button></td>
 		</tr>
+		<tr id="AimAnyButtonStep">
+		  <td colspan="2">
+		    {{displayCheckbox("AimAnyButton")}}
+		    <span id="AimAnyButtonText">Allows the aim buttons to be assigned to any button</span>
+		  </td>
+                  <td><button type="button" onclick="startTheTour(10)">?</button></td>
+		</tr>
+		<tr id="max_ammo_displayStep">
+		  <td colspan="2">
+		    {{displayCheckbox("max_ammo_display")}}
+		    <span id="max_ammo_displayText">Max Ammo Display</span>
+		  </td>
+                  <td><button type="button" onclick="startTheTour(11)">?</button></td>
+		</tr>
+		<tr id="supermetroid_msu1Step">
+		  <td colspan="2">
+		    {{displayCheckbox("supermetroid_msu1")}}
+		    <span id="supermetroid_msu1Text">Play music with MSU1 chip on SD2SNES</span>
+		  </td>
+                  <td><button type="button" onclick="startTheTour(12)">?</button></td>
+		</tr>
 	      </table>
-
 	  </div>
         </div>
         {{=INPUT(_type="submit", _value="customize", _id="submitBtn", _class="btn btn-default buttonRandom")}}

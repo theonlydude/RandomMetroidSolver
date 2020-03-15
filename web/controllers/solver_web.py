@@ -1108,7 +1108,7 @@ def validateWebServiceParams(switchs, quantities, others, isJson=False):
 def sessionWebService():
     # web service to update the session
     switchs = ['suitsRestriction', 'hideItems', 'strictMinors',
-               'areaRandomization', 'areaLayout', 'escapeRando', 'removeEscapeEnemies',
+               'areaRandomization', 'areaLayout', 'escapeRando',
                'bossRandomization',
                'funCombat', 'funMovement', 'funSuits',
                'layoutPatches', 'variaTweaks', 'nerfedCharge',
@@ -1147,7 +1147,6 @@ def sessionWebService():
     session.randomizer['areaRandomization'] = request.vars.areaRandomization
     session.randomizer['areaLayout'] = request.vars.areaLayout
     session.randomizer['escapeRando'] = request.vars.escapeRando
-    session.randomizer['removeEscapeEnemies'] = request.vars.removeEscapeEnemies
     session.randomizer['bossRandomization'] = request.vars.bossRandomization
     session.randomizer['funCombat'] = request.vars.funCombat
     session.randomizer['funMovement'] = request.vars.funMovement
@@ -1189,7 +1188,7 @@ def randomizerWebService():
 
     # check validity of all parameters
     switchs = ['suitsRestriction', 'hideItems', 'strictMinors',
-               'areaRandomization', 'areaLayout', 'escapeRando', 'removeEscapeEnemies',
+               'areaRandomization', 'areaLayout', 'escapeRando',
                'bossRandomization',
                'funCombat', 'funMovement', 'funSuits',
                'layoutPatches', 'variaTweaks', 'nerfedCharge',
@@ -1308,12 +1307,13 @@ def randomizerWebService():
         params.append('--area')
         if request.vars.areaLayout == 'off':
             params.append('--areaLayoutBase')
-        if request.vars.escapeRando == 'off':
-            params.append('--noEscapeRando')
-        if request.vars.removeEscapeEnemies == 'off':
-            params.append('--noRemoveEscapeEnemies')
     elif request.vars.areaRandomization == 'random':
         params += ['--area', 'random']
+
+    if request.vars.escapeRando == 'on':
+        params.append('--escapeRando')
+    elif request.vars.escapeRando == 'random':
+        params += ['--escapeRando', 'random']
 
     if request.vars.bossRandomization == 'on':
         params.append('--bosses')
@@ -2128,6 +2128,9 @@ def initCustomizerSession():
         session.customizer['elevators_doors_speed'] = "off"
         session.customizer['No_Music'] = "off"
         session.customizer['random_music'] = "off"
+        session.customizer['AimAnyButton'] = "off"
+        session.customizer['max_ammo_display'] = "off"
+        session.customizer['supermetroid_msu1'] = "off"
 
 customSprites = {
     'samus': {"index":0, "name": "Samus", "desc": "Samus, with a distinct animation for Screw Attack without Space Jump and a new Crystal Flash animation", "author": "Artheau and Feesh", "group": "Samus"},
@@ -2160,7 +2163,8 @@ def customizer():
 
 def customWebService():
     # check validity of all parameters
-    patches = ['itemsounds', 'spinjumprestart', 'rando_speed', 'elevators_doors_speed', 'No_Music', 'random_music']
+    patches = ['itemsounds', 'spinjumprestart', 'rando_speed', 'elevators_doors_speed', 'No_Music', 'random_music',
+               'AimAnyButton', 'max_ammo_display', 'supermetroid_msu1']
     others = ['colorsRandomization', 'suitsPalettes', 'beamsPalettes', 'tilesPalettes', 'enemiesPalettes',
               'bossesPalettes', 'minDegree', 'maxDegree', 'invert']
     validateWebServiceParams(patches, [], others, isJson=True)
@@ -2190,6 +2194,9 @@ def customWebService():
     session.customizer['elevators_doors_speed'] = request.vars.elevators_doors_speed
     session.customizer['No_Music'] = request.vars.No_Music
     session.customizer['random_music'] = request.vars.random_music
+    session.customizer['AimAnyButton'] = request.vars.AimAnyButton
+    session.customizer['max_ammo_display'] = request.vars.max_ammo_display
+    session.customizer['supermetroid_msu1'] = request.vars.supermetroid_msu1
 
     # call the randomizer
     (fd, jsonFileName) = tempfile.mkstemp()
@@ -2208,6 +2215,12 @@ def customWebService():
         params += ['-c', 'No_Music']
     if request.vars.random_music == 'on':
         params += ['-c', 'random_music.ips']
+    if request.vars.AimAnyButton == 'on':
+        params += ['-c', 'AimAnyButton.ips']
+    if request.vars.max_ammo_display == 'on':
+        params += ['-c', 'max_ammo_display.ips']
+    if request.vars.supermetroid_msu1 == 'on':
+        params += ['-c', 'supermetroid_msu1.ips']
 
     if request.vars.colorsRandomization == 'on':
         params.append('--palette')
@@ -2565,8 +2578,6 @@ def progSpeedStats():
             progSpeedStats["open44"].insert(0, ['Collected items']+realProgSpeedsName)
     else:
         progSpeedStats = None
-
-    print(progSpeedStats)
 
     randoPresets = ['Season_Races']
     majorsSplit = ['Major', 'Full']

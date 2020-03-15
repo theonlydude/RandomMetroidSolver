@@ -1159,8 +1159,8 @@ class InteractiveSolver(CommonSolver):
             romPatcher.writeMagic()
         else:
             romPatcher.writePlandoAddresses(self.visitedLocations)
-        if self.areaRando == True or self.bossRando == True:
-            doors = GraphUtils.getDoorConnections(self.fillGraph(), self.areaRando, self.bossRando)
+        if self.areaRando == True or self.bossRando == True or self.escapeRando == True:
+            doors = GraphUtils.getDoorConnections(self.fillGraph(), self.areaRando, self.bossRando, self.escapeRando)
             romPatcher.writeDoorConnections(doors)
             if magic == None:
                 doorsPtrs = GraphUtils.getAps2DoorsPtrs()

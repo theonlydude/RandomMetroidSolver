@@ -663,7 +663,7 @@ vanillaEscapeTransitions = [
 ]
 
 escapeSource = 'Tourian Escape Room 4 Top Right'
-escapeTargets = ['Climb Bottom Left', 'Green Brinstar Main Shaft Top Left', 'Basement Left', 'Business Center Mid Left', 'Crab Hole Bottom Right']
+escapeTargets = ['Green Brinstar Main Shaft Top Left', 'Basement Left', 'Business Center Mid Left', 'Crab Hole Bottom Right']
 
 def getAccessPoint(apName):
     return next(ap for ap in accessPoints if ap.Name == apName)
@@ -839,12 +839,14 @@ class GraphUtils:
             src.EntryInfo.update(dst.ExitInfo)
         connections = []
         for src, dst in graph.InterAreaTransitions:
-            # area only
-            if not bosses and src.Boss:
-                continue
-            # boss only
-            if not areas and not src.Boss:
-                continue
+            if not (escape and src.Escape and dst.Escape):
+                # area only
+                if not bosses and src.Boss:
+                    continue
+                # boss only
+                if not areas and not src.Boss:
+                    continue
+
             conn = {}
             conn['ID'] = str(src) + ' -> ' + str(dst)
             # remove duplicates (loop transitions)

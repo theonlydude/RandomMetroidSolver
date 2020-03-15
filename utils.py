@@ -385,5 +385,6 @@ def getRandomizerDefaultParameters():
     defaultParams['rando_speed'] = "off"
     defaultParams['animals'] = "off"
     defaultParams['No_Music'] = "off"
+    defaultParams['random_music'] = "off"
 
     return defaultParams

@@ -45,7 +45,7 @@ class RandoSettings(object):
     # vcr: to generate debug .vcr output file
     # plandoRando: list of already set (locationName, itemType) by the plando
     def __init__(self, startAP, maxDiff, progSpeed, progDiff, qty, restrictions,
-                 superFun, runtimeLimit_s, vcr, plandoRando):
+                 superFun, runtimeLimit_s, escapeRando, vcr, plandoRando):
         self.startAP = startAP
         self.progSpeed = progSpeed
         self.progDiff = progDiff
@@ -56,6 +56,7 @@ class RandoSettings(object):
         self.runtimeLimit_s = runtimeLimit_s
         if self.runtimeLimit_s <= 0:
             self.runtimeLimit_s = sys.maxsize
+        self.escapeRando = escapeRando
         self.vcr = vcr
         self.plandoRando = plandoRando
 
@@ -804,6 +805,46 @@ class Randomizer(object):
             # be in a chozo location, but the game is still finishable)
             Knows.IceZebSkip = SMBool(True, 0, [])
 
+        # handle escape rando
+        if settings.escapeRando == True:
+            self.escapeGraph()
+
+    # graph update for randomized escape
+    def escapeGraph(self):
+        sm = self.smbm
+        # setup smbm with item pool
+        sm.resetItems()
+        for boss in Bosses.bosses():
+            Bosses.beatBoss(boss)
+        # Ice not usable because of hyper beam
+        # remove energy to avoid hell runs
+        sm.addItems([item['Type'] for item in self.itemPool if item['Type'] != 'Ice' and item['Category'] != 'Energy'])
+        path = None
+        while path is None:
+            (src, dst) = GraphUtils.createEscapeTransition()
+            path = self.areaGraph.accessPath(sm, dst, 'Landing Site',
+                                             self.difficultyTarget)
+        # cleanup smbm
+        sm.resetItems()
+        Bosses.reset()
+
+        # actually update graph
+        self.areaGraph.addTransition(src, dst)
+
+        # get timer value
+        self.areaGraph.EscapeTimer = self.escapeTimer(path)
+        self.log.debug("escapeGraph: ({}, {}) timer: {}".format(src, dst, self.areaGraph.EscapeTimer))
+
+    def escapeTimer(self, path):
+        escapeTargetsTimer = {
+            'Climb Bottom Left': None, # vanilla
+            'Green Brinstar Main Shaft Top Left': 210, # brinstar
+            'Basement Left': 210, # wrecked ship
+            'Business Center Mid Left': 270, # norfair
+            'Crab Hole Bottom Right': 270 # maridia
+        }
+        return escapeTargetsTimer[path[0].Name]
+
     def computeLateMorphLimit(self):
         if self.restrictions['Morph'] != 'late':
             return
@@ -815,10 +856,11 @@ class Randomizer(object):
         if self.restrictions['MajorMinor'] != 'Full':
             locs = [loc for loc in locs if self.restrictions['MajorMinor'] in loc['Class']]
         self.lateMorphLimit = len(locs)
-        self.lateMorphOutCrateria = len(set([loc['GraphArea'] for loc in locs])) > 1
+        self.lateMorphOutStartArea = len(set([loc['GraphArea'] for loc in locs])) > 1
+        self.startArea = getAccessPoint(self.settings.startAP).GraphArea
         self.computeLateMorphLimitCheck()
         self.lateMorphResult = None
-        self.log.debug("lateMorphLimit: {}: {} {}".format(self.restrictions['MajorMinor'], self.lateMorphLimit, self.lateMorphOutCrateria))
+        self.log.debug("lateMorphLimit: {}: {} {}".format(self.restrictions['MajorMinor'], self.lateMorphLimit, self.lateMorphOutStartArea))
         self.log.debug('lateMorphLimit: locs=' + str([loc['Name'] for loc in locs]))
         # cleanup
         self.smbm.resetItems()
@@ -1191,10 +1233,11 @@ class Randomizer(object):
         return location['GraphArea'] != 'Crateria'
 
     def morphPlacementImpl(self, item, location):
-        # if morph can be out of crateria, restrict it from being put in crateria
-        if self.lateMorphOutCrateria == True:
-            if location['GraphArea'] == 'Crateria':
+        # if morph can be out of start area, restrict it from being put in start area
+        if self.lateMorphOutStartArea == True:
+            if location['GraphArea'] == self.startArea:
                 return False
+
         if self.lateMorphResult is not None:
             return self.lateMorphResult
 

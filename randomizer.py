@@ -50,11 +50,11 @@ if __name__ == "__main__":
     parser.add_argument('--areaLayoutBase',
                         help="use simple layout patch for area mode", action='store_true',
                         dest='areaLayoutBase', default=False)
-    parser.add_argument('--noEscapeRando',
-                        help="Do not randomize the escape sequence in area mode", action='store_true',
-                        dest='noEscapeRando', default=False)
+    parser.add_argument('--escapeRando',
+                        help="Randomize the escape sequence",
+                        dest='escapeRando', nargs='?', const=True, default=False)
     parser.add_argument('--noRemoveEscapeEnemies',
-                        help="Do not remove enemies during escape sequence in area mode", action='store_true',
+                        help="Do not remove enemies during escape sequence", action='store_true',
                         dest='noRemoveEscapeEnemies', default=False)
     parser.add_argument('--bosses', help="randomize bosses",
                         dest='bosses', nargs='?', const=True, default=False)
@@ -310,6 +310,10 @@ if __name__ == "__main__":
         args.bosses = bool(random.randint(0, 2))
     logger.debug("bosses: {}".format(args.bosses))
 
+    if args.escapeRando == 'random':
+        args.escapeRando = bool(random.randint(0, 2))
+    logger.debug("escapeRando: {}".format(args.escapeRando))
+
     if args.suitsRestriction == 'random':
         if args.morphPlacement == 'late' and args.area == True:
             args.suitsRestriction = False
@@ -449,7 +453,7 @@ if __name__ == "__main__":
     randoSettings = RandoSettings(args.startAP,
                                   maxDifficulty, progSpeed, progDiff, qty,
                                   restrictions, args.superFun, args.runtimeLimit_s,
-                                  args.vcr,
+                                  args.escapeRando, args.vcr,
                                   args.plandoRando["locsItems"] if args.plandoRando != None else None)
     bossTransitions = vanillaBossesTransitions
     if args.bosses == True:
@@ -464,9 +468,7 @@ if __name__ == "__main__":
             RomPatches.ActivePatches.remove(RomPatches.AreaRandoGatesOther)
         try:
             randomizer = AreaRandomizer(graphLocations, randoSettings, seedName, bossTransitions,
-                                        dotDir=dotDir,
-                                        escape=not args.noEscapeRando,
-                                        removeEscapeEnemies=not args.noRemoveEscapeEnemies)
+                                        dotDir=dotDir)
         except RuntimeError:
             msg = "Cannot generate area layout. Retry, and change the super fun settings if the problem happens again."
             dumpErrorMsg(args.output, msg)
@@ -490,7 +492,7 @@ if __name__ == "__main__":
         (stuck, itemLocs, progItemLocs) = randomizer.generateItems()
         doors = GraphUtils.getDoorConnections(randomizer.areaGraph,
                                               args.area, args.bosses,
-                                              args.area and not args.noEscapeRando)
+                                              args.escapeRando)
         escapeTimer = randomizer.areaGraph.EscapeTimer
     else:
         stuck = False
@@ -516,7 +518,7 @@ if __name__ == "__main__":
         animalsPatches = ['animal_enemies.ips', 'animals.ips', 'draygonimals.ips', 'escapimals.ips',
                           'gameend.ips', 'grey_door_animals.ips', 'low_timer.ips', 'metalimals.ips',
                           'phantoonimals.ips', 'ridleyimals.ips']
-        if args.area == True and args.noEscapeRando == False:
+        if args.escapeRando == True:
             # these glitch with enemies on
             animalsPatches.remove('phantoonimals.ips') # excessive lag and ridley sound effects
             animalsPatches.remove('ridleyimals.ips') # escape timer tiles tail
@@ -597,7 +599,7 @@ if __name__ == "__main__":
                                        args.noLayout, suitsMode,
                                        args.area, args.bosses, args.areaLayoutBase,
                                        args.noVariaTweaks, args.nerfedCharge,
-                                       args.noEscapeRando, args.noRemoveEscapeEnemies)
+                                       args.escapeRando, args.noRemoveEscapeEnemies)
         else:
             romPatcher.addIPSPatches(args.patches)
         if args.sprite is not None:

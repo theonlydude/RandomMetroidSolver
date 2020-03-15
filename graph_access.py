@@ -839,12 +839,14 @@ class GraphUtils:
             src.EntryInfo.update(dst.ExitInfo)
         connections = []
         for src, dst in graph.InterAreaTransitions:
-            # area only
-            if not bosses and src.Boss:
-                continue
-            # boss only
-            if not areas and not src.Boss:
-                continue
+            if not (escape and src.Escape and dst.Escape):
+                # area only
+                if not bosses and src.Boss:
+                    continue
+                # boss only
+                if not areas and not src.Boss:
+                    continue
+
             conn = {}
             conn['ID'] = str(src) + ' -> ' + str(dst)
             # remove duplicates (loop transitions)

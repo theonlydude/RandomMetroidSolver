@@ -111,7 +111,7 @@ class RomReader:
         #'animals': {'address': 0x7841D, 'value': 0x8C, 'vanillaValue': 0x18},
         'area_rando_blue_doors': {'address': 0x7823E, 'value': 0x3B, 'vanillaValue': 0x66},
         'area_rando_door_transition': {'address': 0x852BA, 'value': 0x20, 'vanillaValue': 0xad},
-        'area_rando_escape': {'address': 0x15f38, 'value': 0x5c, 'vanillaValue': 0xbd},
+        'rando_escape': {'address': 0x15f38, 'value': 0x5c, 'vanillaValue': 0xbd},
         'area_rando_layout_base': {'address': 0x788A0, 'value': 0x2B, 'vanillaValue': 0x26},
         'area_rando_layout': {'address': 0x78666, 'value': 0x62, 'vanillaValue': 0x64},
         'bomb_torizo': {'address': 0x7FDC, 'value': 0xF2, 'vanillaValue': 0x20},
@@ -568,7 +568,7 @@ class RomPatcher:
                      'draygonimals.ips', 'escapimals.ips', 'gameend.ips', 'grey_door_animals.ips',
                      'low_timer.ips', 'metalimals.ips', 'phantoonimals.ips', 'ridleyimals.ips'],
         'Area': ['area_rando_layout.ips', 'area_rando_door_transition.ips', 'Tourian_Refill' ],
-        'AreaEscape' : ['area_rando_escape.ips', 'area_rando_escape_ws_fix.ips', 'Escape_Rando_Tourian_Doors']
+        'Escape' : ['rando_escape.ips', 'rando_escape_ws_fix.ips', 'Escape_Rando_Tourian_Doors']
     }
 
     def __init__(self, romFileName=None, magic=None, plando=False):
@@ -717,7 +717,7 @@ class RomPatcher:
                         optionalPatches=[], noLayout=False, suitsMode="Classic",
                         area=False, bosses=False, areaLayoutBase=False,
                         noVariaTweaks=False, nerfedCharge=False,
-                        noEscapeRando=False, noRemoveEscapeEnemies=False):
+                        escapeRando=False, noRemoveEscapeEnemies=False):
         try:
             # apply standard patches
             stdPatches = []
@@ -757,16 +757,22 @@ class RomPatcher:
                 if patchName in RomPatcher.IPSPatches['Optional']:
                     self.applyIPSPatch(patchName)
 
+            # random escape
+            if escapeRando == True:
+                plms.append("WS_Map_Grey_Door")
+                if noRemoveEscapeEnemies == True:
+                    RomPatcher.IPSPatches['Escape'].append('Escape_Rando_Enable_Enemies')
+                for patchName in RomPatcher.IPSPatches['Escape']:
+                    self.applyIPSPatch(patchName)
+                # handle incompatible doors transitions
+                if area == False and bosses == False:
+                    self.applyIPSPatch('area_rando_door_transition.ips')
+
             # apply area patches
             if area == True:
                 if areaLayoutBase == True:
                     RomPatcher.IPSPatches['Area'].remove('area_rando_layout.ips')
                     RomPatcher.IPSPatches['Area'].append('area_rando_layout_base.ips')
-                if noEscapeRando == False:
-                    RomPatcher.IPSPatches['Area'] += RomPatcher.IPSPatches['AreaEscape']
-                    plms.append("WS_Map_Grey_Door")
-                    if noRemoveEscapeEnemies == True:
-                        RomPatcher.IPSPatches['Area'].append('Escape_Rando_Enable_Enemies')
                 for patchName in RomPatcher.IPSPatches['Area']:
                     self.applyIPSPatch(patchName)
             elif bosses == True:

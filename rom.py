@@ -548,7 +548,7 @@ class RomPatcher:
     # Replace bomb blocks with shot blocks before Spazer
     #   spazer.ips
     IPSPatches = {
-        'Standard': ['new_game.ips', 'plm_spawn.ips',
+        'Standard': ['new_game.ips', 'plm_spawn.ips', 'load_enemies_fix.ips',
                      'credits_varia.ips', 'seed_display.ips', 'tracking.ips',
                      'wake_zebes.ips', 'g4_skip.ips', # XXX those are door ASMs
                      'Mother_Brain_Cutscene_Edits',

@@ -89,7 +89,7 @@ patches = {
         0x7a062: [0x0f, 0x05],
         # map icon X/Y
         0x148d9: [0x28, 0x00, 0x58, 0x00]
-    }
+    },
     # blinking doors for area APs
     'Blinking[Keyhunter Room Bottom]': {
         0x108F7B: [0x0]

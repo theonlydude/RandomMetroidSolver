@@ -17,3 +17,5 @@ check_empty:
 	stz $0e52		; nb of enemies needed to clear the room = 0
 .end:
 	rts
+
+warnpc $a0f830

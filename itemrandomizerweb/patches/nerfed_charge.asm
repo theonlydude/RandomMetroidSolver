@@ -121,3 +121,5 @@ pseudo:
 .end:
 	pla
 	rts
+
+warnpc $a0f820

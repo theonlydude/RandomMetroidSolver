@@ -515,7 +515,7 @@ function activateVCRButtons(index, len) {
   // at start disable << and < buttons
   // at end disable > and >> buttons
   var backElems = ["start", "previous"];
-  var nextElems = ["next", "end"];
+  var nextElems = ["next", "end", "nextRollback"];
   if(index == 0) {
     for(var i=0; i<backElems.length; i++) {
       $("#"+backElems[i]).addClass("greyed");
@@ -651,7 +651,7 @@ function nextAction() {
   }
 }
 
-function gotoEnd() {
+function gotoEnd(stopAtNextRollback) {
   if(loaded == false || webServInProgress == true) {
     return;
   }
@@ -667,7 +667,7 @@ function gotoEnd() {
     return;
   }
 
-  pushActions(vcrData.length - vcrIndex);
+  pushActions(vcrData.length - vcrIndex, stopAtNextRollback);
 }
 
 function gotoX() {
@@ -699,7 +699,7 @@ function gotoX() {
   pushActions(gotoAction);
 }
 
-function pushActions(len) {
+function pushActions(len, stopAtNextRollback=false) {
   var endAction = vcrIndex + len;
   var tmpIndex = vcrIndex;
 
@@ -711,6 +711,9 @@ function pushActions(len) {
       locISolver.replace(/[ ,()-]/g, '');
       ajaxChainedActions.push({action: "add", scope: "item", locName: locISolver, itemName: nextAction["item"], idxFunc: "loadNextAction"})
     } else {
+      if(stopAtNextRollback == true) {
+        break;
+      }
       var count = nextAction["count"];
       ajaxChainedActions.push({action: "remove", scope: "item", count: nextAction["count"], idxFunc: "loadNextAction"});
     }
@@ -861,7 +864,10 @@ def displayNumber(id, min, max, default, step="1"):
 	  <div id="next" class="popupButton greyed"><img src="/solver/static/images/play.svg" alt="end" onclick="nextAction()" data-toggle="tooltip" title="Apply next action" data-placement="bottom" data-container="body" data-html="true"></div>
 	</td>
 	<td>
-	  <div id="end" class="popupButton greyed"><img src="/solver/static/images/fast_forward.svg" alt="end" onclick="gotoEnd()" data-toggle="tooltip" title="Apply all actions" data-placement="bottom" data-container="body" data-html="true"></div>
+	  <div id="nextRollback" class="popupButton greyed"><img src="/solver/static/images/skip_forward.svg" alt="goto" onclick="gotoEnd(true)" data-toggle="tooltip" title="Goto next rollback" data-placement="bottom" data-container="body" data-html="true"></div>
+	</td>
+	<td>
+	  <div id="end" class="popupButton greyed"><img src="/solver/static/images/fast_forward.svg" alt="end" onclick="gotoEnd(false)" data-toggle="tooltip" title="Apply all actions" data-placement="bottom" data-container="body" data-html="true"></div>
 	</td>
 	<td>
 	  <input name="gotoAction" id="gotoAction" type="number" value="1" min="1" max="1024" step="1" class="gotoAction">

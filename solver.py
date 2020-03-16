@@ -434,7 +434,8 @@ class CommonSolver(object):
         if self.vcr != None:
             self.vcr.addRollback(count)
 
-        self.nbAvailLocs = self.nbAvailLocs[:-count]
+        if self.mode == 'standard':
+            self.nbAvailLocs = self.nbAvailLocs[:-count]
 
         for _ in range(count):
             if len(self.visitedLocations) == 0:

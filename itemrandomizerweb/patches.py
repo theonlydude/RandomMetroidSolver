@@ -92,6 +92,7 @@ patches = {
     },
     # blinking doors for area APs
     'Blinking[Keyhunter Room Bottom]': {
+        0x78228: [0x4e, 0xc8, 0x16, 0x2d, 0x0e, 0x8c],
         0x108F7B: [0x0]
     },
 }
@@ -147,10 +148,4 @@ additional_PLMs = {
         ]
     },
     # blinking doors for area APs
-    'Blinking[Keyhunter Room Bottom]': {
-        'room': 0x948c,
-        'plm_bytes_list': [
-            [0x4e, 0xc8, 0x16, 0x2d, 0x0e, 0x8c]
-        ]
-    },
 }

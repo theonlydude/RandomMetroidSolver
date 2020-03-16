@@ -59,6 +59,7 @@ patches = {
     "Escape_Rando_Tourian_Doors":{
         0x7C836: [0x0C],
         0x7C828: [0x0C]},
+    # custom load points for non standard start APs
     "Save_G4": {
         # load point entry
         0x4527: [0xED, 0xA5, 0x16, 0x92, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0xA8, 0x00, 0x60, 0x00],
@@ -89,15 +90,21 @@ patches = {
         # map icon X/Y
         0x148d9: [0x28, 0x00, 0x58, 0x00]
     }
+    # blinking doors for area APs
+    'Blinking[Keyhunter Room Bottom]': {
+        0x108F7B: [0x0]
+    },
 }
 
 additional_PLMs = {
+    # for escape rando seeds
     "WS_Map_Grey_Door": {
         'room': 0Xcc6f,
         'plm_bytes_list': [
             [0x48, 0xc8, 0x1, 0x6, 0x61, 0x90]
         ]
     },
+    # area/boss seeds
     "WS_Save_Blinking_Door": { # works together with ws_save.ips
         'room': 0xcaf6,
         'state': 0xcb08,
@@ -105,6 +112,7 @@ additional_PLMs = {
             [0x42, 0xC8, 0x4E, 0x36, 0x62, 0x0C]
         ]
     },
+    # non standard start AP seeds (morph item is not in vanilla PLM list w/ zebes awake)
     "Morph_Zebes_Awake": {
         'room': 0x9e9f,
         'state': 0x9ecb,
@@ -113,6 +121,7 @@ additional_PLMs = {
         ],
         'locations': [("Morphing Ball", 0)]
     },
+    # custom save points for non standard start APs
     "Save_G4": {
         "room": 0xa5ed,
         'plm_bytes_list': [
@@ -135,6 +144,13 @@ additional_PLMs = {
         "room": 0xa051,
         'plm_bytes_list': [
             [0x6F, 0xB7, 0x04, 0x0B, 0x07, 0x00]
+        ]
+    },
+    # blinking doors for area APs
+    'Blinking[Keyhunter Room Bottom]': {
+        'room': 0x948c,
+        'plm_bytes_list': [
+            [0x4e, 0xc8, 0x16, 0x2d, 0x0e, 0x8c]
         ]
     },
 }

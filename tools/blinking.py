@@ -31,13 +31,13 @@ def makePlmBytes(plm):
             line += ', '
         line += ('0x%02x' % b)
         first = False
-    line += ']'
+    line += ', 0x8c]'
     return line
 
 with open(rom, 'rb') as romFile:
     def readPLM():
         romFile.seek(plmAddr)
-        return romFile.read(6)
+        return romFile.read(5)
     def readMaxEnemiesAddr():
         romFile.seek(0x100000 + nmy_set_addr)
         w = 0

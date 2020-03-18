@@ -420,6 +420,14 @@ accessPoints = [
        escape = True,
        dotOrientation = 'ne'),
     ### Maridia
+    #new APs :
+    # - toilet top
+    # - oasis bottom
+    # - crab shaft left
+    # - aqueduct
+    # - east/west sandpit
+    # - botwoon etank room
+    # + add connections from beach to the rest
     AccessPoint('Main Street Bottom', 'Maridia', {
         'Red Fish Room Left': lambda sm: sm.wand(sm.canGoUpMtEverest(),
                                                  sm.haveItem('Morph')),

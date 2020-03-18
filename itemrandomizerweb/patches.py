@@ -95,6 +95,20 @@ patches = {
         0x78228: [0x4e, 0xc8, 0x16, 0x2d, 0x0e, 0x8c],
         0x108F7B: [0x0]
     },
+    'Blinking[Moat Right]': {
+        0x1085E0: [0x0]
+    },
+    'Blinking[Morph Ball Room Left]': {
+        0x78746: [0x48, 0xc8, 0x01, 0x26, 0x31, 0x8c],
+        0x1093A8: [0x0]
+    },
+    'Blinking[Green Pirates Shaft Bottom Right]': {
+        0x78470: [0x42, 0xc8, 0x0e, 0x66, 0x63, 0x8c],
+        0x108572: [0x0]
+    },
+    'Blinking[Lower Mushrooms Left]': {
+        0x108C0C: [0x0]
+    },
 }
 
 additional_PLMs = {
@@ -148,4 +162,16 @@ additional_PLMs = {
         ]
     },
     # blinking doors for area APs
+    'Blinking[Moat Right]': {
+        'room': 0x95ff,
+        'plm_bytes_list': [
+            [0x42, 0xc8, 0x1e, 0x0a, 0x63, 0x8c]
+        ]
+    },
+    'Blinking[Lower Mushrooms Left]': {
+        'room': 0x9969,
+        'plm_bytes_list': [
+            [0x48, 0xc8, 0x01, 0x06, 0x63, 0x8c]
+        ]
+    },
 }

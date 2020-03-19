@@ -109,6 +109,20 @@ patches = {
     'Blinking[Lower Mushrooms Left]': {
         0x108C0C: [0x0]
     },
+    'Blinking[Golden Four]': {
+        0x109F60: [0x0]
+    },
+    'Blinking[Green Brinstar Elevator]': {
+        0x108585: [0x0]
+    },
+    'Blinking[Green Hill Zone Top Right]': {
+        0x78670: [0x42, 0xc8, 0x1e, 0x06, 0x63, 0x8c],
+        0x109D5B: [0x0]
+    },
+    'Blinking[Noob Bridge Right]': {
+        0x787A6: [0x42, 0xc8, 0x5e, 0x06, 0x63, 0x8c],
+        0x109325: [0x0]
+    },
 }
 
 additional_PLMs = {
@@ -172,6 +186,18 @@ additional_PLMs = {
         'room': 0x9969,
         'plm_bytes_list': [
             [0x48, 0xc8, 0x01, 0x06, 0x63, 0x8c]
+        ]
+    },
+    'Blinking[Golden Four]': {
+        'room': 0xa5ed,
+        'plm_bytes_list': [
+            [0x48, 0xc8, 0x01, 0x06, 0x63, 0x8c]
+        ]
+    },
+    'Blinking[Green Brinstar Elevator]': {
+        'room': 0x9938,
+        'plm_bytes_list': [
+            [0x42, 0xc8, 0x0e, 0x06, 0x63, 0x8c]
         ]
     },
 }

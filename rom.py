@@ -97,7 +97,7 @@ class RomReader:
         'progressiveSuits': {'address':0x869df, 'value': 0xF0, 'desc': "Progressive suits"},
         'nerfedCharge': {'address':0x83821, 'value': 0x80, 'desc': "Nerfed charge beam from the start of the game"}, # this value works for both DASH and VARIA variants
         'variaTweaks': {'address': 0x7CC4D, 'value': 0x37, 'desc': "VARIA tweaks"},
-        'area': {'address': 0x22D564, 'value': 0xF2, 'desc': "Area layout modifications"},
+        'area': {'address': 0x788A0, 'value': 0x2B, 'desc': "Area layout modifications"},
         'areaLayout': {'address': 0x252FA7, 'value': 0xF8, 'desc': "Area layout additional modifications"},
         'areaEscape': {'address': 0x20c91, 'value': 0x4C, 'desc': "Area escape randomization"},
         'newGame': {'address': 0x1001d, 'value': 0x22, 'desc': "Custom new game"}

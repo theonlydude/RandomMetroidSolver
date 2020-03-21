@@ -1108,7 +1108,7 @@ def validateWebServiceParams(switchs, quantities, others, isJson=False):
 def sessionWebService():
     # web service to update the session
     switchs = ['suitsRestriction', 'hideItems', 'strictMinors',
-               'areaRandomization', 'areaLayout', 'escapeRando',
+               'areaRandomization', 'areaLayout', 'escapeRando', 'removeEscapeEnemies',
                'bossRandomization',
                'funCombat', 'funMovement', 'funSuits',
                'layoutPatches', 'variaTweaks', 'nerfedCharge',
@@ -1147,6 +1147,7 @@ def sessionWebService():
     session.randomizer['areaRandomization'] = request.vars.areaRandomization
     session.randomizer['areaLayout'] = request.vars.areaLayout
     session.randomizer['escapeRando'] = request.vars.escapeRando
+    session.randomizer['removeEscapeEnemies'] = request.vars.removeEscapeEnemies
     session.randomizer['bossRandomization'] = request.vars.bossRandomization
     session.randomizer['funCombat'] = request.vars.funCombat
     session.randomizer['funMovement'] = request.vars.funMovement
@@ -1188,7 +1189,7 @@ def randomizerWebService():
 
     # check validity of all parameters
     switchs = ['suitsRestriction', 'hideItems', 'strictMinors',
-               'areaRandomization', 'areaLayout', 'escapeRando',
+               'areaRandomization', 'areaLayout', 'escapeRando', 'removeEscapeEnemies',
                'bossRandomization',
                'funCombat', 'funMovement', 'funSuits',
                'layoutPatches', 'variaTweaks', 'nerfedCharge',
@@ -1312,6 +1313,8 @@ def randomizerWebService():
 
     if request.vars.escapeRando == 'on':
         params.append('--escapeRando')
+        if request.vars.removeEscapeEnemies == 'off':
+            params.append('--noRemoveEscapeEnemies')
     elif request.vars.escapeRando == 'random':
         params += ['--escapeRando', 'random']
 

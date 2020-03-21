@@ -14,13 +14,13 @@ hs.zIndexCounter = 1000000;
 hs.dimmingOpacity = 0.75;
 
 if (hs.registerOverlay) {
-	// The simple semitransparent close button overlay
-	hs.registerOverlay({
-		thumbnailId: 'areathumb',
-		html: '<div class="closebutton"	onclick="return hs.close(this)" title="Close"></div>',
-		position: 'top right',
-		fade: 2 // fading the semi-transparent overlay looks bad in IE
-	});
+        // The simple semitransparent close button overlay
+        hs.registerOverlay({
+                thumbnailId: 'areathumb',
+                html: '<div class="closebutton"        onclick="return hs.close(this)" title="Close"></div>',
+                position: 'top right',
+                fade: 2 // fading the semi-transparent overlay looks bad in IE
+        });
 }
 </script>
 
@@ -406,15 +406,15 @@ google.charts.setOnLoadCallback(drawOpennessHistogram_44);
   <div class="menu">
     <table class="full menuTable">
       <tr>
-	<td>{{=A("Home", _href=URL(f="home"), _class="menu")}}</td>
-	<td>{{=A("Presets", _href=URL(f="presets"), _class="menu")}}</td>
-	<td>{{=A("Randomizer", _href=URL(f="randomizer"), _class="menu")}}</td>
-	<td>{{=A("Solver", _href=URL(f="solver"), _class="menu")}}</td>
-	<td>{{=A("Tracker", _href=URL(f="tracker"), _class="menu")}}</td>
-	<td>{{=A("Plandomizer", _href=URL(f="plando"), _class="menu")}}</td>
-	<td>{{=A("Customizer", _href=URL(f="customizer"), _class="menu")}}</td>
-	<td>{{=A("Statistics", _href=URL(f="extStats"), _class="menu")}}</td>
-	<td>{{=A("Information & Contact", _href=URL(f="infos"), _class="menu")}}</td>
+        <td>{{=A("Home", _href=URL(f="home"), _class="menu")}}</td>
+        <td>{{=A("Presets", _href=URL(f="presets"), _class="menu")}}</td>
+        <td>{{=A("Randomizer", _href=URL(f="randomizer"), _class="menu")}}</td>
+        <td>{{=A("Solver", _href=URL(f="solver"), _class="menu")}}</td>
+        <td>{{=A("Tracker", _href=URL(f="tracker"), _class="menu")}}</td>
+        <td>{{=A("Plandomizer", _href=URL(f="plando"), _class="menu")}}</td>
+        <td>{{=A("Customizer", _href=URL(f="customizer"), _class="menu")}}</td>
+        <td>{{=A("Statistics", _href=URL(f="extStats"), _class="menu")}}</td>
+        <td>{{=A("Information & Contact", _href=URL(f="infos"), _class="menu")}}</td>
       </tr>
     </table>
   </div>
@@ -429,16 +429,16 @@ google.charts.setOnLoadCallback(drawOpennessHistogram_44);
   <div class="tabcontent">
     <form id="mainform" name="mainform">
       <table class="full">
-	<tr>
-	  <td>Settings Preset:</td>
-	  <td>{{=SELECT(*randoPresets, **dict(_name="randoPreset", _id="randoPreset", value=session.progSpeedStats["randoPreset"], _class="filldropdown chzn-select"))}}</td>
-	  <td><button id="randoPresetStep" type="button" onclick="startTheTour(0)">?</button></td>
+        <tr>
+          <td>Settings Preset:</td>
+          <td>{{=SELECT(*randoPresets, **dict(_name="randoPreset", _id="randoPreset", value=session.progSpeedStats["randoPreset"], _class="filldropdown chzn-select"))}}</td>
+          <td><button id="randoPresetStep" type="button" onclick="startTheTour(0)">?</button></td>
 
-	  <td>Majors Split:</td>
-	  <td>{{=SELECT(*majorsSplit, **dict(_name="majorsSplit", _id="majorsSplit", value=session.progSpeedStats["majorsSplit"], _class="filldropdown chzn-select"))}}</td>
-	  <td><button id="majorsSplitStep" type="button" onclick="startTheTour(1)">?</button></td>
+          <td>Majors Split:</td>
+          <td>{{=SELECT(*majorsSplit, **dict(_name="majorsSplit", _id="majorsSplit", value=session.progSpeedStats["majorsSplit"], _class="filldropdown chzn-select"))}}</td>
+          <td><button id="majorsSplitStep" type="button" onclick="startTheTour(1)">?</button></td>
 
-	  <td>{{=INPUT(_type="submit", _value="Load", _name="action", _class="btn btn-default")}}</td>
+          <td>{{=INPUT(_type="submit", _value="Load", _name="action", _class="btn btn-default")}}</td>
         </tr>
       </table>
     </form>

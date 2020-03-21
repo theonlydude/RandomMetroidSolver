@@ -353,12 +353,12 @@ function changeComplexity(evt, name) {
 
   else if(name == "medium") {
     var show = ["maxDiffVisibility", "patchesVisibility", "morphPlacementVisibility", "ammoVisibility", "nerfedChargeVisibility", "musicVisibility", "escapeRandoVisibility"];
-    var hide = ["seedVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "strictMinorsVisibility", "missileQtyVisibility", "superQtyVisibility", "powerBombQtyVisibility", "superFunVisibility", "mainPatchesVisibility", "mainPatchesTextVisibility", "hideItemsVisibility", "raceModeVisibility", "miscVisibility"];
+      var hide = ["seedVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "strictMinorsVisibility", "missileQtyVisibility", "superQtyVisibility", "powerBombQtyVisibility", "superFunVisibility", "mainPatchesVisibility", "gravityBehaviourVisibility", "mainPatchesTextVisibility", "hideItemsVisibility", "raceModeVisibility", "miscVisibility"];
     showHide(show, hide);
   }
 
   else {
-    var show = ["seedVisibility", "ammoVisibility", "maxDiffVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "morphPlacementVisibility", "strictMinorsVisibility", "missileQtyVisibility", "superQtyVisibility", "powerBombQtyVisibility", "superFunVisibility", "patchesVisibility", "mainPatchesVisibility", "mainPatchesTextVisibility", "hideItemsVisibility", "raceModeVisibility", "nerfedChargeVisibility", "miscVisibility", "musicVisibility", "escapeRandoVisibility"];
+      var show = ["seedVisibility", "ammoVisibility", "maxDiffVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "morphPlacementVisibility", "strictMinorsVisibility", "missileQtyVisibility", "superQtyVisibility", "powerBombQtyVisibility", "superFunVisibility", "patchesVisibility", "mainPatchesVisibility", "gravityBehaviourVisibility", "mainPatchesTextVisibility", "hideItemsVisibility", "raceModeVisibility", "nerfedChargeVisibility", "miscVisibility", "musicVisibility", "escapeRandoVisibility"];
     var hide = [];
     showHide(show, hide);
   }
@@ -1397,6 +1397,18 @@ Click on the dice button to randomly set this parameter.",
       placement: "auto left"
     },
     {
+      element: "#nerfedChargeStep",
+      title: "Nerfed Charge Beam",
+      content: "<ul>\
+<li>Samus begins with a starter Charge Beam <img src=\"/solver/static/images/Charge.png\" alt=\"Charge.png\" title=\"Charge.png\" class=\"width: 32px\"/> that does one third of charged shot damage, effectively bringing a nerfed charge shot damage to a standard shot damage, but that can damage bosses.</li>\
+<li><a href=\"https://wiki.supermetroid.run/Pseudo_Screw_Attack\" target=\"_blank\">Pseudo Screws</a> also do one third damage.</li>\
+<li><a href=\"https://wiki.supermetroid.run/Charge_Beam_Combos\" target=\"_blank\">Special Beam Attacks</a> do normal damage but cost 3 Power Bombs instead of 1.</li>\
+<li>Once the Charge Beam <img src=\"/solver/static/images/Charge.png\" alt=\"Charge.png\" title=\"Charge.png\" class=\"width: 32px\"/> item has been collected, it does full damage and special attacks are back to normal.</li>\
+</ul>\
+<p>Patch developed by Smiley and Flo.</p>",
+      placement: "auto left"
+    },
+    {
       element: "#gravityBehaviourStep",
       title: "Suits Properties",
       content: "<p><ul>\
@@ -1411,18 +1423,6 @@ Click on the dice button to randomly set this parameter.",
 <li>Vanilla:<p>No change to vanilla suits properties. Most notably, Gravity <img src=\"/solver/static/images/Gravity.png\" alt=\"Gravity.png\" title=\"Gravity.png\" class=\"width: 32px\"/> provides full protection against environmental damages (heat, spikes, electricity...).</p></li>\
 </ul></p>\
 <p>Patches developed by Total and Smiley.</p>",
-      placement: "auto left"
-    },
-    {
-      element: "#nerfedChargeStep",
-      title: "Nerfed Charge Beam",
-      content: "<ul>\
-<li>Samus begins with a starter Charge Beam <img src=\"/solver/static/images/Charge.png\" alt=\"Charge.png\" title=\"Charge.png\" class=\"width: 32px\"/> that does one third of charged shot damage, effectively bringing a nerfed charge shot damage to a standard shot damage, but that can damage bosses.</li>\
-<li><a href=\"https://wiki.supermetroid.run/Pseudo_Screw_Attack\" target=\"_blank\">Pseudo Screws</a> also do one third damage.</li>\
-<li><a href=\"https://wiki.supermetroid.run/Charge_Beam_Combos\" target=\"_blank\">Special Beam Attacks</a> do normal damage but cost 3 Power Bombs instead of 1.</li>\
-<li>Once the Charge Beam <img src=\"/solver/static/images/Charge.png\" alt=\"Charge.png\" title=\"Charge.png\" class=\"width: 32px\"/> item has been collected, it does full damage and special attacks are back to normal.</li>\
-</ul>\
-<p>Patch developed by Smiley and Flo.</p>",
       placement: "auto left"
     },
     {
@@ -1802,13 +1802,6 @@ def displayNumber(id, min, max, default, step="1"):
                   <td id="variaTweaksStep" class="half">{{displayCheckbox("variaTweaks", True)}} VARIA tweaks</td>
                   <td><button type="button" onclick="startTheTour(27)">?</button></td>
                 </tr>
-                <tr id="gravityBehaviourStep">
-                  <td class="half" colspan="2">Suits properties</td>
-                  <td class="half">
-                    {{displaySelect("gravityBehaviour", ["Balanced", "Progressive", "Vanilla"], "Balanced")}}
-                  </td>
-                  <td><button type="button" onclick="startTheTour(28)">?</button></td>
-                </tr>
               </table>
               <table class="full" id="nerfedChargeVisibility">
                 <colgroup><col class="half" /><col class="half" /></colgroup>
@@ -1816,6 +1809,15 @@ def displayNumber(id, min, max, default, step="1"):
                   <td colspan="2">
                     {{displayCheckbox("nerfedCharge")}}
                     Nerfed Charge Beam available from the start
+                  </td>
+                  <td><button type="button" onclick="startTheTour(28)">?</button></td>
+                </tr>
+              </table>
+              <table class="full" id="gravityBehaviourVisibility">
+                <tr id="gravityBehaviourStep">
+                  <td class="half">Suits properties</td>
+                  <td class="half">
+                    {{displaySelect("gravityBehaviour", ["Balanced", "Progressive", "Vanilla"], "Balanced")}}
                   </td>
                   <td><button type="button" onclick="startTheTour(29)">?</button></td>
                 </tr>

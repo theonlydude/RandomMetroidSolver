@@ -87,12 +87,15 @@ is_music_to_randomize:
     rts
 
 ;;; single use random function that leaves game rng untouched
+;;; result in A
 rand:
-    lda !RNG_seed : pha
-    eor !RTA_timer : sta !RNG_seed
-    jsl !RNG : pha
-    pla : sta !RNG_seed
-    pla
+    phy
+    lda !RNG_seed : pha             ; save current rand seed
+    eor !RTA_timer : sta !RNG_seed  ; alter seed with frame counter
+    jsl !RNG : tay                  ; call RNG and save result to Y
+    pla : sta !RNG_seed             ; restore current rand seed
+    tya                             ; get RNG result in A
+    ply
     rts
 
 ;;; gets a random data/track couple from table, and store it in last_music_rnd (and A)
@@ -117,17 +120,7 @@ get_random_music:
 ;;; will be randomized if:
 ;;; - new music is actually requested
 ;;; - this new music is different from the last new music we tried to load
-;;; xxtt with tt 05 or 06 and xx not 0 => if music combination is to be randomized,
-;;; 		                          randomize and use it.
-;;; 					  if not store as asked.
-;;; 					  in all cases, store asked music
-;;; xxtt with tt not 05 or 06 => if xx is 0, store it as asked.
-;;;                              if not, check if xx05 or xx06 matches last asked music.
-;;;                              if it does not, randomize music but just store it
-;;;                              in last random music.
-;;; 				 if it does, store as asked
-;;; 0005/0006 => if last asked song was randomized, restore random music
-;;; 		 if not, restore last asked music
+;;; - we encountered an item/elevator room
 load_room_music:
     phx
     ;; at this point, A contains music data index in lo byte, 0 in hi
@@ -139,21 +132,16 @@ load_room_music:
     ;; (from room header)
     cmp #$05	: beq .track_ok
     cmp #$06	: beq .track_ok
+    cmp #$03    : beq .elevator_item
     rep #$20
-    bit #$ff00	: beq .store_music	; vanilla load if 00xx
-    ;; here, music data is != 0, but track is neither 05 nor 06
-    ;; check if data|05 or data|06 matches last music request
+    bra .store_music    ; vanilla load if anything else
+.elevator_item:
+    ;; for elevator/item room, we force a randomization to have more variety in game
+    ;; and avoid complicated cases
+    rep #$20
     pha
-    and #$ff00 : ora #$0005
-    cmp !last_music_rq : beq .restore_music
-    and #$ff00 : ora #$0006
-    cmp !last_music_rq : beq .restore_music
     ;; randomize music but don't use it, just store it in last_music_rnd
     jsr get_random_music
-    pla : pha
-    and #$ff00 : ora #$0005
-    sta !last_music_rq	; store data|05 as last requested
-.restore_music:
     pla
     bra .store_music
 .track_ok:
@@ -163,7 +151,7 @@ load_room_music:
     ;; check if music/track couple is to be randomized
     rep #$20
     jsr is_music_to_randomize : bcc .dont_randomize
-    cmp !last_music_rq	  : bne .randomize
+    cmp !last_music_rq	      : bne .randomize
     ;; we're here when new music is asked but it's the same
     ;; as the last asked new music.
 .dont_change:
@@ -172,7 +160,7 @@ load_room_music:
     rep #$20
     lda !last_music_rq
     jsr is_music_to_randomize : bcc .store_music
-    lda !last_music_rnd	  : bra .store_music
+    lda !last_music_rnd	      : bra .store_music
 .dont_randomize:
     sta !last_music_rq
     bra .store_music

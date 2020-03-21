@@ -352,13 +352,13 @@ function changeComplexity(evt, name) {
   }
 
   else if(name == "medium") {
-    var show = ["maxDiffVisibility", "patchesVisibility", "morphPlacementVisibility", "ammoVisibility", "nerfedChargeVisibility", "noMusicVisibility", "random_musicVisibility", "escapeRandoVisibility"];
+    var show = ["maxDiffVisibility", "patchesVisibility", "morphPlacementVisibility", "ammoVisibility", "nerfedChargeVisibility", "musicVisibility", "escapeRandoVisibility"];
     var hide = ["seedVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "strictMinorsVisibility", "missileQtyVisibility", "superQtyVisibility", "powerBombQtyVisibility", "superFunVisibility", "mainPatchesVisibility", "mainPatchesTextVisibility", "hideItemsVisibility", "raceModeVisibility", "miscVisibility"];
     showHide(show, hide);
   }
 
   else {
-    var show = ["seedVisibility", "ammoVisibility", "maxDiffVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "morphPlacementVisibility", "strictMinorsVisibility", "missileQtyVisibility", "superQtyVisibility", "powerBombQtyVisibility", "superFunVisibility", "patchesVisibility", "mainPatchesVisibility", "mainPatchesTextVisibility", "hideItemsVisibility", "raceModeVisibility", "nerfedChargeVisibility", "miscVisibility", "noMusicVisibility", "random_musicVisibility", "escapeRandoVisibility"];
+    var show = ["seedVisibility", "ammoVisibility", "maxDiffVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "morphPlacementVisibility", "strictMinorsVisibility", "missileQtyVisibility", "superQtyVisibility", "powerBombQtyVisibility", "superFunVisibility", "patchesVisibility", "mainPatchesVisibility", "mainPatchesTextVisibility", "hideItemsVisibility", "raceModeVisibility", "nerfedChargeVisibility", "miscVisibility", "musicVisibility", "escapeRandoVisibility"];
     var hide = [];
     showHide(show, hide);
   }
@@ -1588,7 +1588,7 @@ def displayNumber(id, min, max, default, step="1"):
                 <td id="seedStep"><button type="button" onclick="startTheTour(1)">?</button></td>
               </tr>
               <tr>
-                <td>Skills Preset: <span class="rightStep"><a href="javascript:DoPost()">What's in the logic for this skills preset ?</a><span></td>
+                <td>Skills Preset: <span class="rightStep"><a href="javascript:DoPost()">What's in the logic for this skills preset ?</a><span></td><!-- ' -->
                 <td>{{=SELECT(OPTGROUP(*stdPresets, **dict(_label="Standard presets")), OPTGROUP(*tourPresets, **dict(_label="Tournament presets")), OPTGROUP(*comPresets, **dict(_label="Community presets")), **dict(_name="preset", _id="preset", value=session.randomizer["preset"], _class="filldropdown chzn-select"))}}</td>
                 <td id="presetStep"><button type="button" onclick="startTheTour(2)">?</button></td>
               </tr>
@@ -1745,10 +1745,27 @@ def displayNumber(id, min, max, default, step="1"):
               </table>
             </div>
             <div id="superFunVisibility">
-              <h4>Super Fun Times (TM)</h4>
+              <h4>Super Fun Times&trade;</h4>
               <p>
                 Have fun randomly removing major items!
               </p>
+              <table class="full">
+                <tr>
+                  <td class="small" id="funCombatStep"><div class="random"><button id="funCombatRandom" type="button" onclick="randomize(event, 'funCombat')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
+                  <td class="third">{{displayCheckbox("funCombat")}}<span id="funCombatText">Super Fun Combat</span></td>
+                  <td><button type="button" onclick="startTheTour(22)">?</button></td>
+
+                  <td class="small" id="funMovementStep"><div class="random"><button id="funMovementRandom" type="button" onclick="randomize(event, 'funMovement')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
+                  <td class="third">{{displayCheckbox("funMovement")}}<span id="funMovementText">Super Fun Movement</span></td>
+                  <td><button type="button" onclick="startTheTour(23)">?</button></td>
+
+                  <td class="small" id="funSuitsStep"><div class="random"><button id="funSuitsRandom" type="button" onclick="randomize(event, 'funSuits')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
+                  <td class="third">{{displayCheckbox("funSuits")}}<span id="funSuitsText">Suitless</span></td>
+                  <td><button type="button" onclick="startTheTour(24)">?</button></td>
+                </tr>
+              </table>
+
+<!--
               <table class="full">
                 <tr>
                   <td class="small" id="funCombatStep"><div class="random"><button id="funCombatRandom" type="button" onclick="randomize(event, 'funCombat')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
@@ -1766,6 +1783,8 @@ def displayNumber(id, min, max, default, step="1"):
                   <td><button type="button" onclick="startTheTour(24)">?</button></td>
                 </tr>
               </table>
+-->
+
             </div>
             <div id="patchesVisibility">
               <h4 id="patchesStep">Patches<span class="rightStep"><button type="button" onclick="startTheTour(25)">?</button></span></h4>
@@ -1777,18 +1796,15 @@ def displayNumber(id, min, max, default, step="1"):
                 <tr><td colspan="2"><h5 class="center"><b>Randomizer adaptations (logic impact)</b></h5></td><td></td></tr>
               </table>
               <table class="full" id="mainPatchesVisibility">
-                <colgroup><col class="half" /><col class="half" /></colgroup>
-                <tr id="layoutPatchesStep">
-                  <td colspan="2">{{displayCheckbox("layoutPatches", True)}} Anti-softlock layout patches</td>
-                  <td><button type="button" onclick="startTheTour(26)">?</button></td>
-                </tr>
                 <tr>
-                  <td colspan="2" id="variaTweaksStep">{{displayCheckbox("variaTweaks", True)}} VARIA tweaks</td>
+                  <td id="layoutPatchesStep" class="half">{{displayCheckbox("layoutPatches", True)}} Anti-softlock layout patches</td>
+                  <td><button type="button" onclick="startTheTour(26)">?</button></td>
+                  <td id="variaTweaksStep" class="half">{{displayCheckbox("variaTweaks", True)}} VARIA tweaks</td>
                   <td><button type="button" onclick="startTheTour(27)">?</button></td>
                 </tr>
                 <tr id="gravityBehaviourStep">
-                  <td>Suits properties</td>
-                  <td>
+                  <td class="half" colspan="2">Suits properties</td>
+                  <td class="half">
                     {{displaySelect("gravityBehaviour", ["Balanced", "Progressive", "Vanilla"], "Balanced")}}
                   </td>
                   <td><button type="button" onclick="startTheTour(28)">?</button></td>
@@ -1809,16 +1825,13 @@ def displayNumber(id, min, max, default, step="1"):
                 <tr><td colspan="2"><h5 class="center"><b>Game comfort</b></h5></td><td></td></tr>
               </table>
               <table class="full">
-                <colgroup><col class="half" /><col class="half" /></colgroup>
-                <tr id="itemsoundsStep">
-                  <td colspan="2">
+                <tr>
+                  <td id="itemsoundsStep" class="half">
                     {{displayCheckbox("itemsounds")}}
                     Remove fanfare when picking up an item
                   </td>
                   <td><button type="button" onclick="startTheTour(30)">?</button></td>
-                </tr>
-                <tr id="ElevatorDoorsStep">
-                  <td colspan="2">
+                  <td id="ElevatorDoorsStep" class="half">
                     {{displayCheckbox("elevators_doors_speed")}}
                     Accelerate doors and elevators transitions
                   </td>
@@ -1826,16 +1839,13 @@ def displayNumber(id, min, max, default, step="1"):
                 </tr>
               </table>
               <table class="full">
-                <colgroup><col class="half" /><col class="half" /></colgroup>
-                <tr id="spinjumprestartStep">
-                  <td colspan="2">
+                <tr>
+                  <td id="spinjumprestartStep" class="half">
                     {{displayCheckbox("spinjumprestart")}}
                     Spin jump restart (a.k.a. Respin)
                   </td>
                   <td><button type="button" onclick="startTheTour(32)">?</button></td>
-                </tr>
-                <tr id="rando_speedStep">
-                  <td colspan="2">
+                  <td id="rando_speedStep" class="half">
                     {{displayCheckbox("rando_speed")}}
                      Momentum conservation (a.k.a. Speedkeep)
                   </td>
@@ -1856,20 +1866,14 @@ def displayNumber(id, min, max, default, step="1"):
                   <td><button type="button" onclick="startTheTour(34)">?</button></td>
                 </tr>
               </table>
-              <table class="full" id="noMusicVisibility">
-                <colgroup><col class="half" /><col class="half" /></colgroup>
-                <tr id="No_MusicStep">
-                  <td colspan="2">
+              <table class="full" id="musicVisibility">
+                <tr>
+                  <td id="No_MusicStep" class="half">
                     {{displayCheckbox("No_Music")}}
                     Disable background music
                   </td>
                   <td><button type="button" onclick="startTheTour(35)">?</button></td>
-                </tr>
-              </table>
-              <table class="full" id="random_musicVisibility">
-                <colgroup><col class="half" /><col class="half" /></colgroup>
-                <tr id="random_musicStep">
-                  <td colspan="2">
+                  <td id="random_musicStep" class="half">
                     {{displayCheckbox("random_music")}}
                     Randomize background music
                   </td>

@@ -13,8 +13,8 @@ lorom
 arch snes.cpu
 
 ;;; CONSTANTS
-!tracks_tbl_sz	= #$0018
-!nb_tracks_8b	= #$0c
+!tracks_tbl_sz	= #$0018    ; table size, in bytes, for unique tracks
+!nb_tracks_8b	= #$15      ; nb of tracks total, including duplicates
 !last_music_rq	= $7fff30	; RAM address to store music requests by the game
 !last_music_rnd = $7fff32	; RAM address to store our random music
 !room_music	= $07cb
@@ -37,7 +37,7 @@ org $a98810
 
 org $A1F300
 musics_list:
-    ;; music set index
+    ;; music set index. unique tracks to randomize between themselves
     ;; hi: music data index
     ;; lo: music track index
     dw $0905	; Lower Crateria
@@ -52,6 +52,16 @@ musics_list:
     dw $1805	; Lower Norfair
     dw $3605	; Intro
     dw $1e05	; Tourian
+    ;;; duplicates used when choosing music to lower probabilities of WS and Tourian "songs"
+    dw $0905	; Lower Crateria
+    dw $0c05	; Upper Crateria PBs
+    dw $0f05	; Green Brinstar
+    dw $1205	; Red Brinstar
+    dw $1505	; Upper Norfair
+    dw $1b05	; Maridia 1
+    dw $1b06	; Maridia 2
+    dw $1805	; Lower Norfair
+    dw $3605	; Intro
 
 ;;; check that music in A is in musics_list table.
 ;;; set carry flag if true.

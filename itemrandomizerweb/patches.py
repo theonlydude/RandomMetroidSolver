@@ -123,6 +123,12 @@ patches = {
         0x787A6: [0x42, 0xc8, 0x5e, 0x06, 0x63, 0x8c],
         0x109325: [0x0]
     },
+    'Blinking[Warehouse Zeela Room Left]': {
+        0x109451: [0x0]
+    },
+    'Blinking[Kraid Room Out]': {
+        0x10A056: [0x0]
+    },
 }
 
 additional_PLMs = {
@@ -198,6 +204,18 @@ additional_PLMs = {
         'room': 0x9938,
         'plm_bytes_list': [
             [0x42, 0xc8, 0x0e, 0x06, 0x63, 0x8c]
+        ]
+    },
+    'Blinking[Warehouse Zeela Room Left]': {
+        'room': 0xa471,
+        'plm_bytes_list': [
+            [0x48, 0xc8, 0x01, 0x06, 0x63, 0x8c]
+        ]
+    },
+    'Blinking[Kraid Room Out]': {
+        'room': 0xa56b,
+        'plm_bytes_list': [
+            [0x42, 0xc8, 0x1e, 0x16, 0x63, 0x8c]
         ]
     },
 }

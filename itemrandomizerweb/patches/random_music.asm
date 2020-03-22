@@ -35,6 +35,7 @@ org $82DF3E
 org $a98810
     rep 4 : nop		; disables MB2 "no music" before fight, as cutscene is sped up
 
+;;; DATA
 org $A1F300
 musics_list:
     ;; music set index. unique tracks to randomize between themselves
@@ -62,6 +63,8 @@ musics_list:
     dw $1b06	; Maridia 2
     dw $1805	; Lower Norfair
     dw $3605	; Intro
+
+;;; CODE
 
 ;;; check that music in A is in musics_list table.
 ;;; set carry flag if true.

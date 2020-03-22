@@ -31,16 +31,6 @@ define pause_timer_hi $7fff0c
 define add_time_32_tmp_lo $7fff0e
 define add_time_32_tmp_hi $7fff1a
 
-define pump_rem	$7fff1c
-define vx_16 $7fff1e
-
-// constants
-define last_movement_type $0a23
-define vx_pix $0b42
-define vx_subpix_hi $0b45
-define mx_pix $0b46
-define mx_subpix_hi $0b49
-
 // -------------------------------
 // HIJACKS
 // -------------------------------

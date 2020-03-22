@@ -801,13 +801,14 @@ class RomPatcher:
         (w0, w1) = getWord(ap.Start['spawn'])
         doors = [0x10] # red brin elevator
         if area == True:
-            # add area blue doors
-            doors += [0x30, # green hills
-                      0x33, # noob bridge
-                      0x0e, # crateria key hunters
-                      0x1e, # green pirates shaft
-                      0x0f, # coude
-                      0x58] # kronic boost
+            for accessPoint in accessPoints:
+                if accessPoint.Internal == True or accessPoint.Boss == True:
+                    continue
+                key = 'Blinking[{}]'.format(accessPoint.Name)
+                if key in patches:
+                    self.applyIPSPatch(key)
+                if key in additional_PLMs:
+                    plms.append(key)
         if 'doors' in ap.Start:
             doors += ap.Start['doors']
         doors.append(0x0)

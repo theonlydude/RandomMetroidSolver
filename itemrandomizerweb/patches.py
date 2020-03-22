@@ -163,7 +163,7 @@ patches = {
     'Blinking[Crab Hole Bottom Left]': {
         0x10DE59: [0x0]
     },
-    'Blinking[Main Street Bottom Left]': {
+    'Blinking[Main Street Bottom]': {
         0x10DF2F: [0x0]
     },
     'Blinking[Red Fish Room Left]': {
@@ -251,7 +251,7 @@ additional_PLMs = {
     'Blinking[Moat Right]': {
         'room': 0x95ff,
         'plm_bytes_list': [
-            [0x42, 0xc8, 0x1e, 0x0a, 0x63, 0x8c]
+            [0x42, 0xc8, 0x1e, 0x06, 0x63, 0x8c]
         ]
     },
     'Blinking[Lower Mushrooms Left]': {
@@ -335,7 +335,7 @@ additional_PLMs = {
     'Blinking[Crab Maze Left]': {
         'room': 0x957d,
         'plm_bytes_list': [
-            [0x48, 0xc8, 0x01, 0x06, 0x63, 0x8c]
+            [0x48, 0xc8, 0x01, 0x16, 0x63, 0x8c]
         ]
     },
     'Blinking[Crab Hole Bottom Left]': {
@@ -344,7 +344,7 @@ additional_PLMs = {
             [0x48, 0xc8, 0x01, 0x16, 0x63, 0x8c]
         ]
     },
-    'Blinking[Main Street Bottom Left]': {
+    'Blinking[Main Street Bottom]': {
         'room': 0xcfc9,
         'plm_bytes_list': [
             [0x4e, 0xc8, 0x16, 0x7d, 0x63, 0x8c]

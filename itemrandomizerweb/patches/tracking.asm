@@ -75,7 +75,7 @@ org $90b9a1
 
 // Firing SBAs
 org $90ccde
-    jmp fire_sba_local	
+    jmp fire_sba_local
 
 //Missiles/supers fired
 org $90beb7
@@ -104,11 +104,11 @@ pausing_local:
 resuming_local:
 	jml resuming
 
-; arm pump detection (from Drewseph in Redesign/Axeil)
+// arm pump detection (from Drewseph in Redesign/Axeil)
 org $91EB3E
-    JSL pump_left : NOP
+    JSL pump_left ; NOP
 org $91EB21
-    JSL pump_right : NOP
+    JSL pump_right ; NOP
 
 // -------------------------------
 // CODE (using bank A1 free space)
@@ -132,7 +132,7 @@ add_time:
     txa
     jsl {inc_stat}
 +
-    jsl {store_stat}  
+    jsl {store_stat}
     rts
 
 // same as above, using 32bits date for couting long times (> 65535 frames, ~18min)
@@ -170,7 +170,7 @@ add_time_32:
 // Samus hit a door block (Gamestate change to $09 just before hitting $0a)
 door_entered:
     lda #$0002  // Number of door transitions
-    jsl {inc_stat}  
+    jsl {inc_stat}
 
     lda {timer1}
     sta {door_timer_tmp} // Save RTA time to temp variable
@@ -187,7 +187,7 @@ update_region_time:
 	beq +
 	tax
 	lda {region_timer_tmp}
-	jsr add_time    
+	jsr add_time
 +
 	rts
 store_region_time:
@@ -209,7 +209,7 @@ door_exited:
 	lda $7e079f
 	asl
 	clc
-	adc #$0007    
+	adc #$0007
 	sta {region_tmp}
 
 	// Run hijacked code and return
@@ -345,7 +345,7 @@ resuming:
 	inc $0998
 	jml $82939f
 
-;;; ARM PUMP detection/time gained computation. detection borrowed from Redesigne/Axeil by Drewseph
+// ARM PUMP detection/time gained computation. detection borrowed from Redesigne/Axeil by Drewseph
 pump_left:
 	lda #$FFFF
 	sta $12
@@ -354,36 +354,38 @@ pump_right:
 	lda #$0001
 	sta $12
 pumps:
-    LDA $0A1F : AND #$00FF : CMP #$0015 : BNE + ; checks that we're not bonking a wall
-        jmp .end
-
-    +    LDA $0AD2 : BEQ +    ; Checks if in water no gravity suit
-            LDA $09A2 : BIT #$0020 : BNE +     ; Checks Gravity suit
-                BRA .pump		       ; if no grav and in water: arm pump??? FIXME test this
-	;; checks Samus poses
-    +    LDA $0A20 : CMP #$0009 : BEQ .pump
-                    CMP #$000A : BEQ .pump
-                    CMP #$000F : BEQ .pump
-                    CMP #$0010 : BEQ .pump
-                    CMP #$0011 : BEQ .pump
-                    CMP #$0012 : BEQ .pump
-                    jmp .end
-;; pumps:
-;; 	// X momentum is at least 2: walking/underwater running "full speed"
-;; 	// since we don't have accel value, do this to avoid being too wrong
-;; 	// in frame gain computations because of too low speed values
-;; 	lda {mx_pix}
-;; 	cmp #$0002
-;; 	bcs .pump
-;; +
-;; 	jmp .end
+	// checks that we're not bonking a wall
+    LDA $0A1F
+	AND #$00FF
+	CMP #$0015
+	BNE +	// continue check further
+    jmp .end  // BONK
++
+    // Checks if in water no gravity suit
+	LDA $0AD2	// liquid physics type
+	BEQ +		// 0 = air, proceed to pose check
+	// here we're in liquid, checks if Gravity suit is equipped
+    LDA $09A2
+	BIT #$0020
+	BNE +	// grav equipped, proceed to pose check
+    BRA .pump		       // if no grav and in water: arm pump??? FIXME test this
++
+	// check Samus poses
+	LDA $0A20
+	CMP #$0009 ; BEQ .pump
+	CMP #$000A ; BEQ .pump
+    CMP #$000F ; BEQ .pump
+    CMP #$0010 ; BEQ .pump
+    CMP #$0011 ; BEQ .pump
+    CMP #$0012 ; BEQ .pump
+    jmp .end	// no pump
 .pump:
 	// compute arm pump time saved
 	// first, compute speed in 16th of a pixel per frame :
 	// vx_16=(vx+mx)*16 + vx_subpix/4096 + mx_subpix/4096
 	// NOTE: samus max running speed with speed booster is lower than 10px/frame,
 	//       so vx_16 will always be at most one byte long, to be used
-	//	 as divisor for SNES hardware 16b/8b division
+	//	     as divisor for SNES hardware 16b/8b division
 	lda {vx_pix}
 	clc
 	adc {mx_pix}

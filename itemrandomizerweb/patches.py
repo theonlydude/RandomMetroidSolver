@@ -126,7 +126,7 @@ patches = {
     'Blinking[Warehouse Zeela Room Left]': {
         0x109451: [0x0]
     },
-    'Blinking[Kraid Room Out]': {
+    'Blinking[KraidRoomOut]': {
         0x10A056: [0x0]
     },
     'Blinking[Warehouse Entrance Right]': {
@@ -148,13 +148,13 @@ patches = {
     'Blinking[Lava Dive Right]': {
         0x10AD6B: [0x0]
     },
-    'Blinking[Ridley Room Out]': {
+    'Blinking[RidleyRoomOut]': {
         0x10B81B: [0x0]
     },
     'Blinking[West Ocean Left]': {
         0x1086F6: [0x0]
     },
-    'Blinking[Phantoon Room Out]': {
+    'Blinking[PhantoonRoomOut]': {
         0x10C3E5: [0x0]
     },
     'Blinking[Crab Maze Left]': {
@@ -173,7 +173,7 @@ patches = {
         0x7823E: [0x42, 0xc8, 0x0e, 0x06, 0x63, 0x8c],
         0x1085DD: [0x0]
     },
-    'Blinking[Draygon Room Out]': {
+    'Blinking[DraygonRoomOut]': {
         0x10D111: [0x0]
     },
     'Blinking[East Tunnel Top Right]': {
@@ -278,7 +278,7 @@ additional_PLMs = {
             [0x48, 0xc8, 0x01, 0x06, 0x63, 0x8c]
         ]
     },
-    'Blinking[Kraid Room Out]': {
+    'Blinking[KraidRoomOut]': {
         'room': 0xa56b,
         'plm_bytes_list': [
             [0x42, 0xc8, 0x1e, 0x16, 0x63, 0x8c]
@@ -314,7 +314,7 @@ additional_PLMs = {
             [0x42, 0xc8, 0x3e, 0x06, 0x63, 0x8c]
         ]
     },
-    'Blinking[Ridley Room Out]': {
+    'Blinking[RidleyRoomOut]': {
         'room': 0xb37a,
         'plm_bytes_list': [
             [0x48, 0xc8, 0x01, 0x06, 0x63, 0x8c]
@@ -326,7 +326,7 @@ additional_PLMs = {
             [0x48, 0xc8, 0x01, 0x46, 0x63, 0x8c]
         ]
     },
-    'Blinking[Phantoon Room Out]': {
+    'Blinking[PhantoonRoomOut]': {
         'room': 0xcc6f,
         'plm_bytes_list': [
             [0x42, 0xc8, 0x4e, 0x06, 0x63, 0x8c]
@@ -356,7 +356,7 @@ additional_PLMs = {
             [0x48, 0xc8, 0x01, 0x06, 0x63, 0x8c]
         ]
     },
-    'Blinking[Draygon Room Out]': {
+    'Blinking[DraygonRoomOut]': {
         'room': 0xd78f,
         'plm_bytes_list': [
             [0x48, 0xc8, 0x01, 0x26, 0x63, 0x8c]

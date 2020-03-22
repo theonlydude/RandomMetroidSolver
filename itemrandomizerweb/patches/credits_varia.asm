@@ -31,19 +31,25 @@ define timer2 $05ba
 // routine in new_game.asm
 define check_new_game   $A1F210
 
-define stats_sram_sz_b  #$0080
-define stats_sram_sz_w  #$0040
+define _stats_sram_sz   80
+define _stats_sram_sz_w 40
+define stats_sram_sz_b  #$00{_stats_sram_sz}
+define stats_sram_sz_w  #$00{_stats_sram_sz_w}
 define tmp_area_sz      #$00df
 
-define stats_ram         $7ffc00
+define _stats_ram        fc00
+define stats_ram         $7f{_stats_ram}
 define stats_timer       {stats_ram}
 
-define stats_sram_slot0       $701400
-define last_stats_sram_slot0  $701480
-define stats_sram_slot1       $701700
-define last_stats_sram_slot1  $701780
-define stats_sram_slot2       $701a00
-define last_stats_sram_slot2  $701a80
+define _stats_sram_slot0      1400
+define _stats_sram_slot1      1700
+define _stats_sram_slot2      1a00
+define stats_sram_slot0       $70{_stats_sram_slot0}
+define stats_sram_slot1       $70{_stats_sram_slot1}
+define stats_sram_slot2       $70{_stats_sram_slot2}
+
+define last_stats_save_ok_off  #$02fc
+define last_stats_save_ok_flag #$caca
 
 // Patch boot to init our stuff
 org $80844B
@@ -115,13 +121,7 @@ boot1:
     lda #$0000
     sta {timer_backup1}
     sta {timer_backup2}
-    lda {last_saveslot}
-    // check for the 3 possible valid values
-    cmp #$0010
-    beq .save
-    cmp #$0011
-    beq .save
-    cmp #$0012
+    jsl is_save_slot
     beq .save
     bra .cont   // don't restore anything if no game was ever saved
 .save:
@@ -136,12 +136,12 @@ boot1:
     sta {timer_backup2}
     bra .cont
 .power:
-    // load timer from SRAM (it's at beggining of stats area)
-    // TODO handle slots 1 and 2
-    // TODO handle loading from "last" SRAM area if not corrupted
-    lda {stats_sram_slot0}
+    // load timer from SRAM, last stats if possible
+    lda #$0000
+    jsl save_index
+    lda $70000,x
     sta {timer_backup1}
-    lda {stats_sram_slot0}+2
+    lda $70002,x
     sta {timer_backup2}
 .cont:
     // vanilla init stuff
@@ -197,20 +197,60 @@ boot2:
     sta {timer2}
     jml $8084af
 
-warnpc $80ff00
+//// save related routines
+// zero flag set if value in last_saveslot is valid
+is_save_slot:
+    // check for the 3 possible valid values
+    lda {last_saveslot}
+    cmp #$0010
+    beq .end
+    cmp #$0011
+    beq .end
+    cmp #$0012
+    beq .end
+.end:
+    rtl
+
+// assuming a valid save slot is in last_saveslot,
+// stores in X the bank $70 index to stats area
+// arg A: if 0 we want last stats, otherwise standard stats
+save_index:
+    pha
+    lda {last_saveslot}
+    cmp #$0010
+    beq .slot0
+    cmp #$0011
+    beq .slot1
+.slot2:
+    ldx #${_stats_sram_slot2}
+    bra .last
+.slot0:
+    ldx #${_stats_sram_slot0}
+    bra .last
+.slot1:
+    ldx #${_stats_sram_slot1}
+.last:
+    pla
+    bne .end
+    txa
+    clc
+    adc #${_stats_sram_sz}
+    tax
+.end:
+    rtl
+
+warnpc $80ffbf
 
 // Patch load and save routines
+// a save will always be performed when starting a new game (see new_game.asm)
 org $81ef20
 patch_save:
     lda {timer1}
     sta {stats_timer}
     lda {timer2}
     sta {stats_timer}+2
+    lda #$0001
     jsl save_stats
-    lda $7e0952
-    clc
-    adc #$0010
-    sta {last_saveslot}
     ply
     plx
     clc
@@ -222,14 +262,20 @@ patch_load:
     lda $7e0952
     clc
     adc #$0010
-    cmp {last_saveslot}     // If we're loading the same save that's played last
-    beq +                   // don't restore stats from SRAM, only do this if
-    jsl load_stats          // a new save slot is loaded, or loading from hard reset
+    cmp {last_saveslot}     // we're loading the same save that's played last
+    bne .load
+    lda {softreset}
+    cmp #$babe
+    beq .end                   // just use stats from RAM
+.load:
+    // load from SRAM
+    jsl load_stats
+    // update live timer
     lda {stats_timer}
     sta {timer1}
     lda {stats_timer}+2
     sta {timer2}
-+
+.end:
     ply
     plx
     clc
@@ -373,6 +419,7 @@ game_end:
     lda #$0000  // if carry clear this will subtract one from the high byte of timer
     sbc {stats_timer}+2
 
+    lda #$0001
     jsl save_stats
     lda #$000a
     jsl $90f084
@@ -649,80 +696,110 @@ numbers_bot:
 
 load_stats:
     phx
+    phy
     pha
-    ldx #$0000
     lda $7e0952
-    bne +
--
-    lda {stats_sram_slot0}, x
-    sta {stats_ram}, x
-    inx
-    inx
-    cpx {stats_sram_sz_b}
-    bne -
-    jmp .end
-+
-    cmp #$0001
-    bne +
-    lda {stats_sram_slot1}, x
-    sta {stats_ram}, x
-    inx
-    inx
-    cpx {stats_sram_sz_b}
-    bne -
-    jmp .end
-+
-    lda {stats_sram_slot2}, x
-    sta {stats_ram}, x
-    inx
-    inx
-    cpx {stats_sram_sz_b}
-    bne -
-    jmp .end
-
-.end:
-    pla
+    clc
+    adc #$0010
+    sta {last_saveslot}
+    jsl save_index
+    // X = start of standard stats
+    // tries to load from last stats
+    jsr is_last_save_flag_ok
+    bne .notok
+    lda #$0000
+    jsl save_index
+.notok:
+    jsr load_stats_at
+    ply
     plx
     rtl
 
+// arg X = index of where to load stats from in bank $70
+load_stats_at:
+    phx
+    phy
+    ldy #${_stats_ram}
+    // 1 excess byte will be copied but since we restricted
+    // stats area size there is still plenty of room, so not a concern
+    lda {stats_sram_sz_b}
+    phb
+    mvn $70,$7f
+    plb
+    ply
+    plx
+    rts
 
+// args: X = stats area start in $70
+// return zero flag set is flag ok
+is_last_save_flag_ok:
+    phx
+    txa
+    clc
+    adc {last_stats_save_ok_off}
+    tax
+    lda {last_stats_save_ok_flag}
+    cmp $700000,x
+    rts
 
-save_stats:
+// args: X = stats area start in $70
+//       A = value to store
+// X and A untouched
+set_last_save_ok_flag:
     phx
     pha
-    ldx #$0000
-    lda $7e0952
-    bne +
--
-    lda {stats_ram}, x
-    sta {stats_sram_slot0}, x
-    inx
-    inx
-    cpx {stats_sram_sz_b}
-    bne -
-    jmp .end
-+
-    cmp #$0001
-    bne +
-    lda {stats_ram}, x
-    sta {stats_sram_slot1}, x
-    inx
-    inx
-    cpx {stats_sram_sz_b}
-    bne -
-    jmp .end
-+
-    lda {stats_ram}, x
-    sta {stats_sram_slot2}, x
-    inx
-    inx
-    cpx {stats_sram_sz_b}
-    bne -
-    jmp .end
-.end:
+    txa
+    clc
+    adc {last_stats_save_ok_off}
+    tax
     pla
+    sta $700000,x
+    plx
+    rts
+
+// arg X = index of where to save stats in bank $70
+save_stats_at:
+    phx
+    phy
+    txy
+    ldx #${_stats_ram}
+    // 1 excess byte will be copied but since we restricted
+    // stats area size there is still plenty of room, so not a concern
+    lda {stats_sram_sz_b}
+    phb
+    mvn $7f,$70
+    plb
+    ply
+    plx
+    rts
+
+// save stats both in standard and last areas
+// arg: A = 0 if we just want to save last stats
+save_stats:
+    phx
+    phy
+    pha
+    lda $7e0952
+    clc
+    adc #$0010
+    sta {last_saveslot}
+    pla
+    beq .last   // skip standard start save if A=0
+    jsl save_index // A is not 0, so we ask for standard stats index
+    jsr save_stats_at
+    lda #$0000
+.last:
+    jsl save_index // A is 0, so we ask for last stats index
+    lda #$0000
+    jsr set_last_save_ok_flag
+    jsr save_stats_at
+    lda {last_stats_save_ok_flag}
+    jsr set_last_save_ok_flag
+    ply
     plx
     rtl
+
+print "stats end : ", org
 
 warnpc $dfd800
 // Increment Statistic (in A)

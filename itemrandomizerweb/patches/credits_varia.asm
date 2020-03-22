@@ -18,20 +18,38 @@ define green "table tables/green.tbl"
 define orange "table tables/orange.tbl"
 define purple "table tables/purple.tbl"
 define big "table tables/big.tbl"
-define last_saveslot $7fffe0
+// store last save slot in unused SRAM
+define last_saveslot $7016fe
+// backup RAM for timer to avoid it to get cleared at boot
 define timer_backup1 $7fffe2
-define timer_backup2 $7fffe4
+define timer_backup2 {timer_backup1}+2
 define softreset $7fffe6
 define scroll_speed $7fffe8
+// RTA timer RAM updated during NMI
 define timer1 $05b8
 define timer2 $05ba
+// routine in new_game.asm
 define check_new_game   $A1F210
 
-// Patch soft reset to retain value of RTA counter
+define stats_sram_sz_b  #$0080
+define stats_sram_sz_w  #$0040
+define tmp_area_sz      #$00df
+
+define stats_ram         $7ffc00
+define stats_timer       {stats_ram}
+
+define stats_sram_slot0       $701400
+define last_stats_sram_slot0  $701480
+define stats_sram_slot1       $701700
+define last_stats_sram_slot1  $701780
+define stats_sram_slot2       $701a00
+define last_stats_sram_slot2  $701a80
+
+// Patch boot to init our stuff
 org $80844B
-    jml patch_reset1
+    jml boot1
 org $808490
-    jml patch_reset2
+    jml boot2
 
 // Patch loading and saving routines
 org $81807f
@@ -59,8 +77,6 @@ org $8b9a08
 
 org $8b9a19
     jml patch4
-
-
 
 // Hijack when samus is in the ship and ready to leave the planet
 org $a2ab13
@@ -93,25 +109,42 @@ org $809602
     plb
     rti
 
-// Patch soft reset to save the value of the RTA timer
+// Patch boot to init stuff
 org $80fe00
-patch_reset1:
-    lda {softreset} // Check if we're softresetting
-    cmp #$babe
-    beq .save
-    lda #$babe
-    sta {softreset}
+boot1:
     lda #$0000
     sta {timer_backup1}
     sta {timer_backup2}
-    sta {last_saveslot}
-    bra .skipsave
+    lda {last_saveslot}
+    // check for the 3 possible valid values
+    cmp #$0010
+    beq .save
+    cmp #$0011
+    beq .save
+    cmp #$0012
+    beq .save
+    bra .cont   // don't restore anything if no game was ever saved
 .save:
+    // check if "soft reset" and restore RAM timer
+    // if not, restore last SRAM timer (console power cycle)
+    lda {softreset} // Check if we're softresetting
+    cmp #$babe
+    bne .power
     lda {timer1}
     sta {timer_backup1}
     lda {timer2}
     sta {timer_backup2}
-.skipsave:
+    bra .cont
+.power:
+    // load timer from SRAM (it's at beggining of stats area)
+    // TODO handle slots 1 and 2
+    // TODO handle loading from "last" SRAM area if not corrupted
+    lda {stats_sram_slot0}
+    sta {timer_backup1}
+    lda {stats_sram_slot0}+2
+    sta {timer_backup2}
+.cont:
+    // vanilla init stuff
     ldx #$1ffe
     lda #$0000
 -
@@ -119,13 +152,19 @@ patch_reset1:
     dex
     dex
     bpl -
+    // restore RTA timer (or 0 if no save slot)
     lda {timer_backup1}
     sta {timer1}
     lda {timer_backup2}
     sta {timer2}
+    // place marker for resets
+    lda #$babe
+    sta {softreset}
+    // resume
     jml $808455
 
-patch_reset2:
+boot2:
+    // save timer
     lda {timer1}
     sta {timer_backup1}
     lda {timer2}
@@ -144,7 +183,7 @@ patch_reset2:
     dex
     bpl -
 
-    ldx #$00df          // clear temp variables
+    ldx {tmp_area_sz}          // clear temp variables
     lda #$0000
 -
     sta $7fff00, x
@@ -164,9 +203,9 @@ warnpc $80ff00
 org $81ef20
 patch_save:
     lda {timer1}
-    sta $7ffc00
+    sta {stats_timer}
     lda {timer2}
-    sta $7ffc02
+    sta {stats_timer}+2
     jsl save_stats
     lda $7e0952
     clc
@@ -186,9 +225,9 @@ patch_load:
     cmp {last_saveslot}     // If we're loading the same save that's played last
     beq +                   // don't restore stats from SRAM, only do this if
     jsl load_stats          // a new save slot is loaded, or loading from hard reset
-    lda $7ffc00
+    lda {stats_timer}
     sta {timer1}
-    lda $7ffc02
+    lda {stats_timer}+2
     sta {timer2}
 +
     ply
@@ -306,7 +345,7 @@ clear_values:
 -
     jsl store_stat
     inx
-    cpx #$0180
+    cpx {stats_sram_sz_w}
     bne -
 
     // Clear RTA Timer
@@ -322,17 +361,17 @@ clear_values:
 // Game has ended, save RTA timer to RAM and copy all stats to SRAM a final time
 game_end:
     lda {timer1}
-    sta $7ffc00
+    sta {stats_timer}
     lda {timer2}
-    sta $7ffc02
+    sta {stats_timer}+2
 
     // Subtract frames from pressing down at ship to this code running
-    lda $7ffc00
+    lda {stats_timer}
     sec
     sbc #$013d
-    sta $7ffc00
+    sta {stats_timer}
     lda #$0000  // if carry clear this will subtract one from the high byte of timer
-    sbc $7ffc02
+    sbc {stats_timer}+2
 
     jsl save_stats
     lda #$000a
@@ -615,29 +654,29 @@ load_stats:
     lda $7e0952
     bne +
 -
-    lda $701400, x
-    sta $7ffc00, x
+    lda {stats_sram_slot0}, x
+    sta {stats_ram}, x
     inx
     inx
-    cpx #$0300
+    cpx {stats_sram_sz_b}
     bne -
     jmp .end
 +
     cmp #$0001
     bne +
-    lda $701700, x
-    sta $7ffc00, x
+    lda {stats_sram_slot1}, x
+    sta {stats_ram}, x
     inx
     inx
-    cpx #$0300
+    cpx {stats_sram_sz_b}
     bne -
     jmp .end
 +
-    lda $701a00, x
-    sta $7ffc00, x
+    lda {stats_sram_slot2}, x
+    sta {stats_ram}, x
     inx
     inx
-    cpx #$0300
+    cpx {stats_sram_sz_b}
     bne -
     jmp .end
 
@@ -646,6 +685,8 @@ load_stats:
     plx
     rtl
 
+
+
 save_stats:
     phx
     pha
@@ -653,32 +694,31 @@ save_stats:
     lda $7e0952
     bne +
 -
-    lda $7ffc00, x
-    sta $701400, x
+    lda {stats_ram}, x
+    sta {stats_sram_slot0}, x
     inx
     inx
-    cpx #$0300
+    cpx {stats_sram_sz_b}
     bne -
     jmp .end
 +
     cmp #$0001
     bne +
-    lda $7ffc00, x
-    sta $701700, x
+    lda {stats_ram}, x
+    sta {stats_sram_slot1}, x
     inx
     inx
-    cpx #$0300
+    cpx {stats_sram_sz_b}
     bne -
     jmp .end
 +
-    lda $7ffc00, x
-    sta $701a00, x
+    lda {stats_ram}, x
+    sta {stats_sram_slot2}, x
     inx
     inx
-    cpx #$0300
+    cpx {stats_sram_sz_b}
     bne -
     jmp .end
-
 .end:
     pla
     plx
@@ -691,25 +731,26 @@ inc_stat:
     phx
     asl
     tax
-    lda $7ffc00, x
+    lda {stats_ram}, x
     inc
-    sta $7ffc00, x
+    sta {stats_ram}, x
     plx
     rtl
 
+warnpc $dfd83f
 // Decrement Statistic (in A)
 org $dfd840
 dec_stat:
     phx
     asl
     tax
-    lda $7ffc00, x
+    lda {stats_ram}, x
     dec
-    sta $7ffc00, x
+    sta {stats_ram}, x
     plx
     rtl
 
-
+warnpc $dfd87f
 // Store Statistic (value in A, stat in X)
 org $dfd880
 store_stat:
@@ -719,21 +760,22 @@ store_stat:
     asl
     tax
     pla
-    sta $7ffc00, x
+    sta {stats_ram}, x
     plx
     rtl
 
+warnpc $dfd8af
 // Load Statistic (stat in A, returns value in A)
 org $dfd8b0
 load_stat:
     phx
     asl
     tax
-    lda $7ffc00, x
+    lda {stats_ram}, x
     plx
     rtl
 
-
+warnpc $dfd91a
 // New credits script in free space of bank $DF
 org $dfd91b
 script:

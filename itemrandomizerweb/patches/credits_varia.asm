@@ -49,7 +49,7 @@ org $8b9976
     jml scroll
 
 org $8b999b
-    jml patch1 
+    jml patch1
 
 org $8b99e5
     jml patch2
@@ -106,7 +106,7 @@ patch_reset1:
     sta {timer_backup2}
     sta {last_saveslot}
     bra .skipsave
-.save:   
+.save:
     lda {timer1}
     sta {timer_backup1}
     lda {timer2}
@@ -118,7 +118,7 @@ patch_reset1:
     stz $0000, x
     dex
     dex
-    bpl - 
+    bpl -
     lda {timer_backup1}
     sta {timer1}
     lda {timer_backup2}
@@ -140,8 +140,8 @@ patch_reset2:
     stz $a000,x
     stz $c000,x
     stz $e000,x
-    dex        
-    dex        
+    dex
+    dex
     bpl -
 
     ldx #$00df          // clear temp variables
@@ -232,7 +232,7 @@ scroll:
 
 patch1:
     phb; pea $df00; plb; plb
-    lda $0000, y    
+    lda $0000, y
     bpl +
     plb
     jml $8b99a0
@@ -243,7 +243,7 @@ patch1:
 patch2:
     sta $0014
     phb; pea $df00; plb; plb
-    lda $0002, y    
+    lda $0002, y
     plb
     jml $8b99eb
 
@@ -321,7 +321,7 @@ clear_values:
 
 // Game has ended, save RTA timer to RAM and copy all stats to SRAM a final time
 game_end:
-    lda {timer1}    
+    lda {timer1}
     sta $7ffc00
     lda {timer2}
     sta $7ffc02
@@ -356,7 +356,7 @@ draw_full_time:
     lda #$ffff
     sta $1a
     jsr div32 // frames in $14, rest in $16
-    iny; iny; iny; iny; iny; iny // Increment Y three positions forward to write the last value    
+    iny; iny; iny; iny; iny; iny // Increment Y three positions forward to write the last value
     lda $14
     jsr draw_two
     tya
@@ -367,7 +367,7 @@ draw_full_time:
     jsr draw_time
     plb
     plx
-    rts  
+    rts
 
 // Draw time as xx:yy:zz
 draw_time:
@@ -402,12 +402,12 @@ draw_time:
     jsr draw_two
     plb
     plx
-    rts        
+    rts
 
 // Draw 5-digit value to credits tilemap
 // A = number to draw, Y = row address
 draw_value:
-    phx    
+    phx
     phb
     pea $7f7f; plb; plb
     sta $004204
@@ -536,7 +536,7 @@ write_stats:
     txy
     jmp .continue
 
-.fulltime:    
+.fulltime:
     lda stats, x        // Get stat id
     asl
     clc
@@ -563,9 +563,9 @@ write_stats:
     rtl
 
 // 32-bit by 16-bit division routine I found somewhere
-div32: 
+div32:
     phy
-    phx             
+    phx
     php
     rep #$30
     sep #$10
@@ -606,7 +606,7 @@ umend:
 numbers_top:
     dw $0060, $0061, $0062, $0063, $0064, $0065, $0066, $0067, $0068, $0069, $006a, $006b, $006c, $006d, $006e, $006f
 numbers_bot:
-    dw $0070, $0071, $0072, $0073, $0074, $0075, $0076, $0077, $0078, $0079, $007a, $007b, $007c, $007d, $007e, $007f 
+    dw $0070, $0071, $0072, $0073, $0074, $0075, $0076, $0077, $0078, $0079, $007a, $007b, $007c, $007d, $007e, $007f
 
 load_stats:
     phx
@@ -622,7 +622,7 @@ load_stats:
     cpx #$0300
     bne -
     jmp .end
-+   
++
     cmp #$0001
     bne +
     lda $701700, x
@@ -632,7 +632,7 @@ load_stats:
     cpx #$0300
     bne -
     jmp .end
-+   
++
     lda $701a00, x
     sta $7ffc00, x
     inx
@@ -660,7 +660,7 @@ save_stats:
     cpx #$0300
     bne -
     jmp .end
-+   
++
     cmp #$0001
     bne +
     lda $7ffc00, x
@@ -670,7 +670,7 @@ save_stats:
     cpx #$0300
     bne -
     jmp .end
-+   
++
     lda $7ffc00, x
     sta $701a00, x
     inx
@@ -740,185 +740,185 @@ script:
     dw {set}, $0002; -
     dw {draw}, {blank}
     dw {delay}, -
-    
-    // Show a compact version of the original credits so we get time to add more    
+
+    // Show a compact version of the original credits so we get time to add more
     dw {draw}, {row}*0      // SUPER METROID STAFF
     dw {draw}, {blank}
     dw {draw}, {row}*4      // PRODUCER
     dw {draw}, {blank}
     dw {draw}, {row}*7      // MAKOTO KANOH
-    dw {draw}, {row}*8      
+    dw {draw}, {row}*8
     dw {draw}, {blank}
     dw {draw}, {row}*9      // DIRECTOR
     dw {draw}, {blank}
     dw {draw}, {row}*10     // YOSHI SAKAMOTO
-    dw {draw}, {row}*11     
+    dw {draw}, {row}*11
     dw {draw}, {blank}
     dw {draw}, {row}*12     // BACK GROUND DESIGNERS
     dw {draw}, {blank}
     dw {draw}, {row}*13     // HIROFUMI MATSUOKA
-    dw {draw}, {row}*14     
+    dw {draw}, {row}*14
     dw {draw}, {blank}
     dw {draw}, {row}*15     // MASAHIKO MASHIMO
-    dw {draw}, {row}*16     
+    dw {draw}, {row}*16
     dw {draw}, {blank}
     dw {draw}, {row}*17     // HIROYUKI KIMURA
-    dw {draw}, {row}*18     
+    dw {draw}, {row}*18
     dw {draw}, {blank}
     dw {draw}, {row}*19     // OBJECT DESIGNERS
     dw {draw}, {blank}
     dw {draw}, {row}*20     // TOHRU OHSAWA
-    dw {draw}, {row}*21     
+    dw {draw}, {row}*21
     dw {draw}, {blank}
     dw {draw}, {row}*22     // TOMOYOSHI YAMANE
-    dw {draw}, {row}*23    
+    dw {draw}, {row}*23
     dw {draw}, {blank}
     dw {draw}, {row}*24     // SAMUS ORIGINAL DESIGNERS
     dw {draw}, {blank}
     dw {draw}, {row}*25     // HIROJI KIYOTAKE
-    dw {draw}, {row}*26    
+    dw {draw}, {row}*26
     dw {draw}, {blank}
     dw {draw}, {row}*27     // SAMUS DESIGNER
     dw {draw}, {blank}
     dw {draw}, {row}*28     // TOMOMI YAMANE
-    dw {draw}, {row}*29    
+    dw {draw}, {row}*29
     dw {draw}, {blank}
     dw {draw}, {row}*83     // SOUND PROGRAM
     dw {draw}, {row}*107    // AND SOUND EFFECTS
     dw {draw}, {blank}
     dw {draw}, {row}*84     // KENJI YAMAMOTO
-    dw {draw}, {row}*85    
+    dw {draw}, {row}*85
     dw {draw}, {blank}
     dw {draw}, {row}*86     // MUSIC COMPOSERS
     dw {draw}, {blank}
     dw {draw}, {row}*84     // KENJI YAMAMOTO
-    dw {draw}, {row}*85    
+    dw {draw}, {row}*85
     dw {draw}, {blank}
     dw {draw}, {row}*87     // MINAKO HAMANO
-    dw {draw}, {row}*88    
+    dw {draw}, {row}*88
     dw {draw}, {blank}
     dw {draw}, {row}*30     // PROGRAM DIRECTOR
     dw {draw}, {blank}
     dw {draw}, {row}*31     // KENJI IMAI
-    dw {draw}, {row}*64    
+    dw {draw}, {row}*64
     dw {draw}, {blank}
     dw {draw}, {row}*65     // SYSTEM COORDINATOR
     dw {draw}, {blank}
     dw {draw}, {row}*66     // KENJI NAKAJIMA
-    dw {draw}, {row}*67    
+    dw {draw}, {row}*67
     dw {draw}, {blank}
     dw {draw}, {row}*68     // SYSTEM PROGRAMMER
     dw {draw}, {blank}
     dw {draw}, {row}*69     // YOSHIKAZU MORI
-    dw {draw}, {row}*70    
+    dw {draw}, {row}*70
     dw {draw}, {blank}
     dw {draw}, {row}*71     // SAMUS PROGRAMMER
     dw {draw}, {blank}
     dw {draw}, {row}*72     // ISAMU KUBOTA
-    dw {draw}, {row}*73    
+    dw {draw}, {row}*73
     dw {draw}, {blank}
     dw {draw}, {row}*74     // EVENT PROGRAMMER
     dw {draw}, {blank}
     dw {draw}, {row}*75     // MUTSURU MATSUMOTO
-    dw {draw}, {row}*76    
+    dw {draw}, {row}*76
     dw {draw}, {blank}
     dw {draw}, {row}*77     // ENEMY PROGRAMMER
     dw {draw}, {blank}
     dw {draw}, {row}*78     // YASUHIKO FUJI
-    dw {draw}, {row}*79    
+    dw {draw}, {row}*79
     dw {draw}, {blank}
     dw {draw}, {row}*80     // MAP PROGRAMMER
     dw {draw}, {blank}
     dw {draw}, {row}*81     // MOTOMU CHIKARAISHI
-    dw {draw}, {row}*82    
+    dw {draw}, {row}*82
     dw {draw}, {blank}
     dw {draw}, {row}*101    // ASSISTANT PROGRAMMER
     dw {draw}, {blank}
     dw {draw}, {row}*102    // KOUICHI ABE
-    dw {draw}, {row}*103   
+    dw {draw}, {row}*103
     dw {draw}, {blank}
     dw {draw}, {row}*104    // COORDINATORS
     dw {draw}, {blank}
     dw {draw}, {row}*105    // KATSUYA YAMANO
-    dw {draw}, {row}*106   
+    dw {draw}, {row}*106
     dw {draw}, {blank}
     dw {draw}, {row}*63     // TSUTOMU KANESHIGE
-    dw {draw}, {row}*96   
+    dw {draw}, {row}*96
     dw {draw}, {blank}
     dw {draw}, {row}*89    // PRINTED ART WORK
     dw {draw}, {blank}
     dw {draw}, {row}*90    // MASAFUMI SAKASHITA
-    dw {draw}, {row}*91   
+    dw {draw}, {row}*91
     dw {draw}, {blank}
     dw {draw}, {row}*92    // YASUO INOUE
-    dw {draw}, {row}*93   
+    dw {draw}, {row}*93
     dw {draw}, {blank}
     dw {draw}, {row}*94    // MARY COCOMA
-    dw {draw}, {row}*95   
+    dw {draw}, {row}*95
     dw {draw}, {blank}
     dw {draw}, {row}*99    // YUSUKE NAKANO
-    dw {draw}, {row}*100   
+    dw {draw}, {row}*100
     dw {draw}, {blank}
     dw {draw}, {row}*108   // SHINYA SANO
-    dw {draw}, {row}*109   
+    dw {draw}, {row}*109
     dw {draw}, {blank}
     dw {draw}, {row}*110   // NORIYUKI SATO
-    dw {draw}, {row}*111   
+    dw {draw}, {row}*111
     dw {draw}, {blank}
     dw {draw}, {row}*32    // SPECIAL THANKS TO
     dw {draw}, {blank}
     dw {draw}, {row}*33    // DAN OWSEN
-    dw {draw}, {row}*34   
+    dw {draw}, {row}*34
     dw {draw}, {blank}
     dw {draw}, {row}*35    // GEORGE SINFIELD
-    dw {draw}, {row}*36   
+    dw {draw}, {row}*36
     dw {draw}, {blank}
     dw {draw}, {row}*39    // MASARU OKADA
-    dw {draw}, {row}*40   
+    dw {draw}, {row}*40
     dw {draw}, {blank}
     dw {draw}, {row}*43    // TAKAHIRO HARADA
-    dw {draw}, {row}*44   
+    dw {draw}, {row}*44
     dw {draw}, {blank}
     dw {draw}, {row}*47    // KOHTA FUKUI
-    dw {draw}, {row}*48   
+    dw {draw}, {row}*48
     dw {draw}, {blank}
     dw {draw}, {row}*49    // KEISUKE TERASAKI
-    dw {draw}, {row}*50   
+    dw {draw}, {row}*50
     dw {draw}, {blank}
     dw {draw}, {row}*51    // MASARU YAMANAKA
-    dw {draw}, {row}*52   
+    dw {draw}, {row}*52
     dw {draw}, {blank}
     dw {draw}, {row}*53    // HITOSHI YAMAGAMI
-    dw {draw}, {row}*54   
+    dw {draw}, {row}*54
     dw {draw}, {blank}
     dw {draw}, {row}*57    // NOBUHIRO OZAKI
-    dw {draw}, {row}*58   
+    dw {draw}, {row}*58
     dw {draw}, {blank}
     dw {draw}, {row}*59    // KENICHI NAKAMURA
-    dw {draw}, {row}*60   
+    dw {draw}, {row}*60
     dw {draw}, {blank}
     dw {draw}, {row}*61    // TAKEHIKO HOSOKAWA
-    dw {draw}, {row}*62   
+    dw {draw}, {row}*62
     dw {draw}, {blank}
     dw {draw}, {row}*97    // SATOSHI MATSUMURA
-    dw {draw}, {row}*98   
+    dw {draw}, {row}*98
     dw {draw}, {blank}
     dw {draw}, {row}*122   // TAKESHI NAGAREDA
-    dw {draw}, {row}*123  
+    dw {draw}, {row}*123
     dw {draw}, {blank}
     dw {draw}, {row}*124   // MASAHIRO KAWANO
-    dw {draw}, {row}*125  
+    dw {draw}, {row}*125
     dw {draw}, {blank}
     dw {draw}, {row}*45    // HIRO YAMADA
-    dw {draw}, {row}*46  
+    dw {draw}, {row}*46
     dw {draw}, {blank}
     dw {draw}, {row}*112   // AND ALL OF R&D1 STAFFS
-    dw {draw}, {row}*113  
+    dw {draw}, {row}*113
     dw {draw}, {blank}
     dw {draw}, {row}*114   // GENERAL MANAGER
     dw {draw}, {blank}
     dw {draw}, {row}*5     // GUMPEI YOKOI
-    dw {draw}, {row}*6  
+    dw {draw}, {row}*6
     dw {draw}, {blank}
     dw {draw}, {blank}
     dw {draw}, {blank}
@@ -939,7 +939,7 @@ script:
     dw {draw}, {blank}
     dw {draw}, {row}*133 // SNES CODE
     dw {draw}, {blank}
-    dw {draw}, {row}*134 
+    dw {draw}, {row}*134
     dw {draw}, {blank}
     dw {draw}, {row}*135
     dw {draw}, {blank}
@@ -977,10 +977,10 @@ script:
     dw {draw}, {blank}
     dw {draw}, {row}*159 // MORPH PLACEMENT
     dw {draw}, {blank}
-	
+
     // change scroll speed
     dw {speed}, $0003
-	
+
     dw {draw}, {row}*160 // SUPER FUN COMBAT
     dw {draw}, {blank}
     dw {draw}, {row}*161 // SUPER FUN MOVEMENT
@@ -1008,7 +1008,7 @@ script:
     dw {draw}, {row}*163 // AMMO DISTRIBUTION
     dw {draw}, {row}*164
     dw {draw}, {blank}
-	
+
     dw {draw}, {blank}
     dw {draw}, {blank}
     dw {draw}, {blank}
@@ -1091,7 +1091,7 @@ script:
     dw {draw}, {row}*215 // BOMBS
     dw {draw}, {row}*216
 
-   
+
     // Draw item locations
     dw {draw}, {blank}
     dw {draw}, {blank}
@@ -1176,15 +1176,15 @@ script:
     dw {draw}, {blank}
     dw {draw}, {blank}
     dw {draw}, {blank}
-    dw {draw}, {blank}	
+    dw {draw}, {blank}
 
     // Set scroll speed to 4 frames per pixel
     dw {speed}, $0004
-   
+
     // Scroll all text off and end credits
     dw {set}, $0017; -
     dw {draw}, {blank}
-    dw {delay}, -    
+    dw {delay}, -
     dw {end}
 
 stats:
@@ -1204,7 +1204,7 @@ stats:
     dw 21,      {row}*207,  1, 0    // Special Beam Attacks
     dw 22,      {row}*209,  1, 0    // Missiles
     dw 23,      {row}*211,  1, 0    // Super Missiles
-    dw 24,      {row}*213,  1, 0    // Power Bombs	
+    dw 24,      {row}*213,  1, 0    // Power Bombs
     dw 26,      {row}*215,  1, 0    // Bombs
     dw 27,      {row}*221,  3, 0    // Time in pause
 //  dw 29,      {row}*224,  2, 0    // time saved arm pumping
@@ -1221,7 +1221,7 @@ credits:
     // Numbers are mapped in a special way as described below:
     // 0123456789%& '´
     // }!@#$%&/()>~.
-	
+
     // This is not exactly in display order
     {pink}
     dw "     VARIA RANDOMIZER STAFF     " // 128
@@ -1255,7 +1255,7 @@ credits:
     // params title
     dw "     RANDOMIZER PARAMETERS      " // 145
     {big}
-    // item distribution data start 
+    // item distribution data start
     dw " MISSILE PACKS               XX " // 146
     dw " missile packs ............. xx " // 147
     dw " SUPER PACKS                 XX " // 148
@@ -1269,7 +1269,7 @@ credits:
     {yellow}
     dw " PROGRESSION SPEED .... XXXXXXX " // 155
     dw " PROGRESSION DIFFICULTY XXXXXXX " // 156
-    // item distrib title	
+    // item distrib title
     {purple}
     dw "       ITEMS DISTRIBUTION       " // 157
     // params data end
@@ -1302,7 +1302,7 @@ credits:
     dw "                                " // 176
     dw "                                " // 177
     dw "                                " // 178
-// End of reusable space	
+// End of reusable space
     {big}
     dw "            VARIA RUN           " // 179
     dw "            varia.run           " // 180
@@ -1315,11 +1315,11 @@ credits:
     dw "      SPEEDRUNNING STATS        " // 184
     {big}
     dw " DOOR TRANSITIONS               " // 185
-    dw " door transitions               " // 186 
+    dw " door transitions               " // 186
     dw " TIME IN DOORS      00'00'00^00 " // 187
-    dw " time in doors                  " // 188 
+    dw " time in doors                  " // 188
     dw " TIME ALIGNING DOORS   00'00^00 " // 189
-    dw " time aligning doors            " // 190 
+    dw " time aligning doors            " // 190
     {blue}
     dw "         TIME SPENT IN          " // 191
     {big}

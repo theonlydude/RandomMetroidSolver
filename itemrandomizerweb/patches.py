@@ -129,6 +129,72 @@ patches = {
     'Blinking[Kraid Room Out]': {
         0x10A056: [0x0]
     },
+    'Blinking[Warehouse Entrance Right]': {
+        0x1098F6: [0x0]
+    },
+    'Blinking[Warehouse Entrance Left]': {
+        0x1098F6: [0x0]
+    },
+    'Blinking[Single Chamber Top Right]': {
+        0x10B88E: [0x0]
+    },
+    'Blinking[Kronic Boost Room Bottom Left]': {
+        0x78D4E: [0x48, 0xc8, 0x11, 0x26, 0x58, 0x8c],
+        0x10B9D7: [0x0]
+    },
+    'Blinking[Three Muskateers Room Left]': {
+        0x10BB0D: [0x0]
+    },
+    'Blinking[Lava Dive Right]': {
+        0x10AD6B: [0x0]
+    },
+    'Blinking[Ridley Room Out]': {
+        0x10B81B: [0x0]
+    },
+    'Blinking[West Ocean Left]': {
+        0x1086F6: [0x0]
+    },
+    'Blinking[Phantoon Room Out]': {
+        0x10C3E5: [0x0]
+    },
+    'Blinking[Crab Maze Left]': {
+        0x108B3A: [0x0]
+    },
+    'Blinking[Crab Hole Bottom Left]': {
+        0x10DE59: [0x0]
+    },
+    'Blinking[Main Street Bottom Left]': {
+        0x10DF2F: [0x0]
+    },
+    'Blinking[Red Fish Room Left]': {
+        0x10D3EC: [0x0]
+    },
+    'Blinking[Le Coude Right]': {
+        0x7823E: [0x42, 0xc8, 0x0e, 0x06, 0x63, 0x8c],
+        0x1085DD: [0x0]
+    },
+    'Blinking[Draygon Room Out]': {
+        0x10D111: [0x0]
+    },
+    'Blinking[East Tunnel Top Right]': {
+        0x10D5E1: [0x0]
+    },
+    'Blinking[East Tunnel Right]': {
+        0x10D5E1: [0x0]
+    },
+    'Blinking[Glass Tunnel Top]': {
+        0x10D53B: [0x0]
+    },
+    'Blinking[Red Tower Top Left]': {
+        0x109504: [0x0]
+    },
+    'Blinking[Caterpillar Room Top Right]': {
+        0x10A0B9: [0x0]
+    },
+    'Blinking[Red Brinstar Elevator]': {
+        0x78256: [0x54, 0xc8, 0x06, 0x02, 0x10, 0x8c],
+        0x1089F1: [0x0]
+    },
 }
 
 additional_PLMs = {
@@ -216,6 +282,114 @@ additional_PLMs = {
         'room': 0xa56b,
         'plm_bytes_list': [
             [0x42, 0xc8, 0x1e, 0x16, 0x63, 0x8c]
+        ]
+    },
+    'Blinking[Warehouse Entrance Right]': {
+        'room': 0xa6a1,
+        'plm_bytes_list': [
+            [0x48, 0xc8, 0x01, 0x06, 0x63, 0x8c]
+        ]
+    },
+    'Blinking[Warehouse Entrance Left]': {
+        'room': 0xa6a1,
+        'plm_bytes_list': [
+            [0x42, 0xc8, 0x2e, 0x06, 0x63, 0x8c]
+        ]
+    },
+    'Blinking[Single Chamber Top Right]': {
+        'room': 0xad5e,
+        'plm_bytes_list': [
+            [0x42, 0xc8, 0x5e, 0x06, 0x63, 0x8c]
+        ]
+    },
+    'Blinking[Three Muskateers Room Left]': {
+        'room': 0xb656,
+        'plm_bytes_list': [
+            [0x48, 0xc8, 0x11, 0x06, 0x63, 0x8c]
+        ]
+    },
+    'Blinking[Lava Dive Right]': {
+        'room': 0xaf14,
+        'plm_bytes_list': [
+            [0x42, 0xc8, 0x3e, 0x06, 0x63, 0x8c]
+        ]
+    },
+    'Blinking[Ridley Room Out]': {
+        'room': 0xb37a,
+        'plm_bytes_list': [
+            [0x48, 0xc8, 0x01, 0x06, 0x63, 0x8c]
+        ]
+    },
+    'Blinking[West Ocean Left]': {
+        'room': 0x93fe,
+        'plm_bytes_list': [
+            [0x48, 0xc8, 0x01, 0x46, 0x63, 0x8c]
+        ]
+    },
+    'Blinking[Phantoon Room Out]': {
+        'room': 0xcc6f,
+        'plm_bytes_list': [
+            [0x42, 0xc8, 0x4e, 0x06, 0x63, 0x8c]
+        ]
+    },
+    'Blinking[Crab Maze Left]': {
+        'room': 0x957d,
+        'plm_bytes_list': [
+            [0x48, 0xc8, 0x01, 0x06, 0x63, 0x8c]
+        ]
+    },
+    'Blinking[Crab Hole Bottom Left]': {
+        'room': 0xd21c,
+        'plm_bytes_list': [
+            [0x48, 0xc8, 0x01, 0x16, 0x63, 0x8c]
+        ]
+    },
+    'Blinking[Main Street Bottom Left]': {
+        'room': 0xcfc9,
+        'plm_bytes_list': [
+            [0x4e, 0xc8, 0x16, 0x7d, 0x63, 0x8c]
+        ]
+    },
+    'Blinking[Red Fish Room Left]': {
+        'room': 0xd104,
+        'plm_bytes_list': [
+            [0x48, 0xc8, 0x01, 0x06, 0x63, 0x8c]
+        ]
+    },
+    'Blinking[Draygon Room Out]': {
+        'room': 0xd78f,
+        'plm_bytes_list': [
+            [0x48, 0xc8, 0x01, 0x26, 0x63, 0x8c]
+        ]
+    },
+    'Blinking[East Tunnel Top Right]': {
+        'room': 0xcf80,
+        'plm_bytes_list': [
+            [0x42, 0xc8, 0x3e, 0x06, 0x63, 0x8c]
+        ]
+    },
+    'Blinking[East Tunnel Right]': {
+        'room': 0xcf80,
+        'plm_bytes_list': [
+            [0x42, 0xc8, 0x0e, 0x16, 0x63, 0x8c]
+        ]
+    },
+    'Blinking[Glass Tunnel Top]': {
+        'room': 0xcefb,
+        'plm_bytes_list': [
+            [0x54, 0xc8, 0x06, 0x02, 0x63, 0x8c]
+        ]
+    },
+    'Blinking[Red Tower Top Left]': {
+        'room': 0xa253,
+        'plm_bytes_list': [
+            [0x48, 0xc8, 0x01, 0x46, 0x63, 0x8c]
+        ]
+    },
+    'Blinking[Caterpillar Room Top Right]': {
+        'room': 0xa322,
+        'plm_bytes_list': [
+            [0x42, 0xc8, 0x2e, 0x36, 0x63, 0x8c]
         ]
     },
 }

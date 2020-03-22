@@ -22,7 +22,8 @@ locations = [
     },
     'Available': lambda sm: sm.wor(sm.canEnterAndLeaveGauntlet(),
                                    sm.wand(sm.canShortCharge(),
-                                           sm.canEnterAndLeaveGauntletQty(1, 0))) # thanks ponk! https://youtu.be/jil5zTBCF1s
+                                           sm.canEnterAndLeaveGauntletQty(1, 0)), # thanks ponk! https://youtu.be/jil5zTBCF1s
+                                   sm.canDoLowGauntlet())
 },
 {
     'Area': "Crateria",
@@ -257,8 +258,8 @@ locations = [
 },
 {
     'Area': "Brinstar",
-    'GraphArea': "KraidBoss",
-    'SolveArea': "Kraid",
+    'GraphArea': "Kraid",
+    'SolveArea': "Kraid Boss",
     'Name': "Kraid",
     'Class': ["Boss"],
     'CanHidden': False,
@@ -274,8 +275,8 @@ locations = [
 },
 {
     'Area': "Brinstar",
-    'GraphArea': "KraidBoss",
-    'SolveArea': "Kraid",
+    'GraphArea': "Kraid",
+    'SolveArea': "Kraid Boss",
     'Name': "Varia Suit",
     'Class': ["Major", "Chozo"],
     'CanHidden': False,
@@ -431,8 +432,8 @@ locations = [
 },
 {
     'Area': "LowerNorfair",
-    'GraphArea': "LowerNorfairBoss",
-    'SolveArea': "Lower Norfair After Amphitheater",
+    'GraphArea': "LowerNorfair",
+    'SolveArea': "Ridley Boss",
     'Name': "Ridley",
     'Class': ["Boss"],
     'CanHidden': False,
@@ -448,8 +449,8 @@ locations = [
 },
 {
     'Area': "LowerNorfair",
-    'GraphArea': "LowerNorfairBoss",
-    'SolveArea': "Lower Norfair After Amphitheater",
+    'GraphArea': "LowerNorfair",
+    'SolveArea': "Ridley Boss",
     'Name': "Energy Tank, Ridley",
     'Class': ["Major", "Chozo"],
     'CanHidden': False,
@@ -541,8 +542,8 @@ locations = [
 },
 {
     'Area': "WreckedShip",
-    'GraphArea': "WreckedShipBoss",
-    'SolveArea': "WreckedShip Main",
+    'GraphArea': "WreckedShip",
+    'SolveArea': "Phantoon Boss",
     'Name': "Phantoon",
     'Class': ["Boss"],
     'CanHidden': False,
@@ -746,8 +747,8 @@ locations = [
 },
 {
     'Area': "Maridia",
-    'GraphArea': "MaridiaBoss",
-    'SolveArea': "Maridia Pink Top",
+    'GraphArea': "Maridia",
+    'SolveArea': "Draygon Boss",
     'Name': "Draygon",
     'Class': ["Boss"],
     'CanHidden': False,
@@ -762,8 +763,8 @@ locations = [
 },
 {
     'Area': "Maridia",
-    'GraphArea': "MaridiaBoss",
-    'SolveArea': "Maridia Pink Top",
+    'GraphArea': "Maridia",
+    'SolveArea': "Draygon Boss",
     'Name': "Space Jump",
     'Class': ["Major", "Chozo"],
     'CanHidden': False,
@@ -916,10 +917,7 @@ locations = [
     'AccessFrom' : {
         'Landing Site': lambda sm: sm.wor(sm.wand(sm.canEnterAndLeaveGauntlet(),
                                                   sm.canPassBombPassages()),
-                                          sm.wand(sm.canShortCharge(),
-                                                  sm.canUsePowerBombs(),
-                                                  sm.itemCountOk('ETank', 1),
-                                                  sm.knowsLowGauntlet())),
+                                          sm.canDoLowGauntlet()),
         'Gauntlet Top': lambda sm: SMBool(True)
     },
     'Available': lambda sm: SMBool(True)
@@ -938,10 +936,7 @@ locations = [
     'AccessFrom' : {
         'Landing Site': lambda sm: sm.wor(sm.wand(sm.canEnterAndLeaveGauntlet(),
                                                   sm.canPassBombPassages()),
-                                          sm.wand(sm.canShortCharge(),
-                                                  sm.canUsePowerBombs(),
-                                                  sm.itemCountOk('ETank', 1),
-                                                  sm.knowsLowGauntlet())),
+                                          sm.canDoLowGauntlet()),
         'Gauntlet Top': lambda sm: SMBool(True)
     },
     'Available': lambda sm: SMBool(True)

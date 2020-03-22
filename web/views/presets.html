@@ -539,15 +539,15 @@ pass
   <div class="menu">
     <table class="full menuTable">
       <tr>
-	<td>{{=A("Home", _href=URL(f="home"), _class="menu")}}</td>
-	<td class="menu_selected">{{=A("Presets", _href=URL(f="presets"), _class="menu")}}</td>
-	<td>{{=A("Randomizer", _href=URL(f="randomizer"), _class="menu")}}</td>
-	<td>{{=A("Solver", _href=URL(f="solver"), _class="menu")}}</td>
-	<td>{{=A("Tracker", _href=URL(f="tracker"), _class="menu")}}</td>
-	<td>{{=A("Plandomizer", _href=URL(f="plando"), _class="menu")}}</td>
-	<td>{{=A("Customizer", _href=URL(f="customizer"), _class="menu")}}</td>
-	<td>{{=A("Statistics", _href=URL(f="extStats"), _class="menu")}}</td>
-	<td>{{=A("Information & Contact", _href=URL(f="infos"), _class="menu")}}</td>
+        <td>{{=A("Home", _href=URL(f="home"), _class="menu")}}</td>
+        <td class="menu_selected">{{=A("Presets", _href=URL(f="presets"), _class="menu")}}</td>
+        <td>{{=A("Randomizer", _href=URL(f="randomizer"), _class="menu")}}</td>
+        <td>{{=A("Solver", _href=URL(f="solver"), _class="menu")}}</td>
+        <td>{{=A("Tracker", _href=URL(f="tracker"), _class="menu")}}</td>
+        <td>{{=A("Plandomizer", _href=URL(f="plando"), _class="menu")}}</td>
+        <td>{{=A("Customizer", _href=URL(f="customizer"), _class="menu")}}</td>
+        <td>{{=A("Statistics", _href=URL(f="extStats"), _class="menu")}}</td>
+        <td>{{=A("Information & Contact", _href=URL(f="infos"), _class="menu")}}</td>
       </tr>
     </table>
   </div>
@@ -558,55 +558,55 @@ pass
   <div class="row">
     <div class="columnThird">
       <table class="full">
-	<colgroup><col class="quarter" /><col class="quarter" /><col class="quarter" /><col class="quarter"></colgroup>
-	<tr>
-	  <td>Preset:</td>
-	  <td colspan="3">{{=SELECT(OPTGROUP(*stdPresets, **dict(_label="Standard presets")), OPTGROUP(*tourPresets, **dict(_label="Tournament presets")), OPTGROUP(*comPresets, **dict(_label="Community presets")), **dict(_name="preset", _id="preset", value=session.presets["preset"], _class="filldropdown chzn-select"))}}</td>
-	  <td id="presetStep"><button type="button" onclick="startTheTour(0)">?</button></td>
-	</tr>
-	<tr>
-	  <td>New preset:</td>
-	  <td colspan="3"><input class="full" name="presetCreate" type="text"/></td>
-	  <td id="presetCreateStep"><button type="button" onclick="startTheTour(1)">?</button></td>
-	</tr>
-	<tr>
-	  <td></td>
-	  <td>
-	    <input class="full" name="action" type="submit" value="Load"/>
-	  </td>
-	  <td>
-	    <input class="full" name="action" onclick="askPassword();" type="submit" value="Update"/>
-	  </td>
-	  <td>
-	    <input class="full" name="action" onclick="askPassword()" type="submit" value="Create"/>
-	  </td>
-	  <td id="buttonsStep"><button type="button" onclick="startTheTour(2)">?</button></td>
-	</tr>
+        <colgroup><col class="quarter" /><col class="quarter" /><col class="quarter" /><col class="quarter"></colgroup>
+        <tr>
+          <td>Preset:</td>
+          <td colspan="3">{{=SELECT(OPTGROUP(*stdPresets, **dict(_label="Standard presets")), OPTGROUP(*tourPresets, **dict(_label="Tournament presets")), OPTGROUP(*comPresets, **dict(_label="Community presets")), **dict(_name="preset", _id="preset", value=session.presets["preset"], _class="filldropdown chzn-select"))}}</td>
+          <td id="presetStep"><button type="button" onclick="startTheTour(0)">?</button></td>
+        </tr>
+        <tr>
+          <td>New preset:</td>
+          <td colspan="3"><input class="full" name="presetCreate" type="text"/></td>
+          <td id="presetCreateStep"><button type="button" onclick="startTheTour(1)">?</button></td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>
+            <input class="full" name="action" type="submit" value="Load"/>
+          </td>
+          <td>
+            <input class="full" name="action" onclick="askPassword();" type="submit" value="Update"/>
+          </td>
+          <td>
+            <input class="full" name="action" onclick="askPassword()" type="submit" value="Create"/>
+          </td>
+          <td id="buttonsStep"><button type="button" onclick="startTheTour(2)">?</button></td>
+        </tr>
       </table>
       <input id="password" name="password" style="display:none" type="text"/>
       <input id="currenttab" name="currenttab" style="display:none" type="text"/>
     </div>
     <div class="columnThird">
       <table class="full">
-	<tr>
-	  <td>
-	    <h3 class="center">{{=skillBarData["custom"][0]}}</h3>
-	  </td>
-	</tr>
+        <tr>
+          <td>
+            <h3 class="center">{{=skillBarData["custom"][0]}}</h3>
+          </td>
+        </tr>
       </table>
       <table class="full">
-	<tr>
-	  <td>Techniques known:</td>
-	  <td>{{=skillBarData["knowsKnown"]}}</td>
-	  <td>Skill score:</td>
-	  <td>{{=skillBarData["custom"][1]}}</td>
-	</tr>
-	<tr>
-	  <td>Seeds generated:</td>
-	  <td>{{=skillBarData["generatedSeeds"]}}</td>
-	  <td>Last updated:</td>
-	  <td>{{=skillBarData["lastAction"]}}</td>
-	</tr>
+        <tr>
+          <td>Techniques known:</td>
+          <td>{{=skillBarData["knowsKnown"]}}</td>
+          <td>Skill score:</td>
+          <td>{{=skillBarData["custom"][1]}}</td>
+        </tr>
+        <tr>
+          <td>Seeds generated:</td>
+          <td>{{=skillBarData["generatedSeeds"]}}</td>
+          <td>Last updated:</td>
+          <td>{{=skillBarData["lastAction"]}}</td>
+        </tr>
       </table>
     </div>
     <div class="columnThird">
@@ -640,17 +640,17 @@ if skillBarData is not None:
       <h3>Hard rooms</h3>
       <table class="full">
         <colgroup><col class="half" /><col class="half" /></colgroup>
-	<tr>
-	  <td><a href="https://wiki.supermetroid.run/Red_Brinstar_Fireflea_Room" target="_blank">X-Ray:</a></td>
-	  <td>{{xray = ["Aarghh", "I don't like spikes", "Default", "I don't mind spikes", "D-Boost master"]
-	        displaySelect("X-Ray", xray, settings["X-Ray"])}}</td>
+        <tr>
+          <td><a href="https://wiki.supermetroid.run/Red_Brinstar_Fireflea_Room" target="_blank">X-Ray:</a></td>
+          <td>{{xray = ["Aarghh", "I don't like spikes", "Default", "I don't mind spikes", "D-Boost master"]
+                displaySelect("X-Ray", xray, settings["X-Ray"])}}</td>
           <td id="xrayStep"><button type="button" onclick="startTheTour(3)">?</button></td>
-	</tr>
-	<tr>
-	  <td><a href="https://wiki.supermetroid.run/Gauntlet_Entrance" target="_blank">Gauntlet:</a></td>
-	  <td>{{gauntlet = ["Aarghh", "I don't like acid", "Default"]
-	        displaySelect("Gauntlet", gauntlet, settings["Gauntlet"])}}</td>
-	</tr>
+        </tr>
+        <tr>
+          <td><a href="https://wiki.supermetroid.run/Gauntlet_Entrance" target="_blank">Gauntlet:</a></td>
+          <td>{{gauntlet = ["Aarghh", "I don't like acid", "Default"]
+                displaySelect("Gauntlet", gauntlet, settings["Gauntlet"])}}</td>
+        </tr>
       </table>
     </div>
     <div class="column">
@@ -658,45 +658,45 @@ if skillBarData is not None:
       <h3 id="requirementStep">Hard rooms energy requirements<span class="rightStep"><button type="button" onclick="startTheTour(4)">?</button></span></h3>
       <h4>X-Ray</h4>
       <table class="full">
-	<colgroup><col class="sixteen"/><col class="sixteen" /><col/><col/><col/><col/><col/><col/></colgroup>
-	<tr>
-	  <td class="centerTd">Item</td><td class="centerTd">Suit</td><td class="centerTd">easy</td><td class="centerTd">medium</td><td class="centerTd">hard</td><td class="centerTd">very hard</td><td class="centerTd">hardcore</td><td class="centerTd">mania</td>
-	</tr>
-	<tr>
-	  <td class="centerTd">-</td>
-	  <td class="centerTd">Suitless | <img src="/solver/static/images/Varia.png" alt="Varia.png" title="Varia.png" class="width: 32px"/></td>
-	  <td class="centerTd"><pre><span id="easyXray"></span></pre></td>
-	  <td class="centerTd"><pre><span id="mediumXray"></span></pre></td>
-	  <td class="centerTd"><pre><span id="hardXray"></span></pre></td>
-	  <td class="centerTd"><pre><span id="harderXray"></span></pre></td>
-	  <td class="centerTd"><pre><span id="hardcoreXray"></span></pre></td>
-	  <td class="centerTd"><pre><span id="maniaXray"></span></pre></td>
-	</tr>
+        <colgroup><col class="sixteen"/><col class="sixteen" /><col/><col/><col/><col/><col/><col/></colgroup>
+        <tr>
+          <td class="centerTd">Item</td><td class="centerTd">Suit</td><td class="centerTd">easy</td><td class="centerTd">medium</td><td class="centerTd">hard</td><td class="centerTd">very hard</td><td class="centerTd">hardcore</td><td class="centerTd">mania</td>
+        </tr>
+        <tr>
+          <td class="centerTd">-</td>
+          <td class="centerTd">Suitless | <img src="/solver/static/images/Varia.png" alt="Varia.png" title="Varia.png" class="width: 32px"/></td>
+          <td class="centerTd"><pre><span id="easyXray"></span></pre></td>
+          <td class="centerTd"><pre><span id="mediumXray"></span></pre></td>
+          <td class="centerTd"><pre><span id="hardXray"></span></pre></td>
+          <td class="centerTd"><pre><span id="harderXray"></span></pre></td>
+          <td class="centerTd"><pre><span id="hardcoreXray"></span></pre></td>
+          <td class="centerTd"><pre><span id="maniaXray"></span></pre></td>
+        </tr>
       </table>
       <h4>Gauntlet</h4>
       <table class="full">
-	<colgroup><col class="sixteen"/><col class="sixteen" /><col/><col/><col/><col/><col/><col/></colgroup>
-	<td class="centerTd">Item</td><td class="centerTd">Suit</td><td class="centerTd">easy</td><td class="centerTd">medium</td><td class="centerTd">hard</td><td class="centerTd">very hard</td><td class="centerTd">hardcore</td><td class="centerTd">mania</td>
-	<tr>
-	  <td class="centerTd"><img src="/solver/static/images/Bomb.png" alt="Bomb.png" title="Bomb.png" class="width: 32px"/></td>
-	  <td class="centerTd">Suitless | <img src="/solver/static/images/Varia.png" alt="Varia.png" title="Varia.png" class="width: 32px"/></td>
-	  <td class="centerTd"><pre><span id="easyGauntletBomb"></span></pre></td>
-	  <td class="centerTd"><pre><span id="mediumGauntletBomb"></span></pre></td>
-	  <td class="centerTd"><pre><span id="hardGauntletBomb"></span></pre></td>
-	  <td class="centerTd"><pre><span id="harderGauntletBomb"></span></pre></td>
-	  <td class="centerTd"><pre><span id="hardcoreGauntletBomb"></span></pre></td>
-	  <td class="centerTd"><pre><span id="maniaGauntletBomb"></span></pre></td>
-	</tr>
-	<tr>
-	  <td class="centerTd"><img src="/solver/static/images/PowerBomb.png" alt="PowerBomb.png" title="PowerBomb.png" class="width: 32px"/></td>
-	  <td class="centerTd">Suitless | <img src="/solver/static/images/Varia.png" alt="Varia.png" title="Varia.png" class="width: 32px"/></td>
-	  <td class="centerTd"><pre><span id="easyGauntletPowerBomb"></span></pre></td>
-	  <td class="centerTd"><pre><span id="mediumGauntletPowerBomb"></span></pre></td>
-	  <td class="centerTd"><pre><span id="hardGauntletPowerBomb"></span></pre></td>
-	  <td class="centerTd"><pre><span id="harderGauntletPowerBomb"></span></pre></td>
-	  <td class="centerTd"><pre><span id="hardcoreGauntletPowerBomb"></span></pre></td>
-	  <td class="centerTd"><pre><span id="maniaGauntletPowerBomb"></span></pre></td>
-	</tr>
+        <colgroup><col class="sixteen"/><col class="sixteen" /><col/><col/><col/><col/><col/><col/></colgroup>
+        <td class="centerTd">Item</td><td class="centerTd">Suit</td><td class="centerTd">easy</td><td class="centerTd">medium</td><td class="centerTd">hard</td><td class="centerTd">very hard</td><td class="centerTd">hardcore</td><td class="centerTd">mania</td>
+        <tr>
+          <td class="centerTd"><img src="/solver/static/images/Bomb.png" alt="Bomb.png" title="Bomb.png" class="width: 32px"/></td>
+          <td class="centerTd">Suitless | <img src="/solver/static/images/Varia.png" alt="Varia.png" title="Varia.png" class="width: 32px"/></td>
+          <td class="centerTd"><pre><span id="easyGauntletBomb"></span></pre></td>
+          <td class="centerTd"><pre><span id="mediumGauntletBomb"></span></pre></td>
+          <td class="centerTd"><pre><span id="hardGauntletBomb"></span></pre></td>
+          <td class="centerTd"><pre><span id="harderGauntletBomb"></span></pre></td>
+          <td class="centerTd"><pre><span id="hardcoreGauntletBomb"></span></pre></td>
+          <td class="centerTd"><pre><span id="maniaGauntletBomb"></span></pre></td>
+        </tr>
+        <tr>
+          <td class="centerTd"><img src="/solver/static/images/PowerBomb.png" alt="PowerBomb.png" title="PowerBomb.png" class="width: 32px"/></td>
+          <td class="centerTd">Suitless | <img src="/solver/static/images/Varia.png" alt="Varia.png" title="Varia.png" class="width: 32px"/></td>
+          <td class="centerTd"><pre><span id="easyGauntletPowerBomb"></span></pre></td>
+          <td class="centerTd"><pre><span id="mediumGauntletPowerBomb"></span></pre></td>
+          <td class="centerTd"><pre><span id="hardGauntletPowerBomb"></span></pre></td>
+          <td class="centerTd"><pre><span id="harderGauntletPowerBomb"></span></pre></td>
+          <td class="centerTd"><pre><span id="hardcoreGauntletPowerBomb"></span></pre></td>
+          <td class="centerTd"><pre><span id="maniaGauntletPowerBomb"></span></pre></td>
+        </tr>
       </table>
     </div>
   </div>
@@ -705,111 +705,111 @@ if skillBarData is not None:
       <h3 id="iceStep">Hellruns</h3>
       <table class="full">
         <colgroup><col class="half" /><col class="half" /></colgroup>
-	<tr>
-	  <td><a href="https://www.youtube.com/watch?v=E0jcnyb2eec&t=15m11s" target="_blank">Ice:</a></td>
-	  <td>{{hellruns = ['No thanks', 'Gimme energy', 'Default', 'Bring the heat', 'I run RBO']
-	        displaySelect("Ice", hellruns, settings['Ice'])}}</td>
+        <tr>
+          <td><a href="https://www.youtube.com/watch?v=E0jcnyb2eec&t=15m11s" target="_blank">Ice:</a></td>
+          <td>{{hellruns = ['No thanks', 'Gimme energy', 'Default', 'Bring the heat', 'I run RBO']
+                displaySelect("Ice", hellruns, settings['Ice'])}}</td>
           <td><button type="button" onclick="startTheTour(5)">?</button></td>
-	</tr>
-	<tr>
-	  <td><a href="https://www.youtube.com/watch?v=E0jcnyb2eec&t=16m44s" target="_blank">Main Upper Norfair:</a></td>
-	  <td>{{displaySelect("MainUpperNorfair", hellruns, settings['MainUpperNorfair'])}}</td>
-	</tr>
-	<tr>
-	  <td><a href="https://www.youtube.com/watch?v=E0jcnyb2eec&t=23m59s" target="_blank">Lower Norfair:</a></td>
-	  <td>{{hellruns = ['Default', 'Bring the heat', 'I run RBO']
-	        displaySelect("LowerNorfair", hellruns, settings['LowerNorfair'])}}</td>
-	</tr>
+        </tr>
+        <tr>
+          <td><a href="https://www.youtube.com/watch?v=E0jcnyb2eec&t=16m44s" target="_blank">Main Upper Norfair:</a></td>
+          <td>{{displaySelect("MainUpperNorfair", hellruns, settings['MainUpperNorfair'])}}</td>
+        </tr>
+        <tr>
+          <td><a href="https://www.youtube.com/watch?v=E0jcnyb2eec&t=23m59s" target="_blank">Lower Norfair:</a></td>
+          <td>{{hellruns = ['Default', 'Bring the heat', 'I run RBO']
+                displaySelect("LowerNorfair", hellruns, settings['LowerNorfair'])}}</td>
+        </tr>
       </table>
     </div>
     <div class="column">
       <h3 id="hellRunsEnergyStep">Hellruns energy requirements<span class="rightStep"><button id="requirementStep" type="button" onclick="startTheTour(6)">?</button></span></h3>
       <table class="full">
         <colgroup><col class="half" /><col class="half" /></colgroup>
-	<tr>
-	  <td>
-	    <h4>Ice</h4>
-	  </td>
-	  <td>
-	    {{displaySelect("IceHellRun", sorted(hellRuns["Ice"]), hellRuns["Ice"]["Norfair Entrance -> Ice Beam"])}}
-	  </td>
+        <tr>
+          <td>
+            <h4>Ice</h4>
+          </td>
+          <td>
+            {{displaySelect("IceHellRun", sorted(hellRuns["Ice"]), hellRuns["Ice"]["Norfair Entrance -> Ice Beam"])}}
+          </td>
           <td><span class="btn"></span></td>
-	</tr>
+        </tr>
       </table>
       <table class="full">
-	<tr>
-	  <td class="centerTd">easy</td><td class="centerTd">medium</td><td class="centerTd">hard</td><td class="centerTd">very hard</td><td class="centerTd">hardcore</td><td class="centerTd">mania</td>
-	</tr>
-	<tr>
-	  <td class="centerTd"><pre><span id="easyIce"></span></pre></td>
-	  <td class="centerTd"><pre><span id="mediumIce"></span></pre></td>
-	  <td class="centerTd"><pre><span id="hardIce"></span></pre></td>
-	  <td class="centerTd"><pre><span id="harderIce"></span></pre></td>
-	  <td class="centerTd"><pre><span id="hardcoreIce"></span></pre></td>
-	  <td class="centerTd"><pre><span id="maniaIce"></span></pre></td>
-	</tr>
+        <tr>
+          <td class="centerTd">easy</td><td class="centerTd">medium</td><td class="centerTd">hard</td><td class="centerTd">very hard</td><td class="centerTd">hardcore</td><td class="centerTd">mania</td>
+        </tr>
+        <tr>
+          <td class="centerTd"><pre><span id="easyIce"></span></pre></td>
+          <td class="centerTd"><pre><span id="mediumIce"></span></pre></td>
+          <td class="centerTd"><pre><span id="hardIce"></span></pre></td>
+          <td class="centerTd"><pre><span id="harderIce"></span></pre></td>
+          <td class="centerTd"><pre><span id="hardcoreIce"></span></pre></td>
+          <td class="centerTd"><pre><span id="maniaIce"></span></pre></td>
+        </tr>
       </table>
       <table class="full">
         <colgroup><col class="half" /><col class="half" /></colgroup>
-	<tr>
-	  <td>
-	    <h4>Upper Norfair</h4>
-	  </td>
-	  <td>
-	    {{displaySelect("UpperHellRun", sorted(hellRuns["MainUpperNorfair"]), hellRuns["MainUpperNorfair"]["Norfair Entrance -> Bubble"])}}
-	  </td>
+        <tr>
+          <td>
+            <h4>Upper Norfair</h4>
+          </td>
+          <td>
+            {{displaySelect("UpperHellRun", sorted(hellRuns["MainUpperNorfair"]), hellRuns["MainUpperNorfair"]["Norfair Entrance -> Bubble"])}}
+          </td>
           <td><span class="btn"></span></td>
-	</tr>
+        </tr>
       </table>
       <table class="full">
-	<tr>
-	  <td class="centerTd">easy</td><td class="centerTd">medium</td><td class="centerTd">hard</td><td class="centerTd">very hard</td><td class="centerTd">hardcore</td><td class="centerTd">mania</td>
-	</tr>
-	<tr>
-	  <td class="centerTd"><pre><span id="easyMainUpperNorfair"></span></pre></td>
-	  <td class="centerTd"><pre><span id="mediumMainUpperNorfair"></span></pre></td>
-	  <td class="centerTd"><pre><span id="hardMainUpperNorfair"></span></pre></td>
-	  <td class="centerTd"><pre><span id="harderMainUpperNorfair"></span></pre></td>
-	  <td class="centerTd"><pre><span id="hardcoreMainUpperNorfair"></span></pre></td>
-	  <td class="centerTd"><pre><span id="maniaMainUpperNorfair"></span></pre></td>
-	</tr>
+        <tr>
+          <td class="centerTd">easy</td><td class="centerTd">medium</td><td class="centerTd">hard</td><td class="centerTd">very hard</td><td class="centerTd">hardcore</td><td class="centerTd">mania</td>
+        </tr>
+        <tr>
+          <td class="centerTd"><pre><span id="easyMainUpperNorfair"></span></pre></td>
+          <td class="centerTd"><pre><span id="mediumMainUpperNorfair"></span></pre></td>
+          <td class="centerTd"><pre><span id="hardMainUpperNorfair"></span></pre></td>
+          <td class="centerTd"><pre><span id="harderMainUpperNorfair"></span></pre></td>
+          <td class="centerTd"><pre><span id="hardcoreMainUpperNorfair"></span></pre></td>
+          <td class="centerTd"><pre><span id="maniaMainUpperNorfair"></span></pre></td>
+        </tr>
       </table>
       <table class="full">
         <colgroup><col class="half" /><col class="half" /></colgroup>
-	<tr>
-	  <td>
-	    <h4>Lower Norfair</h4>
-	  </td>
-	  <td>
-	    {{displaySelect("LowerHellRun", hellRuns["LowerNorfair"]["NoScrew"], hellRuns["LowerNorfair"]["NoScrew"]["Main"])}}
-	  </td>
+        <tr>
+          <td>
+            <h4>Lower Norfair</h4>
+          </td>
+          <td>
+            {{displaySelect("LowerHellRun", hellRuns["LowerNorfair"]["NoScrew"], hellRuns["LowerNorfair"]["NoScrew"]["Main"])}}
+          </td>
           <td><span class="btn"></span></td>
-	</tr>
+        </tr>
       </table>
       <table class="full">
-	<tr>
-	  <td class="centerTd">Item</td><td class="centerTd"></td><td class="centerTd">easy</td><td class="centerTd">medium</td><td class="centerTd">hard</td><td class="centerTd">very hard</td><td class="centerTd">hardcore</td><td class="centerTd">mania</td>
-	</tr>
-	<tr>
-	  <td class="centerTd"></td>
-	  <td class="centerTd"><img src="/solver/static/images/ETank.png" alt="ETank.png" title="ETank.png" class="width: 32px"/> | <img src="/solver/static/images/crystal_flash.png" alt="CF.png" title="CF.png" class="width: 32px"/></td>
-	  <td class="centerTd"><pre><span id="easyLowerNorfairNoScrew"></span></pre></td>
-	  <td class="centerTd"><pre><span id="mediumLowerNorfairNoScrew"></span></pre></td>
-	  <td class="centerTd"><pre><span id="hardLowerNorfairNoScrew"></span></pre></td>
-	  <td class="centerTd"><pre><span id="harderLowerNorfairNoScrew"></span></pre></td>
-	  <td class="centerTd"><pre><span id="hardcoreLowerNorfairNoScrew"></span></pre></td>
-	  <td class="centerTd"><pre><span id="maniaLowerNorfairNoScrew"></span></pre></td>
-	</tr>
-	<tr>
-	  <td class="centerTd"><img src="/solver/static/images/Gravity.png" alt="Gravity.png" title="Gravity.png" class="width: 32px"/> or <img src="/solver/static/images/ScrewAttack.png" alt="Screw.png" title="Screw.png" class="width: 32px"/></td>
-	  <td class="centerTd"><img src="/solver/static/images/ETank.png" alt="ETank.png" title="ETank.png" class="width: 32px"/> | <img src="/solver/static/images/crystal_flash.png" alt="CF.png" title="CF.png" class="width: 32px"/></td>
-	  <td class="centerTd"><pre><span id="easyLowerNorfairScrew"></span></pre></td>
-	  <td class="centerTd"><pre><span id="mediumLowerNorfairScrew"></span></pre></td>
-	  <td class="centerTd"><pre><span id="hardLowerNorfairScrew"></span></pre></td>
-	  <td class="centerTd"><pre><span id="harderLowerNorfairScrew"></span></pre></td>
-	  <td class="centerTd"><pre><span id="hardcoreLowerNorfairScrew"></span></pre></td>
-	  <td class="centerTd"><pre><span id="maniaLowerNorfairScrew"></span></pre></td>
-	</tr>
+        <tr>
+          <td class="centerTd">Item</td><td class="centerTd"></td><td class="centerTd">easy</td><td class="centerTd">medium</td><td class="centerTd">hard</td><td class="centerTd">very hard</td><td class="centerTd">hardcore</td><td class="centerTd">mania</td>
+        </tr>
+        <tr>
+          <td class="centerTd"></td>
+          <td class="centerTd"><img src="/solver/static/images/ETank.png" alt="ETank.png" title="ETank.png" class="width: 32px"/> | <img src="/solver/static/images/crystal_flash.png" alt="CF.png" title="CF.png" class="width: 32px"/></td>
+          <td class="centerTd"><pre><span id="easyLowerNorfairNoScrew"></span></pre></td>
+          <td class="centerTd"><pre><span id="mediumLowerNorfairNoScrew"></span></pre></td>
+          <td class="centerTd"><pre><span id="hardLowerNorfairNoScrew"></span></pre></td>
+          <td class="centerTd"><pre><span id="harderLowerNorfairNoScrew"></span></pre></td>
+          <td class="centerTd"><pre><span id="hardcoreLowerNorfairNoScrew"></span></pre></td>
+          <td class="centerTd"><pre><span id="maniaLowerNorfairNoScrew"></span></pre></td>
+        </tr>
+        <tr>
+          <td class="centerTd"><img src="/solver/static/images/Gravity.png" alt="Gravity.png" title="Gravity.png" class="width: 32px"/> or <img src="/solver/static/images/ScrewAttack.png" alt="Screw.png" title="Screw.png" class="width: 32px"/></td>
+          <td class="centerTd"><img src="/solver/static/images/ETank.png" alt="ETank.png" title="ETank.png" class="width: 32px"/> | <img src="/solver/static/images/crystal_flash.png" alt="CF.png" title="CF.png" class="width: 32px"/></td>
+          <td class="centerTd"><pre><span id="easyLowerNorfairScrew"></span></pre></td>
+          <td class="centerTd"><pre><span id="mediumLowerNorfairScrew"></span></pre></td>
+          <td class="centerTd"><pre><span id="hardLowerNorfairScrew"></span></pre></td>
+          <td class="centerTd"><pre><span id="harderLowerNorfairScrew"></span></pre></td>
+          <td class="centerTd"><pre><span id="hardcoreLowerNorfairScrew"></span></pre></td>
+          <td class="centerTd"><pre><span id="maniaLowerNorfairScrew"></span></pre></td>
+        </tr>
       </table>
     </div>
   </div>
@@ -818,38 +818,38 @@ if skillBarData is not None:
       <h3>Bosses</h3>
       <table class="full">
         <colgroup><col class="quarter"><col class="quarter" /><col class="half" /></colgroup>
-	<tr>
-	  <td><a href="https://wiki.supermetroid.run/Kraid" target="_blank">Kraid:</a></td>
-	  <td><img src="/solver/static/images/Kraid.png" alt="Kraid" title="Kraid" class="imageBoss"/></td>
-	  <td>{{kraid = ["He's annoying", 'Default', 'Quick Kill']
+        <tr>
+          <td><a href="https://wiki.supermetroid.run/Kraid" target="_blank">Kraid:</a></td>
+          <td><img src="/solver/static/images/Kraid.png" alt="Kraid" title="Kraid" class="imageBoss"/></td>
+          <td>{{kraid = ["He's annoying", 'Default', 'Quick Kill']
             displaySelect("Kraid", kraid, settings['Kraid'])}}</td>
           <td><button id="bossStep" type="button" onclick="startTheTour(7)">?</button></td>
-	</tr>
-	<tr>
-	  <td><a href="https://wiki.supermetroid.run/Draygon" target="_blank">Draygon:</a></td>
-	  <td><img src="/solver/static/images/Draygon.png" alt="Draygon" title="Draygon" class="imageBoss"/></td>
-	  <td>{{draygon = ['A lot of trouble', 'Default', 'Used to it', 'No problemo']
+        </tr>
+        <tr>
+          <td><a href="https://wiki.supermetroid.run/Draygon" target="_blank">Draygon:</a></td>
+          <td><img src="/solver/static/images/Draygon.png" alt="Draygon" title="Draygon" class="imageBoss"/></td>
+          <td>{{draygon = ['A lot of trouble', 'Default', 'Used to it', 'No problemo']
             displaySelect("Draygon", draygon, settings['Draygon'])}}</td>
-	</tr>
-	<tr>
-	  <td><a href="https://wiki.supermetroid.run/Ridley" target="_blank">Ridley:</a></td>
-	  <td><img src="/solver/static/images/Ridley.png" alt="Ridley" title="Ridley" class="imageBoss"/></td>
-	  <td>{{ridley = ["I'm scared!", 'Default', 'Used to it', 'Piece of cake']
-	    displaySelect("Ridley", ridley, settings['Ridley'])}}
-	  </td>
-	</tr>
-	<tr>
-	  <td><a href="https://wiki.supermetroid.run/Phantoon" target="_blank">Phantoon:</a></td>
-	  <td><img src="/solver/static/images/Phantoon.png" alt="Phantoon" title="Phantoon" class="imageBoss"/></td>
-	  <td>{{phantoon = ['A lot of trouble', 'Default', 'Used to it', 'No problemo']
-	    displaySelect("Phantoon", phantoon, settings['Phantoon'])}}</td>
-	</tr>
-	<tr>
-	  <td><a href="https://wiki.supermetroid.run/Mother_Brain" target="_blank">Mother Brain:</a></td>
-	  <td><img src="/solver/static/images/MotherBrain.png" alt="Mother Brain" title="Mother Brain" class="imageBoss"/></td>
-	  <td>{{motherBrain = ['It can get ugly', 'Default', 'Is this really the last boss?', 'Nice cutscene bro']
-	    displaySelect("MotherBrain", motherBrain, settings['MotherBrain'])}}</td>
-	</tr>
+        </tr>
+        <tr>
+          <td><a href="https://wiki.supermetroid.run/Ridley" target="_blank">Ridley:</a></td>
+          <td><img src="/solver/static/images/Ridley.png" alt="Ridley" title="Ridley" class="imageBoss"/></td>
+          <td>{{ridley = ["I'm scared!", 'Default', 'Used to it', 'Piece of cake']
+            displaySelect("Ridley", ridley, settings['Ridley'])}}
+          </td>
+        </tr>
+        <tr>
+          <td><a href="https://wiki.supermetroid.run/Phantoon" target="_blank">Phantoon:</a></td>
+          <td><img src="/solver/static/images/Phantoon.png" alt="Phantoon" title="Phantoon" class="imageBoss"/></td>
+          <td>{{phantoon = ['A lot of trouble', 'Default', 'Used to it', 'No problemo']
+            displaySelect("Phantoon", phantoon, settings['Phantoon'])}}</td>
+        </tr>
+        <tr>
+          <td><a href="https://wiki.supermetroid.run/Mother_Brain" target="_blank">Mother Brain:</a></td>
+          <td><img src="/solver/static/images/MotherBrain.png" alt="Mother Brain" title="Mother Brain" class="imageBoss"/></td>
+          <td>{{motherBrain = ['It can get ugly', 'Default', 'Is this really the last boss?', 'Nice cutscene bro']
+            displaySelect("MotherBrain", motherBrain, settings['MotherBrain'])}}</td>
+        </tr>
       </table>
     </div>
   </div>

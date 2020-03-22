@@ -343,12 +343,14 @@ function startTheTour(step=-1) {
       title: "VARIA Plando Generator",
       content: "<h2 class=\"center\">Welcome to the VARIA Plando Generator</h2>\
 <p>The Plando (a Plando is a Super Metroid seed with manually placed items) Generator allows you to create your own Plando in interactive mode.</p>\
+<p>Please check the help on the <a href=\"{{=URL(f="tracker")}}\" target=\"_blank\">Tracker page</a> first, since the Plandomizer interface is based on the Tracker interface.</p>\
 <h4>Start</h4>\
 <p>To use it, click on the <img src=\"/solver/static/images/play.svg\" alt=\"Start\" style=\"width: 32px\"> button, this popup will be displayed:\
 <img src=\"/solver/static/images/load_popup.png\" alt=\"Load popup\">\
 </p>\
-<p>As a base for your Plando ROM you should generate a seed on the <a href=\"/randomizer\" target=\"_blank\">Randomizer page</a> with all the optional patches that you need.</p>\
+<p>As a base for your Plando ROM you should generate a seed on the <a href=\"/randomizer\" target=\"_blank\">Randomizer page</a> with all the optional patches that you need and the start location of your choice.</p>\
 <p><b>Hint:</b>You can load the base ROM locations and transitions by checking the \"Populate your plando with the items and transitions from the base ROM\" checkbox.</p>\
+<p><b>Warning:</b>Using a race protected seed as your base ROM is not supported and will likely result with in-game crash.</p>\
 <h4>Usage</h4>\
 <p>The available locations will be displayed on the map, click on a location and this popup will be displayed allowing you to choose which item to place:\
 <img src=\"/solver/static/images/item_popup.png\" alt=\"Rando popup\">\
@@ -363,7 +365,7 @@ function startTheTour(step=-1) {
 <h4>Areas/Bosses Transitions</h4>\
 <p>Choose an Areas and/or Bosses seed as your base ROM to use the Plando Generator in items and areas/bosses mode, aka you choose the transitions between the areas/bosses.<br/>\
 <b>Hint:</b>You can mix Area portals <img src=\"/solver/static/images/portal.png\" alt=\"Portal\" style=\"width: 20px\"> and Boss portals <img src=\"/solver/static/images/portal_boss.png\" alt=\"Boss Portal\" style=\"width: 20px\">.<br/>\
-Using a base seed with Escape randomization allows you to edit the escape transition (<img src=\"/solver/static/images/portal_escape.png\" alt=\"Escape Portal\" style=\"width: 20px\">), it must start from Tourian escape portal. You can also set the escape timer by entering the time in the input just under Tourian escape portal (displayed only when the base seed is an escape randomization one).</p>\
+Using a base seed with Escape randomization allows you to edit the escape transition (<img src=\"/solver/static/images/portal_escape.png\" alt=\"Escape Portal\" style=\"width: 20px\">), it must start from Tourian escape portal. You can also set the escape timer by entering the time in the input just under Tourian escape portal (displayed only when the base seed is an escape randomization one) (the am/pm is ignored).</p>\
 <h4>Unused locations/transitions</h4>\
 <p>If you don't set an item to a location it'll be empty. Portals with no transitions will be looping on themselves.</p>\
 <h4>Randomization</h4>\
@@ -404,13 +406,15 @@ function onloadHook() {
     document.getElementById("startDebug").style.display = "block";
   }
 
+  document.getElementById("startLocationVisibility").style.display = "none";
+
   var vcrFileInput = document.getElementById("vcrFile");
   vcrFileInput.addEventListener("change", function(event){
       var file = event.target.files[0];
       var reader = new FileReader();
 
       reader.onload = function(e) {
-	  // check vcr extention
+          // check vcr extention
           var re = /(?:\.([^.]+))?$/;
           var ext = re.exec(file.name)[1];
           if( ! (ext === "vcr") ) {
@@ -512,7 +516,7 @@ function activateVCRButtons(index, len) {
   // at start disable << and < buttons
   // at end disable > and >> buttons
   var backElems = ["start", "previous"];
-  var nextElems = ["next", "end"];
+  var nextElems = ["next", "end", "nextRollback"];
   if(index == 0) {
     for(var i=0; i<backElems.length; i++) {
       $("#"+backElems[i]).addClass("greyed");
@@ -648,7 +652,7 @@ function nextAction() {
   }
 }
 
-function gotoEnd() {
+function gotoEnd(stopAtNextRollback) {
   if(loaded == false || webServInProgress == true) {
     return;
   }
@@ -664,7 +668,7 @@ function gotoEnd() {
     return;
   }
 
-  pushActions(vcrData.length - vcrIndex);
+  pushActions(vcrData.length - vcrIndex, stopAtNextRollback);
 }
 
 function gotoX() {
@@ -696,7 +700,7 @@ function gotoX() {
   pushActions(gotoAction);
 }
 
-function pushActions(len) {
+function pushActions(len, stopAtNextRollback=false) {
   var endAction = vcrIndex + len;
   var tmpIndex = vcrIndex;
 
@@ -708,6 +712,9 @@ function pushActions(len) {
       locISolver.replace(/[ ,()-]/g, '');
       ajaxChainedActions.push({action: "add", scope: "item", locName: locISolver, itemName: nextAction["item"], idxFunc: "loadNextAction"})
     } else {
+      if(stopAtNextRollback == true) {
+        break;
+      }
       var count = nextAction["count"];
       ajaxChainedActions.push({action: "remove", scope: "item", count: nextAction["count"], idxFunc: "loadNextAction"});
     }
@@ -740,15 +747,15 @@ function displayRandoPopup() {
   <div class="menu">
     <table class="full menuTable">
       <tr>
-	<td>{{=A("Home", _href=URL(f="home"), _class="menu")}}</td>
-	<td>{{=A("Presets", _href=URL(f="presets"), _class="menu")}}</td>
-	<td>{{=A("Randomizer", _href=URL(f="randomizer"), _class="menu")}}</td>
-	<td>{{=A("Solver", _href=URL(f="solver"), _class="menu")}}</td>
-	<td>{{=A("Tracker", _href=URL(f="tracker"), _class="menu")}}</td>
-	<td class="menu_selected">{{=A("Plandomizer", _href=URL(f="plando"), _class="menu")}}</td>
-	<td>{{=A("Customizer", _href=URL(f="customizer"), _class="menu")}}</td>
-	<td>{{=A("Statistics", _href=URL(f="extStats"), _class="menu")}}</td>
-	<td>{{=A("Information & Contact", _href=URL(f="infos"), _class="menu")}}</td>
+        <td>{{=A("Home", _href=URL(f="home"), _class="menu")}}</td>
+        <td>{{=A("Presets", _href=URL(f="presets"), _class="menu")}}</td>
+        <td>{{=A("Randomizer", _href=URL(f="randomizer"), _class="menu")}}</td>
+        <td>{{=A("Solver", _href=URL(f="solver"), _class="menu")}}</td>
+        <td>{{=A("Tracker", _href=URL(f="tracker"), _class="menu")}}</td>
+        <td class="menu_selected">{{=A("Plandomizer", _href=URL(f="plando"), _class="menu")}}</td>
+        <td>{{=A("Customizer", _href=URL(f="customizer"), _class="menu")}}</td>
+        <td>{{=A("Statistics", _href=URL(f="extStats"), _class="menu")}}</td>
+        <td>{{=A("Information & Contact", _href=URL(f="infos"), _class="menu")}}</td>
       </tr>
     </table>
   </div>
@@ -788,28 +795,28 @@ def displayNumber(id, min, max, default, step="1"):
       <tr><td id="RandoGrab" colspan=2 class="center greyRow"><p>Plando Randomizer parameters</p></td></tr>
       <tr><td colspan=2 class="blankRow"></td></tr>
       <tr>
-	<td>Progression speed:</td>
-	<td>{{displaySelect("progressionSpeed", ["slowest", "slow", "medium", "fast", "fastest", "basic", "VARIAble"], "VARIAble")}}
+        <td>Progression speed:</td>
+        <td>{{displaySelect("progressionSpeed", ["slowest", "slow", "medium", "fast", "fastest", "basic", "VARIAble"], "VARIAble")}}
 </td>
       </tr>
       <tr>
-	<td>Percentage of minors available:</td>
-	<td>{{displayNumber("minorQty", "7", "100", "100")}}</td>
+        <td>Percentage of minors available:</td>
+        <td>{{displayNumber("minorQty", "7", "100", "100")}}</td>
       </tr>
       <tr>
-	<td>Quantity of Energy/Reserve Tanks available:</td>
-	<td>{{displaySelect("energyQty", ["sparse", "medium", "vanilla"], "vanilla")}}</td>
+        <td>Quantity of Energy/Reserve Tanks available:</td>
+        <td>{{displaySelect("energyQty", ["sparse", "medium", "vanilla"], "vanilla")}}</td>
       </tr>
       <tr>
-	<td>Hide the result of the VARIA Randomizer (to save it without spoiling):</td>
-	<td><input id="hideRando" name="hideRando" type="checkbox"></td>
+        <td>Hide the result of the VARIA Randomizer (to save it without spoiling):</td>
+        <td><input id="hideRando" name="hideRando" type="checkbox"></td>
       </tr>
       <tr><td colspan=2 class="blankLastRow"></td></tr>
     </table>
     <table>
       <tr>
-	<td class="half"><button type="button" onclick="randomize()" class="full">Randomize</button></td>
-	<td class="half"><button type="button" onclick="hideRandoPopup()" class="full">Cancel</button></td>
+        <td class="half"><button type="button" onclick="randomize()" class="full">Randomize</button></td>
+        <td class="half"><button type="button" onclick="hideRandoPopup()" class="full">Cancel</button></td>
       </tr>
     </table>
   </div>
@@ -821,15 +828,15 @@ def displayNumber(id, min, max, default, step="1"):
       <tr><td id="SaveGrab" colspan=2 class="center greyRow">The page has been reloaded, please select your ROM again</td></tr>
       <tr><td colspan=2 class="blankRow"></td></tr>
       <tr>
-	<td>Randomized Super Metroid ROM: </td>
-	<td><input id="saveFile" name="saveFile" type="file"/></td>
+        <td>Randomized Super Metroid ROM: </td>
+        <td><input id="saveFile" name="saveFile" type="file"/></td>
       </tr>
       <tr><td colspan=2 class="blankLastRow"></td></tr>
     </table>
     <table>
       <tr>
-	<td class="half"><button type="button" onclick="save('popup')" class="full">Save</button></td>
-	<td class="half"><button type="button" onclick="hideSavePopup()" class="full">Cancel</button></td>
+        <td class="half"><button type="button" onclick="save('popup')" class="full">Save</button></td>
+        <td class="half"><button type="button" onclick="hideSavePopup()" class="full">Cancel</button></td>
       </tr>
     </table>
   </div>
@@ -841,49 +848,52 @@ def displayNumber(id, min, max, default, step="1"):
       <tr><td id="VCRGrab" colspan=2 class="center greyRow">Debug VCR window</td></tr>
       <tr><td colspan=2 class="blankRow"></td></tr>
       <tr>
-	<td>VCR file: </td>
-	<td><input id="vcrFile" name="vcrFile" type="file"/></td>
+        <td>VCR file: </td>
+        <td><input id="vcrFile" name="vcrFile" type="file"/></td>
       </tr>
       <tr><td colspan=2 class="blankLastRow"></td></tr>
     </table>
     <table>
       <tr>
-	<td>
-	  <div id="start" class="popupButton flip greyed"><img src="/solver/static/images/fast_forward.svg" alt="start" onclick="gotoStart()" data-toggle="tooltip" title="Cancel all actions" data-placement="bottom" data-container="body" data-html="true"></div>
-	</td>
-	<td>
-	  <div id="previous" class="popupButton flip greyed"><img src="/solver/static/images/play.svg" alt="end" onclick="previousAction()" data-toggle="tooltip" title="Cancel last action" data-placement="bottom" data-container="body" data-html="true"></div>
-	</td>
-	<td>
-	  <div id="next" class="popupButton greyed"><img src="/solver/static/images/play.svg" alt="end" onclick="nextAction()" data-toggle="tooltip" title="Apply next action" data-placement="bottom" data-container="body" data-html="true"></div>
-	</td>
-	<td>
-	  <div id="end" class="popupButton greyed"><img src="/solver/static/images/fast_forward.svg" alt="end" onclick="gotoEnd()" data-toggle="tooltip" title="Apply all actions" data-placement="bottom" data-container="body" data-html="true"></div>
-	</td>
-	<td>
-	  <input name="gotoAction" id="gotoAction" type="number" value="1" min="1" max="1024" step="1" class="gotoAction">
-	</td>
-	<td>
-	  <div id="goto" class="popupButton greyed"><img src="/solver/static/images/right_arrow.svg" alt="goto" onclick="gotoX()" data-toggle="tooltip" title="Goto X actions from start" data-placement="bottom" data-container="body" data-html="true"></div>
-	</td>
+        <td>
+          <div id="start" class="popupButton flip greyed"><img src="/solver/static/images/fast_forward.svg" alt="start" onclick="gotoStart()" data-toggle="tooltip" title="Cancel all actions" data-placement="bottom" data-container="body" data-html="true"></div>
+        </td>
+        <td>
+          <div id="previous" class="popupButton flip greyed"><img src="/solver/static/images/play.svg" alt="end" onclick="previousAction()" data-toggle="tooltip" title="Cancel last action" data-placement="bottom" data-container="body" data-html="true"></div>
+        </td>
+        <td>
+          <div id="next" class="popupButton greyed"><img src="/solver/static/images/play.svg" alt="end" onclick="nextAction()" data-toggle="tooltip" title="Apply next action" data-placement="bottom" data-container="body" data-html="true"></div>
+        </td>
+        <td>
+          <div id="nextRollback" class="popupButton greyed"><img src="/solver/static/images/skip_forward.svg" alt="goto" onclick="gotoEnd(true)" data-toggle="tooltip" title="Goto next rollback" data-placement="bottom" data-container="body" data-html="true"></div>
+        </td>
+        <td>
+          <div id="end" class="popupButton greyed"><img src="/solver/static/images/fast_forward.svg" alt="end" onclick="gotoEnd(false)" data-toggle="tooltip" title="Apply all actions" data-placement="bottom" data-container="body" data-html="true"></div>
+        </td>
+        <td>
+          <input name="gotoAction" id="gotoAction" type="number" value="1" min="1" max="1024" step="1" class="gotoAction">
+        </td>
+        <td>
+          <div id="goto" class="popupButton greyed"><img src="/solver/static/images/right_arrow.svg" alt="goto" onclick="gotoX()" data-toggle="tooltip" title="Goto X actions from start" data-placement="bottom" data-container="body" data-html="true"></div>
+        </td>
       </tr>
       <tr><td colspan=3 class="blankLastRow"></td></tr>
     </table>
     <table class="full">
       <colgroup><col class="quarter"/><col class="full"/></colgroup>
       <tr>
-	<td>Next action:</td>
-	<td><input type="text" name="nextAction" id="nextAction" value="" readonly class="full"></td>
+        <td>Next action:</td>
+        <td><input type="text" name="nextAction" id="nextAction" value="" readonly class="full"></td>
       </tr>
       <tr>
-	<td>Previous action:</td>
-	<td><input type="text" name="prevAction" id="prevAction" value="" readonly class="full"></td>
+        <td>Previous action:</td>
+        <td><input type="text" name="prevAction" id="prevAction" value="" readonly class="full"></td>
       </tr>
       <tr><td colspan=2 class="blankLastRow"></td></tr>
     </table>
     <table>
       <tr>
-	<td class="half"><button type="button" onclick="hideDebugPopup()" class="full">Close</button></td>
+        <td class="half"><button type="button" onclick="hideDebugPopup()" class="full">Close</button></td>
       </tr>
     </table>
     <input id="vcrJson" name="vcrJson" style="display:none" type="text"/>

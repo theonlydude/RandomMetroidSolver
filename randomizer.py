@@ -50,11 +50,11 @@ if __name__ == "__main__":
     parser.add_argument('--areaLayoutBase',
                         help="use simple layout patch for area mode", action='store_true',
                         dest='areaLayoutBase', default=False)
-    parser.add_argument('--noEscapeRando',
-                        help="Do not randomize the escape sequence in area mode", action='store_true',
-                        dest='noEscapeRando', default=False)
+    parser.add_argument('--escapeRando',
+                        help="Randomize the escape sequence",
+                        dest='escapeRando', nargs='?', const=True, default=False)
     parser.add_argument('--noRemoveEscapeEnemies',
-                        help="Do not remove enemies during escape sequence in area mode", action='store_true',
+                        help="Do not remove enemies during escape sequence", action='store_true',
                         dest='noRemoveEscapeEnemies', default=False)
     parser.add_argument('--bosses', help="randomize bosses",
                         dest='bosses', nargs='?', const=True, default=False)
@@ -81,8 +81,9 @@ if __name__ == "__main__":
     parser.add_argument('--patch', '-c',
                         help="optional patches to add",
                         dest='patches', nargs='?', default=[], action='append',
-                        choices=['itemsounds.ips', 'elevators_doors_speed.ips',
-                                 'spinjumprestart.ips', 'rando_speed.ips', 'No_Music'])
+                        choices=['itemsounds.ips', 'elevators_doors_speed.ips', 'random_music.ips',
+                                 'spinjumprestart.ips', 'rando_speed.ips', 'No_Music', 'AimAnyButton.ips',
+                                 'max_ammo_display.ips', 'supermetroid_msu1.ips'])
     parser.add_argument('--missileQty', '-m',
                         help="quantity of missiles",
                         dest='missileQty', nargs='?', default=3,
@@ -248,19 +249,6 @@ if __name__ == "__main__":
         seed4rand = seed ^ args.raceMagic
     random.seed(seed4rand)
     optErrMsg = ""
-    # choose on animal patch
-    if args.animals == True:
-        animalsPatches = ['animal_enemies.ips', 'animals.ips', 'draygonimals.ips', 'escapimals.ips',
-                          'gameend.ips', 'grey_door_animals.ips', 'low_timer.ips', 'metalimals.ips',
-                          'phantoonimals.ips', 'ridleyimals.ips']
-        if args.area == True and args.noEscapeRando == False:
-            # these glitch with enemies on
-            animalsPatches.remove('phantoonimals.ips') # excessive lag and ridley sound effects
-            animalsPatches.remove('ridleyimals.ips') # escape timer tiles tail
-            if args.noRemoveEscapeEnemies == False:
-                animalsPatches.remove('draygonimals.ips') # glitched room
-                animalsPatches.remove('metalimals.ips') # no pirates
-        args.patches.append(random.choice(animalsPatches))
     # if no max diff, set it very high
     if args.maxDifficulty:
         if args.maxDifficulty == 'random':
@@ -323,6 +311,10 @@ if __name__ == "__main__":
         args.bosses = bool(random.randint(0, 2))
     logger.debug("bosses: {}".format(args.bosses))
 
+    if args.escapeRando == 'random':
+        args.escapeRando = bool(random.randint(0, 2))
+    logger.debug("escapeRando: {}".format(args.escapeRando))
+
     if args.suitsRestriction == 'random':
         if args.morphPlacement == 'late' and args.area == True:
             args.suitsRestriction = False
@@ -346,8 +338,6 @@ if __name__ == "__main__":
         args.strictMinors = bool(random.randint(0, 2))
 
     if not GraphUtils.isStandardStart(args.startAP):
-        if args.morphPlacement == 'late':
-            optErrMsg += forceArg('morphPlacement', 'normal', "'Morph Placement' forced to normal")
         optErrMsg += forceArg('majorsSplit', 'Full', "'Majors Split' forced to Full")
         optErrMsg += forceArg('noVariaTweaks', False, "'VARIA tweaks' forced to on")
         optErrMsg += forceArg('noLayout', False, "'Anti-softlock layout patches' forced to on")
@@ -355,7 +345,10 @@ if __name__ == "__main__":
         optErrMsg += forceArg('areaLayoutBase', False, "'Additional layout patches for easier navigation' forced to on")
         possibleStartAPs = GraphUtils.getPossibleStartAPs(args.area, maxDifficulty)
         if args.startAP == 'random':
+            possibleStartAPs.remove('Ceres')
             args.startAP = random.choice(possibleStartAPs)
+            if args.startAP == 'Landing Site':
+                args.startAP = random.choice(['Landing Site', 'Ceres'])
         elif args.startAP not in possibleStartAPs:
             optErrMsg += '\nInvalid start location: {}'.format(args.startAP)
             optErrMsg += '\nPossible start locations with these settings: {}'.format(possibleStartAPs)
@@ -464,7 +457,7 @@ if __name__ == "__main__":
     randoSettings = RandoSettings(args.startAP,
                                   maxDifficulty, progSpeed, progDiff, qty,
                                   restrictions, args.superFun, args.runtimeLimit_s,
-                                  args.vcr,
+                                  args.escapeRando, args.vcr,
                                   args.plandoRando["locsItems"] if args.plandoRando != None else None)
     bossTransitions = vanillaBossesTransitions
     if args.bosses == True:
@@ -479,9 +472,7 @@ if __name__ == "__main__":
             RomPatches.ActivePatches.remove(RomPatches.AreaRandoGatesOther)
         try:
             randomizer = AreaRandomizer(graphLocations, randoSettings, seedName, bossTransitions,
-                                        dotDir=dotDir,
-                                        escape=not args.noEscapeRando,
-                                        removeEscapeEnemies=not args.noRemoveEscapeEnemies)
+                                        dotDir=dotDir)
         except RuntimeError:
             msg = "Cannot generate area layout. Retry, and change the super fun settings if the problem happens again."
             dumpErrorMsg(args.output, msg)
@@ -505,7 +496,7 @@ if __name__ == "__main__":
         (stuck, itemLocs, progItemLocs) = randomizer.generateItems()
         doors = GraphUtils.getDoorConnections(randomizer.areaGraph,
                                               args.area, args.bosses,
-                                              args.area and not args.noEscapeRando)
+                                              args.escapeRando)
         escapeTimer = randomizer.areaGraph.EscapeTimer
     else:
         stuck = False
@@ -526,7 +517,19 @@ if __name__ == "__main__":
                 and itemLoc['Location']['Visibility'] == 'Visible'):
                 if bool(random.randint(0, 2)) == True:
                     itemLoc['Location']['Visibility'] = 'Hidden'
-
+    # choose on animal patch
+    if args.animals == True:
+        animalsPatches = ['animal_enemies.ips', 'animals.ips', 'draygonimals.ips', 'escapimals.ips',
+                          'gameend.ips', 'grey_door_animals.ips', 'low_timer.ips', 'metalimals.ips',
+                          'phantoonimals.ips', 'ridleyimals.ips']
+        if args.escapeRando == True:
+            # these glitch with enemies on
+            animalsPatches.remove('phantoonimals.ips') # excessive lag and ridley sound effects
+            animalsPatches.remove('ridleyimals.ips') # escape timer tiles tail
+            if args.noRemoveEscapeEnemies == False:
+                animalsPatches.remove('draygonimals.ips') # glitched room
+                animalsPatches.remove('metalimals.ips') # no pirates
+        args.patches.append(random.choice(animalsPatches))
     # transform itemLocs in our usual dict(location, item), for minors keep only the first
     locsItems = {}
     firstMinorsFound = {'Missile': False, 'Super': False, 'PowerBomb': False}
@@ -546,6 +549,8 @@ if __name__ == "__main__":
         # replace smbool with a dict
         for itemLoc in itemLocs:
             itemLoc["Location"]["difficulty"] = itemLoc["Location"]["difficulty"].json()
+            if "Wrapper" in itemLoc["Item"]:
+                del itemLoc["Item"]["Wrapper"]
 
         with open(args.output, 'w') as jsonFile:
             json.dump({"itemLocs": itemLocs, "errorMsg": randomizer.errorMsg}, jsonFile, default=lambda x: x.__dict__)
@@ -598,7 +603,7 @@ if __name__ == "__main__":
                                        args.noLayout, suitsMode,
                                        args.area, args.bosses, args.areaLayoutBase,
                                        args.noVariaTweaks, args.nerfedCharge,
-                                       args.noEscapeRando, args.noRemoveEscapeEnemies)
+                                       args.escapeRando, args.noRemoveEscapeEnemies)
         else:
             romPatcher.addIPSPatches(args.patches)
         if args.sprite is not None:

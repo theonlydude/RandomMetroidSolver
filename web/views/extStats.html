@@ -14,13 +14,13 @@ hs.zIndexCounter = 1000000;
 hs.dimmingOpacity = 0.75;
 
 if (hs.registerOverlay) {
-	// The simple semitransparent close button overlay
-	hs.registerOverlay({
-		thumbnailId: 'areathumb',
-		html: '<div class="closebutton"	onclick="return hs.close(this)" title="Close"></div>',
-		position: 'top right',
-		fade: 2 // fading the semi-transparent overlay looks bad in IE
-	});
+        // The simple semitransparent close button overlay
+        hs.registerOverlay({
+                thumbnailId: 'areathumb',
+                html: '<div class="closebutton"        onclick="return hs.close(this)" title="Close"></div>',
+                position: 'top right',
+                fade: 2 // fading the semi-transparent overlay looks bad in IE
+        });
 }
 </script>
 
@@ -182,7 +182,59 @@ function drawDifficultiesHistogram() {
 }}
 }
 
+function drawAvgLocsHistogram() {
+{{
+  if solverStats == None or "avgLocs" not in solverStats:
+    response.write("  return;", escape=False)
+    pass
+  else:
+}}
+    // Define the chart to be drawn.
+    var data = google.visualization.arrayToDataTable({{response.write(solverStats["avgLocs"], escape=False)}});
+
+    var options = {
+      title: "Average number of available locations distribution",
+      vAxis: {title: 'Percentage'},
+      hAxis: {title: 'Average number of available locations'},
+      seriesType: 'bars',
+      legend: { position: "none" }
+    };
+
+    // Instantiate and draw the chart.
+    var chart = new google.visualization.ColumnChart(document.getElementById("avgLocsHistogram"));
+    chart.draw(data, options);
+{{
+    pass
+}}
+}
+
+function drawOpennessHistogram() {
+{{
+  if solverStats == None or "open" not in solverStats:
+    response.write("  return;", escape=False)
+    pass
+  else:
+}}
+    // Define the chart to be drawn.
+    var data = google.visualization.arrayToDataTable({{response.write(solverStats["open"], escape=False)}});
+
+    var options = {
+      title: "Progression items distribution",
+      vAxis: {title: 'Percentage'},
+      hAxis: {title: 'Collected items count'}
+    };
+
+    // Instantiate and draw the chart.
+    var chart = new google.visualization.AreaChart(document.getElementById("opennessHistogram"));
+    chart.draw(data, options);
+{{
+    pass
+}}
+}
+
 google.charts.setOnLoadCallback(drawDifficultiesHistogram);
+google.charts.setOnLoadCallback(drawAvgLocsHistogram);
+google.charts.setOnLoadCallback(drawOpennessHistogram);
 
 function loadRandoPreset() {
   console.log("loadRandoPreset: "+document.getElementById("randoPreset").value);
@@ -224,15 +276,15 @@ function ajaxFail(jqXHR, textStatus) {
   <div class="menu">
     <table class="full menuTable">
       <tr>
-	<td>{{=A("Home", _href=URL(f="home"), _class="menu")}}</td>
-	<td>{{=A("Presets", _href=URL(f="presets"), _class="menu")}}</td>
-	<td>{{=A("Randomizer", _href=URL(f="randomizer"), _class="menu")}}</td>
-	<td>{{=A("Solver", _href=URL(f="solver"), _class="menu")}}</td>
-	<td>{{=A("Tracker", _href=URL(f="tracker"), _class="menu")}}</td>
-	<td>{{=A("Plandomizer", _href=URL(f="plando"), _class="menu")}}</td>
-	<td>{{=A("Customizer", _href=URL(f="customizer"), _class="menu")}}</td>
-	<td class="menu_selected">{{=A("Statistics", _href=URL(f="extStats"), _class="menu")}}</td>
-	<td>{{=A("Information & Contact", _href=URL(f="infos"), _class="menu")}}</td>
+        <td>{{=A("Home", _href=URL(f="home"), _class="menu")}}</td>
+        <td>{{=A("Presets", _href=URL(f="presets"), _class="menu")}}</td>
+        <td>{{=A("Randomizer", _href=URL(f="randomizer"), _class="menu")}}</td>
+        <td>{{=A("Solver", _href=URL(f="solver"), _class="menu")}}</td>
+        <td>{{=A("Tracker", _href=URL(f="tracker"), _class="menu")}}</td>
+        <td>{{=A("Plandomizer", _href=URL(f="plando"), _class="menu")}}</td>
+        <td>{{=A("Customizer", _href=URL(f="customizer"), _class="menu")}}</td>
+        <td class="menu_selected">{{=A("Statistics", _href=URL(f="extStats"), _class="menu")}}</td>
+        <td>{{=A("Information & Contact", _href=URL(f="infos"), _class="menu")}}</td>
       </tr>
     </table>
   </div>
@@ -247,15 +299,15 @@ function ajaxFail(jqXHR, textStatus) {
   <div class="tabcontent">
     <form id="mainform" name="mainform">
       <table class="full">
-	<tr>
-	  <td>Skills Preset:</td>
-	  <td>{{=SELECT(OPTGROUP(*stdPresets, **dict(_label="Standard presets")), OPTGROUP(*tourPresets, **dict(_label="Tournament presets")), **dict(_name="preset", _id="preset", value=session.extStats["preset"], _class="filldropdown chzn-select"))}}</td>
-	  <td><button id="presetStep" type="button" onclick="startTheTour(0)">?</button></td>
-	  
-	  <td>Settings Preset:</td>
-	  <td>{{=SELECT(OPTGROUP(*randoPresets, **dict(_label="Standard presets")), OPTGROUP(*tourRandoPresets, **dict(_label="Tournament presets")), **dict(_name="randoPreset", _id="randoPreset", value=session.extStats["randoPreset"], _class="filldropdown chzn-select", _onchange="loadRandoPreset()"))}}</td>
-	  <td><button id="randoPresetStep" type="button" onclick="startTheTour(1)">?</button></td>
-	  <td>{{=INPUT(_type="submit", _value="Load", _name="action", _class="btn btn-default")}}</td>
+        <tr>
+          <td>Skills Preset:</td>
+          <td>{{=SELECT(OPTGROUP(*stdPresets, **dict(_label="Standard presets")), OPTGROUP(*tourPresets, **dict(_label="Tournament presets")), **dict(_name="preset", _id="preset", value=session.extStats["preset"], _class="filldropdown chzn-select"))}}</td>
+          <td><button id="presetStep" type="button" onclick="startTheTour(0)">?</button></td>
+
+          <td>Settings Preset:</td>
+          <td>{{=SELECT(OPTGROUP(*randoPresets, **dict(_label="Standard presets")), OPTGROUP(*tourRandoPresets, **dict(_label="Tournament presets")), **dict(_name="randoPreset", _id="randoPreset", value=session.extStats["randoPreset"], _class="filldropdown chzn-select", _onchange="loadRandoPreset()"))}}</td>
+          <td><button id="randoPresetStep" type="button" onclick="startTheTour(1)">?</button></td>
+          <td>{{=INPUT(_type="submit", _value="Load", _name="action", _class="btn btn-default")}}</td>
         </tr>
       </table>
     </form>
@@ -362,14 +414,14 @@ elif itemsStats != None and len(itemsStats) > 0:
     <div class="left">Statistics have been computed on {{=int(numberSeeds)}} seeds. Minors probabilities are only for the first ammo pack.</div>
     <div class="right">Legend: &nbsp;
       <table class="right">
-	<tr>
-	  <td class="border">0.0</td>
-	  <td class="border red"><{{=getThreshold(0.33, numberSeeds, parameters["majorsSplit"])}}</td>
-	  <td class="border yellow"><{{=getThreshold(0.5, numberSeeds, parameters["majorsSplit"])}}</td>
-	  <td class="border green">>{{=getThreshold(0.5, numberSeeds, parameters["majorsSplit"])}} <{{=getThreshold(2.0, numberSeeds, parameters["majorsSplit"])}}</td>
-	  <td class="border yellow">>{{=getThreshold(2.0, numberSeeds, parameters["majorsSplit"])}}</td>
-	  <td class="border red">>{{=getThreshold(3.0, numberSeeds, parameters["majorsSplit"])}}</td>
-	</tr>
+        <tr>
+          <td class="border">0.0</td>
+          <td class="border red"><{{=getThreshold(0.33, numberSeeds, parameters["majorsSplit"])}}</td>
+          <td class="border yellow"><{{=getThreshold(0.5, numberSeeds, parameters["majorsSplit"])}}</td>
+          <td class="border green">>{{=getThreshold(0.5, numberSeeds, parameters["majorsSplit"])}} <{{=getThreshold(2.0, numberSeeds, parameters["majorsSplit"])}}</td>
+          <td class="border yellow">>{{=getThreshold(2.0, numberSeeds, parameters["majorsSplit"])}}</td>
+          <td class="border red">>{{=getThreshold(3.0, numberSeeds, parameters["majorsSplit"])}}</td>
+        </tr>
       </table>
     </div>
   </p>
@@ -462,24 +514,24 @@ elif itemsStats != None and len(itemsStats) > 0:
 }}
       <div class="columnThird">
         <table class="full border">
-	  <colgroup><col class="threequarter"/><col class="quarter"/></colgroup>
+          <colgroup><col class="threequarter"/><col class="quarter"/></colgroup>
           <tr><td class="center grey bold" colspan="2">{{=category["title"]}}</td></tr>
 {{
       for know in category["knows"]:
         if know in techniquesStats:
-	  percent = float(techniquesStats[know])
+          percent = float(techniquesStats[know])
         else:
-	  percent = 0.0
-	  pass
+          percent = 0.0
+          pass
         if know not in knowsDesc:
-	  # hard rooms and hellruns
-	  display = know
-	elif knowsDesc[know]['href'] is not None:
+          # hard rooms and hellruns
+          display = know
+        elif knowsDesc[know]['href'] is not None:
           display = "<a href=\"{}\" target=\"_blank\">{}</a>".format(knowsDesc[know]["href"], knowsDesc[know]["display"])
-	else:
-	  display = knowsDesc[know]["display"]
-	  pass
-	if percent == 0.0:
+        else:
+          display = knowsDesc[know]["display"]
+          pass
+        if percent == 0.0:
           style = ""
         else:
           style = 'style="background-color:#{}ff00;"'.format(getGradient(percent))
@@ -489,28 +541,40 @@ elif itemsStats != None and len(itemsStats) > 0:
           if skillPresetContent["Knows"][know][0] == False:
             strike = "strike"
             pass
-	elif category["title"] == "Hellruns":
+        elif category["title"] == "Hellruns":
           hellrunName = know[:-len("HellRun")]
           hellrunValue = skillPresetContent["Settings"][hellrunName]
           if hellrunValue == "No thanks" and hellrunName in ("Ice", "MainUpperNorfair"):
-	    strike = "strike"
+            strike = "strike"
           elif hellrunValue == "Default" and hellrunName == "LowerNorfair":
-	    strike = "strike"
+            strike = "strike"
             pass
-	  pass
+          pass
 }}
           <tr class="border"><td class="border {{=strike}}">{{response.write(display, escape=False)}}</td><td {{response.write(style, escape=False)}} class="border {{=strike}}">{{=percent}}</td></tr>
 {{
         pass
 }}
-	</table>
+        </table>
       </div>
 {{
       pass
 }}
     </div>
-    <div id = "difficultiesHistogram" style = "height: 400px; margin: 0 auto"></div>
+    <div id="difficultiesHistogram" style="height: 400px; margin: 0 auto"></div>
 {{
+  if "avgLocs" in solverStats:
+}}
+    <p>When solving the seed we count at each step how many locations are available for next choice, then we keep the average value. The higher average of available locations the more open the seed is.</p>
+    <div id="avgLocsHistogram" style="height: 400px; margin: 0 auto"></div>
+{{
+    pass
+  if "open" in solverStats:
+}}
+    <p>When solving the seed we count when we can reach 1/4, 1/2, 3/4 and all the locations, this gives the distribution of progression items. The sooner we reach this milestones the freer the seed is.</p>
+    <div id="opennessHistogram" style="height: 400px; margin: 0 auto"></div>
+{{
+    pass
   pass
 }}
   </div>

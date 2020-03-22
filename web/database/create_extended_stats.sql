@@ -163,3 +163,11 @@ create table if not exists difficulties (
   mania int unsigned default 0,
   primary key(ext_id)
 );
+
+create table if not exists solver_stats (
+  -- to join with extend_stats
+  ext_id int unsigned not null,
+  name varchar(8) not null,
+  value int unsigned default 0
+);
+create index solver_stats_idx01 on solver_stats(ext_id, name);

@@ -45,7 +45,7 @@ class RandoSettings(object):
     # vcr: to generate debug .vcr output file
     # plandoRando: list of already set (locationName, itemType) by the plando
     def __init__(self, startAP, maxDiff, progSpeed, progDiff, qty, restrictions,
-                 superFun, runtimeLimit_s, vcr, plandoRando):
+                 superFun, runtimeLimit_s, escapeRando, vcr, plandoRando):
         self.startAP = startAP
         self.progSpeed = progSpeed
         self.progDiff = progDiff
@@ -56,6 +56,7 @@ class RandoSettings(object):
         self.runtimeLimit_s = runtimeLimit_s
         if self.runtimeLimit_s <= 0:
             self.runtimeLimit_s = sys.maxsize
+        self.escapeRando = escapeRando
         self.vcr = vcr
         self.plandoRando = plandoRando
 
@@ -485,7 +486,7 @@ class SuperFunProvider(object):
         # get restricted locs
         totalAvailLocs = []
         comeBack = {}
-        locs = [loc for loc in self.rando.currentLocations(post=True)]
+        locs = self.rando.currentLocations(post=True)
         for loc in locs:
             ap = loc['accessPoint']
             if ap not in comeBack:
@@ -504,7 +505,7 @@ class SuperFunProvider(object):
             for ap in interAPs:
                 if not ap in availAccessPoints:
                     ret = False
-                    #self.log.debug("unavail AP: " + ap.Name + ", from " + startApName)
+                    self.log.debug("unavail AP: " + ap.Name + ", from " + startAp.Name)
 
         # check if we can reach all bosses
         if ret:
@@ -521,14 +522,22 @@ class SuperFunProvider(object):
                 maxDiff = self.rando.difficultyTarget
                 ret = self.rando.areaGraph.canAccess(self.sm, 'PhantoonRoomOut', 'PhantoonRoomIn', maxDiff)\
                       and self.rando.areaGraph.canAccess(self.sm, 'Main Street Bottom', 'DraygonRoomIn', maxDiff)
+                self.log.debug('checkPool. boss access sanity check: '+str(ret))
 
+        if self.isChozo:
+            Knows.IceZebSkip = zeb
+            # last check for chozo locations: don't put more restricted locations than removed chozo items (we cannot rely
+            # on removing ammo/energy in fillRestrictedLocations since it is already the bare minimum in chozo pool)
+            restrictedLocs = self.restrictedLocs + [loc for loc in self.lastRestricted if loc not in self.restrictedLocs]
+            nRestrictedChozo = sum(1 for loc in restrictedLocs if 'Chozo' in loc['Class'])
+            nNothingChozo = sum(1 for item in pool if 'Chozo' in item['Class'] and item['Category'] == 'Nothing')
+            ret &= nRestrictedChozo <= nNothingChozo
+            self.log.debug('checkPool. nRestrictedChozo='+str(nRestrictedChozo)+', nNothingChozo='+str(nNothingChozo))
         # cleanup
         self.sm.resetItems()
         Bosses.reset()
         self.restoreBossChecks()
-        if self.isChozo:
-            Knows.IceZebSkip = zeb
-
+        self.log.debug('checkPool. result: '+str(ret))
         return ret
 
     def disableBossChecks(self):
@@ -796,6 +805,46 @@ class Randomizer(object):
             # be in a chozo location, but the game is still finishable)
             Knows.IceZebSkip = SMBool(True, 0, [])
 
+        # handle escape rando
+        if settings.escapeRando == True:
+            self.escapeGraph()
+
+    # graph update for randomized escape
+    def escapeGraph(self):
+        sm = self.smbm
+        # setup smbm with item pool
+        sm.resetItems()
+        for boss in Bosses.bosses():
+            Bosses.beatBoss(boss)
+        # Ice not usable because of hyper beam
+        # remove energy to avoid hell runs
+        sm.addItems([item['Type'] for item in self.itemPool if item['Type'] != 'Ice' and item['Category'] != 'Energy'])
+        path = None
+        while path is None:
+            (src, dst) = GraphUtils.createEscapeTransition()
+            path = self.areaGraph.accessPath(sm, dst, 'Landing Site',
+                                             self.difficultyTarget)
+        # cleanup smbm
+        sm.resetItems()
+        Bosses.reset()
+
+        # actually update graph
+        self.areaGraph.addTransition(src, dst)
+
+        # get timer value
+        self.areaGraph.EscapeTimer = self.escapeTimer(path)
+        self.log.debug("escapeGraph: ({}, {}) timer: {}".format(src, dst, self.areaGraph.EscapeTimer))
+
+    def escapeTimer(self, path):
+        escapeTargetsTimer = {
+            'Climb Bottom Left': None, # vanilla
+            'Green Brinstar Main Shaft Top Left': 210, # brinstar
+            'Basement Left': 210, # wrecked ship
+            'Business Center Mid Left': 270, # norfair
+            'Crab Hole Bottom Right': 270 # maridia
+        }
+        return escapeTargetsTimer[path[0].Name]
+
     def computeLateMorphLimit(self):
         if self.restrictions['Morph'] != 'late':
             return
@@ -807,15 +856,17 @@ class Randomizer(object):
         if self.restrictions['MajorMinor'] != 'Full':
             locs = [loc for loc in locs if self.restrictions['MajorMinor'] in loc['Class']]
         self.lateMorphLimit = len(locs)
-        self.lateMorphOutCrateria = len(set([loc['GraphArea'] for loc in locs])) > 1
-        if self.lateMorphOutCrateria == False and self.restrictions['MajorMinor'] == 'Full' and self.restrictions['Suits'] == False:
-            # we can do better
-            raise RuntimeError('Invalid layout for late morph')
+        self.lateMorphOutStartArea = len(set([loc['GraphArea'] for loc in locs])) > 1
+        self.startArea = getAccessPoint(self.settings.startAP).GraphArea
+        self.computeLateMorphLimitCheck()
         self.lateMorphResult = None
-        self.log.debug("lateMorphLimit: {}: {} {}".format(self.restrictions['MajorMinor'], self.lateMorphLimit, self.lateMorphOutCrateria))
+        self.log.debug("lateMorphLimit: {}: {} {}".format(self.restrictions['MajorMinor'], self.lateMorphLimit, self.lateMorphOutStartArea))
         self.log.debug('lateMorphLimit: locs=' + str([loc['Name'] for loc in locs]))
         # cleanup
         self.smbm.resetItems()
+
+    def computeLateMorphLimitCheck(self):
+        pass
 
     def resetCache(self):
         self.nonProgTypesCache = []
@@ -1182,10 +1233,11 @@ class Randomizer(object):
         return location['GraphArea'] != 'Crateria'
 
     def morphPlacementImpl(self, item, location):
-        # if morph can be out of crateria, restrict it from being put in crateria
-        if self.lateMorphOutCrateria == True:
-            if location['GraphArea'] == 'Crateria':
+        # if morph can be out of start area, restrict it from being put in start area
+        if self.lateMorphOutStartArea == True:
+            if location['GraphArea'] == self.startArea:
                 return False
+
         if self.lateMorphResult is not None:
             return self.lateMorphResult
 
@@ -1208,8 +1260,8 @@ class Randomizer(object):
     # usually these locs are checked last when playing, so placing
     # an important item there has an impact on progression speed
     def isSoftlockPossible(self, item, loc):
-        # disable check for early game
-        if self.isEarlyGame() or loc['Name'] == 'Bomb':
+        # disable check for early game and MB
+        if self.isEarlyGame() or loc['Name'] == 'Bomb' or loc['Name'] == 'Mother Brain':
             return False
         isPickup = 'Pickup' in loc
         if isPickup:
@@ -1465,7 +1517,9 @@ class Randomizer(object):
             sys.stdout.flush()
             return False
         # check that there is room left in all main areas
-        room = {'Brinstar' : 0, 'Norfair' : 0, 'WreckedShip' : 0, 'LowerNorfair' : 0, 'Maridia' : 0, 'Crateria' : 0 }
+        room = {'Brinstar' : 0, 'Norfair' : 0, 'WreckedShip' : 0, 'LowerNorfair' : 0, 'Maridia' : 0 }
+        if not self.stdStart:
+            room['Crateria'] = 0
         for loc in self.unusedLocations:
             majAvail = self.isLocMajor(loc)
             minAvail = self.isLocMinor(loc)
@@ -1633,7 +1687,6 @@ class Randomizer(object):
             sys.stdout.flush()
             return None
         # to stay consistent in case no solution is found as states list was popped in init
-        byPassTriedCheck = self.isEarlyGame()
         fallbackState = self.getCurrentState()
         if fallbackState == self.lastFallbackState:
             # we're stuck there, rewind more in fallback
@@ -1690,13 +1743,18 @@ class Randomizer(object):
     # check if bosses are blocking the last remaining locations
     def onlyBossesLeft(self, bossesKilled):
         self.log.debug('onlyBossesLeft, diff=' + str(self.difficultyTarget))
-        prevLocs = self.currentLocations(post=True)
+        nextBoss = next((item for item in self.itemPool if item['Type'] == 'Boss'), None)
+        if nextBoss is None:
+            return False
+        def getLocList():
+            return [loc for loc in self.currentLocations(post=True) if not self.isSoftlockPossible(nextBoss, loc)]
+        prevLocs = getLocList()
         # fake kill all bosses and see if we can access the rest of the game
         Bosses.reset()
         for boss in ['Kraid', 'Phantoon', 'Ridley', 'Draygon']:
             Bosses.beatBoss(boss)
         # get bosses locations and newly accessible locations (for bosses that open up locs)
-        newLocs = self.currentLocations(post=True)
+        newLocs = getLocList()
         locs = newLocs + [loc for loc in self.unusedLocations if ('Boss' in loc['Class'] or 'Pickup' in loc) and not loc in newLocs]
         ret = (len(locs) > len(prevLocs) and len(locs) == len(self.unusedLocations))
         # restore currently killed bosses
@@ -1959,7 +2017,13 @@ class Randomizer(object):
                     isStuck = self.getItemFromStandardPool()
                 if isStuck:
                     # if we're stuck, check if only bosses locations are left (bosses difficulty settings problems)
-                    self.onlyBosses = self.onlyBossesLeft(self.getCurrentState().bosses)
+                    if not self.onlyBosses:
+                        self.onlyBosses = self.onlyBossesLeft(self.getCurrentState().bosses)
+                    else:
+                        # shouldn't be stuck if onlyBosses was already detected, so it was a false positive
+                        self.onlyBosses = False
+                        self.difficultyTarget = self.prevDiffTarget
+                        self.prevDiffTarget = None
                     if not self.onlyBosses:
                         # check that we're actually stuck
                         nCurLocs = len(self.currentLocations())

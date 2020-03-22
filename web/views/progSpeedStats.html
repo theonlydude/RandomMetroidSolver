@@ -1,0 +1,522 @@
+{{
+extend 'layout.html'
+}}
+
+<meta name="description" content="VARIA Randomizer progression speed statistics"/>
+<link rel="shortcut icon" href={{=URL('static','favicon.ico')}} type="image/ico"/>
+<link rel="stylesheet" type="text/css" href={{=URL('static/css','mystyle_20191017.css')}} media="screen"/>
+<script type="text/javascript" src="{{=URL('static', '/highslide/highslide.js')}}"></script>
+<link rel="stylesheet" type="text/css" href={{=URL("static", "/highslide/highslide.css")}} />
+<script type="text/javascript">
+hs.graphicsDir = "/solver/static/highslide/graphics/";
+hs.showCredits = 0;
+hs.zIndexCounter = 1000000;
+hs.dimmingOpacity = 0.75;
+
+if (hs.registerOverlay) {
+        // The simple semitransparent close button overlay
+        hs.registerOverlay({
+                thumbnailId: 'areathumb',
+                html: '<div class="closebutton"        onclick="return hs.close(this)" title="Close"></div>',
+                position: 'top right',
+                fade: 2 // fading the semi-transparent overlay looks bad in IE
+        });
+}
+</script>
+
+<link href={{=URL('static', 'css/bootstrap-tour.min.css')}} rel="stylesheet">
+<script src="{{=URL('static','js/bootstrap-tour.min.js')}}"></script>
+
+<script type="text/javascript" src="{{=URL('static', 'js/chosen.jquery.min.js')}}"></script>
+<link rel="stylesheet" type="text/css" href={{=URL("static", "css/chosen.css")}} />
+
+<script type = "text/javascript" src = "https://www.gstatic.com/charts/loader.js"></script>
+<script type = "text/javascript">google.charts.load('current', {packages: ['corechart']});</script>
+
+<title>Super Metroid VARIA Randomizer progresssion speed statistics</title>
+
+<style>
+.clickable {
+    cursor: pointer;
+}
+.centerTable {
+    margin-left: auto;
+    margin-right: auto;
+    width: 50%;
+}
+.blue {
+    background-color: #6d9eeb;
+}
+.green {
+    background-color: #93c47d;
+}
+.yellow {
+    background-color: #ffd966;
+}
+.orange {
+    background-color: #f6b26b;
+}
+.red {
+    background-color: #e06666;
+}
+.none {
+    background-color: #ffffff;
+}
+.minor {
+    background-color: #dddddd;
+}
+.border {
+    border: 1px solid #ddd;
+}
+.icon {
+    width: 3.6%;
+}
+.centerIcon {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: 32px;
+    image-rendering: -moz-crisp-edges; /* Firefox */
+    image-rendering: -o-crisp-edges; /* Opera */
+    image-rendering: -webkit-optimize-contrast; /* Webkit (non-standard naming) */
+    image-rendering: crisp-edges;
+    -ms-interpolation-mode: nearest-neighbor; /* IE (non-standard property) */
+}
+.grey {
+    background-color: #f1f1f1;
+}
+.bold {
+    font-weight: bold;
+}
+.left {
+    float: left;
+}
+.right {
+    float: right;
+}
+.row {
+    margin-bottom: 0.5em;
+    padding-left: 0.5em;
+}
+.space {
+    margin-bottom: 1.0em;
+    margin-top: 1.0em;
+}
+.strike {
+    text-decoration: line-through;
+}
+</style>
+
+<script type="text/javascript">
+// https://stackoverflow.com/questions/16960690/chosen-harvesthq-resize-width-dynamically
+$(document).ready(function(){      
+   resizeChosen();
+   jQuery(window).on('resize', resizeChosen);
+});
+
+function resizeChosen() {
+   $(".chosen-container").each(function() {
+       $(this).attr('style', 'width: 100%');
+   });          
+}
+
+window.onload = function(){
+    $(".chzn-select").chosen();
+    resizeChosen();
+}
+
+function startTheTour(step=-1) {
+  // the tour tutorial
+  var tour = new Tour({
+    storage: false,
+    steps: [
+    {
+      element: "#randoPresetStep",
+      title: "Settings Preset",
+      content: "Only Season Races preset is available."
+    },
+    {
+      element: "#majorsSplitStep",
+      title: "Majors Split",
+      content: "Choose between Majors and Full."
+    } ]});
+
+  // Initialize the tour
+  tour.init();
+
+  // Start the tour
+  if(step != -1) {
+    tour.goTo(step);
+  }
+  tour.start();
+}
+
+var columns = {};
+var series = {};
+
+function drawAvgLocsHistogram() {
+{{
+  if progSpeedStats == None or "avgLocs" not in progSpeedStats:
+      response.write("  return;", escape=False)
+  else:
+}}
+    // Define the chart to be drawn.
+    var data = google.visualization.arrayToDataTable({{response.write(progSpeedStats["avgLocs"], escape=False)}});
+
+    var options = {
+      title: "Average number of available locations distribution",
+      vAxis: {title: 'Percentage'},
+      hAxis: {title: 'Average number of available locations'}
+    };
+
+    // Instantiate and draw the chart.
+    var chart = new google.visualization.AreaChart(document.getElementById("avgLocsHistogram"));
+    chart.draw(data, options);
+
+    // allow to highlight a line by clicking on its legend
+    columns['avgLocs'] = [];
+    series['avgLocs'] = {};
+
+    for (var i = 0; i < data.getNumberOfColumns(); i++) {
+        columns['avgLocs'].push(true);
+        series['avgLocs'][i] = {};
+    }
+
+    var options = {
+        series: series['avgLocs']
+    }
+
+    google.visualization.events.addListener(chart, 'select', function () {
+        var sel = chart.getSelection();
+        // if selection length is 0, we deselected an element
+        if (sel.length > 0) {
+            // if row is undefined, we clicked on the legend
+            if (sel[0].row === null) {
+                var col = sel[0].column;
+                if (columns['avgLocs'][col-1] == true) {
+                    columns['avgLocs'][col-1] = false;
+                    series['avgLocs'][col-1].color = '#CCCCCC';
+                } else {
+                    columns['avgLocs'][col-1] = true;
+                    series['avgLocs'][col-1].color = null;
+                }
+                var view = new google.visualization.DataView(data);
+                chart.draw(view, options);
+            }
+        }
+    });
+
+{{
+      pass
+}}
+}
+
+google.charts.setOnLoadCallback(drawAvgLocsHistogram);
+
+function drawOpennessHistogram(progSpeed, dataIn) {
+    // Define the chart to be drawn.
+    var data = google.visualization.arrayToDataTable(dataIn);
+
+    var displayName = progSpeed;
+    if(displayName == "total") {
+        displayName = "total_rando"
+    }
+
+    var options = {
+      title: "Progression items distribution - "+displayName,
+      vAxis: {
+          title: 'Percentage',
+          viewWindow: { min: 0, max: 50 }
+      },
+      hAxis: {title: 'Collected items count'}
+    };
+
+    // Instantiate and draw the chart.
+    var chart = new google.visualization.AreaChart(document.getElementById("opennessHistogram_"+progSpeed));
+    chart.data = data;
+    chart.draw(data, options);
+}
+
+function drawOpennessHistogram2(progSpeed, dataIn) {
+    // Define the chart to be drawn.
+    var data = google.visualization.arrayToDataTable(dataIn);
+
+    var options = {
+      title: "Progression items distribution - "+progSpeed,
+      vAxis: {
+          title: 'Percentage'
+      },
+      hAxis: {title: 'Collected items count'}
+    };
+
+    // Instantiate and draw the chart.
+    var chart = new google.visualization.LineChart(document.getElementById("opennessHistogram_"+progSpeed));
+    chart.data = data;
+    chart.draw(data, options);
+
+    // allow to highlight a line by clicking on its legend
+    columns[progSpeed] = [];
+    series[progSpeed] = {};
+
+    for (var i = 0; i < data.getNumberOfColumns(); i++) {
+        columns[progSpeed].push(true);
+        series[progSpeed][i] = {};
+    }
+
+    var options = {
+        series: series[progSpeed]
+    }
+
+    google.visualization.events.addListener(chart, 'select', function () {
+        var sel = chart.getSelection();
+        // if selection length is 0, we deselected an element
+        if (sel.length > 0) {
+            // if row is undefined, we clicked on the legend
+            if (sel[0].row === null) {
+                var col = sel[0].column;
+                if (columns[progSpeed][col-1] == true) {
+                    columns[progSpeed][col-1] = false;
+                    series[progSpeed][col-1].color = '#CCCCCC';
+                } else {
+                    columns[progSpeed][col-1] = true;
+                    series[progSpeed][col-1].color = null;
+                }
+                var view = new google.visualization.DataView(data);
+                chart.draw(view, options);
+            }
+        }
+    });
+}
+
+{{
+  if progSpeedStats != None:
+    if "slowest" in progSpeedStats:
+}}
+
+function drawOpennessHistogram_slowest() {
+    drawOpennessHistogram("slowest", {{response.write(progSpeedStats["slowest"]["open"], escape=False)}});
+}
+google.charts.setOnLoadCallback(drawOpennessHistogram_slowest);
+{{
+      pass
+    if "slow" in progSpeedStats:
+}}
+
+function drawOpennessHistogram_slow() {
+    drawOpennessHistogram("slow", {{response.write(progSpeedStats["slow"]["open"], escape=False)}});
+}
+google.charts.setOnLoadCallback(drawOpennessHistogram_slow);
+{{
+      pass
+    if "medium" in progSpeedStats:
+}}
+
+function drawOpennessHistogram_medium() {
+    drawOpennessHistogram("medium", {{response.write(progSpeedStats["medium"]["open"], escape=False)}});
+}
+google.charts.setOnLoadCallback(drawOpennessHistogram_medium);
+{{
+      pass
+    if "fast" in progSpeedStats:
+}}
+
+function drawOpennessHistogram_fast() {
+    drawOpennessHistogram("fast", {{response.write(progSpeedStats["fast"]["open"], escape=False)}});
+}
+google.charts.setOnLoadCallback(drawOpennessHistogram_fast);
+{{
+      pass
+    if "fastest" in progSpeedStats:
+}}
+
+function drawOpennessHistogram_fastest() {
+    drawOpennessHistogram("fastest", {{response.write(progSpeedStats["fastest"]["open"], escape=False)}});
+}
+google.charts.setOnLoadCallback(drawOpennessHistogram_fastest);
+{{
+      pass
+    if "basic" in progSpeedStats:
+}}
+
+function drawOpennessHistogram_basic() {
+    drawOpennessHistogram("basic", {{response.write(progSpeedStats["basic"]["open"], escape=False)}});
+}
+google.charts.setOnLoadCallback(drawOpennessHistogram_basic);
+{{
+      pass
+    if "variable" in progSpeedStats:
+}}
+
+function drawOpennessHistogram_variable() {
+    drawOpennessHistogram("variable", {{response.write(progSpeedStats["variable"]["open"], escape=False)}});
+}
+google.charts.setOnLoadCallback(drawOpennessHistogram_variable);
+{{
+      pass
+    if "total" in progSpeedStats:
+}}
+
+function drawOpennessHistogram_total() {
+    drawOpennessHistogram("total", {{response.write(progSpeedStats["total"]["open"], escape=False)}});
+}
+google.charts.setOnLoadCallback(drawOpennessHistogram_total);
+{{
+      pass
+    if "open14" in progSpeedStats and len(progSpeedStats["open14"]) > 0:
+}}
+
+function drawOpennessHistogram_14() {
+    drawOpennessHistogram2("14", {{response.write(progSpeedStats["open14"], escape=False)}});
+}
+google.charts.setOnLoadCallback(drawOpennessHistogram_14);
+{{
+      pass
+    if "open24" in progSpeedStats and len(progSpeedStats["open24"]) > 0:
+}}
+
+function drawOpennessHistogram_24() {
+    drawOpennessHistogram2("24", {{response.write(progSpeedStats["open24"], escape=False)}});
+}
+google.charts.setOnLoadCallback(drawOpennessHistogram_24);
+{{
+      pass
+    if "open34" in progSpeedStats and len(progSpeedStats["open34"]) > 0:
+}}
+
+function drawOpennessHistogram_34() {
+    drawOpennessHistogram2("34", {{response.write(progSpeedStats["open34"], escape=False)}});
+}
+google.charts.setOnLoadCallback(drawOpennessHistogram_34);
+{{
+      pass
+    if "open44" in progSpeedStats and len(progSpeedStats["open44"]) > 0:
+}}
+
+function drawOpennessHistogram_44() {
+    drawOpennessHistogram2("44", {{response.write(progSpeedStats["open44"], escape=False)}});
+}
+google.charts.setOnLoadCallback(drawOpennessHistogram_44);
+{{
+      pass
+    pass
+}}
+</script>
+
+<div class="fixed">
+  <div class="menu">
+    <table class="full menuTable">
+      <tr>
+        <td>{{=A("Home", _href=URL(f="home"), _class="menu")}}</td>
+        <td>{{=A("Presets", _href=URL(f="presets"), _class="menu")}}</td>
+        <td>{{=A("Randomizer", _href=URL(f="randomizer"), _class="menu")}}</td>
+        <td>{{=A("Solver", _href=URL(f="solver"), _class="menu")}}</td>
+        <td>{{=A("Tracker", _href=URL(f="tracker"), _class="menu")}}</td>
+        <td>{{=A("Plandomizer", _href=URL(f="plando"), _class="menu")}}</td>
+        <td>{{=A("Customizer", _href=URL(f="customizer"), _class="menu")}}</td>
+        <td>{{=A("Statistics", _href=URL(f="extStats"), _class="menu")}}</td>
+        <td>{{=A("Information & Contact", _href=URL(f="infos"), _class="menu")}}</td>
+      </tr>
+    </table>
+  </div>
+</div>
+
+<div class="main">
+  <div class="center">
+    <div class="tab">
+      <button class="tablinks" onclick="nope(event);">Statistics</button>
+    </div>
+  </div>
+  <div class="tabcontent">
+    <form id="mainform" name="mainform">
+      <table class="full">
+        <tr>
+          <td>Settings Preset:</td>
+          <td>{{=SELECT(*randoPresets, **dict(_name="randoPreset", _id="randoPreset", value=session.progSpeedStats["randoPreset"], _class="filldropdown chzn-select"))}}</td>
+          <td><button id="randoPresetStep" type="button" onclick="startTheTour(0)">?</button></td>
+
+          <td>Majors Split:</td>
+          <td>{{=SELECT(*majorsSplit, **dict(_name="majorsSplit", _id="majorsSplit", value=session.progSpeedStats["majorsSplit"], _class="filldropdown chzn-select"))}}</td>
+          <td><button id="majorsSplitStep" type="button" onclick="startTheTour(1)">?</button></td>
+
+          <td>{{=INPUT(_type="submit", _value="Load", _name="action", _class="btn btn-default")}}</td>
+        </tr>
+      </table>
+    </form>
+
+{{
+if progSpeedStats != None:
+}}
+
+    <p>When solving the seed we count at each step how many locations are available for next choice, then we keep the average value. The higher average of available locations the more open the seed is.<br/>Click on a progression speed in the legend to grey it.</p>
+    <div id="avgLocsHistogram" style="height: 400px; margin: 0 auto"></div>
+
+    <p>When solving the seed we count when we can reach 1/4, 1/2, 3/4 and all the locations, this gives the distribution of progression items. The sooner we reach this milestones the freer the seed is.</p>
+{{
+  if "slowest" in progSpeedStats:
+}}
+    <div id="opennessHistogram_slowest" style="height: 400px; margin: 0 auto"></div>
+{{
+    pass
+  if "slow" in progSpeedStats:
+}}
+    <div id="opennessHistogram_slow" style="height: 400px; margin: 0 auto"></div>
+{{
+    pass
+  if "medium" in progSpeedStats:
+}}
+    <div id="opennessHistogram_medium" style="height: 400px; margin: 0 auto"></div>
+{{
+    pass
+  if "fast" in progSpeedStats:
+}}
+    <div id="opennessHistogram_fast" style="height: 400px; margin: 0 auto"></div>
+{{
+    pass
+  if "fastest" in progSpeedStats:
+}}
+    <div id="opennessHistogram_fastest" style="height: 400px; margin: 0 auto"></div>
+{{
+    pass
+  if "basic" in progSpeedStats:
+}}
+    <div id="opennessHistogram_basic" style="height: 400px; margin: 0 auto"></div>
+{{
+    pass
+  if "variable" in progSpeedStats:
+}}
+    <div id="opennessHistogram_variable" style="height: 400px; margin: 0 auto"></div>
+{{
+    pass
+  if "total" in progSpeedStats:
+}}
+    <div id="opennessHistogram_total" style="height: 400px; margin: 0 auto"></div>
+{{
+    pass
+}}
+
+    <p>The same values but with all the progression speeds on the same graph.</p>
+{{
+  if "open14" in progSpeedStats and len(progSpeedStats["open14"]) > 0:
+}}
+    <div id="opennessHistogram_14" style="height: 400px; margin: 0 auto"></div>
+{{
+    pass
+  if "open24" in progSpeedStats and len(progSpeedStats["open24"]) > 0:
+}}
+    <div id="opennessHistogram_24" style="height: 400px; margin: 0 auto"></div>
+{{
+    pass
+  if "open34" in progSpeedStats and len(progSpeedStats["open34"]) > 0:
+}}
+    <div id="opennessHistogram_34" style="height: 400px; margin: 0 auto"></div>
+{{
+    pass
+  if "open44" in progSpeedStats and len(progSpeedStats["open44"]) > 0:
+}}
+    <div id="opennessHistogram_44" style="height: 400px; margin: 0 auto"></div>
+{{
+    pass
+  pass
+}}
+  </div>
+</div>

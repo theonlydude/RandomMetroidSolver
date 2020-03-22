@@ -354,7 +354,7 @@ class Knows:
     CrocPBsDBoost = SMBool(False, 0, ['CrocPBsDBoost'])
     desc['CrocPBsDBoost'] = {'display': 'Crocomire Power Bombs Damage Boost',
                              'title': 'Use a D-Boost to reach Crocomire Power Bombs',
-                             'href': None,
+                             'href': 'https://youtu.be/ld8FC_Q9c6Y',
                              'rooms': ['Post Crocomire Farming Room']}
 
     CrocPBsIce = SMBool(False, 0, ['CrocPBsIce'])

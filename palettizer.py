@@ -83,5 +83,5 @@ if __name__ == "__main__":
     logger.debug("settings: {}".format(settings))
 
     romPatcher = RomPatcher(args.rom)
-    paletteRando = PaletteRando(romPatcher, settings)
+    paletteRando = PaletteRando(romPatcher, settings, None)
     paletteRando.randomize()

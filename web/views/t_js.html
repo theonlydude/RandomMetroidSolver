@@ -61,7 +61,7 @@ function isEscapeAP(ap) {
 
 function clickPortal(elemId) {
     if(loaded == false || webServInProgress == true) {
-	return;
+        return;
     }
 
     // console.log("clickPortal "+elemId+" is escape ? "+isEscapeAP(elemId)+" escape mode ? "+escapeRando);
@@ -70,66 +70,66 @@ function clickPortal(elemId) {
 
     // prevent clicking on escape portals
     if(isEscape == true && (escapeRando == false || mode != "plando")) {
-	return;
+        return;
     }
 
     escapeStart = "tourianEscapeRoom4TopRight"
     escapeLine = escapeStart in lines;
     if(escapeLine == true) {
-	escapeEnd = lines[escapeStart]
+        escapeEnd = lines[escapeStart]
     }
 
     if(firstClick == ""){
-	if(isEscape == true && escapeLine == true && elemId != escapeStart && elemId != escapeEnd){
-	    // escape line already there, allow only to select a portal of the escape line
-	    return;
-	}
+        if(isEscape == true && escapeLine == true && elemId != escapeStart && elemId != escapeEnd){
+            // escape line already there, allow only to select a portal of the escape line
+            return;
+        }
 
-	// highlight first element, allow highlight of already linked portals for link removal
-	firstClick = elemId;
-	$("#"+firstClick).addClass("addBorder");
+        // highlight first element, allow highlight of already linked portals for link removal
+        firstClick = elemId;
+        $("#"+firstClick).addClass("addBorder");
     } else if(firstClick == elemId){
-	// click back on same portal
-	$("#"+firstClick).removeClass("addBorder");
-	firstClick = "";
+        // click back on same portal
+        $("#"+firstClick).removeClass("addBorder");
+        firstClick = "";
     } else if(secondClick == "" && elemId != firstClick) {
-	isFirstEscape = isEscapeAP(firstClick);
+        isFirstEscape = isEscapeAP(firstClick);
 
-	if(isFirstEscape != isEscape) {
-	    // no mixing escape ap with other aps
-	    return;
-	}
+        if(isFirstEscape != isEscape) {
+            // no mixing escape ap with other aps
+            return;
+        }
 
-	if(firstClick in lines) {
-	    // first portal was an already connected one, replace the selection
-	    $("#"+firstClick).removeClass("addBorder");
-	    firstClick = elemId;
-	    $("#"+firstClick).addClass("addBorder");
-	} else {
-	    if(! ((firstClick in lines) || (elemId in lines))) {
-		// add new line
+        if(firstClick in lines) {
+            // first portal was an already connected one, replace the selection
+            $("#"+firstClick).removeClass("addBorder");
+            firstClick = elemId;
+            $("#"+firstClick).addClass("addBorder");
+        } else {
+            if(! ((firstClick in lines) || (elemId in lines))) {
+                // add new line
 
-		if(isEscape == true) {
-		    // escape aps, one must be tourian exit
-		    if(firstClick != escapeStart && elemId != escapeStart) {
-			alert("For escape one node must be Tourian escape.");
-			return;
-		    }
-		} else if(checkCompatibleAPs(firstClick, elemId) == false) {
-		    alert("Warning:\n\tYou are mixing an Areas access point and a Bosses access point.\n\tIt's an invalid transition except for Plando seeds.");
-		}
+                if(isEscape == true) {
+                    // escape aps, one must be tourian exit
+                    if(firstClick != escapeStart && elemId != escapeStart) {
+                        alert("For escape one node must be Tourian escape.");
+                        return;
+                    }
+                } else if(checkCompatibleAPs(firstClick, elemId) == false) {
+                    alert("Warning:\n\tYou are mixing an Areas access point and a Bosses access point.\n\tIt's an invalid transition except for Plando seeds.");
+                }
 
-		if(init == true) {
-		    secondClick = elemId;
-		    ajaxCall({action: "add", scope: "area", startPoint: firstClick, endPoint: secondClick}, "upload");
-		    firstClick = "";
-		    secondClick = "";
-		} else {
-		    // warn the user that he have to click on '>' first
-		    alert("Please initialize the tracker/plando first by clicking on the Play button.");
-		}
-	    }
-	}
+                if(init == true) {
+                    secondClick = elemId;
+                    ajaxCall({action: "add", scope: "area", startPoint: firstClick, endPoint: secondClick}, "upload");
+                    firstClick = "";
+                    secondClick = "";
+                } else {
+                    // warn the user that he have to click on '>' first
+                    alert("Please initialize the tracker/plando first by clicking on the Play button.");
+                }
+            }
+        }
     }
 }
 
@@ -678,9 +678,9 @@ window.onload = function(){
     var reader = new FileReader();
   
     reader.onload = function(e) {
-  	// check sfc or smc extention
+          // check sfc or smc extention
         var re = /(?:\.([^.]+))?$/;
-  	var ext = re.exec(file.name)[1];
+          var ext = re.exec(file.name)[1];
         if( ! (ext === "sfc" || ext === "smc") ) {
             document.getElementById("uploadFile").value = "";
             alert("wrong extension: "+ext);
@@ -694,7 +694,7 @@ window.onload = function(){
         document.getElementById("fileName").value = file.name;
 
         var fileSize = file.size;
-  	if( fileSize > 4*1024*1024 ) {
+          if( fileSize > 4*1024*1024 ) {
             document.getElementById("uploadFile").value = "";
             alert("Wrong ROM file size: "+fileSize.toString());
             return false;
@@ -705,6 +705,18 @@ window.onload = function(){
         }
   
         var bytes = new Uint8Array(e.target.result);
+
+        if(document.getElementById("mode").value == "plando") {
+            // detect race mode patch
+            for(var addr=0x1C0200; addr<0x1C0210; addr++) {
+                if(bytes[addr] != 0xff) {
+                    clearInputSeed();
+                    alert("race protected seed detected");
+                    return false;
+                }
+            }
+        }
+
         var romData = {};
   
         // locations items
@@ -735,14 +747,14 @@ window.onload = function(){
             romData[addresses[i]+3] = bytes[addresses[i]+3];
             // screen x y
             romData[addresses[i]+6] = bytes[addresses[i]+6];
-	    romData[addresses[i]+7] = bytes[addresses[i]+7];
+            romData[addresses[i]+7] = bytes[addresses[i]+7];
             // distance to spawn
             romData[addresses[i]+8] = bytes[addresses[i]+8];
-	    romData[addresses[i]+9] = bytes[addresses[i]+9];
+            romData[addresses[i]+9] = bytes[addresses[i]+9];
             // asmPtr
             romData[addresses[i]+10] = bytes[addresses[i]+10];
-	    romData[addresses[i]+11] = bytes[addresses[i]+11];
-	}
+            romData[addresses[i]+11] = bytes[addresses[i]+11];
+        }
   
         // misc
         var addresses = new Array({{=", ".join(str(address) for address in addresses["misc"])}});
@@ -757,7 +769,7 @@ window.onload = function(){
         for(var i=0; i<arrayLength; i+=2) {
           low = ranges[i];
           high = ranges[i+1];
-          for(var j=low; j<high; j++) {
+          for(var j=low; j<=high; j++) {
             romData[j] = bytes[j];
           }
         }
@@ -771,7 +783,7 @@ window.onload = function(){
 
         setGuessedPreset(file.name);
 
-	document.getElementById("startLocationVisibility").style.display = "none";
+        document.getElementById("startLocationVisibility").style.display = "none";
     }
   
     reader.readAsArrayBuffer(file);
@@ -931,7 +943,7 @@ function initSolver() {
             preset: document.getElementById("preset").value,
             fileName: document.getElementById("fileName").value,
             fill: document.getElementById("fillPlando").checked,
-	    startLocation: document.getElementById("startLocation").value,
+            startLocation: document.getElementById("startLocation").value,
             mode: mode}, "download");
 
   hidePopup();
@@ -1214,7 +1226,9 @@ function clearInputSeed() {
   document.getElementById("uploadFile").value = "";
   document.getElementById("romJson").value = "";
   document.getElementById("fileName").value = "";
-  document.getElementById("startLocationVisibility").style.display = "table-row";
+  if(mode != "plando") {
+    document.getElementById("startLocationVisibility").style.display = "table-row";
+  }
 }
 
 // https://www.w3schools.com/howto/howto_js_draggable.asp

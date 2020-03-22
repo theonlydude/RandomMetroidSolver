@@ -12,6 +12,10 @@ macro checkEscape()
     lda #$000e : jsl $808233
 endmacro
 
+;;; see random_music.asm
+!random_music_hook = $82df3e
+!random_music 	   = $a1f3f0
+
 org $809E21
 print "timer_value: ", pc
 timer_value:
@@ -259,7 +263,14 @@ music_and_enemies:
     lda $0006,x                 ; common vanilla fx load
     sta $07CD
     jsl check_ext_escape : bcs .escape
-    ;; vanilla 
+    ;; vanilla
+    ;; check presence of random music patch
+    lda.l !random_music_hook
+    and #$00ff : cmp #$005c	; JML instruction
+    bne .vanilla_music
+    jsl !random_music
+    bra .vanilla_enemies
+.vanilla_music:
     lda $0004,x ;\
     and #$00ff  ;} Music data index = [[X] + 4]
     sta $07CB   ;/

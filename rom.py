@@ -97,7 +97,7 @@ class RomReader:
         'progressiveSuits': {'address':0x869df, 'value': 0xF0, 'desc': "Progressive suits"},
         'nerfedCharge': {'address':0x83821, 'value': 0x80, 'desc': "Nerfed charge beam from the start of the game"}, # this value works for both DASH and VARIA variants
         'variaTweaks': {'address': 0x7CC4D, 'value': 0x37, 'desc': "VARIA tweaks"},
-        'area': {'address': 0x22D564, 'value': 0xF2, 'desc': "Area layout modifications"},
+        'area': {'address': 0x788A0, 'value': 0x2B, 'desc': "Area layout modifications"},
         'areaLayout': {'address': 0x252FA7, 'value': 0xF8, 'desc': "Area layout additional modifications"},
         'areaEscape': {'address': 0x20c91, 'value': 0x4C, 'desc': "Area escape randomization"},
         'newGame': {'address': 0x1001d, 'value': 0x22, 'desc': "Custom new game"}
@@ -111,7 +111,7 @@ class RomReader:
         #'animals': {'address': 0x7841D, 'value': 0x8C, 'vanillaValue': 0x18},
         'area_rando_blue_doors': {'address': 0x7823E, 'value': 0x3B, 'vanillaValue': 0x66},
         'area_rando_door_transition': {'address': 0x852BA, 'value': 0x20, 'vanillaValue': 0xad},
-        'area_rando_escape': {'address': 0x15f38, 'value': 0x5c, 'vanillaValue': 0xbd},
+        'rando_escape': {'address': 0x15f38, 'value': 0x5c, 'vanillaValue': 0xbd},
         'area_rando_layout_base': {'address': 0x788A0, 'value': 0x2B, 'vanillaValue': 0x26},
         'area_rando_layout': {'address': 0x78666, 'value': 0x62, 'vanillaValue': 0x64},
         'bomb_torizo': {'address': 0x7FDC, 'value': 0xF2, 'vanillaValue': 0x20},
@@ -163,7 +163,8 @@ class RomReader:
         'Disable_Space_Time_select_in_menu': {'address': 0x013175, 'value': 0x01, 'vanillaValue': 0x08},
         'Fix_Morph_Ball_Hidden_Chozo_PLMs': {'address': 0x0268ce, 'value': 0x04, 'vanillaValue': 0x02},
         'Fix_Screw_Attack_selection_in_menu': {'address': 0x0134c5, 'value': 0x0c, 'vanillaValue': 0x0a},
-        'No_Music': {'address': 0x278413, 'value': 0x6f, 'vanillaValue': 0xcd}
+        'No_Music': {'address': 0x278413, 'value': 0x6f, 'vanillaValue': 0xcd},
+        'random_music': {'address': 0x10F320, 'value': 0x01, 'vanillaValue': 0xff}
     }
 
     @staticmethod
@@ -547,7 +548,7 @@ class RomPatcher:
     # Replace bomb blocks with shot blocks before Spazer
     #   spazer.ips
     IPSPatches = {
-        'Standard': ['new_game.ips', 'plm_spawn.ips',
+        'Standard': ['new_game.ips', 'plm_spawn.ips', 'load_enemies_fix.ips',
                      'credits_varia.ips', 'seed_display.ips', 'tracking.ips',
                      'wake_zebes.ips', 'g4_skip.ips', # XXX those are door ASMs
                      'Mother_Brain_Cutscene_Edits',
@@ -562,12 +563,12 @@ class RomPatcher:
         'Layout': ['dachora.ips', 'early_super_bridge.ips', 'high_jump.ips', 'moat.ips', 'spospo_save.ips',
                    'nova_boost_platform.ips', 'red_tower.ips', 'spazer.ips', 'brinstar_map_room.ips'],
         'Optional': ['itemsounds.ips', 'rando_speed.ips',
-                     'spinjumprestart.ips', 'elevators_doors_speed.ips', 'No_Music',
+                     'spinjumprestart.ips', 'elevators_doors_speed.ips', 'No_Music', 'random_music.ips',
                      'skip_intro.ips', 'skip_ceres.ips', 'animal_enemies.ips', 'animals.ips',
                      'draygonimals.ips', 'escapimals.ips', 'gameend.ips', 'grey_door_animals.ips',
                      'low_timer.ips', 'metalimals.ips', 'phantoonimals.ips', 'ridleyimals.ips'],
         'Area': ['area_rando_layout.ips', 'area_rando_door_transition.ips', 'Tourian_Refill' ],
-        'AreaEscape' : ['area_rando_escape.ips', 'area_rando_escape_ws_fix.ips', 'Escape_Rando_Tourian_Doors']
+        'Escape' : ['rando_escape.ips', 'rando_escape_ws_fix.ips', 'Escape_Rando_Tourian_Doors']
     }
 
     def __init__(self, romFileName=None, magic=None, plando=False):
@@ -716,7 +717,7 @@ class RomPatcher:
                         optionalPatches=[], noLayout=False, suitsMode="Classic",
                         area=False, bosses=False, areaLayoutBase=False,
                         noVariaTweaks=False, nerfedCharge=False,
-                        noEscapeRando=False, noRemoveEscapeEnemies=False):
+                        escapeRando=False, noRemoveEscapeEnemies=False):
         try:
             # apply standard patches
             stdPatches = []
@@ -756,16 +757,22 @@ class RomPatcher:
                 if patchName in RomPatcher.IPSPatches['Optional']:
                     self.applyIPSPatch(patchName)
 
+            # random escape
+            if escapeRando == True:
+                plms.append("WS_Map_Grey_Door")
+                if noRemoveEscapeEnemies == True:
+                    RomPatcher.IPSPatches['Escape'].append('Escape_Rando_Enable_Enemies')
+                for patchName in RomPatcher.IPSPatches['Escape']:
+                    self.applyIPSPatch(patchName)
+                # handle incompatible doors transitions
+                if area == False and bosses == False:
+                    self.applyIPSPatch('area_rando_door_transition.ips')
+
             # apply area patches
             if area == True:
                 if areaLayoutBase == True:
                     RomPatcher.IPSPatches['Area'].remove('area_rando_layout.ips')
                     RomPatcher.IPSPatches['Area'].append('area_rando_layout_base.ips')
-                if noEscapeRando == False:
-                    RomPatcher.IPSPatches['Area'] += RomPatcher.IPSPatches['AreaEscape']
-                    plms.append("WS_Map_Grey_Door")
-                    if noRemoveEscapeEnemies == True:
-                        RomPatcher.IPSPatches['Area'].append('Escape_Rando_Enable_Enemies')
                 for patchName in RomPatcher.IPSPatches['Area']:
                     self.applyIPSPatch(patchName)
             elif bosses == True:
@@ -917,7 +924,7 @@ class RomPatcher:
         self.nothingId = 0x1a
         # if not default start, use first loc with a nothing
         if not GraphUtils.isStandardStart(startAP):
-            firstNothing = next((il['Location'] for il in itemLocs if il['Item']['Category'] == 'Nothing' and il['Item']['Type'] != 'Boss'), None)
+            firstNothing = next((il['Location'] for il in itemLocs if il['Item']['Category'] == 'Nothing' and il['Item']['Type'] != 'Boss' and 'Boss' not in il['Location']['Class']), None)
             if firstNothing is not None:
                 self.nothingId = firstNothing['Id']
 
@@ -1221,7 +1228,6 @@ class RomPatcher:
             if not isRace:
                 self.romFile.writeWord(w)
             else:
-                self.romFile.seek(address)
                 self.race.writeWordMagic(w)
 
     # write area randomizer transitions to ROM

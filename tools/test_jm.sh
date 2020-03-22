@@ -46,6 +46,7 @@ SUITS=("" "--nogravheatPatch" "--progressiveSuits")
 CHARGES=("" "--nerfedCharge")
 TWEAKS=("" "--novariatweaks")
 LAYOUTS=("" "--nolayout")
+STARTAPS=("" "--startAP random")
 
 function generate_params {
     SEED="$1"
@@ -60,8 +61,10 @@ function generate_params {
     TWEAK=${TWEAKS[$S]}
     let S=$RANDOM%${#LAYOUTS[@]}
     LAYOUT=${LAYOUTS[$S]}
+    let S=$RANDOM%${#STARTAPS[@]}
+    STARTAP=${STARTAPS[$S]}
 
-    echo "-r ${ROM} --param standard_presets/${PRESET}.json --seed ${SEED} --progressionSpeed random --morphPlacement random --progressionDifficulty random --missileQty 0 --superQty 0 --powerBombQty 0 --minorQty 0 --energyQty random --majorsSplit random --suitsRestriction random --hideItems random --strictMinors random --superFun CombatRandom --superFun MovementRandom --superFun SuitsRandom --maxDifficulty random --startAP random --runtime 20 --area random --bosses random ${SUIT} ${CHARGE} ${TWEAK} ${LAYOUT}"
+    echo "-r ${ROM} --param standard_presets/${PRESET}.json --seed ${SEED} --progressionSpeed random --morphPlacement random --progressionDifficulty random --missileQty 0 --superQty 0 --powerBombQty 0 --minorQty 0 --energyQty random --majorsSplit random --suitsRestriction random --hideItems random --strictMinors random --superFun CombatRandom --superFun MovementRandom --superFun SuitsRandom --maxDifficulty random --runtime 20 --area random --bosses random ${SUIT} ${CHARGE} ${TWEAK} ${LAYOUT} ${STARTAP}"
 }
 
 function computeSeed {
@@ -205,6 +208,14 @@ while true; do
 done
 
 echo "DONE"
+
+for AP in "Ceres" "Landing Site" "Gauntlet Top" "Green Brinstar Elevator" "Big Pink" "Etecoons Supers" "Wrecked Ship Main" "Business Center" "Bubble Mountain" "Watering Hole" "Red Brinstar Elevator" "Golden Four"; do
+    TOTAL=$(grep "${AP}" ${CSV}  | wc -l)
+    ERROR=$(grep "${AP}" ${CSV} | grep -E '^error' | wc -l)
+    PERCENT=$(echo "${ERROR}*100/${TOTAL}" | bc)
+    printf "%-24s" "${AP}"; echo "error ${ERROR}/${TOTAL} = ${PERCENT}%"
+done
+echo "total: $(wc -l logs/test_jm.csv)"
 
 echo "errors:"
 grep -E "NOK|mismatch|Can't solve" ${CSV}

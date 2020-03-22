@@ -342,6 +342,9 @@ class CommonSolver(object):
 
         self.areaGraph = AccessGraph(accessPoints, self.curGraphTransitions)
 
+        # store at each step how many locations are available
+        self.nbAvailLocs = []
+
         if self.log.getEffectiveLevel() == logging.DEBUG:
             self.log.debug("Display items at locations:")
             for location in self.locations:
@@ -430,6 +433,9 @@ class CommonSolver(object):
     def cancelLastItems(self, count):
         if self.vcr != None:
             self.vcr.addRollback(count)
+
+        if self.mode == 'standard':
+            self.nbAvailLocs = self.nbAvailLocs[:-count]
 
         for _ in range(count):
             if len(self.visitedLocations) == 0:
@@ -734,6 +740,8 @@ class CommonSolver(object):
                 locs = majorsAvailable
             else:
                 locs = majorsAvailable+minorsAvailable
+
+            self.nbAvailLocs.append(len(locs))
 
             # check if we're stuck
             if len(majorsAvailable) == 0 and len(minorsAvailable) == 0:
@@ -1134,9 +1142,11 @@ class InteractiveSolver(CommonSolver):
             patches.append('race_mode_credits.ips')
         romPatcher.addIPSPatches(patches)
         romPatcher.commitIPS()
+        romPatcher.setNothingId(self.startAP, itemLocs)
         romPatcher.writeItemsLocs(itemLocs)
         romPatcher.writeItemsNumber()
         romPatcher.writeSpoiler(itemLocs)
+        romPatcher.writeNothingId()
         class FakeRandoSettings:
             def __init__(self):
                 self.qty = {'energy': 'plando'}
@@ -1150,8 +1160,8 @@ class InteractiveSolver(CommonSolver):
             romPatcher.writeMagic()
         else:
             romPatcher.writePlandoAddresses(self.visitedLocations)
-        if self.areaRando == True or self.bossRando == True:
-            doors = GraphUtils.getDoorConnections(self.fillGraph(), self.areaRando, self.bossRando)
+        if self.areaRando == True or self.bossRando == True or self.escapeRando == True:
+            doors = GraphUtils.getDoorConnections(self.fillGraph(), self.areaRando, self.bossRando, self.escapeRando)
             romPatcher.writeDoorConnections(doors)
             if magic == None:
                 doorsPtrs = GraphUtils.getAps2DoorsPtrs()
@@ -1335,8 +1345,8 @@ class StandardSolver(CommonSolver):
     # given a rom and parameters returns the estimated difficulty
 
     def __init__(self, rom, presetFileName, difficultyTarget, pickupStrategy, itemsForbidden=[], type='console',
-                 firstItemsLog=None, extStatsFilename=None, displayGeneratedPath=False, outputFileName=None,
-                 magic=None, checkDuplicateMajor=False, vcr=False):
+                 firstItemsLog=None, extStatsFilename=None, extStatsStep=None, displayGeneratedPath=False,
+                 outputFileName=None, magic=None, checkDuplicateMajor=False, vcr=False, plot=None):
         self.checkDuplicateMajor = checkDuplicateMajor
         self.vcr = VCR(rom, 'solver') if vcr == True else None
         # for compatibility with some common methods of the interactive solver
@@ -1352,6 +1362,8 @@ class StandardSolver(CommonSolver):
             self.firstLogFile.write('Item;Location;Area\n')
 
         self.extStatsFilename = extStatsFilename
+        self.extStatsStep = extStatsStep
+        self.plot = plot
 
         # can be called from command line (console) or from web site (web)
         self.type = type
@@ -1390,11 +1402,57 @@ class StandardSolver(CommonSolver):
         if self.vcr != None:
             self.vcr.dump()
 
+        self.computeExtStats()
+
         if self.extStatsFilename != None:
             with open(self.extStatsFilename, 'a') as extStatsFile:
-                db.DB.dumpExtStatsSolver(self.difficulty, knowsUsedList, extStatsFile)
+                db.DB.dumpExtStatsSolver(self.difficulty, knowsUsedList, self.solverStats, self.extStatsStep, extStatsFile)
+
+        if self.plot != None:
+            with open(self.plot, 'w') as outDataFile:
+                for (i, number) in enumerate(self.nbAvailLocs):
+                    outDataFile.write("{} {}\n".format(i, number))
 
         self.output.out()
+
+    def computeExtStats(self):
+        # avgLocs: avg number of available locs, the higher the value the more open is a seed
+        # open[1-4]4: how many location you have to visit to open 1/4, 1/2, 3/4, all locations.
+        #             gives intel about prog item repartition.
+        self.solverStats = {}
+        self.solverStats['avgLocs'] = int(sum(self.nbAvailLocs)/len(self.nbAvailLocs))
+
+        derivative = []
+        for i in range(len(self.nbAvailLocs)-1):
+            d = self.nbAvailLocs[i+1] - self.nbAvailLocs[i]
+            derivative.append(d)
+
+        sumD = sum([d for d in derivative if d != -1])
+        (sum14, sum24, sum34, sum44) = (sumD/4, sumD/2, sumD*3/4, sumD)
+        (open14, open24, open34, open44) = (-1, -1, -1, -1)
+
+        sumD = 0
+        for (i, d) in enumerate(derivative, 1):
+            if d == -1:
+                continue
+            sumD += d
+            if sumD >= sum14 and open14 == -1:
+                open14 = i
+                continue
+            if sumD >= sum24 and open24 == -1:
+                open24 = i
+                continue
+            if sumD >= sum34 and open34 == -1:
+                open34 = i
+                continue
+            if sumD >= sum44 and open44 == -1:
+                open44 = i
+                break
+
+        self.solverStats['open14'] = open14
+        self.solverStats['open24'] = open24
+        self.solverStats['open34'] = open34
+        self.solverStats['open44'] = open44
 
     def getRemainMajors(self):
         return [loc for loc in self.majorLocations if loc['difficulty'].bool == False and loc['itemName'] not in ['Nothing', 'NoEnergy']]
@@ -1461,7 +1519,7 @@ class StandardSolver(CommonSolver):
 class ComeBack(object):
     # object to handle the decision to choose the next area when all locations have the "no comeback" flag.
     # handle rewinding to try the next area in case of a stuck.
-    # one ComebackStep object is created each time we have to use the no comeback heuristic b, used for rewinding.
+    # one ComebackStep object is created each time we have to use the no comeback heuristic, used for rewinding.
     def __init__(self, solver):
         self.comeBackSteps = []
         # used to rewind
@@ -1470,18 +1528,18 @@ class ComeBack(object):
 
     def handleNoComeBack(self, locations, cur):
         # return True if a rewind is needed. choose the next area to use
-        graphAreas = {}
+        solveAreas = {}
         for loc in locations:
             if "comeBack" not in loc:
                 return False
             if loc["comeBack"] == True:
                 return False
-            if loc["GraphArea"] in graphAreas:
-                graphAreas[loc["GraphArea"]] += 1
+            if loc["SolveArea"] in solveAreas:
+                solveAreas[loc["SolveArea"]] += 1
             else:
-                graphAreas[loc["GraphArea"]] = 1
+                solveAreas[loc["SolveArea"]] = 1
 
-        self.log.debug("WARNING: use no come back heuristic for {} locs in {} graph areas ({})".format(len(locations), len(graphAreas), graphAreas))
+        self.log.debug("WARNING: use no come back heuristic for {} locs in {} solve areas ({})".format(len(locations), len(solveAreas), solveAreas))
 
         # check if we can use an existing step
         if len(self.comeBackSteps) > 0:
@@ -1492,13 +1550,13 @@ class ComeBack(object):
             else:
                 self.log.debug("cur: {}, lastStep.cur: {}, don't use lastStep.next()".format(cur, lastStep.cur))
 
-        if len(graphAreas) == 1:
-            self.log.debug("handleNoComeBack: only one graph area")
+        if len(solveAreas) == 1:
+            self.log.debug("handleNoComeBack: only one solve area")
             return False
 
         # create a step
         self.log.debug("Create new step at {}".format(cur))
-        lastStep = ComeBackStep(graphAreas, cur)
+        lastStep = ComeBackStep(solveAreas, cur)
         self.comeBackSteps.append(lastStep)
         return lastStep.next(locations)
 
@@ -1540,16 +1598,16 @@ class ComeBack(object):
 
 class ComeBackStep(object):
     # one case of no come back decision
-    def __init__(self, graphAreas, cur):
-        self.visitedGraphAreas = []
-        self.graphAreas = graphAreas
+    def __init__(self, solveAreas, cur):
+        self.visitedSolveAreas = []
+        self.solveAreas = solveAreas
         self.cur = cur
         self.log = log.get('RewindStep')
-        self.log.debug("create rewind step: {} {}".format(cur, graphAreas))
+        self.log.debug("create rewind step: {} {}".format(cur, solveAreas))
 
     def moreAvailable(self):
-        self.log.debug("moreAvailable: cur: {} len(visited): {} len(areas): {}".format(self.cur, len(self.visitedGraphAreas), len(self.graphAreas)))
-        return len(self.visitedGraphAreas) < len(self.graphAreas)
+        self.log.debug("moreAvailable: cur: {} len(visited): {} len(areas): {}".format(self.cur, len(self.visitedSolveAreas), len(self.solveAreas)))
+        return len(self.visitedSolveAreas) < len(self.solveAreas)
 
     def next(self, locations):
         # use next available area, if all areas have been visited return True (stuck), else False
@@ -1557,39 +1615,39 @@ class ComeBackStep(object):
             self.log.debug("rewind: all areas have been visited, stuck")
             return True
 
-        self.log.debug("rewind next, graphAreas: {} visitedGraphAreas: {}".format(self.graphAreas, self.visitedGraphAreas))
+        self.log.debug("rewind next, solveAreas: {} visitedSolveAreas: {}".format(self.solveAreas, self.visitedSolveAreas))
 
         # get area with max available locs
         maxAreaWeigth = 0
         maxAreaName = ""
-        for graphArea in sorted(self.graphAreas):
-            if graphArea in self.visitedGraphAreas:
+        for solveArea in sorted(self.solveAreas):
+            if solveArea in self.visitedSolveAreas:
                 continue
             else:
-                if self.graphAreas[graphArea] > maxAreaWeigth:
-                    maxAreaWeigth = self.graphAreas[graphArea]
-                    maxAreaName = graphArea
-        self.visitedGraphAreas.append(maxAreaName)
+                if self.solveAreas[solveArea] > maxAreaWeigth:
+                    maxAreaWeigth = self.solveAreas[solveArea]
+                    maxAreaName = solveArea
+        self.visitedSolveAreas.append(maxAreaName)
         self.log.debug("rewind next area: {}".format(maxAreaName))
 
         outWeight = 10000
-        retGraphAreas = {}
-        for graphArea in self.graphAreas:
-            if graphArea == maxAreaName:
-                retGraphAreas[graphArea] = 1
+        retSolveAreas = {}
+        for solveArea in self.solveAreas:
+            if solveArea == maxAreaName:
+                retSolveAreas[solveArea] = 1
             else:
-                retGraphAreas[graphArea] = outWeight
+                retSolveAreas[solveArea] = outWeight
 
         # update locs
         for loc in locations:
-            graphArea = loc["GraphArea"]
-            if graphArea in retGraphAreas:
-                loc["areaWeight"] = retGraphAreas[loc["GraphArea"]]
+            solveArea = loc["SolveArea"]
+            if solveArea in retSolveAreas:
+                loc["areaWeight"] = retSolveAreas[loc["SolveArea"]]
                 self.log.debug("rewind loc {} new areaWeight: {}".format(loc["Name"], loc["areaWeight"]))
             else:
                 # can happen if going to the first area unlocks new areas
                 loc["areaWeight"] = outWeight
-                self.log.debug("rewind loc {} from area {} not in original areas".format(loc["Name"], graphArea))
+                self.log.debug("rewind loc {} from area {} not in original areas".format(loc["Name"], solveArea))
 
         return False
 
@@ -1951,9 +2009,10 @@ def standardSolver(args):
     solver = StandardSolver(args.romFileName, args.presetFileName, difficultyTarget,
                             pickupStrategy, args.itemsForbidden, type=args.type,
                             firstItemsLog=args.firstItemsLog, extStatsFilename=args.extStatsFilename,
+                            extStatsStep=args.extStatsStep,
                             displayGeneratedPath=args.displayGeneratedPath,
                             outputFileName=args.output, magic=args.raceMagic,
-                            checkDuplicateMajor=args.checkDuplicateMajor, vcr=args.vcr)
+                            checkDuplicateMajor=args.checkDuplicateMajor, vcr=args.vcr, plot=args.plot)
 
     solver.solveRom()
 
@@ -1982,6 +2041,8 @@ if __name__ == "__main__":
                         nargs='?', default=None, type=str, dest='firstItemsLog')
     parser.add_argument('--ext_stats', help="Generate extended stats",
                         nargs='?', default=None, dest='extStatsFilename')
+    parser.add_argument('--ext_stats_step', help="what extended stats to generate",
+                        nargs='?', default=None, dest='extStatsStep', type=int)
     parser.add_argument('--displayGeneratedPath', '-g', help="display the generated path (spoilers!)",
                         dest='displayGeneratedPath', action='store_true')
     parser.add_argument('--race', help="Race mode magic number", dest='raceMagic', type=int)
@@ -2025,6 +2086,7 @@ if __name__ == "__main__":
                         dest="minorQty", nargs="?", default=None, choices=[str(i) for i in range(0,101)])
     parser.add_argument('--energyQty', help="rando plando  (used in interactive mode)",
                         dest="energyQty", nargs="?", default=None, choices=["sparse", "medium", "vanilla"])
+    parser.add_argument('--plot', help="dump plot data in file specified", dest="plot", nargs="?", default=None)
 
     args = parser.parse_args()
 

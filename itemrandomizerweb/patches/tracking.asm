@@ -75,7 +75,7 @@ org $90b9a1
 
 // Firing SBAs
 org $90ccde
-    jmp fire_sba_local	
+    jmp fire_sba_local
 
 //Missiles/supers fired
 org $90beb7
@@ -87,30 +87,22 @@ org $90c107
 
 org $90f800
 fire_sba_local:
-	jml fire_sba
+    jml fire_sba
 
 
 // screen finished fading out
 org $828cea
-	jmp pausing_local
+    jmp pausing_local
 
 // screen starts fading in
 org $82939c
-	jmp resuming_local
+    jmp resuming_local
 
 org $82fc00
 pausing_local:
-	jml pausing
+    jml pausing
 resuming_local:
-	jml resuming
-
-// FIXME reenable when arm pumping gain works
-//org $91eb05
-//	jmp pumps_local
-	
-//org $91fff0
-//pumps_local:
-//	jml pumps
+    jml resuming
 
 // -------------------------------
 // CODE (using bank A1 free space)
@@ -134,45 +126,45 @@ add_time:
     txa
     jsl {inc_stat}
 +
-    jsl {store_stat}  
+    jsl {store_stat}
     rts
 
 // same as above, using 32bits date for couting long times (> 65535 frames, ~18min)
 // X = offset in bank 7F for 32-bit tmp var, Y = stat to add to
 add_time_32:
-	// first, do the 32-bit subtraction
-	lda $7f0000,x
-	sta {add_time_32_tmp_lo}
-	inx
-	inx
-	lda $7f0000,x
-	sta {add_time_32_tmp_hi}
-	sec				// set carry for borrow purpose
-	lda {timer1}
-	sbc {add_time_32_tmp_lo}	// perform subtraction on the LSBs
-	sta {add_time_32_tmp_lo}
-	lda {timer2}			// do the same for the MSBs, with carry
-	sbc {add_time_32_tmp_hi}
-	sta {add_time_32_tmp_hi}
-	// add to current 32 bit stat value (don't use load_stat/store_stat for shorter code)
-	tya
-	asl
-	tax
-	lda {stats},x
-	clc				// clear carry
-	adc {add_time_32_tmp_lo}	// add LSBs
-	sta {stats},x
-	inx
-	inx
-	lda {stats},x
-	adc {add_time_32_tmp_hi}	// add the MSBs using carry
-	sta {stats},x
-	rts
+    // first, do the 32-bit subtraction
+    lda $7f0000,x
+    sta {add_time_32_tmp_lo}
+    inx
+    inx
+    lda $7f0000,x
+    sta {add_time_32_tmp_hi}
+    sec				// set carry for borrow purpose
+    lda {timer1}
+    sbc {add_time_32_tmp_lo}	// perform subtraction on the LSBs
+    sta {add_time_32_tmp_lo}
+    lda {timer2}			// do the same for the MSBs, with carry
+    sbc {add_time_32_tmp_hi}
+    sta {add_time_32_tmp_hi}
+    // add to current 32 bit stat value (don't use load_stat/store_stat for shorter code)
+    tya
+    asl
+    tax
+    lda {stats},x
+    clc				// clear carry
+    adc {add_time_32_tmp_lo}	// add LSBs
+    sta {stats},x
+    inx
+    inx
+    lda {stats},x
+    adc {add_time_32_tmp_hi}	// add the MSBs using carry
+    sta {stats},x
+    rts
 
 // Samus hit a door block (Gamestate change to $09 just before hitting $0a)
 door_entered:
     lda #$0002  // Number of door transitions
-    jsl {inc_stat}  
+    jsl {inc_stat}
 
     lda {timer1}
     sta {door_timer_tmp} // Save RTA time to temp variable
@@ -184,40 +176,40 @@ door_entered:
     jml $82e1b7
 
 update_region_time:
-	// Store time spent in last room/area unless region_tmp is 0
-	lda {region_tmp}
-	beq +
-	tax
-	lda {region_timer_tmp}
-	jsr add_time    
+    // Store time spent in last room/area unless region_tmp is 0
+    lda {region_tmp}
+    beq +
+    tax
+    lda {region_timer_tmp}
+    jsr add_time
 +
-	rts
+    rts
 store_region_time:
-	// Store the current frame and the current region to temp variables
-	lda {timer1}
-	sta {region_timer_tmp}
-	rts
+    // Store the current frame and the current region to temp variables
+    lda {timer1}
+    sta {region_timer_tmp}
+    rts
 
 // Samus gains control back after door (Gamestate change back to $08 after door transition)
 door_exited:
-	// Increment saved value with time spent in door transition
-	lda {door_timer_tmp}
-	ldx #$0003
-	jsr add_time
-	// update time spent in region since last store_region_time call,
-	jsr update_region_time
-	jsr store_region_time
-	// Store (region*2) + 7 to region_tmp (This uses stat id 7-18 for region timers)
-	lda $7e079f
-	asl
-	clc
-	adc #$0007    
-	sta {region_tmp}
+    // Increment saved value with time spent in door transition
+    lda {door_timer_tmp}
+    ldx #$0003
+    jsr add_time
+    // update time spent in region since last store_region_time call,
+    jsr update_region_time
+    jsr store_region_time
+    // Store (region*2) + 7 to region_tmp (This uses stat id 7-18 for region timers)
+    lda $7e079f
+    asl
+    clc
+    adc #$0007
+    sta {region_tmp}
 
-	// Run hijacked code and return
-	lda #$0008
-	sta $0998
-	jml $82e76a
+    // Run hijacked code and return
+    lda #$0008
+    sta $0998
+    jml $82e76a
 
 // Door adjust start
 door_adjust_start:
@@ -243,27 +235,27 @@ door_adjust_stop:
 
 // uncharged Beam Fire
 uncharged_beam:
-	sta $0ccc // execute first part of hijacked code, to freely use A
+    sta $0ccc // execute first part of hijacked code, to freely use A
 
-	lda #$0013
-	jsl {inc_stat}
-	// do the vanilla check, done in both auto and normal fire
-	pla
-	bit #$0001
-	bne +
-	// jump back to common branches for auto and normal fire
-	jml $90b933
+    lda #$0013
+    jsl {inc_stat}
+    // do the vanilla check, done in both auto and normal fire
+    pla
+    bit #$0001
+    bne +
+    // jump back to common branches for auto and normal fire
+    jml $90b933
 +
-	jml $90b94c
+    jml $90b94c
 
 hyper_shot:
-	sta $0cd0 // execute first part of hijacked code, to freely use A
+    sta $0cd0 // execute first part of hijacked code, to freely use A
 
-	lda #$0013
-	jsl {inc_stat}
+    lda #$0013
+    jsl {inc_stat}
 
-	plp // execute last instr of hijacked code
-	jml $90bd63 // return
+    plp // execute last instr of hijacked code
+    jml $90bd63 // return
 
 // Charged Beam Fire
 charged_beam:
@@ -322,102 +314,29 @@ bombs_laid:
 
 // stopped fading out, game state about to change to 0Dh
 pausing:
-	// Save RTA time to temp variable
-	lda {timer1}
-	sta {pause_timer_lo}
-	lda {timer2}
-	sta {pause_timer_hi}
-	// don't count time spent in pause in region counters
-	jsr update_region_time
-	// run hijacked code and return
-	inc $0998
-	jml $828ced
+    // Save RTA time to temp variable
+    lda {timer1}
+    sta {pause_timer_lo}
+    lda {timer2}
+    sta {pause_timer_hi}
+    // don't count time spent in pause in region counters
+    jsr update_region_time
+    // run hijacked code and return
+    inc $0998
+    jml $828ced
 
 // start fading in, game state about to change to 12h
 resuming:
-	// add time spent in pause to stat at 27-28 spot
-	phy // XXX don't know whether Y is actually used in vanilla code, save it for safety
-	ldy #$001b
-	ldx {pause_timer_idx}
-	jsr add_time_32
-	ply
-	// don't count  time spent in pause in region counters
-	jsr store_region_time
-	// run hijacked code and return
-	inc $0998
-	jml $82939f
-
-// FIXME : does not work, increase wildly arm pump detection during collisions...
-// count arm pumps: hijack collision detection routine where the arm pump bug occurs 
-pumps:
-	// check if we're running :
-	// last_movement_type is 1
-	lda {last_movement_type}
-	and #$00ff
-	dec
-	bne +
-	// X momentum is at least 2: walking/underwater running "full speed"
-	// since we don't have accel value, do this to avoid being too wrong
-	// in frame gain computations because of too low speed values
-	lda {mx_pix}
-	cmp #$0002
-	bcs .pump
-+
-	jmp .end
-.pump:
-	// compute arm pump time saved
-	// first, compute speed in 16th of a pixel per frame :
-	// vx_16=(vx+mx)*16 + vx_subpix/4096 + mx_subpix/4096
-	// NOTE: samus max running speed with speed booster is lower than 10px/frame,
-	//       so vx_16 will always be at most one byte long, to be used
-	//	 as divisor for SNES hardware 16b/8b division
-	lda {vx_pix}
-	clc
-	adc {mx_pix}
-	asl;asl;asl;asl
-	sta {vx_16}
-	lda {vx_subpix_hi}
-	and #$00ff
-	lsr;lsr;lsr;lsr
-	adc {vx_16}
-	sta {vx_16}
-	lda {mx_subpix_hi}
-	and #$00ff
-	lsr;lsr;lsr;lsr
-	adc {vx_16}
-	sta {vx_16}
-
-	// t=d/v, with :
-	// - t: time saved by this pump in frames
-	// - d: distance, in 16th of a pixel
-	// - v: speed, in 16th of a pixel per frame
-
-	// d = 16(1 px)+last remainder
-	clc
-	lda #$0010
-	adc {pump_rem}
-	sta $4204
-	// switch to 8-bit mode for divisor
-	sep #$20
-	lda {vx_16}
-	sta $4206
-	// back to 16-bit mode
-	rep #$20
-	// load arm pump time saved stat
-	lda #$001d
-	jsl {load_stat}
-	// division result is available by now
-	// add quotient to stat
-	clc
-	adc $4214
-	ldx #$001d
-	jsl {store_stat}
-	// store remainder for next arm pump
-	lda $4216
-	sta {pump_rem}
-.end:
-	// run hijacked code and return
-	lda $0a1e
-	jml $91eb08
+    // add time spent in pause to stat at 27-28 spot
+    phy // XXX don't know whether Y is actually used in vanilla code, save it for safety
+    ldy #$001b
+    ldx {pause_timer_idx}
+    jsr add_time_32
+    ply
+    // don't count  time spent in pause in region counters
+    jsr store_region_time
+    // run hijacked code and return
+    inc $0998
+    jml $82939f
 
 warnpc $a1efff

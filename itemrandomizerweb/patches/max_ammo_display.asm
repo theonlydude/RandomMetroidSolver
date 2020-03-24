@@ -9,14 +9,14 @@ arch snes.cpu
 ;;; $9D98: Draw two HUD digits ;;;
 ;;; Parameters:
 ;;;     A: Number to draw                   ; 0 -> 99
-;;;     X: HUD tilemap index                ; to index $7E:C608
+;;;     X: HUD tilemap index                ; to index into $7E:C608
 ;;;     $00: Long pointer to digits tilemap ; $80:9DD3 (Artillery HUD digits tilemap)
 !draw_two_HUD_digits   = $9D98
 
 ;;; $9D78: Draw three HUD digits ;;;
 ;;; Parameters:
 ;;;     A: Number to draw                   ; 0 -> 999
-;;;     X: HUD tilemap index                ; to index $7E:C608
+;;;     X: HUD tilemap index                ; to index into $7E:C608
 ;;;     $00: Long pointer to digits tilemap ; $80:9DD3 (Artillery HUD digits tilemap)
 !draw_three_HUD_digits = $9D78
 
@@ -57,7 +57,9 @@ arch snes.cpu
 !row1_super_tile2        = $7EC626
 !row2_super_tile0        = $7EC664
 !row2_super_tile1        = $7EC666
-!row3_super_index        = #$009A
+!row3_super_index_vanilla = #$009C
+!row3_super_index_custom  = #$009A
+!row3_super_tile0        = $7EC6A2
 
 !row1_power_bomb_index   = #$0020
 !row1_power_bomb_tile0   = $7EC628
@@ -65,15 +67,17 @@ arch snes.cpu
 !row1_power_bomb_tile2   = $7EC62C
 !row2_power_bomb_tile0   = $7EC66A
 !row2_power_bomb_tile1   = $7EC66C
-!row3_power_bomb_index   = #$00A0
-
+!row3_power_bomb_index_vanilla = #$00A2
+!row3_power_bomb_index_custom  = #$00A0
+!row3_power_bomb_tile0   = $7EC6A8
 
 ;;; ;;; $9DBF: HUD digits tilemap ;;;
 ;;; {
 ;;; ; Artillery                0     1     2     3     4     5     6     7     8     9
 ;;; $80:9DD3             dw 2C09, 2C00, 2C01, 2C02, 2C03, 2C04, 2C05, 2C06, 2C07, 2C08
 ;;; }
-!HUD_digits_tilemap_artillery = #$9DD3
+!HUD_digits_tilemap_row3 = #$9DD3
+!empty_tile = #$2C0F
 
 ;;; used to return values from functions which extract digits
 !digit1 = $0012
@@ -81,7 +85,7 @@ arch snes.cpu
 !digit3 = $0016
 
 ;;; or mask applied for selected/unselected item in hud
-!ormask     = $0018
+!select_mask = $0018
 !selected   = #$1000
 !unselected = #$1400
 
@@ -128,20 +132,13 @@ org $809AE0
         nop : nop : nop : nop
 
 ;;; HIJACKS
-org $809B0C	
-	;; hijack missile count drawing:
-        ;; $80:9B0C 20 78 9D    JSR $9D78  [$80:9D78]  ;/
-        jsr missile_count_drawing
-
 org $809B1A
-        ;; hijack super missile count drawing:
-        ;; $80:9B1A 20 98 9D    JSR $9D98  [$80:9D98]  ;/
-        jsr super_missile_count_drawing
+        ;; hijack vanilla super missile count drawing on row 3 to display on three digits when >= 100
+        jsr super_missile_count_drawing_row3
 	
 org $809B28
-        ;; hijack power bomb count drawing:
-        ;; $80:9B28 20 98 9D    JSR $9D98  [$80:9D98]  ;/
-        jsr power_bomb_count_drawing
+        ;; hijack vanilla power bomb count drawing on row 3 to display on three digits when >= 100
+        jsr power_bomb_count_drawing_row3
 
 org $809C00
         ;; hijack into: $9B44: Handle HUD tilemap (HUD routine when game is paused/running) ;;;
@@ -150,183 +147,192 @@ org $809C00
         ;; $80:9BFE 85 00       STA $00    [$7E:0000]  ;} $00 = pointer to digit tiles
         ;; $80:9C00 AD C8 09    LDA $09C8  [$7E:09C8]  ;\
         ;; $80:9C03 F0 11       BEQ $11    [$9C16]     ;} If [Samus' max missiles] != 0:
-        jmp hud_drawing
+        jmp hud_ammo_drawing
 
-;;; parameters set before hijack:
-;;; LDA !HUD_digits_tilemap_artillery
+
+;;; parameters set by vanilla before all hijacks:
+;;; LDA !HUD_digits_tilemap_row3
 ;;; STA $00    [$7E:0000]
-;;; LDA !samus_missiles
-;;; LDX !row3_missile_index
 org $80CDA0
-missile_count_drawing:
-        jsr !draw_three_HUD_digits ; draw current in vanilla row 3
-        ;; lda !samus_max_missiles
-        ;; ldx !row1_missile_index
-        ;; jsr !draw_three_HUD_digits ; draw also max in row 1
-        rts
 
 ;;; parameters set before hijack:
-;;; LDX !row3_super_index (vanilla one)
+;;; LDX !row3_super_index_vanilla
 ;;; LDA !samus_super_missiles
-super_missile_count_drawing:
-	ldx !row3_super_index
-        jsr !draw_three_HUD_digits ; draw current in vanilla row 3
-        ;; lda !samus_max_super_missiles
-        ;; ldx !row1_super_index
-        ;; jsr !draw_three_HUD_digits ; draw also max in row 1
+super_missile_count_drawing_row3:
+	cmp #$0064
+	bpl .three_digits
+.two_digits
+        jsr !draw_two_HUD_digits
+	;; display empty tile in front of two digits
+        lda !empty_tile
+        sta !row3_super_tile0
+	bra .end
+.three_digits
+	ldx !row3_super_index_custom
+        jsr !draw_three_HUD_digits
+.end
         rts
 
 ;;; parameters set before hijack:
+;;; LDX !row3_power_bomb_index_vanilla
 ;;; LDA !samus_power_bombs
-;;; LDX !row3_power_bomb_index
-power_bomb_count_drawing:
-	ldx !row3_power_bomb_index
-        jsr !draw_three_HUD_digits ; draw current in vanilla row 3
-        ;; lda !samus_max_power_bombs
-        ;; ldx !row1_power_bomb_index
-        ;; jsr !draw_three_HUD_digits ; draw also max in row 1
+power_bomb_count_drawing_row3:
+	cmp #$0064
+	bpl .three_digits
+.two_digits
+        jsr !draw_two_HUD_digits
+	;; display empty tile in front of two digits
+        lda !empty_tile
+        sta !row3_power_bomb_tile0
+	bra .end
+.three_digits
+	ldx !row3_power_bomb_index_custom
+        jsr !draw_three_HUD_digits
+.end
         rts
  
 ;;; hijack into: $9B44: Handle HUD tilemap (HUD routine when game is paused/running) ;;;
-;;; draw row 1 and 2
-hud_drawing:
+;;; draw all three rows for missile/super/powerbomb as we skip that part in vanilla code
+hud_ammo_drawing:
         pha 
         phx 
         phy 
         lda !samus_max_missiles
         beq .no_missile
-        jsr handle_missile
+        jsr draw_missile
 .no_missile:
         lda !samus_max_super_missiles
         beq .no_super
-        jsr handle_super
+        jsr draw_super
 .no_super:
         lda !samus_max_power_bombs
         beq .no_power_bomb
-        jsr handle_power_bomb
+        jsr draw_power_bomb
 .no_power_bomb:
         ply 
         plx 
         pla 
         jmp $9C55
  
-handle_missile:
+draw_missile:
         jsr extract_three_digits
         lda !hud_item_index
         cmp !hud_item_index_missile
-        beq .hud_index_is_missile
+        beq .missile_is_selected
         lda !unselected
-        sta !ormask
-        bra .hud_index_is_not_missile
-.hud_index_is_missile:
+        sta !select_mask
+        bra .else
+.missile_is_selected:
         lda !selected
-        sta !ormask
-.hud_index_is_not_missile:
-        ;; display digits on row 1
+        sta !select_mask
+.else:
+        ;; display custom digits on row 1
         ldx !digit1
         lda HUD_digits_tilemap_row1,X
-        ora !ormask
+        ora !select_mask
         sta !row1_missile_tile0
         ldx !digit2
         lda HUD_digits_tilemap_row1,X
-        ora !ormask
+        ora !select_mask
         sta !row1_missile_tile1
         ldx !digit3
         lda HUD_digits_tilemap_row1,X
-        ora !ormask
+        ora !select_mask
         sta !row1_missile_tile2
-        ;; display missile icon on row 2
+        ;; display custom missile icon on row 2
         lda #$0049
-        ora !ormask
+        ora !select_mask
         sta !row2_missile_tile0
         lda #$004A
-        ora !ormask
+        ora !select_mask
         sta !row2_missile_tile1
         lda #$004B
-        ora !ormask
+        ora !select_mask
         sta !row2_missile_tile2
-        ;; display digits on row 3
-        ;; lda !HUD_digits_tilemap_artillery
-        ;; sta $00
+        ;; display vanilla digits on row 3
         lda !samus_missiles
         ldx !row3_missile_index
-	jsr missile_count_drawing
+	jsr !draw_three_HUD_digits
        rts
  
-handle_super:
+draw_super:
 	jsr extract_three_digits
 	lda !hud_item_index
 	cmp !hud_item_index_super
-	beq .hud_index_is_super
+	beq .super_is_selected
 	lda !unselected
-	sta !ormask
-	bra .hud_index_is_not_super
-.hud_index_is_super:
+	sta !select_mask
+	bra .else
+.super_is_selected:
 	lda !selected
-	sta !ormask
-.hud_index_is_not_super:
-        ;; display digits on row 1
+	sta !select_mask
+.else:
+        ;; display custom digits on row 1
 	ldx !digit1
+	beq .two_digits
 	lda HUD_digits_tilemap_row1,X
-	ora !ormask
+	ora !select_mask
 	sta !row1_super_tile0
+.two_digits:
 	ldx !digit2
 	lda HUD_digits_tilemap_row1,X
-	ora !ormask
+	ora !select_mask
 	sta !row1_super_tile1
 	ldx !digit3
 	lda HUD_digits_tilemap_row1,X
-	ora !ormask
+	ora !select_mask
 	sta !row1_super_tile2
-        ;; display super icon on row 2
+        ;; display custom super icon on row 2
         lda #$0034
-        ora !ormask
+        ora !select_mask
         sta !row2_super_tile0
         lda #$0035
-        ora !ormask
+        ora !select_mask
         sta !row2_super_tile1
-        ;; display digits on row 3
+        ;; display vanilla digits on row 3
 	lda !samus_super_missiles
-        ldx !row3_super_index
-	jsr super_missile_count_drawing
+        ldx !row3_super_index_vanilla
+	jsr super_missile_count_drawing_row3
         rts
  
-handle_power_bomb:
+draw_power_bomb:
         jsr extract_three_digits
         lda !hud_item_index
         cmp !hud_item_index_power_bomb
-        beq .hud_index_is_power_bomb
+        beq .power_bomb_is_selected
         lda !unselected
-        sta !ormask
-        bra .hud_index_is_not_power_bomb
-.hud_index_is_power_bomb:
+        sta !select_mask
+        bra .else
+.power_bomb_is_selected:
         lda !selected
-        sta !ormask
-.hud_index_is_not_power_bomb:
-	;; display digits on row 1
+        sta !select_mask
+.else:
+	;; display custom digits on row 1
         ldx !digit1
+	beq .two_digits
         lda HUD_digits_tilemap_row1,X
-        ora !ormask
+        ora !select_mask
         sta !row1_power_bomb_tile0
+.two_digits:
         ldx !digit2
         lda HUD_digits_tilemap_row1,X
-        ora !ormask
+        ora !select_mask
         sta !row1_power_bomb_tile1
         ldx !digit3
         lda HUD_digits_tilemap_row1,X
-        ora !ormask
+        ora !select_mask
         sta !row1_power_bomb_tile2
-        ;; display pb icon on row 2
+        ;; display custom pb icon on row 2
         lda #$0036
-        ora !ormask
+        ora !select_mask
         sta !row2_power_bomb_tile0
         lda #$0037
-        ora !ormask
+        ora !select_mask
         sta !row2_power_bomb_tile1
-        ;; display digits on row 3
+        ;; display vanilla digits on row 3
 	lda !samus_power_bombs
-	ldx !row3_power_bomb_index
-	jsr power_bomb_count_drawing
+	ldx !row3_power_bomb_index_vanilla
+	jsr power_bomb_count_drawing_row3
         rts
  
 ;;; Extract three digits
@@ -350,27 +356,10 @@ extract_three_digits:
 	asl A ; x2
 	sta !digit1
 	lda !remainder
-
-	sta !dividend ; a = (a/10)*2
-	sep #$20
-	lda #$0A ; 10
-	sta !divisor
-	pha 
-	pla 
-	pha 
-	pla 
-	rep #$20
-	lda !quotient
-	asl A   ; x2
-	sta !digit2
-	lda !remainder
-	asl A ; x2
-	sta !digit3
-	rts
  
 ;;; Extract two digits
 ;;; Parameters:
-;;;     A: Three digits number
+;;;     A: Two digits number
 ;;; Return:
 ;;;     $14: first digit
 ;;;     $16: second digit

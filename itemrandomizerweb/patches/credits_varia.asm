@@ -762,6 +762,7 @@ save_stats_at:
 
 // save stats both in standard and last areas
 // arg: A = 0 if we just want to save last stats
+//      A != 0 save all stats (save stations)
 save_stats:
     phx
     phy
@@ -786,9 +787,19 @@ save_stats:
     plx
     rtl
 
-print "stats end : ", org
+warnpc $dfd7ef
 
-warnpc $dfd800
+// save last stats. to be used from door transitions/menus
+// keeps all registers intact
+org $dfd7f0
+save_last_stats:
+    pha
+    lda #$0000
+    jsl save_stats
+    pla
+    rtl
+
+warnpc $dfd7ff
 // Increment Statistic (in A)
 org $dfd800
 inc_stat:

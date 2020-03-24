@@ -31,10 +31,8 @@ define timer2 $05ba
 // routine in new_game.asm
 define check_new_game   $A1F210
 
-define _stats_sram_sz   80
-define _stats_sram_sz_w 40
-define stats_sram_sz_b  #$00{_stats_sram_sz}
-define stats_sram_sz_w  #$00{_stats_sram_sz_w}
+define stats_sram_sz_b  #$0080
+define stats_sram_sz_w  #$0040
 define tmp_area_sz      #$00df
 
 define _stats_ram        fc00
@@ -152,11 +150,6 @@ boot1:
     dex
     dex
     bpl -
-    // restore RTA timer (or 0 if no save slot)
-    lda {timer_backup1}
-    sta {timer1}
-    lda {timer_backup2}
-    sta {timer2}
     // place marker for resets
     lda #$babe
     sta {softreset}
@@ -164,11 +157,6 @@ boot1:
     jml $808455
 
 boot2:
-    // save timer
-    lda {timer1}
-    sta {timer_backup1}
-    lda {timer2}
-    sta {timer_backup2}
     ldx #$1ffe
 -
     stz $0000,x
@@ -191,10 +179,6 @@ boot2:
     dex
     bpl -
 
-    lda {timer_backup1}
-    sta {timer1}
-    lda {timer_backup2}
-    sta {timer2}
     jml $8084af
 
 //// save related routines
@@ -234,7 +218,7 @@ save_index:
     bne .end
     txa
     clc
-    adc #${_stats_sram_sz}
+    adc {stats_sram_sz_b}
     tax
 .end:
     rtl
@@ -266,9 +250,15 @@ patch_load:
     bne .load
     lda {softreset}
     cmp #$babe
-    beq .end                   // just use stats from RAM
+    // discard time spent in menus by restoring boot time timer
+    // TODO add menu time to pause stat and make it a general menus stat?
+    lda {timer_backup1}
+    sta {timer1}
+    lda {timer_backup2}
+    sta {timer2}
+    beq .end                   // use stats from RAM
 .load:
-    // load from SRAM
+    // load stats from SRAM
     jsl load_stats
     // update live timer
     lda {stats_timer}
@@ -281,7 +271,6 @@ patch_load:
     clc
     plb
     rtl
-
 
 ////////////////////////// CREDITS /////////////////////////////
 
@@ -697,7 +686,6 @@ numbers_bot:
 load_stats:
     phx
     phy
-    pha
     lda $7e0952
     clc
     adc #$0010
@@ -733,7 +721,6 @@ load_stats_at:
 // args: X = stats area start in $70
 // return zero flag set is flag ok
 is_last_save_flag_ok:
-    phx
     txa
     clc
     adc {last_stats_save_ok_off}

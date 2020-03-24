@@ -55,6 +55,10 @@ org $80844B
 org $808490
     jml boot2
 
+// bypass SRAM check to avoid loading 1st save at boot
+org $808268
+    jmp $8294
+
 // Patch loading and saving routines
 org $81807f
     jmp patch_save
@@ -683,6 +687,7 @@ numbers_top:
 numbers_bot:
     dw $0070, $0071, $0072, $0073, $0074, $0075, $0076, $0077, $0078, $0079, $007a, $007b, $007c, $007d, $007e, $007f
 
+print "load_stats: ", org
 load_stats:
     phx
     phy
@@ -705,8 +710,6 @@ load_stats:
 
 // arg X = index of where to load stats from in bank $70
 load_stats_at:
-    phx
-    phy
     ldy #${_stats_ram}
     // 1 excess byte will be copied but since we restricted
     // stats area size there is still plenty of room, so not a concern
@@ -714,8 +717,6 @@ load_stats_at:
     phb
     mvn $70,$7f
     plb
-    ply
-    plx
     rts
 
 // args: X = stats area start in $70
@@ -763,6 +764,7 @@ save_stats_at:
 // save stats both in standard and last areas
 // arg: A = 0 if we just want to save last stats
 //      A != 0 save all stats (save stations)
+print "save_stats: ", org
 save_stats:
     phx
     phy

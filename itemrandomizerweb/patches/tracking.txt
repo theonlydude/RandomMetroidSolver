@@ -27,20 +27,20 @@ Stat tracking ID's (32 bit values are stored low word first)
 // - add stats for deaths and resets
 // - save stats to SRAM at each door transition and when pausing/unpausing,
 //   with a "end transaction" marker
-// - have a clean copy of said stats to SRAM when saving at save station
-// - when loading, load "door/pause stats" if not corrupted, "save station stats" otherwise
-// - reduce saved area size to accomodate actual stats size for both performance and the fact
+// x have a clean copy of said stats to SRAM when saving at save station
+// x when loading, load "door/pause stats" if not corrupted, "save station stats" otherwise
+// x reduce saved area size to accomodate actual stats size for both performance and the fact
 //   that we store two copies of stats
-// - keep timer running in game menus after resets, and keep going if we load the same save
+// x keep timer running in game menus after resets, and keep going if we load the same save
 //   file
 
 // How?
-// - at boot, reload RTA timer value from last save slot. If no save slot, it will be reset
+// x at boot, reload RTA timer value from last save slot. If no save slot, it will be reset
 //   at new game anyway
-// - at load, either load the correct version of stats (see above) and put them in RAM.
+// x at load, either load the correct version of stats (see above) and put them in RAM.
 //   if we load last save slot, keep RTA timer going, if not, take it from SRAM
 //   update last save slot in SRAM to retrieve after power cycle
-// - add additional save_stats routine for door transition save
+// x add additional save_stats routine for door transition save
 // - hijack door transition in a place where we have time to do stuff without creating
 //   apparent lag, and save stats from there
 // - also call this when pausing/unpausing (do that in tracking.asm)

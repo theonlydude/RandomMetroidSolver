@@ -1,3 +1,5 @@
+// compile with xkas-plus
+
 // custom credits
 arch snes.cpu
 lorom
@@ -62,6 +64,8 @@ org $808268
 // Patch loading and saving routines
 org $81807f
     jmp patch_save
+
+// menu=>81:A1C2, autoload? 81:9F55
 
 org $8180f7
     jmp patch_load

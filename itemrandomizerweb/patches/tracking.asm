@@ -1,3 +1,5 @@
+// compile with xkas-plus
+
 arch snes.cpu
 lorom
 

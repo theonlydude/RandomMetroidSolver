@@ -396,7 +396,7 @@ window.onload = function(){
                 var re = /(?:\.([^.]+))?$/;
                 var ext = re.exec(file.name)[1];
                 console.log("ext: "+ext)
-                if( ! (ext === "sfc" || ext === "smc") ) {
+                if( ! (ext === "sfc" || ext === "smc" || ext === "SFC" || ext === "SMC") ) {
                     document.getElementById("uploadFile").value = "";
                     alert("wrong extension: "+ext);
                     return false;

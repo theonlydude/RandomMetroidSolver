@@ -1220,7 +1220,6 @@ script:
     dw {draw}, {blank}
     dw {draw}, {blank}
     dw {draw}, {blank}
-    dw {draw}, {blank}
     dw {draw}, {row}*223 // PLAY THIS RANDOMIZER AT
     dw {draw}, {blank}
     dw {draw}, {row}*179
@@ -1235,12 +1234,15 @@ script:
 
     dw {draw}, {row}*183 // GAMEPLAY STATS
     dw {draw}, {blank}
-    dw {draw}, {blank}
-    dw {draw}, {row}*184 // SPEEDRUNNING STATS
-    dw {draw}, {blank}
 
     // Set scroll speed to 3 frames per pixel
 //    dw {speed}, $0003
+    dw {draw}, {row}*172 // DEATHS
+    dw {draw}, {row}*173
+    dw {draw}, {blank}
+    dw {draw}, {row}*174 // RESETS
+    dw {draw}, {row}*175
+    dw {draw}, {blank}
     dw {draw}, {row}*185 // DOOR TRANSITIONS
     dw {draw}, {row}*186
     dw {draw}, {blank}
@@ -1367,10 +1369,8 @@ script:
     // Last info
     dw {draw}, {blank}
     dw {draw}, {blank}
-    dw {draw}, {blank}
     dw {draw}, {row}*217 // Final Time
     dw {draw}, {row}*218
-    dw {draw}, {blank}
     dw {draw}, {blank}
     dw {draw}, {blank}
     dw {draw}, {row}*219 // Thanks
@@ -1415,6 +1415,8 @@ stats:
     dw 26,      {row}*215,  1, 0    // Bombs
     dw 27,      {row}*221,  3, 0    // Time in pause
 //  dw 29,      {row}*224,  2, 0    // time saved arm pumping
+    dw 31,      {row}*172,  1, 0    // deaths
+    dw 32,      {row}*174,  1, 0    // resets
     dw 0,               0,  0, 0    // end of table
 
 print "credits end : ", org
@@ -1442,10 +1444,10 @@ credits:
     {purple}
     dw "            SNES CODE           " // 133
     {yellow}
-    dw "   TOTAL      FOOSDA      FLO   " // 134
-    dw "   DARKSHOCK   RAKKI   SCYZER   " // 135
+    dw "      FLO     TOTAL    FOOSDA   " // 134
+    dw "   DARKSHOCK  RAKKI    SCYZER   " // 135
     dw "   KEJARDON   SMILEY   LIORAN   " // 136
-    dw "      PERSONITIS    LEODOX      " // 137
+    dw "      PERSONITIS    DUDE        " // 137
     {cyan}
     dw "       SPECIAL THANKS TO        " // 138
     {yellow}
@@ -1501,11 +1503,11 @@ credits:
     dw " available ammo xxx> energy xxx>" // 169
     dw " UNCHARGED SHOTS                " // 170
     dw " uncharged shots                " // 171
+    dw " DEATHS                         " // 172
+    dw " deaths                         " // 173
+    dw " RESETS                         " // 174
+    dw " resets                         " // 175
 // --- this space is reusable
-    dw "                                " // 172
-    dw "                                " // 173
-    dw "                                " // 174
-    dw "                                " // 175
     dw "                                " // 176
     dw "                                " // 177
     dw "                                " // 178
@@ -1518,8 +1520,7 @@ credits:
     dw "        DISCORD.VARIA.RUN       " // 182
     {purple}
     dw "      GAMEPLAY STATISTICS       " // 183
-    {blue}
-    dw "      SPEEDRUNNING STATS        " // 184
+    dw "                                " // 184  : reusable
     {big}
     dw " DOOR TRANSITIONS               " // 185
     dw " door transitions               " // 186

@@ -41,12 +41,9 @@ define _stats_ram        fc00
 define stats_ram         $7f{_stats_ram}
 define stats_timer       {stats_ram}
 
-define _stats_sram_slot0      1400
-define _stats_sram_slot1      1700
-define _stats_sram_slot2      1a00
-define stats_sram_slot0       $70{_stats_sram_slot0}
-define stats_sram_slot1       $70{_stats_sram_slot1}
-define stats_sram_slot2       $70{_stats_sram_slot2}
+define stats_sram_slot0     $1400
+define stats_sram_slot1     $1700
+define stats_sram_slot2     $1a00
 
 define last_stats_save_ok_off  #$02fc
 define last_stats_save_ok_flag #$caca
@@ -61,14 +58,15 @@ org $808490
 org $808268
     jmp $8294
 
-// Patch loading and saving routines
+// Patch load/save/copy
 org $81807f
     jmp patch_save
 
-// menu=>81:A1C2, autoload? 81:9F55
+org $81A24A
+    jsl patch_load // patch load from menu only
 
-org $8180f7
-    jmp patch_load
+org $819A66
+    jsr copy_stats
 
 // Hijack loading new game to reset stats
 org $828063
@@ -158,9 +156,6 @@ boot1:
     dex
     dex
     bpl -
-    // place marker for resets
-    lda #$babe
-    sta {softreset}
     // resume
     jml $808455
 
@@ -214,13 +209,13 @@ save_index:
     cmp #$0011
     beq .slot1
 .slot2:
-    ldx #${_stats_sram_slot2}
+    ldx #{stats_sram_slot2}
     bra .last
 .slot0:
-    ldx #${_stats_sram_slot0}
+    ldx #{stats_sram_slot0}
     bra .last
 .slot1:
-    ldx #${_stats_sram_slot1}
+    ldx #{stats_sram_slot1}
 .last:
     pla
     bne .end
@@ -250,21 +245,35 @@ patch_save:
     plp
     rtl
 
+print "patch_load: ", org
 patch_load:
+    phb
+    phx
+    phy
+    pea $7e7e
+    plb
+    plb
+    // call load routine
+    jsl $818085
+    bcs .end    // skip to end if new file or SRAM corrupt
+    // load stats
     lda $7e0952
     clc
     adc #$0010
-    cmp {last_saveslot}     // we're loading the same save that's played last
+    cmp {last_saveslot}
     bne .load
+    // we're loading the same save that's played last
     lda {softreset}
     cmp #$babe
-    // discard time spent in menus by restoring boot time timer
+    bne .load
+    // soft reset, use stats from RAM
+    // discard time spent in title screen by restoring boot time timer
     // TODO add menu time to pause stat and make it a general menus stat?
     lda {timer_backup1}
     sta {timer1}
     lda {timer_backup2}
     sta {timer2}
-    beq .end                   // use stats from RAM
+    bra .end_ok
 .load:
     // load stats from SRAM
     jsl load_stats
@@ -273,13 +282,56 @@ patch_load:
     sta {timer1}
     lda {stats_timer}+2
     sta {timer2}
+    // place marker for resets
+    lda #$babe
+    sta {softreset}
+.end_ok:
+    // return carry clear
+    clc
 .end:
     ply
     plx
-    clc
     plb
     rtl
 
+save_slots:
+    dw {stats_sram_slot0}
+    dw {stats_sram_slot1}
+    dw {stats_sram_slot2}
+
+print "copy_stats:", org
+copy_stats:
+    // src slot idx = 19b7, dst slot idx = 19b9
+    lda $19b7
+    asl
+    tax
+    lda save_slots,x
+    sta $00
+    lda $19b9
+    asl
+    tax
+    lda save_slots,x
+    sta $03
+    phb
+    pea $7070
+    plb
+    plb
+    ldy #$0000
+.loop:
+    lda [$00],y
+    sta [$03],y
+    iny
+    iny
+    cpy {stats_sram_sz_b}
+    bcc .loop
+    plb
+    // disable save slot check. if data is copied we rely on save contents
+    lda #$0000
+    sta {last_saveslot}
+    lda $19B7   // hijacked code
+    rts
+
+warnpc $81ffff
 ////////////////////////// CREDITS /////////////////////////////
 
 // Hijack after decompression of regular credits tilemaps
@@ -395,7 +447,9 @@ clear_values:
     lda #$0000
     sta {timer1}
     sta {timer2}
-
+    // place marker for resets
+    lda #$babe
+    sta {softreset}
 .ret:
     plp
     jsl $809a79
@@ -714,24 +768,36 @@ load_stats:
 
 // arg X = index of where to load stats from in bank $70
 load_stats_at:
-    ldy #${_stats_ram}
-    // 1 excess byte will be copied but since we restricted
-    // stats area size there is still plenty of room, so not a concern
-    lda {stats_sram_sz_b}
+    phx
     phb
-    mvn $70,$7f
+    pea $7f7f
     plb
+    plb
+    ldy #$0000
+.loop:
+    lda $700000,x
+    sta ${_stats_ram},y
+    iny
+    iny
+    inx
+    inx
+    cpy {stats_sram_sz_b}
+    bcc .loop
+    plb
+    plx
     rts
 
 // args: X = stats area start in $70
 // return zero flag set is flag ok
 is_last_save_flag_ok:
+    phx
     txa
     clc
     adc {last_stats_save_ok_off}
     tax
     lda {last_stats_save_ok_flag}
     cmp $700000,x
+    plx
     rts
 
 // args: X = stats area start in $70
@@ -752,16 +818,21 @@ set_last_save_ok_flag:
 // arg X = index of where to save stats in bank $70
 save_stats_at:
     phx
-    phy
-    txy
-    ldx #${_stats_ram}
-    // 1 excess byte will be copied but since we restricted
-    // stats area size there is still plenty of room, so not a concern
-    lda {stats_sram_sz_b}
     phb
-    mvn $7f,$70
+    pea $7f7f
     plb
-    ply
+    plb
+    ldy #$0000
+.loop:
+    lda ${_stats_ram},y
+    sta $700000,x
+    iny
+    iny
+    inx
+    inx
+    cpy {stats_sram_sz_b}
+    bcc .loop
+    plb
     plx
     rts
 
@@ -778,7 +849,7 @@ save_stats:
     adc #$0010
     sta {last_saveslot}
     pla
-    beq .last   // skip standard start save if A=0
+    beq .last   // skip standard save if A=0
     jsl save_index // A is not 0, so we ask for standard stats index
     jsr save_stats_at
     lda #$0000

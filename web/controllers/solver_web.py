@@ -5,7 +5,7 @@ path = os.path.expanduser('~/RandomMetroidSolver')
 if os.path.exists(path) and path not in sys.path:
     sys.path.append(path)
 
-import datetime, os, hashlib, json, subprocess, tempfile, glob, random, re
+import datetime, os, hashlib, json, subprocess, tempfile, glob, random, re, math, string, base64
 from datetime import datetime, date
 from collections import OrderedDict
 
@@ -23,6 +23,7 @@ from graph_locations import locations
 from smboolmanager import SMBoolManager
 from rom import RomReader
 from rom_patches import RomPatches
+from ips import IPS_Patch
 
 # put an expiration date to the default cookie to have it kept between browser restart
 response.cookies['session_id_solver']['expires'] = 31 * 24 * 3600
@@ -2586,3 +2587,143 @@ def progSpeedStats():
     majorsSplit = ['Major', 'Full']
 
     return dict(randoPresets=randoPresets, majorsSplit=majorsSplit, progSpeedStats=progSpeedStats)
+
+ipsBasePath = "plandository/"
+def plandorepo():
+    # get plando list
+    DB = db.DB()
+    plandos = DB.getPlandos()
+    DB.close()
+
+    return dict(plandos=plandos, math=math, re=re)
+
+def plandoRateWebService():
+    print("plandoRateWebService")
+
+    if request.vars.plando == None:
+        raiseHttp(400, "Missing parameter plando")
+    plando = request.vars.plando
+
+    if request.vars.rate == None:
+        raiseHttp(400, "Missing parameter rate")
+    rate = request.vars.rate
+
+    if IS_LENGTH(maxsize=32, minsize=1)(plando)[1] is not None:
+        raise HTTP(400, "Plando name must be between 1 and 32 characters")
+
+    if IS_MATCH('^[a-zA-Z0-9 -_]*$')(plando)[1] is not None:
+        raise HTTP(400, "Plando name can only contain [a-zA-Z0-9 -_]")
+
+    if IS_INT_IN_RANGE(1, 6)(rate)[1] is not None:
+        raise HTTP(400, "Rate name must be between 1 and 5")
+    rate = int(rate)
+    ip = request.client
+
+    DB = db.DB()
+    already = DB.alreadyRated(plando, ip)
+    if already != None and len(already) > 0:
+        msg = "{}: rating already done".format(plando)
+    else:
+        DB.addRating(plando, rate, ip)
+        msg = "{}: rating ok".format(plando)
+    DB.close()
+
+    # display message in flash box
+    raise HTTP(400, msg)
+
+def downloadPlandoWebService():
+    if request.vars.plando == None:
+        raiseHttp(400, "Missing parameter plando")
+    plandoName = request.vars.plando
+
+    if IS_LENGTH(maxsize=32, minsize=1)(plandoName)[1] is not None:
+        raise HTTP(400, "Plando name must be between 1 and 32 characters")
+
+    if IS_MATCH('^[a-zA-Z0-9 -_]*$')(plandoName)[1] is not None:
+        raise HTTP(400, "Plando name can only contain [a-zA-Z0-9 -_]")
+
+    ipsFileName = os.path.join(ipsBasePath, "{}.ips".format(plandoName))
+    with open(ipsFileName, 'rb') as ipsFile:
+        ipsData = ipsFile.read()
+
+    DB = db.DB()
+    maxSize = DB.getPlandoIpsMaxSize(plandoName)
+    DB.close()
+
+    data = {
+        "ips": base64.b64encode(ipsData).decode(),
+        "fileName": "{}.sfc".format(plandoName),
+        "maxSize": maxSize
+    }
+
+    return json.dumps(data)
+
+def removeHtmlTags(text):
+    clean = re.compile('<.*?>')
+    return re.sub(clean, '', text)
+
+def generateUpdateKey():
+    # 8 chars string
+    stringLength = 8
+    letters = string.ascii_letters + string.digits
+    return ''.join(random.choice(letters) for i in range(stringLength))
+
+def uploadPlandoWebService():
+    print("uploadPlandoWebService")
+
+    for param in ["author", "plandoName", "longDesc", "preset", "romData"]:
+        if request.vars[param] == None:
+            raiseHttp(400, "Missing parameter {}".format(param))
+
+    for param in ["author", "plandoName", "preset"]:
+        if IS_LENGTH(maxsize=32, minsize=1)(request.vars[param])[1] is not None:
+            raise HTTP(400, "{} must be between 1 and 32 characters".format(param))
+
+    plandoName = request.vars.plandoName
+    if IS_MATCH('^[a-zA-Z0-9 -_]*$')(plandoName)[1] is not None:
+        raise HTTP(400, "Plando name can only contain [a-zA-Z0-9 -_]")
+
+    author = request.vars.author
+    longDesc = removeHtmlTags(request.vars.longDesc)
+    preset = request.vars.preset
+
+    romDataJson = request.vars.romData
+    romDataRaw = json.loads(romDataJson)
+    # everything is string in json, cast to int
+    romData = {}
+    for addr in romDataRaw:
+        romData[int(addr)] = int(romDataRaw[addr])
+
+    # dict: address -> value, transform it dict: address -> [values]
+    ipsData = {}
+    prevAddr = -0xff
+    curRecord = []
+    curRecordAddr = -1
+    for addr in sorted(romData):
+        if addr == prevAddr + 1:
+            curRecord.append(romData[addr])
+        else:
+            if len(curRecord) > 0:
+                # save current record
+                ipsData[curRecordAddr] = bytearray(curRecord)
+            # start a new one
+            curRecordAddr = addr
+            curRecord = [romData[addr]]
+        prevAddr = addr
+    # save last record
+    ipsData[curRecordAddr] = bytearray(curRecord)
+
+    # generate ips using the records
+    ipsPatch = IPS_Patch(ipsData)
+    maxSize = ipsPatch.max_size
+
+    # store ips in the repository
+    ipsPatch.save(os.path.join(ipsBasePath, "{}.ips".format(plandoName)))
+
+    updateKey = generateUpdateKey()
+
+    DB = db.DB()
+    DB.insertPlando((plandoName, author, longDesc, preset, updateKey, maxSize))
+    DB.close()
+
+    return json.dumps(updateKey)

@@ -1,11 +1,14 @@
+// compile with xkas-plus
+
 arch snes.cpu
 lorom
 
 // Addresses to helper functions for stat tracking
-define inc_stat $dfd800         // Inc stat, stat id in A
+define inc_stat $dfd810         // Inc stat, stat id in A
 define dec_stat $dfd840         // Dec stat, stat id in A
 define store_stat $dfd880       // Store stat, value in A, stat id in X
 define load_stat $dfd8b0        // Load stat, stat id in A, value returned in A
+define save_last_stats $dfd820  // save stats to "last stats" area in SRAM
 
 // RTA Timer (timer 1 is frames, and timer 2 is number of times frames rolled over)
 define timer1 $05b8
@@ -50,6 +53,12 @@ org $82e309
 // Door stops adjusting
 org $82e34c
     jml door_adjust_stop
+
+// samus is dead
+org $82DCD8
+    jsl death
+    nop
+    nop
 
 // Firing uncharged beam
 org $90b911
@@ -153,13 +162,14 @@ add_time_32:
 
 // Samus hit a door block (Gamestate change to $09 just before hitting $0a)
 door_entered:
-    lda #$0002  // Number of door transitions
+    // save last stats to resist power cycle
+    jsl {save_last_stats}
+    // Number of door transitions
+    lda #$0002
     jsl {inc_stat}
-
+    // Save RTA time to temp variable
     lda {timer1}
-    sta {door_timer_tmp} // Save RTA time to temp variable
-
-
+    sta {door_timer_tmp}
     // Run hijacked code and return
     plp
     inc $0998
@@ -222,6 +232,16 @@ door_adjust_stop:
     lda #$e353
     sta $099c
     jml $82e352
+
+// samus is dead
+death:
+    lda #$001f
+    jsl {inc_stat}
+    jsl {save_last_stats}
+    // hijacked code
+    stz $18aa
+    inc $0998
+    rtl
 
 // uncharged Beam Fire
 uncharged_beam:
@@ -304,6 +324,8 @@ bombs_laid:
 
 // stopped fading out, game state about to change to 0Dh
 pausing:
+    // save last stats to resist power cycle
+    jsl {save_last_stats}
     // Save RTA time to temp variable
     lda {timer1}
     sta {pause_timer_lo}
@@ -325,6 +347,8 @@ resuming:
     ply
     // don't count  time spent in pause in region counters
     jsr store_region_time
+    // save last stats to resist power cycle
+    jsl {save_last_stats}
     // run hijacked code and return
     inc $0998
     jml $82939f

@@ -1,3 +1,5 @@
+// compile with xkas-plus
+
 // custom credits
 arch snes.cpu
 lorom
@@ -18,27 +20,54 @@ define green "table tables/green.tbl"
 define orange "table tables/orange.tbl"
 define purple "table tables/purple.tbl"
 define big "table tables/big.tbl"
-define last_saveslot $7fffe0
+// store last save slot in unused SRAM
+define last_saveslot $701dfe
+// backup RAM for timer to avoid it to get cleared at boot
 define timer_backup1 $7fffe2
-define timer_backup2 $7fffe4
+define timer_backup2 {timer_backup1}+2
 define softreset $7fffe6
 define scroll_speed $7fffe8
+// RTA timer RAM updated during NMI
 define timer1 $05b8
 define timer2 $05ba
+// routine in new_game.asm
 define check_new_game   $A1F210
 
-// Patch soft reset to retain value of RTA counter
-org $80844B
-    jml patch_reset1
-org $808490
-    jml patch_reset2
+define stats_sram_sz_b  #$0080
+define full_stats_area_sz_b  #$0300
+define stats_sram_sz_w  #$0040
+define tmp_area_sz      #$00df
 
-// Patch loading and saving routines
+define _stats_ram        fc00
+define stats_ram         $7f{_stats_ram}
+define stats_timer       {stats_ram}
+
+define stats_sram_slot0     $1400
+define stats_sram_slot1     $1700
+define stats_sram_slot2     $1a00
+
+define last_stats_save_ok_off  #$02fc
+define last_stats_save_ok_flag #$caca
+
+// Patch boot to init our stuff
+org $80844B
+    jml boot1
+org $808490
+    jml boot2
+
+// bypass SRAM check to avoid loading 1st save at boot
+org $808268
+    jmp $8294
+
+// Patch load/save/copy
 org $81807f
     jmp patch_save
 
-org $8180f7
-    jmp patch_load
+org $81A24A
+    jsl patch_load // patch load from menu only
+
+org $819A66
+    jsr copy_stats
 
 // Hijack loading new game to reset stats
 org $828063
@@ -59,8 +88,6 @@ org $8b9a08
 
 org $8b9a19
     jml patch4
-
-
 
 // Hijack when samus is in the ship and ready to leave the planet
 org $a2ab13
@@ -93,25 +120,26 @@ org $809602
     plb
     rti
 
-// Patch soft reset to save the value of the RTA timer
+// Patch boot to init stuff
 org $80fe00
-patch_reset1:
-    lda {softreset} // Check if we're softresetting
-    cmp #$babe
-    beq .save
-    lda #$babe
-    sta {softreset}
+boot1:
     lda #$0000
     sta {timer_backup1}
     sta {timer_backup2}
-    sta {last_saveslot}
-    bra .skipsave
+    jsl is_save_slot
+    beq .save
+    bra .cont   // don't restore anything if no game was ever saved
 .save:
+    // check if soft reset, if so, restore RAM timer
+    lda {softreset}
+    cmp #$babe
+    bne .cont
     lda {timer1}
     sta {timer_backup1}
     lda {timer2}
     sta {timer_backup2}
-.skipsave:
+.cont:
+    // vanilla init stuff (will overwrite our timer, hence the backup)
     ldx #$1ffe
     lda #$0000
 -
@@ -119,17 +147,21 @@ patch_reset1:
     dex
     dex
     bpl -
+    // restore timer
     lda {timer_backup1}
     sta {timer1}
     lda {timer_backup2}
     sta {timer2}
+    // resume
     jml $808455
 
-patch_reset2:
+boot2:
+    // backup the timer again, game likes to clear this area on boot
     lda {timer1}
     sta {timer_backup1}
     lda {timer2}
     sta {timer_backup2}
+    // vanilla init stuff
     ldx #$1ffe
 -
     stz $0000,x
@@ -143,8 +175,13 @@ patch_reset2:
     dex
     dex
     bpl -
-
-    ldx #$00df          // clear temp variables
+    // restore timer
+    lda {timer_backup1}
+    sta {timer1}
+    lda {timer_backup2}
+    sta {timer2}
+    // clear temp variables
+    ldx {tmp_area_sz}
     lda #$0000
 -
     sta $7fff00, x
@@ -152,26 +189,62 @@ patch_reset2:
     dex
     bpl -
 
-    lda {timer_backup1}
-    sta {timer1}
-    lda {timer_backup2}
-    sta {timer2}
     jml $8084af
 
-warnpc $80ff00
+//// save related routines
+// zero flag set if value in last_saveslot is valid
+is_save_slot:
+    // check for the 3 possible valid values
+    lda {last_saveslot}
+    cmp #$0010
+    beq .end
+    cmp #$0011
+    beq .end
+    cmp #$0012
+    beq .end
+.end:
+    rtl
+
+// assuming a valid save slot is in last_saveslot,
+// stores in X the bank $70 index to stats area
+// arg A: if 0 we want last stats, otherwise standard stats
+save_index:
+    pha
+    lda {last_saveslot}
+    cmp #$0010
+    beq .slot0
+    cmp #$0011
+    beq .slot1
+.slot2:
+    ldx #{stats_sram_slot2}
+    bra .last
+.slot0:
+    ldx #{stats_sram_slot0}
+    bra .last
+.slot1:
+    ldx #{stats_sram_slot1}
+.last:
+    pla
+    bne .end
+    txa
+    clc
+    adc {stats_sram_sz_b}
+    tax
+.end:
+    rtl
+
+warnpc $80ffbf
 
 // Patch load and save routines
+// a save will always be performed when starting a new game (see new_game.asm)
 org $81ef20
 patch_save:
     lda {timer1}
-    sta $7ffc00
+    sta {stats_timer}
     lda {timer2}
-    sta $7ffc02
+    sta {stats_timer}+2
+    lda #$0001
     jsl save_stats
-    lda $7e0952
-    clc
-    adc #$0010
-    sta {last_saveslot}
     ply
     plx
     clc
@@ -179,25 +252,87 @@ patch_save:
     plp
     rtl
 
+print "patch_load: ", org
 patch_load:
-    lda $7e0952
+    phb
+    phx
+    phy
+    pea $7e7e
+    plb
+    plb
+    // call load routine
+    jsl $818085
+    bcs .end    // skip to end if new file or SRAM corrupt
+    // check save slot
+    lda $0952
     clc
     adc #$0010
-    cmp {last_saveslot}     // If we're loading the same save that's played last
-    beq +                   // don't restore stats from SRAM, only do this if
-    jsl load_stats          // a new save slot is loaded, or loading from hard reset
-    lda $7ffc00
+    cmp {last_saveslot}
+    bne .load
+    // we're loading the same save that's played last
+    lda {softreset}
+    cmp #$babe
+    beq .end_ok     // soft reset, use stats and timer from RAM
+    // TODO add menu time to pause stat and make it a general menus stat?
+.load:
+    // load stats from SRAM
+    jsl load_stats
+    // update live timer
+    lda {stats_timer}
     sta {timer1}
-    lda $7ffc02
+    lda {stats_timer}+2
     sta {timer2}
-+
+    // place marker for resets
+    lda #$babe
+    sta {softreset}
+.end_ok:
+    // increment reset count
+    lda #$0020
+    jsl inc_stat
+    jsl save_last_stats
+    // return carry clear
+    clc
+.end:
     ply
     plx
-    clc
     plb
     rtl
 
+save_slots:
+    dw {stats_sram_slot0}
+    dw {stats_sram_slot1}
+    dw {stats_sram_slot2}
 
+print "copy_stats:", org
+copy_stats:
+    // src slot idx = 19b7, dst slot idx = 19b9
+    lda $19b7
+    asl
+    tax
+    lda save_slots,x
+    sta $00
+    lda $19b9
+    asl
+    tax
+    lda save_slots,x
+    sta $03
+    ldy #$0000
+    // bank part for indirect long in already setup by original
+    // routine at $02 and $05
+.loop:
+    lda [$00],y
+    sta [$03],y
+    iny
+    iny
+    cpy {full_stats_area_sz_b}
+    bcc .loop
+    // disable save slot check. if data is copied we cannot rely on RAM contents
+    lda #$0000
+    sta {last_saveslot}
+    lda $19B7   // hijacked code
+    rts
+
+warnpc $81ffff
 ////////////////////////// CREDITS /////////////////////////////
 
 // Hijack after decompression of regular credits tilemaps
@@ -306,14 +441,16 @@ clear_values:
 -
     jsl store_stat
     inx
-    cpx #$0180
+    cpx {stats_sram_sz_w}
     bne -
 
     // Clear RTA Timer
     lda #$0000
     sta {timer1}
     sta {timer2}
-
+    // place marker for resets
+    lda #$babe
+    sta {softreset}
 .ret:
     plp
     jsl $809a79
@@ -322,18 +459,19 @@ clear_values:
 // Game has ended, save RTA timer to RAM and copy all stats to SRAM a final time
 game_end:
     lda {timer1}
-    sta $7ffc00
+    sta {stats_timer}
     lda {timer2}
-    sta $7ffc02
+    sta {stats_timer}+2
 
     // Subtract frames from pressing down at ship to this code running
-    lda $7ffc00
+    lda {stats_timer}
     sec
     sbc #$013d
-    sta $7ffc00
+    sta {stats_timer}
     lda #$0000  // if carry clear this will subtract one from the high byte of timer
-    sbc $7ffc02
+    sbc {stats_timer}+2
 
+    lda #$0001
     jsl save_stats
     lda #$000a
     jsl $90f084
@@ -423,6 +561,7 @@ draw_value:
     jsr draw_three
     lda $12
     jsr draw_two
+.end:
     plb
     plx
     rts
@@ -540,7 +679,7 @@ write_stats:
     lda stats, x        // Get stat id
     asl
     clc
-    adc #$fc00          // Get pointer to value instead of actual value
+    adc #${_stats_ram}          // Get pointer to value instead of actual value
     pha
 
     // Load row address
@@ -608,108 +747,176 @@ numbers_top:
 numbers_bot:
     dw $0070, $0071, $0072, $0073, $0074, $0075, $0076, $0077, $0078, $0079, $007a, $007b, $007c, $007d, $007e, $007f
 
+print "load_stats: ", org
 load_stats:
     phx
-    pha
-    ldx #$0000
+    phy
     lda $7e0952
-    bne +
--
-    lda $701400, x
-    sta $7ffc00, x
-    inx
-    inx
-    cpx #$0300
-    bne -
-    jmp .end
-+
-    cmp #$0001
-    bne +
-    lda $701700, x
-    sta $7ffc00, x
-    inx
-    inx
-    cpx #$0300
-    bne -
-    jmp .end
-+
-    lda $701a00, x
-    sta $7ffc00, x
-    inx
-    inx
-    cpx #$0300
-    bne -
-    jmp .end
-
-.end:
-    pla
+    clc
+    adc #$0010
+    sta {last_saveslot}
+    // tries to load from last stats
+    jsr is_last_save_flag_ok
+    bcc .notok
+    lda #$0000
+    jsl save_index
+.notok:
+    jsr load_stats_at
+    ply
     plx
     rtl
 
-save_stats:
+// arg X = index of where to load stats from in bank $70
+load_stats_at:
+    phx
+    phb
+    pea $7f7f
+    plb
+    plb
+    ldy #$0000
+.loop:
+    lda $700000,x
+    sta ${_stats_ram},y
+    iny
+    iny
+    inx
+    inx
+    cpy {stats_sram_sz_b}
+    bcc .loop
+    plb
+    plx
+    rts
+
+// return carry flag set if flag ok
+is_last_save_flag_ok:
     phx
     pha
-    ldx #$0000
-    lda $7e0952
-    bne +
--
-    lda $7ffc00, x
-    sta $701400, x
-    inx
-    inx
-    cpx #$0300
-    bne -
-    jmp .end
-+
-    cmp #$0001
-    bne +
-    lda $7ffc00, x
-    sta $701700, x
-    inx
-    inx
-    cpx #$0300
-    bne -
-    jmp .end
-+
-    lda $7ffc00, x
-    sta $701a00, x
-    inx
-    inx
-    cpx #$0300
-    bne -
-    jmp .end
-
+    lda #$0001
+    jsl save_index
+    txa
+    clc
+    adc {last_stats_save_ok_off}
+    tax
+    lda {last_stats_save_ok_flag}
+    cmp $700000,x
+    beq .flag_ok
+    clc
+    bra .end
+.flag_ok:
+    sec
 .end:
     pla
     plx
+    rts
+
+// args: A = value to store
+// X and A untouched
+set_last_save_ok_flag:
+    phx
+    pha
+    lda #$0001
+    jsl save_index
+    txa
+    clc
+    adc {last_stats_save_ok_off}
+    tax
+    pla
+    sta $700000,x
+    plx
+    rts
+
+// arg X = index of where to save stats in bank $70
+save_stats_at:
+    phx
+    phb
+    pea $7f7f
+    plb
+    plb
+    ldy #$0000
+.loop:
+    lda ${_stats_ram},y
+    sta $700000,x
+    iny
+    iny
+    inx
+    inx
+    cpy {stats_sram_sz_b}
+    bcc .loop
+    plb
+    plx
+    rts
+
+// save stats both in standard and last areas
+// arg: A = 0 if we just want to save last stats
+//      A != 0 save all stats (save stations)
+print "save_stats: ", org
+save_stats:
+    phx
+    phy
+    pha
+    lda $7e0952
+    clc
+    adc #$0010
+    sta {last_saveslot}
+    pla
+    beq .last   // skip standard save if A=0
+    jsl save_index // A is not 0, so we ask for standard stats index
+    jsr save_stats_at
+    lda #$0000
+.last:
+    jsl save_index // A is 0, so we ask for last stats index
+    lda #$0000
+    jsr set_last_save_ok_flag
+    jsr save_stats_at
+    lda {last_stats_save_ok_flag}
+    jsr set_last_save_ok_flag
+    ply
+    plx
     rtl
 
-warnpc $dfd800
+warnpc $dfd80f
 // Increment Statistic (in A)
-org $dfd800
+org $dfd810
 inc_stat:
     phx
     asl
     tax
-    lda $7ffc00, x
+    lda {stats_ram}, x
     inc
-    sta $7ffc00, x
+    sta {stats_ram}, x
     plx
     rtl
 
+warnpc $dfd81f
+
+org $dfd820
+// save last stats. to be used from door transitions/menus
+// keeps all registers intact
+save_last_stats:
+    pha
+    lda {timer1}
+    sta {stats_timer}
+    lda {timer2}
+    sta {stats_timer}+2
+    lda #$0000
+    jsl save_stats
+    pla
+    rtl
+
+warnpc $dfd83f
 // Decrement Statistic (in A)
 org $dfd840
 dec_stat:
     phx
     asl
     tax
-    lda $7ffc00, x
+    lda {stats_ram}, x
     dec
-    sta $7ffc00, x
+    sta {stats_ram}, x
     plx
     rtl
 
-
+warnpc $dfd87f
 // Store Statistic (value in A, stat in X)
 org $dfd880
 store_stat:
@@ -719,21 +926,22 @@ store_stat:
     asl
     tax
     pla
-    sta $7ffc00, x
+    sta {stats_ram}, x
     plx
     rtl
 
+warnpc $dfd8af
 // Load Statistic (stat in A, returns value in A)
 org $dfd8b0
 load_stat:
     phx
     asl
     tax
-    lda $7ffc00, x
+    lda {stats_ram}, x
     plx
     rtl
 
-
+warnpc $dfd91a
 // New credits script in free space of bank $DF
 org $dfd91b
 script:
@@ -1013,7 +1221,6 @@ script:
     dw {draw}, {blank}
     dw {draw}, {blank}
     dw {draw}, {blank}
-    dw {draw}, {blank}
     dw {draw}, {row}*223 // PLAY THIS RANDOMIZER AT
     dw {draw}, {blank}
     dw {draw}, {row}*179
@@ -1028,12 +1235,15 @@ script:
 
     dw {draw}, {row}*183 // GAMEPLAY STATS
     dw {draw}, {blank}
-    dw {draw}, {blank}
-    dw {draw}, {row}*184 // SPEEDRUNNING STATS
-    dw {draw}, {blank}
 
     // Set scroll speed to 3 frames per pixel
 //    dw {speed}, $0003
+    dw {draw}, {row}*172 // DEATHS
+    dw {draw}, {row}*173
+    dw {draw}, {blank}
+    dw {draw}, {row}*174 // RESETS
+    dw {draw}, {row}*175
+    dw {draw}, {blank}
     dw {draw}, {row}*185 // DOOR TRANSITIONS
     dw {draw}, {row}*186
     dw {draw}, {blank}
@@ -1160,10 +1370,8 @@ script:
     // Last info
     dw {draw}, {blank}
     dw {draw}, {blank}
-    dw {draw}, {blank}
     dw {draw}, {row}*217 // Final Time
     dw {draw}, {row}*218
-    dw {draw}, {blank}
     dw {draw}, {blank}
     dw {draw}, {blank}
     dw {draw}, {row}*219 // Thanks
@@ -1208,6 +1416,8 @@ stats:
     dw 26,      {row}*215,  1, 0    // Bombs
     dw 27,      {row}*221,  3, 0    // Time in pause
 //  dw 29,      {row}*224,  2, 0    // time saved arm pumping
+    dw 31,      {row}*172,  1, 0    // deaths
+    dw 32,      {row}*174,  1, 0    // resets
     dw 0,               0,  0, 0    // end of table
 
 print "credits end : ", org
@@ -1235,10 +1445,10 @@ credits:
     {purple}
     dw "            SNES CODE           " // 133
     {yellow}
-    dw "   TOTAL      FOOSDA      FLO   " // 134
-    dw "   DARKSHOCK   RAKKI   SCYZER   " // 135
+    dw "      FLO     TOTAL    FOOSDA   " // 134
+    dw "   DARKSHOCK  RAKKI    SCYZER   " // 135
     dw "   KEJARDON   SMILEY   LIORAN   " // 136
-    dw "      PERSONITIS    LEODOX      " // 137
+    dw "      PERSONITIS    DUDE        " // 137
     {cyan}
     dw "       SPECIAL THANKS TO        " // 138
     {yellow}
@@ -1292,13 +1502,13 @@ credits:
 // stats continued
     dw " AVAILABLE AMMO XXX% ENERGY XXX%" // 168
     dw " available ammo xxx> energy xxx>" // 169
-    dw " UNCHARGED SHOTS                " // 170
-    dw " uncharged shots                " // 171
+    dw " UNCHARGED SHOTS              0 " // 170
+    dw " uncharged shots              } " // 171
+    dw " DEATHS                       0 " // 172
+    dw " deaths                       } " // 173
+    dw " RESETS                       0 " // 174
+    dw " resets                       } " // 175
 // --- this space is reusable
-    dw "                                " // 172
-    dw "                                " // 173
-    dw "                                " // 174
-    dw "                                " // 175
     dw "                                " // 176
     dw "                                " // 177
     dw "                                " // 178
@@ -1311,11 +1521,10 @@ credits:
     dw "        DISCORD.VARIA.RUN       " // 182
     {purple}
     dw "      GAMEPLAY STATISTICS       " // 183
-    {blue}
-    dw "      SPEEDRUNNING STATS        " // 184
+    dw "                                " // 184  : reusable
     {big}
-    dw " DOOR TRANSITIONS               " // 185
-    dw " door transitions               " // 186
+    dw " DOOR TRANSITIONS             0 " // 185
+    dw " door transitions             } " // 186
     dw " TIME IN DOORS      00'00'00^00 " // 187
     dw " time in doors                  " // 188
     dw " TIME ALIGNING DOORS   00'00^00 " // 189
@@ -1338,18 +1547,18 @@ credits:
     {green}
     dw "      SHOTS AND AMMO FIRED      " // 204
     {big}
-    dw " CHARGED SHOTS                  " // 205
-    dw " charged shots                  " // 206
-    dw " SPECIAL BEAM ATTACKS           " // 207
-    dw " special beam attacks           " // 208
-    dw " MISSILES                       " // 209
-    dw " missiles                       " // 210
-    dw " SUPER MISSILES                 " // 211
-    dw " super missiles                 " // 212
-    dw " POWER BOMBS                    " // 213
-    dw " power bombs                    " // 214
-    dw " BOMBS                          " // 215
-    dw " bombs                          " // 216
+    dw " CHARGED SHOTS                0 " // 205
+    dw " charged shots                } " // 206
+    dw " SPECIAL BEAM ATTACKS         0 " // 207
+    dw " special beam attacks         } " // 208
+    dw " MISSILES                     0 " // 209
+    dw " missiles                     } " // 210
+    dw " SUPER MISSILES               0 " // 211
+    dw " super missiles               } " // 212
+    dw " POWER BOMBS                  0 " // 213
+    dw " power bombs                  } " // 214
+    dw " BOMBS                        0 " // 215
+    dw " bombs                        } " // 216
     dw " FINAL TIME         00'00'00^00 " // 217
     dw " final time                     " // 218
     dw "       THANKS FOR PLAYING       " // 219

@@ -21,7 +21,7 @@ define orange "table tables/orange.tbl"
 define purple "table tables/purple.tbl"
 define big "table tables/big.tbl"
 // store last save slot in unused SRAM
-define last_saveslot $7016fe
+define last_saveslot $701dfe
 // backup RAM for timer to avoid it to get cleared at boot
 define timer_backup1 $7fffe2
 define timer_backup2 {timer_backup1}+2
@@ -129,26 +129,16 @@ boot1:
     beq .save
     bra .cont   // don't restore anything if no game was ever saved
 .save:
-    // check if "soft reset" and restore RAM timer
-    // if not, restore last SRAM timer (console power cycle)
-    lda {softreset} // Check if we're softresetting
+    // check if soft reset, if so, restore RAM timer
+    lda {softreset}
     cmp #$babe
-    bne .power
+    bne .cont
     lda {timer1}
     sta {timer_backup1}
     lda {timer2}
     sta {timer_backup2}
-    bra .cont
-.power:
-    // load timer from SRAM, last stats if possible
-    lda #$0000
-    jsl save_index
-    lda $70000,x
-    sta {timer_backup1}
-    lda $70002,x
-    sta {timer_backup2}
 .cont:
-    // vanilla init stuff
+    // vanilla init stuff (will overwrite our timer, hence the backup)
     ldx #$1ffe
     lda #$0000
 -
@@ -156,10 +146,21 @@ boot1:
     dex
     dex
     bpl -
+    // restore timer
+    lda {timer_backup1}
+    sta {timer1}
+    lda {timer_backup2}
+    sta {timer2}
     // resume
     jml $808455
 
 boot2:
+    // backup the timer again, game likes to clear this area on boot
+    lda {timer1}
+    sta {timer_backup1}
+    lda {timer2}
+    sta {timer_backup2}
+    // vanilla init stuff
     ldx #$1ffe
 -
     stz $0000,x
@@ -173,8 +174,13 @@ boot2:
     dex
     dex
     bpl -
-
-    ldx {tmp_area_sz}          // clear temp variables
+    // restore timer
+    lda {timer_backup1}
+    sta {timer1}
+    lda {timer_backup2}
+    sta {timer2}
+    // clear temp variables
+    ldx {tmp_area_sz}
     lda #$0000
 -
     sta $7fff00, x
@@ -256,8 +262,8 @@ patch_load:
     // call load routine
     jsl $818085
     bcs .end    // skip to end if new file or SRAM corrupt
-    // load stats
-    lda $7e0952
+    // check save slot
+    lda $0952
     clc
     adc #$0010
     cmp {last_saveslot}
@@ -265,15 +271,8 @@ patch_load:
     // we're loading the same save that's played last
     lda {softreset}
     cmp #$babe
-    bne .load
-    // soft reset, use stats from RAM
-    // discard time spent in title screen by restoring boot time timer
+    beq .end_ok     // soft reset, use stats and timer from RAM
     // TODO add menu time to pause stat and make it a general menus stat?
-    lda {timer_backup1}
-    sta {timer1}
-    lda {timer_backup2}
-    sta {timer2}
-    bra .end_ok
 .load:
     // load stats from SRAM
     jsl load_stats
@@ -312,11 +311,9 @@ copy_stats:
     tax
     lda save_slots,x
     sta $03
-    phb
-    pea $7070
-    plb
-    plb
     ldy #$0000
+    // bank part for indirect long in already setup by original
+    // routine at $02 and $05
 .loop:
     lda [$00],y
     sta [$03],y
@@ -324,7 +321,6 @@ copy_stats:
     iny
     cpy {stats_sram_sz_b}
     bcc .loop
-    plb
     // disable save slot check. if data is copied we rely on save contents
     lda #$0000
     sta {last_saveslot}
@@ -677,7 +673,7 @@ write_stats:
     lda stats, x        // Get stat id
     asl
     clc
-    adc #$fc00          // Get pointer to value instead of actual value
+    adc #${_stats_ram}          // Get pointer to value instead of actual value
     pha
 
     // Load row address

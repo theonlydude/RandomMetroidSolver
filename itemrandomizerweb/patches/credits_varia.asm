@@ -34,6 +34,7 @@ define timer2 $05ba
 define check_new_game   $A1F210
 
 define stats_sram_sz_b  #$0080
+define full_stats_area_sz_b  #$0300
 define stats_sram_sz_w  #$0040
 define tmp_area_sz      #$00df
 
@@ -319,9 +320,9 @@ copy_stats:
     sta [$03],y
     iny
     iny
-    cpy {stats_sram_sz_b}
+    cpy {full_stats_area_sz_b}
     bcc .loop
-    // disable save slot check. if data is copied we rely on save contents
+    // disable save slot check. if data is copied we cannot rely on RAM contents
     lda #$0000
     sta {last_saveslot}
     lda $19B7   // hijacked code
@@ -749,11 +750,9 @@ load_stats:
     clc
     adc #$0010
     sta {last_saveslot}
-    jsl save_index
-    // X = start of standard stats
     // tries to load from last stats
     jsr is_last_save_flag_ok
-    bne .notok
+    bcc .notok
     lda #$0000
     jsl save_index
 .notok:
@@ -783,25 +782,35 @@ load_stats_at:
     plx
     rts
 
-// args: X = stats area start in $70
-// return zero flag set is flag ok
+// return carry flag set if flag ok
 is_last_save_flag_ok:
     phx
+    pha
+    lda #$0001
+    jsl save_index
     txa
     clc
     adc {last_stats_save_ok_off}
     tax
     lda {last_stats_save_ok_flag}
     cmp $700000,x
+    beq .flag_ok
+    clc
+    bra .end
+.flag_ok:
+    sec
+.end:
+    pla
     plx
     rts
 
-// args: X = stats area start in $70
-//       A = value to store
+// args: A = value to store
 // X and A untouched
 set_last_save_ok_flag:
     phx
     pha
+    lda #$0001
+    jsl save_index
     txa
     clc
     adc {last_stats_save_ok_off}
@@ -860,18 +869,6 @@ save_stats:
     plx
     rtl
 
-warnpc $dfd7ef
-
-// save last stats. to be used from door transitions/menus
-// keeps all registers intact
-org $dfd7f0
-save_last_stats:
-    pha
-    lda #$0000
-    jsl save_stats
-    pla
-    rtl
-
 warnpc $dfd7ff
 // Increment Statistic (in A)
 org $dfd800
@@ -883,6 +880,22 @@ inc_stat:
     inc
     sta {stats_ram}, x
     plx
+    rtl
+
+warnpc $dfd80f
+
+org $dfd810
+// save last stats. to be used from door transitions/menus
+// keeps all registers intact
+save_last_stats:
+    pha
+    lda {timer1}
+    sta {stats_timer}
+    lda {timer2}
+    sta {stats_timer}+2
+    lda #$0000
+    jsl save_stats
+    pla
     rtl
 
 warnpc $dfd83f

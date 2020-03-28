@@ -286,6 +286,10 @@ patch_load:
     lda #$babe
     sta {softreset}
 .end_ok:
+    // increment reset count
+    lda #$0020
+    jsl inc_stat
+    jsl save_last_stats
     // return carry clear
     clc
 .end:

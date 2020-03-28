@@ -54,6 +54,12 @@ org $82e309
 org $82e34c
     jml door_adjust_stop
 
+// samus is dead
+org $82DCD8
+    jsl death
+    nop
+    nop
+
 // Firing uncharged beam
 org $90b911
     jml uncharged_beam
@@ -226,6 +232,16 @@ door_adjust_stop:
     lda #$e353
     sta $099c
     jml $82e352
+
+// samus is dead
+death:
+    lda #$001f
+    jsl {inc_stat}
+    jsl {save_last_stats}
+    // hijacked code
+    stz $18aa
+    inc $0998
+    rtl
 
 // uncharged Beam Fire
 uncharged_beam:

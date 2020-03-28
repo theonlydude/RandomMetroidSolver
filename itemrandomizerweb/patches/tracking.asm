@@ -4,11 +4,11 @@ arch snes.cpu
 lorom
 
 // Addresses to helper functions for stat tracking
-define inc_stat $dfd800         // Inc stat, stat id in A
+define inc_stat $dfd810         // Inc stat, stat id in A
 define dec_stat $dfd840         // Dec stat, stat id in A
 define store_stat $dfd880       // Store stat, value in A, stat id in X
 define load_stat $dfd8b0        // Load stat, stat id in A, value returned in A
-define save_last_stats $dfd810  // save stats to "last stats" area in SRAM
+define save_last_stats $dfd820  // save stats to "last stats" area in SRAM
 
 // RTA Timer (timer 1 is frames, and timer 2 is number of times frames rolled over)
 define timer1 $05b8

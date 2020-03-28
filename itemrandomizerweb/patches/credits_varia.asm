@@ -561,6 +561,7 @@ draw_value:
     jsr draw_three
     lda $12
     jsr draw_two
+.end:
     plb
     plx
     rts
@@ -873,9 +874,9 @@ save_stats:
     plx
     rtl
 
-warnpc $dfd7ff
+warnpc $dfd80f
 // Increment Statistic (in A)
-org $dfd800
+org $dfd810
 inc_stat:
     phx
     asl
@@ -886,9 +887,9 @@ inc_stat:
     plx
     rtl
 
-warnpc $dfd80f
+warnpc $dfd81f
 
-org $dfd810
+org $dfd820
 // save last stats. to be used from door transitions/menus
 // keeps all registers intact
 save_last_stats:
@@ -1501,12 +1502,12 @@ credits:
 // stats continued
     dw " AVAILABLE AMMO XXX% ENERGY XXX%" // 168
     dw " available ammo xxx> energy xxx>" // 169
-    dw " UNCHARGED SHOTS                " // 170
-    dw " uncharged shots                " // 171
-    dw " DEATHS                         " // 172
-    dw " deaths                         " // 173
-    dw " RESETS                         " // 174
-    dw " resets                         " // 175
+    dw " UNCHARGED SHOTS              0 " // 170
+    dw " uncharged shots              } " // 171
+    dw " DEATHS                       0 " // 172
+    dw " deaths                       } " // 173
+    dw " RESETS                       0 " // 174
+    dw " resets                       } " // 175
 // --- this space is reusable
     dw "                                " // 176
     dw "                                " // 177
@@ -1522,8 +1523,8 @@ credits:
     dw "      GAMEPLAY STATISTICS       " // 183
     dw "                                " // 184  : reusable
     {big}
-    dw " DOOR TRANSITIONS               " // 185
-    dw " door transitions               " // 186
+    dw " DOOR TRANSITIONS             0 " // 185
+    dw " door transitions             } " // 186
     dw " TIME IN DOORS      00'00'00^00 " // 187
     dw " time in doors                  " // 188
     dw " TIME ALIGNING DOORS   00'00^00 " // 189
@@ -1546,18 +1547,18 @@ credits:
     {green}
     dw "      SHOTS AND AMMO FIRED      " // 204
     {big}
-    dw " CHARGED SHOTS                  " // 205
-    dw " charged shots                  " // 206
-    dw " SPECIAL BEAM ATTACKS           " // 207
-    dw " special beam attacks           " // 208
-    dw " MISSILES                       " // 209
-    dw " missiles                       " // 210
-    dw " SUPER MISSILES                 " // 211
-    dw " super missiles                 " // 212
-    dw " POWER BOMBS                    " // 213
-    dw " power bombs                    " // 214
-    dw " BOMBS                          " // 215
-    dw " bombs                          " // 216
+    dw " CHARGED SHOTS                0 " // 205
+    dw " charged shots                } " // 206
+    dw " SPECIAL BEAM ATTACKS         0 " // 207
+    dw " special beam attacks         } " // 208
+    dw " MISSILES                     0 " // 209
+    dw " missiles                     } " // 210
+    dw " SUPER MISSILES               0 " // 211
+    dw " super missiles               } " // 212
+    dw " POWER BOMBS                  0 " // 213
+    dw " power bombs                  } " // 214
+    dw " BOMBS                        0 " // 215
+    dw " bombs                        } " // 216
     dw " FINAL TIME         00'00'00^00 " // 217
     dw " final time                     " // 218
     dw "       THANKS FOR PLAYING       " // 219

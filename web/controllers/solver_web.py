@@ -2660,6 +2660,7 @@ def downloadPlandoWebService():
 
     DB = db.DB()
     maxSize = DB.getPlandoIpsMaxSize(plandoName)
+    DB.increaseDownloadCount(plandoName)
     DB.close()
 
     data = {

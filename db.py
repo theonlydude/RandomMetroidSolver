@@ -598,7 +598,7 @@ order by 1,2;"""
             return None
 
         try:
-            sql = "select re.plando_name, re.init_time, re.author, re.long_desc, re.suggested_preset, (select sum(ra.rating)/count(1) from plando_rating ra where ra.plando_name = re.plando_name) from plando_repo re order by re.plando_name;"
+            sql = "select re.plando_name, re.init_time, re.author, re.long_desc, re.suggested_preset, re.download_count, (select sum(ra.rating)/count(1) from plando_rating ra where ra.plando_name = re.plando_name) from plando_repo re order by re.plando_name;"
             return self.execSelect(sql)
         except Exception as e:
             print("DB.getPlandos::error execute: {} error: {}".format(sql, e))
@@ -679,4 +679,15 @@ order by 1,2;"""
             return self.cursor.execute(sql % (plandoName, rating, ip))
         except Exception as e:
             print("DB.addRating::error execute: {} error: {}".format(sql, e))
+            self.dbAvailable = False
+
+    def increaseDownloadCount(self, plandoName):
+        if self.dbAvailable == False:
+            return None
+
+        try:
+            sql = "update plando_repo set download_count = download_count+1 where plando_name = '%s';"
+            return self.cursor.execute(sql % (plandoName,))
+        except Exception as e:
+            print("DB.increaseDownloadCount::error execute: {} error: {}".format(sql, e))
             self.dbAvailable = False

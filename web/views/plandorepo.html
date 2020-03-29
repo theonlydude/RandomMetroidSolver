@@ -674,7 +674,7 @@ function setGuessedPreset(romName){
         response.write("      </tr>\n", escape=False)
 
         for plando in plandos:
-            (name, time, author, longDesc, preset, rating) = plando
+            (name, time, author, longDesc, preset, downloadCount, rating) = plando
             if len(longDesc) > 48:
                 smallDesc = None
                 for i in range(26, 48):
@@ -729,12 +729,12 @@ function setGuessedPreset(romName){
 <tr><td><p>{}</p></td></tr>\
 <tr><td class=\"blankLastRow\"></td></tr>\
 <tr>\
-<td><button class=\"downloadButton\" onclick=\"downloadPlando('{}')\">Download</button>\
+<td><button class=\"downloadButton\" onclick=\"downloadPlando('{}')\">Download ({})</button>\
 <div class=\"right\"><select id=\"rate{}\" name=\"rate\"><option value=\"1\">1</option><option value=\"2\">2</option><option value=\"3\">3</option><option value=\"4\">4</option><option value=\"5\">5</option></select> <button onclick=\"ratePlando('{}', '{}')\">Rate</button></div></td>\
 </tr>\
 <tr><td colspan=\"2\" class=\"blankLastRow\"></td></tr>\
 </table>\
-</div></td></tr>\n".format(longDesc.replace('\n', '<br/>'), name, pureName, name, pureName), escape=False)
+</div></td></tr>\n".format(longDesc.replace('\n', '<br/>'), name, downloadCount, pureName, name, pureName), escape=False)
             pass
 
         response.write("      </table>\n", escape=False)

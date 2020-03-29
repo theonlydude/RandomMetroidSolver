@@ -434,7 +434,7 @@ class CommonSolver(object):
         if self.vcr != None:
             self.vcr.addRollback(count)
 
-        if self.mode == 'standard':
+        if self.interactive == False:
             self.nbAvailLocs = self.nbAvailLocs[:-count]
 
         for _ in range(count):
@@ -833,6 +833,7 @@ class CommonSolver(object):
 
 class InteractiveSolver(CommonSolver):
     def __init__(self, output):
+        self.interactive = True
         self.errorMsg = ""
         self.checkDuplicateMajor = False
         self.vcr = None
@@ -1169,7 +1170,7 @@ class InteractiveSolver(CommonSolver):
                                                   len(vanillaBossesTransitions) + len(vanillaTransitions))
             if self.escapeRando == True and escapeTimer != None:
                 # convert from '03:00' to number of seconds
-                escapeTimer = int(escapeTimer[0:2]) * 60 + int(escapeTimer[3:])
+                escapeTimer = int(escapeTimer[0:2]) * 60 + int(escapeTimer[3:5])
                 romPatcher.writeEscapeTimer(escapeTimer)
 
         romPatcher.end()
@@ -1347,6 +1348,7 @@ class StandardSolver(CommonSolver):
     def __init__(self, rom, presetFileName, difficultyTarget, pickupStrategy, itemsForbidden=[], type='console',
                  firstItemsLog=None, extStatsFilename=None, extStatsStep=None, displayGeneratedPath=False,
                  outputFileName=None, magic=None, checkDuplicateMajor=False, vcr=False, plot=None):
+        self.interactive = False
         self.checkDuplicateMajor = checkDuplicateMajor
         self.vcr = VCR(rom, 'solver') if vcr == True else None
         # for compatibility with some common methods of the interactive solver

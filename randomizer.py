@@ -345,7 +345,10 @@ if __name__ == "__main__":
         optErrMsg += forceArg('areaLayoutBase', False, "'Additional layout patches for easier navigation' forced to on")
         possibleStartAPs = GraphUtils.getPossibleStartAPs(args.area, maxDifficulty)
         if args.startAP == 'random':
+            possibleStartAPs.remove('Ceres')
             args.startAP = random.choice(possibleStartAPs)
+            if args.startAP == 'Landing Site':
+                args.startAP = random.choice(['Landing Site', 'Ceres'])
         elif args.startAP not in possibleStartAPs:
             optErrMsg += '\nInvalid start location: {}'.format(args.startAP)
             optErrMsg += '\nPossible start locations with these settings: {}'.format(possibleStartAPs)

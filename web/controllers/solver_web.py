@@ -5,7 +5,7 @@ path = os.path.expanduser('~/RandomMetroidSolver')
 if os.path.exists(path) and path not in sys.path:
     sys.path.append(path)
 
-import datetime, os, hashlib, json, subprocess, tempfile, glob, random, re
+import datetime, os, hashlib, json, subprocess, tempfile, glob, random, re, math, string, base64
 from datetime import datetime, date
 from collections import OrderedDict
 
@@ -23,6 +23,7 @@ from graph_locations import locations
 from smboolmanager import SMBoolManager
 from rom import RomReader
 from rom_patches import RomPatches
+from ips import IPS_Patch
 
 # put an expiration date to the default cookie to have it kept between browser restart
 response.cookies['session_id_solver']['expires'] = 31 * 24 * 3600
@@ -995,13 +996,13 @@ def getInt(param, isJson=False):
     try:
         return int(request.vars[param])
     except:
-        raiseHttp(400, "Wrong value for {}: {}, must be an int".format(param, request.vars[param]), isJson)
+        raiseHttp(400, "Wrong value for {}, must be an int".format(param), isJson)
 
 def getFloat(param, isJson=False):
     try:
         return float(request.vars[param])
     except:
-        raiseHttp(400, "Wrong value for {}: {}, must be a float".format(param, request.vars[param]), isJson)
+        raiseHttp(400, "Wrong value for {}, must be a float".format(param), isJson)
 
 def validateWebServiceParams(switchs, quantities, others, isJson=False):
     parameters = switchs + quantities + others
@@ -1012,18 +1013,18 @@ def validateWebServiceParams(switchs, quantities, others, isJson=False):
 
     for switch in switchs:
         if request.vars[switch] not in ['on', 'off', 'random']:
-            raiseHttp(400, "Wrong value for {}: {}, authorized values: on/off".format(switch, request.vars[switch]), isJson)
+            raiseHttp(400, "Wrong value for {}, authorized values: on/off".format(switch), isJson)
 
     for qty in quantities:
         if request.vars[qty] == 'random':
             continue
         qtyFloat = getFloat(qty, isJson)
         if qtyFloat < 1.0 or qtyFloat > 9.0:
-            raiseHttp(400, json.dumps("Wrong value for {}: {}, must be between 1 and 9".format(qty, request.vars[qty])), isJson)
+            raiseHttp(400, "Wrong value for {}, must be between 1 and 9".format(qty), isJson)
 
     if 'complexity' in others:
         if request.vars['complexity'] not in ['simple', 'medium', 'advanced']:
-            raiseHttp(400, "Wrong value for complexity: {}, authorized values simple/medium/advanced".format(request.vars['complexity']), isJson)
+            raiseHttp(400, "Wrong value for complexity, authorized values simple/medium/advanced", isJson)
 
     if 'paramsFileTarget' in others:
         try:
@@ -1034,7 +1035,7 @@ def validateWebServiceParams(switchs, quantities, others, isJson=False):
     if 'seed' in others:
         seedInt = getInt('seed', isJson)
         if seedInt < 0 or seedInt > 9999999:
-            raiseHttp(400, "Wrong value for seed: {}, must be between 0 and 9999999".format(request.vars[seed]), isJson)
+            raiseHttp(400, "Wrong value for seed, must be between 0 and 9999999", isJson)
 
     preset = request.vars.preset
     if preset != None:
@@ -1047,7 +1048,7 @@ def validateWebServiceParams(switchs, quantities, others, isJson=False):
         # check that preset exists
         fullPath = '{}/{}.json'.format(getPresetDir(preset), preset)
         if not os.path.isfile(fullPath):
-            raiseHttp(400, "Unknown preset: {}".format(preset), isJson)
+            raiseHttp(400, "Unknown preset", isJson)
 
     randoPreset = request.vars.randoPreset
     if randoPreset != None and len(randoPreset) > 0:
@@ -1060,16 +1061,16 @@ def validateWebServiceParams(switchs, quantities, others, isJson=False):
         # check that randoPreset exists
         fullPath = 'rando_presets/{}.json'.format(randoPreset)
         if not os.path.isfile(fullPath):
-            raiseHttp(400, "Unknown randoPreset: {}".format(randoPreset), isJson)
+            raiseHttp(400, "Unknown randoPreset", isJson)
 
     # check race mode
     if 'raceMode' in request.vars:
         if request.vars.raceMode not in ['on', 'off']:
-            raiseHttp(400, "Wrong value for race mode: {}, must on/off".format(request.vars.raceMode), isJson)
+            raiseHttp(400, "Wrong value for race mode, must on/off", isJson)
 
     if 'majorsSplit' in others:
         if request.vars['majorsSplit'] not in ['Full', 'Major', 'Chozo', 'random']:
-            raiseHttp(400, "Wrong value for majorsSplit: {}, authorized values Full/Major/Chozo/random".format(request.vars['majorsSplit']), isJson)
+            raiseHttp(400, "Wrong value for majorsSplit, authorized values Full/Major/Chozo/random", isJson)
 
     if request.vars['maxDifficulty'] is not None:
         if request.vars.maxDifficulty not in ['no difficulty cap', 'easy', 'medium', 'hard', 'harder', 'hardcore', 'mania', 'random']:
@@ -1078,15 +1079,15 @@ def validateWebServiceParams(switchs, quantities, others, isJson=False):
     if 'progressionSpeed' in others:
         for progSpeed in request.vars['progressionSpeed'].split(','):
             if progSpeed not in ['slowest', 'slow', 'medium', 'fast', 'fastest', 'random', 'basic', 'VARIAble']:
-                raiseHttp(400, "Wrong value for progressionSpeed: {}, authorized values slowest/slow/medium/fast/fastest/basic/VARIAble".format(progSpeed), isJson)
+                raiseHttp(400, "Wrong value for progressionSpeed, authorized values slowest/slow/medium/fast/fastest/basic/VARIAble", isJson)
 
     if 'progressionDifficulty' in others:
         if request.vars['progressionDifficulty'] not in ['easier', 'normal', 'harder', 'random']:
-            raiseHttp(400, "Wrong value for progressionDifficulty: {}, authorized values easier/normal/harder".format(request.vars['progressionDifficulty']), isJson)
+            raiseHttp(400, "Wrong value for progressionDifficulty, authorized values easier/normal/harder", isJson)
 
     if 'morphPlacement' in others:
         if request.vars['morphPlacement'] not in ['early', 'late', 'normal', 'random']:
-            raiseHttp(400, "Wrong value for morphPlacement: {}, authorized values early/late/normal".format(request.vars['morphPlacement']), isJson)
+            raiseHttp(400, "Wrong value for morphPlacement, authorized values early/late/normal", isJson)
 
     if request.vars.minorQty not in ['random', None]:
         minorQtyInt = getInt('minorQty', isJson)
@@ -1099,16 +1100,16 @@ def validateWebServiceParams(switchs, quantities, others, isJson=False):
 
     if 'gravityBehaviour' in others:
         if request.vars.gravityBehaviour not in ['Balanced', 'Progressive', 'Vanilla']:
-            raiseHttp(400, "Wrong value for gravityBehaviour: {}".format(request.vars.gravityBehaviour), isJson)
+            raiseHttp(400, "Wrong value for gravityBehaviour", isJson)
 
     if 'startLocation' in others:
         if request.vars.startLocation not in GraphUtils.getStartAccessPointNames() + ['random']:
-            raiseHttp(400, "Wrong value for startLocation: {}".format(request.vars.startLocation), isJson)
+            raiseHttp(400, "Wrong value for startLocation", isJson)
 
 def sessionWebService():
     # web service to update the session
     switchs = ['suitsRestriction', 'hideItems', 'strictMinors',
-               'areaRandomization', 'areaLayout', 'escapeRando',
+               'areaRandomization', 'areaLayout', 'escapeRando', 'removeEscapeEnemies',
                'bossRandomization',
                'funCombat', 'funMovement', 'funSuits',
                'layoutPatches', 'variaTweaks', 'nerfedCharge',
@@ -1147,6 +1148,7 @@ def sessionWebService():
     session.randomizer['areaRandomization'] = request.vars.areaRandomization
     session.randomizer['areaLayout'] = request.vars.areaLayout
     session.randomizer['escapeRando'] = request.vars.escapeRando
+    session.randomizer['removeEscapeEnemies'] = request.vars.removeEscapeEnemies
     session.randomizer['bossRandomization'] = request.vars.bossRandomization
     session.randomizer['funCombat'] = request.vars.funCombat
     session.randomizer['funMovement'] = request.vars.funMovement
@@ -1188,7 +1190,7 @@ def randomizerWebService():
 
     # check validity of all parameters
     switchs = ['suitsRestriction', 'hideItems', 'strictMinors',
-               'areaRandomization', 'areaLayout', 'escapeRando',
+               'areaRandomization', 'areaLayout', 'escapeRando', 'removeEscapeEnemies',
                'bossRandomization',
                'funCombat', 'funMovement', 'funSuits',
                'layoutPatches', 'variaTweaks', 'nerfedCharge',
@@ -1312,6 +1314,8 @@ def randomizerWebService():
 
     if request.vars.escapeRando == 'on':
         params.append('--escapeRando')
+        if request.vars.removeEscapeEnemies == 'off':
+            params.append('--noRemoveEscapeEnemies')
     elif request.vars.escapeRando == 'random':
         params += ['--escapeRando', 'random']
 
@@ -1412,7 +1416,7 @@ def presetWebService():
         params = json.dumps(params)
         return params
     else:
-        raise HTTP(400, "Preset '{}' not found".format(fullPath))
+        raise HTTP(400, "Preset not found")
 
 def randoPresetWebService():
     # web service to get the content of the rando preset file
@@ -1444,9 +1448,9 @@ def randoPresetWebService():
             params = json.dumps(params)
             return params
         except Exception as e:
-            raise HTTP(400, "Can't load the rando preset: {}".format(preset))
+            raise HTTP(400, "Can't load the rando preset")
     else:
-        raise HTTP(400, "Rando preset '{}' not found".format(fullPath))
+        raise HTTP(400, "Rando preset not found")
 
 def loadRandoPreset(presetFullPath, updateSession):
     with open(presetFullPath) as jsonFile:
@@ -1496,7 +1500,7 @@ def randoParamsWebService():
 
     seed = getInt('seed', False)
     if seed < 0 or seed > 9999999:
-        raiseHttp(400, "Wrong value for seed: {}, must be between 0 and 9999999".format(request.vars[seed]), False)
+        raiseHttp(400, "Wrong value for seed, must be between 0 and 9999999", False)
 
     DB = db.DB()
     params = DB.getRandomizerSeedParams(seed)
@@ -1632,11 +1636,11 @@ class WS(object):
     def factory():
         scope = request.vars.scope
         if scope not in ["area", "item", "common"]:
-            raiseHttp(400, "Unknown scope: {}, must be area/item/common".format(scope), True)
+            raiseHttp(400, "Unknown scope, must be area/item/common", True)
 
         action = request.vars.action
         if action not in ['add', 'remove', 'clear', 'init', 'get', 'save', 'replace', 'randomize']:
-            raiseHttp(400, "Unknown action {}, must be add/remove/clear/init/get/save/randomize".format(action), True)
+            raiseHttp(400, "Unknown action, must be add/remove/clear/init/get/save/randomize", True)
 
         mode = request.vars.mode
         if mode not in ["standard", "seedless", "plando"]:
@@ -1667,7 +1671,7 @@ class WS(object):
         action = request.vars.action
 
         if action not in ['init', 'add', 'remove', 'clear', 'get', 'save', 'replace', 'randomize']:
-            raiseHttp(400, "Unknown action {}, must be init/add/remove/clear/get/save/randomize".format(action), True)
+            raiseHttp(400, "Unknown action, must be init/add/remove/clear/get/save/randomize", True)
 
         if request.vars.escapeTimer != None:
             if re.match("[0-9][0-9]:[0-9][0-9]", request.vars.escapeTimer) == None:
@@ -1691,7 +1695,7 @@ class WS(object):
                               'draygonRoomOut', 'draygonRoomIn', 'phantoonRoomOut', 'phantoonRoomIn',
                               'tourianEscapeRoom4TopRight', 'climbBottomLeft', 'greenBrinstarMainShaftTopLeft',
                               'basementLeft', 'businessCenterMidLeft', 'crabHoleBottomRight']:
-            raiseHttp(400, "Wrong value for {}: {}".format(point, pointValue), True)
+            raiseHttp(400, "Wrong value for {}".format(point), True)
 
     def action(self):
         pass
@@ -1837,12 +1841,12 @@ class WS_common_init(WS):
         if IS_NOT_EMPTY()(preset)[1] is not None:
             raiseHttp(400, "Preset name is empty", True)
         if IS_ALPHANUMERIC()(preset)[1] is not None:
-            raiseHttp(400, "Preset name must be alphanumeric: {}".format(preset), True)
+            raiseHttp(400, "Preset name must be alphanumeric", True)
         if IS_LENGTH(32)(preset)[1] is not None:
-            raiseHttp(400, "Preset name must be max 32 chars: {}".format(preset), True)
+            raiseHttp(400, "Preset name must be max 32 chars", True)
         fullPath = '{}/{}.json'.format(getPresetDir(preset), preset)
         if not os.path.isfile(fullPath):
-            raiseHttp(400, "Unknown preset: {}".format(preset), True)
+            raiseHttp(400, "Unknown preset", True)
 
         if request.vars.mode != 'seedless':
             # ROM (only through file API)
@@ -1851,7 +1855,7 @@ class WS_common_init(WS):
             try:
                 json.loads(request.vars.romJson)
             except:
-                raiseHttp(400, "Wrong value for romJson, must be a JSON string: [{}]".format(request.vars.romJson))
+                raiseHttp(400, "Wrong value for romJson, must be a JSON string")
 
             # ROM file name
             uploadFile = request.vars.fileName
@@ -1864,7 +1868,7 @@ class WS_common_init(WS):
 
         if request.vars.startLocation != None:
             if request.vars.startLocation not in GraphUtils.getStartAccessPointNames():
-                raiseHttp(400, "Wrong value for startLocation: {}".format(request.vars.startLocation), True)
+                raiseHttp(400, "Wrong value for startLocation", True)
 
     def action(self):
         mode = request.vars.mode
@@ -1955,7 +1959,7 @@ class WS_common_save(WS):
             raiseHttp(400, "Missing parameter lock", True)
 
         if request.vars.lock not in ["save", "lock"]:
-            raiseHttp(400, "Wrong value for lock: {}, authorized values: save/lock".format(request.vars.lock), True)
+            raiseHttp(400, "Wrong value for lock, authorized values: save/lock", True)
 
     def action(self):
         if self.session["mode"] != "plando":
@@ -1972,12 +1976,12 @@ class WS_common_randomize(WS):
         super(WS_common_randomize, self).validate()
 
         if request.vars.progressionSpeed not in ["slowest", "slow", "medium", "fast", "fastest", "basic", "VARIAble"]:
-            raiseHttp(400, "Wrong value for progressionSpeed: {}".format(request.vars.progressionSpeed), True)
+            raiseHttp(400, "Wrong value for progressionSpeed", True)
         minorQtyInt = getInt('minorQty', True)
         if minorQtyInt < 7 or minorQtyInt > 100:
             raiseHttp(400, "Wrong value for minorQty, must be between 7 and 100", True)
         if request.vars.energyQty not in ["sparse", "medium", "vanilla"]:
-            raiseHttp(400, "Wrong value for energyQty: {}".format(request.vars.energyQty), True)
+            raiseHttp(400, "Wrong value for energyQty", True)
 
     def action(self):
         if self.session["mode"] != "plando":
@@ -2040,7 +2044,7 @@ class WS_item_add(WS):
         locName = name4isolver(request.vars.locName)
 
         if locName not in ['EnergyTankGauntlet', 'Bomb', 'EnergyTankTerminator', 'ReserveTankBrinstar', 'ChargeBeam', 'MorphingBall', 'EnergyTankBrinstarCeiling', 'EnergyTankEtecoons', 'EnergyTankWaterway', 'EnergyTankBrinstarGate', 'XRayScope', 'Spazer', 'EnergyTankKraid', 'VariaSuit', 'IceBeam', 'EnergyTankCrocomire', 'HiJumpBoots', 'GrappleBeam', 'ReserveTankNorfair', 'SpeedBooster', 'WaveBeam', 'EnergyTankRidley', 'ScrewAttack', 'EnergyTankFirefleas', 'ReserveTankWreckedShip', 'EnergyTankWreckedShip', 'RightSuperWreckedShip', 'GravitySuit', 'EnergyTankMamaturtle', 'PlasmaBeam', 'ReserveTankMaridia', 'SpringBall', 'EnergyTankBotwoon', 'SpaceJump', 'PowerBombCrateriasurface', 'MissileoutsideWreckedShipbottom', 'MissileoutsideWreckedShiptop', 'MissileoutsideWreckedShipmiddle', 'MissileCrateriamoat', 'MissileCrateriabottom', 'MissileCrateriagauntletright', 'MissileCrateriagauntletleft', 'SuperMissileCrateria', 'MissileCrateriamiddle', 'PowerBombgreenBrinstarbottom', 'SuperMissilepinkBrinstar', 'MissilegreenBrinstarbelowsupermissile', 'SuperMissilegreenBrinstartop', 'MissilegreenBrinstarbehindmissile', 'MissilegreenBrinstarbehindreservetank', 'MissilepinkBrinstartop', 'MissilepinkBrinstarbottom', 'PowerBombpinkBrinstar', 'MissilegreenBrinstarpipe', 'PowerBombblueBrinstar', 'MissileblueBrinstarmiddle', 'SuperMissilegreenBrinstarbottom', 'MissileblueBrinstarbottom', 'MissileblueBrinstartop', 'MissileblueBrinstarbehindmissile', 'PowerBombredBrinstarsidehopperroom', 'PowerBombredBrinstarspikeroom', 'MissileredBrinstarspikeroom', 'MissileKraid', 'Missilelavaroom', 'MissilebelowIceBeam', 'MissileaboveCrocomire', 'MissileHiJumpBoots', 'EnergyTankHiJumpBoots', 'PowerBombCrocomire', 'MissilebelowCrocomire', 'MissileGrappleBeam', 'MissileNorfairReserveTank', 'MissilebubbleNorfairgreendoor', 'MissilebubbleNorfair', 'MissileSpeedBooster', 'MissileWaveBeam', 'MissileGoldTorizo', 'SuperMissileGoldTorizo', 'MissileMickeyMouseroom', 'MissilelowerNorfairabovefireflearoom', 'PowerBomblowerNorfairabovefireflearoom', 'PowerBombPowerBombsofshame', 'MissilelowerNorfairnearWaveBeam', 'MissileWreckedShipmiddle', 'MissileGravitySuit', 'MissileWreckedShiptop', 'SuperMissileWreckedShipleft', 'MissilegreenMaridiashinespark', 'SuperMissilegreenMaridia', 'MissilegreenMaridiatatori', 'SuperMissileyellowMaridia', 'MissileyellowMaridiasupermissile', 'MissileyellowMaridiafalsewall', 'MissileleftMaridiasandpitroom', 'MissilerightMaridiasandpitroom', 'PowerBombrightMaridiasandpitroom', 'MissilepinkMaridia', 'SuperMissilepinkMaridia', 'MissileDraygon', 'Kraid', 'Ridley', 'Phantoon', 'Draygon', 'MotherBrain']:
-            raiseHttp(400, "Unknown location name: {}".format(request.vars.locName), True)
+            raiseHttp(400, "Unknown location name", True)
 
         request.vars.locName = locName
 
@@ -2049,7 +2053,7 @@ class WS_item_add(WS):
             itemName = "Nothing"
 
         if itemName not in [None, 'ETank', 'Missile', 'Super', 'PowerBomb', 'Bomb', 'Charge', 'Ice', 'HiJump', 'SpeedBooster', 'Wave', 'Spazer', 'SpringBall', 'Varia', 'Plasma', 'Grapple', 'Morph', 'Reserve', 'Gravity', 'XRayScope', 'SpaceJump', 'ScrewAttack', 'Nothing', 'NoEnergy', 'Boss']:
-            raiseHttp(400, "Unknown item name: {}".format(request.vars.itemName), True)
+            raiseHttp(400, "Unknown item name", True)
 
     def action(self):
         item = request.vars.itemName
@@ -2327,7 +2331,7 @@ def extStats():
             with open(fullPath) as jsonFile:
                 randoPreset = json.load(jsonFile)
         except Exception as e:
-            raise HTTP(400, "Can't load the rando preset: {}: {}".format(randoPreset, e))
+            raise HTTP(400, "Can't load the rando preset: {}".format(e))
 
         # load skill preset
         fullPath = '{}/{}.json'.format(getPresetDir(skillPreset), skillPreset)
@@ -2335,7 +2339,7 @@ def extStats():
             skillPresetContent = PresetLoader.factory(fullPath).params
             completePreset(skillPresetContent)
         except Exception as e:
-            raise HTTP(400, "Error loading the preset {}: {}".format(skillPreset, e))
+            raise HTTP(400, "Error loading the preset: {}".format(e))
 
         parameters = {
             'preset': skillPreset,
@@ -2494,7 +2498,7 @@ def progSpeedStats():
             with open(fullPath) as jsonFile:
                 randoPreset = json.load(jsonFile)
         except Exception as e:
-            raise HTTP(400, "Can't load the rando preset: {}: {}".format(randoPreset, e))
+            raise HTTP(400, "Can't load the rando preset: {}".format(e))
 
         parameters = {
             'preset': randoPreset['preset'] if 'preset' in randoPreset else 'regular',
@@ -2583,3 +2587,155 @@ def progSpeedStats():
     majorsSplit = ['Major', 'Full']
 
     return dict(randoPresets=randoPresets, majorsSplit=majorsSplit, progSpeedStats=progSpeedStats)
+
+ipsBasePath = "plandository/"
+def plandorepo():
+    response.title = 'Super Metroid VARIA Plandository'
+
+    # get plando list
+    DB = db.DB()
+    plandos = DB.getPlandos()
+    DB.close()
+
+    return dict(plandos=plandos, math=math, re=re)
+
+def plandoRateWebService():
+    print("plandoRateWebService")
+
+    if request.vars.plando == None:
+        raiseHttp(400, "Missing parameter plando")
+    plando = request.vars.plando
+
+    if request.vars.rate == None:
+        raiseHttp(400, "Missing parameter rate")
+    rate = request.vars.rate
+
+    if IS_LENGTH(maxsize=32, minsize=1)(plando)[1] is not None:
+        raise HTTP(400, "Plando name must be between 1 and 32 characters")
+
+    if IS_MATCH('^[a-zA-Z0-9 -_]*$')(plando)[1] is not None:
+        raise HTTP(400, "Plando name can only contain [a-zA-Z0-9 -_]")
+
+    if IS_INT_IN_RANGE(1, 6)(rate)[1] is not None:
+        raise HTTP(400, "Rate name must be between 1 and 5")
+    rate = int(rate)
+    ip = request.client
+
+    DB = db.DB()
+    already = DB.alreadyRated(plando, ip)
+    if already != None and len(already) > 0:
+        DB.close()
+        # display message in flash box
+        msg = "{}: rating already done".format(plando)
+        raise HTTP(400, msg)
+    else:
+        DB.addRating(plando, rate, ip)
+        newRate = DB.getPlandoRate(plando)
+        DB.close()
+        if newRate == None:
+            raiseHttp(400, "Can't get new rate")
+        else:
+            newRate = float(newRate[0][0])
+        data = {
+            "msg": "{}: rating updated".format(plando),
+            "purePlandoName": re.sub('[\W_]+', '', plando),
+            "rate": newRate
+        }
+        return json.dumps(data)
+
+def downloadPlandoWebService():
+    if request.vars.plando == None:
+        raiseHttp(400, "Missing parameter plando")
+    plandoName = request.vars.plando
+
+    if IS_LENGTH(maxsize=32, minsize=1)(plandoName)[1] is not None:
+        raise HTTP(400, "Plando name must be between 1 and 32 characters")
+
+    if IS_MATCH('^[a-zA-Z0-9 -_]*$')(plandoName)[1] is not None:
+        raise HTTP(400, "Plando name can only contain [a-zA-Z0-9 -_]")
+
+    ipsFileName = os.path.join(ipsBasePath, "{}.ips".format(plandoName))
+    with open(ipsFileName, 'rb') as ipsFile:
+        ipsData = ipsFile.read()
+
+    DB = db.DB()
+    maxSize = DB.getPlandoIpsMaxSize(plandoName)
+    DB.close()
+
+    data = {
+        "ips": base64.b64encode(ipsData).decode(),
+        "fileName": "{}.sfc".format(plandoName),
+        "maxSize": maxSize
+    }
+
+    return json.dumps(data)
+
+def removeHtmlTags(text):
+    clean = re.compile('<.*?>')
+    return re.sub(clean, '', text)
+
+def generateUpdateKey():
+    # 8 chars string
+    stringLength = 8
+    letters = string.ascii_letters + string.digits
+    return ''.join(random.choice(letters) for i in range(stringLength))
+
+def uploadPlandoWebService():
+    print("uploadPlandoWebService")
+
+    for param in ["author", "plandoName", "longDesc", "preset", "romData"]:
+        if request.vars[param] == None:
+            raiseHttp(400, "Missing parameter {}".format(param))
+
+    for param in ["author", "plandoName", "preset"]:
+        if IS_LENGTH(maxsize=32, minsize=1)(request.vars[param])[1] is not None:
+            raise HTTP(400, "{} must be between 1 and 32 characters".format(param))
+
+    plandoName = request.vars.plandoName
+    if IS_MATCH('^[a-zA-Z0-9 -_]*$')(plandoName)[1] is not None:
+        raise HTTP(400, "Plando name can only contain [a-zA-Z0-9 -_]")
+
+    author = request.vars.author
+    longDesc = removeHtmlTags(request.vars.longDesc)
+    preset = request.vars.preset
+
+    romDataJson = request.vars.romData
+    romDataRaw = json.loads(romDataJson)
+    # everything is string in json, cast to int
+    romData = {}
+    for addr in romDataRaw:
+        romData[int(addr)] = int(romDataRaw[addr])
+
+    # dict: address -> value, transform it dict: address -> [values]
+    ipsData = {}
+    prevAddr = -0xff
+    curRecord = []
+    curRecordAddr = -1
+    for addr in sorted(romData):
+        if addr == prevAddr + 1:
+            curRecord.append(romData[addr])
+        else:
+            if len(curRecord) > 0:
+                # save current record
+                ipsData[curRecordAddr] = bytearray(curRecord)
+            # start a new one
+            curRecordAddr = addr
+            curRecord = [romData[addr]]
+        prevAddr = addr
+    # save last record
+    ipsData[curRecordAddr] = bytearray(curRecord)
+
+    # generate ips using the records
+    ipsPatch = IPS_Patch(ipsData)
+    maxSize = ipsPatch.max_size
+
+    # store ips in the repository
+    ipsPatch.save(os.path.join(ipsBasePath, "{}.ips".format(plandoName)))
+
+    updateKey = generateUpdateKey()
+
+    DB = db.DB()
+    DB.insertPlando((plandoName, author, longDesc, preset, updateKey, maxSize))
+    DB.close()
+
+    return json.dumps(updateKey)

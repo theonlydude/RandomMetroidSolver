@@ -392,18 +392,18 @@ window.onload = function(){
 
             var reader = new FileReader();
             reader.onload = function(e) {
-		// check sfc or smc extention
+                // check sfc or smc extention
                 var re = /(?:\.([^.]+))?$/;
-		var ext = re.exec(file.name)[1];
+                var ext = re.exec(file.name)[1];
                 console.log("ext: "+ext)
-                if( ! (ext === "sfc" || ext === "smc") ) {
+                if( ! (ext === "sfc" || ext === "smc" || ext === "SFC" || ext === "SMC") ) {
                     document.getElementById("uploadFile").value = "";
                     alert("wrong extension: "+ext);
                     return false;
                 }
 
                 var fileSize = file.size;
-		if( fileSize > 4*1024*1024 ) {
+                if( fileSize > 4*1024*1024 ) {
                     document.getElementById("uploadFile").value = "";
                     alert("wrong rom file size: "+fileSize.toString());
                     return false;
@@ -767,15 +767,16 @@ def displayCheckbox(id, defaultTrue=False):
     <div class="menu">
     <table class="full menuTable">
       <tr>
-	<td>{{=A("Home", _href=URL(f="home"), _class="menu")}}</td>
-	<td>{{=A("Presets", _href=URL(f="presets"), _class="menu")}}</td>
-	<td>{{=A("Randomizer", _href=URL(f="randomizer"), _class="menu")}}</td>
-	<td>{{=A("Solver", _href=URL(f="solver"), _class="menu")}}</td>
-	<td>{{=A("Trackers", _href=URL(f="tracker"), _class="menu")}}</td>
-	<td>{{=A("Plandomizer", _href=URL(f="plando"), _class="menu")}}</td>
-	<td class="menu_selected">{{=A("Customizer", _href=URL(f="customizer"), _class="menu")}}</td>
-	<td>{{=A("Statistics", _href=URL(f="extStats"), _class="menu")}}</td>
-	<td>{{=A("Information & Contact", _href=URL(f="infos"), _class="menu")}}</td>
+        <td>{{=A("Home", _href=URL(f="home"), _class="menu")}}</td>
+        <td>{{=A("Presets", _href=URL(f="presets"), _class="menu")}}</td>
+        <td>{{=A("Randomizer", _href=URL(f="randomizer"), _class="menu")}}</td>
+        <td>{{=A("Solver", _href=URL(f="solver"), _class="menu")}}</td>
+        <td>{{=A("Trackers", _href=URL(f="tracker"), _class="menu")}}</td>
+        <td>{{=A("Plandomizer", _href=URL(f="plando"), _class="menu")}}</td>
+        <td>{{=A("Plandository", _href=URL(f="plandorepo"), _class="menu")}}</td>
+        <td class="menu_selected">{{=A("Customizer", _href=URL(f="customizer"), _class="menu")}}</td>
+        <td>{{=A("Statistics", _href=URL(f="extStats"), _class="menu")}}</td>
+        <td>{{=A("Information & Contact", _href=URL(f="infos"), _class="menu")}}</td>
       </tr>
     </table>
     </div>
@@ -790,8 +791,8 @@ def displayCheckbox(id, defaultTrue=False):
     <form id="mainform" name="mainform" onsubmit="doSubmit(); return false;">
       <div class="tabcontent">
         <div class="row">
-	  <div class="column">
-	    <p>Add palette randomization, use custom Samus sprite, apply patches to an already randomized VARIA seed, or a vanilla Super Metroid ROM.</p>
+          <div class="column">
+            <p>Add palette randomization, use custom Samus sprite, apply patches to an already randomized VARIA seed, or a vanilla Super Metroid ROM.</p>
             <table class="full">
               <colgroup><col class="half" /><col class="half" /></colgroup>
               <tr>
@@ -802,49 +803,49 @@ def displayCheckbox(id, defaultTrue=False):
             </table>
             <h4>Colors Randomization</h4>
             <p>
-	      Randomize the colors of Samus, beams, levels, enemies and bosses.
+              Randomize the colors of Samus, beams, levels, enemies and bosses.
             </p>
-	    <table class="full">
-	      <tr>
-	        <td class="third">{{displayCheckbox("colorsRandomization")}}Colors Randomization</td>
-		<td class="full"><span id="textLeft" class="floatleft">-180</span><div id="degree_slider_range" class="sixty floatleft"></div><span id="textRight">180</span></td>
-		<td><button id="invert" type="button" onclick="invertFunc()">Invert</button></td>
+            <table class="full">
+              <tr>
+                <td class="third">{{displayCheckbox("colorsRandomization")}}Colors Randomization</td>
+                <td class="full"><span id="textLeft" class="floatleft">-180</span><div id="degree_slider_range" class="sixty floatleft"></div><span id="textRight">180</span></td>
+                <td><button id="invert" type="button" onclick="invertFunc()">Invert</button></td>
                 <td><button type="button" onclick="startTheTour(1)" id="colorsRandomizationStep">?</button></td>
-	      </tr>
-	      <tr>
-		<td colspan="4">{{displayCheckbox("globalShift")}}<span id="globalShiftText">Use the same degree to randomize all the elements</span></td>
-	      </tr>
+              </tr>
+              <tr>
+                <td colspan="4">{{displayCheckbox("globalShift")}}<span id="globalShiftText">Use the same degree to randomize all the elements</span></td>
+              </tr>
             </table>
-	    <p>
-	      Select the elements to colors randomize.
-	    </p>
-	      <table class="full">
-		<tr>
-	          <td class="third">{{displayCheckbox("suitsPalettes")}}<span id="suitsPalettesText">Samus</span></td>
-	          <td class="third">{{displayCheckbox("beamsPalettes")}}<span id="beamsPalettesText">Beams</span></td>
-	          <td class="third">{{displayCheckbox("tilesPalettes")}}<span id="tilesPalettesText">Levels</span></td>
-		</tr>
-		<tr>
-	          <td class="third">{{displayCheckbox("enemiesPalettes")}}<span id="enemiesPalettesText">Enemies</span></td>
-	          <td class="third">{{displayCheckbox("bossesPalettes")}}<span id="bossesPalettesText">Bosses</span></td>
-		  <td class="third"></td>
-		</tr>
-	      </table>
-	    <h4>Custom Sprites</h4>
-	    <p>
-	      <table class="full">
-		<colgroup><col class="check" /><col class="full" /></colgroup>
-		<tr>
-	          <td>{{displayCheckbox("customSpriteEnable")}}</td>
-		  <td><span id="customSpriteEnableText">Replace Samus sprite with a custom one.</span></td>
+            <p>
+              Select the elements to colors randomize.
+            </p>
+              <table class="full">
+                <tr>
+                  <td class="third">{{displayCheckbox("suitsPalettes")}}<span id="suitsPalettesText">Samus</span></td>
+                  <td class="third">{{displayCheckbox("beamsPalettes")}}<span id="beamsPalettesText">Beams</span></td>
+                  <td class="third">{{displayCheckbox("tilesPalettes")}}<span id="tilesPalettesText">Levels</span></td>
+                </tr>
+                <tr>
+                  <td class="third">{{displayCheckbox("enemiesPalettes")}}<span id="enemiesPalettesText">Enemies</span></td>
+                  <td class="third">{{displayCheckbox("bossesPalettes")}}<span id="bossesPalettesText">Bosses</span></td>
+                  <td class="third"></td>
+                </tr>
+              </table>
+            <h4>Custom Sprites</h4>
+            <p>
+              <table class="full">
+                <colgroup><col class="check" /><col class="full" /></colgroup>
+                <tr>
+                  <td>{{displayCheckbox("customSpriteEnable")}}</td>
+                  <td><span id="customSpriteEnableText">Replace Samus sprite with a custom one.</span></td>
                   <td><button type="button" onclick="startTheTour(2)" id="customSpriteStep">?</button></td>
-		</tr>
-		<tr>
-		  <td></td>
-		  <td>
-		    <div class="border">
-		      <select class="filldropdown" id="customSprite" name="customSprite">
-			<optgroup label="Samus">
+                </tr>
+                <tr>
+                  <td></td>
+                  <td>
+                    <div class="border">
+                      <select class="filldropdown" id="customSprite" name="customSprite">
+                        <optgroup label="Samus">
 {{
   group = "Samus"
   for (key, value) in sorted(customSprites.items(), key=lambda x: x[1]['index']):
@@ -857,95 +858,95 @@ def displayCheckbox(id, defaultTrue=False):
     pass
 }}
                         </optgroup>
-		      </select>
-		    </div>
-		  <td>
-		</tr>
-	      </table>
-	    </p>
-	    <h4>Patches<span class="right"><button type="button" onclick="startTheTour(3)" id="patchesStep">?</button></span></h4>
-	    <p>
-	      Patches to customize your ROM.
-	    </p>
+                      </select>
+                    </div>
+                  <td>
+                </tr>
+              </table>
+            </p>
+            <h4>Patches<span class="right"><button type="button" onclick="startTheTour(3)" id="patchesStep">?</button></span></h4>
+            <p>
+              Patches to customize your ROM.
+            </p>
 
-	      <table class="full">
-		<colgroup><col class="quarter" /><col class="threequarter" /><col class="check" /></colgroup>
-		<tr><td colspan="2"><h5 class="center"><b>Game comfort</b></h5></td><td></td></tr>
-	      </table>
-	      <table class="full">
-		<colgroup><col class="half" /><col class="half" /></colgroup>
-		<tr id="itemsoundsStep">
-		  <td colspan="2">
-		    {{displayCheckbox("itemsounds")}}
-		    <span id="itemsoundsText">Remove fanfare when picking up an item</span>
-		  </td>
+              <table class="full">
+                <colgroup><col class="quarter" /><col class="threequarter" /><col class="check" /></colgroup>
+                <tr><td colspan="2"><h5 class="center"><b>Game comfort</b></h5></td><td></td></tr>
+              </table>
+              <table class="full">
+                <colgroup><col class="half" /><col class="half" /></colgroup>
+                <tr id="itemsoundsStep">
+                  <td colspan="2">
+                    {{displayCheckbox("itemsounds")}}
+                    <span id="itemsoundsText">Remove fanfare when picking up an item</span>
+                  </td>
                   <td><button type="button" onclick="startTheTour(4)">?</button></td>
-		</tr>
-		<tr id="ElevatorDoorsStep">
-		  <td colspan="2">
-		    {{displayCheckbox("elevators_doors_speed")}}
-		    <span id="elevators_doors_speedText">Accelerate doors and elevators transitions</span>
-		  </td>
+                </tr>
+                <tr id="ElevatorDoorsStep">
+                  <td colspan="2">
+                    {{displayCheckbox("elevators_doors_speed")}}
+                    <span id="elevators_doors_speedText">Accelerate doors and elevators transitions</span>
+                  </td>
                   <td><button type="button" onclick="startTheTour(5)">?</button></td>
-		</tr>
-		<tr id="spinjumprestartStep">
-		  <td colspan="2">
-		    {{displayCheckbox("spinjumprestart")}}
-		    <span id="spinjumprestartText">Spin jump restart (a.k.a. Respin)</span>
-		  </td>
+                </tr>
+                <tr id="spinjumprestartStep">
+                  <td colspan="2">
+                    {{displayCheckbox("spinjumprestart")}}
+                    <span id="spinjumprestartText">Spin jump restart (a.k.a. Respin)</span>
+                  </td>
                   <td><button type="button" onclick="startTheTour(6)">?</button></td>
-		</tr>
-		<tr id="rando_speedStep">
-		  <td colspan="2">
-		    {{displayCheckbox("rando_speed")}}
-		     <span id="rando_speedText">Momentum conservation (a.k.a. Speedkeep)</span>
-		  </td>
+                </tr>
+                <tr id="rando_speedStep">
+                  <td colspan="2">
+                    {{displayCheckbox("rando_speed")}}
+                     <span id="rando_speedText">Momentum conservation (a.k.a. Speedkeep)</span>
+                  </td>
                   <td><button type="button" onclick="startTheTour(7)">?</button></td>
-		</tr>
-	      </table>
-	      <table class="full">
-		<colgroup><col class="quarter" /><col class="threequarter" /><col class="check" /></colgroup>
-		<tr><td colspan="2"><h5 class="center"><b>Miscellaneous</b></h5></td><td></td></tr>
-	      </table>
-	      <table class="full">
-		<colgroup><col class="half" /><col class="half" /></colgroup>
-		<tr id="No_MusicStep">
-		  <td colspan="2">
-		    {{displayCheckbox("No_Music")}}
-		    <span id="No_MusicText">Disable background music</span>
-		  </td>
+                </tr>
+              </table>
+              <table class="full">
+                <colgroup><col class="quarter" /><col class="threequarter" /><col class="check" /></colgroup>
+                <tr><td colspan="2"><h5 class="center"><b>Miscellaneous</b></h5></td><td></td></tr>
+              </table>
+              <table class="full">
+                <colgroup><col class="half" /><col class="half" /></colgroup>
+                <tr id="No_MusicStep">
+                  <td colspan="2">
+                    {{displayCheckbox("No_Music")}}
+                    <span id="No_MusicText">Disable background music</span>
+                  </td>
                   <td><button type="button" onclick="startTheTour(8)">?</button></td>
-		</tr>
-		<tr id="random_musicStep">
-		  <td colspan="2">
-		    {{displayCheckbox("random_music")}}
-		    <span id="random_musicText">Randomize background music</span>
-		  </td>
+                </tr>
+                <tr id="random_musicStep">
+                  <td colspan="2">
+                    {{displayCheckbox("random_music")}}
+                    <span id="random_musicText">Randomize background music</span>
+                  </td>
                   <td><button type="button" onclick="startTheTour(9)">?</button></td>
-		</tr>
-		<tr id="AimAnyButtonStep">
-		  <td colspan="2">
-		    {{displayCheckbox("AimAnyButton")}}
-		    <span id="AimAnyButtonText">Allows the aim buttons to be assigned to any button</span>
-		  </td>
+                </tr>
+                <tr id="AimAnyButtonStep">
+                  <td colspan="2">
+                    {{displayCheckbox("AimAnyButton")}}
+                    <span id="AimAnyButtonText">Allows the aim buttons to be assigned to any button</span>
+                  </td>
                   <td><button type="button" onclick="startTheTour(10)">?</button></td>
-		</tr>
-		<tr id="max_ammo_displayStep">
-		  <td colspan="2">
-		    {{displayCheckbox("max_ammo_display")}}
-		    <span id="max_ammo_displayText">Max Ammo Display</span>
-		  </td>
+                </tr>
+                <tr id="max_ammo_displayStep">
+                  <td colspan="2">
+                    {{displayCheckbox("max_ammo_display")}}
+                    <span id="max_ammo_displayText">Max Ammo Display</span>
+                  </td>
                   <td><button type="button" onclick="startTheTour(11)">?</button></td>
-		</tr>
-		<tr id="supermetroid_msu1Step">
-		  <td colspan="2">
-		    {{displayCheckbox("supermetroid_msu1")}}
-		    <span id="supermetroid_msu1Text">Play music with MSU1 chip on SD2SNES</span>
-		  </td>
+                </tr>
+                <tr id="supermetroid_msu1Step">
+                  <td colspan="2">
+                    {{displayCheckbox("supermetroid_msu1")}}
+                    <span id="supermetroid_msu1Text">Play music with MSU1 chip on SD2SNES</span>
+                  </td>
                   <td><button type="button" onclick="startTheTour(12)">?</button></td>
-		</tr>
-	      </table>
-	  </div>
+                </tr>
+              </table>
+          </div>
         </div>
         {{=INPUT(_type="submit", _value="customize", _id="submitBtn", _class="btn btn-default buttonRandom")}}
     </form>

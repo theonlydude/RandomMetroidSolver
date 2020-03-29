@@ -197,6 +197,9 @@ class DB:
             self.dbAvailable = False
 
     def getUsage(self, table, weeks):
+        if self.dbAvailable == False:
+            return None
+
         sql = "select date(action_time), count(*) from {} where action_time > DATE_SUB(CURDATE(), INTERVAL %d WEEK) group by date(action_time) order by 1;".format(table)
         return self.execSelect(sql, (weeks,))
 
@@ -207,6 +210,9 @@ class DB:
         return self.getUsage('randomizer', weeks)
 
     def getSolverPresets(self, weeks):
+        if self.dbAvailable == False:
+            return None
+
         sql = "select distinct(sp.preset) from solver s join solver_params sp on s.id = sp.solver_id where s.action_time > DATE_SUB(CURDATE(), INTERVAL %d WEEK);"
         presets = self.execSelect(sql, (weeks,))
         if presets == None:
@@ -224,14 +230,23 @@ class DB:
         return (presets, self.execSelect(sql))
 
     def getSolverResults(self, weeks):
+        if self.dbAvailable == False:
+            return None
+
         sql = "select date(s.action_time), sr.return_code, count(*) from solver s join solver_result sr on s.id = sr.solver_id where s.action_time > DATE_SUB(CURDATE(), INTERVAL %d WEEK) group by date(s.action_time), sr.return_code order by 1;"
         return self.execSelect(sql, (weeks,))
 
     def getSolverDurations(self, weeks):
+        if self.dbAvailable == False:
+            return None
+
         sql = "select s.action_time, sr.duration from solver s join solver_result sr on s.id = sr.solver_id where s.action_time > DATE_SUB(CURDATE(), INTERVAL %d WEEK) order by 1;"
         return self.execSelect(sql, (weeks,))
 
     def getRandomizerPresets(self, weeks):
+        if self.dbAvailable == False:
+            return None
+
         sql = "select distinct(value) from randomizer r join randomizer_params rp on r.id = rp.randomizer_id where rp.name = 'preset' and r.action_time > DATE_SUB(CURDATE(), INTERVAL %d WEEK);"
         presets = self.execSelect(sql, (weeks,))
         if presets == None:
@@ -249,10 +264,16 @@ class DB:
         return (presets, self.execSelect(sql))
 
     def getRandomizerDurations(self, weeks):
+        if self.dbAvailable == False:
+            return None
+
         sql = "select r.action_time, rr.duration from randomizer r join randomizer_result rr on r.id = rr.randomizer_id where r.action_time > DATE_SUB(CURDATE(), INTERVAL %d WEEK) order by 1;"
         return self.execSelect(sql, (weeks,))
 
     def getSolverData(self, weeks):
+        if self.dbAvailable == False:
+            return None
+
         # return all data csv style
         sql = """select sr.return_code, s.id, s.action_time,
 sp.romFileName, sp.preset, sp.difficultyTarget, sp.pickupStrategy,
@@ -271,6 +292,9 @@ order by s.id;"""
         return (header, self.execSelect(sql, (weeks,)))
 
     def getRandomizerData(self, weeks):
+        if self.dbAvailable == False:
+            return None
+
         sql = """select rr.return_code,
 r.id, r.action_time, rr.return_code, lpad(round(rr.duration, 2), 5, '0'), rr.error_msg,
 rp.params
@@ -304,6 +328,9 @@ order by r.id;"""
         return (header, outData, paramsHead + sorted(list(paramsSet)))
 
     def getRandomizerSeedParams(self, randomizer_id):
+        if self.dbAvailable == False:
+            return None
+
         sql = "select group_concat(\"--\", name, \" \", case when value = 'None' then \"\" else value end order by name separator ' ') from randomizer_params where randomizer_id = %d;"
         data = self.execSelect(sql, (randomizer_id,))
         if data == None:
@@ -312,6 +339,9 @@ order by r.id;"""
             return data[0][0]
 
     def getGeneratedSeeds(self, preset):
+        if self.dbAvailable == False:
+            return None
+
         sql = "select count(*) from randomizer_params where name = 'preset' and value = '%s';"
         data = self.execSelect(sql, (preset,))
         if data == None:
@@ -320,6 +350,9 @@ order by r.id;"""
             return data[0][0]
 
     def getPresetLastActionDate(self, preset):
+        if self.dbAvailable == False:
+            return None
+
         sql = "select max(action_time) from preset_action where preset = '%s';"
         data = self.execSelect(sql, (preset,))
         if data == None:
@@ -328,6 +361,9 @@ order by r.id;"""
         return data
 
     def getISolver(self, weeks):
+        if self.dbAvailable == False:
+            return None
+
         sql = "select distinct(preset) from isolver where init_time > DATE_SUB(CURDATE(), INTERVAL %d WEEK);"
         presets = self.execSelect(sql, (weeks,))
         if presets == None:
@@ -345,6 +381,9 @@ order by r.id;"""
         return (presets, self.execSelect(sql))
 
     def getISolverData(self, weeks):
+        if self.dbAvailable == False:
+            return None
+
         # return all data csv style
         sql = """select 0, init_time, preset, romFileName
 from isolver
@@ -356,6 +395,9 @@ order by init_time;"""
 
     @staticmethod
     def dumpExtStatsItems(parameters, locsItems, sqlFile):
+        if self.dbAvailable == False:
+            return None
+
         sql = """insert into extended_stats (version, preset, area, boss, majorsSplit, progSpeed, morphPlacement, suitsRestriction, progDiff, superFunMovement, superFunCombat, superFunSuit, gravityBehaviour, nerfedCharge, maxDifficulty, startAP, count)
 values
 (%d, '%s', %s, %s, '%s', '%s', '%s', %s, '%s', %s, %s, %s, '%s', %s, '%s', '%s', 1)
@@ -376,6 +418,9 @@ set @last_id = last_insert_id();
 
     @staticmethod
     def dumpExtStatsSolver(difficulty, techniques, solverStats, step, sqlFile):
+        if self.dbAvailable == False:
+            return None
+
         # use @last_id defined by the randomizer
 
         if step == 1:
@@ -408,6 +453,9 @@ set @last_id = last_insert_id();
             sqlFile.write("commit;\n")
 
     def getExtStat(self, parameters):
+        if self.dbAvailable == False:
+            return (None, None, None, None)
+
         sqlItems = """select sum(e.count), i.item, round(100*sum(i.EnergyTankGauntlet)/sum(e.count), 1), round(100*sum(i.Bomb)/sum(e.count), 1), round(100*sum(i.EnergyTankTerminator)/sum(e.count), 1), round(100*sum(i.ReserveTankBrinstar)/sum(e.count), 1), round(100*sum(i.ChargeBeam)/sum(e.count), 1), round(100*sum(i.MorphingBall)/sum(e.count), 1), round(100*sum(i.EnergyTankBrinstarCeiling)/sum(e.count), 1), round(100*sum(i.EnergyTankEtecoons)/sum(e.count), 1), round(100*sum(i.EnergyTankWaterway)/sum(e.count), 1), round(100*sum(i.EnergyTankBrinstarGate)/sum(e.count), 1), round(100*sum(i.XRayScope)/sum(e.count), 1), round(100*sum(i.Spazer)/sum(e.count), 1), round(100*sum(i.EnergyTankKraid)/sum(e.count), 1), round(100*sum(i.Kraid)/sum(e.count), 1), round(100*sum(i.VariaSuit)/sum(e.count), 1), round(100*sum(i.IceBeam)/sum(e.count), 1), round(100*sum(i.EnergyTankCrocomire)/sum(e.count), 1), round(100*sum(i.HiJumpBoots)/sum(e.count), 1), round(100*sum(i.GrappleBeam)/sum(e.count), 1), round(100*sum(i.ReserveTankNorfair)/sum(e.count), 1), round(100*sum(i.SpeedBooster)/sum(e.count), 1), round(100*sum(i.WaveBeam)/sum(e.count), 1), round(100*sum(i.Ridley)/sum(e.count), 1), round(100*sum(i.EnergyTankRidley)/sum(e.count), 1), round(100*sum(i.ScrewAttack)/sum(e.count), 1), round(100*sum(i.EnergyTankFirefleas)/sum(e.count), 1), round(100*sum(i.ReserveTankWreckedShip)/sum(e.count), 1), round(100*sum(i.EnergyTankWreckedShip)/sum(e.count), 1), round(100*sum(i.Phantoon)/sum(e.count), 1), round(100*sum(i.RightSuperWreckedShip)/sum(e.count), 1), round(100*sum(i.GravitySuit)/sum(e.count), 1), round(100*sum(i.EnergyTankMamaturtle)/sum(e.count), 1), round(100*sum(i.PlasmaBeam)/sum(e.count), 1), round(100*sum(i.ReserveTankMaridia)/sum(e.count), 1), round(100*sum(i.SpringBall)/sum(e.count), 1), round(100*sum(i.EnergyTankBotwoon)/sum(e.count), 1), round(100*sum(i.Draygon)/sum(e.count), 1), round(100*sum(i.SpaceJump)/sum(e.count), 1), round(100*sum(i.MotherBrain)/sum(e.count), 1), round(100*sum(i.PowerBombCrateriasurface)/sum(e.count), 1), round(100*sum(i.MissileoutsideWreckedShipbottom)/sum(e.count), 1), round(100*sum(i.MissileoutsideWreckedShiptop)/sum(e.count), 1), round(100*sum(i.MissileoutsideWreckedShipmiddle)/sum(e.count), 1), round(100*sum(i.MissileCrateriamoat)/sum(e.count), 1), round(100*sum(i.MissileCrateriabottom)/sum(e.count), 1), round(100*sum(i.MissileCrateriagauntletright)/sum(e.count), 1), round(100*sum(i.MissileCrateriagauntletleft)/sum(e.count), 1), round(100*sum(i.SuperMissileCrateria)/sum(e.count), 1), round(100*sum(i.MissileCrateriamiddle)/sum(e.count), 1), round(100*sum(i.PowerBombgreenBrinstarbottom)/sum(e.count), 1), round(100*sum(i.SuperMissilepinkBrinstar)/sum(e.count), 1), round(100*sum(i.MissilegreenBrinstarbelowsupermissile)/sum(e.count), 1), round(100*sum(i.SuperMissilegreenBrinstartop)/sum(e.count), 1), round(100*sum(i.MissilegreenBrinstarbehindmissile)/sum(e.count), 1), round(100*sum(i.MissilegreenBrinstarbehindreservetank)/sum(e.count), 1), round(100*sum(i.MissilepinkBrinstartop)/sum(e.count), 1), round(100*sum(i.MissilepinkBrinstarbottom)/sum(e.count), 1), round(100*sum(i.PowerBombpinkBrinstar)/sum(e.count), 1), round(100*sum(i.MissilegreenBrinstarpipe)/sum(e.count), 1), round(100*sum(i.PowerBombblueBrinstar)/sum(e.count), 1), round(100*sum(i.MissileblueBrinstarmiddle)/sum(e.count), 1), round(100*sum(i.SuperMissilegreenBrinstarbottom)/sum(e.count), 1), round(100*sum(i.MissileblueBrinstarbottom)/sum(e.count), 1), round(100*sum(i.MissileblueBrinstartop)/sum(e.count), 1), round(100*sum(i.MissileblueBrinstarbehindmissile)/sum(e.count), 1), round(100*sum(i.PowerBombredBrinstarsidehopperroom)/sum(e.count), 1), round(100*sum(i.PowerBombredBrinstarspikeroom)/sum(e.count), 1), round(100*sum(i.MissileredBrinstarspikeroom)/sum(e.count), 1), round(100*sum(i.MissileKraid)/sum(e.count), 1), round(100*sum(i.Missilelavaroom)/sum(e.count), 1), round(100*sum(i.MissilebelowIceBeam)/sum(e.count), 1), round(100*sum(i.MissileaboveCrocomire)/sum(e.count), 1), round(100*sum(i.MissileHiJumpBoots)/sum(e.count), 1), round(100*sum(i.EnergyTankHiJumpBoots)/sum(e.count), 1), round(100*sum(i.PowerBombCrocomire)/sum(e.count), 1), round(100*sum(i.MissilebelowCrocomire)/sum(e.count), 1), round(100*sum(i.MissileGrappleBeam)/sum(e.count), 1), round(100*sum(i.MissileNorfairReserveTank)/sum(e.count), 1), round(100*sum(i.MissilebubbleNorfairgreendoor)/sum(e.count), 1), round(100*sum(i.MissilebubbleNorfair)/sum(e.count), 1), round(100*sum(i.MissileSpeedBooster)/sum(e.count), 1), round(100*sum(i.MissileWaveBeam)/sum(e.count), 1), round(100*sum(i.MissileGoldTorizo)/sum(e.count), 1), round(100*sum(i.SuperMissileGoldTorizo)/sum(e.count), 1), round(100*sum(i.MissileMickeyMouseroom)/sum(e.count), 1), round(100*sum(i.MissilelowerNorfairabovefireflearoom)/sum(e.count), 1), round(100*sum(i.PowerBomblowerNorfairabovefireflearoom)/sum(e.count), 1), round(100*sum(i.PowerBombPowerBombsofshame)/sum(e.count), 1), round(100*sum(i.MissilelowerNorfairnearWaveBeam)/sum(e.count), 1), round(100*sum(i.MissileWreckedShipmiddle)/sum(e.count), 1), round(100*sum(i.MissileGravitySuit)/sum(e.count), 1), round(100*sum(i.MissileWreckedShiptop)/sum(e.count), 1), round(100*sum(i.SuperMissileWreckedShipleft)/sum(e.count), 1), round(100*sum(i.MissilegreenMaridiashinespark)/sum(e.count), 1), round(100*sum(i.SuperMissilegreenMaridia)/sum(e.count), 1), round(100*sum(i.MissilegreenMaridiatatori)/sum(e.count), 1), round(100*sum(i.SuperMissileyellowMaridia)/sum(e.count), 1), round(100*sum(i.MissileyellowMaridiasupermissile)/sum(e.count), 1), round(100*sum(i.MissileyellowMaridiafalsewall)/sum(e.count), 1), round(100*sum(i.MissileleftMaridiasandpitroom)/sum(e.count), 1), round(100*sum(i.MissilerightMaridiasandpitroom)/sum(e.count), 1), round(100*sum(i.PowerBombrightMaridiasandpitroom)/sum(e.count), 1), round(100*sum(i.MissilepinkMaridia)/sum(e.count), 1), round(100*sum(i.SuperMissilepinkMaridia)/sum(e.count), 1), round(100*sum(i.MissileDraygon)/sum(e.count), 1)
 from extended_stats e join item_locs i on e.id = i.ext_id
 where item not in ('Nothing', 'NoEnergy', 'ETank', 'Reserve')
@@ -469,6 +517,9 @@ order by 1,2;"""
         return (items, techOut, difficulties, solverStatsOut)
 
     def getProgSpeedStat(self, parameters):
+        if self.dbAvailable == False:
+            return None
+
         sqlSolverStats = """
 select s.name, s.value, round(count(*) * 100 / e.count, 1)
 from extended_stats e
@@ -541,3 +592,91 @@ order by 1,2;"""
             sqlParams.append(parameters['superFunSuit'])
 
         return (where, sqlParams)
+
+    def getPlandos(self):
+        if self.dbAvailable == False:
+            return None
+
+        try:
+            sql = "select re.plando_name, re.init_time, re.author, re.long_desc, re.suggested_preset, (select sum(ra.rating)/count(1) from plando_rating ra where ra.plando_name = re.plando_name) from plando_repo re order by re.plando_name;"
+            return self.execSelect(sql)
+        except Exception as e:
+            print("DB.getPlandos::error execute: {} error: {}".format(sql, e))
+            self.dbAvailable = False
+
+    def getPlandoKey(self, plandoName):
+        if self.dbAvailable == False:
+            return None
+
+        try:
+            sql = "select update_key from plando_repo where plando_name = '%';"
+            return self.execSelect(sql, (plandoName,))
+        except Exception as e:
+            print("DB.getPlandoKey::error execute: {} error: {}".format(sql, e))
+            self.dbAvailable = False
+
+    def getPlandoIpsMaxSize(self, plandoName):
+        if self.dbAvailable == False:
+            return None
+
+        try:
+            sql = "select ips_max_size from plando_repo where plando_name = '%s';"
+            return self.execSelect(sql, (plandoName,))
+        except Exception as e:
+            print("DB.getPlandoIpsMaxSize::error execute: {} error: {}".format(sql, e))
+            self.dbAvailable = False
+
+    def getPlandoRate(self, plandoName):
+        if self.dbAvailable == False:
+            return None
+
+        try:
+            sql = "select sum(rating)/count(1) from plando_rating where plando_name = '%s';"
+            return self.execSelect(sql, (plandoName,))
+        except Exception as e:
+            print("DB.getPlandoRate::error execute: {} error: {}".format(sql, e))
+            self.dbAvailable = False
+
+    def insertPlando(self, params):
+        if self.dbAvailable == False:
+            return None
+
+        try:
+            sql = "insert into plando_repo (plando_name, init_time, author, long_desc, suggested_preset, update_key, ips_max_size) values ('%s', now(), '%s', '%s', '%s', '%s', %d);"
+            self.cursor.execute(sql % params)
+        except Exception as e:
+            print("DB.insertPlando::error execute: {} error: {}".format(sql, e))
+            self.dbAvailable = False
+
+    def updatePlando(self, plandoName, params):
+        if self.dbAvailable == False:
+            return None
+
+        try:
+            sql = "update plando_rando set init_time = now(), author = '%s', long_desc = '%s', suggested_preset = '%s' ips_max_size = %d where plando_name = '%s'"
+            self.cursor.execute(sql % params)
+        except Exception as e:
+            print("DB.updatePlando::error execute: {} error: {}".format(sql, e))
+            self.dbAvailable = False
+
+    def alreadyRated(self, plandoName, ip):
+        if self.dbAvailable == False:
+            return None
+
+        try:
+            sql = "select 1 from plando_rating where plando_name = '%s' and ipv4 = inet_aton('%s');"
+            return self.execSelect(sql % (plandoName, ip))
+        except Exception as e:
+            print("DB.alreadyRated::error execute: {} error: {}".format(sql, e))
+            self.dbAvailable = False
+
+    def addRating(self, plandoName, rating, ip):
+        if self.dbAvailable == False:
+            return None
+
+        try:
+            sql = "insert into plando_rating (plando_name, rating, ipv4) values ('%s', %d, inet_aton('%s'));"
+            return self.cursor.execute(sql % (plandoName, rating, ip))
+        except Exception as e:
+            print("DB.addRating::error execute: {} error: {}".format(sql, e))
+            self.dbAvailable = False

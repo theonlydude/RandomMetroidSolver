@@ -626,6 +626,17 @@ order by 1,2;"""
             print("DB.getPlandoIpsMaxSize::error execute: {} error: {}".format(sql, e))
             self.dbAvailable = False
 
+    def getPlandoRate(self, plandoName):
+        if self.dbAvailable == False:
+            return None
+
+        try:
+            sql = "select sum(rating)/count(1) from plando_rating where plando_name = '%s';"
+            return self.execSelect(sql, (plandoName,))
+        except Exception as e:
+            print("DB.getPlandoRate::error execute: {} error: {}".format(sql, e))
+            self.dbAvailable = False
+
     def insertPlando(self, params):
         if self.dbAvailable == False:
             return None

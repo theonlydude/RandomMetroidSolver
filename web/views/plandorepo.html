@@ -7,9 +7,6 @@ extend 'layout.html'
 <script src="{{=URL('static','js/FileSaver.js')}}"></script>
 <link rel="stylesheet" type="text/css" href={{=URL('static/css','mystyle_20191017.css')}} media="screen"/>
 
-<link href={{=URL('static', 'css/bootstrap-tour.min.css')}} rel="stylesheet">
-<script src="{{=URL('static','js/bootstrap-tour.min.js')}}"></script>
-
 <script type="text/javascript" src="{{=URL('static', 'js/crc32.js')}}"></script>
 
 <title>Super Metroid VARIA Randomizer Plandomizer Repository</title>
@@ -133,35 +130,8 @@ extend 'layout.html'
 </style>
 
 <script type="text/javascript">
-function startTheTour(step=-1) {
-  // the tour tutorial
-  var tour = new Tour({
-    storage: false,
-    steps: [
-    {
-      element: "#presetStep",
-      title: "Preset",
-      content: "Choose from the list of standard skill presets and tournament ones."
-    },
-    {
-      element: "#randoPresetStep",
-      title: "Settings Preset",
-      content: "Choose from the list of Randomizer presets and tournament ones."
-    } ]});
-
-  // Initialize the tour
-  tour.init();
-
-  // Start the tour
-  if(step != -1) {
-    tour.goTo(step);
-  }
-  tour.start();
-}
-
 function clearSeed(name) {
-  document.getElementById(name).value = "";
-    document.getElementById(name+"Storage").value = "";
+    document.getElementById(name).value = "";
 }
 
 function displayUploadPopup() {
@@ -233,7 +203,7 @@ window.onload = function(){
                 }
 
                 var fileSize = file.size;
-                 if(fileSize > 3*1024*1024) {
+                 if(fileSize == 4*1024*1024) {
                     clearSeed("plandoROM");
                     alert("Plando seed is too big (Sprite customized seeds are forbidden for hosting space constraints)");
                     return false;
@@ -356,16 +326,6 @@ function AjaxPlandoDownloadCompleted(data) {
         var outFileName = data['fileName'];
         saveAs(blob, outFileName);
     }
-
-    // info message to display ?
-    if("errorMsg" in data && data["errorMsg"].length > 0) {
-        document.getElementById("flash").innerHTML = data["errorMsg"];
-        $('#flash').show();
-        displayFlash = true;
-    } else {
-        displayFlash = false;
-    }
-
 }
 
 function generateRawData(vanillaBytes, plandoBytes) {
@@ -439,8 +399,6 @@ function ajaxFail(jqXHR, textStatus) {
 }
 
 function ratePlando(plando, purePlando) {
-    console.log("ratePlando: "+plando+" pure: "+purePlando);
-
     var dataDict = {
         "plando": plando,
         "rate": document.getElementById("rate"+purePlando).value};
@@ -449,24 +407,63 @@ function ratePlando(plando, purePlando) {
       url: "{{=URL(f='plandoRateWebService')}}",
       method: "POST",
       data: dataDict,
-      dataType: "html"
+      dataType: "json"
     });
 
     request.done(AjaxPlandoRateCompleted);
-    request.fail(ajaxRateFail);
+    request.fail(ajaxFail);
+}
+
+function addImage(parent, name) {
+    var DOM_img = document.createElement("img");
+    DOM_img.src = "/solver/static/images/"+name+".png";
+    DOM_img.class = "imageItem";
+    parent.appendChild(DOM_img);
+}
+
+function updatePlandoRating(plando, rate) {
+    console.log("updatePlandoRating: "+plando+": "+rate);
+
+    var divrate = document.getElementById("divrate"+plando);
+    var children = divrate.childNodes;
+
+    // remove content
+    if(children.length == 1) {
+        divrate.innerHTML = "";
+    } else {
+        while(divrate.firstChild) {
+            divrate.removeChild(divrate.lastChild);
+        }
+    }
+
+    // add new content
+    for(var i=1; i<=Math.floor(rate); i++) {
+        addImage(divrate, "Varia");
+    }
+    var decimal = rate - Math.floor(rate);
+    if(decimal > 0.0 && decimal < 0.25) {
+        addImage(divrate, "No_Varia");
+    } else if(decimal >= 0.25 && decimal < 0.75) {
+        addImage(divrate, "Half_Varia");
+    } else if(decimal >= 0.75) {
+        addImage(divrate, "Varia");
+    }
+    for(var i=1; i<=5-Math.ceil(rate); i++) {
+        addImage(divrate, "No_Varia");
+    }
 }
 
 function AjaxPlandoRateCompleted(data) {
-    // all goes to ajax fail...
     console.log("AjaxPlandoRateCompleted");
-}
 
-function ajaxRateFail(jqXHR, textStatus) {
-    document.getElementById("flash").innerHTML = jqXHR.responseText;
+    var msg = data["msg"];
+    var rate = data["rate"];
+    var purePlandoName = data["purePlandoName"];
+
+    document.getElementById("flash").innerHTML = msg;
     $('#flash').show();
 
-    // reload the page to display the newly uploaded plando
-    //location.reload();
+    updatePlandoRating(purePlandoName, rate);
 }
 
 // https://www.w3schools.com/howto/howto_js_draggable.asp
@@ -682,6 +679,7 @@ function setGuessedPreset(romName){
             else:
                 smallDesc = longDesc
                 pass
+            pureName = re.sub('[\W_]+', '', name)
 
             response.write("      <tr class=\"collapsible full\">\n", escape=False)
             response.write("        <td class=\"collapsibleTd centerCell\">{}</td>\n".format(name), escape=False)
@@ -690,6 +688,8 @@ function setGuessedPreset(romName){
             response.write("        <td class=\"collapsibleTd centerCell\">{}</td>\n".format(time), escape=False)
             response.write("        <td class=\"collapsibleTd centerCell\">{}</td>\n".format(preset), escape=False)
             response.write("        <td class=\"collapsibleTd centerCell\">", escape=False)
+
+            response.write("        <div id=\"divrate{}\">".format(pureName), escape=False)
             if rating == None:
                 response.write("No rating", escape=False);
             else:
@@ -698,23 +698,23 @@ function setGuessedPreset(romName){
                     response.write("<img src='/solver/static/images/Varia.png' alt='Varia' border='0' class='imageItem'>", escape=False)
                     pass
                 decimal = rating - math.floor(rating)
-                if decimal > 0.0 and decimal < 0.25:
+                if decimal > 0.0 and decimal < 0.25 and rating < 5.0:
                     response.write("<img src='/solver/static/images/No_Varia.png' alt='No_Varia' border='0' class='imageItem'>", escape=False)
                 elif decimal >= 0.25 and decimal < 0.75:
                     response.write("<img src='/solver/static/images/Half_Varia.png' alt='Half_Varia' border='0' class='imageItem'>", escape=False)
                 elif decimal >= 0.75:
                     response.write("<img src='/solver/static/images/Varia.png' alt='Varia' border='0' class='imageItem'>", escape=False)
                     pass
-                for i in range(5 - math.ceil(rating) - 1):
+                for i in range(5 - math.ceil(rating)):
                     response.write("<img src='/solver/static/images/No_Varia.png' alt='Varia' border='0' class='imageItem'>", escape=False)
                     pass
                 pass
+                response.write("        </div>", escape=False)
                 response.write("        </td>", escape=False)
             response.write("      </tr>\n", escape=False)
 
             # style="text-align: center; white-space: nowrap">
 
-            pureName = re.sub('[\W_]+', '', name)
             response.write("<tr><td colspan=\"7\"><div class=\"content\">\
 <table class=\"full\">\
 <tr><td><p>{}</p></td></tr>\

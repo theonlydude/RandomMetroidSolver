@@ -675,8 +675,16 @@ function setGuessedPreset(romName){
 
         for plando in plandos:
             (name, time, author, longDesc, preset, rating) = plando
-            if len(longDesc) > 32:    
-                smallDesc = longDesc[:32-len('(...)')]+'(...)'
+            if len(longDesc) > 48:
+                smallDesc = None
+                for i in range(26, 48):
+                    if longDesc[i] == ' ':
+                        smallDesc = longDesc[:i]+' (...)'
+                        break
+                    pass
+                if smallDesc == None:
+                    smallDesc = longDesc[:32-len('(...)')]+'(...)'
+                    pass
             else:
                 smallDesc = longDesc
                 pass

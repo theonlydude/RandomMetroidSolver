@@ -2672,7 +2672,9 @@ def downloadPlandoWebService():
 
 def removeHtmlTags(text):
     clean = re.compile('<.*?>')
-    return re.sub(clean, '', text)
+    text = re.sub(clean, '', text)
+    # also double the ' for db insertion
+    return text.replace("'", "''")
 
 def generateUpdateKey():
     # 8 chars string

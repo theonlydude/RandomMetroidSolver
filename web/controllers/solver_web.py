@@ -2590,12 +2590,12 @@ def progSpeedStats():
 
 ipsBasePath = "plandository/"
 def plandorepo():
+    response.title = 'Super Metroid VARIA Plandository'
+
     # get plando list
     DB = db.DB()
     plandos = DB.getPlandos()
     DB.close()
-
-    print(plandos)
 
     return dict(plandos=plandos, math=math, re=re)
 
@@ -2641,7 +2641,6 @@ def plandoRateWebService():
             "purePlandoName": re.sub('[\W_]+', '', plando),
             "rate": newRate
         }
-        print(data)
         return json.dumps(data)
 
 def downloadPlandoWebService():

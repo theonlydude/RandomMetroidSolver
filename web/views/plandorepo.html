@@ -517,9 +517,7 @@ function sortTable(id, n) {
         rows = table.rows;
         /* Loop through all table rows (except the first, which contains table headers): */
         // sort only one every two lines (as first line is summary and second line is long desc)
-        console.log("rows.length: "+rows.length);
         for (i = 1; i < rows.length - 3; i+=2) {
-            console.log("i: "+i);
             // Start by saying there should be no switching:
             shouldSwitch = false;
             /* Get the two elements you want to compare,

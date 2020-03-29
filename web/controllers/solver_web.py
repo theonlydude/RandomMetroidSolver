@@ -2635,11 +2635,13 @@ def plandoRateWebService():
         if newRate == None:
             raiseHttp(400, "Can't get new rate")
         else:
-            newRate = float(newRate[0][0])
+            newCount = newRate[0][0]
+            newRate = float(newRate[0][1])
         data = {
             "msg": "{}: rating updated".format(plando),
             "purePlandoName": re.sub('[\W_]+', '', plando),
-            "rate": newRate
+            "rate": newRate,
+            "count": newCount
         }
         return json.dumps(data)
 

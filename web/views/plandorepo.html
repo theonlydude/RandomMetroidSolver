@@ -421,7 +421,7 @@ function addImage(parent, name) {
     parent.appendChild(DOM_img);
 }
 
-function updatePlandoRating(plando, rate) {
+function updatePlandoRating(plando, rate, count) {
     console.log("updatePlandoRating: "+plando+": "+rate);
 
     var divrate = document.getElementById("divrate"+plando);
@@ -451,6 +451,8 @@ function updatePlandoRating(plando, rate) {
     for(var i=1; i<=5-Math.ceil(rate); i++) {
         addImage(divrate, "No_Varia");
     }
+    var textnode = document.createTextNode(" ("+count+")");
+    divrate.appendChild(textnode);
 }
 
 function AjaxPlandoRateCompleted(data) {
@@ -458,12 +460,13 @@ function AjaxPlandoRateCompleted(data) {
 
     var msg = data["msg"];
     var rate = data["rate"];
+    var count = data["count"];
     var purePlandoName = data["purePlandoName"];
 
     document.getElementById("flash").innerHTML = msg;
     $('#flash').show();
 
-    updatePlandoRating(purePlandoName, rate);
+    updatePlandoRating(purePlandoName, rate, count);
 }
 
 // https://www.w3schools.com/howto/howto_js_draggable.asp
@@ -668,13 +671,13 @@ function setGuessedPreset(romName){
     if plandos != None:
         response.write("    <table id=\"plandoList\" class=\"full\">\n", escape=False)
         response.write("      <tr>\n", escape=False)
-        for (i, col) in enumerate(["Plando", "Author", "Description", "Release Date", "Suggested preset", "Rating"]):
+        for (i, col) in enumerate(["Plando", "Author", "Description", "Release Date", "Suggested preset", "Rating (votes)"]):
             response.write("        <th class=\"clickable centerCell\" onclick=\"sortTable('plandoList', {})\">{}</th>\n".format(i, col), escape=False)
             pass
         response.write("      </tr>\n", escape=False)
 
         for plando in plandos:
-            (name, time, author, longDesc, preset, downloadCount, rating) = plando
+            (name, time, author, longDesc, preset, downloadCount, rating, ratingCount) = plando
             if len(longDesc) > 48:
                 smallDesc = None
                 for i in range(26, 48):
@@ -718,7 +721,7 @@ function setGuessedPreset(romName){
                     response.write("<img src='/solver/static/images/No_Varia.png' alt='Varia' border='0' class='imageItem'>", escape=False)
                     pass
                 pass
-                response.write("        </div>", escape=False)
+                response.write(" ({})       </div>".format(ratingCount), escape=False)
                 response.write("        </td>", escape=False)
             response.write("      </tr>\n", escape=False)
 

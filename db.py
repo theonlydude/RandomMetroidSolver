@@ -598,7 +598,7 @@ order by 1,2;"""
             return None
 
         try:
-            sql = "select re.plando_name, re.init_time, re.author, re.long_desc, re.suggested_preset, re.download_count, (select sum(ra.rating)/count(1) from plando_rating ra where ra.plando_name = re.plando_name) from plando_repo re order by re.plando_name;"
+            sql = "select re.plando_name, re.init_time, re.author, re.long_desc, re.suggested_preset, re.download_count, (select sum(ra.rating)/count(1) from plando_rating ra where ra.plando_name = re.plando_name), (select count(1) from plando_rating ra where ra.plando_name = re.plando_name) from plando_repo re order by re.plando_name;"
             return self.execSelect(sql)
         except Exception as e:
             print("DB.getPlandos::error execute: {} error: {}".format(sql, e))
@@ -631,7 +631,7 @@ order by 1,2;"""
             return None
 
         try:
-            sql = "select sum(rating)/count(1) from plando_rating where plando_name = '%s';"
+            sql = "select count(1), sum(rating)/count(1) from plando_rating where plando_name = '%s';"
             return self.execSelect(sql, (plandoName,))
         except Exception as e:
             print("DB.getPlandoRate::error execute: {} error: {}".format(sql, e))

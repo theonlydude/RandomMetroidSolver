@@ -386,6 +386,8 @@ HUD_digits_tilemap_row1:
         ;;     0      1      2      3      4      5      6      7      8      9
 	dw $0045, $003C, $003D, $003E, $003F, $0040, $0041, $0042, $0043, $0044
 
+warnpc $80CF66
+
 ;;; 85/ MISSILE/SUPER/POWER BOMB message tilemaps
 org $858851
 	dw $280F, $280F, $280F

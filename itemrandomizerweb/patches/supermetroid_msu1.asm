@@ -50,7 +50,7 @@ macro CheckMSUPresence(labelToJump) {
 seek($808F27)
 	jsr MSU_Main
 	
-seek($80CF30)
+seek($80D02F)
 scope MSU_Main: {
 	php
 	rep #$30

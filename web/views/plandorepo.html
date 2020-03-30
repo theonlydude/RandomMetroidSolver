@@ -96,8 +96,7 @@ extend 'layout.html'
     float: right;
 }
 .uploadButton {
-    padding-right: 6em;
-    padding-left: 6em;
+    width:50%;
 }
 .downloadButton {
     width: 20%;
@@ -661,17 +660,14 @@ function setGuessedPreset(romName){
 
 
     <table class="full">
+      <colgroup><col class="half" /><col class="half" /></colgroup>
       <tr>
-        <td>
-          <div class="left"><p>Welcome to the Plandomizer repository where you can upload your own Plando seed for everyone to enjoy.</p></div>
-          <div class="right"><button class="uploadButton" onclick="displayUploadPopup()">Upload my Plando</button></div>
-        </td>
+        <td><p>Welcome to the Plandomizer repository where you can upload your own Plando seed for everyone to enjoy.</p></td>
+        <td><button class="uploadButton" onclick="displayUploadPopup()">Upload my Plando</button></td>
       </tr>
       <tr>
-        <td>
-          <div class="left"><p>A vanilla unheadered ROM is required to upload/download a Plando seed</p></div>
-          <div class="right"><input id="vanillaROM" name="vanillaROM" type="file" /></div>
-        </td>
+        <td><p>A vanilla unheadered ROM is required to upload/download a Plando seed</p></td>
+        <td><input id="vanillaROM" name="vanillaROM" type="file" /></td>
       </tr>
     </table>
     <p></p>

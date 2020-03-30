@@ -196,6 +196,7 @@ class HelpersGraph(Helpers):
                                              sm.wor(sm.haveItem('SpeedBooster'), # spark
                                                     sm.canSpringBallJump()))),
                               sm.wand(sm.canHellRun('MainUpperNorfair', 0.5*mult),
+                                      sm.haveItem('Morph'),
                                       sm.knowsNovaBoost())))
 
     @Cache.decorator

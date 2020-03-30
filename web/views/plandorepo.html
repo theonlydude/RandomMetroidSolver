@@ -440,6 +440,7 @@ function updatePlandoRating(plando, rate, count) {
     for(var i=1; i<=Math.floor(rate); i++) {
         addImage(divrate, "Varia");
     }
+
     var decimal = rate - Math.floor(rate);
     if(decimal > 0.0 && decimal < 0.25) {
         addImage(divrate, "No_Varia");
@@ -448,11 +449,16 @@ function updatePlandoRating(plando, rate, count) {
     } else if(decimal >= 0.75) {
         addImage(divrate, "Varia");
     }
+
     for(var i=1; i<=5-Math.ceil(rate); i++) {
         addImage(divrate, "No_Varia");
     }
+
     var textnode = document.createTextNode(" ("+count+")");
     divrate.appendChild(textnode);
+
+    // update invisible div used for sorting
+    divrate.previousSibling.innerHTML = rate;
 }
 
 function AjaxPlandoRateCompleted(data) {
@@ -463,8 +469,10 @@ function AjaxPlandoRateCompleted(data) {
     var count = data["count"];
     var purePlandoName = data["purePlandoName"];
 
-    document.getElementById("flash").innerHTML = msg;
-    $('#flash').show();
+    if(msg.length > 0) {
+        document.getElementById("flash").innerHTML = msg;
+        $('#flash').show();
+    }
 
     updatePlandoRating(purePlandoName, rate, count);
 }
@@ -701,7 +709,7 @@ function setGuessedPreset(romName){
             response.write("        <td class=\"collapsibleTd centerCell\">{}</td>\n".format(preset), escape=False)
             response.write("        <td class=\"collapsibleTd centerCell\">", escape=False)
 
-            response.write("        <div id=\"divrate{}\">".format(pureName), escape=False)
+            response.write("        <div style=\"display: none\">{}</div><div id=\"divrate{}\">".format(rating if rating != None else 0, pureName), escape=False)
             if rating == None:
                 response.write("No rating", escape=False);
             else:

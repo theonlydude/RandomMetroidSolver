@@ -2638,7 +2638,7 @@ def plandoRateWebService():
             newCount = newRate[0][0]
             newRate = float(newRate[0][1])
         data = {
-            "msg": "{}: rating updated".format(plando),
+            "msg": "",
             "purePlandoName": re.sub('[\W_]+', '', plando),
             "rate": newRate,
             "count": newCount

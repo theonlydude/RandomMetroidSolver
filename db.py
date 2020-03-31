@@ -613,6 +613,17 @@ order by 1,2;"""
             print("DB.getPlandos::error execute: {} error: {}".format(sql, e))
             self.dbAvailable = False
 
+    def getPlandoCount(self):
+        if self.dbAvailable == False:
+            return None
+
+        try:
+            sql = "select count(1) from plando_repo;"
+            return self.execSelect(sql)
+        except Exception as e:
+            print("DB.getPlandoCount::error execute: {} error: {}".format(sql, e))
+            self.dbAvailable = False
+
     def getPlandoKey(self, plandoName):
         if self.dbAvailable == False:
             return None

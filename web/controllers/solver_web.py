@@ -2724,6 +2724,14 @@ def handleIps(plandoName, romDataJson):
 def uploadPlandoWebService():
     print("uploadPlandoWebService")
 
+    DB = db.DB()
+    count = DB.getPlandoCount()
+    plandoLimit = 2048
+    if count == None or count[0][0] >= plandoLimit:
+        DB.close()
+        raise HTTP(400, "Maximum number of plandos reach: {}".format(plandoLimit))
+    DB.close()
+
     for param in ["author", "plandoName", "longDesc", "preset", "romData"]:
         if request.vars[param] == None:
             raiseHttp(400, "Missing parameter {}".format(param))

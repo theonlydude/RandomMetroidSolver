@@ -552,7 +552,7 @@ function updatePlandoRating(plando, rate, count) {
     divrate.appendChild(textnode);
 
     // update invisible div used for sorting
-    divrate.previousSibling.innerHTML = rate;
+    divrate.previousSibling.innerHTML = rate.toFixed(2);
 }
 
 function AjaxPlandoRateCompleted(data) {
@@ -960,7 +960,7 @@ function setGuessedPreset(romName){
             response.write("        <td id=\"{}_preset\" class=\"collapsibleTd centerCell\">{}</td>\n".format(pureName, preset), escape=False)
             response.write("        <td class=\"collapsibleTd centerCell\">", escape=False)
 
-            response.write("        <div style=\"display: none\">{}</div><div id=\"divrate{}\">".format(rating if rating != None else 0, pureName), escape=False)
+            response.write("        <div style=\"display: none\">{}</div><div id=\"divrate{}\">".format(round(rating, 2) if rating != None else '0.00', pureName), escape=False)
             if rating == None:
                 response.write("No rating", escape=False);
             else:

@@ -2685,25 +2685,7 @@ def generateUpdateKey():
     letters = string.ascii_letters + string.digits
     return ''.join(random.choice(letters) for i in range(stringLength))
 
-def uploadPlandoWebService():
-    print("uploadPlandoWebService")
-
-    for param in ["author", "plandoName", "longDesc", "preset", "romData"]:
-        if request.vars[param] == None:
-            raiseHttp(400, "Missing parameter {}".format(param))
-
-    for param in ["author", "plandoName", "preset"]:
-        if IS_LENGTH(maxsize=32, minsize=1)(request.vars[param])[1] is not None:
-            raise HTTP(400, "{} must be between 1 and 32 characters".format(param))
-
-    plandoName = request.vars.plandoName
-    if IS_MATCH('^[a-zA-Z0-9 -_]*$')(plandoName)[1] is not None:
-        raise HTTP(400, "Plando name can only contain [a-zA-Z0-9 -_]")
-
-    author = request.vars.author
-    longDesc = removeHtmlTags(request.vars.longDesc)
-    preset = request.vars.preset
-
+def handleIps(plandoName, romDataJson):
     romDataJson = request.vars.romData
     romDataRaw = json.loads(romDataJson)
     # everything is string in json, cast to int
@@ -2737,6 +2719,33 @@ def uploadPlandoWebService():
     # store ips in the repository
     ipsPatch.save(os.path.join(ipsBasePath, "{}.ips".format(plandoName)))
 
+    return maxSize
+
+def uploadPlandoWebService():
+    print("uploadPlandoWebService")
+
+    for param in ["author", "plandoName", "longDesc", "preset", "romData"]:
+        if request.vars[param] == None:
+            raiseHttp(400, "Missing parameter {}".format(param))
+
+    for param in ["author", "plandoName", "preset"]:
+        if IS_LENGTH(maxsize=32, minsize=1)(request.vars[param])[1] is not None:
+            raise HTTP(400, "{} must be between 1 and 32 characters".format(param))
+
+    for param in ["longDesc"]:
+        if IS_LENGTH(maxsize=2048, minsize=1)(request.vars[param])[1] is not None:
+            raise HTTP(400, "{} must be between 1 and 2048 characters".format(param))
+
+    plandoName = request.vars.plandoName
+    if IS_MATCH('^[a-zA-Z0-9 -_]*$')(plandoName)[1] is not None:
+        raise HTTP(400, "Plando name can only contain [a-zA-Z0-9 -_]")
+
+    author = request.vars.author
+    longDesc = removeHtmlTags(request.vars.longDesc)
+    preset = request.vars.preset
+
+    maxSize = handleIps(plandoName, request.vars.romData)
+
     updateKey = generateUpdateKey()
 
     DB = db.DB()
@@ -2744,3 +2753,78 @@ def uploadPlandoWebService():
     DB.close()
 
     return json.dumps(updateKey)
+
+def deletePlandoWebService():
+    for param in ["plandoName", "plandoKey"]:
+        if request.vars[param] == None:
+            raiseHttp(400, "Missing parameter {}".format(param))
+
+    plandoName = request.vars.plandoName
+    plandoKey = request.vars.plandoKey
+
+    if IS_LENGTH(maxsize=32, minsize=1)(plandoName)[1] is not None:
+        raise HTTP(400, "Plando name must be between 1 and 32 characters")
+    if IS_MATCH('^[a-zA-Z0-9 -_]*$')(plandoName)[1] is not None:
+        raise HTTP(400, "Plando name can only contain [a-zA-Z0-9 -_]")
+
+    if IS_LENGTH(maxsize=8, minsize=1)(plandoKey)[1] is not None:
+        raise HTTP(400, "Plando key must be between 1 and 8 characters")
+    if IS_MATCH('^[a-zA-Z0-9]*$')(plandoKey)[1] is not None:
+        raise HTTP(400, "Plando key can only contain [a-zA-Z0-9]")
+
+    DB = db.DB()
+    valid = DB.isValidPlandoKey(plandoName, plandoKey)
+    if valid == None or len(valid) == 0:
+        DB.close()
+        raise HTTP(400, "Plando key mismatch")
+    DB.deletePlandoRating(plandoName)
+    DB.deletePlando(plandoName)
+    DB.close()
+
+    return json.dumps("Plando {} deleted".format(plandoName))
+
+def updatePlandoWebService():
+    print("updatePlandoWebService")
+
+    for param in ["author", "plandoName", "longDesc", "preset", "plandoKey"]:
+        if request.vars[param] == None:
+            raiseHttp(400, "Missing parameter {}".format(param))
+
+    for param in ["author", "plandoName", "preset"]:
+        if IS_LENGTH(maxsize=32, minsize=1)(request.vars[param])[1] is not None:
+            raise HTTP(400, "{} must be between 1 and 32 characters".format(param))
+
+    for param in ["plandoKey"]:
+        if IS_LENGTH(maxsize=8, minsize=1)(request.vars[param])[1] is not None:
+            raise HTTP(400, "{} must be between 1 and 8 characters".format(param))
+
+    for param in ["longDesc"]:
+        if IS_LENGTH(maxsize=2048, minsize=1)(request.vars[param])[1] is not None:
+            raise HTTP(400, "{} must be between 1 and 2048 characters".format(param))
+
+    plandoName = request.vars.plandoName
+    if IS_MATCH('^[a-zA-Z0-9 -_]*$')(plandoName)[1] is not None:
+        raise HTTP(400, "Plando name can only contain [a-zA-Z0-9 -_]")
+
+    author = request.vars.author
+    longDesc = removeHtmlTags(request.vars.longDesc)
+    preset = request.vars.preset
+    plandoKey = request.vars.plandoKey
+
+    # check update key
+    DB = db.DB()
+    valid = DB.isValidPlandoKey(plandoName, plandoKey)
+    if valid == None or len(valid) == 0:
+        DB.close()
+        raise HTTP(400, "Plando key mismatch")
+
+    if request.vars.romData != None:
+        print("updatePlandoWebService: update ips")
+        maxSize = handleIps(plandoName, request.vars.romData)
+        DB.updatePlandoAll((author, longDesc, preset, maxSize, plandoName))
+    else:
+        DB.updatePlandoMeta((author, longDesc, preset, plandoName))
+
+    DB.close()
+
+    return json.dumps("Plando {} updated succesfully.".format(plandoName))

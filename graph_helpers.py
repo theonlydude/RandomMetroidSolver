@@ -174,6 +174,14 @@ class HelpersGraph(Helpers):
                               sm.canDoubleSpringBallJump()))
 
     @Cache.decorator
+    def canTraverseSandPits(self):
+        sm = self.smbm
+        return sm.wor(sm.haveItem('Gravity'),
+                      sm.wand(sm.knowsGravLessLevel3(),
+                              sm.haveItem('HiJump'),
+                              sm.haveItem('Ice')))
+
+    @Cache.decorator
     def canPassMaridiaToRedTowerNode(self):
         sm = self.smbm
         return sm.wand(sm.haveItem('Morph'),

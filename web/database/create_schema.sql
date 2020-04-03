@@ -99,6 +99,7 @@ create table if not exists plando_repo (
   suggested_preset varchar(32) not null,
   update_key varchar(8) not null,
   ips_max_size int unsigned not null,
+  download_count int unsigned not null default 0,
   primary key (plando_name)
 );
 

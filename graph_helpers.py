@@ -204,6 +204,7 @@ class HelpersGraph(Helpers):
                                              sm.wor(sm.haveItem('SpeedBooster'), # spark
                                                     sm.canSpringBallJump()))),
                               sm.wand(sm.canHellRun('MainUpperNorfair', 0.5*mult),
+                                      sm.haveItem('Morph'),
                                       sm.knowsNovaBoost())))
 
     @Cache.decorator
@@ -281,11 +282,9 @@ class HelpersGraph(Helpers):
     @Cache.decorator
     def canPassLavaPit(self):
         sm = self.smbm
-        nTanks4Dive = 3
-        if sm.heatProof().bool == False:
-            nTanks4Dive = 8
+        nTanks4Dive = 8 / sm.getDmgReduction()[0]
         if sm.haveItem('HiJump').bool == False:
-            nTanks4Dive = ceil(nTanks4Dive * 1.25) # 4 or 10
+            nTanks4Dive = ceil(nTanks4Dive * 1.25)
         return sm.wand(sm.wor(sm.wand(sm.haveItem('Gravity'), sm.haveItem('SpaceJump')),
                               sm.wand(sm.knowsGravityJump(), sm.haveItem('Gravity'), sm.wor(sm.haveItem('HiJump'), sm.knowsLavaDive())),
                               sm.wand(sm.wor(sm.wand(sm.knowsLavaDive(), sm.haveItem('HiJump')),

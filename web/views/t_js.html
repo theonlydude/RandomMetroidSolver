@@ -702,8 +702,10 @@ window.onload = function(){
             document.getElementById("uploadFile").value = "";
             alert("headered ROM detected, please use an unheadered ROM");
             return false;
+        } else if(mode == "plando" && fileSize == 4*1024*1024) {
+            alert("Warning: You won't be able to upload a Sprite customized seed in the Plandository (hosting space constraints)");
         }
-  
+
         var bytes = new Uint8Array(e.target.result);
 
         if(document.getElementById("mode").value == "plando") {

@@ -12,13 +12,44 @@ extend 'layout.html'
 <title>Super Metroid VARIA Randomizer Plandomizer Repository</title>
 
 <style>
+.hidden {
+    display: none;
+}
+.plandoButton {
+    cursor: pointer;
+    width: 3em;
+}
 .uploadPopup {
     background-color: #ffffff;
     position: absolute;
     z-index: 7;
     width: 40%;
     height: auto;
-    top: 5em;
+    top: 10em;
+    left: 30%;
+    display: none;
+    padding: 0.5%;
+    border: 2px solid gray;
+}
+.deletePopup {
+    background-color: #ffffff;
+    position: absolute;
+    z-index: 7;
+    width: 40%;
+    height: auto;
+    top: 10em;
+    left: 30%;
+    display: none;
+    padding: 0.5%;
+    border: 2px solid gray;
+}
+.updatePopup {
+    background-color: #ffffff;
+    position: absolute;
+    z-index: 7;
+    width: 40%;
+    height: auto;
+    top: 10em;
     left: 30%;
     display: none;
     padding: 0.5%;
@@ -96,13 +127,14 @@ extend 'layout.html'
     float: right;
 }
 .uploadButton {
-    padding-right: 6em;
-    padding-left: 6em;
+    width:50%;
 }
 .downloadButton {
     width: 20%;
     margin-left: 40%;
     margin-right: 20%;
+    margin-top: 1em;
+    margin-bottom: 1em;
 }
 .blankRow {
     height: 1em;
@@ -135,14 +167,17 @@ function clearSeed(name) {
 }
 
 function displayUploadPopup() {
-  document.getElementById("uploadPopup").style.display = "block";
+    hideDeletePopup();
+    hideUpdatePopup();
+    document.getElementById("uploadPopup").style.display = "block";
 }
 
 function hideUploadPopup() {
-  document.getElementById("uploadPopup").style.display = "none";
+    document.getElementById("uploadPopup").style.display = "none";
 }
 
 var plandoROMBytes = null;
+var plandoUpdateROMBytes = null;
 var vanillaROMBytes = null;
 window.onload = function(){
     //Check File API support
@@ -209,8 +244,62 @@ window.onload = function(){
                     return false;
                 }
 
+                console.log("set plando rom bytes");
                 plandoROMBytes = new Uint8Array(e.target.result);
+
+                // check that it's indeed a super metroid ROM
+                // 0x02B9 -> 0x02C4: supermetroid
+                var check = "supermetroid";
+                for(i=0; i<check.length; i++) {
+                    if(plandoROMBytes[0x02B9+i] != check.charCodeAt(i)) {
+                        clearSeed("plandoROM");
+                        plandoROMBytes = null;
+                        alert("Plando seed is not a Super Metroid ROM");
+                        return false;
+                    }
+                }
+
                 setGuessedPreset(file.name);
+            }
+        }, false);
+
+        var filesInput = document.getElementById("updatePlandoROM");
+        filesInput.addEventListener("change", function(event){
+            var files = event.target.files; //It returns a FileList object
+            var file = files[0];
+
+            var reader = new FileReader();
+            reader.readAsArrayBuffer(file)
+            reader.onload = function(e) {
+                // check sfc or smc extention
+                var re = /(?:\.([^.]+))?$/;
+                var ext = re.exec(file.name)[1];
+                if( ! (ext === "sfc" || ext === "smc" || ext === "SFC" || ext === "SMC") ) {
+                    clearSeed("updatePlandoROM");
+                    alert("wrong extension: "+ext);
+                    return false;
+                }
+
+                var fileSize = file.size;
+                 if(fileSize == 4*1024*1024) {
+                    clearSeed("updatePlandoROM");
+                    alert("Plando seed is too big (Sprite customized seeds are forbidden for hosting space constraints)");
+                    return false;
+                }
+
+                plandoUpdateROMBytes = new Uint8Array(e.target.result);
+
+                // check that it's indeed a super metroid ROM
+                // 0x02B9 -> 0x02C4: supermetroid
+                var check = "supermetroid";
+                for(i=0; i<check.length; i++) {
+                    if(plandoUpdateROMBytes[0x02B9+i] != check.charCodeAt(i)) {
+                        clearSeed("updatePlandoROM");
+                        plandoUpdateROMBytes = null;
+                        alert("Plando seed is not a Super Metroid ROM");
+                        return false;
+                    }
+                }
             }
         }, false);
 
@@ -222,6 +311,8 @@ window.onload = function(){
     plandoName.onkeypress = plandoName.onpaste = checkInput;
 
     dragElement(document.getElementById("uploadPopup"), "uploadGrab");
+    dragElement(document.getElementById("deletePopup"), "deleteGrab");
+    dragElement(document.getElementById("updatePopup"), "updateGrab");
 }
 
 // from https://stackoverflow.com/questions/22708434/restrict-characters-in-input-field
@@ -386,6 +477,9 @@ function uploadPlando() {
 function AjaxUploadPlandoCompleted(data) {
     console.log("AjaxUploadPlandoCompleted");
 
+    clearSeed("vanillaROM");
+    clearSeed("plandoROM");
+
     hideUploadPopup();
 
     alert("You plando has been uploaded. Keep this key it'll required if you need to update/delete your plando: "+data);
@@ -421,7 +515,7 @@ function addImage(parent, name) {
     parent.appendChild(DOM_img);
 }
 
-function updatePlandoRating(plando, rate) {
+function updatePlandoRating(plando, rate, count) {
     console.log("updatePlandoRating: "+plando+": "+rate);
 
     var divrate = document.getElementById("divrate"+plando);
@@ -440,6 +534,7 @@ function updatePlandoRating(plando, rate) {
     for(var i=1; i<=Math.floor(rate); i++) {
         addImage(divrate, "Varia");
     }
+
     var decimal = rate - Math.floor(rate);
     if(decimal > 0.0 && decimal < 0.25) {
         addImage(divrate, "No_Varia");
@@ -448,9 +543,16 @@ function updatePlandoRating(plando, rate) {
     } else if(decimal >= 0.75) {
         addImage(divrate, "Varia");
     }
+
     for(var i=1; i<=5-Math.ceil(rate); i++) {
         addImage(divrate, "No_Varia");
     }
+
+    var textnode = document.createTextNode(" ("+count+")");
+    divrate.appendChild(textnode);
+
+    // update invisible div used for sorting
+    divrate.previousSibling.innerHTML = rate.toFixed(2);
 }
 
 function AjaxPlandoRateCompleted(data) {
@@ -458,12 +560,121 @@ function AjaxPlandoRateCompleted(data) {
 
     var msg = data["msg"];
     var rate = data["rate"];
+    var count = data["count"];
     var purePlandoName = data["purePlandoName"];
 
-    document.getElementById("flash").innerHTML = msg;
-    $('#flash').show();
+    if(msg.length > 0) {
+        document.getElementById("flash").innerHTML = msg;
+        $('#flash').show();
+    }
 
-    updatePlandoRating(purePlandoName, rate);
+    updatePlandoRating(purePlandoName, rate, count);
+}
+
+function displayDeletePopup(plandoName) {
+    hideUploadPopup();
+    hideUpdatePopup();
+
+    // populate plando name
+    document.getElementById("deletePlandoName").value = plandoName;
+
+    document.getElementById("deletePopup").style.display = "block";
+}
+
+function hideDeletePopup() {
+    document.getElementById("deletePopup").style.display = "none";
+}
+
+function deletePlando() {
+    var plandoName = document.getElementById("deletePlandoName").value;
+    var plandoKey = document.getElementById("deletePlandoKey").value;
+
+    var dataDict = {
+        "plandoName": plandoName,
+        "plandoKey": plandoKey
+    }
+
+    var request = $.ajax({
+      url: "{{=URL(f='deletePlandoWebService')}}",
+      method: "POST",
+      data: dataDict,
+      dataType: "json"
+    });
+
+    request.done(AjaxPlandoDeleteCompleted);
+    request.fail(ajaxFail);
+}
+
+function AjaxPlandoDeleteCompleted(data) {
+    hideDeletePopup();
+    alert(data);
+    // reload the page to remove the deleted plando
+    location.reload();
+}
+
+function displayUpdatePopup(plandoName, pureName) {
+    hideUploadPopup();
+    hideDeletePopup();
+
+    // populate values
+    document.getElementById("updatePlandoName").value = plandoName;
+    document.getElementById("updateAuthor").value = document.getElementById(pureName+"_author").innerHTML;
+    document.getElementById("updatePreset").value = document.getElementById(pureName+"_preset").innerHTML;
+    document.getElementById("updateLongDesc").value = document.getElementById(pureName+"_longDesc").innerHTML;
+
+    document.getElementById("updatePopup").style.display = "block";
+}
+
+function hideUpdatePopup() {
+    document.getElementById("updatePopup").style.display = "none";
+}
+
+function updatePlando() {
+    console.log("updatePlando");
+
+    // check that both vanilla ROMs is set if plando ROM is set
+    if(plandoUpdateROMBytes != null && vanillaROMBytes == null) {
+        alert("Please select a vanilla ROM first");
+        return;
+    }
+
+    var dataDict = {
+        "author": document.getElementById("updateAuthor").value,
+        "plandoName": document.getElementById("updatePlandoName").value,
+        "longDesc": document.getElementById("updateLongDesc").value,
+        "preset": document.getElementById("updatePreset").value,
+        "plandoKey": document.getElementById("updatePlandoKey").value
+    };
+
+    if(plandoUpdateROMBytes != null) {
+        console.log("updatePlando: also update ips");
+        dataDict["romData"] = generateRawData(vanillaROMBytes, plandoUpdateROMBytes);
+    }
+
+    var request = $.ajax({
+      url: "{{=URL(f='updatePlandoWebService')}}",
+      method: "POST",
+      data: dataDict,
+      dataType: "json"
+    });
+
+    request.done(AjaxUpdatePlandoCompleted);
+    request.fail(ajaxFail);
+
+}
+
+function AjaxUpdatePlandoCompleted(data) {
+    console.log("AjaxUpdatePlandoCompleted");
+
+    clearSeed("vanillaROM");
+    clearSeed("updatePlandoROM");
+
+    hideUpdatePopup();
+
+    alert(data);
+
+    // reload the page to display the newly updated plando
+    location.reload();
 }
 
 // https://www.w3schools.com/howto/howto_js_draggable.asp
@@ -621,13 +832,14 @@ function setGuessedPreset(romName){
     </div>
   </div>
   <div class="tabcontent">
+
   <div id="uploadPopup" class="uploadPopup">
     <table class="full">
       <colgroup><col class="quarter" /><col class="quarter" /><col class="quarter"/><col class="quarter"/></colgroup>
       <tr><td colspan=4></td></tr>
       <tr><td id="uploadGrab" colspan=4 class="center greyRow"><p>Upload you Plando seed</p></td></tr>
       <tr><td colspan=4 class="blankRow"></td></tr>
-      <tr><td colspan=4><input id="plandoROM" type="file"/></td></tr>
+      <tr><td>Plando seed:</td><td colspan=3><input id="plandoROM" type="file"/></td></tr>
       <tr>
         <td>Author:</td><td><input class="full" id="author" type="text" maxLength="32" placeholder="Author"/></td>
         <td>Plando Name:</td><td><input class="full" id="plandoName" type="text" maxLength="32" placeholder="Only [a-zA-Z0-9 -_]"/></td>
@@ -648,19 +860,69 @@ function setGuessedPreset(romName){
     </table>
   </div>
 
-
+  <div id="updatePopup" class="updatePopup">
     <table class="full">
+      <colgroup><col class="quarter" /><col class="quarter" /><col class="quarter"/><col class="quarter"/></colgroup>
+      <tr><td colspan=4></td></tr>
+      <tr><td id="updateGrab" colspan=4 class="center greyRow"><p>Update you Plando seed</p></td></tr>
+      <tr><td colspan=4 class="blankRow"></td></tr>
+      <tr><td colspan=4><p>To update your plando you need the key that was provided when you uploaded it.</p><p>No need to provide your Plando seed again if you just want to update description fields.</p></td></tr>
+      <tr><td>Plando seed:</td><td colspan=3><input id="updatePlandoROM" type="file"/></td></tr>
       <tr>
-        <td>
-          <div class="left"><p>Welcome to the Plandomizer repository where you can upload your own Plando seed for everyone to enjoy.</p></div>
-          <div class="right"><button class="uploadButton" onclick="displayUploadPopup()">Upload my Plando</button></div>
-        </td>
+        <td>Author:</td><td><input class="full" id="updateAuthor" type="text" maxLength="32" placeholder="Author"/></td>
+        <td>Plando Name:</td><td><input class="full" id="updatePlandoName" type="text" maxLength="32" placeholder="Plando Name" disabled/></td>
       </tr>
       <tr>
-        <td>
-          <div class="left"><p>A vanilla unheadered ROM is required to upload/download a Plando seed</p></div>
-          <div class="right"><input id="vanillaROM" name="vanillaROM" type="file" /></div>
-        </td>
+        <td>Plando Key:</td><td><input class="full" id="updatePlandoKey" type="text" maxLength="8" placeholder="Only [a-zA-Z0-9]"/></td>
+        <td>Suggested preset:</td><td><select class="filldropdown" id="updatePreset"><option value="noob">noob</option><option value="casual">casual</option><option selected="selected" value="regular">regular</option><option value="veteran">veteran</option><option value="speedrunner">speedrunner</option><option value="master">master</option></select></td>
+      </tr>
+      <tr>
+        <td>Long Description:</td><td colspan="3"><textarea class="full" id="updateLongDesc" maxLength="2048" rows="8" cols="50" placeholder="Long Description"></textarea></td>
+      </tr>
+      <tr><td colspan=3 class="blankLastRow"></td></tr>
+    </table>
+    <table>
+      <tr>
+        <td class="half"><button type="button" onclick="updatePlando()" class="full">Update</button></td>
+        <td class="half"><button type="button" onclick="hideUpdatePopup()" class="full">Cancel</button></td>
+      </tr>
+    </table>
+  </div>
+
+  <div id="deletePopup" class="deletePopup">
+    <table class="full">
+      <colgroup><col class="half"/><col class="half"/></colgroup>
+      <tr><td colspan=2></td></tr>
+      <tr><td id="deleteGrab" colspan=2 class="center greyRow"><p>Delete you Plando seed</p></td></tr>
+      <tr><td colspan=2 class="blankRow"></td></tr>
+      <tr>
+    <td colspan=2><p>To delete your plando you need to provide the key that was provided when you uploaded it.</p></td>
+      </tr>
+      <tr>
+        <td>Plando Name:</td><td><input class="full" id="deletePlandoName" type="text" maxLength="32" placeholder="Plando Name" disabled/></td>
+      </tr>
+      <tr>
+        <td>Plando Key:</td><td><input class="full" id="deletePlandoKey" type="text" maxLength="8" placeholder="Only [a-zA-Z0-9]"/></td>
+      </tr>
+      <tr><td colspan=3 class="blankLastRow"></td></tr>
+    </table>
+    <table>
+      <tr>
+        <td class="half"><button type="button" onclick="deletePlando()" class="full">Delete</button></td>
+        <td class="half"><button type="button" onclick="hideDeletePopup()" class="full">Cancel</button></td>
+      </tr>
+    </table>
+  </div>
+
+    <table class="full">
+      <colgroup><col class="half" /><col class="half" /></colgroup>
+      <tr>
+        <td><p>Welcome to the Plandomizer repository where you can upload your own Plando seed for everyone to enjoy.</p></td>
+        <td><button class="uploadButton" onclick="displayUploadPopup()">Upload my Plando</button></td>
+      </tr>
+      <tr>
+        <td><p>A vanilla unheadered ROM is required to upload/download a Plando seed</p></td>
+        <td><input id="vanillaROM" name="vanillaROM" type="file" /></td>
       </tr>
     </table>
     <p></p>
@@ -668,15 +930,23 @@ function setGuessedPreset(romName){
     if plandos != None:
         response.write("    <table id=\"plandoList\" class=\"full\">\n", escape=False)
         response.write("      <tr>\n", escape=False)
-        for (i, col) in enumerate(["Plando", "Author", "Description", "Release Date", "Suggested preset", "Rating"]):
+        for (i, col) in enumerate(["Plando", "Author", "Description", "Release Date", "Suggested preset", "Rating (votes)"]):
             response.write("        <th class=\"clickable centerCell\" onclick=\"sortTable('plandoList', {})\">{}</th>\n".format(i, col), escape=False)
             pass
         response.write("      </tr>\n", escape=False)
 
         for plando in plandos:
-            (name, time, author, longDesc, preset, rating) = plando
-            if len(longDesc) > 32:    
-                smallDesc = longDesc[:32-len('(...)')]+'(...)'
+            (name, time, author, longDesc, preset, downloadCount, rating, ratingCount) = plando
+            if len(longDesc) > 48:
+                smallDesc = None
+                for i in range(26, 48):
+                    if longDesc[i] == ' ':
+                        smallDesc = longDesc[:i]+' (...)'
+                        break
+                    pass
+                if smallDesc == None:
+                    smallDesc = longDesc[:32-len('(...)')]+'(...)'
+                    pass
             else:
                 smallDesc = longDesc
                 pass
@@ -684,13 +954,13 @@ function setGuessedPreset(romName){
 
             response.write("      <tr class=\"collapsible full\">\n", escape=False)
             response.write("        <td class=\"collapsibleTd centerCell\">{}</td>\n".format(name), escape=False)
-            response.write("        <td class=\"collapsibleTd centerCell\">{}</td>\n".format(author), escape=False)
+            response.write("        <td id=\"{}_author\" class=\"collapsibleTd centerCell\">{}</td>\n".format(pureName, author), escape=False)
             response.write("        <td class=\"collapsibleTd centerCell\">{}</td>\n".format(smallDesc), escape=False)
             response.write("        <td class=\"collapsibleTd centerCell\">{}</td>\n".format(time), escape=False)
-            response.write("        <td class=\"collapsibleTd centerCell\">{}</td>\n".format(preset), escape=False)
+            response.write("        <td id=\"{}_preset\" class=\"collapsibleTd centerCell\">{}</td>\n".format(pureName, preset), escape=False)
             response.write("        <td class=\"collapsibleTd centerCell\">", escape=False)
 
-            response.write("        <div id=\"divrate{}\">".format(pureName), escape=False)
+            response.write("        <div style=\"display: none\">{}</div><div id=\"divrate{}\">".format(round(rating, 2) if rating != None else '0.00', pureName), escape=False)
             if rating == None:
                 response.write("No rating", escape=False);
             else:
@@ -710,7 +980,7 @@ function setGuessedPreset(romName){
                     response.write("<img src='/solver/static/images/No_Varia.png' alt='Varia' border='0' class='imageItem'>", escape=False)
                     pass
                 pass
-                response.write("        </div>", escape=False)
+                response.write(" ({})       </div>".format(ratingCount), escape=False)
                 response.write("        </td>", escape=False)
             response.write("      </tr>\n", escape=False)
 
@@ -718,15 +988,20 @@ function setGuessedPreset(romName){
 
             response.write("<tr><td colspan=\"7\"><div class=\"content\">\
 <table class=\"full\">\
-<tr><td><p>{}</p></td></tr>\
+<tr><td><div id=\"{}_longDesc\" class=\"hidden\">{}</div><p>{}</p></td></tr>\
 <tr><td class=\"blankLastRow\"></td></tr>\
 <tr>\
-<td><button class=\"downloadButton\" onclick=\"downloadPlando('{}')\">Download</button>\
+<td>\
+<div class=\"left\">\
+<img class=\"plandoButton\" src=\"/solver/static/images/refresh.svg\" alt=\"Update\" onclick=\"displayUpdatePopup('{}', '{}')\" title=\"Update your plando\">\
+<img class=\"plandoButton\" src=\"/solver/static/images/bin.svg\" alt=\"Delete\" onclick=\"displayDeletePopup('{}')\" title=\"Delete your plando\">\
+</div>\
+<button class=\"downloadButton\" onclick=\"downloadPlando('{}')\">Download ({})</button>\
 <div class=\"right\"><select id=\"rate{}\" name=\"rate\"><option value=\"1\">1</option><option value=\"2\">2</option><option value=\"3\">3</option><option value=\"4\">4</option><option value=\"5\">5</option></select> <button onclick=\"ratePlando('{}', '{}')\">Rate</button></div></td>\
 </tr>\
 <tr><td colspan=\"2\" class=\"blankLastRow\"></td></tr>\
 </table>\
-</div></td></tr>\n".format(longDesc.replace('\n', '<br/>'), name, pureName, name, pureName), escape=False)
+</div></td></tr>\n".format(pureName, longDesc, longDesc.replace('\n', '<br/>'), name, pureName, name, name, downloadCount, pureName, name, pureName), escape=False)
             pass
 
         response.write("      </table>\n", escape=False)

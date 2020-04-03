@@ -497,16 +497,6 @@ window.onload = function(){
         });
     });
 
-    $('.area').on('mouseenter', function(evt){
-        var url = window.location.origin+$(this).data("thumbnail-src");
-        $(".popupArea").html('<img src="'+window.location.origin+$(this).data('thumbnail-src')+'">');
-        $(".popupArea").css({left: evt.pageX+30, top: evt.pageY});
-        getMeta(url, ".popupArea", setPopupXY);
-        $(this).on('mouseleave', function(){
-            $(".popupArea").hide();
-        });
-    });
-
     $('.subarea').on('mouseenter', function(evt){
         var url = window.location.origin+$(this).data("thumbnail-src");
         $(".popupSubArea").html('<img src="'+url+'">');

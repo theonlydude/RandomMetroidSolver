@@ -36,6 +36,15 @@ class DB:
         except Exception as e:
             print("DB.close::error: {}".format(e))
 
+    def commit(self):
+        if self.dbAvailable == False:
+            return
+
+        try:
+            self.conn.commit()
+        except Exception as e:
+            print("DB.commit::error: {}".format(e))
+
     # write data
     def initSolver(self):
         if self.dbAvailable == False:
@@ -598,10 +607,21 @@ order by 1,2;"""
             return None
 
         try:
-            sql = "select re.plando_name, re.init_time, re.author, re.long_desc, re.suggested_preset, (select sum(ra.rating)/count(1) from plando_rating ra where ra.plando_name = re.plando_name) from plando_repo re order by re.plando_name;"
+            sql = "select re.plando_name, re.init_time, re.author, re.long_desc, re.suggested_preset, re.download_count, (select sum(ra.rating)/count(1) from plando_rating ra where ra.plando_name = re.plando_name), (select count(1) from plando_rating ra where ra.plando_name = re.plando_name) from plando_repo re order by re.plando_name;"
             return self.execSelect(sql)
         except Exception as e:
             print("DB.getPlandos::error execute: {} error: {}".format(sql, e))
+            self.dbAvailable = False
+
+    def getPlandoCount(self):
+        if self.dbAvailable == False:
+            return None
+
+        try:
+            sql = "select count(1) from plando_repo;"
+            return self.execSelect(sql)
+        except Exception as e:
+            print("DB.getPlandoCount::error execute: {} error: {}".format(sql, e))
             self.dbAvailable = False
 
     def getPlandoKey(self, plandoName):
@@ -631,7 +651,7 @@ order by 1,2;"""
             return None
 
         try:
-            sql = "select sum(rating)/count(1) from plando_rating where plando_name = '%s';"
+            sql = "select count(1), sum(rating)/count(1) from plando_rating where plando_name = '%s';"
             return self.execSelect(sql, (plandoName,))
         except Exception as e:
             print("DB.getPlandoRate::error execute: {} error: {}".format(sql, e))
@@ -644,19 +664,33 @@ order by 1,2;"""
         try:
             sql = "insert into plando_repo (plando_name, init_time, author, long_desc, suggested_preset, update_key, ips_max_size) values ('%s', now(), '%s', '%s', '%s', '%s', %d);"
             self.cursor.execute(sql % params)
+            self.commit()
         except Exception as e:
             print("DB.insertPlando::error execute: {} error: {}".format(sql, e))
             self.dbAvailable = False
 
-    def updatePlando(self, plandoName, params):
+    def updatePlandoAll(self, params):
         if self.dbAvailable == False:
             return None
 
         try:
-            sql = "update plando_rando set init_time = now(), author = '%s', long_desc = '%s', suggested_preset = '%s' ips_max_size = %d where plando_name = '%s'"
+            sql = "update plando_repo set init_time = now(), author = '%s', long_desc = '%s', suggested_preset = '%s', ips_max_size = %d where plando_name = '%s'"
             self.cursor.execute(sql % params)
+            self.commit()
         except Exception as e:
-            print("DB.updatePlando::error execute: {} error: {}".format(sql, e))
+            print("DB.updatePlandoAll::error execute: {} error: {}".format(sql, e))
+            self.dbAvailable = False
+
+    def updatePlandoMeta(self, params):
+        if self.dbAvailable == False:
+            return None
+
+        try:
+            sql = "update plando_repo set author = '%s', long_desc = '%s', suggested_preset = '%s' where plando_name = '%s'"
+            self.cursor.execute(sql % params)
+            self.commit()
+        except Exception as e:
+            print("DB.updatePlandoMeta::error execute: {} error: {}".format(sql, e))
             self.dbAvailable = False
 
     def alreadyRated(self, plandoName, ip):
@@ -676,7 +710,55 @@ order by 1,2;"""
 
         try:
             sql = "insert into plando_rating (plando_name, rating, ipv4) values ('%s', %d, inet_aton('%s'));"
-            return self.cursor.execute(sql % (plandoName, rating, ip))
+            self.cursor.execute(sql % (plandoName, rating, ip))
+            self.commit()
         except Exception as e:
             print("DB.addRating::error execute: {} error: {}".format(sql, e))
+            self.dbAvailable = False
+
+    def increaseDownloadCount(self, plandoName):
+        if self.dbAvailable == False:
+            return None
+
+        try:
+            sql = "update plando_repo set download_count = download_count+1 where plando_name = '%s';"
+            self.cursor.execute(sql % (plandoName,))
+            self.commit()
+        except Exception as e:
+            print("DB.increaseDownloadCount::error execute: {} error: {}".format(sql, e))
+            self.dbAvailable = False
+
+    def isValidPlandoKey(self, plandoName, key):
+        if self.dbAvailable == False:
+            return None
+
+        try:
+            sql = "select 1 from plando_repo where plando_name = '%s' and update_key = '%s';"
+            return self.execSelect(sql % (plandoName, key))
+        except Exception as e:
+            print("DB.isValidPlandoKey::error execute: {} error: {}".format(sql, e))
+            self.dbAvailable = False
+
+    def deletePlando(self, plandoName):
+        if self.dbAvailable == False:
+            return None
+
+        try:
+            sql = "delete from plando_repo where plando_name = '%s';"
+            self.cursor.execute(sql % (plandoName,))
+            self.commit()
+        except Exception as e:
+            print("DB.deletePlando::error execute: {} error: {}".format(sql, e))
+            self.dbAvailable = False
+
+    def deletePlandoRating(self, plandoName):
+        if self.dbAvailable == False:
+            return None
+
+        try:
+            sql = "delete from plando_rating where plando_name = '%s';"
+            self.cursor.execute(sql % (plandoName,))
+            self.commit()
+        except Exception as e:
+            print("DB.deletePlandoRating::error execute: {} error: {}".format(sql, e))
             self.dbAvailable = False

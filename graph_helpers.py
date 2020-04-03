@@ -173,6 +173,7 @@ class HelpersGraph(Helpers):
                               sm.wand(sm.haveItem('Ice'), sm.canDoSuitlessOuterMaridia()), # climbing crabs
                               sm.canDoubleSpringBallJump()))
 
+    # bottom sandpits with the evirs
     @Cache.decorator
     def canTraverseSandPits(self):
         sm = self.smbm
@@ -415,6 +416,13 @@ class HelpersGraph(Helpers):
                                       sm.canDoubleSpringBallJump())))
 
     @Cache.decorator
+    def canJumpUnderwater(self):
+        sm = self.smbm
+        return sm.wor(sm.haveItem('Gravity'),
+                      sm.wand(sm.knowsGravLessLevel1(),
+                              sm.haveItem('HiJump')))
+
+    @Cache.decorator
     def canDoSuitlessOuterMaridia(self):
         sm = self.smbm
         return sm.wand(sm.knowsGravLessLevel1(),
@@ -423,24 +431,25 @@ class HelpersGraph(Helpers):
                               sm.canSpringBallJump()))
 
     @Cache.decorator
-    def canAccessBotwoonFromMainStreet(self):
+    def canPassBotwoonHallway(self):
         sm = self.smbm
-        return sm.wand(sm.canPassMtEverest(),
-                       sm.canOpenGreenDoors(),
-                       sm.canUsePowerBombs())
+        return sm.wor(sm.wand(sm.haveItem('SpeedBooster'),
+                              sm.haveItem('Gravity')),
+                      sm.wand(sm.knowsMochtroidClip(), sm.haveItem('Ice')))
 
-    # from main street only
     @Cache.decorator
     def canDefeatBotwoon(self):
         sm = self.smbm
-        # EXPLAINED: in Botwoon Hallway, either:
-        #             -use regular speedbooster (with gravity)
-        #             -do a mochtroidclip (https://www.youtube.com/watch?v=1z_TQu1Jf1I&t=20m28s)
-        return sm.wand(sm.canAccessBotwoonFromMainStreet(),
-                       sm.enoughStuffBotwoon(),
-                       sm.wor(sm.wand(sm.haveItem('SpeedBooster'),
-                                      sm.haveItem('Gravity')),
-                              sm.wand(sm.knowsMochtroidClip(), sm.haveItem('Ice'))))
+        return sm.wand(sm.enoughStuffBotwoon(),
+                       sm.canPassBotwoonHallway())
+
+    # the sandpits from aqueduct
+    @Cache.decorator
+    def canAccessSandPits(self):
+        sm = self.smbm
+        return sm.wor(sm.haveItem('Gravity'),
+                      sm.wand(sm.haveItem('HiJump'),
+                              sm.knowsGravLessLevel3()))
 
     @Cache.decorator
     def canBotwoonExitToAndFromDraygon(self):
@@ -453,12 +462,6 @@ class HelpersGraph(Helpers):
                                      sm.wand(sm.haveItem('Ice'),
                                              sm.energyReserveCountOk(int(7.0/sm.getDmgReduction(False)[0])), # mochtroid dmg
                                              sm.knowsBotwoonToDraygonWithIce()))))
-
-    @Cache.decorator
-    def canAccessDraygonFromMainStreet(self):
-        sm = self.smbm
-        return sm.wand(sm.canDefeatBotwoon(),
-                       sm.canBotwoonExitToAndFromDraygon())
 
     def getDraygonConnection(self):
         if self.draygonConnection is None:

@@ -420,14 +420,6 @@ accessPoints = [
        escape = True,
        dotOrientation = 'ne'),
     ### Maridia
-    #new APs :
-    # x toilet top
-    # x oasis bottom
-    # - crab shaft left
-    # - aqueduct
-    # - east/west sandpit
-    # - botwoon etank room
-    # + add connections from beach to the rest
     AccessPoint('Main Street Bottom', 'Maridia', {
         'Red Fish Room Left': lambda sm: sm.wand(sm.canGoUpMtEverest(),
                                                  sm.haveItem('Morph')),
@@ -435,13 +427,11 @@ accessPoints = [
                                                     sm.wor(sm.canOpenGreenDoors(), # red door+green gate
                                                            sm.wand(sm.canOpenRedDoors(),
                                                                    RomPatches.has(RomPatches.AreaRandoGatesOther)))),
-        'Le Coude Right': lambda sm: sm.wand(sm.canOpenGreenDoors(), # gate+door
-                                             sm.wor(sm.haveItem('Gravity'),
-                                                    sm.wand(sm.knowsGravLessLevel3(),
-                                                            sm.haveItem('HiJump'),
-                                                            sm.haveItem('Ice'))), # for the sand pits
-                                             sm.canDestroyBombWallsUnderwater()),
-        'Precious Room Top': lambda sm: sm.canAccessDraygonFromMainStreet()
+        'Oasis Bottom': lambda sm: sm.wand(sm.wor(sm.canOpenGreenDoors(), # red door+green gate
+                                                  sm.wand(sm.canOpenRedDoors(),
+                                                          RomPatches.has(RomPatches.AreaRandoGatesOther))),
+                                           sm.canTraverseSandPits()),
+        'Crab Shaft Left': lambda sm: sm.canPassMtEverest()
     }, roomInfo = {'RoomPtr':0xcfc9, "area": 0x4},
        exitInfo = {'DoorPtr':0xa39c, 'direction': 0x6, "cap": (0x6, 0x2), "bitFlag": 0x0,
                    "screen": (0x0, 0x0), "distanceToSpawn": 0x170, "doorAsmPtr": 0x0000},
@@ -452,13 +442,8 @@ accessPoints = [
                                                  sm.wor(sm.wand(sm.haveItem('Super'),
                                                                 sm.knowsGreenGateGlitch()),
                                                         RomPatches.has(RomPatches.AreaRandoGatesOther))),
-        'Le Coude Right': lambda sm: sm.wand(sm.canExitCrabHole(),
-                                             sm.canOpenGreenDoors(), # toilet door
-                                             sm.canDestroyBombWallsUnderwater(),
-                                             sm.wor(sm.haveItem('Gravity'),
-                                                    sm.wand(sm.knowsGravLessLevel3(),
-                                                            sm.haveItem('HiJump'),
-                                                            sm.haveItem('Ice')))) # for the sand pits
+        'Oasis Bottom': lambda sm: sm.wand(sm.canExitCrabHole(),
+                                           sm.canTraverseSandPits())
     }, roomInfo = {'RoomPtr':0xd21c, "area": 0x4},
        exitInfo = {'DoorPtr':0xa510, 'direction': 0x5,
                    "cap": (0x3e, 0x6), "screen": (0x3, 0x0), "bitFlag": 0x0,
@@ -466,27 +451,7 @@ accessPoints = [
        entryInfo = {'SamusX':0x28, 'SamusY':0x188},
        dotOrientation = 'se'),
     AccessPoint('Le Coude Right', 'Maridia', {
-        'Toilet Top': lambda sm: SMBool(True),
-        'Crab Hole Bottom Left': lambda sm: sm.wand(sm.wand(sm.wor(RomPatches.has(RomPatches.AreaRandoBlueDoors), sm.canOpenYellowDoors()),
-                                                            sm.wor(sm.haveItem('Gravity'),
-                                                                   sm.wand(sm.knowsGravLessLevel3(),
-                                                                           sm.haveItem('HiJump'),
-                                                                           sm.haveItem('Ice')))), # for the sand pits
-                                                    sm.wand(sm.canOpenGreenDoors(),
-                                                            sm.canDestroyBombWallsUnderwater(),
-                                                            sm.haveItem('Morph'))), # toilet door
-        'Main Street Bottom': lambda sm: sm.wand(sm.wor(RomPatches.has(RomPatches.AreaRandoBlueDoors), sm.canOpenYellowDoors()),
-                                                 sm.canDestroyBombWallsUnderwater(),
-                                                 sm.wand(sm.wor(sm.haveItem('Gravity'),
-                                                                sm.wand(sm.knowsGravLessLevel3(),
-                                                                        sm.haveItem('HiJump'),
-                                                                        sm.haveItem('Ice'))), # for the sand pits
-                                                         sm.canOpenGreenDoors(), # toilet door
-                                                         sm.wor(RomPatches.has(RomPatches.AreaRandoGatesOther),
-                                                                sm.knowsGreenGateGlitch()))),
-        'Precious Room Top': lambda sm: sm.wand(Bosses.bossDead('Draygon'),
-                                                sm.haveItem('Gravity'), # suitless could be possible with this but unreasonable: https://youtu.be/rtLwytH-u8o
-                                                sm.canOpenGreenDoors())
+        'Toilet Top': lambda sm: SMBool(True)
     }, roomInfo = {'RoomPtr':0x95a8, "area": 0x0},
        exitInfo = {'DoorPtr':0x8aa2, 'direction': 0x4, "cap": (0x1, 0x16), "bitFlag": 0x0,
                    "screen": (0x0, 0x1), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
@@ -501,21 +466,27 @@ accessPoints = [
        dotOrientation = 'w'),
     AccessPoint('Toilet Top', 'Maridia', {
         'Oasis Bottom': lambda sm: sm.wand(sm.canOpenGreenDoors(), sm.canDestroyBombWallsUnderwater()),
-        'Le Coude Right': lambda sm: SMBool(True)
+        'Le Coude Right': lambda sm: SMBool(True),
+        'Precious Room Top': lambda sm: sm.wand(Bosses.bossDead('Draygon'),
+                                                # suitless could be possible with this but unreasonable: https://youtu.be/rtLwytH-u8o
+                                                sm.haveItem('Gravity'),
+                                                sm.canOpenGreenDoors())
     }, internal=True),
     AccessPoint('Oasis Bottom', 'Maridia', {
         'Toilet Top': lambda sm: sm.wand(sm.canOpenGreenDoors(), sm.canDestroyBombWallsUnderwater()),
-        'Main Street Bottom': lambda sm: sm.wand(sm.wor(sm.wand(canOpenGreenDoors(),
+        'Main Street Bottom': lambda sm: sm.wand(sm.wor(sm.wand(sm.canOpenGreenDoors(),
                                                                 sm.knowsGreenGateGlitch()),
                                                         RomPatches.has(RomPatches.AreaRandoGatesOther)),
                                                  sm.canTraverseSandPits()),
-        'Crab Hole Bottom Left': lambda sm.wand(sm.canTraverseSandPits(),
-                                                sm.haveItem('Morph'))
+        'Crab Hole Bottom Left': lambda sm: sm.wand(sm.canTraverseSandPits(),
+                                                    sm.haveItem('Morph'))
     }, internal=True),
     AccessPoint('Crab Shaft Left', 'Maridia', {
         'Main Street Bottom': lambda sm: SMBool(True), # fall down
-        'Beach': lambda sm.wand(sm.canTraverseSandPits(),
-                                                sm.haveItem('Morph'))
+        'Beach': lambda sm: sm.wor(sm.haveItem('Gravity'),
+                                   sm.canDoSuitlessOuterMaridia()),
+        'Aqueduct': lambda sm: sm.wand(sm.canOpenGreenDoors(),
+                                       sm.canUsePowerBombs())
     }, internal=True),
     AccessPoint('Watering Hole', 'Maridia', {
         'Beach': lambda sm: sm.haveItem('Morph'),
@@ -524,24 +495,38 @@ accessPoints = [
        start = {'spawn': 0x0407, 'solveArea': "Maridia Pink Bottom", 'save':"Save_Watering_Hole",
                 'patches':[RomPatches.MaridiaTubeOpened], 'rom_patches':['wh_open_tube.ips']}),
     AccessPoint('Watering Hole Bottom', 'Maridia', {
-        'Watering Hole': lambda sm: sm.wor(sm.haveItem('Gravity'),
-                                           sm.wand(sm.knowsGravLessLevel1(),
-                                                   sm.haveItem('HiJump')))
+        'Watering Hole': lambda sm: sm.canJumpUnderwater()
     }, internal=True),
     AccessPoint('Beach', 'Maridia', {
-        'Main Street Bottom': lambda sm: SMBool(True) # fall down
+        'Crab Shaft Left': lambda sm: SMBool(True), # fall down
+        'Watering Hole': lambda sm: sm.wand(sm.wor(sm.canPassBombPassages(),
+                                                   sm.canUseSpringBall()),
+                                            sm.wor(sm.haveItem('Gravity'),
+                                                   sm.canDoSuitlessOuterMaridia()))
+    }, internal=True),
+    AccessPoint('Aqueduct', 'Maridia', {
+        'Crab Shaft Left': lambda sm: sm.wand(sm.canDestroyBombWallsUnderwater(), # top left bomb blocks
+                                              sm.canJumpUnderwater()),
+        'Post Botwoon': lambda sm: sm.wand(sm.canJumpUnderwater(),
+                                           sm.canDefeatBotwoon()), # includes botwoon hallway conditions
+        'Left Sandpit': lambda sm: sm.canAccessSandPits(),
+        'Right Sandpit': lambda sm: sm.canAccessSandPits()
+    }, internal=True),
+    AccessPoint('Post Botwoon', 'Maridia', {
+        'Aqueduct': lambda sm: SMBool(True), # fall down the sandpit
+        'Precious Room Top': lambda sm: sm.canBotwoonExitToAndFromDraygon(),
+        'Toilet Top': lambda sm: sm.wand(sm.canPassCacatacAlley(),
+                                         sm.canBotwoonExitToAndFromDraygon())
+    }, internal=True),
+    AccessPoint('Left Sandpit', 'Maridia', {
+        'Oasis Bottom': lambda sm: sm.canTraverseSandPits()
+    }, internal=True),
+    AccessPoint('Right Sandpit', 'Maridia', {
+        'Oasis Bottom': lambda sm: sm.canTraverseSandPits()
     }, internal=True),
     AccessPoint('Precious Room Top', 'Maridia', {
-        'Main Street Bottom': lambda sm: sm.wand(sm.canBotwoonExitToAndFromDraygon(),
-                                                 sm.wor(sm.haveItem('Gravity'), # go down sand pits
-                                                        sm.wand(sm.canDoSuitlessOuterMaridia(),
-                                                                sm.wor(sm.wand(sm.haveItem('Ice'),# reverse pre-botwoon
-                                                                               sm.knowsMochtroidClip(),
-                                                                               sm.canDestroyBombWallsUnderwater()),
-                                                                       sm.knowsGravLessLevel3())))), # sandpits
-        'DraygonRoomOut': lambda sm: SMBool(True),
-        'Le Coude Right': lambda sm: sm.wand(sm.canPassCacatacAlley(),
-                                             sm.canBotwoonExitToAndFromDraygon())
+        'Post Botwoon': lambda sm: sm.canBotwoonExitToAndFromDraygon(),
+        'DraygonRoomOut': lambda sm: SMBool(True) # go down
     }, internal = True),
     # boss APs
     AccessPoint('DraygonRoomOut', 'Maridia', {

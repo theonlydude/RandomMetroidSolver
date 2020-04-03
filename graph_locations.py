@@ -629,13 +629,7 @@ locations = [
     'Visibility': "Chozo",
     'Room': 'Plasma Room',
     'AccessFrom' : {
-        'Main Street Bottom': lambda sm: sm.wand(sm.canOpenGreenDoors(),
-                                                 sm.wor(sm.wand(sm.haveItem('Gravity'),
-                                                                sm.canDestroyBombWalls()),
-                                                        sm.wand(sm.canDoSuitlessOuterMaridia(),
-                                                                sm.knowsGravLessLevel3(),
-                                                                sm.canDestroyBombWallsUnderwater()))),
-        'Le Coude Right': lambda sm: SMBool(True)
+        'Toilet Top': lambda sm: SMBool(True)
     },
     # DONE: to leave the Plasma Beam room you have to kill the space pirates and return to the door
     # to unlock the door:
@@ -680,10 +674,11 @@ locations = [
     'Visibility': "Chozo",
     'Room': 'West Sand Hole',
     'AccessFrom' : {
-        'Main Street Bottom': lambda sm: sm.canAccessBotwoonFromMainStreet()
+        'Left Sandpit': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: sm.wor(sm.haveItem('Gravity'),
-                                   sm.knowsGravLessLevel3()) # suitless maridia conditions are in canAccessBotwoonFromMainStreet
+    'Available': lambda sm: sm.wor(sm.haveItem('Gravity'), # TODO? add knows for jumping up there?
+                                   sm.wand(sm.haveItem('HiJump'),
+                                           sm.knowsGravLessLevel3()))
 },
 {
     'Area': "Maridia",
@@ -697,16 +692,9 @@ locations = [
     'Visibility': "Chozo",
     'Room': 'Spring Ball Room',
     'AccessFrom' : {
-        'Main Street Bottom': lambda sm: sm.wor(sm.canOpenGreenDoors(), sm.wand(sm.canOpenRedDoors(), RomPatches.has(RomPatches.AreaRandoGatesOther))), # gate
-        'Le Coude Right': lambda sm: sm.wand(sm.wor(RomPatches.has(RomPatches.AreaRandoBlueDoors), sm.canOpenYellowDoors()),
-                                             sm.canOpenGreenDoors(),
-                                             sm.canDestroyBombWallsUnderwater()) # toilet
+        'Oasis Bottom': lambda sm: sm.canTraverseSandPits()
     },
     'Available': lambda sm: sm.wand(sm.canUsePowerBombs(), # in Shaktool room to let Shaktool access the sand blocks
-                                    sm.wor(sm.haveItem('Gravity'), # access pants room
-                                           sm.wand(sm.haveItem('HiJump'),
-                                                   sm.haveItem('Ice'),
-                                                   sm.knowsGravLessLevel3())),
                                     sm.wor(sm.wand(sm.haveItem('Ice'), # puyo clip
                                                    sm.wor(sm.wand(sm.haveItem('Gravity'),
                                                                   sm.knowsPuyoClip()),
@@ -741,7 +729,7 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Botwoon Energy Tank Room',
     'AccessFrom' : {
-        'Main Street Bottom': lambda sm: sm.canDefeatBotwoon()
+        'Post Botwoon': lambda sm: sm.canJumpUnderwater()
     },
     'Available': lambda sm: sm.haveItem('Morph')
 },
@@ -1479,7 +1467,7 @@ locations = [
                                                    sm.canFly()))), # TODO::test if accessible with a spark (short charge), and how many etanks required
     'PostAvailable': lambda sm: sm.wor(sm.haveItem('Morph'), # normal exit
                                        sm.wand(sm.canOpenGreenDoors(), # go back to grapple room
-                                               sm.wor(sm.haveItem('SpaceJump'), 
+                                               sm.wor(sm.haveItem('SpaceJump'),
                                                       sm.wand(sm.haveItem('SpeedBooster'), sm.haveItem('HiJump'))))) # jump from the yellow plateform ennemy
 },
 {
@@ -1811,9 +1799,6 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Watering Hole',
     'AccessFrom' : {
-        'Main Street Bottom': lambda sm: sm.wand(sm.canPassMtEverest(),
-                                                 sm.wor(sm.canPassBombPassages(),
-                                                        sm.canUseSpringBall())),
         'Watering Hole Bottom': lambda sm: SMBool(True)
     },
     'Available': lambda sm: SMBool(True)
@@ -1830,9 +1815,6 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Watering Hole',
     'AccessFrom' : {
-        'Main Street Bottom': lambda sm: sm.wand(sm.canPassMtEverest(),
-                                                 sm.wor(sm.canPassBombPassages(),
-                                                        sm.canUseSpringBall())),
         'Watering Hole Bottom': lambda sm: SMBool(True)
     },
     'Available': lambda sm: SMBool(True)
@@ -1849,7 +1831,6 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Pseudo Plasma Spark Room',
     'AccessFrom' : {
-        'Main Street Bottom': lambda sm: sm.canPassMtEverest(),
         'Beach': lambda sm: SMBool(True)
     },
     'Available': lambda sm: SMBool(True)
@@ -1866,10 +1847,11 @@ locations = [
     'Visibility': "Visible",
     'Room': 'West Sand Hole',
     'AccessFrom' : {
-        'Main Street Bottom': lambda sm: sm.canAccessBotwoonFromMainStreet()
+        'Left Sandpit': lambda sm: SMBool(True)
     },
     'Available': lambda sm: sm.wor(sm.haveItem('Gravity'),
-                                   sm.knowsGravLessLevel3()) # suitless maridia conditions are in canPassMtEverest
+                                   sm.wand(sm.haveItem('HiJump'),
+                                           sm.knowsGravLessLevel3()))
 },
 {
     'Area': "Maridia",
@@ -1883,10 +1865,11 @@ locations = [
     'Visibility': "Visible",
     'Room': 'East Sand Hole',
     'AccessFrom' : {
-        'Main Street Bottom': lambda sm: sm.canAccessBotwoonFromMainStreet()
+        'Right Sandpit': lambda sm: SMBool(True)
     },
     'Available': lambda sm: sm.wor(sm.haveItem('Gravity'),
-                                   sm.knowsGravLessLevel3()) # suitless maridia conditions are in canPassMtEverest
+                                   sm.wand(sm.haveItem('HiJump'),
+                                           sm.knowsGravLessLevel3()))
 },
 {
     'Area': "Maridia",
@@ -1900,10 +1883,11 @@ locations = [
     'Visibility': "Visible",
     'Room': 'East Sand Hole',
     'AccessFrom' : {
-        'Main Street Bottom': lambda sm: sm.canAccessBotwoonFromMainStreet()
+        'Right Sandpit': lambda sm: SMBool(True)
     },
     'Available': lambda sm: sm.wor(sm.haveItem('Gravity'),
                                    sm.wand(sm.knowsGravLessLevel3(),
+                                           sm.haveItem('HiJump'),
                                            sm.canSpringBallJump())) # https://www.youtube.com/watch?v=7LYYxphRRT0
 },
 {
@@ -1918,7 +1902,7 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Aqueduct',
     'AccessFrom' : {
-        'Main Street Bottom': lambda sm: sm.canAccessBotwoonFromMainStreet()
+        'Aqueduct': lambda sm: SMBool(True)
     },
     'Available': lambda sm: sm.wand(sm.wor(sm.haveItem('SpeedBooster'),
                                            sm.wand(sm.knowsSnailClip(), sm.haveItem('Morph'))),
@@ -1936,7 +1920,7 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Aqueduct',
     'AccessFrom' : {
-        'Main Street Bottom': lambda sm: sm.canAccessBotwoonFromMainStreet()
+        'Aqueduct': lambda sm: SMBool(True)
     },
     'Available': lambda sm: sm.wand(sm.wor(sm.haveItem('SpeedBooster'),
                                            sm.wand(sm.knowsSnailClip(), sm.haveItem('Morph'))),

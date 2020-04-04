@@ -476,6 +476,11 @@ class HelpersGraph(Helpers):
         return sm.wor(sm.haveItem('Gravity'),
                       sm.wand(sm.knowsGravLessLevel2(),
                               sm.haveItem("HiJump"),
+                              # B -> D : get to top right door
+                              # D -> B : climb to room top
+                              sm.wor(sm.haveItem('Grapple'),
+                                     sm.haveItem('Ice')), # climb mochtroids
+                              # go through Colosseum
                               sm.wor(sm.haveItem('Grapple'),
                                      sm.haveItem('SpaceJump'),
                                      sm.wand(sm.haveItem('Ice'),

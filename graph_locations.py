@@ -1908,11 +1908,9 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Aqueduct',
     'AccessFrom' : {
-        'Aqueduct': lambda sm: SMBool(True)
+        'Aqueduct Items': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: sm.wand(sm.wor(sm.haveItem('SpeedBooster'),
-                                           sm.wand(sm.knowsSnailClip(), sm.haveItem('Morph'))),
-                                    sm.haveItem('Gravity'))
+    'Available': lambda sm: SMBool(True)
 },
 {
     'Area': "Maridia",
@@ -1926,11 +1924,9 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Aqueduct',
     'AccessFrom' : {
-        'Aqueduct': lambda sm: SMBool(True)
+        'Aqueduct Items': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: sm.wand(sm.wor(sm.haveItem('SpeedBooster'),
-                                           sm.wand(sm.knowsSnailClip(), sm.haveItem('Morph'))),
-                                    sm.haveItem('Gravity'))
+    'Available': lambda sm: SMBool(True)
 },
 {
     'Area': "Maridia",

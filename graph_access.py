@@ -442,7 +442,7 @@ accessPoints = [
     }, internal=True,
        start = {'spawn': 0x0406, 'solveArea': "Maridia Green", 'save':"Save_Mama",
                 'patches':[RomPatches.MaridiaTubeOpened, RomPatches.MamaTurtleBlueDoor],
-                'rom_patches':['wh_open_tube.ips'], 'doors': []}),  # TODO add mama turtle door
+                'rom_patches':['wh_open_tube.ips'], 'doors': []}),  # TODO add mama turtle door, add platform layout patch
     AccessPoint('Crab Hole Bottom Left', 'Maridia', {
         'Main Street Bottom': lambda sm: sm.wand(sm.canExitCrabHole(),
                                                  sm.wor(sm.wand(sm.haveItem('Super'),
@@ -516,8 +516,18 @@ accessPoints = [
         'Post Botwoon': lambda sm: sm.wand(sm.canJumpUnderwater(),
                                            sm.canDefeatBotwoon()), # includes botwoon hallway conditions
         'Left Sandpit': lambda sm: sm.canAccessSandPits(),
-        'Right Sandpit': lambda sm: sm.canAccessSandPits()
+        'Right Sandpit': lambda sm: sm.canAccessSandPits(),
+        'Aqueduct Items': lambda sm: sm.wand(sm.wor(sm.haveItem('SpeedBooster'),
+                                                    sm.wand(sm.knowsSnailClip(),
+                                                            sm.haveItem('Morph'))),
+                                             sm.haveItem('Gravity'))
     }, internal=True),
+    AccessPoint('Aqueduct Items', 'Maridia', {
+        'Aqueduct': lambda sm: SMBool(True) # go down
+    }, internal=True,
+       start = {'spawn': 0x0405, 'solveArea': "Maridia Pink Bottom", 'save':"Save_Aqueduct",
+                'patches':[RomPatches.MaridiaTubeOpened],
+                'rom_patches':['wh_open_tube.ips'], 'doors': []}),  # TODO add aqueduct save door
     AccessPoint('Post Botwoon', 'Maridia', {
         'Aqueduct': lambda sm: SMBool(True), # fall down the sandpit
         'Precious Room Top': lambda sm: sm.canBotwoonExitToAndFromDraygon(),

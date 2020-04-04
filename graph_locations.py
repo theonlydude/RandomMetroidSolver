@@ -602,20 +602,23 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Mama Turtle Room',
     'AccessFrom' : {
-        'Main Street Bottom': lambda sm: sm.wor(sm.haveItem('Gravity'), sm.canDoSuitlessOuterMaridia())
+        'Main Street Bottom': lambda sm: sm.wand(sm.wor(sm.haveItem('Gravity'), sm.canDoSuitlessOuterMaridia()),
+                                                 sm.wor(sm.canOpenRedDoors(),
+                                                        RomPatches.has(RomPatches.MamaTurtleBlueDoor)),
+                                                 sm.wor(sm.wor(sm.canFly(),
+                                                               sm.wand(sm.haveItem('Gravity'),
+                                                                       sm.haveItem('SpeedBooster')),
+                                                               sm.wand(sm.haveItem('HiJump'),
+                                                                       sm.haveItem('SpeedBooster'),
+                                                                       sm.knowsHiJumpMamaTurtle())),
+                                                        sm.wor(sm.wand(sm.canUseSpringBall(),
+                                                                       sm.wor(sm.wand(sm.haveItem('HiJump'),
+                                                                                      sm.knowsSpringBallJump()),
+                                                                              sm.knowsSpringBallJumpFromWall())),
+                                                               sm.haveItem('Grapple')))),
+        'Mama Turtle Save': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: sm.wand(sm.canOpenRedDoors(),
-                                    sm.wor(sm.wor(sm.canFly(),
-                                                  sm.wand(sm.haveItem('Gravity'),
-                                                          sm.haveItem('SpeedBooster')),
-                                                  sm.wand(sm.haveItem('HiJump'),
-                                                          sm.haveItem('SpeedBooster'),
-                                                          sm.knowsHiJumpMamaTurtle())),
-                                           sm.wor(sm.wand(sm.canUseSpringBall(),
-                                                          sm.wor(sm.wand(sm.haveItem('HiJump'),
-                                                                         sm.knowsSpringBallJump()),
-                                                                 sm.knowsSpringBallJumpFromWall())),
-                                                  sm.haveItem('Grapple'))))
+    'Available': lambda sm: SMBool(True)
 },
 {
     'Area': "Maridia",
@@ -1782,10 +1785,13 @@ locations = [
     'Visibility': "Hidden",
     'Room': 'Mama Turtle Room',
     'AccessFrom' : {
-        'Main Street Bottom': lambda sm: sm.wor(sm.haveItem('Gravity'),
-                                                sm.canDoSuitlessOuterMaridia())
+        'Main Street Bottom': lambda sm: sm.wand(sm.wor(sm.canOpenRedDoors(),
+                                                        RomPatches.has(RomPatches.MamaTurtleBlueDoor)),
+                                                 sm.wor(sm.haveItem('Gravity'),
+                                                        sm.canDoSuitlessOuterMaridia())),
+        'Mama Turtle Save': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: sm.canOpenRedDoors()
+    'Available': lambda sm: SMBool(True)
 },
 {
     'Area': "Maridia",

@@ -437,6 +437,12 @@ accessPoints = [
                    "screen": (0x0, 0x0), "distanceToSpawn": 0x170, "doorAsmPtr": 0x0000},
        entryInfo = {'SamusX':0x14a, 'SamusY':0x7a8},
        dotOrientation = 's'),
+    AccessPoint('Mama Turtle Save', 'Maridia', {
+        'Main Street Bottom': lambda sm: sm.canJumpUnderwater()
+    }, internal=True,
+       start = {'spawn': 0x0406, 'solveArea': "Maridia Green", 'save':"Save_Mama",
+                'patches':[RomPatches.MaridiaTubeOpened, RomPatches.MamaTurtleBlueDoor],
+                'rom_patches':['wh_open_tube.ips'], 'doors': []}),  # TODO add mama turtle door
     AccessPoint('Crab Hole Bottom Left', 'Maridia', {
         'Main Street Bottom': lambda sm: sm.wand(sm.canExitCrabHole(),
                                                  sm.wor(sm.wand(sm.haveItem('Super'),

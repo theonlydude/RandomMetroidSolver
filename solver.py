@@ -442,7 +442,13 @@ class CommonSolver(object):
                 return
 
             loc = self.visitedLocations.pop()
-            self.majorLocations.append(loc)
+            if self.majorsSplit == 'Full':
+                self.majorLocations.append(loc)
+            else:
+                if self.majorsSplit in loc['Class'] or 'Boss' in loc['Class']:
+                    self.majorLocations.append(loc)
+                else:
+                    self.minorLocations.append(loc)
 
             # pickup func
             if 'Unpickup' in loc:

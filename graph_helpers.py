@@ -452,6 +452,25 @@ class HelpersGraph(Helpers):
                               sm.knowsGravLessLevel3()))
 
     @Cache.decorator
+    def canReachCacatacAlleyFromBotowoon(self):
+        sm = self.smbm
+        return sm.wor(sm.haveItem('Gravity'),
+                      sm.wand(sm.knowsGravLessLevel2(),
+                              sm.haveItem("HiJump"),
+                              sm.wor(sm.haveItem('Grapple'),
+                                     sm.haveItem('Ice'),
+                                     sm.canDoubleSpringBallJump())))
+
+    @Cache.decorator
+    def canPassCacatacAlley(self):
+        sm = self.smbm
+        return sm.wand(Bosses.bossDead('Draygon'),
+                       sm.wor(sm.haveItem('Gravity'),
+                              sm.wand(sm.knowsGravLessLevel2(),
+                                      sm.haveItem('HiJump'),
+                                      sm.haveItem('SpaceJump'))))
+
+    @Cache.decorator
     def canBotwoonExitToAndFromDraygon(self):
         sm = self.smbm
         return sm.wor(sm.haveItem('Gravity'),
@@ -565,12 +584,3 @@ class HelpersGraph(Helpers):
             return self.canExitPreciousRoomVanilla()
         else:
             return self.canExitPreciousRoomRandomized()
-
-    @Cache.decorator
-    def canPassCacatacAlley(self):
-        sm = self.smbm
-        return sm.wand(Bosses.bossDead('Draygon'),
-                       sm.wor(sm.haveItem('Gravity'),
-                              sm.wand(sm.knowsGravLessLevel2(),
-                                      sm.haveItem('HiJump'),
-                                      sm.haveItem('SpaceJump'))))

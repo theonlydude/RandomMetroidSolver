@@ -600,6 +600,8 @@ class CommonSolver(object):
             nextMinComeBack = minorsAvailable[0]['comeBack']
             nextMajDistance = majorsAvailable[0]['distance']
             nextMinDistance = minorsAvailable[0]['distance']
+            nextMajAreaWeight = majorsAvailable[0]['areaWeight'] if "areaWeight" in majorsAvailable[0] else 10000
+            nextMinAreaWeight = minorsAvailable[0]['areaWeight'] if "areaWeight" in minorsAvailable[0] else 10000
 
             self.log.debug("diff area back dist - diff area back dist")
             self.log.debug("maj: {} '{}' {} {}, min: {} '{}' {} {}".format(nextMajDifficulty, majorsAvailable[0]['SolveArea'], nextMajComeBack, nextMajDistance, nextMinDifficulty, nextMinArea, nextMinComeBack, nextMinDistance))
@@ -617,9 +619,15 @@ class CommonSolver(object):
                         return self.collectMinor(minorsAvailable.pop(0))
                 # difficulty over area (this is a difficulty estimator, not a speedrunning simulator)
                 elif nextMinDifficulty <= diffThreshold and nextMajDifficulty <= diffThreshold:
+                    # respect areaweight first
+                    if nextMajAreaWeight != nextMinAreaWeight:
+                        if nextMajAreaWeight < nextMinAreaWeight:
+                            return self.collectMajor(majorsAvailable.pop(0))
+                        else:
+                            return self.collectMinor(minorsAvailable.pop(0))
                     # take the closer one
-                    if nextMajDistance != nextMinDistance:
-                        self.log.debug("!= distance")
+                    elif nextMajDistance != nextMinDistance:
+                        self.log.debug("!= distance and <= diffThreshold")
                         if nextMajDistance < nextMinDistance:
                             return self.collectMajor(majorsAvailable.pop(0))
                         else:
@@ -651,7 +659,7 @@ class CommonSolver(object):
                         return self.collectMajor(majorsAvailable.pop(0))
                     # take the closer one
                     elif nextMajDistance != nextMinDistance:
-                        self.log.debug("!= distance")
+                        self.log.debug("!= distance and > diffThreshold")
                         if nextMajDistance < nextMinDistance:
                             return self.collectMajor(majorsAvailable.pop(0))
                         else:
@@ -769,16 +777,18 @@ class CommonSolver(object):
                     break
 
             # sort them on difficulty and proximity
+            self.log.debug("getAvailableItemsList majors")
             majorsAvailable = self.getAvailableItemsList(majorsAvailable, diffThreshold)
             if self.majorsSplit == 'Full':
                 minorsAvailable = majorsAvailable
             else:
+                self.log.debug("getAvailableItemsList minors")
                 minorsAvailable = self.getAvailableItemsList(minorsAvailable, diffThreshold)
-
-            self.comeBack.cleanNoComeBack(locs)
 
             # choose one to pick up
             self.nextDecision(majorsAvailable, minorsAvailable, hasEnoughMinors, diffThreshold)
+
+            self.comeBack.cleanNoComeBack(locs)
 
         # compute difficulty value
         (difficulty, itemsOk) = self.computeDifficultyValue()

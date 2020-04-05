@@ -677,7 +677,7 @@ locations = [
     'Visibility': "Chozo",
     'Room': 'West Sand Hole',
     'AccessFrom' : {
-        'Left Sandpit': lambda sm: SMBool(True)
+        'Left Sandpit': lambda sm: sm.haveItem('Morph')
     },
     'Available': lambda sm: sm.wor(sm.haveItem('Gravity'), # TODO? add knows for jumping up there?
                                    sm.wand(sm.haveItem('HiJump'),
@@ -1853,7 +1853,7 @@ locations = [
     'Visibility': "Visible",
     'Room': 'West Sand Hole',
     'AccessFrom' : {
-        'Left Sandpit': lambda sm: SMBool(True)
+        'Left Sandpit': lambda sm: sm.haveItem('Morph')
     },
     'Available': lambda sm: sm.wor(sm.haveItem('Gravity'),
                                    sm.wand(sm.haveItem('HiJump'),
@@ -1889,7 +1889,7 @@ locations = [
     'Visibility': "Visible",
     'Room': 'East Sand Hole',
     'AccessFrom' : {
-        'Right Sandpit': lambda sm: SMBool(True)
+        'Right Sandpit': lambda sm: sm.haveItem('Morph')
     },
     'Available': lambda sm: sm.wor(sm.haveItem('Gravity'),
                                    sm.wand(sm.knowsGravLessLevel3(),
@@ -1908,7 +1908,7 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Aqueduct',
     'AccessFrom' : {
-        'Aqueduct Items': lambda sm: SMBool(True)
+        'Aqueduct': lambda sm: SMBool(True)
     },
     'Available': lambda sm: SMBool(True)
 },
@@ -1924,7 +1924,7 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Aqueduct',
     'AccessFrom' : {
-        'Aqueduct Items': lambda sm: SMBool(True)
+        'Aqueduct': lambda sm: SMBool(True)
     },
     'Available': lambda sm: SMBool(True)
 },

@@ -616,7 +616,7 @@ locations = [
                                                                                       sm.knowsSpringBallJump()),
                                                                               sm.knowsSpringBallJumpFromWall())),
                                                                sm.haveItem('Grapple')))),
-        'Mama Turtle Save': lambda sm: SMBool(True)
+        'Mama Turtle': lambda sm: SMBool(True)
     },
     'Available': lambda sm: SMBool(True)
 },
@@ -1789,7 +1789,7 @@ locations = [
                                                         RomPatches.has(RomPatches.MamaTurtleBlueDoor)),
                                                  sm.wor(sm.haveItem('Gravity'),
                                                         sm.canDoSuitlessOuterMaridia())),
-        'Mama Turtle Save': lambda sm: SMBool(True)
+        'Mama Turtle': lambda sm: SMBool(True)
     },
     'Available': lambda sm: SMBool(True)
 },

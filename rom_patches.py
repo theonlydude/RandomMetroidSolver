@@ -36,7 +36,7 @@ class RomPatches:
     SpongeBathBlueDoor        = 42
     # maridia
     MaridiaTubeOpened         = 51
-    MamaTurtleBlueDoor        = 52,
+    MamaTurtleBlueDoor        = 52
     ## Area rando patches
     # remove crumble block for reverse lower norfair door access
     SingleChamberNoCrumble    = 101

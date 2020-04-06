@@ -903,7 +903,7 @@ class Randomizer(object):
     # determine randomizer parameters, either statically (all speeds but variable), or dynamically (variable speed)
     def determineParameters(self):
         speed = self.settings.progSpeed
-        if speed == 'variable':
+        if speed == 'VARIAble':
             speed = random.choice(progSpeeds)
         self.spreadProb = self.settings.getSpreadFactor(speed)
         self.minorHelpProb = self.settings.getMinorHelpProb(speed)

@@ -73,7 +73,7 @@ NB_CPU=$(cat /proc/cpuinfo  | grep 'processor' | wc -l)
 
 SKILL_PRESET=${CWD}/standard_presets/Season_Races.json
 BASE_RANDO_PRESET=${CWD}/rando_presets/Season_Races.json
-for PROG_SPEED in slowest slow medium fast fastest basic variable; do
+for PROG_SPEED in slowest slow medium fast fastest basic VARIAble; do
     # generate rando preset
     RANDO_PRESET=${CWD}/rando_presets/Season_Races_${PROG_SPEED}.json
     sed -e "s+VARIAble+${PROG_SPEED}+" ${BASE_RANDO_PRESET} > ${RANDO_PRESET}

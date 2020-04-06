@@ -118,9 +118,6 @@ if (hs.registerOverlay) {
     padding: 0.5%;
     border: 2px solid #666666;
 }
-#psMultiselectDiv {
-    display: none;
-}
 .sixty {
     width: 65%
 }
@@ -239,17 +236,29 @@ $(document).ready(function(){
    jQuery(window).on('resize', resizeChosen);
 });
 
+// chosen elements need a special method to update their value
+var chosenElements = ["preset", "startLocationMultiSelect", "majorsSplitMultiSelect", "progressionSpeedMultiSelect", "progressionDifficultyMultiSelect", "morphPlacementMultiSelect", "energyQtyMultiSelect"];
+var defaultMultiValues = {{response.write(defaultMultiValues, escape=False)}};
+
 function resizeChosen() {
    $(".chosen-container").each(function() {
        $(this).attr('style', 'width: 100%');
    });          
 }
 
+function isElemRandom(elem) {
+    return elem.className.search("active") != -1;
+}
+
+function isElemIdRandom(elemId) {
+    return isElemRandom(document.getElementById(elemId+"Random"));
+}
+
 function randomize(evt, elemId) {
   var e = document.getElementById(elemId);
 
   var isActive;
-  if(evt.currentTarget.className.search("active") != -1) {
+  if(isElemRandom(evt.currentTarget)) {
     evt.currentTarget.className = evt.currentTarget.className.replace(" active", "");
     isActive = false;
 
@@ -275,16 +284,17 @@ function randomize(evt, elemId) {
     }
   }
 
-  // special case for prog speed
-  if(elemId == "progressionSpeed") {
+  // special case for multi select
+  var multi = document.getElementById(elemId+"MultiSelectDiv");
+  if(multi != null) {
     if(isActive == true) {
-      document.getElementById("progressionSpeed").style.display = "none";
-      document.getElementById("psMultiselectDiv").style.display = "block";
+      e.style.display = "none";
+      multi.style.display = "block";
       // chosen must be activated when it's visible, else it doesn't work...
-      $("#psMultiselect").chosen();
+      $("#"+elemId+"MultiSelect").chosen();
     } else {
-      document.getElementById("progressionSpeed").style.display = "block";
-      document.getElementById("psMultiselectDiv").style.display = "none";
+      e.style.display = "block";
+      multi.style.display = "none";
     }
   }
 }
@@ -321,16 +331,14 @@ function getComplexity() {
 
 function setRandom() {
 {{
-    for id in ["missileQty", "superQty", "powerBombQty", "minorQty", "energyQty", "maxDifficulty", "majorsSplit", "suitsRestriction", "morphPlacement", "funCombat", "funMovement", "funSuits", "progressionDifficulty", "hideItems", "strictMinors", "progressionSpeed", "areaRandomization", "bossRandomization", "escapeRando", "startLocation"]:
-    if id in session.randomizer and session.randomizer[id] == "random":
-      response.write("  document.getElementById(\"{}Random\").click();\n".format(id), escape=False)
+    for id in ["missileQty", "superQty", "powerBombQty", "minorQty", "energyQty", "majorsSplit", "suitsRestriction", "morphPlacement", "funCombat", "funMovement", "funSuits", "progressionDifficulty", "hideItems", "strictMinors", "progressionSpeed", "areaRandomization", "bossRandomization", "escapeRando", "startLocation"]:
+      if id in session.randomizer and session.randomizer[id] == "random":
+        response.write("  document.getElementById(\"{}Random\").click();\n".format(id), escape=False)
+        if "{}MultiSelect".format(id) in session.randomizer:
+          response.write("  $(\"#{}MultiSelect\").val({});\n".format(id, session.randomizer["{}MultiSelect".format(id)]), escape=False)
+          pass
+        pass
       pass
-    pass
-  if "progressionSpeed" in session.randomizer and type(session.randomizer["progressionSpeed"]) == list and len(session.randomizer["progressionSpeed"]) > 1:
-    # python2: prog speed are in utf-8 after loading from json and displayed in js like [u'slowest', u'slow']
-    response.write("  $(\"#psMultiselect\").val({});\n".format([str(ps) for ps in session.randomizer["progressionSpeed"]]), escape=False)
-    response.write("  document.getElementById(\"progressionSpeedRandom\").click();\n", escape=False)
-    pass
 }}
 }
 
@@ -391,22 +399,32 @@ function AjaxPresetCallCompleted(data) {
     console.log("AjaxPresetCallCompleted");
 
     var dataDict = {paramsFileTarget : data, "complexity": getComplexity()};
-    var elems = ["seed", "preset", "raceMode", "areaLayout", "removeEscapeEnemies", "layoutPatches", "variaTweaks", "gravityBehaviour", "nerfedCharge", "itemsounds", "elevators_doors_speed", "spinjumprestart", "rando_speed", "animals", "No_Music", "random_music"];
-    var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "energyQty", "maxDifficulty", "majorsSplit", "startLocation", "suitsRestriction", "morphPlacement", "funCombat", "funMovement", "funSuits", "progressionDifficulty", "hideItems", "strictMinors", "areaRandomization", "bossRandomization", "escapeRando"];
+    var elems = ["seed", "preset", "raceMode", "areaLayout", "removeEscapeEnemies", "layoutPatches", "variaTweaks", "gravityBehaviour", "nerfedCharge", "itemsounds", "elevators_doors_speed", "spinjumprestart", "rando_speed", "animals", "No_Music", "random_music", "maxDifficulty"];
+    var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "suitsRestriction", "funCombat", "funMovement", "funSuits", "hideItems", "strictMinors", "areaRandomization", "bossRandomization", "escapeRando"];
+    var multiElems = ["majorsSplit", "startLocation","energyQty", "morphPlacement", "progressionDifficulty", "progressionSpeed"];
 
     for(var i=0; i<elems.length; i++) {
        dataDict[elems[i]] = document.getElementById(elems[i]).value;
     }
     for(var i=0; i<randomElems.length; i++) {
        // check if random dice is checked
-       if(document.getElementById(randomElems[i]+"Random").className.search("active") != -1) {
+       if(isElemIdRandom(randomElems[i])) {
          dataDict[randomElems[i]] = "random";
        } else {
          dataDict[randomElems[i]] = document.getElementById(randomElems[i]).value;
        }
     }
-
-    dataDict["progressionSpeed"] = getProgSpeed();
+    for(var i=0; i<multiElems.length; i++) {
+       // check if random dice is checked
+       var elemId = multiElems[i];
+       if(isElemIdRandom(elemId)) {
+         dataDict[elemId] = "random";
+         multiElemId = elemId+"MultiSelect";
+         dataDict[multiElemId] = $("#"+multiElemId).val().join();
+       } else {
+         dataDict[elemId] = document.getElementById(elemId).value;
+       }
+    }
 
     // call web service with parameters
     var request = $.ajax({
@@ -440,16 +458,6 @@ function ajaxFailJSON(jqXHR, textStatus) {
   $('#overlay').hide();
   $('#loadingGIF').hide();
   cancelTip();
-}
-
-function getProgSpeed() {
-  // multi select value for random prog speed
-  console.log("psMultiselect value: "+$("#psMultiselect").val());
-  if(document.getElementById("progressionSpeedRandom").className.search("active") != -1) {
-    return $("#psMultiselect").val().join();
-  } else {
-    return document.getElementById("progressionSpeed").value;
-  }
 }
 
 function unpack_3bytes(ips, i) {
@@ -556,22 +564,32 @@ function AjaxRandomizerCallCompleted(data) {
     console.log("button text set back to randomize");
 
     var dataDict = {"complexity": getComplexity()};
-    var elems = ["seed", "preset", "raceMode", "areaLayout", "removeEscapeEnemies", "layoutPatches", "variaTweaks", "gravityBehaviour", "nerfedCharge", "itemsounds", "elevators_doors_speed", "spinjumprestart", "rando_speed", "animals", "No_Music", "randoPreset", "random_music"];
-    var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "energyQty", "maxDifficulty", "majorsSplit", "startLocation", "suitsRestriction", "morphPlacement", "funCombat", "funMovement", "funSuits", "progressionDifficulty", "hideItems", "strictMinors", "areaRandomization", "bossRandomization", "escapeRando"];
+    var elems = ["seed", "preset", "raceMode", "areaLayout", "removeEscapeEnemies", "layoutPatches", "variaTweaks", "gravityBehaviour", "nerfedCharge", "itemsounds", "elevators_doors_speed", "spinjumprestart", "rando_speed", "animals", "No_Music", "randoPreset", "random_music", "maxDifficulty"];
+    var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "suitsRestriction", "funCombat", "funMovement", "funSuits", "hideItems", "strictMinors", "areaRandomization", "bossRandomization", "escapeRando"];
+    var multiElems = ["majorsSplit", "startLocation","energyQty", "morphPlacement", "progressionDifficulty", "progressionSpeed"];
 
     for(var i=0; i<elems.length; i++) {
        dataDict[elems[i]] = document.getElementById(elems[i]).value;
     }
     for(var i=0; i<randomElems.length; i++) {
        // check if random dice is checked
-       if(document.getElementById(randomElems[i]+"Random").className.search("active") != -1) {
+       if(isElemIdRandom(randomElems[i])) {
          dataDict[randomElems[i]] = "random";
        } else {
          dataDict[randomElems[i]] = document.getElementById(randomElems[i]).value;
        }
     }
-
-    dataDict["progressionSpeed"] = getProgSpeed();
+    for(var i=0; i<multiElems.length; i++) {
+       // check if random dice is checked
+       var elemId = multiElems[i];
+       if(isElemIdRandom(elemId)) {
+         dataDict[elemId] = "random";
+         multiElemId = elemId+"MultiSelect";
+         dataDict[multiElemId] = $("#"+multiElemId).val().join();
+       } else {
+         dataDict[elemId] = document.getElementById(elemId).value;
+       }
+    }
 
     // call webservice to update the session
     var request = $.ajax({
@@ -613,8 +631,6 @@ function doSubmit() {
     }
 
     var dataDict = {"preset": document.getElementById("preset").value};
-
-    console.log("before preset web service call"+dataDict["preset"]);
 
     // call preset web service with parameters
     var request = $.ajax({
@@ -949,22 +965,16 @@ function loadRandoPresetOK(data) {
   for(var key in data) {
     value = data[key];
     var elem = document.getElementById(key);
-    // console.log("key: "+key+" value: "+value);
 
     var elemRandom = document.getElementById(key+"Random");
     if(value == "random") {
-      if(key == "progressionSpeed") {
-        $("#psMultiselect").val(["slowest", "slow", "medium", "fast", "fastest", "basic", "VARIAble"]).trigger("chosen:updated");
-        document.getElementById("progressionSpeedRandom").click();
-      }
-
       // if not already set as random, set it
-      if(elemRandom.className.search("active") == -1) {
+      if(! isElemRandom(elemRandom)) {
         randomize({currentTarget: elemRandom}, key);
       }
     } else {
       // check if it was random before
-      if(elemRandom != null && elemRandom.className.search("active") != -1) {
+      if(elemRandom != null && isElemRandom(elemRandom)) {
         randomize({currentTarget: elemRandom}, key);
       }
 
@@ -975,22 +985,17 @@ function loadRandoPresetOK(data) {
         }
       }
 
-      // update element value
-      if(key == "progressionSpeed") {
-        if(typeof value == "string") {
-          // one value
-          elem.value = value;
-        } else {
-          // multiple values
-          $("#psMultiselect").val(value).trigger("chosen:updated");
-          document.getElementById("progressionSpeedRandom").click();
-        }
-      } else if(key == "preset") {
-        elem.value = value;
-        $("#preset").val(value).trigger("chosen:updated");
-      } else {
-        elem.value = value;
+      elem.value = value;
+      if(chosenElements.includes(key)) {
+        $("#"+key).val(value).trigger("chosen:updated");
       }
+    }
+  }
+
+  // check if multi select has been set by the rando preset, otherwise load default values
+  for(var key in defaultMultiValues) {
+    if(! (key in data) ) {
+      $("#"+key).val(defaultMultiValues[key]).trigger("chosen:updated");
     }
   }
 }
@@ -1142,7 +1147,7 @@ Tournament presets:<ul>\
     {
       element: "#maxDifficultyStep",
       title: "Maximum difficulty for picking up an item",
-      content: "<p>Depending on the perceived difficulties of the techniques, bosses, hell runs etc. from the preset, it will prevent the Randomizer from placing an item in a location too difficult to reach with the current items.</p><p><b>Warning:</b> if too low may cause the randomizer to up the difficulty for some boss fight.</p><p>Click on the dice button to randomly set this parameter.</p>"
+      content: "<p>Depending on the perceived difficulties of the techniques, bosses, hell runs etc. from the preset, it will prevent the Randomizer from placing an item in a location too difficult to reach with the current items.</p><p><b>Warning:</b> if too low may cause the randomizer to up the difficulty for some boss fight.</p>"
     },
     {
       element: "#progSpeedStep",
@@ -1505,19 +1510,7 @@ def displayCheckbox(id, defaultTrue=False):
 {{
 def displaySelect(id, values, default):
   if id in session.randomizer:
-    if id == "progressionSpeed":
-      if type(session.randomizer["progressionSpeed"]) == list:
-        if len(session.randomizer["progressionSpeed"]) == 1:
-          value = session.randomizer[id][0]
-        else:
-          value = default
-          pass
-      else:
-        value = session.randomizer[id]
-        pass
-    else:
-      value = session.randomizer[id]
-      pass
+    value = session.randomizer[id]
   else:
     value = default
     pass
@@ -1527,6 +1520,24 @@ def displaySelect(id, values, default):
            **dict(_id=id, _name=id, value=value, _class="full"))
   }}
 {{pass}}
+
+{{
+def displayMultiSelect(id, values, default, multipleValues=None):
+  displaySelect(id, values, default)
+
+  response.write("<div id=\"{}MultiSelectDiv\" style=\"display:none\">".format(id), escape=False)
+  response.write("<select id=\"{}MultiSelect\" class=\"filldropdown chzn-select\" multiple>".format(id), escape=False)
+  if multipleValues != None:
+    values = multipleValues
+    pass
+  for value in values:
+    response.write("  <option value=\"{}\" selected=\"selected\">{}</option>".format(value, value), escape=False)
+    pass
+  response.write("</select>", escape=False)
+  response.write("</div>", escape=False)
+  pass
+}}
+
 {{
 def displayNumber(id, min, max, default, step="1"):
   if id in session.randomizer:
@@ -1610,50 +1621,39 @@ def displayNumber(id, min, max, default, step="1"):
               <tr>
                 <td class="small"><div class="random"><button id="startLocationRandom" type="button" onclick="randomize(event, 'startLocation')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
                 <td><span id="startLocationText">Start location</span></td>
-                <td>{{displaySelect("startLocation", startAPs, "Landing Site")}}</td>
+                <td>{{displayMultiSelect("startLocation", startAPs, "Landing Site", defaultMultiValues["startLocationMultiSelect"])}}</td>
                 <td id="StartLocationStep"><button type="button" onclick="startTheTour(5)">?</button></td>
               </tr>
               <tr>
                 <td class="small"><div class="random"><button id="majorsSplitRandom" type="button" onclick="randomize(event, 'majorsSplit')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
                 <td><span id="majorsSplitText">Majors Split</span></td>
-                <td>{{displaySelect("majorsSplit", ["Full", "Major", "Chozo"], "Full")}}</td>
+                <td>{{displayMultiSelect("majorsSplit", defaultMultiValues["majorsSplitMultiSelect"], "Full")}}</td>
                 <td id="majorsSplitStep"><button type="button" onclick="startTheTour(6)">?</button></td>
               </tr>
               <tr id="maxDiffVisibility">
-                <td class="small"><div class="random"><button id="maxDifficultyRandom" type="button" onclick="randomize(event, 'maxDifficulty')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
+                <td class="small"></td>
                 <td><span id="maxDifficultyText">Maximum difficulty for picking up an item:</span></td>
-                <td>{{displaySelect("maxDifficulty", ["no difficulty cap", "easy", "medium", "hard", "harder", "hardcore", "mania"], "no difficulty cap")}}</td>
+                <td>{{displaySelect("maxDifficulty", ['no difficulty cap', 'easy', 'medium', 'hard', 'harder', 'hardcore', 'mania'], "hardcore")}}</td>
                 <td id="maxDifficultyStep"><button type="button" onclick="startTheTour(7)">?</button></td>
               </tr>
               <tr>
                 <td class="small"><div class="random"><button id="progressionSpeedRandom" type="button" onclick="randomize(event, 'progressionSpeed')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
                 <td class="half"><span id="progressionSpeedText">Progression speed:</span></td>
                 <td class="half">
-                  {{displaySelect("progressionSpeed", ["slowest", "slow", "medium", "fast", "fastest", "basic", "VARIAble"], "medium")}}
-                  <div id="psMultiselectDiv">
-                    <select id="psMultiselect" data-placeholder="Speeds to randomize..." class="filldropdown chzn-select" multiple>
-                      <option value="slowest" selected="selected">slowest</option>
-                      <option value="slow" selected="selected">slow</option>
-                      <option value="medium" selected="selected">medium</option>
-                      <option value="fast" selected="selected">fast</option>
-                      <option value="fastest" selected="selected">fastest</option>
-                      <option value="basic" selected="selected">basic</option>
-                      <option value="VARIAble" selected="selected">VARIAble</option>
-                    </select>
-                  </div>
+                  {{displayMultiSelect("progressionSpeed", defaultMultiValues["progressionSpeedMultiSelect"], "medium")}}
                 </td>
                 <td id="progSpeedStep"><button type="button" onclick="startTheTour(8)">?</button></td>
               </tr>
               <tr id="progDiffVisibility">
                 <td class="small"><div class="random"><button id="progressionDifficultyRandom" type="button" onclick="randomize(event, 'progressionDifficulty')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
                 <td class="half"><span id="progressionDifficultyText">Progression difficulty:</span></td>
-                <td class="half">{{displaySelect("progressionDifficulty", ["easier", "normal", "harder"], "normal")}}</td>
+                <td class="half">{{displayMultiSelect("progressionDifficulty", defaultMultiValues["progressionDifficultyMultiSelect"], "normal")}}</td>
                 <td id="progDiffStep"><button type="button" onclick="startTheTour(9)">?</button></td>
               </tr>
               <tr id="morphPlacementVisibility">
                 <td class="small"><div class="random"><button id="morphPlacementRandom" type="button" onclick="randomize(event, 'morphPlacement')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
                 <td class="half"><span id="morphPlacementText">Morph Placement:</span></td>
-                <td class="half">{{displaySelect("morphPlacement", ["early", "normal", "late"], "normal")}}</td>
+                <td class="half">{{displayMultiSelect("morphPlacement", defaultMultiValues["morphPlacementMultiSelect"], "normal")}}</td>
                 <td id="morphPlacementStep"><button type="button" onclick="startTheTour(10)">?</button></td>
               </tr>
               <tr id="suitsRestrictionVisibility">
@@ -1701,7 +1701,7 @@ def displayNumber(id, min, max, default, step="1"):
                 <tr>
                   <td class="small"><div class="random"><button id="energyQtyRandom" type="button" onclick="randomize(event, 'energyQty')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
                   <td><span id="energyQtyText">Quantity of Energy/Reserve Tanks available:</span></td>
-                  <td>{{displaySelect("energyQty", ["sparse", "medium", "vanilla"], "vanilla")}}</td>
+                  <td>{{displayMultiSelect("energyQty", defaultMultiValues["energyQtyMultiSelect"], "vanilla")}}</td>
                   <td id="energyQtyStep"><button type="button" onclick="startTheTour(16)">?</button></td>
                 </tr>
               </table>
@@ -1765,27 +1765,6 @@ def displayNumber(id, min, max, default, step="1"):
                   <td><button type="button" onclick="startTheTour(24)">?</button></td>
                 </tr>
               </table>
-
-<!--
-              <table class="full">
-                <tr>
-                  <td class="small" id="funCombatStep"><div class="random"><button id="funCombatRandom" type="button" onclick="randomize(event, 'funCombat')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
-                  <td colspan="2" class="full">{{displayCheckbox("funCombat")}}<span id="funCombatText">Super Fun Combat</span></td>
-                  <td><button type="button" onclick="startTheTour(22)">?</button></td>
-                </tr>
-                <tr>
-                  <td class="small" id="funMovementStep"><div class="random"><button id="funMovementRandom" type="button" onclick="randomize(event, 'funMovement')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
-                  <td colspan="2" class="full">{{displayCheckbox("funMovement")}}<span id="funMovementText">Super Fun Movement</span></td>
-                  <td><button type="button" onclick="startTheTour(23)">?</button></td>
-                </tr>
-                <tr>
-                  <td class="small" id="funSuitsStep"><div class="random"><button id="funSuitsRandom" type="button" onclick="randomize(event, 'funSuits')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
-                  <td colspan="2" class="full">{{displayCheckbox("funSuits")}}<span id="funSuitsText">Suitless</span></td>
-                  <td><button type="button" onclick="startTheTour(24)">?</button></td>
-                </tr>
-              </table>
--->
-
             </div>
             <div id="patchesVisibility">
               <h4 id="patchesStep">Patches<span class="rightStep"><button type="button" onclick="startTheTour(25)">?</button></span></h4>

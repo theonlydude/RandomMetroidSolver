@@ -6,7 +6,7 @@ GET_STATS=./get_stats.py
 DUMP=./dump_rom.py
 
 presets="smrat Season_Races master"
-progs="slowest slow medium fast fastest variable"
+progs="slowest slow medium fast fastest VARIAble"
 n=20
 vanilla_rom=$1
 if [ -z "$1" ]; then

@@ -14,11 +14,28 @@ from rom import RomPatcher, FakeROM
 from utils import loadRandoPreset
 import log, db
 
-speeds = progSpeeds + ['variable']
+speeds = progSpeeds + ['VARIAble']
 energyQties = ['sparse', 'medium', 'vanilla' ]
 progDiffs = ['easier', 'normal', 'harder']
 morphPlacements = ['early', 'late', 'normal']
 majorsSplits = ['Full', 'Major', 'Chozo']
+
+def randomMulti(args, param, defaultMultiValues):
+    value = args[param]
+
+    isRandom = False
+    if value == "random":
+        isRandom = True
+        if args[param+"List"] != None:
+            # use provided list
+            choices = args[param+"List"].split(',')
+            value = random.choice(choices)
+        else:
+            # use default list
+            value = random.choice(defaultMultiValues)
+    logger.debug("{}: {}".format(param, value))
+
+    return (isRandom, value)
 
 def dumpErrorMsg(outFileName, msg):
     print("DIAG: " + msg)
@@ -61,12 +78,17 @@ if __name__ == "__main__":
     parser.add_argument('--startAP', help="Name of the Access Point to start from",
                         dest='startAP', nargs='?', default="Landing Site",
                         choices=['random'] + GraphUtils.getStartAccessPointNames())
+    parser.add_argument('--startLocation', help="Name of the Access Point to start from",
+                        dest='startAP', nargs='?', default="Landing Site",
+                        choices=['random'] + GraphUtils.getStartAccessPointNames())
+    parser.add_argument('--startLocationList', help="list to choose from when random",
+                        dest='startLocationList', nargs='?', default=None)
     parser.add_argument('--debug', '-d', help="activate debug logging", dest='debug',
                         action='store_true')
     parser.add_argument('--maxDifficulty', '-t',
                         help="the maximum difficulty generated seed will be for given parameters",
                         dest='maxDifficulty', nargs='?', default=None,
-                        choices=['easy', 'medium', 'hard', 'harder', 'hardcore', 'mania', 'random'])
+                        choices=['easy', 'medium', 'hard', 'harder', 'hardcore', 'mania'])
     parser.add_argument('--seed', '-s', help="randomization seed to use", dest='seed',
                         nargs='?', default=0, type=int)
     parser.add_argument('--rom', '-r',
@@ -104,12 +126,16 @@ if __name__ == "__main__":
                         help="quantity of ETanks/Reserve Tanks",
                         dest='energyQty', nargs='?', default='vanilla',
                         choices=energyQties + ['random'])
+    parser.add_argument('--energyQtyList', help="list to choose from when random",
+                        dest='energyQtyList', nargs='?', default=None)
     parser.add_argument('--strictMinors',
                         help="minors quantities values will be strictly followed instead of being probabilities",
                         dest='strictMinors', nargs='?', const=True, default=False)
     parser.add_argument('--majorsSplit',
                         help="how to split majors/minors: Full, Major, Chozo",
                         dest='majorsSplit', nargs='?', choices=majorsSplits + ['random'], default='Full')
+    parser.add_argument('--majorsSplitList', help="list to choose from when random",
+                        dest='majorsSplitList', nargs='?', default=None)
     parser.add_argument('--suitsRestriction',
                         help="no suits in early game",
                         dest='suitsRestriction', nargs='?', const=True, default=False)
@@ -117,15 +143,21 @@ if __name__ == "__main__":
                         help="morph placement",
                         dest='morphPlacement', nargs='?', default='early',
                         choices=morphPlacements + ['random'])
+    parser.add_argument('--morphPlacementList', help="list to choose from when random",
+                        dest='morphPlacementList', nargs='?', default=None)
     parser.add_argument('--hideItems', help="Like in dessy's rando hide half of the items",
                         dest="hideItems", nargs='?', const=True, default=False)
     parser.add_argument('--progressionSpeed', '-i',
                         help="progression speed, from " + str(speeds) + ". 'random' picks a random speed from these. Pick a random speed from a subset using comma-separated values, like 'slow,medium,fast'.",
                         dest='progressionSpeed', nargs='?', default='medium')
+    parser.add_argument('--progressionSpeedList', help="list to choose from when random",
+                        dest='progressionSpeedList', nargs='?', default=None)
     parser.add_argument('--progressionDifficulty',
                         help="",
                         dest='progressionDifficulty', nargs='?', default='normal',
                         choices=progDiffs + ['random'])
+    parser.add_argument('--progressionDifficultyList', help="list to choose from when random",
+                        dest='progressionDifficultyList', nargs='?', default=None)
     parser.add_argument('--superFun',
                         help="randomly remove major items from the pool for maximum enjoyment",
                         dest='superFun', nargs='?', default=[], action='append',
@@ -274,30 +306,10 @@ if __name__ == "__main__":
     maxDifficulty = threshold
     logger.debug("maxDifficulty: {}".format(maxDifficulty))
 
-    # if random progression speed, choose one
-    progSpeed = str(args.progressionSpeed).lower()
-    if progSpeed == "random":
-        progSpeed = random.choice(speeds)
-    mulSpeeds = progSpeed.split(',')
-    progSpeed = random.choice(mulSpeeds)
-    if len(mulSpeeds) > 1:
-        args.progressionSpeed = 'random'
-    if progSpeed not in speeds:
-        print('Invalid progression speed : ' + progSpeed)
-        sys.exit(-1)
-    logger.debug("progression speed: {}".format(progSpeed))
-
-    # if random progression difficulty, choose one
-    progDiff = args.progressionDifficulty
-    if progDiff == "random":
-        progDiff = random.choice(progDiffs)
-    logger.debug("progression diff: {}".format(progDiff))
-
-    majorsSplitRandom = False
-    if args.majorsSplit == 'random':
-        majorsSplitRandom = True
-        args.majorsSplit = random.choice(majorsSplits)
-    logger.debug("majorsSplit: {}".format(args.majorsSplit))
+    # handle random parameters with dynamic pool of values
+    (_, progSpeed) = randomMulti(args.__dict__, "progressionSpeed", speeds)
+    (_, progDiff) = randomMulti(args.__dict__, "progressionDifficulty", progDiffs)
+    (majorsSplitRandom, args.majorsSplit) = randomMulti(args.__dict__, "majorsSplit", majorsSplits)
 
     areaRandom = False
     if args.area == 'random':
@@ -326,8 +338,11 @@ if __name__ == "__main__":
         args.hideItems = bool(random.randint(0, 2))
 
     if args.morphPlacement == 'random':
+        if args.morphPlacementList != None:
+            morphPlacements = args.morphPlacementList.split(',')
         if (args.suitsRestriction == True and args.area == True) or args.majorsSplit == 'Chozo':
-            morphPlacements.remove('late')
+            if 'late' in morphPlacements:
+                morphPlacements.remove('late')
         args.morphPlacement = random.choice(morphPlacements)
     # late + chozo will always stuck
     if args.majorsSplit == 'Chozo' and args.morphPlacement == "late":
@@ -345,9 +360,15 @@ if __name__ == "__main__":
         optErrMsg += forceArg('areaLayoutBase', False, "'Additional layout patches for easier navigation' forced to on")
         possibleStartAPs = GraphUtils.getPossibleStartAPs(args.area, maxDifficulty)
         if args.startAP == 'random':
-            possibleStartAPs.remove('Ceres')
+            if args.startLocationList != None:
+                # intersection between user whishes and reality
+                startLocationList = args.startLocationList.split(',')
+                possibleStartAPs = list(set(possibleStartAPs).intersection(set(startLocationList)))
+            ceres = 'Ceres' in possibleStartAPs
+            if ceres:
+                possibleStartAPs.remove('Ceres')
             args.startAP = random.choice(possibleStartAPs)
-            if args.startAP == 'Landing Site':
+            if args.startAP == 'Landing Site' and ceres:
                 args.startAP = random.choice(['Landing Site', 'Ceres'])
         elif args.startAP not in possibleStartAPs:
             optErrMsg += '\nInvalid start location: {}'.format(args.startAP)
@@ -414,6 +435,8 @@ if __name__ == "__main__":
     if minorQty < 1:
         minorQty = random.randint(25, 100)
     if energyQty == 'random':
+        if args.energyQtyList != None:
+            energyQties = args.energyQtyList.split(',')
         energyQty = random.choice(energyQties)
     qty = {'energy': energyQty,
            'minors': minorQty,

@@ -242,8 +242,19 @@ accessPoints = [
         'Screw Attack Bottom': lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']),
                                                   sm.canPassAmphitheaterReverse(),
                                                   sm.canDestroyBombWalls(),
-                                                  sm.wand(sm.haveItem('Super'), sm.knowsGreenGateGlitch()))
+                                                  sm.wand(sm.haveItem('Super'), sm.knowsGreenGateGlitch())),
+        'Firefleas Top': lambda sm: sm.wand(sm.canPassBombPassages(),
+                                            sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']))
     }, internal=True),
+    AccessPoint('Firefleas Top', 'LowerNorfair', {
+        # this weird condition basically says: "if we start here, give heat protection"
+        'Firefleas': lambda sm: sm.wor(sm.wnot(RomPatches.has(RomPatches.LowerNorfairPBRoomHeatDisable)),
+                                       sm.heatProof())
+    }, internal=True,
+       start={'spawn':0x0207, 'rom_patches': ['LN_PB_Heat_Disable', 'LN_Firefleas_Remove_Fune'],
+              'patches':[RomPatches.LowerNorfairPBRoomHeatDisable, RomPatches.FirefleasRemoveFune],
+              'save': "Save_Firefleas",
+              'solveArea': "Lower Norfair After Amphitheater"}),
     AccessPoint('Ridley Zone', 'LowerNorfair', {
         'Firefleas': lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']),
                                         sm.canUsePowerBombs(),

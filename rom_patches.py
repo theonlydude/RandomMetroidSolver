@@ -30,6 +30,9 @@ class RomPatches:
     # graph blue doors
     HiJumpAreaBlueDoor        = 32
     SpeedAreaBlueDoors        = 33
+    # LN start
+    LowerNorfairPBRoomHeatDisable = 34
+    FirefleasRemoveFune       = 35
     # moat bottom block
     MoatShotBlock             = 41
     #graph

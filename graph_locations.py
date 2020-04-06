@@ -496,12 +496,17 @@ locations = [
     'AccessFrom' : {
         'Firefleas': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: sm.wor(sm.canOpenGreenDoors(), sm.canPassBombPassages(), sm.canUseSpringBall()), # get past the fune
+    'Available': lambda sm: sm.wor(RomPatches.has(RomPatches.FirefleasRemoveFune),
+                                   # get past the fune
+                                   sm.canOpenGreenDoors(),
+                                   sm.canPassBombPassages(),
+                                   sm.canUseSpringBall()),
     # avoid doing the super annoying wall jump in the dark...
-    'PostAvailable': lambda sm: sm.wor(sm.haveItem('Ice'),
-                                       sm.haveItem('HiJump'),
-                                       sm.canFly(),
-                                       sm.canSpringBallJump())
+    'PostAvailable': lambda sm: sm.wor(SMBool(True), # FIXME add knows
+                                       sm.wor(sm.haveItem('Ice'),
+                                              sm.haveItem('HiJump'),
+                                              sm.canFly(),
+                                              sm.canSpringBallJump()))
 },
 {
     'Area': "WreckedShip",
@@ -1617,9 +1622,9 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Lower Norfair Spring Ball Maze Room',
     'AccessFrom' : {
-        'Firefleas': lambda sm: SMBool(True)
+        'Firefleas': lambda sm: sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main'])
     },
-    'Available': lambda sm: sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main'])
+    'Available': lambda sm: SMBool(True)
 },
 {
     'Area': "LowerNorfair",
@@ -1633,9 +1638,9 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Lower Norfair Escape Power Bomb Room',
     'AccessFrom' : {
-        'Firefleas': lambda sm: sm.canPassBombPassages()
+        'Firefleas Top': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main'])
+    'Available': lambda sm: SMBool(True)
 },
 {
     'Area': "LowerNorfair",
@@ -1668,7 +1673,8 @@ locations = [
         'Three Muskateers Room Left': lambda sm: SMBool(True)
     },
     'Available': lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']),
-                                    sm.canPassBombPassages())
+                                    sm.canDestroyBombWalls(),
+                                    sm.haveItem('Morph'))
 },
 {
     'Area': "WreckedShip",

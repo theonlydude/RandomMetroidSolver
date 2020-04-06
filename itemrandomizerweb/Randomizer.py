@@ -715,7 +715,7 @@ class RandoState(object):
         return eq
 
 
-# randomizer algorithm main class. generateItems method will generate a complete seed, or fail (depending on settings) 
+# randomizer algorithm main class. generateItems method will generate a complete seed, or fail (depending on settings)
 class Randomizer(object):
     # locations : items locations
     # settings : RandoSettings instance
@@ -974,7 +974,7 @@ class Randomizer(object):
     # item : optional additional item, or None
     # locs : base locations list. If None, self.unusedLocations will be used.
     # ap : access point name. if None, self.curAccessPoint will be used
-    # post : if True, will also check post availability. Default is False. 
+    # post : if True, will also check post availability. Default is False.
     # return available locations list.
     def currentLocations(self, item=None, locs=None, ap=None, post=False, diff=None):
         isSimpleCall = item is None and locs is None and ap is None and post == False and diff is None
@@ -1095,7 +1095,7 @@ class Randomizer(object):
         return random.choice(availableLocations)
 
     def getLocDiff(self, loc):
-        # avail difficulty already stored by graph algorithm        
+        # avail difficulty already stored by graph algorithm
         return loc['difficulty']
 
     def fillLocsDiff(self, locs):

@@ -59,6 +59,12 @@ patches = {
     "Escape_Rando_Tourian_Doors":{
         0x7C836: [0x0C],
         0x7C828: [0x0C]},
+    "LN_PB_Heat_Disable": {
+        0x18878: [0x80, 0x00]
+    },
+    "LN_Firefleas_Remove_Fune": {
+        0x10ABC2: [0xff, 0x7f, 0xff, 0x7f],
+    },
     # custom load points for non standard start APs
     "Save_G4": {
         # load point entry
@@ -103,6 +109,14 @@ patches = {
         0x7a062: [0x0f, 0x05],
         # map icon X/Y
         0x148d9: [0x28, 0x00, 0x58, 0x00]
+    },
+    "Save_Firefleas": {
+        # load point entry
+        0x473b: [0x5A, 0xB5, 0x9E, 0x9A, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x78, 0x00, 0x00, 0x00],
+        # music in room state header
+        0x7b56b: [0x18, 0x05],
+        # map icon X/Y
+        0x1493f: [0x38, 0x01, 0x28, 0x00]
     },
     # blinking doors for area APs
     'Blinking[Keyhunter Room Bottom]': {
@@ -271,6 +285,12 @@ additional_PLMs = {
         "room": 0xa051,
         'plm_bytes_list': [
             [0x6F, 0xB7, 0x04, 0x0B, 0x07, 0x00]
+        ]
+    },
+    "Save_Firefleas": {
+        "room": 0xb55a,
+        'plm_bytes_list': [
+            [0x6F, 0xB7, 0x07, 0x09, 0x07, 0x00]
         ]
     },
     # blinking doors for area APs

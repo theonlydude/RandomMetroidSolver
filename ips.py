@@ -11,6 +11,15 @@ class IPS_Patch(object):
                 byteData = bytearray(data)
                 self.add_record(addr, byteData)
 
+    def toDict(self):
+        ret = {}
+        for record in self.records:
+            if 'rle_count' in record:
+                ret[record['address']] = [record['data']]*record['rle_count']
+            else:
+                ret[record['address']] = [int(b) for b in record['data']]
+        return ret
+
     @staticmethod
     def load(filename):
         loaded_patch = IPS_Patch()

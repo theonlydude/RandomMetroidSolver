@@ -437,6 +437,12 @@ accessPoints = [
                    "screen": (0x0, 0x0), "distanceToSpawn": 0x170, "doorAsmPtr": 0x0000},
        entryInfo = {'SamusX':0x14a, 'SamusY':0x7a8},
        dotOrientation = 's'),
+    AccessPoint('Mama Turtle', 'Maridia', {
+        'Main Street Bottom': lambda sm: sm.canJumpUnderwater()
+    }, internal=True,
+       start = {'spawn': 0x0406, 'solveArea': "Maridia Green", 'save':"Save_Mama",
+                'patches':[RomPatches.MamaTurtleBlueDoor],
+                'rom_patches':['mama_save.ips'], 'doors': [0x8e]}),
     AccessPoint('Crab Hole Bottom Left', 'Maridia', {
         'Main Street Bottom': lambda sm: sm.wand(sm.canExitCrabHole(),
                                                  sm.wor(sm.wand(sm.haveItem('Super'),
@@ -485,8 +491,8 @@ accessPoints = [
         'Main Street Bottom': lambda sm: SMBool(True), # fall down
         'Beach': lambda sm: sm.wor(sm.haveItem('Gravity'),
                                    sm.canDoSuitlessOuterMaridia()),
-        'Aqueduct': lambda sm: sm.wand(sm.canOpenGreenDoors(),
-                                       sm.canUsePowerBombs())
+        'Aqueduct Bottom': lambda sm: sm.wand(sm.canOpenGreenDoors(),
+                                              sm.canUsePowerBombs())
     }, internal=True),
     AccessPoint('Watering Hole', 'Maridia', {
         'Beach': lambda sm: sm.haveItem('Morph'),
@@ -504,16 +510,25 @@ accessPoints = [
                                             sm.wor(sm.haveItem('Gravity'),
                                                    sm.canDoSuitlessOuterMaridia()))
     }, internal=True),
-    AccessPoint('Aqueduct', 'Maridia', {
+    AccessPoint('Aqueduct Bottom', 'Maridia', {
         'Crab Shaft Left': lambda sm: sm.wand(sm.canDestroyBombWallsUnderwater(), # top left bomb blocks
                                               sm.canJumpUnderwater()),
         'Post Botwoon': lambda sm: sm.wand(sm.canJumpUnderwater(),
                                            sm.canDefeatBotwoon()), # includes botwoon hallway conditions
         'Left Sandpit': lambda sm: sm.canAccessSandPits(),
-        'Right Sandpit': lambda sm: sm.canAccessSandPits()
+        'Right Sandpit': lambda sm: sm.canAccessSandPits(),
+        'Aqueduct': lambda sm: sm.wand(sm.wor(sm.haveItem('SpeedBooster'),
+                                              sm.wand(sm.knowsSnailClip(),
+                                                      sm.haveItem('Morph'))),
+                                       sm.haveItem('Gravity'))
     }, internal=True),
+    AccessPoint('Aqueduct', 'Maridia', {
+        'Aqueduct Bottom': lambda sm: SMBool(True) # go down
+    }, internal=True,
+       start = {'spawn': 0x0405, 'solveArea': "Maridia Pink Bottom", 'save':"Save_Aqueduct",
+                'doors': [0x96]}),  # TODO add aqueduct save door
     AccessPoint('Post Botwoon', 'Maridia', {
-        'Aqueduct': lambda sm: SMBool(True), # fall down the sandpit
+        'Aqueduct Bottom': lambda sm: SMBool(True), # fall down the sandpit
         'Precious Room Top': lambda sm: sm.canBotwoonExitToAndFromDraygon(),
         'Toilet Top': lambda sm: sm.wand(sm.canReachCacatacAlleyFromBotowoon(),
                                          sm.canPassCacatacAlley())

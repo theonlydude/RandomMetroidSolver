@@ -526,7 +526,7 @@ accessPoints = [
         'Aqueduct Bottom': lambda sm: SMBool(True) # go down
     }, internal=True,
        start = {'spawn': 0x0405, 'solveArea': "Maridia Pink Bottom", 'save':"Save_Aqueduct",
-                'doors': [0x96]}),  # TODO add aqueduct save door
+                'doors': [0x96]}),
     AccessPoint('Post Botwoon', 'Maridia', {
         'Aqueduct Bottom': lambda sm: SMBool(True), # fall down the sandpit
         'Precious Room Top': lambda sm: sm.canBotwoonExitToAndFromDraygon(),

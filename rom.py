@@ -164,7 +164,8 @@ class RomReader:
         'Fix_Morph_Ball_Hidden_Chozo_PLMs': {'address': 0x0268ce, 'value': 0x04, 'vanillaValue': 0x02},
         'Fix_Screw_Attack_selection_in_menu': {'address': 0x0134c5, 'value': 0x0c, 'vanillaValue': 0x0a},
         'No_Music': {'address': 0x278413, 'value': 0x6f, 'vanillaValue': 0xcd},
-        'random_music': {'address': 0x10F320, 'value': 0x01, 'vanillaValue': 0xff}
+        'random_music': {'address': 0x10F320, 'value': 0x01, 'vanillaValue': 0xff},
+        'fix_suits_selection_in_menu': {'address': 0x13000, 'value': 0x90, 'vanillaValue': 0x80}
     }
 
     @staticmethod
@@ -555,7 +556,7 @@ class RomPatcher:
                      'Suit_acquisition_animation_skip',
                      'Fix_heat_damage_speed_echoes_bug', 'Disable_GT_Code',
                      'Disable_Space_Time_select_in_menu', 'Fix_Morph_Ball_Hidden_Chozo_PLMs',
-                     'Fix_Screw_Attack_selection_in_menu',
+                     'Fix_Screw_Attack_selection_in_menu', 'fix_suits_selection_in_menu.ips',
                      'Removes_Gravity_Suit_heat_protection',
                      'AimAnyButton.ips', 'endingtotals.ips',
                      'supermetroid_msu1.ips', 'max_ammo_display.ips'],

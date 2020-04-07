@@ -501,8 +501,7 @@ locations = [
                                    sm.canOpenGreenDoors(),
                                    sm.canPassBombPassages(),
                                    sm.canUseSpringBall()),
-    # avoid doing the super annoying wall jump in the dark...
-    'PostAvailable': lambda sm: sm.wor(SMBool(True), # FIXME add knows
+    'PostAvailable': lambda sm: sm.wor(sm.knowsFirefleasWalljump(),
                                        sm.wor(sm.haveItem('Ice'),
                                               sm.haveItem('HiJump'),
                                               sm.canFly(),

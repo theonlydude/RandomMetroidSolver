@@ -295,7 +295,7 @@ class Knows:
                               'title': 'Access Old Mother Brain Missile pack location with just the Speed Booster',
                               'href': 'https://www.youtube.com/watch?v=-SO2QykqnZw',
                               'rooms': ['Climb', 'Pit Room']}
-    
+
     Moondance = SMBool(False, mania, ['Moondance'])
     desc['Moondance'] = {'display': 'Moondance',
                          'title': 'Access Etecoons area using moonfall shenanigans',
@@ -404,6 +404,12 @@ class Knows:
                                            'title': 'Destroy the ceiling, then jump from inside the door with Hi-Jump and Speed Booster to climb up in Screw Attack room',
                                            'href': 'https://youtu.be/2Ws0Zokg-SQ',
                                            'rooms': ['Screw Attack Room']}
+
+    FirefleasWalljump = SMBool(False, 0, ['FirefleasWalljump'])
+    desc['FirefleasWalljump'] = {'display': 'Firefleas Wall Jump',
+                                 'title': 'Get back up from bottom of firefleas without movement items or Ice Beam',
+                                 'href': 'https://youtu.be/tp4V9aNKp64',
+                                 'rooms': ['Lower Norfair Fireflea Room']}
 
     # wrecked ship
     ContinuousWallJump = SMBool(False, 0, ['ContinuousWallJump'])
@@ -576,7 +582,7 @@ class Knows:
             {'knows': ['AlcatrazEscape', 'HiJumpGauntletAccess', 'HiJumpLessGauntletAccess', 'LowGauntlet', 'OldMBWithSpeed'],
              'title': 'Crateria'},
             {'knows': ['CeilingDBoost', 'BillyMays', 'EarlyKraid',
-                       'ReverseGateGlitch', 'ReverseGateGlitchHiJumpLess', 
+                       'ReverseGateGlitch', 'ReverseGateGlitchHiJumpLess',
                        'RedTowerClimb', 'XrayDboost', 'XrayIce',
                        'RonPopeilScrew', 'Moondance'],
              'title': 'Brinstar'}
@@ -610,7 +616,7 @@ class Knows:
         'Norfair': [
             {'knows': ['WallJumpCathedralExit', 'BubbleMountainWallJump', 'NorfairReserveDBoost', 'CrocPBsIce', 'CrocPBsDBoost', 'IceEscape', 'IceMissileFromCroc', 'FrogSpeedwayWithoutSpeed', 'NovaBoost'],
               'title': 'Upper Norfair'},
-            {'knows': ['LavaDive', 'LavaDiveNoHiJump', 'ScrewAttackExit', 'ScrewAttackExitWithoutScrew', 'WorstRoomIceCharge'],
+            {'knows': ['LavaDive', 'LavaDiveNoHiJump', 'ScrewAttackExit', 'ScrewAttackExitWithoutScrew', 'WorstRoomIceCharge', 'FirefleasWalljump'],
              'title': 'Lower Norfair'}
         ],
         'Bosses/End': [

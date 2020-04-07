@@ -303,6 +303,10 @@
     "OldMBWithSpeed": [
       true,
       100
+    ],
+    "FirefleasWalljump": [
+      true,
+      25
     ]
   },
   "Settings": {

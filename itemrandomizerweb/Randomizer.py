@@ -1889,10 +1889,13 @@ class Randomizer(object):
             def getCurLocs(ap):
                 return self.currentLocations(ap=ap)
             def fillup(n, pool, ap):
-                self.log.debug('fillup-n=' + str(n) + ', pool_types=' + str(list(set([item['Type'] for item in pool]))))
+                self.log.debug('fillup-n=' + str(n) + ', pool_types=' + str(list(set([item['Type'] for item in pool]))) + ',ap='+ap)
                 itemLocs = []
                 for i in range(n):
                     curLocs = getLocs(getCurLocs(ap))
+                    if len(curLocs) == 0:
+                        self.log.debug("fillup early abort")
+                        break
                     item = chooseItem(pool, curLocs)
                     loc = chooseLoc(curLocs)
                     il = {'Item':item, 'Location':loc}

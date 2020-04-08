@@ -2145,7 +2145,7 @@ def initCustomizerSession():
 customSprites = {
     'samus': {"index":0, "name": "Samus", "desc": "Samus, with a distinct animation for Screw Attack without Space Jump and a new Crystal Flash animation", "author": "Artheau and Feesh", "group": "Samus"},
     'hitbox_helper': {"index":1, "name": "Hitbox", "desc": "Samus, with her actual hitbox on top", "author": "Artheau and Komaru", "group": "Samus"},
-    'hack_ancient_chozo': {"index":2, "name": "Chozo", "desc": "Samus, from Ancient Chozo hack", "author": "Albert V.", "group": "Samus"},
+    'hack_ancient_chozo': {"index":2, "name": "Chozo", "desc": "Samus, from Ancient Chozo hack", "author": "Physix", "group": "Samus"},
     'hack_ascent': {"index":3, "name": "Ascent", "desc": "Samus, from Ascent hack", "author": "Benox50", "group": "Samus"},
     'hack_decision': {"index":4, "name": "Decision", "desc": "Samus, from Decision hack", "author": "JoshShoeWah", "group": "Samus"},
     'hack_escape2': {"index":5, "name": "Escape II", "desc": "Samus, from Escape II hack", "author": "Hiroishi", "group": "Samus"},

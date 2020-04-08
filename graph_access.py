@@ -251,7 +251,8 @@ accessPoints = [
         'Firefleas': lambda sm: sm.wor(sm.wnot(RomPatches.has(RomPatches.LowerNorfairPBRoomHeatDisable)),
                                        sm.heatProof())
     }, internal=True,
-       start={'spawn':0x0207, 'rom_patches': ['LN_PB_Heat_Disable', 'LN_Firefleas_Remove_Fune'],
+       start={'spawn':0x0207,
+              'rom_patches': ['LN_PB_Heat_Disable', 'LN_Firefleas_Remove_Fune','firefleas_shot_block.ips'],
               'patches':[RomPatches.LowerNorfairPBRoomHeatDisable, RomPatches.FirefleasRemoveFune],
               'knows': ["FirefleasWalljump"],
               'save': "Save_Firefleas",

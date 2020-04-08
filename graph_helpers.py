@@ -361,7 +361,7 @@ class HelpersGraph(Helpers):
             # display all the available energy in the solver.
             return sm.wand(sm.heatProof(), SMBool(True, 0, items=redItems+['Super', '{}-ETank - {}-Reserve'.format(self.smbm.itemCount('ETank'), self.smbm.itemCount('Reserve'))]))
 
-        return SMBool(False)
+        return sm.knowsDodgeThreeMuskateers()
 
     # go though the pirates room filled with acid
     @Cache.decorator

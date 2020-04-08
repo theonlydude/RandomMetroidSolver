@@ -409,6 +409,12 @@ class Knows:
                                  'href': 'https://youtu.be/tp4V9aNKp64',
                                  'rooms': ['Lower Norfair Fireflea Room']}
 
+    DodgeThreeMuskateers = SMBool(False, 0, ['DodgeThreeMuskateers'])
+    desc['DodgeThreeMuskateers'] = {'display': 'Dodge the Three Muskateers',
+                                    'title': 'Get passed the Three Muskateers both ways without taking damage or killing them',
+                                    'href': '', # TODO
+                                    'rooms': ["Three Musketeers' Room"]}
+
     # wrecked ship
     ContinuousWallJump = SMBool(False, 0, ['ContinuousWallJump'])
     desc['ContinuousWallJump'] = {'display': 'Continuous Wall-Jump',
@@ -629,7 +635,7 @@ class Knows:
         'Norfair': [
             {'knows': ['WallJumpCathedralExit', 'BubbleMountainWallJump', 'NorfairReserveDBoost', 'CrocPBsIce', 'CrocPBsDBoost', 'IceEscape', 'IceMissileFromCroc', 'FrogSpeedwayWithoutSpeed', 'NovaBoost'],
               'title': 'Upper Norfair'},
-            {'knows': ['LavaDive', 'LavaDiveNoHiJump', 'ScrewAttackExit', 'ScrewAttackExitWithoutScrew', 'WorstRoomIceCharge', 'FirefleasWalljump'],
+            {'knows': ['LavaDive', 'LavaDiveNoHiJump', 'ScrewAttackExit', 'ScrewAttackExitWithoutScrew', 'WorstRoomIceCharge', 'FirefleasWalljump', 'DodgeThreeMuskateers'],
              'title': 'Lower Norfair'}
         ],
         'Bosses/End': [

@@ -153,7 +153,7 @@ class HelpersGraph(Helpers):
     # the water zone east of WS
     def canPassForgottenHighway(self, fromWs):
         sm = self.smbm
-        suitless = sm.haveItem('HiJump')
+        suitless = sm.wand(sm.haveItem('HiJump'), sm.knowsGravLessLevel1())
         if fromWs is True:
             suitless = sm.wand(suitless, # to climb on the ledges
                                sm.haveItem('SpaceJump')) # to go through the door on the right

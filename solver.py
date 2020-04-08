@@ -398,6 +398,8 @@ class CommonSolver(object):
         if item == None:
             item = loc["itemName"]
 
+        self.nbAvailLocs.append(1 if item in ['ETank', 'Reserve'] else 0)
+
         if self.vcr != None:
             self.vcr.addLocation(loc['Name'], item)
 
@@ -755,7 +757,7 @@ class CommonSolver(object):
             else:
                 locs = majorsAvailable+minorsAvailable
 
-            self.nbAvailLocs.append(len(locs))
+            # self.nbAvailLocs.append(len(locs))
 
             # check if we're stuck
             if len(majorsAvailable) == 0 and len(minorsAvailable) == 0:
@@ -1440,10 +1442,10 @@ class StandardSolver(CommonSolver):
         self.solverStats = {}
         self.solverStats['avgLocs'] = int(sum(self.nbAvailLocs)/len(self.nbAvailLocs))
 
-        derivative = []
-        for i in range(len(self.nbAvailLocs)-1):
-            d = self.nbAvailLocs[i+1] - self.nbAvailLocs[i]
-            derivative.append(d)
+        derivative = self.nbAvailLocs
+        #for i in range(len(self.nbAvailLocs)-1):
+        #    d = self.nbAvailLocs[i+1] - self.nbAvailLocs[i]
+        #    derivative.append(d)
 
         sumD = sum([d for d in derivative if d != -1])
         (sum14, sum24, sum34, sum44) = (sumD/4, sumD/2, sumD*3/4, sumD)

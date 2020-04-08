@@ -209,7 +209,7 @@ done
 
 echo "DONE"
 
-for AP in "Ceres" "Landing Site" "Gauntlet Top" "Green Brinstar Elevator" "Big Pink" "Etecoons Supers" "Wrecked Ship Main" "Business Center" "Bubble Mountain" "Watering Hole" "Red Brinstar Elevator" "Golden Four"; do
+for AP in "Ceres" "Landing Site" "Gauntlet Top" "Green Brinstar Elevator" "Big Pink" "Etecoons Supers" "Wrecked Ship Main" "Business Center" "Bubble Mountain" "Watering Hole" "Red Brinstar Elevator" "Golden Four" "Aqueduct" "Mama Turtle" "Firefleas Top"; do
     TOTAL=$(grep "${AP}" ${CSV}  | wc -l)
     ERROR=$(grep "${AP}" ${CSV} | grep -E '^error' | wc -l)
     PERCENT=$(echo "${ERROR}*100/${TOTAL}" | bc)

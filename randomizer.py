@@ -88,7 +88,7 @@ if __name__ == "__main__":
     parser.add_argument('--maxDifficulty', '-t',
                         help="the maximum difficulty generated seed will be for given parameters",
                         dest='maxDifficulty', nargs='?', default=None,
-                        choices=['easy', 'medium', 'hard', 'harder', 'hardcore', 'mania'])
+                        choices=['easy', 'medium', 'hard', 'harder', 'hardcore', 'mania', 'random'])
     parser.add_argument('--seed', '-s', help="randomization seed to use", dest='seed',
                         nargs='?', default=0, type=int)
     parser.add_argument('--rom', '-r',
@@ -284,7 +284,7 @@ if __name__ == "__main__":
     # if no max diff, set it very high
     if args.maxDifficulty:
         if args.maxDifficulty == 'random':
-            diffs = ['hard', 'harder', 'very hard', 'hardcore', 'mania']
+            diffs = ['easy', 'medium', 'hard', 'harder', 'hardcore', 'mania']
             maxDifficulty = text2diff[random.choice(diffs)]
         else:
             maxDifficulty = text2diff[args.maxDifficulty]

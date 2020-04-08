@@ -672,7 +672,7 @@ locations = [
 {
     'Area': "Maridia",
     'GraphArea': "Maridia",
-    'SolveArea': "Maridia Pink Bottom",
+    'SolveArea': "Left Sandpit",
     'Name': "Reserve Tank, Maridia",
     'Class': ["Major"],
     'CanHidden': False,
@@ -1850,7 +1850,7 @@ locations = [
 {
     'Area': "Maridia",
     'GraphArea': "Maridia",
-    'SolveArea': "Maridia Pink Bottom",
+    'SolveArea': "Left Sandpit",
     'Name': "Missile (left Maridia sand pit room)",
     'Class': ["Minor"],
     'CanHidden': True,
@@ -1868,7 +1868,7 @@ locations = [
 {
     'Area': "Maridia",
     'GraphArea': "Maridia",
-    'SolveArea': "Maridia Pink Bottom",
+    'SolveArea': "Right Sandpit",
     'Name': "Missile (right Maridia sand pit room)",
     'Class': ["Minor"],
     'CanHidden': True,
@@ -1886,7 +1886,7 @@ locations = [
 {
     'Area': "Maridia",
     'GraphArea': "Maridia",
-    'SolveArea': "Maridia Pink Bottom",
+    'SolveArea': "Right Sandpit",
     'Name': "Power Bomb (right Maridia sand pit room)",
     'Class': ["Minor"],
     'CanHidden': True,

@@ -225,8 +225,6 @@ class Knows:
                                'href': 'https://www.youtube.com/watch?v=1M2TiEVwH2I',
                                'rooms': ['West Sand Hole', 'East Sand Hole',
                                          'West Sand Hall', 'East Sand Hall']}
-
-
     # Area difficulties
 
     # Brinstar
@@ -519,6 +517,18 @@ class Knows:
                                 'href': 'https://snipaclip.com/watch/HomelyImpartialVampireFloof',
                                 'rooms': ['Pants Room']}
 
+    CrystalFlashClip = SMBool(False, 0, ['CrystalFlashClip'])
+    desc['CrystalFlashClip'] = {'display': 'Crystal Flash Clip',
+                               'title': 'Use a Crystal Flash to clip through crumble blocks to get to Botwoon or Shaktool, using Gravity and Bombs',
+                               'href': 'https://www.youtube.com/watch?v=z2c3u8ICO6A',
+                               'rooms': ['Botwoon Hallway', 'East Pants Room']}
+
+    SuitlessCrystalFlashClip = SMBool(False, 0, ['SuitlessCrystalFlashClip'])
+    desc['SuitlessCrystalFlashClip'] = {'display': 'Suitless Crystal Flash Clip',
+                               'title': 'Use a Crystal Flash to clip through crumble blocks to get to Botwoon or Shaktool',
+                               'href': 'https://www.youtube.com/watch?v=BUzmHsk0H7k',
+                               'rooms': ['Botwoon Hallway', 'East Pants Room']}
+
     # plasma room
     KillPlasmaPiratesWithSpark = SMBool(False, 0, ['KillPlasmaPiratesWithSpark'])
     desc['KillPlasmaPiratesWithSpark'] = {'display': 'Kill Plasma Pirates with Spark',
@@ -596,7 +606,8 @@ class Knows:
         'Maridia 1/2': [
             {'knows': ['GravLessLevel1', 'GravLessLevel2', 'GravLessLevel3'],
              'title': 'Underwater movement without Gravity Suit'},
-            {'knows': ['MochtroidClip', 'PuyoClip', 'PuyoClipXRay', 'SnailClip'],
+            {'knows': ['MochtroidClip', 'PuyoClip', 'PuyoClipXRay',
+                       'SnailClip', 'CrystalFlashClip'],
              'title': 'Clips'},
             {'knows': ['KillPlasmaPiratesWithCharge', 'KillPlasmaPiratesWithSpark'],
              'title': 'Plasma Room'},
@@ -610,7 +621,9 @@ class Knows:
              'title': 'Spring Ball Access'},
             {'knows': ['DraygonRoomGrappleExit', 'DraygonRoomCrystalFlash', 'PreciousRoomXRayExit'],
              'title': 'Suitless Draygon Exit'},
-            {'knows': ['DoubleSpringBallJump', 'TediousMountEverest', 'BotwoonToDraygonWithIce', 'SuitlessPuyoClip'],
+            {'knows': ['DoubleSpringBallJump', 'TediousMountEverest',
+                       'BotwoonToDraygonWithIce', 'SuitlessCrystalFlashClip',
+                       'SuitlessPuyoClip'],
              'title': 'Obscure suitless stuff'}
         ],
         'Norfair': [

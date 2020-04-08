@@ -435,7 +435,8 @@ class HelpersGraph(Helpers):
         sm = self.smbm
         return sm.wor(sm.wand(sm.haveItem('SpeedBooster'),
                               sm.haveItem('Gravity')),
-                      sm.wand(sm.knowsMochtroidClip(), sm.haveItem('Ice')))
+                      sm.wand(sm.knowsMochtroidClip(), sm.haveItem('Ice')),
+                      sm.canCrystalFlashClip())
 
     @Cache.decorator
     def canDefeatBotwoon(self):

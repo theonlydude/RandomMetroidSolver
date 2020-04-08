@@ -315,6 +315,14 @@
     "FirefleasWalljump": [
       true,
       1
+    ],
+    "CrystalFlashClip": [
+      true,
+      1
+    ],
+    "SuitlessCrystalFlashClip": [
+      true,
+      1
     ]
   },
   "Settings": {

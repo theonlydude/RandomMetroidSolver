@@ -490,9 +490,9 @@ if __name__ == "__main__":
             dotDir = args.directory
         else:
             dotDir = None
-        RomPatches.ActivePatches += RomPatches.AreaSet
-        if args.areaLayoutBase == True:
-            RomPatches.ActivePatches.remove(RomPatches.AreaRandoGatesOther)
+        RomPatches.ActivePatches += RomPatches.AreaBaseSet
+        if args.areaLayoutBase == False:
+            RomPatches.ActivePatches += RomPatches.AreaComfortSet
         try:
             randomizer = AreaRandomizer(graphLocations, randoSettings, seedName, bossTransitions,
                                         dotDir=dotDir)

@@ -154,9 +154,10 @@ class HelpersGraph(Helpers):
     def canPassForgottenHighway(self, fromWs):
         sm = self.smbm
         suitless = sm.wand(sm.haveItem('HiJump'), sm.knowsGravLessLevel1())
-        if fromWs is True:
-            suitless = sm.wand(suitless, # to climb on the ledges
-                               sm.haveItem('SpaceJump')) # to go through the door on the right
+        if fromWs is True and RomPatches.has(RomPatches.EastOceanPlatforms).bool is False:
+            suitless = sm.wand(suitless,
+                               # to break water line and go through the door on the right
+                               sm.haveItem('SpaceJump'))
         return sm.wand(sm.wor(sm.haveItem('Gravity'),
                               suitless),
                        sm.haveItem('Morph')) # for crab maze

@@ -560,7 +560,7 @@ class RomPatcher:
                      'Removes_Gravity_Suit_heat_protection',
                      'AimAnyButton.ips', 'endingtotals.ips',
                      'supermetroid_msu1.ips', 'max_ammo_display.ips'],
-        'VariaTweaks' : ['ws_etank.ips', 'ln_chozo_sj_check_disable.ips', 'ln_chozo_platform.ips', 'bomb_torizo.ips'],
+        'VariaTweaks' : ['WS_Etank', 'LN_Chozo_SpaceJump_Check_Disable', 'ln_chozo_platform.ips', 'bomb_torizo.ips'],
         'Layout': ['dachora.ips', 'early_super_bridge.ips', 'high_jump.ips', 'moat.ips', 'spospo_save.ips',
                    'nova_boost_platform.ips', 'red_tower.ips', 'spazer.ips', 'brinstar_map_room.ips'],
         'Optional': ['itemsounds.ips', 'rando_speed.ips',
@@ -568,7 +568,8 @@ class RomPatcher:
                      'skip_intro.ips', 'skip_ceres.ips', 'animal_enemies.ips', 'animals.ips',
                      'draygonimals.ips', 'escapimals.ips', 'gameend.ips', 'grey_door_animals.ips',
                      'low_timer.ips', 'metalimals.ips', 'phantoonimals.ips', 'ridleyimals.ips'],
-        'Area': ['area_rando_layout.ips', 'area_rando_door_transition.ips', 'Tourian_Refill' ],
+        'Area': ['area_rando_layout.ips', 'area_rando_door_transition.ips', 'Tourian_Refill',
+                 'Sponge_Bath_Blinking_Door', 'east_ocean.ips' ],
         'Escape' : ['rando_escape.ips', 'rando_escape_ws_fix.ips', 'Escape_Rando_Tourian_Doors']
     }
 
@@ -736,7 +737,7 @@ class RomPatcher:
             if nerfedCharge == True:
                 stdPatches.append('nerfed_charge.ips')
             if bosses == True or area == True:
-                stdPatches.append('ws_save.ips')
+                stdPatches += ["WS_Main_Open_Grey", "WS_Save_Active"]
                 plms.append('WS_Save_Blinking_Door')
             if bosses == True:
                 stdPatches.append("Phantoon_Eye_Door")
@@ -772,7 +773,8 @@ class RomPatcher:
             # apply area patches
             if area == True:
                 if areaLayoutBase == True:
-                    RomPatcher.IPSPatches['Area'].remove('area_rando_layout.ips')
+                    for p in ['area_rando_layout.ips', 'Sponge_Bath_Blinking_Door', 'east_ocean.ips']:
+                       RomPatcher.IPSPatches['Area'].remove(p)
                     RomPatcher.IPSPatches['Area'].append('area_rando_layout_base.ips')
                 for patchName in RomPatcher.IPSPatches['Area']:
                     self.applyIPSPatch(patchName)
@@ -952,7 +954,7 @@ class RomPatcher:
                 minQty = q
         for m in minors:
             dist[m]['Proportion'] = dist[m]['Quantity']/minQty
-        
+
         return dist
 
     def getAmmoPct(self, minorsDist):

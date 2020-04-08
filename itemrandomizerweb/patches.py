@@ -48,8 +48,6 @@ patches = {
         0x0134c5: [0x0c]},
     "No_Music":{
         0x278413: [0x6f]},
-    "Phantoon_Eye_Door":{
-        0x7CCAF: [0x91,0xC2]},
     "Tourian_Refill": {
         0x1922C: [0x47, 0xF6]},
     "Escape_Rando_Enable_Enemies":{
@@ -59,11 +57,30 @@ patches = {
     "Escape_Rando_Tourian_Doors":{
         0x7C836: [0x0C],
         0x7C828: [0x0C]},
+    "LN_Chozo_SpaceJump_Check_Disable": {
+        0x2518f: [0xea, 0xea, 0xea, 0xea, 0xea, 0xea, 0xea, 0xea]
+    },
     "LN_PB_Heat_Disable": {
         0x18878: [0x80, 0x00]
     },
     "LN_Firefleas_Remove_Fune": {
         0x10ABC2: [0xff, 0x7f, 0xff, 0x7f],
+    },
+    "WS_Main_Open_Grey": {
+        0x10BE92: [0x0]
+    },
+    "WS_Save_Active": {
+        0x7ceb0: [0xC9]
+    },
+    "WS_Etank": {
+        0x7cc4d: [0x37, 0xc3]
+    },
+    "Phantoon_Eye_Door":{
+        0x7CCAF: [0x91, 0xC2]
+    },
+    # has to be applied along with WS_Main_Open_Grey
+    "Sponge_Bath_Blinking_Door": {
+        0x7C276: [0x0C]
     },
     # custom load points for non standard start APs
     "Save_G4": {
@@ -234,7 +251,8 @@ additional_PLMs = {
         ]
     },
     # area/boss seeds
-    "WS_Save_Blinking_Door": { # works together with ws_save.ips
+    # has to be applied along with WS_Main_Open_Grey
+    "WS_Save_Blinking_Door": {
         'room': 0xcaf6,
         'state': 0xcb08,
         'plm_bytes_list': [

@@ -253,6 +253,7 @@ accessPoints = [
     }, internal=True,
        start={'spawn':0x0207, 'rom_patches': ['LN_PB_Heat_Disable', 'LN_Firefleas_Remove_Fune'],
               'patches':[RomPatches.LowerNorfairPBRoomHeatDisable, RomPatches.FirefleasRemoveFune],
+              'knows': ["FirefleasWalljump"],
               'save': "Save_Firefleas",
               'solveArea': "Lower Norfair After Amphitheater"}),
     AccessPoint('Ridley Zone', 'LowerNorfair', {

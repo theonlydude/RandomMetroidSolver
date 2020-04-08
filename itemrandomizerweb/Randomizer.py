@@ -1996,12 +1996,12 @@ class Randomizer(object):
         self.curAccessPoints = self.currentAccessPoints()
         self.hadChozoLeft = self.isChozoLeft()
         self.onlyBosses = False
+        self.prevDiffTarget = None
         self.initState = RandoState(self, self.currentLocations())
         self.log.debug("initState="+str(self.initState))
         self.log.debug("{} items in pool".format(len(self.itemPool)))
         runtime_s = 0
         startDate = time.process_time()
-        self.prevDiffTarget = None
         while ((len(self.itemPool) > 0 or len(self.plandoItemPool) > 0)
                and not isStuck
                and runtime_s <= self.runtimeLimit_s):

@@ -1877,7 +1877,7 @@ class Randomizer(object):
                 if len(chooseFrom) > 0:
                     ret = random.choice(chooseFrom)
                 else:
-                    minDiff = god
+                    minDiff = infinity
                     for loc in locs:
                         d = loc['difficulty'].difficulty
                         if d < minDiff:

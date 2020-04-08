@@ -680,6 +680,7 @@ class RandoState(object):
         self.progressionStatesIndices = rando.progressionStatesIndices[:]
         self.hadChozoLeft = rando.hadChozoLeft
         self.onlyBosses = rando.onlyBosses
+        self.prevDiffTarget = rando.prevDiffTarget
         self.bosses = [boss for boss in Bosses.golden4Dead if Bosses.golden4Dead[boss] == True]
         self.curLocs = curLocs[:]
 
@@ -698,6 +699,7 @@ class RandoState(object):
         rando.progressionItemLocs = self.progressionItemLocs[:]
         rando.hadChozoLeft = self.hadChozoLeft
         rando.onlyBosses = self.onlyBosses
+        rando.prevDiffTarget = self.prevDiffTarget
         rando.smbm.resetItems()
         rando.smbm.addItems([item['Type'] for item in self.currentItems])
         Bosses.reset()

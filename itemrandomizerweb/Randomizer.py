@@ -1677,8 +1677,9 @@ class Randomizer(object):
         # like spospo etc. too often).
         # in this case, we won't remove any prog items since we're not actually
         # stuck
-        ret = self.generateItem(self.currentLocations(), self.itemPool)
-        isFakeRollback = ret is not None and not self.isEarlyGame()
+        if not self.isEarlyGame():
+            ret = self.generateItem(self.currentLocations(), self.itemPool)
+        isFakeRollback = ret is not None
         self.log.debug('isFakeRollback=' + str(isFakeRollback))
         self.initRollback(isFakeRollback)
         if len(self.states) == 0:

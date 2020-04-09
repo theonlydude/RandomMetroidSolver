@@ -773,6 +773,7 @@ class Randomizer(object):
         self.nonChozoItemPool = []
         self.hadChozoLeft = None
         self.onlyBosses = False
+        self.prevDiffTarget = None
         self.plandoItemPool = []
         self.stdStart = GraphUtils.isStandardStart(self.settings.startAP)
 

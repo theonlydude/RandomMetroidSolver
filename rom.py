@@ -99,6 +99,7 @@ class RomReader:
         'variaTweaks': {'address': 0x7CC4D, 'value': 0x37, 'desc': "VARIA tweaks"},
         'area': {'address': 0x788A0, 'value': 0x2B, 'desc': "Area layout modifications"},
         'areaLayout': {'address': 0x252FA7, 'value': 0xF8, 'desc': "Area layout additional modifications"},
+        'traverseWreckedShip': {'address': 0x219dbf, 'value': 0xFB, 'desc': "Area layout additional access to east Wrecked Ship"},
         'areaEscape': {'address': 0x20c91, 'value': 0x4C, 'desc': "Area escape randomization"},
         'newGame': {'address': 0x1001d, 'value': 0x22, 'desc': "Custom new game"}
     }
@@ -165,7 +166,8 @@ class RomReader:
         'Fix_Screw_Attack_selection_in_menu': {'address': 0x0134c5, 'value': 0x0c, 'vanillaValue': 0x0a},
         'No_Music': {'address': 0x278413, 'value': 0x6f, 'vanillaValue': 0xcd},
         'random_music': {'address': 0x10F320, 'value': 0x01, 'vanillaValue': 0xff},
-        'fix_suits_selection_in_menu': {'address': 0x13000, 'value': 0x90, 'vanillaValue': 0x80}
+        'fix_suits_selection_in_menu': {'address': 0x13000, 'value': 0x90, 'vanillaValue': 0x80},
+        'traverseWreckedShip': {'address': 0x219dbf, 'value': 0xFB, 'desc': "Area layout additional access to east Wrecked Ship"}
     }
 
     @staticmethod
@@ -1560,6 +1562,8 @@ class RomLoader(object):
         # check area layout
         if self.hasPatch("areaLayout"):
             RomPatches.ActivePatches.append(RomPatches.AreaRandoGatesOther)
+        if self.hasPatch("traverseWreckedShip"):
+            RomPatches.ActivePatches += [RomPatches.EastOceanPlatforms, RomPatches.SpongeBathBlueDoor]
 
         # check boss rando
         isBoss = self.isBoss()

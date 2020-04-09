@@ -609,8 +609,8 @@ class CommonSolver(object):
             nextMajAreaWeight = majorsAvailable[0]['areaWeight'] if "areaWeight" in majorsAvailable[0] else 10000
             nextMinAreaWeight = minorsAvailable[0]['areaWeight'] if "areaWeight" in minorsAvailable[0] else 10000
 
-            self.log.debug("diff area back dist - diff area back dist")
-            self.log.debug("maj: {} '{}' {} {}, min: {} '{}' {} {}".format(nextMajDifficulty, majorsAvailable[0]['SolveArea'], nextMajComeBack, nextMajDistance, nextMinDifficulty, nextMinArea, nextMinComeBack, nextMinDistance))
+            self.log.debug("diff area back dist weight - diff area back dist weight")
+            self.log.debug("maj: {} '{}' {} {}, min: {} '{}' {} {}".format(nextMajDifficulty, majorsAvailable[0]['SolveArea'], nextMajComeBack, nextMajDistance, nextMajAreaWeight, nextMinDifficulty, nextMinArea, nextMinComeBack, nextMinDistance, nextMinAreaWeight))
 
             if hasEnoughMinors == True and self.haveAllMinorTypes() == True and self.smbm.haveItem('Charge'):
                 # we have charge, no longer need minors
@@ -623,16 +623,16 @@ class CommonSolver(object):
                         return self.collectMajor(majorsAvailable.pop(0))
                     else:
                         return self.collectMinor(minorsAvailable.pop(0))
+                # respect areaweight first
+                elif nextMajAreaWeight != nextMinAreaWeight:
+                    if nextMajAreaWeight < nextMinAreaWeight:
+                        return self.collectMajor(majorsAvailable.pop(0))
+                    else:
+                        return self.collectMinor(minorsAvailable.pop(0))
                 # difficulty over area (this is a difficulty estimator, not a speedrunning simulator)
                 elif nextMinDifficulty <= diffThreshold and nextMajDifficulty <= diffThreshold:
-                    # respect areaweight first
-                    if nextMajAreaWeight != nextMinAreaWeight:
-                        if nextMajAreaWeight < nextMinAreaWeight:
-                            return self.collectMajor(majorsAvailable.pop(0))
-                        else:
-                            return self.collectMinor(minorsAvailable.pop(0))
                     # take the closer one
-                    elif nextMajDistance != nextMinDistance:
+                    if nextMajDistance != nextMinDistance:
                         self.log.debug("!= distance and <= diffThreshold")
                         if nextMajDistance < nextMinDistance:
                             return self.collectMajor(majorsAvailable.pop(0))

@@ -690,7 +690,11 @@ function AjaxUpdatePlandoCompleted(data) {
 
 // from https://techoverflow.net/2018/03/30/copying-strings-to-the-clipboard-using-pure-javascript/
 function getPermaLink(plandoName) {
-    var link = encodeURI(window.location.href+"/"+plandoName);
+    var host = window.location.protocol+"//"+window.location.hostname;
+    if(window.location.port.length > 0) {
+        host = host+":"+window.location.port;
+    }
+    var link = encodeURI(host+"/plandorepo/"+plandoName);
 
     console.log("getPermaLink, link: "+link);
 

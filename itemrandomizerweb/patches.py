@@ -57,6 +57,15 @@ patches = {
     "Escape_Rando_Tourian_Doors":{
         0x7C836: [0x0C],
         0x7C828: [0x0C]},
+    "Escape_Animals_Open_Brinstar": {
+        0x784BC: [0x10]
+    },
+    "Escape_Animals_Open_Norfair": {
+        0x78B0A: [0x10]
+    },
+    "Escape_Animals_Open_Maridia": {
+        0x7C54B: [0x10]
+    },
     "LN_Chozo_SpaceJump_Check_Disable": {
         0x2518f: [0xea, 0xea, 0xea, 0xea, 0xea, 0xea, 0xea, 0xea]
     },
@@ -248,6 +257,12 @@ additional_PLMs = {
         'room': 0Xcc6f,
         'plm_bytes_list': [
             [0x48, 0xc8, 0x1, 0x6, 0x61, 0x90]
+        ]
+    },
+    "WS_Map_Grey_Door_Openable": {
+        'room': 0Xcc6f,
+        'plm_bytes_list': [
+            [0x48, 0xc8, 0x1, 0x6, 0x61, 0x10]
         ]
     },
     # area/boss seeds

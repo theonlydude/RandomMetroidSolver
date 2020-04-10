@@ -721,7 +721,7 @@ class RomPatcher:
                         optionalPatches=[], noLayout=False, suitsMode="Classic",
                         area=False, bosses=False, areaLayoutBase=False,
                         noVariaTweaks=False, nerfedCharge=False,
-                        escapeRando=False, noRemoveEscapeEnemies=False):
+                        escapeAttr=None, noRemoveEscapeEnemies=False):
         try:
             # apply standard patches
             stdPatches = []
@@ -762,8 +762,7 @@ class RomPatcher:
                     self.applyIPSPatch(patchName)
 
             # random escape
-            if escapeRando == True:
-                plms.append("WS_Map_Grey_Door")
+            if escapeAttr is not None:
                 if noRemoveEscapeEnemies == True:
                     RomPatcher.IPSPatches['Escape'].append('Escape_Rando_Enable_Enemies')
                 for patchName in RomPatcher.IPSPatches['Escape']:
@@ -771,6 +770,8 @@ class RomPatcher:
                 # handle incompatible doors transitions
                 if area == False and bosses == False:
                     self.applyIPSPatch('area_rando_door_transition.ips')
+                # animals and timer
+                self.applyEscapeAttributes(escapeAttr, plms)
 
             # apply area patches
             if area == True:
@@ -834,6 +835,29 @@ class RomPatcher:
         if 'rom_patches' in ap.Start:
             for patch in ap.Start['rom_patches']:
                 self.applyIPSPatch(patch)
+
+    def applyEscapeAttributes(self, escapeAttr, plms):
+        # timer
+        escapeTimer = escapeAttr['Timer']
+        minute = int(escapeTimer / 60)
+        second = escapeTimer % 60
+        minute = int(minute / 10) * 16 + minute % 10
+        second = int(second / 10) * 16 + second % 10
+        patchDict = {'Escape_Timer': {0x1E21:[second, minute]}}
+        self.applyIPSPatch('Escape_Timer', patchDict)
+        # animals door to open
+        if escapeAttr['Animals'] is not None:
+            escapeOpenPatches = {
+                'Green Brinstar Main Shaft Top Left':'Escape_Animals_Open_Brinstar',
+                'Business Center Mid Left':"Escape_Animals_Open_Norfair",
+                'Crab Hole Bottom Right':"Escape_Animals_Open_Maridia",
+            }
+            if escapeAttr['Animals'] in escapeOpenPatches:
+                self.applyIPSPatch(escapeOpenPatches[escapeAttr['Animals']])
+            else:
+                plms.append("WS_Map_Grey_Door_Openable")
+        else:
+            plms.append("WS_Map_Grey_Door")
 
     # adds ad-hoc "IPS patches" for additional PLM tables
     def applyPLMs(self, plms):
@@ -1330,14 +1354,6 @@ class RomPatcher:
         # Room ptr in bank 8F + CRE flag offset
         offset = 0x70000 + roomPtr + 0x8
         self.romFile.writeByte(0x2, offset)
-
-    def writeEscapeTimer(self, escapeTimer):
-        minute = int(escapeTimer / 60)
-        second = escapeTimer % 60
-        minute = int(minute / 10) * 16 + minute % 10
-        second = int(second / 10) * 16 + second % 10
-        self.romFile.writeByte(second, 0x1E21)
-        self.romFile.writeByte(minute)
 
     buttons = {
         "Select" : [0x00, 0x20],

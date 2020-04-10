@@ -520,7 +520,7 @@ if __name__ == "__main__":
         doors = GraphUtils.getDoorConnections(randomizer.areaGraph,
                                               args.area, args.bosses,
                                               args.escapeRando)
-        escapeTimer = randomizer.areaGraph.EscapeTimer
+        escapeAttr = randomizer.areaGraph.EscapeAttributes if args.escapeRando else None
     else:
         stuck = False
         itemLocs = []
@@ -622,7 +622,7 @@ if __name__ == "__main__":
                                        args.noLayout, suitsMode,
                                        args.area, args.bosses, args.areaLayoutBase,
                                        args.noVariaTweaks, args.nerfedCharge,
-                                       args.escapeRando, args.noRemoveEscapeEnemies)
+                                       escapeAttr, args.noRemoveEscapeEnemies)
         else:
             romPatcher.addIPSPatches(args.patches)
         if args.sprite is not None:
@@ -636,8 +636,6 @@ if __name__ == "__main__":
             romPatcher.writeSpoiler(itemLocs, progItemLocs)
             romPatcher.writeRandoSettings(randoSettings, itemLocs)
             romPatcher.writeDoorConnections(doors)
-            if escapeTimer is not None:
-                romPatcher.writeEscapeTimer(escapeTimer)
         if ctrlDict is not None:
             romPatcher.writeControls(ctrlDict)
         if args.moonWalk == True:

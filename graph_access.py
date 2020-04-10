@@ -71,6 +71,7 @@ accessPoints = [
                    "screen": (0x1, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
        entryInfo = {'SamusX':0x34, 'SamusY':0x288},
        dotOrientation = 'sw'),
+    # Escape APs
     AccessPoint('Climb Bottom Left', 'Crateria', {
         'Landing Site': lambda sm: SMBool(True)
     }, roomInfo = {'RoomPtr':0x96ba, "area": 0x0},
@@ -79,6 +80,18 @@ accessPoints = [
        entryInfo = {'SamusX':0x34, 'SamusY':0x888},
        escape = True,
        dotOrientation = 'ne'),
+    AccessPoint('Flyway Right', 'Crateria', {},
+       roomInfo = {'RoomPtr':0x9879, "area": 0x0},
+       exitInfo = {'DoorPtr':0x8bc2, 'direction': 0x4, "cap": (0x1, 0x6), "bitFlag": 0x0,
+                   "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
+       entryInfo = {'SamusX':0xffff, 'SamusY':0xffff}, # unsued
+       escape = True),
+    AccessPoint('Bomb Torizo Room Left', 'Crateria', {},
+       roomInfo = {'RoomPtr':0x9804, "area": 0x0},
+       exitInfo = {'DoorPtr':0x8baa, 'direction': 0x5, "cap": (0x2e, 0x6), "bitFlag": 0x0,
+                   "screen": (0x2, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
+       entryInfo = {'SamusX':0x34, 'SamusY':0xb8},
+       escape = True),
     ### Green and Pink Brinstar
     AccessPoint('Green Brinstar Elevator', 'GreenPinkBrinstar', {
         'Big Pink': lambda sm: sm.wand(sm.wor(sm.haveItem('SpeedBooster'),
@@ -701,7 +714,11 @@ vanillaEscapeTransitions = [
     ('Brinstar Pre-Map Room Right', 'Green Brinstar Main Shaft Top Left'),
     ('Wrecked Ship Map Room', 'Basement Left'),
     ('Norfair Map Room', 'Business Center Mid Left'),
-    ('Maridia Map Room', 'Crab Hole Bottom Right')
+    ('Maridia Map Room', 'Crab Hole Bottom Right'),
+    ('Flyway Right 0', 'Bomb Torizo Room Left'),
+    ('Flyway Right 1', 'Bomb Torizo Room Left'),
+    ('Flyway Right 2', 'Bomb Torizo Room Left'),
+    ('Flyway Right 3', 'Bomb Torizo Room Left')
 ]
 
 escapeSource = 'Tourian Escape Room 4 Top Right'
@@ -802,9 +819,6 @@ class GraphUtils:
                 apNames.remove(apName)
         return transitions
 
-    def createEscapeTransition():
-        return (escapeSource, random.choice(escapeTargets))
-
     def getVanillaExit(apName):
         allVanillaTransitions = vanillaTransitions + vanillaBossesTransitions + vanillaEscapeTransitions
         for (src,dst) in allVanillaTransitions:
@@ -833,6 +847,47 @@ class GraphUtils:
                 rooms[(roomPtr, (0x0, 0x1), (0xbf, 0x198))] = ap
 
         return rooms
+
+    # path: as returned by AccessGraph.accessPath
+    def escapeTimer(graph, path):
+        escapeTargetsTimer = {
+            'Climb Bottom Left': None, # vanilla
+            'Green Brinstar Main Shaft Top Left': 210, # brinstar
+            'Basement Left': 210, # wrecked ship
+            'Business Center Mid Left': 270, # norfair
+            'Crab Hole Bottom Right': 270 # maridia
+        }
+        graph.EscapeAttributes['Timer'] = escapeTargetsTimer[path[0].Name]
+
+    def escapeAnimalsTransitions(graph, possibleTargets, firstEscape):
+        n = len(possibleTargets)
+        assert n < 4, "Invalid possibleTargets list: " + str(possibleTargets)
+        # first gets our 4 list of 4 entries for escape patch
+        if n >= 2:
+            # connect actual animals: pick one of the remaining targets and connect it to BT room
+            src = possibleTargets.pop()
+            graph.addTransition(src, 'Bomb Torizo Room Left')
+            graph.EscapeAttributes['Animals'] = src
+            # we now have at most 2 targets left, fill up to fill cycling 4 targets for animals suprise
+            possibleTargets.append('Climb Bottom Left')
+            possibleTargets.append(firstEscape)
+            poss = possibleTargets[:]
+            while len(possibleTargets) < 4:
+                possibleTargets.append(random.choice(poss))
+        else:
+            # failsafe: if not enough targets left, abort and do vanilla animals
+            possibleTargets = ['Bomb Torizo Room Left'] * 4
+        assert len(possibleTargets) == 4, "Invalid possibleTargets list: " + str(possibleTargets)
+        # then, actually add the 4 connections
+        basePtr = 0x83ADAC
+        btDoor = getAccessPoint('Flyway Right')
+        for i in range(len(possibleTargets)):
+            ap = copy.copy(btDoor)
+            ap.Name += " " + str(i)
+            ap.ExitInfo['DoorPtr'] = basePtr + i*24
+            graph.addAccessPoint(ap)
+            target = possibleTargets[i]
+            graph.addTransition(ap.Name, target)
 
     def isHorizontal(dir):
         # up: 0x3, 0x7
@@ -894,7 +949,7 @@ class GraphUtils:
             # remove duplicates (loop transitions)
             if any(c['ID'] == conn['ID'] for c in connections):
                 continue
-    #        print(conn['ID'])
+            print(conn['ID'])
             # where to write
             conn['DoorPtr'] = src.ExitInfo['DoorPtr']
             # door properties

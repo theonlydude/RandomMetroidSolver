@@ -2,7 +2,6 @@
 ;;;
 ;;;
 ;;; compile with asar (https://www.smwcentral.net/?a=details&id=14560&p=section),
-;;; or a variant of xkas that supports arch directive
 
 lorom
 arch snes.cpu
@@ -13,8 +12,12 @@ macro checkEscape()
 endmacro
 
 ;;; see random_music.asm
-!random_music_hook = $82df3e
-!random_music 	   = $a1f3f0
+!random_music_hook   = $82df3e
+!random_music 	     = $a1f3f0
+;;; where we are in current escapes cycle (for animals)
+!current_escape      = $7fff34
+!door_sz             = 12
+!door_list_ptr       = $07b5
 
 org $809E21
 print "timer_value: ", pc
@@ -27,13 +30,13 @@ org $82df38
 
 org $848c91
     jmp map_station
-    
+
 org $848cf3
     jmp save_station
-    
+
 org $84c556
     jsr super_check             ; green gate left
-    
+
 org $84c575
     jsr super_check             ; green gate right
 
@@ -51,6 +54,28 @@ org $8fe896
 
 org $8fe8bd
     jsr room_main
+
+;;; DATA in bank 83
+
+;;; ASM ptr for down door at the beggining of escape
+org $83aaf6
+    dw escape_setup
+
+;;; alternate flyway (= pre BT) door lists for escape animals surprise
+macro FlywayDoorList()
+    ;; door to parlor
+    db $FD, $92, $00, $05, $3E, $26, $03, $02, $00, $80, $A2, $B9
+    ;; placeholder for BT door to be filled in by randomizer
+    db $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff
+endmacro
+
+org $83ADA0
+print "flyway_door_lists : ", pc
+flyway_door_lists:
+%FlywayDoorList()
+%FlywayDoorList()
+%FlywayDoorList()
+%FlywayDoorList()
 
 ;;; CODE in bank 84 (PLM)
 org $84f070
@@ -130,6 +155,10 @@ org $8f84b8                     ; brinstar map
     db $01,$46
     dw $9020
 
+;;; overwrite flyway setup ASM in "escape" room state
+org $8F98DC
+    dw flyway_escape_setup
+
 ;; ws map door handled with PLM spawn table, as it is blue in vanilla (see plm_spawn.asm)
 
 org $8ff500
@@ -140,6 +169,8 @@ test_door_asm:
     lda #$000e : jsl $8081fa    ; set escape flag
 ;;; door ASM for MB escape door
 escape_setup:
+    ;; init possible escapes cycle (for animals)
+    lda #$0000 : sta !current_escape
     ;; open all doors
     lda #$ffff
     ldx #$0000
@@ -186,6 +217,34 @@ room_main:
 ;;; stop before area rando door transition patch
 warnpc $8ff5ff
 
+;;; flyway door list pointers for escape animals (same place as animals surprise patches)
+org $8fff00
+flyway_door_ptrs:
+macro FlywayDoorPtrs(n)
+    dw flyway_door_lists+(!door_sz*2*<n>)
+    dw flyway_door_lists+(!door_sz*((2*<n>)+1))
+endmacro
+
+%FlywayDoorPtrs(0)
+%FlywayDoorPtrs(1)
+%FlywayDoorPtrs(2)
+%FlywayDoorPtrs(3)
+
+flyway_escape_setup:
+    ;; get current door ptr list :
+    ;; ptr = flyway_door_ptrs + current_escape*4
+    lda !current_escape : asl : asl
+    clc : adc flyway_door_ptrs
+    ;; replace it in RAM
+    sta !door_list_ptr
+    ;; setup next escape:
+    ;; current_escape = (current_escape + 1) % 4
+    lda !current_escape : inc : and #$0003 : sta !current_escape
+    ;; run vanilla setup ASM
+    jmp $91BB
+
+warnpc $8fffff
+
 ;;; DATA (bank A1 free space)
 org $a1f000
 
@@ -196,7 +255,7 @@ opt_remove_enemies:
 
 ;;; custom enemy populations for some rooms
 
-;;; room ID, enemy population in bank a1, enemy GFX in bank b4 
+;;; room ID, enemy population in bank a1, enemy GFX in bank b4
 enemy_table:
     dw $a7de,one_elev_list_1,$8aed  ; business center
     dw $a6a1,$98e4,$8529            ; warehouse (vanilla data)
@@ -341,10 +400,6 @@ fix_timer_gfx:
     RTL							;done. return
 
 warnpc $a1f1ff
-
-;;; ASM ptr for down door at the beggining of escape 
-org $83aaf6
-    dw escape_setup
 
 ;; ;;; TEST
 ;; org $83AB34

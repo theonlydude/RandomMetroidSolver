@@ -17,10 +17,8 @@ arch snes.cpu
 !nb_tracks_8b	= #$15      ; nb of tracks total, including duplicates
 !last_music_rq	= $7fff30	; RAM address to store music requests by the game
 !last_music_rnd = $7fff32	; RAM address to store our random music
-!room_music	= $07cb
-!room_track	= $07c9
-!current_music	= $07f3
-!current_track	= $07f5
+!room_music  	= $07cb
+!room_track 	= $07c9
 !rand           = $a1f2a0   ; see new_game.asm
 
 ;;; HIJACKS

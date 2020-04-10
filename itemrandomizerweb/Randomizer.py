@@ -7,7 +7,7 @@ from smbool import SMBool
 from helpers import Bosses, diffValue2txt
 from utils import randGaussBounds, getRangeDict, chooseFromRange
 from graph import AccessGraph
-from graph_access import accessPoints, GraphUtils, getAccessPoint
+from graph_access import accessPoints, GraphUtils, getAccessPoint, escapeSource, escapeTargets
 from smboolmanager import SMBoolManager
 from vcr import VCR
 import log, logging
@@ -814,6 +814,16 @@ class Randomizer(object):
 
     # graph update for randomized escape
     def escapeGraph(self):
+        possibleTargets, dst, path = self.getPossibleEscapeTargets()
+        # update graph with escape transition
+        self.areaGraph.addTransition(escapeSource, dst)
+        # get timer value
+        GraphUtils.escapeTimer(self.areaGraph, path)
+        self.log.debug("escapeGraph: ({}, {}) timer: {}".format(escapeSource, dst, self.areaGraph.EscapeAttributes['Timer']))
+        # animals
+        GraphUtils.escapeAnimalsTransitions(self.areaGraph, possibleTargets, dst)
+
+    def getPossibleEscapeTargets(self):
         sm = self.smbm
         # setup smbm with item pool
         sm.resetItems()
@@ -822,31 +832,18 @@ class Randomizer(object):
         # Ice not usable because of hyper beam
         # remove energy to avoid hell runs
         sm.addItems([item['Type'] for item in self.itemPool if item['Type'] != 'Ice' and item['Category'] != 'Energy'])
-        path = None
-        while path is None:
-            (src, dst) = GraphUtils.createEscapeTransition()
-            path = self.areaGraph.accessPath(sm, dst, 'Landing Site',
-                                             self.difficultyTarget)
+        possibleTargets = [target for target in escapeTargets if self.areaGraph.accessPath(sm, target, 'Landing Site', self.difficultyTarget) is not None]
+        # failsafe
+        if len(possibleTargets) == 0:
+            possibleTargets.append('Climb Bottom Left')
+        random.shuffle(possibleTargets)
+        # pick one
+        dst = possibleTargets.pop()
+        path = self.areaGraph.accessPath(sm, dst, 'Landing Site', self.difficultyTarget)
         # cleanup smbm
         sm.resetItems()
         Bosses.reset()
-
-        # actually update graph
-        self.areaGraph.addTransition(src, dst)
-
-        # get timer value
-        self.areaGraph.EscapeTimer = self.escapeTimer(path)
-        self.log.debug("escapeGraph: ({}, {}) timer: {}".format(src, dst, self.areaGraph.EscapeTimer))
-
-    def escapeTimer(self, path):
-        escapeTargetsTimer = {
-            'Climb Bottom Left': None, # vanilla
-            'Green Brinstar Main Shaft Top Left': 210, # brinstar
-            'Basement Left': 210, # wrecked ship
-            'Business Center Mid Left': 270, # norfair
-            'Crab Hole Bottom Right': 270 # maridia
-        }
-        return escapeTargetsTimer[path[0].Name]
+        return (possibleTargets, dst, path)
 
     def computeLateMorphLimit(self):
         if self.restrictions['Morph'] != 'late':

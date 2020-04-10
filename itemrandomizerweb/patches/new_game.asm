@@ -1,5 +1,5 @@
 ;;; VARIA new game hook: skips intro and customizes starting point
-;;; 
+;;;
 ;;; compile with asar (https://www.smwcentral.net/?a=details&id=14560&p=section),
 ;;; or a variant of xkas that supports arch directive
 
@@ -99,6 +99,29 @@ gameplay_start:
     plx
     lda $7e0952 : jsl $818000
 .end:
+    rtl
+
+warnpc $a1f29f
+
+;;; since this patch is always included, we can put utility
+;;; routines for other patches here (in fixed locations)
+
+!RNG		= $808111	; RNG function
+!RNG_seed	= $05e5
+!RTA_timer	= $05b8		; see tracking.asm
+
+org $a1f2a0
+;;; single use (will give the same result if called several times in the same frame)
+;;; random function that leaves game rng untouched
+;;; result in A
+rand:
+    phy
+    lda !RNG_seed : pha             ; save current rand seed
+    eor !RTA_timer : sta !RNG_seed  ; alter seed with frame counter
+    jsl !RNG : tay                  ; call RNG and save result to Y
+    pla : sta !RNG_seed             ; restore current rand seed
+    tya                             ; get RNG result in A
+    ply
     rtl
 
 warnpc $a1f2ff

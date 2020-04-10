@@ -21,9 +21,7 @@ arch snes.cpu
 !room_track	= $07c9
 !current_music	= $07f3
 !current_track	= $07f5
-!RNG		= $808111	; RNG function
-!RNG_seed	= $05e5
-!RTA_timer	= $05b8		; see tracking.asm
+!rand           = $a1f2a0   ; see new_game.asm
 
 ;;; HIJACKS
 org $82DF3E
@@ -89,22 +87,10 @@ is_music_to_randomize:
 .endloop:
     rts
 
-;;; single use random function that leaves game rng untouched
-;;; result in A
-rand:
-    phy
-    lda !RNG_seed : pha             ; save current rand seed
-    eor !RTA_timer : sta !RNG_seed  ; alter seed with frame counter
-    jsl !RNG : tay                  ; call RNG and save result to Y
-    pla : sta !RNG_seed             ; restore current rand seed
-    tya                             ; get RNG result in A
-    ply
-    rts
-
 ;;; gets a random data/track couple from table, and store it in last_music_rnd (and A)
 get_random_music:
     ;; call RNG, result in A
-    jsr rand
+    jsl !rand
     ;; A = A % nb_tracks
     sta $4204
     ;; switch to 8-bit mode for divisor

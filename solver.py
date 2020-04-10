@@ -610,7 +610,7 @@ class CommonSolver(object):
             nextMinAreaWeight = minorsAvailable[0]['areaWeight'] if "areaWeight" in minorsAvailable[0] else 10000
 
             self.log.debug("diff area back dist weight - diff area back dist weight")
-            self.log.debug("maj: {} '{}' {} {}, min: {} '{}' {} {}".format(nextMajDifficulty, majorsAvailable[0]['SolveArea'], nextMajComeBack, nextMajDistance, nextMajAreaWeight, nextMinDifficulty, nextMinArea, nextMinComeBack, nextMinDistance, nextMinAreaWeight))
+            self.log.debug("maj: {} '{}' {} {} {}, min: {} '{}' {} {} {}".format(nextMajDifficulty, majorsAvailable[0]['SolveArea'], nextMajComeBack, nextMajDistance, nextMajAreaWeight, nextMinDifficulty, nextMinArea, nextMinComeBack, nextMinDistance, nextMinAreaWeight))
 
             if hasEnoughMinors == True and self.haveAllMinorTypes() == True and self.smbm.haveItem('Charge'):
                 # we have charge, no longer need minors

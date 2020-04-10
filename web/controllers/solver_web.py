@@ -5,7 +5,7 @@ path = os.path.expanduser('~/RandomMetroidSolver')
 if os.path.exists(path) and path not in sys.path:
     sys.path.append(path)
 
-import datetime, os, hashlib, json, subprocess, tempfile, glob, random, re, math, string, base64
+import datetime, os, hashlib, json, subprocess, tempfile, glob, random, re, math, string, base64, urllib.parse
 from datetime import datetime, date
 from collections import OrderedDict
 
@@ -2598,12 +2598,33 @@ ipsBasePath = "plandository/"
 def plandorepo():
     response.title = 'Super Metroid VARIA Plandository'
 
-    # get plando list
     DB = db.DB()
-    plandos = DB.getPlandos()
+    url = request.env.request_uri.split('/')
+    msg = ""
+    plandos = []
+    expand = True
+    if len(url) > 0 and url[-1] != 'plandorepo':
+        # a plando name was passed as parameter
+        plandoName = url[-1]
+
+        # decode url
+        plandoName = urllib.parse.unquote(plandoName)
+
+        # sanity check
+        if IS_MATCH('^[a-zA-Z0-9 -_]*$')(plandoName)[1] is not None:
+            msg = "Plando name can only contain [a-zA-Z0-9 -_]"
+        else:
+            plandos = DB.getPlando(plandoName)
+            if plandos == None or len(plandos) == 0:
+                msg = "Plando not found"
+    if len(plandos) == 0:
+        # get plando list
+        plandos = DB.getPlandos()
+        expand = False
+
     DB.close()
 
-    return dict(plandos=plandos, math=math, re=re)
+    return dict(plandos=plandos, msg=msg, expand=expand, math=math, re=re)
 
 def plandoRateWebService():
     print("plandoRateWebService")

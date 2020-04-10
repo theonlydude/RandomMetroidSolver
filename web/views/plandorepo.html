@@ -313,6 +313,8 @@ window.onload = function(){
     dragElement(document.getElementById("uploadPopup"), "uploadGrab");
     dragElement(document.getElementById("deletePopup"), "deleteGrab");
     dragElement(document.getElementById("updatePopup"), "updateGrab");
+
+    displayMessage();
 }
 
 // from https://stackoverflow.com/questions/22708434/restrict-characters-in-input-field
@@ -492,6 +494,16 @@ function ajaxFail(jqXHR, textStatus) {
     $('#flash').show();
 }
 
+function displayMessage() {
+{{
+    if len(msg) > 0:
+        response.write("document.getElementById('flash').innerHTML = \"{}\";".format(msg), escape=False)
+        response.write("$('#flash').show();", escape=False)
+        pass
+}}
+}
+
+
 function ratePlando(plando, purePlando) {
     var dataDict = {
         "plando": plando,
@@ -660,7 +672,6 @@ function updatePlando() {
 
     request.done(AjaxUpdatePlandoCompleted);
     request.fail(ajaxFail);
-
 }
 
 function AjaxUpdatePlandoCompleted(data) {
@@ -1026,4 +1037,9 @@ for (i = 0; i < coll.length; i++) {
     } 
   });
 }
+{{
+    if expand == True:
+        response.write("coll[0].click()", escape=False)
+        pass
+}}
 </script>

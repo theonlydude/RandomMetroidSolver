@@ -545,14 +545,10 @@ if __name__ == "__main__":
         animalsPatches = ['animal_enemies.ips', 'animals.ips', 'draygonimals.ips', 'escapimals.ips',
                           'gameend.ips', 'grey_door_animals.ips', 'low_timer.ips', 'metalimals.ips',
                           'phantoonimals.ips', 'ridleyimals.ips']
-        if args.escapeRando == True:
-            # these glitch with enemies on
-            animalsPatches.remove('phantoonimals.ips') # excessive lag and ridley sound effects
-            animalsPatches.remove('ridleyimals.ips') # escape timer tiles tail
-            if args.noRemoveEscapeEnemies == False:
-                animalsPatches.remove('draygonimals.ips') # glitched room
-                animalsPatches.remove('metalimals.ips') # no pirates
-        args.patches.append(random.choice(animalsPatches))
+        if args.escapeRando == False:
+            args.patches.append(random.choice(animalsPatches))
+        else:
+            optErrMsg += "\nIgnored animals surprise because of escape randomization"
     # transform itemLocs in our usual dict(location, item), for minors keep only the first
     locsItems = {}
     firstMinorsFound = {'Missile': False, 'Super': False, 'PowerBomb': False}
@@ -672,18 +668,21 @@ if __name__ == "__main__":
                 paletteSettings[param] = getattr(args, param)
             PaletteRando(romPatcher, paletteSettings, args.sprite).randomize()
         romPatcher.end()
-        if args.rom is None:
+        if optErrMsg != "":
+            msg = optErrMsg + '\n' + randomizer.errorMsg
+        else:
+            msg = randomizer.errorMsg
+        if args.rom is None: # web mode
             data = romPatcher.romFile.data
             fileName = '{}.sfc'.format(fileName)
             data["fileName"] = fileName
             # error msg in json to be displayed by the web site
-            if optErrMsg != "":
-                msg = optErrMsg + '\n' + randomizer.errorMsg
-            else:
-                msg = randomizer.errorMsg
             data["errorMsg"] = msg
             with open(outFileName, 'w') as jsonFile:
                 json.dump(data, jsonFile)
+        else: # CLI mode
+            if msg != "":
+                print(msg)
     except Exception as e:
         msg = "Error patching {}: ({}: {})".format(outFileName, type(e).__name__, e)
         dumpErrorMsg(args.output, msg)

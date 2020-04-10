@@ -688,6 +688,31 @@ function AjaxUpdatePlandoCompleted(data) {
     location.reload();
 }
 
+// from https://techoverflow.net/2018/03/30/copying-strings-to-the-clipboard-using-pure-javascript/
+function getPermaLink(plandoName) {
+    var link = encodeURI(window.location.href+"/"+plandoName);
+
+    console.log("getPermaLink, link: "+link);
+
+    // Create new element
+    var el = document.createElement('textarea');
+    // Set value (string to be copied)
+    el.value = link;
+    // Set non-editable to avoid focus and move outside of view
+    el.setAttribute('readonly', '');
+    el.style = {position: 'absolute', left: '-9999px'};
+    document.body.appendChild(el);
+    // Select text inside element
+    el.select();
+    // Copy text to clipboard
+    document.execCommand('copy');
+    // Remove temporary element
+    document.body.removeChild(el);
+
+    document.getElementById("flash").innerHTML = "Link to "+plandoName+" copied to clipboard";
+    $('#flash').show();
+}
+
 // https://www.w3schools.com/howto/howto_js_draggable.asp
 function dragElement(elmnt, headerId) {
   var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
@@ -1006,13 +1031,14 @@ function setGuessedPreset(romName){
 <div class=\"left\">\
 <img class=\"plandoButton\" src=\"/solver/static/images/refresh.svg\" alt=\"Update\" onclick=\"displayUpdatePopup('{}', '{}')\" title=\"Update your plando\">\
 <img class=\"plandoButton\" src=\"/solver/static/images/bin.svg\" alt=\"Delete\" onclick=\"displayDeletePopup('{}')\" title=\"Delete your plando\">\
+<img class=\"plandoButton\" src=\"/solver/static/images/link.svg\" alt=\"Get Permalink\" onclick=\"getPermaLink('{}')\" title=\"Get permanent link\">\
 </div>\
 <button class=\"downloadButton\" onclick=\"downloadPlando('{}')\">Download ({})</button>\
 <div class=\"right\"><select id=\"rate{}\" name=\"rate\"><option value=\"1\">1</option><option value=\"2\">2</option><option value=\"3\">3</option><option value=\"4\">4</option><option value=\"5\">5</option></select> <button onclick=\"ratePlando('{}', '{}')\">Rate</button></div></td>\
 </tr>\
 <tr><td colspan=\"2\" class=\"blankLastRow\"></td></tr>\
 </table>\
-</div></td></tr>\n".format(pureName, longDesc, longDesc.replace('\n', '<br/>'), name, pureName, name, name, downloadCount, pureName, name, pureName), escape=False)
+</div></td></tr>\n".format(pureName, longDesc, longDesc.replace('\n', '<br/>'), name, pureName, name, name, name, downloadCount, pureName, name, pureName), escape=False)
             pass
 
         response.write("      </table>\n", escape=False)

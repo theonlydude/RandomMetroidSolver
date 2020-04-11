@@ -363,7 +363,7 @@ class CommonSolver(object):
             if loc['Name'] == locName:
                 return loc
 
-    def computeLocationsDifficulty(self, locations):
+    def computeLocationsDifficulty(self, locations, phase="major"):
         self.areaGraph.getAvailableLocations(locations, self.smbm, infinity, self.lastAP)
         # check post available functions too
         for loc in locations:
@@ -379,10 +379,10 @@ class CommonSolver(object):
                 loc['comeBack'] = self.areaGraph.canAccess(self.smbm, loc['accessPoint'], self.lastAP, infinity, loc['itemName'])
 
         if self.log.getEffectiveLevel() == logging.DEBUG:
-            self.log.debug("available locs:")
+            self.log.debug("available {} locs:".format(phase))
             for loc in locations:
                 if loc['difficulty'].bool == True:
-                    self.log.debug("{}: {}".format(loc['Name'], loc['difficulty']))
+                    print("{:>48}: {:>8}".format(loc['Name'], round(loc['difficulty'].difficulty, 2)))
 
     def collectMajor(self, loc, itemName=None):
         self.majorLocations.remove(loc)
@@ -424,7 +424,10 @@ class CommonSolver(object):
         if 'Pickup' in loc:
             loc['Pickup']()
 
-        self.log.debug("collectItem: {} at {}".format(item, loc['Name']))
+        if self.log.getEffectiveLevel() == logging.DEBUG:
+            print("---------------------------------------------------------------")
+            print("collectItem: {:<16} at {:<48}".format(item, loc['Name']))
+            print("---------------------------------------------------------------")
 
         # last loc is used as root node for the graph
         self.lastAP = loc['accessPoint']
@@ -491,6 +494,15 @@ class CommonSolver(object):
                 if item not in self.collectedItems:
                     self.smbm.removeItem(item)
 
+    def printLocs(self, locs, phase):
+        if len(locs) > 0:
+            print("{}:".format(phase))
+            print('{:>48} {:>12} {:>8} {:>8} {:>34} {:>10}'.format("Location Name", "Difficulty", "Distance", "ComeBack", "SolveArea", "AreaWeight"))
+            for loc in locs:
+                print('{:>48} {:>12} {:>8} {:>8} {:>34} {:>10}'.
+                      format(loc['Name'], round(loc['difficulty'][1], 2), round(loc['distance'], 2),
+                             loc['comeBack'], loc['SolveArea'], loc['areaWeight'] if 'areaWeight' in loc else -1))
+
     def getAvailableItemsList(self, locations, threshold):
         # locations without distance are not available
         locations = [loc for loc in locations if 'distance' in loc]
@@ -506,8 +518,9 @@ class CommonSolver(object):
                                                    and 'comeBack' in loc and loc['comeBack'] == True) )]
         outside = [loc for loc in locations if not loc in around]
 
-        self.log.debug("around1 = {}".format([(loc['Name'], loc['difficulty'], loc['distance'], loc['comeBack'], loc['SolveArea']) for loc in around]))
-        self.log.debug("outside1 = {}".format([(loc['Name'], loc['difficulty'], loc['distance'], loc['comeBack'], loc['SolveArea']) for loc in outside]))
+        if self.log.getEffectiveLevel() == logging.DEBUG:
+            self.printLocs(around, "around1")
+            self.printLocs(outside, "outside1")
 
         around.sort(key=lambda loc: (
             # locs in the same area
@@ -522,7 +535,9 @@ class CommonSolver(object):
             loc['difficulty'].difficulty
             )
         )
-        self.log.debug("around2: {}".format([(loc['Name'], 0 if loc['SolveArea'] == self.lastArea else 1, loc['distance'], 0 if 'Pickup' in loc else 1, loc['difficulty'].difficulty) for loc in around]))
+
+        if self.log.getEffectiveLevel() == logging.DEBUG:
+            self.printLocs(around, "around2")
 
         # we want to sort the outside locations by putting the ones in the same area first,
         # then we sort the remaining areas starting whith boss dead status.
@@ -572,11 +587,14 @@ class CommonSolver(object):
                 else 100000,
                 loc['difficulty'].difficulty))
 
-        self.log.debug("outside2: (threshold: {}) name, areaWeight, area, distance, boss, boss in area, difficulty".format(threshold))
+
+        if self.log.getEffectiveLevel() == logging.DEBUG:
+            for key in ["areaWeight", "easy", "medium", "hard", "harder", "hardcore", "mania", "noComeBack"]:
+                self.printLocs(ranged[key], "outside2:{}".format(key))
+
         outside = []
         for key in ["areaWeight", "easy", "medium", "hard", "harder", "hardcore", "mania", "noComeBack"]:
             outside += ranged[key]
-            self.log.debug("outside2: {}: {}".format(key, [(loc['Name'], loc["areaWeight"] if "areaWeight" in loc else 0, 0 if loc['SolveArea'] == self.lastArea else 1, loc['distance'], loc['difficulty'].difficulty if (not Bosses.areaBossDead(loc['Area']) and 'Pickup' in loc) else 100000, loc['difficulty'].difficulty if not Bosses.areaBossDead(loc['Area']) else 100000,loc['difficulty'].difficulty) for loc in ranged[key]]))
 
         return around + outside
 
@@ -597,11 +615,12 @@ class CommonSolver(object):
             self.log.debug('MINOR')
             return self.collectMinor(minorsAvailable.pop(0))
         elif len(majorsAvailable) > 0 and len(minorsAvailable) > 0:
-            self.log.debug('BOTH|M=' + majorsAvailable[0]['Name'] + ', m=' + minorsAvailable[0]['Name'])
+            self.log.debug('BOTH|M={}, m={}'.format(majorsAvailable[0]['Name'], minorsAvailable[0]['Name']))
             # if both are available, decide based on area, difficulty and comeBack
             nextMajDifficulty = majorsAvailable[0]['difficulty'].difficulty
-            nextMinArea = minorsAvailable[0]['SolveArea']
             nextMinDifficulty = minorsAvailable[0]['difficulty'].difficulty
+            nextMajArea = majorsAvailable[0]['SolveArea']
+            nextMinArea = minorsAvailable[0]['SolveArea']
             nextMajComeBack = majorsAvailable[0]['comeBack']
             nextMinComeBack = minorsAvailable[0]['comeBack']
             nextMajDistance = majorsAvailable[0]['distance']
@@ -609,22 +628,26 @@ class CommonSolver(object):
             nextMajAreaWeight = majorsAvailable[0]['areaWeight'] if "areaWeight" in majorsAvailable[0] else 10000
             nextMinAreaWeight = minorsAvailable[0]['areaWeight'] if "areaWeight" in minorsAvailable[0] else 10000
 
-            self.log.debug("diff area back dist weight - diff area back dist weight")
-            self.log.debug("maj: {} '{}' {} {}, min: {} '{}' {} {}".format(nextMajDifficulty, majorsAvailable[0]['SolveArea'], nextMajComeBack, nextMajDistance, nextMajAreaWeight, nextMinDifficulty, nextMinArea, nextMinComeBack, nextMinDistance, nextMinAreaWeight))
+            if self.log.getEffectiveLevel() == logging.DEBUG:
+                print("     : {:>4} {:>32} {:>4} {:>4} {:>6}".format("diff", "area", "back", "dist", "weight"))
+                print("major: {:>4} {:>32} {:>4} {:>4} {:>6}".format(round(nextMajDifficulty, 2), nextMajArea, nextMajComeBack, round(nextMajDistance, 2), nextMajAreaWeight))
+                print("minor: {:>4} {:>32} {:>4} {:>4} {:>6}".format(round(nextMinDifficulty, 2), nextMinArea, nextMinComeBack, round(nextMinDistance, 2), nextMinAreaWeight))
 
             if hasEnoughMinors == True and self.haveAllMinorTypes() == True and self.smbm.haveItem('Charge'):
                 # we have charge, no longer need minors
+                self.log.debug("we have charge, no longer need minors, take major")
                 return self.collectMajor(majorsAvailable.pop(0))
             else:
                 # first take item from loc where you can come back
                 if nextMajComeBack != nextMinComeBack:
-                    self.log.debug("!= combeback")
+                    self.log.debug("maj/min != combeback")
                     if nextMajComeBack == True:
                         return self.collectMajor(majorsAvailable.pop(0))
                     else:
                         return self.collectMinor(minorsAvailable.pop(0))
                 # respect areaweight first
                 elif nextMajAreaWeight != nextMinAreaWeight:
+                    self.log.debug("maj/min != area weight")
                     if nextMajAreaWeight < nextMinAreaWeight:
                         return self.collectMajor(majorsAvailable.pop(0))
                     else:
@@ -744,7 +767,7 @@ class CommonSolver(object):
             # compute the difficulty of all the locations
             self.computeLocationsDifficulty(self.majorLocations)
             if self.majorsSplit != 'Full':
-                self.computeLocationsDifficulty(self.minorLocations)
+                self.computeLocationsDifficulty(self.minorLocations, phase="minor")
 
             # keep only the available locations
             majorsAvailable = [loc for loc in self.majorLocations if 'difficulty' in loc and loc["difficulty"].bool == True]
@@ -1545,19 +1568,33 @@ class ComeBack(object):
         self.log = log.get('Rewind')
 
     def handleNoComeBack(self, locations, cur):
+        hasEnoughMinors = self.solver.pickup.enoughMinors(self.solver.smbm, self.solver.minorLocations)
+        hasAllMinorTypes = self.solver.haveAllMinorTypes()
+        hasCharge = self.solver.smbm.haveItem('Charge')
+        noNeedMinors = hasEnoughMinors and hasAllMinorTypes and hasCharge
+
         # return True if a rewind is needed. choose the next area to use
         solveAreas = {}
+        locsCount = 0
         for loc in locations:
+            # filter minors locations when the solver no longer collect minors
+            if self.solver.majorsSplit not in loc['Class'] and 'Boss' not in loc['Class'] and noNeedMinors == True:
+                continue
             if "comeBack" not in loc:
                 return False
             if loc["comeBack"] == True:
                 return False
+            locsCount += 1
             if loc["SolveArea"] in solveAreas:
                 solveAreas[loc["SolveArea"]] += 1
             else:
                 solveAreas[loc["SolveArea"]] = 1
 
-        self.log.debug("WARNING: use no come back heuristic for {} locs in {} solve areas ({})".format(len(locations), len(solveAreas), solveAreas))
+        # only minors locations
+        if locsCount == 0:
+            return False
+
+        self.log.debug("WARNING: use no come back heuristic for {} locs in {} solve areas ({})".format(locsCount, len(solveAreas), solveAreas))
 
         # check if we can use an existing step
         if len(self.comeBackSteps) > 0:

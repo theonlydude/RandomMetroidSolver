@@ -592,3 +592,6 @@ mkdir -p ~/web2py/applications/solver/static/images/sprite_sheets/
 [ -L ~/web2py/applications/solver/static/images/firefleas_top_start.png ] || ln -s ~/RandomMetroidSolver/web/static/start_locations/firefleas_top_start.png ~/web2py/applications/solver/static/images/firefleas_top_start.png
 [ -L ~/web2py/applications/solver/static/images/fune_removed.png ] || ln -s ~/RandomMetroidSolver/web/static/start_locations/fune_removed.png ~/web2py/applications/solver/static/images/fune_removed.png
 [ -L ~/web2py/applications/solver/static/images/firefleas_shot_blocks.png ] || ln -s ~/RandomMetroidSolver/web/static/start_locations/firefleas_shot_blocks.png ~/web2py/applications/solver/static/images/firefleas_shot_blocks.png
+
+[ -L ~/web2py/applications/solver/static/images/forgotten_all_the_way.png ] || ln -s ~/RandomMetroidSolver/web/static/help/forgotten_all_the_way.png ~/web2py/applications/solver/static/images/forgotten_all_the_way.png
+[ -L ~/web2py/applications/solver/static/images/spongebath_blue_door.png ] || ln -s ~/RandomMetroidSolver/web/static/help/spongebath_blue_door.png ~/web2py/applications/solver/static/images/spongebath_blue_door.png

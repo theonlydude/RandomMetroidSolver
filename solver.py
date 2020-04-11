@@ -1568,19 +1568,33 @@ class ComeBack(object):
         self.log = log.get('Rewind')
 
     def handleNoComeBack(self, locations, cur):
+        hasEnoughMinors = self.solver.pickup.enoughMinors(self.solver.smbm, self.solver.minorLocations)
+        hasAllMinorTypes = self.solver.haveAllMinorTypes()
+        hasCharge = self.solver.smbm.haveItem('Charge')
+        noNeedMinors = hasEnoughMinors and hasAllMinorTypes and hasCharge
+
         # return True if a rewind is needed. choose the next area to use
         solveAreas = {}
+        locsCount = 0
         for loc in locations:
+            # filter minors locations when the solver no longer collect minors
+            if self.solver.majorsSplit not in loc['Class'] and 'Boss' not in loc['Class'] and noNeedMinors == True:
+                continue
             if "comeBack" not in loc:
                 return False
             if loc["comeBack"] == True:
                 return False
+            locsCount += 1
             if loc["SolveArea"] in solveAreas:
                 solveAreas[loc["SolveArea"]] += 1
             else:
                 solveAreas[loc["SolveArea"]] = 1
 
-        self.log.debug("WARNING: use no come back heuristic for {} locs in {} solve areas ({})".format(len(locations), len(solveAreas), solveAreas))
+        # only minors locations
+        if locsCount == 0:
+            return False
+
+        self.log.debug("WARNING: use no come back heuristic for {} locs in {} solve areas ({})".format(locsCount, len(solveAreas), solveAreas))
 
         # check if we can use an existing step
         if len(self.comeBackSteps) > 0:

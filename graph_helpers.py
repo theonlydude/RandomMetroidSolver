@@ -357,7 +357,7 @@ class HelpersGraph(Helpers):
         # - or with taking damage as well?
         (dmgRed, redItems) = sm.getDmgReduction(envDmg=False)
         dmgKi = 200.0 / dmgRed
-        if (sm.itemCount('Super')*5*sup)/ki + (sm.energyReserveCount()*100 - 2)/dmgKi >= nbKi:
+        if sm.heatProof() and e(sm.itemCount('Super')*5*sup)/ki + (sm.energyReserveCount()*100 - 2)/dmgKi >= nbKi:
             # require heat proof as long as taking damage is necessary.
             # display all the available energy in the solver.
             return sm.wand(sm.heatProof(), SMBool(True, 0, items=redItems+['Super', '{}-ETank - {}-Reserve'.format(self.smbm.itemCount('ETank'), self.smbm.itemCount('Reserve'))]))

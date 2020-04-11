@@ -371,6 +371,8 @@ find ~/web2py/applications/solver/static -xtype l -exec rm -f {} \;
 [ -L ~/web2py/applications/solver/static/images/super_controid.png ] || ln -s ~/RandomMetroidSolver/web/static/samus_sprites/super_controid.png ~/web2py/applications/solver/static/images/super_controid.png
 [ -L ~/web2py/applications/solver/static/images/win95_cursor.png ] || ln -s ~/RandomMetroidSolver/web/static/samus_sprites/win95_cursor.png ~/web2py/applications/solver/static/images/win95_cursor.png
 [ -L ~/web2py/applications/solver/static/images/luigi.png ] || ln -s ~/RandomMetroidSolver/web/static/samus_sprites/luigi.png ~/web2py/applications/solver/static/images/luigi.png
+[ -L ~/web2py/applications/solver/static/images/mario_8bit.png ] || ln -s ~/RandomMetroidSolver/web/static/samus_sprites/mario_8bit.png ~/web2py/applications/solver/static/images/mario_8bit.png
+[ -L ~/web2py/applications/solver/static/images/mario_8bit_modern.png ] || ln -s ~/RandomMetroidSolver/web/static/samus_sprites/mario_8bit_modern.png ~/web2py/applications/solver/static/images/mario_8bit_modern.png
 
 [ -L ~/web2py/applications/solver/static/images/spore_save.png ] || ln -s ~/RandomMetroidSolver/web/static/help/spore_save.png ~/web2py/applications/solver/static/images/spore_save.png
 [ -L ~/web2py/applications/solver/static/images/ws_save.png ] || ln -s ~/RandomMetroidSolver/web/static/help/ws_save.png ~/web2py/applications/solver/static/images/ws_save.png

@@ -232,7 +232,7 @@ if (hs.registerOverlay) {
 
 <script type="text/javascript">
 // https://stackoverflow.com/questions/16960690/chosen-harvesthq-resize-width-dynamically
-$(document).ready(function(){      
+$(document).ready(function(){
    jQuery(window).on('resize', resizeChosen);
 });
 
@@ -243,7 +243,7 @@ var defaultMultiValues = {{response.write(defaultMultiValues, escape=False)}};
 function resizeChosen() {
    $(".chosen-container").each(function() {
        $(this).attr('style', 'width: 100%');
-   });          
+   });
 }
 
 function isElemRandom(elem) {
@@ -621,7 +621,7 @@ function doSubmit() {
       btn.data = "Randomize";
       btn.disabled = false;
 
-      setTimeout(function(){ 
+      setTimeout(function(){
           btn = document.getElementById("submitBtn");
           btn.data = "Randomize";
           btn.disabled = false;
@@ -681,12 +681,15 @@ var tips = [
     "The aim buttons can be assigned to any button",
     "You can save your own button layout as well as moonwalk option in your skills preset to avoid doing the setup every seed",
     "Using a non-standard or randomized start location will enable Full randomization, all anti-softlock patches and VARIA tweaks",
-    "During randomized escape sequence in area rando, your hyper beam can destroy super/bomb/PB blocks, and open all gates",
-    "During randomized escape sequence in area rando, if you 'forgot' to pick up a suit during your run and cannot escape, you can reload and exit Tourian at any time",
+    "All starting locations come with their layout changes or doors opened, be sure to check them by clicking on '?' next to the option",
+    "During randomized escape sequence, your hyper beam can destroy super/bomb/PB blocks, and open all gates",
+    "During randomized escape sequence, if you 'forgot' to pick up a suit during your run and cannot escape, you can reload and exit Tourian at any time",
+    "During randomized escape sequence, you can find the animals behind a map station door or/and try different escape by going to vanilla animals",
     "Click on the '?' buttons to get help and tutorials in all pages of the VARIA site",
     "You can alter the Suits behaviour in the Advanced tab (Patches section). Choose between Balanced (default), Progressive (like DASH randomizer), and Vanilla.",
     "Tired of looking for Charge beam? Check out the 'Nerfed Charge' patch accessible in Medium and Advanced tabs",
-    "Super Fun settings (Advanced tab) do not require any specific skill in your preset. The seeds generated will always be completable."
+    "Super Fun settings (Advanced tab) do not require any specific skill in your preset. The seeds generated will always be completable.",
+    "Check out the Plandository to play plandos published VARIA users, as well as VARIA weekly races seeds/plandos"
 ];
 
 var myTimer = null;
@@ -1312,9 +1315,9 @@ During the escape sequence:\
 <li>All doors are opened</li>\
 <li>The Hyper Beam can destroy Bomb, Power Bomb and Super Missile blocks and open blue/green gates from both sides</li>\
 <li>All mini bosses are defeated</li>\
-<li>All minor enemies are removed to allow you to move faster.</li>\
+<li>All minor enemies are removed to allow you to move faster and remove lag</li>\
 </ul>\
-During regular game only Crateria Map station door can be opened and activating the station will act as if all map stations were activated at once.",
+During regular game only Crateria Map station door can be opened and activating the station will act as if all map stations were activated at once.<br/><p><b>Animals Challenges:</b> you can use the extra available time to find the animals that are hidden behind a map station door or/and try different escapes by going to vanilla animals, several times if you can!</p>",
       placement: "auto left"
     },
     {

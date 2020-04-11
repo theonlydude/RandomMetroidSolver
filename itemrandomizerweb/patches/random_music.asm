@@ -28,8 +28,11 @@ org $82DF3E
     ;; so it has to call a function here
     jml load_room_music_no_escape_rando
 
-org $a98810
+org $A98810
     rep 4 : nop		; disables MB2 "no music" before fight, as cutscene is sped up
+
+org $88B446
+    rep 4 : nop     ; disables lava sounds to avoid weird noises in Norfair
 
 ;;; DATA
 org $A1F300

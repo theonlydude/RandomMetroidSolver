@@ -218,7 +218,7 @@ room_main:
 warnpc $8ff5ff
 
 ;;; flyway door list pointers for escape animals (same place as animals surprise patches)
-org $8fff00
+org $8ff000
 flyway_door_ptrs:
 macro FlywayDoorPtrs(n)
     dw flyway_door_lists+(!door_sz*2*<n>)
@@ -230,20 +230,27 @@ endmacro
 %FlywayDoorPtrs(2)
 %FlywayDoorPtrs(3)
 
+print "flyway_escape_setup : ", pc
 flyway_escape_setup:
     ;; get current door ptr list :
     ;; ptr = flyway_door_ptrs + current_escape*4
     lda !current_escape : asl : asl
-    clc : adc flyway_door_ptrs
+    clc : adc #flyway_door_ptrs
     ;; replace it in RAM
     sta !door_list_ptr
-    ;; setup next escape:
-    ;; current_escape = (current_escape + 1) % 4
-    lda !current_escape : inc : and #$0003 : sta !current_escape
     ;; run vanilla setup ASM
     jmp $91BB
 
-warnpc $8fffff
+warnpc $8ff02f
+
+;; to call during BT door asm
+org $8ff030
+setup_next_escape:
+    ;; current_escape = (current_escape + 1) % 4
+    lda !current_escape : inc : and #$0003 : sta !current_escape
+    rts
+
+warnpc $8ff0ff
 
 ;;; DATA (bank A1 free space)
 org $a1f000

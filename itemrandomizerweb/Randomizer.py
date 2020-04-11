@@ -818,10 +818,21 @@ class Randomizer(object):
         # update graph with escape transition
         self.areaGraph.addTransition(escapeSource, dst)
         # get timer value
-        GraphUtils.escapeTimer(self.areaGraph, path)
+        self.escapeTimer(path)
         self.log.debug("escapeGraph: ({}, {}) timer: {}".format(escapeSource, dst, self.areaGraph.EscapeAttributes['Timer']))
         # animals
         GraphUtils.escapeAnimalsTransitions(self.areaGraph, possibleTargets, dst)
+
+    # path: as returned by AccessGraph.accessPath
+    def escapeTimer(self, path):
+        escapeTargetsTimer = {
+            'Climb Bottom Left': None, # vanilla
+            'Green Brinstar Main Shaft Top Left': 210, # brinstar
+            'Basement Left': 210, # wrecked ship
+            'Business Center Mid Left': 270, # norfair
+            'Crab Hole Bottom Right': 270 # maridia
+        }
+        self.areaGraph.EscapeAttributes['Timer'] = escapeTargetsTimer[path[0].Name]
 
     def getPossibleEscapeTargets(self):
         sm = self.smbm

@@ -572,7 +572,8 @@ class RomPatcher:
                      'low_timer.ips', 'metalimals.ips', 'phantoonimals.ips', 'ridleyimals.ips'],
         'Area': ['area_rando_layout.ips', 'area_rando_door_transition.ips', 'Tourian_Refill',
                  'Sponge_Bath_Blinking_Door', 'east_ocean.ips' ],
-        'Escape' : ['rando_escape.ips', 'rando_escape_ws_fix.ips', 'Escape_Rando_Tourian_Doors']
+        'Escape' : ['rando_escape.ips', 'rando_escape_ws_fix.ips',
+                    'Escape_Rando_Tourian_Doors', "Escape_Rando_Crateria_Doors"]
     }
 
     def __init__(self, romFileName=None, magic=None, plando=False):
@@ -1314,6 +1315,11 @@ class RomPatcher:
                 # endian convert
                 (D0, D1) = (conn['doorAsmPtr'] & 0x00FF, (conn['doorAsmPtr'] & 0xFF00) >> 8)
                 asmPatch += [ 0x20, D0, D1 ]        # JSR $doorAsmPtr
+            # special ASM hook point for VARIA needs when taking the door (used for animals)
+            if 'exitAsmPtr' in conn:
+                # endian convert
+                (D0, D1) = (conn['exitAsmPtr'] & 0x00FF, (conn['exitAsmPtr'] & 0xFF00) >> 8)
+                asmPatch += [ 0x20, D0, D1 ]        # JSR $exitAsmPtr
             # incompatible transition
             if 'SamusX' in conn:
                 # endian convert

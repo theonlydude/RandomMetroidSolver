@@ -522,6 +522,8 @@ find ~/web2py/applications/solver/static -xtype l -exec rm -f {} \;
 [ -L ~/web2py/applications/solver/static/images/WreckedShipGravity.png ] || ln -s ~/RandomMetroidSolver/web/static/rooms/WreckedShipGravity.png ~/web2py/applications/solver/static/images/WreckedShipGravity.png
 [ -L ~/web2py/applications/solver/static/images/WreckedShipMain.png ] || ln -s ~/RandomMetroidSolver/web/static/rooms/WreckedShipMain.png ~/web2py/applications/solver/static/images/WreckedShipMain.png
 [ -L ~/web2py/applications/solver/static/images/WreckedShipTop.png ] || ln -s ~/RandomMetroidSolver/web/static/rooms/WreckedShipTop.png ~/web2py/applications/solver/static/images/WreckedShipTop.png
+[ -L ~/web2py/applications/solver/static/images/LeftSandpit.png ] || ln -s ~/RandomMetroidSolver/web/static/rooms/LeftSandpit.png ~/web2py/applications/solver/static/images/LeftSandpit.png
+[ -L ~/web2py/applications/solver/static/images/RightSandpit.png ] || ln -s ~/RandomMetroidSolver/web/static/rooms/RightSandpit.png ~/web2py/applications/solver/static/images/RightSandpit.png
 
 mkdir -p ~/web2py/applications/solver/static/images/sprite_sheets/
 [ -L ~/web2py/applications/solver/static/images/sprite_sheets/alucard.png ] || ln -s ~/RandomMetroidSolver/web/static/sprite_sheets/alucard.png ~/web2py/applications/solver/static/images/sprite_sheets/alucard.png

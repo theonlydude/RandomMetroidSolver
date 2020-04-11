@@ -65,4 +65,4 @@ class AreaRandomizer(Randomizer):
         for area in traversedAreas:
             t += traversals[area]
         self.log.debug("escapeTimer. t="+str(t))
-        return max(t, 180)
+        self.areaGraph.EscapeAttributes['Timer'] = max(t, 180)

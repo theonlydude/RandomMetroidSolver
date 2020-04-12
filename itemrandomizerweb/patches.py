@@ -64,13 +64,13 @@ patches = {
         0x783AD: [0x10]
     },
     "Escape_Animals_Open_Brinstar": {
-        0x784BC: [0x10]
+        0x784BD: [0x10]
     },
     "Escape_Animals_Open_Norfair": {
-        0x78B0A: [0x10]
+        0x78B0B: [0x10]
     },
     "Escape_Animals_Open_Maridia": {
-        0x7C54B: [0x10]
+        0x7C54C: [0x10]
     },
     "LN_Chozo_SpaceJump_Check_Disable": {
         0x2518f: [0xea, 0xea, 0xea, 0xea, 0xea, 0xea, 0xea, 0xea]

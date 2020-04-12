@@ -252,7 +252,8 @@ accessPoints = [
                                                          sm.canPassThreeMuskateers()),
         'Ridley Zone': lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']),
                                           sm.canOpenGreenDoors(),
-                                          sm.canOpenYellowDoors()),
+                                          sm.canOpenYellowDoors(),
+                                          sm.canGetBackFromRidleyZone()),
         'Screw Attack Bottom': lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']),
                                                   sm.canPassAmphitheaterReverse(),
                                                   sm.canDestroyBombWalls(),
@@ -274,11 +275,7 @@ accessPoints = [
     AccessPoint('Ridley Zone', 'LowerNorfair', {
         'Firefleas': lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']),
                                         sm.canUsePowerBombs(),
-                                        sm.wor(sm.haveItem('SpringBall'),
-                                               sm.haveItem('Bomb'),
-                                               sm.haveItem('ScrewAttack'),
-                                               sm.wor(sm.itemCountOk('PowerBomb', 2),
-                                                      sm.canShortCharge()))), # speedball
+                                        sm.canGetBackFromRidleyZone()),
         'RidleyRoomOut': lambda sm: sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main'])
     }, internal=True),
     AccessPoint('Three Muskateers Room Left', 'LowerNorfair', {

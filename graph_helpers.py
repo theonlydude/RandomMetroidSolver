@@ -11,7 +11,6 @@ class HelpersGraph(Helpers):
         self.smbm = smbm
         self.draygonConnection = None
 
-
     def canEnterAndLeaveGauntletQty(self, nPB, nTanksSpark):
         sm = self.smbm
         # EXPLAINED: to access Gauntlet Entrance from Landing site we can either:
@@ -375,6 +374,15 @@ class HelpersGraph(Helpers):
                               sm.energyReserveCountOk(nTanksGrav)),
                       sm.wand(sm.energyReserveCountOk(nTanksNoGrav),
                               sm.knowsLavaDive())) # should be a good enough skill filter for acid wall jumps with no grav...
+
+    @Cache.decorator
+    def canGetBackFromRidleyZone(self):
+        sm = self.smbm
+        return sm.wor(sm.haveItem('SpringBall'),
+                      sm.haveItem('Bomb'),
+                      sm.haveItem('ScrewAttack'),
+                      sm.wor(sm.itemCountOk('PowerBomb', 2),
+                             sm.canShortCharge())) # speedball
 
     @Cache.decorator
     def canClimbRedTower(self):

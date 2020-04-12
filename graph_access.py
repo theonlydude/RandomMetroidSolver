@@ -269,15 +269,16 @@ accessPoints = [
               'rom_patches': ['LN_PB_Heat_Disable', 'LN_Firefleas_Remove_Fune','firefleas_shot_block.ips'],
               'patches':[RomPatches.LowerNorfairPBRoomHeatDisable, RomPatches.FirefleasRemoveFune],
               'knows': ["FirefleasWalljump"],
-              'save': "Save_Firefleas",
+              'save': "Save_Firefleas", 'needsPreRando': True,
               'solveArea': "Lower Norfair After Amphitheater"}),
     AccessPoint('Ridley Zone', 'LowerNorfair', {
         'Firefleas': lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']),
                                         sm.canUsePowerBombs(),
                                         sm.wor(sm.haveItem('SpringBall'),
                                                sm.haveItem('Bomb'),
-                                               SMBool(sm.haveItemCount('PowerBomb', 2)),
-                                               sm.canShortCharge())), # speedball
+                                               sm.haveItem('ScrewAttack'),
+                                               sm.wor(sm.itemCountOk('PowerBomb', 2),
+                                                      sm.canShortCharge()))), # speedball
         'RidleyRoomOut': lambda sm: sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main'])
     }, internal=True),
     AccessPoint('Three Muskateers Room Left', 'LowerNorfair', {
@@ -947,7 +948,7 @@ class GraphUtils:
             # remove duplicates (loop transitions)
             if any(c['ID'] == conn['ID'] for c in connections):
                 continue
-            print(conn['ID'])
+#            print(conn['ID'])
             # where to write
             conn['DoorPtr'] = src.ExitInfo['DoorPtr']
             # door properties

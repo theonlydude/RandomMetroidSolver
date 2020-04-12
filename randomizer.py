@@ -375,6 +375,10 @@ if __name__ == "__main__":
             optErrMsg += '\nPossible start locations with these settings: {}'.format(possibleStartAPs)
             dumpErrorMsg(args.output, optErrMsg)
             sys.exit(-1)
+    if args.startAP == 'Firefleas Top':
+        # we have to get morph early at firefleas, silently force it to help
+        # rando algorithm
+        args.morphPlacement = "early"
 
     print("startAP:{}".format(args.startAP))
 

@@ -601,8 +601,8 @@ class SuperFunProvider(object):
     def getForbiddenSuits(self):
         self.log.debug("getForbiddenSuits BEGIN. forbidden="+str(self.forbiddenItems)+",ap="+self.rando.curAccessPoint)
         removableSuits = [suit for suit in self.suits if self.checkPool([suit])]
-        if 'Varia' in removableSuits and self.rando.curAccessPoint == 'Bubble Mountain':
-            # Varia has to be fist item there, and checkPool can't detect it
+        if 'Varia' in removableSuits and self.rando.curAccessPoint in ['Bubble Mountain', 'Firefleas Top']:
+            # Varia has to be first item there, and checkPool can't detect it
             removableSuits.remove('Varia')
         self.log.debug("getForbiddenSuits removable="+str(removableSuits))
         if len(removableSuits) > 0:
@@ -1064,6 +1064,9 @@ class Randomizer(object):
         return funcDict[v]
 
     def chooseItemRandom(self, items):
+        item = self.chooseItemEarlyMorphCheck(items)
+        if item is not None:
+            return item
         return random.choice(items)
 
     def chooseItemMinProgression(self, items):
@@ -1088,12 +1091,19 @@ class Randomizer(object):
                 ret = item
         return ret
 
-    def chooseItem(self, items):
+    def chooseItemEarlyMorphCheck(self, items):
+        ret = None
         # if early morph is asked, and morph is still not placed, place it in priority
         if self.restrictions['Morph'] == 'early':
             morph = next((item for item in items if Randomizer.isMorph(item)), None)
             if morph is not None:
-                return morph
+                ret = morph
+        return ret
+
+    def chooseItem(self, items):
+        item = self.chooseItemEarlyMorphCheck(items)
+        if item is not None:
+            return item
         random.shuffle(items)
         item = self.getChooseFunc(self.chooseItemRanges, self.chooseItemFuncs)(items)
         if item is None:
@@ -1359,6 +1369,7 @@ class Randomizer(object):
             nonlocal nonProgList
             if nonProgList is None:
                 nonProgList = [loc for loc in self.currentLocations(locs=locs, post=True) if not self.isSoftlockPossible(itemObj, loc)] # we don't care what the item is
+                self.log.debug("nonProgLocList="+str([loc['Name'] for loc in nonProgList]))
             return [loc for loc in nonProgList if self.canPlaceAtLocation(itemObj, loc)]
         # boss handling : check bosses we can kill and come back from. return immediately if found
         boss = next((item for item in pool if item['Type'] == 'Boss'), None)
@@ -1392,8 +1403,10 @@ class Randomizer(object):
         # special check for early morph
         if self.restrictions['Morph'] == 'early' and len(curLocs) >= 2:
             morph = next((item for item in pool if Randomizer.isMorph(item)), None)
+            if morph is not None:
+                self.log.debug("getPossiblePlacements: early morph check - morph not placed yet")
             if morph is not None and not any(w.item['Type'] == morph['Type'] for w in itemLocDict):
-                self.log.debug("getPossiblePlacements: early morph check")
+                self.log.debug("getPossiblePlacements: early morph placement check")
                 # we have to place morph early, it's still not placed, and not detected as placeable
                 # let's see if we can place it anyway in the context of a combo
                 morphLocs = getLocList(morph, curLocs)
@@ -1561,6 +1574,7 @@ class Randomizer(object):
         if self.restrictions['Morph'] == 'early':
             morph = next((item for item in basePool if Randomizer.isMorph(item)), None)
             if morph is not None and morph not in pool:
+                self.log.debug("add morph in non prog start pool")
                 pool.append(morph)
         # enabled only in major/minor split, and depends on prog speed
         if random.random() < self.minorHelpProb:

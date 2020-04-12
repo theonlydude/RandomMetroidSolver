@@ -1670,7 +1670,7 @@ locations = [
     'Visibility': "Visible",
     'Room': "Three Muskateers' Room",
     'AccessFrom' : {
-        'Three Muskateers Room Left': lambda sm: SMBool(True)
+        'Firefleas': lambda sm: SMBool(True)
     },
     'Available': lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']),
                                     sm.canDestroyBombWalls(),

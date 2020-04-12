@@ -60,6 +60,12 @@ org $82DCD8
     nop
     nop
 
+// timer is up (equivalent to death)
+org $828423
+    jsl time_up
+    nop
+    nop
+
 // Firing uncharged beam
 org $90b911
     jml uncharged_beam
@@ -241,6 +247,16 @@ death:
     // hijacked code
     stz $18aa
     inc $0998
+    rtl
+
+// timer is up (equivalent to death)
+time_up:
+    lda #$001f
+    jsl {inc_stat}
+    jsl {save_last_stats}
+    // hijacked code
+    lda #$0024
+    sta $0998
     rtl
 
 // uncharged Beam Fire

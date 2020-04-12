@@ -1578,7 +1578,10 @@ class ComeBack(object):
         locsCount = 0
         for loc in locations:
             # filter minors locations when the solver no longer collect minors
-            if self.solver.majorsSplit not in loc['Class'] and 'Boss' not in loc['Class'] and noNeedMinors == True:
+            if (self.solver.majorsSplit != 'Full'
+                and self.solver.majorsSplit not in loc['Class']
+                and 'Boss' not in loc['Class']
+                and noNeedMinors == True):
                 continue
             if "comeBack" not in loc:
                 return False
@@ -1590,8 +1593,8 @@ class ComeBack(object):
             else:
                 solveAreas[loc["SolveArea"]] = 1
 
-        # only minors locations
-        if locsCount == 0:
+        # only minors locations, or just one major, no need for a rewind step
+        if locsCount < 2:
             return False
 
         self.log.debug("WARNING: use no come back heuristic for {} locs in {} solve areas ({})".format(locsCount, len(solveAreas), solveAreas))
@@ -1700,7 +1703,8 @@ class ComeBackStep(object):
                 loc["areaWeight"] = retSolveAreas[loc["SolveArea"]]
                 self.log.debug("rewind loc {} new areaWeight: {}".format(loc["Name"], loc["areaWeight"]))
             else:
-                # can happen if going to the first area unlocks new areas
+                # can happen if going to the first area unlocks new areas,
+                # or for minors locations when we no longer need minors.
                 loc["areaWeight"] = outWeight
                 self.log.debug("rewind loc {} from area {} not in original areas".format(loc["Name"], solveArea))
 

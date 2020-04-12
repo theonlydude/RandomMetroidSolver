@@ -404,7 +404,13 @@ function AjaxPresetCallCompleted(data) {
     var multiElems = ["majorsSplit", "startLocation","energyQty", "morphPlacement", "progressionDifficulty", "progressionSpeed"];
 
     for(var i=0; i<elems.length; i++) {
-       dataDict[elems[i]] = document.getElementById(elems[i]).value;
+        // if element is disabled set it to off
+        var elem = document.getElementById(elems[i]);
+        if(elem.disabled == true) {
+            dataDict[elems[i]] = "off";
+        } else {
+            dataDict[elems[i]] = elem.value;
+        }
     }
     for(var i=0; i<randomElems.length; i++) {
        // check if random dice is checked
@@ -808,15 +814,20 @@ window.onload = function(){
 
         if(escapeRando.checked){
             disableElement("removeEscapeEnemies", false);
+            disableElement("animals", true);
             if(! removeEscapeEnemies.checked){ removeEscapeEnemies.click(); }
         } else {
             if(removeEscapeEnemies.checked){ removeEscapeEnemies.click(); }
             disableElement("removeEscapeEnemies", true);
+            disableElement("animals", false);
         }
         switchCheckbox("escapeRando");
     }
     if(! escapeRando.checked){
         disableElement("removeEscapeEnemies", true);
+    }
+    if(escapeRando.checked){
+        disableElement("animals", true);
     }
 
     // uncheck suits restrictions when late morph + area
@@ -1317,7 +1328,14 @@ During the escape sequence:\
 <li>All mini bosses are defeated</li>\
 <li>All minor enemies are removed to allow you to move faster and remove lag</li>\
 </ul>\
-During regular game only Crateria Map station door can be opened and activating the station will act as if all map stations were activated at once.<br/><p><b>Animals Challenges:</b> you can use the extra available time to find the animals that are hidden behind a map station door or/and try different escapes by going to vanilla animals, several times if you can!</p>",
+<p>During regular game only Crateria Map station door can be opened and activating the station will act as if all map stations were activated at once.</p>\
+<b>Animals Challenges:</b>\
+<p>You can use the extra available time to:\
+<ul>\
+<li>find the animals that are hidden behind a (now blue) map station door</li>\
+<li>go the vanilla animals door to cycle through the 4 available escapes, and complete as many escapes as you can</li>\
+</ul>\
+Pick your challenge, or try to do both, but watch your timer!</p>",
       placement: "auto left"
     },
     {
@@ -1871,7 +1889,7 @@ def displayNumber(id, min, max, default, step="1"):
                 <tr id="animalsStep">
                   <td colspan="2">
                     {{displayCheckbox("animals")}}
-                    Save the animals surprise
+                    <span id="animalsText">Save the animals surprise</span>
                   </td>
                   <td><button type="button" onclick="startTheTour(34)">?</button></td>
                 </tr>

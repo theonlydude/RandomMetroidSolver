@@ -409,11 +409,11 @@ class Knows:
                                  'href': 'https://youtu.be/tp4V9aNKp64',
                                  'rooms': ['Lower Norfair Fireflea Room']}
 
-    DodgeThreeMuskateers = SMBool(False, 0, ['DodgeThreeMuskateers'])
-    desc['DodgeThreeMuskateers'] = {'display': 'Dodge the Three Muskateers',
-                                    'title': 'Get passed the Three Muskateers both ways without taking damage or killing them',
-                                    'href': '', # TODO
-                                    'rooms': ["Three Musketeers' Room"]}
+    DodgeLowerNorfairEnemies = SMBool(False, 0, ['DodgeLowerNorfairEnemies'])
+    desc['DodgeLowerNorfairEnemies'] = {'display': 'Dodge Lower Norfair Enemies',
+                                        'title': 'Go through hard-hitting enemies in Lower Norfair without taking damage or killing them',
+                                        'href': '', # TODO
+                                        'rooms': ["Three Musketeers' Room", "Wasteland", 'Red Kihunter Shaft', 'The Worst Room In The Game']}
 
     # wrecked ship
     ContinuousWallJump = SMBool(False, 0, ['ContinuousWallJump'])
@@ -635,7 +635,7 @@ class Knows:
         'Norfair': [
             {'knows': ['WallJumpCathedralExit', 'BubbleMountainWallJump', 'NorfairReserveDBoost', 'CrocPBsIce', 'CrocPBsDBoost', 'IceEscape', 'IceMissileFromCroc', 'FrogSpeedwayWithoutSpeed', 'NovaBoost'],
               'title': 'Upper Norfair'},
-            {'knows': ['LavaDive', 'LavaDiveNoHiJump', 'ScrewAttackExit', 'ScrewAttackExitWithoutScrew', 'WorstRoomIceCharge', 'FirefleasWalljump', 'DodgeThreeMuskateers'],
+            {'knows': ['LavaDive', 'LavaDiveNoHiJump', 'ScrewAttackExit', 'ScrewAttackExitWithoutScrew', 'WorstRoomIceCharge', 'FirefleasWalljump', 'DodgeLowerNorfairEnemies'],
              'title': 'Lower Norfair'}
         ],
         'Bosses/End': [

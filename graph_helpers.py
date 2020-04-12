@@ -328,40 +328,91 @@ class HelpersGraph(Helpers):
     def canPassWorstRoom(self):
         sm = self.smbm
         return sm.wand(sm.canDestroyBombWalls(),
+                       sm.canPassWorstRoomPirates(),
                        sm.wor(sm.canFly(),
                               sm.wand(sm.knowsWorstRoomIceCharge(), sm.haveItem('Ice'), sm.canFireChargedShots()),
                               sm.wand(sm.knowsGetAroundWallJump(), sm.haveItem('HiJump')),
                               sm.wand(sm.knowsSpringBallJumpFromWall(), sm.canUseSpringBall())))
 
+    # checks mix of super missiles/health
+    def canGoThroughLowerNorfairEnemy(self, nmyHealth, nbNmy, nmyHitDmg, supDmg=300.0):
+        sm = self.smbm
+        # supers only
+        if sm.itemCount('Super')*5*supDmg >= nbNmy*nmyHealth:
+            return SMBool(True, 0, items=['Super'])
+
+        # - or with taking damage as well?
+        (dmgRed, redItems) = sm.getDmgReduction(envDmg=False)
+        dmg = nmyHitDmg / dmgRed
+        if sm.heatProof() and (sm.itemCount('Super')*5*supDmg)/nmyHealth + (sm.energyReserveCount()*100 - 2)/dmg >= nbNmy:
+            # require heat proof as long as taking damage is necessary.
+            # display all the available energy in the solver.
+            return sm.wand(sm.heatProof(), SMBool(True, 0, items=redItems+['Super', '{}-ETank - {}-Reserve'.format(self.smbm.itemCount('ETank'), self.smbm.itemCount('Reserve'))]))
+
+        return sm.knowsDodgeLowerNorfairEnemies()
+
+    def canKillRedKiHunters(self, n):
+        sm = self.smbm
+        return sm.wor(sm.haveItem('Plasma'),
+                      sm.haveItem('ScrewAttack'),
+                      sm.wand(sm.heatProof(), # this takes a loooong time ...
+                              sm.wor(sm.haveItem('Spazer'),
+                                     sm.haveItem('Ice'),
+                                     sm.wand(sm.haveItem('Charge'),
+                                             sm.haveItem('Wave')))))
+        destroy = sm.canKillRedKiHuntersWithScrewOrBeams()
+        if destroy.bool == True:
+            return destroy
+        return sm.canGoThroughLowerNorfairEnemy(1800.0, float(n), 200.0)
+
     @Cache.decorator
     def canPassThreeMuskateers(self):
+        sm = self.smbm
+        return sm.canKillRedKiHunters(6)
+
+    @Cache.decorator
+    def canPassRedKiHunters(self):
+        sm = self.smbm
+        return sm.canKillRedKiHunters(3)
+
+    @Cache.decorator
+    def canPassWastelandDessgeegas(self):
         sm = self.smbm
         destroy = sm.wor(sm.haveItem('Plasma'),
                          sm.haveItem('ScrewAttack'),
                          sm.wand(sm.heatProof(), # this takes a loooong time ...
                                  sm.wor(sm.haveItem('Spazer'),
-                                        sm.haveItem('Ice'))))
+                                        sm.wand(sm.haveItem('Charge'),
+                                                sm.haveItem('Wave')))),
+                                        sm.itemCountOk('PowerBomb', 4))
         if destroy.bool == True:
             return destroy
-        # if no adapted beams or screw attack, check if we can go both ways
-        # (no easy refill around) with supers and/or health
 
-        # - super only?
-        ki = 1800.0
-        sup = 300.0
-        nbKi = 6.0
-        if sm.itemCount('Super')*5*sup >= nbKi*ki:
-            return SMBool(True, 0, items=['Super'])
+        return sm.canGoThroughLowerNorfairEnemy(800.0, 3.0, 160.0)
 
-        # - or with taking damage as well?
-        (dmgRed, redItems) = sm.getDmgReduction(envDmg=False)
-        dmgKi = 200.0 / dmgRed
-        if sm.heatProof() and (sm.itemCount('Super')*5*sup)/ki + (sm.energyReserveCount()*100 - 2)/dmgKi >= nbKi:
-            # require heat proof as long as taking damage is necessary.
-            # display all the available energy in the solver.
-            return sm.wand(sm.heatProof(), SMBool(True, 0, items=redItems+['Super', '{}-ETank - {}-Reserve'.format(self.smbm.itemCount('ETank'), self.smbm.itemCount('Reserve'))]))
+    @Cache.decorator
+    def canPassNinjaPirates(self):
+        sm = self.smbm
+        return sm.wor(sm.itemCountOk('Missile', 10),
+                      sm.itemCountOk('Super', 2),
+                      sm.haveItem('Plasma'),
+                      sm.wor(sm.haveItem('Spazer'),
+                             sm.wand(sm.haveItem('Charge'),
+                                     sm.wor(sm.haveItem('Wave'),
+                                            sm.haveItem('Ice')))))
 
-        return sm.knowsDodgeThreeMuskateers()
+    @Cache.decorator
+    def canPassWorstRoomPirates(self):
+        sm = self.smbm
+        return sm.wor(sm.haveItem('ScrewAttack'),
+                      sm.itemCountOk('Missile', 6),
+                      sm.itemCountOk('Super', 3),
+                      sm.wor(sm.wand(sm.canFireChargedShots(), sm.haveItem('Plasma')),
+                             sm.wand(sm.haveItem('Charge'),
+                                     sm.wor(sm.haveItem('Spazer'),
+                                            sm.haveItem('Wave'),
+                                            sm.haveItem('Ice'))),
+                             sm.knowsDodgeLowerNorfairEnemies()))
 
     # go though the pirates room filled with acid
     @Cache.decorator

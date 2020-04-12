@@ -364,6 +364,10 @@ if __name__ == "__main__":
                 # intersection between user whishes and reality
                 startLocationList = args.startLocationList.split(',')
                 possibleStartAPs = list(set(possibleStartAPs).intersection(set(startLocationList)))
+                if len(possibleStartAPs) == 0:
+                    optErrMsg += '\nInvalid start locations list with your settings.'
+                    dumpErrorMsg(args.output, optErrMsg)
+                    sys.exit(-1)
             ceres = 'Ceres' in possibleStartAPs
             if ceres:
                 possibleStartAPs.remove('Ceres')

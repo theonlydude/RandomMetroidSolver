@@ -51,10 +51,11 @@ if __name__ == "__main__":
         if key not in randoParams:
             randoParams[key] = value
 
-    # fix multiparameter prog speed for rando webservice
-    # (it expects a string '"prog1","prog2"' when multiple prog speed are available to randomize)
-    if type(randoParams["progressionSpeed"]) == list:
-        randoParams["progressionSpeed"] = ','.join(randoParams["progressionSpeed"])
+    # fix multiselect parameters for rando webservice
+    # (it expects a string '"x1","x2"' when a pool of multiple values are available to randomize)
+    for param in randoParams:
+        if type(randoParams[param]) == list:
+            randoParams[param] = ','.join(randoParams[param])
 
     # call web service
     if args.remoteUrl == 'local':

@@ -34,6 +34,8 @@ dude@computer:~/RandomMetroidSolver (master)$ python3.7 ./randomizer.py -r ~/met
 
 You can start with an existing Randomizer preset and create a temporary one to update the parameters you want to change in the json, you can also set the parameters by hand but there's many many parameters (see web/controllers/solver_web.py for the call to randomizer.py using parameters)
 
+For startLocation, majorsSplit, progressionSpeed, progressionDifficulty, morphPlacement and energyQty if you set them to random you can add a second parameter to give the list of possible values (see haste Randomizer preset for an example).
+
 To list all the Randomizer parameters and their description:
 ```
 dude@computer:~/RandomMetroidSolver (master)$ python3.7 ./randomizer.py -h

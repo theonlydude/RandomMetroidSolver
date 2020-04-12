@@ -830,6 +830,9 @@ class GraphUtils:
                 return src
         return None
 
+    def isEscapeAnimals(apName):
+        return 'Flyway Right' in apName
+
     # gets dict like
     # (RoomPtr, (vanilla entry screen X, vanilla entry screen Y)): AP
     def getRooms():
@@ -837,9 +840,18 @@ class GraphUtils:
         for ap in accessPoints:
             if ap.Internal == True:
                 continue
+            # special ap for random escape animals surprise
+            if GraphUtils.isEscapeAnimals(ap.Name):
+                continue
+
             roomPtr = ap.RoomInfo['RoomPtr']
 
-            connAP = getAccessPoint(GraphUtils.getVanillaExit(ap.Name))
+            vanillaExitName = GraphUtils.getVanillaExit(ap.Name)
+            # special ap for random escape animals surprise
+            if GraphUtils.isEscapeAnimals(vanillaExitName):
+                continue
+
+            connAP = getAccessPoint(vanillaExitName)
             entryInfo = connAP.ExitInfo
             rooms[(roomPtr, entryInfo['screen'], entryInfo['direction'])] = ap
             rooms[(roomPtr, entryInfo['screen'], (ap.EntryInfo['SamusX'], ap.EntryInfo['SamusY']))] = ap

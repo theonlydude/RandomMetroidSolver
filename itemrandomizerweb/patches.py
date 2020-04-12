@@ -93,7 +93,8 @@ patches = {
     },
     # has to be applied along with WS_Main_Open_Grey
     "Sponge_Bath_Blinking_Door": {
-        0x7C276: [0x0C]
+        0x7C276: [0x0C],
+        0x10CE69: [0x00]
     },
     # custom load points for non standard start APs
     "Save_G4": {

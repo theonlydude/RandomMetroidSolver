@@ -59,9 +59,7 @@ patches = {
         0x7C828: [0x0C]},
     "Escape_Rando_Crateria_Doors": {
         0x781B1: [0x10],
-        0x781C9: [0x10],
-        0X7804F: [0x10],
-        0x783AD: [0x10]
+        0X7804F: [0x10]
     },
     "Escape_Animals_Open_Brinstar": {
         0x784BD: [0x10]

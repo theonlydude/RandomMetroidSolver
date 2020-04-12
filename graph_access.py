@@ -719,7 +719,8 @@ vanillaEscapeTransitions = [
     ('Flyway Right 0', 'Bomb Torizo Room Left'),
     ('Flyway Right 1', 'Bomb Torizo Room Left'),
     ('Flyway Right 2', 'Bomb Torizo Room Left'),
-    ('Flyway Right 3', 'Bomb Torizo Room Left')
+    ('Flyway Right 3', 'Bomb Torizo Room Left'),
+    ('Bomb Torizo Room Left Animals', 'Flyway Right')
 ]
 
 escapeSource = 'Tourian Escape Room 4 Top Right'
@@ -854,21 +855,21 @@ class GraphUtils:
         assert n < 4, "Invalid possibleTargets list: " + str(possibleTargets)
         # first get our list of 4 entries for escape patch
         if n >= 2:
-            # connect actual animals: pick one of the remaining targets and connect it to BT room
-            src = possibleTargets.pop()
-            graph.addTransition(src, 'Bomb Torizo Room Left')
-            graph.EscapeAttributes['Animals'] = src
+            # get actual animals: pick one of the remaining targets
+            animalsAccess = possibleTargets.pop()
+            graph.EscapeAttributes['Animals'] = animalsAccess
             # we now have at most 2 targets left, fill up to fill cycling 4 targets for animals suprise
             possibleTargets.append('Climb Bottom Left')
             possibleTargets.append(firstEscape)
             poss = possibleTargets[:]
             while len(possibleTargets) < 4:
-                possibleTargets.append(random.choice(poss))
+                possibleTargets.append(poss.pop(random.randint(0, len(poss)-1)))
         else:
             # failsafe: if not enough targets left, abort and do vanilla animals
+            animalsAccess = 'Flyway Right'
             possibleTargets = ['Bomb Torizo Room Left'] * 4
         assert len(possibleTargets) == 4, "Invalid possibleTargets list: " + str(possibleTargets)
-        # then, actually add the 4 connections
+        # actually add the 4 connections for successive escapes challenge
         basePtr = 0xADAC
         btDoor = getAccessPoint('Flyway Right')
         for i in range(len(possibleTargets)):
@@ -878,6 +879,13 @@ class GraphUtils:
             graph.addAccessPoint(ap)
             target = possibleTargets[i]
             graph.addTransition(ap.Name, target)
+        # add the connection for animals access
+        bt = getAccessPoint('Bomb Torizo Room Left')
+        btCpy = copy.copy(bt)
+        btCpy.Name += " Animals"
+        btCpy.ExitInfo['DoorPtr'] = 0xAE00
+        graph.addAccessPoint(btCpy)
+        graph.addTransition(animalsAccess, btCpy.Name)
 
     def isHorizontal(dir):
         # up: 0x3, 0x7
@@ -939,7 +947,7 @@ class GraphUtils:
             # remove duplicates (loop transitions)
             if any(c['ID'] == conn['ID'] for c in connections):
                 continue
-#            print(conn['ID'])
+            print(conn['ID'])
             # where to write
             conn['DoorPtr'] = src.ExitInfo['DoorPtr']
             # door properties

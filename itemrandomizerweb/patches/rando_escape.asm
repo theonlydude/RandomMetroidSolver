@@ -77,6 +77,13 @@ flyway_door_lists:
 %FlywayDoorList()
 %FlywayDoorList()
 
+print "bt_door_list : ", pc
+bt_door_list:
+;; placeholder for inside BT door to get back from animals during escape
+db $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff
+
+warnpc $83ffff
+
 ;;; CODE in bank 84 (PLM)
 org $84f070
 
@@ -155,7 +162,11 @@ org $8f84b8                     ; brinstar map
     db $01,$46
     dw $9020
 
-;;; overwrite flyway setup ASM in "escape" room state
+;;; overwrite BT setup ASM ptr in "escape" room state
+org $8f9867
+    dw bt_escape_setup
+
+;;; overwrite flyway setup ASM ptr in "escape" room state
 org $8F98DC
     dw flyway_escape_setup
 
@@ -246,9 +257,20 @@ warnpc $8ff02f
 ;; to call during BT door asm
 org $8ff030
 setup_next_escape:
+    %checkEscape() : bcc .end
     ;; current_escape = (current_escape + 1) % 4
     lda !current_escape : inc : and #$0003 : sta !current_escape
+.end:
     rts
+
+bt_door_ptr:
+    dw bt_door_list
+
+bt_escape_setup:
+    ;; replace door out list ptr in RAM
+    lda #bt_door_ptr : sta !door_list_ptr
+    ;; run vanilla setup ASM
+    jmp $91B2
 
 warnpc $8ff0ff
 

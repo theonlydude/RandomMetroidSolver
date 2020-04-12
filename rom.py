@@ -854,6 +854,7 @@ class RomPatcher:
                 'Crab Hole Bottom Right':"Escape_Animals_Open_Maridia",
             }
             if escapeAttr['Animals'] in escapeOpenPatches:
+                plms.append("WS_Map_Grey_Door")
                 self.applyIPSPatch(escapeOpenPatches[escapeAttr['Animals']])
             else:
                 plms.append("WS_Map_Grey_Door_Openable")

@@ -547,6 +547,8 @@ mkdir -p ~/web2py/applications/solver/static/images/sprite_sheets/
 [ -L ~/web2py/applications/solver/static/images/sprite_sheets/samus.png ] || ln -s ~/RandomMetroidSolver/web/static/sprite_sheets/samus.png ~/web2py/applications/solver/static/images/sprite_sheets/samus.png
 [ -L ~/web2py/applications/solver/static/images/sprite_sheets/super_controid.png ] || ln -s ~/RandomMetroidSolver/web/static/sprite_sheets/super_controid.png ~/web2py/applications/solver/static/images/sprite_sheets/super_controid.png
 [ -L ~/web2py/applications/solver/static/images/sprite_sheets/win95_cursor.png ] || ln -s ~/RandomMetroidSolver/web/static/sprite_sheets/win95_cursor.png ~/web2py/applications/solver/static/images/sprite_sheets/win95_cursor.png
+[ -L ~/web2py/applications/solver/static/images/sprite_sheets/mario_8bit.png ] || ln -s ~/RandomMetroidSolver/web/static/sprite_sheets/mario_8bit.png ~/web2py/applications/solver/static/images/sprite_sheets/mario_8bit.png
+[ -L ~/web2py/applications/solver/static/images/sprite_sheets/mario_8bit_modern.png ] || ln -s ~/RandomMetroidSolver/web/static/sprite_sheets/mario_8bit_modern.png ~/web2py/applications/solver/static/images/sprite_sheets/mario_8bit_modern.png
 
 [ -L ~/web2py/applications/solver/static/images/area_map_20200112.png ] || ln -s ~/RandomMetroidSolver/web/static/area_map.png ~/web2py/applications/solver/static/images/area_map_20200112.png
 

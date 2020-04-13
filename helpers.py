@@ -259,6 +259,16 @@ class Helpers(object):
                        sm.itemCountOk('PowerBomb', 2*n+1))
 
     @Cache.decorator
+    def canCrystalFlashClip(self):
+        sm = self.smbm
+        return sm.wand(sm.canCrystalFlash(),
+                       sm.wor(sm.wand(sm.haveItem('Gravity'),
+                                      sm.canUseBombs(),
+                                      sm.knowsCrystalFlashClip()),
+                              sm.wand(sm.knowsSuitlessCrystalFlashClip(),
+                                      sm.itemCountOk('PowerBomb', 4))))
+
+    @Cache.decorator
     def canDoLowGauntlet(self):
         sm = self.smbm
         return sm.wand(sm.canShortCharge(),

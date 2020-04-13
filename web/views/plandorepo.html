@@ -1,0 +1,1075 @@
+{{
+extend 'layout.html'
+}}
+
+<meta name="description" content="VARIA Randomizer Plandomizer Repository"/>
+<link rel="shortcut icon" href={{=URL('static','favicon.ico')}} type="image/ico"/>
+<script src="{{=URL('static','js/FileSaver.js')}}"></script>
+<link rel="stylesheet" type="text/css" href={{=URL('static/css','mystyle_20191017.css')}} media="screen"/>
+
+<script type="text/javascript" src="{{=URL('static', 'js/crc32.js')}}"></script>
+
+<title>Super Metroid VARIA Randomizer Plandomizer Repository</title>
+
+<style>
+.hidden {
+    display: none;
+}
+.plandoButton {
+    cursor: pointer;
+    width: 3em;
+}
+.uploadPopup {
+    background-color: #ffffff;
+    position: absolute;
+    z-index: 7;
+    width: 40%;
+    height: auto;
+    top: 10em;
+    left: 30%;
+    display: none;
+    padding: 0.5%;
+    border: 2px solid gray;
+}
+.deletePopup {
+    background-color: #ffffff;
+    position: absolute;
+    z-index: 7;
+    width: 40%;
+    height: auto;
+    top: 10em;
+    left: 30%;
+    display: none;
+    padding: 0.5%;
+    border: 2px solid gray;
+}
+.updatePopup {
+    background-color: #ffffff;
+    position: absolute;
+    z-index: 7;
+    width: 40%;
+    height: auto;
+    top: 10em;
+    left: 30%;
+    display: none;
+    padding: 0.5%;
+    border: 2px solid gray;
+}
+
+// https://www.w3schools.com/howto/tryit.asp?filename=tryhow_js_collapsible_symbol
+.collapsible {
+  background-color: #777;
+  color: white;
+  cursor: pointer;
+  padding: 18px;
+  width: 100%;
+  border: none;
+  text-align: left;
+  outline: none;
+  font-size: 15px;
+}
+.collapsibleTd {
+  background-color: #777;
+  color: white;
+  cursor: pointer;
+  padding: 0.5em;
+  border: none;
+  text-align: left;
+  outline: none;
+  font-size: 15px;
+}
+.active, .collapsible:hover {
+  background-color: #555;
+}
+
+.collapsible:after {
+  content: '\002B';
+  color: white;
+  font-weight: bold;
+  float: right;
+  margin-left: 5px;
+}
+
+.active:after {
+  content: "\2212";
+}
+
+.content {
+  padding: 0 18px;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.2s ease-out;
+  background-color: #f1f1f1;
+}
+
+.90th {
+    width: 90%;
+}
+
+.left {
+    float: left;
+}
+.right {
+    float: right;
+}
+
+.centerCell {
+    text-align: center;
+}
+
+.clickable {
+    cursor: pointer;
+}
+.left {
+    float: left;
+}
+.right {
+    float: right;
+}
+.uploadButton {
+    width:50%;
+}
+.downloadButton {
+    width: 20%;
+    margin-left: 40%;
+    margin-right: 20%;
+    margin-top: 1em;
+    margin-bottom: 1em;
+}
+.blankRow {
+    height: 1em;
+    background-color: #fff;
+}
+.blankLastRow {
+    height: 1em;
+    border-bottom: none;
+}
+.greyRow {
+    background-color: #eee;
+}
+.noborder {
+    border-bottom: none;
+}
+
+.imageItem {
+    width: 16px;
+    image-rendering: -moz-crisp-edges; /* Firefox */
+    image-rendering: -o-crisp-edges; /* Opera */
+    image-rendering: -webkit-optimize-contrast; /* Webkit (non-standard naming) */
+    image-rendering: crisp-edges;
+    -ms-interpolation-mode: nearest-neighbor; /* IE (non-standard property) */
+}
+</style>
+
+<script type="text/javascript">
+function clearSeed(name) {
+    document.getElementById(name).value = "";
+}
+
+function displayUploadPopup() {
+    hideDeletePopup();
+    hideUpdatePopup();
+    document.getElementById("uploadPopup").style.display = "block";
+}
+
+function hideUploadPopup() {
+    document.getElementById("uploadPopup").style.display = "none";
+}
+
+var plandoROMBytes = null;
+var plandoUpdateROMBytes = null;
+var vanillaROMBytes = null;
+window.onload = function(){
+    //Check File API support
+    if(window.File && window.FileList && window.FileReader) {
+        var filesInput = document.getElementById("vanillaROM");
+        filesInput.addEventListener("change", function(event){
+            var files = event.target.files; //It returns a FileList object
+            var file = files[0];
+
+            var crc32 = new Crc32();
+
+            var reader = new FileReader();
+            reader.readAsArrayBuffer(file)
+            reader.onload = function(e) {
+                // check sfc or smc extention
+                var re = /(?:\.([^.]+))?$/;
+                var ext = re.exec(file.name)[1];
+                if( ! (ext === "sfc" || ext === "smc" || ext === "SFC" || ext === "SMC") ) {
+                    clearSeed("vanillaROM");
+                    alert("wrong extension: "+ext);
+                    return false;
+                }
+
+                var fileSize = file.size;
+                 if( fileSize == 3146240) {
+                    clearSeed("vanillaROM");
+                    alert("headered ROM detected, please use an unheadered ROM");
+                    return false;
+                }
+
+                crc32.update(e.target.result);
+                var digest = crc32.digest();
+                if(digest != "d63ed5f8") {
+                    clearSeed("vanillaROM");
+                    alert("Non vanilla ROM detected");
+                    return false;
+                }
+
+                vanillaROMBytes = new Uint8Array(e.target.result);
+            }
+        }, false);
+
+        var filesInput = document.getElementById("plandoROM");
+        filesInput.addEventListener("change", function(event){
+            var files = event.target.files; //It returns a FileList object
+            var file = files[0];
+
+            var reader = new FileReader();
+            reader.readAsArrayBuffer(file)
+            reader.onload = function(e) {
+                // check sfc or smc extention
+                var re = /(?:\.([^.]+))?$/;
+                var ext = re.exec(file.name)[1];
+                if( ! (ext === "sfc" || ext === "smc" || ext === "SFC" || ext === "SMC") ) {
+                    clearSeed("plandoROM");
+                    alert("wrong extension: "+ext);
+                    return false;
+                }
+
+                var fileSize = file.size;
+                 if(fileSize == 4*1024*1024) {
+                    clearSeed("plandoROM");
+                    alert("Plando seed is too big (Sprite customized seeds are forbidden for hosting space constraints)");
+                    return false;
+                }
+
+                console.log("set plando rom bytes");
+                plandoROMBytes = new Uint8Array(e.target.result);
+
+                // check that it's indeed a super metroid ROM
+                // 0x02B9 -> 0x02C4: supermetroid
+                var check = "supermetroid";
+                for(i=0; i<check.length; i++) {
+                    if(plandoROMBytes[0x02B9+i] != check.charCodeAt(i)) {
+                        clearSeed("plandoROM");
+                        plandoROMBytes = null;
+                        alert("Plando seed is not a Super Metroid ROM");
+                        return false;
+                    }
+                }
+
+                setGuessedPreset(file.name);
+            }
+        }, false);
+
+        var filesInput = document.getElementById("updatePlandoROM");
+        filesInput.addEventListener("change", function(event){
+            var files = event.target.files; //It returns a FileList object
+            var file = files[0];
+
+            var reader = new FileReader();
+            reader.readAsArrayBuffer(file)
+            reader.onload = function(e) {
+                // check sfc or smc extention
+                var re = /(?:\.([^.]+))?$/;
+                var ext = re.exec(file.name)[1];
+                if( ! (ext === "sfc" || ext === "smc" || ext === "SFC" || ext === "SMC") ) {
+                    clearSeed("updatePlandoROM");
+                    alert("wrong extension: "+ext);
+                    return false;
+                }
+
+                var fileSize = file.size;
+                 if(fileSize == 4*1024*1024) {
+                    clearSeed("updatePlandoROM");
+                    alert("Plando seed is too big (Sprite customized seeds are forbidden for hosting space constraints)");
+                    return false;
+                }
+
+                plandoUpdateROMBytes = new Uint8Array(e.target.result);
+
+                // check that it's indeed a super metroid ROM
+                // 0x02B9 -> 0x02C4: supermetroid
+                var check = "supermetroid";
+                for(i=0; i<check.length; i++) {
+                    if(plandoUpdateROMBytes[0x02B9+i] != check.charCodeAt(i)) {
+                        clearSeed("updatePlandoROM");
+                        plandoUpdateROMBytes = null;
+                        alert("Plando seed is not a Super Metroid ROM");
+                        return false;
+                    }
+                }
+            }
+        }, false);
+
+    } else {
+        alert("This website requires the HTML5 File API, please upgrade your browser to a newer version.");
+    }
+
+    var plandoName = document.getElementById("plandoName");
+    plandoName.onkeypress = plandoName.onpaste = checkInput;
+
+    dragElement(document.getElementById("uploadPopup"), "uploadGrab");
+    dragElement(document.getElementById("deletePopup"), "deleteGrab");
+    dragElement(document.getElementById("updatePopup"), "updateGrab");
+
+    displayMessage();
+}
+
+// from https://stackoverflow.com/questions/22708434/restrict-characters-in-input-field
+function checkInput(e) {
+    var e = e || event;
+    var char = e.type == 'keypress' 
+        ? String.fromCharCode(e.keyCode || e.which) 
+        : (e.clipboardData || window.clipboardData).getData('Text');
+    if (/[^\w\s]/gi.test(char)) {
+        return false;
+    }
+}
+
+function downloadPlando(plando) {
+    console.log("downloadPlando: "+plando);
+
+    if(vanillaROMBytes == null) {
+        alert("Please select a vanilla ROM first");
+        return;
+    }
+
+    var dataDict = {"plando": plando}
+
+    var request = $.ajax({
+      url: "{{=URL(f='downloadPlandoWebService')}}",
+      method: "POST",
+      data: dataDict,
+      dataType: "json"
+    });
+
+    request.done(AjaxPlandoDownloadCompleted);
+    request.fail(ajaxFail);
+}
+
+function unpack_3bytes(ips, i) {
+  var b1 = ips[i];
+  var b2 = ips[i+1];
+  var b3 = ips[i+2];
+  return (b1*65536) + (b2*256) + b3;
+}
+
+function unpack_2bytes(ips, i) {
+  var b1 = ips[i];
+  var b2 = ips[i+1];
+  return (b1*256) + b2;
+}
+
+function AjaxPlandoDownloadCompleted(data) {
+    // with items/Locations patch the local rom in memory
+    var filesInput = document.getElementById("vanillaROM");
+    var file = filesInput.files[0];
+
+    var reader = new FileReader();
+    reader.readAsArrayBuffer(file);
+
+    reader.onload = function(e) {
+        var bytes = new Uint8Array(e.target.result);
+
+        var maxSize = data["maxSize"]
+        if(maxSize > 3*1024*1024) {
+          var tmp = new Uint8Array(maxSize);
+          tmp.set(bytes);
+          bytes = tmp;
+        }
+
+        var binary_string = atob(data["ips"]);
+        var len = binary_string.length;
+        var ips = new Uint8Array(len);
+        for(var i = 0; i < len; i++) {
+           ips[i] = binary_string.charCodeAt(i);
+        }
+
+        var i = 5;
+        var offset = 0;
+        var size = 0;
+        var rle_size = 0;
+
+        while(i < ips.length - 3) {
+           offset = unpack_3bytes(ips, i);
+           i += 3;
+           size = unpack_2bytes(ips, i);
+           i += 2;
+
+           if(size == 0) {
+             // RLE
+             rle_size = unpack_2bytes(ips, i);
+             i += 2;
+             for(j=0; j<rle_size; j++) {
+               bytes[offset+j] = ips[i];
+             }
+             i += 1;
+           } else {
+             for(j=0; j<size; j++) {
+               bytes[offset+j] = ips[i+j];
+             }
+             i += j;
+           }
+        }
+
+        var blob = new Blob([bytes], {type: "octet/stream"});
+
+        var outFileName = data['fileName'];
+        saveAs(blob, outFileName);
+    }
+}
+
+function generateRawData(vanillaBytes, plandoBytes) {
+    // convert array to b64:
+    var vanillaLength = vanillaBytes.length;
+    var plandoLength = plandoBytes.length;
+    if(plandoLength < vanillaLength) {
+        alert("Something wrong with your plando, it's smaller than vanilla ROM.");
+        return null;
+    }
+
+    var romData = {};
+    for(var i=0; i<vanillaLength; i++) {
+        if(vanillaBytes[i] != plandoBytes[i]) {
+            romData[i] = plandoBytes[i];
+        }
+    }
+    for(var i=vanillaLength; i<plandoLength; i++) {
+        romData[i] = plandoBytes[i];
+    }
+
+    return JSON.stringify(romData);
+}
+
+function uploadPlando() {
+    console.log("uploadPlando");
+
+    // check that both vanilla and plando ROMs are set
+    if(vanillaROMBytes == null) {
+        alert("Please select a vanilla ROM first");
+        return;
+    }
+    if(plandoROMBytes == null) {
+        alert("Please select a Plando seed first");
+        return;
+    }
+
+    var dataDict = {
+        "author": document.getElementById("author").value,
+        "plandoName": document.getElementById("plandoName").value,
+        "longDesc": document.getElementById("longDesc").value,
+        "preset": document.getElementById("preset").value,
+        "romData": generateRawData(vanillaROMBytes, plandoROMBytes)
+    };
+
+
+    var request = $.ajax({
+      url: "{{=URL(f='uploadPlandoWebService')}}",
+      method: "POST",
+      data: dataDict,
+      dataType: "json"
+    });
+
+    request.done(AjaxUploadPlandoCompleted);
+    request.fail(ajaxFail);
+}
+
+function AjaxUploadPlandoCompleted(data) {
+    console.log("AjaxUploadPlandoCompleted");
+
+    clearSeed("vanillaROM");
+    clearSeed("plandoROM");
+
+    hideUploadPopup();
+
+    alert("You plando has been uploaded. Keep this key it'll required if you need to update/delete your plando: "+data);
+    // reload the page to display the newly uploaded plando
+    location.reload();
+}
+
+function ajaxFail(jqXHR, textStatus) {
+    document.getElementById("flash").innerHTML = jqXHR.responseText;
+    $('#flash').show();
+}
+
+function displayMessage() {
+{{
+    if len(msg) > 0:
+        response.write("document.getElementById('flash').innerHTML = \"{}\";".format(msg), escape=False)
+        response.write("$('#flash').show();", escape=False)
+        pass
+}}
+}
+
+
+function ratePlando(plando, purePlando) {
+    var dataDict = {
+        "plando": plando,
+        "rate": document.getElementById("rate"+purePlando).value};
+
+    var request = $.ajax({
+      url: "{{=URL(f='plandoRateWebService')}}",
+      method: "POST",
+      data: dataDict,
+      dataType: "json"
+    });
+
+    request.done(AjaxPlandoRateCompleted);
+    request.fail(ajaxFail);
+}
+
+function addImage(parent, name) {
+    var DOM_img = document.createElement("img");
+    DOM_img.src = "/solver/static/images/"+name+".png";
+    DOM_img.class = "imageItem";
+    parent.appendChild(DOM_img);
+}
+
+function updatePlandoRating(plando, rate, count) {
+    console.log("updatePlandoRating: "+plando+": "+rate);
+
+    var divrate = document.getElementById("divrate"+plando);
+    var children = divrate.childNodes;
+
+    // remove content
+    if(children.length == 1) {
+        divrate.innerHTML = "";
+    } else {
+        while(divrate.firstChild) {
+            divrate.removeChild(divrate.lastChild);
+        }
+    }
+
+    // add new content
+    for(var i=1; i<=Math.floor(rate); i++) {
+        addImage(divrate, "Varia");
+    }
+
+    var decimal = rate - Math.floor(rate);
+    if(decimal > 0.0 && decimal < 0.25) {
+        addImage(divrate, "No_Varia");
+    } else if(decimal >= 0.25 && decimal < 0.75) {
+        addImage(divrate, "Half_Varia");
+    } else if(decimal >= 0.75) {
+        addImage(divrate, "Varia");
+    }
+
+    for(var i=1; i<=5-Math.ceil(rate); i++) {
+        addImage(divrate, "No_Varia");
+    }
+
+    var textnode = document.createTextNode(" ("+count+")");
+    divrate.appendChild(textnode);
+
+    // update invisible div used for sorting
+    divrate.previousSibling.innerHTML = rate.toFixed(2);
+}
+
+function AjaxPlandoRateCompleted(data) {
+    console.log("AjaxPlandoRateCompleted");
+
+    var msg = data["msg"];
+    var rate = data["rate"];
+    var count = data["count"];
+    var purePlandoName = data["purePlandoName"];
+
+    if(msg.length > 0) {
+        document.getElementById("flash").innerHTML = msg;
+        $('#flash').show();
+    }
+
+    updatePlandoRating(purePlandoName, rate, count);
+}
+
+function displayDeletePopup(plandoName) {
+    hideUploadPopup();
+    hideUpdatePopup();
+
+    // populate plando name
+    document.getElementById("deletePlandoName").value = plandoName;
+
+    document.getElementById("deletePopup").style.display = "block";
+}
+
+function hideDeletePopup() {
+    document.getElementById("deletePopup").style.display = "none";
+}
+
+function deletePlando() {
+    var plandoName = document.getElementById("deletePlandoName").value;
+    var plandoKey = document.getElementById("deletePlandoKey").value;
+
+    var dataDict = {
+        "plandoName": plandoName,
+        "plandoKey": plandoKey
+    }
+
+    var request = $.ajax({
+      url: "{{=URL(f='deletePlandoWebService')}}",
+      method: "POST",
+      data: dataDict,
+      dataType: "json"
+    });
+
+    request.done(AjaxPlandoDeleteCompleted);
+    request.fail(ajaxFail);
+}
+
+function AjaxPlandoDeleteCompleted(data) {
+    hideDeletePopup();
+    alert(data);
+    // reload the page to remove the deleted plando
+    location.reload();
+}
+
+function displayUpdatePopup(plandoName, pureName) {
+    hideUploadPopup();
+    hideDeletePopup();
+
+    // populate values
+    document.getElementById("updatePlandoName").value = plandoName;
+    document.getElementById("updateAuthor").value = document.getElementById(pureName+"_author").innerHTML;
+    document.getElementById("updatePreset").value = document.getElementById(pureName+"_preset").innerHTML;
+    document.getElementById("updateLongDesc").value = document.getElementById(pureName+"_longDesc").innerHTML;
+
+    document.getElementById("updatePopup").style.display = "block";
+}
+
+function hideUpdatePopup() {
+    document.getElementById("updatePopup").style.display = "none";
+}
+
+function updatePlando() {
+    console.log("updatePlando");
+
+    // check that both vanilla ROMs is set if plando ROM is set
+    if(plandoUpdateROMBytes != null && vanillaROMBytes == null) {
+        alert("Please select a vanilla ROM first");
+        return;
+    }
+
+    var dataDict = {
+        "author": document.getElementById("updateAuthor").value,
+        "plandoName": document.getElementById("updatePlandoName").value,
+        "longDesc": document.getElementById("updateLongDesc").value,
+        "preset": document.getElementById("updatePreset").value,
+        "plandoKey": document.getElementById("updatePlandoKey").value
+    };
+
+    if(plandoUpdateROMBytes != null) {
+        console.log("updatePlando: also update ips");
+        dataDict["romData"] = generateRawData(vanillaROMBytes, plandoUpdateROMBytes);
+    }
+
+    var request = $.ajax({
+      url: "{{=URL(f='updatePlandoWebService')}}",
+      method: "POST",
+      data: dataDict,
+      dataType: "json"
+    });
+
+    request.done(AjaxUpdatePlandoCompleted);
+    request.fail(ajaxFail);
+}
+
+function AjaxUpdatePlandoCompleted(data) {
+    console.log("AjaxUpdatePlandoCompleted");
+
+    clearSeed("vanillaROM");
+    clearSeed("updatePlandoROM");
+
+    hideUpdatePopup();
+
+    alert(data);
+
+    // reload the page to display the newly updated plando
+    location.reload();
+}
+
+// from https://techoverflow.net/2018/03/30/copying-strings-to-the-clipboard-using-pure-javascript/
+function getPermaLink(plandoName) {
+    var host = window.location.protocol+"//"+window.location.hostname;
+    if(window.location.port.length > 0) {
+        host = host+":"+window.location.port;
+    }
+    var link = encodeURI(host+"/plandorepo/"+plandoName);
+
+    console.log("getPermaLink, link: "+link);
+
+    // Create new element
+    var el = document.createElement('textarea');
+    // Set value (string to be copied)
+    el.value = link;
+    // Set non-editable to avoid focus and move outside of view
+    el.setAttribute('readonly', '');
+    el.style = {position: 'absolute', left: '-9999px'};
+    document.body.appendChild(el);
+    // Select text inside element
+    el.select();
+    // Copy text to clipboard
+    document.execCommand('copy');
+    // Remove temporary element
+    document.body.removeChild(el);
+
+    document.getElementById("flash").innerHTML = "Link to "+plandoName+" copied to clipboard";
+    $('#flash').show();
+}
+
+// https://www.w3schools.com/howto/howto_js_draggable.asp
+function dragElement(elmnt, headerId) {
+  var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+  document.getElementById(headerId).onmousedown = dragMouseDown;
+
+  function dragMouseDown(e) {
+    e = e || window.event;
+    e.preventDefault();
+    // get the mouse cursor position at startup:
+    pos3 = e.clientX;
+    pos4 = e.clientY;
+    document.onmouseup = closeDragElement;
+    // call a function whenever the cursor moves:
+    document.onmousemove = elementDrag;
+  }
+
+  function elementDrag(e) {
+    e = e || window.event;
+    e.preventDefault();
+    // calculate the new cursor position:
+    pos1 = pos3 - e.clientX;
+    pos2 = pos4 - e.clientY;
+    pos3 = e.clientX;
+    pos4 = e.clientY;
+    // set the element's new position:
+    elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
+    elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+  }
+
+  function closeDragElement() {
+    // stop moving when mouse button is released:
+    document.onmouseup = null;
+    document.onmousemove = null;
+  }
+}
+
+// https://www.w3schools.com/howto/howto_js_sort_table.asp
+function sortTable(id, n) {
+    var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+    table = document.getElementById(id);
+    switching = true;
+    // Set the sorting direction to ascending:
+    dir = "asc";
+    /* Make a loop that will continue until
+       no switching has been done: */
+    while (switching) {
+        // Start by saying: no switching is done:
+        switching = false;
+        rows = table.rows;
+        /* Loop through all table rows (except the first, which contains table headers): */
+        // sort only one every two lines (as first line is summary and second line is long desc)
+        for (i = 1; i < rows.length - 3; i+=2) {
+            // Start by saying there should be no switching:
+            shouldSwitch = false;
+            /* Get the two elements you want to compare,
+               one from current row and one from the next: */
+            x = rows[i].getElementsByTagName("TD")[n];
+            y = rows[i + 2].getElementsByTagName("TD")[n];
+            /* Check if the two rows should switch place,
+               based on the direction, asc or desc: */
+            if (dir == "asc") {
+                if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                    // If so, mark as a switch and break the loop:
+                    shouldSwitch = true;
+                    break;
+                }
+            } else if (dir == "desc") {
+                if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                    // If so, mark as a switch and break the loop:
+                    shouldSwitch = true;
+                    break;
+                }
+            }
+        }
+        if (shouldSwitch) {
+            /* If a switch has been marked, make the switch
+               and mark that a switch has been done: */
+            rows[i].parentNode.insertBefore(rows[i + 2], rows[i]);
+            rows[i].parentNode.insertBefore(rows[i + 3], rows[i+1]);
+            switching = true;
+            // Each time a switch is done, increase this count by 1:
+            switchcount ++;
+        } else {
+            /* If no switching has been done AND the direction is "asc",
+               set the direction to "desc" and run the while loop again. */
+            if (switchcount == 0 && dir == "asc") {
+                dir = "desc";
+                switching = true;
+            }
+        }
+    }
+}
+
+function guessVARIAPreset(filename) {
+  var re = /VARIA_Randomizer_[A]?[B]?[F]?[M]?[Z]?X\d+_(\w+)/;
+  var match = filename.match(re);
+  if(match == null) {
+    re = /VARIA_Plandomizer_[A]?[B]?FX\d+_(\w+)/;
+    match = filename.match(re);
+  }
+  if(match != null) {
+    var data = match[1];
+
+    var re = /^(.*)_([a-zA-Z0-9]+)$/;
+    var match = data.match(re);
+
+    if(match != null){
+      var pS = match[2];
+      if(pS == "slowest" || pS == "slow" || pS == "medium" || pS == "fast" || pS == "fastest" || pS == "basic" || pS == "VARIAble") {
+        return match[1];
+      } else {
+        return match[1] + '_' + match[2];
+      }
+    } else {
+      return data;
+    }
+  } else {
+    return null;
+  }
+}
+
+function setGuessedPreset(romName){
+  var preset = guessVARIAPreset(romName);
+  if(preset != null) {
+    document.getElementById("preset").value = preset;
+  }
+}
+</script>
+
+<div class="fixed">
+  <div class="menu">
+    <table class="full menuTable">
+      <tr>
+        <td>{{=A("Home", _href=URL(f="home"), _class="menu")}}</td>
+        <td>{{=A("Presets", _href=URL(f="presets"), _class="menu")}}</td>
+        <td>{{=A("Randomizer", _href=URL(f="randomizer"), _class="menu")}}</td>
+        <td>{{=A("Solver", _href=URL(f="solver"), _class="menu")}}</td>
+        <td>{{=A("Tracker", _href=URL(f="tracker"), _class="menu")}}</td>
+        <td>{{=A("Plandomizer", _href=URL(f="plando"), _class="menu")}}</td>
+        <td class="menu_selected">{{=A("Plandository", _href=URL(f="plandorepo"), _class="menu")}}</td>
+        <td>{{=A("Customizer", _href=URL(f="customizer"), _class="menu")}}</td>
+        <td>{{=A("Statistics", _href=URL(f="extStats"), _class="menu")}}</td>
+        <td>{{=A("Information & Contact", _href=URL(f="infos"), _class="menu")}}</td>
+      </tr>
+    </table>
+  </div>
+</div>
+
+<div class="main">
+  <div class="center">
+    <div class="tab">
+      <button class="tablinks" onclick="nope(event);"></button>
+    </div>
+  </div>
+  <div class="tabcontent">
+
+  <div id="uploadPopup" class="uploadPopup">
+    <table class="full">
+      <colgroup><col class="quarter" /><col class="quarter" /><col class="quarter"/><col class="quarter"/></colgroup>
+      <tr><td colspan=4></td></tr>
+      <tr><td id="uploadGrab" colspan=4 class="center greyRow"><p>Upload you Plando seed</p></td></tr>
+      <tr><td colspan=4 class="blankRow"></td></tr>
+      <tr><td>Plando seed:</td><td colspan=3><input id="plandoROM" type="file"/></td></tr>
+      <tr>
+        <td>Author:</td><td><input class="full" id="author" type="text" maxLength="32" placeholder="Author"/></td>
+        <td>Plando Name:</td><td><input class="full" id="plandoName" type="text" maxLength="32" placeholder="Only [a-zA-Z0-9 -_]"/></td>
+      </tr>
+      <tr>
+        <td colspan="2">Suggested preset:</td><td colspan="2"><select class="filldropdown" id="preset" name="preset"><option value="noob">noob</option><option value="casual">casual</option><option selected="selected" value="regular">regular</option><option value="veteran">veteran</option><option value="speedrunner">speedrunner</option><option value="master">master</option></select></td>
+      </tr>
+      <tr>
+        <td>Long Description:</td><td colspan="3"><textarea class="full" id="longDesc" maxLength="2048" rows="8" cols="50" placeholder="Long Description"></textarea></td>
+      </tr>
+      <tr><td colspan=3 class="blankLastRow"></td></tr>
+    </table>
+    <table>
+      <tr>
+        <td class="half"><button type="button" onclick="uploadPlando()" class="full">Upload</button></td>
+        <td class="half"><button type="button" onclick="hideUploadPopup()" class="full">Cancel</button></td>
+      </tr>
+    </table>
+  </div>
+
+  <div id="updatePopup" class="updatePopup">
+    <table class="full">
+      <colgroup><col class="quarter" /><col class="quarter" /><col class="quarter"/><col class="quarter"/></colgroup>
+      <tr><td colspan=4></td></tr>
+      <tr><td id="updateGrab" colspan=4 class="center greyRow"><p>Update you Plando seed</p></td></tr>
+      <tr><td colspan=4 class="blankRow"></td></tr>
+      <tr><td colspan=4><p>To update your plando you need the key that was provided when you uploaded it.</p><p>No need to provide your Plando seed again if you just want to update description fields.</p></td></tr>
+      <tr><td>Plando seed:</td><td colspan=3><input id="updatePlandoROM" type="file"/></td></tr>
+      <tr>
+        <td>Author:</td><td><input class="full" id="updateAuthor" type="text" maxLength="32" placeholder="Author"/></td>
+        <td>Plando Name:</td><td><input class="full" id="updatePlandoName" type="text" maxLength="32" placeholder="Plando Name" disabled/></td>
+      </tr>
+      <tr>
+        <td>Plando Key:</td><td><input class="full" id="updatePlandoKey" type="text" maxLength="8" placeholder="Only [a-zA-Z0-9]"/></td>
+        <td>Suggested preset:</td><td><select class="filldropdown" id="updatePreset"><option value="noob">noob</option><option value="casual">casual</option><option selected="selected" value="regular">regular</option><option value="veteran">veteran</option><option value="speedrunner">speedrunner</option><option value="master">master</option></select></td>
+      </tr>
+      <tr>
+        <td>Long Description:</td><td colspan="3"><textarea class="full" id="updateLongDesc" maxLength="2048" rows="8" cols="50" placeholder="Long Description"></textarea></td>
+      </tr>
+      <tr><td colspan=3 class="blankLastRow"></td></tr>
+    </table>
+    <table>
+      <tr>
+        <td class="half"><button type="button" onclick="updatePlando()" class="full">Update</button></td>
+        <td class="half"><button type="button" onclick="hideUpdatePopup()" class="full">Cancel</button></td>
+      </tr>
+    </table>
+  </div>
+
+  <div id="deletePopup" class="deletePopup">
+    <table class="full">
+      <colgroup><col class="half"/><col class="half"/></colgroup>
+      <tr><td colspan=2></td></tr>
+      <tr><td id="deleteGrab" colspan=2 class="center greyRow"><p>Delete you Plando seed</p></td></tr>
+      <tr><td colspan=2 class="blankRow"></td></tr>
+      <tr>
+    <td colspan=2><p>To delete your plando you need to provide the key that was provided when you uploaded it.</p></td>
+      </tr>
+      <tr>
+        <td>Plando Name:</td><td><input class="full" id="deletePlandoName" type="text" maxLength="32" placeholder="Plando Name" disabled/></td>
+      </tr>
+      <tr>
+        <td>Plando Key:</td><td><input class="full" id="deletePlandoKey" type="text" maxLength="8" placeholder="Only [a-zA-Z0-9]"/></td>
+      </tr>
+      <tr><td colspan=3 class="blankLastRow"></td></tr>
+    </table>
+    <table>
+      <tr>
+        <td class="half"><button type="button" onclick="deletePlando()" class="full">Delete</button></td>
+        <td class="half"><button type="button" onclick="hideDeletePopup()" class="full">Cancel</button></td>
+      </tr>
+    </table>
+  </div>
+
+    <table class="full">
+      <colgroup><col class="half" /><col class="half" /></colgroup>
+      <tr>
+        <td><p>Welcome to the Plandomizer repository where you can upload your own Plando seed for everyone to enjoy.</p><p>Weekly races seeds are also stored here, check the <a href="https://discord.gg/VsaDPVG">Discord channel</a> to participate.<p></td>
+        <td><button class="uploadButton" onclick="displayUploadPopup()">Upload my Plando</button></td>
+      </tr>
+      <tr>
+        <td><p>A vanilla unheadered ROM is required to upload/download a Plando seed</p></td>
+        <td><input id="vanillaROM" name="vanillaROM" type="file" /></td>
+      </tr>
+    </table>
+    <p></p>
+{{
+    if plandos != None:
+        response.write("    <table id=\"plandoList\" class=\"full\">\n", escape=False)
+        response.write("      <tr>\n", escape=False)
+        for (i, col) in enumerate(["Plando", "Author", "Description", "Release Date", "Suggested preset", "Rating (votes)"]):
+            response.write("        <th class=\"clickable centerCell\" onclick=\"sortTable('plandoList', {})\">{}</th>\n".format(i, col), escape=False)
+            pass
+        response.write("      </tr>\n", escape=False)
+
+        for plando in plandos:
+            (name, time, author, longDesc, preset, downloadCount, rating, ratingCount) = plando
+            if len(longDesc) > 48:
+                smallDesc = None
+                for i in range(26, 48):
+                    if longDesc[i] == ' ':
+                        smallDesc = longDesc[:i]+' (...)'
+                        break
+                    pass
+                if smallDesc == None:
+                    smallDesc = longDesc[:32-len('(...)')]+'(...)'
+                    pass
+            else:
+                smallDesc = longDesc
+                pass
+            pureName = re.sub('[\W_]+', '', name)
+
+            response.write("      <tr class=\"collapsible full\">\n", escape=False)
+            response.write("        <td class=\"collapsibleTd centerCell\">{}</td>\n".format(name), escape=False)
+            response.write("        <td id=\"{}_author\" class=\"collapsibleTd centerCell\">{}</td>\n".format(pureName, author), escape=False)
+            response.write("        <td class=\"collapsibleTd centerCell\">{}</td>\n".format(smallDesc), escape=False)
+            response.write("        <td class=\"collapsibleTd centerCell\">{}</td>\n".format(time), escape=False)
+            response.write("        <td id=\"{}_preset\" class=\"collapsibleTd centerCell\">{}</td>\n".format(pureName, preset), escape=False)
+            response.write("        <td class=\"collapsibleTd centerCell\">", escape=False)
+
+            response.write("        <div style=\"display: none\">{}</div><div id=\"divrate{}\">".format(round(rating, 2) if rating != None else '0.00', pureName), escape=False)
+            if rating == None:
+                response.write("No rating", escape=False);
+            else:
+                rating = float(rating)
+                for i in range(math.floor(rating)):
+                    response.write("<img src='/solver/static/images/Varia.png' alt='Varia' border='0' class='imageItem'>", escape=False)
+                    pass
+                decimal = rating - math.floor(rating)
+                if decimal > 0.0 and decimal < 0.25 and rating < 5.0:
+                    response.write("<img src='/solver/static/images/No_Varia.png' alt='No_Varia' border='0' class='imageItem'>", escape=False)
+                elif decimal >= 0.25 and decimal < 0.75:
+                    response.write("<img src='/solver/static/images/Half_Varia.png' alt='Half_Varia' border='0' class='imageItem'>", escape=False)
+                elif decimal >= 0.75:
+                    response.write("<img src='/solver/static/images/Varia.png' alt='Varia' border='0' class='imageItem'>", escape=False)
+                    pass
+                for i in range(5 - math.ceil(rating)):
+                    response.write("<img src='/solver/static/images/No_Varia.png' alt='Varia' border='0' class='imageItem'>", escape=False)
+                    pass
+                pass
+                response.write(" ({})       </div>".format(ratingCount), escape=False)
+                response.write("        </td>", escape=False)
+            response.write("      </tr>\n", escape=False)
+
+            # style="text-align: center; white-space: nowrap">
+
+            response.write("<tr><td colspan=\"7\"><div class=\"content\">\
+<table class=\"full\">\
+<tr><td><div id=\"{}_longDesc\" class=\"hidden\">{}</div><p>{}</p></td></tr>\
+<tr><td class=\"blankLastRow\"></td></tr>\
+<tr>\
+<td>\
+<div class=\"left\">\
+<img class=\"plandoButton\" src=\"/solver/static/images/refresh.svg\" alt=\"Update\" onclick=\"displayUpdatePopup('{}', '{}')\" title=\"Update your plando\">\
+<img class=\"plandoButton\" src=\"/solver/static/images/bin.svg\" alt=\"Delete\" onclick=\"displayDeletePopup('{}')\" title=\"Delete your plando\">\
+<img class=\"plandoButton\" src=\"/solver/static/images/link.svg\" alt=\"Get Permalink\" onclick=\"getPermaLink('{}')\" title=\"Get permanent link\">\
+</div>\
+<button class=\"downloadButton\" onclick=\"downloadPlando('{}')\">Download ({})</button>\
+<div class=\"right\"><select id=\"rate{}\" name=\"rate\"><option value=\"1\">1</option><option value=\"2\">2</option><option value=\"3\">3</option><option value=\"4\">4</option><option value=\"5\">5</option></select> <button onclick=\"ratePlando('{}', '{}')\">Rate</button></div></td>\
+</tr>\
+<tr><td colspan=\"2\" class=\"blankLastRow\"></td></tr>\
+</table>\
+</div></td></tr>\n".format(pureName, longDesc, longDesc.replace('\n', '<br/>'), name, pureName, name, name, name, downloadCount, pureName, name, pureName), escape=False)
+            pass
+
+        response.write("      </table>\n", escape=False)
+
+        pass
+}}
+  </div>
+</div>
+
+<script>
+var coll = document.getElementsByClassName("collapsible");
+var i;
+
+for (i = 0; i < coll.length; i++) {
+  coll[i].addEventListener("click", function() {
+    this.classList.toggle("active");
+    var content = this.nextElementSibling.querySelectorAll(".content")[0];
+    if (content.style.maxHeight){
+        content.style.maxHeight = null;
+    } else {
+      content.style.maxHeight = content.scrollHeight + "px";
+    } 
+  });
+}
+{{
+    if expand == True:
+        response.write("coll[0].click()", escape=False)
+        pass
+}}
+</script>

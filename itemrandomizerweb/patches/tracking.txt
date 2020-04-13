@@ -19,3 +19,5 @@ Stat tracking ID's (32 bit values are stored low word first)
 26          Number of bombs laid
 27-28	    Time spent in pause
 29-30	    time savec arm pumping
+31          deaths
+32          resets

@@ -99,6 +99,7 @@ class RomReader:
         'variaTweaks': {'address': 0x7CC4D, 'value': 0x37, 'desc': "VARIA tweaks"},
         'area': {'address': 0x788A0, 'value': 0x2B, 'desc': "Area layout modifications"},
         'areaLayout': {'address': 0x252FA7, 'value': 0xF8, 'desc': "Area layout additional modifications"},
+        'traverseWreckedShip': {'address': 0x219dbf, 'value': 0xFB, 'desc': "Area layout additional access to east Wrecked Ship"},
         'areaEscape': {'address': 0x20c91, 'value': 0x4C, 'desc': "Area escape randomization"},
         'newGame': {'address': 0x1001d, 'value': 0x22, 'desc': "Custom new game"}
     }
@@ -111,7 +112,7 @@ class RomReader:
         #'animals': {'address': 0x7841D, 'value': 0x8C, 'vanillaValue': 0x18},
         'area_rando_blue_doors': {'address': 0x7823E, 'value': 0x3B, 'vanillaValue': 0x66},
         'area_rando_door_transition': {'address': 0x852BA, 'value': 0x20, 'vanillaValue': 0xad},
-        'area_rando_escape': {'address': 0x15f38, 'value': 0x5c, 'vanillaValue': 0xbd},
+        'rando_escape': {'address': 0x15f38, 'value': 0x5c, 'vanillaValue': 0xbd},
         'area_rando_layout_base': {'address': 0x788A0, 'value': 0x2B, 'vanillaValue': 0x26},
         'area_rando_layout': {'address': 0x78666, 'value': 0x62, 'vanillaValue': 0x64},
         'bomb_torizo': {'address': 0x7FDC, 'value': 0xF2, 'vanillaValue': 0x20},
@@ -163,7 +164,10 @@ class RomReader:
         'Disable_Space_Time_select_in_menu': {'address': 0x013175, 'value': 0x01, 'vanillaValue': 0x08},
         'Fix_Morph_Ball_Hidden_Chozo_PLMs': {'address': 0x0268ce, 'value': 0x04, 'vanillaValue': 0x02},
         'Fix_Screw_Attack_selection_in_menu': {'address': 0x0134c5, 'value': 0x0c, 'vanillaValue': 0x0a},
-        'No_Music': {'address': 0x278413, 'value': 0x6f, 'vanillaValue': 0xcd}
+        'No_Music': {'address': 0x278413, 'value': 0x6f, 'vanillaValue': 0xcd},
+        'random_music': {'address': 0x10F320, 'value': 0x01, 'vanillaValue': 0xff},
+        'fix_suits_selection_in_menu': {'address': 0x13000, 'value': 0x90, 'vanillaValue': 0x80},
+        'traverseWreckedShip': {'address': 0x219dbf, 'value': 0xFB, 'desc': "Area layout additional access to east Wrecked Ship"}
     }
 
     @staticmethod
@@ -547,27 +551,29 @@ class RomPatcher:
     # Replace bomb blocks with shot blocks before Spazer
     #   spazer.ips
     IPSPatches = {
-        'Standard': ['new_game.ips', 'plm_spawn.ips',
+        'Standard': ['new_game.ips', 'plm_spawn.ips', 'load_enemies_fix.ips',
                      'credits_varia.ips', 'seed_display.ips', 'tracking.ips',
                      'wake_zebes.ips', 'g4_skip.ips', # XXX those are door ASMs
                      'Mother_Brain_Cutscene_Edits',
                      'Suit_acquisition_animation_skip',
                      'Fix_heat_damage_speed_echoes_bug', 'Disable_GT_Code',
                      'Disable_Space_Time_select_in_menu', 'Fix_Morph_Ball_Hidden_Chozo_PLMs',
-                     'Fix_Screw_Attack_selection_in_menu',
+                     'Fix_Screw_Attack_selection_in_menu', 'fix_suits_selection_in_menu.ips',
                      'Removes_Gravity_Suit_heat_protection',
                      'AimAnyButton.ips', 'endingtotals.ips',
                      'supermetroid_msu1.ips', 'max_ammo_display.ips'],
-        'VariaTweaks' : ['ws_etank.ips', 'ln_chozo_sj_check_disable.ips', 'ln_chozo_platform.ips', 'bomb_torizo.ips'],
+        'VariaTweaks' : ['WS_Etank', 'LN_Chozo_SpaceJump_Check_Disable', 'ln_chozo_platform.ips', 'bomb_torizo.ips'],
         'Layout': ['dachora.ips', 'early_super_bridge.ips', 'high_jump.ips', 'moat.ips', 'spospo_save.ips',
                    'nova_boost_platform.ips', 'red_tower.ips', 'spazer.ips', 'brinstar_map_room.ips'],
         'Optional': ['itemsounds.ips', 'rando_speed.ips',
-                     'spinjumprestart.ips', 'elevators_doors_speed.ips', 'No_Music',
+                     'spinjumprestart.ips', 'elevators_doors_speed.ips', 'No_Music', 'random_music.ips',
                      'skip_intro.ips', 'skip_ceres.ips', 'animal_enemies.ips', 'animals.ips',
                      'draygonimals.ips', 'escapimals.ips', 'gameend.ips', 'grey_door_animals.ips',
                      'low_timer.ips', 'metalimals.ips', 'phantoonimals.ips', 'ridleyimals.ips'],
-        'Area': ['area_rando_layout.ips', 'area_rando_door_transition.ips', 'Tourian_Refill' ],
-        'AreaEscape' : ['area_rando_escape.ips', 'area_rando_escape_ws_fix.ips', 'Escape_Rando_Tourian_Doors']
+        'Area': ['area_rando_layout.ips', 'area_rando_door_transition.ips', 'Tourian_Refill',
+                 'Sponge_Bath_Blinking_Door', 'east_ocean.ips' ],
+        'Escape' : ['rando_escape.ips', 'rando_escape_ws_fix.ips',
+                    'Escape_Rando_Tourian_Doors', "Escape_Rando_Crateria_Doors"]
     }
 
     def __init__(self, romFileName=None, magic=None, plando=False):
@@ -716,7 +722,7 @@ class RomPatcher:
                         optionalPatches=[], noLayout=False, suitsMode="Classic",
                         area=False, bosses=False, areaLayoutBase=False,
                         noVariaTweaks=False, nerfedCharge=False,
-                        noEscapeRando=False, noRemoveEscapeEnemies=False):
+                        escapeAttr=None, noRemoveEscapeEnemies=False):
         try:
             # apply standard patches
             stdPatches = []
@@ -734,7 +740,7 @@ class RomPatcher:
             if nerfedCharge == True:
                 stdPatches.append('nerfed_charge.ips')
             if bosses == True or area == True:
-                stdPatches.append('ws_save.ips')
+                stdPatches += ["WS_Main_Open_Grey", "WS_Save_Active"]
                 plms.append('WS_Save_Blinking_Door')
             if bosses == True:
                 stdPatches.append("Phantoon_Eye_Door")
@@ -756,16 +762,24 @@ class RomPatcher:
                 if patchName in RomPatcher.IPSPatches['Optional']:
                     self.applyIPSPatch(patchName)
 
+            # random escape
+            if escapeAttr is not None:
+                if noRemoveEscapeEnemies == True:
+                    RomPatcher.IPSPatches['Escape'].append('Escape_Rando_Enable_Enemies')
+                for patchName in RomPatcher.IPSPatches['Escape']:
+                    self.applyIPSPatch(patchName)
+                # handle incompatible doors transitions
+                if area == False and bosses == False:
+                    self.applyIPSPatch('area_rando_door_transition.ips')
+                # animals and timer
+                self.applyEscapeAttributes(escapeAttr, plms)
+
             # apply area patches
             if area == True:
                 if areaLayoutBase == True:
-                    RomPatcher.IPSPatches['Area'].remove('area_rando_layout.ips')
+                    for p in ['area_rando_layout.ips', 'Sponge_Bath_Blinking_Door', 'east_ocean.ips']:
+                       RomPatcher.IPSPatches['Area'].remove(p)
                     RomPatcher.IPSPatches['Area'].append('area_rando_layout_base.ips')
-                if noEscapeRando == False:
-                    RomPatcher.IPSPatches['Area'] += RomPatcher.IPSPatches['AreaEscape']
-                    plms.append("WS_Map_Grey_Door")
-                    if noRemoveEscapeEnemies == True:
-                        RomPatcher.IPSPatches['Area'].append('Escape_Rando_Enable_Enemies')
                 for patchName in RomPatcher.IPSPatches['Area']:
                     self.applyIPSPatch(patchName)
             elif bosses == True:
@@ -794,13 +808,14 @@ class RomPatcher:
         (w0, w1) = getWord(ap.Start['spawn'])
         doors = [0x10] # red brin elevator
         if area == True:
-            # add area blue doors
-            doors += [0x30, # green hills
-                      0x33, # noob bridge
-                      0x0e, # crateria key hunters
-                      0x1e, # green pirates shaft
-                      0x0f, # coude
-                      0x58] # kronic boost
+            for accessPoint in accessPoints:
+                if accessPoint.Internal == True or accessPoint.Boss == True:
+                    continue
+                key = 'Blinking[{}]'.format(accessPoint.Name)
+                if key in patches:
+                    self.applyIPSPatch(key)
+                if key in additional_PLMs:
+                    plms.append(key)
         if 'doors' in ap.Start:
             doors += ap.Start['doors']
         doors.append(0x0)
@@ -821,6 +836,30 @@ class RomPatcher:
         if 'rom_patches' in ap.Start:
             for patch in ap.Start['rom_patches']:
                 self.applyIPSPatch(patch)
+
+    def applyEscapeAttributes(self, escapeAttr, plms):
+        # timer
+        escapeTimer = escapeAttr['Timer']
+        minute = int(escapeTimer / 60)
+        second = escapeTimer % 60
+        minute = int(minute / 10) * 16 + minute % 10
+        second = int(second / 10) * 16 + second % 10
+        patchDict = {'Escape_Timer': {0x1E21:[second, minute]}}
+        self.applyIPSPatch('Escape_Timer', patchDict)
+        # animals door to open
+        if escapeAttr['Animals'] is not None:
+            escapeOpenPatches = {
+                'Green Brinstar Main Shaft Top Left':'Escape_Animals_Open_Brinstar',
+                'Business Center Mid Left':"Escape_Animals_Open_Norfair",
+                'Crab Hole Bottom Right':"Escape_Animals_Open_Maridia",
+            }
+            if escapeAttr['Animals'] in escapeOpenPatches:
+                plms.append("WS_Map_Grey_Door")
+                self.applyIPSPatch(escapeOpenPatches[escapeAttr['Animals']])
+            else:
+                plms.append("WS_Map_Grey_Door_Openable")
+        else:
+            plms.append("WS_Map_Grey_Door")
 
     # adds ad-hoc "IPS patches" for additional PLM tables
     def applyPLMs(self, plms):
@@ -943,7 +982,7 @@ class RomPatcher:
                 minQty = q
         for m in minors:
             dist[m]['Proportion'] = dist[m]['Quantity']/minQty
-        
+
         return dist
 
     def getAmmoPct(self, minorsDist):
@@ -1277,6 +1316,11 @@ class RomPatcher:
                 # endian convert
                 (D0, D1) = (conn['doorAsmPtr'] & 0x00FF, (conn['doorAsmPtr'] & 0xFF00) >> 8)
                 asmPatch += [ 0x20, D0, D1 ]        # JSR $doorAsmPtr
+            # special ASM hook point for VARIA needs when taking the door (used for animals)
+            if 'exitAsmPtr' in conn:
+                # endian convert
+                (D0, D1) = (conn['exitAsmPtr'] & 0x00FF, (conn['exitAsmPtr'] & 0xFF00) >> 8)
+                asmPatch += [ 0x20, D0, D1 ]        # JSR $exitAsmPtr
             # incompatible transition
             if 'SamusX' in conn:
                 # endian convert
@@ -1317,14 +1361,6 @@ class RomPatcher:
         # Room ptr in bank 8F + CRE flag offset
         offset = 0x70000 + roomPtr + 0x8
         self.romFile.writeByte(0x2, offset)
-
-    def writeEscapeTimer(self, escapeTimer):
-        minute = int(escapeTimer / 60)
-        second = escapeTimer % 60
-        minute = int(minute / 10) * 16 + minute % 10
-        second = int(second / 10) * 16 + second % 10
-        self.romFile.writeByte(second, 0x1E21)
-        self.romFile.writeByte(minute)
 
     buttons = {
         "Select" : [0x00, 0x20],
@@ -1549,6 +1585,8 @@ class RomLoader(object):
         # check area layout
         if self.hasPatch("areaLayout"):
             RomPatches.ActivePatches.append(RomPatches.AreaRandoGatesOther)
+        if self.hasPatch("traverseWreckedShip"):
+            RomPatches.ActivePatches += [RomPatches.EastOceanPlatforms, RomPatches.SpongeBathBlueDoor]
 
         # check boss rando
         isBoss = self.isBoss()

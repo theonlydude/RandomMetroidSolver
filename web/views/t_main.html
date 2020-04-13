@@ -8,28 +8,28 @@
       <tr><td id="solverGrab" colspan=3 class="center greyRow"><p id="solverPopupText"></p></td></tr>
       <tr><td colspan=3 class="blankRow"></td></tr>
       <tr>
-	<td>Randomized Super Metroid ROM: </td>
-	<td><input id="uploadFile" name="uploadFile" type="file"/></td>
-	<td><div class="clearInput"><img src="/solver/static/images/bin.svg" alt="Clear" onclick="clearInputSeed()" data-toggle="tooltip" title="Remove selected ROM file" data-placement="bottom" data-container="body" data-html="true"></div></td>
+        <td>Randomized Super Metroid ROM: </td>
+        <td><input id="uploadFile" name="uploadFile" type="file"/></td>
+        <td><div class="clearInput"><img src="/solver/static/images/bin.svg" alt="Clear" onclick="clearInputSeed()" data-toggle="tooltip" title="Remove selected ROM file" data-placement="bottom" data-container="body" data-html="true"></div></td>
       </tr>
       <tr>
-	<td>Preset:</td>
-	<td colspan=2>{{=SELECT(OPTGROUP(*stdPresets, **dict(_label="Standard presets")), OPTGROUP(*tourPresets, **dict(_label="Tournament presets")), OPTGROUP(*comPresets, **dict(_label="Community presets")), **dict(_name="preset", _id="preset", value=curSession["preset"], _class="filldropdown chzn-select"))}}</td>
+        <td>Preset:</td>
+        <td colspan=2>{{=SELECT(OPTGROUP(*stdPresets, **dict(_label="Standard presets")), OPTGROUP(*tourPresets, **dict(_label="Tournament presets")), OPTGROUP(*comPresets, **dict(_label="Community presets")), **dict(_name="preset", _id="preset", value=curSession["preset"], _class="filldropdown chzn-select"))}}</td>
       </tr>
       <tr id="fillPlandoVisibility">
-	<td colspan=2>Populate your plando with the items and transitions from the base ROM:</td>
-	<td><input id="fillPlando" name="fillPlando" type="checkbox"></td>
+        <td colspan=2>Populate your plando with the items and transitions from the base ROM:</td>
+        <td><input id="fillPlando" name="fillPlando" type="checkbox"></td>
       </tr>
       <tr id="startLocationVisibility">
-	<td>Start location:</td>
-	<td colspan=2>{{=SELECT(*startAPs, **dict(_name="startLocation", _id="startLocation", value=curSession["startLocation"], _class="filldropdown"))}}</td>
+        <td>Start location:</td>
+        <td colspan=2>{{=SELECT(*startAPs, **dict(_name="startLocation", _id="startLocation", value=curSession["startLocation"], _class="filldropdown"))}}</td>
       </tr>
       <tr><td colspan=3 class="blankLastRow"></td></tr>
     </table>
     <table>
       <tr>
-	<td class="half"><button type="button" onclick="initSolver()" class="full">Init</button></td>
-	<td class="half"><button type="button" onclick="hidePopup()" class="full">Cancel</button></td>
+        <td class="half"><button type="button" onclick="initSolver()" class="full">Init</button></td>
+        <td class="half"><button type="button" onclick="hidePopup()" class="full">Cancel</button></td>
       </tr>
     </table>
     <input id="romJson" name="romJson" style="display:none" type="text"/>
@@ -42,58 +42,58 @@
     <table class="full">
       <colgroup><col class="full" /></colgroup>
       <tr>
-	<td><p id="itemPopupText" class="center">Item to place at LOC:</p></td>
+        <td><p id="itemPopupText" class="center">Item to place at LOC:</p></td>
       </tr>
       <tr>
-	<td>
-	  <select class="filldropdown centerDiv" id="item" name="item">
-	    <optgroup label="Nothing">
-	      <option data-img-src="/solver/static/images/Nothing.png" value="Nothing">Nothing</option>
-	    </optgroup>
-	    <optgroup label="Ammo">
-	      <option data-img-src="/solver/static/images/Missile.png" value="Missile">Missile</option>
-	      <option data-img-src="/solver/static/images/Super.png" value="Super">Super Missile</option>
-	      <option data-img-src="/solver/static/images/PowerBomb.png" value="PowerBomb">Power Bomb</option>
-	    </optgroup>
-	    <optgroup label="Energy">
-	      <option data-img-src="/solver/static/images/ETank.png" value="ETank">Energy Tank</option>
-	      <option data-img-src="/solver/static/images/Reserve.png" value="Reserve">Reserve Tank</option>
-	    </optgroup>
-	    <optgroup label="Beams">
-	      <option data-img-src="/solver/static/images/Charge.png" value="Charge">Charge Beam</option>
-	      <option data-img-src="/solver/static/images/Ice.png" value="Ice">Ice Beam</option>
-	      <option data-img-src="/solver/static/images/Wave.png" value="Wave">Wave Beam</option>
-	      <option data-img-src="/solver/static/images/Spazer.png" value="Spazer">Spazer</option>
-	      <option data-img-src="/solver/static/images/Plasma.png" value="Plasma">Plasma Beam</option>
-	    </optgroup>
-	    <optgroup label="Suits">
-	      <option data-img-src="/solver/static/images/Varia.png" value="Varia">Varia Suit</option>
-	      <option data-img-src="/solver/static/images/Gravity.png" value="Gravity">Gravity Suit</option>
-	    </optgroup>
-	    <optgroup label="Items">
-	      <option data-img-src="/solver/static/images/Morph.png" value="Morph">Morph Ball</option>
-	      <option data-img-src="/solver/static/images/Bomb.png" value="Bomb">Bomb</option>
-	      <option data-img-src="/solver/static/images/SpringBall.png" value="SpringBall">Spring Ball</option>
-	      <option data-img-src="/solver/static/images/ScrewAttack.png" value="ScrewAttack">Screw Attack</option>
-	      <option data-img-src="/solver/static/images/HiJump.png" value="HiJump">Hi-Jump Boots</option>
-	      <option data-img-src="/solver/static/images/SpaceJump.png" value="SpaceJump">Space Jump</option>
-	      <option data-img-src="/solver/static/images/SpeedBooster.png" value="SpeedBooster">Speed Booster</option>
-	      <option data-img-src="/solver/static/images/Grapple.png" value="Grapple">Grapple Beam</option>
-	      <option data-img-src="/solver/static/images/XRayScope.png" value="XRayScope">X-Ray Scope</option>
-	    </optgroup>
-	  </select>
-	</td>
+        <td>
+          <select class="filldropdown centerDiv" id="item" name="item">
+            <optgroup label="Nothing">
+              <option data-img-src="/solver/static/images/Nothing.png" value="Nothing">Nothing</option>
+            </optgroup>
+            <optgroup label="Ammo">
+              <option data-img-src="/solver/static/images/Missile.png" value="Missile">Missile</option>
+              <option data-img-src="/solver/static/images/Super.png" value="Super">Super Missile</option>
+              <option data-img-src="/solver/static/images/PowerBomb.png" value="PowerBomb">Power Bomb</option>
+            </optgroup>
+            <optgroup label="Energy">
+              <option data-img-src="/solver/static/images/ETank.png" value="ETank">Energy Tank</option>
+              <option data-img-src="/solver/static/images/Reserve.png" value="Reserve">Reserve Tank</option>
+            </optgroup>
+            <optgroup label="Beams">
+              <option data-img-src="/solver/static/images/Charge.png" value="Charge">Charge Beam</option>
+              <option data-img-src="/solver/static/images/Ice.png" value="Ice">Ice Beam</option>
+              <option data-img-src="/solver/static/images/Wave.png" value="Wave">Wave Beam</option>
+              <option data-img-src="/solver/static/images/Spazer.png" value="Spazer">Spazer</option>
+              <option data-img-src="/solver/static/images/Plasma.png" value="Plasma">Plasma Beam</option>
+            </optgroup>
+            <optgroup label="Suits">
+              <option data-img-src="/solver/static/images/Varia.png" value="Varia">Varia Suit</option>
+              <option data-img-src="/solver/static/images/Gravity.png" value="Gravity">Gravity Suit</option>
+            </optgroup>
+            <optgroup label="Items">
+              <option data-img-src="/solver/static/images/Morph.png" value="Morph">Morph Ball</option>
+              <option data-img-src="/solver/static/images/Bomb.png" value="Bomb">Bomb</option>
+              <option data-img-src="/solver/static/images/SpringBall.png" value="SpringBall">Spring Ball</option>
+              <option data-img-src="/solver/static/images/ScrewAttack.png" value="ScrewAttack">Screw Attack</option>
+              <option data-img-src="/solver/static/images/HiJump.png" value="HiJump">Hi-Jump Boots</option>
+              <option data-img-src="/solver/static/images/SpaceJump.png" value="SpaceJump">Space Jump</option>
+              <option data-img-src="/solver/static/images/SpeedBooster.png" value="SpeedBooster">Speed Booster</option>
+              <option data-img-src="/solver/static/images/Grapple.png" value="Grapple">Grapple Beam</option>
+              <option data-img-src="/solver/static/images/XRayScope.png" value="XRayScope">X-Ray Scope</option>
+            </optgroup>
+          </select>
+        </td>
       </tr>
       <tr id="hideItemVisibility" style="display: none">
-	<td>Hide this item:</td>
-	<td><input id="hideItem" name="hideItem" type="checkbox"></td>
+        <td>Hide this item:</td>
+        <td><input id="hideItem" name="hideItem" type="checkbox"></td>
       </tr>
       <tr><td colspan=2 class="blankLastRow"></td></tr>
     </table>
     <table>
       <tr>
-	<td class="half"><button id="placeItemButton" type="button" onclick="placeItem()" class="full">Place</button></td>
-	<td class="half"><button type="button" onclick="hideItemPopup()" class="full">Cancel</button></td>
+        <td class="half"><button id="placeItemButton" type="button" onclick="placeItem()" class="full">Place</button></td>
+        <td class="half"><button type="button" onclick="hideItemPopup()" class="full">Cancel</button></td>
       </tr>
     </table>
   </div>
@@ -120,7 +120,7 @@
     <div id="warehouseEntranceRight" class="baseButton" onclick="clickPortal('warehouseEntranceRight')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Warehouse Entrance Right"></div>
     <div id="singleChamberTopRight" class="baseButton" onclick="clickPortal('singleChamberTopRight')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Single Chamber Top Right"></div>
     <div id="kronicBoostRoomBottomLeft" class="baseButton" onclick="clickPortal('kronicBoostRoomBottomLeft')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Kronic Boost Room Bottom Left"></div>
-    <div id="mainStreetBottom" class="baseButtonRot" onclick="clickPortal('mainStreetBottom')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Main Street Bottom Left"></div>
+    <div id="mainStreetBottom" class="baseButtonRot" onclick="clickPortal('mainStreetBottom')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Main Street Bottom"></div>
     <div id="crabHoleBottomLeft" class="baseButton" onclick="clickPortal('crabHoleBottomLeft')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Crab Hole Bottom Left"></div>
     <div id="leCoudeRight" class="baseButton" onclick="clickPortal('leCoudeRight')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Le Coude Right"></div>
     <div id="redFishRoomLeft" class="baseButton" onclick="clickPortal('redFishRoomLeft')" onmouseover="startAnimation(this)" onmouseout="stopAnimation(this)" data-toggle="tooltip" title="Red Fish Room Left"></div>

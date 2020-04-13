@@ -225,8 +225,6 @@ class Knows:
                                'href': 'https://www.youtube.com/watch?v=1M2TiEVwH2I',
                                'rooms': ['West Sand Hole', 'East Sand Hole',
                                          'West Sand Hall', 'East Sand Hall']}
-
-
     # Area difficulties
 
     # Brinstar
@@ -295,7 +293,7 @@ class Knows:
                               'title': 'Access Old Mother Brain Missile pack location with just the Speed Booster',
                               'href': 'https://www.youtube.com/watch?v=-SO2QykqnZw',
                               'rooms': ['Climb', 'Pit Room']}
-    
+
     Moondance = SMBool(False, mania, ['Moondance'])
     desc['Moondance'] = {'display': 'Moondance',
                          'title': 'Access Etecoons area using moonfall shenanigans',
@@ -354,7 +352,7 @@ class Knows:
     CrocPBsDBoost = SMBool(False, 0, ['CrocPBsDBoost'])
     desc['CrocPBsDBoost'] = {'display': 'Crocomire Power Bombs Damage Boost',
                              'title': 'Use a D-Boost to reach Crocomire Power Bombs',
-                             'href': None,
+                             'href': 'https://youtu.be/ld8FC_Q9c6Y',
                              'rooms': ['Post Crocomire Farming Room']}
 
     CrocPBsIce = SMBool(False, 0, ['CrocPBsIce'])
@@ -404,6 +402,18 @@ class Knows:
                                            'title': 'Destroy the ceiling, then jump from inside the door with Hi-Jump and Speed Booster to climb up in Screw Attack room',
                                            'href': 'https://youtu.be/2Ws0Zokg-SQ',
                                            'rooms': ['Screw Attack Room']}
+
+    FirefleasWalljump = SMBool(False, 0, ['FirefleasWalljump'])
+    desc['FirefleasWalljump'] = {'display': 'Firefleas Wall Jump',
+                                 'title': 'Get back up from bottom of firefleas without movement items or Ice Beam',
+                                 'href': 'https://youtu.be/tp4V9aNKp64',
+                                 'rooms': ['Lower Norfair Fireflea Room']}
+
+    DodgeLowerNorfairEnemies = SMBool(False, 0, ['DodgeLowerNorfairEnemies'])
+    desc['DodgeLowerNorfairEnemies'] = {'display': 'Dodge Lower Norfair Enemies',
+                                        'title': 'Go through hard-hitting enemies in Lower Norfair without taking damage or killing them',
+                                        'href': None, # TODO
+                                        'rooms': ["Three Musketeers' Room", "Wasteland", 'Red Kihunter Shaft', 'The Worst Room In The Game']}
 
     # wrecked ship
     ContinuousWallJump = SMBool(False, 0, ['ContinuousWallJump'])
@@ -513,6 +523,18 @@ class Knows:
                                 'href': 'https://snipaclip.com/watch/HomelyImpartialVampireFloof',
                                 'rooms': ['Pants Room']}
 
+    CrystalFlashClip = SMBool(False, 0, ['CrystalFlashClip'])
+    desc['CrystalFlashClip'] = {'display': 'Crystal Flash Clip',
+                               'title': 'Use a Crystal Flash to clip through crumble blocks to get to Botwoon or Shaktool, using Gravity and Bombs',
+                               'href': 'https://www.youtube.com/watch?v=z2c3u8ICO6A',
+                               'rooms': ['Botwoon Hallway', 'East Pants Room']}
+
+    SuitlessCrystalFlashClip = SMBool(False, 0, ['SuitlessCrystalFlashClip'])
+    desc['SuitlessCrystalFlashClip'] = {'display': 'Suitless Crystal Flash Clip',
+                               'title': 'Use a Crystal Flash to clip through crumble blocks to get to Botwoon or Shaktool',
+                               'href': 'https://www.youtube.com/watch?v=BUzmHsk0H7k',
+                               'rooms': ['Botwoon Hallway', 'East Pants Room']}
+
     # plasma room
     KillPlasmaPiratesWithSpark = SMBool(False, 0, ['KillPlasmaPiratesWithSpark'])
     desc['KillPlasmaPiratesWithSpark'] = {'display': 'Kill Plasma Pirates with Spark',
@@ -576,7 +598,7 @@ class Knows:
             {'knows': ['AlcatrazEscape', 'HiJumpGauntletAccess', 'HiJumpLessGauntletAccess', 'LowGauntlet', 'OldMBWithSpeed'],
              'title': 'Crateria'},
             {'knows': ['CeilingDBoost', 'BillyMays', 'EarlyKraid',
-                       'ReverseGateGlitch', 'ReverseGateGlitchHiJumpLess', 
+                       'ReverseGateGlitch', 'ReverseGateGlitchHiJumpLess',
                        'RedTowerClimb', 'XrayDboost', 'XrayIce',
                        'RonPopeilScrew', 'Moondance'],
              'title': 'Brinstar'}
@@ -590,7 +612,8 @@ class Knows:
         'Maridia 1/2': [
             {'knows': ['GravLessLevel1', 'GravLessLevel2', 'GravLessLevel3'],
              'title': 'Underwater movement without Gravity Suit'},
-            {'knows': ['MochtroidClip', 'PuyoClip', 'PuyoClipXRay', 'SnailClip'],
+            {'knows': ['MochtroidClip', 'PuyoClip', 'PuyoClipXRay',
+                       'SnailClip', 'CrystalFlashClip'],
              'title': 'Clips'},
             {'knows': ['KillPlasmaPiratesWithCharge', 'KillPlasmaPiratesWithSpark'],
              'title': 'Plasma Room'},
@@ -604,13 +627,15 @@ class Knows:
              'title': 'Spring Ball Access'},
             {'knows': ['DraygonRoomGrappleExit', 'DraygonRoomCrystalFlash', 'PreciousRoomXRayExit'],
              'title': 'Suitless Draygon Exit'},
-            {'knows': ['DoubleSpringBallJump', 'TediousMountEverest', 'BotwoonToDraygonWithIce', 'SuitlessPuyoClip'],
+            {'knows': ['DoubleSpringBallJump', 'TediousMountEverest',
+                       'BotwoonToDraygonWithIce', 'SuitlessCrystalFlashClip',
+                       'SuitlessPuyoClip'],
              'title': 'Obscure suitless stuff'}
         ],
         'Norfair': [
             {'knows': ['WallJumpCathedralExit', 'BubbleMountainWallJump', 'NorfairReserveDBoost', 'CrocPBsIce', 'CrocPBsDBoost', 'IceEscape', 'IceMissileFromCroc', 'FrogSpeedwayWithoutSpeed', 'NovaBoost'],
               'title': 'Upper Norfair'},
-            {'knows': ['LavaDive', 'LavaDiveNoHiJump', 'ScrewAttackExit', 'ScrewAttackExitWithoutScrew', 'WorstRoomIceCharge'],
+            {'knows': ['LavaDive', 'LavaDiveNoHiJump', 'ScrewAttackExit', 'ScrewAttackExitWithoutScrew', 'WorstRoomIceCharge', 'FirefleasWalljump', 'DodgeLowerNorfairEnemies'],
              'title': 'Lower Norfair'}
         ],
         'Bosses/End': [

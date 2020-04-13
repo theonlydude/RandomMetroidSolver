@@ -18,6 +18,7 @@ mkdir -p ${LOG_DIR} ${SQL_DIR}
 ROM=$1
 LOOPS=$2
 TOURNEY=$3
+SKILL_PRESET=$4
 
 function computeSeed {
     RANDO_PRESET="$1"
@@ -35,7 +36,9 @@ function computeSeed {
 	     printf "."
 	     rm -f ${LOG}
 
-	     python3.7 ${CWD}/solver.py -r "${SEED}" --preset "${SKILL_PRESET}" --pickupStrategy any --difficultyTarget 0 --ext_stats "${SQL}" >/dev/null
+	     python3.7 ${CWD}/solver.py -r "${SEED}" --preset "${SKILL_PRESET}" --pickupStrategy any --difficultyTarget 0 --ext_stats "${SQL}" --ext_stats_step 1 >/dev/null
+
+	     python3.7 ${CWD}/solver.py -r "${SEED}" --preset "${SKILL_PRESET}" --pickupStrategy all --difficultyTarget 10 --ext_stats "${SQL}" --ext_stats_step 2 >/dev/null
 
 	     # delete generated ROM
 	     rm -f "${SEED}"
@@ -76,7 +79,9 @@ if [ -n "${TOURNEY}" ]; then
 fi
 
 SKILL_PRESETS=$(ls -1 ${CWD}/standard_presets/*.json | grep -v -E 'solution|samus')
-if [ -n "${TOURNEY}" ]; then
+if [ -n "${SKILL_PRESET}" ]; then
+    SKILL_PRESETS=$(echo "${SKILL_PRESETS}" | grep "${SKILL_PRESET}.json")
+elif [ -n "${TOURNEY}" ]; then
     SKILL_PRESETS=$(echo "${SKILL_PRESETS}" | grep "${TOURNEY}")
 fi
 
@@ -114,7 +119,6 @@ for RANDO_PRESET in ${RANDO_PRESETS}; do
     echo ""
 done
 
-# will fail if more than 'getconf ARG_MAX' sql files (2097152 on linux)
 for F in ${SQL_DIR}/extStats_*.sql; do
     RESULT=${RANDOM}
     let "RESULT %= ${NB_CPU}"

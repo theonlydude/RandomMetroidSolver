@@ -5,7 +5,7 @@ path = os.path.expanduser('~/RandomMetroidSolver')
 if os.path.exists(path) and path not in sys.path:
     sys.path.append(path)
 
-import datetime, os, hashlib, json, subprocess, tempfile, glob, random, re
+import datetime, os, hashlib, json, subprocess, tempfile, glob, random, re, math, string, base64, urllib.parse
 from datetime import datetime, date
 from collections import OrderedDict
 
@@ -18,11 +18,14 @@ from solver import StandardSolver, DifficultyDisplayer, InteractiveSolver
 from utils import PresetLoader, removeChars
 import db
 from graph_access import vanillaTransitions, vanillaBossesTransitions, vanillaEscapeTransitions, accessPoints, GraphUtils
-from utils import isStdPreset
+from utils import isStdPreset, getRandomizerDefaultParameters
 from graph_locations import locations
 from smboolmanager import SMBoolManager
 from rom import RomReader
 from rom_patches import RomPatches
+from ips import IPS_Patch
+from randomizer import energyQties, progDiffs, morphPlacements, majorsSplits
+from itemrandomizerweb.Randomizer import progSpeeds
 
 # put an expiration date to the default cookie to have it kept between browser restart
 response.cookies['session_id_solver']['expires'] = 31 * 24 * 3600
@@ -963,43 +966,29 @@ def infos():
 
 def initRandomizerSession():
     if session.randomizer is None:
-        session.randomizer = {}
+        session.randomizer = getRandomizerDefaultParameters()
+        defaultMultiValues = getDefaultMultiValues()
+        for key in defaultMultiValues:
+            if key not in session.randomizer:
+                session.randomizer.update(defaultMultiValues)
 
-        session.randomizer['complexity'] = "simple"
-        session.randomizer['preset'] = 'regular'
-        session.randomizer['randoPreset'] = ""
-        session.randomizer['majorsSplit'] = "Full"
-        session.randomizer['startLocation'] = "Landing Site"
-        session.randomizer['maxDifficulty'] = 'hardcore'
-        session.randomizer['progressionSpeed'] = "medium"
-        session.randomizer['progressionDifficulty'] = 'normal'
-        session.randomizer['morphPlacement'] = "early"
-        session.randomizer['suitsRestriction'] = "on"
-        session.randomizer['hideItems'] = "off"
-        session.randomizer['strictMinors'] = "off"
-        session.randomizer['missileQty'] = "3"
-        session.randomizer['superQty'] = "2"
-        session.randomizer['powerBombQty'] = "1"
-        session.randomizer['minorQty'] = "100"
-        session.randomizer['energyQty'] = "vanilla"
-        session.randomizer['areaRandomization'] = "off"
-        session.randomizer['areaLayout'] = "off"
-        session.randomizer['escapeRando'] = "off"
-        session.randomizer['removeEscapeEnemies'] = "off"
-        session.randomizer['bossRandomization'] = "off"
-        session.randomizer['funCombat'] = "off"
-        session.randomizer['funMovement'] = "off"
-        session.randomizer['funSuits'] = "off"
-        session.randomizer['layoutPatches'] = "on"
-        session.randomizer['variaTweaks'] = "on"
-        session.randomizer['gravityBehaviour'] = "Balanced"
-        session.randomizer['nerfedCharge'] = "off"
-        session.randomizer['itemsounds'] = "on"
-        session.randomizer['elevators_doors_speed'] = "on"
-        session.randomizer['spinjumprestart'] = "off"
-        session.randomizer['rando_speed'] = "off"
-        session.randomizer['animals'] = "off"
-        session.randomizer['No_Music'] = "off"
+def getDefaultMultiValues():
+    defaultMultiValues = {
+        'startLocationMultiSelect': GraphUtils.getStartAccessPointNames(),
+        'majorsSplitMultiSelect': majorsSplits,
+        'progressionSpeedMultiSelect': progSpeeds + ['VARIAble'],
+        'progressionDifficultyMultiSelect': progDiffs,
+        'morphPlacementMultiSelect': morphPlacements,
+        'energyQtyMultiSelect': energyQties
+    }
+    return defaultMultiValues
+
+def getCurrentMultiValues():
+    defaultMultiValues = getDefaultMultiValues()
+    for key in defaultMultiValues:
+        if key in session.randomizer:
+            defaultMultiValues[key] = session.randomizer[key]
+    return defaultMultiValues
 
 def randomizer():
     response.title = 'Super Metroid VARIA Randomizer'
@@ -1016,9 +1005,12 @@ def randomizer():
                 OPTGROUP(_label="Custom", *startAPs["custom"]),
                 OPTGROUP(_label="Custom (Area rando only)", *startAPs["area"])]
 
+    # get multi
+    multiValues = getCurrentMultiValues()
+
     return dict(stdPresets=stdPresets, tourPresets=tourPresets, comPresets=comPresets,
                 randoPresets=randoPresets, tourRandoPresets=tourRandoPresets,
-                startAPs=startAPs)
+                startAPs=startAPs, multiValues=multiValues)
 
 def raiseHttp(code, msg, isJson=False):
     #print("raiseHttp: code {} msg {} isJson {}".format(code, msg, isJson))
@@ -1031,35 +1023,64 @@ def getInt(param, isJson=False):
     try:
         return int(request.vars[param])
     except:
-        raiseHttp(400, "Wrong value for {}: {}, must be an int".format(param, request.vars[param]), isJson)
+        raiseHttp(400, "Wrong value for {}, must be an int".format(param), isJson)
 
 def getFloat(param, isJson=False):
     try:
         return float(request.vars[param])
     except:
-        raiseHttp(400, "Wrong value for {}: {}, must be a float".format(param, request.vars[param]), isJson)
+        raiseHttp(400, "Wrong value for {}, must be a float".format(param), isJson)
 
-def validateWebServiceParams(switchs, quantities, others, isJson=False):
-    parameters = switchs + quantities + others
+def validateWebServiceParams(switchs, quantities, multis, others, isJson=False):
+    parameters = switchs + quantities + multis + others
 
     for param in parameters:
         if request.vars[param] is None:
             raiseHttp(400, "Missing parameter: {}".format(param), isJson)
 
+    # switchs
     for switch in switchs:
         if request.vars[switch] not in ['on', 'off', 'random']:
-            raiseHttp(400, "Wrong value for {}: {}, authorized values: on/off".format(switch, request.vars[switch]), isJson)
+            raiseHttp(400, "Wrong value for {}, authorized values: on/off".format(switch), isJson)
 
+    # quantities
     for qty in quantities:
         if request.vars[qty] == 'random':
             continue
         qtyFloat = getFloat(qty, isJson)
         if qtyFloat < 1.0 or qtyFloat > 9.0:
-            raiseHttp(400, json.dumps("Wrong value for {}: {}, must be between 1 and 9".format(qty, request.vars[qty])), isJson)
+            raiseHttp(400, "Wrong value for {}, must be between 1 and 9".format(qty), isJson)
+
+    # multis
+    defaultMultiValues = getDefaultMultiValues()
+
+    for param in multis:
+        paramMulti = param+"MultiSelect"
+        value = request.vars[param]
+        if value == 'random':
+            # get multi values
+            for value in request.vars[paramMulti].split(','):
+                # check multi values
+                if value not in defaultMultiValues[paramMulti]:
+                    raiseHttp(400, "Wrong value for {}, authorized values: {}".format(param, defaultMultiValues[param+"MultiSelect"]), isJson)
+        else:
+            # check value
+            if value not in defaultMultiValues[paramMulti]:
+                raiseHttp(400, "Wrong value for {}, authorized values: {}".format(param, defaultMultiValues[param+"MultiSelect"]), isJson)
+
+    # others
+    if request.vars.minorQty not in ['random', None]:
+        minorQtyInt = getInt('minorQty', isJson)
+        if minorQtyInt < 7 or minorQtyInt > 100:
+            raiseHttp(400, "Wrong value for minorQty, must be between 7 and 100", isJson)
+
+    if 'gravityBehaviour' in others:
+        if request.vars.gravityBehaviour not in ['Balanced', 'Progressive', 'Vanilla']:
+            raiseHttp(400, "Wrong value for gravityBehaviour", isJson)
 
     if 'complexity' in others:
         if request.vars['complexity'] not in ['simple', 'medium', 'advanced']:
-            raiseHttp(400, "Wrong value for complexity: {}, authorized values simple/medium/advanced".format(request.vars['complexity']), isJson)
+            raiseHttp(400, "Wrong value for complexity, authorized values simple/medium/advanced", isJson)
 
     if 'paramsFileTarget' in others:
         try:
@@ -1070,7 +1091,7 @@ def validateWebServiceParams(switchs, quantities, others, isJson=False):
     if 'seed' in others:
         seedInt = getInt('seed', isJson)
         if seedInt < 0 or seedInt > 9999999:
-            raiseHttp(400, "Wrong value for seed: {}, must be between 0 and 9999999".format(request.vars[seed]), isJson)
+            raiseHttp(400, "Wrong value for seed, must be between 0 and 9999999", isJson)
 
     preset = request.vars.preset
     if preset != None:
@@ -1083,7 +1104,7 @@ def validateWebServiceParams(switchs, quantities, others, isJson=False):
         # check that preset exists
         fullPath = '{}/{}.json'.format(getPresetDir(preset), preset)
         if not os.path.isfile(fullPath):
-            raiseHttp(400, "Unknown preset: {}".format(preset), isJson)
+            raiseHttp(400, "Unknown preset", isJson)
 
     randoPreset = request.vars.randoPreset
     if randoPreset != None and len(randoPreset) > 0:
@@ -1096,50 +1117,12 @@ def validateWebServiceParams(switchs, quantities, others, isJson=False):
         # check that randoPreset exists
         fullPath = 'rando_presets/{}.json'.format(randoPreset)
         if not os.path.isfile(fullPath):
-            raiseHttp(400, "Unknown randoPreset: {}".format(randoPreset), isJson)
+            raiseHttp(400, "Unknown randoPreset", isJson)
 
     # check race mode
     if 'raceMode' in request.vars:
         if request.vars.raceMode not in ['on', 'off']:
-            raiseHttp(400, "Wrong value for race mode: {}, must on/off".format(request.vars.raceMode), isJson)
-
-    if 'majorsSplit' in others:
-        if request.vars['majorsSplit'] not in ['Full', 'Major', 'Chozo', 'random']:
-            raiseHttp(400, "Wrong value for majorsSplit: {}, authorized values Full/Major/Chozo/random".format(request.vars['majorsSplit']), isJson)
-
-    if request.vars['maxDifficulty'] is not None:
-        if request.vars.maxDifficulty not in ['no difficulty cap', 'easy', 'medium', 'hard', 'harder', 'hardcore', 'mania', 'random']:
-            raiseHttp(400, "Wrong value for difficulty_target, authorized values: no difficulty cap/easy/medium/hard/harder/hardcore/mania", isJson)
-
-    if 'progressionSpeed' in others:
-        for progSpeed in request.vars['progressionSpeed'].split(','):
-            if progSpeed not in ['slowest', 'slow', 'medium', 'fast', 'fastest', 'random', 'basic', 'VARIAble']:
-                raiseHttp(400, "Wrong value for progressionSpeed: {}, authorized values slowest/slow/medium/fast/fastest/basic/VARIAble".format(progSpeed), isJson)
-
-    if 'progressionDifficulty' in others:
-        if request.vars['progressionDifficulty'] not in ['easier', 'normal', 'harder', 'random']:
-            raiseHttp(400, "Wrong value for progressionDifficulty: {}, authorized values easier/normal/harder".format(request.vars['progressionDifficulty']), isJson)
-
-    if 'morphPlacement' in others:
-        if request.vars['morphPlacement'] not in ['early', 'late', 'normal', 'random']:
-            raiseHttp(400, "Wrong value for morphPlacement: {}, authorized values early/late/normal".format(request.vars['morphPlacement']), isJson)
-
-    if request.vars.minorQty not in ['random', None]:
-        minorQtyInt = getInt('minorQty', isJson)
-        if minorQtyInt < 7 or minorQtyInt > 100:
-            raiseHttp(400, "Wrong value for minorQty, must be between 7 and 100", isJson)
-
-    if 'energyQty' in others:
-        if request.vars.energyQty not in ['sparse', 'medium', 'vanilla', 'random']:
-            raiseHttp(400, "Wrong value for energyQty: authorized values: sparse/medium/vanilla", isJson)
-
-    if 'gravityBehaviour' in others:
-        if request.vars.gravityBehaviour not in ['Balanced', 'Progressive', 'Vanilla']:
-            raiseHttp(400, "Wrong value for gravityBehaviour: {}".format(request.vars.gravityBehaviour), isJson)
-
-    if 'startLocation' in others:
-        if request.vars.startLocation not in GraphUtils.getStartAccessPointNames() + ['random']:
-            raiseHttp(400, "Wrong value for startLocation: {}".format(request.vars.startLocation), isJson)
+            raiseHttp(400, "Wrong value for race mode, must on/off", isJson)
 
 def sessionWebService():
     # web service to update the session
@@ -1149,26 +1132,23 @@ def sessionWebService():
                'funCombat', 'funMovement', 'funSuits',
                'layoutPatches', 'variaTweaks', 'nerfedCharge',
                'itemsounds', 'elevators_doors_speed', 'spinjumprestart',
-               'rando_speed', 'animals', 'No_Music']
+               'rando_speed', 'animals', 'No_Music', 'random_music']
     quantities = ['missileQty', 'superQty', 'powerBombQty']
-    others = ['complexity', 'preset', 'randoPreset', 'majorsSplit',
-              'maxDifficulty', 'progressionSpeed', 'progressionDifficulty',
-              'morphPlacement', 'minorQty', 'energyQty',
-              'gravityBehaviour', 'startLocation']
-    validateWebServiceParams(switchs, quantities, others)
+    multis = ['majorsSplit', 'progressionSpeed', 'progressionDifficulty',
+              'morphPlacement', 'energyQty', 'startLocation']
+    others = ['complexity', 'preset', 'randoPreset', 'maxDifficulty', 'minorQty', 'gravityBehaviour']
+    validateWebServiceParams(switchs, quantities, multis, others)
 
     if session.randomizer is None:
         session.randomizer = {}
 
     session.randomizer['complexity'] = request.vars.complexity
     session.randomizer['preset'] = request.vars.preset
-    session.randomizer['randoPreset'] = request.vars.randoPreset
-    session.randomizer['majorsSplit'] = request.vars.majorsSplit
-    session.randomizer['startLocation'] = request.vars.startLocation
+    # after selecting a rando preset and changing an option users can end up
+    # generating a seed with the rando preset selected but not with all
+    # the options set with the rando preset, so always empty the rando preset
+    session.randomizer['randoPreset'] = ""
     session.randomizer['maxDifficulty'] = request.vars.maxDifficulty
-    session.randomizer['progressionSpeed'] = request.vars.progressionSpeed.split(',')
-    session.randomizer['progressionDifficulty'] = request.vars.progressionDifficulty
-    session.randomizer['morphPlacement'] = request.vars.morphPlacement
     session.randomizer['suitsRestriction'] = request.vars.suitsRestriction
     session.randomizer['hideItems'] = request.vars.hideItems
     session.randomizer['strictMinors'] = request.vars.strictMinors
@@ -1176,7 +1156,6 @@ def sessionWebService():
     session.randomizer['superQty'] = request.vars.superQty
     session.randomizer['powerBombQty'] = request.vars.powerBombQty
     session.randomizer['minorQty'] = request.vars.minorQty
-    session.randomizer['energyQty'] = request.vars.energyQty
     session.randomizer['areaRandomization'] = request.vars.areaRandomization
     session.randomizer['areaLayout'] = request.vars.areaLayout
     session.randomizer['escapeRando'] = request.vars.escapeRando
@@ -1195,6 +1174,14 @@ def sessionWebService():
     session.randomizer['rando_speed'] = request.vars.rando_speed
     session.randomizer['animals'] = request.vars.animals
     session.randomizer['No_Music'] = request.vars.No_Music
+    session.randomizer['random_music'] = request.vars.random_music
+
+    multis = ['majorsSplit', 'progressionSpeed', 'progressionDifficulty',
+              'morphPlacement', 'energyQty', 'startLocation']
+    for multi in multis:
+        session.randomizer[multi] = request.vars[multi]
+        if request.vars[multi] == 'random':
+            session.randomizer[multi+"MultiSelect"] = request.vars[multi+"MultiSelect"].split(',')
 
     # to create a new rando preset, uncomment next lines
     #with open('rando_presets/new.json', 'w') as jsonFile:
@@ -1226,13 +1213,12 @@ def randomizerWebService():
                'funCombat', 'funMovement', 'funSuits',
                'layoutPatches', 'variaTweaks', 'nerfedCharge',
                'itemsounds', 'elevators_doors_speed', 'spinjumprestart',
-               'rando_speed', 'animals', 'No_Music']
+               'rando_speed', 'animals', 'No_Music', 'random_music']
     quantities = ['missileQty', 'superQty', 'powerBombQty']
-    others = ['complexity', 'paramsFileTarget', 'seed', 'preset', 'majorsSplit',
-              'maxDifficulty', 'progressionSpeed', 'progressionDifficulty',
-              'morphPlacement', 'minorQty', 'energyQty',
-              'gravityBehaviour', 'startLocation']
-    validateWebServiceParams(switchs, quantities, others, isJson=True)
+    multis = ['majorsSplit', 'progressionSpeed', 'progressionDifficulty',
+              'morphPlacement', 'energyQty', 'startLocation']
+    others = ['complexity', 'paramsFileTarget', 'seed', 'preset', 'gravityBehaviour', 'maxDifficulty']
+    validateWebServiceParams(switchs, quantities, multis, others, isJson=True)
 
     # randomize
     DB = db.DB()
@@ -1266,17 +1252,20 @@ def randomizerWebService():
               '--seed', seed,
               '--output', jsonFileName,
               '--param', presetFileName,
-              '--preset', preset,
-              '--progressionSpeed', request.vars.progressionSpeed,
-              '--progressionDifficulty', request.vars.progressionDifficulty,
-              '--morphPlacement', request.vars.morphPlacement,
-              '--majorsSplit', request.vars.majorsSplit,
-              '--startAP', request.vars.startLocation]
+              '--preset', preset]
     params += ['--missileQty', request.vars.missileQty if request.vars.missileQty != 'random' else '0',
                '--superQty', request.vars.superQty if request.vars.superQty != 'random' else '0',
                '--powerBombQty', request.vars.powerBombQty if request.vars.powerBombQty != 'random' else '0',
-               '--minorQty', request.vars.minorQty if request.vars.minorQty != 'random' else '0',
-               '--energyQty', request.vars.energyQty]
+               '--minorQty', request.vars.minorQty if request.vars.minorQty != 'random' else '0']
+
+    for multi in multis:
+        params += ["--{}".format(multi), request.vars[multi]]
+        if request.vars[multi] == 'random':
+            params += ["--{}List".format(multi), request.vars[multi+"MultiSelect"]]
+
+    if request.vars.maxDifficulty != 'no difficulty cap':
+        params.append('--maxDifficulty')
+        params.append(request.vars.maxDifficulty)
 
     if useRace == True:
         params += ['--race', str(magic)]
@@ -1294,15 +1283,13 @@ def randomizerWebService():
         params += ['-c', 'rando_speed.ips']
     if request.vars.No_Music == 'on':
         params += ['-c', 'No_Music']
+    if request.vars.random_music == 'on':
+        params += ['-c', 'random_music.ips']
 
     if request.vars.animals == 'on':
         params.append('--animals')
     if request.vars.variaTweaks == 'off':
         params.append('--novariatweaks')
-
-    if request.vars.maxDifficulty != 'no difficulty cap':
-        params.append('--maxDifficulty')
-        params.append(request.vars.maxDifficulty)
 
     def addParamRandom(id, params):
         if request.vars[id] in ['on', 'random']:
@@ -1338,12 +1325,15 @@ def randomizerWebService():
         params.append('--area')
         if request.vars.areaLayout == 'off':
             params.append('--areaLayoutBase')
-        if request.vars.escapeRando == 'off':
-            params.append('--noEscapeRando')
-        if request.vars.removeEscapeEnemies == 'off':
-            params.append('--noRemoveEscapeEnemies')
     elif request.vars.areaRandomization == 'random':
         params += ['--area', 'random']
+
+    if request.vars.escapeRando == 'on':
+        params.append('--escapeRando')
+        if request.vars.removeEscapeEnemies == 'off':
+            params.append('--noRemoveEscapeEnemies')
+    elif request.vars.escapeRando == 'random':
+        params += ['--escapeRando', 'random']
 
     if request.vars.bossRandomization == 'on':
         params.append('--bosses')
@@ -1442,7 +1432,7 @@ def presetWebService():
         params = json.dumps(params)
         return params
     else:
-        raise HTTP(400, "Preset '{}' not found".format(fullPath))
+        raise HTTP(400, "Preset not found")
 
 def randoPresetWebService():
     # web service to get the content of the rando preset file
@@ -1467,24 +1457,23 @@ def randoPresetWebService():
     if os.path.isfile(fullPath):
         # load it
         try:
+            # can be called from randomizer and extended stats pages
             updateSession = request.vars.origin == "randomizer"
 
             params = loadRandoPreset(fullPath, updateSession)
-            if updateSession == True:
-                session.randomizer['randoPreset'] = preset
             params = json.dumps(params)
             return params
         except Exception as e:
-            raise HTTP(400, "Can't load the rando preset: {}".format(preset))
+            raise HTTP(400, "Can't load the rando preset")
     else:
-        raise HTTP(400, "Rando preset '{}' not found".format(fullPath))
+        raise HTTP(400, "Rando preset not found")
 
 def loadRandoPreset(presetFullPath, updateSession):
     with open(presetFullPath) as jsonFile:
         randoPreset = json.load(jsonFile)
 
+    # update session
     if updateSession == True:
-        # update session
         for key in randoPreset:
             session.randomizer[key] = randoPreset[key]
 
@@ -1527,7 +1516,7 @@ def randoParamsWebService():
 
     seed = getInt('seed', False)
     if seed < 0 or seed > 9999999:
-        raiseHttp(400, "Wrong value for seed: {}, must be between 0 and 9999999".format(request.vars[seed]), False)
+        raiseHttp(400, "Wrong value for seed, must be between 0 and 9999999", False)
 
     DB = db.DB()
     params = DB.getRandomizerSeedParams(seed)
@@ -1663,11 +1652,11 @@ class WS(object):
     def factory():
         scope = request.vars.scope
         if scope not in ["area", "item", "common"]:
-            raiseHttp(400, "Unknown scope: {}, must be area/item/common".format(scope), True)
+            raiseHttp(400, "Unknown scope, must be area/item/common", True)
 
         action = request.vars.action
         if action not in ['add', 'remove', 'clear', 'init', 'get', 'save', 'replace', 'randomize']:
-            raiseHttp(400, "Unknown action {}, must be add/remove/clear/init/get/save/randomize".format(action), True)
+            raiseHttp(400, "Unknown action, must be add/remove/clear/init/get/save/randomize", True)
 
         mode = request.vars.mode
         if mode not in ["standard", "seedless", "plando"]:
@@ -1698,7 +1687,7 @@ class WS(object):
         action = request.vars.action
 
         if action not in ['init', 'add', 'remove', 'clear', 'get', 'save', 'replace', 'randomize']:
-            raiseHttp(400, "Unknown action {}, must be init/add/remove/clear/get/save/randomize".format(action), True)
+            raiseHttp(400, "Unknown action, must be init/add/remove/clear/get/save/randomize", True)
 
         if request.vars.escapeTimer != None:
             if re.match("[0-9][0-9]:[0-9][0-9]", request.vars.escapeTimer) == None:
@@ -1722,7 +1711,7 @@ class WS(object):
                               'draygonRoomOut', 'draygonRoomIn', 'phantoonRoomOut', 'phantoonRoomIn',
                               'tourianEscapeRoom4TopRight', 'climbBottomLeft', 'greenBrinstarMainShaftTopLeft',
                               'basementLeft', 'businessCenterMidLeft', 'crabHoleBottomRight']:
-            raiseHttp(400, "Wrong value for {}: {}".format(point, pointValue), True)
+            raiseHttp(400, "Wrong value for {}".format(point), True)
 
     def action(self):
         pass
@@ -1868,12 +1857,12 @@ class WS_common_init(WS):
         if IS_NOT_EMPTY()(preset)[1] is not None:
             raiseHttp(400, "Preset name is empty", True)
         if IS_ALPHANUMERIC()(preset)[1] is not None:
-            raiseHttp(400, "Preset name must be alphanumeric: {}".format(preset), True)
+            raiseHttp(400, "Preset name must be alphanumeric", True)
         if IS_LENGTH(32)(preset)[1] is not None:
-            raiseHttp(400, "Preset name must be max 32 chars: {}".format(preset), True)
+            raiseHttp(400, "Preset name must be max 32 chars", True)
         fullPath = '{}/{}.json'.format(getPresetDir(preset), preset)
         if not os.path.isfile(fullPath):
-            raiseHttp(400, "Unknown preset: {}".format(preset), True)
+            raiseHttp(400, "Unknown preset", True)
 
         if request.vars.mode != 'seedless':
             # ROM (only through file API)
@@ -1882,7 +1871,7 @@ class WS_common_init(WS):
             try:
                 json.loads(request.vars.romJson)
             except:
-                raiseHttp(400, "Wrong value for romJson, must be a JSON string: [{}]".format(request.vars.romJson))
+                raiseHttp(400, "Wrong value for romJson, must be a JSON string")
 
             # ROM file name
             uploadFile = request.vars.fileName
@@ -1895,7 +1884,7 @@ class WS_common_init(WS):
 
         if request.vars.startLocation != None:
             if request.vars.startLocation not in GraphUtils.getStartAccessPointNames():
-                raiseHttp(400, "Wrong value for startLocation: {}".format(request.vars.startLocation), True)
+                raiseHttp(400, "Wrong value for startLocation", True)
 
     def action(self):
         mode = request.vars.mode
@@ -1986,7 +1975,7 @@ class WS_common_save(WS):
             raiseHttp(400, "Missing parameter lock", True)
 
         if request.vars.lock not in ["save", "lock"]:
-            raiseHttp(400, "Wrong value for lock: {}, authorized values: save/lock".format(request.vars.lock), True)
+            raiseHttp(400, "Wrong value for lock, authorized values: save/lock", True)
 
     def action(self):
         if self.session["mode"] != "plando":
@@ -2003,12 +1992,12 @@ class WS_common_randomize(WS):
         super(WS_common_randomize, self).validate()
 
         if request.vars.progressionSpeed not in ["slowest", "slow", "medium", "fast", "fastest", "basic", "VARIAble"]:
-            raiseHttp(400, "Wrong value for progressionSpeed: {}".format(request.vars.progressionSpeed), True)
+            raiseHttp(400, "Wrong value for progressionSpeed", True)
         minorQtyInt = getInt('minorQty', True)
         if minorQtyInt < 7 or minorQtyInt > 100:
             raiseHttp(400, "Wrong value for minorQty, must be between 7 and 100", True)
         if request.vars.energyQty not in ["sparse", "medium", "vanilla"]:
-            raiseHttp(400, "Wrong value for energyQty: {}".format(request.vars.energyQty), True)
+            raiseHttp(400, "Wrong value for energyQty", True)
 
     def action(self):
         if self.session["mode"] != "plando":
@@ -2071,7 +2060,7 @@ class WS_item_add(WS):
         locName = name4isolver(request.vars.locName)
 
         if locName not in ['EnergyTankGauntlet', 'Bomb', 'EnergyTankTerminator', 'ReserveTankBrinstar', 'ChargeBeam', 'MorphingBall', 'EnergyTankBrinstarCeiling', 'EnergyTankEtecoons', 'EnergyTankWaterway', 'EnergyTankBrinstarGate', 'XRayScope', 'Spazer', 'EnergyTankKraid', 'VariaSuit', 'IceBeam', 'EnergyTankCrocomire', 'HiJumpBoots', 'GrappleBeam', 'ReserveTankNorfair', 'SpeedBooster', 'WaveBeam', 'EnergyTankRidley', 'ScrewAttack', 'EnergyTankFirefleas', 'ReserveTankWreckedShip', 'EnergyTankWreckedShip', 'RightSuperWreckedShip', 'GravitySuit', 'EnergyTankMamaturtle', 'PlasmaBeam', 'ReserveTankMaridia', 'SpringBall', 'EnergyTankBotwoon', 'SpaceJump', 'PowerBombCrateriasurface', 'MissileoutsideWreckedShipbottom', 'MissileoutsideWreckedShiptop', 'MissileoutsideWreckedShipmiddle', 'MissileCrateriamoat', 'MissileCrateriabottom', 'MissileCrateriagauntletright', 'MissileCrateriagauntletleft', 'SuperMissileCrateria', 'MissileCrateriamiddle', 'PowerBombgreenBrinstarbottom', 'SuperMissilepinkBrinstar', 'MissilegreenBrinstarbelowsupermissile', 'SuperMissilegreenBrinstartop', 'MissilegreenBrinstarbehindmissile', 'MissilegreenBrinstarbehindreservetank', 'MissilepinkBrinstartop', 'MissilepinkBrinstarbottom', 'PowerBombpinkBrinstar', 'MissilegreenBrinstarpipe', 'PowerBombblueBrinstar', 'MissileblueBrinstarmiddle', 'SuperMissilegreenBrinstarbottom', 'MissileblueBrinstarbottom', 'MissileblueBrinstartop', 'MissileblueBrinstarbehindmissile', 'PowerBombredBrinstarsidehopperroom', 'PowerBombredBrinstarspikeroom', 'MissileredBrinstarspikeroom', 'MissileKraid', 'Missilelavaroom', 'MissilebelowIceBeam', 'MissileaboveCrocomire', 'MissileHiJumpBoots', 'EnergyTankHiJumpBoots', 'PowerBombCrocomire', 'MissilebelowCrocomire', 'MissileGrappleBeam', 'MissileNorfairReserveTank', 'MissilebubbleNorfairgreendoor', 'MissilebubbleNorfair', 'MissileSpeedBooster', 'MissileWaveBeam', 'MissileGoldTorizo', 'SuperMissileGoldTorizo', 'MissileMickeyMouseroom', 'MissilelowerNorfairabovefireflearoom', 'PowerBomblowerNorfairabovefireflearoom', 'PowerBombPowerBombsofshame', 'MissilelowerNorfairnearWaveBeam', 'MissileWreckedShipmiddle', 'MissileGravitySuit', 'MissileWreckedShiptop', 'SuperMissileWreckedShipleft', 'MissilegreenMaridiashinespark', 'SuperMissilegreenMaridia', 'MissilegreenMaridiatatori', 'SuperMissileyellowMaridia', 'MissileyellowMaridiasupermissile', 'MissileyellowMaridiafalsewall', 'MissileleftMaridiasandpitroom', 'MissilerightMaridiasandpitroom', 'PowerBombrightMaridiasandpitroom', 'MissilepinkMaridia', 'SuperMissilepinkMaridia', 'MissileDraygon', 'Kraid', 'Ridley', 'Phantoon', 'Draygon', 'MotherBrain']:
-            raiseHttp(400, "Unknown location name: {}".format(request.vars.locName), True)
+            raiseHttp(400, "Unknown location name", True)
 
         request.vars.locName = locName
 
@@ -2080,7 +2069,7 @@ class WS_item_add(WS):
             itemName = "Nothing"
 
         if itemName not in [None, 'ETank', 'Missile', 'Super', 'PowerBomb', 'Bomb', 'Charge', 'Ice', 'HiJump', 'SpeedBooster', 'Wave', 'Spazer', 'SpringBall', 'Varia', 'Plasma', 'Grapple', 'Morph', 'Reserve', 'Gravity', 'XRayScope', 'SpaceJump', 'ScrewAttack', 'Nothing', 'NoEnergy', 'Boss']:
-            raiseHttp(400, "Unknown item name: {}".format(request.vars.itemName), True)
+            raiseHttp(400, "Unknown item name", True)
 
     def action(self):
         item = request.vars.itemName
@@ -2157,13 +2146,16 @@ def initCustomizerSession():
         session.customizer['spinjumprestart'] = "off"
         session.customizer['rando_speed'] = "off"
         session.customizer['elevators_doors_speed'] = "off"
-        session.customizer['animals'] = "off"
         session.customizer['No_Music'] = "off"
+        session.customizer['random_music'] = "off"
+        session.customizer['AimAnyButton'] = "off"
+        session.customizer['max_ammo_display'] = "off"
+        session.customizer['supermetroid_msu1'] = "off"
 
 customSprites = {
     'samus': {"index":0, "name": "Samus", "desc": "Samus, with a distinct animation for Screw Attack without Space Jump and a new Crystal Flash animation", "author": "Artheau and Feesh", "group": "Samus"},
     'hitbox_helper': {"index":1, "name": "Hitbox", "desc": "Samus, with her actual hitbox on top", "author": "Artheau and Komaru", "group": "Samus"},
-    'hack_ancient_chozo': {"index":2, "name": "Chozo", "desc": "Samus, from Ancient Chozo hack", "author": "Albert V.", "group": "Samus"},
+    'hack_ancient_chozo': {"index":2, "name": "Chozo", "desc": "Samus, from Ancient Chozo hack", "author": "Physix", "group": "Samus"},
     'hack_ascent': {"index":3, "name": "Ascent", "desc": "Samus, from Ascent hack", "author": "Benox50", "group": "Samus"},
     'hack_decision': {"index":4, "name": "Decision", "desc": "Samus, from Decision hack", "author": "JoshShoeWah", "group": "Samus"},
     'hack_escape2': {"index":5, "name": "Escape II", "desc": "Samus, from Escape II hack", "author": "Hiroishi", "group": "Samus"},
@@ -2177,9 +2169,11 @@ customSprites = {
     'megaman': {"index":13, "name": "Megaman", "desc": "Megaman X!", "author": "Artheau", "group": "Custom"},
     'fed_trooper': {"index":14, "name": "GF Trooper", "desc": "A Galactic Federation trooper", "author": "Physix", "group": "Custom"},
     'super_controid': {"index":15, "name": "Contra", "desc": "Badass soldier from Contra III", "author": "Nintoaster", "group": "Custom"},
-    'luigi': {"index":16, "name": "Luigi", "desc": "Let's-a go!", "author": "RonnSama", "group": "Custom"},
-    'marga': {"index":17, "name": "Margatroid", "desc": "Alice Margatroid from the Touhou Project", "author": "Plan", "group": "Custom"},
-    'win95_cursor': {"index":18, "name": "Win95 Cursor", "desc": "A classic Windows cursor...", "author": "PlaguedOne", "group": "Custom"}
+    'mario_8bit': {"index":16, "name": "Mario (NES)", "desc": "One of the bros", "author": "TarThoron", "group": "Custom"},
+    'mario_8bit_modern': {"index":17, "name": "Mario (Alt)", "desc": "One of the bros, with a more modern palette", "author": "TarThoron", "group": "Custom"},
+    'luigi': {"index":18, "name": "Luigi", "desc": "The other bro", "author": "RonnSama", "group": "Custom"},
+    'marga': {"index":19, "name": "Margatroid", "desc": "Alice Margatroid from the Touhou Project", "author": "Plan", "group": "Custom"},
+    'win95_cursor': {"index":20, "name": "Win95 Cursor", "desc": "A classic Windows cursor...", "author": "PlaguedOne", "group": "Custom"}
 }
 
 def customizer():
@@ -2191,10 +2185,11 @@ def customizer():
 
 def customWebService():
     # check validity of all parameters
-    patches = ['itemsounds', 'spinjumprestart', 'rando_speed', 'elevators_doors_speed', 'No_Music', 'animals']
+    patches = ['itemsounds', 'spinjumprestart', 'rando_speed', 'elevators_doors_speed', 'No_Music', 'random_music',
+               'AimAnyButton', 'max_ammo_display', 'supermetroid_msu1']
     others = ['colorsRandomization', 'suitsPalettes', 'beamsPalettes', 'tilesPalettes', 'enemiesPalettes',
               'bossesPalettes', 'minDegree', 'maxDegree', 'invert']
-    validateWebServiceParams(patches, [], others, isJson=True)
+    validateWebServiceParams(patches, [], [], others, isJson=True)
     if request.vars.customSpriteEnable == 'on':
         if request.vars.customSprite not in customSprites:
             raiseHttp(400, "Wrong value for customSprite", True)
@@ -2219,8 +2214,11 @@ def customWebService():
     session.customizer['spinjumprestart'] = request.vars.spinjumprestart
     session.customizer['rando_speed'] = request.vars.rando_speed
     session.customizer['elevators_doors_speed'] = request.vars.elevators_doors_speed
-    session.customizer['animals'] = request.vars.animals
     session.customizer['No_Music'] = request.vars.No_Music
+    session.customizer['random_music'] = request.vars.random_music
+    session.customizer['AimAnyButton'] = request.vars.AimAnyButton
+    session.customizer['max_ammo_display'] = request.vars.max_ammo_display
+    session.customizer['supermetroid_msu1'] = request.vars.supermetroid_msu1
 
     # call the randomizer
     (fd, jsonFileName) = tempfile.mkstemp()
@@ -2237,8 +2235,14 @@ def customWebService():
         params += ['-c', 'rando_speed.ips']
     if request.vars.No_Music == 'on':
         params += ['-c', 'No_Music']
-    if request.vars.animals == 'on':
-        params.append('--animals')
+    if request.vars.random_music == 'on':
+        params += ['-c', 'random_music.ips']
+    if request.vars.AimAnyButton == 'on':
+        params += ['-c', 'AimAnyButton.ips']
+    if request.vars.max_ammo_display == 'on':
+        params += ['-c', 'max_ammo_display.ips']
+    if request.vars.supermetroid_msu1 == 'on':
+        params += ['-c', 'supermetroid_msu1.ips']
 
     if request.vars.colorsRandomization == 'on':
         params.append('--palette')
@@ -2345,7 +2349,7 @@ def extStats():
             with open(fullPath) as jsonFile:
                 randoPreset = json.load(jsonFile)
         except Exception as e:
-            raise HTTP(400, "Can't load the rando preset: {}: {}".format(randoPreset, e))
+            raise HTTP(400, "Can't load the rando preset: {}".format(e))
 
         # load skill preset
         fullPath = '{}/{}.json'.format(getPresetDir(skillPreset), skillPreset)
@@ -2353,7 +2357,7 @@ def extStats():
             skillPresetContent = PresetLoader.factory(fullPath).params
             completePreset(skillPresetContent)
         except Exception as e:
-            raise HTTP(400, "Error loading the preset {}: {}".format(skillPreset, e))
+            raise HTTP(400, "Error loading the preset: {}".format(e))
 
         parameters = {
             'preset': skillPreset,
@@ -2365,7 +2369,7 @@ def extStats():
             # parameters which can be random:
             'majorsSplit': randoPreset['majorsSplit'] if 'majorsSplit' in randoPreset else 'Full',
             'startAP': randoPreset['startLocation'] if 'startLocation' in randoPreset else 'Landing Site',
-            'progSpeed': randoPreset['progressionSpeed'] if 'progressionSpeed' in randoPreset else 'variable',
+            'progSpeed': randoPreset['progressionSpeed'] if 'progressionSpeed' in randoPreset else 'VARIAble',
             'morphPlacement': randoPreset['morphPlacement'] if 'morphPlacement' in randoPreset else 'early',
             'suitsRestriction': 'suitsRestriction' in randoPreset and randoPreset['suitsRestriction'] == 'on',
             'progDiff': randoPreset['progressionDifficulty'] if 'progressionDifficulty' in randoPreset else 'normal',
@@ -2384,8 +2388,20 @@ def extStats():
             parameters["superFunSuit"] = "random"
 
         DB = db.DB()
-        (itemsStats, techniquesStats, difficulties) = DB.getExtStat(parameters)
+        (itemsStats, techniquesStats, difficulties, solverStatsRaw) = DB.getExtStat(parameters)
         DB.close()
+
+        solverStats = {}
+        if "avgLocs" in solverStatsRaw:
+            solverStats["avgLocs"] = transformStats(solverStatsRaw["avgLocs"])
+            solverStats["avgLocs"].insert(0, ['Available locations', 'Percentage'])
+        if "open14" in solverStatsRaw:
+            open14 = transformStats(solverStatsRaw["open14"])
+            open24 = transformStats(solverStatsRaw["open24"])
+            open34 = transformStats(solverStatsRaw["open34"])
+            open44 = transformStats(solverStatsRaw["open44"])
+            solverStats["open"] = zipStats([open14, open24, open34, open44])
+            solverStats["open"].insert(0, ['Collected items', '1/4 locations available', '2/4 locations available', '3/4 locations available', '4/4 locations available'])
 
         # check that all items are present in the stats:
         nbItems = 19
@@ -2400,6 +2416,7 @@ def extStats():
         itemsStats = None
         techniquesStats = None
         difficulties = None
+        solverStats = None
         skillPresetContent = None
         parameters = None
 
@@ -2413,4 +2430,448 @@ def extStats():
                 randoPresets=randoPresets, tourRandoPresets=tourRandoPresets,
                 itemsStats=itemsStats, techniquesStats=techniquesStats,
                 categories=Knows.categories, knowsDesc=Knows.desc, skillPresetContent=skillPresetContent,
-                locations=locations, parameters=parameters, difficulties=difficulties)
+                locations=locations, parameters=parameters, difficulties=difficulties, solverStats=solverStats)
+
+def transformStats(stats, maxRange=106):
+    # input a list [(x, value), (x, value), ..., (x, value)]
+    # ouput a list with (x, 0) for missing x values
+    if len(stats) > 0:
+        (curX, curValue) = stats.pop(0)
+    else:
+        (curX, curValue) = (maxRange-1, 0)
+    out = []
+    for i in range(1, maxRange):
+        if i < curX:
+            out.append([i, 0])
+        else:
+            out.append([curX, float(curValue)])
+            if len(stats) > 0:
+                (curX, curValue) = stats.pop(0)
+            else:
+                (curX, curValue) = (maxRange-1, 0)
+    return out
+
+def zipStats(stats):
+    out = []
+    for i in range(len(stats[0])):
+        line = [i+1]
+        for s in stats:
+            line.append(s[i][1])
+        out.append(line)
+    return out
+
+def initProgSpeedStatsSession():
+    if session.progSpeedStats == None:
+        session.progSpeedStats = {}
+        session.progSpeedStats['randoPreset'] = 'Season_Races'
+        session.progSpeedStats['majorsSplit'] = 'Major'
+
+def updateProgSpeedStatsSession():
+    if session.progSpeedStats is None:
+        session.progSpeedStats = {}
+
+    session.progSpeedStats['randoPreset'] = request.vars.randoPreset
+    session.progSpeedStats['majorsSplit'] = request.vars.majorsSplit
+
+def validateProgSpeedStatsParams():
+    for (preset, directory) in [("randoPreset", "rando_presets")]:
+        if request.vars[preset] == None:
+            return (False, "Missing parameter preset")
+        preset = request.vars[preset]
+
+        if IS_ALPHANUMERIC()(preset)[1] is not None:
+            return (False, "Wrong value for preset, must be alphanumeric")
+
+        if IS_LENGTH(maxsize=32, minsize=1)(preset)[1] is not None:
+            return (False, "Wrong length for preset, name must be between 1 and 32 characters")
+
+        # check that preset exists
+        fullPath = '{}/{}.json'.format(directory, preset)
+        if not os.path.isfile(fullPath):
+            return (False, "Unknown preset: {}".format(preset))
+
+    if request.vars['majorsSplit'] not in ['Full', 'Major']:
+            return (False, "Wrong value for majorsSplit, authorized values Full/Major")
+
+    return (True, None)
+
+def progSpeedStats():
+    response.title = 'Super Metroid VARIA Randomizer progression speed statistics'
+
+    initProgSpeedStatsSession()
+
+    if request.vars.action == 'Load':
+        (ok, msg) = validateProgSpeedStatsParams()
+        if not ok:
+            session.flash = msg
+            redirect(URL(r=request, f='progSpeedStats'))
+
+        updateProgSpeedStatsSession()
+
+        randoPreset = request.vars.randoPreset
+
+        # load rando preset
+        fullPath = 'rando_presets/{}.json'.format(randoPreset)
+        try:
+            with open(fullPath) as jsonFile:
+                randoPreset = json.load(jsonFile)
+        except Exception as e:
+            raise HTTP(400, "Can't load the rando preset: {}".format(e))
+
+        parameters = {
+            'preset': randoPreset['preset'] if 'preset' in randoPreset else 'regular',
+            'area': 'areaRandomization' in randoPreset and randoPreset['areaRandomization'] == 'on',
+            'boss': 'bossRandomization' in randoPreset and randoPreset['bossRandomization'] == 'on',
+            'gravityBehaviour': randoPreset['gravityBehaviour'],
+            'nerfedCharge': randoPreset['nerfedCharge'] == 'on',
+            'maxDifficulty': randoPreset['maxDifficulty'],
+            # parameters which can be random:
+            'majorsSplit': randoPreset['majorsSplit'] if 'majorsSplit' in randoPreset else 'Full',
+            'startAP': randoPreset['startLocation'] if 'startLocation' in randoPreset else 'Landing Site',
+            'morphPlacement': randoPreset['morphPlacement'] if 'morphPlacement' in randoPreset else 'early',
+            'suitsRestriction': 'suitsRestriction' in randoPreset and randoPreset['suitsRestriction'] == 'on',
+            'progDiff': randoPreset['progressionDifficulty'] if 'progressionDifficulty' in randoPreset else 'normal',
+            'superFunMovement': 'funMovement' in randoPreset and randoPreset['funMovement'] == 'on',
+            'superFunCombat': 'funCombat' in randoPreset and randoPreset['funCombat'] == 'on',
+            'superFunSuit': 'funSuits' in randoPreset and randoPreset['funSuits'] == 'on'
+        }
+
+        if randoPreset['suitsRestriction'] == "random":
+            parameters["suitsRestriction"] = "random"
+        if randoPreset['funMovement'] == "random":
+            parameters["superFunMovement"] = "random"
+        if randoPreset['funCombat'] == "random":
+            parameters["superFunCombat"] = "random"
+        if randoPreset['funSuits'] == "random":
+            parameters["superFunSuit"] = "random"
+
+        parameters['majorsSplit'] = request.vars.majorsSplit
+
+        DB = db.DB()
+        progSpeedStatsRaw = {}
+        progSpeedStats = {}
+        progSpeedStats["open14"] = {}
+        progSpeedStats["open24"] = {}
+        progSpeedStats["open34"] = {}
+        progSpeedStats["open44"] = {}
+        progSpeeds = ['slowest', 'slow', 'medium', 'fast', 'fastest', 'basic', 'variable', 'total']
+        realProgSpeeds = []
+        realProgSpeedsName = []
+        for progSpeed in progSpeeds:
+            parameters['progSpeed'] = progSpeed
+            progSpeedStatsRaw[progSpeed] = DB.getProgSpeedStat(parameters)
+
+            if len(progSpeedStatsRaw[progSpeed]) != 0:
+                progSpeedStats[progSpeed] = {}
+                progSpeedStats[progSpeed]["avgLocs"] = transformStats(progSpeedStatsRaw[progSpeed]["avgLocs"], 50)
+                open14 = transformStats(progSpeedStatsRaw[progSpeed]["open14"])
+                open24 = transformStats(progSpeedStatsRaw[progSpeed]["open24"])
+                open34 = transformStats(progSpeedStatsRaw[progSpeed]["open34"])
+                open44 = transformStats(progSpeedStatsRaw[progSpeed]["open44"])
+                progSpeedStats[progSpeed]["open"] = zipStats([open14, open24, open34, open44])
+                progSpeedStats[progSpeed]["open"].insert(0, ['Collected items', '1/4 locations available', '2/4 locations available', '3/4 locations available', '4/4 locations available'])
+
+                progSpeedStats["open14"][progSpeed] = open14
+                progSpeedStats["open24"][progSpeed] = open24
+                progSpeedStats["open34"][progSpeed] = open34
+                progSpeedStats["open44"][progSpeed] = open44
+
+                realProgSpeeds.append(progSpeed)
+                if progSpeed == 'total':
+                    realProgSpeedsName.append('total_rando')
+                else:
+                    realProgSpeedsName.append(progSpeed)
+        DB.close()
+
+        # avg locs
+        if len(realProgSpeeds) > 0:
+            progSpeedStats['avgLocs'] = zipStats([progSpeedStats[progSpeed]["avgLocs"] for progSpeed in realProgSpeeds])
+            progSpeedStats["avgLocs"].insert(0, ['Available locations']+realProgSpeedsName)
+
+        # prog items
+        if len(progSpeedStats["open14"]) > 0:
+            progSpeedStats["open14"] = zipStats([progSpeedStats["open14"][progSpeed] for progSpeed in realProgSpeeds])
+            progSpeedStats["open14"].insert(0, ['Collected items']+realProgSpeedsName)
+            progSpeedStats["open24"] = zipStats([progSpeedStats["open24"][progSpeed] for progSpeed in realProgSpeeds])
+            progSpeedStats["open24"].insert(0, ['Collected items']+realProgSpeedsName)
+            progSpeedStats["open34"] = zipStats([progSpeedStats["open34"][progSpeed] for progSpeed in realProgSpeeds])
+            progSpeedStats["open34"].insert(0, ['Collected items']+realProgSpeedsName)
+            progSpeedStats["open44"] = zipStats([progSpeedStats["open44"][progSpeed] for progSpeed in realProgSpeeds])
+            progSpeedStats["open44"].insert(0, ['Collected items']+realProgSpeedsName)
+    else:
+        progSpeedStats = None
+
+    randoPresets = ['Season_Races']
+    majorsSplit = ['Major', 'Full']
+
+    return dict(randoPresets=randoPresets, majorsSplit=majorsSplit, progSpeedStats=progSpeedStats)
+
+ipsBasePath = "plandository/"
+def plandorepo():
+    response.title = 'Super Metroid VARIA Plandository'
+
+    DB = db.DB()
+    url = request.env.request_uri.split('/')
+    msg = ""
+    plandos = []
+    expand = True
+    if len(url) > 0 and url[-1] != 'plandorepo':
+        # a plando name was passed as parameter
+        plandoName = url[-1]
+
+        # decode url
+        plandoName = urllib.parse.unquote(plandoName)
+
+        # sanity check
+        if IS_MATCH('^[a-zA-Z0-9 -_]*$')(plandoName)[1] is not None:
+            msg = "Plando name can only contain [a-zA-Z0-9 -_]"
+        else:
+            plandos = DB.getPlando(plandoName)
+            if plandos == None or len(plandos) == 0:
+                msg = "Plando not found"
+    if len(plandos) == 0:
+        # get plando list
+        plandos = DB.getPlandos()
+        expand = False
+
+    DB.close()
+
+    return dict(plandos=plandos, msg=msg, expand=expand, math=math, re=re)
+
+def plandoRateWebService():
+    print("plandoRateWebService")
+
+    if request.vars.plando == None:
+        raiseHttp(400, "Missing parameter plando")
+    plando = request.vars.plando
+
+    if request.vars.rate == None:
+        raiseHttp(400, "Missing parameter rate")
+    rate = request.vars.rate
+
+    if IS_LENGTH(maxsize=32, minsize=1)(plando)[1] is not None:
+        raise HTTP(400, "Plando name must be between 1 and 32 characters")
+
+    if IS_MATCH('^[a-zA-Z0-9 -_]*$')(plando)[1] is not None:
+        raise HTTP(400, "Plando name can only contain [a-zA-Z0-9 -_]")
+
+    if IS_INT_IN_RANGE(1, 6)(rate)[1] is not None:
+        raise HTTP(400, "Rate name must be between 1 and 5")
+    rate = int(rate)
+    ip = request.client
+
+    DB = db.DB()
+    already = DB.alreadyRated(plando, ip)
+    if already != None and len(already) > 0:
+        DB.close()
+        # display message in flash box
+        msg = "{}: rating already done".format(plando)
+        raise HTTP(400, msg)
+    else:
+        DB.addRating(plando, rate, ip)
+        newRate = DB.getPlandoRate(plando)
+        DB.close()
+        if newRate == None:
+            raiseHttp(400, "Can't get new rate")
+        else:
+            newCount = newRate[0][0]
+            newRate = float(newRate[0][1])
+        data = {
+            "msg": "",
+            "purePlandoName": re.sub('[\W_]+', '', plando),
+            "rate": newRate,
+            "count": newCount
+        }
+        return json.dumps(data)
+
+def downloadPlandoWebService():
+    if request.vars.plando == None:
+        raiseHttp(400, "Missing parameter plando")
+    plandoName = request.vars.plando
+
+    if IS_LENGTH(maxsize=32, minsize=1)(plandoName)[1] is not None:
+        raise HTTP(400, "Plando name must be between 1 and 32 characters")
+
+    if IS_MATCH('^[a-zA-Z0-9 -_]*$')(plandoName)[1] is not None:
+        raise HTTP(400, "Plando name can only contain [a-zA-Z0-9 -_]")
+
+    ipsFileName = os.path.join(ipsBasePath, "{}.ips".format(plandoName))
+    with open(ipsFileName, 'rb') as ipsFile:
+        ipsData = ipsFile.read()
+
+    DB = db.DB()
+    maxSize = DB.getPlandoIpsMaxSize(plandoName)
+    DB.increaseDownloadCount(plandoName)
+    DB.close()
+
+    data = {
+        "ips": base64.b64encode(ipsData).decode(),
+        "fileName": "{}.sfc".format(plandoName),
+        "maxSize": maxSize
+    }
+
+    return json.dumps(data)
+
+def removeHtmlTags(text):
+    clean = re.compile('<.*?>')
+    text = re.sub(clean, '', text)
+    # also double the ' for db insertion
+    return text.replace("'", "''")
+
+def generateUpdateKey():
+    # 8 chars string
+    stringLength = 8
+    letters = string.ascii_letters + string.digits
+    return ''.join(random.choice(letters) for i in range(stringLength))
+
+def handleIps(plandoName, romDataJson):
+    romDataJson = request.vars.romData
+    romDataRaw = json.loads(romDataJson)
+    # everything is string in json, cast to int
+    romData = {}
+    for addr in romDataRaw:
+        romData[int(addr)] = int(romDataRaw[addr])
+
+    # dict: address -> value, transform it dict: address -> [values]
+    ipsData = {}
+    prevAddr = -0xff
+    curRecord = []
+    curRecordAddr = -1
+    for addr in sorted(romData):
+        if addr == prevAddr + 1:
+            curRecord.append(romData[addr])
+        else:
+            if len(curRecord) > 0:
+                # save current record
+                ipsData[curRecordAddr] = bytearray(curRecord)
+            # start a new one
+            curRecordAddr = addr
+            curRecord = [romData[addr]]
+        prevAddr = addr
+    # save last record
+    ipsData[curRecordAddr] = bytearray(curRecord)
+
+    # generate ips using the records
+    ipsPatch = IPS_Patch(ipsData)
+    maxSize = ipsPatch.max_size
+
+    # store ips in the repository
+    ipsPatch.save(os.path.join(ipsBasePath, "{}.ips".format(plandoName)))
+
+    return maxSize
+
+def uploadPlandoWebService():
+    print("uploadPlandoWebService")
+
+    DB = db.DB()
+    count = DB.getPlandoCount()
+    plandoLimit = 2048
+    if count == None or count[0][0] >= plandoLimit:
+        DB.close()
+        raise HTTP(400, "Maximum number of plandos reach: {}".format(plandoLimit))
+    DB.close()
+
+    for param in ["author", "plandoName", "longDesc", "preset", "romData"]:
+        if request.vars[param] == None:
+            raiseHttp(400, "Missing parameter {}".format(param))
+
+    for param in ["author", "plandoName", "preset"]:
+        if IS_LENGTH(maxsize=32, minsize=1)(request.vars[param])[1] is not None:
+            raise HTTP(400, "{} must be between 1 and 32 characters".format(param))
+
+    for param in ["longDesc"]:
+        if IS_LENGTH(maxsize=2048, minsize=1)(request.vars[param])[1] is not None:
+            raise HTTP(400, "{} must be between 1 and 2048 characters".format(param))
+
+    plandoName = request.vars.plandoName
+    if IS_MATCH('^[a-zA-Z0-9 -_]*$')(plandoName)[1] is not None:
+        raise HTTP(400, "Plando name can only contain [a-zA-Z0-9 -_]")
+
+    author = request.vars.author
+    longDesc = removeHtmlTags(request.vars.longDesc)
+    preset = request.vars.preset
+
+    maxSize = handleIps(plandoName, request.vars.romData)
+
+    updateKey = generateUpdateKey()
+
+    DB = db.DB()
+    DB.insertPlando((plandoName, author, longDesc, preset, updateKey, maxSize))
+    DB.close()
+
+    return json.dumps(updateKey)
+
+def deletePlandoWebService():
+    for param in ["plandoName", "plandoKey"]:
+        if request.vars[param] == None:
+            raiseHttp(400, "Missing parameter {}".format(param))
+
+    plandoName = request.vars.plandoName
+    plandoKey = request.vars.plandoKey
+
+    if IS_LENGTH(maxsize=32, minsize=1)(plandoName)[1] is not None:
+        raise HTTP(400, "Plando name must be between 1 and 32 characters")
+    if IS_MATCH('^[a-zA-Z0-9 -_]*$')(plandoName)[1] is not None:
+        raise HTTP(400, "Plando name can only contain [a-zA-Z0-9 -_]")
+
+    if IS_LENGTH(maxsize=8, minsize=1)(plandoKey)[1] is not None:
+        raise HTTP(400, "Plando key must be between 1 and 8 characters")
+    if IS_MATCH('^[a-zA-Z0-9]*$')(plandoKey)[1] is not None:
+        raise HTTP(400, "Plando key can only contain [a-zA-Z0-9]")
+
+    DB = db.DB()
+    valid = DB.isValidPlandoKey(plandoName, plandoKey)
+    if valid == None or len(valid) == 0:
+        DB.close()
+        raise HTTP(400, "Plando key mismatch")
+    DB.deletePlandoRating(plandoName)
+    DB.deletePlando(plandoName)
+    DB.close()
+
+    return json.dumps("Plando {} deleted".format(plandoName))
+
+def updatePlandoWebService():
+    print("updatePlandoWebService")
+
+    for param in ["author", "plandoName", "longDesc", "preset", "plandoKey"]:
+        if request.vars[param] == None:
+            raiseHttp(400, "Missing parameter {}".format(param))
+
+    for param in ["author", "plandoName", "preset"]:
+        if IS_LENGTH(maxsize=32, minsize=1)(request.vars[param])[1] is not None:
+            raise HTTP(400, "{} must be between 1 and 32 characters".format(param))
+
+    for param in ["plandoKey"]:
+        if IS_LENGTH(maxsize=8, minsize=1)(request.vars[param])[1] is not None:
+            raise HTTP(400, "{} must be between 1 and 8 characters".format(param))
+
+    for param in ["longDesc"]:
+        if IS_LENGTH(maxsize=2048, minsize=1)(request.vars[param])[1] is not None:
+            raise HTTP(400, "{} must be between 1 and 2048 characters".format(param))
+
+    plandoName = request.vars.plandoName
+    if IS_MATCH('^[a-zA-Z0-9 -_]*$')(plandoName)[1] is not None:
+        raise HTTP(400, "Plando name can only contain [a-zA-Z0-9 -_]")
+
+    author = request.vars.author
+    longDesc = removeHtmlTags(request.vars.longDesc)
+    preset = request.vars.preset
+    plandoKey = request.vars.plandoKey
+
+    # check update key
+    DB = db.DB()
+    valid = DB.isValidPlandoKey(plandoName, plandoKey)
+    if valid == None or len(valid) == 0:
+        DB.close()
+        raise HTTP(400, "Plando key mismatch")
+
+    if request.vars.romData != None:
+        print("updatePlandoWebService: update ips")
+        maxSize = handleIps(plandoName, request.vars.romData)
+        DB.updatePlandoAll((author, longDesc, preset, maxSize, plandoName))
+    else:
+        DB.updatePlandoMeta((author, longDesc, preset, plandoName))
+
+    DB.close()
+
+    return json.dumps("Plando {} updated succesfully.".format(plandoName))

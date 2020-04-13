@@ -47,6 +47,7 @@ CHARGES=("" "--nerfedCharge")
 TWEAKS=("" "--novariatweaks")
 LAYOUTS=("" "--nolayout")
 STARTAPS=("" "--startAP random")
+AREAS=("" "" "--area" "--area --areaLayoutBase")
 
 function generate_params {
     SEED="$1"
@@ -63,8 +64,10 @@ function generate_params {
     LAYOUT=${LAYOUTS[$S]}
     let S=$RANDOM%${#STARTAPS[@]}
     STARTAP=${STARTAPS[$S]}
+    let S=$RANDOM%${#AREAS[@]}
+    AREA=${AREAS[$S]}
 
-    echo "-r ${ROM} --param standard_presets/${PRESET}.json --seed ${SEED} --progressionSpeed random --morphPlacement random --progressionDifficulty random --missileQty 0 --superQty 0 --powerBombQty 0 --minorQty 0 --energyQty random --majorsSplit random --suitsRestriction random --hideItems random --strictMinors random --superFun CombatRandom --superFun MovementRandom --superFun SuitsRandom --maxDifficulty random --runtime 20 --area random --bosses random ${SUIT} ${CHARGE} ${TWEAK} ${LAYOUT} ${STARTAP}"
+    echo "-r ${ROM} --param standard_presets/${PRESET}.json --seed ${SEED} --progressionSpeed random --morphPlacement random --progressionDifficulty random --missileQty 0 --superQty 0 --powerBombQty 0 --minorQty 0 --energyQty random --majorsSplit random --suitsRestriction random --hideItems random --strictMinors random --superFun CombatRandom --superFun MovementRandom --superFun SuitsRandom --maxDifficulty random --runtime 20 --bosses random ${SUIT} ${CHARGE} ${TWEAK} ${LAYOUT} ${STARTAP} ${AREA}"
 }
 
 function computeSeed {
@@ -209,7 +212,7 @@ done
 
 echo "DONE"
 
-for AP in "Ceres" "Landing Site" "Gauntlet Top" "Green Brinstar Elevator" "Big Pink" "Etecoons Supers" "Wrecked Ship Main" "Business Center" "Bubble Mountain" "Watering Hole" "Red Brinstar Elevator" "Golden Four"; do
+for AP in "Ceres" "Landing Site" "Gauntlet Top" "Green Brinstar Elevator" "Big Pink" "Etecoons Supers" "Wrecked Ship Main" "Business Center" "Bubble Mountain" "Watering Hole" "Red Brinstar Elevator" "Golden Four" "Aqueduct" "Mama Turtle" "Firefleas Top"; do
     TOTAL=$(grep "${AP}" ${CSV}  | wc -l)
     ERROR=$(grep "${AP}" ${CSV} | grep -E '^error' | wc -l)
     PERCENT=$(echo "${ERROR}*100/${TOTAL}" | bc)

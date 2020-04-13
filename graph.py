@@ -37,6 +37,17 @@ class AccessPoint(object):
         # inter-area connection
         self.ConnectedTo = None
 
+    def __copy__(self):
+        exitInfo = copy.deepcopy(self.ExitInfo) if self.ExitInfo is not None else None
+        entryInfo = copy.deepcopy(self.EntryInfo) if self.EntryInfo is not None else None
+        roomInfo = copy.deepcopy(self.RoomInfo) if self.RoomInfo is not None else None
+        start = copy.deepcopy(self.Start) if self.Start is not None else None
+        # in any case, do not copy connections
+        return AccessPoint(self.Name, self.GraphArea, self.transitions, self.traverse,
+                           exitInfo, entryInfo, roomInfo,
+                           self.Internal, self.Boss, self.Escape,
+                           start, self.DotOrientation)
+
     def __str__(self):
         return "[" + self.GraphArea + "] " + self.Name
 
@@ -61,18 +72,23 @@ class AccessPoint(object):
 class AccessGraph(object):
     def __init__(self, accessPointList, transitions, bidir=True, dotFile=None):
         self.log = log.get('Graph')
-
         self.accessPoints = {}
         self.InterAreaTransitions = []
-        self.EscapeTimer = None
+        self.EscapeAttributes = {
+            'Timer': None,
+            'Animals': None
+        }
         self.bidir = bidir
         for ap in accessPointList:
-            ap.distance = 0
-            self.accessPoints[ap.Name] = ap
+            self.addAccessPoint(ap)
         for srcName, dstName in transitions:
             self.addTransition(srcName, dstName, bidir)
         if dotFile is not None:
             self.toDot(dotFile)
+
+    def addAccessPoint(self, ap):
+        ap.distance = 0
+        self.accessPoints[ap.Name] = ap
 
     def toDot(self, dotFile):
         colors = ['red', 'blue', 'green', 'yellow', 'skyblue', 'violet', 'orange',

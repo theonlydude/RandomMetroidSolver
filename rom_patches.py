@@ -30,12 +30,18 @@ class RomPatches:
     # graph blue doors
     HiJumpAreaBlueDoor        = 32
     SpeedAreaBlueDoors        = 33
+    # LN start
+    LowerNorfairPBRoomHeatDisable = 34
+    FirefleasRemoveFune       = 35
     # moat bottom block
     MoatShotBlock             = 41
-    #graph
+    #graph+forgotten hiway anti softlock
     SpongeBathBlueDoor        = 42
+    # forgotten hiway anti softlock
+    EastOceanPlatforms        = 43
     # maridia
-    MaridiaTubeOpened         = 50
+    MaridiaTubeOpened         = 51
+    MamaTurtleBlueDoor        = 52
     ## Area rando patches
     # remove crumble block for reverse lower norfair door access
     SingleChamberNoCrumble    = 101
@@ -74,7 +80,9 @@ class RomPatches:
     TotalCasual = [ BlueBrinstarMissile ] + Total
 
     # area rando patch set
-    AreaSet = [ SingleChamberNoCrumble, AreaRandoGatesBase, AreaRandoGatesOther, AreaRandoBlueDoors, AreaRandoMoreBlueDoors ]
+    AreaBaseSet = [ SingleChamberNoCrumble, AreaRandoGatesBase, AreaRandoBlueDoors, AreaRandoMoreBlueDoors ]
+    AreaComfortSet = [ AreaRandoGatesOther, SpongeBathBlueDoor, EastOceanPlatforms ]
+    AreaSet = AreaBaseSet + AreaComfortSet
 
     # VARIA specific patch set
     VariaTweaks = [ WsEtankPhantoonAlive, LNChozoSJCheckDisabled ]

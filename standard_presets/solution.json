@@ -303,6 +303,22 @@
     "OldMBWithSpeed": [
       true,
       100
+    ],
+    "FirefleasWalljump": [
+      true,
+      25
+    ],
+    "CrystalFlashClip": [
+      true,
+      100
+    ],
+    "SuitlessCrystalFlashClip": [
+      true,
+      100
+    ],
+    "DodgeLowerNorfairEnemies": [
+      true,
+      100
     ]
   },
   "Settings": {

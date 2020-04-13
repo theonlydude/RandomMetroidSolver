@@ -6,7 +6,7 @@ from helpers import Bosses
 
 class AreaRandomizer(Randomizer):
     def __init__(self, locations, settings, seedName, bossTransitions,
-                 bidir=True, dotDir=None, escape=True, removeEscapeEnemies=True):
+                 bidir=True, dotDir=None):
         transitionsOk = False
         attempts = 0
         while not transitionsOk and attempts < 500:
@@ -18,8 +18,6 @@ class AreaRandomizer(Randomizer):
                                                      self.transitions + bossTransitions,
                                                      bidir,
                                                      dotDir)
-                if escape == True:
-                    self.escapeGraph()
                 transitionsOk = True
             except RuntimeError:
                 transitionsOk = False
@@ -31,35 +29,14 @@ class AreaRandomizer(Randomizer):
 
     # adapt restrictions implementation to different area layout
     def computeLateMorphLimitCheck(self):
-        if self.lateMorphOutCrateria == False and self.restrictions['MajorMinor'] == 'Full' and self.restrictions['Suits'] == False:
+        # TODO::allow lateMorphOutStartArea check for custom starts which doesn't require morph early
+        if (self.lateMorphOutStartArea == False and self.stdStart == True
+            and self.restrictions['MajorMinor'] == 'Full' and self.restrictions['Suits'] == False):
             # we can do better
             raise RuntimeError('Invalid layout for late morph')
 
     def areaDistance(self, loc, otherLocs):
         return self.areaDistanceProp(loc, otherLocs, 'GraphArea')
-
-    # area graph update for randomized escape
-    def escapeGraph(self):
-        sm = self.smbm
-        # setup smbm with item pool
-        sm.resetItems()
-        for boss in Bosses.bosses():
-            Bosses.beatBoss(boss)
-        # Ice not usable because of hyper beam
-        # remove energy to avoid hell runs
-        sm.addItems([item['Type'] for item in self.itemPool if item['Type'] != 'Ice' and item['Category'] != 'Energy'])
-        path = None
-        while path is None:
-            (src, dst) = GraphUtils.createEscapeTransition()
-            path = self.areaGraph.accessPath(sm, dst, 'Landing Site',
-                                             self.difficultyTarget)
-        # cleanup smbm
-        sm.resetItems()
-        Bosses.reset()
-        # actually update graph
-        self.areaGraph.addTransition(src, dst)
-        # get timer value
-        self.areaGraph.EscapeTimer = self.escapeTimer(path)
 
     # really rough, to be accurate it would require traversal times for all APs
     # combinations within areas
@@ -88,4 +65,4 @@ class AreaRandomizer(Randomizer):
         for area in traversedAreas:
             t += traversals[area]
         self.log.debug("escapeTimer. t="+str(t))
-        return max(t, 180)
+        self.areaGraph.EscapeAttributes['Timer'] = max(t, 180)

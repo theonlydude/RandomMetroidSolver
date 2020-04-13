@@ -945,6 +945,9 @@ class GraphUtils:
         if escape:
             transitions += vanillaEscapeTransitions
         for srcName, dstName in transitions:
+            if GraphUtils.isEscapeAnimals(srcName) or GraphUtils.isEscapeAnimals(dstName):
+                continue
+
             src = graph.accessPoints[srcName]
             dst = graph.accessPoints[dstName]
             dst.EntryInfo.update(src.ExitInfo)

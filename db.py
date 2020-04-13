@@ -404,9 +404,6 @@ order by init_time;"""
 
     @staticmethod
     def dumpExtStatsItems(parameters, locsItems, sqlFile):
-        if self.dbAvailable == False:
-            return None
-
         sql = """insert into extended_stats (version, preset, area, boss, majorsSplit, progSpeed, morphPlacement, suitsRestriction, progDiff, superFunMovement, superFunCombat, superFunSuit, gravityBehaviour, nerfedCharge, maxDifficulty, startAP, count)
 values
 (%d, '%s', %s, %s, '%s', '%s', '%s', %s, '%s', %s, %s, %s, '%s', %s, '%s', '%s', 1)
@@ -427,9 +424,6 @@ set @last_id = last_insert_id();
 
     @staticmethod
     def dumpExtStatsSolver(difficulty, techniques, solverStats, step, sqlFile):
-        if self.dbAvailable == False:
-            return None
-
         # use @last_id defined by the randomizer
 
         if step == 1:

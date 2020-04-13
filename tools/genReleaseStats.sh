@@ -12,6 +12,11 @@ CWD=$(pwd)
 
 ROM=$1
 
+echo "checking total seeds"
+[ -d ~/download/total_seeds_major ] || exit -1
+[ -d ~/download/total_seeds_full ] || exit -1
+echo "total seeds found"
+
 function getDBParam {
     PARAM="$1"
 
@@ -44,12 +49,21 @@ ${CWD}/tools/genExtStats.sh ${ROM} 900 Season_Races
 ${CWD}/tools/genExtStats.sh ${ROM} 900 Playoff_Races
 ${CWD}/tools/genExtStats.sh ${ROM} 900 SMRAT2020
 
+# 900 seeds pour les skill preset inclus dans les rando presets
+${CWD}/tools/genExtStats.sh ${ROM} 900 default regular
+${CWD}/tools/genExtStats.sh ${ROM} 900 free noob
+${CWD}/tools/genExtStats.sh ${ROM} 900 hardway2hell master
+${CWD}/tools/genExtStats.sh ${ROM} 900 haste Season_Races
+${CWD}/tools/genExtStats.sh ${ROM} 900 highway2hell speedrunner
+${CWD}/tools/genExtStats.sh ${ROM} 900 stupid_hard master
+${CWD}/tools/genExtStats.sh ${ROM} 900 way_of_chozo regular
+
 # 1000 seed pour les stats de prog speed
 ${CWD}/tools/genProgSpeedStats.sh ${ROM} 1000
 ${CWD}/tools/genProgSpeedStats.sh ${ROM} 1000 FULL
 
 # Stats sur l'échantillon de seeds total
-${CWD}/tools/genTotalStats.sh ~/download/total_seeds_majors
+${CWD}/tools/genTotalStats.sh ~/download/total_seeds_major
 ${CWD}/tools/genTotalStats.sh ~/download/total_seeds_full FULL
 
 #################

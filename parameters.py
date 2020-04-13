@@ -412,7 +412,7 @@ class Knows:
     DodgeLowerNorfairEnemies = SMBool(False, 0, ['DodgeLowerNorfairEnemies'])
     desc['DodgeLowerNorfairEnemies'] = {'display': 'Dodge Lower Norfair Enemies',
                                         'title': 'Go through hard-hitting enemies in Lower Norfair without taking damage or killing them',
-                                        'href': '', # TODO
+                                        'href': None, # TODO
                                         'rooms': ["Three Musketeers' Room", "Wasteland", 'Red Kihunter Shaft', 'The Worst Room In The Game']}
 
     # wrecked ship

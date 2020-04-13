@@ -1210,7 +1210,7 @@ class InteractiveSolver(CommonSolver):
             if self.escapeRando == True and escapeTimer != None:
                 # convert from '03:00' to number of seconds
                 escapeTimer = int(escapeTimer[0:2]) * 60 + int(escapeTimer[3:5])
-                romPatcher.writeEscapeTimer(escapeTimer)
+                romPatcher.applyEscapeAttributes({'Timer': escapeTimer, 'Animals': None}, [])
 
         romPatcher.end()
 

@@ -839,7 +839,7 @@ class GraphUtils:
         return None
 
     def isEscapeAnimals(apName):
-        return 'Flyway Right' in apName
+        return 'Flyway Right' in apName or 'Bomb Torizo Room Left' in apName
 
     # gets dict like
     # (RoomPtr, (vanilla entry screen X, vanilla entry screen Y)): AP

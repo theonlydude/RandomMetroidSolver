@@ -968,7 +968,9 @@ def initRandomizerSession():
     if session.randomizer is None:
         session.randomizer = getRandomizerDefaultParameters()
         defaultMultiValues = getDefaultMultiValues()
-        session.randomizer.update(defaultMultiValues)
+        for key in defaultMultiValues:
+            if key not in session.randomizer:
+                session.randomizer.update(defaultMultiValues)
 
 def getDefaultMultiValues():
     defaultMultiValues = {
@@ -979,6 +981,13 @@ def getDefaultMultiValues():
         'morphPlacementMultiSelect': morphPlacements,
         'energyQtyMultiSelect': energyQties
     }
+    return defaultMultiValues
+
+def getCurrentMultiValues():
+    defaultMultiValues = getDefaultMultiValues()
+    for key in defaultMultiValues:
+        if key in session.randomizer:
+            defaultMultiValues[key] = session.randomizer[key]
     return defaultMultiValues
 
 def randomizer():
@@ -996,11 +1005,12 @@ def randomizer():
                 OPTGROUP(_label="Custom", *startAPs["custom"]),
                 OPTGROUP(_label="Custom (Area rando only)", *startAPs["area"])]
 
-    defaultMultiValues = getDefaultMultiValues()
+    # get multi
+    multiValues = getCurrentMultiValues()
 
     return dict(stdPresets=stdPresets, tourPresets=tourPresets, comPresets=comPresets,
                 randoPresets=randoPresets, tourRandoPresets=tourRandoPresets,
-                startAPs=startAPs, defaultMultiValues=defaultMultiValues)
+                startAPs=startAPs, multiValues=multiValues)
 
 def raiseHttp(code, msg, isJson=False):
     #print("raiseHttp: code {} msg {} isJson {}".format(code, msg, isJson))

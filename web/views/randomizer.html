@@ -238,7 +238,7 @@ $(document).ready(function(){
 
 // chosen elements need a special method to update their value
 var chosenElements = ["preset", "startLocationMultiSelect", "majorsSplitMultiSelect", "progressionSpeedMultiSelect", "progressionDifficultyMultiSelect", "morphPlacementMultiSelect", "energyQtyMultiSelect"];
-var defaultMultiValues = {{response.write(defaultMultiValues, escape=False)}};
+var multiValues = {{response.write(multiValues, escape=False)}};
 
 function resizeChosen() {
    $(".chosen-container").each(function() {
@@ -1007,9 +1007,9 @@ function loadRandoPresetOK(data) {
   }
 
   // check if multi select has been set by the rando preset, otherwise load default values
-  for(var key in defaultMultiValues) {
+  for(var key in multiValues) {
     if(! (key in data) ) {
-      $("#"+key).val(defaultMultiValues[key]).trigger("chosen:updated");
+      $("#"+key).val(multiValues[key]).trigger("chosen:updated");
     }
   }
 }
@@ -1667,13 +1667,13 @@ def displayNumber(id, min, max, default, step="1"):
               <tr>
                 <td class="small"><div class="random"><button id="startLocationRandom" type="button" onclick="randomize(event, 'startLocation')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
                 <td><span id="startLocationText">Start location</span></td>
-                <td>{{displayMultiSelect("startLocation", startAPs, "Landing Site", defaultMultiValues["startLocationMultiSelect"])}}</td>
+                <td>{{displayMultiSelect("startLocation", startAPs, "Landing Site", multiValues["startLocationMultiSelect"])}}</td>
                 <td id="StartLocationStep"><button type="button" onclick="startTheTour(5)">?</button></td>
               </tr>
               <tr>
                 <td class="small"><div class="random"><button id="majorsSplitRandom" type="button" onclick="randomize(event, 'majorsSplit')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
                 <td><span id="majorsSplitText">Majors Split</span></td>
-                <td>{{displayMultiSelect("majorsSplit", defaultMultiValues["majorsSplitMultiSelect"], "Full")}}</td>
+                <td>{{displayMultiSelect("majorsSplit", multiValues["majorsSplitMultiSelect"], "Full")}}</td>
                 <td id="majorsSplitStep"><button type="button" onclick="startTheTour(6)">?</button></td>
               </tr>
               <tr id="maxDiffVisibility">
@@ -1686,20 +1686,20 @@ def displayNumber(id, min, max, default, step="1"):
                 <td class="small"><div class="random"><button id="progressionSpeedRandom" type="button" onclick="randomize(event, 'progressionSpeed')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
                 <td class="half"><span id="progressionSpeedText">Progression speed:</span></td>
                 <td class="half">
-                  {{displayMultiSelect("progressionSpeed", defaultMultiValues["progressionSpeedMultiSelect"], "medium")}}
+                  {{displayMultiSelect("progressionSpeed", multiValues["progressionSpeedMultiSelect"], "medium")}}
                 </td>
                 <td id="progSpeedStep"><button type="button" onclick="startTheTour(8)">?</button></td>
               </tr>
               <tr id="progDiffVisibility">
                 <td class="small"><div class="random"><button id="progressionDifficultyRandom" type="button" onclick="randomize(event, 'progressionDifficulty')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
                 <td class="half"><span id="progressionDifficultyText">Progression difficulty:</span></td>
-                <td class="half">{{displayMultiSelect("progressionDifficulty", defaultMultiValues["progressionDifficultyMultiSelect"], "normal")}}</td>
+                <td class="half">{{displayMultiSelect("progressionDifficulty", multiValues["progressionDifficultyMultiSelect"], "normal")}}</td>
                 <td id="progDiffStep"><button type="button" onclick="startTheTour(9)">?</button></td>
               </tr>
               <tr id="morphPlacementVisibility">
                 <td class="small"><div class="random"><button id="morphPlacementRandom" type="button" onclick="randomize(event, 'morphPlacement')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
                 <td class="half"><span id="morphPlacementText">Morph Placement:</span></td>
-                <td class="half">{{displayMultiSelect("morphPlacement", defaultMultiValues["morphPlacementMultiSelect"], "normal")}}</td>
+                <td class="half">{{displayMultiSelect("morphPlacement", multiValues["morphPlacementMultiSelect"], "normal")}}</td>
                 <td id="morphPlacementStep"><button type="button" onclick="startTheTour(10)">?</button></td>
               </tr>
               <tr id="suitsRestrictionVisibility">
@@ -1747,7 +1747,7 @@ def displayNumber(id, min, max, default, step="1"):
                 <tr>
                   <td class="small"><div class="random"><button id="energyQtyRandom" type="button" onclick="randomize(event, 'energyQty')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
                   <td><span id="energyQtyText">Quantity of Energy/Reserve Tanks available:</span></td>
-                  <td>{{displayMultiSelect("energyQty", defaultMultiValues["energyQtyMultiSelect"], "vanilla")}}</td>
+                  <td>{{displayMultiSelect("energyQty", multiValues["energyQtyMultiSelect"], "vanilla")}}</td>
                   <td id="energyQtyStep"><button type="button" onclick="startTheTour(16)">?</button></td>
                 </tr>
               </table>

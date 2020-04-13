@@ -720,7 +720,10 @@ vanillaEscapeTransitions = [
     ('Brinstar Pre-Map Room Right', 'Green Brinstar Main Shaft Top Left'),
     ('Wrecked Ship Map Room', 'Basement Left'),
     ('Norfair Map Room', 'Business Center Mid Left'),
-    ('Maridia Map Room', 'Crab Hole Bottom Right'),
+    ('Maridia Map Room', 'Crab Hole Bottom Right')
+]
+
+vanillaEscapeAnimalsTransitions = [
     ('Flyway Right 0', 'Bomb Torizo Room Left'),
     ('Flyway Right 1', 'Bomb Torizo Room Left'),
     ('Flyway Right 2', 'Bomb Torizo Room Left'),
@@ -936,7 +939,8 @@ class GraphUtils:
             flags |= 0x40
         return flags
 
-    def getDoorConnections(graph, areas=True, bosses=False, escape=True):
+    def getDoorConnections(graph, areas=True, bosses=False,
+                           escape=True, escapeAnimals=True):
         transitions = []
         if areas:
             transitions += vanillaTransitions
@@ -944,6 +948,8 @@ class GraphUtils:
             transitions += vanillaBossesTransitions
         if escape:
             transitions += vanillaEscapeTransitions
+            if escapeAnimals:
+                transitions += vanillaEscapeAnimalsTransitions
         for srcName, dstName in transitions:
             src = graph.accessPoints[srcName]
             dst = graph.accessPoints[dstName]

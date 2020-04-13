@@ -18,6 +18,7 @@ mkdir -p ${LOG_DIR} ${SQL_DIR}
 ROM=$1
 LOOPS=$2
 TOURNEY=$3
+SKILL_PRESET=$4
 
 function computeSeed {
     RANDO_PRESET="$1"
@@ -78,7 +79,9 @@ if [ -n "${TOURNEY}" ]; then
 fi
 
 SKILL_PRESETS=$(ls -1 ${CWD}/standard_presets/*.json | grep -v -E 'solution|samus')
-if [ -n "${TOURNEY}" ]; then
+if [ -n "${SKILL_PRESET}" ]; then
+    SKILL_PRESETS=$(echo "${SKILL_PRESETS}" | grep "${SKILL_PRESET}.json")
+elif [ -n "${TOURNEY}" ]; then
     SKILL_PRESETS=$(echo "${SKILL_PRESETS}" | grep "${TOURNEY}")
 fi
 

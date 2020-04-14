@@ -304,6 +304,18 @@ order by s.id;"""
         if self.dbAvailable == False:
             return None
 
+        # now that we store random multi select values we reach a mysql limit with group_concat.
+        # solution:
+        # SET GLOBAL group_concat_max_len=8192;
+        # but we're not super user on production, so set it at session level
+        sql = "SET SESSION group_concat_max_len=8192";
+        try:
+            self.cursor.execute(sql)
+        except Exception as e:
+            print("DB.getRandomizerData::error execute \"{}\" error: {}".format(sql, e))
+            self.dbAvailable = False
+            return None
+
         sql = """select rr.return_code,
 r.id, r.action_time, rr.return_code, lpad(round(rr.duration, 2), 5, '0'), rr.error_msg,
 rp.params

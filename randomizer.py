@@ -368,7 +368,7 @@ if __name__ == "__main__":
                     optErrMsg += '\nInvalid start locations list with your settings.'
                     dumpErrorMsg(args.output, optErrMsg)
                     sys.exit(-1)
-            ceres = 'Ceres' in possibleStartAPs
+            ceres = 'Ceres' in possibleStartAPs and len(possibleStartAPs) > 1
             if ceres:
                 possibleStartAPs.remove('Ceres')
             args.startAP = random.choice(possibleStartAPs)

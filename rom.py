@@ -1486,7 +1486,29 @@ class FakeROM(ROM):
         mergedIPS = IPS_Patch()
         for ips in ipsPatches:
             mergedIPS.append(ips)
+
+        # generate records for ips from self data
+        groupedData = {}
+        startAddress = -1
+        prevAddress = -1
+        curData = []
+        for address in sorted(self.data):
+            if address == prevAddress + 1:
+                curData.append(self.data[address])
+                prevAddress = address
+            else:
+                if len(curData) > 0:
+                    groupedData[startAddress] = curData
+                startAddress = address
+                prevAddress = address
+                curData = [self.data[startAddress]]
+        if startAddress != -1:
+            groupedData[startAddress] = curData
+
+        patch = IPS_Patch(groupedData)
+        mergedIPS.append(patch)
         patchData = mergedIPS.encode()
+        self.data = {}
         self.data["ips"] = base64.b64encode(patchData).decode()
         if mergedIPS.truncate_length is not None:
             self.data["truncate_length"] = mergedIPS.truncate_length

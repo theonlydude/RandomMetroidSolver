@@ -630,7 +630,10 @@ if __name__ == "__main__":
             romPatcher.addIPSPatches(args.patches)
         if args.sprite is not None:
             romPatcher.customSprite(args.sprite) # adds another IPS
-        romPatcher.commitIPS() # actually write IPS data
+        # we have to write ips to ROM before doing our direct modifications which will rewrite some parts (like in credits),
+        # but in web mode we only want to generate a global ips at the end
+        if args.rom != None:
+            romPatcher.commitIPS()
         if args.patchOnly == False:
             romPatcher.setNothingId(args.startAP, itemLocs)
             romPatcher.writeItemsLocs(itemLocs)
@@ -668,6 +671,9 @@ if __name__ == "__main__":
             for param in paletteSettings:
                 paletteSettings[param] = getattr(args, param)
             PaletteRando(romPatcher, paletteSettings, args.sprite).randomize()
+        # web mode, generate only one ips at the end
+        if args.rom == None:
+            romPatcher.commitIPS()
         romPatcher.end()
         if optErrMsg != "":
             msg = optErrMsg + '\n' + randomizer.errorMsg

@@ -1181,7 +1181,6 @@ class InteractiveSolver(CommonSolver):
             patches.insert(0, 'race_mode.ips')
             patches.append('race_mode_credits.ips')
         romPatcher.addIPSPatches(patches)
-        romPatcher.commitIPS()
         romPatcher.setNothingId(self.startAP, itemLocs)
         romPatcher.writeItemsLocs(itemLocs)
         romPatcher.writeItemsNumber()
@@ -1212,6 +1211,7 @@ class InteractiveSolver(CommonSolver):
                 escapeTimer = int(escapeTimer[0:2]) * 60 + int(escapeTimer[3:5])
                 romPatcher.applyEscapeAttributes({'Timer': escapeTimer, 'Animals': None}, [])
 
+        romPatcher.commitIPS()
         romPatcher.end()
 
         data = romPatcher.romFile.data

@@ -694,7 +694,7 @@ window.onload = function(){
         document.getElementById("fileName").value = file.name;
 
         var fileSize = file.size;
-          if( fileSize > 4*1024*1024 ) {
+        if( fileSize > 4*1024*1024 ) {
             document.getElementById("uploadFile").value = "";
             alert("Wrong ROM file size: "+fileSize.toString());
             return false;

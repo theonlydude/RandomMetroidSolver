@@ -19,9 +19,22 @@ extend 'layout.html'
 <link rel="stylesheet" type="text/css" href="{{=URL('static','image-picker/image-picker.css')}}">
 <script src="{{=URL('static', 'image-picker/image-picker.js')}}" type="text/javascript"></script>
 
+<script type="text/javascript" src="{{=URL('static', 'js/crc32.js')}}"></script>
+
 <title>Super Metroid VARIA Customizer</title>
 
 <style>
+.simple {
+    //background-color: #ddffe1;
+}
+.medium {
+    //background-color: #fff995;
+    //font-size: small;
+}
+.advanced {
+    //background-color: #f9cfcf;
+    //font-size: x-small;
+}
 .center_image {
     display: block;
     margin-left: auto;
@@ -196,7 +209,12 @@ function AjaxCallCompleted(data) {
     console.log("AjaxCallCompleted");
 
     // with items/Locations patch the local rom in memory
-    var filesInput = document.getElementById("uploadFile");
+    if(permalink == true) {
+        var inputName = "vanillaUploadFile";
+    } else {
+        var inputName = "uploadFile";
+    }
+    var filesInput = document.getElementById(inputName);
     var file = filesInput.files[0];
 
     var reader = new FileReader();
@@ -274,7 +292,17 @@ function AjaxCallCompleted(data) {
 
         var blob = new Blob([bytes], {type: "octet/stream"});
 
-        saveAs(blob, "Custom_"+e.target.fileName);
+        if(permalink == true) {
+{{
+if seedInfo != None:
+    response.write('            var filename = "Custom_{}";'.format(seedInfo["filename"]), escape=False)
+    pass
+}}
+        } else {
+            var filename = "Custom_"+e.target.fileName;
+        }
+
+        saveAs(blob, filename);
     }
 
     // info message to display ?
@@ -287,7 +315,7 @@ function AjaxCallCompleted(data) {
     }
 
     // set backup button text to customize
-    document.getElementById("submitBtn").data = "Customize";
+    document.getElementById("submitBtn").data = buttonText;
 
     // remove "working" message
     if(displayFlash == false){
@@ -298,17 +326,26 @@ function AjaxCallCompleted(data) {
 function doSubmit() {
   if(window.File && window.FileList && window.FileReader) {
 
-    var filesInput = document.getElementById("uploadFile");
+    if(permalink == true) {
+        var inputName = "vanillaUploadFile";
+    } else {
+        var inputName = "uploadFile";
+    }
+    var filesInput = document.getElementById(inputName);
     var file = filesInput.files[0]
     if (file === undefined) {
-      alert("Please select a VARIA seed first")
+      if(permalink == true) {
+        alert("Please select a vanilla ROM seed first");
+      } else {
+        alert("Please select a VARIA seed first");
+      }
       btn = document.getElementById("submitBtn");
-      btn.data = "Customize";
+      btn.data = buttonText;
       btn.disabled = false;
 
       setTimeout(function(){ 
           btn = document.getElementById("submitBtn");
-          btn.data = "Customize";
+          btn.data = buttonText;
           btn.disabled = false;
       }, 20000);
 
@@ -334,6 +371,10 @@ function doSubmit() {
       dataDict["invert"] = "on";
     } else {
       dataDict["invert"] = "off";
+    }
+
+    if(permalink == true) {
+      dataDict["seedKey"] = seedKey;
     }
 
     console.log("before customizer web service call");
@@ -374,10 +415,37 @@ function disableElement(id, disable) {
   }
 }
 
+var buttonText = "Customize";
+var permalink = false;
+var seedKey = null;
+{{
+if seedInfo != None:
+    response.write("permalink = true;", escape=False)
+    response.write("seedKey = {};".format(seedInfo["key"]), escape=False)
+    pass
+}}
+
+function greyOutPatches(isRace, isVARIA) {
+    var buttons = ["itemsounds", "elevators_doors_speed", "spinjumprestart", "rando_speed"];
+    for(var i=0; i<buttons.length; i++) {
+        disableElement(buttons[i], isRace);
+    }
+
+    var buttons = ["AimAnyButton", "max_ammo_display", "supermetroid_msu1"];
+    for(var i=0; i<buttons.length; i++) {
+        disableElement(buttons[i], isVARIA);
+    }
+}
+
 window.onload = function(){
     //Check File API support
     if(window.File && window.FileList && window.FileReader) {
-        var filesInput = document.getElementById("uploadFile");
+        if(permalink == true) {
+            var inputName = "vanillaUploadFile";
+        } else {
+            var inputName = "uploadFile";
+        }
+        var filesInput = document.getElementById(inputName);
         filesInput.addEventListener("change", function(event){
             var files = event.target.files; //It returns a FileList object
             var file = files[0];
@@ -401,32 +469,36 @@ window.onload = function(){
                     return false;
                 }
 
-                // detect race mode patch
-                var bytes = new Uint8Array(e.target.result);
-                var isRace = false;
-                for(var addr=0x1C0200; addr<0x1C0210; addr++) {
-                    if(bytes[addr] != 0xff) {
-                        isRace = true;
-                        break;
+                if(permalink == true) {
+                    var crc32 = new Crc32();
+                    crc32.update(e.target.result);
+                    var digest = crc32.digest();
+                    console.log("crc32: "+digest);
+                    if(digest != "d63ed5f8") {
+                        alert("Non vanilla ROM detected");
+                        document.getElementById(inputName).value = "";
+                        return false;
                     }
                 }
 
-                // grey out patches
-                var buttons = ["itemsounds", "elevators_doors_speed", "spinjumprestart", "rando_speed"];
-                for(var i=0; i<buttons.length; i++) {
-                    disableElement(buttons[i], isRace);
-                }
+                if(permalink == false) {
+                    // detect race mode patch
+                    var bytes = new Uint8Array(e.target.result);
+                    var isRace = false;
+                    for(var addr=0x1C0200; addr<0x1C0210; addr++) {
+                        if(bytes[addr] != 0xff) {
+                            isRace = true;
+                            break;
+                        }
+                    }
 
-                // detect varia default patches
-                var isVARIA = false;
-                if(bytes[0x175ca] == 0x60 && bytes[0x19E1] == 0xEA && bytes[0xF27] == 0x20) {
-                    isVARIA = true;
-                }
+                    // detect varia default patches
+                    var isVARIA = false;
+                    if(bytes[0x175ca] == 0x60 && bytes[0x19E1] == 0xEA && bytes[0xF27] == 0x20) {
+                        isVARIA = true;
+                    }
 
-                // grey out patches
-                var buttons = ["AimAnyButton", "max_ammo_display", "supermetroid_msu1"];
-                for(var i=0; i<buttons.length; i++) {
-                    disableElement(buttons[i], isVARIA);
+                    greyOutPatches(isRace, isVARIA);
                 }
             }
 
@@ -470,6 +542,30 @@ if session.customizer["invert"] == "on":
     enableCustomSpriteDropdown()
 
     $("#customSprite").imagepicker({show_label: true});
+
+    permalinkCustomization(permalink);
+
+    displayMessage();
+
+{{
+if seedInfo != None:
+    response.write("    greyOutPatches({}, true);".format("true" if seedInfo["raceMode"] == "on" else "false"), escape=False)
+    pass
+}}
+
+}
+
+function permalinkCustomization(permalink) {
+    if(permalink == true) {
+        document.getElementById("uploadFileVisibility").style.display = "none";
+        document.getElementById("seedInfoVisibility").style.display = "block";
+        buttonText = "download & customize"
+        document.getElementById("submitBtn").value = buttonText;
+    } else {
+        document.getElementById("uploadFileVisibility").style.display = "block";
+        document.getElementById("seedInfoVisibility").style.display = "none";
+        buttonText = "customize"
+    }
 }
 
 function enableCustomSpriteDropdown() {
@@ -477,12 +573,10 @@ function enableCustomSpriteDropdown() {
     var customSprite = document.getElementById("customSprite");
     var text = document.getElementById("customSpriteEnableText");
     if(customSpriteEnable.checked) {
-      console.log("checked, set disabled to false");
       customSprite.disabled = false;
       customSpriteEnable.value = "on";
       text.className = "";
     } else {
-      console.log("non checked, set disabled to true");
       customSprite.disabled = true;
       customSpriteEnable.value = "off";
       text.className = "disabledText";
@@ -639,6 +733,15 @@ function switchCheckbox(id, elems=[]) {
   }
 }
 
+function displayMessage() {
+{{
+    if len(msg) > 0:
+        response.write("document.getElementById('flash').innerHTML = \"{}\";".format(msg), escape=False)
+        response.write("$('#flash').show();", escape=False)
+        pass
+}}
+}
+
 function startTheTour(step=-1) {
   // the tour tutorial
   var tour = new Tour({
@@ -648,6 +751,12 @@ function startTheTour(step=-1) {
       element: "#uploadFileStep",
       title: "VARIA Seed",
       content: "Select a seed generated on the VARIA website."
+    },
+    {
+      element: "#vanillaUploadFileStep",
+      title: "Vanilla ROM",
+      content: "Select a vanilla ROM.",
+      placement: "auto left"
     },
     {
       element: "#colorsRandomizationStep",
@@ -784,15 +893,17 @@ def displayCheckbox(id, defaultTrue=False):
       <div class="tabcontent">
         <div class="row">
           <div class="column">
-            <p>Add palette randomization, use custom Samus sprite, apply patches to an already randomized VARIA seed, or a vanilla Super Metroid ROM.</p>
-            <table class="full">
-              <colgroup><col class="half" /><col class="half" /></colgroup>
-              <tr>
-                <td>ROM:</td>
-                <td>{{=INPUT(_type="file", _name="uploadFile", _id="uploadFile", _class="full")}}</td>
-                <td><button type="button" onclick="startTheTour(0)" id="uploadFileStep">?</button></td>
-              </tr>
-            </table>
+            <div id="uploadFileVisibility">
+              <p>Add palette randomization, use custom Samus sprite, apply patches to an already randomized VARIA seed, or a vanilla Super Metroid ROM.</p>
+              <table class="full">
+                <colgroup><col class="half" /><col class="half" /></colgroup>
+                <tr>
+                  <td>ROM:</td>
+                  <td>{{=INPUT(_type="file", _name="uploadFile", _id="uploadFile", _class="full")}}</td>
+                  <td><button type="button" onclick="startTheTour(0)" id="uploadFileStep">?</button></td>
+                </tr>
+              </table>
+            </div>
             <h4>Colors Randomization</h4>
             <p>
               Randomize the colors of Samus, beams, levels, enemies and bosses.
@@ -802,7 +913,7 @@ def displayCheckbox(id, defaultTrue=False):
                 <td class="third">{{displayCheckbox("colorsRandomization")}}Colors Randomization</td>
                 <td class="full"><span id="textLeft" class="floatleft">-180</span><div id="degree_slider_range" class="sixty floatleft"></div><span id="textRight">180</span></td>
                 <td><button id="invert" type="button" onclick="invertFunc()">Invert</button></td>
-                <td><button type="button" onclick="startTheTour(1)" id="colorsRandomizationStep">?</button></td>
+                <td><button type="button" onclick="startTheTour(2)" id="colorsRandomizationStep">?</button></td>
               </tr>
               <tr>
                 <td colspan="4">{{displayCheckbox("globalShift")}}<span id="globalShiftText">Use the same degree to randomize all the elements</span></td>
@@ -830,7 +941,7 @@ def displayCheckbox(id, defaultTrue=False):
                 <tr>
                   <td>{{displayCheckbox("customSpriteEnable")}}</td>
                   <td><span id="customSpriteEnableText">Replace Samus sprite with a custom one.</span></td>
-                  <td><button type="button" onclick="startTheTour(2)" id="customSpriteStep">?</button></td>
+                  <td><button type="button" onclick="startTheTour(3)" id="customSpriteStep">?</button></td>
                 </tr>
                 <tr>
                   <td></td>
@@ -856,7 +967,7 @@ def displayCheckbox(id, defaultTrue=False):
                 </tr>
               </table>
             </p>
-            <h4>Patches<span class="right"><button type="button" onclick="startTheTour(3)" id="patchesStep">?</button></span></h4>
+            <h4>Patches<span class="right"><button type="button" onclick="startTheTour(4)" id="patchesStep">?</button></span></h4>
             <p>
               Patches to customize your ROM.
             </p>
@@ -872,28 +983,28 @@ def displayCheckbox(id, defaultTrue=False):
                     {{displayCheckbox("itemsounds")}}
                     <span id="itemsoundsText">Remove fanfare when picking up an item</span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(4)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(5)">?</button></td>
                 </tr>
                 <tr id="ElevatorDoorsStep">
                   <td colspan="2">
                     {{displayCheckbox("elevators_doors_speed")}}
                     <span id="elevators_doors_speedText">Accelerate doors and elevators transitions</span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(5)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(6)">?</button></td>
                 </tr>
                 <tr id="spinjumprestartStep">
                   <td colspan="2">
                     {{displayCheckbox("spinjumprestart")}}
                     <span id="spinjumprestartText">Spin jump restart (a.k.a. Respin)</span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(6)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(7)">?</button></td>
                 </tr>
                 <tr id="rando_speedStep">
                   <td colspan="2">
                     {{displayCheckbox("rando_speed")}}
                      <span id="rando_speedText">Momentum conservation (a.k.a. Speedkeep)</span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(7)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(8)">?</button></td>
                 </tr>
               </table>
               <table class="full">
@@ -907,37 +1018,139 @@ def displayCheckbox(id, defaultTrue=False):
                     {{displayCheckbox("No_Music")}}
                     <span id="No_MusicText">Disable background music</span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(8)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(9)">?</button></td>
                 </tr>
                 <tr id="random_musicStep">
                   <td colspan="2">
                     {{displayCheckbox("random_music")}}
                     <span id="random_musicText">Randomize background music</span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(9)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(10)">?</button></td>
                 </tr>
                 <tr id="AimAnyButtonStep">
                   <td colspan="2">
                     {{displayCheckbox("AimAnyButton")}}
                     <span id="AimAnyButtonText">Allows the aim buttons to be assigned to any button</span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(10)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(11)">?</button></td>
                 </tr>
                 <tr id="max_ammo_displayStep">
                   <td colspan="2">
                     {{displayCheckbox("max_ammo_display")}}
                     <span id="max_ammo_displayText">Max Ammo Display</span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(11)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(12)">?</button></td>
                 </tr>
                 <tr id="supermetroid_msu1Step">
                   <td colspan="2">
                     {{displayCheckbox("supermetroid_msu1")}}
                     <span id="supermetroid_msu1Text">Play music with MSU1 chip on SD2SNES</span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(12)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(13)">?</button></td>
                 </tr>
               </table>
+          </div>
+          <div class="column" id="seedInfoVisibility">
+{{
+if seedInfo != None:
+}}
+            <h4>Download seed {{=seedInfo["filename"]}}</h4>
+            <table class="full">
+              <colgroup><col class="half" /><col class="half" /></colgroup>
+              <tr id="vanillaUploadFileStep">
+                <td>Vanilla ROM:</td>
+                <td>{{=INPUT(_type="file", _id="vanillaUploadFile", _class="full")}}</td>
+                <td><button type="button" onclick="startTheTour(1)">?</button></td>
+              </tr>
+            </table>
+            <h4>Game Details</h4>
+            <table class="full">
+              <colgroup><col class="half" /><col class="half" /></colgroup>
+              <tr class="simple"><td>Skills preset</td><td>{{=seedInfo["preset"]}}</td></tr>
+              <tr class="simple"><td>Seed</td><td>{{=seedInfo["seed"]}}</td></tr>
+              <tr class="simple"><td>Created</td><td>{{=seedInfo["time"]}}</td></tr>
+              <tr class="advanced"><td>Race mode</td><td>{{=seedInfo["raceMode"]}}</td></tr>
+            </table>
+            <h4>Randomizer Parameters</h4>
+            <table class="full">
+              <colgroup><col class="half" /><col class="half" /></colgroup>
+              <tr class="simple"><td>Start location</td><td>{{=seedParams["startLocation"]}}</td></tr>
+{{    if seedParams["startLocation"] == "random":}}
+              <tr class="simple"><td>Start location pool</td><td>{{=seedParams["startLocationMultiSelect"]}}</td></tr>
+{{        pass}}
+              <tr class="simple"><td>Majors Split</td><td>{{=seedParams["majorsSplit"]}}</td></tr>
+{{    if seedParams["majorsSplit"] == "random":}}
+              <tr class="simple"><td>Majors Split pool</td><td>{{=seedParams["majorsSplitMultiSelect"]}}</td></tr>
+{{        pass}}
+              <tr class="medium"><td>Maximum difficulty for picking an item </td><td>{{=seedParams["maxDifficulty"]}}</td></tr>
+              <tr class="simple"><td>Progression speed</td><td>{{=seedParams["progressionSpeed"]}}</td></tr>
+{{    if seedParams["progressionSpeed"] == "random":}}
+              <tr class="simple"><td>Progression speed pool</td><td>{{=seedParams["progressionSpeedMultiSelect"]}}</td></tr>
+{{        pass}}
+              <tr class="advanced"><td>Progression difficulty</td><td>{{=seedParams["progressionDifficulty"]}}</td></tr>
+{{    if seedParams["progressionDifficulty"] == "random":}}
+              <tr class="advanced"><td>Progression difficulty pool</td><td>{{=seedParams["progressionDifficultyMultiSelect"]}}</td></tr>
+{{        pass}}
+              <tr class="medium"><td>Morph Placement</td><td>{{=seedParams["morphPlacement"]}}</td></tr>
+{{    if seedParams["morphPlacement"] == "random":}}
+              <tr class="medium"><td>Morph Placement pool</td><td>{{=seedParams["morphPlacementMultiSelect"]}}</td></tr>
+{{        pass}}
+              <tr class="advanced"><td>Suits restriction</td><td>{{=seedParams["suitsRestriction"]}}</td></tr>
+              <tr class="advanced"><td>Hide some items</td><td>{{=seedParams["hideItems"]}}</td></tr>
+            </table>
+
+            <h4>Ammo and Energy</h4>
+            <table class="full">
+              <colgroup><col class="half" /><col class="half" /></colgroup>
+              <tr class="advanced"><td>Strict Minors distribution</td><td>{{=seedParams["strictMinors"]}}</td></tr>
+              <tr class="advanced"><td>Proportion of Missiles</td><td>{{=seedParams["missileQty"]}}</td></tr>
+              <tr class="advanced"><td>Proportion of Super Missiles</td><td>{{=seedParams["superQty"]}}</td></tr>
+              <tr class="advanced"><td>Proportion of Power Bombs</td><td>{{=seedParams["powerBombQty"]}}</td></tr>
+              <tr class="medium"><td>Percentage of minors available</td><td>{{=seedParams["minorQty"]}}</td></tr>
+              <tr class="medium"><td>Quantity of Energy/Reserve Tanks available</td><td>{{=seedParams["energyQty"]}}</td></tr>
+{{    if seedParams["energyQty"] == "random":}}
+              <tr class="medium"><td>Quantity of Energy/Reserve pool</td><td>{{=seedParams["energyQtyMultiSelect"]}}</td></tr>
+{{        pass}}
+            </table>
+
+            <h4>Areas/Bosses/Escape Randomization</h4>
+            <table class="full">
+              <colgroup><col class="half" /><col class="half" /></colgroup>
+              <tr class="simple"><td>Areas randomization</td><td>{{=seedParams["areaRandomization"]}}</td></tr>
+              <tr class="simple"><td>Additional layout patches for easier navigation</td><td>{{=seedParams["areaLayout"]}}</td></tr>
+              <tr class="simple"><td>Bosses randomization</td><td>{{=seedParams["bossRandomization"]}}</td></tr>
+              <tr class="medium"><td>Randomize the escape sequence</td><td>{{=seedParams["escapeRando"]}}</td></tr>
+              <tr class="medium"><td>Remove enemies during randomized escape sequence</td><td>{{=seedParams["removeEscapeEnemies"]}}</td></tr>
+            </table>
+
+            <h4>Super Fun Times™</h4>
+            <table class="full">
+              <colgroup><col class="half" /><col class="half" /></colgroup>
+              <tr class="advanced"><td>Super Fun Combat</td><td>{{=seedParams["funCombat"]}}</td></tr>
+              <tr class="advanced"><td>Super Fun Movement</td><td>{{=seedParams["funMovement"]}}</td></tr>
+              <tr class="advanced"><td>Suitless</td><td>{{=seedParams["funSuits"]}}</td></tr>
+            </table>
+
+            <h4>Patches</h4>
+            <table class="full">
+              <colgroup><col class="half" /><col class="half" /></colgroup>
+              <tr class="advanced"><td>Anti-softlock layout patches</td><td>{{=seedParams["layoutPatches"]}}</td></tr>
+              <tr class="advanced"><td>VARIA tweaks</td><td>{{=seedParams["variaTweaks"]}}</td></tr>
+              <tr class="medium"><td>Nerfed Charge Beam available from the start</td><td>{{=seedParams["nerfedCharge"]}}</td></tr>
+              <tr class="advanced"><td>Suits properties</td><td>{{=seedParams["gravityBehaviour"]}}</td></tr>
+
+              <tr class="medium"><td>Remove fanfare when picking up an item /td><td>{{=seedParams["itemsounds"]}}</td></tr>
+              <tr class="medium"><td>Accelerate doors and elevators transitions</td><td>{{=seedParams["elevators_doors_speed"]}}</td></tr>
+              <tr class="medium"><td>Spin jump restart (a.k.a. Respin)</td><td>{{=seedParams["spinjumprestart"]}}</td></tr>
+              <tr class="medium"><td>Momentum conservation (a.k.a. Speedkeep)</td><td>{{=seedParams["rando_speed"]}}</td></tr>
+
+              <tr class="advanced"><td>Save the animals surprise</td><td>{{=seedParams["animals"]}}</td></tr>
+              <tr class="medium"><td>Disable background music</td><td>{{=seedParams["No_Music"]}}</td></tr>
+              <tr class="medium"><td>Randomize background music</td><td>{{=seedParams["random_music"]}}</td></tr>
+            </table>
+{{
+    pass
+}}
           </div>
         </div>
         {{=INPUT(_type="submit", _value="customize", _id="submitBtn", _class="btn btn-default buttonRandom")}}

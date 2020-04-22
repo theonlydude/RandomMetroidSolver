@@ -549,6 +549,17 @@ function AjaxRandomizerCallCompleted(data) {
         saveAs(blob, outFileName);
     }
 
+    // add permalink
+    if('seedKey' in data) {
+        var host = window.location.protocol+"//"+window.location.hostname;
+        if(window.location.port.length > 0) {
+            host = host+":"+window.location.port;
+        }
+        var seedKey = data['seedKey'];
+        var link = encodeURI(host+"/customizer/"+seedKey);
+        document.getElementById("permalink").innerHTML = "<a href=\""+link+"\" target=\"_blank\">"+link+"</a>";
+    }
+
     // info message to display ?
     if("errorMsg" in data && data["errorMsg"].length > 0) {
         document.getElementById("flash").innerHTML = data["errorMsg"];
@@ -1013,6 +1024,11 @@ function startTheTour(step=-1) {
     storage: false,
     autoscroll: false,
     steps: [
+    {
+      element: "#permalinkStep",
+      title: "Permanent link",
+      content: "Use this permalink to share you seed to other players.<br/><b>Note:</b> You have to click at least once on the link to activate it, else it won't work after seven days."
+    },
     {
       element: "#romStep",
       title: "Vanilla Super Metroid ROM",
@@ -1629,29 +1645,32 @@ def displayNumber(id, min, max, default, step="1"):
             <table class="full">
               <colgroup><col class="half" /><col class="half" /></colgroup>
               <tr>
+              <td>Last generated seed permalink:</td><td><span id="permalink"></span></td><td id="permalinkStep"><button type="button" onclick="startTheTour(0)">?</button></td>
+              </tr>
+              <tr>
                 <td>Vanilla Super Metroid ROM:</td>
                 <td>{{=INPUT(_type="file", _name="uploadFile", _id="uploadFile", _class="full")}}</td>
-                <td id="romStep"><button type="button" onclick="startTheTour(0)">?</button></td>
+                <td id="romStep"><button type="button" onclick="startTheTour(1)">?</button></td>
               </tr>
               <tr id="seedVisibility">
                 <td>Randomizer seed:</td>
                 <td>{{displayNumber("seed", "0", "9999999", "0")}}</td>
-                <td id="seedStep"><button type="button" onclick="startTheTour(1)">?</button></td>
+                <td id="seedStep"><button type="button" onclick="startTheTour(2)">?</button></td>
               </tr>
               <tr>
                 <td>Skills Preset: <span class="rightStep"><a href="javascript:DoPost()">What's in the logic for this skills preset ?</a><span></td><!-- ' -->
                 <td>{{=SELECT(OPTGROUP(*stdPresets, **dict(_label="Standard presets")), OPTGROUP(*tourPresets, **dict(_label="Tournament presets")), OPTGROUP(*comPresets, **dict(_label="Community presets")), **dict(_name="preset", _id="preset", value=session.randomizer["preset"], _class="filldropdown chzn-select"))}}</td>
-                <td id="presetStep"><button type="button" onclick="startTheTour(2)">?</button></td>
+                <td id="presetStep"><button type="button" onclick="startTheTour(3)">?</button></td>
               </tr>
               <tr>
                 <td>Settings Preset:</td>
                 <td>{{=SELECT(OPTGROUP(*randoPresets, **dict(_label="Standard presets")), OPTGROUP(*tourRandoPresets, **dict(_label="Tournament presets")), **dict(_name="randoPreset", _id="randoPreset", value=session.randomizer["randoPreset"], _class="filldropdown chzn-select", _onchange="loadRandoPreset()"))}}</td>
-                <td id="randoPresetStep"><button type="button" onclick="startTheTour(3)">?</button></td>
+                <td id="randoPresetStep"><button type="button" onclick="startTheTour(4)">?</button></td>
               </tr>
               <tr id="raceModeVisibility">
                 <td>{{displayCheckbox("raceMode")}}<span id="raceModeText">Race Mode</span></td>
                 <td></td>
-                <td id="raceStep"><button type="button" onclick="startTheTour(4)">?</button></td>
+                <td id="raceStep"><button type="button" onclick="startTheTour(5)">?</button></td>
               </tr>
             </table>
             <br/>
@@ -1661,19 +1680,19 @@ def displayNumber(id, min, max, default, step="1"):
                 <td class="small"><div class="random"><button id="startLocationRandom" type="button" onclick="randomize(event, 'startLocation')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
                 <td><span id="startLocationText">Start location</span></td>
                 <td>{{displayMultiSelect("startLocation", startAPs, "Landing Site", multiValues["startLocationMultiSelect"])}}</td>
-                <td id="StartLocationStep"><button type="button" onclick="startTheTour(5)">?</button></td>
+                <td id="StartLocationStep"><button type="button" onclick="startTheTour(6)">?</button></td>
               </tr>
               <tr>
                 <td class="small"><div class="random"><button id="majorsSplitRandom" type="button" onclick="randomize(event, 'majorsSplit')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
                 <td><span id="majorsSplitText">Majors Split</span></td>
                 <td>{{displayMultiSelect("majorsSplit", multiValues["majorsSplitMultiSelect"], "Full")}}</td>
-                <td id="majorsSplitStep"><button type="button" onclick="startTheTour(6)">?</button></td>
+                <td id="majorsSplitStep"><button type="button" onclick="startTheTour(7)">?</button></td>
               </tr>
               <tr id="maxDiffVisibility">
                 <td class="small"></td>
                 <td><span id="maxDifficultyText">Maximum difficulty for picking up an item:</span></td>
                 <td>{{displaySelect("maxDifficulty", ['no difficulty cap', 'easy', 'medium', 'hard', 'harder', 'hardcore', 'mania'], "hardcore")}}</td>
-                <td id="maxDifficultyStep"><button type="button" onclick="startTheTour(7)">?</button></td>
+                <td id="maxDifficultyStep"><button type="button" onclick="startTheTour(8)">?</button></td>
               </tr>
               <tr>
                 <td class="small"><div class="random"><button id="progressionSpeedRandom" type="button" onclick="randomize(event, 'progressionSpeed')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
@@ -1681,29 +1700,29 @@ def displayNumber(id, min, max, default, step="1"):
                 <td class="half">
                   {{displayMultiSelect("progressionSpeed", multiValues["progressionSpeedMultiSelect"], "medium")}}
                 </td>
-                <td id="progSpeedStep"><button type="button" onclick="startTheTour(8)">?</button></td>
+                <td id="progSpeedStep"><button type="button" onclick="startTheTour(9)">?</button></td>
               </tr>
               <tr id="progDiffVisibility">
                 <td class="small"><div class="random"><button id="progressionDifficultyRandom" type="button" onclick="randomize(event, 'progressionDifficulty')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
                 <td class="half"><span id="progressionDifficultyText">Progression difficulty:</span></td>
                 <td class="half">{{displayMultiSelect("progressionDifficulty", multiValues["progressionDifficultyMultiSelect"], "normal")}}</td>
-                <td id="progDiffStep"><button type="button" onclick="startTheTour(9)">?</button></td>
+                <td id="progDiffStep"><button type="button" onclick="startTheTour(10)">?</button></td>
               </tr>
               <tr id="morphPlacementVisibility">
                 <td class="small"><div class="random"><button id="morphPlacementRandom" type="button" onclick="randomize(event, 'morphPlacement')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
                 <td class="half"><span id="morphPlacementText">Morph Placement:</span></td>
                 <td class="half">{{displayMultiSelect("morphPlacement", multiValues["morphPlacementMultiSelect"], "normal")}}</td>
-                <td id="morphPlacementStep"><button type="button" onclick="startTheTour(10)">?</button></td>
+                <td id="morphPlacementStep"><button type="button" onclick="startTheTour(11)">?</button></td>
               </tr>
               <tr id="suitsRestrictionVisibility">
                 <td class="small"><div class="random"><button id="suitsRestrictionRandom" type="button" onclick="randomize(event, 'suitsRestriction')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
                 <td colspan="2">{{displayCheckbox("suitsRestriction")}}<span id="suitsRestrictionText">Suits restriction</span></td>
-                <td id="suitsRestrictionStep"><button type="button" onclick="startTheTour(11)">?</button></td>
+                <td id="suitsRestrictionStep"><button type="button" onclick="startTheTour(12)">?</button></td>
               </tr>
               <tr id="hideItemsVisibility">
                 <td class="small"><div class="random"><button id="hideItemsRandom" type="button" onclick="randomize(event, 'hideItems')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
                 <td colspan="2">{{displayCheckbox("hideItems")}}<span id="hideItemsText">Hide some items</span></td>
-                <td id="hideItemsStep"><button type="button" onclick="startTheTour(12)">?</button></td>
+                <td id="hideItemsStep"><button type="button" onclick="startTheTour(13)">?</button></td>
               </tr>
             </table>
             <div id="ammoVisibility">
@@ -1713,13 +1732,13 @@ def displayNumber(id, min, max, default, step="1"):
                 <tr id="strictMinorsVisibility">
                   <td class="small"><div class="random"><button id="strictMinorsRandom" type="button" onclick="randomize(event, 'strictMinors')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
                   <td colspan="2">{{displayCheckbox("strictMinors")}}<span id="strictMinorsText">Strict Minors distribution</span></td>
-                  <td id="strictMinorsStep"><button type="button" onclick="startTheTour(13)">?</button></td>
+                  <td id="strictMinorsStep"><button type="button" onclick="startTheTour(14)">?</button></td>
                 </tr>
                 <tr id="missileQtyVisibility">
                   <td class="small"><div class="random"><button id="missileQtyRandom" type="button" onclick="randomize(event, 'missileQty')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
                   <td><span id="missileQtyText">Proportion of Missiles:</span></td>
                   <td>{{displayNumber("missileQty", "1", "9", "3", "0.1")}}</td>
-                  <td id="missileQtyStep"><button type="button" onclick="startTheTour(14)">?</button></td>
+                  <td id="missileQtyStep"><button type="button" onclick="startTheTour(15)">?</button></td>
                 </tr>
                 <tr id="superQtyVisibility">
                   <td class="small"><div class="random"><button id="superQtyRandom" type="button" onclick="randomize(event, 'superQty')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
@@ -1735,13 +1754,13 @@ def displayNumber(id, min, max, default, step="1"):
                   <td class="small"><div class="random"><button id="minorQtyRandom" type="button" onclick="randomize(event, 'minorQty')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
                   <td><span id="minorQtyText">Percentage of minors available:</span></td>
                   <td>{{displayNumber("minorQty", "7", "100", "100")}}</td>
-                  <td id="minorQtyStep"><button type="button" onclick="startTheTour(15)">?</button></td>
+                  <td id="minorQtyStep"><button type="button" onclick="startTheTour(16)">?</button></td>
                 </tr>
                 <tr>
                   <td class="small"><div class="random"><button id="energyQtyRandom" type="button" onclick="randomize(event, 'energyQty')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
                   <td><span id="energyQtyText">Quantity of Energy/Reserve Tanks available:</span></td>
                   <td>{{displayMultiSelect("energyQty", multiValues["energyQtyMultiSelect"], "vanilla")}}</td>
-                  <td id="energyQtyStep"><button type="button" onclick="startTheTour(16)">?</button></td>
+                  <td id="energyQtyStep"><button type="button" onclick="startTheTour(17)">?</button></td>
                 </tr>
               </table>
             </div>
@@ -1756,9 +1775,9 @@ def displayNumber(id, min, max, default, step="1"):
               <tr>
                 <td class="small"><div class="random"><button id="areaRandomizationRandom" type="button" onclick="randomize(event, 'areaRandomization')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
                 <td class="half" id="areaRandomizationStep">{{displayCheckbox("areaRandomization")}}<span id="areaRandomizationText">Areas randomization</span></td>
-                <td><button type="button" onclick="startTheTour(17)">?</button></td>
-                <td class="full" id="areaLayoutStep">{{displayCheckbox("areaLayout", False)}}<span id="areaLayoutText">Additional layout patches for easier navigation</span></td>
                 <td><button type="button" onclick="startTheTour(18)">?</button></td>
+                <td class="full" id="areaLayoutStep">{{displayCheckbox("areaLayout", False)}}<span id="areaLayoutText">Additional layout patches for easier navigation</span></td>
+                <td><button type="button" onclick="startTheTour(19)">?</button></td>
               </tr>
             </table>
             <h4>Bosses Randomization</h4>
@@ -1769,7 +1788,7 @@ def displayNumber(id, min, max, default, step="1"):
               <tr>
                 <td class="small"><div class="random"><button id="bossRandomizationRandom" type="button" onclick="randomize(event, 'bossRandomization')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
                 <td colspan="2" class="full" id="bossRandomizationStep">{{displayCheckbox("bossRandomization")}}<span id="bossRandomizationText">Bosses randomization</span></td>
-                <td><button type="button" onclick="startTheTour(19)">?</button></td>
+                <td><button type="button" onclick="startTheTour(20)">?</button></td>
               </tr>
             </table>
             <div id="escapeRandoVisibility">
@@ -1778,9 +1797,9 @@ def displayNumber(id, min, max, default, step="1"):
                 <tr>
                   <td class="small"><div class="random"><button id="escapeRandoRandom" type="button" onclick="randomize(event, 'escapeRando')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
                   <td class="half" id="escapeRandoStep">{{displayCheckbox("escapeRando", False)}}<span id="escapeRandoText">Randomize the escape sequence</span></td>
-                  <td><button type="button" onclick="startTheTour(20)">?</button></td>
-                  <td class="half" id="removeEscapeEnemiesStep">{{displayCheckbox("removeEscapeEnemies", False)}}<span id="removeEscapeEnemiesText">Remove enemies during randomized escape sequence</span></td>
                   <td><button type="button" onclick="startTheTour(21)">?</button></td>
+                  <td class="half" id="removeEscapeEnemiesStep">{{displayCheckbox("removeEscapeEnemies", False)}}<span id="removeEscapeEnemiesText">Remove enemies during randomized escape sequence</span></td>
+                  <td><button type="button" onclick="startTheTour(22)">?</button></td>
                 </tr>
               </table>
             </div>
@@ -1793,20 +1812,20 @@ def displayNumber(id, min, max, default, step="1"):
                 <tr>
                   <td class="small" id="funCombatStep"><div class="random"><button id="funCombatRandom" type="button" onclick="randomize(event, 'funCombat')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
                   <td class="third">{{displayCheckbox("funCombat")}}<span id="funCombatText">Super Fun Combat</span></td>
-                  <td><button type="button" onclick="startTheTour(22)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(23)">?</button></td>
 
                   <td class="small" id="funMovementStep"><div class="random"><button id="funMovementRandom" type="button" onclick="randomize(event, 'funMovement')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
                   <td class="third">{{displayCheckbox("funMovement")}}<span id="funMovementText">Super Fun Movement</span></td>
-                  <td><button type="button" onclick="startTheTour(23)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(24)">?</button></td>
 
                   <td class="small" id="funSuitsStep"><div class="random"><button id="funSuitsRandom" type="button" onclick="randomize(event, 'funSuits')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
                   <td class="third">{{displayCheckbox("funSuits")}}<span id="funSuitsText">Suitless</span></td>
-                  <td><button type="button" onclick="startTheTour(24)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(25)">?</button></td>
                 </tr>
               </table>
             </div>
             <div id="patchesVisibility">
-              <h4 id="patchesStep">Patches<span class="rightStep"><button type="button" onclick="startTheTour(25)">?</button></span></h4>
+              <h4 id="patchesStep">Patches<span class="rightStep"><button type="button" onclick="startTheTour(26)">?</button></span></h4>
               <p id="mainPatchesTextVisibility">
                 The bug fix <a href="https://itemrando.supermetroid.run/information" target="_blank">patches</a> from Total Item Randomizer are included by default.
               </p>
@@ -1817,9 +1836,9 @@ def displayNumber(id, min, max, default, step="1"):
               <table class="full" id="mainPatchesVisibility">
                 <tr>
                   <td id="layoutPatchesStep" class="half">{{displayCheckbox("layoutPatches", True)}} Anti-softlock layout patches</td>
-                  <td><button type="button" onclick="startTheTour(26)">?</button></td>
-                  <td id="variaTweaksStep" class="half">{{displayCheckbox("variaTweaks", True)}} VARIA tweaks</td>
                   <td><button type="button" onclick="startTheTour(27)">?</button></td>
+                  <td id="variaTweaksStep" class="half">{{displayCheckbox("variaTweaks", True)}} VARIA tweaks</td>
+                  <td><button type="button" onclick="startTheTour(28)">?</button></td>
                 </tr>
               </table>
               <table class="full" id="nerfedChargeVisibility">
@@ -1829,7 +1848,7 @@ def displayNumber(id, min, max, default, step="1"):
                     {{displayCheckbox("nerfedCharge")}}
                     Nerfed Charge Beam available from the start
                   </td>
-                  <td><button type="button" onclick="startTheTour(28)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(29)">?</button></td>
                 </tr>
               </table>
               <table class="full" id="gravityBehaviourVisibility">
@@ -1838,7 +1857,7 @@ def displayNumber(id, min, max, default, step="1"):
                   <td class="half">
                     {{displaySelect("gravityBehaviour", ["Balanced", "Progressive", "Vanilla"], "Balanced")}}
                   </td>
-                  <td><button type="button" onclick="startTheTour(29)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(30)">?</button></td>
                 </tr>
               </table>
               <table class="full">
@@ -1851,12 +1870,12 @@ def displayNumber(id, min, max, default, step="1"):
                     {{displayCheckbox("itemsounds")}}
                     Remove fanfare when picking up an item
                   </td>
-                  <td><button type="button" onclick="startTheTour(30)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(31)">?</button></td>
                   <td id="ElevatorDoorsStep" class="half">
                     {{displayCheckbox("elevators_doors_speed")}}
                     Accelerate doors and elevators transitions
                   </td>
-                  <td><button type="button" onclick="startTheTour(31)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(32)">?</button></td>
                 </tr>
               </table>
               <table class="full">
@@ -1865,12 +1884,12 @@ def displayNumber(id, min, max, default, step="1"):
                     {{displayCheckbox("spinjumprestart")}}
                     Spin jump restart (a.k.a. Respin)
                   </td>
-                  <td><button type="button" onclick="startTheTour(32)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(33)">?</button></td>
                   <td id="rando_speedStep" class="half">
                     {{displayCheckbox("rando_speed")}}
                      Momentum conservation (a.k.a. Speedkeep)
                   </td>
-                  <td><button type="button" onclick="startTheTour(33)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(34)">?</button></td>
                 </tr>
               </table>
               <table class="full">
@@ -1884,7 +1903,7 @@ def displayNumber(id, min, max, default, step="1"):
                     {{displayCheckbox("animals")}}
                     <span id="animalsText">Save the animals surprise</span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(34)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(35)">?</button></td>
                 </tr>
               </table>
               <table class="full" id="musicVisibility">
@@ -1893,12 +1912,12 @@ def displayNumber(id, min, max, default, step="1"):
                     {{displayCheckbox("No_Music")}}
                     Disable background music
                   </td>
-                  <td><button type="button" onclick="startTheTour(35)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(36)">?</button></td>
                   <td id="random_musicStep" class="half">
                     {{displayCheckbox("random_music")}}
                     Randomize background music
                   </td>
-                  <td><button type="button" onclick="startTheTour(36)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(37)">?</button></td>
                 </tr>
               </table>
             </div>

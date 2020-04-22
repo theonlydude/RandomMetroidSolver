@@ -353,6 +353,7 @@ def getRandomizerDefaultParameters():
     defaultParams['complexity'] = "simple"
     defaultParams['preset'] = 'regular'
     defaultParams['randoPreset'] = ""
+    defaultParams['raceMode'] = "off"
     defaultParams['majorsSplit'] = "Full"
     defaultParams['startLocation'] = "Landing Site"
     defaultParams['maxDifficulty'] = 'hardcore'

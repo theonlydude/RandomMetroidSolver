@@ -797,7 +797,10 @@ class RomPatcher:
             patch = IPS_Patch(patchDict[patchName])
         else:
             # look for ips file
-            patch = IPS_Patch.load(appDir + '/' + ipsDir + '/' + patchName)
+            if os.path.exists(patchName):
+                patch = IPS_Patch.load(patchName)
+            else:
+                patch = IPS_Patch.load(appDir + '/' + ipsDir + '/' + patchName)
         self.ipsPatches.append(patch)
 
     def applyStartAP(self, apName, plms, area):

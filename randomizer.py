@@ -224,6 +224,7 @@ if __name__ == "__main__":
     parser.add_argument('--plandoRando', help="json string with already placed items/locs", dest="plandoRando",
                         nargs='?', default=None)
     parser.add_argument('--sprite', help='use a custom sprite for Samus', dest='sprite', default=None)
+    parser.add_argument('--seedIps', help='ips generated from previous seed', dest='seedIps', default=None)
 
     # parse args
     args = parser.parse_args()
@@ -627,6 +628,10 @@ if __name__ == "__main__":
                                        args.noVariaTweaks, args.nerfedCharge,
                                        escapeAttr, args.noRemoveEscapeEnemies)
         else:
+            # from customizer permalink, apply previously generated seed ips first
+            if args.seedIps != None:
+                romPatcher.applyIPSPatch(args.seedIps)
+
             romPatcher.addIPSPatches(args.patches)
         if args.sprite is not None:
             romPatcher.customSprite(args.sprite) # adds another IPS

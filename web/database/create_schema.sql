@@ -53,9 +53,21 @@ create table if not exists solver_collected_items (
 create table if not exists randomizer (
   id int unsigned not null auto_increment,
   action_time datetime not null,
+  -- local: the ips is stored localy, will be set to pending if the user ask for the permalink, else will be deleted after 7 days
+  -- pending: use has asked for the permalink, to be uploaded during next upload
+  -- uploaded: uploaded in gdrive / stored in git repo
+  -- deleted: local ips deleted
+  -- null: failed randomization
+  -- local -> pending -> uploaded
+  -- local -> deleted
+  upload_status varchar(8),
+  filename varchar(128),
   primary key (id)
 );
 create unique index randomizer_idx01 on randomizer(action_time);
+create index randomizer_idx02 on randomizer(upload_status);
+-- alter table randomizer add upload_status varchar(8) after action_time;
+-- alter table randomizer add filename varchar(128);
 
 create table if not exists randomizer_params (
   randomizer_id int unsigned not null,

@@ -115,39 +115,13 @@ class DB:
         if self.dbAvailable == False:
             return None
 
-        # extract the parameters for the database
-        dbParams = []
-        skipParams = ['output', 'param', 'controls', 'race']
-        superFuns = []
-        i = 2 # skip first parameters (pythonX and randomizer.py)
-        while i < len(params):
-            if params[i][0:len('--')] == '--':
-                paramName = params[i][len('--'):]
-                if i != len(params) - 1 and params[i+1][0:len('--')] not in ['--', '-c']:
-                    paramValue = params[i+1]
-                    i += 2
-                else:
-                    paramValue = None
-                    i += 1
-                if paramName in skipParams:
-                    continue
-                elif paramName == 'superFun':
-                    superFuns.append(paramValue)
-                else:
-                    dbParams.append((paramName, paramValue))
-            elif params[i][0:len('-')] == '-':
-                # patch -c, TODO: store them
-                i += 2
-            else:
-                # shouldn't happen
-                print("DB.addRandoParams unknown param: {}".format(params[i]))
-                i += 1
-        if len(superFuns) > 0:
-            dbParams.append(('superFun', " ".join(superFuns)))
+        ignoreParams = ['paramsFileTarget', 'complexity']
 
         try:
             sql = "insert into randomizer_params values (%d, '%s', '%s');"
-            for (name, value) in dbParams:
+            for (name, value) in params.items():
+                if name in ignoreParams:
+                    continue
                 self.cursor.execute(sql % (id, name, value))
         except Exception as e:
             print("DB.addRandoParams::error execute: {}".format(e))
@@ -166,6 +140,19 @@ class DB:
             self.cursor.execute(sql % (id, returnCode, duration, msg))
         except Exception as e:
             print("DB.addRandoResult::error execute \"{}\" error: {}".format(sql, e))
+            self.dbAvailable = False
+
+    def addRandoUploadResult(self, id, fileName):
+        if self.dbAvailable == False:
+            return None
+
+        try:
+            sql = """
+update randomizer set upload_status = 'local', filename = '%s'
+where id = %s;"""
+            self.cursor.execute(sql % (fileName, id))
+        except Exception as e:
+            print("DB.addRandoUploadResult::error execute \"{}\" error: {}".format(sql, e))
             self.dbAvailable = False
 
     def addPresetAction(self, preset, action):
@@ -380,6 +367,54 @@ order by r.id;"""
             return 'N/A'
         data = data[0][0] if data[0][0] != None else 'N/A'
         return data
+
+        return self.execSelect(sql % (id,))
+
+    def getSeedInfo(self, key):
+        # key is id from randomizer table
+        if self.dbAvailable == False:
+            return None
+
+        sql = """
+select 'upload_status', upload_status
+from randomizer
+where id = %s
+union all
+select 'filename', filename
+from randomizer
+where id = %s
+union all
+select 'time', action_time
+from randomizer
+where id = %s
+union all
+select name, value
+from randomizer_params
+where randomizer_id = %s
+order by 1;"""
+
+        return self.execSelect(sql % (key, key, key, key))
+
+    def getSeedIpsInfo(self, key):
+        # key is id from randomizer table
+        if self.dbAvailable == False:
+            return None
+
+        sql = """select upload_status, filename from randomizer where id = %s;"""
+
+        return self.execSelect(sql % (key,))
+
+    def updateSeedUploadStatus(self, key, newStatus):
+        # key is id from randomizer table
+        if self.dbAvailable == False:
+            return None
+
+        try:
+            sql = """update randomizer set upload_status = '%s' where id = %s;"""
+            self.cursor.execute(sql % (newStatus, key))
+        except Exception as e:
+            print("DB.updateSeedUploadStatus::error execute: {}".format(e))
+            self.dbAvailable = False
 
     def getISolver(self, weeks):
         if self.dbAvailable == False:

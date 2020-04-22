@@ -30,6 +30,8 @@ from itemrandomizerweb.Randomizer import progSpeeds
 # put an expiration date to the default cookie to have it kept between browser restart
 response.cookies['session_id_solver']['expires'] = 31 * 24 * 3600
 
+localIpsDir = 'varia_repository'
+
 # use the correct one
 pythonExec = "python{}.{}".format(sys.version_info.major, sys.version_info.minor)
 
@@ -1124,6 +1126,11 @@ def validateWebServiceParams(switchs, quantities, multis, others, isJson=False):
         if request.vars.raceMode not in ['on', 'off']:
             raiseHttp(400, "Wrong value for race mode, must on/off", isJson)
 
+    # check seed key
+    if 'seedKey' in request.vars:
+        if IS_MATCH('^[0-9]*$')(request.vars.seedKey)[1] is not None:
+            raiseHttp(400, "Seed key can only contain [0-9]", isJson)
+
 def sessionWebService():
     # web service to update the session
     switchs = ['suitsRestriction', 'hideItems', 'strictMinors',
@@ -1241,15 +1248,14 @@ def randomizerWebService():
     with open(presetFileName, 'w') as presetFile:
         presetFile.write(request.vars.paramsFileTarget)
 
-    seed = request.vars.seed
-    if seed == '0':
-        seed = str(random.randint(0, 9999999))
+    if request.vars.seed == '0':
+        request.vars.seed = str(random.randint(0, 9999999))
 
     preset = request.vars.preset
 
     params = [pythonExec,  os.path.expanduser("~/RandomMetroidSolver/randomizer.py"),
               '--runtime', '20',
-              '--seed', seed,
+              '--seed', request.vars.seed,
               '--output', jsonFileName,
               '--param', presetFileName,
               '--preset', preset]
@@ -1356,7 +1362,7 @@ def randomizerWebService():
         if "Moonwalk" in controlMapping and controlMapping["Moonwalk"] == True:
             params.append('--moonwalk')
 
-    DB.addRandoParams(id, params + ['--complexity', request.vars.complexity])
+    DB.addRandoParams(id, request.vars)
 
     print("before calling: {}".format(params))
     start = datetime.now()
@@ -1378,6 +1384,11 @@ def randomizerWebService():
             locsItems['errorMsg'] = msg.replace('\n', '<br/>')
 
         DB.addRandoResult(id, ret, duration, msg)
+
+        # store ips in local directory
+        if storeLocalIps(id, locsItems["fileName"], locsItems["ips"]):
+            DB.addRandoUploadResult(id, locsItems["fileName"])
+            locsItems['seedKey'] = id
         DB.close()
 
         os.close(fd1)
@@ -1405,6 +1416,24 @@ def randomizerWebService():
         os.close(fd2)
         os.remove(jsonFileName)
         raise HTTP(400, json.dumps(msg))
+
+def storeLocalIps(key, fileName, ipsData):
+    try:
+        ipsDir = os.path.join(localIpsDir, str(key))
+        os.makedirs(ipsDir, mode=0o755, exist_ok=True)
+
+        # extract ipsData
+        ips = base64.b64decode(ipsData)
+
+        # write ips as key/fileName.ips
+        ipsFileName = fileName.replace('sfc', 'ips')
+        ipsLocal = os.path.join(ipsDir, ipsFileName)
+        with open(ipsLocal, 'wb') as f:
+            f.write(ips)
+
+        return True
+    except:
+        return False
 
 def presetWebService():
     # web service to get the content of the preset file
@@ -2181,9 +2210,55 @@ def customizer():
 
     initCustomizerSession()
 
-    return dict(customSprites=customSprites)
+    url = request.env.request_uri.split('/')
+    msg = ""
+    seedInfo = None
+    seedParams = None
+    if len(url) > 0 and url[-1] != 'customizer':
+        # a seed unique key was passed as parameter
+        key = url[-1]
+
+        # decode url
+        key = urllib.parse.unquote(key)
+
+        # sanity check
+        if IS_MATCH('^[0-9]*$')(key)[1] is not None:
+            msg = "Seed key can only contain [0-9]"
+        else:
+            DB = db.DB()
+            seedInfo = DB.getSeedInfo(key)
+            DB.close()
+            if seedInfo == None or len(seedInfo) == 0:
+                msg = "Seed {} not found".format(key)
+                seedInfo = None
+            else:
+                # get a dict with seed info and another one with seed parameters
+                info = {}
+                seedParams = {}
+                for (k, value) in seedInfo:
+                    if k in ['time', 'filename', 'preset', 'runtime', 'complexity', 'upload_status', 'seed', 'raceMode']:
+                        info[k] = value
+                    else:
+                        seedParams[k] = value
+                seedInfo = info
+                seedInfo['key'] = key
+
+                # check that the seed ips is available
+                if seedInfo["upload_status"] not in ['pending', 'uploaded', 'local']:
+                    msg = "Seed {} not available".format(key)
+                    seedInfo = None
+                    seedParams = None
+                # accessing the url tell us to store the ips for more than 7 days
+                elif seedInfo["upload_status"] == 'local':
+                    DB = db.DB()
+                    DB.updateSeedUploadStatus(key, 'pending')
+                    DB.close()
+
+    return dict(customSprites=customSprites, seedInfo=seedInfo, seedParams=seedParams, msg=msg)
 
 def customWebService():
+    print("customWebService")
+
     # check validity of all parameters
     patches = ['itemsounds', 'spinjumprestart', 'rando_speed', 'elevators_doors_speed', 'No_Music', 'random_music',
                'AimAnyButton', 'max_ammo_display', 'supermetroid_msu1']
@@ -2267,6 +2342,20 @@ def customWebService():
 
     if request.vars.customSpriteEnable == 'on':
         params += ['--sprite', "{}.ips".format(request.vars.customSprite)]
+
+    if request.vars.seedKey != None:
+        DB = db.DB()
+        seedIpsInfo = DB.getSeedIpsInfo(request.vars.seedKey)
+        print("seedIpsInfo: {}".format(seedIpsInfo))
+        DB.close()
+        if seedIpsInfo == None or len(seedIpsInfo) == 0:
+            raise HTTP(400, json.dumps("Can't get seed info"))
+        (uploadStatus, fileName) = seedIpsInfo[0]
+        if uploadStatus not in ['local', 'pending', 'uploaded']:
+            raise HTTP(400, json.dumps("Seed is not available"))
+
+        ipsFileName = os.path.join(localIpsDir, request.vars.seedKey, fileName.replace('sfc', 'ips'))
+        params += ['--seedIps', ipsFileName]
 
     print("before calling: {}".format(params))
     start = datetime.now()

@@ -29,7 +29,7 @@ accessPoints = [
     }, internal=True,
        start={'spawn': 0x0006, 'solveArea': "Crateria Gauntlet", 'save':"Save_Gauntlet"}),
     AccessPoint('Lower Mushrooms Left', 'Crateria', {
-        'Landing Site': lambda sm: sm.canPassTerminatorBombWall(False),
+        'Landing Site': lambda sm: sm.wand(sm.canPassTerminatorBombWall(False), sm.canPassCrateriaGreenPirates()),
         'Green Pirates Shaft Bottom Right': lambda sm: SMBool(True)
     }, roomInfo = {'RoomPtr':0x9969, "area": 0x0, 'songs':[0x997a]},
        exitInfo = {'DoorPtr':0x8c22, 'direction': 0x5, "cap": (0xe, 0x6), "bitFlag": 0x0,

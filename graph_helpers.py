@@ -47,10 +47,9 @@ class HelpersGraph(Helpers):
 
     def canPassTerminatorBombWall(self, fromLandingSite=True):
         sm = self.smbm
-        return sm.wand(sm.wor(sm.wand(sm.haveItem('SpeedBooster'),
-                                      sm.wor(SMBool(not fromLandingSite, 0), sm.knowsSimpleShortCharge(), sm.knowsShortCharge())),
-                              sm.canDestroyBombWalls()),
-                       sm.canPassCrateriaGreenPirates())
+        return sm.wor(sm.wand(sm.haveItem('SpeedBooster'),
+                              sm.wor(SMBool(not fromLandingSite, 0), sm.knowsSimpleShortCharge(), sm.knowsShortCharge())),
+                      sm.canDestroyBombWalls())
 
     # mostly for going up but let's be noob friendly and add the condition for both ways
     @Cache.decorator

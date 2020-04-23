@@ -2750,28 +2750,20 @@ def plandoRateWebService():
     ip = request.client
 
     DB = db.DB()
-    already = DB.alreadyRated(plando, ip)
-    if already != None and len(already) > 0:
-        DB.close()
-        # display message in flash box
-        msg = "{}: rating already done".format(plando)
-        raise HTTP(400, msg)
-    else:
-        DB.addRating(plando, rate, ip)
-        newRate = DB.getPlandoRate(plando)
-        DB.close()
-        if newRate == None:
-            raiseHttp(400, "Can't get new rate")
-        else:
-            newCount = newRate[0][0]
-            newRate = float(newRate[0][1])
-        data = {
-            "msg": "",
-            "purePlandoName": re.sub('[\W_]+', '', plando),
-            "rate": newRate,
-            "count": newCount
-        }
-        return json.dumps(data)
+    DB.addRating(plando, rate, ip)
+    newRate = DB.getPlandoRate(plando)
+    DB.close()
+    if newRate == None:
+        raiseHttp(400, "Can't get new rate")
+    newCount = newRate[0][0]
+    newRate = float(newRate[0][1])
+    data = {
+        "msg": "",
+        "purePlandoName": re.sub('[\W_]+', '', plando),
+        "rate": newRate,
+        "count": newCount
+    }
+    return json.dumps(data)
 
 def downloadPlandoWebService():
     if request.vars.plando == None:

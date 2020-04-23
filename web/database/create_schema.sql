@@ -118,6 +118,8 @@ create table if not exists plando_repo (
 create table if not exists plando_rating (
   plando_name varchar(32) not null,
   rating int unsigned not null,
-  ipv4 int unsigned not null
+  ipv4 int unsigned not null,
+  primary key (plando_name, ipv4)
 );
-create index plando_rating_idx01 on plando_rating(plando_name, ipv4);
+-- drop index plando_rating_idx01 on plando_rating;
+-- alter table plando_rating add primary key (plando_name, ipv4);

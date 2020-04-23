@@ -761,7 +761,10 @@ order by 1,2;"""
             return None
 
         try:
-            sql = "insert into plando_rating (plando_name, rating, ipv4) values ('%s', %d, inet_aton('%s'));"
+            sql = """
+REPLACE INTO plando_rating
+    (plando_name, rating, ipv4)
+VALUES ('%s', %d, inet_aton('%s'));"""
             self.cursor.execute(sql % (plandoName, rating, ip))
             self.commit()
         except Exception as e:

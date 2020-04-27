@@ -964,6 +964,9 @@ class GraphUtils:
                 # boss only
                 if not areas and not src.Boss:
                     continue
+                # no random escape
+                if not escape and src.Escape:
+                    continue
 
             conn = {}
             conn['ID'] = str(src) + ' -> ' + str(dst)

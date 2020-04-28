@@ -1684,8 +1684,8 @@ class WS(object):
             raiseHttp(400, "Unknown scope, must be area/item/common", True)
 
         action = request.vars.action
-        if action not in ['add', 'remove', 'clear', 'init', 'get', 'save', 'replace', 'randomize']:
-            raiseHttp(400, "Unknown action, must be add/remove/clear/init/get/save/randomize", True)
+        if action not in ['add', 'remove', 'toggle', 'clear', 'init', 'get', 'save', 'replace', 'randomize']:
+            raiseHttp(400, "Unknown action, must be add/remove/toggle/clear/init/get/save/randomize", True)
 
         mode = request.vars.mode
         if mode not in ["standard", "seedless", "plando"]:
@@ -1698,7 +1698,8 @@ class WS(object):
             raiseHttp(400, "{}".format(e.body if "body" in e.__dict__ else e).replace('"', ''), True)
 
     def __init__(self, mode):
-        if mode == "plando":
+        self.mode = mode
+        if self.mode == "plando":
             if session.plando is None:
                 raiseHttp(400, "No session found for the Plandomizer Web service", True)
             self.session = session.plando
@@ -1715,8 +1716,8 @@ class WS(object):
             raiseHttp(400, "Missing parameter action", True)
         action = request.vars.action
 
-        if action not in ['init', 'add', 'remove', 'clear', 'get', 'save', 'replace', 'randomize']:
-            raiseHttp(400, "Unknown action, must be init/add/remove/clear/get/save/randomize", True)
+        if action not in ['init', 'add', 'remove', 'clear', 'get', 'save', 'replace', 'randomize', 'toggle']:
+            raiseHttp(400, "Unknown action, must be init/add/remove/toggle/clear/get/save/randomize", True)
 
         if request.vars.escapeTimer != None:
             if re.match("[0-9][0-9]:[0-9][0-9]", request.vars.escapeTimer) == None:
@@ -1759,6 +1760,7 @@ class WS(object):
                 # item tracker
                 "availableLocations": state["availableLocationsWeb"],
                 "visitedLocations": state["visitedLocationsWeb"],
+                "collectedItems": state["collectedItems"],
                 # compatibility with existing sessions
                 "remainLocations": state["remainLocationsWeb"] if "remainLocationsWeb" in state else [],
                 "lastAP": self.locName4isolver(state["lastAP"]),
@@ -1787,8 +1789,6 @@ class WS(object):
         if "state" not in self.session:
             raiseHttp(400, "Missing Solver state in the session", True)
 
-        mode = self.session["mode"]
-
         (fd1, jsonInFileName) = tempfile.mkstemp()
         (fd2, jsonOutFileName) = tempfile.mkstemp()
         params = [
@@ -1797,13 +1797,14 @@ class WS(object):
             '--state',  jsonInFileName,
             '--output', jsonOutFileName,
             '--action', action,
-            '--mode', mode,
+            '--mode', self.mode,
             '--scope', scope
         ]
         if action in ['add', 'replace']:
             if scope == 'item':
-                params += ['--loc', parameters["loc"]]
-                if mode != 'standard':
+                if 'loc' in parameters:
+                    params += ['--loc', parameters["loc"]]
+                if self.mode != 'standard':
                     params += ['--item', parameters["item"]]
                     if parameters['hide'] == True:
                         params.append('--hide')
@@ -1811,7 +1812,12 @@ class WS(object):
                 params += ['--startPoint', parameters["startPoint"],
                            '--endPoint', parameters["endPoint"]]
         elif action == 'remove' and scope == 'item':
-            params += ['--count', str(parameters["count"])]
+            if 'count' in parameters:
+                params += ['--count', str(parameters["count"])]
+            else:
+                params += ['--item', str(parameters["item"])]
+        elif action == 'toggle' and scope == 'item':
+            params += ['--item', parameters['item']]
         elif action == 'remove' and scope == 'area' and "startPoint" in parameters:
             params += ['--startPoint', parameters["startPoint"]]
         elif action == 'save' and scope == 'common':
@@ -2076,6 +2082,8 @@ class WS_area_clear(WS):
     def action(self):
         return self.callSolverAction("area", "clear", {})
 
+validItemsList = [None, 'ETank', 'Missile', 'Super', 'PowerBomb', 'Bomb', 'Charge', 'Ice', 'HiJump', 'SpeedBooster', 'Wave', 'Spazer', 'SpringBall', 'Varia', 'Plasma', 'Grapple', 'Morph', 'Reserve', 'Gravity', 'XRayScope', 'SpaceJump', 'ScrewAttack', 'Nothing', 'NoEnergy', 'Boss']
+
 class WS_item_add(WS):
     def validate(self):
         super(WS_item_add, self).validate()
@@ -2086,27 +2094,32 @@ class WS_item_add(WS):
             # sed -e 's+ ++g' -e 's+,++g' -e 's+(++g' -e 's+)++g' -e 's+-++g'
             return removeChars(locName, " ,()-")
 
-        locName = name4isolver(request.vars.locName)
+        if request.vars.locName != None:
+            locName = name4isolver(request.vars.locName)
 
-        if locName not in ['EnergyTankGauntlet', 'Bomb', 'EnergyTankTerminator', 'ReserveTankBrinstar', 'ChargeBeam', 'MorphingBall', 'EnergyTankBrinstarCeiling', 'EnergyTankEtecoons', 'EnergyTankWaterway', 'EnergyTankBrinstarGate', 'XRayScope', 'Spazer', 'EnergyTankKraid', 'VariaSuit', 'IceBeam', 'EnergyTankCrocomire', 'HiJumpBoots', 'GrappleBeam', 'ReserveTankNorfair', 'SpeedBooster', 'WaveBeam', 'EnergyTankRidley', 'ScrewAttack', 'EnergyTankFirefleas', 'ReserveTankWreckedShip', 'EnergyTankWreckedShip', 'RightSuperWreckedShip', 'GravitySuit', 'EnergyTankMamaturtle', 'PlasmaBeam', 'ReserveTankMaridia', 'SpringBall', 'EnergyTankBotwoon', 'SpaceJump', 'PowerBombCrateriasurface', 'MissileoutsideWreckedShipbottom', 'MissileoutsideWreckedShiptop', 'MissileoutsideWreckedShipmiddle', 'MissileCrateriamoat', 'MissileCrateriabottom', 'MissileCrateriagauntletright', 'MissileCrateriagauntletleft', 'SuperMissileCrateria', 'MissileCrateriamiddle', 'PowerBombgreenBrinstarbottom', 'SuperMissilepinkBrinstar', 'MissilegreenBrinstarbelowsupermissile', 'SuperMissilegreenBrinstartop', 'MissilegreenBrinstarbehindmissile', 'MissilegreenBrinstarbehindreservetank', 'MissilepinkBrinstartop', 'MissilepinkBrinstarbottom', 'PowerBombpinkBrinstar', 'MissilegreenBrinstarpipe', 'PowerBombblueBrinstar', 'MissileblueBrinstarmiddle', 'SuperMissilegreenBrinstarbottom', 'MissileblueBrinstarbottom', 'MissileblueBrinstartop', 'MissileblueBrinstarbehindmissile', 'PowerBombredBrinstarsidehopperroom', 'PowerBombredBrinstarspikeroom', 'MissileredBrinstarspikeroom', 'MissileKraid', 'Missilelavaroom', 'MissilebelowIceBeam', 'MissileaboveCrocomire', 'MissileHiJumpBoots', 'EnergyTankHiJumpBoots', 'PowerBombCrocomire', 'MissilebelowCrocomire', 'MissileGrappleBeam', 'MissileNorfairReserveTank', 'MissilebubbleNorfairgreendoor', 'MissilebubbleNorfair', 'MissileSpeedBooster', 'MissileWaveBeam', 'MissileGoldTorizo', 'SuperMissileGoldTorizo', 'MissileMickeyMouseroom', 'MissilelowerNorfairabovefireflearoom', 'PowerBomblowerNorfairabovefireflearoom', 'PowerBombPowerBombsofshame', 'MissilelowerNorfairnearWaveBeam', 'MissileWreckedShipmiddle', 'MissileGravitySuit', 'MissileWreckedShiptop', 'SuperMissileWreckedShipleft', 'MissilegreenMaridiashinespark', 'SuperMissilegreenMaridia', 'MissilegreenMaridiatatori', 'SuperMissileyellowMaridia', 'MissileyellowMaridiasupermissile', 'MissileyellowMaridiafalsewall', 'MissileleftMaridiasandpitroom', 'MissilerightMaridiasandpitroom', 'PowerBombrightMaridiasandpitroom', 'MissilepinkMaridia', 'SuperMissilepinkMaridia', 'MissileDraygon', 'Kraid', 'Ridley', 'Phantoon', 'Draygon', 'MotherBrain']:
-            raiseHttp(400, "Unknown location name", True)
+            if locName not in ['EnergyTankGauntlet', 'Bomb', 'EnergyTankTerminator', 'ReserveTankBrinstar', 'ChargeBeam', 'MorphingBall', 'EnergyTankBrinstarCeiling', 'EnergyTankEtecoons', 'EnergyTankWaterway', 'EnergyTankBrinstarGate', 'XRayScope', 'Spazer', 'EnergyTankKraid', 'VariaSuit', 'IceBeam', 'EnergyTankCrocomire', 'HiJumpBoots', 'GrappleBeam', 'ReserveTankNorfair', 'SpeedBooster', 'WaveBeam', 'EnergyTankRidley', 'ScrewAttack', 'EnergyTankFirefleas', 'ReserveTankWreckedShip', 'EnergyTankWreckedShip', 'RightSuperWreckedShip', 'GravitySuit', 'EnergyTankMamaturtle', 'PlasmaBeam', 'ReserveTankMaridia', 'SpringBall', 'EnergyTankBotwoon', 'SpaceJump', 'PowerBombCrateriasurface', 'MissileoutsideWreckedShipbottom', 'MissileoutsideWreckedShiptop', 'MissileoutsideWreckedShipmiddle', 'MissileCrateriamoat', 'MissileCrateriabottom', 'MissileCrateriagauntletright', 'MissileCrateriagauntletleft', 'SuperMissileCrateria', 'MissileCrateriamiddle', 'PowerBombgreenBrinstarbottom', 'SuperMissilepinkBrinstar', 'MissilegreenBrinstarbelowsupermissile', 'SuperMissilegreenBrinstartop', 'MissilegreenBrinstarbehindmissile', 'MissilegreenBrinstarbehindreservetank', 'MissilepinkBrinstartop', 'MissilepinkBrinstarbottom', 'PowerBombpinkBrinstar', 'MissilegreenBrinstarpipe', 'PowerBombblueBrinstar', 'MissileblueBrinstarmiddle', 'SuperMissilegreenBrinstarbottom', 'MissileblueBrinstarbottom', 'MissileblueBrinstartop', 'MissileblueBrinstarbehindmissile', 'PowerBombredBrinstarsidehopperroom', 'PowerBombredBrinstarspikeroom', 'MissileredBrinstarspikeroom', 'MissileKraid', 'Missilelavaroom', 'MissilebelowIceBeam', 'MissileaboveCrocomire', 'MissileHiJumpBoots', 'EnergyTankHiJumpBoots', 'PowerBombCrocomire', 'MissilebelowCrocomire', 'MissileGrappleBeam', 'MissileNorfairReserveTank', 'MissilebubbleNorfairgreendoor', 'MissilebubbleNorfair', 'MissileSpeedBooster', 'MissileWaveBeam', 'MissileGoldTorizo', 'SuperMissileGoldTorizo', 'MissileMickeyMouseroom', 'MissilelowerNorfairabovefireflearoom', 'PowerBomblowerNorfairabovefireflearoom', 'PowerBombPowerBombsofshame', 'MissilelowerNorfairnearWaveBeam', 'MissileWreckedShipmiddle', 'MissileGravitySuit', 'MissileWreckedShiptop', 'SuperMissileWreckedShipleft', 'MissilegreenMaridiashinespark', 'SuperMissilegreenMaridia', 'MissilegreenMaridiatatori', 'SuperMissileyellowMaridia', 'MissileyellowMaridiasupermissile', 'MissileyellowMaridiafalsewall', 'MissileleftMaridiasandpitroom', 'MissilerightMaridiasandpitroom', 'PowerBombrightMaridiasandpitroom', 'MissilepinkMaridia', 'SuperMissilepinkMaridia', 'MissileDraygon', 'Kraid', 'Ridley', 'Phantoon', 'Draygon', 'MotherBrain']:
+                raiseHttp(400, "Unknown location name", True)
 
-        request.vars.locName = locName
+            request.vars.locName = locName
 
         itemName = request.vars.itemName
         if itemName == "NoEnergy":
             itemName = "Nothing"
 
-        if itemName not in [None, 'ETank', 'Missile', 'Super', 'PowerBomb', 'Bomb', 'Charge', 'Ice', 'HiJump', 'SpeedBooster', 'Wave', 'Spazer', 'SpringBall', 'Varia', 'Plasma', 'Grapple', 'Morph', 'Reserve', 'Gravity', 'XRayScope', 'SpaceJump', 'ScrewAttack', 'Nothing', 'NoEnergy', 'Boss']:
+        if itemName not in validItemsList:
             raiseHttp(400, "Unknown item name", True)
 
     def action(self):
         item = request.vars.itemName
+
         # items used only in the randomizer that we get in vcr mode
-        if item in ["Boss", "NoEnergy"]:
+        if item in ["Boss", "NoEnergy", None]:
             item = 'Nothing'
 
-        return self.callSolverAction("item", "add", {"loc": request.vars.locName, "item": item, "hide": request.vars.hide == "true"})
+        params = {"item": item, "hide": request.vars.hide == "true"}
+        if request.vars.locName != None:
+            params['loc'] = request.vars.locName
+        return self.callSolverAction("item", "add", params)
 
 class WS_item_replace(WS_item_add):
     def validate(self):
@@ -2115,20 +2128,39 @@ class WS_item_replace(WS_item_add):
     def action(self):
         return self.callSolverAction("item", "replace", {"loc": request.vars.locName, "item": request.vars.itemName, "hide": request.vars.hide == "true"})
 
+class WS_item_toggle(WS_item_add):
+    def validate(self):
+        super(WS_item_toggle, self).validate()
+
+        if request.vars.itemName not in validItemsList:
+            raiseHttp(400, "Unknown item name", True)
+
+    def action(self):
+        return self.callSolverAction("item", "toggle", {"item": request.vars.itemName})
+
 class WS_item_remove(WS):
     def validate(self):
         super(WS_item_remove, self).validate()
 
-    def action(self):
-        count = request.vars.count
-        if count != None:
-            count = getInt("count", True)
-            if count > 105 or count < 1:
-                raiseHttp(400, "Wrong value for count, must be in [1-105] ", True)
-        else:
-            count = 1
+        if request.vars.itemName not in validItemsList:
+            raiseHttp(400, "Unknown item name", True)
 
-        return self.callSolverAction("item", "remove", {"count": count})
+        self.itemName = request.vars.itemName
+        if self.itemName == None:
+            if request.vars.count != None:
+                self.count = getInt("count", True)
+                if self.count > 105 or self.count < 1:
+                    raiseHttp(400, "Wrong value for count, must be in [1-105] ", True)
+            else:
+                self.count = 1
+        else:
+            self.count = -1
+
+    def action(self):
+        if self.itemName != None:
+            return self.callSolverAction("item", "remove", {"item": self.itemName})
+        else:
+            return self.callSolverAction("item", "remove", {"count": self.count})
 
 class WS_item_clear(WS):
     def validate(self):

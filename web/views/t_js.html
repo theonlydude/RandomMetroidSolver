@@ -415,6 +415,17 @@ function ajaxOkGet(jsonData, status, dummy, chained=false) {
     $("#"+elem+'[data-toggle="tooltip"]').attr("title", tooltip).tooltip('fixTitle');
   }
 
+    if(mode == "seedless") {
+        // load items as all locs contain Nothing
+        var collectedItems = jsonData["collectedItems"];
+        for(var i=0; i<collectedItems.length; i++) {
+            var item = collectedItems[i];
+            if(item != "Nothing") {
+                addItem(item);
+            }
+        }
+    }
+
   setItemCount("Missile");
   setItemCount("Super");
   setItemCount("PowerBomb");
@@ -483,33 +494,40 @@ function ajaxOkGet(jsonData, status, dummy, chained=false) {
 }
 
 function setActive(mode, area, boss) {
-  var itemElems = ["repeatItem", "binItem"];
-  var plandoElems = ["repeatPlando", "binPlando", "savePlando"];
-  var areaElems = ["repeatArea", "binArea"];
-  if(mode != "plando") {
-    for(var i=0; i<itemElems.length; i++) {
-      $("#"+itemElems[i]).removeClass("greyed");
+    var itemElems = ["repeatItem", "binItem"];
+    var plandoElems = ["repeatPlando", "binPlando", "savePlando"];
+    var areaElems = ["repeatArea", "binArea"];
+    if(mode != "plando") {
+        for(var i=0; i<itemElems.length; i++) {
+            $("#"+itemElems[i]).removeClass("greyed");
+        }
+        for(var i=0; i<plandoElems.length; i++) {
+            $("#"+plandoElems[i]).addClass("greyed");
+        }
+    } else {
+        for(var i=0; i<itemElems.length; i++) {
+            $("#"+itemElems[i]).addClass("greyed");
+        }
+        for(var i=0; i<plandoElems.length; i++) {
+            $("#"+plandoElems[i]).removeClass("greyed");
+        }
     }
-    for(var i=0; i<plandoElems.length; i++) {
-      $("#"+plandoElems[i]).addClass("greyed");
+    if(area == true || boss == true) {
+        for(var i=0; i<areaElems.length; i++) {
+            $("#"+areaElems[i]).removeClass("greyed");
+        }
+    } else {
+        for(var i=0; i<areaElems.length; i++) {
+            $("#"+areaElems[i]).addClass("greyed");
+        }
     }
-  } else {
-    for(var i=0; i<itemElems.length; i++) {
-      $("#"+itemElems[i]).addClass("greyed");
+    if(mode == "seedless") {
+        document.getElementById("pause_background").style.display = "none";
+        document.getElementById("pause_background_seedless").style.display = "block";
+    } else {
+        document.getElementById("pause_background").style.display = "block";
+        document.getElementById("pause_background_seedless").style.display = "none";
     }
-    for(var i=0; i<plandoElems.length; i++) {
-      $("#"+plandoElems[i]).removeClass("greyed");
-    }
-  }
-  if(area == true || boss == true) {
-    for(var i=0; i<areaElems.length; i++) {
-      $("#"+areaElems[i]).removeClass("greyed");
-    }
-  } else {
-    for(var i=0; i<areaElems.length; i++) {
-      $("#"+areaElems[i]).addClass("greyed");
-    }
-  }
 }
 
 function isActive(elemId) {
@@ -971,7 +989,7 @@ function clickLoc(elem) {
 
   var locName = elem.id;
 
-  if(mode != "standard") {
+  if(mode == "plando") {
     // we don't put an item in boss locations
     if("boss" in locsInfo[locName]) {
       // check that lock is in the available list
@@ -1007,6 +1025,7 @@ function clickLoc(elem) {
     // check that lock is in the available list
     if("state" in locsInfo[locName] && (locsInfo[locName]["state"] == "available" || locsInfo[locName]["state"] == "break")) {
       // call webservice
+      console.log("add item loc: "+locName);
       ajaxCall({action: "add", scope: "item", locName: locName}, "upload");
   
       // if mother brain loc, display end message
@@ -1015,6 +1034,19 @@ function clickLoc(elem) {
      }
     }
   }
+}
+
+function actionItem(itemName, action) {
+    if(loaded == false || webServInProgress == true || init == false) {
+        return;
+    }
+
+    if(mode == "seedless") {
+        console.log("actionItem itemName: "+itemName+" action: "+action);
+
+        // call webservice
+        ajaxCall({action: action, scope: "item", itemName: itemName}, "upload");
+    }
 }
 
 function placeItem() {
@@ -1142,9 +1174,16 @@ function resetItems() {
     document.getElementById("Reserve_"+i+"_pause").style.display = "none";
   }
 
-  var items = ["Charge", "Ice", "Wave", "Spazer", "Plasma", "Varia", "Gravity", "Morph", "Bomb", "SpringBall", "ScrewAttack", "HiJump", "SpaceJump", "SpeedBooster", "Missile", "Super", "PowerBomb", "Grapple", "XRayScope"];
+  var items = ["Charge", "Ice", "Wave", "Spazer", "Plasma", "Varia", "Gravity", "Morph", "Bomb", "SpringBall", "ScrewAttack", "HiJump", "SpaceJump", "SpeedBooster", "Grapple", "XRayScope"];
   for(var item in items) {
-    document.getElementById(items[item]+"_pause").style.display = "none";
+    document.getElementById(items[item]+"_pause_img").style.display = "none";
+  }
+
+  if(mode != "seedless") {
+    var items = ["Missile", "Super", "PowerBomb"];
+    for(var item in items) {
+        document.getElementById(items[item]+"_pause").style.display = "none";
+    }
   }
 }
 
@@ -1155,7 +1194,9 @@ function addItem(itemName) {
   if(itemName in itemCount) {
     itemCount[itemName] += 1
     if(itemName == "Missile" || itemName == "Super" || itemName == "PowerBomb") {
-      document.getElementById(itemName+"_pause").style.display = "block";
+      if(mode != "seedless") {
+        document.getElementById(itemName+"_pause").style.display = "block";
+      }
     } else {
       if(itemName == "ETank") {
         var count = Math.min(14, itemCount[itemName]);
@@ -1166,7 +1207,7 @@ function addItem(itemName) {
       }
     }
   } else {
-    document.getElementById(itemName+"_pause").style.display = "block";
+    document.getElementById(itemName+"_pause_img").style.display = "block";
   }
 }
 

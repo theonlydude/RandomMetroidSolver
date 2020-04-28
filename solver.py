@@ -967,15 +967,26 @@ class InteractiveSolver(CommonSolver):
             else:
                 if action == 'add':
                     if self.mode == 'plando' or self.mode == 'seedless':
-                        self.setItemAt(params['loc'], params['item'], params['hide'])
+                        if params['loc'] != None:
+                            if self.mode == 'plando':
+                                self.setItemAt(params['loc'], params['item'], params['hide'])
+                            else:
+                                self.setItemAt(params['loc'], 'Nothing', False)
+                        else:
+                            self.increaseItem(params['item'])
                     else:
                         # pickup item at locName
                         self.pickItemAt(params['loc'])
                 elif action == 'remove':
-                    # remove last collected item
-                    self.cancelLastItems(params['count'])
+                    if 'count' in params:
+                        # remove last collected item
+                        self.cancelLastItems(params['count'])
+                    else:
+                        self.decreaseItem(params['item'])
                 elif action == 'replace':
                     self.replaceItemAt(params['loc'], params['item'], params['hide'])
+                elif action == 'toggle':
+                    self.toggleItem(params['item'])
         elif scope == 'area':
             if action == 'clear':
                 self.clearTransitions()
@@ -1299,6 +1310,25 @@ class InteractiveSolver(CommonSolver):
             loc["Visibility"] = 'Visible'
 
         self.smbm.addItem(itemName)
+
+    def increaseItem(self, item):
+        # add item at begining of collectedItems to not mess with item removal when cancelling a location
+        self.collectedItems.insert(0, item)
+        self.smbm.addItem(item)
+
+    def decreaseItem(self, item):
+        if item in self.collectedItems:
+            self.collectedItems.remove(item)
+            self.smbm.removeItem(item)
+
+    def toggleItem(self, item):
+        # add or remove a major item
+        if item in self.collectedItems:
+            self.collectedItems.remove(item)
+            self.smbm.removeItem(item)
+        else:
+            self.collectedItems.insert(0, item)
+            self.smbm.addItem(item)
 
     def clearItems(self, reload=False):
         self.collectedItems = []
@@ -2021,16 +2051,21 @@ def interactiveSolver(args):
                 print("Missing state/action/output parameter")
                 sys.exit(1)
             if args.action in ["add", "replace"]:
-                if args.loc == None:
+                if args.mode != 'seedless' and args.loc == None:
                     print("Missing loc parameter when using action add for item")
                     sys.exit(1)
-                if args.mode != 'standard':
+                if args.mode == 'plando':
                     if args.item == None:
                         print("Missing item parameter when using action add in plando/suitless mode")
                         sys.exit(1)
                 params = {'loc': args.loc, 'item': args.item, 'hide': args.hide}
             elif args.action == "remove":
-                params = {'count': args.count}
+                if args.item != None:
+                    params = {'item': args.item}
+                else:
+                    params = {'count': args.count}
+            elif args.action == "toggle":
+                params = {'item': args.item}
         elif args.scope == 'area':
             if args.state == None or args.action == None or args.output == None:
                 print("Missing state/action/output parameter")
@@ -2117,7 +2152,7 @@ if __name__ == "__main__":
     parser.add_argument('--loc', help="Name of the location to action on (used in interactive mode)",
                         dest="loc", nargs='?', default=None)
     parser.add_argument('--action', help="Pickup item at location, remove last pickedup location, clear all (used in interactive mode)",
-                        dest="action", nargs="?", default=None, choices=['init', 'add', 'remove', 'clear', 'get', 'save', 'replace', 'randomize'])
+                        dest="action", nargs="?", default=None, choices=['init', 'add', 'remove', 'clear', 'get', 'save', 'replace', 'randomize', 'toggle'])
     parser.add_argument('--item', help="Name of the item to place in plando mode (used in interactive mode)",
                         dest="item", nargs='?', default=None)
     parser.add_argument('--hide', help="Hide the item to place in plando mode (used in interactive mode)",

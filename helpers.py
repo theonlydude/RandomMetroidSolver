@@ -508,11 +508,7 @@ class Helpers(object):
         if diff < 0:
             return SMBool(False)
 
-        # need missile or super to open the eye door
-        if sm.wor(sm.haveItem('Missile'), sm.haveItem('Super')) == False:
-            return SMBool(False)
-        else:
-            return SMBool(True, diff)
+        return SMBool(True, diff)
 
     def adjustHealthDropDiff(self, difficulty):
         (dmgRed, items) = self.getDmgReduction(envDmg=False)

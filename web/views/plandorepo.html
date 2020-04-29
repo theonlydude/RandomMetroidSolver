@@ -9,6 +9,8 @@ extend 'layout.html'
 
 <script type="text/javascript" src="{{=URL('static', 'js/crc32.js')}}"></script>
 
+<script type="text/javascript" src="{{=URL('static', 'js/localforage.nopromises.min.js')}}"></script>
+
 <title>Super Metroid VARIA Randomizer Plandomizer Repository</title>
 
 <style>
@@ -216,7 +218,16 @@ window.onload = function(){
                     return false;
                 }
 
-                vanillaROMBytes = new Uint8Array(e.target.result);
+                // store file in localforage
+                localforage.setItem('vanillaROM', e.target.result, function(err, value) {
+                    if(err != null) {
+                        clearLocalStorage();
+                    } else {
+                        console.log("vanilla ROM stored in local storage");
+                        vanillaROMBytes = new Uint8Array(value);
+                        displayROMInput(false);
+                    }
+                });
             }
         }, false);
 
@@ -315,6 +326,37 @@ window.onload = function(){
     dragElement(document.getElementById("updatePopup"), "updateGrab");
 
     displayMessage();
+
+    // check if a vanilla ROM is already in local storage
+    clearLocalStorage();
+    localforage.getItem('vanillaROM', function(err, value) {
+        if(err != null) {
+            clearLocalStorage();
+        } else {
+            if(value != null) {
+                displayROMInput(false);
+                vanillaROMBytes = new Uint8Array(value);
+            } else {
+                clearLocalStorage();
+            }
+        }
+    });
+}
+
+function displayROMInput(show) {
+    if(show == true) {
+        document.getElementById("vanillaROMVisibility").style.display = "block";
+        document.getElementById("vanillaROMOKVisibility").style.display = "none";
+    } else {
+        document.getElementById("vanillaROMVisibility").style.display = "none";
+        document.getElementById("vanillaROMOKVisibility").style.display = "block";
+    }
+}
+
+function clearLocalStorage() {
+    displayROMInput(true);
+    localforage.clear();
+    vanillaROMBytes = null;
 }
 
 // from https://stackoverflow.com/questions/22708434/restrict-characters-in-input-field
@@ -364,61 +406,53 @@ function unpack_2bytes(ips, i) {
 
 function AjaxPlandoDownloadCompleted(data) {
     // with items/Locations patch the local rom in memory
-    var filesInput = document.getElementById("vanillaROM");
-    var file = filesInput.files[0];
+    var bytes = vanillaROMBytes;
 
-    var reader = new FileReader();
-    reader.readAsArrayBuffer(file);
-
-    reader.onload = function(e) {
-        var bytes = new Uint8Array(e.target.result);
-
-        var maxSize = data["maxSize"]
-        if(maxSize > 3*1024*1024) {
-          var tmp = new Uint8Array(maxSize);
-          tmp.set(bytes);
-          bytes = tmp;
-        }
-
-        var binary_string = atob(data["ips"]);
-        var len = binary_string.length;
-        var ips = new Uint8Array(len);
-        for(var i = 0; i < len; i++) {
-           ips[i] = binary_string.charCodeAt(i);
-        }
-
-        var i = 5;
-        var offset = 0;
-        var size = 0;
-        var rle_size = 0;
-
-        while(i < ips.length - 3) {
-           offset = unpack_3bytes(ips, i);
-           i += 3;
-           size = unpack_2bytes(ips, i);
-           i += 2;
-
-           if(size == 0) {
-             // RLE
-             rle_size = unpack_2bytes(ips, i);
-             i += 2;
-             for(j=0; j<rle_size; j++) {
-               bytes[offset+j] = ips[i];
-             }
-             i += 1;
-           } else {
-             for(j=0; j<size; j++) {
-               bytes[offset+j] = ips[i+j];
-             }
-             i += j;
-           }
-        }
-
-        var blob = new Blob([bytes], {type: "octet/stream"});
-
-        var outFileName = data['fileName'];
-        saveAs(blob, outFileName);
+    var maxSize = data["maxSize"]
+    if(maxSize > 3*1024*1024) {
+        var tmp = new Uint8Array(maxSize);
+        tmp.set(bytes);
+        bytes = tmp;
     }
+
+    var binary_string = atob(data["ips"]);
+    var len = binary_string.length;
+    var ips = new Uint8Array(len);
+    for(var i = 0; i < len; i++) {
+        ips[i] = binary_string.charCodeAt(i);
+    }
+
+    var i = 5;
+    var offset = 0;
+    var size = 0;
+    var rle_size = 0;
+
+    while(i < ips.length - 3) {
+        offset = unpack_3bytes(ips, i);
+        i += 3;
+        size = unpack_2bytes(ips, i);
+        i += 2;
+
+        if(size == 0) {
+            // RLE
+            rle_size = unpack_2bytes(ips, i);
+            i += 2;
+            for(j=0; j<rle_size; j++) {
+                bytes[offset+j] = ips[i];
+            }
+            i += 1;
+        } else {
+            for(j=0; j<size; j++) {
+                bytes[offset+j] = ips[i+j];
+            }
+            i += j;
+        }
+    }
+
+    var blob = new Blob([bytes], {type: "octet/stream"});
+
+    var outFileName = data['fileName'];
+    saveAs(blob, outFileName);
 }
 
 function generateRawData(vanillaBytes, plandoBytes) {
@@ -962,7 +996,14 @@ function setGuessedPreset(romName){
       </tr>
       <tr>
         <td><p>A vanilla unheadered ROM is required to upload/download a Plando seed</p></td>
-        <td><input id="vanillaROM" name="vanillaROM" type="file" /></td>
+        <td>
+          <div id="vanillaROMVisibility">
+           {{=INPUT(_type="file", _name="vanillaROM", _id="vanillaROM", _class="full")}}
+          </div>
+          <div id="vanillaROMOKVisibility">
+            Vanilla ROM already loaded
+          </div>
+        </td>
       </tr>
     </table>
     <p></p>

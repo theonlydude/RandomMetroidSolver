@@ -42,6 +42,8 @@ if (hs.registerOverlay) {
 
 <script type="text/javascript" src="{{=URL('static', 'js/crc32.js')}}"></script>
 
+<script type="text/javascript" src="{{=URL('static', 'js/localforage.nopromises.min.js')}}"></script>
+
 <title>Super Metroid VARIA Randomizer</title>
 
 <style>
@@ -483,71 +485,63 @@ function AjaxRandomizerCallCompleted(data) {
     console.log("AjaxRandomizerCallCompleted");
 
     // with items/Locations patch the local rom in memory
-    var filesInput = document.getElementById("uploadFile");
-    var file = filesInput.files[0];
+    var bytes = new Uint8Array(vanillaROM);
 
-    var reader = new FileReader();
-    reader.readAsArrayBuffer(file);
-
-    reader.onload = function(e) {
-        var bytes = new Uint8Array(e.target.result);
-
-        var binary_string = atob(data["ips"]);
-        var len = binary_string.length;
-        var ips = new Uint8Array(len);
-        for(var i = 0; i < len; i++) {
-           ips[i] = binary_string.charCodeAt(i);
-        }
-
-        console.log("IPS size: "+ips.length);
-        var i = 5;
-        var offset = 0;
-        var size = 0;
-        var rle_size = 0;
-
-        while(i < ips.length - 3) {
-           offset = unpack_3bytes(ips, i);
-           i += 3;
-           size = unpack_2bytes(ips, i);
-           i += 2;
-
-           if(size == 0) {
-             // RLE
-             rle_size = unpack_2bytes(ips, i);
-             i += 2;
-             for(j=0; j<rle_size; j++) {
-               bytes[offset+j] = ips[i];
-             }
-             i += 1;
-           } else {
-             for(j=0; j<size; j++) {
-               bytes[offset+j] = ips[i+j];
-             }
-             i += j;
-           }
-        }
-
-        // fix checksum
-        var sum1 = 0;
-        for(var i=0; i<0x200000; i++) { sum1 += bytes[i]; }
-        var sum2 = 0;
-        for(var i=0x200000; i<0x300000; i++) { sum2 += bytes[i]; }
-        var sum = (sum1 + (sum2 * 2)) & 0xFFFF;
-        var sumlo = sum & 0x00FF;
-        var sumhi = (sum & 0xFF00) >> 8;
-        var invSum = sum ^ 0xFFFF;
-        var invSumlo = invSum & 0x00FF;
-        var invSumhi = (invSum & 0xFF00) >> 8;
-        bytes[0x7FDC] = invSumlo;
-        bytes[0x7FDD] = invSumhi;
-        bytes[0x7FDE] = sumlo;
-        bytes[0x7FDF] = sumhi;
-
-        var blob = new Blob([bytes], {type: "octet/stream"});
-
-        var outFileName = data['fileName'];
-        saveAs(blob, outFileName);
+    var binary_string = atob(data["ips"]);
+    var len = binary_string.length;
+    var ips = new Uint8Array(len);
+    for(var i = 0; i < len; i++) {
+        ips[i] = binary_string.charCodeAt(i);
     }
+
+    console.log("IPS size: "+ips.length);
+    var i = 5;
+    var offset = 0;
+    var size = 0;
+    var rle_size = 0;
+
+    while(i < ips.length - 3) {
+        offset = unpack_3bytes(ips, i);
+        i += 3;
+        size = unpack_2bytes(ips, i);
+        i += 2;
+
+        if(size == 0) {
+            // RLE
+            rle_size = unpack_2bytes(ips, i);
+            i += 2;
+            for(j=0; j<rle_size; j++) {
+                bytes[offset+j] = ips[i];
+            }
+            i += 1;
+        } else {
+            for(j=0; j<size; j++) {
+                bytes[offset+j] = ips[i+j];
+            }
+            i += j;
+        }
+    }
+
+    // fix checksum
+    var sum1 = 0;
+    for(var i=0; i<0x200000; i++) { sum1 += bytes[i]; }
+    var sum2 = 0;
+    for(var i=0x200000; i<0x300000; i++) { sum2 += bytes[i]; }
+    var sum = (sum1 + (sum2 * 2)) & 0xFFFF;
+    var sumlo = sum & 0x00FF;
+    var sumhi = (sum & 0xFF00) >> 8;
+    var invSum = sum ^ 0xFFFF;
+    var invSumlo = invSum & 0x00FF;
+    var invSumhi = (invSum & 0xFF00) >> 8;
+    bytes[0x7FDC] = invSumlo;
+    bytes[0x7FDD] = invSumhi;
+    bytes[0x7FDE] = sumlo;
+    bytes[0x7FDF] = sumhi;
+
+    var blob = new Blob([bytes], {type: "octet/stream"});
+
+    var outFileName = data['fileName'];
+    saveAs(blob, outFileName);
 
     // add permalink
     if('seedKey' in data) {
@@ -571,7 +565,6 @@ function AjaxRandomizerCallCompleted(data) {
 
     // set backup button text to Randomize
     document.getElementById("submitBtn").data = "Randomize";
-    console.log("button text set back to randomize");
 
     var dataDict = {"complexity": getComplexity()};
     var elems = ["seed", "preset", "raceMode", "areaLayout", "removeEscapeEnemies", "layoutPatches", "variaTweaks", "gravityBehaviour", "nerfedCharge", "itemsounds", "elevators_doors_speed", "spinjumprestart", "rando_speed", "animals", "No_Music", "randoPreset", "random_music", "maxDifficulty"];
@@ -623,21 +616,9 @@ function AjaxRandomizerCallCompleted(data) {
 function doSubmit() {
   if(window.File && window.FileList && window.FileReader) {
 
-    var filesInput = document.getElementById("uploadFile");
-    var file = filesInput.files[0]
-    if (file === undefined) {
-      alert("Please select a Super Metroid Vanilla ROM first")
-      btn = document.getElementById("submitBtn");
-      btn.data = "Randomize";
-      btn.disabled = false;
-
-      setTimeout(function(){
-          btn = document.getElementById("submitBtn");
-          btn.data = "Randomize";
-          btn.disabled = false;
-      }, 20000);
-
-      return false;
+    if(vanillaROMStored == false) {
+        alert("Please select a Super Metroid Vanilla ROM first");
+        return false;
     }
 
     var dataDict = {"preset": document.getElementById("preset").value};
@@ -733,6 +714,8 @@ function cancelTip() {
   $("#loadingTips"+curLoadingTips).hide();
 }
 
+var vanillaROMStored = false;
+var vanillaROM = null;
 window.onload = function(){
     //Check File API support
     if(window.File && window.FileList && window.FileReader) {
@@ -771,8 +754,22 @@ window.onload = function(){
                 var digest = crc32.digest();
                 console.log("crc32: "+digest);
                 if(digest != "d63ed5f8") {
-                    alert("Non vanilla ROM detected, use at your own risk!");
+                    document.getElementById("uploadFile").value = "";
+                    alert("Non vanilla ROM detected");
+                    return false;
                 }
+
+                // store file in localforage
+                localforage.setItem('vanillaROM', e.target.result, function(err, value) {
+                    if(err != null) {
+                        clearLocalStorage();
+                    } else {
+                        console.log("vanilla ROM stored in local storage");
+                        vanillaROM = value;
+                        vanillaROMStored = true;
+                        displayROMInput(false);
+                    }
+                });
             }
         }, false);
     } else {
@@ -946,6 +943,39 @@ window.onload = function(){
     $("#preset").chosen();
     $("#randoPreset").chosen();
     resizeChosen();
+
+    // check if a vanilla ROM is already in local storage
+    localforage.getItem('vanillaROM', function(err, value) {
+        if(err != null) {
+            clearLocalStorage();
+        } else {
+            if(value != null) {
+                vanillaROMStored = true;
+                displayROMInput(false);
+                vanillaROM = value;
+                vanillaROMStored = true;
+            } else {
+                clearLocalStorage();
+            }
+        }
+    });
+}
+
+function displayROMInput(show) {
+    if(show == true) {
+        document.getElementById("uploadFileVisibility").style.display = "block";
+        document.getElementById("uploadFileOKVisibility").style.display = "none";
+    } else {
+        document.getElementById("uploadFileVisibility").style.display = "none";
+        document.getElementById("uploadFileOKVisibility").style.display = "block";
+    }
+}
+
+function clearLocalStorage() {
+    displayROMInput(true);
+    localforage.clear();
+    vanillaROMStored = false;
+    vanillaROM = null;
 }
 
 function switchCheckbox(id, elems=[]) {
@@ -1032,7 +1062,8 @@ function startTheTour(step=-1) {
     {
       element: "#romStep",
       title: "Vanilla Super Metroid ROM",
-      content: "Use an American/Japan unheadered ROM of Super Metroid.<br/>The randomized ROM is generated locally."
+      content: "<p>Use an American/Japan unheadered ROM of Super Metroid.<br/>\
+The vanilla ROM is stored in the browser local storage and is never sent to our server, all the patching is done locally in the browser.</p>"
     },
     {
       element: "#seedStep",
@@ -1649,7 +1680,14 @@ def displayNumber(id, min, max, default, step="1"):
               </tr>
               <tr>
                 <td>Vanilla Super Metroid ROM:</td>
-                <td>{{=INPUT(_type="file", _name="uploadFile", _id="uploadFile", _class="full")}}</td>
+                <td>
+                   <div id="uploadFileVisibility">
+                     {{=INPUT(_type="file", _name="uploadFile", _id="uploadFile", _class="full")}}
+                   </div>
+                   <div id="uploadFileOKVisibility">
+                     Vanilla ROM already loaded
+                   </div>
+                </td>
                 <td id="romStep"><button type="button" onclick="startTheTour(1)">?</button></td>
               </tr>
               <tr id="seedVisibility">

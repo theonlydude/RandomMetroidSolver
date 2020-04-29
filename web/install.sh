@@ -602,3 +602,5 @@ mkdir -p ~/web2py/applications/solver/static/images/sprite_sheets/
 [ -L ~/web2py/applications/solver/static/images/forgotten_all_the_way.png ] || ln -s ~/RandomMetroidSolver/web/static/help/forgotten_all_the_way.png ~/web2py/applications/solver/static/images/forgotten_all_the_way.png
 
 [ -L ~/web2py/applications/solver/static/images/background_seedless.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/tracker/pause/background_seedless.png ~/web2py/applications/solver/static/images/background_seedless.png
+
+[ -L ~/web2py/applications/solver/static/js/localforage.nopromises.min.js ] || ln -s ~/RandomMetroidSolver/web/static/localforage.nopromises.min.js ~/web2py/applications/solver/static/js/localforage.nopromises.min.js

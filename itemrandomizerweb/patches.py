@@ -70,6 +70,11 @@ patches = {
     "Escape_Animals_Open_Maridia": {
         0x7C54C: [0x10]
     },
+    # vanilla data to restore setup asm for plandos
+    "Escape_Animals_Disable": {
+        0x79867: [0xb2, 0x91],
+        0x798dc: [0xbb, 0x91]
+    },
     "LN_Chozo_SpaceJump_Check_Disable": {
         0x2518f: [0xea, 0xea, 0xea, 0xea, 0xea, 0xea, 0xea, 0xea]
     },

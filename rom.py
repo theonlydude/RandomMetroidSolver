@@ -572,8 +572,7 @@ class RomPatcher:
                      'low_timer.ips', 'metalimals.ips', 'phantoonimals.ips', 'ridleyimals.ips'],
         'Area': ['area_rando_layout.ips', 'area_rando_door_transition.ips', 'Tourian_Refill',
                  'Sponge_Bath_Blinking_Door', 'east_ocean.ips' ],
-        'Escape' : ['rando_escape.ips', 'rando_escape_ws_fix.ips',
-                    'Escape_Rando_Tourian_Doors', "Escape_Rando_Crateria_Doors"]
+        'Escape' : ['rando_escape.ips', 'rando_escape_ws_fix.ips']
     }
 
     def __init__(self, romFileName=None, magic=None, plando=False):

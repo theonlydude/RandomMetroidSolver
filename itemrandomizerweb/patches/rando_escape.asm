@@ -162,6 +162,26 @@ org $8f84b8                     ; brinstar map
     db $01,$46
     dw $9020
 
+;;; other door tweaks
+;; open Tourian grey doors to disable one way
+org $8fc828
+    db $0c
+
+org $8fc836
+    db $0c
+
+;; open crateria doors to open path for animais searching
+org $8f81b1
+    db $10
+
+org $8f804f
+    db $10
+
+;; open bowling alley door to escape the room
+org $8fc2fa
+    db $10
+
+
 ;;; overwrite BT setup ASM ptr in "escape" room state
 org $8f9867
     dw bt_escape_setup

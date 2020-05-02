@@ -1007,6 +1007,11 @@ function setGuessedPreset(romName){
     </table>
     <p></p>
 {{
+    def getPresetSortId(preset):
+        # to sort preset by difficulty
+        d = {"noob": 0, "casual": 1, "regular": 2, "veteran": 3, "speedrunner": 4, "master": 5}
+        return d[preset]
+
     if plandos != None:
         response.write("    <table id=\"plandoList\" class=\"full\">\n", escape=False)
         response.write("      <tr>\n", escape=False)
@@ -1037,7 +1042,7 @@ function setGuessedPreset(romName){
             response.write("        <td id=\"{}_author\" class=\"collapsibleTd centerCell\">{}</td>\n".format(pureName, author), escape=False)
             response.write("        <td class=\"collapsibleTd centerCell\">{}</td>\n".format(smallDesc), escape=False)
             response.write("        <td class=\"collapsibleTd centerCell\">{}</td>\n".format(time), escape=False)
-            response.write("        <td id=\"{}_preset\" class=\"collapsibleTd centerCell\">{}</td>\n".format(pureName, preset), escape=False)
+            response.write("        <td class=\"collapsibleTd centerCell\"><div style=\"display: none\">{}</div><div id=\"{}_preset\">{}</div></td>\n".format(getPresetSortId(preset), pureName, preset), escape=False)
             response.write("        <td class=\"collapsibleTd centerCell\">", escape=False)
 
             response.write("        <div style=\"display: none\">{}</div><div id=\"divrate{}\">".format(round(rating, 2) if rating != None else '0.00', pureName), escape=False)

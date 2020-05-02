@@ -142,15 +142,15 @@ class DB:
             print("DB.addRandoResult::error execute \"{}\" error: {}".format(sql, e))
             self.dbAvailable = False
 
-    def addRandoUploadResult(self, id, fileName):
+    def addRandoUploadResult(self, id, guid, fileName):
         if self.dbAvailable == False:
             return None
 
         try:
             sql = """
-update randomizer set upload_status = 'local', filename = '%s'
+update randomizer set upload_status = 'local', filename = '%s', guid = '%s'
 where id = %s;"""
-            self.cursor.execute(sql % (fileName, id))
+            self.cursor.execute(sql % (fileName, guid, id))
         except Exception as e:
             print("DB.addRandoUploadResult::error execute \"{}\" error: {}".format(sql, e))
             self.dbAvailable = False
@@ -378,19 +378,19 @@ order by r.id;"""
         sql = """
 select 'upload_status', upload_status
 from randomizer
-where id = %s
+where guid = '%s'
 union all
 select 'filename', filename
 from randomizer
-where id = %s
+where guid = '%s'
 union all
 select 'time', action_time
 from randomizer
-where id = %s
+where guid = '%s'
 union all
 select name, value
 from randomizer_params
-where randomizer_id = %s
+where randomizer_id = (select id from randomizer where guid = '%s')
 order by 1;"""
 
         return self.execSelect(sql % (key, key, key, key))
@@ -410,7 +410,7 @@ order by 1;"""
             return None
 
         try:
-            sql = """update randomizer set upload_status = '%s' where id = %s;"""
+            sql = """update randomizer set upload_status = '%s' where guid = '%s';"""
             self.cursor.execute(sql % (newStatus, key))
         except Exception as e:
             print("DB.updateSeedUploadStatus::error execute: {}".format(e))

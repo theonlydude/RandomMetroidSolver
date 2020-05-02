@@ -62,12 +62,15 @@ create table if not exists randomizer (
   -- local -> deleted
   upload_status varchar(8),
   filename varchar(128),
+  guid char(36),
   primary key (id)
 );
 create unique index randomizer_idx01 on randomizer(action_time);
 create index randomizer_idx02 on randomizer(upload_status);
+create index randomizer_idx03 on randomizer(guid);
 -- alter table randomizer add upload_status varchar(8) after action_time;
 -- alter table randomizer add filename varchar(128);
+-- alter table randomizer add guid char(36);
 
 create table if not exists randomizer_params (
   randomizer_id int unsigned not null,

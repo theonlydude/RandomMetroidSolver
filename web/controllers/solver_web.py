@@ -5,7 +5,7 @@ path = os.path.expanduser('~/RandomMetroidSolver')
 if os.path.exists(path) and path not in sys.path:
     sys.path.append(path)
 
-import datetime, os, hashlib, json, subprocess, tempfile, glob, random, re, math, string, base64, urllib.parse
+import datetime, os, hashlib, json, subprocess, tempfile, glob, random, re, math, string, base64, urllib.parse, uuid
 from datetime import datetime, date
 from collections import OrderedDict
 
@@ -1128,8 +1128,10 @@ def validateWebServiceParams(switchs, quantities, multis, others, isJson=False):
 
     # check seed key
     if 'seedKey' in request.vars:
-        if IS_MATCH('^[0-9]*$')(request.vars.seedKey)[1] is not None:
-            raiseHttp(400, "Seed key can only contain [0-9]", isJson)
+        if IS_MATCH('^[0-9a-z-]*$')(request.vars.seedKey)[1] is not None:
+            raiseHttp(400, "Seed key can only contain [0-9a-z-]", isJson)
+        if IS_LENGTH(maxsize=36, minsize=36)(request.vars.seedKey)[1] is not None:
+            raiseHttp(400, "Seed key must be 36 chars long", isJson)
 
 def sessionWebService():
     # web service to update the session
@@ -1386,9 +1388,10 @@ def randomizerWebService():
         DB.addRandoResult(id, ret, duration, msg)
 
         # store ips in local directory
-        if storeLocalIps(id, locsItems["fileName"], locsItems["ips"]):
-            DB.addRandoUploadResult(id, locsItems["fileName"])
-            locsItems['seedKey'] = id
+        guid = str(uuid.uuid4())
+        if storeLocalIps(guid, locsItems["fileName"], locsItems["ips"]):
+            DB.addRandoUploadResult(id, guid, locsItems["fileName"])
+            locsItems['seedKey'] = guid
         DB.close()
 
         os.close(fd1)
@@ -2254,8 +2257,10 @@ def customizer():
         key = urllib.parse.unquote(key)
 
         # sanity check
-        if IS_MATCH('^[0-9]*$')(key)[1] is not None:
-            msg = "Seed key can only contain [0-9]"
+        if IS_MATCH('^[0-9a-z-]*$')(key)[1] is not None:
+            msg = "Seed key can only contain [0-9a-z-]"
+        elif IS_LENGTH(maxsize=36, minsize=36)(key)[1] is not None:
+            msg = "Seed key must be 36 chars long"
         else:
             DB = db.DB()
             seedInfo = DB.getSeedInfo(key)

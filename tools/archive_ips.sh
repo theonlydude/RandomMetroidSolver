@@ -8,7 +8,7 @@ function get_db_param {
 }
 
 function get_pending_seeds {
-    SQL="select id from randomizer where upload_status = 'pending';"
+    SQL="select guid from randomizer where upload_status = 'pending';"
     echo "${SQL}" | mysql --skip-column-names --silent -h ${host} -u ${user} -p${password} ${database}
 }
 
@@ -16,7 +16,7 @@ function update_seed_status {
     local KEY="${1}"
     local STATUS="${2}"
 
-    SQL="update randomizer set upload_status = '${STATUS}' where id = ${KEY};"
+    SQL="update randomizer set upload_status = '${STATUS}' where guid = '${KEY}';"
     echo "${SQL}" | mysql --skip-column-names --silent -h ${host} -u ${user} -p${password} ${database}
 }
 

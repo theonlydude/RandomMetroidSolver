@@ -421,7 +421,7 @@ var seedKey = null;
 {{
 if seedInfo != None:
     response.write("permalink = true;", escape=False)
-    response.write("seedKey = {};".format(seedInfo["key"]), escape=False)
+    response.write("seedKey = '{}';".format(seedInfo["key"]), escape=False)
     pass
 }}
 

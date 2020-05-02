@@ -400,7 +400,7 @@ order by 1;"""
         if self.dbAvailable == False:
             return None
 
-        sql = """select upload_status, filename from randomizer where id = %s;"""
+        sql = """select upload_status, filename from randomizer where guid = '%s';"""
 
         return self.execSelect(sql % (key,))
 

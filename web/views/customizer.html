@@ -21,6 +21,8 @@ extend 'layout.html'
 
 <script type="text/javascript" src="{{=URL('static', 'js/crc32.js')}}"></script>
 
+<script type="text/javascript" src="{{=URL('static', 'js/localforage.nopromises.min.js')}}"></script>
+
 <title>Super Metroid VARIA Customizer</title>
 
 <style>
@@ -205,104 +207,102 @@ function unpack_2bytes(ips, i) {
   return (b1*256) + b2;
 }
 
+function updateROM(bytes, data, filename) {
+    // with custom sprites we have to create a bigger array
+    var is4MB = false;
+    if("ips" in data && "max_size" in data && data["max_size"] > 0x300000) {
+        var tmp = new Uint8Array(0x400000);
+        tmp.set(bytes);
+        bytes = tmp;
+        is4MB = true;
+    }
+
+    var binary_string = atob(data["ips"]);
+    var len = binary_string.length;
+    var ips = new Uint8Array(len);
+    for(var i = 0; i < len; i++) {
+        ips[i] = binary_string.charCodeAt(i);
+    }
+
+    console.log("IPS size: "+ips.length);
+    var i = 5;
+    var offset = 0;
+    var size = 0;
+    var rle_size = 0;
+
+    while(i < ips.length - 3) {
+        offset = unpack_3bytes(ips, i);
+        i += 3;
+        size = unpack_2bytes(ips, i);
+        i += 2;
+
+        if(size == 0) {
+            // RLE
+            rle_size = unpack_2bytes(ips, i);
+            i += 2;
+            for(j=0; j<rle_size; j++) {
+                bytes[offset+j] = ips[i];
+            }
+            i += 1;
+        } else {
+            for(j=0; j<size; j++) {
+                bytes[offset+j] = ips[i+j];
+            }
+            i += j;
+        }
+    }
+
+    // fix checksum
+    var sum1 = 0;
+    for(var i=0; i<0x200000; i++) { sum1 += bytes[i]; }
+    var sum2 = 0;
+    var max = 0x300000;
+    if(is4MB == true){ max = 0x400000; }
+    for(var i=0x200000; i<max; i++) { sum2 += bytes[i]; }
+    if(is4MB == true){
+        var sum = (sum1 + sum2) & 0xFFFF;
+    } else {
+        var sum = (sum1 + (sum2 * 2)) & 0xFFFF;
+    }
+    var sumlo = sum & 0x00FF;
+    var sumhi = (sum & 0xFF00) >> 8;
+    var invSum = sum ^ 0xFFFF;
+    var invSumlo = invSum & 0x00FF;
+    var invSumhi = (invSum & 0xFF00) >> 8;
+    bytes[0x7FDC] = invSumlo;
+    bytes[0x7FDD] = invSumhi;
+    bytes[0x7FDE] = sumlo;
+    bytes[0x7FDF] = sumhi;
+
+    var blob = new Blob([bytes], {type: "octet/stream"});
+    saveAs(blob, filename);
+}
+
 function AjaxCallCompleted(data) {
     console.log("AjaxCallCompleted");
 
     // with items/Locations patch the local rom in memory
     if(permalink == true) {
         var inputName = "vanillaUploadFile";
-    } else {
-        var inputName = "uploadFile";
-    }
-    var filesInput = document.getElementById(inputName);
-    var file = filesInput.files[0];
-
-    var reader = new FileReader();
-    reader.fileName = file.name;
-    reader.readAsArrayBuffer(file);
-
-    reader.onload = function(e) {
-        var bytes = new Uint8Array(e.target.result);
-
-        // with custom sprites we have to create a bigger array
-        var is4MB = false;
-        if("ips" in data && "max_size" in data && data["max_size"] > 0x300000) {
-          var tmp = new Uint8Array(0x400000);
-          tmp.set(bytes);
-          bytes = tmp;
-          is4MB = true;
-        }
-
-        var binary_string = atob(data["ips"]);
-        var len = binary_string.length;
-        var ips = new Uint8Array(len);
-        for(var i = 0; i < len; i++) {
-           ips[i] = binary_string.charCodeAt(i);
-        }
-
-        console.log("IPS size: "+ips.length);
-        var i = 5;
-        var offset = 0;
-        var size = 0;
-        var rle_size = 0;
-
-        while(i < ips.length - 3) {
-           offset = unpack_3bytes(ips, i);
-           i += 3;
-           size = unpack_2bytes(ips, i);
-           i += 2;
-
-           if(size == 0) {
-             // RLE
-             rle_size = unpack_2bytes(ips, i);
-             i += 2;
-             for(j=0; j<rle_size; j++) {
-               bytes[offset+j] = ips[i];
-             }
-             i += 1;
-           } else {
-             for(j=0; j<size; j++) {
-               bytes[offset+j] = ips[i+j];
-             }
-             i += j;
-           }
-        }
-
-        // fix checksum
-        var sum1 = 0;
-        for(var i=0; i<0x200000; i++) { sum1 += bytes[i]; }
-        var sum2 = 0;
-        var max = 0x300000;
-        if(is4MB == true){ max = 0x400000; }
-        for(var i=0x200000; i<max; i++) { sum2 += bytes[i]; }
-        if(is4MB == true){
-            var sum = (sum1 + sum2) & 0xFFFF;
-        } else {
-            var sum = (sum1 + (sum2 * 2)) & 0xFFFF;
-        }
-        var sumlo = sum & 0x00FF;
-        var sumhi = (sum & 0xFF00) >> 8;
-        var invSum = sum ^ 0xFFFF;
-        var invSumlo = invSum & 0x00FF;
-        var invSumhi = (invSum & 0xFF00) >> 8;
-        bytes[0x7FDC] = invSumlo;
-        bytes[0x7FDD] = invSumhi;
-        bytes[0x7FDE] = sumlo;
-        bytes[0x7FDF] = sumhi;
-
-        var blob = new Blob([bytes], {type: "octet/stream"});
-
-        if(permalink == true) {
 {{
 if seedInfo != None:
-    response.write('            var filename = "Custom_{}";'.format(seedInfo["filename"]), escape=False)
+    response.write('        updateROM(vanillaROMBytes, data, "Custom_{}");'.format(seedInfo["filename"]), escape=False)
     pass
 }}
-        } else {
-            var filename = "Custom_"+e.target.fileName;
-        }
+    } else {
+        var inputName = "uploadFile";
+        var filesInput = document.getElementById(inputName);
+        var file = filesInput.files[0];
 
-        saveAs(blob, filename);
+        var reader = new FileReader();
+        reader.fileName = file.name;
+        reader.readAsArrayBuffer(file);
+
+        reader.onload = function(e) {
+            var bytes = new Uint8Array(e.target.result);
+
+            updateROM(bytes, data, "Custom_"+e.target.fileName);
+        }
     }
 
     // info message to display ?
@@ -327,29 +327,18 @@ function doSubmit() {
   if(window.File && window.FileList && window.FileReader) {
 
     if(permalink == true) {
-        var inputName = "vanillaUploadFile";
+        if(vanillaROMBytes == null) {
+            alert("Please select a vanilla ROM first");
+            return false;
+        }
     } else {
         var inputName = "uploadFile";
-    }
-    var filesInput = document.getElementById(inputName);
-    var file = filesInput.files[0]
-    if (file === undefined) {
-      if(permalink == true) {
-        alert("Please select a vanilla ROM seed first");
-      } else {
-        alert("Please select a VARIA seed first");
-      }
-      btn = document.getElementById("submitBtn");
-      btn.data = buttonText;
-      btn.disabled = false;
-
-      setTimeout(function(){ 
-          btn = document.getElementById("submitBtn");
-          btn.data = buttonText;
-          btn.disabled = false;
-      }, 20000);
-
-      return false;
+        var filesInput = document.getElementById(inputName);
+        var file = filesInput.files[0]
+        if (file === undefined) {
+            alert("Please select a VARIA seed first");
+            return false;
+        }
     }
 
     var dataDict = {};
@@ -437,6 +426,7 @@ function greyOutPatches(isRace, isVARIA) {
     }
 }
 
+var vanillaROMBytes = null;
 window.onload = function(){
     //Check File API support
     if(window.File && window.FileList && window.FileReader) {
@@ -479,9 +469,19 @@ window.onload = function(){
                         document.getElementById(inputName).value = "";
                         return false;
                     }
-                }
 
-                if(permalink == false) {
+                    // store file in localforage
+                    localforage.setItem('vanillaROM', e.target.result, function(err, value) {
+                        if(err != null) {
+                            clearLocalStorage();
+                        } else {
+                            console.log("vanilla ROM stored in local storage");
+                            vanillaROMBytes = new Uint8Array(value);
+                            displayROMInput(false);
+                        }
+                    });
+
+                } else {
                     // detect race mode patch
                     var bytes = new Uint8Array(e.target.result);
                     var isRace = false;
@@ -553,6 +553,37 @@ if seedInfo != None:
     pass
 }}
 
+    if(permalink == true) {
+        // check if a vanilla ROM is already in local storage
+        localforage.getItem('vanillaROM', function(err, value) {
+            if(err != null) {
+                clearLocalStorage();
+            } else {
+                if(value != null) {
+                    displayROMInput(false);
+                    vanillaROMBytes = new Uint8Array(value);
+                } else {
+                    clearLocalStorage();
+                }
+            }
+        });
+    }
+}
+
+function displayROMInput(show) {
+    if(show == true) {
+        document.getElementById("vanillaROMVisibility").style.display = "block";
+        document.getElementById("vanillaROMOKVisibility").style.display = "none";
+    } else {
+        document.getElementById("vanillaROMVisibility").style.display = "none";
+        document.getElementById("vanillaROMOKVisibility").style.display = "block";
+    }
+}
+
+function clearLocalStorage() {
+    displayROMInput(true);
+    localforage.clear();
+    vanillaROMBytes = null;
 }
 
 function permalinkCustomization(permalink) {
@@ -1059,7 +1090,14 @@ if seedInfo != None:
               <colgroup><col class="half" /><col class="half" /></colgroup>
               <tr id="vanillaUploadFileStep">
                 <td>Vanilla ROM:</td>
-                <td>{{=INPUT(_type="file", _id="vanillaUploadFile", _class="full")}}</td>
+                <td>
+                  <div id="vanillaROMVisibility">
+                   {{=INPUT(_type="file", _name="vanillaUploadFile", _id="vanillaUploadFile", _class="full")}}
+                  </div>
+                  <div id="vanillaROMOKVisibility">
+                    Vanilla ROM already loaded
+                  </div>
+                </td>
                 <td><button type="button" onclick="startTheTour(1)">?</button></td>
               </tr>
             </table>

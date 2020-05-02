@@ -328,7 +328,6 @@ window.onload = function(){
     displayMessage();
 
     // check if a vanilla ROM is already in local storage
-    clearLocalStorage();
     localforage.getItem('vanillaROM', function(err, value) {
         if(err != null) {
             clearLocalStorage();

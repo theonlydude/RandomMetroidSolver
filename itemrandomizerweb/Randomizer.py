@@ -2011,11 +2011,7 @@ class Randomizer(object):
             if found == False:
                 break
 
-    # only function to use (once) from outside of the Randomizer class.
-    # returns a list of item/location dicts with 'Item' and 'Location' as keys.
-    def generateItems(self):
-        stuck = False
-        isStuck = False
+    def initGenerateItems(self):
         # if major items are removed from the pool (super fun setting), fill not accessible locations with
         # items that are as useless as possible
         self.fillRestrictedLocations()
@@ -2027,6 +2023,28 @@ class Randomizer(object):
         self.initState = RandoState(self, self.currentLocations())
         self.log.debug("initState="+str(self.initState))
         self.log.debug("{} items in pool".format(len(self.itemPool)))
+
+    # called if we could not fill all locs, but game is still finishable
+    def endFill(self):
+        # seed is finishable, place randomly all remaining items
+        while len(self.itemPool) > 0:
+            item = self.itemPool[0]
+            possibleLocs = [loc for loc in self.unusedLocations if self.canPlaceAtLocation(item, loc, checkRestrictions=False)]
+            self.log.debug("last fill item = " + item['Type'] + "/" + item['Class'] + ", locs = " + str([loc['Name'] for loc in possibleLocs]))
+            itemLocation = {
+                'Item' : item,
+                'Location' : possibleLocs[random.randint(0, len(possibleLocs) - 1)]
+            }
+            self.log.debug("last Fill: {} at {}".format(itemLocation['Item']['Type'], itemLocation['Location']['Name']))
+            self.getItem(itemLocation, False)
+        self.chozoCheck()
+
+    # only function to use (once) from outside of the Randomizer class.
+    # returns a list of item/location dicts with 'Item' and 'Location' as keys.
+    def generateItems(self):
+        self.initGenerateItems()
+        stuck = False
+        isStuck = False
         runtime_s = 0
         startDate = time.process_time()
         while ((len(self.itemPool) > 0 or len(self.plandoItemPool) > 0)
@@ -2086,18 +2104,7 @@ class Randomizer(object):
         if len(self.itemPool) > 0:
             # we could not place all items, check if we can finish the game
             if self.canEndGame():
-                # seed is finishable, place randomly all remaining items
-                while len(self.itemPool) > 0:
-                    item = self.itemPool[0]
-                    possibleLocs = [loc for loc in self.unusedLocations if self.canPlaceAtLocation(item, loc, checkRestrictions=False)]
-                    self.log.debug("last fill item = " + item['Type'] + "/" + item['Class'] + ", locs = " + str([loc['Name'] for loc in possibleLocs]))
-                    itemLocation = {
-                        'Item' : item,
-                        'Location' : possibleLocs[random.randint(0, len(possibleLocs) - 1)]
-                    }
-                    self.log.debug("last Fill: {} at {}".format(itemLocation['Item']['Type'], itemLocation['Location']['Name']))
-                    self.getItem(itemLocation, False)
-                self.chozoCheck()
+                self.endFill()
             else:
                 print("\nSTUCK ! ")
                 print("REM LOCS = "  + str([loc['Name'] for loc in self.unusedLocations]))

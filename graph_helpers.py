@@ -51,7 +51,6 @@ class HelpersGraph(Helpers):
                               sm.wor(SMBool(not fromLandingSite, 0), sm.knowsSimpleShortCharge(), sm.knowsShortCharge())),
                       sm.canDestroyBombWalls())
 
-    # mostly for going up but let's be noob friendly and add the condition for both ways
     @Cache.decorator
     def canPassCrateriaGreenPirates(self):
         sm = self.smbm

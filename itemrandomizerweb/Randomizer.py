@@ -496,6 +496,7 @@ class SuperFunProvider(object):
             if comeBack[ap]:
                 totalAvailLocs.append(loc)
         self.lastRestricted = [loc for loc in self.locations if loc not in totalAvailLocs]
+        self.log.debug('totalAvailAPs='+str(comeBack.keys()))
         self.log.debug("restricted=" + str([loc['Name'] for loc in self.lastRestricted]))
 
         # check if we all inter-area APs reach each other

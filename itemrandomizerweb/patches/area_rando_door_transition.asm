@@ -2,7 +2,7 @@
 ;;; - for incompatible transitions, cancel samus movement
 ;;; - for all transitions, give I-frames
 ;;; - refill at Tourian elevator
-;;; 
+;;;
 ;;; compile with asar (https://www.smwcentral.net/?a=details&id=14560&p=section),
 ;;; or a variant of xkas that supports arch directive
 
@@ -16,7 +16,7 @@ arch snes.cpu
 !samus_health          = $09c2
 ;;; For movement cancel
 !current_pose          = $0a1c
-!poses_transitions     = $0a2a	
+!poses_transitions     = $0a2a
 !contact_dmg_idx       = $0a6e
 !iframes               = $18a8
 ;;; For refill
@@ -116,6 +116,19 @@ full_refill:
 .end:
 	rts
 
-;;; stop before generated door asm routines start
+org $8ff7ef
 
+;;; use this as croc top exit door asm :
+;;; croc draws its tilemap on BG2, and a routine to draw enemy
+;;; BG2 ($A0:9726) is ran both by Croc/MB and at the end every
+;;; door transition. It uses $0e1e as flag to know if a VRAM transfer
+;;; has to be done. If we exit during croc fight, the value can be non-0
+;;; and some garbage resulting from room tiles decompression of door transition
+;;; is copied to BG2 tilemap in the next room.
+org $8ff7f0
+croc_exit_fix:
+    stz $0e1e	; clear the flag to disable enemy BG2 tilemap routine
+    rts
+
+;;; stop before generated door asm routines start
 warnpc $8ff7ff

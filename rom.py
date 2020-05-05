@@ -592,10 +592,13 @@ class RomPatcher:
         self.altLocsAddresses = {}
         # specific fixes for area rando connections
         self.roomConnectionSpecific = {
+            # fix scrolling sky when transitioning to west ocean
             0x93fe: self.patchWestOcean
         }
         self.doorConnectionSpecific = {
+            # get out of kraid room: reload CRE
             0x91ce: self.forceRoomCRE,
+            # get out of croc room: reload CRE
             0x93ea: self.forceRoomCRE
         }
 
@@ -1367,10 +1370,10 @@ class RomPatcher:
         self.romFile.writeWord(doorPtr, 0x7B7BB)
 
     # forces CRE graphics refresh when exiting kraid's or croc room
-    def forceRoomCRE(self, roomPtr):
+    def forceRoomCRE(self, roomPtr, creFlag=0x2):
         # Room ptr in bank 8F + CRE flag offset
         offset = 0x70000 + roomPtr + 0x8
-        self.romFile.writeByte(0x2, offset)
+        self.romFile.writeByte(creFlag, offset)
 
     buttons = {
         "Select" : [0x00, 0x20],

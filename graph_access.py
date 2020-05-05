@@ -415,14 +415,6 @@ accessPoints = [
                    "screen": (0x3, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
        entryInfo = {'SamusX':0xc57, 'SamusY':0x2b8},
        dotOrientation = 'se'),
-    AccessPoint('Crocomire Room Top', 'Norfair', {
-    }, traverse=lambda sm: sm.wor(RomPatches.has(RomPatches.CrocBlueDoors), sm.enoughStuffCroc()),
-       roomInfo = {'RoomPtr':0xa98d, "area": 0x2},
-       exitInfo = {'DoorPtr':0x93ea, 'direction': 0x7, "cap": (0xc6, 0x2d), "bitFlag": 0x0,
-                   "screen": (0xc, 0x2), "distanceToSpawn": 0x1c0, "doorAsmPtr": 0x0000,
-                   "exitAsmPtr": 0xf7f0},
-       entryInfo = {'SamusX':0x390, 'SamusY':0x98},
-       dotOrientation = 'se'),
     AccessPoint('Bubble Mountain', 'Norfair', {
         # bottom left door -> frog speed way OR exit cathedral
         'Business Center': lambda sm: sm.wor(sm.wand(sm.canPassBombPassages(),
@@ -462,6 +454,15 @@ accessPoints = [
        entryInfo = {'SamusX':0xffff, 'SamusY':0xffff}, # unused
        escape = True,
        dotOrientation = 'ne'),
+    ### Croc
+    AccessPoint('Crocomire Room Top', 'Crocomire', {
+    }, traverse=lambda sm: sm.wor(RomPatches.has(RomPatches.CrocBlueDoors), sm.enoughStuffCroc()),
+       roomInfo = {'RoomPtr':0xa98d, "area": 0x2},
+       exitInfo = {'DoorPtr':0x93ea, 'direction': 0x7, "cap": (0xc6, 0x2d), "bitFlag": 0x0,
+                   "screen": (0xc, 0x2), "distanceToSpawn": 0x1c0, "doorAsmPtr": 0x0000,
+                   "exitAsmPtr": 0xf7f0},
+       entryInfo = {'SamusX':0x390, 'SamusY':0x98},
+       dotOrientation = 'se'),
     ### Maridia
     AccessPoint('Main Street Bottom', 'Maridia', {
         'Red Fish Room Left': lambda sm: sm.wand(sm.canGoUpMtEverest(),

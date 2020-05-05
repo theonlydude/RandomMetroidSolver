@@ -314,7 +314,7 @@ locations = [
 },
 {
     'Area': "Norfair",
-    'GraphArea': "Norfair",
+    'GraphArea': "Crocomire",
     'SolveArea': "Crocomire",
     'Name': "Energy Tank, Crocomire",
     'Class': ["Major"],
@@ -351,7 +351,7 @@ locations = [
 },
 {
     'Area': "Norfair",
-    'GraphArea': "Norfair",
+    'GraphArea': "Crocomire",
     'SolveArea': "Crocomire",
     'Name': "Grapple Beam",
     'Class': ["Major", "Chozo"],
@@ -1411,7 +1411,7 @@ locations = [
 },
 {
     'Area': "Norfair",
-    'GraphArea': "Norfair",
+    'GraphArea': "Crocomire",
     'SolveArea': "Crocomire",
     'Name': "Power Bomb (Crocomire)",
     'Class': ["Minor"],
@@ -1436,7 +1436,7 @@ locations = [
 },
 {
     'Area': "Norfair",
-    'GraphArea': "Norfair",
+    'GraphArea': "Crocomire",
     'SolveArea': "Crocomire",
     'Name': "Missile (below Crocomire)",
     'Class': ["Minor"],
@@ -1452,7 +1452,7 @@ locations = [
 },
 {
     'Area': "Norfair",
-    'GraphArea': "Norfair",
+    'GraphArea': "Crocomire",
     'SolveArea': "Crocomire",
     'Name': "Missile (Grapple Beam)",
     'Class': ["Minor"],

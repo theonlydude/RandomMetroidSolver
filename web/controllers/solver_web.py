@@ -1008,11 +1008,12 @@ def randomizer():
                 OPTGROUP(_label="Custom (Area rando only)", *startAPs["area"])]
 
     # get multi
-    multiValues = getCurrentMultiValues()
+    currentMultiValues = getCurrentMultiValues()
+    defaultMultiValues = getDefaultMultiValues()
 
     return dict(stdPresets=stdPresets, tourPresets=tourPresets, comPresets=comPresets,
                 randoPresets=randoPresets, tourRandoPresets=tourRandoPresets,
-                startAPs=startAPs, multiValues=multiValues)
+                startAPs=startAPs, currentMultiValues=currentMultiValues, defaultMultiValues=defaultMultiValues)
 
 def raiseHttp(code, msg, isJson=False):
     #print("raiseHttp: code {} msg {} isJson {}".format(code, msg, isJson))

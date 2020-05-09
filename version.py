@@ -1,2 +1,2 @@
-# the current randomizer algorithm version
-randoAlgoVersion = 20191114
+# version displayed on the title screen, must be a 10 chars [a-z0-9.-] string
+displayedVersion = 'varia.beta'

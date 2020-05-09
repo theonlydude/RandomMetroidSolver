@@ -1436,6 +1436,34 @@ class RomPatcher:
 
         return len(compressedData)
 
+    def setOamTile(self, nth, newTile):
+        # an oam entry is made of five bytes: (s000000 xxxxxxxxx) (yyyyyyyy) (YXpp000t tttttttt),
+        # tile is the last byte, as it's stored as (Word Byte Word) it's the 4th byte in the rom
+        baseAddr = 0x060105
+        oamSize = 5
+        oamAddr = baseAddr + nth * oamSize
+        oamOffset = 3
+        self.romFile.writeByte(newTile, oamAddr+oamOffset)
+
+    def writeVersion(self, version):
+        # version is either 'YYYY-MM-DD' or 'VARIA.BETA'
+        # reverse the string as oam are in japanese text order in the rom
+        version = version[::-1]
+        for (i, char) in enumerate(version):
+            self.setOamTile(i, char2tile[char])
+
+# tile number in tileset
+char2tile = {
+    '-': 207,
+    'a': 208,
+    '.': 243,
+    '0': 244
+}
+for i in range(1, ord('z')-ord('a')+1):
+    char2tile[chr(ord('a')+i)] = char2tile['a']+i
+for i in range(1, ord('9')-ord('0')+1):
+    char2tile[chr(ord('0')+i)] = char2tile['0']+i
+
 class ROM(object):
     def readWord(self, address=None):
         return self.readBytes(2, address)

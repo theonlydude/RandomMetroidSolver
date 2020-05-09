@@ -8,7 +8,6 @@ try:
 except:
     dbAvailable = False
 
-from version import randoAlgoVersion
 from parameters import easy, medium, hard, harder, hardcore, mania
 from utils import removeChars
 
@@ -451,14 +450,14 @@ order by init_time;"""
 
     @staticmethod
     def dumpExtStatsItems(parameters, locsItems, sqlFile):
-        sql = """insert into extended_stats (version, preset, area, boss, majorsSplit, progSpeed, morphPlacement, suitsRestriction, progDiff, superFunMovement, superFunCombat, superFunSuit, gravityBehaviour, nerfedCharge, maxDifficulty, startAP, count)
+        sql = """insert into extended_stats (preset, area, boss, majorsSplit, progSpeed, morphPlacement, suitsRestriction, progDiff, superFunMovement, superFunCombat, superFunSuit, gravityBehaviour, nerfedCharge, maxDifficulty, startAP, count)
 values
 (%d, '%s', %s, %s, '%s', '%s', '%s', %s, '%s', %s, %s, %s, '%s', %s, '%s', '%s', 1)
 on duplicate key update id=LAST_INSERT_ID(id), count = count + 1;
 set @last_id = last_insert_id();
 """
 
-        sqlFile.write(sql % (randoAlgoVersion, parameters['preset'], parameters['area'], parameters['boss'], parameters['majorsSplit'], parameters['progSpeed'], parameters['morphPlacement'], parameters['suitsRestriction'], parameters['progDiff'], parameters['superFunMovement'], parameters['superFunCombat'], parameters['superFunSuit'], parameters['gravityBehaviour'], parameters['nerfedCharge'], parameters['maxDifficulty'], parameters['startAP']))
+        sqlFile.write(sql % (parameters['preset'], parameters['area'], parameters['boss'], parameters['majorsSplit'], parameters['progSpeed'], parameters['morphPlacement'], parameters['suitsRestriction'], parameters['progDiff'], parameters['superFunMovement'], parameters['superFunCombat'], parameters['superFunSuit'], parameters['gravityBehaviour'], parameters['nerfedCharge'], parameters['maxDifficulty'], parameters['startAP']))
 
         for (location, item) in locsItems.items():
             if item == 'Boss':
@@ -593,9 +592,9 @@ order by 1,2;"""
         return solverStatsOut
 
     def getWhereClause(self, parameters):
-        where = """and e.version = %d and e.preset = '%s' and e.area = %s and e.boss = %s and e.gravityBehaviour = '%s' and e.nerfedCharge = %s """
+        where = """and e.preset = '%s' and e.area = %s and e.boss = %s and e.gravityBehaviour = '%s' and e.nerfedCharge = %s """
 
-        sqlParams = [randoAlgoVersion, parameters['preset'], parameters['area'], parameters['boss'], parameters['gravityBehaviour'], parameters['nerfedCharge']]
+        sqlParams = [parameters['preset'], parameters['area'], parameters['boss'], parameters['gravityBehaviour'], parameters['nerfedCharge']]
 
         if parameters["maxDifficulty"] != "random":
             where += """and e.maxDifficulty = '%s' """

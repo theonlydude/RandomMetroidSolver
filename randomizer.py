@@ -12,6 +12,7 @@ from utils import PresetLoader
 from rom_patches import RomPatches
 from rom import RomPatcher, FakeROM
 from utils import loadRandoPreset
+from version import displayedVersion
 import log, db
 
 speeds = progSpeeds + ['VARIAble']
@@ -647,6 +648,7 @@ if __name__ == "__main__":
             romPatcher.writeSpoiler(itemLocs, progItemLocs)
             romPatcher.writeRandoSettings(randoSettings, itemLocs)
             romPatcher.writeDoorConnections(doors)
+            romPatcher.writeVersion(displayedVersion)
         if ctrlDict is not None:
             romPatcher.writeControls(ctrlDict)
         if args.moonWalk == True:

@@ -130,5 +130,21 @@ croc_exit_fix:
     stz $0e1e	; clear the flag to disable enemy BG2 tilemap routine
     rts
 
+;;; door pointers for room below botwoon
+below_botwoon_doors:
+	dw $a7d4,$a534
+
 ;;; stop before generated door asm routines start
 warnpc $8ff7ff
+
+;;; add door in room below botwoon etank (room header update)
+org $8FD706
+    dw below_botwoon_doors
+
+;; update left sand hall left door to lead to it
+org $83a63c
+	dw $D6FD
+	db $00,$05,$3E,$06,$03,$00
+	dw $8000,$0000
+
+warnpc $83ae1f

@@ -260,6 +260,12 @@ patches = {
         0x78B9E: [0x54, 0xc8, 0x36, 0x02, 0x4f, 0x8c],
         0x10BB30: [0x0]
     },
+    'Blinking[Below Botwoon Energy Tank Right]': {
+        0x10DD9A: [0x0]
+    },
+    'Blinking[West Sand Hall Left]': {
+        0x10DACF: [0x0]
+    },
 }
 
 additional_PLMs = {
@@ -480,6 +486,18 @@ additional_PLMs = {
         'room': 0xa322,
         'plm_bytes_list': [
             [0x42, 0xc8, 0x2e, 0x36, 0x63, 0x8c]
+        ]
+    },
+    'Blinking[Below Botwoon Energy Tank Right]': {
+        'room': 0xd6fd,
+        'plm_bytes_list': [
+            [0x42, 0xc8, 0x3e, 0x06, 0x63, 0x8c]
+        ]
+    },
+    'Blinking[West Sand Hall Left]': {
+        'room': 0xd461,
+        'plm_bytes_list': [
+            [0x48, 0xc8, 0x01, 0x06, 0x63, 0x8c]
         ]
     },
 }

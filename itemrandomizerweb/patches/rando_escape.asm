@@ -82,7 +82,7 @@ bt_door_list:
 ;; placeholder for inside BT door to get back from animals during escape
 db $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff
 
-warnpc $83ffff
+warnpc $83ae0f
 
 ;;; CODE in bank 84 (PLM)
 org $84f070

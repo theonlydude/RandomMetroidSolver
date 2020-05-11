@@ -1,7 +1,7 @@
 import colorsys, random
 from rom import RomLoader
-from itemrandomizerweb.palettes import palettes
-from itemrandomizerweb.sprite_palettes import sprite_palettes
+from rando.palettes import palettes
+from rando.sprite_palettes import sprite_palettes
 import log
 
 #Palette Hue Shift

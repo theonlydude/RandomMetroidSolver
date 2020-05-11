@@ -1,9 +1,9 @@
 
 import re, sys, os, json, copy, base64, random
 
-from itemrandomizerweb.Items import ItemManager
-from itemrandomizerweb.patches import patches, additional_PLMs
-from itemrandomizerweb.stdlib import List
+from rando.Items import ItemManager
+from rando.patches import patches, additional_PLMs
+from rando.stdlib import List
 from compression import Compressor
 from ips import IPS_Patch
 from parameters import appDir
@@ -715,7 +715,7 @@ class RomPatcher:
             self.applyIPSPatch(patchName)
 
     def customSprite(self, sprite):
-        self.applyIPSPatch(sprite, ipsDir='itemrandomizerweb/patches/sprites')
+        self.applyIPSPatch(sprite, ipsDir='rando/patches/sprites')
 
     def applyIPSPatches(self, startAP="Landing Site",
                         optionalPatches=[], noLayout=False, suitsMode="Classic",
@@ -788,7 +788,7 @@ class RomPatcher:
         except Exception as e:
             raise Exception("Error patching {}. ({})".format(self.romFileName, e))
 
-    def applyIPSPatch(self, patchName, patchDict=None, ipsDir="itemrandomizerweb/patches"):
+    def applyIPSPatch(self, patchName, patchDict=None, ipsDir="rando/patches"):
         if patchDict is None:
             patchDict = patches
         print("Apply patch {}".format(patchName))

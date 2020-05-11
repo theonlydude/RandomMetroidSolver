@@ -1,6 +1,6 @@
 import random, sys
 
-from itemrandomizerweb.Randomizer import Randomizer
+from rando.Randomizer import Randomizer
 from graph_access import GraphUtils
 from helpers import Bosses
 

@@ -2,9 +2,9 @@
 
 import argparse, os.path, json, sys, shutil, random
 
-from itemrandomizerweb.Randomizer import Randomizer, RandoSettings, progSpeeds
-from itemrandomizerweb.AreaRandomizer import AreaRandomizer
-from itemrandomizerweb.PaletteRando import PaletteRando
+from rando.Randomizer import Randomizer, RandoSettings, progSpeeds
+from rando.AreaRandomizer import AreaRandomizer
+from rando.PaletteRando import PaletteRando
 from graph_locations import locations as graphLocations
 from graph_access import vanillaTransitions, vanillaBossesTransitions, GraphUtils
 from parameters import Knows, easy, medium, hard, harder, hardcore, mania, text2diff, diff2text

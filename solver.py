@@ -13,7 +13,7 @@ from smboolmanager import SMBoolManager
 from helpers import Pickup, Bosses
 from rom import RomLoader, RomPatcher, RomReader
 from rom_patches import RomPatches
-from itemrandomizerweb.Items import ItemManager
+from rando.Items import ItemManager
 from graph_locations import locations as graphLocations
 from graph import AccessGraph
 from graph_access import vanillaTransitions, vanillaBossesTransitions, vanillaEscapeTransitions, accessPoints, GraphUtils, getAccessPoint

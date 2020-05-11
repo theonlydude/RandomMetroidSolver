@@ -1,8 +1,8 @@
 import sys, time, copy, random
 
-from itemrandomizerweb.Items import ItemManager
+from rando.Items import ItemManager
 from parameters import Knows, isBossKnows, Settings, samus, infinity, god
-from itemrandomizerweb.stdlib import List
+from rando.stdlib import List
 from smbool import SMBool
 from helpers import Bosses, diffValue2txt
 from utils import randGaussBounds, getRangeDict, chooseFromRange

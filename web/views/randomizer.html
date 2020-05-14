@@ -358,18 +358,18 @@ function setComplexity() {
 function changeComplexity(evt, name) {
   if(name == "simple") {
     var show = [];
-    var hide = ["seedVisibility", "ammoVisibility", "maxDiffVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "morphPlacementVisibility", "superFunVisibility", "patchesVisibility", "hideItemsVisibility", "raceModeVisibility", "escapeRandoVisibility"];
+    var hide = ["seedVisibility", "ammoVisibility", "maxDiffVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "morphPlacementVisibility", "superFunVisibility", "patchesVisibility", "hideItemsVisibility", "raceModeVisibility", "escapeRandoVisibility", "helperPatchesVisibility"];
     showHide(show, hide);
   }
 
   else if(name == "medium") {
     var show = ["maxDiffVisibility", "patchesVisibility", "morphPlacementVisibility", "ammoVisibility", "nerfedChargeVisibility", "musicVisibility", "escapeRandoVisibility"];
-      var hide = ["seedVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "strictMinorsVisibility", "missileQtyVisibility", "superQtyVisibility", "powerBombQtyVisibility", "superFunVisibility", "mainPatchesVisibility", "gravityBehaviourVisibility", "mainPatchesTextVisibility", "hideItemsVisibility", "raceModeVisibility", "miscVisibility"];
+      var hide = ["seedVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "strictMinorsVisibility", "missileQtyVisibility", "superQtyVisibility", "powerBombQtyVisibility", "superFunVisibility", "mainPatchesVisibility", "gravityBehaviourVisibility", "mainPatchesTextVisibility", "hideItemsVisibility", "raceModeVisibility", "miscVisibility", "helperPatchesVisibility"];
     showHide(show, hide);
   }
 
   else {
-      var show = ["seedVisibility", "ammoVisibility", "maxDiffVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "morphPlacementVisibility", "strictMinorsVisibility", "missileQtyVisibility", "superQtyVisibility", "powerBombQtyVisibility", "superFunVisibility", "patchesVisibility", "mainPatchesVisibility", "gravityBehaviourVisibility", "mainPatchesTextVisibility", "hideItemsVisibility", "raceModeVisibility", "nerfedChargeVisibility", "miscVisibility", "musicVisibility", "escapeRandoVisibility"];
+      var show = ["seedVisibility", "ammoVisibility", "maxDiffVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "morphPlacementVisibility", "strictMinorsVisibility", "missileQtyVisibility", "superQtyVisibility", "powerBombQtyVisibility", "superFunVisibility", "patchesVisibility", "mainPatchesVisibility", "gravityBehaviourVisibility", "mainPatchesTextVisibility", "hideItemsVisibility", "raceModeVisibility", "nerfedChargeVisibility", "miscVisibility", "musicVisibility", "escapeRandoVisibility", "helperPatchesVisibility"];
     var hide = [];
     showHide(show, hide);
   }
@@ -402,7 +402,7 @@ function AjaxPresetCallCompleted(data) {
     console.log("AjaxPresetCallCompleted");
 
     var dataDict = {paramsFileTarget : data, "complexity": getComplexity()};
-    var elems = ["seed", "preset", "raceMode", "areaLayout", "removeEscapeEnemies", "layoutPatches", "variaTweaks", "gravityBehaviour", "nerfedCharge", "itemsounds", "elevators_doors_speed", "spinjumprestart", "rando_speed", "animals", "No_Music", "random_music", "maxDifficulty"];
+    var elems = ["seed", "preset", "raceMode", "areaLayout", "removeEscapeEnemies", "layoutPatches", "variaTweaks", "gravityBehaviour", "nerfedCharge", "itemsounds", "elevators_doors_speed", "spinjumprestart", "rando_speed", "animals", "No_Music", "random_music", "maxDifficulty", "Infinite_Space_Jump", "refill_before_save"];
     var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "suitsRestriction", "funCombat", "funMovement", "funSuits", "hideItems", "strictMinors", "areaRandomization", "bossRandomization", "escapeRando"];
     var multiElems = ["majorsSplit", "startLocation","energyQty", "morphPlacement", "progressionDifficulty", "progressionSpeed"];
 
@@ -568,7 +568,7 @@ function AjaxRandomizerCallCompleted(data) {
     document.getElementById("submitBtn").data = "Randomize";
 
     var dataDict = {"complexity": getComplexity()};
-    var elems = ["seed", "preset", "raceMode", "areaLayout", "removeEscapeEnemies", "layoutPatches", "variaTweaks", "gravityBehaviour", "nerfedCharge", "itemsounds", "elevators_doors_speed", "spinjumprestart", "rando_speed", "animals", "No_Music", "randoPreset", "random_music", "maxDifficulty"];
+    var elems = ["seed", "preset", "raceMode", "areaLayout", "removeEscapeEnemies", "layoutPatches", "variaTweaks", "gravityBehaviour", "nerfedCharge", "itemsounds", "elevators_doors_speed", "spinjumprestart", "rando_speed", "animals", "No_Music", "randoPreset", "random_music", "maxDifficulty", "Infinite_Space_Jump", "refill_before_save"];
     var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "suitsRestriction", "funCombat", "funMovement", "funSuits", "hideItems", "strictMinors", "areaRandomization", "bossRandomization", "escapeRando"];
     var multiElems = ["majorsSplit", "startLocation","energyQty", "morphPlacement", "progressionDifficulty", "progressionSpeed"];
 
@@ -1546,6 +1546,20 @@ Click on the dice button to randomly set this parameter.",
       placement: "auto left"
     },
     {
+      element: "#Infinite_Space_JumpStep",
+      title: "Infinite Space Jump",
+      content: "<p>Space jumps can be done quicker and at any time in air, water or lava, even after falling long distances.</p>\
+<p>This patch was developed by MetConst.</p>",
+      placement: "auto left"
+    },
+    {
+      element: "#refill_before_saveStep",
+      title: "Refill before save",
+      content: "<p>Refill energy and ammo when saving.</p>\
+<p>This patch was developed by Adam.</p>",
+      placement: "auto left"
+    },
+    {
       element: "#animalsStep",
       title: "Animals surprise",
       content: "<p>Replace saving the animals in the escape sequence by a random surprise.<br/><b>Note:</b> This setting is not available when Escape Randomization is enabled, as it is replaced by Animals Challenges (see Escape Randomization help for more information).</p>\
@@ -1932,6 +1946,20 @@ def displayNumber(id, min, max, default, step="1"):
                   <td><button type="button" onclick="startTheTour(34)">?</button></td>
                 </tr>
               </table>
+              <table class="full" id="helperPatchesVisibility">
+                <tr>
+                  <td id="Infinite_Space_JumpStep" class="half">
+                    {{displayCheckbox("Infinite_Space_Jump")}}
+                    Infinite Space Jump
+                  </td>
+                  <td><button type="button" onclick="startTheTour(35)">?</button></td>
+                  <td id="refill_before_saveStep" class="half">
+                    {{displayCheckbox("refill_before_save")}}
+                     Refill energy and ammo when saving
+                  </td>
+                  <td><button type="button" onclick="startTheTour(36)">?</button></td>
+                </tr>
+              </table>
               <table class="full">
                 <colgroup><col class="quarter" /><col class="threequarter" /><col class="check" /></colgroup>
                 <tr><td colspan="2"><h5 class="center"><b>Miscellaneous</b></h5></td><td></td></tr>
@@ -1943,7 +1971,7 @@ def displayNumber(id, min, max, default, step="1"):
                     {{displayCheckbox("animals")}}
                     <span id="animalsText">Save the animals surprise</span>
                   </td>
-                  <td><button type="button" onclick="startTheTour(35)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(37)">?</button></td>
                 </tr>
               </table>
               <table class="full" id="musicVisibility">
@@ -1952,12 +1980,12 @@ def displayNumber(id, min, max, default, step="1"):
                     {{displayCheckbox("No_Music")}}
                     Disable background music
                   </td>
-                  <td><button type="button" onclick="startTheTour(36)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(38)">?</button></td>
                   <td id="random_musicStep" class="half">
                     {{displayCheckbox("random_music")}}
                     Randomize background music
                   </td>
-                  <td><button type="button" onclick="startTheTour(37)">?</button></td>
+                  <td><button type="button" onclick="startTheTour(39)">?</button></td>
                 </tr>
               </table>
             </div>

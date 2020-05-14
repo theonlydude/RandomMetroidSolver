@@ -1142,7 +1142,8 @@ def sessionWebService():
                'funCombat', 'funMovement', 'funSuits',
                'layoutPatches', 'variaTweaks', 'nerfedCharge',
                'itemsounds', 'elevators_doors_speed', 'spinjumprestart',
-               'rando_speed', 'animals', 'No_Music', 'random_music']
+               'rando_speed', 'animals', 'No_Music', 'random_music',
+               'Infinite_Space_Jump', 'refill_before_save']
     quantities = ['missileQty', 'superQty', 'powerBombQty']
     multis = ['majorsSplit', 'progressionSpeed', 'progressionDifficulty',
               'morphPlacement', 'energyQty', 'startLocation']
@@ -1185,6 +1186,8 @@ def sessionWebService():
     session.randomizer['animals'] = request.vars.animals
     session.randomizer['No_Music'] = request.vars.No_Music
     session.randomizer['random_music'] = request.vars.random_music
+    session.randomizer['Infinite_Space_Jump'] = request.vars.Infinite_Space_Jump
+    session.randomizer['refill_before_save'] = request.vars.refill_before_save
 
     multis = ['majorsSplit', 'progressionSpeed', 'progressionDifficulty',
               'morphPlacement', 'energyQty', 'startLocation']
@@ -1223,7 +1226,8 @@ def randomizerWebService():
                'funCombat', 'funMovement', 'funSuits',
                'layoutPatches', 'variaTweaks', 'nerfedCharge',
                'itemsounds', 'elevators_doors_speed', 'spinjumprestart',
-               'rando_speed', 'animals', 'No_Music', 'random_music']
+               'rando_speed', 'animals', 'No_Music', 'random_music',
+               'Infinite_Space_Jump', 'refill_before_save']
     quantities = ['missileQty', 'superQty', 'powerBombQty']
     multis = ['majorsSplit', 'progressionSpeed', 'progressionDifficulty',
               'morphPlacement', 'energyQty', 'startLocation']
@@ -1294,6 +1298,10 @@ def randomizerWebService():
         params += ['-c', 'No_Music']
     if request.vars.random_music == 'on':
         params += ['-c', 'random_music.ips']
+    if request.vars.Infinite_Space_Jump == 'on':
+        params += ['-c', 'Infinite_Space_Jump']
+    if request.vars.refill_before_save == 'on':
+        params += ['-c', 'refill_before_save.ips']
 
     if request.vars.animals == 'on':
         params.append('--animals')
@@ -2213,6 +2221,8 @@ def initCustomizerSession():
         session.customizer['elevators_doors_speed'] = "off"
         session.customizer['No_Music'] = "off"
         session.customizer['random_music'] = "off"
+        session.customizer['Infinite_Space_Jump'] = "off"
+        session.customizer['refill_before_save'] = "off"
         session.customizer['AimAnyButton'] = "off"
         session.customizer['max_ammo_display'] = "off"
         session.customizer['supermetroid_msu1'] = "off"
@@ -2273,13 +2283,20 @@ def customizer():
                 # get a dict with seed info and another one with seed parameters
                 info = {}
                 seedParams = {}
+                infoKeys = ['time', 'filename', 'preset', 'runtime', 'complexity', 'upload_status', 'seed', 'raceMode']
                 for (k, value) in seedInfo:
-                    if k in ['time', 'filename', 'preset', 'runtime', 'complexity', 'upload_status', 'seed', 'raceMode']:
+                    if k in infoKeys:
                         info[k] = value
                     else:
                         seedParams[k] = value
                 seedInfo = info
                 seedInfo['key'] = key
+
+                # if new parameters have been added since the seed creation, add them with value "n/a"
+                defaultParams = getRandomizerDefaultParameters()
+                for k in defaultParams:
+                    if k not in infoKeys and k not in seedParams:
+                        seedParams[k] = "n/a"
 
                 # check that the seed ips is available
                 if seedInfo["upload_status"] not in ['pending', 'uploaded', 'local']:
@@ -2299,7 +2316,7 @@ def customWebService():
 
     # check validity of all parameters
     patches = ['itemsounds', 'spinjumprestart', 'rando_speed', 'elevators_doors_speed', 'No_Music', 'random_music',
-               'AimAnyButton', 'max_ammo_display', 'supermetroid_msu1']
+               'AimAnyButton', 'max_ammo_display', 'supermetroid_msu1', 'Infinite_Space_Jump', 'refill_before_save']
     others = ['colorsRandomization', 'suitsPalettes', 'beamsPalettes', 'tilesPalettes', 'enemiesPalettes',
               'bossesPalettes', 'minDegree', 'maxDegree', 'invert']
     validateWebServiceParams(patches, [], [], others, isJson=True)
@@ -2329,6 +2346,8 @@ def customWebService():
     session.customizer['elevators_doors_speed'] = request.vars.elevators_doors_speed
     session.customizer['No_Music'] = request.vars.No_Music
     session.customizer['random_music'] = request.vars.random_music
+    session.customizer['Infinite_Space_Jump'] = request.vars.Infinite_Space_Jump
+    session.customizer['refill_before_save'] = request.vars.refill_before_save
     session.customizer['AimAnyButton'] = request.vars.AimAnyButton
     session.customizer['max_ammo_display'] = request.vars.max_ammo_display
     session.customizer['supermetroid_msu1'] = request.vars.supermetroid_msu1
@@ -2356,6 +2375,10 @@ def customWebService():
         params += ['-c', 'max_ammo_display.ips']
     if request.vars.supermetroid_msu1 == 'on':
         params += ['-c', 'supermetroid_msu1.ips']
+    if request.vars.Infinite_Space_Jump == 'on':
+        params += ['-c', 'Infinite_Space_Jump']
+    if request.vars.refill_before_save == 'on':
+        params += ['-c', 'refill_before_save.ips']
 
     if request.vars.colorsRandomization == 'on':
         params.append('--palette')

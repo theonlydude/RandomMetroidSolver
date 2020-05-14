@@ -94,6 +94,9 @@ patches = {
         0x7C276: [0x0C],
         0x10CE69: [0x00]
     },
+    "Infinite_Space_Jump": {
+        0x82493: [0xEA, 0xEA, 0xEA]
+    },
     # custom load points for non standard start APs
     "Save_G4": {
         # load point entry

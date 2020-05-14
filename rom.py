@@ -167,7 +167,9 @@ class RomReader:
         'No_Music': {'address': 0x278413, 'value': 0x6f, 'vanillaValue': 0xcd},
         'random_music': {'address': 0x10F320, 'value': 0x01, 'vanillaValue': 0xff},
         'fix_suits_selection_in_menu': {'address': 0x13000, 'value': 0x90, 'vanillaValue': 0x80},
-        'traverseWreckedShip': {'address': 0x219dbf, 'value': 0xFB, 'desc': "Area layout additional access to east Wrecked Ship"}
+        'traverseWreckedShip': {'address': 0x219dbf, 'value': 0xFB, 'vanillaValue': 0xeb},
+        'Infinite_Space_Jump': {'address': 0x82493, 'value': 0xEA, 'vanillaValue': 0xf0},
+        'refill_before_save': {'address': 0x270C2, 'value': 0x98, 'vanillaValue': 0xff}
     }
 
     @staticmethod
@@ -565,7 +567,7 @@ class RomPatcher:
         'VariaTweaks' : ['WS_Etank', 'LN_Chozo_SpaceJump_Check_Disable', 'ln_chozo_platform.ips', 'bomb_torizo.ips'],
         'Layout': ['dachora.ips', 'early_super_bridge.ips', 'high_jump.ips', 'moat.ips', 'spospo_save.ips',
                    'nova_boost_platform.ips', 'red_tower.ips', 'spazer.ips', 'brinstar_map_room.ips'],
-        'Optional': ['itemsounds.ips', 'rando_speed.ips',
+        'Optional': ['itemsounds.ips', 'rando_speed.ips', 'Infinite_Space_Jump', 'refill_before_save.ips',
                      'spinjumprestart.ips', 'elevators_doors_speed.ips', 'No_Music', 'random_music.ips',
                      'skip_intro.ips', 'skip_ceres.ips', 'animal_enemies.ips', 'animals.ips',
                      'draygonimals.ips', 'escapimals.ips', 'gameend.ips', 'grey_door_animals.ips',

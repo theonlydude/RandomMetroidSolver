@@ -384,6 +384,8 @@ def getRandomizerDefaultParameters():
     defaultParams['elevators_doors_speed'] = "on"
     defaultParams['spinjumprestart'] = "off"
     defaultParams['rando_speed'] = "off"
+    defaultParams['Infinite_Space_Jump'] = "off"
+    defaultParams['refill_before_save'] = "off"
     defaultParams['animals'] = "off"
     defaultParams['No_Music'] = "off"
     defaultParams['random_music'] = "off"

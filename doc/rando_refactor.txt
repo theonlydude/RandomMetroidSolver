@@ -1,7 +1,10 @@
 
 
-Settings : inchangé, servira d'input à obj de gestion de restrictions
+Settings :
 **********
+
+juste un wrapper simple autout du dico settings avec des helpers
+mettre les isChozo, loc match etc dedans
 
 Rando setup :
 *************
@@ -15,12 +18,15 @@ Services requis :
 - smbm
 - possibilité d'arreter tout (settings invalides)
 - éléments simples du rando pour le pré-rando
+- settings
 
 Services fournis:
-- restricted items/locs : prefill les locs inaccessibles
+- restricted items/locs :
+    - prefill les locs inaccessibles
+    - donne la list des locs utiles: important pour le mini solver en hundo
 - check area layout
 - check start location
-- construction item pool final
+- construction item pool final: à amputer des items auto fillés
 - liste de locs interdites par item type (pour random fill)
 
 Variantes rando et plando/rando?
@@ -69,12 +75,12 @@ Filler :
 Fournit au rando la stratégie de fill (= generateItems)
 Besoin des settings, des restrictions, du graph, des locs, des items
 Filler Prog speed based :
-- la plupart du rando actuel hors services de base
+- helper classe type rando settings pour les choose
 - rajouter un "sous-filler" pour le chozo: attention à la gestion des items/loc pools
 - generateItem et sous fonctions sauf getPossiblePlacements
 - getItem
 - rollback at amis
-- choose* : ou plutot objet à part relié aux settings ?
+- choose*/determineParams: objet à part relié aux settings
 - fill non prog
 
 Filler Random fill
@@ -91,6 +97,7 @@ Services utilisables par les différents sous éléments :
 - getPossiblePlacements
 - currentLocations/getAvailLocs : appels à hooks dans l'objet de gestion de restrictions
 - currentAccessPoints
+- isSoftLockPossible
 
 Accès aux items/locs en container/cache, mais peut fonctionner avec d'autres listes
 Besoin smbm/graph aussi

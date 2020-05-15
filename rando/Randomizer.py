@@ -886,31 +886,6 @@ class Randomizer(object):
         self.curAccessPoints = None
         self.lateMorphResult = None
 
-    # with the new chozo split the tests change, a loc can have one or two classes, an item just one
-    def isLocMajor(self, loc):
-        return 'Boss' not in loc['Class'] and (self.restrictions['MajorMinor'] == "Full" or self.restrictions['MajorMinor'] in loc['Class'])
-
-    def isLocMinor(self, loc):
-        return 'Boss' not in loc['Class'] and (self.restrictions['MajorMinor'] == "Full" or self.restrictions['MajorMinor'] not in loc['Class'])
-
-    def isItemMajor(self, item):
-        if self.restrictions['MajorMinor'] == "Full":
-            return True
-        else:
-            return item['Class'] == self.restrictions['MajorMinor']
-
-    def isItemMinor(self, item):
-        if self.restrictions['MajorMinor'] == "Full":
-            return True
-        else:
-            return item['Class'] == "Minor"
-
-    def isItemLocMatching(self, loc, item):
-        if self.restrictions['MajorMinor'] in loc['Class']:
-            return item['Class'] == self.restrictions['MajorMinor']
-        else:
-            return item['Class'] == "Minor"
-
     # determine randomizer parameters, either statically (all speeds but variable), or dynamically (variable speed)
     def determineParameters(self):
         speed = self.settings.progSpeed
@@ -1159,23 +1134,6 @@ class Randomizer(object):
 
         return locs
 
-    def hasItemType(self, t):
-        return self.hasItemTypeInPool(t, self.currentItems)
-
-    def hasItemTypeInPool(self, t, pool=None):
-        if pool is None:
-            pool = self.itemPool
-        return any(item['Type'] == t for item in pool)
-
-    def countItemTypeInPool(self, t, pool=None):
-        if pool is None:
-            pool = self.itemPool
-        return len([item for item in pool if item['Type'] == t])
-
-    def isJunk(self, item):
-        if item['Type'] in ['Nothing', 'NoEnergy']:
-            return True
-
     def isProgItemNow(self, item):
         if self.isJunk(item):
             return False
@@ -1241,14 +1199,6 @@ class Randomizer(object):
                 ret = not self.hasItemType('Missile') or not self.hasItemType('Super') or not self.hasItemType('PowerBomb')
 
         return ret
-
-    @staticmethod
-    def isSuit(item):
-        return item['Type'] in ['Gravity', 'Varia']
-
-    @staticmethod
-    def isMorph(item):
-        return item['Type'] == 'Morph'
 
     def suitsRestrictionsImpl(self, item, location):
         return location['GraphArea'] != 'Crateria'
@@ -1807,11 +1757,6 @@ class Randomizer(object):
         return not any(loc['Name'] == 'Mother Brain' for loc in self.unusedLocations)
         # itemTypes = [item['Type'] for item in self.currentItems]
         # return self.smbm.wand(Bosses.allBossesDead(self.smbm), self.smbm.enoughStuffTourian())
-
-    def getNextItemInPool(self, t, pool=None):
-        if pool is None:
-            pool = self.itemPool
-        return next(item for item in pool if item['Type'] == t)
 
     # fill up unreachable locations with "junk" to maximize the chance of the ROM
     # to be finishable

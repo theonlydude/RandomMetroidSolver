@@ -312,7 +312,7 @@ locations = [
 },
 {
     'Area': "Norfair",
-    'GraphArea': "Norfair",
+    'GraphArea': "Crocomire",
     'SolveArea': "Crocomire",
     'Name': "Energy Tank, Crocomire",
     'Class': ["Major"],
@@ -322,7 +322,7 @@ locations = [
     'Visibility': "Visible",
     'Room': "Crocomire's Room",
     'AccessFrom' : {
-        'Croc Zone': lambda sm: SMBool(True)
+        'Crocomire Room Top': lambda sm: SMBool(True)
     },
     'Available': lambda sm: sm.wand(sm.enoughStuffCroc(),
                                     sm.wor(sm.haveItem('Grapple'),
@@ -349,7 +349,7 @@ locations = [
 },
 {
     'Area': "Norfair",
-    'GraphArea': "Norfair",
+    'GraphArea': "Crocomire",
     'SolveArea': "Crocomire",
     'Name': "Grapple Beam",
     'Class': ["Major", "Chozo"],
@@ -359,7 +359,7 @@ locations = [
     'Visibility': "Chozo",
     'Room': 'Grapple Beam Room',
     'AccessFrom' : {
-        'Croc Zone': lambda sm: SMBool(True)
+        'Crocomire Room Top': lambda sm: SMBool(True)
     },
     'Available': lambda sm: sm.wand(sm.enoughStuffCroc(),
                                     sm.wor(sm.wand(sm.haveItem('Morph'),
@@ -1347,7 +1347,7 @@ locations = [
                                                       sm.wor(sm.wand(sm.haveItem('Morph'),
                                                                      sm.knowsMockball()),
                                                              sm.haveItem('SpeedBooster'))),
-        'Croc Zone': lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Croc -> Ice Missiles']),
+        'Crocomire Room Top': lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Croc -> Ice Missiles']),
                                         sm.haveItem('SpeedBooster'),
                                         sm.knowsIceMissileFromCroc())
     },
@@ -1365,7 +1365,7 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Crocomire Escape',
     'AccessFrom' : {
-        'Croc Zone': lambda sm: sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Croc -> Grapple Escape Missiles'])
+        'Crocomire Room Top': lambda sm: sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Croc -> Grapple Escape Missiles'])
     },
     'Available': lambda sm: sm.canGrappleEscape()
 },
@@ -1405,7 +1405,7 @@ locations = [
 },
 {
     'Area': "Norfair",
-    'GraphArea': "Norfair",
+    'GraphArea': "Crocomire",
     'SolveArea': "Crocomire",
     'Name': "Power Bomb (Crocomire)",
     'Class': ["Minor"],
@@ -1415,7 +1415,7 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Post Crocomire Power Bomb Room',
     'AccessFrom' : {
-        'Croc Zone': lambda sm: sm.energyReserveCountOk(1)
+        'Crocomire Room Top': lambda sm: sm.energyReserveCountOk(1)
     },
     'Available': lambda sm: sm.wand(sm.enoughStuffCroc(),
                                     sm.wor(sm.wor(sm.canFly(),
@@ -1430,7 +1430,7 @@ locations = [
 },
 {
     'Area': "Norfair",
-    'GraphArea': "Norfair",
+    'GraphArea': "Crocomire",
     'SolveArea': "Crocomire",
     'Name': "Missile (below Crocomire)",
     'Class': ["Minor"],
@@ -1440,13 +1440,13 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Post Crocomire Missile Room',
     'AccessFrom' : {
-        'Croc Zone': lambda sm: SMBool(True)
+        'Crocomire Room Top': lambda sm: SMBool(True)
     },
     'Available': lambda sm: sm.wand(sm.canOpenRedDoors(), sm.enoughStuffCroc(), sm.haveItem('Morph'))
 },
 {
     'Area': "Norfair",
-    'GraphArea': "Norfair",
+    'GraphArea': "Crocomire",
     'SolveArea': "Crocomire",
     'Name': "Missile (Grapple Beam)",
     'Class': ["Minor"],
@@ -1456,7 +1456,7 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Post Crocomire Jump Room',
     'AccessFrom' : {
-        'Croc Zone': lambda sm: SMBool(True)
+        'Crocomire Room Top': lambda sm: SMBool(True)
     },
     'Available': lambda sm: sm.wand(sm.enoughStuffCroc(),
                                     sm.wor(sm.wor(sm.wand(sm.haveItem('Morph'), # from below

@@ -590,6 +590,17 @@ class RomPatcher:
         # loc name to alternate address. we still write to original
         # address to help the RomReader.
         self.altLocsAddresses = {}
+        # specific fixes for area rando connections
+        self.roomConnectionSpecific = {
+            # fix scrolling sky when transitioning to west ocean
+            0x93fe: self.patchWestOcean
+        }
+        self.doorConnectionSpecific = {
+            # get out of kraid room: reload CRE
+            0x91ce: self.forceRoomCRE,
+            # get out of croc room: reload CRE
+            0x93ea: self.forceRoomCRE
+        }
 
     def end(self):
         self.romFile.close()
@@ -1281,10 +1292,10 @@ class RomPatcher:
 #            print('Writing door connection ' + conn['ID'])
             doorPtr = conn['DoorPtr']
             roomPtr = conn['RoomPtr']
-            if roomPtr == 0x93fe: # west ocean
-                self.patchWestOcean(doorPtr)
-            if doorPtr == 0x91ce: # kraid room exit door
-                self.patchKraidExit(roomPtr)
+            if doorPtr in self.doorConnectionSpecific:
+                self.doorConnectionSpecific[doorPtr](roomPtr)
+            if roomPtr in self.roomConnectionSpecific:
+                self.roomConnectionSpecific[roomPtr](doorPtr)
             self.romFile.seek(0x10000 + doorPtr)
 
             # write room ptr
@@ -1358,11 +1369,11 @@ class RomPatcher:
     def patchWestOcean(self, doorPtr):
         self.romFile.writeWord(doorPtr, 0x7B7BB)
 
-    # forces CRE graphics refresh when exiting kraid's room in boss rando
-    def patchKraidExit(self, roomPtr):
+    # forces CRE graphics refresh when exiting kraid's or croc room
+    def forceRoomCRE(self, roomPtr, creFlag=0x2):
         # Room ptr in bank 8F + CRE flag offset
         offset = 0x70000 + roomPtr + 0x8
-        self.romFile.writeByte(0x2, offset)
+        self.romFile.writeByte(creFlag, offset)
 
     buttons = {
         "Select" : [0x00, 0x20],

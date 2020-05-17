@@ -48,8 +48,8 @@ class RandoSetup(object):
     def fillRestrictedLocations(self):
 #        isChozo = self.restrictions['MajorMinor'] == 'Chozo'
         for loc in self.restrictedLocations:
-            isMajor = self.services.isLocMajor(loc)
-            isMinor = self.services.isLocMinor(loc)
+            isMajor = self.services.restrictions.isLocMajor(loc)
+            isMinor = self.services.restrictions.isLocMinor(loc)
             # if isChozo:
             #     if isMajor: # chozo loc
             #         self.itemPool = self.chozoItemPool
@@ -95,17 +95,18 @@ class RandoSetup(object):
         startOk = True
 #        self.rando.computeLateMorphLimit()
         self.sm.resetItems()
-        curLocs = self.services.currentLocations(container=container)
+        curLocs = self.services.currentLocations(ap, container)
 #        state = RandoState(self.rando, curLocs)
 #        self.rando.determineParameters()
         for i in range(4):
             # services need restrictions object
-            itemLoc = self.services.generateItem(curLocs, container=container)
+            itemLoc = self.services.generateItem(curLocs, container)
             if itemLoc is None:
                 startOk = False
                 break
-            container.collect(itemLoc)
-            curLocs = self.services.currentLocations(container=container)
+            container.collect(itemLoc)            
+            ap = self.services.updateAP(ap, container, itemLoc)
+            curLocs = self.services.currentLocations(ap, container)
 #        state.apply(self.rando)
         self.log.debug("********* PRE RANDO END")
 

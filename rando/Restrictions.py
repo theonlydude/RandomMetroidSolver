@@ -1,14 +1,31 @@
 
 
 class Restrictions(object):
-    def __init__(self, settings, services):
+    def __init__(self, settings):
         self.settings = settings
-        self.services = services
         self.checkers = self.getCheckers()
 
+    def isLocMajor(self, loc):
+        return 'Boss' not in loc['Class'] and (self.settings.restrictions['MajorMinor'] == "Full" or self.settings.restrictions['MajorMinor'] in loc['Class'])
+
+    def isLocMinor(self, loc):
+        return 'Boss' not in loc['Class'] and (self.settings.restrictions['MajorMinor'] == "Full" or self.settings.restrictions['MajorMinor'] not in loc['Class'])
+
+    def isItemMajor(self, item):
+        if self.settings.restrictions['MajorMinor'] == "Full":
+            return True
+        else:
+            return item['Class'] == self.settings.restrictions['MajorMinor']
+
+    def isItemMinor(self, item):
+        if self.settings.restrictions['MajorMinor'] == "Full":
+            return True
+        else:
+            return item['Class'] == "Minor"
+
     def isItemLocMatching(item, loc):
-        if self.restrictions['MajorMinor'] in loc['Class']:
-            return item['Class'] == self.restrictions['MajorMinor']
+        if self.settings.restrictions['MajorMinor'] in loc['Class']:
+            return item['Class'] == self.settings.restrictions['MajorMinor']
         else:
             return item['Class'] == "Minor"
 
@@ -26,19 +43,17 @@ class Restrictions(object):
             checkers.append(self.isItemLocMatching)
         if restrictions['Suits']:
             checkers.append(lambda item, loc: not isSuit(item) or loc['GraphArea'] != 'Crateroa')
-        if self.restrictions['Morph'] == 'late':
+        if self.settings.restrictions['Morph'] == 'late':
             checkers.append(lambda item, loc: not isMorph(item) or self.lateMorphCheck(location))
         # TODO add checker for random fill is random fill in settings
         return checkers        
 
-    def canPlaceAtLocation(self, item, location, checkSoftlock=False):
+    def canPlaceAtLocation(self, item, location):
         ret = True
         for chk in self.checkers:
             ret = ret and chk(item, location)
             if not ret:
                 break
-        if ret and checkSoftlock == True:
-            ret = self.services.isSoftlockPossible(item, location)
         return ret
 
         # # plando locs are not available

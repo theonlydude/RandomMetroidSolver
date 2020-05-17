@@ -1,5 +1,5 @@
 
-
+from rando.Items import ItemManager
 
 class RandoSettings(object):
     def __init__(self, startAP, maxDiff, progSpeed, progDiff, qty, restrictions,
@@ -17,24 +17,6 @@ class RandoSettings(object):
         self.escapeRando = escapeRando
         self.vcr = vcr
         self.plandoRando = plandoRando
-
-    def isLocMajor(self, loc):
-        return 'Boss' not in loc['Class'] and (self.restrictions['MajorMinor'] == "Full" or self.restrictions['MajorMinor'] in loc['Class'])
-
-    def isLocMinor(self, loc):
-        return 'Boss' not in loc['Class'] and (self.restrictions['MajorMinor'] == "Full" or self.restrictions['MajorMinor'] not in loc['Class'])
-
-    def isItemMajor(self, item):
-        if self.restrictions['MajorMinor'] == "Full":
-            return True
-        else:
-            return item['Class'] == self.restrictions['MajorMinor']
-
-    def isItemMinor(self, item):
-        if self.restrictions['MajorMinor'] == "Full":
-            return True
-        else:
-            return item['Class'] == "Minor"
 
     def getItemManager(self, smbm):
         return ItemManager(self.restrictions['MajorMinor'], self.qty, self.smbm)

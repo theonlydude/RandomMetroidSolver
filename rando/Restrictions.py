@@ -4,28 +4,37 @@ class Restrictions(object):
     def __init__(self, settings):
         self.settings = settings
         self.checkers = self.getCheckers()
+        self.split = settings.restrictions['MajorMinor']
+
+    def isEarlyMorph(self):
+        return self.settings.restrictions['Morph'] == 'early'
+
+    def isLateMorph(self):
+        return self.settings.restrictions['Morph'] == 'late'
 
     def isLocMajor(self, loc):
-        return 'Boss' not in loc['Class'] and (self.settings.restrictions['MajorMinor'] == "Full" or self.settings.restrictions['MajorMinor'] in loc['Class'])
+        return 'Boss' not in loc['Class'] and (self.split == "Full" or self.split in loc['Class'])
 
     def isLocMinor(self, loc):
-        return 'Boss' not in loc['Class'] and (self.settings.restrictions['MajorMinor'] == "Full" or self.settings.restrictions['MajorMinor'] not in loc['Class'])
+        return 'Boss' not in loc['Class'] and (self.split == "Full" or self.split not in loc['Class'])
 
     def isItemMajor(self, item):
-        if self.settings.restrictions['MajorMinor'] == "Full":
+        if self.split == "Full":
             return True
         else:
-            return item['Class'] == self.settings.restrictions['MajorMinor']
+            return item['Class'] == self.split
 
     def isItemMinor(self, item):
-        if self.settings.restrictions['MajorMinor'] == "Full":
+        if self.split == "Full":
             return True
         else:
             return item['Class'] == "Minor"
 
     def isItemLocMatching(item, loc):
-        if self.settings.restrictions['MajorMinor'] in loc['Class']:
-            return item['Class'] == self.settings.restrictions['MajorMinor']
+        if self.split == "Full":
+            return True
+        if self.split in loc['Class']:
+            return item['Class'] == self.split
         else:
             return item['Class'] == "Minor"
 
@@ -37,8 +46,7 @@ class Restrictions(object):
     
     def getCheckers(self):
         checkers = []
-        checkers.append(lambda item, loc: not (item['Type'] == 'Boss' and not 'Boss' in location['Class']))
-        checkers.append(lambda item, loc: not ('Boss' in location['Class'] and not item['Type'] == 'Boss'))
+        checkers.append(lambda item, loc: not 'Boss' in loc['Class'] or item['Name'] == loc['Name'])
         if restrictions['MajorMinor'] != 'Full':
             checkers.append(self.isItemLocMatching)
         if restrictions['Suits']:

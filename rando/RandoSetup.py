@@ -3,16 +3,17 @@ from helpers import Bosses
 
 class RandoSetup(object):
     # give the rando since we have to access services from it
-    def __init__(self, smbm, startAP, graph, locations, settings, services):
+    def __init__(self, smbm, startAP, locations, services):
         self.sm = smbm
         self.startAP = startAP
-        self.settings = settings
-        self.itemManager = settings.getItemManager(smbm)
-        self.superFun = settings.superFun
+        self.settings = services.settings
+        self.itemManager = self.settings.getItemManager(smbm)
+        self.superFun = self.settings.superFun
         self.container = None
         self.services = services
+        self.restrictions = services.restrictions
         self.locations = locations
-        self.areaGraph = graph
+        self.areaGraph = services.areaGraph
         self.forbiddenItems = []
         self.restrictedLocs = []
         self.lastRestricted = []
@@ -48,8 +49,8 @@ class RandoSetup(object):
     def fillRestrictedLocations(self):
 #        isChozo = self.restrictions['MajorMinor'] == 'Chozo'
         for loc in self.restrictedLocations:
-            isMajor = self.services.restrictions.isLocMajor(loc)
-            isMinor = self.services.restrictions.isLocMinor(loc)
+            isMajor = self.restrictions.isLocMajor(loc)
+            isMinor = self.restrictions.isLocMinor(loc)
             # if isChozo:
             #     if isMajor: # chozo loc
             #         self.itemPool = self.chozoItemPool
@@ -89,6 +90,7 @@ class RandoSetup(object):
            (('needsPreRando' not in ap.Start or not ap.Start['needsPreRando']) and \
             ('areaMode' not in ap.Start or not ap.Start['areaMode'])):
             return True
+        # FIXME : remove this...instantiate a basic filler and run it for 4 steps
         self.log.debug("********* PRE RANDO START")
         container = copy.copy(self.container)
         itemLoc = None

@@ -269,9 +269,7 @@ locations = [
     'AccessFrom' : {
         'KraidRoomIn': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: sm.enoughStuffsKraid(),
-    'Pickup': lambda: Bosses.beatBoss('Kraid'),
-    'Unpickup': lambda: Bosses.unbeatBoss('Kraid')
+    'Available': lambda sm: sm.enoughStuffsKraid()
 },
 {
     'Area': "Brinstar",
@@ -443,9 +441,7 @@ locations = [
     'AccessFrom' : {
         'RidleyRoomIn': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']), sm.enoughStuffsRidley()),
-    'Pickup': lambda: Bosses.beatBoss('Ridley'),
-    'Unpickup': lambda: Bosses.unbeatBoss('Ridley')
+    'Available': lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']), sm.enoughStuffsRidley())
 },
 {
     'Area': "LowerNorfair",
@@ -557,9 +553,7 @@ locations = [
     'AccessFrom' : {
         'PhantoonRoomIn': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: sm.enoughStuffsPhantoon(),
-    'Pickup': lambda: Bosses.beatBoss('Phantoon'),
-    'Unpickup': lambda: Bosses.unbeatBoss('Phantoon')
+    'Available': lambda sm: sm.enoughStuffsPhantoon()
 },
 {
     'Area': "WreckedShip",

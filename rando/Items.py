@@ -142,12 +142,31 @@ class ItemManager:
             'Code': 0xeedb,
             'Name': "No Energy"
         },
-        'Boss': {
-            'Category': 'Nothing',
-            'Class': 'Minor',
-            'Code': 0xeedb,
-            'Name': "Boss"
-        }
+        'Kraid': {
+            'Category': 'Boss',
+            'Class': 'Boss',
+            'Name': "Kraid"
+        },
+        'Phantoon': {
+            'Category': 'Boss',
+            'Class': 'Boss',
+            'Name': "Phantoon"
+        },
+        'Draygon': {
+            'Category': 'Boss',
+            'Class': 'Boss',
+            'Name': "Phantoon"
+        },
+        'Ridley': {
+            'Category': 'Boss',
+            'Class': 'Boss',
+            'Name': "Ridley"
+        },
+        'MotherBrain': {
+            'Category': 'Boss',
+            'Class': 'Boss',
+            'Name': "Mother Brain"
+        },
     }
 
     @staticmethod
@@ -199,8 +218,8 @@ class ItemManager:
         self.itemPool = []
         if addBosses == True:
             # for the bosses
-            for i in range(5):
-                self.addMinor('Boss')
+            for boss in ['Kraid', 'Phantoon', 'Draygon', 'Ridley', 'MotherBrain']:
+                self.addMinor(boss)
 
     def getItemPool(self):
         return self.itemPool

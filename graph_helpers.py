@@ -135,7 +135,7 @@ class HelpersGraph(Helpers):
     @Cache.decorator
     def canPassBowling(self):
         sm = self.smbm
-        return sm.wand(Bosses.bossDead('Phantoon'),
+        return sm.wand(Bosses.bossDead(sm, 'Phantoon'),
                        sm.wor(sm.heatProof(),
                               sm.energyReserveCountOk(1),
                               sm.haveItem("SpaceJump"),
@@ -522,7 +522,7 @@ class HelpersGraph(Helpers):
     @Cache.decorator
     def canPassCacatacAlley(self):
         sm = self.smbm
-        return sm.wand(Bosses.bossDead('Draygon'),
+        return sm.wand(Bosses.bossDead(sm, 'Draygon'),
                        sm.wor(sm.haveItem('Gravity'),
                               sm.wand(sm.knowsGravLessLevel2(),
                                       sm.haveItem('HiJump'),
@@ -616,11 +616,13 @@ class HelpersGraph(Helpers):
                               sm.knowsDraygonRoomGrappleExit()),
                       sm.canDoubleSpringBallJump())
 
-    def canExitDraygon(self):
+    def canExitDraygon(self):        
         if self.isVanillaDraygon():
-            return self.canExitDraygonVanilla()
+            return sm.wand(Bosses.bossDead(sm, 'Draygon'),
+                           self.canExitDraygonVanilla())
         else:
-            return self.canExitDraygonRandomized()
+            return sm.wand(Bosses.bossDead(sm, 'Draygon'),
+                           self.canExitDraygonRandomized())
 
     @Cache.decorator
     def canExitPreciousRoomVanilla(self):

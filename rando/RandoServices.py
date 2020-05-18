@@ -1,5 +1,5 @@
 
-import log, copy
+import log, copy, random
 
 class ItemWrapper(object): # to put items in dictionaries
     def __init__(self, item):
@@ -96,14 +96,9 @@ class RandoServices(object):
         # disable check for early game and MB
         if loc['Name'] == 'Bomb' or loc['Name'] == 'Mother Brain':
             return False
-        isPickup = 'Pickup' in loc
-        if isPickup:
-            loc['Pickup']()
         # if the loc forces us to go to an area we can't come back from
         comeBack = loc['accessPoint'] == ap or \
             self.areaGraph.canAccess(sm, loc['accessPoint'], ap, self.settings.maxDiff, item['Type'])
-        if isPickup:
-            loc['Unpickup']()
         if not comeBack:
             self.log.debug("KO come back from " + loc['accessPoint'] + " to " + ap + " when trying to place " + item['Type'] + " at " + loc['Name'])
             return True
@@ -140,11 +135,12 @@ class RandoServices(object):
         newLocations = [loc for loc in self.currentLocations(ap, container, item) if loc not in oldLocations]
         ret = len(newLocations) > 0 and any(self.restrictions.isItemLocMatching(item, loc) for loc in newLocations)
         self.log.debug('checkItem. item=' + item['Type'] + ', newLocs=' + str([loc['Name'] for loc in newLocations]))
-        if ret == False and self.restrictions.split == 'Major':
+        if ret == False and len(newLocations) > 0 and self.restrictions.split == 'Major':
             # in major/minor split, still consider minor locs as
             # progression if not all types are distributed
-            ret = not container.hasItemType('Missile') or not container.hasItemType('Super') or not container.hasItemType('PowerBomb')
-
+            ret = not sm.haveItem('Missile').bool \
+                  or not sm.haveItem('Super').bool \
+                  or not sm.haveItem('PowerBomb').bool
         return ret
 
     def getPossiblePlacements(self, ap, container, curLocs, justComeback):
@@ -163,12 +159,12 @@ class RandoServices(object):
                 nonProgList = [loc for loc in self.currentLocations(ap, container) if self.fullComebackCheck(sm, ap, itemObj, loc, justComeback)] # we don't care what the item is
                 self.log.debug("nonProgLocList="+str([loc['Name'] for loc in nonProgList]))
             return [loc for loc in nonProgList if self.restrictions.canPlaceAtLocation(itemObj, loc)]
-        # boss handling : check bosses we can kill and come back from. return immediately if found
-        boss = container.getNextItemInPoolFromCategory("Boss")
-        if boss is not None:
+        # boss handling : check bosses we can kill and come back from. return immediately if one found        
+        if container.hasItemCategoryInPool('Boss'):
             bossLocs = getLocList(boss, [loc for loc in curLocs if 'Boss' in loc['Class']])
             if len(bossLocs) > 0:
-                itemLocDict[ItemWrapper(boss)] = bossLocs
+                boss = container.getNextItemInPoolFromCategory('Boss')                
+                itemLocDict[ItemWrapper(boss)] = [next(loc for loc in bossLocs if loc['Name'] == boss['Name'])]
                 return (itemLocDict, False)
         for itemType,items in sorted(poolDict.items()):
             itemObj = items[0]
@@ -203,18 +199,21 @@ class RandoServices(object):
                 # let's see if we can place it anyway in the context of a combo
                 morphLocs = getLocList(morph, curLocs)
                 if len(morphLocs) > 0:
+                    # copy our context to do some destructive checks
                     containerCpy = copy.copy(container)
+                    # choose a morph item location in that context
                     morphItemLoc = {
                         'Item':morph,
-                        'Location':random.choice(morphLocs)
+                        'Location':random.choice(containerCpy.extractLocs(morphLocs))
                     }
-                    containerCpy.collect()
-                    # acquire morph and see if we can still open new locs
-                    self.getItem({}, pool=pool, locs=locs, showDot=False)
-                    (ild, poss) = self.getPossiblePlacements(pool, self.currentLocations(locs=locs), locs=locs)
+                    # acquire morph in new context and see if we can still open new locs
+                    containerCpy.collect(morphItemLoc)
+                    newAP = self.getCollectAP(ap, container, morphItemLoc)
+                    newCurLocs = self.currentLocations(newAP, containerCpy)
+                    (ild, poss) = self.getPossiblePlacements(newAP, containerCpy, newCurLocs, justComeback)
                     if poss:
+                        # it's possible, add morph and its locations from our context
                         itemLocDict[ItemWrapper(morph)] = morphLocs
-                    state.apply(self) # restore consistent state
         if self.log.getEffectiveLevel() == logging.DEBUG:
             debugDict = {}
             for w, locList in itemLocDict.items():
@@ -223,3 +222,30 @@ class RandoServices(object):
             self.log.debug('itemLocDict='+str(debugDict))
             self.log.debug('possibleProg='+str(possibleProg))
         return (itemLocDict, possibleProg)
+
+    # check if bosses are blocking the last remaining locations.
+    # accurate most of the time, still a heuristic
+    def onlyBossesLeft(self, ap, container):
+        self.log.debug('onlyBossesLeft, diff=' + str(self.difficultyTarget))
+        sm = container.sm
+        bossesLeft = container.getAllItemsInPoolFromCategory('Boss')
+        if len(bossesLeft) > 0:
+            return False
+        nextBoss = container.getNextItemInPoolFromCategory('Boss')
+        def getLocList():
+            return [loc for loc in self.currentLocations(ap, container) if self.fullComebackCheck(sm, ap, nextBoss, loc, True)]
+        prevLocs = getLocList()
+        # fake kill all bosses and see if we can access the rest of the game
+        for boss in bossesLeft:
+            sm.addItem(boss['Type'])
+        # get bosses locations and newly accessible locations (for bosses that open up locs)
+        newLocs = getLocList()
+        locs = newLocs + container.getLocs(lambda loc: 'Boss' in loc['Class'] and not loc in newLocs)
+        ret = (len(locs) > len(prevLocs) and len(locs) == len(container.unusedLocations))
+        # restore bosses killed state
+        for boss in bossesLeft:
+            sm.removeItem(boss['Type'])
+        return ret
+
+    def canEndGame(self, container):
+        return not any(loc['Name'] == 'Mother Brain' for loc in container.unusedLocations)

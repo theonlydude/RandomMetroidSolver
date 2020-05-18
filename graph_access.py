@@ -166,9 +166,9 @@ accessPoints = [
        dotOrientation = 'w'),
     AccessPoint('Wrecked Ship Main', 'WreckedShip', {
         'West Ocean Left': lambda sm: SMBool(True),
-        'Wrecked Ship Back': lambda sm: sm.wor(sm.wand(Bosses.bossDead('Phantoon'),
+        'Wrecked Ship Back': lambda sm: sm.wor(sm.wand(Bosses.bossDead(sm, 'Phantoon'),
                                                        sm.canPassSpongeBath()),
-                                               sm.wand(sm.wnot(Bosses.bossDead('Phantoon')),
+                                               sm.wand(sm.wnot(Bosses.bossDead(sm, 'Phantoon')),
                                                        RomPatches.has(RomPatches.SpongeBathBlueDoor))),
         'PhantoonRoomOut': lambda sm: sm.wand(sm.canOpenGreenDoors(), sm.canPassBombPassages())
     }, internal=True,
@@ -517,7 +517,7 @@ accessPoints = [
     AccessPoint('Toilet Top', 'Maridia', {
         'Oasis Bottom': lambda sm: sm.wand(sm.canOpenGreenDoors(), sm.canDestroyBombWallsUnderwater()),
         'Le Coude Right': lambda sm: SMBool(True),
-        'Precious Room Top': lambda sm: sm.wand(Bosses.bossDead('Draygon'),
+        'Precious Room Top': lambda sm: sm.wand(Bosses.bossDead(sm, 'Draygon'),
                                                 # suitless could be possible with this but unreasonable: https://youtu.be/rtLwytH-u8o
                                                 sm.haveItem('Gravity'),
                                                 sm.canOpenGreenDoors())
@@ -597,14 +597,18 @@ accessPoints = [
        entryInfo = {'SamusX':0x34, 'SamusY':0x288},
        traverse=lambda sm: sm.canOpenRedDoors(),
        dotOrientation = 'e'),
-    AccessPoint('DraygonRoomIn', 'Maridia', {},
-       boss = True,
+    AccessPoint('DraygonRoomIn', 'Maridia', {
+        'Draygon Room Bottom': lambda sm: sm.wand(canFightDraygon(),
+                                                  sm.enoughStuffsDraygon())
+    }, boss = True,
        roomInfo = {'RoomPtr':0xda60, "area": 0x4},
        exitInfo = {'DoorPtr':0xa96c, 'direction': 0x4, "cap": (0x1, 0x26), "bitFlag": 0x0,
                    "screen": (0x0, 0x2), "distanceToSpawn": 0x8000, "doorAsmPtr": 0xe3d9},
        entryInfo = {'SamusX':0x1c8, 'SamusY':0x88},
-       traverse = lambda sm: sm.canExitDraygon(),
        dotOrientation = 'e'),
+    AccessPoint('Draygon Room Bottom', 'Maridia', {
+       'DraygonRoomIn': lambda sm: sm.canExitDraygon()
+    }, internal = True),
     # escape APs
     AccessPoint('Crab Hole Bottom Right', 'Maridia', {
         'Crab Hole Bottom Left': lambda sm: SMBool(True)

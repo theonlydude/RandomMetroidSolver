@@ -734,49 +734,26 @@ class Bosses:
         'WreckedShip Top': 'Phantoon'
     }
 
-    golden4Dead = {
-        'Kraid' : False,
-        'Phantoon' : False,
-        'Draygon' : False,
-        'Ridley' : False
-    }
+    @staticmethod
+    def Golden4():
+        return ['Kraid', 'Phantoon', 'Draygon', 'Ridley']
 
     @staticmethod
-    def bosses():
-        return Bosses.golden4Dead.keys()
+    def bossDead(sm, boss):
+        return sm.haveItem(boss)
 
     @staticmethod
-    def reset():
-        for boss in Bosses.golden4Dead:
-            Bosses.golden4Dead[boss] = False
-
-    @staticmethod
-    def bossDead(boss):
-        return SMBool(Bosses.golden4Dead[boss], 0)
-
-    @staticmethod
-    def beatBoss(boss):
-        if boss in Bosses.golden4Dead:
-            Bosses.golden4Dead[boss] = True
-
-    @staticmethod
-    def unbeatBoss(boss):
-        if boss in Bosses.golden4Dead:
-            Bosses.golden4Dead[boss] = False
-
-    @staticmethod
-    def areaBossDead(area):
+    def areaBossDead(sm, area):
         if area not in Bosses.areaBosses:
             return True
-        return Bosses.golden4Dead[Bosses.areaBosses[area]]
+        return Bosses.bossDead(sm, Bosses.areaBosses[area])
 
     @staticmethod
     def allBossesDead(smbm):
-        return smbm.wand(Bosses.bossDead('Kraid'),
-                         Bosses.bossDead('Phantoon'),
-                         Bosses.bossDead('Draygon'),
-                         Bosses.bossDead('Ridley'))
-
+        return smbm.wand(Bosses.bossDead(smbm, 'Kraid'),
+                         Bosses.bossDead(smbm, 'Phantoon'),
+                         Bosses.bossDead(smbm, 'Draygon'),
+                         Bosses.bossDead(smbm, 'Ridley'))
 
 def diffValue2txt(diff):
     last = 0

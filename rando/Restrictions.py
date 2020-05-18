@@ -51,7 +51,7 @@ class Restrictions(object):
             checkers.append(self.isItemLocMatching)
         if restrictions['Suits']:
             checkers.append(lambda item, loc: not isSuit(item) or loc['GraphArea'] != 'Crateroa')
-        if self.settings.restrictions['Morph'] == 'late':
+        if self.isLateMorph():
             checkers.append(lambda item, loc: not isMorph(item) or self.lateMorphCheck(location))
         # TODO add checker for random fill is random fill in settings
         return checkers        

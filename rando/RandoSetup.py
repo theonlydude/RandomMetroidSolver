@@ -1,5 +1,6 @@
 import copy, log
 from helpers import Bosses
+from graph_access import getAccessPoint
 
 class RandoSetup(object):
     # give the rando since we have to access services from it
@@ -38,9 +39,13 @@ class RandoSetup(object):
 
     def createItemLocContainer(self):
         self.getForbidden()
-        if not self.checkPool() or not self.checkStart():
+        if not self.checkPool():
             return None
         self.container = ItemLocContainer(self.sm, self.getItemPool(), self.locations)
+        # checkStart needs the container
+        if not self.checkStart():
+            self.container = None
+            return None
         self.fillRestrictedLocations()
         return self.container
 
@@ -134,9 +139,7 @@ class RandoSetup(object):
         # give us everything and beat every boss to see what we can access
         self.disableBossChecks()
         self.sm.resetItems()
-        self.sm.addItems([item['Type'] for item in pool])
-        for boss in self.bossChecks:
-            Bosses.beatBoss(boss)
+        self.sm.addItems([item['Type'] for item in pool]) # will add bosses as well
         # get restricted locs
         totalAvailLocs = []
         comeBack = {}
@@ -170,10 +173,9 @@ class RandoSetup(object):
                     self.log.debug("unavail Boss: " + loc['Name'])
             if ret:
                 # revive bosses and see if phantoon doesn't block himself, and if we can reach draygon if she's alive
-                Bosses.reset()
                 # reset cache
                 self.sm.resetItems()
-                self.sm.addItems([item['Type'] for item in pool])
+                self.sm.addItems([item['Type'] for item in pool if item['Category'] != 'Boss'])
                 maxDiff = self.settings.difficultyTarget
                 ret = self.areaGraph.canAccess(self.sm, 'PhantoonRoomOut', 'PhantoonRoomIn', maxDiff)\
                       and self.areaGraph.canAccess(self.sm, 'Main Street Bottom', 'DraygonRoomIn', maxDiff)
@@ -190,7 +192,6 @@ class RandoSetup(object):
         #     self.log.debug('checkPool. nRestrictedChozo='+str(nRestrictedChozo)+', nNothingChozo='+str(nNothingChozo))
         # cleanup
         self.sm.resetItems()
-        Bosses.reset()
         self.restoreBossChecks()
         self.log.debug('checkPool. result: '+str(ret))
         return ret

@@ -254,7 +254,7 @@ locations = [
     'AccessFrom' : {
         'Warehouse Zeela Room Left': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: Bosses.bossDead('Kraid')
+    'Available': lambda sm: Bosses.bossDead(sm, 'Kraid')
 },
 {
     'Area': "Brinstar",
@@ -285,7 +285,7 @@ locations = [
     'AccessFrom' : {
         'KraidRoomIn': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: Bosses.bossDead('Kraid')
+    'Available': lambda sm: Bosses.bossDead(sm, 'Kraid')
 },
 {
     'Area': "Norfair",
@@ -457,7 +457,7 @@ locations = [
     'AccessFrom' : {
         'RidleyRoomIn': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: Bosses.bossDead('Ridley')
+    'Available': lambda sm: sm.haveItem('Ridley')
 },
 {
     'Area': "LowerNorfair",
@@ -533,11 +533,11 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Wrecked Ship Energy Tank Room',
     'AccessFrom' : {
-        'Wrecked Ship Back': lambda sm: sm.wor(sm.wand(sm.wnot(Bosses.bossDead('Phantoon')),
+        'Wrecked Ship Back': lambda sm: sm.wor(sm.wand(sm.wnot(Bosses.bossDead(sm, 'Phantoon')),
                                                        RomPatches.has(RomPatches.WsEtankPhantoonAlive)),
                                                sm.canOpenRedDoors())
     },
-    'Available': lambda sm: sm.wor(Bosses.bossDead('Phantoon'),
+    'Available': lambda sm: sm.wor(Bosses.bossDead(sm, 'Phantoon'),
                                    RomPatches.has(RomPatches.WsEtankPhantoonAlive))
 },
 {
@@ -567,7 +567,7 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Wrecked Ship East Super Room',
     'AccessFrom' : {
-        'Wrecked Ship Main': lambda sm: Bosses.bossDead('Phantoon')
+        'Wrecked Ship Main': lambda sm: Bosses.bossDead(sm, 'Phantoon')
     },
     'Available': lambda sm: sm.canPassBombPassages()
 },
@@ -644,7 +644,7 @@ locations = [
     #  -have high jump boots
     #  -can fly (space jump or infinite bomb jump)
     #  -use short charge with speedbooster
-    'Available': lambda sm: Bosses.bossDead('Draygon'),
+    'Available': lambda sm: Bosses.bossDead(sm, 'Draygon'),
     'PostAvailable': lambda sm: sm.wand(sm.wor(sm.wand(sm.canShortCharge(),
                                                        sm.knowsKillPlasmaPiratesWithSpark()),
                                                sm.wand(sm.canFireChargedShots(),
@@ -746,10 +746,9 @@ locations = [
     'Visibility': "Hidden",
     'Room': "Draygon's Room",
     'AccessFrom' : {
-        'DraygonRoomIn': lambda sm: sm.canFightDraygon()
+        'Draygon Room Bottom': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: Bosses.bossDead('Draygon'), # this is an evil trick, see SJ location below
-    'PostAvailable': lambda sm: sm.canExitDraygon(),
+    'Available': lambda sm: SMBool(True)
 },
 {
     'Area': "Maridia",
@@ -762,18 +761,12 @@ locations = [
     'Id': 0x9a,
     'Visibility': "Chozo",
     'Room': 'Space Jump Room',
-    'AccessFrom' : {
-        'DraygonRoomIn': lambda sm: sm.canFightDraygon()
+    'AccessFrom' : {        
+        'Draygon Room Bottom': lambda sm: SMBool(True)
     },
-    # evil trick: we put the actual boss fight here instead of draygon
-    # location to open the possibility of an item unlocking draygon
-    # exit to be placed here.
-    # in other words we force space jump loc to be filled before dray
-    # loc.
-    'Available': lambda sm: sm.enoughStuffsDraygon(),
-    'PostAvailable': lambda sm: sm.canExitDraygon(),
-    'Pickup': lambda: Bosses.beatBoss('Draygon'),
-    'Unpickup': lambda: Bosses.unbeatBoss('Draygon')
+    # do not put draygon's dead req here in order for the rando to be able
+    # to place an item there to get you out
+    'Available': lambda sm: SMBool(True)
 },
 {
     'Area': "Tourian",
@@ -840,7 +833,7 @@ locations = [
     'AccessFrom' : {
         'Wrecked Ship Main': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: Bosses.bossDead('Phantoon')
+    'Available': lambda sm: Bosses.bossDead(sm, 'Phantoon')
 },
 {
     'Area': "Crateria",
@@ -856,7 +849,7 @@ locations = [
     'AccessFrom' : {
         'Wrecked Ship Main': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: sm.wand(sm.haveItem('Super'), sm.haveItem('Morph'), Bosses.bossDead('Phantoon'))
+    'Available': lambda sm: sm.wand(sm.haveItem('Super'), sm.haveItem('Morph'), Bosses.bossDead(sm, 'Phantoon'))
 },
 {
     'Area': "Crateria",
@@ -1717,7 +1710,7 @@ locations = [
     'AccessFrom' : {
         'Wrecked Ship Main': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: Bosses.bossDead('Phantoon')
+    'Available': lambda sm: Bosses.bossDead(sm, 'Phantoon')
 },
 {
     'Area': "WreckedShip",
@@ -1733,7 +1726,7 @@ locations = [
     'AccessFrom' : {
         'Wrecked Ship Main': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: Bosses.bossDead('Phantoon')
+    'Available': lambda sm: Bosses.bossDead(sm, 'Phantoon')
 },
 {
     'Area': "Maridia",

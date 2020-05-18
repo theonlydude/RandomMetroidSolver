@@ -598,7 +598,7 @@ accessPoints = [
        traverse=lambda sm: sm.canOpenRedDoors(),
        dotOrientation = 'e'),
     AccessPoint('DraygonRoomIn', 'Maridia', {
-        'Draygon Room Bottom': lambda sm: sm.wand(canFightDraygon(),
+        'Draygon Room Bottom': lambda sm: sm.wand(sm.canFightDraygon(),
                                                   sm.enoughStuffsDraygon())
     }, boss = True,
        roomInfo = {'RoomPtr':0xda60, "area": 0x4},

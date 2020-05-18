@@ -13,13 +13,14 @@ class RandoServices(object):
         self.areaGraph = graph
         self.log = log.get('RandoServices')
 
-    def getCollectAP(self, ap, container, itemLoc):
+    def collect(self, ap, container, itemLoc):
         # walk the graph to update AP
-        self.currentLocations(ap, container)
+        self.currentLocations(ap, container, itemLoc['Item'])
+        container.collect(itemLoc)
         return itemLoc['Location']['accessPoint']
 
     def currentLocations(self, ap, container, item=None, post=False, diff=None):
-        sm = container.smbm
+        sm = container.sm
         if diff is None:
             diff = self.settings.maxDiff
         itemType = None
@@ -42,7 +43,7 @@ class RandoServices(object):
         return result.bool == True and result.difficulty <= self.settings.maxDiff
     
     def getAvailLocs(self, container, ap, diff):
-        sm = container.smbm
+        sm = container.sm
         locs = container.unusedLocations
         return self.areaGraph.getAvailableLocations(locs, sm, diff, ap)
 
@@ -80,7 +81,7 @@ class RandoServices(object):
         # return availLocs
 
     def currentAccessPoints(self, ap, container, item=None):
-        sm = container.smbm
+        sm = container.sm
         if item is not None:
             itemType = item['Type']
             sm.addItem(itemType)
@@ -124,7 +125,7 @@ class RandoServices(object):
         return self.locPostAvailable(sm, loc, item['Type']) and not self.isSoftlockPossible(sm, ap, item, loc, justComeback)
 
     def isProgression(self, item, ap, container):
-        sm = container.smbm
+        sm = container.sm
         # no need to test nothing items
         if item['Category'] == 'Nothing':
             return False
@@ -143,9 +144,10 @@ class RandoServices(object):
                   or not sm.haveItem('PowerBomb').bool
         return ret
 
-    def getPossiblePlacements(self, ap, container, curLocs, justComeback):
+    def getPossiblePlacements(self, ap, container, justComeback):
+        curLocs = self.currentLocations(ap, container)
         self.log.debug('getPossiblePlacements. nCurLocs='+str(len(curLocs)))
-        sm = container.smbm
+        sm = container.sm
         poolDict = container.getPoolDict()
         itemLocDict = {}
         possibleProg = False
@@ -159,13 +161,14 @@ class RandoServices(object):
                 nonProgList = [loc for loc in self.currentLocations(ap, container) if self.fullComebackCheck(sm, ap, itemObj, loc, justComeback)] # we don't care what the item is
                 self.log.debug("nonProgLocList="+str([loc['Name'] for loc in nonProgList]))
             return [loc for loc in nonProgList if self.restrictions.canPlaceAtLocation(itemObj, loc)]
-        # boss handling : check bosses we can kill and come back from. return immediately if one found        
-        if container.hasItemCategoryInPool('Boss'):
-            bossLocs = getLocList(boss, [loc for loc in curLocs if 'Boss' in loc['Class']])
-            if len(bossLocs) > 0:
-                boss = container.getNextItemInPoolFromCategory('Boss')                
-                itemLocDict[ItemWrapper(boss)] = [next(loc for loc in bossLocs if loc['Name'] == boss['Name'])]
-                return (itemLocDict, False)
+        # boss handling : check if we can kill a boss, if so return immediately
+        bossLoc = next((loc for loc in curLocs if 'Boss' in loc['Class']), None)
+        if bossLoc is not None:
+            bosses = container.getItems(lambda item: item['Name'] == loc['Name'])
+            assert len(bosses) == 1
+            boss = bosses[0]
+            itemLocDict[ItemWrapper(boss)] = [bossLoc]
+            return (itemLocDict, False)
         for itemType,items in sorted(poolDict.items()):
             itemObj = items[0]
             cont = True
@@ -207,10 +210,8 @@ class RandoServices(object):
                         'Location':random.choice(containerCpy.extractLocs(morphLocs))
                     }
                     # acquire morph in new context and see if we can still open new locs
-                    containerCpy.collect(morphItemLoc)
-                    newAP = self.getCollectAP(ap, container, morphItemLoc)
-                    newCurLocs = self.currentLocations(newAP, containerCpy)
-                    (ild, poss) = self.getPossiblePlacements(newAP, containerCpy, newCurLocs, justComeback)
+                    newAP = self.collect(ap, container, morphItemLoc)
+                    (ild, poss) = self.getPossiblePlacements(newAP, containerCpy, justComeback)
                     if poss:
                         # it's possible, add morph and its locations from our context
                         itemLocDict[ItemWrapper(morph)] = morphLocs

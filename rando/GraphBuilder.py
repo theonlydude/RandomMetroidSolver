@@ -5,15 +5,16 @@ from graph_access import GraphUtils, vanillaTransitions, vanillaBossesTransition
 from graph import AccessGraph
 
 class GraphBuilder(object):
-    def __init__(self, areaRando, bossRando, escapeRando, transitions=None):
-        self.areaRando = areaRando
-        self.bossRando = bossRando
-        self.escapeRando = escapeRando
+    def __init__(self, graphSettings, transitions=None):
+        self.graphSettings = graphSettings
+        self.areaRando = graphSettings.areaRando
+        self.bossRando = graphSettings.bossRando
+        self.escapeRando = graphSettings.escapeRando
         self.transitions = transitions
         self.log = log.get('GraphBuilder')
 
     # builds everything but escape transitions
-    def createGraph(self, bidir, dotFile):
+    def createGraph(self):
         if self.transitions is None:
             self.transitions = []
             if not self.bossRando:
@@ -24,7 +25,8 @@ class GraphBuilder(object):
                 self.transitions += vanillaTransitions
             else:
                 self.transitions += GraphUtils.createAreaTransitions(bidir)
-        return AccessGraph(accessPoints, self.transitions, bidir, dotFile)
+        return AccessGraph(accessPoints, self.transitions,
+                           self.graphSettings.bidir, self.graphSettings.dotFile)
 
     def escapeGraph(self, emptyContainer, graph, maxDiff):
         possibleTargets, dst, path = self.getPossibleEscapeTargets(emptyContainer, graph, maxDiff)

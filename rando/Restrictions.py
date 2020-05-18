@@ -3,8 +3,9 @@
 class Restrictions(object):
     def __init__(self, settings):
         self.settings = settings
-        self.checkers = self.getCheckers()
         self.split = settings.restrictions['MajorMinor']
+        self.suitsRestrictions = settings.restrictions['Suits']
+        self.checkers = self.getCheckers()
 
     def isEarlyMorph(self):
         return self.settings.restrictions['Morph'] == 'early'
@@ -47,13 +48,13 @@ class Restrictions(object):
     def getCheckers(self):
         checkers = []
         checkers.append(lambda item, loc: not 'Boss' in loc['Class'] or item['Name'] == loc['Name'])
-        if restrictions['MajorMinor'] != 'Full':
+        if self.split != 'Full':
             checkers.append(self.isItemLocMatching)
-        if restrictions['Suits']:
+        if self.suitsRestrictions:
             checkers.append(lambda item, loc: not isSuit(item) or loc['GraphArea'] != 'Crateroa')
         if self.isLateMorph():
             checkers.append(lambda item, loc: not isMorph(item) or self.lateMorphCheck(location))
-        # TODO add checker for random fill is random fill in settings
+        # TODO add checker for random fill is random fill in settings?
         return checkers        
 
     def canPlaceAtLocation(self, item, location):

@@ -1,14 +1,18 @@
 import copy, log
+
+from smbool import SMBool
+from smboolmanager import SMBoolManager
 from helpers import Bosses
 from graph_access import getAccessPoint
+from rando.Fillers import FrontFiller
+from rando.ItemLocContainer import ItemLocContainer
 
 class RandoSetup(object):
-    # give the rando since we have to access services from it
-    def __init__(self, smbm, startAP, locations, services):
-        self.sm = smbm
+    def __init__(self, startAP, locations, services):
+        self.sm = SMBoolManager()
         self.startAP = startAP
         self.settings = services.settings
-        self.itemManager = self.settings.getItemManager(smbm)
+        self.itemManager = self.settings.getItemManager(self.sm)
         self.superFun = self.settings.superFun
         self.container = None
         self.services = services
@@ -53,7 +57,7 @@ class RandoSetup(object):
     # to be finishable
     def fillRestrictedLocations(self):
 #        isChozo = self.restrictions['MajorMinor'] == 'Chozo'
-        for loc in self.restrictedLocations:
+        for loc in self.restrictedLocs:
             isMajor = self.restrictions.isLocMajor(loc)
             isMinor = self.restrictions.isLocMinor(loc)
             # if isChozo:
@@ -95,29 +99,13 @@ class RandoSetup(object):
            (('needsPreRando' not in ap.Start or not ap.Start['needsPreRando']) and \
             ('areaMode' not in ap.Start or not ap.Start['areaMode'])):
             return True
-        # FIXME : remove this...instantiate a basic filler and run it for 4 steps
         self.log.debug("********* PRE RANDO START")
         container = copy.copy(self.container)
-        itemLoc = None
-        startOk = True
-#        self.rando.computeLateMorphLimit()
-        self.sm.resetItems()
-        curLocs = self.services.currentLocations(ap, container)
-#        state = RandoState(self.rando, curLocs)
-#        self.rando.determineParameters()
-        for i in range(4):
-            # services need restrictions object
-            itemLoc = self.services.generateItem(curLocs, container)
-            if itemLoc is None:
-                startOk = False
-                break
-            container.collect(itemLoc)            
-            ap = self.services.updateAP(ap, container, itemLoc)
-            curLocs = self.services.currentLocations(ap, container)
-#        state.apply(self.rando)
+        filler = FrontFiller(self.startAP, self.areaGraph, self.restrictions, container)
+        condition = filler.createStepCountCondition(4)
+        (isStuck, itemLocations, progItems) = filler.generateItems(condition)
         self.log.debug("********* PRE RANDO END")
-
-        return startOk
+        return not isStuck
 
     def checkPool(self, forbidden=None):
         self.log.debug("checkPool. forbidden=" + str(forbidden) + ", self.forbiddenItems=" + str(self.forbiddenItems))
@@ -133,9 +121,6 @@ class RandoSetup(object):
         #     # as if zeb skip is not known, an extra missile pack is guaranteed to be added (it won't
         #     # be in a chozo location, but the game is still finishable)
         #     Knows.IceZebSkip = SMBool(True, 0, [])
-
-        poolDict = self.services.getPoolDict(pool)
-        self.log.debug('pool={}'.format(sorted([(t, len(poolDict[t])) for t in poolDict])))
         # give us everything and beat every boss to see what we can access
         self.disableBossChecks()
         self.sm.resetItems()
@@ -144,13 +129,16 @@ class RandoSetup(object):
         totalAvailLocs = []
         comeBack = {}
         container = ItemLocContainer(self.sm, pool, self.locations)
-        locs = self.services.currentLocations(container=container, post=True)
+        poolDict = container.getPoolDict()
+        self.log.debug('pool={}'.format(sorted([(t, len(poolDict[t])) for t in poolDict])))
+        refAP = 'Landing Site'
+        locs = self.services.currentLocations(self.startAP, container, post=True)
         for loc in locs:
             ap = loc['accessPoint']
             if ap not in comeBack:
                 # we chose Landing Site because other start APs might not have comeback transitions
                 # possible start AP issues are handled in checkStart
-                comeBack[ap] = self.areaGraph.canAccess(self.sm, ap, 'Landing Site', self.rando.difficultyTarget)
+                comeBack[ap] = self.areaGraph.canAccess(self.sm, ap, 'Landing Site', self.settings.maxDiff)
             if comeBack[ap]:
                 totalAvailLocs.append(loc)
         self.lastRestricted = [loc for loc in self.locations if loc not in totalAvailLocs]
@@ -159,7 +147,7 @@ class RandoSetup(object):
         # check if we all inter-area APs reach each other
         interAPs = [ap for ap in self.areaGraph.accessPoints.values() if ap.isArea()]
         for startAp in interAPs:
-            availAccessPoints = self.areaGraph.getAvailableAccessPoints(startAp, self.sm, self.rando.difficultyTarget)
+            availAccessPoints = self.areaGraph.getAvailableAccessPoints(startAp, self.sm, self.settings.maxDiff)
             for ap in interAPs:
                 if not ap in availAccessPoints:
                     ret = False
@@ -176,7 +164,7 @@ class RandoSetup(object):
                 # reset cache
                 self.sm.resetItems()
                 self.sm.addItems([item['Type'] for item in pool if item['Category'] != 'Boss'])
-                maxDiff = self.settings.difficultyTarget
+                maxDiff = self.settings.maxDiff
                 ret = self.areaGraph.canAccess(self.sm, 'PhantoonRoomOut', 'PhantoonRoomIn', maxDiff)\
                       and self.areaGraph.canAccess(self.sm, 'Main Street Bottom', 'DraygonRoomIn', maxDiff)
                 self.log.debug('checkPool. boss access sanity check: '+str(ret))
@@ -255,9 +243,9 @@ class RandoSetup(object):
         return len(forb)
 
     def getForbiddenSuits(self):
-        self.log.debug("getForbiddenSuits BEGIN. forbidden="+str(self.forbiddenItems)+",ap="+self.rando.curAccessPoint)
+        self.log.debug("getForbiddenSuits BEGIN. forbidden="+str(self.forbiddenItems)+",ap="+self.startAP)
         removableSuits = [suit for suit in self.suits if self.checkPool([suit])]
-        if 'Varia' in removableSuits and self.rando.curAccessPoint in ['Bubble Mountain', 'Firefleas Top']:
+        if 'Varia' in removableSuits and self.startAP in ['Bubble Mountain', 'Firefleas Top']:
             # Varia has to be first item there, and checkPool can't detect it
             removableSuits.remove('Varia')
         self.log.debug("getForbiddenSuits removable="+str(removableSuits))

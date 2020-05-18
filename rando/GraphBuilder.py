@@ -24,7 +24,7 @@ class GraphBuilder(object):
             if not self.areaRando:
                 self.transitions += vanillaTransitions
             else:
-                self.transitions += GraphUtils.createAreaTransitions(bidir)
+                self.transitions += GraphUtils.createAreaTransitions(self.graphSettings.bidir)
         return AccessGraph(accessPoints, self.transitions,
                            self.graphSettings.bidir, self.graphSettings.dotFile)
 

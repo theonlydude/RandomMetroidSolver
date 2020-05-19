@@ -7,10 +7,11 @@ class ItemWrapper(object): # to put items in dictionaries
         item['Wrapper'] = self
 
 class RandoServices(object):
-    def __init__(self, graph, restrictions):
+    def __init__(self, graph, restrictions, cache=None):
         self.restrictions = restrictions
         self.settings = restrictions.settings
         self.areaGraph = graph
+        self.cache = cache
         self.log = log.get('RandoServices')
 
     def collect(self, ap, container, itemLoc):
@@ -23,6 +24,11 @@ class RandoServices(object):
         return itemLoc['Location']['accessPoint']
 
     def currentLocations(self, ap, container, item=None, post=False, diff=None):
+        isSimpleCall = item is None and post == False and diff is None
+        if isSimpleCall and self.cache is not None:
+            ret = self.cache.get('currentLocations', ap, container)
+            if ret is not None:
+                return ret
         sm = container.sm
         if diff is None:
             diff = self.settings.maxDiff
@@ -36,7 +42,8 @@ class RandoServices(object):
             ret = [loc for loc in ret if self.locPostAvailable(sm, loc, itemType)]
         if item is not None:
             sm.removeItem(itemType)
-
+        if isSimpleCall and self.cache is not None:
+            self.cache.store(ret, 'currentLocations', ap, container)
         return ret
 
     def locPostAvailable(self, sm, loc, item):
@@ -229,6 +236,18 @@ class RandoServices(object):
             self.log.debug('itemLocDict='+str(debugDict))
             self.log.debug('possibleProg='+str(possibleProg))
         return (itemLocDict, possibleProg)
+
+    def getPossiblePlacementsNoLogic(self, container):
+        poolDict = container.getPoolDict()
+        itemLocDict = {}
+        def getLocList(itemObj, baseList):
+            return [loc for loc in baseList if self.restrictions.canPlaceAtLocation(itemObj, loc)]
+        for itemType,items in sorted(poolDict.items()):
+            itemObj = items[0]
+            locList = getLocList(itemObj, container.unusedLocations)
+            for item in items:
+                itemLocDict[ItemWrapper(item)] = locList
+        return (itemLocDict, False)
 
     # check if bosses are blocking the last remaining locations.
     # accurate most of the time, still a heuristic

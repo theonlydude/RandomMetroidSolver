@@ -1,13 +1,15 @@
 
 import log, copy, time
 
+from cache import RequestCache
 from rando.RandoServices import RandoServices
 from rando.Choice import ItemThenLocChoice
 
 class Filler(object):
     def __init__(self, startAP, graph, restrictions, emptyContainer):
         self.startAP = startAP
-        self.services = RandoServices(graph, restrictions)
+        self.cache = RequestCache()
+        self.services = RandoServices(graph, restrictions, self.cache)
         self.settings = restrictions.settings
         self.runtimeLimit_s = self.settings.runtimeLimit_s
         self.baseContainer = emptyContainer
@@ -64,8 +66,12 @@ class FrontFiller(Filler):
 
     # one item/loc per step
     def step(self):
-        (itemLocDict, isProg) = self.services.getPossiblePlacements(self.ap, self.container, False)
+        if not self.services.canEndGame(self.container):
+            (itemLocDict, isProg) = self.services.getPossiblePlacements(self.ap, self.container, False)
+        else:
+            (itemLocDict, isProg) = self.services.getPossiblePlacementsNoLogic(self.container)
         itemLoc = self.choice.chooseItemLoc(itemLocDict, isProg)
+        self.cache.reset()
         if itemLoc is None:        
             return False
         self.ap = self.services.collect(self.ap, self.container, itemLoc)

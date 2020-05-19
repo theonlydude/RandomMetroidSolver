@@ -3,7 +3,7 @@
 import argparse, os.path, json, sys, shutil, random
 
 from rando.RandoSettings import RandoSettings, GraphSettings
-from rando.Run import randomize
+from rando.RandoExec import RandoExec
 from rando.PaletteRando import PaletteRando
 from graph_access import vanillaTransitions, vanillaBossesTransitions, GraphUtils
 from parameters import Knows, easy, medium, hard, harder, hardcore, mania, text2diff, diff2text
@@ -526,18 +526,19 @@ if __name__ == "__main__":
     #         dumpErrorMsg(args.output, msg)
     #         sys.exit(-1)
     if args.patchOnly == False:
-        (stuck, itemLocs, progItemLocs) = randomize(randoSettings, graphSettings)
-        doors = GraphUtils.getDoorConnections(randomizer.areaGraph,
+        randoExec = RandoExec()
+        (stuck, itemLocs, progItemLocs) = randoExec.randomize(randoSettings, graphSettings)
+        doors = GraphUtils.getDoorConnections(randoExec.areaGraph,
                                               args.area, args.bosses,
                                               args.escapeRando)
-        escapeAttr = randomizer.areaGraph.EscapeAttributes if args.escapeRando else None
+        escapeAttr = randoExec.areaGraph.EscapeAttributes if args.escapeRando else None
     else:
         stuck = False
         itemLocs = []
         progItemLocs = None
     if stuck == True:
-        dumpErrorMsg(args.output, randomizer.errorMsg)
-        print("Can't generate " + fileName + " with the given parameters: {}".format(randomizer.errorMsg))
+        dumpErrorMsg(args.output, randoExec.errorMsg)
+        print("Can't generate " + fileName + " with the given parameters: {}".format(randoExec.errorMsg))
         # in vcr mode we still want the seed to be generated to analyze it
         if args.vcr == False:
             sys.exit(-1)
@@ -582,7 +583,7 @@ if __name__ == "__main__":
                 del itemLoc["Item"]["Wrapper"]
 
         with open(args.output, 'w') as jsonFile:
-            json.dump({"itemLocs": itemLocs, "errorMsg": randomizer.errorMsg}, jsonFile, default=lambda x: x.__dict__)
+            json.dump({"itemLocs": itemLocs, "errorMsg": randoExec.errorMsg}, jsonFile, default=lambda x: x.__dict__)
         sys.exit(0)
 
     # generate extended stats
@@ -688,9 +689,9 @@ if __name__ == "__main__":
             romPatcher.commitIPS()
         romPatcher.end()
         if optErrMsg != "":
-            msg = optErrMsg + '\n' + randomizer.errorMsg
+            msg = optErrMsg + '\n' + randoExec.errorMsg
         else:
-            msg = randomizer.errorMsg
+            msg = randoExec.errorMsg
         if args.rom is None: # web mode
             data = romPatcher.romFile.data
             fileName = '{}.sfc'.format(fileName)

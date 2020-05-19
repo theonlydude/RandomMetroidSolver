@@ -1,5 +1,5 @@
 
-import log
+import log,random
 
 from graph_access import GraphUtils, vanillaTransitions, vanillaBossesTransitions, accessPoints, escapeSource, escapeTargets
 from graph import AccessGraph

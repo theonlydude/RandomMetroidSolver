@@ -7,9 +7,10 @@ from rom_patches import RomPatches
 from graph_helpers import HelpersGraph
 from cache import Cache
 from parameters import Knows, isKnows
+from helpers import Bosses
 
 class SMBoolManager(object):
-    items = ['ETank', 'Missile', 'Super', 'PowerBomb', 'Bomb', 'Charge', 'Ice', 'HiJump', 'SpeedBooster', 'Wave', 'Spazer', 'SpringBall', 'Varia', 'Plasma', 'Grapple', 'Morph', 'Reserve', 'Gravity', 'XRayScope', 'SpaceJump', 'ScrewAttack', 'Nothing', 'NoEnergy']
+    items = ['ETank', 'Missile', 'Super', 'PowerBomb', 'Bomb', 'Charge', 'Ice', 'HiJump', 'SpeedBooster', 'Wave', 'Spazer', 'SpringBall', 'Varia', 'Plasma', 'Grapple', 'Morph', 'Reserve', 'Gravity', 'XRayScope', 'SpaceJump', 'ScrewAttack', 'Nothing', 'NoEnergy', 'MotherBrain'] + Bosses.Golden4()
     countItems = ['ETank', 'Reserve', 'Missile', 'Super', 'PowerBomb']
 
     def __init__(self):

@@ -155,7 +155,7 @@ class ItemManager:
         'Draygon': {
             'Category': 'Boss',
             'Class': 'Boss',
-            'Name': "Phantoon"
+            'Name': "Draygon"
         },
         'Ridley': {
             'Category': 'Boss',

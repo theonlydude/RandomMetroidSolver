@@ -1,5 +1,5 @@
 
-import log, copy, random
+import log, copy, random, sys, logging
 
 class ItemWrapper(object): # to put items in dictionaries
     def __init__(self, item):
@@ -17,6 +17,9 @@ class RandoServices(object):
         # walk the graph to update AP
         self.currentLocations(ap, container, itemLoc['Item'])
         container.collect(itemLoc)
+        self.log.debug("COLLECT "+itemLoc['Item']['Type']+" at "+itemLoc['Location']['Name'])
+        sys.stdout.write('.')
+        sys.stdout.flush()
         return itemLoc['Location']['accessPoint']
 
     def currentLocations(self, ap, container, item=None, post=False, diff=None):
@@ -101,10 +104,10 @@ class RandoServices(object):
         comeBack = loc['accessPoint'] == ap or \
             self.areaGraph.canAccess(sm, loc['accessPoint'], ap, self.settings.maxDiff, item['Type'])
         if not comeBack:
-            self.log.debug("KO come back from " + loc['accessPoint'] + " to " + ap + " when trying to place " + item['Type'] + " at " + loc['Name'])
+#            self.log.debug("KO come back from " + loc['accessPoint'] + " to " + ap + " when trying to place " + item['Type'] + " at " + loc['Name'])
             return True
-        else:
-            self.log.debug("OK come back from " + loc['accessPoint'] + " to " + ap + " when trying to place " + item['Type'] + " at " + loc['Name'])
+#        else:
+#            self.log.debug("OK come back from " + loc['accessPoint'] + " to " + ap + " when trying to place " + item['Type'] + " at " + loc['Name'])
         if not justComeback:
             # we know that loc is avail and post avail with the item
             # if it is not post avail without it, then the item prevents the
@@ -162,9 +165,10 @@ class RandoServices(object):
                 self.log.debug("nonProgLocList="+str([loc['Name'] for loc in nonProgList]))
             return [loc for loc in nonProgList if self.restrictions.canPlaceAtLocation(itemObj, loc)]
         # boss handling : check if we can kill a boss, if so return immediately
-        bossLoc = next((loc for loc in curLocs if 'Boss' in loc['Class']), None)
+        bosses = container.getAllItemsInPoolFromCategory('Boss')
+        bossLoc = None if len(bosses) == 0 else next((loc for loc in curLocs if 'Boss' in loc['Class'] and self.fullComebackCheck(sm, ap, bosses[0], loc, justComeback)), None)
         if bossLoc is not None:
-            bosses = container.getItems(lambda item: item['Name'] == loc['Name'])
+            bosses = container.getItems(lambda item: item['Name'] == bossLoc['Name'])
             assert len(bosses) == 1
             boss = bosses[0]
             itemLocDict[ItemWrapper(boss)] = [bossLoc]

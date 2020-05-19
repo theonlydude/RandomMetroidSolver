@@ -11,6 +11,7 @@ class Filler(object):
         self.settings = restrictions.settings
         self.runtimeLimit_s = self.settings.runtimeLimit_s
         self.baseContainer = emptyContainer
+        self.errorMsg = ""
         self.log = log.get('Filler')
 
     # reinit algo state
@@ -35,13 +36,15 @@ class Filler(object):
         startDate = time.process_time()
         while condition() and not isStuck and runtime_s <= self.runtimeLimit_s:
             isStuck = not self.step()
-            nSteps += 1
+            self.nSteps += 1
             runtime_s = time.process_time() - startDate
         if not condition():
             isStuck = True
             if runtime_s > self.runtimeLimit_s:
-                # TODO handle error messages
-                pass
+                self.errorMsg = "Exceeded time limit of "+str(self.runtimeLimit_s) +" seconds"
+        else:
+            isStuck = False
+        print('')
         return (isStuck, self.container.itemLocations, self.getProgressionItemLocations())
 
     def getProgressionItemLocations(self):
@@ -60,7 +63,7 @@ class FrontFiller(Filler):
     # one item/loc per step
     def step(self):
         (itemLocDict, isProg) = self.services.getPossiblePlacements(self.ap, self.container, False)
-        itemLoc = self.choice(itemLocDict, isProg)
+        itemLoc = self.choice.chooseItemLoc(itemLocDict, isProg)
         if itemLoc is None:        
             return False
         self.ap = self.services.collect(self.ap, self.container, itemLoc)

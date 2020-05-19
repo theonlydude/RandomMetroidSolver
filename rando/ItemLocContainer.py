@@ -1,5 +1,6 @@
 
-import copy, sys
+import copy
+
 from smboolmanager import SMBoolManager
 
 class ItemLocContainer(object):
@@ -37,8 +38,6 @@ class ItemLocContainer(object):
         if pickup == True:
             self.currentItems.append(item)
             self.sm.addItem(item['Type'])
-            sys.stdout.write('.')
-            sys.stdout.flush()
         self.unusedLocations.remove(location)
         self.itemLocations.append(itemLocation)
         self.itemPool.remove(self.getNextItemInPool(item['Type']))
@@ -76,4 +75,4 @@ class ItemLocContainer(object):
         return [loc for loc in self.unusedLocations if predicate(loc) == True]
 
     def getItems(self, predicate):
-        return [loc for loc in self.itemPool if predicate(item) == True]
+        return [item for item in self.itemPool if predicate(item) == True]

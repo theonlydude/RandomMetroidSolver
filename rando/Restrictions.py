@@ -31,7 +31,7 @@ class Restrictions(object):
         else:
             return item['Class'] == "Minor"
 
-    def isItemLocMatching(item, loc):
+    def isItemLocMatching(self, item, loc):
         if self.split == "Full":
             return True
         if self.split in loc['Class']:
@@ -47,7 +47,7 @@ class Restrictions(object):
     
     def getCheckers(self):
         checkers = []
-        checkers.append(lambda item, loc: not 'Boss' in loc['Class'] or item['Name'] == loc['Name'])
+        checkers.append(lambda item, loc: not item['Category'] == 'Boss' or ('Boss' in loc['Class'] and item['Name'] == loc['Name']))
         if self.split != 'Full':
             checkers.append(self.isItemLocMatching)
         if self.suitsRestrictions:

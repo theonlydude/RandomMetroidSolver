@@ -1,5 +1,3 @@
-
-
 import log, random
 
 class Choice(object):
@@ -47,7 +45,7 @@ class ItemThenLocChoice(Choice):
     def earlyMorphCheck(self, itemList):
         if not self.restrictions.isEarlyMorph():
             return None
-        return next((item for item in items if item['Type'] == 'Morph'), None)
+        return next((item for item in itemList if item['Type'] == 'Morph'), None)
 
     def chooseItemProg(self, itemList):
         ret = self.earlyMorphCheck(itemList)
@@ -57,3 +55,11 @@ class ItemThenLocChoice(Choice):
 
     def chooseItemRandom(self, itemList):
         return random.choice(itemList)
+
+    def chooseLocation(self, locList, item, isProg):
+        if len(locList) == 0:
+            return None
+        return self.chooseLocationRandom(locList)
+
+    def chooseLocationRandom(self, locList):
+        return random.choice(locList)

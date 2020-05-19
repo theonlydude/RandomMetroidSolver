@@ -4,7 +4,7 @@ from smbool import SMBool
 from smboolmanager import SMBoolManager
 from helpers import Bosses
 from graph_access import getAccessPoint
-from rando.Fillers import FrontFiller
+from rando.Filler import FrontFiller
 from rando.ItemLocContainer import ItemLocContainer
 
 class RandoSetup(object):

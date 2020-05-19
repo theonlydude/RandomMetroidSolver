@@ -33,7 +33,7 @@ class ItemLocContainer(object):
         ret.sm.addItems([item['Type'] for item in ret.currentItems])
         return ret
 
-    def __str__(self):
+    def dump(self):
         return "ItemPool: %s\nLocPool: %s\nCollected: %s" % (getItemListStr(self.itemPool), getLocListStr(self.unusedLocations), getItemListStr(self.currentItems))
 
     def extractLocs(self, locs):

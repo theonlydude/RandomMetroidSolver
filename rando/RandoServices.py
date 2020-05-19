@@ -24,9 +24,9 @@ class RandoServices(object):
         return itemLoc['Location']['accessPoint']
 
     def currentLocations(self, ap, container, item=None, post=False, diff=None):
-        isSimpleCall = item is None and post == False and diff is None
-        if isSimpleCall and self.cache is not None:
-            ret = self.cache.get('currentLocations', ap, container)
+        if self.cache is not None:
+            request = self.cache.request('currentLocations', ap, container, None if item is None else item['Type'], post, diff)
+            ret = self.cache.get(request)
             if ret is not None:
                 return ret
         sm = container.sm
@@ -42,8 +42,8 @@ class RandoServices(object):
             ret = [loc for loc in ret if self.locPostAvailable(sm, loc, itemType)]
         if item is not None:
             sm.removeItem(itemType)
-        if isSimpleCall and self.cache is not None:
-            self.cache.store(ret, 'currentLocations', ap, container)
+        if self.cache is not None:
+            self.cache.store(request, ret)
         return ret
 
     def locPostAvailable(self, sm, loc, item):

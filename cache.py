@@ -27,16 +27,14 @@ class RequestCache(object):
     def __init__(self):
         self.results = {}
 
-    def store(self, result, request, *args):
-        h = self.getHashString(request, args)
-        self.results[h] = result
+    def request(self, request, *args):
+        return ''.join([request] + [str(arg) for arg in args])
 
-    def get(self, request, *args):
-        h = self.getHashString(request, args)
-        return self.results[h] if h in self.results else None
+    def store(self, request, result):
+        self.results[request] = result
+
+    def get(self, request):
+        return self.results[request] if request in self.results else None
 
     def reset(self):
         self.results = {}
-
-    def getHashString(self, request, args):
-        return ''.join([request] + [str(arg) for arg in args])

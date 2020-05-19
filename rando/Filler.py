@@ -45,7 +45,7 @@ class Filler(object):
             if runtime_s > self.runtimeLimit_s:
                 self.errorMsg = "Exceeded time limit of "+str(self.runtimeLimit_s) +" seconds"
             else:
-                self.errorMsg = "STUCK !\n"+str(self.container)
+                self.errorMsg = "STUCK !\n"+self.container.dump()
         else:
             isStuck = False
         print('')
@@ -66,12 +66,12 @@ class FrontFiller(Filler):
 
     # one item/loc per step
     def step(self):
+        self.cache.reset()
         if not self.services.canEndGame(self.container):
             (itemLocDict, isProg) = self.services.getPossiblePlacements(self.ap, self.container, False)
         else:
             (itemLocDict, isProg) = self.services.getPossiblePlacementsNoLogic(self.container)
         itemLoc = self.choice.chooseItemLoc(itemLocDict, isProg)
-        self.cache.reset()
         if itemLoc is None:        
             return False
         self.ap = self.services.collect(self.ap, self.container, itemLoc)

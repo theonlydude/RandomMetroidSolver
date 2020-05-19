@@ -27,5 +27,6 @@ def randomize(randoSettings, graphSettings):
     if container is None:
         # TODO handle error messages
         return (True, [], [])
+    graphBuilder.escapeGraph(container, graph, randoSettings.maxDiff)
     filler = FrontFiller(graphSettings.startAP, graph, restrictions, container)
     return filler.generateItems()

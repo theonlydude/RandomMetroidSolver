@@ -1,25 +1,22 @@
 #!/usr/bin/python3
 
-import sys, math, argparse, re, json, os, subprocess, logging, random
-from time import gmtime, strftime
+import sys, argparse, json, os, logging
 
 # the difficulties for each technics
 from parameters import Knows, Settings, isKnows, isSettings
-from parameters import easy, medium, hard, harder, hardcore, mania, god, samus, impossibru, infinity, diff2text
+from parameters import easy, medium, hard, harder, hardcore, mania, impossibru, infinity, diff2text
 
 # the helper functions
 from smbool import SMBool
 from smboolmanager import SMBoolManager
 from helpers import Pickup, Bosses
-from rom import RomLoader, RomPatcher, RomReader
+from rom import RomLoader, RomPatcher
 from rom_patches import RomPatches
-from itemrandomizerweb.Items import ItemManager
 from graph_locations import locations as graphLocations
 from graph import AccessGraph
 from graph_access import vanillaTransitions, vanillaBossesTransitions, vanillaEscapeTransitions, accessPoints, GraphUtils, getAccessPoint
 from utils import PresetLoader, removeChars
-from vcr import VCR
-import log, db
+import log
 
 class Conf:
     # keep getting majors of at most this difficulty before going for minors or changing area
@@ -1140,6 +1137,7 @@ class InteractiveSolver(CommonSolver):
             '--energyQty', parameters["energyQty"]
         ]
 
+        import subprocess
         subprocess.call(params)
 
         with open(self.outputFileName, 'r') as jsonFile:
@@ -1170,6 +1168,7 @@ class InteractiveSolver(CommonSolver):
 
     def savePlando(self, lock, escapeTimer):
         # store filled locations addresses in the ROM for next creating session
+        from itemrandomizerweb.Items import ItemManager
         locsItems = {}
         itemLocs = []
         for loc in self.visitedLocations:
@@ -1183,6 +1182,7 @@ class InteractiveSolver(CommonSolver):
 
         # patch the ROM
         if lock == True:
+            import random
             magic = random.randint(1, 0xffff)
         else:
             magic = None
@@ -1232,6 +1232,7 @@ class InteractiveSolver(CommonSolver):
             seedCode = 'B'+seedCode
         if self.areaRando == True:
             seedCode = 'A'+seedCode
+        from time import gmtime, strftime
         fileName = 'VARIA_Plandomizer_{}{}_{}.sfc'.format(seedCode, strftime("%Y%m%d%H%M%S", gmtime()), preset)
         data["fileName"] = fileName
         # error msg in json to be displayed by the web site
@@ -1419,7 +1420,11 @@ class StandardSolver(CommonSolver):
                  outputFileName=None, magic=None, checkDuplicateMajor=False, vcr=False, plot=None):
         self.interactive = False
         self.checkDuplicateMajor = checkDuplicateMajor
-        self.vcr = VCR(rom, 'solver') if vcr == True else None
+        if vcr == True:
+            from vcr import VCR
+            self.vcr = VCR(rom, 'solver')
+        else:
+            self.vcr = None
         # for compatibility with some common methods of the interactive solver
         self.mode = 'standard'
 
@@ -1476,6 +1481,7 @@ class StandardSolver(CommonSolver):
         self.computeExtStats()
 
         if self.extStatsFilename != None:
+            import db
             with open(self.extStatsFilename, 'a') as extStatsFile:
                 db.DB.dumpExtStatsSolver(self.difficulty, knowsUsedList, self.solverStats, self.extStatsStep, extStatsFile)
 
@@ -1841,6 +1847,7 @@ class OutWeb(Out):
         # dotFileName: the /directory/image.dot
         # the png and thumbnails are generated in the same directory as the dot
         # requires that graphviz is installed
+        import subprocess
 
         splited = os.path.splitext(dotFileName)
         pngFileName = splited[0] + '.png'

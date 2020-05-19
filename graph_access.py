@@ -607,7 +607,7 @@ accessPoints = [
        entryInfo = {'SamusX':0x1c8, 'SamusY':0x88},
        dotOrientation = 'e'),
     AccessPoint('Draygon Room Bottom', 'Maridia', {
-       'DraygonRoomIn': lambda sm: sm.canExitDraygon()
+       'DraygonRoomIn': lambda sm: sm.wand(Bosses.bossDead(sm, 'Draygon'), sm.canExitDraygon())
     }, internal = True),
     # escape APs
     AccessPoint('Crab Hole Bottom Right', 'Maridia', {

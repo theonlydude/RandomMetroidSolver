@@ -2,6 +2,13 @@
 import copy
 
 from smboolmanager import SMBoolManager
+from collections import Counter
+
+def getItemListStr(items):
+    return str(dict(Counter([item['Type'] for item in items])))
+
+def getLocListStr(locs):
+    return str([loc['Name'] for loc in locs])
 
 class ItemLocContainer(object):
     def __init__(self, sm, itemPool, locations):
@@ -25,6 +32,9 @@ class ItemLocContainer(object):
             ret.itemLocations.append(ilCpy)
         ret.sm.addItems([item['Type'] for item in ret.currentItems])
         return ret
+
+    def __str__(self):
+        return "ItemPool: %s\nLocPool: %s\nCollected: %s" % (getItemListStr(self.itemPool), getLocListStr(self.unusedLocations), getItemListStr(self.currentItems))
 
     def extractLocs(self, locs):
         ret = []

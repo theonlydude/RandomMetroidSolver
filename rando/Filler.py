@@ -38,10 +38,12 @@ class Filler(object):
             isStuck = not self.step()
             self.nSteps += 1
             runtime_s = time.process_time() - startDate
-        if not condition():
+        if condition():
             isStuck = True
             if runtime_s > self.runtimeLimit_s:
                 self.errorMsg = "Exceeded time limit of "+str(self.runtimeLimit_s) +" seconds"
+            else:
+                self.errorMsg = "STUCK !\n"+str(self.container)
         else:
             isStuck = False
         print('')

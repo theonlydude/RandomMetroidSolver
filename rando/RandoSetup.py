@@ -1,5 +1,6 @@
-import copy, log
+import copy, log, random
 
+from utils import randGaussBounds
 from smbool import SMBool
 from smboolmanager import SMBoolManager
 from helpers import Bosses

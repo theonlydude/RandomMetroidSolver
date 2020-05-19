@@ -620,11 +620,9 @@ class HelpersGraph(Helpers):
     def canExitDraygon(self):
         sm = self.smbm
         if self.isVanillaDraygon():
-            return sm.wand(Bosses.bossDead(sm, 'Draygon'),
-                           self.canExitDraygonVanilla())
+            return self.canExitDraygonVanilla()
         else:
-            return sm.wand(Bosses.bossDead(sm, 'Draygon'),
-                           self.canExitDraygonRandomized())
+            return self.canExitDraygonRandomized()
 
     @Cache.decorator
     def canExitPreciousRoomVanilla(self):

@@ -98,13 +98,14 @@ class RandoServices(object):
 
     def isSoftlockPossible(self, sm, ap, item, loc, justComeback):
         # disable check for early game and MB
-        if loc['Name'] == 'Bomb' or loc['Name'] == 'Mother Brain':
+        if loc['Name'] == 'Bomb' or loc['Name'] == 'Mother Brain' or\
+           (loc['Name'] in ['Draygon', 'Space Jump'] and sm.canExitDraygon()):
             return False
         # if the loc forces us to go to an area we can't come back from
         comeBack = loc['accessPoint'] == ap or \
             self.areaGraph.canAccess(sm, loc['accessPoint'], ap, self.settings.maxDiff, item['Type'])
         if not comeBack:
-#            self.log.debug("KO come back from " + loc['accessPoint'] + " to " + ap + " when trying to place " + item['Type'] + " at " + loc['Name'])
+            self.log.debug("KO come back from " + loc['accessPoint'] + " to " + ap + " when trying to place " + item['Type'] + " at " + loc['Name'])
             return True
 #        else:
 #            self.log.debug("OK come back from " + loc['accessPoint'] + " to " + ap + " when trying to place " + item['Type'] + " at " + loc['Name'])
@@ -165,13 +166,14 @@ class RandoServices(object):
                 self.log.debug("nonProgLocList="+str([loc['Name'] for loc in nonProgList]))
             return [loc for loc in nonProgList if self.restrictions.canPlaceAtLocation(itemObj, loc)]
         # boss handling : check if we can kill a boss, if so return immediately
-        bosses = container.getAllItemsInPoolFromCategory('Boss')
-        bossLoc = None if len(bosses) == 0 else next((loc for loc in curLocs if 'Boss' in loc['Class'] and self.fullComebackCheck(sm, ap, bosses[0], loc, justComeback)), None)
+        boss = container.getNextItemInPoolFromCategory('Boss')
+        bossLoc = None if boss is None else next((loc for loc in curLocs if 'Boss' in loc['Class'] and self.fullComebackCheck(sm, ap, boss, loc, justComeback)), None)
         if bossLoc is not None:
             bosses = container.getItems(lambda item: item['Name'] == bossLoc['Name'])
             assert len(bosses) == 1
             boss = bosses[0]
             itemLocDict[ItemWrapper(boss)] = [bossLoc]
+            self.log.debug("getPossiblePlacements. boss: "+boss['Name'])
             return (itemLocDict, False)
         for itemType,items in sorted(poolDict.items()):
             itemObj = items[0]

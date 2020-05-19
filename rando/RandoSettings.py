@@ -1,4 +1,5 @@
 
+import sys
 from rando.Items import ItemManager
 
 class RandoSettings(object):

@@ -1,11 +1,12 @@
 
 import math
-from functools import reduce
-from smbool import SMBool
-from rom_patches import RomPatches
-from parameters import Settings, easy, medium, hard, harder, hardcore, mania, diff2text
+
 from cache import Cache
+from parameters import Settings, easy, medium, diff2text
+from rom_patches import RomPatches
+from smbool import SMBool
 from utils import normalizeRounding
+
 
 class Helpers(object):
     def __init__(self, smbm):

@@ -3,7 +3,7 @@
 import sys, argparse, json, os, logging
 
 # the difficulties for each technics
-from parameters import Knows, Settings, isKnows, isSettings
+from parameters import Knows, Settings, isKnows
 from parameters import easy, medium, hard, harder, hardcore, mania, impossibru, infinity, diff2text
 
 # the helper functions

@@ -1,12 +1,10 @@
 # object to handle the smbools and optimize them
 
-from functools import reduce
-
-from smbool import SMBool
-from rom_patches import RomPatches
-from graph_helpers import HelpersGraph
 from cache import Cache
+from graph_helpers import HelpersGraph
 from parameters import Knows, isKnows
+from smbool import SMBool
+
 
 class SMBoolManager(object):
     items = ['ETank', 'Missile', 'Super', 'PowerBomb', 'Bomb', 'Charge', 'Ice', 'HiJump', 'SpeedBooster', 'Wave', 'Spazer', 'SpringBall', 'Varia', 'Plasma', 'Grapple', 'Morph', 'Reserve', 'Gravity', 'XRayScope', 'SpaceJump', 'ScrewAttack', 'Nothing', 'NoEnergy']

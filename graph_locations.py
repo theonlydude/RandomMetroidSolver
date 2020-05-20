@@ -1,5 +1,5 @@
-from parameters import Knows, Settings, easy, medium, hard, harder, hardcore, mania
 from helpers import Bosses
+from parameters import Settings
 from rom_patches import RomPatches
 from smbool import SMBool
 

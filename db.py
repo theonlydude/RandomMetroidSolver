@@ -8,7 +8,7 @@ try:
 except:
     dbAvailable = False
 
-from parameters import easy, medium, hard, harder, hardcore, mania
+from parameters import medium, hard, harder, hardcore, mania
 from utils import removeChars
 
 class DB:

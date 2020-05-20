@@ -1,20 +1,19 @@
 # -*- coding: utf-8 -*-
 
 import sys, os.path
+
 path = os.path.expanduser('~/RandomMetroidSolver')
 if os.path.exists(path) and path not in sys.path:
     sys.path.append(path)
 
 import datetime, os, hashlib, json, subprocess, tempfile, glob, random, re, math, string, base64, urllib.parse, uuid
-from datetime import datetime, date
-from collections import OrderedDict
+from datetime import datetime
 
 # to solve the rom
 from parameters import easy, medium, hard, harder, hardcore, mania
 from parameters import Knows, Settings, Controller, isKnows, isButton
 from solver import Conf
 from parameters import diff2text, text2diff
-from solver import StandardSolver, DifficultyDisplayer, InteractiveSolver
 from utils import PresetLoader, removeChars
 import db
 from graph_access import vanillaTransitions, vanillaBossesTransitions, vanillaEscapeTransitions, accessPoints, GraphUtils

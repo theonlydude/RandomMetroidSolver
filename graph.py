@@ -1,8 +1,9 @@
 import copy
-from smbool import SMBool
-from rom_patches import RomPatches
-from parameters import infinity
+
 import log
+from parameters import infinity
+from smbool import SMBool
+
 
 class AccessPoint(object):
     # name : AccessPoint name

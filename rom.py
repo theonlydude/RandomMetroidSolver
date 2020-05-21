@@ -100,7 +100,8 @@ class RomReader:
         'areaLayout': {'address': 0x252FA7, 'value': 0xF8, 'desc': "Area layout additional modifications"},
         'traverseWreckedShip': {'address': 0x219dbf, 'value': 0xFB, 'desc': "Area layout additional access to east Wrecked Ship"},
         'areaEscape': {'address': 0x20c91, 'value': 0x4C, 'desc': "Area escape randomization"},
-        'newGame': {'address': 0x1001d, 'value': 0x22, 'desc': "Custom new game"}
+        'newGame': {'address': 0x1001d, 'value': 0x22, 'desc': "Custom new game"},
+        'nerfedRainbowBeam': {'address': 0x14BA2E, 'value': 0x13, 'desc': 'nerfed rainbow beam'}
     }
 
     # FIXME shouldn't be here
@@ -168,7 +169,8 @@ class RomReader:
         'fix_suits_selection_in_menu': {'address': 0x13000, 'value': 0x90, 'vanillaValue': 0x80},
         'traverseWreckedShip': {'address': 0x219dbf, 'value': 0xFB, 'vanillaValue': 0xeb},
         'Infinite_Space_Jump': {'address': 0x82493, 'value': 0xEA, 'vanillaValue': 0xf0},
-        'refill_before_save': {'address': 0x270C2, 'value': 0x98, 'vanillaValue': 0xff}
+        'refill_before_save': {'address': 0x270C2, 'value': 0x98, 'vanillaValue': 0xff},
+        'nerfed_rainbow_beam': {'address': 0x14BA2E, 'value': 0x13, 'vanillaValue': 0x2b}
     }
 
     @staticmethod
@@ -721,7 +723,7 @@ class RomPatcher:
     def applyIPSPatches(self, startAP="Landing Site",
                         optionalPatches=[], noLayout=False, suitsMode="Classic",
                         area=False, bosses=False, areaLayoutBase=False,
-                        noVariaTweaks=False, nerfedCharge=False,
+                        noVariaTweaks=False, nerfedCharge=False, nerfedRainbowBeam=False,
                         escapeAttr=None, noRemoveEscapeEnemies=False):
         try:
             # apply standard patches
@@ -739,6 +741,8 @@ class RomPatcher:
                 stdPatches.append('progressive_suits.ips')
             if nerfedCharge == True:
                 stdPatches.append('nerfed_charge.ips')
+            if nerfedRainbowBeam == True:
+                stdPatches.append('nerfed_rainbow_beam.ips')
             if bosses == True or area == True:
                 stdPatches += ["WS_Main_Open_Grey", "WS_Save_Active"]
                 plms.append('WS_Save_Blinking_Door')
@@ -1621,6 +1625,8 @@ class RomLoader(object):
             RomPatches.ActivePatches.append(RomPatches.ProgressiveSuits)
         if self.hasPatch("nerfedCharge"):
             RomPatches.ActivePatches.append(RomPatches.NerfedCharge)
+        if self.hasPatch('nerfedRainbowBeam'):
+            RomPatches.ActivePatches.append(RomPatches.NerfedRainbowBeam)
 
         # check varia tweaks
         if self.hasPatch("variaTweaks"):

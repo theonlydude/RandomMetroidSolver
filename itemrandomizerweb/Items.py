@@ -332,7 +332,12 @@ class ItemPoolGeneratorChozo(ItemPoolGenerator):
     def addEnergy(self):
         total = 18
         energyQty = self.qty['energy']
-        if energyQty == 'sparse':
+        if energyQty == 'ultra sparse':
+            # complete up to 18 energies with nothing item
+            alreadyInPool = 4
+            for i in range(total - alreadyInPool):
+                self.itemManager.addItem('NoEnergy')
+        elif energyQty == 'sparse':
             # 4-6
             # already 3E and 1R
             alreadyInPool = 4
@@ -385,7 +390,17 @@ class ItemPoolGeneratorMajors(ItemPoolGenerator):
     def addEnergy(self):
         total = 18
         energyQty = self.qty['energy']
-        if energyQty == 'sparse':
+        if energyQty == 'ultra sparse':
+            # 0-1, remove reserve tank, check if it also remove the etank
+            self.itemManager.removeItem('Reserve')
+            if random.random() < 0.5:
+                self.itemManager.removeItem('ETank')
+                self.itemManager.addItem('NoEnergy')
+            # complete up to 18 energies with nothing item
+            for i in range(total - 1):
+                self.itemManager.addItem('NoEnergy')
+
+        elif energyQty == 'sparse':
             # 4-6
             if random.random() < 0.5:
                 self.itemManager.addItem('Reserve')

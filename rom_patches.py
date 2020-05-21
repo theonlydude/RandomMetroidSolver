@@ -65,6 +65,8 @@ class RomPatches:
     ProgressiveSuits        = 1003
     # Nerfed charge beam available from the start
     NerfedCharge            = 1004
+    # Nerfed rainbow beam for ultra sparse energy qty
+    NerfedRainbowBeam       = 1005
 
     #### Patch sets
     # total randomizer

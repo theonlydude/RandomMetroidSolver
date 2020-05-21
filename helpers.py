@@ -579,6 +579,8 @@ class Helpers(object):
 
     def mbEtankCheck(self):
         sm = self.smbm
+        if RomPatches.has(RomPatches.NerfedRainbowBeam):
+            return (True, 0)
         nTanks = sm.energyReserveCount()
         energyDiff = 0
         if sm.haveItem('Varia') == False:

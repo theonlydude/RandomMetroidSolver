@@ -16,7 +16,7 @@ from version import displayedVersion
 import log, db
 
 speeds = progSpeeds + ['VARIAble']
-energyQties = ['sparse', 'medium', 'vanilla' ]
+energyQties = ['ultra sparse', 'sparse', 'medium', 'vanilla' ]
 progDiffs = ['easier', 'normal', 'harder']
 morphPlacements = ['early', 'late', 'normal']
 majorsSplits = ['Full', 'Major', 'Chozo']
@@ -444,6 +444,9 @@ if __name__ == "__main__":
         if args.energyQtyList != None:
             energyQties = args.energyQtyList.split(',')
         energyQty = random.choice(energyQties)
+    if energyQty == 'ultra sparse':
+        # add nerfed rainbow beam patch
+        RomPatches.ActivePatches.append(RomPatches.NerfedRainbowBeam)
     qty = {'energy': energyQty,
            'minors': minorQty,
            'ammo': { 'Missile': missileQty,
@@ -627,7 +630,7 @@ if __name__ == "__main__":
             romPatcher.applyIPSPatches(args.startAP, args.patches,
                                        args.noLayout, suitsMode,
                                        args.area, args.bosses, args.areaLayoutBase,
-                                       args.noVariaTweaks, args.nerfedCharge,
+                                       args.noVariaTweaks, args.nerfedCharge, energyQty == 'ultra sparse',
                                        escapeAttr, args.noRemoveEscapeEnemies)
         else:
             # from customizer permalink, apply previously generated seed ips first

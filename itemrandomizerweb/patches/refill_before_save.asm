@@ -3,7 +3,8 @@
 
 ; Makes save points refill Samus' energy and supplies, like the ship.
 ;
-; Hijacks the save station PLM and uses some free space in that bank ($84).
+; Hijacks the save station PLM and uses some free space in that bank ($84), as
+; well as any other bank of your choosing.  This *is* the cross-bank version.
 
 lorom
 
@@ -14,23 +15,45 @@ lorom
 ; making it have the effect of:
 ; [B00E][refill_run, repeated until full][8CF1][B008][8C07,2E]...
 org $84AFEE
-	DW refill_start    ; hijack the "save?" message & posing
-	DW refill_run, $B008
+	DW plm_start    ; hijack the "save?" message & posing
+	DW plm_run, $B008
 	; the hijack will chain the PLMs we overwrote.
 	; remaining PLM instructions are used as-is.
 
-; this can be moved anywhere in bank $84’s free space, and MUST be bank $84.
-; Now optimized to 106 ($6A) bytes--still big, but there's a lot to do.
-org $84F0C2
-refill_start:
+; this stub can be moved anywhere in bank $84’s free space, and MUST be bank $84.
+; the stub needs 31 ($1F) bytes of space.
+; moved to an unused plm instruction.
+org $84853E
+plm_start:
 	TYA                ; copy pointer to refill_run into A
 	STA $1D27,X        ; set refill_run as next PLM instruction
 	JSR $B00E          ; freeze and pose Samus (saves X/Y itself)
+	JSL refill_start
+plm_run:
+	JSL refill_run
+	ASL                ; set Z flag if A is $0000 (saves 2 bytes vs. CMP)
+	BNE plm_more       ; not all full: run this refill instruction next frame
+	JMP $8CF1          ; all items full: run hijacked save prompt
+	; (this will stop the current PLM instruction from running again)
+
+plm_more:
+	LDA #$0001         ; run this PLM instruction next frame
+	STA $7EDE1C,X      ; write frame delay
+	PLA                ; end current frame's instructions for this PLM
+	RTS                ; run next PLM
+
+
+; this can be any free space, anywhere in the ROM.
+; all it needs is 86 ($56) bytes of space there.
+; for demonstration, I just picked the first possible location.
+org $A1F400
+refill_start:
 	STZ $0A6A          ; zero "health alarm on" flag
 	LDA #$0001         ; stop sound
 	JSL $80914D        ; sound lib 3 routine (also saves X/Y)
 	INY : INY          ; advance past the refill_run instruction
 	; (if we are ALREADY full, JMP $8CF1 wouldn't have $B008 as arg.)
+	RTL                ; get back to PLM code (so it can JSL refill_run...)
 
 refill_run:
 	PHX : PHY          ; preserve regs
@@ -50,16 +73,7 @@ refill_run:
 
 	TYA                ; hang onto fill-state result
 	PLY : PLX          ; restore regs
-	ASL                ; set Z flag if A is $0000 (saves 2 bytes vs. CMP)
-	BNE refill_more    ; not all full: run this refill instruction next frame
-	JMP $8CF1          ; all items full: run hijacked save prompt
-	; (this will stop the current PLM instruction from running again)
-
-refill_more:
-	LDA #$0001         ; run this PLM instruction next frame
-	STA $7EDE1C,X      ; write frame delay
-	PLA                ; end current frame's instructions for this PLM
-	RTS                ; run next PLM
+	RTL
 
 inc_item:
 	LDA $0000,X        ; current value
@@ -75,4 +89,4 @@ inc_item_write:
 inc_is_full:
 	RTS                ; return
 
-warnpc $84f12d
+warnpc $a1f456

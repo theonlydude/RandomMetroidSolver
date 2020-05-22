@@ -333,8 +333,16 @@ class ItemPoolGeneratorChozo(ItemPoolGenerator):
         total = 18
         energyQty = self.qty['energy']
         if energyQty == 'ultra sparse':
+            # 0-1, remove reserve tank and two etanks, check if it also remove the last etank
+            self.itemManager.removeItem('Reserve')
+            self.itemManager.removeItem('ETank')
+            self.itemManager.removeItem('ETank')
+            if random.random() < 0.5:
+                self.itemManager.removeItem('ETank')
+                self.itemManager.addItem('NoEnergy')
+
             # complete up to 18 energies with nothing item
-            alreadyInPool = 4
+            alreadyInPool = 1
             for i in range(total - alreadyInPool):
                 self.itemManager.addItem('NoEnergy')
         elif energyQty == 'sparse':

@@ -1,10 +1,12 @@
 import log, random
+from utils import getRangeDict, chooseFromRange
 
 class Choice(object):
     def __init__(self, restrictions):
         self.restrictions = restrictions
-        self.loc = log.get("Choice")
-    
+        self.settings = restrictions.settings
+        self.log = log.get("Choice")
+
     # args are return from RandoServices.getPossiblePlacements
     # return itemLoc dict, or None if no possible choice
     def chooseItemLoc(self, itemLocDict, isProg):
@@ -59,7 +61,207 @@ class ItemThenLocChoice(Choice):
     def chooseLocation(self, locList, item, isProg):
         if len(locList) == 0:
             return None
+        if isProg:
+            return self.chooseLocationProg(locList, item)
+        else:
+            return self.chooseLocationRandom(locList)
+
+    def chooseLocationProg(self, locList, item):
         return self.chooseLocationRandom(locList)
 
     def chooseLocationRandom(self, locList):
         return random.choice(locList)
+
+
+class ItemThenLocChoiceProgSpeed(ItemThenLocChoice):
+    def __init__(self, restrictions, distanceProp):
+        super(ItemThenLocChoiceProgSpeed, self).__init__(restrictions)
+        self.distanceProp = distanceProp
+        self.chooseItemFuncs = {
+            'Random' : self.chooseItemRandom,
+            'MinProgression' : self.chooseItemMinProgression,
+            'MaxProgression' : self.chooseItemMaxProgression
+        }
+        self.chooseLocFuncs = {
+            'Random' : self.chooseLocationRandom,
+            'MinDiff' : self.chooseLocationMinDiff,
+            'MaxDiff' : self.chooseLocationMaxDiff
+        }
+
+    def chooseItemLoc(self, itemLocDict, isProg, progressionItemLocs):
+        self.progressionItemLocs = progressionItemLocs
+        super(ItemThenLocChoiceProgSpeed, self).chooseItemLoc(itemLocDict, isProg)
+
+    def determineParameters(self, progSpeed=None, progDiff=None):
+        self.chooseLocRanges = getRangeDict(self.getChooseLocs(progDiff))
+        self.chooseItemRanges = getRangeDict(self.getChooseItems(progSpeed))
+        self.spreadProb = self.settings.getSpreadFactor(speed)
+
+    def getChooseLocs(self, progDiff=None):
+        if progDiff is None:
+            progDiff = self.settings.progDiff
+        return self.getChooseLocDict(self.settings.progDiff)
+
+    def getChooseItems(self, progSpeed):
+        if progSpeed is None:
+            progSpeed = self.settings.progSpeed
+        return self.getChooseItemDict(progSpeed)
+
+    def getChooseLocDict(self, progDiff):
+        if progDiff == 'normal':
+            return {
+                'Random' : 1,
+                'MinDiff' : 0,
+                'MaxDiff' : 0
+            }
+        elif progDiff == 'easier':
+            return {
+                'Random' : 2,
+                'MinDiff' : 1,
+                'MaxDiff' : 0
+            }
+        elif progDiff == 'harder':
+            return {
+                'Random' : 2,
+                'MinDiff' : 0,
+                'MaxDiff' : 1
+            }
+
+    def getChooseItemDict(self, progSpeed):
+        if progSpeed == 'slowest':
+            return {
+                'MinProgression' : 1,
+                'Random' : 2,
+                'MaxProgression' : 0
+            }
+        elif progSpeed == 'slow':
+            return {
+                'MinProgression' : 25,
+                'Random' : 75,
+                'MaxProgression' : 0
+            }
+        elif progSpeed == 'medium':
+            return {
+                'MinProgression' : 0,
+                'Random' : 1,
+                'MaxProgression' : 0
+            }
+        elif progSpeed == 'fast':
+            return {
+                'MinProgression' : 0,
+                'Random' : 75,
+                'MaxProgression' : 25
+            }
+        elif progSpeed == 'fastest':
+            return {
+                'MinProgression' : 0,
+                'Random' : 2,
+                'MaxProgression' : 1
+            }
+
+    def getSpreadFactor(self, progSpeed):
+        if progSpeed == 'slowest':
+            return 0.9
+        elif progSpeed == 'slow':
+            return 0.7
+        elif progSpeed == 'medium':
+            return 0.4
+        elif progSpeed == 'fast':
+            return 0.1
+        return 0
+
+    def chooseItemProg(self, itemList):
+        ret = self.earlyMorphCheck(itemList)
+        if ret is None:
+            ret = self.getChooseFunc(self.chooseItemRanges, self.chooseItemFuncs)(itemList)
+        return ret
+
+    def chooseLocationProg(self, locs, item):
+        # FIXME find a proper way to add this locations restrictions function. idea: do the same as item pool restriction in item pool container
+        # locs = availableLocations
+        # if self.isEarlyGame():
+        #     # cheat a little bit if non-standard start: place early
+        #     # progression away from crateria/blue brin if possible
+        #     startAp = getAccessPoint(self.settings.startAP)
+        #     if startAp.GraphArea != "Crateria":
+        #         locs = [loc for loc in availableLocations if loc['GraphArea'] != 'Crateria']
+        #         if len(locs) == 0:
+        #             locs = availableLocations
+        # isProg = self.isProgItem(item)
+        if random.random() < self.spreadProb:
+            locs = self.getLocsSpreadProgression(locs)
+        random.shuffle(locs)
+        self.log.debug("chooseLocation isProg: {}".format(isProg))
+        if isProg == True:
+            return self.getChooseFunc(self.chooseLocRanges, self.chooseLocFuncs)(locs, item)
+        else:
+            # choose randomly if non-progression
+            return self.chooseLocationRandom(locs, item)
+
+    # get choose function from a weighted dict
+    def getChooseFunc(self, rangeDict, funcDict):
+        v = chooseFromRange(rangeDict)
+
+        return funcDict[v]
+
+    def chooseItemMinProgression(self, items):
+        minNewLocs = 1000
+        ret = None
+
+        for item in items:
+            newLocs = len(self.currentLocations(item))
+            if newLocs < minNewLocs:
+                minNewLocs = newLocs
+                ret = item
+        return ret
+
+    def chooseItemMaxProgression(self, items):
+        maxNewLocs = 0
+        ret = None
+
+        for item in items:
+            newLocs = len(self.currentLocations(item))
+            if newLocs > maxNewLocs:
+                maxNewLocs = newLocs
+                ret = item
+        return ret
+
+    def getLocDiff(self, loc):
+        # avail difficulty already stored by graph algorithm
+        return loc['difficulty']
+
+    def fillLocsDiff(self, locs):
+        for loc in locs:
+            if 'PostAvailable' in loc:
+                loc['difficulty'] = self.smbm.wand(self.getLocDiff(loc), self.smbm.eval(loc['PostAvailable']))
+
+    def chooseLocationMaxDiff(self, availableLocations, item):
+        self.log.debug("MAX")
+        self.fillLocsDiff(availableLocations)
+        self.log.debug("chooseLocationMaxDiff: {}".format([(l['Name'], l['difficulty']) for l in availableLocations]))
+        return max(availableLocations, key=lambda loc:loc['difficulty'].difficulty)
+
+    def chooseLocationMinDiff(self, availableLocations, item):
+        self.log.debug("MIN")
+        self.fillLocsDiff(availableLocations)
+        self.log.debug("chooseLocationMinDiff: {}".format([(l['Name'], l['difficulty']) for l in availableLocations]))
+        return min(availableLocations, key=lambda loc:loc['difficulty'].difficulty)
+
+    def areaDistance(self, loc, otherLocs):
+        areas = [l[self.distanceProp] for l in otherLocs]
+        cnt = areas.count(loc[self.distanceProp])
+        d = None
+        if cnt == 0:
+            d = 2
+        else:
+            d = 1.0/cnt
+        return d
+
+    def getLocsSpreadProgression(self, availableLocations):
+        progLocs = [il['Location'] for il in self.progressionItemLocs if (self.restriction.split == 'Full' or self.restrictions.split == il['Item']['Class']) and il['Item']['Category'] != "Energy"]
+        distances = [self.areaDistance(loc, progLocs) for loc in availableLocations]
+        maxDist = max(distances)
+        indices = [index for index, d in enumerate(distances) if d == maxDist]
+        locs = [availableLocations[i] for i in indices]
+
+        return locs

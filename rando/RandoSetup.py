@@ -301,6 +301,8 @@ class RandoSetup(object):
             self.getForbiddenMovement()
         if 'Combat' in self.superFun:
             self.getForbiddenCombat()
-
+        # if no super fun, check that there's no resctricted locations (for ultra sparse)
+        if len(self.superFun) == 0:
+            self.addRestricted()
         self.log.debug("forbiddenItems: {}".format(self.forbiddenItems))
         self.log.debug("restrictedLocs: {}".format([loc['Name'] for loc in self.restrictedLocs]))

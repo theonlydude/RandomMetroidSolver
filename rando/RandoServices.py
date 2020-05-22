@@ -138,21 +138,27 @@ class RandoServices(object):
     def isProgression(self, item, ap, container):
         sm = container.sm
         # no need to test nothing items
-        if item['Category'] == 'Nothing':
+        if item['Category'] == 'Nothing' or item['Category'] == 'Boss':
             return False
+        if self.cache is not None:
+            request = self.cache.request('isProgression', item['Type'], ap, container)
+            ret = self.cache.get(request)
+            if ret is not None:
+                return ret
         oldLocations = self.currentLocations(ap, container)
-        canPlaceIt = any(self.restrictions.canPlaceAtLocation(item, loc) for loc in oldLocations)
-        if canPlaceIt == False:
-            return False
-        newLocations = [loc for loc in self.currentLocations(ap, container, item) if loc not in oldLocations]
-        ret = len(newLocations) > 0 and any(self.restrictions.isItemLocMatching(item, loc) for loc in newLocations)
-        self.log.debug('checkItem. item=' + item['Type'] + ', newLocs=' + str([loc['Name'] for loc in newLocations]))
-        if ret == False and len(newLocations) > 0 and self.restrictions.split == 'Major':
-            # in major/minor split, still consider minor locs as
-            # progression if not all types are distributed
-            ret = not sm.haveItem('Missile').bool \
-                  or not sm.haveItem('Super').bool \
-                  or not sm.haveItem('PowerBomb').bool
+        ret = any(self.restrictions.canPlaceAtLocation(item, loc) for loc in oldLocations)
+        if ret == True:
+            newLocations = [loc for loc in self.currentLocations(ap, container, item) if loc not in oldLocations]
+            ret = len(newLocations) > 0 and any(self.restrictions.isItemLocMatching(item, loc) for loc in newLocations)
+            self.log.debug('checkItem. item=' + item['Type'] + ', newLocs=' + str([loc['Name'] for loc in newLocations]))
+            if ret == False and len(newLocations) > 0 and self.restrictions.split == 'Major':
+                # in major/minor split, still consider minor locs as
+                # progression if not all types are distributed
+                ret = not sm.haveItem('Missile').bool \
+                      or not sm.haveItem('Super').bool \
+                      or not sm.haveItem('PowerBomb').bool
+        if self.cache is not None:
+            self.cache.store(request, ret)
         return ret
 
     def getPossiblePlacements(self, ap, container, justComeback):

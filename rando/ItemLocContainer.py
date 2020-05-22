@@ -17,6 +17,7 @@ class ItemLocContainer(object):
         self.unusedLocations = locations
         self.currentItems = []
         self.itemPool = itemPool
+        self.itemPoolBackup = None
 
     def __copy__(self):
         locs = [copy.deepcopy(loc) for loc in self.unusedLocations]
@@ -36,6 +37,18 @@ class ItemLocContainer(object):
     def dump(self):
         return "ItemPool: %s\nLocPool: %s\nCollected: %s" % (getItemListStr(self.itemPool), getLocListStr(self.unusedLocations), getItemListStr(self.currentItems))
 
+    # temporarily restrict item pool to items fulfilling predicate
+    def restrictItemPool(self, predicate):
+        assert self.itemPoolBackup is None, "Item pool already restricted"
+        self.itemPoolBackup = self.itemPool
+        self.itemPool = [item for item in self.itemPoolBackup if predicate(item)]
+
+    # remove a placed restriction
+    def unrestrictItemPool(self):
+        assert self.itemPoolBackup is not None, "No pool restriction to remove"
+        self.itemPool = self.itemPoolBackup
+        self.itemPoolBackup = None
+
     def extractLocs(self, locs):
         ret = []
         for loc in locs:
@@ -50,7 +63,10 @@ class ItemLocContainer(object):
             self.sm.addItem(item['Type'])
         self.unusedLocations.remove(location)
         self.itemLocations.append(itemLocation)
-        self.itemPool.remove(self.getNextItemInPool(item['Type']))
+        itemToRemove = self.getNextItemInPool(item['Type'])
+        self.itemPool.remove(itemToRemove)
+        if self.itemPoolBackup is not None:
+            self.itemPoolBackup.remove(itemToRemove)
 
     def isPoolEmpty(self):
         return len(self.itemPool) == 0

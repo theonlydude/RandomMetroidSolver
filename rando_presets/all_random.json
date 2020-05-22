@@ -17,6 +17,7 @@
   "suitsRestriction": "random",
   "superQty": "random",
   "energyQty": "random",
+  "energyQtyMultiSelect": ["sparse", "medium", "vanilla"],
   "funSuits": "random",
   "escapeRando": "random"
 }

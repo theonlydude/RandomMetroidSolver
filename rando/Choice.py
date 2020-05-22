@@ -188,15 +188,9 @@ class ItemThenLocChoiceProgSpeed(ItemThenLocChoice):
         #         if len(locs) == 0:
         #             locs = availableLocations
         # isProg = self.isProgItem(item)
-        if random.random() < self.spreadProb:
-            locs = self.getLocsSpreadProgression(locs)
+        locs = self.getLocsSpreadProgression(locs)
         random.shuffle(locs)
-        self.log.debug("chooseLocation isProg: {}".format(isProg))
-        if isProg == True:
-            return self.getChooseFunc(self.chooseLocRanges, self.chooseLocFuncs)(locs, item)
-        else:
-            # choose randomly if non-progression
-            return self.chooseLocationRandom(locs, item)
+        return self.getChooseFunc(self.chooseLocRanges, self.chooseLocFuncs)(locs, item)
 
     # get choose function from a weighted dict
     def getChooseFunc(self, rangeDict, funcDict):
@@ -258,10 +252,14 @@ class ItemThenLocChoiceProgSpeed(ItemThenLocChoice):
         return d
 
     def getLocsSpreadProgression(self, availableLocations):
-        progLocs = [il['Location'] for il in self.progressionItemLocs if (self.restriction.split == 'Full' or self.restrictions.split == il['Item']['Class']) and il['Item']['Category'] != "Energy"]
+        cond = lambda item: ((self.restriction.split == 'Full' and item['Class'] == 'Major') or self.restriction.split == item['Class']) and item['Category'] != "Energy"
+        progLocs = [il['Location'] for il in self.progressionItemLocs if cond(il['Item'])]
         distances = [self.areaDistance(loc, progLocs) for loc in availableLocations]
         maxDist = max(distances)
-        indices = [index for index, d in enumerate(distances) if d == maxDist]
-        locs = [availableLocations[i] for i in indices]
-
+        locs = []
+        for i in range(len(availableLocations)):
+            loc = availableLocations[i]
+            d = distances[i]
+            if d == maxDist or random.random() >= self.spreadProb:
+                locs.append(loc)
         return locs

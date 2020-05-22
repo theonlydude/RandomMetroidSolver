@@ -1,4 +1,4 @@
-;;; Reduce rainbow beam from 299 damages to 19 (for ultra sparse energy seeds)
+;;; Reduce rainbow beam from 300 damage to 20 (for ultra sparse energy seeds)
 ;;;
 ;;; compile with asar (https://www.smwcentral.net/?a=details&id=14560&p=section),
 ;;; or a variant of xkas that supports arch directive
@@ -18,7 +18,7 @@ arch snes.cpu
 ; $A9:BA39 8D 3E 18    STA $183E  [$7E:183E] ; type of screen shaking
 ; }
 
-;;; reduce samus energy for 19 loops instead of 299.
+;;; reduce samus energy for 19 loops instead of 299. One more loop is done.
 ;;; each loop reduce 1 energy when varia is equipped, 2 if not
 org $A9BA2D
         lda #$0013

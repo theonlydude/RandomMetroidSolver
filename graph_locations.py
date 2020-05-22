@@ -1421,7 +1421,7 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Post Crocomire Power Bomb Room',
     'AccessFrom' : {
-        'Croc Zone': lambda sm: sm.energyReserveCountOk(1)
+        'Croc Zone': lambda sm: SMBool(True)
     },
     'Available': lambda sm: sm.wand(sm.enoughStuffCroc(),
                                     sm.wor(sm.wor(sm.canFly(),

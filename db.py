@@ -452,7 +452,7 @@ order by init_time;"""
     def dumpExtStatsItems(parameters, locsItems, sqlFile):
         sql = """insert into extended_stats (preset, area, boss, majorsSplit, progSpeed, morphPlacement, suitsRestriction, progDiff, superFunMovement, superFunCombat, superFunSuit, gravityBehaviour, nerfedCharge, maxDifficulty, startAP, count)
 values
-(%d, '%s', %s, %s, '%s', '%s', '%s', %s, '%s', %s, %s, %s, '%s', %s, '%s', '%s', 1)
+('%s', %s, %s, '%s', '%s', '%s', %s, '%s', %s, %s, %s, '%s', %s, '%s', '%s', 1)
 on duplicate key update id=LAST_INSERT_ID(id), count = count + 1;
 set @last_id = last_insert_id();
 """

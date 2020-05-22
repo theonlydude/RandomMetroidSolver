@@ -301,13 +301,15 @@ def loadRandoPreset(randoPreset, args):
         else:
             args.superFun.append("SuitsRandom")
 
-    patches = ["itemsounds", "spinjumprestart", "rando_speed", "elevators_doors_speed"]
-
-    for patch in patches:
+    ipsPatches = ["itemsounds", "spinjumprestart", "rando_speed", "elevators_doors_speed", "refill_before_save"]
+    for patch in ipsPatches:
         if patch in randoParams and randoParams[patch] == "on":
             args.patches.append(patch + '.ips')
-    if "No_Music" in randoParams and randoParams["No_Music"] == "on":
-        args.patches.append("No_Music")
+
+    patches = ["No_Music", "Infinite_Space_Jump"]
+    for patch in patches:
+        if patch in randoParams and randoParams[patch] == "on":
+            args.patches.append(patch)
 
     if "morphPlacement" in randoParams:
         args.morphPlacement = randoParams["morphPlacement"]

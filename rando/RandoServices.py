@@ -110,13 +110,13 @@ class RandoServices(object):
             return False
         # if the loc forces us to go to an area we can't come back from
         comeBack = loc['accessPoint'] == ap or \
-            self.areaGraph.canAccess(sm, loc['accessPoint'], ap, self.settings.maxDiff, item['Type'])
+            self.areaGraph.canAccess(sm, loc['accessPoint'], ap, self.settings.maxDiff, item['Type'] if item is not None else None)
         if not comeBack:
             self.log.debug("KO come back from " + loc['accessPoint'] + " to " + ap + " when trying to place " + item['Type'] + " at " + loc['Name'])
             return True
 #        else:
 #            self.log.debug("OK come back from " + loc['accessPoint'] + " to " + ap + " when trying to place " + item['Type'] + " at " + loc['Name'])
-        if not justComeback:
+        if item is not None and not justComeback:
             # we know that loc is avail and post avail with the item
             # if it is not post avail without it, then the item prevents the
             # possible softlock
@@ -133,7 +133,7 @@ class RandoServices(object):
         return False
 
     def fullComebackCheck(self, sm, ap, item, loc, justComeback):
-        return self.locPostAvailable(sm, loc, item['Type']) and not self.isSoftlockPossible(sm, ap, item, loc, justComeback)
+        return self.locPostAvailable(sm, loc, item['Type'] if item is not None else None) and not self.isSoftlockPossible(sm, ap, item, loc, justComeback)
 
     def isProgression(self, item, ap, container):
         sm = container.sm
@@ -179,8 +179,8 @@ class RandoServices(object):
                 self.log.debug("nonProgLocList="+str([loc['Name'] for loc in nonProgList]))
             return [loc for loc in nonProgList if self.restrictions.canPlaceAtLocation(itemObj, loc)]
         # boss handling : check if we can kill a boss, if so return immediately
-        boss = container.getNextItemInPoolFromCategory('Boss')
-        bossLoc = None if boss is None else next((loc for loc in curLocs if 'Boss' in loc['Class'] and self.fullComebackCheck(sm, ap, boss, loc, justComeback)), None)
+        hasBoss = container.hasItemCategoryInPool('Boss')
+        bossLoc = None if not hasBoss else next((loc for loc in curLocs if 'Boss' in loc['Class'] and self.fullComebackCheck(sm, ap, None, loc, justComeback)), None)
         if bossLoc is not None:
             bosses = container.getItems(lambda item: item['Name'] == bossLoc['Name'])
             assert len(bosses) == 1
@@ -258,17 +258,19 @@ class RandoServices(object):
     # check if bosses are blocking the last remaining locations.
     # accurate most of the time, still a heuristic
     def onlyBossesLeft(self, ap, container):
-        self.log.debug('onlyBossesLeft, diff=' + str(self.difficultyTarget))
+        self.log.debug('onlyBossesLeft, diff=' + str(self.settings.maxDiff))
         sm = container.sm
         bossesLeft = container.getAllItemsInPoolFromCategory('Boss')
-        if len(bossesLeft) > 0:
+        if len(bossesLeft) == 0:
             return False
-        nextBoss = container.getNextItemInPoolFromCategory('Boss')
         def getLocList():
-            return [loc for loc in self.currentLocations(ap, container) if self.fullComebackCheck(sm, ap, nextBoss, loc, True)]
+            return [loc for loc in self.currentLocations(ap, container) if self.fullComebackCheck(sm, ap, None, loc, True)]
         prevLocs = getLocList()
-        # fake kill all bosses and see if we can access the rest of the game
+        # fake kill remaining bosses and see if we can access the rest of the game
+        if self.cache is not None:
+            self.cache.reset()
         for boss in bossesLeft:
+            self.log.debug("onlyBossesLeft. kill " + boss['Type'])
             sm.addItem(boss['Type'])
         # get bosses locations and newly accessible locations (for bosses that open up locs)
         newLocs = getLocList()
@@ -276,7 +278,11 @@ class RandoServices(object):
         ret = (len(locs) > len(prevLocs) and len(locs) == len(container.unusedLocations))
         # restore bosses killed state
         for boss in bossesLeft:
+            self.log.debug("onlyBossesLeft. revive " + boss['Type'])
             sm.removeItem(boss['Type'])
+        if self.cache is not None:
+            self.cache.reset()
+        self.log.debug("onlyBossesLeft? " +str(ret))
         return ret
 
     def canEndGame(self, container):

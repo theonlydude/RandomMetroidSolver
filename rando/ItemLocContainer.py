@@ -102,3 +102,9 @@ class ItemLocContainer(object):
 
     def getItems(self, predicate):
         return [item for item in self.itemPool if predicate(item) == True]
+
+    def getUsedLocs(self, predicate):
+        return [il['Location'] for il in self.itemLocations if predicate(il['Location']) == True]
+
+    def getCollectedItems(self, predicate):
+        return [item for item in self.currentItems if predicate(item) == True]

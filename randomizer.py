@@ -6,7 +6,7 @@ from rando.RandoSettings import RandoSettings, GraphSettings
 from rando.RandoExec import RandoExec
 from rando.PaletteRando import PaletteRando
 from graph_access import vanillaTransitions, vanillaBossesTransitions, GraphUtils
-from parameters import Knows, easy, medium, hard, harder, hardcore, mania, text2diff, diff2text
+from parameters import Knows, easy, medium, hard, harder, hardcore, mania, infinity, text2diff, diff2text
 from utils import PresetLoader
 from rom_patches import RomPatches
 from rom import RomPatcher, FakeROM
@@ -290,7 +290,7 @@ if __name__ == "__main__":
         else:
             maxDifficulty = text2diff[args.maxDifficulty]
     else:
-        maxDifficulty = float('inf')
+        maxDifficulty = infinity
     # same as solver, increase max difficulty
     threshold = maxDifficulty
     epsilon = 0.001

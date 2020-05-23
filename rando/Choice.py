@@ -74,9 +74,10 @@ class ItemThenLocChoice(Choice):
 
 
 class ItemThenLocChoiceProgSpeed(ItemThenLocChoice):
-    def __init__(self, restrictions, distanceProp):
+    def __init__(self, restrictions, distanceProp, services):
         super(ItemThenLocChoiceProgSpeed, self).__init__(restrictions)
         self.distanceProp = distanceProp
+        self.services = services
         self.chooseItemFuncs = {
             'Random' : self.chooseItemRandom,
             'MinProgression' : self.chooseItemMinProgression,
@@ -88,8 +89,13 @@ class ItemThenLocChoiceProgSpeed(ItemThenLocChoice):
             'MaxDiff' : self.chooseLocationMaxDiff
         }
 
-    def chooseItemLoc(self, itemLocDict, isProg, progressionItemLocs):
+    def currentLocations(self, item=None):
+        return self.services.currentLocations(self.ap, self.container, item=item)
+
+    def chooseItemLoc(self, itemLocDict, isProg, progressionItemLocs, ap, container):
         self.progressionItemLocs = progressionItemLocs
+        self.ap = ap
+        self.container = container
         return super(ItemThenLocChoiceProgSpeed, self).chooseItemLoc(itemLocDict, isProg)
 
     def determineParameters(self, progSpeed=None, progDiff=None):

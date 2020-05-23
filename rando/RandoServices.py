@@ -1,6 +1,7 @@
 
 import log, copy, random, sys, logging
 from enum import Enum, unique
+from parameters import infinity
 
 class ItemWrapper(object): # to put items in dictionaries
     def __init__(self, item):
@@ -277,6 +278,8 @@ class RandoServices(object):
     # check if bosses are blocking the last remaining locations.
     # accurate most of the time, still a heuristic
     def onlyBossesLeft(self, ap, container):
+        if self.settings.maxDiff == infinity:
+            return False
         self.log.debug('onlyBossesLeft, diff=' + str(self.settings.maxDiff))
         sm = container.sm
         bossesLeft = container.getAllItemsInPoolFromCategory('Boss')
@@ -289,7 +292,6 @@ class RandoServices(object):
         if self.cache is not None:
             self.cache.reset()
         for boss in bossesLeft:
-            self.log.debug("onlyBossesLeft. kill " + boss['Type'])
             sm.addItem(boss['Type'])
         # get bosses locations and newly accessible locations (for bosses that open up locs)
         newLocs = getLocList()
@@ -297,7 +299,6 @@ class RandoServices(object):
         ret = (len(locs) > len(prevLocs) and len(locs) == len(container.unusedLocations))
         # restore bosses killed state
         for boss in bossesLeft:
-            self.log.debug("onlyBossesLeft. revive " + boss['Type'])
             sm.removeItem(boss['Type'])
         if self.cache is not None:
             self.cache.reset()

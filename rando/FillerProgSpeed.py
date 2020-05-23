@@ -120,7 +120,7 @@ class FillerProgSpeed(Filler):
         super(FillerProgSpeed, self).__init__(graphSettings.startAP, areaGraph, restrictions, container)
         distanceProp = 'GraphArea' if graphSettings.areaRando else 'Area'
         self.stdStart = GraphUtils.isStandardStart(self.startAP)
-        self.choice = ItemThenLocChoiceProgSpeed(restrictions, distanceProp)
+        self.choice = ItemThenLocChoiceProgSpeed(restrictions, distanceProp, self.services)
         self.progSpeedParams = ProgSpeedParameters(restrictions)
 
     def currentLocations(self, item=None):
@@ -177,7 +177,7 @@ class FillerProgSpeed(Filler):
                         newItemLocDict[w] = filtered
                 if len(newItemLocDict) > 0:
                     itemLocDict = newItemLocDict
-        itemLoc = self.choice.chooseItemLoc(itemLocDict, possibleProg, self.progressionItemLocs)
+        itemLoc = self.choice.chooseItemLoc(itemLocDict, possibleProg, self.progressionItemLocs, self.ap, self.container)
         self.log.debug("generateItem. itemLoc="+("None" if itemLoc is None else itemLoc['Item']['Type']+"@"+itemLoc['Location']['Name']))
         return itemLoc
 
@@ -289,8 +289,9 @@ class FillerProgSpeed(Filler):
             if itemLocation is not None:
                 nItems += 1
                 self.log.debug("fillNonProgressionItems: {} at {}".format(itemLocation['Item']['Name'], itemLocation['Location']['Name']))
-                self.collect(itemLocation)
+                # doing this first is actually important, as state is save in collect
                 self.container.unrestrictItemPool()
+                self.collect(itemLocation)
                 locPoolOk = self.checkLocPool()
                 poolRestriction = self.getNonProgItemPoolRestriction()
                 self.container.restrictItemPool(poolRestriction)

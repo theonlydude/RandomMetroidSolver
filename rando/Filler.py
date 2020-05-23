@@ -25,6 +25,7 @@ class Filler(object):
         self.ap = self.startAP
         self.container = copy.copy(self.baseContainer)
         self.nSteps = 0
+        self.maxDiff = self.settings.maxDiff
 
     def itemPoolCondition(self):
         return not self.container.isPoolEmpty()
@@ -40,7 +41,6 @@ class Filler(object):
         runtime_s = 0
         isStuck = False
         startDate = time.process_time()
-        maxDiff = self.settings.maxDiff
         while condition() and not isStuck and runtime_s <= self.runtimeLimit_s:
             isStuck = not self.step()
             if not isStuck:
@@ -54,7 +54,7 @@ class Filler(object):
                 self.errorMsg = "STUCK !\n"+self.container.dump()
         else:
             # check if some locations are above max diff and add relevant message
-            locs = self.container.getUsedLocs(lambda loc: loc['difficulty'].difficulty > maxDiff)
+            locs = self.container.getUsedLocs(lambda loc: loc['difficulty'].difficulty > self.maxDiff)
             aboveMaxDiffStr = '[ ' + ' ; '.join([loc['Name'] + ': ' + diffValue2txt(loc['difficulty'].difficulty) for loc in locs]) + ' ]'
             if aboveMaxDiffStr != '[  ]':
                 self.errorMsg += "Maximum difficulty could not be applied everywhere. Affected locations: {}".format(aboveMaxDiffStr)

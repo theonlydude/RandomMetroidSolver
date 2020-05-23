@@ -442,6 +442,10 @@ class FillerProgSpeed(Filler):
                 if onlyBossCheck == False and self.services.onlyBossesLeft(self.ap, self.container):
                     self.settings.maxDiff = infinity
                     return self.step(onlyBossCheck=True)
+                if onlyBossCheck == True:
+                    # we're stuck even after bumping diff.
+                    # it was a onlyBossesLeft false positive, restore max diff
+                    self.settings.maxDiff = self.maxDiff
                 # check that we're actually stuck
                 nCurLocs = len(self.currentLocations())
                 nLocsLeft = len(self.container.unusedLocations)

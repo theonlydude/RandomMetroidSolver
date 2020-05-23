@@ -4,6 +4,7 @@ import log, copy, time
 from cache import RequestCache
 from rando.RandoServices import RandoServices
 from rando.Choice import ItemThenLocChoice
+from rando.RandoServices import ComebackCheckType
 from parameters import infinity
 from helpers import diffValue2txt
 
@@ -12,6 +13,7 @@ class Filler(object):
         self.startAP = startAP
         self.cache = RequestCache()
         self.services = RandoServices(graph, restrictions, self.cache)
+        self.restrictions = restrictions
         self.settings = restrictions.settings
         self.runtimeLimit_s = self.settings.runtimeLimit_s
         self.baseContainer = emptyContainer
@@ -77,7 +79,7 @@ class FrontFiller(Filler):
     def step(self, onlyBossCheck=False):
         self.cache.reset()
         if not self.services.canEndGame(self.container):
-            (itemLocDict, isProg) = self.services.getPossiblePlacements(self.ap, self.container, False)
+            (itemLocDict, isProg) = self.services.getPossiblePlacements(self.ap, self.container, ComebackCheckType.ComebackWithoutItem)
         else:
             (itemLocDict, isProg) = self.services.getPossiblePlacementsNoLogic(self.container)
         itemLoc = self.choice.chooseItemLoc(itemLocDict, isProg)

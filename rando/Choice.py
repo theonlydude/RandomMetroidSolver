@@ -21,7 +21,7 @@ class Choice(object):
 class ItemThenLocChoice(Choice):
     def __init__(self, restrictions):
         super(ItemThenLocChoice, self).__init__(restrictions)
-    
+
     def chooseItemLoc(self, itemLocDict, isProg):
         itemList = self.getItemList(itemLocDict)
         item = self.chooseItem(itemList, isProg)
@@ -90,12 +90,12 @@ class ItemThenLocChoiceProgSpeed(ItemThenLocChoice):
 
     def chooseItemLoc(self, itemLocDict, isProg, progressionItemLocs):
         self.progressionItemLocs = progressionItemLocs
-        super(ItemThenLocChoiceProgSpeed, self).chooseItemLoc(itemLocDict, isProg)
+        return super(ItemThenLocChoiceProgSpeed, self).chooseItemLoc(itemLocDict, isProg)
 
     def determineParameters(self, progSpeed=None, progDiff=None):
         self.chooseLocRanges = getRangeDict(self.getChooseLocs(progDiff))
         self.chooseItemRanges = getRangeDict(self.getChooseItems(progSpeed))
-        self.spreadProb = self.settings.getSpreadFactor(speed)
+        self.spreadProb = self.getSpreadFactor(progSpeed)
 
     def getChooseLocs(self, progDiff=None):
         if progDiff is None:
@@ -174,23 +174,15 @@ class ItemThenLocChoiceProgSpeed(ItemThenLocChoice):
         ret = self.earlyMorphCheck(itemList)
         if ret is None:
             ret = self.getChooseFunc(self.chooseItemRanges, self.chooseItemFuncs)(itemList)
+        self.log.debug('chooseItemProg. ret='+ret['Type'])
         return ret
 
     def chooseLocationProg(self, locs, item):
-        # FIXME find a proper way to add this locations restrictions function. idea: do the same as item pool restriction in item pool container
-        # locs = availableLocations
-        # if self.isEarlyGame():
-        #     # cheat a little bit if non-standard start: place early
-        #     # progression away from crateria/blue brin if possible
-        #     startAp = getAccessPoint(self.settings.startAP)
-        #     if startAp.GraphArea != "Crateria":
-        #         locs = [loc for loc in availableLocations if loc['GraphArea'] != 'Crateria']
-        #         if len(locs) == 0:
-        #             locs = availableLocations
-        # isProg = self.isProgItem(item)
         locs = self.getLocsSpreadProgression(locs)
         random.shuffle(locs)
-        return self.getChooseFunc(self.chooseLocRanges, self.chooseLocFuncs)(locs, item)
+        ret = self.getChooseFunc(self.chooseLocRanges, self.chooseLocFuncs)(locs)
+        self.log.debug('chooseLocationProg. ret='+ret['Name'])
+        return ret
 
     # get choose function from a weighted dict
     def getChooseFunc(self, rangeDict, funcDict):

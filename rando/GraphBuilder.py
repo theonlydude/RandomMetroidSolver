@@ -29,6 +29,8 @@ class GraphBuilder(object):
                            self.graphSettings.bidir, self.graphSettings.dotFile)
 
     def escapeGraph(self, emptyContainer, graph, maxDiff):
+        if not self.escapeRando:
+            return
         possibleTargets, dst, path = self.getPossibleEscapeTargets(emptyContainer, graph, maxDiff)
         # update graph with escape transition
         graph.addTransition(escapeSource, dst)

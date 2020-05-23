@@ -1,10 +1,17 @@
 
 import log, copy, random, sys, logging
+from enum import Enum, unique
 
 class ItemWrapper(object): # to put items in dictionaries
     def __init__(self, item):
         self.item = item
         item['Wrapper'] = self
+
+@unique
+class ComebackCheckType(Enum):
+    NoCheck = 1
+    JustComeback = 2
+    ComebackWithoutItem = 3
 
 class RandoServices(object):
     def __init__(self, graph, restrictions, cache=None):
@@ -91,6 +98,11 @@ class RandoServices(object):
         # return availLocs
 
     def currentAccessPoints(self, ap, container, item=None):
+        if self.cache is not None:
+            request = self.cache.request('currentAccessPoints', ap, container, None if item is None else item['Type'])
+            ret = self.cache.get(request)
+            if ret is not None:
+                return ret
         sm = container.sm
         if item is not None:
             itemType = item['Type']
@@ -100,11 +112,17 @@ class RandoServices(object):
                        key=lambda ap: ap.Name)
         if item is not None:
             sm.removeItem(itemType)
+        if self.cache is not None:
+            self.cache.store(request, nodes)
 
         return nodes
 
-    def isSoftlockPossible(self, sm, ap, item, loc, justComeback):
-        # disable check for early game and MB
+    def isSoftlockPossible(self, container, ap, item, loc, comebackCheck):
+        sm = container.sm
+        # usually early game
+        if comebackCheck == ComebackCheckType.NoCheck:
+            return False
+        # some specific checks
         if loc['Name'] == 'Bomb' or loc['Name'] == 'Mother Brain' or\
            (loc['Name'] in ['Draygon', 'Space Jump'] and sm.canExitDraygon()):
             return False
@@ -116,7 +134,7 @@ class RandoServices(object):
             return True
 #        else:
 #            self.log.debug("OK come back from " + loc['accessPoint'] + " to " + ap + " when trying to place " + item['Type'] + " at " + loc['Name'])
-        if item is not None and not justComeback:
+        if item is not None and comebackCheck == ComebackCheckType.ComebackWithoutItem and self.isProgression(item, ap, container):
             # we know that loc is avail and post avail with the item
             # if it is not post avail without it, then the item prevents the
             # possible softlock
@@ -132,8 +150,9 @@ class RandoServices(object):
 
         return False
 
-    def fullComebackCheck(self, sm, ap, item, loc, justComeback):
-        return self.locPostAvailable(sm, loc, item['Type'] if item is not None else None) and not self.isSoftlockPossible(sm, ap, item, loc, justComeback)
+    def fullComebackCheck(self, container, ap, item, loc, comebackCheck):
+        sm = container.sm
+        return self.locPostAvailable(sm, loc, item['Type'] if item is not None else None) and not self.isSoftlockPossible(container, ap, item, loc, comebackCheck)
 
     def isProgression(self, item, ap, container):
         sm = container.sm
@@ -161,7 +180,7 @@ class RandoServices(object):
             self.cache.store(request, ret)
         return ret
 
-    def getPossiblePlacements(self, ap, container, justComeback):
+    def getPossiblePlacements(self, ap, container, comebackCheck):
         curLocs = self.currentLocations(ap, container)
         self.log.debug('getPossiblePlacements. nCurLocs='+str(len(curLocs)))
         sm = container.sm
@@ -171,16 +190,16 @@ class RandoServices(object):
         nonProgList = None
         def getLocList(itemObj, baseList):
             nonlocal sm
-            return [loc for loc in baseList if self.restrictions.canPlaceAtLocation(itemObj, loc) and self.fullComebackCheck(sm, ap, itemObj, loc, justComeback)]
+            return [loc for loc in baseList if self.restrictions.canPlaceAtLocation(itemObj, loc) and self.fullComebackCheck(container, ap, itemObj, loc, comebackCheck)]
         def getNonProgLocList(itemObj):
             nonlocal nonProgList, sm
             if nonProgList is None:
-                nonProgList = [loc for loc in self.currentLocations(ap, container) if self.fullComebackCheck(sm, ap, itemObj, loc, justComeback)] # we don't care what the item is
+                nonProgList = [loc for loc in self.currentLocations(ap, container) if self.fullComebackCheck(container, ap, itemObj, loc, comebackCheck)] # we don't care what the item is
                 self.log.debug("nonProgLocList="+str([loc['Name'] for loc in nonProgList]))
             return [loc for loc in nonProgList if self.restrictions.canPlaceAtLocation(itemObj, loc)]
         # boss handling : check if we can kill a boss, if so return immediately
         hasBoss = container.hasItemCategoryInPool('Boss')
-        bossLoc = None if not hasBoss else next((loc for loc in curLocs if 'Boss' in loc['Class'] and self.fullComebackCheck(sm, ap, None, loc, justComeback)), None)
+        bossLoc = None if not hasBoss else next((loc for loc in curLocs if 'Boss' in loc['Class'] and self.fullComebackCheck(container, ap, None, loc, comebackCheck)), None)
         if bossLoc is not None:
             bosses = container.getItems(lambda item: item['Name'] == bossLoc['Name'])
             assert len(bosses) == 1
@@ -230,7 +249,7 @@ class RandoServices(object):
                     }
                     # acquire morph in new context and see if we can still open new locs
                     newAP = self.collect(ap, container, morphItemLoc)
-                    (ild, poss) = self.getPossiblePlacements(newAP, containerCpy, justComeback)
+                    (ild, poss) = self.getPossiblePlacements(newAP, containerCpy, comebackCheck)
                     if poss:
                         # it's possible, add morph and its locations from our context
                         itemLocDict[ItemWrapper(morph)] = morphLocs
@@ -264,7 +283,7 @@ class RandoServices(object):
         if len(bossesLeft) == 0:
             return False
         def getLocList():
-            return [loc for loc in self.currentLocations(ap, container) if self.fullComebackCheck(sm, ap, None, loc, True)]
+            return [loc for loc in self.currentLocations(ap, container) if self.fullComebackCheck(container, ap, None, loc, True)]
         prevLocs = getLocList()
         # fake kill remaining bosses and see if we can access the rest of the game
         if self.cache is not None:

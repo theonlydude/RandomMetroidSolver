@@ -38,6 +38,12 @@ class ProgSpeedParameters(object):
             itemLimit = 1
         if self.restrictions.split == 'Chozo':
             itemLimit = int(itemLimit / 4)
+        minLimit = itemLimit - int(itemLimit/5)
+        maxLimit = itemLimit + int(itemLimit/5)
+        if minLimit == maxLimit:
+            itemLimit = minLimit
+        else:
+            itemLimit = random.randint(minLimit, maxLimit)
         return itemLimit
 
     def getLocLimit(self, progSpeed):
@@ -101,11 +107,11 @@ class FillerState(object):
         self.progressionStatesIndices = filler.progressionStatesIndices[:]
 
     def apply(self, filler):
-        filler.container = copy.copy(self.container)
+        filler.container = self.container
         filler.ap = self.ap
-        filler.states = self.states[:]
-        filler.progressionItemLocs = self.progressionItemLocs[:]
-        filler.progressionStatesIndices = self.progressionStatesIndices[:]
+        filler.states = self.states
+        filler.progressionItemLocs = self.progressionItemLocs
+        filler.progressionStatesIndices = self.progressionStatesIndices
         filler.cache.reset()
 
     def __eq__(self, rhs):
@@ -134,7 +140,7 @@ class FillerProgSpeed(Filler):
         self.initState = FillerState(self)
 
     def determineParameters(self):
-        speed = self.settings.progSpeed.lower()
+        speed = self.settings.progSpeed
         if speed == 'variable':
             speed = random.choice(progSpeeds)
         self.choice.determineParameters(speed)
@@ -288,13 +294,7 @@ class FillerProgSpeed(Filler):
         nItems = 0
         locPoolOk = True
         self.log.debug("NON-PROG")
-        minLimit = self.itemLimit - int(self.itemLimit/5)
-        maxLimit = self.itemLimit + int(self.itemLimit/5)
-        if minLimit == maxLimit:
-            itemLimit = minLimit
-        else:
-            itemLimit = random.randint(minLimit, maxLimit)
-        while not self.container.isPoolEmpty() and nItems < itemLimit and locPoolOk:
+        while not self.container.isPoolEmpty() and nItems < self.itemLimit and locPoolOk:
             itemLocation = self.generateItem()
             if itemLocation is not None:
                 nItems += 1

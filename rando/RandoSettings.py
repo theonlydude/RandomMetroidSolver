@@ -6,7 +6,7 @@ class RandoSettings(object):
     def __init__(self, maxDiff, progSpeed, progDiff, qty, restrictions,
                  superFun, runtimeLimit_s, vcr, plandoRando):
         self.progSpeed = progSpeed
-        self.progDiff = progDiff
+        self.progDiff = progDiff.lower()
         self.maxDiff = maxDiff
         self.qty = qty
         self.restrictions = restrictions

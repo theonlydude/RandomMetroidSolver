@@ -3,7 +3,6 @@ import re, sys, os, json, copy, base64, random
 
 from rando.Items import ItemManager
 from rando.patches import patches, additional_PLMs
-from rando.stdlib import List
 from compression import Compressor
 from ips import IPS_Patch
 from parameters import appDir
@@ -969,7 +968,7 @@ class RomPatcher:
         self.nothingId = 0x1a
         # if not default start, use first loc with a nothing
         if not GraphUtils.isStandardStart(startAP):
-            firstNothing = next((il['Location'] for il in itemLocs if il['Item']['Category'] == 'Nothing' and il['Item']['Type'] != 'Boss' and 'Boss' not in il['Location']['Class']), None)
+            firstNothing = next((il['Location'] for il in itemLocs if il['Item']['Category'] == 'Nothing'), None)
             if firstNothing is not None:
                 self.nothingId = firstNothing['Id']
 
@@ -1096,8 +1095,7 @@ class RomPatcher:
 
     def writeSpoiler(self, itemLocs, progItemLocs=None):
         # keep only majors, filter out Etanks and Reserve
-        fItemLocs = List.filter(lambda il: il['Item']['Category'] not in ['Ammo', 'Nothing', 'Energy'],
-                                itemLocs)
+        fItemLocs = [il for il in itemLocs if il['Item']['Category'] not in ['Ammo', 'Nothing', 'Energy', 'Boss']]
         # add location of the first instance of each minor
         for t in ['Missile', 'Super', 'PowerBomb']:
             itLoc = None

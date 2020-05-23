@@ -188,11 +188,11 @@ class RandoServices(object):
         morph = container.getNextItemInPool('Morph')
         if morph is not None:
             self.log.debug("getPossiblePlacements: early morph check - morph not placed yet")
-            if any(w.item['Type'] == morph['Type'] for w in itemLocDict):
-                w = next(w for w in itemLocDict if w.item['Type'] == morph['Type'])
-                itemLocDict = {
-                    w: itemLocDict[w]
-                }
+            morphWrapper = next((w for w in itemLocDict if w.item['Type'] == morph['Type']), None)
+            if morphWrapper is not None:
+                morphLocs = itemLocDict[morphWrapper]
+                itemLocDict.clear()
+                itemLocDict[morphWrapper] = morphLocs
             else:
                 self.log.debug("getPossiblePlacements: early morph placement check")
                 # we have to place morph early, it's still not placed, and not detected as placeable
@@ -211,7 +211,8 @@ class RandoServices(object):
                     (ild, poss) = self.getPossiblePlacements(newAP, containerCpy, comebackCheck)
                     if poss:
                         # it's possible, only offer morph as possibility
-                        itemLocDict = { ItemWrapper(morph): morphLocs }
+                        itemLocDict.clear()
+                        itemLocDict[ItemWrapper(morph)] = morphLocs
 
     def processMorphPlacements(self, ap, container, comebackCheck, itemLocDict, curLocs):
         if self.restrictions.isEarlyMorph() and len(curLocs) >= 2:

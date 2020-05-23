@@ -33,6 +33,7 @@ class ItemLocContainer(object):
             }
             ret.itemLocations.append(ilCpy)
         ret.sm.addItems([item['Type'] for item in ret.currentItems])
+        # we don't copy restriction state on purpose
         return ret
 
     def dump(self):

@@ -307,3 +307,6 @@ class RandoServices(object):
 
     def canEndGame(self, container):
         return not any(loc['Name'] == 'Mother Brain' for loc in container.unusedLocations)
+
+    # def couldEndGame(self, container):
+        

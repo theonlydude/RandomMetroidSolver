@@ -123,9 +123,6 @@ class FillerProgSpeed(Filler):
         self.choice = ItemThenLocChoiceProgSpeed(restrictions, distanceProp, self.services)
         self.progSpeedParams = ProgSpeedParameters(restrictions)
 
-    def currentLocations(self, item=None):
-        return self.services.currentLocations(self.ap, self.container, item=item)
-
     def initFiller(self):
         super(FillerProgSpeed, self).initFiller()
         self.states = []
@@ -154,13 +151,19 @@ class FillerProgSpeed(Filler):
             ammos.remove('Missile')
         self.progressionItemTypes += [ammoType for ammoType in ammos if ammoType not in collectedAmmoTypes]
 
+    def chooseItemLoc(self, itemLocDict, possibleProg):
+        return self.choice.chooseItemLoc(itemLocDict, possibleProg, self.progressionItemLocs, self.ap, self.container)
+
+    def currentLocations(self, item=None):
+        return self.services.currentLocations(self.ap, self.container, item=item)
+
     def getComebackCheck(self):
         if self.isEarlyGame():
             return ComebackCheckType.NoCheck
         if random.random() >= self.possibleSoftlockProb:
             return ComebackCheckType.ComebackWithoutItem
         return ComebackCheckType.JustComeback
-        
+
     # from current accessible locations and an item pool, generate an item/loc dict.
     # return item/loc, or None if stuck
     def generateItem(self):        
@@ -177,7 +180,7 @@ class FillerProgSpeed(Filler):
                         newItemLocDict[w] = filtered
                 if len(newItemLocDict) > 0:
                     itemLocDict = newItemLocDict
-        itemLoc = self.choice.chooseItemLoc(itemLocDict, possibleProg, self.progressionItemLocs, self.ap, self.container)
+        itemLoc = self.chooseItemLoc(itemLocDict, possibleProg)
         self.log.debug("generateItem. itemLoc="+("None" if itemLoc is None else itemLoc['Item']['Type']+"@"+itemLoc['Location']['Name']))
         return itemLoc
 
@@ -192,7 +195,13 @@ class FillerProgSpeed(Filler):
     def collect(self, itemLoc):
         item = itemLoc['Item']
         location = itemLoc['Location']
+        isProg = self.services.isProgression(item, self.ap, self.container)
         self.ap = self.services.collect(self.ap, self.container, itemLoc)
+        if isProg:
+            n = len(self.states)
+            self.log.debug("prog indice="+str(n))
+            self.progressionStatesIndices.append(n)
+            self.progressionItemLocs.append(itemLoc)
         self.appendCurrentState()
         self.cache.reset()
 
@@ -433,6 +442,12 @@ class FillerProgSpeed(Filler):
 
     def step(self, onlyBossCheck=False):
         self.cache.reset()
+        if self.services.canEndGame(self.container) and self.settings.progSpeed not in ['slowest', 'slow']:
+            (itemLocDict, isProg) = self.services.getPossiblePlacementsNoLogic(self.container)
+            itemLoc = self.chooseItemLoc(itemLocDict, False)
+            assert itemLoc is not None
+            self.collect(itemLoc)
+            return True
         self.determineParameters()
         # fill up with non-progression stuff
         isStuck = self.fillNonProgressionItems()

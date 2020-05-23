@@ -181,7 +181,7 @@ class FillerProgSpeed(Filler):
             startAp = getAccessPoint(self.startAP)
             if startAp.GraphArea != "Crateria":
                 newItemLocDict = {}
-                for w, locs in itemLocDict:
+                for w, locs in itemLocDict.items():
                     filtered = [loc for loc in locs if loc['GraphArea'] != 'Crateria']
                     if len(filtered) > 0:
                         newItemLocDict[w] = filtered
@@ -271,7 +271,7 @@ class FillerProgSpeed(Filler):
         return (item['Category'] == 'Energy' and self.addEnergyAsNonProg()) or (not self.stdStart and item['Category'] == 'Ammo') or (self.restrictions.isEarlyMorph() and item['Type'] == 'Morph') or not self.isProgItem(item)
 
     def getNonProgItemPoolRestriction(self):
-        return lambda item: self.nonProgItemCheck(item)
+        return self.nonProgItemCheck
 
     def pickHelpfulMinor(self, item):
         self.helpfulMinorPicked = not self.container.hasItemTypeInPool(item['Type'])
@@ -299,7 +299,7 @@ class FillerProgSpeed(Filler):
             if itemLocation is not None:
                 nItems += 1
                 self.log.debug("fillNonProgressionItems: {} at {}".format(itemLocation['Item']['Name'], itemLocation['Location']['Name']))
-                # doing this first is actually important, as state is save in collect
+                # doing this first is actually important, as state is saved in collect
                 self.container.unrestrictItemPool()
                 self.collect(itemLocation)
                 locPoolOk = self.checkLocPool()

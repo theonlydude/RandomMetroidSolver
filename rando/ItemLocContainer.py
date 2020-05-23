@@ -1,5 +1,5 @@
 
-import copy
+import copy, log
 
 from smboolmanager import SMBoolManager
 from collections import Counter
@@ -18,6 +18,7 @@ class ItemLocContainer(object):
         self.currentItems = []
         self.itemPool = itemPool
         self.itemPoolBackup = None
+        self.log = log.get('ItemLocContainer')
 
     def __copy__(self):
         locs = [copy.deepcopy(loc) for loc in self.unusedLocations]
@@ -42,12 +43,14 @@ class ItemLocContainer(object):
         assert self.itemPoolBackup is None, "Item pool already restricted"
         self.itemPoolBackup = self.itemPool
         self.itemPool = [item for item in self.itemPoolBackup if predicate(item)]
+        self.log.debug("restrictItemPool: "+getItemListStr(self.itemPool))
 
     # remove a placed restriction
     def unrestrictItemPool(self):
         assert self.itemPoolBackup is not None, "No pool restriction to remove"
         self.itemPool = self.itemPoolBackup
         self.itemPoolBackup = None
+        self.log.debug("unrestrictItemPool: "+getItemListStr(self.itemPool))
 
     def extractLocs(self, locs):
         ret = []

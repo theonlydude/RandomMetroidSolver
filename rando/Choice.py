@@ -17,7 +17,7 @@ class Choice(object):
     def getLocList(self, itemLocDict, item):
         return itemLocDict[item['Wrapper']]
 
-# simple random choice (still with early morph check)
+# simple random choice
 class ItemThenLocChoice(Choice):
     def __init__(self, restrictions):
         super(ItemThenLocChoice, self).__init__(restrictions)
@@ -44,16 +44,8 @@ class ItemThenLocChoice(Choice):
         else:
             return self.chooseItemRandom(itemList)
 
-    def earlyMorphCheck(self, itemList):
-        if not self.restrictions.isEarlyMorph():
-            return None
-        return next((item for item in itemList if item['Type'] == 'Morph'), None)
-
     def chooseItemProg(self, itemList):
-        ret = self.earlyMorphCheck(itemList)
-        if ret is None:
-            ret = self.chooseItemRandom(itemList)
-        return ret
+        return self.chooseItemRandom(itemList)
 
     def chooseItemRandom(self, itemList):
         return random.choice(itemList)
@@ -177,9 +169,7 @@ class ItemThenLocChoiceProgSpeed(ItemThenLocChoice):
         return 0
 
     def chooseItemProg(self, itemList):
-        ret = self.earlyMorphCheck(itemList)
-        if ret is None:
-            ret = self.getChooseFunc(self.chooseItemRanges, self.chooseItemFuncs)(itemList)
+        ret = self.getChooseFunc(self.chooseItemRanges, self.chooseItemFuncs)(itemList)
         self.log.debug('chooseItemProg. ret='+ret['Type'])
         return ret
 

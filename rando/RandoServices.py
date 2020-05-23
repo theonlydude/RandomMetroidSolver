@@ -170,7 +170,7 @@ class RandoServices(object):
         if ret == True:
             newLocations = [loc for loc in self.currentLocations(ap, container, item) if loc not in oldLocations]
             ret = len(newLocations) > 0 and any(self.restrictions.isItemLocMatching(item, loc) for loc in newLocations)
-            self.log.debug('checkItem. item=' + item['Type'] + ', newLocs=' + str([loc['Name'] for loc in newLocations]))
+            self.log.debug('isProgression. item=' + item['Type'] + ', newLocs=' + str([loc['Name'] for loc in newLocations]))
             if ret == False and len(newLocations) > 0 and self.restrictions.split == 'Major':
                 # in major/minor split, still consider minor locs as
                 # progression if not all types are distributed
@@ -181,6 +181,44 @@ class RandoServices(object):
             self.cache.store(request, ret)
         return ret
 
+    def getPlacementLocs(self, ap, container, comebackCheck, itemObj, baseList):
+        return [loc for loc in baseList if self.restrictions.canPlaceAtLocation(itemObj, loc) and self.fullComebackCheck(container, ap, itemObj, loc, comebackCheck)]
+
+    def processEarlyMorph(self, ap, container, comebackCheck, itemLocDict, curLocs):
+        morph = container.getNextItemInPool('Morph')
+        if morph is not None:
+            self.log.debug("getPossiblePlacements: early morph check - morph not placed yet")
+            if any(w.item['Type'] == morph['Type'] for w in itemLocDict):
+                w = next(w for w in itemLocDict if w.item['Type'] == morph['Type'])
+                itemLocDict = {
+                    w: itemLocDict[w]
+                }
+            else:
+                self.log.debug("getPossiblePlacements: early morph placement check")
+                # we have to place morph early, it's still not placed, and not detected as placeable
+                # let's see if we can place it anyway in the context of a combo
+                morphLocs = self.getPlacementLocs(ap, container, comebackCheck, morph, curLocs)
+                if len(morphLocs) > 0:
+                    # copy our context to do some destructive checks
+                    containerCpy = copy.copy(container)
+                    # choose a morph item location in that context
+                    morphItemLoc = {
+                        'Item':morph,
+                        'Location':random.choice(containerCpy.extractLocs(morphLocs))
+                    }
+                    # acquire morph in new context and see if we can still open new locs
+                    newAP = self.collect(ap, container, morphItemLoc)
+                    (ild, poss) = self.getPossiblePlacements(newAP, containerCpy, comebackCheck)
+                    if poss:
+                        # it's possible, only offer morph as possibility
+                        itemLocDict = { ItemWrapper(morph): morphLocs }
+
+    def processMorphPlacements(self, ap, container, comebackCheck, itemLocDict, curLocs):
+        if self.restrictions.isEarlyMorph() and len(curLocs) >= 2:
+            self.processEarlyMorph(ap, container, comebackCheck, itemLocDict, curLocs)
+        elif self.restrictions.isLateMorph():
+            pass
+
     def getPossiblePlacements(self, ap, container, comebackCheck):
         curLocs = self.currentLocations(ap, container)
         self.log.debug('getPossiblePlacements. nCurLocs='+str(len(curLocs)))
@@ -189,9 +227,9 @@ class RandoServices(object):
         itemLocDict = {}
         possibleProg = False
         nonProgList = None
-        def getLocList(itemObj, baseList):
-            nonlocal sm
-            return [loc for loc in baseList if self.restrictions.canPlaceAtLocation(itemObj, loc) and self.fullComebackCheck(container, ap, itemObj, loc, comebackCheck)]
+        def getLocList(itemObj):
+            nonlocal curLocs
+            return self.getPlacementLocs(ap, container, comebackCheck, itemObj, curLocs)
         def getNonProgLocList(itemObj):
             nonlocal nonProgList, sm
             if nonProgList is None:
@@ -220,40 +258,17 @@ class RandoServices(object):
             if cont: # ignore non prog items if a prog item has already been found
                 continue
             # check possible locations for this item type
-            self.log.debug('getPossiblePlacements. itemType=' + itemType + ', curLocs='+str([loc['Name'] for loc in curLocs]))
-            locations = getLocList(itemObj, curLocs) if prog else getNonProgLocList(itemObj)
+#            self.log.debug('getPossiblePlacements. itemType=' + itemType + ', curLocs='+str([loc['Name'] for loc in curLocs]))
+            locations = getLocList(itemObj) if prog else getNonProgLocList(itemObj)
             if len(locations) == 0:
                 continue
             if prog and not possibleProg:
                 possibleProg = True
                 itemLocDict = {} # forget all the crap ones we stored just in case
-            self.log.debug('getPossiblePlacements. itemType=' + itemType + ', locs='+str([loc['Name'] for loc in locations]))
+#            self.log.debug('getPossiblePlacements. itemType=' + itemType + ', locs='+str([loc['Name'] for loc in locations]))
             for item in items:
                 itemLocDict[ItemWrapper(item)] = locations
-        # special check for early morph
-        if self.restrictions.isEarlyMorph() and len(curLocs) >= 2:
-            morph = container.getNextItemInPool('Morph')
-            if morph is not None:
-                self.log.debug("getPossiblePlacements: early morph check - morph not placed yet")
-            if morph is not None and not any(w.item['Type'] == morph['Type'] for w in itemLocDict):
-                self.log.debug("getPossiblePlacements: early morph placement check")
-                # we have to place morph early, it's still not placed, and not detected as placeable
-                # let's see if we can place it anyway in the context of a combo
-                morphLocs = getLocList(morph, curLocs)
-                if len(morphLocs) > 0:
-                    # copy our context to do some destructive checks
-                    containerCpy = copy.copy(container)
-                    # choose a morph item location in that context
-                    morphItemLoc = {
-                        'Item':morph,
-                        'Location':random.choice(containerCpy.extractLocs(morphLocs))
-                    }
-                    # acquire morph in new context and see if we can still open new locs
-                    newAP = self.collect(ap, container, morphItemLoc)
-                    (ild, poss) = self.getPossiblePlacements(newAP, containerCpy, comebackCheck)
-                    if poss:
-                        # it's possible, add morph and its locations from our context
-                        itemLocDict[ItemWrapper(morph)] = morphLocs
+        self.processMorphPlacements(ap, container, comebackCheck, itemLocDict, curLocs)
         if self.log.getEffectiveLevel() == logging.DEBUG:
             debugDict = {}
             for w, locList in itemLocDict.items():
@@ -285,8 +300,10 @@ class RandoServices(object):
         bossesLeft = container.getAllItemsInPoolFromCategory('Boss')
         if len(bossesLeft) == 0:
             return False
+        curLocs = self.currentLocations(ap, container)
         def getLocList():
-            return [loc for loc in self.currentLocations(ap, container) if self.fullComebackCheck(container, ap, None, loc, True)]
+            nonlocal curLocs
+            return self.getPlacementLocs(ap, container, ComebackCheckType.JustComeback, None, curLocs)
         prevLocs = getLocList()
         # fake kill remaining bosses and see if we can access the rest of the game
         if self.cache is not None:

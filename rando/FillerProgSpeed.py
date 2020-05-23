@@ -5,6 +5,7 @@ from rando.Filler import Filler
 from rando.Choice import ItemThenLocChoiceProgSpeed
 from rando.RandoServices import ComebackCheckType
 from rando.Items import ItemManager
+from parameters import infinity
 from graph_access import GraphUtils, getAccessPoint
 
 progSpeeds = ['slowest', 'slow', 'medium', 'fast', 'fastest']
@@ -133,8 +134,8 @@ class FillerProgSpeed(Filler):
         self.initState = FillerState(self)
 
     def determineParameters(self):
-        speed = self.settings.progSpeed
-        if speed == 'VARIAble':
+        speed = self.settings.progSpeed.lower()
+        if speed == 'variable':
             speed = random.choice(progSpeeds)
         self.choice.determineParameters(speed)
         self.minorHelpProb = self.progSpeedParams.getMinorHelpProb(speed)
@@ -446,7 +447,7 @@ class FillerProgSpeed(Filler):
             (itemLocDict, isProg) = self.services.getPossiblePlacementsNoLogic(self.container)
             itemLoc = self.chooseItemLoc(itemLocDict, False)
             assert itemLoc is not None
-            self.collect(itemLoc)
+            self.ap = self.services.collect(self.ap, self.container, itemLoc)
             return True
         self.determineParameters()
         # fill up with non-progression stuff

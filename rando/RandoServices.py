@@ -131,7 +131,7 @@ class RandoServices(object):
         comeBack = loc['accessPoint'] == ap or \
             self.areaGraph.canAccess(sm, loc['accessPoint'], ap, self.settings.maxDiff, item['Type'] if item is not None else None)
         if not comeBack:
-            self.log.debug("KO come back from " + loc['accessPoint'] + " to " + ap + " when trying to place " + item['Type'] + " at " + loc['Name'])
+            self.log.debug("KO come back from " + loc['accessPoint'] + " to " + ap + " when trying to place " + ("None" if item is None else item['Type']) + " at " + loc['Name'])
             return True
 #        else:
 #            self.log.debug("OK come back from " + loc['accessPoint'] + " to " + ap + " when trying to place " + item['Type'] + " at " + loc['Name'])

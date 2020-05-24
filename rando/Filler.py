@@ -17,7 +17,7 @@ class Filler(object):
         self.settings = restrictions.settings
         self.runtimeLimit_s = self.settings.runtimeLimit_s
         self.baseContainer = emptyContainer
-        self.errorMsg = ""
+        self.maxDiff = self.settings.maxDiff
         self.log = log.get('Filler')
 
     # reinit algo state
@@ -25,7 +25,8 @@ class Filler(object):
         self.ap = self.startAP
         self.container = copy.copy(self.baseContainer)
         self.nSteps = 0
-        self.maxDiff = self.settings.maxDiff
+        self.errorMsg = ""
+        self.settings.maxDiff = self.maxDiff
 
     def itemPoolCondition(self):
         return not self.container.isPoolEmpty()

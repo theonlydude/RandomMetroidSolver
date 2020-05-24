@@ -476,3 +476,6 @@ class FillerProgSpeed(Filler):
                 else:
                     isStuck = self.getItemFromStandardPool()
         return not isStuck
+
+    def getProgressionItemLocations(self):
+        return self.progressionItemLocs

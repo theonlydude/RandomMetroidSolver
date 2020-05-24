@@ -32,7 +32,7 @@ class RandoExec(object):
             return fact(graphSettings, self.areaGraph, self.restrictions, container)
         else:
 #            if randoSettings.progSpeed in ['basic', 'speedrun']:
-            secondPhase = lambda graphSettings, graph, restr, cont, prog: FillerRandom(graphSettings.startAP, graph, restr, cont)
+            secondPhase = lambda graphSettings, graph, restr, cont, prog: FillerRandom(graphSettings.startAP, graph, restr, cont, diffSteps=100)
             # TODO 2nd phase for progression speed
             chozoFact = ChozoFillerFactory(graphSettings, self.areaGraph, self.restrictions, fact, secondPhase)
             return ChozoWrapperFiller(randoSettings, container, chozoFact)

@@ -279,7 +279,7 @@ class FillerProgSpeed(Filler):
 
     def getNonProgItemPoolRestrictionStart(self):
         self.helpfulMinorPicked = random.random() >= self.minorHelpProb
-        return lambda item: (item['Category'] == 'Ammo' and not self.helpfulMinorPicked and self.pickHelpfulMinor()) or self.nonProgItemCheck(item)
+        return lambda item: (item['Category'] == 'Ammo' and not self.helpfulMinorPicked and self.pickHelpfulMinor(item)) or self.nonProgItemCheck(item)
 
     # return True if stuck, False if not
     def fillNonProgressionItems(self):

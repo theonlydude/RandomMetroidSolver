@@ -246,7 +246,7 @@ class RandoServices(object):
             nonlocal curLocs
             return self.getPlacementLocs(ap, container, comebackCheck, itemObj, curLocs)
         def getNonProgLocList(itemObj):
-            nonlocal nonProgList, sm
+            nonlocal nonProgList
             if nonProgList is None:
                 nonProgList = [loc for loc in self.currentLocations(ap, container) if self.fullComebackCheck(container, ap, itemObj, loc, comebackCheck)] # we don't care what the item is
                 self.log.debug("nonProgLocList="+str([loc['Name'] for loc in nonProgList]))

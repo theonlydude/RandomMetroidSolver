@@ -35,7 +35,7 @@ class RandoExec(object):
         while self.container is None and i < attempts:
             self.areaGraph = graphBuilder.createGraph()
             services = RandoServices(self.areaGraph, self.restrictions)
-            setup = RandoSetup(graphSettings.startAP, graphLocations, services)
+            setup = RandoSetup(graphSettings, graphLocations, services)
             self.container = setup.createItemLocContainer()
             if self.container is None:
                 sys.stdout.write('*')

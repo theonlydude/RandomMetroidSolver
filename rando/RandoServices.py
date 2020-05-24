@@ -214,11 +214,25 @@ class RandoServices(object):
                         itemLocDict.clear()
                         itemLocDict[ItemWrapper(morph)] = morphLocs
 
+    def processLateMorph(self, container, itemLocDict):
+        morphWrapper = next((w for w in itemLocDict if w.item['Type'] == 'Morph'), None)
+        if morphWrapper is None or len(itemLocDict) == 1:
+            # no morph, or it is the only possibility: nothing to do
+            return
+        forbidden = not self.restrictions.lateMorphCheck(container)
+        if not forbidden and self.restrictions.lateMorphForbiddenArea is not None:
+            morphLocs = [loc for loc in itemLocDict[morphWrapper] if loc['GraphArea'] != self.restrictions.lateMorphForbiddenArea]
+            forbidden = len(morphLocs) == 0
+            if not forbidden:
+                itemLocDict[morphWrapper] = morphLocs
+        if forbidden:
+            del itemLocDict[morphWrapper]
+
     def processMorphPlacements(self, ap, container, comebackCheck, itemLocDict, curLocs):
         if self.restrictions.isEarlyMorph() and len(curLocs) >= 2:
             self.processEarlyMorph(ap, container, comebackCheck, itemLocDict, curLocs)
         elif self.restrictions.isLateMorph():
-            pass
+            self.processLateMorph(container, itemLocDict)
 
     def getPossiblePlacements(self, ap, container, comebackCheck):
         curLocs = self.currentLocations(ap, container)

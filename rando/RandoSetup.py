@@ -4,15 +4,16 @@ from utils import randGaussBounds
 from smbool import SMBool
 from smboolmanager import SMBoolManager
 from helpers import Bosses
-from graph_access import getAccessPoint
+from graph_access import getAccessPoint, GraphUtils
 from rando.Filler import FrontFiller
 from rando.ItemLocContainer import ItemLocContainer
 
 class RandoSetup(object):
-    def __init__(self, startAP, locations, services):
+    def __init__(self, graphSettings, locations, services):
         self.sm = SMBoolManager()
-        self.startAP = startAP
         self.settings = services.settings
+        self.graphSettings = graphSettings
+        self.startAP = graphSettings.startAP
         self.itemManager = self.settings.getItemManager(self.sm)
         self.superFun = self.settings.superFun
         self.container = None
@@ -47,6 +48,14 @@ class RandoSetup(object):
         if not self.checkPool():
             return None
         self.container = ItemLocContainer(self.sm, self.getItemPool(), self.locations)
+        if self.restrictions.isLateMorph():
+            self.restrictions.lateMorphInit(self.startAP, self.container, self.services)
+            isStdStart = GraphUtils.isStandardStart(self.startAP)
+            # ensure we have an area layout that can put morph outside start area
+            # TODO::allow for custom start which doesn't require morph early
+            if self.graphSettings.areaRando and isStdStart and not self.restrictions.suitsRestrictions and self.restrictions.lateMorphForbiddenArea is None:
+                self.container = None
+                return None
         # checkStart needs the container
         if not self.checkStart():
             self.container = None

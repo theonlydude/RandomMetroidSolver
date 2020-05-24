@@ -30,7 +30,7 @@ class Restrictions(object):
             self.lateMorphForbiddenArea = None
 
     def addPlacementeRestrictions(self, restrictionDict):
-        self.checkers.append(lambda item, loc: item['Type'] not in restrictionDict or any(l['Name'] == loc['Name'] for l in restrictionDict[item['Type']]))
+        self.checkers.append(lambda item, loc, cont: item['Type'] not in restrictionDict or (item['Category'] == 'Ammo' and cont.hasUnrestrictedLocWithItemType(item['Type'])) or any(l['Name'] == loc['Name'] for l in restrictionDict[item['Type']]))
 
     def isLocMajor(self, loc):
         return 'Boss' not in loc['Class'] and (self.split == "Full" or self.split in loc['Class'])
@@ -73,17 +73,17 @@ class Restrictions(object):
     
     def getCheckers(self):
         checkers = []
-        checkers.append(lambda item, loc: (item['Category'] != 'Boss' and 'Boss' not in loc['Class']) or (item['Category'] == 'Boss' and item['Name'] == loc['Name']))
+        checkers.append(lambda item, loc, cont: (item['Category'] != 'Boss' and 'Boss' not in loc['Class']) or (item['Category'] == 'Boss' and item['Name'] == loc['Name']))
         if self.split != 'Full':
-            checkers.append(self.isItemLocMatching)
+            checkers.append(lambda item, loc, cont: self.isItemLocMatching(item, loc))
         if self.suitsRestrictions:
-            checkers.append(lambda item, loc: not self.isSuit(item) or loc['GraphArea'] != 'Crateroa')
+            checkers.append(lambda item, loc, cont: not self.isSuit(item) or loc['GraphArea'] != 'Crateroa')
         return checkers
 
-    def canPlaceAtLocation(self, item, location):
+    def canPlaceAtLocation(self, item, location, container):
         ret = True
         for chk in self.checkers:
-            ret = ret and chk(item, location)
+            ret = ret and chk(item, location, container)
             if not ret:
                 break
         return ret

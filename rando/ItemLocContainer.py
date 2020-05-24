@@ -122,3 +122,6 @@ class ItemLocContainer(object):
 
     def getCollectedItems(self, predicate):
         return [item for item in self.currentItems if predicate(item) == True]
+
+    def hasUnrestrictedLocWithItemType(self, itemType):
+        return any(il for il in self.itemLocations if ('restricted' not in il['Location'] or il['Location']['restricted'] == False) and il['Item']['Type'] == itemType)

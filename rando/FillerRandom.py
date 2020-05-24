@@ -35,7 +35,7 @@ class FillerRandom(Filler):
         # here a step is not an item collection but a whole fill attempt
         while not self.container.isPoolEmpty():
             item = random.choice(self.container.itemPool)
-            locs = [loc for loc in self.container.unusedLocations if self.restrictions.canPlaceAtLocation(item, loc)]
+            locs = [loc for loc in self.container.unusedLocations if self.restrictions.canPlaceAtLocation(item, loc, self.container)]
             if len(locs) == 0:
                 self.resetContainer()
                 continue
@@ -47,7 +47,7 @@ class FillerRandom(Filler):
             sys.stdout.write('o')
             sys.stdout.flush()
         else:
-            if self.diffSteps > 0:
+            if self.diffSteps > 0 and self.settings.maxDiff < infinity:
                 if self.nSteps < self.diffSteps:
                     couldBeBeatable = self.isBeatable(maxDiff=infinity)
                     if couldBeBeatable:

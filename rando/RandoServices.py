@@ -142,7 +142,7 @@ class RandoServices(object):
             if ret is not None:
                 return ret
         oldLocations = self.currentLocations(ap, container)
-        ret = any(self.restrictions.canPlaceAtLocation(item, loc) for loc in oldLocations)
+        ret = any(self.restrictions.canPlaceAtLocation(item, loc, container) for loc in oldLocations)
         if ret == True:
             newLocations = [loc for loc in self.currentLocations(ap, container, item) if loc not in oldLocations]
             ret = len(newLocations) > 0 and any(self.restrictions.isItemLocMatching(item, loc) for loc in newLocations)
@@ -158,7 +158,7 @@ class RandoServices(object):
         return ret
 
     def getPlacementLocs(self, ap, container, comebackCheck, itemObj, locs):
-        return [loc for loc in locs if (itemObj is None or self.restrictions.canPlaceAtLocation(itemObj, loc)) and self.fullComebackCheck(container, ap, itemObj, loc, comebackCheck)]
+        return [loc for loc in locs if (itemObj is None or self.restrictions.canPlaceAtLocation(itemObj, loc, container)) and self.fullComebackCheck(container, ap, itemObj, loc, comebackCheck)]
 
     def processEarlyMorph(self, ap, container, comebackCheck, itemLocDict, curLocs):
         morph = container.getNextItemInPool('Morph')
@@ -227,7 +227,7 @@ class RandoServices(object):
             if nonProgList is None:
                 nonProgList = [loc for loc in self.currentLocations(ap, container) if self.fullComebackCheck(container, ap, itemObj, loc, comebackCheck)] # we don't care what the item is
                 self.log.debug("nonProgLocList="+str([loc['Name'] for loc in nonProgList]))
-            return [loc for loc in nonProgList if self.restrictions.canPlaceAtLocation(itemObj, loc)]
+            return [loc for loc in nonProgList if self.restrictions.canPlaceAtLocation(itemObj, loc, container)]
         # boss handling : check if we can kill a boss, if so return immediately
         hasBoss = container.hasItemCategoryInPool('Boss')
         bossLoc = None if not hasBoss else next((loc for loc in curLocs if 'Boss' in loc['Class'] and self.fullComebackCheck(container, ap, None, loc, comebackCheck)), None)
@@ -274,7 +274,7 @@ class RandoServices(object):
         poolDict = container.getPoolDict()
         itemLocDict = {}
         def getLocList(itemObj, baseList):
-            return [loc for loc in baseList if self.restrictions.canPlaceAtLocation(itemObj, loc)]
+            return [loc for loc in baseList if self.restrictions.canPlaceAtLocation(itemObj, loc, container)]
         for itemType,items in sorted(poolDict.items()):
             itemObj = items[0]
             locList = getLocList(itemObj, container.unusedLocations)

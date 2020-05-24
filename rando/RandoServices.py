@@ -193,7 +193,7 @@ class RandoServices(object):
                 morphLocs = itemLocDict[morphWrapper]
                 itemLocDict.clear()
                 itemLocDict[morphWrapper] = morphLocs
-            else:
+            elif len(curLocs) >= 2:
                 self.log.debug("getPossiblePlacements: early morph placement check")
                 # we have to place morph early, it's still not placed, and not detected as placeable
                 # let's see if we can place it anyway in the context of a combo
@@ -229,7 +229,7 @@ class RandoServices(object):
             del itemLocDict[morphWrapper]
 
     def processMorphPlacements(self, ap, container, comebackCheck, itemLocDict, curLocs):
-        if self.restrictions.isEarlyMorph() and len(curLocs) >= 2:
+        if self.restrictions.isEarlyMorph():
             self.processEarlyMorph(ap, container, comebackCheck, itemLocDict, curLocs)
         elif self.restrictions.isLateMorph():
             self.processLateMorph(container, itemLocDict)

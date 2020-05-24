@@ -73,7 +73,7 @@ class Restrictions(object):
     
     def getCheckers(self):
         checkers = []
-        checkers.append(lambda item, loc: not item['Category'] == 'Boss' or ('Boss' in loc['Class'] and item['Name'] == loc['Name']))
+        checkers.append(lambda item, loc: (item['Category'] != 'Boss' and 'Boss' not in loc['Class']) or (item['Category'] == 'Boss' and item['Name'] == loc['Name']))
         if self.split != 'Full':
             checkers.append(self.isItemLocMatching)
         if self.suitsRestrictions:

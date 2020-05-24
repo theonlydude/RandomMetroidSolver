@@ -2,6 +2,7 @@
 import log, copy, random, sys, logging
 from enum import Enum, unique
 from parameters import infinity
+from rando.ItemLocContainer import getLocListStr
 
 class ItemWrapper(object): # to put items in dictionaries
     def __init__(self, item):
@@ -64,39 +65,6 @@ class RandoServices(object):
         sm = container.sm
         locs = container.unusedLocations
         return self.areaGraph.getAvailableLocations(locs, sm, diff, ap)
-
-        # if self.restrictions['MajorMinor'] != 'Chozo' or diff >= god or not self.isChozoLeft():
-        #     return availLocs
-        # # in chozo mode, we use high difficulty check for bosses/hardrooms/hellruns
-        # availLocsInf = self.areaGraph.getAvailableLocations(locs,
-        #                                                     self.smbm,
-        #                                                     god,
-        #                                                     ap)
-        # def isAvail(loc):
-        #     for k in loc['difficulty'].knows:
-        #         try:
-        #             smKnows = getattr(Knows, k)
-        #             # filter out tricks above diff target except boss
-        #             # knows, because boss fights can be performed
-        #             # without the trick anyway.
-        #             # this barely works, because it is possible for
-        #             # standard fight diff to be above god.  it is
-        #             # never totally impossible because there is no
-        #             # Knows for Ridley, and other bosses give
-        #             # drops. so only boss fights with diff above god
-        #             # can slip in
-        #             if smKnows.difficulty > diff and isBossKnows(k) is None:
-        #                 return False
-        #         except AttributeError:
-        #             # hard room/hell run
-        #             pass
-        #     return True
-
-        # for loc in availLocsInf:
-        #     if loc not in availLocs and isAvail(loc):
-        #         availLocs.append(loc)
-
-        # return availLocs
 
     def currentAccessPoints(self, ap, container, item=None):
         if self.cache is not None:
@@ -182,7 +150,7 @@ class RandoServices(object):
         return ret
 
     def getPlacementLocs(self, ap, container, comebackCheck, itemObj, baseList):
-        return [loc for loc in baseList if self.restrictions.canPlaceAtLocation(itemObj, loc) and self.fullComebackCheck(container, ap, itemObj, loc, comebackCheck)]
+        return [loc for loc in baseList if (itemObj is None or self.restrictions.canPlaceAtLocation(itemObj, loc)) and self.fullComebackCheck(container, ap, itemObj, loc, comebackCheck)]
 
     def processEarlyMorph(self, ap, container, comebackCheck, itemLocDict, curLocs):
         morph = container.getNextItemInPool('Morph')
@@ -237,6 +205,7 @@ class RandoServices(object):
     def getPossiblePlacements(self, ap, container, comebackCheck):
         curLocs = self.currentLocations(ap, container)
         self.log.debug('getPossiblePlacements. nCurLocs='+str(len(curLocs)))
+        self.log.debug('getPossiblePlacements. curLocs='+getLocListStr(curLocs))
         sm = container.sm
         poolDict = container.getPoolDict()
         itemLocDict = {}

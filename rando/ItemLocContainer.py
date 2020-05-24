@@ -19,6 +19,7 @@ class ItemLocContainer(object):
         self.itemPool = itemPool
         self.itemPoolBackup = None
         self.log = log.get('ItemLocContainer')
+        assert len(self.unusedLocations) == len(self.itemPool), "Item/Locs count mismatch"
 
     def __copy__(self):
         locs = [copy.deepcopy(loc) for loc in self.unusedLocations]
@@ -35,6 +36,15 @@ class ItemLocContainer(object):
         ret.sm.addItems([item['Type'] for item in ret.currentItems])
         # we don't copy restriction state on purpose
         return ret
+
+    def slice(self, itemPoolCond, locPoolCond):
+        assert self.itemPoolBackup is None, "Cannot slice a constrained container"
+        locs = self.getLocs(locPoolCond)
+        items = self.getItems(itemPoolCond)
+        cont = ItemLocContainer(self.sm, items, locs)
+        cont.currentItems = self.currentItems
+        cont.itemLocations = self.itemLocations
+        return copy.copy(cont)
 
     def dump(self):
         return "ItemPool: %s\nLocPool: %s\nCollected: %s" % (getItemListStr(self.itemPool), getLocListStr(self.unusedLocations), getItemListStr(self.currentItems))

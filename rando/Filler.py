@@ -27,6 +27,7 @@ class Filler(object):
         self.nSteps = 0
         self.errorMsg = ""
         self.settings.maxDiff = self.maxDiff
+        self.runtime_s = 0
 
     def itemPoolCondition(self):
         return not self.container.isPoolEmpty()
@@ -40,17 +41,16 @@ class Filler(object):
         self.initFiller()
         if condition is None:
             condition = self.itemPoolCondition
-        runtime_s = 0
         isStuck = False
         startDate = time.process_time()
-        while condition() and not isStuck and runtime_s <= self.runtimeLimit_s:
+        while condition() and not isStuck and self.runtime_s <= self.runtimeLimit_s:
             isStuck = not self.step()
             if not isStuck:
                 self.nSteps += 1
-            runtime_s = time.process_time() - startDate
+            self.runtime_s = time.process_time() - startDate
         if condition():
             isStuck = True
-            if runtime_s > self.runtimeLimit_s:
+            if self.runtime_s > self.runtimeLimit_s:
                 self.errorMsg = "Exceeded time limit of "+str(self.runtimeLimit_s) +" seconds"
             else:
                 self.errorMsg = "STUCK !\n"+self.container.dump()

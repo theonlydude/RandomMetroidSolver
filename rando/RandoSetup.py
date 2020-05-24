@@ -83,6 +83,7 @@ class RandoSetup(object):
             #         self.itemPool = self.chozoItemPool
             #     else:
             #         self.itemPool = self.nonChozoItemPool
+            loc['restricted'] = True
             itemLocation = {'Location' : loc}
             if isMinor and self.container.hasItemTypeInPool('Nothing'):
                 itemLocation['Item'] = self.container.getNextItemInPool('Nothing')

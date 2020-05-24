@@ -20,6 +20,8 @@ class MiniSolver(object):
         locations = []
         for il in itemLocations:
             loc = il['Location']
+            if 'restricted' in loc and loc['restricted'] == True:
+                continue
             loc['itemType'] = il['Item']['Type']
             loc['difficulty'] = None
             locations.append(loc)

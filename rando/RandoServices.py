@@ -157,8 +157,8 @@ class RandoServices(object):
             self.cache.store(request, ret)
         return ret
 
-    def getPlacementLocs(self, ap, container, comebackCheck, itemObj, baseList):
-        return [loc for loc in baseList if (itemObj is None or self.restrictions.canPlaceAtLocation(itemObj, loc)) and self.fullComebackCheck(container, ap, itemObj, loc, comebackCheck)]
+    def getPlacementLocs(self, ap, container, comebackCheck, itemObj, locs):
+        return [loc for loc in locs if (itemObj is None or self.restrictions.canPlaceAtLocation(itemObj, loc)) and self.fullComebackCheck(container, ap, itemObj, loc, comebackCheck)]
 
     def processEarlyMorph(self, ap, container, comebackCheck, itemLocDict, curLocs):
         morph = container.getNextItemInPool('Morph')
@@ -287,27 +287,32 @@ class RandoServices(object):
     def onlyBossesLeft(self, ap, container):
         if self.settings.maxDiff == infinity:
             return False
-        self.log.debug('onlyBossesLeft, diff=' + str(self.settings.maxDiff))
+        self.log.debug('onlyBossesLeft, diff=' + str(self.settings.maxDiff) + ", ap="+ap)
         sm = container.sm
         bossesLeft = container.getAllItemsInPoolFromCategory('Boss')
         if len(bossesLeft) == 0:
             return False
-        curLocs = self.currentLocations(ap, container)
         def getLocList():
-            nonlocal curLocs
+            curLocs = self.currentLocations(ap, container)
+            self.log.debug('onlyBossesLeft, curLocs=' + getLocListStr(curLocs))
             return self.getPlacementLocs(ap, container, ComebackCheckType.JustComeback, None, curLocs)
         prevLocs = getLocList()
+        self.log.debug("onlyBossesLeft. prevLocs="+getLocListStr(prevLocs))
         # fake kill remaining bosses and see if we can access the rest of the game
         if self.cache is not None:
             self.cache.reset()
         for boss in bossesLeft:
+            self.log.debug('onlyBossesLeft. kill '+boss['Name'])
             sm.addItem(boss['Type'])
         # get bosses locations and newly accessible locations (for bosses that open up locs)
         newLocs = getLocList()
-        locs = newLocs + container.getLocs(lambda loc: 'Boss' in loc['Class'] and not loc in newLocs)
+        self.log.debug("onlyBossesLeft. newLocs="+getLocListStr(newLocs))
+        locs = newLocs + container.getLocs(lambda loc: (loc['Name'] == 'Space Jump' or 'Boss' in loc['Class']) and not loc in newLocs)
+        self.log.debug("onlyBossesLeft. locs="+getLocListStr(locs))
         ret = (len(locs) > len(prevLocs) and len(locs) == len(container.unusedLocations))
         # restore bosses killed state
         for boss in bossesLeft:
+            self.log.debug('onlyBossesLeft. revive '+boss['Name'])
             sm.removeItem(boss['Type'])
         if self.cache is not None:
             self.cache.reset()

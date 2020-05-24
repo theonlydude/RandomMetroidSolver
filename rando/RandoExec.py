@@ -8,10 +8,13 @@ from rando.GraphBuilder import GraphBuilder
 from rando.RandoSetup import RandoSetup
 from rando.Filler import FrontFiller
 from rando.FillerProgSpeed import FillerProgSpeed
+from vcr import VCR
 
 class RandoExec(object):
-    def __init__(self):
+    def __init__(self, seedName, vcr):
         self.errorMsg = ""
+        self.seedName = seedName
+        self.vcr = vcr
 
     def createFiller(self, randoSettings, graphSettings):
         if randoSettings.progSpeed == 'basic':
@@ -46,6 +49,7 @@ class RandoExec(object):
             return (True, [], [])
         graphBuilder.escapeGraph(self.container, self.areaGraph, randoSettings.maxDiff)
         filler = self.createFiller(randoSettings, graphSettings)
-        ret = filler.generateItems()
+        vcr = VCR(self.seedName, 'rando') if self.vcr == True else None
+        ret = filler.generateItems(vcr=vcr)
         self.errorMsg = filler.errorMsg
         return ret

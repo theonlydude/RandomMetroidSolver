@@ -200,10 +200,8 @@ class FillerProgSpeed(Filler):
         curState.states.append(curState)
 
     def collect(self, itemLoc):
-        item = itemLoc['Item']
-        location = itemLoc['Location']
-        isProg = self.services.isProgression(item, self.ap, self.container)
-        self.ap = self.services.collect(self.ap, self.container, itemLoc)
+        isProg = self.services.isProgression(itemLoc['Item'], self.ap, self.container)
+        super(FillerProgSpeed, self).collect(itemLoc)
         if isProg:
             n = len(self.states)
             self.log.debug("prog indice="+str(n))
@@ -385,8 +383,8 @@ class FillerProgSpeed(Filler):
         if len(self.states) == 0:
             self.initState.apply(self)
             self.log.debug("rollback END initState apply, nCurLocs="+str(len(self.currentLocations())))
-            # if self.vcr != None:
-            #     self.vcr.addRollback(nStatesAtStart)
+            if self.vcr != None:
+                self.vcr.addRollback(nStatesAtStart)
             sys.stdout.write('<'*nStatesAtStart)
             sys.stdout.flush()
             return None
@@ -423,16 +421,16 @@ class FillerProgSpeed(Filler):
             self.updateRollbackItemsTried(itemLoc)
             state.apply(self)
             ret = itemLoc
-            # if self.vcr != None:
-            #     nRoll = nItemsAtStart - len(self.currentItems)
-            #     if nRoll > 0:
-            #         self.vcr.addRollback(nRoll)
+            if self.vcr != None:
+                nRoll = nItemsAtStart - len(self.container.currentItems)
+                if nRoll > 0:
+                    self.vcr.addRollback(nRoll)
         else:
             if isFakeRollback == False:
                 self.log.debug('fallbackState apply')
                 fallbackState.apply(self)
-                # if self.vcr != None:
-                #     self.vcr.addRollback(1)
+                if self.vcr != None:
+                    self.vcr.addRollback(1)
             else:
                 self.log.debug('currentState restore')
                 currentState.apply(self)

@@ -4,7 +4,7 @@ from rando.Items import ItemManager
 
 class RandoSettings(object):
     def __init__(self, maxDiff, progSpeed, progDiff, qty, restrictions,
-                 superFun, runtimeLimit_s, vcr, plandoRando):
+                 superFun, runtimeLimit_s, plandoRando):
         self.progSpeed = progSpeed
         self.progDiff = progDiff.lower()
         self.maxDiff = maxDiff
@@ -14,7 +14,6 @@ class RandoSettings(object):
         self.runtimeLimit_s = runtimeLimit_s
         if self.runtimeLimit_s <= 0:
             self.runtimeLimit_s = sys.maxsize
-        self.vcr = vcr
 
     def getItemManager(self, smbm):
         return ItemManager(self.restrictions['MajorMinor'], self.qty, smbm)

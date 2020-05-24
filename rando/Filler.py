@@ -35,7 +35,8 @@ class Filler(object):
         return lambda: self.nSteps < n
 
     # shall return (stuck, itemLoc dict list, progression itemLoc dict list)
-    def generateItems(self, condition=None):
+    def generateItems(self, condition=None, vcr=None):
+        self.vcr = vcr
         self.initFiller()
         if condition is None:
             condition = self.itemPoolCondition
@@ -61,7 +62,16 @@ class Filler(object):
                 self.errorMsg += "Maximum difficulty could not be applied everywhere. Affected locations: {}".format(aboveMaxDiffStr)
             isStuck = False
         print('')
+        if self.vcr != None:
+            self.vcr.dump()
         return (isStuck, self.container.itemLocations, self.getProgressionItemLocations())
+
+    def collect(self, itemLoc):
+        location = itemLoc['Location']
+        item = itemLoc['Item']
+        self.ap = self.services.collect(self.ap, self.container, itemLoc)
+        if self.vcr is not None:
+            self.vcr.addLocation(location['Name'], item['Type'])
 
     def getProgressionItemLocations(self):
         return []
@@ -89,5 +99,5 @@ class FrontFiller(Filler):
                 self.settings.maxDiff = infinity
                 return self.step(onlyBossCheck=True)
             return False
-        self.ap = self.services.collect(self.ap, self.container, itemLoc)
+        self.collect(itemLoc)
         return True

@@ -12,6 +12,7 @@ from rom_patches import RomPatches
 from rom import RomPatcher, FakeROM
 from utils import loadRandoPreset
 from version import displayedVersion
+
 import log, db
 
 speeds = ['slowest', 'slow', 'medium', 'fast', 'fastest', 'basic', 'VARIAble']
@@ -480,9 +481,8 @@ if __name__ == "__main__":
     if args.plandoRando != None:
         args.plandoRando = json.loads(args.plandoRando)
         RomPatches.ActivePatches = args.plandoRando["patches"]
-
     randoSettings = RandoSettings(maxDifficulty, progSpeed, progDiff, qty,
-                                  restrictions, args.superFun, args.runtimeLimit_s, args.vcr,
+                                  restrictions, args.superFun, args.runtimeLimit_s,
                                   args.plandoRando["locsItems"] if args.plandoRando != None else None)
     dotFile = None
     if args.area == True:
@@ -492,41 +492,8 @@ if __name__ == "__main__":
         if args.areaLayoutBase == False:
             RomPatches.ActivePatches += RomPatches.AreaComfortSet
     graphSettings = GraphSettings(args.startAP, args.area, args.bosses, args.escapeRando, dotFile)
-    # bossTransitions = vanillaBossesTransitions
-    # if args.bosses == True:
-    #     bossTransitions = GraphUtils.createBossesTransitions()
-    # if args.area == True:
-    #     if args.dot == True:
-    #         dotDir = args.directory
-    #     else:
-    #         dotDir = None
-    #     RomPatches.ActivePatches += RomPatches.AreaBaseSet
-    #     if args.areaLayoutBase == False:
-    #         RomPatches.ActivePatches += RomPatches.AreaComfortSet
-    #     try:
-    #         randomizer = AreaRandomizer(graphLocations, randoSettings, seedName, bossTransitions,
-    #                                     dotDir=dotDir)
-    #     except RuntimeError:
-    #         msg = "Cannot generate area layout. Retry, and change the super fun settings if the problem happens again."
-    #         dumpErrorMsg(args.output, msg)
-    #         sys.exit(-1)
-    # else:
-    #     try:
-    #         if args.plandoRando != None:
-    #             transitions = args.plandoRando["transitions"]
-    #         else:
-    #             transitions = vanillaTransitions + bossTransitions
-    #         randomizer = Randomizer(graphLocations, randoSettings, seedName, transitions)
-    #     except RuntimeError:
-    #         msg = "Locations unreachable detected with preset/super fun/max diff. Retry, and change the Super Fun settings and/or Maximum difficulty if the problem happens again."
-    #         dumpErrorMsg(args.output, msg)
-    #         sys.exit(-1)
-    #     except Exception as e:
-    #         msg = str(e)
-    #         dumpErrorMsg(args.output, msg)
-    #         sys.exit(-1)
     if args.patchOnly == False:
-        randoExec = RandoExec()
+        randoExec = RandoExec(seedName, args.vcr)
         (stuck, itemLocs, progItemLocs) = randoExec.randomize(randoSettings, graphSettings)
         doors = GraphUtils.getDoorConnections(randoExec.areaGraph,
                                               args.area, args.bosses,

@@ -60,6 +60,14 @@ class RandoSetup(object):
         if not self.checkStart():
             self.container = None
             return None
+        # add placement restriction helpers for random fill
+        if self.settings.progSpeed == 'speedrun':
+            itemTypes = list(set([item['Type'] for item in self.container.itemPool if item['Category'] not in ['Energy', 'Boss']]))
+            itemTypes.remove('Missile')
+            restrictionDict = {}
+            for itemType in itemTypes:
+                restrictionDict[itemType] = self.services.possibleLocations(itemType, self.startAP, self.container)
+            self.restrictions.addPlacementeRestrictions(restrictionDict)
         self.fillRestrictedLocations()
         return self.container
 

@@ -17,12 +17,9 @@ class Restrictions(object):
     def isLateMorph(self):
         return self.settings.restrictions['Morph'] == 'late'
 
-    def lateMorphInit(self, ap, container, services):
+    def lateMorphInit(self, ap, emptyContainer, services):
         assert self.isLateMorph()
-        container = copy.copy(container)
-        allButMorph = container.getItems(lambda item: item['Type'] != 'Morph')
-        container.sm.addItems([item['Type'] for item in allButMorph])
-        locs = services.currentLocations(ap, container, post=True)
+        locs = services.possibleLocations('Morph', ap, emptyContainer)
         if self.split != 'Full':
             locs = [loc for loc in locs if self.split in loc['Class']]
         self.log.debug('lateMorphInit. locs='+getLocListStr(locs))
@@ -31,6 +28,9 @@ class Restrictions(object):
             self.lateMorphForbiddenArea = getAccessPoint(ap).GraphArea
         else:
             self.lateMorphForbiddenArea = None
+
+    def addPlacementeRestrictions(self, restrictionDict):
+        self.checkers.append(lambda item, loc: item['Type'] not in restrictionDict or any(l['Name'] == loc['Name'] for l in restrictionDict[item['Type']]))
 
     def isLocMajor(self, loc):
         return 'Boss' not in loc['Class'] and (self.split == "Full" or self.split in loc['Class'])
@@ -78,7 +78,6 @@ class Restrictions(object):
             checkers.append(self.isItemLocMatching)
         if self.suitsRestrictions:
             checkers.append(lambda item, loc: not self.isSuit(item) or loc['GraphArea'] != 'Crateroa')
-        # TODO add checker for random fill is random fill in settings?
         return checkers
 
     def canPlaceAtLocation(self, item, location):

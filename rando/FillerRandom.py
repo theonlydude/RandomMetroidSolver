@@ -25,21 +25,25 @@ class FillerRandom(Filler):
         self.container.unusedLocations = self.baseUnusedLocations[:]
 
     def step(self):
-        item = random.choice(self.container.itemPool)
-        locs = [loc for loc in self.container.unusedLocations if self.restrictions.canPlaceAtLocation(item, loc)]
-        loc = random.choice(locs)
-        itemLoc = {'Item':item, 'Location':loc}
-        self.container.collect(itemLoc, pickup=False)
-        if self.container.isPoolEmpty():
-            # pool is exhausted, use mini solver to see if it is beatable
-            if self.solver.isBeatable(self.container.itemLocations):
-                sys.stdout.write('o')
-                sys.stdout.flush()
-            else:
-                # reset container to force a retry
+        # here a step is not an item collection but a whole fill attempt
+        while not self.container.isPoolEmpty():
+            item = random.choice(self.container.itemPool)
+            locs = [loc for loc in self.container.unusedLocations if self.restrictions.canPlaceAtLocation(item, loc)]
+            if len(locs) == 0:
                 self.resetContainer()
-                sys.stdout.write('x')
-                sys.stdout.flush()
+                continue
+            loc = random.choice(locs)
+            itemLoc = {'Item':item, 'Location':loc}
+            self.container.collect(itemLoc, pickup=False)
+        # pool is exhausted, use mini solver to see if it is beatable
+        if self.solver.isBeatable(self.container.itemLocations):
+            sys.stdout.write('o')
+            sys.stdout.flush()
+        else:
+            # reset container to force a retry
+            self.resetContainer()
+            sys.stdout.write('x')
+            sys.stdout.flush()
         # never stuck, stop if we hit runtime limit only
         return True
 

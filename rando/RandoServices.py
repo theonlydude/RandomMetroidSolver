@@ -2,7 +2,7 @@
 import log, copy, random, sys, logging
 from enum import Enum, unique
 from parameters import infinity
-from rando.ItemLocContainer import getLocListStr
+from rando.ItemLocContainer import getLocListStr, getItemListStr
 
 class ItemWrapper(object): # to put items in dictionaries
     def __init__(self, item):
@@ -31,6 +31,14 @@ class RandoServices(object):
         sys.stdout.write('.')
         sys.stdout.flush()
         return itemLoc['Location']['accessPoint']
+
+    def possibleLocations(self, itemType, ap, emptyContainer):
+        assert len(emptyContainer.currentItems) == 0, "Invalid call to possibleLocations. emptyContainer had collected items"
+        allBut = emptyContainer.getItems(lambda item: item['Type'] != itemType)
+        emptyContainer.sm.addItems([item['Type'] for item in allBut])
+        ret = self.currentLocations(ap, emptyContainer, post=True)
+        emptyContainer.sm.resetItems()
+        return ret
 
     def currentLocations(self, ap, container, item=None, post=False, diff=None):
         if self.cache is not None:

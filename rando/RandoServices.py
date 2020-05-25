@@ -68,7 +68,7 @@ class RandoServices(object):
             return True
         result = sm.eval(loc['PostAvailable'], item)
         return result.bool == True and result.difficulty <= self.settings.maxDiff
-    
+
     def getAvailLocs(self, container, ap, diff):
         sm = container.sm
         locs = container.unusedLocations
@@ -307,7 +307,7 @@ class RandoServices(object):
         # get bosses locations and newly accessible locations (for bosses that open up locs)
         newLocs = getLocList()
         self.log.debug("onlyBossesLeft. newLocs="+getLocListStr(newLocs))
-        locs = newLocs + container.getLocs(lambda loc: (loc['Name'] == 'Space Jump' or 'Boss' in loc['Class']) and not loc in newLocs)
+        locs = newLocs + container.getLocs(lambda loc: 'Boss' in loc['Class'] and not loc in newLocs)
         self.log.debug("onlyBossesLeft. locs="+getLocListStr(locs))
         ret = (len(locs) > len(prevLocs) and len(locs) == len(container.unusedLocations))
         # restore bosses killed state
@@ -323,4 +323,3 @@ class RandoServices(object):
         return not any(loc['Name'] == 'Mother Brain' for loc in container.unusedLocations)
 
     # def couldEndGame(self, container):
-        

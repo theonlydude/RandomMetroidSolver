@@ -7,6 +7,7 @@ from rando.Choice import ItemThenLocChoice
 from rando.RandoServices import ComebackCheckType
 from parameters import infinity
 from helpers import diffValue2txt
+from graph_access import GraphUtils
 
 class Filler(object):
     def __init__(self, startAP, graph, restrictions, emptyContainer):
@@ -61,7 +62,7 @@ class Filler(object):
             if aboveMaxDiffStr != '[  ]':
                 self.errorMsg += "Maximum difficulty could not be applied everywhere. Affected locations: {}".format(aboveMaxDiffStr)
             isStuck = False
-        print('')
+        print('\n%d steps' % self.nSteps)
         if self.vcr != None:
             self.vcr.dump()
         return (isStuck, self.container.itemLocations, self.getProgressionItemLocations())
@@ -85,12 +86,18 @@ class FrontFiller(Filler):
     def __init__(self, startAP, graph, restrictions, emptyContainer):
         super(FrontFiller, self).__init__(startAP, graph, restrictions, emptyContainer)
         self.choice = ItemThenLocChoice(restrictions)
+        self.stdStart = GraphUtils.isStandardStart(self.startAP)
+
+    def isEarlyGame(self):
+        n = 2 if self.stdStart else 3
+        return len(self.container.currentItems) <= n
 
     # one item/loc per step
     def step(self, onlyBossCheck=False):
         self.cache.reset()
         if not self.services.canEndGame(self.container):
-            (itemLocDict, isProg) = self.services.getPossiblePlacements(self.ap, self.container, ComebackCheckType.ComebackWithoutItem)
+            comebackCheck = ComebackCheckType.ComebackWithoutItem if not self.isEarlyGame() else ComebackCheckType.NoCheck
+            (itemLocDict, isProg) = self.services.getPossiblePlacements(self.ap, self.container, comebackCheck)
         else:
             (itemLocDict, isProg) = self.services.getPossiblePlacementsNoLogic(self.container)
         itemLoc = self.choice.chooseItemLoc(itemLocDict, isProg)

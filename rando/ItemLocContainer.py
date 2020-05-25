@@ -18,6 +18,7 @@ class ItemLocContainer(object):
         self.currentItems = []
         self.itemPool = itemPool
         self.itemPoolBackup = None
+        self.unrestrictedItems = set()
         self.log = log.get('ItemLocContainer')
         assert len(self.unusedLocations) == len(self.itemPool), "Item/Locs count mismatch"
 
@@ -27,6 +28,7 @@ class ItemLocContainer(object):
                                self.itemPool[:],
                                locs)
         ret.currentItems = self.currentItems[:]
+        ret.unrestrictedItems = copy.copy(self.unrestrictedItems)
         for il in self.itemLocations:
             ilCpy = {
                 'Item': il['Item'],
@@ -72,6 +74,8 @@ class ItemLocContainer(object):
     def collect(self, itemLocation, pickup=True):
         item = itemLocation['Item']
         location = itemLocation['Location']
+        if 'restricted' not in location or location['restricted'] == False:
+            self.unrestrictedItems.add(item['Type'])
         if pickup == True:
             self.currentItems.append(item)
             self.sm.addItem(item['Type'])
@@ -124,4 +128,4 @@ class ItemLocContainer(object):
         return [item for item in self.currentItems if predicate(item) == True]
 
     def hasUnrestrictedLocWithItemType(self, itemType):
-        return any(il for il in self.itemLocations if ('restricted' not in il['Location'] or il['Location']['restricted'] == False) and il['Item']['Type'] == itemType)
+        return itemType in self.unrestrictedItems

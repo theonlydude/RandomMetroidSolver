@@ -32,11 +32,11 @@ class RandoServices(object):
         sys.stdout.flush()
         return itemLoc['Location']['accessPoint']
 
-    def possibleLocations(self, itemType, ap, emptyContainer):
+    def possibleLocations(self, item, ap, emptyContainer):
         assert len(emptyContainer.currentItems) == 0, "Invalid call to possibleLocations. emptyContainer had collected items"
-        allBut = emptyContainer.getItems(lambda item: item['Type'] != itemType)
-        emptyContainer.sm.addItems([item['Type'] for item in allBut])
-        ret = self.currentLocations(ap, emptyContainer, post=True)
+        allBut = emptyContainer.getItems(lambda it: it['Type'] != item['Type'])
+        emptyContainer.sm.addItems([it['Type'] for it in allBut])
+        ret = [loc for loc in self.currentLocations(ap, emptyContainer, post=True) if self.restrictions.canPlaceAtLocation(item, loc, emptyContainer)]
         emptyContainer.sm.resetItems()
         return ret
 

@@ -19,9 +19,9 @@ class Restrictions(object):
 
     def lateMorphInit(self, ap, emptyContainer, services):
         assert self.isLateMorph()
-        locs = services.possibleLocations('Morph', ap, emptyContainer)
-        if self.split != 'Full':
-            locs = [loc for loc in locs if self.split in loc['Class']]
+        morph = emptyContainer.getNextItemInPool('Morph')
+        assert morph is not None
+        locs = services.possibleLocations(morph, ap, emptyContainer)
         self.log.debug('lateMorphInit. locs='+getLocListStr(locs))
         self.lateMorphLimit = len(locs)
         if len(set([loc['GraphArea'] for loc in locs])) > 1:
@@ -29,8 +29,10 @@ class Restrictions(object):
         else:
             self.lateMorphForbiddenArea = None
 
+    NoCheckCat = set(['Energy', 'Nothing', 'Boss'])
+
     def addPlacementeRestrictions(self, restrictionDict):
-        self.checkers.append(lambda item, loc, cont: item['Type'] not in restrictionDict or (item['Category'] == 'Ammo' and cont.hasUnrestrictedLocWithItemType(item['Type'])) or any(l['Name'] == loc['Name'] for l in restrictionDict[item['Type']]))
+        self.checkers.append(lambda item, loc, cont: item['Category'] in Restrictions.NoCheckCat or item['Type'] == 'Missile' or (item['Category'] == 'Ammo' and cont.hasUnrestrictedLocWithItemType(item['Type'])) or loc['GraphArea'] not in restrictionDict or item['Type'] not in restrictionDict[loc['GraphArea']] or loc['Name'] in restrictionDict[loc['GraphArea']][item['Type']])
 
     def isLocMajor(self, loc):
         return 'Boss' not in loc['Class'] and (self.split == "Full" or self.split in loc['Class'])

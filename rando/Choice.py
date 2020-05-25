@@ -208,24 +208,14 @@ class ItemThenLocChoiceProgSpeed(ItemThenLocChoice):
                 ret = item
         return ret
 
-    def getLocDiff(self, loc):
-        # avail difficulty already stored by graph algorithm
-        return loc['difficulty']
 
-    def fillLocsDiff(self, locs):
-        for loc in locs:
-            if 'PostAvailable' in loc:
-                loc['difficulty'] = self.smbm.wand(self.getLocDiff(loc), self.smbm.eval(loc['PostAvailable']))
-
-    def chooseLocationMaxDiff(self, availableLocations, item):
+    def chooseLocationMaxDiff(self, availableLocations):
         self.log.debug("MAX")
-        self.fillLocsDiff(availableLocations)
         self.log.debug("chooseLocationMaxDiff: {}".format([(l['Name'], l['difficulty']) for l in availableLocations]))
         return max(availableLocations, key=lambda loc:loc['difficulty'].difficulty)
 
-    def chooseLocationMinDiff(self, availableLocations, item):
+    def chooseLocationMinDiff(self, availableLocations):
         self.log.debug("MIN")
-        self.fillLocsDiff(availableLocations)
         self.log.debug("chooseLocationMinDiff: {}".format([(l['Name'], l['difficulty']) for l in availableLocations]))
         return min(availableLocations, key=lambda loc:loc['difficulty'].difficulty)
 

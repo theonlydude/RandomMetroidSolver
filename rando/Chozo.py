@@ -62,8 +62,7 @@ class ChozoWrapperFiller(Filler):
         self.settings.maxDiff = self.maxDiff
         # transfer stuff to second container
         cont = copy.copy(self.secondPhaseContainer)
-        cont.currentItems = firstCont.currentItems
-        cont.itemLocations = firstCont.itemLocations
+        firstCont.transferCollected(cont)
         self.log.debug("prepareSecondPhase. container="+cont.dump())
         return self.fillerFactory.createSecondPhaseFiller(cont, progItemLocs)
 
@@ -71,7 +70,7 @@ class ChozoWrapperFiller(Filler):
         filler = self.prepareFirstPhase()
         (isStuck, itemLocations, progItemLocs) = filler.generateItems(vcr=vcr)
         self.errorMsg = filler.errorMsg
-        if isStuck:            
+        if isStuck:
             return (isStuck, itemLocations, progItemLocs)
         self.settings.runtimeLimit_s -= filler.runtime_s
         filler = self.prepareSecondPhase(filler.container, progItemLocs)

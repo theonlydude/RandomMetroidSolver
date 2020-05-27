@@ -10,6 +10,9 @@ def getItemListStr(items):
 def getLocListStr(locs):
     return str([loc['Name'] for loc in locs])
 
+# TODO add "loose container" than does not check item pool/unsued loc length and allow pickup
+# from locations that are not in the pool
+
 class ItemLocContainer(object):
     def __init__(self, sm, itemPool, locations):
         self.sm = sm
@@ -48,6 +51,25 @@ class ItemLocContainer(object):
         cont.itemLocations = self.itemLocations
         return copy.copy(cont)
 
+    def transferCollected(self, dest):
+        dest.currentItems = self.currentItems[:]
+        dest.sm = SMBoolManager()
+        dest.sm.addItems([item['Type'] for item in dest.currentItems])
+        # FIXME unclear what extractLocs should actually do
+        dLocs = dest.extractLocs([il['Location'] for il in self.itemLocations])
+        for il in self.itemLocations:
+            dLoc = next((loc for loc in dLocs if loc['Name'] == il['Location']['Name']), None)
+            if dLoc is None:
+                dLoc = copy.deepcopy(il['Location'])
+            dest.itemLocations.append({'Item':il['Item'], 'Location':dLoc})
+        dest.unrestrictedItems = copy.copy(self.unrestrictedItems)
+
+    def resetCollected(self):
+        self.currentItems = []
+        self.itemLocations = {}
+        self.unrestrictedItems = {}
+        self.sm.resetItems()
+
     def dump(self):
         return "ItemPool: %s\nLocPool: %s\nCollected: %s" % (getItemListStr(self.itemPool), getLocListStr(self.unusedLocations), getItemListStr(self.currentItems))
 
@@ -68,7 +90,9 @@ class ItemLocContainer(object):
     def extractLocs(self, locs):
         ret = []
         for loc in locs:
-            ret.append(next(l for l in self.unusedLocations if l['Name'] == loc['Name']))
+            myLoc = next((l for l in self.unusedLocations if l['Name'] == loc['Name']), None)
+            if myLoc is not None:
+                ret.append(myLoc)
         return ret
 
     def collect(self, itemLocation, pickup=True):
@@ -88,7 +112,7 @@ class ItemLocContainer(object):
 
     def isPoolEmpty(self):
         return len(self.itemPool) == 0
-        
+
     def getNextItemInPool(self, t):
         return next((item for item in self.itemPool if item['Type'] == t), None)
 
@@ -103,7 +127,7 @@ class ItemLocContainer(object):
 
     def getAllItemsInPoolFromCategory(self, cat):
         return [item for item in self.itemPool if item['Category'] == cat]
-    
+
     def countItemTypeInPool(self, t):
         return len([item for item in self.itemPool if item['Type'] == t])
 

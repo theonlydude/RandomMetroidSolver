@@ -173,7 +173,7 @@ class FillerProgSpeed(Filler):
 
     # from current accessible locations and an item pool, generate an item/loc dict.
     # return item/loc, or None if stuck
-    def generateItem(self):        
+    def generateItem(self):
         itemLocDict, possibleProg = self.services.getPossiblePlacements(self.ap, self.container, self.getComebackCheck())
         if self.isEarlyGame():
             # cheat a little bit if non-standard start: place early
@@ -193,7 +193,7 @@ class FillerProgSpeed(Filler):
 
     def getCurrentState(self):
         return self.states[-1] if len(self.states) > 0 else self.initState
-    
+
     def appendCurrentState(self):
         curState = FillerState(self)
         self.states.append(curState)
@@ -403,7 +403,7 @@ class FillerProgSpeed(Filler):
             i = maxRollbackPoint
             while i >= minRollbackPoint and len(possibleStates) < 3:
                 state = states[i]
-                state.apply(self)                
+                state.apply(self)
                 itemLoc = self.generateItem()
                 if itemLoc is not None and not self.hasTried(itemLoc) and self.services.isProgression(itemLoc['Item'], self.ap, self.container):
                     possibleStates.append((state, itemLoc))
@@ -477,3 +477,39 @@ class FillerProgSpeed(Filler):
 
     def getProgressionItemLocations(self):
         return self.progressionItemLocs
+
+
+# TODO ensure container here is a "loose container"
+def FillerProgSpeedChozoSecondPhase(Filler):
+    def __init__(self, startAP, graph, restrictions, container):
+        super(FillerProgSpeedChozoSecondPhase, self).__init__(startAP, graph, restrictions, container)
+        self.firstPhaseItemLocs = container.itemLocations
+        self.conditions = [
+            ('Missile', lambda sm: sm.canOpenRedDoors()),
+            ('Super', lambda sm: sm.canOpenGreenDoors()),
+            ('PowerBomb', lambda sm: sm.canOpenYellowDoors())
+        ]
+
+    def initFiller(self):
+        super(FillerProgSpeedChozoSecondPhase, self).initFiller()
+        self.container.resetCollected()
+
+    def step(self):
+        return False
+        # TODO
+        # if there are still conditions:
+        #   while no condition is met:
+        #     - get current locations, merging them along the way to not get trolled by comeback
+        #     - collect items (with ap/logic) from unrestricted locs of first container until one of the remaining conditions is met.
+        #   - pop the met condition
+        #   - create location pool with current locations
+        #   - create loose container with our item pool (no copy) and above location pool, transfer our collected items
+        #   - restrict container with item restriction matching the one in the condition just met and a probability depending on prog speed (to put in ProgSpeedParameters)
+        #   - create a FillerRandomItems with a number of steps matching the number of locations
+        #   - run said filler
+        #   - transfer collected from container back to ours
+        #   - end step
+        # when no condition left :
+        #   - create a FillerRandom with 100 diff steps and give it our container
+        #     (its item/loc pool should be depleted and collected itemLocations updated accordingly if what's above worked ok)
+        #   - run it, the end

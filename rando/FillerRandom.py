@@ -69,5 +69,23 @@ class FillerRandom(Filler):
             sys.stdout.flush()
         return True
 
-# TODO actual random filler will real solver instead of just mini: make it a subclass and change isBeatable method
+# no logic random fill with one item placement per step. intended for incremental filling
+class FillerRandomItems(Filler):
+    def __init__(self, startAP, graph, restrictions, container, steps=0):
+        super(FillerRandomItems, self).__init__(startAP, graph, restrictions, container)
+        self.steps = steps
 
+    def generateItems(self, condition=None, vcr=None):
+        if condition is None and self.steps > 0:
+            condition = self.createStepCountCondition(self.steps)
+        return super(FillerRandomItems, self).generateItems(condition, vcr)
+
+    def step(self):
+        item = random.choice(self.container.itemPool)
+        locs = [loc for loc in self.container.unusedLocations if self.restrictions.canPlaceAtLocation(item, loc, self.container)]
+        loc = random.choice(locs)
+        itemLoc = {'Item':item, 'Location':loc}
+        self.container.collect(itemLoc, pickup=False)
+        return True
+
+# TODO actual random filler will real solver instead of just mini: make it a subclass and change isBeatable method

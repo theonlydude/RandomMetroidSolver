@@ -975,15 +975,15 @@ class RomPatcher:
         q = len([il for il in itemLocs if il['Item']['Type'] == itemType])
         if itemType == 'Missile' and self.nothingMissile == True:
             q += 1
-        # in vcr mode if the seed has stuck we may not have these items, return at least 1
-        return max(q, 1)
+        return q
 
     def getMinorsDistribution(self, itemLocs):
         dist = {}
         minQty = 100
         minors = ['Missile', 'Super', 'PowerBomb']
         for m in minors:
-            q = float(self.getItemQty(itemLocs, m))
+            # in vcr mode if the seed has stuck we may not have these items, return at least 1
+            q = float(max(self.getItemQty(itemLocs, m), 1))
             dist[m] = {'Quantity' : q }
             if q < minQty:
                 minQty = q

@@ -10,6 +10,12 @@ def getItemListStr(items):
 def getLocListStr(locs):
     return str([loc['Name'] for loc in locs])
 
+def getItemLocStr(itemLoc):
+    return itemLoc['Item']['Type'] + " at " + itemLoc['Location']['Name']
+
+def getItemLocationsStr(itemLocations):
+    return str([getItemLocStr(il) for il in itemLocations])
+
 class ItemLocContainer(object):
     def __init__(self, sm, itemPool, locations):
         self.sm = sm
@@ -24,6 +30,14 @@ class ItemLocContainer(object):
 
     def checkConsistency(self):
         assert len(self.unusedLocations) == len(self.itemPool), "Item/Locs count mismatch"
+
+    def __eq__(self, rhs):
+        eq = self.currentItems == rhs.currentItems
+        eq &= getLocListStr(self.unusedLocations) == getLocListStr(rhs.unusedLocations)
+        eq &= self.itemPool == rhs.itemPool
+        eq &= getItemLocationsStr(self.itemLocations) == getItemLocationsStr(rhs.itemLocations)
+
+        return eq
 
     def __copy__(self):
         locs = [copy.deepcopy(loc) for loc in self.unusedLocations]

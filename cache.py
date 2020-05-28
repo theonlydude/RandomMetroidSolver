@@ -37,4 +37,4 @@ class RequestCache(object):
         return self.results[request] if request in self.results else None
 
     def reset(self):
-        self.results = {}
+        self.results.clear()

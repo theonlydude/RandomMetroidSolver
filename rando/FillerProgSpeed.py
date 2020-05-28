@@ -6,7 +6,7 @@ from rando.FillerRandom import FillerRandom, FillerRandomItems
 from rando.Choice import ItemThenLocChoiceProgSpeed
 from rando.RandoServices import ComebackCheckType
 from rando.Items import ItemManager
-from rando.ItemLocContainer import ItemLocContainer, LooseItemLocContainer, getLocListStr, getItemListStr
+from rando.ItemLocContainer import ItemLocContainer, LooseItemLocContainer, getLocListStr, getItemListStr, getItemLocationsStr, getItemLocStr
 from parameters import infinity
 from graph_access import GraphUtils, getAccessPoint
 
@@ -120,19 +120,19 @@ class FillerState(object):
         self.progressionStatesIndices = filler.progressionStatesIndices[:]
 
     def apply(self, filler):
-        filler.container = self.container
+        filler.container = copy.copy(self.container)
         filler.ap = self.ap
-        filler.states = self.states
-        filler.progressionItemLocs = self.progressionItemLocs
-        filler.progressionStatesIndices = self.progressionStatesIndices
+        filler.states = self.states[:]
+        filler.progressionItemLocs = self.progressionItemLocs[:]
+        filler.progressionStatesIndices = self.progressionStatesIndices[:]
         filler.cache.reset()
 
     def __eq__(self, rhs):
         if rhs is None:
             return False
-        eq = self.container == rhs.container
-        eq &= self.ap == rhs.ap
+        eq = self.ap == rhs.ap
         eq &= self.progressionStatesIndices == rhs.progressionStatesIndices
+        eq &= self.container == rhs.container
         return eq
 
 class FillerProgSpeed(Filler):
@@ -201,7 +201,7 @@ class FillerProgSpeed(Filler):
                 if len(newItemLocDict) > 0:
                     itemLocDict = newItemLocDict
         itemLoc = self.chooseItemLoc(itemLocDict, possibleProg)
-        self.log.debug("generateItem. itemLoc="+("None" if itemLoc is None else itemLoc['Item']['Type']+"@"+itemLoc['Location']['Name']))
+        self.log.debug("generateItem. itemLoc="+"None" if itemLoc is None else getItemLocStr(itemLoc))
         return itemLoc
 
     def getCurrentState(self):
@@ -417,6 +417,7 @@ class FillerProgSpeed(Filler):
             while i >= minRollbackPoint and len(possibleStates) < 3:
                 state = states[i]
                 state.apply(self)
+                self.log.debug('rollback. state applied. Container=\n'+self.container.dump())
                 itemLoc = self.generateItem()
                 if itemLoc is not None and not self.hasTried(itemLoc) and self.services.isProgression(itemLoc['Item'], self.ap, self.container):
                     possibleStates.append((state, itemLoc))
@@ -486,6 +487,7 @@ class FillerProgSpeed(Filler):
                     isStuck = False
                 else:
                     isStuck = self.getItemFromStandardPool()
+        self.log.debug("step end. itemLocations="+getItemLocationsStr(self.container.itemLocations))
         return not isStuck
 
     def getProgressionItemLocations(self):

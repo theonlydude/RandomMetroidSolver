@@ -14,8 +14,9 @@ class Choice(object):
 
     def getItemList(self, itemLocDict):
         return sorted([wrapper.item for wrapper in itemLocDict.keys()], key=lambda item: item['Type'])
+
     def getLocList(self, itemLocDict, item):
-        return itemLocDict[item['Wrapper']]
+        return sorted(itemLocDict[item['Wrapper']], key=lambda loc: loc['Name'])
 
 # simple random choice
 class ItemThenLocChoice(Choice):

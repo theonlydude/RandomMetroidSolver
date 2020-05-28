@@ -270,7 +270,7 @@ if __name__ == "__main__":
 
     # if no seed given, choose one
     if args.seed == 0:
-        seed = random.randint(0, 9999999)
+        seed = random.randint(0, 9999999999)
     else:
         seed = args.seed
     logger.debug("seed: {}".format(seed))
@@ -346,9 +346,11 @@ if __name__ == "__main__":
             if 'late' in morphPlacements:
                 morphPlacements.remove('late')
         args.morphPlacement = random.choice(morphPlacements)
-    # late + chozo will always stuck
-    if args.majorsSplit == 'Chozo' and args.morphPlacement == "late":
+    # random fill makes certain options unavailable
+    if progSpeed == 'speedrun':
         optErrMsg += forceArg('morphPlacement', 'normal', "'Morph Placement' forced to normal")
+        optErrMsg += forceArg('progressionDifficulty', 'normal', "'Progression difficulty' forced to normal")
+        progDiff = args.progressionDifficulty
     logger.debug("morphPlacement: {}".format(args.morphPlacement))
 
     if args.strictMinors == 'random':
@@ -491,7 +493,8 @@ if __name__ == "__main__":
         RomPatches.ActivePatches += RomPatches.AreaBaseSet
         if args.areaLayoutBase == False:
             RomPatches.ActivePatches += RomPatches.AreaComfortSet
-    graphSettings = GraphSettings(args.startAP, args.area, args.bosses, args.escapeRando, dotFile)
+    graphSettings = GraphSettings(args.startAP, args.area, args.bosses, args.escapeRando, dotFile,
+                                  args.plandoRando["transitions"] if args.plandoRando != None else None)
     if args.patchOnly == False:
         randoExec = RandoExec(seedName, args.vcr)
         (stuck, itemLocs, progItemLocs) = randoExec.randomize(randoSettings, graphSettings)

@@ -583,5 +583,6 @@ class FillerProgSpeedChozoSecondPhase(Filler):
             self.log.debug("step. LAST FILL. cont: "+self.container.dump())
             filler = FillerRandomNoCopy(self.startAP, self.graph, self.restrictions, self.container, diffSteps=100)
             (stuck, itemLocs, prog) = filler.generateItems()
+            self.errorMsg += filler.errorMsg
             assert not stuck
         return True

@@ -10,9 +10,6 @@ def getItemListStr(items):
 def getLocListStr(locs):
     return str([loc['Name'] for loc in locs])
 
-# TODO add "loose container" than does not check item pool/unsued loc length and allow pickup
-# from locations that are not in the pool
-
 class ItemLocContainer(object):
     def __init__(self, sm, itemPool, locations):
         self.sm = sm
@@ -23,6 +20,9 @@ class ItemLocContainer(object):
         self.itemPoolBackup = None
         self.unrestrictedItems = set()
         self.log = log.get('ItemLocContainer')
+        self.checkConsistency()
+
+    def checkConsistency(self):
         assert len(self.unusedLocations) == len(self.itemPool), "Item/Locs count mismatch"
 
     def __copy__(self):
@@ -55,23 +55,17 @@ class ItemLocContainer(object):
         dest.currentItems = self.currentItems[:]
         dest.sm = SMBoolManager()
         dest.sm.addItems([item['Type'] for item in dest.currentItems])
-        # FIXME unclear what extractLocs should actually do
-        dLocs = dest.extractLocs([il['Location'] for il in self.itemLocations])
-        for il in self.itemLocations:
-            dLoc = next((loc for loc in dLocs if loc['Name'] == il['Location']['Name']), None)
-            if dLoc is None:
-                dLoc = copy.deepcopy(il['Location'])
-            dest.itemLocations.append({'Item':il['Item'], 'Location':dLoc})
+        dest.itemLocations = copy.copy(self.itemLocations)
         dest.unrestrictedItems = copy.copy(self.unrestrictedItems)
 
     def resetCollected(self):
         self.currentItems = []
-        self.itemLocations = {}
-        self.unrestrictedItems = {}
+        self.itemLocations = []
+        self.unrestrictedItems = set()
         self.sm.resetItems()
 
     def dump(self):
-        return "ItemPool: %s\nLocPool: %s\nCollected: %s" % (getItemListStr(self.itemPool), getLocListStr(self.unusedLocations), getItemListStr(self.currentItems))
+        return "ItemPool(%d): %s\nLocPool(%d): %s\nCollected: %s" % (len(self.itemPool), getItemListStr(self.itemPool), len(self.unusedLocations), getLocListStr(self.unusedLocations), getItemListStr(self.currentItems))
 
     # temporarily restrict item pool to items fulfilling predicate
     def restrictItemPool(self, predicate):
@@ -90,11 +84,17 @@ class ItemLocContainer(object):
     def extractLocs(self, locs):
         ret = []
         for loc in locs:
-            myLoc = next((l for l in self.unusedLocations if l['Name'] == loc['Name']), None)
-            if myLoc is not None:
-                ret.append(myLoc)
+            ret.append(next(l for l in self.unusedLocations if l['Name'] == loc['Name']))
         return ret
 
+    def removeLocation(self, location):
+        self.unusedLocations.remove(location)
+
+    def removeItem(self, item):
+        self.itemPool.remove(item)
+        if self.itemPoolBackup is not None:
+            self.itemPoolBackup.remove(item)
+    
     def collect(self, itemLocation, pickup=True):
         item = itemLocation['Item']
         location = itemLocation['Location']
@@ -103,12 +103,9 @@ class ItemLocContainer(object):
         if pickup == True:
             self.currentItems.append(item)
             self.sm.addItem(item['Type'])
-        self.unusedLocations.remove(location)
+        self.removeLocation(location)
         self.itemLocations.append(itemLocation)
-        itemToRemove = self.getNextItemInPool(item['Type'])
-        self.itemPool.remove(itemToRemove)
-        if self.itemPoolBackup is not None:
-            self.itemPoolBackup.remove(itemToRemove)
+        self.removeItem(item)
 
     def isPoolEmpty(self):
         return len(self.itemPool) == 0
@@ -153,3 +150,23 @@ class ItemLocContainer(object):
 
     def hasUnrestrictedLocWithItemType(self, itemType):
         return itemType in self.unrestrictedItems
+
+
+# accepts itemPool/locPool size inconsistency
+# accepts collection of item/locs that might not be in the pool
+class LooseItemLocContainer(ItemLocContainer):
+    def __init__(self, sm, itemPool, locations):
+        super(LooseItemLocContainer, self).__init__(sm, itemPool, locations)
+
+    def checkConsistency(self):
+        return
+
+    def removeLocation(self, location):
+        if location in self.unusedLocations:
+            self.unusedLocations.remove(location)
+
+    def removeItem(self, item):
+        if item in self.itemPool:
+            self.itemPool.remove(item)
+            if self.itemPoolBackup is not None:
+                self.itemPoolBackup.remove(item)

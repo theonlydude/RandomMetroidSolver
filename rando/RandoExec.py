@@ -7,7 +7,7 @@ from rando.RandoServices import RandoServices
 from rando.GraphBuilder import GraphBuilder
 from rando.RandoSetup import RandoSetup
 from rando.Filler import FrontFiller
-from rando.FillerProgSpeed import FillerProgSpeed
+from rando.FillerProgSpeed import FillerProgSpeed, FillerProgSpeedChozoSecondPhase
 from rando.FillerRandom import FillerRandom
 from rando.Chozo import ChozoFillerFactory, ChozoWrapperFiller
 from vcr import VCR
@@ -31,9 +31,10 @@ class RandoExec(object):
         if self.restrictions.split != "Chozo":
             return fact(graphSettings, self.areaGraph, self.restrictions, container)
         else:
-#            if randoSettings.progSpeed in ['basic', 'speedrun']:
-            secondPhase = lambda graphSettings, graph, restr, cont, prog: FillerRandom(graphSettings.startAP, graph, restr, cont, diffSteps=100)
-            # TODO 2nd phase for progression speed
+            if randoSettings.progSpeed in ['basic', 'speedrun']:
+                secondPhase = lambda graphSettings, graph, restr, cont, prog: FillerRandom(graphSettings.startAP, graph, restr, cont, diffSteps=100)
+            else:
+                secondPhase = lambda graphSettings, graph, restr, cont, prog: FillerProgSpeedChozoSecondPhase(graphSettings.startAP, graph, restr, cont)
             chozoFact = ChozoFillerFactory(graphSettings, self.areaGraph, self.restrictions, fact, secondPhase)
             return ChozoWrapperFiller(randoSettings, container, chozoFact)
         # TODO plando/rando ??

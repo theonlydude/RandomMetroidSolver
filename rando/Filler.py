@@ -13,6 +13,7 @@ class Filler(object):
     def __init__(self, startAP, graph, restrictions, emptyContainer):
         self.startAP = startAP
         self.cache = RequestCache()
+        self.graph = graph
         self.services = RandoServices(graph, restrictions, self.cache)
         self.restrictions = restrictions
         self.settings = restrictions.settings
@@ -24,11 +25,14 @@ class Filler(object):
     # reinit algo state
     def initFiller(self):
         self.ap = self.startAP
-        self.container = copy.copy(self.baseContainer)
+        self.initContainer()
         self.nSteps = 0
         self.errorMsg = ""
         self.settings.maxDiff = self.maxDiff
         self.runtime_s = 0
+
+    def initContainer(self):
+        self.container = copy.copy(self.baseContainer)
 
     def itemPoolCondition(self):
         return not self.container.isPoolEmpty()
@@ -62,7 +66,7 @@ class Filler(object):
             if aboveMaxDiffStr != '[  ]':
                 self.errorMsg += "Maximum difficulty could not be applied everywhere. Affected locations: {}".format(aboveMaxDiffStr)
             isStuck = False
-        print('\n%d steps' % self.nSteps)
+        print('\n%d step(s)' % self.nSteps)
         if self.vcr != None:
             self.vcr.dump()
         return (isStuck, self.container.itemLocations, self.getProgressionItemLocations())

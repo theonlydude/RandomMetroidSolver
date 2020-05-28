@@ -2,9 +2,11 @@
 import copy, random, sys
 
 from rando.Filler import Filler
+from rando.FillerRandom import FillerRandom, FillerRandomItems
 from rando.Choice import ItemThenLocChoiceProgSpeed
 from rando.RandoServices import ComebackCheckType
 from rando.Items import ItemManager
+from rando.ItemLocContainer import ItemLocContainer, LooseItemLocContainer, getLocListStr, getItemListStr
 from parameters import infinity
 from graph_access import GraphUtils, getAccessPoint
 
@@ -96,6 +98,17 @@ class ProgSpeedParameters(object):
         if progSpeed == 'fastest':
             return 0
         raise RuntimeError("Unknown prog speed " + progSpeed)
+
+    def getChozoSecondPhaseRestrictionProb(self, progSpeed):
+        if progSpeed == 'slowest':
+            return 0
+        if progSpeed == 'slow':
+            return 0.16
+        if progSpeed == 'medium':
+            return 0.5
+        if progSpeed == 'fast':
+            return 0.9
+        return 1
 
 # algo state used for rollbacks
 class FillerState(object):
@@ -479,37 +492,94 @@ class FillerProgSpeed(Filler):
         return self.progressionItemLocs
 
 
-# TODO ensure container here is a "loose container"
-def FillerProgSpeedChozoSecondPhase(Filler):
+class FillerRandomNoCopy(FillerRandom):
+    def __init__(self, startAP, graph, restrictions, container, diffSteps=0):
+        super(FillerRandomNoCopy, self).__init__(startAP, graph, restrictions, container, diffSteps)
+
+    def initContainer(self):
+        self.container = self.baseContainer
+
+class FillerProgSpeedChozoSecondPhase(Filler):
     def __init__(self, startAP, graph, restrictions, container):
         super(FillerProgSpeedChozoSecondPhase, self).__init__(startAP, graph, restrictions, container)
+        # turn baseContainer into a loose container with nothing collected
+        self.baseContainer = LooseItemLocContainer(self.baseContainer.sm,
+                                                   self.baseContainer.itemPool,
+                                                   self.baseContainer.unusedLocations)
         self.firstPhaseItemLocs = container.itemLocations
+        self.progSpeedParams = ProgSpeedParameters(self.restrictions)
+
+    def initContainer(self):
+        self.container = self.baseContainer
+
+    def initFiller(self):
+        super(FillerProgSpeedChozoSecondPhase, self).initFiller()
         self.conditions = [
             ('Missile', lambda sm: sm.canOpenRedDoors()),
             ('Super', lambda sm: sm.canOpenGreenDoors()),
             ('PowerBomb', lambda sm: sm.canOpenYellowDoors())
         ]
-
-    def initFiller(self):
-        super(FillerProgSpeedChozoSecondPhase, self).initFiller()
         self.container.resetCollected()
+        self.firstPhaseContainer = ItemLocContainer(self.container.sm,
+                                                    [il['Item'] for il in self.firstPhaseItemLocs],
+                                                    [il['Location'] for il in self.firstPhaseItemLocs])
+        self.firstPhaseIndex = 0
+
+    def nextMetCondition(self):
+        for cond in self.conditions:
+            diff = cond[1](self.container.sm)
+            if diff.bool == True and diff.difficulty <= self.settings.maxDiff:
+                return cond
+        return None
+
+    def currentLocations(self):
+        curLocs = self.services.currentLocations(self.ap, self.container)
+        return self.services.getPlacementLocs(self.ap, self.container, ComebackCheckType.JustComeback, None, curLocs)
+
+    def determineParameters(self):
+        speed = self.settings.progSpeed
+        if speed == 'variable':
+            speed = random.choice(progSpeeds)
+        self.restrictedItemProba = self.progSpeedParams.getChozoSecondPhaseRestrictionProb(speed)
 
     def step(self):
-        return False
-        # TODO
-        # if there are still conditions:
-        #   while no condition is met:
-        #     - get current locations, merging them along the way to not get trolled by comeback
-        #     - collect items (with ap/logic) from unrestricted locs of first container until one of the remaining conditions is met.
-        #   - pop the met condition
-        #   - create location pool with current locations
-        #   - create loose container with our item pool (no copy) and above location pool, transfer our collected items
-        #   - restrict container with item restriction matching the one in the condition just met and a probability depending on prog speed (to put in ProgSpeedParameters)
-        #   - create a FillerRandomItems with a number of steps matching the number of locations
-        #   - run said filler
-        #   - transfer collected from container back to ours
-        #   - end step
-        # when no condition left :
-        #   - create a FillerRandom with 100 diff steps and give it our container
-        #     (its item/loc pool should be depleted and collected itemLocations updated accordingly if what's above worked ok)
-        #   - run it, the end
+        if len(self.conditions) > 1:
+            self.determineParameters()
+            curLocs = []
+            while self.firstPhaseIndex < len(self.firstPhaseItemLocs):
+                self.cache.reset()
+                newCurLocs = [loc for loc in self.currentLocations() if loc not in curLocs]
+                curLocs += newCurLocs
+                cond = self.nextMetCondition()
+                if cond is not None:
+                    self.log.debug('step. cond item='+cond[0])
+                    self.conditions.remove(cond)
+                    break
+                self.ap = self.services.collect(self.ap, self.firstPhaseContainer, self.firstPhaseItemLocs[self.firstPhaseIndex])
+                self.firstPhaseIndex += 1
+            self.log.debug('step. curLocs='+getLocListStr(curLocs))
+            restrictedItemTypes = [cond[0] for cond in self.conditions]
+            self.log.debug('step. restrictedItemTypes='+str(restrictedItemTypes))
+            itemPool = []
+            while len(itemPool) < len(curLocs):
+                item = random.choice(self.container.itemPool)
+                if item['Type'] not in restrictedItemTypes or random.random() < self.restrictedItemProba:
+                    itemPool.append(item)
+            self.log.debug('step. itemPool='+getItemListStr(itemPool))
+            cont = ItemLocContainer(self.container.sm, itemPool, curLocs)
+            self.container.transferCollected(cont)
+            filler = FillerRandomItems(self.ap, self.graph, self.restrictions, cont)
+            (stuck, itemLocs, prog) = filler.generateItems()
+            assert not stuck
+            for itemLoc in itemLocs:
+                if itemLoc['Location'] in self.container.unusedLocations:
+                    self.log.debug("step. POST COLLECT "+itemLoc['Item']['Type']+" at "+itemLoc['Location']['Name'])
+                    self.container.collect(itemLoc)
+        else:
+            # merge collected of 1st phase and 2nd phase so far for seed to be solvable by random fill
+            self.container.itemLocations += self.firstPhaseItemLocs
+            self.log.debug("step. LAST FILL. cont: "+self.container.dump())
+            filler = FillerRandomNoCopy(self.startAP, self.graph, self.restrictions, self.container, diffSteps=100)
+            (stuck, itemLocs, prog) = filler.generateItems()
+            assert not stuck
+        return True

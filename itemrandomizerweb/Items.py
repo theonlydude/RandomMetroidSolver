@@ -341,8 +341,13 @@ class ItemPoolGeneratorChozo(ItemPoolGenerator):
             self.itemManager.removeItem('ETank')
             self.itemManager.addItem('NoEnergy', 'Chozo')
             if random.random() < 0.5:
+                # no etank nor reserve
                 self.itemManager.removeItem('ETank')
                 self.itemManager.addItem('NoEnergy', 'Chozo')
+            elif random.random() < 0.5:
+                # replace only etank with reserve
+                self.itemManager.removeItem('ETank')
+                self.itemManager.addItem('Reserve', 'Chozo')
 
             # complete up to 18 energies with nothing item
             alreadyInPool = 4
@@ -402,13 +407,22 @@ class ItemPoolGeneratorMajors(ItemPoolGenerator):
         total = 18
         energyQty = self.qty['energy']
         if energyQty == 'ultra sparse':
-            # 0-1, remove reserve tank, check if it also remove the etank
+            # 0-1, add up to one energy (etank or reserve)
             self.itemManager.removeItem('Reserve')
+            self.itemManager.removeItem('ETank')
+            self.itemManager.addItem('NoEnergy')
             if random.random() < 0.5:
-                self.itemManager.removeItem('ETank')
+                # no energy at all
                 self.itemManager.addItem('NoEnergy')
+            else:
+                if random.random() < 0.5:
+                    self.itemManager.addItem('ETank')
+                else:
+                    self.itemManager.addItem('Reserve')
+
             # complete up to 18 energies with nothing item
-            for i in range(total - 1):
+            alreadyInPool = 2
+            for i in range(total - alreadyInPool):
                 self.itemManager.addItem('NoEnergy')
 
         elif energyQty == 'sparse':

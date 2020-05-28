@@ -496,6 +496,7 @@ class FillerProgSpeed(Filler):
 
 class FillerRandomNoCopy(FillerRandom):
     def __init__(self, startAP, graph, restrictions, container, diffSteps=0):
+        assert len(container.itemPool) == len(container.unusedLocations), "Invalid container given to FillerRandomNoCopy : "+container.dump()
         super(FillerRandomNoCopy, self).__init__(startAP, graph, restrictions, container, diffSteps)
 
     def initContainer(self):

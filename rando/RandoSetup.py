@@ -19,8 +19,8 @@ class RandoSetup(object):
         self.container = None
         self.services = services
         self.restrictions = services.restrictions
-        self.locations = locations
         self.areaGraph = services.areaGraph
+        self.locations = self.areaGraph.getAccessibleLocations(locations, self.startAP)
         self.forbiddenItems = []
         self.restrictedLocs = []
         self.lastRestricted = []
@@ -39,7 +39,12 @@ class RandoSetup(object):
             'Mother Brain': self.sm.enoughStuffsMotherbrain
         }
         self.okay = lambda: SMBool(True, 0)
-        self.itemManager.createItemPool() # we have to do this only once, otherwise pool will change
+        exclude = self.settings.getExcludeItems()
+        # we have to use item manager only once, otherwise pool will change
+        if exclude is None:
+            self.itemManager.createItemPool()
+        else:
+            self.itemManager.createItemPool(exclude)
         self.basePool = self.itemManager.getItemPool()[:]
         self.log = log.get('RandoSetup')
 
@@ -78,6 +83,7 @@ class RandoSetup(object):
             #self.log.debug("createItemLocContainer. restrictionDict="+str(restrictionDict))
             self.restrictions.addPlacementeRestrictions(restrictionDict)
         self.fillRestrictedLocations()
+        self.settings.collectAlreadyPlacedItemLocations(self.container)
         return self.container
 
     # fill up unreachable locations with "junk" to maximize the chance of the ROM

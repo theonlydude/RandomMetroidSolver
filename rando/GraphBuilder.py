@@ -13,7 +13,8 @@ class GraphBuilder(object):
         self.log = log.get('GraphBuilder')
 
     # builds everything but escape transitions
-    def createGraph(self, transitions=None):
+    def createGraph(self):
+        transitions = self.graphSettings.plandoRandoTransitions
         if transitions is None:
             transitions = []
             if not self.bossRando:

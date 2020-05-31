@@ -479,6 +479,9 @@ if __name__ == "__main__":
                 raise ValueError("Invalid button name : " + str(b))
 
     if args.plandoRando != None:
+        optErrMsg += forceArg('progressionSpeed', 'speedrun', "'Progression Speed' forced to speedrun")
+        progSpeed = 'speedrun'
+        # FIXME startAP. either give it through json or classic CLI argument (in which case nothing to update here, only in web part)
         args.plandoRando = json.loads(args.plandoRando)
         RomPatches.ActivePatches = args.plandoRando["patches"]
     randoSettings = RandoSettings(maxDifficulty, progSpeed, progDiff, qty,

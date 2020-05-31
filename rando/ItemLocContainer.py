@@ -130,8 +130,14 @@ class ItemLocContainer(object):
     def getNextItemInPool(self, t):
         return next((item for item in self.itemPool if item['Type'] == t), None)
 
+    def getNextItemInPoolMatching(self, predicate):
+        return next((item for item in self.itemPool if predicate(item) == True), None)
+
     def hasItemTypeInPool(self, t):
         return any(item['Type'] == t for item in self.itemPool)
+
+    def hasItemInPool(self, predicate):
+        return any(predicate(item) == True for item in self.itemPool)
 
     def hasItemCategoryInPool(self, cat):
         return any(item['Category'] == cat for item in self.itemPool)
@@ -143,7 +149,10 @@ class ItemLocContainer(object):
         return [item for item in self.itemPool if item['Category'] == cat]
 
     def countItemTypeInPool(self, t):
-        return len([item for item in self.itemPool if item['Type'] == t])
+        return sum(1 for item in self.itemPool if item['Type'] == t)
+
+    def countItems(self, predicate):
+        return sum(1 for item in self.itemPool if predicate(item) == True)
 
     def getPoolDict(self):
         poolDict = {}

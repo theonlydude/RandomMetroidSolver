@@ -89,38 +89,37 @@ class RandoSetup(object):
     # fill up unreachable locations with "junk" to maximize the chance of the ROM
     # to be finishable
     def fillRestrictedLocations(self):
-#        isChozo = self.restrictions['MajorMinor'] == 'Chozo'
-        for loc in self.restrictedLocs:
-            isMajor = self.restrictions.isLocMajor(loc)
-            isMinor = self.restrictions.isLocMinor(loc)
-            # if isChozo:
-            #     if isMajor: # chozo loc
-            #         self.itemPool = self.chozoItemPool
-            #     else:
-            #         self.itemPool = self.nonChozoItemPool
-            loc['restricted'] = True
-            itemLocation = {'Location' : loc}
-            if isMinor and self.container.hasItemTypeInPool('Nothing'):
-                itemLocation['Item'] = self.container.getNextItemInPool('Nothing')
-            elif isMajor and self.container.hasItemTypeInPool('NoEnergy'):
-                itemLocation['Item'] = self.container.getNextItemInPool('NoEnergy')
-            elif isMinor and self.container.countItemTypeInPool('Missile') > 3:
-                itemLocation['Item'] = self.container.getNextItemInPool('Missile')
-            elif isMinor and self.container.countItemTypeInPool('Super') > 2:
-                itemLocation['Item'] = self.container.getNextItemInPool('Super')
-            elif isMinor and self.container.countItemTypeInPool('PowerBomb') > 1:
-                itemLocation['Item'] = self.container.getNextItemInPool('PowerBomb')
-            elif isMajor and self.container.countItemTypeInPool('Reserve') > 1:
-                itemLocation['Item'] = self.container.getNextItemInPool('Reserve')
-            elif isMajor and self.container.countItemTypeInPool('ETank') > 3:
-                itemLocation['Item'] = self.container.getNextItemInPool('ETank')
-            else:
-                raise RuntimeError("Cannot fill restricted locations")
-            self.log.debug("Fill: {} at {}".format(itemLocation['Item']['Type'], itemLocation['Location']['Name']))
-            self.container.collect(itemLocation, False)
-        # if isChozo:
-        #     self.itemPool = self.chozoItemPool
-    
+        majorRestrictedLocs = [loc for loc in self.restrictedLocs if self.restrictions.isLocMajor(loc)]
+        otherRestrictedLocs = [loc for loc in self.restrictedLocs if loc not in majorRestrictedLocs]
+        def getItemPredicateMajor(itemType):
+            return lambda item: item['Type'] == itemType and self.restrictions.isItemMajor(item)
+        def getItemPredicateMinor(itemType):
+            return lambda item: item['Type'] == itemType
+        def fill(locs, getPred):
+            for loc in locs:
+                loc['restricted'] = True
+                itemLocation = {'Location' : loc}
+                if self.container.hasItemInPool(getPred('Nothing')):
+                    itemLocation['Item'] = self.container.getNextItemInPoolMatching(getPred('Nothing'))
+                elif self.container.hasItemInPool(getPred('NoEnergy')):
+                    itemLocation['Item'] = self.container.getNextItemInPoolMatching(getPred('NoEnergy'))
+                elif self.container.countItems(getPred('Missile')) > 3:
+                    itemLocation['Item'] = self.container.getNextItemInPoolMatching(getPred('Missile'))
+                elif self.container.countItems(getPred('Super')) > 2:
+                    itemLocation['Item'] = self.container.getNextItemInPoolMatching(getPred('Super'))
+                elif self.container.countItems(getPred('PowerBomb')) > 1:
+                    itemLocation['Item'] = self.container.getNextItemInPoolMatching(getPred('PowerBomb'))
+                elif self.container.countItems(getPred('Reserve')) > 1:
+                    itemLocation['Item'] = self.container.getNextItemInPoolMatching(getPred('Reserve'))
+                elif self.container.countItems(getPred('ETank')) > 3:
+                    itemLocation['Item'] = self.container.getNextItemInPoolMatching(getPred('ETank'))
+                else:
+                    raise RuntimeError("Cannot fill restricted locations")
+                self.log.debug("Fill: {} at {}".format(itemLocation['Item']['Type'], itemLocation['Location']['Name']))
+                self.container.collect(itemLocation, False)
+        fill(majorRestrictedLocs, getItemPredicateMajor)
+        fill(otherRestrictedLocs, getItemPredicateMinor)
+
     def getItemPool(self, forbidden=[]):
         self.itemManager.setItemPool(self.basePool[:]) # reuse base pool to have constant base item set
         return self.itemManager.removeForbiddenItems(self.forbiddenItems + forbidden)
@@ -148,13 +147,6 @@ class RandoSetup(object):
             pool = self.getItemPool(forbidden)
         else:
             pool = self.getItemPool()
-        # if self.isChozo:
-        #     zeb = self.sm.knowsIceZebSkip()
-        #     pool = [item for item in pool if item['Class'] == 'Chozo' or item['Name'] == 'Boss']
-        #     # forces ice zeb skip in the knows to pass end game condition. this is ugly but valid,
-        #     # as if zeb skip is not known, an extra missile pack is guaranteed to be added (it won't
-        #     # be in a chozo location, but the game is still finishable)
-        #     Knows.IceZebSkip = SMBool(True, 0, [])
         # give us everything and beat every boss to see what we can access
         self.disableBossChecks()
         self.sm.resetItems()
@@ -203,15 +195,15 @@ class RandoSetup(object):
                       and self.areaGraph.canAccess(self.sm, 'Main Street Bottom', 'DraygonRoomIn', maxDiff)
                 self.log.debug('checkPool. boss access sanity check: '+str(ret))
 
-        # if self.isChozo:
-        #     Knows.IceZebSkip = zeb
-        #     # last check for chozo locations: don't put more restricted locations than removed chozo items (we cannot rely
-        #     # on removing ammo/energy in fillRestrictedLocations since it is already the bare minimum in chozo pool)
-        #     restrictedLocs = self.restrictedLocs + [loc for loc in self.lastRestricted if loc not in self.restrictedLocs]
-        #     nRestrictedChozo = sum(1 for loc in restrictedLocs if 'Chozo' in loc['Class'])
-        #     nNothingChozo = sum(1 for item in pool if 'Chozo' in item['Class'] and item['Category'] == 'Nothing')
-        #     ret &= nRestrictedChozo <= nNothingChozo
-        #     self.log.debug('checkPool. nRestrictedChozo='+str(nRestrictedChozo)+', nNothingChozo='+str(nNothingChozo))
+        if self.restrictions.isChozo():
+            # last check for chozo locations: don't put more restricted chozo locations than removed chozo items
+            # (we cannot rely on removing ammo/energy in fillRestrictedLocations since it is already the bare minimum in chozo pool)
+            # FIXME something to do there for ultra sparse, it gives us up to 3 more spots for nothing items
+            restrictedLocs = self.restrictedLocs + [loc for loc in self.lastRestricted if loc not in self.restrictedLocs]
+            nRestrictedChozo = sum(1 for loc in restrictedLocs if 'Chozo' in loc['Class'])
+            nNothingChozo = sum(1 for item in pool if 'Chozo' in item['Class'] and item['Category'] == 'Nothing')
+            ret &= nRestrictedChozo <= nNothingChozo
+            self.log.debug('checkPool. nRestrictedChozo='+str(nRestrictedChozo)+', nNothingChozo='+str(nNothingChozo))
         # cleanup
         self.sm.resetItems()
         self.restoreBossChecks()

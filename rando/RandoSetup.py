@@ -39,7 +39,7 @@ class RandoSetup(object):
             'Mother Brain': self.sm.enoughStuffsMotherbrain
         }
         self.okay = lambda: SMBool(True, 0)
-        exclude = self.settings.getExcludeItems()
+        exclude = self.settings.getExcludeItems(self.locations)
         # we have to use item manager only once, otherwise pool will change
         if exclude is None:
             self.itemManager.createItemPool()

@@ -22,12 +22,14 @@ class RandoSettings(object):
         else:
             return ItemManager('Plando', self.qty, self.smbm)
 
-    def getExcludeItems(self):
+    def getExcludeItems(self, locations):
         if self.plandoRandoItemLocs is None:
             return None
         exclude = {'total':0}
         # plandoRando is a dict {'loc name': 'item type'}
-        for loc,itemType in self.plandoRandoItemLocs.items():
+        for locName,itemType in self.plandoRandoItemLocs.items():
+            if not any(loc['Name'] == locName for loc in locations):
+                continue
             if itemType not in exclude:
                 exclude[itemType] = 0
             exclude[itemType] += 1

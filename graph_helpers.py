@@ -329,7 +329,8 @@ class HelpersGraph(Helpers):
                        sm.canPassWorstRoomPirates(),
                        sm.wor(sm.canFly(),
                               sm.wand(sm.knowsWorstRoomIceCharge(), sm.haveItem('Ice'), sm.canFireChargedShots()),
-                              sm.wand(sm.knowsGetAroundWallJump(), sm.haveItem('HiJump')),
+                              sm.wor(sm.wand(sm.knowsGetAroundWallJump(), sm.haveItem('HiJump')),
+                                     sm.knowsWorstRoomWallJump()),
                               sm.wand(sm.knowsSpringBallJumpFromWall(), sm.canUseSpringBall())))
 
     # checks mix of super missiles/health

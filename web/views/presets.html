@@ -144,7 +144,7 @@ else:
 }}
 
 {{
-  for category in categories["Common"] + categories["Crateria/Brinstar"] + categories["Wrecked Ship"] + categories["Maridia 1/2"] + categories["Maridia 2/2"] + categories["Norfair"] + categories["Bosses/End"]:
+  for category in categories["Common"] + categories["Crateria/Brinstar"] + categories["Wrecked Ship"] + categories["Maridia 1/2"] + categories["Maridia 2/2"] + categories["Upper Norfair"] + categories["Lower Norfair"] + categories["Bosses/End"]:
     for know in category['knows']:
       response.write("  $(function() { " + "$('#{}_diff')".format(know) + ".barrating('show', {theme: 'bars-1to10'}); });\n", escape=False)
       if knows[know][0] == False or ('readonly' in desc[know] and desc[know]['readonly'] == True):
@@ -630,8 +630,9 @@ if skillBarData is not None:
   <button class="tablinks" onclick="changeTab(event, 'Techniques3')" name="Techniques3">Wrecked Ship</button>
   <button class="tablinks" onclick="changeTab(event, 'Techniques4')" name="Techniques4">Maridia 1/2</button>
   <button class="tablinks" onclick="changeTab(event, 'Techniques5')" name="Techniques5">Maridia 2/2</button>
-  <button class="tablinks" onclick="changeTab(event, 'Techniques6')" name="Techniques6">Norfair</button>
-  <button class="tablinks" onclick="changeTab(event, 'Techniques7')" name="Techniques7">Bosses/End</button>
+  <button class="tablinks" onclick="changeTab(event, 'Techniques6')" name="Techniques6">Upper Norfair</button>
+  <button class="tablinks" onclick="changeTab(event, 'Techniques7')" name="Techniques7">Lower Norfair</button>
+  <button class="tablinks" onclick="changeTab(event, 'Techniques8')" name="Techniques8">Bosses/End</button>
   <button class="tablinks" onclick="changeTab(event, 'Mapping')" name="Mapping">Gamepad Mapping</button>
 </div>
 
@@ -908,7 +909,7 @@ pass
 
 <div id="Techniques6" class="tabcontent">
 {{
-for category in categories["Norfair"]:
+for category in categories["Upper Norfair"]:
   displayCategory(category)
   pass
 
@@ -917,6 +918,16 @@ pass
 </div>
 
 <div id="Techniques7" class="tabcontent">
+{{
+for category in categories["Lower Norfair"]:
+  displayCategory(category)
+  pass
+
+pass
+}}
+</div>
+
+<div id="Techniques8" class="tabcontent">
 {{
 for category in categories["Bosses/End"]:
   displayCategory(category)

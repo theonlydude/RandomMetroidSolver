@@ -167,27 +167,3 @@ class ItemLocContainer(object):
 
     def hasUnrestrictedLocWithItemType(self, itemType):
         return itemType in self.unrestrictedItems
-
-
-# accepts itemPool/locPool size inconsistency
-# accepts collection of item/locs that might not be in the pool
-class LooseItemLocContainer(ItemLocContainer):
-    def __init__(self, sm, itemPool, locations):
-        super(LooseItemLocContainer, self).__init__(sm, itemPool, locations)
-
-    def checkConsistency(self):
-        return
-
-    def removeLocation(self, location):
-        if location in self.unusedLocations:
-            self.unusedLocations.remove(location)
-        else:
-            location = next((loc for loc in self.unusedLocations if loc['Name'] == location['Name']), None)
-            if location is not None:
-                self.unusedLocations.remove(location)
-
-    def removeItem(self, item):
-        if item in self.itemPool:
-            self.itemPool.remove(item)
-            if self.itemPoolBackup is not None:
-                self.itemPoolBackup.remove(item)

@@ -6,7 +6,7 @@ from rando.FillerRandom import FillerRandom, FillerRandomItems
 from rando.Choice import ItemThenLocChoiceProgSpeed
 from rando.RandoServices import ComebackCheckType
 from rando.Items import ItemManager
-from rando.ItemLocContainer import ItemLocContainer, LooseItemLocContainer, getLocListStr, getItemListStr, getItemLocationsStr, getItemLocStr
+from rando.ItemLocContainer import ItemLocContainer, getLocListStr, getItemListStr, getItemLocationsStr, getItemLocStr
 from parameters import infinity
 from graph_access import GraphUtils, getAccessPoint
 
@@ -496,7 +496,6 @@ class FillerProgSpeed(Filler):
 
 class FillerRandomNoCopy(FillerRandom):
     def __init__(self, startAP, graph, restrictions, container, diffSteps=0):
-        assert len(container.itemPool) == len(container.unusedLocations), "Invalid container given to FillerRandomNoCopy : "+container.dump()
         super(FillerRandomNoCopy, self).__init__(startAP, graph, restrictions, container, diffSteps)
 
     def initContainer(self):
@@ -505,10 +504,6 @@ class FillerRandomNoCopy(FillerRandom):
 class FillerProgSpeedChozoSecondPhase(Filler):
     def __init__(self, startAP, graph, restrictions, container):
         super(FillerProgSpeedChozoSecondPhase, self).__init__(startAP, graph, restrictions, container)
-        # turn baseContainer into a loose container with nothing collected
-        self.baseContainer = LooseItemLocContainer(self.baseContainer.sm,
-                                                   self.baseContainer.itemPool,
-                                                   self.baseContainer.unusedLocations)
         self.firstPhaseItemLocs = container.itemLocations
         self.progSpeedParams = ProgSpeedParameters(self.restrictions)
 

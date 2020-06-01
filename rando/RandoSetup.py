@@ -6,7 +6,7 @@ from smboolmanager import SMBoolManager
 from helpers import Bosses
 from graph_access import getAccessPoint, GraphUtils
 from rando.Filler import FrontFiller
-from rando.ItemLocContainer import ItemLocContainer
+from rando.ItemLocContainer import ItemLocContainer, getLocListStr
 
 class RandoSetup(object):
     def __init__(self, graphSettings, locations, services):
@@ -47,6 +47,8 @@ class RandoSetup(object):
             self.itemManager.createItemPool(exclude)
         self.basePool = self.itemManager.getItemPool()[:]
         self.log = log.get('RandoSetup')
+        if len(locations) != len(self.locations):
+            self.log.debug("inaccessible locations :"+getLocListStr([loc for loc in locations if loc not in self.locations]))
 
     def createItemLocContainer(self):
         self.getForbidden()
@@ -147,14 +149,18 @@ class RandoSetup(object):
             pool = self.getItemPool(forbidden)
         else:
             pool = self.getItemPool()
+        # get restricted locs
+        totalAvailLocs = []
+        comeBack = {}
+        try:
+            container = ItemLocContainer(self.sm, pool, self.locations)
+        except AssertionError:
+            # invalid graph altogether
+            return False
         # give us everything and beat every boss to see what we can access
         self.disableBossChecks()
         self.sm.resetItems()
         self.sm.addItems([item['Type'] for item in pool]) # will add bosses as well
-        # get restricted locs
-        totalAvailLocs = []
-        comeBack = {}
-        container = ItemLocContainer(self.sm, pool, self.locations)
         poolDict = container.getPoolDict()
         self.log.debug('pool={}'.format(sorted([(t, len(poolDict[t])) for t in poolDict])))
         refAP = 'Landing Site'

@@ -2681,7 +2681,7 @@ def progSpeedStats():
         progSpeedStats["open24"] = {}
         progSpeedStats["open34"] = {}
         progSpeedStats["open44"] = {}
-        progSpeeds = ['slowest', 'slow', 'medium', 'fast', 'fastest', 'basic', 'variable', 'total']
+        progSpeeds = ['speedrun', 'slowest', 'slow', 'medium', 'fast', 'fastest', 'basic', 'variable', 'total']
         realProgSpeeds = []
         realProgSpeedsName = []
         for progSpeed in progSpeeds:

@@ -67,8 +67,9 @@ class ItemThenLocChoice(Choice):
 
 
 class ItemThenLocChoiceProgSpeed(ItemThenLocChoice):
-    def __init__(self, restrictions, distanceProp, services):
+    def __init__(self, restrictions, progSpeedParams, distanceProp, services):
         super(ItemThenLocChoiceProgSpeed, self).__init__(restrictions)
+        self.progSpeedParams = progSpeedParams
         self.distanceProp = distanceProp
         self.services = services
         self.chooseItemFuncs = {
@@ -94,80 +95,17 @@ class ItemThenLocChoiceProgSpeed(ItemThenLocChoice):
     def determineParameters(self, progSpeed=None, progDiff=None):
         self.chooseLocRanges = getRangeDict(self.getChooseLocs(progDiff))
         self.chooseItemRanges = getRangeDict(self.getChooseItems(progSpeed))
-        self.spreadProb = self.getSpreadFactor(progSpeed)
+        self.spreadProb = self.progSpeedParams.getSpreadFactor(progSpeed)
 
     def getChooseLocs(self, progDiff=None):
         if progDiff is None:
             progDiff = self.settings.progDiff
-        return self.getChooseLocDict(self.settings.progDiff)
+        return self.progSpeedParams.getChooseLocDict(progDiff)
 
     def getChooseItems(self, progSpeed):
         if progSpeed is None:
             progSpeed = self.settings.progSpeed
-        return self.getChooseItemDict(progSpeed)
-
-    def getChooseLocDict(self, progDiff):
-        if progDiff == 'normal':
-            return {
-                'Random' : 1,
-                'MinDiff' : 0,
-                'MaxDiff' : 0
-            }
-        elif progDiff == 'easier':
-            return {
-                'Random' : 2,
-                'MinDiff' : 1,
-                'MaxDiff' : 0
-            }
-        elif progDiff == 'harder':
-            return {
-                'Random' : 2,
-                'MinDiff' : 0,
-                'MaxDiff' : 1
-            }
-
-    def getChooseItemDict(self, progSpeed):
-        if progSpeed == 'slowest':
-            return {
-                'MinProgression' : 1,
-                'Random' : 2,
-                'MaxProgression' : 0
-            }
-        elif progSpeed == 'slow':
-            return {
-                'MinProgression' : 25,
-                'Random' : 75,
-                'MaxProgression' : 0
-            }
-        elif progSpeed == 'medium':
-            return {
-                'MinProgression' : 0,
-                'Random' : 1,
-                'MaxProgression' : 0
-            }
-        elif progSpeed == 'fast':
-            return {
-                'MinProgression' : 0,
-                'Random' : 75,
-                'MaxProgression' : 25
-            }
-        elif progSpeed == 'fastest':
-            return {
-                'MinProgression' : 0,
-                'Random' : 2,
-                'MaxProgression' : 1
-            }
-
-    def getSpreadFactor(self, progSpeed):
-        if progSpeed == 'slowest':
-            return 0.9
-        elif progSpeed == 'slow':
-            return 0.7
-        elif progSpeed == 'medium':
-            return 0.4
-        elif progSpeed == 'fast':
-            return 0.1
-        return 0
+        return self.progSpeedParams.getChooseItemDict(progSpeed)
 
     def chooseItemProg(self, itemList):
         ret = self.getChooseFunc(self.chooseItemRanges, self.chooseItemFuncs)(itemList)

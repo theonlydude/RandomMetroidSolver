@@ -7,108 +7,9 @@ from rando.Choice import ItemThenLocChoiceProgSpeed
 from rando.RandoServices import ComebackCheckType
 from rando.Items import ItemManager
 from rando.ItemLocContainer import ItemLocContainer, getLocListStr, getItemListStr, getItemLocationsStr, getItemLocStr
+from rando.RandoSettings import ProgSpeedParameters
 from parameters import infinity
 from graph_access import GraphUtils, getAccessPoint
-
-progSpeeds = ['slowest', 'slow', 'medium', 'fast', 'fastest']
-
-# algo settings depending on prog speed, and unrelated to choice
-class ProgSpeedParameters(object):
-    def __init__(self, restrictions):
-        self.restrictions = restrictions
-
-    def getMinorHelpProb(self, progSpeed):
-        if self.restrictions.split != 'Major':
-            return 0
-        if progSpeed == 'slowest':
-            return 0.16
-        elif progSpeed == 'slow':
-            return 0.33
-        elif progSpeed == 'medium':
-            return 0.5
-        return 1
-
-    def getItemLimit(self, progSpeed):
-        itemLimit = 105
-        if progSpeed == 'slow':
-            itemLimit = 21
-        elif progSpeed == 'medium':
-            itemLimit = 12
-        elif progSpeed == 'fast':
-            itemLimit = 5
-        elif progSpeed == 'fastest':
-            itemLimit = 1
-        if self.restrictions.split == 'Chozo':
-            itemLimit = int(itemLimit / 4)
-        minLimit = itemLimit - int(itemLimit/5)
-        maxLimit = itemLimit + int(itemLimit/5)
-        if minLimit == maxLimit:
-            itemLimit = minLimit
-        else:
-            itemLimit = random.randint(minLimit, maxLimit)
-        return itemLimit
-
-    def getLocLimit(self, progSpeed):
-        locLimit = -1
-        if progSpeed == 'slow':
-            locLimit = 1
-        elif progSpeed == 'medium':
-            locLimit = 2
-        elif progSpeed == 'fast':
-            locLimit = 3
-        elif progSpeed == 'fastest':
-            locLimit = 4
-        return locLimit
-
-    def getProgressionItemTypes(self, progSpeed):
-        progTypes = ItemManager.getProgTypes()
-        progTypes.append('Charge')
-        if progSpeed == 'slowest':
-            return progTypes
-        else:
-            progTypes.remove('HiJump')
-            progTypes.remove('Charge')
-        if progSpeed == 'slow':
-            return progTypes
-        else:
-            progTypes.remove('Bomb')
-            progTypes.remove('Grapple')
-        if progSpeed == 'medium':
-            return progTypes
-        else:
-            progTypes.remove('Ice')
-            progTypes.remove('SpaceJump')
-        if progSpeed == 'fast':
-            return progTypes
-        else:
-            progTypes.remove('SpeedBooster')
-        if progSpeed == 'fastest':
-            return progTypes # only morph, varia, gravity
-        raise RuntimeError("Unknown prog speed " + progSpeed)
-
-    def getPossibleSoftlockProb(self, progSpeed):
-        if progSpeed == 'slowest':
-            return 1
-        if progSpeed == 'slow':
-            return 0.66
-        if progSpeed == 'medium':
-            return 0.33
-        if progSpeed == 'fast':
-            return 0.1
-        if progSpeed == 'fastest':
-            return 0
-        raise RuntimeError("Unknown prog speed " + progSpeed)
-
-    def getChozoSecondPhaseRestrictionProb(self, progSpeed):
-        if progSpeed == 'slowest':
-            return 0
-        if progSpeed == 'slow':
-            return 0.16
-        if progSpeed == 'medium':
-            return 0.5
-        if progSpeed == 'fast':
-            return 0.9
-        return 1
 
 # algo state used for rollbacks
 class FillerState(object):
@@ -140,8 +41,8 @@ class FillerProgSpeed(Filler):
         super(FillerProgSpeed, self).__init__(graphSettings.startAP, areaGraph, restrictions, container)
         distanceProp = 'GraphArea' if graphSettings.areaRando else 'Area'
         self.stdStart = GraphUtils.isStandardStart(self.startAP)
-        self.choice = ItemThenLocChoiceProgSpeed(restrictions, distanceProp, self.services)
         self.progSpeedParams = ProgSpeedParameters(restrictions)
+        self.choice = ItemThenLocChoiceProgSpeed(restrictions, self.progSpeedParams, distanceProp, self.services)
 
     def initFiller(self):
         super(FillerProgSpeed, self).initFiller()
@@ -155,7 +56,7 @@ class FillerProgSpeed(Filler):
     def determineParameters(self):
         speed = self.settings.progSpeed
         if speed == 'variable':
-            speed = random.choice(progSpeeds)
+            speed = self.progSpeedParams.getVariableSpeed()
         self.choice.determineParameters(speed)
         self.minorHelpProb = self.progSpeedParams.getMinorHelpProb(speed)
         self.itemLimit = self.progSpeedParams.getItemLimit(speed)
@@ -537,7 +438,7 @@ class FillerProgSpeedChozoSecondPhase(Filler):
     def determineParameters(self):
         speed = self.settings.progSpeed
         if speed == 'variable':
-            speed = random.choice(progSpeeds)
+            speed = self.progSpeedParams.getVariableSpeed()
         self.restrictedItemProba = self.progSpeedParams.getChozoSecondPhaseRestrictionProb(speed)
 
     def step(self):

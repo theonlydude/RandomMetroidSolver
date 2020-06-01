@@ -1,11 +1,12 @@
 
-import sys
+import sys, random
 from rando.Items import ItemManager
+from utils import getRangeDict, chooseFromRange
 
 class RandoSettings(object):
     def __init__(self, maxDiff, progSpeed, progDiff, qty, restrictions,
                  superFun, runtimeLimit_s, plandoRandoItemLocs):
-        self.progSpeed = progSpeed
+        self.progSpeed = progSpeed.lower()
         self.progDiff = progDiff.lower()
         self.maxDiff = maxDiff
         self.qty = qty
@@ -58,3 +59,175 @@ class GraphSettings(object):
         self.escapeRando = escapeRando
         self.dotFile = dotFile
         self.plandoRandoTransitions = plandoRandoTransitions
+
+# algo settings depending on prog speed (slowest to fastest+variable,
+# other "speeds" are actually different algorithms)
+class ProgSpeedParameters(object):
+    def __init__(self, restrictions):
+        self.restrictions = restrictions
+
+    def getVariableSpeed(self):
+        ranges = getRangeDict({
+            'slowest':10,
+            'slow':25,
+            'medium':30,
+            'fast':25,
+            'fastest':10
+        })
+        return chooseFromRange(ranges)
+
+    def getMinorHelpProb(self, progSpeed):
+        if self.restrictions.split != 'Major':
+            return 0
+        if progSpeed == 'slowest':
+            return 0.16
+        elif progSpeed == 'slow':
+            return 0.33
+        elif progSpeed == 'medium':
+            return 0.5
+        return 1
+
+    def getItemLimit(self, progSpeed):
+        itemLimit = 105
+        if progSpeed == 'slow':
+            itemLimit = 21
+        elif progSpeed == 'medium':
+            itemLimit = 9
+        elif progSpeed == 'fast':
+            itemLimit = 6
+        elif progSpeed == 'fastest':
+            itemLimit = 1
+        if self.restrictions.split == 'Chozo':
+            itemLimit = int(itemLimit / 4)
+        minLimit = itemLimit - int(itemLimit/5)
+        maxLimit = itemLimit + int(itemLimit/5)
+        if minLimit == maxLimit:
+            itemLimit = minLimit
+        else:
+            itemLimit = random.randint(minLimit, maxLimit)
+        return itemLimit
+
+    def getLocLimit(self, progSpeed):
+        locLimit = -1
+        if progSpeed == 'slow':
+            locLimit = 1
+        elif progSpeed == 'medium':
+            locLimit = 2
+        elif progSpeed == 'fast':
+            locLimit = 3
+        elif progSpeed == 'fastest':
+            locLimit = 4
+        return locLimit
+
+    def getProgressionItemTypes(self, progSpeed):
+        progTypes = ItemManager.getProgTypes()
+        progTypes.append('Charge')
+        if progSpeed == 'slowest':
+            return progTypes
+        else:
+            progTypes.remove('HiJump')
+            progTypes.remove('Charge')
+        if progSpeed == 'slow':
+            return progTypes
+        else:
+            progTypes.remove('Bomb')
+            progTypes.remove('Grapple')
+        if progSpeed == 'medium':
+            return progTypes
+        else:
+            progTypes.remove('Ice')
+            progTypes.remove('SpaceJump')
+        if progSpeed == 'fast':
+            return progTypes
+        else:
+            progTypes.remove('SpeedBooster')
+        if progSpeed == 'fastest':
+            return progTypes # only morph, varia, gravity
+        raise RuntimeError("Unknown prog speed " + progSpeed)
+
+    def getPossibleSoftlockProb(self, progSpeed):
+        if progSpeed == 'slowest':
+            return 1
+        if progSpeed == 'slow':
+            return 0.66
+        if progSpeed == 'medium':
+            return 0.33
+        if progSpeed == 'fast':
+            return 0.1
+        if progSpeed == 'fastest':
+            return 0
+        raise RuntimeError("Unknown prog speed " + progSpeed)
+
+    def getChooseLocDict(self, progDiff):
+        if progDiff == 'normal':
+            return {
+                'Random' : 1,
+                'MinDiff' : 0,
+                'MaxDiff' : 0
+            }
+        elif progDiff == 'easier':
+            return {
+                'Random' : 2,
+                'MinDiff' : 1,
+                'MaxDiff' : 0
+            }
+        elif progDiff == 'harder':
+            return {
+                'Random' : 2,
+                'MinDiff' : 0,
+                'MaxDiff' : 1
+            }
+
+    def getChooseItemDict(self, progSpeed):
+        if progSpeed == 'slowest':
+            return {
+                'MinProgression' : 1,
+                'Random' : 2,
+                'MaxProgression' : 0
+            }
+        elif progSpeed == 'slow':
+            return {
+                'MinProgression' : 25,
+                'Random' : 75,
+                'MaxProgression' : 0
+            }
+        elif progSpeed == 'medium':
+            return {
+                'MinProgression' : 0,
+                'Random' : 1,
+                'MaxProgression' : 0
+            }
+        elif progSpeed == 'fast':
+            return {
+                'MinProgression' : 0,
+                'Random' : 85,
+                'MaxProgression' : 15
+            }
+        elif progSpeed == 'fastest':
+            return {
+                'MinProgression' : 0,
+                'Random' : 2,
+                'MaxProgression' : 1
+            }
+
+    def getSpreadFactor(self, progSpeed):
+        if progSpeed == 'slowest':
+            return 0.9
+        elif progSpeed == 'slow':
+            return 0.7
+        elif progSpeed == 'medium':
+            return 0.4
+        elif progSpeed == 'fast':
+            return 0.1
+        return 0
+
+    def getChozoSecondPhaseRestrictionProb(self, progSpeed):
+        if progSpeed == 'slowest':
+            return 0
+        if progSpeed == 'slow':
+            return 0.16
+        if progSpeed == 'medium':
+            return 0.5
+        if progSpeed == 'fast':
+            return 0.9
+        return 1

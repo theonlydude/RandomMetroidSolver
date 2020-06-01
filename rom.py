@@ -258,7 +258,8 @@ class RomReader:
             chozoItems = {}
         for loc in locations:
             if 'Boss' in loc['Class']:
-                loc["itemName"] = "Nothing"
+                # the boss item has the same name as its location, except for mother brain which has a space
+                loc["itemName"] = loc["Name"].replace(' ', '')
                 continue
             item = self.getItem(loc["Address"], loc["Visibility"])
             try:

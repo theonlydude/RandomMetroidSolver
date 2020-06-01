@@ -82,7 +82,7 @@ class Restrictions(object):
         if self.split != 'Full':
             checkers.append(lambda item, loc, cont: self.isItemLocMatching(item, loc))
         if self.suitsRestrictions:
-            checkers.append(lambda item, loc, cont: not self.isSuit(item) or loc['GraphArea'] != 'Crateroa')
+            checkers.append(lambda item, loc, cont: not self.isSuit(item) or loc['GraphArea'] != 'Crateria')
         return checkers
 
     def canPlaceAtLocation(self, item, location, container):

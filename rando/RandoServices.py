@@ -186,7 +186,7 @@ class RandoServices(object):
                         'Location':random.choice(containerCpy.extractLocs(morphLocs))
                     }
                     # acquire morph in new context and see if we can still open new locs
-                    newAP = self.collect(ap, container, morphItemLoc)
+                    newAP = self.collect(ap, containerCpy, morphItemLoc)
                     (ild, poss) = self.getPossiblePlacements(newAP, containerCpy, comebackCheck)
                     if poss:
                         # it's possible, only offer morph as possibility

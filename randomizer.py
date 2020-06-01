@@ -15,7 +15,7 @@ from version import displayedVersion
 
 import log, db
 
-speeds = ['slowest', 'slow', 'medium', 'fast', 'fastest', 'basic', 'VARIAble']
+speeds = ['slowest', 'slow', 'medium', 'fast', 'fastest', 'basic', 'VARIAble', 'speedrun']
 energyQties = ['sparse', 'medium', 'vanilla' ]
 progDiffs = ['easier', 'normal', 'harder']
 morphPlacements = ['early', 'late', 'normal']
@@ -150,7 +150,7 @@ if __name__ == "__main__":
                         dest="hideItems", nargs='?', const=True, default=False)
     parser.add_argument('--progressionSpeed', '-i',
                         help="progression speed, from " + str(speeds) + ". 'random' picks a random speed from these. Pick a random speed from a subset using comma-separated values, like 'slow,medium,fast'.",
-                        dest='progressionSpeed', nargs='?', default='medium')
+                        dest='progressionSpeed', nargs='?', default='medium', choices=speeds+['random'])
     parser.add_argument('--progressionSpeedList', help="list to choose from when random",
                         dest='progressionSpeedList', nargs='?', default=None)
     parser.add_argument('--progressionDifficulty',

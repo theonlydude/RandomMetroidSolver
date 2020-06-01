@@ -37,7 +37,6 @@ class RandoExec(object):
                 secondPhase = lambda graphSettings, graph, restr, cont, prog: FillerProgSpeedChozoSecondPhase(graphSettings.startAP, graph, restr, cont)
             chozoFact = ChozoFillerFactory(graphSettings, self.areaGraph, self.restrictions, fact, secondPhase)
             return ChozoWrapperFiller(randoSettings, container, chozoFact)
-        # TODO plando/rando ??
 
     # processes settings to build appropriate objects, run appropriate stuff
     # return (isStuck, itemLocs, progItemLocs)
@@ -57,7 +56,10 @@ class RandoExec(object):
                 sys.stdout.flush()
                 i += 1
         if container is None:
-            self.errorMsg = "Could not find an area layout with these settings"
+            if graphSettings.areaRando:
+                self.errorMsg = "Could not find an area layout with these settings"
+            else:
+                self.errorMsg = "Unable to process settings"
             return (True, [], [])
         graphBuilder.escapeGraph(container, self.areaGraph, randoSettings.maxDiff)
         filler = self.createFiller(randoSettings, graphSettings, container)

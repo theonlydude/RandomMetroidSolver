@@ -558,11 +558,13 @@ class FillerProgSpeedChozoSecondPhase(Filler):
             self.log.debug('step. curLocs='+getLocListStr(curLocs))
             restrictedItemTypes = [cond[0] for cond in self.conditions]
             self.log.debug('step. restrictedItemTypes='+str(restrictedItemTypes))
+            basePool = self.container.itemPool[:]
             itemPool = []
             while len(itemPool) < len(curLocs):
-                item = random.choice(self.container.itemPool)
+                item = random.choice(basePool)
                 if item['Type'] not in restrictedItemTypes or random.random() < self.restrictedItemProba:
                     itemPool.append(item)
+                    basePool.remove(item)
             self.log.debug('step. itemPool='+getItemListStr(itemPool))
             cont = ItemLocContainer(self.container.sm, itemPool, curLocs)
             self.container.transferCollected(cont)

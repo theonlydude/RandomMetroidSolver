@@ -8,7 +8,7 @@ from rando.GraphBuilder import GraphBuilder
 from rando.RandoSetup import RandoSetup
 from rando.Filler import FrontFiller
 from rando.FillerProgSpeed import FillerProgSpeed, FillerProgSpeedChozoSecondPhase
-from rando.FillerRandom import FillerRandom
+from rando.FillerRandom import FillerRandom, FillerRandomSpeedrun
 from rando.Chozo import ChozoFillerFactory, ChozoWrapperFiller
 from vcr import VCR
 
@@ -22,7 +22,7 @@ class RandoExec(object):
         if progSpeed == "basic":
             return lambda graphSettings, graph, restr, cont: FrontFiller(graphSettings.startAP, graph, restr, cont)
         elif progSpeed == "speedrun":
-            return lambda graphSettings, graph, restr, cont: FillerRandom(graphSettings.startAP, graph, restr, cont)
+            return lambda graphSettings, graph, restr, cont: FillerRandomSpeedrun(graphSettings.startAP, graph, restr, cont)
         else:
             return lambda graphSettings, graph, restr, cont: FillerProgSpeed(graphSettings, graph, restr, cont)
 

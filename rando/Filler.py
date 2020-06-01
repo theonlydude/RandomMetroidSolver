@@ -66,7 +66,7 @@ class Filler(object):
             if aboveMaxDiffStr != '[  ]':
                 self.errorMsg += "Maximum difficulty could not be applied everywhere. Affected locations: {}".format(aboveMaxDiffStr)
             isStuck = False
-        print('\n%d step(s)' % self.nSteps)
+        print('\n%d step(s) in %dms' % (self.nSteps, int(self.runtime_s*1000)))
         if self.vcr != None:
             self.vcr.dump()
         return (isStuck, self.container.itemLocations, self.getProgressionItemLocations())

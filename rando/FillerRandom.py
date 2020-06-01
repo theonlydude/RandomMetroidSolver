@@ -4,6 +4,7 @@ import random, sys, copy
 from rando.Filler import Filler
 from rando.Choice import ItemThenLocChoice
 from rando.MiniSolver import MiniSolver
+from solver import RandoSolver
 from parameters import infinity
 from helpers import diffValue2txt
 
@@ -65,8 +66,9 @@ class FillerRandom(Filler):
                     return False
             # reset container to force a retry
             self.resetContainer()
-            sys.stdout.write('x')
-            sys.stdout.flush()
+            if self.nSteps % 100 == 0 and self.nSteps > 0:
+                sys.stdout.write('x')
+                sys.stdout.flush()
         return True
 
 # no logic random fill with one item placement per step. intended for incremental filling,
@@ -94,4 +96,21 @@ class FillerRandomItems(Filler):
         sys.stdout.flush()
         return True
 
-# TODO actual random filler will real solver instead of just mini: make it a subclass and change isBeatable method
+# actual random filler will real solver on top of mini
+class FillerRandomSpeedrun(FillerRandom):
+    def __init__(self, startAP, graph, restrictions, container, diffSteps=0):
+        super(FillerRandomSpeedrun, self).__init__(startAP, graph, restrictions, container)
+
+    def isBeatable(self, maxDiff=None):
+        miniOk = self.miniSolver.isBeatable(self.container.itemLocations, maxDiff=maxDiff)
+        if miniOk == False:
+            return False
+        print("seed validated by mini solver after {} tries in {}ms".format(self.nSteps, int(self.runtime_s*1000)))
+        graphLocations = self.container.getLocsForSolver()
+        solver = RandoSolver(self.restrictions.split, self.startAP, self.graph, graphLocations)
+        if(solver.solveRom() == -1):
+            print("ERROR: unsolvable seed with real solver")
+            return False
+
+        print("seed validated by real solver")
+        return True

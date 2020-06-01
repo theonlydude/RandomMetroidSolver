@@ -176,3 +176,11 @@ class ItemLocContainer(object):
 
     def hasUnrestrictedLocWithItemType(self, itemType):
         return itemType in self.unrestrictedItems
+
+    def getLocsForSolver(self):
+        locs = []
+        for il in self.itemLocations:
+            loc = il['Location']
+            loc['itemName'] = il['Item']['Type']
+            locs.append(loc)
+        return locs

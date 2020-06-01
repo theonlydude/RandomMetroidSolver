@@ -270,7 +270,7 @@ if __name__ == "__main__":
 
     # if no seed given, choose one
     if args.seed == 0:
-        seed = random.randint(0, 9999999999)
+        seed = random.randrange(sys.maxsize)
     else:
         seed = args.seed
     logger.debug("seed: {}".format(seed))

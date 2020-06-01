@@ -1340,9 +1340,9 @@ locations = [
                                                       sm.wor(sm.wand(sm.haveItem('Morph'),
                                                                      sm.knowsMockball()),
                                                              sm.haveItem('SpeedBooster'))),
-        'Crocomire Room Top': lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Croc -> Ice Missiles']),
-                                        sm.haveItem('SpeedBooster'),
-                                        sm.knowsIceMissileFromCroc())
+        'Crocomire Speedway Bottom': lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Croc -> Ice Missiles']),
+                                                        sm.haveItem('SpeedBooster'),
+                                                        sm.knowsIceMissileFromCroc())
     },
     'Available': lambda sm: SMBool(True)
 },
@@ -1358,7 +1358,7 @@ locations = [
     'Visibility': "Visible",
     'Room': 'Crocomire Escape',
     'AccessFrom' : {
-        'Crocomire Room Top': lambda sm: sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Croc -> Grapple Escape Missiles'])
+        'Crocomire Speedway Bottom': lambda sm: sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Croc -> Grapple Escape Missiles'])
     },
     'Available': lambda sm: sm.canGrappleEscape()
 },

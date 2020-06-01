@@ -1012,7 +1012,8 @@ def randomizer():
 
     return dict(stdPresets=stdPresets, tourPresets=tourPresets, comPresets=comPresets,
                 randoPresets=randoPresets, tourRandoPresets=tourRandoPresets,
-                startAPs=startAPs, currentMultiValues=currentMultiValues, defaultMultiValues=defaultMultiValues)
+                startAPs=startAPs, currentMultiValues=currentMultiValues, defaultMultiValues=defaultMultiValues,
+                maxsize=sys.maxsize)
 
 def raiseHttp(code, msg, isJson=False):
     #print("raiseHttp: code {} msg {} isJson {}".format(code, msg, isJson))
@@ -1092,8 +1093,8 @@ def validateWebServiceParams(switchs, quantities, multis, others, isJson=False):
 
     if 'seed' in others:
         seedInt = getInt('seed', isJson)
-        if seedInt < 0 or seedInt > 9999999:
-            raiseHttp(400, "Wrong value for seed, must be between 0 and 9999999", isJson)
+        if seedInt < 0 or seedInt > sys.maxsize:
+            raiseHttp(400, "Wrong value for seed", isJson)
 
     preset = request.vars.preset
     if preset != None:
@@ -1251,7 +1252,7 @@ def randomizerWebService():
         presetFile.write(request.vars.paramsFileTarget)
 
     if request.vars.seed == '0':
-        request.vars.seed = str(random.randint(0, 9999999))
+        request.vars.seed = str(random.randrange(sys.maxsize))
 
     preset = request.vars.preset
 

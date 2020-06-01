@@ -67,7 +67,7 @@ class FillerRandom(Filler):
                     return False
             # reset container to force a retry
             self.resetContainer()
-            if self.nSteps % 100 == 0 and self.nSteps > 0:
+            if (self.nSteps + 1) % 100 == 0:
                 sys.stdout.write('x')
                 sys.stdout.flush()
         return True
@@ -106,12 +106,11 @@ class FillerRandomSpeedrun(FillerRandom):
         miniOk = self.miniSolver.isBeatable(self.container.itemLocations, maxDiff=maxDiff)
         if miniOk == False:
             return False
-        print("seed validated by mini solver after {} tries in {}ms".format(self.nSteps, int(self.runtime_s*1000)))
+        print("\nseed validated by mini solver after {} tries in {}ms".format(self.nSteps, int(self.runtime_s*1000)))
         graphLocations = self.container.getLocsForSolver()
         solver = RandoSolver(self.restrictions.split, self.startAP, self.graph, graphLocations)
         if(solver.solveRom() == -1):
             print("unsolvable seed with real solver")
             return False
-
         print("seed validated by real solver")
         return True

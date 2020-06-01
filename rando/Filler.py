@@ -99,7 +99,7 @@ class FrontFiller(Filler):
     # one item/loc per step
     def step(self, onlyBossCheck=False):
         self.cache.reset()
-        if not self.services.canEndGame(self.container):
+        if not self.services.can100percent(self.ap, self.container):
             comebackCheck = ComebackCheckType.ComebackWithoutItem if not self.isEarlyGame() else ComebackCheckType.NoCheck
             (itemLocDict, isProg) = self.services.getPossiblePlacements(self.ap, self.container, comebackCheck)
         else:

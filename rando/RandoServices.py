@@ -325,4 +325,6 @@ class RandoServices(object):
     def canEndGame(self, container):
         return not any(loc['Name'] == 'Mother Brain' for loc in container.unusedLocations)
 
-    # def couldEndGame(self, container):
+    def can100percent(self, ap, container):
+        curLocs = self.currentLocations(ap, container, post=True)
+        return len(curLocs) == len(container.unusedLocations)

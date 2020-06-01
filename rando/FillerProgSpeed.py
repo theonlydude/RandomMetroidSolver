@@ -455,7 +455,7 @@ class FillerProgSpeed(Filler):
 
     def step(self, onlyBossCheck=False):
         self.cache.reset()
-        if self.services.canEndGame(self.container) and self.settings.progSpeed not in ['slowest', 'slow']:
+        if self.services.can100percent(self.ap, self.container) and self.settings.progSpeed not in ['slowest', 'slow']:
             (itemLocDict, isProg) = self.services.getPossiblePlacementsNoLogic(self.container)
             itemLoc = self.chooseItemLoc(itemLocDict, False)
             assert itemLoc is not None

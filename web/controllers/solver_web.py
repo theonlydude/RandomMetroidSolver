@@ -24,8 +24,7 @@ from smboolmanager import SMBoolManager
 from rom import RomReader
 from rom_patches import RomPatches
 from ips import IPS_Patch
-from randomizer import energyQties, progDiffs, morphPlacements, majorsSplits
-from itemrandomizerweb.Randomizer import progSpeeds
+from randomizer import energyQties, progDiffs, morphPlacements, majorsSplits, speeds
 
 # put an expiration date to the default cookie to have it kept between browser restart
 response.cookies['session_id_solver']['expires'] = 31 * 24 * 3600
@@ -978,7 +977,7 @@ def getDefaultMultiValues():
     defaultMultiValues = {
         'startLocationMultiSelect': GraphUtils.getStartAccessPointNames(),
         'majorsSplitMultiSelect': majorsSplits,
-        'progressionSpeedMultiSelect': progSpeeds + ['VARIAble'],
+        'progressionSpeedMultiSelect': speeds,
         'progressionDifficultyMultiSelect': progDiffs,
         'morphPlacementMultiSelect': morphPlacements,
         'energyQtyMultiSelect': energyQties

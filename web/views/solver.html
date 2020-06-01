@@ -159,7 +159,7 @@ function guessVARIAPreset(filename) {
 
     if(match != null){
       var pS = match[2];
-      if(pS == "slowest" || pS == "slow" || pS == "medium" || pS == "fast" || pS == "fastest" || pS == "basic" || pS == "VARIAble") {
+      if(pS == "slowest" || pS == "slow" || pS == "medium" || pS == "fast" || pS == "fastest" || pS == "basic" || pS == "VARIAble" || pS == "speedrun") {
         return match[1];
       } else {
         return match[1] + '_' + match[2];

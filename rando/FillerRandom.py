@@ -109,7 +109,7 @@ class FillerRandomSpeedrun(FillerRandom):
         graphLocations = self.container.getLocsForSolver()
         solver = RandoSolver(self.restrictions.split, self.startAP, self.graph, graphLocations)
         if(solver.solveRom() == -1):
-            print("ERROR: unsolvable seed with real solver")
+            print("unsolvable seed with real solver")
             return False
 
         print("seed validated by real solver")

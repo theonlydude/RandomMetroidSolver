@@ -75,8 +75,6 @@ class SolverState(object):
         self.state["availableLocations"] = self.getAvailableLocations(solver.majorLocations)
         # string of last access point
         self.state["lastAP"] = solver.lastAP
-        # list of killed bosses: ["boss1", "boss2"]
-        self.state["bosses"] = [boss for boss in Bosses.golden4Dead if Bosses.golden4Dead[boss] == True]
         # dict {locNameWeb: {infos}, ...}
         self.state["availableLocationsWeb"] = self.getAvailableLocationsWeb(solver.majorLocations)
         # dict {locNameWeb: {infos}, ...}
@@ -119,9 +117,6 @@ class SolverState(object):
                                                                              self.state["availableLocations"],
                                                                              solver.locations)
         solver.lastAP = self.state["lastAP"]
-        Bosses.reset()
-        for boss in self.state["bosses"]:
-            Bosses.beatBoss(boss)
         solver.mode = self.state["mode"]
         solver.seed = self.state["seed"]
 
@@ -1327,7 +1322,6 @@ class InteractiveSolver(CommonSolver):
             for loc in self.majorLocations:
                 if "difficulty" in loc:
                     del loc["difficulty"]
-        Bosses.reset()
         self.smbm.resetItems()
 
     def addTransition(self, startPoint, endPoint):

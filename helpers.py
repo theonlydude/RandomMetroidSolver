@@ -672,9 +672,9 @@ class Pickup:
         elif self.itemsPickup == 'any':
             return True
         elif self.itemsPickup == 'minimal':
-            canResistRainbow = (smbm.haveItemCount('ETank', 3)
-                                and smbm.haveItem('Varia')) \
-                               or smbm.haveItemCount('ETank', 6)
+            canResistRainbow = ((smbm.haveItemCount('ETank', 3) and smbm.haveItem('Varia'))
+                                or smbm.haveItemCount('ETank', 6)
+                                or RomPatches.has(RomPatches.NerfedRainbowBeam))
 
             return (smbm.haveItem('Morph')
                     # pass bomb block passages

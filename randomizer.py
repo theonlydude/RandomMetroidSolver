@@ -485,7 +485,6 @@ if __name__ == "__main__":
         optErrMsg += forceArg('morphPlacement', 'normal', "'Morph Placement' forced to normal")
         optErrMsg += forceArg('progressionDifficulty', 'normal', "'Progression difficulty' forced to normal")
         progDiff = 'normal'
-        # FIXME startAP. either give it through json or classic CLI argument (in which case nothing to update here, only in web part)
         args.plandoRando = json.loads(args.plandoRando)
         RomPatches.ActivePatches = args.plandoRando["patches"]
     randoSettings = RandoSettings(maxDifficulty, progSpeed, progDiff, qty,

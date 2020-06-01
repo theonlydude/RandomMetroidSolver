@@ -363,7 +363,7 @@ function ajaxOkGet(jsonData, status, dummy, chained=false) {
       // check if a boss was at that location
       if("boss" in locsInfo[locName]) {
         var bossName = locsInfo[locName]["boss"];
-        if(bossName != "Mother Brain") {
+        if(bossName != "MotherBrain") {
           document.getElementById(bossName+"G4").style.display = "none";
         }
       }
@@ -394,7 +394,7 @@ function ajaxOkGet(jsonData, status, dummy, chained=false) {
       // check if a boss was at that location
       if("boss" in locsInfo[locName]) {
         var bossName = locsInfo[locName]["boss"];
-        if(bossName != "Mother Brain") {
+        if(bossName != "MotherBrain") {
           document.getElementById(bossName+"G4").style.display = "block";
         }
       }
@@ -455,7 +455,7 @@ function ajaxOkGet(jsonData, status, dummy, chained=false) {
       // check if a boss was at that location
       if("boss" in locsInfo[locName]) {
         var bossName = locsInfo[locName]["boss"];
-        if(bossName != "Mother Brain") {
+        if(bossName != "MotherBrain") {
           document.getElementById(bossName+"G4").style.display = "none";
         }
       }
@@ -669,7 +669,7 @@ var locsInfo = {
   Ridley: {left: 76.6, top: 93.8, boss: "Ridley"},
   Phantoon: {left: 78.8, top: 16.3, boss: "Phantoon"},
   Draygon: {left: 92.6, top: 50, boss: "Draygon"},
-  MotherBrain: {left: 22, top: 33.2, boss: "Mother Brain"}
+  MotherBrain: {left: 22, top: 33.2, boss: "MotherBrain"}
 };
 
 window.onload = function(){
@@ -990,11 +990,11 @@ function clickLoc(elem) {
   var locName = elem.id;
 
   if(mode == "plando") {
-    // we don't put an item in boss locations
+    // we put an item in boss locations which is the boss' name
     if("boss" in locsInfo[locName]) {
       // check that lock is in the available list
       if("state" in locsInfo[locName] && (locsInfo[locName]["state"] == "available" || locsInfo[locName]["state"] == "break")) {
-        ajaxCall({action: "add", scope: "item", locName: locName, itemName: "Nothing"}, "upload");
+        ajaxCall({action: "add", scope: "item", locName: locName, itemName: locsInfo[locName]["boss"]}, "upload");
 
         if(locName == "MotherBrain") {
           alert("SEE YOU NEXT MISSION");

@@ -1830,8 +1830,7 @@ class WS(object):
             if 'escapeTimer' in parameters:
                 params += ['--escapeTimer', parameters['escapeTimer']]
         elif action == 'randomize':
-            params += ['--progressionSpeed', parameters["progressionSpeed"],
-                       '--minorQty', parameters["minorQty"],
+            params += ['--minorQty', parameters["minorQty"],
                        '--energyQty', parameters["energyQty"]
             ]
 
@@ -2030,8 +2029,6 @@ class WS_common_randomize(WS):
     def validate(self):
         super(WS_common_randomize, self).validate()
 
-        if request.vars.progressionSpeed not in ["slowest", "slow", "medium", "fast", "fastest", "basic", "VARIAble"]:
-            raiseHttp(400, "Wrong value for progressionSpeed", True)
         minorQtyInt = getInt('minorQty', True)
         if minorQtyInt < 7 or minorQtyInt > 100:
             raiseHttp(400, "Wrong value for minorQty, must be between 7 and 100", True)
@@ -2043,7 +2040,7 @@ class WS_common_randomize(WS):
             raiseHttp(400, "Randomize can only be use in plando mode", True)
 
         params = {}
-        for elem in "progressionSpeed", "minorQty", "energyQty":
+        for elem in "minorQty", "energyQty":
             params[elem] = request.vars[elem]
 
         self.session["rando"] = params
@@ -2086,7 +2083,7 @@ class WS_area_clear(WS):
     def action(self):
         return self.callSolverAction("area", "clear", {})
 
-validItemsList = [None, 'ETank', 'Missile', 'Super', 'PowerBomb', 'Bomb', 'Charge', 'Ice', 'HiJump', 'SpeedBooster', 'Wave', 'Spazer', 'SpringBall', 'Varia', 'Plasma', 'Grapple', 'Morph', 'Reserve', 'Gravity', 'XRayScope', 'SpaceJump', 'ScrewAttack', 'Nothing', 'NoEnergy', 'Boss']
+validItemsList = [None, 'ETank', 'Missile', 'Super', 'PowerBomb', 'Bomb', 'Charge', 'Ice', 'HiJump', 'SpeedBooster', 'Wave', 'Spazer', 'SpringBall', 'Varia', 'Plasma', 'Grapple', 'Morph', 'Reserve', 'Gravity', 'XRayScope', 'SpaceJump', 'ScrewAttack', 'Nothing', 'NoEnergy', 'Kraid', 'Phantoon', 'Draygon', 'Ridley', 'MotherBrain']
 
 class WS_item_add(WS):
     def validate(self):
@@ -2117,7 +2114,7 @@ class WS_item_add(WS):
         item = request.vars.itemName
 
         # items used only in the randomizer that we get in vcr mode
-        if item in ["Boss", "NoEnergy", None]:
+        if item in ["NoEnergy", None]:
             item = 'Nothing'
 
         params = {"item": item, "hide": request.vars.hide == "true"}

@@ -1096,10 +1096,7 @@ class InteractiveSolver(CommonSolver):
 
         plandoLocsItems = {}
         for loc in self.visitedLocations:
-            if "Boss" in loc["Class"]:
-                plandoLocsItems[loc["Name"]] = "Boss"
-            else:
-                plandoLocsItems[loc["Name"]] = loc["itemName"]
+            plandoLocsItems[loc["Name"]] = loc["itemName"]
 
         plandoCurrent = {
             "locsItems": plandoLocsItems,
@@ -1116,10 +1113,11 @@ class InteractiveSolver(CommonSolver):
             '--param', self.presetFileName,
             '--output', self.outputFileName,
             '--plandoRando', plandoCurrentJson,
-            '--progressionSpeed', parameters["progressionSpeed"],
+            '--progressionSpeed', 'speedrun',
             '--minorQty', parameters["minorQty"],
             '--maxDifficulty', 'hardcore',
-            '--energyQty', parameters["energyQty"]
+            '--energyQty', parameters["energyQty"],
+            '--startAP', self.startAP
         ]
 
         subprocess.call(params)

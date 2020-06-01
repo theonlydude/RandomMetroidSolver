@@ -1,5 +1,5 @@
 
-import log
+import log, random
 
 from smboolmanager import SMBoolManager
 
@@ -26,10 +26,11 @@ class MiniSolver(object):
             loc['difficulty'] = None
             locations.append(loc)
         self.smbm.resetItems()
+        ap = self.startAP
         while True:
             if len(locations) == 0:
                 return True
-            self.areaGraph.getAvailableLocations(locations, self.smbm, maxDiff, self.startAP)
+            self.areaGraph.getAvailableLocations(locations, self.smbm, maxDiff, ap)
             for loc in locations:
                 if loc['difficulty'].bool == True:
                     if 'PostAvailable' in loc:
@@ -43,3 +44,5 @@ class MiniSolver(object):
             for loc in toCollect:
                 self.smbm.addItem(loc['itemType'])
             locations = [loc for loc in locations if loc['difficulty'].bool == False or loc['difficulty'].difficulty > maxDiff]
+            # if len(locations) > 0:
+            #     ap = random.choice([loc['accessPoint'] for loc in locations])

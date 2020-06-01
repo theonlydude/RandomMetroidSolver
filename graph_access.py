@@ -241,7 +241,8 @@ accessPoints = [
     AccessPoint('Screw Attack Bottom', 'LowerNorfair', {
         'LN Entrance': lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']),
                                           sm.canExitScrewAttackArea(),
-                                          sm.haveItem('Super'))
+                                          sm.haveItem('Super'),
+                                          sm.canUsePowerBombs())
     }, internal=True),
     AccessPoint('Firefleas', 'LowerNorfair', {
         'LN Entrance': lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']),

@@ -100,7 +100,8 @@ class RomReader:
         'areaLayout': {'address': 0x252FA7, 'value': 0xF8, 'desc': "Area layout additional modifications"},
         'traverseWreckedShip': {'address': 0x219dbf, 'value': 0xFB, 'desc': "Area layout additional access to east Wrecked Ship"},
         'areaEscape': {'address': 0x20c91, 'value': 0x4C, 'desc': "Area escape randomization"},
-        'newGame': {'address': 0x1001d, 'value': 0x22, 'desc': "Custom new game"}
+        'newGame': {'address': 0x1001d, 'value': 0x22, 'desc': "Custom new game"},
+        'croc_area': {'address': 0x78ba3, 'value': 0x8c, 'desc': "Crocomire in its own area"}
     }
 
     # FIXME shouldn't be here
@@ -166,7 +167,8 @@ class RomReader:
         'No_Music': {'address': 0x278413, 'value': 0x6f, 'vanillaValue': 0xcd},
         'random_music': {'address': 0x10F320, 'value': 0x01, 'vanillaValue': 0xff},
         'fix_suits_selection_in_menu': {'address': 0x13000, 'value': 0x90, 'vanillaValue': 0x80},
-        'traverseWreckedShip': {'address': 0x219dbf, 'value': 0xFB, 'desc': "Area layout additional access to east Wrecked Ship"}
+        'traverseWreckedShip': {'address': 0x219dbf, 'value': 0xFB, 'desc': "Area layout additional access to east Wrecked Ship"},
+        'croc_area': {'address': 0x78ba3, 'value': 0x8c, 'vanillaValue': 0x4}
     }
 
     @staticmethod
@@ -1642,6 +1644,8 @@ class RomLoader(object):
                                          RomPatches.AreaRandoBlueDoors]
             if self.hasPatch("newGame"):
                 RomPatches.ActivePatches.append(RomPatches.AreaRandoMoreBlueDoors)
+            if self.hasPatch("croc_area"):
+                RomPatches.ActivePatches.append(RomPatches.CrocBlueDoors)
             isArea = True
 
         # check area layout

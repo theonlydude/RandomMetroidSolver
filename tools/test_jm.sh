@@ -104,6 +104,9 @@ function computeSeed {
 	fi
     fi
     STARTAP_NEW=$(echo "${OUT}" | grep startAP | cut -d ':' -f 2)
+    PROGSPEED_NEW=$(echo "${OUT}" | grep progressionSpeed | cut -d ':' -f 2)
+    MAJORSSPLIT_NEW=$(echo "${OUT}" | grep majorsSplit | cut -d ':' -f 2)
+    MORPH_NEW=$(echo "${OUT}" | grep morphPlacement | cut -d ':' -f 2)
 
     if [ "${OLD_MD5}" != "${NEW_MD5}" -a ${COMPARE} -eq 0 ]; then
 	if [ "${OLD_MD5}" = "old n/a" ] && [ "${NEW_MD5}" = "new n/a" ]; then
@@ -119,14 +122,14 @@ function computeSeed {
     # solve seed
     ROM_GEN=$(ls -1 VARIA_Randomizer_*X${SEED}_${PRESET}.sfc)
     if [ $? -ne 0 ]; then
-	echo "error;${SEED};${DIFF_CAP};${RTIME_OLD};${RTIME_NEW};${STIME_OLD};${STIME_NEW};${MD5};${STARTAP_NEW};${PARAMS};" | tee -a ${CSV}
+	echo "error;${SEED};${DIFF_CAP};${RTIME_OLD};${RTIME_NEW};${STIME_OLD};${STIME_NEW};${MD5};${STARTAP_NEW};${PROGSPEED_NEW};${MAJORSSPLIT_NEW};${MORPH_NEW};${PARAMS};" | tee -a ${CSV}
 	exit 0
     fi
 
     if [ ${COMPARE} -eq 0 ]; then
 	OUT=$(/usr/bin/time -f "\t%E real" python3.7 ${ORIG}/solver.py -r ${ROM_GEN} --preset standard_presets/${PRESET}.json -g --checkDuplicateMajor 2>&1)
 	if [ $? -ne 0 ]; then
-            echo "${SEED};${DIFF_CAP};${RTIME_OLD};${RTIME_NEW};${STIME_OLD};${STIME_NEW};${MD5};${STARTAP_NEW};${PARAMS};" | tee -a ${CSV}
+            echo "${SEED};${DIFF_CAP};${RTIME_OLD};${RTIME_NEW};${STIME_OLD};${STIME_NEW};${MD5};${STARTAP_NEW};${PROGSPEED_NEW};${MAJORSSPLIT_NEW};${MORPH_NEW};${PARAMS};" | tee -a ${CSV}
             echo "Can't solve ${ROM_GEN}" | tee -a ${CSV}
             exit 0
 	    STIME_OLD="n/a"
@@ -142,7 +145,7 @@ function computeSeed {
 
     OUT=$(/usr/bin/time -f "\t%E real" python3.7 ./solver.py -r ${ROM_GEN} --preset standard_presets/${PRESET}.json -g --checkDuplicateMajor 2>&1)
     if [ $? -ne 0 ]; then
-        echo "${SEED};${DIFF_CAP};${RTIME_OLD};${RTIME_NEW};${STIME_OLD};${STIME_NEW};${MD5};${STARTAP_NEW};${PARAMS};" | tee -a ${CSV}
+        echo "${SEED};${DIFF_CAP};${RTIME_OLD};${RTIME_NEW};${STIME_OLD};${STIME_NEW};${MD5};${STARTAP_NEW};${PROGSPEED_NEW};${MAJORSSPLIT_NEW};${MORPH_NEW};${PARAMS};" | tee -a ${CSV}
         echo "Can't solve ${ROM_GEN}" | tee -a ${CSV}
         exit 0
 	STIME_NEW="n/a"
@@ -159,7 +162,7 @@ function computeSeed {
     if [ ${DUP_NEW} -eq 0 -o ${DUP_OLD} -eq 0 ]; then
 	DUP="dup major detected"
     fi
-    echo "${SEED};${DIFF_CAP};${RTIME_OLD};${RTIME_NEW};${STIME_OLD};${STIME_NEW};${MD5};${PARAMS};${STARTAP_NEW};${DUP}" | tee -a ${CSV}
+    echo "${SEED};${DIFF_CAP};${RTIME_OLD};${RTIME_NEW};${STIME_OLD};${STIME_NEW};${MD5};${PARAMS};${STARTAP_NEW};${PROGSPEED_NEW};${MAJORSSPLIT_NEW};${MORPH_NEW};${DUP}" | tee -a ${CSV}
 
     if [ ${COMPARE} -eq 0 ]; then
 	DIFF=$(diff ${ROM_GEN}.old ${ROM_GEN}.new)
@@ -212,12 +215,39 @@ done
 
 echo "DONE"
 
+echo ""
+echo "Start AP"
 for AP in "Ceres" "Landing Site" "Gauntlet Top" "Green Brinstar Elevator" "Big Pink" "Etecoons Supers" "Wrecked Ship Main" "Business Center" "Bubble Mountain" "Watering Hole" "Red Brinstar Elevator" "Golden Four" "Aqueduct" "Mama Turtle" "Firefleas Top"; do
     TOTAL=$(grep "${AP}" ${CSV}  | wc -l)
     ERROR=$(grep "${AP}" ${CSV} | grep -E '^error' | wc -l)
     PERCENT=$(echo "${ERROR}*100/${TOTAL}" | bc)
     printf "%-24s" "${AP}"; echo "error ${ERROR}/${TOTAL} = ${PERCENT}%"
 done
+echo ""
+echo "Prog speed"
+for PROGSPEED in "speedrun" "slowest" "slow" "medium" "fast" "fastest" "VARIAble" "basic"; do
+    TOTAL=$(grep "${PROGSPEED}" ${CSV}  | wc -l)
+    ERROR=$(grep "${PROGSPEED}" ${CSV} | grep -E '^error' | wc -l)
+    PERCENT=$(echo "${ERROR}*100/${TOTAL}" | bc)
+    printf "%-24s" "${PROGSPEED}"; echo "error ${ERROR}/${TOTAL} = ${PERCENT}%"
+done
+echo ""
+echo "Majors split"
+for MAJORSPLIT in "Major" "Full" "Chozo"; do
+    TOTAL=$(grep "${MAJORSPLIT}" ${CSV}  | wc -l)
+    ERROR=$(grep "${MAJORSPLIT}" ${CSV} | grep -E '^error' | wc -l)
+    PERCENT=$(echo "${ERROR}*100/${TOTAL}" | bc)
+    printf "%-24s" "${MAJORSPLIT}"; echo "error ${ERROR}/${TOTAL} = ${PERCENT}%"
+done
+echo ""
+echo "Morph placement"
+for MORPH in "early" "normal" "late"; do
+    TOTAL=$(grep "${MORPH}" ${CSV}  | wc -l)
+    ERROR=$(grep "${MORPH}" ${CSV} | grep -E '^error' | wc -l)
+    PERCENT=$(echo "${ERROR}*100/${TOTAL}" | bc)
+    printf "%-24s" "${MORPH}"; echo "error ${ERROR}/${TOTAL} = ${PERCENT}%"
+done
+
 echo "total: $(wc -l logs/test_jm.csv)"
 
 echo "errors:"

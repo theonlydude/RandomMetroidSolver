@@ -106,11 +106,13 @@ class FillerRandomSpeedrun(FillerRandom):
         miniOk = self.miniSolver.isBeatable(self.container.itemLocations, maxDiff=maxDiff)
         if miniOk == False:
             return False
-        print("\nseed validated by mini solver after {} tries in {}ms".format(self.nSteps, int(self.runtime_s*1000)))
+        sys.stdout.write('s')
         graphLocations = self.container.getLocsForSolver()
         solver = RandoSolver(self.restrictions.split, self.startAP, self.graph, graphLocations)
         if(solver.solveRom() == -1):
-            print("unsolvable seed with real solver")
+            sys.stdout.write('X')
+            sys.stdout.flush()
             return False
-        print("seed validated by real solver")
+        sys.stdout.write('S({}/{}ms)'.format(self.nSteps, int(self.runtime_s*1000)))
+        sys.stdout.flush()
         return True

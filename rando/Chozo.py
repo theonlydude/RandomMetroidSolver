@@ -70,6 +70,7 @@ class ChozoWrapperFiller(Filler):
         filler = self.prepareFirstPhase()
         (isStuck, itemLocations, progItemLocs) = filler.generateItems(vcr=vcr)
         if isStuck:
+            self.errorMsg = filler.errorMsg
             return (isStuck, itemLocations, progItemLocs)
         self.settings.runtimeLimit_s -= filler.runtime_s
         filler = self.prepareSecondPhase(filler.container, progItemLocs)

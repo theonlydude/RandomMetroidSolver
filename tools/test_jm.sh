@@ -74,7 +74,7 @@ function computeSeed {
     # generate seed
     let P=$RANDOM%${#PRESETS[@]}
     PRESET=${PRESETS[$P]}
-    SEED="$RANDOM"
+    SEED="$RANDOM$RANDOM$RANDOM$RANDOM"
 
     PARAMS=$(generate_params "${SEED}" "${PRESET}")
 

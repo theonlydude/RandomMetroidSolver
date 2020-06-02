@@ -379,11 +379,15 @@ class RomReader:
             # as incompatible transition change the value of direction
             asmAddress = 0x70000 | self.romFile.readWord()
 
-            b = self.romFile.readByte(asmAddress+3)
             offset = 0
+            b = self.romFile.readByte(asmAddress+3)
             if b == 0x20:
                 # ignore original door asm ptr call
-                offset = 3
+                offset += 3
+            b = self.romFile.readByte(asmAddress+6)
+            if b == 0x20:
+                # ignore exit asm ptr call
+                offset += 3
 
             x = self.romFile.readWord(asmAddress+4+offset)
             y = self.romFile.readWord(asmAddress+10+offset)
@@ -1290,7 +1294,7 @@ class RomPatcher:
         asmAddress = 0x7F800
         for conn in doorConnections:
             # write door ASM for transition doors (code and pointers)
-#            print('Writing door connection ' + conn['ID'])
+            #print('Writing door connection ' + conn['ID'])
             doorPtr = conn['DoorPtr']
             roomPtr = conn['RoomPtr']
             if doorPtr in self.doorConnectionSpecific:

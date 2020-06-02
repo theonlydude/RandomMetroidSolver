@@ -95,7 +95,7 @@ class RandoSetup(object):
         def getItemPredicateMajor(itemType):
             return lambda item: item['Type'] == itemType and self.restrictions.isItemMajor(item)
         def getItemPredicateMinor(itemType):
-            return lambda item: item['Type'] == itemType
+            return lambda item: item['Type'] == itemType and self.restrictions.isItemMinor(item)
         def fill(locs, getPred):
             for loc in locs:
                 loc['restricted'] = True

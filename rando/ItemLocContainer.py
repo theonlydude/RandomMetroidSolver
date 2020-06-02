@@ -41,8 +41,10 @@ class ItemLocContainer(object):
 
     def __copy__(self):
         locs = [copy.deepcopy(loc) for loc in self.unusedLocations]
+        # when a backup of the item pool is available use it to create a new container,
+        # as the current restricted item pool won't pass the checkConsistency assert (it's shorter than the locs).
         ret = ItemLocContainer(SMBoolManager(),
-                               self.itemPool[:],
+                               self.itemPoolBackup[:] if self.itemPoolBackup != None else self.itemPool[:],
                                locs)
         ret.currentItems = self.currentItems[:]
         ret.unrestrictedItems = copy.copy(self.unrestrictedItems)

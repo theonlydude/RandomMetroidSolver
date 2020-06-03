@@ -20,7 +20,7 @@ class MiniSolver(object):
         locations = []
         for il in itemLocations:
             loc = il['Location']
-            if 'restricted' in loc and loc['restricted'] == True:
+            if loc.get('restricted') == True:
                 continue
             loc['itemType'] = il['Item']['Type']
             loc['difficulty'] = None
@@ -31,6 +31,12 @@ class MiniSolver(object):
             if not locations:
                 return True
             self.areaGraph.getAvailableLocations(locations, self.smbm, maxDiff, ap)
+            for loc in locations:
+                if 'PostAvailable' in loc and loc['difficulty'].bool == True:
+                    self.smbm.addItem(loc['itemType'])
+                    postAvailable = loc['PostAvailable'](self.smbm)
+                    self.smbm.removeItem(loc['itemType'])
+                    loc['difficulty'] = self.smbm.wand(loc['difficulty'], postAvailable)
             toCollect = [loc for loc in locations if loc['difficulty'].bool == True and loc['difficulty'].difficulty <= maxDiff]
             if not toCollect:
                 return False

@@ -37,8 +37,8 @@ class FillerRandom(Filler):
         while not self.container.isPoolEmpty():
             item = random.choice(self.container.itemPool)
             locs = [loc for loc in self.container.unusedLocations if self.restrictions.canPlaceAtLocation(item, loc, self.container)]
-            if len(locs) == 0:
-                self.log.debug("FillerRandom. constraint collision during step "+str(self.nSteps))
+            if not locs:
+                self.log.debug("FillerRandom: constraint collision during step {} for item {}".format(self.nSteps, item['Type']))
                 self.resetContainer()
                 continue
             loc = random.choice(locs)

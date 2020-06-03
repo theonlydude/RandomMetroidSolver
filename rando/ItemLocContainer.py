@@ -186,3 +186,7 @@ class ItemLocContainer(object):
             loc['itemName'] = il['Item']['Type']
             locs.append(loc)
         return locs
+
+    def getDistinctItems(self):
+        itemTypes = {item['Type'] for item in self.itemPool}
+        return [self.getNextItemInPool(itemType) for itemType in itemTypes]

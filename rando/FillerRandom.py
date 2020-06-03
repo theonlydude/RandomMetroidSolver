@@ -36,7 +36,7 @@ class FillerRandom(Filler):
         # here a step is not an item collection but a whole fill attempt
         while not self.container.isPoolEmpty():
             item = random.choice(self.container.itemPool)
-            locs = [loc for loc in self.container.unusedLocations if self.restrictions.canPlaceAtLocation(item, loc, self.container)]
+            locs = [loc for loc in self.container.unusedLocations if self.restrictions.canPlaceAtLocationFast(item['Type'], loc['Name'], self.container)]
             if not locs:
                 self.log.debug("FillerRandom: constraint collision during step {} for item {}".format(self.nSteps, item['Type']))
                 self.resetContainer()
@@ -101,6 +101,10 @@ class FillerRandomItems(Filler):
 class FillerRandomSpeedrun(FillerRandom):
     def __init__(self, startAP, graph, restrictions, container, diffSteps=0):
         super(FillerRandomSpeedrun, self).__init__(startAP, graph, restrictions, container)
+
+    def initFiller(self):
+        super(FillerRandomSpeedrun, self).initFiller()
+        self.restrictions.precomputeRestrictions(self.container)
 
     def isBeatable(self, maxDiff=None):
         miniOk = self.miniSolver.isBeatable(self.container.itemLocations, maxDiff=maxDiff)

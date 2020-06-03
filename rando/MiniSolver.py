@@ -31,12 +31,12 @@ class MiniSolver(object):
             if not locations:
                 return True
             self.areaGraph.getAvailableLocations(locations, self.smbm, maxDiff, ap)
-            for loc in locations:
-                if 'PostAvailable' in loc and loc['difficulty'].bool == True:
-                    self.smbm.addItem(loc['itemType'])
-                    postAvailable = loc['PostAvailable'](self.smbm)
-                    self.smbm.removeItem(loc['itemType'])
-                    loc['difficulty'] = self.smbm.wand(loc['difficulty'], postAvailable)
+            post = [loc for loc in locations if 'PostAvailable' in loc and loc['difficulty'].bool == True]
+            for loc in post:
+                self.smbm.addItem(loc['itemType'])
+                postAvailable = loc['PostAvailable'](self.smbm)
+                self.smbm.removeItem(loc['itemType'])
+                loc['difficulty'] = self.smbm.wand(loc['difficulty'], postAvailable)
             toCollect = [loc for loc in locations if loc['difficulty'].bool == True and loc['difficulty'].difficulty <= maxDiff]
             if not toCollect:
                 return False

@@ -10,6 +10,8 @@ class Restrictions(object):
         self.suitsRestrictions = settings.restrictions['Suits']
         self.checkers = self.getCheckers()
         self.log = log.get("Restrictions")
+        self.static = {}
+        self.dynamic = {}
 
     def isEarlyMorph(self):
         return self.settings.restrictions['Morph'] == 'early'
@@ -97,8 +99,31 @@ class Restrictions(object):
             ret = ret and chk(item, location, container)
             if not ret:
                 break
+
         return ret
 
         # # plando locs are not available
         # if 'itemName' in location:
         #     return False
+
+    def precomputeRestrictions(self, container):
+        # precompute the values for canPlaceAtLocation. only for random filler.
+        # dict (loc name, item type) -> bool
+        items = container.getDistinctItems()
+        for item in items:
+            for location in container.unusedLocations:
+                self.static[(location['Name'], item['Type'])] = self.canPlaceAtLocation(item, location, container)
+
+        container.unrestrictedItems = set(['Super', 'PowerBomb'])
+        for item in items:
+            if item['Type'] not in ['Super', 'PowerBomb']:
+                continue
+            for location in container.unusedLocations:
+                self.dynamic[(location['Name'], item['Type'])] = self.canPlaceAtLocation(item, location, container)
+        container.unrestrictedItems = set()
+
+    def canPlaceAtLocationFast(self, itemType, locName, container):
+        if itemType in ['Super', 'PowerBomb'] and container.hasUnrestrictedLocWithItemType(itemType):
+            return self.dynamic.get((locName, itemType))
+        else:
+            return self.static.get((locName, itemType))

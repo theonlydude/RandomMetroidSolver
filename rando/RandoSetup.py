@@ -7,6 +7,8 @@ from helpers import Bosses
 from graph_access import getAccessPoint, GraphUtils
 from rando.Filler import FrontFiller
 from rando.ItemLocContainer import ItemLocContainer, getLocListStr
+from rando.Chozo import isChozoItem
+from parameters import infinity
 
 class RandoSetup(object):
     def __init__(self, graphSettings, locations, services):
@@ -24,7 +26,7 @@ class RandoSetup(object):
         self.forbiddenItems = []
         self.restrictedLocs = []
         self.lastRestricted = []
-        self.bossesLocs = ['Draygon', 'Kraid', 'Ridley', 'Phantoon', 'Mother Brain']
+        self.bossesLocs = sorted(['Draygon', 'Kraid', 'Ridley', 'Phantoon', 'Mother Brain'])
         self.suits = ['Varia', 'Gravity']
         # organized by priority
         self.movementItems = ['SpaceJump', 'HiJump', 'SpeedBooster', 'Bomb', 'Grapple', 'SpringBall']
@@ -154,10 +156,19 @@ class RandoSetup(object):
         except AssertionError:
             # invalid graph altogether
             return False
+        # restrict item pool in chozo: game should be finishable with chozo items only
+        contPool = []
+        if self.restrictions.isChozo():
+            container.restrictItemPool(isChozoItem)
+            missile = container.getNextItemInPool('Missile')
+            if missile is not None:
+                # add missile (if zeb skip not known)
+                contPool.append(missile)
+        contPool += [item for item in pool if item in container.itemPool]
         # give us everything and beat every boss to see what we can access
         self.disableBossChecks()
         self.sm.resetItems()
-        self.sm.addItems([item['Type'] for item in pool]) # will add bosses as well
+        self.sm.addItems([item['Type'] for item in contPool]) # will add bosses as well
         poolDict = container.getPoolDict()
         self.log.debug('pool={}'.format(sorted([(t, len(poolDict[t])) for t in poolDict])))
         refAP = 'Landing Site'
@@ -182,20 +193,26 @@ class RandoSetup(object):
                     ret = False
                     self.log.debug("unavail AP: " + ap.Name + ", from " + startAp.Name)
 
-        # check if we can reach all bosses
+        # cleanup
+        self.sm.resetItems()
+        self.restoreBossChecks()
+        # check if we can reach/beat all bosses
         if ret:
             for loc in self.lastRestricted:
                 if loc['Name'] in self.bossesLocs:
                     ret = False
                     self.log.debug("unavail Boss: " + loc['Name'])
             if ret:
-                # revive bosses and see if phantoon doesn't block himself, and if we can reach draygon if she's alive
-                # reset cache
-                self.sm.resetItems()
-                self.sm.addItems([item['Type'] for item in pool if item['Category'] != 'Boss'])
+                # revive bosses
+                self.sm.addItems([item['Type'] for item in contPool if item['Category'] != 'Boss'])
                 maxDiff = self.settings.maxDiff
+                # see if phantoon doesn't block himself, and if we can reach draygon if she's alive
                 ret = self.areaGraph.canAccess(self.sm, 'PhantoonRoomOut', 'PhantoonRoomIn', maxDiff)\
                       and self.areaGraph.canAccess(self.sm, 'Main Street Bottom', 'DraygonRoomIn', maxDiff)
+                if ret:
+                    # see if we can beat bosses with this equipment (infinity as max diff for a "onlyBossesLeft" type check
+                    beatableBosses = sorted([loc['Name'] for loc in self.services.currentLocations(self.startAP, container, diff=infinity) if "Boss" in loc['Class']])
+                    ret = beatableBosses == Bosses.Golden4()
                 self.log.debug('checkPool. boss access sanity check: '+str(ret))
 
         if self.restrictions.isChozo():
@@ -207,9 +224,6 @@ class RandoSetup(object):
             nNothingChozo = sum(1 for item in pool if 'Chozo' in item['Class'] and item['Category'] == 'Nothing')
             ret &= nRestrictedChozo <= nNothingChozo
             self.log.debug('checkPool. nRestrictedChozo='+str(nRestrictedChozo)+', nNothingChozo='+str(nNothingChozo))
-        # cleanup
-        self.sm.resetItems()
-        self.restoreBossChecks()
         self.log.debug('checkPool. result: '+str(ret))
         return ret
 
@@ -256,6 +270,7 @@ class RandoSetup(object):
         tries = 0
         while forb is None and tries < 100:
             forb = self.getForbiddenItemsFromList(removable[:])
+            self.log.debug("addForbidden. forb="+str(forb))
             if self.checkPool(forb) == False:
                 forb = None
             tries += 1

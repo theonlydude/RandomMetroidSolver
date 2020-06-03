@@ -353,11 +353,11 @@ class HelpersGraph(Helpers):
         sm = self.smbm
         destroy = sm.wor(sm.haveItem('Plasma'),
                          sm.haveItem('ScrewAttack'),
-                          sm.wand(sm.heatProof(), # this takes a loooong time ...
-                                  sm.wor(sm.haveItem('Spazer'),
-                                         sm.haveItem('Ice'),
-                                         sm.wand(sm.haveItem('Charge'),
-                                                 sm.haveItem('Wave')))))
+                         sm.wand(sm.heatProof(), # this takes a loooong time ...
+                                 sm.wor(sm.haveItem('Spazer'),
+                                        sm.haveItem('Ice'),
+                                        sm.wand(sm.haveItem('Charge'),
+                                                sm.haveItem('Wave')))))
         if destroy.bool == True:
             return destroy
         return sm.canGoThroughLowerNorfairEnemy(1800.0, float(n), 200.0)

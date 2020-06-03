@@ -736,7 +736,7 @@ class Bosses:
 
     @staticmethod
     def Golden4():
-        return ['Kraid', 'Phantoon', 'Draygon', 'Ridley']
+        return sorted(['Kraid', 'Phantoon', 'Draygon', 'Ridley'])
 
     @staticmethod
     def bossDead(sm, boss):

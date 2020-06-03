@@ -6,6 +6,10 @@ from smbool import SMBool
 from rando.Filler import Filler
 from rando.ItemLocContainer import ItemLocContainer, getItemListStr, getLocListStr
 
+# to filter item pools
+def isChozoItem(item):
+    return item['Class'] == 'Chozo' or item['Category'] == 'Boss'
+
 class ChozoFillerFactory(object):
     def __init__(self, graphSettings, areaGraph, restrictions, firstPhaseFact, secondPhaseFact):
         self.graphSettings = graphSettings
@@ -43,7 +47,7 @@ class ChozoWrapperFiller(Filler):
         # set max diff to god (for hard rooms/hellruns/bosses)
         self.settings.maxDiff = god
         # prepare 1st phase container
-        itemCond = lambda item: item['Class'] == 'Chozo' or item['Category'] == 'Boss'
+        itemCond = isChozoItem
         locCond = lambda loc: 'Chozo' in loc['Class'] or 'Boss' in loc['Class']
         # this will create a new smbm with new knows functions
         cont = self.baseContainer.slice(itemCond, locCond)

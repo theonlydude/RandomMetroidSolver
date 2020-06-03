@@ -343,14 +343,13 @@ if __name__ == "__main__":
         if args.morphPlacementList != None:
             morphPlacements = args.morphPlacementList.split(',')
         args.morphPlacement = random.choice(morphPlacements)
-    print("morphPlacement:{}".format(args.morphPlacement))
     # random fill makes certain options unavailable
     if progSpeed == 'speedrun':
         optErrMsg += forceArg('morphPlacement', 'normal', "'Morph Placement' forced to normal")
     if progSpeed == 'speedrun' or progSpeed == 'basic':
         optErrMsg += forceArg('progressionDifficulty', 'normal', "'Progression difficulty' forced to normal")
         progDiff = args.progressionDifficulty
-    logger.debug("morphPlacement: {}".format(args.morphPlacement))
+    print("morphPlacement:{}".format(args.morphPlacement))
 
     if args.strictMinors == 'random':
         args.strictMinors = bool(random.randint(0, 2))

@@ -35,11 +35,14 @@ class FillerRandom(Filler):
     def isBeatable(self, maxDiff=None):
         return self.miniSolver.isBeatable(self.container.itemLocations, maxDiff=maxDiff)
 
+    def getLocations(self, item):
+        return [loc for loc in self.container.unusedLocations if self.restrictions.canPlaceAtLocation(item, loc, self.container)]
+
     def step(self):
         # here a step is not an item collection but a whole fill attempt
         while not self.container.isPoolEmpty():
             item = random.choice(self.container.itemPool)
-            locs = [loc for loc in self.container.unusedLocations if self.restrictions.canPlaceAtLocationFast(item['Type'], loc['Name'], self.container)]
+            locs = self.getLocations(item)
             if not locs:
                 self.log.debug("FillerRandom: constraint collision during step {} for item {}".format(self.nSteps, item['Type']))
                 self.resetContainer()
@@ -126,6 +129,9 @@ class FillerRandomSpeedrun(FillerRandom):
             self.settings.runtimeLimit_s -= filler.runtime_s
             # our container is updated, we can create base lists
         super(FillerRandomSpeedrun, self).createBaseLists()
+
+    def getLocations(self, item):
+        return [loc for loc in self.container.unusedLocations if self.restrictions.canPlaceAtLocationFast(item['Type'], loc['Name'], self.container)]
 
     def isBeatable(self, maxDiff=None):
         miniOk = self.miniSolver.isBeatable(self.container.itemLocations, maxDiff=maxDiff)

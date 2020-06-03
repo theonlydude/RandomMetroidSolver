@@ -4,6 +4,7 @@
 CWD=$(dirname $0)/..
 cd ${CWD}
 CWD=$(pwd)
+[ -z $PYTHON ] && PYTHON=python3.7
 
 LOG_DIR=${CWD}/logs
 mkdir -p ${LOG_DIR}
@@ -80,7 +81,7 @@ function computeSeed {
 
     if [ ${COMPARE} -eq 0 ]; then
 	OLD_MD5="old n/a"
-	OUT=$(/usr/bin/time -f "\t%E real" python3.7 ${ORIG}/randomizer.py ${PARAMS} 2>&1)
+	OUT=$(/usr/bin/time -f "\t%E real" $PYTHON ${ORIG}/randomizer.py ${PARAMS} 2>&1)
 	if [ $? -ne 0 ]; then
 	    echo "${OUT}" >> ${LOG}
 	else
@@ -93,7 +94,7 @@ function computeSeed {
     fi
 
     NEW_MD5="new n/a"
-    OUT=$(/usr/bin/time -f "\t%E real" python3.7 ./randomizer.py ${PARAMS} 2>&1)
+    OUT=$(/usr/bin/time -f "\t%E real" $PYTHON ./randomizer.py ${PARAMS} 2>&1)
     if [ $? -ne 0 ]; then
 	echo "${OUT}" >> ${LOG}
     else
@@ -127,7 +128,7 @@ function computeSeed {
     fi
 
     if [ ${COMPARE} -eq 0 ]; then
-	OUT=$(/usr/bin/time -f "\t%E real" python3.7 ${ORIG}/solver.py -r ${ROM_GEN} --preset standard_presets/${PRESET}.json -g --checkDuplicateMajor 2>&1)
+	OUT=$(/usr/bin/time -f "\t%E real" $PYTHON ${ORIG}/solver.py -r ${ROM_GEN} --preset standard_presets/${PRESET}.json -g --checkDuplicateMajor 2>&1)
 	if [ $? -ne 0 ]; then
             echo "${SEED};${DIFF_CAP};${RTIME_OLD};${RTIME_NEW};${STIME_OLD};${STIME_NEW};${MD5};${STARTAP_NEW};${PROGSPEED_NEW};${MAJORSSPLIT_NEW};${MORPH_NEW};${PARAMS};" | tee -a ${CSV}
             echo "Can't solve ${ROM_GEN}" | tee -a ${CSV}
@@ -143,7 +144,7 @@ function computeSeed {
 	DUP_OLD=1
     fi
 
-    OUT=$(/usr/bin/time -f "\t%E real" python3.7 ./solver.py -r ${ROM_GEN} --preset standard_presets/${PRESET}.json -g --checkDuplicateMajor 2>&1)
+    OUT=$(/usr/bin/time -f "\t%E real" $PYTHON ./solver.py -r ${ROM_GEN} --preset standard_presets/${PRESET}.json -g --checkDuplicateMajor 2>&1)
     if [ $? -ne 0 ]; then
         echo "${SEED};${DIFF_CAP};${RTIME_OLD};${RTIME_NEW};${STIME_OLD};${STIME_NEW};${MD5};${STARTAP_NEW};${PROGSPEED_NEW};${MAJORSSPLIT_NEW};${MORPH_NEW};${PARAMS};" | tee -a ${CSV}
         echo "Can't solve ${ROM_GEN}" | tee -a ${CSV}

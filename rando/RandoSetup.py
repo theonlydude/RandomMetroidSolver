@@ -126,12 +126,10 @@ class RandoSetup(object):
         return self.itemManager.removeForbiddenItems(self.forbiddenItems + forbidden)
 
     # if needed, do a simplified "pre-randomization" of a few items to check start AP/area layout validity
-    # very basic because we know we're in full randomization in cases the check can fail
     def checkStart(self):
         ap = getAccessPoint(self.startAP)
-        if ap.Start is None or \
-           (('needsPreRando' not in ap.Start or not ap.Start['needsPreRando']) and \
-            ('areaMode' not in ap.Start or not ap.Start['areaMode'])):
+        if not self.graphSettings.areaRando or ap.Start is None or \
+           ('needsPreRando' not in ap.Start or not ap.Start['needsPreRando']):
             return True
         self.log.debug("********* PRE RANDO START")
         container = copy.copy(self.container)

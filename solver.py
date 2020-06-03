@@ -9,7 +9,7 @@ from parameters import easy, medium, hard, harder, hardcore, mania, god, samus, 
 
 # the helper functions
 from smbool import SMBool
-from smboolmanager import SMBoolManager
+from smboolmanager import SMBoolManagerPlando as SMBoolManager
 from helpers import Pickup, Bosses
 from rom import RomLoader, RomPatcher, RomReader
 from rom_patches import RomPatches

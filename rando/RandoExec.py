@@ -22,7 +22,7 @@ class RandoExec(object):
         if progSpeed == "basic":
             return lambda graphSettings, graph, restr, cont: FrontFiller(graphSettings.startAP, graph, restr, cont)
         elif progSpeed == "speedrun":
-            return lambda graphSettings, graph, restr, cont: FillerRandomSpeedrun(graphSettings.startAP, graph, restr, cont)
+            return lambda graphSettings, graph, restr, cont: FillerRandomSpeedrun(graphSettings, graph, restr, cont)
         else:
             return lambda graphSettings, graph, restr, cont: FillerProgSpeed(graphSettings, graph, restr, cont)
 

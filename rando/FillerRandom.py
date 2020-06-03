@@ -1,7 +1,7 @@
 
 import random, sys, copy
 
-from rando.Filler import Filler
+from rando.Filler import Filler, FrontFiller
 from rando.Choice import ItemThenLocChoice
 from rando.MiniSolver import MiniSolver
 from solver import RandoSolver
@@ -19,6 +19,9 @@ class FillerRandom(Filler):
     def initFiller(self):
         super(FillerRandom, self).initFiller()
         self.log.debug("initFiller. maxDiff="+str(self.settings.maxDiff))
+        self.createBaseLists()
+
+    def createBaseLists(self):
         self.baseItemLocs = self.container.itemLocations[:]
         self.baseItemPool = self.container.itemPool[:]
         self.baseUnusedLocations = self.container.unusedLocations[:]
@@ -97,14 +100,32 @@ class FillerRandomItems(Filler):
         sys.stdout.flush()
         return True
 
+class FrontFillerNoCopy(FrontFiller):
+    def __init__(self, startAP, graph, restrictions, container):
+        super(FrontFillerNoCopy, self).__init__(startAP, graph, restrictions, container)
+
+    def initContainer(self):
+        self.container = self.baseContainer
+
 # actual random filler will real solver on top of mini
 class FillerRandomSpeedrun(FillerRandom):
-    def __init__(self, startAP, graph, restrictions, container, diffSteps=0):
-        super(FillerRandomSpeedrun, self).__init__(startAP, graph, restrictions, container)
+    def __init__(self, graphSettings, graph, restrictions, container, diffSteps=0):
+        super(FillerRandomSpeedrun, self).__init__(graphSettings.startAP, graph, restrictions, container)
+        self.nFrontFillSteps = graphSettings.getRandomFillHelp()
 
     def initFiller(self):
         super(FillerRandomSpeedrun, self).initFiller()
         self.restrictions.precomputeRestrictions(self.container)
+
+    def createBaseLists(self):
+        if self.nFrontFillSteps > 0:
+            filler = FrontFillerNoCopy(self.startAP, self.graph, self.restrictions, self.container)
+            condition = filler.createStepCountCondition(self.nFrontFillSteps)
+            (isStuck, itemLocations, progItems) = filler.generateItems(condition)
+            assert not isStuck
+            self.settings.runtimeLimit_s -= filler.runtime_s
+            # our container is updated, we can create base lists
+        super(FillerRandomSpeedrun, self).createBaseLists()
 
     def isBeatable(self, maxDiff=None):
         miniOk = self.miniSolver.isBeatable(self.container.itemLocations, maxDiff=maxDiff)
@@ -117,6 +138,6 @@ class FillerRandomSpeedrun(FillerRandom):
             sys.stdout.write('X')
             sys.stdout.flush()
             return False
-        sys.stdout.write('S({}/{}ms)'.format(self.nSteps, int(self.runtime_s*1000)))
+        sys.stdout.write('S({}/{}ms)'.format(self.nSteps+1, int(self.runtime_s*1000)))
         sys.stdout.flush()
         return True

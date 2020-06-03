@@ -60,6 +60,18 @@ class GraphSettings(object):
         self.dotFile = dotFile
         self.plandoRandoTransitions = plandoRandoTransitions
 
+    def getRandomFillHelp(self):
+        helpByAp = {
+            "Firefleas Top": 3,
+            "Aqueduct": 1,
+            "Mama Turtle": 1,
+            "Watering Hole": 2,
+            "Etecoons Supers": 2,
+            "Gauntlet Top":1,
+            "Bubble Mountain":1
+        }
+        return helpByAp[self.startAP] if self.startAP in helpByAp else 0
+
 # algo settings depending on prog speed (slowest to fastest+variable,
 # other "speeds" are actually different algorithms)
 class ProgSpeedParameters(object):

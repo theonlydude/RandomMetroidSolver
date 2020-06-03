@@ -1,6 +1,6 @@
 
 import log, random
-from datetime import datetime
+
 from smboolmanager import SMBoolManager
 
 class MiniSolver(object):
@@ -28,11 +28,11 @@ class MiniSolver(object):
         self.smbm.resetItems()
         ap = self.startAP
         while True:
-            if len(locations) == 0:
+            if not locations:
                 return True
             self.areaGraph.getAvailableLocations(locations, self.smbm, maxDiff, ap)
             toCollect = [loc for loc in locations if loc['difficulty'].bool == True and loc['difficulty'].difficulty <= maxDiff]
-            if len(toCollect) == 0:
+            if not toCollect:
                 return False
             self.smbm.addItems([loc['itemType'] for loc in toCollect])
             for loc in toCollect:

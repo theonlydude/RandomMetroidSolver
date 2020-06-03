@@ -1,6 +1,6 @@
 
 import log, random
-
+from datetime import datetime
 from smboolmanager import SMBoolManager
 
 class MiniSolver(object):
@@ -35,6 +35,7 @@ class MiniSolver(object):
             if len(toCollect) == 0:
                 return False
             self.smbm.addItems([loc['itemType'] for loc in toCollect])
-            locations = [loc for loc in locations if loc['difficulty'].bool == False or loc['difficulty'].difficulty > maxDiff]
+            for loc in toCollect:
+                locations.remove(loc)
             # if len(locations) > 0:
             #     ap = random.choice([loc['accessPoint'] for loc in locations])

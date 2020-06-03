@@ -35,7 +35,13 @@ class Restrictions(object):
     NoCheckCat = set(['Energy', 'Nothing', 'Boss'])
 
     def addPlacementeRestrictions(self, restrictionDict):
-        self.checkers.append(lambda item, loc, cont: item['Category'] in Restrictions.NoCheckCat or item['Type'] == 'Missile' or (item['Category'] == 'Ammo' and cont.hasUnrestrictedLocWithItemType(item['Type'])) or loc['GraphArea'] not in restrictionDict or item['Type'] not in restrictionDict[loc['GraphArea']] or loc['Name'] in restrictionDict[loc['GraphArea']][item['Type']])
+        self.checkers.append(lambda item, loc, cont:
+                             item['Category'] in Restrictions.NoCheckCat
+                             or item['Type'] == 'Missile'
+                             or (item['Category'] == 'Ammo' and cont.hasUnrestrictedLocWithItemType(item['Type']))
+                             or loc['GraphArea'] not in restrictionDict
+                             or item['Type'] not in restrictionDict[loc['GraphArea']]
+                             or loc['Name'] in restrictionDict[loc['GraphArea']][item['Type']])
 
     def isLocMajor(self, loc):
         return 'Boss' not in loc['Class'] and (self.split == "Full" or self.split in loc['Class'])

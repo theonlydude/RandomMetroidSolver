@@ -31,18 +31,10 @@ class MiniSolver(object):
             if len(locations) == 0:
                 return True
             self.areaGraph.getAvailableLocations(locations, self.smbm, maxDiff, ap)
-            for loc in locations:
-                if loc['difficulty'].bool == True:
-                    if 'PostAvailable' in loc:
-                        self.smbm.addItem(loc['itemType'])
-                        postAvailable = loc['PostAvailable'](self.smbm)
-                        self.smbm.removeItem(loc['itemType'])
-                        loc['difficulty'] = self.smbm.wand(loc['difficulty'], postAvailable)
             toCollect = [loc for loc in locations if loc['difficulty'].bool == True and loc['difficulty'].difficulty <= maxDiff]
             if len(toCollect) == 0:
                 return False
-            for loc in toCollect:
-                self.smbm.addItem(loc['itemType'])
+            self.smbm.addItems([loc['itemType'] for loc in toCollect])
             locations = [loc for loc in locations if loc['difficulty'].bool == False or loc['difficulty'].difficulty > maxDiff]
             # if len(locations) > 0:
             #     ap = random.choice([loc['accessPoint'] for loc in locations])

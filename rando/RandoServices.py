@@ -166,14 +166,14 @@ class RandoServices(object):
     def processEarlyMorph(self, ap, container, comebackCheck, itemLocDict, curLocs):
         morph = container.getNextItemInPool('Morph')
         if morph is not None:
-            self.log.debug("getPossiblePlacements: early morph check - morph not placed yet")
+            self.log.debug("processEarlyMorph. morph not placed yet")
             morphWrapper = next((w for w in itemLocDict if w.item['Type'] == morph['Type']), None)
             if morphWrapper is not None:
                 morphLocs = itemLocDict[morphWrapper]
                 itemLocDict.clear()
                 itemLocDict[morphWrapper] = morphLocs
             elif len(curLocs) >= 2:
-                self.log.debug("getPossiblePlacements: early morph placement check")
+                self.log.debug("processEarlyMorph. early morph placement check")
                 # we have to place morph early, it's still not placed, and not detected as placeable
                 # let's see if we can place it anyway in the context of a combo
                 morphLocs = self.getPlacementLocs(ap, container, comebackCheck, morph, curLocs)
@@ -217,6 +217,7 @@ class RandoServices(object):
         curLocs = self.currentLocations(ap, container)
         self.log.debug('getPossiblePlacements. nCurLocs='+str(len(curLocs)))
         self.log.debug('getPossiblePlacements. curLocs='+getLocListStr(curLocs))
+        self.log.debug('getPossiblePlacements. comebackCheck='+str(comebackCheck))
         sm = container.sm
         poolDict = container.getPoolDict()
         itemLocDict = {}
@@ -233,7 +234,10 @@ class RandoServices(object):
             return [loc for loc in nonProgList if self.restrictions.canPlaceAtLocation(itemObj, loc, container)]
         # boss handling : check if we can kill a boss, if so return immediately
         hasBoss = container.hasItemCategoryInPool('Boss')
-        bossLoc = None if not hasBoss else next((loc for loc in curLocs if 'Boss' in loc['Class'] and self.fullComebackCheck(container, ap, None, loc, comebackCheck)), None)
+        comebackPred = lambda loc: self.fullComebackCheck(container, ap,
+                                                          container.getNextItemInPoolMatching(lambda item:item['Name'] == loc['Name']),
+                                                          loc, comebackCheck)
+        bossLoc = None if not hasBoss else next((loc for loc in curLocs if 'Boss' in loc['Class'] and comebackPred(loc)), None)
         if bossLoc is not None:
             bosses = container.getItems(lambda item: item['Name'] == bossLoc['Name'])
             assert len(bosses) == 1

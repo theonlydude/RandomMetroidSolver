@@ -225,6 +225,7 @@ if __name__ == "__main__":
                         nargs='?', default=None)
     parser.add_argument('--sprite', help='use a custom sprite for Samus', dest='sprite', default=None)
     parser.add_argument('--seedIps', help='ips generated from previous seed', dest='seedIps', default=None)
+    parser.add_argument('--jm,', help="display data used by jm for its stats", dest='jm', action='store_true', default=False)
 
     # parse args
     args = parser.parse_args()
@@ -379,8 +380,6 @@ if __name__ == "__main__":
         # rando algorithm
         args.morphPlacement = "early"
 
-    print("startAP:{}".format(args.startAP))
-
     if args.patchOnly == False:
         print("SEED: " + str(seed))
 
@@ -490,10 +489,11 @@ if __name__ == "__main__":
                                   args.plandoRando["locsItems"] if args.plandoRando != None else None)
 
     # print some parameters for jm's stats
-    print("startAP:{}".format(args.startAP))
-    print("progressionSpeed:{}".format(args.progressionSpeed))
-    print("majorsSplit:{}".format(args.majorsSplit))
-    print("morphPlacement:{}".format(args.morphPlacement))
+    if args.jm == True:
+        print("startAP:{}".format(args.startAP))
+        print("progressionSpeed:{}".format(progSpeed))
+        print("majorsSplit:{}".format(args.majorsSplit))
+        print("morphPlacement:{}".format(args.morphPlacement))
 
     dotFile = None
     if args.area == True:

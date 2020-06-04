@@ -34,7 +34,6 @@ def randomMulti(args, param, defaultMultiValues):
         else:
             # use default list
             value = random.choice(defaultMultiValues)
-    print("{}:{}".format(param, value))
 
     return (isRandom, value)
 
@@ -349,7 +348,6 @@ if __name__ == "__main__":
     if progSpeed == 'speedrun' or progSpeed == 'basic':
         optErrMsg += forceArg('progressionDifficulty', 'normal', "'Progression difficulty' forced to normal")
         progDiff = args.progressionDifficulty
-    print("morphPlacement:{}".format(args.morphPlacement))
 
     if args.strictMinors == 'random':
         args.strictMinors = bool(random.randint(0, 2))
@@ -490,6 +488,13 @@ if __name__ == "__main__":
     randoSettings = RandoSettings(maxDifficulty, progSpeed, progDiff, qty,
                                   restrictions, args.superFun, args.runtimeLimit_s,
                                   args.plandoRando["locsItems"] if args.plandoRando != None else None)
+
+    # print some parameters for jm's stats
+    print("startAP:{}".format(args.startAP))
+    print("progressionSpeed:{}".format(args.progressionSpeed))
+    print("majorsSplit:{}".format(args.majorsSplit))
+    print("morphPlacement:{}".format(args.morphPlacement))
+
     dotFile = None
     if args.area == True:
         if args.dot == True:

@@ -2,6 +2,7 @@
 import log, random
 
 from smboolmanager import SMBoolManager
+from parameters import infinity
 
 class MiniSolver(object):
     def __init__(self, startAP, areaGraph, restrictions):
@@ -27,9 +28,15 @@ class MiniSolver(object):
             locations.append(loc)
         self.smbm.resetItems()
         ap = self.startAP
+        onlyBossesLeft = -1
         while True:
             if not locations:
                 return True
+            # only two loops to collect all remaining locations in only bosses left mode
+            if onlyBossesLeft > 0:
+                onlyBossesLeft += 1
+                if onlyBossesLeft > 2:
+                    return False
             self.areaGraph.getAvailableLocations(locations, self.smbm, maxDiff, ap)
             post = [loc for loc in locations if 'PostAvailable' in loc and loc['difficulty'].bool == True]
             for loc in post:
@@ -39,6 +46,11 @@ class MiniSolver(object):
                 loc['difficulty'] = self.smbm.wand(loc['difficulty'], postAvailable)
             toCollect = [loc for loc in locations if loc['difficulty'].bool == True and loc['difficulty'].difficulty <= maxDiff]
             if not toCollect:
+                # mini onlyBossesLeft
+                if maxDiff < infinity:
+                    maxDiff = infinity
+                    onlyBossesLeft = 0
+                    continue
                 return False
             self.smbm.addItems([loc['itemType'] for loc in toCollect])
             for loc in toCollect:

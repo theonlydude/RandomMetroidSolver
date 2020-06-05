@@ -15,6 +15,9 @@ class FillerRandom(Filler):
         self.miniSolver = MiniSolver(startAP, graph, restrictions)
         self.diffSteps = diffSteps
         self.beatableBackup = None
+        self.nFrontFillSteps = 0
+        self.stepIncr = 1
+        self.maxStep = len(container.unusedLocations)
 
     def initFiller(self):
         super(FillerRandom, self).initFiller()
@@ -26,11 +29,23 @@ class FillerRandom(Filler):
         self.baseItemPool = self.container.itemPool[:]
         self.baseUnusedLocations = self.container.unusedLocations[:]
 
+    def createHelpingBaseLists(self):
+        self.helpBaseItemLocs = self.container.itemLocations[:]
+        self.helpBaseItemPool = self.container.itemPool[:]
+        self.helpBaseUnusedLocations = self.container.unusedLocations[:]
+
     def resetContainer(self):
         # avoid costly deep copies of locations
         self.container.itemLocations = self.baseItemLocs[:]
         self.container.itemPool = self.baseItemPool[:]
         self.container.unusedLocations = self.baseUnusedLocations[:]
+        self.maxStep = len(self.baseUnusedLocations)
+
+    def resetHelpingContainer(self):
+        # avoid costly deep copies of locations
+        self.container.itemLocations = self.helpBaseItemLocs[:]
+        self.container.itemPool = self.helpBaseItemPool[:]
+        self.container.unusedLocations = self.helpBaseUnusedLocations[:]
 
     def isBeatable(self, maxDiff=None):
         return self.miniSolver.isBeatable(self.container.itemLocations, maxDiff=maxDiff)
@@ -45,7 +60,7 @@ class FillerRandom(Filler):
             locs = self.getLocations(item)
             if not locs:
                 self.log.debug("FillerRandom: constraint collision during step {} for item {}".format(self.nSteps, item['Type']))
-                self.resetContainer()
+                self.resetHelpingContainer()
                 continue
             loc = random.choice(locs)
             itemLoc = {'Item':item, 'Location':loc}
@@ -72,10 +87,18 @@ class FillerRandom(Filler):
                 else:
                     return False
             # reset container to force a retry
-            self.resetContainer()
+            self.resetHelpingContainer()
             if (self.nSteps + 1) % 100 == 0:
                 sys.stdout.write('x')
                 sys.stdout.flush()
+
+            if (self.nSteps + 1) % 1000 == 0:
+                # help the random fill with a bit of frontfill
+                self.nFrontFillSteps += self.stepIncr
+                if self.nFrontFillSteps > self.maxStep:
+                    self.nFrontFillSteps = self.maxStep
+                self.createBaseLists(updateBase=False)
+
         return True
 
 # no logic random fill with one item placement per step. intended for incremental filling,
@@ -120,15 +143,22 @@ class FillerRandomSpeedrun(FillerRandom):
         super(FillerRandomSpeedrun, self).initFiller()
         self.restrictions.precomputeRestrictions(self.container)
 
-    def createBaseLists(self):
+    def createBaseLists(self, updateBase=True):
         if self.nFrontFillSteps > 0:
+            if updateBase == False:
+                super(FillerRandomSpeedrun, self).resetContainer()
+            self.container.sm.resetItems()
             filler = FrontFillerNoCopy(self.startAP, self.graph, self.restrictions, self.container)
             condition = filler.createStepCountCondition(self.nFrontFillSteps)
             (isStuck, itemLocations, progItems) = filler.generateItems(condition)
-            assert not isStuck
+            # do not stop if we got stuck while trying to help the random fill
+            if updateBase == True:
+                assert not isStuck
             self.settings.runtimeLimit_s -= filler.runtime_s
+        if updateBase == True:
             # our container is updated, we can create base lists
-        super(FillerRandomSpeedrun, self).createBaseLists()
+            super(FillerRandomSpeedrun, self).createBaseLists()
+        super(FillerRandomSpeedrun, self).createHelpingBaseLists()
 
     def getLocations(self, item):
         return [loc for loc in self.container.unusedLocations if self.restrictions.canPlaceAtLocationFast(item['Type'], loc['Name'], self.container)]

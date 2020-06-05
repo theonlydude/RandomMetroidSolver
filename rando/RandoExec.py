@@ -62,6 +62,7 @@ class RandoExec(object):
                 self.errorMsg = "Unable to process settings"
             return (True, [], [])
         graphBuilder.escapeGraph(container, self.areaGraph, randoSettings.maxDiff)
+        self.areaGraph.printGraph()
         filler = self.createFiller(randoSettings, graphSettings, container)
         vcr = VCR(self.seedName, 'rando') if self.vcr == True else None
         ret = filler.generateItems(vcr=vcr)

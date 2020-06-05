@@ -17,7 +17,8 @@ class FillerRandom(Filler):
         self.beatableBackup = None
         self.nFrontFillSteps = 0
         self.stepIncr = 1
-        self.maxStep = len(container.unusedLocations)
+        # based on runtime limit, help the random fill with up to three front fill steps
+        self.runtimeSteps = [self.runtimeLimit_s/4, self.runtimeLimit_s/2, self.runtimeLimit_s*3/4, sys.maxsize]
 
     def initFiller(self):
         super(FillerRandom, self).initFiller()
@@ -28,24 +29,27 @@ class FillerRandom(Filler):
         self.baseItemLocs = self.container.itemLocations[:]
         self.baseItemPool = self.container.itemPool[:]
         self.baseUnusedLocations = self.container.unusedLocations[:]
+        self.baseCurrentItems = self.container.currentItems[:]
 
     def createHelpingBaseLists(self):
         self.helpBaseItemLocs = self.container.itemLocations[:]
         self.helpBaseItemPool = self.container.itemPool[:]
         self.helpBaseUnusedLocations = self.container.unusedLocations[:]
+        self.helpBaseCurrentItems = self.container.currentItems[:]
 
     def resetContainer(self):
         # avoid costly deep copies of locations
         self.container.itemLocations = self.baseItemLocs[:]
         self.container.itemPool = self.baseItemPool[:]
         self.container.unusedLocations = self.baseUnusedLocations[:]
-        self.maxStep = len(self.baseUnusedLocations)
+        self.container.currentItems = self.baseCurrentItems[:]
 
     def resetHelpingContainer(self):
         # avoid costly deep copies of locations
         self.container.itemLocations = self.helpBaseItemLocs[:]
         self.container.itemPool = self.helpBaseItemPool[:]
         self.container.unusedLocations = self.helpBaseUnusedLocations[:]
+        self.container.currentItems = self.helpBaseCurrentItems[:]
 
     def isBeatable(self, maxDiff=None):
         return self.miniSolver.isBeatable(self.container.itemLocations, maxDiff=maxDiff)
@@ -92,11 +96,9 @@ class FillerRandom(Filler):
                 sys.stdout.write('x')
                 sys.stdout.flush()
 
-            if (self.nSteps + 1) % 1000 == 0:
+            if self.runtime_s > self.runtimeSteps[self.nFrontFillSteps]:
                 # help the random fill with a bit of frontfill
                 self.nFrontFillSteps += self.stepIncr
-                if self.nFrontFillSteps > self.maxStep:
-                    self.nFrontFillSteps = self.maxStep
                 self.createBaseLists(updateBase=False)
 
         return True
@@ -155,9 +157,12 @@ class FillerRandomSpeedrun(FillerRandom):
             if updateBase == True:
                 assert not isStuck
             self.settings.runtimeLimit_s -= filler.runtime_s
+            self.log.debug(self.container.dump())
         if updateBase == True:
             # our container is updated, we can create base lists
             super(FillerRandomSpeedrun, self).createBaseLists()
+            # reset help steps to zero
+            self.nFrontFillSteps = 0
         super(FillerRandomSpeedrun, self).createHelpingBaseLists()
 
     def getLocations(self, item):

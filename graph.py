@@ -1,4 +1,4 @@
-import copy
+import copy, logging
 from smbool import SMBool
 from rom_patches import RomPatches
 from parameters import infinity
@@ -85,6 +85,12 @@ class AccessGraph(object):
             self.addTransition(srcName, dstName, bidir)
         if dotFile is not None:
             self.toDot(dotFile)
+
+    def printGraph(self):
+        if self.log.getEffectiveLevel() == logging.DEBUG:
+            self.log.debug("Area graph:")
+            for s, d in self.InterAreaTransitions:
+                self.log.debug("{} -> {}".format(s.Name, d.Name))
 
     def addAccessPoint(self, ap):
         ap.distance = 0

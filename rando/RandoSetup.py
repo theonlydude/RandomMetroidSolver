@@ -131,7 +131,8 @@ class RandoSetup(object):
     def checkStart(self):
         ap = getAccessPoint(self.startAP)
         if not self.graphSettings.areaRando or ap.Start is None or \
-           ('needsPreRando' not in ap.Start or not ap.Start['needsPreRando']):
+           (('needsPreRando' not in ap.Start or not ap.Start['needsPreRando']) and\
+            ('areaMode' not in ap.Start or not ap.Start['areaMode'])):
             return True
         self.log.debug("********* PRE RANDO START")
         container = copy.copy(self.container)

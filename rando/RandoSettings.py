@@ -111,7 +111,7 @@ class ProgSpeedParameters(object):
         elif progSpeed == 'medium':
             itemLimit = 9
         elif progSpeed == 'fast':
-            itemLimit = 6
+            itemLimit = 5
         elif progSpeed == 'fastest':
             itemLimit = 1
         if self.restrictions.split == 'Chozo':

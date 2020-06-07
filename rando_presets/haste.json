@@ -9,7 +9,7 @@
   "strictMinors": "on",
   "layoutPatches": "on",
   "missileQty": "8.5",
-  "morphPlacement": "early",
+  "morphPlacement": "normal",
   "progressionSpeed": "speedrun",
   "No_Music": "off",
   "areaRandomization": "off",

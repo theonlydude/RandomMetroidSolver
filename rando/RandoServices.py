@@ -120,22 +120,9 @@ class RandoServices(object):
         # some specific early/late game checks
         if loc['Name'] == 'Bomb' or loc['Name'] == 'Mother Brain':
             return False
-        tmpItems = []
-        # draygon special case: there are two locations, and we can
-        # place one item, but we might need both the item and the boss
-        # dead to get out
-        if loc['SolveArea'] == "Draygon Boss":
-            if sm.canExitDraygon():
-                return False
-            elif Bosses.bossDead(sm, 'Draygon').bool == False:
-                # temporary kill draygon
-                tmpItems.append('Draygon')
-        sm.addItems(tmpItems)
         # if the loc forces us to go to an area we can't come back from
         comeBack = loc['accessPoint'] == ap or \
             self.areaGraph.canAccess(sm, loc['accessPoint'], ap, self.settings.maxDiff, item['Type'] if item is not None else None)
-        for tmp in tmpItems:
-            sm.removeItem(tmp)
         if not comeBack:
             self.log.debug("KO come back from " + loc['accessPoint'] + " to " + ap + " when trying to place " + ("None" if item is None else item['Type']) + " at " + loc['Name'])
             return True
@@ -159,7 +146,18 @@ class RandoServices(object):
 
     def fullComebackCheck(self, container, ap, item, loc, comebackCheck):
         sm = container.sm
-        return self.locPostAvailable(sm, loc, item['Type'] if item is not None else None) and not self.isSoftlockPossible(container, ap, item, loc, comebackCheck)
+        tmpItems = []
+        # draygon special case: there are two locations, and we can
+        # place one item, but we might need both the item and the boss
+        # dead to get out
+        if loc['SolveArea'] == "Draygon Boss" and Bosses.bossDead(sm, 'Draygon').bool == False:
+            # temporary kill draygon
+            tmpItems.append('Draygon')
+        sm.addItems(tmpItems)
+        ret = self.locPostAvailable(sm, loc, item['Type'] if item is not None else None) and not self.isSoftlockPossible(container, ap, item, loc, comebackCheck)
+        for tmp in tmpItems:
+            sm.removeItem(tmp)
+        return ret
 
     def isProgression(self, item, ap, container):
         sm = container.sm

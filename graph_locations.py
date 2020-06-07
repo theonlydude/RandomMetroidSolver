@@ -764,7 +764,10 @@ locations = [
     'AccessFrom' : {        
         'Draygon Room Bottom': lambda sm: SMBool(True)
     },
-    'Available': lambda sm: Bosses.bossDead(sm, 'Draygon')
+    'Available': lambda sm: SMBool(True),
+    # put dray dead condition in post available to make it a comeback check and allow
+    # rando to put stuff there to get out
+    'PostAvailable': lambda sm: Bosses.bossDead(sm, 'Draygon')
 },
 {
     'Area': "Tourian",

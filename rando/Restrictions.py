@@ -32,7 +32,7 @@ class Restrictions(object):
         assert morph is not None
         locs = services.possibleLocations(morph, ap, emptyContainer)
         self.log.debug('lateMorphInit. locs='+getLocListStr(locs))
-        self.lateMorphLimit = len(locs)
+        self.lateMorphLimit = 2*len(locs)
         if len(set([loc['GraphArea'] for loc in locs])) > 1:
             self.lateMorphForbiddenArea = getAccessPoint(ap).GraphArea
         else:

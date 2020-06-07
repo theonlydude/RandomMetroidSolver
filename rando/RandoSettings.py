@@ -85,11 +85,11 @@ class ProgSpeedParameters(object):
 
     def getVariableSpeed(self):
         ranges = getRangeDict({
-            'slowest':5,
+            'slowest':7,
             'slow':20,
             'medium':35,
-            'fast':25,
-            'fastest':15
+            'fast':27,
+            'fastest':11
         })
         return chooseFromRange(ranges)
 

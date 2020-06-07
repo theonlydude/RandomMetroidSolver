@@ -226,10 +226,10 @@ class RandoServices(object):
         def getLocList(itemObj):
             nonlocal curLocs
             return self.getPlacementLocs(ap, container, comebackCheck, itemObj, curLocs)
-        def getNonProgLocList(itemObj):
+        def getNonProgLocList():
             nonlocal nonProgList
             if nonProgList is None:
-                nonProgList = [loc for loc in self.currentLocations(ap, container) if self.fullComebackCheck(container, ap, itemObj, loc, comebackCheck)] # we don't care what the item is
+                nonProgList = [loc for loc in self.currentLocations(ap, container) if self.fullComebackCheck(container, ap, None, loc, comebackCheck)]
                 self.log.debug("nonProgLocList="+str([loc['Name'] for loc in nonProgList]))
             return [loc for loc in nonProgList if self.restrictions.canPlaceAtLocation(itemObj, loc, container)]
         # boss handling : check if we can kill a boss, if so return immediately
@@ -258,7 +258,7 @@ class RandoServices(object):
                 continue
             # check possible locations for this item type
 #            self.log.debug('getPossiblePlacements. itemType=' + itemType + ', curLocs='+str([loc['Name'] for loc in curLocs]))
-            locations = getLocList(itemObj) if prog else getNonProgLocList(itemObj)
+            locations = getLocList(itemObj) if prog else getNonProgLocList()
             if len(locations) == 0:
                 continue
             if prog and not possibleProg:

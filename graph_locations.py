@@ -764,9 +764,7 @@ locations = [
     'AccessFrom' : {        
         'Draygon Room Bottom': lambda sm: SMBool(True)
     },
-    # do not put draygon's dead req here in order for the rando to be able
-    # to place an item there to get you out
-    'Available': lambda sm: SMBool(True)
+    'Available': lambda sm: Bosses.bossDead(sm, 'Draygon')
 },
 {
     'Area': "Tourian",

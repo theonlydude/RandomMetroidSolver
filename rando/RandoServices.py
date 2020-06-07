@@ -3,6 +3,7 @@ import log, copy, random, sys, logging
 from enum import Enum, unique
 from parameters import infinity
 from rando.ItemLocContainer import getLocListStr, getItemListStr
+from helpers import Bosses
 
 # hackish object to put items in dictionaries
 class ItemWrapper(object):
@@ -116,13 +117,25 @@ class RandoServices(object):
         # usually early game
         if comebackCheck == ComebackCheckType.NoCheck:
             return False
-        # some specific checks
-        if loc['Name'] == 'Bomb' or loc['Name'] == 'Mother Brain' or\
-           (loc['Name'] in ['Draygon', 'Space Jump'] and sm.canExitDraygon()):
+        # some specific early/late game checks
+        if loc['Name'] == 'Bomb' or loc['Name'] == 'Mother Brain':
             return False
+        tmpItems = []
+        # draygon special case: there are two locations, and we can
+        # place one item, but we might need both the item and the boss
+        # dead to get out
+        if loc['SolveArea'] == "Draygon Boss":
+            if sm.canExitDraygon():
+                return False
+            elif Bosses.bossDead(sm, 'Draygon').bool == False:
+                # temporary kill draygon
+                tmpItems.append('Draygon')
+        sm.addItems(tmpItems)
         # if the loc forces us to go to an area we can't come back from
         comeBack = loc['accessPoint'] == ap or \
             self.areaGraph.canAccess(sm, loc['accessPoint'], ap, self.settings.maxDiff, item['Type'] if item is not None else None)
+        for tmp in tmpItems:
+            sm.removeItem(tmp)
         if not comeBack:
             self.log.debug("KO come back from " + loc['accessPoint'] + " to " + ap + " when trying to place " + ("None" if item is None else item['Type']) + " at " + loc['Name'])
             return True

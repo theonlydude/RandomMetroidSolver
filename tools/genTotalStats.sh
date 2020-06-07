@@ -24,9 +24,9 @@ else
     SPLIT="Major"
 fi
 
-SQL_BASE="insert into extended_stats (version, preset, area, boss, majorsSplit, progSpeed, morphPlacement, suitsRestriction, progDiff, superFunMovement, superFunCombat, superFunSuit, gravityBehaviour, nerfedCharge, maxDifficulty, startAP, count)
+SQL_BASE="insert into extended_stats (preset, area, boss, majorsSplit, progSpeed, morphPlacement, suitsRestriction, progDiff, superFunMovement, superFunCombat, superFunSuit, gravityBehaviour, nerfedCharge, maxDifficulty, startAP, count)
 values
-(20191114, 'Season_Races', False, False, '${SPLIT}', 'total', 'early', True, 'normal', False, False, False, 'Balanced', False, 'harder', 'Landing Site', 1)
+('Season_Races', False, False, '${SPLIT}', 'total', 'early', True, 'normal', False, False, False, 'Balanced', False, 'harder', 'Landing Site', 1)
 on duplicate key update id=LAST_INSERT_ID(id), count = count + 1;
 set @last_id = last_insert_id();"
 

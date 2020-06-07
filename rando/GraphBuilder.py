@@ -4,6 +4,7 @@ import log,random
 from graph_access import GraphUtils, vanillaTransitions, vanillaBossesTransitions, accessPoints, escapeSource, escapeTargets
 from graph import AccessGraph
 
+# creates graph and handles randomized escape
 class GraphBuilder(object):
     def __init__(self, graphSettings):
         self.graphSettings = graphSettings
@@ -28,6 +29,7 @@ class GraphBuilder(object):
         return AccessGraph(accessPoints, transitions,
                            self.graphSettings.bidir, self.graphSettings.dotFile)
 
+    # fills in escape transitions if escape rando is enabled
     def escapeGraph(self, emptyContainer, graph, maxDiff):
         if not self.escapeRando:
             return

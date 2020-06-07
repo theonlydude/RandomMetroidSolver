@@ -4,17 +4,23 @@ from enum import Enum, unique
 from parameters import infinity
 from rando.ItemLocContainer import getLocListStr, getItemListStr
 
-class ItemWrapper(object): # to put items in dictionaries
+# hackish object to put items in dictionaries
+class ItemWrapper(object):
     def __init__(self, item):
         self.item = item
         item['Wrapper'] = self
 
+# used to specify whether we want to come back from locations
 @unique
 class ComebackCheckType(Enum):
+    # do not check whether we should come back
     NoCheck = 1
+    # come back with the placed item
     JustComeback = 2
+    # come back without the placed item
     ComebackWithoutItem = 3
 
+# collection of stateless services to be used mainly by fillers
 class RandoServices(object):
     def __init__(self, graph, restrictions, cache=None):
         self.restrictions = restrictions
@@ -23,6 +29,8 @@ class RandoServices(object):
         self.cache = cache
         self.log = log.get('RandoServices')
 
+    # collect an item/loc with logic in a container from a given AP
+    # return new AP
     def collect(self, ap, container, itemLoc):
         # walk the graph to update AP
         self.currentLocations(ap, container, itemLoc['Item'])
@@ -32,6 +40,7 @@ class RandoServices(object):
         sys.stdout.flush()
         return itemLoc['Location']['accessPoint']
 
+    # gives all the possible theoretical locations for a given item
     def possibleLocations(self, item, ap, emptyContainer):
         assert len(emptyContainer.currentItems) == 0, "Invalid call to possibleLocations. emptyContainer had collected items"
         emptyContainer.sm.resetItems()
@@ -41,8 +50,12 @@ class RandoServices(object):
         emptyContainer.sm.addItems([it['Type'] for it in allBut])
         ret = [loc for loc in self.currentLocations(ap, emptyContainer, post=True) if self.restrictions.canPlaceAtLocation(item, loc, emptyContainer)]
         self.log.debug('possibleLocations='+getLocListStr(ret))
+        emptyContainer.sm.resetItems()
         return ret
 
+    # gives current accessible locations within a container from an AP, given an optional item.
+    # post: checks post available?
+    # diff: max difficulty to use (None for max diff from settings)
     def currentLocations(self, ap, container, item=None, post=False, diff=None):
         if self.cache is not None:
             request = self.cache.request('currentLocations', ap, container, None if item is None else item['Type'], post, diff)
@@ -77,6 +90,7 @@ class RandoServices(object):
         locs = container.unusedLocations
         return self.areaGraph.getAvailableLocations(locs, sm, diff, ap)
 
+    # gives current accessible APs within a container from an AP, given an optional item.
     def currentAccessPoints(self, ap, container, item=None):
         if self.cache is not None:
             request = self.cache.request('currentAccessPoints', ap, container, None if item is None else item['Type'])
@@ -213,6 +227,11 @@ class RandoServices(object):
         elif self.restrictions.isLateMorph():
             self.processLateMorph(container, itemLocDict)
 
+    # main logic function to be used by fillers. gives possible locations for each item.
+    # ap: AP to check from
+    # container: our item/loc container
+    # comebackCheck: how to check for comebacks (cf ComebackCheckType)
+    # return a dictionary with ItemWrapper instances as keys and locations lists as values
     def getPossiblePlacements(self, ap, container, comebackCheck):
         curLocs = self.currentLocations(ap, container)
         self.log.debug('getPossiblePlacements. nCurLocs='+str(len(curLocs)))
@@ -277,6 +296,7 @@ class RandoServices(object):
             self.log.debug('possibleProg='+str(possibleProg))
         return (itemLocDict, possibleProg)
 
+    # same as getPossiblePlacements, without any logic check
     def getPossiblePlacementsNoLogic(self, container):
         poolDict = container.getPoolDict()
         itemLocDict = {}

@@ -10,6 +10,8 @@ from rando.ItemLocContainer import ItemLocContainer, getLocListStr
 from rando.Chozo import isChozoItem
 from parameters import infinity
 
+# checks init conditions for the randomizer: processes super fun settings, graph, start location, special restrictions
+# the entry point is createItemLocContainer
 class RandoSetup(object):
     def __init__(self, graphSettings, locations, services):
         self.sm = SMBoolManager()
@@ -52,6 +54,7 @@ class RandoSetup(object):
         if len(locations) != len(self.locations):
             self.log.debug("inaccessible locations :"+getLocListStr([loc for loc in locations if loc not in self.locations]))
 
+    # processes everything and returns an ItemLocContainer, or None if failed (invalid init conditions/settings)
     def createItemLocContainer(self):
         self.getForbidden()
         if not self.checkPool():

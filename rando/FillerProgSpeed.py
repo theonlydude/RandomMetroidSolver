@@ -36,6 +36,10 @@ class FillerState(object):
         eq &= self.container == rhs.container
         return eq
 
+# complex filler based on progression speed settings.  will alternate
+# non progression phases and progression phases. can get stuck and
+# rollback.  duration of each phases, item pool restrictions and
+# choices are based on progression speed (see ProgSpeedParameters)
 class FillerProgSpeed(Filler):
     def __init__(self, graphSettings, areaGraph, restrictions, container):
         super(FillerProgSpeed, self).__init__(graphSettings.startAP, areaGraph, restrictions, container)
@@ -113,6 +117,7 @@ class FillerProgSpeed(Filler):
         self.states.append(curState)
         curState.states.append(curState)
 
+    # collect specialization that stores progression and state
     def collect(self, itemLoc):
         isProg = self.services.isProgression(itemLoc['Item'], self.ap, self.container)
         super(FillerProgSpeed, self).collect(itemLoc)
@@ -402,6 +407,9 @@ class FillerRandomNoCopy(FillerRandom):
     def initContainer(self):
         self.container = self.baseContainer
 
+# progression speed based filler to use for 2nd phase Chozo split. has
+# more and more chance to preserve "intended" Chozo progression as
+# speed slows.
 class FillerProgSpeedChozoSecondPhase(Filler):
     def __init__(self, startAP, graph, restrictions, container):
         super(FillerProgSpeedChozoSecondPhase, self).__init__(startAP, graph, restrictions, container)

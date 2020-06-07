@@ -10,6 +10,7 @@ from rando.ItemLocContainer import ItemLocContainer, getItemListStr, getLocListS
 def isChozoItem(item):
     return item['Class'] == 'Chozo' or item['Category'] == 'Boss'
 
+# provides factory methods to instantate fillers for chozo first and second phase
 class ChozoFillerFactory(object):
     def __init__(self, graphSettings, areaGraph, restrictions, firstPhaseFact, secondPhaseFact):
         self.graphSettings = graphSettings
@@ -24,6 +25,11 @@ class ChozoFillerFactory(object):
     def createSecondPhaseFiller(self, container, firstPhaseProg):
         return self.secondPhaseFact(self.graphSettings, self.areaGraph, self.restrictions, container, firstPhaseProg)
 
+# settings-agnostic fille for chozo randos. handles all the specifics related to Chozo:
+# - ensures that seed is finishable by going only to chozo locations (first phase)
+# - disregards difficulty for bosses/hard rooms/hell runs during first phase
+# - fill remaining items with a filler adapted for chozo second phase, that shall do its
+#   best to fulfill max difficulty requirement
 class ChozoWrapperFiller(Filler):
     def __init__(self, settings, container, fillerFactory):
         self.settings = settings

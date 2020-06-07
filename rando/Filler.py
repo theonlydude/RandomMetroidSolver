@@ -9,6 +9,10 @@ from parameters import infinity
 from helpers import diffValue2txt
 from graph_access import GraphUtils
 
+# base class for fillers. a filler responsibility is to fill a given
+# ItemLocContainer while a certain condition is fulfilled (usually
+# item pool is not empty).
+# entry point is generateItems
 class Filler(object):
     def __init__(self, startAP, graph, restrictions, emptyContainer):
         self.startAP = startAP
@@ -31,15 +35,21 @@ class Filler(object):
         self.settings.maxDiff = self.maxDiff
         self.runtime_s = 0
 
+    # sets up container initial state
     def initContainer(self):
         self.container = copy.copy(self.baseContainer)
 
+    # default continuation condition: item pool is not empty
     def itemPoolCondition(self):
         return not self.container.isPoolEmpty()
 
+    # factory for step count condition
     def createStepCountCondition(self, n):
         return lambda: self.nSteps < n
 
+    # calls step while condition is fulfilled and we did not hit runtime limit
+    # condition: continuation condition
+    # vcr: debug VCR object
     # shall return (stuck, itemLoc dict list, progression itemLoc dict list)
     def generateItems(self, condition=None, vcr=None):
         self.vcr = vcr
@@ -71,6 +81,7 @@ class Filler(object):
             self.vcr.dump()
         return (isStuck, self.container.itemLocations, self.getProgressionItemLocations())
 
+    # helper method to collect in item/location with logic. updates self.ap and VCR
     def collect(self, itemLoc):
         location = itemLoc['Location']
         item = itemLoc['Item']
@@ -78,9 +89,13 @@ class Filler(object):
         if self.vcr is not None:
             self.vcr.addLocation(location['Name'], item['Type'])
 
+    # called by generateItems at the end to knows which particulier
+    # item/locations were progression, if the info is available
     def getProgressionItemLocations(self):
         return []
 
+    # performs a fill step. can be multiple item/locations placement,
+    # not necessarily just one.
     # return True if ok, False if stuck
     def step(self):
         pass

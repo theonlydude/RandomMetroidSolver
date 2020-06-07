@@ -12,6 +12,7 @@ from rando.FillerRandom import FillerRandom, FillerRandomSpeedrun
 from rando.Chozo import ChozoFillerFactory, ChozoWrapperFiller
 from vcr import VCR
 
+# entry point for rando execution ("randomize" method)
 class RandoExec(object):
     def __init__(self, seedName, vcr):
         self.errorMsg = ""
@@ -38,7 +39,10 @@ class RandoExec(object):
             chozoFact = ChozoFillerFactory(graphSettings, self.areaGraph, self.restrictions, fact, secondPhase)
             return ChozoWrapperFiller(randoSettings, container, chozoFact)
 
-    # processes settings to build appropriate objects, run appropriate stuff
+    # processes settings to :
+    # - create Restrictions and GraphBuilder objects
+    # - create graph and item loc container using a RandoSetup instance: in area rando, if it fails, iterate on possible graph layouts
+    # - create filler based on progression speed and run it
     # return (isStuck, itemLocs, progItemLocs)
     def randomize(self, randoSettings, graphSettings):
         self.restrictions = Restrictions(randoSettings)

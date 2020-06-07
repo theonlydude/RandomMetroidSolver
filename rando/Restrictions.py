@@ -3,11 +3,15 @@ import copy, random, log
 from graph_access import getAccessPoint
 from rando.ItemLocContainer import getLocListStr
 
+# Holds settings related to item placement restrictions.
+# canPlaceAtLocation is the main entry point here
 class Restrictions(object):
     def __init__(self, settings):
         self.settings = settings
+        # Item split : Major, Chozo or Full
         self.split = settings.restrictions['MajorMinor']
         self.suitsRestrictions = settings.restrictions['Suits']
+        # checker function chain used by canPlaceAtLocation
         self.checkers = self.getCheckers()
         self.log = log.get("Restrictions")
         self.static = {}
@@ -93,6 +97,7 @@ class Restrictions(object):
             checkers.append(lambda item, loc, cont: not self.isSuit(item) or loc['GraphArea'] != 'Crateria')
         return checkers
 
+    # return bool telling whether we can place a given item at a given location
     def canPlaceAtLocation(self, item, location, container):
         ret = True
         for chk in self.checkers:
@@ -102,9 +107,7 @@ class Restrictions(object):
 
         return ret
 
-        # # plando locs are not available
-        # if 'itemName' in location:
-        #     return False
+    ### Below : faster implementation tailored for random fill
 
     def precomputeRestrictions(self, container):
         # precompute the values for canPlaceAtLocation. only for random filler.

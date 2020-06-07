@@ -16,6 +16,10 @@ def getItemLocStr(itemLoc):
 def getItemLocationsStr(itemLocations):
     return str([getItemLocStr(il) for il in itemLocations])
 
+# Holds items yet to place (itemPool), locations yet to fill (unusedLocations),
+# placed items/locations (itemLocations).
+# If logic is needed, also holds a SMBoolManager (sm) and collected items so far
+# (collectedItems)
 class ItemLocContainer(object):
     def __init__(self, sm, itemPool, locations):
         self.sm = sm
@@ -57,6 +61,9 @@ class ItemLocContainer(object):
         ret.sm.addItems([item['Type'] for item in ret.currentItems])
         return ret
 
+    # create a new container based on slice predicates on items and
+    # locs.  both predicates must reslut in a consistent container
+    # (same number of unused locations and not placed items)
     def slice(self, itemPoolCond, locPoolCond):
         assert self.itemPoolBackup is None, "Cannot slice a constrained container"
         locs = self.getLocs(locPoolCond)
@@ -66,6 +73,7 @@ class ItemLocContainer(object):
         cont.itemLocations = self.itemLocations
         return copy.copy(cont)
 
+    # transfer collected items/lcoations to another container
     def transferCollected(self, dest):
         dest.currentItems = self.currentItems[:]
         dest.sm = SMBoolManager()
@@ -73,6 +81,7 @@ class ItemLocContainer(object):
         dest.itemLocations = copy.copy(self.itemLocations)
         dest.unrestrictedItems = copy.copy(self.unrestrictedItems)
 
+    # reset collected items/locations
     def resetCollected(self):
         self.currentItems = []
         self.itemLocations = []
@@ -96,6 +105,8 @@ class ItemLocContainer(object):
         self.itemPoolBackup = None
         self.log.debug("unrestrictItemPool: "+getItemListStr(self.itemPool))
 
+    # utility function that exists only because locations are lame dictionaries.
+    # extract from this container locations matching the ones given
     def extractLocs(self, locs):
         ret = []
         for loc in locs:
@@ -112,7 +123,8 @@ class ItemLocContainer(object):
         self.itemPool.remove(item)
         if self.itemPoolBackup is not None:
             self.itemPoolBackup.remove(item)
-    
+
+    # collect an item at a location. if pickup is True, also affects logic (sm) and collectedItems
     def collect(self, itemLocation, pickup=True):
         item = itemLocation['Item']
         location = itemLocation['Location']
@@ -155,6 +167,8 @@ class ItemLocContainer(object):
     def countItems(self, predicate):
         return sum(1 for item in self.itemPool if predicate(item) == True)
 
+    # gets the items pool in the form of a dicitionary whose keys are item types
+    # and values list of items of this type
     def getPoolDict(self):
         poolDict = {}
         for item in self.itemPool:

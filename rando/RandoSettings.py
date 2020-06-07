@@ -3,6 +3,9 @@ import sys, random
 from rando.Items import ItemManager
 from utils import getRangeDict, chooseFromRange
 
+# Holder for settings and a few utility functions related to them
+# (especially for plando/rando).
+# Holds settings not related to graph layout.
 class RandoSettings(object):
     def __init__(self, maxDiff, progSpeed, progDiff, qty, restrictions,
                  superFun, runtimeLimit_s, plandoRandoItemLocs):
@@ -50,6 +53,7 @@ class RandoSettings(object):
             itemLoc = {'Item':item, 'Location':location}
             container.collect(itemLoc, pickup=False)
 
+# Holds settings and utiliy functions related to graph layout
 class GraphSettings(object):
     def __init__(self, startAP, areaRando, bossRando, escapeRando, dotFile, plandoRandoTransitions):
         self.bidir = True
@@ -60,6 +64,7 @@ class GraphSettings(object):
         self.dotFile = dotFile
         self.plandoRandoTransitions = plandoRandoTransitions
 
+    # used by FillerRandom to know how many front fill steps it must perform
     def getRandomFillHelp(self):
         helpByAp = {
             "Firefleas Top": 3,

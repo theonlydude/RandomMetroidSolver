@@ -1,6 +1,7 @@
 import log, random
 from utils import getRangeDict, chooseFromRange
 
+# helper object to choose item/loc
 class Choice(object):
     def __init__(self, restrictions):
         self.restrictions = restrictions
@@ -18,7 +19,7 @@ class Choice(object):
     def getLocList(self, itemLocDict, item):
         return sorted(itemLocDict[item['Wrapper']], key=lambda loc: loc['Name'])
 
-# simple random choice
+# simple random choice, that chooses an item first, then a locatio to put it in
 class ItemThenLocChoice(Choice):
     def __init__(self, restrictions):
         super(ItemThenLocChoice, self).__init__(restrictions)
@@ -65,7 +66,7 @@ class ItemThenLocChoice(Choice):
     def chooseLocationRandom(self, locList):
         return random.choice(locList)
 
-
+# Choice specialization for prog speed based filler
 class ItemThenLocChoiceProgSpeed(ItemThenLocChoice):
     def __init__(self, restrictions, progSpeedParams, distanceProp, services):
         super(ItemThenLocChoiceProgSpeed, self).__init__(restrictions)

@@ -82,10 +82,13 @@ class Filler(object):
         return (isStuck, self.container.itemLocations, self.getProgressionItemLocations())
 
     # helper method to collect in item/location with logic. updates self.ap and VCR
-    def collect(self, itemLoc):
+    def collect(self, itemLoc, container=None, pickup=True):
+        if container is None:
+            container = self.container
         location = itemLoc['Location']
         item = itemLoc['Item']
-        self.ap = self.services.collect(self.ap, self.container, itemLoc)
+        pickup &= 'restricted' not in location or location['restricted'] == False
+        self.ap = self.services.collect(self.ap, container, itemLoc, pickup=pickup)
         if self.vcr is not None:
             self.vcr.addLocation(location['Name'], item['Type'])
 

@@ -32,14 +32,14 @@ class RandoServices(object):
 
     # collect an item/loc with logic in a container from a given AP
     # return new AP
-    def collect(self, ap, container, itemLoc):
+    def collect(self, ap, container, itemLoc, pickup=True):
         # walk the graph to update AP
         self.currentLocations(ap, container, itemLoc['Item'])
-        container.collect(itemLoc)
+        container.collect(itemLoc, pickup=pickup)
         self.log.debug("COLLECT "+itemLoc['Item']['Type']+" at "+itemLoc['Location']['Name'])
         sys.stdout.write('.')
         sys.stdout.flush()
-        return itemLoc['Location']['accessPoint']
+        return itemLoc['Location']['accessPoint'] if pickup == True else ap
 
     # gives all the possible theoretical locations for a given item
     def possibleLocations(self, item, ap, emptyContainer):

@@ -472,7 +472,8 @@ class FillerProgSpeedChozoSecondPhase(Filler):
                     self.log.debug('step. cond item='+cond[0])
                     self.conditions.remove(cond)
                     break
-                self.ap = self.services.collect(self.ap, self.firstPhaseContainer, self.firstPhaseItemLocs[self.firstPhaseIndex])
+                itemLoc = self.firstPhaseItemLocs[self.firstPhaseIndex]
+                self.collect(itemLoc, container=self.firstPhaseContainer)
                 self.firstPhaseIndex += 1
             self.log.debug('step. curLocs='+getLocListStr(curLocs))
             restrictedItemTypes = [cond[0] for cond in self.conditions]

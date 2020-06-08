@@ -1,9 +1,7 @@
-import copy
-
+import copy, logging
 import log
-from parameters import infinity
 from smbool import SMBool
-
+from parameters import infinity
 
 class AccessPoint(object):
     # name : AccessPoint name
@@ -87,6 +85,12 @@ class AccessGraph(object):
         if dotFile is not None:
             self.toDot(dotFile)
 
+    def printGraph(self):
+        if self.log.getEffectiveLevel() == logging.DEBUG:
+            self.log.debug("Area graph:")
+            for s, d in self.InterAreaTransitions:
+                self.log.debug("{} -> {}".format(s.Name, d.Name))
+
     def addAccessPoint(self, ap):
         ap.distance = 0
         self.accessPoints[ap.Name] = ap
@@ -126,7 +130,7 @@ class AccessGraph(object):
 
     # availNodes: all already available nodes
     # nodesToCheck: nodes we have to check transitions for
-    # items: collected items
+    # smbm: smbm to test logic on. if None, discard logic check, assume we can reach everything
     # maxDiff: difficulty limit
     # return newly opened access points
     def getNewAvailNodes(self, availNodes, nodesToCheck, smbm, maxDiff):
@@ -137,7 +141,10 @@ class AccessGraph(object):
                 dst = self.accessPoints[dstName]
                 if dst in newAvailNodes or dst in availNodes:
                     continue
-                diff = smbm.eval(tFunc)
+                if smbm is not None:
+                    diff = smbm.eval(tFunc)
+                else:
+                    diff = SMBool(True, 0)
                 if diff.bool == True and diff.difficulty <= maxDiff:
                     if src.GraphArea == dst.GraphArea:
                         dst.distance = src.distance + 0.01
@@ -149,8 +156,9 @@ class AccessGraph(object):
         return newAvailNodes
 
     # rootNode: starting AccessPoint instance
-    # items: collected items
-    # maxDiff: difficulty limit
+    # smbm: smbm to test logic on. if None, discard logic check, assume we can reach everything
+    # maxDiff: difficulty limit.
+    # noLogic: if True, discard logic check, assume we can reach everything
     # return available AccessPoint list
     def getAvailableAccessPoints(self, rootNode, smbm, maxDiff):
         availNodes = { rootNode : { 'difficulty' : SMBool(True, 0), 'from' : None } }
@@ -320,3 +328,11 @@ class AccessGraph(object):
         if destAccessPoint not in availAccessPoints:
             return None
         return self.getPath(destAccessPoint, availAccessPoints)
+
+    # gives theoretically accessible locations within a base list
+    # returns locations with accessible GraphArea in this graph (no logic considered)
+    def getAccessibleLocations(self, locations, rootNode='Landing Site'):
+        rootAp = self.accessPoints[rootNode]
+        availAccessPoints = self.getAvailableAccessPoints(rootAp, None, 0)
+        graphAreas = {ap.GraphArea for ap in availAccessPoints}
+        return [loc for loc in locations if loc['GraphArea'] in graphAreas]

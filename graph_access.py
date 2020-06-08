@@ -166,9 +166,9 @@ accessPoints = [
        dotOrientation = 'w'),
     AccessPoint('Wrecked Ship Main', 'WreckedShip', {
         'West Ocean Left': lambda sm: SMBool(True),
-        'Wrecked Ship Back': lambda sm: sm.wor(sm.wand(Bosses.bossDead('Phantoon'),
+        'Wrecked Ship Back': lambda sm: sm.wor(sm.wand(Bosses.bossDead(sm, 'Phantoon'),
                                                        sm.canPassSpongeBath()),
-                                               sm.wand(sm.wnot(Bosses.bossDead('Phantoon')),
+                                               sm.wand(sm.wnot(Bosses.bossDead(sm, 'Phantoon')),
                                                        RomPatches.has(RomPatches.SpongeBathBlueDoor))),
         'PhantoonRoomOut': lambda sm: sm.wand(sm.canOpenGreenDoors(), sm.canPassBombPassages())
     }, internal=True,
@@ -241,7 +241,8 @@ accessPoints = [
     AccessPoint('Screw Attack Bottom', 'LowerNorfair', {
         'LN Entrance': lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']),
                                           sm.canExitScrewAttackArea(),
-                                          sm.haveItem('Super'))
+                                          sm.haveItem('Super'),
+                                          sm.canUsePowerBombs())
     }, internal=True),
     AccessPoint('Firefleas', 'LowerNorfair', {
         'LN Entrance': lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']),
@@ -356,16 +357,15 @@ accessPoints = [
                                              # go through cathedral
                                              sm.wand(sm.canOpenGreenDoors(),
                                                      sm.canEnterCathedral(Settings.hellRunsTable['MainUpperNorfair']['Norfair Entrance -> Bubble']['mult']))),
-        'Croc Zone': lambda sm: sm.wor(sm.wand(sm.haveItem('SpeedBooster'), # frog speedway
-                                               sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Norfair Entrance -> Croc via Frog w/Wave' if sm.haveItem('Wave') else 'Norfair Entrance -> Croc via Frog']),
-                                               sm.wor(sm.wand(sm.canOpenRedDoors(), sm.knowsGreenGateGlitch()),
-                                                      sm.haveItem('Wave')),
-                                               sm.canOpenGreenDoors()),
+        'Crocomire Speedway Bottom': lambda sm: sm.wor(sm.wand(sm.haveItem('SpeedBooster'), # frog speedway
+                                                               sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Norfair Entrance -> Croc via Frog w/Wave' if sm.haveItem('Wave') else 'Norfair Entrance -> Croc via Frog']),
+                                                               sm.wor(sm.wand(sm.canOpenRedDoors(),
+                                                                              sm.knowsGreenGateGlitch()),
+                                                                      sm.haveItem('Wave'))),
                                        # below ice
-                                       sm.wand(sm.canOpenGreenDoors(),
-                                               sm.haveItem('SpeedBooster'),
-                                               sm.canUsePowerBombs(),
-                                               sm.canHellRun(**Settings.hellRunsTable['Ice']['Norfair Entrance -> Croc via Ice']))),
+                                                      sm.wand(sm.haveItem('SpeedBooster'),
+                                                              sm.canUsePowerBombs(),
+                                                              sm.canHellRun(**Settings.hellRunsTable['Ice']['Norfair Entrance -> Croc via Ice']))),
         'Warehouse Entrance Left': lambda sm: SMBool(True)
     }, internal=True,
        start={'spawn':0x0208, 'doors':[0x4d], 'patches':[RomPatches.HiJumpAreaBlueDoor], 'solveArea': "Norfair Entrance", 'needsPreRando':True}),
@@ -390,18 +390,17 @@ accessPoints = [
                                               sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Single Chamber <-> Bubble Mountain'])),
         'Bubble Mountain Top': lambda sm: sm.wand(sm.haveItem('Morph'),
                                                   sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Kronic Boost Room -> Bubble Mountain Top'])), # go all the way around
-        'Croc Zone': lambda sm: sm.wand(sm.canOpenGreenDoors(),
-                                        sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Kronic Boost Room <-> Croc']),
-                                        sm.wor(sm.haveItem('Wave'),
-                                               sm.wand(sm.canOpenRedDoors(),
-                                                       sm.knowsGreenGateGlitch()))),
+        'Crocomire Speedway Bottom': lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Kronic Boost Room <-> Croc']),
+                                                        sm.wor(sm.haveItem('Wave'),
+                                                               sm.wand(sm.canOpenRedDoors(),
+                                                                       sm.knowsGreenGateGlitch()))),
     }, traverse=lambda sm: sm.wor(RomPatches.has(RomPatches.AreaRandoBlueDoors), sm.canOpenYellowDoors()),
        roomInfo = {'RoomPtr':0xae74, "area": 0x2, 'songs':[0xae85]},
        exitInfo = {'DoorPtr':0x967e, 'direction': 0x5, "cap": (0x3e, 0x6), "bitFlag": 0x0,
                    "screen": (0x3, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
        entryInfo = {'SamusX':0x134, 'SamusY':0x288, 'song': 0x15},
        dotOrientation = 'se'),
-    AccessPoint('Croc Zone', 'Norfair', {
+    AccessPoint('Crocomire Speedway Bottom', 'Norfair', {
         'Business Center': lambda sm: sm.wor(sm.wand(sm.canPassFrogSpeedwayRightToLeft(),
                                                      sm.canHellRun(**Settings.hellRunsTable['Ice']['Croc -> Norfair Entrance'])),
                                              sm.wand(sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Croc -> Norfair Entrance']),
@@ -411,7 +410,12 @@ accessPoints = [
                                               sm.canHellRun(**Settings.hellRunsTable['Ice']['Croc -> Bubble Mountain'])),
         'Kronic Boost Room Bottom Left': lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Kronic Boost Room <-> Croc']),
                                                             sm.haveItem('Morph'))
-    }, internal=True),
+    }, traverse=lambda sm: sm.wor(RomPatches.has(RomPatches.CrocBlueDoors), sm.canOpenGreenDoors()),
+       roomInfo = {'RoomPtr':0xa923, "area": 0x2},
+       exitInfo = {'DoorPtr':0x93d2, 'direction': 0x6, "cap": (0x36, 0x2), "bitFlag": 0x0,
+                   "screen": (0x3, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
+       entryInfo = {'SamusX':0xc57, 'SamusY':0x2b8},
+       dotOrientation = 'se'),
     AccessPoint('Bubble Mountain', 'Norfair', {
         # bottom left door -> frog speed way OR exit cathedral
         'Business Center': lambda sm: sm.wor(sm.wand(sm.canPassBombPassages(),
@@ -422,11 +426,11 @@ accessPoints = [
                                                                    sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Kronic Boost Room'])),
                                                            sm.wand(sm.haveItem('Morph'),
                                                                    sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Kronic Boost Room wo/Bomb']))), # go all the way around
-        'Croc Zone': lambda sm: sm.wand(sm.canPassBombPassages(),
-                                        sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Croc']),
-                                        sm.wor(sm.wand(sm.canOpenRedDoors(), sm.knowsGreenGateGlitch()),
-                                               sm.haveItem('Wave')),
-                                        sm.canOpenGreenDoors())
+        'Crocomire Speedway Bottom': lambda sm: sm.wand(sm.canPassBombPassages(),
+                                                        sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Croc']),
+                                                        sm.wor(sm.wand(sm.canOpenRedDoors(),
+                                                                       sm.knowsGreenGateGlitch()),
+                                                               sm.haveItem('Wave')))
     }, internal=True,
        start={'spawn':0x0201, 'doors':[0x54,0x55], 'patches':[RomPatches.SpeedAreaBlueDoors], 'knows':['BubbleMountainWallJump'], 'solveArea': "Bubble Norfair Bottom"}),
     AccessPoint('Bubble Mountain Top', 'Norfair', {
@@ -451,6 +455,15 @@ accessPoints = [
        entryInfo = {'SamusX':0xffff, 'SamusY':0xffff}, # unused
        escape = True,
        dotOrientation = 'ne'),
+    ### Croc
+    AccessPoint('Crocomire Room Top', 'Crocomire', {
+    }, traverse=lambda sm: sm.wor(RomPatches.has(RomPatches.CrocBlueDoors), sm.enoughStuffCroc()),
+       roomInfo = {'RoomPtr':0xa98d, "area": 0x2},
+       exitInfo = {'DoorPtr':0x93ea, 'direction': 0x7, "cap": (0xc6, 0x2d), "bitFlag": 0x0,
+                   "screen": (0xc, 0x2), "distanceToSpawn": 0x1c0, "doorAsmPtr": 0x0000,
+                   "exitAsmPtr": 0xf7f0},
+       entryInfo = {'SamusX':0x383, 'SamusY':0x98},
+       dotOrientation = 'se'),
     ### Maridia
     AccessPoint('Main Street Bottom', 'Maridia', {
         'Red Fish Room Left': lambda sm: sm.wand(sm.canGoUpMtEverest(),
@@ -505,7 +518,7 @@ accessPoints = [
     AccessPoint('Toilet Top', 'Maridia', {
         'Oasis Bottom': lambda sm: sm.wand(sm.canOpenGreenDoors(), sm.canDestroyBombWallsUnderwater()),
         'Le Coude Right': lambda sm: SMBool(True),
-        'Precious Room Top': lambda sm: sm.wand(Bosses.bossDead('Draygon'),
+        'Precious Room Top': lambda sm: sm.wand(Bosses.bossDead(sm, 'Draygon'),
                                                 # suitless could be possible with this but unreasonable: https://youtu.be/rtLwytH-u8o
                                                 sm.haveItem('Gravity'),
                                                 sm.canOpenGreenDoors())
@@ -585,14 +598,19 @@ accessPoints = [
        entryInfo = {'SamusX':0x34, 'SamusY':0x288},
        traverse=lambda sm: sm.canOpenRedDoors(),
        dotOrientation = 'e'),
-    AccessPoint('DraygonRoomIn', 'Maridia', {},
-       boss = True,
+    AccessPoint('DraygonRoomIn', 'Maridia', {
+        'Draygon Room Bottom': lambda sm: sm.wor(Bosses.bossDead(sm, "Draygon"),
+                                                 sm.wand(sm.canFightDraygon(),
+                                                         sm.enoughStuffsDraygon()))
+    }, boss = True,
        roomInfo = {'RoomPtr':0xda60, "area": 0x4},
        exitInfo = {'DoorPtr':0xa96c, 'direction': 0x4, "cap": (0x1, 0x26), "bitFlag": 0x0,
                    "screen": (0x0, 0x2), "distanceToSpawn": 0x8000, "doorAsmPtr": 0xe3d9},
        entryInfo = {'SamusX':0x1c8, 'SamusY':0x88},
-       traverse = lambda sm: sm.canExitDraygon(),
        dotOrientation = 'e'),
+    AccessPoint('Draygon Room Bottom', 'Maridia', {
+       'DraygonRoomIn': lambda sm: sm.wand(Bosses.bossDead(sm, 'Draygon'), sm.canExitDraygon())
+    }, internal = True),
     # escape APs
     AccessPoint('Crab Hole Bottom Right', 'Maridia', {
         'Crab Hole Bottom Left': lambda sm: SMBool(True)
@@ -698,6 +716,7 @@ vanillaTransitions = [
     ('Noob Bridge Right', 'Red Tower Top Left'),
     ('Crab Maze Left', 'Le Coude Right'),
     ('Kronic Boost Room Bottom Left', 'Lava Dive Right'),
+    ('Crocomire Speedway Bottom', 'Crocomire Room Top'),
     ('Three Muskateers Room Left', 'Single Chamber Top Right'),
     ('Warehouse Entrance Left', 'East Tunnel Right'),
     ('East Tunnel Top Right', 'Crab Hole Bottom Left'),

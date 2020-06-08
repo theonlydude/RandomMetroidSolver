@@ -23,8 +23,7 @@ from smboolmanager import SMBoolManager
 from rom import RomReader
 from rom_patches import RomPatches
 from ips import IPS_Patch
-from randomizer import energyQties, progDiffs, morphPlacements, majorsSplits
-from itemrandomizerweb.Randomizer import progSpeeds
+from randomizer import energyQties, progDiffs, morphPlacements, majorsSplits, speeds
 
 # put an expiration date to the default cookie to have it kept between browser restart
 response.cookies['session_id_solver']['expires'] = 31 * 24 * 3600
@@ -977,7 +976,7 @@ def getDefaultMultiValues():
     defaultMultiValues = {
         'startLocationMultiSelect': GraphUtils.getStartAccessPointNames(),
         'majorsSplitMultiSelect': majorsSplits,
-        'progressionSpeedMultiSelect': progSpeeds + ['VARIAble'],
+        'progressionSpeedMultiSelect': speeds,
         'progressionDifficultyMultiSelect': progDiffs,
         'morphPlacementMultiSelect': morphPlacements,
         'energyQtyMultiSelect': energyQties
@@ -1012,7 +1011,8 @@ def randomizer():
 
     return dict(stdPresets=stdPresets, tourPresets=tourPresets, comPresets=comPresets,
                 randoPresets=randoPresets, tourRandoPresets=tourRandoPresets,
-                startAPs=startAPs, currentMultiValues=currentMultiValues, defaultMultiValues=defaultMultiValues)
+                startAPs=startAPs, currentMultiValues=currentMultiValues, defaultMultiValues=defaultMultiValues,
+                maxsize=sys.maxsize)
 
 def raiseHttp(code, msg, isJson=False):
     #print("raiseHttp: code {} msg {} isJson {}".format(code, msg, isJson))
@@ -1092,8 +1092,8 @@ def validateWebServiceParams(switchs, quantities, multis, others, isJson=False):
 
     if 'seed' in others:
         seedInt = getInt('seed', isJson)
-        if seedInt < 0 or seedInt > 9999999:
-            raiseHttp(400, "Wrong value for seed, must be between 0 and 9999999", isJson)
+        if seedInt < 0 or seedInt > sys.maxsize:
+            raiseHttp(400, "Wrong value for seed", isJson)
 
     preset = request.vars.preset
     if preset != None:
@@ -1255,7 +1255,7 @@ def randomizerWebService():
         presetFile.write(request.vars.paramsFileTarget)
 
     if request.vars.seed == '0':
-        request.vars.seed = str(random.randint(0, 9999999))
+        request.vars.seed = str(random.randrange(sys.maxsize))
 
     preset = request.vars.preset
 
@@ -1837,8 +1837,7 @@ class WS(object):
             if 'escapeTimer' in parameters:
                 params += ['--escapeTimer', parameters['escapeTimer']]
         elif action == 'randomize':
-            params += ['--progressionSpeed', parameters["progressionSpeed"],
-                       '--minorQty', parameters["minorQty"],
+            params += ['--minorQty', parameters["minorQty"],
                        '--energyQty', parameters["energyQty"]
             ]
 
@@ -2037,8 +2036,6 @@ class WS_common_randomize(WS):
     def validate(self):
         super(WS_common_randomize, self).validate()
 
-        if request.vars.progressionSpeed not in ["slowest", "slow", "medium", "fast", "fastest", "basic", "VARIAble"]:
-            raiseHttp(400, "Wrong value for progressionSpeed", True)
         minorQtyInt = getInt('minorQty', True)
         if minorQtyInt < 7 or minorQtyInt > 100:
             raiseHttp(400, "Wrong value for minorQty, must be between 7 and 100", True)
@@ -2050,7 +2047,7 @@ class WS_common_randomize(WS):
             raiseHttp(400, "Randomize can only be use in plando mode", True)
 
         params = {}
-        for elem in "progressionSpeed", "minorQty", "energyQty":
+        for elem in "minorQty", "energyQty":
             params[elem] = request.vars[elem]
 
         self.session["rando"] = params
@@ -2093,7 +2090,7 @@ class WS_area_clear(WS):
     def action(self):
         return self.callSolverAction("area", "clear", {})
 
-validItemsList = [None, 'ETank', 'Missile', 'Super', 'PowerBomb', 'Bomb', 'Charge', 'Ice', 'HiJump', 'SpeedBooster', 'Wave', 'Spazer', 'SpringBall', 'Varia', 'Plasma', 'Grapple', 'Morph', 'Reserve', 'Gravity', 'XRayScope', 'SpaceJump', 'ScrewAttack', 'Nothing', 'NoEnergy', 'Boss']
+validItemsList = [None, 'ETank', 'Missile', 'Super', 'PowerBomb', 'Bomb', 'Charge', 'Ice', 'HiJump', 'SpeedBooster', 'Wave', 'Spazer', 'SpringBall', 'Varia', 'Plasma', 'Grapple', 'Morph', 'Reserve', 'Gravity', 'XRayScope', 'SpaceJump', 'ScrewAttack', 'Nothing', 'NoEnergy', 'Kraid', 'Phantoon', 'Draygon', 'Ridley', 'MotherBrain']
 
 class WS_item_add(WS):
     def validate(self):
@@ -2124,7 +2121,7 @@ class WS_item_add(WS):
         item = request.vars.itemName
 
         # items used only in the randomizer that we get in vcr mode
-        if item in ["Boss", "NoEnergy", None]:
+        if item in ["NoEnergy", None]:
             item = 'Nothing'
 
         params = {"item": item, "hide": request.vars.hide == "true"}
@@ -2709,7 +2706,7 @@ def progSpeedStats():
         progSpeedStats["open24"] = {}
         progSpeedStats["open34"] = {}
         progSpeedStats["open44"] = {}
-        progSpeeds = ['slowest', 'slow', 'medium', 'fast', 'fastest', 'basic', 'variable', 'total']
+        progSpeeds = ['speedrun', 'slowest', 'slow', 'medium', 'fast', 'fastest', 'basic', 'variable', 'total']
         realProgSpeeds = []
         realProgSpeedsName = []
         for progSpeed in progSpeeds:

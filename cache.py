@@ -22,3 +22,19 @@ class Cache:
 #                print("cache added for {}: {}".format(func.__name__, Cache.cache[func.__name__]))
                 return ret
         return _decorator
+
+class RequestCache(object):
+    def __init__(self):
+        self.results = {}
+
+    def request(self, request, *args):
+        return ''.join([request] + [str(arg) for arg in args])
+
+    def store(self, request, result):
+        self.results[request] = result
+
+    def get(self, request):
+        return self.results[request] if request in self.results else None
+
+    def reset(self):
+        self.results.clear()

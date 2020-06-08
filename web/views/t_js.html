@@ -363,7 +363,7 @@ function ajaxOkGet(jsonData, status, dummy, chained=false) {
       // check if a boss was at that location
       if("boss" in locsInfo[locName]) {
         var bossName = locsInfo[locName]["boss"];
-        if(bossName != "Mother Brain") {
+        if(bossName != "MotherBrain") {
           document.getElementById(bossName+"G4").style.display = "none";
         }
       }
@@ -394,7 +394,7 @@ function ajaxOkGet(jsonData, status, dummy, chained=false) {
       // check if a boss was at that location
       if("boss" in locsInfo[locName]) {
         var bossName = locsInfo[locName]["boss"];
-        if(bossName != "Mother Brain") {
+        if(bossName != "MotherBrain") {
           document.getElementById(bossName+"G4").style.display = "block";
         }
       }
@@ -455,7 +455,7 @@ function ajaxOkGet(jsonData, status, dummy, chained=false) {
       // check if a boss was at that location
       if("boss" in locsInfo[locName]) {
         var bossName = locsInfo[locName]["boss"];
-        if(bossName != "Mother Brain") {
+        if(bossName != "MotherBrain") {
           document.getElementById(bossName+"G4").style.display = "none";
         }
       }
@@ -580,9 +580,9 @@ var locsInfo = {
   EnergyTankKraid: {left: 50.97, top: 66.8},
   VariaSuit: {left: 67.6, top: 66.75},
   IceBeam: {left: 38.6, top: 73.99},
-  EnergyTankCrocomire: {left: 52, top: 86.05},
+  EnergyTankCrocomire: {left: 25.8, top: 82.5},
   HiJumpBoots: {left: 40.4, top: 80},
-  GrappleBeam: {left: 36.65, top: 95.2},
+  GrappleBeam: {left: 10.6, top: 91.65},
   ReserveTankNorfair: {left: 51.02, top: 73.99},
   SpeedBooster: {left: 69.05, top: 73.95},
   WaveBeam: {left: 61.4, top: 76.9},
@@ -634,9 +634,9 @@ var locsInfo = {
   MissileaboveCrocomire: {left: 45.2, top: 80.1},
   MissileHiJumpBoots: {left: 41.4, top: 78.6},
   EnergyTankHiJumpBoots: {left: 42.4, top: 78.5},
-  PowerBombCrocomire: {left: 42.4, top: 86.05},
-  MissilebelowCrocomire: {left: 47, top: 93.7},
-  MissileGrappleBeam: {left: 41.3, top: 93.8},
+  PowerBombCrocomire: {left: 16.3, top: 82.5},
+  MissilebelowCrocomire: {left: 21, top: 90.15},
+  MissileGrappleBeam: {left: 15.3, top: 90.25},
   MissileNorfairReserveTank: {left: 51.9, top: 73.95},
   MissilebubbleNorfairgreendoor: {left: 53.8, top: 73.95},
   MissilebubbleNorfair: {left: 55.7, top: 78.45},
@@ -669,7 +669,7 @@ var locsInfo = {
   Ridley: {left: 76.6, top: 93.8, boss: "Ridley"},
   Phantoon: {left: 78.8, top: 16.3, boss: "Phantoon"},
   Draygon: {left: 92.6, top: 50, boss: "Draygon"},
-  MotherBrain: {left: 22, top: 33.2, boss: "Mother Brain"}
+  MotherBrain: {left: 22, top: 33.2, boss: "MotherBrain"}
 };
 
 window.onload = function(){
@@ -853,7 +853,7 @@ function guessVARIAPreset(filename) {
 
     if(match != null){
       var pS = match[2];
-      if(pS == "slowest" || pS == "slow" || pS == "medium" || pS == "fast" || pS == "fastest" || pS == "basic" || pS == "VARIAble") {
+      if(pS == "slowest" || pS == "slow" || pS == "medium" || pS == "fast" || pS == "fastest" || pS == "basic" || pS == "VARIAble" || pS == "speedrun") {
         return match[1];
       } else {
         return match[1] + '_' + match[2];
@@ -990,11 +990,11 @@ function clickLoc(elem) {
   var locName = elem.id;
 
   if(mode == "plando") {
-    // we don't put an item in boss locations
+    // we put an item in boss locations which is the boss' name
     if("boss" in locsInfo[locName]) {
       // check that lock is in the available list
       if("state" in locsInfo[locName] && (locsInfo[locName]["state"] == "available" || locsInfo[locName]["state"] == "break")) {
-        ajaxCall({action: "add", scope: "item", locName: locName, itemName: "Nothing"}, "upload");
+        ajaxCall({action: "add", scope: "item", locName: locName, itemName: locsInfo[locName]["boss"]}, "upload");
 
         if(locName == "MotherBrain") {
           alert("SEE YOU NEXT MISSION");
@@ -1187,8 +1187,9 @@ function resetItems() {
   }
 }
 
+var bosses = ["Kraid", "Phantoon", "Draygon", "Ridley", "MotherBrain"];
 function addItem(itemName) {
-  if(itemName == "Nothing" || itemName == "NoEnergy") {
+  if(itemName == "Nothing" || itemName == "NoEnergy" || bosses.includes(itemName)) {
     return;
   }
   if(itemName in itemCount) {

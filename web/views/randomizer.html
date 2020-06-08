@@ -1069,7 +1069,7 @@ The vanilla ROM is stored in the browser local storage and is never sent to our 
     {
       element: "#seedStep",
       title: "Randomizer seed",
-      content: "Choose a seed number between 1 and 9999999, choose 0 to generate a random one."
+      content: "Choose a seed number between 1 and {{=maxsize}}, choose 0 to generate a random one."
     },
     {
       element: "#presetStep",
@@ -1708,7 +1708,7 @@ def displayNumber(id, min, max, default, step="1"):
               </tr>
               <tr id="seedVisibility">
                 <td>Randomizer seed:</td>
-                <td>{{displayNumber("seed", "0", "9999999", "0")}}</td>
+                <td>{{displayNumber("seed", "0", maxsize, "0")}}</td>
                 <td id="seedStep"><button type="button" onclick="startTheTour(2)">?</button></td>
               </tr>
               <tr>

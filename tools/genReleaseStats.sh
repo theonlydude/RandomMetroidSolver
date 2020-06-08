@@ -70,6 +70,10 @@ ${CWD}/tools/genTotalStats.sh ~/download/total_seeds_full FULL
 # load stats
 ${CWD}/tools/loadExtStats.sh
 
+# update speedrun prog speed stats to match season races preset
+SQL="update extended_stats set morphPlacement = 'early' where progSpeed = 'speedrun' and preset = 'Season_Races' and area = false and boss = false and majorsSplit in ('Full', 'Major') and morphPlacement = 'normal' and suitsRestriction = true and progDiff = 'normal' and superFunMovement = false and superFunCombat = false and superFunSuit = false and gravityBehaviour = 'Balanced' and nerfedCharge = false and maxDifficulty = 'harder' and startAP = 'Landing Site';"
+echo "${SQL}" | mysql -h ${host} -u ${user} -p${password} ${database}
+
 # dump stats
 mysqldump -h ${host} -u ${user} -p${password} ${database} difficulties extended_stats item_locs techniques solver_stats > ${CWD}/new_stats.sql
 gzip ${CWD}/new_stats.sql

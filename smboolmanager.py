@@ -4,11 +4,11 @@ from cache import Cache
 from graph_helpers import HelpersGraph
 from parameters import Knows, isKnows
 from smbool import SMBool
-
+from helpers import Bosses
 
 class SMBoolManager(object):
-    items = ['ETank', 'Missile', 'Super', 'PowerBomb', 'Bomb', 'Charge', 'Ice', 'HiJump', 'SpeedBooster', 'Wave', 'Spazer', 'SpringBall', 'Varia', 'Plasma', 'Grapple', 'Morph', 'Reserve', 'Gravity', 'XRayScope', 'SpaceJump', 'ScrewAttack', 'Nothing', 'NoEnergy']
-    countItems = ['ETank', 'Reserve', 'Missile', 'Super', 'PowerBomb']
+    items = ['ETank', 'Missile', 'Super', 'PowerBomb', 'Bomb', 'Charge', 'Ice', 'HiJump', 'SpeedBooster', 'Wave', 'Spazer', 'SpringBall', 'Varia', 'Plasma', 'Grapple', 'Morph', 'Reserve', 'Gravity', 'XRayScope', 'SpaceJump', 'ScrewAttack', 'Nothing', 'NoEnergy', 'MotherBrain'] + Bosses.Golden4()
+    countItems = ['Missile', 'Super', 'PowerBomb', 'ETank', 'Reserve']
 
     def __init__(self):
         Cache.reset()
@@ -16,6 +16,15 @@ class SMBoolManager(object):
         self.createFacadeFunctions()
         self.createKnowsFunctions()
         self.resetItems()
+
+    def isEmpty(self):
+        for item in self.items:
+            if self.haveItem(item):
+                return False
+        for item in self.countItems:
+            if self.itemCount(item) > 0:
+                return False
+        return True
 
     def getItems(self):
         # get a dict of collected items and how many (to be displayed on the solver spoiler)
@@ -49,14 +58,8 @@ class SMBoolManager(object):
 
     def addItem(self, item):
         # a new item is available
-        already = self.haveItem(item)
-        isCount = self.isCountItem(item)
-        if isCount or not already:
-            setattr(self, item, True)
-        else:
-            # handle duplicate major items (plandos)
-            setattr(self, 'dup_'+item, False)
-        if item in self.countItems:
+        setattr(self, item, True)
+        if self.isCountItem(item):
             setattr(self, item+'Count', getattr(self, item+'Count') + 1)
 
         Cache.reset()
@@ -66,24 +69,20 @@ class SMBoolManager(object):
             return
         for item in items:
             setattr(self, item, True)
-            if item in self.countItems:
+            if self.isCountItem(item):
                 setattr(self, item+'Count', getattr(self, item+'Count') + 1)
 
         Cache.reset()
 
     def removeItem(self, item):
         # randomizer removed an item (or the item was added to test a post available)
-        if item in self.countItems:
+        if self.isCountItem(item):
             count = getattr(self, item+'Count') - 1
             setattr(self, item+'Count', count)
             if count == 0:
                 setattr(self, item, False)
         else:
-            dup = 'dup_'+item
-            if getattr(self, dup, None) is None:
-                setattr(self, item, False)
-            else:
-                setattr(self, dup, False)
+            setattr(self, item, False)
 
         Cache.reset()
 
@@ -102,7 +101,7 @@ class SMBoolManager(object):
                                                                                   Knows.__dict__[knows].difficulty)))
 
     def isCountItem(self, item):
-        return item in ['Missile', 'Super', 'PowerBomb', 'ETank', 'Reserve']
+        return item in self.countItems
 
     def itemCount(self, item):
         # return integer
@@ -185,3 +184,37 @@ class SMBoolManager(object):
             return SMBool(True, difficulty, items = [items])
         else:
             return SMBool(False)
+
+class SMBoolManagerPlando(SMBoolManager):
+    def __init__(self):
+        super(SMBoolManagerPlando, self).__init__()
+
+    def addItem(self, item):
+        # a new item is available
+        already = self.haveItem(item)
+        isCount = self.isCountItem(item)
+        if isCount or not already:
+            setattr(self, item, True)
+        else:
+            # handle duplicate major items (plandos)
+            setattr(self, 'dup_'+item, False)
+        if isCount:
+            setattr(self, item+'Count', getattr(self, item+'Count') + 1)
+
+        Cache.reset()
+
+    def removeItem(self, item):
+        # randomizer removed an item (or the item was added to test a post available)
+        if self.isCountItem(item):
+            count = getattr(self, item+'Count') - 1
+            setattr(self, item+'Count', count)
+            if count == 0:
+                setattr(self, item, False)
+        else:
+            dup = 'dup_'+item
+            if getattr(self, dup, None) is None:
+                setattr(self, item, False)
+            else:
+                setattr(self, dup, False)
+
+        Cache.reset()

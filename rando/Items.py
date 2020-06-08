@@ -142,12 +142,31 @@ class ItemManager:
             'Code': 0xeedb,
             'Name': "No Energy"
         },
-        'Boss': {
-            'Category': 'Nothing',
-            'Class': 'Minor',
-            'Code': 0xeedb,
-            'Name': "Boss"
-        }
+        'Kraid': {
+            'Category': 'Boss',
+            'Class': 'Boss',
+            'Name': "Kraid"
+        },
+        'Phantoon': {
+            'Category': 'Boss',
+            'Class': 'Boss',
+            'Name': "Phantoon"
+        },
+        'Draygon': {
+            'Category': 'Boss',
+            'Class': 'Boss',
+            'Name': "Draygon"
+        },
+        'Ridley': {
+            'Category': 'Boss',
+            'Class': 'Boss',
+            'Name': "Ridley"
+        },
+        'MotherBrain': {
+            'Category': 'Boss',
+            'Class': 'Boss',
+            'Name': "Mother Brain"
+        },
     }
 
     @staticmethod
@@ -199,8 +218,8 @@ class ItemManager:
         self.itemPool = []
         if addBosses == True:
             # for the bosses
-            for i in range(5):
-                self.addMinor('Boss')
+            for boss in ['Kraid', 'Phantoon', 'Draygon', 'Ridley', 'MotherBrain']:
+                self.addMinor(boss)
 
     def getItemPool(self):
         return self.itemPool
@@ -491,7 +510,7 @@ class ItemPoolGeneratorPlando(ItemPoolGenerator):
             if item == 'total':
                 continue
             itemClass = 'Major'
-            if item in ['Missile', 'Super', 'PowerBomb']:
+            if item in ['Missile', 'Super', 'PowerBomb', 'Kraid', 'Phantoon', 'Draygon', 'Ridley', 'MotherBrain']:
                 itemClass = 'Minor'
             for i in range(self.exclude[item]):
                 self.itemManager.addItem(item, itemClass)
@@ -500,11 +519,11 @@ class ItemPoolGeneratorPlando(ItemPoolGenerator):
         self.log.debug("Plando: remain start: {}".format(remain))
         if remain > 0:
             # add missing bosses
-            (itemType, minimum) = ('Boss', 5)
-            while self.exclude[itemType] < minimum:
-                self.itemManager.addItem(itemType, 'Minor')
-                self.exclude[itemType] += 1
-                remain -= 1
+            for boss in ['Kraid', 'Phantoon', 'Draygon', 'Ridley', 'MotherBrain']:
+                if boss not in self.exclude or self.exclude[boss] == 0:
+                    self.itemManager.addItem(boss, 'Minor')
+                    self.exclude[boss] = 1
+                    remain -= 1
 
             self.log.debug("Plando: remain after bosses: {}".format(remain))
             if remain < 0:
@@ -513,7 +532,7 @@ class ItemPoolGeneratorPlando(ItemPoolGenerator):
             # add missing majors
             majors = []
             for itemType in ['Bomb', 'Charge', 'Ice', 'HiJump', 'SpeedBooster', 'Wave', 'Spazer', 'SpringBall', 'Varia', 'Plasma', 'Grapple', 'Morph', 'Gravity', 'XRayScope', 'SpaceJump', 'ScrewAttack']:
-                if self.exclude[itemType] == 0:
+                if itemType not in self.exclude or self.exclude[itemType] == 0:
                     self.itemManager.addItem(itemType, 'Major')
                     self.exclude[itemType] = 1
                     majors.append(itemType)
@@ -525,6 +544,8 @@ class ItemPoolGeneratorPlando(ItemPoolGenerator):
 
             # add minimum minors to finish the game
             for (itemType, minimum) in [('Missile', 3), ('Super', 2), ('PowerBomb', 1)]:
+                if itemType not in self.exclude:
+                    self.exclude[itemType] = 0
                 while self.exclude[itemType] < minimum:
                     self.itemManager.addItem(itemType, 'Minor')
                     self.exclude[itemType] += 1
@@ -542,6 +563,8 @@ class ItemPoolGeneratorPlando(ItemPoolGenerator):
                 "vanilla": [('ETank', 14), ('Reserve', 4)]
             }
             for (itemType, minimum) in limits[energyQty]:
+                if itemType not in self.exclude:
+                    self.exclude[itemType] = 0
                 while self.exclude[itemType] < minimum:
                     self.itemManager.addItem(itemType, 'Major')
                     self.exclude[itemType] += 1

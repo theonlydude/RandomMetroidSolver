@@ -53,6 +53,8 @@ class RomPatches:
     AreaRandoBlueDoors        = 104
     # crateria key hunter yellow, green pirates shaft red
     AreaRandoMoreBlueDoors    = 105
+    # croc green+grey doors
+    CrocBlueDoors             = 106
 
     ### Other
     # Gravity no longer protects from environmental damage (heat, spikes...)
@@ -82,7 +84,7 @@ class RomPatches:
     TotalCasual = [ BlueBrinstarMissile ] + Total
 
     # area rando patch set
-    AreaBaseSet = [ SingleChamberNoCrumble, AreaRandoGatesBase, AreaRandoBlueDoors, AreaRandoMoreBlueDoors ]
+    AreaBaseSet = [ SingleChamberNoCrumble, AreaRandoGatesBase, AreaRandoBlueDoors, AreaRandoMoreBlueDoors, CrocBlueDoors ]
     AreaComfortSet = [ AreaRandoGatesOther, SpongeBathBlueDoor, EastOceanPlatforms ]
     AreaSet = AreaBaseSet + AreaComfortSet
 

@@ -8,7 +8,7 @@ from parameters import easy, medium, hard, harder, hardcore, mania, impossibru, 
 
 # the helper functions
 from smbool import SMBool
-from smboolmanager import SMBoolManager
+from smboolmanager import SMBoolManagerPlando as SMBoolManager
 from helpers import Pickup, Bosses
 from rom import RomLoader, RomPatcher
 from rom_patches import RomPatches
@@ -72,8 +72,6 @@ class SolverState(object):
         self.state["availableLocations"] = self.getAvailableLocations(solver.majorLocations)
         # string of last access point
         self.state["lastAP"] = solver.lastAP
-        # list of killed bosses: ["boss1", "boss2"]
-        self.state["bosses"] = [boss for boss in Bosses.golden4Dead if Bosses.golden4Dead[boss] == True]
         # dict {locNameWeb: {infos}, ...}
         self.state["availableLocationsWeb"] = self.getAvailableLocationsWeb(solver.majorLocations)
         # dict {locNameWeb: {infos}, ...}
@@ -96,14 +94,7 @@ class SolverState(object):
             self.state["last"] = ""
 
     def toSolver(self, solver):
-        if 'majorsSplit' in self.state:
-            solver.majorsSplit = self.state["majorsSplit"]
-        else:
-            # compatibility with existing sessions
-            if self.state['fullRando'] == True:
-                solver.majorsSplit = 'Full'
-            else:
-                solver.majorsSplit = 'Major'
+        solver.majorsSplit = self.state["majorsSplit"]
         solver.areaRando = self.state["areaRando"]
         solver.bossRando = self.state["bossRando"]
         solver.escapeRando = self.state["escapeRando"]
@@ -123,9 +114,6 @@ class SolverState(object):
                                                                              self.state["availableLocations"],
                                                                              solver.locations)
         solver.lastAP = self.state["lastAP"]
-        Bosses.reset()
-        for boss in self.state["bosses"]:
-            Bosses.beatBoss(boss)
         solver.mode = self.state["mode"]
         solver.seed = self.state["seed"]
 
@@ -416,10 +404,8 @@ class CommonSolver(object):
             loc["itemName"] = item
             self.collectedItems.append(item)
             # we still need the boss difficulty
-            if 'Pickup' not in loc:
+            if 'Boss' not in loc['Class']:
                 loc["difficulty"] = SMBool(False)
-        if 'Pickup' in loc:
-            loc['Pickup']()
 
         if self.log.getEffectiveLevel() == logging.DEBUG:
             print("---------------------------------------------------------------")
@@ -449,10 +435,6 @@ class CommonSolver(object):
                     self.majorLocations.append(loc)
                 else:
                     self.minorLocations.append(loc)
-
-            # pickup func
-            if 'Unpickup' in loc:
-                loc['Unpickup']()
 
             # access point
             if len(self.visitedLocations) == 0:
@@ -511,7 +493,7 @@ class CommonSolver(object):
         around = [loc for loc in locations if( ('areaWeight' in loc and loc['areaWeight'] == 1)
                                                or ((loc['SolveArea'] == self.lastArea or loc['distance'] < 3)
                                                    and loc['difficulty'].difficulty <= threshold
-                                                   and not Bosses.areaBossDead(self.lastArea)
+                                                   and not Bosses.areaBossDead(self.smbm, self.lastArea)
                                                    and 'comeBack' in loc and loc['comeBack'] == True) )]
         outside = [loc for loc in locations if not loc in around]
 
@@ -526,7 +508,7 @@ class CommonSolver(object):
             # nearest locs
             loc['distance'],
             # beating a boss
-            0 if 'Pickup' in loc
+            0 if 'Boss' in loc['Class']
             else 1,
             # easiest first
             loc['difficulty'].difficulty
@@ -576,11 +558,11 @@ class CommonSolver(object):
                 # first nearest locs
                 loc['distance'],
                 # beating a boss
-                loc['difficulty'].difficulty if (not Bosses.areaBossDead(loc['Area'])
-                                                 and 'Pickup' in loc)
+                loc['difficulty'].difficulty if (not Bosses.areaBossDead(self.smbm, loc['Area'])
+                                                 and 'Boss' in loc['Class'])
                 else 100000,
                 # areas with boss still alive
-                loc['difficulty'].difficulty if (not Bosses.areaBossDead(loc['Area']))
+                loc['difficulty'].difficulty if (not Bosses.areaBossDead(self.smbm, loc['Area']))
                 else 100000,
                 loc['difficulty'].difficulty))
 
@@ -828,7 +810,7 @@ class CommonSolver(object):
             for loc in self.majorLocations:
                 self.log.debug("{} ({})".format(loc['Name'], loc['itemName']))
 
-            self.log.debug("bosses: {}".format(Bosses.golden4Dead))
+            self.log.debug("bosses: {}".format([(boss, Bosses.bossDead(self.smbm, boss)) for boss in Bosses.Golden4()]))
 
         return (difficulty, itemsOk)
 
@@ -1111,10 +1093,7 @@ class InteractiveSolver(CommonSolver):
 
         plandoLocsItems = {}
         for loc in self.visitedLocations:
-            if "Boss" in loc["Class"]:
-                plandoLocsItems[loc["Name"]] = "Boss"
-            else:
-                plandoLocsItems[loc["Name"]] = loc["itemName"]
+            plandoLocsItems[loc["Name"]] = loc["itemName"]
 
         plandoCurrent = {
             "locsItems": plandoLocsItems,
@@ -1131,10 +1110,11 @@ class InteractiveSolver(CommonSolver):
             '--param', self.presetFileName,
             '--output', self.outputFileName,
             '--plandoRando', plandoCurrentJson,
-            '--progressionSpeed', parameters["progressionSpeed"],
+            '--progressionSpeed', 'speedrun',
             '--minorQty', parameters["minorQty"],
             '--maxDifficulty', 'hardcore',
-            '--energyQty', parameters["energyQty"]
+            '--energyQty', parameters["energyQty"],
+            '--startAP', self.startAP
         ]
 
         import subprocess
@@ -1341,7 +1321,6 @@ class InteractiveSolver(CommonSolver):
             for loc in self.majorLocations:
                 if "difficulty" in loc:
                     del loc["difficulty"]
-        Bosses.reset()
         self.smbm.resetItems()
 
     def addTransition(self, startPoint, endPoint):
@@ -1492,6 +1471,8 @@ class StandardSolver(CommonSolver):
 
         self.output.out()
 
+        return self.difficulty
+
     def computeExtStats(self):
         # avgLocs: avg number of available locs, the higher the value the more open is a seed
         # open[1-4]4: how many location you have to visit to open 1/4, 1/2, 3/4, all locations.
@@ -1592,6 +1573,49 @@ class StandardSolver(CommonSolver):
         self.areaGraph.getAvailableLocations(locations, self.smbm, infinity, self.lastAP)
 
         return [loc for loc in locations if loc['difficulty'].bool == True]
+
+class RandoSolver(StandardSolver):
+    def __init__(self, majorsSplit, startAP, areaGraph, locations):
+        self.interactive = False
+        self.checkDuplicateMajor = False
+        self.vcr = None
+        # for compatibility with some common methods of the interactive solver
+        self.mode = 'standard'
+
+        self.log = log.get('Solver')
+
+        # default conf
+        self.setConf(easy, 'any', [], False)
+
+        self.firstLogFile = None
+
+        self.extStatsFilename = None
+        self.extStatsStep = None
+        self.plot = None
+
+        self.type = 'rando'
+        self.output = Out.factory(self.type, self)
+        self.outputFileName = None
+
+        self.locations = locations
+
+        self.smbm = SMBoolManager()
+
+        # preset already loaded by rando
+        self.presetFileName = None
+
+        self.pickup = Pickup(Conf.itemsPickup)
+
+        self.comeBack = ComeBack(self)
+
+        # load ROM info, patches are already loaded by the rando. get the graph from the rando too
+        self.majorsSplit = majorsSplit
+        self.startAP = startAP
+        self.startArea = getAccessPoint(startAP).Start['solveArea']
+        self.areaGraph = areaGraph
+
+        # store at each step how many locations are available
+        self.nbAvailLocs = []
 
 class ComeBack(object):
     # object to handle the decision to choose the next area when all locations have the "no comeback" flag.
@@ -1753,6 +1777,8 @@ class Out(object):
             return OutWeb(solver)
         elif output == 'console':
             return OutConsole(solver)
+        elif output == 'rando':
+            return OutRando(solver)
         else:
             raise Exception("Wrong output type for the Solver: {}".format(output))
 
@@ -1961,6 +1987,13 @@ class OutConsole(Out):
             print("Estimated difficulty: {}".format(text))
         else:
             print("Aborted run, can't finish the game with the given prerequisites")
+
+class OutRando(OutConsole):
+    def __init__(self, solver):
+        self.solver = solver
+
+    def out(self):
+        pass
 
 class DifficultyDisplayer:
     def __init__(self, difficulty):

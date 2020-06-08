@@ -1,9 +1,8 @@
 
 import re, sys, os, json, copy, base64, random
 
-from itemrandomizerweb.Items import ItemManager
-from itemrandomizerweb.patches import patches, additional_PLMs
-from itemrandomizerweb.stdlib import List
+from rando.Items import ItemManager
+from rando.patches import patches, additional_PLMs
 from compression import Compressor
 from ips import IPS_Patch
 from parameters import appDir
@@ -101,7 +100,8 @@ class RomReader:
         'traverseWreckedShip': {'address': 0x219dbf, 'value': 0xFB, 'desc': "Area layout additional access to east Wrecked Ship"},
         'areaEscape': {'address': 0x20c91, 'value': 0x4C, 'desc': "Area escape randomization"},
         'newGame': {'address': 0x1001d, 'value': 0x22, 'desc': "Custom new game"},
-        'nerfedRainbowBeam': {'address': 0x14BA2E, 'value': 0x13, 'desc': 'nerfed rainbow beam'}
+        'nerfedRainbowBeam': {'address': 0x14BA2E, 'value': 0x13, 'desc': 'nerfed rainbow beam'},
+        'croc_area': {'address': 0x78ba3, 'value': 0x8c, 'desc': "Crocomire in its own area"}
     }
 
     # FIXME shouldn't be here
@@ -170,7 +170,8 @@ class RomReader:
         'traverseWreckedShip': {'address': 0x219dbf, 'value': 0xFB, 'vanillaValue': 0xeb},
         'Infinite_Space_Jump': {'address': 0x82493, 'value': 0xEA, 'vanillaValue': 0xf0},
         'refill_before_save': {'address': 0x270C2, 'value': 0x98, 'vanillaValue': 0xff},
-        'nerfed_rainbow_beam': {'address': 0x14BA2E, 'value': 0x13, 'vanillaValue': 0x2b}
+        'nerfed_rainbow_beam': {'address': 0x14BA2E, 'value': 0x13, 'vanillaValue': 0x2b},
+        'croc_area': {'address': 0x78ba3, 'value': 0x8c, 'vanillaValue': 0x4}
     }
 
     @staticmethod
@@ -262,7 +263,8 @@ class RomReader:
             chozoItems = {}
         for loc in locations:
             if 'Boss' in loc['Class']:
-                loc["itemName"] = "Nothing"
+                # the boss item has the same name as its location, except for mother brain which has a space
+                loc["itemName"] = loc["Name"].replace(' ', '')
                 continue
             item = self.getItem(loc["Address"], loc["Visibility"])
             try:
@@ -380,11 +382,15 @@ class RomReader:
             # as incompatible transition change the value of direction
             asmAddress = 0x70000 | self.romFile.readWord()
 
-            b = self.romFile.readByte(asmAddress+3)
             offset = 0
+            b = self.romFile.readByte(asmAddress+3)
             if b == 0x20:
                 # ignore original door asm ptr call
-                offset = 3
+                offset += 3
+            b = self.romFile.readByte(asmAddress+6)
+            if b == 0x20:
+                # ignore exit asm ptr call
+                offset += 3
 
             x = self.romFile.readWord(asmAddress+4+offset)
             y = self.romFile.readWord(asmAddress+10+offset)
@@ -593,6 +599,17 @@ class RomPatcher:
         # loc name to alternate address. we still write to original
         # address to help the RomReader.
         self.altLocsAddresses = {}
+        # specific fixes for area rando connections
+        self.roomConnectionSpecific = {
+            # fix scrolling sky when transitioning to west ocean
+            0x93fe: self.patchWestOcean
+        }
+        self.doorConnectionSpecific = {
+            # get out of kraid room: reload CRE
+            0x91ce: self.forceRoomCRE,
+            # get out of croc room: reload CRE
+            0x93ea: self.forceRoomCRE
+        }
 
     def end(self):
         self.romFile.close()
@@ -718,7 +735,7 @@ class RomPatcher:
             self.applyIPSPatch(patchName)
 
     def customSprite(self, sprite):
-        self.applyIPSPatch(sprite, ipsDir='itemrandomizerweb/patches/sprites')
+        self.applyIPSPatch(sprite, ipsDir='rando/patches/sprites')
 
     def applyIPSPatches(self, startAP="Landing Site",
                         optionalPatches=[], noLayout=False, suitsMode="Classic",
@@ -793,7 +810,7 @@ class RomPatcher:
         except Exception as e:
             raise Exception("Error patching {}. ({})".format(self.romFileName, e))
 
-    def applyIPSPatch(self, patchName, patchDict=None, ipsDir="itemrandomizerweb/patches"):
+    def applyIPSPatch(self, patchName, patchDict=None, ipsDir="rando/patches"):
         if patchDict is None:
             patchDict = patches
         print("Apply patch {}".format(patchName))
@@ -963,7 +980,7 @@ class RomPatcher:
         self.nothingId = 0x1a
         # if not default start, use first loc with a nothing
         if not GraphUtils.isStandardStart(startAP):
-            firstNothing = next((il['Location'] for il in itemLocs if il['Item']['Category'] == 'Nothing' and il['Item']['Type'] != 'Boss' and 'Boss' not in il['Location']['Class']), None)
+            firstNothing = next((il['Location'] for il in itemLocs if il['Item']['Category'] == 'Nothing'), None)
             if firstNothing is not None:
                 self.nothingId = firstNothing['Id']
 
@@ -1090,8 +1107,7 @@ class RomPatcher:
 
     def writeSpoiler(self, itemLocs, progItemLocs=None):
         # keep only majors, filter out Etanks and Reserve
-        fItemLocs = List.filter(lambda il: il['Item']['Category'] not in ['Ammo', 'Nothing', 'Energy'],
-                                itemLocs)
+        fItemLocs = [il for il in itemLocs if il['Item']['Category'] not in ['Ammo', 'Nothing', 'Energy', 'Boss']]
         # add location of the first instance of each minor
         for t in ['Missile', 'Super', 'PowerBomb']:
             itLoc = None
@@ -1283,13 +1299,13 @@ class RomPatcher:
         asmAddress = 0x7F800
         for conn in doorConnections:
             # write door ASM for transition doors (code and pointers)
-#            print('Writing door connection ' + conn['ID'])
+            #print('Writing door connection ' + conn['ID'])
             doorPtr = conn['DoorPtr']
             roomPtr = conn['RoomPtr']
-            if roomPtr == 0x93fe: # west ocean
-                self.patchWestOcean(doorPtr)
-            if doorPtr == 0x91ce: # kraid room exit door
-                self.patchKraidExit(roomPtr)
+            if doorPtr in self.doorConnectionSpecific:
+                self.doorConnectionSpecific[doorPtr](roomPtr)
+            if roomPtr in self.roomConnectionSpecific:
+                self.roomConnectionSpecific[roomPtr](doorPtr)
             self.romFile.seek(0x10000 + doorPtr)
 
             # write room ptr
@@ -1363,11 +1379,11 @@ class RomPatcher:
     def patchWestOcean(self, doorPtr):
         self.romFile.writeWord(doorPtr, 0x7B7BB)
 
-    # forces CRE graphics refresh when exiting kraid's room in boss rando
-    def patchKraidExit(self, roomPtr):
+    # forces CRE graphics refresh when exiting kraid's or croc room
+    def forceRoomCRE(self, roomPtr, creFlag=0x2):
         # Room ptr in bank 8F + CRE flag offset
         offset = 0x70000 + roomPtr + 0x8
-        self.romFile.writeByte(0x2, offset)
+        self.romFile.writeByte(creFlag, offset)
 
     buttons = {
         "Select" : [0x00, 0x20],
@@ -1639,6 +1655,8 @@ class RomLoader(object):
                                          RomPatches.AreaRandoBlueDoors]
             if self.hasPatch("newGame"):
                 RomPatches.ActivePatches.append(RomPatches.AreaRandoMoreBlueDoors)
+            if self.hasPatch("croc_area"):
+                RomPatches.ActivePatches.append(RomPatches.CrocBlueDoors)
             isArea = True
 
         # check area layout

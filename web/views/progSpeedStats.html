@@ -290,6 +290,15 @@ function drawOpennessHistogram2(progSpeed, dataIn) {
 
 {{
   if progSpeedStats != None:
+    if "speedrun" in progSpeedStats:
+}}
+
+function drawOpennessHistogram_speedrun() {
+    drawOpennessHistogram("speedrun", {{response.write(progSpeedStats["speedrun"]["open"], escape=False)}});
+}
+google.charts.setOnLoadCallback(drawOpennessHistogram_speedrun);
+{{
+      pass
     if "slowest" in progSpeedStats:
 }}
 
@@ -453,6 +462,11 @@ if progSpeedStats != None:
 
     <p>When solving the seed we count when we can reach 1/4, 1/2, 3/4 and all the locations, this gives the distribution of progression items. The sooner we reach this milestones the freer the seed is.</p>
 {{
+  if "speedrun" in progSpeedStats:
+}}
+    <div id="opennessHistogram_speedrun" style="height: 400px; margin: 0 auto"></div>
+{{
+    pass
   if "slowest" in progSpeedStats:
 }}
     <div id="opennessHistogram_slowest" style="height: 400px; margin: 0 auto"></div>

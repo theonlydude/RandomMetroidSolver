@@ -135,7 +135,7 @@ class HelpersGraph(Helpers):
     @Cache.decorator
     def canPassBowling(self):
         sm = self.smbm
-        return sm.wand(Bosses.bossDead('Phantoon'),
+        return sm.wand(Bosses.bossDead(sm, 'Phantoon'),
                        sm.wor(sm.heatProof(),
                               sm.energyReserveCountOk(1),
                               sm.haveItem("SpaceJump"),
@@ -352,14 +352,13 @@ class HelpersGraph(Helpers):
 
     def canKillRedKiHunters(self, n):
         sm = self.smbm
-        return sm.wor(sm.haveItem('Plasma'),
-                      sm.haveItem('ScrewAttack'),
-                      sm.wand(sm.heatProof(), # this takes a loooong time ...
-                              sm.wor(sm.haveItem('Spazer'),
-                                     sm.haveItem('Ice'),
-                                     sm.wand(sm.haveItem('Charge'),
-                                             sm.haveItem('Wave')))))
-        destroy = sm.canKillRedKiHuntersWithScrewOrBeams()
+        destroy = sm.wor(sm.haveItem('Plasma'),
+                         sm.haveItem('ScrewAttack'),
+                         sm.wand(sm.heatProof(), # this takes a loooong time ...
+                                 sm.wor(sm.haveItem('Spazer'),
+                                        sm.haveItem('Ice'),
+                                        sm.wand(sm.haveItem('Charge'),
+                                                sm.haveItem('Wave')))))
         if destroy.bool == True:
             return destroy
         return sm.canGoThroughLowerNorfairEnemy(1800.0, float(n), 200.0)
@@ -524,7 +523,7 @@ class HelpersGraph(Helpers):
     @Cache.decorator
     def canPassCacatacAlley(self):
         sm = self.smbm
-        return sm.wand(Bosses.bossDead('Draygon'),
+        return sm.wand(Bosses.bossDead(sm, 'Draygon'),
                        sm.wor(sm.haveItem('Gravity'),
                               sm.wand(sm.knowsGravLessLevel2(),
                                       sm.haveItem('HiJump'),
@@ -618,7 +617,9 @@ class HelpersGraph(Helpers):
                               sm.knowsDraygonRoomGrappleExit()),
                       sm.canDoubleSpringBallJump())
 
+    @Cache.decorator
     def canExitDraygon(self):
+        sm = self.smbm
         if self.isVanillaDraygon():
             return self.canExitDraygonVanilla()
         else:

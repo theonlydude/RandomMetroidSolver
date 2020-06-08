@@ -213,7 +213,7 @@ function randomize() {
 
   var data = {action: "randomize", scope: "common"};
 
-  var elems = ["progressionSpeed", "minorQty", "energyQty"];
+  var elems = ["minorQty", "energyQty"];
 
   for(var i=0; i<elems.length; i++) {
     data[elems[i]] = document.getElementById(elems[i]).value;
@@ -789,11 +789,6 @@ def displayNumber(id, min, max, default, step="1"):
       <tr><td colspan=2></td></tr>
       <tr><td id="RandoGrab" colspan=2 class="center greyRow"><p>Plando Randomizer parameters</p></td></tr>
       <tr><td colspan=2 class="blankRow"></td></tr>
-      <tr>
-        <td>Progression speed:</td>
-        <td>{{displaySelect("progressionSpeed", ["slowest", "slow", "medium", "fast", "fastest", "basic", "VARIAble"], "VARIAble")}}
-</td>
-      </tr>
       <tr>
         <td>Percentage of minors available:</td>
         <td>{{displayNumber("minorQty", "7", "100", "100")}}</td>

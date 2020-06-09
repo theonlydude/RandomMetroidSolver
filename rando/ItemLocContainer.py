@@ -16,6 +16,23 @@ def getItemLocStr(itemLoc):
 def getItemLocationsStr(itemLocations):
     return str([getItemLocStr(il) for il in itemLocations])
 
+class ContainerSoftBackup(object):
+    def __init__(self, container):
+        self.itemLocations = container.itemLocations[:]
+        self.itemPool = container.itemPool[:]
+        self.unusedLocations = container.unusedLocations[:]
+        self.currentItems = container.currentItems[:]
+
+    def restore(self, container, resetSM=True):
+        # avoid costly deep copies of locations
+        container.itemLocations = self.itemLocations[:]
+        container.itemPool = self.itemPool[:]
+        container.unusedLocations = self.unusedLocations[:]
+        container.currentItems = self.currentItems[:]
+        if resetSM:
+            container.sm.resetItems()
+            container.sm.addItems([it['Type'] for it in container.currentItems])
+
 # Holds items yet to place (itemPool), locations yet to fill (unusedLocations),
 # placed items/locations (itemLocations).
 # If logic is needed, also holds a SMBoolManager (sm) and collected items so far
@@ -62,7 +79,7 @@ class ItemLocContainer(object):
         return ret
 
     # create a new container based on slice predicates on items and
-    # locs.  both predicates must reslut in a consistent container
+    # locs.  both predicates must result in a consistent container
     # (same number of unused locations and not placed items)
     def slice(self, itemPoolCond, locPoolCond):
         assert self.itemPoolBackup is None, "Cannot slice a constrained container"
@@ -73,7 +90,7 @@ class ItemLocContainer(object):
         cont.itemLocations = self.itemLocations
         return copy.copy(cont)
 
-    # transfer collected items/lcoations to another container
+    # transfer collected items/locations to another container
     def transferCollected(self, dest):
         dest.currentItems = self.currentItems[:]
         dest.sm = SMBoolManager()

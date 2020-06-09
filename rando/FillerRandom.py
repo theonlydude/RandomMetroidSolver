@@ -1,9 +1,11 @@
 
-import random, sys, copy
+import random, sys, copy, logging
 
 from rando.Filler import Filler, FrontFiller
 from rando.Choice import ItemThenLocChoice
 from rando.MiniSolver import MiniSolver
+from rando.ItemLocContainer import ContainerSoftBackup
+from rando.RandoServices import ComebackCheckType
 from solver import RandoSolver
 from parameters import infinity
 from helpers import diffValue2txt
@@ -26,30 +28,17 @@ class FillerRandom(Filler):
         self.createBaseLists()
 
     def createBaseLists(self):
-        self.baseItemLocs = self.container.itemLocations[:]
-        self.baseItemPool = self.container.itemPool[:]
-        self.baseUnusedLocations = self.container.unusedLocations[:]
-        self.baseCurrentItems = self.container.currentItems[:]
+        self.baseContainer = ContainerSoftBackup(self.container)
+        self.helpContainer = ContainerSoftBackup(self.container)
 
     def createHelpingBaseLists(self):
-        self.helpBaseItemLocs = self.container.itemLocations[:]
-        self.helpBaseItemPool = self.container.itemPool[:]
-        self.helpBaseUnusedLocations = self.container.unusedLocations[:]
-        self.helpBaseCurrentItems = self.container.currentItems[:]
+        self.helpContainer = ContainerSoftBackup(self.container)
 
     def resetContainer(self):
-        # avoid costly deep copies of locations
-        self.container.itemLocations = self.baseItemLocs[:]
-        self.container.itemPool = self.baseItemPool[:]
-        self.container.unusedLocations = self.baseUnusedLocations[:]
-        self.container.currentItems = self.baseCurrentItems[:]
+        self.baseContainer.restore(self.container, resetSM=True)
 
     def resetHelpingContainer(self):
-        # avoid costly deep copies of locations
-        self.container.itemLocations = self.helpBaseItemLocs[:]
-        self.container.itemPool = self.helpBaseItemPool[:]
-        self.container.unusedLocations = self.helpBaseUnusedLocations[:]
-        self.container.currentItems = self.helpBaseCurrentItems[:]
+        self.helpContainer.restore(self.container, resetSM=False)
 
     def isBeatable(self, maxDiff=None):
         return self.miniSolver.isBeatable(self.container.itemLocations, maxDiff=maxDiff)
@@ -97,6 +86,9 @@ class FillerRandom(Filler):
                 sys.stdout.flush()
 
             if self.runtime_s > self.runtimeSteps[self.nFrontFillSteps]:
+                # store the step for debug purpose
+                sys.stdout.write('n({})'.format(self.nSteps))
+                sys.stdout.flush()
                 # help the random fill with a bit of frontfill
                 self.nFrontFillSteps += self.stepIncr
                 self.createBaseLists(updateBase=False)
@@ -135,6 +127,97 @@ class FrontFillerNoCopy(FrontFiller):
     def initContainer(self):
         self.container = self.baseContainer
 
+class FrontFillerKickstart(FrontFiller):
+    def __init__(self, startAP, graph, restrictions, emptyContainer):
+        super(FrontFillerKickstart, self).__init__(startAP, graph, restrictions, emptyContainer)
+
+    def initContainer(self):
+        self.container = self.baseContainer
+
+    # if during first step no item is a progression item, check all two items pairs instead of just one item
+    def step(self, onlyBossCheck=False):
+        if self.nSteps > 0:
+            return super(FrontFillerKickstart, self).step(onlyBossCheck)
+
+        (itemLocDict, isProg) = self.services.getPossiblePlacements(self.ap, self.container, ComebackCheckType.NoCheck)
+        if isProg == True:
+            self.log.debug("FrontFillerKickstart: found prog item")
+            return super(FrontFillerKickstart, self).step(onlyBossCheck)
+
+        self.log.debug("FrontFillerKickstart: no prog item found, kickstart")
+
+        # save container
+        saveEmptyContainer = ContainerSoftBackup(self.container)
+
+        # key is (item1, item2)
+        pairItemLocDict = {}
+
+        # keep only unique items in itemLocDict
+        uniqItemLocDict = {}
+        for item, locs in itemLocDict.items():
+            if item.item['Type'] in ['NoEnergy', 'Nothing']:
+                continue
+            if item.item['Type'] not in [it.item['Type'] for it in uniqItemLocDict.keys()]:
+                uniqItemLocDict[item] = locs
+        assert len(uniqItemLocDict) > 0
+
+        curLocsBefore = self.services.currentLocations(self.ap, self.container)
+        assert len(curLocsBefore) > 0
+
+        self.log.debug("search for progression with a second item")
+        for item1, locs1 in uniqItemLocDict.items():
+            # collect first item in first available location
+            self.cache.reset()
+            self.container.collect({'Item': item1.item, 'Location': curLocsBefore[0]})
+            saveAfterFirst = ContainerSoftBackup(self.container)
+
+            curLocsAfterFirst = self.services.currentLocations(self.ap, self.container)
+            if not curLocsAfterFirst:
+                saveEmptyContainer.restore(self.container)
+                continue
+
+            for item2, locs2 in uniqItemLocDict.items():
+                if item1.item['Type'] == item2.item['Type']:
+                    continue
+
+                if (item1, item2) in pairItemLocDict.keys() or (item2, item1) in pairItemLocDict.keys():
+                    continue
+
+                # collect second item in first available location
+                self.cache.reset()
+                self.container.collect({'Item': item2.item, 'Location': curLocsAfterFirst[0]})
+
+                curLocsAfterSecond = self.services.currentLocations(self.ap, self.container)
+                if not curLocsAfterSecond:
+                    saveAfterFirst.restore(self.container)
+                    continue
+
+                pairItemLocDict[(item1, item2)] = [curLocsBefore, curLocsAfterFirst, curLocsAfterSecond]
+                saveAfterFirst.restore(self.container)
+
+            saveEmptyContainer.restore(self.container)
+
+        # check if a pair was found
+        if len(pairItemLocDict) == 0:
+            self.log.debug("no pair was found")
+            return super(FrontFillerKickstart, self).step(onlyBossCheck)
+
+        # choose a pair of items which create progression
+        if self.log.getEffectiveLevel() == logging.DEBUG:
+            self.log.debug("pairItemLocDict:")
+            for key, locs in pairItemLocDict.items():
+                self.log.debug("{}->{}: {}".format(key[0].item['Type'], key[1].item['Type'], [l['Name'] for l in locs[2]]))
+
+        keys = list(pairItemLocDict.keys())
+        key = random.choice(keys)
+
+        # collect them
+        availableLocs = pairItemLocDict[key]
+        self.collect({'Item': key[0].item, 'Location': availableLocs[0][0]})
+        self.collect({'Item': key[1].item, 'Location': availableLocs[1][0]})
+
+        return True
+
 # actual random filler will real solver on top of mini
 class FillerRandomSpeedrun(FillerRandom):
     def __init__(self, graphSettings, graph, restrictions, container, diffSteps=0):
@@ -145,12 +228,13 @@ class FillerRandomSpeedrun(FillerRandom):
         super(FillerRandomSpeedrun, self).initFiller()
         self.restrictions.precomputeRestrictions(self.container)
 
+    # depending on the start location help the randomfill with a little bit of frontfill.
+    # also if the randomfill can't find a solution, help him too with a little bit of frontfill.
     def createBaseLists(self, updateBase=True):
         if self.nFrontFillSteps > 0:
             if updateBase == False:
                 super(FillerRandomSpeedrun, self).resetContainer()
-            self.container.sm.resetItems()
-            filler = FrontFillerNoCopy(self.startAP, self.graph, self.restrictions, self.container)
+            filler = FrontFillerKickstart(self.startAP, self.graph, self.restrictions, self.container)
             condition = filler.createStepCountCondition(self.nFrontFillSteps)
             (isStuck, itemLocations, progItems) = filler.generateItems(condition)
             # do not stop if we got stuck while trying to help the random fill
@@ -163,7 +247,8 @@ class FillerRandomSpeedrun(FillerRandom):
             super(FillerRandomSpeedrun, self).createBaseLists()
             # reset help steps to zero
             self.nFrontFillSteps = 0
-        super(FillerRandomSpeedrun, self).createHelpingBaseLists()
+        else:
+            super(FillerRandomSpeedrun, self).createHelpingBaseLists()
 
     def getLocations(self, item):
         return [loc for loc in self.container.unusedLocations if self.restrictions.canPlaceAtLocationFast(item['Type'], loc['Name'], self.container)]

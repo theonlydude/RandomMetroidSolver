@@ -68,7 +68,7 @@ function generate_params {
     let S=$RANDOM%${#AREAS[@]}
     AREA=${AREAS[$S]}
 
-    echo "-r ${ROM} --param standard_presets/${PRESET}.json --seed ${SEED} --progressionSpeed random --morphPlacement random --progressionDifficulty random --missileQty 0 --superQty 0 --powerBombQty 0 --minorQty 0 --energyQty random --majorsSplit random --suitsRestriction random --hideItems random --strictMinors random --superFun CombatRandom --superFun MovementRandom --superFun SuitsRandom --maxDifficulty random --runtime 20 --bosses random ${SUIT} ${CHARGE} ${TWEAK} ${LAYOUT} ${STARTAP} ${AREA} --jm"
+    echo "-r ${ROM} --param standard_presets/${PRESET}.json --seed ${SEED} --progressionSpeed random --progressionSpeedList slowest,slow,medium,fast,fastest,VARIAble,speedrun --morphPlacement random --progressionDifficulty random --missileQty 0 --superQty 0 --powerBombQty 0 --minorQty 0 --energyQty random --majorsSplit random --suitsRestriction random --hideItems random --strictMinors random --superFun CombatRandom --superFun MovementRandom --superFun SuitsRandom --maxDifficulty random --runtime 20 --bosses random ${SUIT} ${CHARGE} ${TWEAK} ${LAYOUT} ${STARTAP} ${AREA} --jm"
 }
 
 function computeSeed {
@@ -226,7 +226,7 @@ for AP in "Ceres" "Landing Site" "Gauntlet Top" "Green Brinstar Elevator" "Big P
 done
 echo ""
 echo "Prog speed"
-for PROGSPEED in "speedrun" "slowest" "slow" "medium" "fast" "fastest" "VARIAble" "basic"; do
+for PROGSPEED in "speedrun" "slowest" "slow" "medium" "fast" "fastest" "VARIAble"; do
     TOTAL=$(grep "${PROGSPEED}" ${CSV}  | wc -l)
     ERROR=$(grep "${PROGSPEED}" ${CSV} | grep -E '^error' | wc -l)
     PERCENT=$(echo "${ERROR}*100/${TOTAL}" | bc)

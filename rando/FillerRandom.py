@@ -139,75 +139,11 @@ class FrontFillerKickstart(FrontFiller):
         if self.nSteps > 0:
             return super(FrontFillerKickstart, self).step(onlyBossCheck)
 
-        (itemLocDict, isProg) = self.services.getPossiblePlacements(self.ap, self.container, ComebackCheckType.NoCheck)
-        if isProg == True:
-            self.log.debug("FrontFillerKickstart: found prog item")
-            return super(FrontFillerKickstart, self).step(onlyBossCheck)
-
-        self.log.debug("FrontFillerKickstart: no prog item found, kickstart")
-
-        # save container
-        saveEmptyContainer = ContainerSoftBackup(self.container)
-
-        # key is (item1, item2)
-        pairItemLocDict = {}
-
-        # keep only unique items in itemLocDict
-        uniqItemLocDict = {}
-        for item, locs in itemLocDict.items():
-            if item.item['Type'] in ['NoEnergy', 'Nothing']:
-                continue
-            if item.item['Type'] not in [it.item['Type'] for it in uniqItemLocDict.keys()]:
-                uniqItemLocDict[item] = locs
-        assert len(uniqItemLocDict) > 0
-
-        curLocsBefore = self.services.currentLocations(self.ap, self.container)
-        assert len(curLocsBefore) > 0
-
-        self.log.debug("search for progression with a second item")
-        for item1, locs1 in uniqItemLocDict.items():
-            # collect first item in first available location
-            self.cache.reset()
-            self.container.collect({'Item': item1.item, 'Location': curLocsBefore[0]})
-            saveAfterFirst = ContainerSoftBackup(self.container)
-
-            curLocsAfterFirst = self.services.currentLocations(self.ap, self.container)
-            if not curLocsAfterFirst:
-                saveEmptyContainer.restore(self.container)
-                continue
-
-            for item2, locs2 in uniqItemLocDict.items():
-                if item1.item['Type'] == item2.item['Type']:
-                    continue
-
-                if (item1, item2) in pairItemLocDict.keys() or (item2, item1) in pairItemLocDict.keys():
-                    continue
-
-                # collect second item in first available location
-                self.cache.reset()
-                self.container.collect({'Item': item2.item, 'Location': curLocsAfterFirst[0]})
-
-                curLocsAfterSecond = self.services.currentLocations(self.ap, self.container)
-                if not curLocsAfterSecond:
-                    saveAfterFirst.restore(self.container)
-                    continue
-
-                pairItemLocDict[(item1, item2)] = [curLocsBefore, curLocsAfterFirst, curLocsAfterSecond]
-                saveAfterFirst.restore(self.container)
-
-            saveEmptyContainer.restore(self.container)
-
-        # check if a pair was found
-        if len(pairItemLocDict) == 0:
-            self.log.debug("no pair was found")
+        pairItemLocDict = self.services.getStartupProgItemsPairs(self.ap, self.container)
+        if pairItemLocDict == None:
             return super(FrontFillerKickstart, self).step(onlyBossCheck)
 
         # choose a pair of items which create progression
-        if self.log.getEffectiveLevel() == logging.DEBUG:
-            self.log.debug("pairItemLocDict:")
-            for key, locs in pairItemLocDict.items():
-                self.log.debug("{}->{}: {}".format(key[0].item['Type'], key[1].item['Type'], [l['Name'] for l in locs[2]]))
-
         keys = list(pairItemLocDict.keys())
         key = random.choice(keys)
 

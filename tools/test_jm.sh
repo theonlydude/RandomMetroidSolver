@@ -227,8 +227,8 @@ done
 echo ""
 echo "Prog speed"
 for PROGSPEED in "speedrun" "slowest" "slow" "medium" "fast" "fastest" "VARIAble"; do
-    TOTAL=$(grep "${PROGSPEED}" ${CSV}  | wc -l)
-    ERROR=$(grep "${PROGSPEED}" ${CSV} | grep -E '^error' | wc -l)
+    TOTAL=$(grep ";${PROGSPEED};" ${CSV}  | wc -l)
+    ERROR=$(grep ";${PROGSPEED};" ${CSV} | grep -E '^error' | wc -l)
     PERCENT=$(echo "${ERROR}*100/${TOTAL}" | bc)
     printf "%-24s" "${PROGSPEED}"; echo "error ${ERROR}/${TOTAL} = ${PERCENT}%"
 done
@@ -249,7 +249,7 @@ for MORPH in "early" "normal" "late"; do
     printf "%-24s" "${MORPH}"; echo "error ${ERROR}/${TOTAL} = ${PERCENT}%"
 done
 
-echo "total: $(wc -l logs/test_jm.csv)"
+echo "total: $(wc -l ${CSV})"
 
 echo "errors:"
 grep -E "NOK|mismatch|Can't solve" ${CSV}

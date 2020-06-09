@@ -2,7 +2,7 @@
 import log, copy, random, sys, logging
 from enum import Enum, unique
 from parameters import infinity
-from rando.ItemLocContainer import getLocListStr, getItemListStr
+from rando.ItemLocContainer import getLocListStr, getItemListStr, ContainerSoftBackup
 from helpers import Bosses
 
 # hackish object to put items in dictionaries
@@ -364,3 +364,74 @@ class RandoServices(object):
     def can100percent(self, ap, container):
         curLocs = self.currentLocations(ap, container, post=True)
         return len(curLocs) == len(container.unusedLocations)
+
+    def getStartupProgItemsPairs(self, ap, container):
+        (itemLocDict, isProg) = self.getPossiblePlacements(ap, container, ComebackCheckType.NoCheck)
+        if isProg == True:
+            self.log.debug("getStartupProgItemsPairs: found prog item")
+            return None
+
+        self.log.debug("getStartupProgItemsPairs: no prog item found, kickstart")
+
+        # save container
+        saveEmptyContainer = ContainerSoftBackup(container)
+
+        # key is (item1, item2)
+        pairItemLocDict = {}
+
+        # keep only unique items in itemLocDict
+        uniqItemLocDict = {}
+        for item, locs in itemLocDict.items():
+            if item.item['Type'] in ['NoEnergy', 'Nothing']:
+                continue
+            if item.item['Type'] not in [it.item['Type'] for it in uniqItemLocDict.keys()]:
+                uniqItemLocDict[item] = locs
+        assert len(uniqItemLocDict) > 0
+
+        curLocsBefore = self.currentLocations(ap, container)
+        assert len(curLocsBefore) > 0
+
+        self.log.debug("search for progression with a second item")
+        for item1, locs1 in uniqItemLocDict.items():
+            # collect first item in first available location
+            self.cache.reset()
+            container.collect({'Item': item1.item, 'Location': curLocsBefore[0]})
+            saveAfterFirst = ContainerSoftBackup(container)
+
+            curLocsAfterFirst = self.currentLocations(ap, container)
+            if not curLocsAfterFirst:
+                saveEmptyContainer.restore(container)
+                continue
+
+            for item2, locs2 in uniqItemLocDict.items():
+                if item1.item['Type'] == item2.item['Type']:
+                    continue
+
+                if (item1, item2) in pairItemLocDict.keys() or (item2, item1) in pairItemLocDict.keys():
+                    continue
+
+                # collect second item in first available location
+                self.cache.reset()
+                container.collect({'Item': item2.item, 'Location': curLocsAfterFirst[0]})
+
+                curLocsAfterSecond = self.currentLocations(ap, container)
+                if not curLocsAfterSecond:
+                    saveAfterFirst.restore(container)
+                    continue
+
+                pairItemLocDict[(item1, item2)] = [curLocsBefore, curLocsAfterFirst, curLocsAfterSecond]
+                saveAfterFirst.restore(container)
+
+            saveEmptyContainer.restore(container)
+
+        # check if a pair was found
+        if len(pairItemLocDict) == 0:
+            self.log.debug("no pair was found")
+            return None
+        else:
+            if self.log.getEffectiveLevel() == logging.DEBUG:
+                self.log.debug("pairItemLocDict:")
+                for key, locs in pairItemLocDict.items():
+                    self.log.debug("{}->{}: {}".format(key[0].item['Type'], key[1].item['Type'], [l['Name'] for l in locs[2]]))
+
+            return pairItemLocDict

@@ -1148,7 +1148,7 @@ class InteractiveSolver(CommonSolver):
 
     def savePlando(self, lock, escapeTimer):
         # store filled locations addresses in the ROM for next creating session
-        from itemrandomizerweb.Items import ItemManager
+        from rando.Items import ItemManager
         locsItems = {}
         itemLocs = []
         for loc in self.visitedLocations:

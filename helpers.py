@@ -314,11 +314,13 @@ class Helpers(object):
     def canInflictEnoughDamages(self, bossEnergy, doubleSuper=False, charge=True, power=False, givesDrops=True, ignoreMissiles=False, ignoreSupers=False):
         # TODO: handle special beam attacks ? (http://deanyd.net/sm/index.php?title=Charge_Beam_Combos)
         sm = self.smbm
+        items = []
 
         # http://deanyd.net/sm/index.php?title=Damage
         standardDamage = 0
         if sm.canFireChargedShots().bool == True and charge == True:
             standardDamage = self.getBeamDamage()
+            items.append('Charge')
         # charge triples the damage
         chargeDamage = standardDamage
         if sm.haveItem('Charge').bool == True:
@@ -330,11 +332,15 @@ class Helpers(object):
             missilesDamage = 0
         else:
             missilesDamage = missilesAmount * 100
+            if missilesAmount > 0:
+                items.append('Missile')
         supersAmount = sm.itemCount('Super') * 5
         if ignoreSupers == True:
             oneSuper = 0
         else:
             oneSuper = 300.0
+            if supersAmount > 0:
+                items.append('Super')
         if doubleSuper == True:
             oneSuper *= 2
         supersDamage = supersAmount * oneSuper
@@ -343,10 +349,11 @@ class Helpers(object):
         if power == True and sm.haveItem('PowerBomb') == True:
             powerAmount = sm.itemCount('PowerBomb') * 5
             powerDamage = powerAmount * 200
+            items.append('PowerBomb')
 
         canBeatBoss = chargeDamage > 0 or givesDrops or (missilesDamage + supersDamage + powerDamage) >= bossEnergy
         if not canBeatBoss:
-            return (0, 0)
+            return (0, 0, [])
 
         ammoMargin = (missilesDamage + supersDamage + powerDamage) / bossEnergy
         if chargeDamage > 0:
@@ -385,7 +392,7 @@ class Helpers(object):
             secs += bossEnergy * Settings.algoSettings['missileDropsPerMinute'] * 100 / 60
             # print('ammoMargin = ' + str(ammoMargin) + ', secs = ' + str(secs))
 
-        return (ammoMargin, secs)
+        return (ammoMargin, secs, items)
 
     # return diff score, or -1 if below minimum energy in diffTbl
     def computeBossDifficulty(self, ammoMargin, secs, diffTbl, energyDiff=0):
@@ -400,8 +407,14 @@ class Helpers(object):
         else:
             duration = secs / rate
         # print('rate=' + str(rate) + ', duration=' + str(duration))
-        suitsCoeff = sm.getDmgReduction(envDmg=False)[0] / 2.0
-        energy = suitsCoeff * (1 + self.energyReserveCount() + energyDiff)
+        (suitsCoeff, items) = sm.getDmgReduction(envDmg=False)
+        suitsCoeff /= 2.0
+        energyCount = self.energyReserveCount()
+        energy = suitsCoeff * (1 + energyCount + energyDiff)
+
+        # add all energy in used items
+        items += sm.energyReserveCountOk(energyCount).items
+
         energyDict = None
         if 'Energy' in diffTbl:
             energyDict = diffTbl['Energy']
@@ -413,7 +426,7 @@ class Helpers(object):
             if len(keyz) > 0:
                 current = keyz[0]
                 if energy < current:
-                    return -1
+                    return (-1, [])
                 sup = None
                 difficulty = energyDict[current]
                 for k in keyz:
@@ -436,64 +449,64 @@ class Helpers(object):
         if diffAdjust > 1:
             difficulty *= diffAdjust
 
-        return round(difficulty, 2)
+        return (round(difficulty, 2), items)
 
     @Cache.decorator
     def enoughStuffCroc(self):
         # say croc has ~5000 energy, and ignore its useless drops
-        (ammoMargin, secs) = self.canInflictEnoughDamages(5000, givesDrops=False)
+        (ammoMargin, secs, items) = self.canInflictEnoughDamages(5000, givesDrops=False)
         if ammoMargin == 0:
             return SMBool(False)
         else:
-            return SMBool(True, easy)
+            return SMBool(True, easy, items=items)
 
     @Cache.decorator
     def enoughStuffBotwoon(self):
         # say botwoon has 4000 energy : it is actually 3000 but account for missed shots
         # 4000 to allow for low% botwoon without charge beam (10 - 10 | missiles - supers)
         # there is a setup to "never" miss a shot by only shooting him when he exits through the top left hole
-        (ammoMargin, secs) = self.canInflictEnoughDamages(4000, givesDrops=False)
+        (ammoMargin, secs, items) = self.canInflictEnoughDamages(4000, givesDrops=False)
         if ammoMargin == 0:
             return SMBool(False)
         else:
-            return SMBool(True, easy)
+            return SMBool(True, easy, items=items)
 
     @Cache.decorator
     def enoughStuffGT(self):
-        (ammoMargin, secs) = self.canInflictEnoughDamages(3000, ignoreMissiles=True) # requires 10 supers or charge for the fight
+        (ammoMargin, secs, items) = self.canInflictEnoughDamages(3000, ignoreMissiles=True) # requires 10 supers or charge for the fight
         if ammoMargin == 0:
             return SMBool(False)
         else:
             # TODO add energy check
-            return SMBool(True, easy)
+            return SMBool(True, easy, items=items)
 
     @Cache.decorator
     def enoughStuffsRidley(self):
-        (ammoMargin, secs) = self.canInflictEnoughDamages(18000, doubleSuper=True, power=True, givesDrops=False)
+        (ammoMargin, secs, ammoItems) = self.canInflictEnoughDamages(18000, doubleSuper=True, power=True, givesDrops=False)
         if ammoMargin == 0:
             return SMBool(False)
 
         # print('RIDLEY', ammoMargin, secs)
-        diff = self.computeBossDifficulty(ammoMargin, secs,
-                                          Settings.bossesDifficulty['Ridley'])
+        (diff, defenseItems) = self.computeBossDifficulty(ammoMargin, secs,
+                                                          Settings.bossesDifficulty['Ridley'])
         if diff < 0:
             return SMBool(False)
         else:
-            return SMBool(True, diff)
+            return SMBool(True, diff, items=ammoItems+defenseItems)
 
     @Cache.decorator
     def enoughStuffsKraid(self):
         sm = self.smbm
-        (ammoMargin, secs) = self.canInflictEnoughDamages(1000)
+        (ammoMargin, secs, ammoItems) = self.canInflictEnoughDamages(1000)
         if ammoMargin == 0:
             return SMBool(False)
         #print('KRAID True ', ammoMargin, secs)
-        diff = self.computeBossDifficulty(ammoMargin, secs,
-                                          Settings.bossesDifficulty['Kraid'])
+        (diff, defenseItems) = self.computeBossDifficulty(ammoMargin, secs,
+                                                          Settings.bossesDifficulty['Kraid'])
         if diff < 0:
             return SMBool(False)
 
-        return SMBool(True, diff)
+        return SMBool(True, diff, items=ammoItems+defenseItems)
 
     def adjustHealthDropDiff(self, difficulty):
         (dmgRed, items) = self.getDmgReduction(envDmg=False)
@@ -508,17 +521,19 @@ class Helpers(object):
     @Cache.decorator
     def enoughStuffsDraygon(self):
         sm = self.smbm
-        (ammoMargin, secs) = self.canInflictEnoughDamages(6000)
+        (ammoMargin, secs, ammoItems) = self.canInflictEnoughDamages(6000)
         # print('DRAY', ammoMargin, secs)
         if ammoMargin > 0:
-            diff = self.computeBossDifficulty(ammoMargin, secs,
-                                              Settings.bossesDifficulty['Draygon'])
+            (diff, defenseItems) = self.computeBossDifficulty(ammoMargin, secs,
+                                                              Settings.bossesDifficulty['Draygon'])
             if diff < 0:
                 fight = SMBool(False)
             else:
-                fight = SMBool(True, diff)
+                fight = SMBool(True, diff, items=ammoItems+defenseItems)
             if sm.haveItem('Gravity') == False:
                 fight.difficulty *= Settings.algoSettings['draygonNoGravityMalus']
+            else:
+                fight.items.append('Gravity')
             fight.difficulty = self.adjustHealthDropDiff(fight.difficulty)
         else:
             fight = SMBool(False)
@@ -536,24 +551,26 @@ class Helpers(object):
     @Cache.decorator
     def enoughStuffsPhantoon(self):
         sm = self.smbm
-        (ammoMargin, secs) = self.canInflictEnoughDamages(2500, doubleSuper=True)
+        (ammoMargin, secs, ammoItems) = self.canInflictEnoughDamages(2500, doubleSuper=True)
         if ammoMargin == 0:
             return SMBool(False)
         # print('PHANTOON', ammoMargin, secs)
-        difficulty = self.computeBossDifficulty(ammoMargin, secs,
-                                                Settings.bossesDifficulty['Phantoon'])
+        (difficulty, defenseItems) = self.computeBossDifficulty(ammoMargin, secs,
+                                                                Settings.bossesDifficulty['Phantoon'])
         if difficulty < 0:
             return SMBool(False)
         hasCharge = sm.canFireChargedShots()
         hasScrew = sm.haveItem('ScrewAttack')
         if hasScrew:
             difficulty /= Settings.algoSettings['phantoonFlamesAvoidBonusScrew']
+            defenseItems += hasScrew.items
         elif hasCharge:
             difficulty /= Settings.algoSettings['phantoonFlamesAvoidBonusCharge']
+            defenseItems += hasCharge.items
         elif not hasCharge and sm.itemCount('Missile') <= 2: # few missiles is harder
             difficulty *= Settings.algoSettings['phantoonLowMissileMalus']
         difficulty = self.adjustHealthDropDiff(difficulty)
-        fight = SMBool(True, difficulty)
+        fight = SMBool(True, difficulty, items=ammoItems+defenseItems)
 
         return sm.wor(fight,
                       sm.wand(sm.knowsMicrowavePhantoon(),
@@ -580,7 +597,7 @@ class Helpers(object):
     def enoughStuffsMotherbrain(self):
         sm = self.smbm
         # MB1 can't be hit by charge beam
-        (ammoMargin, secs) = self.canInflictEnoughDamages(3000, charge=False, givesDrops=False)
+        (ammoMargin, secs, _) = self.canInflictEnoughDamages(3000, charge=False, givesDrops=False)
         if ammoMargin == 0:
             return SMBool(False)
         # requires 10-10 to break the glass
@@ -588,7 +605,7 @@ class Helpers(object):
             return SMBool(False)
         # we actually don't give a shit about MB1 difficulty,
         # since we embark its health in the following calc
-        (ammoMargin, secs) = self.canInflictEnoughDamages(18000 + 3000, givesDrops=False)
+        (ammoMargin, secs, ammoItems) = self.canInflictEnoughDamages(18000 + 3000, givesDrops=False)
         if ammoMargin == 0:
             return SMBool(False)
         (possible, energyDiff) = self.mbEtankCheck()
@@ -596,10 +613,10 @@ class Helpers(object):
             return SMBool(False)
         # print('MB2', ammoMargin, secs)
         #print("ammoMargin: {}, secs: {}, settings: {}, energyDiff: {}".format(ammoMargin, secs, Settings.bossesDifficulty['MotherBrain'], energyDiff))
-        diff = self.computeBossDifficulty(ammoMargin, secs, Settings.bossesDifficulty['MotherBrain'], energyDiff)
+        (diff, defenseItems) = self.computeBossDifficulty(ammoMargin, secs, Settings.bossesDifficulty['MotherBrain'], energyDiff)
         if diff < 0:
             return SMBool(False)
-        return SMBool(True, diff)
+        return SMBool(True, diff, items=ammoItems+defenseItems)
 
     @Cache.decorator
     def canPassMetroids(self):

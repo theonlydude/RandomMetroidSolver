@@ -151,24 +151,8 @@ class Helpers(object):
     @Cache.decorator
     def canFly(self):
         sm = self.smbm
-        if sm.haveItem('SpaceJump') == True:
-            return SMBool(True, easy, items=['SpaceJump'])
-        elif sm.canInfiniteBombJump() == True:
-            return sm.knowsInfiniteBombJump()
-        else:
-            return SMBool(False)
-
-    @Cache.decorator
-    def canFlyDiagonally(self):
-        sm = self.smbm
-        if sm.haveItem('SpaceJump') == True:
-            return SMBool(True, easy, items=['SpaceJump'])
-        elif sm.wand(sm.haveItem('Morph'),
-                     sm.haveItem('Bomb'),
-                     sm.knowsDiagonalBombJump()) == True:
-            return sm.knowsDiagonalBombJump()
-        else:
-            return SMBool(False)
+        return sm.wor(sm.haveItem('SpaceJump'),
+                      sm.canInfiniteBombJump())
 
     @Cache.decorator
     def canSimpleShortCharge(self):

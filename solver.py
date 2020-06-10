@@ -13,7 +13,7 @@ from helpers import Pickup, Bosses
 from rom import RomLoader, RomPatcher
 from rom_patches import RomPatches
 from graph_locations import locations as graphLocations
-from graph import AccessGraph
+from graph import AccessGraphSolver as AccessGraph
 from graph_access import vanillaTransitions, vanillaBossesTransitions, vanillaEscapeTransitions, accessPoints, GraphUtils, getAccessPoint
 from utils import PresetLoader, removeChars
 import log
@@ -1856,14 +1856,34 @@ class OutWeb(Out):
 
         out = []
         for loc in locations:
-            self.fixEnergy(loc['difficulty'].items)
+            if 'locDifficulty' in loc:
+                # draygon fight is in it's path
+                if loc['Name'] == 'Draygon':
+                    loc['locDifficulty'] = loc['pathDifficulty']
 
-            out.append([(loc['Name'], loc['Room']), loc['Area'], loc['SolveArea'], loc['itemName'],
-                        '{0:.2f}'.format(loc['difficulty'].difficulty),
-                        sorted(loc['difficulty'].knows),
-                        sorted(list(set(loc['difficulty'].items))),
-                        [ap.Name for ap in loc['path']] if 'path' in loc else None,
-                        loc['Class']])
+                self.fixEnergy(loc['locDifficulty'].items)
+                self.fixEnergy(loc['pathDifficulty'].items)
+
+                out.append([(loc['Name'], loc['Room']), loc['Area'], loc['SolveArea'], loc['itemName'],
+                            '{0:.2f}'.format(loc['locDifficulty'].difficulty),
+                            sorted(loc['locDifficulty'].knows),
+                            sorted(list(set(loc['locDifficulty'].items))),
+                            '{0:.2f}'.format(loc['pathDifficulty'].difficulty),
+                            sorted(loc['pathDifficulty'].knows),
+                            sorted(list(set(loc['pathDifficulty'].items))),
+                            [ap.Name for ap in loc['path']] if 'path' in loc else None,
+                            loc['Class']])
+
+            else:
+                self.fixEnergy(loc['difficulty'].items)
+
+                out.append([(loc['Name'], loc['Room']), loc['Area'], loc['SolveArea'], loc['itemName'],
+                            '{0:.2f}'.format(loc['difficulty'].difficulty),
+                            sorted(loc['difficulty'].knows),
+                            sorted(list(set(loc['difficulty'].items))),
+                            '0.00', [], [],
+                            [ap.Name for ap in loc['path']] if 'path' in loc else None,
+                            loc['Class']])
 
         return out
 
@@ -1923,20 +1943,44 @@ class OutConsole(Out):
                 lastAP = path[-1]
                 if not (len(path) == 1 and path[0] == lastAP):
                     path = " -> ".join(path)
-                    print('{:>50}: {}'.format('Path', path))
+                    pathDiff = loc['pathDifficulty']
+                    print('{}: {} {} {} {}'.format('Path', path, round(float(pathDiff.difficulty), 2), sorted(pathDiff.knows), sorted(list(set(pathDiff.items)))))
             line = '{} {:>48}: {:>12} {:>34} {:>8} {:>16} {:>14} {} {}'
 
-            self.fixEnergy(loc['difficulty'].items)
+            if 'locDifficulty' in loc:
+                self.fixEnergy(loc['locDifficulty'].items)
 
-            print(line.format('Z' if 'Chozo' in loc['Class'] else ' ',
-                              loc['Name'],
-                              loc['Area'],
-                              loc['SolveArea'],
-                              loc['distance'] if 'distance' in loc else 'nc',
-                              loc['itemName'],
-                              round(float(loc['difficulty'].difficulty), 2) if 'difficulty' in loc else 'nc',
-                              sorted(loc['difficulty'].knows) if 'difficulty' in loc else 'nc',
-                              sorted(list(set(loc['difficulty'].items))) if 'difficulty' in loc else 'nc'))
+                print(line.format('Z' if 'Chozo' in loc['Class'] else ' ',
+                                  loc['Name'],
+                                  loc['Area'],
+                                  loc['SolveArea'],
+                                  loc['distance'] if 'distance' in loc else 'nc',
+                                  loc['itemName'],
+                                  round(float(loc['locDifficulty'].difficulty), 2) if 'locDifficulty' in loc else 'nc',
+                                  sorted(loc['locDifficulty'].knows) if 'locDifficulty' in loc else 'nc',
+                                  sorted(list(set(loc['locDifficulty'].items))) if 'locDifficulty' in loc else 'nc'))
+            elif 'difficulty' in loc:
+                self.fixEnergy(loc['difficulty'].items)
+
+                print(line.format('Z' if 'Chozo' in loc['Class'] else ' ',
+                                  loc['Name'],
+                                  loc['Area'],
+                                  loc['SolveArea'],
+                                  loc['distance'] if 'distance' in loc else 'nc',
+                                  loc['itemName'],
+                                  round(float(loc['difficulty'].difficulty), 2),
+                                  sorted(loc['difficulty'].knows),
+                                  sorted(list(set(loc['difficulty'].items)))))
+            else:
+                print(line.format('Z' if 'Chozo' in loc['Class'] else ' ',
+                                  loc['Name'],
+                                  loc['Area'],
+                                  loc['SolveArea'],
+                                  loc['distance'] if 'distance' in loc else 'nc',
+                                  loc['itemName'],
+                                  'nc',
+                                  'nc',
+                                  'nc'))
 
     def displayOutput(self):
         s = self.solver

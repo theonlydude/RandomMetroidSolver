@@ -554,11 +554,12 @@ def genPathTable(locations, displayAPs=True):
   </tr>
 """
 
-    for location, area, subarea, item, diff, techniques, items, path, _class in locations:
+    currentSuit = 'Power'
+    for location, area, subarea, item, locDiff, locTechniques, locItems, pathDiff, pathTechniques, pathItems, path, _class in locations:
         if path is not None:
             lastAP = path[-1]
             if displayAPs == True and not (len(path) == 1 and path[0] == lastAP):
-                pathTable += """<tr class="grey"><td>Path</td><td colspan="6">{}</td></tr>\n""".format(" -&gt; ".join(path))
+                pathTable += """<tr class="grey"><td colspan="3">{}</td><td>{}</td><td>{}</td><td>{}</td><td>{}</td></tr>\n""".format(" -&gt; ".join(path), """<img alt="samus" class="imageItem" src="/solver/static/images/samus_run_{}.gif" title="samus" />""".format(currentSuit), pathDiff, getTechniques(pathTechniques), getItems(pathItems))
 
         (name, room) = location
 
@@ -575,8 +576,13 @@ def genPathTable(locations, displayAPs=True):
   <td>{}</td>
 </tr>
 """.format(item, getRoomLink(name, room), getAreaLink(area), getSubArea(subarea),
-           getBossImg(name) if "Boss" in _class else getItemImg(item), diff,
-           getTechniques(techniques), getItems(items))
+           getBossImg(name) if "Boss" in _class else getItemImg(item), locDiff,
+           getTechniques(locTechniques), getItems(locItems))
+
+            if item == 'Varia' and currentSuit == 'Power':
+                currentSuit = 'Varia'
+            elif item == 'Gravity':
+                currentSuit = 'Gravity'
         else:
             pathTable += """
 <tr class="{}">

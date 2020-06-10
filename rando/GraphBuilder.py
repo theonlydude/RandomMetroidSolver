@@ -2,7 +2,7 @@
 import log,random
 
 from graph_access import GraphUtils, vanillaTransitions, vanillaBossesTransitions, accessPoints, escapeSource, escapeTargets
-from graph import AccessGraph
+from graph import AccessGraphRando as AccessGraph
 
 # creates graph and handles randomized escape
 class GraphBuilder(object):

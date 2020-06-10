@@ -263,28 +263,34 @@ class AccessGraph(object):
                 #    print("{} root: {} ap: {}".format(loc['Name'], rootNode, apName))
                 if tdiff.bool == True and tdiff.difficulty <= maxDiff:
                     diff = smbm.eval(loc['Available'])
-                    path = availAPPaths[apName]["path"]
-                    #if loc['Name'] == "Kraid":
-                    #    print("{} path: {}".format(loc['Name'], [a.Name for a in path]))
-                    pdiff = availAPPaths[apName]["pdiff"]
-                    locDiff = SMBool(diff.bool,
-                                     difficulty=max(tdiff.difficulty, diff.difficulty, pdiff.difficulty),
-                                     knows=list(set(tdiff.knows + diff.knows + pdiff.knows)),
-                                     items=tdiff.items + diff.items + pdiff.items)
-                    if locDiff.bool == True and locDiff.difficulty <= maxDiff:
-                        loc['distance'] = ap.distance + 1
-                        loc['accessPoint'] = apName
-                        loc['difficulty'] = locDiff
-                        loc['path'] = path
-                        availLocs.append(loc)
+                    if diff.bool == True:
+                        path = availAPPaths[apName]["path"]
                         #if loc['Name'] == "Kraid":
-                        #    print("{} diff: {} tdiff: {} pdiff: {}".format(loc['Name'], diff, tdiff, pdiff))
-                        break
+                        #    print("{} path: {}".format(loc['Name'], [a.Name for a in path]))
+                        pdiff = availAPPaths[apName]["pdiff"]
+                        (allDiff, locDiff) = self.computeLocDiff(tdiff, diff, pdiff)
+                        if allDiff.bool == True and allDiff.difficulty <= maxDiff:
+                            loc['distance'] = ap.distance + 1
+                            loc['accessPoint'] = apName
+                            loc['difficulty'] = allDiff
+                            loc['path'] = path
+                            # used only by solver
+                            loc['pathDifficulty'] = pdiff
+                            loc['locDifficulty'] = locDiff
+                            availLocs.append(loc)
+                            #if loc['Name'] == "Kraid":
+                            #    print("{} diff: {} tdiff: {} pdiff: {}".format(loc['Name'], diff, tdiff, pdiff))
+                            break
+                        else:
+                            loc['distance'] = 1000 + tdiff.difficulty
+                            loc['difficulty'] = SMBool(False)
+                            #if loc['Name'] == "Kraid":
+                            #    print("loc: {} allDiff is false".format(loc["Name"]))
                     else:
                         loc['distance'] = 1000 + tdiff.difficulty
                         loc['difficulty'] = SMBool(False)
                         #if loc['Name'] == "Kraid":
-                        #    print("loc: {} locDiff is false".format(loc["Name"]))
+                        #    print("loc: {} allDiff is false".format(loc["Name"]))
                 else:
                     loc['distance'] = 10000 + tdiff.difficulty
                     loc['difficulty'] = SMBool(False)
@@ -336,3 +342,32 @@ class AccessGraph(object):
         availAccessPoints = self.getAvailableAccessPoints(rootAp, None, 0)
         graphAreas = {ap.GraphArea for ap in availAccessPoints}
         return [loc for loc in locations if loc['GraphArea'] in graphAreas]
+
+class AccessGraphSolver(AccessGraph):
+    def computeLocDiff(self, tdiff, diff, pdiff):
+        # tdiff: difficulty from the location's access point to the location's room
+        # diff: difficulty to reach the item in the location's room
+        # pdiff: difficulty of the path from the current access point to the location's access point
+        # in output we need the global difficulty but we also need to separate pdiff and (tdiff + diff)
+
+        # loc diff: tdiff + diff
+        locDiff = SMBool(diff.bool,
+                         difficulty=max(tdiff.difficulty, diff.difficulty),
+                         knows=list(set(tdiff.knows + diff.knows)),
+                         items=tdiff.items + diff.items)
+
+        # total diff: loc diff + pdiff
+        allDiff = SMBool(diff.bool,
+                         difficulty=max(locDiff.difficulty, pdiff.difficulty),
+                         knows=list(set(locDiff.knows + pdiff.knows)),
+                         items=locDiff.items + pdiff.items)
+
+        return (allDiff, locDiff)
+
+class AccessGraphRando(AccessGraph):
+    def computeLocDiff(self, tdiff, diff, pdiff):
+        allDiff = SMBool(diff.bool,
+                         difficulty=max(tdiff.difficulty, diff.difficulty, pdiff.difficulty),
+                         knows=list(set(tdiff.knows + diff.knows + pdiff.knows)),
+                         items=tdiff.items + diff.items + pdiff.items)
+        return (allDiff, None)

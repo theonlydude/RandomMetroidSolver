@@ -159,7 +159,7 @@ class SMBoolManager(object):
 
     # negates boolean part of the SMBool
     def wnot(self, a):
-        return SMBool(not a.bool, a.difficulty, a.knows, a.items)
+        return SMBool(not a.bool, a.difficulty)
 
     def itemCountOk(self, item, count, difficulty=0):
         if self.itemCount(item) >= count:

@@ -2124,16 +2124,23 @@ class WS_item_add(WS):
         if itemName not in validItemsList:
             raiseHttp(400, "Unknown item name", True)
 
+
     def action(self):
         item = request.vars.itemName
+        locName = request.vars.locName
 
         # items used only in the randomizer that we get in vcr mode
         if item in ["NoEnergy", None]:
             item = 'Nothing'
 
+        # in seedless mode we have to had boss items instead of nothing
+        if request.vars.mode == "seedless":
+            if locName in ['Kraid', 'Ridley', 'Phantoon', 'Draygon', 'MotherBrain']:
+                item = locName
+
         params = {"item": item, "hide": request.vars.hide == "true"}
-        if request.vars.locName != None:
-            params['loc'] = request.vars.locName
+        if locName != None:
+            params['loc'] = locName
         return self.callSolverAction("item", "add", params)
 
 class WS_item_replace(WS_item_add):

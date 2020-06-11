@@ -355,6 +355,7 @@ function ajaxOkGet(jsonData, status, dummy, chained=false) {
       locsInfo[locName]["difficulty"] = locData["difficulty"];
       locsInfo[locName]["canHidden"] = locData["canHidden"];
       locsInfo[locName]["visibility"] = locData["visibility"];
+      locsInfo[locName]["accessPoint"] = locData["accessPoint"];
 
       $("#"+locName).attr("class", "baseLoc marker_available_"+locData["difficulty"]);
       var tooltip = getTooltip(locName, locData, "?", false);
@@ -379,6 +380,7 @@ function ajaxOkGet(jsonData, status, dummy, chained=false) {
       locsInfo[locName]["canHidden"] = locData["canHidden"];
       locsInfo[locName]["visibility"] = locData["visibility"];
       locsInfo[locName]["item"] = locData["item"];
+      locsInfo[locName]["accessPoint"] = locData["accessPoint"];
 
       // keep current loc zoomed
       var base = "baseLoc";
@@ -816,7 +818,31 @@ window.onload = function(){
 
   $("#placeItemButton").keypress(onEnterKey);
 
+  addTooltipCallback();
+
   loaded = true;
+}
+
+function addTooltipCallback() {
+    // display the next ap while the tooltip is displayed
+    $("[data-toggle=tooltip]").on('show.bs.tooltip', function (callbackData) {
+        var locName = callbackData.target.id;
+        if(locName in locsInfo) {
+            var locData = locsInfo[locName];
+
+            // display next ap
+            if("accessPoint" in locData) {
+                var nextAP = locData["accessPoint"];
+                $("#nextAP").attr("class", "nextAP "+nextAP+"Gps");
+                document.getElementById("nextAP").style.display = "block";
+                $("#nextgps"+'[data-toggle="tooltip"]').attr("title", nextAP).tooltip('fixTitle');
+            }
+        }
+    });
+    $("[data-toggle=tooltip]").on('hide.bs.tooltip', function (a) {
+        // hide next ap
+        document.getElementById("nextAP").style.display = "none";
+    });
 }
 
 function onEnterKey(event) {
@@ -1137,19 +1163,35 @@ function clearLocs(isPlando) {
 }
 
 function getTooltip(locName, locData, item, visited) {
-  var tooltip = "<center>"+locData["name"]+"</center>";
+    var tooltip = "<center>"+locData["name"]+"</center>";
 
-  if("boss" in locsInfo[locName]) {
-    tooltip += "Boss: "+locsInfo[locName]["boss"]+"<br>";
-  }
+    if("boss" in locsInfo[locName]) {
+        tooltip += "<center>Boss: "+locsInfo[locName]["boss"]+"</center>";
+        if(visited == true) {
+            return tooltip;
+        }
+    }
 
-  if(visited == true) {
-    return tooltip+"Item: "+item;
-
-  } else {
-    return tooltip+"Techniques: "+(locData["knows"].length > 0 ? locData["knows"] : "None")+"<br>Items: "+(locData["items"].length > 0 ? locData["items"] : "None")+("path" in locData ? "<br>Path: "+locData["path"] : "")+("comeBack" in locData && locData["comeBack"] == false ? "<br>WARNING: Can't come back" : "")+("difficulty" in locData ? "<br>Difficulty: "+locData["difficulty"] : "")+("distance" in locData ? "<br>Distance: "+locData["distance"] : "");
-
-  }
+    if(visited == true) {
+        return tooltip+"<center>Item: "+item+"</center>";
+    } else {
+        // sequence break
+        if(locData["knows"].length > 0 && locData["knows"][0] == "Sequence Break") {
+            return tooltip+"<center>Sequence Break</center>"
+                // debug data
+                +("path" in locData ? "<br>Path: "+locData["path"] : "")
+                +("distance" in locData ? "<br>Distance: "+locData["distance"] : "");
+        } else {
+            return tooltip
+                   +"Techniques: "+(locData["knows"].length > 0 ? locData["knows"] : "None")
+                   +"<br>Items: "+(locData["items"].length > 0 ? locData["items"] : "None")
+                   +("comeBack" in locData && locData["comeBack"] == false ? "<br>WARNING: Can't come back" : "")
+                   +("difficulty" in locData ? "<br>Difficulty: "+locData["difficulty"] : "")
+                   // debug data
+                   +("path" in locData ? "<br>Path: "+locData["path"] : "")
+                   +("distance" in locData ? "<br>Distance: "+locData["distance"] : "");
+        }
+    }
 }
 
 var itemCount = {

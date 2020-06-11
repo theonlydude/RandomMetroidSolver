@@ -209,8 +209,18 @@ class SolverState(object):
                                 "name": loc["Name"],
                                 "canHidden": loc["CanHidden"],
                                 "visibility": loc["Visibility"]}
+
+#                if "locDifficulty" in loc:
+#                    lDiff = loc["locDifficulty"]
+#                    ret[locName]["locDifficulty"] = [self.diff4isolver(lDiff.difficulty), self.knows2isolver(lDiff.knows), list(set(lDiff.items))]
+#                if "pathDifficulty" in loc:
+#                    pDiff = loc["pathDifficulty"]
+#                    ret[locName]["pathDifficulty"] = [self.diff4isolver(pDiff.difficulty), self.knows2isolver(pDiff.knows), list(set(pDiff.items))]
+
                 if "comeBack" in loc:
                     ret[locName]["comeBack"] = loc["comeBack"]
+                if "accessPoint" in loc:
+                    ret[locName]["accessPoint"] = self.transition2isolver(loc["accessPoint"])
                 # for debug purpose
                 if self.debug == True:
                     if "path" in loc:

@@ -620,3 +620,5 @@ mkdir -p ~/web2py/applications/solver/static/images/sprite_sheets/
 [ -L ~/web2py/applications/solver/static/images/samus_run_Power.gif ] || ln -s ~/RandomMetroidSolver/web/static/samus_sprites/samus_run_Power.gif ~/web2py/applications/solver/static/images/samus_run_Power.gif
 [ -L ~/web2py/applications/solver/static/images/samus_run_Varia.gif ] || ln -s ~/RandomMetroidSolver/web/static/samus_sprites/samus_run_Varia.gif ~/web2py/applications/solver/static/images/samus_run_Varia.gif
 [ -L ~/web2py/applications/solver/static/images/samus_run_Gravity.gif ] || ln -s ~/RandomMetroidSolver/web/static/samus_sprites/samus_run_Gravity.gif ~/web2py/applications/solver/static/images/samus_run_Gravity.gif
+
+[ -L ~/web2py/applications/solver/static/images/nextgps.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/nextgps.png ~/web2py/applications/solver/static/images/nextgps.png

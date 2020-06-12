@@ -43,6 +43,22 @@ text2diff = {
     'infinity': infinity
 }
 
+def diff4solver(difficulty):
+    if difficulty == -1:
+        return "break"
+    elif difficulty < medium:
+        return "easy"
+    elif difficulty < hard:
+        return "medium"
+    elif difficulty < harder:
+        return "hard"
+    elif difficulty < hardcore:
+        return "harder"
+    elif difficulty < mania:
+        return "hardcore"
+    else:
+        return "mania"
+
 appDir = os.path.expanduser(os.path.join("~/RandomMetroidSolver"))
 
 def isKnows(knows):

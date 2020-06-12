@@ -10,7 +10,7 @@ import datetime, os, hashlib, json, subprocess, tempfile, glob, random, re, math
 from datetime import datetime
 
 # to solve the rom
-from parameters import easy, medium, hard, harder, hardcore, mania
+from parameters import easy, medium, hard, harder, hardcore, mania, diff4solver
 from parameters import Knows, Settings, Controller, isKnows, isButton
 from solver import Conf
 from parameters import diff2text, text2diff
@@ -559,7 +559,7 @@ def genPathTable(locations, displayAPs=True):
         if path is not None:
             lastAP = path[-1]
             if displayAPs == True and not (len(path) == 1 and path[0] == lastAP):
-                pathTable += """<tr class="grey"><td colspan="3">{}</td><td>{}</td><td>{}</td><td>{}</td><td>{}</td></tr>\n""".format(" -&gt; ".join(path), """<img alt="samus" class="imageItem" src="/solver/static/images/samus_run_{}.gif" title="samus" />""".format(currentSuit), pathDiff, getTechniques(pathTechniques), getItems(pathItems))
+                pathTable += """<tr class="grey"><td colspan="3">{}</td><td>{}</td><td>{}</td><td>{}</td><td>{}</td></tr>\n""".format(" -&gt; ".join(path), """<img alt="samus" class="imageItem" src="/solver/static/images/samus_run_{}.gif" title="samus" />""".format(currentSuit), getDiffImg(pathDiff), getTechniques(pathTechniques), getItems(pathItems))
 
         (name, room) = location
 
@@ -576,7 +576,7 @@ def genPathTable(locations, displayAPs=True):
   <td>{}</td>
 </tr>
 """.format(item, getRoomLink(name, room), getAreaLink(area), getSubArea(subarea),
-           getBossImg(name) if "Boss" in _class else getItemImg(item), locDiff,
+           getBossImg(name) if "Boss" in _class else getItemImg(item), getDiffImg(locDiff),
            getTechniques(locTechniques), getItems(locItems))
 
             if item == 'Varia' and currentSuit == 'Power':
@@ -594,7 +594,7 @@ def genPathTable(locations, displayAPs=True):
   <td></td>
   <td></td>
 </tr>
-""".format(item, getRoomLink(name, room), getAreaLink(area), getSubArea(subarea), item, diff)
+""".format(item, getRoomLink(name, room), getAreaLink(area), getSubArea(subarea), item, getDiffImg(diff))
 
     pathTable += "</table>"
 
@@ -652,6 +652,11 @@ def getItemImg(item, small=False):
     else:
         _class = "imageItem"
     return """<img alt="{}" class="{}" src="/solver/static/images/{}.png" title="{}" />""".format(item, _class, item, item)
+
+def getDiffImg(diff):
+    diffName = diff4solver(float(diff))
+
+    return """<img alt="{}" class="imageItem" src="/solver/static/images/marker_{}.gif" title="{}" />""".format(diffName, diffName, diffName)
 
 def prepareResult():
     if session.solver['result'] is not None:

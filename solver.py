@@ -941,7 +941,7 @@ class InteractiveSolver(CommonSolver):
         state.fromSolver(self)
         state.toJson(self.outputFileName)
 
-    def initialize(self, mode, rom, presetFileName, magic, debug, fill, startAP):
+    def initialize(self, mode, rom, presetFileName, magic, debug, fill, startAP, trackerRace):
         # load rom and preset, return first state
         self.debug = debug
         self.mode = mode
@@ -980,6 +980,9 @@ class InteractiveSolver(CommonSolver):
 
         # compute new available locations
         self.computeLocationsDifficulty(self.majorLocations)
+
+        if trackerRace == True:
+            self.mode = 'seedless'
 
         self.dumpState()
 
@@ -2176,7 +2179,7 @@ def interactiveSolver(args):
             sys.exit(1)
 
         solver = InteractiveSolver(args.output)
-        solver.initialize(args.mode, args.romFileName, args.presetFileName, magic=args.raceMagic, debug=args.vcr, fill=args.fill, startAP=args.startAP)
+        solver.initialize(args.mode, args.romFileName, args.presetFileName, magic=args.raceMagic, debug=args.vcr, fill=args.fill, startAP=args.startAP, trackerRace=args.trackerRace)
     else:
         # iterate
         params = {}
@@ -2325,6 +2328,7 @@ if __name__ == "__main__":
     parser.add_argument('--energyQty', help="rando plando  (used in interactive mode)",
                         dest="energyQty", nargs="?", default=None, choices=["sparse", "medium", "vanilla"])
     parser.add_argument('--plot', help="dump plot data in file specified", dest="plot", nargs="?", default=None)
+    parser.add_argument('--trackerRace', help="the seed is race protected, tell the solver to use seedless mode after reading the patchs from the seed", dest="trackerRace", action='store_true')
 
     args = parser.parse_args()
 

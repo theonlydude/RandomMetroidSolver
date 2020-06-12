@@ -562,6 +562,7 @@ var boss = true;
 var escapeRando = true;
 var init = false;
 var webServInProgress = false;
+var race = false;
 
 // can add more variables:
 //  -state: posible values: ["available", "visited", "break"]
@@ -728,13 +729,17 @@ window.onload = function(){
 
         var bytes = new Uint8Array(e.target.result);
 
-        if(document.getElementById("mode").value == "plando") {
-            // detect race mode patch
-            for(var addr=0x1C0200; addr<0x1C0210; addr++) {
-                if(bytes[addr] != 0xff) {
+        // detect race mode patch
+        race = false;
+        for(var addr=0x1C0200; addr<0x1C0210; addr++) {
+            if(bytes[addr] != 0xff) {
+                if(document.getElementById("mode").value == "plando") {
                     clearInputSeed();
                     alert("race protected seed detected");
                     return false;
+                } else {
+                    race = true;
+                    break;
                 }
             }
         }
@@ -990,7 +995,7 @@ function initSolver() {
             fileName: document.getElementById("fileName").value,
             fill: document.getElementById("fillPlando").checked,
             startLocation: document.getElementById("startLocation").value,
-            mode: mode}, "download");
+            mode: mode, race: race}, "download");
 
   hidePopup();
   $('#hideRandoOverlay').hide();

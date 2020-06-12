@@ -1964,10 +1964,11 @@ class WS_common_init(WS):
 
         vcr = request.vars.debug != None
         fill = request.vars.fill == "true"
+        race = request.vars.race == "true"
 
-        return self.callSolverInit(jsonRomFileName, presetFileName, preset, seed, mode, vcr, fill, startLocation)
+        return self.callSolverInit(jsonRomFileName, presetFileName, preset, seed, mode, vcr, fill, startLocation, race)
 
-    def callSolverInit(self, jsonRomFileName, presetFileName, preset, romFileName, mode, vcr, fill, startLocation):
+    def callSolverInit(self, jsonRomFileName, presetFileName, preset, romFileName, mode, vcr, fill, startLocation, race):
         (fd, jsonOutFileName) = tempfile.mkstemp()
         params = [
             pythonExec,  os.path.expanduser("~/RandomMetroidSolver/solver.py"),
@@ -1981,6 +1982,9 @@ class WS_common_init(WS):
 
         if mode != "seedless":
             params += ['-r', str(jsonRomFileName)]
+
+        if race == True:
+            params.append('--trackerRace')
 
         if vcr == True:
             params.append('--vcr')

@@ -76,14 +76,20 @@ class Restrictions(object):
             return item['Class'] == "Minor"
 
     # return True if we can keep morph as a possibility
-    def lateMorphCheck(self, container):
+    def lateMorphCheck(self, container, possibleLocs):
         # the closer we get to the limit the higher the chances of allowing morph
         proba = random.randint(0, self.lateMorphLimit)
         if self.split == 'Full':
             nbItems = len(container.currentItems)
         else:
             nbItems = len([item for item in container.currentItems if self.split == item['Class']])
-        return proba <= nbItems
+        if proba > nbItems:
+            return None
+        if self.lateMorphForbiddenArea is not None:
+            morphLocs = [loc for loc in possibleLocs if loc['GraphArea'] != self.lateMorphForbiddenArea]
+            forbidden = len(morphLocs) == 0
+            possibleLocs = morphLocs if not forbidden else None
+        return possibleLocs
 
     def isSuit(self, item):
         return item['Type'] == 'Varia' or item['Type'] == 'Gravity'

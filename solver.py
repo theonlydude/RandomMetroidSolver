@@ -3,7 +3,7 @@
 import sys, argparse, json, os, logging
 
 # the difficulties for each technics
-from parameters import Knows, Settings, isKnows
+from parameters import Knows, Settings, isKnows, diff4solver
 from parameters import easy, medium, hard, harder, hardcore, mania, impossibru, infinity, diff2text
 
 # the helper functions
@@ -162,22 +162,6 @@ class SolverState(object):
         retVis.sort(key=lambda x: x[0])
         return ([loc for (i, loc) in retVis], retMaj)
 
-    def diff4isolver(self, difficulty):
-        if difficulty == -1:
-            return "break"
-        elif difficulty < medium:
-            return "easy"
-        elif difficulty < hard:
-            return "medium"
-        elif difficulty < harder:
-            return "hard"
-        elif difficulty < hardcore:
-            return "harder"
-        elif difficulty < mania:
-            return "hardcore"
-        else:
-            return "mania"
-
     def name4isolver(self, locName):
         # remove space and special characters
         # sed -e 's+ ++g' -e 's+,++g' -e 's+(++g' -e 's+)++g' -e 's+-++g'
@@ -202,7 +186,7 @@ class SolverState(object):
             if "difficulty" in loc and loc["difficulty"].bool == True:
                 diff = loc["difficulty"]
                 locName = self.name4isolver(loc["Name"])
-                ret[locName] = {"difficulty": self.diff4isolver(diff.difficulty),
+                ret[locName] = {"difficulty": diff4solver(diff.difficulty),
                                 "knows": self.knows2isolver(diff.knows),
                                 "items": list(set(diff.items)),
                                 "item": loc["itemName"],
@@ -212,10 +196,10 @@ class SolverState(object):
 
 #                if "locDifficulty" in loc:
 #                    lDiff = loc["locDifficulty"]
-#                    ret[locName]["locDifficulty"] = [self.diff4isolver(lDiff.difficulty), self.knows2isolver(lDiff.knows), list(set(lDiff.items))]
+#                    ret[locName]["locDifficulty"] = [diff4solver(lDiff.difficulty), self.knows2isolver(lDiff.knows), list(set(lDiff.items))]
 #                if "pathDifficulty" in loc:
 #                    pDiff = loc["pathDifficulty"]
-#                    ret[locName]["pathDifficulty"] = [self.diff4isolver(pDiff.difficulty), self.knows2isolver(pDiff.knows), list(set(pDiff.items))]
+#                    ret[locName]["pathDifficulty"] = [diff4solver(pDiff.difficulty), self.knows2isolver(pDiff.knows), list(set(pDiff.items))]
 
                 if "comeBack" in loc:
                     ret[locName]["comeBack"] = loc["comeBack"]
@@ -941,7 +925,7 @@ class InteractiveSolver(CommonSolver):
         state.fromSolver(self)
         state.toJson(self.outputFileName)
 
-    def initialize(self, mode, rom, presetFileName, magic, debug, fill, startAP):
+    def initialize(self, mode, rom, presetFileName, magic, debug, fill, startAP, trackerRace):
         # load rom and preset, return first state
         self.debug = debug
         self.mode = mode
@@ -980,6 +964,9 @@ class InteractiveSolver(CommonSolver):
 
         # compute new available locations
         self.computeLocationsDifficulty(self.majorLocations)
+
+        if trackerRace == True:
+            self.mode = 'seedless'
 
         self.dumpState()
 
@@ -2176,7 +2163,7 @@ def interactiveSolver(args):
             sys.exit(1)
 
         solver = InteractiveSolver(args.output)
-        solver.initialize(args.mode, args.romFileName, args.presetFileName, magic=args.raceMagic, debug=args.vcr, fill=args.fill, startAP=args.startAP)
+        solver.initialize(args.mode, args.romFileName, args.presetFileName, magic=args.raceMagic, debug=args.vcr, fill=args.fill, startAP=args.startAP, trackerRace=args.trackerRace)
     else:
         # iterate
         params = {}
@@ -2325,6 +2312,7 @@ if __name__ == "__main__":
     parser.add_argument('--energyQty', help="rando plando  (used in interactive mode)",
                         dest="energyQty", nargs="?", default=None, choices=["sparse", "medium", "vanilla"])
     parser.add_argument('--plot', help="dump plot data in file specified", dest="plot", nargs="?", default=None)
+    parser.add_argument('--trackerRace', help="the seed is race protected, tell the solver to use seedless mode after reading the patchs from the seed", dest="trackerRace", action='store_true')
 
     args = parser.parse_args()
 

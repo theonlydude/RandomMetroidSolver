@@ -55,6 +55,10 @@ class RomPatches:
     AreaRandoMoreBlueDoors    = 105
     # croc green+grey doors
     CrocBlueDoors             = 106
+    # maridia crab shaft AP door
+    CrabShaftBlueDoor   = 107
+    # wrap door from sand halls left to under botwoon
+    MaridiaSandWrap           = 108
 
     ### Other
     # Gravity no longer protects from environmental damage (heat, spikes...)

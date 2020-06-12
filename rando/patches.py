@@ -269,6 +269,13 @@ patches = {
     'Blinking[West Sand Hall Left]': {
         0x10DACF: [0x0]
     },
+    'Blinking[Aqueduct Top Left]': {
+        0x10D3A9: [0x0]
+    },
+    'Blinking[Crab Shaft Right]': {
+        0x7C4FB: [0x42, 0xc8, 0x1e, 0x36, 0x8f, 0x8c],
+        0x10D005: [0x0]
+    },
 }
 
 additional_PLMs = {
@@ -501,6 +508,12 @@ additional_PLMs = {
         'room': 0xd461,
         'plm_bytes_list': [
             [0x48, 0xc8, 0x01, 0x06, 0x63, 0x8c]
+        ]
+    },
+    'Blinking[Aqueduct Top Left]': {
+        'room': 0xd5a7,
+        'plm_bytes_list': [
+            [0x48, 0xc8, 0x01, 0x16, 0x63, 0x8c]
         ]
     },
 }

@@ -473,11 +473,11 @@ accessPoints = [
                                                            sm.wand(sm.canOpenRedDoors(),
                                                                    RomPatches.has(RomPatches.AreaRandoGatesOther)))),
         # this transition leads to EastMaridia directly
-        'Oasis Bottom': lambda sm: sm.wand(sm.wnot(RomPatches.has(RomPatches.MaridiaSandWrap)),
+        'Oasis Bottom': lambda sm: sm.wand(sm.wnot(RomPatches.has(RomPatches.MaridiaSandWarp)),
                                            sm.wor(sm.canOpenGreenDoors(), # red door+green gate
                                                   sm.wand(sm.canOpenRedDoors(),
                                                           RomPatches.has(RomPatches.AreaRandoGatesOther))),
-                                           sm.canTraverseWestSandHallLeftToRight())
+                                           sm.canTraverseWestSandHallLeftToRight()),
         'Crab Shaft Left': lambda sm: sm.canPassMtEverest()
     }, roomInfo = {'RoomPtr':0xcfc9, "area": 0x4},
        exitInfo = {'DoorPtr':0xa39c, 'direction': 0x6, "cap": (0x6, 0x2), "bitFlag": 0x0,
@@ -496,7 +496,7 @@ accessPoints = [
                                                                 sm.knowsGreenGateGlitch()),
                                                         RomPatches.has(RomPatches.AreaRandoGatesOther))),
         # this transition leads to EastMaridia directly
-        'Oasis Bottom': lambda sm: sm.wand(sm.wnot(RomPatches.has(RomPatches.MaridiaSandWrap)),
+        'Oasis Bottom': lambda sm: sm.wand(sm.wnot(RomPatches.has(RomPatches.MaridiaSandWarp)),
                                            sm.canExitCrabHole(),
                                            sm.canTraverseWestSandHallLeftToRight())
     }, roomInfo = {'RoomPtr':0xd21c, "area": 0x4},
@@ -538,11 +538,11 @@ accessPoints = [
         'Crab Shaft Left': lambda sm: sm.canJumpUnderwater()
     }, traverse=lambda sm: sm.wor(RomPatches.has(RomPatches.CrabShaftBlueDoor),
                                   sm.canOpenGreenDoors()),
-       roomInfo = {'RoomPtr':0x, "area": 0x4},
-       exitInfo = {'DoorPtr':0x, 'direction': 0x, "cap": (0x, 0x), "bitFlag": 0x0,
-                   "screen": (0x, 0x), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x},
-       entryInfo = {'SamusX':0x, 'SamusY':0x},
-       dotOrientation = 'w'),
+       roomInfo = {'RoomPtr':0xd1a3, "area": 0x4},
+       exitInfo = {'DoorPtr':0xa4c8, 'direction': 0x4, "cap": (0x1, 0x16), "bitFlag": 0x0,
+                   "screen": (0x0, 0x1), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0},
+       entryInfo = {'SamusX':0x1ca, 'SamusY':0x388},
+       dotOrientation = 'e'),
     # escape APs
     AccessPoint('Crab Hole Bottom Right', 'WestMaridia', {
         'Crab Hole Bottom Left': lambda sm: SMBool(True)
@@ -562,10 +562,10 @@ accessPoints = [
     ### East Maridia
     AccessPoint('Aqueduct Top Left', 'EastMaridia', {
         'Aqueduct Bottom': lambda sm: sm.canUsePowerBombs()
-    }, roomInfo = {'RoomPtr':0x, "area": 0x4},
-       exitInfo = {'DoorPtr':0x, 'direction': 0x, "cap": (0x, 0x), "bitFlag": 0x0,
-                   "screen": (0x, 0x), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x},
-       entryInfo = {'SamusX':0x, 'SamusY':0x},
+    }, roomInfo = {'RoomPtr':0xd5a7, "area": 0x4},
+       exitInfo = {'DoorPtr':0xa708, 'direction': 0x5, "cap": (0x1e, 0x36), "bitFlag": 0x0,
+                   "screen": (0x1, 0x3), "distanceToSpawn": 0x8000, "doorAsmPtr": 0xe398},
+       entryInfo = {'SamusX':0x34, 'SamusY':0x188},
        dotOrientation = 'w'),
     AccessPoint('Aqueduct Bottom', 'EastMaridia', {
         'Aqueduct Top Left': lambda sm: sm.wand(sm.canDestroyBombWallsUnderwater(), # top left bomb blocks
@@ -614,16 +614,16 @@ accessPoints = [
     AccessPoint('Oasis Bottom', 'EastMaridia', {
         'Toilet Top': lambda sm: sm.wand(sm.canOpenGreenDoors(), sm.canDestroyBombWallsUnderwater()),
         # this goes directly to WestMaridia
-        'Main Street Bottom': lambda sm: sm.wand(sm.wnot(RomPatches.has(RomPatches.MaridiaSandWrap)),
+        'Main Street Bottom': lambda sm: sm.wand(sm.wnot(RomPatches.has(RomPatches.MaridiaSandWarp)),
                                                  sm.wor(sm.wand(sm.canOpenGreenDoors(),
                                                                 sm.knowsGreenGateGlitch()),
                                                         RomPatches.has(RomPatches.AreaRandoGatesOther)),
                                                  sm.canTraverseSandPits()),
         # this goes directly to WestMaridia
-        'Crab Hole Bottom Left': lambda sm: sm.wand(sm.wnot(RomPatches.has(RomPatches.MaridiaSandWrap)),
+        'Crab Hole Bottom Left': lambda sm: sm.wand(sm.wnot(RomPatches.has(RomPatches.MaridiaSandWarp)),
                                                     sm.canTraverseSandPits(),
                                                     sm.haveItem('Morph')),
-        'Aqueduct Bottom': lambda sm: sm.wand(RomPatches.has(RomPatches.MaridiaSandWrap),
+        'Aqueduct Bottom': lambda sm: sm.wand(RomPatches.has(RomPatches.MaridiaSandWarp),
                                               sm.canTraverseSandPits())
     }, internal=True),
     AccessPoint('Precious Room Top', 'EastMaridia', {
@@ -749,7 +749,8 @@ vanillaTransitions = [
     ('Caterpillar Room Top Right', 'Red Fish Room Left'),
     ('Glass Tunnel Top', 'Main Street Bottom'),
     ('Green Pirates Shaft Bottom Right', 'Golden Four'),
-    ('Warehouse Entrance Right', 'Warehouse Zeela Room Left')
+    ('Warehouse Entrance Right', 'Warehouse Zeela Room Left'),
+    ('Crab Shaft Right', 'Aqueduct Top Left')
 ]
 
 vanillaBossesTransitions = [
@@ -1018,7 +1019,7 @@ class GraphUtils:
             # remove duplicates (loop transitions)
             if any(c['ID'] == conn['ID'] for c in connections):
                 continue
-#            print(conn['ID'])
+            print(conn['ID'])
             # where to write
             conn['DoorPtr'] = src.ExitInfo['DoorPtr']
             # door properties

@@ -88,6 +88,16 @@ class ItemThenLocChoiceProgSpeed(ItemThenLocChoice):
         return self.services.currentLocations(self.ap, self.container, item=item)
 
     def chooseItemLoc(self, itemLocDict, isProg, progressionItemLocs, ap, container):
+        # if late morph, redo the late morph check if morph is the
+        # only possibility since we can rollback
+        if self.restrictions.isLateMorph() and len(itemLocDict) == 1:
+            itemWrapper, locList = list(itemLocDict.items())[0]
+            if itemWrapper.item['Type'] == 'Morph':
+                morphLocs = self.restrictions.lateMorphCheck(container, locList)
+                if morphLocs is not None:
+                    itemLocDict[itemWrapper] = morphLocs
+                else:
+                    return None
         self.progressionItemLocs = progressionItemLocs
         self.ap = ap
         self.container = container

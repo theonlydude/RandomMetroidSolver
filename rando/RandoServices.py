@@ -221,8 +221,8 @@ class RandoServices(object):
 
     def processLateMorph(self, container, itemLocDict):
         morphWrapper = next((w for w in itemLocDict if w.item['Type'] == 'Morph'), None)
-        if morphWrapper is None or len(itemLocDict) == 1:
-            # no morph, or it is the only possibility: nothing to do
+        if morphWrapper is None or (self.settings.progSpeed == 'basic' and len(itemLocDict) == 1):
+            # no morph, or it is the only possibility and no rollback possible: nothing to do
             return
         forbidden = not self.restrictions.lateMorphCheck(container)
         if not forbidden and self.restrictions.lateMorphForbiddenArea is not None:

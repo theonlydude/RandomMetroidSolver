@@ -1058,6 +1058,10 @@ function clickLoc(elem) {
      if(locName == "MotherBrain") {
        alert("SEE YOU NEXT MISSION");
      }
+    } else {
+        // uncollect it
+        console.log("remove item loc: "+locName);
+        ajaxCall({action: "remove", scope: "item", locName: locName}, "upload");
     }
   }
 }

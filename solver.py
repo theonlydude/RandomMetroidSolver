@@ -426,6 +426,52 @@ class CommonSolver(object):
         self.lastAP = loc['accessPoint']
         self.lastArea = loc['SolveArea']
 
+    def getLocIndex(self, locName):
+        for (i, loc) in enumerate(self.visitedLocations):
+            if loc['Name'] == locName:
+                return i
+
+    def removeItemAt(self, locNameWeb):
+        locName = self.locNameWeb2Internal(locNameWeb)
+        locIndex = self.getLocIndex(locName)
+        loc = self.visitedLocations.pop(locIndex)
+        # removeItemAt is only used from the tracker, so all the locs are in majorLocations
+        self.majorLocations.append(loc)
+
+        # access point
+        if len(self.visitedLocations) == 0:
+            self.lastAP = self.startAP
+            self.lastArea = self.startArea
+        else:
+            self.lastAP = self.visitedLocations[-1]["accessPoint"]
+            self.lastArea = self.visitedLocations[-1]["SolveArea"]
+
+        # delete location params which are set when the location is available
+        if 'difficulty' in loc:
+            del loc['difficulty']
+        if 'distance' in loc:
+            del loc['distance']
+        if 'accessPoint' in loc:
+            del loc['accessPoint']
+        if 'path' in loc:
+            del loc['path']
+
+        # item
+        item = loc["itemName"]
+
+        if self.mode == 'seedless':
+            # in seedless remove the first nothing found as collectedItems is not ordered
+            self.collectedItems.remove(item)
+        else:
+            self.collectedItems.pop(locIndex)
+
+        # if multiple majors in plando mode, remove it from smbm only when it's the last occurence of it
+        if self.smbm.isCountItem(item):
+            self.smbm.removeItem(item)
+        else:
+            if item not in self.collectedItems:
+                self.smbm.removeItem(item)
+
     def cancelLastItems(self, count):
         if self.vcr != None:
             self.vcr.addRollback(count)
@@ -967,7 +1013,9 @@ class InteractiveSolver(CommonSolver):
                         # pickup item at locName
                         self.pickItemAt(params['loc'])
                 elif action == 'remove':
-                    if 'count' in params:
+                    if 'loc' in params:
+                        self.removeItemAt(params['loc'])
+                    elif 'count' in params:
                         # remove last collected item
                         self.cancelLastItems(params['count'])
                     else:
@@ -2154,7 +2202,9 @@ def interactiveSolver(args):
                         sys.exit(1)
                 params = {'loc': args.loc, 'item': args.item, 'hide': args.hide}
             elif args.action == "remove":
-                if args.item != None:
+                if args.loc != None:
+                    params = {'loc': args.loc}
+                elif args.item != None:
                     params = {'item': args.item}
                 else:
                     params = {'count': args.count}

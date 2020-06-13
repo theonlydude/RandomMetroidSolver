@@ -205,10 +205,10 @@ class SolverState(object):
                     ret[locName]["comeBack"] = loc["comeBack"]
                 if "accessPoint" in loc:
                     ret[locName]["accessPoint"] = self.transition2isolver(loc["accessPoint"])
+                    if "path" in loc:
+                        ret[locName]["path"] = [self.transition2isolver(a.Name) for a in loc["path"]]
                 # for debug purpose
                 if self.debug == True:
-                    if "path" in loc:
-                        ret[locName]["path"] = [a.Name for a in loc["path"]]
                     if "distance" in loc:
                         ret[locName]["distance"] = loc["distance"]
         return ret

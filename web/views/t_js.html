@@ -356,6 +356,7 @@ function ajaxOkGet(jsonData, status, dummy, chained=false) {
       locsInfo[locName]["canHidden"] = locData["canHidden"];
       locsInfo[locName]["visibility"] = locData["visibility"];
       locsInfo[locName]["accessPoint"] = locData["accessPoint"];
+      locsInfo[locName]["path"] = locData["path"];
 
       $("#"+locName).attr("class", "baseLoc marker_available_"+locData["difficulty"]);
       var tooltip = getTooltip(locName, locData, "?", false);
@@ -837,16 +838,37 @@ function addTooltipCallback() {
 
             // display next ap
             if("accessPoint" in locData) {
-                var nextAP = locData["accessPoint"];
-                $("#nextAP").attr("class", "nextAP "+nextAP+"Gps");
-                document.getElementById("nextAP").style.display = "block";
-                $("#nextgps"+'[data-toggle="tooltip"]').attr("title", nextAP).tooltip('fixTitle');
+                // display path
+                if(nextAP != lastAP && "path" in locData) {
+                    var path = locData["path"];
+                    for(var i=0; i<path.length; i++) {
+                        var gps = "gps_"+(i+1);
+                        var ap = path[i];
+
+                        $("#"+gps).attr("class", "nextAP "+ap+"Gps");
+                        document.getElementById(gps).style.display = "block";
+                    }
+                    document.getElementById("lastAP").style.display = "none";
+                    document.getElementById("nextAP").style.display = "none";
+                } else {
+                    var nextAP = locData["accessPoint"];
+                    $("#nextAP").attr("class", "nextAP "+nextAP+"Gps");
+                    document.getElementById("nextAP").style.display = "block";
+                    $("#nextgps"+'[data-toggle="tooltip"]').attr("title", nextAP).tooltip('fixTitle');
+                }
             }
         }
     });
     $("[data-toggle=tooltip]").on('hide.bs.tooltip', function (a) {
+        document.getElementById("lastAP").style.display = "block";
+
         // hide next ap
         document.getElementById("nextAP").style.display = "none";
+
+        // hide path aps
+        for(var i=1; i<=16; i++) {
+            document.getElementById("gps_"+i).style.display = "none";
+        }
     });
 }
 
@@ -1197,7 +1219,6 @@ function getTooltip(locName, locData, item, visited) {
                    +("comeBack" in locData && locData["comeBack"] == false ? "<br>WARNING: Can't come back" : "")
                    +("difficulty" in locData ? "<br>Difficulty: "+locData["difficulty"] : "")
                    // debug data
-                   +("path" in locData ? "<br>Path: "+locData["path"] : "")
                    +("distance" in locData ? "<br>Distance: "+locData["distance"] : "");
         }
     }

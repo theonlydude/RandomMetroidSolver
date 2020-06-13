@@ -677,7 +677,7 @@ if __name__ == "__main__":
             else:
                 msg = randoExec.errorMsg
         else:
-            msg = ""
+            msg = ''
         if args.rom is None: # web mode
             data = romPatcher.romFile.data
             fileName = '{}.sfc'.format(fileName)

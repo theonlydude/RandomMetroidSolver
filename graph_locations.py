@@ -590,7 +590,7 @@ locations = [
 },
 {
     'Area': "Maridia",
-    'GraphArea': "Maridia",
+    'GraphArea': "WestMaridia",
     'SolveArea': "Maridia Green",
     'Name': "Energy Tank, Mama turtle",
     'Class': ["Major"],
@@ -620,7 +620,7 @@ locations = [
 },
 {
     'Area': "Maridia",
-    'GraphArea': "Maridia",
+    'GraphArea': "EastMaridia",
     'SolveArea': "Maridia Forgotten Highway",
     'Name': "Plasma Beam",
     'Class': ["Major", "Chozo"],
@@ -665,7 +665,7 @@ locations = [
 },
 {
     'Area': "Maridia",
-    'GraphArea': "Maridia",
+    'GraphArea': "EastMaridia",
     'SolveArea': "Left Sandpit",
     'Name': "Reserve Tank, Maridia",
     'Class': ["Major"],
@@ -683,7 +683,7 @@ locations = [
 },
 {
     'Area': "Maridia",
-    'GraphArea': "Maridia",
+    'GraphArea': "EastMaridia",
     'SolveArea': "Maridia Sandpits",
     'Name': "Spring Ball",
     'Class': ["Major", "Chozo"],
@@ -722,7 +722,7 @@ locations = [
 },
 {
     'Area': "Maridia",
-    'GraphArea': "Maridia",
+    'GraphArea': "EastMaridia",
     'SolveArea': "Maridia Pink Top",
     'Name': "Energy Tank, Botwoon",
     'Class': ["Major"],
@@ -738,7 +738,7 @@ locations = [
 },
 {
     'Area': "Maridia",
-    'GraphArea': "Maridia",
+    'GraphArea': "EastMaridia",
     'SolveArea': "Draygon Boss",
     'Name': "Draygon",
     'Class': ["Boss"],
@@ -753,7 +753,7 @@ locations = [
 },
 {
     'Area': "Maridia",
-    'GraphArea': "Maridia",
+    'GraphArea': "EastMaridia",
     'SolveArea': "Draygon Boss",
     'Name': "Space Jump",
     'Class': ["Major", "Chozo"],
@@ -1732,7 +1732,7 @@ locations = [
 },
 {
     'Area': "Maridia",
-    'GraphArea': "Maridia",
+    'GraphArea': "WestMaridia",
     'SolveArea': "Maridia Green",
     'Name': "Missile (green Maridia shinespark)",
     'Class': ["Minor"],
@@ -1752,7 +1752,7 @@ locations = [
 },
 {
     'Area': "Maridia",
-    'GraphArea': "Maridia",
+    'GraphArea': "WestMaridia",
     'SolveArea': "Maridia Green",
     'Name': "Super Missile (green Maridia)",
     'Class': ["Minor"],
@@ -1770,7 +1770,7 @@ locations = [
 },
 {
     'Area': "Maridia",
-    'GraphArea': "Maridia",
+    'GraphArea': "WestMaridia",
     'SolveArea': "Maridia Green",
     'Name': "Missile (green Maridia tatori)",
     'Class': ["Minor"],
@@ -1790,7 +1790,7 @@ locations = [
 },
 {
     'Area': "Maridia",
-    'GraphArea': "Maridia",
+    'GraphArea': "WestMaridia",
     'SolveArea': "Maridia Pink Bottom",
     'Name': "Super Missile (yellow Maridia)",
     'Class': ["Minor"],
@@ -1806,7 +1806,7 @@ locations = [
 },
 {
     'Area': "Maridia",
-    'GraphArea': "Maridia",
+    'GraphArea': "WestMaridia",
     'SolveArea': "Maridia Pink Bottom",
     'Name': "Missile (yellow Maridia super missile)",
     'Class': ["Minor"],
@@ -1822,7 +1822,7 @@ locations = [
 },
 {
     'Area': "Maridia",
-    'GraphArea': "Maridia",
+    'GraphArea': "WestMaridia",
     'SolveArea': "Maridia Pink Bottom",
     'Name': "Missile (yellow Maridia false wall)",
     'Class': ["Minor"],
@@ -1838,7 +1838,7 @@ locations = [
 },
 {
     'Area': "Maridia",
-    'GraphArea': "Maridia",
+    'GraphArea': "EastMaridia",
     'SolveArea': "Left Sandpit",
     'Name': "Missile (left Maridia sand pit room)",
     'Class': ["Minor"],
@@ -1856,7 +1856,7 @@ locations = [
 },
 {
     'Area': "Maridia",
-    'GraphArea': "Maridia",
+    'GraphArea': "EastMaridia",
     'SolveArea': "Right Sandpit",
     'Name': "Missile (right Maridia sand pit room)",
     'Class': ["Minor"],
@@ -1874,7 +1874,7 @@ locations = [
 },
 {
     'Area': "Maridia",
-    'GraphArea': "Maridia",
+    'GraphArea': "EastMaridia",
     'SolveArea': "Right Sandpit",
     'Name': "Power Bomb (right Maridia sand pit room)",
     'Class': ["Minor"],
@@ -1893,7 +1893,7 @@ locations = [
 },
 {
     'Area': "Maridia",
-    'GraphArea': "Maridia",
+    'GraphArea': "EastMaridia",
     'SolveArea': "Maridia Pink Bottom",
     'Name': "Missile (pink Maridia)",
     'Address': 0x7C603,
@@ -1909,7 +1909,7 @@ locations = [
 },
 {
     'Area': "Maridia",
-    'GraphArea': "Maridia",
+    'GraphArea': "EastMaridia",
     'SolveArea': "Maridia Pink Bottom",
     'Name': "Super Missile (pink Maridia)",
     'Class': ["Minor"],
@@ -1925,7 +1925,7 @@ locations = [
 },
 {
     'Area': "Maridia",
-    'GraphArea': "Maridia",
+    'GraphArea': "EastMaridia",
     'SolveArea': "Maridia Pink Top",
     'Name': "Missile (Draygon)",
     'Class': ["Minor"],

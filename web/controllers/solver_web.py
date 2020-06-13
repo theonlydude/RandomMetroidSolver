@@ -1763,7 +1763,7 @@ class WS(object):
                               'draygonRoomOut', 'draygonRoomIn', 'phantoonRoomOut', 'phantoonRoomIn',
                               'tourianEscapeRoom4TopRight', 'climbBottomLeft', 'greenBrinstarMainShaftTopLeft',
                               'basementLeft', 'businessCenterMidLeft', 'crabHoleBottomRight', 'crocomireRoomTop',
-                              'crocomireSpeedwayBottom']:
+                              'crocomireSpeedwayBottom', 'crabShaftRight', 'aqueductTopLeft']:
             raiseHttp(400, "Wrong value for {}".format(point), True)
 
     def action(self):

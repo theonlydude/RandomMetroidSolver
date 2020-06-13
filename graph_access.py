@@ -458,11 +458,11 @@ accessPoints = [
     ### Croc
     AccessPoint('Crocomire Room Top', 'Crocomire', {
     }, traverse=lambda sm: sm.wor(RomPatches.has(RomPatches.CrocBlueDoors), sm.enoughStuffCroc()),
-       roomInfo = {'RoomPtr':0xa98d, "area": 0x2},
+       roomInfo = {'RoomPtr':0xa98d, "area": 0x2, 'songs':[0xa9bd]},
        exitInfo = {'DoorPtr':0x93ea, 'direction': 0x7, "cap": (0xc6, 0x2d), "bitFlag": 0x0,
                    "screen": (0xc, 0x2), "distanceToSpawn": 0x1c0, "doorAsmPtr": 0x0000,
                    "exitAsmPtr": 0xf7f0},
-       entryInfo = {'SamusX':0x383, 'SamusY':0x98},
+       entryInfo = {'SamusX':0x383, 'SamusY':0x98, 'song': 0x15},
        dotOrientation = 'se'),
     ### West Maridia
     AccessPoint('Main Street Bottom', 'WestMaridia', {

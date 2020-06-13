@@ -310,6 +310,13 @@ additional_PLMs = {
         ],
         'locations': [("Morphing Ball", 0)]
     },
+    # seal west/east maridia connection in area rando
+    'Maridia Sand Hall Seal': {
+        'room': 0xd252,
+        'plm_bytes_list': [
+            [0x42, 0xc8, 0x0e, 0x06, 0x63, 0x90]
+        ]
+    },
     # custom save points for non standard start APs
     "Save_G4": {
         "room": 0xa5ed,

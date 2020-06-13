@@ -832,6 +832,7 @@ class RomPatcher:
         (w0, w1) = getWord(ap.Start['spawn'])
         doors = [0x10] # red brin elevator
         if area == True:
+            plms.append('Maridia Sand Hall Seal')
             def addBlinking(name):
                 key = 'Blinking[{}]'.format(name)
                 if key in patches:

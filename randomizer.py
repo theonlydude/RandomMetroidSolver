@@ -671,10 +671,13 @@ if __name__ == "__main__":
         if args.rom == None:
             romPatcher.commitIPS()
         romPatcher.end()
-        if optErrMsg != "":
-            msg = optErrMsg + '\n' + randoExec.errorMsg
+        if args.patchOnly == False:
+            if optErrMsg != "":
+                msg = optErrMsg + '\n' + randoExec.errorMsg
+            else:
+                msg = randoExec.errorMsg
         else:
-            msg = randoExec.errorMsg
+            msg = ""
         if args.rom is None: # web mode
             data = romPatcher.romFile.data
             fileName = '{}.sfc'.format(fileName)

@@ -343,9 +343,12 @@ if __name__ == "__main__":
     if args.morphPlacement == 'random':
         if args.morphPlacementList != None:
             morphPlacements = args.morphPlacementList.split(',')
+        if (args.suitsRestriction == True and args.area == True) or args.majorsSplit == 'Chozo':
+            if 'late' in morphPlacements:
+                morphPlacements.remove('late')
         args.morphPlacement = random.choice(morphPlacements)
     # random fill makes certain options unavailable
-    if progSpeed == 'speedrun':
+    if progSpeed == 'speedrun' or (args.majorsSplit == 'Chozo' and args.morphPlacement == "late"):
         optErrMsg += forceArg('morphPlacement', 'normal', "'Morph Placement' forced to normal")
     if progSpeed == 'speedrun' or progSpeed == 'basic':
         optErrMsg += forceArg('progressionDifficulty', 'normal', "'Progression difficulty' forced to normal")

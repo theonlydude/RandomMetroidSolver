@@ -171,7 +171,7 @@ class HelpersGraph(Helpers):
                               sm.wand(sm.haveItem('Ice'), sm.canDoSuitlessOuterMaridia()), # climbing crabs
                               sm.canDoubleSpringBallJump()))
 
-    # bottom sandpits with the evirs
+    # bottom sandpits with the evirs except west sand hall left to right
     @Cache.decorator
     def canTraverseSandPits(self):
         sm = self.smbm
@@ -179,6 +179,11 @@ class HelpersGraph(Helpers):
                       sm.wand(sm.knowsGravLessLevel3(),
                               sm.haveItem('HiJump'),
                               sm.haveItem('Ice')))
+
+    @Cache.decorator
+    def canTraverseWestSandHallLeftToRight(self):
+        sm = self.smbm
+        return sm.haveItem('Gravity') # FIXME find suitless condition
 
     @Cache.decorator
     def canPassMaridiaToRedTowerNode(self):

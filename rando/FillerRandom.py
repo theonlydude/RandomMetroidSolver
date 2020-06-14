@@ -173,9 +173,6 @@ class FillerRandomSpeedrun(FillerRandom):
             filler = FrontFillerKickstart(self.startAP, self.graph, self.restrictions, self.container)
             condition = filler.createStepCountCondition(self.nFrontFillSteps)
             (isStuck, itemLocations, progItems) = filler.generateItems(condition)
-            # do not stop if we got stuck while trying to help the random fill
-            if updateBase == True:
-                assert not isStuck
             self.settings.runtimeLimit_s -= filler.runtime_s
             self.log.debug(self.container.dump())
         if updateBase == True:

@@ -386,10 +386,12 @@ class RandoServices(object):
                 continue
             if item.item['Type'] not in [it.item['Type'] for it in uniqItemLocDict.keys()]:
                 uniqItemLocDict[item] = locs
-        assert len(uniqItemLocDict) > 0
+        if not uniqItemLocDict:
+            return None
 
         curLocsBefore = self.currentLocations(ap, container)
-        assert len(curLocsBefore) > 0
+        if not curLocsBefore:
+            return None
 
         self.log.debug("search for progression with a second item")
         for item1, locs1 in uniqItemLocDict.items():

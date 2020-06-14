@@ -562,6 +562,8 @@ if __name__ == "__main__":
         # replace smbool with a dict
         for itemLoc in itemLocs:
             itemLoc["Location"]["difficulty"] = itemLoc["Location"]["difficulty"].json()
+            if "pathDifficulty" in itemLoc["Location"]:
+                del itemLoc["Location"]["pathDifficulty"]
             if "Wrapper" in itemLoc["Item"]:
                 del itemLoc["Item"]["Wrapper"]
 

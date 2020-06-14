@@ -171,7 +171,8 @@ class RomReader:
         'Infinite_Space_Jump': {'address': 0x82493, 'value': 0xEA, 'vanillaValue': 0xf0},
         'refill_before_save': {'address': 0x270C2, 'value': 0x98, 'vanillaValue': 0xff},
         'nerfed_rainbow_beam': {'address': 0x14BA2E, 'value': 0x13, 'vanillaValue': 0x2b},
-        'croc_area': {'address': 0x78ba3, 'value': 0x8c, 'vanillaValue': 0x4}
+        'croc_area': {'address': 0x78ba3, 'value': 0x8c, 'vanillaValue': 0x4},
+        'area_rando_warp_door': {'address': 0x26425E, 'value': 0x80, 'vanillaValue': 0x70}
     }
 
     @staticmethod
@@ -832,6 +833,7 @@ class RomPatcher:
         (w0, w1) = getWord(ap.Start['spawn'])
         doors = [0x10] # red brin elevator
         if area == True:
+            plms.append('Maridia Sand Hall Seal')
             def addBlinking(name):
                 key = 'Blinking[{}]'.format(name)
                 if key in patches:
@@ -1659,8 +1661,9 @@ class RomLoader(object):
                                          RomPatches.AreaRandoBlueDoors]
             if self.hasPatch("newGame"):
                 RomPatches.ActivePatches.append(RomPatches.AreaRandoMoreBlueDoors)
+            # use croc patch for separate croc and maridia split in two
             if self.hasPatch("croc_area"):
-                RomPatches.ActivePatches.append(RomPatches.CrocBlueDoors)
+                RomPatches.ActivePatches += [RomPatches.CrocBlueDoors, RomPatches.CrabShaftBlueDoor, RomPatches.MaridiaSandWarp]
             isArea = True
 
         # check area layout

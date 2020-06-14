@@ -289,39 +289,35 @@ if result is not None:
         dataTable.addColumn({ type: 'date', id: 'End' });
         dataTable.addRows([
 {{
-  if result["diffPercent"] == 20 or result["diffPercent"] == 40 or result["diffPercent"] == 60 or result["diffPercent"] == 80:
+  if result["diffPercent"] in [20, 40, 60, 80]:
     result["diffPercent"] += 1
     pass
 
   if result["diffPercent"] <= 20:
-    if result["diffPercent"] < 10:
-      response.write("[ 'Difficulty', 'easy', new Date(1900, 0, 0), new Date(190{}, 0, 0) ]".format(result["diffPercent"]), escape=False)
-    else:
-      response.write("[ 'Difficulty', 'easy', new Date(1900, 0, 0), new Date(19{}, 0, 0) ]".format(result["diffPercent"]), escape=False)
-      pass
+    response.write("[ 'Difficulty', 'easy', new Date(1900, 0, 0), new Date({}, 0, 0) ]".format(1900+result["diffPercent"]), escape=False)
   else:
     response.write("[ 'Difficulty', 'easy', new Date(1900, 0, 0), new Date(1920, 0, 0) ],", escape=False)
     pass
   if result["diffPercent"] > 20 and result["diffPercent"] <= 40:
-    response.write("[ 'Difficulty', 'medium', new Date(1920, 0, 0), new Date(19{}, 0, 0) ]".format(result["diffPercent"]), escape=False)
+    response.write("[ 'Difficulty', 'medium', new Date(1920, 0, 0), new Date({}, 0, 0) ]\n".format(1900+result["diffPercent"]), escape=False)
   elif result["diffPercent"] > 40:
-    response.write("[ 'Difficulty', 'medium', new Date(1920, 0, 0), new Date(1940, 0, 0) ],", escape=False)
+    response.write("[ 'Difficulty', 'medium', new Date(1920, 0, 0), new Date(1940, 0, 0) ],\n", escape=False)
     pass
   if result["diffPercent"] > 40 and result["diffPercent"] <= 60:
-    response.write("[ 'Difficulty', 'hard', new Date(1940, 0, 0), new Date(19{}, 0, 0) ]".format(result["diffPercent"]), escape=False)
+    response.write("[ 'Difficulty', 'hard', new Date(1940, 0, 0), new Date({}, 0, 0) ]\n".format(1900+result["diffPercent"]), escape=False)
   elif result["diffPercent"] > 60:
-    response.write("[ 'Difficulty', 'hard', new Date(1940, 0, 0), new Date(1960, 0, 0) ],", escape=False)
+    response.write("[ 'Difficulty', 'hard', new Date(1940, 0, 0), new Date(1960, 0, 0) ],\n", escape=False)
     pass
   if result["diffPercent"] > 60 and result["diffPercent"] <= 80:
-    response.write("[ 'Difficulty', 'very hard', new Date(1960, 0, 0), new Date(19{}, 0, 0) ]".format(result["diffPercent"]), escape=False)
+    response.write("[ 'Difficulty', 'very hard', new Date(1960, 0, 0), new Date({}, 0, 0) ]\n".format(1900+result["diffPercent"]), escape=False)
   elif result["diffPercent"] > 80:
-    response.write("[ 'Difficulty', 'very hard', new Date(1960, 0, 0), new Date(1980, 0, 0) ],", escape=False)
+    response.write("[ 'Difficulty', 'very hard', new Date(1960, 0, 0), new Date(1980, 0, 0) ],\n", escape=False)
     pass
-  if result["diffPercent"] > 80 and result["diffPercent"] <= 100:
-    if result["diffPercent"] == 100:
-      result["diffPercent"] = 99
-      pass
-    response.write("[ 'Difficulty', 'hardcore', new Date(1980, 0, 0), new Date(19{}, 0, 0) ]".format(result["diffPercent"]), escape=False)
+  if result["diffPercent"] > 80 and result["diffPercent"] < 100:
+    response.write("[ 'Difficulty', 'hardcore', new Date(1980, 0, 0), new Date({}, 0, 0) ]\n".format(1900+result["diffPercent"]), escape=False)
+  elif result["diffPercent"] == 100:
+    response.write("[ 'Difficulty', 'hardcore', new Date(1980, 0, 0), new Date(2000, 0, 0) ],\n", escape=False)
+    response.write("[ 'Difficulty', 'mania', new Date(2000, 0, 0), new Date(2010, 0, 0) ]\n", escape=False)
     pass
 }}
           ]);
@@ -329,11 +325,11 @@ if result is not None:
         var options = {
           hAxis: {
             minValue: new Date(1900, 0, 0),
-            maxValue: new Date(2000, 0, 0)
+            maxValue: new Date(2020, 0, 0)
           },
-          timeline: { groupByRowLabel: true},
+          timeline: { groupByRowLabel: true },
           tooltip: { trigger: 'none' },
-          colors: ['#6daa53', '#C1B725', '#e69235', '#d13434', '#000000'],
+          colors: ['#6daa53', '#C1B725', '#e69235', '#d13434', '#123456', '#ffffff'],
           avoidOverlappingGridLines: false
         };
 
@@ -349,7 +345,8 @@ function allReady() {
 
       for (i = 0; i < labels.length; i++) {
         // console.log(labels[i].textContent)
-        if (labels[i].textContent.substring(0,2) == '19') {
+        var start = labels[i].textContent.substring(0,2);
+        if(start == '19' || start == '20') {
           //console.log("found")
           labels[i].parentNode.removeChild(labels[i]);
           i--;

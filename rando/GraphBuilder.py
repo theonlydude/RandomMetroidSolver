@@ -78,12 +78,14 @@ class GraphBuilder(object):
                 'GreenPinkBrinstar':90,
                 'WreckedShip':120,
                 'LowerNorfair':135,
-                'Maridia':150,
+                'WestMaridia':75,
+                'EastMaridia':100,
                 'RedBrinstar':75,
                 'Norfair': 120,
-                # Kraid and Tourian can't be on the path
+                # can't be on the path
                 'Kraid': 0,
-                'Tourian': 0
+                'Tourian': 0,
+                'Crocomire': 0
             }
             t = 90
             for area in traversedAreas:

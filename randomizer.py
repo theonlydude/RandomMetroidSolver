@@ -514,10 +514,13 @@ if __name__ == "__main__":
     if args.patchOnly == False:
         randoExec = RandoExec(seedName, args.vcr)
         (stuck, itemLocs, progItemLocs) = randoExec.randomize(randoSettings, graphSettings)
-        doors = GraphUtils.getDoorConnections(randoExec.areaGraph,
-                                              args.area, args.bosses,
-                                              args.escapeRando)
-        escapeAttr = randoExec.areaGraph.EscapeAttributes if args.escapeRando else None
+        # if we couldn't find an area layout then the escape graph is not created either
+        # and getDoorConnections will crash if random escape is activated.
+        if not stuck:
+            doors = GraphUtils.getDoorConnections(randoExec.areaGraph,
+                                                  args.area, args.bosses,
+                                                  args.escapeRando)
+            escapeAttr = randoExec.areaGraph.EscapeAttributes if args.escapeRando else None
     else:
         stuck = False
         itemLocs = []

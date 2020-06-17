@@ -1463,12 +1463,8 @@ class RomPatcher:
 
         return len(compressedData)
 
-    def setOamTile(self, nth, length, newTile):
+    def setOamTile(self, nth, middle, newTile):
         # an oam entry is made of five bytes: (s000000 xxxxxxxxx) (yyyyyyyy) (YXpp000t tttttttt)
-        if length % 2 == 0:
-            middle = int(length / 2)
-        else:
-            middle = int(length / 2) + 1
 
         # after and before the middle of the screen is not handle the same
         if nth >= middle:
@@ -1488,11 +1484,17 @@ class RomPatcher:
         self.romFile.writeWord(0xF3E9, 0x5a0e9)
 
         # string length
-        self.romFile.writeWord(len(version), 0x0673e9)
+        length = len(version)
+        self.romFile.writeWord(length, 0x0673e9)
+
+        if length % 2 == 0:
+            middle = int(length / 2)
+        else:
+            middle = int(length / 2) + 1
 
         # oams
         for (i, char) in enumerate(version):
-            self.setOamTile(i, len(version), char2tile[char])
+            self.setOamTile(i, middle, char2tile[char])
 
 # tile number in tileset
 char2tile = {

@@ -88,7 +88,7 @@ if __name__ == "__main__":
     parser.add_argument('--maxDifficulty', '-t',
                         help="the maximum difficulty generated seed will be for given parameters",
                         dest='maxDifficulty', nargs='?', default=None,
-                        choices=['easy', 'medium', 'hard', 'harder', 'hardcore', 'mania'])
+                        choices=['easy', 'medium', 'hard', 'harder', 'hardcore', 'mania', 'random'])
     parser.add_argument('--minDifficulty',
                         help="the minimum difficulty generated seed will be for given parameters (speedrun prog speed required)",
                         dest='minDifficulty', nargs='?', default=None,
@@ -290,7 +290,11 @@ if __name__ == "__main__":
     optErrMsg = ""
     # if no max diff, set it very high
     if args.maxDifficulty:
-        maxDifficulty = text2diff[args.maxDifficulty]
+        if args.maxDifficulty == 'random':
+            diffs = ['easy', 'medium', 'hard', 'harder', 'hardcore', 'mania']
+            maxDifficulty = text2diff[random.choice(diffs)]
+        else:
+            maxDifficulty = text2diff[args.maxDifficulty]
     else:
         maxDifficulty = infinity
     # same as solver, increase max difficulty

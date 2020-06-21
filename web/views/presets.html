@@ -382,11 +382,11 @@ if skillBarData is not None:
 {{
   mult = 2
   score = 100 + skillBarData["custom"][1]*mult
-  lower = 100 + skillBarData["standards"]["noob"]*mult
+  lower = 100 + skillBarData["standards"]["newbie"]*mult
   upper = 100 + skillBarData["standards"]["samus"]*mult
 
   previousStdScore = lower
-  previousPreset = 'noob'
+  previousPreset = 'newbie'
   stop = False
   for preset in ['casual', 'regular', 'veteran', 'speedrunner', 'master', 'samus']:
     if stop == False:

@@ -42,7 +42,7 @@ else
     ORIG=.
 fi
 
-PRESETS=("regular" "noob" "master")
+PRESETS=("regular" "newbie" "master")
 SUITS=("" "--nogravheatPatch" "--progressiveSuits")
 CHARGES=("" "--nerfedCharge")
 TWEAKS=("" "--novariatweaks")

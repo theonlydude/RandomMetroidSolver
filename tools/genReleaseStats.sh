@@ -51,7 +51,7 @@ ${CWD}/tools/genExtStats.sh ${ROM} 900 SMRAT2020
 
 # 900 seeds pour les skill preset inclus dans les rando presets
 ${CWD}/tools/genExtStats.sh ${ROM} 900 default regular
-${CWD}/tools/genExtStats.sh ${ROM} 900 free noob
+${CWD}/tools/genExtStats.sh ${ROM} 900 free newbie
 ${CWD}/tools/genExtStats.sh ${ROM} 900 hardway2hell master
 ${CWD}/tools/genExtStats.sh ${ROM} 900 haste Season_Races
 ${CWD}/tools/genExtStats.sh ${ROM} 900 highway2hell speedrunner

@@ -650,3 +650,10 @@ mkdir -p ~/web2py/applications/solver/static/images/sprite_sheets/
 [ -L ~/web2py/applications/solver/static/images/gps_22.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/gps_22.png ~/web2py/applications/solver/static/images/gps_22.png
 [ -L ~/web2py/applications/solver/static/images/gps_23.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/gps_23.png ~/web2py/applications/solver/static/images/gps_23.png
 [ -L ~/web2py/applications/solver/static/images/gps_24.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/gps_24.png ~/web2py/applications/solver/static/images/gps_24.png
+
+[ -L ~/web2py/applications/solver/static/images/marker_easy.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/marker_easy.png ~/web2py/applications/solver/static/images/marker_easy.png
+[ -L ~/web2py/applications/solver/static/images/marker_medium.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/marker_medium.png ~/web2py/applications/solver/static/images/marker_medium.png
+[ -L ~/web2py/applications/solver/static/images/marker_hard.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/marker_hard.png ~/web2py/applications/solver/static/images/marker_hard.png
+[ -L ~/web2py/applications/solver/static/images/marker_harder.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/marker_harder.png ~/web2py/applications/solver/static/images/marker_harder.png
+[ -L ~/web2py/applications/solver/static/images/marker_hardcore.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/marker_hardcore.png ~/web2py/applications/solver/static/images/marker_hardcore.png
+[ -L ~/web2py/applications/solver/static/images/marker_mania.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/marker_mania.png ~/web2py/applications/solver/static/images/marker_mania.png

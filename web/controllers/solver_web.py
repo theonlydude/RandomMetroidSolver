@@ -656,7 +656,7 @@ def getItemImg(item, small=False):
 def getDiffImg(diff):
     diffName = diff4solver(float(diff))
 
-    return """<img alt="{}" class="imageItem" src="/solver/static/images/marker_{}.gif" title="{}" />""".format(diffName, diffName, diffName)
+    return """<img alt="{}" class="imageItem" src="/solver/static/images/marker_{}.png" title="{}" />""".format(diffName, diffName, diffName)
 
 def prepareResult():
     if session.solver['result'] is not None:

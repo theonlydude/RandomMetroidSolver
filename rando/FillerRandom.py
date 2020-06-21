@@ -191,9 +191,13 @@ class FillerRandomSpeedrun(FillerRandom):
         if miniOk == False:
             return False
         sys.stdout.write('s')
+        if maxDiff is None:
+            maxDiff = self.settings.maxDiff
+        minDiff = self.settings.minDiff
         graphLocations = self.container.getLocsForSolver()
         solver = RandoSolver(self.restrictions.split, self.startAP, self.graph, graphLocations)
-        if(solver.solveRom() == -1):
+        diff = solver.solveRom()
+        if diff < minDiff or diff > maxDiff: # minDiff is 0 if unspecified: that covers "unsolvable" (-1)
             sys.stdout.write('X')
             sys.stdout.flush()
             return False

@@ -8,7 +8,7 @@ from utils import getRangeDict, chooseFromRange
 # Holds settings not related to graph layout.
 class RandoSettings(object):
     def __init__(self, maxDiff, progSpeed, progDiff, qty, restrictions,
-                 superFun, runtimeLimit_s, plandoRandoItemLocs):
+                 superFun, runtimeLimit_s, plandoRandoItemLocs, minDiff):
         self.progSpeed = progSpeed.lower()
         self.progDiff = progDiff.lower()
         self.maxDiff = maxDiff
@@ -19,6 +19,7 @@ class RandoSettings(object):
         if self.runtimeLimit_s <= 0:
             self.runtimeLimit_s = sys.maxsize
         self.plandoRandoItemLocs = plandoRandoItemLocs
+        self.minDiff = minDiff
 
     def getItemManager(self, smbm):
         if self.plandoRandoItemLocs is None:

@@ -18,6 +18,7 @@ class MiniSolver(object):
     def isBeatable(self, itemLocations, maxDiff=None):
         if maxDiff is None:
             maxDiff = self.settings.maxDiff
+        minDiff = self.settings.minDiff
         locations = []
         for il in itemLocations:
             loc = il['Location']
@@ -29,9 +30,10 @@ class MiniSolver(object):
         self.smbm.resetItems()
         ap = self.startAP
         onlyBossesLeft = -1
+        hasOneLocAboveMinDiff = False
         while True:
             if not locations:
-                return True
+                return hasOneLocAboveMinDiff
             # only two loops to collect all remaining locations in only bosses left mode
             if onlyBossesLeft > 0:
                 onlyBossesLeft += 1
@@ -52,6 +54,8 @@ class MiniSolver(object):
                     onlyBossesLeft = 0
                     continue
                 return False
+            if not hasOneLocAboveMinDiff:
+                hasOneLocAboveMinDiff = any(loc['difficulty'].difficulty >= minDiff for loc in locations)
             self.smbm.addItems([loc['itemType'] for loc in toCollect])
             for loc in toCollect:
                 locations.remove(loc)

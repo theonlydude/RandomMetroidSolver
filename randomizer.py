@@ -88,7 +88,11 @@ if __name__ == "__main__":
     parser.add_argument('--maxDifficulty', '-t',
                         help="the maximum difficulty generated seed will be for given parameters",
                         dest='maxDifficulty', nargs='?', default=None,
-                        choices=['easy', 'medium', 'hard', 'harder', 'hardcore', 'mania', 'random'])
+                        choices=['easy', 'medium', 'hard', 'harder', 'hardcore', 'mania'])
+    parser.add_argument('--minDifficulty',
+                        help="the minimum difficulty generated seed will be for given parameters (speedrun prog speed required)",
+                        dest='minDifficulty', nargs='?', default=None,
+                        choices=['easy', 'medium', 'hard', 'harder', 'hardcore', 'mania'])
     parser.add_argument('--seed', '-s', help="randomization seed to use", dest='seed',
                         nargs='?', default=0, type=int)
     parser.add_argument('--rom', '-r',
@@ -286,11 +290,7 @@ if __name__ == "__main__":
     optErrMsg = ""
     # if no max diff, set it very high
     if args.maxDifficulty:
-        if args.maxDifficulty == 'random':
-            diffs = ['easy', 'medium', 'hard', 'harder', 'hardcore', 'mania']
-            maxDifficulty = text2diff[random.choice(diffs)]
-        else:
-            maxDifficulty = text2diff[args.maxDifficulty]
+        maxDifficulty = text2diff[args.maxDifficulty]
     else:
         maxDifficulty = infinity
     # same as solver, increase max difficulty
@@ -313,6 +313,12 @@ if __name__ == "__main__":
     (_, progSpeed) = randomMulti(args.__dict__, "progressionSpeed", speeds)
     (_, progDiff) = randomMulti(args.__dict__, "progressionDifficulty", progDiffs)
     (majorsSplitRandom, args.majorsSplit) = randomMulti(args.__dict__, "majorsSplit", majorsSplits)
+    if args.minDifficulty:
+        minDifficulty = text2diff[args.minDifficulty]
+        if progSpeed != "speedrun":
+            optErrMsg += "\nMinimum difficulty setting ignored, as prog speed is not speedrun"
+    else:
+        minDifficulty = 0
 
     areaRandom = False
     if args.area == 'random':
@@ -493,7 +499,8 @@ if __name__ == "__main__":
         RomPatches.ActivePatches = args.plandoRando["patches"]
     randoSettings = RandoSettings(maxDifficulty, progSpeed, progDiff, qty,
                                   restrictions, args.superFun, args.runtimeLimit_s,
-                                  args.plandoRando["locsItems"] if args.plandoRando != None else None)
+                                  args.plandoRando["locsItems"] if args.plandoRando != None else None,
+                                  minDifficulty)
 
     # print some parameters for jm's stats
     if args.jm == True:

@@ -95,7 +95,7 @@ def completePreset(params):
 
 def loadPresetsList():
     files = sorted(os.listdir('community_presets'), key=lambda v: v.upper())
-    stdPresets = ['noob', 'casual', 'regular', 'veteran', 'speedrunner', 'master']
+    stdPresets = ['newbie', 'casual', 'regular', 'veteran', 'speedrunner', 'master']
     tourPresets = ['Season_Races', 'Playoff_Races', 'Playoff_Races_Chozo', 'SMRAT2020']
     comPresets = [os.path.splitext(file)[0] for file in files if file != '.git']
     return (stdPresets, tourPresets, comPresets)
@@ -162,7 +162,7 @@ def getSkillLevelBarData(preset):
         result['knowsKnown'] = 'N/A'
 
     # get score of standard presets
-    for preset in ['noob', 'casual', 'regular', 'veteran', 'speedrunner', 'master', 'samus']:
+    for preset in ['newbie', 'casual', 'regular', 'veteran', 'speedrunner', 'master', 'samus']:
         score = PresetLoader.factory('{}/{}.json'.format(getPresetDir(preset), preset)).params['score']
         result['standards'][preset] = score
 

@@ -340,6 +340,9 @@ window.onload = function(){
             }
         }
     });
+
+    // mysql sort is not a natural one, so start by doing a js natural sort.
+    sortTable("plandoList", 0);
 }
 
 function displayROMInput(show) {
@@ -811,13 +814,13 @@ function sortTable(id, n) {
             /* Check if the two rows should switch place,
                based on the direction, asc or desc: */
             if (dir == "asc") {
-                if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                if (x.innerHTML.toLowerCase().localeCompare(y.innerHTML.toLowerCase(), undefined, {numeric: true, sensitivity: 'base'}) > 0) {
                     // If so, mark as a switch and break the loop:
                     shouldSwitch = true;
                     break;
                 }
             } else if (dir == "desc") {
-                if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                if (x.innerHTML.toLowerCase().localeCompare(y.innerHTML.toLowerCase(), undefined, {numeric: true, sensitivity: 'base'}) < 0) {
                     // If so, mark as a switch and break the loop:
                     shouldSwitch = true;
                     break;
@@ -918,7 +921,7 @@ function setGuessedPreset(romName){
         <td>Plando Name:</td><td><input class="full" id="plandoName" type="text" maxLength="32" placeholder="Only [a-zA-Z0-9 -_]"/></td>
       </tr>
       <tr>
-        <td colspan="2">Suggested preset:</td><td colspan="2"><select class="filldropdown" id="preset" name="preset"><option value="noob">noob</option><option value="casual">casual</option><option selected="selected" value="regular">regular</option><option value="veteran">veteran</option><option value="speedrunner">speedrunner</option><option value="master">master</option></select></td>
+        <td colspan="2">Suggested preset:</td><td colspan="2"><select class="filldropdown" id="preset" name="preset"><option value="newbie">newbie</option><option value="casual">casual</option><option selected="selected" value="regular">regular</option><option value="veteran">veteran</option><option value="speedrunner">speedrunner</option><option value="master">master</option></select></td>
       </tr>
       <tr>
         <td>Long Description:</td><td colspan="3"><textarea class="full" id="longDesc" maxLength="2048" rows="8" cols="50" placeholder="Long Description"></textarea></td>
@@ -947,7 +950,7 @@ function setGuessedPreset(romName){
       </tr>
       <tr>
         <td>Plando Key:</td><td><input class="full" id="updatePlandoKey" type="text" maxLength="8" placeholder="Only [a-zA-Z0-9]"/></td>
-        <td>Suggested preset:</td><td><select class="filldropdown" id="updatePreset"><option value="noob">noob</option><option value="casual">casual</option><option selected="selected" value="regular">regular</option><option value="veteran">veteran</option><option value="speedrunner">speedrunner</option><option value="master">master</option></select></td>
+        <td>Suggested preset:</td><td><select class="filldropdown" id="updatePreset"><option value="newbie">newbie</option><option value="casual">casual</option><option selected="selected" value="regular">regular</option><option value="veteran">veteran</option><option value="speedrunner">speedrunner</option><option value="master">master</option></select></td>
       </tr>
       <tr>
         <td>Long Description:</td><td colspan="3"><textarea class="full" id="updateLongDesc" maxLength="2048" rows="8" cols="50" placeholder="Long Description"></textarea></td>
@@ -1009,7 +1012,7 @@ function setGuessedPreset(romName){
 {{
     def getPresetSortId(preset):
         # to sort preset by difficulty
-        d = {"noob": 0, "casual": 1, "regular": 2, "veteran": 3, "speedrunner": 4, "master": 5}
+        d = {"newbie": 0, "casual": 1, "regular": 2, "veteran": 3, "speedrunner": 4, "master": 5}
         return d[preset]
 
     if plandos != None:

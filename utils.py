@@ -5,7 +5,7 @@ from parameters import easy, medium, hard, harder, hardcore, mania
 from smbool import SMBool
 
 def isStdPreset(preset):
-    return preset in ['noob', 'casual', 'regular', 'veteran', 'speedrunner', 'master', 'samus', 'solution', 'Season_Races', 'Playoff_Races', 'Playoff_Races_Chozo', 'SMRAT2020']
+    return preset in ['newbie', 'casual', 'regular', 'veteran', 'speedrunner', 'master', 'samus', 'solution', 'Season_Races', 'Playoff_Races', 'Playoff_Races_Chozo', 'SMRAT2020']
 
 def removeChars(string, toRemove):
     return re.sub('[{}]+'.format(toRemove), '', string)

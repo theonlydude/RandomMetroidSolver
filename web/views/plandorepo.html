@@ -340,6 +340,9 @@ window.onload = function(){
             }
         }
     });
+
+    // mysql sort is not a natural one, so start by doing a js natural sort.
+    sortTable("plandoList", 0);
 }
 
 function displayROMInput(show) {
@@ -811,13 +814,13 @@ function sortTable(id, n) {
             /* Check if the two rows should switch place,
                based on the direction, asc or desc: */
             if (dir == "asc") {
-                if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                if (x.innerHTML.toLowerCase().localeCompare(y.innerHTML.toLowerCase(), undefined, {numeric: true, sensitivity: 'base'}) > 0) {
                     // If so, mark as a switch and break the loop:
                     shouldSwitch = true;
                     break;
                 }
             } else if (dir == "desc") {
-                if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                if (x.innerHTML.toLowerCase().localeCompare(y.innerHTML.toLowerCase(), undefined, {numeric: true, sensitivity: 'base'}) < 0) {
                     // If so, mark as a switch and break the loop:
                     shouldSwitch = true;
                     break;

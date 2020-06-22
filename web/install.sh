@@ -600,3 +600,5 @@ mkdir -p ~/web2py/applications/solver/static/images/sprite_sheets/
 [ -L ~/web2py/applications/solver/static/images/firefleas_shot_blocks.png ] || ln -s ~/RandomMetroidSolver/web/static/start_locations/firefleas_shot_blocks.png ~/web2py/applications/solver/static/images/firefleas_shot_blocks.png
 
 [ -L ~/web2py/applications/solver/static/images/forgotten_all_the_way.png ] || ln -s ~/RandomMetroidSolver/web/static/help/forgotten_all_the_way.png ~/web2py/applications/solver/static/images/forgotten_all_the_way.png
+
+[ -L ~/web2py/applications/solver/static/images/donate.png ] || ln -s ~/RandomMetroidSolver/web/static/donate.png ~/web2py/applications/solver/static/images/donate.png

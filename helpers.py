@@ -406,7 +406,7 @@ class Helpers(object):
             duration = 120.0
         else:
             duration = secs / rate
-        # print('rate=' + str(rate) + ', duration=' + str(duration))
+ #       print('rate=' + str(rate) + ', duration=' + str(duration))
         (suitsCoeff, items) = sm.getDmgReduction(envDmg=False)
         suitsCoeff /= 2.0
         energyCount = self.energyReserveCount()
@@ -438,7 +438,7 @@ class Helpers(object):
                 # interpolate if we can
                 if energy > current and sup is not None:
                     difficulty += (energyDict[sup] - difficulty)/(sup - current) * (energy - current)
-    #    print("energy=" + str(energy) + ", base diff=" + str(difficulty))
+ #       print("energy=" + str(energy) + ", base diff=" + str(difficulty))
         # adjust by fight duration
         difficulty *= (duration / 120)
         # and by ammo margin
@@ -448,6 +448,7 @@ class Helpers(object):
         diffAdjust = (1 - (ammoMargin - Settings.algoSettings['ammoMarginIfNoCharge']))
         if diffAdjust > 1:
             difficulty *= diffAdjust
+#        print("final diff: "+str(round(difficulty, 2)))
 
         return (round(difficulty, 2), items)
 

@@ -61,12 +61,13 @@ def boss(name, diffFunction):
             print(str(Settings.bossesDifficulty[name]))
             for setName, itemSet in itemSets[name].items():
                 print('* Item set ' + setName)
-                #        print(str(itemSet))
+                print(str(itemSet))
                 sm.resetItems()
                 sm.addItems(itemSet)
                 d = diffFunction()
-                print('---> ' + str(d))
+                print('---> ' + str(d) + "\n")
                 csvOut.write(presetName + ";" + setName + ";" + str(d[0]) + ";" + str(d[1]) + "\n")
+        print("\n")
 
 if __name__ == "__main__":
     if len(sys.argv) >= 2:

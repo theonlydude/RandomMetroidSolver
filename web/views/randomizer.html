@@ -60,6 +60,10 @@ if (hs.registerOverlay) {
     margin-bottom: 0em;
     text-align: center;
 }
+.donate {
+    text-align: center;
+    margin-top: 1em;
+}
 .rightStep {
     float: right;
     margin-right: 0.3em;
@@ -1444,28 +1448,34 @@ Click on the dice button to randomly set this parameter.",
 <td class=\"knowsUsed\"><p class=\"top\">Escape from below early Super bridge without Bombs:</p></td>\
 <td class=\"knowsUsed\"><p class=\"top\">Escape from below early Super bridge:</p></td>\
 <td class=\"knowsUsed\"><p class=\"top\">Replace bomb blocks with shot blocks before Hi-Jump:</p></td>\
-<td class=\"knowsUsed\"><p class=\"top\">Replace bomb blocks with shot blocks at Moat:</p></td>\
 </tr>\
 <tr>\
 <td class=\"knowsUsed\"><img src=\"/solver/static/images/dachora.png\" alt=\"dachora\" title=\"dachora\" class=\"full\"/></td>\
 <td class=\"knowsUsed\"><img src=\"/solver/static/images/early_super.png\" alt=\"early_super\" title=\"early_super\" class=\"full\"/></td>\
 <td class=\"knowsUsed\"><img src=\"/solver/static/images/early_super_bis.png\" alt=\"early_super_bis\" title=\"early_super_bis\" class=\"full\"/></td>\
 <td class=\"knowsUsed\"><img src=\"/solver/static/images/high_jump.png\" alt=\"high_jump\" title=\"high_jump\" class=\"full\"/></td>\
-<td class=\"knowsUsed\"><img src=\"/solver/static/images/moat.png\" alt=\"moat\" title=\"moat\" class=\"full\"/></td>\
 </tr>\
 <tr>\
+<td class=\"knowsUsed\"><p class=\"top\">Replace bomb blocks with shot blocks at Moat:</p></td>\
 <td class=\"knowsUsed\"><p class=\"top\">First heated Norfair room without High-Jump:</p></td>\
 <td class=\"knowsUsed\"><p class=\"top\">Always be able to get back up from bottom Red Tower:</p></td>\
 <td class=\"knowsUsed\"><p class=\"top\">Replace bomb blocks with shot blocks before Spazer:</p></td>\
-<td class=\"knowsUsed\"><p class=\"top\">Remove grey door at Brinstar map stations:</p></td>\
-<td class=\"knowsUsed\"><p class=\"top\">Spore Spawn save station is always available:</p></td>\
 </tr>\
 <tr>\
+<td class=\"knowsUsed\"><img src=\"/solver/static/images/moat.png\" alt=\"moat\" title=\"moat\" class=\"full\"/></td>\
 <td class=\"knowsUsed\"><img src=\"/solver/static/images/cathedral.png\" alt=\"cathedral\" title=\"cathedral\" class=\"full\"/></td>\
 <td class=\"knowsUsed\"><img src=\"/solver/static/images/red_tower.png\" alt=\"red_tower\" title=\"red_tower\" class=\"full\"/></td>\
 <td class=\"knowsUsed\"><img src=\"/solver/static/images/spazer_block.png\" alt=\"spazer_block\" title=\"spazer_block\" class=\"full\"/></td>\
+</tr>\
+<tr>\
+<td class=\"knowsUsed\"><p class=\"top\">Remove grey door at Brinstar map stations:</p></td>\
+<td class=\"knowsUsed\"><p class=\"top\">Spore Spawn save station is always available:</p></td>\
+<td class=\"knowsUsed\"><p class=\"top\">Replace bomb blocks with shot blocks before Kraid save:</p></td>\
+</tr>\
+<tr>\
 <td class=\"knowsUsed\"><img src=\"/solver/static/images/bt_map.png\" alt=\"bt_map\" title=\"bt_map\" class=\"full\"/></td>\
 <td class=\"knowsUsed\"><img src=\"/solver/static/images/spore_save.png\" alt=\"spore_save\" title=\"spore_save\" class=\"full\"/></td>\
+<td class=\"knowsUsed\"><img src=\"/solver/static/images/kraid_save.png\" alt=\"kraid_save\" title=\"kraid_save\" class=\"full\"/></td>\
 </tr>\
 </table>\
 <p>Using a non-standard or randomized start location will force this setting on.</p>\
@@ -2000,5 +2010,13 @@ def displayNumber(id, min, max, default, step="1"):
         </p>
         {{=INPUT(_type="submit", _value="Randomize", _id="submitBtn", _class="btn btn-default buttonRandom")}}
     </form>
+    <div class="donate">
+      <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
+        <input type="hidden" name="cmd" value="_s-xclick" />
+        <input type="hidden" name="hosted_button_id" value="UT94YKT25BFJC" />
+        <input class="leagueImg" type="image" src="/solver/static/images/donate_randomizer.png" border="0" name="submit" title="PayPal - The safer, easier way to pay online!" alt="Donate with PayPal button" />
+        <img alt="" border="0" src="https://www.paypal.com/en_FR/i/scr/pixel.gif" width="1" height="1" />
+      </form>
+    </div>
   </div>
 </body>

@@ -27,6 +27,7 @@ itemSets = {
     'Phantoon' : {
         'Standard' : stuff(['Spazer', 'Charge', 'Wave', 'Varia'], 5, 6, 1, 1),
         'ChargeLess' : stuff(['Varia'], 5, 6, 3, 1),
+        'ChargeLessSuitLess' : stuff([], 5, 6, 3, 1),
         'Tough' : stuff(['Charge', 'Wave'], 5, 3, 1, 1),
         'VeryTough': stuff(['Charge'], 1, 2, 1, 1),
         'NoTanks': stuff(['Charge'], 0, 2, 1, 1),

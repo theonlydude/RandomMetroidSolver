@@ -1252,11 +1252,9 @@ function resetItems() {
     document.getElementById(items[item]+"_pause_img").style.display = "none";
   }
 
-  if(mode != "seedless") {
-    var items = ["Missile", "Super", "PowerBomb"];
-    for(var item in items) {
-        document.getElementById(items[item]+"_pause").style.display = "none";
-    }
+  var items = ["Missile", "Super", "PowerBomb"];
+  for(var item in items) {
+      document.getElementById(items[item]+"_pause").style.display = "none";
   }
 }
 

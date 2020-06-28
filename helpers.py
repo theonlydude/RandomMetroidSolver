@@ -411,6 +411,7 @@ class Helpers(object):
         suitsCoeff /= 2.0
         energyCount = self.energyReserveCount()
         energy = suitsCoeff * (1 + energyCount + energyDiff)
+#        print("energy="+str(energy)+", energyCount="+str(energyCount)+",energyDiff="+str(energyDiff)+",suitsCoeff="+str(suitsCoeff))
 
         # add all energy in used items
         items += sm.energyReserveCountOk(energyCount).items
@@ -582,7 +583,9 @@ class Helpers(object):
     def mbEtankCheck(self):
         sm = self.smbm
         if RomPatches.has(RomPatches.NerfedRainbowBeam):
-            return (True, 0)
+            # "add" energy for difficulty calculations
+            energy = 2.8 if sm.haveItem('Varia') else 2.6
+            return (True, energy)
         nTanks = sm.energyReserveCount()
         energyDiff = 0
         if sm.haveItem('Varia') == False:

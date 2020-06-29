@@ -490,7 +490,9 @@ function AjaxRandomizerCallCompleted(data) {
     console.log("AjaxRandomizerCallCompleted");
 
     // with items/Locations patch the local rom in memory
-    var bytes = new Uint8Array(vanillaROM);
+    var bytes_temp = new Uint8Array(vanillaROM);
+    var bytes = new Uint8Array(bytes_temp.length);
+    bytes.set(bytes_temp);
 
     var binary_string = atob(data["ips"]);
     var len = binary_string.length;
